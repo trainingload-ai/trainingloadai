@@ -1,0 +1,84 @@
+---
+title: Competitions
+description: Add races and competition events, set their importance and goal, review plan impact, and manage cancellation or restoration without turning the event into a workout.
+keywords: ["race calendar", "competition planning", "training plan race impact"]
+---
+
+# Competitions
+
+Competition events remain independent from training plans. This lets one event influence plan decisions without pretending the event itself is an ordinary scheduled workout.
+
+## Before you begin
+
+- Confirm the official event date, local start time, and time zone.
+- Decide whether it is a low-priority practice event or a protected key race.
+- Keep the event separate from any planned workout that happens on the same day.
+- Add a target time only when it is a real goal rather than an unsupported prediction.
+
+## Add a competition
+
+Open **Competitions** and select **Add Competition**. Enter:
+
+- Competition name.
+- Date or date range.
+- Start time and time zone together when a timed start matters.
+- Sport and optional sport definition.
+- Distance when relevant.
+- Importance: low, medium, high, or critical.
+- Goal type, including target time when selected.
+- Location and notes.
+
+Use importance to express how much the plan should protect the event. Do not mark every race critical; multiple critical events close together create a real planning conflict rather than extra priority.
+
+<DocsScreenshot
+  id="competition-event-details"
+  title="Competition detail and plan impact"
+  description="The event stays independent while its timing, importance, and goal inform current plan review."
+  route="Competitions → Competition details"
+/>
+
+## Review the event
+
+After saving, verify the countdown, date, sport, goal, and importance. The event also appears in relevant calendar and day views.
+
+Trainingload.ai can evaluate current plan impact using the event window and nearby planned training. The impact is decision support, not an automatic guarantee that every conflicting workout should be removed.
+
+## Resolve a competition-day conflict
+
+When a planned workout and competition share a day:
+
+1. Confirm that the event date and time zone are correct.
+2. Decide whether the competition replaces the workout, fulfills similar intent, or coexists with a separate easy session.
+3. Edit, skip, or move the planned workout explicitly.
+4. Review surrounding intensity and recovery days.
+5. Ask AI Coach for an adjustment only after the desired competition priority is clear.
+
+## Update safely
+
+Competition records use version-aware updates. If another request changed the event, refresh and review the latest copy before saving again.
+
+## Cancel, restore, or delete
+
+- **Cancel** preserves the event record but removes it from planned competition status.
+- **Restore** returns a canceled event when it is relevant again.
+- **Delete** removes the record and should be reserved for accidental or disposable entries.
+
+## Verify success
+
+- The event appears in the correct year and calendar day.
+- Countdown and local time are correct.
+- Goal and target time are internally consistent.
+- The current plan impact can be loaded when a plan is in scope.
+- Competition-day workout conflicts are visible rather than silently resolved.
+
+## Troubleshooting
+
+- **The countdown is wrong:** check event date, start time, time zone, and account time zone together.
+- **The event is absent from the calendar:** confirm that it is not cancelled and that the visible date range includes it.
+- **Plan impact cannot load:** verify that a current plan overlaps the event window and refresh any stale plan or event version.
+- **A conflict appears unresolved:** explicitly move, skip, or edit the planned workout; the event should not silently mutate the plan.
+- **An update conflicts:** refresh the event and reapply the change to the latest version.
+
+## Next step
+
+Review [Create a Training Plan](/docs/guide/create-training-plan) or ask [AI Coach](/docs/guide/ai-coach) to prepare a race-aware draft for confirmation.

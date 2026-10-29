@@ -1,0 +1,54 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "isolatedModules": true,
+    "outDir": "./dist-selfhost",
+    "declaration": false,
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist-selfhost/.tsbuildinfo",
+    "paths": {
+      "@deployment/provider-catalog": [
+        "src/deployment/provider-catalog"
+      ],
+      "@/public-demo/*": [
+        "src/self-host/public-demo/*"
+      ],
+      "@/*": [
+        "src/*"
+      ],
+      "@shared/*": [
+        "../../packages/shared/*"
+      ],
+      "prisma": [
+        "../../packages/prisma/node_modules/@prisma/client/*"
+      ],
+      "@prisma/client": [
+        "../../packages/prisma/generated/core"
+      ],
+      "@prisma/client/*": [
+        "../../packages/prisma/generated/core/*"
+      ]
+    },
+    "types": [
+      "node",
+      "express",
+      "multer"
+    ]
+  },
+  "files": [
+    "src/types/better-auth-utils-password.d.ts",
+    "src/main.self-host.ts",
+    "src/self-host/self-host-owner-bootstrap.command.ts",
+    "src/self-host/self-host-owner-recovery.command.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "dist-selfhost",
+    "**/*spec.ts"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-release-bundle-manifest-v1.json",
+  "title": "Trainingload self-host release bundle manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "releaseVersion",
+    "created",
+    "archiveBaseName",
+    "minimumNodeVersion",
+    "platforms",
+    "entrypoints",
+    "staticFiles",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-release-bundle" },
+    "releaseVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "created": { "type": "string", "format": "date-time" },
+    "archiveBaseName": {
+      "type": "string",
+      "pattern": "^trainingload-selfhost-\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "minimumNodeVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "platforms": {
+      "type": "array",
+      "const": ["linux/amd64", "linux/arm64"]
+    },
+    "entrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["installLinux", "installWindows", "cliLinux", "cliWindows"],
+      "properties": {
+        "installLinux": { "const": "./install.sh" },
+        "installWindows": { "const": ".\\install.ps1" },
+        "cliLinux": { "const": "./self-host" },
+        "cliWindows": { "const": ".\\self-host.ps1" }
+      }
+    },
+    "staticFiles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "mode"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "mode": { "enum": ["0644", "0755"] }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "checksums", "signatureBundle"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "checksums": { "const": "checksums.txt" },
+        "signatureBundle": { "const": "checksums.bundle.json" }
+      }
+    }
+  }
+}

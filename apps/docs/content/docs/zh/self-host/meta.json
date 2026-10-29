@@ -1,0 +1,11 @@
+{
+  "title": "自托管",
+  "pages": [
+    "index",
+    "self-host-vs-cloud",
+    "installation",
+    "configuration",
+    "operations",
+    "troubleshooting"
+  ]
+}

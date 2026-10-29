@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-upgrade-report-v1.json",
+  "title": "Trainingload self-host upgrade and rollback report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "lifecycleId",
+    "command",
+    "status",
+    "startedAt",
+    "finishedAt",
+    "source",
+    "target",
+    "backup",
+    "migrations",
+    "applicationRollbackAllowed",
+    "databaseRollback",
+    "errorCode"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "trainingload-selfhost-upgrade-report"
+    },
+    "lifecycleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "command": {
+      "type": "string",
+      "enum": [
+        "upgrade",
+        "rollback"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed"
+      ]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "$ref": "#/$defs/release"
+    },
+    "target": {
+      "$ref": "#/$defs/release"
+    },
+    "backup": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "path"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "migrations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "before",
+        "after",
+        "target",
+        "pending"
+      ],
+      "properties": {
+        "before": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/appliedMigration"
+          }
+        },
+        "after": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/appliedMigration"
+              }
+            }
+          ]
+        },
+        "target": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/releaseMigration"
+          }
+        },
+        "pending": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/releaseMigration"
+          }
+        }
+      }
+    },
+    "applicationRollbackAllowed": {
+      "type": "boolean"
+    },
+    "databaseRollback": {
+      "const": "unsupported"
+    },
+    "errorCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "errorCode": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "migrationId": {
+      "type": "string",
+      "pattern": "^(?:[0-9]{4}|[0-9]{14})_[a-z0-9_]+$"
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrate",
+        "server",
+        "client"
+      ],
+      "properties": {
+        "migrate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "server": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "configSchemaVersion",
+        "composeSchemaVersion",
+        "schemaEpoch",
+        "sourceRevision",
+        "images"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "configSchemaVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "composeSchemaVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "schemaEpoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceRevision": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{40}([a-f0-9]{24})?$"
+        },
+        "images": {
+          "$ref": "#/$defs/images"
+        }
+      }
+    },
+    "appliedMigration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "checksum"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/migrationId"
+        },
+        "checksum": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "releaseMigration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "checksum",
+        "phase",
+        "releaseVersion"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/migrationId"
+        },
+        "checksum": {
+          "$ref": "#/$defs/sha256"
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "expand",
+            "backfill",
+            "contract"
+          ]
+        },
+        "releaseVersion": {
+          "$ref": "#/$defs/semver"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+---
+title: Mobile Recording
+description: Prepare permissions, record a workout safely, recover interrupted sessions, and verify that a mobile activity synchronized to Trainingload.ai.
+keywords:
+  ["mobile workout recording", "Trainingload.ai recording", "GPS workout app"]
+---
+
+# Mobile Recording
+
+This tutorial ends with a saved mobile workout that appears in your Trainingload.ai activity history.
+
+## Before you begin
+
+- Sign in to the mobile app with the same account you use on web.
+- Enable location permission for outdoor GPS recording.
+- Allow background location when your operating system offers it and you intend to lock the screen during a workout.
+- Disable aggressive battery restrictions for Trainingload.ai if your device pauses background apps.
+- Make sure the phone has enough battery and storage for the planned duration.
+
+## 1. Check permissions
+
+Open **Permissions** from the mobile account area. Resolve any required location or health permission before the workout. A provider permission and phone GPS permission are different: connecting a provider does not grant the phone permission to record location.
+
+## 2. Open the recorder
+
+Open **Record**, choose the sport, and wait for the recorder to report a usable location state before starting an outdoor session.
+
+<DocsScreenshot
+  id="mobile-recording-ready"
+  title="Recorder ready state"
+  description="Choose the sport and confirm location readiness before starting an outdoor workout."
+  route="Record"
+  platform="mobile"
+/>
+
+## 3. Start and monitor the workout
+
+1. Start the recording only once.
+2. Confirm that elapsed time increases.
+3. For outdoor sessions, check that distance or route data begins updating.
+4. Lock the screen only after the session is clearly running.
+
+If the app returns to the foreground after being suspended, wait for it to restore the active session. Do not create a second recording while recovery is in progress.
+
+## 4. Finish and save
+
+When the session is complete:
+
+1. Stop the recording.
+2. Review duration, distance, and sport.
+3. Save the workout.
+4. Keep the app online until the upload or import handoff completes.
+
+The mobile app preserves recording data locally during the session and uses a recovery flow for interrupted recordings. A successful local save does not mean every server chart is immediately ready; analysis continues after upload.
+
+## Verify the result
+
+Open **Me → Activities** or the relevant calendar day. Confirm:
+
+- Only one activity exists for the session.
+- Start time, sport, duration, and distance are plausible.
+- The map appears for a GPS workout.
+- Sensor-derived charts appear only when the recording contained that data.
+- The activity can be linked to the intended planned workout.
+
+## Troubleshooting
+
+### Time increases but distance stays at zero
+
+Check location permission, GPS signal, and whether the selected sport expects outdoor distance. Move to an open area and wait for location readiness.
+
+### Recording stops when the screen locks
+
+Enable background location and remove battery optimization for the app. Operating-system settings can override the in-app permission state.
+
+### The activity appears twice
+
+Do not upload the locally recorded file again while synchronization is still pending. Compare start time and duration, then delete only the confirmed duplicate.
+
+### Activity exists but charts are missing
+
+Wait for analysis to finish and refresh. Missing heart rate, power, or cadence can also mean the recording never contained those streams.
+
+## Next step
+
+Open [Activity Detail](/docs/guide/activity-detail), then link the result through [Manage an Active Plan](/docs/guide/manage-active-plan) if it was a planned session.

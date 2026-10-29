@@ -1,0 +1,11 @@
+{
+  "completionEmail": {
+    "subject": "Trainingload.ai 계정 삭제가 완료되었습니다",
+    "completed": "Trainingload.ai 계정과 관련 데이터가 삭제되었습니다.",
+    "thanks": "그동안 Trainingload.ai를 이용해 주셔서 감사합니다.",
+    "feedback": "떠나시는 이유나 개선 의견을 알려 주시려면 이 이메일에 직접 답장하거나 문의해 주세요.",
+    "feedbackAction": "의견 보내기",
+    "feedbackSubject": "Trainingload.ai 계정 삭제 관련 의견",
+    "closing": "앞으로의 훈련도 늘 순조롭기를 바랍니다."
+  }
+}

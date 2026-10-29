@@ -1,0 +1,68 @@
+---
+title: Self-host troubleshooting
+description: Diagnose installation, readiness, storage, AI, restore, and upgrade failures without bypassing lifecycle or data-safety controls.
+---
+
+# Self-host troubleshooting
+
+Start with the supported read-only checks. Preserve the first stable error code; it is more useful than repeatedly changing the host until the symptom disappears.
+
+## First response
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+If Docker is unavailable, `doctor` still reports the checks it can complete. If a restore or upgrade failed, preserve its report and incomplete marker. Do not remove the marker to force a normal start.
+
+## Common problems
+
+| Symptom                       | Check                                                                                  | Safe next action                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Installer rejects the release | Outer checksum, Cosign identity, exact version, and complete downloaded files          | Download every artifact again from the same official release                            |
+| Site does not open            | `status`, Client logs, bind address, port conflict, and HTTPS origin                  | Correct the declared setting, then run `start --dry-run` before `start`                 |
+| Database is unavailable       | Database service state, disk, permissions, and migration result in `doctor`            | Restore host capacity or permissions; do not expose or edit PostgreSQL directly         |
+| Upload fails                  | Data-root space, inode capacity, ownership, and uploads directory                      | Expand the dedicated data volume and rerun `doctor`                                     |
+| AI settings are hidden        | Deployment mode, instance readiness, signed-in Owner identity                          | Sign in as the claimed Owner; non-owners cannot read or change provider settings        |
+| AI request fails              | Provider status, exact base URL, model IDs, key access, and outbound DNS/TLS           | Correct the Owner-managed configuration or disable AI while the provider is unavailable |
+| AI fails after restore        | Whether the target uses a different instance auth secret                               | Enter a fresh provider key; do not attempt to extract the old plaintext key             |
+| Restore is blocked            | Target version, target authority state, backup manifest, checksum, and report          | Use a clean exact-version target and keep the failed target for diagnosis               |
+| Upgrade is blocked            | Supported source versions, migration inventory, backup, disk, and rollback declaration | Follow the upgrade report; do not change image tags or migration records manually       |
+
+## Collect diagnostics
+
+When `doctor` is not enough:
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+Diagnostics apply automatic redaction, but automatic redaction is not permission to publish the artifact. Open it locally and check for hostnames, user data, activity details, and business logs before sharing it through a maintainer-approved private channel.
+
+Never share:
+
+- `.env.selfhost`;
+- Owner passwords or the bootstrap token;
+- provider API keys, cookies, or private keys;
+- a database dump or uploaded activity files;
+- an unreviewed diagnostics bundle.
+
+## Actions to avoid
+
+- Do not use `docker compose down -v`.
+- Do not delete PostgreSQL data, uploads, the data-root marker, operation locks, or incomplete lifecycle markers.
+- Do not edit `_prisma_migrations`, release manifests, checksums, or upgrade reports.
+- Do not use `--skip-verify` or mutable image tags.
+- Do not retry state-changing commands in parallel.
+
+These actions can turn a diagnosable failure into unrecoverable or ambiguous data loss.
+
+## Escalate with useful evidence
+
+Share only the exact release version, host OS and architecture, stable `error.code`, the command that failed, and the SHA-256 of a locally reviewed diagnostics artifact. Keep the full artifact private unless a maintainer provides an approved transfer channel.
+
+## Next step
+
+Return to [Managing your instance](/docs/self-host/operations) after the blocking condition is resolved. If recovery requires replacing the data, restore a verified backup into a clean target instead of overwriting the failed instance.

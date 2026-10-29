@@ -1,0 +1,119 @@
+{
+  "planExecution": {
+    "completedWithTomorrowOne": "Das heutige Training ist abgeschlossen. Konzentriere dich jetzt auf Verpflegung, Mobilität und Schlaf. Morgen steht eine Einheit an; füge heute keine weitere Intensität hinzu.",
+    "completedWithTomorrowMany": "Das heutige Training ist abgeschlossen. Konzentriere dich jetzt auf Verpflegung, Mobilität und Schlaf. Morgen stehen {count} Einheiten an; füge heute keine weitere Intensität hinzu.",
+    "completed": "Das heutige Training ist abgeschlossen. Erholung, Flüssigkeit und Schlaf haben jetzt Vorrang. Notiere auch dein Körpergefühl, die Herzfrequenz und die empfundene Schwierigkeit für spätere Anpassungen.",
+    "partial": "Du hast heute {count} verknüpfte Aktivität abgeschlossen. Entscheide anhand deiner Beine und der Gesamtmüdigkeit über den Rest; schütze die Qualität, statt den Umfang zu erzwingen.",
+    "plannedOne": "Heute ist eine Einheit geplant. Beginne nach Plan, prüfe nach dem Aufwärmen dein Körpergefühl und bleibe im Zielbereich. Verknüpfe die Aktivität danach, damit ich weiter anpassen kann.",
+    "plannedMany": "Heute sind {count} Einheiten geplant. Beginne nach Plan, prüfe nach dem Aufwärmen dein Körpergefühl und bleibe im Zielbereich. Verknüpfe die Aktivitäten danach, damit ich weiter anpassen kann.",
+    "plannedNone": "Heute ist keine konkrete Einheit geplant. Bleibe bei lockerer Erholung oder Mobilität und füge nicht spontan eine harte Einheit hinzu.",
+    "extraOne": "Heute gibt es eine zusätzliche Aktivität. Prüfe zuerst, ob sie zu einer geplanten Einheit gehört. War es Zusatztraining, reduziere morgen bei Bedarf Intensität oder Dauer.",
+    "extraMany": "Heute gibt es {count} zusätzliche Aktivitäten. Prüfe zuerst, ob sie zu geplanten Einheiten gehören. War es Zusatztraining, reduziere morgen bei Bedarf Intensität oder Dauer.",
+    "restWithTomorrowOne": "Heute ist Ruhetag: Erholung statt Nachholen. Morgen steht eine Einheit an. Schlafe früh und fülle Flüssigkeit und Kohlenhydrate auf.",
+    "restWithTomorrowMany": "Heute ist Ruhetag: Erholung statt Nachholen. Morgen stehen {count} Einheiten an. Schlafe früh und fülle Flüssigkeit und Kohlenhydrate auf.",
+    "rest": "Heute ist Ruhetag. Hole Schlaf nach, bewege dich leicht und notiere Beschwerden. Für eine Serie brauchst du keine zusätzliche Einheit.",
+    "noPlan": "Du hast noch keinen aktiven Trainingsplan. Nenne mir Zielwettkampf, Vorbereitungszeit und wöchentliche Verfügbarkeit; ich helfe dir beim nächsten Block.",
+    "tags": {
+      "completed": "abgeschlossen",
+      "recoveryPriority": "Erholung zuerst",
+      "partial": "teilweise abgeschlossen",
+      "adjustByFeel": "nach Gefühl anpassen",
+      "planned": "Plan befolgen",
+      "controlIntensity": "Intensität steuern",
+      "extraActivity": "Zusatzaktivität",
+      "checkLink": "Verknüpfung prüfen",
+      "restDay": "Ruhetag",
+      "recovery": "Erholung",
+      "noPlan": "kein Plan",
+      "setGoal": "Ziel festlegen"
+    }
+  },
+  "today": {
+    "decision": {
+      "unavailable": "Ich konnte deine neueste Trainingsänderung nicht laden. Aktualisiere die Ansicht später noch einmal. Bis ich die Änderung bestätigen kann, folge deinem aktuellen Plan.",
+      "statePending": "Für die aktuelle Zustandsbewertung fehlt noch eine wichtige Angabe. Bis sie ergänzt ist, solltest du die geplante Intensität nicht erzwingen und heute konservativ sowie erholungsorientiert trainieren.",
+      "defaultAdjustment": "deinen aktuellen Trainingsplan anpassen",
+      "today": "heute",
+      "tomorrow": "morgen",
+      "confirmed": "bestätigt",
+      "pending": "offen",
+      "timedDetail": "{when} so trainieren: {detail}",
+      "untimedDetail": "diese Anpassung vornehmen: {detail}",
+      "approved": "Diese Anpassung ist bestätigt. {detail}. Halte dich daran, während dein Plan aktualisiert wird, und füge keine weitere Einheit hinzu.",
+      "proposed": "Ich habe einen neuen Vorschlag für dich. {detail}. Bestätige ihn, dann aktualisiere ich deinen Plan.",
+      "defaultCurrentWorkout": "die aktuell geplante Einheit",
+      "rejectedWorkout": "Ich weiß, dass du die letzte Anpassung nicht übernommen hast. Absolviere heute wie geplant „{title}“ und nimm Tempo heraus, wenn dein Körper es braucht.",
+      "rejectedRest": "Ich weiß, dass du die letzte Anpassung nicht übernommen hast. Behalte den heutigen Ruhetag bei und konzentriere dich auf Erholung und Körpergefühl.",
+      "guidance": "{summary}. Noch ein Hinweis aus unserem letzten Rückblick: {guidance}.",
+      "clearIntensityTarget": "ein klares Intensitätsziel",
+      "controlledRpe": "die Belastung bei RPE {range} halten",
+      "doNotRace": "diese Einheit nicht wie einen Wettkampf laufen"
+    },
+    "fact": {
+      "defaultWorkout": "geplante Einheit",
+      "oneSession": "1 Einheit",
+      "manySessions": "{count} Einheiten",
+      "restDay": "Ruhetag",
+      "loadChange": "Belastung {value}",
+      "defaultEvent": "der relevante Wettkampf",
+      "raceToday": "der Wettkampf ist heute",
+      "daysToRace": "noch {count} Tage bis zum Wettkampf",
+      "daysAfterRace": "{count} Tage nach dem Wettkampf",
+      "influenceWindow": "du befindest dich im Einflusszeitraum",
+      "eventDistance": ", über {distance}",
+      "competition": "Du hast {event} als {importance} markiert; {timing}{distanceNote}. Schütze heute Wettkampfvorbereitung und Erholung und entscheide dann nach Körpergefühl, ob du wie geplant trainierst oder die Belastung reduzierst.",
+      "noPlan": "Du hast noch keinen aktiven Trainingsplan. Nenne mir Ziel, Vorbereitungszeit und wöchentliche Verfügbarkeit; dann planen wir das heutige Training.",
+      "completedOne": "Die heutige Einheit ist abgeschlossen. Konzentriere dich für den Rest des Tages auf Verpflegung, Mobilität und Schlaf, statt Intensität hinzuzufügen.",
+      "completedMany": "Alle {count} heutigen Einheiten sind abgeschlossen. Konzentriere dich für den Rest des Tages auf Verpflegung, Mobilität und Schlaf, statt Intensität hinzuzufügen.",
+      "activityWithDuration": "Heute war keine Einheit geplant, aber du hast {duration} Minuten {sport} aufgezeichnet. Kein Nachholumfang nötig; jetzt zählen Flüssigkeit, Verpflegung, Mobilität und Erholung.",
+      "activityWithoutDuration": "Heute war keine Einheit geplant, aber du hast {sport} aufgezeichnet. Kein Nachholumfang nötig; jetzt zählen Flüssigkeit, Verpflegung, Mobilität und Erholung.",
+      "restFatigue": "Heute ist kein Training geplant und deine Form ist niedrig (TSB {tsb}). Erhole dich, füge keine Belastung hinzu und achte auf Schlaf und Verpflegung.",
+      "restLoad": "Heute ist kein Training geplant. Die Wochenbelastung ist um {drift} gestiegen; behalte dieses Erholungsfenster bei, statt Umfang hinzuzufügen.",
+      "rest": "Heute ist kein Training geplant. Erhole dich gut oder bewege dich nur locker, wenn du dich frisch fühlst.",
+      "fatigue": "Geplant ist „{title}“, aber deine Form ist niedrig (TSB {tsb}). Steuere die Intensität und kürze die Einheit, wenn die Erholung begrenzt ist.",
+      "loadSpike": "Der heutige Schwerpunkt ist „{title}“. Die Wochenbelastung ist um {drift} gestiegen; erledige die Kerneinheit und füge keinen Umfang hinzu.",
+      "multiWorkout": "Heute sind {count} Einheiten geplant. Absolviere zuerst die Schlüsseleinheit „{title}“ und entscheide danach nach Körpergefühl.",
+      "workout": "Der heutige Schwerpunkt ist „{title}“. Bleibe im Zielbereich und verknüpfe die Aktivität danach, damit wir sie gemeinsam auswerten können."
+    },
+    "tags": {
+      "tryAgain": "erneut versuchen",
+      "stateCheck": "Statusangabe fehlt",
+      "trainingAdvice": "Coach-Vorschlag",
+      "followPlan": "Plan befolgen",
+      "reviewNote": "Hinweis aus dem Rückblick",
+      "eventImpact": "Wettkampfeinfluss",
+      "noPlan": "kein Plan",
+      "setGoal": "Ziel festlegen",
+      "activityRecorded": "Aktivität erfasst"
+    }
+  },
+  "enum": {
+    "importance": {
+      "low": "niedrige Priorität",
+      "medium": "mittlere Priorität",
+      "high": "hohe Priorität",
+      "critical": "höchste Priorität"
+    },
+    "impact": {
+      "low": "geringer Einfluss",
+      "medium": "mittlerer Einfluss",
+      "high": "hoher Einfluss",
+      "critical": "kritischer Einfluss"
+    },
+    "phase": {
+      "general_preparation": "allgemeine Vorbereitung",
+      "specific_preparation": "spezifische Vorbereitung",
+      "peak": "Höhepunkt",
+      "taper": "Tapering",
+      "event": "Wettkampf",
+      "recovery": "Erholung"
+    },
+    "sport": {
+      "run": "Laufen",
+      "cycling": "Radfahren",
+      "swim": "Schwimmen",
+      "strength": "Krafttraining",
+      "unknown": "Aktivität"
+    }
+  }
+}

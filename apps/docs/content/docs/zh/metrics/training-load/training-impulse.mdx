@@ -1,0 +1,128 @@
+---
+title: TRIMP（训练冲量）：用心率计算内部训练负荷公式详解
+description: TRIMP（训练冲量）用心率和时长估算内部训练负荷。看 Banister 指数公式、Edwards 心率分区，以及没有功率或可靠配速时，怎样用 TRIMP 代替 TSS 作为负荷输入。
+keywords:
+  ["TRIMP", "训练冲量", "Banister TRIMP", "心率训练负荷", "Edwards TRIMP", "内部训练负荷"]
+---
+
+# TRIMP（训练冲量）：用心率计算内部训练负荷公式详解
+
+**TRIMP（训练冲量）**用心率和时长估算**内部训练负荷**：时长乘以非线性强度权重，高强度分钟比轻松分钟贡献更大。Banister 于 1975 年提出、1991 年完善这一方法，用来在缺少功率或可靠配速时量化内部负荷。
+
+功率和配速更接近外部输出，而 TRIMP 用 **心率与时长** 来估算身体内部反应。它要解决的是一个实际问题：**当功率不可用或不适合时，如何把心率和时间合成一个训练负荷分数？**
+
+## 核心概念
+
+TRIMP 的基本逻辑是：**负荷 = 持续时间 × 强度**。
+
+但在 TRIMP 中，“强度”不只是简单的平均心率，而是考虑了高心率区间对身体反应的**非线性**影响。
+
+- 心率从 130 升到 140，身体的压力增加很少。
+- 心率从 180 升到 190（接近极限），身体反应通常会明显增加（例如乳酸堆积、激素反应）。
+
+因此，Banister 引入了指数加权因子，让高心率训练比同等时长的低心率训练贡献更多负荷。
+
+## 计算公式 (Banister's TRIMP)
+
+当所需心率输入完整时，Trainingload.ai 可以使用经典 **Banister TRIMP (指数模型)** 作为计算方式：
+
+$$
+TRIMP = t \times HR_{ratio} \times 0.64 \times e^{k \times HR_{ratio}}
+$$
+
+其中：
+
+- $t$ = 训练持续时间（分钟）
+- $HR_{ratio}$ = 心率储备比率 (Heart Rate Reserve Ratio)
+  $$
+  HR_{ratio} = \frac{HR_{avg} - HR_{rest}}{HR_{max} - HR_{rest}}
+  $$
+- $e$ = 自然常数 (2.718...)
+- $k$ = 性别系数（男性 **1.92**，女性 **1.67**），用于反映不同性别对高强度心率的乳酸阈值响应差异。
+
+### 举个例子
+
+假设一名男性运动员（最大心率 200，静息 50）：
+
+1.  **慢跑 1 小时 @ 140 bpm** ($HR_{ratio} = 0.6$)：
+    - $TRIMP \approx 60 \times 0.6 \times 0.64 \times e^{1.92 \times 0.6} \approx 72$
+2.  **竞速 1 小时 @ 185 bpm** ($HR_{ratio} = 0.9$)：
+    - $TRIMP \approx 60 \times 0.9 \times 0.64 \times e^{1.92 \times 0.9} \approx 194$
+
+可以看到，虽然时间相同，但高强度下的 TRIMP 值是低强度的近 3 倍，体现了强度对内部负荷的非线性影响。
+
+## TRIMP 的变体与演进
+
+除了经典的 Banister 模型，业界还衍生出了多种计算方式：
+
+| 变体           | 全称                 | 计算核心         | 优缺点                                                                                        |
+| :------------- | :------------------- | :--------------- | :-------------------------------------------------------------------------------------------- |
+| **TRIMP**      | **Banister's TRIMP** | **指数加权心率** | ⭐⭐⭐⭐ 适合心率数据可靠的稳态有氧训练；但对短间歇反应迟钝。                                 |
+| **TRIMP_zone** | **Edwards' TRIMP**   | **心率区间累积** | ⭐⭐⭐ 简单直观。将心率划为 5 个区，每个区赋予权重（如 Z1=1, Z5=5）。缺点是区间边界效应明显。 |
+| **TRIMP_avg**  | **Average HR**       | **平均心率**     | ⭐⭐ 过于简单。直接用 $Time \times HR_{avg}$，完全忽略了高强度的代价，极易低估高强度训练。    |
+| **sRPE**       | **整节训练 RPE**     | **主观打分**     | ⭐ 兜底方案。$Time \times RPE(1-10)$。在没有心率带时非常有效，但依赖主观记录的准确性。        |
+
+## 典型应用场景
+
+### 1. PMC 的数据源
+
+对于游泳、越野跑、健身房训练等**难以获取功率数据**的项目，TRIMP 可以作为计算 [ATL](/zh/docs/metrics/pmc/acute-training-load) 和 [CTL](/zh/docs/metrics/pmc/chronic-training-load) 的替代负荷输入。
+
+- **TSS** 适用于骑行、跑步。
+- **TRIMP** 适用于所有有氧运动。
+
+## Trainingload.ai 如何使用 TRIMP
+
+Trainingload.ai 会把 TRIMP 作为内部负荷输入，尤其适合功率、可靠配速或结构化目标缺失的训练。在计划复盘里，TRIMP 可以帮助解释为什么一节外部输出不高的训练，仍然让身体感觉成本较高。
+
+TRIMP 最适合结合上下文使用：
+
+- 和 RPE、训练备注一起看；
+- 留意高温、脱水和心率漂移；
+- 不要单独用它判断短冲刺或无氧间歇训练。
+
+### 2. 复查心率与 RPE 不一致
+
+如果你的 **TRIMP/RPE 比率** 发生异常：
+
+- **正常**：高 TRIMP 对应高 RPE（累 = 累）。
+- **异常**：TRIMP 很高但 RPE 很低（心率漂移，可能脱水或生病）；或者 TRIMP 很低但 RPE 很高（心率上不去，典型的副交感神经主导型过度训练）。
+
+## TRIMP 的局限性
+
+1.  **心率滞后性 (Cardiac Lag)**：
+    在 30 秒全力冲刺中，功率会立刻达到峰值，但心率通常滞后上升。这会让 TRIMP 低估短间歇无氧训练的负荷。
+2.  **环境干扰**：
+    高温、脱水、咖啡因、睡眠不足都会导致心率升高（Cardiac Drift）。这会让 TRIMP 虚高——你的心脏跳得更快了，但这并不代表你的肌肉做了更多的功。
+3.  **非特异性**：
+    100 TRIMP 的游泳和 100 TRIMP 的跑步，对肌肉骨骼的压力完全不同，但 TRIMP 无法区分这种机械负荷的差异。
+
+## 常见问题
+
+### TRIMP 是什么？
+
+TRIMP 是训练冲量：时长 × 心率强度，高强度分钟权重更大。它估算内部训练负荷，不是骑行功率 TSS 那种外部做功。
+
+### Banister TRIMP 怎么算？
+
+分钟数 × 心率储备比 × 0.64 × exp(k × 心率储备比)。心率储备比 =（平均心率 − 安静心率）/（最大心率 − 安静心率）。系数 `k` 男性 1.92，女性 1.67。
+
+### TRIMP 和 TSS 用哪个？
+
+有功率或可靠跑步配速时用 TSS。心率主导的课——游泳、越野、力量有氧，或外部负荷不可信时——用 TRIMP。
+
+### 为什么短间歇 TRIMP 会偏低？
+
+心率落后于功率。30 秒冲刺输出立刻到顶，心率后到，TRIMP 会低估短无氧负荷。请和 RPE 或功率/配速分数一起看。
+
+## 下一步
+
+- [在计划里管理 CTL、ATL、TSB 训练负荷](/zh/training-load)
+- 对照[训练压力分数 TSS](/zh/docs/metrics/training-load/training-stress-score)
+- [计算心率训练负荷区间](/zh/heart-rate-zones-calculator)
+- [用 AI 教练在负荷变化时调整训练计划](/zh/ai-training-plan)
+
+## 参考资料
+
+- [Fellrnr: TRIMP Explained](https://fellrnr.com/wiki/TRIMP)
+- Banister, E.W. (1991). Modeling Elite Athletic Performance. In: MacDougall, J.D., Wenger, H.A., Green, H.J. (eds) Physiological Testing of the High-Performance Athlete.

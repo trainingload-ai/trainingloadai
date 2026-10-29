@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "kind": "trainingload-selfhost-release-candidate-contract",
+  "workflow": ".github/workflows/selfhost-release-candidate.yml",
+  "releaseWorkflow": ".github/workflows/selfhost-images.yml",
+  "acceptanceWorkflow": ".github/workflows/selfhost-acceptance.yml",
+  "attestationPreparer": "scripts/selfhost/release-attestation.mjs",
+  "verifier": "scripts/selfhost/verify-release-candidate.mjs",
+  "manualOnly": true,
+  "nodeVersion": "22.23.3",
+  "candidatePattern": "^rc\\.[1-9][0-9]*$",
+  "artifact": {
+    "name": "trainingload-selfhost-rc-<version>-<candidate>",
+    "manifest": "release-candidate-manifest.json",
+    "checksums": "release-candidate-checksums.txt",
+    "signatureBundle": "release-candidate-checksums.bundle.json",
+    "releaseDirectory": "release",
+    "acceptanceDirectory": "acceptance",
+    "attestationsDirectory": "attestations",
+    "documentsDirectory": "documents",
+    "contractsDirectory": "contracts",
+    "retentionDays": 90
+  },
+  "requiredDocuments": [
+    "SELF_HOSTING.md",
+    "SELF_HOST_OPERATIONS.md",
+    "SELF_HOST_KNOWN_LIMITATIONS.md",
+    "BACKUP_RESTORE.md",
+    "UPGRADE.md",
+    "docs/self-hosting/release-candidate.zh.md",
+    "docs/self-hosting/release-retrospective.zh.md"
+  ],
+  "requiredContracts": [
+    "docker/selfhost/v1-contract.json",
+    "docker/selfhost/documentation-contract.json",
+    "docker/selfhost/release-candidate-contract.json",
+    "docker/selfhost/release-policy.json",
+    "docker/selfhost/release-bundle-contract.json",
+    "docker/selfhost/acceptance-contract.json",
+    "schemas/self-host-release-candidate-manifest.schema.json",
+    "schemas/self-host-release-attestation.schema.json",
+    "schemas/self-host-release-manifest.schema.json",
+    "schemas/self-host-acceptance-manifest.schema.json"
+  ],
+  "gates": {
+    "exactReleaseTagAndRevision": true,
+    "releaseOuterAndInnerSignatures": true,
+    "completeAcceptanceSignature": true,
+    "acceptanceStatus": "passed",
+    "requiredMatrixCells": 8,
+    "structuredReleaseAttestation": true,
+    "codexCleanRoomHostRestart": true,
+    "unresolvedP0": 0,
+    "unresolvedP1": 0,
+    "databaseRollback": "unsupported"
+  },
+  "limits": {
+    "maximumReleaseArchiveBytes": 4294967296,
+    "maximumCandidateBytes": 4831838208,
+    "maximumAcceptanceEvidenceBytes": 67108864,
+    "maximumAttestationBytes": 65536,
+    "maximumAttestationAgeDays": 30,
+    "maximumMetadataFileBytes": 16777216,
+    "maximumEvidenceFiles": 10000,
+    "maximumEvidenceDirectories": 10000,
+    "maximumEvidenceDepth": 64
+  }
+}

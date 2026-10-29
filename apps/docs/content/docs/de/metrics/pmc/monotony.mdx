@@ -1,0 +1,55 @@
+---
+title: Trainingsmonotonie
+description: So berechnet Trainingload.ai die begrenzte Trainingsmonotonie und Training Strain aus den letzten sieben Tagesbelastungen.
+keywords: ["Trainingsmonotonie", "Monotonie Formel", "Training Strain", "Belastungsvariation", "Carl Foster"]
+---
+
+# Was ist Trainingsmonotonie?
+
+**Trainingsmonotonie** beschreibt, wie ähnlich die täglichen Belastungswerte der letzten sieben Kalendertage sind. Ähnliche Tage ergeben meist einen höheren Wert; deutlich unterschiedliche Hoch-, Niedrig- und Ruhetage meist einen niedrigeren.
+
+Trainingload.ai zeigt eine normalisierte, begrenzte Variante und nicht den klassischen Foster-Wert. Sie misst weder Ermüdung noch Erholung, Übertraining oder Verletzungswahrscheinlichkeit.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotonie"
+    valuePopoverTitle="Monotoniewert"
+    valuePopoverBody="Berechnet aus Mittelwert und Populationsstandardabweichung der letzten sieben Tagesbelastungen; trainingsfreie Tage zählen als null."
+    rangePopoverTitle="Anzeigeabschnitte"
+    rangePopoverBody="<0,6, 0,6–0,8 und >0,8 sind Prüfhilfen, keine Gesundheits- oder Verletzungsgrenzen."
+    helpTitle="Belastungsvariation"
+    details="Betrachte alle sieben Tageswerte und die Gesamtbelastung gemeinsam."
+  />
+</div>
+
+## Produktformel
+
+```text
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+monotony = mean_load / (sd_load + mean_load)
+training_strain = sum(loads) × monotony / 0.5
+```
+
+Enthalten sind heute und die sechs vorherigen Kalendertage. Tage ohne Belastung zählen mit null. Sind alle sieben Werte null, gibt das Produkt Monotonie und Strain als null zurück.
+
+## Unterschied zu Foster
+
+```text
+foster_monotony = mean_load / sd_load
+foster_strain = sum(loads) × foster_monotony
+```
+
+Der Foster-Wert ist unbegrenzt und wird bei identischen Tageswerten unendlich groß. Die Trainingload.ai-Variante begrenzt den Wert in einer Woche mit Belastung auf den Bereich von 0 bis 1. Daher ist `0.8` im Produkt nicht mit `2.0` nach Foster vergleichbar.
+
+Sieben Ruhetage ergeben 0, ein einzelner Belastungstag etwa 0,29 und sieben identische positive Tage 1. Niedrig ist nicht automatisch besser: Ein großer Belastungssprung plus sechs Ruhetage ergibt ebenfalls einen niedrigen Wert. Hoch bedeutet nur, dass die Tageswerte ähnlich sind.
+
+Prüfe immer die sieben Einzelwerte, die Gesamtbelastung, Sportart, Einheiteninhalt, Schlaf, Schmerzen und subjektives Befinden.
+
+## Quellen
+
+- [Foster (1998)](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad et al. (2017): Session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones et al. (2017): systematische Übersichtsarbeit](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr: Training Monotony](https://fellrnr.com/wiki/Training_Monotony)

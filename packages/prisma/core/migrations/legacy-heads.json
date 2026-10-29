@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "acceptedHeads": [],
+  "requiredRelations": [
+    "t_user",
+    "t_activity",
+    "t_plan",
+    "t_self_host_instance"
+  ]
+}

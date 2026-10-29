@@ -1,0 +1,11 @@
+{
+  "completionEmail": {
+    "subject": "Trainingload.ai アカウントの削除が完了しました",
+    "completed": "Trainingload.ai アカウントと関連データの削除が完了しました。",
+    "thanks": "Trainingload.ai をご利用いただき、ありがとうございました。",
+    "feedback": "退会理由や改善へのご提案がありましたら、このメールに直接返信するか、お問い合わせください。",
+    "feedbackAction": "フィードバックを送る",
+    "feedbackSubject": "Trainingload.ai アカウント削除に関するフィードバック",
+    "closing": "これからのトレーニングが実りあるものになることを願っています。"
+  }
+}

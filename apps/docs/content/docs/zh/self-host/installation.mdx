@@ -1,0 +1,158 @@
+---
+title: 自托管快速安装
+description: 验证 Trainingload.ai 签名发行包，安装本地实例，认领 Owner 账号，并创建第一份可验证备份。
+seoTitle: "Trainingload.ai 自托管安装教程：验证签名并安全部署"
+seoDescription: 在 Linux、macOS 或 Windows 上按正式流程验证并安装 Trainingload.ai 自托管发行包，认领 Owner，检查就绪状态并完成首次备份。
+keywords:
+  [
+    "Trainingload.ai 安装",
+    "自托管快速开始",
+    "签名发行包",
+    "Docker Compose 自托管",
+  ]
+---
+
+# 自托管快速安装
+
+## 完成结果
+
+完成后，你会得到一个正在运行的本地 Trainingload.ai 实例、一个已认领的 Owner 账号、通过的健康检查，以及第一份经过验证的备份。
+
+## 开始前
+
+准备以下任一种受支持宿主机：
+
+- `amd64` 或 `arm64` 的 Ubuntu 24.04；
+- 使用 Docker Desktop 的 Apple Silicon macOS；
+- 使用 Docker Desktop、WSL2 和 Linux containers 的 `amd64` Windows 11。
+
+宿主机还需要：
+
+- Node.js 22 或更高版本；
+- Docker Engine 和 Docker Compose v2；
+- 支持 `verify-blob --bundle` 的 Cosign；
+- Core Local 至少 2 CPU、2 GiB 内存和 5 GiB 可用磁盘。
+
+从官方 [GitHub Releases](https://github.com/trainingload-ai/trainingloadai/releases) 页面下载精确版本的发行压缩包、checksum 文件和 checksum 签名 bundle。不要把源码 checkout 或没有版本的压缩包当作生产发行物。
+
+默认数据目录是解压后发行目录中的 `./data`。如果要使用独立磁盘或其他路径，请在执行安装器前先阅读[选择本地数据路径](/zh/docs/self-host/configuration#选择本地数据路径)。
+
+## 在 Linux、macOS 或 WSL2 上安装
+
+### 1. 验证下载的压缩包
+
+在三个下载文件所在目录执行：
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+然后根据宿主系统验证压缩包 checksum：
+
+```bash
+# Linux 或 WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+只有签名和 checksum 都验证成功后才能继续。
+
+### 2. 解压并检查安装计划
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+Dry-run 会验证内部 bundle 签名、宿主前置条件、精确发行版本、配置、数据路径和生命周期计划。只有 JSON 结果包含 `"ok": true` 时才能继续。
+
+### 3. 安装实例
+
+```bash
+./install.sh --json
+```
+
+安装器会生成受保护的本地 secret、准备声明的数据目录、启动固定 digest 的镜像、执行数据库迁移，并等待必需服务进入就绪状态。
+
+## 在 Windows 11 上安装
+
+在下载文件所在目录打开 PowerShell：
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+只有 dry-run 结果包含 `"ok": true` 时才继续执行实际安装。
+
+## 创建本地账户
+
+默认安装只监听 `127.0.0.1`。服务就绪后，在同一台电脑打开 `http://localhost:43210`。首次启动页只要求一个用户名；不需要邮箱或密码。提交后，系统会创建唯一 Owner、建立本机会话，并直接进入 onboarding。以后会话失效时，再次打开应用即可恢复同一个 Owner 的本机会话。
+
+无密码访问只在站点地址、Client 绑定和真实客户端地址全部是 loopback，且请求来自同源浏览器时启用。数据库不会保存空密码。
+
+需要从另一台电脑访问时，保持实例监听 loopback，并通过 SSH 把远端端口转发到本机 `localhost:43210`。公共应用提供用户名初始化和本机会话恢复；Cloud 的邮箱、密码、注册和 OAuth 页面由托管版本提供。不要把无密码实例直接发布到公网。
+
+## 接下来会发生什么
+
+默认通过 `http://localhost:43210` 访问。PostgreSQL 数据、上传文件、缓存、备份和操作记录保存在声明的数据根目录中。只有 Client 发布端口，Docs 独立部署。首次使用无需 AI 或训练平台 Key；唯一 Owner 可在之后配置 BYOK AI 和 Intervals.icu 个人 API Key。
+
+## 验证安装
+
+运行只读检查，然后创建第一份经过验证的备份：
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+满足以下条件后才算安装完成：
+
+- `status` 和 `doctor` 返回 `"ok": true`；
+- 可以通过配置的站点地址进入实例；
+- 备份包含成功的 `backup-result.json`，并通过完整性验证。
+
+把经过验证的备份转移到独立故障域中的加密存储。只把备份留在同一块磁盘上，不能提供足够的恢复保障。
+
+## 故障排查
+
+- **安装器拒绝宿主机：** 不要绕过平台检查，改用受支持的宿主组合。
+- **签名或 checksum 验证失败：** 立即停止，从同一个精确版本重新下载全部发行文件。
+- **Docker 不可用：** 确认 Docker 正在运行，支持 Compose v2，并使用 Linux containers backend。
+- **端口已被占用：** 启动前配置其他受支持的 bind 和端口。
+- **就绪检查失败：** 执行 `./self-host doctor --json`，不要自行拼接 `docker compose` 命令替代生命周期工具。
+
+需要稳定错误码和安全恢复步骤时，请查看[自托管故障排查](/zh/docs/self-host/troubleshooting)。
+
+## 下一步
+
+继续阅读[配置](/zh/docs/self-host/configuration)，设置网络暴露方式并按需启用 BYOK AI。导入重要数据前，再阅读[管理实例](/zh/docs/self-host/operations)。

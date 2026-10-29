@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starshards.local/schemas/workout-parsed-plan.schema.json",
+  "$comment": "Standard JSON does not allow // or /* */ comments. Use this key, or x-dslTextExamples, for human notes. Editors: use .jsonc if you need // comments (tooling-dependent).",
+  "title": "Workout ParsedPlan (PlanBlock[])",
+  "description": "Matches the JSON returned by WorkoutService.parsePlanText and POST /workout/parse-text. Persisted plan workouts use DSL text on the server; blocks[] may be cached client-side for UI. Grammar: apps/docs/content/docs/en|zh/planning/workout-dsl.mdx. Implementation: apps/server/src/api/workout/workout.service.ts (parsePlanText).",
+  "x-notes": [
+    "Client stringifyParsedPlan (apps/client/src/api/workout.ts) may emit targets compatible with this shape. Zone selections should keep HEART_RATE_ZONE/POWER_ZONE/SPEED zone provenance instead of being collapsed into custom absolute values.",
+    "workRestStep uses additionalProperties: true so forward-compatible fields do not fail validation."
+  ],
+  "x-dslTextExamples": [
+    "warmup 5m\nwork 20m pace 7:20-8:20/km\nrecovery 90s\nwork 3km\ncooldown 5m",
+    "work: 30s pwr 250W\nrest: 2m",
+    "work 8m pwr 220-250W cad 85rpm\nrecovery 2m\nwork 5m pwr 250W hr 150-160bpm",
+    "work 12m hr 145-155bpm\nrecovery 5m hr 120-130bpm",
+    "work 25m hr z2\nwork 10m power z4\nwork 20m pace z2",
+    "work 500kj pwr 70%\nrecovery 3m",
+    "work hr<150bpm pwr 200W\nrecovery hr>120bpm",
+    "repeat 4 {\n  work 4m pwr 270W\n  recovery 2m\n}",
+    "repeat until 30m {\n  work 4m power 270W\n  recovery 2m\n}",
+    "repeat until cadence<80rpm {\n  work 30s power 300W\n  recovery 30s\n}"
+  ],
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/planBlock"
+  },
+  "$defs": {
+    "planBlock": {
+      "oneOf": [
+        { "$ref": "#/$defs/workRestBlock" },
+        { "$ref": "#/$defs/repeatBlock" }
+      ]
+    },
+    "workRestBlock": {
+      "type": "object",
+      "required": ["type", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["work", "rest"],
+          "description": "work：主训练/热身/放松等（见 steps[].stepKind）；rest：恢复/休息等。"
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/workRestStep" },
+          "minItems": 1
+        }
+      }
+    },
+    "repeatBlock": {
+      "type": "object",
+      "required": ["type", "count", "children"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "repeat" },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "repeat N { ... } 中的 N；repeat until 使用 1 作为内部占位值。"
+        },
+        "until": {
+          "$ref": "#/$defs/repeatUntil",
+          "description": "repeat until <condition> 的结束条件；固定次数 repeat 不提供该字段。"
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/workRestBlock" },
+          "description": "当前解析器产出的子节点为 work/rest 块（非嵌套 repeat）。"
+        }
+      }
+    },
+    "repeatUntil": {
+      "type": "object",
+      "required": ["kind", "value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "TIME",
+            "DISTANCE",
+            "CALORIES",
+            "HR_LESS_THAN",
+            "HR_GREATER_THAN",
+            "POWER_LESS_THAN",
+            "POWER_GREATER_THAN",
+            "CADENCE_LESS_THAN",
+            "CADENCE_GREATER_THAN"
+          ]
+        },
+        "value": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": {
+          "type": "string",
+          "enum": ["SECONDS", "METERS", "CALORIES", "BPM", "WATTS", "RPM"]
+        }
+      }
+    },
+    "workRestStep": {
+      "type": "object",
+      "required": ["duration"],
+      "additionalProperties": true,
+      "properties": {
+        "duration": {
+          "type": "number",
+          "description": "当 durationMeta.kind 为 TIME 时表示秒数；其它 kind 时常为 0。"
+        },
+        "power": {
+          "type": "number",
+          "description": "功率相对 FTP 的比例 0..1（仅来自 pwr …%，例如 pwr 70%）。瓦特目标在 powerWatts，不在此字段。"
+        },
+        "powerWatts": {
+          "type": "number",
+          "description": "瓦特：来自 pwr 250W 或 pwr 250（无单位按瓦解析）。"
+        },
+        "cadence": { "type": "number", "description": "rpm 等。" },
+        "heartRatePercent": {
+          "type": "number",
+          "description": "已废弃：DSL 不再解析 hr …%。仅存于历史 JSON。"
+        },
+        "heartRateBpm": { "type": "number", "description": "次/分。" },
+        "paceKmh": { "type": "number", "description": "内部换算速度 km/h。" },
+        "gradeDeg": { "type": "number", "description": "坡度 °。" },
+        "stepKind": {
+          "type": "string",
+          "enum": ["WARMUP", "WORK", "RECOVERY", "REST", "COOLDOWN", "OTHER"]
+        },
+        "durationMeta": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/durationMeta" }]
+        },
+        "swimMeta": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/swimMeta" }]
+        },
+        "primaryTargetMeta": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/stepTarget" }]
+        },
+        "secondaryTarget": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/stepTarget" }]
+        }
+      }
+    },
+    "durationMeta": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "TIME",
+            "DISTANCE",
+            "CALORIES",
+            "HR_LESS_THAN",
+            "HR_GREATER_THAN",
+            "POWER_LESS_THAN",
+            "POWER_GREATER_THAN",
+            "CADENCE_LESS_THAN",
+            "CADENCE_GREATER_THAN"
+          ],
+          "description": "与 DSL 第一个 measureToken 的解析结果对应。"
+        },
+        "value": { "type": "number" },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "SECONDS",
+            "KILOMETERS",
+            "METERS",
+            "KJ",
+            "BPM",
+            "WATTS",
+            "RPM"
+          ]
+        }
+      }
+    },
+    "swimMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stroke": {
+          "type": "string",
+          "enum": [
+            "FREESTYLE",
+            "BREASTSTROKE",
+            "BACKSTROKE",
+            "BUTTERFLY",
+            "DRILL",
+            "MEDLEY"
+          ]
+        },
+        "trainingType": {
+          "type": "string",
+          "enum": ["KICK", "PULL", "DRILL"]
+        },
+        "equipment": {
+          "type": "string",
+          "enum": ["FINS", "KICKBOARD", "PADDLES", "PULL_BUOY", "SNORKEL"]
+        }
+      }
+    },
+    "stepTarget": {
+      "type": "object",
+      "description": "primaryTargetMeta / secondaryTarget。parsePlanText 可产出 HEART_RATE_ZONE / POWER_ZONE / SPEED zone 引用，也可产出自定义 bpm/W/pace/cadence 值。",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "SPEED",
+            "CADENCE",
+            "HEART_RATE_ZONE",
+            "HEART_RATE_CUSTOM",
+            "POWER_ZONE",
+            "POWER_CUSTOM"
+          ],
+          "description": "ZONE 表示引用用户当前区间；CUSTOM 表示锁定绝对值或百分比。"
+        },
+        "value": { "type": "number" },
+        "valueHigh": { "type": "number" },
+        "zoneIndex": { "type": "number" },
+        "zoneLabel": { "type": "string" },
+        "zoneSystem": { "type": "string" },
+        "zoneSource": { "type": "string" },
+        "zoneBasis": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "区间基准快照，例如 benchmark=FTP/CP/LTHR/HRR、benchmarkValue、HRR 输入值、targetLow/High/unit。"
+        },
+        "unit": { "type": "string" }
+      }
+    }
+  }
+}

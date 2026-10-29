@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starshards.local/schemas/ask-user-question.schema.json",
+  "title": "AskUserQuestion",
+  "description": "AI coach structured multiple-choice question payload for client UI rendering and hydration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "questions"
+  ],
+  "properties": {
+    "type": {
+      "const": "ask_user_question",
+      "description": "Discriminator for fenced block parsing or persisted tool inputs"
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "description": "Questions to ask the user. Use 1-4 questions. Each question must have a stable id, a short header, and 2-4 options.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "header",
+          "question",
+          "options"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Stable question id used to map the answer, for example weekly_days or long_day."
+          },
+          "header": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Very short chip label shown above the question, ideally 2-12 characters."
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "The full question to ask the user. Keep it concise and specific."
+          },
+          "multiSelect": {
+            "type": "boolean",
+            "description": "Allow selecting multiple options when choices are not mutually exclusive."
+          },
+          "options": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "description": "Available answer choices. Use 2-4 options. Put the recommended option first and include the trade-off in description.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "value",
+                "label",
+                "description"
+              ],
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S",
+                  "description": "Stable, unique option identifier, e.g. restart_training. Required in addition to the visible label."
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "preview": {
+                  "type": "string",
+                  "description": "Optional preview content for future rich UI use."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Optional identifier for analytics or debugging, for example plan-builder."
+        },
+        "skill": {
+          "type": "string",
+          "description": "Optional active skill name, for example plan-builder."
+        }
+      }
+    }
+  }
+}

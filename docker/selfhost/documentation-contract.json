@@ -1,0 +1,472 @@
+{
+  "schemaVersion": 3,
+  "workflow": ".github/workflows/selfhost-docs.yml",
+  "supportIssueTemplate": ".github/ISSUE_TEMPLATE/self-host-support.yml",
+  "schedule": "17 3 * * 1",
+  "nodeVersion": "22.23.3",
+  "documents": [
+    "SELF_HOSTING.md",
+    "SELF_HOST_OPERATIONS.md",
+    "SELF_HOST_KNOWN_LIMITATIONS.md",
+    "BACKUP_RESTORE.md",
+    "UPGRADE.md",
+    "docs/self-hosting/management-cli.zh.md",
+    "docs/self-hosting/doctor-and-diagnostics.zh.md",
+    "docs/self-hosting/error-catalog.zh.md",
+    "docs/self-hosting/release-candidate.zh.md",
+    "docs/self-hosting/release-retrospective.zh.md"
+  ],
+  "installerScenarios": [
+    {
+      "id": "install-dry-run",
+      "document": "SELF_HOSTING.md",
+      "argv": [
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "install.sh",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "install",
+      "document": "SELF_HOSTING.md",
+      "argv": [
+        "--json"
+      ],
+      "requiredTokens": [
+        "install.sh",
+        "--json"
+      ]
+    },
+    {
+      "id": "install-no-start-dry-run",
+      "document": "SELF_HOSTING.md",
+      "argv": [
+        "--no-start",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "install.sh",
+        "--no-start",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "install-no-start",
+      "document": "SELF_HOSTING.md",
+      "argv": [
+        "--no-start",
+        "--json"
+      ],
+      "requiredTokens": [
+        "install.sh",
+        "--no-start",
+        "--json"
+      ]
+    },
+    {
+      "id": "install-windows-dry-run",
+      "document": "SELF_HOSTING.md",
+      "argv": [
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "install.ps1",
+        "--dry-run",
+        "--json"
+      ]
+    }
+  ],
+  "managementScenarios": [
+    {
+      "id": "daily-status",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "status",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "status",
+        "--json"
+      ]
+    },
+    {
+      "id": "daily-doctor",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "doctor",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "doctor",
+        "--json"
+      ]
+    },
+    {
+      "id": "bounded-logs",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "logs",
+        "--tail",
+        "200",
+        "--service",
+        "server",
+        "--service",
+        "client",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "logs",
+        "--tail",
+        "--service",
+        "--json"
+      ]
+    },
+    {
+      "id": "start-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "start",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "start",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "start",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "start",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "start",
+        "--json"
+      ]
+    },
+    {
+      "id": "stop-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "stop",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "stop",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "stop",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "stop",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "stop",
+        "--json"
+      ]
+    },
+    {
+      "id": "uninstall-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "uninstall",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "uninstall",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "uninstall",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "uninstall",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "uninstall",
+        "--json"
+      ]
+    },
+    {
+      "id": "uninstall-delete-data-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "uninstall",
+        "--delete-data",
+        "--confirm-data-root",
+        "/absolute/path/to/trainingload-data",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "uninstall",
+        "--delete-data",
+        "--confirm-data-root",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "uninstall-delete-data",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "uninstall",
+        "--delete-data",
+        "--confirm-data-root",
+        "/absolute/path/to/trainingload-data",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "uninstall",
+        "--delete-data",
+        "--confirm-data-root",
+        "--json"
+      ]
+    },
+    {
+      "id": "backup-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "backup",
+        "--output",
+        "weekly-2026-10-18",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "backup",
+        "--output",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "backup",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "backup",
+        "--output",
+        "weekly-2026-10-18",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "backup",
+        "--output",
+        "--json"
+      ]
+    },
+    {
+      "id": "restore-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "restore",
+        "/secure/backup",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "restore",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "restore",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "restore",
+        "/secure/backup",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "restore",
+        "--json"
+      ]
+    },
+    {
+      "id": "upgrade-source-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "upgrade",
+        "/release/target",
+        "--directory",
+        "/instance",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "upgrade",
+        "--directory",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "upgrade-target",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "upgrade",
+        "/release/target",
+        "--directory",
+        "/instance",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "upgrade",
+        "--directory",
+        "--json"
+      ]
+    },
+    {
+      "id": "rollback-dry-run",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "rollback",
+        "1.1.12",
+        "--directory",
+        "/instance",
+        "--dry-run",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "rollback",
+        "--directory",
+        "--dry-run",
+        "--json"
+      ]
+    },
+    {
+      "id": "rollback",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "rollback",
+        "1.1.12",
+        "--directory",
+        "/instance",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "rollback",
+        "--directory",
+        "--json"
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "document": "SELF_HOST_OPERATIONS.md",
+      "argv": [
+        "diagnostics",
+        "--output",
+        "support-2026-10-18",
+        "--tail",
+        "500",
+        "--service",
+        "server",
+        "--service",
+        "client",
+        "--json"
+      ],
+      "requiredTokens": [
+        "self-host",
+        "diagnostics",
+        "--output",
+        "--tail",
+        "--service",
+        "--json"
+      ]
+    }
+  ],
+  "releaseCandidateScenarios": [
+    {
+      "id": "verify-release-candidate",
+      "document": "docs/self-hosting/release-candidate.zh.md",
+      "argv": [
+        "--candidate-directory",
+        "<downloaded-candidate-directory>",
+        "--release-version",
+        "1.1.15",
+        "--release-revision",
+        "0123456789abcdef0123456789abcdef01234567",
+        "--json"
+      ],
+      "requiredTokens": [
+        "selfhost:release-candidate-verify",
+        "--candidate-directory",
+        "--release-version",
+        "--release-revision",
+        "--json"
+      ]
+    }
+  ],
+  "attestationScenarios": [
+    {
+      "id": "prepare-release-attestation",
+      "document": "docs/self-hosting/release-candidate.zh.md",
+      "argv": [
+        "--attestation-file",
+        "release-attestation.json",
+        "--release-version",
+        "1.1.15",
+        "--release-revision",
+        "0123456789abcdef0123456789abcdef01234567",
+        "--release-archive-sha256",
+        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "--json"
+      ],
+      "requiredTokens": [
+        "selfhost:release-attestation-prepare",
+        "--attestation-file",
+        "--release-version",
+        "--release-revision",
+        "--release-archive-sha256",
+        "--json"
+      ]
+    }
+  ],
+  "forbiddenExecutablePatterns": [
+    "docker compose down -v",
+    "docker compose down --volumes",
+    "--skip-verify",
+    "chmod 777",
+    "rm -rf data",
+    "rm -rf .selfhost"
+  ]
+}

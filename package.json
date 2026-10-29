@@ -1,0 +1,90 @@
+{
+  "name": "trainingloadai",
+  "version": "1.1.15",
+  "private": true,
+  "description": "Open-source, self-hosted endurance training analysis and AI coaching platform.",
+  "homepage": "https://trainingload.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trainingload-ai/trainingloadai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/trainingload-ai/trainingloadai/issues"
+  },
+  "keywords": [
+    "self-hosted",
+    "training-analysis",
+    "running",
+    "cycling",
+    "training-load",
+    "ai-coach",
+    "docker-compose"
+  ],
+  "license": "AGPL-3.0-only",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "pnpm": {
+    "overrides": {
+      "body-parser@2.2.2": "2.4.0",
+      "brace-expansion@2.1.1": "2.1.7",
+      "browserslist@4.28.2": "4.29.5",
+      "dompurify@3.4.7": "3.4.17",
+      "fast-uri@3.1.2": "3.1.9",
+      "follow-redirects@1.16.0": "1.16.1",
+      "iconv-lite@0.7.2": "0.7.3",
+      "linkify-it@5.0.1": "5.0.2",
+      "markdown-it@14.2.0": "14.3.3",
+      "multer@2.1.1": "2.5.0",
+      "postcss@8.4.31": "8.5.32",
+      "prosemirror-view@1.41.8": "1.42.8",
+      "proxy-addr@2.0.7": "2.0.8",
+      "sharp@0.34.5": "0.35.5",
+      "set-cookie-parser@3.1.0": "3.2.1",
+      "source-map-js@1.2.1": "1.2.2",
+      "undici@7.27.0": "7.30.1",
+      "vite@7.3.6": "7.3.7"
+    }
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "husky": "9.1.7",
+    "trackswap": "0.2.2",
+    "yaml": "2.9.0"
+  },
+  "scripts": {
+    "prepare": "node .husky/install.mjs",
+    "design-tokens:generate": "pnpm --filter @trainingloadai/design-tokens generate",
+    "design-tokens:check": "pnpm --filter @trainingloadai/design-tokens check && pnpm --filter @trainingloadai/design-tokens test",
+    "precommit:check": "git diff --cached --check && pnpm design-tokens:check && pnpm boundary:check && pnpm messages:check && pnpm selfhost:inventory:check && pnpm selfhost:docs-contract",
+    "selfhost:inventory": "node scripts/generate-selfhost-inventory.mjs",
+    "selfhost:inventory:check": "node scripts/generate-selfhost-inventory.mjs --check",
+    "selfhost:image-contract": "node scripts/selfhost/verify-image-contract.mjs",
+    "selfhost:image-supply-chain": "node scripts/selfhost/verify-image-contract.mjs && node scripts/selfhost/verify-image-workflow.mjs",
+    "selfhost:compose-contract": "node scripts/selfhost/verify-compose-contract.mjs",
+    "selfhost:compose-smoke": "node scripts/selfhost/smoke-compose.mjs",
+    "selfhost:acceptance-contract": "node scripts/selfhost/verify-acceptance-workflow.mjs",
+    "selfhost:v1-contract": "node scripts/selfhost/verify-v1-contract.mjs",
+    "selfhost:release-candidate-contract": "node scripts/selfhost/verify-release-candidate-workflow.mjs",
+    "selfhost:release-attestation-prepare": "node scripts/selfhost/release-attestation.mjs",
+    "selfhost:release-candidate-verify": "node scripts/selfhost/verify-release-candidate.mjs",
+    "selfhost:docs-contract": "node scripts/selfhost/verify-selfhost-documentation.mjs",
+    "selfhost:agent-contract": "node --test scripts/selfhost/agent-deployment-contract.test.mjs",
+    "selfhost:error-catalog:check": "node scripts/selfhost/generate-error-catalog.mjs --check",
+    "dev:selfhost": "pnpm --parallel --filter @trainingloadai/client --filter @trainingloadai/server run dev:selfhost",
+    "build:selfhost": "pnpm --dir apps/server build:selfhost && pnpm --dir apps/client build:selfhost",
+    "build": "pnpm build:selfhost",
+    "test": "pnpm --dir apps/client test:selfhost && pnpm --dir apps/server test:selfhost",
+    "test:selfhost": "pnpm test",
+    "messages:check": "node packages/messages/check-client-baseline.mjs",
+    "docs:dev": "pnpm --dir apps/docs dev",
+    "docs:build": "pnpm --dir apps/docs build",
+    "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* · (en|zh)$'",
+    "prisma:generate": "pnpm --dir packages/prisma exec prisma generate --schema core/schema.prisma",
+    "prisma:migrate": "pnpm --dir packages/prisma core:migrate",
+    "boundary:check": "node scripts/audit-public.mjs",
+    "self-host": "node scripts/selfhost/cli.mjs"
+  }
+}

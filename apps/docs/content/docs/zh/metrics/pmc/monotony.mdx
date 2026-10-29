@@ -1,0 +1,202 @@
+---
+title: 训练单调性是什么？Foster 公式与有界评分怎么对照
+description: 训练单调性衡量最近七天每日负荷有多相似。对照经典 Foster 公式与 Trainingload.ai 的有界评分、训练压力，避免把高分误读成伤病或过度训练预警。
+keywords:
+  - "训练单调性"
+  - "Foster 单调性"
+  - "训练压力"
+  - "每日负荷变化"
+  - "训练单调性公式"
+---
+
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# 训练单调性是什么？Foster 公式与有界评分怎么对照
+
+**训练单调性（Monotony）**用于描述最近 7 个日历日的每日负荷有多相似。每日负荷越接近，单调性通常越高；高低日、低负荷日和休息日带来的变化越明显，单调性通常越低。
+
+Trainingload.ai 显示的是一个经过归一化的有界版本，范围和经典 Foster 单调性不同。它描述负荷数字的分布，不直接测量疲劳、恢复、过度训练、伤病概率或训练质量。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotony"
+    valuePopoverTitle="Monotony 值"
+    valuePopoverBody="根据最近 7 个日历日的每日负荷均值和总体标准差计算；没有活动的日期按零负荷计入。"
+    rangePopoverTitle="界面分段"
+    rangePopoverBody="界面使用 <0.6、0.6–0.8 和 >0.8 三段帮助定位负荷分布。这些分段不是健康或伤病风险边界。"
+    helpTitle="负荷变化"
+    details="同时查看 7 天每日负荷和总负荷，判断高值或低值是由计划结构、休息日、负荷尖峰还是数据问题造成。"
+  />
+</div>
+
+_示例数值仅用于界面预览。_
+
+## Monotony 的数值来源
+
+Trainingload.ai 使用从今天到六天前的 7 个每日负荷值：
+
+- 每项活动先按照负荷来源优先级选出一个负荷值。
+- 同一天多项活动的负荷相加。
+- 没有记录活动的日期按零负荷计算，而不是从窗口中删除。
+- 活动缺失、重复、阈值变化或负荷来源变化都会改变每日序列，进而改变 Monotony。
+
+Monotony 只看到每天最终的负荷数字。它不会识别这些负荷来自跑步、骑行、游泳还是力量训练，也不会判断课程内容是否合理。
+
+## Trainingload.ai 使用的公式
+
+首先取包含今天在内的最近 7 个日历日：
+
+```text
+loads = [
+  daily_load_today,
+  daily_load_1_day_ago,
+  ...,
+  daily_load_6_days_ago
+]
+
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+```
+
+这里的 `sd_load` 是这 7 个数值的总体标准差。然后计算：
+
+```text
+monotony = mean_load / (sd_load + mean_load)
+```
+
+如果 `sd_load + mean_load = 0`，说明七天负荷全部为零，产品返回 `monotony = 0`。
+
+Trainingload.ai 还基于同一窗口计算训练压力（Training Strain）：
+
+```text
+total_load = sum(loads)
+training_strain = total_load × monotony / 0.5
+```
+
+产品会把 Monotony 和 Training Strain 保留两位小数用于显示。
+
+## 与经典 Foster 公式的区别
+
+经典 Foster 单调性通常写作：
+
+```text
+foster_monotony = mean_load / sd_load
+foster_strain = total_load × foster_monotony
+```
+
+经典值没有上限；当每天负荷完全相同时，标准差为零，结果会趋向无穷。Trainingload.ai 使用 `mean_load / (sd_load + mean_load)` 避免除以零，并把非零训练周的结果限制在 0 到 1 之间。
+
+当均值和标准差都大于零时，两种单调性的关系是：
+
+```text
+trainingload_monotony = foster_monotony / (1 + foster_monotony)
+```
+
+因此，Trainingload.ai 的 `0.8` 不能与经典 Foster 指标中的 `2.0` 直接比较；产品的 Training Strain 也不是经典 Foster Strain。
+
+## 如何理解数值
+
+对于非负每日负荷：
+
+- **七天全部为零**：产品返回 0，表示没有可用于分析的近期训练负荷。
+- **只有一天有负荷**：Monotony 约为 0.29，是 7 天窗口内非常集中的负荷分布。
+- **每天正负荷完全相同**：Monotony 为 1，表示每日负荷数字没有变化。
+- **介于两者之间**：数值越高，通常表示每日负荷相对越接近。
+
+低值不一定更好。一次很大的负荷尖峰加六个零负荷日也会产生较低 Monotony，但这不代表训练结构健康。高值也不等于受伤或过度训练；它只说明最近七天的每日负荷数字较为接近。
+
+## 界面分段如何使用
+
+Client 当前使用以下分段：
+
+| 界面分段 | 产品边界 | 可以确定的模型关系 |
+| --- | ---: | --- |
+| 较低 | `< 0.6` | 每日负荷相对变化较明显，或负荷集中在少数日期。 |
+| 中等 | `0.6–0.8` | 每日负荷的相似程度处于中间范围。 |
+| 较高 | `> 0.8` | 每日负荷数字相对接近。 |
+
+这些边界是产品显示规则，不是经过个体化验证的健康、安全或伤病风险阈值。七天全部为零时的特殊值 `0` 也不应被解读为“训练结构优秀”。
+
+## 训练压力（Training Strain）怎样变化
+
+Training Strain 同时受 7 天总负荷和 Monotony 影响：
+
+- 总负荷增加而分布不变时，Training Strain 会增加。
+- 总负荷相同但每日负荷更接近时，Monotony 和 Training Strain 都会增加。
+- 总负荷相同但负荷更集中时，Monotony 和 Training Strain 可能下降。
+
+因此，Training Strain 仍然只是产品定义的负荷摘要。它不能告诉你训练是否已经被吸收，也不能替代症状、主观疲劳、睡眠、表现趋势和课程完成质量。
+
+## 适合回答的问题
+
+Monotony 可以帮助回答：
+
+- 最近 7 天的每日负荷是相对接近，还是高低变化明显？
+- 当前数值是由计划中的规律训练、真正的休息日，还是单次负荷尖峰造成？
+- 两个总负荷相近的周期，日间负荷分布是否不同？
+- 异常变化是否来自活动缺失、重复或负荷来源调整？
+
+Monotony 无法单独回答：
+
+- 训练安排是否科学或适合当前运动员？
+- 运动员是否正在过度训练？
+- 某个数值是否会导致伤病或生病？
+- 是否应该增加休息日或取消下一节训练？
+- 不同运动项目但负荷数字相同的课程是否具有相同影响？
+
+## 实际复查流程
+
+1. 查看最近 7 个日历日的全部每日负荷，包括零负荷日。
+2. 同时查看七天总负荷，避免孤立解读 Monotony。
+3. 找出高负荷日、低负荷日和休息日是否符合计划。
+4. 回到具体活动，检查运动类型、课程内容、阈值和负荷来源。
+5. 加入主观疲劳、睡眠、疼痛、生病信号、表现趋势和课程完成质量。
+6. 只有这些证据共同支持调整时，再改变后续训练。
+
+<DocsToolCtaCard
+  title="在 Trainingload.ai 中复查每日负荷分布"
+  description={
+    <>
+      同时查看七天总负荷、每日变化和来源活动，判断 Monotony 的变化是否符合计划。
+    </>
+  }
+  primary={{ href: "/zh/training-load", label: "在计划里管理 CTL、ATL、TSB 训练负荷" }}
+  secondary={{
+    href: "/zh/docs/metrics/training-load/training-stress-score",
+    label: "看 TSS 如何变成每日负荷",
+  }}
+/>
+
+## 参考资料
+
+- [Foster（1998）：运动员训练监控与过度训练综合征](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad 等（2017）：Session-RPE 训练负荷监控方法综述](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones 等（2017）：训练负荷、疲劳指标与伤病和疾病关系的系统综述](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr：Training Monotony 及有界修正公式](https://fellrnr.com/wiki/Training_Monotony)
+
+## 常见问题
+
+### 训练单调性是什么？
+
+训练单调性是最近七天每日负荷的相似程度。日子越像，分数越高；强度日、轻松日和休息日分开，分数通常更低。它描述数字分布，不预测伤病。
+
+### Foster 公式和产品分数有何不同？
+
+经典 Foster 单调性是均值 ÷ 标准差，没有上限，天天相同会趋向无穷。Trainingload.ai 用 均值 /（标准差 + 均值），有负荷的一周落在 0 到 1。产品里的 0.8 不能当成 Foster 的 2.0。
+
+### 什么是训练压力（Training Strain）？
+
+训练压力 = 七天总负荷 × 单调性（本产品再除以 0.5）。总量高且每天很像，压力会升高。要和七个每日负荷一起看，不要单独当红灯。
+
+### 单调性低就一定更好吗？
+
+不一定。一次尖峰加六天零负荷也会很低。用它发现“一周太平”，再核对计划、缺记的活动和主观感觉。
+
+## 相关页面
+
+- [训练负荷是什么？](/zh/docs/metrics/training-load)
+- [慢性训练负荷 CTL](/zh/docs/metrics/pmc/chronic-training-load)
+- [疲劳（ATL）](/zh/docs/metrics/pmc/acute-training-load)
+- [急慢性负荷比（ACWR）](/zh/docs/metrics/pmc/acute-to-chronic-workload-ratio)
+- [用 AI 教练在负荷变化时调整训练计划](/zh/ai-training-plan)

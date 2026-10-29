@@ -1,0 +1,72 @@
+---
+title: MCP 使用场景
+description: 可直接复制的训练问题、预期工具路径和答案应包含的证据。
+---
+
+# MCP 使用场景
+
+以下问题可以直接粘贴到已连接 TrainingLoad 的客户端。客户端不一定需要调用列出的每个工具；原则是先使用最小、最能回答问题的组合。
+
+## 当前状态与疲劳感
+
+> 使用 TrainingLoad 总结我截至今天的训练状态。比较最近 7 天和此前 7 天，说明负荷、状态和接下来三次计划课程；把事实与推断分开。
+
+预期路径：`get_training_snapshot` → `get_training_readiness` → 必要时 `list_planned_workouts`。
+
+答案应说明 `asOf`、时区、负荷差异、ATL/CTL/TSB 是否有数据，以及 readiness 输出只是训练负荷信号，不是医疗或“应该训练”的判断。
+
+## 比较两个训练周期
+
+> 比较 2026-09-01 至 2026-09-28 和 2026-10-01 至 2026-10-28 的训练。按跑步、骑行、游泳拆分负荷，并指出哪些变化有数据支持。
+
+预期路径：`compare_training_periods` + `get_training_breakdown`。
+
+需要反复使用时，可以直接选择原生 `compare-training-blocks` prompt。若次数、时长或距离变化与负荷不同步，再使用 `get_activity_statistics`；需要分析频率、连续训练天数或负荷波动时，使用 `get_training_consistency`。
+
+## 查看一条已完成活动
+
+> 显示这条活动的区间分布与 lap/split 摘要。只根据已存储聚合字段指出配速或强度是否均匀，不请求原始轨迹或传感器流。
+
+预期路径：`get_activity` → `get_activity_zones` + `get_activity_splits`。
+
+## 体能趋势和个人最佳
+
+> 查看今年跑步 VO2_MAX 的估算趋势、当前训练区间，以及 5 km 和 10 km 最佳表现。不要把估算值说成实验室测量。
+
+预期路径：`get_fitness_trends` + `get_training_zones` + `get_personal_bests`。
+
+## 计划执行
+
+> 总结过去 8 周的计划执行情况：完成、跳过和仍待处理的课程各有多少；再列出下一周课程。说明完成率的计算口径。
+
+预期路径：`get_plan_adherence` + `list_planned_workouts`。
+
+`get_plan_adherence` 使用课程状态，而不是猜测活动是否匹配计划。`DONE` 才计为完成；未来仍为 `PLANNED` 的课程会保留在所选区间的分母中。
+
+如果要复盘完整计划，先用 `list_training_plans` 发现 opaque ID，再调用 `get_plan_summary` 查看完成率、实际与预计负荷、每周进度和项目构成。
+
+## 比赛准备
+
+> 找出下一场比赛，并结合相关计划、近期负荷/状态信号和接下来的课程检查准备情况。明确缺失证据，不把 readiness 写成医疗或“可以参赛”的判断。
+
+预期路径：`list_competitions` → `get_competition` → `list_training_plans` / `get_plan_summary` → `get_training_readiness` → `list_planned_workouts`。
+
+支持 MCP prompts 的客户端可以直接选择 `race-preparation-check`，无需复制完整问题。
+
+## 同步故障排查
+
+> 检查我的 Strava 连接。告诉我完成活动导入和导出是否可用、是否自动开启、最近是否有同步错误；不要显示账号 ID 或错误原文。
+
+预期路径：`get_integration_status`。
+
+## 健康背景（需单独授权）
+
+> 在我授权健康数据后，总结最近 14 天可用的 wellness 变化。缺失项明确写缺失，不做诊断。
+
+预期路径：`get_health_summary`。如果尚未授权 `health:read`，客户端应显示增量授权，而不是索要 token。
+
+## 让答案更可核验
+
+可以在任何问题末尾加上：
+
+> 列出你实际调用的 TrainingLoad 工具、每个工具的日期范围，以及支持结论的返回字段。空值不要补全。

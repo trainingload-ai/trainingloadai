@@ -1,0 +1,44 @@
+---
+title: MCP security and privacy
+description: OAuth, data minimization, tenant isolation, sanitization, limits, auditing, and health-data boundaries for TrainingLoad MCP.
+---
+
+# MCP security and privacy
+
+TrainingLoad MCP is a read-only resource server for private athlete data. OAuth is the only public connection path; the MCP endpoint does not accept API keys or long-lived agent tokens.
+
+## Authorization in depth
+
+- OAuth metadata advertises the MCP resource, authorization server, supported scopes, and PKCE S256.
+- `tools/list` filters by granted scope, entitlement, user/client feature flag, and server availability.
+- Every tool execution repeats the authoritative policy check. Hiding a tool is not treated as authorization.
+- Tokens are audience-bound to the MCP resource. Invalid tokens, missing scopes, verifier outages, and rate limits have distinct responses.
+- `health:read` is an incremental scope and is excluded from the default grant.
+
+## Data returned
+
+Tools return reduced summaries needed for training questions. They do not return email, internal user ID, precise GPS, raw sensor streams, third-party credentials, or complete FIT records. Every identifier lookup is scoped to the OAuth user, including opaque activity and plan identifiers.
+
+All list tools enforce a bounded date range, a maximum result count, and an HMAC-protected opaque cursor. Tool output is revalidated against its Zod schema and a byte budget before it leaves the server.
+
+## Untrusted text and prompt injection
+
+Activity names, descriptions, workout names, and competition notes are user-controlled. The server removes control characters and bidirectional overrides, labels results as untrusted data, and instructs clients never to execute instructions found in those fields. URLs and markup from these fields do not become tool calls or authorization decisions.
+
+## Health boundary
+
+The health tool provides a reduced wellness summary. It is not a diagnosis, medical record export, or substitute for qualified care. Clients are instructed to state this boundary and avoid medical conclusions.
+
+## Operational controls
+
+- Capability timeouts and cancellation propagation
+- Global, tool, user, and OAuth-client concurrency/rate limits
+- `Retry-After` metadata for retryable limits
+- OpenTelemetry spans and outcome/latency/output-size metrics
+- Global, per-tool, per-client, and per-user feature flags
+
+The minimal audit record stores pseudonymous user/client fingerprints, tool name, status, error code, duration, output size, request ID, and an input fingerprint. It does not store access tokens or complete request/response payloads.
+
+## Report a concern
+
+Revoke the client from your TrainingLoad account first. Then use the support channel on the TrainingLoad website and include the approximate time, client name, and request ID if one was shown. Never send an access token or full health payload.

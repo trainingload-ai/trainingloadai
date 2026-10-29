@@ -1,0 +1,276 @@
+---
+title: Strength Workout DSL
+description: Build and validate a complete Trainingload.ai strength workout in Rules mode with exercises, set groups, load, RPE or RIR, and rest.
+keywords:
+  [
+    "Trainingload.ai strength DSL",
+    "strength workout rules",
+    "exercise set syntax",
+  ]
+---
+
+# Strength Workout DSL
+
+Strength DSL is the text form of the strength workout builder. Use it when copying a session from a coach, editing several set groups quickly, or reviewing the exact structure that Trainingload.ai will save. It describes one static session; each exercise contains one or more warm-up or work set groups.
+
+## Before you begin
+
+- Open an editable workout and choose **Strength Training** as the sport.
+- Select the **Rules** tab. The **Manual** tab edits the same workout structure visually.
+- Decide which loads are known. Use `open` instead of inventing weight or percentage values.
+- Keep coaching explanations in workout notes. DSL contains the prescription, not free-form prose.
+
+## Start with the smallest valid workout
+
+Paste this into **Rules**:
+
+```text
+exercise "Goblet Squat" equipment dumbbell {
+  work 3x8 open rir 3 rest 90s
+}
+```
+
+Then select **Validate Input**. This example means:
+
+- one exercise named “Goblet Squat”;
+- dumbbell equipment;
+- three work sets of eight repetitions;
+- no fixed load;
+- three repetitions in reserve;
+- 90 seconds of rest after each set.
+
+Every valid workout needs at least one exercise. Every exercise needs a non-empty quoted name and at least one `work` line.
+
+<DocsScreenshot
+  id="strength-dsl-rules-input"
+  title="Strength DSL in Rules mode"
+  description="A valid two-exercise session after validation, with the saved structure visible in the strength preview."
+  route="Plans → Manual workout → Strength Training → Rules"
+/>
+
+## Understand the document shape
+
+A complete session has three levels:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+```
+
+1. `duration` and `session rpe` describe the whole session. Both are optional and may appear only once.
+2. `exercise "…" {` starts an exercise block. The closing `}` ends it.
+3. `warmup` and `work` lines describe groups of sets inside that exercise.
+
+Blank lines are allowed. Comments and ordinary prose are not part of the grammar.
+
+## Add session settings
+
+Use these lines before the first exercise:
+
+```text
+duration 50m
+session rpe 6
+```
+
+`duration` accepts seconds, minutes, or hours, such as `45s`, `50m`, or `1.5h`. It is the planned duration of the complete workout, not one set.
+
+`session rpe` accepts a number from 1 to 10. It is the planned overall session difficulty. It is different from `rpe` on a set-group line, which describes the effort target for those sets.
+
+## Add an exercise
+
+The basic form is:
+
+```text
+exercise "Romanian Deadlift" {
+  work 3x8 open rir 2 rest 2m
+}
+```
+
+The exercise name must be inside double quotes and cannot be empty. Names can use the athlete's language. Escape a double quote inside a name as `\"` and a literal backslash as `\\`.
+
+Equipment is optional:
+
+```text
+exercise "Romanian Deadlift" equipment barbell {
+```
+
+An equipment code may contain lowercase or uppercase letters, digits, hyphens, and underscores. Saved DSL normalizes the code to lowercase. Prefer stable codes such as `barbell`, `dumbbell`, `bodyweight`, `cable`, or `machine`.
+
+## Write a set group
+
+Use the following order for readable, canonical DSL:
+
+```text
+work PRESCRIPTION LOAD EFFORT rest DURATION
+```
+
+Only `warmup` or `work` and the prescription are required. Load defaults to open when omitted, but writing `open` makes the intent clear. Effort and rest are optional.
+
+| Part         | Accepted form                            | Example                                              |
+| ------------ | ---------------------------------------- | ---------------------------------------------------- |
+| Set type     | `warmup` or `work`                       | `work`                                               |
+| Prescription | fixed reps, range, AMRAP, or time        | `3x5`, `3x8-12`, `1x5+`, `3x45s`                     |
+| Load         | open, weight, percent 1RM, or bodyweight | `open`, `weight 80kg`, `weight 75%1rm`, `bodyweight` |
+| Effort       | RPE or RIR                               | `rpe 7`, `rir 2`                                     |
+| Rest         | time after `rest`                        | `rest 90s`, `rest 3m`                                |
+
+An exercise may contain several set groups:
+
+```text
+exercise "Back Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+```
+
+Warm-up groups are optional. At least one work group is required, so an exercise containing only `warmup` lines will not validate.
+
+## Choose a repetition or time prescription
+
+| Goal                 | Syntax   | Meaning                                               |
+| -------------------- | -------- | ----------------------------------------------------- |
+| Fixed repetitions    | `3x5`    | 3 sets of 5                                           |
+| Repetition range     | `3x8-12` | 3 sets, 8 to 12 repetitions each                      |
+| AMRAP                | `1x5+`   | 1 set with the AMRAP flag and a base of 5 repetitions |
+| Timed set            | `3x45s`  | 3 sets of 45 seconds                                  |
+| Timed set in minutes | `2x1.5m` | 2 sets of 90 seconds                                  |
+
+The set count and repetition values must be positive. In a range, write the smaller value first.
+
+## Choose a load
+
+### Open load
+
+```text
+work 3x10 open rir 3 rest 90s
+```
+
+Use `open` when the athlete should choose the load on the day, or when no reliable load history is available.
+
+### Fixed weight
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x5 weight 175lb rpe 7 rest 3m
+```
+
+Write the number and `kg` or `lb` without a space.
+
+### Percentage of 1RM
+
+```text
+work 4x4 weight 80%1rm rest 3m
+```
+
+Use this only when the exercise has a known, current 1RM. The accepted percentage is greater than 0 and no more than 100.
+
+### Bodyweight and bodyweight offset
+
+```text
+work 3x8 bodyweight rir 2 rest 90s
+work 3x6 bodyweight +10kg rpe 8 rest 2m
+work 3x8 bodyweight -20kg rir 2 rest 2m
+```
+
+`+10kg` means added weight. `-20kg` means assistance that reduces the effective bodyweight load.
+
+## Choose RPE or RIR
+
+Use only one effort model on a set-group line:
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x8 open rir 2 rest 2m
+```
+
+- `rpe` accepts 1–10.
+- `rir` accepts 0–10.
+- Do not put both on the same line.
+
+RPE and RIR are cues, not automatic load calculations. `rpe 7` does not cause Trainingload.ai to invent or adjust a weight.
+
+## Build a complete localized session
+
+Exercise names are user content, so they do not have to be English. The DSL keywords remain English because they are the grammar.
+
+```text
+duration 45m
+session rpe 6
+
+exercise "Barbell Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+
+exercise "Push-up" equipment bodyweight {
+  work 3x8-12 bodyweight rir 2 rest 90s
+}
+
+exercise "Plank" equipment bodyweight {
+  work 3x45s bodyweight rest 60s
+}
+```
+
+This produces three exercises: a loaded repetition exercise, a bodyweight repetition range, and a timed bodyweight hold.
+
+## Validate, compare, and save
+
+1. Select **Validate Input**.
+2. Read the first reported line error before changing other lines.
+3. Compare the strength preview with the intended exercise count and work-set count.
+4. Switch to **Manual** if you want to inspect the parsed fields visually.
+5. Return to **Rules** and confirm the normalized DSL still has the same meaning.
+6. Select **Save Draft**, reopen the workout, and verify it again.
+
+Normalization may lowercase keywords, equipment codes, and units or insert an explicit `open`. Those changes do not alter the workout. A changed exercise, set count, prescription, load, effort, or rest does.
+
+## What the DSL does not support
+
+Strength DSL is a static session prescription. Do not put these in the text:
+
+- `if/else` or executable logic;
+- weekly progression or deload rules;
+- nested exercise blocks;
+- comma-separated attributes;
+- executable progression scripts;
+- notes or coaching paragraphs.
+
+Put human guidance in workout notes. Keep unsupported external scripts in their original system rather than translating them into a different prescription.
+
+## Verify the workout
+
+- The workout uses **Strength Training**, not an endurance sport.
+- Every exercise has a quoted, non-empty name.
+- Every exercise contains at least one `work` group.
+- Repetition ranges are ordered from low to high.
+- Each set group uses no more than one load and one effort model.
+- The preview shows the intended exercises and work sets.
+- Reopening the saved workout preserves the same meaning.
+
+## Troubleshooting
+
+| Error or symptom                                           | Fix                                                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Exercise name cannot be empty                              | Put a non-empty name inside double quotes, for example `exercise "Back Squat" {`.                |
+| Strength workout requires at least one exercise            | Add one complete `exercise` block.                                                               |
+| Exercise requires at least one work set                    | Add a `work` line; warm-up groups alone are not a valid exercise.                                |
+| Invalid set prescription                                   | Use `3x5`, `3x8-12`, `1x5+`, or a timed form such as `3x45s`.                                    |
+| Maximum reps must be greater than or equal to minimum reps | Change `3x12-8` to `3x8-12`.                                                                     |
+| Use either RPE or RIR, not both                            | Remove one effort target from the set-group line.                                                |
+| Invalid weight                                             | Write `weight 80kg`, `weight 175lb`, or `weight 80%1rm`; do not insert a space inside the value. |
+| Unsupported set attribute                                  | Remove prose, commas, unknown keywords, or dynamic logic from the set line.                      |
+| Exercise is missing a closing brace                        | Add one `}` after the final set group for that exercise.                                         |
+| Switching sport clears or replaces the editor              | Copy or save the DSL before switching because endurance and strength use different structures.   |
+
+## Next steps
+
+- Use [Strength Workouts](/docs/planning/strength-workouts) for the visual builder and programming decisions.
+- Read [Manual Workout Editor](/docs/planning/manual-workout-editor) to compare Rules and Manual modes.
+- Add the workout to a plan with [Create a Training Plan](/docs/guide/create-training-plan).

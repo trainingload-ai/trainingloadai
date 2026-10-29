@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/activity-metric.schema.json",
+  "title": "Activity derived metric",
+  "description": "A named workload, training-effect, peak, or performance metric derived from an activity.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "activityId": {
+      "type": "string",
+      "description": "The parent activity identifier."
+    },
+    "metricType": {
+      "type": "string",
+      "description": "The stable metric identifier."
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The numeric metric value."
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The canonical unit symbol, or null for a dimensionless value."
+    },
+    "durationSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The duration window in seconds for peak or interval metrics."
+    },
+    "distanceMeters": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The distance window in meters for distance-based performance metrics."
+    },
+    "metadata": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Additional structured context specific to the metric type.",
+      "additionalProperties": true
+    },
+    "source": {
+      "type": "string",
+      "description": "The system that supplied or calculated this metric."
+    },
+    "algorithm": {
+      "type": "string",
+      "description": "The stable identifier of the calculation or source metric family."
+    },
+    "algorithmVersion": {
+      "type": "string",
+      "description": "The calculation version, or legacy-unversioned when historical records predate explicit versioning."
+    },
+    "calculatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The time the metric was calculated in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "activityId",
+    "metricType",
+    "source",
+    "algorithm",
+    "algorithmVersion"
+  ]
+}

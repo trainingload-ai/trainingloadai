@@ -1,0 +1,79 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020706"/><stop offset="0.58" stop-color="#03120F"/><stop offset="1" stop-color="#05231E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(946 144) rotate(132) scale(570 460)">
+      <stop stop-color="#00BFA5" stop-opacity="0.22"/><stop offset="0.7" stop-color="#00BFA5" stop-opacity="0.04"/><stop offset="1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="logo" x1="14" y1="18" x2="88" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00DDB0"/><stop offset="1" stop-color="#009689"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="28" y1="0" x2="458" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B8F34B"/><stop offset="0.55" stop-color="#56DDA4"/><stop offset="1" stop-color="#20CDBB"/>
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="25" flood-color="#000000" flood-opacity="0.42"/>
+    </filter>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#001D17" flood-opacity="0.30"/>
+    </filter>
+    <clipPath id="mainClip"><rect x="0" y="0" width="514" height="326" rx="22"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <g opacity="0.14" fill="none" stroke="#78D8C4" stroke-width="1.5">
+    <path d="M-95 77C35 12 92 117 226 51C353 -12 424 83 552 28C697 -34 764 87 909 23C1038 -34 1110 41 1268 -22"/>
+    <path d="M-105 111C35 39 96 146 236 76C367 11 435 111 568 52C714 -13 784 112 928 47C1053 -10 1127 68 1282 2"/>
+    <path d="M-98 532C42 466 104 567 242 500C375 436 444 536 580 478C727 415 797 535 941 472C1077 412 1135 492 1292 426"/>
+    <path d="M-103 566C36 497 108 603 249 531C385 462 451 570 589 510C736 446 808 566 951 505C1087 447 1147 526 1298 461"/>
+  </g>
+  <path d="M-70 521C66 476 128 512 247 458C364 405 446 461 573 392C701 322 754 332 860 278C988 212 1070 231 1277 143" fill="none" stroke="#12B8A1" stroke-opacity="0.22" stroke-width="2"/>
+  <g opacity="0.36">
+    <circle cx="75" cy="491" r="5" fill="#20CDBB"/><circle cx="248" cy="458" r="5" fill="#20CDBB"/><circle cx="574" cy="392" r="5" fill="#20CDBB"/><circle cx="860" cy="278" r="5" fill="#20CDBB"/>
+  </g>
+
+  <g transform="translate(62 52) scale(.64)">
+    <path d="M20 18H76L72 30H64L60 42H56L40 82H18L22 70H26L30 58H34L38 46H42L46 34H14L16 28H20Z" fill="url(#logo)"/>
+    <path d="M68 42H74V50H72V58H68V66H64V70H88L86 76H82L80 82H46L50 70H54V62H58V54H62V46H68Z" fill="url(#logo)"/>
+  </g>
+  <text x="126" y="92" fill="#F8FAFC" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="28" font-weight="850" text-anchor="start" letter-spacing="-0.7">TrainingLoad.ai</text>
+  <text x="68" y="197" fill="#36E0BD" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="15" font-weight="900" text-anchor="start" letter-spacing="3.2">ローカルツール</text>
+  <text x="68" y="258" fill="#F8FAFC" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="58" font-weight="900" text-anchor="start" letter-spacing="-1.8">FITファイルを</text><text x="68" y="324" fill="#F8FAFC" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="58" font-weight="900" text-anchor="start" letter-spacing="-1.8">オンラインで表示</text>
+  <text x="68" y="418" fill="#BCD0CB" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="20" font-weight="500" text-anchor="start" letter-spacing="0">端末内で解析。アップロード不要。</text>
+  <rect x="68" y="456" width="58" height="4" rx="2" fill="#00DDB0"/>
+  <text x="68" y="576" fill="#88AAA2" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="15" font-weight="750" text-anchor="start" letter-spacing="0.7">trainingload.ai</text>
+
+  <g transform="translate(640 48) rotate(-2 257 163)" filter="url(#shadow)">
+    <rect width="514" height="326" rx="22" fill="#FDFEFE"/>
+    <g clip-path="url(#mainClip)">
+      <rect width="514" height="62" fill="#F7F9F8"/>
+      <circle cx="28" cy="31" r="5" fill="#00BFA5"/>
+      <text x="44" y="37" fill="#111827" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="13" font-weight="850" text-anchor="start" letter-spacing="0">TrainingLoad.ai</text>
+      <circle cx="442" cy="31" r="4" fill="#CBD5D1"/><circle cx="462" cy="31" r="4" fill="#CBD5D1"/><circle cx="482" cy="31" r="4" fill="#CBD5D1"/>
+      <text x="28" y="94" fill="#111827" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="18" font-weight="850" text-anchor="start" letter-spacing="0">アクティビティ.fit</text>
+      <rect x="28" y="112" width="430" height="80" rx="18" fill="#F0F5F3" stroke="#DCE7E3"/>
+      <circle cx="64" cy="152" r="19" fill="#CCFBF1"/>
+      <path d="M57 152L63 158L73 145" fill="none" stroke="#009F8E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="96" y="146" fill="#111827" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="16" font-weight="800" text-anchor="start" letter-spacing="0">アクティビティ.fit</text>
+      <text x="96" y="170" fill="#64748B" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="13" font-weight="500" text-anchor="start" letter-spacing="0">Validated and ready</text>
+      <rect x="28" y="212" width="130" height="50" rx="14" fill="#E8EFED"/>
+      <rect x="178" y="212" width="130" height="50" rx="14" fill="#E8EFED"/>
+      <rect x="328" y="212" width="130" height="50" rx="14" fill="#E8EFED"/>
+    </g>
+  </g>
+
+  <g transform="translate(628 328) rotate(1.4 282 126)" filter="url(#softShadow)">
+    <rect width="565" height="252" rx="22" fill="#FFFFFF"/>
+    <text x="28" y="48" fill="#64748B" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="12" font-weight="900" text-anchor="start" letter-spacing="2">RESULT</text>
+    <text x="28" y="105" fill="#111827" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="52" font-weight="900" text-anchor="start" letter-spacing="0">25</text>
+    <text x="180" y="102" fill="#0F766E" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="14" font-weight="850" text-anchor="start" letter-spacing="0">MB 上限</text>
+    <text x="28" y="143" fill="#64748B" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="15" font-weight="500" text-anchor="start" letter-spacing="0">端末内で解析 · 通信なし</text>
+    <rect x="28" y="186" width="145" height="43" rx="13" fill="#C9F7E7"/>
+        <text x="100.5" y="213" fill="#0B241E" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="13" font-weight="900" text-anchor="middle" letter-spacing="0">ヘッダー</text><rect x="195" y="186" width="145" height="43" rx="13" fill="#D9F99D"/>
+        <text x="267.5" y="213" fill="#0B241E" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="13" font-weight="900" text-anchor="middle" letter-spacing="0">CRC</text><rect x="362" y="186" width="145" height="43" rx="13" fill="#CFFAFE"/>
+        <text x="434.5" y="213" fill="#0B241E" fill-opacity="1" font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', Arial, sans-serif" font-size="13" font-weight="900" text-anchor="middle" letter-spacing="0">メッセージ</text>
+  </g>
+  <rect width="1200" height="630" fill="none" stroke="#FFFFFF" stroke-opacity="0.05"/>
+</svg>

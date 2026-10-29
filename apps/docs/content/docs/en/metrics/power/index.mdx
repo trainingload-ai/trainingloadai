@@ -1,0 +1,103 @@
+---
+title: Power
+description: What power is in endurance training, how cycling and running power are measured or estimated, and how Trainingload.ai uses power for zones, TSS, FTP, CP, NP, and VI.
+keywords:
+  - "power training"
+  - "cycling power"
+  - "running power"
+  - "estimated power"
+  - "power zones"
+  - "FTP"
+  - "normalized power"
+---
+
+# Power
+
+Power is one of the most direct ways to describe exercise intensity. In physics, power is defined as the work done per unit of time.
+
+$$
+P = W / t = (F * d) / t = F * v
+$$
+
+Where:
+- `P` is Power (Watts).
+- `W` is Work (Joules).
+- `t` is Time (Seconds).
+- `F` is Force (Newtons).
+- `v` is Velocity (m/s).
+
+In cycling, this roughly means that power rises when you apply more force to the pedals and/or turn them faster.
+
+## Why power is useful
+
+Compared to heart rate or pace, power has several practical advantages:
+
+1.  **Fast response**: heart rate lags behind intensity changes, while power responds almost immediately.
+2.  **Clear external output**: heart rate is influenced by stress, caffeine, sleep, temperature, and dehydration; power describes the work rate being produced.
+3.  **Useful for load models**: power is a key input for FTP, CP, IF, TSS, NP, and VI.
+4.  **Helpful across terrain**: uphill or into a headwind, pace may slow, but power can help keep effort more consistent.
+
+Power is still not the whole story. Sensor quality, calibration, drivetrain losses, wind, surface, running form, fatigue, and heat can all affect interpretation. Trainingload.ai reads power alongside heart rate, pace, RPE, and recent load.
+
+## Estimated Power
+
+Not everyone owns a power meter. Trainingload.ai can estimate power with a physical model. Estimates are stored in a separate `calculatedPower` series and are never presented as measured device `power`.
+
+Version 1 is explicitly a flat model: it uses speed, body mass, and versioned fixed parameters, while ignoring grade. When at least 50% of samples contain valid measured power, measured power always wins.
+
+### Estimation Principles
+
+#### Cycling power estimation
+
+When you ride outdoors, your power output is mainly used to overcome:
+
+$$
+P_{calculated} = (P_{rolling} + P_{air}) / (1 - drivetrainLoss)
+$$
+
+Version 1 uses a flat steady-state Gribble structure with rolling resistance, aerodynamic drag, and drivetrain loss. Bike mass, Crr, CdA, air density, and loss use versioned defaults. Grade, acceleration, and live wind are intentionally excluded.
+
+### Prerequisites for useful estimates
+
+The usefulness of estimated power depends heavily on input data quality:
+- **Body and bike weight**: should be set as reliably as possible.
+- **GPS speed precision**: speed jitter directly affects the estimate.
+- **Environmental factors**: models typically cannot observe wind direction (tailwind/headwind) or road surface conditions, so errors increase in windy conditions.
+
+Estimated power is best used for trends within the same model, not as a power-meter reading.
+
+#### Running power estimation
+
+Running power estimation differs from cycling. There is no drivetrain-measured mechanical output; it is a modeled estimate of the metabolic output needed to sustain a given speed.
+
+When a run lacks reliable measured power, Trainingload.ai creates a separate estimate from **speed, body mass, and height**. Version 1 uses the flat cost and does not read grade.
+
+A common approach is to estimate an “energy cost per distance” at a given grade (`J/kg/m`), then multiply by speed and weight to get watts:
+
+$$
+Power(W) = Cost(J/kg/m) * Speed(m/s) * Weight(kg)
+$$
+
+Version 1 uses a flat cost of `3.6 J/kg/m`, plus speed-dependent efficiency and aerodynamic cost.
+
+**Prerequisites for useful estimates** (running also applies):
+
+- **Reliable speed**: GPS speed jitter directly distorts the estimate.
+- **Accurate body weight**: watts scale linearly with weight.
+- **Approximation**: wind, surface compliance, running form, acceleration/variability, etc. are hard to fully capture. Use it for trends and comparisons, not as an absolute measurement.
+
+## How Trainingload.ai uses power
+
+- **Set intensity zones**: measured power anchors FTP, CP, and power zones.
+- **Calculate load**: formal power-derived load and records use measured power only; estimates do not affect athlete capability metrics.
+- **Review pacing**: VI and NP help show whether an effort was steady or surge-heavy.
+- **Fill missing context**: the power chart and live recording screen can show a clearly labelled estimate. Running GOVSS uses the same model family but performs its own threshold and time-window calculation.
+
+## Related tools and docs
+
+- [Estimate FTP training load from an activity file](/ftp-calculator)
+- [Fit Critical Power for training load planning](/critical-power-calculator)
+- [Calculate power training load zones](/power-zones-calculator)
+- [Functional Threshold Power](/docs/metrics/power/functional-threshold-power)
+- [Critical Power](/docs/metrics/power/critical-power)
+- [Normalized Power](/docs/metrics/power/normalized-power)

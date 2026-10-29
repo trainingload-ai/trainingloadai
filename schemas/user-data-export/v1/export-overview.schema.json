@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/export-overview.schema.json",
+  "title": "Export overview",
+  "description": "A compact summary of the archive subject, dataset sizes, coverage, and applied redactions.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "string",
+      "description": "The export contract identifier."
+    },
+    "userId": {
+      "type": "string",
+      "description": "The stable subject identifier for this archive; pseudonymous in AI analysis mode."
+    },
+    "preferredLocale": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The user's preferred BCP 47 locale, if known."
+    },
+    "datasetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The number of datasets described by this overview."
+    },
+    "totalRecordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The sum of record counts across all exported datasets."
+    },
+    "datasets": {
+      "type": "array",
+      "description": "Compact summaries of the exported datasets.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The stable dataset identifier."
+          },
+          "recordCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The number of records in the dataset."
+          },
+          "path": {
+            "type": "string",
+            "description": "The relative data path inside the archive."
+          },
+          "coverage": {
+            "type": "object",
+            "description": "Date coverage and top-level missing-value statistics.",
+            "additionalProperties": false,
+            "properties": {
+              "timeStart": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The earliest recognized record time in ISO 8601 format.",
+                "format": "date-time"
+              },
+              "timeEnd": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The latest recognized record time in ISO 8601 format.",
+                "format": "date-time"
+              },
+              "missingValueRate": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "The fraction of top-level record fields whose values are null."
+              }
+            },
+            "required": [
+              "timeStart",
+              "timeEnd",
+              "missingValueRate"
+            ]
+          },
+          "redactions": {
+            "type": "array",
+            "description": "The deterministic privacy transformations applied to the dataset.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "recordCount",
+          "path",
+          "coverage",
+          "redactions"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "userId",
+    "preferredLocale",
+    "datasetCount",
+    "totalRecordCount",
+    "datasets"
+  ]
+}

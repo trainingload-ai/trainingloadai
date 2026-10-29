@@ -1,0 +1,11 @@
+{
+  "title": "Plans and Workouts",
+  "pages": [
+    "index",
+    "plan-lifecycle",
+    "manual-workout-editor",
+    "strength-workouts",
+    "strength-workout-dsl",
+    "workout-dsl"
+  ]
+}

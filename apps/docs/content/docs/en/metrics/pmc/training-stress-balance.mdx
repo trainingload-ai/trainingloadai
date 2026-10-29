@@ -1,0 +1,77 @@
+---
+title: Form (TSB)
+description: Learn how Trainingload.ai calculates Form (TSB) from same-day Fitness and Fatigue, and how to use load balance without mistaking it for readiness.
+keywords: ["form", "training stress balance", "TSB", "TSB formula", "load balance", "how to read TSB"]
+---
+
+# What is Form (TSB)?
+
+**Form (TSB)**, or Training Stress Balance, is the difference between Fitness (CTL) and Fatigue (ATL). It shows where fast-moving recent load sits relative to the slower long-term load model.
+
+“Form” is a readable UI label. TSB is derived from two modeled load curves; it is not a direct readiness, recovery, health, or performance measurement.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <TsbStatPreviewCard
+    value="-12"
+    metricLabel="TSB"
+    valuePopoverTitle="TSB value"
+    valuePopoverBody="Trainingload.ai subtracts same-day Fatigue (ATL) from same-day Fitness (CTL)."
+    rangePopoverTitle="TSB context"
+    rangePopoverBody="Positive and negative values describe the relationship between recent and long-term modeled load; they are not universal readiness zones."
+    helpTitle="Load balance"
+    details="Use TSB to compare the two load curves, then inspect activities, performance, and subjective state."
+  />
+</div>
+
+_Example values are for interface preview only._
+
+## Where the value comes from
+
+TSB has no separate activity input. Trainingload.ai first calculates same-day CTL with a 42-day time constant and same-day ATL with a seven-day time constant, using the same daily-load series. Any activity, threshold, or load-source change that affects either curve can also change TSB.
+
+TSB uses the same modeled load scale as CTL and ATL. It is not a percentage or physiological unit.
+
+## Formula
+
+Trainingload.ai follows the same-day convention used by Intervals.icu:
+
+```text
+TSB_today = CTL_today − ATL_today
+```
+
+For example, if today’s CTL is 50 and ATL is 65, TSB is `50 − 65 = −15`.
+
+Platforms do not all use the same date convention. Intervals.icu uses same-day CTL minus ATL, while TrainingPeaks publicly describes today’s Form using yesterday’s Fitness minus yesterday’s Fatigue. Before comparing platforms, verify the date convention, time constants, and load source.
+
+## Reading Form
+
+- **Negative TSB:** ATL is above CTL; recent modeled load is above the slower long-term level.
+- **Near-zero TSB:** the two load curves are close; this does not prove physiological balance.
+- **Positive TSB:** ATL is below CTL; recent modeled load is below the slower long-term level.
+
+When load increases, ATL usually rises faster than CTL and TSB falls. During rest or tapering, ATL usually decays faster and TSB rises. The sign describes a load relationship—not how the athlete must feel.
+
+## Use and limits
+
+TSB can help you check whether a build, recovery week, or taper changed the relationship between recent and long-term load as planned. It is most useful when compared with the athlete’s own similar historical periods.
+
+TSB alone cannot establish race readiness, label a negative value as dangerous, label a positive value as optimal, prescribe rest days, or explain pain and illness.
+
+Avoid chasing universal “peak,” “optimal,” or “high-risk” bands. Such bands depend on the load method, sport, training history, individual response, and data quality. Use [Fitness (CTL)](/docs/metrics/pmc/chronic-training-load), [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load), source activities, performance trends, and subjective state together.
+
+## References
+
+- [Intervals.icu developer explanation of the same-day Form convention](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE glossary: Training Stress Balance (TSB)](https://runalyze.com/glossary/tsb)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah source: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke and Skiba (2013): Mathematical modeling of athletic training and performance](https://doi.org/10.1152/advan.00078.2011)
+
+## Related pages
+
+- [Fitness (CTL)](/docs/metrics/pmc/chronic-training-load)
+- [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load)
+- [Project CTL, ATL, and TSB from daily TSS](/training-load-calculator)
+- [Using PMC to adjust marathon training](/docs/guide/pmc-marathon-adjustment)
+- [Training analysis workflow](/docs/guide/training-analysis-workflow)

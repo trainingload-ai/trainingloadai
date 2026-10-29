@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-acceptance-manifest.schema.json",
+  "title": "Trainingload self-host acceptance gate manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "runId",
+    "generatedAt",
+    "status",
+    "workflow",
+    "releases",
+    "contracts",
+    "summary",
+    "cells"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-acceptance-manifest" },
+    "runId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,199}$"
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "status": { "const": "passed" },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "ref"],
+      "properties": {
+        "revision": { "$ref": "#/$defs/revision" },
+        "ref": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    },
+    "releases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current", "previous"],
+      "properties": {
+        "current": { "$ref": "#/$defs/release" },
+        "previous": { "$ref": "#/$defs/release" }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptance",
+        "reportSchema",
+        "environmentSchema",
+        "manifestSchema"
+      ],
+      "properties": {
+        "acceptance": { "$ref": "#/$defs/contractFile" },
+        "reportSchema": { "$ref": "#/$defs/contractFile" },
+        "environmentSchema": { "$ref": "#/$defs/contractFile" },
+        "manifestSchema": { "$ref": "#/$defs/contractFile" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredCells",
+        "passedCells",
+        "scenarioExecutions",
+        "securityChecks"
+      ],
+      "properties": {
+        "requiredCells": { "type": "integer", "minimum": 1 },
+        "passedCells": { "type": "integer", "minimum": 1 },
+        "scenarioExecutions": { "type": "integer", "minimum": 1 },
+        "securityChecks": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "platformId",
+          "mode",
+          "report",
+          "reportSha256",
+          "environment",
+          "environmentSha256",
+          "reportRunId",
+          "generatedAt",
+          "scenarioCount",
+          "securityCheckCount"
+        ],
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "platformId": { "$ref": "#/$defs/id" },
+          "mode": { "enum": ["core-local", "connected"] },
+          "report": {
+            "type": "string",
+            "pattern": "^reports/[a-z0-9-]+\\.json$"
+          },
+          "reportSha256": { "$ref": "#/$defs/sha256" },
+          "environment": {
+            "type": "string",
+            "pattern": "^environments/[a-z0-9-]+\\.json$"
+          },
+          "environmentSha256": { "$ref": "#/$defs/sha256" },
+          "reportRunId": { "type": "string", "minLength": 1, "maxLength": 400 },
+          "generatedAt": { "type": "string", "format": "date-time" },
+          "scenarioCount": { "type": "integer", "minimum": 1 },
+          "securityCheckCount": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,199}$" },
+    "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "revision", "archiveSha256"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "revision": { "$ref": "#/$defs/revision" },
+        "archiveSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "contractFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^contracts/[A-Za-z0-9._-]+$" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

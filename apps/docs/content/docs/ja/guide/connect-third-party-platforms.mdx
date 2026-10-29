@@ -1,0 +1,96 @@
+---
+title: Strava・Garmin・COROSを接続してワークアウトを取り込む
+description: Strava、Garmin、COROS、Polar、Suunto、Wahooを接続してワークアウトを取り込みます。OAuth、APIキー、Garmin履歴の手順を追い、最初の同期を確認します。
+keywords:
+  ["Strava連携", "Garmin接続", "COROS接続", "Polar同期", "Wahoo取り込み", "Garmin履歴インポート"]
+---
+
+# Strava・Garmin・COROSを接続してワークアウトを取り込む
+
+このページは **Strava を接続する**、Garmin 履歴インポート、COROS、Polar、Suunto、Wahoo、Intervals.icu の手順です。どこで認可し、どの同期を残し、最初の 1 本が入ったかを確かめます。多くは OAuth、Intervals.icu は API キーも可、Garmin は一度きりの履歴であり常時接続ではありません。
+
+## 始める前に
+
+- 取り込みたいワークアウトを持つ提供元アカウントでサインインする。
+- 記録ごとに主経路を 1 つにする。COROS 直接と Strava 転送を同時に使わない。
+- Trainingload.ai に既にある最新アクティビティを控える。
+- プロフィール、ゾーン、エクスポート、予定ワークアウトの正本をどちらにするか決める。
+- API キーと一時ダウンロードリンクは、該当の接続ダイアログにだけ入れる。
+
+## 接続画面を開く
+
+Web は **Account → Third Party Connections**、カードを選びます。モバイルは **Me → Account → Connections**。OAuth はシステムブラウザで承認し、アプリに戻ります。Strava、Polar、COROS、Suunto、Wahoo、Intervals.icu はモバイルでも管理できます。Garmin 履歴は Web のみです。
+
+| 提供元        | Web | モバイル | 認可                 | 最初の典型動作                 |
+| ------------- | --- | -------- | -------------------- | ------------------------------ |
+| Strava        | 可  | 可       | OAuth                | 選択時は直近 60 日を取り込み   |
+| Polar         | 可  | 可       | OAuth                | 選択時は直近 30 日を取り込み   |
+| COROS         | 可  | 可       | OAuth                | アクティビティとヘルスケアを別同期 |
+| Intervals.icu | 可  | 可       | OAuth または API キー | 直近アクティビティを取り込み  |
+| Suunto        | 可  | 可       | OAuth                | 直近ワークアウトの初回取り込み |
+| Wahoo         | 可  | 可       | OAuth                | 接続、方向の保存、同期         |
+| Garmin        | 可  | 不可     | Garmin エクスポートリンク | 履歴ジョブを 1 回開始       |
+
+## Stravaを接続する
+
+1. **Connections → Strava** を開く。
+2. 認可前に、直近 60 日をすぐ取り込むかを選ぶ。
+3. 以後の方向を選ぶ：新規 Strava の自動取り込み、Trainingload.ai から Strava へのアップロード、プロフィール/ゾーンの取り込みまたは書き出し。
+4. **Connect with Strava** で承認し、戻る。
+5. 設定を確認し、足りなければ **Sync now** を 1 回。
+
+両方のプロフィール方向を同時にオンにしないでください。自動取り込みは Strava 通知、手動は突き合わせ用です。
+
+<DocsScreenshot
+  id="strava-oauth-settings"
+  title="Strava 接続設定"
+  description="認可に進む前に、初回取り込みと継続方向を選びます。"
+  route="Account → Third Party Connections → Strava"
+/>
+
+## Polar / COROS / Suunto / Wahoo
+
+Polar は直近 30 日と、必要ならウェルネスを選び、Polar Flow で承認します。COROS は認可後に **Sync activities** と日次/ヘルス同期を別々に実行します。Suunto と Wahoo は OAuth のあと方向を保存し、欠けていれば **Sync now** を 1 回。プロフィールの取り込みと書き出しを、正本を決めずに両方オンにしないでください。
+
+## Intervals.icu
+
+通常は OAuth です。API キーが必要なときだけキーを使います。保存済みキーは再表示されず、末尾 4 桁だけ見えます。OAuth とキーを入れ替えると、履歴は残りますが以後の認証が変わります。
+
+## Garmin履歴を取り込む
+
+Garmin は常時接続ではなく、公式エクスポートの一度きりです。
+
+1. Web で **Account → Third Party Connections → Garmin** を開く。
+2. [Garmin の公式データエクスポート](https://www.garmin.com/account/datamanagement/exportdata/) を依頼する。
+3. メールを待つ。48 時間程度かかることが多いです。
+4. フルエクスポート ZIP をアップロードするか、メールの **Download** の裏にある URL を貼る。
+5. **Start import** を選び、キュー、ダウンロード、取り込み、完了を追う。
+
+URL は一時的な認証情報です。チャット、AI Coach、スクリーンショットに貼らないでください。
+
+<DocsScreenshot
+  id="garmin-history-import"
+  title="Garmin 履歴インポート"
+  description="Garmin エクスポート ZIP をアップロードするか、一時リンクを貼ってジョブを開始します。"
+  route="Account → Third Party Connections → Garmin"
+/>
+
+## よくある質問
+
+### Stravaのつなぎ方は？
+
+**Account → Third Party Connections → Strava** を開き、60 日取り込みと方向を選び、認可します。戻って最新が無ければ **Sync now** を 1 回。
+
+### Garminは継続同期しますか？
+
+しません。公式エクスポートの一度きりです。その後の新しい練習は Strava や COROS などのライブ経路、または FIT / TCX / GPX です。
+
+### 同じワークアウトが二重になる理由は？
+
+同じ記録が 2 経路から入っています。例：COROS 直接と Strava。記録ごとに主経路を 1 つにしてから、続きを取り込んでください。
+
+## 次のステップ
+
+- 経路の比較は [トレーニングアプリ連携](/ja/docs/guide/integrations)。
+- 非対応や単発ファイルはファイルアップロード。
+- 最初の 1 週間が入ったら [計画内でトレーニング負荷を管理する](/ja/training-load)。

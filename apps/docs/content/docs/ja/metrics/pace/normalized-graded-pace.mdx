@@ -1,0 +1,43 @@
+---
+title: Normalized Graded Pace (NGP)
+description: 勾配補正と正規化を行ったペース指標で、ランの生理的コストをよりよく反映します。
+keywords:
+  ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS"]
+---
+
+# Normalized Graded Pace (NGP)
+
+**Normalized Graded Pace (NGP)** は、ランニングの中心的な強度指標です。[GAP](/ja/docs/metrics/pace/grade-adjusted-pace) を土台にし、バイクの [NP](/ja/docs/metrics/power/normalized-power) に近い考え方で変動の大きい走りを正規化します。
+
+## GAP と NGP の違い
+
+- **GAP**: ある瞬間または区間の坂道ペースを平地相当へ換算する。
+- **NGP**: 全体として、変動するランを同じ生理的コストの一定ペースに換算する。
+
+## 計算
+
+1. GAP の時系列に 30 秒移動平均をかける。
+2. 4 乗重み付けで強い区間を強調する。
+3. 平均を取り、4 乗根を取る。
+
+```text
+NGP = 4th_root( average(GAP_rolling^4) )
+```
+
+## 使いどころ
+
+- 起伏のあるコースやトレイルの努力評価。
+- rTSS の計算。
+- インターバルや変動走で平均ペースより実態に近い強度を見る。
+
+## 比較
+
+| 指標         | 意味                 | 向いている場面                             |
+| :----------- | :------------------- | :----------------------------------------- |
+| **Avg Pace** | 実平均ペース         | 平坦で一定したラン                         |
+| **Avg GAP**  | 勾配補正平均ペース   | 起伏はあるが変動が少ないラン               |
+| **NGP**      | 正規化勾配補正ペース | 多くのラン分析、特にトレイルやインターバル |
+
+## 参考
+
+- [TrainingPeaks: Normalized Graded Pace](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)

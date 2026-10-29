@@ -1,0 +1,82 @@
+---
+title: Notifications and Review Automation
+description: Manage Trainingload.ai notifications and choose which activity, daily, weekly, monthly, and plan reviews AI may run automatically.
+keywords:
+  ["AI training review", "review automation", "Trainingload.ai notifications"]
+---
+
+# Notifications and Review Automation
+
+Notifications report completed background work and review availability. Review automation controls which eligible AI review jobs may run without being manually requested each time.
+
+## Before you enable automation
+
+- Set the correct time zone for daily, weekly, and monthly boundaries.
+- Import activities consistently and keep the active plan current.
+- Link completed activities when plan execution should be reviewed.
+- Check account entitlement and AI usage availability.
+
+## Notification types
+
+Notifications can include general system messages and training-review digests. Import dialogs may also tell you that a notification will arrive when a background batch completes, so you do not need to keep the dialog open.
+
+From Notifications you can:
+
+- Open the related review or destination.
+- Mark one notification as read.
+- Mark all notifications as read.
+
+Marking a notification read does not delete the underlying activity, plan, or coach session.
+
+## Configure review automation
+
+Open **Account → AI Review Automation** on web or the equivalent account panel on mobile.
+
+<DocsScreenshot
+  id="review-automation-mobile"
+  title="AI review automation"
+  description="Choose which eligible activity, daily, weekly, monthly, and plan reviews can run automatically."
+  route="Me → AI Review Automation"
+  platform="mobile"
+/>
+
+The available switches can include:
+
+- Activity review.
+- Daily review.
+- Weekly review.
+- Monthly review.
+- Plan review.
+
+Automation availability depends on account entitlement and AI usage limits. Enabling a switch authorizes that review category; it does not guarantee useful output when required activity or plan data is missing.
+
+## Prepare useful review context
+
+Before relying on automation:
+
+1. Confirm time zone, because daily and weekly boundaries depend on it.
+2. Import completed activities consistently.
+3. Keep the active plan current.
+4. Link completed activities to planned workouts.
+5. Add session RPE or current-state context when relevant.
+
+## Manually trigger a review
+
+Where the product exposes manual review controls, you can request daily, weekly, or monthly review work without changing the automation schedule. Review jobs run asynchronously; wait for completion rather than submitting repeated triggers.
+
+## Verify success
+
+- Saved switches remain enabled after reopening settings.
+- A completed review produces a notification or coach entry.
+- Opening the notification navigates to the expected review.
+- The review references the correct time window, plan, or activity.
+
+## Troubleshooting
+
+If a review does not appear, check entitlement, usage, time zone, data availability, and whether the background job is still running. For structured action failures, open [Troubleshooting](/docs/guide/troubleshooting).
+
+Repeatedly triggering the same review does not improve missing context and may consume usage. Fix the underlying data or wait for the existing job first.
+
+## Next step
+
+Read [AI Coach](/docs/guide/ai-coach) to understand review sessions, structured cards, plan drafts, and confirmable adjustments.

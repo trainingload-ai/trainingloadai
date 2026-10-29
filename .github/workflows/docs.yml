@@ -1,0 +1,52 @@
+name: Public docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/docs.yml"
+      - "apps/docs/**"
+      - "packages/design-tokens/**"
+      - "packages/messages/docs/**"
+      - "packages/shared/**"
+      - "scripts/docs/**"
+      - ".npmrc"
+      - ".nvmrc"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+  pull_request:
+    paths:
+      - ".github/workflows/docs.yml"
+      - "apps/docs/**"
+      - "packages/design-tokens/**"
+      - "packages/messages/docs/**"
+      - "packages/shared/**"
+      - "scripts/docs/**"
+      - ".npmrc"
+      - ".nvmrc"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_BUILD_CPUS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: 22.23.3
+      - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: node --test scripts/docs/*.test.mjs
+      - run: pnpm docs:build

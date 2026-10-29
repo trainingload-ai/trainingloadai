@@ -1,0 +1,124 @@
+---
+title: "VO2 Max Levels"
+description: "VO2 Max レベル表。VO2 Max レベルの意味、良い VO2 Max の目安、年齢と性別による違いを説明します。"
+keywords:
+  - "vo2 max levels"
+  - "vo2 max levels chart"
+  - "vo2 max levels by age"
+  - "vo2 max levels by age and gender"
+  - "what is a good vo2 max level"
+  - "garmin vo2 max levels"
+---
+
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# VO2 Max Levels
+
+> このページの VO2 Max 値はすべて **推定値** であり、ラボ測定 VO2 Max ではありません。読みやすさのため、推定 VO2 Max も VO2 Max と呼びます。
+
+Trainingload.ai は、推定 VO2 Max を 5 段階に分類し、現在の有酸素フィットネスをすばやく読めるようにします。
+
+| Level     | 説明           | Color                                                                                                                                                |
+| :-------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Excellent | 最上位         | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#8b5cf6", verticalAlign: "middle", marginRight: 6 }} /> |
+| Very Good | 強い           | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#0ea5e9", verticalAlign: "middle", marginRight: 6 }} /> |
+| Good      | 良好           | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#10b981", verticalAlign: "middle", marginRight: 6 }} /> |
+| Fair      | 改善余地あり   | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#f59e0b", verticalAlign: "middle", marginRight: 6 }} /> |
+| Poor      | 大きな改善余地 | <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: "#f87171", verticalAlign: "middle", marginRight: 6 }} /> |
+
+## VO2 Max レベルとは
+
+VO2 Max レベルは、`ml·kg⁻¹·min⁻¹` で表される連続値を、実用的なフィットネス段階へ変換する方法です。
+
+役立つ場面:
+
+- 現在位置をすばやく読む。
+- 同じデバイス/アルゴリズムで長期トレンドを見る。
+- 年齢と性別を考慮して比較する。
+
+先に推定したい場合:
+
+- [VO2 Max Calculator](/ja/vo2-max-calculator)
+
+VO2 Max の意味を詳しく知りたい場合:
+
+- [VO2 Max (Maximal Oxygen Uptake)](/ja/docs/metrics/maximal-oxygen-uptake)
+
+## 良い VO2 Max レベルとは
+
+「良い」は年齢、性別、競技、トレーニング歴で変わります。実用的には、年齢と性別の閾値を参考にしつつ、自分自身の長期トレンドを重視します。
+
+## 年齢または性別がない場合
+
+| Level     | VO2 Max (ml·kg⁻¹·min⁻¹) |
+| :-------- | :---------------------- |
+| Excellent | ≥ 50                    |
+| Very Good | ≥ 40 and < 50           |
+| Good      | ≥ 35 and < 40           |
+| Fair      | ≥ 30 and < 35           |
+| Poor      | < 30                    |
+
+## 年齢と性別がある場合
+
+年齢と性別がある場合は、より具体的な閾値を使います。
+
+### Men
+
+| Level     |  20-29 |  30-39 |  40-49 |  50-59 |  60-69 |  70-79 |
+| :-------- | -----: | -----: | -----: | -----: | -----: | -----: |
+| Excellent |   55.4 |   54.0 |   52.5 |   48.9 |   45.7 |   42.1 |
+| Very Good |   51.1 |   48.3 |   46.4 |   43.4 |   39.5 |   36.7 |
+| Good      |   45.4 |   44.0 |   42.4 |   39.2 |   35.5 |   32.3 |
+| Fair      |   41.7 |   40.5 |   38.5 |   35.6 |   32.3 |   29.4 |
+| Poor      | < 41.7 | < 40.5 | < 38.5 | < 35.6 | < 32.3 | < 29.4 |
+
+### Women
+
+| Level     |  20-29 |  30-39 |  40-49 |  50-59 |  60-69 |  70-79 |
+| :-------- | -----: | -----: | -----: | -----: | -----: | -----: |
+| Excellent |   49.6 |   47.4 |   45.3 |   41.1 |   37.8 |   36.7 |
+| Very Good |   43.9 |   42.4 |   39.7 |   36.7 |   33.0 |   30.9 |
+| Good      |   39.5 |   37.8 |   36.3 |   33.0 |   30.0 |   28.1 |
+| Fair      |   36.1 |   34.4 |   33.0 |   30.1 |   27.5 |   25.9 |
+| Poor      | < 36.1 | < 34.4 | < 33.0 | < 30.1 | < 27.5 | < 25.9 |
+
+## Garmin VO2 Max レベルは信頼できるか
+
+Garmin の VO2 Max はモデル推定です。ラボ測定ではありません。
+
+実用上は:
+
+- 同じデバイス/エコシステム内で比較する。
+- ブランド間で生値を比べない。
+- 5K/10K など再現しやすい努力でクロスチェックする。
+
+## 血中酸素と VO2 Max は同じか
+
+- **血中酸素 (SpO₂)**: 今この瞬間の血液中酸素飽和度。
+- **VO2 Max**: 強い運動中に酸素経路全体が発揮できる最大能力。
+
+関連する場面はありますが、同じ指標ではありません。
+
+## VO2 Max レベルを上げるには
+
+- 一貫した有酸素ベース（イージー / Z2 ボリューム）
+- 周期的な VO2 強度インターバル
+- 十分な回復を伴う漸進的な負荷増加
+
+<DocsToolCtaCard
+  title="ツールへ: VO2 Max を推定し、VO2 Max レベルを見る"
+  description={
+    <>
+      まだ VO2 Max を推定していない場合は、ツールページから始めてください。
+      結果には <b>VO2 Max レベル</b> と短い説明も表示されます。
+    </>
+  }
+  primary={{
+    href: "/ja/vo2-max-calculator",
+    label: "VO2 Max Calculator を開く →",
+  }}
+  secondary={{
+    href: "/ja/docs/metrics/maximal-oxygen-uptake",
+    label: "先に VO2 Max ガイドを読む",
+  }}
+/>

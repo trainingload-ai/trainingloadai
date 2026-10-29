@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 2,
+  "workflow": ".github/workflows/selfhost-acceptance.yml",
+  "sourceWorkflow": ".github/workflows/selfhost-images.yml",
+  "manualOnly": true,
+  "nodeVersion": "22.23.3",
+  "artifact": {
+    "name": "trainingload-selfhost-release-<revision>",
+    "archive": "trainingload-selfhost-<version>.tar.gz",
+    "checksum": "trainingload-selfhost-<version>.tar.gz.sha256",
+    "outerSignature": "trainingload-selfhost-<version>.tar.gz.sha256.bundle.json",
+    "innerChecksums": "checksums.txt",
+    "innerSignature": "checksums.bundle.json"
+  },
+  "platforms": [
+    {
+      "id": "ubuntu-amd64",
+      "host": "Ubuntu 24.04",
+      "nodePlatform": "linux",
+      "architecture": "amd64",
+      "containerPlatform": "linux/amd64",
+      "runtime": "Docker Engine with Compose v2",
+      "minimumFreeDiskBytes": 8589934592,
+      "runner": [
+        "ubuntu-24.04"
+      ]
+    },
+    {
+      "id": "linux-arm64",
+      "host": "Ubuntu 24.04 ARM",
+      "nodePlatform": "linux",
+      "architecture": "arm64",
+      "containerPlatform": "linux/arm64",
+      "runtime": "Docker Engine with Compose v2",
+      "minimumFreeDiskBytes": 8589934592,
+      "runner": [
+        "ubuntu-24.04-arm"
+      ]
+    },
+    {
+      "id": "macos-apple-silicon",
+      "host": "macOS Apple Silicon",
+      "nodePlatform": "darwin",
+      "architecture": "arm64",
+      "containerPlatform": "linux/arm64",
+      "runtime": "Docker Desktop",
+      "minimumFreeDiskBytes": 17179869184,
+      "runner": [
+        "self-hosted",
+        "macOS",
+        "ARM64",
+        "selfhost-acceptance",
+        "docker-desktop"
+      ]
+    },
+    {
+      "id": "windows-11-wsl2",
+      "host": "Windows 11",
+      "nodePlatform": "win32",
+      "architecture": "amd64",
+      "containerPlatform": "linux/amd64",
+      "runtime": "Docker Desktop with WSL2 backend",
+      "minimumFreeDiskBytes": 17179869184,
+      "runner": [
+        "self-hosted",
+        "windows",
+        "x64",
+        "selfhost-acceptance",
+        "docker-desktop",
+        "wsl2"
+      ]
+    }
+  ],
+  "modes": [
+    "core-local",
+    "connected"
+  ],
+  "scenarios": [
+    {
+      "id": "signed-release-integrity",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "fresh-install",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "owner-bootstrap-and-sign-in",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "core-user-journey",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "restart-persistence",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "recreate-persistence",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "backup-clean-restore",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "signed-upgrade",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "declared-application-rollback",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "database-unavailable-recovery",
+      "priority": "P1",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "network-disconnect-recovery",
+      "priority": "P1",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "disk-insufficient-fail-closed",
+      "priority": "P1",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "permission-error-fail-closed",
+      "priority": "P1",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "provider-timeout-degrades",
+      "priority": "P1",
+      "modes": [
+        "connected"
+      ]
+    },
+    {
+      "id": "default-security-audit",
+      "priority": "P0",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "resource-baseline",
+      "priority": "P1",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    },
+    {
+      "id": "safe-uninstall-reinstall",
+      "priority": "P1",
+      "modes": [
+        "core-local",
+        "connected"
+      ]
+    }
+  ],
+  "scenarioEvidence": {
+    "signed-release-integrity": {
+      "outerSignatureVerified": true,
+      "innerSignatureVerified": true
+    },
+    "fresh-install": {
+      "ready": true,
+      "installerSameArgumentDryRun": true
+    },
+    "owner-bootstrap-and-sign-in": {
+      "ownerState": "READY",
+      "managementCli": true,
+      "sameArgumentDryRun": true,
+      "bootstrapReplayRejected": true
+    },
+    "core-user-journey": {
+      "activityImported": true,
+      "routeVisible": true,
+      "localThumbnailAvailable": true,
+      "rawElevationExported": true,
+      "sourceFileStored": true,
+      "commercialCredentialsRequired": false
+    },
+    "restart-persistence": {
+      "persisted": true
+    },
+    "recreate-persistence": {
+      "persisted": true
+    },
+    "backup-clean-restore": {
+      "verified": true,
+      "ready": true,
+      "installerSameArgumentDryRun": true
+    },
+    "signed-upgrade": {
+      "backupVerified": true
+    },
+    "declared-application-rollback": {
+      "databaseRollback": "unsupported"
+    },
+    "database-unavailable-recovery": {
+      "degraded": true,
+      "recovered": true,
+      "doctorOverall": "fail",
+      "doctorErrorCode": "SELF_HOST_DOCTOR_FAILED",
+      "databaseErrorCode": "SELF_HOST_DOCTOR_DATABASE_FAILED",
+      "diagnosticsSecretScan": "pass",
+      "diagnosticsOperatorReviewRequired": true
+    },
+    "network-disconnect-recovery": {
+      "degraded": true,
+      "recovered": true
+    },
+    "disk-insufficient-fail-closed": {
+      "errorCode": "SELF_HOST_BACKUP_DISK_SPACE_INSUFFICIENT"
+    },
+    "permission-error-fail-closed": {
+      "writeRejected": true,
+      "permissionsRestored": true
+    },
+    "provider-timeout-degrades": {
+      "coreReady": true,
+      "providerStatus": "warning"
+    },
+    "default-security-audit": {
+      "checks": 6
+    },
+    "resource-baseline": {
+      "measuredServices": [
+        "postgres",
+        "server",
+        "client"
+      ]
+    },
+    "safe-uninstall-reinstall": {
+      "composeResourcesRemoved": true,
+      "dataRetained": true,
+      "reinstallVerified": true
+    }
+  },
+  "thresholds": {
+    "memoryTotalBytes": 2147483648,
+    "dataAfterInstallBytes": 1073741824,
+    "fixtureDiskGrowthBytes": 134217728,
+    "restoreDiskVarianceBytes": 134217728,
+    "freshInstallMs": 900000,
+    "restartMs": 180000,
+    "recreateMs": 300000,
+    "restoreMs": 900000,
+    "upgradeMs": 1200000,
+    "healthLatencyP95Ms": 1500,
+    "healthLatencySamples": 20,
+    "providerTimeoutMinimumMs": 7000
+  },
+  "resources": {
+    "measuredServices": [
+      "postgres",
+      "server",
+      "client"
+    ]
+  },
+  "security": {
+    "databaseHostPortForbidden": true,
+    "applicationRootReadOnly": [
+      "migrate",
+      "server",
+      "client"
+    ],
+    "capDropAll": [
+      "permissions",
+      "migrate",
+      "server",
+      "client"
+    ],
+    "noNewPrivileges": [
+      "permissions",
+      "postgres",
+      "migrate",
+      "server",
+      "client"
+    ],
+    "nonRoot": [
+      "migrate",
+      "server",
+      "client"
+    ],
+    "runtimeEvidence": {
+      "runtime-non-root": {
+        "services": [
+          "migrate",
+          "server",
+          "client"
+        ]
+      },
+      "runtime-read-only-root": {
+        "services": [
+          "migrate",
+          "server",
+          "client"
+        ]
+      },
+      "runtime-cap-drop-all": {
+        "services": [
+          "permissions",
+          "migrate",
+          "server",
+          "client"
+        ]
+      },
+      "runtime-no-new-privileges": {
+        "services": [
+          "permissions",
+          "postgres",
+          "migrate",
+          "server",
+          "client"
+        ]
+      },
+      "database-not-published": {
+        "publishedPorts": []
+      },
+      "permissions-cap-allowlist": {
+        "capabilities": [
+          "CHOWN",
+          "DAC_OVERRIDE",
+          "FOWNER"
+        ]
+      }
+    }
+  },
+  "gate": {
+    "requiredPriorSignedRelease": true,
+    "allowSkippedP0P1": false,
+    "allowContinueOnError": false,
+    "workflowRevisionMustMatchRelease": true,
+    "evidenceRetentionDays": 90,
+    "aggregateArtifact": "selfhost-acceptance-gate-<revision>",
+    "manifest": "acceptance-manifest.json",
+    "checksums": "acceptance-checksums.txt",
+    "signatureBundle": "acceptance-checksums.bundle.json"
+  }
+}

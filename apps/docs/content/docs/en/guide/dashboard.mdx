@@ -1,0 +1,126 @@
+---
+title: Dashboard
+description: Use the Trainingload.ai dashboard to review training trends, filter by time and sport, customize cards, and connect summary signals with deeper metric pages.
+keywords:
+  [
+    "Trainingload.ai dashboard",
+    "training dashboard",
+    "fitness status",
+    "training load dashboard",
+  ]
+---
+
+# Dashboard
+
+The dashboard is the fastest way to understand your recent training pattern. It combines summary cards, fitness status, and configurable overview metrics.
+
+Use it when you want to answer:
+
+- How much have I trained recently?
+- Is my load rising, stable, or falling?
+- Which sport is driving the trend?
+- Do I need to look deeper at activities, PMC, power, pace, or heart rate?
+
+## Before you begin
+
+- Import enough recent activities for the selected time range to be meaningful.
+- Configure thresholds and load-source priority before comparing intensity-based metrics.
+- Use one sport at a time when running, cycling, and swimming rely on different thresholds.
+
+## Trend review workflow
+
+1. Select the intended time range and sport.
+2. Read fitness status as a trend, not a diagnosis or readiness verdict.
+3. Identify the card or chart that changed.
+4. Open the activities behind that change.
+5. Continue to the relevant PMC, power, pace, or heart-rate page before changing the plan.
+
+<DocsScreenshot
+  id="dashboard-trend-review"
+  title="Dashboard trend review"
+  description="Confirm time and sport filters before comparing fitness status and overview cards with the activities behind them."
+  route="Home → Dashboard"
+/>
+
+## Filters
+
+The dashboard supports global filters:
+
+- **Time range**: switch between recent periods.
+- **Sport type**: focus on running, cycling, swimming, or all activity.
+
+When you change filters, the cards and charts update to match the selected context.
+
+## Fitness status
+
+Fitness status cards summarize the current training picture. They are meant for scanning, not final decisions.
+
+Common signals include:
+
+- Long-term load and fitness trend.
+- Recent fatigue.
+- Readiness/form context.
+- Training consistency.
+
+For the underlying model, read:
+
+- [Chronic Training Load](/docs/metrics/pmc/chronic-training-load)
+- [Acute Training Load](/docs/metrics/pmc/acute-training-load)
+- [Training Stress Balance](/docs/metrics/pmc/training-stress-balance)
+
+## Overview cards
+
+Overview cards summarize activity volume and performance-related metrics. Depending on your data, they can include distance, duration, elevation, heart rate, power, cadence, and other training fields.
+
+Use overview cards to spot changes, then open the relevant page for detail:
+
+- **Activities** for the workouts behind the numbers.
+- **PMC** for load trend.
+- **Power** for FTP, CP, NP, VI, and power curve context.
+- **Pace** for running pace, GAP, NGP, and best-distance views.
+- **Heart Rate** for HR response, zones, EF, and decoupling.
+
+## Edit layout
+
+On desktop, the dashboard supports editing the layout of key sections. Use this when you want the dashboard to match your training focus.
+
+Examples:
+
+- Put load and consistency first during base training.
+- Put power or pace metrics first during a race-specific block.
+- Keep recovery and fatigue visible when returning from a high-load week.
+
+After editing, save the layout so the dashboard opens in the same structure next time.
+
+## How to interpret dashboard changes
+
+Do not overreact to one card changing for one day. A better workflow:
+
+1. Check whether the time range and sport filter are correct.
+2. Open recent activities behind the change.
+3. Compare load with subjective fatigue.
+4. Use AI Coach if you want a plan-aware interpretation.
+
+The dashboard is your starting point. The decision should still consider the plan, recent workouts, and how you feel.
+
+## Verify the result
+
+- The active filters match the question you intended to answer.
+- The visible activities and totals cover the same date and sport scope.
+- A trend can be traced back to specific completed activities.
+- Threshold-dependent metrics use current profile values.
+- A saved desktop layout remains after reopening the dashboard.
+
+## Troubleshooting
+
+- **Cards are empty:** widen the time range, clear the sport filter, and confirm activities are Ready.
+- **A total differs from the activity list:** compare time zone, date range, sport filter, and processing status.
+- **Load or status changed unexpectedly:** check threshold history and load-source priority before assuming the training changed.
+- **A layout did not persist:** save the edit and confirm the account is signed in before refreshing.
+- **One card looks extreme:** open the underlying activity and check sensor quality before acting on the outlier.
+
+## Next steps
+
+- [Training Analysis Workflow](/docs/guide/training-analysis-workflow)
+- [Activity Detail](/docs/guide/activity-detail)
+- [Training Load](/docs/metrics/training-load)

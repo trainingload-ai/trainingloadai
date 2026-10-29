@@ -1,0 +1,6343 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "generated-from-current-worktree",
+  "entries": [
+    {
+      "name": "ACCOUNT_DELETION_SECRET",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "name": "ACCOUNT_DELETION_STORAGE_HOSTS",
+      "capability": "storage",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/user/account-deletion.service.ts",
+          "line": 427
+        }
+      ]
+    },
+    {
+      "name": "ACCOUNT_DELETION_WORKER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 313
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 314
+        }
+      ]
+    },
+    {
+      "name": "ACCOUNT_DELETION_WORKER_ENABLED",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 307
+        }
+      ]
+    },
+    {
+      "name": "ACCOUNT_DELETION_WORKER_LEASE_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 317
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 318
+        }
+      ]
+    },
+    {
+      "name": "ACCOUNT_DELETION_WORKER_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 309
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 310
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2079
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_BATCH_SIZE",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 265
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 266
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_CONCURRENCY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 269
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 270
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 259
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_LOCK_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 277
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 278
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_MAX_ATTEMPTS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 273
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 274
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_POLL_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 261
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 262
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_PROVIDER",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "local",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 284
+        },
+        {
+          "file": "apps/server/src/maps/activity-map-thumbnail-provider.ts",
+          "line": 7
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_PUBLIC_BASE_URL",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 82
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_WORKER_BATCH_SIZE",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 293
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 294
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_WORKER_CONCURRENCY",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 297
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 298
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_WORKER_ENABLED",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 287
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_WORKER_LEASE_MS",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 301
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 302
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_MAP_THUMB_WORKER_POLL_MS",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 289
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 290
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_DEFAULT_TIMEZONE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 356
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_FREE_LOOKBACK_DAYS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 344
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 345
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_NIGHTLY_JITTER_MINUTES",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 363
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 364
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_NIGHTLY_START_HOUR",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 358
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 359
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 360
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_VIP_LOOKBACK_DAYS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 348
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 349
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_VIP_USER_IDS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 351
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_WORKER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 244
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 245
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_WORKER_CONCURRENCY",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 248
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 249
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_WORKER_ENABLED",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 238
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_WORKER_MAX_ATTEMPTS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 252
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 253
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_RECOMPUTE_WORKER_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 240
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 241
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_WEATHER_ENABLED",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "false",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 46
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_WEATHER_WORKER_BATCH_SIZE",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_WEATHER_WORKER_CONCURRENCY",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 56
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_WEATHER_WORKER_LEASE_MS",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 66
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_WEATHER_WORKER_MAX_ATTEMPTS",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_WEATHER_WORKER_POLL_MS",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "name": "AI_ACTIVITY_MAX_HASHID_CHARS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 2079
+        }
+      ]
+    },
+    {
+      "name": "AI_ANALYSIS_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 426
+        }
+      ]
+    },
+    {
+      "name": "AI_API_KEY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "<redacted-non-empty-example>",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 59
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 194
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 336
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/provider-web-evidence.adapter.ts",
+          "line": 62
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 130
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 251
+        },
+        {
+          "file": "compose.yml",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "AI_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "http://llm.example.local/v1",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 66
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 138
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 195
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 337
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/provider-web-evidence.adapter.ts",
+          "line": 71
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 255
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 288
+        },
+        {
+          "file": "compose.yml",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_BRANCH_RECENT_MESSAGES",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 580
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_COMPACTION_KEEP_TAIL_GROUPS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 296
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_COMPRESS_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 1134
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_COMPRESSION_THRESHOLD_RATIO",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 224
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_CONTEXT_WINDOW_TOKENS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 210
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_DEBUG_PLAN_DRAFT",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
+          "line": 57
+        },
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 258
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 749
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_DEBUG_TOOLS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
+          "line": 50
+        },
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 251
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_MAX_AGENT_STEPS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 693
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 1046
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_MAX_CHARS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 925
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_MAX_PROMPT_CHARS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 1016
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2809
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_MAX_SID_CHARS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 1018
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2505
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2566
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2653
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2705
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2793
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_PROVIDER",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 46
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 108
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_READ_THROTTLE_LIMIT",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 279
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_READ_THROTTLE_TTL_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 278
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_REASONING_EFFORT",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 210
+        },
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 610
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_REBASE_COPY_MESSAGES",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/coach-branching.service.ts",
+          "line": 1516
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_RECENT_TURNS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 503
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 924
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_RESERVED_OUTPUT_TOKENS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 215
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_STEP_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 645
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 311
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_STREAM_IDLE_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 337
+        }
+      ]
+    },
+    {
+      "name": "AI_COACH_TOTAL_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 1054
+        }
+      ]
+    },
+    {
+      "name": "AI_COMPETITION_IMPACT_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/competition/competition-impact.evaluator.ts",
+          "line": 93
+        }
+      ]
+    },
+    {
+      "name": "AI_DEFAULT_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "replace-with-default-model-id",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 173
+        },
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
+          "line": 293
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 137
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 269
+        },
+        {
+          "file": "compose.yml",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "name": "AI_DEFAULT_MODEL_CONTEXT_TOKENS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 174
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 148
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 271
+        }
+      ]
+    },
+    {
+      "name": "AI_DEFAULT_MODEL_PURPOSE",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 144
+        }
+      ]
+    },
+    {
+      "name": "AI_DOCS_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/docs-index.ts",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "name": "AI_LOG_TOOL_OUTPUTS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/ai-sdk-tool-adapter.ts",
+          "line": 43
+        },
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 244
+        }
+      ]
+    },
+    {
+      "name": "AI_MODEL_CATALOG_JSON",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 121
+        }
+      ]
+    },
+    {
+      "name": "AI_PLAN_EXECUTION_ADVICE_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-plan-execution-advice.service.ts",
+          "line": 205
+        }
+      ]
+    },
+    {
+      "name": "AI_PROVIDER",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "custom-openai-compatible",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 42
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 103
+        },
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 165
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 218
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 236
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 279
+        },
+        {
+          "file": "compose.yml",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "AI_REASONING_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "replace-with-reasoning-model-id",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 178
+        },
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
+          "line": 294
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 141
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 270
+        },
+        {
+          "file": "compose.yml",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "AI_REASONING_MODEL_CONTEXT_TOKENS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/context-window.ts",
+          "line": 180
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 156
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 272
+        }
+      ]
+    },
+    {
+      "name": "AI_THROTTLE_LIMIT",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 288
+        }
+      ]
+    },
+    {
+      "name": "AI_THROTTLE_TTL_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.controller.ts",
+          "line": 287
+        }
+      ]
+    },
+    {
+      "name": "AI_TODAY_SUGGESTION_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-plan-execution-advice.service.ts",
+          "line": 206
+        }
+      ]
+    },
+    {
+      "name": "AI_TODAY_WEATHER_ENABLED",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "false",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 163
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "name": "AI_TODAY_WEATHER_ROLLOUT_PERCENT",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "AI_WEB_SEARCH_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 133
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/provider-web-evidence.adapter.ts",
+          "line": 53
+        },
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
+          "line": 295
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 273
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 294
+        }
+      ]
+    },
+    {
+      "name": "ALIYUN_STEP_TIMEOUT_MS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 655
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 324
+        }
+      ]
+    },
+    {
+      "name": "ALIYUN_STREAM_IDLE_TIMEOUT_MS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 349
+        }
+      ]
+    },
+    {
+      "name": "ANALYZE_RECOMPUTE_WINDOW_DAYS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 231
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 232
+        }
+      ]
+    },
+    {
+      "name": "APP_VERSION",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/runtime-capabilities/runtime-capability.service.ts",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "name": "AUTH_SECRET",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
+          "line": 20
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 17
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 39
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 72
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 153
+        }
+      ]
+    },
+    {
+      "name": "BETTER_AUTH_SECRET",
+      "capability": "auth",
+      "mode": "core-local",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
+          "line": 19
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/server/src/api/user/oauth-authorizations.service.ts",
+          "line": 99
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 152
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 187
+        }
+      ]
+    },
+    {
+      "name": "BETTER_AUTH_URL",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "name": "CALENDAR_FEED_PUBLIC_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/calendar/calendar.service.ts",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "name": "CI",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 221
+        }
+      ]
+    },
+    {
+      "name": "CLIENT_INTERNAL_API_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 60
+        },
+        {
+          "file": "apps/client/src/lib/server-api-base-url.ts",
+          "line": 10
+        }
+      ]
+    },
+    {
+      "name": "CLIENT_INTERNAL_ORIGIN",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/api/v2-home.ts",
+          "line": 124
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "name": "CLIENT_PUBLIC_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "name": "COACH_E2E",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "name": "COACH_REVIEW_RUNTIME_V4_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/coach-daily-review-runtime.service.ts",
+          "line": 524
+        },
+        {
+          "file": "apps/server/src/review/coach-period-review-runtime.service.ts",
+          "line": 559
+        }
+      ]
+    },
+    {
+      "name": "COACH_REVIEW_UPSTREAM_TIMEOUT_MS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 387
+        }
+      ]
+    },
+    {
+      "name": "CORE_MIGRATION_DIALECT",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "packages"
+      ],
+      "references": [
+        {
+          "file": "packages/prisma/core/runner/core-migration-runner.mjs",
+          "line": 202
+        }
+      ]
+    },
+    {
+      "name": "DASHSCOPE_API_KEY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 63
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 447
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 117
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 178
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 324
+        },
+        {
+          "file": "compose.yml",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "name": "DASHSCOPE_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 452
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 135
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 180
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 326
+        },
+        {
+          "file": "compose.yml",
+          "line": 53
+        }
+      ]
+    },
+    {
+      "name": "DASHSCOPE_DEFAULT_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "name": "DASHSCOPE_REASONING_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_DATABASE",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_HOST",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_NAME",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_PASSWORD",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 28
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_PORT",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_TYPE",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_URL",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "apps",
+        "packages"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/audit/export-coach-conversations.command.ts",
+          "line": 108
+        },
+        {
+          "file": "apps/server/src/health-data/repair-health-daily-links.command.ts",
+          "line": 80
+        },
+        {
+          "file": "packages/prisma/core/runner/core-migration-runner.mjs",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "name": "DATABASE_USER",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_API_KEY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "<redacted-non-empty-example>",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 61
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 118
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 187
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 374
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 140
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 236
+        },
+        {
+          "file": "compose.yml",
+          "line": 56
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "https://api.deepseek.com",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 136
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 188
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 375
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 224
+        },
+        {
+          "file": "compose.yml",
+          "line": 57
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_DEFAULT_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "deepseek-flash",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_REASONING_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "deepseek-v4-pro",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_STEP_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 649
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 317
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_STREAM_IDLE_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 342
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_WEB_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 223
+        }
+      ]
+    },
+    {
+      "name": "DEEPSEEK_WEB_TOOL_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "name": "DEPLOYMENT_MODE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
+          "line": 289
+        },
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
+          "line": 327
+        },
+        {
+          "file": "apps/server/src/app.module.ts",
+          "line": 85
+        },
+        {
+          "file": "apps/server/src/bootstrap/deployment-edition.ts",
+          "line": 8
+        },
+        {
+          "file": "apps/server/src/bootstrap/deployment-edition.ts",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "name": "DESKTOP_INTERNAL_CREDENTIAL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/bff-upstream-headers.ts",
+          "line": 37
+        },
+        {
+          "file": "apps/server/src/bootstrap/desktop-internal-credential.middleware.ts",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "name": "DOCS_INTERNAL_API_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/docs-server-api-base-url.ts",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "name": "DOMAIN_BASE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 307
+        },
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "name": "ELEVATION_DATA_PATH",
+      "capability": "elevation",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "/data/elevation",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 92
+        }
+      ]
+    },
+    {
+      "name": "ELEVATION_PROVIDER",
+      "capability": "elevation",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "none",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 90
+        },
+        {
+          "file": "compose.yml",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "ELEVATION_TILE_ZOOM",
+      "capability": "elevation",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "13",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 93
+        },
+        {
+          "file": "compose.yml",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "name": "EXTERNAL_PROVIDER_CREDENTIAL_SECRET",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 37
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 155
+        }
+      ]
+    },
+    {
+      "name": "FITNESS_ASSESSMENT_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 1234
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",
+          "line": 23
+        },
+        {
+          "file": "apps/server/src/api/ai/fitness-assessment-followup.service.ts",
+          "line": 218
+        },
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 342
+        }
+      ]
+    },
+    {
+      "name": "FITNESS_DISABLED_METHODS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 324
+        }
+      ]
+    },
+    {
+      "name": "FITNESS_ESTIMATE_APPLY_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 343
+        }
+      ]
+    },
+    {
+      "name": "FITNESS_LTHR_APPLY_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 345
+        }
+      ]
+    },
+    {
+      "name": "HOST",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 99
+        }
+      ]
+    },
+    {
+      "name": "IMPORT_ITEM_WORKER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 184
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 185
+        }
+      ]
+    },
+    {
+      "name": "IMPORT_ITEM_WORKER_CONCURRENCY",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 188
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 189
+        }
+      ]
+    },
+    {
+      "name": "IMPORT_ITEM_WORKER_ENABLED",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 178
+        }
+      ]
+    },
+    {
+      "name": "IMPORT_ITEM_WORKER_LEASE_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 196
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 197
+        }
+      ]
+    },
+    {
+      "name": "IMPORT_ITEM_WORKER_MAX_ATTEMPTS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 192
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 193
+        }
+      ]
+    },
+    {
+      "name": "IMPORT_ITEM_WORKER_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 180
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 181
+        }
+      ]
+    },
+    {
+      "name": "INTERNAL_API_SECRET",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 38
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 151
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_API_BASE_URL",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 131
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_OAUTH_AUTHORIZE_URL",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 330
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 137
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_OAUTH_CLIENT_ID",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 299
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 133
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_OAUTH_CLIENT_SECRET",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 308
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_OAUTH_REDIRECT_URI",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 317
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_OAUTH_TOKEN_URL",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 140
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_WEBHOOK_CALLBACK_URL",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 145
+        }
+      ]
+    },
+    {
+      "name": "INTERVALS_ICU_WEBHOOK_SECRET",
+      "capability": "third-party-sync",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 144
+        }
+      ]
+    },
+    {
+      "name": "JWT_EXPIRY_TIME",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "name": "LOCAL_STORAGE_CACHE_PATH",
+      "capability": "storage",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "/data/cache/storage",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 86
+        }
+      ]
+    },
+    {
+      "name": "LOCAL_STORAGE_PATH",
+      "capability": "storage",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "/data/uploads",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 95
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "name": "MAP_ATTRIBUTION",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "name": "MAP_MAX_ZOOM",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "name": "MAP_PROVIDER",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "none",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "name": "MAP_STYLE_URL",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "name": "MAP_TILE_URL",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "MCP_AUDIT_SECRET",
+      "capability": "agent",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/user/oauth-authorizations.service.ts",
+          "line": 98
+        }
+      ]
+    },
+    {
+      "name": "MEMORY_EXTRACTION_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/memory/ai-coach-memory-extraction.worker.ts",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "name": "MEMORY_EXTRACTION_LEASE_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/memory/ai-coach-memory-extraction.worker.ts",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "MEMORY_EXTRACTION_MAX_ATTEMPTS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/memory/ai-coach-memory-extraction.worker.ts",
+          "line": 373
+        }
+      ]
+    },
+    {
+      "name": "MEMORY_EXTRACTION_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/memory/ai-coach-memory-extraction.worker.ts",
+          "line": 94
+        }
+      ]
+    },
+    {
+      "name": "MEMORY_JUDGE_MODEL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/memory/memory-judge.service.ts",
+          "line": 107
+        }
+      ]
+    },
+    {
+      "name": "NEW_USER_GIFT_ACCESS_DAYS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/offer-content.ts",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "name": "NEW_USER_GIFT_BONUS_CREDITS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/offer-content.ts",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "name": "NEXT_BUILD_CPUS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 10
+        },
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "name": "NEXT_DIST_DIR",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_AI_TODAY_WEATHER_ENABLED",
+      "capability": "weather",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/api/ai-today-suggestion.ts",
+          "line": 88
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_API_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 62
+        },
+        {
+          "file": "apps/docs/src/lib/docs-server-api-base-url.ts",
+          "line": 29
+        },
+        {
+          "file": "apps/server/src/api/calendar/calendar.service.ts",
+          "line": 24
+        },
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 318
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 41
+        },
+        {
+          "file": "apps/server/src/oauth/oauth-bearer.service.ts",
+          "line": 189
+        },
+        {
+          "file": "apps/server/src/oauth/oauth.controller.ts",
+          "line": 77
+        },
+        {
+          "file": "apps/server/src/storage/storage.service.ts",
+          "line": 730
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_APP_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/components/layout/MainAppShell.tsx",
+          "line": 75
+        },
+        {
+          "file": "apps/client/src/lib/tiptap-utils.ts",
+          "line": 42
+        },
+        {
+          "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
+          "line": 323
+        },
+        {
+          "file": "apps/docs/src/components/TenKBridgePage.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/docs/src/lib/plan-share.ts",
+          "line": 49
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 15
+        },
+        {
+          "file": "apps/server/src/api/ai/core/docs-index.ts",
+          "line": 15
+        },
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 338
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 48
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_APP_VERSION",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/utils/version.ts",
+          "line": 9
+        },
+        {
+          "file": "apps/client/src/utils/version.ts",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_ASSET_BASE_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/map-thumbnail.ts",
+          "line": 8
+        },
+        {
+          "file": "apps/docs/src/components/ProductVisualPlaceholder.tsx",
+          "line": 6
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion.service.ts",
+          "line": 433
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_BASE_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 111
+        },
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 120
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/10k-training-plan/page.tsx",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/intermediate/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/page.tsx",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
+          "line": 37
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
+          "line": 32
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
+          "line": 24
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-marathon-training-plan/page.tsx",
+          "line": 24
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-training-plan/page.tsx",
+          "line": 29
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/alternatives/page.tsx",
+          "line": 25
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/best-efforts/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/brick-workout/page.tsx",
+          "line": 34
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/contact/page.tsx",
+          "line": 28
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/contact/page.tsx",
+          "line": 68
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/converter-direction-page.tsx",
+          "line": 25
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/converter/page.tsx",
+          "line": 24
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/converter/page.tsx",
+          "line": 81
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/couch-to-5k-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/cp-ftp-lthr-estimator/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
+          "line": 128
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
+          "line": 179
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
+          "line": 139
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
+          "line": 187
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/custom-zones/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/cycling-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
+          "line": 30
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/effective-vo2max-trend/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/features/mcp/page.tsx",
+          "line": 16
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
+          "line": 53
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
+          "line": 25
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
+          "line": 73
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
+          "line": 21
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fitness-fatigue-form/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/free-ai-workout-review/page.tsx",
+          "line": 23
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
+          "line": 151
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
+          "line": 199
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 92
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 146
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ironman-70-3-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 118
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 169
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 76
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 134
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/olympic-triathlon-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 106
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 155
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
+          "line": 126
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
+          "line": 17
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-curve/page.tsx",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-rankings/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 119
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 170
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 36
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 81
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 55
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 96
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/race-time-predictor/page.tsx",
+          "line": 39
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/race-time-predictor/page.tsx",
+          "line": 90
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/rpe-scale/page.tsx",
+          "line": 48
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/running-pace-calculator/page.tsx",
+          "line": 41
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/running-pace-calculator/page.tsx",
+          "line": 92
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/share/plans/[publicId]/page.tsx",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/swim-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/terms-and-conditions/page.tsx",
+          "line": 15
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/terms-and-conditions/page.tsx",
+          "line": 56
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
+          "line": 79
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
+          "line": 131
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
+          "line": 16
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 83
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 137
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
+          "line": 29
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tss-calculator/page.tsx",
+          "line": 85
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tss-calculator/page.tsx",
+          "line": 136
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
+          "line": 93
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
+          "line": 146
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 187
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 261
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/workout-editor/page.tsx",
+          "line": 68
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/workout-editor/page.tsx",
+          "line": 132
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
+          "line": 120
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
+          "line": 168
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
+          "line": 21
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/blog/page.tsx",
+          "line": 49
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
+          "line": 27
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/layout.tsx",
+          "line": 96
+        },
+        {
+          "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
+          "line": 9
+        },
+        {
+          "file": "apps/docs/src/app/llms-full.txt/route.ts",
+          "line": 18
+        },
+        {
+          "file": "apps/docs/src/app/llms.txt/route.ts",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/pricing.md/route.ts",
+          "line": 8
+        },
+        {
+          "file": "apps/docs/src/app/robots.ts",
+          "line": 5
+        },
+        {
+          "file": "apps/docs/src/app/sitemap.ts",
+          "line": 30
+        },
+        {
+          "file": "apps/docs/src/app/tools.md/route.ts",
+          "line": 4
+        },
+        {
+          "file": "apps/docs/src/components/EndurancePlanHubPage.tsx",
+          "line": 31
+        },
+        {
+          "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
+          "line": 251
+        },
+        {
+          "file": "apps/docs/src/components/RunningPlanPage.tsx",
+          "line": 31
+        },
+        {
+          "file": "apps/docs/src/components/TenKBridgePage.tsx",
+          "line": 23
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 14
+        },
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 339
+        },
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 390
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 51
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_DEMO_HOST",
+      "capability": "public-demo",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 28
+        },
+        {
+          "file": "apps/docs/src/lib/public-demo-url.ts",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/layout.tsx",
+          "line": 162
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_MAPBOX_TOKEN",
+      "capability": "maps",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/api/runtime-capabilities.ts",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_MARKETING_BASE_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_POSTHOG_HOST",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/posthog-client.ts",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/posthog-client.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/docs/src/lib/posthog-client.ts",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_REACT_SCAN",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/layout.tsx",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SELF_HOST_MODE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 20
+        },
+        {
+          "file": "apps/client/src/api/runtime-capabilities.ts",
+          "line": 90
+        },
+        {
+          "file": "apps/client/src/api/self-host-bootstrap.ts",
+          "line": 104
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/calendar/components/CalendarPlanActions.tsx",
+          "line": 54
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/usage/page.tsx",
+          "line": 146
+        },
+        {
+          "file": "apps/client/src/app/[locale]/onboarding/OnboardingPageClient.tsx",
+          "line": 1156
+        },
+        {
+          "file": "apps/client/src/hooks/useSelfHostAiAccess.ts",
+          "line": 9
+        },
+        {
+          "file": "apps/client/src/lib/bff-upstream-headers.ts",
+          "line": 26
+        },
+        {
+          "file": "apps/client/src/lib/bff-upstream-headers.ts",
+          "line": 48
+        },
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 61
+        },
+        {
+          "file": "apps/client/src/middleware.ts",
+          "line": 66
+        },
+        {
+          "file": "apps/docs/src/lib/telemetry-config.mjs",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_SENTRY_DSN",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/telemetry-config.mjs",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "name": "NEXT_PUBLIC_TELEMETRY_ENABLED",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/telemetry-config.mjs",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "name": "NEXT_RUNTIME",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/instrumentation.ts",
+          "line": 4
+        },
+        {
+          "file": "apps/docs/src/instrumentation.ts",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "name": "NODE_ENV",
+      "capability": "core-runtime",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 19
+        },
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 111
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/ActivitiesPageClient.tsx",
+          "line": 136
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/dev-activity-feed-fixture.ts",
+          "line": 83
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/ai-coach/training-visualization-card.tsx",
+          "line": 145
+        },
+        {
+          "file": "apps/client/src/app/[locale]/layout.tsx",
+          "line": 58
+        },
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 63
+        },
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 40
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/layout.tsx",
+          "line": 159
+        },
+        {
+          "file": "apps/docs/src/lib/posthog-client.ts",
+          "line": 13
+        },
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review-config.ts",
+          "line": 7
+        },
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review-config.ts",
+          "line": 17
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 33
+        },
+        {
+          "file": "apps/server/src/api/user/oauth-authorizations.service.ts",
+          "line": 100
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 306
+        },
+        {
+          "file": "apps/server/src/auth/auth-security-config.ts",
+          "line": 45
+        },
+        {
+          "file": "apps/server/src/auth/login-rate-limit.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 88
+        },
+        {
+          "file": "apps/server/src/bootstrap/self-host-network-security.ts",
+          "line": 148
+        },
+        {
+          "file": "apps/server/src/oauth/oauth-mobile-config.service.ts",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "name": "OAUTH_MOBILE_CLIENT_ID",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/oauth/oauth-mobile-config.service.ts",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "OAUTH_MOBILE_REDIRECT_URI",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 349
+        },
+        {
+          "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
+          "line": 32
+        },
+        {
+          "file": "apps/server/src/oauth/oauth-mobile-config.service.ts",
+          "line": 93
+        }
+      ]
+    },
+    {
+      "name": "OAUTH_MOBILE_REDIRECT_URIS",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 350
+        },
+        {
+          "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
+          "line": 33
+        },
+        {
+          "file": "apps/server/src/oauth/oauth-mobile-config.service.ts",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "<redacted-non-empty-example>",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 60
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 447
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 115
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 156
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 315
+        },
+        {
+          "file": "compose.yml",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "name": "OPENAI_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "https://api.openai.com/v1",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 133
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 157
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 316
+        },
+        {
+          "file": "compose.yml",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "name": "OPENAI_DEFAULT_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "replace-with-default-model-id",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 46
+        }
+      ]
+    },
+    {
+      "name": "OPENAI_REASONING_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "replace-with-reasoning-model-id",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_API_KEY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 62
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 116
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 161
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 301
+        },
+        {
+          "file": "compose.yml",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_APP_TITLE",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 165
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 298
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_BASE_URL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 130
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 163
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 303
+        },
+        {
+          "file": "compose.yml",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_DEFAULT_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 50
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_FALLBACK_MODELS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_REASONING_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_RETRY_BASE_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 577
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_RETRY_MAX",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 576
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_STEP_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/legacy/coach.orchestrator.legacy.ts",
+          "line": 660
+        },
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 329
+        }
+      ]
+    },
+    {
+      "name": "OPENROUTER_STREAM_IDLE_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
+          "line": 355
+        }
+      ]
+    },
+    {
+      "name": "PARQUET_GARBAGE_CRON",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/sensor/parquet-garbage-collector.service.ts",
+          "line": 90
+        }
+      ]
+    },
+    {
+      "name": "PORT",
+      "capability": "core-runtime",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/src/api/v2-home.ts",
+          "line": 127
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
+          "line": 66
+        },
+        {
+          "file": "apps/server/src/api/calendar/calendar.service.ts",
+          "line": 27
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 43
+        },
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 99
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "name": "POSTGRES_DB",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 116
+        }
+      ]
+    },
+    {
+      "name": "POSTGRES_USER",
+      "capability": "database",
+      "mode": "core-local",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 116
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_AI_REVIEW_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review-config.ts",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_AI_REVIEW_FILE_MAX_BYTES",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review.controller.ts",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_AI_REVIEW_MAX_COMPLETION_TOKENS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review-result.ts",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_AI_REVIEW_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review-result.ts",
+          "line": 195
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_AI_REVIEW_UPSTREAM_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/public/workout-review/public-review.controller.ts",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_ASSET_BASE_URL",
+      "capability": "storage",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/user/account-deletion.service.ts",
+          "line": 432
+        }
+      ]
+    },
+    {
+      "name": "REDIS_DB",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 79
+        }
+      ]
+    },
+    {
+      "name": "REDIS_HOST",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "name": "REDIS_PASSWORD",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 78
+        }
+      ]
+    },
+    {
+      "name": "REDIS_PORT",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "name": "REDIS_TTL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 80
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_AI_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-digest.service.ts",
+          "line": 626
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_AI_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/athlete-state/athlete-state-model.service.ts",
+          "line": 23
+        },
+        {
+          "file": "apps/server/src/review/review-digest.service.ts",
+          "line": 631
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_CRON_DAILY_CRON",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-cron.service.ts",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_CRON_DEBUG",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-cron.service.ts",
+          "line": 94
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_CRON_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-cron.service.ts",
+          "line": 89
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_CRON_MONTHLY_CRON",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-cron.service.ts",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_CRON_WEEKLY_CRON",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-cron.service.ts",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_DEFAULT_TIMEZONE",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/review/review-schedule.service.ts",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_MODEL_CALL_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/review/review-model-call-guard.ts",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_WORKER_BATCH_SIZE",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 164
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 165
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_WORKER_CONCURRENCY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 168
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 169
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_WORKER_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 158
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_WORKER_MAX_ATTEMPTS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 172
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 173
+        }
+      ]
+    },
+    {
+      "name": "REVIEW_WORKER_POLL_MS",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 160
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 161
+        }
+      ]
+    },
+    {
+      "name": "RUNTIME_DATA_DIRS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "scripts"
+      ],
+      "references": [
+        {
+          "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+          "line": 204
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_ALLOW_INSECURE_HTTP",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "false",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_AUTH_SECRET",
+      "capability": "auth",
+      "mode": "core-local",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "<redacted-non-empty-example>",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
+          "line": 18
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 15
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 186
+        },
+        {
+          "file": "compose.yml",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "86400",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/self-host/self-host-bootstrap.service.ts",
+          "line": 74
+        },
+        {
+          "file": "compose.yml",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_CLIENT_IMAGE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "trainingload-selfhost-client:1.1.15",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 191
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_DATA_ROOT",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "./data",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 94
+        },
+        {
+          "file": "compose.yml",
+          "line": 112
+        },
+        {
+          "file": "compose.yml",
+          "line": 163
+        },
+        {
+          "file": "compose.yml",
+          "line": 164
+        },
+        {
+          "file": "compose.yml",
+          "line": 165
+        },
+        {
+          "file": "compose.yml",
+          "line": 166
+        },
+        {
+          "file": "compose.yml",
+          "line": 211
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_DATABASE_CONNECTION_LIMIT",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "5",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_DATABASE_NAME",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "trainingload",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 16
+        },
+        {
+          "file": "compose.yml",
+          "line": 107
+        },
+        {
+          "file": "compose.yml",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_DATABASE_PASSWORD",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "<redacted-non-empty-example>",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 16
+        },
+        {
+          "file": "compose.yml",
+          "line": 109
+        },
+        {
+          "file": "compose.yml",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_DATABASE_POOL_TIMEOUT_SECONDS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "20",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 16
+        },
+        {
+          "file": "compose.yml",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_DATABASE_USER",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "trainingload",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 16
+        },
+        {
+          "file": "compose.yml",
+          "line": 108
+        },
+        {
+          "file": "compose.yml",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_HTTP_BIND",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "127.0.0.1",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 23
+        },
+        {
+          "file": "compose.yml",
+          "line": 213
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_HTTP_PORT",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "43210",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 213
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_INTEGRATION_SECRET",
+      "capability": "third-party-sync",
+      "mode": "core-local",
+      "sensitive": true,
+      "documented": true,
+      "exampleDefault": "<redacted-non-empty-example>",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_MIGRATE_IMAGE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "trainingload-selfhost-migrate:1.1.15",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 73
+        },
+        {
+          "file": "compose.yml",
+          "line": 128
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_MODE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "core-local",
+      "owners": [
+        "apps",
+        "compose.build.yml",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai-model-catalog.ts",
+          "line": 59
+        },
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 438
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 113
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 131
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/provider-web-evidence.adapter.ts",
+          "line": 51
+        },
+        {
+          "file": "apps/server/src/api/user/account-deletion-crypto.ts",
+          "line": 13
+        },
+        {
+          "file": "apps/server/src/auth/self-host-mail-auth-policy.ts",
+          "line": 12
+        },
+        {
+          "file": "apps/server/src/bootstrap/deployment-edition.ts",
+          "line": 17
+        },
+        {
+          "file": "apps/server/src/bootstrap/deployment-edition.ts",
+          "line": 18
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 285
+        },
+        {
+          "file": "apps/server/src/maps/activity-map-thumbnail-provider.ts",
+          "line": 10
+        },
+        {
+          "file": "apps/server/src/prisma/prisma.service.ts",
+          "line": 20
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
+          "line": 179
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-owner-bootstrap.command.ts",
+          "line": 48
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-owner-recovery.command.ts",
+          "line": 47
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-owner.guard.ts",
+          "line": 30
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 38
+        },
+        {
+          "file": "compose.yml",
+          "line": 15
+        },
+        {
+          "file": "compose.yml",
+          "line": 205
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_OPERATIONS_PATH",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "/data/operations",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/self-host/self-host-token-file.ts",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_PROJECT_NAME",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "trainingload-selfhost",
+      "owners": [
+        "compose.build.yml",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.build.yml",
+          "line": 3
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 15
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 23
+        },
+        {
+          "file": "compose.yml",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_PUBLIC_API_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/storage/storage.service.ts",
+          "line": 729
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_SERVER_IMAGE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "trainingload-selfhost-server:1.1.15",
+      "owners": [
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 152
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_SITE_ADDRESS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "http://localhost:43210",
+      "owners": [
+        "compose.build.yml",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.build.yml",
+          "line": 33
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 34
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 35
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 36
+        },
+        {
+          "file": "compose.yml",
+          "line": 19
+        },
+        {
+          "file": "compose.yml",
+          "line": 20
+        },
+        {
+          "file": "compose.yml",
+          "line": 21
+        },
+        {
+          "file": "compose.yml",
+          "line": 22
+        },
+        {
+          "file": "compose.yml",
+          "line": 201
+        },
+        {
+          "file": "compose.yml",
+          "line": 202
+        },
+        {
+          "file": "compose.yml",
+          "line": 203
+        },
+        {
+          "file": "compose.yml",
+          "line": 204
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_SOURCE_REVISION",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "compose.build.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.build.yml",
+          "line": 10
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_SOURCE_URL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "compose.build.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.build.yml",
+          "line": 11
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "name": "SELF_HOST_VERSION",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "1.1.15",
+      "owners": [
+        "compose.build.yml",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "compose.build.yml",
+          "line": 3
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 9
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 15
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 23
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 29
+        },
+        {
+          "file": "compose.yml",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_AUTH_TOKEN",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": true,
+      "documented": false,
+      "exampleDefault": "",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_DSN",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/src/lib/telemetry-config.mjs",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_ORG",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 215
+        }
+      ]
+    },
+    {
+      "name": "SENTRY_PROJECT",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 217
+        }
+      ]
+    },
+    {
+      "name": "SERVER_MESSAGE_CATALOG_PATH",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/app.module.ts",
+          "line": 81
+        },
+        {
+          "file": "apps/server/src/app.module.ts",
+          "line": 89
+        },
+        {
+          "file": "apps/server/src/app.module.ts",
+          "line": 90
+        }
+      ]
+    },
+    {
+      "name": "STORAGE_OBJECT_GARBAGE_CRON",
+      "capability": "storage",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/sensor/parquet-garbage-collector.service.ts",
+          "line": 89
+        }
+      ]
+    },
+    {
+      "name": "STORAGE_STRATEGY",
+      "capability": "storage",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "LOCAL",
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 82
+        }
+      ]
+    },
+    {
+      "name": "TELEMETRY_ENABLED",
+      "capability": "telemetry",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "false",
+      "owners": [
+        "deployment-template"
+      ],
+      "references": []
+    },
+    {
+      "name": "THIRD_PARTY_SCHEDULER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 107
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_SCHEDULER_CRON",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 97
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_SCHEDULER_STALE_STARTED_MINUTES",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 103
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_SCHEDULER_START_HOUR_LOCAL",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 99
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_SYNC_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "false",
+      "owners": [
+        "deployment-template"
+      ],
+      "references": []
+    },
+    {
+      "name": "THIRD_PARTY_WEBHOOK_WORKER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 117
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_WEBHOOK_WORKER_MAX_ATTEMPTS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 121
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_WEBHOOK_WORKER_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "name": "THIRD_PARTY_WEBHOOK_WORKER_STALE_AFTER_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "name": "TRUSTED_ORIGINS",
+      "capability": "auth",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 559
+        },
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "name": "TZ",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-tools.service.ts",
+          "line": 1050
+        }
+      ]
+    },
+    {
+      "name": "USER_DATA_EXPORT_RETENTION_DAYS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 337
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 338
+        }
+      ]
+    },
+    {
+      "name": "USER_DATA_EXPORT_WORKER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 329
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 330
+        }
+      ]
+    },
+    {
+      "name": "USER_DATA_EXPORT_WORKER_ENABLED",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 323
+        }
+      ]
+    },
+    {
+      "name": "USER_DATA_EXPORT_WORKER_LEASE_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 333
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 334
+        }
+      ]
+    },
+    {
+      "name": "USER_DATA_EXPORT_WORKER_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 325
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 326
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_AI_REVIEW_IMPORT_MAX_ACTIVITIES",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/importing/user-post-process.worker.ts",
+          "line": 71
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_WORKER_BATCH_SIZE",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 209
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 210
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_WORKER_CONCURRENCY",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 213
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 214
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_WORKER_ENABLED",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 203
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_WORKER_LEASE_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 221
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 222
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_WORKER_MAX_ATTEMPTS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 217
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 218
+        }
+      ]
+    },
+    {
+      "name": "USER_POST_PROCESS_WORKER_POLL_MS",
+      "capability": "workers",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 205
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 206
+        }
+      ]
+    }
+  ]
+}

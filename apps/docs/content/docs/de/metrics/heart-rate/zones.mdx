@@ -1,0 +1,146 @@
+---
+title: Heart Rate Zones
+description: "Heart rate zones for endurance training, including Karvonen HRR, LTHR-based Joe Friel zones, and Max HR fallback zones."
+keywords: ["Heart Rate Zones", "heart rate zones calculator", "Karvonen heart rate zones", "HRR", "LTHR zones", "Max HR", "Joe Friel"]
+---
+
+# Heart Rate Zones
+
+**Heart rate zones** translate heart-rate data into practical intensity ranges. They are useful for understanding **internal training load** because heart rate reflects how your body responds to work, not just how fast or hard you moved.
+
+Heart-rate zones are most useful when interpreted with pace, power, temperature, fatigue, hydration, and perceived effort. Trainingload.ai supports three mainstream models so the zone system can match the data you actually have.
+
+## Model overview
+
+Trainingload.ai can select an appropriate model based on what data you have:
+
+1.  **Karvonen**: a practical default. Uses heart-rate reserve (HRR), adapts to individual differences, and works well when resting HR is available.
+2.  **Joe Friel**: a threshold-based model. Anchored on lactate-threshold heart rate (LTHR), useful when you have a reliable LTHR estimate.
+3.  **Max HR**: a simple fallback. Used when resting HR or LTHR is missing.
+
+---
+
+## 1. Karvonen model (HRR-based)
+
+This is the **default model** in Trainingload.ai. The Karvonen formula (Martti Karvonen) introduces **Heart Rate Reserve (HRR)**.
+
+### Core idea
+Don’t only use maximum heart rate—also use **resting heart rate**.
+$$
+HRR = HR_{max} - HR_{rest}
+$$
+Then:
+$$
+TargetHR = (HRR \times Intensity\%) + HR_{rest}
+$$
+-   **Adapts with fitness**: as you get fitter, resting HR often drops and HRR grows. That changes zone boundaries in a way that tracks improvements.
+-   **Why it’s the default**: compared with Max HR, it uses resting HR (a useful fitness signal). Compared with the Joe Friel model, it does not require a demanding threshold test. It offers a good balance of personalization and usability.
+
+### Zone definitions
+Uses a classic **5-zone system**:
+
+| Zone | Name | Intensity % (HRR) | Typical feel | Training goal |
+| :--- | :--- | :--- | :--- | :--- |
+| **Zone 1** | **Warm Up / Recovery** | 50% - 60% | Easy conversation | Warm-up, recovery, gentle circulation. |
+| **Zone 2** | **Fat Burn / Aerobic** | 60% - 70% | Deeper breathing | Aerobic base; commonly used for easy volume. |
+| **Zone 3** | **Aerobic** | 70% - 80% | Talking is harder | Improve aerobic endurance and cardiovascular capacity. |
+| **Zone 4** | **Anaerobic** | 80% - 90% | Short phrases only | Improve high-intensity tolerance and durability. |
+| **Zone 5** | **VO2 Max** | 90% - 100% | No talking | Very hard efforts; only sustainable briefly. |
+
+### When to use it
+-   **Most athletes**: from general fitness to advanced runners.
+-   **Tracking fitness**: reflects changes in resting HR over time.
+
+### Limitations
+-   **High-intensity accuracy**: in Z4–Z5, HRR-based zones can be less precise than threshold-based zones because it doesn’t anchor directly to a metabolic breakpoint.
+-   **Data quality**: requires a reliable resting HR measurement (often best measured upon waking, before getting out of bed).
+
+---
+
+## 2. Joe Friel model (LTHR-based)
+
+This is a **threshold-based model** for structured endurance training.
+
+### Core idea
+All zones anchor to your **Lactate Threshold Heart Rate (LTHR)**.
+-   **Physiology**: the HR around the point where lactate accumulation begins to outpace clearance (often near the anaerobic threshold).
+-   **Why it can be more specific**: two people can share the same Max HR but have very different threshold HRs due to training. Anchoring zones on LTHR can reduce that mismatch, especially around threshold work.
+
+### Zone definitions
+Uses a more granular **7-zone system**:
+
+| Zone | Code | Name | % LTHR | RPE | Adaptation / training goal |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Zone 1** | **Z1** | **Recovery** | < 81% | < 2 | Active recovery; minimal fatigue. |
+| **Zone 2** | **Z2** | **Aerobic** | 81% - 89% | 2 - 3 | Aerobic base; improve fat oxidation and durability. |
+| **Zone 3** | **Z3** | **Tempo** | 90% - 93% | 3 - 4 | Mixed aerobic/glycolytic; marathon / half-marathon style intensity. |
+| **Zone 4** | **Z4** | **SubThreshold** | 94% - 99% | 4 - 5 | Work near threshold; improve lactate clearance and sustainable pace. |
+| **Zone 5a** | **Z5a** | **SuperThreshold** | 100% - 102% | 5 - 6 | Slightly above threshold; time trial / ~10K intensity. |
+| **Zone 5b** | **Z5b** | **VO2max** | 103% - 106% | 7 - 8 | Raise aerobic ceiling; very hard intervals. |
+| **Zone 5c** | **Z5c** | **Anaerobic** | > 106% | 9 - 10 | Short maximal bursts; phosphagen + anaerobic glycolysis. |
+
+### When to use it
+-   **Serious endurance athletes**: triathlon, cycling, marathon.
+-   **Structured training**: useful when you follow complex plans (e.g., Sweet Spot work near the Z3/Z4 boundary).
+
+### Limitations
+-   **Testing cost**: getting a good LTHR often requires a hard 30-minute time trial, which can be difficult and is not ideal for many beginners.
+-   **Drift/variation**: LTHR can change with fitness and fatigue; re-test every 4–6 weeks if you rely on it.
+
+---
+
+## 3. Max HR model (fallback)
+
+This is the simplest and most traditional model. When you have neither **LTHR** nor **resting HR** configured, Trainingload.ai falls back to Max HR to keep basic calculations available.
+
+### Core idea
+Zones are direct percentages of Max HR, without individual adjustment.
+$$
+TargetHR = HR_{max} \times Intensity\%
+$$
+
+### Zone definitions
+Uses a rough **5-zone system** (note: these percentages differ from Karvonen):
+
+| Zone | Name | Intensity % (MHR) | Potential issue |
+| :--- | :--- | :--- | :--- |
+| **Zone 1** | **Very Light** | 50% - 60% | For very fit athletes, this can even be near resting HR. |
+| **Zone 2** | **Light** | 60% - 70% | Often below a true aerobic zone; may underload training. |
+| **Zone 3** | **Moderate** | 70% - 80% | Broad “aerobic zone” that can mix multiple intensity domains. |
+| **Zone 4** | **Hard** | 80% - 90% | Doesn’t isolate threshold well; can make intensity distribution harder to control. |
+| **Zone 5** | **Maximum** | 90% - 100% | Only indicates near-max effort. |
+
+### When to use it
+-   **Beginners**: very little data or structure.
+-   **Fallback**: prevents missing-data failures.
+
+### Limitations
+-   **Huge individual variance**: effectively ignores resting HR differences.
+-   **Max HR estimation error**: “220 - age” has large error (often ±10–12 bpm or more).
+-   **Recommendation**: add resting HR (and/or LTHR) and use Karvonen or Joe Friel as soon as practical.
+
+---
+
+## Summary recommendation
+
+| If you are… | Recommended model | Why |
+| :--- | :--- | :--- |
+| **General fitness / advancing runner** | **Karvonen** | Practical default; balances usability and personalization; adapts with resting HR changes. |
+| **Serious runner / triathlete** | **Joe Friel** | Useful when you need tighter control around threshold and above. |
+| **Complete beginner** | **Max HR** | Fallback; start moving first, then collect better data for upgrades. |
+
+## How Trainingload.ai uses heart-rate zones
+
+Trainingload.ai uses heart-rate zones as one layer of the training picture:
+
+- **Internal load context**: compare planned intensity with the body’s actual response.
+- **Session review**: flag easy runs or rides that drifted into higher zones because of heat, fatigue, terrain, or pacing.
+- **Zone distribution**: check whether a week is mostly easy, threshold-heavy, or skewed toward high intensity.
+- **Model selection**: use Karvonen when resting HR is available, LTHR zones when a threshold estimate is reliable, and Max HR as a fallback.
+
+## Related tools and docs
+
+- [Calculate heart-rate training load zones](/de/heart-rate-zones-calculator)
+- [Kostenloser Maximalpuls-Rechner — HRmax-Formeln vergleichen](/de/max-heart-rate-calculator)
+- [Lactate Threshold](/de/docs/metrics/physiology/lactate-threshold)
+- [Training Impulse (TRIMP)](/de/docs/metrics/training-load/training-impulse)

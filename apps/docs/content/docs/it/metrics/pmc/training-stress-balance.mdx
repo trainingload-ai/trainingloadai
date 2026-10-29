@@ -1,0 +1,37 @@
+---
+title: Forma (TSB)
+description: Scopri come Trainingload.ai calcola la Forma (TSB) da Forma fisica e Fatica dello stesso giorno, senza confonderla con la prontezza.
+keywords: ["forma", "Training Stress Balance", "TSB", "formula TSB", "equilibrio del carico"]
+---
+
+# Che cos’è la Forma (TSB)?
+
+La **Forma (TSB)** è la differenza tra Forma fisica (CTL) e Fatica (ATL). Mostra dove si trova il carico recente, più reattivo, rispetto al modello di carico a lungo termine.
+
+TSB deriva da due curve di carico: non misura direttamente prontezza, recupero, salute o prestazione.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <TsbStatPreviewCard value="-12" metricLabel="TSB"
+    valuePopoverTitle="Valore TSB"
+    valuePopoverBody="Trainingload.ai sottrae la Fatica (ATL) di oggi dalla Forma fisica (CTL) di oggi."
+    rangePopoverTitle="Contesto TSB"
+    rangePopoverBody="Segno e valore descrivono una relazione di carico, non zone universali di prontezza."
+    helpTitle="Equilibrio del carico"
+    details="Confronta le curve, poi verifica attività, prestazioni e sensazioni." />
+</div>
+
+```text
+TSB_today = CTL_today − ATL_today
+```
+
+Con CTL 50 e ATL 65, TSB è `−15`. Trainingload.ai segue la convenzione dello stesso giorno di Intervals.icu. TrainingPeaks descrive invece pubblicamente la Forma di oggi usando Fitness e Fatigue di ieri: prima di confrontare piattaforme verifica data, costanti e fonte del carico.
+
+Negativa significa ATL sopra CTL; vicina a zero indica curve simili, non equilibrio fisiologico; positiva significa ATL sotto CTL. TSB spesso scende durante il carico e sale con riposo o tapering, ma il segno non impone come debba sentirsi l’atleta.
+
+Evita fasce universali di “picco”, “ottimale” o “rischio”. Usa TSB con [Forma fisica (CTL)](/it/docs/metrics/pmc/chronic-training-load), [Fatica (ATL)](/it/docs/metrics/pmc/acute-training-load), attività, prestazioni e stato soggettivo.
+
+## Riferimenti
+
+- [Intervals.icu: convenzione Form dello stesso giorno](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE: Training Stress Balance](https://runalyze.com/glossary/tsb)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)

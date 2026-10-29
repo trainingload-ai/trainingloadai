@@ -1,0 +1,73 @@
+---
+title: 自托管
+description: 在自己控制的基础设施上运行 Trainingload.ai，使用本地文件存储、Owner 管理的 AI、可验证备份和明确的运维边界。
+seoTitle: "Trainingload.ai 自托管文档：本地安装、配置与运维"
+seoDescription: 使用签名发行包安装 Trainingload.ai，自主管理本地训练文件、BYOK AI、备份、恢复和升级，并了解正式支持边界。
+keywords:
+  [
+    "Trainingload.ai 自托管",
+    "训练软件本地部署",
+    "训练数据本地存储",
+    "Docker Compose 部署",
+  ]
+---
+
+# 自托管
+
+自托管是在你控制的机器上运行 Trainingload.ai。产品请求链由 `client` 网页端和 `server` API 组成；PostgreSQL 保存结构化数据，本地存储保存上传文件，Client 直接发布浏览器访问端口。
+
+v1 正式支持精确版本、带签名的发行包，并通过 Docker Compose 管理。你不需要编译源码，也不需要手工组合容器。
+
+## 从哪里开始
+
+<Cards>
+  <Card
+    title="自托管还是云服务"
+    href="/zh/docs/self-host/self-host-vs-cloud"
+    description="部署前比较运维责任、数据位置、AI、备份和功能边界。"
+  />
+  <Card
+    title="快速安装"
+    href="/zh/docs/self-host/installation"
+    description="验证签名发行包，安装实例，认领 Owner，并创建第一份备份。"
+  />
+  <Card
+    title="配置"
+    href="/zh/docs/self-host/configuration"
+    description="选择本地数据路径，并配置 OpenAI、DeepSeek 或其他兼容 AI 服务。"
+  />
+  <Card
+    title="管理实例"
+    href="/zh/docs/self-host/operations"
+    description="安全地检查健康状态、查看日志、备份、恢复、升级和停止实例。"
+  />
+  <Card
+    title="故障排查"
+    href="/zh/docs/self-host/troubleshooting"
+    description="从稳定诊断信息开始恢复，不绕过数据安全保护。"
+  />
+</Cards>
+
+## 本地运行哪些组件
+
+| 层级       | 作用                                 |
+| ---------- | ------------------------------------ |
+| `client`   | 本地浏览器界面和所有 Web 请求的 BFF  |
+| `server`   | 登录、产品 API、AI 编排和后台任务    |
+| PostgreSQL | 账号、活动、计划、设置等结构化记录   |
+| 本地存储   | 上传的活动文件和应用持久文件         |
+| 一次性任务 | 生命周期操作中的目录权限和数据库迁移 |
+
+Docs 独立部署，不包含在应用 Compose 或镜像中。AI 默认关闭，只有 Owner 主动配置供应商后，才会成为需要访问外部网络的依赖。
+
+浏览器不直接访问 `server`。产品、登录和 AI 请求先到达同源 `client` BFF，再通过容器私有网络转发到 `server`。Client 是唯一浏览器入口，PostgreSQL 和 `server` 端口不对宿主公开。
+
+## 支持边界
+
+Docker Compose 是 v1 唯一正式支持的自托管部署方式，因为安装、迁移、就绪检查、备份、恢复、升级、回滚和诊断共同组成一套经过验证的生命周期。
+
+直接使用 Node.js、PostgreSQL 和反向代理在技术上可行，但目前没有签名的原生发行包，也没有等价的生命周期契约。Podman、Kubernetes 和 Helm 同样不是受支持的发行目标。从源码直接运行只用于开发和验证，不是生产安装方式。
+
+## 下一步
+
+先阅读[自托管还是云服务](/zh/docs/self-host/self-host-vs-cloud)；确认运维责任适合你之后，再继续[快速安装](/zh/docs/self-host/installation)。

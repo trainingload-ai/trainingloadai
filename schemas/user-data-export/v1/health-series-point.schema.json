@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/health-series-point.schema.json",
+  "title": "Health series point",
+  "description": "A timestamped or interval health observation converted to an interoperable row.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metricType": {
+      "type": "string",
+      "description": "The stable health metric identifier."
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "The observation time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "endTime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The interval end time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The normalized observation value."
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The canonical unit symbol."
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The source provider."
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The observation availability or validity status."
+    },
+    "quality": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The source-provided confidence or quality score."
+    },
+    "sourceMessage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The source message or sample category."
+    },
+    "sourceIndex": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The zero-based position within the source message stream."
+    },
+    "metadata": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Additional structured context for the observation.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "metricType",
+    "timestamp"
+  ]
+}

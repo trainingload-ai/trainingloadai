@@ -1,0 +1,12 @@
+{
+  "title": "Trainingload.ai Documentation",
+  "pages": [
+    "index",
+    "workflow",
+    "guide",
+    "planning",
+    "metrics",
+    "self-host",
+    "mcp"
+  ]
+}

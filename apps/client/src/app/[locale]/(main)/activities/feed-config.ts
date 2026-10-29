@@ -1,0 +1,2 @@
+export const V2_ACTIVITIES_FEED_PAGE_SIZE = 10;
+export const V2_ACTIVITIES_FEED_MAX_ITEMS = 240;

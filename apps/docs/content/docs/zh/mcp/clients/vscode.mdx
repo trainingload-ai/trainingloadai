@@ -1,0 +1,32 @@
+---
+title: 连接 VS Code
+description: "使用 VS Code MCP: Add Server 或可移植 .mcp.json 连接 TrainingLoad。"
+---
+
+# 连接 VS Code
+
+推荐使用命令面板执行 **MCP: Add Server**：
+
+1. 选择 **HTTP**。
+2. 输入 `https://api.trainingload.ai/mcp`。
+3. 服务 ID 填写 `trainingload`。
+4. 选择用户级或工作区级配置。
+
+也可以在项目根目录创建可移植的 `.mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "trainingload": {
+      "type": "http",
+      "url": "https://api.trainingload.ai/mcp"
+    }
+  }
+}
+```
+
+打开 Chat 的 Agent mode，从工具选择器启用 TrainingLoad，并完成浏览器 OAuth。验证问题：“总结过去 8 周计划完成情况，并列出下一周课程。”
+
+如有错误，运行 **MCP: List Servers** 查看日志、重启服务或重置信任。不要在共享的 `.mcp.json` 中保存凭证。
+
+[VS Code MCP 官方说明](https://code.visualstudio.com/docs/agent-customization/mcp-servers)

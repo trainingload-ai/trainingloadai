@@ -1,0 +1,80 @@
+---
+title: 有氧解耦（Aerobic Decoupling）
+description: Joe Friel 推廣嘅核心指標，用嚟評估有氧耐力同抗疲勞能力。
+keywords: ["Aerobic Decoupling", "Cardiac Drift", "Pw:Hr", "Pa:Hr", "EF", "Efficiency Factor", "Aerobic Endurance"]
+---
+
+# 有氧解耦（Aerobic Decoupling）
+
+**有氧解耦**（亦叫 **cardiac decoupling / cardiac drift**）用嚟量度喺一段穩定努力入面，你嘅心率同功率/配速之間嘅關係有冇「走樣」。
+
+> 「夏天嘅比賽，冬天就贏。」——base 期其中一個核心目標，就係降低解耦率。
+
+## 核心概念：耦合 vs 解耦
+
+理想有氧狀態下，你嘅 **輸入**（心率）同 **輸出**（功率或配速）應該保持 **耦合**，好似兩條平行鐵軌。
+
+喺長時間穩定努力中，如果出現以下其中一種情況，就叫 **解耦**：
+
+1. **心率漂移**：功率大致相同，但心率慢慢上升
+2. **功率/配速衰退**：心率大致相同，但功率/配速慢慢下跌
+
+呢個通常反映 **疲勞**：慢肌纖維逐步用盡、轉用效率較差嘅快肌纖維；核心體溫上升亦會令 cardiac drift 增加。
+
+常見解讀：
+
+- **正數**：有氧效率隨時間下降（常見原因：疲勞、熱/脫水、補給不足、強度太高）
+- **常見範圍**：多數平台見到 **0% - 10%**（實作、環境同數據質素會影響）
+- **最佳用途**：長、**穩定** 嘅努力（耐力/穩態段）。太短或變化太大嘅努力意義較低。
+
+## 計算方法
+
+做法係拎一段穩態訓練（排除熱身），然後 **對半分**：
+
+1. 計第一半嘅效率因子 $EF_1$
+2. 計第二半嘅效率因子 $EF_2$
+
+呢度 **EF / AE（Aerobic Efficiency）**基本上就係「輸出 / 心率」：
+
+- **Pw:Hr**：以功率做輸出，$EF = \frac{Power}{HR}$
+- **Pa:Hr**：以速度做輸出，$EF = \frac{Speed}{HR}$
+
+$$
+Pw:Hr[\%] / Pa:Hr[\%] = \frac{AE_1 - AE_2}{AE_1} \times 100\%
+$$
+
+一般會以 **Pw:Hr** 或 **Pa:Hr** 嘅百分比變化表示。
+
+## 黃金標準：5% 規則
+
+按 **Joe Friel** 嘅常用實務標準，**5%** 係一個好實用分界：
+
+| 解耦 | 水平 | 意思 & 建議 |
+| :--- | :--- | :--- |
+| **< 5%** | **Excellent** | **有氧底好扎實**；長時間效率保持穩。**建議**：可以轉入 build，加返更高強度訓練。 |
+| **5% - 10%** | **OK** | base 唔錯，但長課或後半段開始見疲勞。**建議**：繼續砌有氧耐力，逐步拉長 LSD。 |
+| **> 10%** | **Needs Work** | 以呢個強度/時長嚟講 base 偏弱。**建議**：暫避高強度，多累積低強度（Z2）量。 |
+
+## 實用指南：點樣測？
+
+唔好靠隨機課表判斷。建議用結構化嘅 **有氧閾值測試**：
+
+1. **強度**：嚴格留喺 **Zone 2**
+   - 功率/配速：65–75% FTP / FTPa
+   - 心率：低過 AeT（有氧閾值），常見係 LTHR 減 20–30 bpm
+2. **時長**：
+   - 奧運距離 / 半馬目標：1–1.5 小時
+   - Ironman / 超馬目標：2–4 小時
+3. **環境**：平路或者訓練台；保持補水，避免因脫水造成「假解耦」
+
+## Trainingload.ai 建議
+
+- **唔好忽略 3%**：長距離比賽（例如三鐵或馬拉松），最後 10km 差 3–4% 足以決定你係 negative split 定係爆缸。
+- **當作長課 check-in**：每次 LSD 完結後睇解耦；如果 > 5%，多數係你踩/跑得太快，或者耐力未夠頂得住呢個時長。下一次 **放慢** 或者 **縮短**。
+
+## 參考
+
+- [Joe Friel: Are You Fit? All About Aerobic Endurance and Decoupling](https://www.trainingpeaks.com/blog/aerobic-endurance-and-decoupling/)
+- [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
+- [TrainingPeaks Help: Aerobic Decoupling (Pw:Hr and Pa:HR) and Efficiency Factor (EF)](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF)
+
