@@ -1,0 +1,96 @@
+---
+title: Manage a self-host instance
+description: Use the supported management entry point for health checks, logs, backup, restore, upgrade, rollback, and shutdown.
+---
+
+# Manage a self-host instance
+
+Operate the instance through `./self-host <command> --json` on Linux, macOS, and WSL2, or `.\self-host.ps1 <command> --json` in Windows PowerShell. The management entry point preserves the release's validation, locking, audit, and data-safety rules.
+
+## Before you begin
+
+- Keep the installed release directory and its `.env.selfhost` private.
+- Judge automation by JSON `ok`, `exitCode`, `error.code`, and `details`, not human-readable messages.
+- Run the same command with `--dry-run` before every operation that changes state.
+- Never use `docker compose down -v`, delete lifecycle markers, or manually downgrade the database.
+
+## Check status, health, and logs
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` gives a bounded runtime snapshot. `doctor` checks trusted configuration, host resources, data paths, database state, readiness, and enabled providers. Logs are redacted and bounded, but can still contain business data; inspect them before sharing.
+
+## Start and stop
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+Stopping preserves containers, configuration, and persistent data. To remove runtime resources while retaining data, use the documented `uninstall` flow; do not remove volumes manually.
+
+## Create a verified backup
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+A backup contains a PostgreSQL logical dump and authoritative uploads. It excludes caches, diagnostics, bootstrap tokens, TLS private state, local elevation data, and secret values. Keep the completed bundle in encrypted storage outside the host and periodically test it against a clean, isolated target.
+
+## Restore safely
+
+Restore only into a newly initialized, exact-version target whose authoritative database and uploads are empty:
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+Do not overwrite the current instance. A failed restore leaves a blocking marker and report so that an incomplete target cannot be started as if it were healthy.
+
+## Upgrade
+
+An upgrade requires the complete signed target release directory. Keep the current instance, target bundle, and a verified off-host backup. Run both the current and target controllers' compatibility dry runs before the actual target-controlled upgrade:
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+Database migrations are forward-only. An application rollback is available only when the upgrade report explicitly declares it and the old images remain verifiable; it never downgrades the database.
+
+## Suggested routine
+
+- Daily: check `status` and disk capacity.
+- Weekly: run `doctor` and create a verified off-host backup.
+- Before every upgrade: read the target release notes, verify the target bundle, test the backup, and review the rollback declaration.
+- Periodically: restore a backup into an isolated target and verify the Owner, activities, and uploads.
+
+## Verify
+
+- Every mutation was preceded by the same command and parameters with `--dry-run`.
+- `doctor` returns `"ok": true` after a start, restore, or upgrade.
+- At least one current verified backup exists outside the instance host.
+- A restore drill has confirmed that the backup is usable, not merely present.
+
+## Troubleshooting
+
+If an operation fails, preserve its stable error code and run `doctor`. Create diagnostics only when needed, inspect them locally, and never publish the raw `.env.selfhost`, database dump, uploads, passwords, tokens, or provider keys. Do not retry a mutation in parallel while another operation holds the instance lock.
+
+## Next step
+
+Keep [Troubleshooting](/docs/self-host/troubleshooting) available with your operator runbook. Review [Configuration](/docs/self-host/configuration) before changing network or provider settings.

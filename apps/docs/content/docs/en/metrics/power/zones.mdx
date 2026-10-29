@@ -1,0 +1,114 @@
+---
+title: Power Zones
+description: Power zones translate FTP or CP into practical training targets for endurance, threshold, VO2max, and sprint work.
+keywords: ["Power Zones", "power zones calculator", "FTP zones", "CP zones", "Friel", "Vance", "Stryd", "Zone 2", "Sweet Spot", "VO2 Max", "FTP", "CP"]
+---
+
+# Power Zones
+
+Power zones break continuous power output into actionable training “gears”. They let you describe intensity with a consistent language (Z1–Z7 / Z1–Z5) and align training goals to energy systems and pacing scenarios.
+
+## Reference power: FTP
+
+Zone percentages require a reference:
+
+- **FTP**: see [Functional Threshold Power (FTP)](./functional-threshold-power)
+- **CP**: see [Critical Power (CP)](./critical-power), especially for running-power models such as Stryd.
+
+If you already know your FTP or CP, use the [calculate power training load zones from FTP or CP](/power-zones-calculator) to compute the boundaries.
+
+## How to interpret zone boundaries
+
+All “% FTP” ranges below are written as **non-overlapping** intervals. For example:
+
+- Z1: ≤ 55%
+- Z2: 56%–75%
+
+When a percentage is exactly a boundary (e.g. 128%), assign it consistently. Trainingload.ai usually assigns the boundary to the **higher** zone (e.g. 128% → Z7) to avoid ambiguity.
+
+---
+
+## 1. Joe Friel: 7-zone cycling model
+
+Joe Friel’s model uses 7 zones spanning recovery through neuromuscular sprinting. It is commonly used for cycling and can be used for running if your threshold reference is appropriate.
+
+| Zone | Name | English | % FTP | Typical use |
+| :--- | :--- | :--- | :--- | :--- |
+| **Z1** | Active recovery | Active Recovery | ≤ 55% | Easy spin / recovery run; supports recovery. |
+| **Z2** | Endurance | Endurance | 56%–75% | LSD / aerobic base; improves aerobic capacity and fat oxidation. |
+| **Z3** | Tempo | Tempo | 76%–90% | Steady work; improves durability and glycogen economy. |
+| **Z4** | Threshold | Threshold | 91%–105% | Threshold work; improves sustainable power and threshold ability. |
+| **Z5** | VO2max | VO2 Max | 106%–120% | VO2 intervals; raises high-intensity aerobic ceiling. |
+| **Z6** | Anaerobic | Anaerobic | 121%–150% | Anaerobic intervals; improves lactate tolerance and repeatability. |
+| **Z7** | Neuromuscular | Neuromuscular | ≥ 151% | Short sprints / accelerations; neuromuscular recruitment. |
+
+> Source: [Joe Friel](https://joefrieltraining.com/a-quick-guide-to-setting-zones/)
+---
+
+
+## 2. Jim Vance: 7-zone running model
+
+Jim Vance’s model also uses 7 zones, but splits low intensity more finely. Z1–Z3 align well with everyday “walk / easy / steady” layering and can help fine-tune endurance and tempo control.
+
+| Zone | Name | English | % FTP | Typical use |
+| :--- | :--- | :--- | :--- | :--- |
+| **Z1** | Recovery / walking | Recovery/Walking | ≤ 80% | Recovery, warm-up, very easy. |
+| **Z2** | Endurance | Endurance | 81%–88% | Main aerobic endurance range; sustainable. |
+| **Z3** | Tempo | Tempo | 89%–95% | Higher steady intensity, approaching threshold. |
+| **Z4** | Threshold | Threshold | 96%–105% | Threshold work and durability. |
+| **Z5** | High intensity | High Intensity | 106%–115% | High-intensity intervals (upper aerobic). |
+| **Z6** | VO2 | VO2 | 116%–128% | VO2 intervals (boundary 128% is often assigned to Z7). |
+| **Z7** | Anaerobic capacity | Anaerobic Capacity | ≥ 128% | Short reps focusing on anaerobic capacity and explosiveness. |
+
+> Source: [Jim Vance, *Run with Power*](https://www.velopress.com/books/run-with-power/)
+---
+
+## 3. Stryd: 5-zone running model
+
+The Stryd model merges the high-intensity end into a simpler 5-zone structure for running. It typically uses **CP** as the reference, but the percentage mapping is the same if you use FTP.
+
+| Zone | Name | English | % FTP | Typical use |
+| :--- | :--- | :--- | :--- | :--- |
+| **Z1** | Easy | Easy | ≤ 80% | Recovery runs and easy running. |
+| **Z2** | Moderate | Moderate | 81%–90% | Steady endurance runs; long-run main intensity. |
+| **Z3** | Threshold | Threshold | 91%–100% | Core range for threshold and tempo work. |
+| **Z4** | Interval | Interval | 101%–115% | VO2 / high-intensity intervals. |
+| **Z5** | Repetition | Repetition | ≥ 116% | Short reps, sprints, anaerobic bursts. |
+
+> 
+> Source: [Stryd](https://blog.stryd.com/2018/02/21/nicks-training-manual-lesson-3-if-you-dont-follow-a-plan-you-can-easily-trash-your-legs-for-weeks/)
+---
+
+## How to calculate your zone boundaries
+
+Let your reference power be $B$ (either FTP or CP). To compute a boundary, multiply the percentage by $B$:
+
+```text
+W = B * (pct / 100)
+```
+
+### Example: FRIEL Z2 (56%–75%)
+
+Assume $B = 250 W$:
+
+```text
+Z2_min = 250 * 0.56 = 140 W
+Z2_max = 250 * 0.75 = 187.5 W
+```
+
+So your Z2 is roughly **140 W – 188 W** (actual display may be rounded to whole watts).
+
+## Trainingload.ai Advice
+
+Trainingload.ai uses power zones to compare planned intensity with completed intensity:
+
+1. **Set thresholds per sport**: running and cycling power differ. Maintain CP/FTP separately and pick the appropriate model.
+2. **Update regularly**: FTP and CP change with training; re-test periodically or use auto-estimation so zones stay relevant.
+3. **Treat zones as target bands**: boundaries are not walls. The goal is to keep most work aligned with the intended training stimulus.
+4. **Review completed workouts**: after a session, zone distribution can show whether an easy day drifted too hard or a key interval session missed the intended range.
+
+## Related
+
+- [Functional Threshold Power (FTP)](./functional-threshold-power)
+- [Critical Power (CP)](./critical-power)
+- [Calculate power training load zones from FTP or CP](/power-zones-calculator)

@@ -1,0 +1,148 @@
+---
+title: MCP resources and prompts
+description: Native TrainingLoad MCP reference resources and reusable training-analysis prompts.
+---
+
+# MCP resources and prompts
+
+This page is generated from the server MCP content catalog. Do not edit it directly; run `pnpm --dir apps/server mcp:reference`.
+
+Resources give clients stable metric, safety, and authorized-capability guidance without reading additional athlete data. Prompts produce structured question templates; actual data still comes from OAuth-scoped tools.
+
+## Resources
+
+| URI | Name | Purpose |
+| --- | --- | --- |
+| `trainingload://guide/training-metrics` | TrainingLoad metric interpretation guide | Definitions and interpretation boundaries for load, ATL, CTL, TSB, readiness bands, coverage, and missing data. |
+| `trainingload://guide/privacy-and-safety` | TrainingLoad privacy and safety guide | Read-only boundaries, untrusted-text handling, health limits, and excluded data classes. |
+| `trainingload://catalog/capabilities` | Authorized TrainingLoad capability catalog | The currently authorized read-only tool names, descriptions, and OAuth scopes. |
+
+## Prompts
+
+## `weekly-training-review`
+
+Build an evidence-based review of recent load, consistency, activities, and upcoming workouts.
+
+<details>
+<summary>Argument JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": "7",
+      "type": "string",
+      "enum": [
+        "7",
+        "14",
+        "28"
+      ]
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `compare-training-blocks`
+
+Compare two bounded periods using load, sport mix, activity totals, and consistency.
+
+<details>
+<summary>Argument JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "periodAFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodATo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBTo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "periodAFrom",
+    "periodATo",
+    "periodBFrom",
+    "periodBTo"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `race-preparation-check`
+
+Review a competition, plan execution, recent load, and upcoming workouts without making a medical claim.
+
+<details>
+<summary>Argument JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "horizonDays": {
+      "default": "28",
+      "type": "string",
+      "enum": [
+        "14",
+        "28",
+        "56"
+      ]
+    }
+  },
+  "required": [
+    "horizonDays"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>

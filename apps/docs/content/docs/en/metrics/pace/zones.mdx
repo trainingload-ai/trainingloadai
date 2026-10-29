@@ -1,0 +1,90 @@
+---
+title: Pace Zones
+description: Running pace zones based on Functional Threshold Pace (FTPa), used to plan and review easy, tempo, threshold, VO2max, and anaerobic running intensity.
+keywords: ["Pace Zones", "FTPa", "Threshold Pace", "Running Zones", "running pace zones", "VDOT calculator"]
+---
+
+# Pace Zones
+
+**Pace zones** are a direct way to plan and review running intensity. Compared with heart rate, pace responds immediately to speed changes, but it still needs context: terrain, wind, surface, heat, fatigue, and elevation can all change how hard a pace feels.
+
+Trainingload.ai uses a classic zone model based on **Functional Threshold Pace (FTPa / Threshold Pace)** (similar in spirit to common definitions from Joe Friel or Jack Daniels).
+
+## Key concept: FTPa
+
+All pace zones anchor to your **FTPa (Functional Threshold Pace)**: an estimate of the fastest pace you can sustain for roughly an all-out 1-hour effort.
+-   For elite runners, this is often around half-marathon to 15K race pace.
+-   For recreational runners, it’s often slightly slower than 10K pace, or close to 10K pace.
+
+## How Trainingload.ai calculates threshold pace (TP)
+
+When automatic updates are enabled, Trainingload.ai looks for the best valid **5 km** running performance in the most recent **180 days**:
+
+1. Read the best 5 km average speed from distance peak records.
+2. Convert it to seconds per kilometer.
+3. Add **20 seconds per kilometer** to estimate TP.
+4. Store both threshold speed (m/s) and threshold pace (s/km).
+
+For example, a best recent 5 km pace of `4:20/km` produces an automatic TP of `4:40/km`. Without a valid 5 km peak, the platform does not invent a TP. You can also record TP manually in your running profile; which manual or automatic value is active depends on your auto-update setting.
+
+## How TP changes pace zones
+
+Current Status shows the active TP and every resolved absolute pace range. When TP changes, zones that depend on TP are recalculated:
+
+- The **Friel model** uses threshold speed directly as its anchor.
+- With a TP available, the **Daniels model** uses `vVO2max speed ≈ TP speed ÷ 0.90`, then applies the Easy, Marathon, Threshold, Interval, and Repetition speed percentages.
+- If Daniels has no TP yet, it falls back to vVO2max derived from the current VO2 Max.
+- Saved custom zones are resolved against their configured benchmark: TP, VO2 Max, CS, or absolute pace.
+
+When TP gets faster (fewer seconds per kilometer), all TP-dependent absolute boundaries move faster; a slower TP moves them in the opposite direction. This does not alter the raw speed of past activities. It changes future plan targets and how zones are interpreted against the current profile.
+
+## Zone definitions
+
+The table below shows the Trainingload.ai standard pace zones, their FTPa percentages, and training intent.
+
+| Zone | Name | Intensity | % FTPa | Typical feel (RPE) | Training goal |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Z1** | **Recovery** | Very easy | > 129% | < 2 | Promote circulation, speed recovery, build volume. |
+| **Z2** | **Aerobic** | Easy | 114% - 129% | 2 - 3 | Build aerobic base, improve fat oxidation, increase mitochondrial and capillary density. |
+| **Z3** | **Tempo** | Moderate / comfortably hard | 106% - 113% | 3 - 4 | Raise aerobic durability, practice race-like steady pacing (HM / marathon). |
+| **Z4** | **Threshold** | Hard | 100% - 105% | 5 - 7 | Improve lactate clearance and raise FTPa; learn to work near the threshold boundary. |
+| **Z5a** | **VO2max** | Very hard | 90% - 99% | 8 - 9 | Improve VO2 max; typically done as 3–5 minute intervals. |
+| **Z5b** | **Anaerobic** | All-out | < 90% | 10 | Improve anaerobic capacity, sprint speed, and neuromuscular recruitment. |
+
+> **Note**: pace percentages are **time-based** (min/km). A larger number means a **slower** pace.
+> *Example: if FTPa is 5:00 (300 s), the Z2 upper bound 129% is 300 × 1.29 = 387 s (6:27/km).*
+
+## Typical applications
+
+### 1. Base phase
+Focus on mostly easy running. **Z1/Z2** is commonly used to build aerobic volume while keeping fatigue manageable.
+
+### 2. Build / race-specific phase
+Add zones based on your target event:
+-   **Marathon**: lots of **Z3 tempo**.
+-   **5K/10K**: emphasize **Z4 threshold** and **Z5a VO2 max intervals**.
+
+### 3. Recovery
+Use **Z1** for recovery days after hard sessions. If the run drifts into Z2 or Z3, it may no longer serve the recovery purpose and can add fatigue without much targeted benefit.
+
+## How Trainingload.ai uses pace zones
+
+-   **Plan vs. actual**: pace zones show whether a run matched the intended intensity.
+-   **Use with heart rate**: pace is **external load**, heart rate is **internal load**.
+    -   On flat terrain in good conditions, prioritize **pace**.
+    -   In heat/humidity, headwinds, or fatigue, prioritize **heart rate** and adjust pace down to maintain similar physiological intensity.
+-   **Use grade-adjusted metrics when needed**: on hilly routes, Grade Adjusted Pace and Normalized Graded Pace can make zone analysis more realistic.
+-   **Re-test periodically**: FTPa changes with training. Re-test every 4–6 weeks, or after a meaningful fitness change, to keep zones calibrated.
+
+## Related tools and docs
+
+- [Calculate VDOT to set training load pace targets](/vdot-calculator)
+- [Estimate lactate threshold for training load pace zones](/lactate-threshold-calculator)
+- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
+- [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace)
+- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+
+## References
+
+-   [Joe Friel: Setting Zones for Running](https://joefrieltraining.com/setting-zones-for-running/)
+-   [TrainingPeaks: Pace Zones](https://help.trainingpeaks.com/hc/en-us/articles/204071854-Pace-Zones)

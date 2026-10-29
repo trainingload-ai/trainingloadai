@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/fitness-metric.schema.json",
+  "title": "Fitness metric",
+  "description": "A dated physiological or performance benchmark.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The stable record identifier."
+    },
+    "type": {
+      "type": "string",
+      "description": "The metric type, such as FTP, CRITICAL_POWER, VO2_MAX, or MAX_HEART_RATE."
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The primary numeric metric value."
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The canonical unit symbol for the primary value."
+    },
+    "secondaryValue": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The optional paired value, such as W-prime for critical power or D-prime for critical speed."
+    },
+    "secondaryUnit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The canonical unit symbol for the optional secondary value."
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The external provider that supplied the value, when available."
+    },
+    "sportType": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The sport type to which the metric applies."
+    },
+    "effectiveDate": {
+      "type": "string",
+      "description": "The date and time from which this value is effective in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "metricSource": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "How the value was obtained, such as AUTO, ESTIMATED, MANUAL, or SNAPSHOT."
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The system or user action that originally supplied this record."
+    },
+    "sourceExternalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stable record identifier assigned by the source system, when available."
+    },
+    "sourceUpdatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The last modification time reported by the source system in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "effectiveDate"
+  ]
+}

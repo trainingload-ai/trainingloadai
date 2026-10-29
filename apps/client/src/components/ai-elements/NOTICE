@@ -1,0 +1,25 @@
+AI Elements components, Copyright 2023 Vercel, Inc.
+Source: https://github.com/vercel/ai-elements/tree/main/packages/elements/src
+Retrieved 2026-10-08. Licensed under Apache-2.0 (see LICENSE).
+
+Local changes: imports target the existing design system; PromptInput is a
+text-only adaptation of the form and IME-safe textarea (Coach has no attachment
+upload endpoint); motion respects reduced-motion preferences.
+
+Tool, Plan and Confirmation adapted 2026-10-09 from the same source.
+Tool accepts localized domain result headers and deliberately omits raw JSON
+inputs/outputs. Plan reuses the existing workout calendar. Confirmation adapts
+the presentation state only; all approvals still use the existing domain ledger.
+
+Coach visual adaptation: disclosure headers are unframed inline rows with a
+trailing chevron; result surfaces use the product's neutral background tokens,
+not nested borders. Focus indicators and semantic chart strokes are retained.
+
+Context composition adapted 2026-10-09 from the AI Elements Context reference.
+It uses a touch/keyboard-accessible Popover, localized domain input-budget
+estimates and no tokenlens cost estimate. Unavailable usage is not shown as zero.
+
+Reasoning adapted 2026-10-09 from the official Reasoning registry component.
+Only explicitly public, validated analysis summaries are displayed. Content is
+escaped plain text; no code/diagram plugins or local invented timers. Manual
+disclosure choices override automatic transitions and history starts collapsed.

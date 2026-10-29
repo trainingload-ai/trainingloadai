@@ -1,0 +1,55 @@
+---
+title: Normalized Power (NP)
+description: 変動の大きいパワー走の生理的コストを、一定強度に換算して表す指標です。
+keywords:
+  [
+    "Normalized Power",
+    "NP",
+    "TSS",
+    "IF",
+    "Training Stress Score",
+    "Variability Index",
+    "VI",
+  ]
+---
+
+# Normalized Power (NP)
+
+Normalized Power (NP) は、変動するパワーデータを「同じ生理的コストを持つ一定パワー」に換算する指標です。
+
+平均パワーよりも高強度の上げ下げに敏感で、インターバルやレースの負荷を評価しやすくします。
+
+## なぜ NP が必要か
+
+生理的コストは強度に対して直線的ではありません。300 W のストレスは、100 W の楽さで単純に相殺されるわけではありません。
+
+そのため NP は、高いパワー区間を **4 乗重み付け** で強調し、代謝コストに近い値を出します。
+
+## 計算方法
+
+Trainingload.ai は一般的な NP 定義に従います。
+
+```text
+P_smooth(t) = 30 秒移動平均
+NP = 4th_root( average(P_smooth^4) )
+```
+
+## 使いどころ
+
+### レース分析
+
+クリテリウムや集団走のように加減速が多い場合、NP は平均パワーよりも実際のきつさを反映しやすくなります。
+
+### トレーニング負荷
+
+NP は [TSS](/ja/docs/metrics/training-load/training-stress-score) の重要な入力です。
+
+```text
+IF = NP / FTP
+```
+
+## 注意点
+
+- 20 分未満の短い活動では意味が薄くなりやすい。
+- 回復走でスプリントを入れて NP を上げても、目的から外れる。
+- [VI](/ja/docs/metrics/power/variability-index) と一緒に見ると、どれだけ変動した走りかがわかります。

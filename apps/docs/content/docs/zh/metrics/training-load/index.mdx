@@ -1,0 +1,69 @@
+---
+title: 训练负荷是什么？TSS、TRIMP 与强度系数怎么看
+description: 训练负荷用 TSS、TRIMP 和强度系数量化一次课或一周的训练剂量。看这些指标如何比较不同时长与类型的训练，并为计划复盘、恢复安排和后续调整提供证据。
+keywords:
+  ["训练负荷是什么", "训练负荷怎么看", "TSS 和 TRIMP", "训练负荷指标", "训练负荷怎么算"]
+---
+
+# 训练负荷是什么？TSS、TRIMP 与强度系数怎么看
+
+**训练负荷**是一次课、一周或一个周期的模型化剂量。本页说明 TSS、TRIMP 和强度系数如何比较“两小时轻松”和“三十分钟间歇”，并判断计划该继续加量、维持、恢复还是调整。产品决策见[训练负荷管理](/zh/training-load)；下面各页负责定义。
+
+如果缺少负荷量化，你很难把“2 小时轻松骑/跑”和“30 分钟间歇”放到同一把尺子上比较，也更难判断近期负荷是否上升过快、恢复是否跟得上。
+
+## 核心指标
+
+<Cards>
+  <Card
+    title="TSS"
+    href="/zh/docs/metrics/training-load/training-stress-score"
+  />
+  <Card title="IF" href="/zh/docs/metrics/training-load/intensity-factor" />
+  <Card title="TRIMP" href="/zh/docs/metrics/training-load/training-impulse" />
+</Cards>
+
+## 为什么要量化训练负荷？
+
+1.  **客观对比**：把不同时长、不同类型训练放在同一标准下衡量。
+2.  **追踪趋势**：识别模型化周负荷的渐进变化或突然变化。
+3.  **提供恢复上下文**：把负荷历史与课程质量和运动员反馈放在一起，辅助安排训练日与休息日。
+
+## 训练负荷如何支持自适应计划？
+
+训练负荷不是训练计划本身，而是计划调整背后的证据层：
+
+- **完成训练之后**：可以比较实际负荷与计划负荷，而不是只看“是否完成”。
+- **做周期复盘时**：CTL、ATL 与 TSB 用于比较变化较慢和较快的模型化负荷趋势；它们不直接测量体能、疲劳或准备度。
+- **决定是否调整前**：漏训、疲劳异常升高、负荷增长过快，都可能成为调整后续训练的理由。
+
+Trainingload.ai 的核心循环正是：计划 → 完成训练 → 负荷趋势 → 智能教练复盘 → 用户确认调整。
+
+## 常见问题
+
+### 训练负荷是什么？
+
+训练负荷是模型化的训练剂量。TSS 或 TRIMP 估算一次课；CTL 和 ATL 把这些分数汇总成趋势，用来比较周与周，而不只看“有没有完成”。
+
+### TSS 和 TRIMP 哪个衡量训练负荷？
+
+有功率或可靠配速时，TSS 是常用的外部负荷。TRIMP 用心率和时长看内部负荷。Trainingload.ai 会按项目和你设置的负荷来源优先级选择。
+
+### 跑步和骑行怎么测训练负荷？
+
+骑行通常用 NP、IF、FTP 算功率 TSS。跑步常用 NGP 和阈值配速算 rTSS；只有心率可信时用 TRIMP。先在同一项目内比较，再跨项目对照。
+
+### 看完总览下一步去哪？
+
+打开 [TSS](/zh/docs/metrics/training-load/training-stress-score)、[TRIMP](/zh/docs/metrics/training-load/training-impulse) 和[强度系数](/zh/docs/metrics/training-load/intensity-factor)的定义页，然后[在计划里管理 CTL、ATL、TSB 训练负荷](/zh/training-load)。
+
+## 相关概念
+
+- [训练压力分数 (TSS)](/zh/docs/metrics/training-load/training-stress-score)：单次训练压力。
+- [强度系数 (IF)](/zh/docs/metrics/training-load/intensity-factor)：相对阈值的训练强度。
+- [训练冲量 (TRIMP)](/zh/docs/metrics/training-load/training-impulse)：基于心率的内部负荷。
+- [用时长、NP 和 FTP 计算 TSS](/zh/tss-calculator)
+- [用每日 TSS 推演 CTL、ATL、TSB](/zh/training-load-calculator)
+- [慢性训练负荷 (CTL)](/zh/docs/metrics/pmc/chronic-training-load)：长期负荷趋势。
+- [短期训练负荷 (ATL)](/zh/docs/metrics/pmc/acute-training-load)：变化较快的近期负荷趋势。
+- [训练压力平衡 (TSB)](/zh/docs/metrics/pmc/training-stress-balance)：当前 CTL 减去当前 ATL。
+- [用 AI 教练在负荷变化时调整训练计划](/zh/ai-training-plan)

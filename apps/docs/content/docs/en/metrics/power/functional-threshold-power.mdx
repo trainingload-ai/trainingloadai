@@ -1,0 +1,77 @@
+---
+title: Functional Threshold Power (FTP)
+description: Functional Threshold Power (FTP) is a practical threshold benchmark used to set power zones, estimate training load, and guide cycling workouts.
+keywords: ["FTP", "Functional Threshold Power", "FTP test", "FTP calculator", "Lactate Threshold", "20-minute test", "CP60", "Power benchmark"]
+---
+
+# Functional Threshold Power (FTP)
+
+In endurance sports, **functional threshold** is a practical benchmark near the boundary between steady and increasingly fatiguing work. It is widely used to set training zones, estimate training load, and track whether threshold-level performance is improving.
+
+Two common terms are **FTP** for cycling and **rFTP** for running.
+
+## Functional Threshold Power (FTP)
+
+**FTP** usually refers to cycling threshold power. It is commonly described as the **highest average power you can sustain for roughly 60 minutes**, though in practice it is an estimate that depends on testing method, pacing, fatigue, and recent training.
+
+### Why it matters
+-   **Physiological anchor**: FTP roughly aligns with the threshold range around [Lactate Threshold (LT)](/docs/metrics/physiology/lactate-threshold). Below it, many athletes can work for much longer; above it, fatigue accumulates faster.
+-   **Relative-intensity reference**: whether your FTP is 400 W or 150 W, percentages of FTP make workouts more comparable within an athlete’s own fitness context. Most power-based training plans use FTP percentages (for example, Zone 2 ≈ 55–75% FTP).
+
+### How to estimate FTP
+1.  **20-minute test (classic)**: ride all-out for 20 minutes, then take 95% of the average power.
+2.  **Ramp test**: increase load each minute to exhaustion, then use ~75% of the final minute’s power.
+3.  **CP model estimate**: Trainingload.ai can estimate from your Power Duration Curve (PDC), often using `FTP ≈ 0.95 * CP`.
+
+If you want a file-based estimate, use the [estimate FTP training load from an activity file](/ftp-calculator). If you already have maximal efforts across durations, use the [fit Critical Power and W' for training load planning](/critical-power-calculator) to fit CP and W'.
+
+---
+
+## Running Functional Threshold Power (rFTP)
+
+**Running Functional Threshold Power (rFTP)** became popular with the rise of running power meters (Stryd, Garmin, COROS, etc.).
+
+It is commonly defined as the **highest average running power you can sustain for roughly 60 minutes**.
+
+### rFTP vs. FTP
+Even though the definitions are similar, the numbers are usually **not interchangeable**:
+-   **Different magnitude**: many athletes have higher rFTP than cycling FTP. Running includes elastic energy storage/release (spring-like behavior), recruits more muscle groups, and typically yields higher heart rates.
+-   **Test separately**: don’t use cycling FTP to guide running training, and vice versa.
+
+### rFTP vs. threshold pace
+-   **rFTP (power)**: measured in watts. Less affected by hills and wind (depending on the device/model), and often closer to physiological output.
+-   **Threshold pace**: measured in min/km. Strongly affected by terrain (pace slows uphill even when intensity is high).
+    -   *Note: on flat, calm terrain, the pace corresponding to rFTP approximates threshold pace. On rolling trails, rFTP can be more stable.*
+
+### How to estimate rFTP
+Common running power tests (e.g. Stryd protocols):
+-   **3/9 test**: 3 minutes all-out (then 30 minutes recovery) + 9 minutes all-out.
+-   **CP model**: fit Critical Power from maximal efforts of different durations (e.g. 30s, 2min, 10min); CP is often used directly as rFTP.
+
+## How Trainingload.ai uses FTP
+
+Trainingload.ai uses FTP as a threshold reference for power zones, Intensity Factor, and Training Stress Score. If FTP is too low, hard workouts can look more stressful than they really were; if FTP is too high, training load and zone targets can be understated.
+
+For plan review, FTP is most useful when it answers:
+
+-   Did the completed workout match the intended zone?
+-   Are TSS and IF being calculated from a current threshold?
+-   Has threshold fitness changed enough to update future workouts?
+
+## Summary
+
+| Metric | Full Name | Sport | Unit | Meaning |
+| :--- | :--- | :--- | :--- | :--- |
+| **FTP** | Functional Threshold Power | Cycling | Watts | Highest ~1-hour cycling power |
+| **rFTP** | Running Functional Threshold Power | Running | Watts | Highest ~1-hour running power |
+{/* | **FTPa** | Functional Threshold Pace | Running | min/km | Highest ~1-hour running pace (typically flat) | */}
+
+> **Trainingload.ai advice**:
+> Update your threshold settings regularly (every 4–8 weeks) so TSS calculations and training zones stay useful.
+
+## Related tools and docs
+
+-   [Estimate FTP training load from an activity file](/ftp-calculator)
+-   [Calculate Critical Power and W' for training load planning](/critical-power-calculator)
+-   [Power Zones](/docs/metrics/power/zones)
+-   [Critical Power (CP)](/docs/metrics/power/critical-power)

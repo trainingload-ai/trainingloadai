@@ -1,0 +1,126 @@
+---
+title: Critical Power (CP)
+description: Critical Power (CP) is a model-based threshold used with W' to describe power-duration performance and high-intensity fatigue.
+keywords: ["Critical Power", "CP", "critical power calculator", "W'", "W Prime", "Anaerobic Work Capacity", "MMP", "Monod-Scherrer", "FTP vs CP"]
+---
+
+# Critical Power (CP)
+
+**Critical Power (CP)** is a model-based threshold used in endurance physiology to describe the boundary between heavy and severe intensity domains.
+
+In simple terms, CP estimates the highest power at which a physiological steady state may still be possible. Above CP, fatigue develops quickly and the finite work capacity above CP, called W', begins to matter.
+
+In 1965, Monod and Scherrer proposed the Critical Power model. They described CP as the maximal rate of work that can be sustained without progressive fatigue, and introduced a finite “energy reserve” available above CP (later referred to as W').
+
+## Core Model: The Two-Parameter Model
+
+The theoretical foundation of CP is often called the **two-parameter model**, describing your performance as the combination of two components:
+
+1.  **Critical Power (CP)**:
+    *   **Nature**: a model threshold for high sustainable power.
+    *   **Interpretation**: staying below CP usually allows much longer work than staying above CP, though duration is still limited by glycogen, heat, motivation, fueling, and other factors.
+    *   **Unit**: Watts (W).
+
+2.  **[W' (W Prime)](/docs/metrics/power/anaerobic-work-capacity)**：
+    *   **Nature**: Anaerobic Work Capacity.
+    *   **Interpretation**: a finite amount of work available above CP. Once your power exceeds CP, this reserve is depleted.
+    *   **Unit**: Joules (J) or kilojoules (kJ).
+
+### Power–Duration relationship
+
+These two parameters form the well-known hyperbolic relationship:
+
+```text
+P = CP + W' / t
+```
+
+Or, rearranged to predict time to exhaustion:
+
+```text
+t = W' / (P - CP)
+```
+
+This means:
+*   **When P > CP**: the time you can hold it depends on how large your W' is and how far above CP you are. The higher above CP, the faster W' is depleted.
+*   **When P ≤ CP**: the simple model no longer predicts a finite exhaustion time, but real performance is still limited by other fatigue mechanisms.
+
+## Physiological Meaning: A Boundary Between Intensity Domains
+
+In exercise physiology, CP is often treated as the boundary between the **Heavy** and **Severe** intensity domains:
+
+*   **Below CP**:
+    *   You can reach a physiological steady state.
+    *   Blood lactate may rise but can stabilize.
+    *   VO2 can stabilize at a submaximal level.
+
+*   **Above CP**:
+    *   **No steady state**.
+    *   Blood lactate keeps rising until you stop.
+    *   VO2 often shows a slow component and rises toward VO2max.
+    *   Once W' is depleted, you generally need to reduce power toward CP or below.
+
+## CP vs. FTP
+
+Although CP and [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power) are often used interchangeably, they differ slightly in definition and typical value:
+
+1.  **Different definitions**:
+    *   **FTP**: commonly defined as the maximum average power you can sustain for about 60 minutes; a performance-based, practical concept.
+    *   **CP**: a model parameter representing the fatigue threshold in the CP model.
+
+2.  **Typical values**:
+    *   CP is often **slightly higher** than FTP.
+    *   In many athletes, riding at CP lasts less than an hour, often closer to ~30–40 minutes, but this varies with model fit and testing data.
+    *   In Trainingload.ai, we often treat `FTP ≈ 95%–96% of CP`.
+
+3.  **Use cases**:
+    *   **FTP** is commonly used as the basis for training zones (Zone 1–Zone 7).
+    *   The **CP + W'** model is useful for predicting time-to-exhaustion for short, high-intensity efforts (intervals, attacks, sprints).
+
+## W' Depletion and Recovery
+
+W' is often modeled as a finite reserve that depletes above CP and recovers below CP:
+
+*   **Depletion**: when P > CP, W' depletes at a rate proportional to (P - CP).
+*   **Recovery**: when P < CP, W' begins to recover. The recovery rate depends on how far below CP you are.
+    *   Full rest (0 W) recovers fastest.
+    *   Riding just below CP (e.g., 90% CP) recovers very slowly.
+
+This is why recovery intensity matters so much in interval workouts.
+
+## How Trainingload.ai estimates CP
+
+Trainingload.ai can estimate CP from historical **MMP (Max Mean Power)** data rather than requiring one fixed protocol.
+
+1.  **Data selection**: best average power for key durations over the last ~90 days (e.g., 1 min, 3 min, 5 min, 10 min, 20 min…).
+2.  **Model fitting**: fit CP and W' from these time–power points.
+3.  **FTP estimate**: derive FTP from CP (default 0.95 × CP).
+
+If you have a test file, you can also upload it for a one-off estimate: see [estimate FTP and CP training load from an activity file](/ftp-calculator).
+
+For manual model fitting, use the [fit Critical Power for training load planning](/critical-power-calculator).
+
+### Tips to improve estimate quality
+
+To make the estimated **CP** more useful, ensure your power–duration curve contains enough hard, representative efforts:
+
+*   **Short durations**: include 3–5 minute maximal efforts (important for W').
+*   **Medium/long durations**: include 10–20 minute or longer maximal efforts (important for CP).
+
+If you only do low-intensity riding for a long time, the system may underestimate your CP and W'.
+
+## How Trainingload.ai uses CP
+
+Trainingload.ai uses CP to understand the power-duration profile behind threshold and above-threshold work. CP helps estimate FTP, but it is also useful for reviewing whether intervals, climbs, or race-like surges are targeting the intended intensity.
+
+CP is most useful when paired with W':
+
+-   CP describes the sustainable side of the model.
+-   W' describes the finite work available above CP.
+-   The power-duration curve shows whether your data has enough maximal efforts to support the estimate.
+
+## Related tools and docs
+
+-   [Fit Critical Power for training load planning](/critical-power-calculator)
+-   [Estimate FTP training load from an activity file](/ftp-calculator)
+-   [W' (Anaerobic Work Capacity)](/docs/metrics/power/anaerobic-work-capacity)
+-   [Power Duration Curve](/docs/metrics/power/power-duration-curve)

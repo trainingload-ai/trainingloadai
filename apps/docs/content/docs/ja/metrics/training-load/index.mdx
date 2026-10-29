@@ -1,0 +1,60 @@
+---
+title: トレーニング負荷とは？TSS・TRIMP・IFの違いを解説
+description: トレーニング負荷はTSS、TRIMP、インテンシティファクターでセッションや週の用量を定量化します。種類の違う練習を比べ、計画の見直しに使う流れを整理します。
+keywords:
+  ["トレーニング負荷とは", "トレーニング負荷 解説", "TSS と TRIMP", "トレーニング負荷指標"]
+---
+
+# トレーニング負荷とは？TSS・TRIMP・IFの違いを解説
+
+**トレーニング負荷** は、1 回、1 週間、またはブロックに割り当てるモデル化された用量です。このハブでは TSS、TRIMP、インテンシティファクターを説明し、長いイージーと短いインターバルを比べ、計画を積む・維持・回復・調整のどれにするか見直します。製品側の判断は [トレーニング負荷管理](/ja/training-load) です。定義はこの下の各ページが持ちます。
+
+負荷指標がないと、「2 時間のイージーライド」と「30 分の高強度インターバル」を比較しにくく、回復が追いつく範囲で増やせているかも判断しにくくなります。
+
+## 主な指標
+
+<Cards>
+  <Card
+    title="TSS（Training Stress Score）"
+    href="/ja/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF（Intensity Factor）"
+    href="/ja/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP（Training Impulse）"
+    href="/ja/docs/metrics/training-load/training-impulse"
+  />
+</Cards>
+
+## なぜ定量化するのか
+
+1. **客観比較**: 長さや種類が違うセッションをひとつの物差しで比べられます。
+2. **進捗管理**: 週ごとの負荷増加が急すぎないか確認できます。
+3. **回復管理**: 高い負荷にはより多くの回復が必要です。
+
+## よくある質問
+
+### トレーニング負荷とは？
+
+モデル化されたトレーニング用量です。TSS や TRIMP が 1 回を推定し、CTL と ATL がその推移をまとめます。「終わったかどうか」だけでなく、週同士を比べられます。
+
+### TSSとTRIMPの違いは？
+
+パワーや信頼できるペースがあるときの外部負荷は TSS。心拍と時間の内部負荷は TRIMP。Trainingload.ai は種目と負荷ソースの優先順位で選びます。
+
+### ランとバイクでどう測りますか？
+
+バイクは NP・IF・FTP のパワーTSS。ランは NGP と閾値ペースの rTSS、心拍しか信頼できないときは TRIMP。種目内で比べてから、種目をまたいで見てください。
+
+## 関連
+
+- [トレーニングストレススコア](/ja/docs/metrics/training-load/training-stress-score)
+- [インテンシティファクター](/ja/docs/metrics/training-load/intensity-factor)
+- [TRIMP](/ja/docs/metrics/training-load/training-impulse)
+- [時間・NP・FTP から TSS を計算する](/ja/tss-calculator)
+- [日次 TSS から CTL、ATL、TSB を投影する](/ja/training-load-calculator)
+- [慢性トレーニング負荷（CTL）](/ja/docs/metrics/pmc/chronic-training-load)
+- [計画内でトレーニング負荷を管理する](/ja/training-load)
+- [AIコーチで負荷調整案を作る](/ja/ai-training-plan)

@@ -1,0 +1,1504 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "generated-from-current-worktree",
+  "entries": [
+    {
+      "file": "apps/server/Dockerfile",
+      "line": 63,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "RUNTIME_DATA_DIRS=/data/uploads:/data/cache/storage:/data/elevation:/data/operations \\"
+    },
+    {
+      "file": "apps/server/src/api/ai/audit/export-coach-conversations.command.ts",
+      "line": 94,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "await file.writeFile(markdown, 'utf8');"
+    },
+    {
+      "file": "apps/server/src/api/plan-template/generate-official-5k-candidate.command.ts",
+      "line": 464,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "await writeFile("
+    },
+    {
+      "file": "apps/server/src/api/plan-template/generate-official-5k-candidate.command.ts",
+      "line": 530,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "await writeFile("
+    },
+    {
+      "file": "apps/server/src/api/plan-template/generate-official-5k-candidate.command.ts",
+      "line": 555,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "await writeFile("
+    },
+    {
+      "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+      "line": 95,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "resolve(process.env.LOCAL_STORAGE_PATH || '/data/uploads'),"
+    },
+    {
+      "file": "apps/server/src/config/config.ts",
+      "line": 86,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "process.env.LOCAL_STORAGE_CACHE_PATH || '/data/cache/storage',"
+    },
+    {
+      "file": "apps/server/src/config/config.ts",
+      "line": 92,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "dataPath: process.env.ELEVATION_DATA_PATH || '/data/elevation',"
+    },
+    {
+      "file": "apps/server/src/elevation/elevation.service.ts",
+      "line": 73,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "'/data/elevation',"
+    },
+    {
+      "file": "apps/server/src/elevation/local-file-cache.manager.ts",
+      "line": 20,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "this.cacheDir = path.join(os.tmpdir(), 'starshards-elevation-cache');"
+    },
+    {
+      "file": "apps/server/src/elevation/local-file-cache.manager.ts",
+      "line": 35,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "await fs.mkdir(this.cacheDir, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/elevation/local-file-cache.manager.ts",
+      "line": 80,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(filePath, data);"
+    },
+    {
+      "file": "apps/server/src/elevation/local-file-cache.manager.ts",
+      "line": 97,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(filePath);"
+    },
+    {
+      "file": "apps/server/src/elevation/local-file-cache.manager.ts",
+      "line": 111,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "fs.unlink(path.join(this.cacheDir, file)).catch(() => {}),"
+    },
+    {
+      "file": "apps/server/src/elevation/local-file-cache.manager.ts",
+      "line": 185,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(fileInfo.path);"
+    },
+    {
+      "file": "apps/server/src/health-data/health-series-storage.service.ts",
+      "line": 159,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const outputPath = path.join(tmpdir(), `${tableName}.parquet`);"
+    },
+    {
+      "file": "apps/server/src/health-data/health-series-storage.service.ts",
+      "line": 214,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.unlink(outputPath).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/health-data/health-series-storage.service.ts",
+      "line": 354,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const readDir = path.join(tmpdir(), `health-series-read-${randomUUID()}`);"
+    },
+    {
+      "file": "apps/server/src/health-data/health-series-storage.service.ts",
+      "line": 355,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(readDir, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/health-data/health-series-storage.service.ts",
+      "line": 375,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.writeFile(localPath, buffer);"
+    },
+    {
+      "file": "apps/server/src/health-data/health-series-storage.service.ts",
+      "line": 500,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.rm(readDir, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/self-host/self-host-token-file.ts",
+      "line": 6,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "const DEFAULT_OPERATIONS_DIRECTORY = '/data/operations';"
+    },
+    {
+      "file": "apps/server/src/self-host/self-host-token-file.ts",
+      "line": 36,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(directory, { recursive: true, mode: 0o700 });"
+    },
+    {
+      "file": "apps/server/src/self-host/self-host-token-file.ts",
+      "line": 106,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await handle.writeFile(`${token}\\n`, 'utf8');"
+    },
+    {
+      "file": "apps/server/src/self-host/self-host-token-file.ts",
+      "line": 110,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.rename(temporaryPath, filePath);"
+    },
+    {
+      "file": "apps/server/src/self-host/self-host-token-file.ts",
+      "line": 121,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(temporaryPath).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/self-host/self-host-token-file.ts",
+      "line": 130,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(selfHostBootstrapTokenPath(env));"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 1459,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const cacheDir = path.join(os.tmpdir(), 'parquet-cache');"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 1460,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "await fsp.mkdir(cacheDir, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 1502,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.writeFile(stagingPath, buffer, { flag: 'wx' });"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 1503,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.rename(stagingPath, cachePath);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 1505,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.unlink(stagingPath).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 1828,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const tmpPath = path.join(os.tmpdir(), `${tableName}.parquet`);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 2284,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 2295,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 2323,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const tmpPath = path.join(os.tmpdir(), `${tableName}.parquet`);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 2460,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
+    },
+    {
+      "file": "apps/server/src/sensor/sensor-data.service.ts",
+      "line": 2471,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
+    },
+    {
+      "file": "apps/server/src/storage/storage-path.ts",
+      "line": 4,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "export const DEFAULT_LOCAL_STORAGE_PATH = '/data/uploads';"
+    },
+    {
+      "file": "apps/server/src/storage/storage-path.ts",
+      "line": 124,
+      "owner": "apps",
+      "classification": "runtime-write",
+      "expression": "await fsp.mkdir(current, { mode: 0o750 });"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 76,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "'/data/cache/storage'"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 100,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "fs.mkdirSync(this.localStoragePath, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 117,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "fs.mkdirSync(namespacePath, { mode: 0o750 });"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 185,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.unlink(fullPath);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 258,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.unlink(file.path).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 287,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.mkdir(this.localMultipartDirectory(uploadId), {"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 319,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.mkdir(directory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 323,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.copyFile(args.filePath, temporary);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 324,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.rename(temporary, destination);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 326,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.unlink(temporary).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 405,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.rename(stagingPath, destination);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 407,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.rm(directory, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 410,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.unlink(stagingPath).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 429,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.rm(this.localMultipartDirectory(args.uploadId), {"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 453,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.mkdir(path.dirname(destinationPath), { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 456,
+      "owner": "apps",
+      "classification": "cache",
+      "expression": "await fsp.copyFile(cachedPath, destinationPath);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 468,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await pipeline(body, fs.createWriteStream(destinationPath));"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 865,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fsp.unlink(fullPath);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 961,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await handle.writeFile(buffer);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 965,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.rename(stagingPath, fullPath);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 970,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.unlink(stagingPath).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 984,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "fs.createWriteStream(stagingPath, { flags: 'wx', mode: 0o600 }),"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 992,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.rename(stagingPath, fullPath);"
+    },
+    {
+      "file": "apps/server/src/storage/storage.service.ts",
+      "line": 995,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fsp.unlink(stagingPath).catch(() => undefined);"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 335,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const workingDirectory = await fs.mkdtemp("
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 336,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "path.join(tmpdir(), 'trainingload-user-export-'),"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 366,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(root, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 449,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.rm(workingDirectory, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 455,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.rm(result.workingDirectory, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 459,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "const directory = tmpdir();"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 473,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.rm(workingDirectory, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 488,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(schemaDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 489,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(guideDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 495,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.writeFile("
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 500,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.writeFile("
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 505,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.writeFile("
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1707,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(recordOutputDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1708,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(lengthOutputDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1709,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(stagingDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1747,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.rm(localParquet, { force: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1758,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fs.rm(stagingDirectory, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1894,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(outputDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 1895,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(stagingDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2009,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "localPaths.map((filePath) => fs.rm(filePath, { force: true })),"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2025,
+      "owner": "apps",
+      "classification": "ephemeral",
+      "expression": "await fs.rm(stagingDirectory, { recursive: true, force: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2070,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(outputDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2139,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.writeFile(outputPath, generated.content);"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2216,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(healthDirectory, { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2348,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(path.dirname(filePath), { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2349,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.writeFile("
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2392,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(path.dirname(filePath), { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2393,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "const stream = createWriteStream(filePath, { encoding: 'utf8' });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2428,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "await fs.mkdir(path.dirname(filePath), { recursive: true });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2429,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "const stream = createWriteStream(filePath, { encoding: 'utf8' });"
+    },
+    {
+      "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
+      "line": 2543,
+      "owner": "apps",
+      "classification": "authoritative-or-export",
+      "expression": "const output = createWriteStream(destination);"
+    },
+    {
+      "file": "compose.yml",
+      "line": 25,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "SELF_HOST_OPERATIONS_PATH: /data/operations"
+    },
+    {
+      "file": "compose.yml",
+      "line": 28,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "LOCAL_STORAGE_PATH: /data/uploads"
+    },
+    {
+      "file": "compose.yml",
+      "line": 29,
+      "owner": "compose.yml",
+      "classification": "cache",
+      "expression": "LOCAL_STORAGE_CACHE_PATH: /data/cache/storage"
+    },
+    {
+      "file": "compose.yml",
+      "line": 37,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "ELEVATION_DATA_PATH: /data/elevation"
+    },
+    {
+      "file": "compose.yml",
+      "line": 89,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "fs.mkdirSync(file, {recursive: true});"
+    },
+    {
+      "file": "compose.yml",
+      "line": 163,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "- ${SELF_HOST_DATA_ROOT:-./data}/uploads:/data/uploads"
+    },
+    {
+      "file": "compose.yml",
+      "line": 164,
+      "owner": "compose.yml",
+      "classification": "cache",
+      "expression": "- ${SELF_HOST_DATA_ROOT:-./data}/cache:/data/cache"
+    },
+    {
+      "file": "compose.yml",
+      "line": 165,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "- ${SELF_HOST_DATA_ROOT:-./data}/elevation:/data/elevation:ro"
+    },
+    {
+      "file": "compose.yml",
+      "line": 166,
+      "owner": "compose.yml",
+      "classification": "runtime-write",
+      "expression": "- ${SELF_HOST_DATA_ROOT:-./data}/operations:/data/operations"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 46,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rm(cleanup.path, cleanup.options);"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 275,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await handle.writeFile(bytes);"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 341,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.link(staged.temporary, staged.output);"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 350,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await Promise.all(stagedFiles.map(({ temporary }) => fs.unlink(temporary)));"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 364,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(staged.output);"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 371,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(temporary).catch((cleanupError) => {"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 417,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rename(staged.temporary, staged.output);"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 503,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(dirname(destination), { recursive: true, mode: parentMode });"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 585,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rm(destination, { force: true });"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 608,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rm(destination, { force: true });"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 887,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(destination, { mode: directoryMode });"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 898,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(path, { mode: directoryMode });"
+    },
+    {
+      "file": "scripts/selfhost/backup-artifact.mjs",
+      "line": 961,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rm(destination, { recursive: true, force: true });"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 44,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(dirname(destination), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 89,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(etc, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 90,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "writeFileSync("
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 94,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "writeFileSync(resolve(etc, \"group\"), \"trainingload:x:10001:\\n\");"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 138,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(dirname(destination), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 139,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "writeFileSync(destination, status);"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 162,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(outputRoot, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 201,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(path, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/collect-linux-runtime-rootfs.mjs",
+      "line": 208,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(path, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/copy-optional-workspace-metadata.mjs",
+      "line": 17,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(dirname(destination), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 222,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(destination, contents, {"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 240,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(parent, { recursive: true, mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 242,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const staging = await fs.mkdtemp("
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 247,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(resolve(staging, \"reports\"), { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 248,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(resolve(staging, \"environments\"), { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 249,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(resolve(staging, \"contracts\"), { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 346,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(destination, contents, { flag: \"wx\", mode: 0o600 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 349,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(environmentDestination, environmentContents, {"
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 411,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile("
+    },
+    {
+      "file": "scripts/selfhost/finalize-acceptance.mjs",
+      "line": 419,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.rename(staging, output);"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 629,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const work = await fs.mkdtemp("
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 630,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "resolve(tmpdir(), \"selfhost-acceptance-verify-\"),"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 703,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(parent, { recursive: true, mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 704,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(staging, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 766,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(releaseOutput, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 840,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(attestationOutput, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 994,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\\n`, {"
+    },
+    {
+      "file": "scripts/selfhost/finalize-release-candidate.mjs",
+      "line": 1019,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.rename(staging, output);"
+    },
+    {
+      "file": "scripts/selfhost/generate-error-catalog.mjs",
+      "line": 26,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(outputPath, expected);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1382,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(path, { recursive: true, mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1414,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await handle.writeFile(content, \"utf8\");"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1421,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.link(temporaryPath, path);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1422,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(temporaryPath);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1443,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await handle.writeFile(content, \"utf8\");"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1448,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rename(temporaryPath, path);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1718,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(reclaimPath);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1727,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(reclaimPath);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1842,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.link(lock.path, released);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1855,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(lock.path);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1858,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(released);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1868,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.link(released, lock.path);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 1872,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(released);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 2667,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(directory, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 2749,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(file.path);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 6899,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "walk(\"/data/uploads\",0);process.stdout.write(\"SELF_HOST_UPLOAD_BYTES=\"+bytes);`,"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 7183,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(markerPath);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 7386,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(paths.lock);"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 7492,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await lockHandle.writeFile(`${context.operationId}\\n`, \"utf8\");"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 7497,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(paths.staging, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/management-core.mjs",
+      "line": 7562,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.rename(paths.staging, paths.destination);"
+    },
+    {
+      "file": "scripts/selfhost/prepare-acceptance-release.mjs",
+      "line": 244,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(outputDirectory, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/prepare-acceptance-release.mjs",
+      "line": 250,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const staging = await fs.mkdtemp("
+    },
+    {
+      "file": "scripts/selfhost/prepare-acceptance-release.mjs",
+      "line": 270,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(snapshotDirectory, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/prepare-acceptance-release.mjs",
+      "line": 271,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(extractionDirectory, { mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/prepare-acceptance-release.mjs",
+      "line": 395,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rename(stagedReleaseRoot, releaseRoot);"
+    },
+    {
+      "file": "scripts/selfhost/prepare-acceptance-release.mjs",
+      "line": 429,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(dirname(recordPath), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/private-path.mjs",
+      "line": 81,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.unlink(temporaryPath);"
+    },
+    {
+      "file": "scripts/selfhost/prune-server-runtime-deploy.mjs",
+      "line": 119,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "writeFileSync(manifestPath, `${JSON.stringify(runtimeManifest, null, 2)}\\n`);"
+    },
+    {
+      "file": "scripts/selfhost/release-artifact.mjs",
+      "line": 489,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const snapshotRoot = await fs.mkdtemp("
+    },
+    {
+      "file": "scripts/selfhost/release-artifact.mjs",
+      "line": 490,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "resolve(tmpdir(), \"selfhost-release-evidence-\"),"
+    },
+    {
+      "file": "scripts/selfhost/release-bundle.mjs",
+      "line": 519,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(parent, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/release-bundle.mjs",
+      "line": 520,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.mkdir(staging, { mode: 0o755 });"
+    },
+    {
+      "file": "scripts/selfhost/release-bundle.mjs",
+      "line": 560,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(destination, rendered, { mode: 0o644, flag: \"wx\" });"
+    },
+    {
+      "file": "scripts/selfhost/release-bundle.mjs",
+      "line": 579,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile("
+    },
+    {
+      "file": "scripts/selfhost/release-bundle.mjs",
+      "line": 610,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "await fs.rename(staging, output);"
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 468,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"const fs=require('node:fs');const path='/data/operations/bootstrap-token';const stat=fs.statSync(path);process.stdout.write(JSON.stringify({token:fs.readFileSync(path,'utf8').trim(),mode:stat.mode&0o777}));\","
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 481,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"process.stdout.write(String(require('node:fs').existsSync('/data/operations/bootstrap-token')));\","
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 966,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.writeFile(path, configured, { mode: 0o600 });"
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 1254,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"require('node:fs').writeFileSync('/data/uploads/acceptance-permission-probe','must-not-write')\","
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 1455,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.mkdir(evidenceDirectory, { recursive: true, mode: 0o700 });"
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 1562,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const workspace = await fs.mkdtemp("
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 1563,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "join(tmpdir(), `trainingload-acceptance-${options.platformId}-`),"
+    },
+    {
+      "file": "scripts/selfhost/run-acceptance.mjs",
+      "line": 2181,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await fs.rm(workspace, { recursive: true, force: true });"
+    },
+    {
+      "file": "scripts/selfhost/scan-image-layers.mjs",
+      "line": 182,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "(() => mkdtemp(join(tmpdir(), \"trainingload-image-scan-\")));"
+    },
+    {
+      "file": "scripts/selfhost/scan-image-layers.mjs",
+      "line": 211,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await mkdir(extracted);"
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 135,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "removeWorkspace = (path, options) => rm(path, options),"
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 187,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await mkdir(resolve(directory, \"docker/selfhost\"), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 194,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await copyFile(resolve(repositoryRoot, file), resolve(directory, file));"
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 202,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await writeFile("
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 405,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "`const fs=require('node:fs');fs.mkdirSync('/data/uploads/selfhost-restore-smoke',{recursive:true});fs.writeFileSync('/data/uploads/selfhost-restore-smoke/fixture.txt',Buffer.from(${JSON.stringify(encodedFile)},'base64'),{mode:0o600});`,"
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 429,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"process.stdout.write(require('node:fs').readFileSync('/data/uploads/selfhost-restore-smoke/fixture.txt','utf8'));\","
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 461,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const workspace = await mkdtemp("
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 462,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "join(tmpdir(), \"trainingload-selfhost-smoke-\"),"
+    },
+    {
+      "file": "scripts/selfhost/smoke-compose.mjs",
+      "line": 608,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "await mkdir(restoreDirectory, { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/upload-copy-helper.mjs",
+      "line": 26,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "fs.mkdirSync(target, {mode:0o700});"
+    },
+    {
+      "file": "scripts/selfhost/upload-copy-helper.mjs",
+      "line": 53,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "fs.mkdirSync(task.target,{recursive:true,mode:0o700});"
+    },
+    {
+      "file": "scripts/selfhost/verify-acceptance-workflow.mjs",
+      "line": 482,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "authenticationSource.includes(\"fs.mkdirSync(trusted)\")"
+    },
+    {
+      "file": "scripts/selfhost/verify-acceptance-workflow.mjs",
+      "line": 660,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "source.includes(\"/data/uploads/acceptance/\")"
+    },
+    {
+      "file": "scripts/selfhost/verify-release-candidate.mjs",
+      "line": 370,
+      "owner": "scripts",
+      "classification": "ephemeral",
+      "expression": "const work = await fs.mkdtemp(resolve(tmpdir(), \"selfhost-rc-verify-\"));"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 160,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "source.includes(\"await fs.link(lock.path, released)\") &&"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 161,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "source.includes(\"await fs.unlink(lock.path)\") &&"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 162,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "!source.includes(\"await fs.rename(lock.path, released)\") &&"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 309,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "cleanupBlock.includes(\"await fs.unlink(paths.lock)\") &&"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 332,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "!source.includes(\"await fs.unlink(paths.lock).catch(() => undefined)\"),"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 358,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"await fs.unlink(destination).catch(() => undefined)\","
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 713,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"${SELF_HOST_DATA_ROOT:-./data}/uploads:/data/uploads\" &&"
+    },
+    {
+      "file": "scripts/selfhost/verify-v1-contract.mjs",
+      "line": 715,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "\"${SELF_HOST_DATA_ROOT:-./data}/operations:/data/operations\" &&"
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "planExecution": {
+    "completedWithTomorrowOne": "今天的计划已经完成，接下来重点补给、拉伸和睡眠。明天还有 1 节训练，今天不要再追加强度，给下一课留点余量。",
+    "completedWithTomorrowMany": "今天的计划已经完成，接下来重点补给、拉伸和睡眠。明天还有 {count} 节训练，今天不要再追加强度，给下一课留点余量。",
+    "completed": "今天的计划已经完成，接下来优先恢复、补水和睡眠。也可以记一下体感、心率和完成难度，方便我后续调整训练负荷。",
+    "partial": "今天已经完成 {count} 个关联活动，说明计划已经开始执行。剩余训练根据腿部状态和主观疲劳决定；疲劳明显时，优先保住训练质量，不要硬凑量。",
+    "plannedOne": "今天有 1 节计划训练，我建议先按课表执行。热身后再确认体感，把强度控制在目标区间内；完成后记得关联活动，我会结合这次训练继续帮你调整。",
+    "plannedMany": "今天有 {count} 节计划训练，我建议先按课表执行。热身后再确认体感，把强度控制在目标区间内；完成后记得关联活动，我会结合这次训练继续帮你调整。",
+    "plannedNone": "今天没有明确课表，适合轻松恢复或做灵活性训练。就算体感很好，也不要临时堆强度。",
+    "extraOne": "今天有 1 个额外活动。先确认它是否对应计划训练；如果是额外加练，明天可以适当降低强度或缩短时长。",
+    "extraMany": "今天有 {count} 个额外活动。先确认它们是否对应计划训练；如果是额外加练，明天可以适当降低强度或缩短时长。",
+    "restWithTomorrowOne": "今天是休息日，重点是恢复，不是补量。明天还有 1 节训练，早点睡，补足碳水和水分，让下一课更稳定。",
+    "restWithTomorrowMany": "今天是休息日，重点是恢复，不是补量。明天还有 {count} 节训练，早点睡，补足碳水和水分，让下一课更稳定。",
+    "rest": "今天是休息日，适合补睡眠、轻活动和整理训练反馈。如果身体有酸痛，优先恢复，不需要为了连续性额外加练。",
+    "noPlan": "你还没有激活训练计划。告诉我目标比赛、准备周期和每周可训练时间，我会帮你安排下一阶段。",
+    "tags": {
+      "completed": "已完成",
+      "recoveryPriority": "恢复优先",
+      "partial": "部分完成",
+      "adjustByFeel": "按体感调整",
+      "planned": "按计划训练",
+      "controlIntensity": "控制强度",
+      "extraActivity": "额外活动",
+      "checkLink": "检查关联",
+      "restDay": "休息日",
+      "recovery": "恢复",
+      "noPlan": "暂无计划",
+      "setGoal": "完善目标"
+    }
+  },
+  "today": {
+    "decision": {
+      "unavailable": "我暂时没能读取你最新的训练安排。请稍后刷新再试；在确认新安排前，先按当前课表训练。",
+      "statePending": "当前状态评估还缺少一项关键信息。补充前先不要追求原计划强度，今天以保守执行和恢复为主。",
+      "defaultAdjustment": "调整当前训练安排",
+      "today": "今天",
+      "tomorrow": "明天",
+      "confirmed": "已确认",
+      "pending": "待确认",
+      "timedDetail": "{when}这样练：{detail}",
+      "untimedDetail": "这样调整：{detail}",
+      "approved": "这项调整已经确认。{detail}。课表更新前，先按这个安排训练，不用再额外加练。",
+      "proposed": "我有一项新的建议。{detail}。你确认后，我会帮你更新课表。",
+      "defaultCurrentWorkout": "当前计划课次",
+      "rejectedWorkout": "我记得你没有采用上次的调整。今天继续按课表完成「{title}」，训练时根据身体感觉适当放轻。",
+      "rejectedRest": "我记得你没有采用上次的调整。今天继续按课表休息，把重点放在恢复和身体反馈上。",
+      "guidance": "{summary}。结合上次复盘，我再提醒你：{guidance}。",
+      "clearIntensityTarget": "没有明确配速目标时，按体感控制强度",
+      "controlledRpe": "强度控制在 RPE {range}",
+      "doNotRace": "别把这次训练跑成比赛"
+    },
+    "fact": {
+      "defaultWorkout": "计划课次",
+      "oneSession": "1 节课",
+      "manySessions": "{count} 节课",
+      "restDay": "休息日",
+      "loadChange": "负荷 {value}",
+      "defaultEvent": "相关赛事",
+      "raceToday": "今天比赛",
+      "daysToRace": "距比赛 {count} 天",
+      "daysAfterRace": "赛后 {count} 天",
+      "influenceWindow": "当前处于赛事影响期",
+      "eventDistance": "，比赛距离 {distance}",
+      "competition": "你把 {event} 标记为{importance}；{timing}{distanceNote}。我建议今天先保护比赛准备和恢复，再根据体感决定按计划训练还是适当降量。",
+      "noPlan": "你还没有激活训练计划。告诉我目标、准备周期和每周可训练时间，我会帮你安排今天怎么练。",
+      "completedOne": "今天的计划课次已经完成，接下来重点补给、拉伸和睡眠，不建议再临时加强度。",
+      "completedMany": "今天 {count} 节计划课次已经全部完成，接下来重点补给、拉伸和睡眠，不建议再临时加强度。",
+      "activityWithDuration": "今天没有计划课次，但已经记录了 {duration} 分钟的{sport}。不用为了补课额外加量，接下来优先补水、补给、拉伸和恢复。",
+      "activityWithoutDuration": "今天没有计划课次，但已经记录了{sport}。不用为了补课额外加量，接下来优先补水、补给、拉伸和恢复。",
+      "restFatigue": "今天没有安排训练，而且状态较低（TSB {tsb}）。优先恢复，不要临时加量，把睡眠和补给做好。",
+      "restLoad": "今天没有安排训练。本周负荷已经增加 {drift}，建议保留恢复窗口，不要为了补量临时加练。",
+      "rest": "今天没有安排训练。好好休息；如果体感不错，可以做一段轻松有氧或灵活性训练。",
+      "fatigue": "计划是「{title}」，但状态较低（TSB {tsb}）。今天请控制强度，必要时缩短训练，优先保证恢复。",
+      "loadSpike": "今天的重点是「{title}」。本周负荷已经增加 {drift}，完成关键训练即可，不要额外加量。",
+      "multiWorkout": "今天有 {count} 节计划课次，先完成「{title}」这节关键训练，再根据体感决定后续安排。",
+      "workout": "今天的重点是「{title}」。按目标强度完成即可；结束后及时关联活动记录，方便我继续帮你复盘。"
+    },
+    "tags": {
+      "tryAgain": "稍后重试",
+      "stateCheck": "状态待补充",
+      "trainingAdvice": "教练建议",
+      "followPlan": "按课表训练",
+      "reviewNote": "复盘提醒",
+      "eventImpact": "赛事影响",
+      "noPlan": "暂无计划",
+      "setGoal": "完善目标",
+      "activityRecorded": "已记录活动"
+    }
+  },
+  "enum": {
+    "importance": {
+      "low": "低优先级",
+      "medium": "中优先级",
+      "high": "高优先级",
+      "critical": "最高优先级"
+    },
+    "impact": {
+      "low": "低影响",
+      "medium": "中等影响",
+      "high": "高影响",
+      "critical": "关键影响"
+    },
+    "phase": {
+      "general_preparation": "基础准备期",
+      "specific_preparation": "专项准备期",
+      "peak": "高峰期",
+      "taper": "减量期",
+      "event": "比赛期",
+      "recovery": "恢复期"
+    },
+    "sport": {
+      "run": "跑步",
+      "cycling": "骑行",
+      "swim": "游泳",
+      "strength": "力量训练",
+      "unknown": "活动"
+    }
+  }
+}

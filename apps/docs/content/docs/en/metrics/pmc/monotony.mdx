@@ -1,0 +1,126 @@
+---
+title: "Training Monotony: Foster Formula vs Bounded Score"
+description: "Training monotony measures how similar your last seven daily loads are. Compare the Foster formula with Trainingload.ai’s bounded score and training strain."
+keywords:
+  [
+    "training monotony",
+    "Foster monotony",
+    "training strain",
+    "daily load variability",
+    "monotony formula",
+  ]
+---
+
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# Training Monotony: Foster Formula vs Bounded Score
+
+**Training monotony** describes how similar the daily loads are across the most recent seven calendar days. Similar days produce a higher value; a clearer mix of high, low, and zero-load days usually produces a lower one.
+
+Trainingload.ai displays a bounded, normalized version—not the classic Foster value. It describes the distribution of load numbers; it does not directly measure fatigue, recovery, overtraining, injury probability, or training quality.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotony"
+    valuePopoverTitle="Monotony value"
+    valuePopoverBody="Calculated from the mean and population standard deviation of the last seven calendar-day loads; no-activity days count as zero."
+    rangePopoverTitle="UI bands"
+    rangePopoverBody="The UI uses <0.6, 0.6–0.8, and >0.8 as review cues—not health or injury-risk boundaries."
+    helpTitle="Load variation"
+    details="Review all seven daily loads and the total load to explain the value."
+  />
+</div>
+
+_Example values are for interface preview only._
+
+## Data and formula
+
+Trainingload.ai includes today and the previous six calendar days. Multiple activities on one day are added together; a day without recorded load contributes zero.
+
+```text
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+monotony = mean_load / (sd_load + mean_load)
+```
+
+If `sd_load + mean_load = 0`, all seven loads are zero and the product returns `monotony = 0`.
+
+Training Strain uses the same window:
+
+```text
+total_load = sum(loads)
+training_strain = total_load × monotony / 0.5
+```
+
+## Difference from the classic Foster metric
+
+```text
+foster_monotony = mean_load / sd_load
+foster_strain = total_load × foster_monotony
+```
+
+The classic value is unbounded and tends toward infinity when every daily load is identical. Trainingload.ai instead uses `mean_load / (sd_load + mean_load)`, which keeps a non-zero week between 0 and 1.
+
+When both mean and standard deviation are positive:
+
+```text
+trainingload_monotony = foster_monotony / (1 + foster_monotony)
+```
+
+Therefore, a Trainingload.ai value of `0.8` is not comparable to a classic Foster value of `2.0`; the two Training Strain formulas also differ.
+
+## Reading the value
+
+- Seven zero-load days return 0.
+- One loaded day plus six zero days produces about 0.29.
+- Seven identical positive-load days produce 1.
+- Between those cases, a higher value generally means more similar daily loads.
+
+A low value is not automatically better: one very large load spike plus six rest days is also low-monotony. A high value does not diagnose injury or overtraining; it only says the seven daily load numbers are similar.
+
+The interface bands are `<0.6`, `0.6–0.8`, and `>0.8`. They are display rules, not validated safety thresholds. The special zero value for an all-rest week does not mean “excellent structure.”
+
+## Practical review
+
+Inspect all seven daily loads together with total load. Identify whether the pattern comes from the plan, true rest days, one spike, missing activities, or a threshold/load-source change. Then add sport type, session content, performance, sleep, pain, illness, and subjective fatigue.
+
+<DocsToolCtaCard
+  title="Review daily load distribution"
+  description="Use seven-day total load, daily variation, and source activities together."
+  primary={{ href: "/training-load", label: "Manage training load with CTL, ATL, and TSB in your plan" }}
+  secondary={{ href: "/docs/metrics/training-load/training-stress-score", label: "See how TSS becomes daily load" }}
+/>
+
+## References
+
+- [Foster (1998): Monitoring training with reference to overtraining syndrome](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad et al. (2017): Review of the session-RPE method](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones et al. (2017): Systematic review of training load, fatigue markers, injury, and illness](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr: Training Monotony and the bounded modification](https://fellrnr.com/wiki/Training_Monotony)
+
+## FAQ
+
+### What is training monotony?
+
+Training monotony is a seven-day similarity score for daily load. Days that look alike raise the value; a mix of hard, easy, and rest days usually lowers it. It describes the numbers, not injury risk.
+
+### How is the Foster monotony formula different?
+
+Classic Foster monotony is mean load ÷ standard deviation and has no upper bound. Identical days send it toward infinity. Trainingload.ai uses mean / (sd + mean), so a loaded week stays between 0 and 1. A product value of 0.8 is not a Foster 2.0.
+
+### What is training strain?
+
+Training strain multiplies seven-day total load by monotony (in this product, divided by 0.5). High total load plus similar days raises strain. Read it with the seven daily values, not as a standalone red flag.
+
+### Is low monotony always better?
+
+No. One huge spike plus six zeros is also low monotony. Use the score to notice a flat week, then check the plan, missing files, and how the sessions felt.
+
+## Related pages
+
+- [What is training load?](/docs/metrics/training-load)
+- [Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load)
+- [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load)
+- [ACWR](/docs/metrics/pmc/acute-to-chronic-workload-ratio)
+- [Use AI coach review to adjust training load safely](/ai-training-plan)

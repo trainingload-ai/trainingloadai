@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": "design-records/open-source-extraction/boundary-map.yaml",
+  "excludes": [
+    "apps/client/Dockerfile.managed",
+    "apps/docs/AGENTS.md",
+    "apps/docs/Dockerfile",
+    "apps/server/src/instrumentation.ts",
+    "packages/messages/client"
+  ]
+}

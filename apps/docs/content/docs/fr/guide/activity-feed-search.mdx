@@ -1,0 +1,134 @@
+---
+title: Activities Feed and Search
+description: Use the Trainingload.ai activity feed and search page to review imported workouts, filter activities, open details, export files, delete mistakes, and link activities to training-plan workouts.
+keywords: ["activity feed", "activity search", "workout management", "training activity list", "Trainingload.ai activities"]
+---
+
+# Activities Feed and Search
+
+The activity feed is the main list of completed workouts in Trainingload.ai. It brings together synced activities, uploaded files, manual imports, map previews, load values, and plan links.
+
+Use it when you want to answer:
+
+- What did I train recently?
+- Did a new import arrive?
+- Which workouts still need review?
+- Is this activity linked to the right plan workout?
+- Where is the activity detail page for deeper analysis?
+
+## Activity feed
+
+Open **Activities** to see recent workouts. Each activity card can show:
+
+- Activity title.
+- Sport type.
+- Start time.
+- Distance and duration.
+- Training load when available.
+- Source provider, such as Garmin, Strava, or manual upload.
+- Activity status.
+- Map thumbnail when route data is available.
+- Plan workout link when the activity falls inside an active plan window.
+
+The feed loads more items as you scroll. On mobile, pull down at the top of the list to refresh.
+
+## Activity status
+
+Activity cards can show statuses such as:
+
+- **Synced**: imported or synced into Trainingload.ai.
+- **Pending review**: available but not yet reviewed.
+- **Reviewed**: already reviewed or processed through the review flow.
+- **Unknown**: status was not available.
+
+Status labels help you triage the list, but they do not replace the activity detail page. Open the activity when charts, metrics, or processing results matter.
+
+## Search and filters
+
+Use activity search when the feed is too broad.
+
+Quick filters include:
+
+- Recent 7 days.
+- Recent 30 days.
+- Run.
+- Cycling.
+- Swim.
+
+Search also supports query parameters for fields such as sport type, provider, date range, duration, distance, ordering, and time zone. The visible UI may expose only the common filters, while saved links can preserve more specific query combinations.
+
+## Open an activity
+
+Open an activity when you need more than the summary card.
+
+The detail page is where you review:
+
+- Full summary metrics.
+- Charts and time series.
+- Route and terrain context.
+- Load and intensity.
+- Heart rate, power, pace, and elevation signals.
+- AI Coach prompts for that workout.
+
+See [Activity Detail](/docs/guide/activity-detail).
+
+## Link activities to plan workouts
+
+When there is an active plan and the activity date falls inside the plan range, the activity card can show a plan-link control.
+
+Use it to connect the completed workout to the intended plan session.
+
+This matters because Trainingload.ai can then compare:
+
+- Planned workout vs completed activity.
+- Expected load vs actual load.
+- Completion status.
+- Plan compliance.
+- AI Coach plan follow-up.
+
+If the wrong workout is linked, unlink it and choose the correct one manually.
+
+## Export or delete an activity
+
+The activity card menu can include:
+
+- **View**: open the activity detail page.
+- **Export**: download the activity as GPX, FIT, or TCX when export is supported.
+- **Delete**: remove the activity after confirmation.
+
+Use delete carefully. If an activity is linked to a plan workout, removing it can change plan execution summaries and load comparisons.
+
+## Map entry
+
+The activities page can show a map entry that opens the map view. Use the map when route context matters:
+
+- Comparing routes.
+- Reviewing where workouts happened.
+- Finding GPS-based activities visually.
+- Checking whether a route looks incomplete or unusual.
+
+The map is useful for location context, while the activity detail page remains the better place for metrics.
+
+## Troubleshooting
+
+If an activity is missing:
+
+- Check whether the import batch has finished.
+- Refresh the feed.
+- Search with a wider date range.
+- Confirm the source provider actually has the workout.
+- Check whether the activity was deleted or filtered out.
+
+If load or charts are missing:
+
+- Open the activity detail page and check processing status.
+- Confirm the source file includes the needed sensor data.
+- Check profile thresholds and zones.
+- Wait for analysis to finish if the activity was just uploaded.
+
+Related pages:
+
+- [Upload Activity Files](/docs/guide/upload-activity-files)
+- [Connect Data](/docs/guide/connect-data)
+- [Activity Detail](/docs/guide/activity-detail)
+- [Manage an Active Plan](/docs/guide/manage-active-plan)

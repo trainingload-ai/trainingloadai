@@ -1,0 +1,84 @@
+---
+title: Fitness (CTL)
+description: Trainingload.ai zeigt CTL mit einem blauen Fortschrittsbalken und einer blauen Linie im PMC-Diagramm an.
+keywords: ["chronische Trainingsbelastung", "Fitness", "CTL", "CTL-Formel", "Trainingsbelastungstrend", "CTL verstehen"]
+---
+
+# Was ist Fitness (CTL)?
+
+Die **Fitness (CTL)** beziehungsweise Chronic Training Load kombiniert Trainingsdauer und Trainingsbelastung (TSS), um den Trainingsverlauf eines Benutzers zusammenzufassen. Trainingload.ai verwendet standardmäßig eine Zeitkonstante von 42 Tagen und zeigt den aktuellen Prozentsatz relativ zum historischen CTL-Höchstwert des Benutzers an. CTL beschreibt die modellierte Belastungshistorie; sie misst Fitness, Anpassung, Gesundheit oder Wettkampfleistung nicht direkt.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <CtlStatPreviewCard
+    value="67.2"
+    percent={58}
+    metricLabel="CTL"
+    valuePopoverTitle="CTL-Wert"
+    valuePopoverBody="Ein langsamer exponentieller Durchschnitt der anhand deiner Belastungsquellen-Einstellungen ausgewählten Tagesbelastung."
+    percentPopoverTitle="CTL-Prozentsatz"
+    percentPopoverBody="Der aktuelle CTL-Wert relativ zu deinem historischen CTL-Höchstwert."
+    helpTitle="Langfristige Belastung"
+    details="Nutze CTL, um Richtung und Beständigkeit der modellierten Belastung über mehrere Wochen zu beurteilen."
+  />
+</div>
+
+_Die Beispielwerte dienen nur der UI-Vorschau._
+
+## Woher der Fitness-(CTL)-Wert stammt
+
+Trainingload.ai ermittelt zuerst die Belastung jeder Aktivität anhand der verfügbaren Messwerte und deiner konfigurierten Priorität der Belastungsquellen. Je nach Aktivität und Einstellungen kann die Quelle Leistung, Herzfrequenz, Tempo oder Session-RPE sein.
+
+Das bedeutet:
+
+- Fehlende oder geänderte Aktivitätsdaten können Fitness (CTL) verändern.
+- Änderungen an Schwellenwerten oder der Quellenpriorität können die abgeleitete Aktivitätsbelastung und spätere PMC-Werte verändern.
+- Trainingload.ai wählt entsprechend der Priorität pro Aktivität eine verfügbare Belastung aus; uneinheitlich skalierte Quellen verringern die Vergleichbarkeit zwischen Zeiträumen.
+- An einem Tag ohne aufgezeichnete Aktivitätsbelastung ist die Tageseingabe null und der vorherige CTL-Wert fällt allmählich ab.
+
+## Formel
+
+Trainingload.ai verwendet einen exponentiellen Abfall mit einer standardmäßigen CTL-Zeitkonstante von 42 Tagen:
+
+```text
+decay_CTL = exp(-1 / 42)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+`exp` ist die natürliche Exponentialfunktion. Bei der Standardzeitkonstante gilt `decay_CTL ≈ 0.976472`; die heutige Belastung erhält somit ein Gewicht von ungefähr `0.023528`.
+
+## Den Fitness-(CTL)-Trend verstehen
+
+- **CTL steigt**: Die jüngste Tagesbelastung liegt im Allgemeinen über dem aktuellen CTL-Niveau.
+- **CTL bleibt stabil**: Die jüngste Belastung hält das modellierte Niveau ungefähr aufrecht.
+- **CTL fällt**: Die jüngste Belastung liegt im Allgemeinen darunter, etwa bei reduziertem Training oder im Tapering.
+
+## Geeignete Fragen
+
+CTL kann helfen zu beantworten:
+
+- Steigt, hält oder fällt die aktuelle Fitness (CTL)?
+- Haben ausgelassene Einheiten oder eine Erholungsphase den längerfristigen Trend verändert?
+- Erzeugt der aktuelle Plan die beabsichtigte Belastungsrichtung?
+- Hat eine Änderung von Schwellenwert oder Quelle die Vergleichbarkeit verringert?
+
+CTL kann allein nicht beantworten:
+
+- Hat sich der Benutzer erfolgreich angepasst?
+- Ist die harte Einheit morgen sicher?
+- Ist der Benutzer erholt, gesund oder wettkampfbereit?
+- Ist ein Benutzer fitter als ein anderer?
+
+Berücksichtige vor einer Entscheidung außerdem Leistungstrends, Ausführungsqualität, subjektives Befinden, [Ermüdung (ATL)](/docs/metrics/pmc/acute-training-load) und [Form (TSB)](/docs/metrics/pmc/training-stress-balance).
+
+## Referenzen
+
+- [Intervals.icu: Formeln für Fitness, Ermüdung und Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE-Glossar: Chronic Training Load (CTL)](https://runalyze.com/glossary/ctl)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## Verwandte Seiten
+
+- [Ermüdung (ATL)](/docs/metrics/pmc/acute-training-load)
+- [Form (TSB)](/docs/metrics/pmc/training-stress-balance)
+- [Workflow zur Trainingsanalyse](/docs/guide/training-analysis-workflow)
+- [PMC für Marathon-Anpassungen verwenden](/docs/guide/pmc-marathon-adjustment)

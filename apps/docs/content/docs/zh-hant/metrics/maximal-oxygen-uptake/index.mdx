@@ -1,0 +1,210 @@
+---
+title: "VO2 Max（最大攝氧量）"
+description: "VO2 Max（最大攝氧量）是衡量心肺有氧能力上限的關鍵指標之一。本文解釋它的含義、手錶/平台常見估算方式與誤差來源，並說明訓練中如何用 VO2 Max 看趨勢、定強度。"
+keywords:
+  - "VO2 Max"
+  - "VO2 max calculator"
+  - "estimate VO2 max"
+  - "estimate VO2 max calculator"
+  - "what is VO2 max"
+  - "VO2 max for runners"
+  - "VO2 max for cyclists"
+  - "VDOT"
+  - "vVO2max"
+  - "estimated VO2 max"
+  - "watch VO2 max"
+  - "cycling VO2 max from power"
+---
+
+import {
+  VO2_METHODS_COMPARE_SHELL,
+  VO2_MT_STRONG_BL,
+  VO2_MT_STRONG_EM,
+} from "@/lib/vo2-methods-compare-classes";
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# VO2 Max（最大攝氧量）
+
+> 術語說明：為了可讀性與搜尋意圖一致，本文以 **VO2 Max** 作為統一稱呼（不特別區分 VO2 max / eVO2 Max / estimated VO2 Max）。當需要更精準時，會明確標示 **實驗室測得 VO2 Max（呼吸氣體分析）** vs **估算 VO2 Max（手錶/平台）**。
+
+**VO2 Max** 是身體在高強度運動時，**吸入、運送並利用氧氣** 的最大速率，通常用 `ml · kg⁻¹ · min⁻¹` 表示。
+
+它之所以重要，是因為在耐力運動中它很像一個 **有氧天花板**：天花板越高，你就有更多空間去維持更高強度。但成績不只由 VO2 Max 決定——**閾值能力、效率/經濟性、耐久、補給、地形與配速** 同樣可能同等重要（甚至更重要）。
+
+## 你看到的「VO2 Max」是哪一種？
+
+- **實驗室測得 VO2 Max（呼吸氣體分析）**：在跑步機或自行車功率台進行，搭配 metabolic cart。最接近生理意義上的「真 VO2 Max」。
+- **估算 VO2 Max（手錶/平台）**：模型輸出，由你的 **配速/速度、心率與情境** 推算（通常也會對近期訓練做平滑）。
+
+在日常訓練中，手錶/平台數值可能會因 **感測器噪音、炎熱、海拔、風、坡度、疲勞、睡眠、補給** 而波動。建議主要把它當作 **趨勢指標**，不要當成醫療級測量。
+
+## 為什麼 VO2 Max 有用
+
+可以把 VO2 Max 當作「天花板」，但你的表現很多時候取決於你能在天花板下 **穩定運作到多高**。
+
+- **VO2 Max 的用途**：解讀有氧體能趨勢、設定訓練強度（尤其 VO2 間歇）、理解表現變化背景。
+- **VO2 Max 的限制**：無法取代閾值指標、經濟性、耐久與專項能力。同樣的實驗室 VO2 Max，兩個人也可能跑出完全不同的比賽結果。
+
+## 如何估算 VO2 Max
+
+Trainingload.ai 會依運動項目與你的輸入資料品質，使用不同資料來源與模型。核心概念是把 **表現能力**（你可以跑多快 / 踩出多少功率）轉換成 `ml · kg⁻¹ · min⁻¹`。
+
+### 跑步：心率 → 速度模型
+
+跑步方面，可以理解為：**心率強度 → 等效 vVO2max → 氧耗成本模型**。
+
+核心公式如下（`v` 單位是 `m/min`，`r = HR / HRmax`；亦可參考 [Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm) 的實作說明）：
+
+$$
+X = v / exp((r - 1.00466) / 0.68725)
+$$
+
+$$
+VO2max = -4.6 + 0.182258 * X + 0.000104 * X^2
+$$
+
+### 自行車：功率 → 體重模型
+
+如果你有可靠的自行車功率與體重，可以用 FRIEND 類型的 cycle ergometry 關係估算 VO2 Max（可參考 [Kokkinos P, et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29692203/)）。系統內部可能會先估算最大有氧功率，例如 `MAP = MMP(5min) * 0.92`，然後組合為：
+
+$$
+VO2max = 1.74 * ((0.92 * MMP_5 * 6.12) / Weight_kg) + 3.5
+$$
+
+## 不同 VO2 Max 方法（快速比較）
+
+以下是按 **準確度、成本、可重複性、用途** 做的實務比較。你不一定要用「最科學」的方法；最適合的方法是你可以 **穩定、長期重複** 的方法。
+
+<div className={VO2_METHODS_COMPARE_SHELL}>
+<table>
+  <colgroup>
+    <col style={{ width: "18%" }} />
+    <col style={{ width: "18%" }} />
+    <col style={{ width: "18%" }} />
+    <col style={{ width: "26%" }} />
+    <col style={{ width: "20%" }} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>方法</th>
+      <th>你需要什麼</th>
+      <th>優點</th>
+      <th>缺點 / 誤差來源</th>
+      <th>最適合</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="vo2-mt-row-a">
+      <td><strong>實驗室呼吸氣體分析（跑台/功率台）</strong></td>
+      <td>實驗室設備 + 人員</td>
+      <td><strong className={VO2_MT_STRONG_EM}>最接近「真 VO2 Max」</strong>；也可同時量測閾值</td>
+      <td>昂貴；protocol 差異；難以頻繁重複</td>
+      <td>一次性基準；研究；詳細評估</td>
+    </tr>
+    <tr className="vo2-mt-row-b">
+      <td><strong>比賽/時間試 → VDOT / 表現 VO2</strong></td>
+      <td>接近全力的成績（3K/5K/10K/半馬）</td>
+      <td><strong className={VO2_MT_STRONG_BL}>低成本、可重複</strong>；與表現高度相關</td>
+      <td>天氣/路線/配速策略影響；不同距離得到不同值（屬正常）</td>
+      <td>追蹤進步；設定配速；預測比賽</td>
+    </tr>
+    <tr className="vo2-mt-row-n">
+      <td><strong>跑步 心率–配速 模型（訓練估算）</strong></td>
+      <td>好心率數據（建議胸帶）+ 穩定條件</td>
+      <td>不需要經常做全力測試；更貼近日常訓練</td>
+      <td>HRmax 設錯、漂移、坡度/炎熱、疲勞都會扭曲心率–速度關係</td>
+      <td>趨勢追蹤；「相同 HR 更快 / 相同配速更輕鬆」</td>
+    </tr>
+    <tr className="vo2-mt-row-n">
+      <td><strong>自行車 功率–體重 估算（FTP/MAP）</strong></td>
+      <td>功率計 + 體重</td>
+      <td>與自行車表現高度相關；訓練數據品質高</td>
+      <td>校準/數據品質很重要；體重波動會改變相對值</td>
+      <td>監測有氧變化；指導強度</td>
+    </tr>
+    <tr className="vo2-mt-row-n">
+      <td><strong>心率比例法（HRmax/HRrest）</strong></td>
+      <td>最大心率 + 靜息心率（多日平均）</td>
+      <td>裝備門檻低；可作粗略起點</td>
+      <td>變異大；受壓力/睡眠/訓練狀態影響；誤差較大</td>
+      <td>只作大概參考</td>
+    </tr>
+    <tr className="vo2-mt-row-n">
+      <td><strong>手錶/平台 VO2 Max</strong></td>
+      <td>穿戴裝置（黑箱模型）</td>
+      <td>方便；可持續追蹤</td>
+      <td>不同品牌不可直接比較；環境與課表類型會拉歪</td>
+      <td>同裝置內看趨勢；配合其他方法交叉確認</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+實用捷徑：用於訓練（配速/區間/進步）時，優先使用 **可重複的比賽/時間試（VDOT）** 或 **固定條件下的訓練估算（心率–配速 / 功率）**。若要追求「真最大」，再考慮實驗室測試。
+
+## 實驗室 VO2 Max vs 估算 VO2 Max
+
+即使實驗室 VO2 Max 相同，兩位運動員也可能跑出差很多的成績，因為表現同時受 **經濟性/效率、技術、肌耐力、耐久、補給與配速** 影響。
+
+因此跑步圈常見「表現 VO2」概念（VDOT / equivalent VO2）：它不是要複製實驗室生理，而是把「**你跑得多快**」映射到 VO2 類尺度，用於：
+
+- **預測**不同距離的比賽表現
+- **設定訓練配速**（Easy/Marathon/Threshold/Interval 常用 vVO2max 百分比描述）
+
+## 如何理解與使用 VO2 Max（訓練角度）
+
+- **看趨勢，不看日波動**：以週/月視角更可靠
+- **確認輸入**：HRmax 設錯、心率帶漂移、停表/停跑、炎熱/大風、嚴重疲勞都會破壞心率–配速關係
+- **與負荷與恢復一起看**：VO2 Max 更像背景指標；可搭配 **[疲勞｜ATL](/zh-hant/docs/metrics/pmc/acute-training-load)**、**[體能｜CTL](/zh-hant/docs/metrics/pmc/chronic-training-load)**、**[狀態｜TSB](/zh-hant/docs/metrics/pmc/training-stress-balance)** 一起解讀
+- **用於指導訓練，而非追數字**：估算 VO2 Max 上升很多時反映「相同 HR 更快」或「相同配速更輕鬆」
+
+## 跑者角度：VO2 Max 在實務上代表什麼？
+
+VO2 間歇常用於提升高有氧輸出，也可能幫助經濟性/跑姿。它在不同賽事的「重要性權重」並不相同：短距離通常更依賴 VO2 強度能力；而在馬拉松訓練中 VO2 不是主菜，但定期穿插一些訓練區塊有助維持速度與動作品質。
+
+## 常見誤區
+
+- **把估算當成醫療報告**：平台 VO2 Max 多為模型輸出——主要看趨勢
+- **忽略閾值與耐久**：很多人平台停滯其實是閾值、耐久、補給或策略問題，而不是 VO2 Max 本身
+
+## VO2 Max 等級
+
+為了讓 VO2 Max 更易讀，我們會把它映射成 5 個等級並用顏色標示；支援兩種方式：
+
+- **缺少年齡/性別**：使用通用閾值
+- **具備年齡/性別**：使用按年齡區間/性別閾值
+
+詳見 **[VO2 Max 等級](/zh-hant/docs/metrics/maximal-oxygen-uptake/levels)**。
+
+## 常見疑問（FAQ）
+
+### 什麼算「好的」VO2 Max？
+取決於年齡與性別；最有用的基準是你自己的長期趨勢。如果想用分類視角解讀，可參考 **[VO2 Max 等級](/zh-hant/docs/metrics/maximal-oxygen-uptake/levels)**。
+
+### 為什麼我的手錶 VO2 Max 會突然下降？
+常見原因包含：炎熱、坡度/大風、疲勞、HRmax 設錯、心率訊號差，或配速策略異常。建議看週平均，並配合主觀感受與訓練負荷交叉確認。
+
+### VO2 Max 是不是預測比賽時間最好的指標？
+不是只靠它。表現也受閾值能力、經濟性、耐久、配速/補給影響。VO2 Max 是有用的「天花板」，但不是全部。
+
+### 如何提升 VO2 Max？
+多數人受益於穩定的有氧訓練量，再加上週期性的 VO2 強度間歇（並配合足夠恢復）。當輸入穩定、用趨勢追蹤時，改善會更容易被觀察到。
+
+## 參考資料
+
+- [RunnersConnect: VO2 Max for Runners](https://runnersconnect.net/vo2-max-for-runners/)
+- [Simpson Associates: Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm)
+- [Kokkinos P, et al. FRIEND cycle ergometry VO2max equation (2018)](https://pubmed.ncbi.nlm.nih.gov/29692203/)
+
+<DocsToolCtaCard
+  title="去工具頁：估算 VO2 Max，並直接查看你的 VO2 Max 等級"
+  description={
+    <>
+      如果你還沒估算過 VO2 Max，建議先用工具頁開始。結果也會顯示你的{" "}
+      <b>VO2 Max 等級</b>與簡短解釋，方便你用實用區間（Fair / Good / Very Good / Excellent）理解數字。
+    </>
+  }
+  primary={{ href: "/zh-hant/vo2-max-calculator", label: "打開 VO2 Max 計算器 →" }}
+  secondary={{ href: "/zh-hant/docs/metrics/maximal-oxygen-uptake", label: "先讀 VO2 Max 指南" }}
+/>
+

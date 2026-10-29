@@ -1,0 +1,84 @@
+---
+title: Normalized Graded Pace (NGP)
+description: Normalized Graded Pace converts variable running pace and terrain into a steady flat-equivalent intensity used for rTSS and run analysis.
+keywords: ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS", "running TSS", "normalized pace"]
+---
+
+# Normalized Graded Pace (NGP)
+
+**Normalized Graded Pace (NGP)** is an intensity metric for running. It builds on **[GAP (Grade Adjusted Pace)](/docs/metrics/pace/grade-adjusted-pace)**, and the logic is similar to cycling’s **[NP (Normalized Power)](/docs/metrics/power/normalized-power)**.
+
+In plain terms:
+-   **GAP** answers: “What flat-ground pace is equivalent to this uphill/downhill pace?” (instant/segment-level equivalence).
+-   **NGP** answers: “For this variable run (changes in grade and speed), what steady flat pace would have similar physiological cost?” (whole-run equivalence).
+
+## Core idea
+
+Physiological cost (glycogen use, lactate accumulation, overall metabolic stress) is **non-linear** with intensity.
+
+> **Example**:
+> A steady 5:00/km run is usually less stressful than “half the time at 4:00/km + half the time at 6:00/km”.
+> Even though both average to 5:00/km, the second run’s **NGP** may be meaningfully faster, reflecting the higher physiological cost of the surges.
+
+## Computation
+
+NGP is computed from a grade-adjusted intensity stream, then displayed back as a pace.
+
+### Normalization
+
+Because pace is a time value (smaller means faster), Trainingload.ai converts GAP into a speed/intensity equivalent before weighting. Then it applies an NP-like normalization:
+
+1.  **Convert**: turn GAP pace into speed or intensity.
+2.  **Smooth**: compute a 30-second rolling average.
+3.  **Weight**: apply 4th-power weighting to emphasize harder segments.
+4.  **Average + root**: take the mean and then the 4th root.
+5.  **Display**: convert the result back to pace for readability.
+
+```text
+NGP_intensity = 4th_root( (1/N) * sum_{i=1..N} (GAP_intensity_rolling(i))^4 )
+```
+
+## Typical applications
+
+### 1. Add context for trail and mountain effort
+On hilly terrain, average pace can look very slow. NGP helps reveal that your actual effort may not have dropped.
+-   **Example**: a mountainous trail run averages 10:00/km.
+-   **NGP**: could be much faster, better reflecting the metabolic stress your body felt.
+
+### 2. Basis for rTSS
+Trainingload.ai uses NGP to compute **rTSS (Running Training Stress Score)**. The formula structure is similar to cycling TSS:
+
+When NGP and FTPa are displayed as min/km pace, convert them to speed first. In speed terms:
+
+```text
+IF = Speed_NGP / Speed_FTPa
+```
+
+Using NGP helps keep running load comparable across different terrains.
+
+## Metric comparison
+
+| Metric | Full name | Meaning | When to use |
+| :--- | :--- | :--- | :--- |
+| **Avg Pace** | Average Pace | Actual average pace | Flat steady runs, finish-time estimation |
+| **Avg GAP** | Average GAP | Average grade-adjusted pace | Rolling routes without big surges |
+| **NGP** | Normalized Graded Pace | Normalized grade-adjusted pace | Trails, intervals, complex terrain, and rTSS |
+
+## How Trainingload.ai uses NGP
+
+-   **Use as a terrain-aware intensity reference**: NGP is often more informative than average pace on hilly or variable runs.
+-   **Compute running load**: NGP is a key input for rTSS because it reflects terrain and intensity variation.
+-   **Use with VI**: compute **VI (Variability Index) = NGP / Avg GAP**.
+    -   If VI is close to 1.0, the effort was steady.
+    -   If VI > 1.05, it likely reflects intervals or very complex terrain.
+
+## Related docs
+
+- [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace)
+- [Pace Zones](/docs/metrics/pace/zones)
+- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
+
+## References
+
+-   [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
+-   *Normalized Graded Pace (NGP) is a registered trademark of Peaksware, LLC.*

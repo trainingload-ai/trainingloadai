@@ -1,0 +1,11 @@
+{
+  "completionEmail": {
+    "subject": "L’eliminazione del tuo account Trainingload.ai è stata completata",
+    "completed": "Il tuo account Trainingload.ai e i dati associati sono stati eliminati.",
+    "thanks": "Grazie per aver utilizzato Trainingload.ai.",
+    "feedback": "Se vuoi dirci perché hai deciso di lasciarci o suggerirci come migliorare, rispondi direttamente a questa e-mail o contattaci.",
+    "feedbackAction": "Invia un feedback",
+    "feedbackSubject": "Feedback sull’eliminazione del mio account Trainingload.ai",
+    "closing": "Ti auguriamo il meglio per i tuoi prossimi allenamenti."
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-release-policy-v1.json",
+  "title": "Trainingload self-host release policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "releaseVersion",
+    "releaseKind",
+    "upgrade",
+    "database"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "releaseVersion": { "$ref": "#/$defs/stableVersion" },
+    "releaseKind": { "type": "string", "minLength": 1 },
+    "upgrade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supportedSourceVersions",
+        "applicationRollbackTo",
+        "backupRequired"
+      ],
+      "properties": {
+        "supportedSourceVersions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stableVersion" }
+        },
+        "applicationRollbackTo": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stableVersion" }
+        },
+        "backupRequired": { "const": true }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaEpoch",
+        "migrationPolicy",
+        "baselineMigration",
+        "baselineReleaseVersion",
+        "compatibilityWindowMinorVersions",
+        "databaseRollback",
+        "postBaselineMigrations"
+      ],
+      "properties": {
+        "schemaEpoch": { "type": "integer", "minimum": 1 },
+        "migrationPolicy": { "const": "expand-contract" },
+        "baselineMigration": { "$ref": "#/$defs/migrationId" },
+        "baselineReleaseVersion": { "$ref": "#/$defs/stableVersion" },
+        "compatibilityWindowMinorVersions": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "databaseRollback": { "const": "unsupported" },
+        "postBaselineMigrations": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/migrationId" },
+          "additionalProperties": { "$ref": "#/$defs/migrationPolicy" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stableVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "migrationId": {
+      "type": "string",
+      "pattern": "^(?:[0-9]{4}|[0-9]{14})_[a-z0-9_]+$"
+    },
+    "migrationPolicy": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["phase", "releaseVersion"],
+          "properties": {
+            "phase": { "enum": ["expand", "backfill"] },
+            "releaseVersion": { "$ref": "#/$defs/stableVersion" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["phase", "releaseVersion", "expandedInRelease"],
+          "properties": {
+            "phase": { "const": "contract" },
+            "releaseVersion": { "$ref": "#/$defs/stableVersion" },
+            "expandedInRelease": { "$ref": "#/$defs/stableVersion" }
+          }
+        }
+      ]
+    }
+  }
+}

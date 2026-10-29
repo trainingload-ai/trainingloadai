@@ -1,0 +1,116 @@
+---
+title: Training Stress Score (TSS)
+description: Training Stress Score (TSS) estimates single-session training load by combining duration and relative intensity.
+keywords: ["TSS", "Training Stress Score", "rTSS", "sTSS", "hrTSS", "tTSS", "training stress score", "single session training load", "training load"]
+---
+
+# Training Stress Score (TSS)
+
+**Training Stress Score (TSS)** is a widely used way to estimate the **training stress** of a single workout. It combines **duration** and **relative intensity** into one number so you can compare load across different session types and lengths.
+
+It answers the key question: **“How much stress did today’s workout place on my body?”**
+
+## Core Concept
+
+TSS rests on one baseline:
+
+> **One hour all-out at functional threshold (FTP) produces 100 TSS.**
+
+This means:
+-   **100 TSS** = 1 hour @ FTP (all-out)
+-   **50 TSS** = 1 hour easy (~70% FTP) or 30 minutes @ FTP
+-   **150 TSS** = a very hard session, usually taking more than 2–3 hours of cycling
+
+With TSS, you can compare the stress of “a 2-hour easy run” vs. “a 30-minute interval run.”
+
+## Calculation Formula
+
+The standard TSS formula (for cycling) is:
+
+$$
+TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
+$$
+
+Where:
+-   $t$ = exercise duration (seconds)
+-   $NP$ = [Normalized Power (NP)](/docs/metrics/power/normalized-power)
+-   $IF$ = [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor)
+-   $FTP$ = [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power)
+-   $3600$ = seconds in one hour
+
+In essence, this computes: **duration (hours) $\times$ squared intensity factor ($IF^2$) $\times$ 100**. Stress from intensity rises much faster than linearly—not proportionally with intensity alone.
+
+## TSS Variants and Priority
+
+Different sports use different sensors (power meter vs. GPS vs. heart rate strap), so several TSS variants exist. Trainingload.ai selects the calculation method **according to the priority you set in preferences** (default: **power > heart rate > pace > RPE**):
+
+| Variant | Full name | Sport | Accuracy | Core of calculation | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **TSS** | **Power TSS** | Cycling/rowing | ⭐⭐⭐⭐⭐ | **Power** | Most direct when power data and FTP are reliable; based on NP and FTP. |
+| **hrTSS** | **Heart Rate TSS** | All sports | ⭐⭐ | **Heart rate (TRIMP)** | Based on time in HR zones ([TRIMP](/docs/metrics/training-load/training-impulse)). **Cardiac lag** underestimates short-interval load. |
+| **rTSS** | **Running TSS** | Running | ⭐⭐⭐⭐ | **Pace** | Based on [NGP](/docs/metrics/pace/normalized-graded-pace) and threshold pace (rFTPa). Terrain-corrected; useful when threshold pace and route data are reliable. |
+| **sTSS** | **Swim TSS** | Swimming | ⭐⭐⭐ | **Speed** | Based on CSS (critical swim speed) and distance/time. |
+| **tTSS** | **Time TSS** | Fallback | ⭐ | **Average heart rate** | Rough estimate when only average HR is available; higher error. |
+
+## Typical Reference Ranges
+
+Understanding TSS ranges helps you judge a session’s impact and recovery needs:
+
+| TSS range | Fatigue level | Recovery suggestion | Typical examples |
+| :--- | :--- | :--- | :--- |
+| **< 150** | **Low** | Usually fully recovered the next day | 1–2 h aerobic endurance ride; 45 min easy run. |
+| **150 - 300** | **Medium** | Residual fatigue may remain the next day | 3–4 h long ride; high-intensity interval workout. |
+| **300 - 450** | **High** | Fatigue may still be present after two days | Half-distance triathlon; Grand Tour–style stage; ultra-long endurance workout. |
+| **> 450** | **Epic** | May need several days to recover; can affect immunity | Ironman; extreme endurance challenge. |
+
+## Recommendations
+
+### How Trainingload.ai uses TSS
+
+Trainingload.ai treats TSS as one input, not as a verdict. A workout with high TSS may justify easier follow-up training, but the decision should also consider sport type, recent ATL, current CTL, subjective feedback, and whether the workout matched the plan.
+
+In practice, TSS is most useful when it is connected to the plan:
+
+-   Compare **planned TSS vs. completed TSS** after each workout.
+-   Watch weekly load progression before increasing volume or intensity.
+-   Use TSS together with [ATL](/docs/metrics/pmc/acute-training-load), [CTL](/docs/metrics/pmc/chronic-training-load), and [TSB](/docs/metrics/pmc/training-stress-balance), rather than treating a single workout score in isolation.
+
+### 1. Watch out for “inflated” TSS
+If you often see single-session TSS above 200 or even 300, first check whether your **FTP/threshold is set too low**.
+-   For most amateurs, 300 TSS in one session is a rare physiological challenge.
+-   If FTP is set too low, IF is inflated, and TSS rises disproportionately.
+
+### 2. No data? Manual estimation
+If your device died or you did strength training, use **RPE (rating of perceived exertion)** to estimate load and keep your [PMC chart](/docs/metrics/pmc/chronic-training-load) continuous:
+
+$$
+TSS \approx \frac{\text{duration (min)} \times \text{RPE}(1-10)}{60} \times 10
+$$
+
+*Note: this is a rough heuristic. RPE 10 corresponds to ~100 TSS per hour.*
+
+## Limitations
+
+1.  **Cross-sport trap**: although TSS aims to standardize, **100 TSS of running** usually causes more mechanical damage (musculoskeletal impact) than **100 TSS of cycling**. Don’t treat them as fully interchangeable.
+2.  **Non-physiological stress**: TSS does not include environmental stress (heat, altitude) or life stress (poor sleep, work anxiety), which also raise true recovery cost.
+
+## FAQ
+
+### Is higher TSS always better?
+
+No. Higher TSS means higher modeled stress, not automatically better training. Productive training depends on the goal of the session, the phase of the plan, and whether you can recover before the next key workout.
+
+### Can TSS compare running and cycling directly?
+
+Only cautiously. TSS helps normalize workload, but running usually adds more musculoskeletal stress than cycling at the same score.
+
+### Why does an incorrect FTP distort TSS?
+
+TSS depends on intensity relative to threshold. If FTP is set too low, IF becomes too high and TSS can be inflated; if FTP is too high, training stress can be understated.
+
+## References
+
+-   [TrainingPeaks: Training Stress Scores (TSS) Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
+-   [Joe Friel: The Triathlete's Training Bible](https://joefrieltraining.com/)
+
+> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of [Peaksware, LLC](https://trainingpeaks.com/).

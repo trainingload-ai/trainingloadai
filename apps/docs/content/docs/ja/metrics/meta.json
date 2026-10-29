@@ -1,0 +1,13 @@
+{
+  "title": "指標",
+  "pages": [
+    "index",
+    "power",
+    "heart-rate",
+    "pace",
+    "training-load",
+    "pmc",
+    "physiology",
+    "maximal-oxygen-uptake"
+  ]
+}

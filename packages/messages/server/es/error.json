@@ -1,0 +1,9 @@
+{
+  "user": {
+    "not_found": "Usuario no encontrado",
+    "not_authorized": "Usuario no autorizado"
+  },
+  "common": {
+    "internal_server_error": "Internal server error"
+  }
+}

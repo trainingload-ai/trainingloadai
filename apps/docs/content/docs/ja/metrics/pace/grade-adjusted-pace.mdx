@@ -1,0 +1,50 @@
+---
+title: Grade Adjusted Pace (GAP)
+description: 坂道での実ペースを、同じ努力に相当する平地ペースへ換算します。
+keywords: ["GAP", "Grade Adjusted Pace", "Pace", "Running", "Elevation"]
+---
+
+# Grade Adjusted Pace (GAP)
+
+**Grade Adjusted Pace (GAP)** は、上りや下りでの実際のペースを、同じエネルギーコストに相当する平地ペースへ換算する指標です。
+
+「この坂がなかったら、同じ努力で平地をどれくらいのペースで走っていたか？」に答えるためのものです。
+
+## 基本概念
+
+起伏のあるコースでは実ペースが誤解を生みます。
+
+- **上り**: 重力に逆らうため、ペースは遅くても負荷は高い。
+- **下り**: ペースは速くなるが、ブレーキ動作による筋ダメージもあります。
+
+GAP は地形の影響を減らし、異なるルート同士の努力を比べやすくします。
+
+## 計算の考え方
+
+Trainingload.ai は Minetti (2002) に基づくエネルギーコストモデルを使います。
+
+$$
+C_r = 155.4i^5 - 30.4i^4 - 43.3i^3 + 46.3i^2 + 19.5i + 3.6
+$$
+
+- $C_r$: エネルギーコスト
+- $i$: 勾配（5% = 0.05）
+
+```text
+GAP = Pace_actual / (C_r / C_flat)
+```
+
+## 使いどころ
+
+- トレイルや山岳ランの努力評価。
+- [NGP](/ja/docs/metrics/pace/normalized-graded-pace) と rTSS の土台。
+- レースコースのペーシング設計。
+
+## 注意点
+
+GAP は代謝コストの換算であり、筋ダメージを完全には表しません。長い下りは GAP 上では楽に見えても、脚への負担は大きい場合があります。
+
+## 参考
+
+- Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes.
+- [Strava: Grade Adjusted Pace](https://support.strava.com/hc/en-us/articles/216917067-Grade-Adjusted-Pace-GAP)

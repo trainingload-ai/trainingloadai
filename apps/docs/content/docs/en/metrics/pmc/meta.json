@@ -1,0 +1,11 @@
+{
+  "title": "PMC (Performance Manager Chart)",
+  "pages": [
+    "chronic-training-load",
+    "acute-training-load",
+    "training-stress-balance",
+    "acute-to-chronic-workload-ratio",
+    "monotony"
+  ]
+}
+

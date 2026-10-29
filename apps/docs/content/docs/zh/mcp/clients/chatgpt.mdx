@@ -1,0 +1,18 @@
+---
+title: 连接 ChatGPT
+description: 在 ChatGPT 中添加 TrainingLoad custom MCP server 并完成 OAuth。
+---
+
+# 连接 ChatGPT
+
+1. 打开 ChatGPT 的 **Plugins**，选择加号，再选择 **Add custom MCP server**。如果工作区要求 developer mode，请先按管理员策略启用。
+2. 名称填写 `TrainingLoad`，服务地址填写 `https://api.trainingload.ai/mcp`。
+3. 扫描工具并选择 **Connect**。浏览器会打开 TrainingLoad 授权页。
+4. 检查客户端名称和只读 scopes，然后批准。
+5. 在新对话中启用 TrainingLoad，发送：“总结我当前的训练状态，并列出使用的工具和日期范围。”
+
+应首先看到 `get_training_snapshot`。需要健康数据时再调用 `get_health_summary` 并完成单独的 `health:read` 授权。
+
+如果工具未刷新，先从当前对话移除并重新启用 TrainingLoad；如果 OAuth 失败，从 TrainingLoad 授权页面撤销旧连接后重连。
+
+[ChatGPT MCP 官方说明](https://developers.openai.com/plugins/build/app-quickstart)

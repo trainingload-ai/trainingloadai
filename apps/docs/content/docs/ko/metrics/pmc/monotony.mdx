@@ -1,0 +1,39 @@
+---
+title: 훈련 단조도(Monotony)
+description: Trainingload.ai가 최근 7일의 일일 부하로 훈련 단조도와 Training Strain을 계산하는 방법과 Foster 고전 지표와의 차이를 설명합니다.
+keywords: ["훈련 단조도", "Monotony", "Training Strain", "부하 변동", "Carl Foster"]
+---
+
+# 훈련 단조도란?
+
+**훈련 단조도**는 오늘을 포함한 최근 7일의 일일 부하가 얼마나 비슷한지 나타냅니다. 매일 비슷하면 값이 높아지고, 높은 날·낮은 날·부하 0인 날이 뚜렷하면 대체로 낮아집니다.
+
+Trainingload.ai는 0~1 범위로 정규화한 값을 표시하며, Foster의 고전 지표와는 다릅니다. 피로, 회복, 오버트레이닝 또는 부상 확률을 직접 측정하지 않습니다.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard value="0.72" metricLabel="Monotony"
+    valuePopoverTitle="단조도 값"
+    valuePopoverBody="7일 일일 부하의 평균과 모표준편차로 계산하며, 활동이 없는 날은 0입니다."
+    rangePopoverTitle="화면 구간"
+    rangePopoverBody="<0.6, 0.6–0.8, >0.8은 검토용 구간이지 건강 또는 부상 기준이 아닙니다."
+    helpTitle="부하 변동"
+    details="7일의 개별 값과 총부하를 함께 확인하세요." />
+</div>
+
+```text
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+monotony = mean_load / (sd_load + mean_load)
+training_strain = sum(loads) × monotony / 0.5
+```
+
+7일이 모두 0이면 Monotony와 Strain은 0입니다. 고전 공식은 `foster_monotony = mean_load / sd_load`이며 상한이 없습니다. 따라서 Trainingload.ai의 `0.8`을 Foster의 `2.0`과 직접 비교할 수 없습니다.
+
+7일 모두 부하 0이면 0, 하루만 부하가 있으면 약 0.29, 7일의 양수 부하가 모두 같으면 1입니다. 낮다고 항상 좋은 것은 아닙니다. 한 번의 큰 부하와 여섯 번의 0도 낮은 단조도를 만듭니다.
+
+## 참고 자료
+
+- [Foster(1998)](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad 외(2017): session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones 외(2017): 체계적 문헌고찰](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr: Training Monotony](https://fellrnr.com/wiki/Training_Monotony)

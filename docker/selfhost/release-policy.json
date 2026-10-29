@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "1.1.13",
+  "releaseKind": "initial-self-host-v1",
+  "upgrade": {
+    "supportedSourceVersions": [],
+    "applicationRollbackTo": [],
+    "backupRequired": true
+  },
+  "database": {
+    "schemaEpoch": 1,
+    "migrationPolicy": "expand-contract",
+    "baselineMigration": "0001_core_baseline",
+    "baselineReleaseVersion": "1.1.13",
+    "compatibilityWindowMinorVersions": 2,
+    "databaseRollback": "unsupported",
+    "postBaselineMigrations": {
+      "0002_neutral_ai_operations": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0003_self_host_ai_configuration": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0004_core_ai_usage_compatibility": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0005_self_host_ai_model_metadata": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0006_self_host_operation_analytics_consent": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0007_single_owner": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0008_core_domain_invariants": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0009_core_preference_defaults": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0010_background_coach_runs": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0011_background_coach_task_kinds": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      "0012_today_suggestion_action_loop": {
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      }
+    }
+  }
+}

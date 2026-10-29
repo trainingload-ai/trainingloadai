@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-restore-report-v1.json",
+  "title": "Trainingload self-host restore report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "restoreId",
+    "backupId",
+    "status",
+    "startedAt",
+    "finishedAt",
+    "sourceReleaseVersion",
+    "targetReleaseVersion",
+    "checksumsVerified",
+    "databaseRestored",
+    "uploadsRestored",
+    "serviceReady",
+    "errorCode"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-restore-report" },
+    "restoreId": { "type": "string", "format": "uuid" },
+    "backupId": { "type": "string", "format": "uuid" },
+    "status": { "type": "string", "enum": ["completed", "failed"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "sourceReleaseVersion": { "type": "string", "minLength": 1 },
+    "targetReleaseVersion": { "type": "string", "minLength": 1 },
+    "checksumsVerified": { "type": "boolean" },
+    "databaseRestored": { "type": "boolean" },
+    "uploadsRestored": { "type": "boolean" },
+    "serviceReady": { "type": "boolean" },
+    "errorCode": { "type": ["string", "null"] }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "completed" } } },
+      "then": {
+        "properties": {
+          "checksumsVerified": { "const": true },
+          "databaseRestored": { "const": true },
+          "uploadsRestored": { "const": true },
+          "serviceReady": { "const": true },
+          "errorCode": { "type": "null" }
+        }
+      },
+      "else": { "properties": { "errorCode": { "type": "string" } } }
+    }
+  ]
+}

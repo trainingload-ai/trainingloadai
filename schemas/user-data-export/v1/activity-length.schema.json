@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/activity-length.schema.json",
+  "title": "Pool swimming length",
+  "description": "One active or idle pool length recorded within a swimming activity.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "activityId": {
+      "type": "string",
+      "description": "The parent activity identifier."
+    },
+    "lengthIndex": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The zero-based length order within the activity."
+    },
+    "timestamp": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The length message time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "startTime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The length start time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "elapsedTimeSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The elapsed length duration in seconds."
+    },
+    "timerTimeSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The active length duration in seconds."
+    },
+    "totalStrokes": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The total stroke count."
+    },
+    "averageSpeedMetersPerSecond": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The average speed in meters per second."
+    },
+    "strokeType": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The normalized swimming stroke type."
+    },
+    "averageCadenceStrokesPerMinute": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The average swimming cadence in strokes per minute."
+    },
+    "caloriesKilocalories": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The estimated energy expenditure in kilocalories."
+    },
+    "lengthType": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Whether the length is active or idle."
+    }
+  },
+  "required": [
+    "activityId"
+  ]
+}

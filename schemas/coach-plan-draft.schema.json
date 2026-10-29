@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starshards.local/schemas/coach-plan-draft.schema.json",
+  "title": "CoachPlanDraft",
+  "description": "AI coach fenced JSON for a training plan draft. Aligns with POST /plans/create body (CreatePlanDto). Each workout `text` must be valid workout DSL.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "title",
+    "periodWeeks",
+    "workouts"
+  ],
+  "properties": {
+    "type": {
+      "const": "coach_plan_draft",
+      "description": "Discriminator for fenced block parsing"
+    },
+    "qualityContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "startDate": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Agreed preview start date, not activation. Weeks/days are relative to this date."
+        },
+        "weekPhases": {
+          "type": "array",
+          "maxItems": 520,
+          "items": {
+            "type": "string",
+            "enum": [
+              "BASE",
+              "BUILD",
+              "RECOVERY",
+              "TAPER",
+              "RACE",
+              "MAINTENANCE"
+            ]
+          }
+        },
+        "maxTrainingDaysPerWeek": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "maxDailyMinutes": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1440
+        },
+        "allowedDays": {
+          "type": "array",
+          "description": "Allowed 1-based day offsets within each plan week, not ISO weekday numbers.",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          }
+        },
+        "requiredSports": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "RUN",
+              "CYCLING",
+              "SWIM",
+              "STRENGTH"
+            ]
+          }
+        },
+        "raceDiscipline": {
+          "type": "string",
+          "enum": [
+            "RUN",
+            "CYCLING",
+            "SWIM",
+            "TRIATHLON"
+          ]
+        }
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable plan explanation. Prefer 2-5 concise sentences covering goal, current training context or baseline assumptions, weekly structure, intended adaptations/effects, and key safety/personalization caveats. Do not put workout DSL/parser instructions here."
+    },
+    "periodWeeks": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "workouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "weekIndex",
+          "dayIndex",
+          "structureKind",
+          "text"
+        ],
+        "properties": {
+          "weekIndex": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "dayIndex": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "sessionIndex": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "structureKind": {
+            "type": "string",
+            "enum": [
+              "ENDURANCE",
+              "STRENGTH",
+              "FREEFORM"
+            ],
+            "description": "Workout DSL family. Use ENDURANCE for step DSL and STRENGTH for exercise/set DSL."
+          },
+          "dslVersion": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Trainingload.ai workout DSL only (parseable). Example: `work 30m` or a multiline repeat block. Prefer multiline repeats over inline comma repeats. Not free-form prose."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Athlete-readable natural-language explanation of the complete workout, in the user's language. In roughly 1-3 practical sentences, restate the ordered warm-up, main work, repeats, recovery/rest, cool-down, durations/distances, and intensity/effort cues. For strength include exercises, sets, reps/time, load or RPE/RIR, and rest. It must make sense without reading the DSL text; do not paste DSL or provide only an intent cue."
+          },
+          "sportType": {
+            "type": "string"
+          },
+          "sportDefinitionCode": {
+            "type": "string",
+            "description": "Use STRENGTH_TRAINING for strength workouts and the exact sport catalog code when known."
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

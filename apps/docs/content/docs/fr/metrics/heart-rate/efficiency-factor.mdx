@@ -1,0 +1,80 @@
+---
+title: Efficiency Factor (EF)
+description: Efficiency Factor compares output with average heart rate to track aerobic efficiency trends across similar endurance sessions.
+keywords: ["EF", "Efficiency Factor", "aerobic efficiency", "Aerobic Fitness", "Base Training", "heart rate efficiency"]
+---
+
+# Efficiency Factor (EF)
+
+**Efficiency Factor (EF)** links your **physiological input** to your **performance output**. In simple terms, it asks: how much pace or power did you produce per beat of heart rate?
+
+It is useful for tracking aerobic efficiency during similar endurance sessions, especially across a base period.
+
+## Core idea
+
+EF is simple: **output per unit heart rate**.
+As you get fitter, you can produce more output at the same HR, or you can maintain the same output at a lower HR.
+
+## Formula
+
+EF is computed as output divided by input:
+
+### Cycling
+
+$$
+EF = \frac{NP}{AvgHR}
+$$
+*Note: some tools use average power instead. Trainingload.ai uses **NP** by default to stay consistent with how Decoupling is computed.*
+
+### Running
+
+$$
+EF = \frac{NGP}{AvgHR}
+$$
+*Note: Trainingload.ai uses the speed derived from **NGP (Normalized Graded Pace)** (m/min or yd/min) to reduce terrain effects.*
+
+## Typical values
+
+EF is a **relative metric**. You generally shouldn’t compare EF across athletes because resting HR, Max HR, body mass, and measurement devices differ.
+-   **Compare to yourself**: compare to your own past EF.
+-   **Typical trend**: across a solid 12–16 week base period, EF often rises gradually.
+
+## Typical applications
+
+### 1. Track base training progress
+During long base periods, low-intensity endurance work can feel repetitive. A steadily rising EF trend across comparable sessions can be a sign that aerobic efficiency is improving.
+
+-   **Rising**: training may be improving aerobic efficiency.
+-   **Plateau**: if EF stops rising for several weeks, your base may be stabilizing, or you may be carrying fatigue.
+-   **Decision point**: this can support adding more threshold or interval work, but it should be checked against fatigue, goals, and recent load.
+
+### 2. Cross-check fatigue signals
+If EF changes abruptly, it is not always a fitness change. Unusually low heart rate, unusually high RPE, poor sleep, heat, or sensor issues can all distort EF. Cross-check with how the session felt and with recent training load.
+
+## EF vs. aerobic decoupling
+
+**EF** and **[Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)** complement each other:
+
+| Metric | Time horizon | Question |
+| :--- | :--- | :--- |
+| **EF** | **Long-term trend** | “How much did I improve over the last month?” |
+| **Decoupling** | **Single-workout quality** | “Did I maintain efficiency during this long session?” |
+
+EF shows the efficiency level of a session or trend. Decoupling shows whether that efficiency stayed stable later in a long steady effort.
+
+## How Trainingload.ai uses EF
+
+-   **Trend only comparable sessions**: EF is most useful when comparing similar routes, durations, terrain, and intensity.
+-   **Filter noisy workouts**: Trainingload.ai emphasizes aerobic sessions (mostly Zone 1 / Zone 2) when looking at EF trends.
+-   **Pair with decoupling**: EF can rise while late-session drift remains high, so both metrics tell a fuller story.
+-   **Keep equipment consistent**: use the same HR strap and power meter when possible. Device differences can hide small real improvements.
+
+## Related docs
+
+- [Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)
+- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
+- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+
+## References
+
+-   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)

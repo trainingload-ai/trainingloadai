@@ -1,0 +1,510 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-config-v1.json",
+  "title": "Trainingload.ai self-host v1 resolved runtime configuration",
+  "description": "Application process configuration after Compose has resolved operator settings and injected fixed runtime values. This is not the schema for .env.selfhost; use self-host-instance-config.schema.json for the signed release operator surface.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "SELF_HOST_MODE",
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "EXTERNAL_PROVIDER_CREDENTIAL_SECRET",
+    "STORAGE_STRATEGY",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_API_URL",
+    "TRUSTED_ORIGINS",
+    "SELF_HOST_HTTP_BIND"
+  ],
+  "properties": {
+    "SELF_HOST_MODE": {
+      "type": "string",
+      "enum": [
+        "core-local",
+        "connected",
+        "extended"
+      ],
+      "default": "core-local"
+    },
+    "DATABASE_URL": {
+      "type": "string",
+      "minLength": 1,
+      "writeOnly": true
+    },
+    "BETTER_AUTH_SECRET": {
+      "type": "string",
+      "minLength": 32,
+      "writeOnly": true
+    },
+    "EXTERNAL_PROVIDER_CREDENTIAL_SECRET": {
+      "type": "string",
+      "minLength": 32,
+      "writeOnly": true
+    },
+    "NEXT_PUBLIC_APP_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "NEXT_PUBLIC_API_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "TRUSTED_ORIGINS": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SELF_HOST_HTTP_BIND": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SELF_HOST_ALLOW_INSECURE_HTTP": {
+      "type": "boolean",
+      "default": false
+    },
+    "SELF_HOST_OPERATIONS_PATH": {
+      "type": "string",
+      "pattern": "^/",
+      "default": "/data/operations"
+    },
+    "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS": {
+      "type": "integer",
+      "minimum": 600,
+      "maximum": 604800,
+      "default": 86400
+    },
+    "STORAGE_STRATEGY": {
+      "type": "string",
+      "enum": [
+        "LOCAL"
+      ],
+      "default": "LOCAL"
+    },
+    "LOCAL_STORAGE_PATH": {
+      "type": "string",
+      "default": "/data/uploads"
+    },
+    "LOCAL_STORAGE_CACHE_PATH": {
+      "type": "string",
+      "default": "/data/cache/storage"
+    },
+    "MAP_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "none",
+        "openfreemap",
+        "osm-raster",
+        "custom-raster",
+        "custom-style",
+        "local"
+      ],
+      "default": "none"
+    },
+    "MAP_STYLE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MAP_TILE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MAP_ATTRIBUTION": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MAP_MAX_ZOOM": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 24
+    },
+    "ACTIVITY_MAP_THUMB_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "local"
+      ],
+      "default": "local"
+    },
+    "ELEVATION_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "none",
+        "local-dem"
+      ],
+      "default": "none"
+    },
+    "ELEVATION_DATA_PATH": {
+      "type": "string",
+      "minLength": 1,
+      "default": "/data/elevation"
+    },
+    "ELEVATION_TILE_ZOOM": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 22,
+      "default": 13
+    },
+    "AI_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "none",
+        "openai",
+        "deepseek",
+        "openrouter",
+        "aliyun",
+        "dashscope",
+        "custom-openai-compatible"
+      ],
+      "default": "none"
+    },
+    "OPENROUTER_API_KEY": {
+      "type": "string",
+      "minLength": 1,
+      "writeOnly": true
+    },
+    "OPENROUTER_DEFAULT_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OPENROUTER_REASONING_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DASHSCOPE_API_KEY": {
+      "type": "string",
+      "minLength": 1,
+      "writeOnly": true
+    },
+    "DASHSCOPE_BASE_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "DASHSCOPE_DEFAULT_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DASHSCOPE_REASONING_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DEEPSEEK_API_KEY": {
+      "type": "string",
+      "minLength": 1,
+      "writeOnly": true
+    },
+    "DEEPSEEK_BASE_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "DEEPSEEK_DEFAULT_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DEEPSEEK_REASONING_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AI_API_KEY": {
+      "type": "string",
+      "minLength": 1,
+      "writeOnly": true
+    },
+    "AI_BASE_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "AI_DEFAULT_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AI_REASONING_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OPENAI_API_KEY": {
+      "type": "string",
+      "minLength": 1,
+      "writeOnly": true
+    },
+    "OPENAI_BASE_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "OPENAI_DEFAULT_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OPENAI_REASONING_MODEL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OPENROUTER_BASE_URL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "TELEMETRY_ENABLED": {
+      "type": "boolean",
+      "default": false
+    },
+    "ACTIVITY_WEATHER_ENABLED": {
+      "type": "boolean",
+      "default": false
+    },
+    "AI_TODAY_WEATHER_ENABLED": {
+      "type": "boolean",
+      "default": false
+    },
+    "THIRD_PARTY_SYNC_ENABLED": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "openai"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "OPENAI_API_KEY",
+          "OPENAI_DEFAULT_MODEL",
+          "OPENAI_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "custom-raster"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "MAP_TILE_URL",
+          "MAP_ATTRIBUTION"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "custom-style"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "MAP_STYLE_URL",
+          "MAP_ATTRIBUTION"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "local"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "MAP_ATTRIBUTION"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "MAP_STYLE_URL"
+            ]
+          },
+          {
+            "required": [
+              "MAP_TILE_URL"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "openrouter"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "OPENROUTER_API_KEY",
+          "OPENROUTER_DEFAULT_MODEL",
+          "OPENROUTER_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "enum": [
+              "aliyun",
+              "dashscope"
+            ]
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "DASHSCOPE_API_KEY",
+          "DASHSCOPE_DEFAULT_MODEL",
+          "DASHSCOPE_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "deepseek"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "DEEPSEEK_API_KEY",
+          "DEEPSEEK_DEFAULT_MODEL",
+          "DEEPSEEK_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "custom-openai-compatible"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "required": [
+          "AI_API_KEY",
+          "AI_BASE_URL",
+          "AI_DEFAULT_MODEL",
+          "AI_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "TELEMETRY_ENABLED": {
+            "const": true
+          }
+        },
+        "required": [
+          "TELEMETRY_ENABLED"
+        ]
+      },
+      "then": {
+        "required": [
+          "LANGFUSE_PUBLIC_KEY",
+          "LANGFUSE_SECRET_KEY"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "STORAGE_STRATEGY": {
+            "const": "R2"
+          }
+        },
+        "required": [
+          "STORAGE_STRATEGY"
+        ]
+      },
+      "then": {
+        "required": [
+          "CLOUDFLARE_ACCOUNT_ID",
+          "CLOUDFLARE_ACCESS_KEY_ID",
+          "CLOUDFLARE_SECRET_ACCESS_KEY",
+          "CLOUDFLARE_BUCKET_NAME"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "SELF_HOST_MODE": {
+            "const": "core-local"
+          }
+        },
+        "required": [
+          "SELF_HOST_MODE"
+        ]
+      },
+      "then": {
+        "properties": {
+          "STORAGE_STRATEGY": {
+            "const": "LOCAL"
+          },
+          "MAP_PROVIDER": {
+            "enum": [
+              "none",
+              "local"
+            ]
+          },
+          "ACTIVITY_MAP_THUMB_PROVIDER": {
+            "const": "local"
+          },
+          "ELEVATION_PROVIDER": {
+            "enum": [
+              "none",
+              "local-dem"
+            ]
+          },
+          "TELEMETRY_ENABLED": {
+            "const": false
+          },
+          "ACTIVITY_WEATHER_ENABLED": {
+            "const": false
+          },
+          "AI_TODAY_WEATHER_ENABLED": {
+            "const": false
+          },
+          "THIRD_PARTY_SYNC_ENABLED": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}

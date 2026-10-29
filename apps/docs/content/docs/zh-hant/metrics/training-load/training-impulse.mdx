@@ -1,0 +1,119 @@
+---
+title: TRIMP（訓練衝量）：用心率計算內部訓練負荷公式
+description: TRIMP（訓練衝量）用心率和時長估算內部訓練負荷。看 Banister 指數公式、Edwards 心率分區，以及沒有功率或可靠配速時，怎樣用 TRIMP 代替 TSS 作為負荷輸入。
+keywords: ["TRIMP", "訓練衝量", "Banister TRIMP", "心率訓練負荷", "Edwards TRIMP", "內部訓練負荷"]
+---
+
+# TRIMP（訓練衝量）：用心率計算內部訓練負荷公式
+
+**訓練衝量（TRIMP）**係 Banister 博士喺 1975 年提出（1991 年再完善）嘅方法，用嚟量化 **內部訓練負荷（internal training load）**。
+
+如果 TSS 係以功率（外部做功）為基礎嘅黃金標準，TRIMP 就係以 **心率（生理壓力）**為基礎嘅核心指標。佢想解決嘅問題係：**點樣將心率同時間合併成一個數字，代表身體究竟承受咗幾多壓力？**
+
+## 核心概念
+
+基本邏輯係：**負荷 = 時長 × 強度**。
+
+喺 TRIMP 入面，「強度」唔係單純平均心率；因為高心率帶嚟嘅生理成本係 **非線性**：
+
+- 130 → 140 bpm 增加嘅壓力相對細
+- 180 → 190 bpm（接近最大）壓力會 **指數式**上升（乳酸累積、荷爾蒙反應）
+
+所以 Banister 引入指數加權，令高強度段得到更符合生理成本嘅分數。
+
+## 公式（Banister TRIMP）
+
+Trainingload.ai 預設使用經典 **Banister TRIMP（指數模型）**：
+
+```text
+TRIMP = t_min * HR_ratio * 0.64 * exp(k * HR_ratio)
+```
+
+其中：
+
+- $t_{min}$ = 時長（分鐘）
+- $HR_{ratio}$ = 心率儲備比（HRR ratio）
+
+  ```text
+  HR_ratio = (HR_avg - HR_rest) / (HR_max - HR_rest)
+  ```
+
+- $e$ = 自然常數（2.718…）
+- $k$ = 性別係數：男 **1.92**、女 **1.67**（反映高心率下乳酸反應差異）
+
+### 例子
+
+假設一位男運動員（HRmax 200、HRrest 50）：
+
+1) **輕鬆跑 1 小時 @ 140 bpm**（HR_ratio = 0.6）：
+
+```text
+TRIMP ≈ 60 * 0.6 * 0.64 * exp(1.92 * 0.6) ≈ 72
+```
+
+2) **硬 1 小時 @ 185 bpm**（HR_ratio = 0.9）：
+
+```text
+TRIMP ≈ 60 * 0.9 * 0.64 * exp(1.92 * 0.9) ≈ 194
+```
+
+同樣 1 小時，高強度 TRIMP 可以係低強度嘅約 3 倍，反映強度成本嘅非線性。
+
+## 變體與演化
+
+除咗 Banister 模型，仲有其他變體。Trainingload.ai 會按數據可用性支援：
+
+| 變體 | 全名 | 核心訊號 | 優點 / 缺點 |
+| :--- | :--- | :--- | :--- |
+| **TRIMP** | **Banister TRIMP** | **指數加權心率** | ⭐⭐⭐⭐ 推薦。貼近生理（乳酸曲線），適合穩定訓練；對短間歇較唔敏感。 |
+| **TRIMP_zone** | **Edwards TRIMP** | **心率區間累積** | ⭐⭐⭐ 簡單直觀。分 5 區加權（Z1=1…Z5=5），但邊界效應係缺點。 |
+| **TRIMP_avg** | **平均心率** | **平均心率** | ⭐⭐ 太簡化：`Time * HR_avg`，忽略高強度成本，易低估硬課。 |
+| **sRPE** | **Session RPE** | **主觀評分** | ⭐ 後備：Time × RPE（1–10）。冇心率亦可用，但靠自我回報。 |
+
+## 常見用途
+
+### 1) 作為 PMC 嘅數據來源
+
+對於功率唔易取得嘅運動（游泳、越野跑、健身），TRIMP 係計 [ATL（疲勞）](/zh-hant/docs/metrics/pmc/acute-training-load) 同 [CTL（體能）](/zh-hant/docs/metrics/pmc/chronic-training-load) 嘅好替代。
+
+- 單車/公路跑多數用 **TSS**
+- 任何有氧活動都可以用 **TRIMP**
+
+### 2) 監測過度訓練
+
+如果你見到 **TRIMP / RPE 比例**異常：
+
+- **正常**：TRIMP 高，RPE 都高
+- **異常**：TRIMP 高但 RPE 低（可能脫水/生病造成心率漂移），或者 TRIMP 低但 RPE 高（心率升唔到，常見於副交感過度負荷）
+
+## 局限
+
+1) **心率滯後**：30 秒全力衝時功率即刻上峰，但心率升得慢，TRIMP 會 **嚴重低估**短無氧間歇負荷。
+2) **環境噪音**：熱、脫水、咖啡因、瞓得少會令心率偏高（漂移），令 TRIMP 被抬高——心跳快唔一定等於肌肉做多咗功。
+3) **唔分機械負荷**：游泳 100 TRIMP 同跑步 100 TRIMP 對肌骨壓力差好遠；TRIMP 分唔到。
+
+## 常見問題
+
+### TRIMP 是什麼？
+
+TRIMP 是訓練衝量：時長 × 心率強度，高強度分鐘權重更大。它估算內部訓練負荷，不是單車功率 TSS 那種外部做功。
+
+### Banister TRIMP 怎麼算？
+
+分鐘數 × 心率儲備比 × 0.64 × exp(k × 心率儲備比)。心率儲備比 =（平均心率 − 安靜心率）/（最大心率 − 安靜心率）。係數 `k` 男性 1.92，女性 1.67。
+
+### TRIMP 和 TSS 用哪個？
+
+有功率或可靠跑步配速時用 TSS。心率主導的課——游泳、越野、肌力有氧，或外部負荷不可信時——用 TRIMP。
+
+## 下一步
+
+- [在計畫中管理訓練負荷](/zh-hant/training-load)
+- 對照[訓練壓力分數 TSS](/zh-hant/docs/metrics/training-load/training-stress-score)
+- [用 AI 教練產生負荷調整建議](/zh-hant/ai-training-plan)
+
+## 參考
+
+- [Fellrnr: TRIMP Explained](https://fellrnr.com/wiki/TRIMP)
+- Banister, E.W. (1991). Modeling Elite Athletic Performance. In: MacDougall, J.D., Wenger, H.A., Green, H.J. (eds) Physiological Testing of the High-Performance Athlete.
+

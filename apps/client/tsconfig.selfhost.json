@@ -1,0 +1,41 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["../../packages/shared/*"],
+      "@deployment/auth-client-plugins": [
+        "./src/deployment/auth-client-plugins.ts"
+      ],
+      "@deployment/managed-ui": ["./src/deployment/managed-ui.tsx"],
+      "@deployment/managed-messages": ["./src/deployment/managed-messages.ts"],
+      "@deployment/analytics": ["./src/deployment/analytics.ts"],
+      "@deployment/provider-catalog": ["./src/deployment/provider-catalog.ts"],
+      "@deployment/provider-presentation": [
+        "./src/deployment/provider-presentation.ts"
+      ],
+      "@deployment/route-policy": ["./src/deployment/route-policy.ts"],
+      "@deployment/registration-attribution": [
+        "./src/deployment/registration-attribution.ts"
+      ],
+      "@deployment/map-engine": ["./src/deployment/map-engine.ts"],
+      "@/public-demo/public-demo-provider": [
+        "./src/deployment/public-demo-provider.tsx"
+      ],
+      "@/public-demo/public-demo-runtime": [
+        "./src/deployment/public-demo-runtime.ts"
+      ],
+      "@/public-demo/use-viewer-session": [
+        "./src/deployment/use-viewer-session.ts"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", ".next-dev", ".next-coach-e2e"]
+}

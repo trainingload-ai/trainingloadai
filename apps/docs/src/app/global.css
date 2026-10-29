@@ -1,0 +1,229 @@
+@import "tailwindcss";
+@import "@trainingloadai/design-tokens/web.css";
+/* Scan MDX under /content so utilities used in docs are generated */
+@source "../../content/**/*.{md,mdx}";
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
+@import "tw-animate-css";
+@import "katex/dist/katex.css";
+@import "uplot/dist/uPlot.min.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+
+  --animate-marquee: marquee var(--duration) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+}
+
+.client-demo-radius {
+  --radius: var(--tl-radius-control-lg);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  :where(
+    button,
+    [role="button"],
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"],
+    summary
+  ):not(:disabled, [aria-disabled="true"], [data-disabled]) {
+    cursor: pointer;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--tl-font-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 72%, transparent);
+    color: var(--brand-foreground);
+  }
+  :where(.font-display, [data-marketing-display]) {
+    font-family: var(--tl-font-display);
+  }
+  :where(h1) {
+    --tw-leading: 1.08;
+    text-wrap: balance;
+  }
+  :where(h2:not(.uppercase)) {
+    --tw-leading: 1.14;
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .marketing-section {
+    @apply px-4 py-12 md:px-6 md:py-16;
+  }
+
+  .marketing-container {
+    @apply mx-auto w-full max-w-7xl;
+  }
+
+  .marketing-eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  .marketing-title {
+    @apply font-display mt-3 text-3xl font-bold tracking-[-0.025em] text-foreground md:text-[2.5rem];
+  }
+
+  .marketing-copy {
+    @apply mt-4 text-[15px] leading-7 text-muted-foreground md:text-base;
+  }
+
+  .docs-prose :where(h1, h2, h3, h4) {
+    font-family: var(--tl-font-display);
+    letter-spacing: -0.018em;
+  }
+
+  .docs-prose :where(p, li) {
+    line-height: 1.75;
+  }
+
+  .docs-prose :where(h2) {
+    margin-top: var(--tl-space-ten);
+    margin-bottom: var(--tl-space-three);
+  }
+
+  .docs-prose :where(h3) {
+    margin-top: var(--tl-space-eight);
+    margin-bottom: var(--tl-space-two);
+  }
+
+  .docs-prose :where(h4) {
+    margin-top: var(--tl-space-six);
+    margin-bottom: var(--tl-space-two);
+  }
+
+  .docs-prose :where(p, ul, ol, blockquote, figure, table) {
+    margin-top: var(--tl-space-four);
+    margin-bottom: var(--tl-space-four);
+  }
+
+  .docs-prose :where(code):not(:where(pre *)) {
+    @apply rounded-xs bg-muted px-1.5 py-0.5 text-[0.88em] text-foreground;
+  }
+}
+
+/* Match Fumadocs' unlayered sidebar theme without changing shared tokens. */
+.docs-system-shell :is(#nd-sidebar, #nd-sidebar-mobile) {
+  --color-fd-primary: var(--brand);
+  --color-fd-primary-foreground: var(--brand-foreground);
+  --color-fd-accent: var(--muted);
+  --color-fd-accent-foreground: var(--foreground);
+}
+
+@layer components {
+  .docs-system-shell {
+    --fd-page-width: 1240px;
+  }
+
+  .docs-system-shell #nd-sidebar a,
+  .docs-system-shell #nd-sidebar button {
+    min-height: 36px;
+    border-radius: var(--tl-radius-control);
+  }
+
+  .docs-system-shell #nd-sidebar a[data-active="true"] {
+    background: var(--brand);
+    color: var(--brand-foreground);
+    font-weight: 700;
+  }
+
+  .docs-system-shell #nd-page_article {
+    gap: var(--tl-space-four);
+    padding-bottom: var(--tl-space-sixteen);
+  }
+
+  .docs-system-shell #nd-sidebar-mobile {
+    top: var(--fd-banner-height);
+  }
+
+  .docs-system-shell #nd-tocnav,
+  .docs-system-shell #nd-subnav {
+    background-color: color-mix(in srgb, var(--background) 92%, transparent);
+  }
+
+  .docs-system-shell [data-card] {
+    border-radius: var(--tl-radius-surface);
+    padding: var(--tl-space-five);
+    box-shadow: none;
+  }
+
+  .docs-system-shell figure.shiki,
+  .docs-system-shell .docs-prose > details {
+    border-radius: var(--tl-radius-surface);
+    box-shadow: none;
+  }
+
+  @media (min-width: 768px) {
+    .docs-system-shell #nd-page_article {
+      padding-inline: var(--tl-space-eight);
+    }
+  }
+}

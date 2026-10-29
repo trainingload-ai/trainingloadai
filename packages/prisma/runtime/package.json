@@ -1,0 +1,9 @@
+{
+  "name": "@trainingload/core-migration-runtime",
+  "version": "0.0.0-preparation",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "pg": "8.21.0"
+  }
+}

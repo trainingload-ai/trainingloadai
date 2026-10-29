@@ -1,0 +1,172 @@
+.promo {
+  width: 100%;
+  padding: clamp(3rem, 5vw, 4rem) 1rem;
+  background: var(--brand);
+  color: var(--brand-foreground);
+}
+.inner {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.hero {
+  display: grid;
+  grid-template-areas: "copy" "stage" "action";
+  align-items: center;
+  gap: 1.5rem 2rem;
+}
+.copy {
+  grid-area: copy;
+}
+.kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.copy h2 {
+  margin-top: 0.8rem;
+  max-width: 13ch;
+  font-family: var(--tl-font-display);
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+.lead {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  font-weight: 550;
+  line-height: 1.7;
+}
+.stage {
+  grid-area: stage;
+  display: grid;
+  grid-template-columns: minmax(0, 35%) minmax(0, 1fr);
+  align-items: center;
+  margin: 0;
+}
+.web {
+  grid-column: 1/-1;
+  grid-row: 1;
+  margin-left: 23%;
+  border-radius: var(--tl-radius-overlay);
+  overflow: hidden;
+  background: #141919;
+}
+.webBar {
+  display: flex;
+  gap: 5px;
+  padding: 10px 12px;
+  background: #222927;
+}
+.webBar span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #758079;
+}
+.phone {
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 1;
+  max-width: 13rem;
+  overflow: hidden;
+  padding: 5px;
+  border: 1px solid #78837c;
+  border-radius: 1.7rem;
+  background: #141919;
+}
+.phone img {
+  border-radius: 1.35rem;
+}
+.stage img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.action {
+  grid-area: action;
+}
+.action h3 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.action > p {
+  margin-top: 0.65rem;
+  line-height: 1.75;
+  font-size: 0.95rem;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--tl-radius-control);
+  background: var(--brand-foreground);
+  color: #f7f9f3;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.button:hover {
+  background: color-mix(in srgb, var(--brand-foreground) 86%, transparent);
+}
+.button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+.action .trust {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+.steps {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.steps li {
+  padding: 1.2rem;
+  border-radius: var(--tl-radius-surface);
+  background: color-mix(in srgb, var(--brand-foreground) 94%, white);
+  color: #f7f9f3;
+}
+.index {
+  color: var(--brand);
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.steps h3 {
+  margin-top: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.steps p {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #d0dfd7;
+}
+@media (min-width: 720px) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .hero {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.05fr);
+    grid-template-areas: "copy stage" "action stage";
+    gap: 2rem;
+  }
+}
+@media print {
+  .promo {
+    display: none !important;
+  }
+}

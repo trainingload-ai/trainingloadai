@@ -1,0 +1,71 @@
+---
+title: Normalized Power (NP)
+description: Normalized Power estimates the steady-power equivalent of a variable ride, helping calculate TSS, IF, and pacing variability.
+keywords: ["Normalized Power", "NP", "normalized power cycling", "TSS", "IF", "Training Stress Score", "Variability Index", "VI"]
+---
+
+# Normalized Power (NP)
+
+Normalized Power (NP) converts a variable power profile into a single equivalent steady intensity. Intuitively, it tries to answer:
+
+- If I rode at a constant power with the same physiological cost, what constant power would that be?
+
+Compared to average power, NP is more sensitive to high-intensity surges, making it useful for estimating training load (e.g., power-based TSS).
+
+## Why NP exists
+
+Physiology shows that intensity and physiological cost (glycogen use, lactate accumulation, hormonal stress) are not linear; the cost rises disproportionately at higher intensities.
+
+### Linear vs. exponential
+- **Linear view (average power)**: riding 1 hour at 200 W has the same average as “30 min at 100 W + 30 min at 300 W” (both average to 200 W).
+- **Physiological view (NP)**: 300 W causes much more stress than 100 W “gives back”. The latter often feels closer to a steady ~260–270 W effort.
+
+NP amplifies high-power segments via a **fourth-power weighting**, which is intended to better approximate metabolic cost than a simple average.
+
+## How Trainingload.ai computes NP
+
+Trainingload.ai follows the common NP definition: compute a 30-second rolling average, raise to the 4th power, average, then take the 4th root.
+
+```text
+P_smooth(t) = (1/30) * sum_{i=0..29} P(t-i)
+NP = 4th_root( (1/N) * sum_{j=1..N} (P_smooth(j))^4 )
+```
+
+Where:
+- $P(t)$ is instantaneous power at time $t$
+- $P_{smooth}(t)$ is the 30-second rolling average at time $t$
+- $N$ is the number of samples
+
+## Typical Use Cases
+
+### 1. Race analysis
+- **Criterium**: frequent accelerations often make NP much higher than average power. NP better reflects how hard the race was.
+- **Time trial / triathlon**: NP should be close to average power due to steadier pacing. If NP is much higher, pacing was likely too variable.
+
+### 2. Training load (TSS)
+NP is a key input to [TSS (Training Stress Score)](/docs/metrics/training-load/training-stress-score).
+
+```text
+IF = NP / FTP
+TSS ∝ Duration_sec * NP * IF
+```
+
+Using NP helps TSS capture the load of variable workouts (intervals) more realistically than average power alone.
+
+> **Trainingload.ai advice**:
+>
+> 1. **Less meaningful for short durations**: below ~20 minutes, NP can be noisy because physiology may not reach a steady state. For sprint sessions, use max power, average power, and interval-level metrics instead.
+> 2. **Don’t “game” NP**: on recovery rides, don’t add sprints just to inflate NP. The goal is low intensity; NP should match the purpose of the session.
+> 3. **Check VI**: view it alongside [VI (Variability Index)](./variability-index): `VI = NP / Avg Power`. Higher VI means a more variable effort.
+
+## Limitations
+
+- Depends on reliable power data: dropouts and device errors affect results.
+- Sensitive to windowing and sampling: different sampling rates/interpolation can slightly change NP.
+- Captures “cost intensity”, not fatigue directly: NP doesn’t directly equal recovery needs or muscle damage.
+
+## Related docs
+
+- [Variability Index](/docs/metrics/power/variability-index)
+- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
+- [Intensity Factor](/docs/metrics/training-load/intensity-factor)

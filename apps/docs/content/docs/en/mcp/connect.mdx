@@ -1,0 +1,50 @@
+---
+title: Connect an AI client
+description: Choose the connection guide for ChatGPT, Codex, Claude Code, Claude Desktop, Cursor, VS Code, or opencode.
+---
+
+# Connect an AI client
+
+Every client uses the same remote Streamable HTTP endpoint:
+
+```text
+https://api.trainingload.ai/mcp
+```
+
+TrainingLoad uses OAuth 2.1 discovery, PKCE S256, refresh-token rotation, and resource-bound access tokens. Never put an API key or access token in a configuration file.
+
+## Choose your client
+
+| Client | Shortest path | Full guide |
+| --- | --- | --- |
+| ChatGPT | Add a custom MCP server from Plugins | [ChatGPT](/docs/mcp/clients/chatgpt) |
+| Codex | `codex mcp add trainingload --url https://api.trainingload.ai/mcp` | [Codex](/docs/mcp/clients/codex) |
+| Claude Code | `claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp` | [Claude Code](/docs/mcp/clients/claude-code) |
+| Claude Desktop | Customize → Connectors → Add custom connector | [Claude Desktop](/docs/mcp/clients/claude-desktop) |
+| Cursor | Add the remote server to `~/.cursor/mcp.json` | [Cursor](/docs/mcp/clients/cursor) |
+| VS Code | MCP: Add Server → HTTP | [VS Code](/docs/mcp/clients/vscode) |
+| opencode | Add a `remote` entry to `opencode.json` | [opencode](/docs/mcp/clients/opencode) |
+
+## Default permissions
+
+Recommended initial grant:
+
+```text
+openid profile email offline_access profile:read activity:read training:read plan:read competition:read
+```
+
+`health:read` is deliberately excluded. Add it only when you want the client to read the reduced daily health summary.
+
+## Acceptance check for every client
+
+1. The catalog should contain 24 tools, 3 resources, and 3 prompts. Without `health:read`, the health tool can remain visible as an incremental-consent entry point.
+2. Ask: “Use TrainingLoad to summarize my current training state and state the date and timezone used.”
+3. The client should call `get_training_snapshot` and must not ask you to paste a token.
+4. The result should distinguish missing values from zero and expose the TrainingLoad tool call.
+5. Ask a period-comparison question and confirm the client can call `compare_training_periods`.
+
+## Revoke or reconnect
+
+Open the TrainingLoad account authorization page to review scopes and recent use or revoke the client. If the client still shows stale state after revocation, disconnect or clear that MCP server's OAuth session in the client, then connect again.
+
+See [Troubleshooting](/docs/mcp/troubleshooting) if connection or authorization fails.

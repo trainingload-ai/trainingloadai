@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/activity-lap.schema.json",
+  "title": "Activity lap",
+  "description": "A normalized lap or split belonging to an activity.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "activityId": {
+      "type": "string",
+      "description": "The parent activity identifier."
+    },
+    "lapIndex": {
+      "type": "string",
+      "description": "The zero-based lap order encoded as a string."
+    },
+    "startTime": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The lap start time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "elapsedTimeSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The lap elapsed time in seconds."
+    },
+    "movingTimeSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The lap moving time in seconds."
+    },
+    "distanceMeters": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The lap distance in meters."
+    },
+    "averageHeartRateBpm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The average lap heart rate in beats per minute."
+    },
+    "maximumHeartRateBpm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The maximum lap heart rate in beats per minute."
+    },
+    "averagePowerWatts": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The average lap power in watts."
+    },
+    "averageCadenceRpm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The average lap cadence in revolutions per minute."
+    }
+  },
+  "required": [
+    "activityId",
+    "lapIndex"
+  ]
+}

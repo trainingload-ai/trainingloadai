@@ -1,0 +1,60 @@
+---
+title: 訓練平台串接怎麼選：Strava、Garmin、COROS 對照
+description: 對比 Trainingload.ai 的 Strava、Garmin、COROS、Polar、Suunto、Wahoo 與 Intervals.icu 串接方式。先選持續同步、一次性歷史匯入或檔案上傳，再進入對應授權流程。
+keywords:
+  ["訓練平台串接", "Strava 串接", "Garmin 串接", "COROS 同步", "Intervals.icu 串接"]
+---
+
+# 訓練平台串接怎麼選：Strava、Garmin、COROS 對照
+
+**訓練平台串接**決定訓練如何進入 Trainingload.ai。先選路徑：Strava 或 COROS 持續同步、Garmin 一次性歷史匯入、Intervals.icu 的 OAuth 或 API Key，或上傳 FIT / TCX / GPX。具體授權與驗證見[連接 Strava、Garmin 與 COROS](/zh-hant/docs/guide/connect-third-party-platforms)。
+
+平台能力與支援方向可能調整，連接彈窗裡實際顯示的操作始終是最終依據。
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="第三方平台連接"
+  description="每張平台卡片顯示連接狀態，以及目前帳號可用的操作。"
+  route="Account → Third Party Connections"
+/>
+
+## 連接前
+
+- 登入真正保存目標訓練的平台帳號。
+- 為每條裝置訓練只選一條主要匯入路徑。
+- 確認你需要持續連接、一次性歷史匯入，還是檔案上傳。
+- 憑證只在官方連接彈窗輸入。
+- 記下 Trainingload.ai 目前最新的一條活動，方便辨認第一次成功匯入。
+
+## 選擇匯入路徑
+
+| 來源            | 最適合                               | 連接模型                     |
+| --------------- | ------------------------------------ | ---------------------------- |
+| Strava          | 持續活動同步                         | 帶同步設定的已連接帳號       |
+| Polar           | 持續 Polar 活動匯入                  | OAuth 與同步設定             |
+| COROS           | 活動與每日資料同步                   | 帶手動同步的已連接帳號       |
+| Intervals.icu   | 活動同步與相容的計畫課流程           | OAuth 或 API Key             |
+| Suunto          | 持續課表匯入                         | OAuth 與同步設定             |
+| Wahoo           | 持續 Wahoo 課表匯入                  | OAuth 與同步設定             |
+| Garmin          | 一次性歷史活動匯入                   | 匯入動作，不是常駐連接卡片   |
+| FIT / TCX / GPX | 個別檔案或不支援來源                 | 手動上傳                     |
+
+## 常見問題
+
+### Trainingload.ai 支援哪些訓練平台串接？
+
+Strava、Polar、COROS、Intervals.icu、Suunto、Wahoo 可以保持連接。Garmin 是一次性歷史匯入。FIT、TCX、GPX 用於單檔或不支援的手錶。
+
+### 選 Strava 串接還是 Garmin 匯入？
+
+要讓新訓練持續進來，選 Strava 或其他線上平台。只要一份歷史存檔，選 Garmin 歷史匯入。之後的新 Garmin 檔仍需線上路徑或手動上傳。
+
+### 同一塊錶能開兩個串接嗎？
+
+能，但不要把同一條記錄導兩次。回填前先定一條主路徑，例如只走 COROS 直連，不要再疊加 Strava 轉發。
+
+## 下一步
+
+- 按照[連接 Strava、Garmin 與 COROS](/zh-hant/docs/guide/connect-third-party-platforms)完成授權與第一次同步。
+- 需要先轉檔再上傳時，[查看全部 GPX、FIT、TCX 轉換工具](/zh-hant/converter)。
+- 歷史匯入完成後，[在計畫中管理訓練負荷](/zh-hant/training-load)。

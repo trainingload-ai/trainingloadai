@@ -1,0 +1,72 @@
+---
+title: インテンシティファクター（IF）とは？NP÷FTPで強度を読む
+description: インテンシティファクター（IF）は正規化パワーをFTPで割った相対強度です。バイクやランのきつさ、ゾーン確認、TSSへの効き方を説明します。
+keywords:
+  ["インテンシティファクター", "IF サイクリング", "NP/FTP", "ランニング IF", "IF ゾーン"]
+---
+
+# インテンシティファクター（IF）とは？NP÷FTPで強度を読む
+
+**インテンシティファクター（IF）** は閾値に対する相対強度です。[正規化パワー](/ja/docs/metrics/power/normalized-power) ÷ [FTP](/ja/docs/metrics/power/functional-threshold-power)。「このセッションはどれだけきつかったか」を、選手ごとの能力差を除いて見ます。
+
+## 計算式
+
+バイクでは、[Normalized Power (NP)](/ja/docs/metrics/power/normalized-power) を FTP で割ります。
+
+$$
+IF = \frac{NP}{FTP}
+$$
+
+例:
+
+- FTP = 200 W
+- ライドの NP = 150 W
+- IF = 150 / 200 = 0.75
+
+ランニングでは CP または rFTP を基準にすることがあります。
+
+## IF の読み方
+
+| IF 範囲       | 目安            | 説明                       |
+| :------------ | :-------------- | :------------------------- |
+| **< 0.75**    | Z1 / Z2         | 回復または有酸素持久       |
+| **0.75-0.85** | Z3 / Sweet Spot | テンポ、ややきつい持続強度 |
+| **0.85-0.95** | Z4              | 閾値付近                   |
+| **0.95-1.05** | Z5              | VO2max に近い高強度        |
+| **> 1.05**    | Z6 / Z7         | 無酸素、スプリント寄り     |
+
+## 使いどころ
+
+- FTP 設定が低すぎないか確認する。
+- ロングイベントのペーシングを管理する。
+- [TSS](/ja/docs/metrics/training-load/training-stress-score) の計算に使う。
+
+## 注意点
+
+- 短すぎるセッションでは IF が高く見えやすい。
+- FTP が間違っていると IF も意味を失います。
+- イージー走で IF が高く出続ける場合、FTP 設定または実際の強度を見直します。
+
+## よくある質問
+
+### インテンシティファクターとは？
+
+NP ÷ FTP（ランでは NGP ÷ 閾値ペース）です。IF 0.75 は多くの選手でコントロールされた有酸素、1.0 付近は約 1 時間の閾値です。
+
+### バイクでどう使いますか？
+
+意図したゾーンに収まったか、ロングのペース、FTP が低すぎないかを見ます。1 時間ずっと IF ≈ 1.1 なら、閾値を低く見積もっている可能性が高いです。
+
+### ランでも使えますか？
+
+ランニング閾値パワー/CP、または NGP 対閾値ペースで使えます。心拍の IF は遅れとドリフトがあるため精度が落ちます。
+
+## 次のステップ
+
+- [TSSの計算を見る](/ja/docs/metrics/training-load/training-stress-score)
+- [時間・NP・FTP から TSS を計算する](/ja/tss-calculator)
+- [アクティビティファイルからFTPを推定する](/ja/ftp-calculator)
+- [パワーのトレーニング負荷ゾーンを計算する](/ja/power-zones-calculator)
+- [計画内でトレーニング負荷を管理する](/ja/training-load)
+
+> Normalized Power (NP), Intensity Factor (IF), Training Stress Score (TSS) は [Peaksware, LLC](https://trainingpeaks.com/) の登録商標です。

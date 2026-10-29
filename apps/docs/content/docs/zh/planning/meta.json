@@ -1,0 +1,11 @@
+{
+  "title": "计划与训练课程",
+  "pages": [
+    "index",
+    "plan-lifecycle",
+    "manual-workout-editor",
+    "strength-workouts",
+    "strength-workout-dsl",
+    "workout-dsl"
+  ]
+}

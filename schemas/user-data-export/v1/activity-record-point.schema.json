@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/activity-record-point.schema.json",
+  "title": "Activity record point",
+  "description": "A time-ordered sensor sample converted from internal columnar storage to an interoperable row.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "activityId": {
+      "type": "string",
+      "description": "The parent activity identifier."
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "The sample time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "elapsedSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Seconds elapsed since the activity start."
+    },
+    "latitudeDegrees": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The latitude in decimal degrees, subject to the selected location privacy policy."
+    },
+    "longitudeDegrees": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The longitude in decimal degrees, subject to the selected location privacy policy."
+    },
+    "altitudeMeters": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The altitude above sea level in meters."
+    },
+    "distanceMeters": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The accumulated distance in meters."
+    },
+    "speedMetersPerSecond": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The instantaneous speed in meters per second."
+    },
+    "heartRateBpm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The heart rate in beats per minute."
+    },
+    "cadenceRpm": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The cadence in revolutions per minute."
+    },
+    "powerWatts": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The power in watts."
+    },
+    "temperatureCelsius": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The temperature in degrees Celsius."
+    },
+    "gradePercent": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The instantaneous grade in percent."
+    }
+  },
+  "required": [
+    "activityId",
+    "timestamp"
+  ]
+}

@@ -1,0 +1,132 @@
+---
+title: Strength Workouts
+description: Create structured strength workouts with exercises, warm-up and work sets, repetitions or time, load, effort, and rest in Trainingload.ai.
+keywords: ["strength workout builder", "strength training plan"]
+---
+
+# Strength Workouts
+
+Strength workouts need exercises, sets, repetitions, load, effort, and rest rather than endurance steps based on time and distance. Trainingload.ai provides a dedicated strength editor and can show the planned prescription alongside the completed strength activity.
+
+## Before you begin
+
+- Open a plan draft or an editable future workout. Do not rewrite a completed activity as a new prescription.
+- Choose **Strength Training** as the sport to open the strength editor.
+- Decide whether to use **Manual** or **Rules** mode. Both resolve to the same workout structure.
+- Gather exercise names, equipment, reliable loads or 1RM values, and the intended RPE/RIR. Choose **Open Load** when a numeric load is not known.
+
+## Structure at a glance
+
+<Mermaid
+  chart={`flowchart TD
+  Session[Strength session] --> Exercise[Exercise]
+  Exercise --> Warmup[Warm-up set group]
+  Exercise --> Work[Work set group]
+  Work --> Prescription[Repetitions or time]
+  Work --> Load[Open, weight, percent 1RM, or bodyweight]
+  Work --> Effort[RPE or RIR]
+  Work --> Rest[Rest duration]`}
+/>
+
+## 1. Choose Strength Training
+
+Open the manual workout editor and select **Strength Training**. The editor switches from endurance steps to the strength builder.
+
+<DocsScreenshot
+  id="strength-workout-builder"
+  title="Strength workout builder"
+  description="A complete exercise includes a name and at least one work set group; warm-up sets are optional."
+  route="Plans → Manual workout → Strength Training"
+/>
+
+## 2. Set session guidance
+
+Add planned duration and session RPE only when useful for the plan. Session RPE describes the intended overall difficulty, not the effort target of every set.
+
+## 3. Add an exercise
+
+Every exercise must have a non-empty name. Use a stable, recognizable name so the plan and completed session can be compared later. Equipment is optional and should describe what the athlete needs, not duplicate the exercise name.
+
+Examples:
+
+- Back Squat — Barbell
+- Romanian Deadlift — Barbell
+- Pull-up — Bodyweight
+- Split Squat — Dumbbells
+
+## 4. Add set groups
+
+A set group describes repeated sets with the same prescription.
+
+- **Warm-up** — preparation sets; optional.
+- **Work** — the sets that define the main training prescription; required for every exercise.
+
+Choose repetitions for rep-based work or time for an isometric/timed set. For a repetition range, keep minimum no greater than maximum.
+
+## 5. Choose load
+
+- **Open load** — no numeric load is prescribed. Use this when equipment or current strength is unknown.
+- **Fixed weight** — a numeric weight with a supported unit.
+- **Percent of 1RM** — appropriate only when the relevant 1RM is known and current.
+- **Bodyweight** — the athlete's bodyweight.
+- **Bodyweight offset** — bodyweight plus or minus an external amount where supported.
+
+AI-generated strength plans should not invent kilograms, pounds, or percent 1RM when the athlete has no tool-backed history or known 1RM. Open load plus an RPE/RIR cue is the safer default.
+
+## 6. Add effort and rest
+
+Use RPE to describe perceived effort or RIR to describe repetitions left in reserve. Keep the cue internally consistent; avoid prescribing an aggressive load and a very easy effort target unless that contrast is intentional.
+
+Rest is stored per set group. Use enough time for the intended quality rather than forcing every exercise into the same rest value.
+
+## 7. Write the same workout with Strength DSL
+
+In **Rules** mode, a strength session can be written as:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+
+exercise "Pull Up" equipment bodyweight {
+  work 3x8 bodyweight rir 2 rest 90s
+}
+```
+
+Follow [Strength Workout DSL](/docs/planning/strength-workout-dsl) for the complete grammar, localized exercise names, load forms, validation flow, and error fixes. Strength DSL is a static prescription: it does not execute `if/else`, weekly progression, deload scripts, nested blocks, or arbitrary executable scripts.
+
+## Verify the workout
+
+Before saving, confirm:
+
+- At least one exercise exists.
+- Every exercise has a name.
+- Every exercise has at least one set group.
+- Every exercise includes at least one work set group.
+- Sets, repetitions, seconds, effort, and load are within supported ranges.
+- The preview reflects the intended session.
+
+After saving, reopen the workout and confirm the same structure appears in the visual builder or normalized Strength DSL. The preview summary should count the intended exercises and work sets.
+
+## Troubleshooting
+
+- **“Enter a name for every exercise”:** add a non-empty quoted name in DSL or fill the Exercise field in the visual builder.
+- **“Each exercise needs at least one set group”:** add a warm-up or work group before closing the exercise.
+- **“Each exercise needs at least one work set”:** a warm-up-only exercise is invalid; add at least one `work` line.
+- **A repetition range fails:** write the lower value first, such as `3x8-12`.
+- **Load or effort fails validation:** use a supported load form and choose RPE or RIR, not both.
+- **The closing brace is rejected:** close each exercise once and do not nest exercise blocks.
+- **Switching from strength to endurance clears the editor:** the structures are intentionally different. Save or copy the intended text before changing sport.
+
+## Completed strength sessions
+
+Strength activities can record exercises, set completion, and session completion. After the workout, open the strength activity detail and verify exercise names, completed sets, load, repetitions/time, and overall session context before using it for review.
+
+## Next steps
+
+- Follow [Strength Workout DSL](/docs/planning/strength-workout-dsl) for a complete text-mode tutorial.
+- Add the workout to a plan and continue with [Plan Lifecycle](/docs/planning/plan-lifecycle) or [Manage an Active Plan](/docs/guide/manage-active-plan).

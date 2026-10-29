@@ -1,0 +1,123 @@
+---
+title: AI Marathon Plan Adjustments
+description: A conservative method for using AI-generated marathon workout adjustments with explicit confirmation.
+keywords:
+  [
+    "AI marathon training plan",
+    "marathon workout adjustments",
+    "adaptive marathon plan",
+    "AI coach",
+  ]
+---
+
+# AI Marathon Plan Adjustments
+
+AI Coach can connect plan, activity, and training-load context, then draft a change. It should not silently rewrite a marathon block. Use it to produce one explicit, conservative proposal that you inspect before confirmation.
+
+## Before you begin
+
+- Open the correct active plan and confirm its dates, goal, and current week.
+- Let recent activities finish processing and link them to planned workouts.
+- Review the relevant PMC window and, when useful, the effective VO2max/VDOT trend.
+- Add real constraints: available days, pain or illness concerns, travel, equipment, and which key session matters most.
+- Choose one decision. Examples: keep or move tomorrow's marathon-pace workout, simplify the next seven days, or respond to a missed long run.
+- Do not ask AI Coach for medical clearance or injury diagnosis.
+
+## 1. Start with plan context
+
+Open AI Coach from the active plan or name the exact plan and target week in a new conversation. A plan entry point reduces the risk of discussing the wrong schedule.
+
+Use a prompt with four parts:
+
+1. **Decision:** the single question you need answered.
+2. **Evidence:** completed and missed sessions, PMC pattern, response trend, and subjective state.
+3. **Constraints:** dates and workouts that must not change.
+4. **Output:** one conservative draft plus a review point.
+
+Example:
+
+> Review week 7 of my active marathon plan. Tuesday's threshold session was harder than planned, ATL rose after the weekend, and Saturday's long run must remain. Draft at most one change for the next seven days. Preserve weekly frequency and explain the evidence, exact workout change, and next review point. Do not apply it yet.
+
+## 2. Inspect the evidence used
+
+Before discussing a change, confirm that the answer references:
+
+- The correct plan, week, and sport.
+- The correct completed or missed workouts.
+- A relevant date range for CTL, ATL, and TSB.
+- The actual next key session.
+- The constraints you supplied.
+
+If any target is wrong, stop and restate it. Do not confirm a plausible recommendation built on the wrong record.
+
+## 3. Ask for the smallest change
+
+Use this adjustment order:
+
+1. Keep the plan unchanged when evidence is insufficient.
+2. Move a workout without changing its purpose.
+3. Shorten one workout while preserving structure.
+4. Replace one non-essential quality exposure with easy aerobic work or rest.
+5. Change broader weekly volume or intensity only when the smaller options do not address the problem.
+
+Avoid simultaneously changing frequency, volume, intensity, and key-session placement. That makes the result difficult to attribute or reverse.
+
+<DocsScreenshot
+  id="ai-adjustment-confirmation"
+  title="Review an AI workout adjustment"
+  description="The proposal should identify its evidence, show one exact future-workout change, preserve constraints, and remain unconfirmed until reviewed."
+  route="AI Coach"
+/>
+
+## 4. Review the proposal before confirmation
+
+Check the proposed action card or workout diff field by field:
+
+| Check       | Question                                                                |
+| ----------- | ----------------------------------------------------------------------- |
+| Target      | Is this the intended future workout and date?                           |
+| Scope       | Is only one primary variable changing?                                  |
+| Purpose     | Does the workout still serve the intended marathon-block goal?          |
+| Constraints | Are the protected long run, race, rest day, and availability unchanged? |
+| Evidence    | Does the explanation distinguish observed data from interpretation?     |
+| Review      | Is the next checkpoint explicit?                                        |
+
+Reject or revise the draft when it modifies completed history, the wrong plan, multiple unrelated workouts, or a protected constraint.
+
+## 5. Confirm, then check the plan
+
+Confirm only after the proposal passes the review. Then:
+
+1. Reopen the active plan or calendar.
+2. Verify the target workout date, sport, duration, and structure.
+3. Confirm surrounding workouts did not change unexpectedly.
+4. Record the rationale in the plan or review context when available.
+5. Set a checkpoint after the next comparable key workout.
+
+When Undo is offered and the applied result is wrong, use it promptly. Otherwise, edit the affected future workout directly after reviewing the current plan version.
+
+## Verify the adjustment
+
+- AI Coach used the correct plan, week, activities, and date range.
+- The proposal showed the exact before/after effect before confirmation.
+- Only the intended future workout changed.
+- Completed, skipped, and linked history remained intact.
+- Protected constraints and the marathon-block purpose were preserved.
+- The active plan and calendar show the same updated workout.
+- A specific next review point is recorded.
+
+## Troubleshooting
+
+- **The answer is generic:** start from the plan page, name the exact week and workout, and provide the relevant evidence and constraints.
+- **The wrong activity or plan is referenced:** do not confirm. Open the correct record or start a new plan-context conversation.
+- **The proposal rewrites too much:** ask for one change, one primary variable, protected constraints, and a seven-day maximum scope.
+- **The action fails with a version conflict:** reload the active plan, compare the latest version, and request or apply the smallest change again.
+- **The applied workout is unexpected:** use Undo immediately when available; otherwise inspect the plan and manually correct only the future workout.
+- **Evidence is still processing or missing:** keep the plan unchanged, finish data processing or linking, and return when the context is complete.
+- **Pain, illness, or unusual symptoms drive the question:** use qualified medical or coaching guidance; AI Coach cannot diagnose or clear training.
+
+## Next steps
+
+- Learn the full [AI Coach](/docs/guide/ai-coach) interaction and undo model.
+- Review pressure with [PMC for Marathon Adjustments](/docs/guide/pmc-marathon-adjustment).
+- Continue executing and checking the result in [Manage an Active Plan](/docs/guide/manage-active-plan).

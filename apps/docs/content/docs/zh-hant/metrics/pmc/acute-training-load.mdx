@@ -1,0 +1,87 @@
+---
+title: 疲勞（ATL）
+description: 瞭解 Trainingload.ai 如何根據每日訓練負荷計算疲勞（ATL），以及如何解讀近期負荷趨勢，而不將 ATL 誤認為生理疲勞的測量值。
+keywords: ["疲勞", "Fatigue", "急性訓練負荷", "短期訓練負荷", "ATL", "ATL 公式", "近期訓練負荷", "ATL 怎麼看"]
+---
+
+# 什麼是疲勞（ATL）
+
+急性訓練負荷 **疲勞（ATL）** 是每日訓練負荷的快速指數平均。它更重視最近幾天的負荷，變化速度也快於體能（CTL）。Trainingload.ai 預設使用 7 天時間常數，並以歷史最高 ATL 顯示目前的百分比。
+
+「疲勞」是為了便於理解而使用的介面名稱。ATL 彙整的是模型化的近期負荷，並不直接測量生理或主觀疲勞，也不直接測量恢復、健康或訓練適應。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AtlStatPreviewCard
+    value="16.99"
+    percent={72}
+    metricLabel="ATL"
+    valuePopoverTitle="ATL 數值"
+    valuePopoverBody="根據負荷來源設定所選出的每日負荷，計算快速指數平均。"
+    percentPopoverTitle="ATL 百分比"
+    percentPopoverBody="以歷史最高疲勞（ATL）值表示目前百分比，並非通用的疲勞百分位。"
+    helpTitle="近期負荷"
+    details="使用 ATL 查看最近數天模型負荷的變化，再結合課表與恢復資訊判斷原因。"
+  />
+</div>
+
+_範例數值僅供介面預覽。_
+
+## 疲勞（ATL）的數值來源
+
+Trainingload.ai 會先依照可用的活動負荷和你設定的來源優先順序，為每項活動選擇一個負荷值。依活動與設定不同，依據可能來自功率、心率、配速或整堂訓練 RPE；同一天若有多項活動，負荷會相加成為當天的 `daily_load`。
+
+因此：
+
+- 活動資料缺漏、重複或變更，都可能使 ATL 改變。
+- 調整閾值或負荷來源優先順序，可能改變活動衍生負荷及後續 PMC 數值。
+- 混用計算口徑不一致的負荷來源，會降低不同日期與週期之間的可比性。
+- 某天沒有記錄活動負荷時，每日輸入為零；先前的 ATL 不會立刻歸零，而會依時間常數逐漸衰減。
+
+## 公式
+
+Trainingload.ai 使用指數時間常數衰減；ATL 的預設時間常數為 7 天：
+
+```text
+decay_ATL = exp(-1 / 7)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+```
+
+其中 `exp` 是自然指數函數。使用預設時間常數時，`decay_ATL ≈ 0.866878`，所以當日負荷的權重約為 `0.133122`。
+
+這裡的「7 天」是時間常數，不是最近七個日曆日的簡單總和或算術平均。更早的訓練仍保留逐漸縮小的權重。若每日負荷突然變成固定水準，經過一個 7 天時間常數後，ATL 會完成約 63.2% 的變化；經過三個時間常數後，則完成約 95.0%。
+
+## 如何理解疲勞（ATL）趨勢
+
+- **ATL 上升**：當日及近期每日負荷整體高於目前 ATL 水準。
+- **ATL 穩定**：近期每日負荷大致維持在模型水準附近。
+- **ATL 下降**：近期每日負荷整體低於目前 ATL，包括休息、恢復週或減量階段。
+
+ATL 的時間常數短於 CTL，因此一天的高負荷可能明顯推高 ATL；連續降低負荷時，ATL 通常也會更快下降。上升或下降只描述模型負荷的變化，不能證明這些負荷是否已被身體成功吸收。
+
+## ATL 能回答與不能回答的問題
+
+ATL 可以協助判斷最近幾天的模型負荷是在上升、維持或下降，多堂高負荷課程是否連續堆疊，以及恢復週或減量是否正在降低近期負荷。
+
+ATL 無法單獨判斷運動員是否真的疲勞、某個數值是否安全、下一堂訓練是否應取消，也無法證明運動員已經恢復或進入比賽準備狀態。
+
+## 與體能（CTL）、狀態（TSB）一起查看
+
+由於 ATL 的變化快於[體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)，建立負荷時 ATL 常高於 CTL；減少訓練時，ATL 通常又下降得更快。[狀態（TSB）](/zh-hant/docs/metrics/pmc/training-stress-balance)表示兩者在同一天的差值。
+
+查看 ATL 變化後，還應檢查造成變化的活動、運動類型、時間、強度、感測器品質和負荷來源，並結合睡眠、疼痛、生病徵兆、整堂訓練 RPE、主觀疲勞與課程完成品質做決策。
+
+## 參考資料
+
+- [Intervals.icu 開發者對體能、疲勞與狀態公式的說明](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE 詞彙表：急性訓練負荷（ATL）](https://runalyze.com/glossary/atl)
+- [TrainingPeaks：Performance Management Chart 中的疲勞（ATL）](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah 原始碼：PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert 等人（1976）：訓練對身體表現影響的系統模型](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke 與 Skiba（2013）：運動訓練與表現的數學建模](https://doi.org/10.1152/advan.00078.2011)
+
+## 相關頁面
+
+- [體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)
+- [狀態（TSB）](/zh-hant/docs/metrics/pmc/training-stress-balance)
+- [用每日 TSS 推演 CTL、ATL、TSB](/zh-hant/training-load-calculator)
+- [訓練分析工作流程](/zh-hant/docs/guide/training-analysis-workflow)

@@ -1,0 +1,473 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-release-manifest-v1.json",
+  "title": "Trainingload self-host release manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "releaseVersion",
+    "configSchemaVersion",
+    "composeSchemaVersion",
+    "releaseKind",
+    "source",
+    "created",
+    "registry",
+    "license",
+    "runtimeIdentity",
+    "images",
+    "upgrade",
+    "database",
+    "verification"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "releaseVersion": {
+      "$ref": "#/$defs/semver"
+    },
+    "configSchemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "composeSchemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "releaseKind": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "revision"
+      ],
+      "properties": {
+        "url": {
+          "const": "https://github.com/trainingload-ai/trainingloadai"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}([a-f0-9]{24})?$"
+        }
+      }
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "registry": {
+      "const": "ghcr.io"
+    },
+    "license": {
+      "const": "AGPL-3.0-only"
+    },
+    "runtimeIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uid",
+        "gid"
+      ],
+      "properties": {
+        "uid": {
+          "const": 10001
+        },
+        "gid": {
+          "const": 10001
+        }
+      }
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "client",
+        "migrate",
+        "server"
+      ],
+      "properties": {
+        "client": {
+          "$ref": "#/$defs/image"
+        },
+        "migrate": {
+          "$ref": "#/$defs/image"
+        },
+        "server": {
+          "$ref": "#/$defs/image"
+        }
+      }
+    },
+    "upgrade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supportedSourceVersions",
+        "applicationRollbackTo",
+        "backupRequired"
+      ],
+      "properties": {
+        "supportedSourceVersions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/semver"
+          }
+        },
+        "applicationRollbackTo": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/semver"
+          }
+        },
+        "backupRequired": {
+          "const": true
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaEpoch",
+        "migrationPolicy",
+        "migrationHead",
+        "migrationInventorySha256",
+        "compatibilityWindowMinorVersions",
+        "databaseRollback",
+        "migrations"
+      ],
+      "properties": {
+        "schemaEpoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "migrationPolicy": {
+          "const": "expand-contract"
+        },
+        "migrationHead": {
+          "$ref": "#/$defs/migrationId"
+        },
+        "migrationInventorySha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "compatibilityWindowMinorVersions": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "databaseRollback": {
+          "const": "unsupported"
+        },
+        "migrations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/migration"
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow",
+        "oidcIssuer",
+        "digestAlgorithm",
+        "evidenceFilesCoveredBy",
+        "releaseEvidenceSignature"
+      ],
+      "properties": {
+        "workflow": {
+          "const": ".github/workflows/selfhost-images.yml"
+        },
+        "oidcIssuer": {
+          "const": "https://token.actions.githubusercontent.com"
+        },
+        "digestAlgorithm": {
+          "const": "sha256"
+        },
+        "evidenceFilesCoveredBy": {
+          "const": "checksums.txt"
+        },
+        "releaseEvidenceSignature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tool",
+            "version",
+            "bundle"
+          ],
+          "properties": {
+            "tool": {
+              "const": "cosign"
+            },
+            "version": {
+              "const": "v3.0.6"
+            },
+            "bundle": {
+              "const": "checksums.bundle.json"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "migrationId": {
+      "type": "string",
+      "pattern": "^(?:[0-9]{4}|[0-9]{14})_[a-z0-9_]+$"
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "checksum",
+        "phase",
+        "releaseVersion"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/migrationId"
+        },
+        "checksum": {
+          "$ref": "#/$defs/sha256"
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "expand",
+            "backfill",
+            "contract"
+          ]
+        },
+        "releaseVersion": {
+          "$ref": "#/$defs/semver"
+        }
+      }
+    },
+    "platformDigests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "properties": {
+        "linux/amd64": {
+          "$ref": "#/$defs/digest"
+        },
+        "linux/arm64": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "repository",
+        "digest",
+        "reference",
+        "tags",
+        "platforms",
+        "platformDigests",
+        "evidence"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/trainingload-ai/trainingloadai/"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "reference": {
+          "type": "string",
+          "pattern": "@sha256:[a-f0-9]{64}$"
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "platforms": {
+          "type": "array",
+          "const": [
+            "linux/amd64",
+            "linux/arm64"
+          ]
+        },
+        "platformDigests": {
+          "$ref": "#/$defs/platformDigests"
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sbom",
+            "provenance",
+            "signature",
+            "vulnerability"
+          ],
+          "properties": {
+            "sbom": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "format",
+                "file"
+              ],
+              "properties": {
+                "format": {
+                  "const": "spdx-json"
+                },
+                "file": {
+                  "type": "string",
+                  "pattern": "\\.sbom\\.json$"
+                }
+              }
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "file"
+              ],
+              "properties": {
+                "mode": {
+                  "const": "mode=max"
+                },
+                "file": {
+                  "type": "string",
+                  "pattern": "\\.provenance\\.json$"
+                }
+              }
+            },
+            "signature": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "tool",
+                "version",
+                "oidcIssuer",
+                "identity",
+                "verified"
+              ],
+              "properties": {
+                "tool": {
+                  "const": "cosign"
+                },
+                "version": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "oidcIssuer": {
+                  "const": "https://token.actions.githubusercontent.com"
+                },
+                "identity": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "verified": {
+                  "const": true
+                }
+              }
+            },
+            "vulnerability": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "tool",
+                "version",
+                "policy",
+                "resultFile",
+                "scans"
+              ],
+              "properties": {
+                "tool": {
+                  "const": "trivy"
+                },
+                "version": {
+                  "const": "v0.76.1"
+                },
+                "policy": {
+                  "const": "zero-fixable-critical-high"
+                },
+                "resultFile": {
+                  "const": "vulnerability-result.json"
+                },
+                "scans": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "linux/amd64",
+                    "linux/arm64"
+                  ],
+                  "properties": {
+                    "linux/amd64": {
+                      "$ref": "#/$defs/vulnerabilityScan"
+                    },
+                    "linux/arm64": {
+                      "$ref": "#/$defs/vulnerabilityScan"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "vulnerabilityScan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "sha256",
+        "findings"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "^vulnerability/(client|docs|migrate|server)-(amd64|arm64)\\.sarif\\.json$"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "findings": {
+          "const": 0
+        }
+      }
+    }
+  }
+}

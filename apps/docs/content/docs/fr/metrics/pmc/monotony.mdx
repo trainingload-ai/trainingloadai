@@ -1,0 +1,46 @@
+---
+title: Monotonie de l’entraînement
+description: Découvrez comment Trainingload.ai calcule la Monotonie bornée et le Training Strain à partir des sept dernières charges quotidiennes.
+keywords: ["monotonie", "formule de monotonie", "Training Strain", "variation de charge", "Carl Foster"]
+---
+
+# Qu’est-ce que la monotonie ?
+
+La **monotonie de l’entraînement** décrit à quel point les charges quotidiennes des sept derniers jours calendaires se ressemblent. Des journées similaires donnent généralement une valeur plus élevée ; une alternance nette de journées fortes, légères et sans charge donne souvent une valeur plus basse.
+
+Trainingload.ai affiche une version normalisée et bornée, différente de la métrique classique de Foster. Elle ne mesure ni la fatigue, ni la récupération, ni le surentraînement, ni la probabilité de blessure.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotonie"
+    valuePopoverTitle="Valeur de monotonie"
+    valuePopoverBody="Calculée avec la moyenne et l’écart-type de population de sept charges quotidiennes ; les jours sans activité valent zéro."
+    rangePopoverTitle="Segments de l’interface"
+    rangePopoverBody="<0,6, 0,6–0,8 et >0,8 servent à examiner la distribution, pas à définir un risque."
+    helpTitle="Variation de charge"
+    details="Examinez ensemble les sept valeurs et la charge totale."
+  />
+</div>
+
+## Formule du produit
+
+```text
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+monotony = mean_load / (sd_load + mean_load)
+training_strain = sum(loads) × monotony / 0.5
+```
+
+La fenêtre comprend aujourd’hui et les six jours précédents. Si les sept charges sont nulles, Monotonie et Strain valent zéro.
+
+La formule classique est `foster_monotony = mean_load / sd_load` et n’est pas bornée. Trainingload.ai évite la division par zéro et maintient une semaine non vide entre 0 et 1. La valeur produit `0.8` ne correspond donc pas à `2.0` chez Foster.
+
+Sept jours sans charge donnent 0 ; un seul jour chargé environ 0,29 ; sept charges positives identiques donnent 1. Une valeur basse n’est pas forcément meilleure : un pic unique suivi de six jours à zéro est lui aussi peu monotone.
+
+## Références
+
+- [Foster (1998)](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad et al. (2017) : méthode session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones et al. (2017) : revue systématique](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr : Training Monotony](https://fellrnr.com/wiki/Training_Monotony)

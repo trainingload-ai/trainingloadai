@@ -1,0 +1,84 @@
+---
+title: Aerobic Decoupling
+description: Aerobic decoupling compares output-to-heart-rate efficiency between the first and second half of a steady endurance session.
+keywords: ["Aerobic Decoupling", "Cardiac Drift", "Pw:Hr", "Pa:Hr", "EF", "Efficiency Factor", "Aerobic Endurance", "heart rate drift"]
+---
+
+# Aerobic Decoupling
+
+**Aerobic Decoupling** (also called **cardiac decoupling / cardiac drift**) measures whether the relationship between your heart rate and your power or pace changes during a steady effort.
+
+## Core Concept: Coupling vs. Decoupling
+
+During a well-controlled steady endurance effort, your **input** (heart rate) and **output** (power or pace) should stay reasonably coupled. If the same output requires a higher heart rate later in the session, or the same heart rate produces less output, efficiency is drifting.
+
+During a long steady effort, we call it **Decoupling** if either of these happens:
+1.  **Heart rate drift**: power stays similar but heart rate gradually rises.
+2.  **Power/pace fade**: heart rate stays similar but power/pace gradually drops.
+
+This can reflect fatigue, heat stress, dehydration, fueling issues, pacing that was too aggressive for the day, or data-quality problems.
+
+Common interpretation:
+
+- **Positive value**: aerobic efficiency decreases over time (often due to fatigue, heat/dehydration, poor fueling, or going too hard)
+- **Typical range**: often **0% - 10%** (implementations, environment, and data quality vary by platform)
+- **Best use case**: long, **steady** efforts (endurance / steady-state segments). Very short or highly variable efforts are less meaningful.
+
+## Calculation Formula
+
+The logic involves taking a steady-state workout (excluding warm-up) and splitting it **in half**:
+
+1.  Calculate the Efficiency Factor ($EF_1$) for the **first half**.
+2.  Calculate the Efficiency Factor ($EF_2$) for the **second half**.
+
+Here, **EF / AE (Aerobic Efficiency)** is essentially “output / heart rate”:
+
+- **Pw:Hr**: using power as output, $EF = \frac{Power}{HR}$
+- **Pa:Hr**: using speed as output, $EF = \frac{Speed}{HR}$
+
+$$
+Pw:Hr[\%] / Pa:Hr[\%] = \frac{AE_1 - AE_2}{AE_1} \times 100\%
+$$
+
+Usually expressed as the percentage change of **Pw:Hr** or **Pa:Hr**.
+
+## Common Reference: The 5% Rule
+
+According to **Joe Friel**, **5%** is often used as a practical reference point:
+
+| Decoupling | Level | Meaning & Suggestion |
+| :--- | :--- | :--- |
+| **< 5%** | **Stable** | Efficiency stayed fairly stable for this duration and intensity. This is a positive sign for aerobic durability. |
+| **5% - 10%** | **Moderate drift** | Fatigue, heat, fueling, terrain, or pacing may be affecting the second half. Compare with similar sessions before changing the plan. |
+| **> 10%** | **High drift** | The session may have been too long, too hard, too hot, or poorly fueled for the current state. Treat it as a signal to review context. |
+
+## Practical Guide: How to Test?
+
+Don’t rely on random workouts. Use a structured **Aerobic Threshold Test**:
+
+1.  **Intensity**: strictly stay in **Zone 2** (aerobic endurance).
+    -   Power/pace: 65–75% FTP / FTPa.
+    -   Heart rate: below AeT (Aerobic Threshold), often LTHR minus 20–30 bpm.
+2.  **Duration**:
+    -   Olympic / Half marathon target: 1–1.5 hours.
+    -   Ironman / Ultramarathon target: 2–4 hours.
+3.  **Environment**: flat terrain or trainer; stay hydrated (avoid pseudo-decoupling caused by dehydration).
+
+## How Trainingload.ai uses aerobic decoupling
+
+-   **Long-session quality check**: after steady long runs or rides, decoupling helps show whether aerobic efficiency held up.
+-   **Context-aware review**: Trainingload.ai reads high decoupling alongside heat, elevation, pace/power variability, fueling, and recent load before treating it as a warning.
+-   **Base training feedback**: repeated low decoupling in similar sessions can support the case that aerobic durability is improving.
+-   **Not for every workout**: intervals, races with surges, hilly routes, and very short sessions can produce noisy decoupling values.
+
+## Related docs
+
+- [Efficiency Factor (EF)](/docs/metrics/heart-rate/efficiency-factor)
+- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
+- [Pace Zones](/docs/metrics/pace/zones)
+
+## References
+
+-   [Joe Friel: Are You Fit? All About Aerobic Endurance and Decoupling](https://www.trainingpeaks.com/blog/aerobic-endurance-and-decoupling/)
+-   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
+-   [TrainingPeaks Help: Aerobic Decoupling (Pw:Hr and Pa:HR) and Efficiency Factor (EF)](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF)

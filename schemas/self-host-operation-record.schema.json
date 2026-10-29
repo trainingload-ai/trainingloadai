@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-operation-record-v1.json",
+  "title": "Trainingload self-host operation record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "operationId",
+    "command",
+    "status",
+    "ok",
+    "exitCode",
+    "dryRun",
+    "startedAt",
+    "finishedAt",
+    "releaseVersion",
+    "actionCodes",
+    "errorCode"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "operationId": { "type": "string", "format": "uuid" },
+    "command": {
+      "type": "string",
+      "enum": [
+        "init",
+        "doctor",
+        "diagnostics",
+        "start",
+        "status",
+        "logs",
+        "backup",
+        "restore",
+        "upgrade",
+        "rollback",
+        "stop",
+        "owner-bootstrap",
+        "owner-recovery",
+        "uninstall"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "planned", "unchanged", "failed"]
+    },
+    "ok": { "type": "boolean" },
+    "exitCode": { "type": "integer", "enum": [0, 2, 3, 4, 5, 6, 7, 8, 10] },
+    "dryRun": { "type": "boolean" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "releaseVersion": { "type": "string", "minLength": 1 },
+    "actionCodes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
+      "uniqueItems": true
+    },
+    "errorCode": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "failed" } } },
+      "then": {
+        "properties": {
+          "ok": { "const": false },
+          "exitCode": { "enum": [2, 3, 4, 5, 6, 7, 8, 10] },
+          "errorCode": { "type": "string" }
+        }
+      },
+      "else": {
+        "properties": {
+          "ok": { "const": true },
+          "exitCode": { "const": 0 },
+          "errorCode": { "type": "null" }
+        }
+      }
+    }
+  ]
+}

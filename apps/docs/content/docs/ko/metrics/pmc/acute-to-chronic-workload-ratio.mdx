@@ -1,0 +1,40 @@
+---
+title: 급성:만성 훈련부하 비율(ACWR)
+description: Trainingload.ai가 같은 날의 피로와 체력으로 ACWR을 계산하는 방법과, 부상 예측이 아닌 부하 점검 도구로 사용하는 이유를 설명합니다.
+keywords: ["ACWR", "A:C 비율", "급성 만성 훈련부하", "ATL CTL", "결합형 ACWR"]
+---
+
+# 급성:만성 훈련부하 비율(ACWR)이란?
+
+**ACWR**은 모델로 계산한 최근 부하와 장기 부하를 비교합니다. Trainingload.ai에서는 오늘의 [피로(ATL)](/ko/docs/metrics/pmc/acute-training-load)를 오늘의 [체력(CTL)](/ko/docs/metrics/pmc/chronic-training-load)으로 나눕니다.
+
+부하 맥락의 변화를 찾는 데 도움이 되지만 부상이나 준비도를 예측하지는 않습니다.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AcRatioStatPreviewCard value="1.12" metricLabel="A:C"
+    valuePopoverTitle="A:C 값"
+    valuePopoverBody="같은 날의 ATL을 같은 날의 CTL로 나눈 값입니다."
+    rangePopoverTitle="화면 구간"
+    rangePopoverBody="<0.8, 0.8–1.3, 1.3–1.5, ≥1.5는 검토용 구간이며 안전 기준이 아닙니다."
+    helpTitle="상대 부하"
+    details="ATL, CTL과 원본 활동을 항상 함께 확인하세요." />
+</div>
+
+```text
+ACWR_today = ATL_today / CTL_today
+```
+
+ATL이 60이고 CTL이 50이면 ACWR은 `1.20`입니다. CTL이 0이면 0으로 나누는 일을 피하기 위해 제품은 `0`을 반환합니다.
+
+Trainingload.ai는 **결합형 지수 PMC 비율**을 사용합니다. 오늘 부하는 시간 상수 7일의 ATL과 42일의 CTL 양쪽에 들어갑니다. 단순한 7일/28일 평균 비율도, 최근 구간을 제외하는 비결합형도 아닙니다.
+
+1보다 크면 ATL이 CTL보다 높고, 1 부근이면 두 곡선이 비슷하며, 1보다 작으면 ATL이 낮습니다. 하지만 `12 / 10`과 `120 / 100`은 모두 1.20입니다. CTL이 매우 작으면 한 번의 세션만으로도 큰 비율이 나올 수 있습니다.
+
+`<0.8`, `0.8–<1.3`, `1.3–<1.5`, `≥1.5`는 표시 규칙이지 최적·안전·위험 상태의 증거가 아닙니다.
+
+## 참고 자료
+
+- [Windt & Gabbett(2019): 수학적 결합](https://doi.org/10.1136/bjsports-2017-098925)
+- [Maupin 외(2020): 체계적 문헌고찰](https://doi.org/10.2147/OAJSM.S231405)
+- [Impellizzeri 외(2020): 개념적 문제](https://doi.org/10.1123/ijspp.2019-0864)
+- [Wang 외(2020): ACWR에서 얻은 교훈](https://doi.org/10.1007/s40279-020-01280-1)

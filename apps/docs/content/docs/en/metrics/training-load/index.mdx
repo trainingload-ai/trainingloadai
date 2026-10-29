@@ -1,0 +1,81 @@
+---
+title: "What Is Training Load? TSS, TRIMP, and IF Explained"
+description: "Training load quantifies session and weekly training dose with TSS, TRIMP, and Intensity Factor. See how these metrics compare sessions and support plan review."
+keywords:
+  [
+    "what is training load",
+    "training load explained",
+    "TSS vs TRIMP",
+    "training load metrics",
+    "how to measure training load",
+  ]
+---
+
+# What Is Training Load? TSS, TRIMP, and IF Explained
+
+**Training load** is a modeled dose for one workout, one week, or a block. This hub explains the metric family—TSS, TRIMP, and Intensity Factor—so you can compare a long easy session with a short interval day, then review whether the plan should build, hold, recover, or adjust. Product decisions live on [training load management](/training-load); the pages below own the definitions.
+
+Without a load metric, it is hard to compare “a 2-hour easy ride/run” with “a 30-minute interval session”. It is also harder to see whether recent load has risen faster than recovery can absorb.
+
+## Key Metrics
+
+<Cards>
+  <Card
+    title="TSS (Training Stress Score)"
+    href="/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF (Intensity Factor)"
+    href="/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP (Training Impulse)"
+    href="/docs/metrics/training-load/training-impulse"
+  />
+</Cards>
+
+## Why Quantify Training Load?
+
+1.  **Objective comparison**: evaluate different durations and session types with a single yardstick.
+2.  **Trend tracking**: identify gradual or sudden changes in modeled weekly load.
+3.  **Recovery context**: combine load history with session quality and athlete feedback when planning training and rest.
+
+## How Training Load Supports Adaptive Planning
+
+Training load is not the plan itself. It is the evidence layer behind better plan decisions:
+
+- **After completed workouts**: actual load can be compared with planned load instead of relying only on completion status.
+- **During review**: CTL, ATL, and TSB compare slower and faster modeled load trends; they do not directly measure fitness, fatigue, or readiness.
+- **Before adjustment**: missed workouts, unusually high fatigue, or a fast load ramp can justify changing the next few sessions.
+
+Trainingload.ai uses this pattern throughout the product loop: plan → completed workouts → load trend → AI coach review → confirmed adjustment.
+
+## FAQ
+
+### What is training load?
+
+Training load is a modeled training dose. Session scores such as TSS or TRIMP estimate one workout; CTL and ATL summarize those scores over time so you can compare weeks, not just “did I finish.”
+
+### TSS vs TRIMP: which measures training load?
+
+TSS is the usual external-load score when power or reliable pace exists. TRIMP is internal load from heart rate and duration. Trainingload.ai can use either, depending on the sport and your load-source priority.
+
+### How do I measure training load for running and cycling?
+
+Cycling usually uses power TSS from NP, IF, and FTP. Running often uses rTSS from NGP and threshold pace, or TRIMP when only heart rate is trustworthy. Compare scores inside one sport before you compare across sports.
+
+### Where should I go after this hub?
+
+Open the definition pages for [TSS](/docs/metrics/training-load/training-stress-score), [TRIMP](/docs/metrics/training-load/training-impulse), and [Intensity Factor](/docs/metrics/training-load/intensity-factor). Then [manage training load with CTL, ATL, and TSB in your plan](/training-load).
+
+## Related Concepts
+
+- [Training Stress Score (TSS)](/docs/metrics/training-load/training-stress-score): single-session training stress.
+- [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor): workout intensity relative to threshold.
+- [Training Impulse (TRIMP)](/docs/metrics/training-load/training-impulse): heart-rate-based internal load.
+- [Calculate TSS from duration, NP, and FTP](/tss-calculator)
+- [Project CTL, ATL, and TSB from daily TSS](/training-load-calculator)
+- [Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load): longer-term load trend.
+- [Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load): faster recent-load trend.
+- [Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance): current CTL minus current ATL.
+- [Use AI coach review to adjust training load safely](/ai-training-plan)

@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-acceptance-report.schema.json",
+  "title": "Trainingload self-host acceptance report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "runId",
+    "generatedAt",
+    "status",
+    "platform",
+    "mode",
+    "releases",
+    "scenarios",
+    "measurements",
+    "security",
+    "failure"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-acceptance-report" },
+    "runId": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["running", "passed", "failed"] },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "host",
+        "nodePlatform",
+        "architecture",
+        "containerPlatform",
+        "runtime"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "host": { "type": "string", "minLength": 1 },
+        "nodePlatform": { "enum": ["linux", "darwin", "win32"] },
+        "architecture": { "enum": ["amd64", "arm64"] },
+        "containerPlatform": { "enum": ["linux/amd64", "linux/arm64"] },
+        "runtime": { "type": "string", "minLength": 1 }
+      }
+    },
+    "mode": { "enum": ["core-local", "connected"] },
+    "releases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current", "previous"],
+      "properties": {
+        "current": { "$ref": "#/$defs/release" },
+        "previous": { "$ref": "#/$defs/release" }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scenario" }
+    },
+    "measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "freshInstallMs",
+        "restartMs",
+        "recreateMs",
+        "restoreMs",
+        "upgradeMs",
+        "healthLatencyMs",
+        "memoryBytes",
+        "diskBytes"
+      ],
+      "properties": {
+        "freshInstallMs": { "$ref": "#/$defs/nonNegativeInteger" },
+        "restartMs": { "$ref": "#/$defs/nonNegativeInteger" },
+        "recreateMs": { "$ref": "#/$defs/nonNegativeInteger" },
+        "restoreMs": { "$ref": "#/$defs/nonNegativeInteger" },
+        "upgradeMs": { "$ref": "#/$defs/nonNegativeInteger" },
+        "healthLatencyMs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["samples", "p50", "p95", "max"],
+          "properties": {
+            "samples": { "type": "integer", "minimum": 1 },
+            "p50": { "type": "number", "minimum": 0 },
+            "p95": { "type": "number", "minimum": 0 },
+            "max": { "type": "number", "minimum": 0 }
+          }
+        },
+        "memoryBytes": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/nonNegativeInteger" }
+        },
+        "diskBytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["afterInstall", "afterFixtures", "afterRestore"],
+          "properties": {
+            "afterInstall": { "$ref": "#/$defs/nonNegativeInteger" },
+            "afterFixtures": { "$ref": "#/$defs/nonNegativeInteger" },
+            "afterRestore": { "$ref": "#/$defs/nonNegativeInteger" }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "details"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "status": { "enum": ["pass", "fail"] },
+          "details": { "type": "object" }
+        }
+      }
+    },
+    "failure": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["scenario", "message"],
+      "properties": {
+        "scenario": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 4096 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "passed" } } },
+      "then": {
+        "properties": {
+          "scenarios": { "minItems": 1 },
+          "security": { "minItems": 1 },
+          "failure": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "failed" } } },
+      "then": { "properties": { "failure": { "type": "object" } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "running" } } },
+      "then": { "properties": { "failure": { "type": "null" } } }
+    }
+  ],
+  "$defs": {
+    "nonNegativeInteger": { "type": "integer", "minimum": 0 },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "revision", "archiveSha256"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "archiveSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "priority", "status", "durationMs", "details"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "priority": { "enum": ["P0", "P1", "P2"] },
+        "status": { "enum": ["pass", "fail"] },
+        "durationMs": { "$ref": "#/$defs/nonNegativeInteger" },
+        "details": { "type": "object" }
+      }
+    }
+  }
+}

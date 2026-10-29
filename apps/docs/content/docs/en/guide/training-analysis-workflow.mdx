@@ -1,0 +1,118 @@
+---
+title: Training Analysis Workflow
+description: Turn plan execution, completed activity evidence, training load, response trends, and AI review into one conservative training decision.
+keywords:
+  [
+    "training analysis app",
+    "endurance training analysis",
+    "plan vs actual",
+    "training load workflow",
+  ]
+---
+
+# Training Analysis Workflow
+
+Training analysis is useful only when it improves a real decision. This workflow prevents a dashboard full of metrics from becoming a collection of unrelated scores.
+
+## Before you begin
+
+- Choose one decision and time range, such as whether to keep tomorrow's key workout.
+- Let relevant activities reach Ready status.
+- Confirm thresholds, time zone, sport filter, and load-source priority.
+- Link completed activities to planned workouts when the plan is part of the question.
+- Record subjective context such as session RPE or current state when available.
+
+## 1. Define the question
+
+Start with a decision, not a metric:
+
+- Should the next key workout remain as planned?
+- Did this week deliver the intended training stress?
+- Is a repeated execution problem caused by schedule, load, or workout design?
+
+Set the relevant sport and date range. Do not mix a seven-day execution question with an all-time chart.
+
+## 2. Compare plan and actual
+
+Before reading any score, answer:
+
+- What was planned?
+- What was completed, skipped, moved, or left unlinked?
+- Which key sessions differed in duration, intensity, structure, or load?
+- Was the difference intentional?
+
+If this step is skipped, load metrics lose their training purpose.
+
+## 3. Validate the evidence
+
+Open the activities behind the totals and check:
+
+- Processing status and source provider.
+- Sensor availability and obvious data errors.
+- Threshold and zone context.
+- Which source produced activity load.
+- Terrain, weather, equipment, or other execution context that changes interpretation.
+
+An explicit missing signal is better than filling the gap with a precise-looking guess.
+
+## 4. Read load and response together
+
+Use the PMC signals as a set:
+
+- [CTL](/docs/metrics/pmc/chronic-training-load) describes the longer load trend.
+- [ATL](/docs/metrics/pmc/acute-training-load) describes recent training pressure.
+- [TSB](/docs/metrics/pmc/training-stress-balance) shows the difference between longer and recent modeled load.
+
+Then compare them with execution quality, subjective fatigue, and a relevant response trend. Load describes applied pressure; it does not prove adaptation by itself.
+
+<DocsScreenshot
+  id="training-analysis-decision"
+  title="Training load in decision context"
+  description="Use one time range to connect CTL, ATL, and TSB with the activities and active-plan period that produced the trend."
+  route="Analysis → PMC"
+/>
+
+## 5. Draft one conservative change
+
+Change one primary variable first:
+
+- Keep frequency and reduce one session's intensity.
+- Keep the workout purpose and shorten duration.
+- Move one key session by 24–48 hours.
+- Leave the plan unchanged and collect the next key-session result.
+
+State what should remain unchanged so the adjustment does not silently rewrite the entire training block.
+
+## 6. Confirm and record the rationale
+
+Before applying a plan change, record:
+
+- **Trigger:** the plan/execution or load pattern that prompted review.
+- **Decision:** the exact workout and field that changes.
+- **Protected intent:** what the plan should still accomplish.
+- **Expected result:** what should improve or stabilize.
+- **Review point:** the next activity or date that will test the decision.
+
+When AI Coach prepares the adjustment, inspect the proposed workout and confirm it only after these five items are clear.
+
+## Verify the decision
+
+- Every conclusion can be traced to a plan, activity, setting, or trend visible in Trainingload.ai.
+- Observed data is separated from interpretation and uncertainty.
+- Only the intended future workout changes.
+- Completed and skipped history remains intact.
+- A specific next review point is defined.
+
+## Troubleshooting
+
+- **The metrics disagree:** compare date range, sport, thresholds, and load sources before choosing one signal as “correct.”
+- **The chart changed after a settings edit:** identify the changed threshold or source priority and reinterpret history consistently.
+- **Plan and actual cannot be compared:** link the correct activity and confirm the planned workout has enough structure for expected load.
+- **AI suggests a large rewrite:** ask for one conservative change with protected constraints and require confirmation.
+- **There is not enough evidence:** keep the plan unchanged or make the safest reversible adjustment, then collect the next relevant session.
+
+## Next steps
+
+- [Manage an Active Plan](/docs/guide/manage-active-plan)
+- [Activity Detail](/docs/guide/activity-detail)
+- [AI Coach](/docs/guide/ai-coach)
