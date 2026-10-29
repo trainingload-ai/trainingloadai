@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/zone-setting.schema.json",
+  "title": "Training zone setting",
+  "description": "A versioned heart-rate, pace, or power zone configuration.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The stable record identifier."
+    },
+    "sportType": {
+      "type": "string",
+      "description": "The sport type to which the zones apply."
+    },
+    "zoneType": {
+      "type": "string",
+      "description": "The measurement domain used by the zones."
+    },
+    "benchmark": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ],
+      "description": "The benchmark value or stable benchmark type used to calculate the zones."
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The external provider that supplied the zone configuration, when available."
+    },
+    "zones": {
+      "type": "array",
+      "description": "The ordered zone definitions from the lowest to the highest intensity.",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "description": "A zone definition including its label and boundaries.",
+        "additionalProperties": true
+      }
+    },
+    "effectiveFrom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The start of the configuration validity period in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "The time the configuration was created in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The system or user action that originally supplied this record."
+    },
+    "sourceExternalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stable record identifier assigned by the source system, when available."
+    },
+    "sourceUpdatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The last modification time reported by the source system in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "sportType",
+    "zoneType",
+    "zones",
+    "createdAt"
+  ]
+}

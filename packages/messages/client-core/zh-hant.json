@@ -1,0 +1,6231 @@
+{
+  "banner": {
+    "betaWarning": "⚠️ 目前仍在開發測試階段（v0.1.0），資料隨時有可能清零。"
+  },
+  "ActivityTitle": {
+    "untitled": "未命名活動",
+    "periods": {
+      "morning": "上午{sport}",
+      "noon": "中午{sport}",
+      "afternoon": "下午{sport}",
+      "evening": "晚間{sport}",
+      "night": "夜間{sport}"
+    },
+    "sports": {
+      "run": "跑步",
+      "ride": "騎乘",
+      "swim": "游泳",
+      "workout": "訓練"
+    },
+    "demo": {
+      "base": {
+        "recoveryWalk": "恢復步行",
+        "recoveryRun": "恢復跑",
+        "poolSwim": "泳池游泳",
+        "easyRun": "輕鬆跑",
+        "longEasyRun": "長距離輕鬆跑",
+        "baseRun": "基礎跑",
+        "thresholdRun": "閾值跑",
+        "longRun": "長距離跑",
+        "unplannedEasyRun": "計劃外輕鬆跑",
+        "tempoRun": "節奏跑",
+        "progressiveLongRun": "漸進長跑",
+        "treadmillRun": "跑步機跑",
+        "treadmillTempo": "跑步機節奏跑",
+        "peakLongRun": "高峰長跑",
+        "fatigueRecoveryWalk": "疲勞恢復步行",
+        "taperRun": "減量跑",
+        "goalRace10K": "10 公里目標賽"
+      },
+      "detail": {
+        "minutes": "{value} 分鐘",
+        "kilometers": "{value} 公里",
+        "meters": "{value} 公尺",
+        "shortened": "縮短完成",
+        "moved": "調整日期",
+        "skipped": "已跳過"
+      },
+      "note": {
+        "skippedRecovery": "展示情境：恢復指標不佳，因此跳過本次訓練。",
+        "postponedDay": "展示情境：訓練順延一天。",
+        "shortened": "展示情境：運動員縮短了原定訓練。"
+      }
+    }
+  },
+  "ColorPicker": {
+    "title": "揀選顏色",
+    "srOnly": "揀選顏色",
+    "paletteTitle": "顏色調色盤",
+    "paletteDescription": "為呢個區間揀一個顏色。",
+    "hex": "Hex"
+  },
+  "sidebar": {
+    "home": "首頁",
+    "plan": "計劃",
+    "dashboard": "概覽",
+    "pmc": "體能管理",
+    "analysis": "分析",
+    "aiCoach": "AI 教練",
+    "power": "功率",
+    "heartRate": "心率",
+    "pace": "配速",
+    "overview": "概覽",
+    "bestDistance": "最佳距離",
+    "map": "地圖",
+    "activities": "活動",
+    "me": "我的",
+    "settings": "設定",
+    "calendar": "日曆",
+    "competitions": "賽事",
+    "calendarShort": "日曆",
+    "coach": "教練",
+    "trainingSpace": "訓練",
+    "spaceSwitcherLabel": "切換工作空間",
+    "navigationLabel": "主導覽",
+    "secondaryNavigationLabel": "輔助導覽",
+    "expand": "展開側邊欄",
+    "collapse": "收起側邊欄",
+    "resize": "調整側邊欄寬度"
+  },
+  "MobileCalendarTimeline": {
+    "rest": "休息日",
+    "summary": "{workouts} 項計畫 · {activities} 項已完成",
+    "plannedWorkout": "計畫訓練",
+    "planned": "計畫",
+    "activity": "活動",
+    "completed": "已完成",
+    "competition": "賽事",
+    "load": "負荷",
+    "actualLoad": "實際",
+    "plannedLoad": "計畫",
+    "restHint": "這一天沒有安排訓練",
+    "selectDateHint": "選擇右側日期或月曆中的某一天查看內容",
+    "dayContent": "當天內容",
+    "noSchedule": "暫無安排",
+    "activityDetail": "活動詳情",
+    "workoutDetail": "訓練詳情",
+    "competitionDetail": "賽事詳情",
+    "backToDay": "返回當天內容",
+    "viewFullActivity": "查看完整活動"
+  },
+  "notifications": {
+    "title": "通知",
+    "tabs": {
+      "unread": "未讀",
+      "all": "全部"
+    },
+    "loading": "載入中…",
+    "empty": "暫無通知",
+    "unreadBadge": "未讀",
+    "receivedAt": "收到時間",
+    "noBody": "冇額外內容",
+    "openReview": "查看複盤",
+    "loadingMore": "載入更多…",
+    "templates": {
+      "general": "系統通知",
+      "importSuccess": "導入完成",
+      "importWarning": "導入提醒",
+      "reviewDigest": "訓練複盤",
+      "exportFailed": "同步失敗"
+    },
+    "summary": {
+      "success": "成功",
+      "failed": "失敗",
+      "skipped": "跳過",
+      "reviewType": "複盤類型",
+      "exportRoute": "同步"
+    },
+    "reviewTypes": {
+      "DAILY": "日複盤",
+      "WEEKLY": "週複盤",
+      "MONTHLY": "月複盤",
+      "PLAN": "計畫複盤"
+    },
+    "reviewReadyTitles": {
+      "DAILY": "日複盤已產生",
+      "WEEKLY": "週複盤已產生",
+      "MONTHLY": "月複盤已產生",
+      "PLAN": "計畫複盤已產生"
+    },
+    "kinds": {
+      "IMPORT_BATCH_COMPLETED": {
+        "title": "導入已完成",
+        "body": "已處理 {total} 個來源。\n\n- 成功：{success}\n- 失敗：{failed}\n- 跳過：{skipped}"
+      },
+      "IMPORT_BATCH_PARTIAL_FAILED": {
+        "title": "導入完成（含失敗項）",
+        "body": "已處理 {total} 個來源。\n\n- 成功：{success}\n- 失敗：{failed}\n- 跳過：{skipped}"
+      },
+      "THIRD_PARTY_EXPORT_FAILED": {
+        "title": "未能同步到外部服務",
+        "preview": "{sourceLabel} → {provider} ·「{activityName}」",
+        "body": "我們嘗試將此活動從 **{sourceLabel}** 同步到 **{provider}**，但未成功。\n\n活動：「{activityName}」\n\n請檢查外部連線後重試。"
+      }
+    }
+  },
+  "AiCoachPage": {
+    "timeline": {
+      "publicSummary": "思路摘要",
+      "publicSummaryHint": "面向你的簡短分析說明，並非完整的內部思考過程",
+      "tools": {
+        "activityDetail": "讀取訓練詳情",
+        "activitySeries": "讀取訓練數據曲線",
+        "activitySearch": "搜尋訓練紀錄",
+        "activityDay": "讀取當日訓練",
+        "activityRecent": "讀取最近訓練",
+        "question": "準備確認問題",
+        "bests": "彙整最佳表現",
+        "compareBlocks": "比較訓練週期",
+        "decisionDraft": "準備調整建議",
+        "decisionApply": "套用已確認的調整",
+        "competitionList": "讀取賽事安排",
+        "competitionImpact": "分析賽事影響",
+        "currentTime": "讀取目前時間",
+        "docsSearch": "搜尋說明文件",
+        "docsRead": "讀取說明文件",
+        "integrationStatus": "檢查裝置同步狀態",
+        "memorySearch": "搜尋運動員記憶",
+        "webSearch": "搜尋即時網頁",
+        "webFetch": "讀取網頁來源",
+        "metricCurrent": "讀取目前指標",
+        "metricHistory": "讀取指標歷史",
+        "metricCompare": "比較訓練指標",
+        "profile": "讀取運動員資料",
+        "thresholds": "讀取閾值設定",
+        "zones": "讀取強度區間",
+        "loadTrend": "讀取訓練負荷趨勢",
+        "planRead": "讀取訓練計畫",
+        "planActive": "讀取目前計畫",
+        "planRecent": "讀取最近計畫",
+        "planSuitability": "計劃適配評估",
+        "planDay": "讀取當天課表",
+        "planExecution": "讀取計畫執行情況",
+        "planPreview": "預覽計畫變更",
+        "trainingAggregate": "彙整訓練數據",
+        "trainingBaseline": "讀取訓練基準",
+        "trainingPlanContext": "讀取訓練計畫背景",
+        "readiness": "評估訓練準備度",
+        "weekSummary": "彙整本週訓練",
+        "intensity": "確定訓練強度",
+        "planDraft": "產生訓練計畫草案",
+        "workoutAdjustment": "產生訓練調整草案",
+        "visualization": "產生訓練圖表",
+        "skillActivate": "載入技能",
+        "fitnessMethods": "讀取體能評估方法",
+        "fitnessEvidence": "收集體能評估依據",
+        "fitnessCalculate": "計算體能指標",
+        "fitnessTrack": "追蹤體能測試",
+        "fitnessApply": "套用體能評估結果",
+        "activityDelete": "刪除訓練紀錄",
+        "activityDescription": "更新訓練描述",
+        "activityRpe": "記錄訓練感受",
+        "activityLink": "關聯訓練與課表",
+        "activityUnlink": "取消訓練與課表關聯",
+        "competitionUpdate": "更新賽事安排",
+        "planLifecycle": "更新計畫狀態",
+        "workoutAdd": "新增訓練課",
+        "workoutUpdate": "更新訓練課",
+        "workoutStatus": "更新訓練完成狀態",
+        "workoutPostpone": "延後訓練課",
+        "metricUpdate": "更新體能指標",
+        "bodyWeightUpdate": "記錄體重",
+        "trainingDataCoverage": "訓練資料覆蓋",
+        "coachTaskResult": "後台任務結果"
+      },
+      "skills": {
+        "integrationSupport": "裝置連接與同步",
+        "fitnessAssessment": "體能評估",
+        "trainingAnalytics": "訓練分析",
+        "activityReview": "活動回顧",
+        "workoutManagement": "訓練課管理",
+        "workoutGenerator": "產生訓練課",
+        "planFollowup": "計畫跟進",
+        "planDayReview": "單日計畫回顧",
+        "planWeekReview": "每週計畫回顧",
+        "planReviewAdjustment": "計劃調整",
+        "planCycleReview": "訓練週期回顧",
+        "planBuilder": "訓練計畫制定",
+        "readinessCheck": "訓練準備度評估",
+        "weekReview": "每週訓練回顧",
+        "performanceReview": "運動表現分析",
+        "metricExplainer": "訓練指標解讀",
+        "periodReview": "週期訓練回顧"
+      },
+      "resumed": "繼續先前任務",
+      "seconds": "{count} 秒",
+      "scrollToBottom": "回到最新訊息",
+      "retry": "繼續執行（新嘗試）",
+      "retryBlocked": "本次執行包含寫入操作，請先確認操作結果。為避免重複修改，已停用直接重試。",
+      "lateOutcome": "中斷後已核實操作結果",
+      "questionInactive": "此問題已停止接收回答。",
+      "run": {
+        "running": "執行中",
+        "awaiting_input": "等待你的回答",
+        "completed": "執行完成",
+        "failed": "執行失敗",
+        "cancelled": "已停止",
+        "interrupted": "已中斷"
+      },
+      "kind": {
+        "analysis": "分析請求",
+        "skill": "載入技能",
+        "tool": "執行工具",
+        "question": "確認資訊",
+        "narration": "進度說明",
+        "artifact": "交付結果",
+        "recovery": "恢復執行",
+        "trainingDataCoverage": "檢查訓練資料覆蓋",
+        "coachTaskResult": "完成背景教練任務"
+      },
+      "activity": {
+        "queued": "排隊中",
+        "running": "進行中",
+        "waiting": "等待確認",
+        "completed": "已完成",
+        "failed": "失敗",
+        "cancelled": "已停止",
+        "interrupted": "已中斷",
+        "skipped": "已略過"
+      }
+    },
+    "emptyChatHint": "直接提問，或從下面的建議開始。",
+    "recentActions": "近期操作",
+    "pageTitle": "智能教練",
+    "fallbackName": "運動員",
+    "heroTitleGeneric": "今日想先了解乜嘢？",
+    "heroTitlePersonal": "{name}，今日想先了解乜嘢？",
+    "heroDescription": "可以問昨日練成點、點樣提高 FTP、恢復夠唔夠，或者對比唔同訓練週期。",
+    "chatHeader": "問訓練負荷、恢復、FTP 或階段對比都可以。",
+    "loadingThread": "思考中…",
+    "composer": {
+      "placeholder": "例如：我昨日練成點？我點樣可以提升 FTP？",
+      "hint": "撳 Enter 發送，Shift+Enter 換行",
+      "thinking": "思考",
+      "standardMode": "標準模式",
+      "deepMode": "深度推理",
+      "modelPurposeHint": "為本次請求選擇預設模型或服務商提供的推理模型。"
+    },
+    "chatPlaceholder": "可以繼續追問訓練負荷、恢復或進步狀況…",
+    "examplesTitle": "可以試下問",
+    "followUpsTitle": "下一步可以問",
+    "queue": {
+      "title": "待發送",
+      "ariaList": "待發送訊息隊列",
+      "edit": "喺輸入框編輯",
+      "interruptSend": "停止並立即發送",
+      "delete": "從隊列移除"
+    },
+    "status": {
+      "ready": "就緒",
+      "streaming": "思考中",
+      "phaseModel": "生成回覆",
+      "phaseToolRun": "擷取資料",
+      "progress": {
+        "preparing": "正在準備這次分析",
+        "analyzingRequest": "正在理解你的計畫條件",
+        "readingBaseline": "正在讀取近期訓練基線",
+        "readingPerformance": "正在查看近期最佳表現",
+        "resolvingIntensity": "正在確定可執行的強度依據",
+        "checkingCompetitions": "正在檢查賽事影響",
+        "synthesizingEvidence": "正在整合訓練資料與計畫限制",
+        "draftingPlan": "正在編排完整訓練週期",
+        "validatingPlan": "正在驗證計畫結構與訓練安排"
+      },
+      "contextWindow": {
+        "trigger": "上下文 {percent}",
+        "usedInput": "已用輸入（估算）",
+        "inputBudget": "可用輸入預算",
+        "remaining": "剩餘輸入（估算）",
+        "reservedOutput": "預留回覆空間",
+        "totalWindow": "總上下文視窗",
+        "nearLimit": "已接近壓縮門檻，後續請求可能壓縮較早訊息。",
+        "estimateHint": "最近一次模型請求的 token 估算，不含尚未傳送的輸入。",
+        "titleIdle": "上下文視窗",
+        "titleActive": "已用 {percent}",
+        "idleDescription": "教練思考時會喺度顯示上下文使用情況。",
+        "usage": "已用 {used} / 上限 {max}",
+        "compressed": "呢一步已壓縮 {count} 條較舊訊息",
+        "ariaIdle": "上下文視窗閒置中",
+        "ariaActive": "上下文視窗使用率 {percent}"
+      }
+    },
+    "rendering": {
+      "thinking": "思考中…",
+      "preparing": "思考中…",
+      "rendering": "正在渲染 {name}",
+      "tools": {
+        "generic": "內容",
+        "planDay": "計畫日",
+        "activityRecent": "最近訓練",
+        "activityDay": "當日訓練",
+        "pmc": "負荷趨勢",
+        "profileZones": "閾值配置",
+        "profileZoneRanges": "強度區間",
+        "competitionEvents": "賽事安排",
+        "question": "問題卡片",
+        "planDraft": "計畫草案",
+        "workoutAdjustment": "訓練調整",
+        "decisionDraft": "決策草案",
+        "decisionApply": "決策結果",
+        "actionResult": "操作結果",
+        "trainingVisualization": "訓練圖表"
+      }
+    },
+    "actions": {
+      "copy": "複製",
+      "copied": "已複製",
+      "copyFailed": "複製失敗",
+      "interruptAndSend": "立即發送",
+      "newChat": "新對話",
+      "loginRequired": "請先登入，登入後會返回目前頁面。",
+      "newSessionFailed": "未能開始新對話，請再試一次。",
+      "send": "發送",
+      "stop": "停止",
+      "editUserMessage": "編輯",
+      "editUserAria": "編輯訊息",
+      "cancelEdit": "取消",
+      "saveEdit": "儲存並重新生成",
+      "savingEdit": "儲存中…",
+      "editWhileStreaming": "請先停止生成，再編輯訊息。",
+      "editUserFailed": "未能更新訊息，請再試一次。",
+      "editInlineHint": "Enter 發送 · Shift+Enter 換行 · Esc 取消",
+      "editEmpty": "訊息唔可以留空。",
+      "sendingEdit": "發送中…",
+      "enqueueToQueue": "加入隊列",
+      "composerQueueEditHint": "Enter 儲存到隊列 · Esc 取消編輯"
+    },
+    "roles": {
+      "user": "你",
+      "coach": "教練"
+    },
+    "transcript": {
+      "titleError": "連線問題",
+      "titleSystem": "提示",
+      "titleTurnFailed": "回覆未完成",
+      "reasonTimeout": "請求逾時。",
+      "reasonDisconnect": "網絡中斷或無法連接伺服器。",
+      "reasonRateLimit": "請求太頻密，請稍後再試。",
+      "reasonAuth": "登入狀態可能已過期，或呢個操作已無權限。",
+      "reasonServer": "教練服務暫時不可用或返回錯誤。",
+      "reasonInternal": "系統出咗問題，請稍後再試。",
+      "reasonUnknown": "生成回覆時發生錯誤。",
+      "retry": "重試",
+      "titleAccessRequired": "AI 存取暫不可用",
+      "reasonAccessRequired": "請檢查執行個體的 AI 設定或目前帳戶權限。",
+      "titleActionInProgress": "已有 AI 操作進行中",
+      "reasonActionInProgress": "請等待目前 AI 操作完成後再發起下一次操作。",
+      "titleSettlementPending": "正在結算上次用量",
+      "reasonSettlementPending": "上一次 AI 操作仍在結算，完成後即可繼續。",
+      "titleModelTierUnavailable": "模型暫不可用",
+      "reasonModelTierUnavailable": "目前模型檔位暫不可用，請選擇其他檔位或稍後重試。",
+      "titleModelUnavailable": "模型暫時無法回應",
+      "reasonModelUnavailable": "請嘗試切換模型後重試，或稍後再試。",
+      "switchToDeepAndRetry": "切換到深度模式重試",
+      "switchToStandardAndRetry": "切換到標準模式重試"
+    },
+    "questions": {
+      "dismissAnswering": "暫時收起問題",
+      "resumeAnswering": "繼續回答",
+      "confirmed": "已確認",
+      "title": "教練問題",
+      "answeredCount": "已完成 {answered}/{total}",
+      "questionAnswered": "已揀 {count} 項",
+      "questionPending": "待回答",
+      "multiHint": "可以揀多過一個。",
+      "noteLabel": "備註",
+      "notePlaceholder": "可選補充…",
+      "submit": "提交",
+      "submitAll": "提交",
+      "back": "返回",
+      "next": "下一步",
+      "stepLabel": "第 {current}/{total} 題",
+      "progressHint": "仲有問題未完成",
+      "otherPlaceholder": "可選補充…",
+      "answerNote": "備註",
+      "submitWhileStreaming": "請等教練完成呢次回覆先，再提交你嘅選擇。",
+      "bubbleDeferredToCard": "請用下面嘅卡片揀選答案。",
+      "skip": "略過",
+      "answeredBadge": "你嘅選擇",
+      "answeredSkipped": "已略過"
+    },
+    "planDraft": {
+      "title": "計劃預覽",
+      "cardHint": "喺週網格確認課表後，可以儲存到訓練日曆。",
+      "weekColumn": "週",
+      "weekLabel": "第 {week} 週",
+      "summary": "{weeks} 週 · 已排 {sessions} 課",
+      "rest": "休息",
+      "createPlan": "儲存計劃",
+      "savedMetaPrompt": "[計劃已儲存到訓練計劃]",
+      "bubbleDeferredToCard": "計劃預覽喺下面張卡片。",
+      "planAlreadySaved": "呢個草稿已經儲存成計劃。",
+      "planAlreadySavedShort": "已儲存",
+      "waitStreamEnd": "請等回覆完成先再儲存。",
+      "creating": "儲存中…",
+      "createFailed": "未能儲存計劃。請檢查 workout 文字（DSL）後再試。",
+      "createSuccess": "計劃已儲存",
+      "noWorkouts": "呢個草稿冇任何包含 workout 文字嘅課。",
+      "weekdayShort": {
+        "0": "一",
+        "1": "二",
+        "2": "三",
+        "3": "四",
+        "4": "五",
+        "5": "六",
+        "6": "日"
+      },
+      "workoutDialogTitle": "第 {week} 週 · 週{weekday}",
+      "workoutDialogNotes": "備註",
+      "workoutDialogNotesEmpty": "無",
+      "workoutDialogDsl": "Workout 規則（DSL）",
+      "workoutDialogIntensity": "相對強度",
+      "workoutDialogLoading": "載入圖表中…",
+      "workoutDialogNoChart": "冇嘢可以視覺化",
+      "workoutDialogSessionCount": "{count, plural, one {# 個訓練} other {# 個訓練}}",
+      "workoutDialogSessionMeta": "第 {ordinal} 節 · {sport}",
+      "workoutDialogSessionFallback": "第 {ordinal} 節",
+      "workoutDialogClose": "關閉"
+    },
+    "readCards": {
+      "competitionEvents": {
+        "title": "賽事安排",
+        "empty": "查詢範圍內暫無賽事安排。",
+        "limited": "顯示 {count} 場，共 {total} 場賽事。"
+      },
+      "toggleDetails": "展開或收起詳情",
+      "planDay": {
+        "title": "計畫某日",
+        "subtitleWithPlan": "{date} · {title}",
+        "subtitleNoPlan": "{date}",
+        "outsideRange": "該日期不在目前計畫週期內。",
+        "position": "位置",
+        "weekDay": "第 {week} 週 · 第 {day} 天",
+        "session": "第 {index} 節",
+        "emptyDay": "當日無安排訓練。"
+      },
+      "activityRecent": {
+        "title": "最近活動",
+        "subtitle": "{count, plural, one {# 筆活動} other {# 筆活動}}",
+        "empty": "尚無紀錄。"
+      },
+      "activityDay": {
+        "title": "{date} 的活動",
+        "subtitle": "{count, plural, one {# 筆活動} other {# 筆活動}}",
+        "empty": "當日無活動。"
+      },
+      "pmc": {
+        "title": "負荷與體能（PMC）",
+        "stats": {
+          "activeDays": "活躍日",
+          "restDays": "休息日",
+          "totalLoad": "總負荷",
+          "avgDaily": "日均負荷"
+        }
+      },
+      "profileZones": {
+        "title": "閾值與區間",
+        "maxHr": "最大心率",
+        "zonesHr": "心率區間",
+        "zonesPower": "功率區間",
+        "zonesPace": "配速區間"
+      },
+      "zoneRanges": {
+        "title": "{sport} · 區間明細",
+        "power": "功率",
+        "pace": "配速",
+        "tabPace": "配速",
+        "tabHr": "心率",
+        "tabPower": "功率",
+        "colZone": "分區",
+        "colMin": "下限",
+        "colMax": "上限",
+        "unitPace": "(分/km)",
+        "unitPace100m": "(分/100m)",
+        "unitHr": "(bpm)",
+        "unitPower": "(W)",
+        "benchmarkLine": "基準：{value}",
+        "fallbackZone": "區間 {n}",
+        "empty": "目前運動暫無可用區間明細。",
+        "toggleDetails": "展開或收起區間明細"
+      }
+    },
+    "planFollowup": {
+      "cardTitle": "訓練計劃跟進",
+      "pendingLine": "{count, plural, one {# 個訓練仍在計畫或進行中} other {# 個訓練仍在計畫或進行中}}"
+    },
+    "workoutAdjustment": {
+      "before": "調整前",
+      "after": "調整後",
+      "position": "第 {week} 週 · 第 {day} 日",
+      "changes": "變更摘要",
+      "fields": {
+        "name": "訓練名稱",
+        "text": "訓練結構",
+        "notes": "備註",
+        "sportType": "運動類型",
+        "weekIndex": "週次",
+        "dayIndex": "天次",
+        "sessionIndex": "課次",
+        "scheduledDate": "計畫日期"
+      },
+      "apply": "套用調整",
+      "applying": "套用中…",
+      "applied": "已套用",
+      "applySuccess": "訓練調整已套用",
+      "applyFailed": "未能套用訓練調整",
+      "appliedMetaPrompt": "[已套用訓練調整]"
+    },
+    "mutationApplied": {
+      "lifecycle": {
+        "activate": "已啟用計劃",
+        "pause": "已暫停計劃",
+        "complete": "已完成計劃",
+        "cancel": "已終止計劃"
+      },
+      "undoCountdown": "{seconds}s 內可復原",
+      "undoButton": "復原",
+      "undoing": "復原中…",
+      "undoneTag": "已復原",
+      "undoSuccess": "已復原此操作",
+      "undoFailed": "復原失敗，請稍後再試",
+      "title": {
+        "PLAN_WORKOUT_ADD": "已加入訓練",
+        "PLAN_WORKOUT_UPDATE": "已更新訓練",
+        "PLAN_WORKOUT_STATUS": "已更新訓練狀態",
+        "PLAN_SHIFT": "已順延計畫",
+        "PLAN_LIFECYCLE": "已變更計畫狀態",
+        "ACTIVITY_LINK": "已關聯活動",
+        "ACTIVITY_UNLINK": "已解除活動關聯",
+        "ACTIVITY_META_UPDATE": "已更新活動資訊",
+        "ACTIVITY_SESSION_RPE": "已記錄主觀疲勞",
+        "ACTIVITY_DELETE": "已刪除活動",
+        "USER_THRESHOLD_UPDATE": "已更新閾值",
+        "USER_BODY_METRIC_UPDATE": "已記錄體重",
+        "COMPETITION_EVENT_MUTATION": "已更新賽事"
+      }
+    },
+    "decision": {
+      "rejectedTitle": "未採用",
+      "rejectedHint": "已取消此方案，未套用變更。",
+      "rejectFailed": "取消失敗，方案仍待確認，請重試。",
+      "approvedTitle": "已確認",
+      "approvedHint": "已確認，尚未收到執行成功回執。",
+      "draftTitle": "決策草案",
+      "draftSubtitle": "尚未修改計畫，確認後才會生效。",
+      "workoutDraftSubtitle": "訓練課草案 · 尚未加入計畫",
+      "willAdd": "待加入",
+      "suggestionTitle": "計畫變更",
+      "draftBadge": "待確認",
+      "reviewBadge": "需確認",
+      "draftTab": "草案 {index}",
+      "selectedDraft": "已選擇草案 {index}",
+      "confirmSelectedButton": "確認這個草案",
+      "confirmHint": "確認後將套用以上變更。",
+      "confirmButton": "確認並更新計畫",
+      "applyAdaptationButton": "套用調整",
+      "applySupersessionButton": "依此計畫接管",
+      "cancelButton": "取消",
+      "showAll": "查看全部",
+      "showLess": "收起",
+      "evidence": "採用的資料",
+      "loadDelta": "預計負荷變化",
+      "syncImpact": "裝置同步影響",
+      "total": "評估",
+      "changed": "修改",
+      "preserved": "保留",
+      "skipped": "跳過",
+      "confirmPrompt": "我確認套用目前選中的這個決策。",
+      "waitStreamEnd": "請等教練本條回覆生成完成後再確認。",
+      "appliedBadge": "已套用",
+      "appliedTitle": "決策已套用",
+      "applyResultTitle": "決策套用結果",
+      "rebaseTitle": "需要重新計算",
+      "rebaseNoChange": "這次確認沒有修改正式計畫。主計畫上下文已經前進，教練需要基於最新事實重新生成方案。",
+      "rebaseButton": "基於最新狀態重新分析",
+      "rebaseStarting": "正在進入最新分支",
+      "rebasePrompt": "請基於最新計畫上下文重新分析這個過期決策。請先檢查新增事實，再判斷是否維持原建議、調整建議，或生成新的決策草案。",
+      "rebaseFailed": "重新分析啟動失敗，請稍後再試",
+      "decisionId": "決策",
+      "decisionType": "類型",
+      "state": "狀態",
+      "commitId": "提交",
+      "conflictBase": "決策基於",
+      "conflictHead": "目前主線",
+      "confidence": "把握",
+      "confidenceValue": "{value}%",
+      "rationale": "理由",
+      "impactPreview": "影響預覽",
+      "changePreview": "計畫變更",
+      "whyThis": "安排依據",
+      "selectedOption": "選擇方案",
+      "positionLabel": "位置",
+      "newPosition": "新位置",
+      "sportType": "運動",
+      "workoutName": "名稱",
+      "workoutText": "課表",
+      "notes": "備註",
+      "reason": "原因",
+      "status": "狀態",
+      "action": "動作",
+      "startDate": "開始日期",
+      "activity": "活動",
+      "workout": "訓練",
+      "statusValue": {
+        "PLANNED": "計畫中",
+        "IN_PROGRESS": "進行中",
+        "DONE": "已完成",
+        "SKIPPED": "已跳過",
+        "MOVED": "已順延"
+      },
+      "position": "第 {week} 週 · 第 {day} 天 · 第 {session} 節",
+      "applyResult": {
+        "APPLIED": "已寫入主計畫上下文。",
+        "REBASE_REQUIRED": "計畫上下文已變化，需要重新對齊後再套用。",
+        "FAILED": "套用失敗，請繼續和教練確認。",
+        "SKIPPED": "這次沒有修改主計畫。"
+      }
+    },
+    "history": {
+      "title": "歷史",
+      "empty": "暫時未有對話",
+      "untitled": "新對話",
+      "today": "今日",
+      "yesterday": "昨日",
+      "last7Days": "最近 7 日",
+      "last30Days": "最近 30 日",
+      "past": "過去",
+      "openSheet": "打開對話記錄",
+      "mobileSubtitle": "向右滑亦可打開",
+      "toolbarHistory": "歷史",
+      "collapseSidebar": "收起對話記錄側欄",
+      "expandSidebar": "展開對話記錄側欄",
+      "pinnedSection": "置頂",
+      "menuMore": "更多操作",
+      "editTitle": "編輯標題",
+      "pin": "置頂",
+      "unpin": "取消置頂",
+      "delete": "刪除",
+      "editTitleDialogTitle": "編輯對話標題",
+      "editTitlePlaceholder": "標題",
+      "save": "儲存",
+      "cancel": "取消",
+      "deleteConfirmTitle": "刪除呢個對話？",
+      "deleteConfirmDescription": "會永久刪除此會話同所有訊息，無法還原。",
+      "deleteConfirm": "刪除",
+      "toastDeleted": "已刪除",
+      "toastUpdated": "已更新",
+      "toastFailed": "出咗啲問題，請再試一次。",
+      "viewAll": "查看全部",
+      "fullPageTitle": "對話記錄",
+      "noReply": "暫時未有回覆",
+      "loginToView": "登入後先可以睇到你嘅記錄",
+      "pinAria": "置頂",
+      "unpinAria": "取消置頂",
+      "editTitleAria": "編輯標題",
+      "deleteAria": "刪除",
+      "goSignIn": "登入",
+      "backToCoach": "返回對話",
+      "openAiReview": "AI復盤"
+    },
+    "reviews": {
+      "title": "AI復盤",
+      "daily": "日復盤",
+      "weekly": "週復盤",
+      "monthly": "月復盤",
+      "newReview": "發起新對話",
+      "empty": "暫無復盤會話",
+      "analyzedDate": "分析日期",
+      "cardYearMeta": "{year}年",
+      "cardWeekSuffix": "週",
+      "cardMonthSuffix": "月",
+      "viewAll": "查看全部",
+      "listInvalidType": "連結無效：type 須為 day、week 或 month",
+      "listBack": "返回 AI 教練",
+      "listPullToRefresh": "下拉可刷新",
+      "listReleaseToRefresh": "放手立即刷新",
+      "listRefreshing": "刷新中...",
+      "listLoadingMore": "思考中…",
+      "listNoMore": "沒有更多了"
+    },
+    "mobile": {
+      "openCoach": "打開 AI 教練",
+      "back": "返回"
+    },
+    "prompts": [
+      "我昨日練成點？",
+      "我而家恢復狀況點？",
+      "我今日適合繼續練，定係恢復？",
+      "我最近 4 週同之前 4 週有咩分別？",
+      "我過去 7 日係咪積得太多疲勞？",
+      "今週訓練安排需要調整嗎？",
+      "下一次關鍵訓練應該點安排強度？",
+      "我最近跑步/騎行嘅強度分佈合理嗎？",
+      "呢個訓練週期同上一個相比，主要變化係咩？",
+      "如果週末比賽，接落嚟幾日應該點練？",
+      "我最近邊一次訓練最值得復盤？",
+      "幫我搵下最近狀態下滑嘅可能原因。",
+      "我應該將邊一日改成輕鬆訓練或者休息？",
+      "我嘅有氧基礎最近有冇變好？",
+      "我點樣可以提升 FTP 或閾值配速？",
+      "我最近嘅負荷增長會唔會太進取？"
+    ],
+    "fitnessAssessment": {
+      "title": "體能評估",
+      "details": "方法與證據",
+      "noWrite": "本次評估未修改設置。",
+      "apply": "確認採用",
+      "recompute": "重新評估",
+      "solo": "是，獨自連續盡力完成 30 分鐘",
+      "ordinary": "普通訓練",
+      "skip": "暫不確認",
+      "select": "選擇活動",
+      "start": "測試開始時間（從活動開始計，分鐘）",
+      "check": "檢查這段數據",
+      "sent": "已提交，請查看後續回復。",
+      "failure": "提交失敗，請重試。",
+      "testDraft": "準備測試訓練課草案",
+      "zoneImpact": "使用本次指標計算的心率、功率或配速區間可能變化；自定義區間保持原配置。",
+      "priorRecord": "原記錄",
+      "adopted": "已採用此結果。",
+      "testSegment": "分析片段",
+      "openAssessment": "查看評估",
+      "pass": "通過",
+      "notMet": "不滿足",
+      "checkResult": "{label}{amount} · {status}",
+      "limitations": {
+        "PARTIAL_EVIDENCE": "範圍內部分活動尚不可用，結果僅基於已列出的證據。",
+        "CANDIDATE_LIST_LIMIT": "候選列表僅顯示最近 20 項，請縮小範圍或指定活動。",
+        "APPLICATION_NOT_ENABLED": "結果可預覽，採用功能尚未開放。",
+        "FIELD_ESTIMATE_NOT_LAB_MEASUREMENT": "這是場測估計，不是實驗室測量。",
+        "ORDINARY_ACTIVITY_LTHR": "根據活動中有效 30 分鐘片段的後 20 分鐘平均心率估計；未要求全力測試，運動強度與環境會影響其代表性。",
+        "USER_REPORTED_PROTOCOL": "測試性質由你確認。",
+        "SOURCE_VERSION_UNVERIFIED": "原始數據版本暫無法驗證，本次不能採用。",
+        "DERIVED_ACTIVITY_PEAKS": "使用已發佈活動峰值；本輪不重新驗證原始軌跡或計時。",
+        "CYCLING_SPEED_ENVIRONMENT": "騎行速度受地形、風和阻力影響，不能直接作為生理閾值。",
+        "HR_WINDOW_AVERAGE": "缺少 1 秒峰值，顯示的是已有心率窗口均值中的最高值。",
+        "TP_EMPIRICAL_OFFSET": "使用 5K 配速加 20 秒/公里的既有經驗公式，未確認全力程度。",
+        "VDOT_NOT_LAB_VO2MAX": "根據跑步距離與時間估算 VDOT；普通訓練可能低估能力。",
+        "DERIVED_ACTIVITY_ESTIMATES": "重新匯總範圍內活動的已有估計，並使用當前來源偏好與修正系數；未重新分析原始跑步信號。",
+        "DAILY_HEALTH_MEDIAN": "使用已選健康來源的每日靜息心率中位數；不能從運動中的最低心率代替。",
+        "OBSERVED_HR_NOT_MAXIMUM": "實測峰值只能說明此次觀察到的心率，不等於生理最大心率，可能包含設備誤差。",
+        "NO_VALIDATED_AEROBIC_METHOD": "尚無可驗證的有氧閾值方法；不能直接用 LTHR/MaxHR 的固定比例推算。",
+        "USER_ADOPTED_ESTIMATE": "此結果是估計；你可以確認採用為個人參考設置，採用不代表方法已通過科學驗證。",
+        "PREVIEW_METHOD": "此方法目前僅提供預覽。",
+        "RECORDED_PERFORMANCE_NOT_MAXIMAL_CAPACITY": "結果反映已記錄表現，未必代表當前能力上限。",
+        "FTP_PRODUCT_MAPPING_095_UNVALIDATED": "FTP 使用尚未驗證的 0.95 × CP 經驗換算；採用後僅作為你選用的估計。",
+        "unknown": "此結果有方法適用性限制。"
+      },
+      "methods": {
+        "lthr-activity-observation": "日常活動 LTHR 估計",
+        "lthr-30-minute": "30 分鐘場測",
+        "cycling-extended-cp": "騎行擴展臨界功率模型（估計）",
+        "running-extended-cp": "跑步擴展臨界功率模型（估計）",
+        "critical-speed": "多活動距離—時間擬合（估計）",
+        "running-5k-threshold-pace": "5K 表現換算閾值配速（估計）",
+        "running-performance-vdot": "跑步表現等效 VDOT（估計）",
+        "running-effective-vo2max": "活動 VDOT 時間加權估計",
+        "observed-max-hr": "活動心率峰值觀察",
+        "daily-resting-hr": "每日靜息心率中位數（估計）",
+        "aerobic-threshold-unavailable": "有氧閾值：尚無已驗證方法"
+      },
+      "statuses": {
+        "ESTIMATED": "本次估計",
+        "OBSERVATION_ONLY": "觀測結果，尚未驗證為生理閾值",
+        "NEEDS_INPUT": "需要補充信息",
+        "WAITING_DATA": "活動仍在處理中，處理完成後可重新評估。",
+        "UNAVAILABLE": "本次無法估算",
+        "FAILED": "計算遇到技術故障，請重試。"
+      },
+      "checks": {
+        "ORDERED_TIMESTAMPS": "時間序列有效",
+        "FULL_COVERAGE": "全段有效覆蓋",
+        "TAIL_COVERAGE": "後 20 分鐘有效覆蓋",
+        "MAX_GAP_SECONDS": "最長缺口",
+        "NO_KNOWN_PAUSE": "未發現超過門檻的暫停",
+        "FIT_CONVERGED": "擬合收斂",
+        "INDEPENDENT_ACTIVITIES": "獨立活動數",
+        "FIT_R_SQUARED": "距離—時間擬合 R²",
+        "OBSERVED_DURATIONS": "實測時長點"
+      },
+      "observations": {
+        "last20MinutesMeanHeartRate": "後 20 分鐘平均心率",
+        "observedMaxHr": "範圍內實測最高心率（非生理最大心率）",
+        "dPrime": "D′（距離模型截距）"
+      },
+      "sports": {
+        "RUN": "跑步",
+        "CYCLING": "騎行",
+        "SWIM": "游泳",
+        "UNKNOWN": "通用"
+      },
+      "evidence": {
+        "daily": "{count} 項每日健康記錄",
+        "activities": "{included}/{total} 項活動參與"
+      },
+      "tracking": {
+        "title": "測試訓練",
+        "description": "訓練活動同步後重新檢查測試數據；有結果或需要補充信息時提醒你。",
+        "start": "開啓跟蹤",
+        "stop": "停止跟蹤",
+        "startMessage": "跟蹤測試",
+        "stopMessage": "取消跟蹤"
+      },
+      "reasons": {
+        "SCOPE_UNSUPPORTED": "該方法不支持這個範圍，請按方法要求選擇日期範圍。",
+        "AMBIGUOUS_SCOPE": "需要確定活動或測試段。",
+        "TIMEZONE_REQUIRED": "請先在個人資料中設置時區。",
+        "NO_MATCHING_ACTIVITY": "指定範圍內沒有找到活動，請檢查日期或同步狀態。",
+        "MISSING_SIGNAL": "缺少該方法要求的有效數據或獨立記錄，請查看方法與證據要求。",
+        "QUALITY_REJECTED": "記錄的數據質量、有效覆蓋或擬合檢查未通過。",
+        "PROTOCOL_UNKNOWN": "需要確認這段是否為實際完成的 30 分鐘盡力測試。",
+        "PROTOCOL_UNCONFIRMED": "尚未確認測試性質，本次僅提供觀察值。",
+        "PROTOCOL_MISMATCH": "普通訓練不能按該測試方法估算閾值。",
+        "REFERENCE_REQUIRED": "缺少同運動最大心率參照，暫不能採用該估計。",
+        "REFERENCE_CONFLICT": "估計與當前參照指標衝突，需要覈實。",
+        "METHOD_UNAVAILABLE": "當前產品尚未開放這個計算方法。",
+        "EXECUTION_FAILED": "本次計算遇到技術故障，可以重試。",
+        "RESOURCE_LIMIT": "數據超出本次處理上限，請縮小範圍。",
+        "NON_CONVERGENCE": "模型未穩定收斂，不能提供可靠估計。",
+        "STALE": "證據或設置已變化，請重新評估後確認。",
+        "CONFIRMATION_REQUIRED": "請確認已展示的具體變更。"
+      },
+      "adoption": {
+        "estimate": "確認後保存為你主動採用的估計值，保留原有歷史及本次方法和證據；不會標記為實測或已驗證的生理閾值。",
+        "maxHr": "確認後將本次記錄到的最高心率保存為你的 MaxHR 參考設置。它可能低於真實最大心率，也可能受設備誤差影響；不會標記為已驗證的生理最大心率。"
+      }
+    },
+    "trainingVisualization": {
+      "showData": "查看資料",
+      "bucket": "時間 / 分類",
+      "rowsRange": "{start}–{end} / 共 {total} 筆",
+      "previousPage": "上一頁",
+      "nextPage": "下一頁",
+      "partialData": "目前結果已達資料讀取上限，僅顯示已讀取的部分。請縮小時間範圍後重新查看完整結果。",
+      "sampledData": "圖表抽樣顯示 {shown}/{total} 個資料點；資料表保留本次回傳的全部列。",
+      "measures": {
+        "ACTIVITY_COUNT": "運動次數",
+        "DURATION_MIN": "運動時長",
+        "DISTANCE_KM": "距離",
+        "AVG_SPEED_KMH": "平均速度",
+        "AVG_HEART_RATE": "平均心率",
+        "AVG_POWER": "平均功率",
+        "DAILY_LOAD": "訓練負荷",
+        "RUNNING_LOAD": "跑步負荷",
+        "CYCLING_LOAD": "騎行負荷",
+        "SWIMMING_LOAD": "游泳負荷",
+        "OTHER_LOAD": "其他負荷",
+        "CP": "臨界功率",
+        "W_PRIME": "無氧做功容量",
+        "FTP": "功能性閾值功率",
+        "MAX_HR": "最大心率",
+        "RESTING_HR": "靜息心率",
+        "LTHR": "乳酸閾值心率",
+        "CS": "臨界速度",
+        "TP": "閾值配速",
+        "AET_PACE": "有氧閾值配速",
+        "VO2_MAX": "VO2 Max",
+        "P_MAX": "最大功率",
+        "WEIGHT": "體重",
+        "HEIGHT": "身高",
+        "AET_HR": "有氧閾值心率"
+      },
+      "sources": {
+        "ESTIMATED": "歷史估算",
+        "AUTO": "自動採用紀錄",
+        "MANUAL": "手動紀錄"
+      },
+      "exploration": {
+        "PLANNED": "計畫",
+        "ACTUAL": "實際",
+        "bucket": "採樣範圍",
+        "range": "最小–最大",
+        "coverage": "覆蓋率",
+        "showData": "查看資料",
+        "series": "資料系列",
+        "previous": "上一頁",
+        "next": "下一頁",
+        "paired": "配對樣本",
+        "records": "記錄數",
+        "missing": "不可用",
+        "touch": "輕點圖表查看數值。",
+        "interact": "可用方向鍵或輕點查看數值。",
+        "notes": {
+          "NO_DATA": "沒有符合範圍的可用資料。",
+          "PARTIAL_DATA": "已達讀取上限，請縮小範圍查看完整資料。",
+          "TIME_WEIGHTED": "曲線按實際時間加權分桶；懸停或輕點可查看範圍與覆蓋率。",
+          "GAPS": "缺失訊號及超過 10 秒的採樣缺口會斷線顯示。",
+          "DISTANCE_UNAVAILABLE": "沒有可用的實測距離，請改為按時間對齊。",
+          "PROGRESS_TIME": "完成進度將經過時間正規化至 0–100%，不代表距離或強度相同。",
+          "RECORDED_START": "缺少活動開始時間，橫軸從首個採樣點開始。",
+          "ZONE_SNAPSHOTS": "區間採用各次活動記錄時的邊界。",
+          "ZONE_SPLIT": "運動類型或區間邊界不同，已分別顯示。",
+          "ZONE_COVERAGE": "百分比僅以已記錄的區間時長為分母，不計缺失資料。",
+          "LINKED_ONLY": "實際值只統計明確關聯的主要活動。",
+          "MISSING_ACTUAL": "未關聯、不可用或關聯不明確的活動保留空值，不計作 0。",
+          "PLAN_DATE": "實際值歸屬於對應訓練的計畫日期。",
+          "LOAD_METHODS": "計畫負荷為估計值；實際負荷沿用使用者的 PMC 負荷來源設定。",
+          "PAIRED_ONLY": "僅繪製同一活動或同一時段內成對存在的數值。",
+          "NOT_CAUSAL": "指標相關不代表因果關係。",
+          "HISTORY_PAIRS": "歷史指標僅配對同一本地日內同時存在的記錄，不沿用前一天的值。",
+          "MULTI_AXES": "各縱軸使用自己的單位和刻度；曲線交叉不代表數值相等，也不代表因果關係。"
+        },
+        "measures": {
+          "HEART_RATE": "心率",
+          "POWER": "功率",
+          "SPEED": "速度",
+          "PACE": "配速",
+          "CADENCE": "踏頻 / 步頻",
+          "ELEVATION": "海拔",
+          "GRADE": "坡度",
+          "DURATION_MIN": "運動時長",
+          "DISTANCE_KM": "距離",
+          "LOAD": "負荷",
+          "ACTIVITY_COUNT": "運動次數",
+          "AVG_SPEED_KMH": "平均速度",
+          "AVG_HEART_RATE": "平均心率",
+          "AVG_POWER": "平均功率",
+          "DAILY_LOAD": "訓練負荷",
+          "RUNNING_LOAD": "跑步負荷",
+          "CYCLING_LOAD": "騎行負荷",
+          "SWIMMING_LOAD": "游泳負荷",
+          "OTHER_LOAD": "其他負荷",
+          "CP": "臨界功率",
+          "W_PRIME": "無氧做功容量",
+          "FTP": "功能性閾值功率",
+          "MAX_HR": "最大心率",
+          "RESTING_HR": "靜息心率",
+          "LTHR": "乳酸閾值心率",
+          "CS": "臨界速度",
+          "TP": "閾值配速",
+          "AET_PACE": "有氧閾值配速",
+          "VO2_MAX": "VO2 Max",
+          "P_MAX": "最大功率",
+          "WEIGHT": "體重",
+          "HEIGHT": "身高",
+          "AET_HR": "有氧閾值心率"
+        },
+        "axes": {
+          "ELAPSED_TIME": "經過時間",
+          "DISTANCE": "距離",
+          "PROGRESS": "時間進度",
+          "DATE": "日期",
+          "CATEGORY": "分類",
+          "NUMBER": "數值"
+        },
+        "seriesDefault": "配對記錄",
+        "separate": "分開顯示",
+        "overlay": "疊加顯示"
+      }
+    }
+  },
+  "login": {
+    "platformTitle": "Trainingload.ai - 訓練分析管理平台",
+    "authShell": {
+      "sideTitle": "由訓練記錄，到下一次更好嘅表現"
+    },
+    "selfHost": {
+      "instanceLabel": "本機版本",
+      "sideTitle": "訓練資料，留喺你自己嘅環境入面",
+      "localOwnerTitle": "建立本機帳戶",
+      "localOwnerPageDescription": "首次使用只需要設定使用者名稱，建立後會直接進入初始設定。",
+      "localOwnerName": "使用者名稱",
+      "localOwnerNamePlaceholder": "例如：Victor",
+      "localOwnerNameHint": "1–20 個字元，支援中英文、數字、空格、連字號同底線。",
+      "localOwnerNameRequired": "請輸入使用者名稱。",
+      "localOwnerCreating": "正在建立…",
+      "localOwnerContinue": "建立帳戶並繼續",
+      "localOwnerSetupFailed": "建立失敗，請重新整理頁面後再試。",
+      "localSessionFailed": "無法建立本機工作階段，請確認執行個體仍然透過 localhost 存取。",
+      "localSessionRetry": "再試進入執行個體"
+    }
+  },
+  "HomePage": {
+    "title": "首頁"
+  },
+  "AccountPage": {
+    "title": "Trainingload.ai · 帳戶設定",
+    "innerTitle": "帳戶設定",
+    "description": "管理你嘅帳戶設定",
+    "autoUpdateTitle": "自動更新",
+    "autoUpdate": {
+      "title": "自動更新",
+      "description": "系統會持續更新估算值。開啟後，最新估算值會自動成為目前生效值；關閉後，估算值僅供參考，不影響目前生效值。頁面主值顯示目前生效值，右側顯示最新估算值及變化方向。",
+      "loading": "載入中…",
+      "toast": {
+        "enabledSuccess": "已開啟自動更新",
+        "disabledSuccess": "已關閉自動更新",
+        "updateFailed": "更新失敗，請稍後再試"
+      },
+      "metrics": {
+        "cp": "臨界功率（CP）",
+        "ftp": "功能性閾值功率（FTP）",
+        "wPrime": "W' 無氧做功能力",
+        "pMax": "最大功率（Pmax）",
+        "cs": "臨界速度（CS）",
+        "tp": "閾值配速（TP）",
+        "maxHr": "最大心率（Max HR）",
+        "lthr": "乳酸閾值心率（LTHR）",
+        "vVo2Max": "vVO2max"
+      }
+    }
+  },
+  "DashboardPage": {
+    "title": "Trainingload.ai · 概覽"
+  },
+  "MapPage": {
+    "title": "Trainingload.ai · 地圖"
+  },
+  "ActivitySharePoster": {
+    "titleFallback": "活動海報",
+    "activityFallback": "活動",
+    "loading": {
+      "activity": "載入活動中…",
+      "map": "載入地圖中…"
+    },
+    "actions": {
+      "cancel": "取消",
+      "share": "分享",
+      "generating": "生成中…",
+      "view": "查看"
+    },
+    "metrics": {
+      "duration": "時長",
+      "paceOrSpeed": "配速/速度",
+      "elevationGain": "爬升",
+      "cadence": "步頻",
+      "heartRate": "心率",
+      "power": "功率"
+    }
+  },
+  "SelfHostAiSettings": {
+    "title": "自託管 AI",
+    "ownerOnly": "僅限執行個體擁有者",
+    "summaryDescription": "管理此執行個體使用的 AI 服務商、模型和 API Key。僅執行個體 Owner 可修改。",
+    "privacySummaryDescription": "查看此執行個體是否已啟用 AI，以及訓練資料會傳送給哪個服務商。",
+    "statusEnabled": "已啟用",
+    "statusDisabled": "未啟用",
+    "modelSummary": "預設：{default} · 推理：{reasoning}",
+    "disabledSummary": "目前不會呼叫任何 AI 服務。",
+    "manage": "管理設定",
+    "description": "選擇此執行個體使用的 AI 服務。啟用後訓練資料會傳送給所選服務商。金鑰只會提交至本機 server，加密儲存後不會傳回瀏覽器。OpenAI 需要 API Key，ChatGPT 訂閱無法取代。",
+    "provider": "AI 服務商",
+    "required": "必填",
+    "optional": "（可選）",
+    "requirementsHint": "* 為必填項，AI 設定可以稍後完成。",
+    "apiKey": "API Key",
+    "apiKeyPlaceholder": "輸入服務商 API Key",
+    "apiKeyKeep": "留空以繼續使用已儲存的金鑰",
+    "apiKeyReenter": "重新輸入金鑰，改由介面管理",
+    "apiKeyHelp": "儲存後只顯示是否已設定，不會把金鑰傳回 client。",
+    "baseUrl": "API Base URL",
+    "baseUrlHelpOptional": "可以留空，系統會使用該服務商嘅預設 API 位址。",
+    "baseUrlHelpRequired": "請輸入自訂 OpenAI-compatible 服務嘅完整 HTTP(S) 位址。",
+    "defaultModel": "預設模型",
+    "reasoningModel": "推理模型",
+    "customModel": "自訂模型 ID",
+    "customDefaultModel": "自訂預設模型",
+    "customReasoningModel": "自訂推理模型",
+    "defaultModelContext": "預設模型上下文視窗",
+    "reasoningModelContext": "推理模型上下文視窗",
+    "contextWindowPlaceholder": "輸入上下文視窗 token 數",
+    "contextWindowValue": "上下文視窗：{count} tokens",
+    "contextWindowRequired": "自訂模型需要填寫上下文視窗。",
+    "modelPlaceholder": "輸入服務商支援的模型 ID",
+    "webSearch": "網際網路搜尋",
+    "webSearchOn": "已啟用",
+    "webSearchOff": "已關閉",
+    "webSearchUnavailable": "此服務商不支援",
+    "webSearchHelpSupported": "啟用後，AI 可透過目前服務商的原生搜尋能力查詢即時公開網頁。",
+    "webSearchHelpUnsupported": "此接入方式不提供受控的網際網路搜尋；模型本身仍可正常使用。",
+    "sourceOwner": "目前設定由執行個體擁有者在此頁面管理。",
+    "sourceEnvironment": "目前來自部署環境；首次儲存時需要重新輸入 API Key。",
+    "sourceDisabled": "AI 目前已關閉。選擇服務商後填寫 API Key 同模型。",
+    "save": "儲存 AI 設定",
+    "saving": "正在儲存…",
+    "onboardingSave": "儲存並完成設定",
+    "onboardingUseCurrent": "使用目前設定並完成",
+    "onboardingSaving": "正在套用 AI 設定…",
+    "saved": "AI 設定已儲存並生效",
+    "saveFailed": "AI 設定未儲存，請檢查欄位後重試。",
+    "loadFailed": "無法讀取 AI 設定。請檢查自託管 server 狀態後重試。",
+    "retry": "重新讀取",
+    "providers": {
+      "none": "關閉 AI",
+      "openai": "OpenAI",
+      "deepseek": "DeepSeek",
+      "openrouter": "OpenRouter",
+      "dashscope": "阿里雲百鍊（DashScope）",
+      "gemini": "Google Gemini",
+      "xai": "xAI",
+      "ollama": "Ollama",
+      "custom-openai-compatible": "自訂 OpenAI-compatible API"
+    }
+  },
+  "SelfHostAiOnboarding": {
+    "eyebrow": "可選 · 自託管 AI",
+    "title": "設定你嘅 AI 服務",
+    "subtitle": "使用自己的 API Key 接入 OpenAI、DeepSeek、OpenRouter、阿里雲百鍊、Gemini 或 xAI；其他服務可透過 OpenAI-compatible 介面接入。也可以暫時關閉，之後在設定中配置。",
+    "dataNotice": "啟用後，只有使用 AI 功能時，本機 Server 先會將所需嘅訓練摘要直接傳送畀你選擇嘅服務商；Trainingload.ai 雲端唔會參與轉發。",
+    "skip": "稍後設定並完成",
+    "error": "AI 設定未能完成，請檢查設定後再試。"
+  },
+  "SettingsPage": {
+    "title": "Trainingload.ai · 設定",
+    "settings": "設定",
+    "description": "管理你嘅帳戶設定"
+  },
+  "MePage": {
+    "title": "Trainingload.ai · 我的",
+    "guestName": "Trainingload.ai 運動員",
+    "guestEmail": "登入後先可以查看帳戶資料",
+    "verified": "已驗證",
+    "unverified": "未驗證",
+    "quickLinksTitle": "快速入口",
+    "quickLinksDescription": "快速返回你最常用嘅功能。",
+    "versionTitle": "版本",
+    "actions": {
+      "account": "帳戶"
+    },
+    "links": {
+      "analysis": {
+        "title": "分析中心"
+      },
+      "map": {
+        "title": "地圖"
+      },
+      "preferences": {
+        "title": "偏好設定"
+      },
+      "account": {
+        "title": "帳戶"
+      }
+    }
+  },
+  "AnalysisHubPage": {
+    "eyebrow": "工具",
+    "title": "訓練工具",
+    "description": "將常用訓練分析能力集中在一處，從累計進度、負荷趨勢到表現回顧，按問題進入對應工具。",
+    "soon": "即將推出",
+    "searchPlaceholder": "搜尋工具",
+    "noResults": "沒有匹配的工具",
+    "groups": {
+      "training": "訓練量與負荷",
+      "performance": "表現與指標"
+    },
+    "tools": {
+      "progression": {
+        "title": "累計進度",
+        "description": "按月或按年對比距離、時長、活動數和訓練負荷的累計曲線。"
+      },
+      "activityStats": {
+        "title": "活動統計",
+        "description": "查看訓練量、頻率和長期活動分佈。"
+      },
+      "pmc": {
+        "title": "PMC 負荷",
+        "description": "查看體能、疲勞、狀態和每日訓練負荷趨勢。"
+      },
+      "bestDistance": {
+        "title": "最佳距離",
+        "description": "回顧不同距離上的最佳表現和近期變化。"
+      },
+      "heartRate": {
+        "title": "心率",
+        "description": "趨勢、區間同負荷相關指標"
+      },
+      "power": {
+        "title": "功率",
+        "description": "功率曲線、區間同關鍵功率指標"
+      },
+      "pace": {
+        "title": "配速",
+        "description": "趨勢、分段同區間分佈"
+      }
+    }
+  },
+  "ActivitiesPage": {
+    "title": "Trainingload.ai · 活動"
+  },
+  "WeekSummaryCell": {
+    "count": "次數",
+    "tss": "負荷",
+    "distance": "距離",
+    "duration": "時長"
+  },
+  "AccountInner": {
+    "title": "帳戶",
+    "name": {
+      "label": "名稱",
+      "description": "更新平台顯示嘅名稱",
+      "placeholder": "名稱",
+      "updateButton": "更新",
+      "updating": "更新中…",
+      "emptyError": "名稱唔可以留空",
+      "lengthError": "名稱唔可以超過 20 個字元",
+      "invalidCharError": "名稱只可以包含字母、數字、中文、空格、連字號同底線",
+      "updateSuccess": "名稱已成功更新",
+      "updateError": "未能更新名稱"
+    },
+    "reviewAutomation": {
+      "title": "AI 複盤自動化",
+      "description": "選擇哪些複盤任務可以由 AI 自動處理。",
+      "accessRequired": "目前執行個體未開放這項自動化能力。",
+      "activityReview": "活動複盤",
+      "dailyReview": "每日複盤",
+      "weeklyReview": "每週複盤",
+      "monthlyReview": "每月複盤",
+      "planReview": "計劃複盤",
+      "saved": "複盤設定已儲存",
+      "saveFailed": "儲存複盤設定失敗"
+    },
+    "dataExport": {
+      "title": "匯出全部資料",
+      "description": "將活動、健康資料、訓練計畫、設定和符合條件的原始來源檔案整理成版本化 ZIP，並包含英文 JSON Schema 和 AI 閱讀指南。",
+      "entryDescription": "建立適合 AI 分析或長期備份的完整資料封存。",
+      "openAction": "管理資料匯出",
+      "backToAccount": "返回帳戶設定",
+      "modeLabel": "匯出模式",
+      "modes": {
+        "aiAnalysis": "AI 分析",
+        "aiAnalysisHint": "使用精簡的 JSON、JSONL 和 CSV，適合直接交給 AI 閱讀。",
+        "fullBackup": "完整備份",
+        "fullBackupHint": "保留範圍最廣的可攜式資料，並可包含符合條件的原始活動與健康來源檔案。"
+      },
+      "privacyLabel": "位置隱私",
+      "privacy": {
+        "redact": "隱藏起點和終點位置",
+        "remove": "移除全部 GPS 座標",
+        "exact": "保留精確座標"
+      },
+      "privacyHint": "系統會在轉換高頻活動資料時套用所選隱私策略。",
+      "includeOriginals": "包含原始來源檔案",
+      "includeOriginalsHint": "僅完整備份可用。加入可用的 FIT、GPX、TCX 活動檔案和保留的健康來源檔案，其中可能包含精確 GPS、裝置資訊及其他敏感健康資料；沒有活動原檔時可能提供重建的 FIT。",
+      "createAction": "建立匯出",
+      "alreadyRunning": "匯出進行中",
+      "refresh": "重新整理",
+      "loading": "正在載入匯出記錄…",
+      "empty": "你尚未申請資料匯出。",
+      "requestAccepted": "資料匯出已進入佇列。",
+      "requestFailed": "無法建立匯出請求。",
+      "deleteFailed": "無法移除匯出檔案。",
+      "deleteAction": "移除匯出",
+      "download": "下載（{size}）",
+      "preparing": "正在準備匯出包…",
+      "progress": "{progress}% · {stage}",
+      "expiresAt": "下載有效期限至 {date}。",
+      "failedHint": "任務重試後仍然失敗。",
+      "boundary": "不會匯出 AI 對話和 AI 產生的複盤內容。活動與健康資料中的詳細記錄會整理為通用的 CSV 檔案，方便查看和進一步分析。",
+      "statuses": {
+        "QUEUED": "等待處理",
+        "SNAPSHOTTING": "正在整理資料",
+        "PACKAGING": "正在封裝 ZIP",
+        "UPLOADING": "正在建立安全下載",
+        "READY": "可下載",
+        "RETRY_WAIT": "等待重試",
+        "FAILED": "匯出失敗",
+        "EXPIRED": "匯出已過期"
+      }
+    },
+    "deleteAccount": {
+      "sectionTitle": "刪除帳戶",
+      "sectionDescription": "永久刪除帳戶及所有活動、訓練計劃、健康資料和教練對話。此操作無法復原。",
+      "signOutDescription": "結束目前工作階段並返回登入頁，你的帳戶和資料不會受到影響。",
+      "cancel": "取消",
+      "deleteAccountTitle": "永久刪除帳戶？",
+      "deleteAccountDetail": "這會永久刪除你的活動、訓練計劃、健康數據、教練對話和全部帳戶資料，且無法恢復。",
+      "deleteContinue": "繼續刪除",
+      "deleteFinalTitle": "最後確認",
+      "deleteFinalDetail": "提交後帳戶會立即登出且無法再次登入。後台將非同步永久刪除全部關聯資料，通常 24 小時內完成，最長可能需要 7 天。自動續訂會被關閉，但目前已付款週期不會自動退款。",
+      "deleteAccountAction": "永久刪除帳戶",
+      "deletingAccount": "正在刪除帳戶…",
+      "deleteFailedMessage": "帳戶刪除失敗，請稍後重試。",
+      "deleteCancelRenewalAndContinue": "關閉自動續訂並繼續",
+      "deleteAcceptedTitle": "刪除請求已受理",
+      "deleteAcceptedDetail": "你已登出，帳戶無法繼續存取。系統正在後台清理關聯資料，通常會在 24 小時內完成，最長可能需要 7 天。完成後會寄送感謝與意見回饋郵件。",
+      "deleteBackToLogin": "返回登入頁",
+      "localSectionTitle": "刪除本機帳戶",
+      "localSectionDescription": "永久刪除此執行個體中的本機帳戶，以及所有活動、訓練計畫、健康資料和教練對話。此操作無法復原。",
+      "localAction": "永久刪除本機帳戶",
+      "localFinalTitle": "刪除這個本機帳戶？",
+      "localFinalDetail": "提交後，本機存取會立即失效，系統將在背景永久刪除帳戶資料。清理完成後，此執行個體會回到首次初始化狀態。",
+      "localAcceptedTitle": "已開始刪除本機帳戶",
+      "localAcceptedDetail": "本機存取已結束。執行個體正在清理帳戶資料，完成後會回到首次初始化狀態。",
+      "localBackToOnboarding": "繼續初始化"
+    }
+  },
+  "ThirdPartyConnections": {
+    "title": "第三方連結",
+    "trainingDataGroup": "訓練資料",
+    "providers": {
+      "intervalsIcu": {
+        "name": "Intervals.icu",
+        "description": "連結你的 Intervals.icu 帳號，用於同步活動資料、健康資料和計劃課程"
+      }
+    },
+    "connected": "已連結",
+    "connectProvider": "連接 {provider}",
+    "connecting": "連結中…",
+    "disconnecting": "解除連結中…",
+    "disconnectSuccess": "已成功解除連結",
+    "connectError": "連結失敗",
+    "syncError": "同步暫時失敗，請稍後再試。",
+    "disconnectError": "解除連結失敗",
+    "disconnectConfirmTitle": "確認解除 {provider} 連結？",
+    "disconnectConfirmDescription": "解除後會取消同 {provider} 嘅綁定關係，並停止後續同步。",
+    "disconnectConfirmCancel": "取消",
+    "disconnectConfirmAction": "確認解除",
+    "intervalsIcu": {
+      "apiKeyLabel": "API Key",
+      "apiKeyPlaceholder": "貼上 API Key",
+      "apiKeyHelp": "儲存後會同步最近 60 天的活動記錄。更早的歷史目前尚未自動同步。",
+      "apiKeyHelpConnected": "留空即可保留已儲存的 API Key。如輸入新 key，系統會先驗證並確認後再替換。",
+      "apiKeyHelpOAuthConnected": "輸入 API Key 後會替換目前 OAuth 授權綁定。",
+      "getApiKey": "取得 API Key",
+      "openApiKeySettings": "開啟 Intervals.icu 取得 API Key",
+      "apiKeyRequired": "請輸入 API Key",
+      "authTypeLabel": "目前綁定方式：",
+      "oauthTab": "OAuth 授權",
+      "apiKeyTab": "API Key",
+      "oauthTitle": "使用 Intervals.icu OAuth 授權",
+      "oauthHelp": "將跳轉到 Intervals.icu 完成授權。授權成功後會繼續使用下面的同步設定。",
+      "oauthReplaceApiKeyHint": "目前帳號正在使用 API Key；完成 OAuth 授權後，新授權會取代舊 API Key。",
+      "oauthAuthMode": "OAuth",
+      "apiKeyAuthMode": "API Key",
+      "oauthAthlete": "Intervals.icu 帳號：{name}",
+      "connectWithOAuth": "使用 OAuth 連接",
+      "authorizeOAuth": "授權 OAuth",
+      "upgradeToOAuth": "升級到 OAuth",
+      "reconnectOAuth": "重新授權 OAuth",
+      "oauthConnectSuccess": "Intervals.icu OAuth 已連接",
+      "oauthConnectFailed": "Intervals.icu OAuth 授權失敗",
+      "accountAlreadyConnected": "此 Intervals.icu 帳號已綁定到其他 Trainingload.ai 帳號，請先在原帳號中解除綁定",
+      "syncActivities": "立即同步",
+      "syncActivitiesHelp": "立即同步 Intervals.icu 平台近 60 天的活動記錄到 Trainingload.ai。",
+      "syncScheduledActivities": "每日自動同步",
+      "syncScheduledActivitiesHelp": "在凌晨自動同步前一天的運動記錄到 Trainingload.ai。",
+      "syncWellness": "同步健康記錄",
+      "syncWellnessHelp": "包括體重、靜息心率、睡眠和疲勞感等日常記錄，可按需要開啟。",
+      "exportActivities": "自動上傳運動記錄",
+      "exportActivitiesHelp": "Trainingload.ai 平台中的運動記錄會自動同步到 Intervals.icu 平台。",
+      "syncSportSettings": "同步運動員資料和區間",
+      "syncSportSettingsHelp": "將 Intervals.icu 中的運動員資料、功率區間、心率區間等同步到 Trainingload.ai。",
+      "exportSportSettings": "上傳運動員資料和區間",
+      "exportSportSettingsHelp": "將 Trainingload.ai 中的運動員資料、功率區間、心率區間等同步到 Intervals.icu。",
+      "syncPlannedWorkouts": "同步計畫中的課程",
+      "syncPlannedWorkoutsHelp": "將 Intervals.icu 計畫中的課程同步到 Trainingload.ai 平台。",
+      "exportPlannedWorkouts": "上傳計畫中的課程",
+      "exportPlannedWorkoutsHelp": "將 Trainingload.ai 計畫中的課程同步到 Intervals.icu。",
+      "connectWithApiKey": "儲存 API Key",
+      "saveSettings": "儲存設定",
+      "savingSettings": "儲存中...",
+      "disconnectOAuth": "斷開 OAuth",
+      "disconnectApiKey": "斷開 API Key",
+      "connectSuccess": "Intervals.icu 已連接",
+      "settingsSaved": "Intervals.icu 設定已儲存",
+      "connectAndSyncStarted": "Intervals.icu 已連接。最近 60 天同步已開始；完成後會通知你。",
+      "initialSyncFailed": "Intervals.icu 已連接，但首次同步未能開始。稍後可在設定中重試。",
+      "openSettings": "設定",
+      "settingsTitle": "設定 Intervals.icu",
+      "settingsDescription": "選擇 OAuth 或 API Key 綁定方式，並設定同步選項。",
+      "apiKeySettingsDescription": "填寫個人 API Key，並選擇需要嘅同步方向。Key 只會提交到目前本機執行個體。",
+      "manualSync": "立即同步",
+      "syncing": "同步中...",
+      "syncQueued": "Intervals.icu 同步已開始，{count} 筆活動已排入佇列",
+      "keyEnding": "API Key 結尾：{last4}",
+      "lastSync": "上次同步",
+      "neverSynced": "尚未同步",
+      "replaceKeyConfirmTitle": "要替換 API Key 嗎？",
+      "replaceKeyConfirmDescription": "這個 API Key 與已儲存的 key 不同，可能屬於另一個帳戶。儲存後會保留已匯入的歷史，之後用新的 key 同步。",
+      "replaceKeyCancel": "取消",
+      "replaceKeyConfirmAction": "替換 key"
+    }
+  },
+  "UserProfile": {
+    "zonePreview": {
+      "title": "所選模型預覽",
+      "basis": "計算基準：{basis}",
+      "zone": "區間",
+      "range": "配速範圍",
+      "loading": "正在載入區間…",
+      "error": "區間載入失敗",
+      "retry": "重試",
+      "empty": "暫無可用區間，請檢查此運動的區間設定及所需指標。",
+      "savedOverride": "此運動已有另外儲存的區間設定，實際生效區間以該設定為準。",
+      "custom": "自訂",
+      "unknown": "未指定",
+      "names": {
+        "easy": "輕鬆跑",
+        "marathon": "馬拉松",
+        "threshold": "閾值跑",
+        "interval": "間歇跑",
+        "repetition": "重複跑",
+        "superOxygen": "低強度有氧跑",
+        "slow": "慢跑",
+        "moderate": "中等強度跑",
+        "fast": "快跑",
+        "sprint": "比賽／衝刺",
+        "recovery": "恢復",
+        "aerobic": "有氧",
+        "tempo": "節奏",
+        "subThreshold": "閾值以下",
+        "superThreshold": "閾值以上",
+        "aerobicCapacity": "有氧能力",
+        "anaerobicCapacity": "無氧能力",
+        "easyIntensity": "輕鬆",
+        "moderateIntensity": "中等強度",
+        "thresholdIntensity": "閾值",
+        "intervalIntensity": "間歇",
+        "repetitionIntensity": "重複",
+        "recoveryWalking": "恢復／步行",
+        "endurance": "耐力",
+        "highIntensity": "高強度",
+        "vo2": "最大攝氧量",
+        "activeRecovery": "主動恢復",
+        "anaerobic": "無氧",
+        "neuromuscular": "神經肌肉"
+      },
+      "heartRateRange": "心率範圍",
+      "powerRange": "功率範圍",
+      "hrr": "儲備心率",
+      "estimated": "{basis}（估算）"
+    },
+    "title": "個人資料",
+    "description": "管理個人資料以提升活動分析準確度",
+    "loading": "載入中…",
+    "tabs": {
+      "default": "預設",
+      "run": "跑步",
+      "cycling": "單車",
+      "swim": "游泳"
+    },
+    "common": {
+      "cancel": "取消",
+      "confirm": "確認"
+    },
+    "validation": {
+      "rangeError": "{label} 必須介乎 0 到 255 之間"
+    },
+    "updateButton": "更新資料",
+    "updating": "更新中…",
+    "updateSuccess": "資料已成功更新",
+    "updateError": "未能更新資料",
+    "loadError": "未能載入資料",
+    "historyHint": "按生效日期排序（由新到舊）",
+    "save": "儲存",
+    "empty": "冇資料",
+    "historyTable": {
+      "columns": {
+        "effectiveDate": "生效日期",
+        "value": "數值",
+        "source": "來源"
+      },
+      "sourceLabels": {
+        "manual": "手動",
+        "auto": "系統估算",
+        "imported": "第三方同步",
+        "intervals_icu": "Intervals.icu 同步",
+        "unknown": "未知來源"
+      },
+      "validation": {
+        "completeRowFirst": "請先完成目前呢一行",
+        "birthdaySingleRow": "出生日期只允許一條記錄",
+        "rowEffectiveDateRequired": "第 {row} 行：必須填寫生效日期",
+        "rowEffectiveDateInvalid": "第 {row} 行：生效日期無效",
+        "rowValueRequired": "第 {row} 行：必須填寫數值",
+        "rowNumberRequired": "第 {row} 行：請輸入數字",
+        "rowPositiveRequired": "第 {row} 行：請輸入大於 0 嘅數字",
+        "rowDateInvalid": "第 {row} 行：請選擇有效日期",
+        "rowGenderRequired": "第 {row} 行：請選擇性別"
+      }
+    },
+    "fitnessMetricDialog": {
+      "actions": {
+        "edit": "編輯",
+        "apply": "套用"
+      },
+      "context": {
+        "default": "預設指標（非運動項目專屬）",
+        "sport": "運動：{sport}"
+      },
+      "sections": {
+        "active": "現行",
+        "proposed": "自動計算"
+      },
+      "labels": {
+        "value": "數值",
+        "source": "來源",
+        "sport": "運動"
+      },
+      "manualInput": "手動數值",
+      "manualPlaceholder": "輸入數值",
+      "source": {
+        "manual": "手動",
+        "auto": "自動"
+      }
+    },
+    "fields": {
+      "weight": {
+        "label": "體重（kg）",
+        "placeholder": "70.0"
+      },
+      "height": {
+        "label": "身高（cm）",
+        "placeholder": "175.0"
+      },
+      "age": {
+        "label": "年齡",
+        "placeholder": "30"
+      },
+      "birthDate": {
+        "label": "出生日期",
+        "placeholder": "YYYY-MM-DD"
+      },
+      "gender": {
+        "label": "性別",
+        "placeholder": "選擇性別",
+        "options": {
+          "male": "男",
+          "female": "女",
+          "other": "其他"
+        }
+      },
+      "timezone": {
+        "label": "時區",
+        "placeholder": "例如 Asia/Hong_Kong"
+      },
+      "maxHeartRate": {
+        "label": "最大心率（bpm）",
+        "placeholder": "190"
+      },
+      "restingHeartRate": {
+        "label": "靜息心率（bpm）",
+        "placeholder": "60"
+      },
+      "lactateThresholdHeartRate": {
+        "label": "乳酸閾值心率（bpm）",
+        "placeholder": "140"
+      },
+      "heartRateZoneModel": {
+        "label": "心率區間",
+        "placeholder": "選擇區間模型",
+        "options": {
+          "friel": "Joe Friel (LTHR)",
+          "karvonen": "Karvonen (HRR)",
+          "mhr": "最大心率（5 區間）"
+        },
+        "help": {
+          "title": "心率區間模型",
+          "description": "心率區間模型會根據你嘅心率資料，決定點樣計算訓練強度區間。",
+          "table": {
+            "model": "模型",
+            "basis": "依據",
+            "features": "特點"
+          },
+          "models": {
+            "friel": {
+              "name": "Joe Friel",
+              "basis": "乳酸閾值心率（LTHR）",
+              "features": "適合耐力訓練，反映代謝分界點"
+            },
+            "karvonen": {
+              "name": "Karvonen",
+              "basis": "心率儲備（HRR）",
+              "features": "考慮靜息心率，適合一般體能訓練"
+            },
+            "mhr": {
+              "name": "最大心率（MHR）",
+              "basis": "最大心率",
+              "features": "依最大心率百分比劃分 5 個區間，僅需最大心率。"
+            }
+          },
+          "fallback": "新使用者及未設定模型時預設使用最大心率。既有模型選擇保持不變。Karvonen 缺少靜息心率時回退至最大心率；Friel 缺少閾值心率時，依最大心率的 88% 估算閾值心率繼續計算，並標註估算。所需資料不足時無法產生區間。",
+          "current": "目前"
+        }
+      },
+      "runFtp": {
+        "label": "跑步 FTP（W）",
+        "placeholder": "例如 255"
+      },
+      "cyclingFtp": {
+        "label": "單車 FTP（W）",
+        "placeholder": "例如 255"
+      },
+      "ftp": {
+        "label": "功能性閾值功率 (W)",
+        "placeholder": "250"
+      },
+      "cp": {
+        "label": "臨界功率 (W)",
+        "placeholder": "例如 250"
+      },
+      "wPrime": {
+        "label": "無氧做功容量 (J)",
+        "placeholder": "例如 20000"
+      },
+      "PMax": {
+        "label": "最大功率 (W)",
+        "placeholder": "例如 1000"
+      },
+      "cs": {
+        "label": "臨界速度",
+        "placeholder": "例如 4.0"
+      },
+      "tp": {
+        "label": "閾值配速"
+      },
+      "aerobicThresholdPaceSec": {
+        "label": "有氧閾值配速",
+        "placeholder": "例如 300"
+      },
+      "vo2max": {
+        "label": "VO2 Max",
+        "placeholder": "例如 50",
+        "description": "系統會由最大攝氧量估算 vVO2max（最大攝氧量時嘅速度），用嚟生成區間。"
+      },
+      "paceZoneModel": {
+        "label": "配速區間模型",
+        "placeholder": "選擇模型",
+        "options": {
+          "friel": "Joe Friel (閾值配速)",
+          "daniels": "Jack Daniels（最大攝氧量）"
+        }
+      },
+      "powerZoneModel": {
+        "label": "功率區間模型",
+        "placeholder": "選擇模型",
+        "options": {
+          "friel": "Joe Friel Bike(7 zones) FTP",
+          "vance": "Jim Vance Run(7 zones) FTP",
+          "stryd": "Stryd Run(5 zones) FTP"
+        }
+      },
+      "equipmentWeight": {
+        "label": "裝備重量（kg）",
+        "placeholder": "2.0"
+      },
+      "bikeWeight": {
+        "label": "單車重量（kg）",
+        "placeholder": "8.5"
+      },
+      "fitnessLevel": {
+        "label": "體能水平",
+        "placeholder": "選擇體能水平",
+        "options": {
+          "beginner": "初學",
+          "intermediate": "中級",
+          "advanced": "高級",
+          "elite": "精英"
+        }
+      },
+      "vo2maxCorrectionFactor": {
+        "label": "VO2 Max 修正係數",
+        "placeholder": "輸入修正係數（0.0 - 1.2）",
+        "description": "用嚟校準 VO2 Max 估算，通常介乎 0.85 到 1.15",
+        "invalid": "請輸入大於 0 且不超過 1.20 的數字"
+      },
+      "defaultVdotSource": {
+        "label": "預設 VDOT 來源",
+        "placeholder": "選擇來源",
+        "description": "選擇校正後的最大攝氧量或比賽表現作為首選來源。原始心率估算一律先套用個人因子校正。",
+        "options": {
+          "STANDARD": "比賽成績",
+          "HEARTRATE": "心率",
+          "FACTOR": "校正值"
+        }
+      },
+      "loadSources": {
+        "label": "負荷優先順序",
+        "placeholder": "功率 < 心率 < 配速",
+        "search": "搜尋來源",
+        "description": "用優先順序揀選每日訓練負荷；留空會預設為「功率 < 心率 < 配速」。",
+        "options": {
+          "POWER": "功率",
+          "HEART_RATE": "心率",
+          "PACE": "配速",
+          "SESSIONRPE": "Session RPE"
+        }
+      },
+      "altitudeOptimizationModel": {
+        "label": "海拔優化模型",
+        "placeholder": "選擇模型",
+        "options": {
+          "NOSMOOTHING": "不平滑",
+          "THRESHOLDMETHOD": "閾值優化",
+          "DOUGLASPEUCKERALGORITHM": "Douglas–Peucker 演算法"
+        }
+      },
+      "altitudeThreshold": {
+        "label": "海拔閾值（m）",
+        "placeholder": "例如 100",
+        "default": "預設 3m"
+      }
+    },
+    "calibrateButton": "由活動校準",
+    "calibrateSuccess": "校準成功",
+    "calibrateError": "校準失敗",
+    "calibrateModal": {
+      "title": "選擇用作校準嘅活動",
+      "description": "請選擇一個全力跑步活動（例如比賽）用嚟校準你嘅 VO2 Max 係數。我哋會自動計算修正係數。",
+      "noActivities": "未搵到跑步活動",
+      "date": "日期",
+      "name": "名稱",
+      "distance": "距離",
+      "duration": "時長",
+      "action": "操作",
+      "select": "選擇"
+    },
+    "activitySelector": {
+      "filters": {
+        "sportType": "運動類型",
+        "search": "搜尋名稱",
+        "dateRange": "日期範圍",
+        "duration": "時長（分鐘）",
+        "distance": "距離（km）",
+        "sportTypeOptions": {
+          "run": "跑步",
+          "cycling": "單車",
+          "all": "全部"
+        },
+        "placeholders": {
+          "min": "最小",
+          "max": "最大"
+        }
+      },
+      "columns": {
+        "date": "日期",
+        "name": "名稱",
+        "sportType": "類型",
+        "distance": "距離",
+        "duration": "時長",
+        "vo2max": "VO2Max (V/H)",
+        "ratio": "比例"
+      },
+      "actions": {
+        "confirm": "選擇",
+        "cancel": "取消"
+      }
+    },
+    "saving": "儲存中…",
+    "saveChanges": "儲存變更",
+    "cpHistory": {
+      "title": "CP 歷史",
+      "noData": "暫無 CP 歷史資料",
+      "current": "現行",
+      "updateAvailable": "偵測到新 CP",
+      "updateButton": "更新為 {value} W",
+      "confirmUpdateTitle": "更新臨界功率",
+      "confirmUpdateDesc": "你想將臨界功率（CP）更新到最新計算值 {value} W 嗎？呢個會套用到之後嘅活動。",
+      "updateSuccess": "CP 已成功更新",
+      "updateFailed": "未能更新 CP"
+    },
+    "ftpHistory": {
+      "title": "FTP 歷史",
+      "noData": "暫無 FTP 歷史資料",
+      "current": "現行",
+      "updateAvailable": "偵測到新 FTP",
+      "updateButton": "更新為 {value} W",
+      "confirmUpdateTitle": "更新 FTP",
+      "confirmUpdateDesc": "你想將功能性閾值功率（FTP）更新到最新計算值 {value} W 嗎？呢個會套用到之後嘅活動。",
+      "updateSuccess": "FTP 已成功更新",
+      "updateFailed": "未能更新 FTP"
+    },
+    "estimatedLabel": "估算"
+  },
+  "ZoneSettings": {
+    "title": "區間設定",
+    "description": "自訂你嘅訓練區間。區間會以基準數值嘅百分比定義。",
+    "power": "功率",
+    "heartRate": "心率",
+    "pace": "配速",
+    "reset": "重設",
+    "resetConfirmTitle": "重設區間設定？",
+    "resetConfirmDesc": "呢個會刪除你自訂嘅區間設定並還原成系統預設。此操作無法復原。",
+    "cancel": "取消",
+    "resetSuccess": "區間設定已成功重設",
+    "resetError": "未能重設區間設定",
+    "ftpNoData": "暫無功能性閾值功率（FTP）資料",
+    "cpNoData": "暫無臨界功率（CP）資料",
+    "csNoData": "暫無臨界速度（CS）資料",
+    "hrrNoData": "缺少最大心率或靜息心率（無法計算 HRR）",
+    "comingSoon": "即將推出",
+    "benchmark": {
+      "ftp": "功能性閾值功率（FTP）",
+      "cp": "臨界功率（CP）",
+      "custom": "自訂（絕對值）",
+      "maxHr": "最大心率",
+      "lthr": "乳酸閾值心率",
+      "hrr": "心率儲備（HRR）",
+      "rhr": "靜息心率",
+      "cs": "閾值速度（CS）"
+    },
+    "unsavedChanges": {
+      "title": "未儲存變更",
+      "description": "你有未儲存嘅變更。切換分頁會捨棄佢哋。確定要繼續？",
+      "discard": "捨棄變更",
+      "keep": "繼續編輯"
+    },
+    "editor": {
+      "loadError": "未能載入區間",
+      "saveSuccess": "區間已成功儲存",
+      "saveError": "未能儲存區間",
+      "duplicateError": "區間名稱唔可以重複",
+      "addZone": "新增區間",
+      "saveChanges": "儲存變更",
+      "saving": "儲存中…",
+      "selectSport": "選擇運動",
+      "selectBenchmark": "選擇基準",
+      "referenceValue": "參考數值",
+      "current": "（目前）",
+      "currentUsed": "目前套用：{benchmark}",
+      "columns": {
+        "order": "排序",
+        "name": "名稱",
+        "minPercent": "最小 %",
+        "maxPercent": "最大 %",
+        "minAbsolute": "最小（{unit}）",
+        "maxAbsolute": "最大（{unit}）",
+        "ref": "參考"
+      },
+      "placeholders": {
+        "name": "名稱",
+        "min": "最小",
+        "max": "最大",
+        "minPercent": "最小 %",
+        "maxPercent": "最大 %"
+      },
+      "sports": {
+        "run": "跑步",
+        "cycling": "單車",
+        "swim": "游泳"
+      }
+    }
+  },
+  "ActivityDetail": {
+    "title": "活動詳情",
+    "backButton": "返回",
+    "configuration": "設定",
+    "loading": "載入中…",
+    "processing": {
+      "title": "活動處理中",
+      "description": "活動記錄已存在，但分析同衍生資料仍在準備中。",
+      "failedTitle": "活動處理未完成",
+      "failedDescription": "活動已建立，但分析流程中出咗問題，所以詳情頁暫時未準備好。",
+      "currentStatus": "目前狀態",
+      "pendingNote": "你可以遲啲再返嚟。我哋會喺處理完成後通知你。",
+      "failedNote": "請稍後再試，或者返回活動列表等待最終處理結果。",
+      "status": {
+        "RECEIVED": "已接收",
+        "NORMALIZED": "已標準化",
+        "DEDUPED": "已去重",
+        "MATERIALIZED": "已物化",
+        "PARQUET_READY": "分析檔已就緒",
+        "ANALYZING": "分析中",
+        "READY": "就緒",
+        "PARTIAL_FAILED": "部分失敗",
+        "FAILED": "失敗"
+      }
+    },
+    "tabs": {
+      "overview": "概覽",
+      "heartrate": "心率",
+      "power": "功率",
+      "slope": "坡度",
+      "lap": "計圈",
+      "pace": "配速",
+      "runningDynamics": "跑步動態",
+      "bestIntervals": "最佳表現"
+    },
+    "suspenseFallback": "載入中…",
+    "activityFeed": "活動流",
+    "source": "來源",
+    "sourceUpload": "手動上載",
+    "coachReview": "教練復盤",
+    "bestIntervals": {
+      "title": "本次最佳表現",
+      "description": "查看本次活動喺唔同時間或距離下嘅最高連續表現；選擇後地圖會定位到對應路段。",
+      "clear": "清除",
+      "selected": "已選擇",
+      "location": "路段",
+      "timeSection": "按時間",
+      "timeSectionDescription": "比較唔同持續時間內嘅最高平均表現。撳數值可以喺地圖定位對應路段。",
+      "duration": "持續時間",
+      "timeRange": "時間段",
+      "distanceSection": "按距離",
+      "distanceSectionDescription": "查看標準跑步距離嘅最快連續表現。",
+      "distance": "距離",
+      "effortTime": "用時"
+    },
+    "activityAnalysis": {
+      "title": "活動分析",
+      "gradeMedian": "中位坡度",
+      "vam": "垂直爬升速度",
+      "cadence": "活動步頻",
+      "powerVariability": "功率波動",
+      "coverage": "資料覆蓋率",
+      "power": "功率",
+      "hr": "心率",
+      "pace": "配速",
+      "profile": {
+        "FLAT": "平路",
+        "UPHILL": "上坡為主",
+        "DOWNHILL": "下坡為主",
+        "HILLY": "丘陵",
+        "ROLLING": "起伏"
+      }
+    },
+    "dataCharts": "資料曲線",
+    "zoneTable": {
+      "zone": "區間",
+      "range": "範圍",
+      "distribution": "分布",
+      "percentage": "佔比",
+      "duration": "時間",
+      "noData": "暫無區間資料"
+    },
+    "dataChartsHint": "輕觸曲線查看對應數值，展開後可查看完整細節。",
+    "untitledActivity": "未命名活動",
+    "sportTypeRecalculateConfirmTitle": "切換運動類型？",
+    "sportTypeRecalculateConfirmDescription": "切換運動類型會觸發此活動指標重新計算，是否繼續？",
+    "sportTypeRecalculateConfirmCancel": "取消",
+    "sportTypeRecalculateConfirmContinue": "繼續",
+    "sessionRpe": {
+      "chipLabel": "RPE",
+      "helpAriaLabel": "主觀強度說明",
+      "label": "主觀強度 (RPE)",
+      "notSet": "未填寫",
+      "notSetShort": "—",
+      "hint": "單次訓練主觀用力程度（1～10）。當負荷來源優先順序包含「主觀 RPE」時會納入 PMC。",
+      "placeholder": "例如 7",
+      "save": "儲存",
+      "clear": "清除",
+      "saved": "已儲存主觀強度",
+      "cleared": "已清除主觀強度",
+      "invalid": "請輸入 1～10 之間的數字",
+      "failed": "儲存主觀強度失敗"
+    }
+  },
+  "SwimOverview": {
+    "speed": "速度",
+    "strokes": "划水次數",
+    "swolf": "SWOLF"
+  },
+  "ActivityNotFound": {
+    "title": "搵唔到活動",
+    "description": "抱歉，你瀏覽嘅活動唔存在或已被刪除。",
+    "backButton": "返回",
+    "homeButton": "活動"
+  },
+  "ActivityMap": {
+    "locked": "已鎖定",
+    "unlocked": "未鎖定"
+  },
+  "Overview": {
+    "noData": "暫無資料",
+    "stats": {
+      "avgSpeed": "平均速度",
+      "avgPace": "平均配速",
+      "distance": "距離",
+      "elevation": "海拔",
+      "enhancedElevation": "增強海拔",
+      "climb": "爬升",
+      "descend": "下降",
+      "slope": "坡度",
+      "enhancedSlope": "增強坡度",
+      "avgHeartRate": "平均心率",
+      "avgPower": "平均功率",
+      "avgCadence": "平均步頻/踏頻",
+      "avgStepLength": "平均步幅",
+      "avgStanceTime": "平均觸地時間",
+      "temperature": "溫度",
+      "aerobicEfficiencyPower": "功率有氧效率",
+      "runningEffectiveness": "跑步效率",
+      "efficiencyIndex": "效率指數"
+    }
+  },
+  "HeartRatePage": {
+    "title": "心率區間分析",
+    "heartRate": "心率",
+    "tabs": {
+      "mhr": "MHR",
+      "hrr": "HRR",
+      "lthr": "LTHR"
+    },
+    "baseStats": {
+      "avg": "平均心率",
+      "max": "最大心率",
+      "reserve": "心率儲備",
+      "intensity": "心率強度",
+      "avgPct": "平均 HR %",
+      "maxPct": "最大 HR %",
+      "energy": "能量",
+      "trimp": "TRIMP",
+      "tss": "TSS(hr)",
+      "powerDecoupling": "Pw:Hr",
+      "paceDecoupling": "Pa:Hr",
+      "peakEpoc": "峰值 EPOC",
+      "maxHeartRateRecovery": "最大心率恢復"
+    },
+    "average": "平均",
+    "epocInfo": {
+      "title": "峰值 EPOC",
+      "description": "運動後過量耗氧量（EPOC）係指身體回復到正常靜息代謝水平所需嘅氧氣量。峰值 EPOC 反映該次訓練帶嚟嘅生理壓力同刺激。",
+      "source": "參考資料",
+      "firstbeatSource": "Firstbeat 科學論文（Rusko 等，2003）"
+    },
+    "charts": {
+      "zoneDistribution": {
+        "title": "心率區間分佈"
+      },
+      "timeSeries": {
+        "title": "心率時間序列",
+        "description": "顯示活動期間嘅心率走勢同區間分佈"
+      },
+      "durationCurve": {
+        "title": "心率時長曲線",
+        "description": "顯示唔同時長嘅峰值心率",
+        "tooltip": {
+          "peak": "{days} 日峰值"
+        }
+      }
+    },
+    "help": {
+      "zonesTip": "如果區間睇落唔對，請到「用戶設定」檢查你嘅最大心率。更新後重新上載活動，區間就會刷新。"
+    },
+    "zones": {
+      "Z1": "恢復／輕鬆",
+      "Z2": "有氧／耐力",
+      "Z3": "節奏",
+      "Z4": "閾值",
+      "Z5": "無氧／VO2 Max"
+    },
+    "tooltip": {
+      "time": "時間",
+      "heartRate": "心率",
+      "power": "功率",
+      "percentage": "百分比",
+      "duration": "時長",
+      "avgHeartRate": "平均",
+      "maxHeartRate": "最大",
+      "minHeartRate": "最小",
+      "heartRateRange": "範圍",
+      "connected": "已連接",
+      "minutes": "分鐘",
+      "pace": "配速",
+      "distance": "距離"
+    },
+    "trimpInfo": {
+      "title": "訓練衝量（TRIMP）",
+      "description": "TRIMP（Training Impulse）由 Eric Banister 提出。本應用主要使用 <highlight>TRIMPexp（指數心率縮放）</highlight>。（如果最大心率同靜息心率不可用，會改用 TRIMPavg（平均心率縮放）。）",
+      "details": "呢個算法加入指數因子去模擬血乳酸濃度嘅非線性上升。<highlight>隨住心率強度上升，訓練壓力會呈指數增加</highlight>，因此更準確量化高強度訓練嘅生理負荷。",
+      "source": "算法來源",
+      "sourceLink": "fellrnr.com - TRIMPexp Exponential Scaling",
+      "rangeTitle": "負荷參考範圍",
+      "rangeSource": "參考：Firstbeat",
+      "ranges": {
+        "easy": "輕鬆／恢復",
+        "moderate": "中等強度",
+        "hard": "高強度／閾值",
+        "severe": "極高強度／耐力"
+      },
+      "note": "注意：本頁顯示嘅 TRIMP 數值係 TRIMP(100)，已標準化以便同 TSS 等指標對比。",
+      "hrPercentage": "心率 %",
+      "cumulativeTrimp": "累計 TRIMP",
+      "noData": "沒有 TRIMP 資料"
+    },
+    "decouplingInfo": {
+      "title": "有氧去耦合（Aerobic Decoupling）",
+      "description": "有氧去耦合係衡量有氧效率同耐力嘅重要指標，代表喺功率或配速保持穩定時，心率隨時間出現嘅上漂（cardiac drift）。",
+      "details": "當疲勞累積，身體會動員更多肌纖維，令對氧氣同血液供應嘅需求增加，從而出現 <highlight>功率／配速維持不變但心率逐步上升</highlight>。去耦合越高，通常代表有氧底子較弱或抗疲勞能力較差。",
+      "pwHr": "Pw:Hr (Power:Heart Rate)",
+      "pwHrFormula": "EF = AvgPower / AvgHR; Pw:Hr = (EF1 - EF2) / EF1 × 100%",
+      "paHr": "Pa:Hr (Pace:Heart Rate)",
+      "paHrFormula": "EF = AvgSpeed / AvgHR; Pa:Hr = (EF1 - EF2) / EF1 × 100%",
+      "interpretation": "一般而言，對於你目標賽事嘅時長，<highlight>去耦合少於 5%</highlight> 代表有唔錯嘅有氧底子。",
+      "source": "來源",
+      "sourceLink": "Tailwind Coaching - What is Aerobic Decoupling?",
+      "note": "注意：呢個指標需要穩態有氧努力；無氧或間歇式努力會扭曲計算。"
+    },
+    "noData": "冇心率資料"
+  },
+  "PacePage": {
+    "title": "配速分析",
+    "pace": "配速",
+    "header": {
+      "eyebrow": "指標",
+      "description": "查看配速曲線、臨界速度預測同配速區間。"
+    },
+    "stats": {
+      "avgPace": "平均配速",
+      "avgSpeed": "平均速度",
+      "avgGap": "平均 GAP",
+      "xPace": "xPace",
+      "xGap": "xGAP",
+      "viPace": "VI (Pace)",
+      "viGap": "VI (GAP)",
+      "aerobicEfficiency": "有氧效率",
+      "vo2max": "VO2 Max（估算）"
+    },
+    "charts": {
+      "zoneDistribution": {
+        "title": "配速區間分佈",
+        "description": "顯示各配速區間嘅時間分佈"
+      }
+    },
+    "tooltip": {
+      "percentage": "百分比",
+      "duration": "時長"
+    },
+    "zones": {
+      "Z1": "Z1",
+      "Z2": "Z2",
+      "Z3": "Z3",
+      "Z4": "Z4",
+      "Z5": "Z5",
+      "Z6": "Z6",
+      "Z7": "Z7"
+    }
+  },
+  "HeartRatePowerRatio": {
+    "title": "功率效率因子",
+    "description": "按分鐘顯示功率對心率比（Power/HR）；數值越高代表功率效率越高",
+    "tooltip": {
+      "time": "時間",
+      "ratio": "功率效率因子",
+      "heartRate": "心率",
+      "power": "功率",
+      "pace": "配速",
+      "distance": "距離"
+    },
+    "noData": "冇功率效率因子資料"
+  },
+  "EpocChart": {
+    "title": "EPOC 估算",
+    "epoc": "EPOC (ml/kg)",
+    "heartRate": "心率（bpm）",
+    "distance": "距離",
+    "peak": "峰值"
+  },
+  "PaceChart": {
+    "title": "配速",
+    "tabs": {
+      "zones": "區間",
+      "curve": "曲線"
+    },
+    "description": "顯示活動期間嘅配速走勢",
+    "tooltip": {
+      "time": "時間",
+      "pace": "配速"
+    },
+    "max": "最大",
+    "cs": "臨界速度",
+    "noData": "冇配速資料",
+    "viewType": {
+      "chart": "圖表",
+      "list": "表格"
+    },
+    "split": {
+      "label": "分段",
+      "1km": "1 公里",
+      "3km": "3 公里",
+      "5km": "5 公里"
+    },
+    "table": {
+      "segment": "區段",
+      "pace": "配速（min/km）"
+    },
+    "average": "平均",
+    "min": "最小"
+  },
+  "StrideChart": {
+    "title": "步幅",
+    "description": "顯示活動期間嘅步幅走勢",
+    "tooltip": {
+      "time": "時間",
+      "stride": "步幅",
+      "pace": "配速",
+      "distance": "距離"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "冇步幅資料"
+  },
+  "RunningDynamicsPage": {
+    "average": "平均",
+    "metrics": {
+      "cadence": "步頻",
+      "stepLength": "步幅",
+      "verticalOscillation": "垂直振幅",
+      "verticalRatio": "垂直比例",
+      "stanceTime": "著地時間",
+      "flightTime": "騰空時間",
+      "flightRatio": "騰空比",
+      "totalSteps": "總步數"
+    },
+    "units": {
+      "steps": "步"
+    }
+  },
+  "CadenceChart": {
+    "title": "步頻",
+    "runningTitle": "步頻",
+    "description": "顯示活動期間嘅步頻走勢",
+    "tooltip": {
+      "time": "時間",
+      "cadence": "步頻",
+      "distance": "距離"
+    },
+    "average": "平均",
+    "max": "最大",
+    "noData": "冇步頻資料",
+    "min": "最小"
+  },
+  "ElevationChart": {
+    "title": "海拔",
+    "description": "顯示活動期間嘅海拔走勢",
+    "expand": "放大海拔圖表",
+    "tooltip": {
+      "time": "時間",
+      "enhancedAltitude": "校正海拔",
+      "altitude": "海拔",
+      "distance": "距離"
+    },
+    "average": "平均海拔",
+    "max": "最大海拔",
+    "min": "最小海拔",
+    "noData": "冇海拔資料"
+  },
+  "TemperatureChart": {
+    "title": "溫度",
+    "description": "顯示活動期間嘅溫度走勢",
+    "tooltip": {
+      "time": "時間",
+      "temperature": "溫度",
+      "distance": "距離"
+    },
+    "average": "平均溫度",
+    "max": "最高溫度",
+    "min": "最低溫度",
+    "noData": "冇溫度資料"
+  },
+  "PowerChart": {
+    "title": "功率",
+    "calculatedTitle": "估算功率",
+    "calculatedBadge": "估算",
+    "calculatedDescription": "根據速度同體重估算；目前平路模型唔使用坡度",
+    "description": "顯示活動期間嘅功率走勢",
+    "tooltip": {
+      "time": "時間",
+      "power": "功率",
+      "distance": "距離"
+    },
+    "average": "平均功率",
+    "max": "最大功率",
+    "min": "最小功率",
+    "noData": "冇功率資料"
+  },
+  "HeartRateChart": {
+    "title": "心率",
+    "description": "顯示活動期間嘅心率走勢",
+    "tooltip": {
+      "time": "時間",
+      "heartRate": "心率",
+      "distance": "距離"
+    },
+    "average": "平均心率",
+    "max": "最大心率",
+    "min": "最小心率",
+    "noData": "冇心率資料"
+  },
+  "HeartRateTable": {
+    "timeRangeHeartRate": "時間範圍／最高平均心率",
+    "oneSecond": "1s",
+    "fiveSeconds": "5s",
+    "tenSeconds": "10s",
+    "twentySeconds": "20s",
+    "thirtySeconds": "30s",
+    "oneMinute": "1m",
+    "threeMinutes": "3m",
+    "fiveMinutes": "5m",
+    "tenMinutes": "10m",
+    "twentyMinutes": "20m",
+    "thirtyMinutes": "30m",
+    "sixtyMinutes": "60m",
+    "twoHours": "2h",
+    "threeHours": "3h",
+    "sixHours": "6h"
+  },
+  "StanceTimeChart": {
+    "title": "著地時間",
+    "description": "顯示活動期間每一步觸地所需嘅時間",
+    "tooltip": {
+      "time": "時間",
+      "stanceTime": "觸地時間",
+      "distance": "距離"
+    },
+    "average": "平均觸地時間",
+    "max": "最大觸地時間",
+    "noData": "冇觸地時間資料",
+    "min": "最小觸地時間"
+  },
+  "ActivityPowerPage": {
+    "title": "功率區間分析",
+    "average": "平均",
+    "basicStats": {
+      "avgPower": "平均功率",
+      "maxPower": "最大功率",
+      "normalizedPower": "標準化功率（NP）",
+      "trainingStressScore": "訓練壓力分數（eTSS）",
+      "intensityFactor": "強度因子（IF）",
+      "variabilityIndex": "變異指數（VI）",
+      "relativeIntensity": "相對強度（RI）",
+      "powerWeightRatio": "功率／體重（W/kg）",
+      "efficiencyFactor": "效率因子（EF）",
+      "powerHeartRateRatio": "功率／心率（P/HR）"
+    },
+    "chart": {
+      "power": "功率",
+      "avgPower": "平均功率",
+      "powerRange": "功率範圍",
+      "unknownZone": "未知區間",
+      "noPowerData": "冇功率資料",
+      "pdc": "功率時長曲線"
+    },
+    "charts": {
+      "timeSeries": {
+        "title": "功率時間序列圖",
+        "description": "顯示功率隨時間變化嘅走勢同區間分佈"
+      },
+      "zoneDistribution": {
+        "title": "功率區間分佈",
+        "description": "顯示各功率區間嘅時間分佈"
+      },
+      "powerDurationCurve": {
+        "title": "功率時長曲線",
+        "description": "顯示唔同時長下嘅最大平均功率"
+      }
+    },
+    "zones": {
+      "Z1": "主動恢復",
+      "Z2": "耐力",
+      "Z3": "節奏",
+      "Z4": "閾值",
+      "Z5": "VO2 Max",
+      "Z6": "無氧",
+      "Z7": "神經肌肉"
+    },
+    "tooltip": {
+      "percentage": "百分比",
+      "duration": "時長",
+      "minutes": "分鐘",
+      "avgPower": "平均功率",
+      "maxPower": "最大功率",
+      "minPower": "最小功率",
+      "powerRange": "功率範圍",
+      "power": "功率"
+    },
+    "powerDurationCurve": {
+      "title": "功率時長曲線"
+    },
+    "unit": {
+      "watt": "W"
+    },
+    "noData": "冇功率資料",
+    "powerInfo": {
+      "title": "功率指標說明",
+      "description": "FTP（功能性閾值功率）係你可以維持 1 小時嘅最大平均功率。CP（臨界功率）係理論上你可以長時間維持嘅功率閾值。",
+      "details": "顯示嘅數值由兩部分組成：<br/><b>1. 主要數值</b>：用於計算本次活動 TSS/IF 嘅設定值。<br/><b>2. 次要數值（較細字）</b>：根據本次活動數據估算嘅 eFTP / eCP。",
+      "trademark": "Functional Threshold Power（FTP）、Normalized Power（NP）、Training Stress Score（TSS）皆為 Peaksware, LLC 所擁有嘅註冊商標。",
+      "source": "來源",
+      "sourceLink": "TrainingPeaks"
+    },
+    "normalizedPowerInfo": {
+      "title": "NP (Normalized Power)",
+      "description": "標準化功率（NP）係一種功率平均方法，用嚟量化一節訓練真正嘅生理代謝成本。",
+      "details": "同平均功率唔同，NP 會更著重令身體承受更大壓力嘅高強度波動。<br></br><br></br><b>核心算法：</b><br></br>1. 計算功率嘅 30 秒移動平均。<br></br>2. 將以上數值提升至 4 次方（放大高強度波動嘅影響）。<br></br>3. 計算呢啲 4 次方數值嘅平均。<br></br>4. 開 4 次方根得到 NP。<br></br><br></br><b>意義：</b><br></br>生理反應（例如乳酸累積、糖原消耗）同運動強度之間係非線性關係。NP 透過加權算法，更準確反映包含間歇、衝刺或起伏地形訓練嘅負荷。",
+      "source": "來源",
+      "sourceLink": "TrainingPeaks",
+      "trademark": "Normalized Power（NP）、Training Stress Score（TSS）同 Intensity Factor（IF）皆為 Peaksware, LLC 所擁有嘅註冊商標。"
+    },
+    "xPowerInfo": {
+      "title": "xPower",
+      "description": "Skiba 嘅「xPower」係功率嘅指數加權移動平均（25 秒），再提升至 4 次方，用嚟刻畫生理壓力。",
+      "details": "計算：<br></br>1. 用 25 秒 EWMA 平滑功率，得到即時 LNP<br></br>2. 計算 LNP^4 嘅平均，再開 4 次方根<br></br>3. 作為 BikeScore/ETSS 同相對強度（RI）嘅基礎<br></br><br></br>同 Coggan 嘅 NP 類似，但算法細節唔同；更常見於 Skiba 嘅訓練負荷系統。",
+      "source": "來源",
+      "sourceLink": "Skiba / GoldenCheetah"
+    },
+    "tssInfo": {
+      "title": "TSS (Training Stress Score)",
+      "description": "TSS 源自 Coggan 系統，用嚟衡量一節訓練對身體造成嘅總壓力。",
+      "details": "核心計算：<b>TSS = 100 × IF² × 小時</b><br></br>IF（強度因子）= NP / FTP<br></br>NP（標準化功率）反映有氧代謝負荷",
+      "source": "來源",
+      "sourceLink": "TrainingPeaks",
+      "trademark": "Training Stress Score（TSS）、Intensity Factor（IF）同 Normalized Power（NP）皆為 Peaksware, LLC 所擁有嘅註冊商標。"
+    },
+    "bikeScoreInfo": {
+      "title": "BikeScore",
+      "description": "BikeScore 係 Skiba / GoldenCheetah 對應 TSS 嘅指標，使用 xPower 同相對強度（RI）計算。",
+      "details": "計算：<b>BikeScore = 100 × RI² × 小時</b><br></br>同 TSS 類似，但用 xPower 代替 NP，並用 CP 代替 FTP。",
+      "source": "來源",
+      "sourceLink": "Skiba / GoldenCheetah"
+    },
+    "intensityFactorInfo": {
+      "title": "IF (Intensity Factor)",
+      "description": "強度因子（IF）係標準化功率（NP）相對於你功能性閾值功率（FTP）嘅比例。",
+      "details": "計算：<b>IF = NP / FTP</b><br></br>IF 反映今次騎行相對於你目前體能水平有幾高強度。<br></br>IF = 1.0 大致相當於 1 小時嘅全力努力。",
+      "source": "來源",
+      "sourceLink": "TrainingPeaks",
+      "trademark": "Intensity Factor（IF）、Normalized Power（NP）同 Training Stress Score（TSS）皆為 Peaksware, LLC 所擁有嘅註冊商標。"
+    },
+    "riInfo": {
+      "title": "RI (Relative Intensity)",
+      "description": "RI（相對強度）係 Skiba 系統對應 Coggan 系統 IF（強度因子）嘅指標。",
+      "details": "核心計算：<b>RI = xPower / CP</b><br></br>反映相對於個人臨界功率嘅強度水平。<br></br>RI 接近 1.0 代表閾值強度；高於 1.0 代表超閾值。",
+      "source": "來源",
+      "sourceLink": "Skiba / GoldenCheetah"
+    },
+    "viInfo": {
+      "title": "VI (Variability Index)",
+      "description": "VI（變異指數）用嚟描述配速/功率輸出有幾平順。",
+      "details": "計算：<b>VI = NP / 平均功率</b>（或 xPower / 平均功率）<br></br>VI 接近 1.0 代表輸出穩定；數值越高代表功率波動越大。<br></br>時間試同耐力騎行通常希望 VI 越接近 1 越好。",
+      "source": "來源",
+      "sourceLink": "TrainingPeaks / GoldenCheetah"
+    },
+    "wkgInfo": {
+      "title": "W/kg (Power-to-Weight Ratio)",
+      "description": "W/kg 代表每單位體重嘅功率輸出，係比較唔同體重單車能力嘅重要指標。",
+      "details": "計算：<b>平均功率 / 體重</b><br></br>對爬坡更相關；平路受空氣動力影響更大。<br></br>可用嚟比較唔同體重車手嘅相對爬坡能力。",
+      "source": "來源",
+      "sourceLink": "General Cycling Metrics"
+    },
+    "efficiencyFactorInfo": {
+      "title": "Efficiency Factor  (EF)",
+      "description": "EF 係標準化功率（NP）相對於平均心率嘅比例，用嚟衡量你喺有氧耐力區嘅效率。",
+      "details": "計算：<b>EF = 標準化功率（NP）/ 平均心率</b><br/>同一心率更高 NP，或者同一 NP 更低心率，代表更強嘅有氧底子。<br/>最適合喺耐力騎行中觀察。",
+      "source": "來源",
+      "sourceLink": "TrainingPeaks",
+      "sourceLink2": "cyklopedia"
+    },
+    "powerHeartRateRatioInfo": {
+      "title": "Power/HR (Output/Input Ratio)",
+      "description": "功率/心率（Power/HR），又稱輸出/輸入比（Output/Input Ratio），衡量喺固定輸入（心率）下可產生幾多輸出（功率）。",
+      "details": "隨住體能提升，呢個數值通常會上升，但心率亦會受好多因素影響。<br/>最適合喺耐力騎行中觀察。",
+      "source": "來源",
+      "sourceLink": "General Cycling Metrics"
+    }
+  },
+  "Activities": {
+    "title": "活動",
+    "loading": "載入活動中…",
+    "loadError": "未能載入活動",
+    "noActivities": "未搵到活動",
+    "uploadButton": "上載活動",
+    "filters": {
+      "all": "全部",
+      "cycling": "單車",
+      "running": "跑步",
+      "swimming": "游泳"
+    },
+    "sortBy": {
+      "date": "日期",
+      "distance": "距離",
+      "duration": "時長"
+    }
+  },
+  "activities": {
+    "activities": "活動",
+    "weeklyActivity": "每週活動",
+    "lastWeek": "上星期",
+    "monthlyActivity": "每月活動",
+    "monthlySummary": "每月摘要",
+    "yearlySummary": "每年摘要",
+    "totalCount": "活動總數",
+    "totalDistance": "總距離",
+    "totalDuration": "總時長",
+    "totalCalories": "總卡路里",
+    "name": "名稱",
+    "type": "類型",
+    "date": "日期",
+    "startTime": "開始時間",
+    "distance": "距離",
+    "duration": "時長",
+    "vo2max": "VO2Max",
+    "updated": "已更新",
+    "actions": "操作",
+    "viewDetails": "查看",
+    "exportData": "匯出",
+    "deleteActivity": "刪除",
+    "processingStatus": {
+      "processing": "處理中",
+      "notReady": "呢個活動仍在處理中。請喺就緒後再打開或匯出。"
+    },
+    "importFiles": "匯入檔案",
+    "importActivityFiles": "匯入活動檔案",
+    "supportedFormatsDescription": "支援匯入最多 {maxFiles} 個 {formats} 格式檔案",
+    "dropFilesHere": "將檔案拖放到呢度",
+    "dragOrClickToSelect": "將檔案拖到呢度，或按一下揀選檔案",
+    "supportedFormats": "支援格式：{formats}",
+    "selectedFiles": "已選擇 {count} 個檔案",
+    "cancel": "取消",
+    "uploading": "上載中",
+    "uploadWithCount": "上載 {count} 個檔案",
+    "upload": "上載",
+    "uploadSuccess": "上載成功",
+    "checkDuplicatesFailed": "未能檢查重複檔案",
+    "uploadFailed": "上載失敗",
+    "unknownError": "未知錯誤",
+    "importProgress": {
+      "title": "匯入中",
+      "description": "你嘅檔案已排入匯入隊列。我哋會喺背景處理，你可以繼續瀏覽。",
+      "completedTitle": "匯入完成",
+      "completedDescription": "呢一批已完成處理。你而家可以關閉視窗並查看結果。",
+      "batchCreatedToast": "已建立匯入批次。正處理 {count} 個檔案",
+      "openEntry": "匯入進度",
+      "laterHint": "你可以稍後隨時返嚟查看結果。",
+      "doneHint": "呢一批已完成處理。",
+      "notificationHint": "匯入完成後你會收到通知，所以毋須一直留喺呢個對話框。",
+      "progressLabel": "進度",
+      "total": "總數",
+      "success": "成功",
+      "failed": "失敗",
+      "skipped": "略過",
+      "batchStatus": "批次狀態",
+      "postProcessStatus": "後處理狀態",
+      "itemListTitle": "檔案狀態",
+      "itemsLoadFailed": "未能載入匯入項目。請稍後再試。",
+      "waitingForItems": "載入匯入項目狀態中…",
+      "continueLater": "稍後查看",
+      "close": "關閉",
+      "item": "檔案",
+      "waiting": "等待處理",
+      "ready": "活動已就緒",
+      "activityStatus": "活動狀態：{status}",
+      "activityProcessingStatus": {
+        "received": "已接收",
+        "normalized": "已標準化",
+        "deduped": "已去重",
+        "materialized": "已建檔",
+        "parquetReady": "分析檔案已建立",
+        "analyzing": "分析中",
+        "ready": "已就緒",
+        "partialFailed": "部分失敗",
+        "failed": "失敗",
+        "unknown": "未知狀態"
+      },
+      "status": {
+        "batchQueued": "已排隊",
+        "batchRunning": "處理中",
+        "batchCompleted": "已完成",
+        "batchPartialFailed": "部分失敗",
+        "batchFailed": "失敗",
+        "batchCancelled": "已取消",
+        "itemQueued": "已排隊",
+        "itemNormalizing": "標準化中",
+        "itemMaterializing": "物化中",
+        "itemParquetBuilding": "建立分析中",
+        "itemDone": "完成",
+        "itemSkipped": "略過",
+        "itemFailed": "失敗",
+        "itemDead": "已終止",
+        "postPending": "等待中",
+        "postRunning": "處理中",
+        "postCompleted": "已完成",
+        "postFailed": "失敗",
+        "postDead": "已終止",
+        "postWaiting": "等待開始"
+      }
+    },
+    "noActivitiesData": "冇活動資料",
+    "confirmDeleteTitle": "確認刪除",
+    "confirmDeleteDescription": "此操作無法復原。要刪除呢個活動嗎？",
+    "confirm": "確認",
+    "deleting": "刪除中…",
+    "exportDialogTitle": "選擇匯出類型",
+    "exportDialogDescription": "請選擇匯出檔案格式。",
+    "selectExportTypePlaceholder": "選擇匯出類型",
+    "exporting": "匯出中…",
+    "pageLabel": "第 {current} 頁／共 {total} 頁",
+    "prevPage": "上一頁",
+    "nextPage": "下一頁",
+    "duplicateActivities": {
+      "title": "發現重複活動",
+      "description": "以下檔案可能包含重複嘅活動資料。請選擇點樣處理：",
+      "createNew": "建立新活動",
+      "cancel": "取消上載",
+      "viewActivity": "查看活動",
+      "duplicatesFound": "找到 {count} 個重複項目",
+      "fileName": "檔名",
+      "activityName": "活動名稱",
+      "sportType": "運動類型",
+      "startTime": "開始時間",
+      "distance": "距離",
+      "duration": "時長",
+      "actions": "操作",
+      "possibleDuplicates": "可能重複嘅活動",
+      "unnamedActivity": "未命名活動",
+      "sportTypes": {
+        "RUN": "跑步",
+        "CYCLING": "單車",
+        "SWIM": "游泳",
+        "UNKNOWN": "未知"
+      }
+    }
+  },
+  "power": {
+    "title": "Trainingload.ai · 功率分析",
+    "powerAnalysis": "功率分析",
+    "header": {
+      "eyebrow": "指標",
+      "description": "查看功率曲線、最大功率、區間同能力檔案。"
+    },
+    "maximumPower": "最大功率",
+    "duration": "時長",
+    "unknown": "未知",
+    "noData": "冇資料",
+    "tabs": {
+      "curve": "曲線",
+      "maximum": "最大值",
+      "zones": "區間",
+      "profile": "檔案"
+    },
+    "zones": "區間"
+  },
+  "PowerProfile": {
+    "table": {
+      "level": "等級",
+      "male": "男",
+      "female": "女"
+    },
+    "levels": {
+      "worldClass": "世界級",
+      "exceptional": "卓越",
+      "excellent": "優秀",
+      "veryGood": "非常好",
+      "good": "良好",
+      "moderate": "中等",
+      "fair": "一般",
+      "novice": "新手",
+      "untrained": "未受訓"
+    },
+    "missing": {
+      "title": "無法計算 W/kg",
+      "missingWeight": "未設定體重，因此無法將功率轉換為 W/kg。",
+      "missingPowerData": "冇可用功率數據（5 秒/1 分鐘/5 分鐘或 FTP）。",
+      "missingData": "缺少必要資料，無法估算 W/kg。",
+      "action": "前往帳戶"
+    },
+    "interpretation": {
+      "title": "檔案解讀",
+      "noDataHint": "缺少體重或功率數據，無法由你嘅檔案判斷類型。",
+      "type": "類型",
+      "unknown": "未知",
+      "text": "解讀",
+      "reference": "參考",
+      "referenceTitle": "Creating Your Power Profile（Coggan）"
+    },
+    "types": {
+      "allRounder": {
+        "label": "全能型",
+        "interpretation": "短爆發同長距離耐力相對均衡，通常喺多種賽制都能保持競爭力，但未必喺某一項絕對最強。"
+      },
+      "pursuiter": {
+        "label": "追逐型",
+        "interpretation": "無氧容量同有氧能力都唔錯，適合需要高強度持續輸出嘅項目（例如場地追逐／高強度滾動突圍）。"
+      },
+      "sprinter": {
+        "label": "衝刺型",
+        "interpretation": "神經肌肉爆發同無氧輸出突出，更擅長短時間高功率同反覆衝刺；長距離耐力同閾值相對較弱。"
+      },
+      "timeTrialist": {
+        "label": "計時型",
+        "interpretation": "可持續有氧／閾值功率突出，更適合計時賽、長爬坡或穩定輸出；短爆發同無氧容量相對較弱。"
+      }
+    }
+  },
+  "PowerTable": {
+    "timeRangePower": "時間／最高平均功率",
+    "fiveSeconds": "5s",
+    "thirtySeconds": "30s",
+    "oneMinute": "1min",
+    "threeMinutes": "3min",
+    "fiveMinutes": "5min",
+    "twentyMinutes": "20min",
+    "thirtyMinutes": "30min",
+    "sixtyMinutes": "60min",
+    "twoHours": "2h",
+    "threeHours": "3h"
+  },
+  "PaceTable": {
+    "segment": "分段",
+    "pace": "配速",
+    "time": "用時"
+  },
+  "dashboard": {
+    "average": "平均",
+    "maximum": "最大",
+    "minimum": "最小",
+    "cadenceTrend": "步頻趨勢",
+    "currentCadence": "目前步頻",
+    "comparisonCadence": "對照步頻",
+    "current": "目前",
+    "comparison": "對照",
+    "noData": "暫無資料",
+    "heartRateTrend": "心率趨勢",
+    "count": "次數",
+    "duration": "總時長",
+    "distance": "總距離",
+    "climb": "爬升",
+    "calories": "熱量",
+    "averageSpeed": "平均速度",
+    "averagePower": "平均功率",
+    "averageHeartRate": "平均心率",
+    "paceTrend": "配速趨勢",
+    "powerTrend": "功率趨勢",
+    "speedTrend": "速度趨勢",
+    "overview": {
+      "title": "概覽",
+      "addMetricTitle": "新增指標",
+      "add": "新增",
+      "added": "已加入",
+      "remove": "移除",
+      "recent30Days": "近 30 日",
+      "selectSportForComparableSpeed": "選擇一種運動，再比較同類活動的速度。",
+      "shrinkChart": "縮小圖表",
+      "expandChart": "放大圖表",
+      "removeChart": "移除圖表",
+      "groups": {
+        "fitness": "訓練指標",
+        "activity": "活動指標",
+        "weeklySummary": "週匯總"
+      }
+    },
+    "fitnessStatus": {
+      "aboutMetric": "關於{title}",
+      "edit": "版面",
+      "save": "儲存",
+      "cancel": "取消",
+      "backButton": "返回",
+      "remove": "移除",
+      "addMetric": "新增指標",
+      "noMoreMetrics": "冇更多指標",
+      "saveSuccess": "已儲存",
+      "saveFailed": "儲存失敗",
+      "estimatedLabel": "估算",
+      "manualLabel": "手動",
+      "previousWeekLabel": "上週",
+      "changeLabel": "變化",
+      "activityVo2MaxLabel": "活動 VO2Max",
+      "vo2Max": {
+        "title": "最大攝氧量",
+        "description": "未知",
+        "level": {
+          "EXCELLENT": "極好",
+          "VERY_GOOD": "很好",
+          "GOOD": "好",
+          "FAIR": "普通",
+          "POOR": "尚可"
+        },
+        "details": "最大攝氧量係指喺遞增強度運動中，當身體無法再維持下去時，機體所能攝入嘅氧氣量。",
+        "guide": {
+          "what": "咩係最大攝氧量？",
+          "whatContent": "最大攝氧量係衡量有氧耐力嘅黃金指標，代表身體喺劇烈運動中每分鐘能消耗嘅最大氧氣量。數值越高，有氧能力越強。",
+          "use": "點樣解讀？",
+          "useContent": "一般人最大攝氧量約 30–40 ml/kg/min，頂尖耐力運動員可超過 70–80。會隨年齡自然下降，但可透過訓練提升。",
+          "reference": "參考範圍",
+          "referenceContent": "一般（30–40）、優秀（>50）、頂尖（>70）",
+          "source": "來源：Jack Daniels VDOT / Firstbeat",
+          "algorithm": {
+            "title": "演算法基於 Jack Daniels 嘅 VDOT 理論，分兩種計算方式：",
+            "standardTitle": "標準模式：",
+            "standardContent": "由最佳跑步成績直接對應 VDOT 值作為最大攝氧量參考。",
+            "heartRateTitle": "心率模式：",
+            "heartRateContent": "參考 Firstbeat 模型，透過心率百分比（%HRmax）推算目前攝氧量百分比，再結合配速反推最大攝氧量。",
+            "note": "注：心率估算易受環境溫度、地形同身體狀態影響，建議關注長期趨勢而唔係單次數值。"
+          }
+        }
+      },
+      "atl": {
+        "title": "疲勞（ATL）",
+        "description": "疲勞度",
+        "details": "短期訓練負荷（Fatigue），反映過去 7 日平均訓練壓力。",
+        "guide": {
+          "what": "咩係 ATL（疲勞度）？",
+          "whatContent": "ATL（Acute Training Load）係過去 7 日訓練壓力嘅指數加權平均，反映你而家嘅疲勞程度。",
+          "use": "點樣用？",
+          "useContent": "ATL 上升代表近期訓練強度大，身體處於疲勞累積期。賽前應適當降低 ATL 以減少疲勞、提升狀態（TSB）。",
+          "reference": "參考範圍",
+          "referenceContent": "視乎個人體能，通常唔應長期顯著高於 CTL。",
+          "source": "來源：TrainingPeaks / Joe Friel"
+        }
+      },
+      "ctl": {
+        "title": "體能（CTL）",
+        "description": "體能",
+        "details": "長期訓練負荷（Fitness），反映過去 42 日平均訓練壓力。",
+        "guide": {
+          "what": "咩係 CTL（體能）？",
+          "whatContent": "CTL（Chronic Training Load）係過去 42 日（6 週）訓練壓力嘅指數加權平均，代表你而家嘅體能基礎。",
+          "use": "點樣用？",
+          "useContent": "CTL 越高代表體能越好，能承受更大訓練量。建立 CTL 需要時間，應循序漸進，避免因增加過快而受傷。",
+          "reference": "參考範圍",
+          "referenceContent": "入門（20–40）、進階（40–70）、精英（>100）",
+          "source": "來源：TrainingPeaks / Joe Friel"
+        }
+      },
+      "tsb": {
+        "title": "狀態（TSB）",
+        "description": "狀態",
+        "details": "訓練壓力平衡（Form）：狀態 = 體能 − 疲勞，反映身體清新度或疲勞度。",
+        "status": {
+          "peak": "巔峰狀態（+15 ~ +25）",
+          "fresh": "清新狀態（+5 ~ +15）",
+          "optimal": "最佳訓練（-10 ~ -30）",
+          "highRisk": "高風險（< -30）",
+          "neutral": "中性（-10 ~ +5）",
+          "transition": "過渡期（> +25）"
+        },
+        "guide": {
+          "what": "咩係 TSB（狀態）？",
+          "whatContent": "TSB（Training Stress Balance）係體能（CTL）同疲勞（ATL）嘅差值，反映你而家嘅競技狀態。",
+          "use": "點樣用？",
+          "useContent": "正值代表身體清新、適合比賽；負值代表疲勞、適合累積訓練。賽前減量（Taper）嘅目標係令 TSB 回升到正值。",
+          "reference": "參考範圍",
+          "referenceContent": "巔峰區：+15 ~ +25；清新區：+5 ~ +15；過渡區：-10 ~ +5；最佳訓練區：-30 ~ -10；風險區：< -30",
+          "source": "來源：TrainingPeaks / Joe Friel"
+        }
+      },
+      "acRatio": {
+        "title": "A:C 比率",
+        "description": "最佳",
+        "details": "短期與長期負荷比率，衡量訓練負荷激增風險。最佳範圍：0.8 – 1.3。",
+        "guide": {
+          "what": "咩係 A:C Ratio？",
+          "whatContent": "A:C Ratio（Acute:Chronic Workload Ratio）係短期負荷（ATL）與長期負荷（CTL）嘅比值，用嚟評估受傷風險。",
+          "use": "點樣用？",
+          "useContent": "維持喺 0.8 – 1.3 之間係最佳「甜點」，受傷風險最低且體能有效提升。超過 1.5 會顯著增加受傷風險。",
+          "reference": "參考範圍",
+          "referenceContent": "最佳：0.8 – 1.3；高風險：> 1.5",
+          "source": "來源：Tim Gabbett"
+        },
+        "status": {
+          "low": "訓練不足（<0.8）",
+          "optimal": "最佳區間（0.8–1.3）",
+          "high": "負荷過高（1.3–1.5）",
+          "danger": "極高風險（>1.5）"
+        }
+      },
+      "monotony": {
+        "title": "單調性",
+        "description": "低風險",
+        "details": "訓練變異性指標（範圍約 0.29–1.0）。低單調性（< 0.6）代表訓練變化豐富；高單調性（> 0.8）可能增加過度訓練風險。",
+        "guide": {
+          "what": "咩係單調性？",
+          "whatContent": "單調性（Monotony）= 平均每日負荷 ÷ 負荷標準差，衡量訓練嘅單一程度；如果每日強度都一樣，單調性就高。",
+          "use": "點樣用？",
+          "useContent": "低單調性（< 0.6）代表訓練有張有弛（輕鬆日同強度日交替），有利恢復。高單調性（> 0.8）容易導致過度訓練同倦怠。",
+          "reference": "參考範圍",
+          "referenceContent": "健康：< 0.6；中等：0.6 – 0.8；高風險：> 0.8",
+          "source": "來源：Carl Foster"
+        },
+        "status": {
+          "low": "健康（<0.6）",
+          "moderate": "中等（0.6–0.8）",
+          "high": "高風險（>0.8）"
+        }
+      },
+      "intensity": {
+        "title": "訓練壓力",
+        "description": "負荷指標",
+        "details": "訓練壓力（Training Strain）= 總訓練負荷 × 單調性 ÷ 0.5，反映近期訓練負荷對身體造成嘅綜合壓力。",
+        "guide": {
+          "what": "咩係訓練壓力？",
+          "whatContent": "訓練壓力（Training Strain）= 總週負荷 × 單調性，反映高負荷但缺乏變化時對身體造成嘅綜合壓力。",
+          "use": "點樣用？",
+          "useContent": "即使總負荷好高，如果單調性低（有休息日），壓力仍可控。反之，持續中等強度（垃圾跑量）會導致高壓力。",
+          "reference": "參考範圍",
+          "referenceContent": "< 600（低）、600–1000（適中）、> 1000（高）",
+          "source": "來源：Carl Foster"
+        },
+        "status": {
+          "low": "低負荷",
+          "optimal": "適中負荷",
+          "high": "高負荷"
+        }
+      },
+      "restDays": {
+        "title": "建議休息",
+        "description": "達到 TSB=0",
+        "details": "要達到平衡訓練負荷（即 TSB=0）預計需要嘅休息日數；若目前狀態良好則可能唔需要休息。",
+        "unit": "日"
+      },
+      "ftp": {
+        "title": "FTP",
+        "description": "閾值功率",
+        "details": "功能性閾值功率（FTP）係你理論上可以持續約 1 小時嘅最大平均功率。"
+      },
+      "cp": {
+        "title": "CP",
+        "description": "臨界功率",
+        "details": "臨界功率（CP）係衡量耐力功率水平嘅重要指標，常用於訓練區間劃分同負荷分析。"
+      },
+      "pMax": {
+        "title": "PMax",
+        "description": "最大功率",
+        "details": "最大瞬時功率（PMax）反映你嘅爆發力同短時輸出能力。"
+      },
+      "tp": {
+        "title": "TP",
+        "description": "閾值配速",
+        "details": "閾值配速（TP）反映你嘅閾值跑能力水平，常用於設定訓練配速區間。",
+        "unit": "/km"
+      },
+      "cs": {
+        "title": "CS",
+        "description": "臨界配速",
+        "details": "臨界配速（CS）係衡量有氧能力同耐力跑表現嘅重要指標，常用於設定配速區間。",
+        "unit": "/km"
+      },
+      "maxHr": {
+        "title": "MAX_HR",
+        "description": "最大心率",
+        "details": "最大心率（Max HR）用於心率區間劃分同強度分析。",
+        "unit": "bpm"
+      },
+      "restingHr": {
+        "title": "RESTING_HR",
+        "description": "靜息心率",
+        "details": "靜息心率（Rest HR）常用於心率儲備（HRR）同 TRIMP 等訓練負荷計算。",
+        "unit": "bpm"
+      },
+      "lthr": {
+        "title": "LTHR",
+        "description": "乳酸閾值心率",
+        "details": "乳酸閾值心率（LTHR）常用於心率訓練區間劃分同耐力強度評估。",
+        "unit": "bpm"
+      },
+      "weekPressure": {
+        "title": "週壓力",
+        "description": "訓練壓力",
+        "details": "本週累計訓練壓力（通常為 TSS／TRIMP 等綜合負荷）。",
+        "unit": "TSS"
+      },
+      "weekCount": {
+        "title": "週次數",
+        "description": "訓練次數",
+        "details": "本週訓練次數（活動數量）。"
+      },
+      "weekDuration": {
+        "title": "週時長",
+        "description": "總時長",
+        "details": "本週總訓練時長。"
+      },
+      "weekDistance": {
+        "title": "週距離",
+        "description": "總距離",
+        "details": "本週總訓練距離。"
+      },
+      "weekSpeed": {
+        "title": "週速度",
+        "description": "平均速度",
+        "details": "本週平均速度（按活動匯總）。"
+      },
+      "weekPower": {
+        "title": "週功率",
+        "description": "平均功率",
+        "details": "本週平均功率（按活動匯總）。"
+      },
+      "weekHeartRate": {
+        "title": "週心率",
+        "description": "平均心率",
+        "details": "本週平均心率（按活動匯總）。"
+      },
+      "weekClimb": {
+        "title": "週爬升",
+        "description": "爬升",
+        "details": "本週累計爬升。"
+      },
+      "weekCalories": {
+        "title": "週能量",
+        "description": "能量消耗",
+        "details": "本週累計能量消耗。"
+      },
+      "paceZones": {
+        "title": "Pace zones",
+        "description": "Current running threshold pace and training zones",
+        "details": "Pace zones are calculated from your current training profile.",
+        "noData": "No threshold pace is available yet. Complete a run with valid distance and time data.",
+        "dependency": "Current threshold pace (TP) is {pace} {unit}. Pace zones that depend on TP are recalculated when TP changes."
+      }
+    }
+  },
+  "bestDistance": {
+    "title": "最佳距離",
+    "byDistance": "按距離",
+    "byTime": "按時間",
+    "rank": "排名",
+    "timeRange": "時間範圍",
+    "distance": "距離",
+    "allTimeBest": "{distance} 歷史最佳",
+    "viewActivity": "查看活動",
+    "period": "時間段",
+    "time": "用時",
+    "pace": "配速",
+    "date": "日期",
+    "activity": "活動",
+    "best": "最佳",
+    "details": "詳情",
+    "noRecords": "未搵到 {distance} 嘅紀錄",
+    "loading": "載入中…",
+    "selectDistance": "揀距離以查看表現",
+    "allTime": "全部時間",
+    "noDistances": "無可用距離",
+    "selectDistances": "揀距離",
+    "selected": "已揀",
+    "distances": {
+      "halfMarathon": "半程馬拉松",
+      "marathon": "全程馬拉松",
+      "cooperTest": "12 分鐘跑",
+      "ftp20": "20 分鐘 FTP",
+      "ftp60": "60 分鐘 FTP",
+      "1min": "1 分鐘",
+      "5min": "5 分鐘",
+      "20min": "20 分鐘",
+      "30min": "30 分鐘",
+      "1hour": "1 小時",
+      "2hour": "2 小時",
+      "3hour": "3 小時",
+      "5hour": "5 小時",
+      "8hour": "8 小時"
+    }
+  },
+  "dateSelector": {
+    "day": "日",
+    "week": "週",
+    "month": "月",
+    "year": "年",
+    "addTime": "新增時間",
+    "confirm": "確定",
+    "selectedCount": "已揀 {count} 個",
+    "maxTimeRangesWarning": "最多只能揀 5 個時間段",
+    "minTimeRangesWarning": "至少要保留一個時間選項",
+    "last7Days": "最近 7 日",
+    "last14Days": "最近 14 日",
+    "last30Days": "近 30 天",
+    "last60Days": "近 60 天",
+    "last90Days": "近 90 天",
+    "today": "今日",
+    "thisWeek": "本週",
+    "thisMonth": "本月",
+    "thisYear": "今年",
+    "lastYear": "去年",
+    "allTime": "全部時間",
+    "customRange": "自訂範圍"
+  },
+  "MobileAnalytics": {
+    "tabs": {
+      "navigationLabel": "分析視圖",
+      "curve": "曲線",
+      "maximum": "尖峰",
+      "zones": "區間",
+      "profile": "畫像"
+    }
+  },
+  "activityFilter": {
+    "all": "全部",
+    "allTypes": "全部類型",
+    "run": "跑步",
+    "cycling": "單車",
+    "swim": "游泳"
+  },
+  "sportType": {
+    "run": "跑步",
+    "cycling": "單車",
+    "swim": "游泳",
+    "unknown": "未知",
+    "confirmTitle": "確認運動類型",
+    "confirmDescription": "檔案上載成功！請確認或修改以下活動嘅運動類型。",
+    "skip": "略過",
+    "confirm": "確認設定",
+    "setting": "設定中…",
+    "confirmed": "運動類型設定成功",
+    "confirmationFailed": "運動類型設定失敗"
+  },
+  "activityDetails": {
+    "duration": "持續時間",
+    "distance": "距離",
+    "avgSpeed": "平均速度",
+    "editSportType": "編輯運動類型",
+    "sportTypeUpdated": "運動類型已更新",
+    "sportTypeUpdateFailed": "未能更新運動類型"
+  },
+  "topBar": {
+    "account": "帳戶",
+    "bestDistance": "最佳距離",
+    "notifications": "通知",
+    "tools": "訓練工具",
+    "signOut": "登出"
+  },
+  "settings": {
+    "settings": "設定",
+    "description": "管理你嘅應用程式偏好設定同單位",
+    "units": "單位",
+    "application": "應用程式",
+    "language": "語言",
+    "languageDescription": "切換應用顯示語言",
+    "unitSystem": "系統單位",
+    "unitSystemDescription": "揀用英制或公制作為預設單位",
+    "metric": "公制",
+    "imperial": "英制",
+    "distanceUnit": "距離單位",
+    "distanceUnitDescription": "揀用嚟顯示距離嘅單位",
+    "speedUnit": "速度單位",
+    "speedUnitDescription": "揀用嚟顯示速度嘅單位",
+    "powerUnit": "功率單位",
+    "powerUnitDescription": "揀用嚟顯示功率嘅單位",
+    "theme": "主題",
+    "themeDescription": "揀應用程式嘅外觀主題",
+    "chartXaxis": "圖表預設 X 軸",
+    "chartXaxisDescription": "揀圖表預設用距離或時間作為 X 軸",
+    "timeFormat": "時間格式",
+    "timeFormatDescription": "揀應用程式中時鐘時間嘅顯示方式",
+    "meters": "m",
+    "kilometers": "km",
+    "miles": "mile",
+    "kilometersPerHour": "km/h",
+    "milesPerHour": "mile/h",
+    "metersPerSecond": "m/s",
+    "watts": "W",
+    "wattsPerKilogram": "W/kg",
+    "light": "淺色",
+    "dark": "深色",
+    "system": "跟隨系統",
+    "selectUnitSystem": "揀單位系統",
+    "selectDistanceUnit": "揀距離單位",
+    "selectSpeedUnit": "揀速度單位",
+    "selectPowerUnit": "揀功率單位",
+    "selectTheme": "揀主題",
+    "selectLanguage": "揀語言",
+    "selectChartXaxis": "揀圖表預設 X 軸",
+    "selectTimeFormat": "揀時間格式",
+    "chartXaxisDistance": "距離",
+    "chartXaxisTime": "時間",
+    "timeFormat24h": "24 小時制",
+    "timeFormat12h": "12 小時制 AM/PM",
+    "update": "更新",
+    "updating": "更新中",
+    "unitSystemUpdated": "單位系統已更新",
+    "distanceUnitUpdated": "距離單位已更新",
+    "speedUnitUpdated": "速度單位已更新",
+    "powerUnitUpdated": "功率單位已更新",
+    "themeUpdated": "主題已更新",
+    "chartXaxisUpdated": "圖表預設 X 軸已更新",
+    "settingsUpdated": "設定已更新",
+    "failedToUpdateUnitSystem": "未能更新單位系統",
+    "failedToUpdateDistanceUnit": "未能更新距離單位",
+    "failedToUpdateSpeedUnit": "未能更新速度單位",
+    "failedToUpdatePowerUnit": "未能更新功率單位",
+    "failedToUpdateTheme": "未能更新主題",
+    "failedToUpdateChartXaxis": "未能更新圖表預設 X 軸",
+    "failedToUpdateSettings": "未能更新設定"
+  },
+  "PMC": {
+    "title": "Trainingload.ai · 體能管理",
+    "pmcAnalysis": "PMC 分析",
+    "header": {
+      "eyebrow": "指標",
+      "description": "用體能、疲勞同狀態判斷訓練負荷同恢復節奏。"
+    },
+    "performanceManagementChart": "Performance Management Chart · 體能管理圖表分析",
+    "calculate": "重新計算",
+    "recalculate": "重新計算",
+    "calculating": "計算中…",
+    "calculationComplete": "PMC 數據計算完成，共生成 {count} 個數據點",
+    "calculationFailed": "計算 PMC 數據失敗，請稍後再試",
+    "totalDataPoints": "總數據點",
+    "startDate": "開始日期",
+    "endDate": "結束日期",
+    "combinedAnalysis": "PMC 綜合分析",
+    "combinedDescription": "體能、疲勞同狀態嘅綜合趨勢",
+    "metricsExplanation": "PMC 指標說明",
+    "abbr": {
+      "fitness": "CTL",
+      "fatigue": "ATL",
+      "form": "TSB"
+    },
+    "zoneHelp": {
+      "ariaLabel": "狀態分區說明",
+      "title": "狀態分區說明",
+      "danger": "高風險區（紅色）：狀態 < -30。受傷／過度訓練風險高，避免高強度。",
+      "optimal": "最佳訓練區（綠色）：-30 ≤ 狀態 < -10。適合高質素訓練同負荷進階。",
+      "neutral": "中性區（灰色）：-10 ≤ 狀態 < +5。維持性訓練，恢復同負荷平衡。",
+      "fresh": "新鮮區（藍色）：+5 ≤ 狀態 < +15。狀態新鮮，適合次要比賽或強度測試。",
+      "peak": "巔峰區（紫色）：+15 ≤ 狀態 < +25。比賽黃金窗口，狀態最佳。",
+      "transition": "過渡區（橙色）：狀態 ≥ +25。賽季結束／傷病恢復期，訓練極少、非常安全但體能較低。"
+    },
+    "acmpHelp": {
+      "title": "ACMP（疲勞／體能）說明",
+      "formula": "ACMP = 疲勞 / 體能。",
+      "sweet": "甜區（綠色）：0.8 – 1.3。訓練負荷合理，受傷風險較低。",
+      "danger": "危險區（紅色）：≥ 1.5。負荷躍升過快，受傷風險較高。",
+      "advice": "建議將 ACMP 控制喺 0.8 – 1.3 範圍以降低風險。唔同項目嘅負荷–傷病關係可能唔同，需結合自身情況謹慎應用。"
+    },
+    "fitness": {
+      "title": "體能",
+      "description": "每日訓練負荷嘅 42 日指數平均，用嚟建模較長期負荷，唔直接量度體能或適應。"
+    },
+    "fatigue": {
+      "title": "疲勞",
+      "description": "每日訓練負荷嘅 7 日指數平均，用嚟建模近期負荷，唔直接量度疲勞。"
+    },
+    "form": {
+      "title": "狀態",
+      "description": "當日體能減去當日疲勞，用嚟描述模型化負荷平衡，唔直接量度準備度、恢復或健康。"
+    },
+    "load": {
+      "title": "訓練負荷"
+    },
+    "noData": "暫無數據",
+    "fitnessChart": "體能圖表",
+    "fatigueChart": "疲勞圖表",
+    "formChart": "狀態圖表"
+  },
+  "AIAnalysis": {
+    "generated": "內容由 AI 生成",
+    "analyzing": "正在分析活動數據…",
+    "description": "根據本次活動的結構化資料生成訓練解讀。",
+    "analysisFailed": "分析失敗，請稍後再試",
+    "noAnalysisData": "暫無分析數據",
+    "aiCoach": "AI 教練",
+    "expand": "展開",
+    "aiDetailedAnalysis": "AI 詳細分析",
+    "useCache": "使用快取",
+    "regenerate": "重新解讀",
+    "emptyHint": "暫無教練復盤。",
+    "standardMode": "標準模式",
+    "deepMode": "深度推理",
+    "modelPurposeHint": "為本次請求選擇預設模型或服務商提供的推理模型。"
+  },
+  "Calendar": {
+    "page": {
+      "title": "Trainingload.ai · 日曆"
+    }
+  },
+  "CalendarHeader": {
+    "addButton": "新增",
+    "plan": "計劃",
+    "prevMonth": "上一個月",
+    "today": "今日",
+    "nextMonth": "下一個月",
+    "calendarLabel": "日曆",
+    "viewByDay": "按日查看",
+    "viewByWeek": "按週查看",
+    "viewByMonth": "按月查看",
+    "viewByYear": "按年查看",
+    "weekMode": "週視圖",
+    "monthMode": "月視圖",
+    "calendarSubscriptionButton": "訂閱",
+    "calendarSubscriptionTitle": "訂閱訓練計劃",
+    "calendarSubscriptionDescription": "把目前訓練計劃同步到 Mac、iOS 或其他日曆。",
+    "calendarSubscriptionOpen": "打開",
+    "calendarSubscriptionCopy": "複製",
+    "calendarSubscriptionCopied": "訂閱連結已複製",
+    "calendarSubscriptionReset": "重置訂閱連結",
+    "calendarSubscriptionResetDone": "訂閱連結已重置",
+    "aiSubmitted": "生成請求已提交",
+    "aiSubmitFailed": "生成請求提交失敗"
+  },
+  "CalendarSettings": {
+    "title": "日曆設定",
+    "useDarkMode": "使用深色模式",
+    "useDotBadge": "使用圓點徽章",
+    "use24HourFormat": "使用 24 小時制",
+    "defaultView": "預設視圖",
+    "agendaViewGroupBy": "議程視圖分組方式",
+    "view": {
+      "day": "日",
+      "week": "週",
+      "month": "月",
+      "year": "年",
+      "agenda": "議程"
+    },
+    "groupBy": {
+      "date": "日期",
+      "color": "顏色"
+    }
+  },
+  "CalendarViews": {
+    "yearUnavailable": "較小裝置暫時唔支援年視圖。",
+    "weekUnavailable": "較小裝置暫時唔支援週視圖。",
+    "switchToDayOrMonth": "請切換到日視圖或月視圖。"
+  },
+  "CalendarDialogs": {
+    "more": "更多...",
+    "eventsOn": "{date} 嘅事件",
+    "noEventsForDate": "呢一日冇事件。",
+    "deleteSuccess": "事件已成功刪除。",
+    "deleteError": "刪除事件失敗。",
+    "delete": "刪除",
+    "deleteTitle": "確定要刪除嗎？",
+    "deleteDescription": "此操作無法復原。刪除後，該事件及相關資料會被永久移除。",
+    "cancel": "取消",
+    "continue": "繼續",
+    "editEvent": "編輯事件",
+    "addEvent": "新增事件",
+    "editEventDescription": "修改現有事件。",
+    "addEventDescription": "為你嘅日曆建立一個新事件。",
+    "title": "標題",
+    "enterTitle": "請輸入標題",
+    "variant": "樣式",
+    "selectVariant": "請選擇樣式",
+    "description": "描述",
+    "enterDescription": "請輸入描述",
+    "saveChanges": "儲存變更",
+    "createEvent": "建立事件",
+    "eventUpdated": "事件更新成功",
+    "eventCreated": "事件建立成功",
+    "eventSaveFailed": "儲存事件失敗",
+    "responsible": "負責人",
+    "startDate": "開始時間",
+    "endDate": "結束時間",
+    "multiDayProgress": "第 {currentDay} 日 / 共 {totalDays} 日",
+    "at": "於",
+    "edit": "編輯"
+  },
+  "AgendaEvents": {
+    "searchPlaceholder": "輸入指令或搜尋...",
+    "noResults": "搵唔到結果。",
+    "at": "於"
+  },
+  "CalendarGrid": {
+    "weekSummary": "週摘要"
+  },
+  "MonthYearPicker": {
+    "selectYear": "揀年份"
+  },
+  "DayCell": {
+    "planTitle": "計劃訓練",
+    "activity": "活動",
+    "distance": "距離",
+    "duration": "時長",
+    "moreTraining": "訓練"
+  },
+  "CalendarExperience": {
+    "weekStripLabel": "本週",
+    "monthOverview": "月曆概覽",
+    "selectedDay": "當天詳情",
+    "agendaLabel": "當天安排",
+    "weeklySnapshot": "本週概覽",
+    "trainingTab": "訓練",
+    "activityTab": "活動",
+    "activityCountShort": "次",
+    "loadLabel": "負荷",
+    "plannedBadge": "計劃",
+    "moreActivities": "個活動",
+    "activitiesCount": "個活動",
+    "plannedTraining": "計劃訓練",
+    "openPlan": "查看訓練",
+    "noPlannedTraining": "呢一日仲未有計劃訓練。",
+    "activitiesTitle": "已完成活動",
+    "noActivities": "呢一日仲未有活動紀錄。",
+    "vsLastWeekFlat": "同上週持平",
+    "vsLastWeekUp": "高於上週",
+    "vsLastWeekDown": "低於上週",
+    "weekModeLabel": "本週聚焦",
+    "monthModeLabel": "月曆概覽",
+    "swipeHint": "左右滑動切換",
+    "planProgressTitle": "計劃進度",
+    "planProgressDescription": "當前週期 · {start} - {end}",
+    "monthOverviewDescription": "{month} · 當前可見月份",
+    "comparisonLabelPlan": "較計劃前等長週期",
+    "comparisonLabelMonth": "較上月",
+    "summaryScope": {
+      "plan": "計劃",
+      "month": "本月"
+    },
+    "delta": {
+      "flat": "持平",
+      "up": "增加",
+      "down": "減少"
+    },
+    "sportLabels": {
+      "run": "跑步",
+      "cycling": "單車",
+      "swim": "游泳",
+      "strength": "力量",
+      "other": "其他"
+    },
+    "sportTrainingName": "{sport}訓練",
+    "selectedDateLabel": "已選日期",
+    "viewDay": "查看當日",
+    "planCycleLabel": "計畫週期",
+    "planWorkoutCount": "{count} 個訓練"
+  },
+  "NewUserDialog": {
+    "title": "首次使用設定",
+    "description": "完成以下 3 步以獲得更準確嘅分析。",
+    "steps": {
+      "step1Label": "揀偏好運動",
+      "step2Label": "設定心率",
+      "step3Label": "設定 FTP 等"
+    },
+    "selectPreferredSports": "揀你偏好嘅運動（可多選）",
+    "selected": "已揀",
+    "sportOptions": {
+      "cycling": "單車",
+      "run": "跑步",
+      "swim": "游泳"
+    },
+    "settings": {
+      "hintAdjust": "你可以隨時喺「用戶設定 · 個人資料」調整偏好運動。"
+    },
+    "buttons": {
+      "skip": "略過",
+      "next": "下一步",
+      "back": "上一步",
+      "finish": "完成",
+      "applyEstimate": "套用估算值"
+    },
+    "step2": {
+      "title": "設定心率參數"
+    },
+    "step3": {
+      "title": "設定 FTP 等參數"
+    },
+    "inputs": {
+      "maxHR": {
+        "label": "最大心率（bpm）",
+        "placeholder": "例如 190"
+      },
+      "restHR": {
+        "label": "靜息心率（bpm）",
+        "placeholder": "例如 60"
+      },
+      "age": {
+        "label": "年齡（歲）"
+      },
+      "estimatedMaxHR": {
+        "label": "估算最大心率（bpm）"
+      },
+      "estimatedRestHR": {
+        "label": "估算靜息心率（bpm）"
+      },
+      "runftp": {
+        "label": "跑步 FTP（W）",
+        "placeholder": "例如 255"
+      },
+      "cyclingftp": {
+        "label": "單車 FTP（W）",
+        "placeholder": "例如 255"
+      },
+      "weight": {
+        "label": "體重（kg，可選）",
+        "placeholder": "例如 70"
+      }
+    },
+    "hint": {
+      "hrRanges": "建議：最大心率通常喺 150–210 之間；靜息心率通常喺 45–75 之間。",
+      "otherSports": "若主要跑步或游泳，可稍後喺「設定 · 個人資料」補充閾值資訊。"
+    },
+    "quickEstimate": {
+      "title": "快速估算（輸入年齡）",
+      "badge": "參考值"
+    },
+    "info": {
+      "description": "以上估算僅供參考。若需更準確嘅個人閾值，請實測最大心率同靜息心率，並喺「用戶設定 · 個人資料」更新為測量值。"
+    }
+  },
+  "AiDataConsent": {
+    "title": "與 AI 分享資料",
+    "summary": "請選擇是否允許 Trainingload.ai 將指定資料傳送給 AI 服務商。",
+    "recipientLabel": "資料接收方",
+    "recipientUnknown": "目前設定的 AI 服務商",
+    "dataLabel": "傳送的資料",
+    "dataValue": "你的提問和主動提交的語音轉寫文字；以及移除直接帳號識別資訊、僅與目前請求相關的訓練摘要，例如運動類型、時長、距離與爬升、心率彙總及區間、配速、功率、踏頻、訓練負荷、恢復趨勢、目標、計畫和相關設定。不會傳送完整 GPS 軌跡或 HealthKit 原始樣本。",
+    "purposeLabel": "處理目的",
+    "purposeValue": "產生個人化教練建議、訓練計畫和自動訓練回顧。對話中的部分資訊也可能被擷取為跨對話記憶，並用於未來對話或狀態評估。服務商會處理這些資料並傳回 AI 結果。",
+    "processingLabel": "服務商處理方式與地點",
+    "processingValue": "DeepSeek 會處理請求及生成的回覆以提供 AI 功能，並可能在中國大陸處理或儲存這些資料。其公開條款允許在嚴格去識別且無法識別個人的前提下，有限使用輸入和輸出以營運、開發或改進服務。請勿在提問中填寫姓名、聯絡方式或其他可識別個人的資訊。",
+    "protectionLabel": "儲存與保護",
+    "protectionValue": "Trainingload.ai 會在你的帳號中保存主動提交的提問和 AI 結果，方便之後查看。請求採用傳輸加密。你可以查看、修改或刪除已保存的記憶，也可以關閉記憶功能；關閉後不再寫入或讀取新記憶，已有記憶會保留到你將其刪除。我們要求接收使用者資料的第三方提供與本隱私政策所述相同或同等級別的保護。具體保留與刪除規則請查看隱私政策。",
+    "choice": "此項為選擇性。拒絕後仍可使用非 AI 功能；你可以隨時在行動版或 Web 的「隱私與 AI」中撤回同意。我們不會將這些資料用於廣告。",
+    "accept": "同意並啟用 AI",
+    "decline": "暫不啟用",
+    "settingsTitle": "隱私與 AI",
+    "toggleTitle": "AI 資料分享",
+    "settingsHint": "同意紀錄與列出的服務商和政策版本綁定；服務商或政策有重大變更時，需要重新取得你的同意。",
+    "enabled": "已允許傳送給 {recipient}",
+    "decidedAt": "選擇記錄時間：{date}",
+    "disabled": "已關閉，不會向 AI 服務商傳送新資料",
+    "privacyPolicy": "查看隱私權政策",
+    "reviewAction": "查看分享說明",
+    "error": "無法儲存你的選擇，請檢查網路後再試一次。"
+  },
+  "OnboardingPage": {
+    "hero": {
+      "badge": "新手引導",
+      "title": "開始使用 Trainingload.ai",
+      "subtitle": "用幾項基礎資料，令訓練計劃同複盤更適合你。",
+      "promise": "約 3 分鐘"
+    },
+    "setupHint": "呢啲設定之後都可以喺個人資料修改。",
+    "intro": {
+      "badge": "訓練由呢度開始",
+      "title": "先完成基礎設定，之後每次訓練都有依據。",
+      "subtitle": "選擇運動、補充基礎資料，再導入一條活動。我哋會用呢啲資料生成訓練負荷、強度區間同複盤內容，幫你執行計劃、睇明完成情況，並決定下一次點練。",
+      "features": {
+        "load": {
+          "title": "訓練負荷",
+          "description": "了解最近練咗幾多，恢復係咪跟得上。"
+        },
+        "zones": {
+          "title": "強度區間",
+          "description": "用心率、功率或配速分辨輕鬆、節奏同高強度。"
+        },
+        "thresholds": {
+          "title": "個人基準",
+          "description": "可選填 FTP、最大心率等，令分析更準。"
+        },
+        "ai": {
+          "title": "訓練複盤",
+          "description": "對比計劃同完成情況，俾出清楚反饋。"
+        },
+        "import": {
+          "title": "活動導入",
+          "description": "上載文件或連接平台，匯總你嘅訓練記錄。"
+        },
+        "plan": {
+          "title": "計劃跟進",
+          "description": "用真實完成情況調整後續訓練安排。"
+        }
+      }
+    },
+    "displayUnits": {
+      "eyebrow": "顯示與單位",
+      "title": "設定系統級單位。",
+      "subtitle": "先選擇全域使用的單位和時間格式，再填寫身體與訓練數值。",
+      "timezoneHint": "時區：{timezone} · 已自動讀取帳戶資料或瀏覽器設定。"
+    },
+    "progress": {
+      "title": "設定進度",
+      "count": "第 {current} / {total} 步",
+      "steps": {
+        "1": "概覽",
+        "2": "運動",
+        "3": "顯示與單位",
+        "4": "個人資料",
+        "5": "心率",
+        "6": "閾值",
+        "7": "導入",
+        "8": "AI 資料分享"
+      }
+    },
+    "step1": {
+      "eyebrow": "選擇運動",
+      "title": "你平時主要練咩？",
+      "subtitle": "選擇後，我哋會優先顯示相關指標。可以多選，之後亦可以修改。",
+      "sports": {
+        "RUN": {
+          "title": "跑步",
+          "description": "關注配速、心率、負荷同跑步能力變化。"
+        },
+        "CYCLING": {
+          "title": "單車",
+          "description": "關注功率、FTP、心率同單車負荷。"
+        },
+        "SWIM": {
+          "title": "游泳",
+          "description": "記錄游泳訓練，並同跑步、單車一齊查看。"
+        },
+        "STRENGTH": {
+          "title": "力量訓練",
+          "description": "規劃並記錄動作、組數、次數、重量和訓練強度。"
+        }
+      }
+    },
+    "step2": {
+      "eyebrow": "個人資料",
+      "title": "填寫幾項基礎資料。",
+      "subtitle": "出生年月、體重和身高會用於心率估算與身體相關指標；時區已自動偵測。"
+    },
+    "step3": {
+      "eyebrow": "心率",
+      "title": "設定心率範圍。",
+      "subtitle": "最大心率同靜息心率用於劃分強度區間。不確定都冇問題，可以先用估算值。",
+      "estimate": {
+        "title": "按出生年月估算",
+        "empty": "填寫出生年月後，可以生成一個參考值。",
+        "ready": "估算最大心率：{max} bpm · 靜息心率：{rest} bpm"
+      }
+    },
+    "step4": {
+      "eyebrow": "閾值",
+      "title": "知道閾值嘅話，可以填上。",
+      "subtitle": "呢一步可以跳過。FTP 等閾值會令負荷同強度分析更準，之後亦可以隨時補充。",
+      "swimOnly": "目前所選運動不需要填寫跑步或單車功率閾值。"
+    },
+    "step5": {
+      "eyebrow": "導入活動",
+      "title": "將第一條訓練帶入嚟。",
+      "subtitle": "上載一個 FIT / TCX / GPX 文件，或連接常用平台。導入後，你就可以睇到訓練分析同複盤。",
+      "uploadMethod": {
+        "title": "上載文件",
+        "description": "適合手上已經有訓練文件嘅情況。"
+      },
+      "platforms": {
+        "title": "連接平台",
+        "description": "連接你常用嘅訓練平台，後續活動可以自動同步。"
+      },
+      "upload": {
+        "title": "上載活動文件",
+        "description": "支援 FIT、TCX 同 GPX。處理完成後會更新訓練分析。",
+        "button": "上載文件"
+      },
+      "providers": {
+        "intervals_icu": {
+          "title": "綁定 Intervals.icu",
+          "description": "使用 OAuth 同步活動記錄和每日訓練資料。",
+          "apiKeyDescription": "填寫個人 API Key，按需要同步活動、計劃課同訓練資料。"
+        }
+      },
+      "connect": "綁定",
+      "connecting": "綁定中…",
+      "connected": "已綁定",
+      "oauthConnected": "Intervals.icu 已綁定",
+      "oauthFailed": "Intervals.icu 授權失敗",
+      "error": "綁定失敗"
+    },
+    "fields": {
+      "birthMonth": {
+        "label": "出生年月",
+        "placeholder": "選擇年份和月份",
+        "help": "用於計算年齡並估算初始心率範圍。"
+      },
+      "weight": {
+        "label": "體重",
+        "placeholder": "例如 70",
+        "help": "可選。用於計算功率體重比等指標。"
+      },
+      "height": {
+        "label": "身高",
+        "placeholder": "例如 175",
+        "help": "可選。用於身體與訓練相關指標。"
+      },
+      "timezone": {
+        "label": "時區",
+        "placeholder": "搜尋城市、地區或 UTC+8",
+        "help": "已自動檢測。訓練日期不對時可以調整。",
+        "empty": "沒有找到匹配嘅時區"
+      },
+      "maxHR": {
+        "label": "最大心率",
+        "placeholder": "例如 190",
+        "help": "唔知道可以先使用估算值。"
+      },
+      "restHR": {
+        "label": "靜息心率",
+        "placeholder": "例如 60",
+        "help": "早晨醒來後測量通常更穩定。"
+      },
+      "runFtp": {
+        "label": "跑步功率閾值",
+        "placeholder": "例如 255",
+        "help": "可選。使用跑步功率訓練時填寫。"
+      },
+      "cyclingFtp": {
+        "label": "單車 FTP",
+        "placeholder": "例如 255",
+        "help": "可選。知道 FTP 時填寫。"
+      }
+    },
+    "buttons": {
+      "getStarted": "開始設定",
+      "skipSetup": "略過設定",
+      "next": "繼續",
+      "back": "返回",
+      "toImport": "去導入活動",
+      "toAiConsent": "繼續設定 AI",
+      "uploadLater": "稍後上傳",
+      "applyEstimate": "使用估算值",
+      "finish": "開始使用"
+    },
+    "done": {
+      "toast": "設定完成"
+    },
+    "errors": {
+      "birthMonth": "請輸入有效的出生年月。",
+      "height": "請輸入有效的身高。",
+      "save": "保存失敗，請稍後再試"
+    }
+  },
+  "WelcomeDialog": {
+    "badge": {
+      "beta": "Beta"
+    },
+    "title": "歡迎使用 Trainingload.ai",
+    "description": "我哋正打磨產品體驗，感謝你參與同支持。",
+    "sections": {
+      "testVersion": {
+        "title": "測試版本提醒",
+        "desc": "目前係測試版本，數據可能遺失或不穩定，請謹慎操作並及時備份重要資料。我哋會盡力保留你嘅數據並持續優化穩定性。"
+      },
+      "free": {
+        "title": "功能免費開放",
+        "desc": "正式版發布前，所有功能均免費使用，歡迎體驗同探索。"
+      },
+      "feedback": {
+        "title": "你嘅回饋好重要",
+        "desc": "若使用時遇到問題或有建議，歡迎回饋以幫助我哋持續改進。"
+      }
+    },
+    "buttons": {
+      "start": "開始"
+    }
+  },
+  "PlanTemplateDetail": {
+    "goal": {
+      "5K": "5K",
+      "10K": "10K",
+      "HALF_MARATHON": "半馬",
+      "MARATHON": "全馬"
+    },
+    "backToGoal": "全部{goal}計畫",
+    "createDraft": "建立草稿計畫",
+    "creatingDraft": "正在建立草稿…",
+    "createDraftFailed": "無法建立草稿計畫，請檢查日期和訓練日後再試一次。",
+    "checkingAccess": "正在確認功能是否可用…",
+    "memberCoachSummary": "計畫開始後，AI 教練會綜合訓練完成情況、訓練負荷、恢復狀態和日程變化，及時提出調整建議。",
+    "officialTraining": "官方訓練",
+    "running": "跑步",
+    "personalizedPaceBadge": "目前計畫將使用你的個人化訓練配速",
+    "examplePaceBadge": "尚無可靠個人基準，目前顯示範例配速"
+  },
+  "PlanTemplateCoachReminder": {
+    "label": "教練提醒",
+    "ready": "你近期的訓練基礎符合這個計劃。",
+    "baseWarning": "開始前請先查看這項能力提醒。",
+    "caution": "你可以開始；在能力資料更完整前，訓練強度會先按 RPE 引導。",
+    "inputRequired": "目前尚無模型支援的跑步能力基準。",
+    "notReady": "目前計劃設定需要調整後才能產生。",
+    "buildBlocked": "請先處理以上事項，再產生計劃。",
+    "capabilityRequired": "請完成合適的跑步活動；系統會自動使用近期賽事、最大攝氧量/VDOT、閾值配速或臨界速度。",
+    "tenKBase": "目前最長連續跑 {actual} 分鐘，建議先達到 {required} 分鐘，或完成一次近期 5K。",
+    "halfMarathonBase": "系統記錄的最長跑是 {actual} 公里，建議先完成一次 {required} 公里再開始半馬計劃。",
+    "marathonLongRun": "系統記錄的最長跑是 {actual} 公里，建議先完成一次 {required} 公里再開始全馬計劃。",
+    "vo2MaxBelowRange": "目前最大攝氧量為 {actual}，低於配速模型支援的下限 {required}，不會用它設定訓練配速。",
+    "vo2MaxLowForDistance": "目前最大攝氧量為 {actual}，低於長距離計劃的提醒線 {required}。建議先建立短距離訓練穩定性，再依賴這個計劃。",
+    "goalNotSupported": "關聯比賽目標是 {actual}，目前能力較穩妥的目標約為 {required} 或更慢。",
+    "goalNotSupportedGeneric": "你目前的最大攝氧量暫時還不支援關聯的比賽目標。",
+    "planPeriod": "距離比賽只剩 {actual} 天，而這個計劃需要 {required} 天。",
+    "genericRequirement": "目前還有計劃准入條件尚未滿足。",
+    "personalizedPaces": "目前計畫的基準值為最大攝氧量 {value}。",
+    "rpeFallback": "目前沒有可靠的配速基準，本計畫將透過 RPE 和談話測試控制訓練強度。"
+  },
+  "CreatePlanDialog": {
+    "badge": "建立計劃",
+    "title": "建立訓練計劃",
+    "description": "請揀建立方式",
+    "options": {
+      "template": {
+        "title": "官方訓練",
+        "desc": "先選擇訓練目標，再預覽完整結構化計畫",
+        "badge": "無需 AI 對話"
+      },
+      "ai": {
+        "title": "AI 教練",
+        "desc": "進入 AI 教練，用多輪選項問答嚟生成訓練計劃",
+        "badge": "AI 教練"
+      },
+      "manual": {
+        "title": "手動建立",
+        "desc": "透過手動配置嚟建立訓練計劃"
+      }
+    },
+    "buttons": {
+      "cancel": "取消"
+    }
+  },
+  "PlanEditorBase": {
+    "title": "新建計劃",
+    "fields": {
+      "name": {
+        "label": "名稱",
+        "placeholder": "輸入計劃名稱"
+      },
+      "weeks": {
+        "label": "週期（週）"
+      },
+      "description": {
+        "label": "描述"
+      }
+    },
+    "buttons": {
+      "continue": "繼續編輯"
+    }
+  },
+  "PlanListDialog": {
+    "title": "計劃列表",
+    "badges": {
+      "active": "進行中"
+    },
+    "states": {
+      "loading": "載入中…",
+      "loadFailed": "載入失敗",
+      "empty": "暫無計劃",
+      "cannotDeleteActive": "進行中嘅計劃無法刪除"
+    },
+    "buttons": {
+      "create": "新建計劃",
+      "view": "查看",
+      "activate": "開始",
+      "deactivate": "停用",
+      "delete": "刪除",
+      "cancel": "取消"
+    },
+    "activate": {
+      "title": "揀開始日期",
+      "description": "請先揀呢份訓練計劃嘅開始日期。",
+      "confirm": "確認開始"
+    }
+  },
+  "PlanEditor": {
+    "title": {
+      "view": "查看計劃",
+      "edit": "編輯計劃"
+    },
+    "sessions": {
+      "count": "{count, plural, =0 {0 節} one {# 節} other {# 節}}",
+      "add": "新增"
+    },
+    "grid": {
+      "weekDay": "週／日",
+      "week": "第",
+      "weekLabel": "第 {week} 週"
+    },
+    "buttons": {
+      "edit": "編輯",
+      "close": "關閉",
+      "save": "儲存",
+      "saving": "儲存中…"
+    }
+  },
+  "RichTextToolbar": {
+    "alignment": {
+      "tooltip": "文字對齊",
+      "left": "靠左對齊",
+      "center": "置中",
+      "right": "靠右對齊",
+      "justify": "左右對齊"
+    },
+    "undo": "復原",
+    "redo": "重做",
+    "bold": "粗體",
+    "shortcutBold": "(⌘ + B)",
+    "italic": "斜體",
+    "shortcutItalic": "(⌘ + I)",
+    "underline": "底線",
+    "shortcutUnderline": "(⌘ + U)",
+    "strikethrough": "刪除線",
+    "shortcutStrikethrough": "(⌘ + Shift + X)",
+    "blockquote": "引言",
+    "code": "行內程式碼",
+    "codeBlock": "程式碼區塊",
+    "bulletList": "項目符號清單",
+    "orderedList": "編號清單",
+    "horizontalRule": "水平線",
+    "hardBreak": "換行",
+    "headings": {
+      "tooltip": "標題",
+      "normal": "正文",
+      "levelLabel": "H{level}"
+    },
+    "colorHighlight": {
+      "tooltip": "文字色彩與醒目提示",
+      "mobileColorGroup": "色彩",
+      "mobileHighlightGroup": "醒目提示",
+      "sectionTextColor": "色彩",
+      "sectionBackground": "背景"
+    },
+    "palette": {
+      "default": "預設",
+      "gray": "灰色",
+      "brown": "棕色",
+      "orange": "橙色",
+      "yellow": "黃色",
+      "green": "綠色",
+      "blue": "藍色",
+      "purple": "紫色",
+      "pink": "粉色",
+      "red": "紅色"
+    },
+    "link": {
+      "button": "連結",
+      "tooltip": "連結",
+      "formTitle": "連結",
+      "formDescription": "為選取的文字附加連結",
+      "remove": "移除",
+      "update": "更新",
+      "confirm": "確認",
+      "placeholder": "https://example.com"
+    }
+  },
+  "PlanCreatePage": {
+    "title": "手動建立計劃",
+    "subtitle": "按步驟完成計劃基本資訊、日期選擇同訓練編輯。",
+    "buttons": {
+      "cancel": "取消",
+      "back": "返回",
+      "savePlan": "儲存計劃",
+      "saving": "儲存中…",
+      "continueToCalendar": "繼續到日期選擇",
+      "continueToReview": "繼續核對",
+      "saveWorkout": "儲存目前訓練",
+      "addStep": "新增步驟",
+      "addRepeat": "新增重複"
+    },
+    "validation": {
+      "needWorkout": "請先新增至少一節有內容嘅訓練先至儲存。"
+    },
+    "steps": {
+      "1": {
+        "title": "新建計劃嘅基本資訊",
+        "description": "先填計劃名稱、週期同描述。"
+      },
+      "2": {
+        "title": "喺日曆揀某日",
+        "description": "喺計劃週期內點選某日，進入具體訓練設定。"
+      },
+      "3": {
+        "title": "編輯具體計劃",
+        "description": "支援規則輸入同結構化步驟編輯。"
+      },
+      "review": {
+        "title": "核對並儲存",
+        "description": "確認計劃概覽後儲存到計劃庫。"
+      }
+    },
+    "weekdays": {
+      "sun": "週日",
+      "mon": "週一",
+      "tue": "週二",
+      "wed": "週三",
+      "thu": "週四",
+      "fri": "週五",
+      "sat": "週六"
+    },
+    "baseInfo": {
+      "title": "計劃基本資訊",
+      "fields": {
+        "name": "計劃名稱",
+        "weeks": "週期（週）",
+        "description": "計劃描述"
+      },
+      "validation": {
+        "nameRequired": "請填寫計劃名稱",
+        "nameTooLong": "計劃名稱請勿超過 120 個字元",
+        "weeksMin": "週期至少為 1 週",
+        "weeksMax": "週期最多為 24 週",
+        "weeksInvalid": "請輸入 1～24 之間的整數週數",
+        "descriptionTooLong": "計劃描述最多 {max, number} 個字（按正文計）"
+      }
+    },
+    "calendarSelection": {
+      "title": "揀要編輯嘅日期",
+      "summary": "共 {weeks} 週，已配置 {count} 日訓練",
+      "hint": "先揀一個日期，再進入具體訓練編輯。之後可以隨時返嚟繼續補其他日期。",
+      "clickDay": "點任意日期即可開始設定",
+      "hoverHint": "點擊設定",
+      "weekColumn": "週次",
+      "weekLabel": "第 {week} 週",
+      "dayLabel": "{day}",
+      "filled": "已設定",
+      "emptyDay": "點擊設定當日訓練",
+      "restDay": "休息日",
+      "chooseWorkoutType": "選擇訓練類型",
+      "enduranceTypeHint": "跑步、騎車、游泳或伸展訓練。",
+      "strengthTypeHint": "依動作、組數、重量和 RPE 編排肌力訓練。",
+      "emptyDayHint": "當天還沒有安排訓練。",
+      "sessionLabel": "第 {index} 節",
+      "trainingDays": "訓練日",
+      "scheduleReview": "課表概覽"
+    },
+    "editor": {
+      "title": "編輯訓練 · 第 {week} 週 · {day}",
+      "subtitle": "先揀運動類型，再透過規則輸入或結構化步驟配置訓練。",
+      "manualTitle": "手動設定訓練結構",
+      "preview": "訓練預覽圖"
+    },
+    "cards": {
+      "step": "步驟模組",
+      "repeat": "重複模組"
+    },
+    "fields": {
+      "stepType": "步驟類型",
+      "durationType": "持續條件",
+      "durationValue": "持續值",
+      "primaryTarget": "主要目標",
+      "targetType": "Target Type",
+      "targetSource": "Target Source",
+      "targetRelation": "Target Relation",
+      "targetValue": "Target Value",
+      "secondaryTarget": "次要目標",
+      "swimIntensityTarget": "強度目標",
+      "repeatCount": "重複次數",
+      "targetValuePlaceholder": "輸入目標值",
+      "cadencePlaceholder": "輸入踏頻",
+      "zonePlaceholder": "揀分區",
+      "fromPlaceholder": "由",
+      "toPlaceholder": "到",
+      "selectPlaceholder": "請揀",
+      "swimStroke": "泳姿",
+      "swimTrainingType": "訓練類型",
+      "swimEquipment": "器材"
+    },
+    "durationKinds": {
+      "TIME": "時間",
+      "DISTANCE": "距離",
+      "OPEN": "開放",
+      "CALORIES": "熱量消耗",
+      "HR_GREATER_THAN": "心率高於",
+      "HR_LESS_THAN": "心率低於",
+      "POWER_GREATER_THAN": "功率高於",
+      "POWER_LESS_THAN": "功率低於",
+      "CADENCE_GREATER_THAN": "踏頻高於",
+      "CADENCE_LESS_THAN": "踏頻低於"
+    },
+    "stepTypes": {
+      "WARMUP": "熱身",
+      "WORK": "運動",
+      "RECOVERY": "恢復",
+      "REST": "休息",
+      "COOLDOWN": "緩和",
+      "OTHER": "其他"
+    },
+    "targets": {
+      "NONE": "無目標",
+      "SPEED": "速度",
+      "RUN_PACE": "配速",
+      "SWIM_PACE": "目標配速",
+      "CYCLING_SPEED": "速度",
+      "CADENCE": "踏頻",
+      "RUN_CADENCE": "步頻",
+      "CYCLING_CADENCE": "踏頻",
+      "HEART_RATE_ZONE": "心率區間",
+      "HEART_RATE_CUSTOM": "自訂心率",
+      "POWER_ZONE": "功率區間",
+      "POWER_CUSTOM": "自訂功率"
+    },
+    "targetTypes": {
+      "NONE": "No target",
+      "HEART_RATE": "Heart rate",
+      "POWER": "Power",
+      "PACE": "Pace",
+      "UNSUPPORTED": "Unsupported"
+    },
+    "targetSources": {
+      "BASE": "Base value",
+      "ZONE": "Zone"
+    },
+    "targetRelations": {
+      "EQUAL": "Equals",
+      "GREATER_THAN": "Greater than",
+      "LESS_THAN": "Less than",
+      "RANGE": "Range"
+    },
+    "swim": {
+      "stroke": {
+        "FREESTYLE": "自由泳",
+        "BREASTSTROKE": "蛙泳",
+        "BACKSTROKE": "仰泳",
+        "BUTTERFLY": "蝶泳",
+        "DRILL": "分解動作",
+        "MEDLEY": "混合泳"
+      },
+      "trainingType": {
+        "KICK": "踢水",
+        "PULL": "划水",
+        "DRILL": "分解動作"
+      },
+      "equipment": {
+        "FINS": "腳蹼",
+        "KICKBOARD": "浮板",
+        "PADDLES": "手蹼",
+        "PULL_BUOY": "浮力夾",
+        "SNORKEL": "呼吸管"
+      }
+    },
+    "states": {
+      "emptyStructure": "仲未有任何訓練步驟，先新增步驟或重複模組。",
+      "noPreview": "儲存或校驗後會喺呢度顯示訓練圖表預覽。",
+      "noTargetInput": "目前目標類型唔需要額外輸入",
+      "noZones": "暫無可用分區",
+      "unsupportedTarget": "This legacy target type is not editable here yet",
+      "invalidRange": "起始值唔可以大過結束值"
+    }
+  },
+  "SportCatalog": {
+    "families": {
+      "RUN": "跑步",
+      "CYCLING": "騎行",
+      "SWIM": "游泳",
+      "STRETCHING": "伸展",
+      "UNKNOWN": "其他"
+    },
+    "sports": {
+      "ROAD_RUNNING": "跑步",
+      "TRAIL_RUNNING": "越野跑",
+      "TREADMILL_RUNNING": "跑步機",
+      "ROAD_CYCLING": "騎行",
+      "MOUNTAIN_BIKING": "山地騎行",
+      "GRAVEL_CYCLING": "礫石路騎行",
+      "INDOOR_CYCLING": "室內騎行",
+      "E_BIKING": "電助力騎行",
+      "POOL_SWIMMING": "室內游泳",
+      "OPEN_WATER_SWIMMING": "開放水域游泳",
+      "STRETCHING": "伸展",
+      "WALKING": "步行",
+      "HIKING": "徒步",
+      "STRENGTH_TRAINING": "力量訓練",
+      "HIIT": "高強度間歇訓練",
+      "YOGA": "瑜伽",
+      "ROWING": "划船",
+      "ELLIPTICAL": "橢圓機",
+      "OTHER": "其他"
+    }
+  },
+  "WorkoutEditor": {
+    "strength": {
+      "session": {
+        "title": "訓練設定",
+        "durationMinutes": "訓練時長（分鐘）",
+        "plannedSessionRpe": "計劃訓練 RPE"
+      },
+      "exercise": {
+        "title": "動作 {number}",
+        "name": "動作名稱",
+        "namePlaceholder": "例如：槓鈴深蹲…",
+        "equipment": "器械",
+        "equipmentPlaceholder": "例如：BARBELL…",
+        "remove": "刪除動作 {number}"
+      },
+      "setGroup": {
+        "title": "組方案 {number}",
+        "remove": "刪除組方案 {number}",
+        "setType": "組類型",
+        "sets": "組數",
+        "prescription": "訓練方式",
+        "seconds": "時長（秒）",
+        "minReps": "最少次數",
+        "maxReps": "最多次數",
+        "load": "負重方式",
+        "loadValue": "負重值",
+        "loadUnit": "負重單位",
+        "percent1rm": "1RM 百分比",
+        "effort": "強度目標",
+        "effortValue": "強度值",
+        "restSeconds": "組間休息（秒）",
+        "setTypes": {
+          "warmup": "熱身組",
+          "work": "正式組"
+        },
+        "prescriptions": {
+          "reps": "按次數",
+          "time": "按時間"
+        },
+        "loads": {
+          "open": "不指定負重",
+          "absolute": "固定重量",
+          "percent1rm": "1RM 百分比",
+          "bodyweight": "自重",
+          "bodyweightOffset": "自重增減"
+        },
+        "efforts": {
+          "none": "不指定",
+          "rpe": "RPE",
+          "rir": "RIR"
+        }
+      },
+      "preview": {
+        "title": "力量訓練",
+        "exerciseCount": "{count} 個動作",
+        "workingSetCount": "{count} 個正式組",
+        "warmup": "熱身",
+        "rest": "休息 {seconds} 秒",
+        "openLoad": "不指定負重",
+        "bodyweight": "自重",
+        "unnamedExercise": "未命名動作",
+        "moreExercises": "另外 {count} 個動作"
+      },
+      "buttons": {
+        "addSetGroup": "新增組方案",
+        "addExercise": "新增動作"
+      }
+    },
+    "title": {
+      "view": "查看訓練",
+      "edit": "編輯訓練",
+      "week": "第",
+      "weekLabel": "第 {week} 週",
+      "sessionLabel": "第 {session} 節"
+    },
+    "tabs": {
+      "rules": "規則輸入",
+      "manual": "手動設定"
+    },
+    "chart": {
+      "placeholder": "驗證規則或手動搭建後可在此預覽強度曲線。"
+    },
+    "fields": {
+      "sportType": {
+        "label": "運動類型",
+        "placeholder": "揀類型",
+        "options": {
+          "run": "跑步",
+          "cycling": "單車",
+          "swim": "游泳"
+        }
+      },
+      "notes": {
+        "label": "備註",
+        "placeholder": "補充說明、注意事項或訓練備註…"
+      },
+      "rules": {
+        "label": "規則",
+        "placeholder": "貼上訓練描述或結構化內容…"
+      }
+    },
+    "manual": {
+      "title": "手動設定訓練結構",
+      "empty": "仲未有任何訓練塊，先加一個 work／rest／repeat。",
+      "blocks": {
+        "work": "Work",
+        "rest": "Rest",
+        "repeat": "Repeat"
+      },
+      "labels": {
+        "child": "子塊"
+      },
+      "fields": {
+        "duration": "時長（秒）",
+        "targetType": "目標類型",
+        "targetValue": "目標值",
+        "targetValuePlaceholder": "輸入目標值",
+        "repeatCount": "重複次數"
+      },
+      "targets": {
+        "none": "無目標",
+        "powerPercent": "功率 %",
+        "powerWatts": "功率 W",
+        "cadence": "踏頻 rpm",
+        "heartRatePercent": "心率 %",
+        "heartRateBpm": "心率 bpm",
+        "paceKmh": "配速 km/h",
+        "gradeDeg": "坡度 °"
+      },
+      "buttons": {
+        "addStep": "新增步驟",
+        "addWorkBlock": "新增 Work",
+        "addRestBlock": "新增 Rest",
+        "addRepeatBlock": "新增 Repeat",
+        "remove": "移除",
+        "removeBlock": "移除塊"
+      }
+    },
+    "errors": {
+      "definition": {
+        "exerciseNameRequired": "請為每個動作填寫名稱。",
+        "exerciseRequired": "請至少新增一個動作。",
+        "setGroupRequired": "每個動作至少需要一個組方案。",
+        "workSetRequired": "每個動作至少需要一個正式組。"
+      },
+      "sportType": "請揀運動類型",
+      "rules": "請輸入訓練規則",
+      "validateFirst": "請先校驗規則",
+      "parseFailed": "文字解析失敗",
+      "invalidInput": "請檢查訓練輸入：持續值、重複次數和目標值必須有效，且不能為負數。",
+      "saveFailed": "儲存失敗"
+    },
+    "buttons": {
+      "close": "關閉",
+      "delete": "刪除",
+      "uploadFit": "上載 FIT",
+      "validate": "校驗輸入",
+      "validating": "校驗中…",
+      "saveDraft": "儲存草稿"
+    },
+    "mobile": {
+      "addWorkout": "新增訓練",
+      "workoutType": "訓練類型",
+      "scheduledAt": "安排在",
+      "editMode": "編輯方式",
+      "manualMode": "手動編排",
+      "dslMode": "DSL 文字",
+      "sport": "運動類型",
+      "endurance": "耐力訓練",
+      "strength": "肌力訓練",
+      "stepLabel": "步驟 {number}",
+      "repeatLabel": "重複組 {number}",
+      "repeatSummary": "重複 {count} 次 · {steps} 個步驟",
+      "manualBuilderHint": "每個步驟都可以按時間、距離或開放方式結束，並單獨設定強度目標。",
+      "dslHint": "每行描述一個訓練步驟，可使用 10m、30s 或 5km 等時長與距離。",
+      "dslPlaceholder": "warmup 10m\nwork 30m\ncooldown 5m"
+    },
+    "confirmDelete": {
+      "title": "刪除呢節訓練？",
+      "description": "呢個操作會將目前訓練由計劃草稿中移除。",
+      "cancel": "取消"
+    }
+  },
+  "PlanMutations": {
+    "success": {
+      "saved": "計劃已儲存",
+      "updated": "計劃已更新",
+      "workoutUpdated": "訓練已更新",
+      "activated": "計劃已開始",
+      "activationCancelled": "已取消啟用",
+      "paused": "計劃已暫停",
+      "completed": "計劃已完成",
+      "cancelled": "計劃已停用",
+      "deleted": "計劃已刪除"
+    },
+    "errors": {
+      "noPlan": "冇可儲存嘅計劃",
+      "saveFailed": "儲存失敗",
+      "updateFailed": "更新計劃失敗",
+      "workoutUpdateFailed": "更新訓練失敗",
+      "activateFailed": "開始計劃失敗",
+      "cancelFailed": "停用計劃失敗",
+      "pauseFailed": "暫停計劃失敗",
+      "completeFailed": "完成計劃失敗",
+      "deleteFailed": "刪除計劃失敗"
+    }
+  },
+  "GlobalHeartRatePage": {
+    "title": "Trainingload.ai · 心率分析",
+    "heartRateAnalysis": "心率分析",
+    "header": {
+      "eyebrow": "指標",
+      "description": "查看心率曲線、閾值參考同區間分佈。"
+    },
+    "tabs": {
+      "curve": "曲線",
+      "zones": "區間"
+    }
+  },
+  "GlobalHeartRateChart": {
+    "time": "時間",
+    "noData": "冇心率資料",
+    "maxHr": "最大心率",
+    "lthr": "乳酸閾值心率"
+  },
+  "V2HomePage": {
+    "aiTodaySuggestion": {
+      "title": "智能教練 今日建議",
+      "fallbackTitle": "今日訓練提示",
+      "weatherAttribution": "{serviceName} 資料經 Trainingload.ai 處理",
+      "loading": "智能教練正在思考中…",
+      "summary": {
+        "workout": "今天建議圍繞「{title}」執行：先把熱身做充分，{sport} 主課按計劃強度完成，預計 {duration}；若身體反饋偏沉，就保留品質、減少額外加量。",
+        "multi": "今天有 {count} 項計劃，優先保證第一項「{title}」的品質；兩項之間留足補給和恢復，不要把輕鬆課練成強度課。",
+        "fatigue": "今天安排了「{title}」，但目前 TSB {tsb}，疲勞訊號偏高。建議把 {sport} 控制在計劃下限，熱身後若仍發沉，就改成輕鬆完成或推遲。",
+        "loadSpike": "本週負荷較上週已變化 {drift}，今天「{title}」建議穩住強度上限，別額外加量；訓練後優先補給、睡眠和伸展。",
+        "rest": "今天沒有計劃訓練，建議做 20-30 分鐘輕鬆活動或完全休息，把精力留給下一次關鍵課。",
+        "restFatigue": "今天沒有計劃訓練，且 TSB {tsb} 顯示疲勞偏高。建議真正恢復：輕鬆走動、補水、睡眠，比硬加一練更值。",
+        "restLoad": "今天沒有計劃訓練，本週負荷變化 {drift}。建議把今天當恢復日，只做低強度活動，避免把負荷繼續推高。",
+        "completed": "今天 {count} 項計劃已完成。接下來重點是恢復：補水、補糖、記錄體感，明天再根據疲勞決定是否加量。"
+      },
+      "tags": {
+        "planCount": "{count} 項計劃",
+        "restDay": "恢復日",
+        "tsb": "TSB {value}",
+        "loadDrift": "負荷 {value}",
+        "recentActivity": "近期已訓練"
+      }
+    },
+    "decisionStack": {
+      "title": "待確認調整",
+      "confirm": "確定調整",
+      "dismiss": "先不改",
+      "confirmCancel": "取消",
+      "confirmTitle": "確認調整訓練計畫？",
+      "confirmDescription": "教練根據日復盤建議改下一練。確認後才會寫入計畫。",
+      "postponeImpact": "將「{name}」推遲一天",
+      "skipImpact": "跳過「{name}」",
+      "reduceVolumeImpact": "降低「{name}」的訓練量：{after}",
+      "reduceIntensityImpact": "降低「{name}」的強度：{after}",
+      "recoveryImpact": "將「{name}」改為恢復訓練：{after}",
+      "applySuccess": "已按教練建議調整計畫",
+      "applyFailed": "無法套用調整，請稍後重試",
+      "rejectSuccess": "已保持原計畫",
+      "bringForward": "切換到這張卡片",
+      "unnamedWorkout": "下一練",
+      "startNext": "開啟下一計劃",
+      "startNextTitle": "週期已完成",
+      "startNextImpact": "基於「{name}」的週期總結開啟下一計劃",
+      "startNextConfirmTitle": "確認開啟下一計劃？",
+      "startNextConfirmDescription": "確認後會進入計劃建立，並把本週期總結作為依據。不會改已完成的計劃。",
+      "startNextSuccess": "已確認開啟下一計劃",
+      "startNextDismiss": "先不開始"
+    },
+    "recentActivity": {
+      "titleSection": "最近活动",
+      "title": "暂无最近活动",
+      "time": "",
+      "summary": "上传或同步训练后，这里会显示最近一条活动。",
+      "status": "--",
+      "viewReview": "查看复盘",
+      "untitled": "未命名活動"
+    },
+    "timezonePrompt": {
+      "title": "系統偵測到時區已變更，是否將檔案時區更新為 {label}？",
+      "snoozeHint": "選擇「稍後」後，30 天內不再詢問。",
+      "update": "更新",
+      "later": "稍後",
+      "success": "已更新檔案時區",
+      "error": "更新時區失敗"
+    },
+    "currentPlan": {
+      "title": "当前计划",
+      "cycle": "训练周期",
+      "weekLabel": "当前周",
+      "todayFocus": "今日安排",
+      "noWorkoutToday": "今日暫無計劃訓練"
+    },
+    "weekday": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    },
+    "today": {
+      "date": "今天",
+      "weekday": ""
+    },
+    "summaryMetrics": {
+      "pmc": {
+        "title": "體能負荷",
+        "label": "训练负荷",
+        "hint": "状态待更新",
+        "fitness": "體能",
+        "fatigue": "疲勞",
+        "form": "狀態"
+      },
+      "power": {
+        "title": "功率",
+        "label": "功率能力",
+        "hint": "能力待更新"
+      },
+      "speed": {
+        "title": "配速",
+        "label": "配速趋势",
+        "hint": "趋势待更新"
+      },
+      "hr": {
+        "title": "心率",
+        "label": "心率效率",
+        "value": "心率待更新",
+        "hint": "效率待更新"
+      }
+    },
+    "common": {
+      "show": "顯示",
+      "load": "負荷",
+      "session": "課表"
+    },
+    "toast": {
+      "inProgress": "該功能正在完善中"
+    },
+    "load": {
+      "title": "課表",
+      "viewWeek": "查看本週",
+      "settingsAria": "課表模組設定",
+      "settingsTitle": "課表模組設定",
+      "settingsDescription": "配置課表模組的篩選項、顯示項與區間。",
+      "settingsPlaceholder": "設定項待補充",
+      "completed": "本週負荷",
+      "target": "上週負荷",
+      "driftToday": "較上週變化",
+      "chartTitle": "本週負荷",
+      "weeklyTrainingLoad": "本週訓練負荷",
+      "weeklySessionCount": "週訓練次數",
+      "loadUnit": "負荷",
+      "goal": "目標",
+      "completedLabel": "已完成",
+      "actual": "實際",
+      "expected": "計劃",
+      "todayValues": "實際 {actual} · 計劃 {planned}",
+      "chartAria": "本週實際負荷與計劃負荷",
+      "noData": "本週暫無負荷資料"
+    },
+    "summary": {
+      "title": "摘要",
+      "viewAllMetrics": "查看全部指标",
+      "settingsAria": "摘要模块设置",
+      "settingsTitle": "摘要模块设置",
+      "settingsDescription": "配置摘要指标的选择与排序。"
+    },
+    "currentState": {
+      "title": "当前状态",
+      "settingsAria": "当前状态模块设置",
+      "settingsTitle": "当前状态模块设置",
+      "settingsDescription": "配置状态卡片的显示、隐藏与排序。",
+      "hideMetric": "隱藏",
+      "emptyMetrics": "暫無指標。點右上角齒輪進入佈局模式，再新增或排序卡片。",
+      "cards": {
+        "fitness": "体能",
+        "fatigue": "疲劳",
+        "form": "状态",
+        "readiness": "准备度"
+      },
+      "healthCard": {
+        "title": "健康",
+        "restingHeartRate": "静息心率",
+        "maxHeartRate": "最大心率"
+      }
+    },
+    "todayExecution": {
+      "title": "今日訓練",
+      "mobileTitle": "訓練",
+      "mobileMeta": "{weekday}  {count} 節課",
+      "meta": "{date}  {weekday}  {count} 项计划",
+      "enterToday": "查看",
+      "linked": "已关联活动：{activity}",
+      "notLinked": "未关联活动",
+      "empty": "今日暫無計劃訓練",
+      "actionPending": "處理中...",
+      "actionPostpone": "順延",
+      "actionSkip": "跳過",
+      "actionDelete": "刪除",
+      "deleteDisabledTip": "目前尚不支援刪除進行中計畫內的單一訓練。",
+      "toastPostponeSuccess": "訓練已順延。",
+      "toastPostponeFailed": "順延失敗，請再試一次。",
+      "toastSkipSuccess": "已標記為跳過。",
+      "toastSkipFailed": "標記跳過失敗，請再試一次。",
+      "postponeConfirmTitle": "要順延這次訓練嗎？",
+      "postponeConfirmDescription": "順延會改變本週節奏，也可能影響後續訓練。請只在需要時使用。",
+      "postponeConfirmCancel": "取消",
+      "postponeConfirmAction": "仍要順延"
+    },
+    "upload": {
+      "title": "上傳活動",
+      "cardTitle": "上傳活動文件",
+      "description": "匯入 FIT / TCX / GPX 活動文件後，可關聯到計劃訓練並生成活動復盤。",
+      "selectFile": "上傳活動文件",
+      "soonToast": "檔案上傳功能即將上線"
+    },
+    "empty": {
+      "header": "訓練首頁",
+      "title": "還沒有進行中的訓練計劃",
+      "description": "创建一个 AI 教练计划后，首页会展示今日训练、周负荷、当前状态和最近活动。",
+      "createPlan": "创建计划",
+      "viewHistory": "查看历史计划",
+      "getStarted": "开始使用",
+      "cards": {
+        "create": {
+          "title": "创建训练计划",
+          "description": "从目标和时间约束开始，让 AI 教练生成周期草案。"
+        },
+        "upload": {
+          "title": "上傳活動",
+          "description": "即使沒有計劃，也可以先匯入 FIT / TCX / GPX 活動文件做復盤。"
+        },
+        "coach": {
+          "title": "询问教练",
+          "description": "不确定训练方向时，先让教练帮你判断下一步。"
+        }
+      }
+    },
+    "header": {
+      "askCoach": "问教练",
+      "weekTarget": "周目标",
+      "viewCurrentPlan": "查看当前计划"
+    },
+    "dynamic": {
+      "weekLabel": "第 {current} / {total} 周",
+      "sport": {
+        "run": "跑步",
+        "cycle": "骑行",
+        "swim": "游泳",
+        "other": "其他"
+      },
+      "status": {
+        "done": "完成",
+        "inProgress": "进行中",
+        "skipped": "跳过",
+        "moved": "已调整",
+        "planned": "计划"
+      },
+      "activityStatus": {
+        "processing": "處理中",
+        "ready": "已就緒",
+        "partialFailed": "部分異常",
+        "failed": "處理失敗",
+        "unknown": "未知"
+      },
+      "dateLabel": "{month}月{day}日",
+      "plannedWorkoutFallback": "今日訓練"
+    },
+    "todaySuggestionActions": {
+      "viewSuggestion": "查看今日教練建議",
+      "workoutProposal": "建議課次",
+      "durationMinutes": "{minutes} 分鐘",
+      "independentWorkoutNote": "確認後會加入為今天的計畫外課次，不會改動現有訓練計畫。",
+      "suggestionChanged": "訓練事實已變化，今日建議已更新",
+      "sport": {
+        "run": "跑步",
+        "cycling": "騎行",
+        "swim": "游泳",
+        "strength": "力量訓練",
+        "other": "其他"
+      },
+      "intensity": {
+        "very_easy": "非常輕鬆",
+        "easy": "輕鬆",
+        "moderate": "中等",
+        "hard": "高強度"
+      },
+      "reasoning": "判斷依據",
+      "remindAt": "提醒時間",
+      "schedule": "設定提醒",
+      "workoutFailed": "無法建立今天的課次",
+      "reminderScheduled": "已設定站內提醒",
+      "reminderFailed": "無法設定提醒",
+      "actionFailed": "無法更新今日建議",
+      "coachPrompt": "請根據今天的教練建議，和我一起判斷接下來怎麼做。",
+      "trainingWindowClosed": "今天已不再適合安排新的訓練",
+      "workoutAlreadyExists": "今天已有計畫課次，無需重複加入"
+    }
+  },
+  "V2PlanPage": {
+    "weekday": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    },
+    "status": {
+      "active": "進行中",
+      "paused": "已暫停",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "draft": "草稿"
+    },
+    "header": {
+      "title": "訓練計劃",
+      "createPlan": "建立計劃",
+      "currentCycle": "目前週期",
+      "viewOtherPlans": "查看其他計劃",
+      "remaining": "剩餘",
+      "remainingWeeks": "{weeks} 週",
+      "manageAriaLabel": "管理計劃",
+      "weekStatus": "第 {current} / {total} 週 · {status}",
+      "totalSessions": "共 {count} 個 session"
+    },
+    "empty": {
+      "title": "還沒有進行中的訓練計劃",
+      "description": "建立或啟用一個訓練計劃後，這裡會展示週結構、今日訓練和執行進度。",
+      "createPlan": "建立計劃",
+      "viewHistory": "查看歷史計劃",
+      "nextSteps": {
+        "title": "下一步",
+        "aiTitle": "透過 AI 教練生成計劃",
+        "aiDescription": "輸入目標、週期和每週可訓練時間，生成可編輯草案。",
+        "historyTitle": "查看歷史計劃",
+        "historyDescription": "從草稿、暫停或已完成計劃中繼續管理。",
+        "coachTitle": "詢問教練",
+        "coachDescription": "不確定訓練方向時，讓教練先給出建議。"
+      },
+      "includesTitle": "目前計劃會包含",
+      "includes": {
+        "structure": "週期和週結構",
+        "daily": "每日訓練安排",
+        "review": "執行與復盤入口"
+      }
+    },
+    "weekStrip": {
+      "currentPosition": "目前第 {current} / {total} 週",
+      "viewWeek": "查看第 {week} 週",
+      "sessionsUnit": "課次",
+      "title": "週期進度",
+      "action": "全部計劃",
+      "legend": "灰柱為每週計劃負荷，綠柱為實際負荷；各週使用同一縱軸比較",
+      "ratioOfPlannedShort": "當週計劃負荷的 {pct}%",
+      "noPlannedLoadShort": "無計劃負荷",
+      "weekTooltip": "第 {week} 週 · 完成 {done}/{total} · 實際 {actual} / 期望 {estimated} · 合規率 {rate}%",
+      "weekTooltipSessions": "第 {week} 週 · {done}/{total} 節",
+      "state": {
+        "done": "已完成",
+        "current": "目前",
+        "next": "後續"
+      }
+    },
+    "weekLoad": {
+      "title": "本週負荷",
+      "currentWeek": "第 {week} 週",
+      "barHelpAria": "每日負荷條如何計算",
+      "barHeightHint": "紫色折線為每日實際負荷，斜紋柱為計劃負荷，兩者使用同一縱軸比較。",
+      "plannedSessions": "計劃 session"
+    },
+    "workout": {
+      "title": "本週訓練",
+      "empty": "本週暫無訓練安排",
+      "session": "第 {index} 組",
+      "editPlan": "編輯計劃",
+      "unscheduled": "未排期",
+      "status": {
+        "overdue": "未完成",
+        "done": "已完成",
+        "inProgress": "進行中",
+        "skipped": "已跳過",
+        "moved": "已推遲",
+        "today": "待執行",
+        "planned": "待執行"
+      },
+      "linkedActivityLine": "關聯活動",
+      "linkedActivityFallback": "活動"
+    },
+    "today": {
+      "title": "今日訓練",
+      "viewTodayPlan": "查看計畫",
+      "empty": "今天沒有計劃訓練"
+    },
+    "actions": {
+      "pending": "處理中...",
+      "postpone": "推遲",
+      "skip": "跳過",
+      "delete": "刪除",
+      "deleteDisabledTip": "暫不支援刪除進行中計劃的單條訓練",
+      "postponeToday": "推遲今天",
+      "linkedBlockedTip": "已關聯活動，請先在活動側解除關聯後再推遲或跳過。",
+      "postponeTodayBlockedTip": "今天沒有可推遲的訓練（已關聯活動的訓練需先解除關聯）。"
+    },
+    "toast": {
+      "noPostponableToday": "今天沒有可推遲的訓練",
+      "postponeTodaySuccess": "已將今日訓練推遲到明天",
+      "postponeOneSuccess": "訓練已推遲到下一天",
+      "postponeFailed": "推遲失敗，請稍後重試",
+      "skipSuccess": "已標記為跳過",
+      "skipFailed": "標記跳過失敗，請稍後重試"
+    },
+    "goal": {
+      "title": "目標進度",
+      "weekSessions": "本週 session",
+      "completed": "已完成",
+      "progressTo": "推進到",
+      "dayNumber": "第 {day} 天",
+      "notStarted": "未開始"
+    },
+    "coach": {
+      "title": "教練建議",
+      "description": "目前計劃狀態：{status}。已完成 {completed}/{total} 個 session，剩餘約 {remainingWeeks} 週。建議根據執行情況繼續微調。",
+      "ask": "詢問教練"
+    },
+    "manage": {
+      "cancel": "取消",
+      "confirm": "確認",
+      "pause": {
+        "menu": "暫停計劃",
+        "title": "暫停計劃",
+        "description": "暫停後會保留目前訓練結構和執行記錄。",
+        "confirm": "確認暫停"
+      },
+      "complete": {
+        "menu": "完成計劃",
+        "title": "完成計劃",
+        "description": "將計劃標記為完成，後續可作為歷史計劃查看。",
+        "confirm": "確認完成"
+      },
+      "delete": {
+        "menu": "刪除計劃",
+        "title": "刪除計劃",
+        "description": "刪除後不可恢復，請確認不再需要該計劃。",
+        "confirm": "確認刪除"
+      }
+    },
+    "postponeConfirm": {
+      "title": "要順延訓練嗎？",
+      "todayDescription": "順延今天未完成的訓練可能會影響本週負荷和後續安排。",
+      "singleDescription": "順延這次訓練會改變接下來的訓練節奏，並可能影響計畫結果。",
+      "confirm": "仍要順延"
+    },
+    "workoutStatus": {
+      "done": "已完成",
+      "inProgress": "進行中",
+      "skipped": "已跳過",
+      "moved": "已推遲",
+      "planned": "待執行",
+      "incomplete": "未完成",
+      "upcoming": "待執行"
+    },
+    "movedBy": {
+      "user": "我推遲",
+      "coach": "教練推遲"
+    }
+  },
+  "UsagePage": {
+    "navTitle": "AI 用量",
+    "navDescription": "AI 服務商用量",
+    "open": "查看用量",
+    "title": "AI 用量",
+    "description": "AI 服務商用量",
+    "loading": "載入中...",
+    "selfHost": {
+      "eyebrow": "自託管 · 自有 API Key",
+      "title": "AI 用量由你的服務商記錄",
+      "description": "本執行個體直接呼叫 Owner 設定的 AI 服務商。Trainingload.ai 不參與請求轉送，也不蒐集服務商的用量記錄。",
+      "statusSummary": "自託管 AI 狀態",
+      "currentProvider": "目前 AI 服務",
+      "notConfigured": "尚未設定",
+      "statusReady": "已設定",
+      "statusOff": "未啟用",
+      "statusIssue": "設定異常",
+      "trainingloadMetering": "Trainingload.ai 用量統計",
+      "notApplicable": "不適用",
+      "providerRecords": "服務商用量記錄",
+      "providerDashboard": "AI 服務商控制台",
+      "explanationTitle": "這裡為什麼沒有用量圖表？",
+      "providerUsage": "用量由你的 AI 服務商記錄，Trainingload.ai 無法讀取這些記錄。請前往對應服務商控制台查看明細。",
+      "openSettings": "管理 AI 設定"
+    }
+  },
+  "PlanWorkoutActivityLink": {
+    "label": {
+      "unlinked": "關聯活動",
+      "linkedFallback": "活動"
+    },
+    "dropdown": {
+      "heading": "當天的活動",
+      "empty": "當天暫無活動紀錄",
+      "loading": "載入中…",
+      "noScheduledDate": "此訓練尚未排到具體日期",
+      "durationMinutes": "約 {minutes} 分鐘",
+      "linkedOtherPlanWorkout": "已關聯：{name}",
+      "activityFallback": "活動",
+      "sessionFallback": "計劃訓練",
+      "removeLink": "解除關聯"
+    },
+    "confirm": {
+      "replaceTitle": "替換關聯？",
+      "replaceDescription": "「{activity}」已關聯「{workout}」，要用本節計劃課替換嗎？",
+      "confirm": "替換",
+      "cancel": "取消"
+    },
+    "toast": {
+      "linkSuccess": "已關聯活動",
+      "linkFailed": "關聯失敗，請重試",
+      "unlinkSuccess": "已解除關聯",
+      "unlinkFailed": "解除失敗，請重試"
+    }
+  },
+  "ActivityPlanLink": {
+    "label": {
+      "unlinked": "關聯訓練",
+      "auto": "自動"
+    },
+    "dropdown": {
+      "heading": "當日計畫課程",
+      "empty": "當日沒有可用的計畫課程",
+      "loading": "載入中…",
+      "expectedDuration": "計畫約 {minutes} 分鐘",
+      "occupiedBy": "已關聯：{title}",
+      "removeLink": "移除關聯",
+      "sessionFallback": "第 {index} 課",
+      "linkedFallback": "計畫課程"
+    },
+    "confirm": {
+      "replaceTitle": "取代關聯？",
+      "replaceDescription": "「{workout}」已關聯活動「{other}」，是否改為關聯本則活動？",
+      "confirm": "取代",
+      "cancel": "取消"
+    },
+    "toast": {
+      "linkSuccess": "已關聯訓練",
+      "linkFailed": "關聯失敗",
+      "unlinkSuccess": "已移除關聯",
+      "unlinkFailed": "移除失敗"
+    }
+  },
+  "V2ActivitiesPage": {
+    "searchEntry": "搜尋活動、來源或訓練關鍵字",
+    "feed": {
+      "title": "活動流",
+      "filter": "篩選",
+      "refresh": "刷新",
+      "refreshing": "重新整理中",
+      "pullToRefresh": "下拉可刷新",
+      "releaseToRefresh": "放開刷新",
+      "pullBottomToRefresh": "已到底部，繼續下拉可刷新",
+      "releaseBottomToRefresh": "放手立即刷新",
+      "loadingMore": "載入中...",
+      "noMore": "沒有更多了"
+    },
+    "provider": {
+      "intervalsIcu": "Intervals.icu",
+      "manual": "手動"
+    },
+    "mirror": {
+      "untitled": "等待來源同步的活動",
+      "discoveredVia": "由 Intervals.icu 發現",
+      "syncing": "正在取得來源活動的完整資料。",
+      "connectionRequired": "目前連線無法提供完整活動，請檢查來源連線。",
+      "importDisabled": "來源已連線，但活動自動匯入尚未開啟。",
+      "reauthRequired": "來源授權已失效，重新授權後可繼續同步。",
+      "notFound": "未在來源中找到可唯一配對的活動。",
+      "ambiguous": "有多筆可能配對的來源活動，因此未自動關聯。",
+      "syncFailed": "來源同步未能完成，請檢查連線後重試。",
+      "pending": "同步中",
+      "retry": "重新同步",
+      "retrying": "正在重試",
+      "connectSource": "連接來源",
+      "reauthorizeSource": "重新授權來源",
+      "enableSourceImport": "開啟來源匯入",
+      "checkSourceConnection": "檢查來源連線"
+    },
+    "common": {
+      "unknownTime": "未知時間",
+      "dateTime": "{month}/{day} {hh}:{mm}",
+      "load": "負荷",
+      "untitledActivity": "未命名活動"
+    },
+    "status": {
+      "processing": "處理中",
+      "ready": "已就緒",
+      "partialFailed": "部分異常",
+      "failed": "處理失敗",
+      "unknown": "未知"
+    },
+    "actions": {
+      "viewReview": "查看復盤",
+      "view": "查看",
+      "aiReview": "AI 復盤",
+      "more": "更多操作",
+      "export": "匯出",
+      "delete": "刪除",
+      "exportFailed": "匯出失敗，請稍後再試",
+      "confirmDeleteTitle": "刪除此活動？",
+      "confirmDeleteDescription": "刪除後無法復原。",
+      "exportDialogTitle": "選擇匯出類型",
+      "exportDialogDescription": "請選擇要匯出的檔案格式。",
+      "selectExportTypePlaceholder": "請選擇匯出格式",
+      "confirm": "確認",
+      "cancel": "取消",
+      "deleting": "刪除中...",
+      "exporting": "匯出中...",
+      "exportToProvider": "傳送到 {provider}",
+      "exportingToProvider": "正在傳送到 {provider}...",
+      "exportToProviderSuccess": "活動已傳送到 {provider}",
+      "exportToProviderFailed": "傳送活動到 {provider} 失敗",
+      "openMenu": "開啟選單"
+    },
+    "map": {
+      "description": "活動地圖",
+      "open": "打開活動地圖"
+    },
+    "import": {
+      "title": "上傳活動",
+      "cardTitle": "上傳活動文件",
+      "description": "匯入 FIT / TCX / GPX 活動文件，生成復盤並關聯到計劃訓練。",
+      "selectFile": "上傳活動文件",
+      "soonToast": "文件上傳功能即將上線"
+    },
+    "empty": {
+      "title": "暫無活動資料",
+      "description": "上傳 FIT / TCX / GPX 活動文件後，活動流會顯示最近訓練，並支援復盤和關聯計劃。"
+    },
+    "statsCard": {
+      "title": "活動統計",
+      "subtitle": "目前視圖內 {count} 筆活動",
+      "open": "開啟"
+    }
+  },
+  "V2PlansPage": {
+    "status": {
+      "active": "進行中",
+      "scheduled": "待接管",
+      "paused": "已暫停",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "superseded": "已被接管",
+      "draft": "草稿"
+    },
+    "header": {
+      "badge": "訓練計劃",
+      "title": "訓練計劃",
+      "description": "管理目前、草稿和歷史訓練計劃。"
+    },
+    "overview": {
+      "title": "概覽",
+      "active": "進行中",
+      "completed": "已完成",
+      "averageSessionCompletion": "平均課次完成率",
+      "averageLoadCompliance": "平均負荷合規率"
+    },
+    "allPlans": {
+      "title": "全部計劃",
+      "count": "{count} 個計劃",
+      "empty": "還沒有訓練計劃"
+    },
+    "create": {
+      "title": "建立計劃",
+      "cardTitle": "生成新的訓練計劃",
+      "description": "從目標、週期和每週可訓練時間開始，讓教練生成計劃草案。",
+      "button": "建立計劃"
+    },
+    "recent": {
+      "title": "最近計劃",
+      "empty": "暫無最近計劃",
+      "itemMeta": "{weeks} 週 · {sessions} 次訓練"
+    },
+    "statusGuide": {
+      "title": "狀態說明",
+      "draft": "草稿可繼續編輯或交給教練完善。",
+      "active": "進行中的計劃會出現在首頁和日曆中。",
+      "history": "已完成、暫停或取消的計劃會保留在歷史中。",
+      "askCoach": "不確定如何安排時，可以先詢問教練。"
+    },
+    "planRange": {
+      "startOn": "開始於 {date}",
+      "createdOn": "建立於 {date}"
+    },
+    "planProgress": {
+      "active": "第 {current} / {total} 週",
+      "scheduled": "等待按日期接管",
+      "paused": "暫停在第 {current} / {total} 週",
+      "completed": "已完成 {count} 次訓練",
+      "cancelled": "已取消",
+      "superseded": "已由新計劃接管",
+      "draft": "草稿 · {count} 次訓練"
+    },
+    "actions": {
+      "viewCurrentPlan": "查看目前計劃",
+      "viewPlanDetail": "查看計劃詳情"
+    },
+    "coachText": {
+      "active": "目前計劃已完成 {completed}/{total} 次訓練，繼續按執行情況微調。",
+      "scheduled": "計劃將在設定的開始日期自動接管。",
+      "paused": "計劃已暫停，可以恢復後繼續執行。",
+      "completed": "計劃已完成，可以作為歷史復盤參考。",
+      "cancelled": "計劃已取消，保留用於歷史查看。",
+      "superseded": "新計劃已經接管，本計劃保留為歷史記錄。",
+      "draft": "草稿計劃可繼續編輯，或讓教練補齊細節。"
+    },
+    "stats": {
+      "sessionCompletion": "課次完成",
+      "loadCompliance": "負荷合規",
+      "plannedSessions": "計劃訓練次數",
+      "completed": "已完成"
+    },
+    "delete": {
+      "iconAria": "刪除計劃",
+      "cannotDeleteActive": "進行中嘅計劃唔可以刪除",
+      "activeHint": "到詳情頁控制"
+    },
+    "start": {
+      "iconAria": "開始計劃",
+      "disabledHasActivePlan": "已有進行中嘅計劃，需先結束或暫停當前計劃"
+    }
+  },
+  "V2DayPage": {
+    "weekdayShort": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    },
+    "dynamic": {
+      "dateLabel": "{month}月{day}日",
+      "status": {
+        "done": "完成",
+        "inProgress": "進行中",
+        "skipped": "跳過",
+        "moved": "已調整",
+        "planned": "計劃"
+      },
+      "noDetail": "暫無詳情",
+      "weekLabel": "第 {current} / {total} 週",
+      "readiness": "正常"
+    },
+    "header": {
+      "notInPlanRange": "不在計劃週期內",
+      "notActivated": "未啟用",
+      "noPlan": "暫無訓練計劃",
+      "backHome": "返回首頁",
+      "selectDate": "選擇日期",
+      "todayPlanMeta": "{date} · {weekday} · {week}",
+      "previousDay": "前一天",
+      "nextDay": "後一天"
+    },
+    "summary": {
+      "readiness": "待評估"
+    },
+    "coach": {
+      "title": "教練建議",
+      "askCoach": "詢問教練",
+      "branchPrompt": "請基於今天的計劃、完成情況和當前訓練週期，幫我判斷今天是否需要調整，並說明理由。"
+    },
+    "toast": {
+      "inProgress": "該功能正在完善中"
+    },
+    "overview": {
+      "title": "今日概覽",
+      "adjust": "調整",
+      "plannedLoad": "計劃課表",
+      "completed": "已完成",
+      "plannedDuration": "計劃時長",
+      "progress": "進度"
+    },
+    "timeline": {
+      "title": "訓練安排",
+      "addWorkout": "新增訓練",
+      "meta": "{duration} · {sessionCount} 節",
+      "cardActionsSoon": "訓練操作即將上線",
+      "linkedActivity": "已關聯活動：{activity}",
+      "linkedBlockedTip": "已關聯活動嘅課次暫不支援推遲或跳過",
+      "markedDoneToast": "已標記完成",
+      "markDone": "標記完成",
+      "actionPending": "處理中",
+      "actionPostpone": "推遲",
+      "actionSkip": "跳過",
+      "actionDelete": "刪除",
+      "deleteDisabledTip": "刪除功能暫未開放",
+      "postponeSuccess": "已推遲到下一日",
+      "postponeFailed": "推遲失敗，請稍後再試",
+      "skipSuccess": "已標記為跳過",
+      "skipFailed": "跳過失敗，請稍後再試",
+      "linkSoon": "關聯活動功能即將上線",
+      "linkActivity": "關聯活動",
+      "adjustSoon": "調整訓練功能即將上線",
+      "adjustWorkout": "調整訓練",
+      "empty": {
+        "title": "當天沒有計劃訓練",
+        "description": "這個日期沒有安排訓練。你可以上傳活動文件做復盤，或回到計劃頁調整訓練安排。"
+      }
+    },
+    "weekContext": {
+      "title": "本週上下文",
+      "empty": {
+        "title": "暫無本週訓練上下文",
+        "description": "目前日期沒有可用的計劃訓練資料，儲存訓練安排後會顯示本週分佈。"
+      }
+    },
+    "upload": {
+      "title": "上傳活動",
+      "cardTitle": "上傳活動文件",
+      "description": "上傳 FIT / TCX / GPX 活動文件後，可關聯到當天訓練並生成復盤。",
+      "selectFile": "上傳活動文件"
+    }
+  },
+  "V2ActivitiesSearchPage": {
+    "back": "返回活動",
+    "quickFilters": {
+      "recent7d": "最近 7 天",
+      "recent30d": "最近 30 天",
+      "run": "跑步",
+      "cycling": "騎行",
+      "swim": "游泳"
+    },
+    "feed": {
+      "title": "搜尋結果",
+      "total": "共 {count} 條",
+      "filtering": "正在更新篩選結果...",
+      "loadingMore": "載入中...",
+      "noMore": "沒有更多了"
+    },
+    "empty": {
+      "title": "暫無活動資料",
+      "description": "目前篩選條件下沒有活動。你可以調整篩選，或先上傳 FIT / TCX / GPX 活動文件。"
+    },
+    "upload": {
+      "cardTitle": "上傳活動文件",
+      "description": "上傳活動後，這裡會顯示活動記錄，並可進入復盤或關聯訓練計劃。",
+      "selectFile": "上傳活動文件"
+    },
+    "provider": {
+      "intervalsIcu": "Intervals.icu",
+      "manual": "手動"
+    },
+    "common": {
+      "unknownTime": "未知時間",
+      "dateTime": "{month}/{day} {hh}:{mm}",
+      "load": "負荷",
+      "untitledActivity": "未命名活動"
+    },
+    "status": {
+      "processing": "處理中",
+      "ready": "已就緒",
+      "partialFailed": "部分異常",
+      "failed": "處理失敗",
+      "unknown": "未知"
+    },
+    "actions": {
+      "viewReview": "查看復盤",
+      "aiReview": "AI 復盤"
+    }
+  },
+  "V2MePage": {
+    "zones": {
+      "runThresholdPace": "跑步阈值配速",
+      "cyclingFtp": "骑行 FTP",
+      "thresholdHr": "阈值心率"
+    },
+    "connections": {
+      "connected": "已连接",
+      "available": "可用",
+      "upload": "上傳"
+    },
+    "goal": {
+      "name": "暂无当前目标",
+      "description": "创建训练计划后，这里会显示当前周期与目标。",
+      "title": "当前目标",
+      "edit": "调整"
+    },
+    "header": {
+      "badge": "我的档案",
+      "description": "完善训练偏好后，计划和 AI 建议会更贴合你。"
+    },
+    "trainingZones": {
+      "title": "训练区间",
+      "manage": "管理"
+    },
+    "preferences": {
+      "title": "训练偏好",
+      "adjust": "调整",
+      "runFirst": {
+        "title": "跑步优先",
+        "description": "尚未设置专项偏好"
+      },
+      "cycleSupport": {
+        "title": "骑行支持",
+        "description": "尚未设置负荷来源"
+      }
+    },
+    "platformConnections": {
+      "title": "平台连接",
+      "manage": "管理"
+    },
+    "privacy": {
+      "title": "隐私与数据",
+      "defaultPrivate": "默认仅自己可见",
+      "deletable": "可随时删除账户数据",
+      "aiScope": "AI 仅使用授权训练数据"
+    },
+    "settings": {
+      "title": "设置",
+      "trainingReminder": "训练提醒",
+      "recoveryReminder": "恢复提醒",
+      "unitsAndDisplay": "单位与显示"
+    }
+  },
+  "V2CoachPage": {
+    "toast": {
+      "inProgress": "功能开发中"
+    },
+    "dynamic": {
+      "stateHintGood": "本周执行不错",
+      "stateHintWatch": "留意本周执行节奏",
+      "stateHintDefault": "暂无计划执行数据",
+      "stateValue": "已完成 {done}/{total}",
+      "activityScope": "{distanceKm} km 活动",
+      "unknownTime": "未知时间",
+      "week": "第 {current}/{total} 周"
+    },
+    "dynamicPrompts": {
+      "p1": "今天的 {workout} 应该怎么执行？",
+      "p2": "第 {week} 周要不要调整强度？",
+      "p3": "最近恢复状态适合加量吗？",
+      "p4": "帮我复盘最近一次活动。"
+    },
+    "prompts": {
+      "p1": "帮我制定本周训练重点",
+      "p2": "我今天应该练什么？",
+      "p3": "如何安排恢复日？",
+      "p4": "根据最近活动给我建议。"
+    },
+    "header": {
+      "badge": "AI 教练",
+      "title": "训练问答与计划调整",
+      "description": "结合当前计划、近期活动和个人设置，向 AI 教练发起训练问题。",
+      "newChat": "新对话"
+    },
+    "currentContext": {
+      "title": "当前上下文",
+      "switch": "切换",
+      "week": "暂无周期",
+      "cycle": "未激活计划",
+      "load": "本周完成"
+    },
+    "recommended": {
+      "title": "推荐提问",
+      "filled": "已填入：{prompt}"
+    },
+    "entry": {
+      "title": "快速提问",
+      "intro": "把训练目标、疲劳感或想调整的内容告诉 AI 教练。",
+      "placeholder": "輸入你想問的問題"
+    },
+    "threads": {
+      "title": "近期活动上下文",
+      "all": "全部",
+      "unavailable": "进入活动：{title}",
+      "emptyTitle": "暂无近期活动",
+      "emptyDescription": "上传或同步活动后，这里会显示可供 AI 参考的训练上下文。",
+      "untitledActivity": "未命名活動"
+    },
+    "context": {
+      "title": "可用上下文",
+      "currentCycle": "当前训练周期",
+      "thisWeek": "本周训练安排",
+      "recentActivities": "近期活动记录"
+    },
+    "constraints": {
+      "title": "使用边界",
+      "description": "AI 建议用于辅助训练决策；如果出现伤痛、疾病或明显不适，请优先咨询专业人士。"
+    }
+  },
+  "V2PlanDetailPage": {
+    "goal": {
+      "5K": "5K",
+      "10K": "10K",
+      "HALF_MARATHON": "半馬",
+      "MARATHON": "全馬"
+    },
+    "mobile": {
+      "training": "訓練",
+      "currentWeek": "目前週",
+      "openSessions": "待完成",
+      "today": "今日",
+      "restDay": "休息日",
+      "noPlannedWorkout": "今天沒有計畫訓練。",
+      "noOpenSession": "目前沒有待完成的訓練",
+      "showAll": "顯示全部",
+      "session": "課次",
+      "unscheduled": "未排期",
+      "plannedWorkout": "計畫訓練",
+      "overdue": "已過期",
+      "loadChart": {
+        "title": "訓練負荷",
+        "plannedLoad": "計畫負荷",
+        "fitness": "體能",
+        "fatigue": "疲勞"
+      }
+    },
+    "status": {
+      "active": "进行中",
+      "scheduled": "待接管",
+      "paused": "已暂停",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "superseded": "已被接管",
+      "draft": "草稿"
+    },
+    "workoutStatus": {
+      "done": "已完成",
+      "inProgress": "進行中",
+      "skipped": "已跳過",
+      "moved": "已推遲",
+      "planned": "待執行",
+      "incomplete": "未完成",
+      "upcoming": "待執行"
+    },
+    "movedBy": {
+      "user": "我推遲",
+      "coach": "教練推遲"
+    },
+    "workout": {
+      "unscheduled": "未排期",
+      "linkedActivityLine": "關聯活動",
+      "linkedActivityFallback": "活動"
+    },
+    "actions": {
+      "pending": "處理中...",
+      "postpone": "推遲",
+      "linkedBlockedTip": "請先解除活動關聯後再調整 — 已關聯時無法推遲或跳過。"
+    },
+    "postponeConfirm": {
+      "title": "確認推遲訓練？",
+      "description": "推遲會改變週內訓練節奏，並可能影響後續計劃效果。",
+      "cancel": "取消",
+      "confirm": "仍要推遲"
+    },
+    "toast": {
+      "postponeSuccess": "訓練已推遲到下一天",
+      "postponeFailed": "推遲失敗，請稍後再試"
+    },
+    "defaultPageTitle": "訓練計劃",
+    "lifecycle": {
+      "title": "狀態與操作",
+      "pending": "處理中...",
+      "description": {
+        "draft": "這個計劃還沒有開始。排期確認後可以開啟，不再需要時可以刪除草稿。",
+        "scheduled": "這個計劃已準備好，將在設定的開始日期自動接管。取消它即可繼續使用目前計劃。",
+        "active": "這個計劃正在執行中。暫停會保留計劃，終止會停止本輪執行；複盤確認後也可以手動標記完成。",
+        "paused": "這個計劃已暫停。準備好後可以繼續執行；如果本輪週期不再繼續，可以終止計劃。",
+        "completed": "這個計劃已完成，會作為歷史記錄保留。",
+        "cancelled": "這個計劃已在完成前終止，會作為歷史記錄保留。",
+        "superseded": "新計劃已經接管；本計劃及其歷史完成記錄保持不變。"
+      },
+      "actions": {
+        "activate": "開啟",
+        "resume": "繼續",
+        "pause": "暫停",
+        "complete": "標記完成",
+        "cancel": "終止",
+        "delete": "刪除"
+      },
+      "reasons": {
+        "pause": "使用者暫停計劃",
+        "complete": "使用者手動標記完成"
+      },
+      "confirm": {
+        "cancel": {
+          "title": "終止這個計劃？",
+          "description": "這會停止目前執行流，並把計劃移到已取消歷史；計劃記錄仍會保留。",
+          "confirm": "終止計劃"
+        },
+        "activate": {
+          "title": "開啟這個計劃？",
+          "description": "選擇開始日期後，這個計劃會成為目前執行計劃。",
+          "confirm": "開啟計劃"
+        },
+        "resume": {
+          "title": "繼續這個計劃？",
+          "description": "計劃會回到進行中狀態，並重新出現在首頁和日曆中。",
+          "confirm": "繼續計劃"
+        },
+        "pause": {
+          "title": "暫停這個計劃？",
+          "description": "計劃會保留目前排期和進度，但不再作為目前執行計劃。",
+          "confirm": "暫停計劃"
+        },
+        "complete": {
+          "title": "把這個計劃標記為完成？",
+          "description": "這只會手動標記計劃完成，不會繼續執行剩餘訓練。",
+          "confirm": "標記為完成"
+        },
+        "delete": {
+          "title": "刪除這個計劃記錄？",
+          "description": "這會移除計劃記錄和其中的排期訓練，操作無法復原。",
+          "confirm": "刪除記錄"
+        },
+        "dismiss": "保持目前狀態"
+      }
+    },
+    "notFound": {
+      "backToPlans": "返回计划",
+      "title": "找不到这个计划",
+      "description": "这个计划可能已被删除，或你当前没有访问权限。"
+    },
+    "header": {
+      "backToPlans": "返回计划",
+      "startOn": "{date} 开始",
+      "notActivated": "尚未激活",
+      "noGoalDescription": "暂无目标描述",
+      "activatePlan": "啟用計畫",
+      "resumePlan": "恢復計畫",
+      "activating": "啟用中..."
+    },
+    "overview": {
+      "cycleLength": "周期长度",
+      "weekCount": "{count} 周",
+      "completionRate": "完成率",
+      "plannedSessions": "计划课表",
+      "skipped": "跳过",
+      "title": "進度摘要"
+    },
+    "execution": {
+      "notStarted": "未完成",
+      "incomplete": "未完成",
+      "upcoming": "待執行",
+      "inProgress": "進行中",
+      "done": "已完成",
+      "skipped": "已跳過",
+      "postponed": "已推遲",
+      "title": "執行統計"
+    },
+    "weekBreakdown": {
+      "openDetailsAria": "開啟：{title}",
+      "title": "周计划",
+      "weekLabel": "第 {week} 周",
+      "completedMeta": "已完成 {done}/{total}",
+      "sessionsCount": "{count} 次",
+      "dayMeta": "{day} · {date}",
+      "emptyDay": "当天暂无训练安排",
+      "sessionMeta": "第 {index} 课 · {sportType}",
+      "emptyPlanTitle": "這個計劃還沒有訓練安排",
+      "emptyPlanDescription": "計劃生成或儲存訓練課表後，這裡會顯示每週執行明細。",
+      "postponeNeedActivate": "請先開啟計劃後再推遲訓練",
+      "sportOnly": "{sportType}",
+      "sessionOnly": "第 {index} 次訓練"
+    },
+    "notes": {
+      "title": "计划备注",
+      "goalLabel": "目标",
+      "noGoal": "暂无目标",
+      "descriptionLabel": "描述",
+      "noDescription": "暂无描述"
+    },
+    "nextSteps": {
+      "title": "下一步"
+    },
+    "coach": {
+      "title": "智能教練",
+      "continueAsk": "繼續詢問這個計畫",
+      "description": "帶上計畫上下文繼續對話",
+      "enter": "進入智能教練"
+    },
+    "weekday": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    },
+    "sportType": {
+      "run": "跑步",
+      "cycling": "騎行",
+      "swim": "游泳"
+    },
+    "workoutDetail": {
+      "title": "訓練詳情",
+      "meta": "{day} · {date} · {status}",
+      "dsl": "訓練內容",
+      "notes": "備註",
+      "openDay": "開啟當日視圖"
+    },
+    "share": {
+      "title": "分享計劃",
+      "hint": "產生一條不公開列出的連結。拿到連結的人可以預覽課表，並匯入成自己的草稿。",
+      "derivedHint": "這份計劃來自分享。再分享會從你的副本開一條新譜系。",
+      "share": "分享計劃",
+      "shareAgain": "分享最新版本",
+      "pending": "處理中...",
+      "created": "分享連結已產生",
+      "unchanged": "內容未變，仍使用目前版本。",
+      "failed": "分享失敗",
+      "versionLabel": "第 {version} 版",
+      "copyLatest": "複製最新連結",
+      "copyVersion": "複製本版連結",
+      "copiedLatest": "已複製最新連結",
+      "copiedVersion": "已複製本版連結",
+      "copyFailed": "複製失敗",
+      "revokeVersion": "撤回本版",
+      "revokeLineage": "撤回整條分享",
+      "revokedVersion": "已撤回這一版",
+      "revokedLineage": "已撤回整條分享"
+    },
+    "providerAction": {
+      "exportPlan": "傳送到 {provider}",
+      "exporting": "正在傳送到 {provider}…",
+      "connectRequired": "請先連接 {provider}，再傳送此計畫。"
+    }
+  },
+  "StrengthCatalog": {
+    "equipment": {
+      "bodyweight": "自重",
+      "dumbbell": "啞鈴",
+      "barbell": "槓鈴",
+      "kettlebell": "壺鈴",
+      "resistance_band": "彈力帶",
+      "machine": "固定器械",
+      "bench": "訓練椅",
+      "pull_up_bar": "單槓"
+    },
+    "exercise": {
+      "backSquat": "槓鈴後蹲",
+      "gobletSquat": "高腳杯深蹲",
+      "squat": "深蹲",
+      "deadlift": "硬舉",
+      "romanianDeadlift": "羅馬尼亞硬舉",
+      "dumbbellRomanianDeadlift": "啞鈴羅馬尼亞硬舉",
+      "lunge": "弓箭步",
+      "splitSquat": "分腿蹲",
+      "stepUp": "登階",
+      "hipThrust": "臀推",
+      "calfRaise": "提踵",
+      "benchPress": "臥推",
+      "overheadPress": "過頭推舉",
+      "row": "划船",
+      "dumbbellRow": "啞鈴划船",
+      "pullUp": "引體向上",
+      "latPulldown": "高位下拉",
+      "pushUp": "伏地挺身",
+      "plank": "平板支撐",
+      "sidePlank": "側平板支撐",
+      "deadBug": "死蟲式",
+      "gluteBridge": "臀橋"
+    }
+  },
+  "V2PlanCreatePage": {
+    "sport": {
+      "run": "跑步",
+      "cycle": "骑行",
+      "swim": "游泳",
+      "strength": "健身訓練"
+    },
+    "intent": {
+      "racePrep": {
+        "title": "备赛",
+        "description": "围绕比赛日期安排周期"
+      },
+      "fitnessBuild": {
+        "title": "提升体能",
+        "description": "稳步提高有氧与负荷"
+      },
+      "skillFocus": {
+        "title": "专项能力",
+        "description": "聚焦速度、力量或技术"
+      },
+      "returnToTraining": {
+        "title": "恢复训练",
+        "description": "从低风险节奏重新开始"
+      },
+      "healthFatLoss": {
+        "title": "健康减脂",
+        "description": "用可持续训练建立习惯"
+      }
+    },
+    "raceDistance": {
+      "run": {
+        "half": "半程马拉松",
+        "full": "全程马拉松"
+      },
+      "cycle": {
+        "criterium": "绕圈赛",
+        "road": "公路赛"
+      }
+    },
+    "common": {
+      "joiner": "、"
+    },
+    "raceDiscipline": {
+      "run": "跑步",
+      "tri": "铁三",
+      "cycle": "骑行"
+    },
+    "header": {
+      "backToPlans": "返回计划",
+      "badge": "创建计划",
+      "title": "让 AI 生成训练计划",
+      "description": "选择目标、周期与约束后，会带着这些信息进入 AI 教练继续生成。"
+    },
+    "mainSport": {
+      "title": "計劃運動組成",
+      "description": "可選擇一個或多個項目；健身訓練可作為主目標的輔助訓練。"
+    },
+    "trainingIntent": {
+      "title": "训练目的",
+      "description": "告诉 AI 这轮周期想解决什么问题。"
+    },
+    "raceInfo": {
+      "title": "比赛信息",
+      "discipline": "比赛项目",
+      "distance": "距离"
+    },
+    "cycleConstraints": {
+      "title": "周期约束",
+      "cycleLength": "周期长度",
+      "weekOption": "{value} 周",
+      "daysPerWeek": "每周训练天数",
+      "dailyMinutes": "单次可用分钟"
+    },
+    "strength": {
+      "title": "輔助力量訓練",
+      "description": "這是計畫偏好；AI 會結合目標、器械和恢復空間安排獨立的力量課。",
+      "preference": {
+        "AUTO": "由 AI 建議",
+        "INCLUDE": "包含力量訓練",
+        "EXCLUDE": "不包含力量訓練"
+      },
+      "sessionsPerWeek": "每週力量課",
+      "minutesPerSession": "每節分鐘",
+      "availableEquipment": "可用器械"
+    },
+    "brief": {
+      "title": "计划简报",
+      "sports": "項目：{value}",
+      "intent": "目的：{value}",
+      "cycle": "週期：{weeks} 週 · 每週 {weeklyDays} 天 · 單次 {dailyMinutes} 分鐘",
+      "race": "比賽：{discipline} · {distance}",
+      "strength": "力量訓練：{value}",
+      "equipment": "可用器械：{value}",
+      "start": "生成計劃",
+      "handoff": "會打開 AI 教練，並帶入上面的項目、目的和週期。"
+    },
+    "nextFlow": {
+      "title": "接下来",
+      "step1": "AI 会确认目标和约束",
+      "step2": "生成周结构与训练日安排",
+      "step3": "保存后可在计划页跟踪执行"
+    },
+    "alternative": {
+      "title": "还没想好？",
+      "backToPlans": "先回到计划列表"
+    }
+  },
+  "V2MetricsPage": {
+    "metricCards": {
+      "trainingLoad": {
+        "title": "训练负荷",
+        "body": "查看 CTL、ATL 与疲劳变化。"
+      },
+      "power": {
+        "title": "功率",
+        "body": "管理 FTP 与功率区间。"
+      },
+      "heartRate": {
+        "title": "心率",
+        "body": "检查阈值心率与心率漂移。"
+      },
+      "pace": {
+        "title": "配速",
+        "body": "查看跑步阈值与配速趋势。"
+      }
+    },
+    "toast": {
+      "inProgress": "功能开发中"
+    },
+    "header": {
+      "badge": "指标",
+      "title": "训练指标",
+      "description": "把负荷、功率、心率和配速放到同一个视图里。",
+      "coreMetric": "核心指标"
+    },
+    "loadTrend": {
+      "title": "负荷趋势",
+      "viewLoad": "查看负荷",
+      "currentDone": "当前疲劳",
+      "emptyTitle": "暂无负荷趋势",
+      "emptyDescription": "上传或同步活动后，系统会计算训练负荷并展示趋势。"
+    },
+    "entry": {
+      "title": "指标入口"
+    },
+    "recentTrends": {
+      "title": "近期变化",
+      "fitnessUp": {
+        "title": "体能趋势"
+      },
+      "fatigueHigh": {
+        "title": "疲劳状态"
+      },
+      "efficiencyStable": {
+        "title": "效率观察"
+      }
+    },
+    "explanation": {
+      "title": "说明",
+      "body": "这些指标基于活动数据和个人阈值计算，用来辅助判断训练负荷与恢复节奏。"
+    },
+    "weeklyFocus": {
+      "title": "本周关注",
+      "loadProgress": {
+        "label": "急慢性负荷比"
+      },
+      "hrDrift": {
+        "label": "恢复压力"
+      },
+      "intensityDistribution": {
+        "label": "单调性"
+      }
+    }
+  },
+  "TimeFilters": {
+    "granularity": {
+      "placeholder": "選擇時間粒度",
+      "day": "按日",
+      "week": "按週",
+      "month": "按月",
+      "year": "按年",
+      "allTime": "全部"
+    },
+    "range": {
+      "placeholder": "選擇時間範圍",
+      "allTime": "所有歷史",
+      "past7Days": "過去 7 天",
+      "past1Month": "過去 1 個月",
+      "past6Months": "過去半年",
+      "past1Year": "過去一年"
+    }
+  },
+  "ChartAxis": {
+    "selectXAxis": "選擇 X 軸",
+    "distance": "距離",
+    "time": "時間"
+  },
+  "HistoryComparisonChart": {
+    "title": "歷史趨勢",
+    "current": "目前",
+    "history": "歷史",
+    "empty": "暫無歷史資料",
+    "series": {
+      "historyData": "歷史資料"
+    }
+  },
+  "WorkoutPlanChart": {
+    "stepKind": {
+      "WARMUP": "熱身",
+      "WORK": "主訓練",
+      "RECOVERY": "恢復",
+      "REST": "休息",
+      "COOLDOWN": "放鬆",
+      "OTHER": "其他"
+    },
+    "labels": {
+      "speed": "速度",
+      "pace": "配速",
+      "type": "類型",
+      "power": "功率",
+      "heartRate": "心率",
+      "grade": "坡度",
+      "relativeIntensity": "相對強度",
+      "estimatedIf": "估算強度（IF）",
+      "schematic": "訓練結構示意",
+      "time": "時間"
+    },
+    "empty": "暫無視覺化資料"
+  },
+  "PlanSummary": {
+    "title": "計畫複盤",
+    "completionRate": "完成率",
+    "completionHint": "已完成 {done} / 共 {total} 節",
+    "complianceRate": "負荷情況",
+    "complianceHint": "實際 {actual} / 預期 {expected}",
+    "statusBreakdown": "順延 / 略過",
+    "statusHint": "順延 {moved} · 略過 {skipped}",
+    "bySport": "按運動分項",
+    "weekly": "週負荷",
+    "legend": "綠色疊層 = 當週實際負荷",
+    "weekTooltip": "第 {week} 週 · 完成 {done}/{total} · 實際 {actual} / 預期 {estimated} · 合規率 {rate}%",
+    "weekEmpty": "第 {week} 週 · 暫無安排",
+    "sport": {
+      "RUN": "跑步",
+      "CYCLING": "騎行",
+      "SWIM": "游泳",
+      "OTHER": "其他"
+    }
+  },
+  "ViewWorkoutDialog": {
+    "moreActions": "更多操作",
+    "deleteWorkoutDescription": "這節計劃訓練將被永久移除，不會刪除已上傳的活動記錄。",
+    "mobile": {
+      "plannedWorkout": "計畫訓練",
+      "workoutDetailMeta": "課次詳情",
+      "workoutDescriptionLabel": "描述",
+      "workoutChartLabel": "結構預覽",
+      "workoutStructureLabel": "訓練結構",
+      "notLinked": "未關聯活動",
+      "linked": "已關聯 {activity}",
+      "linkedActivityAction": "活動",
+      "linkActivityAction": "去關聯",
+      "postpone": "延遲",
+      "skip": "跳過",
+      "exerciseFallback": "動作 {index}",
+      "noData": "暫無資料",
+      "loading": "載入中",
+      "pending": "處理中…",
+      "cancel": "取消",
+      "confirmPostponeTitle": "延後訓練？",
+      "confirmPostponeMessage": "訓練內容會保持不變，並移動到下一個計畫日。",
+      "confirmSkipTitle": "跳過訓練？",
+      "confirmSkipMessage": "該課次會標記為已跳過。"
+    },
+    "linkedBlockedTip": "已關聯活動嘅課次暫不支援推遲或跳過",
+    "actionPending": "處理中",
+    "actionPostpone": "推遲",
+    "actionSkip": "跳過",
+    "actionDelete": "刪除",
+    "deleteDisabledTip": "刪除功能暫未開放",
+    "postponeSuccess": "已推遲到下一日",
+    "postponeFailed": "推遲失敗，請稍後再試",
+    "skipSuccess": "已標記為跳過",
+    "skipFailed": "跳過失敗，請稍後再試",
+    "markDone": "標記完成",
+    "undoStatus": "撤銷目前狀態",
+    "statusToast": {
+      "DONE": "已標記完成",
+      "PLANNED": "已恢復為計畫態",
+      "SKIPPED": "已跳過",
+      "IN_PROGRESS": "已開始",
+      "MOVED": "已順延",
+      "failed": "狀態更新失敗"
+    },
+    "title": "查看訓練",
+    "titleWithWeek": "查看訓練 · 第 {week} 週 · {day}",
+    "sportTypeLabel": "運動類型",
+    "notesLabel": "備註",
+    "rulesLabel": "規則",
+    "notesPlaceholder": "補充備註、注意事項、說明...",
+    "rulesPlaceholder": "訓練規則或結構化內容...",
+    "loading": "載入中...",
+    "close": "關閉",
+    "sport": {
+      "run": "跑步",
+      "cycling": "騎行",
+      "swim": "游泳"
+    },
+    "weekday": {
+      "sun": "週日",
+      "mon": "週一",
+      "tue": "週二",
+      "wed": "週三",
+      "thu": "週四",
+      "fri": "週五",
+      "sat": "週六"
+    }
+  },
+  "SharedUI": {
+    "close": "關閉",
+    "dialog": "對話框",
+    "feedback": "回饋",
+    "help": "說明",
+    "loadingEllipsis": "載入中…",
+    "pickDate": "選擇日期",
+    "platformTitleWithVersion": "Trainingload.ai - 訓練分析管理平台 版本：{version}",
+    "commandPaletteTitle": "命令面板",
+    "commandPaletteDescription": "搜尋要執行嘅命令..."
+  },
+  "DateTimePicker": {
+    "startDate": "開始時間",
+    "endDate": "結束時間",
+    "placeholder": "MM/DD/YYYY hh:mm aa"
+  },
+  "AppError": {
+    "notFound": {
+      "eyebrow": "404 / 頁面偏航",
+      "title": "這個訓練頁面暫時不可用",
+      "description": "連結可能已經過期，或對應的活動、計畫、資料檢視已經不存在。",
+      "primary": "回到概覽",
+      "secondary": "返回上一頁",
+      "helpTitle": "可以這樣繼續",
+      "helpBody": "先回到概覽，再從最新的活動或計畫列表重新進入。"
+    },
+    "serverError": {
+      "eyebrow": "500 / 恢復模式",
+      "title": "頁面載入失敗",
+      "description": "載入這個頁面時出現了異常。你的資料仍然安全，通常重試一次就能繼續。",
+      "primary": "重試",
+      "secondary": "回到概覽",
+      "reference": "錯誤參考",
+      "helpTitle": "如果仍然失敗",
+      "helpBody": "聯絡支援時，可以帶上方的錯誤參考，方便我們定位問題。"
+    }
+  },
+  "ErrorBoundary": {
+    "title": "發生錯誤",
+    "unknownError": "發生未知錯誤，請稍後再試。",
+    "loadFailed": "載入失敗",
+    "loadFailedDescription": "資料載入失敗，請稍後再試。",
+    "retry": "重試"
+  },
+  "HeartRateComparisonCard": {
+    "noHistoricalData": "暫無歷史資料",
+    "currentActivity": "目前活動",
+    "historicalAvg": "歷史平均",
+    "historicalMax": "歷史最高",
+    "diff": "差值",
+    "change": "變化",
+    "current": "目前"
+  },
+  "WorkoutLoadEstimate": {
+    "sectionTitle": "預估負荷",
+    "expected": "預期 {value}",
+    "actual": "實際 {value}",
+    "deltaAbove": "+{pct}%",
+    "deltaBelow": "-{pct}%",
+    "source": {
+      "POWER": "功率",
+      "HR": "心率",
+      "PACE": "配速",
+      "RPE": "RPE"
+    },
+    "crossSourceTip": "預期依「{expected}」估算，實際依「{actual}」量測。跨軌道比較——兩者皆在「100 = 1h@閾值」同一軸上，但差值並非同一物理量。",
+    "needThresholdsTip": "補齊 FTP / LTHR / TP / CSS 後即可給出數字化估算。",
+    "partialEstimateTip": "部分步驟因缺閾值或需反推時長，已退化到 RPE 估算（標 *）。",
+    "mixedSourceTip": "本節訓練混合了多種目標類型，估值合併各軌道貢獻。",
+    "table": {
+      "bucket": "來源",
+      "if": "IF",
+      "duration": "時長",
+      "contribution": "負荷"
+    }
+  },
+  "AuthError": {
+    "pageTitle": "登入錯誤",
+    "title": "無法繼續授權",
+    "fallbackDescription": "授權請求不完整或已過期。請返回應用程式後再試一次。",
+    "login": "登入",
+    "home": "首頁"
+  },
+  "PlanActivationDialog": {
+    "title": "啟用計畫",
+    "description": "選擇實際開始日期。訓練日期會依此日期和每次訓練的偏移量計算。",
+    "cancel": "取消",
+    "confirm": "確認"
+  },
+  "V2ActivitiesStatsPage": {
+    "title": "活動統計",
+    "back": "返回活動",
+    "heatmapTitle": "{year} 活動圖",
+    "chartTitle": "趨勢",
+    "metricChartTitle": "{metric} 趨勢",
+    "monthlyListTitle": "每月活動",
+    "countSummary": "{count} 筆活動",
+    "emptyYear": "這一年沒有活動",
+    "untitledActivity": "未命名活動",
+    "controls": {
+      "year": "年份",
+      "metric": "趨勢指標"
+    },
+    "sport": {
+      "all": "全部運動",
+      "RUN": "跑步",
+      "CYCLING": "騎行",
+      "SWIM": "游泳"
+    },
+    "heatmap": {
+      "range": "{start} 至 {end}",
+      "total": "{count} 筆活動",
+      "day": "{date}：{count} 筆活動",
+      "less": "較少",
+      "more": "較多"
+    }
+  },
+  "PlanShareImportPage": {
+    "title": "匯入訓練計劃",
+    "loading": "正在載入預覽...",
+    "errorTitle": "無法打開這份分享",
+    "errorText": "連結可能無效，或預覽暫時不可用。",
+    "goneTitle": "這份分享已撤回",
+    "goneText": "作者已撤回連結。如果你已經匯入，自己的草稿不會受影響。",
+    "retry": "重試",
+    "backToPlans": "返回計劃",
+    "summary": "{weeks} 週 · {count} 節課 · v{version}",
+    "workoutSlot": "第 {week} 週，第 {day} 天",
+    "import": "收入為我的草稿",
+    "importAndShare": "收入並分享",
+    "importing": "正在匯入...",
+    "importError": "匯入失敗，請稍後重試。",
+    "importCta": "登入後匯入",
+    "publicBadge": "可拿走的訓練計劃",
+    "disclaimer": "這是課表快照，不是依你目前體能客製的教練方案。開始前請自己確認。",
+    "takeCta": "拿走這份計劃",
+    "takeHint": "匯入為草稿，正在用的計劃不會被覆蓋。",
+    "statWeeks": "週",
+    "statDaysPerWeek": "每週訓練",
+    "statWorkouts": "課次",
+    "rhythmTitle": "整季怎麼排",
+    "rhythmHint": "點一週，看那天練什麼。",
+    "weekShort": "第 {week} 週",
+    "weekTitle": "第 {week} 週",
+    "weekSessions": "{count} 堂課",
+    "restDay": "休息",
+    "notActivated": "課表快照，尚未按你的日曆啟用",
+    "goalLabel": "目標",
+    "descriptionLabel": "描述",
+    "overviewTitle": "概覽",
+    "weekBreakdownTitle": "週計劃",
+    "sessionsCount": "{count} 次",
+    "emptyDay": "當天暫無訓練安排",
+    "openDetailsAria": "打開：{title}",
+    "loadTitle": "預估負荷",
+    "loadHint": "依課表結構做的通用估算，不是依你的閾值客製。匯入後會依你的體能重算。",
+    "loadPersonalizedHint": "依你目前的閾值估算。匯入為草稿後，啟用計劃才會把負荷寫入課次。",
+    "weekLoadTooltip": "第 {week} 週 · 負荷 {load} · {count} 堂課",
+    "loadBadge": "負荷 {value}",
+    "loadGenericTip": "通用估算負荷 {value}。匯入後會依你的閾值重算。",
+    "loadPersonalizedTip": "依你的閾值估算負荷 {value}",
+    "importTitle": "匯入這份計劃",
+    "importHint": "匯入為可編輯草稿，正在用的計劃不會被覆蓋。",
+    "dialogTitle": "訓練詳情",
+    "dialogTitleWithWeek": "第 {week} 週 · {day}",
+    "notesLabel": "備註",
+    "chartLabel": "課次結構",
+    "close": "關閉",
+    "weekday": {
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "日"
+    },
+    "sport": {
+      "RUN": "跑步",
+      "CYCLING": "騎乘",
+      "SWIM": "游泳",
+      "STRETCHING": "伸展"
+    }
+  },
+  "AiOperationErrors": {
+    "accessRequired": "目前無法使用 AI，請檢查執行個體設定或帳戶權限。",
+    "inProgress": "已有一項 AI 操作正在進行，請等待完成後再試。",
+    "settlementPending": "上一項 AI 操作仍在完成收尾，請稍後再試。",
+    "purposeUnavailable": "所選模型檔位暫時不可用，請稍後再試。"
+  },
+  "CoachTurnErrors": {
+    "modelUnavailable": "模型暫時無法回應，請嘗試切換模型後重試。",
+    "aborted": "本次生成已中斷，你可以重新傳送。",
+    "business": "目前請求無法完成，請檢查要求後重試。",
+    "internal": "系統發生錯誤，請稍後再試。",
+    "upstreamFailed": "教練服務暫時不可用，請稍後再試。",
+    "unsafeOutput": "本次回答無法安全顯示，請重新生成。",
+    "invalidStructuredOutput": "結構化內容生成失敗，請重試。",
+    "unknown": "生成回覆時發生錯誤，請稍後再試。"
+  },
+  "ActivityLaps": {
+    "empty": "暫無分圈資料",
+    "groups": {
+      "lap": "圈段",
+      "pace": "配速",
+      "heartRate": "心率",
+      "power": "功率",
+      "terrain": "地形",
+      "dynamics": "跑步動態",
+      "other": "其他"
+    },
+    "summary": {
+      "average": "平均"
+    },
+    "columns": {
+      "lap": "圈",
+      "duration": "持續時間",
+      "distance": "距離",
+      "cumulativeTime": "累計時間",
+      "pace": "配速",
+      "speed": "速度",
+      "difference": "差異",
+      "avgHeartRate": "平均心率",
+      "maxHeartRate": "最大心率",
+      "avgPower": "平均功率",
+      "maxPower": "最大功率",
+      "elevation": "爬升 / 下降",
+      "calories": "熱量",
+      "avgRunCadence": "平均步頻",
+      "avgCadence": "平均踏頻",
+      "avgStrideLength": "平均步幅",
+      "avgGroundContactTime": "平均觸地時間",
+      "avgVerticalOscillation": "平均垂直振幅",
+      "avgVerticalRatio": "平均垂直比例",
+      "temperature": "溫度"
+    }
+  },
+  "GuestAccess": {
+    "banner": "唯讀訪客存取",
+    "createAccount": "進入你的帳戶",
+    "aiReadOnly": "唯讀訪客無法使用 AI 對話",
+    "readOnlyAction": "唯讀存取",
+    "loadError": "無法載入訪客存取，請重試。",
+    "retry": "重試"
+  }
+}

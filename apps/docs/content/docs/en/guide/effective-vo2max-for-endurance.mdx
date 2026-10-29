@@ -1,0 +1,120 @@
+---
+title: Effective VO2max for Endurance Decisions
+description: How to interpret effective VO2max trends with training load and plan execution context.
+keywords:
+  [
+    "effective VO2max",
+    "training analysis",
+    "endurance decisions",
+    "training load response",
+  ]
+---
+
+# Effective VO2max for Endurance Decisions
+
+Trainingload.ai estimates VO2max/VDOT from available activity evidence. Treat the result as a performance-response trend, not a laboratory measurement, diagnosis, or daily readiness score. Its value comes from comparing similar activities over time and interpreting the trend with execution and load.
+
+## Before you begin
+
+- Import several recent, comparable endurance activities and wait until they are Ready.
+- Check maximum heart rate, running thresholds, units, and sport type in your profile.
+- Prefer activities with reliable pace or power and heart-rate streams.
+- Exclude warm-ups, recovery walks, sensor failures, and unlike sports from a like-for-like comparison.
+- Choose a review question, such as whether the current running block is producing a stable positive response.
+
+## 1. Open the trend, not just the current value
+
+Open **Dashboard**, select one sport, and choose a time range that contains several comparable sessions. Select the **VO2Max** fitness-status card to open its history.
+
+The current value is a snapshot. The history is more useful because it shows whether estimates are stable, drifting, or dominated by one activity.
+
+<DocsScreenshot
+  id="effective-vo2max-trend"
+  title="VO2Max response trend"
+  description="Review a running-only history with comparable Ready activities, then investigate any outlier before interpreting the direction."
+  route="Dashboard → VO2Max"
+/>
+
+## 2. Check whether the activities are comparable
+
+Open the activities behind the trend and compare:
+
+- Sport and workout purpose.
+- Duration and terrain.
+- Pace or power quality.
+- Heart-rate availability and sensor reliability.
+- Heat, altitude, wind, fatigue, and race effort.
+- The estimation source shown for the activity when available.
+
+A race-derived estimate, a heart-rate-and-speed estimate, and a corrected estimate are not interchangeable observations. Trainingload.ai can store multiple VO2max/VDOT estimates from different evidence; note which one produced the value you are interpreting.
+
+## 3. Classify the pattern
+
+Use several comparable points rather than a single threshold.
+
+### Gradual improvement with stable execution
+
+The block may be producing a useful response. Confirm that key workouts are being completed and that the improvement is not caused by a threshold, correction-factor, or sensor change. Usually no immediate plan change is needed.
+
+### Flat trend with high recent load
+
+Do not automatically add more volume. Compare [ATL](/docs/metrics/pmc/acute-training-load), [TSB](/docs/metrics/pmc/training-stress-balance), plan completion, and session quality. The safest first response may be to hold load, reduce one non-essential intensity exposure, and review the next comparable workout.
+
+### Decline across comparable sessions
+
+Inspect fatigue, conditions, illness, missed recovery, and data quality. If execution is also deteriorating, protect the next key session with a small reversible adjustment. If only one point fell, investigate the activity instead of rewriting the week.
+
+### One abrupt outlier
+
+Open that activity. Check the heart-rate stream, speed or power, pauses, sport classification, maximum-heart-rate setting, and whether the effort was truly comparable. Exclude the point from your decision mentally until its cause is understood.
+
+## 4. Combine response with training pressure
+
+Use two questions together:
+
+1. **What pressure was applied?** Read CTL, ATL, TSB, and session load.
+2. **What response is visible?** Read effective VO2max/VDOT trend, workout execution, and subjective state.
+
+This creates four useful cases:
+
+| Load context           | Response trend      | Practical interpretation                                                      |
+| ---------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| Rising as planned      | Stable or improving | Continue and review at the scheduled checkpoint.                              |
+| High or rising quickly | Declining           | Investigate recovery, data quality, and workout execution before adding load. |
+| Low or interrupted     | Declining           | Check consistency, missed training, illness, and detraining context.          |
+| Stable                 | One outlier         | Inspect the activity; do not treat it as a block-level result.                |
+
+## 5. Make one reviewable decision
+
+Choose one of four outcomes:
+
+- **Continue:** the trend and execution support the current block.
+- **Hold:** keep load stable until the next comparable session.
+- **Reduce one stressor:** shorten, move, or simplify one future workout.
+- **Fix the evidence:** correct settings or data before deciding.
+
+Record the reason, the exact change, and the next comparable activity that will validate it. Do not recalibrate merely to make the chart match an expected number.
+
+## Verify the interpretation
+
+- The trend uses one sport and a relevant date range.
+- At least several activities are comparable in purpose and data quality.
+- Any abrupt outlier was opened and investigated.
+- Estimation source or settings changes are separated from real performance change.
+- Load, plan execution, and subjective context support the interpretation.
+- The decision has a defined next review point.
+
+## Troubleshooting
+
+- **The VO2Max card is empty:** confirm that supported Ready activities contain the required pace/power and heart-rate evidence, then widen the range.
+- **The trend jumps after changing profile values:** maximum heart rate, correction factor, thresholds, or recalculation may change estimates. Compare only under a known, consistent setup.
+- **Running and cycling disagree:** review each sport separately; they use different activity evidence and should not be merged into one performance conclusion.
+- **A hard race and easy run produce very different values:** compare estimation source and workout purpose. Favor repeated comparable observations over unlike sessions.
+- **The value differs from a watch or lab result:** methods and inputs differ. Use each series consistently rather than forcing exact agreement.
+- **The decline comes with pain or illness:** use real symptoms and qualified guidance; the estimate cannot provide medical clearance.
+
+## Next steps
+
+- Read [Maximal Oxygen Uptake](/docs/metrics/maximal-oxygen-uptake) for the metric model and estimation limits.
+- Use [PMC for Marathon Adjustments](/docs/guide/pmc-marathon-adjustment) to interpret training pressure.
+- Bring the evidence to [AI Marathon Plan Adjustments](/docs/guide/ai-marathon-plan-adjustments).

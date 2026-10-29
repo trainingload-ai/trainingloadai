@@ -1,0 +1,43 @@
+---
+title: MCP 故障排查
+description: 排查 TrainingLoad MCP 的 discovery、OAuth、scope、工具缺失、超时和客户端缓存问题。
+---
+
+# MCP 故障排查
+
+## 客户端无法发现服务
+
+确认地址完整为 `https://api.trainingload.ai/mcp`，不能漏掉 `/mcp`。客户端必须支持远程 Streamable HTTP。公司网络需要允许访问 `api.trainingload.ai` 和 TrainingLoad 授权页面。
+
+## OAuth 没有打开，或返回客户端时报错
+
+- 从客户端的连接操作重新开始，不要复用旧授权 URL。
+- 确认客户端支持 OAuth discovery 和 PKCE S256。
+- 确认 callback 回到了发起授权的同一个客户端实例。
+- authorization verifier 暂时不可用时，等待 `Retry-After` 指定时间再试。
+
+## 某个工具没有出现
+
+服务会按账号 entitlement 和 rollout flag 过滤 `tools/list`。即使尚未授予 `health:read`，`get_health_summary` 仍会显示，以便调用时触发增量授权。若其他工具缺失，请确认账号和 rollout 可用后重新连接，不要手工填写 bearer token。
+
+## `INSUFFICIENT_SCOPE`
+
+使用客户端的重新连接或授权操作，并批准所需 scope。如果客户端忽略 MCP 的 `mcp/www_authenticate` challenge，请移除并重新添加连接，让它重新申请预期的只读 scopes。
+
+## 返回空数据
+
+空数据只表示该日期范围内没有匹配的已保存数据，并不表示负荷为 0、没有训练或健康正常。先检查工具返回的时区和查询范围，再在文档允许的边界内适当扩大范围。
+
+## `CAPABILITY_TIMEOUT`、取消或限流
+
+- `CAPABILITY_TIMEOUT`：缩短日期范围或减小 `limit`，然后只重试一次。
+- `CAPABILITY_CANCELLED`：客户端取消或断开了请求，请发起新请求。
+- 限流：等待返回的 retry interval，不要快速循环。
+
+## 客户端仍显示旧工具
+
+刷新或重置客户端的 MCP 工具缓存。ChatGPT 已发布的 workspace app 可能保留冻结的工具快照，直到管理员更新。VS Code 可执行 **MCP: Reset Cached Tools**。必要时移除并重新连接。
+
+## 数据看起来不安全或属于其他账号
+
+立即停止使用并从 TrainingLoad 撤销连接。记录客户端名称、大致时间和 request ID 后联系支持；不要发送 token 或完整 payload。

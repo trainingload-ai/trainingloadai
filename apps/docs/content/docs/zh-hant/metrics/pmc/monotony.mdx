@@ -1,0 +1,169 @@
+---
+title: 訓練單調性是什麼？Foster 公式與有界評分對照
+description: 訓練單調性衡量最近七天每日負荷有多相似。對照經典 Foster 公式與 Trainingload.ai 的有界評分、訓練壓力，避免把高分誤讀成傷病或過度訓練預警。
+keywords:
+  - "訓練單調性"
+  - "Foster 單調性"
+  - "訓練壓力"
+  - "每日負荷變化"
+  - "訓練單調性公式"
+---
+
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# 訓練單調性是什麼？Foster 公式與有界評分對照
+
+**訓練單調性（Monotony）**用來描述最近 7 個日曆日的每日負荷有多相似。每日負荷越接近，單調性通常越高；高低負荷日、低負荷日與休息日帶來的變化越明顯，單調性通常越低。
+
+Trainingload.ai 顯示的是經過正規化的有界版本，數值範圍與經典 Foster 單調性不同。它描述負荷數字的分布，不直接測量疲勞、恢復、過度訓練、傷病機率或訓練品質。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard
+    value="0.72"
+    metricLabel="Monotony"
+    valuePopoverTitle="Monotony 數值"
+    valuePopoverBody="依最近 7 個日曆日的每日負荷平均值與母體標準差計算；沒有活動的日期會以零負荷計入。"
+    rangePopoverTitle="介面分段"
+    rangePopoverBody="介面使用 <0.6、0.6–0.8 與 >0.8 三段協助定位負荷分布。這些分段不是健康或傷病風險界線。"
+    helpTitle="負荷變化"
+    details="同時查看 7 天每日負荷與總負荷，判斷數值是由計畫結構、休息日、負荷尖峰或資料問題造成。"
+  />
+</div>
+
+_範例數值僅供介面預覽。_
+
+## Monotony 的數值來源
+
+Trainingload.ai 使用從今天到六天前的 7 個每日負荷值：
+
+- 每項活動會先依負荷來源優先順序選出一個負荷值。
+- 同一天若有多項活動，負荷會相加。
+- 沒有記錄活動的日期會以零負荷計算，而不是從窗口中刪除。
+- 活動缺漏、重複、閾值或負荷來源變更，都會改變每日序列，進而影響 Monotony。
+
+Monotony 只看每天最終的負荷數字。它不會辨識負荷來自跑步、自行車、游泳或肌力訓練，也不會判斷課程內容是否合理。
+
+## Trainingload.ai 使用的公式
+
+首先取包含今天在內的最近 7 個日曆日：
+
+```text
+loads = [
+  daily_load_today,
+  daily_load_1_day_ago,
+  ...,
+  daily_load_6_days_ago
+]
+
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+```
+
+這裡的 `sd_load` 是這 7 個數值的母體標準差。接著計算：
+
+```text
+monotony = mean_load / (sd_load + mean_load)
+```
+
+若 `sd_load + mean_load = 0`，表示七天負荷全部為零，產品會回傳 `monotony = 0`。
+
+Trainingload.ai 也會根據同一窗口計算訓練壓力（Training Strain）：
+
+```text
+total_load = sum(loads)
+training_strain = total_load × monotony / 0.5
+```
+
+產品顯示時會將 Monotony 與 Training Strain 保留至小數點後兩位。
+
+## 與經典 Foster 公式的差異
+
+經典 Foster 單調性通常寫成：
+
+```text
+foster_monotony = mean_load / sd_load
+foster_strain = total_load × foster_monotony
+```
+
+經典值沒有上限；當每天負荷完全相同時，標準差為零，結果會趨近無限大。Trainingload.ai 使用 `mean_load / (sd_load + mean_load)` 避免除以零，並將非零訓練週的結果限制在 0 到 1 之間。
+
+當平均值與標準差都大於零時，兩種單調性的關係為：
+
+```text
+trainingload_monotony = foster_monotony / (1 + foster_monotony)
+```
+
+因此，Trainingload.ai 的 `0.8` 不能直接與經典 Foster 指標中的 `2.0` 比較；產品的 Training Strain 也不是經典 Foster Strain。
+
+## 如何理解數值
+
+對非負的每日負荷而言：
+
+- **七天全部為零**：產品回傳 0，表示沒有可供分析的近期訓練負荷。
+- **只有一天有負荷**：Monotony 約為 0.29，代表負荷高度集中在 7 天窗口中的單一天。
+- **每天的正負荷完全相同**：Monotony 為 1，代表每日負荷數字沒有變化。
+- **介於兩者之間**：數值越高，通常表示每天的負荷相對越接近。
+
+低值不一定更好。一次很大的負荷尖峰加上六個零負荷日，也會產生較低的 Monotony，但這不代表訓練結構健康。高值也不等於傷病或過度訓練；它只表示最近七天的每日負荷數字較為接近。
+
+## 介面分段如何使用
+
+| 介面分段 | 產品界線 | 可以確定的模型關係 |
+| --- | ---: | --- |
+| 較低 | `< 0.6` | 每日負荷變化較明顯，或負荷集中在少數日期。 |
+| 中等 | `0.6–0.8` | 每日負荷的相似程度處於中間範圍。 |
+| 較高 | `> 0.8` | 每日負荷數字相對接近。 |
+
+這些界線是產品顯示規則，不是經個人化驗證的健康、安全或傷病風險閾值。七天全部為零時的特殊值 `0`，也不應被解讀為「訓練結構優良」。
+
+## 實際檢查流程
+
+1. 查看最近 7 個日曆日的所有每日負荷，包括零負荷日。
+2. 同時查看七天總負荷，避免單獨解讀 Monotony。
+3. 確認高負荷日、低負荷日與休息日是否符合計畫。
+4. 回到具體活動，檢查運動類型、課程內容、閾值與負荷來源。
+5. 加入主觀疲勞、睡眠、疼痛、生病徵兆、表現趨勢與課程完成品質。
+6. 只有在這些證據共同支持調整時，再變更後續訓練。
+
+<DocsToolCtaCard
+  title="在 Trainingload.ai 中檢查每日負荷分布"
+  description={
+    <>
+      同時查看七天總負荷、每日變化與來源活動，判斷 Monotony 的變化是否符合計畫。
+    </>
+  }
+  primary={{ href: "/zh-hant/training-load", label: "在計畫中管理訓練負荷" }}
+  secondary={{
+    href: "/zh-hant/docs/metrics/training-load/training-stress-score",
+    label: "看 TSS 如何變成每日負荷",
+  }}
+/>
+
+## 參考資料
+
+- [Foster（1998）：運動員訓練監控與過度訓練症候群](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad 等人（2017）：Session-RPE 訓練負荷監控方法回顧](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones 等人（2017）：訓練負荷、疲勞指標與傷病和疾病關係的系統性回顧](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr：Training Monotony 與有界修正公式](https://fellrnr.com/wiki/Training_Monotony)
+
+## 常見問題
+
+### 訓練單調性是什麼？
+
+訓練單調性是最近七天每日負荷的相似程度。日子越像，分數越高；強度日、輕鬆日和休息日分開，分數通常更低。它描述數字分布，不預測傷病。
+
+### Foster 公式和產品分數有何不同？
+
+經典 Foster 單調性是均值 ÷ 標準差，沒有上限。Trainingload.ai 用 均值 /（標準差 + 均值），有負荷的一週落在 0 到 1。產品裡的 0.8 不能當成 Foster 的 2.0。
+
+### 單調性低就一定更好嗎？
+
+不一定。一次尖峰加六天零負荷也會很低。用它發現「一週太平」，再核對計畫、缺記的活動和主觀感覺。
+
+## 相關頁面
+
+- [訓練負荷是什麼？](/zh-hant/docs/metrics/training-load)
+- [慢性訓練負荷 CTL](/zh-hant/docs/metrics/pmc/chronic-training-load)
+- [疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)
+- [在計畫中管理訓練負荷](/zh-hant/training-load)
+- [用 AI 教練產生負荷調整建議](/zh-hant/ai-training-plan)

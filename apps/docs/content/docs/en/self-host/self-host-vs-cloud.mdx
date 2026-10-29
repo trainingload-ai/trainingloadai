@@ -1,0 +1,65 @@
+---
+title: Self-hosted vs Cloud
+description: Compare the managed Cloud service with self-host v1 across setup, data control, AI, integrations, availability, backup, and support.
+seoTitle: "Trainingload.ai Self-Hosted vs Cloud: Which Should You Use?"
+seoDescription: Compare Trainingload.ai Cloud and self-hosting by setup effort, data location, local files, BYOK AI, integrations, backups, upgrades, and availability.
+keywords:
+  [
+    "self-hosted vs cloud",
+    "Trainingload.ai deployment",
+    "local training data",
+    "BYOK AI",
+  ]
+---
+
+# Self-hosted vs Cloud
+
+Cloud and self-hosted Trainingload.ai serve different operational needs. The training workflow may feel familiar in both, but the person responsible for security, availability, updates, and recovery changes completely.
+
+## Quick comparison
+
+| Question                  | Cloud                                                  | Self-host v1                                                                                           |
+| ------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Setup                     | Create an account and start using the managed service  | Prepare a supported host, verify a signed release, and install it                                      |
+| Maintenance               | Trainingload.ai operates the service                   | You monitor the host and run updates                                                                   |
+| Structured data           | Stored in the managed service                          | Stored in PostgreSQL on your declared data root                                                        |
+| Uploaded files            | Managed storage                                        | Local storage under your declared data root                                                            |
+| AI                        | Managed product configuration and account usage rules  | Off by default; the Owner supplies a provider API key and pays that provider directly                  |
+| Membership and AI credits | Cloud memberships, credit balances, and credit packs   | No Trainingload.ai membership billing or credit packs; the AI provider meters and bills actual usage   |
+| AI data path              | Governed by the managed service configuration          | Sent to the selected provider only after you enable BYOK AI                                            |
+| Integrations              | Available according to the managed product and account | Only a user's own Intervals.icu API key is supported; other third-party sync and social login stay off |
+| Apple Watch app           | Supported by the managed product                       | Not available in v1; Watch pairing, dashboard, and workout-upload routes are not registered            |
+| Availability              | Operated by Trainingload.ai                            | Single-instance deployment without built-in high availability or automatic failover                    |
+| Backup and recovery       | Managed service responsibility                         | You create, move, retain, and test verified backups                                                    |
+| Updates                   | Managed rollout                                        | You verify a target bundle, back up, and run the supported upgrade flow                                |
+
+## Choose Cloud when
+
+- you want the shortest setup path;
+- you do not want to operate PostgreSQL, storage, TLS, monitoring, or backups;
+- managed integrations matter more than controlling the host;
+- another person or team cannot reliably own upgrades and recovery drills.
+
+## Choose self-hosting when
+
+- local placement of structured data and uploaded files is a hard requirement;
+- you can maintain a supported machine and keep it patched;
+- you accept a single-instance v1 topology;
+- you can keep verified backups in a separate failure domain and test restores;
+- you prefer to bring your own AI provider key, or keep AI disabled.
+
+## Important boundaries
+
+Self-hosting does not make an external AI provider local. When the Owner enables OpenAI, DeepSeek, OpenRouter, DashScope, or another compatible API, the relevant AI request leaves your host and is processed under that provider's terms.
+
+The self-host server has its own build entrypoint and Dockerfile. Its release image does not contain the payment controllers, webhooks, reconciliation jobs, or Creem/Waffo SDKs used by Trainingload.ai Cloud, and `BILLING_PROVIDER` cannot turn those capabilities back on in a self-host image.
+
+Intervals.icu is also an explicit outbound connection. Each user can enter their own personal API key in the Client; activities, planned workouts, wellness, or sport settings are read or sent only according to that user's selected sync options. Self-hosting does not enable Intervals.icu OAuth or webhooks, and does not offer Strava, Polar, COROS, Suunto, Wahoo, Garmin account connections, or social login.
+
+The native Apple Watch app is outside the self-host v1 boundary. A self-host server does not initialize Watch device credentials or expose Watch pairing, dashboard, or workout-upload endpoints.
+
+Self-host v1 also does not include automatic high availability, automatic backups, automatic upgrades, or zero-downtime database migrations. These are operator responsibilities, not hidden background services.
+
+## Next step
+
+If self-hosting is still the right fit, follow the [quick start](/docs/self-host/installation). Otherwise, use the managed Cloud service and continue with [Getting started](/docs/guide/getting-started).

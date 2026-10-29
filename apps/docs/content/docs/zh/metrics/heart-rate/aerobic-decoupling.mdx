@@ -1,0 +1,84 @@
+---
+title: 有氧脱钩 (Aerobic Decoupling)
+description: 有氧脱钩比较稳态耐力训练前后半段的输出/心率效率，用于观察心率漂移与有氧耐力稳定性。
+keywords: ["Aerobic Decoupling", "有氧脱钩", "心率漂移", "Pw:Hr", "Pa:Hr", "EF", "Efficiency Factor", "有氧基础"]
+---
+
+# 有氧脱钩 (Aerobic Decoupling)
+
+**有氧脱钩 (Aerobic Decoupling)**（也常被称为**心脏去耦 / 心率漂移**）用来衡量：在一次持续稳态输出中，你的心率与功率/配速的关系是否随着时间发生变化。
+
+## 核心概念：耦合与脱钩
+
+在控制良好的稳态耐力训练里，你的**输入**（心率）与**输出**（功率或配速）应该保持相对稳定。如果后半段维持同样输出需要更高心率，或者同样心率下输出下降，就说明效率出现了漂移。
+
+当我们进行长时间稳态运动时，如果出现以下情况，称为**脱钩**：
+1.  **心率漂移**：功率不变，心率随时间逐渐上升。
+2.  **功率衰减**：心率不变，功率随时间逐渐下降。
+
+这可能来自疲劳、高温、脱水、补给不足、当天配速偏快，也可能来自路线起伏或设备数据质量问题。
+
+常见解读方式：
+
+- **正值**：有氧效率随时间下降（更常见，通常与疲劳、脱水/高温、补给不足、配速偏快有关）
+- **典型范围**：多见于 **0% - 10%**（不同平台实现、环境与数据质量会影响数值）
+- **最适用场景**：**持续、相对恒定**的努力（耐力/稳态段）。太短或强度变化很大的段落参考意义会下降
+
+## 计算公式
+
+计算逻辑是将一次稳态训练（剔除热身）从中间**一分为二**：
+
+1.  计算 **前半程** 的效率系数 ($EF_1$)。
+2.  计算 **后半程** 的效率系数 ($EF_2$)。
+
+这里的 **EF / AE（有氧效率）** 本质是“输出 / 心率”：
+
+- **Pw:Hr**：以功率作为输出，$EF = \frac{Power}{HR}$
+- **Pa:Hr**：以速度作为输出，$EF = \frac{Speed}{HR}$
+
+$$
+Pw:Hr[\%] / Pa:Hr[\%] = \frac{AE_1 - AE_2}{AE_1} \times 100\%
+$$
+
+通常表示为 **Pw:Hr** 或 **Pa:Hr** 的变化百分比。
+
+## 常用参考：5% 规则
+
+根据 **Joe Friel** 的经验框架，**5%** 常被用作一个实用参考点：
+
+| 脱钩率 | 状态 | 含义与建议 |
+| :--- | :--- | :--- |
+| **< 5%** | **较稳定** | 该强度和时长下效率维持较好，是有氧耐力稳定性的积极信号。 |
+| **5% - 10%** | **中等漂移** | 后半段可能受到疲劳、高温、补给、地形或配速影响。建议和相似训练一起比较。 |
+| **> 10%** | **较高漂移** | 这次训练可能对当前状态偏长、偏快、偏热或补给不足。应结合上下文复盘，而不是直接下结论。 |
+
+## 实战指南：如何测试？
+
+不要依赖随意的训练数据。你需要进行严谨的 **Aerobic Threshold Test**：
+
+1.  **强度**：严格锁定在 **Zone 2** (有氧耐力区)。
+    -   功率/配速：65-75% FTP/FTPa。
+    -   心率：AeT (有氧阈值) 以下，通常是 LTHR 减去 20-30 bpm。
+2.  **时长**：
+    -   标铁/半马目标：1 - 1.5 小时。
+    -   大铁/超马目标：2 - 4 小时。
+3.  **环境**：平坦地形或骑行台，保持补水（排除严重脱水导致的假性脱钩）。
+
+## Trainingload.ai 如何使用有氧脱钩
+
+-   **长距离质量检查**：在稳态长跑或长骑之后，观察后半段效率是否稳定。
+-   **结合上下文复盘**：Trainingload.ai 会把较高脱钩和天气、海拔、配速/功率波动、补给、近期负荷一起看。
+-   **基础期反馈**：相似条件下脱钩逐渐降低，通常说明有氧耐力稳定性在改善。
+-   **不适合所有训练**：间歇、比赛冲刺、多坡路线和很短的训练，脱钩数值容易受噪声影响。
+
+## 相关文档
+
+- [效率系数 EF](/zh/docs/metrics/heart-rate/efficiency-factor)
+- [心率区间](/zh/docs/metrics/heart-rate/zones)
+- [配速区间](/zh/docs/metrics/pace/zones)
+
+## 参考资料
+
+-   [Joe Friel: Are You Fit? All About Aerobic Endurance and Decoupling](https://www.trainingpeaks.com/blog/aerobic-endurance-and-decoupling/)
+-   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)
+-   [TrainingPeaks Help: Aerobic Decoupling (Pw:Hr and Pa:HR) and Efficiency Factor (EF)](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF)

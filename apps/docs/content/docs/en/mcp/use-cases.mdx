@@ -1,0 +1,72 @@
+---
+title: MCP use cases
+description: Prompts you can copy, the expected tool path, and the evidence a good answer should include.
+---
+
+# MCP use cases
+
+Paste any prompt below into a client connected to TrainingLoad. The client does not need every listed tool; it should use the smallest combination that answers the question.
+
+## Current state and perceived fatigue
+
+> Use TrainingLoad to summarize my training state as of today. Compare the last 7 days with the previous 7, include form and my next three planned workouts, and separate facts from inference.
+
+Expected path: `get_training_snapshot` → `get_training_readiness` → `list_planned_workouts` when needed.
+
+The answer should state `asOf`, timezone, load difference, whether ATL/CTL/TSB are available, and that readiness output is an observational load signal—not a medical or “safe to train” verdict.
+
+## Compare two training blocks
+
+> Compare September 1–28, 2026 with October 1–28, 2026. Break load down by running, cycling, and swimming, and identify only changes supported by the data.
+
+Expected path: `compare_training_periods` + `get_training_breakdown`.
+
+For a repeatable version, select the native `compare-training-blocks` prompt. Add `get_activity_statistics` when session count, duration, or distance changed independently of load, and `get_training_consistency` when frequency, streaks, or variability matters.
+
+## Inspect one completed activity
+
+> Show the time-in-zone distribution and lap or split summary for this activity. Highlight uneven pacing using only stored aggregate fields; do not request the raw track or sensor stream.
+
+Expected path: `get_activity` → `get_activity_zones` + `get_activity_splits`.
+
+## Fitness trends and personal bests
+
+> Show my estimated running VO2_MAX trend this year, current training zones, and best 5 km and 10 km performances. Do not describe an estimate as a laboratory measurement.
+
+Expected path: `get_fitness_trends` + `get_training_zones` + `get_personal_bests`.
+
+## Plan execution
+
+> Summarize the last 8 weeks of plan execution: completed, skipped, and still-pending workouts. Then list next week's workouts and explain the completion-rate denominator.
+
+Expected path: `get_plan_adherence` + `list_planned_workouts`.
+
+`get_plan_adherence` uses workout status rather than guessing whether an activity matches a plan. Only `DONE` counts as complete; future `PLANNED` workouts remain in the selected range's denominator.
+
+For one complete plan, use `list_training_plans` to discover its opaque ID, then `get_plan_summary` for completion, actual-versus-estimated load, weekly progress, and sport mix.
+
+## Race preparation
+
+> Find my next competition and review the relevant plan, recent load/form signals, and upcoming workouts. State missing evidence and do not turn readiness into a medical or safe-to-race decision.
+
+Expected path: `list_competitions` → `get_competition` → `list_training_plans` / `get_plan_summary` → `get_training_readiness` → `list_planned_workouts`.
+
+Clients that support MCP prompts can select `race-preparation-check` instead of copying the full request.
+
+## Sync troubleshooting
+
+> Check my Strava connection. Tell me whether completed-activity import and export are available and automatic, and whether the latest sync has an error. Do not expose account IDs or raw error text.
+
+Expected path: `get_integration_status`.
+
+## Health context (separate consent)
+
+> After I authorize health access, summarize the available wellness changes from the last 14 days. Mark missing values and do not diagnose.
+
+Expected path: `get_health_summary`. If `health:read` has not been granted, the client should show incremental consent rather than ask for a token.
+
+## Make any answer easier to verify
+
+Append this to a prompt:
+
+> List the TrainingLoad tools you actually called, each date range, and the returned fields supporting the conclusion. Do not fill in missing values.

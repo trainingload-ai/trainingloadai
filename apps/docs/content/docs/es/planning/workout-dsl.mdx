@@ -1,0 +1,147 @@
+---
+title: Create a training plan with the workout DSL
+description: Plain-language guide to writing the workout DSL in Trainingload.ai—what each line means, repeats, pace, power, all in everyday words.
+---
+
+# Create a training plan with the workout DSL
+
+When you edit a day in **text / rules** mode, this is the deal: **one line = one chunk** of the session. Read top to bottom, that’s the order you’ll do it. If something’s wrong, the app complains—fix it until it saves.
+
+---
+
+## What goes on each line (left to right)
+
+Don’t jumble tokens. Three chunks, separated by spaces:
+
+| Bit | In plain English | Examples |
+| --- | --- | --- |
+| ① What this chunk is | Warmup, main work, easy spin, rest, cooldown… | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
+| ② How long / how it ends | **Only one** “number + unit” first: time, distance, kJ, or HR rule | `5m`, `3km`, `500kj`, `hr<150bpm` |
+| ③ What to aim for (optional) | Pace, power, HR, cadence… | `pace …`, `pwr …`, `hr …` |
+
+You can stack several things in ③—they all apply to **the same** chunk of time or distance.
+`work: 20m` and `work 20m` are the same; the colon is optional.
+
+---
+
+## ① Words at the start of the line
+
+Stick these **first** (case usually doesn’t matter):
+
+| Word | Basically |
+| --- | --- |
+| `warmup` / `wu` | Ease in at the start |
+| `work` | The hard / main bit |
+| `recovery` / `rec` | Easy jog or spin between reps |
+| `rest` | Lighter than recovery—more “stop” |
+| `cooldown` / `cd` | Wind down at the end |
+| `other` | Rare, special label |
+
+`recovery` vs `rest` is fuzzy—**use whichever matches how you coach it**.
+
+---
+
+## ② The first number after that word
+
+That’s **how this chunk ends**—by time, distance, energy, or HR. **Only one primary measure per line.** Anything like `pwr` or `hr` after it is **intensity**, not a second “length”.
+
+| Form | Basically |
+| --- | --- |
+| `30s`, `5m`, `1h` | Clock time |
+| `5km`, `400m` | Distance (`3km` is three km, not three seconds) |
+| `500kj` | Kilojoules on the bike |
+| `hr<150bpm`, etc. | End this part when HR hits a rule |
+
+---
+
+## ③ Targets after that
+
+All after the first measure, space-separated:
+
+| Keyword | For |
+| --- | --- |
+| `pace` | Run pace |
+| `speed` | Speed (app shows pace or km/h) |
+| `pwr` / `power` | Power: prefer **watts** (`250W`); a bare number like `250` is parsed as **watts**; legacy `%FTP` (`85%`) still works |
+| `cad`, `cadence`, `rpm` | Cadence |
+| `hr` | Heart rate: **bpm only** (`150bpm`, `150-160bpm`, or a bare number like `150`) |
+| `grade` | Slope |
+
+`pwr` + `cad` on one line means you’re trying to hold **both** during that chunk.
+
+---
+
+## `repeat`: same mini-block, many times
+
+```text
+repeat 4 {
+  work 4m pwr 270W
+  recovery 2m
+}
+```
+
+- `repeat 4` = run the stuff inside **four times**.
+- Inside the braces: line 1, then line 2 = **one round**. Here it’s four rounds of “4 min hard @ ~90% power + 2 min easy”.
+Some builds also let you close with `end` / `endrepeat` instead of `}`—whatever your UI accepts.
+
+---
+
+## Example 1: run
+
+```text
+warmup 5m
+work 20m pace 7:20-8:20/km
+recovery 90s
+work 3km
+cooldown 5m
+```
+
+- `warmup 5m`: five easy minutes.
+- `work 20m pace …`: twenty minutes main work, ~7:20–8:20 / km.
+- `recovery 90s`: ninety seconds easy.
+- `work 3km`: three **km** of work, not another 20 minutes.
+- `cooldown 5m`: five minutes easy to finish.
+
+Top to bottom = session order.
+
+---
+
+## Example 2: bike
+
+```text
+work 8m pwr 220-250W cad 85rpm
+recovery 2m
+work 5m pwr 250W hr 150-160bpm
+```
+
+- Line 1: eight minutes, 220–250 W, ~85 rpm.
+- Line 2: two minutes easy, nothing else.
+- Line 3: five minutes, 250 W, HR 150–160.
+
+---
+
+## Example 3: four intervals
+
+```text
+repeat 4 {
+  work 4m pwr 270W
+  recovery 2m
+}
+```
+
+Four times: hard 4 min @ ~270 W, then easy 2 min. Without `repeat` you’d paste those two lines four times.
+
+---
+
+## Saves keep failing?
+
+Usually order: **keyword → one measure → then targets**.
+Whether `m` is meters or minutes depends on **position**—the **first** number+unit right after the keyword is the chunk’s main measure.
+
+---
+
+## Three rules
+
+1. One line = one piece; read down.
+2. What kind → how it ends → how hard (optional).
+3. Use `repeat` instead of copy-paste.

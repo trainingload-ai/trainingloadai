@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-diagnostics-bundle-v1.json",
+  "title": "Trainingload self-host diagnostics bundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "bundleId",
+    "generatedAt",
+    "releaseVersion",
+    "mode",
+    "privacy",
+    "integrity",
+    "contents"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-diagnostics" },
+    "bundleId": { "type": "string", "format": "uuid" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "releaseVersion": { "type": "string", "minLength": 1 },
+    "mode": {
+      "enum": ["core-local", "connected", "extended", "unknown"]
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "redactionsApplied",
+        "secretScan",
+        "operatorReviewRequired"
+      ],
+      "properties": {
+        "policy": { "const": "allowlist-v1" },
+        "redactionsApplied": { "type": "integer", "minimum": 0 },
+        "secretScan": { "const": "pass" },
+        "operatorReviewRequired": { "const": true }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "contentsSha256"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "contentsSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "contents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["doctor", "configuration", "logs", "operations"],
+      "properties": {
+        "doctor": {
+          "$ref": "https://trainingload.ai/schemas/self-host-doctor-report-v1.json"
+        },
+        "configuration": { "type": "object" },
+        "logs": { "type": "object" },
+        "operations": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  }
+}

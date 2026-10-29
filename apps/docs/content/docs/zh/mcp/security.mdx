@@ -1,0 +1,44 @@
+---
+title: MCP 安全与隐私
+description: TrainingLoad MCP 的 OAuth、数据最小化、租户隔离、文本清理、限流、审计和健康数据边界。
+---
+
+# MCP 安全与隐私
+
+TrainingLoad MCP 是面向私人运动员数据的只读 resource server。OAuth 是唯一公开连接路径；MCP 端点不接受 API Key 或长期 agent token。
+
+## 纵深授权
+
+- OAuth metadata 会声明 MCP resource、authorization server、支持的 scopes 和 PKCE S256。
+- `tools/list` 会按已授权 scope、entitlement、用户/客户端 feature flag 和服务可用性过滤。
+- 每次工具执行都会再次进行权威策略校验；“没有列出工具”本身不是授权机制。
+- token 必须绑定 MCP audience。无效 token、scope 不足、verifier 不可用和限流会返回不同结果。
+- `health:read` 是增量 scope，不包含在默认授权内。
+
+## 返回的数据
+
+工具只返回训练问题所需的精简摘要，不返回邮箱、内部用户 ID、精确 GPS、原始传感器流、第三方凭证或完整 FIT 记录。包括 opaque 活动与计划 ID 在内的所有查询都会绑定当前 OAuth 用户。
+
+所有列表工具都强制使用有界日期范围、最大结果数和 HMAC 保护的 opaque cursor。输出在离开服务前会再次通过 Zod schema 与字节预算校验。
+
+## 不可信文本与 prompt injection
+
+活动名称、描述、课程名称和比赛备注都由用户控制。服务会移除控制字符与 bidi override，把结果标记为不可信数据，并明确要求客户端不得执行这些字段里的指令。字段中的 URL 或 markup 不能变成工具调用或授权决定。
+
+## 健康数据边界
+
+健康工具只提供精简的 wellness 摘要，不是诊断、病历导出或专业医疗替代。客户端必须说明这条边界，不得据此给出医疗结论。
+
+## 运行保障
+
+- capability 超时和取消信号传递
+- 全局、工具、用户和 OAuth client 维度的并发/频率限制
+- 可重试限制的 `Retry-After` metadata
+- OpenTelemetry spans 与结果、延迟、输出大小指标
+- 全局、按工具、按客户端和按用户 feature flags
+
+最小审计记录只保存经过 pseudonymous 处理的用户/客户端指纹、工具名、状态、错误码、耗时、输出大小、request ID 和输入指纹；不保存 access token 或完整请求/响应 payload。
+
+## 报告问题
+
+先在 TrainingLoad 账号中撤销客户端，然后通过官网支持渠道报告。请提供大致时间、客户端名称和界面显示的 request ID；不要发送 access token 或完整健康 payload。

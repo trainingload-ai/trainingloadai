@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/athlete-memory.schema.json",
+  "title": "Athlete memory fact",
+  "description": "A user-visible fact saved from a Coach conversation for relevant future conversations and athlete-state assessments.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The stable memory fact identifier."
+    },
+    "kind": {
+      "type": "string",
+      "description": "The memory fact kind."
+    },
+    "category": {
+      "type": "string",
+      "description": "The user-visible memory category."
+    },
+    "claim": {
+      "type": "string",
+      "description": "The concise factual claim saved for future use."
+    },
+    "status": {
+      "type": "string",
+      "description": "The current lifecycle status of the fact."
+    },
+    "epistemicStatus": {
+      "type": "string",
+      "description": "Whether the fact is model-extracted, user-confirmed, or otherwise qualified."
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The bounded extraction confidence from zero to one."
+    },
+    "eventStart": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The beginning of the real-world event interval in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "eventEnd": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The end of the real-world event interval in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "timeText": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The original relative or absolute time expression."
+    },
+    "timezone": {
+      "type": "string",
+      "description": "The IANA timezone used to resolve event time."
+    },
+    "validFrom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The time from which the fact is applicable.",
+      "format": "date-time"
+    },
+    "validUntil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The fact expiry time, when bounded.",
+      "format": "date-time"
+    },
+    "decayProfile": {
+      "type": "string",
+      "description": "The relevance decay policy identifier."
+    },
+    "version": {
+      "type": "integer",
+      "description": "The optimistic concurrency version."
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "The creation time.",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "The last correction time.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "category",
+    "claim",
+    "status",
+    "epistemicStatus",
+    "timezone",
+    "decayProfile",
+    "version",
+    "createdAt",
+    "updatedAt"
+  ]
+}

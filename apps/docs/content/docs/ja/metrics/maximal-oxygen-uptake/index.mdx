@@ -1,0 +1,123 @@
+---
+title: "VO2 Max (Maximal Oxygen Uptake)"
+description: "VO2 Max は有酸素能力と心肺フィットネスを表す重要指標です。このガイドでは意味、推定方法、誤差要因、トレーニングでの使い方を説明します。"
+keywords:
+  - "VO2 Max"
+  - "VO2 max calculator"
+  - "estimate VO2 max"
+  - "what is VO2 max"
+  - "VO2 max for runners"
+  - "VO2 max for cyclists"
+  - "VDOT"
+  - "estimated VO2 max"
+---
+
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# VO2 Max (Maximal Oxygen Uptake)
+
+> 用語について: このページでは読みやすさのため、VO2 max、推定 VO2 Max、eVO2 Max などをまとめて **VO2 Max** と呼びます。厳密に区別する必要がある場合は、**ラボ測定 VO2 Max** と **推定 VO2 Max** と明記します。
+
+**VO2 Max** は、強い運動中に身体が酸素を **取り込み、運び、使う** 最大速度です。通常は `ml · kg⁻¹ · min⁻¹` で表されます。
+
+持久系スポーツでは、有酸素の「天井」のような役割を持ちます。ただし、成績は VO2 Max だけで決まりません。閾値、効率、耐久性、補給、地形、ペーシングも同じくらい重要です。
+
+## どの VO2 Max を見ているのか
+
+- **ラボ測定 VO2 Max**: トレッドミルやバイクエルゴでガス分析を行う方法。生理学的な真値にもっとも近い。
+- **推定 VO2 Max**: 時計やプラットフォームが、ペース/速度、心拍、条件から推定するモデル出力。
+
+日常のトレーニングでは、推定 VO2 Max は暑さ、標高、風、坂、疲労、睡眠不足、補給、センサー誤差で動きます。医療レベルの測定ではなく、**トレンド指標** として扱うのが実用的です。
+
+## なぜ役立つのか
+
+- 有酸素フィットネスの変化を説明する。
+- VO2 インターバルなどの強度設定に使う。
+- パフォーマンス変化の背景を理解する。
+
+ただし、閾値、経済性、耐久性、競技特異的な筋力の代わりにはなりません。
+
+## 推定方法
+
+### ランニング: 心拍と速度
+
+ランでは、心拍強度から vVO2max 相当を推定し、酸素コストモデルへ変換することがあります。
+
+$$
+X = v / exp((r - 1.00466) / 0.68725)
+$$
+
+$$
+VO2max = -4.6 + 0.182258 * X + 0.000104 * X^2
+$$
+
+### バイク: パワーと体重
+
+信頼できるパワーデータと体重がある場合、最大有酸素パワーから VO2 Max を推定できます。
+
+$$
+VO2max = 1.74 * ((0.92 * MMP_5 * 6.12) / Weight_kg) + 3.5
+$$
+
+## トレーニングでの使い方
+
+- **日々のノイズではなくトレンドを見る**。
+- **入力を確認する**: HRmax、心拍センサー、停止、暑さ、風、疲労は推定を乱します。
+- **負荷と回復と一緒に読む**: [ATL](/ja/docs/metrics/pmc/acute-training-load)、[CTL](/ja/docs/metrics/pmc/chronic-training-load)、[TSB](/ja/docs/metrics/pmc/training-stress-balance) と合わせる。
+- **数字を追いすぎない**: 推定 VO2 Max の上昇は、多くの場合「同じ心拍で速い」「同じペースが楽」になったことを表します。
+
+## ランナーにとっての意味
+
+VO2 Max インターバルは、高い有酸素出力とランニングメカニクスの維持に役立ちます。短いレースほど重要度が上がり、マラソンでは主役ではないものの、周期的に入れる価値があります。
+
+## よくある誤解
+
+- 推定値を医療レポートのように扱う。
+- 閾値や耐久性を無視して VO2 Max だけで成績を説明する。
+
+## VO2 Max レベル
+
+Trainingload.ai では、VO2 Max を読みやすくするため 5 段階のレベルにマッピングします。
+
+- 年齢/性別なし: 一般的な閾値。
+- 年齢/性別あり: 年代と性別に応じた閾値。
+
+詳しくは [VO2 Max levels](/ja/docs/metrics/maximal-oxygen-uptake/levels) を読んでください。
+
+## FAQ
+
+### 良い VO2 Max とは？
+
+年齢、性別、競技歴によって変わります。もっとも役立つ基準は、自分自身の長期トレンドです。
+
+### 時計の VO2 Max が急に落ちたのはなぜ？
+
+暑さ、坂、風、疲労、HRmax 設定ミス、心拍信号不良、いつもと違うペーシングが原因になることがあります。
+
+### VO2 Max はレースタイムの最良予測ですか？
+
+単独ではありません。閾値、経済性、耐久性、補給、ペーシングが結果を大きく左右します。
+
+## 参考
+
+- [RunnersConnect: VO2 Max for Runners](https://runnersconnect.net/vo2-max-for-runners/)
+- [Simpson Associates: Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm)
+- [Kokkinos P, et al. FRIEND cycle ergometry VO2max equation (2018)](https://pubmed.ncbi.nlm.nih.gov/29692203/)
+
+<DocsToolCtaCard
+  title="ツールへ: VO2 Max を推定し、VO2 Max レベルを見る"
+  description={
+    <>
+      まだ VO2 Max を推定していない場合は、ツールページから始めてください。
+      結果には <b>VO2 Max レベル</b> と短い説明も表示されます。
+    </>
+  }
+  primary={{
+    href: "/ja/vo2-max-calculator",
+    label: "VO2 Max Calculator を開く →",
+  }}
+  secondary={{
+    href: "/ja/docs/metrics/maximal-oxygen-uptake",
+    label: "先に VO2 Max ガイドを読む",
+  }}
+/>

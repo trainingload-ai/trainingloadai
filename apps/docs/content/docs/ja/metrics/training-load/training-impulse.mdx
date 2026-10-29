@@ -1,0 +1,80 @@
+---
+title: TRIMPとは？心拍で内部トレーニング負荷を計算する
+description: TRIMP（トレーニングインパルス）は心拍と時間から内部負荷を推定します。Banister公式、Edwardsゾーン、パワーがないときにTSSの代わりに使う場面を整理します。
+keywords:
+  ["TRIMP", "トレーニングインパルス", "Banister TRIMP", "心拍トレーニング負荷", "Edwards TRIMP"]
+---
+
+# TRIMPとは？心拍で内部トレーニング負荷を計算する
+
+**TRIMP（トレーニングインパルス）** は、心拍と時間から **内部トレーニング負荷** を出す指標です。時間に非線形の強度重みを掛け、きつい分ほど大きく数えます。Banister が 1975 年に提案し、1991 年に洗練しました。パワーや信頼できるペースがないときに使います。
+
+パワーに基づく TSS が外部仕事量の代表だとすれば、TRIMP は **心拍による生理的ストレス** を見るための代表的な指標です。
+
+## 基本概念
+
+考え方はシンプルです。
+
+```text
+Load = Duration × Intensity
+```
+
+ただし TRIMP では、強度は平均心拍だけではありません。高心拍になるほど生理的コストは非線形に増えるため、指数的な重み付けを使います。
+
+## Banister TRIMP
+
+Trainingload.ai では、標準的な方法として Banister TRIMP を使います。
+
+```text
+TRIMP = t_min * HR_ratio * 0.64 * exp(k * HR_ratio)
+```
+
+```text
+HR_ratio = (HR_avg - HR_rest) / (HR_max - HR_rest)
+```
+
+- $t_{min}$: 運動時間（分）
+- $HR_{ratio}$: 心拍予備能に対する割合
+- $k$: 性別係数（男性 1.92、女性 1.67）
+
+## 使いどころ
+
+- パワーが取りにくいスポーツで [ATL](/ja/docs/metrics/pmc/acute-training-load) や [CTL](/ja/docs/metrics/pmc/chronic-training-load) の入力に使う。
+- スイム、トレイルラン、ジムワークなど、外部仕事量が測りにくい活動の負荷を見る。
+- RPE と比べて、心拍反応が普段と違うか確認する。
+
+## 注意点
+
+1. **心拍遅れ**: 30 秒スプリントのような短い無酸素負荷は過小評価しやすい。
+2. **環境ノイズ**: 暑さ、脱水、カフェイン、睡眠不足で心拍が上がると TRIMP も増えます。
+3. **スポーツ差**: 同じ TRIMP でも、ランとスイムでは筋骨格への負担が違います。
+
+## よくある質問
+
+### TRIMPとは何ですか？
+
+TRIMP は時間 × 心拍強度のスコアです。きつい分の重みが大きく、内部負荷を推定します。バイクのパワーTSSのような外部仕事量ではありません。
+
+### Banister TRIMPの計算式は？
+
+分 × 心拍予備比 × 0.64 × exp(k × 心拍予備比) です。心拍予備比は（平均心拍 − 安静心拍）/（最大心拍 − 安静心拍）。係数 `k` は男性 1.92、女性 1.67 です。
+
+### TRIMPとTSSの使い分けは？
+
+パワーや信頼できるランペースがあるときは TSS。心拍中心のスイム、トレイル、ジム、外部負荷が取れない有酸素は TRIMP です。
+
+### 短いインターバルでTRIMPが小さく出る理由は？
+
+心拍はパワーに遅れます。30 秒スプリントは出力が先にピークになり、心拍は後から上がるため、短い無酸素負荷を過小評価します。RPE やパワー/ペースと併用してください。
+
+## 次のステップ
+
+- [計画内でトレーニング負荷を管理する](/ja/training-load)
+- [トレーニングストレススコア](/ja/docs/metrics/training-load/training-stress-score)と比較する
+- [心拍のトレーニング負荷ゾーンを計算する](/ja/heart-rate-zones-calculator)
+- [AIコーチで負荷調整案を作る](/ja/ai-training-plan)
+
+## 参考
+
+- [Fellrnr: TRIMP Explained](https://fellrnr.com/wiki/TRIMP)
+- Banister, E.W. (1991). Modeling Elite Athletic Performance.

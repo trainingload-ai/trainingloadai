@@ -1,0 +1,84 @@
+---
+title: 체력(CTL)
+description: Trainingload.ai는 PMC 차트에서 파란색 진행 막대와 파란색 선으로 CTL을 표시합니다.
+keywords: ["만성 훈련 부하", "체력", "CTL", "CTL 공식", "훈련 부하 추세", "CTL 해석"]
+---
+
+# 체력(CTL)이란 무엇인가요?
+
+만성 훈련 부하인 **체력(CTL)**은 훈련 시간과 훈련 부하(TSS)를 결합해 사용자의 훈련 이력을 요약합니다. Trainingload.ai는 기본적으로 42일 시간 상수를 사용하며, 현재 값을 사용자 본인의 역대 최고 CTL 대비 백분율로 표시합니다. CTL은 모델링된 부하 이력을 요약할 뿐 체력, 적응, 건강 또는 경기력을 직접 측정하지 않습니다.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <CtlStatPreviewCard
+    value="67.2"
+    percent={58}
+    metricLabel="CTL"
+    valuePopoverTitle="CTL 값"
+    valuePopoverBody="부하 소스 설정에 따라 선택된 일일 부하의 느린 지수 평균입니다."
+    percentPopoverTitle="CTL 백분율"
+    percentPopoverBody="현재 CTL을 본인의 역대 최고 CTL과 비교한 비율입니다."
+    helpTitle="장기 부하"
+    details="CTL로 여러 주에 걸친 모델 부하의 방향과 일관성을 확인하세요."
+  />
+</div>
+
+_예시 값은 UI 미리보기용입니다._
+
+## 체력(CTL) 값의 출처
+
+Trainingload.ai는 사용 가능한 지표와 설정된 부하 소스 우선순위에 따라 각 활동의 부하를 먼저 결정합니다. 활동과 설정에 따라 파워, 심박수, 페이스 또는 세션 RPE가 소스가 될 수 있습니다.
+
+이는 다음을 의미합니다.
+
+- 활동 데이터가 누락되거나 변경되면 체력(CTL)이 달라질 수 있습니다.
+- 임계값이나 부하 소스 우선순위를 변경하면 파생 활동 부하와 이후 PMC 값이 달라질 수 있습니다.
+- Trainingload.ai는 설정된 우선순위에 따라 활동마다 사용 가능한 부하 하나를 선택합니다. 척도가 일관되지 않은 소스를 혼용하면 기간 간 비교 가능성이 낮아집니다.
+- 기록된 활동 부하가 없는 날에는 일일 입력이 0이 되고 이전 CTL이 점차 감소합니다.
+
+## 공식
+
+Trainingload.ai는 지수 시간 상수 감쇠를 사용하며 기본 CTL 시간 상수는 42일입니다.
+
+```text
+decay_CTL = exp(-1 / 42)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+`exp`는 자연지수 함수입니다. 기본 시간 상수에서 `decay_CTL ≈ 0.976472`이므로 오늘 부하의 가중치는 약 `0.023528`입니다.
+
+## 체력(CTL) 추세 이해하기
+
+- **CTL 상승**: 최근 일일 부하가 대체로 현재 CTL 수준보다 높습니다.
+- **CTL 유지**: 최근 부하가 모델 수준을 대체로 유지하고 있습니다.
+- **CTL 하락**: 훈련량 감소나 테이퍼 기간을 포함해 최근 부하가 대체로 현재 CTL 수준보다 낮습니다.
+
+## 답할 수 있는 질문
+
+CTL은 다음을 확인하는 데 도움이 됩니다.
+
+- 현재 체력(CTL)이 상승, 유지 또는 하락하고 있는가?
+- 누락된 훈련이나 회복 기간이 장기 추세를 바꾸었는가?
+- 현재 계획이 의도한 부하 방향을 만들고 있는가?
+- 임계값이나 소스 변경으로 비교 가능성이 낮아졌는가?
+
+CTL만으로는 다음을 판단할 수 없습니다.
+
+- 사용자가 훈련에 성공적으로 적응했는가?
+- 내일의 고강도 훈련이 안전한가?
+- 사용자가 회복되었고 건강하며 경기에 나설 준비가 되었는가?
+- 한 사용자가 다른 사용자보다 더 체력이 좋은가?
+
+결정하기 전에 경기력 추세, 훈련 수행 품질, 주관적 상태, [피로(ATL)](/docs/metrics/pmc/acute-training-load), [컨디션(TSB)](/docs/metrics/pmc/training-stress-balance)을 함께 고려하세요.
+
+## 참고 자료
+
+- [Intervals.icu: 체력, 피로 및 컨디션 공식](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE 용어집: Chronic Training Load(CTL)](https://runalyze.com/glossary/ctl)
+- [Calvert 외(1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## 관련 페이지
+
+- [피로(ATL)](/docs/metrics/pmc/acute-training-load)
+- [컨디션(TSB)](/docs/metrics/pmc/training-stress-balance)
+- [훈련 분석 워크플로](/docs/guide/training-analysis-workflow)
+- [PMC를 활용한 마라톤 훈련 조정](/docs/guide/pmc-marathon-adjustment)

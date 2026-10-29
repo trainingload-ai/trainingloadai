@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/original-file.schema.json",
+  "title": "Original activity file index entry",
+  "description": "Metadata for an original or reconstructed interoperable activity file.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "activityId": {
+      "type": "string",
+      "description": "The related activity identifier."
+    },
+    "path": {
+      "type": "string",
+      "description": "The relative path inside the export archive."
+    },
+    "format": {
+      "type": "string",
+      "description": "The activity file format, such as FIT, GPX, or TCX."
+    },
+    "provenance": {
+      "type": "string",
+      "description": "How the activity file was obtained.",
+      "oneOf": [
+        {
+          "const": "ORIGINAL_SOURCE",
+          "description": "The original file preserved from the source system."
+        },
+        {
+          "const": "PRESERVED_CANONICAL",
+          "description": "The interoperable activity file preserved by Trainingload."
+        },
+        {
+          "const": "GENERATED_FIT",
+          "description": "A FIT file reconstructed from normalized activity data."
+        }
+      ]
+    },
+    "sizeBytes": {
+      "type": "string",
+      "description": "The file size in bytes encoded as a decimal string."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "The lowercase hexadecimal SHA-256 digest of the file."
+    },
+    "warning": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "A provenance or fidelity warning for reconstructed files."
+    }
+  },
+  "required": [
+    "activityId",
+    "path",
+    "format",
+    "provenance",
+    "sizeBytes",
+    "sha256"
+  ]
+}

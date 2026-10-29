@@ -1,0 +1,106 @@
+---
+title: 慢性トレーニング負荷（CTL）とは？PMCフィットネスの見方
+description: 慢性トレーニング負荷（CTL）は日次負荷から作るPMCの遅いフィットネス推移です。42日の計算式、上昇と下降の読み方、単体では判断できないことを説明します。
+keywords:
+  ["慢性トレーニング負荷", "CTL", "CTL フィットネス", "慢性トレーニング負荷 計算", "PMC フィットネス"]
+---
+
+# 慢性トレーニング負荷（CTL）とは？PMCフィットネスの見方
+
+**慢性トレーニング負荷（CTL）** は PMC の遅いフィットネス線です。日次負荷（多くは TSS）を標準 42 日の時定数で指数平均します。Trainingload.ai は、自分の過去最高 CTL に対する今の割合も表示します。CTL はモデル化された負荷履歴であり、体力、適応、健康、レース準備を直接測るものではありません。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <CtlStatPreviewCard
+    value="67.2"
+    percent={58}
+    metricLabel="CTL"
+    valuePopoverTitle="CTL 値"
+    valuePopoverBody="負荷ソースの設定に従って選ばれた日次負荷の、変化が緩やかな指数平均です。"
+    percentPopoverTitle="CTL パーセント"
+    percentPopoverBody="現在の CTL を、自分の過去最高 CTL に対する割合で示します。"
+    helpTitle="長期負荷"
+    details="CTL を使って、数週間にわたるモデル負荷の方向と一貫性を確認します。"
+  />
+</div>
+
+_表示値は UI プレビュー用の例です。_
+
+## フィットネス（CTL）値の算出元
+
+Trainingload.ai は、利用可能な指標と設定された負荷ソースの優先順位に従って、まず各アクティビティの負荷を決定します。アクティビティと設定に応じて、パワー、心拍数、ペース、セッション RPE のいずれかがソースになります。
+
+そのため、次の点に注意してください。
+
+- アクティビティデータの欠落や変更によって、フィットネス（CTL）が変わることがあります。
+- 閾値や負荷ソースの優先順位を変更すると、算出負荷とその後の PMC 値が変わることがあります。
+- Trainingload.ai は優先順位に従い、アクティビティごとに利用可能な負荷を 1 つ選びます。尺度が一致しないソースを混在させると、期間間の比較可能性が下がります。
+- アクティビティ負荷が記録されていない日は日次入力がゼロとなり、前日の CTL は徐々に減衰します。
+
+## 計算式
+
+Trainingload.ai は指数時定数減衰を使用し、CTL の標準時定数は 42 日です。
+
+```text
+decay_CTL = exp(-1 / 42)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+`exp` は自然指数関数です。標準時定数では `decay_CTL ≈ 0.976472` となるため、当日の負荷の重みは約 `0.023528` です。
+
+## フィットネス（CTL）の推移を理解する
+
+- **CTL が上昇**：最近の日次負荷が、現在の CTL 水準をおおむね上回っています。
+- **CTL が安定**：最近の負荷が、モデル上の水準をほぼ維持しています。
+- **CTL が低下**：最近の負荷が、減量期やテーパリングを含め、現在の CTL 水準をおおむね下回っています。
+
+## 判断に使える質問
+
+CTL は次の確認に役立ちます。
+
+- 現在のフィットネス（CTL）は上昇、維持、低下のどれか？
+- 未実施のトレーニングや回復期間によって長期傾向が変わったか？
+- 現在のプランは意図した負荷方向を生み出しているか？
+- 閾値やソースの変更によって比較可能性が下がったか？
+
+CTL だけでは次のことは判断できません。
+
+- ユーザーがトレーニングにうまく適応したか？
+- 明日の高強度トレーニングが安全か？
+- ユーザーが回復し、健康で、レースの準備ができているか？
+- あるユーザーが別のユーザーより高い体力を持つか？
+
+判断する前に、パフォーマンス傾向、ワークアウトの実行品質、主観的な状態、[疲労（ATL）](/ja/docs/metrics/pmc/acute-training-load)、[コンディション（TSB）](/ja/docs/metrics/pmc/training-stress-balance)も確認してください。
+
+## 参考
+
+- [Intervals.icu：フィットネス、疲労、コンディションの計算式](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE 用語集：Chronic Training Load（CTL）](https://runalyze.com/glossary/ctl)
+- [Calvert ほか（1976）：A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## よくある質問
+
+### 慢性トレーニング負荷とは？
+
+CTL は PMC の遅いフィットネス推移です。日次負荷を標準 42 日の時定数で指数平均します。最近の日が今の CTL より高ければ上がり、低ければ下がります。
+
+### CTLの計算式は？
+
+`CTL_today = CTL_yesterday × e^(−1/42) + daily_load × (1 − e^(−1/42))`。標準では今日の重みは約 2.35%、昨日の CTL は約 97.65% です。休養日でも線は減衰します。
+
+### CTLが高いほど強いですか？
+
+単体では言えません。上昇は、モデル負荷が長期平均を押し上げたことだけを示します。適応、健康、レース準備は、パフォーマンス、主観、[ATL](/ja/docs/metrics/pmc/acute-training-load)、[TSB](/ja/docs/metrics/pmc/training-stress-balance)と合わせて見てください。
+
+### FTPを変えたらCTLが跳ねた理由は？
+
+CTL は日次負荷から作られます。FTP、ゾーン、負荷ソースの優先順位を変えると過去の TSS/TRIMP が書き換わり、新しい練習がなくても線が動きます。
+
+## 関連ページ
+
+- [トレーニング負荷とは](/ja/docs/metrics/training-load)
+- [疲労（ATL）](/ja/docs/metrics/pmc/acute-training-load)
+- [コンディション（TSB）](/ja/docs/metrics/pmc/training-stress-balance)
+- [日次 TSS から CTL、ATL、TSB を投影する](/ja/training-load-calculator)
+- [時間・NP・FTP から TSS を計算する](/ja/tss-calculator)
+- [計画内でトレーニング負荷を管理する](/ja/training-load)
+- [AIコーチで負荷調整案を作る](/ja/ai-training-plan)

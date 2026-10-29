@@ -1,0 +1,41 @@
+---
+title: コンディション（TSB）
+description: Trainingload.ai が同日のフィットネスと疲労からコンディション（TSB）を算出する方法と、レディネスと混同しない読み方を解説します。
+keywords: ["コンディション", "TSB", "Training Stress Balance", "TSB 計算式", "負荷バランス"]
+---
+
+# コンディション（TSB）とは
+
+**コンディション（TSB）**は、フィットネス（CTL）と疲労（ATL）の差です。反応の速い直近負荷が、長期負荷モデルに対してどの位置にあるかを示します。
+
+TSB は 2 本の負荷曲線から導くモデル値です。レディネス、回復、健康、パフォーマンスを直接測定するものではありません。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <TsbStatPreviewCard value="-12" metricLabel="TSB"
+    valuePopoverTitle="TSB の値"
+    valuePopoverBody="当日のフィットネス（CTL）から当日の疲労（ATL）を差し引きます。"
+    rangePopoverTitle="TSB の文脈"
+    rangePopoverBody="正負は 2 つの負荷モデルの関係を表し、普遍的なレディネス区分ではありません。"
+    helpTitle="負荷バランス"
+    details="2 本の曲線を比較したうえで、活動、パフォーマンス、主観状態を確認します。" />
+</div>
+
+```text
+TSB_today = CTL_today − ATL_today
+```
+
+CTL が 50、ATL が 65 なら TSB は `−15` です。Trainingload.ai は Intervals.icu と同じく当日値を使います。一方、TrainingPeaks の公開説明では、今日の Form に前日の Fitness と Fatigue を使います。サービス間で比較する際は、日付の扱い、時定数、負荷ソースを確認してください。
+
+TSB が負なら ATL が CTL より高く、正なら低い状態です。0 付近は 2 本の曲線が近いだけで、生理的な均衡を証明しません。負荷期には下がり、休養やテーパリングでは上がりやすいものの、符号だけで本人の状態は決まりません。
+
+「ピーク」「最適」「危険」といった一律の区分を安全基準として使わず、[フィットネス（CTL）](/ja/docs/metrics/pmc/chronic-training-load)、[疲労（ATL）](/ja/docs/metrics/pmc/acute-training-load)、元の活動、パフォーマンス、主観状態を併せて判断してください。
+
+## 参考資料
+
+- [Intervals.icu：当日 Form の計算方法](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE：Training Stress Balance](https://runalyze.com/glossary/tsb)
+- [TrainingPeaks：Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+
+## 関連ページ
+
+- [日次 TSS から CTL、ATL、TSB を投影する](/ja/training-load-calculator)

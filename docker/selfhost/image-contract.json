@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "configSchemaVersion": 1,
+  "license": "AGPL-3.0-only",
+  "platforms": [
+    "linux/amd64",
+    "linux/arm64"
+  ],
+  "runtimeIdentity": {
+    "uid": 10001,
+    "gid": 10001
+  },
+  "forbiddenRuntimeCommands": [
+    "npm",
+    "npx",
+    "pnpm",
+    "corepack",
+    "yarn",
+    "yarnpkg"
+  ],
+  "forbiddenRuntimePackages": [
+    "@better-auth/expo",
+    "@creem_io/",
+    "@waffo/",
+    "@revenuecat/",
+    "react-native-purchases",
+    "posthog-js",
+    "posthog-node",
+    "@langfuse/",
+    "langfuse",
+    "@modelcontextprotocol/",
+    "@aws-sdk/",
+    "prisma",
+    "typescript",
+    "ts-node",
+    "parquet-wasm"
+  ],
+  "baseImages": {
+    "node": {
+      "reference": "node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+      "source": "https://hub.docker.com/_/node",
+      "architectures": [
+        "amd64",
+        "arm64"
+      ]
+    },
+    "debian": {
+      "reference": "debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587",
+      "source": "https://hub.docker.com/_/debian",
+      "architectures": [
+        "amd64",
+        "arm64"
+      ]
+    }
+  },
+  "requiredLabels": [
+    "org.opencontainers.image.title",
+    "org.opencontainers.image.description",
+    "org.opencontainers.image.source",
+    "org.opencontainers.image.revision",
+    "org.opencontainers.image.version",
+    "org.opencontainers.image.created",
+    "org.opencontainers.image.licenses",
+    "org.opencontainers.image.base.name",
+    "io.trainingload.selfhost.config-schema",
+    "io.trainingload.selfhost.image-role"
+  ],
+  "images": {
+    "migrate": {
+      "name": "trainingload-migrate",
+      "dockerfile": "packages/prisma/Dockerfile",
+      "packageFile": "packages/prisma/package.json",
+      "runtimeLayout": "scratch-minimal-rootfs",
+      "baseImage": "debian",
+      "maximumSizeBytes": null,
+      "port": null,
+      "workdir": "/app/packages/prisma",
+      "entrypoint": [
+        "node",
+        "core/runner/core-migration-runner.mjs"
+      ]
+    },
+    "server": {
+      "name": "trainingload-server",
+      "dockerfile": "apps/server/Dockerfile",
+      "packageFile": "apps/server/package.json",
+      "runtimeLayout": "scratch-minimal-rootfs",
+      "baseImage": "debian",
+      "maximumSizeBytes": 734003200,
+      "port": 3001,
+      "workdir": "/app/apps/server",
+      "entrypoint": [
+        "node",
+        "dist/apps/server/src/main.self-host"
+      ]
+    },
+    "client": {
+      "name": "trainingload-client",
+      "dockerfile": "apps/client/Dockerfile",
+      "packageFile": "apps/client/package.json",
+      "runtimeLayout": "scratch-minimal-rootfs",
+      "baseImage": "debian",
+      "maximumSizeBytes": 367001600,
+      "port": 3002,
+      "workdir": "/app/apps/client",
+      "entrypoint": [
+        "node",
+        "server.js"
+      ]
+    }
+  },
+  "requiredDockerignorePatterns": [
+    ".git",
+    ".github",
+    ".codex",
+    ".agents",
+    ".env",
+    ".env.*",
+    "**/*.key",
+    "**/*.pem",
+    "**/*.p12",
+    "**/*.pfx",
+    "**/.aws",
+    "**/.ssh",
+    "**/secrets",
+    "**/credentials",
+    "uploads",
+    "data",
+    "backups"
+  ]
+}

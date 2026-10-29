@@ -1,0 +1,152 @@
+---
+title: 配置自托管实例
+description: 选择本地数据路径、控制网络暴露，并配置由 Owner 管理的 OpenAI-compatible AI 供应商。
+---
+
+# 配置自托管实例
+
+v1 有意区分宿主级配置和产品内配置。容器启动前必须确定本地数据路径、端口和 Client 绑定；AI 供应商则可以由 Owner 随时在 Client 中修改。
+
+## 开始前
+
+- 只使用发行包 `.env.example` 和实例 schema 中声明的设置。
+- 每次修改生命周期状态前，先执行完全相同参数的 `--dry-run --json`。
+- 不要把 `.env.selfhost`、密码、API Key 或 token 粘贴到聊天、Issue 或共享终端记录中。
+- 已有实例的数据目录是权威数据，不能把它当作可随意替换或清理的普通目录。
+
+## 选择本地数据路径
+
+默认路径是发行目录内的 `./data`，其中包含 PostgreSQL 数据、上传文件、操作记录、备份和缓存。应用会把宿主机中的上传目录挂载到 `/data/uploads`；v1 不要求额外的对象存储服务。
+
+要在第一次安装前指定其他路径：
+
+1. 在已经验证并解压的发行目录中，根据内置模板创建私有实例配置：
+
+   ```bash
+   umask 077
+   cp .env.example .env.selfhost
+   chmod 600 .env.selfhost
+   ```
+
+2. 在本机使用 `openssl rand -hex 32` 分别生成三个不同的 32 字节值，并替换 `.env.selfhost` 中的三个 secret 占位值。安装器正常执行时会自动完成这一步。
+3. 取消 `SELF_HOST_DATA_ROOT` 的注释并指定专用路径，例如：
+
+   ```dotenv
+   SELF_HOST_DATA_ROOT=/srv/trainingload-data
+   ```
+
+4. 正常执行安装 dry-run，只有结果返回 `"ok": true` 时才继续：
+
+   ```bash
+   ./install.sh --dry-run --json
+   ./install.sh --json
+   ```
+
+目标路径可以不存在，也可以是专门用于该实例的目录。管理 CLI 会拒绝文件系统根目录、发行目录的祖先、签名发行子目录、不安全的符号链接和包含无关文件的目录。
+
+不要修改运行中实例的 `SELF_HOST_DATA_ROOT` 来充当文件迁移。迁移已有实例时，应先创建经过验证的备份，再恢复到新初始化的目标实例。
+
+## 控制网络暴露
+
+默认只在 loopback 发布 Client HTTP 端口：
+
+```dotenv
+SELF_HOST_SITE_ADDRESS=http://localhost:43210
+SELF_HOST_HTTP_BIND=127.0.0.1
+SELF_HOST_HTTP_PORT=43210
+```
+
+端口被占用时，同时修改站点地址和 HTTP 端口。PostgreSQL 与 Server 保留在 Compose 私有网络中。其他电脑访问时使用 SSH 隧道，保持浏览器 origin 为本机地址。应用发行包不包含 Caddy、HTTPS 端口或 Docs profile。
+
+通过生命周期入口验证宿主配置变更：
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+./self-host doctor --json
+```
+
+### 本地请求路径
+
+浏览器请求同源 Client BFF，由它通过私有网络转发 API、Cookie、上传和流式响应。浏览器自带的转发头会被移除，Self-host 不信任任意代理传入的客户端地址。
+
+## 单 Owner 访问
+
+首次页面只要求一个用户名，随后进入 onboarding。已有会话始终属于同一个 Owner。数据库唯一约束和服务端事务拒绝第二个用户；没有开启公开注册或多账号的配置开关。
+
+公共应用没有 Cloud 的密码、注册和 OAuth 页面。本机会话过期后自动恢复。Owner 显式确认账号删除后，异步流程清理该账号的数据，完成后回到用户名初始化页。备份和实例配置的保留应单独管理。
+
+## 连接 Intervals.icu
+
+自托管只支持一种训练平台连接：Owner 使用自己的 **Intervals.icu 个人 API Key**。不需要也不支持 Intervals.icu OAuth client、redirect URI 或 webhook；其他训练平台连接保持隐藏，服务端同样会拒绝对应请求。
+
+连接步骤：
+
+1. 打开 [Intervals.icu Settings](https://intervals.icu/settings)，在页面底部复制个人 API Key；Client 连接弹窗中的 **获取 API Key** 按钮会直接打开该页面。
+2. 在首次引导的“导入活动”步骤选择 **Intervals.icu**，或稍后打开 **账号 → 第三方连接 → Intervals.icu**。
+3. 填入 API Key，选择需要的活动、计划课、wellness 和运动设置同步方向，然后保存。
+4. 完成一次手动同步，确认最近同步时间和导入结果。
+
+[Intervals.icu Open API 说明](https://www.intervals.icu/features/open-api/)每个用户都可以用个人 API Key 调用 REST API，并支持上传/下载活动、wellness 和计划课等能力。API Key 只提交给你的本地 Server；Server 使用安装时生成的独立 integration secret 通过 AES-256-GCM 加密后保存到 PostgreSQL，后续接口不会返回明文。
+
+这不是离线功能。启用后，本地 Server 会直接访问 `intervals.icu`，并按你选中的同步方向读取或发送数据。API Key 属于具体的 Intervals.icu 用户，不应放进共享环境变量，也不要粘贴到日志、Issue 或聊天中。
+
+备份包含数据库里的 API Key 密文，实例密钥需要在安全位置单独保存。恢复数据库时同时恢复原始认证和集成密钥，已有凭据才能继续解密；管理工具不会打印或导出这些密钥。完整流程见发行包中的 `BACKUP_RESTORE.md`。
+
+## 在 Client 中配置 AI
+
+AI 默认关闭。首次引导的最后一步会直接提供自有 AI 配置，不显示 Trainingload.ai 云端供应商授权页；也可以跳过并稍后配置：
+
+1. 打开本地 Client。
+2. 在首次引导中打开“配置你的 AI 服务”，或稍后打开 **设置 → 自托管 AI**。
+3. 选择 OpenAI、DeepSeek、OpenRouter、阿里云百炼，或**自定义 OpenAI-compatible**。
+4. 首次配置或切换服务商时输入供应商 API Key，并填写常规模型和推理模型；内置服务商的 Base URL 可留空使用默认地址，自定义 OpenAI-compatible 服务商则必须填写完整 Base URL。
+5. 保存后打开一项 AI 功能，验证一次请求。
+
+模型名称必须是供应商实际支持的标识。远程 Base URL 应使用 HTTPS；只有完全控制局域网链路时，才考虑对本地模型端点使用 HTTP。
+
+OpenAI API Key 与 ChatGPT Plus 或 Pro 订阅是两回事。ChatGPT 订阅不能当作 API Key，也不会为该实例提供 API 用量。
+
+### API Key 如何保存
+
+- 浏览器只把 Key 提交给你的本地 `server`。
+- Server 使用实例 auth secret 派生加密密钥，并通过 AES-256-GCM 把供应商 Key 加密后存入 PostgreSQL。
+- 后续 API 只返回“是否已配置”，永远不会返回明文 Key。
+- Owner 配置优先于部署级 AI 环境变量，并在 v1 单 Server 运行时中立即生效。
+- 选择**关闭**会删除已保存的供应商凭据并停用 AI。
+
+恢复数据库时应同时恢复原始实例认证密钥。更换密钥会导致已有 AI 凭据和认证状态无法解密；应先确认原始配置再启动。
+
+### 哪些数据会离开本机
+
+Core Local 可以在 AI 关闭时运行。启用任何外部供应商都是显式的出站例外：本次请求所需的提示词和训练上下文会发送给所选供应商。启用前应检查其数据保留、隐私、区域和计费条款。
+
+自托管实例不使用 Trainingload.ai 的会员套餐、AI 积分或积分补充包。Client 的 **AI 用量** 页面不会调用云端计费接口，只说明 BYOK 的计费边界；实际 API 用量、余额和费用应在所配置 AI 服务商的控制台查看。
+
+## 用于自动化部署的环境变量兜底
+
+发行 schema 仍允许在 `.env.selfhost` 中提供完整的供应商配置组，用于无人值守部署。这只是兜底方式，不是推荐的交互路径。Client 不会显示环境中的 Key；从环境变量切换到 Client 管理时，Owner 必须重新输入 Key。
+
+## 验证配置
+
+- 宿主级配置修改后，`./self-host doctor --json` 返回 `"ok": true`。
+- 数据根目录包含实例 marker 和预期子目录，没有无关文件。
+- 自托管 AI 设置只对实例 Owner 显示。
+- 保存 AI 设置后，输入框被清空，页面只显示 Key 已配置。
+- 自托管的第三方连接页只显示 Intervals.icu，且连接弹窗只提供 API Key，不显示 OAuth。
+- **AI 用量** 页面不显示会员购买、积分余额或积分补充包，也不会请求 `/billing/*` 接口。
+- 保存 Intervals.icu API Key 后，输入框被清空，页面只显示 Key 末四位；手动同步可以完成。
+- 关闭 AI 后不再产生新的供应商请求，非 AI 功能仍然正常。
+
+## 故障排查
+
+- **数据目录被拒绝：** 选择发行目录之外的空白专用路径，不要绕过 marker 或符号链接检查。
+- **没有看到自托管 AI：** 确认当前是自托管实例，并且登录账号是已认领的 Owner。
+- **切换供应商后要求重新输入 Key：** 这是有意的安全限制，供应商变化必须提供新凭据。
+- **恢复后 AI 不可用：** 先检查是否恢复了原始实例认证密钥，再运行 `doctor`。
+- **恢复后 Intervals.icu 不可用：** 检查原始集成密钥是否随数据库配置一并恢复。
+- **模型被上游拒绝：** 从供应商账号复制准确的模型标识，并确认 Key 有权访问该模型。
+
+## 下一步
+
+阅读[管理实例](/zh/docs/self-host/operations)并安排可验证备份。遇到失败时，继续查看[故障排查](/zh/docs/self-host/troubleshooting)。

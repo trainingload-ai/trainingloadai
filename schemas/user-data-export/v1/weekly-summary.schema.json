@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/weekly-summary.schema.json",
+  "title": "Weekly training summary",
+  "description": "A deterministic weekly aggregation of training volume and load.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "weekStart": {
+      "type": "string",
+      "description": "The Monday starting the ISO week in YYYY-MM-DD format.",
+      "format": "date"
+    },
+    "activityCount": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The number of activities in the week."
+    },
+    "totalDurationSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The total activity duration in seconds."
+    },
+    "totalTrainingStressScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The total normalized training stress accumulated in the week."
+    },
+    "sportBreakdown": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The weekly training stress grouped by sport.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "weekStart"
+  ]
+}

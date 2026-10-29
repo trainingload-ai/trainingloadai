@@ -1,0 +1,11 @@
+{
+  "completionEmail": {
+    "subject": "Your Trainingload.ai account deletion is complete",
+    "completed": "Your Trainingload.ai account and its associated data have been deleted.",
+    "thanks": "Thank you for having used Trainingload.ai.",
+    "feedback": "If you are willing to share why you left or suggest how we can improve, reply directly to this email or contact us.",
+    "feedbackAction": "Send feedback",
+    "feedbackSubject": "Trainingload.ai account deletion feedback",
+    "closing": "We wish you all the best with your training."
+  }
+}

@@ -1,0 +1,130 @@
+---
+title: Activity History and Best Efforts
+description: Review yearly activity volume, rank best distance or time efforts, inspect GPS routes, and trace every result back to its source activity.
+keywords:
+  [
+    "activity history",
+    "best distance",
+    "training heatmap",
+    "workout map",
+    "personal best efforts",
+  ]
+---
+
+# Activity History and Best Efforts
+
+Use the history tools to move from “what happened?” to a specific source activity. Activity Stats summarizes volume, Best Distance ranks sustained efforts, and Map adds route context.
+
+These pages describe recorded data. They do not certify a race result, predict a finish time, or explain why performance changed without further review.
+
+## Before you begin
+
+- Let imported activities reach Ready status.
+- Confirm sport classification, time zone, and unit system.
+- Correct duplicates and obvious sensor errors before comparing totals or records.
+- Select a time range that matches the question.
+- Remember that Map requires usable GPS coordinates; indoor and GPS-free activities can still appear elsewhere.
+
+## 1. Review yearly activity volume
+
+Open **Analysis → Activity Stats**. The page uses the current Activities sport filter, so set that filter before interpreting the report.
+
+Choose a year from the sidebar. The available years extend back to the earliest activity for the selected sport. The heatmap covers the selected year's available 365-day window and counts activity days.
+
+Below the heatmap, choose one metric:
+
+- Distance.
+- Duration.
+- Heart rate.
+- Activity count.
+- Calories.
+
+Then aggregate the line chart by day, week, or month. Use daily data to investigate a short period, weekly data to review consistency, and monthly data to compare broad volume. Heart rate is averaged across contributing values; additive metrics such as distance and duration are summed.
+
+<DocsScreenshot
+  id="activity-stats-year"
+  title="Yearly activity history"
+  description="Select a sport and year, then compare the activity heatmap with one metric aggregated by day, week, or month."
+  route="Analysis → Activity Stats"
+/>
+
+## 2. Find best efforts
+
+Open **Analysis → Best Distance** and follow this order:
+
+1. Select **Run**, **Cycling**, or **Swim**.
+2. Choose **By Distance** or **By Time**.
+3. Set the date range.
+4. Select a distance or duration target.
+5. Review the ranked records; the page requests up to ten results per target.
+6. Open the source activity from the record row.
+
+**By Distance** answers “What was my fastest time for this distance?” **By Time** answers “How far did I cover during this duration?” The displayed pace helps compare efforts inside the same sport and context.
+
+<DocsScreenshot
+  id="best-distance-records"
+  title="Ranked best efforts"
+  description="Select sport, distance-or-time mode, date range, and target before opening the activity behind a ranked result."
+  route="Analysis → Best Distance"
+/>
+
+Do not call every row a personal record. A result is the best qualifying segment found in the selected data and range. It can come from a training activity, depend on GPS quality, and change after reprocessing or correcting an activity.
+
+## 3. Inspect route history on Map
+
+Open **Map**, then set the time and sport filters. The page draws routes for matching activities that contain usable GPS data.
+
+Use Map to:
+
+- Find activities by location or route shape.
+- Compare where repeated sessions occurred.
+- Spot an incomplete or implausible route before opening the activity.
+- Create a route-based share poster for a selected activity.
+
+Select a route to open its activity poster. From the poster, continue to the full activity detail when metrics, processing status, or sensor evidence matters.
+
+<DocsScreenshot
+  id="activity-history-map"
+  title="Filtered activity routes"
+  description="Use time and sport filters to narrow GPS routes, then select one route to inspect its activity poster and source detail."
+  route="Map"
+/>
+
+Map is sensitive location data. Review the poster and route before sharing, and avoid exposing home, workplace, or another private start location.
+
+## 4. Investigate a surprising result
+
+If a yearly total, best effort, or route looks wrong:
+
+1. Open the source activity.
+2. Confirm start time, sport, provider, processing status, and unit system.
+3. Inspect GPS, distance, duration, pauses, and relevant sensor streams.
+4. Check for duplicates or incorrect sport classification.
+5. Correct the source activity or settings, then refresh the summary page.
+
+Treat the source activity as the evidence. A summary page can reveal the problem but usually cannot explain or repair it by itself.
+
+## Verify the result
+
+- Activity Stats uses the intended sport, year, metric, and aggregation.
+- A best-effort row opens the expected source activity and matches its date.
+- The selected Map route belongs to the expected activity.
+- GPS-free activities are not mistaken for missing imports merely because they are absent from Map.
+- Any shared poster has been checked for private location data.
+
+## Troubleshooting
+
+- **The wrong sport appears in Activity Stats:** return to Activities, change the sport filter, then reopen or refresh Activity Stats.
+- **Only the current year is available:** the selected sport has no earlier qualifying activity, or the earliest-activity query has not completed.
+- **The heatmap and line chart seem different:** the heatmap counts activity days; the line chart uses the selected metric and aggregation.
+- **A best effort is missing:** widen the date range, confirm the sport and target, and check that the activity has usable distance and time data.
+- **A record looks impossible:** inspect GPS spikes, pauses, distance, duration, and duplicate activities before using it.
+- **An activity does not appear on Map:** it may be outside the filters or have no usable GPS route.
+- **Selecting a route opens the wrong-looking poster:** verify the activity date and open the full detail before sharing.
+
+## Next steps
+
+- [Activities Feed and Search](/docs/guide/activity-feed-search)
+- [Activity Detail](/docs/guide/activity-detail)
+- [Performance Analysis Pages](/docs/guide/performance-analysis-pages)
+- [Training Analysis Workflow](/docs/guide/training-analysis-workflow)

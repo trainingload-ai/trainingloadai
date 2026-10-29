@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "defaults": {
+    "webViewport": "1440x960",
+    "mobileViewport": "390x844",
+    "dataPolicy": "Use synthetic athlete data; hide email, tokens, exact home location, and third-party account identifiers."
+  },
+  "captures": [
+    {
+      "id": "getting-started-web-home",
+      "article": "guide/getting-started",
+      "platform": "web",
+      "status": "pending",
+      "route": "/home",
+      "state": "Signed in with one processed activity and an active or draft plan",
+      "asset": "docs/getting-started/web-home.webp"
+    },
+    {
+      "id": "choose-path-mobile-today",
+      "article": "guide/choose-your-path",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/today",
+      "state": "Today tab showing the next planned workout",
+      "asset": "docs/getting-started/mobile-today.webp"
+    },
+    {
+      "id": "web-mobile-navigation",
+      "article": "guide/web-and-mobile",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/",
+      "state": "Authenticated tab navigation with Today, Calendar, Coach, Plan, and Me",
+      "asset": "docs/platform/mobile-navigation.webp"
+    },
+    {
+      "id": "product-tour-web-home",
+      "article": "guide/product-tour",
+      "platform": "web",
+      "status": "pending",
+      "route": "/home",
+      "state": "Home workspace showing plan, recent activity, and training state",
+      "asset": "docs/product-tour/web-home.webp"
+    },
+    {
+      "id": "mobile-recording-ready",
+      "article": "guide/mobile-recording",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/record",
+      "state": "Recording screen ready, with permission status and sport selected",
+      "asset": "docs/mobile/recording-ready.webp"
+    },
+    {
+      "id": "mobile-manual-plan-schedule",
+      "article": "guide/mobile-plans-and-strength",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/plans/create",
+      "state": "Manual plan schedule step with endurance and strength sessions arranged across multiple weeks",
+      "asset": "docs/mobile/manual-plan-schedule.webp"
+    },
+    {
+      "id": "mobile-strength-session",
+      "article": "guide/mobile-plans-and-strength",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/strength/{activityId}",
+      "state": "Active strength session with elapsed time, exercise sets, completion controls, and optional session RPE",
+      "asset": "docs/mobile/strength-session.webp"
+    },
+    {
+      "id": "integrations-connections",
+      "article": "guide/integrations",
+      "platform": "web",
+      "status": "pending",
+      "route": "/account",
+      "state": "Third-party connections section with provider status cards",
+      "asset": "docs/integrations/connections.webp"
+    },
+    {
+      "id": "manual-workout-editor",
+      "article": "planning/manual-workout-editor",
+      "platform": "web",
+      "status": "pending",
+      "route": "/plans/create/manual",
+      "state": "Manual workout dialog with sport selector, structured builder, notes, and preview",
+      "asset": "docs/planning/manual-workout-editor.webp"
+    },
+    {
+      "id": "activity-detail-review",
+      "article": "guide/activity-detail",
+      "platform": "web",
+      "status": "pending",
+      "route": "/activities/{activityId}",
+      "state": "Ready activity detail with summary, time-series charts, load source, route context, and plan link",
+      "asset": "docs/activities/activity-detail-review.webp"
+    },
+    {
+      "id": "activities-feed-review",
+      "article": "guide/activity-feed-search",
+      "platform": "web",
+      "status": "pending",
+      "route": "/activities",
+      "state": "Activity feed with Ready and processing activities, filters, load values, and one plan-link control",
+      "asset": "docs/activities/feed-review.webp"
+    },
+    {
+      "id": "today-execution-overview",
+      "article": "guide/today-and-current-state",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/today",
+      "state": "Synthetic athlete with one open planned workout, weekly load comparison, selected current-status cards, and a recent Ready activity",
+      "asset": "docs/daily/today-execution-overview.webp"
+    },
+    {
+      "id": "calendar-plan-actual",
+      "article": "guide/calendar",
+      "platform": "web",
+      "status": "pending",
+      "route": "/calendar",
+      "state": "Calendar and selected-day panel showing planned workouts, completed activities, and daily load",
+      "asset": "docs/calendar/plan-actual.webp"
+    },
+    {
+      "id": "dashboard-trend-review",
+      "article": "guide/dashboard",
+      "platform": "web",
+      "status": "pending",
+      "route": "/home",
+      "state": "Dashboard with time and sport filters, fitness status, and overview cards for a synthetic athlete",
+      "asset": "docs/dashboard/trend-review.webp"
+    },
+    {
+      "id": "profile-thresholds-calibration",
+      "article": "guide/profile-thresholds-zones",
+      "platform": "web",
+      "status": "ready",
+      "route": "/account",
+      "state": "Profile settings with time zone, units, current thresholds, load-source priority, and sport-specific zones",
+      "asset": "docs/settings/profile-thresholds-calibration-en.png",
+      "aspectRatio": "896 / 385",
+      "localizedAssets": {
+        "zh": "docs/settings/profile-thresholds-calibration-zh.png"
+      }
+    },
+    {
+      "id": "activity-import-batch",
+      "article": "guide/upload-activity-files",
+      "platform": "web",
+      "status": "pending",
+      "route": "/activities",
+      "state": "Import batch dialog with one completed file, one duplicate warning, and one failed file with a synthetic filename",
+      "asset": "docs/activities/import-batch.webp"
+    },
+    {
+      "id": "ai-coach-contextual-review",
+      "article": "guide/ai-coach",
+      "platform": "web",
+      "status": "pending",
+      "route": "/ai-coach",
+      "state": "Activity or plan review conversation showing evidence, recommendation, and a confirmation card",
+      "asset": "docs/coach/contextual-review.webp"
+    },
+    {
+      "id": "strength-workout-builder",
+      "article": "planning/strength-workouts",
+      "platform": "web",
+      "status": "pending",
+      "route": "/plans/create/manual",
+      "state": "Strength workout builder with one exercise, warm-up group, and work group",
+      "asset": "docs/planning/strength-workout-builder.webp"
+    },
+    {
+      "id": "plan-active-summary",
+      "article": "planning/plan-lifecycle",
+      "platform": "web",
+      "status": "pending",
+      "route": "/plans/{planId}",
+      "state": "Active plan detail showing status, week structure, and expected-versus-actual load",
+      "asset": "docs/planning/active-plan-summary.webp"
+    },
+    {
+      "id": "plan-create-paths",
+      "article": "guide/create-training-plan",
+      "platform": "web",
+      "status": "pending",
+      "route": "/plans/create",
+      "state": "Plan creation entry showing manual and AI-assisted paths with a synthetic goal brief",
+      "asset": "docs/planning/create-paths.webp"
+    },
+    {
+      "id": "active-plan-execution",
+      "article": "guide/manage-active-plan",
+      "platform": "web",
+      "status": "pending",
+      "route": "/plans/current",
+      "state": "Current plan showing today's workout, status controls, one linked completed activity, and expected-versus-actual load",
+      "asset": "docs/planning/active-plan-execution.webp"
+    },
+    {
+      "id": "training-analysis-decision",
+      "article": "guide/training-analysis-workflow",
+      "platform": "web",
+      "status": "pending",
+      "route": "/pmc",
+      "state": "PMC range with CTL, ATL, TSB, recent activities, and an overlapping active-plan period for a synthetic athlete",
+      "asset": "docs/analysis/training-decision.webp"
+    },
+    {
+      "id": "pmc-marathon-window",
+      "article": "guide/pmc-marathon-adjustment",
+      "platform": "web",
+      "status": "pending",
+      "route": "/pmc",
+      "state": "Six-week synthetic marathon block with CTL, ATL, TSB, a recent overload, and the next key workout date",
+      "asset": "docs/analysis/pmc-marathon-window.webp"
+    },
+    {
+      "id": "effective-vo2max-trend",
+      "article": "guide/effective-vo2max-for-endurance",
+      "platform": "web",
+      "status": "pending",
+      "route": "/dashboard",
+      "state": "Running-only VO2Max metric history with several comparable Ready activities and one visible outlier",
+      "asset": "docs/analysis/effective-vo2max-trend.webp"
+    },
+    {
+      "id": "ai-adjustment-confirmation",
+      "article": "guide/ai-marathon-plan-adjustments",
+      "platform": "web",
+      "status": "pending",
+      "route": "/ai-coach",
+      "state": "Plan-aware AI Coach conversation with evidence, one conservative workout adjustment, and an unconfirmed action card",
+      "asset": "docs/analysis/ai-adjustment-confirmation.webp"
+    },
+    {
+      "id": "competition-event-details",
+      "article": "guide/competitions",
+      "platform": "web",
+      "status": "pending",
+      "route": "/competitions",
+      "state": "Competition detail with importance, goal, countdown, and current plan impact",
+      "asset": "docs/competitions/event-details.webp"
+    },
+    {
+      "id": "review-automation-mobile",
+      "article": "guide/notifications-and-reviews",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/account/review-automation",
+      "state": "Review automation settings for activity, daily, weekly, monthly, and plan reviews",
+      "asset": "docs/reviews/mobile-review-automation.webp"
+    },
+    {
+      "id": "analysis-hub-tools",
+      "article": "guide/performance-analysis-pages",
+      "platform": "web",
+      "status": "pending",
+      "route": "/analysis",
+      "state": "Synthetic athlete signed in; Analysis hub shows training and performance groups, searchable available tools, and the Progression card marked Coming soon",
+      "asset": "docs/analysis/analysis-hub-tools.webp"
+    },
+    {
+      "id": "power-analysis-tabs",
+      "article": "guide/performance-analysis-pages",
+      "platform": "web",
+      "status": "pending",
+      "route": "/power",
+      "state": "Cycling selected with two synthetic comparison ranges, visible Curve, Maximum, Zones, and Profile tabs, and qualifying power activities",
+      "asset": "docs/analysis/power-analysis-tabs.webp"
+    },
+    {
+      "id": "activity-stats-year",
+      "article": "guide/activity-history-insights",
+      "platform": "web",
+      "status": "pending",
+      "route": "/activities/stats",
+      "state": "Running filter selected; a complete synthetic year shows contribution heatmap, distance metric, monthly aggregation, and multiple year choices",
+      "asset": "docs/activities/activity-stats-year.webp"
+    },
+    {
+      "id": "best-distance-records",
+      "article": "guide/activity-history-insights",
+      "platform": "web",
+      "status": "pending",
+      "route": "/pace/best-distance",
+      "state": "Running, By Distance, all-time, and 10 km target selected with several ranked synthetic records linked to source activities",
+      "asset": "docs/activities/best-distance-records.webp"
+    },
+    {
+      "id": "activity-history-map",
+      "article": "guide/activity-history-insights",
+      "platform": "web",
+      "status": "pending",
+      "route": "/map",
+      "state": "Recent running filter selected with synthetic GPS routes away from private locations and one route selected for its activity poster",
+      "asset": "docs/activities/activity-history-map.webp"
+    },
+    {
+      "id": "account-security-status",
+      "article": "guide/account-permissions-and-usage",
+      "platform": "web",
+      "status": "pending",
+      "route": "/account",
+      "state": "Synthetic verified account with password status visible; hide the email username and all private identifiers",
+      "asset": "docs/account/security-status.webp"
+    },
+    {
+      "id": "mobile-permission-sources",
+      "article": "guide/account-permissions-and-usage",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/account/connections",
+      "state": "Health and Location local-source states plus a mix of connected and disconnected third-party providers; no provider account identifiers",
+      "asset": "docs/account/mobile-permission-sources.webp"
+    },
+    {
+      "id": "ai-usage-ledger",
+      "article": "guide/account-permissions-and-usage",
+      "platform": "web",
+      "status": "pending",
+      "route": "/usage",
+      "state": "Synthetic active plan with remaining grant, seven-day token and call trends, and both debit and credit ledger events",
+      "asset": "docs/account/ai-usage-ledger.webp"
+    },
+    {
+      "id": "strava-oauth-settings",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "web",
+      "status": "pending",
+      "route": "/account",
+      "state": "Synthetic Strava account disconnected; initial 60-day sync and all ongoing data-direction settings visible; no athlete identifier",
+      "asset": "docs/connections/strava-oauth-settings.webp"
+    },
+    {
+      "id": "intervals-icu-auth-methods",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "web",
+      "status": "pending",
+      "route": "/account",
+      "state": "Synthetic Intervals.icu connection dialog showing OAuth and API Key tabs; API key field empty and no secret visible",
+      "asset": "docs/connections/intervals-icu-auth-methods.webp"
+    },
+    {
+      "id": "mobile-provider-settings",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "mobile",
+      "status": "pending",
+      "route": "/account/connections",
+      "state": "Synthetic connected provider sheet with sync directions, Save settings, Sync now, and Disconnect; no provider account identifier",
+      "asset": "docs/connections/mobile-provider-settings.webp"
+    },
+    {
+      "id": "garmin-history-import",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "web",
+      "status": "pending",
+      "route": "/account",
+      "state": "Synthetic completed Garmin history-import job showing stage counts; temporary download URL field blank and no private archive metadata",
+      "asset": "docs/connections/garmin-history-import.webp"
+    },
+    {
+      "id": "strength-dsl-rules-input",
+      "article": "planning/strength-workout-dsl",
+      "platform": "web",
+      "status": "pending",
+      "route": "/plans/create/manual",
+      "state": "Strength Training selected with a validated two-exercise synthetic DSL example; Rules tab and parsed strength preview visible; no athlete data",
+      "asset": "docs/planning/strength-dsl-rules-input.webp"
+    }
+  ]
+}

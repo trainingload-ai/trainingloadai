@@ -1,0 +1,126 @@
+---
+title: Connect Data
+description: Connect training data to Trainingload.ai so completed workouts can feed activity analysis, training load, plans, calendar views, and AI Coach reviews.
+keywords:
+  [
+    "connect training data",
+    "Strava sync",
+    "activity import",
+    "Trainingload.ai data",
+  ]
+---
+
+# Connect Data
+
+Trainingload.ai needs completed workouts before it can analyze execution, load, and readiness. You can bring data in through platform sync or by uploading files.
+
+## Before you begin
+
+- Decide which provider should be the primary source for new activities.
+- Avoid connecting multiple services that forward the same device activity unless you are prepared to review duplicates.
+- Confirm that the source account contains the workouts and sensor fields you expect.
+- For file import, keep the original GPX, TCX, or FIT files unchanged.
+
+## Choose an import path
+
+Use a provider connection for ongoing automatic imports. Use file upload for a historical archive, an unsupported recording source, or a specific retry.
+
+For provider-by-provider setup and disconnect behavior, follow [Connect Third-Party Platforms](/docs/guide/connect-third-party-platforms). Use [Integrations and Imports](/docs/guide/integrations) to compare all import paths. For files, follow [Upload Activity Files](/docs/guide/upload-activity-files).
+
+## What happens after data arrives
+
+Imported workouts go through a processing pipeline:
+
+1. **Receive** the source activity or file.
+2. **Normalize** the data into a common activity format.
+3. **Check duplicates** so repeated uploads do not create confusing history.
+4. **Materialize** the activity in your account.
+5. **Build analysis data** for charts, maps, and metrics.
+6. **Compute training metrics** such as load, pace, power, heart rate, and PMC signals.
+
+<Mermaid
+  chart={`flowchart LR
+  Source[Provider or file] --> Receive[Receive]
+  Receive --> Normalize[Normalize]
+  Normalize --> Duplicate[Duplicate check]
+  Duplicate --> Activity[Activity record]
+  Activity --> Analysis[Charts and metrics]
+  Analysis --> Review[Plan and AI review]`}
+/>
+
+You may see an activity before every chart is ready. If analysis is still running, wait for the status to finish and refresh the page.
+
+## Platform sync
+
+If you connect a supported third-party provider, new activities can be brought into Trainingload.ai without manual file upload.
+
+Use platform sync when:
+
+- You record workouts on another service.
+- You want recent activities to appear automatically.
+- You want AI Coach and plans to use the latest completed training.
+
+If a synced activity looks incomplete, check the original source first. Missing heart rate, power, GPS, or elevation data usually comes from the source file or device permissions.
+
+## File upload
+
+Use file upload when:
+
+- You have a GPX / TCX / FIT file.
+- You want to import historical workouts.
+- You recorded a workout outside the connected platform.
+- You need to retry or test a specific activity.
+
+See [Upload Activity Files](/docs/guide/upload-activity-files) for the step-by-step flow.
+
+## Data quality checklist
+
+For the best analysis, make sure your files contain:
+
+- Accurate start time and time zone when available.
+- Distance and duration.
+- GPS track for outdoor routes.
+- Heart rate if you want HR zones, TRIMP, EF, or decoupling.
+- Power if you want FTP/CP/NP/VI and power-based TSS.
+- Elevation if you want GAP, NGP, route analysis, or climb context.
+
+## How connected data is used
+
+Once processed, workouts can appear in:
+
+- **Activities**: feed, search, detail pages, charts, and map.
+- **Dashboard**: summary cards and trend views.
+- **PMC**: CTL, ATL, TSB, and related load metrics.
+- **Plans**: actual workouts can link back to planned sessions.
+- **AI Coach**: reviews can reference real completed training.
+
+For day-to-day activity management, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+
+## Connect Suunto
+
+Open **Account → Third Party Connections → Suunto**, then select **Connect with OAuth**. After you approve workout access on Suunto, Trainingload.ai queues an initial import of recent workouts. New workouts are imported through Suunto notifications with scheduled reconciliation as a fallback.
+
+You can return to the Suunto settings dialog to run a manual sync, disable automatic synchronization, reconnect an expired authorization, or disconnect the account. Disconnecting stops future imports but does not delete activities that were already imported.
+
+## Verify the connection
+
+- The connection card shows the expected account and connected state.
+- A known recent workout appears once in Activities with the correct provider.
+- The activity reaches Ready or exposes a specific processing failure.
+- Expected sensor data is present in Activity Detail.
+- Disconnecting or disabling automatic sync does not delete already imported activities.
+
+## Troubleshooting
+
+- **Authorization returns to a disconnected state:** retry from the connection card and confirm the provider account granted workout access.
+- **No activities arrive:** run a supported manual sync, widen the activity date search, and verify that the source contains eligible workouts.
+- **The same workout appears twice:** identify which connected services forwarded it before deleting or changing the import path.
+- **Sensor fields are absent:** inspect the original provider activity; a connection cannot import fields the provider did not supply.
+- **A connection expired:** reconnect it rather than repeatedly uploading copies of the same activity.
+
+## Next steps
+
+- [Connect Third-Party Platforms](/docs/guide/connect-third-party-platforms)
+- [Integrations and Imports](/docs/guide/integrations)
+- [Activities Feed and Search](/docs/guide/activity-feed-search)
+- [Activity Detail](/docs/guide/activity-detail)

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/dataset-catalog.schema.json",
+  "title": "Dataset catalog",
+  "description": "A machine-readable index describing every dataset in the export archive.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "string",
+      "description": "The export contract identifier."
+    },
+    "datasets": {
+      "type": "array",
+      "description": "The ordered dataset entries.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The stable dataset identifier."
+          },
+          "path": {
+            "type": "string",
+            "description": "The relative data path inside the archive."
+          },
+          "schemaPath": {
+            "type": "string",
+            "description": "The relative JSON Schema path inside the archive."
+          },
+          "mediaType": {
+            "type": "string",
+            "description": "The IANA media type of the data file."
+          },
+          "recordCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The number of records."
+          },
+          "description": {
+            "type": "string",
+            "description": "A concise English explanation of the dataset."
+          },
+          "primaryKey": {
+            "type": "array",
+            "description": "The ordered fields that form the logical primary key.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "relations": {
+            "type": "array",
+            "description": "The declared relations to other datasets.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "fields": {
+                  "type": "array",
+                  "description": "The local relation fields.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "dataset": {
+                  "type": "string",
+                  "description": "The referenced dataset identifier."
+                },
+                "referencedFields": {
+                  "type": "array",
+                  "description": "The referenced key fields.",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "fields",
+                "dataset",
+                "referencedFields"
+              ]
+            }
+          },
+          "coverage": {
+            "type": "object",
+            "description": "Date coverage and top-level missing-value statistics.",
+            "additionalProperties": false,
+            "properties": {
+              "timeStart": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The earliest recognized record time in ISO 8601 format.",
+                "format": "date-time"
+              },
+              "timeEnd": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The latest recognized record time in ISO 8601 format.",
+                "format": "date-time"
+              },
+              "missingValueRate": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "The fraction of top-level record fields whose values are null."
+              }
+            },
+            "required": [
+              "timeStart",
+              "timeEnd",
+              "missingValueRate"
+            ]
+          },
+          "redactions": {
+            "type": "array",
+            "description": "The deterministic privacy transformations applied to this dataset.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "schemaPath",
+          "mediaType",
+          "recordCount",
+          "description",
+          "primaryKey",
+          "relations",
+          "coverage",
+          "redactions"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "datasets"
+  ]
+}

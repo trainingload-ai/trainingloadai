@@ -1,0 +1,40 @@
+{
+  "reasons": {
+    "SCOPE_UNSUPPORTED": "该方法不支持这个范围，请按方法要求选择日期范围。",
+    "AMBIGUOUS_SCOPE": "需要确定活动或测试段。",
+    "TIMEZONE_REQUIRED": "请先在个人资料中设置时区。",
+    "NO_MATCHING_ACTIVITY": "指定范围内没有找到活动，请检查日期或同步状态。",
+    "MISSING_SIGNAL": "缺少该方法要求的有效数据或独立记录，请查看方法与证据要求。",
+    "QUALITY_REJECTED": "记录的数据质量、有效覆盖或拟合检查未通过。",
+    "PROTOCOL_UNKNOWN": "需要确认这段是否为实际完成的 30 分钟尽力测试。",
+    "PROTOCOL_UNCONFIRMED": "尚未确认测试性质，本次仅提供观察值。",
+    "PROTOCOL_MISMATCH": "普通训练不能按该测试方法估算阈值。",
+    "REFERENCE_REQUIRED": "缺少同运动最大心率参照，暂不能采用该估计。",
+    "REFERENCE_CONFLICT": "估计与当前参照指标冲突，需要核实。",
+    "METHOD_UNAVAILABLE": "当前产品尚未开放这个计算方法。",
+    "EXECUTION_FAILED": "本次计算遇到技术故障，可以重试。",
+    "RESOURCE_LIMIT": "数据超出本次处理上限，请缩小范围。",
+    "NON_CONVERGENCE": "模型未稳定收敛，不能提供可靠估计。",
+    "STALE": "证据或设置已变化，请重新评估后确认。",
+    "CONFIRMATION_REQUIRED": "请确认已展示的具体变更。"
+  },
+  "notification": {
+    "title": "体能评估有新进展",
+    "estimated": "测试活动已完成评估，请查看结果。",
+    "available": "测试活动已有新评估，请查看。"
+  },
+  "confirmation": {
+    "header": "确认采用",
+    "question": "确认将{sport}的 {changes} 保存为个人参考值吗？生效日期：{date}。",
+    "apply": "确认采用",
+    "applyDescription": "保存这次估计，作为后续训练和区间计算的参考；采用不等于实验室实测。",
+    "keep": "暂不采用",
+    "keepDescription": "保留计算结果，不修改当前设置。",
+    "sports": {
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳",
+      "UNKNOWN": "通用指标"
+    }
+  }
+}

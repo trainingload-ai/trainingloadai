@@ -1,0 +1,43 @@
+---
+title: MCP troubleshooting
+description: Diagnose TrainingLoad MCP discovery, OAuth, scope, tool, timeout, and stale-client issues.
+---
+
+# MCP troubleshooting
+
+## The client cannot discover the server
+
+Confirm the URL is exactly `https://api.trainingload.ai/mcp`, including `/mcp`. The client must support remote Streamable HTTP. Corporate networks must allow HTTPS to both `api.trainingload.ai` and the TrainingLoad authorization pages.
+
+## OAuth does not open or returns to the client with an error
+
+- Start from the client's connect action instead of reusing an old authorization URL.
+- Confirm the client supports OAuth discovery and PKCE S256.
+- Check that the callback returns to the same client instance that started authorization.
+- If the authorization verifier is temporarily unavailable, wait for the `Retry-After` interval before retrying.
+
+## A tool is missing
+
+The server filters `tools/list` by account entitlement and rollout flags. `get_health_summary` remains visible before `health:read` is granted so calling it can trigger incremental authorization. If another tool is absent, reconnect after confirming the account and rollout are eligible; do not add a bearer token manually.
+
+## `INSUFFICIENT_SCOPE`
+
+Use the client's reconnect or authorize action and approve the requested scope. If the client ignores the MCP `mcp/www_authenticate` challenge, remove and re-add the connection so it can request the full intended read-only scope set.
+
+## Empty results
+
+Empty means no matching stored data in that date range. It does not mean zero load, no training, or healthy/normal. Check the tool's returned timezone and queried range, then widen the range within the documented bound if appropriate.
+
+## `CAPABILITY_TIMEOUT`, cancellation, or rate limit
+
+- `CAPABILITY_TIMEOUT`: narrow the date range or reduce `limit`, then retry once.
+- `CAPABILITY_CANCELLED`: the client cancelled or disconnected; start a new request.
+- Rate limit: wait for the returned retry interval. Do not loop rapidly.
+
+## The client still shows old tools
+
+Refresh or reset that client's MCP tool cache. In ChatGPT, a published workspace app may retain a frozen tool snapshot until an admin updates it. In VS Code, run **MCP: Reset Cached Tools**. If needed, remove and reconnect the server.
+
+## Data looks unsafe or belongs to another account
+
+Stop using the connection and revoke it immediately from TrainingLoad. Record the client name, approximate time, and request ID, then contact support. Do not share the token or complete payload.

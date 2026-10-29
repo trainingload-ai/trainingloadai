@@ -1,0 +1,160 @@
+---
+title: Create a Training Plan
+description: Create a plan from an official template, with AI Coach, or manually in Trainingload.ai; review the draft and activate it when ready.
+keywords:
+  [
+    "create training plan",
+    "AI training plan",
+    "manual training plan",
+    "Trainingload.ai plan",
+  ]
+---
+
+# Create a Training Plan
+
+Trainingload.ai supports three plan creation paths:
+
+- **Official template**: preview a reviewed plan, fit it to your calendar, then create a draft without a runtime model call.
+- **Manual plan**: you build the plan week by week.
+- **AI-assisted plan**: you provide a brief, then AI Coach drafts a plan for review.
+
+All three paths produce the same core object: a structured training plan with weeks, days, workouts, sport types, planned workout text, and optional notes.
+
+## Before you create a plan
+
+Check these items first:
+
+- Your profile and thresholds are up to date.
+- Your recent activities have finished processing.
+- Your training goal is specific enough to guide scheduling.
+- Your available training days and session duration are realistic.
+
+Thresholds and recent activity history help Trainingload.ai estimate plan load and give AI Coach better context. If those inputs are missing, the plan can still be created, but load estimates and recommendations may be less precise.
+
+## Choose a creation path
+
+1. Open **Plans** and select the create action.
+2. Choose Official templates when a reviewed plan already matches your goal and current level.
+3. Choose Manual when the schedule is already known.
+4. Choose AI-assisted when the goal and constraints are known but the weekly structure still needs a draft.
+5. Save the result as a draft first, then review it before activation.
+
+<DocsScreenshot
+  id="plan-create-paths"
+  title="Official template, AI-assisted, and manual plan creation"
+  description="Choose a reviewed template, ask AI Coach to draft around your constraints, or build the schedule manually. Every result remains reviewable as a draft."
+  route="Plans → Create plan"
+/>
+
+## Official templates
+
+Use an official template when its entry criteria and weekly frequency already fit the outcome you want. The running library contains three 5K plans and Finish, Improve, and Target plans for [10K](/10k-training-plan), [half marathon](/half-marathon-training-plan), and [marathon](/marathon-training-plan), for a total of 12 reviewed templates.
+
+The full template preview is free. Choose a start date and training days before creating a draft; PLUS or PRO is required to create it. Preview and creation do not call a model or consume AI credits.
+
+AI still affects the workflow in three explicit stages:
+
+1. The Plan Prompt creates an offline structured candidate, followed by schema checks, training-rule validation, and human review before the official version is frozen.
+2. At preview time, deterministic rules use your recent running, chosen days, saved capability metrics, and optional race result to map dates and resolve pace ranges only when the evidence supports them. Finish and Improve plans fall back to RPE and the talk test; Target plans also require a saved goal race and reliable current capability.
+3. After creation, AI Coach can compare planned and completed work, explain load and recovery, and propose reviewable adjustments. It does not silently rewrite the frozen template.
+
+## Manual plan
+
+Use the manual flow when you already know the structure you want.
+
+The manual flow usually has three steps:
+
+- Enter the plan name, duration, and description.
+- Add workouts to the weekly calendar.
+- Review the plan preview and save it.
+
+Each workout can include:
+
+- Sport type.
+- Week, day, and session order.
+- Workout text.
+- Workout name.
+- Notes.
+
+Manual plans are useful when a coach has already written the training, or when you are copying a plan from another source and want Trainingload.ai to track execution.
+
+## AI-assisted plan
+
+Use the AI flow when you want Trainingload.ai to help draft the structure.
+
+The plan brief can include:
+
+- Main sport or sports.
+- Training intent, such as race preparation, fitness build, skill focus, return to training, or health and fat loss.
+- Plan duration.
+- Weekly training days.
+- Typical daily training time.
+- Race discipline and distance when relevant.
+
+After you submit the brief, AI Coach receives the plan request and can generate a draft. Review the draft before saving it as a plan.
+
+## Review the draft
+
+Before saving or activating a plan, check:
+
+- Does the weekly rhythm match your real schedule?
+- Are hard days separated well enough from other hard days?
+- Are easy or recovery days actually easy?
+- Does the plan start from your current fitness rather than your target fitness?
+- Are sport types and workout descriptions correct?
+- Is the total volume plausible for the next few weeks?
+
+If something is off, edit the plan before you activate it.
+
+## Save vs activate
+
+A saved plan may still be a draft. A draft is useful for review, editing, or comparison.
+
+Activate the plan when you are ready to execute it. Activation gives the plan a start date and lets Trainingload.ai treat its workouts as the current schedule.
+
+After activation, the plan can be connected to:
+
+- Calendar and current plan views.
+- Completed activities.
+- Expected vs actual load.
+- AI Coach follow-up.
+
+## Expected load
+
+Trainingload.ai can estimate the expected load of planned workouts when the workout structure and your thresholds provide enough signal.
+
+In general:
+
+- Draft plans may not have final expected-load snapshots.
+- Active or paused plans can use expected load during execution review.
+- Expected load is an estimate, not a promise of how the workout will feel.
+
+Read [Training Load](/docs/metrics/training-load) for the metric background.
+
+## Verify the plan
+
+Open the plan detail page and confirm:
+
+- Plan status.
+- Start date.
+- Week-by-week structure.
+- Workout count.
+- Completion and load summary.
+
+Then use [Manage an Active Plan](/docs/guide/manage-active-plan) to execute the plan day by day.
+
+## Troubleshooting
+
+- **Expected load is missing:** confirm that the workout has supported structure and the athlete has the required threshold; do not invent one to force an estimate.
+- **A workout is on the wrong day:** check week, day, session order, plan duration, and eventual activation start date.
+- **The AI draft is too generic:** provide recent baseline, availability, equipment, competition facts, and constraints, then request a revised draft rather than saving it unchanged.
+- **An Improve preview has no pace target:** save a reliable recent race or supported running capability metric. Without an eligible anchor, the template intentionally uses RPE and the talk test rather than inventing pace.
+- **A Target preview cannot be created:** confirm that a matching running race with a target time is saved, the race day is one of the selected training days, the full frozen period fits, and current capability supports the goal.
+- **The plan cannot save:** fix the first validation message, including empty workouts, invalid structure, or a workout outside the plan period.
+- **Activation maps to unexpected dates:** cancel the confirmation, correct the start date or time zone, and review the mapping again.
+
+## Next steps
+
+- [Manual workout editor guide](/docs/planning/manual-workout-editor)
+- [Plan Lifecycle](/docs/planning/plan-lifecycle)
+- [Manage an Active Plan](/docs/guide/manage-active-plan)

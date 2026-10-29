@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/health-daily-metric.schema.json",
+  "title": "Daily health metric",
+  "description": "A normalized health or recovery value aggregated for one local date.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The stable record identifier."
+    },
+    "localDate": {
+      "type": "string",
+      "description": "The local calendar date in YYYY-MM-DD format.",
+      "format": "date"
+    },
+    "metricType": {
+      "type": "string",
+      "description": "The stable health metric identifier."
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The normalized metric value."
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The canonical unit symbol."
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The selected source provider."
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The normalized confidence score from zero to one."
+    },
+    "timezone": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The IANA timezone used to assign the observation to its local date."
+    },
+    "sourceBreakdown": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The privacy-reviewed provider candidates and selection evidence used to produce this canonical value.",
+      "additionalProperties": true
+    },
+    "recordedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The representative observation time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The system or user action that originally supplied this record."
+    },
+    "sourceExternalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stable record identifier assigned by the source system, when available."
+    },
+    "sourceUpdatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The last modification time reported by the source system in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "localDate",
+    "metricType"
+  ]
+}

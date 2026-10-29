@@ -1,0 +1,114 @@
+---
+title: "Chronic Training Load (CTL): How Fitness Is Modeled"
+description: "Chronic Training Load (CTL) is the slower PMC fitness trend from daily load. Learn the 42-day formula, how to read rising or falling CTL, and its limits."
+keywords:
+  [
+    "Chronic Training Load",
+    "CTL",
+    "CTL fitness",
+    "chronic training load formula",
+    "PMC fitness",
+  ]
+---
+
+# Chronic Training Load (CTL): How Fitness Is Modeled
+
+**Chronic Training Load (CTL)** is the slower fitness line on a PMC. It is an exponential average of daily load—usually TSS—with a default 42-day time constant. Trainingload.ai also shows today’s CTL as a percentage of your historical maximum. CTL summarizes modeled load history; it does not directly measure fitness, adaptation, health, or race performance.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <CtlStatPreviewCard
+    value="67.2"
+    percent={58}
+    metricLabel="CTL"
+    valuePopoverTitle="CTL value"
+    valuePopoverBody="A slow exponential average of the daily load selected by your load-source settings."
+    percentPopoverTitle="CTL percentage"
+    percentPopoverBody="The current CTL expressed relative to your historical maximum CTL."
+    helpTitle="Longer-term load"
+    details="Use CTL to review the direction and consistency of modeled load across several weeks."
+  />
+</div>
+
+_Example values are for UI preview only._
+
+## Where the Fitness (CTL) value comes from
+
+Trainingload.ai first resolves each activity's load according to the available metrics and your configured load-source priority. Depending on the activity and settings, the source may be power, heart rate, pace, or Session RPE.
+
+This means:
+
+- Missing or changed activity data can change Fitness (CTL).
+- Editing thresholds or load-source priority can change derived activity load and later PMC values.
+- Trainingload.ai selects one available load for each activity according to the configured source priority; mixing sources with inconsistent scales reduces comparability between periods.
+- On a day without recorded activity load, the daily input is zero and the previous CTL gradually decays.
+
+## Formula
+
+Trainingload.ai uses exponential time-constant decay with a default CTL time constant of 42 days:
+
+```text
+decay_CTL = exp(-1 / 42)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+Here `exp` is the natural exponential function. With the default time constant, `decay_CTL ≈ 0.976472`, so today's load receives a weight of about `0.023528`.
+
+## How to understand the Fitness (CTL) trend
+
+- **CTL rising**: recent daily load is generally above the current CTL level.
+- **CTL stable**: recent load is roughly maintaining the modeled level.
+- **CTL falling**: recent load is generally below it, including during reduced training or tapering.
+
+## Useful questions
+
+CTL can help answer:
+
+- Is the current Fitness (CTL) rising, holding, or falling?
+- Did missed sessions or a recovery period change the longer-term trend?
+- Is the current plan producing the intended load direction?
+- Did a threshold or source change reduce comparability?
+
+CTL cannot answer by itself:
+
+- Has the user adapted successfully?
+- Is tomorrow's hard workout safe?
+- Is the user recovered, healthy, or race-ready?
+- Is one user fitter than another?
+
+Before making a decision, also consider performance trends, workout execution quality, subjective state, [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load), and [Form (TSB)](/docs/metrics/pmc/training-stress-balance).
+
+## References
+
+- [Intervals.icu developer explanation of the Fitness, Fatigue, and Form formulas](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE glossary: Chronic Training Load (CTL)](https://runalyze.com/glossary/ctl)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## FAQ
+
+### What is Chronic Training Load?
+
+Chronic Training Load (CTL) is the slower PMC fitness trend: an exponential average of daily load with a default 42-day time constant. It rises when recent days sit above the current CTL and falls when they sit below it.
+
+### How is CTL calculated?
+
+`CTL_today = CTL_yesterday × e^(−1/42) + daily_load × (1 − e^(−1/42))`. With the default constant, today weighs about 2.35% and yesterday’s CTL about 97.65%. Rest days still decay the line.
+
+### Does a higher CTL mean I am fitter?
+
+Not by itself. A rising CTL means modeled load has been high enough to lift the long average. It does not prove adaptation, health, or race readiness. Read it with performance, how sessions felt, [ATL](/docs/metrics/pmc/acute-training-load), and [TSB](/docs/metrics/pmc/training-stress-balance).
+
+### Why did my CTL jump after I changed FTP?
+
+CTL is built from daily load. Changing FTP, zones, or load-source priority rewrites past TSS/TRIMP inputs, so the fitness line can move without any new training.
+
+## Related pages
+
+- [What is training load?](/docs/metrics/training-load)
+- [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load)
+- [Form (TSB)](/docs/metrics/pmc/training-stress-balance)
+- [Project CTL, ATL, and TSB from daily TSS](/training-load-calculator)
+- [Calculate TSS from duration, NP, and FTP](/tss-calculator)
+- [Manage training load with CTL, ATL, and TSB in your plan](/training-load)
+- [Use AI coach review to adjust training load safely](/ai-training-plan)
+- [Training Analysis Workflow](/docs/guide/training-analysis-workflow)
+- [Using PMC for Marathon Adjustments](/docs/guide/pmc-marathon-adjustment)

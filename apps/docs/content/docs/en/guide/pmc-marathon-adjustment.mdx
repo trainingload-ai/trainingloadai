@@ -1,0 +1,126 @@
+---
+title: Using PMC for Marathon Adjustments
+description: How to use CTL, ATL, and TSB in a practical marathon workflow without overreacting to daily noise.
+keywords:
+  ["PMC", "marathon training load", "CTL ATL TSB", "marathon adjustment"]
+---
+
+# Using PMC for Marathon Adjustments
+
+PMC metrics describe accumulated training pressure. They do not decide whether a workout is safe, prove adaptation, or diagnose fatigue. In a marathon block, use them to protect consistency and the purpose of key sessions.
+
+## Before you begin
+
+- Let the relevant activities finish processing so their load has reached PMC.
+- Confirm running thresholds and the activity-load source priority in your profile.
+- Link completed activities to their planned workouts.
+- Choose one decision window, usually the previous 2–6 weeks plus the next 7 days.
+- Identify the next key session: long run, marathon-pace workout, threshold session, or race.
+- Record non-chart context such as sleep, illness, pain, travel, heat, and session RPE. PMC does not contain these facts.
+
+## 1. Open the correct PMC window
+
+Open **Analysis → PMC**, choose **Running**, and set a range that includes both the load build and the recent change you want to understand. Avoid judging a marathon block from a single day or an all-time chart.
+
+Read the three signals together:
+
+- [CTL](/docs/metrics/pmc/chronic-training-load) summarizes the longer load trend.
+- [ATL](/docs/metrics/pmc/acute-training-load) reacts more quickly to recent training stress.
+- [TSB](/docs/metrics/pmc/training-stress-balance) is the relationship between longer and recent load; it is context, not a readiness guarantee.
+
+<DocsScreenshot
+  id="pmc-marathon-window"
+  title="Marathon-block PMC window"
+  description="Use one running-only range to connect CTL, ATL, and TSB with the recent overload and the next key workout."
+  route="Analysis → PMC"
+/>
+
+## 2. Find the event behind the curve
+
+Locate the date where ATL accelerated, CTL changed direction, or TSB moved sharply. Then open the activities and planned workouts around that date.
+
+Check whether the movement came from:
+
+- A planned overload week.
+- A race, long run, or unusually hard quality session.
+- An unplanned extra activity.
+- A threshold or load-source change.
+- Duplicate, misclassified, or incomplete activity data.
+
+Do not adjust the plan until the chart movement can be explained by real training or a known settings change.
+
+## 3. Compare load with execution
+
+Use Calendar or the active plan to answer:
+
+- Were the key sessions completed for their intended purpose?
+- Is easy running still easy, or is execution quality deteriorating?
+- Were sessions skipped because of schedule, fatigue, pain, or incorrect workout design?
+- Does the next key workout still fit after the actual week?
+
+PMC tells you how much pressure accumulated. Plan-versus-actual evidence tells you whether that pressure produced the intended work.
+
+## 4. Choose the smallest useful adjustment
+
+Use the pattern as a prompt for review, not as a rigid threshold rule.
+
+### Recent pressure rose and key-session quality fell
+
+- Keep the weekly rhythm when possible.
+- Replace one non-essential quality session with easy aerobic work or rest.
+- Protect either the long run or the marathon-pace session instead of trying to rescue both.
+- Review again after 24–48 hours or the next completed session.
+
+### TSB is lower than usual before a key workout
+
+- Compare it with the athlete's normal successful range and current subjective state.
+- Move the workout by 24–48 hours if the schedule allows.
+- Shorten the session while preserving its purpose when delaying would disrupt the week.
+- Do not infer injury or illness from TSB; use real symptoms and professional advice where appropriate.
+
+### CTL rises while completion quality deteriorates
+
+- Stop increasing load for the moment.
+- Review whether thresholds, source priority, or duplicate activities inflated the curve.
+- Simplify one week before adding more volume or intensity.
+- Use the next comparable key workout as the review point.
+
+### The curves are stable and execution is good
+
+Leave the plan unchanged. A chart does not require an intervention merely because it is available.
+
+## 5. Record the decision
+
+Write down five items before changing the plan:
+
+1. **Observed pattern:** what changed in PMC and over which dates.
+2. **Execution evidence:** which activities or missed workouts support the concern.
+3. **Adjustment:** the exact future workout and field that changes.
+4. **Protected intent:** what the week must still accomplish.
+5. **Review point:** the date or next session that will test the decision.
+
+You can take this summary to [AI Coach](/docs/guide/ai-coach) and ask for one conservative plan-aware draft.
+
+## Verify the adjustment
+
+- The selected sport and date range match the marathon question.
+- The curve movement can be traced to activities or a known settings change.
+- Subjective state and key-session execution were considered alongside PMC.
+- Only the intended future workout changed; completed history remained intact.
+- A specific review point is scheduled.
+- The adjustment can be reversed or revised if the next evidence disagrees.
+
+## Troubleshooting
+
+- **PMC is empty:** confirm that activities are Ready, broaden the range, clear an incorrect sport filter, then use the page's calculate action once.
+- **Values changed after editing settings:** identify the threshold or load-source change and reinterpret the full comparison window consistently.
+- **A single activity creates an extreme spike:** open it and inspect duration, sensor data, sport classification, duplicates, and selected load source.
+- **The plan and chart use different dates:** verify account time zone and the activity start time.
+- **The metrics and subjective state disagree:** treat the disagreement as evidence to investigate, not a reason to discard either side. Keep the next change conservative.
+- **Pain, illness, or unusual symptoms are present:** do not use PMC or AI Coach as medical clearance; stop or modify training and seek qualified guidance when needed.
+
+## Next steps
+
+- Use [Effective VO2max for Endurance Decisions](/docs/guide/effective-vo2max-for-endurance) to add a response trend.
+- Follow [AI Marathon Plan Adjustments](/docs/guide/ai-marathon-plan-adjustments) to draft and confirm a change.
+- Return to the complete [Training Analysis Workflow](/docs/guide/training-analysis-workflow).

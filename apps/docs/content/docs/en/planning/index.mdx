@@ -1,0 +1,70 @@
+---
+title: Plans and Workouts
+description: Learn how Trainingload.ai represents plans, scheduled workouts, endurance structure, strength structure, expected load, and completed activity links.
+keywords:
+  ["Trainingload.ai plans", "structured workouts", "training plan lifecycle"]
+---
+
+# Plans and Workouts
+
+Trainingload.ai treats the plan as an active workspace, not a static PDF. A plan contains dated or relative workouts; each workout can carry machine-readable structure, human notes, expected load, execution status, and links to completed activities.
+
+## The planning model
+
+<Mermaid
+  chart={`flowchart TD
+  Goal[Goal and constraints] --> Plan[Plan]
+  Plan --> Workout[Scheduled workout]
+  Workout --> Structure[Endurance or strength structure]
+  Structure --> Expected[Expected load]
+  Workout --> Activity[Completed activity link]
+  Activity --> Actual[Actual load and execution]
+  Expected --> Review[Plan review]
+  Actual --> Review
+  Review --> Adjustment[Confirmed adjustment]
+  Adjustment --> Plan`}
+/>
+
+## Plan states
+
+- **Draft** — editable plan under construction. Use it for review before execution.
+- **Active** — current plan with a start date and daily execution context.
+- **Paused** — temporarily stopped while preserving the plan and its history.
+- **Completed** — intentionally finished plan.
+- **Canceled** — plan ended without being completed as intended.
+
+Read [Plan Lifecycle](/docs/planning/plan-lifecycle) before changing the state of a plan that already has completed activity links.
+
+## Workout structure types
+
+### Endurance
+
+Endurance workouts contain warm-up, work, recovery, repeat, and related steps with time or distance prescriptions and optional targets such as zones, pace, speed, power, cadence, or heart rate.
+
+Use the [manual workout editor guide](/docs/planning/manual-workout-editor) for in-app visual editing, the [Workout Editor & Builder](/workout-editor) to draft a public session, or the [Workout DSL](/docs/planning/workout-dsl) for compact text rules.
+
+### Strength
+
+Strength workouts contain exercises and set groups. Work can be prescribed by repetitions or time, with open load, fixed weight, percent of 1RM, bodyweight, effort, and rest where supported.
+
+Use [Strength Workouts](/docs/planning/strength-workouts) for the visual workflow or [Strength Workout DSL](/docs/planning/strength-workout-dsl) for step-by-step Rules mode.
+
+## Expected versus actual load
+
+Expected load is calculated only when workout structure, thresholds, and target information provide enough signal. Actual load comes from the completed activity and configured load-source priority.
+
+The two values answer different questions:
+
+- Expected: “What stress did this plan intend?”
+- Actual: “What stress did the completed session produce?”
+
+Do not force an expected-load value by inventing a threshold or target. An explicit unknown is safer than false precision.
+
+## Recommended learning order
+
+1. [Create a Training Plan](/docs/guide/create-training-plan)
+2. [Manual workout editor guide](/docs/planning/manual-workout-editor)
+3. [Strength Workout DSL](/docs/planning/strength-workout-dsl), when you program strength sessions
+4. [Plan Lifecycle](/docs/planning/plan-lifecycle)
+5. [Manage an Active Plan](/docs/guide/manage-active-plan)
+6. [AI Coach](/docs/guide/ai-coach)

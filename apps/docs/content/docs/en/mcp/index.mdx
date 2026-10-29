@@ -1,0 +1,56 @@
+---
+title: TrainingLoad MCP
+description: Securely connect your TrainingLoad account to ChatGPT, Codex, Claude, Cursor, VS Code, and opencode.
+---
+
+# TrainingLoad MCP
+
+TrainingLoad MCP lets an AI client answer questions with your own training data. It is a goal-oriented read-only product surface rather than a raw collection of endpoints: a client can establish your current state, compare training blocks, inspect plan execution, review fitness trends, or diagnose sync readiness, then tie each conclusion to returned evidence.
+
+**Server URL:** `https://api.trainingload.ai/mcp`
+
+No API key is required. The client opens TrainingLoad OAuth, where you review the client name and requested scopes. You can revoke access later from your account.
+
+## What the 24 read-only tools cover
+
+| Question | Primary capabilities |
+| --- | --- |
+| What is my training state now? | Training snapshot, readiness indicators, load series |
+| What changed between two training blocks? | Period comparison, sport breakdown, activity statistics, and consistency |
+| Is my running, cycling, or swimming fitness changing? | Fitness trends, training zones, personal bests |
+| How closely am I following my plan? | Plan discovery and summary, planned workouts, workout detail, status-based adherence |
+| What training did I complete? | Activity list, privacy-reduced detail, time in zones, and lap/split summaries |
+| What competitions are ahead? | Competition list and user-scoped event detail |
+| Why is a provider not syncing? | Connection and sync readiness |
+| Has my wellness context changed? | Separately authorized daily health summary |
+
+See [Tool reference](/docs/mcp/tools) for every field and scope. Clients can also discover three built-in [resources and prompts](/docs/mcp/resources-and-prompts) for metric interpretation, safety boundaries, and repeatable analysis workflows.
+
+## How a transparent answer is produced
+
+For “Why does this week feel harder than last week?”, a client should:
+
+1. Call `get_training_snapshot` for one consistent current-state view.
+2. Call `compare_training_periods` or `get_training_load` to verify the week-over-week difference.
+3. Call `list_planned_workouts` only if the upcoming schedule matters.
+4. State the date range, supporting facts, and missing data without turning correlation into a medical conclusion.
+
+This aggregate-first, detail-on-demand pattern is more reliable and easier to verify than a chain of unrelated low-level calls.
+
+## Product boundaries
+
+- **Read-only:** no activity, plan, competition, profile, integration, or account mutations.
+- **Current athlete only:** every identifier and query is bound to the OAuth user.
+- **Reduced data:** no email, internal user ID, precise GPS, raw sensor stream, third-party credential, or complete FIT data.
+- **Bounded access:** time series and lists enforce windows, result limits, or opaque cursors.
+- **Health isolation:** `health:read` is excluded from the default grant.
+- **Verifiable conclusions:** names, descriptions, and notes are untrusted data, never model instructions.
+
+## Start here
+
+- [See how one request works](/docs/mcp/how-it-works)
+- [Copy practical prompts](/docs/mcp/use-cases)
+- [Choose a client and connect](/docs/mcp/connect)
+- [Review all tools](/docs/mcp/tools)
+- [Discover resources and prompts](/docs/mcp/resources-and-prompts)
+- [Read security and privacy boundaries](/docs/mcp/security)
