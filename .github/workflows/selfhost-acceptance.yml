@@ -59,7 +59,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up the contracted Node.js runtime
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -118,7 +118,7 @@ jobs:
     runs-on: ${{ fromJSON(matrix.runner) }}
     steps:
       - name: Set up the contracted Node.js runtime
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -276,7 +276,7 @@ jobs:
 
       - name: Upload immutable acceptance evidence
         if: ${{ always() }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: selfhost-acceptance-${{ matrix.id }}
           path: ${{ runner.temp }}/selfhost-acceptance-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.id }}/evidence
@@ -316,7 +316,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up the contracted Node.js runtime
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -348,7 +348,7 @@ jobs:
         run: cosign verify-blob --bundle dist/acceptance-gate/acceptance-checksums.bundle.json --certificate-identity "https://github.com/${GITHUB_WORKFLOW_REF}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" dist/acceptance-gate/acceptance-checksums.txt
 
       - name: Upload the signed aggregate acceptance gate
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: selfhost-acceptance-gate-${{ inputs.release_revision }}
           path: dist/acceptance-gate
