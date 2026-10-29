@@ -1,0 +1,41 @@
+services:
+  migrate:
+    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-migrate:${SELF_HOST_VERSION:-1.1.16}
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: packages/prisma/Dockerfile
+      args: &common-build-args
+        RELEASE_VERSION: ${SELF_HOST_VERSION:-1.1.16}
+        SOURCE_REVISION: ${SELF_HOST_SOURCE_REVISION:-local}
+        SOURCE_URL: ${SELF_HOST_SOURCE_URL:-local://trainingloadai}
+        SELF_HOST_SCHEMA_VERSION: "1"
+
+  server:
+    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-server:${SELF_HOST_VERSION:-1.1.16}
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+      args: *common-build-args
+
+  client:
+    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-client:${SELF_HOST_VERSION:-1.1.16}
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+      args:
+        RELEASE_VERSION: ${SELF_HOST_VERSION:-1.1.16}
+        SOURCE_REVISION: ${SELF_HOST_SOURCE_REVISION:-local}
+        SOURCE_URL: ${SELF_HOST_SOURCE_URL:-local://trainingloadai}
+        SELF_HOST_SCHEMA_VERSION: "1"
+        NEXT_PUBLIC_API_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+        NEXT_PUBLIC_BASE_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+        NEXT_PUBLIC_APP_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+        NEXT_PUBLIC_MARKETING_BASE_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+        NEXT_PUBLIC_AUTH_UI_ENABLED: "true"
+        SELF_HOST_MODE_MARKER: ${SELF_HOST_MODE:-connected}
+        SELF_HOST_TELEMETRY_ENABLED: "false"
+        AI_TODAY_WEATHER_ENABLED: "false"
+

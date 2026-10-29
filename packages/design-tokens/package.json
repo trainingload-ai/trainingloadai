@@ -1,0 +1,30 @@
+{
+  "name": "@trainingloadai/design-tokens",
+  "version": "1.1.16",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "exports": {
+    "./web.css": "./dist/web.css",
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "default": "./dist/native.js"
+    },
+    "./charts": {
+      "types": "./dist/charts.d.ts",
+      "default": "./dist/charts.js"
+    },
+    "./meta": {
+      "types": "./dist/meta.d.ts",
+      "default": "./dist/meta.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "check": "node scripts/generate.mjs --check",
+    "test": "node --test test/*.test.mjs"
+  }
+}

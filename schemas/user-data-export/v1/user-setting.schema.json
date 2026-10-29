@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/user-setting.schema.json",
+  "title": "User setting",
+  "description": "A user-configurable application preference.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "The stable setting category identifier."
+    },
+    "value": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stored setting value."
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "The time the setting was last updated in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "category",
+    "updatedAt"
+  ]
+}

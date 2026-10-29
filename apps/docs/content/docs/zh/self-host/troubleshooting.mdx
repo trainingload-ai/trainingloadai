@@ -1,0 +1,68 @@
+---
+title: 自托管故障排查
+description: 在不绕过生命周期和数据安全保护的前提下，诊断安装、就绪、存储、AI、恢复和升级故障。
+---
+
+# 自托管故障排查
+
+先执行受支持的只读检查，并保留第一次出现的稳定错误码。与其不断修改宿主环境直到现象消失，稳定错误码更适合定位真正原因。
+
+## 第一响应
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+即使 Docker 不可用，`doctor` 仍会返回能够完成的检查。如果恢复或升级失败，保留对应报告和 incomplete marker，不要删除 marker 强制普通启动。
+
+## 常见问题
+
+| 现象             | 检查内容                                                    | 安全的下一步                                                |
+| ---------------- | ----------------------------------------------------------- | ----------------------------------------------------------- |
+| 安装器拒绝发行物 | 外层 checksum、Cosign identity、精确版本和下载文件完整性    | 从同一个官方发行版本重新下载全部工件                        |
+| 无法打开站点     | `status`、Client 日志、bind 地址、端口冲突和 HTTPS origin      | 修正声明的设置，然后先执行 `start --dry-run` 再执行 `start` |
+| 数据库不可用     | `doctor` 中的数据库服务、磁盘、权限和迁移结果               | 恢复宿主容量或权限，不要直接暴露或修改 PostgreSQL           |
+| 上传失败         | 数据目录空间、inode、所有权和 uploads 目录                  | 扩容专用数据卷，然后再次执行 `doctor`                       |
+| 看不到 AI 设置   | 部署模式、实例就绪状态和当前账号是否为 Owner                | 使用已认领的 Owner 登录；其他用户不能读取或修改供应商设置   |
+| AI 请求失败      | 供应商状态、准确 Base URL、模型标识、Key 权限和出站 DNS/TLS | 修正 Owner 配置，或在供应商不可用期间关闭 AI                |
+| 恢复后 AI 失败   | 目标实例是否使用不同的 auth secret                          | 输入新的供应商 Key，不要尝试提取旧的明文 Key                |
+| 恢复被阻止       | 目标版本、权威数据状态、备份 manifest、checksum 和报告      | 使用同版本的干净目标，并保留失败目标用于诊断                |
+| 升级被阻止       | 支持的来源版本、迁移清单、备份、磁盘和回滚声明              | 按升级报告处理，不要手工修改镜像 tag 或迁移记录             |
+
+## 收集诊断工件
+
+当 `doctor` 信息不足时：
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+Diagnostics 会执行自动脱敏，但自动脱敏不代表可以公开工件。分享前必须在本机打开，检查 hostname、用户数据、活动详情和业务日志；完整工件只能通过维护者认可的私密渠道传输。
+
+永远不要分享：
+
+- `.env.selfhost`；
+- Owner 密码或 bootstrap token；
+- 供应商 API Key、cookie 或私钥；
+- 数据库 dump 或上传的活动文件；
+- 未经人工检查的 diagnostics bundle。
+
+## 不要执行这些操作
+
+- 不要执行 `docker compose down -v`。
+- 不要删除 PostgreSQL 数据、uploads、数据目录 marker、操作锁或 incomplete 生命周期 marker。
+- 不要修改 `_prisma_migrations`、release manifest、checksum 或升级报告。
+- 不要使用 `--skip-verify` 或可变镜像 tag。
+- 不要并行重试会改变状态的命令。
+
+这些操作可能把原本可诊断的失败变成不可恢复或无法判断的数据丢失。
+
+## 提供有效的支持信息
+
+只提供精确发行版本、宿主操作系统与架构、稳定 `error.code`、失败命令，以及经过本机检查的 diagnostics 工件 SHA-256。除非维护者提供认可的传输渠道，否则完整工件始终保持私密。
+
+## 下一步
+
+解决阻塞条件后返回[管理实例](/zh/docs/self-host/operations)。如果恢复过程需要替换权威数据，应把可验证备份恢复到干净目标，而不是覆盖失败实例。

@@ -1,0 +1,107 @@
+export const colors = Object.freeze({
+  "light": {
+    "background": "#FAFAF7",
+    "foreground": "#191B18",
+    "card": "#FFFFFF",
+    "cardForeground": "#191B18",
+    "popover": "#FFFFFF",
+    "popoverForeground": "#191B18",
+    "primary": "#191B18",
+    "primaryForeground": "#FFFFFF",
+    "secondary": "#F4F5F0",
+    "secondaryForeground": "#30342E",
+    "muted": "#EEF0EA",
+    "mutedForeground": "#70746C",
+    "accent": "#E7F7ED",
+    "accentForeground": "#183728",
+    "brand": "#20C77A",
+    "brandForeground": "#102319",
+    "brandSoft": "#E7F7ED",
+    "destructive": "#BF554E",
+    "destructiveForeground": "#FFFFFF",
+    "success": "#287A4A",
+    "warning": "#9B6718",
+    "info": "#356AA3",
+    "border": "#E3E6DE",
+    "input": "#DDE1D7",
+    "ring": "#16865A",
+    "sidebar": "#FBFBF8",
+    "sidebarForeground": "#30342E",
+    "sidebarAccent": "#20C77A",
+    "sidebarAccentForeground": "#102319",
+    "sidebarBorder": "#E3E6DE"
+  },
+  "dark": {
+    "background": "#0B0C0B",
+    "foreground": "#F4F6F2",
+    "card": "#121412",
+    "cardForeground": "#F4F6F2",
+    "popover": "#151715",
+    "popoverForeground": "#F4F6F2",
+    "primary": "#F4F6F2",
+    "primaryForeground": "#0B0C0B",
+    "secondary": "#191B19",
+    "secondaryForeground": "#E9ECE7",
+    "muted": "#202320",
+    "mutedForeground": "#A9AEA7",
+    "accent": "#173B2A",
+    "accentForeground": "#CFF7DE",
+    "brand": "#20C77A",
+    "brandForeground": "#102319",
+    "brandSoft": "#173B2A",
+    "destructive": "#E47770",
+    "destructiveForeground": "#0B0C0B",
+    "success": "#68D391",
+    "warning": "#D8A24B",
+    "info": "#76A9E0",
+    "border": "#2D302D",
+    "input": "#3A3E3A",
+    "ring": "#3AD98E",
+    "sidebar": "#090A09",
+    "sidebarForeground": "#E9ECE7",
+    "sidebarAccent": "#20C77A",
+    "sidebarAccentForeground": "#102319",
+    "sidebarBorder": "#2D302D"
+  }
+});
+
+export const spacing = Object.freeze({
+  "half": 2,
+  "one": 4,
+  "two": 8,
+  "three": 12,
+  "four": 16,
+  "five": 20,
+  "six": 24,
+  "eight": 32,
+  "ten": 40,
+  "twelve": 48,
+  "sixteen": 64
+});
+
+export const radii = Object.freeze({
+  "micro": 2,
+  "xs": 4,
+  "compact": 6,
+  "control": 8,
+  "lg": 10,
+  "controlLg": 10,
+  "surface": 12,
+  "overlay": 16,
+  "feature": 20,
+  "full": 999
+});
+
+export const motion = Object.freeze({
+  "fast": 120,
+  "standard": 180,
+  "overlay": 220,
+  "page": 260
+});
+
+export const typography = Object.freeze({
+  "webSans": "'Space Grotesk Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif",
+  "webDisplay": "'Jost Variable', 'Space Grotesk Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif",
+  "nativeSans": "system-ui",
+  "nativeMono": "ui-monospace"
+});

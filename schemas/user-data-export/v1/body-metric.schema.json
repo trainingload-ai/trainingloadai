@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/body-metric.schema.json",
+  "title": "Body metric",
+  "description": "A dated body measurement or demographic value.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The stable record identifier."
+    },
+    "type": {
+      "type": "string",
+      "description": "The metric type, such as WEIGHT, HEIGHT, BIRTHDAY, or GENDER."
+    },
+    "value": {
+      "type": "string",
+      "description": "The metric value in the canonical unit documented by the metric type."
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The canonical unit symbol, or null for categorical and date values."
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The external provider that supplied the value, when available."
+    },
+    "effectiveDate": {
+      "type": "string",
+      "description": "The date and time from which this value is effective in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "The time the record was created in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The system or user action that originally supplied this record."
+    },
+    "sourceExternalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stable record identifier assigned by the source system, when available."
+    },
+    "sourceUpdatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The last modification time reported by the source system in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "value",
+    "effectiveDate",
+    "createdAt"
+  ]
+}

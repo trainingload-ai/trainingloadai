@@ -1,0 +1,132 @@
+---
+title: Performance Analysis Pages
+description: Choose the right Trainingload.ai analysis page, keep sport and time filters consistent, and trace power, pace, heart-rate, and load trends back to real activities.
+keywords:
+  [
+    "training performance analysis",
+    "power curve",
+    "pace curve",
+    "heart rate zones",
+    "Trainingload.ai analysis",
+  ]
+---
+
+# Performance Analysis Pages
+
+The Analysis hub is a directory of tools, not a single scorecard. Start there when you know the training question but are not sure which page provides the evidence.
+
+## Before you begin
+
+- Wait for the relevant activities to reach Ready status.
+- Check profile thresholds and sport-specific zones before interpreting zone distributions.
+- Choose one sport and one decision window.
+- Confirm that the activities contain the sensor needed by the page: power, heart rate, or usable distance and time.
+- Use the same unit system and time zone when comparing values across pages.
+
+## 1. Choose a page from Analysis
+
+Open **Analysis** and search or select a tool:
+
+| Question                                                  | Page           | What it shows                                                            |
+| --------------------------------------------------------- | -------------- | ------------------------------------------------------------------------ |
+| How much and how often did I train?                       | Activity Stats | Year heatmap and distance, duration, heart rate, count, or calorie trend |
+| How has recent load changed?                              | PMC            | CTL, ATL, and TSB load context                                           |
+| What are my best sustained efforts?                       | Best Distance  | Ranked performance by fixed distance or fixed time                       |
+| How has my power capability changed?                      | Power          | Curve, maximum power, zone distribution, and power profile               |
+| How has pace changed for one sport?                       | Pace           | Pace curve and pace-zone distribution                                    |
+| What heart-rate efforts and zone time appear in the data? | Heart Rate     | Heart-rate curve and zone distribution                                   |
+
+**Progression** is marked **Coming soon**. Do not treat its card as an available report or wait for it to answer a question that an existing page already covers.
+
+<DocsScreenshot
+  id="analysis-hub-tools"
+  title="Analysis tool directory"
+  description="Choose a report from the training and performance groups; the Progression card remains clearly marked Coming soon."
+  route="Analysis"
+/>
+
+## 2. Set filters before reading the chart
+
+On Power, Pace, and Heart Rate, set the sport and date range first. Keep them unchanged while comparing tabs.
+
+- Use one range to answer a current-state question.
+- Add multiple ranges only when the page allows it and the comparison has a clear purpose.
+- Pace requires a specific sport; it does not offer an all-sports view.
+- Power and Heart Rate can include all sports, but a mixed-sport result may be harder to interpret.
+- A missing chart often means no qualifying sensor data exists inside the selected range.
+
+Write the filter context beside any conclusion. “Power improved” is incomplete; “cycling power for 5 minutes increased in the current 90-day range compared with the previous 90 days” is traceable.
+
+## 3. Use the Power tabs
+
+The Power page has four views:
+
+- **Curve**: table and chart of best sustained power across durations. It can compare multiple time ranges.
+- **Maximum**: maximum-power history for the selected context.
+- **Zones**: distribution of work across configured power zones. It can compare multiple ranges.
+- **Profile**: power-profile context for the selected sport and range.
+
+Use Curve for duration-specific capability, Zones for how work was distributed, and Profile for context. They answer different questions and should not be collapsed into one “fitness” judgement.
+
+<DocsScreenshot
+  id="power-analysis-tabs"
+  title="Power analysis with consistent filters"
+  description="Keep the sport fixed while moving between Curve, Maximum, Zones, and Profile; use multiple ranges only where the page supports comparison."
+  route="Analysis → Power"
+/>
+
+## 4. Use Pace and Heart Rate
+
+The Pace page contains:
+
+- **Curve**: a table and chart of pace performance across distances.
+- **Zones**: time or work distribution across the configured pace zones.
+
+Select running, cycling, or swimming as offered by the filter. Swimming pace uses a swimming-specific distance basis, while running and cycling use their own display context. Avoid comparing the raw pace number across sports.
+
+The Heart Rate page contains:
+
+- **Curve**: a table and chart of sustained heart-rate values.
+- **Zones**: distribution across configured heart-rate zones.
+
+Heart rate is a response signal. Interpret it with duration, pace or power, conditions, fatigue, and sensor quality rather than treating a higher value as automatically better.
+
+## 5. Add load context with PMC
+
+Use PMC when the question is about accumulated training pressure rather than a single performance signal. Read [CTL](/docs/metrics/pmc/chronic-training-load), [ATL](/docs/metrics/pmc/acute-training-load), and [TSB](/docs/metrics/pmc/training-stress-balance) together and keep the sport and date range aligned with the activities under review.
+
+Load describes applied training pressure. It does not prove adaptation or readiness on its own. Continue with the [Training Analysis Workflow](/docs/guide/training-analysis-workflow) when a chart needs to become a plan decision.
+
+## 6. Trace a result back to evidence
+
+When a curve point, zone distribution, or load change matters:
+
+1. Note the sport, date range, tab, duration, and value.
+2. Open the relevant activity or use activity search to find likely source sessions.
+3. Check processing status, sensor coverage, thresholds, and obvious spikes or dropouts.
+4. Separate the observed result from your interpretation.
+5. Make the smallest decision supported by the evidence.
+
+## Verify the analysis
+
+- The page matches the question being asked.
+- Sport, time range, units, and zone settings are recorded.
+- The result is supported by qualifying Ready activities.
+- A sensor gap or outlier is stated instead of silently averaged away.
+- Any training decision can be traced to the underlying activities and plan context.
+
+## Troubleshooting
+
+- **The Analysis search returns nothing:** clear the search term; tool search matches the localized title and description.
+- **A card cannot be opened:** confirm whether it is marked Coming soon.
+- **A curve or zone chart is empty:** widen the date range, select the correct sport, and confirm that qualifying activities contain the required sensor stream.
+- **Values changed after editing thresholds:** zone distributions and derived context may change; record the new settings before comparing history.
+- **Power, pace, and heart rate tell different stories:** they measure different inputs and responses. Recheck the question, source sessions, and conditions instead of choosing the most favorable chart.
+- **All-sports results look inconsistent:** switch to a single sport and repeat the comparison.
+
+## Next steps
+
+- [Activity History and Best Efforts](/docs/guide/activity-history-insights)
+- [Training Analysis Workflow](/docs/guide/training-analysis-workflow)
+- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+- [Activity Detail](/docs/guide/activity-detail)

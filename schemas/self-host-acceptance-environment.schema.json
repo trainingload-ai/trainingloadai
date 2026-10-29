@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-acceptance-environment.schema.json",
+  "title": "Trainingload self-host acceptance environment evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "platformId",
+    "hostPlatform",
+    "hostArchitecture",
+    "dockerVersion",
+    "composeVersion",
+    "dockerArchitecture",
+    "dockerOsType",
+    "dockerOperatingSystem",
+    "availableBytes"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "platformId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "hostPlatform": { "enum": ["linux", "darwin", "win32"] },
+    "hostArchitecture": { "enum": ["x64", "arm64"] },
+    "dockerVersion": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "composeVersion": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "dockerArchitecture": { "enum": ["amd64", "arm64"] },
+    "dockerOsType": { "const": "linux" },
+    "dockerOperatingSystem": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "availableBytes": {
+      "type": "string",
+      "maxLength": 20,
+      "pattern": "^[1-9][0-9]*$"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+---
+title: TrainingLoad MCP
+description: 把 TrainingLoad 账号安全连接到 ChatGPT、Codex、Claude、Cursor、VS Code 和 opencode。
+---
+
+# TrainingLoad MCP
+
+TrainingLoad MCP 让 AI 客户端基于你自己的训练数据回答问题。它不是一组裸接口，而是一套面向真实训练问题设计的只读能力：客户端可以先读取当前状态，再按需比较训练周期、检查计划执行、查看体能趋势或确认同步状态，并把每个结论对应到实际返回值。
+
+**服务地址：** `https://api.trainingload.ai/mcp`
+
+连接不需要 API Key。客户端通过 OAuth 打开 TrainingLoad 授权页；你可以检查客户端名称和 scopes，之后也可以从账号中撤销访问。
+
+## 24 个只读工具能做什么
+
+| 问题 | 首选能力 |
+| --- | --- |
+| 我现在的训练状态怎样？ | 训练快照、训练 readiness 指标、负荷时间序列 |
+| 最近两个训练周期有什么变化？ | 周期比较、按项目负荷拆分、活动统计与训练一致性 |
+| 我的跑步、骑行或游泳能力在变化吗？ | 体能指标趋势、训练区间、个人最佳 |
+| 计划执行得怎么样？ | 训练计划发现与总结、计划课程、课程详情、状态型计划完成率 |
+| 最近完成了哪些训练？ | 活动列表、隐私精简详情、区间分布和 lap/split 摘要 |
+| 接下来有什么比赛？ | 比赛列表与绑定当前用户的赛事详情 |
+| 为什么没有同步？ | 第三方连接和同步 readiness |
+| 健康背景是否有变化？ | 单独授权的每日健康摘要 |
+
+完整字段和 scopes 见[工具参考](/zh/docs/mcp/tools)。客户端还可以发现 3 个内置 [Resources 与 Prompts](/zh/docs/mcp/resources-and-prompts)，用于理解指标、安全边界和复用分析流程。
+
+## 一个透明答案如何产生
+
+例如你问“为什么这周感觉比上周累？”，客户端应当：
+
+1. 调用 `get_training_snapshot`，先取得统一口径的当前状态。
+2. 调用 `compare_training_periods` 或 `get_training_load`，验证本周和上周的差异。
+3. 需要时调用 `list_planned_workouts`，确认后续安排。
+4. 在回答中说明日期范围、使用的事实与缺失的数据，不把相关性写成医疗结论。
+
+这种“聚合优先、细节按需”的方式比连续调用许多细碎接口更稳定，也更容易核验。
+
+## 产品边界
+
+- **只读：** 不能修改活动、计划、比赛、资料、连接或账号。
+- **仅当前运动员：** 所有 ID 和查询都会绑定当前 OAuth 用户。
+- **数据最小化：** 不返回邮箱、内部用户 ID、精确 GPS、原始传感器流、第三方凭证或完整 FIT 数据。
+- **有界查询：** 时间序列和列表都有最大时间窗、结果数或 opaque cursor。
+- **健康隔离：** 默认授权不包含 `health:read`。
+- **结论可核验：** 活动名称、描述和备注属于不可信数据，不能成为模型指令。
+
+## 从这里开始
+
+- [了解一次调用如何完成](/zh/docs/mcp/how-it-works)
+- [复制可直接使用的问题](/zh/docs/mcp/use-cases)
+- [选择客户端并完成连接](/zh/docs/mcp/connect)
+- [查看全部工具](/zh/docs/mcp/tools)
+- [了解 Resources 与 Prompts](/zh/docs/mcp/resources-and-prompts)
+- [阅读安全与隐私边界](/zh/docs/mcp/security)

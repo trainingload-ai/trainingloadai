@@ -1,0 +1,35 @@
+---
+title: Diagnose Activity, Load, and Recovery Data Problems
+description: Work from the visible symptom to the missing input or processing state before changing thresholds, load sources, or training decisions.
+seoTitle: "Missing Activity or Training Load? Troubleshooting Guide"
+seoDescription: Diagnose missing activities, training load, recovery metrics, and processing errors by tracing each visible symptom to its source data and status.
+keywords: ["missing activity data", "training load missing", "activity sync troubleshooting", "recovery data"]
+---
+
+# Diagnose Activity, Load, and Recovery Data Problems
+
+## Start with the symptom
+
+| Symptom | Check first | Likely next guide |
+| --- | --- | --- |
+| Activity is missing | Provider connection, import time range, and file status | [Connect data](/docs/guide/connect-data) |
+| Activity is duplicated | Multiple import paths and source identifiers | [Integrations](/docs/guide/integrations) |
+| Activity exists but has no load | Processing state, duration, heart rate, power, pace, and profile thresholds | [Activity detail](/docs/guide/activity-detail) |
+| Charts or laps fail | Whether the source file supplied records and laps | [Upload activity files](/docs/guide/upload-activity-files) |
+| Sleep, HRV, or resting heart rate is empty | Health permission, provider coverage, date, and time zone | [Account, permissions, and usage](/docs/guide/account-permissions-and-usage) |
+| PMC looks unexpectedly low or high | Duplicates, missing days, selected sport, load source, and threshold changes | [Training analysis workflow](/docs/guide/training-analysis-workflow) |
+
+## Diagnose in order
+
+1. Confirm the expected source and time range.
+2. Confirm whether the source supplied the required sensor stream.
+3. Check import and processing status.
+4. Check profile thresholds and load-source priority.
+5. Compare one affected activity with one known-good activity.
+6. Only then change configuration or contact support.
+
+## Gather safe support evidence
+
+Include the activity date, sport, source, visible status, expected versus actual result, and whether the problem is reproducible. Remove email addresses, OAuth tokens, API keys, precise home locations, and private provider identifiers.
+
+Do not edit thresholds merely to force a preferred load value. A configuration change affects later interpretation and may change derived history.

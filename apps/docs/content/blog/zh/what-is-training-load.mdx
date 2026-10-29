@@ -1,0 +1,170 @@
+---
+title: 什么是训练负荷？功率、心率、EPOC 与 RPE 有什么区别
+description: 为什么同一次训练在 Garmin、TrainingPeaks 和 Strava 上会得到不同的负荷？本文解释外在负荷、内在负荷、TSS、TRIMP、EPOC 与 Session RPE，以及这些指标各自适合回答什么问题。
+author: Trainingload.ai 编辑团队
+date: 2026-08-29
+image: /blog/training-load/cover-zh.png
+tags: ["训练负荷", "TSS", "EPOC", "Session RPE", "耐力训练"]
+---
+
+> **同一次训练，功率、心率、EPOC 和 RPE 算出的负荷可以完全不同。原因很简单：它们看的不是同一件事。**
+
+同一次骑行，Garmin、TrainingPeaks 和 Strava 给出的训练负荷经常对不上。一个可能根据功率计算 TSS，一个根据心率估算 EPOC，另一个显示 Relative Effort。三个数字各有自己的计算口径，并不存在通用的换算关系。
+
+所以，看到一个负荷分数时，先别急着判断高低。更重要的问题是：这个数字来自你完成的外在工作、身体产生的生理反应，还是你对整节训练的感受？
+
+训练负荷只是一个总称。不同方法都在尝试把训练的时长和强度压缩成可比较的数字，方便我们复盘单次训练、观察一段时间的变化，并作为 [CTL、ATL 和 TSB](/zh/blog/what-are-ctl-atl-tsb) 的每日输入。它描述的是训练刺激，不是对疲劳、恢复或比赛状态的直接测量。
+
+## 先分清外在负荷和内在负荷
+
+运动科学通常把训练负荷分为**外在负荷**和**内在负荷**。实际使用时，我们还可以把内在负荷再拆成客观生理反应和主观感知反应。这样看起来有三个观察角度，但基础分类仍然是内在与外在两类。
+
+| 观察角度 | 它在回答什么 | 常见数据 |
+| --- | --- | --- |
+| 外在负荷 | 完成了多少工作？ | 功率、配速、距离、爬升、机械功、加速度 |
+| 客观内在负荷 | 身体产生了多大生理反应？ | 心率、TRIMP、乳酸、耗氧量、EPOC |
+| 主观内在负荷 | 整节训练感觉有多难？ | RPE、Session RPE、呼吸 RPE、肌肉 RPE |
+
+比如两名运动员都以 200 W 骑行一小时，两人的外在功率负荷相同。如果其中一人的平均心率和 RPE 更高，那么他的内在负荷很可能更大。换成同一名运动员也一样：天气炎热、补水不足或恢复不好时，即使功率没变，心率和 RPE 也可能明显上升。
+
+功率和配速记录“做了什么”，心率与 EPOC 记录“身体怎么回应”，Session RPE 则保留运动员自己的整体感受。三者不是竞争关系。
+
+## 功率、配速与 TSS：你完成了多少工作
+
+骑行功率、跑步配速和游泳速度都属于外在输出。平均功率或总距离只能说明完成量；TSS 一类指标再把时长、强度和个人阈值放在一起，得到一个更适合跨训练比较的分数。
+
+经典功率 TSS 可以简化为：
+
+```text
+TSS = 时长（小时） × IF² × 100
+IF = 标准化功率（NP）÷ FTP
+```
+
+在 FTP 附近骑行一小时，大约是 100 TSS。强度以平方进入公式，所以强度稍微提高，负荷就会增长得更快。跑步的 rTSS 会参考坡度修正配速和阈值配速，游泳的 sTSS 则参考阈值游速；底层思路相近，都是先按个人阈值把强度标准化，再乘上时间。
+
+功率负荷最适合分析间歇、冲刺和变速训练。功率变化几乎是即时的，也方便把计划课表与实际完成情况放在一起比较。前提是 FTP、阈值配速或 CSS 设置可靠；阈值设高或设低，后面的负荷都会跟着偏。
+
+它看不到的东西也很多。同样的 200 W，在凉爽清晨和炎热午后，对身体的代价可能不同。睡眠不足、脱水和高海拔通常不会直接进入功率 TSS。跑步中的落地冲击和下坡离心负荷也很难被配速完整表达。因此，100 TSS 跑步和 100 TSS 骑行虽然数字相同，恢复成本并不一定相同。
+
+## 心率、TRIMP 与 hrTSS：身体付出了多少心血管代价
+
+心率属于客观内在负荷。TRIMP（Training Impulse）把训练时间和相对心率强度放在一起计算，通常还会给高强度区间更高的权重。hrTSS、心率区间积分以及一些平台的 Cardio Load，都属于相近的思路。
+
+它的优势是门槛低。只要心率记录稳定，跑步、骑行、游泳和其他有氧项目都能使用；炎热、海拔、脱水等因素带来的额外心血管压力，也可能反映在心率上。对于持续而稳定的有氧训练，心率负荷通常很有参考价值。
+
+不过，心率不是即时输出。短冲刺可能已经结束，心率才升到峰值；长时间训练中，即使功率不变，心率也可能逐渐漂高。气温、咖啡因、情绪、疾病、药物和传感器误差都会影响读数。疲劳较深时，心率反应有时还会受到抑制，所以“心率比平时低”也不能自动理解为训练更轻松。
+
+更准确地说，心率负荷反映的是心血管系统的反应，而不是肌肉、肌腱和关节承受的全部负荷。
+
+## EPOC 是什么？Garmin 又是怎么使用它的？
+
+EPOC 的全称是 Excess Post-Exercise Oxygen Consumption，中文通常译为**运动后过量氧耗**。运动结束后，身体不会立刻回到静息状态，而会在一段时间内继续以高于静息水平的速度消耗氧气。高出的这一部分就是 EPOC。
+
+实验室可以通过气体交换直接测量 EPOC。Garmin 手表并不直接测量氧耗，而是根据运动中的心率数据，通过模型实时估算 EPOC 的累积。名称中虽然有“运动后”，并不代表手表要等到训练结束后才开始计算；它是在训练过程中预测这次运动结束后会产生多少额外氧耗。
+
+Garmin 把这项 EPOC 估算作为单次活动的 Exercise Load。近期活动的 Exercise Load 再进入 Acute Load，进一步用于 Chronic Load 和 Load Ratio。换句话说，Garmin Training Load 是**基于估算 EPOC 的负荷体系**，不是功率 TSS。
+
+它的好处是可以用同一套逻辑观察多种有氧活动，也比单纯累计时长更能区分强弱。局限同样明显：EPOC 是算法估算值，具体模型无法由用户完整复算，而且仍会受到心率数据质量的影响。力量训练、短爆发、碰撞和下坡跑造成的机械损伤，也未必能在这个分数里充分体现。
+
+所以，Garmin Load 适合与自己的历史数据比较，不适合拿来与 TSS 或 Relative Effort 逐点换算。
+
+## Session RPE：整节训练到底有多难
+
+RPE 是主观用力程度。Session RPE 要求运动员回顾整节训练的总体难度，再乘以训练时长：
+
+```text
+Session RPE Load = RPE（0–10）× 训练时长（分钟）
+```
+
+训练 60 分钟，整体 RPE 为 7，Session RPE 负荷就是 420 AU。AU 是任意单位，不对应瓦特、心率或耗氧量。
+
+Session RPE 不宜简单称为“心理负荷”。它属于主观内在负荷：呼吸是否急促、腿部是否沉重、有没有疼痛、天气是否闷热、前一晚睡得怎样，都会影响最后的评分。情绪和生活压力确实会影响 RPE，但只是其中一部分。
+
+这套方法几乎没有设备门槛，也不受项目限制。尤其在力量训练、越野跑，或者传感器数据缺失时，它能补上功率和心率留下的空白。但主观评分很依赖使用习惯。量表、问题和记录时间最好保持一致，例如每次都在训练结束 15–30 分钟后问：“整节训练总体有多困难？”
+
+Session RPE 也会损失细节。60 分钟 RPE 5 和 30 分钟 RPE 10 都是 300 AU，两次训练对身体的影响显然不同。这个分数适合追踪趋势，不适合替代训练内容本身。
+
+## 还有一块常被漏掉：机械负荷
+
+跑步的每一次落地、长下坡中的离心收缩、反复加速，以及力量训练中的重量、次数和组数，都属于机械负荷的一部分。它们会给肌肉、肌腱和关节带来压力，但心率不一定很高。
+
+这也是为什么一次下坡跑的 Garmin Load 可能不算突出，第二天股四头肌却非常酸。平台给出的“肌肉负荷”通常仍是根据功率、动作或训练记录估算，并不是在直接测量肌肉损伤。
+
+机械负荷很难被压缩成跨项目通用的单一分数。对跑步、越野和力量训练来说，单独保留距离、爬升、下坡量、组数和重量等原始信息，往往比强行合并更有用。
+
+## 各个平台的“负荷”分别在算什么？
+
+平台界面都写着 Training Load，底层数据却可能不同。
+
+| 平台 | 主要单次负荷 | 主要输入 | 长期模型或比较方式 | 使用时最需要注意 |
+| --- | --- | --- | --- | --- |
+| Trainingload.ai | 按优先级选择的活动负荷 | 功率、心率、配速或 Session RPE | CTL / ATL / TSB | 负荷来源可配置；比较周期时应保持口径一致 |
+| TrainingPeaks | TSS、rTSS、sTSS、hrTSS、tTSS | 功率、配速、游速或心率 | CTL / ATL / TSB | 先确认活动使用了哪一种 TSS，以及阈值是否正确 |
+| Garmin | Exercise Load（EPOC 估算） | 心率数据和生理模型 | Acute Load、Chronic Load、Load Ratio | Garmin Load 不是功率 TSS；力量和机械负荷可能被低估 |
+| Strava | Training Load 或 Relative Effort | 骑行功率；或者心率 / 主观用力 | Fitness、Fatigue、Form 的冲激响应模型 | 不同活动可能混用功率负荷和 Relative Effort |
+| COROS | Training Load | 心率、时长和个体化强度模型 | 7 天 Load Impact、42 天 Base Fitness | 公式不完全公开，适合看个人趋势而非跨平台对数值 |
+| Polar | Cardio Load、Muscle Load、Perceived Load | TRIMP；功率×时长；RPE×时长 | Cardio Strain 7 天、Tolerance 28 天 | 三种负荷不是同一单位，不应该直接相加 |
+| Suunto | TSS(r)、TSS(hr)、TSS(p)、TSS(s)、TSS(met) | 配速、心率、功率、游速或 MET | CTL 42 天、ATL 7 天、TSB | 跨阶段比较时要确认负荷来源有没有改变 |
+| Apple Watch | Training Load | Effort 1–10 × 时长；部分有氧项目自动估算 Effort | 最近 7 天与 28 天加权基线比较 | 自动 Effort 是 Apple 的模型，不等同于标准 Session RPE |
+| WHOOP | Strain 0–21 | 连续心率；部分活动加入肌肉负荷估算 | Day Strain 与 Recovery / Strain Target | 非线性专有分数，不能与 TSS 或 EPOC 分数直接换算 |
+| Intervals.icu | Load（功率、心率、配速或游泳口径） | 可按项目选择和配置 | Fitness、Fatigue、Form | 改变负荷优先级后，前后曲线可能失去可比性 |
+
+这不是一张换算表。看平台负荷时，只要先检查三个地方，大多数疑问就能解释：这项活动用了功率、配速、心率还是 RPE？个人阈值设得是否可靠？平台有没有在不同项目或不同日期切换负荷来源？
+
+同一次骑行出现 100 Garmin Load、85 TSS 和 72 Relative Effort，并不意味着其中两个结果是错的。三个数字采用不同输入和单位，不能因为数值接近就把它们当成同一种东西。
+
+### Trainingload.ai 如何选择负荷来源？
+
+Trainingload.ai 会按照用户设置的负荷来源优先级，为每项活动选择一个可用值。根据项目和数据完整度，这个值可能来自功率、心率、配速或 Session RPE。一天有多项活动时，活动负荷会相加为当天的 `daily_load`，再用于计算 CTL、ATL 和 TSB。
+
+活动重复或缺失、阈值变化、负荷来源切换，都会影响后面的曲线。多种来源可以显示在同一张图上，不代表它们在生理意义上完全相等。如果某一天的曲线突然异常，应该先回到当天活动，确认平台实际采用了哪一种负荷。
+
+## 耐力运动者该看哪一种？
+
+没有哪一种负荷能包办所有问题。比较实用的方式，是把三类信号放在一起看：
+
+```text
+外在输出：功率 / 配速 / 距离
+客观内在反应：心率 / TRIMP / EPOC
+主观内在反应：Session RPE
+```
+
+真正有信息量的，往往是它们不一致的时候。
+
+- 功率和过去一样，心率、RPE 却都升高：先检查炎热、补水、恢复或生病迹象；
+- 心率和平时接近，RPE 却更高：肌肉疲劳、疼痛和睡眠可能比心血管压力更突出；
+- 功率下降，心率和 RPE 仍然很高：下一节关键课可能需要重新评估；
+- 功率提高，心率和 RPE 没有明显上升：训练效率可能正在改善；
+- 下坡跑后酸痛明显，Garmin Load 却不高：机械负荷可能没有被算法充分记录。
+
+如果一定要选一个主指标，就选数据覆盖最完整、阈值最可靠，而且能够长期保持一致的那一个。有稳定功率数据的骑行可以优先看功率负荷；没有功率计或经常跨项目训练，心率负荷通常更连续；力量、越野或设备数据不稳定时，再用 Session RPE 补充。
+
+计算 CTL、ATL 和 TSB 时，“口径稳定”尤其重要。前一阶段用功率 TSS，后一阶段改成心率或 RPE，曲线的变化可能只是算法变了，并不代表训练本身发生了同样幅度的变化。
+
+## 别把负荷当成训练结果
+
+训练负荷记录的是施加了多少刺激，训练结果取决于身体如何吸收这些刺激。相同负荷，在睡眠充足、营养良好时可能带来适应；遇到疾病、工作压力或恢复不足，结果可能完全不同。
+
+负荷数据适合用来检查训练量是否按计划变化、哪几节课推动了曲线、计划和实际完成之间差了多少。它不能单独证明你已经恢复，也不能保证明天训练安全，更不能因为 CTL 上升或 TSB 到达某个数字，就断定比赛状态已经到位。
+
+最简单的使用顺序是：先看完成了什么，再看身体如何回应，最后结合自己的感受决定下一步。
+
+训练负荷不是一笔必须逐节偿还的欠账。如果新手计划被现实打断，先看看[Couch to 5K 漏跑一次后应该怎么调整](/zh/blog/couch-to-5k-missed-run)，再决定是否要把那次训练挤回来。
+
+理解单次训练负荷之后，可以继续阅读[《什么是 CTL、ATL、TSB？读懂体能、疲劳与状态》](/zh/blog/what-are-ctl-atl-tsb)，看看这些每日负荷如何形成长期和短期曲线。也可以先[用时长、NP 和 FTP 计算 TSS](/zh/tss-calculator)，或[用每日 TSS 推演 CTL、ATL、TSB](/zh/training-load-calculator)，再打开应用内 PMC。
+
+## 参考资料
+
+- [IOC 共识：运动负荷与伤病风险](https://ostrc.no/globalassets/publications/soligard_2016_bjsm_how-much-is-too-much.-ioc-consensus-statement-on-load-in-sport-and-risk-of-injury.pdf)
+- [Session RPE 方法综述](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [TrainingPeaks：Training Stress Scores Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
+- [Garmin：EPOC](https://www.garmin.com/en-US/garmin-technology/running-science/physiological-measurements/epoc/)
+- [Garmin：Training Load](https://www.garmin.com/en-US/garmin-technology/cycling-science/physiological-measurements/training-load/)
+- [Strava：Fitness & Freshness](https://support.strava.com/en-us/articles/15402032-fitness-freshness)
+- [COROS：Fitness Metrics](https://support.coros.com/hc/en-us/articles/41966403972500-Fitness-Metrics)
+- [Polar：Training Load Pro](https://support.polar.com/uk-en/training-load-pro)
+- [Suunto：Training Stress Score in Suunto App](https://www.suunto.com/en-gb/sports/News-Articles-container-page/training-stress-score-in-suunto-app/)
+- [Apple：watchOS Training Load](https://www.apple.com/newsroom/2024/09/watchos-11-is-available-today/)
+- [WHOOP：WHOOP Strain](https://support.whoop.com/s/article/WHOOP-Strain?language=en_US)
+
+> Normalized Power（NP）、Intensity Factor（IF）和 Training Stress Score（TSS）是 Peaksware, LLC 的注册商标。

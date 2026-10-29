@@ -1,0 +1,24 @@
+---
+title: 连接 Cursor
+description: 在 Cursor mcp.json 中配置 TrainingLoad 远程 MCP 服务。
+---
+
+# 连接 Cursor
+
+将以下内容加入 macOS/Linux 的 `~/.cursor/mcp.json`（保留文件中已有的其他服务）：
+
+```json
+{
+  "mcpServers": {
+    "trainingload": {
+      "url": "https://api.trainingload.ai/mcp"
+    }
+  }
+}
+```
+
+重启 Cursor 或在 MCP 设置中刷新服务，在提示时完成 TrainingLoad OAuth。确认 TrainingLoad 工具已启用后，询问：“显示我今年的跑步体能趋势、当前训练区间和 5 km 最佳成绩。”
+
+如果显示未连接，先验证 JSON 语法和 URL，再从 Cursor MCP 设置重新认证。不要在 `headers` 中硬编码 token。
+
+[Cursor MCP 官方说明](https://docs.cursor.com/context/model-context-protocol)

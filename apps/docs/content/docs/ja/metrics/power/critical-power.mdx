@@ -1,0 +1,70 @@
+---
+title: Critical Power (CP)
+description: Critical Power (CP) の定義、生理学的な意味、W' との関係を説明します。
+keywords:
+  [
+    "Critical Power",
+    "CP",
+    "W'",
+    "Anaerobic Work Capacity",
+    "MMP",
+    "Monod-Scherrer",
+    "FTP vs CP",
+  ]
+---
+
+# Critical Power (CP)
+
+**Critical Power (CP)** は、持久系生理学で重要な概念です。持続可能な強度と、いずれ維持できなくなる強度の境界を表します。
+
+簡単に言うと、CP は代謝的な定常状態を保てる上限に近いパワーです。CP を超えると乳酸蓄積や VO2 の slow component が進み、やがて VO2max に近づいていきます。
+
+## 2 パラメータモデル
+
+CP モデルは、パフォーマンスを 2 つの要素で表します。
+
+1. **Critical Power (CP)**  
+   有酸素システムの上限に近い値です。CP 以下なら、理論上は長く続けられます。
+
+2. **[W' (W Prime)](/ja/docs/metrics/power/anaerobic-work-capacity)**  
+   CP を超えたときに使う有限の無酸素エネルギーです。バッテリーのように消費されます。
+
+代表的な関係式は次の通りです。
+
+```text
+P = CP + W' / t
+```
+
+または、疲労困憊までの時間を推定する場合:
+
+```text
+t = W' / (P - CP)
+```
+
+## 生理学的な意味
+
+CP は、しばしば **Heavy** と **Severe** 強度領域の境界として扱われます。
+
+- **CP 以下**: 乳酸や VO2 が安定しやすい。
+- **CP 超え**: 定常状態にならず、W' が減っていく。
+
+W' がなくなると、CP を超えるパワーは維持できず、CP 以下に落とす必要があります。
+
+## CP と FTP の違い
+
+CP と [FTP](/ja/docs/metrics/power/functional-threshold-power) は似た場面で使われますが、定義は違います。
+
+- **FTP**: 実践的には約 60 分維持できる最高平均パワー。
+- **CP**: CP モデル上の疲労閾値パラメータ。
+
+多くの場合、CP は FTP より少し高くなります。Trainingload.ai では目安として `FTP ≈ 95%-96% of CP` を使うことがあります。
+
+## Trainingload.ai での推定
+
+Trainingload.ai は、特定のテストだけに頼らず、過去データの **MMP (Max Mean Power)** から CP と W' を推定します。
+
+1. 直近約 90 日の主要時間帯のベスト平均パワーを集める。
+2. 時間-パワー点から CP と W' をフィットする。
+3. 必要に応じて FTP を CP から推定する。
+
+精度を上げるには、3-5 分、10-20 分など複数時間帯の最大努力が含まれていることが重要です。

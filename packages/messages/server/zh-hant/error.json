@@ -1,0 +1,9 @@
+{
+  "user": {
+    "not_found": "使用者不存在",
+    "not_authorized": "使用者未授權"
+  },
+  "common": {
+    "internal_server_error": "伺服器內部錯誤"
+  }
+}

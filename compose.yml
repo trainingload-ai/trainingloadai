@@ -1,0 +1,237 @@
+name: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+
+x-server-environment: &server-environment
+  NODE_ENV: production
+  DEPLOYMENT_MODE: self-host
+  APP_VERSION: ${SELF_HOST_VERSION:-1.1.16}
+  NODE_OPTIONS: --max-old-space-size=256 --max-semi-space-size=4
+  PORT: "3001"
+  SELF_HOST_MODE: ${SELF_HOST_MODE:-connected}
+  DATABASE_URL: postgresql://${SELF_HOST_DATABASE_USER:-trainingload}:${SELF_HOST_DATABASE_PASSWORD:?Set SELF_HOST_DATABASE_PASSWORD in .env.selfhost}@postgres:5432/${SELF_HOST_DATABASE_NAME:-trainingload}?connection_limit=${SELF_HOST_DATABASE_CONNECTION_LIMIT:-5}&pool_timeout=${SELF_HOST_DATABASE_POOL_TIMEOUT_SECONDS:-20}
+  BETTER_AUTH_SECRET: ${SELF_HOST_AUTH_SECRET:?Set SELF_HOST_AUTH_SECRET in .env.selfhost}
+  EXTERNAL_PROVIDER_CREDENTIAL_SECRET: ${SELF_HOST_INTEGRATION_SECRET:?Set SELF_HOST_INTEGRATION_SECRET in .env.selfhost}
+  NEXT_PUBLIC_API_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+  NEXT_PUBLIC_APP_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+  NEXT_PUBLIC_BASE_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+  TRUSTED_ORIGINS: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+  SELF_HOST_HTTP_BIND: ${SELF_HOST_HTTP_BIND:-127.0.0.1}
+  SELF_HOST_ALLOW_INSECURE_HTTP: ${SELF_HOST_ALLOW_INSECURE_HTTP:-false}
+  SELF_HOST_OPERATIONS_PATH: /data/operations
+  SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS: ${SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS:-86400}
+  STORAGE_STRATEGY: LOCAL
+  LOCAL_STORAGE_PATH: /data/uploads
+  LOCAL_STORAGE_CACHE_PATH: /data/cache/storage
+  MAP_PROVIDER: ${MAP_PROVIDER:-openfreemap}
+  MAP_STYLE_URL: ${MAP_STYLE_URL:-}
+  MAP_TILE_URL: ${MAP_TILE_URL:-}
+  MAP_ATTRIBUTION: ${MAP_ATTRIBUTION:-}
+  MAP_MAX_ZOOM: ${MAP_MAX_ZOOM:-19}
+  ACTIVITY_MAP_THUMB_PROVIDER: local
+  ELEVATION_PROVIDER: ${ELEVATION_PROVIDER:-none}
+  ELEVATION_DATA_PATH: /data/elevation
+  ELEVATION_TILE_ZOOM: ${ELEVATION_TILE_ZOOM:-13}
+  AI_PROVIDER: ${AI_PROVIDER:-none}
+  AI_API_KEY: ${AI_API_KEY:-}
+  AI_BASE_URL: ${AI_BASE_URL:-}
+  AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-}
+  AI_REASONING_MODEL: ${AI_REASONING_MODEL:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+  OPENAI_DEFAULT_MODEL: ${OPENAI_DEFAULT_MODEL:-}
+  OPENAI_REASONING_MODEL: ${OPENAI_REASONING_MODEL:-}
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+  OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-}
+  OPENROUTER_DEFAULT_MODEL: ${OPENROUTER_DEFAULT_MODEL:-}
+  OPENROUTER_REASONING_MODEL: ${OPENROUTER_REASONING_MODEL:-}
+  DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+  DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-}
+  DASHSCOPE_DEFAULT_MODEL: ${DASHSCOPE_DEFAULT_MODEL:-}
+  DASHSCOPE_REASONING_MODEL: ${DASHSCOPE_REASONING_MODEL:-}
+  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+  DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-}
+  DEEPSEEK_DEFAULT_MODEL: ${DEEPSEEK_DEFAULT_MODEL:-}
+  DEEPSEEK_REASONING_MODEL: ${DEEPSEEK_REASONING_MODEL:-}
+  BILLING_PROVIDER: none
+  TELEMETRY_ENABLED: "false"
+  WEATHER_PROVIDER: none
+  ACTIVITY_WEATHER_ENABLED: "false"
+  AI_TODAY_WEATHER_ENABLED: "false"
+  THIRD_PARTY_SYNC_ENABLED: "false"
+  THIRD_PARTY_WEBHOOK_BOOTSTRAP: "false"
+  AGENT_CAPABILITIES_ENABLED: "false"
+  SOCIAL_AUTH_ENABLED: "false"
+  PUBLIC_DEMO_ENABLED: "false"
+
+services:
+  permissions:
+    image: ${SELF_HOST_MIGRATE_IMAGE:?Set SELF_HOST_MIGRATE_IMAGE in .env.selfhost}
+    user: "0:0"
+    command:
+      - node
+      - -e
+      - |
+        const fs = require('node:fs');
+        const path = require('node:path');
+        function own(file) {
+          const stat = fs.lstatSync(file);
+          if (stat.isSymbolicLink()) throw new Error('State directories must not contain symbolic links');
+          fs.chownSync(file, 10001, 10001);
+          if (stat.isDirectory()) for (const name of fs.readdirSync(file)) own(path.join(file, name));
+        }
+        for (const name of ['uploads', 'cache/storage', 'cache/client', 'elevation', 'operations']) {
+          const file = path.join('/state', name);
+          fs.mkdirSync(file, {recursive: true});
+          own(file);
+        }
+        fs.chmodSync('/state/operations', 0o700);
+    volumes:
+      - ${SELF_HOST_DATA_ROOT:-./data}:/state
+    restart: "no"
+    network_mode: none
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+  postgres:
+    image: postgres:17.10-bookworm@sha256:9b18b78397054fce88a9552e9d5a3ad5bb7fd258c5b3cc1c5028e46373d6ea8f
+    restart: unless-stopped
+    stop_grace_period: 60s
+    environment:
+      POSTGRES_DB: ${SELF_HOST_DATABASE_NAME:-trainingload}
+      POSTGRES_USER: ${SELF_HOST_DATABASE_USER:-trainingload}
+      POSTGRES_PASSWORD: ${SELF_HOST_DATABASE_PASSWORD:?Set SELF_HOST_DATABASE_PASSWORD in .env.selfhost}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    volumes:
+      - ${SELF_HOST_DATA_ROOT:-./data}/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - app
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  migrate:
+    image: ${SELF_HOST_MIGRATE_IMAGE:?Set SELF_HOST_MIGRATE_IMAGE in .env.selfhost}
+    command:
+      - node
+      - core/runner/core-migration-runner.mjs
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${SELF_HOST_DATABASE_USER:-trainingload}:${SELF_HOST_DATABASE_PASSWORD:?Set SELF_HOST_DATABASE_PASSWORD in .env.selfhost}@postgres:5432/${SELF_HOST_DATABASE_NAME:-trainingload}?connection_limit=1&pool_timeout=${SELF_HOST_DATABASE_POOL_TIMEOUT_SECONDS:-20}
+      CHECKPOINT_DISABLE: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    networks:
+      - app
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  server:
+    image: ${SELF_HOST_SERVER_IMAGE:?Set SELF_HOST_SERVER_IMAGE in .env.selfhost}
+    restart: unless-stopped
+    stop_grace_period: 30s
+    init: true
+    environment: *server-environment
+    depends_on:
+      permissions:
+        condition: service_completed_successfully
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ${SELF_HOST_DATA_ROOT:-./data}/uploads:/data/uploads
+      - ${SELF_HOST_DATA_ROOT:-./data}/cache:/data/cache
+      - ${SELF_HOST_DATA_ROOT:-./data}/elevation:/data/elevation:ro
+      - ${SELF_HOST_DATA_ROOT:-./data}/operations:/data/operations
+    expose:
+      - "3001"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3001/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    networks:
+      - app
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  client:
+    image: ${SELF_HOST_CLIENT_IMAGE:?Set SELF_HOST_CLIENT_IMAGE in .env.selfhost}
+    restart: unless-stopped
+    stop_grace_period: 20s
+    init: true
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=128 --max-semi-space-size=4
+      PORT: "3002"
+      HOSTNAME: 0.0.0.0
+      CLIENT_INTERNAL_API_URL: http://server:3001
+      CLIENT_PUBLIC_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+      NEXT_PUBLIC_API_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+      NEXT_PUBLIC_APP_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+      NEXT_PUBLIC_BASE_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+      NEXT_PUBLIC_SELF_HOST_MODE: ${SELF_HOST_MODE:-connected}
+      NEXT_PUBLIC_TELEMETRY_ENABLED: "false"
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - ${SELF_HOST_DATA_ROOT:-./data}/cache/client:/app/apps/client/.next/cache
+    ports:
+      - ${SELF_HOST_HTTP_BIND:-127.0.0.1}:${SELF_HOST_HTTP_PORT:-43210}:3002
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3002/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m
+    networks:
+      - app
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+networks:
+  app:
+    driver: bridge

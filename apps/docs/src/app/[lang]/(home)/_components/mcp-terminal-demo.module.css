@@ -1,0 +1,75 @@
+.reveal {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.typedPrompt {
+  animation: terminal-type 820ms steps(22, end) both;
+  clip-path: inset(0 100% 0 0);
+}
+
+.cursor {
+  animation: terminal-cursor 850ms steps(1, end) infinite;
+}
+
+.spinner {
+  animation: terminal-spin 800ms linear infinite;
+}
+
+.completedIcon {
+  display: block;
+}
+
+@keyframes terminal-type {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes terminal-cursor {
+  0%,
+  46% {
+    opacity: 1;
+  }
+
+  47%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes terminal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .typedPrompt {
+    animation: none;
+    clip-path: none;
+  }
+
+  .cursor,
+  .spinner {
+    display: none;
+  }
+
+  .completedIcon {
+    display: block !important;
+  }
+}

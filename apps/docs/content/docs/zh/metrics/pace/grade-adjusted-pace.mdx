@@ -1,0 +1,79 @@
+---
+title: 坡度调整配速 (Grade Adjusted Pace，GAP)
+description: 将上坡和下坡跑步配速换算为估算的平路等效配速，用于比较起伏路线中的相对努力程度。
+keywords: ["GAP", "Grade Adjusted Pace", "坡度调整配速", "坡度配速", "配速", "跑步", "爬坡跑"]
+---
+
+# 坡度调整配速 (Grade Adjusted Pace)
+
+**坡度调整配速 (GAP)** 是一种将**上坡**或**下坡**的实际配速，通过生物力学模型换算成**估算的平路等效配速**的方法。
+
+它试图回答的问题是：“如果我现在不是在爬坡或下坡，而是在平路上用相近能量代价跑，我的配速大约是多少？”
+
+## 核心概念
+
+在起伏路面跑步时，单纯看**实际配速**很难反映你的努力程度：
+-   **上坡**: 对抗重力做功，实际配速变慢，但心率和生理代价很高。
+-   **下坡**: 重力辅助，实际配速变快，但能量消耗并不一定线性减少（受制动效应影响）。
+
+GAP 会降低地形对配速解读的干扰，提供一个更标准化的参考，让你更容易跨路线比较相似努力。
+
+## 计算原理
+
+Trainingload.ai 采用基于 **Minetti (2002)** 的能量消耗模型来计算 GAP。该模型量化了不同坡度下的**能量消耗 (Energy Cost, EC)**。
+
+### 能量消耗公式
+
+$$
+C_r = 155.4 \times i^5 - 30.4 \times i^4 - 43.3 \times i^3 + 46.3 \times i^2 + 19.5 \times i + 3.6
+$$
+
+其中：
+-   $C_r$: 能量消耗 (J/kg/m)
+-   $i$: 坡度 (Grade)，例如 5% 坡度为 0.05。
+
+### GAP 计算
+
+$$
+GAP = \frac{\text{Pace}_{actual}}{C_r / C_{flat}}
+$$
+
+-   当坡度为 0% 时，$C_{flat} \approx 3.6$。
+-   当上坡时，$C_r > 3.6$，因此 GAP 快于实际配速（数值更小）。
+-   当下坡时（缓坡），$C_r < 3.6$，因此 GAP 慢于实际配速。
+-   **注意**：在极陡的下坡（通常超过 -20%），由于肌肉需要进行大量的**离心收缩**来制动，能量消耗反而会上升，导致 GAP 重新变快。
+
+## 典型应用场景
+
+### 1. 越野跑与山地训练
+在爬升很大的越野赛中，实际配速很难直接解读。
+-   **实际情况**：你在爬一个 15% 的陡坡，配速掉到了 12:00/km。
+-   **GAP 分析**：GAP 显示为 5:00/km。
+-   **解读**：这段代谢强度可能明显高于原始配速看起来的强度，并不一定代表状态下降。
+
+### 2. rTSS 计算的基础
+Trainingload.ai 使用 **NGP (标准化坡度配速)** 来计算跑步的训练负荷 (rTSS)，而 NGP 的基础正是 GAP。
+$$
+Pace_{actual} \xrightarrow{\text{坡度修正}} GAP \xrightarrow{\text{加权平滑}} NGP
+$$
+
+### 3. 比赛策略制定
+通过分析赛道的 GPX 数据，结合 GAP，你可以规划出在不同路段应该跑多少实际配速，以维持恒定的体能输出。
+
+## Trainingload.ai 如何使用 GAP
+
+-   **解释地形上下文**：GAP 可以帮助理解为什么很慢的上坡分段仍然可能是高强度努力。
+-   **作为 NGP 的基础**：Trainingload.ai 先计算 GAP，再进一步计算 NGP 与 rTSS。
+-   **不要盲目追求 GAP**：GAP 主要是**能量代谢**等效，不完整反映肌肉骨骼压力。长时间高强度下坡跑，GAP 可能看起来可控，但股四头肌和膝盖负荷仍然很高。
+-   **关注趋势而非瞬时值**：GPS 设备对瞬时坡度的计算往往有延迟和误差，导致实时 GAP 波动明显。建议关注 **Lap GAP**（分段平均 GAP）或赛后分析。
+
+## 相关文档
+
+- [标准化坡度配速 NGP](/zh/docs/metrics/pace/normalized-graded-pace)
+- [配速区间](/zh/docs/metrics/pace/zones)
+- [训练压力积分 TSS](/zh/docs/metrics/training-load/training-stress-score)
+
+## 参考资料
+
+-   Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *Journal of Applied Physiology*.
+-   Strava: [Grade Adjusted Pace (GAP)](https://support.strava.com/hc/en-us/articles/216917067-Grade-Adjusted-Pace-GAP)

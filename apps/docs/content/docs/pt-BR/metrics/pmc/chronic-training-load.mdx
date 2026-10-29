@@ -1,0 +1,84 @@
+---
+title: Condicionamento físico (CTL)
+description: O Trainingload.ai mostra o CTL com uma barra de progresso azul e uma linha azul no gráfico PMC.
+keywords: ["carga crônica de treinamento", "condicionamento físico", "CTL", "fórmula CTL", "tendência de carga", "como interpretar CTL"]
+---
+
+# O que é condicionamento físico (CTL)?
+
+O **condicionamento físico (CTL)**, ou carga crônica de treinamento, combina duração e carga de treinamento (TSS) para resumir o histórico de treinamento do usuário. O Trainingload.ai usa por padrão uma constante de tempo de 42 dias e mostra o percentual atual em relação ao maior CTL histórico do próprio usuário. O CTL resume um histórico de carga modelado; ele não mede diretamente condicionamento físico, adaptação, saúde ou desempenho em prova.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <CtlStatPreviewCard
+    value="67.2"
+    percent={58}
+    metricLabel="CTL"
+    valuePopoverTitle="Valor do CTL"
+    valuePopoverBody="Uma média exponencial lenta da carga diária selecionada pelas configurações de fonte de carga."
+    percentPopoverTitle="Percentual do CTL"
+    percentPopoverBody="O CTL atual expresso em relação ao seu maior CTL histórico."
+    helpTitle="Carga de longo prazo"
+    details="Use o CTL para avaliar a direção e a consistência da carga modelada ao longo de várias semanas."
+  />
+</div>
+
+_Os valores de exemplo servem apenas para visualizar a interface._
+
+## De onde vem o valor de condicionamento físico (CTL)
+
+O Trainingload.ai primeiro determina a carga de cada atividade conforme as métricas disponíveis e a prioridade configurada das fontes. Dependendo da atividade e das configurações, a fonte pode ser potência, frequência cardíaca, ritmo ou RPE da sessão.
+
+Isso significa que:
+
+- Dados de atividade ausentes ou alterados podem mudar o condicionamento físico (CTL).
+- Alterar limiares ou a prioridade das fontes pode mudar a carga derivada e os valores posteriores do PMC.
+- O Trainingload.ai seleciona uma carga disponível por atividade conforme a prioridade configurada; misturar fontes com escalas inconsistentes reduz a comparabilidade entre períodos.
+- Em um dia sem carga de atividade registrada, a entrada diária é zero e o CTL anterior diminui gradualmente.
+
+## Fórmula
+
+O Trainingload.ai usa decaimento exponencial com uma constante de tempo padrão do CTL de 42 dias:
+
+```text
+decay_CTL = exp(-1 / 42)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+`exp` é a função exponencial natural. Com a constante padrão, `decay_CTL ≈ 0.976472`; portanto, a carga de hoje recebe peso aproximado de `0.023528`.
+
+## Como entender a tendência do condicionamento físico (CTL)
+
+- **CTL subindo**: a carga diária recente está, em geral, acima do nível atual de CTL.
+- **CTL estável**: a carga recente está aproximadamente mantendo o nível modelado.
+- **CTL caindo**: a carga recente está, em geral, abaixo desse nível, inclusive durante redução de treino ou taper.
+
+## Perguntas úteis
+
+O CTL pode ajudar a responder:
+
+- O condicionamento físico (CTL) atual está subindo, mantendo ou caindo?
+- Treinos perdidos ou um período de recuperação mudaram a tendência de longo prazo?
+- O plano atual está produzindo a direção de carga pretendida?
+- Uma alteração de limiar ou fonte reduziu a comparabilidade?
+
+O CTL sozinho não consegue responder:
+
+- O usuário se adaptou bem ao treinamento?
+- O treino intenso de amanhã é seguro?
+- O usuário está recuperado, saudável ou pronto para competir?
+- Um usuário tem mais condicionamento que outro?
+
+Antes de decidir, considere também tendências de desempenho, qualidade de execução, estado subjetivo, [fadiga (ATL)](/docs/metrics/pmc/acute-training-load) e [forma (TSB)](/docs/metrics/pmc/training-stress-balance).
+
+## Referências
+
+- [Intervals.icu: fórmulas de condicionamento, fadiga e forma](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [Glossário RUNALYZE: Chronic Training Load (CTL)](https://runalyze.com/glossary/ctl)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## Páginas relacionadas
+
+- [Fadiga (ATL)](/docs/metrics/pmc/acute-training-load)
+- [Forma (TSB)](/docs/metrics/pmc/training-stress-balance)
+- [Fluxo de análise do treinamento](/docs/guide/training-analysis-workflow)
+- [Como usar o PMC para ajustes de maratona](/docs/guide/pmc-marathon-adjustment)

@@ -1,0 +1,43 @@
+---
+title: Fatica (ATL)
+description: Scopri come Trainingload.ai modella la Fatica (ATL) dal carico giornaliero e come leggere l’andamento senza scambiarlo per una misura diretta della fatica.
+keywords: ["fatica", "carico acuto", "ATL", "formula ATL", "carico recente"]
+---
+
+# Che cos’è la Fatica (ATL)?
+
+La **Fatica (ATL)**, o Acute Training Load, è una media esponenziale del carico giornaliero che reagisce rapidamente. Dà più peso ai giorni recenti e cambia più velocemente della Forma fisica (CTL). Trainingload.ai usa per impostazione predefinita una costante di tempo di sette giorni.
+
+“Fatica” è un’etichetta leggibile dell’interfaccia. ATL riassume il carico recente modellato; non misura direttamente fatica fisiologica o percepita, recupero, salute o adattamento.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AtlStatPreviewCard value="16.99" percent={72} metricLabel="ATL"
+    valuePopoverTitle="Valore ATL"
+    valuePopoverBody="Media esponenziale rapida dei carichi giornalieri scelti in base alla priorità delle fonti."
+    percentPopoverTitle="Percentuale ATL"
+    percentPopoverBody="ATL attuale rispetto al massimo storico; non è un percentile universale di fatica."
+    helpTitle="Carico recente"
+    details="Collega ogni variazione alle sedute e al contesto di recupero." />
+</div>
+
+## Origine e formula
+
+Per ogni attività Trainingload.ai seleziona un carico basato su potenza, frequenza cardiaca, passo o RPE di sessione. Le attività dello stesso giorno vengono sommate in `daily_load`; un giorno senza carico registrato vale zero.
+
+```text
+decay_ATL = exp(-1 / 7)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+```
+
+Con i valori predefiniti, `decay_ATL ≈ 0.866878` e il carico di oggi pesa circa `0.133122`. Sette giorni sono una **costante di tempo**, non una media semplice dell’ultima settimana. Dopo il passaggio a un carico giornaliero costante, ATL completa circa il 63,2% del cambiamento in una costante e il 95% in tre.
+
+ATL sale quando il carico recente supera il livello attuale, resta stabile quando lo mantiene e scende con riposo, recupero o tapering. Non stabilisce da sola se l’atleta sia affaticato o se la prossima seduta sia sicura.
+
+Leggila insieme a [Forma fisica (CTL)](/it/docs/metrics/pmc/chronic-training-load), [Forma (TSB)](/it/docs/metrics/pmc/training-stress-balance), qualità delle sedute, sonno, dolore, malattia, RPE e sensazioni.
+
+## Riferimenti
+
+- [Intervals.icu: formule Fitness, Fatigue e Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE: Acute Training Load](https://runalyze.com/glossary/atl)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [Codice GoldenCheetah: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)

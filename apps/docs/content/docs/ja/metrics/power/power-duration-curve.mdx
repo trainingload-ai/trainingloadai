@@ -1,0 +1,57 @@
+---
+title: Power Duration Curve (PDC)
+description: さまざまな時間で出せる最大平均パワーを示す、サイクリング能力の指紋のような曲線です。
+keywords:
+  [
+    "Power Duration Curve",
+    "PDC",
+    "MMP",
+    "Max Mean Power",
+    "Phenotype",
+    "Rider Profile",
+    "CP model",
+  ]
+---
+
+# Power Duration Curve (PDC)
+
+**Power Duration Curve (PDC)** は、持久系分析の基本モデルのひとつです。異なる時間幅における **最大平均パワー (MMP)** を曲線として表します。
+
+## PDC とは
+
+- **X 軸**: 継続時間（1 秒から数時間）
+- **Y 軸**: 平均パワー（W）
+
+左側は短時間の爆発力、右側は長時間の有酸素能力を示します。
+
+<PDCChart />
+
+## 主な構成要素
+
+### Pmax
+
+1 秒前後の最大瞬間パワーです。筋力と神経系の動員に強く影響されます。
+
+### W'
+
+[W'](/ja/docs/metrics/power/anaerobic-work-capacity) は、[CP](/ja/docs/metrics/power/critical-power) を超えて使える有限のエネルギーです。
+
+### CP
+
+CP は有酸素定常状態の上限に近いパワーです。PDC の右側の漸近線として解釈されます。
+
+## 曲線の読み方
+
+- **スプリンター型**: 左側が非常に高く、短時間パワーに強い。
+- **パンチャー型**: 1-5 分の領域が強い。
+- **TT / クライマー型**: 20 分以上の領域が高く、持続力に優れる。
+
+## Trainingload.ai での使い方
+
+Trainingload.ai は PDC から CP、W'、FTP 推定、ベスト努力の変化を読み取ります。より正確にするには、短時間と中長時間の最大努力がデータに含まれていることが重要です。
+
+## 関連
+
+- [Critical Power (CP)](/ja/docs/metrics/power/critical-power)
+- [W'](/ja/docs/metrics/power/anaerobic-work-capacity)
+- [Functional Threshold Power (FTP)](/ja/docs/metrics/power/functional-threshold-power)

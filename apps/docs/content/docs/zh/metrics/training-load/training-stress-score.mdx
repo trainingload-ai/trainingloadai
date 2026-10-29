@@ -1,0 +1,133 @@
+---
+title: 训练压力分数 TSS 是什么？公式、区间与计算方法
+description: 训练压力分数（TSS）用时长和相对强度估算单次训练负荷。看 TSS 公式、rTSS 与 hrTSS、常见分数区间，以及 FTP 设错如何放大结果、跨项目为何不能直接换算。
+keywords: ["训练压力分数", "TSS", "TSS 怎么算", "rTSS", "hrTSS", "训练负荷分数"]
+---
+
+# 训练压力分数 TSS 是什么？公式、区间与计算方法
+
+**训练压力分数（TSS）**用**时长**和**相对强度**估算一次课的训练压力。骑行常用基准：在 FTP 上骑 1 小时 = 100 TSS。用这一个数字比较“两小时轻松骑”和“三十分钟间歇”。
+
+它回答了最重要的问题：**“今天这次训练到底给身体带来了多大的压力？”**
+
+## 核心概念
+
+TSS 的核心理念基于一个基准：
+
+> **你在功能性阈值 (FTP) 强度下全力运动 1 小时，产生的压力为 100 TSS。**
+
+这意味着：
+-   **100 TSS** = 1 小时 @ FTP (全力以赴)
+-   **50 TSS** = 1 小时 @ 轻松骑 (约 70% FTP) 或 30 分钟 @ FTP
+-   **150 TSS** = 非常艰难的训练，通常需要超过 2-3 小时的骑行。
+
+通过 TSS，你可以比较“2小时的轻松跑”和“30分钟的间歇跑”哪个对身体压力更大。
+
+## 计算公式
+
+最标准的 TSS 计算公式（适用于骑行）如下：
+
+$$
+TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
+$$
+
+其中：
+-   $t$ = 运动持续时间（秒）
+-   $NP$ = [归一化功率 (Normalized Power)](/zh/docs/metrics/power/normalized-power)
+-   $IF$ = [强度系数 (Intensity Factor)](/zh/docs/metrics/training-load/intensity-factor)
+-   $FTP$ = [功能性阈值功率](/zh/docs/metrics/power/functional-threshold-power)
+-   $3600$ = 1 小时的秒数
+
+这个公式本质上是计算：**持续时间(小时) $\times$ 强度系数的平方 ($IF^2$) $\times$ 100**。也就是说，强度升高带来的训练压力并不是线性增加，而会被放大。
+
+## TSS 的变体与优先级
+
+由于不同运动的测量设备不同（功率计 vs GPS vs 心率带），TSS 衍生出了多种变体。Trainingload.ai 按照 用户预设的优先级选择计算方式（默认为：功率 > 心率 > 速度 > RPE）：
+
+| 变体 | 全称 | 适用运动 | 准确度 | 计算核心 | 备注 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **TSS** | **Power TSS** | 骑行/划船 | ⭐⭐⭐⭐⭐ | **功率 (Power)** | 在功率数据与 FTP 可靠时参考价值最高；基于 NP 和 FTP。 |
+| **hrTSS** | **Heart Rate TSS** | 所有运动 | ⭐⭐ | **心率 (TRIMP)** | 基于心率区间滞留时间 ([TRIMP](/zh/docs/metrics/training-load/training-impulse))。受**心率滞后**影响，低估短间歇负荷。 |
+| **rTSS** | **Running TSS** | 跑步 | ⭐⭐⭐⭐ | **配速 (Pace)** | 基于 [NGP](/zh/docs/metrics/pace/normalized-graded-pace) 和阈值配速 (rFTPa)。在阈值配速和路线数据可靠时参考价值较高。 |
+| **sTSS** | **Swim TSS** | 游泳 | ⭐⭐⭐ | **速度 (Speed)** | 基于 CSS (临界泳速) 和游进距离/时间。 |
+| **tTSS** | **Time TSS** | 兜底方案 | ⭐ | **平均心率** | 仅有平均心率时的粗略估算，误差较大。 |
+
+## 典型数值参考
+
+了解 TSS 的数值范围有助于你评估单次训练的负荷影响及所需的恢复时间：
+
+| TSS 范围 | 疲劳程度 | 恢复建议 | 典型训练示例 |
+| :--- | :--- | :--- | :--- |
+| **< 150** | **轻度 (Low)** | 次日通常完全恢复 | 1-2小时的有氧耐力骑行；45分钟轻松跑。 |
+| **150 - 300** | **中度 (Medium)** | 次日可能有残留疲劳 | 3-4小时的长距离骑行；高强度间歇课。 |
+| **300 - 450** | **高度 (High)** | 即使在两天后也可能有疲劳感 | 半大铁比赛；环法赛段；超长距离耐力训练。 |
+| **> 450** | **很高 (Epic)** | 可能需要数天恢复，并影响后续训练质量 | 大铁比赛 (Ironman)；极限耐力挑战。 |
+
+## 建议
+
+### Trainingload.ai 如何使用 TSS
+
+Trainingload.ai 会把 TSS 作为一个输入，而不是把它当成最终结论。高 TSS 的训练可能意味着后续需要降低强度或增加恢复，但具体是否调整，还要同时看运动类型、近期 ATL、当前 CTL、主观反馈，以及这次训练是否符合原计划。
+
+在训练计划里，TSS 最有价值的用法是和计划关联起来：
+
+-   比较 **计划 TSS 与实际完成 TSS**。
+-   在增加训练量或强度之前，观察周负荷是否上升过快。
+-   把 TSS 与 [ATL](/zh/docs/metrics/pmc/acute-training-load)、[CTL](/zh/docs/metrics/pmc/chronic-training-load)、[TSB](/zh/docs/metrics/pmc/training-stress-balance) 一起看，而不是孤立解读单次训练分数。
+
+### 1. 警惕“虚高”的 TSS
+如果你经常看到单次训练 TSS 超过 200 甚至 300，首先应检查你的 **FTP/阈值设置是否过低**。
+-   对于大多数业余爱好者，单次 300 TSS 是极其罕见的生理挑战。
+-   如果你的 FTP 设置偏低，IF 就会虚高，导致 TSS 指数级虚高。
+
+### 2. 没有数据？手动估算
+如果设备没电了，或者进行了力量训练，可以使用 **RPE (自觉体感强度)** 手动估算，以保持 [PMC 图表](/zh/docs/metrics/pmc/chronic-training-load) 的连续性：
+
+$$
+TSS \approx \frac{\text{时长(分)} \times \text{RPE}(1-10)}{60} \times 10
+$$
+
+*注：这是一个粗略的经验公式，RPE 10 对应 TSS 100/小时。*
+
+## 局限性
+
+1.  **跨项目比较的陷阱**：虽然 TSS 试图标准化，但 **100 TSS 的跑步** 对身体造成的机械损伤（骨骼肌肉冲击）通常远大于 **100 TSS 的骑行**。不要简单地认为它们是可以完全等价交换的。
+2.  **忽略非生理压力**：TSS 不包含环境压力（高温、高海拔）或生活压力（睡眠不足、工作焦虑），这些都会增加实际的恢复成本。
+
+## 常见问题
+
+### TSS 越高越好吗？
+
+不是。TSS 越高代表模型估算的训练压力越高，不代表训练一定更有效。一次训练是否有价值，取决于训练目标、所处周期，以及你能否在下一次关键训练前完成恢复。
+
+### TSS 可以直接比较跑步和骑行吗？
+
+只能谨慎比较。TSS 有助于统一负荷尺度，但相同 TSS 下，跑步通常会带来更高的肌肉骨骼冲击。
+
+### 为什么 FTP 设置不准会影响 TSS？
+
+TSS 依赖相对阈值强度。如果 FTP 设置过低，IF 会被高估，TSS 也会被放大；如果 FTP 设置过高，训练压力则可能被低估。
+
+### TSS 怎么计算？
+
+骑行：TSS =（秒 × NP × IF）/（FTP × 3600）× 100，也就是小时数 × IF² × 100。跑步常用 NGP 和阈值配速算 rTSS；心率课可用 [TRIMP](/zh/docs/metrics/training-load/training-impulse) 得到 hrTSS。
+
+### 一次课多少 TSS 算正常？
+
+低于 150 通常恢复较快；150–300 隔天可能还有疲劳；对多数业余选手，单次 300+ 已经很重——先检查 FTP 再相信异常高分。
+
+## 下一步
+
+- [用时长、NP 和 FTP 计算 TSS](/zh/tss-calculator)
+- [用每日 TSS 推演 CTL、ATL、TSB](/zh/training-load-calculator)
+- [在计划里管理 CTL、ATL、TSB 训练负荷](/zh/training-load)
+- 阅读[强度系数 IF](/zh/docs/metrics/training-load/intensity-factor)，看 IF 如何以平方进入 TSS
+- [从活动文件估算 FTP 训练负荷](/zh/ftp-calculator)
+- [用 AI 教练在负荷变化时调整训练计划](/zh/ai-training-plan)
+
+## 参考资料
+
+-   [TrainingPeaks: Training Stress Scores (TSS) Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
+-   [Joe Friel: The Triathlete's Training Bible](https://joefrieltraining.com/)
+
+> Normalized Power (NP), Intensity Factor (IF) 以及 Training Stress Score (TSS) 皆为 [Peaksware, LLC](https://trainingpeaks.com/) 所拥有的注册商标。

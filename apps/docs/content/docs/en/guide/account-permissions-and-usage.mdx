@@ -1,0 +1,207 @@
+---
+title: Account, Permissions, Exports, and AI Usage
+description: Verify account security, manage permissions and connections, export account data, review membership and AI usage, and delete an account safely.
+keywords:
+  [
+    "Trainingload.ai account",
+    "mobile permissions",
+    "AI usage",
+    "change password",
+    "automatic threshold updates",
+    "export Trainingload data",
+    "delete Trainingload account",
+  ]
+---
+
+# Account, Permissions, Exports, and AI Usage
+
+Account settings control identity and access; permissions control which device and provider data can enter Trainingload.ai; usage explains membership and AI consumption. Review them together when setting up a new device or investigating a missing feature.
+
+## Before you begin
+
+- Sign in to the same Trainingload.ai account on web and mobile.
+- Keep access to the account email for verification codes.
+- On mobile, know whether the operating system has already denied Health or Location access.
+- Decide which thresholds may update automatically before enabling any switch.
+- Do not share verification codes, passwords, connection credentials, or screenshots containing private account identifiers.
+
+## 1. Verify identity and password status
+
+On web, open **Account**. On mobile, open **Me → Account**.
+
+You can review:
+
+- Display name.
+- Account email and verification status.
+- Whether a password has been set.
+
+The current email field is read-only. If the account is unverified, request a six-digit verification code and enter it before it expires. On web, a sent code remains valid for five minutes and cannot be resent while its countdown is active.
+
+Use **Set password** when the account has no password, or **Change password** when one already exists. An OAuth-based account can still show that no password has been set; use the displayed password action rather than assuming the account is broken.
+
+### Recover access and finish sign-in
+
+From the login page, use **Forgot password** to request a reset email. Open only the newest reset link, confirm that it returns to the Trainingload.ai reset screen, and set a new password there. An expired, malformed, or already-used token must be replaced with a new reset request.
+
+OAuth sign-in can pass through a completion or error screen before returning to the app. If completion does not redirect, return to Login and retry once; if an error page appears, record the visible error text without sharing tokens or the full callback URL.
+
+When another application asks to access Trainingload.ai, the OAuth consent page shows the requesting application, signed-in account, requested scopes, and return destination. Approve only when all four match what you intended. Denying consent returns control without granting the requested access.
+
+<DocsScreenshot
+  id="account-security-status"
+  title="Account identity and security status"
+  description="Confirm the account email, verification badge, and password status before changing connections or membership settings."
+  route="Account → Identity and security"
+/>
+
+## 2. Review mobile permissions and data sources
+
+Open **Me → Account → Connections** or the mobile **Permissions** page. Sources are separated into local device sources and third-party services.
+
+Local sources include:
+
+- **Health**: authorize supported health and workout reads, review granted or partial status, request a historical sync, manage connected devices, or open system Health settings.
+- **Location**: allow route recording, or open system settings after permission has been denied.
+
+Third-party sources can include Strava, Polar, COROS, Suunto, Wahoo, and Intervals.icu. The source row shows its current state. Open a source to connect it, review provider-specific settings, or continue to the connections page.
+
+<DocsScreenshot
+  id="mobile-permission-sources"
+  title="Mobile permission and connection sources"
+  description="Review local Health and Location status separately from third-party provider connections, then open one source for its available actions."
+  route="Mobile → Account → Connections"
+  platform="mobile"
+/>
+
+Device permission and server connection are separate states. Health can be authorized in the operating system while the Trainingload.ai device connection still needs to be reconnected. Reopen the source detail after returning from system settings so the app can refresh both states.
+
+## 3. Control automatic metric updates
+
+Open **Account → Auto update** on web or mobile. Each switch authorizes updates for one metric:
+
+| Group      | Metrics           |
+| ---------- | ----------------- |
+| Power      | FTP, CP, W′, Pmax |
+| Pace       | TP, CS            |
+| Heart rate | LTHR, Max HR      |
+
+Enable only metrics you want Trainingload.ai to update from qualifying evidence. A switch is not a promise that a new value will be available immediately; the system still needs sufficient supported activity data.
+
+Automatic updates can change thresholds used by zones, charts, structured workouts, and load interpretation. After an update, check the metric history and review a recent activity before comparing old and new periods.
+
+## 4. Review membership and AI usage
+
+The Account membership card shows:
+
+- Current plan and active state.
+- Membership period or expiry context.
+- Billing source.
+- Whether cancellation is scheduled for the end of the period.
+
+Only an active subscription from the supported subscription billing source exposes the in-app subscription management action. Other access sources can show membership status without the same management controls.
+
+Open **Usage** from the membership card or mobile account area. The page shows:
+
+- Current plan.
+- Available credits, including a negative balance when the last completed operation exceeded the prior balance.
+- Monthly subscription credits used, remaining, and expiry.
+- Available or membership-locked credit-pack balance and its nearest expiry.
+- Outstanding debt, consumption trends, operation count, and individual ledger entries.
+
+Choose 1 day, 7 days, 30 days, month to date, or last month. Ledger entries identify Standard (1×), Deep (3×), mixed-mode operations, subscription grants, credit packs, gifts, refunds, and debt offsets. One credit represents 1,000 equivalent tokens after cached input, uncached input, output, mode, and global multipliers are applied; it is not a fixed number of messages.
+
+<DocsScreenshot
+  id="ai-usage-ledger"
+  title="AI usage summary and ledger"
+  description="Compare plan, remaining grants, period consumption, selected-range trends, and the signed event ledger."
+  route="Account → Usage"
+/>
+
+## 5. Set application preferences
+
+Open **Settings** on web to choose:
+
+- light, dark, or system theme;
+- metric or imperial units;
+- chart x-axis behavior;
+- 12-hour or 24-hour time display;
+- preferred interface language.
+
+These controls use a temporary value until you press **Save**. Changing language also moves the current route to the selected locale and stores the preference for later visits. Units and time format affect presentation; they do not rewrite the underlying activity record.
+
+## 6. Export your account data
+
+On web, open **Account → Data export**. Choose the export that matches the next task:
+
+- **AI analysis** creates a compact analysis-oriented package and does not include original uploaded files.
+- **Full backup** creates a broader archive and can include original files when exact location data is retained.
+
+Choose how route locations are handled before requesting the export:
+
+- redact frequently visited locations;
+- remove GPS data;
+- retain exact locations.
+
+Including original files forces exact location handling because those files may contain their own location data. Treat an exact-location export as sensitive and do not upload it to an AI service or share it with another person unless you understand what the archive contains.
+
+Export creation is asynchronous. Keep the page open or return later, refresh the latest job, and download the archive only after its status is **Ready**. The page shows the archive size and expiration time. A ready, failed, or expired export job can be removed from the list.
+
+## 7. Delete an account safely
+
+Account deletion is permanent and asynchronous. Before starting it on mobile:
+
+1. Export anything you need to retain.
+2. Review the displayed membership and billing provider.
+3. Cancel renewal when the flow requires it.
+4. Read and select every final acknowledgement.
+5. Submit the deletion request and wait for the accepted screen before leaving the flow.
+
+The request signs the account out and removes active access while deletion continues in the background. Completion is normally expected within 24 hours and can take up to 7 days. The accepted screen returns to Login; it does not mean the old account can be restored.
+
+Subscription handling depends on the active billing source. Web-billed renewal may need to be canceled before deletion can continue. Apple renewal is managed through Apple and can continue after the Trainingload.ai account is deleted unless you cancel it separately. Deletion does not itself promise a refund, and deleting the account does not make a later subscription purchase restore the deleted data.
+
+## 8. Verify cross-device settings
+
+After changing account, connection, permission, or auto-update settings:
+
+1. Save or complete the action on the current device.
+2. Return to the source list and confirm the displayed state.
+3. Refresh the other device.
+4. Confirm the same account email and relevant server-backed setting.
+5. For local permissions, verify the operating-system status on the device where the permission was granted; local permissions do not transfer to another phone.
+
+## Verify the setup
+
+- The web and mobile sessions show the same account email.
+- Email verification and password status match the intended sign-in method.
+- Health and Location show the expected device-level state.
+- Third-party providers show the expected server connection state.
+- Only intended automatic metric switches are enabled.
+- Membership status and the Usage ledger are consistent with recent grants or AI actions.
+- A requested export reaches Ready, downloads successfully before expiry, and reflects the selected location-privacy option.
+- Theme, unit, chart, time-format, and language settings persist after reopening Settings.
+
+## Troubleshooting
+
+- **The verification code does not work:** enter all six digits, confirm the email, check expiry, and request a new code only after the resend control becomes available.
+- **The email cannot be edited:** email change is not exposed in the current Account UI; the field is intentionally read-only.
+- **Health is authorized but not connected:** reopen Health, check the apps/server/device connection state, and use reconnect when offered.
+- **Location remains denied:** open the operating-system app settings; a previously denied permission may not show another system prompt.
+- **A provider shows disconnected after OAuth:** refresh the source status, confirm the same Trainingload.ai account, and inspect provider-specific settings.
+- **An automatic metric did not change:** confirm the switch is enabled and that recent qualifying activities contain sufficient supported data.
+- **Usage appears empty:** select a wider range and confirm the account has AI grant or consumption events.
+- **Membership cannot be managed in app:** management is shown only for supported active subscription sources; verify the displayed billing source.
+- **An export request cannot start:** wait for the current export job to finish, then refresh the page and try again.
+- **An export has expired:** remove the expired job and request a new archive with the required privacy options.
+- **Account deletion is blocked by a subscription:** follow the provider-specific renewal step shown in the deletion flow, then refresh its status. For Apple billing, cancel renewal through Apple separately.
+- **A reset link is rejected:** request a new email and use its newest link; do not reuse a consumed or expired token.
+- **OAuth consent looks unfamiliar:** deny the request and verify the requesting app, scopes, account, and return destination before trying again.
+- **A preference appears unchanged:** press Save, then reopen Settings; local display preferences and server-backed locale can refresh at different times.
+
+## Next steps
+
+- [Connect Data](/docs/guide/connect-data)
+- [Integrations](/docs/guide/integrations)
+- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+- [Mobile Recording](/docs/guide/mobile-recording)
+- [Notifications and Automated Reviews](/docs/guide/notifications-and-reviews)

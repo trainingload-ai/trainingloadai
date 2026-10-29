@@ -1,0 +1,42 @@
+name: Public core
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "apps/docs/**"
+      - "packages/messages/docs/**"
+      - "scripts/docs/**"
+  pull_request:
+    paths-ignore:
+      - "apps/docs/**"
+      - "packages/messages/docs/**"
+      - "scripts/docs/**"
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_BUILD_CPUS: '2'
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/trainingload
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
+        with:
+          node-version: 22.23.3
+      - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm boundary:check
+      - run: pnpm messages:check
+      - run: pnpm selfhost:inventory:check
+      - run: pnpm selfhost:docs-contract
+      - run: pnpm --dir packages/prisma exec prisma validate --schema core/schema.prisma
+      - run: pnpm prisma:generate
+      - run: pnpm build:selfhost
+      - run: pnpm --dir apps/server test:core
+      - run: pnpm test:selfhost
+      - run: pnpm --dir packages/prisma core:migrate:test
+      - run: node --test scripts/selfhost/*.test.mjs

@@ -1,0 +1,152 @@
+---
+title: Configure a self-host instance
+description: Choose the local data path, control network exposure, and configure an Owner-managed OpenAI-compatible AI provider.
+---
+
+# Configure a self-host instance
+
+The v1 configuration model deliberately separates host-level settings from product settings. The local data path, ports, and Client bind must be known before containers start. The AI provider can be changed later by the Owner inside the Client.
+
+## Before you begin
+
+- Use only settings declared in the release bundle's `.env.example` and instance schema.
+- Run the matching `--dry-run --json` before every lifecycle mutation.
+- Do not paste `.env.selfhost`, passwords, API keys, or tokens into chat, an issue, or a shared terminal transcript.
+- Treat an existing instance data path as authoritative data, not as a directory to replace or clean manually.
+
+## Choose the local data path
+
+The default is `./data` inside the release directory. It contains PostgreSQL data, uploads, operation records, backups, and caches. The application mounts uploads from that host path into `/data/uploads`; v1 does not require an object-storage service.
+
+To choose another path before the first installation:
+
+1. In the extracted, verified release directory, create a private instance configuration from the bundled template:
+
+   ```bash
+   umask 077
+   cp .env.example .env.selfhost
+   chmod 600 .env.selfhost
+   ```
+
+2. Locally generate three different 32-byte values with `openssl rand -hex 32`, then replace the three secret placeholders in `.env.selfhost`. The normal installer does this automatically.
+3. Uncomment `SELF_HOST_DATA_ROOT` and set it to a dedicated path, for example:
+
+   ```dotenv
+   SELF_HOST_DATA_ROOT=/srv/trainingload-data
+   ```
+
+4. Run the normal installer dry run and continue only when it returns `"ok": true`:
+
+   ```bash
+   ./install.sh --dry-run --json
+   ./install.sh --json
+   ```
+
+The target may be absent or dedicated to this instance. The management CLI rejects filesystem roots, release ancestors, signed release subtrees, unsafe symbolic links, and unrelated existing files.
+
+Do not change `SELF_HOST_DATA_ROOT` on a running instance as a file-migration shortcut. Moving an existing instance requires a verified backup and restore into a newly initialized target.
+
+## Control network exposure
+
+Only the Client HTTP port is published, on loopback by default:
+
+```dotenv
+SELF_HOST_SITE_ADDRESS=http://localhost:43210
+SELF_HOST_HTTP_BIND=127.0.0.1
+SELF_HOST_HTTP_PORT=43210
+```
+
+Choose another free port by changing both the site address and HTTP port. Keep PostgreSQL and Server on the private Compose network. For another computer, use an SSH tunnel while keeping the browser origin local. The application bundle has no Caddy, HTTPS port, or Docs profile.
+
+Validate host changes through the lifecycle entry point:
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+./self-host doctor --json
+```
+
+### Local request path
+
+The browser calls the same-origin Client BFF. It forwards API calls, cookies, uploads, and streaming responses to Server over the private Compose network. Browser-provided forwarding headers are stripped; Self-host does not trust an arbitrary proxy client address.
+
+## Single-owner access
+
+The first page asks for one username, then opens onboarding. Existing sessions belong to that same Owner. A database uniqueness constraint and server transactions reject a second user. There is no setting that enables public registration or multiple accounts.
+
+The public application has no Cloud password, signup, or OAuth pages. An expired local session is restored automatically. If the Owner confirms account deletion, the asynchronous deletion flow removes that account's data and returns the instance to username setup after completion. Keep backups and instance configuration separate from account deletion.
+
+## Connect Intervals.icu
+
+Self-hosting supports one training-platform connection: the Owner provides their own **Intervals.icu personal API key**. An Intervals.icu OAuth client, redirect URI, and webhook are neither required nor supported. Other training-platform connections stay hidden, and the server rejects their endpoints as well.
+
+To connect:
+
+1. Open [Intervals.icu Settings](https://intervals.icu/settings) and copy the personal API key near the bottom of the page. The **Get API Key** button in the Client connection dialog opens this page directly.
+2. Choose **Intervals.icu** in the onboarding Import activity step, or later open **Account → Third-party connections → Intervals.icu**.
+3. Enter the API key, choose the activity, planned-workout, wellness, and sport-setting sync directions you need, then save.
+4. Run one manual sync and verify the latest sync time and imported result.
+
+[Intervals.icu's Open API documentation](https://www.intervals.icu/features/open-api/) states that every user can call the REST API with a personal API key, including activity upload/download, wellness data, and planned workouts. The key is submitted only to your local Server. The Server encrypts it with AES-256-GCM using a dedicated integration secret generated during installation, stores the ciphertext in PostgreSQL, and never returns the plaintext through later API responses.
+
+This is not an offline feature. Once enabled, the local Server connects directly to `intervals.icu` and reads or sends data according to the selected directions. The key belongs to an individual Intervals.icu user; do not put it in shared environment variables or paste it into logs, issues, or chat.
+
+Backups contain API-key ciphertext, but the instance secrets must be kept separately in a secure location. Restore the original authentication and integration secrets with the database so stored credentials remain decryptable. The management tools do not print or export these secrets. See the release bundle's `BACKUP_RESTORE.md` for the complete procedure.
+
+## Configure AI in the Client
+
+AI is disabled by default. The final onboarding step offers BYOK AI configuration directly instead of a Trainingload.ai Cloud provider-consent screen; you can also skip it and configure AI later:
+
+1. Open the local Client.
+2. Open **Configure your AI service** during onboarding, or later open **Settings → Self-hosted AI**.
+3. Choose OpenAI, DeepSeek, OpenRouter, DashScope, or **Custom OpenAI-compatible**.
+4. Enter the provider API key when configuring or switching providers, and fill in both the standard and reasoning model. The Base URL may be left blank for built-in providers to use their default endpoint, but it is required for a custom OpenAI-compatible provider.
+5. Save, then open an AI feature and verify one request.
+
+Use model identifiers supported by your provider. Remote base URLs should use HTTPS. A custom LAN model endpoint may use HTTP only when you understand and control that network path.
+
+An OpenAI API key is separate from a ChatGPT Plus or Pro subscription. A ChatGPT subscription cannot be entered as an API key and does not include API usage for this instance.
+
+### How the key is stored
+
+- The browser sends the key only to your local `server`.
+- The server derives an encryption key from the instance auth secret and stores the provider key in PostgreSQL with AES-256-GCM.
+- Later API responses return only whether a key is configured; they never return the plaintext key.
+- Owner-managed settings take precedence over deployment-level AI environment variables and apply immediately on the single-server v1 runtime.
+- Choosing **None** deletes the stored provider credential and disables AI.
+
+Restore the original instance authentication secret with the database. A different secret cannot decrypt existing AI credentials or authentication state; confirm the original configuration before restarting.
+
+### Data leaving the host
+
+Core Local can run with AI disabled. Enabling any external provider is an explicit outbound exception: prompts and the training context required for that request are sent to the selected provider. Review that provider's retention, privacy, location, and billing terms before enabling it.
+
+A self-hosted instance does not use Trainingload.ai memberships, AI credits, or credit packs. The Client's **AI Usage** page does not call Cloud billing endpoints; it explains the BYOK billing boundary instead. Review actual API usage, balance, and charges in the configured AI provider's dashboard.
+
+## Environment fallback for automated provisioning
+
+The release schema still accepts complete provider groups in `.env.selfhost` for unattended provisioning. This is a fallback, not the preferred interactive path. The Client never reveals an environment key, and the Owner must enter a fresh key when switching from environment-managed configuration to Client-managed configuration.
+
+## Verify
+
+- `./self-host doctor --json` returns `"ok": true` after host-level changes.
+- The data root contains the instance marker and expected subdirectories, without unrelated files.
+- The AI settings page is visible only to the instance Owner.
+- After saving AI settings, the field is cleared and the page shows only that a key is configured.
+- The self-host third-party connection page shows only Intervals.icu, and its dialog offers API-key authentication without OAuth.
+- The **AI Usage** page shows no membership checkout, credit balance, or credit packs and does not call `/billing/*` endpoints.
+- After an Intervals.icu key is saved, the field is cleared, only the final four characters are shown, and a manual sync succeeds.
+- Disabling AI prevents new provider calls without affecting non-AI product features.
+
+## Troubleshooting
+
+- **The data root is rejected:** choose an empty, dedicated path outside the release tree; do not bypass the marker or symlink checks.
+- **The AI settings section is missing:** confirm the instance is self-hosted and you are signed in as the claimed Owner.
+- **A new provider asks for the key again:** provider changes intentionally require a fresh credential.
+- **AI stopped working after restore:** restore the original instance authentication secret before restarting.
+- **Intervals.icu stopped working after restore:** verify that the original integration secret was restored with the database.
+- **The model is rejected upstream:** copy the exact model identifier from the provider account and check that the key can access it.
+
+## Next step
+
+Read [Managing your instance](/docs/self-host/operations) and schedule a verified backup. For failures, continue with [Troubleshooting](/docs/self-host/troubleshooting).

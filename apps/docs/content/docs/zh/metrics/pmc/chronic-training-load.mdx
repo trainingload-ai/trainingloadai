@@ -1,0 +1,110 @@
+---
+title: 慢性训练负荷 CTL 是什么？PMC 体能趋势怎么计算
+description: 慢性训练负荷（CTL）是 PMC 上较慢的体能趋势，由每日负荷按 42 天时间常数累积。看上升、持平或下降怎么读，以及它不能单独判断健康、恢复或比赛准备。
+keywords: ["慢性训练负荷", "CTL", "CTL 体能", "慢性训练负荷公式", "PMC 体能"]
+---
+
+# 慢性训练负荷 CTL 是什么？PMC 体能趋势怎么计算
+
+**慢性训练负荷（CTL）**是 PMC 上较慢的体能线：每日负荷（通常是 TSS）按默认 42 天时间常数做指数平均。Trainingload.ai 还会用历史最高 CTL 显示当前百分比。CTL 概括模型化负荷历史，不直接测量体能、适应、健康或比赛表现。
+
+
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <CtlStatPreviewCard
+    value="67.2"
+    percent={58}
+    metricLabel="CTL"
+    valuePopoverTitle="CTL 数值"
+    valuePopoverBody="根据负荷来源设置选出的每日负荷所计算的慢速指数平均。"
+    percentPopoverTitle="CTL 百分比"
+    percentPopoverBody="使用历史最大 体能（CTL）值来表示当前百分比。"
+    helpTitle="较长期负荷"
+    details="使用 CTL 查看数周尺度下模型负荷的方向和一致性。"
+  />
+</div>
+
+_示例数值仅用于界面预览。_
+
+## 体能（CTL）的数值来源
+
+Trainingload.ai 会先根据可用活动负荷和你配置的来源优先级，确定当前活动负荷。根据具体活动和设置不同，依据可能来自功率、心率、配速或整节训练 RPE（负荷优先级可以在系统当中配置）。
+
+这意味着：
+
+- 活动数据缺失或变化可能会导致 体能（CTL）发生变化。
+- 修改阈值或负荷来源优先级，可能改变活动派生负荷和后续 PMC 数值。
+- Trainingload.ai 会按负荷来源优先级，为每项活动选择一个可用负荷；混用口径不一致的来源会降低不同周期的可比性。
+- 某天没有记录活动负荷时，每日输入为零，先前 CTL 会逐渐衰减。
+
+## 公式
+
+Trainingload.ai 使用指数时间常数衰减，CTL 默认时间常数为 42 天：
+
+```text
+decay_CTL = exp(-1 / 42)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+其中 `exp` 是自然指数函数。默认时间常数下，`decay_CTL ≈ 0.976472`，所以当天负荷的权重约为 `0.023528`。
+
+## 如何理解体能（CTL）趋势
+
+- **CTL 上升**：近期每日负荷整体高于当前 CTL 水平。
+- **CTL 稳定**：近期负荷大致维持模型水平。
+- **CTL 下降**：近期负荷整体低于它，包括减量或减少训练阶段。
+
+
+## 适合回答的问题
+
+CTL 可以帮助回答：
+
+- 当前体能（CTL）是在上升、维持还是下降？
+- 漏训或恢复周期是否改变了较长期趋势？
+- 当前计划是否产生预期负荷方向？
+- 阈值或来源变化是否破坏了可比性？
+
+CTL 无法单独回答：
+
+- 用户是否已经成功适应？
+- 明天的高强度课程是否安全？
+- 用户是否恢复、健康或达到比赛准备状态？
+- 一个用户是否比另一个更强？
+
+做决策前，还要结合表现趋势、课程完成质量、主观状态，以及 [疲劳（ATL）](/zh/docs/metrics/pmc/acute-training-load) 和 [状态（TSB）](/zh/docs/metrics/pmc/training-stress-balance)。
+
+## 参考资料
+
+- [Intervals.icu 开发者对体能、疲劳与状态公式的说明](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE 术语：长期训练负荷（CTL）](https://runalyze.com/glossary/ctl)
+- [Calvert 等（1976）：训练对身体表现影响的系统模型](https://doi.org/10.1109/TSMC.1976.5409179)
+
+## 常见问题
+
+### 慢性训练负荷是什么？
+
+慢性训练负荷（CTL）是 PMC 上较慢的体能趋势：每日负荷按默认 42 天时间常数做指数平均。最近几天高于当前 CTL 就上升，低于就下降。
+
+### CTL 怎么计算？
+
+`CTL_today = CTL_yesterday × e^(−1/42) + daily_load × (1 − e^(−1/42))`。默认常数下，今天大约占 2.35%，昨天的 CTL 约占 97.65%。休息日也会让这条线衰减。
+
+### CTL 更高就代表更强吗？
+
+不能单看。CTL 上升只说明模型化负荷够高、抬起了长期平均。它不能证明适应、健康或比赛准备。还要看表现、主观感觉、[ATL](/zh/docs/metrics/pmc/acute-training-load) 和 [TSB](/zh/docs/metrics/pmc/training-stress-balance)。
+
+### 改了 FTP 为什么 CTL 会跳？
+
+CTL 由每日负荷堆出来。改 FTP、区间或负荷来源优先级会改写过去的 TSS/TRIMP，体能线可能在没有新训练时移动。
+
+## 相关页面
+
+- [训练负荷是什么？](/zh/docs/metrics/training-load)
+- [疲劳（ATL）](/zh/docs/metrics/pmc/acute-training-load)
+- [状态（TSB）](/zh/docs/metrics/pmc/training-stress-balance)
+- [用每日 TSS 推演 CTL、ATL、TSB](/zh/training-load-calculator)
+- [用时长、NP 和 FTP 计算 TSS](/zh/tss-calculator)
+- [在计划里管理 CTL、ATL、TSB 训练负荷](/zh/training-load)
+- [用 AI 教练在负荷变化时调整训练计划](/zh/ai-training-plan)
+- [训练分析工作流](/zh/docs/guide/training-analysis-workflow)
+- [使用 PMC 调整马拉松训练](/zh/docs/guide/pmc-marathon-adjustment)

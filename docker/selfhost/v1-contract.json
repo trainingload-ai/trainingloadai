@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "kind": "trainingload-selfhost-v1-contract",
+  "status": "frozen",
+  "initialReleaseVersion": "1.1.13",
+  "modes": [
+    "core-local",
+    "connected",
+    "extended"
+  ],
+  "schemas": {
+    "config": 1,
+    "instanceConfig": 1,
+    "compose": 2,
+    "releaseBundle": 1,
+    "releaseManifest": 1,
+    "backup": 1,
+    "restoreReport": 1,
+    "upgradeReport": 1,
+    "doctorReport": 1,
+    "diagnosticsBundle": 1,
+    "cliResult": 1,
+    "operationRecord": 1
+  },
+  "platforms": [
+    "linux/amd64",
+    "linux/arm64"
+  ],
+  "hostPlatforms": [
+    "linux/amd64",
+    "linux/arm64",
+    "darwin/arm64",
+    "win32/amd64"
+  ],
+  "runtimeIdentity": {
+    "uid": 10001,
+    "gid": 10001
+  },
+  "limits": {
+    "maximumBackupUploadFiles": 100000,
+    "maximumBackupTreeFiles": 100006,
+    "maximumBackupTreeDirectories": 100000,
+    "maximumBackupTreeDepth": 64,
+    "maximumBackupJsonMetadataBytes": 1048576,
+    "maximumBackupChecksumBytes": 16777216,
+    "maximumReleaseBundleFileBytes": 33554432,
+    "maximumReleaseBundleBytes": 536870912,
+    "maximumReleaseBundleRuntimeEntries": 1024,
+    "maximumDoctorBackupEntries": 1024,
+    "maximumDoctorBackupBytes": 67108864,
+    "maximumDoctorRestoreEntries": 4096,
+    "maximumDoctorRestoreBytes": 16777216,
+    "maximumOperationEntries": 10000,
+    "maximumOperationBytes": 2097152,
+    "maximumUpgradeReportEntries": 1024,
+    "maximumUpgradeReportBytes": 67108864
+  },
+  "data": {
+    "hostRootDefault": "./data",
+    "containerRoot": "/data",
+    "authoritative": [
+      "postgres",
+      "uploads"
+    ],
+    "operatorManaged": [
+      "backups",
+      "elevation"
+    ],
+    "sensitiveTransient": [
+      "operations"
+    ],
+    "derived": [
+      "cache",
+      "diagnostics"
+    ],
+    "lifecycleState": ".selfhost",
+    "backupRestoreMode": "exact-release"
+  },
+  "images": {
+    "roles": [
+      "migrate",
+      "server",
+      "client"
+    ],
+    "immutableDigestRequired": true,
+    "sbom": "spdx-json",
+    "provenance": "mode=max",
+    "signature": "cosign-keyless",
+    "vulnerabilityPolicy": "zero-fixable-critical-high"
+  },
+  "upgrade": {
+    "migrationPolicy": "expand-contract",
+    "compatibilityWindowMinorVersions": 2,
+    "backupRequired": true,
+    "databaseRollback": "unsupported",
+    "applicationRollback": "declared-release-only"
+  },
+  "management": {
+    "commands": [
+      "init",
+      "doctor",
+      "diagnostics",
+      "start",
+      "status",
+      "logs",
+      "backup",
+      "restore",
+      "upgrade",
+      "rollback",
+      "stop",
+      "owner-bootstrap",
+      "owner-recovery",
+      "uninstall"
+    ],
+    "serializedMutationCommands": [
+      "init",
+      "start",
+      "backup",
+      "restore",
+      "upgrade",
+      "rollback",
+      "stop",
+      "owner-bootstrap",
+      "owner-recovery",
+      "uninstall"
+    ],
+    "operationLock": ".selfhost/operation.lock.json",
+    "operationLockReclaim": ".selfhost/operation.lock.reclaim",
+    "staleOperationLockGraceSeconds": 7200,
+    "operationReclaimTimeoutSeconds": 900,
+    "stateChangesRequireDryRun": true,
+    "uninstallRetainsDataByDefault": true,
+    "dataDeletionConfirmation": "exact-absolute-data-root-inode-quarantine"
+  },
+  "security": {
+    "databaseHostPortForbidden": true,
+    "defaultBind": "127.0.0.1",
+    "defaultTelemetry": false,
+    "composeEnvironmentIsolation": "validated-private-runtime-snapshot-only",
+    "dataRootBoundary": "physical-path-outside-signed-subtrees",
+    "ownerBootstrap": "single-use",
+    "secretsExcludedFromBackupAndDiagnostics": true
+  }
+}

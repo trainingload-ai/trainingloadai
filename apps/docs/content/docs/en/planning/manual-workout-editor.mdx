@@ -1,0 +1,139 @@
+---
+title: "Manual Workout Editor Guide: Edit Workouts in Trainingload"
+description: "Product documentation for editing planned workouts in Trainingload. Learn how to manually edit endurance and strength sessions in the in-app editor—not a standalone workout builder."
+keywords:
+  [
+    "manual workout editor",
+    "how to edit workouts",
+    "how to manually edit workouts",
+    "Trainingload workout editor guide",
+    "edit structured workout",
+    "in-app workout editor",
+  ]
+---
+
+# How to Manually Edit Workouts in Trainingload
+
+This is the **product guide for the manual workout editor inside Trainingload.ai**. It explains how to edit a planned workout after you open a plan—choose the sport, add endurance steps or strength sets, preview the session, and save a valid draft.
+
+It is not a standalone **workout editor** or **workout builder**. If you want a free browser tool that ranks for those queries and lets you draft steps, then copy workout DSL, use the [Workout Editor & Builder](/workout-editor). Come back here when you need the in-app save, strength builder, and plan-day workflow.
+
+## Before you begin
+
+- Open a manual plan or an editable plan workout.
+- Confirm the athlete thresholds used by any zone or percentage target.
+- Decide whether the session is endurance or strength.
+- If you only need a public draft first, [build the session in the workout editor](/workout-editor), then paste or rebuild it here.
+
+## 1. Choose the sport
+
+The manual editor intentionally offers a focused planning list:
+
+- Running: Running, Trail Running, Treadmill.
+- Cycling: Cycling, Mountain Biking, Indoor Cycling.
+- Swimming: Pool Swimming, Open Water Swimming.
+- Other: Strength Training.
+
+The selected sport changes available target units and can change the workout structure type. Switching between endurance and strength resets incompatible draft structure, so choose the sport before entering detailed steps.
+
+<DocsScreenshot
+  id="manual-workout-editor"
+  title="Manual workout editor"
+  description="Choose the sport, build structured work, add coaching notes, and compare the preview before saving."
+  route="Plans → Manual plan → Add workout"
+/>
+
+## 2. Add a name and notes
+
+Use the name for a short session identity, such as “Aerobic intervals” or “Lower-body strength.” Use notes for human guidance that should not become machine structure:
+
+- Technique cues.
+- Equipment reminders.
+- Fueling guidance.
+- Route or terrain notes.
+- Conditions for stopping or reducing the session.
+
+Do not put prose into a DSL field. Workout steps belong in Manual or Rules mode; coaching context belongs in notes.
+
+## 3. Build an endurance workout
+
+In manual mode, add a step or repeat module. For each step:
+
+1. Choose the step type, such as warm-up, work, or recovery.
+2. Set duration or distance.
+3. Add a target only when the athlete has a trustworthy reference value.
+4. For intervals, use a repeat module instead of copying identical work and recovery steps many times.
+5. Review the chart as structure changes.
+
+A valid endurance structure needs at least one meaningful step. A range target must have a start value no greater than its end value.
+
+## 4. Build a strength workout
+
+Choose **Strength Training** to open the strength builder. Add exercises and work sets as described in [Strength Workouts](/docs/planning/strength-workouts). For text entry, follow [Strength Workout DSL](/docs/planning/strength-workout-dsl).
+
+## 5. Use rules mode when appropriate
+
+Rules mode accepts the supported workout DSL. It is useful for compact authoring and repeatable text, but it is not a free-form coaching note field.
+
+Before saving in Rules mode:
+
+- Keep one instruction per supported DSL expression.
+- Put natural-language explanation in notes.
+- Validate the result and inspect the rendered structure.
+- Read [Endurance Workout DSL](/docs/planning/workout-dsl) or [Strength Workout DSL](/docs/planning/strength-workout-dsl) for the matching syntax.
+- You can [draft the same DSL in the public workout editor](/workout-editor) first, then paste it here.
+
+## 6. Save
+
+Select **Save Draft**. Trainingload.ai validates the workout before adding it to the plan draft.
+
+## Verify the saved workout
+
+Confirm that:
+
+- The sport label is correct.
+- The preview matches the intended work/recovery sequence or strength sets.
+- Notes remain separate from structure.
+- The saved workout appears on the correct week, day, and session order.
+- Expected load is present only when enough information exists.
+
+## Troubleshooting
+
+- **The sport list contains an unexpected item:** make sure you are using the manual plan workout editor. Its creation list is limited to the nine sports documented above; activity classification screens have a broader catalog.
+- **Switching sport removes the draft:** endurance and strength structures are incompatible. Choose the sport first; copy any reusable notes or rules before switching.
+- **The endurance preview is empty:** add a meaningful step and confirm its duration/distance and target values are valid.
+- **A target range is rejected:** place the lower value before the higher value and verify the unit for the selected sport.
+- **“Enter a name for every exercise”:** fill every Strength exercise name; placeholder text is not saved content.
+- **A Strength exercise will not save:** add at least one set group and at least one work set to every exercise.
+- **A Rules error is still in English:** do not copy the raw server message into notes. Record the localized alert, selected sport, and failing DSL line for support.
+- **The saved workout appears on the wrong day:** confirm plan start date, week/day offset, session order, and account time zone.
+
+## FAQ
+
+### What is the manual workout editor?
+
+It is the in-app screen for editing one planned workout in Trainingload. You choose a sport, add endurance steps or strength exercises, attach coaching notes, preview the session, and save it to a week and day. The public [workout editor and builder](/workout-editor) is a separate drafting tool.
+
+### How do I manually edit a workout in Trainingload?
+
+Open an editable plan workout, choose the sport first, then add steps or a repeat module. Set duration or distance, add a target only when the threshold is trustworthy, and use a repeat module for intervals instead of copying the same pair many times.
+
+### Can the in-app editor build strength sessions?
+
+Yes. Choose **Strength Training** to open the strength builder. Add named exercises and at least one work set per exercise. For text entry, use [Strength Workout DSL](/docs/planning/strength-workout-dsl).
+
+### Manual mode or Rules mode?
+
+Use Manual mode when you want to click steps into place. Use Rules mode when you want compact, repeatable DSL. Do not put coaching prose in a DSL field—that belongs in notes. See [Endurance Workout DSL](/docs/planning/workout-dsl).
+
+### Why did switching sport reset the draft?
+
+Endurance and strength structures are incompatible. Choose the sport before you build detailed steps, and copy reusable notes or rules before you switch.
+
+## Next steps
+
+- [Draft a structured workout in the workout editor](/workout-editor) if you want a public builder first.
+- Continue with [Plan Lifecycle](/docs/planning/plan-lifecycle), then activate the plan when the complete schedule is ready.
+- Use [Endurance Workout DSL](/docs/planning/workout-dsl) for text/rules authoring.
+- Use [Strength Workouts](/docs/planning/strength-workouts) for the visual builder.
+- [Use AI coach review to adjust training load safely](/ai-training-plan) after the session is completed.

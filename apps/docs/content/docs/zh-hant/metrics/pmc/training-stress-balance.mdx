@@ -1,0 +1,86 @@
+---
+title: 狀態（TSB）
+description: 瞭解 Trainingload.ai 如何根據當日體能與疲勞計算狀態（TSB），以及如何將負荷平衡用於訓練分析，而不將它誤認為準備度測量。
+keywords: ["狀態", "Form", "訓練壓力平衡", "TSB", "TSB 公式", "訓練負荷平衡", "TSB 怎麼看"]
+---
+
+# 什麼是狀態（TSB）
+
+訓練壓力平衡 **狀態（TSB）** 是體能（CTL）與疲勞（ATL）的差值，用來表示模型化近期負荷相對於較慢的長期負荷所處的位置。
+
+「狀態」是為了便於理解而使用的介面名稱；有些資料也稱為「清新度」或 Form。TSB 不是感測器測量值，也不直接測量準備度、恢復、健康或表現。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <TsbStatPreviewCard
+    value="-12"
+    metricLabel="TSB"
+    valuePopoverTitle="TSB 數值"
+    valuePopoverBody="Trainingload.ai 使用當日體能（CTL）減去當日疲勞（ATL）計算狀態（TSB）。"
+    rangePopoverTitle="TSB 上下文"
+    rangePopoverBody="正負值描述近期與長期模型負荷的關係，並不是通用的準備度區間。"
+    helpTitle="負荷平衡"
+    details="使用 TSB 查看兩條負荷趨勢的相對位置，並結合活動、表現與主觀狀態判斷原因。"
+  />
+</div>
+
+_範例數值僅供介面預覽。_
+
+## 狀態（TSB）的數值來源
+
+TSB 沒有獨立的活動負荷輸入。Trainingload.ai 會先使用同一組每日負荷，分別計算當日 CTL 與 ATL，再算出兩者的差值：
+
+- CTL 預設使用 42 天時間常數，反應較慢。
+- ATL 預設使用 7 天時間常數，反應較快。
+- 兩者都依賴活動資料、閾值與負荷來源優先順序，因此其中任一項重新計算都可能改變 TSB。
+- TSB 與 CTL、ATL 使用相同的模型負荷尺度，不是百分比，也不是生理單位。
+
+## 公式
+
+Trainingload.ai 採用與 Intervals.icu 一致的當日值口徑：
+
+```text
+TSB_today = CTL_today − ATL_today
+```
+
+例如，當日 CTL 為 50、ATL 為 65 時，TSB 為 `50 − 65 = −15`。
+
+不同平台的日期口徑並不完全相同。Intervals.icu 使用當日 CTL 減去當日 ATL；TrainingPeaks 的公開說明則使用昨日 Fitness 減去昨日 Fatigue，表示今天的 Form。因此，比較不同平台的數值前，必須確認公式、時間常數、負荷來源與日期口徑一致，不能只比較同一日期顯示的數字。
+
+## 如何理解狀態（TSB）
+
+- **TSB 為負**：當日 ATL 高於 CTL，表示模型化近期負荷高於較慢的長期負荷水準。
+- **TSB 接近零**：兩條指數負荷曲線接近；這不代表生理上的訓練與恢復恰好平衡。
+- **TSB 為正**：當日 ATL 低於 CTL，表示模型化近期負荷低於較慢的長期負荷水準。
+
+負荷增加時，ATL 通常比 CTL 上升得快，TSB 因而下降；休息或減量時，ATL 通常比 CTL 衰減得快，TSB 因而上升。正負號描述的是負荷關係，不代表運動員感覺一定好或壞。
+
+## TSB 能回答與不能回答的問題
+
+TSB 可以協助確認近期模型負荷高於或低於長期趨勢，也能查看恢復週、減量或負荷建立期是否依計畫改變兩條曲線的相對位置。
+
+TSB 無法單獨判斷運動員是否已進入比賽或測試準備狀態、負值是否安全或有效、正值是否最佳，也不能決定需要休息幾天或下一堂訓練該如何調整。
+
+## 不要追逐通用 TSB 區間
+
+「巔峰」「最佳訓練」「高風險」等區間通常源自特定平台或教練經驗，並不是跨運動項目、負荷演算法和運動員都成立的生理閾值，也不是 Trainingload.ai 的安全保證。
+
+對個人有用的範圍取決於負荷計算方式、運動類型、訓練歷史、賽事需求、個體反應與資料品質。較可靠的做法，是比較同一位運動員在計算口徑一致的歷史週期中，TSB 與實際表現、主觀狀態及課程完成品質之間的關係。
+
+做決策前，應同時查看[體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)、[疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)、來源活動、表現趨勢與主觀狀態。
+
+## 參考資料
+
+- [Intervals.icu 開發者對當日狀態（TSB）口徑的說明](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE 詞彙表：訓練壓力平衡（TSB）](https://runalyze.com/glossary/tsb)
+- [TrainingPeaks：Performance Management Chart 中的狀態（TSB）](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah 原始碼：PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert 等人（1976）：訓練對身體表現影響的系統模型](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke 與 Skiba（2013）：運動訓練與表現的數學建模](https://doi.org/10.1152/advan.00078.2011)
+
+## 相關頁面
+
+- [體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)
+- [疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)
+- [用每日 TSS 推演 CTL、ATL、TSB](/zh-hant/training-load-calculator)
+- [使用 PMC 調整馬拉松訓練](/zh-hant/docs/guide/pmc-marathon-adjustment)
+- [訓練分析工作流程](/zh-hant/docs/guide/training-analysis-workflow)

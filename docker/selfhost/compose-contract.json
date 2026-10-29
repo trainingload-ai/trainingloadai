@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 3,
+  "composeSchemaVersion": 2,
+  "compose": "compose.yml",
+  "sourceBuildOverride": "compose.build.yml",
+  "environmentExample": ".env.example",
+  "requiredServices": [
+    "permissions",
+    "postgres",
+    "migrate",
+    "server",
+    "client"
+  ],
+  "requiredServerEnvironment": {
+    "NODE_OPTIONS": "--max-old-space-size=256 --max-semi-space-size=4",
+    "EXTERNAL_PROVIDER_CREDENTIAL_SECRET": "${SELF_HOST_INTEGRATION_SECRET:?Set SELF_HOST_INTEGRATION_SECRET in .env.selfhost}",
+    "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS": "${SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS:-86400}",
+    "STORAGE_STRATEGY": "LOCAL",
+    "BILLING_PROVIDER": "none",
+    "TELEMETRY_ENABLED": "false",
+    "WEATHER_PROVIDER": "none",
+    "ACTIVITY_WEATHER_ENABLED": "false",
+    "AI_TODAY_WEATHER_ENABLED": "false",
+    "THIRD_PARTY_SYNC_ENABLED": "false",
+    "THIRD_PARTY_WEBHOOK_BOOTSTRAP": "false",
+    "AGENT_CAPABILITIES_ENABLED": "false",
+    "SOCIAL_AUTH_ENABLED": "false",
+    "PUBLIC_DEMO_ENABLED": "false",
+    "DEPLOYMENT_MODE": "self-host"
+  },
+  "requiredImageEnvironment": [
+    "SELF_HOST_MIGRATE_IMAGE",
+    "SELF_HOST_SERVER_IMAGE",
+    "SELF_HOST_CLIENT_IMAGE"
+  ],
+  "requiredFrontendEnvironment": {
+    "NODE_OPTIONS": "--max-old-space-size=128 --max-semi-space-size=4",
+    "NEXT_PUBLIC_TELEMETRY_ENABLED": "false"
+  },
+  "externalImages": {
+    "postgres": {
+      "reference": "postgres:17.10-bookworm@sha256:9b18b78397054fce88a9552e9d5a3ad5bb7fd258c5b3cc1c5028e46373d6ea8f",
+      "source": "https://hub.docker.com/_/postgres"
+    }
+  },
+  "persistentMounts": {
+    "postgres": "${SELF_HOST_DATA_ROOT:-./data}/postgres:/var/lib/postgresql/data",
+    "serverUploads": "${SELF_HOST_DATA_ROOT:-./data}/uploads:/data/uploads",
+    "serverCache": "${SELF_HOST_DATA_ROOT:-./data}/cache:/data/cache",
+    "serverElevation": "${SELF_HOST_DATA_ROOT:-./data}/elevation:/data/elevation:ro",
+    "serverOperations": "${SELF_HOST_DATA_ROOT:-./data}/operations:/data/operations",
+    "clientCache": "${SELF_HOST_DATA_ROOT:-./data}/cache/client:/app/apps/client/.next/cache"
+  },
+  "forbiddenConfiguration": [
+    "CLOUDFLARE_API_TOKEN",
+    "CLOUDFLARE_ACCOUNT_ID",
+    "INTERNAL_API_SECRET",
+    "WATCH_DEVICE_CREDENTIAL_PEPPER_K1",
+    "ACCOUNT_DELETION_SECRET",
+    "MAIL_PROVIDER",
+    "MAIL_HOST",
+    "MAIL_PORT",
+    "MAIL_USER",
+    "MAIL_PASSWORD",
+    "MAIL_SECURE",
+    "MAPBOX_ACCESS_TOKEN",
+    "NEXT_PUBLIC_MAPBOX_TOKEN",
+    "MAP_PUBLIC_TOKEN",
+    "DISABLE_SIGNUP"
+  ],
+  "optionalProfiles": {},
+  "security": {
+    "noNewPrivileges": [
+      "permissions",
+      "postgres",
+      "migrate",
+      "server",
+      "client"
+    ],
+    "capDropAll": [
+      "permissions",
+      "migrate",
+      "server",
+      "client"
+    ],
+    "allowedCapAdd": {
+      "permissions": [
+        "CHOWN",
+        "DAC_OVERRIDE",
+        "FOWNER"
+      ]
+    },
+    "readOnlyRoot": [
+      "migrate",
+      "server",
+      "client"
+    ],
+    "documentedExceptions": {
+      "postgres": "The pinned upstream entrypoint starts as root with the image defaults to initialize ownership before dropping to the postgres user; the database network remains private and has no host port."
+    }
+  },
+  "clientPorts": [
+    "${SELF_HOST_HTTP_BIND:-127.0.0.1}:${SELF_HOST_HTTP_PORT:-43210}:3002"
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "planExecution": {
+    "completedWithTomorrowOne": "El trabajo previsto para hoy está completo. Céntrate ahora en reponer energía, movilidad y sueño. Mañana tienes una sesión; no añadas más intensidad hoy.",
+    "completedWithTomorrowMany": "El trabajo previsto para hoy está completo. Céntrate ahora en reponer energía, movilidad y sueño. Mañana tienes {count} sesiones; no añadas más intensidad hoy.",
+    "completed": "El trabajo previsto para hoy está completo. Prioriza recuperación, hidratación y sueño, y anota tus sensaciones para orientar los próximos ajustes.",
+    "partial": "Hoy has completado {count} actividad vinculada. Decide el resto según tus piernas y la fatiga general; protege la calidad en vez de forzar el volumen.",
+    "plannedOne": "Hoy tienes una sesión planificada. Empieza según el plan, comprueba tus sensaciones tras el calentamiento y mantén el esfuerzo en el rango objetivo. Vincula la actividad al terminar.",
+    "plannedMany": "Hoy tienes {count} sesiones planificadas. Empieza según el plan, comprueba tus sensaciones tras el calentamiento y mantén el esfuerzo en el rango objetivo. Vincula las actividades al terminar.",
+    "plannedNone": "Hoy no hay una sesión concreta programada. Limítate a recuperación suave o movilidad y no añadas una sesión intensa de forma improvisada.",
+    "extraOne": "Hoy aparece una actividad extra. Primero comprueba si corresponde a una sesión planificada. Si fue entrenamiento adicional, reduce mañana la intensidad o la duración si hace falta.",
+    "extraMany": "Hoy aparecen {count} actividades extra. Primero comprueba si corresponden a sesiones planificadas. Si fueron entrenamiento adicional, reduce mañana la intensidad o la duración si hace falta.",
+    "restWithTomorrowOne": "Hoy es día de descanso: recupera en vez de compensar volumen. Mañana tienes una sesión; duerme pronto y repón líquidos y carbohidratos.",
+    "restWithTomorrowMany": "Hoy es día de descanso: recupera en vez de compensar volumen. Mañana tienes {count} sesiones; duerme pronto y repón líquidos y carbohidratos.",
+    "rest": "Hoy es día de descanso. Recupera sueño, muévete suavemente y anota cualquier molestia. No necesitas otra sesión solo para mantener una racha.",
+    "noPlan": "Todavía no tienes un plan de entrenamiento activo. Dime tu competición objetivo, el tiempo de preparación y tu disponibilidad semanal; te ayudaré con el siguiente bloque.",
+    "tags": {
+      "completed": "completado",
+      "recoveryPriority": "recuperación primero",
+      "partial": "parcialmente completado",
+      "adjustByFeel": "ajustar por sensaciones",
+      "planned": "seguir el plan",
+      "controlIntensity": "controlar la intensidad",
+      "extraActivity": "actividad extra",
+      "checkLink": "comprobar vínculo",
+      "restDay": "día de descanso",
+      "recovery": "recuperación",
+      "noPlan": "sin plan",
+      "setGoal": "definir objetivo"
+    }
+  },
+  "today": {
+    "decision": {
+      "unavailable": "No pude cargar tu última actualización de entrenamiento. Actualiza y vuelve a intentarlo más tarde. Hasta que pueda confirmarla, sigue tu programa actual.",
+      "statePending": "A la evaluación de tu estado actual todavía le falta un dato clave. Hasta que lo respondas, no fuerces la intensidad prevista y prioriza hoy una ejecución conservadora y la recuperación.",
+      "defaultAdjustment": "ajustar tu programa actual",
+      "today": "hoy",
+      "tomorrow": "mañana",
+      "confirmed": "confirmado",
+      "pending": "pendiente",
+      "timedDetail": "entrenar así {when}: {detail}",
+      "untimedDetail": "hacer este ajuste: {detail}",
+      "approved": "Este ajuste está confirmado. {detail}. Síguelo mientras se actualiza el programa y no añadas otra sesión.",
+      "proposed": "Tengo una nueva sugerencia para ti. {detail}. Confírmala y actualizaré tu programa.",
+      "defaultCurrentWorkout": "la sesión planificada actual",
+      "rejectedWorkout": "Recuerdo que decidiste no aplicar el último ajuste. Sigue hoy la sesión programada, «{title}», y baja el ritmo si tu cuerpo lo necesita.",
+      "rejectedRest": "Recuerdo que decidiste no aplicar el último ajuste. Mantén hoy el descanso programado y céntrate en la recuperación y tus sensaciones.",
+      "guidance": "{summary}. Un recordatorio más de nuestra última revisión: {guidance}.",
+      "clearIntensityTarget": "un objetivo de intensidad claro",
+      "controlledRpe": "mantener el esfuerzo en RPE {range}",
+      "doNotRace": "no convertir esta sesión en una carrera"
+    },
+    "fact": {
+      "defaultWorkout": "sesión planificada",
+      "oneSession": "1 sesión",
+      "manySessions": "{count} sesiones",
+      "restDay": "día de descanso",
+      "loadChange": "carga {value}",
+      "defaultEvent": "la competición correspondiente",
+      "raceToday": "la carrera es hoy",
+      "daysToRace": "faltan {count} días para la carrera",
+      "daysAfterRace": "{count} días después de la carrera",
+      "influenceWindow": "estás dentro de su periodo de influencia",
+      "eventDistance": ", con una distancia de {distance}",
+      "competition": "Marcaste {event} como {importance}; {timing}{distanceNote}. Te recomiendo proteger hoy la preparación y la recuperación, y decidir según tus sensaciones si sigues el plan o reduces la carga.",
+      "noPlan": "Todavía no tienes un plan de entrenamiento activo. Dime tu objetivo, el tiempo de preparación y tu disponibilidad semanal; te ayudaré a decidir qué hacer hoy.",
+      "completedOne": "La sesión planificada de hoy está completa. Dedica el resto del día a reponer energía, movilidad y sueño en vez de añadir intensidad.",
+      "completedMany": "Las {count} sesiones planificadas de hoy están completas. Dedica el resto del día a reponer energía, movilidad y sueño en vez de añadir intensidad.",
+      "activityWithDuration": "Hoy no había sesión planificada, pero registraste {duration} minutos de {sport}. No hace falta añadir volumen de compensación; prioriza hidratación, nutrición, movilidad y recuperación.",
+      "activityWithoutDuration": "Hoy no había sesión planificada, pero registraste una actividad de {sport}. No hace falta añadir volumen de compensación; prioriza hidratación, nutrición, movilidad y recuperación.",
+      "restFatigue": "Hoy no hay entrenamiento planificado y tu forma es baja (TSB {tsb}). Prioriza la recuperación, no añadas carga y cuida el sueño y la nutrición.",
+      "restLoad": "Hoy no hay entrenamiento planificado. La carga semanal ha subido {drift}; conserva esta ventana de recuperación en vez de añadir volumen.",
+      "rest": "Hoy no hay entrenamiento planificado. Descansa bien o muévete solo con suavidad si te sientes fresco.",
+      "fatigue": "El plan es «{title}», pero tu forma es baja (TSB {tsb}). Controla la intensidad y acorta la sesión si la recuperación parece limitada.",
+      "loadSpike": "El foco de hoy es «{title}». La carga semanal ha subido {drift}; completa el trabajo clave y no añadas volumen extra.",
+      "multiWorkout": "Hoy tienes {count} sesiones planificadas. Completa primero la sesión clave, «{title}», y decide el resto según tus sensaciones.",
+      "workout": "El foco de hoy es «{title}». Mantente en el esfuerzo objetivo y vincula la actividad al terminar para que podamos revisarla."
+    },
+    "tags": {
+      "tryAgain": "volver a intentar",
+      "stateCheck": "estado por completar",
+      "trainingAdvice": "sugerencia del entrenador",
+      "followPlan": "seguir el plan",
+      "reviewNote": "recordatorio de revisión",
+      "eventImpact": "impacto de competición",
+      "noPlan": "sin plan",
+      "setGoal": "definir objetivo",
+      "activityRecorded": "actividad registrada"
+    }
+  },
+  "enum": {
+    "importance": {
+      "low": "prioridad baja",
+      "medium": "prioridad media",
+      "high": "prioridad alta",
+      "critical": "prioridad máxima"
+    },
+    "impact": {
+      "low": "impacto bajo",
+      "medium": "impacto medio",
+      "high": "impacto alto",
+      "critical": "impacto crítico"
+    },
+    "phase": {
+      "general_preparation": "preparación general",
+      "specific_preparation": "preparación específica",
+      "peak": "pico",
+      "taper": "puesta a punto",
+      "event": "competición",
+      "recovery": "recuperación"
+    },
+    "sport": {
+      "run": "carrera",
+      "cycling": "ciclismo",
+      "swim": "natación",
+      "strength": "fuerza",
+      "unknown": "actividad"
+    }
+  }
+}

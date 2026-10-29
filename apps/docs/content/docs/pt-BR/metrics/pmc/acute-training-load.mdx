@@ -1,0 +1,43 @@
+---
+title: Fadiga (ATL)
+description: Entenda como o Trainingload.ai modela a Fadiga (ATL) a partir da carga diária e como interpretar a tendência sem tratá-la como medida direta de fadiga.
+keywords: ["fadiga", "carga aguda", "ATL", "fórmula ATL", "carga recente"]
+---
+
+# O que é Fadiga (ATL)?
+
+A **Fadiga (ATL)**, ou carga aguda de treinamento, é uma média exponencial da carga diária que reage rapidamente. Os dias recentes têm mais peso, por isso a ATL muda mais depressa que o Condicionamento físico (CTL). O Trainingload.ai usa uma constante de tempo de sete dias por padrão.
+
+“Fadiga” é um rótulo simples da interface. A ATL resume carga recente modelada; não mede diretamente fadiga fisiológica ou percebida, recuperação, saúde ou adaptação.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AtlStatPreviewCard value="16.99" percent={72} metricLabel="ATL"
+    valuePopoverTitle="Valor da ATL"
+    valuePopoverBody="Média exponencial rápida das cargas diárias escolhidas conforme a prioridade das fontes."
+    percentPopoverTitle="Percentual da ATL"
+    percentPopoverBody="ATL atual em relação ao seu máximo histórico; não é um percentil universal de fadiga."
+    helpTitle="Carga recente"
+    details="Relacione cada mudança às sessões e ao contexto de recuperação." />
+</div>
+
+## Origem e fórmula
+
+Para cada atividade, o Trainingload.ai seleciona uma carga baseada em potência, frequência cardíaca, ritmo ou RPE da sessão. Atividades do mesmo dia são somadas em `daily_load`; um dia sem carga registrada entra como zero.
+
+```text
+decay_ATL = exp(-1 / 7)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+```
+
+Com a configuração padrão, `decay_ATL ≈ 0.866878` e a carga de hoje recebe peso de cerca de `0.133122`. Sete dias é uma **constante de tempo**, não uma média simples da última semana. Após uma mudança para uma carga diária constante, a ATL incorpora cerca de 63,2% da mudança em uma constante de tempo e 95% em três.
+
+A ATL sobe quando a carga recente supera o nível atual, se mantém quando a carga o sustenta e cai com descanso, recuperação ou polimento. Sozinha, ela não mostra se o atleta está de fato fatigado nem se a próxima sessão é segura.
+
+Use-a com [Condicionamento físico (CTL)](/pt-BR/docs/metrics/pmc/chronic-training-load), [Forma (TSB)](/pt-BR/docs/metrics/pmc/training-stress-balance), qualidade das sessões, sono, dor, doença, RPE e percepção subjetiva.
+
+## Referências
+
+- [Intervals.icu: fórmulas de Fitness, Fatigue e Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE: Acute Training Load](https://runalyze.com/glossary/atl)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [Código do GoldenCheetah: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)

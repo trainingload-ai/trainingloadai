@@ -1,0 +1,6790 @@
+{
+  "HeartRateTable": {
+    "timeRangeHeartRate": "时间范围 / 最大平均心率",
+    "oneSecond": "1秒",
+    "fiveSeconds": "5秒",
+    "tenSeconds": "10秒",
+    "twentySeconds": "20秒",
+    "thirtySeconds": "30秒",
+    "oneMinute": "1分钟",
+    "threeMinutes": "3分钟",
+    "fiveMinutes": "5分钟",
+    "tenMinutes": "10分钟",
+    "twentyMinutes": "20分钟",
+    "thirtyMinutes": "30分钟",
+    "sixtyMinutes": "60分钟",
+    "twoHours": "2小时",
+    "threeHours": "3小时",
+    "sixHours": "6小时"
+  },
+  "banner": {
+    "betaWarning": "⚠️ 还在开发测试阶段，目前版本为 0.1.0，数据随时有可能清零"
+  },
+  "ActivityTitle": {
+    "untitled": "未命名活动",
+    "periods": {
+      "morning": "上午{sport}",
+      "noon": "中午{sport}",
+      "afternoon": "下午{sport}",
+      "evening": "晚间{sport}",
+      "night": "夜间{sport}"
+    },
+    "sports": {
+      "run": "跑步",
+      "ride": "骑行",
+      "swim": "游泳",
+      "workout": "训练"
+    },
+    "demo": {
+      "base": {
+        "recoveryWalk": "恢复步行",
+        "recoveryRun": "恢复跑",
+        "poolSwim": "泳池游泳",
+        "easyRun": "轻松跑",
+        "longEasyRun": "长距离轻松跑",
+        "baseRun": "基础跑",
+        "thresholdRun": "阈值跑",
+        "longRun": "长距离跑",
+        "unplannedEasyRun": "计划外轻松跑",
+        "tempoRun": "节奏跑",
+        "progressiveLongRun": "渐进长跑",
+        "treadmillRun": "跑步机跑",
+        "treadmillTempo": "跑步机节奏跑",
+        "peakLongRun": "峰值长跑",
+        "fatigueRecoveryWalk": "疲劳恢复步行",
+        "taperRun": "减量跑",
+        "goalRace10K": "10 公里目标赛"
+      },
+      "detail": {
+        "minutes": "{value} 分钟",
+        "kilometers": "{value} 公里",
+        "meters": "{value} 米",
+        "shortened": "缩短完成",
+        "moved": "调整日期",
+        "skipped": "已跳过"
+      },
+      "note": {
+        "skippedRecovery": "演示情境：恢复指标不佳，因此跳过本次训练。",
+        "postponedDay": "演示情境：训练顺延一天。",
+        "shortened": "演示情境：运动员缩短了原定训练。"
+      }
+    }
+  },
+  "ColorPicker": {
+    "title": "选择颜色",
+    "srOnly": "选择颜色",
+    "paletteTitle": "颜色面板",
+    "paletteDescription": "为该区间选择一个颜色。",
+    "hex": "Hex"
+  },
+  "sidebar": {
+    "home": "首页",
+    "plan": "计划",
+    "dashboard": "概览",
+    "pmc": "体能管理",
+    "analysis": "分析",
+    "aiCoach": "AI 教练",
+    "power": "功率",
+    "heartRate": "心率",
+    "pace": "配速",
+    "overview": "概览",
+    "bestDistance": "最佳距离",
+    "map": "地图",
+    "activities": "活动",
+    "me": "我的",
+    "settings": "设置",
+    "calendar": "日历",
+    "competitions": "赛事",
+    "calendarShort": "日历",
+    "coach": "教练",
+    "trainingSpace": "训练",
+    "spaceSwitcherLabel": "切换工作空间",
+    "navigationLabel": "主导航",
+    "secondaryNavigationLabel": "辅助导航",
+    "expand": "展开侧边栏",
+    "collapse": "收起侧边栏",
+    "resize": "调整侧边栏宽度"
+  },
+  "MobileApp": {
+    "tabs": {
+      "navigationLabel": "应用导航",
+      "today": "今日",
+      "plan": "计划",
+      "coach": "教练",
+      "calendar": "日历",
+      "me": "我的"
+    },
+    "titles": {
+      "default": "Trainingload.ai",
+      "today": "今日",
+      "plan": "计划",
+      "plans": "计划库",
+      "coach": "AI 教练",
+      "calendar": "日历",
+      "day": "训练日",
+      "me": "我的",
+      "activities": "活动",
+      "map": "地图",
+      "dashboard": "概览",
+      "metrics": "指标",
+      "pmc": "体能管理",
+      "power": "功率",
+      "heartRate": "心率",
+      "pace": "配速",
+      "notifications": "通知",
+      "usage": "用量",
+      "analysis": "分析",
+      "account": "账户",
+      "settings": "设置",
+      "competitions": "赛事"
+    },
+    "actions": {
+      "back": "返回",
+      "openPlanLibrary": "打开计划库",
+      "openNotifications": "打开通知（{count} 条未读）"
+    },
+    "planNavigation": {
+      "title": "计划",
+      "allPlans": "全部计划",
+      "create": "创建计划",
+      "loading": "正在加载计划…",
+      "failed": "计划加载失败，请重试。",
+      "empty": "还没有计划",
+      "weeks": "{count} 周",
+      "status": {
+        "ACTIVE": "进行中",
+        "PAUSED": "已暂停",
+        "DRAFT": "草稿",
+        "COMPLETED": "已完成",
+        "CANCELLED": "已取消"
+      }
+    },
+    "meDashboard": {
+      "weeks": "{count}周",
+      "allActivities": "全部",
+      "sportFilter": "筛选运动类型",
+      "training": "训练",
+      "sports": {
+        "ALL": "全部",
+        "RUN": "跑步",
+        "CYCLING": "骑行",
+        "SWIM": "游泳",
+        "FITNESS": "体能"
+      },
+      "range": "最近 {count} 周",
+      "metrics": {
+        "count": "次数",
+        "distance": "距离",
+        "duration": "时长",
+        "load": "负荷",
+        "ascent": "爬升",
+        "calories": "热量",
+        "avgSpeed": "均速",
+        "avgHeartRate": "心率",
+        "avgPower": "功率",
+        "avgCadence": "踏频"
+      },
+      "units": {
+        "count": "",
+        "distance": "km",
+        "duration": "h",
+        "load": "",
+        "ascent": "m",
+        "calories": "kcal",
+        "avgSpeed": "km/h",
+        "avgHeartRate": "bpm",
+        "avgPower": "W",
+        "avgCadence": "rpm"
+      },
+      "recent": "训练记录",
+      "masonry": "宫格布局",
+      "list": "列表布局",
+      "noMore": "没有更多了",
+      "delete": "删除活动",
+      "deleting": "正在删除…",
+      "deleted": "活动已删除",
+      "deleteFailed": "活动删除失败，请重试。",
+      "deleteConfirmTitle": "删除此活动？",
+      "deleteConfirmDescription": "该活动将被永久删除，且无法恢复。",
+      "cancel": "取消",
+      "untitled": "未命名活动",
+      "empty": "这个范围内暂无活动",
+      "failed": "活动加载失败，请重试。",
+      "chartAria": "活动指标趋势"
+    }
+  },
+  "MobileCalendarTimeline": {
+    "rest": "休息日",
+    "summary": "{workouts} 项计划 · {activities} 项已完成",
+    "plannedWorkout": "计划训练",
+    "planned": "计划",
+    "activity": "活动",
+    "completed": "已完成",
+    "competition": "赛事",
+    "load": "负荷",
+    "actualLoad": "实际",
+    "plannedLoad": "计划",
+    "restHint": "这一天没有安排训练",
+    "selectDateHint": "选择右侧日期或月历中的某一天查看内容",
+    "dayContent": "当天内容",
+    "noSchedule": "暂无安排",
+    "activityDetail": "活动详情",
+    "workoutDetail": "训练详情",
+    "competitionDetail": "赛事详情",
+    "backToDay": "返回当天内容",
+    "viewFullActivity": "查看完整活动"
+  },
+  "AiCoachPage": {
+    "timeline": {
+      "publicSummary": "思路摘要",
+      "publicSummaryHint": "面向你的简短分析说明，并非完整的内部思考过程",
+      "tools": {
+        "activityDetail": "读取训练详情",
+        "activitySeries": "读取训练数据曲线",
+        "activitySearch": "搜索训练记录",
+        "activityDay": "读取当日训练",
+        "activityRecent": "读取最近训练",
+        "question": "准备确认问题",
+        "bests": "汇总最佳表现",
+        "compareBlocks": "对比训练周期",
+        "decisionDraft": "准备调整建议",
+        "decisionApply": "应用已确认的调整",
+        "competitionList": "读取赛事安排",
+        "competitionImpact": "分析赛事影响",
+        "currentTime": "读取当前时间",
+        "docsSearch": "搜索帮助文档",
+        "docsRead": "读取帮助文档",
+        "integrationStatus": "检查设备同步状态",
+        "memorySearch": "搜索运动员记忆",
+        "webSearch": "搜索实时网页",
+        "webFetch": "读取网页来源",
+        "metricCurrent": "读取当前指标",
+        "metricHistory": "读取指标历史",
+        "metricCompare": "对比训练指标",
+        "profile": "读取运动员资料",
+        "thresholds": "读取阈值配置",
+        "zones": "读取强度区间",
+        "loadTrend": "读取训练负荷趋势",
+        "planRead": "读取训练计划",
+        "planActive": "读取当前计划",
+        "planRecent": "读取最近计划",
+        "planSuitability": "计划适配评估",
+        "planDay": "读取当天课表",
+        "planExecution": "读取计划执行情况",
+        "planPreview": "预览计划变更",
+        "trainingAggregate": "汇总训练数据",
+        "trainingBaseline": "读取训练基线",
+        "trainingPlanContext": "读取训练计划背景",
+        "readiness": "评估训练准备度",
+        "weekSummary": "汇总本周训练",
+        "intensity": "确定训练强度",
+        "planDraft": "生成训练计划草案",
+        "workoutAdjustment": "生成训练调整草案",
+        "visualization": "生成训练图表",
+        "skillActivate": "加载技能",
+        "fitnessMethods": "读取体能评估方法",
+        "fitnessEvidence": "收集体能评估依据",
+        "fitnessCalculate": "计算体能指标",
+        "fitnessTrack": "跟踪体能测试",
+        "fitnessApply": "应用体能评估结果",
+        "activityDelete": "删除训练记录",
+        "activityDescription": "更新训练描述",
+        "activityRpe": "记录训练感受",
+        "activityLink": "关联训练与课表",
+        "activityUnlink": "取消训练与课表关联",
+        "competitionUpdate": "更新赛事安排",
+        "planLifecycle": "更新计划状态",
+        "workoutAdd": "添加训练课",
+        "workoutUpdate": "更新训练课",
+        "workoutStatus": "更新训练完成状态",
+        "workoutPostpone": "推迟训练课",
+        "metricUpdate": "更新体能指标",
+        "bodyWeightUpdate": "记录体重",
+        "trainingDataCoverage": "训练数据覆盖",
+        "coachTaskResult": "后台任务结果"
+      },
+      "skills": {
+        "integrationSupport": "设备连接与同步",
+        "fitnessAssessment": "体能评估",
+        "trainingAnalytics": "训练分析",
+        "activityReview": "活动复盘",
+        "workoutManagement": "训练课管理",
+        "workoutGenerator": "生成训练课",
+        "planFollowup": "计划跟进",
+        "planDayReview": "单日计划复盘",
+        "planWeekReview": "每周计划复盘",
+        "planReviewAdjustment": "计划调整",
+        "planCycleReview": "训练周期复盘",
+        "planBuilder": "训练计划制定",
+        "readinessCheck": "训练准备度评估",
+        "weekReview": "每周训练复盘",
+        "performanceReview": "运动表现分析",
+        "metricExplainer": "训练指标解读",
+        "periodReview": "周期训练复盘"
+      },
+      "resumed": "继续此前任务",
+      "seconds": "{count} 秒",
+      "scrollToBottom": "回到最新消息",
+      "retry": "继续执行（新尝试）",
+      "retryBlocked": "本次执行包含写操作，请先确认操作结果。为避免重复修改，已禁用直接重试。",
+      "lateOutcome": "中断后已核实操作结果",
+      "questionInactive": "此问题已停止接收回答。",
+      "run": {
+        "running": "运行中",
+        "awaiting_input": "等待你的回答",
+        "completed": "运行完成",
+        "failed": "运行失败",
+        "cancelled": "已停止",
+        "interrupted": "已中断"
+      },
+      "kind": {
+        "analysis": "分析请求",
+        "skill": "加载技能",
+        "tool": "执行工具",
+        "question": "确认信息",
+        "narration": "进度说明",
+        "artifact": "交付结果",
+        "recovery": "恢复执行",
+        "trainingDataCoverage": "检查训练数据覆盖",
+        "coachTaskResult": "完成后台教练任务"
+      },
+      "activity": {
+        "queued": "排队中",
+        "running": "进行中",
+        "waiting": "等待确认",
+        "completed": "已完成",
+        "failed": "失败",
+        "cancelled": "已停止",
+        "interrupted": "已中断",
+        "skipped": "已跳过"
+      }
+    },
+    "emptyChatHint": "直接提问，或从下面的建议开始。",
+    "recentActions": "近期操作",
+    "pageTitle": "智能教练",
+    "fallbackName": "运动员",
+    "heroTitleGeneric": "今天想先了解什么？",
+    "heroTitlePersonal": "{name}，今天想先了解什么？",
+    "heroDescription": "可以问昨天练得怎么样、怎么提高 FTP、恢复够不够，或者对比训练周期。",
+    "chatHeader": "问训练负荷、恢复、FTP 或阶段对比都可以。",
+    "loadingThread": "思考中…",
+    "composer": {
+      "placeholder": "比如：我昨天练得怎么样？怎么提高 FTP？",
+      "hint": "Enter 发送，Shift+Enter 换行",
+      "thinking": "思考",
+      "standardMode": "标准模式",
+      "deepMode": "深度推理",
+      "modelPurposeHint": "为本次请求选择默认模型或服务商提供的推理模型。"
+    },
+    "chatPlaceholder": "继续追问训练负荷、恢复状态或进步情况...",
+    "examplesTitle": "可以直接这样问",
+    "followUpsTitle": "还可以继续问",
+    "queue": {
+      "title": "待发送",
+      "ariaList": "待发送消息队列",
+      "edit": "在输入框中编辑",
+      "interruptSend": "打断并立即发送此条",
+      "delete": "从队列移除"
+    },
+    "status": {
+      "ready": "已就绪",
+      "streaming": "思考中",
+      "phaseModel": "生成回复",
+      "phaseToolRun": "查询数据",
+      "progress": {
+        "preparing": "正在准备这次分析",
+        "analyzingRequest": "正在理解你的计划条件",
+        "readingBaseline": "正在读取近期训练基线",
+        "readingPerformance": "正在查看近期最佳表现",
+        "resolvingIntensity": "正在确定可执行的强度依据",
+        "checkingCompetitions": "正在检查赛事影响",
+        "synthesizingEvidence": "正在综合训练数据与计划约束",
+        "draftingPlan": "正在编排完整训练周期",
+        "validatingPlan": "正在校验计划结构与训练安排"
+      },
+      "contextWindow": {
+        "trigger": "上下文 {percent}",
+        "usedInput": "已用输入（估算）",
+        "inputBudget": "可用输入预算",
+        "remaining": "剩余输入（估算）",
+        "reservedOutput": "预留回复空间",
+        "totalWindow": "总上下文窗口",
+        "nearLimit": "已接近压缩阈值，后续请求可能压缩较早消息。",
+        "estimateHint": "最近一次模型请求的 token 估算，不含尚未发送的输入。",
+        "titleIdle": "上下文窗口",
+        "titleActive": "已用 {percent}",
+        "idleDescription": "教练在思考时，这里会显示上下文占用情况。",
+        "usage": "已用 {used} / 上限 {max}",
+        "compressed": "本轮已压缩 {count} 条更早的消息",
+        "ariaIdle": "上下文窗口当前空闲",
+        "ariaActive": "上下文窗口占用 {percent}"
+      }
+    },
+    "rendering": {
+      "thinking": "思考中…",
+      "preparing": "思考中…",
+      "rendering": "正在渲染 {name}",
+      "tools": {
+        "generic": "内容",
+        "planDay": "计划日",
+        "activityRecent": "最近训练",
+        "activityDay": "当日训练",
+        "pmc": "负荷趋势",
+        "profileZones": "阈值配置",
+        "profileZoneRanges": "强度区间",
+        "competitionEvents": "赛事安排",
+        "question": "问题卡片",
+        "planDraft": "计划草案",
+        "workoutAdjustment": "训练调整",
+        "decisionDraft": "决策草案",
+        "decisionApply": "决策结果",
+        "actionResult": "操作结果",
+        "trainingVisualization": "训练图表"
+      }
+    },
+    "actions": {
+      "copy": "复制",
+      "copied": "复制成功",
+      "copyFailed": "复制失败",
+      "interruptAndSend": "打断并发送",
+      "newChat": "新对话",
+      "loginRequired": "请先登录，登录后会回到当前页面。",
+      "newSessionFailed": "无法创建新会话，请稍后重试",
+      "send": "发送",
+      "stop": "停止",
+      "editUserMessage": "编辑",
+      "editUserAria": "编辑消息",
+      "cancelEdit": "取消",
+      "saveEdit": "保存并重新生成",
+      "savingEdit": "保存中…",
+      "editWhileStreaming": "请先停止生成后再编辑消息。",
+      "editUserFailed": "无法更新消息，请重试。",
+      "editInlineHint": "Enter 发送 · Shift+Enter 换行 · Esc 取消",
+      "editEmpty": "内容不能为空",
+      "sendingEdit": "发送中…",
+      "enqueueToQueue": "排队",
+      "composerQueueEditHint": "Enter 保存到队列 · Esc 取消编辑"
+    },
+    "roles": {
+      "user": "你",
+      "coach": "教练"
+    },
+    "transcript": {
+      "titleError": "连接异常",
+      "titleSystem": "提示",
+      "titleTurnFailed": "回复未生成完成",
+      "reasonTimeout": "请求超时。",
+      "reasonDisconnect": "网络中断或无法连接服务器。",
+      "reasonRateLimit": "请求过于频繁，请稍后再试。",
+      "reasonAuth": "登录状态可能已失效，或当前请求已无权限继续。",
+      "reasonServer": "教练服务暂时不可用，或服务端返回了异常。",
+      "reasonInternal": "系统内部错误，请稍后重试。",
+      "reasonUnknown": "生成过程出现问题。",
+      "retry": "重试",
+      "titleAccessRequired": "AI 访问暂不可用",
+      "reasonAccessRequired": "请检查实例的 AI 配置或当前账户权限。",
+      "titleActionInProgress": "已有 AI 操作进行中",
+      "reasonActionInProgress": "请等待当前 AI 操作完成后再发起下一次操作。",
+      "titleSettlementPending": "正在结算上次用量",
+      "reasonSettlementPending": "上一次 AI 操作仍在结算，完成后即可继续。",
+      "titleModelTierUnavailable": "模型暂不可用",
+      "reasonModelTierUnavailable": "当前模型档位暂不可用，请选择其他档位或稍后重试。",
+      "titleModelUnavailable": "模型暂时无法响应",
+      "reasonModelUnavailable": "请尝试切换模型后重试，或稍后再试。",
+      "switchToDeepAndRetry": "切换到深度模式重试",
+      "switchToStandardAndRetry": "切换到标准模式重试"
+    },
+    "questions": {
+      "dismissAnswering": "暂时收起问题",
+      "resumeAnswering": "继续回答",
+      "confirmed": "已确认",
+      "title": "教练提问",
+      "answeredCount": "已完成 {answered}/{total}",
+      "questionAnswered": "{count} 项已选",
+      "questionPending": "待回答",
+      "multiHint": "本题可选择多项。",
+      "noteLabel": "备注",
+      "notePlaceholder": "可选补充…",
+      "submit": "提交",
+      "submitAll": "提交",
+      "back": "上一题",
+      "next": "下一步",
+      "stepLabel": "第 {current}/{total} 题",
+      "progressHint": "还有问题未完成",
+      "otherPlaceholder": "可选补充…",
+      "answerNote": "备注",
+      "submitWhileStreaming": "请等教练本条回复生成完成后再提交选项。",
+      "bubbleDeferredToCard": "请在下方卡片中选择答案。",
+      "skip": "跳过",
+      "answeredBadge": "你的选择",
+      "answeredSkipped": "已跳过"
+    },
+    "planDraft": {
+      "title": "计划预览",
+      "cardHint": "在周网格中确认课表后，可保存到训练日历。",
+      "weekColumn": "周次",
+      "weekLabel": "第{week}周",
+      "summary": "共 {weeks} 周 · 已排 {sessions} 次训练",
+      "rest": "休息",
+      "createPlan": "保存计划",
+      "savedMetaPrompt": "[已将计划保存到训练计划]",
+      "bubbleDeferredToCard": "计划预览见下方卡片。",
+      "planAlreadySaved": "该草案已保存为正式计划。",
+      "planAlreadySavedShort": "已保存",
+      "waitStreamEnd": "请等本条回复生成完成后再保存。",
+      "creating": "保存中…",
+      "createFailed": "无法保存计划，请检查课表 DSL 是否正确后重试。",
+      "createSuccess": "计划已保存",
+      "noWorkouts": "草案中没有可保存的训练内容。",
+      "weekdayShort": {
+        "0": "一",
+        "1": "二",
+        "2": "三",
+        "3": "四",
+        "4": "五",
+        "5": "六",
+        "6": "日"
+      },
+      "workoutDialogTitle": "第{week}周 · {weekday}",
+      "workoutDialogNotes": "备注",
+      "workoutDialogNotesEmpty": "无",
+      "workoutDialogDsl": "课表规则（DSL）",
+      "workoutDialogIntensity": "相对强度",
+      "workoutDialogLoading": "加载图表…",
+      "workoutDialogNoChart": "暂无可视化",
+      "workoutDialogSessionCount": "{count, plural, one {# 个训练} other {# 个训练}}",
+      "workoutDialogSessionMeta": "第 {ordinal} 节 · {sport}",
+      "workoutDialogSessionFallback": "第 {ordinal} 节",
+      "workoutDialogClose": "关闭"
+    },
+    "readCards": {
+      "competitionEvents": {
+        "title": "赛事安排",
+        "empty": "查询范围内暂无赛事安排。",
+        "limited": "显示 {count} 场，共 {total} 场赛事。"
+      },
+      "toggleDetails": "展开或收起详情",
+      "planDay": {
+        "title": "计划某日",
+        "subtitleWithPlan": "{date} · {title}",
+        "subtitleNoPlan": "{date}",
+        "outsideRange": "该日期不在当前计划周期内。",
+        "position": "位置",
+        "weekDay": "第 {week} 周 · 第 {day} 天",
+        "session": "第 {index} 节",
+        "emptyDay": "当日无安排训练。"
+      },
+      "activityRecent": {
+        "title": "最近活动",
+        "subtitle": "{count, plural, one {# 条活动} other {# 条活动}}",
+        "empty": "暂无记录。"
+      },
+      "activityDay": {
+        "title": "{date} 的活动",
+        "subtitle": "{count, plural, one {# 条活动} other {# 条活动}}",
+        "empty": "当日无活动。"
+      },
+      "pmc": {
+        "title": "负荷与体能（PMC）",
+        "stats": {
+          "activeDays": "活跃日",
+          "restDays": "休息日",
+          "totalLoad": "总负荷",
+          "avgDaily": "日均负荷"
+        }
+      },
+      "profileZones": {
+        "title": "阈值与区间",
+        "maxHr": "最大心率",
+        "zonesHr": "心率区间",
+        "zonesPower": "功率区间",
+        "zonesPace": "配速区间"
+      },
+      "zoneRanges": {
+        "title": "{sport}训练区间",
+        "summary": "包含{metrics}",
+        "metricTabs": "区间指标",
+        "sports": {
+          "RUN": "跑步",
+          "CYCLING": "骑行",
+          "SWIM": "游泳",
+          "UNKNOWN": "运动"
+        },
+        "power": "功率",
+        "pace": "配速",
+        "tabPace": "配速",
+        "tabHr": "心率",
+        "tabPower": "功率",
+        "colZone": "分区",
+        "colMin": "下限",
+        "colMax": "上限",
+        "unitPace": "(分/km)",
+        "unitPace100m": "(分/100m)",
+        "unitHr": "(bpm)",
+        "unitPower": "(W)",
+        "benchmarkLine": "基准：{value}",
+        "fallbackZone": "区间 {n}",
+        "empty": "当前运动暂无可用区间明细。",
+        "toggleDetails": "展开或收起区间明细"
+      }
+    },
+    "planFollowup": {
+      "cardTitle": "训练计划跟进",
+      "pendingLine": "{count, plural, one {# 个训练仍在计划或进行中} other {# 个训练仍在计划或进行中}}"
+    },
+    "workoutAdjustment": {
+      "before": "调整前",
+      "after": "调整后",
+      "position": "第 {week} 周 · 第 {day} 天",
+      "changes": "变化摘要",
+      "fields": {
+        "name": "训练名称",
+        "text": "训练结构",
+        "notes": "备注",
+        "sportType": "运动类型",
+        "weekIndex": "周次",
+        "dayIndex": "天次",
+        "sessionIndex": "课次",
+        "scheduledDate": "计划日期"
+      },
+      "apply": "应用调整",
+      "applying": "应用中…",
+      "applied": "已应用",
+      "applySuccess": "训练调整已应用",
+      "applyFailed": "无法应用训练调整",
+      "appliedMetaPrompt": "[已应用训练调整]"
+    },
+    "mutationApplied": {
+      "lifecycle": {
+        "activate": "已启用计划",
+        "pause": "已暂停计划",
+        "complete": "已完成计划",
+        "cancel": "已终止计划"
+      },
+      "undoCountdown": "{seconds}s 内可撤销",
+      "undoButton": "撤销",
+      "undoing": "撤销中…",
+      "undoneTag": "已撤销",
+      "undoSuccess": "已撤销该操作",
+      "undoFailed": "撤销失败，请稍后重试",
+      "title": {
+        "PLAN_WORKOUT_ADD": "已加入训练",
+        "PLAN_WORKOUT_UPDATE": "已更新训练",
+        "PLAN_WORKOUT_STATUS": "已更新训练状态",
+        "PLAN_SHIFT": "已顺延计划",
+        "PLAN_LIFECYCLE": "已变更计划状态",
+        "ACTIVITY_LINK": "已关联活动",
+        "ACTIVITY_UNLINK": "已解除活动关联",
+        "ACTIVITY_META_UPDATE": "已更新活动信息",
+        "ACTIVITY_SESSION_RPE": "已记录主观疲劳",
+        "ACTIVITY_DELETE": "已删除活动",
+        "USER_THRESHOLD_UPDATE": "已更新阈值",
+        "USER_BODY_METRIC_UPDATE": "已记录体重",
+        "COMPETITION_EVENT_MUTATION": "已更新赛事"
+      }
+    },
+    "decision": {
+      "rejectedTitle": "未采用",
+      "rejectedHint": "已取消此方案，未应用变更。",
+      "rejectFailed": "取消失败，方案仍待确认，请重试。",
+      "approvedTitle": "已确认",
+      "approvedHint": "已确认，尚未收到执行成功回执。",
+      "draftTitle": "决策草案",
+      "draftSubtitle": "尚未修改计划，确认后才会生效。",
+      "workoutDraftSubtitle": "训练课草案 · 尚未加入计划",
+      "willAdd": "待加入",
+      "suggestionTitle": "计划变更",
+      "draftBadge": "待确认",
+      "reviewBadge": "需确认",
+      "draftTab": "草案 {index}",
+      "selectedDraft": "已选择草案 {index}",
+      "confirmSelectedButton": "确认这个草案",
+      "confirmHint": "确认后将应用以上变更。",
+      "confirmButton": "确认并更新计划",
+      "applyAdaptationButton": "应用调整",
+      "applySupersessionButton": "按此计划接管",
+      "cancelButton": "取消",
+      "showAll": "查看全部",
+      "showLess": "收起",
+      "evidence": "采用的数据",
+      "loadDelta": "预计负荷变化",
+      "syncImpact": "设备同步影响",
+      "total": "评估",
+      "changed": "修改",
+      "preserved": "保留",
+      "skipped": "跳过",
+      "confirmPrompt": "我确认应用当前选中的这个决策。",
+      "waitStreamEnd": "请等教练本条回复生成完成后再确认。",
+      "appliedBadge": "已应用",
+      "appliedTitle": "决策已应用",
+      "applyResultTitle": "决策应用结果",
+      "rebaseTitle": "需要重新计算",
+      "rebaseNoChange": "这次确认没有修改正式计划。主计划上下文已经前进，教练需要基于最新事实重新生成方案。",
+      "rebaseButton": "基于最新状态重新分析",
+      "rebaseStarting": "正在进入最新分支",
+      "rebasePrompt": "请基于最新计划上下文重新分析这个过期决策。请先检查新增事实，再判断是否维持原建议、调整建议，或生成新的决策草案。",
+      "rebaseFailed": "重新分析启动失败，请稍后再试",
+      "decisionId": "决策",
+      "decisionType": "类型",
+      "state": "状态",
+      "commitId": "提交",
+      "conflictBase": "决策基于",
+      "conflictHead": "当前主链",
+      "confidence": "把握",
+      "confidenceValue": "{value}%",
+      "rationale": "理由",
+      "impactPreview": "影响预览",
+      "changePreview": "计划变更",
+      "whyThis": "安排依据",
+      "selectedOption": "选择方案",
+      "positionLabel": "位置",
+      "newPosition": "新位置",
+      "sportType": "运动",
+      "workoutName": "名称",
+      "workoutText": "课表",
+      "notes": "备注",
+      "reason": "原因",
+      "status": "状态",
+      "action": "动作",
+      "startDate": "开始日期",
+      "activity": "活动",
+      "workout": "训练",
+      "statusValue": {
+        "PLANNED": "计划中",
+        "IN_PROGRESS": "进行中",
+        "DONE": "已完成",
+        "SKIPPED": "已跳过",
+        "MOVED": "已顺延"
+      },
+      "position": "第 {week} 周 · 第 {day} 天 · 第 {session} 节",
+      "applyResult": {
+        "APPLIED": "已写入主计划上下文。",
+        "REBASE_REQUIRED": "计划上下文已变化，需要重新对齐后再应用。",
+        "FAILED": "应用失败，请继续和教练确认。",
+        "SKIPPED": "这次没有修改主计划。"
+      }
+    },
+    "history": {
+      "title": "历史对话",
+      "empty": "暂无历史会话",
+      "untitled": "新对话",
+      "today": "今天",
+      "yesterday": "昨天",
+      "last7Days": "最近 7 天",
+      "last30Days": "最近 30 天",
+      "past": "过去",
+      "openSheet": "打开历史对话",
+      "mobileSubtitle": "右滑也可打开",
+      "toolbarHistory": "历史",
+      "collapseSidebar": "收起历史对话侧栏",
+      "expandSidebar": "展开历史对话侧栏",
+      "pinnedSection": "置顶",
+      "menuMore": "更多操作",
+      "editTitle": "编辑标题",
+      "pin": "置顶",
+      "unpin": "取消置顶",
+      "delete": "删除",
+      "editTitleDialogTitle": "编辑会话标题",
+      "editTitlePlaceholder": "输入标题",
+      "save": "保存",
+      "cancel": "取消",
+      "deleteConfirmTitle": "删除此对话？",
+      "deleteConfirmDescription": "将永久删除该会话及全部消息，此操作不可恢复。",
+      "deleteConfirm": "删除",
+      "toastDeleted": "已删除",
+      "toastUpdated": "已更新",
+      "toastFailed": "操作失败，请重试",
+      "viewAll": "查看全部",
+      "fullPageTitle": "历史会话",
+      "noReply": "暂无回答",
+      "loginToView": "登录后查看历史会话",
+      "pinAria": "置顶",
+      "unpinAria": "取消置顶",
+      "editTitleAria": "编辑标题",
+      "deleteAria": "删除",
+      "goSignIn": "去登录",
+      "backToCoach": "返回对话",
+      "openAiReview": "AI复盘"
+    },
+    "reviews": {
+      "title": "AI复盘",
+      "daily": "日复盘",
+      "weekly": "周复盘",
+      "monthly": "月复盘",
+      "newReview": "发起新对话",
+      "empty": "暂无复盘会话",
+      "analyzedDate": "分析日期",
+      "cardYearMeta": "{year}年",
+      "cardWeekSuffix": "周",
+      "cardMonthSuffix": "月",
+      "viewAll": "查看全部",
+      "listInvalidType": "链接无效：type 需为 day、week 或 month",
+      "listBack": "返回 AI 教练",
+      "listPullToRefresh": "下拉可刷新",
+      "listReleaseToRefresh": "松开立即刷新",
+      "listRefreshing": "刷新中...",
+      "listLoadingMore": "思考中…",
+      "listNoMore": "没有更多了"
+    },
+    "mobile": {
+      "openCoach": "打开 AI 教练",
+      "back": "返回"
+    },
+    "prompts": [
+      "我昨天练得怎么样？",
+      "我现在的恢复状态怎么样？",
+      "我今天适合继续练还是恢复？",
+      "对比最近 4 周和上一个 4 周，我进步了吗？",
+      "最近 7 天我是不是累积了太多疲劳？",
+      "这周的训练安排需要调整吗？",
+      "下一次关键训练该怎么安排强度？",
+      "我最近的跑步/骑行强度分布合理吗？",
+      "这个训练周期相比上一个周期，主要变化是什么？",
+      "如果周末比赛，接下来几天该怎么练？",
+      "我最近哪一次训练最值得复盘？",
+      "帮我找一下最近状态下滑的可能原因。",
+      "我应该把哪一天改成轻松训练或休息？",
+      "我的有氧基础最近是在变好吗？",
+      "我怎样提高 FTP 或阈值配速？",
+      "我最近的负荷增长会不会太激进？"
+    ],
+    "fitnessAssessment": {
+      "title": "体能评估",
+      "details": "方法与证据",
+      "noWrite": "本次评估未修改设置。",
+      "apply": "确认采用",
+      "recompute": "重新评估",
+      "solo": "是，独自连续尽力完成 30 分钟",
+      "ordinary": "普通训练",
+      "skip": "暂不确认",
+      "select": "选择活动",
+      "start": "测试开始时间（从活动开始计，分钟）",
+      "check": "检查这段数据",
+      "sent": "已提交，请查看后续回复。",
+      "failure": "提交失败，请重试。",
+      "testDraft": "准备测试训练课草案",
+      "zoneImpact": "使用本次指标计算的心率、功率或配速区间可能变化；自定义区间保持原配置。",
+      "priorRecord": "原记录",
+      "adopted": "已采用此结果。",
+      "testSegment": "分析片段",
+      "openAssessment": "查看评估",
+      "pass": "通过",
+      "notMet": "不满足",
+      "checkResult": "{label}{amount} · {status}",
+      "limitations": {
+        "PARTIAL_EVIDENCE": "范围内部分活动尚不可用，结果仅基于已列出的证据。",
+        "CANDIDATE_LIST_LIMIT": "候选列表仅显示最近 20 项，请缩小范围或指定活动。",
+        "APPLICATION_NOT_ENABLED": "结果可预览，采用功能尚未开放。",
+        "FIELD_ESTIMATE_NOT_LAB_MEASUREMENT": "这是场测估计，不是实验室测量。",
+        "ORDINARY_ACTIVITY_LTHR": "根据活动中有效 30 分钟片段的后 20 分钟平均心率估计；未要求全力测试，运动强度与环境会影响其代表性。",
+        "USER_REPORTED_PROTOCOL": "测试性质由你确认。",
+        "SOURCE_VERSION_UNVERIFIED": "原始数据版本暂无法验证，本次不能采用。",
+        "DERIVED_ACTIVITY_PEAKS": "使用已发布活动峰值；本轮不重新验证原始轨迹或计时。",
+        "CYCLING_SPEED_ENVIRONMENT": "骑行速度受地形、风和阻力影响，不能直接作为生理阈值。",
+        "HR_WINDOW_AVERAGE": "缺少 1 秒峰值，显示的是已有心率窗口均值中的最高值。",
+        "TP_EMPIRICAL_OFFSET": "使用 5K 配速加 20 秒/公里的既有经验公式，未确认全力程度。",
+        "VDOT_NOT_LAB_VO2MAX": "根据跑步距离与时间估算 VDOT；普通训练可能低估能力。",
+        "DERIVED_ACTIVITY_ESTIMATES": "重新汇总范围内活动的已有估计，并使用当前来源偏好与修正系数；未重新分析原始跑步信号。",
+        "DAILY_HEALTH_MEDIAN": "使用已选健康来源的每日静息心率中位数；不能从运动中的最低心率代替。",
+        "OBSERVED_HR_NOT_MAXIMUM": "实测峰值只能说明此次观察到的心率，不等于生理最大心率，可能包含设备误差。",
+        "NO_VALIDATED_AEROBIC_METHOD": "尚无可验证的有氧阈值方法；不能直接用 LTHR/MaxHR 的固定比例推算。",
+        "USER_ADOPTED_ESTIMATE": "此结果是估计；你可以确认采用为个人参考设置，采用不代表方法已通过科学验证。",
+        "PREVIEW_METHOD": "此方法目前仅提供预览。",
+        "RECORDED_PERFORMANCE_NOT_MAXIMAL_CAPACITY": "结果反映已记录表现，未必代表当前能力上限。",
+        "FTP_PRODUCT_MAPPING_095_UNVALIDATED": "FTP 使用尚未验证的 0.95 × CP 经验换算；采用后仅作为你选用的估计。",
+        "unknown": "此结果有方法适用性限制。"
+      },
+      "methods": {
+        "lthr-activity-observation": "日常活动 LTHR 估计",
+        "lthr-30-minute": "30 分钟场测",
+        "cycling-extended-cp": "骑行扩展临界功率模型（估计）",
+        "running-extended-cp": "跑步扩展临界功率模型（估计）",
+        "critical-speed": "多活动距离—时间拟合（估计）",
+        "running-5k-threshold-pace": "5K 表现换算阈值配速（估计）",
+        "running-performance-vdot": "跑步表现等效 VDOT（估计）",
+        "running-effective-vo2max": "活动 VDOT 时间加权估计",
+        "observed-max-hr": "活动心率峰值观察",
+        "daily-resting-hr": "每日静息心率中位数（估计）",
+        "aerobic-threshold-unavailable": "有氧阈值：尚无已验证方法"
+      },
+      "statuses": {
+        "ESTIMATED": "本次估计",
+        "OBSERVATION_ONLY": "观测结果，尚未验证为生理阈值",
+        "NEEDS_INPUT": "需要补充信息",
+        "WAITING_DATA": "活动仍在处理中，处理完成后可重新评估。",
+        "UNAVAILABLE": "本次无法估算",
+        "FAILED": "计算遇到技术故障，请重试。"
+      },
+      "checks": {
+        "ORDERED_TIMESTAMPS": "时间序列有效",
+        "FULL_COVERAGE": "全段有效覆盖",
+        "TAIL_COVERAGE": "后 20 分钟有效覆盖",
+        "MAX_GAP_SECONDS": "最长缺口",
+        "NO_KNOWN_PAUSE": "未发现超过门槛的暂停",
+        "FIT_CONVERGED": "拟合收敛",
+        "INDEPENDENT_ACTIVITIES": "独立活动数",
+        "FIT_R_SQUARED": "距离—时间拟合 R²",
+        "OBSERVED_DURATIONS": "实测时长点"
+      },
+      "observations": {
+        "last20MinutesMeanHeartRate": "后 20 分钟平均心率",
+        "observedMaxHr": "范围内实测最高心率（非生理最大心率）",
+        "dPrime": "D′（距离模型截距）"
+      },
+      "sports": {
+        "RUN": "跑步",
+        "CYCLING": "骑行",
+        "SWIM": "游泳",
+        "UNKNOWN": "通用"
+      },
+      "evidence": {
+        "daily": "{count} 项每日健康记录",
+        "activities": "{included}/{total} 项活动参与"
+      },
+      "tracking": {
+        "title": "测试训练",
+        "description": "训练活动同步后重新检查测试数据；有结果或需要补充信息时提醒你。",
+        "start": "开启跟踪",
+        "stop": "停止跟踪",
+        "startMessage": "跟踪测试",
+        "stopMessage": "取消跟踪"
+      },
+      "reasons": {
+        "SCOPE_UNSUPPORTED": "该方法不支持这个范围，请按方法要求选择日期范围。",
+        "AMBIGUOUS_SCOPE": "需要确定活动或测试段。",
+        "TIMEZONE_REQUIRED": "请先在个人资料中设置时区。",
+        "NO_MATCHING_ACTIVITY": "指定范围内没有找到活动，请检查日期或同步状态。",
+        "MISSING_SIGNAL": "缺少该方法要求的有效数据或独立记录，请查看方法与证据要求。",
+        "QUALITY_REJECTED": "记录的数据质量、有效覆盖或拟合检查未通过。",
+        "PROTOCOL_UNKNOWN": "需要确认这段是否为实际完成的 30 分钟尽力测试。",
+        "PROTOCOL_UNCONFIRMED": "尚未确认测试性质，本次仅提供观察值。",
+        "PROTOCOL_MISMATCH": "普通训练不能按该测试方法估算阈值。",
+        "REFERENCE_REQUIRED": "缺少同运动最大心率参照，暂不能采用该估计。",
+        "REFERENCE_CONFLICT": "估计与当前参照指标冲突，需要核实。",
+        "METHOD_UNAVAILABLE": "当前产品尚未开放这个计算方法。",
+        "EXECUTION_FAILED": "本次计算遇到技术故障，可以重试。",
+        "RESOURCE_LIMIT": "数据超出本次处理上限，请缩小范围。",
+        "NON_CONVERGENCE": "模型未稳定收敛，不能提供可靠估计。",
+        "STALE": "证据或设置已变化，请重新评估后确认。",
+        "CONFIRMATION_REQUIRED": "请确认已展示的具体变更。"
+      },
+      "adoption": {
+        "estimate": "确认后保存为你主动采用的估计值，保留原有历史及本次方法和证据；不会标记为实测或已验证的生理阈值。",
+        "maxHr": "确认后将本次记录到的最高心率保存为你的 MaxHR 参考设置。它可能低于真实最大心率，也可能受设备误差影响；不会标记为已验证的生理最大心率。"
+      }
+    },
+    "trainingVisualization": {
+      "showData": "查看数据",
+      "bucket": "时间 / 分类",
+      "rowsRange": "{start}–{end} / 共 {total} 条",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "partialData": "当前结果达到数据读取上限，仅展示已读取部分。请缩小时间范围后重新查看完整结果。",
+      "sampledData": "图表抽样显示 {shown}/{total} 个数据点；数据表保留此次返回的全部行。",
+      "measures": {
+        "ACTIVITY_COUNT": "运动次数",
+        "DURATION_MIN": "运动时长",
+        "DISTANCE_KM": "距离",
+        "AVG_SPEED_KMH": "平均速度",
+        "AVG_HEART_RATE": "平均心率",
+        "AVG_POWER": "平均功率",
+        "DAILY_LOAD": "训练负荷",
+        "RUNNING_LOAD": "跑步负荷",
+        "CYCLING_LOAD": "骑行负荷",
+        "SWIMMING_LOAD": "游泳负荷",
+        "OTHER_LOAD": "其他负荷",
+        "CP": "临界功率",
+        "W_PRIME": "无氧做功容量",
+        "FTP": "功能性阈值功率",
+        "MAX_HR": "最大心率",
+        "RESTING_HR": "静息心率",
+        "LTHR": "阈值心率",
+        "CS": "临界配速",
+        "TP": "阈值配速",
+        "AET_PACE": "有氧阈值配速",
+        "VO2_MAX": "最大摄氧量",
+        "P_MAX": "最大功率",
+        "WEIGHT": "体重",
+        "HEIGHT": "身高",
+        "AET_HR": "有氧阈值心率"
+      },
+      "sources": {
+        "ESTIMATED": "历史估算",
+        "AUTO": "自动采用记录",
+        "MANUAL": "手动记录"
+      },
+      "exploration": {
+        "PLANNED": "计划",
+        "ACTUAL": "实际",
+        "bucket": "采样范围",
+        "range": "最小–最大",
+        "coverage": "覆盖率",
+        "showData": "查看数据",
+        "series": "数据系列",
+        "previous": "上一页",
+        "next": "下一页",
+        "paired": "配对样本",
+        "records": "记录数",
+        "missing": "不可用",
+        "touch": "轻点图表查看数值。",
+        "interact": "可用方向键或轻点查看数值。",
+        "notes": {
+          "NO_DATA": "没有符合范围的可用数据。",
+          "PARTIAL_DATA": "已达到读取上限，请缩小范围查看完整数据。",
+          "TIME_WEIGHTED": "曲线按真实时间加权分桶；悬停或轻点可查看范围和覆盖率。",
+          "GAPS": "缺失信号及超过 10 秒的采样缺口会断线显示。",
+          "DISTANCE_UNAVAILABLE": "没有可用的实测距离，请改为按时间对齐。",
+          "PROGRESS_TIME": "完成进度将经过时间归一化到 0–100%，不代表距离或强度相同。",
+          "RECORDED_START": "缺少活动开始时间，横轴从首个采样点开始。",
+          "ZONE_SNAPSHOTS": "区间采用各次活动记录时的边界。",
+          "ZONE_SPLIT": "运动类型或区间边界不同，已分别展示。",
+          "ZONE_COVERAGE": "百分比仅以已记录的区间时长为分母，缺失区间记录不计入。",
+          "LINKED_ONLY": "实际值只统计明确关联的主要活动。",
+          "MISSING_ACTUAL": "未关联、不可用或关联不明确的活动保留空值，不计作 0。",
+          "PLAN_DATE": "实际值按对应训练的计划日期归属。",
+          "LOAD_METHODS": "计划负荷是估计值；实际负荷沿用用户的 PMC 负荷来源设置。",
+          "PAIRED_ONLY": "仅绘制同一活动或同一时间段内成对存在的数值。",
+          "NOT_CAUSAL": "指标相关不代表因果关系。",
+          "HISTORY_PAIRS": "历史指标仅配对同一本地日内同时存在的记录，不沿用前一天的值。",
+          "MULTI_AXES": "各纵轴使用自己的单位和刻度；曲线交叉不代表数值相等，也不代表因果关系。"
+        },
+        "measures": {
+          "HEART_RATE": "心率",
+          "POWER": "功率",
+          "SPEED": "速度",
+          "PACE": "配速",
+          "CADENCE": "踏频 / 步频",
+          "ELEVATION": "海拔",
+          "GRADE": "坡度",
+          "DURATION_MIN": "运动时长",
+          "DISTANCE_KM": "距离",
+          "LOAD": "负荷",
+          "ACTIVITY_COUNT": "运动次数",
+          "AVG_SPEED_KMH": "平均速度",
+          "AVG_HEART_RATE": "平均心率",
+          "AVG_POWER": "平均功率",
+          "DAILY_LOAD": "训练负荷",
+          "RUNNING_LOAD": "跑步负荷",
+          "CYCLING_LOAD": "骑行负荷",
+          "SWIMMING_LOAD": "游泳负荷",
+          "OTHER_LOAD": "其他负荷",
+          "CP": "临界功率",
+          "W_PRIME": "无氧做功容量",
+          "FTP": "功能性阈值功率",
+          "MAX_HR": "最大心率",
+          "RESTING_HR": "静息心率",
+          "LTHR": "阈值心率",
+          "CS": "临界配速",
+          "TP": "阈值配速",
+          "AET_PACE": "有氧阈值配速",
+          "VO2_MAX": "最大摄氧量",
+          "P_MAX": "最大功率",
+          "WEIGHT": "体重",
+          "HEIGHT": "身高",
+          "AET_HR": "有氧阈值心率"
+        },
+        "axes": {
+          "ELAPSED_TIME": "经过时间",
+          "DISTANCE": "距离",
+          "PROGRESS": "时间进度",
+          "DATE": "日期",
+          "CATEGORY": "分类",
+          "NUMBER": "数值"
+        },
+        "seriesDefault": "配对记录",
+        "separate": "分开展示",
+        "overlay": "叠加展示"
+      }
+    }
+  },
+  "AuthError": {
+    "pageTitle": "登录错误",
+    "title": "无法继续授权",
+    "fallbackDescription": "授权请求不完整或已过期。请回到 App 后重试。",
+    "login": "登录",
+    "home": "首页"
+  },
+  "login": {
+    "platformTitle": "Trainingload.ai - 训练分析管理平台",
+    "authShell": {
+      "sideTitle": "从训练记录，到下一次更好的表现"
+    },
+    "selfHost": {
+      "instanceLabel": "本地版本",
+      "sideTitle": "训练数据，留在你自己的环境里",
+      "localOwnerTitle": "创建本地账户",
+      "localOwnerPageDescription": "首次使用只需设置用户名，创建后会直接进入初始化设置。",
+      "localOwnerName": "用户名",
+      "localOwnerNamePlaceholder": "例如：Victor",
+      "localOwnerNameHint": "1–20 个字符，支持中英文、数字、空格、短横线和下划线。",
+      "localOwnerNameRequired": "请输入用户名。",
+      "localOwnerCreating": "正在创建…",
+      "localOwnerContinue": "创建账户并继续",
+      "localOwnerSetupFailed": "创建失败，请刷新页面后重试。",
+      "localSessionFailed": "无法建立本机会话，请确认实例仍通过 localhost 访问。",
+      "localSessionRetry": "重试进入实例"
+    }
+  },
+  "HomePage": {
+    "title": "首页"
+  },
+  "AccountPage": {
+    "title": "Trainingload.ai · 账户设置",
+    "innerTitle": "账户设置",
+    "description": "管理你的账户设置",
+    "autoUpdateTitle": "自动更新",
+    "privacyData": {
+      "title": "隐私与数据",
+      "description": "集中管理 AI 数据使用、跨对话记忆和账户数据导出。",
+      "status": {
+        "loading": "正在读取状态…",
+        "enabled": "已允许",
+        "disabled": "未允许"
+      },
+      "ai": {
+        "title": "隐私与 AI",
+        "description": "查看 AI 会使用哪些数据，并管理当前授权。"
+      },
+      "memory": {
+        "title": "跨对话记忆",
+        "description": "管理 AI 教练保存的事实、发生时间和记忆开关。",
+        "statusEnabled": "已启用",
+        "statusDisabled": "未启用"
+      },
+      "export": {
+        "title": "导出全部数据",
+        "description": "创建适合长期备份或进一步分析的账户数据归档。"
+      }
+    },
+    "autoUpdate": {
+      "title": "自动更新",
+      "description": "系统会持续更新估算值。开启后，最新估算值会自动成为当前生效值；关闭后，估算值仅供参考，不影响当前生效值。页面主值显示当前生效值，右侧显示最新估算值及变化方向。",
+      "loading": "加载中...",
+      "mobileHint": "当检测到新的阈值表现时，自动更新对应指标。",
+      "mobileLoading": "正在加载自动更新设置",
+      "sections": {
+        "power": {
+          "title": "功率",
+          "footer": "检测到新的骑行表现后，可自动更新功率相关基准。"
+        },
+        "pace": {
+          "title": "配速",
+          "footer": "跑步和游泳的阈值表现会用于训练区间和负荷估算。"
+        },
+        "heartRate": {
+          "title": "心率",
+          "maxHrLabel": "最大心率"
+        }
+      },
+      "mobileMetrics": {
+        "ftp": "功能阈值功率",
+        "cp": "临界功率",
+        "wPrime": "无氧容量",
+        "pMax": "最大输出能力",
+        "tp": "跑步阈值配速",
+        "cs": "临界速度",
+        "lthr": "乳酸阈值心率",
+        "maxHr": "活动中检测到的新高值"
+      },
+      "toast": {
+        "enabledSuccess": "已开启自动更新",
+        "disabledSuccess": "已关闭自动更新",
+        "updateFailed": "更新失败，请稍后重试"
+      },
+      "metrics": {
+        "cp": "临界功率（CP）",
+        "ftp": "功能阈值功率（FTP）",
+        "wPrime": "W' 无氧做功能力",
+        "pMax": "最大功率（Pmax）",
+        "cs": "临界速度（CS）",
+        "tp": "阈值配速（TP）",
+        "maxHr": "最大心率（Max HR）",
+        "lthr": "乳酸阈心率（阈值心率）",
+        "vVo2Max": "最大摄氧速度（vVO₂max）"
+      }
+    }
+  },
+  "DashboardPage": {
+    "title": "Trainingload.ai · 仪表盘"
+  },
+  "MapPage": {
+    "title": "Trainingload.ai · 地图"
+  },
+  "ActivitySharePoster": {
+    "titleFallback": "活动海报",
+    "activityFallback": "活动",
+    "loading": {
+      "activity": "加载活动信息中…",
+      "map": "地图加载中…"
+    },
+    "actions": {
+      "cancel": "取消",
+      "share": "分享",
+      "generating": "生成中…",
+      "view": "查看"
+    },
+    "metrics": {
+      "duration": "时长",
+      "paceOrSpeed": "配速/速度",
+      "elevationGain": "爬升",
+      "cadence": "踏频",
+      "heartRate": "心率",
+      "power": "功率"
+    }
+  },
+  "SelfHostAiSettings": {
+    "title": "自托管 AI",
+    "ownerOnly": "仅实例所有者",
+    "summaryDescription": "管理此实例使用的 AI 服务商、模型和 API Key。修改仅对实例 Owner 开放。",
+    "privacySummaryDescription": "查看本实例是否启用 AI，以及训练数据会发送给哪个服务商。",
+    "statusEnabled": "已启用",
+    "statusDisabled": "未启用",
+    "modelSummary": "默认：{default} · 推理：{reasoning}",
+    "disabledSummary": "当前不会调用任何 AI 服务。",
+    "manage": "管理配置",
+    "description": "选择由此实例使用的 AI 服务。开启后训练数据会发送给所选服务商。密钥只提交给本地 server，加密后保存，不会返回浏览器。OpenAI 需要 API Key，ChatGPT 订阅不能代替。",
+    "provider": "AI 服务商",
+    "required": "必填",
+    "optional": "（可选）",
+    "requirementsHint": "* 为必填项，AI 服务可以稍后配置。",
+    "apiKey": "API Key",
+    "apiKeyPlaceholder": "输入服务商 API Key",
+    "apiKeyKeep": "留空以继续使用已保存的密钥",
+    "apiKeyReenter": "重新输入密钥，改由界面管理",
+    "apiKeyHelp": "保存后只显示是否已配置，不会把密钥返回 client。",
+    "baseUrl": "API Base URL",
+    "baseUrlHelpOptional": "可留空，系统会使用该服务商的默认 API 地址。",
+    "baseUrlHelpRequired": "请输入自定义 OpenAI-compatible 服务的完整 HTTP(S) 地址。",
+    "defaultModel": "默认模型",
+    "reasoningModel": "推理模型",
+    "customModel": "自定义模型 ID",
+    "customDefaultModel": "自定义默认模型",
+    "customReasoningModel": "自定义推理模型",
+    "defaultModelContext": "默认模型上下文窗口",
+    "reasoningModelContext": "推理模型上下文窗口",
+    "contextWindowPlaceholder": "输入上下文窗口 token 数",
+    "contextWindowValue": "上下文窗口：{count} tokens",
+    "contextWindowRequired": "自定义模型需要填写上下文窗口。",
+    "modelPlaceholder": "输入服务商提供的模型 ID",
+    "webSearch": "互联网搜索",
+    "webSearchOn": "已开启",
+    "webSearchOff": "已关闭",
+    "webSearchUnavailable": "此服务商不支持",
+    "webSearchHelpSupported": "开启后，AI 可通过当前服务商的原生搜索能力查询实时公开网页。",
+    "webSearchHelpUnsupported": "该接入方式不提供受控的互联网搜索；模型本身仍可正常使用。",
+    "sourceOwner": "当前配置由实例所有者在此页面管理。",
+    "sourceEnvironment": "当前来自部署环境；首次保存时需要重新输入 API Key。",
+    "sourceDisabled": "AI 当前关闭。选择服务商后填写 API Key 和模型。",
+    "save": "保存 AI 配置",
+    "saving": "正在保存…",
+    "onboardingSave": "保存并完成设置",
+    "onboardingUseCurrent": "使用当前配置并完成",
+    "onboardingSaving": "正在应用 AI 配置…",
+    "saved": "AI 配置已保存并生效",
+    "saveFailed": "AI 配置未保存，请检查字段后重试。",
+    "loadFailed": "无法读取 AI 配置。server 未返回可用设置，请检查自托管实例状态。",
+    "retry": "重新读取",
+    "providers": {
+      "none": "关闭 AI",
+      "openai": "OpenAI",
+      "deepseek": "DeepSeek",
+      "openrouter": "OpenRouter",
+      "dashscope": "阿里云百炼（DashScope）",
+      "gemini": "Google Gemini",
+      "xai": "xAI",
+      "ollama": "Ollama",
+      "custom-openai-compatible": "自定义 OpenAI-compatible API"
+    }
+  },
+  "SelfHostAiOnboarding": {
+    "eyebrow": "可选 · 自托管 AI",
+    "title": "配置你的 AI 服务",
+    "subtitle": "使用自己的 API Key 接入 OpenAI、DeepSeek、OpenRouter、阿里云百炼、Gemini 或 xAI；其他服务可通过 OpenAI-compatible 接口接入。也可以暂时关闭，之后在设置中配置。",
+    "dataNotice": "启用后，只有在使用 AI 功能时，所需的训练摘要才会由本地 Server 直接发送给你选择的服务商；Trainingload.ai 云端不参与转发。",
+    "skip": "稍后配置并继续",
+    "error": "AI 配置未能完成，请检查设置后重试。"
+  },
+  "SettingsPage": {
+    "title": "Trainingload.ai · 设置",
+    "settings": "设置",
+    "description": "管理你的账户设置"
+  },
+  "MePage": {
+    "title": "Trainingload.ai · 我的",
+    "guestName": "Trainingload.ai 运动员",
+    "guestEmail": "登录后查看你的账户信息",
+    "verified": "已验证",
+    "unverified": "未验证",
+    "quickLinksTitle": "常用入口",
+    "quickLinksDescription": "快速回到你最常用的几个区域。",
+    "versionTitle": "当前版本",
+    "actions": {
+      "account": "账户信息"
+    },
+    "links": {
+      "analysis": {
+        "title": "分析中心"
+      },
+      "map": {
+        "title": "地图"
+      },
+      "preferences": {
+        "title": "偏好设置"
+      },
+      "account": {
+        "title": "账户"
+      }
+    }
+  },
+  "AnalysisHubPage": {
+    "eyebrow": "工具",
+    "title": "训练工具",
+    "description": "把常用训练分析能力收在一起，从累计进度、负荷趋势到表现复盘，按问题进入对应工具。",
+    "soon": "即将推出",
+    "searchPlaceholder": "搜索工具",
+    "noResults": "没有匹配的工具",
+    "groups": {
+      "training": "训练量与负荷",
+      "performance": "表现与指标"
+    },
+    "tools": {
+      "progression": {
+        "title": "累计进度",
+        "description": "按月或按年对比距离、时长、活动数和训练负荷的累计曲线。"
+      },
+      "activityStats": {
+        "title": "活动统计",
+        "description": "查看训练量、频率和长期活动分布。"
+      },
+      "pmc": {
+        "title": "PMC 负荷",
+        "description": "查看体能、疲劳、状态和每日训练负荷趋势。"
+      },
+      "bestDistance": {
+        "title": "最佳距离",
+        "description": "回顾不同距离上的最佳表现和近期变化。"
+      },
+      "heartRate": {
+        "title": "心率",
+        "description": "心率趋势、区间与负荷相关指标"
+      },
+      "power": {
+        "title": "功率",
+        "description": "功率曲线、区间与关键功率指标"
+      },
+      "pace": {
+        "title": "配速",
+        "description": "配速趋势、分段与区间分布"
+      }
+    }
+  },
+  "ActivitiesPage": {
+    "title": "Trainingload.ai · 活动"
+  },
+  "WeekSummaryCell": {
+    "count": "次数",
+    "tss": "负荷",
+    "distance": "距离",
+    "duration": "时长"
+  },
+  "AccountInner": {
+    "title": "账户",
+    "name": {
+      "label": "昵称",
+      "description": "更新你在平台上显示的昵称",
+      "placeholder": "昵称",
+      "updateButton": "更新",
+      "updating": "更新中...",
+      "emptyError": "昵称不能为空",
+      "lengthError": "昵称长度不能超过 20 个字符",
+      "invalidCharError": "昵称只能包含字母、数字、中文、空格、连字符和下划线",
+      "updateSuccess": "昵称更新成功",
+      "updateError": "更新昵称失败"
+    },
+    "reviewAutomation": {
+      "title": "AI 复盘自动化",
+      "description": "选择哪些复盘任务可以自动由 AI 处理。",
+      "hint": "选择哪些复盘由 AI 自动生成。",
+      "loading": "正在加载复盘设置",
+      "accessRequired": "当前实例未开放这项自动化能力。",
+      "sections": {
+        "activity": "活动",
+        "cycle": "周期",
+        "plan": "计划"
+      },
+      "cycleFooter": "周期复盘会根据近期训练、恢复和计划执行情况生成。",
+      "details": {
+        "activityReview": "活动完成后自动生成训练分析",
+        "dailyReview": "每天汇总训练与恢复状态",
+        "weeklyReview": "每周总结负荷与计划执行",
+        "monthlyReview": "每月整理趋势和关键变化",
+        "planReview": "计划阶段完成后生成复盘"
+      },
+      "activityReview": "活动复盘",
+      "dailyReview": "每日复盘",
+      "weeklyReview": "每周复盘",
+      "monthlyReview": "每月复盘",
+      "planReview": "计划复盘",
+      "saved": "复盘设置已保存",
+      "saveFailed": "保存复盘设置失败"
+    },
+    "dataExport": {
+      "title": "导出全部数据",
+      "description": "将活动、健康数据、训练计划、设置和符合条件的原始来源文件整理成版本化 ZIP。导出包包含英文 JSON Schema 和 AI 阅读指南，可直接交给 AI 分析。",
+      "entryDescription": "创建适合 AI 分析或长期备份的完整数据归档。",
+      "openAction": "管理数据导出",
+      "backToAccount": "返回账户设置",
+      "modeLabel": "导出模式",
+      "modes": {
+        "aiAnalysis": "AI 分析",
+        "aiAnalysisHint": "使用紧凑的 JSON、JSONL 和 CSV 数据集，适合直接交给 AI 阅读。",
+        "fullBackup": "完整备份",
+        "fullBackupHint": "保留范围最广的可移植数据，并可包含符合条件的原始活动和健康来源文件。"
+      },
+      "privacyLabel": "位置隐私",
+      "privacy": {
+        "redact": "隐藏起点和终点位置",
+        "remove": "移除全部 GPS 坐标",
+        "exact": "保留精确坐标"
+      },
+      "privacyHint": "系统会在转换高频活动数据时应用所选位置隐私策略。",
+      "includeOriginals": "包含原始来源文件",
+      "includeOriginalsHint": "仅完整备份可用。加入可用的 FIT、GPX、TCX 活动文件和保留的健康来源文件，其中可能包含精确 GPS、设备信息及其他敏感健康数据；没有活动原文件时可能提供重建的 FIT。",
+      "createAction": "创建导出",
+      "alreadyRunning": "导出进行中",
+      "refresh": "刷新",
+      "loading": "正在加载导出记录…",
+      "empty": "你还没有申请过数据导出。",
+      "requestAccepted": "数据导出已进入队列。",
+      "requestFailed": "无法创建导出请求，请稍后重试。",
+      "deleteFailed": "无法移除导出文件。",
+      "deleteAction": "移除导出",
+      "download": "下载（{size}）",
+      "preparing": "正在准备导出包…",
+      "progress": "{progress}% · {stage}",
+      "expiresAt": "下载有效期至 {date}。",
+      "failedHint": "任务重试后仍然失败。你可以移除这条记录并重新申请。",
+      "boundary": "不会导出 AI 对话和 AI 生成的复盘内容。活动与健康数据中的详细记录会整理为通用的 CSV 文件，方便查看和进一步分析。",
+      "statuses": {
+        "QUEUED": "等待处理",
+        "SNAPSHOTTING": "正在整理数据",
+        "PACKAGING": "正在打包 ZIP",
+        "UPLOADING": "正在生成安全下载",
+        "READY": "可下载",
+        "RETRY_WAIT": "等待重试",
+        "FAILED": "导出失败",
+        "EXPIRED": "导出已过期"
+      }
+    },
+    "deleteAccount": {
+      "sectionTitle": "删除账户",
+      "sectionDescription": "永久删除账户及全部活动、训练计划、健康数据和教练对话。此操作无法撤销。",
+      "signOutDescription": "结束当前会话并返回登录页，你的账户和数据不会受到影响。",
+      "cancel": "取消",
+      "deleteAccountTitle": "永久删除账户？",
+      "deleteAccountDetail": "这会永久删除你的活动、训练计划、健康数据、教练对话和全部账户资料，且无法恢复。",
+      "deleteContinue": "继续删除",
+      "deleteFinalTitle": "最后确认",
+      "deleteFinalDetail": "提交后账户会立即退出且无法再次登录。后台将异步永久删除全部关联数据，通常 24 小时内完成，最长可能需要 7 天。自动续订会被关闭，但当前已支付周期不会自动退款。",
+      "deleteAccountAction": "永久删除账户",
+      "deletingAccount": "正在删除账户…",
+      "deleteFailedMessage": "账户删除失败，请稍后重试。",
+      "deleteCancelRenewalAndContinue": "关闭自动续订并继续",
+      "deleteAcceptedTitle": "删除请求已受理",
+      "deleteAcceptedDetail": "你已退出登录，账户无法继续访问。系统正在后台清理关联数据，通常会在 24 小时内完成，最长可能需要 7 天。完成后会发送感谢与反馈邮件。",
+      "deleteBackToLogin": "返回登录页",
+      "localSectionTitle": "删除本地账户",
+      "localSectionDescription": "永久删除此实例中的本地账户，以及全部活动、训练计划、健康数据和教练对话。此操作无法撤销。",
+      "localAction": "永久删除本地账户",
+      "localFinalTitle": "删除这个本地账户？",
+      "localFinalDetail": "提交后，本地访问会立即失效，系统将在后台永久删除账户数据。清理完成后，此实例会回到首次初始化状态。",
+      "localAcceptedTitle": "已开始删除本地账户",
+      "localAcceptedDetail": "本地访问已结束。实例正在清理账户数据，完成后会回到首次初始化状态。",
+      "localBackToOnboarding": "继续初始化"
+    }
+  },
+  "ThirdPartyConnections": {
+    "title": "第三方连接",
+    "trainingDataGroup": "训练数据",
+    "providers": {
+      "intervalsIcu": {
+        "name": "Intervals.icu",
+        "description": "连接你的 Intervals.icu 账户，用于同步活动数据、健康数据和计划课程"
+      }
+    },
+    "connected": "已连接",
+    "connectProvider": "连接 {provider}",
+    "connecting": "连接中...",
+    "disconnecting": "断开连接中...",
+    "disconnectSuccess": "断开连接成功",
+    "connectError": "连接失败",
+    "syncError": "同步暂时失败，请稍后重试。",
+    "disconnectError": "断开连接失败",
+    "disconnectConfirmTitle": "确认断开 {provider} 吗？",
+    "disconnectConfirmDescription": "断开后将解除与 {provider} 的绑定关系，并停止后续同步。",
+    "disconnectConfirmCancel": "取消",
+    "disconnectConfirmAction": "确认断开",
+    "intervalsIcu": {
+      "apiKeyLabel": "API Key",
+      "apiKeyPlaceholder": "粘贴 API Key",
+      "apiKeyHelp": "保存后会同步最近 60 天的运动记录；更早的数据暂不自动同步。",
+      "apiKeyHelpConnected": "留空表示继续使用当前保存的 API Key；如果填写新的 Key，系统会先校验并在替换前让你确认。",
+      "apiKeyHelpOAuthConnected": "输入 API Key 后会替换当前 OAuth 授权绑定。",
+      "getApiKey": "获取 API Key",
+      "openApiKeySettings": "打开 Intervals.icu 获取 API Key",
+      "apiKeyRequired": "请输入 API Key",
+      "authTypeLabel": "当前绑定方式：",
+      "oauthTab": "OAuth 授权",
+      "apiKeyTab": "API Key",
+      "oauthTitle": "使用 Intervals.icu OAuth 授权",
+      "oauthHelp": "将跳转到 Intervals.icu 完成授权。授权成功后会继续使用下面的同步设置。",
+      "oauthReplaceApiKeyHint": "当前账号正在使用 API Key；完成 OAuth 授权后，新授权会顶替旧 API Key。",
+      "oauthAuthMode": "OAuth",
+      "apiKeyAuthMode": "API Key",
+      "oauthAthlete": "Intervals.icu 账号：{name}",
+      "connectWithOAuth": "使用 OAuth 连接",
+      "authorizeOAuth": "授权 OAuth",
+      "upgradeToOAuth": "升级到 OAuth",
+      "reconnectOAuth": "重新授权 OAuth",
+      "oauthConnectSuccess": "Intervals.icu OAuth 已连接",
+      "oauthConnectFailed": "Intervals.icu OAuth 授权失败",
+      "accountAlreadyConnected": "该 Intervals.icu 账号已绑定到其他 Trainingload.ai 账号，请先在原账号中解除绑定",
+      "syncActivities": "立即导入近期已完成活动",
+      "syncActivitiesHelp": "连接后立即从 Intervals.icu 导入近 60 天已完成活动；这是一次性操作，不是自动同步开关。",
+      "syncScheduledActivities": "从 Intervals.icu 自动导入新活动",
+      "syncScheduledActivitiesHelp": "Intervals.icu 中新增的已完成活动会自动导入 Trainingload.ai。",
+      "syncWellness": "从 Intervals.icu 导入日常健康数据",
+      "syncWellnessHelp": "包括体重、静息心率、睡眠和疲劳感等日常记录，可按需要开启。",
+      "exportActivities": "将已完成活动发送到 Intervals.icu",
+      "exportActivitiesHelp": "Trainingload.ai 中新完成或新导入的活动会自动发送到 Intervals.icu。",
+      "syncSportSettings": "同步运动员资料和区间",
+      "syncSportSettingsHelp": "将 intervals.icu 中的运动员资料、功率区间、心率区间等同步到 trainingload.ai。",
+      "exportSportSettings": "上传运动员资料和区间",
+      "exportSportSettingsHelp": "将 trainingload.ai 中的运动员资料、功率区间、心率区间等同步到 intervals.icu。",
+      "syncPlannedWorkouts": "从 Intervals.icu 导入计划训练",
+      "syncPlannedWorkoutsHelp": "将 Intervals.icu 中的计划课导入 Trainingload.ai。",
+      "exportPlannedWorkouts": "将计划训练发送到 Intervals.icu",
+      "exportPlannedWorkoutsHelp": "将 Trainingload.ai 中未来的计划课发送到 Intervals.icu。",
+      "connectWithApiKey": "保存 API Key",
+      "saveSettings": "保存设置",
+      "savingSettings": "保存中...",
+      "disconnectOAuth": "断开 OAuth",
+      "disconnectApiKey": "断开 API Key",
+      "connectSuccess": "Intervals.icu 已连接",
+      "settingsSaved": "Intervals.icu 设置已保存",
+      "connectAndSyncStarted": "Intervals.icu 连接成功，已开始同步近 60 天数据，同步完成后会在通知中提醒。",
+      "initialSyncFailed": "Intervals.icu 已连接，但首次同步启动失败，请稍后在设置中重试",
+      "openSettings": "设置",
+      "settingsTitle": "设置 Intervals.icu",
+      "settingsDescription": "选择 OAuth 或 API Key 绑定方式，并配置同步设置。",
+      "apiKeySettingsDescription": "填写个人 API Key，并选择需要的同步方向。Key 只会提交到当前本地实例。",
+      "manualSync": "立即同步",
+      "syncing": "同步中...",
+      "syncQueued": "Intervals.icu 同步已开始，已排队 {count} 条活动",
+      "keyEnding": "API Key 尾号：{last4}",
+      "lastSync": "最近同步",
+      "neverSynced": "尚未同步",
+      "replaceKeyConfirmTitle": "确认替换 API Key？",
+      "replaceKeyConfirmDescription": "这个 API Key 与当前保存的 Key 不一致，可能对应另一个账号。保存后会保留已导入的历史数据，并使用新的 Key 继续同步。",
+      "replaceKeyCancel": "取消",
+      "replaceKeyConfirmAction": "确认替换"
+    }
+  },
+  "UserProfile": {
+    "zonePreview": {
+      "title": "所选模型预览",
+      "basis": "计算基准：{basis}",
+      "zone": "区间",
+      "range": "配速范围",
+      "loading": "正在加载区间…",
+      "error": "区间加载失败",
+      "retry": "重试",
+      "empty": "暂无可用区间，请检查该运动的区间设置及所需指标。",
+      "savedOverride": "此运动已有单独保存的区间配置，实际生效区间以该配置为准。",
+      "custom": "自定义",
+      "unknown": "未指定",
+      "names": {
+        "easy": "轻松跑",
+        "marathon": "马拉松",
+        "threshold": "阈值跑",
+        "interval": "间歇跑",
+        "repetition": "重复跑",
+        "superOxygen": "低强度有氧跑",
+        "slow": "慢跑",
+        "moderate": "中等强度跑",
+        "fast": "快跑",
+        "sprint": "比赛／冲刺",
+        "recovery": "恢复",
+        "aerobic": "有氧",
+        "tempo": "节奏",
+        "subThreshold": "阈值以下",
+        "superThreshold": "阈值以上",
+        "aerobicCapacity": "有氧能力",
+        "anaerobicCapacity": "无氧能力",
+        "easyIntensity": "轻松",
+        "moderateIntensity": "中等强度",
+        "thresholdIntensity": "阈值",
+        "intervalIntensity": "间歇",
+        "repetitionIntensity": "重复",
+        "recoveryWalking": "恢复／步行",
+        "endurance": "耐力",
+        "highIntensity": "高强度",
+        "vo2": "最大摄氧量",
+        "activeRecovery": "主动恢复",
+        "anaerobic": "无氧",
+        "neuromuscular": "神经肌肉"
+      },
+      "heartRateRange": "心率范围",
+      "powerRange": "功率范围",
+      "hrr": "储备心率",
+      "estimated": "{basis}（估算）"
+    },
+    "title": "个人信息",
+    "description": "管理你的个人信息，让活动分析更准确",
+    "estimatedLabel": "估算",
+    "loading": "加载中...",
+    "tabs": {
+      "default": "默认",
+      "run": "跑步",
+      "cycling": "骑行",
+      "swim": "游泳"
+    },
+    "common": {
+      "cancel": "取消",
+      "confirm": "确认"
+    },
+    "validation": {
+      "rangeError": "{label} 应在 0 到 255 之间"
+    },
+    "updateButton": "更新资料",
+    "updating": "更新中...",
+    "updateSuccess": "资料更新成功",
+    "updateError": "更新资料失败",
+    "loadError": "加载资料失败",
+    "activitySelector": {
+      "filters": {
+        "sportType": "运动类型",
+        "search": "搜索名称",
+        "dateRange": "日期范围",
+        "duration": "时长 (分钟)",
+        "distance": "距离 (公里)",
+        "sportTypeOptions": {
+          "run": "跑步",
+          "cycling": "骑行",
+          "all": "全部"
+        },
+        "placeholders": {
+          "min": "最小",
+          "max": "最大"
+        }
+      },
+      "columns": {
+        "name": "名称",
+        "date": "日期",
+        "sportType": "类型",
+        "distance": "距离",
+        "duration": "时长",
+        "vo2max": "VO2Max (V/H)",
+        "ratio": "比率"
+      },
+      "actions": {
+        "confirm": "选择",
+        "cancel": "取消"
+      }
+    },
+    "historyHint": "按生效日期倒序排列",
+    "save": "保存",
+    "empty": "暂无数据",
+    "fields": {
+      "weight": {
+        "label": "体重 (kg)",
+        "placeholder": "70.0"
+      },
+      "height": {
+        "label": "身高 (cm)",
+        "placeholder": "175.0"
+      },
+      "age": {
+        "label": "年龄",
+        "placeholder": "30"
+      },
+      "birthDate": {
+        "label": "出生日期",
+        "placeholder": "YYYY-MM-DD"
+      },
+      "gender": {
+        "label": "性别",
+        "placeholder": "选择性别",
+        "options": {
+          "male": "男性",
+          "female": "女性",
+          "other": "其他"
+        }
+      },
+      "timezone": {
+        "label": "时区",
+        "placeholder": "例如 Asia/Shanghai"
+      },
+      "maxHeartRate": {
+        "label": "最大心率 (bpm)",
+        "placeholder": "190"
+      },
+      "restingHeartRate": {
+        "label": "静息心率 (bpm)",
+        "placeholder": "60"
+      },
+      "lactateThresholdHeartRate": {
+        "label": "阈值心率 (bpm)",
+        "placeholder": "140"
+      },
+      "heartRateZoneModel": {
+        "label": "心率区间",
+        "placeholder": "选择区间",
+        "options": {
+          "friel": "Joe Friel(阈值心率)",
+          "karvonen": "Karvonen (储备心率)",
+          "mhr": "最大心率（5 区间）"
+        },
+        "help": {
+          "title": "心率区间模型说明",
+          "description": "心率区间模型决定了如何根据你的心率数据划分训练强度区间。",
+          "table": {
+            "model": "模型",
+            "basis": "基准",
+            "features": "特点"
+          },
+          "models": {
+            "friel": {
+              "name": "Joe Friel",
+              "basis": "乳酸阈值心率",
+              "features": "适合耐力训练，反映代谢拐点"
+            },
+            "karvonen": {
+              "name": "Karvonen",
+              "basis": "储备心率",
+              "features": "考虑静息心率，适合大众健身"
+            },
+            "mhr": {
+              "name": "最大心率",
+              "basis": "最大心率",
+              "features": "按最大心率百分比划分 5 个区间，仅需最大心率。"
+            }
+          },
+          "fallback": "新用户及未设置模型时默认使用最大心率。已有模型选择保持不变。Karvonen 缺少静息心率时回退到最大心率；Friel 缺少阈值心率时，按最大心率的 88% 估算阈值心率继续计算，并标注估算。所需数据不足时无法生成区间。",
+          "current": "当前使用"
+        }
+      },
+      "runFtp": {
+        "label": "跑步 FTP (瓦特)",
+        "placeholder": "例如 255"
+      },
+      "cyclingFtp": {
+        "label": "骑行 FTP (瓦特)",
+        "placeholder": "例如 255"
+      },
+      "ftp": {
+        "label": "功能性阈值功率 (W)",
+        "placeholder": "250"
+      },
+      "cp": {
+        "label": "临界功率 (W)",
+        "placeholder": "例如 250"
+      },
+      "wPrime": {
+        "label": "无氧做功容量 (J)",
+        "placeholder": "例如 20000"
+      },
+      "PMax": {
+        "label": "最大功率 (W)",
+        "placeholder": "例如 1000"
+      },
+      "cs": {
+        "label": "临界配速",
+        "placeholder": "例如 4.0"
+      },
+      "tp": {
+        "label": "阈值配速"
+      },
+      "aerobicThresholdPaceSec": {
+        "label": "有氧阈值配速",
+        "placeholder": "例如 300"
+      },
+      "vo2max": {
+        "label": "最大摄氧量",
+        "placeholder": "例如 50",
+        "description": "系统将根据最大摄氧量自动估算 vVO₂max（最大摄氧量配速）用于生成区间。"
+      },
+      "paceZoneModel": {
+        "label": "配速区间",
+        "placeholder": "选择区间",
+        "options": {
+          "friel": "Joe Friel (阈值配速)",
+          "daniels": "Jack Daniels（最大摄氧量）"
+        }
+      },
+      "powerZoneModel": {
+        "label": "功率区间",
+        "placeholder": "选择区间",
+        "options": {
+          "friel": "Joe Friel Bike(7区) FTP",
+          "vance": "Jim Vance Run(7区) FTP",
+          "stryd": "Stryd Run(5区) FTP"
+        }
+      },
+      "equipmentWeight": {
+        "label": "装备重量 (kg)",
+        "placeholder": "2.0"
+      },
+      "bikeWeight": {
+        "label": "自行车重量 (kg)",
+        "placeholder": "8.5"
+      },
+      "vo2maxCorrectionFactor": {
+        "label": "VO2Max 校准因子",
+        "placeholder": "请输入校准因子 (0.0 - 1.2)",
+        "description": "用于校准 VO2Max 估算值，通常在 0.85 到 1.15 之间",
+        "invalid": "请输入大于 0 且不超过 1.20 的数字"
+      },
+      "defaultVdotSource": {
+        "label": "默认 VDOT 来源",
+        "placeholder": "选择来源",
+        "description": "选择校正后的最大摄氧量或比赛表现作为首选来源。原始心率估算始终先经过个人因子校正。",
+        "options": {
+          "STANDARD": "比赛成绩",
+          "HEARTRATE": "心率",
+          "FACTOR": "校正值"
+        }
+      },
+      "loadSources": {
+        "label": "负荷计算优先级",
+        "placeholder": "功率 < 心率 < 配速",
+        "search": "搜索负荷来源",
+        "description": "用于训练负荷取值顺序；留空则默认 功率 < 心率 < 配速。",
+        "options": {
+          "POWER": "功率",
+          "HEART_RATE": "心率",
+          "PACE": "配速",
+          "SESSIONRPE": "主观强度 (RPE)"
+        }
+      },
+      "altitudeOptimizationModel": {
+        "label": "海拔优化模型",
+        "placeholder": "选择模型",
+        "options": {
+          "NOSMOOTHING": "不处理",
+          "THRESHOLDMETHOD": "阈值优化",
+          "DOUGLASPEUCKERALGORITHM": "道格拉斯-普克算法"
+        }
+      },
+      "altitudeThreshold": {
+        "label": "海拔阈值 (m) ",
+        "placeholder": "例如 100",
+        "default": "默认3m"
+      },
+      "fitnessLevel": {
+        "label": "体能水平",
+        "placeholder": "选择体能水平",
+        "options": {
+          "beginner": "入门",
+          "intermediate": "中级",
+          "advanced": "进阶",
+          "elite": "精英"
+        }
+      }
+    },
+    "calibrateButton": "从活动校准",
+    "calibrateSuccess": "校准成功",
+    "calibrateError": "校准失败",
+    "calibrateModal": {
+      "title": "选择校准活动",
+      "description": "请选择一次接近最大努力的跑步活动（如比赛），用来校准你的最大摄氧量因子。我们会根据这次活动调整估算系数。",
+      "noActivities": "未找到跑步活动",
+      "date": "日期",
+      "name": "名称",
+      "distance": "距离",
+      "duration": "时长",
+      "action": "操作",
+      "select": "选择"
+    },
+    "saving": "保存中...",
+    "saveChanges": "保存更改",
+    "cpHistory": {
+      "title": "CP 历史记录",
+      "noData": "暂无 CP 历史数据",
+      "current": "当前应用",
+      "updateAvailable": "发现新的 CP 值",
+      "updateButton": "更新为 {value} W",
+      "confirmUpdateTitle": "确认更新 CP",
+      "confirmUpdateDesc": "是否将你的临界功率（CP）更新为最新值 {value} W？这会影响后续活动分析。",
+      "updateSuccess": "CP 更新成功",
+      "updateFailed": "CP 更新失败"
+    },
+    "ftpHistory": {
+      "title": "FTP 历史记录",
+      "noData": "暂无 FTP 历史数据",
+      "current": "当前应用",
+      "updateAvailable": "发现新的 FTP 值",
+      "updateButton": "更新为 {value} W",
+      "confirmUpdateTitle": "确认更新 FTP",
+      "confirmUpdateDesc": "是否将你的功能阈值功率（FTP）更新为最新值 {value} W？这会影响后续活动分析。",
+      "updateSuccess": "FTP 更新成功",
+      "updateFailed": "FTP 更新失败"
+    },
+    "historyTable": {
+      "columns": {
+        "effectiveDate": "生效日期",
+        "value": "数值",
+        "source": "来源"
+      },
+      "sourceLabels": {
+        "manual": "手动",
+        "auto": "系统估算",
+        "imported": "第三方同步",
+        "intervals_icu": "Intervals.icu 同步",
+        "unknown": "未知来源"
+      },
+      "validation": {
+        "completeRowFirst": "请先完成当前未填写的行",
+        "birthdaySingleRow": "出生日期仅允许一条记录",
+        "rowEffectiveDateRequired": "第 {row} 行生效日期不能为空",
+        "rowEffectiveDateInvalid": "第 {row} 行生效日期无效",
+        "rowValueRequired": "第 {row} 行数值不能为空",
+        "rowNumberRequired": "第 {row} 行请输入数字",
+        "rowPositiveRequired": "第 {row} 行请输入大于 0 的数字",
+        "rowDateInvalid": "第 {row} 行请选择正确的日期",
+        "rowGenderRequired": "第 {row} 行请选择性别"
+      }
+    },
+    "fitnessMetricDialog": {
+      "actions": {
+        "edit": "编辑",
+        "apply": "应用"
+      },
+      "context": {
+        "default": "默认指标（不关联运动类型）",
+        "sport": "运动类型：{sport}"
+      },
+      "sections": {
+        "active": "当前应用",
+        "proposed": "估算值"
+      },
+      "labels": {
+        "value": "数值",
+        "source": "来源",
+        "sport": "运动类型"
+      },
+      "manualInput": "手动设定",
+      "manualPlaceholder": "请输入数值",
+      "source": {
+        "manual": "手动",
+        "auto": "自动"
+      }
+    }
+  },
+  "ZoneSettings": {
+    "title": "区间设置",
+    "description": "自定义你的训练区间。区间按基准值百分比定义。",
+    "power": "功率",
+    "heartRate": "心率",
+    "pace": "配速",
+    "reset": "重置",
+    "resetConfirmTitle": "重置区间设置？",
+    "resetConfirmDesc": "这将删除你的自定义区间，并恢复为系统默认设置。此操作无法撤销。",
+    "cancel": "取消",
+    "resetSuccess": "区间设置已重置",
+    "resetError": "重置区间设置失败",
+    "ftpNoData": "暂无 功能性阈值功率 (FTP) 数据",
+    "cpNoData": "暂无 临界功率 (CP) 数据",
+    "csNoData": "暂无 临界速度 (CS) 数据",
+    "hrrNoData": "暂无 最大心率 / 静息心率 数据（无法计算储备心率 HRR）",
+    "comingSoon": "敬请期待",
+    "benchmark": {
+      "ftp": "功能性阈值功率 (FTP)",
+      "cp": "临界功率 (CP)",
+      "custom": "自定义 (绝对值)",
+      "maxHr": "最大心率",
+      "lthr": "乳酸阈值心率",
+      "hrr": "储备心率 (HRR)",
+      "rhr": "静息心率",
+      "cs": "临界速度 (CS)"
+    },
+    "unsavedChanges": {
+      "title": "未保存的更改",
+      "description": "您有未保存的更改。切换标签页将丢弃这些更改。确定吗？",
+      "discard": "丢弃更改",
+      "keep": "继续编辑"
+    },
+    "editor": {
+      "loadError": "加载区间失败",
+      "saveSuccess": "保存成功",
+      "saveError": "保存失败",
+      "duplicateError": "区间名称不能重复",
+      "addZone": "添加区间",
+      "saveChanges": "保存更改",
+      "saving": "保存中...",
+      "selectSport": "选择运动类型",
+      "selectBenchmark": "选择基准",
+      "referenceValue": "参考值",
+      "current": "(当前应用)",
+      "currentUsed": "当前实际应用：{benchmark}",
+      "columns": {
+        "order": "排序",
+        "name": "名称",
+        "minPercent": "最小 %",
+        "maxPercent": "最大 %",
+        "minAbsolute": "最小 ({unit})",
+        "maxAbsolute": "最大 ({unit})",
+        "ref": "参考"
+      },
+      "placeholders": {
+        "name": "名称",
+        "min": "最小",
+        "max": "最大",
+        "minPercent": "最小 %",
+        "maxPercent": "最大 %"
+      },
+      "sports": {
+        "run": "跑步",
+        "cycling": "骑行",
+        "swim": "游泳"
+      }
+    }
+  },
+  "ActivityDetail": {
+    "title": "活动详情",
+    "backButton": "返回",
+    "configuration": "配置",
+    "loading": "加载中...",
+    "processing": {
+      "title": "活动处理中",
+      "description": "活动已经建档，但分析和衍生数据还在处理中。",
+      "failedTitle": "活动处理未完成",
+      "failedDescription": "活动已创建，但分析流程出现了问题，当前详情暂时不可用。",
+      "currentStatus": "当前状态",
+      "pendingNote": "你可以稍后再回来查看，系统处理完成后会通过消息提醒你。",
+      "failedNote": "你可以稍后重试查看，或回到活动列表等待后续处理结果。",
+      "status": {
+        "RECEIVED": "已接收",
+        "NORMALIZED": "已标准化",
+        "DEDUPED": "已去重",
+        "MATERIALIZED": "已建档",
+        "PARQUET_READY": "分析文件已生成",
+        "ANALYZING": "分析中",
+        "READY": "已就绪",
+        "PARTIAL_FAILED": "部分失败",
+        "FAILED": "失败"
+      }
+    },
+    "tabs": {
+      "overview": "总览",
+      "heartrate": "心率",
+      "power": "功率",
+      "slope": "坡度",
+      "lap": "计圈",
+      "pace": "配速",
+      "runningDynamics": "跑步动态",
+      "bestIntervals": "最佳表现"
+    },
+    "suspenseFallback": "加载中...",
+    "activityFeed": "活动流",
+    "source": "来源",
+    "sourceUpload": "手动上传",
+    "coachReview": "教练复盘",
+    "bestIntervals": {
+      "title": "本次最佳表现",
+      "description": "查看本次活动在不同时间或距离下的最高连续表现；选择后地图会定位到对应路段。",
+      "clear": "清除",
+      "selected": "已选择",
+      "location": "路段",
+      "timeSection": "按时间",
+      "timeSectionDescription": "比较不同持续时间内的最高平均表现。点击数值可在地图定位对应路段。",
+      "duration": "持续时间",
+      "timeRange": "时间段",
+      "distanceSection": "按距离",
+      "distanceSectionDescription": "查看标准跑步距离的最快连续表现。",
+      "distance": "距离",
+      "effortTime": "用时"
+    },
+    "activityAnalysis": {
+      "title": "活动分析",
+      "gradeMedian": "中位坡度",
+      "vam": "垂直爬升速度",
+      "cadence": "活动步频",
+      "powerVariability": "功率波动",
+      "coverage": "数据覆盖率",
+      "power": "功率",
+      "hr": "心率",
+      "pace": "配速",
+      "profile": {
+        "FLAT": "平路",
+        "UPHILL": "上坡为主",
+        "DOWNHILL": "下坡为主",
+        "HILLY": "丘陵",
+        "ROLLING": "起伏"
+      }
+    },
+    "dataCharts": "数据曲线",
+    "zoneTable": {
+      "zone": "区间",
+      "range": "范围",
+      "distribution": "分布",
+      "percentage": "占比",
+      "duration": "时间",
+      "noData": "暂无区间数据"
+    },
+    "dataChartsHint": "轻触曲线查看对应数值，展开后可查看完整细节。",
+    "untitledActivity": "未命名活动",
+    "sportTypeRecalculateConfirmTitle": "切换运动类型？",
+    "sportTypeRecalculateConfirmDescription": "切换运动类型会触发该活动指标重新计算，是否继续？",
+    "sportTypeRecalculateConfirmCancel": "取消",
+    "sportTypeRecalculateConfirmContinue": "继续",
+    "sessionRpe": {
+      "chipLabel": "RPE",
+      "helpAriaLabel": "主观强度说明",
+      "label": "主观强度 (RPE)",
+      "notSet": "未填写",
+      "notSetShort": "—",
+      "hint": "会话主观用力程度（1～10）。当你的负荷来源优先级包含「主观 RPE」时会参与 PMC。",
+      "placeholder": "如 7",
+      "save": "保存",
+      "clear": "清除",
+      "saved": "已保存主观强度",
+      "cleared": "已清除主观强度",
+      "invalid": "请输入 1～10 之间的数字",
+      "failed": "保存主观强度失败"
+    }
+  },
+  "SwimOverview": {
+    "speed": "速度",
+    "strokes": "划水次数",
+    "swolf": "SWOLF"
+  },
+  "ActivityNotFound": {
+    "title": "活动未找到",
+    "description": "抱歉，您访问的活动不存在或已被删除。",
+    "backButton": "返回上页",
+    "homeButton": "活动列表"
+  },
+  "ActivityMap": {
+    "locked": "锁定",
+    "unlocked": "未锁定"
+  },
+  "Overview": {
+    "noData": "暂无数据",
+    "stats": {
+      "avgSpeed": "平均速度",
+      "avgPace": "平均配速",
+      "distance": "距离",
+      "elevation": "海拔",
+      "enhancedElevation": "增强海拔",
+      "climb": "爬升",
+      "descend": "下降",
+      "slope": "坡度",
+      "enhancedSlope": "增强坡度",
+      "avgHeartRate": "平均心率",
+      "avgPower": "平均功率",
+      "avgCadence": "平均步频/踏频",
+      "avgStepLength": "平均步幅",
+      "avgStanceTime": "平均触地时间",
+      "temperature": "温度",
+      "aerobicEfficiencyPower": "功率有氧效率",
+      "runningEffectiveness": "跑步效率",
+      "efficiencyIndex": "效率指数"
+    }
+  },
+  "ActivityWeather": {
+    "title": "活动中段天气",
+    "pending": "正在补充活动中段天气…",
+    "apparentTemperature": "体感温度",
+    "dewPoint": "露点",
+    "wind": "风",
+    "gust": "阵风",
+    "humidity": "湿度",
+    "cloudCover": "云量",
+    "pressure": "气压",
+    "windChill": "风寒温度",
+    "heatIndex": "热指数",
+    "source": "天气来源：{name}",
+    "directions": {
+      "0": "北风",
+      "1": "东北风",
+      "2": "东风",
+      "3": "东南风",
+      "4": "南风",
+      "5": "西南风",
+      "6": "西风",
+      "7": "西北风"
+    },
+    "conditions": {
+      "CLEAR": "晴",
+      "PARTLY_CLOUDY": "局部多云",
+      "CLOUDY": "多云",
+      "FOG": "雾",
+      "DRIZZLE": "毛毛雨",
+      "RAIN": "雨",
+      "HEAVY_RAIN": "大雨",
+      "SLEET": "雨夹雪",
+      "SNOW": "雪",
+      "HAIL": "冰雹",
+      "THUNDERSTORM": "雷暴",
+      "WINDY": "大风",
+      "OTHER": "天气"
+    }
+  },
+  "HeartRatePage": {
+    "title": "心率区间分析",
+    "heartRate": "心率",
+    "tabs": {
+      "mhr": "最大心率",
+      "hrr": "HRR",
+      "lthr": "LTHR"
+    },
+    "baseStats": {
+      "avg": "平均心率",
+      "max": "最大心率",
+      "reserve": "心率储备",
+      "intensity": "心率强度",
+      "avgPct": "平均心率 %",
+      "maxPct": "最大心率 %",
+      "energy": "能量",
+      "trimp": "TRIMP",
+      "tss": "TSS(hr)",
+      "powerDecoupling": "Pw:Hr",
+      "paceDecoupling": "Pa:Hr",
+      "peakEpoc": "峰值 EPOC",
+      "maxHeartRateRecovery": "最大心率恢复"
+    },
+    "average": "平均",
+    "epocInfo": {
+      "title": "峰值 EPOC",
+      "description": "运动后过量氧耗 (EPOC) 是指在高强度运动后，身体为了恢复到静息状态所需的额外氧气量。峰值 EPOC 反映了本次训练对身体造成的生理压力和刺激程度，是评估训练负荷的重要指标。",
+      "source": "参考来源",
+      "firstbeatSource": "Firstbeat 科学论文 (Rusko et al. 2003)"
+    },
+    "charts": {
+      "zoneDistribution": {
+        "title": "心率区间占比分布"
+      },
+      "timeSeries": {
+        "title": "心率时间序列",
+        "description": "显示活动过程中的心率变化趋势和区间分布"
+      },
+      "durationCurve": {
+        "title": "心率持续时间曲线",
+        "description": "显示不同持续时间下的峰值心率",
+        "tooltip": {
+          "peak": "{days} 天峰值"
+        }
+      }
+    },
+    "help": {
+      "zonesTip": "如果分区看起来不准确，请到“用户设置”确认最大心率。调整后重新上传活动，分区会自动更新。"
+    },
+    "zones": {
+      "Z1": "恢复/低强度",
+      "Z2": "有氧耐力",
+      "Z3": "节奏训练",
+      "Z4": "阈值/高强度",
+      "Z5": "无氧冲刺"
+    },
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "heartRate": "心率",
+      "power": "功率",
+      "percentage": "占比",
+      "duration": "时长",
+      "avgHeartRate": "平均心率",
+      "maxHeartRate": "最大心率",
+      "minHeartRate": "最小心率",
+      "heartRateRange": "心率范围",
+      "connected": "已连接",
+      "minutes": "分钟",
+      "pace": "配速"
+    },
+    "trimpInfo": {
+      "title": "训练冲量",
+      "description": "TRIMP（Training Impulse）是 Eric Banister 提出的训练冲量指标。本应用优先采用 <highlight>TRIMPexp（指数心率缩放）</highlight>算法；如果没有最大心率和静息心率数据，则回退到 TRIMPavg（平均心率缩放）算法。",
+      "details": "指数心率缩放算法引入了指数因子来模拟血乳酸浓度的非线性增长，<highlight>随着心率强度的提升，训练压力呈指数级增加</highlight>，从而更准确地量化高强度训练对身体的生理负荷。",
+      "source": "算法来源",
+      "sourceLink": "fellrnr.com - TRIMPexp Exponential Scaling",
+      "rangeTitle": "负荷参考范围",
+      "rangeSource": "Firstbeat",
+      "hrPercentage": "心率百分比",
+      "cumulativeTrimp": "累计 TRIMP",
+      "noData": "暂无数据",
+      "ranges": {
+        "easy": "轻松 / 恢复训练",
+        "moderate": "中等强度训练",
+        "hard": "高强度 / 阈值训练",
+        "severe": "极高强度 / 耐力训练"
+      },
+      "note": "注：页面显示的 TRIMP 数值为 TRIMP(100)，已进行归一化处理，以便与 TSS 等指标在同一量级对比。"
+    },
+    "decouplingInfo": {
+      "title": "有氧脱钩",
+      "description": "有氧脱钩是衡量有氧耐力和效率的重要指标，反映了在恒定功率或配速下心率随时间产生的漂移现象 (Cardiac Drift)。",
+      "details": "随着训练时间的推移，身体疲劳会导致肌肉纤维募集增加，进而增加氧气和血液需求，导致<highlight>心率在功率/配速不变的情况下逐渐升高</highlight>。脱钩率越高，表明有氧基础越薄弱或疲劳抗性越差。",
+      "pwHr": "Pw:Hr (功率:心率)",
+      "pwHrFormula": "EF = AvgPower / AvgHR；Pw:Hr = (EF1 - EF2) / EF1 × 100%",
+      "paHr": "Pa:Hr (配速:心率)",
+      "paHrFormula": "EF = AvgSpeed / AvgHR；Pa:Hr = (EF1 - EF2) / EF1 × 100%",
+      "interpretation": "一般来说，对于目标赛事时长的训练，<highlight>脱钩率低于 5%</highlight> 表示具备良好的有氧基础和疲劳抗性。",
+      "source": "参考来源",
+      "sourceLink": "Tailwind Coaching - What is Aerobic Decoupling?",
+      "note": "注：该指标仅适用于稳态有氧训练，无氧或间歇训练会干扰脱钩率的计算。"
+    },
+    "noData": "暂无心率数据"
+  },
+  "PacePage": {
+    "title": "配速",
+    "pace": "配速",
+    "header": {
+      "eyebrow": "指标",
+      "description": "查看配速曲线、临界速度预测和配速区间。"
+    },
+    "stats": {
+      "avgPace": "平均配速",
+      "avgSpeed": "平均速度",
+      "avgGap": "平均 GAP",
+      "xPace": "标准化配速",
+      "xGap": "标准化 GAP",
+      "viPace": "VI (配速)",
+      "viGap": "VI (GAP)",
+      "aerobicEfficiency": "有氧效率",
+      "vo2max": "最大摄氧量（估算）"
+    },
+    "charts": {
+      "zoneDistribution": {
+        "title": "配速区间占比分布",
+        "description": "显示各配速区间的时间占比分布"
+      }
+    },
+    "tooltip": {
+      "percentage": "占比",
+      "duration": "时长"
+    },
+    "zones": {
+      "Z1": "Z1",
+      "Z2": "Z2",
+      "Z3": "Z3",
+      "Z4": "Z4",
+      "Z5": "Z5",
+      "Z6": "Z6",
+      "Z7": "Z7"
+    }
+  },
+  "HeartRatePowerRatio": {
+    "title": "功率效率因子",
+    "description": "显示每分钟的功率与心率比值（功率/心率），数值越高表示功率效率越高",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "ratio": "功率效率因子",
+      "heartRate": "心率",
+      "power": "功率",
+      "pace": "配速"
+    },
+    "noData": "暂无功率效率因子数据"
+  },
+  "EpocChart": {
+    "title": "EPOC 估算",
+    "epoc": "EPOC (ml/kg)",
+    "heartRate": "心率 (bpm)",
+    "distance": "距离",
+    "peak": "峰值"
+  },
+  "PaceChart": {
+    "title": "配速",
+    "tabs": {
+      "zones": "区间",
+      "curve": "曲线"
+    },
+    "description": "显示活动过程中的配速变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "pace": "配速"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "cs": "临界速度",
+    "noData": "暂无配速数据",
+    "viewType": {
+      "chart": "图表",
+      "list": "表格"
+    },
+    "split": {
+      "label": "分段",
+      "1km": "1公里",
+      "3km": "3公里",
+      "5km": "5公里"
+    },
+    "table": {
+      "segment": "分段",
+      "pace": "配速（min/km）"
+    }
+  },
+  "StrideChart": {
+    "title": "步幅",
+    "description": "显示活动过程中的步幅变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "stride": "步幅",
+      "pace": "配速"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无步幅数据"
+  },
+  "RunningDynamicsPage": {
+    "average": "平均",
+    "metrics": {
+      "cadence": "步频",
+      "stepLength": "步幅",
+      "verticalOscillation": "垂直振幅",
+      "verticalRatio": "垂直比例",
+      "stanceTime": "着地时间",
+      "flightTime": "腾空时间",
+      "flightRatio": "腾空比",
+      "totalSteps": "总步数"
+    },
+    "units": {
+      "steps": "步"
+    }
+  },
+  "CadenceChart": {
+    "title": "踏频",
+    "runningTitle": "步频",
+    "description": "显示活动过程中的踏频变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "cadence": "踏频"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无踏频数据"
+  },
+  "ElevationChart": {
+    "title": "海拔",
+    "description": "显示活动过程中的海拔变化趋势",
+    "expand": "放大海拔图表",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "enhancedAltitude": "标准海拔",
+      "altitude": "海拔"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无海拔数据"
+  },
+  "TemperatureChart": {
+    "title": "温度",
+    "description": "显示活动过程中的温度变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "temperature": "温度"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无温度数据"
+  },
+  "PowerChart": {
+    "title": "功率",
+    "calculatedTitle": "估算功率",
+    "calculatedBadge": "估算",
+    "calculatedDescription": "根据速度和体重估算；当前平路模型不使用坡度",
+    "description": "显示活动过程中的功率变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "power": "功率"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无功率数据"
+  },
+  "HeartRateChart": {
+    "title": "心率",
+    "description": "显示活动过程中的心率变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "heartRate": "心率"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无心率数据"
+  },
+  "StanceTimeChart": {
+    "title": "着地时间",
+    "description": "显示活动过程中的触地时间变化趋势",
+    "tooltip": {
+      "time": "时间",
+      "distance": "距离",
+      "stanceTime": "触地时间"
+    },
+    "average": "平均",
+    "max": "最大",
+    "min": "最小",
+    "noData": "暂无触地时间数据"
+  },
+  "ActivityPowerPage": {
+    "title": "功率区间分析",
+    "average": "平均值",
+    "basicStats": {
+      "avgPower": "平均功率",
+      "maxPower": "最大功率",
+      "normalizedPower": "标准化功率(NP)",
+      "trainingStressScore": "训练负荷(TSS)",
+      "intensityFactor": "强度因子(IF)",
+      "variabilityIndex": "变异性(VI)",
+      "relativeIntensity": "相对强度(RI)",
+      "powerWeightRatio": "功体比(WKG)",
+      "efficiencyFactor": "效率因子(EF)",
+      "powerHeartRateRatio": "功率/心率(P/HR)"
+    },
+    "normalizedPowerInfo": {
+      "title": "标准化功率 (NP)",
+      "description": "标准化功率 (NP) 是一种功率平均方法，用于量化运动过程中生理上的真实代谢代价。",
+      "details": "与普通平均功率不同，NP 更加重视高强度波动对身体造成的压力。<br></br><br></br><b>核心算法：</b><br></br>1. 计算 30 秒移动平均功率。<br></br>2. 将这些值取 4 次方（放大高强度的影响）。<br></br>3. 计算这些 4 次方值的平均数。<br></br>4. 最后开 4 次根得到 NP。<br></br><br></br><b>意义：</b><br></br>生理反应（如乳酸堆积、糖原消耗）与运动强度呈非线性关系。NP 通过加权算法，能更准确地反映那些包含间歇、冲刺或起伏路况的运动负荷。",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks",
+      "trademark": "Functional Threshold Power (FTP), Normalized Power (NP), Training Stress Score (TSS) are registered trademarks of Peaksware, LLC."
+    },
+    "xPowerInfo": {
+      "title": "xPower",
+      "description": "xPower (Skiba) 是一种基于指数加权移动平均的功率算法，用于评估生理负荷，与 Coggan 的标准化功率 (NP) 概念类似但算法不同。",
+      "details": "xPower 使用指数平滑来模拟身体对强度变化的延迟反应，避免了简单移动平均对快速变化的过度敏感。<br></br><br></br><b>核心算法：</b><br></br>1. 对原始功率数据进行 25 秒的指数加权移动平均 (EWMA)。<br></br>2. 将平滑后的值取 4 次方。<br></br>3. 计算这些 4 次方值的平均数。<br></br>4. 最后开 4 次根得到 xPower。<br></br><br></br><b>意义：</b><br></br>xPower 是 Skiba 训练体系（如 BikeScore, GOVSS）的核心。相比 NP，它在处理短时间高强度爆发时，数学特性上可能更加平滑和稳健。",
+      "source": "来源",
+      "sourceLink": "Skiba / PhysFarm"
+    },
+    "tssInfo": {
+      "title": "TSS (训练压力分数)",
+      "description": "TSS (Training Stress Score) 是衡量一次训练对身体产生的总压力的指标，它综合考虑了持续时间和强度。",
+      "details": "TSS 让你能量化不同持续时间和强度的训练负荷。<br></br><br></br><b>核心算法：</b><br></br>TSS = (秒数 × NP × IF) / (FTP × 3600) × 100<br></br>简化公式：<b>TSS = 小时数 × IF² × 100</b><br></br><br></br><b>意义：</b><br></br>100 分大约相当于 1 小时全力以赴（即 FTP 强度）的压力。通过累积 TSS，你可以计算长期训练负荷 (CTL) 和疲劳度 (ATL)。",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks",
+      "trademark": "Functional Threshold Power (FTP), Normalized Power (NP), Training Stress Score (TSS) are registered trademarks of Peaksware, LLC."
+    },
+    "bikeScoreInfo": {
+      "title": "BikeScore",
+      "description": "BikeScore 是 Skiba 体系中对应于 TSS 的指标，用于量化训练负荷。",
+      "details": "它是基于 xPower 和相对强度 (RI) 计算的。<br></br><br></br><b>核心算法：</b><br></br><b>BikeScore = 小时数 × RI² × 100</b><br></br>其中 RI = xPower / CP。<br></br><br></br><b>意义：</b><br></br>在 Skiba 的 Impulse-Response 模型中，BikeScore 用于替代 TSS 来计算长期和短期训练负荷。对于大多数骑行者，BikeScore 和 TSS 的数值通常非常接近。",
+      "source": "来源",
+      "sourceLink": "Skiba / GoldenCheetah"
+    },
+    "intensityFactorInfo": {
+      "title": "IF (强度因子)",
+      "description": "强度因子 (IF) 反映了本次训练相对于你当前体能水平（FTP）的强度。",
+      "details": "它是一个比率，用于横向比较不同时长训练的“狠”度。<br></br><br></br><b>核心算法：</b><br></br><b>IF = NP / FTP</b><br></br><br></br><b>意义：</b><br></br>IF < 0.75: 恢复骑行<br></br>IF 0.75-0.85: 耐力训练<br></br>IF 0.85-0.95: 节奏/甜区<br></br>IF 0.95-1.05: 阈值训练<br></br>IF > 1.05: 短时间高强度<br></br>如果长时间骑行（>1小时）IF 超过 1.05，可能意味着你的 FTP 设置偏低。",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks",
+      "trademark": "Functional Threshold Power (FTP), Normalized Power (NP), Training Stress Score (TSS) are registered trademarks of Peaksware, LLC."
+    },
+    "riInfo": {
+      "title": "RI (相对强度)",
+      "description": "RI (Relative Intensity) 是 Skiba 体系中对应于 Coggan 体系 IF (强度因子) 的指标。",
+      "details": "它使用 xPower 而不是 NP 来衡量相对强度。<br></br><br></br><b>核心算法：</b><br></br><b>RI = xPower / CP</b><br></br><br></br><b>意义：</b><br></br>与 IF 类似，RI 用于评估训练的相对强度。RI 值接近或超过 1.0 表示训练强度接近或超过了你的无氧阈值。",
+      "source": "来源",
+      "sourceLink": "Skiba / GoldenCheetah"
+    },
+    "viInfo": {
+      "title": "VI (变异性)",
+      "description": "VI (Variability Index) 描述了骑行过程中功率输出的平稳程度。",
+      "details": "它是标准化功率与平均功率的比值。<br></br><br></br><b>核心算法：</b><br></br><b>VI = NP / 平均功率</b><br></br><br></br><b>意义：</b><br></br>VI = 1.0: 完美稳定的输出（如骑行台）。<br></br>VI 1.0-1.05: 平路计时赛或铁人三项，配速非常稳。<br></br>VI > 1.2: 典型的山地车赛或绕圈赛，包含大量滑行和高功率爆发。<br></br>对于铁三和计时赛选手，追求较低的 VI 有助于节省体能。",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks"
+    },
+    "wkgInfo": {
+      "title": "功体比 (W/kg)",
+      "description": "功体比 (Power-to-Weight Ratio) 是功率与体重的比值，是衡量爬坡能力的关键指标。",
+      "details": "它消除了体重差异，让不同体型的车手可以相互比较。<br></br><br></br><b>核心算法：</b><br></br><b>W/kg = 功率 / 体重(kg)</b><br></br>通常使用 FTP 或特定时长的平均功率来计算。<br></br><br></br><b>意义：</b><br></br>在陡坡上，重力是主要阻力，W/kg 决定了速度。在平路上，绝对功率 (Watts) 和空气动力学更重要。顶级职业车手的 FTP 功体比通常在 6.0 W/kg 以上。",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks"
+    },
+    "efficiencyFactorInfo": {
+      "title": "效率 (EF) ",
+      "description": "效率 (efficiency factor) 用于衡量有氧运动水平，即“每跳心率能产生多少标准化功率”。",
+      "details": "它是外部负荷（功率）与内部负荷（心率）的比值。<br></br><br></br><b>核心算法：</b><br></br><b>效率(EF) = 标准化功率(NP) / 平均心率</b><br></br><br></br><b>意义：</b><br></br>随着有氧基础的提升，你的 EF 应该会增加（相同心率下功率更高，或相同功率下心率更低）。<br></br>在进行长距离低强度训练（LSD）时，比较不同时期的 EF 是监控有氧能力进步的绝佳方法。",
+      "source": "参考",
+      "sourceLink": "TrainingPeaks",
+      "sourceLink2": "cyklopedia"
+    },
+    "powerHeartRateRatioInfo": {
+      "title": "P/HR (功率/心率比)",
+      "description": "功率/心率比 (Power to Heart Rate Ratio) 是衡量有氧解耦 (Decoupling) 和效率的基础指标。",
+      "details": "它直接反映了输出（功率）与输入（心率）的关系。<br></br><br></br><b>核心算法：</b><br></br><b>P/HR = 平均功率 / 平均心率</b><br></br>通常在分段分析中使用，比较前半程和后半程的比率变化。<br></br><br></br><b>意义：</b><br></br>如果后半程 P/HR 显著下降（>5%），称为“有氧解耦”，通常意味着有氧耐力不足、补给不足或过热。",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks"
+    },
+    "powerInfo": {
+      "title": "功率指标说明",
+      "description": "FTP (Functional Threshold Power) 是指你在1小时内能维持的最大平均功率。CP (Critical Power) 是指理论上你可以长时间维持的功率阈值。",
+      "details": "显示的数值包含两个部分：<br></br><b>1. 主要数值</b>：当前活动计算 TSS/IF 时使用的设定值。<br></br><b>2. 次要数值（小字）</b>：基于本次活动数据估算的 eFTP / eCP 值。",
+      "trademark": "Functional Threshold Power (FTP), Normalized Power (NP), Training Stress Score (TSS) are registered trademarks of Peaksware, LLC.",
+      "source": "来源",
+      "sourceLink": "TrainingPeaks"
+    },
+    "chart": {
+      "power": "功率",
+      "avgPower": "平均功率",
+      "powerRange": "功率范围",
+      "unknownZone": "未知区间",
+      "noPowerData": "暂无功率数据",
+      "pdc": "功率持续时间曲线"
+    },
+    "charts": {
+      "timeSeries": {
+        "title": "功率时间序列图表",
+        "description": "显示功率随时间的变化趋势和区间分布"
+      },
+      "zoneDistribution": {
+        "title": "功率区间占比分布",
+        "description": "显示各功率区间的时间占比分布"
+      },
+      "powerDurationCurve": {
+        "title": "功率持续曲线",
+        "description": "显示不同时间段的最大平均功率"
+      }
+    },
+    "zones": {
+      "Z1": "主动恢复",
+      "Z2": "有氧基础",
+      "Z3": "节奏训练",
+      "Z4": "阈值功率",
+      "Z5": "最大摄氧",
+      "Z6": "无氧功率",
+      "Z7": "神经肌肉"
+    },
+    "tooltip": {
+      "percentage": "占比",
+      "duration": "时长",
+      "minutes": "分钟",
+      "avgPower": "平均功率",
+      "maxPower": "最大功率",
+      "minPower": "最小功率",
+      "powerRange": "功率范围",
+      "power": "功率"
+    },
+    "powerDurationCurve": {
+      "title": "功率持续曲线"
+    },
+    "unit": {
+      "watt": "W"
+    },
+    "noData": "暂无功率数据"
+  },
+  "activities": {
+    "activities": "活动",
+    "weeklyActivity": "周活动",
+    "lastWeek": "上周",
+    "monthlyActivity": "本月活动",
+    "monthlySummary": "本月概览",
+    "yearlySummary": "年度概览",
+    "totalCount": "总次数",
+    "totalDistance": "总里程",
+    "totalDuration": "总时长",
+    "totalCalories": "总消耗",
+    "name": "名称",
+    "type": "类型",
+    "date": "日期",
+    "startTime": "开始时间",
+    "distance": "距离",
+    "duration": "时长",
+    "vo2max": "VO2Max",
+    "updated": "更新时间",
+    "actions": "操作",
+    "viewDetails": "查看详情",
+    "exportData": "导出数据",
+    "deleteActivity": "删除活动",
+    "processingStatus": {
+      "processing": "处理中",
+      "notReady": "该活动仍在处理中，完成后再查看详情或导出。"
+    },
+    "importFiles": "导入文件",
+    "importActivityFiles": "导入活动文件",
+    "supportedFormatsDescription": "支持一次性导入最多 {maxFiles} 个 {formats} 格式的文件",
+    "dropFilesHere": "将文件拖放到此处",
+    "dragOrClickToSelect": "拖拽文件到此处或点击选择文件",
+    "supportedFormats": "支持的格式：{formats}",
+    "selectedFiles": "已选择 {count} 个文件",
+    "cancel": "取消",
+    "uploading": "上传中",
+    "uploadWithCount": "上传 {count} 个文件",
+    "upload": "上传",
+    "uploadSuccess": "上传成功",
+    "checkDuplicatesFailed": "检查重复失败",
+    "uploadFailed": "上传失败",
+    "unknownError": "未知错误",
+    "importProgress": {
+      "title": "导入中",
+      "description": "文件已提交到导入队列。你可以继续浏览页面，系统会持续处理这些文件。",
+      "completedTitle": "导入已完成",
+      "completedDescription": "当前批次已经处理完成。你现在可以关闭窗口并查看结果。",
+      "batchCreatedToast": "已创建导入批次，正在处理 {count} 个文件",
+      "openEntry": "导入进度",
+      "laterHint": "你可以先去做别的事，稍后再回来查看导入结果。",
+      "doneHint": "这个批次已经处理完毕。",
+      "notificationHint": "导入完成后会有消息提醒，你不需要一直停留在这里。",
+      "progressLabel": "当前进度",
+      "total": "总数",
+      "success": "成功",
+      "failed": "失败",
+      "skipped": "跳过",
+      "batchStatus": "批次状态",
+      "postProcessStatus": "后处理状态",
+      "itemListTitle": "文件状态",
+      "itemsLoadFailed": "导入项加载失败，请稍后重试。",
+      "waitingForItems": "正在获取导入项状态...",
+      "continueLater": "稍后再看",
+      "close": "关闭",
+      "item": "文件",
+      "waiting": "等待处理中",
+      "ready": "活动已可用",
+      "activityStatus": "活动状态：{status}",
+      "activityProcessingStatus": {
+        "received": "已接收",
+        "normalized": "已标准化",
+        "deduped": "已去重",
+        "materialized": "已建档",
+        "parquetReady": "分析文件已生成",
+        "analyzing": "分析中",
+        "ready": "已可用",
+        "partialFailed": "部分失败",
+        "failed": "失败",
+        "unknown": "未知状态"
+      },
+      "status": {
+        "batchQueued": "排队中",
+        "batchRunning": "处理中",
+        "batchCompleted": "已完成",
+        "batchPartialFailed": "部分失败",
+        "batchFailed": "失败",
+        "batchCancelled": "已取消",
+        "itemQueued": "排队中",
+        "itemNormalizing": "标准化中",
+        "itemMaterializing": "建档中",
+        "itemParquetBuilding": "分析生成中",
+        "itemDone": "已完成",
+        "itemSkipped": "已跳过",
+        "itemFailed": "失败",
+        "itemDead": "终止",
+        "postPending": "等待开始",
+        "postRunning": "执行中",
+        "postCompleted": "已完成",
+        "postFailed": "失败",
+        "postDead": "终止",
+        "postWaiting": "等待创建"
+      }
+    },
+    "noActivitiesData": "暂无活动数据",
+    "confirmDeleteTitle": "确认删除",
+    "confirmDeleteDescription": "此操作不可撤销，是否删除该活动？",
+    "confirm": "确认",
+    "deleting": "删除中...",
+    "exportDialogTitle": "选择导出类型",
+    "exportDialogDescription": "请选择导出文件格式。",
+    "selectExportTypePlaceholder": "选择导出类型",
+    "exporting": "导出中...",
+    "pageLabel": "第 {current} 页，共 {total} 页",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "duplicateActivities": {
+      "title": "发现重复活动",
+      "description": "检测到以下文件可能包含重复的活动数据。请选择如何处理：",
+      "createNew": "创建新活动",
+      "cancel": "取消上传",
+      "viewActivity": "查看活动",
+      "duplicatesFound": "发现 {count} 个重复活动",
+      "fileName": "文件名",
+      "activityName": "活动名称",
+      "sportType": "运动类型",
+      "startTime": "开始时间",
+      "distance": "距离",
+      "duration": "时长",
+      "actions": "操作",
+      "possibleDuplicates": "可能重复的现有活动",
+      "unnamedActivity": "未命名活动",
+      "sportTypes": {
+        "RUN": "跑步",
+        "CYCLING": "骑行",
+        "SWIM": "游泳",
+        "UNKNOWN": "未知"
+      }
+    }
+  },
+  "power": {
+    "title": "Trainingload.ai · 功率分析",
+    "powerAnalysis": "功率分析",
+    "header": {
+      "eyebrow": "指标",
+      "description": "查看功率曲线、最大功率、区间和能力画像。"
+    },
+    "maximumPower": "最大功率",
+    "duration": "持续时间",
+    "unknown": "未知",
+    "noData": "暂无数据",
+    "mobile": {
+      "bestPeak": "最佳峰值",
+      "dataPoints": "数据点"
+    },
+    "tabs": {
+      "curve": "曲线",
+      "maximum": "最大功率",
+      "zones": "区间",
+      "profile": "画像"
+    },
+    "zones": "区间"
+  },
+  "PowerProfile": {
+    "table": {
+      "level": "等级",
+      "male": "男性",
+      "female": "女性"
+    },
+    "levels": {
+      "worldClass": "世界级",
+      "exceptional": "顶尖",
+      "excellent": "优秀",
+      "veryGood": "很好",
+      "good": "良好",
+      "moderate": "一般",
+      "fair": "较弱",
+      "novice": "新手",
+      "untrained": "未训练"
+    },
+    "missing": {
+      "title": "无法计算功体比",
+      "missingWeight": "未设置体重，无法将功率换算为 W/kg。",
+      "missingPowerData": "缺少可用功率数据（5s/1m/5m 或 FTP）。",
+      "missingData": "当前缺少可用数据，无法推算 W/kg。",
+      "action": "去账户页设置"
+    },
+    "interpretation": {
+      "title": "选手类型解读",
+      "noDataHint": "当前缺少体重或功率数据，无法基于选手真实数据判断类型。",
+      "type": "类型",
+      "unknown": "无法判定",
+      "text": "解读",
+      "reference": "参考",
+      "referenceTitle": "Creating Your Power Profile (Coggan)"
+    },
+    "types": {
+      "allRounder": {
+        "label": "全能型",
+        "interpretation": "短时爆发与长时耐力相对均衡，通常在多种赛制里都能保持竞争力，但未必在某一项绝对占优。"
+      },
+      "pursuiter": {
+        "label": "追逐型",
+        "interpretation": "无氧容量与有氧能力都不错，适合需要高强度持续输出的项目（如场地追逐类/高强度滚动）。"
+      },
+      "sprinter": {
+        "label": "冲刺型",
+        "interpretation": "神经肌肉爆发与无氧输出突出，更擅长短时高功率与反复冲刺；长时耐力与阈值相对弱。"
+      },
+      "timeTrialist": {
+        "label": "计时型",
+        "interpretation": "可持续有氧功率与阈值突出，更适合计时、长爬坡或稳定输出的赛事；短时爆发与无氧容量相对弱。"
+      }
+    }
+  },
+  "PowerTable": {
+    "timeRangePower": "时间/最大平均功率",
+    "fiveSeconds": "5秒",
+    "thirtySeconds": "30秒",
+    "oneMinute": "1分钟",
+    "threeMinutes": "3分钟",
+    "fiveMinutes": "5分钟",
+    "twentyMinutes": "20分钟",
+    "thirtyMinutes": "30分钟",
+    "sixtyMinutes": "60分钟",
+    "twoHours": "2小时",
+    "threeHours": "3小时"
+  },
+  "PaceTable": {
+    "segment": "分段",
+    "pace": "配速",
+    "time": "耗时"
+  },
+  "dashboard": {
+    "average": "平均",
+    "maximum": "最大",
+    "minimum": "最小",
+    "cadenceTrend": "踏频趋势",
+    "current": "当前",
+    "comparison": "历史",
+    "noData": "暂无数据",
+    "heartRateTrend": "心率趋势",
+    "count": "次数",
+    "duration": "总时长",
+    "distance": "总距离",
+    "climb": "爬升",
+    "calories": "能量消耗",
+    "averageSpeed": "平均速度",
+    "averagePower": "平均功率",
+    "averageHeartRate": "平均心率",
+    "paceTrend": "配速趋势",
+    "powerTrend": "功率趋势",
+    "speedTrend": "速度趋势",
+    "overview": {
+      "title": "概览",
+      "addMetricTitle": "新增指标",
+      "add": "新增",
+      "added": "已添加",
+      "remove": "移除",
+      "recent30Days": "近30天",
+      "selectSportForComparableSpeed": "选择一种运动，再比较同类活动的速度。",
+      "shrinkChart": "缩小图表",
+      "expandChart": "放大图表",
+      "removeChart": "移除图表",
+      "groups": {
+        "fitness": "训练指标",
+        "activity": "活动指标",
+        "weeklySummary": "周汇总"
+      }
+    },
+    "fitnessStatus": {
+      "aboutMetric": "关于{title}",
+      "edit": "布局",
+      "save": "保存",
+      "cancel": "取消",
+      "backButton": "返回",
+      "remove": "移除",
+      "addMetric": "新增指标",
+      "noMoreMetrics": "没有更多指标了",
+      "saveSuccess": "已保存",
+      "saveFailed": "保存失败",
+      "estimatedLabel": "估算",
+      "manualLabel": "手动",
+      "previousWeekLabel": "上周",
+      "changeLabel": "变化",
+      "activityVo2MaxLabel": "活动 VO2Max",
+      "vo2Max": {
+        "title": "最大摄氧量",
+        "description": "未知",
+        "level": {
+          "EXCELLENT": "极好",
+          "VERY_GOOD": "很好",
+          "GOOD": "好",
+          "FAIR": "普通",
+          "POOR": "尚可"
+        },
+        "details": "最大摄氧量是指在人体进行最大强度的运动，当机体出现无力继续支撑接下来的运动时，所能摄入的氧气含量。",
+        "guide": {
+          "what": "什么是最大摄氧量？",
+          "whatContent": "最大摄氧量是衡量有氧耐力的黄金指标。它代表身体在剧烈运动中每分钟能消耗的最大氧气量。数值越高，意味着有氧能力越强。",
+          "use": "如何解读？",
+          "useContent": "一般人的最大摄氧量在 30-40 ml/kg/min 之间，优秀耐力运动员可达 70-80 以上。该数值随年龄增长自然下降，但可通过训练提升。",
+          "reference": "参考范围",
+          "referenceContent": "一般(30-40), 优秀(>50), 顶尖(>70)",
+          "source": "来源：Jack Daniels VDOT / Firstbeat",
+          "algorithm": {
+            "title": "该算法基于 Jack Daniels 的 VDOT 理论，分为两种计算方式：",
+            "standardTitle": "标准模式：",
+            "standardContent": "基于最佳跑步成绩直接对应 VDOT 值作为最大摄氧量参考。",
+            "heartRateTitle": "心率模式：",
+            "heartRateContent": "参考 Firstbeat 模型，通过心率百分比 (%HRmax) 推算当前的摄氧量百分比，进而结合配速反推最大摄氧量。",
+            "note": "注：心率估算易受环境温度、地形和身体状态等因素影响，建议关注长期趋势而非单次数值。"
+          }
+        }
+      },
+      "atl": {
+        "title": "疲劳（ATL）",
+        "description": "疲劳度",
+        "details": "短期训练负荷（Fatigue），反映过去 7 天的平均训练压力。",
+        "guide": {
+          "what": "什么是 ATL (疲劳度)？",
+          "whatContent": "ATL (Acute Training Load) 是过去 7 天训练压力的指数加权平均值。它反映了你当前的疲劳程度。",
+          "use": "如何使用？",
+          "useContent": "ATL 上升意味着近期训练强度大，身体处于疲劳累积期。赛前应适当降低 ATL 以减少疲劳，提升状态 (TSB)。",
+          "reference": "参考范围",
+          "referenceContent": "取决于个人体能，通常不应长期高于 CTL 太多。",
+          "source": "来源：TrainingPeaks / Joe Friel"
+        }
+      },
+      "ctl": {
+        "title": "体能（CTL）",
+        "description": "体能",
+        "details": "长期训练负荷（Fitness），反映过去 42 天的平均训练压力。",
+        "guide": {
+          "what": "什么是 CTL (体能)？",
+          "whatContent": "CTL (Chronic Training Load) 是过去 42 天 (6周) 训练压力的指数加权平均值。它代表你当前的体能基础。",
+          "use": "如何使用？",
+          "useContent": "CTL 越高，说明体能越好，能承受更大的训练量。建立 CTL 需要时间，应循序渐进，避免因增加过快导致受伤。",
+          "reference": "参考范围",
+          "referenceContent": "入门(20-40), 进阶(40-70), 精英(>100)",
+          "source": "来源：TrainingPeaks / Joe Friel"
+        }
+      },
+      "tsb": {
+        "title": "状态（TSB）",
+        "description": "状态",
+        "details": "训练压力平衡（Form），状态 = 体能 - 疲劳。指示身体的新鲜度或疲劳度。",
+        "status": {
+          "peak": "巅峰状态 (+15 ~ +25)",
+          "fresh": "清新状态 (+5 ~ +15)",
+          "optimal": "最佳训练 (-10 ~ -30)",
+          "highRisk": "高风险 (< -30)",
+          "neutral": "中性 (-10 ~ +5)",
+          "transition": "过渡期 (> +25)"
+        },
+        "guide": {
+          "what": "什么是 TSB (状态)？",
+          "whatContent": "TSB (Training Stress Balance) 是体能 (CTL) 与疲劳 (ATL) 的差值。它反映了你当前的竞技状态。",
+          "use": "如何使用？",
+          "useContent": "正值表示身体清新，适合比赛；负值表示疲劳，适合训练积累。赛前减量 (Taper) 的目标是让 TSB 回升到正值。",
+          "reference": "参考范围",
+          "referenceContent": "巅峰区: +15 ~ +25; 清新区: +5 ~ +15; 过渡区: -10 ~ +5; 最佳训练区: -30 ~ -10; 风险区: < -30",
+          "source": "来源：TrainingPeaks / Joe Friel"
+        }
+      },
+      "acRatio": {
+        "title": "A:C 比率",
+        "description": "最佳",
+        "details": "短期与长期负荷比率。衡量训练负荷激增的风险。最佳范围：0.8 - 1.3。",
+        "status": {
+          "low": "训练不足 (<0.8)",
+          "optimal": "最佳区间 (0.8-1.3)",
+          "high": "负荷过高 (1.3-1.5)",
+          "danger": "极高风险 (>1.5)"
+        },
+        "guide": {
+          "what": "什么是 A:C Ratio？",
+          "whatContent": "A:C Ratio (Acute:Chronic Workload Ratio) 是短期负荷 (ATL) 与长期负荷 (CTL) 的比值。它用于评估受伤风险。",
+          "use": "如何使用？",
+          "useContent": "保持在 0.8 - 1.3 之间是最佳的“甜蜜点”，此时受伤风险最低且体能提升有效。超过 1.5 会显著增加受伤风险。",
+          "reference": "参考范围",
+          "referenceContent": "最佳范围：0.8 - 1.3; 高风险：> 1.5",
+          "source": "来源：Tim Gabbett"
+        }
+      },
+      "monotony": {
+        "title": "单调性",
+        "description": "低风险",
+        "details": "训练变异性的衡量标准（范围 0.29-1.0）。低单调性（< 0.6）表示训练变化丰富，高单调性（> 0.8）可能增加过度训练风险。",
+        "status": {
+          "low": "健康 (<0.6)",
+          "moderate": "中等 (0.6-0.8)",
+          "high": "高风险 (>0.8)"
+        },
+        "guide": {
+          "what": "什么是单调性？",
+          "whatContent": "单调性 (Monotony) = 平均每日负荷 / 负荷标准差。它衡量训练的单一程度。如果每天训练强度都一样，单调性就高。",
+          "use": "如何使用？",
+          "useContent": "低单调性 (< 0.6) 说明训练有张有弛（轻松日与强度日交替），有利于恢复。高单调性 (> 0.8) 容易导致过度训练和倦怠。",
+          "reference": "参考范围",
+          "referenceContent": "健康：< 0.6; 中等：0.6 - 0.8; 高风险：> 0.8",
+          "source": "来源：Carl Foster"
+        }
+      },
+      "intensity": {
+        "title": "训练压力",
+        "description": "Training Strain",
+        "details": "训练压力 (Training Strain) = 总训练负荷 × 单调性 / 0.5。反映近期训练负荷对身体造成的综合压力。",
+        "status": {
+          "low": "低负荷",
+          "optimal": "适中负荷",
+          "high": "高负荷"
+        },
+        "guide": {
+          "what": "什么是训练压力？",
+          "whatContent": "训练压力 (Training Strain) = 总训练负荷 × 单调性。它反映了高负荷且缺乏变化对身体造成的综合压力。",
+          "use": "如何使用？",
+          "useContent": "即使总负荷很高，如果单调性低（有休息日），压力也会受控。反之，持续中等强度的训练（垃圾跑量）会导致高压力。",
+          "reference": "参考范围",
+          "referenceContent": "< 600 (低), 600-1000 (适中), > 1000 (高)",
+          "source": "来源：Carl Foster"
+        }
+      },
+      "restDays": {
+        "title": "建议休息",
+        "description": "达到 TSB=0",
+        "details": "实现平衡训练负荷（即 TSB=0）所需的预计休息天数。若当前状态良好则无需休息。",
+        "unit": "天"
+      },
+      "ftp": {
+        "title": "FTP",
+        "description": "阈值功率",
+        "details": "功能性阈值功率 (FTP) 是你理论上可以持续 1 小时的最大平均功率。"
+      },
+      "cp": {
+        "title": "CP",
+        "description": "临界功率",
+        "details": "临界功率 (CP) 是衡量耐力功率水平的重要指标，常用于训练区间划分与负荷分析。"
+      },
+      "pMax": {
+        "title": "PMax",
+        "description": "最大功率",
+        "details": "最大瞬时功率 (PMax) 反映你的爆发力与短时输出能力。"
+      },
+      "tp": {
+        "title": "TP",
+        "description": "阈值配速",
+        "details": "阈值配速 (TP) 反映你的阈值跑能力水平，常用于训练配速区间划分。",
+        "unit": "/km"
+      },
+      "cs": {
+        "title": "CS",
+        "description": "临界配速",
+        "details": "临界配速 (CS) 是衡量有氧能力与耐力跑表现的重要指标，常用于训练配速区间划分。",
+        "unit": "/km"
+      },
+      "maxHr": {
+        "title": "MAX_HR",
+        "description": "最大心率",
+        "details": "最大心率 (Max HR) 用于心率区间划分与强度分析。",
+        "unit": "bpm"
+      },
+      "restingHr": {
+        "title": "RESTING_HR",
+        "description": "静息心率",
+        "details": "静息心率 (Rest HR) 常用于心率储备 (HRR) 与 TRIMP 等训练负荷计算。",
+        "unit": "bpm"
+      },
+      "lthr": {
+        "title": "LTHR",
+        "description": "乳酸阈值心率",
+        "details": "乳酸阈值心率 (LTHR) 常用于心率训练区间划分与耐力强度评估。",
+        "unit": "bpm"
+      },
+      "weekPressure": {
+        "title": "周压力",
+        "description": "训练压力",
+        "details": "本周累计训练压力（通常为 TSS/TRIMP 等综合负荷）。",
+        "unit": "TSS"
+      },
+      "weekCount": {
+        "title": "周次数",
+        "description": "训练次数",
+        "details": "本周训练次数（活动数量）。"
+      },
+      "weekDuration": {
+        "title": "周时长",
+        "description": "总时长",
+        "details": "本周总训练时长。"
+      },
+      "weekDistance": {
+        "title": "周距离",
+        "description": "总距离",
+        "details": "本周总训练距离。"
+      },
+      "weekSpeed": {
+        "title": "周速度",
+        "description": "平均速度",
+        "details": "本周平均速度（按活动汇总）。"
+      },
+      "weekPower": {
+        "title": "周功率",
+        "description": "平均功率",
+        "details": "本周平均功率（按活动汇总）。"
+      },
+      "weekHeartRate": {
+        "title": "周心率",
+        "description": "平均心率",
+        "details": "本周平均心率（按活动汇总）。"
+      },
+      "weekClimb": {
+        "title": "周爬升",
+        "description": "爬升",
+        "details": "本周累计爬升。"
+      },
+      "weekCalories": {
+        "title": "周能量",
+        "description": "能量消耗",
+        "details": "本周累计能量消耗。"
+      },
+      "paceZones": {
+        "title": "配速区间",
+        "description": "当前跑步阈值配速与训练区间",
+        "details": "配速区间依据当前训练档案计算。",
+        "noData": "还没有可用的阈值配速；完成包含有效距离和时间的跑步后再试。",
+        "dependency": "当前阈值配速（TP）为 {pace} {unit}。TP 更新后，依赖 TP 的配速区间也会重新计算。"
+      }
+    },
+    "currentCadence": "当前步频",
+    "comparisonCadence": "历史步频"
+  },
+  "bestDistance": {
+    "title": "最佳距离",
+    "byDistance": "按距离",
+    "byTime": "按时间",
+    "rank": "排名",
+    "timeRange": "时间范围",
+    "distance": "距离",
+    "allTimeBest": "{distance} 历史最佳",
+    "viewActivity": "查看活动",
+    "period": "时间段",
+    "time": "用时",
+    "pace": "配速",
+    "date": "日期",
+    "activity": "活动",
+    "best": "最佳",
+    "details": "详情",
+    "noRecords": "未找到 {distance} 的记录",
+    "loading": "加载中...",
+    "selectDistance": "选择距离以查看表现",
+    "allTime": "全部时间",
+    "noDistances": "无可用距离",
+    "selectDistances": "选择距离",
+    "selected": "已选择",
+    "distances": {
+      "halfMarathon": "半程马拉松",
+      "marathon": "全程马拉松",
+      "cooperTest": "12分钟",
+      "ftp20": "20分钟 FTP",
+      "ftp60": "60分钟 FTP",
+      "1min": "1分钟",
+      "5min": "5分钟",
+      "20min": "20分钟",
+      "30min": "30分钟",
+      "1hour": "1小时",
+      "2hour": "2小时",
+      "3hour": "3小时",
+      "5hour": "5小时",
+      "8hour": "8小时"
+    }
+  },
+  "dateSelector": {
+    "day": "天",
+    "week": "周",
+    "month": "月",
+    "year": "年",
+    "addTime": "添加时间",
+    "confirm": "确定",
+    "selectedCount": "已选 {count} 个",
+    "maxTimeRangesWarning": "最多只能选择5个时间段",
+    "minTimeRangesWarning": "至少需要保留一个时间选择项",
+    "last7Days": "最近7天",
+    "last14Days": "最近14天",
+    "last30Days": "近 30 天",
+    "last60Days": "近 60 天",
+    "last90Days": "近 90 天",
+    "today": "今天",
+    "thisWeek": "本周",
+    "thisMonth": "本月",
+    "thisYear": "今年",
+    "lastYear": "去年",
+    "allTime": "全部时间",
+    "customRange": "自定义范围"
+  },
+  "MobileAnalytics": {
+    "tabs": {
+      "navigationLabel": "分析视图",
+      "curve": "曲线",
+      "maximum": "峰值",
+      "zones": "区间",
+      "profile": "特征"
+    }
+  },
+  "activityFilter": {
+    "all": "全部",
+    "allTypes": "全部类型",
+    "run": "跑步",
+    "cycling": "骑行",
+    "swim": "游泳"
+  },
+  "sportType": {
+    "run": "跑步",
+    "cycling": "骑行",
+    "swim": "游泳",
+    "unknown": "未知",
+    "confirmTitle": "确认运动类型",
+    "confirmDescription": "文件上传成功！请确认或修改以下活动的运动类型。",
+    "skip": "跳过",
+    "confirm": "确认设置",
+    "setting": "设置中...",
+    "confirmed": "运动类型设置成功",
+    "confirmationFailed": "运动类型设置失败"
+  },
+  "activityDetails": {
+    "duration": "持续时间",
+    "distance": "距离",
+    "avgSpeed": "平均速度",
+    "editSportType": "编辑运动类型",
+    "sportTypeUpdated": "运动类型更新成功",
+    "sportTypeUpdateFailed": "运动类型更新失败"
+  },
+  "topBar": {
+    "account": "账户",
+    "bestDistance": "最佳距离",
+    "notifications": "通知",
+    "tools": "训练工具",
+    "signOut": "退出登录"
+  },
+  "notifications": {
+    "title": "通知",
+    "tabs": {
+      "unread": "未读",
+      "all": "全部"
+    },
+    "loading": "加载中…",
+    "empty": "暂无通知",
+    "unreadBadge": "未读",
+    "receivedAt": "收到于",
+    "noBody": "无正文",
+    "openReview": "查看复盘",
+    "loadingMore": "加载更多…",
+    "templates": {
+      "general": "系统通知",
+      "importSuccess": "导入完成",
+      "importWarning": "导入提醒",
+      "reviewDigest": "训练复盘",
+      "exportFailed": "同步失败"
+    },
+    "summary": {
+      "success": "成功",
+      "failed": "失败",
+      "skipped": "跳过",
+      "reviewType": "复盘类型",
+      "exportRoute": "同步"
+    },
+    "reviewTypes": {
+      "DAILY": "日复盘",
+      "WEEKLY": "周复盘",
+      "MONTHLY": "月复盘",
+      "PLAN": "计划复盘"
+    },
+    "reviewReadyTitles": {
+      "DAILY": "日复盘已生成",
+      "WEEKLY": "周复盘已生成",
+      "MONTHLY": "月复盘已生成",
+      "PLAN": "计划复盘已生成"
+    },
+    "kinds": {
+      "IMPORT_BATCH_COMPLETED": {
+        "title": "导入已完成",
+        "body": "已处理 {total} 个来源。\n\n- 成功：{success}\n- 失败：{failed}\n- 跳过：{skipped}"
+      },
+      "IMPORT_BATCH_PARTIAL_FAILED": {
+        "title": "导入完成（含失败项）",
+        "body": "已处理 {total} 个来源。\n\n- 成功：{success}\n- 失败：{failed}\n- 跳过：{skipped}"
+      },
+      "THIRD_PARTY_EXPORT_FAILED": {
+        "title": "未能同步到外部服务",
+        "preview": "{sourceLabel} → {provider} ·「{activityName}」",
+        "body": "我们尝试将此活动从 **{sourceLabel}** 同步到 **{provider}**，但未成功。\n\n活动：“{activityName}”\n\n请检查外部连接后重试。"
+      }
+    }
+  },
+  "settings": {
+    "settings": "设置",
+    "description": "管理你的应用偏好和单位",
+    "units": "单位",
+    "application": "应用",
+    "language": "语言",
+    "languageDescription": "切换应用显示语言",
+    "unitSystem": "系统单位",
+    "unitSystemDescription": "选择使用英制或公制作为默认单位",
+    "metric": "公制",
+    "imperial": "英制",
+    "distanceUnit": "距离单位",
+    "distanceUnitDescription": "选择用于显示距离的单位",
+    "speedUnit": "速度单位",
+    "speedUnitDescription": "选择用于显示速度的单位",
+    "powerUnit": "功率单位",
+    "powerUnitDescription": "选择用于显示功率的单位",
+    "theme": "主题",
+    "themeDescription": "选择应用的外观主题",
+    "chartXaxis": "图表默认 X 轴",
+    "chartXaxisDescription": "选择图表默认使用距离或时间作为 X 轴",
+    "timeFormat": "时间格式",
+    "timeFormatDescription": "选择应用中时钟时间的显示方式",
+    "meters": "m",
+    "kilometers": "km",
+    "miles": "mile",
+    "kilometersPerHour": "km/h",
+    "milesPerHour": "mile/h",
+    "metersPerSecond": "m/s",
+    "watts": "W",
+    "wattsPerKilogram": "W/kg",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统",
+    "selectUnitSystem": "选择单位系统",
+    "selectDistanceUnit": "选择距离单位",
+    "selectSpeedUnit": "选择速度单位",
+    "selectPowerUnit": "选择功率单位",
+    "selectTheme": "选择主题",
+    "selectLanguage": "选择语言",
+    "selectChartXaxis": "选择图表默认 X 轴",
+    "selectTimeFormat": "选择时间格式",
+    "chartXaxisDistance": "距离",
+    "chartXaxisTime": "时间",
+    "timeFormat24h": "24 小时制",
+    "timeFormat12h": "12 小时制",
+    "update": "更新",
+    "updating": "更新中",
+    "unitSystemUpdated": "单位系统已更新",
+    "distanceUnitUpdated": "距离单位已更新",
+    "speedUnitUpdated": "速度单位已更新",
+    "powerUnitUpdated": "功率单位已更新",
+    "themeUpdated": "主题已更新",
+    "chartXaxisUpdated": "图表默认 X 轴已更新",
+    "settingsUpdated": "设置已更新",
+    "failedToUpdateUnitSystem": "更新单位系统失败",
+    "failedToUpdateDistanceUnit": "更新距离单位失败",
+    "failedToUpdateSpeedUnit": "更新速度单位失败",
+    "failedToUpdatePowerUnit": "更新功率单位失败",
+    "failedToUpdateTheme": "更新主题失败",
+    "failedToUpdateChartXaxis": "更新图表默认 X 轴失败",
+    "failedToUpdateSettings": "更新设置失败"
+  },
+  "PMC": {
+    "title": "Trainingload.ai · 体能管理",
+    "pmcAnalysis": "PMC 分析",
+    "header": {
+      "eyebrow": "指标",
+      "description": "用体能、疲劳和状态判断训练负荷与恢复节奏。"
+    },
+    "mobile": {
+      "currentStatus": "当前状态",
+      "loadTrend": "负荷趋势",
+      "metricInsights": "指标解读",
+      "acRatio": "急慢比",
+      "zones": {
+        "danger": "深度疲劳",
+        "optimal": "适合加强",
+        "neutral": "平衡区间",
+        "fresh": "状态良好",
+        "peak": "峰值状态",
+        "transition": "过渡区间"
+      },
+      "tips": {
+        "danger": "短期负荷明显高于体能基础，优先安排恢复与睡眠，避免连续高强度。",
+        "optimal": "疲劳在可控范围，是推进训练量的窗口期，可安排质量课。",
+        "neutral": "体能与疲劳大致匹配，维持当前节奏或小幅调整即可。",
+        "fresh": "恢复充分，适合安排比赛、测试或关键训练课。",
+        "peak": "短期恢复度较高，把握关键赛事窗口，同时避免突然加量。",
+        "transition": "TSB 偏高且持续，留意是否训练量不足或刚经历大幅减量。"
+      }
+    },
+    "performanceManagementChart": "Performance Management Chart - 体能管理图表分析",
+    "calculate": "重新计算",
+    "recalculate": "重新计算",
+    "calculating": "计算中...",
+    "calculationComplete": "PMC 数据计算完成，共生成 {count} 条数据",
+    "calculationFailed": "计算 PMC 数据失败，请稍后重试",
+    "totalDataPoints": "总数据点",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "combinedAnalysis": "PMC 综合分析",
+    "combinedDescription": "体能、疲劳和状态的综合趋势",
+    "metricsExplanation": "PMC 指标说明",
+    "abbr": {
+      "fitness": "CTL",
+      "fatigue": "ATL",
+      "form": "TSB"
+    },
+    "zoneHelp": {
+      "ariaLabel": "状态 分区说明",
+      "title": "状态 分区说明",
+      "danger": "高风险区（红色）：状态 < -30。受伤/过度训练风险高，避免高强度。",
+      "optimal": "最佳训练区（绿色）：-30 ≤ 状态 < -10。适合高质量训练与负荷进阶。",
+      "neutral": "中性区（灰色）：-10 ≤ 状态 < +5。维持性训练，恢复与负荷平衡。",
+      "fresh": "新鲜区（蓝色）：+5 ≤ 状态 < +15。状态新鲜，适合次要比赛或强度测试。",
+      "peak": "巅峰区（紫色）：+15 ≤ 状态 < +25。比赛黄金窗口，状态最佳。",
+      "transition": "过渡区（橙色）：状态 ≥ +25。赛季结束/伤病恢复期，训练极少、非常安全但体能低。"
+    },
+    "acmpHelp": {
+      "title": "ACMP（疲劳/体能）说明",
+      "formula": "ACMP = 疲劳 / 体能。",
+      "sweet": "甜区（绿色）：0.8 – 1.3。训练负荷合理，受伤风险较低。",
+      "danger": "危险区（红色）：≥ 1.5。负荷跃升过快，受伤风险较高。",
+      "advice": "建议将 ACMP 控制在 0.8 – 1.3 范围以降低风险。不同项目的负荷–伤病关系可能不同，需结合自身情况谨慎应用。"
+    },
+    "fitness": {
+      "title": "体能",
+      "description": "每日训练负荷的 42 天指数平均，用于建模较长期负荷，不直接测量体能或适应。"
+    },
+    "fatigue": {
+      "title": "疲劳",
+      "description": "每日训练负荷的 7 天指数平均，用于建模近期负荷，不直接测量疲劳。"
+    },
+    "form": {
+      "title": "状态",
+      "description": "当日体能减去当日疲劳，用于描述模型化负荷平衡，不直接测量准备度、恢复或健康。"
+    },
+    "load": {
+      "title": "训练负荷"
+    },
+    "noData": "暂无数据",
+    "fitnessChart": "体能图表",
+    "fatigueChart": "疲劳图表",
+    "formChart": "状态图表"
+  },
+  "AIAnalysis": {
+    "generated": "内容由 AI 生成",
+    "analyzing": "正在分析运动数据...",
+    "description": "根据本次活动的结构化数据生成训练解读。",
+    "analysisFailed": "分析失败，请稍后重试",
+    "noAnalysisData": "暂无分析数据",
+    "aiCoach": "AI 教练",
+    "expand": "展开",
+    "aiDetailedAnalysis": "AI 详细分析",
+    "useCache": "使用缓存",
+    "regenerate": "重新解读",
+    "emptyHint": "暂无教练复盘。",
+    "standardMode": "标准模式",
+    "deepMode": "深度推理",
+    "modelPurposeHint": "为本次请求选择默认模型或服务商提供的推理模型。"
+  },
+  "Calendar": {
+    "page": {
+      "title": "Trainingload.ai · 日历"
+    }
+  },
+  "CalendarHeader": {
+    "addButton": "添加",
+    "plan": "计划",
+    "prevMonth": "上一月",
+    "today": "今天",
+    "nextMonth": "下一月",
+    "calendarLabel": "日历",
+    "viewByDay": "按天查看",
+    "viewByWeek": "按周查看",
+    "viewByMonth": "按月查看",
+    "viewByYear": "按年查看",
+    "weekMode": "周视图",
+    "monthMode": "月视图",
+    "calendarSubscriptionButton": "订阅",
+    "calendarSubscriptionTitle": "订阅训练计划",
+    "calendarSubscriptionDescription": "把当前训练计划同步到 Mac、iOS 或其他日历。",
+    "calendarSubscriptionOpen": "打开",
+    "calendarSubscriptionCopy": "复制",
+    "calendarSubscriptionCopied": "订阅链接已复制",
+    "calendarSubscriptionReset": "重置订阅链接",
+    "calendarSubscriptionResetDone": "订阅链接已重置",
+    "aiSubmitted": "生成请求已提交",
+    "aiSubmitFailed": "生成请求提交失败"
+  },
+  "CalendarSettings": {
+    "title": "日历设置",
+    "useDarkMode": "使用深色模式",
+    "useDotBadge": "使用圆点徽标",
+    "use24HourFormat": "使用 24 小时制",
+    "defaultView": "默认视图",
+    "agendaViewGroupBy": "议程视图分组方式",
+    "view": {
+      "day": "日",
+      "week": "周",
+      "month": "月",
+      "year": "年",
+      "agenda": "议程"
+    },
+    "groupBy": {
+      "date": "日期",
+      "color": "颜色"
+    }
+  },
+  "CalendarViews": {
+    "yearUnavailable": "较小设备暂不支持年视图。",
+    "weekUnavailable": "较小设备暂不支持周视图。",
+    "switchToDayOrMonth": "请切换到日视图或月视图。"
+  },
+  "CalendarDialogs": {
+    "more": "更多...",
+    "eventsOn": "{date} 的事件",
+    "noEventsForDate": "这一天没有事件。",
+    "deleteSuccess": "事件删除成功。",
+    "deleteError": "删除事件失败。",
+    "delete": "删除",
+    "deleteTitle": "确定要删除吗？",
+    "deleteDescription": "此操作无法撤销。删除后，该事件及相关数据将被永久移除。",
+    "cancel": "取消",
+    "continue": "继续",
+    "editEvent": "编辑事件",
+    "addEvent": "新增事件",
+    "editEventDescription": "修改现有事件。",
+    "addEventDescription": "为你的日历创建一个新事件。",
+    "title": "标题",
+    "enterTitle": "请输入标题",
+    "variant": "样式",
+    "selectVariant": "请选择样式",
+    "description": "描述",
+    "enterDescription": "请输入描述",
+    "saveChanges": "保存更改",
+    "createEvent": "创建事件",
+    "eventUpdated": "事件更新成功",
+    "eventCreated": "事件创建成功",
+    "eventSaveFailed": "保存事件失败",
+    "responsible": "负责人",
+    "startDate": "开始时间",
+    "endDate": "结束时间",
+    "multiDayProgress": "第 {currentDay} 天 / 共 {totalDays} 天",
+    "at": "于",
+    "edit": "编辑"
+  },
+  "AgendaEvents": {
+    "searchPlaceholder": "输入命令或搜索...",
+    "noResults": "没有找到结果。",
+    "at": "于"
+  },
+  "CalendarGrid": {
+    "weekSummary": "周总结"
+  },
+  "MonthYearPicker": {
+    "selectYear": "选择年份"
+  },
+  "DayCell": {
+    "planTitle": "计划训练",
+    "activity": "活动",
+    "distance": "距离",
+    "duration": "时长",
+    "moreTraining": "训练"
+  },
+  "CalendarExperience": {
+    "weekStripLabel": "本周",
+    "monthOverview": "月历概览",
+    "selectedDateLabel": "选中日期",
+    "viewDay": "查看当天",
+    "selectedDay": "当天详情",
+    "agendaLabel": "当天安排",
+    "weeklySnapshot": "本周概览",
+    "trainingTab": "训练",
+    "activityTab": "活动",
+    "activityCountShort": "次",
+    "loadLabel": "负荷",
+    "plannedBadge": "计划",
+    "moreActivities": "个活动",
+    "activitiesCount": "个活动",
+    "plannedTraining": "计划训练",
+    "planCycleLabel": "计划周期",
+    "planWorkoutCount": "{count} 个训练",
+    "openPlan": "查看训练",
+    "noPlannedTraining": "这一天还没有计划训练。",
+    "activitiesTitle": "已完成活动",
+    "noActivities": "这一天还没有活动记录。",
+    "vsLastWeekFlat": "与上周持平",
+    "vsLastWeekUp": "高于上周",
+    "vsLastWeekDown": "低于上周",
+    "weekModeLabel": "本周聚焦",
+    "monthModeLabel": "月历概览",
+    "swipeHint": "左右滑动切换",
+    "planProgressTitle": "计划进度",
+    "planProgressDescription": "当前周期 · {start} - {end}",
+    "monthOverviewDescription": "{month} · 当前可见月份",
+    "comparisonLabelPlan": "较计划前等长周期",
+    "comparisonLabelMonth": "较上月",
+    "summaryScope": {
+      "plan": "计划",
+      "month": "本月"
+    },
+    "delta": {
+      "flat": "持平",
+      "up": "增加",
+      "down": "减少"
+    },
+    "sportLabels": {
+      "run": "跑步",
+      "cycling": "骑行",
+      "swim": "游泳",
+      "strength": "力量",
+      "other": "其他"
+    },
+    "sportTrainingName": "{sport}训练",
+    "independentBadge": "计划外",
+    "createWorkoutButton": "添加训练",
+    "attachToPlan": "移入当前计划",
+    "attachSuccess": "已移入当前计划",
+    "attachFailed": "移入计划失败",
+    "createWorkout": {
+      "title": "创建训练",
+      "scopeInPlan": "计划内",
+      "scopeIndependent": "计划外",
+      "dateLabel": "排期日期：{date}",
+      "namePlaceholder": "训练名称（可选）",
+      "textPlaceholder": "work 45m",
+      "sportRun": "跑步",
+      "sportCycling": "骑行",
+      "sportSwim": "游泳",
+      "cancel": "取消",
+      "create": "创建",
+      "creating": "创建中…",
+      "success": "训练已创建",
+      "failed": "创建训练失败",
+      "missingActivePlan": "当前没有进行中的计划，无法创建计划内训练"
+    }
+  },
+  "NewUserDialog": {
+    "title": "首次使用设置",
+    "description": "完成以下 3 步以获得更准确的分析。",
+    "steps": {
+      "step1Label": "选择偏好运动",
+      "step2Label": "设置心率",
+      "step3Label": "设置 FTP 等"
+    },
+    "selectPreferredSports": "选择你偏好的运动（可多选）",
+    "selected": "已选择",
+    "sportOptions": {
+      "cycling": "骑行",
+      "run": "跑步",
+      "swim": "游泳"
+    },
+    "settings": {
+      "hintAdjust": "你可以在右上角『用户设置 - 个人信息』中随时调整偏好运动。"
+    },
+    "buttons": {
+      "skip": "跳过",
+      "next": "下一步",
+      "back": "上一步",
+      "finish": "完成",
+      "applyEstimate": "应用估算值"
+    },
+    "step2": {
+      "title": "设置心率参数"
+    },
+    "step3": {
+      "title": "设置 FTP 等参数"
+    },
+    "inputs": {
+      "maxHR": {
+        "label": "最大心率 (bpm)",
+        "placeholder": "例如 190"
+      },
+      "restHR": {
+        "label": "静息心率 (bpm)",
+        "placeholder": "例如 60"
+      },
+      "age": {
+        "label": "年龄 (岁)"
+      },
+      "estimatedMaxHR": {
+        "label": "估算最大心率 (bpm)"
+      },
+      "estimatedRestHR": {
+        "label": "估算静息心率 (bpm)"
+      },
+      "runftp": {
+        "label": "跑步 FTP (瓦特)",
+        "placeholder": "例如 255"
+      },
+      "cyclingftp": {
+        "label": "骑行 FTP (瓦特)",
+        "placeholder": "例如 255"
+      },
+      "weight": {
+        "label": "体重 (kg，可选)",
+        "placeholder": "例如 70"
+      }
+    },
+    "hint": {
+      "hrRanges": "建议：最大心率通常在 150-210 之间；静息心率通常在 45-75 之间。",
+      "otherSports": "若主要进行跑步或游泳，可稍后在『设置 - 个人信息』中补充阈值信息。"
+    },
+    "quickEstimate": {
+      "title": "快速估算（输入年龄）",
+      "badge": "参考值"
+    },
+    "info": {
+      "description": "以上估算仅供参考。若需更准确的个人阈值，请进行最大心率与静息心率的实际测试，并在右上角『用户设置 - 个人信息』中更新为测量值。"
+    }
+  },
+  "AiDataConsent": {
+    "title": "让 AI 教练使用你的训练数据",
+    "summary": "AI 功能是可选的。请先了解会共享什么，再决定是否启用。",
+    "recipientLabel": "第三方 AI 数据接收方",
+    "recipientUnknown": "当前配置的 AI 服务商",
+    "dataLabel": "会共享什么",
+    "dataValue": "你提交的提问或语音转写文本，以及回答本次请求所需的去标识化训练摘要，例如活动汇总、心率区间、配速、功率、负荷、恢复趋势、目标和计划。我们不会附加你的姓名、邮箱、账号 ID、完整 GPS 轨迹或 HealthKit 原始样本。",
+    "purposeLabel": "为什么共享",
+    "purposeValue": "用于生成你请求的教练回复、计划、调整或复盘。对话中的部分信息也可能被提取为跨对话记忆，并用于未来对话或状态评估。Trainingload.ai 不会将这些数据用于广告。",
+    "processingLabel": "DeepSeek 如何处理",
+    "processingValue": "DeepSeek 可能在中国大陆处理或存储请求与回复。其公开条款允许在严格去标识的前提下，有限使用输入和输出以运营、开发或改进服务。请勿在提问中填写姓名、联系方式、诊断信息或其他非必要敏感信息。",
+    "protectionLabel": "存储与控制",
+    "protectionValue": "Trainingload.ai 会在你的账号中保存已提交的提问和 AI 结果，供你查看历史。请求采用加密传输。你可以查看、修改或删除已保存的记忆，也可以关闭记忆功能；关闭后不再写入或读取新记忆，已有记忆会保留到你将其删除。你还可以删除教练对话、撤回 AI 授权以停止新的传输，或删除账号。完整的留存、跨境处理和接收方说明请查看隐私政策。",
+    "choice": "只有你点击同意后，数据才会发送至 DeepSeek。选择“暂不启用”不会影响任何非 AI 功能。",
+    "accept": "同意并启用 AI",
+    "decline": "暂不启用",
+    "settingsTitle": "隐私与 AI",
+    "toggleTitle": "AI 数据共享",
+    "settingsHint": "同意记录与明确列出的服务商和政策版本绑定；服务商或政策发生实质变化时，需要重新征得你的同意。",
+    "enabled": "已允许发送给 {recipient}",
+    "decidedAt": "选择记录时间：{date}",
+    "disabled": "已关闭，不会向 AI 服务商发送新数据",
+    "consentRecordLabel": "授权记录时间",
+    "notRecorded": "尚未记录",
+    "privacyPolicy": "查看隐私政策",
+    "reviewAction": "查看共享说明",
+    "reviewDescription": "查看会发送哪些数据、用途、处理位置和你的控制方式。",
+    "relatedTitle": "相关设置",
+    "relatedDescription": "AI 数据授权与跨对话记忆相互独立管理；记忆功能需要先获得此授权。",
+    "memoryAction": "管理跨对话记忆",
+    "memoryDescription": "查看、纠正或删除 AI 教练跨对话使用的事实。",
+    "error": "无法保存你的选择，请检查网络后重试。"
+  },
+  "AthleteMemory": {
+    "title": "运动员记忆",
+    "description": "管理 AI 教练可跨对话使用的事实。设置变更只对新消息生效，不会回溯处理旧对话。",
+    "back": "返回账户",
+    "toggleTitle": "跨对话记忆",
+    "toggleDescription": "开启后，AI 教练可以保存近期睡眠、疼痛、时间安排、目标和偏好等有用事实及其发生时间；之后只会使用相关且未过期的事实。",
+    "unavailable": "服务端功能尚未开放，暂时不能启用记忆。",
+    "consentRequired": "请先在“隐私与 AI”中开启 AI 数据共享，再启用记忆。",
+    "updatedAt": "最近变更：{date}",
+    "savedTitle": "已保存的记忆",
+    "savedDescription": "你可以核对具体事实和发生时间；修改后的内容会标记为用户确认。",
+    "export": "导出 JSON",
+    "loading": "加载中…",
+    "loadErrorTitle": "暂时无法读取记忆",
+    "loadErrorDescription": "请检查网络后重试。现有记忆不会因此被修改。",
+    "retry": "重试",
+    "unknownTime": "时间未知",
+    "emptyTitle": "还没有保存的记忆",
+    "emptyDescription": "启用后，新对话可能产生记忆；启用前的历史对话不会被自动处理。",
+    "loadMore": "加载更多",
+    "edit": "修改记忆",
+    "delete": "删除记忆",
+    "deleteDescription": "确定删除这条记忆吗？此操作无法撤销，并可能触发一次新的状态评估。",
+    "updated": "记忆已更新",
+    "deleted": "记忆已删除",
+    "preferenceEnabled": "跨对话记忆已开启",
+    "preferenceDisabled": "跨对话记忆已关闭",
+    "memoriesCleared": "已清除全部跨对话记忆",
+    "saveError": "无法保存记忆变更。",
+    "exportError": "无法导出记忆。",
+    "clearTitle": "删除全部记忆",
+    "clearDescriptionEnabled": "永久删除全部事实及其证据，并停止后续记忆读写。不会删除 AI 教练对话。",
+    "clearDescriptionDisabled": "永久删除全部事实及其证据。不会删除 AI 教练对话。",
+    "clearAction": "删除全部记忆",
+    "clearConfirmTitle": "清空全部记忆？",
+    "clearConfirmDescription": "此操作无法撤销。再次启用前，AI 教练不会读取或写入记忆。",
+    "disableTitle": "是否同时清除已保存的记忆？",
+    "disableDescription": "跨对话记忆已关闭，现有 {count} 条记忆仍被保留。清除后无法恢复，但不会删除 AI 教练对话。",
+    "disableKeep": "保留已有记忆",
+    "disableClear": "清除全部记忆",
+    "cancel": "取消",
+    "save": "保存修改",
+    "editTitle": "修正记忆",
+    "editDescription": "请保持事实准确、简洁；修改会被记录为用户确认。",
+    "claimLabel": "记忆内容",
+    "categoryLabel": "记忆分类",
+    "categories": {
+      "sleep_quality": "睡眠质量",
+      "sleep_duration": "睡眠时长",
+      "fatigue": "疲劳",
+      "recovery": "恢复",
+      "pain": "疼痛",
+      "illness": "疾病",
+      "stress": "压力",
+      "mood": "情绪",
+      "schedule_constraint": "时间安排",
+      "travel": "出行",
+      "equipment_constraint": "装备限制",
+      "training_preference": "训练偏好",
+      "communication_preference": "沟通偏好",
+      "goal": "目标",
+      "race_goal": "比赛目标",
+      "nutrition": "营养",
+      "hydration": "补水",
+      "subjective_effort": "主观用力感",
+      "general_context": "其他情况"
+    }
+  },
+  "OnboardingPage": {
+    "hero": {
+      "badge": "新手引导",
+      "title": "开始使用 Trainingload.ai",
+      "subtitle": "用几项基础信息，让训练计划和复盘更适合你。",
+      "promise": "约 3 分钟"
+    },
+    "setupHint": "这些设置之后都可以在个人资料里修改。",
+    "intro": {
+      "badge": "训练从这里开始",
+      "title": "先完成基础设置，之后每次训练都有依据。",
+      "subtitle": "选择运动、补充基础信息，再导入一条活动。我们会用这些信息生成训练负荷、强度区间和复盘内容，帮助你执行计划、看懂完成情况，并决定下一次怎么练。",
+      "features": {
+        "load": {
+          "title": "训练负荷",
+          "description": "了解最近练了多少，恢复是否跟得上。"
+        },
+        "zones": {
+          "title": "强度区间",
+          "description": "用心率、功率或配速区分轻松、节奏和高强度。"
+        },
+        "thresholds": {
+          "title": "个人基准",
+          "description": "可选填写 FTP、最大心率等，让分析更准确。"
+        },
+        "ai": {
+          "title": "训练复盘",
+          "description": "对比计划和完成情况，给出清楚的反馈。"
+        },
+        "import": {
+          "title": "活动导入",
+          "description": "上传文件或连接平台，汇总你的训练记录。"
+        },
+        "plan": {
+          "title": "计划跟进",
+          "description": "用真实完成情况调整后续训练安排。"
+        }
+      }
+    },
+    "displayUnits": {
+      "eyebrow": "显示与单位",
+      "title": "配置系统级单位。",
+      "subtitle": "先选择全局使用的单位和时间格式，再填写身体与训练数值。",
+      "timezoneHint": "时区：{timezone} · 已自动读取账户资料或浏览器设置。"
+    },
+    "progress": {
+      "title": "设置进度",
+      "count": "第 {current} / {total} 步",
+      "steps": {
+        "1": "概览",
+        "2": "运动",
+        "3": "显示与单位",
+        "4": "个人信息",
+        "5": "心率",
+        "6": "阈值",
+        "7": "导入",
+        "8": "AI 数据共享"
+      }
+    },
+    "step1": {
+      "eyebrow": "选择运动",
+      "title": "你平时主要练什么？",
+      "subtitle": "选择后，我们会优先显示相关指标。可以多选，之后也能修改。",
+      "sports": {
+        "RUN": {
+          "title": "跑步",
+          "description": "关注配速、心率、负荷和跑步能力变化。"
+        },
+        "CYCLING": {
+          "title": "骑行",
+          "description": "关注功率、FTP、心率和骑行负荷。"
+        },
+        "SWIM": {
+          "title": "游泳",
+          "description": "记录游泳训练，并和跑骑训练一起查看。"
+        },
+        "STRENGTH": {
+          "title": "力量训练",
+          "description": "规划并记录动作、组数、次数、重量和训练强度。"
+        }
+      }
+    },
+    "step2": {
+      "eyebrow": "个人信息",
+      "title": "填写几个基础信息。",
+      "subtitle": "出生年月、体重和身高会用于心率估算与身体相关指标；时区已自动检测。"
+    },
+    "step3": {
+      "eyebrow": "心率",
+      "title": "设置心率范围。",
+      "subtitle": "最大心率和静息心率用于划分强度区间。不确定也没关系，可以先用估算值。",
+      "estimate": {
+        "title": "按出生年月估算",
+        "empty": "填写出生年月后，可以生成一个参考值。",
+        "ready": "估算最大心率：{max} bpm · 静息心率：{rest} bpm"
+      }
+    },
+    "step4": {
+      "eyebrow": "阈值",
+      "title": "知道阈值的话，可以填上。",
+      "subtitle": "这一步可以跳过。FTP 等阈值会让负荷和强度分析更准确，之后也可以随时补充。",
+      "swimOnly": "当前所选运动不需要填写跑步或骑行功率阈值。"
+    },
+    "step5": {
+      "eyebrow": "导入活动",
+      "title": "把第一条训练带进来。",
+      "subtitle": "上传一个 FIT / TCX / GPX 文件，或连接常用平台。导入后，你就能看到训练分析和复盘。",
+      "uploadMethod": {
+        "title": "上传文件",
+        "description": "适合手上已经有训练文件的情况。"
+      },
+      "platforms": {
+        "title": "连接平台",
+        "description": "连接你常用的训练平台，后续活动可以自动同步。"
+      },
+      "upload": {
+        "title": "上传活动文件",
+        "description": "支持 FIT、TCX 和 GPX。处理完成后会更新训练分析。",
+        "button": "上传文件"
+      },
+      "providers": {
+        "intervals_icu": {
+          "title": "绑定 Intervals.icu",
+          "description": "使用 OAuth 同步活动记录和每日训练数据。",
+          "apiKeyDescription": "填写个人 API Key，按需同步活动、计划课和训练数据。"
+        }
+      },
+      "connect": "绑定",
+      "connecting": "绑定中…",
+      "connected": "已绑定",
+      "oauthConnected": "Intervals.icu 已绑定",
+      "oauthFailed": "Intervals.icu 授权失败",
+      "error": "绑定失败"
+    },
+    "fields": {
+      "birthMonth": {
+        "label": "出生年月",
+        "placeholder": "选择年份和月份",
+        "help": "用于计算年龄并估算初始心率范围。"
+      },
+      "weight": {
+        "label": "体重",
+        "placeholder": "例如 70",
+        "help": "可选。用于计算功率体重比等指标。"
+      },
+      "height": {
+        "label": "身高",
+        "placeholder": "例如 175",
+        "help": "可选。用于身体与训练相关指标。"
+      },
+      "timezone": {
+        "label": "时区",
+        "placeholder": "搜索城市、地区或 UTC+8",
+        "help": "已自动检测。训练日期不对时可以调整。",
+        "empty": "没有找到匹配的时区"
+      },
+      "maxHR": {
+        "label": "最大心率",
+        "placeholder": "例如 190",
+        "help": "不知道可以先使用估算值。"
+      },
+      "restHR": {
+        "label": "静息心率",
+        "placeholder": "例如 60",
+        "help": "早晨醒来后测量通常更稳定。"
+      },
+      "runFtp": {
+        "label": "跑步功率阈值",
+        "placeholder": "例如 255",
+        "help": "可选。使用跑步功率训练时填写。"
+      },
+      "cyclingFtp": {
+        "label": "骑行 FTP",
+        "placeholder": "例如 255",
+        "help": "可选。知道 FTP 时填写。"
+      }
+    },
+    "buttons": {
+      "getStarted": "开始设置",
+      "skipSetup": "跳过设置",
+      "next": "继续",
+      "back": "返回",
+      "toImport": "去导入活动",
+      "toAiConsent": "继续设置 AI",
+      "uploadLater": "稍后上传",
+      "applyEstimate": "使用估算值",
+      "finish": "开始使用"
+    },
+    "done": {
+      "toast": "设置完成"
+    },
+    "errors": {
+      "birthMonth": "请输入有效的出生年月。",
+      "height": "请输入有效的身高。",
+      "save": "保存失败，请稍后再试"
+    }
+  },
+  "WelcomeDialog": {
+    "badge": {
+      "beta": "Beta"
+    },
+    "title": "欢迎来到 Trainingload.ai",
+    "description": "我们正在打磨产品体验，感谢你的参与与支持。",
+    "sections": {
+      "testVersion": {
+        "title": "测试版本提醒",
+        "desc": "当前仍是测试版本，数据可能丢失或不稳定。请谨慎操作，并及时备份重要数据。我们会尽力保留你的数据，并持续提升稳定性。"
+      },
+      "free": {
+        "title": "功能免费开放",
+        "desc": "在正式版本发布前，所有功能均免费使用。欢迎体验与探索。"
+      },
+      "feedback": {
+        "title": "你的反馈很重要",
+        "desc": "若在使用过程中遇到问题或有建议，欢迎反馈以帮助我们持续改进。"
+      }
+    },
+    "buttons": {
+      "start": "开始"
+    }
+  },
+  "PlanTemplateDetail": {
+    "goal": {
+      "5K": "5K",
+      "10K": "10K",
+      "HALF_MARATHON": "半马",
+      "MARATHON": "全马"
+    },
+    "backToGoal": "全部{goal}计划",
+    "createDraft": "创建草稿计划",
+    "creatingDraft": "正在创建草稿…",
+    "createDraftFailed": "草稿计划创建失败，请检查日期和训练日后重试。",
+    "checkingAccess": "正在确认功能是否可用…",
+    "memberCoachSummary": "计划开始后，AI 教练会结合训练完成情况、训练负荷、恢复状态和日程变化，及时提出调整建议。",
+    "officialTraining": "官方训练",
+    "running": "跑步",
+    "personalizedPaceBadge": "当前计划将使用你的个性化训练配速",
+    "examplePaceBadge": "暂无可靠个人基准，当前显示示例配速"
+  },
+  "PlanTemplateCoachReminder": {
+    "label": "教练提醒",
+    "ready": "你近期的训练基础符合这个计划。",
+    "baseWarning": "开始前请先查看这项能力提醒。",
+    "caution": "你可以开始；在能力数据更完整前，训练强度会先按 RPE 引导。",
+    "inputRequired": "目前还没有模型支持的跑步能力基准。",
+    "notReady": "当前计划设置需要调整后才能生成。",
+    "buildBlocked": "请先处理以上事项，再生成计划。",
+    "capabilityRequired": "请完成合适的跑步活动；系统会自动使用近期比赛、最大摄氧量/VDOT、阈值配速或临界速度。",
+    "tenKBase": "目前最长连续跑 {actual} 分钟，建议先达到 {required} 分钟，或完成一次近期 5K。",
+    "halfMarathonBase": "系统记录的最长跑是 {actual} 公里，建议先完成一次 {required} 公里再开始半马计划。",
+    "marathonLongRun": "系统记录的最长跑是 {actual} 公里，建议先完成一次 {required} 公里再开始全马计划。",
+    "vo2MaxBelowRange": "当前最大摄氧量为 {actual}，低于配速模型支持的下限 {required}，不会用它设置训练配速。",
+    "vo2MaxLowForDistance": "当前最大摄氧量为 {actual}，低于长距离计划的提醒线 {required}。建议先建立短距离训练稳定性，再依赖这个计划。",
+    "goalNotSupported": "关联比赛目标是 {actual}，当前能力较稳妥的目标约为 {required} 或更慢。",
+    "goalNotSupportedGeneric": "你当前的最大摄氧量暂时还不支持关联的比赛目标。",
+    "planPeriod": "距离比赛只剩 {actual} 天，而这个计划需要 {required} 天。",
+    "genericRequirement": "目前还有计划准入条件尚未满足。",
+    "personalizedPaces": "当前计划的基准值为最大摄氧量 {value}。",
+    "rpeFallback": "当前没有可靠的配速基准，本计划将通过 RPE 和谈话测试控制训练强度。"
+  },
+  "CreatePlanDialog": {
+    "badge": "创建计划",
+    "title": "创建训练计划",
+    "description": "选择最适合你的创建方式",
+    "options": {
+      "template": {
+        "title": "官方训练",
+        "desc": "先选择训练目标，再预览完整结构化计划",
+        "badge": "无需 AI 对话"
+      },
+      "ai": {
+        "title": "AI 教练",
+        "desc": "告诉教练目标和时间，由 AI 起草完整训练周期。",
+        "badge": "AI 教练"
+      },
+      "manual": {
+        "title": "手动编排",
+        "desc": "按周安排每一节耐力或力量训练，完全由你控制。"
+      }
+    },
+    "buttons": {
+      "cancel": "取消"
+    }
+  },
+  "PlanEditorBase": {
+    "title": "新建计划",
+    "fields": {
+      "name": {
+        "label": "名称",
+        "placeholder": "输入计划名称"
+      },
+      "weeks": {
+        "label": "周期（周）"
+      },
+      "description": {
+        "label": "描述"
+      }
+    },
+    "buttons": {
+      "continue": "继续编辑"
+    }
+  },
+  "PlanListDialog": {
+    "title": "计划列表",
+    "badges": {
+      "active": "进行中"
+    },
+    "states": {
+      "loading": "加载中...",
+      "loadFailed": "加载失败",
+      "empty": "暂无计划",
+      "cannotDeleteActive": "进行中的计划无法删除"
+    },
+    "buttons": {
+      "create": "新建计划",
+      "view": "查看",
+      "activate": "开始",
+      "deactivate": "停用",
+      "delete": "删除",
+      "cancel": "取消"
+    },
+    "activate": {
+      "title": "选择开始日期",
+      "description": "请先选择这份训练计划的开始日期。",
+      "confirm": "确认开始"
+    }
+  },
+  "PlanEditor": {
+    "title": {
+      "view": "查看计划",
+      "edit": "编辑计划"
+    },
+    "sessions": {
+      "count": "{count, plural, =0 {0 节} one {# 节} other {# 节}}",
+      "add": "添加"
+    },
+    "grid": {
+      "weekDay": "周 / 天",
+      "week": "第",
+      "weekLabel": "第 {week} 周"
+    },
+    "buttons": {
+      "edit": "编辑",
+      "close": "关闭",
+      "save": "保存",
+      "saving": "保存中..."
+    }
+  },
+  "RichTextToolbar": {
+    "alignment": {
+      "tooltip": "文本对齐",
+      "left": "左对齐",
+      "center": "居中",
+      "right": "右对齐",
+      "justify": "两端对齐"
+    },
+    "undo": "撤销",
+    "redo": "重做",
+    "bold": "加粗",
+    "shortcutBold": "(⌘ + B)",
+    "italic": "斜体",
+    "shortcutItalic": "(⌘ + I)",
+    "underline": "下划线",
+    "shortcutUnderline": "(⌘ + U)",
+    "strikethrough": "删除线",
+    "shortcutStrikethrough": "(⌘ + Shift + X)",
+    "blockquote": "引用",
+    "code": "行内代码",
+    "codeBlock": "代码块",
+    "bulletList": "无序列表",
+    "orderedList": "有序列表",
+    "horizontalRule": "分隔线",
+    "hardBreak": "换行",
+    "headings": {
+      "tooltip": "标题",
+      "normal": "正文",
+      "levelLabel": "H{level}"
+    },
+    "colorHighlight": {
+      "tooltip": "文字颜色与高亮",
+      "mobileColorGroup": "颜色",
+      "mobileHighlightGroup": "高亮",
+      "sectionTextColor": "颜色",
+      "sectionBackground": "背景"
+    },
+    "palette": {
+      "default": "默认",
+      "gray": "灰色",
+      "brown": "棕色",
+      "orange": "橙色",
+      "yellow": "黄色",
+      "green": "绿色",
+      "blue": "蓝色",
+      "purple": "紫色",
+      "pink": "粉色",
+      "red": "红色"
+    },
+    "link": {
+      "button": "链接",
+      "tooltip": "链接",
+      "formTitle": "链接",
+      "formDescription": "为选中的文字添加链接",
+      "remove": "移除",
+      "update": "更新",
+      "confirm": "确定",
+      "placeholder": "https://example.com"
+    }
+  },
+  "PlanCreatePage": {
+    "title": "手动创建计划",
+    "subtitle": "按步骤设置计划信息、编排课表并检查保存。",
+    "buttons": {
+      "cancel": "取消",
+      "back": "上一步",
+      "savePlan": "保存计划",
+      "saving": "保存中...",
+      "continueToCalendar": "继续编排课表",
+      "continueToReview": "检查计划",
+      "saveWorkout": "保存当前训练",
+      "addStep": "新增步骤",
+      "addRepeat": "新增重复"
+    },
+    "validation": {
+      "needWorkout": "请先添加至少一节有内容的训练后再保存。"
+    },
+    "steps": {
+      "1": {
+        "title": "基本信息",
+        "description": "先设置计划名称、周期和说明，稍后再安排每一节训练。"
+      },
+      "2": {
+        "title": "编排课表",
+        "description": "逐周安排训练；同一天可以添加多节耐力或力量训练。"
+      },
+      "3": {
+        "title": "编辑具体计划",
+        "description": "支持规则输入和结构化步骤编辑。"
+      },
+      "review": {
+        "title": "检查并保存",
+        "description": "确认周期与训练分布，保存后会先成为可编辑草稿。"
+      }
+    },
+    "weekdays": {
+      "sun": "周日",
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六"
+    },
+    "baseInfo": {
+      "title": "计划基本信息",
+      "fields": {
+        "name": "计划名称",
+        "weeks": "周期（周）",
+        "description": "计划说明"
+      },
+      "validation": {
+        "nameRequired": "请填写计划名称",
+        "nameTooLong": "计划名称请勿超过 120 个字符",
+        "weeksMin": "周期至少为 1 周",
+        "weeksMax": "周期最多为 24 周",
+        "weeksInvalid": "请输入 1～24 之间的整数周数",
+        "descriptionTooLong": "计划描述最多 {max, number} 个字（按正文计算）"
+      }
+    },
+    "calendarSelection": {
+      "title": "编排课表",
+      "summary": "共 {weeks} 周 · 已安排 {count} 个训练日",
+      "hint": "选择日期后添加训练；同一天可以安排多节训练。",
+      "clickDay": "选择日期开始编排",
+      "hoverHint": "打开日期",
+      "weekColumn": "周次",
+      "weekLabel": "第 {week} 周",
+      "dayLabel": "{day}",
+      "filled": "已设置",
+      "emptyDay": "当天还没有训练",
+      "restDay": "休息日",
+      "chooseWorkoutType": "选择训练类型",
+      "enduranceTypeHint": "跑步、骑行、游泳或拉伸训练。",
+      "strengthTypeHint": "按动作、组数、重量和 RPE 编排力量训练。",
+      "emptyDayHint": "当天还没有安排训练。",
+      "sessionLabel": "第 {index} 节",
+      "trainingDays": "训练日",
+      "scheduleReview": "课表概览"
+    },
+    "editor": {
+      "title": "编辑训练 · 第 {week} 周 · {day}",
+      "subtitle": "先选择运动类型，再通过规则输入或结构化步骤配置训练。",
+      "manualTitle": "手动设置训练结构",
+      "preview": "训练预览图"
+    },
+    "cards": {
+      "step": "步骤模块",
+      "repeat": "重复模块"
+    },
+    "fields": {
+      "stepType": "步骤类型",
+      "durationType": "持续条件",
+      "durationValue": "持续值",
+      "primaryTarget": "主要目标",
+      "targetType": "目标类型",
+      "targetSource": "目标来源",
+      "targetRelation": "目标关系",
+      "targetValue": "目标值",
+      "secondaryTarget": "次要目标",
+      "swimIntensityTarget": "强度目标",
+      "repeatCount": "重复次数",
+      "targetValuePlaceholder": "输入目标值",
+      "cadencePlaceholder": "输入踏频",
+      "zonePlaceholder": "选择分区",
+      "fromPlaceholder": "从",
+      "toPlaceholder": "到",
+      "selectPlaceholder": "请选择",
+      "swimStroke": "泳姿",
+      "swimTrainingType": "训练类型",
+      "swimEquipment": "器材"
+    },
+    "durationKinds": {
+      "TIME": "时间",
+      "DISTANCE": "距离",
+      "OPEN": "开放",
+      "CALORIES": "热量消耗",
+      "HR_GREATER_THAN": "心率高于",
+      "HR_LESS_THAN": "心率低于",
+      "POWER_GREATER_THAN": "功率高于",
+      "POWER_LESS_THAN": "功率低于",
+      "CADENCE_GREATER_THAN": "踏频高于",
+      "CADENCE_LESS_THAN": "踏频低于"
+    },
+    "stepTypes": {
+      "WARMUP": "热身",
+      "WORK": "运动",
+      "RECOVERY": "恢复",
+      "REST": "休息",
+      "COOLDOWN": "缓和",
+      "OTHER": "其他"
+    },
+    "targets": {
+      "NONE": "无目标",
+      "SPEED": "速度",
+      "RUN_PACE": "配速",
+      "SWIM_PACE": "目标配速",
+      "CYCLING_SPEED": "速度",
+      "CADENCE": "踏频",
+      "RUN_CADENCE": "步频",
+      "CYCLING_CADENCE": "踏频",
+      "HEART_RATE_ZONE": "心率区间",
+      "HEART_RATE_CUSTOM": "自定义心率",
+      "POWER_ZONE": "功率区间",
+      "POWER_CUSTOM": "自定义功率"
+    },
+    "targetTypes": {
+      "NONE": "无目标",
+      "HEART_RATE": "心率",
+      "POWER": "功率",
+      "PACE": "配速",
+      "UNSUPPORTED": "暂不支持"
+    },
+    "targetSources": {
+      "BASE": "基础值",
+      "ZONE": "区间"
+    },
+    "targetRelations": {
+      "EQUAL": "等于",
+      "GREATER_THAN": "大于",
+      "LESS_THAN": "小于",
+      "RANGE": "区间"
+    },
+    "swim": {
+      "stroke": {
+        "FREESTYLE": "自由泳",
+        "BREASTSTROKE": "蛙泳",
+        "BACKSTROKE": "仰泳",
+        "BUTTERFLY": "蝶泳",
+        "DRILL": "分解动作",
+        "MEDLEY": "混合泳"
+      },
+      "trainingType": {
+        "KICK": "踢动",
+        "PULL": "划水",
+        "DRILL": "分解动作"
+      },
+      "equipment": {
+        "FINS": "脚蹼",
+        "KICKBOARD": "浮板",
+        "PADDLES": "手璞",
+        "PULL_BUOY": "夹水器",
+        "SNORKEL": "呼吸管"
+      }
+    },
+    "states": {
+      "emptyStructure": "还没有训练步骤，先新增步骤或重复模块。",
+      "noPreview": "保存或校验后会在这里显示训练图表预览。",
+      "noTargetInput": "当前目标类型不需要额外输入",
+      "noZones": "暂无可用分区",
+      "unsupportedTarget": "旧目标类型暂不支持在这里编辑",
+      "invalidRange": "起始值不能大于结束值"
+    }
+  },
+  "SportCatalog": {
+    "families": {
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳",
+      "STRETCHING": "拉伸",
+      "UNKNOWN": "其他"
+    },
+    "sports": {
+      "ROAD_RUNNING": "跑步",
+      "TRAIL_RUNNING": "越野跑",
+      "TREADMILL_RUNNING": "跑步机",
+      "ROAD_CYCLING": "骑行",
+      "MOUNTAIN_BIKING": "山地骑行",
+      "GRAVEL_CYCLING": "砾石路骑行",
+      "INDOOR_CYCLING": "室内骑行",
+      "E_BIKING": "电助力骑行",
+      "POOL_SWIMMING": "室内游泳",
+      "OPEN_WATER_SWIMMING": "开放水域游泳",
+      "STRETCHING": "拉伸",
+      "WALKING": "步行",
+      "HIKING": "徒步",
+      "STRENGTH_TRAINING": "力量训练",
+      "HIIT": "高强度间歇训练",
+      "YOGA": "瑜伽",
+      "ROWING": "划船",
+      "ELLIPTICAL": "椭圆机",
+      "OTHER": "其他"
+    }
+  },
+  "WorkoutEditor": {
+    "strength": {
+      "session": {
+        "title": "训练设置",
+        "durationMinutes": "训练时长（分钟）",
+        "plannedSessionRpe": "计划训练 RPE"
+      },
+      "exercise": {
+        "title": "动作 {number}",
+        "name": "动作名称",
+        "namePlaceholder": "例如：杠铃深蹲…",
+        "equipment": "器械",
+        "equipmentPlaceholder": "例如：BARBELL…",
+        "remove": "删除动作 {number}"
+      },
+      "setGroup": {
+        "title": "组方案 {number}",
+        "remove": "删除组方案 {number}",
+        "setType": "组类型",
+        "sets": "组数",
+        "prescription": "训练方式",
+        "seconds": "时长（秒）",
+        "minReps": "最少次数",
+        "maxReps": "最多次数",
+        "load": "负重方式",
+        "loadValue": "负重值",
+        "loadUnit": "负重单位",
+        "percent1rm": "1RM 百分比",
+        "effort": "强度目标",
+        "effortValue": "强度值",
+        "restSeconds": "组间休息（秒）",
+        "setTypes": {
+          "warmup": "热身组",
+          "work": "正式组"
+        },
+        "prescriptions": {
+          "reps": "按次数",
+          "time": "按时间"
+        },
+        "loads": {
+          "open": "不指定负重",
+          "absolute": "固定重量",
+          "percent1rm": "1RM 百分比",
+          "bodyweight": "自重",
+          "bodyweightOffset": "自重增减"
+        },
+        "efforts": {
+          "none": "不指定",
+          "rpe": "RPE",
+          "rir": "RIR"
+        }
+      },
+      "preview": {
+        "title": "力量训练",
+        "exerciseCount": "{count} 个动作",
+        "workingSetCount": "{count} 个正式组",
+        "warmup": "热身",
+        "rest": "休息 {seconds} 秒",
+        "openLoad": "不指定负重",
+        "bodyweight": "自重",
+        "unnamedExercise": "未命名动作",
+        "moreExercises": "另外 {count} 个动作"
+      },
+      "buttons": {
+        "addSetGroup": "添加组方案",
+        "addExercise": "添加动作"
+      }
+    },
+    "title": {
+      "view": "查看训练",
+      "edit": "编辑训练",
+      "week": "第",
+      "weekLabel": "第 {week} 周",
+      "sessionLabel": "第 {session} 节"
+    },
+    "tabs": {
+      "rules": "规则输入",
+      "manual": "手动设置"
+    },
+    "chart": {
+      "placeholder": "验证规则或手动搭建后可在此预览强度曲线。"
+    },
+    "fields": {
+      "sportType": {
+        "label": "运动类型",
+        "placeholder": "选择类型",
+        "options": {
+          "run": "跑步",
+          "cycling": "骑行",
+          "swim": "游泳"
+        }
+      },
+      "notes": {
+        "label": "备注",
+        "placeholder": "补充说明、注意事项或训练备注..."
+      },
+      "name": {
+        "label": "名称",
+        "placeholder": "训练名称（可选）"
+      },
+      "rules": {
+        "label": "规则",
+        "placeholder": "粘贴训练描述或结构化内容..."
+      }
+    },
+    "manual": {
+      "title": "手动设置训练结构",
+      "empty": "还没有任何训练块，先添加一个 work / rest / repeat。",
+      "blocks": {
+        "work": "Work",
+        "rest": "Rest",
+        "repeat": "Repeat"
+      },
+      "labels": {
+        "child": "子块"
+      },
+      "fields": {
+        "duration": "时长（秒）",
+        "targetType": "目标类型",
+        "targetValue": "目标值",
+        "targetValuePlaceholder": "输入目标值",
+        "repeatCount": "重复次数"
+      },
+      "targets": {
+        "none": "无目标",
+        "powerPercent": "功率 %",
+        "powerWatts": "功率 W",
+        "cadence": "踏频 rpm",
+        "heartRatePercent": "心率 %",
+        "heartRateBpm": "心率 bpm",
+        "paceKmh": "配速 km/h",
+        "gradeDeg": "坡度 °"
+      },
+      "buttons": {
+        "addStep": "新增步骤",
+        "addWorkBlock": "新增 Work",
+        "addRestBlock": "新增 Rest",
+        "addRepeatBlock": "新增 Repeat",
+        "remove": "删除",
+        "removeBlock": "删除块"
+      }
+    },
+    "errors": {
+      "definition": {
+        "exerciseNameRequired": "请为每个动作填写名称。",
+        "exerciseRequired": "请至少添加一个动作。",
+        "setGroupRequired": "每个动作至少需要一个组方案。",
+        "workSetRequired": "每个动作至少需要一个正式组。"
+      },
+      "sportType": "请选择运动类型",
+      "rules": "请输入训练规则",
+      "validateFirst": "请先校验规则",
+      "parseFailed": "文本解析失败",
+      "invalidInput": "请检查训练输入：持续值、重复次数和目标值必须有效，且不能为负数。",
+      "saveFailed": "保存失败"
+    },
+    "buttons": {
+      "close": "关闭",
+      "delete": "删除",
+      "uploadFit": "上传 FIT",
+      "validate": "校验输入",
+      "validating": "校验中...",
+      "saveDraft": "保存草稿"
+    },
+    "mobile": {
+      "addWorkout": "添加训练",
+      "workoutType": "训练类型",
+      "scheduledAt": "安排在",
+      "editMode": "编辑方式",
+      "manualMode": "手动编排",
+      "dslMode": "DSL 文本",
+      "sport": "运动类型",
+      "endurance": "耐力训练",
+      "strength": "力量训练",
+      "stepLabel": "步骤 {number}",
+      "repeatLabel": "重复组 {number}",
+      "repeatSummary": "重复 {count} 次 · {steps} 个步骤",
+      "manualBuilderHint": "每个步骤都可以按时间、距离或开放方式结束，并单独设置强度目标。",
+      "dslHint": "每行描述一个训练步骤，可使用 10m、30s 或 5km 等时长与距离。",
+      "dslPlaceholder": "warmup 10m\nwork 30m\ncooldown 5m"
+    },
+    "confirmDelete": {
+      "title": "删除这节训练？",
+      "description": "这会把当前训练从计划草稿中移除。",
+      "cancel": "取消"
+    }
+  },
+  "PlanMutations": {
+    "success": {
+      "saved": "计划已保存",
+      "updated": "计划已更新",
+      "workoutUpdated": "训练已更新",
+      "activated": "计划已开始",
+      "activationCancelled": "已取消启用",
+      "paused": "计划已暂停",
+      "completed": "计划已完成",
+      "cancelled": "计划已停用",
+      "deleted": "计划已删除"
+    },
+    "errors": {
+      "noPlan": "没有可保存的计划",
+      "saveFailed": "保存失败",
+      "updateFailed": "更新计划失败",
+      "workoutUpdateFailed": "更新训练失败",
+      "activateFailed": "开始计划失败",
+      "cancelFailed": "停用计划失败",
+      "pauseFailed": "暂停计划失败",
+      "completeFailed": "完成计划失败",
+      "deleteFailed": "删除计划失败"
+    }
+  },
+  "GlobalHeartRatePage": {
+    "title": "Trainingload.ai · 心率分析",
+    "heartRateAnalysis": "心率分析",
+    "header": {
+      "eyebrow": "指标",
+      "description": "查看心率曲线、阈值参考和区间分布。"
+    },
+    "tabs": {
+      "curve": "曲线",
+      "zones": "区间"
+    }
+  },
+  "GlobalHeartRateChart": {
+    "time": "时间",
+    "noData": "暂无心率数据",
+    "maxHr": "最大心率",
+    "lthr": "乳酸阈值心率"
+  },
+  "V2HomePage": {
+    "aiTodaySuggestion": {
+      "title": "智能教练 今日建议",
+      "fallbackTitle": "今日训练提示",
+      "weatherAttribution": "{serviceName} 数据经 Trainingload.ai 处理",
+      "loading": "智能教练正在思考中…",
+      "summary": {
+        "workout": "今天建议围绕「{title}」执行：先把热身做充分，{sport} 主课按计划强度完成，预计 {duration}。训练中重点观察呼吸、腿部反馈和心率漂移，若身体反馈偏沉，就保留质量、减少额外加量。",
+        "multi": "今天有 {count} 项计划，优先保证第一项「{title}」的质量。两项之间留足补给、补水和恢复时间，后一项按体感微调，不要把轻松课练成强度课。",
+        "fatigue": "今天安排了「{title}」，但当前 TSB {tsb}，疲劳信号偏高。建议把 {sport} 控制在计划下限，热身后若仍发沉，就改成轻松完成或推迟，别用意志硬顶强度。",
+        "loadSpike": "本周负荷较上周已变化 {drift}，今天「{title}」建议稳住强度上限，别额外加量。完成后优先补给、睡眠和拉伸，让负荷被吸收，而不是继续堆高。",
+        "rest": "今天没有计划训练，建议做 20-30 分钟轻松活动或完全休息。可以顺手整理训练记录、补充主观体感，把精力和新鲜感留给下一次关键课。",
+        "restFatigue": "今天没有计划训练，且 TSB {tsb} 显示疲劳偏高。建议真正恢复：轻松走动、补水、早睡，比硬加一练更值；如果仍酸痛，就继续降低刺激。",
+        "restLoad": "今天没有计划训练，本周负荷变化 {drift}。建议把今天当恢复日，只做低强度活动，避免把负荷继续推高；明天再根据睡眠和腿感决定是否恢复正常训练。",
+        "completed": "今天 {count} 项计划已完成。接下来重点是恢复：补水、补糖、记录体感和完成难度；明天是否加量，建议根据睡眠、酸痛和晨间状态来决定。"
+      },
+      "tags": {
+        "planCount": "{count} 项计划",
+        "restDay": "恢复日",
+        "tsb": "TSB {value}",
+        "loadDrift": "负荷 {value}",
+        "recentActivity": "近期已训练"
+      }
+    },
+    "stateInquiry": {
+      "tag": "状态补充",
+      "subtitle": "补充一项信息，让今天的建议更可靠",
+      "answer": "去 AI 教练回答",
+      "skip": "暂时跳过"
+    },
+    "decisionStack": {
+      "title": "待确认调整",
+      "confirm": "确定调整",
+      "dismiss": "先不改",
+      "confirmCancel": "取消",
+      "confirmTitle": "确认调整训练计划？",
+      "confirmDescription": "教练根据日复盘建议改下一练。确认后才会写入计划。",
+      "postponeImpact": "将「{name}」推迟一天",
+      "skipImpact": "跳过「{name}」",
+      "reduceVolumeImpact": "降低「{name}」的训练量：{after}",
+      "reduceIntensityImpact": "降低「{name}」的强度：{after}",
+      "recoveryImpact": "将「{name}」改为恢复训练：{after}",
+      "applySuccess": "已按教练建议调整计划",
+      "applyFailed": "无法应用调整，请稍后重试",
+      "rejectSuccess": "已保持原计划",
+      "bringForward": "切换到这张卡片",
+      "unnamedWorkout": "下一练",
+      "startNext": "开启下一计划",
+      "startNextTitle": "周期已完成",
+      "startNextImpact": "基于「{name}」的周期总结开启下一计划",
+      "startNextConfirmTitle": "确认开启下一计划？",
+      "startNextConfirmDescription": "确认后会进入计划创建，并把本周期总结作为依据。不会改已完成的计划。",
+      "startNextSuccess": "已确认开启下一计划",
+      "startNextDismiss": "先不开始"
+    },
+    "recentActivity": {
+      "titleSection": "最近活动",
+      "title": "暂无最近活动",
+      "time": "",
+      "summary": "上传或同步训练后，这里会显示最近一条活动。",
+      "status": "--",
+      "viewReview": "查看复盘",
+      "untitled": "未命名活动"
+    },
+    "timezonePrompt": {
+      "title": "系统检测到时区发生变化，是否将时区更新为 {label}？",
+      "snoozeHint": "选择「暂不更新」后，30 天内不再询问。",
+      "update": "更新",
+      "later": "暂不更新",
+      "success": "已更新档案时区",
+      "error": "更新时区失败"
+    },
+    "currentPlan": {
+      "title": "当前计划",
+      "cycle": "训练周期",
+      "weekLabel": "当前周",
+      "todayFocus": "今日安排",
+      "noWorkoutToday": "今日暂无计划训练"
+    },
+    "weekday": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    },
+    "today": {
+      "date": "今天",
+      "weekday": ""
+    },
+    "summaryMetrics": {
+      "pmc": {
+        "title": "体能负荷",
+        "label": "训练负荷",
+        "hint": "状态待更新",
+        "fitness": "体能",
+        "fatigue": "疲劳",
+        "form": "状态"
+      },
+      "power": {
+        "title": "功率",
+        "label": "功率能力",
+        "hint": "能力待更新"
+      },
+      "speed": {
+        "title": "配速",
+        "label": "配速趋势",
+        "hint": "趋势待更新"
+      },
+      "hr": {
+        "title": "心率",
+        "label": "心率效率",
+        "value": "心率待更新",
+        "hint": "效率待更新"
+      }
+    },
+    "common": {
+      "show": "显示",
+      "load": "负荷",
+      "session": "课表"
+    },
+    "toast": {
+      "inProgress": "该功能正在完善中"
+    },
+    "load": {
+      "title": "负荷",
+      "viewWeek": "查看本周",
+      "settingsAria": "负荷模块设置",
+      "settingsTitle": "负荷模块设置",
+      "settingsDescription": "配置负荷模块的筛选项、显示项与区间。",
+      "settingsPlaceholder": "设置项待补充",
+      "completed": "本周负荷",
+      "target": "上周负荷",
+      "driftToday": "较上周变化",
+      "chartTitle": "本周负荷",
+      "weeklyTrainingLoad": "本周训练负荷",
+      "weeklySessionCount": "周训练次数",
+      "loadUnit": "负荷",
+      "goal": "目标",
+      "completedLabel": "已完成",
+      "actual": "实际",
+      "expected": "计划",
+      "todayValues": "实际 {actual} · 计划 {planned}",
+      "chartAria": "本周实际负荷与计划负荷",
+      "noData": "本周暂无负荷数据"
+    },
+    "summary": {
+      "title": "摘要",
+      "viewAllMetrics": "查看全部指标",
+      "settingsAria": "摘要模块设置",
+      "settingsTitle": "摘要模块设置",
+      "settingsDescription": "配置摘要指标的选择与排序。"
+    },
+    "currentState": {
+      "title": "当前状态",
+      "settingsAria": "当前状态模块设置",
+      "settingsTitle": "当前状态模块设置",
+      "settingsDescription": "配置状态卡片的显示、隐藏与排序。",
+      "hideMetric": "隐藏",
+      "emptyMetrics": "暂无指标。点击右上角齿轮进入布局模式，再添加或排序卡片。",
+      "cards": {
+        "fitness": "体能",
+        "fatigue": "疲劳",
+        "form": "状态",
+        "readiness": "准备度"
+      },
+      "healthCard": {
+        "title": "健康",
+        "restingHeartRate": "静息心率",
+        "maxHeartRate": "最大心率"
+      }
+    },
+    "todayExecution": {
+      "title": "今日训练",
+      "mobileTitle": "训练",
+      "mobileMeta": "{weekday}  {count} 节课",
+      "meta": "{date}  {weekday}  {count} 项计划",
+      "enterToday": "查看",
+      "linked": "已关联活动：{activity}",
+      "notLinked": "未关联活动",
+      "empty": "今日暂无计划训练",
+      "actionPending": "处理中…",
+      "actionPostpone": "推迟",
+      "actionSkip": "跳过",
+      "actionDelete": "删除",
+      "deleteDisabledTip": "进行中的计划暂不支持删除单条训练",
+      "toastPostponeSuccess": "已推迟该训练",
+      "toastPostponeFailed": "推迟失败，请重试",
+      "toastSkipSuccess": "已标记为跳过",
+      "toastSkipFailed": "跳过失败，请重试",
+      "postponeConfirmTitle": "确认推迟训练？",
+      "postponeConfirmDescription": "推迟会改变本周节奏和后续训练衔接。建议仅在确实无法按时完成时使用。",
+      "postponeConfirmCancel": "取消",
+      "postponeConfirmAction": "仍要推迟"
+    },
+    "upload": {
+      "title": "上传活动",
+      "cardTitle": "上传活动文件",
+      "description": "导入 FIT / TCX / GPX 活动文件后，可关联到计划训练并生成活动复盘。",
+      "selectFile": "上传活动文件",
+      "soonToast": "文件上传功能即将上线"
+    },
+    "empty": {
+      "header": "训练首页",
+      "title": "还没有进行中的训练计划",
+      "description": "创建一个 AI 教练计划后，首页会展示今日训练、周负荷、当前状态和最近活动。",
+      "createPlan": "创建计划",
+      "viewHistory": "查看历史计划",
+      "getStarted": "开始使用",
+      "cards": {
+        "create": {
+          "title": "创建训练计划",
+          "description": "从目标和时间约束开始，让 AI 教练生成周期草案。"
+        },
+        "upload": {
+          "title": "上传活动",
+          "description": "即使没有计划，也可以先导入 FIT / TCX / GPX 活动文件做复盘。"
+        },
+        "coach": {
+          "title": "询问教练",
+          "description": "不确定训练方向时，先让教练帮你判断下一步。"
+        }
+      }
+    },
+    "header": {
+      "askCoach": "问教练",
+      "weekTarget": "周目标",
+      "viewCurrentPlan": "查看当前计划"
+    },
+    "dynamic": {
+      "weekLabel": "第 {current} / {total} 周",
+      "sport": {
+        "run": "跑步",
+        "cycle": "骑行",
+        "swim": "游泳",
+        "other": "其他"
+      },
+      "status": {
+        "done": "完成",
+        "inProgress": "进行中",
+        "skipped": "跳过",
+        "moved": "已调整",
+        "planned": "计划"
+      },
+      "activityStatus": {
+        "processing": "处理中",
+        "ready": "已就绪",
+        "partialFailed": "部分异常",
+        "failed": "处理失败",
+        "unknown": "未知"
+      },
+      "dateLabel": "{month}月{day}日",
+      "plannedWorkoutFallback": "今日训练"
+    },
+    "todaySuggestionActions": {
+      "viewSuggestion": "查看今日教练建议",
+      "workoutProposal": "建议课次",
+      "durationMinutes": "{minutes} 分钟",
+      "independentWorkoutNote": "确认后会添加为今天的计划外课次，不会改动现有训练计划。",
+      "suggestionChanged": "训练事实已变化，今日建议已更新",
+      "sport": {
+        "run": "跑步",
+        "cycling": "骑行",
+        "swim": "游泳",
+        "strength": "力量训练",
+        "other": "其他"
+      },
+      "intensity": {
+        "very_easy": "非常轻松",
+        "easy": "轻松",
+        "moderate": "中等",
+        "hard": "高强度"
+      },
+      "reasoning": "判断依据",
+      "remindAt": "提醒时间",
+      "schedule": "设置提醒",
+      "workoutFailed": "无法创建今天的课次",
+      "reminderScheduled": "已设置站内提醒",
+      "reminderFailed": "无法设置提醒",
+      "actionFailed": "无法更新今日建议",
+      "coachPrompt": "请基于今天的教练建议，和我一起判断接下来怎么做。",
+      "trainingWindowClosed": "今天已不再适合安排新的训练",
+      "workoutAlreadyExists": "今天已有计划课次，无需重复添加"
+    }
+  },
+  "PlanActivationDialog": {
+    "title": "开始计划",
+    "description": "请选择计划实际开始日期。系统会按该日期结合训练偏移量计算每节训练的实际日期。",
+    "cancel": "取消",
+    "confirm": "确认开始"
+  },
+  "V2PlanPage": {
+    "weekday": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    },
+    "status": {
+      "active": "进行中",
+      "paused": "已暂停",
+      "completed": "已完成",
+      "cancelled": "已终止",
+      "draft": "草稿"
+    },
+    "header": {
+      "title": "训练计划",
+      "createPlan": "创建计划",
+      "currentCycle": "当前周期",
+      "viewOtherPlans": "查看其他计划",
+      "remaining": "剩余",
+      "remainingWeeks": "{weeks} 周",
+      "manageAriaLabel": "管理计划",
+      "weekStatus": "第 {current} / {total} 周 · {status}",
+      "totalSessions": "共 {count} 节训练"
+    },
+    "empty": {
+      "title": "暂无进行中的计划",
+      "description": "创建新计划，或从已有计划中选择一个开始执行。",
+      "createPlan": "创建计划",
+      "viewHistory": "浏览全部计划",
+      "nextSteps": {
+        "title": "你可以这样开始",
+        "aiTitle": "用 AI 生成计划",
+        "aiDescription": "告诉教练你的目标和时间，生成一份可编辑的训练计划。",
+        "historyTitle": "浏览全部计划",
+        "historyDescription": "继续编辑草稿，或查看暂停和已完成的计划。",
+        "coachTitle": "先问问教练",
+        "coachDescription": "不确定怎么安排？让教练根据你的近期训练给出建议。"
+      },
+      "includesTitle": "计划内容",
+      "includes": {
+        "structure": "周期与每周结构",
+        "daily": "每日训练安排",
+        "review": "进度跟踪与复盘"
+      }
+    },
+    "weekStrip": {
+      "currentPosition": "当前第 {current} / {total} 周",
+      "viewWeek": "查看第 {week} 周",
+      "sessionsUnit": "课次",
+      "title": "周期进度",
+      "action": "全部计划",
+      "legend": "灰柱为每周计划负荷，绿柱为实际负荷；各周使用同一纵轴比较",
+      "ratioOfPlannedShort": "当周计划负荷的 {pct}%",
+      "noPlannedLoadShort": "无计划负荷",
+      "weekTooltip": "第 {week} 周 · 完成 {done}/{total} · 实际 {actual} / 期望 {estimated} · 合规率 {rate}%",
+      "weekTooltipSessions": "第 {week} 周 · {done}/{total} 节",
+      "state": {
+        "done": "已完成",
+        "current": "当前",
+        "next": "后续"
+      }
+    },
+    "weekLoad": {
+      "title": "本周负荷",
+      "currentWeek": "第 {week} 周",
+      "barHelpAria": "每日负荷条如何计算",
+      "barHeightHint": "紫色折线为每日实际负荷，斜纹柱为计划负荷，两者使用同一纵轴比较。",
+      "plannedSessions": "计划训练"
+    },
+    "workout": {
+      "title": "本周训练",
+      "empty": "本周暂无训练安排",
+      "session": "第 {index} 节",
+      "editPlan": "编辑计划",
+      "unscheduled": "未排期",
+      "status": {
+        "overdue": "未完成",
+        "done": "已完成",
+        "inProgress": "进行中",
+        "skipped": "已跳过",
+        "moved": "已推迟",
+        "today": "待执行",
+        "planned": "待执行"
+      },
+      "linkedActivityLine": "关联活动",
+      "linkedActivityFallback": "活动"
+    },
+    "today": {
+      "title": "今日训练",
+      "viewTodayPlan": "查看计划",
+      "empty": "今天没有计划训练"
+    },
+    "actions": {
+      "pending": "处理中...",
+      "postpone": "推迟",
+      "skip": "跳过",
+      "delete": "删除",
+      "deleteDisabledTip": "暂不支持删除进行中计划的单个训练",
+      "postponeToday": "推迟今天",
+      "linkedBlockedTip": "已关联活动，请先在活动侧解除关联后再推迟或跳过。",
+      "postponeTodayBlockedTip": "今天没有可推迟的训练（已关联活动的训练需先解除关联）。"
+    },
+    "toast": {
+      "noPostponableToday": "今天没有可推迟的训练",
+      "postponeTodaySuccess": "已将今日训练推迟到明天",
+      "postponeOneSuccess": "训练已推迟到下一天",
+      "postponeFailed": "推迟失败，请稍后重试",
+      "skipSuccess": "已标记为跳过",
+      "skipFailed": "标记跳过失败，请稍后重试"
+    },
+    "goal": {
+      "title": "目标进度",
+      "weekSessions": "本周训练",
+      "completed": "已完成",
+      "progressTo": "推进到",
+      "dayNumber": "第 {day} 天",
+      "notStarted": "未开始"
+    },
+    "coach": {
+      "title": "教练建议",
+      "description": "当前计划：{status}。本周已完成 {completed}/{total} 节训练，周期还剩约 {remainingWeeks} 周。可根据实际完成情况继续调整。",
+      "ask": "询问教练"
+    },
+    "manage": {
+      "cancel": "取消",
+      "confirm": "确认",
+      "pause": {
+        "menu": "暂停计划",
+        "title": "暂停计划",
+        "description": "暂停后会保留当前训练结构和执行记录。",
+        "confirm": "确认暂停"
+      },
+      "complete": {
+        "menu": "完成计划",
+        "title": "完成计划",
+        "description": "将计划标记为完成，后续可作为历史计划查看。",
+        "confirm": "确认完成"
+      },
+      "delete": {
+        "menu": "删除计划",
+        "title": "删除计划",
+        "description": "删除后不可恢复，并会中断当前周期的连续性，请确认后再执行。",
+        "confirm": "确认删除"
+      }
+    },
+    "postponeConfirm": {
+      "title": "确认推迟训练？",
+      "todayDescription": "推迟今天训练会将今日未完成内容顺延，可能影响本周负荷与后续课程衔接。",
+      "singleDescription": "推迟该训练会改变后续训练节奏，可能影响计划效果。",
+      "confirm": "仍要推迟"
+    },
+    "workoutStatus": {
+      "done": "已完成",
+      "inProgress": "进行中",
+      "skipped": "已跳过",
+      "moved": "已推迟",
+      "planned": "待执行",
+      "incomplete": "未完成",
+      "upcoming": "待执行"
+    },
+    "movedBy": {
+      "user": "我推迟",
+      "coach": "教练推迟"
+    }
+  },
+  "UsagePage": {
+    "navTitle": "AI 用量",
+    "navDescription": "AI 服务商用量",
+    "open": "查看用量",
+    "title": "AI 用量",
+    "description": "AI 服务商用量",
+    "loading": "加载中...",
+    "selfHost": {
+      "eyebrow": "自托管 · 自有 API Key",
+      "title": "AI 用量由你的服务商记录",
+      "description": "本实例直接调用 Owner 配置的 AI 服务商。Trainingload.ai 不参与请求转发，也不采集服务商的用量记录。",
+      "statusSummary": "自托管 AI 状态",
+      "currentProvider": "当前 AI 服务",
+      "notConfigured": "未配置",
+      "statusReady": "已配置",
+      "statusOff": "未启用",
+      "statusIssue": "配置异常",
+      "trainingloadMetering": "Trainingload.ai 用量统计",
+      "notApplicable": "不适用",
+      "providerRecords": "服务商用量记录",
+      "providerDashboard": "AI 服务商控制台",
+      "explanationTitle": "这里为什么没有用量图表？",
+      "providerUsage": "用量由你的 AI 服务商记录，Trainingload.ai 无法读取这些记录。请前往对应服务商控制台查看明细。",
+      "openSettings": "管理 AI 配置"
+    }
+  },
+  "PlanWorkoutActivityLink": {
+    "label": {
+      "unlinked": "关联活动",
+      "linkedFallback": "活动"
+    },
+    "dropdown": {
+      "heading": "当天的活动",
+      "empty": "当天暂无活动记录",
+      "loading": "加载中…",
+      "noScheduledDate": "该训练尚未排到具体日期",
+      "durationMinutes": "约 {minutes} 分钟",
+      "linkedOtherPlanWorkout": "已关联：{name}",
+      "activityFallback": "活动",
+      "sessionFallback": "计划训练",
+      "removeLink": "解除关联"
+    },
+    "confirm": {
+      "replaceTitle": "替换关联？",
+      "replaceDescription": "「{activity}」已关联「{workout}」，要用本节计划课替换吗？",
+      "confirm": "替换",
+      "cancel": "取消"
+    },
+    "toast": {
+      "linkSuccess": "已关联活动",
+      "linkFailed": "关联失败，请重试",
+      "unlinkSuccess": "已解除关联",
+      "unlinkFailed": "解除失败，请重试"
+    }
+  },
+  "ActivityPlanLink": {
+    "label": {
+      "unlinked": "关联训练",
+      "auto": "自动"
+    },
+    "dropdown": {
+      "heading": "当日计划课程",
+      "empty": "当日没有可用的计划课程",
+      "loading": "加载中…",
+      "expectedDuration": "计划约 {minutes} 分钟",
+      "occupiedBy": "已关联：{title}",
+      "removeLink": "移除关联",
+      "sessionFallback": "第 {index} 课",
+      "linkedFallback": "计划课程"
+    },
+    "confirm": {
+      "replaceTitle": "替换关联？",
+      "replaceDescription": "「{workout}」已关联活动「{other}」，是否改为关联本条活动？",
+      "confirm": "替换",
+      "cancel": "取消"
+    },
+    "toast": {
+      "linkSuccess": "已关联训练",
+      "linkFailed": "关联失败",
+      "unlinkSuccess": "已移除关联",
+      "unlinkFailed": "移除失败"
+    }
+  },
+  "V2ActivitiesPage": {
+    "searchEntry": "搜索活动、来源或训练关键词",
+    "feed": {
+      "title": "活动流",
+      "filter": "筛选",
+      "refresh": "刷新",
+      "refreshing": "刷新中",
+      "pullToRefresh": "下拉可刷新",
+      "releaseToRefresh": "松开刷新",
+      "pullBottomToRefresh": "已到底部，继续下拉可刷新",
+      "releaseBottomToRefresh": "松开立即刷新",
+      "loadingMore": "加载中...",
+      "noMore": "没有更多了"
+    },
+    "statsCard": {
+      "title": "活动统计",
+      "subtitle": "当前视图 {count} 次活动",
+      "open": "打开"
+    },
+    "provider": {
+      "intervalsIcu": "Intervals.icu",
+      "manual": "手动"
+    },
+    "mirror": {
+      "untitled": "等待来源同步的活动",
+      "discoveredVia": "由 Intervals.icu 发现",
+      "syncing": "正在获取来源活动的完整数据。",
+      "connectionRequired": "当前连接无法提供完整活动，请检查来源连接。",
+      "importDisabled": "来源已连接，但活动自动导入尚未开启。",
+      "reauthRequired": "来源授权已失效，重新授权后可继续同步。",
+      "notFound": "未在来源中找到可唯一匹配的活动。",
+      "ambiguous": "存在多条可能匹配的来源活动，因此未自动关联。",
+      "syncFailed": "来源同步未能完成，请检查连接后重试。",
+      "pending": "同步中",
+      "retry": "重新同步",
+      "retrying": "正在重试",
+      "connectSource": "连接来源",
+      "reauthorizeSource": "重新授权来源",
+      "enableSourceImport": "开启来源导入",
+      "checkSourceConnection": "检查来源连接"
+    },
+    "common": {
+      "unknownTime": "未知时间",
+      "dateTime": "{month}/{day} {hh}:{mm}",
+      "load": "负荷",
+      "untitledActivity": "未命名活动"
+    },
+    "status": {
+      "processing": "处理中",
+      "ready": "已就绪",
+      "partialFailed": "部分异常",
+      "failed": "处理失败",
+      "unknown": "未知"
+    },
+    "actions": {
+      "viewReview": "查看复盘",
+      "view": "查看",
+      "aiReview": "AI 复盘",
+      "more": "更多操作",
+      "openMenu": "打开菜单",
+      "export": "导出",
+      "delete": "删除",
+      "exportFailed": "导出失败，请稍后重试",
+      "confirmDeleteTitle": "删除此活动？",
+      "confirmDeleteDescription": "删除后不可恢复。",
+      "exportDialogTitle": "选择导出类型",
+      "exportDialogDescription": "请选择导出文件格式。",
+      "selectExportTypePlaceholder": "请选择导出格式",
+      "confirm": "确认",
+      "cancel": "取消",
+      "deleting": "删除中...",
+      "exporting": "导出中...",
+      "exportToProvider": "发送到 {provider}",
+      "exportingToProvider": "正在发送到 {provider}...",
+      "exportToProviderSuccess": "活动已发送到 {provider}",
+      "exportToProviderFailed": "发送活动到 {provider} 失败"
+    },
+    "map": {
+      "description": "活动地图",
+      "open": "打开活动地图"
+    },
+    "import": {
+      "title": "上传活动",
+      "cardTitle": "上传活动文件",
+      "description": "导入 FIT / TCX / GPX 活动文件，生成复盘并关联到计划训练。",
+      "selectFile": "上传活动文件",
+      "soonToast": "文件上传功能即将上线"
+    },
+    "empty": {
+      "title": "暂无活动数据",
+      "description": "上传 FIT / TCX / GPX 活动文件后，活动流会显示最近训练，并支持复盘和关联计划。"
+    }
+  },
+  "V2ActivitiesStatsPage": {
+    "title": "活动统计",
+    "back": "返回活动流",
+    "heatmapTitle": "{year} 年活动点图",
+    "chartTitle": "趋势",
+    "metricChartTitle": "{metric}趋势",
+    "monthlyListTitle": "按月活动列表",
+    "countSummary": "{count} 次活动",
+    "emptyYear": "这一年还没有活动",
+    "untitledActivity": "未命名活动",
+    "controls": {
+      "year": "年份",
+      "metric": "趋势指标"
+    },
+    "sport": {
+      "all": "全部运动",
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳"
+    },
+    "heatmap": {
+      "range": "{start} 到 {end}",
+      "total": "{count} 次活动",
+      "day": "{date}: {count} 次活动",
+      "less": "少",
+      "more": "多"
+    }
+  },
+  "V2PlansPage": {
+    "status": {
+      "active": "进行中",
+      "scheduled": "待接管",
+      "paused": "已暂停",
+      "completed": "已完成",
+      "cancelled": "已终止",
+      "superseded": "已被接管",
+      "draft": "草稿"
+    },
+    "header": {
+      "badge": "计划库",
+      "title": "训练计划",
+      "description": "查看全部计划，继续编辑草稿，并跟踪完成率与负荷执行情况。"
+    },
+    "overview": {
+      "title": "概览",
+      "active": "进行中",
+      "completed": "已完成",
+      "averageSessionCompletion": "平均课次完成率",
+      "averageLoadCompliance": "平均负荷合规率"
+    },
+    "allPlans": {
+      "title": "全部计划",
+      "count": "{count} 个计划",
+      "empty": "还没有计划"
+    },
+    "create": {
+      "title": "创建计划",
+      "cardTitle": "开始一份新计划",
+      "description": "手动编排每节训练，或告诉 AI 你的目标和时间，生成完整周期。",
+      "button": "创建计划"
+    },
+    "recent": {
+      "title": "最近计划",
+      "empty": "暂无最近计划",
+      "itemMeta": "{weeks} 周 · {sessions} 节训练"
+    },
+    "statusGuide": {
+      "title": "状态说明",
+      "draft": "草稿可以继续编辑，开始后即可执行。",
+      "active": "进行中的计划会同步到首页和日历。",
+      "history": "暂停、完成或终止的计划会保留在这里。",
+      "askCoach": "问教练"
+    },
+    "planRange": {
+      "startOn": "开始于 {date}",
+      "createdOn": "创建于 {date}"
+    },
+    "planProgress": {
+      "active": "第 {current} / {total} 周",
+      "scheduled": "等待按日期接管",
+      "paused": "已暂停 · 第 {current} / {total} 周",
+      "completed": "已完成 {count} 节训练",
+      "cancelled": "已终止",
+      "superseded": "已由新计划接管",
+      "draft": "草稿 · {count} 节训练"
+    },
+    "actions": {
+      "viewCurrentPlan": "查看当前计划",
+      "viewPlanDetail": "查看计划详情"
+    },
+    "coachText": {
+      "active": "进行中 · 已完成 {completed}/{total} 节训练",
+      "scheduled": "计划将在设定的开始日期自动接管。",
+      "paused": "计划已暂停，恢复后可继续执行。",
+      "completed": "计划已完成，可在历史中复盘。",
+      "cancelled": "计划已终止。",
+      "superseded": "新计划已经接管，本计划保留为历史记录。",
+      "draft": "草稿计划，开始后即可执行。"
+    },
+    "stats": {
+      "sessionCompletion": "课次完成率",
+      "loadCompliance": "负荷合规",
+      "plannedSessions": "计划课次",
+      "completed": "已完成"
+    },
+    "delete": {
+      "iconAria": "删除计划",
+      "cannotDeleteActive": "进行中的计划不能删除",
+      "activeHint": "进行中"
+    },
+    "start": {
+      "iconAria": "开始计划",
+      "disabledHasActivePlan": "已有进行中的计划，需先结束或暂停当前计划"
+    }
+  },
+  "V2DayPage": {
+    "weekdayShort": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    },
+    "dynamic": {
+      "dateLabel": "{month}月{day}日",
+      "status": {
+        "done": "完成",
+        "inProgress": "进行中",
+        "skipped": "跳过",
+        "moved": "已调整",
+        "planned": "计划"
+      },
+      "noDetail": "暂无详情",
+      "weekLabel": "第 {current} / {total} 周",
+      "readiness": "正常"
+    },
+    "header": {
+      "notInPlanRange": "不在计划周期内",
+      "notActivated": "未激活",
+      "noPlan": "暂无训练计划",
+      "backHome": "返回首页",
+      "selectDate": "选择日期",
+      "todayPlanMeta": "{date} · {weekday} · {week}",
+      "previousDay": "上一天",
+      "nextDay": "下一天"
+    },
+    "summary": {
+      "readiness": "待评估"
+    },
+    "coach": {
+      "title": "教练建议",
+      "askCoach": "询问教练",
+      "branchPrompt": "请基于今天的计划、完成情况和当前训练周期，帮我判断今天是否需要调整，并说明理由。"
+    },
+    "toast": {
+      "inProgress": "该功能正在完善中"
+    },
+    "overview": {
+      "title": "今日概览",
+      "adjust": "调整",
+      "plannedLoad": "计划课表",
+      "completed": "已完成",
+      "plannedDuration": "计划时长",
+      "progress": "进度"
+    },
+    "timeline": {
+      "title": "训练安排",
+      "addWorkout": "添加训练",
+      "meta": "{duration} · {sessionCount} 节",
+      "cardActionsSoon": "训练操作即将上线",
+      "linkedActivity": "已关联活动：{activity}",
+      "linkedBlockedTip": "已关联活动的课次暂不支持推迟或跳过",
+      "markedDoneToast": "已标记完成",
+      "markDone": "标记完成",
+      "actionPending": "处理中",
+      "actionPostpone": "推迟",
+      "actionSkip": "跳过",
+      "actionDelete": "删除",
+      "deleteDisabledTip": "删除功能暂未开放",
+      "postponeSuccess": "已推迟到下一天",
+      "postponeFailed": "推迟失败，请稍后重试",
+      "skipSuccess": "已标记为跳过",
+      "skipFailed": "跳过失败，请稍后重试",
+      "linkSoon": "关联活动功能即将上线",
+      "linkActivity": "关联活动",
+      "adjustSoon": "调整训练功能即将上线",
+      "adjustWorkout": "调整训练",
+      "empty": {
+        "title": "当天没有计划训练",
+        "description": "这个日期没有安排训练。你可以上传活动文件做复盘，或回到计划页调整训练安排。"
+      }
+    },
+    "weekContext": {
+      "title": "本周上下文",
+      "empty": {
+        "title": "暂无本周训练上下文",
+        "description": "当前日期没有可用的计划训练数据，保存训练安排后会显示本周分布。"
+      }
+    },
+    "upload": {
+      "title": "上传活动",
+      "cardTitle": "上传活动文件",
+      "description": "上传 FIT / TCX / GPX 活动文件后，可关联到当天训练并生成复盘。",
+      "selectFile": "上传活动文件"
+    }
+  },
+  "V2ActivitiesSearchPage": {
+    "back": "返回活动",
+    "quickFilters": {
+      "recent7d": "最近 7 天",
+      "recent30d": "最近 30 天",
+      "run": "跑步",
+      "cycling": "骑行",
+      "swim": "游泳"
+    },
+    "feed": {
+      "title": "搜索结果",
+      "total": "共 {count} 条",
+      "filtering": "正在更新筛选结果...",
+      "loadingMore": "加载中...",
+      "noMore": "没有更多了"
+    },
+    "empty": {
+      "title": "暂无活动数据",
+      "description": "当前筛选条件下没有活动。你可以调整筛选，或先上传 FIT / TCX / GPX 活动文件。"
+    },
+    "upload": {
+      "cardTitle": "上传活动文件",
+      "description": "上传活动后，这里会显示活动记录，并可进入复盘或关联训练计划。",
+      "selectFile": "上传活动文件"
+    },
+    "provider": {
+      "intervalsIcu": "Intervals.icu",
+      "manual": "手动"
+    },
+    "common": {
+      "unknownTime": "未知时间",
+      "dateTime": "{month}/{day} {hh}:{mm}",
+      "load": "负荷",
+      "untitledActivity": "未命名活动"
+    },
+    "status": {
+      "processing": "处理中",
+      "ready": "已就绪",
+      "partialFailed": "部分异常",
+      "failed": "处理失败",
+      "unknown": "未知"
+    },
+    "actions": {
+      "viewReview": "查看复盘",
+      "aiReview": "AI 复盘"
+    }
+  },
+  "V2MePage": {
+    "zones": {
+      "runThresholdPace": "跑步阈值配速",
+      "cyclingFtp": "骑行 FTP",
+      "thresholdHr": "阈值心率"
+    },
+    "connections": {
+      "connected": "已连接",
+      "available": "可用",
+      "upload": "上传"
+    },
+    "goal": {
+      "name": "暂无当前目标",
+      "description": "创建训练计划后，这里会显示当前周期与目标。",
+      "title": "当前目标",
+      "edit": "调整"
+    },
+    "header": {
+      "badge": "我的档案",
+      "description": "完善训练偏好后，计划和 AI 建议会更贴合你。"
+    },
+    "trainingZones": {
+      "title": "训练区间",
+      "manage": "管理"
+    },
+    "preferences": {
+      "title": "训练偏好",
+      "adjust": "调整",
+      "runFirst": {
+        "title": "跑步优先",
+        "description": "尚未设置专项偏好"
+      },
+      "cycleSupport": {
+        "title": "骑行支持",
+        "description": "尚未设置负荷来源"
+      }
+    },
+    "platformConnections": {
+      "title": "平台连接",
+      "manage": "管理"
+    },
+    "privacy": {
+      "title": "隐私与数据",
+      "defaultPrivate": "默认仅自己可见",
+      "deletable": "可随时删除账户数据",
+      "aiScope": "AI 仅使用授权训练数据"
+    },
+    "settings": {
+      "title": "设置",
+      "trainingReminder": "训练提醒",
+      "recoveryReminder": "恢复提醒",
+      "unitsAndDisplay": "单位与显示"
+    },
+    "mobile": {
+      "training": {
+        "title": "训练",
+        "activities": "活动",
+        "calendar": "日历",
+        "map": "活动地图",
+        "overview": "训练概览",
+        "analysis": "训练分析"
+      },
+      "performance": {
+        "title": "表现",
+        "pmc": "体能与疲劳",
+        "power": "功率",
+        "heartRate": "心率",
+        "pace": "配速"
+      },
+      "account": {
+        "title": "账户",
+        "profile": "个人资料",
+        "connections": "平台连接",
+        "zones": "训练区间",
+        "notifications": "通知",
+        "usage": "用量",
+        "settings": "设置",
+        "autoUpdate": "自动更新",
+        "reviewAutomation": "复盘自动化",
+        "activities": "活动",
+        "bestDistance": "最佳距离"
+      },
+      "settings": {
+        "title": "设置",
+        "theme": "外观主题",
+        "language": "语言",
+        "units": "单位制",
+        "powerUnit": "功率单位",
+        "chartAxis": "图表横轴",
+        "timeFormat": "时间格式"
+      },
+      "menu": "打开账户与设置菜单",
+      "signOut": "退出登录",
+      "signingOut": "正在退出…",
+      "version": "Trainingload.ai {version}",
+      "support": "支持"
+    }
+  },
+  "V2CoachPage": {
+    "toast": {
+      "inProgress": "功能开发中"
+    },
+    "dynamic": {
+      "stateHintGood": "本周执行不错",
+      "stateHintWatch": "留意本周执行节奏",
+      "stateHintDefault": "暂无计划执行数据",
+      "stateValue": "已完成 {done}/{total}",
+      "activityScope": "{distanceKm} km 活动",
+      "unknownTime": "未知时间",
+      "week": "第 {current}/{total} 周"
+    },
+    "dynamicPrompts": {
+      "p1": "今天的 {workout} 应该怎么执行？",
+      "p2": "第 {week} 周要不要调整强度？",
+      "p3": "最近恢复状态适合加量吗？",
+      "p4": "帮我复盘最近一次活动。"
+    },
+    "prompts": {
+      "p1": "帮我制定本周训练重点",
+      "p2": "我今天应该练什么？",
+      "p3": "如何安排恢复日？",
+      "p4": "根据最近活动给我建议。"
+    },
+    "header": {
+      "badge": "AI 教练",
+      "title": "训练问答与计划调整",
+      "description": "结合当前计划、近期活动和个人设置，向 AI 教练发起训练问题。",
+      "newChat": "新对话"
+    },
+    "currentContext": {
+      "title": "当前上下文",
+      "switch": "切换",
+      "week": "暂无周期",
+      "cycle": "未激活计划",
+      "load": "本周完成"
+    },
+    "recommended": {
+      "title": "推荐提问",
+      "filled": "已填入：{prompt}"
+    },
+    "entry": {
+      "title": "快速提问",
+      "intro": "把训练目标、疲劳感或想调整的内容告诉 AI 教练。",
+      "placeholder": "输入你想问的问题"
+    },
+    "threads": {
+      "title": "近期活动上下文",
+      "all": "全部",
+      "unavailable": "进入活动：{title}",
+      "emptyTitle": "暂无近期活动",
+      "emptyDescription": "上传或同步活动后，这里会显示可供 AI 参考的训练上下文。",
+      "untitledActivity": "未命名活动"
+    },
+    "context": {
+      "title": "可用上下文",
+      "currentCycle": "当前训练周期",
+      "thisWeek": "本周训练安排",
+      "recentActivities": "近期活动记录"
+    },
+    "constraints": {
+      "title": "使用边界",
+      "description": "AI 建议用于辅助训练决策；如果出现伤痛、疾病或明显不适，请优先咨询专业人士。"
+    }
+  },
+  "V2PlanDetailPage": {
+    "goal": {
+      "5K": "5K",
+      "10K": "10K",
+      "HALF_MARATHON": "半马",
+      "MARATHON": "全马"
+    },
+    "mobile": {
+      "training": "训练",
+      "currentWeek": "当前周",
+      "openSessions": "待完成",
+      "today": "今日",
+      "restDay": "休息日",
+      "noPlannedWorkout": "今天没有计划训练。",
+      "noOpenSession": "暂无待完成课次",
+      "showAll": "显示全部",
+      "session": "课次",
+      "unscheduled": "未排期",
+      "plannedWorkout": "计划训练",
+      "overdue": "已过期",
+      "loadChart": {
+        "title": "训练负荷",
+        "plannedLoad": "计划负荷",
+        "fitness": "体能",
+        "fatigue": "疲劳"
+      }
+    },
+    "status": {
+      "active": "进行中",
+      "scheduled": "待接管",
+      "paused": "已暂停",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "superseded": "已被接管",
+      "draft": "草稿"
+    },
+    "workoutStatus": {
+      "done": "已完成",
+      "inProgress": "进行中",
+      "skipped": "已跳过",
+      "moved": "已推迟",
+      "planned": "待执行",
+      "incomplete": "未完成",
+      "upcoming": "待执行"
+    },
+    "movedBy": {
+      "user": "我推迟",
+      "coach": "教练推迟"
+    },
+    "workout": {
+      "unscheduled": "未排期",
+      "linkedActivityLine": "关联活动",
+      "linkedActivityFallback": "活动"
+    },
+    "actions": {
+      "pending": "处理中...",
+      "postpone": "推迟",
+      "linkedBlockedTip": "请先解除活动关联后再调整 — 已关联时无法推迟或跳过。"
+    },
+    "postponeConfirm": {
+      "title": "确认推迟训练？",
+      "description": "推迟会改变周内训练节奏，并可能影响后续计划效果。",
+      "cancel": "取消",
+      "confirm": "仍要推迟"
+    },
+    "toast": {
+      "postponeSuccess": "训练已推迟到下一天",
+      "postponeFailed": "推迟失败，请稍后重试"
+    },
+    "defaultPageTitle": "训练计划",
+    "lifecycle": {
+      "title": "状态与操作",
+      "pending": "处理中...",
+      "description": {
+        "draft": "这是草稿，课表可以继续改。确认后再开启；不再需要时可以删除。",
+        "scheduled": "这个计划已准备好，将在设定的开始日期自动接管。取消它即可继续使用当前计划。",
+        "active": "这个计划正在执行中。暂停会保留计划，终止会停止本轮执行；复盘确认后也可以手动标记完成。",
+        "paused": "这个计划已暂停。准备好后可以继续执行；如果本轮周期不再继续，可以终止计划。",
+        "completed": "这个计划已完成，会作为历史记录保留。",
+        "cancelled": "这个计划已在完成前终止，会作为历史记录保留。",
+        "superseded": "新计划已经接管；本计划及其历史完成记录保持不变。"
+      },
+      "actions": {
+        "activate": "开启",
+        "resume": "继续",
+        "pause": "暂停",
+        "complete": "标记完成",
+        "cancel": "终止",
+        "delete": "删除"
+      },
+      "reasons": {
+        "pause": "用户暂停计划",
+        "complete": "用户手动标记完成"
+      },
+      "confirm": {
+        "cancel": {
+          "title": "终止这个计划？",
+          "description": "这会停止当前执行流，并把计划移到已取消历史；计划记录仍会保留。",
+          "confirm": "终止计划"
+        },
+        "activate": {
+          "title": "开启这个计划？",
+          "description": "选择开始日期后，这个计划会成为当前执行计划。",
+          "confirm": "开启计划"
+        },
+        "resume": {
+          "title": "继续这个计划？",
+          "description": "计划会回到进行中状态，并重新出现在首页和日历中。",
+          "confirm": "继续计划"
+        },
+        "pause": {
+          "title": "暂停这个计划？",
+          "description": "计划会保留当前排期和进度，但不再作为当前执行计划。",
+          "confirm": "暂停计划"
+        },
+        "complete": {
+          "title": "把这个计划标记为完成？",
+          "description": "这只会手动标记计划完成，不会继续执行剩余训练。",
+          "confirm": "标记为完成"
+        },
+        "delete": {
+          "title": "删除这个计划记录？",
+          "description": "这会移除计划记录和其中的排期训练，操作无法撤销。",
+          "confirm": "删除记录"
+        },
+        "dismiss": "保持当前状态"
+      }
+    },
+    "notFound": {
+      "backToPlans": "返回计划",
+      "title": "找不到这个计划",
+      "description": "这个计划可能已被删除，或你当前没有访问权限。"
+    },
+    "header": {
+      "backToPlans": "返回计划",
+      "startOn": "{date} 开始",
+      "notActivated": "尚未激活",
+      "noGoalDescription": "暂无目标描述",
+      "activatePlan": "开启计划",
+      "resumePlan": "恢复计划",
+      "activating": "开启中..."
+    },
+    "overview": {
+      "cycleLength": "周期长度",
+      "weekCount": "{count} 周",
+      "completionRate": "完成率",
+      "plannedSessions": "计划课表",
+      "skipped": "跳过",
+      "title": "进度摘要"
+    },
+    "execution": {
+      "notStarted": "未完成",
+      "incomplete": "未完成",
+      "upcoming": "待执行",
+      "inProgress": "进行中",
+      "done": "已完成",
+      "skipped": "已跳过",
+      "postponed": "已推迟",
+      "title": "执行统计"
+    },
+    "weekBreakdown": {
+      "openDetailsAria": "打开：{title}",
+      "title": "周计划",
+      "weekLabel": "第 {week} 周",
+      "completedMeta": "已完成 {done}/{total}",
+      "sessionsCount": "{count} 次",
+      "dayMeta": "{day} · {date}",
+      "emptyDay": "当天暂无训练安排",
+      "sessionMeta": "第 {index} 课 · {sportType}",
+      "sportOnly": "{sportType}",
+      "sessionOnly": "第 {index} 课",
+      "emptyPlanTitle": "这个计划还没有训练安排",
+      "emptyPlanDescription": "计划生成或保存训练课表后，这里会显示每周执行明细。",
+      "postponeNeedActivate": "请先开启计划后再推迟训练"
+    },
+    "sportType": {
+      "run": "跑步",
+      "cycling": "骑行",
+      "swim": "游泳"
+    },
+    "notes": {
+      "title": "计划备注",
+      "goalLabel": "目标",
+      "noGoal": "暂无目标",
+      "descriptionLabel": "描述",
+      "noDescription": "暂无描述"
+    },
+    "nextSteps": {
+      "title": "下一步"
+    },
+    "workoutDetail": {
+      "title": "训练详情",
+      "meta": "{day} · {date} · {status}",
+      "dsl": "训练内容",
+      "notes": "备注",
+      "openDay": "查看当日页面"
+    },
+    "coach": {
+      "title": "智能教练",
+      "continueAsk": "继续询问这个计划",
+      "description": "带上计划上下文继续对话",
+      "enter": "进入智能教练"
+    },
+    "weekday": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    },
+    "share": {
+      "title": "分享计划",
+      "hint": "草稿可以继续改。分享会冻结当前这一版；已分享的草稿每次保存课次会生成新版本，最新链接始终指向最新版。",
+      "derivedHint": "这份计划来自分享导入，仍是可编辑的草稿。改完后再分享会从你的副本开一条新谱系。",
+      "share": "分享计划",
+      "shareAgain": "分享最新版本",
+      "pending": "处理中...",
+      "created": "分享链接已生成",
+      "unchanged": "内容未变，仍使用当前版本。",
+      "failed": "分享失败",
+      "versionLabel": "第 {version} 版",
+      "copyLatest": "复制最新链接",
+      "copyVersion": "复制本版链接",
+      "copiedLatest": "已复制最新链接",
+      "copiedVersion": "已复制本版链接",
+      "copyFailed": "复制失败",
+      "revokeVersion": "撤回本版",
+      "revokeLineage": "撤回整条分享",
+      "revokedVersion": "已撤回这一版",
+      "revokedLineage": "已撤回整条分享"
+    },
+    "providerAction": {
+      "exportPlan": "发送到 {provider}",
+      "exporting": "正在发送到 {provider}…",
+      "connectRequired": "请先连接 {provider}，再发送此计划。"
+    }
+  },
+  "StrengthCatalog": {
+    "equipment": {
+      "bodyweight": "自重",
+      "dumbbell": "哑铃",
+      "barbell": "杠铃",
+      "kettlebell": "壶铃",
+      "resistance_band": "弹力带",
+      "machine": "固定器械",
+      "bench": "训练凳",
+      "pull_up_bar": "单杠"
+    },
+    "exercise": {
+      "backSquat": "杠铃后蹲",
+      "gobletSquat": "高脚杯深蹲",
+      "squat": "深蹲",
+      "deadlift": "硬拉",
+      "romanianDeadlift": "罗马尼亚硬拉",
+      "dumbbellRomanianDeadlift": "哑铃罗马尼亚硬拉",
+      "lunge": "箭步蹲",
+      "splitSquat": "分腿蹲",
+      "stepUp": "登台阶",
+      "hipThrust": "臀推",
+      "calfRaise": "提踵",
+      "benchPress": "卧推",
+      "overheadPress": "过顶推举",
+      "row": "划船",
+      "dumbbellRow": "哑铃划船",
+      "pullUp": "引体向上",
+      "latPulldown": "高位下拉",
+      "pushUp": "俯卧撑",
+      "plank": "平板支撑",
+      "sidePlank": "侧平板支撑",
+      "deadBug": "死虫式",
+      "gluteBridge": "臀桥"
+    }
+  },
+  "V2PlanCreatePage": {
+    "sport": {
+      "run": "跑步",
+      "cycle": "骑行",
+      "swim": "游泳",
+      "strength": "力量训练"
+    },
+    "intent": {
+      "racePrep": {
+        "title": "比赛备战",
+        "description": "围绕目标赛事安排训练周期。"
+      },
+      "fitnessBuild": {
+        "title": "综合体能",
+        "description": "提升有氧基础与整体训练容量。"
+      },
+      "skillFocus": {
+        "title": "专项强化",
+        "description": "针对配速、功率或技术短板进行训练。"
+      },
+      "returnToTraining": {
+        "title": "恢复回归",
+        "description": "伤病或停训后循序渐进恢复。"
+      },
+      "healthFatLoss": {
+        "title": "健康减脂",
+        "description": "在可控负荷下提升活动量与体能。"
+      }
+    },
+    "raceDistance": {
+      "run": {
+        "half": "半程马拉松",
+        "full": "全程马拉松"
+      },
+      "cycle": {
+        "criterium": "绕圈赛",
+        "road": "公路赛"
+      }
+    },
+    "common": {
+      "joiner": "、"
+    },
+    "raceDiscipline": {
+      "run": "跑步",
+      "tri": "铁三",
+      "cycle": "骑行"
+    },
+    "header": {
+      "backToPlans": "返回计划",
+      "badge": "创建计划",
+      "title": "AI 创建计划",
+      "description": "填写训练偏好后，交给教练生成完整计划。"
+    },
+    "mainSport": {
+      "title": "主要运动",
+      "description": "至少选择一种，可多选；力量训练也可以作为辅助。"
+    },
+    "trainingIntent": {
+      "title": "训练目标",
+      "description": "选择这轮训练最想达成的目标。"
+    },
+    "raceInfo": {
+      "title": "比赛信息",
+      "discipline": "比赛项目",
+      "distance": "距离"
+    },
+    "cycleConstraints": {
+      "title": "训练安排",
+      "cycleLength": "计划周期",
+      "weekOption": "{value} 周",
+      "daysPerWeek": "每周训练天数",
+      "dailyMinutes": "单次训练时长"
+    },
+    "strength": {
+      "title": "辅助力量训练",
+      "description": "这是计划偏好；AI 会结合目标、器械和恢复空间安排独立的力量课。",
+      "preference": {
+        "AUTO": "由 AI 建议",
+        "INCLUDE": "包含力量训练",
+        "EXCLUDE": "不包含力量训练"
+      },
+      "sessionsPerWeek": "每周力量课",
+      "minutesPerSession": "每节分钟",
+      "availableEquipment": "可用器械"
+    },
+    "brief": {
+      "title": "计划简报",
+      "sports": "项目：{value}",
+      "intent": "目的：{value}",
+      "cycle": "周期：{weeks} 周 · 每周 {weeklyDays} 天 · 单次 {dailyMinutes} 分钟",
+      "race": "比赛：{discipline} · {distance}",
+      "strength": "力量训练：{value}",
+      "equipment": "可用器械：{value}",
+      "start": "交给教练生成",
+      "handoff": "接下来会打开 AI 教练，并根据这些信息生成完整计划。"
+    },
+    "nextFlow": {
+      "title": "接下来",
+      "step1": "AI 会确认目标和约束",
+      "step2": "生成周结构与训练日安排",
+      "step3": "保存后可在计划页跟踪执行"
+    },
+    "alternative": {
+      "title": "还没想好？",
+      "backToPlans": "先回到计划列表"
+    }
+  },
+  "V2MetricsPage": {
+    "metricCards": {
+      "trainingLoad": {
+        "title": "训练负荷",
+        "body": "查看 CTL、ATL 与疲劳变化。"
+      },
+      "power": {
+        "title": "功率",
+        "body": "管理 FTP 与功率区间。"
+      },
+      "heartRate": {
+        "title": "心率",
+        "body": "检查阈值心率与心率漂移。"
+      },
+      "pace": {
+        "title": "配速",
+        "body": "查看跑步阈值与配速趋势。"
+      }
+    },
+    "toast": {
+      "inProgress": "功能开发中"
+    },
+    "header": {
+      "badge": "指标",
+      "title": "训练指标",
+      "description": "把负荷、功率、心率和配速放到同一个视图里。",
+      "coreMetric": "核心指标"
+    },
+    "loadTrend": {
+      "title": "负荷趋势",
+      "viewLoad": "查看负荷",
+      "currentDone": "当前疲劳",
+      "emptyTitle": "暂无负荷趋势",
+      "emptyDescription": "上传或同步活动后，系统会计算训练负荷并展示趋势。"
+    },
+    "entry": {
+      "title": "指标入口"
+    },
+    "recentTrends": {
+      "title": "近期变化",
+      "fitnessUp": {
+        "title": "体能趋势"
+      },
+      "fatigueHigh": {
+        "title": "疲劳状态"
+      },
+      "efficiencyStable": {
+        "title": "效率观察"
+      }
+    },
+    "explanation": {
+      "title": "说明",
+      "body": "这些指标基于活动数据和个人阈值计算，用来辅助判断训练负荷与恢复节奏。"
+    },
+    "weeklyFocus": {
+      "title": "本周关注",
+      "loadProgress": {
+        "label": "急慢性负荷比"
+      },
+      "hrDrift": {
+        "label": "恢复压力"
+      },
+      "intensityDistribution": {
+        "label": "单调性"
+      }
+    }
+  },
+  "TimeFilters": {
+    "granularity": {
+      "placeholder": "选择时间粒度",
+      "day": "按天",
+      "week": "按周",
+      "month": "按月",
+      "year": "按年",
+      "allTime": "全部"
+    },
+    "range": {
+      "placeholder": "选择时间范围",
+      "allTime": "历史所有",
+      "past7Days": "过去 7 天",
+      "past1Month": "过去 1 个月",
+      "past6Months": "过去半年",
+      "past1Year": "过去一年"
+    }
+  },
+  "ChartAxis": {
+    "selectXAxis": "选择 X 轴",
+    "distance": "距离",
+    "time": "时间"
+  },
+  "HistoryComparisonChart": {
+    "title": "历史趋势",
+    "current": "当前",
+    "history": "历史",
+    "empty": "暂无历史数据",
+    "series": {
+      "historyData": "历史数据"
+    }
+  },
+  "WorkoutPlanChart": {
+    "stepKind": {
+      "WARMUP": "热身",
+      "WORK": "主训练",
+      "RECOVERY": "恢复",
+      "REST": "休息",
+      "COOLDOWN": "放松",
+      "OTHER": "其它"
+    },
+    "labels": {
+      "speed": "速度",
+      "pace": "配速",
+      "type": "类型",
+      "power": "功率",
+      "heartRate": "心率",
+      "grade": "坡度",
+      "relativeIntensity": "相对强度",
+      "estimatedIf": "估算强度（IF）",
+      "schematic": "训练结构示意",
+      "time": "时间"
+    },
+    "empty": "暂无可视化数据"
+  },
+  "ViewWorkoutDialog": {
+    "moreActions": "更多操作",
+    "deleteWorkoutDescription": "这节计划训练将被永久移除，不会删除已上传的活动记录。",
+    "mobile": {
+      "plannedWorkout": "计划训练",
+      "workoutDetailMeta": "课次详情",
+      "workoutDescriptionLabel": "描述",
+      "workoutChartLabel": "结构预览",
+      "workoutStructureLabel": "训练结构",
+      "notLinked": "未关联活动",
+      "linked": "已关联 {activity}",
+      "linkedActivityAction": "活动",
+      "linkActivityAction": "去关联",
+      "postpone": "推迟",
+      "skip": "跳过",
+      "exerciseFallback": "动作 {index}",
+      "noData": "暂无数据",
+      "loading": "加载中",
+      "pending": "处理中…",
+      "cancel": "取消",
+      "confirmPostponeTitle": "推迟训练？",
+      "confirmPostponeMessage": "训练内容会保持不变，并移动到下一个计划日。",
+      "confirmSkipTitle": "跳过训练？",
+      "confirmSkipMessage": "该课次会标记为已跳过。"
+    },
+    "title": "查看训练",
+    "titleWithWeek": "查看训练 · 第 {week} 周 · {day}",
+    "sportTypeLabel": "运动类型",
+    "notesLabel": "备注",
+    "rulesLabel": "规则",
+    "notesPlaceholder": "补充说明、注意事项、备注...",
+    "rulesPlaceholder": "训练规则或结构化内容...",
+    "loading": "加载中...",
+    "close": "关闭",
+    "linkedBlockedTip": "已关联活动的课次暂不支持推迟或跳过",
+    "actionPending": "处理中",
+    "actionPostpone": "推迟",
+    "actionSkip": "跳过",
+    "actionDelete": "删除",
+    "deleteDisabledTip": "删除功能暂未开放",
+    "deleteSuccess": "训练已删除",
+    "deleteFailed": "删除失败，请重试",
+    "confirmDelete": {
+      "title": "删除这条训练？",
+      "description": "该计划外训练将被永久删除。",
+      "cancel": "取消"
+    },
+    "postponeSuccess": "已推迟到下一天",
+    "postponeFailed": "推迟失败，请稍后重试",
+    "skipSuccess": "已标记为跳过",
+    "skipFailed": "跳过失败，请稍后重试",
+    "markDone": "标记完成",
+    "undoStatus": "撤销当前状态",
+    "statusToast": {
+      "DONE": "已标记完成",
+      "PLANNED": "已恢复为计划态",
+      "SKIPPED": "已跳过",
+      "IN_PROGRESS": "已开始",
+      "MOVED": "已顺延",
+      "failed": "状态更新失败"
+    },
+    "sport": {
+      "run": "跑步",
+      "cycling": "骑行",
+      "swim": "游泳"
+    },
+    "weekday": {
+      "sun": "周日",
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六"
+    }
+  },
+  "SharedUI": {
+    "close": "关闭",
+    "dialog": "对话框",
+    "feedback": "反馈",
+    "help": "帮助",
+    "loadingEllipsis": "加载中…",
+    "pickDate": "选择日期",
+    "platformTitleWithVersion": "Trainingload.ai - 训练分析管理平台 版本：{version}",
+    "commandPaletteTitle": "命令面板",
+    "commandPaletteDescription": "搜索要执行的命令..."
+  },
+  "DateTimePicker": {
+    "startDate": "开始时间",
+    "endDate": "结束时间",
+    "placeholder": "MM/DD/YYYY hh:mm aa"
+  },
+  "AppError": {
+    "notFound": {
+      "eyebrow": "404 / 路线偏离",
+      "title": "这个训练页面暂时不可用",
+      "description": "链接可能已经过期，或对应的活动、计划、数据视图已经不存在。",
+      "primary": "回到概览",
+      "secondary": "返回上一页",
+      "helpTitle": "可以这样继续",
+      "helpBody": "先回到概览，再从最新的活动或计划列表重新进入。"
+    },
+    "serverError": {
+      "eyebrow": "500 / 恢复模式",
+      "title": "页面加载失败",
+      "description": "加载这个页面时出现了异常。你的数据仍然安全，通常重试一次就能继续。",
+      "primary": "重试",
+      "secondary": "回到概览",
+      "reference": "错误参考",
+      "helpTitle": "如果仍然失败",
+      "helpBody": "联系支持时，可以带上方的错误参考，方便我们定位问题。"
+    }
+  },
+  "ErrorBoundary": {
+    "title": "发生错误",
+    "unknownError": "发生未知错误，请稍后重试。",
+    "loadFailed": "加载失败",
+    "loadFailedDescription": "数据加载失败，请稍后重试。",
+    "retry": "重试"
+  },
+  "HeartRateComparisonCard": {
+    "noHistoricalData": "暂无历史数据",
+    "currentActivity": "当前活动",
+    "historicalAvg": "历史平均",
+    "historicalMax": "历史最大",
+    "diff": "差值",
+    "change": "变化",
+    "current": "当前"
+  },
+  "Activities": {
+    "title": "活动",
+    "loading": "加载中...",
+    "loadError": "加载活动失败",
+    "noActivities": "暂无活动",
+    "uploadButton": "上传活动",
+    "filters": {
+      "all": "全部",
+      "cycling": "骑行",
+      "running": "跑步",
+      "swimming": "游泳"
+    },
+    "sortBy": {
+      "date": "日期",
+      "distance": "距离",
+      "duration": "时长"
+    }
+  },
+  "PlanSummary": {
+    "title": "计划复盘",
+    "completionRate": "完成率",
+    "completionHint": "已完成 {done} / 共 {total} 节",
+    "complianceRate": "负荷情况",
+    "complianceHint": "实际 {actual} / 期望 {expected}",
+    "statusBreakdown": "顺延 / 跳过",
+    "statusHint": "顺延 {moved} · 跳过 {skipped}",
+    "bySport": "按运动分项",
+    "weekly": "周负荷",
+    "legend": "绿色叠层 = 当周实际负荷",
+    "weekTooltip": "第 {week} 周 · 完成 {done}/{total} · 实际 {actual} / 期望 {estimated} · 合规率 {rate}%",
+    "weekEmpty": "第 {week} 周 · 暂无安排",
+    "sport": {
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳",
+      "OTHER": "其他"
+    }
+  },
+  "WorkoutLoadEstimate": {
+    "sectionTitle": "期望负荷",
+    "expected": "期望 {value}",
+    "actual": "实际 {value}",
+    "deltaAbove": "+{pct}%",
+    "deltaBelow": "-{pct}%",
+    "source": {
+      "POWER": "功率",
+      "HR": "心率",
+      "PACE": "配速",
+      "RPE": "RPE"
+    },
+    "crossSourceTip": "期望按「{expected}」估算，实际按「{actual}」度量。跨轨道比较——双方都在「100 = 1h@阈值」同一坐标轴上，但差额并非同一物理量。",
+    "needThresholdsTip": "补全 FTP / LTHR / TP / CSS 后即可给出数字化估算。",
+    "partialEstimateTip": "部分步骤因为缺阈值或需要反推时长，已退化到 RPE 估算（标 *）。",
+    "mixedSourceTip": "本节训练混合了多种目标类型，估值合并各轨道贡献。",
+    "table": {
+      "bucket": "来源",
+      "if": "IF",
+      "duration": "时长",
+      "contribution": "负荷"
+    }
+  },
+  "CompetitionEvents": {
+    "page": {
+      "title": "赛事",
+      "description": "管理独立赛事时间线，以及 AI 调整训练时参考的重要程度。",
+      "add": "添加赛事",
+      "openCalendar": "打开日历",
+      "previousYear": "上一年",
+      "nextYear": "下一年",
+      "yearLabel": "{year} 年赛事",
+      "count": "{count} 场赛事",
+      "empty": "{year} 年暂无赛事",
+      "emptyDescription": "添加赛事日期后，它会出现在日历中，并供 AI 教练参考。",
+      "loading": "正在加载赛事…",
+      "error": "暂时无法加载赛事，请稍后重试。"
+    },
+    "dialog": {
+      "createTitle": "添加赛事",
+      "viewTitle": "赛事详情",
+      "editTitle": "编辑赛事",
+      "description": "赛事独立于训练计划。重要程度由你设置，AI 动态判断当前训练影响。"
+    },
+    "form": {
+      "name": "赛事名称",
+      "dateRange": "赛事日期",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "startTime": "开始时间",
+      "pickDate": "选择日期",
+      "optionalDate": "不设置结束日期",
+      "clearDate": "清除结束日期",
+      "allDay": "全天赛事 · 添加开始时间",
+      "useAllDay": "设为全天",
+      "hour": "小时",
+      "minute": "分钟",
+      "sport": "运动项目",
+      "distance": "距离（公里）",
+      "importance": "对你的重要程度",
+      "goal": "赛事目标",
+      "targetTime": "目标成绩",
+      "targetHours": "目标小时",
+      "targetMinutes": "目标分钟",
+      "hoursPlaceholder": "小时",
+      "minutesPlaceholder": "分钟",
+      "location": "地点",
+      "notes": "备注"
+    },
+    "sports": {
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳",
+      "STRETCHING": "拉伸",
+      "UNKNOWN": "其他"
+    },
+    "importance": {
+      "LOW": {
+        "label": "低",
+        "detail": "训练连续性优先。"
+      },
+      "MEDIUM": {
+        "label": "中",
+        "detail": "局部准备，但不打乱主要训练方向。"
+      },
+      "HIGH": {
+        "label": "高",
+        "detail": "关键赛事，应影响邻近阶段训练。"
+      },
+      "CRITICAL": {
+        "label": "极高",
+        "detail": "核心目标，其他训练优先保护它。"
+      }
+    },
+    "goals": {
+      "FINISH": "完赛",
+      "TARGET_TIME": "目标成绩",
+      "PERFORMANCE": "最佳表现",
+      "EXPERIENCE": "体验赛事"
+    },
+    "status": {
+      "PLANNED": "计划中",
+      "COMPLETED": "已完成",
+      "CANCELLED": "已取消"
+    },
+    "countdown": {
+      "today": "今天比赛",
+      "future": "距离比赛还有 {days} 天",
+      "past": "比赛已过去 {days} 天"
+    },
+    "actions": {
+      "save": "保存赛事",
+      "saving": "正在保存…",
+      "close": "关闭",
+      "edit": "编辑",
+      "cancelEdit": "取消编辑",
+      "cancelEvent": "取消赛事",
+      "restoreEvent": "恢复赛事",
+      "deleteEvent": "删除",
+      "confirmDelete": "删除赛事",
+      "deleting": "正在删除…",
+      "viewAll": "查看全部"
+    },
+    "details": {
+      "allDay": "全天"
+    },
+    "impact": {
+      "title": "对训练安排的影响",
+      "description": "评估赛事是否影响训练、影响多久，以及需要哪些保护约束。",
+      "automatic": "个性化评估",
+      "loading": "正在读取最新训练影响…",
+      "unavailable": "暂时还没有训练影响结论。",
+      "evaluate": "开始评估",
+      "refresh": "重新评估",
+      "confidence": "置信度 {percent}%",
+      "fallback": "个性化评估暂不可用，当前显示保守安全评估。",
+      "fallbackLabel": "保守规则",
+      "fallbackSummary": "系统暂时无法完成个性化判断。当前先依据赛事重要程度、运动项目、距离和时间，采用保守的训练保护规则。",
+      "fallbackNotRelevant": "按当前赛事时间与训练范围，暂不需要调整训练安排。",
+      "notRelevant": "该赛事当前不需要调整训练。",
+      "currentLevel": "当前影响",
+      "window": "影响时间",
+      "confidenceLabel": "判断把握"
+    },
+    "planImpact": {
+      "loading": "正在读取赛事影响…",
+      "title": "当前计划的赛事影响",
+      "relevantEvent": "相关赛事",
+      "athleteImportance": "用户重要程度",
+      "currentImpact": "当前影响",
+      "fallback": "当前为安全规则评估，个性化 AI 评估正在后台刷新。"
+    },
+    "conflict": {
+      "title": "赛事已在其他设备更新",
+      "useServer": "采用服务器版本",
+      "keepDraft": "保留当前草稿"
+    },
+    "validation": {
+      "nameRequired": "请输入赛事名称。",
+      "dateInvalid": "请选择有效的日期范围。",
+      "targetRequired": "请输入大于零的目标成绩。"
+    },
+    "feedback": {
+      "saved": "赛事已保存",
+      "failed": "赛事保存失败，请检查表单后重试。",
+      "impactFailed": "赛事影响评估失败，请重试。"
+    },
+    "deleteConfirm": {
+      "title": "删除赛事？",
+      "description": "确定删除“{title}”吗？赛事会从日历中消失，且不能通过普通流程恢复。"
+    },
+    "calendar": {
+      "title": "赛事",
+      "add": "添加",
+      "conflict": "当天同时存在计划赛事和训练，请在执行前检查训练安排。",
+      "empty": "当天没有赛事。",
+      "viewAll": "全部赛事"
+    }
+  },
+  "PlanShareImportPage": {
+    "title": "导入训练计划",
+    "loading": "正在加载预览...",
+    "errorTitle": "无法打开这份分享",
+    "errorText": "链接可能无效，或预览暂时不可用。",
+    "goneTitle": "这份分享已撤回",
+    "goneText": "作者已撤回链接。如果你已经导入，自己的草稿不会受影响。",
+    "retry": "重试",
+    "backToPlans": "返回计划",
+    "summary": "{weeks} 周 · {count} 节课 · v{version}",
+    "workoutSlot": "第 {week} 周，第 {day} 天",
+    "import": "收入为我的草稿",
+    "importAndShare": "收入并分享",
+    "importing": "正在导入...",
+    "importError": "导入失败，请稍后重试。",
+    "importCta": "登录后导入",
+    "publicBadge": "可拿走的训练计划",
+    "disclaimer": "这是课表快照，不是按你当前体能定制的教练方案。开始前请自己确认。",
+    "takeCta": "拿走这份计划",
+    "takeHint": "导入为草稿，正在用的计划不会被覆盖。",
+    "statWeeks": "周",
+    "statDaysPerWeek": "每周训练",
+    "statWorkouts": "课次",
+    "rhythmTitle": "整季怎么排",
+    "rhythmHint": "点一周，看那天练什么。",
+    "weekShort": "第 {week} 周",
+    "weekTitle": "第 {week} 周",
+    "weekSessions": "{count} 堂课",
+    "restDay": "休息",
+    "notActivated": "课表快照，尚未按你的日历激活",
+    "goalLabel": "目标",
+    "descriptionLabel": "描述",
+    "overviewTitle": "概览",
+    "weekBreakdownTitle": "周计划",
+    "sessionsCount": "{count} 次",
+    "emptyDay": "当天暂无训练安排",
+    "openDetailsAria": "打开：{title}",
+    "loadTitle": "预估负荷",
+    "loadHint": "按课表结构做的通用估算，不是按你的阈值定制。导入后会按你的体能重算。",
+    "loadPersonalizedHint": "按你当前的阈值估算。导入为草稿后，激活计划才会把负荷写入课次。",
+    "weekLoadTooltip": "第 {week} 周 · 负荷 {load} · {count} 堂课",
+    "loadBadge": "负荷 {value}",
+    "loadGenericTip": "通用估算负荷 {value}。导入后会按你的阈值重算。",
+    "loadPersonalizedTip": "按你的阈值估算负荷 {value}",
+    "importTitle": "导入这份计划",
+    "importHint": "导入为可编辑草稿，正在用的计划不会被覆盖。",
+    "dialogTitle": "训练详情",
+    "dialogTitleWithWeek": "第 {week} 周 · {day}",
+    "notesLabel": "备注",
+    "chartLabel": "课次结构",
+    "close": "关闭",
+    "weekday": {
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "日"
+    },
+    "sport": {
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳",
+      "STRETCHING": "拉伸"
+    }
+  },
+  "AiOperationErrors": {
+    "accessRequired": "当前无法使用 AI，请检查实例配置或账户权限。",
+    "inProgress": "已有一项 AI 操作正在进行，请等待它完成后再试。",
+    "settlementPending": "上一项 AI 操作仍在完成收尾，请稍后再试。",
+    "purposeUnavailable": "所选模型档位暂时不可用，请稍后再试。"
+  },
+  "CoachTurnErrors": {
+    "modelUnavailable": "模型暂时无法响应，请尝试切换模型后重试。",
+    "aborted": "本次生成已中断，你可以重新发送。",
+    "business": "当前请求无法完成，请检查要求后重试。",
+    "internal": "系统内部错误，请稍后重试。",
+    "upstreamFailed": "教练服务暂时不可用，请稍后重试。",
+    "unsafeOutput": "本次回答无法安全展示，请重新生成。",
+    "invalidStructuredOutput": "结构化内容生成失败，请重试。",
+    "unknown": "生成过程出现问题，请稍后重试。"
+  },
+  "ActivityLaps": {
+    "empty": "暂无计圈数据",
+    "groups": {
+      "lap": "圈段",
+      "pace": "配速",
+      "heartRate": "心率",
+      "power": "功率",
+      "terrain": "地形",
+      "dynamics": "跑步动态",
+      "other": "其他"
+    },
+    "summary": {
+      "average": "平均"
+    },
+    "columns": {
+      "lap": "圈",
+      "duration": "持续时间",
+      "distance": "距离",
+      "cumulativeTime": "累计时间",
+      "pace": "配速",
+      "speed": "速度",
+      "difference": "差异",
+      "avgHeartRate": "平均心率",
+      "maxHeartRate": "最大心率",
+      "avgPower": "平均功率",
+      "maxPower": "最大功率",
+      "elevation": "爬升 / 下降",
+      "calories": "热量",
+      "avgRunCadence": "平均步频",
+      "avgCadence": "平均踏频",
+      "avgStrideLength": "平均步幅",
+      "avgGroundContactTime": "平均着地时间",
+      "avgVerticalOscillation": "平均垂直振幅",
+      "avgVerticalRatio": "平均垂直比例",
+      "temperature": "温度"
+    }
+  },
+  "GuestAccess": {
+    "banner": "只读访客访问",
+    "createAccount": "进入你的账户",
+    "aiReadOnly": "只读访客无法使用 AI 对话",
+    "readOnlyAction": "只读访问",
+    "loadError": "无法加载访客访问，请重试。",
+    "retry": "重试"
+  }
+}

@@ -1,0 +1,454 @@
+/*
+  TipTap — align editor chrome & prose with shadcn semantic tokens from globals.css.
+  Theme (light/dark) follows :root / .dark automatically via var(--foreground), etc.
+*/
+
+:root {
+  --editor-text-default: var(--foreground);
+  --editor-text-gray: var(--muted-foreground);
+  /* Accent colors for typography extension / legacy toolbar swatches */
+  --editor-text-brown: hsl(25 95% 53%);
+  --editor-text-orange: hsl(24 95% 53%);
+  --editor-text-yellow: hsl(48 96% 53%);
+  --editor-text-green: hsl(160.1 84.1% 39.4%); /* emerald-500，与全站 accent 一致 */
+  --editor-text-blue: var(--primary);
+  --editor-text-purple: hsl(269 97% 58%);
+  --editor-text-pink: hsl(336 80% 58%);
+  --editor-text-red: hsl(0 84% 60%);
+
+  --editor-bg-default: transparent;
+  --editor-bg-subtle: var(--muted);
+  --editor-bg-muted: color-mix(in oklch, var(--muted) 92%, transparent);
+
+  --editor-highlight-default: color-mix(in oklch, var(--muted-foreground) 12%, transparent);
+  --editor-highlight-gray: color-mix(in oklch, var(--muted-foreground) 14%, transparent);
+  --editor-highlight-brown: hsl(43 96% 96%);
+  --editor-highlight-orange: hsl(33 100% 96%);
+  --editor-highlight-yellow: hsl(54 100% 96%);
+  --editor-highlight-green: hsl(142 71% 96%);
+  --editor-highlight-blue: color-mix(in oklch, var(--primary) 15%, transparent);
+  --editor-highlight-purple: hsl(269 97% 96%);
+  --editor-highlight-pink: hsl(336 80% 96%);
+  --editor-highlight-red: hsl(0 84% 96%);
+
+  --editor-border-default: var(--border);
+  --editor-border-strong: var(--input);
+
+  --editor-spacing-1: 0.25rem;
+  --editor-spacing-2: 0.5rem;
+  --editor-spacing-3: 0.75rem;
+  --editor-spacing-4: 1rem;
+  --editor-spacing-6: 1.5rem;
+  --editor-spacing-8: 2rem;
+  --editor-spacing-12: 3rem;
+  --editor-spacing-16: 4rem;
+
+  --editor-font-sans: inherit;
+  --editor-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --editor-font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --editor-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --editor-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --editor-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --editor-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --editor-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --editor-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+}
+
+/* Core Editor Styles */
+.ProseMirror {
+  caret-color: var(--editor-text-default);
+  outline: none;
+  padding: var(--editor-spacing-4) var(--editor-spacing-2);
+  margin: 0 auto;
+  /* max-width: 100ch; */
+  font-family: var(--editor-font-sans);
+  position: relative;
+  background-color: var(--editor-bg-default);
+  color: var(--editor-text-default);
+  /* min-height: 100vh; */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ProseMirror:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.ProseMirror *::selection {
+  background-color: color-mix(in oklch, var(--primary) 22%, transparent);
+  color: var(--foreground);
+}
+
+.ProseMirror > .react-renderer {
+  margin: var(--editor-spacing-12) 0;
+  transition:
+    opacity var(--editor-transition-normal),
+    transform var(--editor-transition-normal);
+}
+
+.ProseMirror > .react-renderer:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror > .react-renderer:last-child {
+  margin-bottom: 0;
+}
+
+/* Typography Styles */
+.ProseMirror p {
+  line-height: 1.55;
+  margin: var(--editor-spacing-4) 0;
+  color: var(--editor-text-default);
+  font-size: 1rem;
+}
+
+.ProseMirror > p {
+  margin: var(--editor-spacing-6) 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4 {
+  font-family: var(--editor-font-sans);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--editor-text-default);
+  scroll-margin-top: var(--editor-spacing-16);
+  line-height: 1.2;
+}
+
+.ProseMirror h1 {
+  font-size: 2rem;
+  margin: var(--editor-spacing-8) 0 var(--editor-spacing-4);
+}
+
+.ProseMirror h2 {
+  font-size: 1.75rem;
+  margin: var(--editor-spacing-8) 0 var(--editor-spacing-4);
+}
+
+.ProseMirror h3 {
+  font-size: 1.5rem;
+  margin: var(--editor-spacing-6) 0 var(--editor-spacing-3);
+}
+
+.ProseMirror h4 {
+  font-size: 1.25rem;
+  margin: var(--editor-spacing-4) 0 var(--editor-spacing-2);
+}
+
+.ProseMirror a {
+  color: var(--editor-text-blue);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 0.1em;
+  text-underline-offset: 0.2em;
+  transition:
+    color var(--editor-transition-fast),
+    text-decoration-thickness var(--editor-transition-fast);
+}
+
+.ProseMirror a:hover {
+  color: var(--editor-text-blue);
+  text-decoration-thickness: 0.2em;
+}
+
+.ProseMirror code {
+  font-family: var(--editor-font-mono);
+  font-size: 0.9em;
+  background-color: var(--editor-bg-muted);
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-xs);
+  color: var(--editor-text-default);
+  border: 1px solid var(--editor-border-default);
+}
+
+.ProseMirror pre {
+  margin: var(--editor-spacing-6) 0;
+  padding: var(--editor-spacing-4);
+  background-color: var(--editor-bg-subtle);
+  border-radius: var(--radius-xs);
+  overflow-x: auto;
+  border: 1px solid var(--editor-border-default);
+}
+
+.ProseMirror pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--editor-text-default);
+}
+
+.ProseMirror blockquote {
+  margin: var(--editor-spacing-6) 0;
+  padding: var(--editor-spacing-4) var(--editor-spacing-6);
+  border-left: 4px solid var(--editor-border-strong);
+  font-style: italic;
+  color: var(--editor-text-gray);
+  background-color: var(--editor-bg-subtle);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+
+/* Lists */
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: var(--editor-spacing-4) 0;
+  padding-left: var(--editor-spacing-6);
+}
+
+.ProseMirror li {
+  margin: var(--editor-spacing-2) 0;
+  padding-left: var(--editor-spacing-2);
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ul ul {
+  list-style-type: circle;
+}
+
+.ProseMirror ul ul ul {
+  list-style-type: square;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror ol ol {
+  list-style-type: lower-alpha;
+}
+
+.ProseMirror ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* Tables */
+.ProseMirror table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: var(--editor-spacing-6) 0;
+  border: 1px solid var(--editor-border-default);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+
+.ProseMirror th {
+  background-color: var(--editor-bg-subtle);
+  font-weight: 600;
+  text-align: left;
+  padding: var(--editor-spacing-3) var(--editor-spacing-4);
+  border-bottom: 2px solid var(--editor-border-default);
+}
+
+.ProseMirror td {
+  padding: var(--editor-spacing-3) var(--editor-spacing-4);
+  border-bottom: 1px solid var(--editor-border-default);
+  transition: background-color var(--editor-transition-fast);
+}
+
+.ProseMirror tr:last-child td {
+  border-bottom: none;
+}
+
+.ProseMirror tr:hover td {
+  background-color: var(--editor-bg-subtle);
+}
+
+/* Images */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--editor-border-default);
+  box-shadow: var(--editor-shadow-sm);
+  transition:
+    box-shadow var(--editor-transition-normal),
+    transform var(--editor-transition-normal);
+  display: block;
+  margin: var(--editor-spacing-1) auto;
+}
+
+.ProseMirror img:hover {
+  box-shadow: var(--editor-shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Horizontal Rule */
+.ProseMirror hr {
+  margin: var(--editor-spacing-8) 0;
+  border: none;
+  border-top: 2px solid var(--editor-border-default);
+}
+
+/* Floating Menu & Toolbar */
+.floating-menu {
+  background-color: var(--editor-bg-default);
+  border: 1px solid var(--editor-border-default);
+  box-shadow: var(--editor-shadow-lg);
+  border-radius: var(--radius-compact);
+  padding: var(--editor-spacing-1);
+  display: flex;
+  gap: var(--editor-spacing-1);
+  align-items: center;
+  animation: fadeIn var(--editor-transition-normal);
+  backdrop-filter: blur(8px);
+}
+
+.toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-control);
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 2rem;
+  padding: 0 var(--editor-spacing-3);
+  transition:
+    background-color var(--editor-transition-fast),
+    border-color var(--editor-transition-fast),
+    box-shadow var(--editor-transition-fast),
+    color var(--editor-transition-fast);
+  background-color: transparent;
+  color: var(--editor-text-default);
+  border: 1px solid transparent;
+}
+
+.toolbar-button:hover {
+  background-color: var(--editor-bg-subtle);
+  color: var(--editor-text-default);
+}
+
+.toolbar-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--editor-border-strong);
+}
+
+.toolbar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar-button.active {
+  background-color: var(--editor-bg-muted);
+  color: var(--primary);
+}
+
+/* Placeholder Styles
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: "Start writing or press '/' for commands...";
+  color: var(--editor-text-gray);
+  pointer-events: none;
+  float: left;
+  height: 0;
+} */
+
+/* Embedded plan description — compact scale, match Input text-sm */
+.plan-description-editor .ProseMirror {
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem 0.75rem;
+  min-height: max(6rem, 100%);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.plan-description-editor .ProseMirror p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0.4rem 0;
+}
+
+.plan-description-editor .ProseMirror > p:first-of-type {
+  margin-top: 0;
+}
+
+.plan-description-editor .ProseMirror h1,
+.plan-description-editor .ProseMirror h2,
+.plan-description-editor .ProseMirror h3,
+.plan-description-editor .ProseMirror h4 {
+  letter-spacing: -0.02em;
+}
+
+.plan-description-editor .ProseMirror h1 {
+  font-size: 1.125rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.plan-description-editor .ProseMirror h2 {
+  font-size: 1.0625rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.plan-description-editor .ProseMirror h3 {
+  font-size: 1rem;
+  margin: 0.45rem 0 0.2rem;
+}
+
+.plan-description-editor .ProseMirror h4 {
+  font-size: 0.9375rem;
+  margin: 0.4rem 0 0.15rem;
+}
+
+.plan-description-editor .ProseMirror pre {
+  font-size: 0.8125rem;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .ProseMirror {
+    padding: var(--editor-spacing-8) var(--editor-spacing-4);
+  }
+
+  .ProseMirror h1 { font-size: 2rem; }
+  .ProseMirror h2 { font-size: 1.75rem; }
+  .ProseMirror h3 { font-size: 1.5rem; }
+  .ProseMirror h4 { font-size: 1.25rem; }
+  .ProseMirror p { font-size: 1rem; }
+
+  .plan-description-editor .ProseMirror {
+    padding: 0.45rem 0.625rem 0.625rem;
+  }
+
+  .plan-description-editor .ProseMirror h1 { font-size: 1.0625rem; }
+  .plan-description-editor .ProseMirror h2 { font-size: 1rem; }
+  .plan-description-editor .ProseMirror h3 { font-size: 0.9375rem; }
+  .plan-description-editor .ProseMirror h4 { font-size: 0.875rem; }
+  .plan-description-editor .ProseMirror p { font-size: 0.875rem; }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Print Styles */
+@media print {
+  .ProseMirror {
+    padding: 0;
+    max-width: none;
+  }
+
+  .floating-menu,
+  .toolbar-button {
+    display: none;
+  }
+}
+
+.is-editor-empty::before {
+  color: var(--editor-text-gray);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

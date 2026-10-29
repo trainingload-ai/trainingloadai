@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/user-profile.schema.json",
+  "title": "User profile",
+  "description": "A privacy-reviewed profile snapshot used to interpret the exported training data.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "The stable export subject identifier, pseudonymous in AI analysis exports."
+    },
+    "displayName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The display name selected by the user."
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The account email address."
+    },
+    "preferredLocale": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The preferred interface locale."
+    },
+    "registrationPlatform": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The client platform on which the account was first created."
+    },
+    "registrationMethod": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The authentication method used when the account was first created."
+    },
+    "acquisitionSource": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The attributed acquisition channel captured when the account was first created."
+    },
+    "timezone": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The IANA timezone used for local dates and times."
+    },
+    "loadSources": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The ordered training-load source preference, encoded as a comma-separated list."
+    },
+    "preferredSports": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The preferred sport types, encoded as a comma-separated list."
+    },
+    "altitudeOptimizationModel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The selected model used to account for altitude in performance estimates."
+    },
+    "altitudeThresholdMeters": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The altitude threshold in meters used by the selected optimization model."
+    },
+    "defaultVdotSource": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The preferred physiological source used to estimate VDOT."
+    },
+    "vo2maxCorrectionFactor": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The user-configured dimensionless correction factor applied to VO2 max estimates."
+    },
+    "heartRateZoneModel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The selected model used to calculate heart-rate training zones."
+    },
+    "paceZoneModel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The selected model used to calculate pace training zones."
+    },
+    "powerZoneModel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The selected model used to calculate power training zones."
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "The time the account was created in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "The time the account was last updated in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "userId",
+    "createdAt",
+    "updatedAt"
+  ]
+}

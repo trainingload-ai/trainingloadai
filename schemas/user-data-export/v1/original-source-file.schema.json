@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/original-source-file.schema.json",
+  "title": "Original source file index entry",
+  "description": "Metadata for a preserved non-activity source file.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "The stable source record identifier."
+    },
+    "recordType": {
+      "type": "string",
+      "description": "The normalized domain type associated with the file."
+    },
+    "path": {
+      "type": "string",
+      "description": "The relative path inside the export archive."
+    },
+    "format": {
+      "type": "string",
+      "description": "The uppercase file format identifier."
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The source provider, when available."
+    },
+    "sizeBytes": {
+      "type": "string",
+      "description": "The file size in bytes encoded as a decimal string."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "The lowercase hexadecimal SHA-256 digest of the file."
+    }
+  },
+  "required": [
+    "recordId",
+    "recordType",
+    "path",
+    "format",
+    "sizeBytes",
+    "sha256"
+  ]
+}

@@ -1,0 +1,225 @@
+---
+title: Endurance Workout DSL
+description: Write and validate endurance workout steps, targets, repeats, and sport-specific zones in Trainingload.ai text/rules mode.
+---
+
+# Endurance Workout DSL
+
+Use this DSL to describe one structured endurance workout in **Rules** mode. A training plan can contain many workouts; each workout is parsed and validated separately. **One line represents one step**, and the steps run from top to bottom.
+
+This page covers running, cycling, and swimming endurance steps. For exercises and sets, use the [Strength Workouts](/docs/planning/strength-workouts) structure instead.
+
+## Before you begin
+
+- Choose the exact sport before writing the workout; sport controls zone and unit interpretation.
+- Configure the athlete's pace, power, or heart-rate zones before using `z1`, `z2`, and similar references.
+- Decide whether each step ends by time, distance, energy, or a sensor condition.
+- Use the visual builder when you do not need text-based editing.
+
+---
+
+## Write each line from left to right
+
+Each line contains up to three space-separated parts in this order:
+
+| Part                         | Purpose                                                            | Examples                                         |
+| ---------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
+| ① What this chunk is         | Warmup, main work, easy spin, rest, cooldown…                      | `warmup`, `work`, `recovery`, `rest`, `cooldown` |
+| ② How long / how it ends     | **Only one** “number + unit” first: time, distance, kJ, or HR rule | `5m`, `3km`, `500kj`, `hr<150bpm`                |
+| ③ What to aim for (optional) | Pace, power, HR, cadence…                                          | `pace …`, `power …`, `hr …`                      |
+
+Use **at most one target** in ③. A step may target pace, power, heart rate, cadence, or grade, but not several at once. Split multiple goals into separate steps or keep secondary guidance in the workout notes. `work: 20m` and `work 20m` are equivalent; the colon is optional.
+
+---
+
+## ① Choose the step type
+
+Write one of these keywords first. Keywords are case-insensitive:
+
+| Keyword            | Meaning                                      |
+| ------------------ | -------------------------------------------- |
+| `warmup` / `wu`    | Opening warm-up                              |
+| `work`             | Main work                                    |
+| `recovery` / `rec` | Active recovery between work steps           |
+| `rest`             | Rest step                                    |
+| `cooldown` / `cd`  | Closing cooldown                             |
+| `other`            | A step that does not fit the standard labels |
+
+Use `recovery` for an active easy segment and `rest` when the instruction is to rest. The saved step type preserves that distinction for display and export.
+
+---
+
+## ② Add the ending condition
+
+This determines **when the step ends**—by time, distance, energy, or a sensor condition. Use only one primary ending condition per line. A later `power` or `hr` value is an intensity target, not another duration.
+
+| Form                            | Basically                                       |
+| ------------------------------- | ----------------------------------------------- |
+| `30s`, `5m`, `25min`, `1h`      | Clock time                                      |
+| `5km`, `400m`                   | Distance (`3km` is three km, not three seconds) |
+| `500kj`                         | Kilojoules on the bike                          |
+| `hr<150bpm`, `power>250W`, etc. | End this part when HR / power hits a rule       |
+
+---
+
+## ③ Add an optional target
+
+All after the first measure, space-separated:
+
+| Keyword   | For                                                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `pace`    | Run pace                                                                                                              |
+| `speed`   | Speed (app shows pace or km/h)                                                                                        |
+| `power`   | Power: prefer **watts** (`250W`); a bare number like `250` is parsed as **watts**; legacy `%FTP` (`85%`) still works  |
+| `cadence` | Cadence                                                                                                               |
+| `hr`      | Heart rate: **bpm** (`150bpm`, `150-160bpm`, `<150bpm`, or a bare number like `150`) or a zone reference like `hr z2` |
+| `grade`   | Slope                                                                                                                 |
+
+Legacy aliases `pwr`, `cad`, and `rpm` still parse, but newly generated DSL uses full words.
+
+DSL keywords, units, and zone tokens are case-insensitive: `WORK 25M HR Z2` parses the same as `work 25m hr z2`. Saved or regenerated text is normalized to lowercase keywords.
+
+If you want to reference the athlete's current zones instead of locking exact values, use:
+
+```text
+work 25m hr z2
+work 10m power z4
+work 20m pace z2
+```
+
+These mean "execute against the athlete's current Z2 / Z4 range." If zones change later, the system can interpret the workout with the new ranges. Use explicit values like `hr 140-150bpm`, `power 220-250W`, or `pace 4:30-4:45` when you want to lock the target.
+
+Keep the first duration rule separate from targets:
+
+```text
+work hr<150bpm
+work 25m hr <150bpm
+```
+
+The first line ends when HR crosses the rule and cannot add another target. The second line lasts 25 minutes and uses HR 150 bpm as a ceiling.
+
+---
+
+## `repeat`: same mini-block, many times
+
+```text
+repeat 4 {
+  work 4m power 270W
+  recovery 2m
+}
+```
+
+- `repeat 4` runs the enclosed steps **four times**.
+- The two lines inside the braces form one round. This example creates four rounds of 4 minutes at 270 W followed by 2 minutes of recovery. Some builds also let you close with `end` / `endrepeat` instead of `}`—use the form accepted by the current editor.
+
+You can also repeat until a condition is reached:
+
+```text
+repeat until 30m {
+  work 4m power 270W
+  recovery 2m
+}
+
+repeat until cadence<80rpm {
+  work 30s power 300W
+  recovery 30s
+}
+```
+
+`repeat until` accepts time, distance, calories, heart rate, power, and cadence conditions. Nested repeats are intentionally rejected. An integration that cannot represent a condition must report it as unsupported or explicitly degraded instead of silently changing the workout.
+
+---
+
+## Example 1: run
+
+```text
+warmup 5m
+work 20m pace 7:20-8:20/km
+recovery 90s
+work 3km
+cooldown 5m
+```
+
+- `warmup 5m`: five easy minutes.
+- `work 20m pace …`: twenty minutes main work, ~7:20–8:20 / km.
+- `recovery 90s`: ninety seconds easy.
+- `work 3km`: three **km** of work, not another 20 minutes.
+- `cooldown 5m`: five minutes easy to finish.
+
+Top to bottom = session order.
+
+---
+
+## Example 2: bike
+
+```text
+work 8m power 220-250W
+recovery 2m
+work 5m hr 150-160bpm
+```
+
+- Line 1: eight minutes, 220–250 W.
+- Line 2: two minutes easy, nothing else.
+- Line 3: five minutes, HR 150–160.
+
+---
+
+## Example 3: four intervals
+
+```text
+repeat 4 {
+  work 4m power 270W
+  recovery 2m
+}
+```
+
+Four times: hard 4 min @ ~270 W, then easy 2 min. Without `repeat` you’d paste those two lines four times.
+
+---
+
+## Validate and save
+
+1. Select **Rules** in the workout editor.
+2. Enter or paste the DSL.
+3. Use the parse/preview action before saving when it is available.
+4. Compare the normalized text and visual preview with the intended step order.
+5. Save the workout, reopen it, and confirm the sport, duration, repeat count, and target.
+
+Saved text may be normalized to lowercase keywords and canonical units. Normalization is expected; a change in workout meaning is not.
+
+---
+
+## Sports and DSL capabilities
+
+Planned workouts keep an exact sport such as road running, trail running, treadmill running, road cycling, mountain biking, indoor cycling, pool swimming, or open-water swimming. Related sports still share run, cycling, or swim zones and load analysis, while exports to Suunto, Intervals.icu, and COROS prefer the exact sport mapping.
+
+In the API, `sportType` is the broad family such as running, cycling, or swimming, while `subSportType` is the canonical subtype such as `TRAIL_RUNNING` or `INDOOR_CYCLING`.
+
+A disabled sport in the selector means the structured editor cannot represent it without losing meaning yet. It can still be used as an activity type, and the app will not silently convert an unsupported structure into a different workout.
+
+---
+
+## Verify the workout
+
+- Every step appears in the preview in source order.
+- Each line has one primary ending condition and no more than one target.
+- Zone references resolve against the intended sport and athlete profile.
+- Repeat blocks contain the expected steps and number or ending condition.
+- Reopening the workout preserves the same structure and sport subtype.
+
+## Troubleshooting
+
+- **A line reports an unknown keyword:** use a supported step type or target name and remove punctuation that is not shown in the grammar.
+- **A duration or distance is wrong:** check the unit and position. The first measure after the step type is the ending condition.
+- **The parser rejects multiple targets:** keep one target on the line and move secondary guidance to notes or another step.
+- **A threshold-duration line rejects a target:** `work hr<150bpm` already uses heart rate as its ending condition; use `work 25m hr <150bpm` for a fixed-duration step with an HR ceiling.
+- **A repeat fails:** close the braces, avoid nested repeats, and verify the `repeat until` condition.
+- **The preview changes after switching sport:** zone and unit meaning depend on sport. Re-select the correct sport and review every target.
+- **Export reports degradation or unsupported structure:** simplify only after reading the provider warning; do not assume every device supports conditional repeats.
+
+## Next steps
+
+- [Draft a structured workout in the workout editor](/workout-editor), then paste the DSL here.
+- Use the [manual workout editor guide](/docs/planning/manual-workout-editor) for the in-app visual and text workflows.
+- Build exercise-based sessions with [Strength Workouts](/docs/planning/strength-workouts).
+- Add the saved workout to a plan through [Create a Training Plan](/docs/guide/create-training-plan).

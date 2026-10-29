@@ -1,0 +1,24 @@
+{
+  "title": "User Guide",
+  "pages": [
+    "getting-started",
+    "profile-thresholds-zones",
+    "connect-data",
+    "upload-activity-files",
+    "activity-feed-search",
+    "calendar",
+    "dashboard",
+    "activity-detail",
+    "create-training-plan",
+    "manage-active-plan",
+    "ai-coach",
+    "training-analysis-workflow",
+    "pmc-marathon-adjustment",
+    "effective-vo2max-for-endurance",
+    "ai-marathon-plan-adjustments",
+    "intervals-icu-alternative-for-training-load",
+    "runalyze-alternative-for-training-load",
+    "trainingpeaks-alternative-for-training-load",
+    "formbeat-alternative-for-training-load"
+  ]
+}

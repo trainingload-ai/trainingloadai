@@ -1,0 +1,55 @@
+---
+title: Product Terms and Statuses
+description: Understand the product objects and states that connect training plans, planned workouts, completed activities, processing, reviews, and AI usage.
+seoTitle: "Trainingload.ai Glossary: Plans, Activities, Load & AI"
+seoDescription: Understand Trainingload.ai terms for plans, workouts, completed activities, processing states, training load, coach reviews, AI credits, and Demo accounts.
+keywords: ["Trainingload.ai glossary", "training plan status", "activity processing status", "AI credits"]
+---
+
+# Product Terms and Statuses
+
+Use this page as a reference while following the task guides. These terms describe product state; they do not by themselves judge whether training was good or bad.
+
+## Core objects
+
+| Term | Meaning |
+| --- | --- |
+| Athlete profile | Time zone, units, thresholds, zones, preferences, and sport context used to interpret training |
+| Training plan | A dated training cycle containing planned workouts and a lifecycle state |
+| Planned workout | What was intended for a specific date, including sport, structure, duration, intensity, and expected load when available |
+| Completed activity | What was actually recorded, synchronized, or uploaded from a device or platform |
+| Plan-to-activity link | An explicit relationship showing that a completed activity represents a particular planned workout |
+| Current state | Recent training load, recovery inputs, subjective feedback, and other context used for today's decision |
+| Review | An interpretation of an activity, day, week, month, or plan based on available evidence |
+| AI operation | A proposed or executed action such as creating, moving, or changing planned training |
+
+## Activity states
+
+| State | What it means | What to do |
+| --- | --- | --- |
+| Uploading or importing | The file or provider payload is still being transferred | Wait before retrying |
+| Processing | The activity exists, but derived data may still be incomplete | Do not interpret missing load or charts yet |
+| Ready | Supported processing has completed | Review the data the source actually supplied |
+| Failed | Import or processing could not complete | Read the visible error, then use troubleshooting |
+| Duplicate | The same source activity or equivalent file already exists | Keep one trustworthy source path |
+
+## Plan and workout states
+
+| State | What it means |
+| --- | --- |
+| Draft | The plan can still be reviewed or edited before it becomes current |
+| Active | The plan drives current and upcoming workout context |
+| Completed | The plan period has ended and remains available for review |
+| Planned | A workout is scheduled but has no final execution result yet |
+| Completed workout | A planned workout is marked complete, usually with a linked activity or explicit completion record |
+| Skipped | The workout was intentionally not completed |
+| Unplanned activity | A completed activity does not represent a scheduled workout |
+
+## Load, review, and credits
+
+- **Training load** is a derived training-dose estimate. Its availability depends on sport, duration, sensor data, thresholds, and load-source rules.
+- **Coach review** is an evidence-based interpretation, not raw device data and not a medical diagnosis.
+- **AI credits** are usage units for eligible AI operations. A credit ledger describes consumption; it does not describe training load or account permissions.
+- **Demo account** exposes representative product states. Its restrictions do not redefine normal account roles or capabilities.
+
+Continue with the [complete training workflow](/docs/workflow) or open the [metrics reference](/docs/metrics).
