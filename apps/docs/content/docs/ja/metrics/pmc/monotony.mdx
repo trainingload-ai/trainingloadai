@@ -1,0 +1,66 @@
+---
+title: トレーニング単調性とは？Foster式と上限付きスコアの違い
+description: トレーニング単調性は直近7日の日次負荷がどれだけ似ているかを示します。Fosterの古典式とTrainingload.aiの上限付きスコア、Training Strainの読み方を整理します。
+keywords:
+  ["トレーニング単調性", "Foster 単調性", "トレーニングストレイン", "日次負荷のばらつき", "単調性の計算"]
+---
+
+# トレーニング単調性とは？Foster式と上限付きスコアの違い
+
+**トレーニング単調性**は、直近 7 暦日の負荷がどの程度似ているかを表します。毎日の値が近いほど高くなり、強い日、軽い日、負荷 0 の日がはっきり分かれるほど低くなる傾向があります。
+
+Trainingload.ai が表示するのは、正規化された上限付きの値です。Foster の古典的な指標とは異なり、疲労、回復、オーバートレーニング、傷害確率を直接測るものではありません。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard value="0.72" metricLabel="Monotony"
+    valuePopoverTitle="単調性の値"
+    valuePopoverBody="7 日分の日次負荷の平均と母標準偏差から算出します。活動がない日は 0 です。"
+    rangePopoverTitle="画面上の区分"
+    rangePopoverBody="<0.6、0.6–0.8、>0.8 は確認用の区分であり、健康や傷害の基準ではありません。"
+    helpTitle="負荷のばらつき"
+    details="7 日分の値と合計負荷を一緒に確認します。" />
+</div>
+
+```text
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+monotony = mean_load / (sd_load + mean_load)
+training_strain = sum(loads) × monotony / 0.5
+```
+
+7 日すべてが 0 なら Monotony と Strain は 0 です。古典式は `foster_monotony = mean_load / sd_load` で上限がありません。そのため、Trainingload.ai の `0.8` を Foster の `2.0` と直接比較することはできません。
+
+7 日間すべて負荷 0 なら 0、1 日だけ負荷があれば約 0.29、7 日間が同じ正の負荷なら 1 です。低いほど常に良いわけではありません。大きな負荷が 1 日だけあり、残り 6 日が 0 の場合も低い値になります。
+
+## よくある質問
+
+### トレーニング単調性とは？
+
+直近 7 暦日の日次負荷がどれだけ似ているかのスコアです。似た日が続くと高く、強度日・イージー・休養が分かれると低くなりやすいです。数字の分布であり、傷害リスクそのものではありません。
+
+### Foster式との違いは？
+
+古典式は平均 ÷ 標準偏差で上限がありません。毎日同じだと無限に近づきます。Trainingload.ai は 平均 /（標準偏差 + 平均）なので、負荷がある週は 0〜1 です。製品の 0.8 を Foster の 2.0 と比べないでください。
+
+### Training Strainとは？
+
+7 日合計負荷 × 単調性（本製品ではさらに 0.5 で割る）です。合計が高く、日々が似ていると上がります。7 日分の値と一緒に見てください。
+
+### 低いほど良いですか？
+
+いいえ。大きな尖りが 1 日だけで残りが 0 でも低くなります。平坦な週に気づく手がかりとして使い、計画、欠損、主観と照合します。
+
+## 関連ページ
+
+- [トレーニング負荷とは](/ja/docs/metrics/training-load)
+- [慢性トレーニング負荷（CTL）](/ja/docs/metrics/pmc/chronic-training-load)
+- [疲労（ATL）](/ja/docs/metrics/pmc/acute-training-load)
+- [計画内でトレーニング負荷を管理する](/ja/training-load)
+- [AIコーチで負荷調整案を作る](/ja/ai-training-plan)
+
+## 参考資料
+
+- [Foster（1998）](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad ほか（2017）：session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones ほか（2017）：系統的レビュー](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr：Training Monotony](https://fellrnr.com/wiki/Training_Monotony)

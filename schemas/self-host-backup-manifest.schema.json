@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-backup-manifest-v1.json",
+  "title": "Trainingload self-host backup manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "backupId",
+    "createdAt",
+    "release",
+    "database",
+    "uploads",
+    "configuration",
+    "integrity",
+    "consistency",
+    "compatibility"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "trainingload-selfhost-backup"
+    },
+    "backupId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "configSchemaVersion",
+        "sourceRevision"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configSchemaVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceRevision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "format",
+        "file",
+        "sizeBytes",
+        "logicalSizeBytes",
+        "sha256",
+        "appliedMigrations",
+        "recordCounts"
+      ],
+      "properties": {
+        "engine": {
+          "const": "postgresql"
+        },
+        "format": {
+          "const": "pg_dump-custom"
+        },
+        "file": {
+          "const": "database.dump"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "logicalSizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "appliedMigrations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "checksum"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "checksum": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "recordCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "selfHostInstance",
+            "user",
+            "activity"
+          ],
+          "properties": {
+            "selfHostInstance": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "user": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "activity": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "uploads": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root",
+        "fileCount",
+        "sizeBytes"
+      ],
+      "properties": {
+        "root": {
+          "const": "uploads"
+        },
+        "fileCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshotFile",
+        "secretReferencesFile"
+      ],
+      "properties": {
+        "snapshotFile": {
+          "const": "configuration.json"
+        },
+        "secretReferencesFile": {
+          "const": "secret-references.json"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "checksumsFile"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "checksumsFile": {
+          "const": "checksums.txt"
+        }
+      }
+    },
+    "consistency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "quiescedServices"
+      ],
+      "properties": {
+        "method": {
+          "const": "application-quiesce-plus-pg-dump"
+        },
+        "quiescedServices": {
+          "type": "array",
+          "const": [
+            "client",
+            "server"
+          ]
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restoreMode",
+        "requiredReleaseVersion"
+      ],
+      "properties": {
+        "restoreMode": {
+          "const": "exact-release"
+        },
+        "requiredReleaseVersion": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

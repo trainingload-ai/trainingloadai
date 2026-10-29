@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Self-host documentation
+    url: https://trainingload.ai/docs/self-host
+    about: Read installation, configuration, operations, backup, upgrade, and troubleshooting guidance first.
+  - name: Security vulnerability
+    url: https://github.com/Buerber/trainingloadai/security/advisories/new
+    about: Report vulnerabilities privately. Never publish exploitation details, secrets, or personal data in an issue.
+  - name: Product or usage question
+    url: https://github.com/Buerber/trainingloadai/discussions
+    about: Ask questions and discuss ideas that are not reproducible bugs or concrete feature proposals.

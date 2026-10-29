@@ -1,0 +1,69 @@
+---
+title: 计划与训练课程
+description: 了解 Trainingload.ai 如何组织训练计划、计划课程、耐力与力量结构、预期负荷，以及已完成活动的关联。
+keywords: ["Trainingload.ai 训练计划", "结构化训练", "训练计划生命周期"]
+---
+
+# 计划与训练课程
+
+Trainingload.ai 把训练计划视为持续执行和复盘的工作区，而不是一份静态 PDF。计划中的每节训练都可以包含具体步骤、给运动员看的备注、预期负荷、执行状态，以及与已完成活动的关联。
+
+## 计划模型
+
+<Mermaid
+  chart={`flowchart TD
+  Goal[目标与约束] --> Plan[训练计划]
+  Plan --> Workout[计划课程]
+  Workout --> Structure[耐力或力量结构]
+  Structure --> Expected[预期负荷]
+  Workout --> Activity[关联已完成活动]
+  Activity --> Actual[实际负荷与执行结果]
+  Expected --> Review[计划复盘]
+  Actual --> Review
+  Review --> Adjustment[确认调整]
+  Adjustment --> Plan`}
+/>
+
+## 计划状态
+
+- **草稿**：仍在编排和审核，可以继续修改。
+- **进行中**：已经设置开始日期，是当前训练与每日执行的上下文。
+- **已暂停**：暂时停止执行，但保留计划、课程和历史记录。
+- **已完成**：训练周期有意结束。
+- **已取消**：计划不再执行，也没有按原意完成。
+
+已经关联真实活动的计划在切换状态前，先阅读[计划生命周期](/zh/docs/planning/plan-lifecycle)。
+
+## 训练结构类型
+
+### 耐力训练
+
+耐力课程由热身、训练、恢复、重复等步骤组成，可按时间或距离安排，并支持心率、功率、配速、速度、踏频等目标。
+
+需要应用内可视化编排时，阅读[手动训练编辑指南](/zh/docs/planning/manual-workout-editor)；若要先在浏览器起草，使用[训练编辑器与结构化训练构建器](/zh/workout-editor)；熟悉紧凑文本规则后，可以使用[训练 DSL](/zh/docs/planning/workout-dsl)。
+
+### 力量训练
+
+力量训练由动作和组方案组成。正式组可以按次数或时间安排，并可设置不指定负重、固定重量、1RM 百分比、自重、主观强度和组间休息。
+
+可视化流程见[力量训练课程](/zh/docs/planning/strength-workouts)；需要使用规则输入时，按照[力量训练 DSL](/zh/docs/planning/strength-workout-dsl)操作。
+
+## 预期负荷与实际负荷
+
+只有当训练结构、阈值和目标提供了足够信息时，系统才会估算预期负荷。实际负荷来自完成后的活动，并遵循用户配置的负荷来源优先级。
+
+两者回答的问题不同：
+
+- 预期负荷：“这份计划原本想施加多少训练压力？”
+- 实际负荷：“运动员完成后实际产生了多少训练压力？”
+
+不要为了得到一个预期负荷而虚构阈值或训练目标。明确显示未知，比制造虚假的精确值更可靠。
+
+## 推荐学习顺序
+
+1. [创建训练计划](/zh/docs/guide/create-training-plan)
+2. [手动训练编辑指南](/zh/docs/planning/manual-workout-editor)
+3. [力量训练 DSL](/zh/docs/planning/strength-workout-dsl)（需要编写力量训练时）
+4. [计划生命周期](/zh/docs/planning/plan-lifecycle)
+5. [管理进行中的计划](/zh/docs/guide/manage-active-plan)
+6. [智能教练](/zh/docs/guide/ai-coach)

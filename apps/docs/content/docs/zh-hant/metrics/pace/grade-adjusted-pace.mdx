@@ -1,0 +1,79 @@
+---
+title: 坡度調整配速（GAP）
+description: 將上落斜嘅實際配速換算成等效平路配速，更貼近真實努力。
+keywords: ["GAP", "Grade Adjusted Pace", "Pace", "Running", "Elevation"]
+---
+
+# 坡度調整配速（GAP）
+
+**坡度調整配速（GAP）**會用一個生物力學/能量成本模型，將你喺 **上斜** 或 **落斜** 嘅實際配速，換算成「如果喺平路、付出相同能量成本」時嘅理論配速。
+
+佢想回答跑手最關心嘅問題：「如果唔使爬呢段斜路，我以同樣努力，平路應該跑到幾快？」
+
+## 核心概念
+
+喺起伏路線上，**實際配速**好容易誤導你：
+
+- **上斜**：要對抗重力，配速變慢，但生理成本好高
+- **落斜**：有重力輔助，配速變快，但能量成本唔會線性下降（制動/離心收縮會影響）
+
+GAP 會盡量消除地形影響，提供一個「標準化」配速，令你可以比較唔同路線嘅努力程度。
+
+## 點樣計
+
+Trainingload.ai 會用 **Minetti (2002)** 嘅能量成本模型去計 GAP，模型會量化唔同坡度下嘅 **能量成本（EC）**。
+
+### 能量成本方程
+
+$$
+C_r = 155.4 \times i^5 - 30.4 \times i^4 - 43.3 \times i^3 + 46.3 \times i^2 + 19.5 \times i + 3.6
+$$
+
+其中：
+
+- $C_r$：能量成本（J/kg/m）
+- $i$：坡度（例：5% 坡度即 0.05）
+
+### GAP 方程
+
+```text
+GAP = Pace_actual / (C_r / C_flat)
+```
+
+- 0% 坡度時，$C_{flat} \approx 3.6$
+- 上斜：$C_r > 3.6$，所以 GAP 會比實際配速「更快」（時間值更細）
+- 緩落斜：$C_r < 3.6$，所以 GAP 會比實際配速「更慢」
+- **注意**：喺非常陡嘅落斜（好多時低過 -20%），強烈嘅 **離心制動** 會令能量成本再上升，GAP 可能又會「變快」
+
+## 常見用途
+
+### 1) 越野 / 山跑
+
+地形一陡，平均配速好多時近乎冇意義。
+
+- **例**：15% 上斜時配速跌到 12:00/km
+- **GAP**：可能顯示 5:00/km
+- **解讀**：代謝強度可能更接近馬拉松努力，而唔係原始配速睇落咁「慢」
+
+### 2) rTSS 嘅基礎
+
+Trainingload.ai 會用 **NGP（Normalized Graded Pace）**去計跑步負荷（rTSS），而 GAP 就係 NGP 嘅底層：
+
+```text
+Pace_actual  --(坡度調整)-->  GAP  --(加權平滑)-->  NGP
+```
+
+### 3) 比賽配速策略
+
+透過分析路線 GPX + GAP，你可以計劃唔同路段嘅實際配速，令整體努力更一致。
+
+## Trainingload.ai 建議
+
+- **唔好盲追 GAP**：GAP 係代謝等效，唔代表肌肉骨骼壓力。長時間硬落斜，GAP 可能睇落「輕鬆」，但對股四頭肌同膝頭衝擊可以好大。
+- **睇趨勢多過即時值**：GPS 坡度估算有噪音同延遲，即時 GAP 會跳。建議用 lap 平均或事後分析。
+
+## 參考
+
+- Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *Journal of Applied Physiology*.
+- Strava: [Grade Adjusted Pace (GAP)](https://support.strava.com/hc/en-us/articles/216917067-Grade-Adjusted-Pace-GAP)
+

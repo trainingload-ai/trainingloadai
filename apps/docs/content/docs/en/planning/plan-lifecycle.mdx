@@ -1,0 +1,131 @@
+---
+title: Plan Lifecycle, Sharing, and Import
+description: Understand plan states, share versioned plan snapshots, import a shared or VDOT-generated draft, and change lifecycle state without losing execution context.
+keywords:
+  [
+    "training plan status",
+    "activate training plan",
+    "share training plan",
+    "import training plan",
+    "VDOT training plan",
+  ]
+---
+
+# Plan Lifecycle, Sharing, and Import
+
+Plan state controls whether Trainingload.ai treats a schedule as a draft, the current training context, temporarily paused work, or historical record.
+
+## Before you change plan state
+
+- Open the intended plan and confirm its name, goal, dates, and current status.
+- Save or discard any workout edit still open on another device.
+- Review completed, skipped, and linked workouts before ending or deleting a plan.
+- Prefer a lifecycle state over deletion when the plan contains meaningful history.
+
+<DocsScreenshot
+  id="plan-active-summary"
+  title="Active plan summary"
+  description="Status, weekly structure, workout completion, and expected-versus-actual load stay together on the plan detail page."
+  route="Plans → Plan detail"
+/>
+
+## Draft
+
+Use a draft while building, importing, or reviewing the plan. Draft workouts can be edited without presenting the plan as the athlete's current schedule.
+
+Before activation, verify:
+
+- Goal and date range.
+- Start date and week alignment.
+- Weekly rhythm and recovery spacing.
+- Sport and workout structure.
+- Threshold-dependent targets.
+- Whether the first week is realistic for current fitness.
+
+## Activate
+
+Activation assigns execution context and allows the plan to drive daily views, activity linking, expected load, and AI Coach review.
+
+1. Open the plan detail page.
+2. Select **Activate**.
+3. Choose the intended start date when prompted.
+4. Review how plan-relative days map to calendar dates.
+5. Confirm activation.
+
+**Verify:** the plan status is Active and its workouts appear on the expected calendar days.
+
+## Pause and resume
+
+Pause when the plan should temporarily stop guiding daily execution but should remain available. Typical reasons include illness, travel, injury evaluation, or a deliberate break.
+
+Pausing does not erase completed activities or workout links. Before resuming, review whether the remaining dates and workload still make sense; edit the plan rather than pretending the interruption did not happen.
+
+## Complete
+
+Complete a plan when its intended block is finished. Review completion rate, actual versus expected load, key activity links, and what should carry into the next block.
+
+Completion is different from cancelation: completion means the plan reached an intentional endpoint, even if some sessions were skipped.
+
+## Cancel
+
+Cancel when the plan should no longer be executed and should not be represented as completed. Add context in the plan or coaching record when the reason matters for future decisions.
+
+## Share and import a plan snapshot
+
+Create a share from the plan detail page when another athlete or coach needs to review or reuse the schedule. Plan shares are unlisted: they are not placed in a public catalog, but anyone who has a working link can open its preview. Do not include private notes or sensitive context that the recipient should not see.
+
+A shared plan has two useful link behaviors:
+
+- A **version link** stays attached to one immutable snapshot.
+- A **latest link** follows the share lineage to its newest available version.
+
+Editing a shared plan can produce a new version. Use the fixed version link when a review or decision must refer to the exact schedule that was sent; use the latest link when recipients should follow future revisions. The owner can revoke one version or the whole lineage. A revoked version can no longer be imported.
+
+A signed-in recipient can preview the shared plan and import it as a separate **Draft**. Importing does not activate the plan or modify the owner's plan. Review dates, thresholds, pace or power targets, recovery spacing, and the recipient-specific load preview before activation. Estimated load can differ from a public preview because a signed-in viewer's thresholds can personalize the calculation.
+
+The recipient can optionally create a new share while importing. That creates a derived share lineage for the imported copy; it does not transfer ownership of or overwrite the original lineage.
+
+### Import a VDOT-generated draft
+
+The public VDOT plan generator has been retired. Previously issued authenticated VDOT import links remain a legacy compatibility path: review the VDOT value, pace zones, dates, and weekly schedule before confirming an import. Trainingload.ai creates a **Draft**; it does not silently replace or activate the current plan.
+
+## Delete
+
+Deletion is more destructive than a lifecycle state change. Prefer complete or cancel when the plan is part of meaningful training history. Delete only when the plan is an accidental or disposable draft and the confirmation clearly identifies the intended record.
+
+## Workout execution states
+
+Individual planned workouts can be marked complete, skipped, or otherwise updated according to the active plan workflow. A completed activity link is separate evidence: status records the plan decision; the link records which real activity fulfilled the session.
+
+## Concurrent edits
+
+Plan records use version-aware updates. If another device or AI action changed the plan after your page loaded, refresh and review the new version before retrying. This prevents an old edit from silently overwriting a newer decision.
+
+## Verify the state change
+
+- The plan detail shows the intended new status.
+- Active-plan, Today, and Calendar surfaces reflect the same execution state.
+- Existing workout completion and activity links remain intact.
+- Pausing or canceling stops the plan from guiding current execution without rewriting history.
+- Completing preserves the plan as an intentional finished block.
+- A newly activated plan maps its first week to the expected calendar dates.
+- A fixed share link still opens the intended version, while the latest link opens the newest available version.
+- An imported shared or VDOT-generated plan appears as a separate Draft before activation.
+
+## Troubleshooting
+
+- **Activate is unavailable:** finish required plan fields, check the date range, and confirm another plan-state rule is not preventing activation.
+- **Workouts appear on unexpected dates:** compare activation start date, plan-relative day offsets, account time zone, and calendar date.
+- **The wrong plan appears current:** return to the plan list, compare statuses, and activate only the intended record.
+- **Pause or resume does not appear elsewhere:** refresh Today, Calendar, and the plan detail on the other device.
+- **An update reports a version conflict:** reload the plan and reapply the decision to the newest version.
+- **A shared plan link is unavailable:** ask the owner whether that version or the whole share lineage was revoked, then request a new link if appropriate.
+- **An imported plan's load differs from the public preview:** compare the signed-in athlete's thresholds and units; viewer-specific estimates can differ from the generic public preview.
+- **A VDOT import link fails:** reopen the newest generator result, confirm that the import link is complete, and generate a fresh draft when the token is no longer valid.
+- **Delete is blocked or risky:** use Cancel or Complete when history should remain. Delete only the disposable draft identified by the confirmation.
+
+## Next steps
+
+- Continue with [Manage an Active Plan](/docs/guide/manage-active-plan) to link activities and compare expected versus actual load.
+- Use [Calendar](/docs/guide/calendar) to verify scheduled dates.
+- Read [AI Coach](/docs/guide/ai-coach) before applying plan-aware adjustments.

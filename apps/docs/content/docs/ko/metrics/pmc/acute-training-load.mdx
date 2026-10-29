@@ -1,0 +1,43 @@
+---
+title: 피로(ATL)
+description: Trainingload.ai가 일일 훈련부하로 피로(ATL)를 계산하는 방법과, 실제 피로 측정값으로 오해하지 않고 추세를 읽는 방법을 설명합니다.
+keywords: ["피로", "급성 훈련부하", "ATL", "ATL 공식", "최근 훈련부하"]
+---
+
+# 피로(ATL)란?
+
+**피로(ATL)**, 즉 급성 훈련부하는 일일 훈련부하를 빠르게 반영하는 지수평균입니다. 최근 날짜에 더 큰 가중치를 주기 때문에 체력(CTL)보다 빠르게 변합니다. Trainingload.ai의 기본 시간 상수는 7일입니다.
+
+‘피로’는 이해하기 쉬운 화면 명칭입니다. ATL은 모델로 계산한 최근 부하를 요약할 뿐, 생리적·주관적 피로, 회복, 건강 또는 적응을 직접 측정하지 않습니다.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AtlStatPreviewCard value="16.99" percent={72} metricLabel="ATL"
+    valuePopoverTitle="ATL 값"
+    valuePopoverBody="부하 소스 우선순위에 따라 선택된 일일 부하의 빠른 지수평균입니다."
+    percentPopoverTitle="ATL 백분율"
+    percentPopoverBody="현재 ATL을 개인의 과거 최대 ATL과 비교한 표시이며, 보편적인 피로 백분위가 아닙니다."
+    helpTitle="최근 부하"
+    details="변화를 만든 세션과 회복 맥락을 함께 확인하세요." />
+</div>
+
+## 데이터와 공식
+
+Trainingload.ai는 각 활동에서 파워, 심박수, 페이스 또는 세션 RPE 기반 부하 중 우선순위에 맞는 값을 선택합니다. 같은 날의 여러 활동은 `daily_load`로 합산하며, 기록된 부하가 없는 날은 0으로 계산합니다.
+
+```text
+decay_ATL = exp(-1 / 7)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+```
+
+기본값에서는 `decay_ATL ≈ 0.866878`이고 오늘 부하의 가중치는 약 `0.133122`입니다. 7일은 단순한 최근 7일 평균이 아니라 **시간 상수**입니다. 일정한 일일 부하로 바뀌면 ATL은 한 시간 상수에서 변화량의 약 63.2%, 세 시간 상수에서 약 95%를 반영합니다.
+
+ATL은 최근 부하가 현재 수준보다 높으면 상승하고, 휴식·회복·테이퍼 기간에는 하락합니다. 상승했다는 사실만으로 실제 피로나 부하 적응 여부를 판단할 수는 없습니다.
+
+[체력(CTL)](/ko/docs/metrics/pmc/chronic-training-load), [컨디션(TSB)](/ko/docs/metrics/pmc/training-stress-balance), 세션 수행 품질, 수면, 통증, 질병 신호, RPE와 주관적 상태를 함께 보세요.
+
+## 참고 자료
+
+- [Intervals.icu: Fitness·Fatigue·Form 공식](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE: Acute Training Load](https://runalyze.com/glossary/atl)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [GoldenCheetah 소스: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)

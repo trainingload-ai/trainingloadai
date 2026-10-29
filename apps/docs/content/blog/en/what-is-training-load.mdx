@@ -1,0 +1,170 @@
+---
+title: What Is Training Load? Power, Heart Rate, EPOC, and RPE Explained
+description: Why can the same workout produce different load scores in Garmin, TrainingPeaks, and Strava? Learn what external load, internal load, TSS, TRIMP, EPOC, and Session RPE actually measure.
+author: Trainingload.ai editorial team
+date: 2026-08-29
+image: /blog/training-load/cover-en.png
+tags: ["training load", "TSS", "EPOC", "Session RPE", "endurance training"]
+---
+
+> **Power, heart rate, EPOC, and RPE can assign very different loads to the same workout because they are not observing the same thing.**
+
+A ride may produce one training-load score in Garmin, another in TrainingPeaks, and a third in Strava. That does not necessarily mean two platforms got the calculation wrong. One may be calculating power-based TSS, another estimating EPOC from heart-rate data, while the third reports Relative Effort. The numbers use different inputs and do not share a universal conversion.
+
+Before deciding whether a load score looks high or low, ask where it came from. Does it describe the work you completed, your body's physiological response, or how hard the entire session felt?
+
+Training load is an umbrella term, not a single measurement. Each method compresses some combination of duration and intensity into a number that is easier to compare across sessions and over time. That number may also become the daily input for [CTL, ATL, and TSB](/blog/what-are-ctl-atl-tsb). It describes a training stimulus; it does not directly measure fatigue, recovery, adaptation, or race readiness.
+
+## Start with external and internal load
+
+Sports science usually separates training load into **external load** and **internal load**. For practical use, internal load can be viewed through objective physiological responses and subjective perceived responses. That gives us three useful lenses, but the underlying classification still begins with external versus internal load.
+
+| Lens | The question it answers | Common inputs |
+| --- | --- | --- |
+| External load | How much work was completed? | Power, pace, distance, elevation gain, mechanical work, acceleration |
+| Objective internal load | How strongly did the body respond? | Heart rate, TRIMP, blood lactate, oxygen consumption, EPOC |
+| Subjective internal load | How hard did the full session feel? | RPE, Session RPE, respiratory RPE, muscular RPE |
+
+Imagine two athletes riding at 200 W for one hour. Their external power load is the same. If one has a substantially higher heart rate and RPE, that athlete is likely carrying a greater internal load. The same split can appear within one athlete: 200 W may feel routine on a cool, well-rested morning and much harder in heat, dehydration, or accumulated fatigue.
+
+Power and pace record what you did. Heart rate and EPOC describe how your body responded. Session RPE preserves your overall experience of the workout. These signals complement one another; they are not competing versions of a single truth.
+
+## Power, pace, and TSS: how much work did you complete?
+
+Cycling power, running pace, and swimming speed are external outputs. Average power or total distance describes volume, but it does not combine duration and relative intensity. TSS and related metrics add an athlete-specific threshold so that sessions can be compared on a common personal scale.
+
+A simplified version of classic power-based TSS is:
+
+```text
+TSS = duration (hours) × IF² × 100
+IF = Normalized Power (NP) ÷ FTP
+```
+
+Riding near FTP for one hour produces roughly 100 TSS. Because intensity is squared, a modest increase in intensity can raise the score quickly. Running rTSS uses grade-adjusted pace and threshold pace, while swimming sTSS uses threshold swim speed. The details differ, but the common idea is to normalize external output against a personal threshold and combine it with time.
+
+Power-based load is particularly useful for intervals, sprints, and variable efforts. Power reacts immediately, and it makes planned-versus-completed comparisons straightforward. The quality of the result, however, depends on the quality of the threshold. If FTP, threshold pace, or CSS is wrong, every load calculated from it will lean in the same direction.
+
+External load also misses part of the story. The same 200 W can cost more physiologically in heat, at altitude, or after poor sleep. Those conditions do not normally enter a power TSS calculation directly. Running impact and downhill eccentric loading are also difficult to capture from pace alone. A 100 TSS run and a 100 TSS ride may have the same score but very different recovery costs.
+
+## Heart rate, TRIMP, and hrTSS: what did the cardiovascular response cost?
+
+Heart rate is an objective internal-load signal. TRIMP (Training Impulse) combines time with relative heart-rate intensity and usually gives harder intensity zones more weight. hrTSS, time-in-zone scores, and several branded Cardio Load metrics follow related principles.
+
+Heart-rate load has a low equipment barrier and works across most endurance sports when the signal is reliable. It can also reflect extra cardiovascular strain from heat, altitude, and dehydration. For long, steady aerobic work, that makes it a useful counterpart to pace or power.
+
+The signal is not instantaneous. A short sprint may be over before heart rate reaches its peak, and cardiac drift can raise heart rate during a long session even when power stays constant. Temperature, caffeine, stress, illness, medication, and sensor error can all alter the reading. Deep fatigue can sometimes suppress the heart-rate response as well, so a lower-than-usual heart rate does not automatically make a session easier.
+
+Heart-rate load is best understood as a view of cardiovascular response, not a complete account of what happened to muscles, tendons, and joints.
+
+## What is EPOC, and how does Garmin use it?
+
+EPOC stands for **excess post-exercise oxygen consumption**. After exercise, oxygen use does not return to its resting level immediately. It remains elevated while the body works back toward homeostasis. That oxygen consumed above the normal resting rate is EPOC.
+
+EPOC can be measured directly in a laboratory through respiratory gas analysis. A Garmin watch does not measure oxygen consumption directly. Instead, Garmin uses heart-rate data collected during exercise to model the accumulation of EPOC in real time. The word “post-exercise” describes the physiological phenomenon; it does not mean that the watch must wait until the workout ends before estimating it.
+
+Garmin uses that EPOC estimate as the Exercise Load for an activity. Recent Exercise Load values feed Acute Load, which in turn contributes to Chronic Load and Load Ratio. Garmin Training Load is therefore an **EPOC-based load system**, not power-based TSS.
+
+This approach gives Garmin a consistent way to compare the physiological impact of different aerobic activities and separates an easy hour from a hard hour more effectively than duration alone. It remains a model, though. Users cannot fully reproduce the proprietary calculation, and the estimate inherits the limitations of heart-rate data. Strength work, very short explosive efforts, contact, and eccentric muscle damage may not be represented well.
+
+Garmin Load is most useful when compared with your own Garmin history. It should not be converted point-for-point into TSS or Relative Effort.
+
+## Session RPE: how hard did the whole workout feel?
+
+RPE is a rating of perceived exertion. Session RPE asks the athlete to rate the difficulty of the workout as a whole, then multiplies that rating by duration:
+
+```text
+Session RPE Load = RPE (0–10) × duration (minutes)
+```
+
+A 60-minute session rated 7 produces 420 AU. AU means arbitrary units; it is not a unit of power, heart rate, or oxygen consumption.
+
+Session RPE is sometimes mislabeled as “psychological load.” It is better described as subjective internal load. Breathing, muscular fatigue, pain, heat, sleep, and mental state all contribute to the final rating. Work stress or mood can influence RPE, but neither is the whole measure.
+
+The method costs almost nothing and works across endurance, strength, and team sports. It is especially valuable when power or heart-rate data is missing, or when a session contains muscular stress that cardiovascular metrics do not show well. Consistency matters: use the same scale, question, and timing. One workable routine is to ask 15–30 minutes after training, “How hard was the session overall?”
+
+Like every single-number summary, Session RPE discards detail. Sixty minutes at RPE 5 and 30 minutes at RPE 10 both equal 300 AU, even though the sessions are clearly not equivalent. Use the score to follow patterns, not to replace the workout description.
+
+## The frequently missed piece: mechanical load
+
+Every running foot strike, a long descent's eccentric contractions, repeated accelerations, and the weight and repetitions used in strength training create mechanical load. These stresses affect muscles, tendons, bones, and joints without necessarily producing a high heart rate.
+
+That is why a downhill run can generate a modest Garmin Load while leaving the quadriceps sore the next day. A platform's “muscle load” is still generally inferred from power, movement, or workout records; it is not a direct measurement of tissue damage.
+
+Mechanical load is difficult to reduce to one score that transfers cleanly across sports. For running, trail running, and strength training, retaining raw context—distance, climbing and descending, repetitions, sets, and weight—may be more useful than forcing everything into a universal number.
+
+## What do the major platforms call training load?
+
+The interfaces may all say Training Load, but the underlying signals are not the same.
+
+| Platform | Main activity-level load | Primary inputs | Longer-term view | What to check |
+| --- | --- | --- | --- | --- |
+| Trainingload.ai | Activity load chosen by priority | Power, heart rate, pace, or Session RPE | CTL / ATL / TSB | Keep the load-source basis consistent when comparing blocks |
+| TrainingPeaks | TSS, rTSS, sTSS, hrTSS, tTSS | Power, pace, swim speed, or heart rate | CTL / ATL / TSB | Confirm which TSS variant was used and whether thresholds are current |
+| Garmin | Exercise Load (estimated EPOC) | Heart-rate data and a physiological model | Acute Load, Chronic Load, Load Ratio | Garmin Load is not power TSS; mechanical and strength load may be underrepresented |
+| Strava | Training Load or Relative Effort | Cycling power, or heart rate / perceived exertion | Fitness, Fatigue, Form | Different activities may mix power-based Load and Relative Effort |
+| COROS | Training Load | Heart rate, duration, and personalized intensity | 7-day Load Impact, 42-day Base Fitness | The complete formula is not public; compare personal trends rather than platform scores |
+| Polar | Cardio Load, Muscle Load, Perceived Load | TRIMP; power × time; RPE × time | 7-day Strain, 28-day Tolerance | These loads do not use the same unit and should not simply be added together |
+| Suunto | TSS(r), TSS(hr), TSS(p), TSS(s), TSS(met) | Pace, heart rate, power, swim speed, or MET | 42-day CTL, 7-day ATL, TSB | Check whether the selected source changes between sports or blocks |
+| Apple Watch | Training Load | Effort 1–10 × duration; automatic Effort for some cardio workouts | Recent 7 days versus a weighted 28-day baseline | Automatic Effort is an Apple model, not standard Session RPE |
+| WHOOP | Strain 0–21 | Continuous heart rate; muscular-load estimates for supported activities | Day Strain with Recovery / Strain Target | A proprietary nonlinear score that cannot be converted directly to TSS or EPOC |
+| Intervals.icu | Configurable activity Load | Power, heart rate, pace, or swimming data | Fitness, Fatigue, Form | Changing load priority can break comparability with earlier periods |
+
+This table is not a conversion chart. Most apparent discrepancies become easier to explain after checking three things: Was the activity scored from power, pace, heart rate, or RPE? Are the relevant thresholds current? Did the platform switch load sources across sports or dates?
+
+The same ride might show 100 Garmin Load, 85 TSS, and 72 Relative Effort. Those values can all be internally valid. Similar-looking numbers do not make them the same unit.
+
+### How Trainingload.ai chooses a load source
+
+Trainingload.ai selects one available load for each activity according to the athlete's load-source priority. Depending on the sport and available data, that load may come from power, heart rate, pace, or Session RPE. Multiple activity loads on the same day are added into `daily_load`, which then updates CTL, ATL, and TSB.
+
+Missing or duplicate activities, threshold changes, and load-source changes can all move the later curves. Displaying multiple sources on one chart does not make them physiologically identical. When the curve changes unexpectedly, return to the source activities and check which load was actually selected.
+
+## Which load should an endurance athlete use?
+
+No single load metric answers every question. A practical approach is to keep three signals visible:
+
+```text
+External output: power / pace / distance
+Objective internal response: heart rate / TRIMP / EPOC
+Subjective internal response: Session RPE
+```
+
+Disagreement between them is often more informative than agreement.
+
+- Power is unchanged while heart rate and RPE rise: check heat, hydration, recovery, and illness signals.
+- Heart rate looks normal but RPE rises: muscular fatigue, pain, or poor sleep may matter more than cardiovascular strain.
+- Power falls while heart rate and RPE remain high: reconsider recovery before the next key session.
+- Power improves without a similar rise in heart rate or RPE: efficiency or capacity may be improving.
+- Downhill soreness is high while Garmin Load is modest: the model may not have captured the mechanical cost.
+
+If you need one primary load, choose the method with the best data coverage, reliable thresholds, and a calculation basis you can keep consistent. Power load is a strong default for cycling with dependable power data. Heart-rate load offers broader coverage without a power meter and across multiple sports. Session RPE is an important complement for strength work, trail running, and sessions with unreliable sensor data.
+
+Consistency matters even more when the load feeds CTL, ATL, and TSB. If one block uses power TSS and the next uses heart rate or RPE, part of the change in the curve may come from the method rather than the training itself.
+
+## Training load is not the training result
+
+Training load records the stimulus applied. The result depends on how the athlete absorbs it. The same load may support adaptation when sleep and fueling are good, yet become difficult to tolerate during illness, life stress, or inadequate recovery.
+
+Load data is useful for checking whether volume is changing as planned, identifying which sessions moved the curve, and comparing planned work with completed work. It cannot prove that you have recovered, guarantee that tomorrow's workout is safe, or confirm race readiness because CTL rose or TSB reached a particular number.
+
+A simple order of operations works well: review what you completed, examine how your body responded, then use your own experience to decide what comes next.
+
+Training load is not a debt that must be repaid session by session. If a beginner plan is disrupted, [see what to do after missing a Couch to 5K run](/blog/couch-to-5k-missed-run) before trying to squeeze the workout back in.
+
+Once the activity-level load makes sense, continue with [What Are CTL, ATL, and TSB?](/blog/what-are-ctl-atl-tsb) to see how daily load becomes longer- and shorter-term trends. You can also [calculate TSS from duration, NP, and FTP](/tss-calculator) or [project CTL, ATL, and TSB from daily TSS](/training-load-calculator) before opening the in-app PMC.
+
+## References
+
+- [IOC consensus statement on load in sport and risk of injury](https://ostrc.no/globalassets/publications/soligard_2016_bjsm_how-much-is-too-much.-ioc-consensus-statement-on-load-in-sport-and-risk-of-injury.pdf)
+- [Review of the Session RPE method](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [TrainingPeaks: Training Stress Scores Explained](https://help.trainingpeaks.com/hc/en-us/articles/204071944-Training-Stress-Scores-TSS-Explained)
+- [Garmin: EPOC](https://www.garmin.com/en-US/garmin-technology/running-science/physiological-measurements/epoc/)
+- [Garmin: Training Load](https://www.garmin.com/en-US/garmin-technology/cycling-science/physiological-measurements/training-load/)
+- [Strava: Fitness & Freshness](https://support.strava.com/en-us/articles/15402032-fitness-freshness)
+- [COROS: Fitness Metrics](https://support.coros.com/hc/en-us/articles/41966403972500-Fitness-Metrics)
+- [Polar: Training Load Pro](https://support.polar.com/uk-en/training-load-pro)
+- [Suunto: Training Stress Score in Suunto App](https://www.suunto.com/en-gb/sports/News-Articles-container-page/training-stress-score-in-suunto-app/)
+- [Apple: watchOS Training Load](https://www.apple.com/newsroom/2024/09/watchos-11-is-available-today/)
+- [WHOOP: WHOOP Strain](https://support.whoop.com/s/article/WHOOP-Strain?language=en_US)
+
+> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of Peaksware, LLC.

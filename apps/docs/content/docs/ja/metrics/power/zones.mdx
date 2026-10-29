@@ -1,0 +1,48 @@
+---
+title: Power Zones
+description: FTP または CP を基準にしたパワーゾーンの考え方と、主要モデルの使い分けを説明します。
+keywords:
+  ["Power Zones", "FTP zones", "CP zones", "Joe Friel", "Stryd", "Jim Vance"]
+---
+
+# Power Zones
+
+**パワーゾーン** は、FTP または CP を基準にして運動強度を分ける方法です。心拍より反応が速く、ペースより地形の影響を受けにくいため、構造化トレーニングでよく使われます。
+
+## 基準値
+
+- **バイク**: 多くの場合 FTP を基準にします。
+- **ランニングパワー**: CP または rFTP を基準にします。
+
+## 代表的な 7 ゾーンモデル
+
+| Zone   | 名称            | % FTP     | 主な用途               |
+| :----- | :-------------- | :-------- | :--------------------- |
+| **Z1** | Active Recovery | ≤ 55%     | 回復走、イージースピン |
+| **Z2** | Endurance       | 56%-75%   | 有酸素ベース、LSD      |
+| **Z3** | Tempo           | 76%-90%   | 持久力、テンポ走       |
+| **Z4** | Threshold       | 91%-105%  | 閾値トレーニング       |
+| **Z5** | VO2max          | 106%-120% | VO2 インターバル       |
+| **Z6** | Anaerobic       | 121%-150% | 無酸素インターバル     |
+| **Z7** | Neuromuscular   | ≥ 151%    | 短いスプリント         |
+
+## ゾーン境界の計算
+
+基準パワーを $B$ とすると、境界は次のように計算します。
+
+```text
+W = B * (pct / 100)
+```
+
+例: FTP が 250 W の場合、Z2 の 56%-75% はおよそ 140-188 W です。
+
+## Trainingload.ai のアドバイス
+
+1. **スポーツごとに基準を分ける**: ランとバイクのパワーは別物です。
+2. **定期的に更新する**: FTP/CP はトレーニングで変化します。
+3. **ゾーンを壁だと思わない**: 境界は目安です。狙った範囲に多くの時間を置くことが大切です。
+
+## 関連
+
+- [Functional Threshold Power (FTP)](/ja/docs/metrics/power/functional-threshold-power)
+- [Critical Power (CP)](/ja/docs/metrics/power/critical-power)

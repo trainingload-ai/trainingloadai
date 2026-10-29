@@ -1,0 +1,65 @@
+---
+title: Variability Index (VI)
+description: Variability Index compares Normalized Power with average power to show how steady or surgy a ride or power-based run was.
+keywords: ["Variability Index", "VI", "variability index cycling", "Normalized Power", "NP", "Pacing", "Efficiency"]
+---
+
+# Variability Index (VI)
+
+**Variability Index (VI)** describes how steady your power output was in a ride (and often in runs with power, too). In plain terms, it tells you whether the effort was steady or repeatedly surgy.
+
+## Formula
+
+VI is the ratio of [Normalized Power (NP)](/docs/metrics/power/normalized-power) to Average Power:
+
+```text
+VI = NP / AvgPower
+```
+
+-   **NP** reflects physiological cost (including the cost of variability).
+-   **Average power** reflects mechanical work output.
+
+## Why VI matters
+
+Although VI was originally designed for cycling power analysis, it is also useful for running power (Stryd, Garmin, COROS, etc.) and has become a cross-sport metric.
+
+### 1. Pacing efficiency
+- **Cycling**: for triathlon and time trial pacing, VI reflects how well you hold a steady output. Closer to 1.0 usually means less wasted effort on surges.
+- **Running**: for marathon pacing, VI reflects how economically you distribute effort across terrain and conditions. Running typically has lower VI than cycling (no coasting). High VI often means pushing too hard on climbs or pacing inconsistently.
+
+### 2. Race demands
+- **Road cycling**: criteriums often have very high VI (> 1.2) due to repeated switching between 0 W (coasting) and high sprint power out of corners.
+- **Trail running**: VI is often higher than road running due to terrain variability; that can be a natural feature, not necessarily a pacing mistake.
+
+## Typical reference values
+
+Because movement patterns differ, **running VI is usually much lower than cycling VI**.
+
+### Cycling (rough reference)
+
+| VI Range | Ride Type | Description |
+| :--- | :--- | :--- |
+| **1.00 - 1.05** | Triathlon / TT | Very steady. Common target range for long-course pacing. |
+| **1.05 - 1.10** | Climbing / steady training | Steady. Many Zone 2 rides fall here. |
+| **1.10 - 1.20** | Rolling / group ride | Moderately variable due to terrain and drafting dynamics. |
+| **> 1.20** | Criterium / MTB | Highly variable with lots of coasting and anaerobic surges. |
+
+### Running (rough reference)
+
+| VI Range | Run Type | Description |
+| :--- | :--- | :--- |
+| **1.00 - 1.02** | Track / flat marathon | Very steady. Typical for well-paced marathons. |
+| **1.02 - 1.05** | Rolling road / city run | Normal variability from stops, bridges, and small hills. |
+| **1.05 - 1.15** | Trail / fartlek | High variability with climbs, technical descents, or intervals. |
+
+## How Trainingload.ai uses VI
+
+- **Running / marathon**: on flat marathons, a low VI usually reflects steadier pacing. On hilly routes, use power or effort instead of forcing flat-pace targets.
+- **Triathlon / time trial**: lower VI often means fewer costly surges, but terrain and wind still matter.
+- **Road / MTB**: high VI can be a feature of the discipline. Trainingload.ai reads it as race-demand context, not automatically as a pacing mistake.
+- **Session review**: VI is interpreted alongside NP, average power, IF, terrain, and the workout goal.
+
+## Related
+
+- [Normalized Power (NP)](./normalized-power)
+- [Average power vs. NP](./normalized-power#linear-vs-exponential)

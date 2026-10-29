@@ -1,0 +1,118 @@
+---
+title: 什么是 CTL、ATL、TSB？读懂体能、疲劳与状态
+description: 从每天的训练负荷到 CTL、ATL 和 TSB：解释 42 天与 7 天时间常数、同日 TSB 公式，以及加量、恢复和减量时这些指标为什么会变化。
+date: 2026-08-23
+author: Trainingload.ai 编辑团队
+image: /blog/ctl-atl-tsb/cover-zh.png
+tags: ["CTL", "ATL", "TSB", "PMC", "训练负荷"]
+---
+
+> **CTL 和 ATL 都由每天的训练负荷计算：CTL 变化慢，ATL 变化快；TSB 则是当天的 CTL 减去 ATL。**
+
+这就是 Performance Management Chart（PMC，体能管理图）的核心。如果把每日训练负荷看成输入，CTL 和 ATL 是两种变化速度不同的平滑结果，TSB 只是它们的差。它们可以帮助你观察负荷如何累积和消退，却不会直接告诉你身体此刻有多强、有多累，或是否已经为比赛做好准备。
+
+| 指标                                                | 界面名称            | 可以用来观察什么       | 默认时间常数   |
+| --------------------------------------------------- | ------------------- | ---------------------- | -------------- |
+| [CTL](/zh/docs/metrics/pmc/chronic-training-load)   | 体能 / 慢性训练负荷 | 过去数周的负荷趋势     | 42 天          |
+| [ATL](/zh/docs/metrics/pmc/acute-training-load)     | 疲劳 / 急性训练负荷 | 最近几天的负荷变化     | 7 天           |
+| [TSB](/zh/docs/metrics/pmc/training-stress-balance) | 状态 / 训练压力平衡 | 当天 CTL 与 ATL 的差值 | 无独立时间常数 |
+
+## 为什么 Fitness 翻译成“体能”？
+
+在 Trainingload.ai 中，我们把 Fitness 译为“体能”。这是一个便于理解、也与耐力训练软件常见用法一致的**界面名称**，但不能按字面把它理解为身体能力测试。
+
+CTL 并不直接测量耐力、VO₂max、训练适应或比赛表现。更准确地说，它是**根据每日训练负荷计算出的长期趋势**。所以我们不会把 Fitness 翻译成“耐力”：耐力是一种运动能力，CTL 则是训练负荷历史的数学摘要。
+
+同样需要注意：
+
+- “疲劳（ATL）”不等于主观疲劳或生理疲劳；
+- “状态（TSB）”不等于恢复程度或比赛准备度；
+- 三个名称帮助我们阅读图表，但不能把模型变成身体检测报告。
+
+## CTL 和 ATL 为什么变化速度不同？
+
+Trainingload.ai 使用指数时间常数递推。对 CTL 和 ATL 来说，公式相同，区别只在时间常数 `τ`：
+
+```text
+decay = exp(-1 / τ)
+X_today = X_yesterday × decay + daily_load × (1 − decay)
+```
+
+- CTL 使用 `τ = 42`，变化较慢；
+- ATL 使用 `τ = 7`，对最近几天的负荷反应更快；
+- TSB 不再平滑一次，而是直接计算 `TSB_today = CTL_today − ATL_today`。
+
+这里的 42 天和 7 天是**时间常数**，不是最近 42 天或 7 天的简单算术平均。更早的训练仍会保留逐渐减小的权重。如果每日负荷突然变为一个固定水平，经过一个时间常数，指标大约完成 63.2% 的变化；经过三个时间常数，大约完成 95%。
+
+某一天没有记录训练负荷时，当天的 `daily_load` 为 0。CTL 和 ATL 会按各自速度逐渐衰减，而不是立即归零。
+
+## CTL 反映过去数周的负荷趋势
+
+CTL 的 42 天时间常数让它不容易被一两次训练突然改变。它更适合回答：过去数周的训练负荷趋势是在上升、维持，还是下降？
+
+- **CTL 上升**：近期每日负荷整体高于当前 CTL 水平；
+- **CTL 稳定**：近期负荷大致维持当前模型水平；
+- **CTL 下降**：近期负荷低于它，例如恢复周、漏训或赛前减量。
+
+CTL 上升只能说明训练负荷正在累积，不能证明运动员已经成功适应，也不能单独说明训练是否有效或安全。
+
+## ATL 对最近几天的训练更敏感
+
+ATL 使用 7 天时间常数，因此一天高负荷或连续几节重点课都可能让它明显上升。减少训练后，它通常也会比 CTL 更快下降。
+
+ATL 能让我们看到最近几天是否突然加量，却不能回答“运动员现在有多疲劳”。相同的 ATL，可能对应完全不同的睡眠、压力、疼痛、健康情况和训练耐受能力。
+
+因此，读完 ATL 之后还要回到产生变化的训练：运动类型是什么，时长和强度如何，课程是否按计划完成，负荷来源是否可靠？
+
+## TSB 只是 CTL 与 ATL 的差
+
+Trainingload.ai 使用同一天的 CTL 减去 ATL：
+
+```text
+TSB_today = CTL_today − ATL_today
+```
+
+例如，当日 CTL 为 50、ATL 为 65，TSB 就是 `−15`。
+
+- **TSB 为负**：ATL 高于 CTL，说明最近几天的负荷高于过去数周形成的水平；
+- **TSB 接近零**：ATL 与 CTL 接近，但不代表身体在生理上刚好平衡；
+- **TSB 为正**：ATL 低于 CTL，说明最近几天的负荷低于过去数周形成的水平。
+
+负值不等于坏，正值也不等于最佳。在计划中的负荷构建期，TSB 下降可能完全符合目标；在恢复周或赛前减量期，TSB 回升也只是确认近期负荷下降得更快，不能证明疲劳已经消除或比赛状态已经到达峰值。
+
+不同平台还可能使用不同的日期口径。Trainingload.ai 和 Intervals.icu 使用相同的当日值口径；TrainingPeaks 的公开说明则使用前一日 Fitness 与 Fatigue 表示今天的 Form。跨平台比较之前，需要同时确认日期口径、时间常数和负荷来源。
+
+## 加量和减量时，这些指标会怎么变？
+
+下面的 Trainingload.ai 示例使用同一组 72 天每日负荷，并通过前面的公式逐日计算。最后一天得到 CTL `47.7`、ATL `51.3`、TSB `−3.6`。这些数字展示的是负荷变化，不是某位运动员的身体检测结果。
+
+![Trainingload.ai PMC 示例页面，展示 72 天每日负荷以及由公式计算的 CTL、ATL 趋势](/blog/ctl-atl-tsb/pmc-demo.png)
+
+在典型的**加量阶段**，最近几天的训练负荷增加，ATL 通常最先上升；CTL 变化较慢，只会逐步跟上，因此 TSB 往往下降。
+
+进入**恢复周或赛前减量**后，每日负荷减少，ATL 会更快下降；CTL 仍保留较多过去数周的负荷，因此 TSB 往往回升。
+
+所以，单看某一天的数字意义有限。更值得追问的是：变化由哪些训练造成？是否符合当前周期的计划？课程完成质量和运动员的实际感受是否也支持同一个判断？
+
+## 在 Trainingload.ai 里，这些数字从哪里来？
+
+Trainingload.ai 会按照你的负荷来源优先级，为每项活动选择一个可用负荷。根据活动和设置，它可能来自功率、心率、配速或 Session RPE。同一天多项活动的负荷会相加，形成当天的 `daily_load`，再依次计算 CTL、ATL 和 TSB。
+
+因此，活动缺失或重复、阈值变化、负荷来源变化，都可能改变后续曲线。比较两个训练周期时，应尽量保持计算口径一致。
+
+在实际使用中，可以按下面的顺序检查：
+
+1. **计划了什么**：当前训练周期和目标课程；
+2. **实际完成了什么**：活动、时长、强度和训练负荷；
+3. **负荷怎样变化**：CTL、ATL 和 TSB 是否按预期移动。
+
+图表负责提供线索，训练决策仍需结合课程完成质量、表现趋势、睡眠、疼痛、生病信号和主观状态。
+
+你可以继续查看 [Trainingload.ai 的 PMC 功能](/zh/features/pmc-fitness-chart)，[用每日 TSS 推演 CTL、ATL、TSB](/zh/training-load-calculator)，或直接[查看自己的 PMC](https://app.trainingload.ai/zh/pmc)。需要核对定义和完整边界时，可阅读[体能（CTL）](/zh/docs/metrics/pmc/chronic-training-load)、[疲劳（ATL）](/zh/docs/metrics/pmc/acute-training-load)与[状态（TSB）](/zh/docs/metrics/pmc/training-stress-balance)文档。
+
+## 参考资料
+
+- [Intervals.icu 开发者对 Fitness、Fatigue 与 Form 公式的说明](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [TrainingPeaks：Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [Calvert 等（1976）：训练对身体表现影响的系统模型](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke 与 Skiba（2013）：运动训练与表现的数学建模](https://doi.org/10.1152/advan.00078.2011)

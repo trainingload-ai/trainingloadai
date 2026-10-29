@@ -1,0 +1,158 @@
+---
+title: Self-host quick start
+description: Verify a signed Trainingload.ai release, install the local instance, claim the Owner account, and create the first verified backup.
+seoTitle: "Install Trainingload.ai Self-Hosted with a Signed Release"
+seoDescription: "Follow the supported Trainingload.ai self-host quick start for Linux, macOS, or Windows: verify the release, install safely, claim the Owner, and back up the instance."
+keywords:
+  [
+    "install Trainingload.ai",
+    "self-host quick start",
+    "signed release bundle",
+    "Docker Compose self-host",
+  ]
+---
+
+# Self-host quick start
+
+## Outcome
+
+You will finish with a running local Trainingload.ai instance, one claimed Owner account, a passing health check, and a verified first backup.
+
+## Before you begin
+
+Prepare one of these supported hosts:
+
+- Ubuntu 24.04 on `amd64` or `arm64`;
+- macOS on Apple Silicon with Docker Desktop;
+- Windows 11 on `amd64` with Docker Desktop using WSL2 and Linux containers.
+
+The host also needs:
+
+- Node.js 22 or later;
+- Docker Engine and Docker Compose v2;
+- Cosign with `verify-blob --bundle` support;
+- at least 2 CPU, 2 GiB memory, and 5 GiB free disk for Core Local.
+
+Download the exact-version release archive, its checksum file, and its checksum signature bundle from the official [GitHub Releases](https://github.com/Buerber/trainingloadai/releases) page. Do not use a source checkout or an unversioned archive as a production release.
+
+The default data directory is `./data` inside the extracted release. If you need a dedicated disk or another path, read [Choose the local data path](/docs/self-host/configuration#choose-the-local-data-path) before running the installer.
+
+## Install on Linux, macOS, or WSL2
+
+### 1. Verify the downloaded archive
+
+Run these commands in the directory containing the three downloaded files:
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/Buerber/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+Then verify the archive checksum with the command for your host:
+
+```bash
+# Linux or WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+Continue only when both signature and checksum verification succeed.
+
+### 2. Extract and inspect the installation plan
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+The dry run verifies the inner bundle signature, host prerequisites, exact release version, configuration, data path, and lifecycle plan. Continue only when the JSON result contains `"ok": true`.
+
+### 3. Install the instance
+
+```bash
+./install.sh --json
+```
+
+The installer generates protected local secrets, prepares the declared data directory, starts digest-pinned images, runs database migrations, and waits for required services to become ready.
+
+## Install on Windows 11
+
+Use PowerShell in the directory containing the downloaded files:
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/Buerber/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+Continue from PowerShell only if the dry-run result contains `"ok": true`.
+
+## Create a local account
+
+The default installation listens only on `127.0.0.1`. After the services are ready, open `http://localhost:43210` on the same computer. The first-run page asks only for a username; no email address or password is required. Submitting it creates the single Owner, establishes a local session, and continues directly to onboarding. If that session later expires, opening the application restores a session for the same Owner.
+
+Passwordless access is enabled only when the site origin, Client bind, and trusted client address are all loopback and the request comes from the same-origin browser. No empty password is stored in the database.
+
+For access from another computer, keep the instance bound to loopback and use an SSH port-forward to `localhost:43210`. The public application provides username setup and local session restoration. It does not provide the Cloud email, password, signup, or OAuth pages. Do not publish a passwordless instance directly to the internet.
+
+## What happens next
+
+The default site opens at `http://localhost:43210`. PostgreSQL data, uploaded files, caches, backups, and operation records remain under the declared data root. The Client is the only published service; Docs is deployed separately. Initial use requires no AI or training-platform key. The single Owner can later configure BYOK AI and an Intervals.icu personal API key.
+
+## Verify
+
+Run the read-only checks, then create the first verified backup:
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+The installation is ready when:
+
+- `status` and `doctor` return `"ok": true`;
+- you can enter the instance at the configured site address;
+- the backup contains a successful `backup-result.json` and passes its verification step.
+
+Move the verified backup to encrypted storage in a separate failure domain. A backup left only on the same disk is not sufficient recovery protection.
+
+## Troubleshooting
+
+- **The installer rejects the host:** do not bypass the platform check; use one of the supported host combinations.
+- **Signature or checksum verification fails:** stop and download all release files again from the same exact version.
+- **Docker is unavailable:** confirm Docker is running with Compose v2 and a Linux containers backend.
+- **The port is already in use:** configure a different supported bind and port before starting the instance.
+- **Readiness fails:** run `./self-host doctor --json`; do not replace the lifecycle commands with hand-written `docker compose` commands.
+
+For stable error codes and safe recovery steps, use [Self-host troubleshooting](/docs/self-host/troubleshooting).
+
+## Next step
+
+Continue with [Configuration](/docs/self-host/configuration) to choose network exposure and optionally enable a BYOK AI provider. Then review [Managing your instance](/docs/self-host/operations) before importing important data.

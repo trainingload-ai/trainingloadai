@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@deployment/provider-catalog": [
+        "src/deployment/provider-catalog"
+      ],
+      "@shared/*": [
+        "../../packages/shared/*"
+      ],
+      "prisma": [
+        "../../packages/prisma/node_modules/@prisma/client/*"
+      ],
+      "@prisma/client": [
+        "../../packages/prisma/generated/core"
+      ]
+    },
+    "types": [
+      "node",
+      "express",
+      "multer"
+    ]
+  }
+}

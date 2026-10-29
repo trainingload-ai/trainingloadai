@@ -1,0 +1,27 @@
+---
+title: 连接 Codex
+description: 使用 Codex CLI 或 config.toml 连接 TrainingLoad MCP。
+---
+
+# 连接 Codex
+
+在终端执行：
+
+```bash
+codex mcp add trainingload --url https://api.trainingload.ai/mcp
+codex mcp login trainingload
+codex mcp list
+```
+
+也可以手动加入 `~/.codex/config.toml`：
+
+```toml
+[mcp_servers.trainingload]
+url = "https://api.trainingload.ai/mcp"
+```
+
+`codex mcp login` 会打开浏览器完成 OAuth。授权后可问：“使用 TrainingLoad 比较最近 7 天和此前 7 天，并引用返回字段。”
+
+如果 `codex mcp list` 能看到服务但工具调用未授权，请在 Codex 中重新触发登录；不要在 TOML 中加入 access token。
+
+[Codex MCP 官方说明](https://developers.openai.com/codex/mcp/)

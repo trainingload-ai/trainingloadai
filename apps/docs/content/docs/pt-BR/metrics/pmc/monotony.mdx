@@ -1,0 +1,39 @@
+---
+title: Monotonia do treinamento
+description: Entenda como o Trainingload.ai calcula Monotonia e Training Strain com as sete cargas diárias mais recentes e como isso difere das métricas clássicas de Foster.
+keywords: ["monotonia", "fórmula de monotonia", "Training Strain", "variação de carga", "Carl Foster"]
+---
+
+# O que é monotonia?
+
+A **monotonia do treinamento** descreve o quanto as cargas diárias dos últimos sete dias corridos são parecidas. Dias semelhantes geralmente produzem valor maior; uma alternância clara entre dias altos, baixos e de descanso costuma produzir valor menor.
+
+O Trainingload.ai mostra uma versão normalizada e limitada, não o valor clássico de Foster. Ela não mede fadiga, recuperação, overtraining nem probabilidade de lesão.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <MonotonyStatPreviewCard value="0.72" metricLabel="Monotonia"
+    valuePopoverTitle="Valor de monotonia"
+    valuePopoverBody="Média e desvio-padrão populacional de sete cargas diárias; dias sem atividade contam como zero."
+    rangePopoverTitle="Faixas da interface"
+    rangePopoverBody="<0,6, 0,6–0,8 e >0,8 ajudam a interpretar a distribuição, mas não são limites de saúde ou lesão."
+    helpTitle="Variação da carga"
+    details="Observe em conjunto os sete valores e a carga total." />
+</div>
+
+```text
+mean_load = sum(loads) / 7
+sd_load = sqrt(sum((load − mean_load)²) / 7)
+monotony = mean_load / (sd_load + mean_load)
+training_strain = sum(loads) × monotony / 0.5
+```
+
+Se todas as cargas forem zero, Monotonia e Strain retornam zero. A fórmula clássica é `foster_monotony = mean_load / sd_load` e não tem limite superior. Por isso, `0.8` no Trainingload.ai não equivale a `2.0` em Foster.
+
+Sete dias zerados dão 0; um único dia com carga dá aproximadamente 0,29; sete cargas positivas idênticas dão 1. Valor baixo não é automaticamente melhor: um pico grande com seis dias zerados também gera baixa monotonia.
+
+## Referências
+
+- [Foster (1998)](https://doi.org/10.1097/00005768-199807000-00023)
+- [Haddad et al. (2017): método session-RPE](https://pmc.ncbi.nlm.nih.gov/articles/PMC5673663/)
+- [Jones et al. (2017): revisão sistemática](https://doi.org/10.1007/s40279-016-0619-5)
+- [Fellrnr: Training Monotony](https://fellrnr.com/wiki/Training_Monotony)

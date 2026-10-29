@@ -1,0 +1,84 @@
+---
+title: 标准化坡度配速 (NGP)
+description: 标准化坡度配速将起伏路线和变速跑转换为稳定平路等效强度，用于跑步负荷 rTSS 与训练复盘。
+keywords: ["NGP", "Normalized Graded Pace", "GAP", "坡度调整配速", "标准化配速", "跑步功率", "rTSS"]
+---
+
+# 标准化坡度配速 (Normalized Graded Pace, NGP)
+
+**标准化坡度配速 (NGP)** 是衡量跑步强度的指标。它是对 **[GAP (坡度调整配速)](/zh/docs/metrics/pace/grade-adjusted-pace)** 的进一步处理，其思路与骑行中的 **[NP (标准化功率)](/zh/docs/metrics/power/normalized-power)** 类似。
+
+简单来说：
+-   **GAP** 解决了“在山坡上跑这个配速相当于平路多少配速”的问题（瞬时值）。
+-   **NGP** 解决了“这趟忽快忽慢、忽上忽下的跑步，生理代价相当于匀速平路跑多少”的问题（整段平均值）。
+
+## 核心概念
+
+跑步的生理代价（乳酸堆积、糖原消耗）与强度是**非线性关系**。
+
+> **例子**：
+> 匀速跑 5:00/km 的生理代价，通常低于“一半时间 4:00/km + 一半时间 6:00/km”的变速跑。
+> 尽管两者的**平均配速**都是 5:00/km，但后者的 **NGP** 可能明显更快，用来反映变速带来的额外生理负荷。
+
+## 计算公式
+
+NGP 先从坡度调整后的强度序列计算，再转换回配速展示。
+
+### 标准化加权 (Normalization)
+
+因为配速是时间值（数值越小代表越快），Trainingload.ai 会先把 GAP 配速转换成速度/强度等价值，再应用与 NP 类似的加权算法：
+
+1.  **转换**：将 GAP 配速转换为速度或强度等价值。
+2.  **平滑**：计算 30 秒移动平均。
+3.  **加权**：对这些强度值进行 4 次方加权，放大高强度部分的影响。
+4.  **平均**：计算平均值后开 4 次方根。
+5.  **展示**：将结果转换回配速，方便阅读。
+
+$$
+NGP_{intensity} = \sqrt[4]{\frac{1}{N} \sum_{i=1}^{N} (GAP_{intensity, rolling})^4}
+$$
+
+## 典型应用场景
+
+### 1. 为越野跑/山地跑强度增加上下文
+在起伏路面，你的平均配速往往很慢。但通过 NGP，你可以看到代谢压力可能并没有原始配速显示得那么低。
+-   **实际场景**：一场爬升很大的越野跑，平均配速可能只有 10:00/km。
+-   **NGP 分析**：NGP 可能明显快于平均配速，更接近身体承受的代谢压力。
+
+### 2. rTSS 计算的基础
+Trainingload.ai 使用 NGP 来计算跑步的 **rTSS (Running Training Stress Score)**。公式逻辑与骑行 TSS 类似：
+
+当 NGP 与 FTPa 以 `min/km` 配速展示时，需要先转换成速度再计算 IF。用速度表示时：
+
+$$
+IF = \frac{Speed_{NGP}}{Speed_{FTPa}}
+$$
+
+使用 NGP 可以让不同地形下的跑步负荷更有可比性。
+
+## 指标对比
+
+| 指标 | 英文全称 | 含义 | 适用场景 |
+| :--- | :--- | :--- | :--- |
+| **Avg Pace** | Average Pace | 实际平均配速 | 平路匀速跑，比赛完赛时间估算 |
+| **Avg GAP** | Average GAP | 平均坡度调整配速 | 简单的起伏路跑，不涉及剧烈变速 |
+| **NGP** | Normalized Graded Pace | 标准化坡度配速 | 越野跑、间歇跑、复杂地形和 rTSS |
+
+## Trainingload.ai 如何使用 NGP
+
+-   **作为地形修正强度参考**：在起伏或变速明显的跑步中，NGP 往往比平均配速更有解释力。
+-   **计算跑步负荷**：NGP 是 rTSS 的关键输入，因为它同时考虑地形和强度波动。
+-   **结合 VI 使用**：计算 **VI (Variability Index) = NGP / Avg GAP**。
+    -   如果 VI 接近 1.0，说明你是匀速巡航。
+    -   如果 VI > 1.05，通常说明这是间歇跑或地形复杂的越野跑。
+
+## 相关文档
+
+- [坡度调整配速 GAP](/zh/docs/metrics/pace/grade-adjusted-pace)
+- [配速区间](/zh/docs/metrics/pace/zones)
+- [训练压力积分 TSS](/zh/docs/metrics/training-load/training-stress-score)
+
+## 参考资料
+
+-   [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
+-   *Normalized Graded Pace (NGP) 是 Peaksware, LLC 的注册商标。*

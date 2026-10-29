@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.next-dev/
+dist/
+dist-selfhost/
+.generated/
+generated/
+.env*
+!.env.example
+data/
+.selfhost/
+*.tsbuildinfo

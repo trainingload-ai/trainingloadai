@@ -1,0 +1,10 @@
+{
+    "user": {
+        "not_found": "用户不存在",
+        "not_authorized": "用户未授权"
+        
+    },
+    "common": {
+        "internal_server_error": "服务器内部错误"
+    }
+}

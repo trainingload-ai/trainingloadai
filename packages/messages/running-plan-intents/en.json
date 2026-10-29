@@ -1,0 +1,434 @@
+{
+  "labels": {
+    "eyebrow": "Find your next step",
+    "faq": "Questions before you start",
+    "goal": "Finish-time boundary",
+    "perKm": "Average / km",
+    "perMile": "Average / mile",
+    "paceNote": "Rounded average race paces, not easy-run or interval targets. To finish under a time, your actual average must be faster than the exact boundary. Terrain, weather and the distance you run also matter.",
+    "paceTool": "Calculate race splits",
+    "vdotTool": "Check training paces from a recent result",
+    "viewSchedule": "View the free schedule",
+    "addPlan": "Add the 10K plan free",
+    "startFoundation": "Start the run–walk plan free",
+    "showFoundation": "Open the 9-week run–walk schedule",
+    "foundationSchedule": "Stage 1 · Build continuous running",
+    "tenKSchedule": "Stage 2 · The 10-week 10K schedule",
+    "stageNote": "Add the stages to your calendar separately. Start the 10K stage when its opening week feels manageable; repeat or extend the foundation stage as needed.",
+    "freeNote": "The full schedule is free to read. Add the official plan to your calendar for free and start training.",
+    "screenshotNote": "Web and iPhone · product screens with example training data",
+    "relatedTitle": "Choose the right starting point",
+    "hub5K": "All 5K training plans",
+    "hub10K": "All 10K training plans",
+    "bridge5K": "From 5K to 10K",
+    "couch10K": "Couch to 10K",
+    "sources": "About this progression",
+    "sourceNote": "These are Trainingload.ai schedules. NHS guidance explains the run–walk approach and allowing more than nine weeks; Polar highlights an easy-running base before a 10K block. Neither source endorses this plan."
+  },
+  "guides": {
+    "couch-to-5k-training-plan": {
+      "title": "What comes after Couch to 5K?",
+      "intro": "Finishing the programme is a starting point, not a deadline to race farther. Thirty minutes of running is not automatically 5K.",
+      "items": [
+        {
+          "title": "Make your first 5K feel repeatable",
+          "text": "Keep practising comfortable continuous runs before adding distance or speed. The 5K hub helps you choose between a first finish and an improvement block.",
+          "href": "/5k-training-plan",
+          "link": "Choose a 5K plan"
+        },
+        {
+          "title": "Build toward 10K in stages",
+          "text": "Use the Couch to 10K route to see the foundation stage, the readiness check and the later 10-week block together.",
+          "href": "/couch-to-10k-training-plan",
+          "link": "See the Couch to 10K progression"
+        }
+      ],
+      "faq": []
+    },
+    "5k-training-plan": {
+      "title": "After your first 5K: faster, or farther?",
+      "intro": "Choose one next goal so your training has a clear purpose. You do not need to increase distance and intensity together.",
+      "items": [
+        {
+          "title": "Run a faster 5K",
+          "text": "The 8-week intermediate plan adds controlled intervals and tempo work for runners with a repeatable running base and a recent result.",
+          "href": "/5k-training-plan/intermediate",
+          "link": "See the intermediate 5K plan"
+        },
+        {
+          "title": "Move from 5K to 10K",
+          "text": "Keep three running days and gradually extend the long run. Check the opening workload before moving into the 10-week plan.",
+          "href": "/5k-to-10k-training-plan",
+          "link": "See the 5K to 10K plan"
+        }
+      ],
+      "faq": []
+    },
+    "5k-training-plan-intermediate": {
+      "title": "Working toward a sub-25 or sub-20 5K?",
+      "intro": "A sub-25 5K needs an average faster than 5:00/km; sub-20 needs faster than 4:00/km. Those are race boundaries, not the pace for every session.",
+      "items": [
+        {
+          "title": "Start with current fitness",
+          "text": "Use a recent race result to estimate training paces. The same eight-week structure is not a promise of either finish time; your starting point and ability to recover matter.",
+          "href": "/vdot-calculator",
+          "link": "Estimate training paces"
+        },
+        {
+          "title": "Make race pacing explicit",
+          "text": "Check kilometre splits separately from easy, tempo and interval work. If the current workload is not repeatable, return to the first-finish plan before adding faster sessions.",
+          "href": "/5k-training-plan",
+          "link": "Compare 5K starting points"
+        }
+      ],
+      "faq": []
+    },
+    "10k-training-plan": {
+      "title": "Which 10K training plan fits your starting point?",
+      "intro": "This beginner schedule takes 10 weeks and three runs per week. A shorter calendar or a faster goal needs a different starting base.",
+      "items": [
+        {
+          "title": "Already comfortable at 5K",
+          "text": "See how the first week, the 45–65 minute long-run progression and recovery days bridge the gap to 10K.",
+          "href": "/5k-to-10k-training-plan",
+          "link": "5K to 10K progression"
+        },
+        {
+          "title": "Starting with walking",
+          "text": "Build continuous running first, then check readiness for the 10K block. The Couch to 10K route combines both stages without a fixed completion deadline.",
+          "href": "/couch-to-10k-training-plan",
+          "link": "Couch to 10K progression"
+        },
+        {
+          "title": "Looking for an 8-week intermediate plan",
+          "text": "Use the dedicated improvement block if you already have a consistent running base. It is a separate schedule, not this beginner plan with two weeks removed.",
+          "href": "/10k-training-plan/improve",
+          "link": "8-week intermediate 10K plan"
+        }
+      ],
+      "faq": []
+    },
+    "half-marathon-training-plan": {
+      "title": "First half marathon, 12-week build, or sub-2 goal?",
+      "intro": "The 14-week beginner plan focuses on finishing. Choose a different block when you already have the endurance and want to improve your time.",
+      "items": [
+        {
+          "title": "12-week intermediate half marathon plan",
+          "text": "For established runners, the improvement block adds more specific work. Compare its opening week with your recent training before choosing it.",
+          "href": "/half-marathon-training-plan/improve",
+          "link": "See the 12-week plan"
+        },
+        {
+          "title": "Sub-2 hour half marathon",
+          "text": "A two-hour half marathon averages about 5:41/km. The goal-time page explains this pace, readiness and the 14-week target schedule.",
+          "href": "/half-marathon-training-plan/target",
+          "link": "Explore a sub-2 goal"
+        }
+      ],
+      "faq": []
+    },
+    "marathon-training-plan": {
+      "title": "Choose your 18-week marathon build",
+      "intro": "Eighteen weeks describes the length, not the difficulty. A first marathon, a personal best and a specific finish time call for different preparation.",
+      "items": [
+        {
+          "title": "Improve on a previous marathon",
+          "text": "Use the intermediate block when a consistent running base and longer runs are already in place. Check the actual weekly workload before committing.",
+          "href": "/marathon-training-plan/improve",
+          "link": "18-week intermediate marathon plan"
+        },
+        {
+          "title": "Work toward sub-4 or sub-3",
+          "text": "Four hours averages about 5:41/km; three hours about 4:16/km. A pace calculation alone cannot establish readiness for either goal.",
+          "href": "/marathon-training-plan/target",
+          "link": "Compare marathon goal times"
+        }
+      ],
+      "faq": []
+    },
+    "improve-10k": {
+      "title": "An 8-week intermediate 10K plan: is it the right step?",
+      "intro": "This is an improvement block for an established running routine. Compare week 1 with your recent training, including the quality sessions and the time available for recovery.",
+      "items": [
+        {
+          "title": "If your first 10K is still the goal",
+          "text": "Choose the 10-week, three-run beginner plan when extending comfortable running is the priority.",
+          "href": "/10k-training-plan",
+          "link": "See the beginner 10K plan"
+        },
+        {
+          "title": "If you have a finish time in mind",
+          "text": "Use the target page to compare sub-40, sub-45 and sub-50 race averages, then assess them against a recent result.",
+          "href": "/10k-training-plan/target",
+          "link": "Explore 10K goal times"
+        }
+      ],
+      "faq": [
+        [
+          "Can I use this 8-week plan as a complete beginner?",
+          "No. Eight weeks is the length of this intermediate block, not a shortcut from no running. Start with the foundation or beginner schedule if week 1 is beyond your current routine."
+        ],
+        [
+          "Should I use the example pace printed in the schedule?",
+          "The public pace example uses VDOT 40 for illustration. It is not your prescription. Use a recent result to establish training paces and keep easy days conversational."
+        ]
+      ]
+    },
+    "target-10k": {
+      "title": "Sub-40, sub-45 or sub-50 10K: turn the goal into a pace",
+      "intro": "The 10-week target block is a shared structure, not three separate guaranteed-result plans. Check the required race pace against your recent performance before choosing a goal.",
+      "items": [
+        {
+          "title": "Use evidence from a recent race",
+          "text": "A recent 5K or 10K helps you judge the gap. Use it to estimate current training paces rather than forcing every run to match the goal average.",
+          "href": "/vdot-calculator",
+          "link": "Check current training paces"
+        },
+        {
+          "title": "Keep first-finish and time goals separate",
+          "text": "If comfortable continuous running is still developing, use the beginner plan first. You can choose a time-focused block once that workload is repeatable.",
+          "href": "/10k-training-plan",
+          "link": "Compare the 10K plans"
+        }
+      ],
+      "faq": [
+        [
+          "What pace do I need for a sub-50 10K?",
+          "Faster than 5:00 per kilometre on average. Sub-45 requires faster than 4:30/km, and sub-40 faster than 4:00/km. These are race averages, not easy-run targets."
+        ],
+        [
+          "Does this plan guarantee a sub-40 or sub-50 result?",
+          "No. The ten-week schedule cannot guarantee a finish time. Your recent performance, training consistency, recovery and race conditions all affect the outcome."
+        ]
+      ]
+    },
+    "improve-half-marathon": {
+      "title": "How to use a 12-week intermediate half marathon plan",
+      "intro": "Start this block with a settled running routine. The twelve weeks are for developing race fitness, not building all of your endurance from scratch.",
+      "items": [
+        {
+          "title": "Check the opening week",
+          "text": "Look at the long run and the quality sessions together. If they represent a large jump from recent training, allow more foundation time.",
+          "href": "/half-marathon-training-plan",
+          "link": "Compare the 14-week beginner plan"
+        },
+        {
+          "title": "Choose a realistic time goal",
+          "text": "If you are considering sub-2, compare its race pace with a recent result and your longer-run endurance before moving to the target block.",
+          "href": "/half-marathon-training-plan/target",
+          "link": "See the half marathon target plan"
+        }
+      ],
+      "faq": [
+        [
+          "Can I shorten the beginner plan to twelve weeks?",
+          "This is a separate intermediate schedule. Removing weeks from the fourteen-week beginner plan removes part of its progression; it does not turn it into this plan."
+        ],
+        [
+          "Should my long runs be at half marathon goal pace?",
+          "Not by default. Follow the effort and structure of each session. Goal pace is not a substitute for the easy-running prescription."
+        ]
+      ]
+    },
+    "target-half-marathon": {
+      "title": "A sub-2 hour half marathon starts with a realistic pace",
+      "intro": "Two hours over 21.0975 km averages about 5:41/km or 9:09/mile. This 14-week goal-time block helps organise preparation; the goal still needs to fit your current fitness.",
+      "items": [
+        {
+          "title": "Check both speed and endurance",
+          "text": "A recent 5K or 10K gives a useful reference, but a prediction does not show whether you can sustain that effort over 21.1 km. Review longer runs and recovery too.",
+          "href": "/race-time-predictor",
+          "link": "Compare a recent race result"
+        },
+        {
+          "title": "Choose a first-finish plan when needed",
+          "text": "If the goal-time workload is too large a jump, the beginner plan keeps the focus on building endurance for your first finish.",
+          "href": "/half-marathon-training-plan",
+          "link": "See all half marathon plans"
+        }
+      ],
+      "faq": [
+        [
+          "Is 5:41/km enough for a sub-2 half marathon?",
+          "It is a rounded reference. The exact two-hour boundary is about 5:41.27/km; your average must be faster than that, and the distance you actually run may exceed 21.0975 km."
+        ],
+        [
+          "Do I run every session at sub-2 pace?",
+          "No. Easy running, longer runs and quality sessions have different purposes. Follow their prescribed effort rather than using race pace everywhere."
+        ]
+      ]
+    },
+    "improve-marathon": {
+      "title": "An 18-week intermediate marathon plan needs an existing base",
+      "intro": "The calendar gives you time to build, practise fueling and taper. It does not replace the running consistency needed to handle week 1.",
+      "items": [
+        {
+          "title": "Check the whole week, not just the long run",
+          "text": "Compare the opening schedule with recent weeks and leave room for recovery. Extra missed sessions should not be stacked onto the next week.",
+          "href": "/marathon-training-plan",
+          "link": "Compare marathon starting points"
+        },
+        {
+          "title": "Separate improvement from a finish-time promise",
+          "text": "Use the target plan when you have a specific time backed by recent performance. Sub-4 and sub-3 require substantially different race paces.",
+          "href": "/marathon-training-plan/target",
+          "link": "Explore marathon time goals"
+        }
+      ],
+      "faq": [
+        [
+          "Is an 18-week marathon plan suitable for beginners?",
+          "There is a separate eighteen-week first-finish plan. This intermediate version assumes an established running routine; compare the actual opening workload rather than choosing by duration alone."
+        ],
+        [
+          "Should I add extra long runs to improve faster?",
+          "Follow the planned progression and recovery days. Adding another long run increases workload without guaranteeing a better result, especially when you are already struggling to recover."
+        ]
+      ]
+    },
+    "target-marathon": {
+      "title": "Sub-4 or sub-3 marathon: choose the goal before the pace",
+      "intro": "Four hours averages about 5:41/km; three hours about 4:16/km. This 18-week goal-time structure must be matched to your current fitness, endurance and recovery.",
+      "items": [
+        {
+          "title": "Check more than a predicted finish time",
+          "text": "A recent half marathon is useful evidence, but a calculator cannot assess fueling, durability or how you recover from long runs.",
+          "href": "/race-time-predictor",
+          "link": "Compare race performances"
+        },
+        {
+          "title": "Keep training pace tied to current ability",
+          "text": "Do not use the desired marathon average for every easy run. Training pace guidance should come from recent performance and the purpose of each session.",
+          "href": "/vdot-calculator",
+          "link": "Estimate current training paces"
+        }
+      ],
+      "faq": [
+        [
+          "What pace is a sub-4 or sub-3 marathon?",
+          "Over 42.195 km, the exact four-hour boundary is about 5:41.27/km and the three-hour boundary about 4:15.95/km. A sub-time finish requires a faster average; the table rounds these values for readability."
+        ],
+        [
+          "Is the same schedule a guaranteed sub-3 and sub-4 plan?",
+          "No. It is a goal-time training structure. The appropriate workload and intensity depend on current ability, and neither finish time is guaranteed. Use the first-finish plan if this block exceeds your base."
+        ]
+      ]
+    }
+  },
+  "bridges": {
+    "5k-to-10k-training-plan": {
+      "metaTitle": "5K to 10K Training Plan | Free 10-Week, 3-Day Schedule",
+      "metaDescription": "Move from a comfortable 5K to your first 10K with a free 10-week plan: three runs a week, a readiness check, full workouts and calendar access.",
+      "eyebrow": "5K → 10K · free training plan",
+      "heading": ["5K to 10K", "training plan."],
+      "intro": "Already comfortable running 5K? Build toward 10K over ten weeks with three runs a week, recovery days and a gradual long-run progression.",
+      "facts": [
+        ["Duration", "10 weeks"],
+        ["Frequency", "3 runs / week"],
+        ["Starting point", "Comfortable 5K"],
+        ["Goal", "First 10K finish"]
+      ],
+      "readinessTitle": "Before you add the distance",
+      "readiness": [
+        "You can repeat an easy 5K or roughly 30–40 minutes of continuous running; one all-out 5K is not the same base.",
+        "The opening week contains two easy runs and a 45-minute long-run session. Check that this is manageable alongside your recent training.",
+        "You can leave recovery days between runs. If fatigue is carrying over or pain changes your stride, do not increase the workload."
+      ],
+      "stages": [
+        {
+          "title": "Keep the running rhythm",
+          "text": "Begin with three separated running days. Keep the shorter sessions easy while you become comfortable with the opening workload."
+        },
+        {
+          "title": "Extend the long run",
+          "text": "The long-run labels progress from 45 minutes to a 65-minute peak in week 7. Weeks 4, 6 and 8 include controlled steady work, not all-out intervals."
+        },
+        {
+          "title": "Arrive ready for 10K",
+          "text": "Reduce the load before race week and start the final 10K conservatively. Short walk breaks are allowed; the aim is completing the distance."
+        }
+      ],
+      "faq": [
+        [
+          "How long does it take to go from 5K to 10K?",
+          "This block is ten weeks for runners who already have an easy-running base. You may need extra foundation or repeat weeks; a single 5K finish does not establish readiness for a fixed race date."
+        ],
+        [
+          "Can I train for 10K three days a week?",
+          "This official schedule uses three running days, usually separated by rest. Most sessions are easy or long; short steady work appears in weeks 4, 6 and 8."
+        ],
+        [
+          "Can I complete the transition in six or eight weeks?",
+          "Do not remove recovery or build weeks to fit a date. The separate eight-week 10K improvement plan is for established runners and is not a shortened version of this first-finish progression."
+        ],
+        [
+          "Do I need to run a full 10K before race day?",
+          "Not in this plan. The longest training run is labelled 65 minutes and is effort-based; the distance covered depends on your pace. The final session is 10K."
+        ],
+        [
+          "How is this different from the beginner 10K page?",
+          "It uses the same official finish-10k workouts. This page explains the transition from an existing 5K base; the 10K hub compares beginner, intermediate and goal-time options."
+        ]
+      ]
+    },
+    "couch-to-10k-training-plan": {
+      "metaTitle": "Couch to 10K Training Plan | Free Beginner Progression",
+      "metaDescription": "Start with walking and running, build continuous running, then progress to 10K. Two free schedules, three runs a week and a clear readiness check.",
+      "eyebrow": "Couch to 10K · start from walking",
+      "heading": ["Couch to 10K.", "Start with walking."],
+      "intro": "First build a running habit with nine weeks of run–walk training. When continuous running feels comfortable, move into the ten-week 10K plan.",
+      "facts": [
+        ["Foundation", "9-week run–walk plan"],
+        ["Next stage", "10-week 10K plan"],
+        ["Frequency", "3 runs / week"],
+        ["Transition", "When you are ready"]
+      ],
+      "readinessTitle": "The step between the two plans matters",
+      "readiness": [
+        "Finish the run–walk stage with comfortable continuous running. Thirty minutes does not automatically equal 5K; distance depends on pace.",
+        "Before starting the 10K block, establish a repeatable easy 5K or roughly 30–40 minutes of running and check the opening 45-minute long-run session.",
+        "Allow extra foundation or repeat weeks when needed. Nine plus ten describes the two schedules, not a guaranteed 19-week couch-to-10K result."
+      ],
+      "stages": [
+        {
+          "title": "01 / Build the habit · 9 weeks",
+          "text": "Alternate short easy runs and walks, keep three sessions a week and gradually build toward 30 minutes of continuous running."
+        },
+        {
+          "title": "02 / Consolidate · your own pace",
+          "text": "Keep the running comfortable and repeatable. Review recovery and the next plan’s opening workload before extending the long run."
+        },
+        {
+          "title": "03 / Build toward 10K · 10 weeks",
+          "text": "Use the official first-finish 10K block once ready. It keeps three running days, progresses the long run and includes a taper before the final 10K."
+        }
+      ],
+      "faq": [
+        [
+          "How many weeks does Couch to 10K take?",
+          "This route uses a nine-week foundation schedule followed by a ten-week 10K schedule, with extra consolidation or repeat weeks as needed. It is not a fixed nineteen-week promise."
+        ],
+        [
+          "Can I start the ten-week 10K plan without running experience?",
+          "No. Its opening week assumes an easy-running base. Begin with the run–walk stage if you are starting from walking."
+        ],
+        [
+          "Is there an NHS Couch to 10K plan here?",
+          "No. These are Trainingload.ai schedules. NHS Couch to 5K is a separate programme; the NHS source below explains the run–walk approach, not an endorsement of this 10K progression."
+        ],
+        [
+          "What if I finish Couch to 5K but do not run five kilometres?",
+          "That is possible: thirty minutes of running covers different distances at different paces. Consolidate comfortable continuous running before using the 10K readiness check."
+        ],
+        [
+          "Can I add the whole progression to my calendar?",
+          "Add the nine-week foundation plan first, then add the ten-week 10K plan when ready. They are two separate official templates, so you choose the transition date."
+        ],
+        [
+          "What if I already run 5K comfortably?",
+          "Use the 5K to 10K route and check the opening workload. You do not need to repeat the run–walk foundation just to follow this progression."
+        ]
+      ]
+    }
+  }
+}

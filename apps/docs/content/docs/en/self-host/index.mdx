@@ -1,0 +1,73 @@
+---
+title: Self-hosting
+description: Run Trainingload.ai on infrastructure you control with local file storage, owner-managed AI, verified backups, and explicit operational boundaries.
+seoTitle: "Trainingload.ai Self-Hosting: Install and Operate Locally"
+seoDescription: Install a signed Trainingload.ai self-host release, keep uploads on your own storage, configure a BYOK AI provider, and manage backups and upgrades safely.
+keywords:
+  [
+    "Trainingload.ai self-hosting",
+    "self-host training app",
+    "local training data",
+    "Docker Compose deployment",
+  ]
+---
+
+# Self-hosting
+
+Self-hosting runs Trainingload.ai on a machine you control. The product request path contains the `client` web app and the `server` API. PostgreSQL stores structured data, local storage keeps uploaded files, and the Client exposes the browser-facing port.
+
+The supported v1 distribution is an exact-version, signed release bundle managed through Docker Compose. You do not need to build the source repository or assemble containers by hand.
+
+## Choose where to start
+
+<Cards>
+  <Card
+    title="Self-hosted vs Cloud"
+    href="/docs/self-host/self-host-vs-cloud"
+    description="Compare responsibility, data location, AI, backups, and feature boundaries before deploying."
+  />
+  <Card
+    title="Quick start"
+    href="/docs/self-host/installation"
+    description="Verify a signed bundle, install the instance, claim the owner, and create the first backup."
+  />
+  <Card
+    title="Configuration"
+    href="/docs/self-host/configuration"
+    description="Choose the local data path and configure OpenAI, DeepSeek, or another compatible AI provider."
+  />
+  <Card
+    title="Managing your instance"
+    href="/docs/self-host/operations"
+    description="Check health, inspect logs, back up, restore, upgrade, and stop the instance safely."
+  />
+  <Card
+    title="Troubleshooting"
+    href="/docs/self-host/troubleshooting"
+    description="Start with stable diagnostics and recover without bypassing data-safety controls."
+  />
+</Cards>
+
+## What runs locally
+
+| Layer         | Role                                                                 |
+| ------------- | -------------------------------------------------------------------- |
+| `client`      | Local browser UI and BFF for every web product request               |
+| `server`      | Authentication, product APIs, AI orchestration, and background work  |
+| PostgreSQL    | Accounts, activities, plans, settings, and other structured records  |
+| Local storage | Uploaded activity files and application-owned persistent files       |
+| One-shot jobs | File permissions and database migrations during lifecycle operations |
+
+Docs is deployed separately and is not included in the application Compose stack or images. AI is off by default and becomes an outbound dependency only after the owner explicitly configures a provider.
+
+The browser does not call `server` directly. Product, authentication, and AI requests first reach the same-origin `client` BFF and then cross the private container network to `server`. The Client is the only browser entry point; PostgreSQL and the `server` port are not published on the host.
+
+## Support boundary
+
+Docker Compose is the only formally supported self-host deployment for v1 because installation, migration, readiness, backup, restore, upgrade, rollback, and diagnostics share one verified lifecycle.
+
+A native Node.js, PostgreSQL, and reverse-proxy deployment is technically possible, but there is no signed native bundle or equivalent lifecycle contract yet. Podman, Kubernetes, and Helm are also not supported release targets. Running directly from source is for development and verification, not production installation.
+
+## Next step
+
+Read [Self-hosted vs Cloud](/docs/self-host/self-host-vs-cloud), then continue to the [quick start](/docs/self-host/installation) if the operational tradeoff fits your needs.

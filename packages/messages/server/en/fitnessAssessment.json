@@ -1,0 +1,40 @@
+{
+  "reasons": {
+    "SCOPE_UNSUPPORTED": "This method needs a supported date range, not the requested scope.",
+    "AMBIGUOUS_SCOPE": "Select the activity or test segment.",
+    "TIMEZONE_REQUIRED": "Set your profile timezone first.",
+    "NO_MATCHING_ACTIVITY": "No activity was found in this range. Check dates or sync.",
+    "MISSING_SIGNAL": "Required valid data or independent records are missing. Check the method and evidence requirements.",
+    "QUALITY_REJECTED": "Data quality, coverage or fit checks did not pass.",
+    "PROTOCOL_UNKNOWN": "Confirm whether this was an actual 30-minute time trial.",
+    "PROTOCOL_UNCONFIRMED": "The test protocol is unconfirmed; this is an observation only.",
+    "PROTOCOL_MISMATCH": "Ordinary training does not meet this test protocol.",
+    "REFERENCE_REQUIRED": "A maximum heart rate reference is needed before adoption.",
+    "REFERENCE_CONFLICT": "The estimate conflicts with current reference metrics.",
+    "METHOD_UNAVAILABLE": "This method is not available in the product.",
+    "EXECUTION_FAILED": "The assessment failed technically. You can retry.",
+    "RESOURCE_LIMIT": "This request exceeds the processing limit. Narrow the range.",
+    "NON_CONVERGENCE": "The model did not converge reliably.",
+    "STALE": "Evidence or settings changed. Reassess before confirming.",
+    "CONFIRMATION_REQUIRED": "Confirm the specific displayed changes."
+  },
+  "notification": {
+    "title": "Fitness assessment update",
+    "estimated": "Your test activity has been assessed. View the result.",
+    "available": "A new assessment is available."
+  },
+  "confirmation": {
+    "header": "Confirm adoption",
+    "question": "Adopt {changes} for {sport} as your personal reference, effective {date}?",
+    "apply": "Confirm adoption",
+    "applyDescription": "Save this estimate for training and zone calculations. Adoption does not make it a laboratory measurement.",
+    "keep": "Keep current settings",
+    "keepDescription": "Keep the calculation without changing your settings.",
+    "sports": {
+      "RUN": "running",
+      "CYCLING": "cycling",
+      "SWIM": "swimming",
+      "UNKNOWN": "general metrics"
+    }
+  }
+}

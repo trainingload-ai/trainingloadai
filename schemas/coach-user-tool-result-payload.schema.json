@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starshards.local/schemas/coach-user-tool-result-payload.schema.json",
+  "title": "CoachUserToolResultPayload",
+  "description": "User-side structured AI coach payload stored in tool_result.content for replies, skips, and draft-saved acknowledgements.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "calculationId",
+        "applyOptionId",
+        "proposalDigest"
+      ],
+      "properties": {
+        "kind": {
+          "const": "fitness_apply_confirmation"
+        },
+        "calculationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "applyOptionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "proposalDigest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "calculationId",
+        "taskRevision",
+        "answer"
+      ],
+      "properties": {
+        "kind": {
+          "const": "fitness_protocol_reply"
+        },
+        "calculationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "taskRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "answer": {
+          "enum": [
+            "TEST",
+            "ORDINARY",
+            "SKIP"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "taskId",
+        "action"
+      ],
+      "properties": {
+        "kind": {
+          "const": "fitness_tracking_reply"
+        },
+        "taskId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "workoutId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "action": {
+          "enum": [
+            "START",
+            "STOP"
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "action": {
+            "const": "START"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "workoutId"
+        ]
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "calculationId",
+        "activityHashId",
+        "startSeconds"
+      ],
+      "properties": {
+        "kind": {
+          "const": "fitness_segment_reply"
+        },
+        "calculationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "activityHashId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "startSeconds": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "calculationId"
+      ],
+      "properties": {
+        "kind": {
+          "const": "fitness_recompute"
+        },
+        "calculationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "taskId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "taskId"
+      ],
+      "properties": {
+        "kind": {
+          "const": "fitness_workout_request"
+        },
+        "taskId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "repliesToAssistantMessageId",
+        "answers",
+        "notes"
+      ],
+      "properties": {
+        "kind": {
+          "const": "coach_question_reply"
+        },
+        "questionToolUseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repliesToAssistantMessageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        },
+        "notes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "repliesToAssistantMessageId"
+      ],
+      "properties": {
+        "kind": {
+          "const": "coach_question_skip"
+        },
+        "questionToolUseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repliesToAssistantMessageId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "repliesToAssistantMessageId"
+      ],
+      "properties": {
+        "kind": {
+          "const": "coach_plan_draft_saved"
+        },
+        "repliesToAssistantMessageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planId": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "repliesToAssistantMessageId",
+        "planId",
+        "workoutId"
+      ],
+      "properties": {
+        "kind": {
+          "const": "plan_workout_adjustment_applied"
+        },
+        "repliesToAssistantMessageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workoutId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  ]
+}

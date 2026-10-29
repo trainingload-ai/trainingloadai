@@ -1,0 +1,118 @@
+---
+title: What Are CTL, ATL, and TSB? Fitness, Fatigue, and Form
+description: "From daily training load to CTL, ATL, and TSB: learn the 42- and 7-day time constants, the same-day TSB formula, and why the metrics move during a build, recovery week, or taper."
+date: 2026-08-23
+author: Trainingload.ai editorial team
+image: /blog/ctl-atl-tsb/cover-en.png
+tags: ["CTL", "ATL", "TSB", "PMC", "training load"]
+---
+
+> **CTL and ATL receive the same daily training load but remember the past at different speeds. TSB is the difference between them on the same day.**
+
+That is the simplest way to understand a Performance Management Chart (PMC). These are not three sensor readings or direct tests of your body. They are three views of the same training-load history.
+
+| Metric                                           | Trainingload.ai label           | What it describes        | Default time constant     |
+| ------------------------------------------------ | ------------------------------- | ------------------------ | ------------------------- |
+| [CTL](/docs/metrics/pmc/chronic-training-load)   | Fitness / Chronic Training Load | Longer-term modeled load | 42 days                   |
+| [ATL](/docs/metrics/pmc/acute-training-load)     | Fatigue / Acute Training Load   | Recent modeled load      | 7 days                    |
+| [TSB](/docs/metrics/pmc/training-stress-balance) | Form / Training Stress Balance  | Same-day CTL − ATL       | No separate time constant |
+
+## The labels are useful—but they are not body measurements
+
+Trainingload.ai uses the familiar labels **Fitness**, **Fatigue**, and **Form** because they make the chart easier to navigate. Each label still needs a boundary.
+
+CTL does not directly measure endurance, VO₂max, adaptation, or race performance. A more precise description is a **slow-moving signal derived from chronic training load**. In our Chinese interface, Fitness is translated as “体能,” not “耐力” (endurance), because CTL summarizes load history rather than an endurance capability.
+
+The same caution applies to the other two labels:
+
+- Fatigue (ATL) is not a measurement of physiological or subjective fatigue.
+- Form (TSB) is not a readiness, recovery, or health score.
+- The names help us read the model; they do not turn the model into a body test.
+
+## Why do CTL and ATL move at different speeds?
+
+Trainingload.ai uses exponential time-constant decay. CTL and ATL share the same update formula; only the time constant `τ` changes:
+
+```text
+decay = exp(-1 / τ)
+X_today = X_yesterday × decay + daily_load × (1 − decay)
+```
+
+- CTL uses `τ = 42`, so it moves slowly.
+- ATL uses `τ = 7`, so it reacts more strongly to the latest days.
+- TSB is not smoothed again: `TSB_today = CTL_today − ATL_today`.
+
+The 42 and 7 days are **time constants**, not simple averages of the last 42 or 7 calendar days. Older training still contributes with progressively less weight. After daily load steps to a fixed level, a metric completes about 63.2% of the change in one time constant and about 95% in three.
+
+When a day has no recorded training load, its `daily_load` is zero. CTL and ATL decay at their respective speeds rather than dropping immediately to zero.
+
+## CTL shows the load trend across recent weeks
+
+CTL's 42-day time constant prevents one or two sessions from moving it dramatically. It is useful for asking whether modeled load across the past several weeks is rising, holding, or falling.
+
+- **Rising CTL:** recent daily load is generally above the current CTL level.
+- **Stable CTL:** recent load is broadly maintaining the modeled level.
+- **Falling CTL:** recent load is below it, as during missed training, a recovery week, or a taper.
+
+A rising CTL shows that modeled load is accumulating. It does not prove that the athlete has adapted successfully, that the training is effective, or that the current progression is safe.
+
+## ATL reacts more strongly to the latest days
+
+ATL uses a seven-day time constant, so one large day or several key sessions close together can move it noticeably. When training is reduced, ATL will usually fall faster than CTL.
+
+That makes ATL useful for locating changes in recent load, but it cannot answer “How fatigued am I?” The same ATL can sit alongside very different sleep, stress, pain, health, and training-tolerance contexts.
+
+After spotting a change in ATL, return to the sessions behind it: Which sports were involved? How long and intense were they? Were the sessions completed as planned? Is the selected load source reliable?
+
+## TSB is simply the difference between CTL and ATL
+
+Trainingload.ai subtracts same-day ATL from same-day CTL:
+
+```text
+TSB_today = CTL_today − ATL_today
+```
+
+If today's CTL is 50 and ATL is 65, TSB is `−15`.
+
+- **Negative TSB:** ATL is above CTL; recent modeled load is above the slower longer-term level.
+- **Near-zero TSB:** the two curves are close; this does not prove physiological balance.
+- **Positive TSB:** ATL is below CTL; recent modeled load is below the slower longer-term level.
+
+Negative does not automatically mean bad, and positive does not automatically mean optimal. A falling TSB may be expected during a planned build. A rising TSB during recovery or tapering only confirms that recent modeled load is falling faster; it does not prove that fatigue has disappeared or race readiness has peaked.
+
+Date conventions can also differ between platforms. Trainingload.ai and Intervals.icu use the same-day convention. TrainingPeaks publicly describes today's Form using the previous day's Fitness and Fatigue. Before comparing numbers across platforms, verify the date convention, time constants, and load source.
+
+## What happens during a build or taper?
+
+The Trainingload.ai example below sends the same 72-day daily-load series through the formulas above. On the final day, it produces CTL `47.7`, ATL `51.3`, and TSB `−3.6`. These are model examples, not an athlete health assessment.
+
+![Trainingload.ai PMC example showing 72 days of daily load and formula-derived CTL and ATL trends](/blog/ctl-atl-tsb/pmc-demo.png)
+
+During a typical **load-building phase**, recent training increases and ATL usually moves first. CTL follows more slowly because it retains a longer memory, so TSB falls.
+
+During a **recovery week or taper**, daily load is reduced and ATL decays faster. CTL retains more of the earlier load history, so TSB tends to rise.
+
+The useful question is not whether today's number looks “good.” Ask which sessions and which training block produced the change—and whether it agrees with the plan, workout execution, and the athlete's actual experience.
+
+## Where do the numbers come from in Trainingload.ai?
+
+Trainingload.ai selects one available load for each activity according to your load-source priority. Depending on the activity and settings, that load can come from power, heart rate, pace, or Session RPE. Loads from multiple activities on the same day are added into `daily_load`, which then updates CTL and ATL before TSB is calculated.
+
+Missing or duplicate activities, changed thresholds, and changed load-source settings can all alter the curves. When comparing training blocks, keep the calculation basis as consistent as possible.
+
+In the product, we want three layers to remain visible together:
+
+1. **What was planned:** the current block and its target sessions.
+2. **What was completed:** activities, duration, intensity, and training load.
+3. **How the load trend moved:** whether CTL, ATL, and TSB changed as expected.
+
+The chart provides evidence, not a final prescription. Decisions should still consider workout execution, performance trends, sleep, pain, illness signals, and subjective state.
+
+Explore the [Trainingload.ai PMC feature](/features/pmc-fitness-chart), [project CTL, ATL, and TSB from daily TSS](/training-load-calculator), or [open your own PMC](https://app.trainingload.ai/en/pmc). For the complete definitions and limitations, continue with the documentation for [Fitness (CTL)](/docs/metrics/pmc/chronic-training-load), [Fatigue (ATL)](/docs/metrics/pmc/acute-training-load), and [Form (TSB)](/docs/metrics/pmc/training-stress-balance).
+
+## References
+
+- [Intervals.icu developer explanation of the Fitness, Fatigue, and Form formulas](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke and Skiba (2013): Mathematical modeling of athletic training and performance](https://doi.org/10.1152/advan.00078.2011)

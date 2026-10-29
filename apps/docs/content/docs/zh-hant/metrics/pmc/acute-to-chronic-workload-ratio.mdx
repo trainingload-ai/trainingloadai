@@ -1,0 +1,134 @@
+---
+title: 急慢性負荷比（ACWR）
+description: 瞭解 Trainingload.ai 如何使用當日疲勞與體能計算 ACWR，以及如何將比值用於負荷檢查，而不將它誤認為傷病或準備度預測。
+keywords:
+  - "急慢性負荷比"
+  - "ACWR"
+  - "A:C Ratio"
+  - "ATL 除以 CTL"
+  - "訓練負荷變化"
+  - "耦合 ACWR"
+---
+
+import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
+
+# 什麼是急慢性負荷比（ACWR）
+
+**急慢性負荷比（ACWR）**用來比較模型化近期負荷與長期負荷。在 Trainingload.ai 中，頁面顯示的 A:C 數值，是當日[疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)除以當日[體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)。
+
+ACWR 可以協助定位近期負荷相對於長期趨勢發生了多大變化，但它不能預測傷病或準備度，也不直接測量適應、疲勞、恢復或醫療風險。
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AcRatioStatPreviewCard
+    value="1.12"
+    metricLabel="A:C"
+    valuePopoverTitle="A:C 數值"
+    valuePopoverBody="Trainingload.ai 使用當日疲勞（ATL）除以當日體能（CTL），比較快速與慢速指數負荷模型。"
+    rangePopoverTitle="介面分段"
+    rangePopoverBody="介面使用 <0.8、0.8–1.3、1.3–1.5 與 ≥1.5 四段協助定位變化。這些分段不是安全界線或傷病機率。"
+    helpTitle="相對負荷"
+    details="先查看 ATL、CTL 的絕對值與來源活動，再結合訓練完成品質、疼痛、生病、睡眠與主觀狀態。"
+  />
+</div>
+
+_範例數值僅供介面預覽。_
+
+## ACWR 的數值來源
+
+ACWR 沒有獨立的活動負荷輸入。Trainingload.ai 會先依活動資料與負荷來源優先順序計算每日負荷，再維護兩條指數負荷曲線：
+
+- ATL 預設使用 7 天時間常數，近期負荷的影響較大。
+- CTL 預設使用 42 天時間常數，變化速度較慢。
+- ATL 與 CTL 使用同一組每日負荷，因此活動缺漏、重複、閾值或負荷來源變更，都可能改變 ACWR。
+- ACWR 是無單位比值，不會保留 ATL 與 CTL 的絕對規模。
+
+## 公式
+
+Trainingload.ai 先按照與 Intervals.icu 一致的指數時間常數口徑，計算當日 ATL 與 CTL：
+
+```text
+decay_ATL = exp(-1 / 7)
+decay_CTL = exp(-1 / 42)
+
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+CTL_today = CTL_yesterday × decay_CTL + daily_load × (1 − decay_CTL)
+```
+
+接著計算：
+
+```text
+ACWR_today = ATL_today / CTL_today
+```
+
+例如，當日 ATL 為 60、CTL 為 50 時，ACWR 為 `60 / 50 = 1.20`。當 CTL 為零時，產品回傳 `0`，以避免除以零。
+
+## Trainingload.ai 使用哪一種 ACWR
+
+「ACWR」並不代表唯一演算法。研究與產品可能採用不同的負荷輸入、時間窗口和平均方式，因此同名指標未必能直接比較。
+
+Trainingload.ai 目前使用的是**耦合的 PMC 指數比值**：
+
+- 當日負荷會同時進入 ATL 與 CTL。
+- 分子與分母使用指數時間常數，而不是固定窗口的簡單平均。
+- 它不是「最近 7 天總負荷 ÷ 最近 28 天每週平均負荷」。
+- 它也不是從長期窗口排除最近 7 天的解耦 ACWR。
+
+因此，來自其他 ACWR 演算法、運動項目或負荷來源的研究閾值，不能直接當作 Trainingload.ai 數值的驗證界線。
+
+## 如何理解 ACWR
+
+- **ACWR 大於 1**：當日 ATL 高於 CTL，近期模型負荷高於長期模型水準。
+- **ACWR 接近 1**：ATL 與 CTL 接近；這不表示訓練量最佳，也不表示生理狀態平衡。
+- **ACWR 小於 1**：當日 ATL 低於 CTL，近期模型負荷低於長期模型水準。
+
+比值必須與分子和分母一起看。例如 `ATL 12 / CTL 10` 與 `ATL 120 / CTL 100` 都等於 1.20，但兩者的絕對負荷與運動員情境完全不同。新帳號、歷史資料不足或長期負荷很低時，一次訓練也可能產生很大的比值。
+
+## 介面分段如何使用
+
+| 介面分段 | 產品界線 | 可以確定的模型關係 |
+| --- | ---: | --- |
+| 較低 | `< 0.8` | ATL 明顯低於 CTL。 |
+| 接近基準 | `0.8–<1.3` | ATL 與 CTL 相對接近。 |
+| 升高 | `1.3–<1.5` | ATL 相對 CTL 更高。 |
+| 最高分段 | `≥ 1.5` | ATL 相對 CTL 的差距更大。 |
+
+這些分段只是介面上的檢查提示。現有研究所使用的演算法與人群差異很大，而且 ACWR 與傷病之間的因果關係尚未建立。因此，這些分段不能證明某個數值「最佳」「安全」「危險」「訓練不足」或「過度訓練」。
+
+## 實際檢查流程
+
+1. 確認 ACWR、ATL 與 CTL 對應同一天。
+2. 同時查看 ATL、CTL 的絕對值，尤其注意 CTL 很小的情況。
+3. 在 PMC 圖表中找出比值從哪一天開始變化。
+4. 回到具體活動，核對負荷、運動類型、日期與感測器資料。
+5. 檢查 FTP、LTHR、配速閾值或負荷來源優先順序是否變更。
+6. 加入課程完成品質、主觀疲勞、睡眠、疼痛、生病與過往傷病等模型外資訊。
+
+<DocsToolCtaCard
+  title="在 Trainingload.ai 中追查 A:C 的變化"
+  description={
+    <>
+      從比值回到疲勞、體能與具體活動，再結合運動員的主觀與健康訊號做訓練決策。
+    </>
+  }
+  primary={{ href: "/zh-hant/features", label: "查看訓練負荷分析 →" }}
+  secondary={{
+    href: "/zh-hant/docs/metrics/pmc/chronic-training-load",
+    label: "繼續瞭解體能（CTL）",
+  }}
+/>
+
+## 參考資料
+
+- [Intervals.icu 開發者對體能與疲勞指數公式的說明](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [Gabbett（2016）：訓練—傷病預防悖論](https://doi.org/10.1136/bjsports-2015-095788)
+- [Windt 與 Gabbett（2019）：ACWR 的數學耦合問題](https://doi.org/10.1136/bjsports-2017-098925)
+- [Maupin 等人（2020）：ACWR 與運動傷病關係的系統性回顧](https://doi.org/10.2147/OAJSM.S231405)
+- [Impellizzeri 等人（2020）：ACWR 的概念問題與根本缺陷](https://doi.org/10.1123/ijspp.2019-0864)
+- [Wang 等人（2020）：從 ACWR 得到的活動與傷病分析教訓](https://doi.org/10.1007/s40279-020-01280-1)
+
+## 相關頁面
+
+- [疲勞（ATL）](/zh-hant/docs/metrics/pmc/acute-training-load)
+- [體能（CTL）](/zh-hant/docs/metrics/pmc/chronic-training-load)
+- [狀態（TSB）](/zh-hant/docs/metrics/pmc/training-stress-balance)
+- [訓練負荷](/zh-hant/docs/metrics/training-load)

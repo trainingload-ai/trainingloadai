@@ -1,0 +1,67 @@
+{
+  "name": "trainingloadai",
+  "version": "1.1.13",
+  "private": true,
+  "description": "Open-source, self-hosted endurance training analysis and AI coaching platform.",
+  "homepage": "https://trainingload.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Buerber/trainingloadai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Buerber/trainingloadai/issues"
+  },
+  "keywords": [
+    "self-hosted",
+    "training-analysis",
+    "running",
+    "cycling",
+    "training-load",
+    "ai-coach",
+    "docker-compose"
+  ],
+  "license": "AGPL-3.0-only",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "husky": "9.1.7",
+    "yaml": "2.9.0"
+  },
+  "scripts": {
+    "prepare": "node .husky/install.mjs",
+    "design-tokens:generate": "pnpm --filter @trainingloadai/design-tokens generate",
+    "design-tokens:check": "pnpm --filter @trainingloadai/design-tokens check && pnpm --filter @trainingloadai/design-tokens test",
+    "precommit:check": "git diff --cached --check && pnpm design-tokens:check && pnpm boundary:check && pnpm messages:check && pnpm selfhost:inventory:check && pnpm selfhost:docs-contract",
+    "selfhost:inventory": "node scripts/generate-selfhost-inventory.mjs",
+    "selfhost:inventory:check": "node scripts/generate-selfhost-inventory.mjs --check",
+    "selfhost:image-contract": "node scripts/selfhost/verify-image-contract.mjs",
+    "selfhost:image-supply-chain": "node scripts/selfhost/verify-image-contract.mjs && node scripts/selfhost/verify-image-workflow.mjs",
+    "selfhost:compose-contract": "node scripts/selfhost/verify-compose-contract.mjs",
+    "selfhost:compose-smoke": "node scripts/selfhost/smoke-compose.mjs",
+    "selfhost:acceptance-contract": "node scripts/selfhost/verify-acceptance-workflow.mjs",
+    "selfhost:v1-contract": "node scripts/selfhost/verify-v1-contract.mjs",
+    "selfhost:release-candidate-contract": "node scripts/selfhost/verify-release-candidate-workflow.mjs",
+    "selfhost:release-attestation-prepare": "node scripts/selfhost/release-attestation.mjs",
+    "selfhost:release-candidate-verify": "node scripts/selfhost/verify-release-candidate.mjs",
+    "selfhost:docs-contract": "node scripts/selfhost/verify-selfhost-documentation.mjs",
+    "selfhost:agent-contract": "node --test scripts/selfhost/agent-deployment-contract.test.mjs",
+    "selfhost:error-catalog:check": "node scripts/selfhost/generate-error-catalog.mjs --check",
+    "dev:selfhost": "pnpm --parallel --filter @trainingloadai/client --filter @trainingloadai/server run dev:selfhost",
+    "build:selfhost": "pnpm --dir apps/server build:selfhost && pnpm --dir apps/client build:selfhost",
+    "build": "pnpm build:selfhost",
+    "test": "pnpm --dir apps/client test:selfhost && pnpm --dir apps/server test:selfhost",
+    "test:selfhost": "pnpm test",
+    "messages:check": "node packages/messages/check-client-baseline.mjs",
+    "docs:dev": "pnpm --dir apps/docs dev",
+    "docs:build": "pnpm --dir apps/docs build",
+    "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* · (en|zh)$'",
+    "prisma:generate": "pnpm --dir packages/prisma exec prisma generate --schema core/schema.prisma",
+    "prisma:migrate": "pnpm --dir packages/prisma core:migrate",
+    "boundary:check": "node scripts/audit-public.mjs",
+    "self-host": "node scripts/selfhost/cli.mjs"
+  }
+}

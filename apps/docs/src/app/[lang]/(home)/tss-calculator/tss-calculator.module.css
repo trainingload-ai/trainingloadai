@@ -1,0 +1,215 @@
+.calculator {
+  display: grid;
+  gap: 4.5rem;
+}
+.formHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.formHeader h2 {
+  font-weight: 700;
+}
+.formFields {
+  gap: 1.25rem;
+}
+.fieldSet {
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.powerToggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
+.powerToggle > * {
+  width: 100%;
+}
+.calculateButton {
+  width: 100%;
+}
+.result {
+  scroll-margin-top: 9rem;
+}
+.report {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  border: 2px solid #eceddf;
+  box-shadow: 8px 8px 0 #e9ecd9;
+  color: #e9eee5;
+  background: #08130e;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.reportHeader {
+  padding: 1.2rem 1.6rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #78847b;
+  font-size: 0.8rem;
+  font-family: ui-monospace, monospace;
+}
+.reportHeader span {
+  background: #f5d65d;
+  color: #172219;
+  padding: 0.4rem 0.75rem;
+  font-weight: 700;
+}
+.reportHeader b {
+  align-self: center;
+}
+.score {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  padding: 2rem;
+  background-image:
+    linear-gradient(#21433360 1px, transparent 1px),
+    linear-gradient(90deg, #21433360 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.score p {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.score strong {
+  display: block;
+  font-size: clamp(4rem, 10vw, 8rem);
+  color: #79eda3;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.065em;
+  line-height: 1.3;
+}
+.secondary {
+  border-left: 1px solid #516156;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.secondary b {
+  color: #f5d65d;
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+.secondary small {
+  font-size: 0.8rem;
+}
+.reportFooter {
+  border-top: 1px solid #78847b;
+  padding: 1.5rem 2rem;
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+.reportFooter p + p {
+  margin-top: 0.4rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.status {
+  text-align: center;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+.empty {
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed #84928b;
+  color: #667582;
+}
+@media (max-width: 480px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+  .powerToggle {
+    grid-template-columns: 1fr;
+  }
+  .score {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+  .secondary {
+    padding-left: 1rem;
+  }
+  .secondary b {
+    font-size: 1.8rem;
+  }
+  .reportHeader {
+    padding: 1rem;
+    font-size: 0.7rem;
+  }
+}
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+  :global(body:has(#result)):has(.calculator) * {
+    visibility: hidden;
+  }
+  :global(body:has(#result)):has(.calculator) header,
+  :global(body:has(#result)):has(.calculator) footer,
+  :global(body:has(#result)):has(.calculator) nav,
+  :global(main):has(.report) > div > :not(:has(.report)),
+  .calculator > :not(.result),
+  .actions,
+  .status,
+  .empty {
+    display: none !important;
+  }
+  :global(main):has(.report),
+  :global(main):has(.report) > div,
+  .calculator,
+  .result {
+    display: block;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    background: white;
+  }
+  .report,
+  .report * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report {
+    position: relative;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .score strong {
+    font-size: 100px;
+  }
+  .reportHeader {
+    display: flex !important;
+    padding: 4mm 8mm;
+  }
+  .score {
+    padding: 7mm 8mm;
+  }
+  .reportFooter {
+    display: block !important;
+    padding: 5mm 8mm;
+  }
+}

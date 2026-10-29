@@ -1,0 +1,3384 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "generated-from-current-worktree",
+  "entries": [
+    {
+      "host": "*.analytics.google.com",
+      "url": "https://*.analytics.google.com",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 39
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "*.google-analytics.com",
+      "url": "https://*.google-analytics.com",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 38
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "*.posthog.com",
+      "url": "https://*.posthog.com",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 41
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "*.sentry.io",
+      "url": "https://*.sentry.io",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 42
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "${normalizeddomainbase",
+      "url": "https://${normalizedDomainBase",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 31
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "${str",
+      "url": "https://${str",
+      "references": [
+        {
+          "file": "apps/client/src/lib/tiptap-utils.ts",
+          "line": 34
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "127.0.0.1:3000",
+      "url": "http://127.0.0.1:3000",
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/server/src/api/ai/core/docs-index.ts",
+          "line": 16
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 54
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "127.0.0.1:3001",
+      "url": "http://127.0.0.1:3001/api/health/ready",
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 174
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "compose.yml"
+      ]
+    },
+    {
+      "host": "127.0.0.1:3001",
+      "url": "http://127.0.0.1:3001/api/runtime/capabilities",
+      "references": [
+        {
+          "file": "scripts/selfhost/management-core.mjs",
+          "line": 4299
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "127.0.0.1:3002",
+      "url": "http://127.0.0.1:3002/",
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 219
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "compose.yml"
+      ]
+    },
+    {
+      "host": "api.${normalizeddomainbase",
+      "url": "https://api.${normalizedDomainBase",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 33
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "api.deepseek.com",
+      "url": "https://api.deepseek.com",
+      "references": [
+        {
+          "file": ".env.example",
+          "line": 61
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 188
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 375
+        },
+        {
+          "file": "apps/server/src/api/ai/infrastructure/deepseek-web-evidence.adapter.ts",
+          "line": 225
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        ".env.example",
+        "apps"
+      ]
+    },
+    {
+      "host": "api.openai.com",
+      "url": "https://api.openai.com/v1",
+      "references": [
+        {
+          "file": ".env.example",
+          "line": 55
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 133
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 157
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 316
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        ".env.example",
+        "apps"
+      ]
+    },
+    {
+      "host": "api.provider.tld",
+      "url": "https://api.provider.tld/v1",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/settings/component/SelfHostAiSettings.tsx",
+          "line": 460
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "api.trainingload.ai",
+      "url": "https://api.trainingload.ai",
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 34
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "app.${normalizeddomainbase",
+      "url": "https://app.${normalizedDomainBase",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 34
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "app.intervals.icu",
+      "url": "https://app.intervals.icu/privacy-policy.html",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 242
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "app.trainingload.ai",
+      "url": "https://app.trainingload.ai",
+      "references": [
+        {
+          "file": "apps/client/src/components/layout/MainAppShell.tsx",
+          "line": 75
+        },
+        {
+          "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
+          "line": 323
+        },
+        {
+          "file": "apps/docs/src/components/TenKBridgePage.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/docs/src/lib/analytics.ts",
+          "line": 151
+        },
+        {
+          "file": "apps/docs/src/lib/plan-share.ts",
+          "line": 49
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "app.trainingload.ai",
+      "url": "https://app.trainingload.ai/${lang",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
+          "line": 182
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
+          "line": 103
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
+          "line": 77
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
+          "line": 90
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-marathon-training-plan/page.tsx",
+          "line": 90
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-training-plan/page.tsx",
+          "line": 92
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/alternatives/page.tsx",
+          "line": 92
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/brick-workout/page.tsx",
+          "line": 120
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/brick-workout/page.tsx",
+          "line": 308
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/contact/page.tsx",
+          "line": 71
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
+          "line": 271
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 153
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
+          "line": 180
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
+          "line": 94
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 85
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
+          "line": 73
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
+          "line": 86
+        },
+        {
+          "file": "apps/docs/src/components/calculators/app-promo.tsx",
+          "line": 39
+        },
+        {
+          "file": "apps/docs/src/components/CustomHeader.tsx",
+          "line": 328
+        },
+        {
+          "file": "apps/docs/src/components/CustomHeader.tsx",
+          "line": 453
+        },
+        {
+          "file": "apps/docs/src/components/DocsHeader.tsx",
+          "line": 171
+        },
+        {
+          "file": "apps/docs/src/components/DocsHeader.tsx",
+          "line": 253
+        },
+        {
+          "file": "apps/docs/src/components/EndurancePlanHubPage.tsx",
+          "line": 52
+        },
+        {
+          "file": "apps/docs/src/components/ReleaseBanner.tsx",
+          "line": 54
+        },
+        {
+          "file": "apps/docs/src/components/ReleaseBanner.tsx",
+          "line": 59
+        },
+        {
+          "file": "apps/docs/src/components/RunningPlanPage.tsx",
+          "line": 52
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "app.trainingload.ai",
+      "url": "https://app.trainingload.ai/en",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 118
+        },
+        {
+          "file": "apps/docs/src/app/pricing.md/route.ts",
+          "line": 29
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "app.trainingload.ai${resolvedlocale",
+      "url": "https://app.trainingload.ai${resolvedLocale",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/vdot-plan-content.ts",
+          "line": 549
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "apps.apple.com",
+      "url": "https://apps.apple.com/us/app/trainingload-ai/id6801523660",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/app-links.ts",
+          "line": 2
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "assets.firstbeat.com",
+      "url": "https://assets.firstbeat.com/firstbeat/uploads/2015/10/rusko_et_al_acsm_2003_congress-1.pdf",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/heartRate/components/EpocInfo.tsx",
+          "line": 53
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "assets.trainingload.ai",
+      "url": "https://assets.trainingload.ai",
+      "references": [
+        {
+          "file": "apps/docs/src/components/ProductVisualPlaceholder.tsx",
+          "line": 6
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "cdn.deepseek.com",
+      "url": "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 253
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "cdn.deepseek.com",
+      "url": "https://cdn.deepseek.com/policies/en-US/deepseek-terms-of-use.html",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 257
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "chatgpt.com",
+      "url": "https://chatgpt.com/?${new",
+      "references": [
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 177
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "claude.ai",
+      "url": "https://claude.ai/new?${new",
+      "references": [
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 195
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "cyklopedia.cc",
+      "url": "https://cyklopedia.cc/cycling-tips/efficiency-factor/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/EfficiencyFactorInfo.tsx",
+          "line": 83
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "dashscope.aliyuncs.com",
+      "url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 181
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 327
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "demo.trainingload.ai",
+      "url": "https://demo.trainingload.ai",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 6
+        },
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 23
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "developer.garmin.com",
+      "url": "https://developer.garmin.com/fit/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/client.tsx",
+          "line": 590
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
+          "line": 149
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
+          "line": 469
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "developer.garmin.com",
+      "url": "https://developer.garmin.com/fit/file-types/workout/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
+          "line": 976
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "discord.gg",
+      "url": "https://discord.gg/m3asfGU7G",
+      "references": [
+        {
+          "file": "apps/docs/src/components/CustomHeader.tsx",
+          "line": 21
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "docs.orama.com",
+      "url": "https://docs.orama.com/docs/orama-js/supported-languages",
+      "references": [
+        {
+          "file": "apps/docs/src/app/api/search/route.ts",
+          "line": 76
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "docs.sentry.io",
+      "url": "https://docs.sentry.io/platforms/javascript/guides/nextjs/",
+      "references": [
+        {
+          "file": "apps/docs/sentry.edge.config.ts",
+          "line": 4
+        },
+        {
+          "file": "apps/docs/sentry.server.config.ts",
+          "line": 3
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "docs.sentry.io",
+      "url": "https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii",
+      "references": [
+        {
+          "file": "apps/docs/sentry.edge.config.ts",
+          "line": 22
+        },
+        {
+          "file": "apps/docs/sentry.server.config.ts",
+          "line": 21
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "docs.sentry.io",
+      "url": "https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/",
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 224
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "docs.sentry.io",
+      "url": "https://docs.sentry.io/product/crons/",
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 246
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://[::1]:${port",
+      "references": [
+        {
+          "file": "apps/server/src/auth/trusted-origins.ts",
+          "line": 16
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://127.0.0.1:${definition.port",
+      "references": [
+        {
+          "file": "scripts/selfhost/smoke-image.mjs",
+          "line": 166
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://127.0.0.1:${httpPort",
+      "references": [
+        {
+          "file": "scripts/selfhost/run-acceptance.mjs",
+          "line": 1002
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://127.0.0.1:${options.httpPort",
+      "references": [
+        {
+          "file": "scripts/selfhost/smoke-compose.mjs",
+          "line": 474
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://127.0.0.1:${port",
+      "references": [
+        {
+          "file": "apps/client/src/api/v2-home.ts",
+          "line": 128
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
+          "line": 67
+        },
+        {
+          "file": "apps/server/src/auth/trusted-origins.ts",
+          "line": 15
+        },
+        {
+          "file": "scripts/selfhost/run-acceptance.mjs",
+          "line": 301
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps",
+        "scripts"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://127.0.0.1:${process.env.PORT",
+      "references": [
+        {
+          "file": "apps/server/src/api/calendar/calendar.service.ts",
+          "line": 27
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 43
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "dynamic",
+      "url": "http://localhost:${port",
+      "references": [
+        {
+          "file": "apps/server/src/auth/trusted-origins.ts",
+          "line": 14
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "fellrnr.com",
+      "url": "https://fellrnr.com/wiki/TRIMP#TRIMPexp_Exponential_Heart_Rate_Scaling",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/heartRate/components/TrimpInfo.tsx",
+          "line": 68
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "fumadocs.dev",
+      "url": "https://fumadocs.dev/docs/ui/navigation/links",
+      "references": [
+        {
+          "file": "apps/docs/src/app/layout.config.tsx",
+          "line": 40
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "fumadocs.vercel.app",
+      "url": "https://fumadocs.vercel.app/docs/headless/source-api",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/source.ts",
+          "line": 7
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/${GITHUB_WORKFLOW_REF",
+      "references": [
+        {
+          "file": "scripts/selfhost/verify-acceptance-workflow.mjs",
+          "line": 427
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/Buerber/trainingloadai",
+      "references": [
+        {
+          "file": "scripts/selfhost/release-artifact.mjs",
+          "line": 40
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/Buerber/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v",
+      "references": [
+        {
+          "file": "scripts/selfhost/verify-acceptance-workflow.mjs",
+          "line": 411
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/expressjs/multer/issues/1104",
+      "references": [
+        {
+          "file": "apps/server/src/pipe/index.ts",
+          "line": 4
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/garmin/fit-javascript-sdk",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/client.tsx",
+          "line": 577
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
+          "line": 148
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/GoldenCheetah/GoldenCheetah",
+      "references": [
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 101
+        },
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 126
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/mscdex/busboy/issues/20",
+      "references": [
+        {
+          "file": "apps/server/src/pipe/index.ts",
+          "line": 3
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "github.dev",
+      "url": "https://github.dev/Runalyze/Runalyze/src/CoreBundle/Bridge/Activity/Calculation/VO2maxCalculator.php",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/vo2max.ts",
+          "line": 13
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "help.trainingpeaks.com",
+      "url": "https://help.trainingpeaks.com/hc/en-us/articles/204071764-Form-TSB",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 334
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "help.trainingpeaks.com",
+      "url": "https://help.trainingpeaks.com/hc/en-us/articles/204071884-Fitness-CTL",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 318
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "help.trainingpeaks.com",
+      "url": "https://help.trainingpeaks.com/hc/en-us/articles/204071894-Fatigue-ATL",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 326
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
+          "line": 983
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/api/oauth/token",
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 141
+        },
+        {
+          "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
+          "line": 302
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/api/v1",
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 131
+        },
+        {
+          "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
+          "line": 297
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/api/v1/docs/",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
+          "line": 10
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/api/v1/docs/swagger-ui/index.html",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
+          "line": 9
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/oauth/authorize",
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 331
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 138
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "intervals.icu",
+      "url": "https://intervals.icu/settings",
+      "references": [
+        {
+          "file": "apps/client/src/components/third-party/intervals-icu-connection-dialog.tsx",
+          "line": 44
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "joefrieltraining.com",
+      "url": "https://joefrieltraining.com/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 440
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "joefrieltraining.com",
+      "url": "https://joefrieltraining.com/determining-your-lthr/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 526
+        },
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 76
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "link.springer.com",
+      "url": "https://link.springer.com/article/10.1186/s13102-016-0052-y",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/race-time-education.ts",
+          "line": 51
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "llm.example.local",
+      "url": "http://llm.example.local/v1",
+      "references": [
+        {
+          "file": ".env.example",
+          "line": 67
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        ".env.example"
+      ]
+    },
+    {
+      "host": "local",
+      "url": "http://local",
+      "references": [
+        {
+          "file": "apps/client/src/lib/auth-callback.ts",
+          "line": 63
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost",
+      "url": "http://localhost",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 26
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost",
+      "url": "http://localhost:80",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 25
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost",
+      "url": "http://localhost/email-otp/send-verification-otp",
+      "references": [
+        {
+          "file": "apps/server/src/api/user/user.controller.ts",
+          "line": 1106
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost:3000",
+      "url": "http://localhost:3000",
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 21
+        },
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 33
+        },
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 120
+        },
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 21
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost:3001",
+      "url": "http://localhost:3001",
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/lib/docs-server-api-base-url.ts",
+          "line": 32
+        },
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 318
+        },
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 22
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost:3002",
+      "url": "http://localhost:3002",
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
+          "line": 340
+        },
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 23
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost:3003",
+      "url": "http://localhost:3003",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 24
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "localhost:43210",
+      "url": "http://localhost:43210",
+      "references": [
+        {
+          "file": ".env.example",
+          "line": 14
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 33
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 34
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 35
+        },
+        {
+          "file": "compose.build.yml",
+          "line": 36
+        },
+        {
+          "file": "compose.yml",
+          "line": 19
+        },
+        {
+          "file": "compose.yml",
+          "line": 20
+        },
+        {
+          "file": "compose.yml",
+          "line": 21
+        },
+        {
+          "file": "compose.yml",
+          "line": 22
+        },
+        {
+          "file": "compose.yml",
+          "line": 201
+        },
+        {
+          "file": "compose.yml",
+          "line": 202
+        },
+        {
+          "file": "compose.yml",
+          "line": 203
+        },
+        {
+          "file": "compose.yml",
+          "line": 204
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        ".env.example",
+        "compose.build.yml",
+        "compose.yml"
+      ]
+    },
+    {
+      "host": "medium.com",
+      "url": "https://medium.com/strava-engineering/an-improved-gap-model-8b07ae8886c3",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/gap.ts",
+          "line": 7
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "nextjs.org",
+      "url": "https://nextjs.org/telemetry",
+      "references": [
+        {
+          "file": "apps/client/Dockerfile",
+          "line": 41
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "openrouter.ai",
+      "url": "https://openrouter.ai/api/v1",
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 130
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 163
+        },
+        {
+          "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
+          "line": 303
+        }
+      ],
+      "capability": "ai",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "perfprostudio.com",
+      "url": "https://perfprostudio.com/Help/BikeScore.htm",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/BikeScore.ts",
+          "line": 36
+        },
+        {
+          "file": "apps/server/src/algorithm/BikeScore.ts",
+          "line": 158
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "physfarm.com",
+      "url": "http://physfarm.com/new/?page_id=511",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/BikeScoreInfo.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/RelativeIntensityInfo.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/XPowerInfo.tsx",
+          "line": 74
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "policies.google.com",
+      "url": "https://policies.google.com/privacy",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 251
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "posthog.com",
+      "url": "https://posthog.com/privacy",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 249
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11153730/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/client.tsx",
+          "line": 509
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 312
+        },
+        {
+          "file": "apps/docs/src/lib/heart-rate-llm.ts",
+          "line": 89
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/12430990/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/rpe-scale/page.tsx",
+          "line": 34
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/13470504/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 252
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/14624296/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 66
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/1555562/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
+          "line": 355
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17414804/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 72
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17685689/",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 265
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19453206/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 533
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20195180/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
+          "line": 352
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/20585008/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 317
+        },
+        {
+          "file": "apps/docs/src/lib/heart-rate-llm.ts",
+          "line": 90
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21694556/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 270
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22376273/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 322
+        },
+        {
+          "file": "apps/docs/src/lib/heart-rate-llm.ts",
+          "line": 91
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/27881567/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 48
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29692203/",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/vo2max.ts",
+          "line": 265
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/3184250/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 83
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33508782/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/rpe-scale/page.tsx",
+          "line": 42
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/33551839/",
+      "references": [
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 102
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/3600239/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 60
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/36361320/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/rpe-scale/page.tsx",
+          "line": 38
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/5694044/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 54
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "runalyze.com",
+      "url": "https://runalyze.com/help/article/vo2max",
+      "references": [
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 217
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "schema.org",
+      "url": "https://schema.org",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/contact/page.tsx",
+          "line": 79
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
+          "line": 325
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 179
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/terms-and-conditions/page.tsx",
+          "line": 61
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
+          "line": 119
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
+          "line": 217
+        },
+        {
+          "file": "apps/docs/src/lib/seo-schema.ts",
+          "line": 5
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "schema.org",
+      "url": "https://schema.org/InStock",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 132
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 142
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 152
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 162
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 171
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 180
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 189
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 198
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "scira.ai",
+      "url": "https://scira.ai/?${new",
+      "references": [
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 113
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "self-host.invalid",
+      "url": "https://self-host.invalid/",
+      "references": [
+        {
+          "file": "apps/client/src/deployment/analytics.ts",
+          "line": 52
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "sentry.io",
+      "url": "https://sentry.io/privacy/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 250
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "server:3001",
+      "url": "http://server:3001",
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 200
+        },
+        {
+          "file": "scripts/selfhost/verify-compose-contract.mjs",
+          "line": 394
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "compose.yml",
+        "scripts"
+      ]
+    },
+    {
+      "host": "stats.g.doubleclick.net",
+      "url": "https://stats.g.doubleclick.net",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 40
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "support.apple.com",
+      "url": "https://support.apple.com/en-us/108790",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 93
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "support.garmin.com",
+      "url": "https://support.garmin.com/en-IE/?faq=lWqSVlq3w76z5WoihLy5f8",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 88
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "support.vdoto2.com",
+      "url": "https://support.vdoto2.com/v-o2-faq/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
+          "line": 376
+        },
+        {
+          "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
+          "line": 194
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "t3.chat",
+      "url": "https://t3.chat/new?${new",
+      "references": [
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 212
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "tailwind-coaching.com",
+      "url": "https://tailwind-coaching.com/2017/03/30/what-is-aerobic-decoupling/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/heartRate/components/DecouplingInfo.tsx",
+          "line": 90
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "tile.openstreetmap.org",
+      "url": "https://tile.openstreetmap.org/{z",
+      "references": [
+        {
+          "file": "apps/server/src/runtime-capabilities/runtime-capability.resolver.ts",
+          "line": 16
+        }
+      ],
+      "capability": "maps-and-elevation",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "tiles.openfreemap.org",
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "references": [
+        {
+          "file": "apps/server/src/runtime-capabilities/runtime-capability.resolver.ts",
+          "line": 18
+        }
+      ],
+      "capability": "maps-and-elevation",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "token.actions.githubusercontent.com",
+      "url": "https://token.actions.githubusercontent.com",
+      "references": [
+        {
+          "file": "scripts/selfhost/release-artifact.mjs",
+          "line": 44
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "trainingpeaks.com",
+      "url": "https://trainingpeaks.com/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/PowerInfo.tsx",
+          "line": 68
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "us.humankinetics.com",
+      "url": "https://us.humankinetics.com/blogs/excerpt/the-basic-laws-of-running-according-to-jack-daniels",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
+          "line": 366
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "us.humankinetics.com",
+      "url": "https://us.humankinetics.com/products/daniels-running-formula-4th-edition",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
+          "line": 356
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "us.humankinetics.com",
+      "url": "https://us.humankinetics.com/products/daniels-running-formula-4th-edition-pdf-with-web-resource",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
+          "line": 281
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "us.i.posthog.com",
+      "url": "https://us.i.posthog.com",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/posthog-client.ts",
+          "line": 39
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "vdoto2.com",
+      "url": "https://vdoto2.com/calculator",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
+          "line": 273
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 77
+        },
+        {
+          "file": "apps/docs/src/lib/race-time-education.ts",
+          "line": 45
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "vdoto2.com",
+      "url": "https://vdoto2.com/calculator/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/race-time-predictor/page.tsx",
+          "line": 258
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "vdoto2.com",
+      "url": "https://vdoto2.com/learn-more/training-definitions",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 98
+        },
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 253
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "vercel.com",
+      "url": "https://vercel.com/docs/cron-jobs",
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 247
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "worldathletics.org",
+      "url": "https://worldathletics.org/download/download?filename=175739a3-b6be-4e84-914c-15d7ce791665.pdf&urlslug=Terms%2Band%2Babbreviations",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-pace-education.ts",
+          "line": 57
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.${normalizeddomainbase",
+      "url": "https://www.${normalizedDomainBase",
+      "references": [
+        {
+          "file": "apps/server/src/bootstrap/cors-origin.ts",
+          "line": 32
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.acsm.org",
+      "url": "https://www.acsm.org/docs/default-source/files-for-resource-library/exercise-intensity-infographic.pdf",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 269
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.baa.org",
+      "url": "https://www.baa.org/races/boston-10k/info-for-athletes/b-a-a-10k-training/",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 261
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.cdc.gov",
+      "url": "https://www.cdc.gov/physical-activity-basics/guidelines/adults.html",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 234
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.cdc.gov",
+      "url": "https://www.cdc.gov/physicalactivity/basics/measuring/index.html",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/rpe-scale/page.tsx",
+          "line": 30
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.coros.com",
+      "url": "https://www.coros.com/privacy",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 240
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.firstbeat.com",
+      "url": "https://www.firstbeat.com/en/blog/what-is-trimp/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/heartRate/components/TrimpInfo.tsx",
+          "line": 88
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.garmin.com",
+      "url": "https://www.garmin.com/en-AU/blog/how-to-train-for-your-next-race-with-the-garmin-race-widget/",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/race-time-education.ts",
+          "line": 57
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.garmin.com",
+      "url": "https://www.garmin.com/en-US/privacy/connect/policy/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 237
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.googletagmanager.com",
+      "url": "https://www.googletagmanager.com",
+      "references": [
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 30
+        },
+        {
+          "file": "apps/docs/security-headers.mjs",
+          "line": 37
+        }
+      ],
+      "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.halhigdon.com",
+      "url": "https://www.halhigdon.com/training-programs/10k-training/novice-10k/",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 257
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.nhs.uk",
+      "url": "https://www.nhs.uk/better-health/get-active/get-running-with-couch-to-5k/",
+      "references": [
+        {
+          "file": "apps/docs/src/components/TenKBridgePage.tsx",
+          "line": 348
+        },
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 245
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.nhs.uk",
+      "url": "https://www.nhs.uk/better-health/get-active/get-running-with-couch-to-5k/couch-to-5k-running-plan/",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 241
+        },
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 284
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.nist.gov",
+      "url": "https://www.nist.gov/document/2026-hb-133-appendix-e",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-pace-education.ts",
+          "line": 55
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.npmjs.com",
+      "url": "https://www.npmjs.com/package/@sentry/webpack-plugin#options",
+      "references": [
+        {
+          "file": "apps/docs/next.config.mjs",
+          "line": 213
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.physfarm.com",
+      "url": "http://www.physfarm.com/swimscore.pdf",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/SwimScore.ts",
+          "line": 7
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.polar.com",
+      "url": "https://www.polar.com/en/guide/running/10k-training-plan/beginners",
+      "references": [
+        {
+          "file": "apps/docs/src/components/TenKBridgePage.tsx",
+          "line": 354
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.revenuecat.com",
+      "url": "https://www.revenuecat.com/privacy",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 248
+        }
+      ],
+      "capability": "billing",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.simpsonassociatesinc.com",
+      "url": "http://www.simpsonassociatesinc.com/runningmath1.htm",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/predictRaceTime.ts",
+          "line": 7
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.simpsonassociatesinc.com",
+      "url": "http://www.simpsonassociatesinc.com/runningmath2.htm",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/vo2max.ts",
+          "line": 40
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.simpsonassociatesinc.com",
+      "url": "http://www.simpsonassociatesinc.com/runningmath3.htm",
+      "references": [
+        {
+          "file": "apps/server/src/algorithm/vo2max.ts",
+          "line": 24
+        },
+        {
+          "file": "apps/server/src/algorithm/vo2max.ts",
+          "line": 98
+        },
+        {
+          "file": "apps/server/src/algorithm/vo2max.ts",
+          "line": 107
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.strava.com",
+      "url": "https://www.strava.com/legal/privacy",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 245
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.stryd.com",
+      "url": "https://www.stryd.com/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 456
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.suunto.com",
+      "url": "https://www.suunto.com/Privacy-Policy/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 247
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.swimsmooth.guru",
+      "url": "https://www.swimsmooth.guru/css/calcsingle",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
+          "line": 363
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.topografix.com",
+      "url": "http://www.topografix.com/GPX/1/1",
+      "references": [
+        {
+          "file": "scripts/selfhost/run-acceptance.mjs",
+          "line": 391
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "scripts"
+      ]
+    },
+    {
+      "host": "www.trainingload.ai",
+      "url": "https://www.trainingload.ai",
+      "references": [
+        {
+          "file": "apps/client/src/lib/config.ts",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/10k-training-plan/page.tsx",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/_components/FiveKTrainingPlanPage.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/intermediate/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/5k-training-plan/page.tsx",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
+          "line": 37
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
+          "line": 32
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
+          "line": 24
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-marathon-training-plan/page.tsx",
+          "line": 24
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ai-training-plan/page.tsx",
+          "line": 29
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/alternatives/page.tsx",
+          "line": 25
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/best-efforts/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/brick-workout/page.tsx",
+          "line": 34
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/contact/page.tsx",
+          "line": 28
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/contact/page.tsx",
+          "line": 68
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/converter-direction-page.tsx",
+          "line": 25
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/converter/page.tsx",
+          "line": 24
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/converter/page.tsx",
+          "line": 81
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/couch-to-5k-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/cp-ftp-lthr-estimator/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
+          "line": 128
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
+          "line": 179
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
+          "line": 139
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
+          "line": 187
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/custom-zones/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/cycling-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
+          "line": 30
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/effective-vo2max-trend/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/features/mcp/page.tsx",
+          "line": 16
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
+          "line": 53
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
+          "line": 25
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
+          "line": 73
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
+          "line": 21
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/fitness-fatigue-form/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/free-ai-workout-review/page.tsx",
+          "line": 23
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
+          "line": 151
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
+          "line": 199
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 92
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 146
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ironman-70-3-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 118
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 169
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
+          "line": 13
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 76
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
+          "line": 134
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/olympic-triathlon-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 100
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 149
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
+          "line": 126
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
+          "line": 17
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-curve/page.tsx",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-rankings/page.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 119
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 170
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 36
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
+          "line": 81
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 55
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 96
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/race-time-predictor/page.tsx",
+          "line": 39
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/race-time-predictor/page.tsx",
+          "line": 90
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/rpe-scale/page.tsx",
+          "line": 48
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/running-pace-calculator/page.tsx",
+          "line": 41
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/running-pace-calculator/page.tsx",
+          "line": 92
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/share/plans/[publicId]/page.tsx",
+          "line": 12
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/swim-training-plan/page.tsx",
+          "line": 14
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/terms-and-conditions/page.tsx",
+          "line": 15
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/terms-and-conditions/page.tsx",
+          "line": 56
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
+          "line": 79
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
+          "line": 131
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
+          "line": 16
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 83
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
+          "line": 137
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
+          "line": 29
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tss-calculator/page.tsx",
+          "line": 85
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/tss-calculator/page.tsx",
+          "line": 136
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
+          "line": 93
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
+          "line": 146
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 187
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 261
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/workout-editor/page.tsx",
+          "line": 68
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/workout-editor/page.tsx",
+          "line": 132
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
+          "line": 120
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
+          "line": 168
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
+          "line": 21
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/blog/page.tsx",
+          "line": 49
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
+          "line": 27
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/layout.tsx",
+          "line": 96
+        },
+        {
+          "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
+          "line": 9
+        },
+        {
+          "file": "apps/docs/src/app/llms-full.txt/route.ts",
+          "line": 18
+        },
+        {
+          "file": "apps/docs/src/app/llms.txt/route.ts",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/pricing.md/route.ts",
+          "line": 8
+        },
+        {
+          "file": "apps/docs/src/app/robots.ts",
+          "line": 6
+        },
+        {
+          "file": "apps/docs/src/app/sitemap.ts",
+          "line": 30
+        },
+        {
+          "file": "apps/docs/src/app/tools.md/route.ts",
+          "line": 4
+        },
+        {
+          "file": "apps/docs/src/components/EndurancePlanHubPage.tsx",
+          "line": 31
+        },
+        {
+          "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
+          "line": 251
+        },
+        {
+          "file": "apps/docs/src/components/RunningPlanPage.tsx",
+          "line": 31
+        },
+        {
+          "file": "apps/docs/src/components/TenKBridgePage.tsx",
+          "line": 23
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingload.ai",
+      "url": "https://www.trainingload.ai/${docsLocale",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/dashboard/components/FitnessStatus/fitness-status-model.ts",
+          "line": 291
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/dashboard/components/FitnessStatus/fitness-status-model.ts",
+          "line": 293
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/dashboard/components/FitnessStatus/fitness-status-model.ts",
+          "line": 294
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/dashboard/fitness-metric/page.tsx",
+          "line": 104
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/dashboard/fitness-metric/page.tsx",
+          "line": 110
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/home-demo/metric-history/demo-fixtures.ts",
+          "line": 75
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/home-demo/metric-history/demo-fixtures.ts",
+          "line": 76
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingload.ai",
+      "url": "https://www.trainingload.ai/${locale",
+      "references": [
+        {
+          "file": "apps/client/src/components/ai-consent/AiDataConsentDisclosure.tsx",
+          "line": 77
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/blog/power-profiling/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/power/components/PowerProfile/PowerProfile.tsx",
+          "line": 539
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/blog/power-training-levels/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 341
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 432
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/learn/articles/efficiency-factor-and-decoupling/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/EfficiencyFactorInfo.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/PowerHeartRateRatioInfo.tsx",
+          "line": 74
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/learn/articles/joe-friel-s-quick-guide-to-setting-zones/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/heart-rate-zones-calculator/page.tsx",
+          "line": 261
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/learn/articles/normalized-power-intensity-factor-training-stress/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/IntensityFactorInfo.tsx",
+          "line": 74
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/NormalizedPowerInfo.tsx",
+          "line": 76
+        },
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/VariabilityIndexInfo.tsx",
+          "line": 74
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/learn/articles/power-to-weight-ratio/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/PowerWeightRatioInfo.tsx",
+          "line": 74
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.trainingpeaks.com",
+      "url": "https://www.trainingpeaks.com/learn/articles/what-is-tss/",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/[activityId]/components/power/components/info/TSSInfo.tsx",
+          "line": 74
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.velopress.com",
+      "url": "https://www.velopress.com/books/run-with-power/",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
+          "line": 448
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.w3.org",
+      "url": "http://www.w3.org/2000/svg",
+      "references": [
+        {
+          "file": "apps/client/src/components/calendar/settings/settings.tsx",
+          "line": 100
+        },
+        {
+          "file": "apps/client/src/components/calendar/settings/settings.tsx",
+          "line": 120
+        },
+        {
+          "file": "apps/client/src/components/DateSelector/DateAdd.tsx",
+          "line": 77
+        },
+        {
+          "file": "apps/client/src/components/icons/spinner.tsx",
+          "line": 11
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
+          "line": 128
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
+          "line": 207
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
+          "line": 230
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
+          "line": 293
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
+          "line": 315
+        },
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 122
+        },
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 186
+        },
+        {
+          "file": "apps/docs/src/components/page-actions.tsx",
+          "line": 203
+        },
+        {
+          "file": "apps/server/src/maps/local-route-thumbnail.renderer.ts",
+          "line": 144
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.wahoofitness.com",
+      "url": "https://www.wahoofitness.com/privacy-policy",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
+          "line": 246
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.who.int",
+      "url": "https://www.who.int/publications/i/item/9789240015128",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/running-plan-schedules.ts",
+          "line": 230
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www8.garmin.com",
+      "url": "https://www8.garmin.com/manuals/webhelp/GUID-2DA54DF8-8084-40ED-954F-EDA09C13B47F/EN-US/GUID-1F58FA8E-09FF-4E51-B9B4-C4B83ED1D6CE.html",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
+          "line": 617
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www8.garmin.com",
+      "url": "https://www8.garmin.com/manuals/webhelp/GUID-CB71AAE9-99E6-47B4-AB7F-F14BA316E7C6/EN-US/GUID-1FBCCD9E-19E1-4E4C-BD60-1793B5B97EB3.html",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/client.tsx",
+          "line": 826
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
+          "line": 462
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "x.com",
+      "url": "https://x.com/trainingloadai",
+      "references": [
+        {
+          "file": "apps/docs/src/components/CustomHeader.tsx",
+          "line": 22
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    }
+  ]
+}

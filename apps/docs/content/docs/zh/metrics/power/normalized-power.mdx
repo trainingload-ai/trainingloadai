@@ -1,0 +1,74 @@
+---
+title: 标准化功率（Normalized Power，NP）
+description: 标准化功率用于估算变动功率骑行的稳态等效强度，是计算 TSS、IF 和功率变异性的关键输入。
+keywords: ["Normalized Power", "NP", "标准化功率", "骑行功率", "TSS", "IF", "Training Stress Score", "Variability Index", "VI", "生理代价"]
+---
+
+# 标准化功率（Normalized Power）
+
+标准化功率（NP）是一种把“功率随时间波动的训练”转换成单一等效强度的指标。直觉上，它试图回答：
+
+- 如果我用一个恒定功率完成同样的生理代价，这个恒定功率大约是多少？
+
+相比平均功率，NP 会对高强度波动更敏感，因此适合用于后续的训练负荷估算（例如功率口径的 TSS）。
+
+## 核心概念：为什么需要 NP？
+
+运动强度与生理代价（如糖原消耗、乳酸堆积、激素压力）之间不是线性的，高强度部分的代价会不成比例地上升。
+
+### 线性 vs 指数
+- **线性视角（平均功率）**：骑行 1 小时 200W，和“30分钟 100W + 30分钟 300W”的做功总量是一样的（平均都是 200W）。
+- **生理视角（NP）**：300W 造成的生理压力远大于 100W 的恢复效果。后者可能让身体感受到接近更高稳态功率的代谢压力。
+
+NP 通过**四次方加权**放大高功率部分的影响，目的是比简单平均功率更接近身体承受的代谢成本。
+
+## Trainingload.ai 如何计算 NP
+
+Trainingload.ai 的实现与常见 NP 定义一致：先对功率做 30 秒滚动平均，再做四次方加权并开四次方根。
+
+$$
+P_{smooth}(t) = \frac{1}{30} \sum_{i=0}^{29} P(t-i)
+$$
+
+$$
+NP = \sqrt[4]{ \frac{1}{N} \sum_{j=1}^{N} (P_{smooth}(j))^4 }
+$$
+
+其中：
+- $P(t)$ 是时刻 $t$ 的瞬时功率
+- $P_{smooth}(t)$ 是时刻 $t$ 的 30 秒滚动平均功率
+- $N$ 是总样本点数
+
+## 典型应用场景
+
+### 1. 评估比赛强度 (Race Analysis)
+- **平路绕圈赛 (Criterium)**：由于大量的弯道加减速，NP 通常远高于平均功率。看 NP 才能知道这场比赛有多累。
+- **计时赛/铁三 (TT/Tri)**：由于追求稳态输出，NP 应该非常接近平均功率。如果 NP 远高于平均功率，说明配速策略失败（忽快忽慢）。
+
+### 2. 训练负荷计算 (TSS)
+NP 是计算 [TSS (训练压力积分)](/zh/docs/metrics/training-load/training-stress-score) 的基础输入。
+$$
+IF = \frac{NP}{FTP}
+$$
+$$
+TSS = \text{Duration(sec)} \times NP \times IF \times \text{Factor}
+$$
+使用 NP 可以让 TSS 比单纯使用平均功率更合理地反映间歇训练（Intervals）的负荷。
+
+> **Trainingload.ai 建议**：
+>
+> 1. **短时间参考价值有限**：对于少于 20 分钟的运动，NP 可能比较噪声，因为身体未必进入稳定反应。短时间冲刺训练更适合看最大功率、平均功率和分段指标。
+> 2. **不要刻意刷 NP**：在恢复骑（Recovery Ride）中，不要为了让数据好看而刻意加入几脚冲刺来拉高 NP。恢复骑的目标是低强度，NP 应该服务于训练目的。
+> 3. **检查 VI**：结合 [变异性 (VI)](./variability-index) 一起看，`VI = NP / Avg Power`。VI 越大，说明过程越“波折”。
+
+## 局限性
+
+- 依赖可靠的功率数据：设备误差、掉功率、零值处理都会影响结果。
+- 对窗口与采样敏感：不同的采样间隔、插值方式可能导致 NP 轻微差异。
+- 仅刻画“代价强度”：NP 不直接等价于疲劳、恢复需求或肌肉损伤程度。
+
+## 相关文档
+
+- [变异性 VI](/zh/docs/metrics/power/variability-index)
+- [训练压力积分 TSS](/zh/docs/metrics/training-load/training-stress-score)
+- [强度因子 IF](/zh/docs/metrics/training-load/intensity-factor)

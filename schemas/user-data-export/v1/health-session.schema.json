@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/health-session.schema.json",
+  "title": "Health session",
+  "description": "A normalized sleep, stress, or other bounded health session.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The stable record identifier."
+    },
+    "sessionType": {
+      "type": "string",
+      "description": "The stable health session type."
+    },
+    "startTime": {
+      "type": "string",
+      "description": "The session start time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "endTime": {
+      "type": "string",
+      "description": "The session end time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "localDate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The associated local calendar date in YYYY-MM-DD format.",
+      "format": "date"
+    },
+    "timezone": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The IANA timezone used to interpret the session and its local date."
+    },
+    "durationSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The session duration in seconds."
+    },
+    "score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The normalized session score when supplied by the source."
+    },
+    "summary": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Normalized summary values for the session.",
+      "additionalProperties": true
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The selected source provider."
+    },
+    "sourceBreakdown": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The privacy-reviewed provider candidates and selection evidence used to select this canonical session.",
+      "additionalProperties": true
+    },
+    "computedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The time the canonical session was last computed in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The system or user action that originally supplied this record."
+    },
+    "sourceExternalId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The stable record identifier assigned by the source system, when available."
+    },
+    "sourceUpdatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The last modification time reported by the source system in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "sessionType",
+    "startTime",
+    "endTime"
+  ]
+}

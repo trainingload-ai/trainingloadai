@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-cli-result-v1.json",
+  "title": "Trainingload self-host CLI result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "operationId",
+    "command",
+    "status",
+    "ok",
+    "exitCode",
+    "dryRun",
+    "startedAt",
+    "finishedAt",
+    "releaseVersion",
+    "summary",
+    "actions",
+    "details",
+    "error",
+    "operationRecord"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "operationId": { "type": "string", "format": "uuid" },
+    "command": {
+      "type": "string",
+      "enum": [
+        "init",
+        "doctor",
+        "diagnostics",
+        "start",
+        "status",
+        "logs",
+        "backup",
+        "restore",
+        "upgrade",
+        "rollback",
+        "stop",
+        "owner-bootstrap",
+        "owner-recovery",
+        "uninstall",
+        "unknown"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "planned", "unchanged", "failed"]
+    },
+    "ok": { "type": "boolean" },
+    "exitCode": { "type": "integer", "enum": [0, 2, 3, 4, 5, 6, 7, 8, 10] },
+    "dryRun": { "type": "boolean" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "releaseVersion": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "status", "message"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
+          "status": {
+            "type": "string",
+            "enum": ["planned", "completed", "skipped", "failed"]
+          },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "details": { "type": "object" },
+    "error": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "retryable"],
+          "properties": {
+            "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]+$" },
+            "message": { "type": "string", "minLength": 1 },
+            "retryable": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "operationRecord": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "string",
+          "pattern": "^\\.selfhost/operations/[0-9T-]+Z-[0-9a-fA-F-]{36}\\.json$"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "failed" } } },
+      "then": {
+        "properties": {
+          "ok": { "const": false },
+          "exitCode": { "minimum": 1 },
+          "error": { "type": "object" }
+        }
+      },
+      "else": {
+        "properties": {
+          "ok": { "const": true },
+          "exitCode": { "const": 0 },
+          "error": { "type": "null" }
+        }
+      }
+    }
+  ]
+}

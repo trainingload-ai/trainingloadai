@@ -1,0 +1,50 @@
+---
+title: Fatigue (ATL)
+description: Découvrez comment Trainingload.ai modélise la Fatigue (ATL) à partir de la charge quotidienne, sans confondre cet indicateur avec une mesure directe de la fatigue.
+keywords: ["fatigue", "charge aiguë", "ATL", "formule ATL", "charge récente"]
+---
+
+# Qu’est-ce que la Fatigue (ATL) ?
+
+La **Fatigue (ATL)**, ou charge aiguë d’entraînement, est une moyenne exponentielle qui réagit rapidement à la charge quotidienne. Les jours récents pèsent davantage ; l’ATL évolue donc plus vite que la Condition physique (CTL). Trainingload.ai utilise par défaut une constante de temps de sept jours.
+
+« Fatigue » est un libellé lisible dans l’interface. L’ATL résume une charge récente modélisée ; elle ne mesure directement ni la fatigue physiologique ou ressentie, ni la récupération, la santé ou l’adaptation.
+
+<div className="my-6 max-w-sm w-full mx-auto">
+  <AtlStatPreviewCard
+    value="16.99"
+    percent={72}
+    metricLabel="ATL"
+    valuePopoverTitle="Valeur ATL"
+    valuePopoverBody="Moyenne exponentielle rapide des charges quotidiennes retenues selon vos priorités de source."
+    percentPopoverTitle="Pourcentage ATL"
+    percentPopoverBody="ATL actuelle rapportée à votre maximum historique ; ce n’est pas un percentile universel de fatigue."
+    helpTitle="Charge récente"
+    details="Reliez chaque variation aux séances et au contexte de récupération."
+  />
+</div>
+
+## Origine et formule
+
+Pour chaque activité, Trainingload.ai retient une charge issue de la puissance, de la fréquence cardiaque, de l’allure ou du RPE de séance. Les activités d’une même journée sont additionnées dans `daily_load`. Une journée sans charge enregistrée vaut zéro et l’ATL précédente décroît progressivement.
+
+```text
+decay_ATL = exp(-1 / 7)
+ATL_today = ATL_yesterday × decay_ATL + daily_load × (1 − decay_ATL)
+```
+
+Avec le réglage par défaut, `decay_ATL ≈ 0.866878` et la charge du jour pèse environ `0.133122`. Sept jours désignent une **constante de temps**, pas une moyenne simple sur une semaine. Après un passage à une charge quotidienne constante, l’ATL accomplit environ 63,2 % du changement en une constante et 95 % en trois.
+
+## Interprétation et limites
+
+L’ATL monte lorsque la charge récente dépasse son niveau actuel, se stabilise quand elle le maintient et baisse pendant le repos, la récupération ou l’affûtage. Une hausse indique seulement davantage de charge récente modélisée.
+
+Utilisez-la avec la [Condition physique (CTL)](/fr/docs/metrics/pmc/chronic-training-load), la [Forme (TSB)](/fr/docs/metrics/pmc/training-stress-balance), la qualité des séances, le sommeil, la douleur, les signes de maladie, le RPE et le ressenti.
+
+## Références
+
+- [Intervals.icu : formules Fitness, Fatigue et Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE : Acute Training Load](https://runalyze.com/glossary/atl)
+- [TrainingPeaks : Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
+- [Code GoldenCheetah : PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
+- [Calvert et al. (1976)](https://doi.org/10.1109/TSMC.1976.5409179)

@@ -1,0 +1,83 @@
+---
+title: トレーニングストレススコア（TSS）とは？計算式と目安
+description: トレーニングストレススコア（TSS）は時間と相対強度から1回の負荷を推定します。計算式、rTSSとhrTSS、目安レンジ、FTP設定ミスで数値が膨らむ理由を説明します。
+keywords:
+  ["トレーニングストレススコア", "TSS", "TSS 計算", "rTSS", "hrTSS", "トレーニング負荷スコア"]
+---
+
+# トレーニングストレススコア（TSS）とは？計算式と目安
+
+**トレーニングストレススコア（TSS）** は、1 回のワークアウトの負荷を **時間** と **相対強度** から推定します。バイクの基準は「FTP で約 1 時間 = 100 TSS」です。長いイージーと短いインターバルを同じ尺度で比べられます。
+
+## 基本概念
+
+> **FTP で 1 時間全力に近く走ると 100 TSS。**
+
+- **100 TSS**: 1 時間 @ FTP
+- **50 TSS**: 1 時間イージー、または 30 分 @ FTP
+- **150 TSS**: かなりきついセッション
+
+## 計算式
+
+バイクの標準的な TSS は次の式で計算されます。
+
+$$
+TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
+$$
+
+- $t$: 運動時間（秒）
+- $NP$: [Normalized Power](/ja/docs/metrics/power/normalized-power)
+- $IF$: [Intensity Factor](/ja/docs/metrics/training-load/intensity-factor)
+- $FTP$: [Functional Threshold Power](/ja/docs/metrics/power/functional-threshold-power)
+
+本質的には **時間（時間単位） × IF² × 100** に近い考え方です。
+
+## 主なバリエーション
+
+| 指標      | 対象           | 主な入力           |
+| :-------- | :------------- | :----------------- |
+| **TSS**   | バイクなど     | パワー             |
+| **hrTSS** | 全スポーツ     | 心拍 / TRIMP       |
+| **rTSS**  | ラン           | ペース / NGP       |
+| **sTSS**  | スイム         | スピード           |
+| **tTSS**  | フォールバック | 時間と平均心拍など |
+
+## 目安
+
+| TSS         | 疲労感     | 回復の目安                 |
+| :---------- | :--------- | :------------------------- |
+| **< 150**   | 低め       | 翌日には戻りやすい         |
+| **150-300** | 中程度     | 翌日に疲労が残ることがある |
+| **300-450** | 高い       | 2 日以上残ることがある     |
+| **> 450**   | 非常に高い | 数日単位の回復が必要       |
+
+## 注意点
+
+- FTP が低すぎると TSS が過大になります。
+- ランの 100 TSS とバイクの 100 TSS は、筋骨格への負担が同じとは限りません。
+- 暑さ、睡眠不足、生活ストレスは TSS に直接含まれません。
+
+## よくある質問
+
+### TSSとは何ですか？
+
+1 セッションのモデル化されたストレスです。時間と相対強度を一つの数にし、種類や長さが違うワークアウトを比べます。高いほど良い訓練ではありません。
+
+### TSSの計算方法は？
+
+バイクは TSS =（秒 × NP × IF）/（FTP × 3600）× 100、つまり時間（時間）× IF² × 100 です。ランは NGP と閾値ペースの rTSS、心拍セッションは [TRIMP](/ja/docs/metrics/training-load/training-impulse) 由来の hrTSS です。
+
+### 1回あたりの目安は？
+
+150 未満は翌日戻りやすい負荷、150–300 は疲労が残りやすく、300 超は多くのアマチュアにとって重い日です。異常に高い値は先に FTP を疑ってください。
+
+## 次のステップ
+
+- [時間・NP・FTP から TSS を計算する](/ja/tss-calculator)
+- [日次 TSS から CTL、ATL、TSB を投影する](/ja/training-load-calculator)
+- [計画内でトレーニング負荷を管理する](/ja/training-load)
+- [インテンシティファクター](/ja/docs/metrics/training-load/intensity-factor)で IF が TSS にどう効くかを見る
+- [アクティビティファイルからFTPを推定する](/ja/ftp-calculator)
+- [AIコーチで負荷調整案を作る](/ja/ai-training-plan)
+
+> Normalized Power (NP), Intensity Factor (IF), Training Stress Score (TSS) は [Peaksware, LLC](https://trainingpeaks.com/) の登録商標です。

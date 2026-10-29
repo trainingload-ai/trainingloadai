@@ -1,0 +1,98 @@
+---
+title: Intensity Factor (IF)
+description: Intensity Factor (IF) compares workout intensity with threshold and helps interpret how hard a session was relative to current fitness.
+keywords: ["IF", "Intensity Factor", "intensity factor", "NP", "FTP", "TSS", "Tempo", "Sweet Spot", "training intensity"]
+---
+
+# Intensity Factor (IF)
+
+**Intensity Factor (IF)** measures the **relative intensity** of a workout compared with your current **[FTP (Functional Threshold Power)](/docs/metrics/power/functional-threshold-power)** or a sport-specific threshold.
+
+It answers “How hard was this session?”—and makes training intensity comparable across athletes with different ability levels.
+
+## Calculation Formula
+
+IF is the ratio of [Normalized Power (NP)](/docs/metrics/power/normalized-power) to [Functional Threshold Power (FTP)](/docs/metrics/power/functional-threshold-power):
+
+$$
+IF = \frac{NP}{FTP}
+$$
+
+**Example**:
+-   Suppose your FTP is 200 W.
+-   You complete a ride with NP = 150 W.
+-   Then $IF = 150 / 200 = 0.75$.
+
+> **Note**: the same logic applies to running (using rFTP and NGP). Heart rate is generally less precise than power due to **lag and drift**.
+
+### IF calculation in running
+
+For running, we usually use **rFTP (running threshold power)** or **CP (Critical Power)** as the baseline:
+
+$$
+IF_{run} = \frac{RunPower}{CP}
+$$
+
+Or, if using pace:
+
+$$
+IF_{pace} = \frac{NGP}{ThresholdPace}
+$$
+
+*Note: [NGP (Normalized Graded Pace)](/docs/metrics/pace/normalized-graded-pace) is a grade-adjusted normalized pace.*
+
+## Why focus on IF?
+
+### 1. Cross-athlete comparison
+- **Absolute power**: a pro can ride 200 W easily; a beginner may ride 200 W all-out. Watts alone don’t reflect effort.
+- **Relative intensity (IF)**: if both athletes have IF = 0.75, they’re doing the same relative aerobic endurance work.
+
+### 2. Identify training zones
+IF is the fastest way to see which intensity domain a session sits in:
+
+| IF range | Training zone | Typical description |
+| :--- | :--- | :--- |
+| **< 0.75** | **Z1 / Z2** | **Recovery / aerobic endurance**. Easy to moderate work, often used for base or recovery sessions. |
+| **0.75 - 0.85** | **Z3 / Sweet Spot** | **Tempo / sweet spot**. Moderately hard and sustainable for many athletes, depending on duration and sport. |
+| **0.85 - 0.95** | **Z4** | **Threshold**. Very hard, near FTP; common in intervals or time trials. |
+| **0.95 - 1.05** | **Z5** | **VO2max**. Very high-intensity work, usually performed in shorter intervals. |
+| **> 1.05** | **Z6 / Z7** | **Anaerobic / sprint**. Short bursts; usually only in short races or tests. |
+
+## Typical application scenarios
+
+### 1. Validate FTP settings
+If you hold **IF ≈ 1.1** for a full **solo 1-hour time trial (TT)** (i.e., NP is 1.1× FTP), your **FTP may be set too low**.
+- **Why**: FTP is commonly treated as the highest power you can sustain near steady state for about an hour. If IF stays well above 1.0 for a full hour, your threshold estimate likely needs review.
+
+### 2. Race pacing strategy
+In long endurance events, controlling IF helps protect late-race pacing and nutrition:
+
+| Race type | Target IF range | Risk note |
+| :--- | :--- | :--- |
+| **Ironman** | **0.65 - 0.75** | Higher bike intensity can increase run and nutrition risk. |
+| **Half Ironman (70.3)** | **0.75 - 0.85** | The upper end is aggressive and depends heavily on run durability. |
+| **Olympic-distance** | **0.85 - 0.95** | Near-threshold bike; leave margin for the run. |
+
+### 3. A core building block of Training Stress Score (TSS)
+IF is a multiplier in **[TSS](./training-stress-score)**—it sets how fast TSS accumulates:
+
+$$
+TSS = \frac{t \times NP \times IF}{FTP \times 3600} \times 100
+$$
+
+- A small increase in IF raises TSS a lot (the formula effectively involves an $IF^2$ relationship).
+
+## Trainingload.ai recommendations
+
+Trainingload.ai uses IF to interpret the character of a workout, not just its total load:
+
+1.  **Match IF to the session goal**: aerobic base sessions should usually stay controlled; threshold or VO2max sessions are intentionally higher.
+2.  **Be cautious with very short sessions**: for workouts shorter than roughly 20 minutes, IF can look unusually high and should not be interpreted the same way as a long steady session.
+3.  **Review threshold settings**: if easy sessions frequently show IF above 0.8, either the workout is not as easy as intended or your threshold estimate may need recalibration.
+
+## Limitations
+
+-   **Bias in short, intense sessions**: for very short workouts (e.g., ~10 minutes), NP behavior can make IF look unusually high.
+-   **Depends on a reliable FTP**: if FTP is outdated or wrong, IF loses meaning.
+
+> Normalized Power (NP), Intensity Factor (IF), and Training Stress Score (TSS) are registered trademarks of [Peaksware, LLC](https://trainingpeaks.com/).

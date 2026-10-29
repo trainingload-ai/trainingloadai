@@ -1,0 +1,142 @@
+---
+title: Profile, Thresholds, and Zones
+description: Set up athlete profile values, thresholds, load-source priority, and training zones so Trainingload.ai can interpret workouts, plans, and AI Coach context more accurately.
+keywords: ["athlete profile", "training thresholds", "training zones", "load source priority", "Trainingload.ai settings"]
+---
+
+# Profile, Thresholds, and Zones
+
+Profile, thresholds, and zones are the calibration layer of Trainingload.ai. They help the product interpret your workouts, estimate load, build useful charts, and give AI Coach enough context to avoid generic advice.
+
+You do not need every field on day one. Start with the values you trust, then refine them after tests, races, or consistent training data.
+
+## Basic profile
+
+Basic profile values affect display, calendar logic, and some physiology-related calculations.
+
+Check:
+
+- **Time zone**: used for calendar days, review windows, and date-based training views.
+- **Unit system**: controls how distance, pace, elevation, and related values are displayed.
+- **Body weight**: useful for relative power and weight-related metrics.
+- **Height, birthday, and gender**: used where age, body-size context, or demographic reference ranges are relevant.
+- **Primary sport**: helps choose sport-specific defaults and display choices.
+
+If your time zone is wrong, a workout may appear on the wrong training day. Fix time zone before judging calendar or review summaries.
+
+## Key thresholds
+
+Thresholds convert raw workout data into intensity and load.
+
+Common fields include:
+
+- **FTP**: functional threshold power, mainly used for cycling power intensity and power-based load.
+- **CP**: critical power, useful for power-duration and critical-power-based analysis.
+- **W' / W Prime**: finite work capacity above critical power.
+- **Pmax**: peak power context for power profiling.
+- **LTHR**: lactate threshold heart rate, useful for heart-rate zones and threshold-oriented HR analysis.
+- **Max heart rate**: used by max-HR-based zones and some heart-rate comparisons.
+- **Resting heart rate**: used with max HR for heart-rate reserve.
+- **CS**: critical speed, used for pace or speed benchmarks.
+- **TP**: threshold pace or threshold speed context, depending on sport and display.
+
+Use the latest reliable value, not the best value you have ever seen. Thresholds should represent what you can currently sustain in training decisions.
+
+## Load-source priority
+
+Trainingload.ai can derive activity load from different signals. Your load-source priority tells the system which signal to prefer when more than one is available.
+
+Available sources include:
+
+- **Power**.
+- **Heart rate**.
+- **Pace**.
+- **Session RPE**.
+
+A practical default is to put the most reliable sensor first:
+
+- Cycling with a reliable power meter: power first.
+- Running without power: pace or heart rate first, depending on terrain and data quality.
+- Indoor or sensor-limited sessions: heart rate or session RPE may be more useful.
+
+Changing load-source priority can change historical load interpretation. Do it when your data quality or training setup changes, not as a way to make a single workout look better.
+
+## Zone models
+
+Training zones group intensity into ranges you can use in charts, workout targets, and review.
+
+Trainingload.ai supports model-based and custom zones:
+
+- **Heart rate zones** can use max HR, heart-rate reserve, LTHR, or custom values.
+- **Power zones** can use FTP, CP, or custom values.
+- **Pace zones** can use CS or custom values.
+
+Zone models are shortcuts, not universal truth. If your coach uses a specific model, match that model. If you have lab or field-test zones, custom zones may be the better choice.
+
+## Sport-specific zones
+
+Zones can differ by sport. Running, cycling, and swimming should not always share the same interpretation.
+
+Examples:
+
+- Cycling power zones depend on cycling power benchmarks.
+- Running pace zones depend on running speed or pace benchmarks.
+- Swimming pace zones are usually expressed per 100 m.
+- Heart-rate response can differ across running, cycling, and swimming.
+
+Set zones for the sports you actually train. Missing zones do not block activity import, but charts, workout targets, and AI Coach explanations may be less specific.
+
+## Custom zones
+
+Use custom zones when:
+
+- Your coach has already defined your zones.
+- You tested in a lab or with a trusted protocol.
+- Model-generated zones do not match your training reality.
+- You need sport-specific ranges that the default model does not capture.
+
+Custom zones are entered as absolute values:
+
+- Power in watts.
+- Heart rate in bpm.
+- Running pace in seconds per kilometer.
+- Swimming pace in seconds per 100 m.
+
+Keep zone names short and ordered. Clear labels make charts and AI Coach context easier to read.
+
+## When to update thresholds
+
+Update thresholds when there is enough evidence that your current settings are no longer representative.
+
+Good reasons:
+
+- A recent test produced a credible new value.
+- A race performance clearly changes your current benchmark.
+- Several weeks of workouts show sustained improvement or decline.
+- A device or measurement method changed.
+- You returned from a long break, illness, or injury.
+
+Avoid updating thresholds after one unusually good or bad day. Threshold changes should explain a pattern, not chase noise.
+
+## How this affects AI Coach
+
+AI Coach can use profile values, thresholds, zones, and load-source priority as context.
+
+Better setup helps AI Coach answer questions such as:
+
+- Whether a workout matched the intended intensity.
+- Whether load is rising too quickly.
+- Whether a planned workout looks appropriate after recent fatigue.
+- Whether a pace, heart-rate, or power target is realistic.
+
+If key values are missing, AI Coach may still help, but it should be more cautious and may ask follow-up questions.
+
+## Related pages
+
+- [Calculateur gratuit de fréquence cardiaque maximale](/fr/max-heart-rate-calculator)
+- [Getting Started](/docs/guide/getting-started)
+- [Connect Data](/docs/guide/connect-data)
+- [Activity Detail](/docs/guide/activity-detail)
+- [Create a Training Plan](/docs/guide/create-training-plan)
+- [AI Coach](/docs/guide/ai-coach)
+- [Training Load](/docs/metrics/training-load)

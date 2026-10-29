@@ -1,0 +1,50 @@
+---
+title: Efficiency Factor (EF)
+description: 有酸素効率とベース期の進捗を見るための基本指標です。
+keywords: ["EF", "Efficiency Factor", "Aerobic Fitness", "Base Training"]
+---
+
+# Efficiency Factor (EF)
+
+**Efficiency Factor (EF)** は、生理的入力である心拍に対して、どれだけのパフォーマンス出力を出せたかを表します。
+
+VO2 Max がエンジンの大きさだとすれば、EF は燃費のようなものです。
+
+## 基本式
+
+EF は「出力 ÷ 心拍」で計算します。
+
+### バイク
+
+$$
+EF = \frac{NP}{AvgHR}
+$$
+
+### ラン
+
+$$
+EF = \frac{NGP}{AvgHR}
+$$
+
+Trainingload.ai では、地形影響を減らすために [NGP](/ja/docs/metrics/pace/normalized-graded-pace) を使います。
+
+## どう使うか
+
+EF は他人と比べるより、自分の過去と比べる指標です。ベース期に EF が徐々に上がっていれば、同じ心拍でより速く、またはより高いパワーを出せるようになっている可能性があります。
+
+## EF とデカップリング
+
+| 指標           | 見る時間軸           | 問い                         |
+| :------------- | :------------------- | :--------------------------- |
+| **EF**         | 長期トレンド         | 最近どれだけ効率が上がったか |
+| **Decoupling** | 1 回の長いセッション | 後半まで効率を保てたか       |
+
+## 注意点
+
+- EF のトレンドを見るときは、主に Z1/Z2 の有酸素セッションに絞る。
+- 心拍ストラップやパワーメーターをなるべく一貫させる。
+- 異常な EF 上昇は、疲労や心拍反応の鈍さを示すこともあります。
+
+## 参考
+
+- [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)

@@ -1,0 +1,119 @@
+{
+  "planExecution": {
+    "completedWithTomorrowOne": "Today's planned work is complete. Focus on fueling, mobility, and sleep now. You have one session tomorrow, so do not add more intensity today.",
+    "completedWithTomorrowMany": "Today's planned work is complete. Focus on fueling, mobility, and sleep now. You have {count} sessions tomorrow, so do not add more intensity today.",
+    "completed": "Today's planned work is complete. Focus on recovery, hydration, and sleep, and note how the session felt so I can use it in later adjustments.",
+    "partial": "You have completed {count} linked activity today. Decide on the remaining work from how your legs and overall fatigue feel; protect the quality of the work instead of forcing the volume.",
+    "plannedOne": "You have one planned session today. Start with the plan, check how you feel after the warm-up, and keep the effort within the target range. Link the activity afterward so I can keep adjusting your training.",
+    "plannedMany": "You have {count} planned sessions today. Start with the plan, check how you feel after the warm-up, and keep the effort within the target range. Link the activities afterward so I can keep adjusting your training.",
+    "plannedNone": "There is no specific session on the schedule today. Keep it to easy recovery or mobility work, and do not add a hard session just because you feel fresh.",
+    "extraOne": "There is one extra activity today. First check whether it belongs to a planned session. If it was extra training, reduce tomorrow's intensity or duration as needed.",
+    "extraMany": "There are {count} extra activities today. First check whether they belong to planned sessions. If they were extra training, reduce tomorrow's intensity or duration as needed.",
+    "restWithTomorrowOne": "Today is a rest day, so recover instead of making up volume. You have one session tomorrow; sleep early and replenish fluids and carbohydrates so you are ready for it.",
+    "restWithTomorrowMany": "Today is a rest day, so recover instead of making up volume. You have {count} sessions tomorrow; sleep early and replenish fluids and carbohydrates so you are ready for them.",
+    "rest": "Today is a rest day. Catch up on sleep, keep movement light, and note any soreness. You do not need an extra session just to preserve a streak.",
+    "noPlan": "You do not have an active training plan yet. Tell me your goal event, preparation window, and weekly availability, and I will help plan your next block.",
+    "tags": {
+      "completed": "completed",
+      "recoveryPriority": "recovery first",
+      "partial": "partly completed",
+      "adjustByFeel": "adjust by feel",
+      "planned": "follow the plan",
+      "controlIntensity": "control intensity",
+      "extraActivity": "extra activity",
+      "checkLink": "check activity link",
+      "restDay": "rest day",
+      "recovery": "recovery",
+      "noPlan": "no plan",
+      "setGoal": "set a goal"
+    }
+  },
+  "today": {
+    "decision": {
+      "unavailable": "I could not load your latest training update. Please refresh and try again. Until I can confirm the update, follow your current schedule.",
+      "statePending": "Your current state check is still missing one key detail. Until it is answered, do not chase the planned intensity; keep today conservative and recovery-focused.",
+      "defaultAdjustment": "adjust your current training schedule",
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "confirmed": "confirmed",
+      "pending": "pending",
+      "timedDetail": "train this way {when}: {detail}",
+      "untimedDetail": "make this adjustment: {detail}",
+      "approved": "This adjustment is confirmed. {detail}. Follow it while your schedule updates, and do not add another session.",
+      "proposed": "I have a new suggestion for you. {detail}. Confirm it and I will update your schedule.",
+      "defaultCurrentWorkout": "the current planned session",
+      "rejectedWorkout": "I remember you chose not to use the last adjustment. Follow today's scheduled session, “{title}”, and ease off if your body needs it.",
+      "rejectedRest": "I remember you chose not to use the last adjustment. Keep today as the scheduled rest day and focus on recovery and how your body feels.",
+      "guidance": "{summary}. One more reminder from our last review: {guidance}.",
+      "clearIntensityTarget": "a clear intensity target",
+      "controlledRpe": "keep the effort at RPE {range}",
+      "doNotRace": "do not turn this session into a race"
+    },
+    "fact": {
+      "defaultWorkout": "planned session",
+      "oneSession": "1 session",
+      "manySessions": "{count} sessions",
+      "restDay": "rest day",
+      "loadChange": "load {value}",
+      "defaultEvent": "the relevant event",
+      "raceToday": "the race is today",
+      "daysToRace": "{count} days to the race",
+      "daysAfterRace": "{count} days after the race",
+      "influenceWindow": "you are currently inside its influence window",
+      "eventDistance": ", over a distance of {distance}",
+      "competition": "You marked {event} as {importance}; {timing}{distanceNote}. I recommend protecting race preparation and recovery today, then deciding from how you feel whether to train as planned or reduce the load.",
+      "noPlan": "You do not have an active training plan yet. Tell me your goal, preparation window, and weekly availability, and I will help you decide how to train today.",
+      "completedOne": "Today's planned session is complete. Focus on fueling, mobility, and sleep for the rest of the day instead of adding intensity.",
+      "completedMany": "All {count} planned sessions are complete. Focus on fueling, mobility, and sleep for the rest of the day instead of adding intensity.",
+      "activityWithDuration": "There was no planned session today, but you recorded a {duration}-minute {sport}. There is no need to add make-up volume; focus on hydration, fueling, mobility, and recovery now.",
+      "activityWithoutDuration": "There was no planned session today, but you recorded a {sport}. There is no need to add make-up volume; focus on hydration, fueling, mobility, and recovery now.",
+      "restFatigue": "No workout is planned today and your form is low (TSB {tsb}). Prioritize recovery, avoid adding load, and protect sleep and fueling.",
+      "restLoad": "No workout is planned today. Weekly load is up {drift}, so keep this recovery window instead of adding extra volume.",
+      "rest": "No workout is planned today. Rest well, or keep any movement easy if you feel fresh.",
+      "fatigue": "The plan is “{title}”, but your form is low (TSB {tsb}). Keep the intensity controlled today and shorten the session if recovery feels limited.",
+      "loadSpike": "Today's focus is “{title}”. Weekly load is up {drift}, so complete the key work and avoid adding extra volume.",
+      "multiWorkout": "You have {count} planned sessions today. Complete the key session, “{title}”, first, then decide on the rest from how you feel.",
+      "workout": "Today's focus is “{title}”. Stay within the target effort and link the activity afterward so I can review it with you."
+    },
+    "tags": {
+      "tryAgain": "try again",
+      "stateCheck": "state check pending",
+      "trainingAdvice": "coach suggestion",
+      "followPlan": "follow the plan",
+      "reviewNote": "review reminder",
+      "eventImpact": "event impact",
+      "noPlan": "no plan",
+      "setGoal": "set a goal",
+      "activityRecorded": "activity recorded"
+    }
+  },
+  "enum": {
+    "importance": {
+      "low": "low priority",
+      "medium": "medium priority",
+      "high": "high priority",
+      "critical": "top priority"
+    },
+    "impact": {
+      "low": "low impact",
+      "medium": "medium impact",
+      "high": "high impact",
+      "critical": "critical impact"
+    },
+    "phase": {
+      "general_preparation": "general preparation",
+      "specific_preparation": "specific preparation",
+      "peak": "peak",
+      "taper": "taper",
+      "event": "race",
+      "recovery": "recovery"
+    },
+    "sport": {
+      "run": "run",
+      "cycling": "ride",
+      "swim": "swim",
+      "strength": "strength session",
+      "unknown": "activity"
+    }
+  }
+}

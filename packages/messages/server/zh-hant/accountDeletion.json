@@ -1,0 +1,11 @@
+{
+  "completionEmail": {
+    "subject": "Trainingload.ai 帳戶刪除已完成",
+    "completed": "你的 Trainingload.ai 帳戶及其相關資料已完成刪除。",
+    "thanks": "感謝你曾經使用 Trainingload.ai。",
+    "feedback": "如果你願意告訴我們離開的原因，或對產品有任何建議，可以直接回覆此郵件或聯絡我們。",
+    "feedbackAction": "傳送意見",
+    "feedbackSubject": "Trainingload.ai 帳戶刪除意見",
+    "closing": "祝你接下來的訓練一切順利。"
+  }
+}

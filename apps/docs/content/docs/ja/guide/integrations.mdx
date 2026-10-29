@@ -1,0 +1,60 @@
+---
+title: トレーニングアプリ連携：Strava・Garmin・COROSの選び方
+description: Trainingload.aiのStrava、Garmin、COROS、Polar、Suunto、Wahoo、Intervals.icu連携を比較し、継続同期、履歴インポート、ファイルアップロードのどれを使うか決めます。
+keywords:
+  ["トレーニングアプリ連携", "Strava連携", "Garmin連携", "COROS同期", "Intervals.icu連携"]
+---
+
+# トレーニングアプリ連携：Strava・Garmin・COROSの選び方
+
+**トレーニングアプリ連携**は、ワークアウトが Trainingload.ai に入る経路です。先に選びます。Strava や COROS の継続同期、Garmin の一度きりの履歴インポート、Intervals.icu の OAuth または API キー、FIT / TCX / GPX のアップロードです。認可と確認のクリックは [Strava・Garmin・COROSを接続する](/ja/docs/guide/connect-third-party-platforms) を見てください。
+
+提供元の可否と方向は変わることがあります。接続ダイアログに出ている操作が最終判断です。
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="サードパーティ接続"
+  description="各カードに接続状態と、今のアカウントで使える操作が表示されます。"
+  route="Account → Third Party Connections"
+/>
+
+## つなぐ前に
+
+- 取り込みたいデータを持つ提供元アカウントでサインインする。
+- 各アクティビティの主経路を 1 つ決める。同じ記録を 2 サービス経由で入れない。
+- 継続接続、一度きりの履歴、ファイルアップロードのどれが必要か確認する。
+- 認証情報は公式の接続ダイアログにだけ入れる。
+- Trainingload.ai に既にある最新アクティビティを覚えておき、最初の成功を見分ける。
+
+## 取り込み経路
+
+| ソース          | 向いている用途                         | 接続の形                         |
+| --------------- | -------------------------------------- | -------------------------------- |
+| Strava          | 継続的なアクティビティ同期             | 設定付きの接続アカウント         |
+| Polar           | Polar アクティビティの継続取り込み     | OAuth と同期設定                 |
+| COROS           | アクティビティと日次データの同期       | 手動同期付きの接続               |
+| Intervals.icu   | アクティビティと対応する予定ワークアウト | OAuth または API キー          |
+| Suunto          | 継続的なワークアウト取り込み           | OAuth と同期設定                 |
+| Wahoo           | Wahoo ワークアウトの継続取り込み       | OAuth と同期設定                 |
+| Garmin          | 一度きりの履歴取り込み                 | 常時接続カードではないインポート |
+| FIT / TCX / GPX | 非対応ソースや個別ファイル             | 手動アップロード                 |
+
+## よくある質問
+
+### どのトレーニングアプリ連携がありますか？
+
+Strava、Polar、COROS、Intervals.icu、Suunto、Wahoo は接続を維持できます。Garmin は一度きりの履歴インポートです。FIT、TCX、GPX は単発ファイルや非対応ウォッチ向けです。
+
+### Strava連携とGarminインポートの違いは？
+
+新しいワークアウトを継続して入れたいなら Strava などのライブ接続。アーカイブを一度取り込むなら Garmin 履歴です。その後の新しい Garmin ファイルは、ライブ経路か手動アップロードが必要です。
+
+### 同じウォッチで2つ接続してよいですか？
+
+できますが、同じ記録を二重に入れないでください。大きな取り込みの前に主経路を 1 つにします。例：COROS 直接のみで、Strava 転送を重ねない。
+
+## 次のステップ
+
+- [Strava・Garmin・COROSを接続する](/ja/docs/guide/connect-third-party-platforms) で認可、初回同期、切り分けを行う。
+- ファイルが先に必要なら [GPX、FIT、TCX変換ツールを見る](/ja/converter)。
+- 履歴が入ったら [計画内でトレーニング負荷を管理する](/ja/training-load)。

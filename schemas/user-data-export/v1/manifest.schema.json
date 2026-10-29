@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/manifest.schema.json",
+  "title": "Export manifest",
+  "description": "The integrity, provenance, and compatibility manifest for the archive.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "type": "string",
+      "description": "The export contract identifier."
+    },
+    "exportId": {
+      "type": "string",
+      "description": "The stable export job identifier."
+    },
+    "mode": {
+      "type": "string",
+      "description": "The requested export mode.",
+      "oneOf": [
+        {
+          "const": "FULL_BACKUP",
+          "description": "A portable backup that can include direct identity and original files."
+        },
+        {
+          "const": "AI_ANALYSIS",
+          "description": "A privacy-reduced archive optimized for external AI analysis."
+        }
+      ]
+    },
+    "generatedAt": {
+      "type": "string",
+      "description": "The archive generation time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "dataCutoffAt": {
+      "type": "string",
+      "description": "The latest included database snapshot time in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "locationPrivacy": {
+      "type": "string",
+      "description": "The location privacy policy applied to the archive.",
+      "oneOf": [
+        {
+          "const": "EXACT",
+          "description": "Precise exported coordinates were retained."
+        },
+        {
+          "const": "REDACT_FREQUENT_LOCATIONS",
+          "description": "Coordinates near activity starts and ends were removed."
+        },
+        {
+          "const": "REMOVE_GPS",
+          "description": "All exported latitude and longitude values were removed."
+        }
+      ]
+    },
+    "includeOriginalFiles": {
+      "type": "boolean",
+      "description": "Whether eligible original source files were requested, including activity files and preserved health source files."
+    },
+    "identityRedacted": {
+      "type": "boolean",
+      "description": "Whether direct account identity fields were removed."
+    },
+    "exclusions": {
+      "type": "array",
+      "description": "The intentionally excluded data categories.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Non-fatal generation or fidelity warnings.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "files": {
+      "type": "array",
+      "description": "The integrity entries for archive files.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The relative path inside the archive."
+          },
+          "mediaType": {
+            "type": "string",
+            "description": "The IANA media type."
+          },
+          "sizeBytes": {
+            "type": "string",
+            "description": "The file size in bytes encoded as a decimal string."
+          },
+          "sha256": {
+            "type": "string",
+            "description": "The lowercase hexadecimal SHA-256 digest."
+          }
+        },
+        "required": [
+          "path",
+          "mediaType",
+          "sizeBytes",
+          "sha256"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "exportId",
+    "mode",
+    "generatedAt",
+    "dataCutoffAt",
+    "locationPrivacy",
+    "includeOriginalFiles",
+    "identityRedacted",
+    "exclusions",
+    "warnings",
+    "files"
+  ]
+}

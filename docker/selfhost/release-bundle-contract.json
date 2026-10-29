@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "bundleSchemaVersion": 1,
+  "archivePrefix": "trainingload-selfhost",
+  "minimumNodeVersion": "22.0.0",
+  "limits": {
+    "maximumFileBytes": 33554432,
+    "maximumBundleBytes": 536870912,
+    "maximumRuntimeTopLevelEntries": 1024
+  },
+  "compatibility": {
+    "schemaVersion": 1,
+    "staticFilesPolicy": "required-baseline-with-signed-additions",
+    "requiredFiles": [
+      ".env.example",
+      "AGENTS.md",
+      "BACKUP_RESTORE.md",
+      "LICENSE.md",
+      "SELF_HOSTING.md",
+      "SELF_HOST_KNOWN_LIMITATIONS.md",
+      "SELF_HOST_OPERATIONS.md",
+      "UPGRADE.md",
+      "compose.yml",
+      "ai_docs/self-hosting/doctor-and-diagnostics.zh.md",
+      "ai_docs/self-hosting/error-catalog.zh.md",
+      "ai_docs/self-hosting/management-cli.zh.md",
+      "ai_docs/self-hosting/release-candidate.zh.md",
+      "ai_docs/self-hosting/release-retrospective.zh.md",
+      "docker/selfhost/compose-contract.json",
+      "docker/selfhost/documentation-contract.json",
+      "docker/selfhost/release-candidate-contract.json",
+      "docker/selfhost/release-bundle-contract.json",
+      "docker/selfhost/release-policy.json",
+      "docker/selfhost/v1-contract.json",
+      "install.ps1",
+      "install.sh",
+      "schemas/self-host-backup-manifest.schema.json",
+      "schemas/self-host-cli-result.schema.json",
+      "schemas/self-host-config.schema.json",
+      "schemas/self-host-diagnostics-bundle.schema.json",
+      "schemas/self-host-doctor-report.schema.json",
+      "schemas/self-host-install-result.schema.json",
+      "schemas/self-host-instance-config.schema.json",
+      "schemas/self-host-operation-record.schema.json",
+      "schemas/self-host-release-bundle-manifest.schema.json",
+      "schemas/self-host-release-candidate-manifest.schema.json",
+      "schemas/self-host-release-attestation.schema.json",
+      "schemas/self-host-release-manifest.schema.json",
+      "schemas/self-host-release-policy.schema.json",
+      "schemas/self-host-restore-report.schema.json",
+      "schemas/self-host-upgrade-report.schema.json",
+      "scripts/selfhost/backup-artifact.mjs",
+      "scripts/selfhost/cli.mjs",
+      "scripts/selfhost/compose-environment.mjs",
+      "scripts/selfhost/compose-state.mjs",
+      "scripts/selfhost/create-checksums.mjs",
+      "scripts/selfhost/diagnostics-artifact.mjs",
+      "scripts/selfhost/doctor-core.mjs",
+      "scripts/selfhost/error-catalog.mjs",
+      "scripts/selfhost/install-core.mjs",
+      "scripts/selfhost/install.mjs",
+      "scripts/selfhost/management-core.mjs",
+      "scripts/selfhost/migration-policy.mjs",
+      "scripts/selfhost/private-path-acl.ps1",
+      "scripts/selfhost/private-path.mjs",
+      "scripts/selfhost/release-artifact.mjs",
+      "scripts/selfhost/release-bundle.mjs",
+      "scripts/selfhost/upgrade-plan.mjs",
+      "scripts/selfhost/verify-published-evidence.mjs",
+      "scripts/selfhost/vulnerability-evidence.mjs",
+      "self-host",
+      "self-host.ps1",
+      "scripts/selfhost/upload-copy-helper.mjs"
+    ]
+  },
+  "files": [
+    {
+      "path": ".env.example",
+      "mode": "0644"
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "0644"
+    },
+    {
+      "path": "BACKUP_RESTORE.md",
+      "mode": "0644"
+    },
+    {
+      "path": "LICENSE.md",
+      "mode": "0644"
+    },
+    {
+      "path": "SELF_HOSTING.md",
+      "mode": "0644"
+    },
+    {
+      "path": "SELF_HOST_KNOWN_LIMITATIONS.md",
+      "mode": "0644"
+    },
+    {
+      "path": "SELF_HOST_OPERATIONS.md",
+      "mode": "0644"
+    },
+    {
+      "path": "UPGRADE.md",
+      "mode": "0644"
+    },
+    {
+      "path": "compose.yml",
+      "mode": "0644"
+    },
+    {
+      "path": "ai_docs/self-hosting/acceptance-matrix.zh.md",
+      "mode": "0644"
+    },
+    {
+      "path": "ai_docs/self-hosting/doctor-and-diagnostics.zh.md",
+      "mode": "0644"
+    },
+    {
+      "path": "ai_docs/self-hosting/error-catalog.zh.md",
+      "mode": "0644"
+    },
+    {
+      "path": "ai_docs/self-hosting/management-cli.zh.md",
+      "mode": "0644"
+    },
+    {
+      "path": "ai_docs/self-hosting/release-candidate.zh.md",
+      "mode": "0644"
+    },
+    {
+      "path": "ai_docs/self-hosting/release-retrospective.zh.md",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/compose-contract.json",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/documentation-contract.json",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/acceptance-contract.json",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/release-candidate-contract.json",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/release-bundle-contract.json",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/release-policy.json",
+      "mode": "0644"
+    },
+    {
+      "path": "docker/selfhost/v1-contract.json",
+      "mode": "0644"
+    },
+    {
+      "path": "install.ps1",
+      "mode": "0644"
+    },
+    {
+      "path": "install.sh",
+      "mode": "0755"
+    },
+    {
+      "path": "schemas/self-host-backup-manifest.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-acceptance-environment.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-acceptance-report.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-acceptance-manifest.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-cli-result.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-config.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-diagnostics-bundle.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-doctor-report.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-install-result.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-instance-config.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-operation-record.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-release-bundle-manifest.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-release-candidate-manifest.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-release-attestation.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-release-manifest.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-release-policy.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-restore-report.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "schemas/self-host-upgrade-report.schema.json",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/backup-artifact.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/cli.mjs",
+      "mode": "0755"
+    },
+    {
+      "path": "scripts/selfhost/compose-environment.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/compose-state.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/create-checksums.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/diagnostics-artifact.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/doctor-core.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/error-catalog.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/install-core.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/install.mjs",
+      "mode": "0755"
+    },
+    {
+      "path": "scripts/selfhost/management-core.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/migration-policy.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/private-path-acl.ps1",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/private-path.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/release-artifact.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/release-bundle.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/upgrade-plan.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/verify-published-evidence.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/vulnerability-evidence.mjs",
+      "mode": "0644"
+    },
+    {
+      "path": "self-host",
+      "mode": "0755"
+    },
+    {
+      "path": "self-host.ps1",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/selfhost/upload-copy-helper.mjs",
+      "mode": "0644"
+    }
+  ],
+  "entrypoints": {
+    "installLinux": "./install.sh",
+    "installWindows": ".\\install.ps1",
+    "cliLinux": "./self-host",
+    "cliWindows": ".\\self-host.ps1"
+  },
+  "evidence": {
+    "algorithm": "sha256",
+    "checksums": "checksums.txt",
+    "signatureBundle": "checksums.bundle.json"
+  }
+}

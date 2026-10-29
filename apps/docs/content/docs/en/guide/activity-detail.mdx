@@ -1,0 +1,155 @@
+---
+title: Activity Detail
+description: Understand an activity detail page in Trainingload.ai, including processing status, summary metrics, charts, route data, load, pace, power, and heart-rate analysis.
+keywords:
+  [
+    "activity detail",
+    "workout analysis",
+    "training activity charts",
+    "Trainingload.ai activity",
+  ]
+---
+
+# Activity Detail
+
+The activity detail page explains one completed workout. It is where you move from “I uploaded a file” to “I understand what this session did.”
+
+Open it from:
+
+- The activity feed.
+- Activity search.
+- Map.
+- Calendar or day view.
+- A linked workout inside a training plan.
+
+## Before you review
+
+- Wait until the activity is Ready whenever possible.
+- Confirm that the sport type, start time, duration, and distance look plausible.
+- Check that relevant thresholds and zones are current before judging intensity.
+- If the session followed a plan, open or link the intended planned workout.
+
+## Review workflow
+
+Use the same order for every activity:
+
+1. Check processing state and source data.
+2. Read the summary to understand the session's scale.
+3. Inspect time-series charts for how the work unfolded.
+4. Confirm which signal produced the load estimate.
+5. Add terrain and plan context before drawing a conclusion.
+
+<DocsScreenshot
+  id="activity-detail-review"
+  title="Activity detail review"
+  description="Start with processing state and summary, then inspect charts, load source, route context, and the linked plan workout."
+  route="Activities → Activity detail"
+/>
+
+## Processing status
+
+An activity may not be fully analyzed immediately after import. Processing can include file normalization, duplicate handling, time-series preparation, and metric computation.
+
+Common states:
+
+- **Analyzing**: charts and derived metrics may still be incomplete.
+- **Ready**: the activity is available for normal review.
+- **Partial failed**: the activity exists, but some analysis may be missing.
+- **Failed**: the file could not be processed.
+
+If the activity is not ready yet, wait for processing to complete before judging missing charts or metrics.
+
+## Summary metrics
+
+The top-level summary usually includes core workout fields such as:
+
+- Sport type.
+- Start time and time zone.
+- Distance and duration.
+- Moving time and elapsed time.
+- Elevation gain.
+- Average and max heart rate.
+- Average and max power.
+- Pace or speed.
+
+The exact fields depend on the sport and the data available in the file.
+
+## Charts and time series
+
+Activity charts help explain how the workout unfolded over time. Depending on the data, you may see:
+
+- Pace or speed.
+- Heart rate.
+- Power.
+- Cadence.
+- Elevation.
+- Grade or slope.
+
+Use charts to find pacing drift, surges, climbs, stops, or unusual sensor behavior.
+
+## Load and intensity
+
+Trainingload.ai can compute session load from different data sources:
+
+- Power-based TSS when power and threshold are reliable.
+- Pace-based rTSS for running when pace, terrain, and threshold pace are available.
+- Heart-rate-based TRIMP / hrTSS when heart rate is the best available signal.
+- Fallback estimates when limited data is available.
+
+For the concepts behind this, read [Training Load](/docs/metrics/training-load).
+
+## Route and terrain context
+
+If the activity has GPS and elevation data, terrain can change how you interpret pace and effort.
+
+- Uphill pace may look slow while effort is high.
+- Downhill pace may look fast while mechanical stress is high.
+- GAP and NGP help compare hilly running with flatter efforts.
+
+See [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace) and [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace).
+
+## Plan linkage
+
+If the activity belongs to a plan workout, link it to the planned session. This unlocks plan execution review:
+
+- Planned vs completed session.
+- Expected load vs actual load.
+- Completion status.
+- AI Coach follow-up with plan context.
+
+If the wrong activity is linked, unlink it and choose the correct workout manually.
+
+## Ask AI Coach
+
+Use AI Coach when you want interpretation rather than raw numbers. Helpful prompts:
+
+- “Did this session match the planned intensity?”
+- “Why did my heart rate drift late in the run?”
+- “Was this too hard for an easy day?”
+- “What should I change before the next workout?”
+
+## Verify your interpretation
+
+Before acting on the activity, make sure you can answer:
+
+- What was the purpose of this session?
+- Which data source and threshold drove its load or intensity?
+- Did the charts show a real training pattern or a sensor/data problem?
+- If it was planned, did the activity fulfill the intended workout?
+- What is the smallest decision this evidence supports?
+
+Avoid changing a plan because one isolated metric looks unusual. Compare the activity with recent training and the athlete's current state.
+
+## Troubleshooting
+
+- **Charts are missing:** wait for Ready status, then confirm the uploaded file actually contains time-series samples.
+- **Load looks wrong:** check threshold values, sport type, and load-source priority before comparing formulas.
+- **Route is missing:** the source may not contain GPS, or privacy processing may remove part of the route.
+- **Plan comparison is absent:** link the activity to the correct planned workout and refresh the detail.
+- **Only part of the page is available:** a Partial failed state means some processing succeeded; use the available evidence and retry or re-import only when the source file is trustworthy.
+
+## Next steps
+
+- [Training Analysis Workflow](/docs/guide/training-analysis-workflow)
+- [Manage an Active Plan](/docs/guide/manage-active-plan)
+- [AI Coach](/docs/guide/ai-coach)

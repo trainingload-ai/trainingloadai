@@ -1,0 +1,95 @@
+---
+title: Troubleshooting
+description: Diagnose common Trainingload.ai problems with sign-in, synchronization, activity processing, plans, mobile recording, AI Coach, and missing metrics.
+keywords:
+  [
+    "Trainingload.ai troubleshooting",
+    "activity sync failed",
+    "training plan error",
+  ]
+---
+
+# Troubleshooting
+
+Start with the observable symptom. Avoid reconnecting providers, deleting activities, or recreating plans until you know which stage failed.
+
+## Sign-in or authorization loops
+
+1. Confirm that the browser or mobile app can reach the service.
+2. Finish the OAuth flow in the same browser session that started it.
+3. Check that the account uses an available login method before disconnecting another one.
+4. Retry once after refreshing the sign-in page.
+
+If a provider authorization succeeds but Trainingload.ai still shows disconnected, reopen the provider dialog and check for a callback or permission error.
+
+## A synchronized activity is missing
+
+1. Confirm the workout exists in the source provider.
+2. Check the provider connection state.
+3. Run one manual sync or reconciliation action if available.
+4. Wait for the import batch to finish.
+5. Search Activities by date and sport.
+
+Do not disconnect and reconnect repeatedly; that can create overlapping import work without fixing a source permission problem.
+
+## Activity is visible but analysis is incomplete
+
+An activity can be materialized before every derived chart is ready. Refresh after processing finishes. If only one metric family is missing, inspect the source streams:
+
+- Heart-rate analysis needs heart-rate samples.
+- Power analysis needs power samples and an appropriate sport/profile context.
+- Route and elevation views need GPS/elevation data.
+- Pace and distance analysis needs usable distance and time data.
+
+## A metric looks wrong
+
+Check, in order:
+
+1. Sport type and sport definition.
+2. Units and time zone.
+3. Threshold value and effective date.
+4. Zone model and custom boundaries.
+5. Selected load-source priority.
+6. Raw activity streams.
+
+Changing a threshold can affect interpretation of later calculations. Record why the value changed rather than tuning it until one workout looks ideal.
+
+## A workout cannot be saved
+
+For endurance workouts, verify that each structured step has a valid duration or distance and a supported target. For strength workouts, verify that:
+
+- At least one exercise exists.
+- Every exercise has a name.
+- Every exercise has at least one set group.
+- Every exercise includes at least one work set.
+
+The editor shows a localized validation message and keeps the invalid draft open for correction.
+
+## Plan changed elsewhere
+
+If the app reports a version or state conflict, another request changed the plan after your screen loaded. Refresh the plan, verify the latest state, and apply the edit again. Do not retry an outdated destructive action blindly.
+
+## Mobile recording did not finish syncing
+
+Keep the app installed and avoid clearing local storage while recovery is possible. Reopen the recording screen, let the app restore the session, and reconnect to the network. See [Mobile Recording](/docs/guide/mobile-recording).
+
+## AI Coach cannot complete a request
+
+- Shorten very large requests or split them into stages.
+- Confirm the plan or activity still exists and is accessible.
+- Review usage limits.
+- If a structured action fails validation, describe the intended change in plain language and retry.
+- Never apply an adjustment you cannot verify in the before/after preview.
+
+## Collect useful evidence
+
+When reporting a problem, include:
+
+- Approximate time and time zone.
+- Web or mobile, operating system, and app/browser version.
+- The page or workflow, not credentials.
+- Activity hash ID, plan ID, or provider name when safe.
+- Exact localized error text.
+- A screenshot with personal data hidden.
+
+Do not include passwords, OAuth tokens, API keys, or precise home coordinates.

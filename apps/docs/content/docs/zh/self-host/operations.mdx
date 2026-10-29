@@ -1,0 +1,96 @@
+---
+title: 管理自托管实例
+description: 通过受支持的管理入口执行健康检查、日志读取、备份、恢复、升级、回滚和停止。
+---
+
+# 管理自托管实例
+
+在 Linux、macOS 和 WSL2 上使用 `./self-host <command> --json`，在 Windows PowerShell 中使用 `.\self-host.ps1 <command> --json`。统一管理入口会保留发行物中的校验、操作锁、审计和数据安全规则。
+
+## 开始前
+
+- 妥善保护安装目录和其中的 `.env.selfhost`。
+- 自动化只判断 JSON 的 `ok`、`exitCode`、`error.code` 和 `details`，不要解析展示文本。
+- 任何会改变状态的操作，都先用完全相同的命令和参数执行 `--dry-run`。
+- 永远不要执行 `docker compose down -v`、删除生命周期 marker 或手工降级数据库。
+
+## 查看状态、健康和日志
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` 返回有界的运行状态快照。`doctor` 会检查可信配置、宿主资源、数据路径、数据库状态、就绪状态和已启用供应商。日志经过脱敏并限制长度，但仍可能包含业务数据，分享前必须人工检查。
+
+## 启动和停止
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+停止操作会保留容器、配置和持久数据。需要移除运行资源并保留数据时，应使用文档声明的 `uninstall` 流程，不要手工删除 volume。
+
+## 创建可验证备份
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+备份包含 PostgreSQL logical dump 和权威 uploads，不包含缓存、诊断工件、bootstrap token、TLS 私有状态、本地海拔数据和 secret 值。完成后把 bundle 存放到宿主机之外的加密存储，并定期在干净、隔离的目标中验证恢复。
+
+## 安全恢复
+
+只恢复到新初始化、版本完全一致，并且权威数据库与 uploads 为空的目标实例：
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+不要覆盖当前实例。恢复失败会保留阻塞 marker 和报告，防止不完整的目标被当成健康实例启动。
+
+## 升级
+
+升级需要完整的签名目标发行目录。保留当前实例、目标 bundle 和一份已验证的异地备份。实际升级前，先分别使用当前和目标 controller 执行兼容性 dry-run：
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+数据库迁移只向前执行。只有升级报告明确声明、并且旧镜像仍可验证时，才允许应用回滚；应用回滚不会降级数据库。
+
+## 建议频率
+
+- 每天：检查 `status` 和磁盘容量。
+- 每周：执行 `doctor` 并创建一份可验证的异地备份。
+- 每次升级前：阅读目标发行说明、验证目标 bundle、测试备份并检查回滚声明。
+- 定期：把备份恢复到隔离目标，核对 Owner、活动和上传文件。
+
+## 验证运维状态
+
+- 每个变更操作之前，都执行了相同参数的 `--dry-run`。
+- 启动、恢复或升级后，`doctor` 返回 `"ok": true`。
+- 实例宿主机之外至少保留一份当前有效的验证备份。
+- 已通过恢复演练证明备份可以使用，而不只是文件存在。
+
+## 故障排查
+
+操作失败时，保留稳定 error code 并执行 `doctor`。只有需要时才生成 diagnostics，先在本机人工检查，绝不公开原始 `.env.selfhost`、数据库 dump、uploads、密码、token 或供应商 Key。其他操作持有实例锁时，不要并行重试变更命令。
+
+## 下一步
+
+把[故障排查](/zh/docs/self-host/troubleshooting)加入实例运维手册。修改网络或供应商设置前，先复核[配置](/zh/docs/self-host/configuration)。

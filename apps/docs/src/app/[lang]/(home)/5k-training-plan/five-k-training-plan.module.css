@@ -1,0 +1,2072 @@
+.page {
+  --plan-canvas: var(--background);
+  --plan-surface: var(--card);
+  --plan-ink: var(--foreground);
+  --plan-muted: var(--muted-foreground);
+  --plan-line: var(--border);
+  --plan-line-strong: var(--input);
+  --plan-accent: var(--brand);
+  --plan-radius-control: var(--tl-radius-control);
+  --plan-radius-surface: var(--tl-radius-surface);
+  overflow-x: clip;
+  background: var(--plan-canvas);
+  color: var(--plan-ink);
+  scroll-behavior: smooth;
+}
+
+:global(.dark) .page {
+  --plan-canvas: var(--background);
+  --plan-surface: var(--card);
+  --plan-ink: var(--foreground);
+  --plan-muted: var(--muted-foreground);
+  --plan-line: var(--border);
+  --plan-line-strong: var(--input);
+  --plan-accent: var(--brand);
+}
+
+.shell {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.hero {
+  padding: clamp(2.25rem, 5vw, 4.5rem) 1.25rem 2.25rem;
+  background: var(--plan-canvas);
+}
+
+.heroGrid {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+
+.heroCopy {
+  min-width: 0;
+}
+
+.kicker {
+  color: var(--success);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.heroCopy h1 {
+  max-width: none;
+  margin-top: 1rem;
+  font-family: var(--tl-font-display);
+  font-size: clamp(2.65rem, 5.4vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.heroCopy h1 span {
+  display: block;
+}
+
+.heroCopyCjk h1 {
+  font-size: clamp(2.45rem, 3.4vw, 3.25rem);
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+.heroCopy h1::after,
+.sectionIntro h2::after,
+.systemHeading h2::after,
+.methodHeading h2::after,
+.workflowIntro h2::after,
+.faqHeading h2::after {
+  display: none;
+}
+
+.heroSubtitle {
+  max-width: 42rem;
+  margin-top: 1.35rem;
+  color: var(--plan-muted);
+  font-size: clamp(0.98rem, 1.2vw, 1.08rem);
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+}
+
+.primaryButton,
+.secondaryButton,
+.bridgeButton,
+.signupButton {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: var(--plan-radius-control);
+  padding: 0.65rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.primaryButton {
+  border: 1px solid var(--plan-accent);
+  background: var(--plan-accent);
+  color: var(--brand-foreground);
+}
+
+.secondaryButton {
+  border: 1px solid var(--plan-line-strong);
+  background: transparent;
+  color: var(--plan-ink);
+}
+
+.primaryButton:hover,
+.bridgeButton:hover,
+.signupButton:hover {
+  background: color-mix(
+    in srgb,
+    var(--plan-accent) 84%,
+    var(--brand-foreground)
+  );
+}
+
+.secondaryButton:hover {
+  border-color: var(--success);
+}
+
+.primaryButton svg,
+.bridgeButton svg,
+.signupButton svg,
+.textLink svg,
+.relatedLink > svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.bridgeButton:focus-visible,
+.choice:focus-visible,
+.textLink:focus-visible,
+.relatedLink:focus-visible,
+.signupButton:focus-visible,
+.jumpInner a:focus-visible,
+.faqList summary:focus-visible {
+  outline: 2px solid var(--plan-accent);
+  outline-offset: 3px;
+}
+
+.promise {
+  max-width: 40rem;
+  margin-top: 1.25rem;
+  color: var(--plan-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.heroProduct {
+  min-width: 0;
+}
+
+.systemVisual {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--plan-line);
+  border-radius: var(--plan-radius-surface);
+  background: var(--plan-surface);
+  box-shadow: 0 28px 60px -46px rgb(3 12 10 / 48%);
+}
+
+.devicePreview {
+  position: relative;
+  margin: 0;
+  color: var(--plan-ink);
+}
+
+.devicePreview::before {
+  display: none;
+}
+
+.previewCanvas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, 0.27fr);
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.webDevice {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid var(--plan-line-strong);
+  border-radius: var(--plan-radius-surface);
+  background: var(--plan-surface);
+  box-shadow: 0 24px 50px -38px rgb(3 12 10 / 45%);
+}
+
+.actualWebImage,
+.actualMobileImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.themeDarkImage {
+  display: none;
+}
+
+:global(.dark) .themeLightImage {
+  display: none;
+}
+
+:global(.dark) .themeDarkImage {
+  display: block;
+}
+
+.actualWebImage {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.mobileDevice {
+  overflow: hidden;
+  border: 1px solid var(--plan-line-strong);
+  border-radius: 1.25rem;
+  background: var(--plan-surface);
+  box-shadow: 0 24px 50px -34px rgb(3 12 10 / 52%);
+}
+
+.mobileDevice .actualMobileImage {
+  border-radius: 1.1rem;
+}
+
+.webChrome {
+  display: flex;
+  height: 1.75rem;
+  align-items: center;
+  gap: 0.28rem;
+  border-bottom: 1px solid #303a37;
+  padding: 0 0.65rem;
+  color: #7f8d88;
+}
+
+.webChrome > span {
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 50%;
+  background: #48534f;
+}
+
+.webChrome strong {
+  margin-left: 0.35rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.55rem;
+  font-weight: 650;
+}
+
+.webScreen {
+  min-height: 338px;
+  padding: 0.8rem;
+  background: #111716;
+}
+
+.previewPlanHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid #2b3633;
+  border-radius: var(--tl-radius-compact);
+  background: #1a211f;
+  padding: 0.65rem 0.75rem;
+}
+
+.previewPlanHeader > div,
+.phoneScreen header > div {
+  display: grid;
+  min-width: 0;
+}
+
+.previewPlanHeader span,
+.previewSectionTitle,
+.todayCard > span,
+.previewCoachCard > span,
+.phoneScreen header small,
+.mobileTodayCard > span {
+  color: #7f918a;
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.previewPlanHeader strong {
+  margin-top: 0.18rem;
+  font-size: 0.78rem;
+}
+
+.previewPlanHeader small {
+  margin-top: 0.18rem;
+  color: #8f9c97;
+  font-size: 0.54rem;
+}
+
+.previewPlanHeader button {
+  border: 1px solid #37443f;
+  border-radius: var(--tl-radius-xs);
+  padding: 0.25rem 0.42rem;
+  color: #74d8b4;
+  font-size: 0.56rem;
+  font-weight: 800;
+}
+
+.webPreviewGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(9.25rem, 0.72fr);
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.webPreviewMain {
+  display: grid;
+  min-width: 0;
+  gap: 0.65rem;
+}
+
+.webPreviewMain > section,
+.webPreviewAside > section,
+.previewStats {
+  border: 1px solid #293431;
+  border-radius: var(--tl-radius-compact);
+  background: #171e1c;
+  padding: 0.6rem;
+}
+
+.previewSectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.previewSectionTitle small {
+  color: #70dab2;
+  font-size: 0.55rem;
+}
+
+.previewWeekBars {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.28rem;
+  margin-top: 0.55rem;
+}
+
+.previewWeekBars li {
+  display: grid;
+  gap: 0.25rem;
+  border-radius: var(--tl-radius-xs);
+  background: #222a28;
+  padding: 0.35rem 0.25rem;
+  color: #7c8984;
+  font-size: 0.48rem;
+  text-align: center;
+}
+
+.previewWeekBars i {
+  height: 1.6rem;
+  border-radius: var(--tl-radius-micro);
+  background: #2d3633;
+}
+
+.previewWeekDone i {
+  background: #087b5b;
+}
+
+.previewWeekActive {
+  outline: 1px solid #32c997;
+  color: #e9fff7 !important;
+}
+
+.previewWeekActive i {
+  background: linear-gradient(to top, #0eb980 62%, #2d3633 62%);
+}
+
+.previewSessionList {
+  display: grid;
+  margin-top: 0.4rem;
+}
+
+.previewSessionList li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 0.45rem;
+  align-items: center;
+  border-top: 1px solid #2a3431;
+  padding: 0.42rem 0;
+}
+
+.previewSessionIcon {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: var(--tl-radius-xs);
+  background: #0f7458;
+  color: #d8fff0;
+}
+
+.previewSessionIcon svg,
+.previewSessionList > li > svg {
+  width: 0.64rem;
+  height: 0.64rem;
+}
+
+.previewSessionList li > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+}
+
+.previewSessionList small {
+  color: #77847f;
+  font-size: 0.46rem;
+}
+
+.previewSessionList strong {
+  overflow: hidden;
+  margin-top: 0.08rem;
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewSessionMeta {
+  color: #a6b2ad;
+  font-size: 0.5rem;
+  font-weight: 650;
+}
+
+.webPreviewAside {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+}
+
+.todayCard {
+  position: relative;
+  display: grid;
+}
+
+.todayCard > svg {
+  position: absolute;
+  top: 0.52rem;
+  right: 0.55rem;
+  width: 0.72rem;
+  color: #64ddb1;
+}
+
+.todayCard strong {
+  max-width: 12ch;
+  margin-top: 0.45rem;
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.todayCard small {
+  margin-top: 0.25rem;
+  color: #98a59f;
+  font-size: 0.48rem;
+}
+
+.previewWorkoutChart {
+  display: grid;
+  grid-template-columns: 0.25fr 1fr 0.25fr;
+  height: 2.1rem;
+  align-items: end;
+  overflow: hidden;
+  margin-top: 0.55rem;
+  border: 1px solid #31403b;
+  border-radius: var(--tl-radius-xs);
+  background: #111715;
+}
+
+.previewWorkoutChart i:nth-child(1) {
+  height: 45%;
+  background: #4d9bd7;
+}
+
+.previewWorkoutChart i:nth-child(2) {
+  height: 78%;
+  background: #766dd7;
+}
+
+.previewWorkoutChart i:nth-child(3) {
+  height: 32%;
+  background: #38bac4;
+}
+
+.previewStats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 0;
+}
+
+.previewStats div {
+  padding: 0.5rem;
+}
+
+.previewStats div + div {
+  border-left: 1px solid #293431;
+}
+
+.previewStats dt {
+  color: #7f8b87;
+  font-size: 0.46rem;
+}
+
+.previewStats dd {
+  margin-top: 0.2rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.previewCoachCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem;
+}
+
+.previewCoachCard > svg {
+  width: 0.7rem;
+  color: #64ddb1;
+}
+
+.previewCoachCard p {
+  grid-column: 1 / -1;
+  color: #a3afa9;
+  font-size: 0.48rem;
+  line-height: 1.45;
+}
+
+.phoneDevice {
+  position: absolute;
+  z-index: 3;
+  right: 0.85rem;
+  bottom: 2.15rem;
+  width: 29%;
+  max-width: 10.2rem;
+  overflow: hidden;
+  border: 1px solid #53605c;
+  border-radius: 1.25rem;
+  background: #070b0a;
+  padding: 0.28rem;
+  box-shadow: 0 22px 50px rgb(0 0 0 / 55%);
+}
+
+.actualMobileImage {
+  border-radius: 0.95rem;
+}
+
+.phoneSpeaker {
+  position: absolute;
+  z-index: 2;
+  top: 0.48rem;
+  left: 50%;
+  width: 28%;
+  height: 0.22rem;
+  border-radius: var(--tl-radius-full);
+  background: #303936;
+  transform: translateX(-50%);
+}
+
+.phoneScreen {
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #121816;
+  padding: 0.9rem 0.6rem 0.45rem;
+}
+
+.phoneScreen header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.phoneScreen header strong {
+  overflow: hidden;
+  margin-top: 0.12rem;
+  font-size: 0.55rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phoneScreen header > svg {
+  width: 0.7rem;
+  color: #5fd2a7;
+}
+
+.mobileProgress {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.65rem;
+  color: #8a9993;
+  font-size: 0.45rem;
+}
+
+.mobileProgress > i {
+  height: 0.18rem;
+  overflow: hidden;
+  border-radius: var(--tl-radius-full);
+  background: #2e3935;
+}
+
+.mobileProgress b {
+  display: block;
+  width: 37.5%;
+  height: 100%;
+  background: #36c997;
+}
+
+.mobileTodayCard {
+  position: relative;
+  margin-top: 0.55rem;
+  border: 1px solid #2e3c37;
+  border-radius: 0.6rem;
+  background: #19211e;
+  padding: 0.58rem;
+}
+
+.mobileWorkoutIcon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #13a978;
+}
+
+.mobileWorkoutIcon svg {
+  width: 0.65rem;
+}
+
+.mobileTodayCard h3 {
+  max-width: 10ch;
+  margin-top: 0.8rem;
+  font-size: 0.76rem;
+  line-height: 1.15;
+}
+
+.mobileTodayCard > p {
+  margin-top: 0.25rem;
+  color: #9aa8a2;
+  font-size: 0.48rem;
+}
+
+.mobileMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+}
+
+.mobileMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: var(--tl-radius-xs);
+  background: #252f2c;
+  padding: 0.2rem 0.3rem;
+  color: #aebbb6;
+  font-size: 0.43rem;
+  font-weight: 700;
+}
+
+.mobileMeta svg {
+  width: 0.48rem;
+  height: 0.48rem;
+}
+
+.mobileTodayCard button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.6rem;
+  border-radius: var(--tl-radius-xs);
+  background: #55c99f;
+  padding: 0.38rem;
+  color: var(--brand-foreground);
+  font-size: 0.5rem;
+  font-weight: 800;
+}
+
+.mobileTodayCard button svg {
+  width: 0.55rem;
+}
+
+.mobileCoachCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem;
+  margin-top: 0.48rem;
+  border: 1px solid #2a3532;
+  border-radius: 0.5rem;
+  padding: 0.45rem;
+}
+
+.mobileCoachCard > svg {
+  width: 0.65rem;
+  color: #59cfa4;
+}
+
+.mobileCoachCard strong {
+  display: block;
+  font-size: 0.48rem;
+}
+
+.mobileCoachCard p {
+  margin-top: 0.15rem;
+  color: #91a099;
+  font-size: 0.42rem;
+  line-height: 1.4;
+}
+
+.phoneScreen nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid #29322f;
+  padding-top: 0.4rem;
+}
+
+.phoneScreen nav span {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  color: #7d8b85;
+  font-size: 0.38rem;
+}
+
+.phoneScreen nav svg {
+  width: 0.58rem;
+  height: 0.58rem;
+}
+
+.windowBar {
+  display: flex;
+  min-height: 2.45rem;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--plan-line);
+  padding: 0 0.85rem;
+  color: var(--plan-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+.windowDots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.windowDots i {
+  display: block;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--plan-line-strong);
+}
+
+.systemName {
+  color: var(--success);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.heroFacts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid var(--plan-line);
+  border-left: 1px solid var(--plan-line);
+  background: var(--plan-surface);
+}
+
+.heroFacts > div {
+  min-width: 0;
+  border-right: 1px solid var(--plan-line);
+  border-bottom: 1px solid var(--plan-line);
+  padding: 0.9rem 1rem;
+}
+
+.heroFacts dt {
+  color: var(--plan-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.heroFacts dd {
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.jumpNav {
+  position: sticky;
+  top: 4rem;
+  z-index: 30;
+  border-block: 1px solid var(--plan-line);
+  background: color-mix(in srgb, var(--plan-canvas) 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.jumpInner {
+  display: flex;
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  gap: 0.15rem;
+  overflow-x: auto;
+  padding: 0.45rem 1.25rem;
+  scrollbar-width: none;
+}
+
+.jumpInner::-webkit-scrollbar {
+  display: none;
+}
+
+.jumpInner a {
+  flex: 0 0 auto;
+  padding: 0.55rem 0.7rem;
+  color: var(--plan-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.jumpInner a:hover {
+  color: var(--plan-ink);
+}
+
+.chooser,
+.methodSection,
+.workflowSection,
+.relatedSection,
+.faqSection {
+  padding: clamp(3.75rem, 7vw, 6.5rem) 1.25rem;
+}
+
+.chooser {
+  scroll-margin-top: 7rem;
+  background: var(--plan-surface);
+}
+
+.sectionIntro,
+.systemHeading,
+.methodHeading,
+.workflowIntro,
+.faqHeading {
+  max-width: 48rem;
+}
+
+.sectionIntro h2,
+.systemHeading h2,
+.methodHeading h2,
+.workflowIntro h2,
+.faqHeading h2 {
+  margin-top: 0.75rem;
+  font-size: clamp(2rem, 4vw, 3.55rem);
+  font-weight: 720;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.sectionIntro > p:last-child,
+.systemHeading > p:last-child,
+.methodHeading > p:last-child,
+.workflowIntro > p:last-child,
+.faqHeading > p:last-child {
+  margin-top: 1.15rem;
+  color: var(--plan-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.chooserGrid {
+  display: grid;
+  gap: 1px;
+  margin-top: 2.5rem;
+  overflow: hidden;
+  border: 1px solid var(--plan-line);
+  background: var(--plan-line);
+}
+
+.choice {
+  position: relative;
+  min-height: 14rem;
+  background: var(--plan-surface);
+  padding: 1.25rem;
+  color: var(--plan-ink);
+  transition: background-color 160ms ease;
+}
+
+.choice:hover {
+  background: color-mix(in srgb, var(--plan-accent) 5%, var(--plan-surface));
+}
+
+.choiceCurrent {
+  background: var(--plan-accent);
+  color: var(--brand-foreground);
+}
+
+.choiceCurrent:hover {
+  background: var(--plan-accent);
+}
+
+.choiceTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--plan-muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.choiceCurrent .choiceTopline {
+  color: rgb(0 29 22 / 70%);
+}
+
+.choice h3 {
+  max-width: 15ch;
+  margin-top: 2.5rem;
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.choice p {
+  max-width: 34rem;
+  margin-top: 0.85rem;
+  color: var(--plan-muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.choiceCurrent p {
+  color: rgb(0 29 22 / 76%);
+}
+
+.choiceAction {
+  position: absolute;
+  right: 1.15rem;
+  bottom: 1.15rem;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: var(--plan-radius-control);
+}
+
+.choiceAction svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.planBridge {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #25312d;
+  border-radius: var(--plan-radius-surface);
+  background: #25312d;
+  color: #eef8f3;
+}
+
+.bridgeCopy {
+  background: #101816;
+  padding: 1.25rem;
+}
+
+.bridgeCopy > span {
+  color: #6ee7b7;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.bridgeCopy h3 {
+  margin-top: 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+
+.bridgeCopy p {
+  margin-top: 0.5rem;
+  color: #abbab4;
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.bridgeButton {
+  min-height: 100%;
+  border-radius: 0;
+  background: var(--plan-accent);
+  color: var(--brand-foreground);
+}
+
+.systemSection {
+  scroll-margin-top: 7rem;
+  padding: clamp(3.25rem, 5vw, 4.75rem) 1.25rem;
+  background: #0d1113;
+  color: #f4f6f8;
+}
+
+.systemSection .kicker {
+  color: var(--success);
+}
+
+.systemHeading > p:last-child {
+  color: #aab8c3;
+}
+
+.systemSection .systemHeading h2 {
+  max-width: 20ch;
+  font-size: clamp(2.25rem, 4vw, 3.6rem);
+}
+
+.systemStack {
+  display: grid;
+  gap: 1px;
+  margin-top: clamp(2rem, 4vw, 3rem);
+  border: 1px solid #2d373b;
+  background: #2d373b;
+}
+
+.systemShowcase {
+  display: grid;
+  margin-top: clamp(2rem, 4vw, 3rem);
+  overflow: hidden;
+  border: 1px solid #2d373b;
+  background: #11171a;
+}
+
+.systemTabs {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  background: #0f1416;
+}
+
+.systemTabs button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  min-width: 0;
+  align-items: start;
+  gap: 0.8rem;
+  border-bottom: 1px solid #2d373b;
+  padding: 1.1rem 1.15rem;
+  color: #81908a;
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.systemTabs button:last-child {
+  border-bottom: 0;
+}
+
+.systemTabs button:hover {
+  background: #151d20;
+  color: #d8e2de;
+}
+
+.systemTabs button:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--plan-accent);
+  outline-offset: -2px;
+}
+
+.systemTabIndex {
+  padding-top: 0.08rem;
+  color: #61706a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.systemTabCopy {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.systemTabCopy small {
+  color: var(--success);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.systemTabCopy strong {
+  color: #edf4f1;
+  font-size: 1rem;
+  font-weight: 720;
+  line-height: 1.25;
+}
+
+.systemTabCopy > span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #8e9d97;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.systemTabs button > svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+  color: #65736e;
+  transition:
+    transform 160ms ease,
+    color 160ms ease;
+}
+
+.systemTabs .systemTabActive {
+  background: #17231f;
+  color: #f4f6f8;
+}
+
+.systemTabs .systemTabActive .systemTabIndex {
+  color: var(--success);
+}
+
+.systemTabs .systemTabActive .systemTabCopy strong {
+  font-size: 1.08rem;
+}
+
+.systemTabs .systemTabActive::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--plan-accent);
+  content: "";
+}
+
+.systemTabs .systemTabActive > svg {
+  color: var(--success);
+  transform: translateX(0.2rem);
+}
+
+.systemPanel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1rem 1rem 0;
+}
+
+.systemPanel .systemProductVisual {
+  margin: 0;
+  padding-top: 0;
+}
+
+.systemPanel .systemScreens {
+  min-height: clamp(18rem, 28vw, 21rem);
+}
+
+.systemPanelFooter {
+  display: flex;
+  min-height: 3.1rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid #2d373b;
+  margin-top: 0.65rem;
+  color: #8e9d97;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.systemPanelFooter .textLink {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.systemFeature {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  background: #11171a;
+  padding: 1.25rem;
+}
+
+.systemCopy {
+  min-width: 0;
+}
+
+.featureIndex {
+  color: #66756f;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.systemName {
+  margin-top: 0.75rem;
+  color: var(--success);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.systemCopy h3 {
+  max-width: 18ch;
+  margin-top: 0.55rem;
+  font-size: clamp(1.45rem, 2.1vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.systemCopy > p:not(.systemName) {
+  max-width: 34rem;
+  margin-top: 0.7rem;
+  color: #aab8c3;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.systemCopy ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
+  margin-top: 0.9rem;
+}
+
+.systemCopy li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #d7e1dc;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.systemCopy li svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--success);
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  color: #6ee7b7;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.systemProductVisual {
+  min-width: 0;
+  margin: auto 0 0;
+  padding-top: 1.35rem;
+}
+
+.systemPreviewLabels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+  color: #76847f;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.58rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.systemScreens {
+  position: relative;
+  min-height: 15.5rem;
+}
+
+.systemWebScreen {
+  position: absolute;
+  inset: 0.3rem 8% 0 auto;
+  width: 92%;
+  overflow: hidden;
+  border: 1px solid #39454a;
+  border-radius: var(--plan-radius-surface);
+  background: #171e21;
+}
+
+.systemWebScreen img {
+  display: block;
+  width: 100%;
+  height: calc(100% - 2.25rem);
+  object-fit: cover;
+  object-position: top left;
+}
+
+.systemPhoneScreen {
+  position: absolute;
+  right: 0;
+  bottom: -0.1rem;
+  width: 20%;
+  overflow: hidden;
+  border: 1px solid #4b585d;
+  border-radius: 1.05rem;
+  background: #f5f7f8;
+  box-shadow: 0 18px 34px -18px rgb(0 0 0 / 85%);
+}
+
+.systemPhoneScreen img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.systemSection .systemVisual {
+  border-color: #343e44;
+  background: #151b20;
+}
+
+.systemSection .windowBar {
+  border-color: #343e44;
+  color: #91a19b;
+}
+
+.methodSection {
+  scroll-margin-top: 7rem;
+  background: var(--plan-surface);
+}
+
+.methodGrid {
+  display: grid;
+  gap: 1px;
+  margin-top: 2.75rem;
+  overflow: hidden;
+  border: 1px solid var(--plan-line);
+  background: var(--plan-line);
+}
+
+.methodGrid article {
+  min-width: 0;
+  background: var(--plan-surface);
+  padding: 1.25rem;
+}
+
+.methodGrid article > span {
+  color: var(--success);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.methodGrid h3 {
+  margin-top: 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 750;
+}
+
+.methodGrid p,
+.methodGrid li,
+.progression p,
+.fitBlock li {
+  color: var(--plan-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.methodGrid p {
+  margin-top: 0.6rem;
+}
+
+.methodGrid ul {
+  margin-top: 1rem;
+  border-top: 1px solid var(--plan-line);
+  padding-top: 0.8rem;
+}
+
+.methodGrid li + li {
+  margin-top: 0.35rem;
+}
+
+.planProfile {
+  display: grid;
+  gap: 2rem;
+  margin-top: clamp(3.5rem, 7vw, 6rem);
+  border-top: 1px solid var(--plan-line);
+  padding-top: 2.5rem;
+}
+
+.planProfile h2,
+.relatedHeading h2 {
+  font-size: clamp(1.8rem, 3vw, 2.75rem);
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+}
+
+.planProfileIntro > p {
+  margin-top: 0.9rem;
+  color: var(--plan-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.planProfileIntro > h3 {
+  margin-top: 2rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.planProfileBody,
+.progressionList,
+.fitList {
+  display: grid;
+}
+
+.progressionList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--plan-line);
+  border-left: 1px solid var(--plan-line);
+}
+
+.progressionList li {
+  min-width: 0;
+  border-right: 1px solid var(--plan-line);
+  border-bottom: 1px solid var(--plan-line);
+  padding: 1rem;
+}
+
+.progressionList li > span {
+  color: var(--success);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.progressionList h3 {
+  margin-top: 0.45rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.progressionList p {
+  margin-top: 0.4rem;
+  color: var(--plan-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.fitList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-left: 1px solid var(--plan-line);
+}
+
+.fitList li {
+  display: flex;
+  gap: 0.75rem;
+  min-width: 0;
+  border-right: 1px solid var(--plan-line);
+  border-bottom: 1px solid var(--plan-line);
+  padding: 0.8rem 1rem;
+  color: var(--plan-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.fitList li svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  color: var(--success);
+}
+
+.workflowSection {
+  background: var(--plan-accent);
+  color: var(--brand-foreground);
+}
+
+:global(.dark) .workflowSection {
+  background: var(--plan-accent);
+  color: var(--brand-foreground);
+}
+
+.workflowHero {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.workflowSection .workflowIntro {
+  max-width: 35rem;
+}
+
+.workflowSection .kicker {
+  color: #063d34;
+}
+
+.workflowSection .workflowIntro h2 {
+  max-width: 12ch;
+  color: var(--brand-foreground);
+  font-size: clamp(2.75rem, 4.7vw, 4.4rem);
+  line-height: 1.02;
+}
+
+.workflowSection .workflowIntro h2::after {
+  background: #063d34;
+}
+
+.workflowSection .workflowIntro > p:last-of-type {
+  max-width: 34rem;
+  color: #063d34;
+  font-weight: 560;
+}
+
+.workflowButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+  border-radius: var(--plan-radius-control);
+  background: #04261f;
+  padding: 0.7rem 1rem;
+  color: #effaf5;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.workflowButton:hover {
+  background: #103c32;
+}
+
+.workflowButton:active {
+  transform: translateY(1px);
+}
+
+.workflowButton:focus-visible {
+  outline: 2px solid var(--brand-foreground);
+  outline-offset: 4px;
+}
+
+.workflowButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.workflowPreview {
+  position: relative;
+  min-height: clamp(18rem, 34vw, 26rem);
+  margin: 0;
+}
+
+.workflowWeb {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 84%;
+  overflow: hidden;
+  border: 1px solid #1d3933;
+  border-radius: var(--plan-radius-surface);
+  background: #f8faf9;
+  box-shadow: 0 30px 60px -38px rgb(1 29 24 / 62%);
+  transform: translateY(-50%);
+}
+
+.workflowPhone {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+  width: 30%;
+  max-width: 11.5rem;
+  overflow: hidden;
+  border: 1px solid #29463f;
+  border-radius: 1.4rem;
+  background: #f8faf9;
+  padding: 0.2rem;
+  box-shadow: 0 28px 60px -32px rgb(1 29 24 / 78%);
+}
+
+.workflowPhone .actualMobileImage {
+  border-radius: 1.15rem;
+}
+
+.workflowGrid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2.25rem;
+}
+
+.workflowGrid li {
+  min-height: 12rem;
+  border-radius: var(--plan-radius-surface);
+  background: #031e19;
+  padding: 1.2rem;
+  color: #effaf5;
+}
+
+.workflowGrid li > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #55dfad;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.workflowGrid svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.workflowGrid h3 {
+  margin-top: 2.75rem;
+  font-size: 1.08rem;
+  font-weight: 750;
+}
+
+.workflowGrid p {
+  margin-top: 0.55rem;
+  color: #c7d8d0;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.relatedSection {
+  padding-block: clamp(2rem, 4vw, 3rem);
+  background: var(--plan-surface);
+}
+
+.relatedHeading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.relatedHeading > svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--success);
+}
+
+.relatedHeading h2 {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+.relatedGrid {
+  display: grid;
+  gap: 1px;
+  margin-top: 1.35rem;
+  border: 1px solid var(--plan-line);
+  background: var(--plan-line);
+}
+
+.relatedLink {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 7.5rem;
+  background: var(--plan-surface);
+  padding: 1rem;
+  color: var(--plan-ink);
+}
+
+.relatedLink strong,
+.relatedLink small {
+  display: block;
+}
+
+.relatedLink strong {
+  font-size: 0.96rem;
+  font-weight: 750;
+}
+
+.relatedLink small {
+  margin-top: 0.35rem;
+  color: var(--plan-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.relatedLink > svg {
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  color: var(--success);
+  transition: transform 160ms ease;
+}
+
+.relatedLink:hover > svg {
+  transform: translateX(0.2rem);
+}
+
+.faqSection {
+  scroll-margin-top: 7rem;
+}
+
+.faqList {
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--plan-line);
+}
+
+.faqList details {
+  border-bottom: 1px solid var(--plan-line);
+  padding: 1.15rem 0;
+}
+
+.faqList summary {
+  display: flex;
+  cursor: pointer;
+  list-style: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.faqList summary::-webkit-details-marker {
+  display: none;
+}
+
+.faqList summary i {
+  color: var(--success);
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.faqList details[open] summary i {
+  transform: rotate(45deg);
+}
+
+.faqList details > p {
+  max-width: 54rem;
+  margin-top: 0.8rem;
+  padding-right: 2rem;
+  color: var(--plan-muted);
+  font-size: 0.86rem;
+  line-height: 1.75;
+}
+
+.signupSection {
+  padding: clamp(3.5rem, 7vw, 6rem) 1.25rem;
+  background: var(--plan-accent);
+  color: var(--brand-foreground);
+}
+
+.signupInner {
+  display: grid;
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  gap: 2rem;
+  align-items: center;
+}
+
+.signupInner p {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.signupInner h2 {
+  max-width: 16ch;
+  margin-top: 0.75rem;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.signupInner span {
+  display: block;
+  max-width: 42rem;
+  margin-top: 1rem;
+  font-size: 0.94rem;
+  font-weight: 550;
+  line-height: 1.7;
+}
+
+.signupButton {
+  justify-self: start;
+  background: var(--brand-foreground);
+  color: #f3fff9;
+}
+
+@media (min-width: 640px) {
+  .heroFacts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .chooserGrid,
+  .methodGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .planBridge {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(11rem, 0.48fr);
+  }
+
+  .workflowGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .relatedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 0.78fr) minmax(540px, 1.22fr);
+    gap: clamp(2.5rem, 4vw, 4rem);
+  }
+
+  .systemShowcase {
+    grid-template-columns: minmax(17rem, 0.34fr) minmax(0, 0.66fr);
+  }
+
+  .systemPanel {
+    border-left: 1px solid #2d373b;
+  }
+
+  .planProfile {
+    grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr);
+    gap: 4rem;
+  }
+
+  .workflowHero {
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    gap: clamp(3rem, 6vw, 6rem);
+  }
+
+  .workflowGrid {
+    margin-top: 2.25rem;
+  }
+
+  .signupInner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .signupButton {
+    justify-self: end;
+  }
+}
+
+@media (min-width: 1100px) {
+  .workflowGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .relatedGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .hero {
+    padding-top: 2.5rem;
+  }
+
+  .heroCopy h1 {
+    font-size: clamp(2.2rem, 10vw, 3rem);
+  }
+
+  .heroActions > * {
+    width: 100%;
+  }
+
+  .previewCanvas {
+    grid-template-columns: 1fr;
+  }
+
+  .mobileDevice {
+    z-index: 1;
+    width: 38%;
+    margin: -3.75rem 0 0 auto;
+  }
+
+  .workflowPreview {
+    min-height: 20rem;
+  }
+
+  .workflowWeb {
+    top: 42%;
+    width: 92%;
+  }
+
+  .workflowPhone {
+    width: 34%;
+  }
+
+  .systemCopy h3 {
+    font-size: 1.8rem;
+  }
+
+  .systemSection {
+    padding-block: 3rem;
+  }
+
+  .systemSection .systemHeading h2 {
+    max-width: 13ch;
+    font-size: clamp(2rem, 10vw, 2.65rem);
+  }
+
+  .systemSection .systemHeading > p:last-child {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .systemShowcase {
+    margin-top: 1.75rem;
+  }
+
+  .systemTabs button {
+    grid-template-columns: 1.55rem minmax(0, 1fr) 0.9rem;
+    min-height: 0;
+    gap: 0.55rem;
+    padding: 0.82rem 0.75rem;
+  }
+
+  .systemTabIndex {
+    padding-top: 0.12rem;
+    font-size: 0.72rem;
+  }
+
+  .systemTabCopy {
+    gap: 0.16rem;
+  }
+
+  .systemTabCopy small {
+    font-size: 0.58rem;
+  }
+
+  .systemTabCopy strong,
+  .systemTabs .systemTabActive .systemTabCopy strong {
+    font-size: 0.9rem;
+    line-height: 1.22;
+  }
+
+  .systemTabCopy > span {
+    font-size: 0.67rem;
+    line-height: 1.4;
+    -webkit-line-clamp: 1;
+  }
+
+  .systemTabs button > svg {
+    width: 0.88rem;
+    height: 0.88rem;
+  }
+
+  .systemPanel {
+    padding: 0.75rem 0.75rem 0;
+  }
+
+  .systemPreviewLabels {
+    margin-bottom: 0.4rem;
+    font-size: 0.5rem;
+  }
+
+  .systemPanel .systemScreens,
+  .systemScreens {
+    min-height: 13rem;
+  }
+
+  .systemWebScreen {
+    right: 7%;
+    width: 93%;
+  }
+
+  .systemPhoneScreen {
+    width: 22%;
+  }
+
+  .systemPanelFooter {
+    min-height: 2.8rem;
+    font-size: 0.62rem;
+  }
+
+  .systemPanelFooter > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .progressionList,
+  .fitList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .heroProduct,
+  .jumpNav,
+  .chooser,
+  .planBridge,
+  .systemSection,
+  .workflowSection,
+  .relatedSection,
+  .signupSection,
+  .heroActions {
+    display: none !important;
+  }
+
+  .hero {
+    padding-block: 1rem;
+  }
+
+  .heroGrid {
+    display: block;
+  }
+
+  .heroCopy h1 {
+    max-width: none;
+    font-size: 2rem;
+  }
+}

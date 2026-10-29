@@ -1,0 +1,82 @@
+---
+title: 正規化坡度配速（NGP）
+description: 將坡度調整後再正規化嘅配速，更貼近一次跑步嘅生理成本。
+keywords: ["NGP", "Normalized Graded Pace", "GAP", "Grade Adjusted Pace", "rTSS"]
+---
+
+# 正規化坡度配速（NGP）
+
+**正規化坡度配速（NGP）**係跑步分析入面嘅核心強度指標。佢建立喺 **[GAP（坡度調整配速）](/zh-hant/docs/metrics/pace/grade-adjusted-pace)** 之上，而且邏輯同單車嘅 **[NP（正規化功率）](/zh-hant/docs/metrics/power/normalized-power)** 好相似。
+
+用最白話講：
+
+- **GAP**：回答「呢段上落斜，以同等能量成本，平路等效配速係幾多？」（偏即時/分段等效）
+- **NGP**：回答「呢次跑步強度有起伏（坡度同速度都變），如果用一個穩定平路配速去代表同等生理成本，會係幾多？」（全程等效）
+
+## 核心概念
+
+生理成本（肝醣消耗、乳酸累積、代謝壓力）對強度係 **非線性**。
+
+> **例子**：  
+> 穩定 5:00/km 嘅跑步，通常遠比「一半時間 4:00/km + 一半時間 6:00/km」輕鬆。  
+> 雖然平均都係 5:00/km，但第二個跑法嘅 **NGP** 會明顯更快（例如 4:45/km），反映更高嘅生理成本。
+
+## 計算
+
+NGP 嘅計算大概係：
+
+### 正規化
+
+先將 GAP 時間序列做一個 NP 式正規化：
+
+1. **平滑**：對 GAP 做 30 秒 rolling average
+2. **加權**：用 4 次方加權，令「更硬嘅段落」影響更大
+3. **平均 + 開方**：取平均再做 4 次方根
+
+```text
+NGP = 4th_root( (1/N) * sum_{i=1..N} (GAP_rolling(i))^4 )
+```
+
+## 常見用途
+
+### 1) 更準確反映越野/山跑努力
+
+喺上落起伏路線，平均配速可能好慢；NGP 可以揭示你嘅實際努力未必低。
+
+- **例**：山路越野平均 10:00/km
+- **NGP**：可能係 6:00/km，更貼近身體感受到嘅代謝壓力
+
+### 2) rTSS 嘅基礎
+
+Trainingload.ai 用 NGP 去計 **rTSS（Running Training Stress Score）**。結構同單車 TSS 類似：
+
+```text
+IF = NGP / FTPa
+```
+
+```text
+rTSS = (t_sec * NGP * IF) / (FTPa * 3600) * 100
+```
+
+用 NGP 可以令唔同地形下嘅跑步負荷更可比。
+
+## 指標比較
+
+| 指標 | 全名 | 意思 | 幾時用 |
+| :--- | :--- | :--- | :--- |
+| **Avg Pace** | 平均配速 | 實際平均配速 | 平路穩定跑、估 finish time |
+| **Avg GAP** | 平均 GAP | 平均坡度調整配速 | 起伏但冇太多衝刺嘅路線 |
+| **NGP** | 正規化坡度配速 | 正規化後嘅坡度調整配速 | **大部分情況**，尤其係越野、間歇、地形複雜 |
+
+## Trainingload.ai 建議
+
+- **作為主要強度參考**：大部分跑步分析，NGP 比平均配速更有訊息量，亦令平路同山路更可比。
+- **配合 VI**：可以計 **VI（變異指數）= NGP / Avg GAP**  
+  - VI 接近 1.0：努力較穩
+  - VI > 1.05：多數係間歇或地形/配速變化好大
+
+## 參考
+
+- [TrainingPeaks: What is Normalized Graded Pace?](https://help.trainingpeaks.com/hc/en-us/articles/204071804-Normalized-Graded-Pace-NGP-)
+- *Normalized Graded Pace (NGP) is a registered trademark of Peaksware, LLC.*
+

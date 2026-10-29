@@ -1,0 +1,2 @@
+ALTER TYPE "enum_ai_usage_kind"
+ADD VALUE IF NOT EXISTS 'TODAY_SUGGESTION';

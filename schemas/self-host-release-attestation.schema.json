@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-release-attestation-v1.json",
+  "title": "Trainingload self-host release attestation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "generatedAt",
+    "release",
+    "codexCleanRoom",
+    "issueReview"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-release-attestation" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "revision", "archiveSha256"],
+      "properties": {
+        "version": { "$ref": "#/$defs/version" },
+        "revision": { "$ref": "#/$defs/revision" },
+        "archiveSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "codexCleanRoom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reference",
+        "evidenceSha256",
+        "platform",
+        "architecture",
+        "dockerVersion",
+        "composeVersion",
+        "dockerOperatingSystem",
+        "agent",
+        "contractSource",
+        "cleanTarget",
+        "installerDryRunPassed",
+        "installationCompleted",
+        "deploymentReady",
+        "ownerBootstrapPerformedByOperator",
+        "coreUserJourneyPassed",
+        "containerRecreatePassed",
+        "hostRestartPassed",
+        "postRestartDataVerified",
+        "diagnosticsReviewed",
+        "secretScan"
+      ],
+      "properties": {
+        "status": { "const": "passed" },
+        "reference": { "$ref": "#/$defs/evidenceReference" },
+        "evidenceSha256": { "$ref": "#/$defs/sha256" },
+        "platform": {
+          "enum": [
+            "ubuntu-amd64",
+            "linux-arm64",
+            "macos-apple-silicon",
+            "windows-11-wsl2"
+          ]
+        },
+        "architecture": { "enum": ["amd64", "arm64"] },
+        "dockerVersion": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "composeVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "dockerOperatingSystem": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "agent": { "const": "codex" },
+        "contractSource": { "const": "signed-release-bundle-only" },
+        "cleanTarget": { "const": true },
+        "installerDryRunPassed": { "const": true },
+        "installationCompleted": { "const": true },
+        "deploymentReady": { "const": true },
+        "ownerBootstrapPerformedByOperator": { "const": true },
+        "coreUserJourneyPassed": { "const": true },
+        "containerRecreatePassed": { "const": true },
+        "hostRestartPassed": { "const": true },
+        "postRestartDataVerified": { "const": true },
+        "diagnosticsReviewed": { "const": true },
+        "secretScan": { "const": "pass" }
+      }
+    },
+    "issueReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reference",
+        "evidenceSha256",
+        "knownLimitationsReviewed",
+        "unresolvedP0",
+        "unresolvedP1",
+        "releaseBlockers"
+      ],
+      "properties": {
+        "status": { "const": "passed" },
+        "reference": { "$ref": "#/$defs/evidenceReference" },
+        "evidenceSha256": { "$ref": "#/$defs/sha256" },
+        "knownLimitationsReviewed": { "const": true },
+        "unresolvedP0": { "const": 0 },
+        "unresolvedP1": { "const": 0 },
+        "releaseBlockers": { "const": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^(?:https|codex)://[^\\s/?#@]+(?:/[^\\s?#]*)?(?:#[^\\s?]*)?$"
+    }
+  }
+}

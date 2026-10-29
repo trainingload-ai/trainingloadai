@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "schemaChecksum": "ef776b473c6f0075965f2b22131ebae32b744b6efb301c9e86c6bdac012c48ef",
+  "migrations": [
+    {
+      "id": "0001_core_baseline",
+      "file": "0001_core_baseline/migration.sql",
+      "sha256": "71a5eb7208621b2feda75352f2d1bbe4ea77417102fed5efeaa3fda7757c25d9"
+    },
+    {
+      "id": "0002_neutral_ai_operations",
+      "file": "0002_neutral_ai_operations/migration.sql",
+      "sha256": "919ec48d9e397840205fbd4a4bfc40b427bd21fe7f25b2fd0c4baf7de74a5c85"
+    },
+    {
+      "id": "0003_self_host_ai_configuration",
+      "file": "0003_self_host_ai_configuration/migration.sql",
+      "sha256": "63f658a3602ee4830118633a84ffb2b0b904b000b0900e20691a63b6eb66d089"
+    },
+    {
+      "id": "0004_core_ai_usage_compatibility",
+      "file": "0004_core_ai_usage_compatibility/migration.sql",
+      "sha256": "e1254493eaea07d65aaf39896d559bf5ce990f74991ef4918c34d8b3231fb6a0"
+    },
+    {
+      "id": "0005_self_host_ai_model_metadata",
+      "file": "0005_self_host_ai_model_metadata/migration.sql",
+      "sha256": "c900103867bb702497d09c6e4711528e22e32a8c4181aada3630d62e204fd0bd"
+    },
+    {
+      "id": "0006_self_host_operation_analytics_consent",
+      "file": "0006_self_host_operation_analytics_consent/migration.sql",
+      "sha256": "e58462503358fddc85136b728035aca3f5d883a56c3f8283b8c4eed97953f0e0"
+    },
+    {
+      "id": "0007_single_owner",
+      "file": "0007_single_owner/migration.sql",
+      "sha256": "f7ec8f8dbdbcd35bf20e750548ae205d960b83ceefee13a92468585f5848ec69"
+    },
+    {
+      "id": "0008_core_domain_invariants",
+      "file": "0008_core_domain_invariants/migration.sql",
+      "sha256": "602864b942a9923019cbd6f46333541a58342286e72ed18bef806a685730cf9b"
+    },
+    {
+      "id": "0009_core_preference_defaults",
+      "file": "0009_core_preference_defaults/migration.sql",
+      "sha256": "cd117ef12f38eca011253ee12cb8fac519a11b05d8bcebfd15f0b35cfe38d2c8"
+    },
+    {
+      "id": "0010_background_coach_runs",
+      "file": "0010_background_coach_runs/migration.sql",
+      "sha256": "1aa6f6e1da8ee5fb6371b513e8670aeeec9f56c16a7b9bb036e1365684425e91"
+    },
+    {
+      "id": "0011_background_coach_task_kinds",
+      "file": "0011_background_coach_task_kinds/migration.sql",
+      "sha256": "c6fe4970ecf58769fd32d3e466058f7ef001e86e98b4f06c22fa70c5da8a4187"
+    },
+    {
+      "id": "0012_today_suggestion_action_loop",
+      "file": "0012_today_suggestion_action_loop/migration.sql",
+      "sha256": "3da79f4622beaea96b3f952c63411599aad7d33248e4fb3bfb3e334ba38c0e8c"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/activity-zone.schema.json",
+  "title": "Activity zone distribution",
+  "description": "Time or distance accumulated in one activity intensity zone.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "activityId": {
+      "type": "string",
+      "description": "The parent activity identifier."
+    },
+    "zoneType": {
+      "type": "string",
+      "description": "The zone domain, such as heart rate, pace, or power."
+    },
+    "zoneIndex": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The zero-based zone order."
+    },
+    "zoneName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The human-readable zone name."
+    },
+    "lowerBound": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The inclusive lower boundary in the zone domain unit."
+    },
+    "upperBound": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The exclusive upper boundary in the zone domain unit."
+    },
+    "durationSeconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The accumulated duration in seconds."
+    },
+    "distanceMeters": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The accumulated distance in meters."
+    },
+    "percent": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The percentage of measured activity time assigned to the zone."
+    },
+    "averageValue": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The average measurement value within the zone."
+    }
+  },
+  "required": [
+    "activityId",
+    "zoneType"
+  ]
+}

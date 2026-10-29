@@ -1,0 +1,70 @@
+---
+title: 正規化功率（NP）
+description: 一個可以捕捉「變化強度」生理成本嘅功率指標。
+keywords: ["Normalized Power", "NP", "TSS", "IF", "Training Stress Score", "Variability Index", "VI"]
+---
+
+# 正規化功率（NP）
+
+正規化功率（NP）會將一段「忽高忽低」嘅功率輸出，轉換成一個等效嘅「穩定強度」數值。直覺上，NP 想回答：
+
+- 如果我用同樣生理成本，以固定功率踩，咁個固定功率大概會係幾多？
+
+相比平均功率，NP 對高強度抽插更敏感，所以更適合用嚟估算訓練負荷（例如功率版 TSS）。
+
+## 點解需要 NP
+
+生理學顯示：強度同生理成本（肝醣使用、乳酸累積、荷爾蒙壓力）唔係線性關係，而更接近 **指數關係**。
+
+### 線性 vs 指數
+
+- **線性角度（平均功率）**：1 小時 200W 嘅平均，等於「30 分鐘 100W + 30 分鐘 300W」（平均都係 200W）
+- **生理角度（NP）**：300W 帶嚟嘅壓力遠大於 100W 可以「補返」嘅程度；後者嘅生理感覺往往更接近一段穩定約 260–270W 嘅努力
+
+NP 會用 **四次方加權（fourth-power weighting）** 放大高功率片段，更貼近代謝成本。
+
+## Trainingload.ai 點樣計 NP
+
+Trainingload.ai 跟常見 NP 定義：先計 30 秒 rolling average，再四次方、取平均、最後開四次方根。
+
+```text
+P_smooth(t) = (1/30) * sum_{i=0..29} P(t-i)
+NP = 4th_root( (1/N) * sum_{j=1..N} (P_smooth(j))^4 )
+```
+
+當中：
+
+- $P(t)$ 係時間 $t$ 嘅即時功率
+- $P_{smooth}(t)$ 係 30 秒 rolling average
+- $N$ 係樣本數
+
+## 常見用途
+
+### 1) 比賽分析
+
+- **場地繞圈（criterium）**：頻繁加速通常令 NP 遠高於平均功率；NP 更能反映實際有幾辛苦
+- **計時賽 / 三鐵**：配速較穩定，NP 應該接近平均功率；如果 NP 明顯高好多，可能代表配速太浮動
+
+### 2) 訓練負荷（TSS）
+
+NP 係 [TSS（Training Stress Score）](/zh-hant/docs/metrics/training-load/training-stress-score) 嘅核心輸入之一。
+
+```text
+IF = NP / FTP
+TSS ∝ Duration_sec * NP * IF
+```
+
+用 NP 可以令 TSS 更準確捕捉變化型課表（例如間歇）嘅負荷。
+
+> **Trainingload.ai 建議**：
+>
+> 1. **短時間意義較低**：少過約 20 分鐘，NP 用處會細啲，因為生理未必進入穩態；衝刺課更應該睇最大功率或平均功率
+> 2. **唔好「刷 NP」**：恢復踩唔好特登加衝刺去抬高 NP；目標係低強度，NP 愈低愈好
+> 3. **一齊睇 VI**：配合 [VI（Variability Index）](./variability-index) 去睇：`VI = NP / Avg Power`。VI 越高代表努力越唔穩定
+
+## 局限
+
+- 依賴可靠功率數據：斷點同裝置錯誤會影響結果
+- 對取樣/插值敏感：取樣率唔同可能令 NP 有少少差異
+- 反映「成本強度」，唔等於直接反映疲勞：NP 唔等於恢復需求或肌肉損傷
+

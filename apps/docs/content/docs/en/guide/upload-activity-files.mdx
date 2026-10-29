@@ -1,0 +1,103 @@
+---
+title: Upload Activity Files
+description: Upload GPX, TCX, or FIT activity files to Trainingload.ai and understand duplicate checks, import batches, processing status, and post-import analysis.
+keywords:
+  [
+    "upload FIT file",
+    "upload GPX",
+    "upload TCX",
+    "activity file import",
+    "Trainingload.ai upload",
+  ]
+---
+
+# Upload Activity Files
+
+Use file upload when you have activity files from a watch, bike computer, training platform, or exported archive.
+
+Trainingload.ai supports the file-based workflow used by the activity import screen. After upload, files are processed as an import batch so you can see progress and failures clearly.
+
+## Before uploading
+
+Check that the file is one of the supported activity formats:
+
+- GPX
+- TCX
+- FIT
+
+Before upload, the server uses TrackSwap to inspect the file contents and report the actual format, activity count, laps, and record points. The filename extension is only a hint: if GPX content is named `.fit`, for example, the interface shows `FIT → GPX` and processes the real content.
+
+For better analysis, prefer original files from the device or platform. Screenshots, CSV exports without time series, and manually edited files may not include enough data for charts or load metrics. A FIT file containing only health or all-day monitoring data, with no activity records, cannot be imported through the activity upload flow.
+
+## Convert between formats
+
+If another platform requires a different format, use the [FIT, GPX, and TCX converter](/converter) first. The general converter detects the source from the file contents. Direction-specific converter pages also validate the detected source format, preventing a misleading filename from being converted in the wrong direction. Conversion responses expose the TrackSwap-detected source format as well.
+
+## Upload from Activities
+
+1. Open **Activities**.
+2. Choose the upload action.
+3. Select one or more files.
+4. Confirm the upload.
+5. Keep the import progress dialog open or return later from the recent import batch button.
+
+<DocsScreenshot
+  id="activity-import-batch"
+  title="Activity import batch"
+  description="Track each file separately, review duplicate decisions, and open a precise failure instead of treating the whole batch as one result."
+  route="Activities → Upload"
+/>
+
+If Trainingload.ai detects possible duplicates, review the duplicate warning before continuing. You can cancel, keep the existing activity, or force a new import when you intentionally want a separate copy.
+
+## Import statuses
+
+During import, each item may move through states such as:
+
+- **Queued**: waiting to be processed.
+- **Normalizing**: converting the source file into the internal activity format.
+- **Materializing**: creating or updating the activity record.
+- **Parquet building**: preparing time-series data for charts and analysis.
+- **Done**: import completed.
+- **Skipped**: not imported, usually because it matched an existing activity.
+- **Failed**: the file could not be processed.
+
+The batch can finish as completed, partially failed, failed, or cancelled.
+
+## After upload
+
+Once processing is complete:
+
+- Open the new activity from the import dialog or activity feed.
+- Check whether key metrics are present.
+- Confirm sport type if it was inferred incorrectly.
+- Link the activity to a planned workout if it belongs to a training plan.
+- Ask AI Coach to review the session if you want context.
+
+For ongoing review and filtering, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+
+## Verify the result
+
+- Every selected file has a terminal Done, Skipped, Failed, or cancelled result.
+- A Done file creates one activity with the expected start time, sport, and duration.
+- A Skipped duplicate points to an activity that already exists.
+- Activity Detail shows only the metrics supported by the source data.
+- The imported activity is linked to a plan only after its identity is confirmed.
+
+## Troubleshooting
+
+If a file fails:
+
+- Export the original activity again from the source platform.
+- Avoid editing the file manually before upload.
+- Check whether the file contains time-series data.
+- Check the detected format and any extension mismatch shown beside the file.
+- Try importing one file at a time to isolate the failing file.
+
+If analysis looks incomplete, the file may lack heart rate, power, GPS, elevation, or pace data. Trainingload.ai can still show the activity, but some metrics may be unavailable or estimated.
+
+## Next steps
+
+- [Activities Feed and Search](/docs/guide/activity-feed-search)
+- [Activity Detail](/docs/guide/activity-detail)
+- [Troubleshooting](/docs/guide/troubleshooting)

@@ -1,0 +1,1 @@
+export const DEFAULT_REVIEW_SEND_AT_LOCAL_TIME = '05:00';

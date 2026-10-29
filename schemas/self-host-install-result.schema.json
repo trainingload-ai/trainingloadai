@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-install-result-v1.json",
+  "title": "Trainingload self-host installer result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "operationId",
+    "status",
+    "ok",
+    "exitCode",
+    "dryRun",
+    "releaseVersion",
+    "bundleVerified",
+    "steps",
+    "nextActions",
+    "error"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "trainingload-selfhost-install-result" },
+    "operationId": { "type": "string", "format": "uuid" },
+    "status": { "enum": ["completed", "planned", "failed"] },
+    "ok": { "type": "boolean" },
+    "exitCode": { "type": "integer", "enum": [0, 2, 3, 4, 5, 6, 7, 8, 10] },
+    "dryRun": { "type": "boolean" },
+    "releaseVersion": { "type": "string", "minLength": 1 },
+    "bundleVerified": { "type": "boolean" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "errorCode"],
+        "properties": {
+          "name": {
+            "enum": ["runtime", "bundle", "docker", "init", "start"]
+          },
+          "status": { "enum": ["completed", "planned", "skipped", "failed"] },
+          "errorCode": {
+            "oneOf": [
+              { "type": "null" },
+              { "type": "string", "pattern": "^SELF_HOST_[A-Z0-9_]+$" }
+            ]
+          }
+        }
+      }
+    },
+    "nextActions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "error": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "retryable"],
+          "properties": {
+            "code": { "type": "string", "pattern": "^SELF_HOST_[A-Z0-9_]+$" },
+            "message": { "type": "string", "minLength": 1 },
+            "retryable": { "type": "boolean" }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "failed" } } },
+      "then": {
+        "properties": {
+          "ok": { "const": false },
+          "exitCode": { "minimum": 1 },
+          "error": { "type": "object" }
+        }
+      },
+      "else": {
+        "properties": {
+          "ok": { "const": true },
+          "exitCode": { "const": 0 },
+          "error": { "type": "null" }
+        }
+      }
+    }
+  ]
+}

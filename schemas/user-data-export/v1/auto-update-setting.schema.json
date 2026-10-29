@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/auto-update-setting.schema.json",
+  "title": "Automatic metric update setting",
+  "description": "A user-controlled preference that enables or disables automatic updates for one fitness metric.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metricType": {
+      "type": "string",
+      "description": "The stable fitness metric identifier controlled by this setting."
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether automatic updates are enabled for this metric."
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "The time the setting was created in ISO 8601 format.",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "The time the setting was last updated in ISO 8601 format.",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "metricType",
+    "enabled",
+    "createdAt",
+    "updatedAt"
+  ]
+}

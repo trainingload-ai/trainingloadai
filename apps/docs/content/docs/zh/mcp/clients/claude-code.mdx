@@ -1,0 +1,21 @@
+---
+title: 连接 Claude Code
+description: 通过 Claude Code 的远程 HTTP MCP 支持连接 TrainingLoad。
+---
+
+# 连接 Claude Code
+
+为当前用户的所有项目添加服务：
+
+```bash
+claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp
+claude mcp list
+```
+
+只想在当前项目使用时，省略 `--scope user`。进入 Claude Code 后运行 `/mcp`，选择 TrainingLoad 并完成浏览器 OAuth。
+
+验证问题：“检查我最近两个 28 天训练周期的差异，并说明哪些结论只是推断。”应使用 `compare_training_periods`，必要时再使用细节工具。
+
+如果状态未连接，先用 `claude mcp list` 检查 URL，再通过 `/mcp` 重试 OAuth。
+
+[Claude Code MCP 官方说明](https://docs.anthropic.com/en/docs/claude-code/mcp)

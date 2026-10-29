@@ -1,0 +1,13 @@
+{
+  "title": "客户端指南",
+  "pages": [
+    "index",
+    "chatgpt",
+    "codex",
+    "claude-code",
+    "claude-desktop",
+    "cursor",
+    "vscode",
+    "opencode"
+  ]
+}

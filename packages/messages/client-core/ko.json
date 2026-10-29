@@ -1,0 +1,6132 @@
+{
+  "banner": {
+    "betaWarning": "⚠️ 현재 베타 버전(v0.1.0) 개발 중입니다. 데이터는 언제든지 재설정될 수 있습니다."
+  },
+  "ActivityTitle": {
+    "untitled": "이름 없는 활동",
+    "periods": {
+      "morning": "아침 {sport}",
+      "noon": "정오 {sport}",
+      "afternoon": "오후 {sport}",
+      "evening": "저녁 {sport}",
+      "night": "야간 {sport}"
+    },
+    "sports": {
+      "run": "달리기",
+      "ride": "사이클링",
+      "swim": "수영",
+      "workout": "훈련"
+    },
+    "demo": {
+      "base": {
+        "recoveryWalk": "회복 걷기",
+        "recoveryRun": "회복 달리기",
+        "poolSwim": "수영장 수영",
+        "easyRun": "가벼운 달리기",
+        "longEasyRun": "장거리 가벼운 달리기",
+        "baseRun": "기초 달리기",
+        "thresholdRun": "역치 달리기",
+        "longRun": "장거리 달리기",
+        "unplannedEasyRun": "계획 외 가벼운 달리기",
+        "tempoRun": "템포 달리기",
+        "progressiveLongRun": "점진적 장거리 달리기",
+        "treadmillRun": "트레드밀 달리기",
+        "treadmillTempo": "트레드밀 템포",
+        "peakLongRun": "피크 장거리 달리기",
+        "fatigueRecoveryWalk": "피로 회복 걷기",
+        "taperRun": "테이퍼 달리기",
+        "goalRace10K": "10km 목표 레이스"
+      },
+      "detail": {
+        "minutes": "{value}분",
+        "kilometers": "{value} km",
+        "meters": "{value} m",
+        "shortened": "단축",
+        "moved": "일정 변경",
+        "skipped": "건너뜀"
+      },
+      "note": {
+        "skippedRecovery": "Demo 시나리오: 회복 지표가 좋지 않아 이 훈련을 건너뛰었습니다.",
+        "postponedDay": "Demo 시나리오: 훈련을 하루 연기했습니다.",
+        "shortened": "Demo 시나리오: 예정된 훈련을 단축했습니다."
+      }
+    }
+  },
+  "ColorPicker": {
+    "title": "색상을 선택하세요",
+    "srOnly": "색상을 선택하세요",
+    "paletteTitle": "컬러 팔레트",
+    "paletteDescription": "이 영역의 색상을 선택하세요.",
+    "hex": "Hex"
+  },
+  "sidebar": {
+    "home": "홈",
+    "plan": "계획",
+    "dashboard": "개요",
+    "pmc": "PMC",
+    "analysis": "분석",
+    "aiCoach": "AI 코치",
+    "power": "파워",
+    "heartRate": "심박수",
+    "pace": "페이스",
+    "overview": "개요",
+    "bestDistance": "최고 거리",
+    "map": "지도",
+    "activities": "활동",
+    "me": "내 정보",
+    "settings": "설정",
+    "calendar": "캘린더",
+    "competitions": "대회",
+    "calendarShort": "캘린더",
+    "coach": "코치",
+    "trainingSpace": "트레이닝",
+    "spaceSwitcherLabel": "작업 공간 전환",
+    "navigationLabel": "기본 탐색",
+    "secondaryNavigationLabel": "보조 탐색",
+    "expand": "사이드바 펼치기",
+    "collapse": "사이드바 접기",
+    "resize": "사이드바 너비 조절"
+  },
+  "MobileCalendarTimeline": {
+    "rest": "휴식일",
+    "summary": "계획 {workouts}개 · 완료 {activities}개",
+    "plannedWorkout": "계획된 운동",
+    "planned": "계획",
+    "activity": "활동",
+    "completed": "완료",
+    "competition": "대회",
+    "load": "부하",
+    "actualLoad": "실제",
+    "plannedLoad": "계획",
+    "restHint": "이 날에는 예정된 운동이 없습니다",
+    "selectDateHint": "오른쪽 날짜나 월간 달력의 날짜를 선택해 내용을 확인하세요.",
+    "dayContent": "오늘의 내용",
+    "noSchedule": "일정 없음",
+    "activityDetail": "활동 상세",
+    "workoutDetail": "운동 상세",
+    "competitionDetail": "대회 상세",
+    "backToDay": "오늘의 내용으로 돌아가기",
+    "viewFullActivity": "전체 활동 보기"
+  },
+  "notifications": {
+    "title": "알림",
+    "tabs": {
+      "unread": "읽히지 않는",
+      "all": "모두"
+    },
+    "loading": "로드 중…",
+    "empty": "알림 없음",
+    "unreadBadge": "읽히지 않는",
+    "receivedAt": "받았다",
+    "noBody": "추가 콘텐츠 없음",
+    "openReview": "리뷰 열기",
+    "loadingMore": "더 로드 중…",
+    "templates": {
+      "general": "시스템 알림",
+      "importSuccess": "가져오기 완료",
+      "importWarning": "가져오기에 주의가 필요합니다.",
+      "reviewDigest": "훈련 리뷰",
+      "exportFailed": "동기화 실패"
+    },
+    "summary": {
+      "success": "성공",
+      "failed": "실패한",
+      "skipped": "건너뛰었습니다.",
+      "reviewType": "리뷰 유형",
+      "exportRoute": "동기화"
+    },
+    "reviewTypes": {
+      "DAILY": "일일",
+      "WEEKLY": "주간",
+      "MONTHLY": "월간 간행물",
+      "PLAN": "계획"
+    },
+    "reviewReadyTitles": {
+      "DAILY": "일일 리뷰가 준비되었습니다",
+      "WEEKLY": "주간 리뷰가 준비되었습니다",
+      "MONTHLY": "월간 리뷰가 준비되었습니다",
+      "PLAN": "훈련 계획 리뷰가 준비되었습니다"
+    },
+    "kinds": {
+      "IMPORT_BATCH_COMPLETED": {
+        "title": "일괄 가져오기 완료",
+        "body": "{total} 소스 개체를 처리했습니다.\n\n- 성공: {success}\n- 실패: {failed}\n- 건너뛰기: {skipped}"
+      },
+      "IMPORT_BATCH_PARTIAL_FAILED": {
+        "title": "일괄 가져오기가 완료되었으나 실패했습니다.",
+        "body": "{total} 소스 개체를 처리했습니다.\n\n- 성공: {success}\n- 실패: {failed}\n- 건너뛰기: {skipped}"
+      },
+      "THIRD_PARTY_EXPORT_FAILED": {
+        "title": "외부 서비스와 동기화하지 못했습니다",
+        "preview": "{sourceLabel} → {provider} · “{activityName}”",
+        "body": "이 활동을 **{sourceLabel}**에서 **{provider}**로 동기화하지 못했습니다.\n\n활동: “{activityName}”\n\n외부 연결을 확인한 뒤 다시 시도하세요."
+      }
+    }
+  },
+  "AiCoachPage": {
+    "timeline": {
+      "publicSummary": "분석 요약",
+      "publicSummaryHint": "사용자를 위한 간단한 설명이며 전체 내부 추론 과정은 아닙니다",
+      "tools": {
+        "activityDetail": "활동 상세 조회",
+        "activitySeries": "활동 시계열 데이터 조회",
+        "activitySearch": "활동 검색",
+        "activityDay": "오늘 활동 조회",
+        "activityRecent": "최근 활동 조회",
+        "question": "확인 질문 준비",
+        "bests": "최고 기록 요약",
+        "compareBlocks": "훈련 주기 비교",
+        "decisionDraft": "조정 제안 준비",
+        "decisionApply": "확인된 조정 적용",
+        "competitionList": "대회 일정 조회",
+        "competitionImpact": "대회 영향 평가",
+        "currentTime": "현재 시간 조회",
+        "docsSearch": "도움말 검색",
+        "docsRead": "도움말 조회",
+        "integrationStatus": "기기 동기화 상태 확인",
+        "memorySearch": "선수 기억 검색",
+        "webSearch": "실시간 웹 검색",
+        "webFetch": "웹 출처 읽기",
+        "metricCurrent": "현재 지표 조회",
+        "metricHistory": "지표 이력 조회",
+        "metricCompare": "훈련 지표 비교",
+        "profile": "선수 프로필 조회",
+        "thresholds": "역치 설정 조회",
+        "zones": "강도 구간 조회",
+        "loadTrend": "훈련 부하 추세 조회",
+        "planRead": "훈련 계획 조회",
+        "planActive": "진행 중인 계획 조회",
+        "planRecent": "최근 계획 조회",
+        "planSuitability": "계획 적합성",
+        "planDay": "오늘 운동 조회",
+        "planExecution": "계획 수행 현황 조회",
+        "planPreview": "계획 변경 미리보기",
+        "trainingAggregate": "훈련 데이터 요약",
+        "trainingBaseline": "훈련 기준선 조회",
+        "trainingPlanContext": "훈련 계획 배경 조회",
+        "readiness": "훈련 준비도 평가",
+        "weekSummary": "이번 주 훈련 요약",
+        "intensity": "운동 강도 결정",
+        "planDraft": "훈련 계획 초안 생성",
+        "workoutAdjustment": "운동 조정 초안 생성",
+        "visualization": "훈련 차트 생성",
+        "skillActivate": "스킬 불러오기",
+        "fitnessMethods": "체력 평가 방법 조회",
+        "fitnessEvidence": "체력 평가 근거 수집",
+        "fitnessCalculate": "체력 지표 계산",
+        "fitnessTrack": "체력 테스트 추적",
+        "fitnessApply": "체력 평가 결과 적용",
+        "activityDelete": "활동 삭제",
+        "activityDescription": "활동 설명 수정",
+        "activityRpe": "자각 운동 강도 기록",
+        "activityLink": "활동과 운동 연결",
+        "activityUnlink": "활동과 운동 연결 해제",
+        "competitionUpdate": "대회 일정 수정",
+        "planLifecycle": "계획 상태 수정",
+        "workoutAdd": "운동 추가",
+        "workoutUpdate": "운동 수정",
+        "workoutStatus": "운동 완료 상태 수정",
+        "workoutPostpone": "운동 연기",
+        "metricUpdate": "체력 지표 수정",
+        "bodyWeightUpdate": "체중 기록",
+        "trainingDataCoverage": "훈련 데이터 범위",
+        "coachTaskResult": "백그라운드 작업 결과"
+      },
+      "skills": {
+        "integrationSupport": "기기 연결 및 동기화",
+        "fitnessAssessment": "체력 평가",
+        "trainingAnalytics": "훈련 분석",
+        "activityReview": "활동 리뷰",
+        "workoutManagement": "운동 관리",
+        "planFollowup": "계획 후속 관리",
+        "planDayReview": "일일 계획 검토",
+        "planWeekReview": "주간 계획 검토",
+        "planReviewAdjustment": "계획 조정",
+        "planCycleReview": "훈련 주기 검토",
+        "planBuilder": "훈련 계획 설계",
+        "readinessCheck": "훈련 준비도 평가",
+        "weekReview": "주간 훈련 검토",
+        "performanceReview": "운동 성과 분석",
+        "metricExplainer": "훈련 지표 해설",
+        "periodReview": "주기별 훈련 검토"
+      },
+      "resumed": "이전 작업 이어서 진행",
+      "seconds": "{count}초",
+      "scrollToBottom": "최신 메시지로",
+      "retry": "계속 (새 시도)",
+      "retryBlocked": "이 시도에는 쓰기 작업이 포함됩니다. 먼저 결과를 확인하세요. 중복 변경 방지를 위해 직접 재시도는 비활성화되었습니다.",
+      "lateOutcome": "중단 후 작업 결과 확인됨",
+      "questionInactive": "이 질문은 더 이상 답변을 받지 않습니다.",
+      "run": {
+        "running": "실행 중",
+        "awaiting_input": "답변 대기 중",
+        "completed": "실행 완료",
+        "failed": "실행 실패",
+        "cancelled": "중지됨",
+        "interrupted": "중단됨"
+      },
+      "kind": {
+        "analysis": "요청 분석",
+        "skill": "스킬 로드",
+        "tool": "도구 실행",
+        "question": "정보 확인",
+        "narration": "진행 상황",
+        "artifact": "결과 전달",
+        "recovery": "실행 복구",
+        "trainingDataCoverage": "훈련 데이터 범위 확인",
+        "coachTaskResult": "백그라운드 코치 작업 완료"
+      },
+      "activity": {
+        "queued": "대기 중",
+        "running": "진행 중",
+        "waiting": "확인 대기",
+        "completed": "완료",
+        "failed": "실패",
+        "cancelled": "중지됨",
+        "interrupted": "중단됨",
+        "skipped": "건너뜀"
+      }
+    },
+    "emptyChatHint": "직접 물어보거나 아래 제안 사항부터 시작해 보세요.",
+    "recentActions": "최근 변경 사항",
+    "pageTitle": "AI 코치",
+    "fallbackName": "선수",
+    "heroTitleGeneric": "오늘 무엇을 알고 싶나요?",
+    "heroTitlePersonal": "{name}님, 오늘 무엇을 확인해볼까요?",
+    "heroDescription": "어제 훈련, FTP, 회복 상태를 묻거나 훈련 블록을 비교해보세요.",
+    "chatHeader": "훈련 부하, 회복, FTP, 블록 비교를 편하게 물어보세요.",
+    "loadingThread": "분석 중…",
+    "composer": {
+      "placeholder": "예: 어제 훈련은 어땠나요? FTP를 어떻게 높일 수 있을까요?",
+      "hint": "Enter로 전송, Shift+Enter로 줄바꿈",
+      "thinking": "분석 중",
+      "standardMode": "표준 모드 · 1×",
+      "deepMode": "심층 모드 · 3×",
+      "modelPurposeHint": "이번 요청에 기본 모델 또는 제공업체의 추론 모델을 선택합니다."
+    },
+    "chatPlaceholder": "훈련 부하, 회복 상태, 성장 흐름에 대해 이어서 물어보세요...",
+    "examplesTitle": "물어보세요",
+    "followUpsTitle": "다음 시도",
+    "queue": {
+      "title": "보낼 메시지",
+      "ariaList": "보낼 메시지 대기열",
+      "edit": "입력창에서 편집",
+      "interruptSend": "중단하고 지금 보내기",
+      "delete": "대기열에서 제거"
+    },
+    "status": {
+      "ready": "준비됨",
+      "streaming": "분석 중…",
+      "phaseModel": "생성 중",
+      "phaseToolRun": "데이터 확인 중",
+      "progress": {
+        "preparing": "분석을 준비하고 있어요",
+        "analyzingRequest": "계획 조건을 확인하고 있어요",
+        "readingBaseline": "최근 훈련 기준을 읽고 있어요",
+        "readingPerformance": "최근 최고 기록을 확인하고 있어요",
+        "resolvingIntensity": "실행 가능한 강도를 정하고 있어요",
+        "checkingCompetitions": "대회 영향을 확인하고 있어요",
+        "synthesizingEvidence": "훈련 데이터와 조건을 종합하고 있어요",
+        "draftingPlan": "전체 훈련 주기를 구성하고 있어요",
+        "validatingPlan": "계획 구조와 일정을 검증하고 있어요"
+      },
+      "contextWindow": {
+        "trigger": "컨텍스트 {percent}",
+        "usedInput": "사용한 입력 (추정)",
+        "inputBudget": "입력 예산",
+        "remaining": "남은 입력 (추정)",
+        "reservedOutput": "응답 예약 공간",
+        "totalWindow": "전체 컨텍스트 창",
+        "nearLimit": "압축 임계값에 가깝습니다. 이후 요청에서 이전 메시지가 압축될 수 있습니다.",
+        "estimateHint": "마지막 모델 요청의 토큰 추정치이며 전송하지 않은 입력은 제외됩니다.",
+        "titleIdle": "컨텍스트 창",
+        "titleActive": "{percent} 사용",
+        "idleDescription": "코치가 분석하는 동안 이곳에 컨텍스트 사용량이 표시됩니다.",
+        "usage": "{used} 사용 / 최대 {max}",
+        "compressed": "이번 단계에서 이전 메시지 {count}개를 압축했습니다.",
+        "ariaIdle": "컨텍스트 창이 유휴 상태입니다.",
+        "ariaActive": "컨텍스트 창 사용량 {percent}"
+      }
+    },
+    "rendering": {
+      "thinking": "분석 중…",
+      "preparing": "분석 중…",
+      "rendering": "{name} 표시 중",
+      "tools": {
+        "generic": "콘텐츠",
+        "planDay": "계획일",
+        "activityRecent": "최근 활동",
+        "activityDay": "당일 활동",
+        "pmc": "부하 추세",
+        "profileZones": "역치와 구간",
+        "profileZoneRanges": "강도 구간",
+        "competitionEvents": "대회 일정",
+        "question": "질문 카드",
+        "planDraft": "계획 초안",
+        "workoutAdjustment": "운동 조정",
+        "decisionDraft": "결정 초안",
+        "decisionApply": "결정 결과",
+        "actionResult": "작업 결과",
+        "trainingVisualization": "훈련 차트"
+      }
+    },
+    "actions": {
+      "copy": "복사",
+      "copied": "복사됨",
+      "copyFailed": "복사 실패",
+      "interruptAndSend": "지금 보내기",
+      "newChat": "새 채팅",
+      "loginRequired": "먼저 로그인해주세요. 로그인하면 이 페이지로 돌아옵니다.",
+      "newSessionFailed": "새 채팅을 시작할 수 없습니다. 다시 시도해 주세요.",
+      "send": "보내기",
+      "stop": "중지",
+      "editUserMessage": "편집",
+      "editUserAria": "메시지 편집",
+      "cancelEdit": "취소",
+      "saveEdit": "저장 및 재생성",
+      "savingEdit": "저장 중…",
+      "editWhileStreaming": "메시지를 편집하기 전에 생성을 중지하세요.",
+      "editUserFailed": "메시지를 업데이트할 수 없습니다. 다시 시도해 주세요.",
+      "editInlineHint": "Enter 보내기 · Shift+Enter 줄바꿈 · Esc 취소",
+      "editEmpty": "메시지는 비워둘 수 없습니다.",
+      "sendingEdit": "전송 중…",
+      "enqueueToQueue": "대기열에 추가",
+      "composerQueueEditHint": "Enter 대기열에 저장 · Esc 편집 취소"
+    },
+    "roles": {
+      "user": "나",
+      "coach": "코치"
+    },
+    "transcript": {
+      "titleError": "연결 문제",
+      "titleSystem": "안내",
+      "titleTurnFailed": "응답이 완료되지 않았습니다.",
+      "reasonTimeout": "요청 시간이 초과되었습니다.",
+      "reasonDisconnect": "네트워크가 중단되었거나 서버에 연결할 수 없습니다.",
+      "reasonRateLimit": "요청이 너무 빠르게 전송되고 있습니다. 잠시 후 다시 시도해 주세요.",
+      "reasonAuth": "세션이 만료되었거나 이 작업이 더 이상 승인되지 않았습니다.",
+      "reasonServer": "코치 서비스를 일시적으로 사용할 수 없거나 오류가 반환되었습니다.",
+      "reasonInternal": "시스템 내부에서 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+      "reasonUnknown": "답글을 생성하는 중에 문제가 발생했습니다.",
+      "retry": "다시 시도",
+      "titleAccessRequired": "AI 접근을 사용할 수 없음",
+      "reasonAccessRequired": "이 인스턴스의 AI 설정 또는 계정 권한을 확인하세요.",
+      "titleActionInProgress": "AI 작업 진행 중",
+      "reasonActionInProgress": "현재 AI 작업이 끝난 후 다음 작업을 시작해 주세요.",
+      "titleSettlementPending": "이전 사용량 정산 중",
+      "reasonSettlementPending": "이전 AI 작업을 정산하고 있습니다. 정산이 끝나면 계속할 수 있습니다.",
+      "titleModelTierUnavailable": "모델을 사용할 수 없음",
+      "reasonModelTierUnavailable": "현재 모델 등급을 일시적으로 사용할 수 없습니다. 다른 등급을 선택하거나 나중에 다시 시도해 주세요.",
+      "titleModelUnavailable": "모델이 응답하지 못했습니다",
+      "reasonModelUnavailable": "모델을 전환한 후 다시 시도하거나 잠시 후 다시 시도해 주세요.",
+      "switchToDeepAndRetry": "심층 모드로 전환 후 다시 시도",
+      "switchToStandardAndRetry": "표준 모드로 전환 후 다시 시도"
+    },
+    "questions": {
+      "dismissAnswering": "질문 잠시 닫기",
+      "resumeAnswering": "계속 답변하기",
+      "confirmed": "확인됨",
+      "title": "코치 질문",
+      "answeredCount": "{answered}/{total} 완료",
+      "questionAnswered": "{count}개 선택됨",
+      "questionPending": "보류 중",
+      "multiHint": "둘 이상을 선택할 수 있습니다.",
+      "noteLabel": "메모",
+      "notePlaceholder": "선택적 세부 사항…",
+      "submit": "계속하다",
+      "submitAll": "답변 제출",
+      "back": "이전",
+      "next": "다음",
+      "stepLabel": "{current}/{total}번 질문",
+      "progressHint": "일부 질문에는 아직 답변이 필요합니다.",
+      "otherPlaceholder": "선택적 세부 사항…",
+      "answerNote": "메모",
+      "submitWhileStreaming": "코치가 이 답변을 마칠 때까지 기다린 후 선택 사항을 제출하십시오.",
+      "bubbleDeferredToCard": "아래 카드를 사용하여 답변을 선택하세요.",
+      "skip": "건너뛰다",
+      "answeredBadge": "내 선택",
+      "answeredSkipped": "건너뜀"
+    },
+    "planDraft": {
+      "title": "계획 미리보기",
+      "cardHint": "아래의 주 그리드를 검토한 후 훈련 달력에 저장하세요.",
+      "weekColumn": "주",
+      "weekLabel": "{week}주차",
+      "summary": "총 {weeks}주 · 예정된 훈련 {sessions}회",
+      "rest": "휴식",
+      "createPlan": "계획 저장",
+      "savedMetaPrompt": "[계획을 훈련 계획에 저장했습니다]",
+      "bubbleDeferredToCard": "아래의 계획 미리보기 카드를 참조하세요.",
+      "planAlreadySaved": "이 초안은 이미 계획으로 저장되었습니다.",
+      "planAlreadySavedShort": "저장됨",
+      "waitStreamEnd": "저장하기 전에 응답이 완료될 때까지 기다리십시오.",
+      "creating": "저장 중…",
+      "createFailed": "계획을 저장할 수 없습니다. 운동 텍스트(DSL)를 확인하고 다시 시도하세요.",
+      "createSuccess": "계획이 저장되었습니다",
+      "noWorkouts": "이 초안에는 운동 텍스트가 포함된 세션이 없습니다.",
+      "weekdayShort": {
+        "0": "월",
+        "1": "화",
+        "2": "수",
+        "3": "목",
+        "4": "금",
+        "5": "토",
+        "6": "일"
+      },
+      "workoutDialogTitle": "{week}주차 · {weekday}",
+      "workoutDialogNotes": "메모",
+      "workoutDialogNotesEmpty": "없음",
+      "workoutDialogDsl": "운동 규칙(DSL)",
+      "workoutDialogIntensity": "상대 강도",
+      "workoutDialogLoading": "차트 불러오는 중…",
+      "workoutDialogNoChart": "시각화할 내용이 없습니다",
+      "workoutDialogSessionCount": "{count, plural, one {#개 세션} other {#개 세션}}",
+      "workoutDialogSessionMeta": "{ordinal}번째 세션 · {sport}",
+      "workoutDialogSessionFallback": "{ordinal}번째 세션",
+      "workoutDialogClose": "닫다"
+    },
+    "readCards": {
+      "competitionEvents": {
+        "title": "대회 일정",
+        "empty": "이 기간에 예정된 대회가 없습니다.",
+        "limited": "전체 {total}개 중 {count}개 대회를 표시합니다."
+      },
+      "toggleDetails": "세부정보 펼치기 또는 접기",
+      "planDay": {
+        "title": "계획된 날",
+        "subtitleWithPlan": "{date} · {title}",
+        "subtitleNoPlan": "{date}",
+        "outsideRange": "이 날짜는 현재 계획 기간을 벗어났습니다.",
+        "position": "위치",
+        "weekDay": "{week}주차 · {day}일차",
+        "session": "{index}번째 세션",
+        "emptyDay": "이 날에는 예정된 운동이 없습니다."
+      },
+      "activityRecent": {
+        "title": "최근 활동",
+        "subtitle": "{count, plural, one {#개 활동} other {#개 활동}}",
+        "empty": "아직 활동이 없습니다."
+      },
+      "activityDay": {
+        "title": "{date} 활동",
+        "subtitle": "{count, plural, one {#개 활동} other {#개 활동}}",
+        "empty": "이 날에는 활동이 없습니다."
+      },
+      "pmc": {
+        "title": "훈련 부하와 체력(PMC)",
+        "stats": {
+          "activeDays": "활동적인 날",
+          "restDays": "휴식일",
+          "totalLoad": "총부하",
+          "avgDaily": "평균 일일 부하"
+        }
+      },
+      "profileZones": {
+        "title": "임계값 및 영역",
+        "maxHr": "최대 심박수",
+        "zonesHr": "HR 영역",
+        "zonesPower": "파워존",
+        "zonesPace": "페이스 존"
+      },
+      "zoneRanges": {
+        "title": "{sport} · 구간 상세",
+        "power": "힘",
+        "pace": "속도",
+        "tabPace": "속도",
+        "tabHr": "심박수",
+        "tabPower": "힘",
+        "colZone": "존",
+        "colMin": "낮은",
+        "colMax": "높은",
+        "unitPace": "(분/km)",
+        "unitPace100m": "(분/100m)",
+        "unitHr": "(bpm)",
+        "unitPower": "(W)",
+        "benchmarkLine": "기준값: {value}",
+        "fallbackZone": "구역 {n}",
+        "empty": "이 스포츠에 사용할 수 있는 구역 범위가 없습니다.",
+        "toggleDetails": "영역 세부정보 확장 또는 축소"
+      }
+    },
+    "planFollowup": {
+      "cardTitle": "훈련 계획 후속 조치",
+      "pendingLine": "{count, plural, one {#개 세션이 아직 계획됨 또는 진행 중} other {#개 세션이 아직 계획됨 또는 진행 중}}"
+    },
+    "workoutAdjustment": {
+      "before": "전에",
+      "after": "후에",
+      "position": "{week}주차 · {day}일차",
+      "changes": "변경 요약",
+      "fields": {
+        "name": "운동 이름",
+        "text": "운동 구성",
+        "notes": "메모",
+        "sportType": "운동 종목",
+        "weekIndex": "주차",
+        "dayIndex": "일차",
+        "sessionIndex": "세션",
+        "scheduledDate": "예정일"
+      },
+      "apply": "조정 적용",
+      "applying": "신청 중…",
+      "applied": "적용된",
+      "applySuccess": "운동 조정 적용됨",
+      "applyFailed": "운동 조정을 적용할 수 없습니다.",
+      "appliedMetaPrompt": "[훈련 조정을 적용했습니다]"
+    },
+    "mutationApplied": {
+      "lifecycle": {
+        "activate": "계획 활성화됨",
+        "pause": "계획 일시 중지됨",
+        "complete": "계획 완료됨",
+        "cancel": "계획 취소됨"
+      },
+      "undoCountdown": "{seconds}초 안에 실행 취소",
+      "undoButton": "끄르다",
+      "undoing": "타락…",
+      "undoneTag": "푼",
+      "undoSuccess": "작업을 되돌렸습니다.",
+      "undoFailed": "실행 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      "title": {
+        "PLAN_WORKOUT_ADD": "운동이 추가됨",
+        "PLAN_WORKOUT_UPDATE": "운동이 업데이트되었습니다.",
+        "PLAN_WORKOUT_STATUS": "운동 상태가 업데이트되었습니다.",
+        "PLAN_SHIFT": "계획이 변경되었습니다",
+        "PLAN_LIFECYCLE": "요금제 수명 주기가 변경됨",
+        "ACTIVITY_LINK": "활동이 연결됨",
+        "ACTIVITY_UNLINK": "활동 연결 해제됨",
+        "ACTIVITY_META_UPDATE": "활동이 업데이트되었습니다.",
+        "ACTIVITY_SESSION_RPE": "세션 RPE가 저장되었습니다.",
+        "ACTIVITY_DELETE": "활동이 삭제되었습니다.",
+        "USER_THRESHOLD_UPDATE": "임계값이 업데이트되었습니다.",
+        "USER_BODY_METRIC_UPDATE": "체중이 기록되었습니다.",
+        "COMPETITION_EVENT_MUTATION": "대회가 업데이트되었습니다."
+      }
+    },
+    "decision": {
+      "rejectedTitle": "미채택",
+      "rejectedHint": "제안이 취소되었습니다. 변경 사항은 적용되지 않았습니다.",
+      "rejectFailed": "취소하지 못했습니다. 제안은 확인 대기 중입니다. 다시 시도하세요.",
+      "approvedTitle": "확인됨",
+      "approvedHint": "확인되었습니다. 실행 성공 결과는 아직 수신되지 않았습니다.",
+      "draftTitle": "결정 초안",
+      "draftSubtitle": "계획은 아직 변경되지 않았습니다. 확인하면 제안이 적용됩니다.",
+      "workoutDraftSubtitle": "운동 초안 · 아직 추가되지 않음",
+      "willAdd": "추가 예정",
+      "suggestionTitle": "계획 변경",
+      "draftBadge": "확인 필요",
+      "reviewBadge": "검토 필요",
+      "draftTab": "초안 {index}",
+      "selectedDraft": "선택한 초안 {index}",
+      "confirmSelectedButton": "이 초안을 확인하세요",
+      "confirmHint": "확인하면 위 변경 사항이 적용됩니다.",
+      "confirmButton": "확인하고 계획 업데이트",
+      "applyAdaptationButton": "조정 적용",
+      "applySupersessionButton": "이 계획으로 전환",
+      "cancelButton": "취소",
+      "showAll": "모두 보기",
+      "showLess": "접기",
+      "evidence": "사용한 데이터",
+      "loadDelta": "예상 부하 변화",
+      "syncImpact": "기기 동기화 영향",
+      "total": "평가",
+      "changed": "변경",
+      "preserved": "유지",
+      "skipped": "건너뜀",
+      "confirmPrompt": "나는 현재 선택된 결정을 적용함을 확인합니다.",
+      "waitStreamEnd": "확인하기 전에 코치가 이 응답을 마칠 때까지 기다리십시오.",
+      "appliedBadge": "적용된",
+      "appliedTitle": "결정이 적용됨",
+      "applyResultTitle": "결정 적용 결과",
+      "rebaseTitle": "재계산 필요",
+      "rebaseNoChange": "정식 계획은 변경되지 않았습니다. 메인 계획의 맥락이 달라졌기 때문에 코치가 최신 사실을 기준으로 제안을 다시 만들어야 합니다.",
+      "rebaseButton": "최신 상태 다시 분석",
+      "rebaseStarting": "최신 분기 여는 중",
+      "rebasePrompt": "이 오래된 결정을 최신 계획 맥락에 맞춰 다시 분석해 주세요. 먼저 새로 바뀐 사실을 확인한 뒤, 기존 권장안을 유지할지, 조정할지, 새 결정을 작성할지 판단해 주세요.",
+      "rebaseFailed": "재분석을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      "decisionId": "결정",
+      "decisionType": "유형",
+      "state": "상태",
+      "commitId": "저지르다",
+      "conflictBase": "의사결정 기반",
+      "conflictHead": "현 대표",
+      "confidence": "신뢰",
+      "confidenceValue": "{value}%",
+      "rationale": "판단 근거",
+      "impactPreview": "영향 미리보기",
+      "changePreview": "계획 변경",
+      "whyThis": "추천 근거",
+      "selectedOption": "선택한 옵션",
+      "positionLabel": "위치",
+      "newPosition": "새로운 직위",
+      "sportType": "스포츠",
+      "workoutName": "이름",
+      "workoutText": "운동하다",
+      "notes": "메모",
+      "reason": "이유",
+      "status": "상태",
+      "action": "행동",
+      "startDate": "시작일",
+      "activity": "활동",
+      "workout": "운동하다",
+      "statusValue": {
+        "PLANNED": "예정",
+        "IN_PROGRESS": "진행 중",
+        "DONE": "완료",
+        "SKIPPED": "건너뛰었습니다.",
+        "MOVED": "움직이는"
+      },
+      "position": "{week}주차 · {day}일차 · {session}번째 세션",
+      "applyResult": {
+        "APPLIED": "메인 계획 맥락에 반영했습니다.",
+        "REBASE_REQUIRED": "계획 맥락이 바뀌었습니다. 적용하기 전에 다시 맞춰야 합니다.",
+        "FAILED": "적용하지 못했습니다. 코치와 이어서 확인해 주세요.",
+        "SKIPPED": "메인 계획은 변경되지 않았습니다."
+      }
+    },
+    "history": {
+      "title": "역사",
+      "empty": "아직 대화가 없습니다.",
+      "untitled": "새 채팅",
+      "today": "오늘",
+      "yesterday": "어제",
+      "past": "과거",
+      "openSheet": "대화 기록 열기",
+      "toolbarHistory": "역사",
+      "collapseSidebar": "대화 기록 사이드바 접기",
+      "expandSidebar": "대화 기록 사이드바 펼치기",
+      "pinnedSection": "고정됨",
+      "menuMore": "추가 작업",
+      "editTitle": "제목 수정",
+      "pin": "상단에 고정",
+      "unpin": "고정 해제",
+      "delete": "삭제",
+      "editTitleDialogTitle": "대화 제목 수정",
+      "editTitlePlaceholder": "제목",
+      "save": "구하다",
+      "cancel": "취소",
+      "deleteConfirmTitle": "이 대화를 삭제하시겠습니까?",
+      "deleteConfirmDescription": "세션과 모든 메시지가 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.",
+      "deleteConfirm": "삭제",
+      "toastDeleted": "삭제됨",
+      "toastUpdated": "업데이트됨",
+      "toastFailed": "작업에 실패했습니다. 다시 시도해 주세요.",
+      "viewAll": "모두 보기",
+      "fullPageTitle": "대화 기록",
+      "noReply": "아직 답장이 없습니다",
+      "loginToView": "기록을 보려면 로그인하세요.",
+      "pinAria": "핀",
+      "unpinAria": "고정 해제",
+      "editTitleAria": "제목 수정",
+      "deleteAria": "삭제",
+      "goSignIn": "로그인",
+      "backToCoach": "채팅으로 돌아가기",
+      "openAiReview": "AI 검토",
+      "last7Days": "최근 7일",
+      "last30Days": "최근 30일",
+      "mobileSubtitle": "오른쪽으로 밀어 열기"
+    },
+    "reviews": {
+      "title": "AI 리뷰",
+      "daily": "일일 리뷰",
+      "weekly": "주간 검토",
+      "monthly": "월간 리뷰",
+      "newReview": "새 채팅 시작",
+      "empty": "아직 검토 세션이 없습니다.",
+      "analyzedDate": "분석일자",
+      "cardYearMeta": "{year}년",
+      "cardWeekSuffix": "주",
+      "cardMonthSuffix": "",
+      "viewAll": "모두 보기",
+      "listInvalidType": "잘못된 링크: 유형은 일, 주 또는 월이어야 합니다.",
+      "listBack": "AI 코치로 돌아가기",
+      "listPullToRefresh": "아래로 당겨 새로고침하세요.",
+      "listReleaseToRefresh": "새로고침하려면 손을 떼세요",
+      "listRefreshing": "상쾌하다...",
+      "listLoadingMore": "불러오는 중…",
+      "listNoMore": "더 이상은 안돼"
+    },
+    "mobile": {
+      "openCoach": "오픈 AI 코치",
+      "back": "뒤로"
+    },
+    "prompts": [
+      "어제 훈련은 어땠나요?",
+      "지금 회복 상태는 어떤가요?",
+      "오늘은 훈련해도 될까요, 회복을 우선해야 할까요?",
+      "최근 4주는 이전 4주와 어떻게 다른가요?",
+      "지난 7일 동안 피로가 너무 많이 쌓였나요?",
+      "이번 주 훈련 계획을 조정해야 할까요?",
+      "다음 핵심 훈련은 어떤 페이스로 진행하면 좋을까요?",
+      "최근 달리기/라이딩 강도 분포가 적절한가요?",
+      "이번 훈련 블록에서 가장 크게 달라진 점은 무엇인가요?",
+      "이번 주말에 대회가 있다면 남은 며칠은 어떻게 훈련해야 할까요?",
+      "최근 훈련 중 어떤 세션을 가장 먼저 리뷰해야 하나요?",
+      "최근 컨디션이 떨어지는 이유를 같이 찾아주세요.",
+      "어느 날을 가벼운 훈련이나 휴식으로 바꾸는 게 좋을까요?",
+      "유산소 기반이 실제로 좋아지고 있나요?",
+      "FTP나 역치 페이스를 어떻게 개선할 수 있을까요?",
+      "최근 훈련 부하 증가가 너무 공격적인가요?"
+    ],
+    "fitnessAssessment": {
+      "title": "Fitness assessment",
+      "details": "Method and evidence",
+      "noWrite": "This assessment has not changed your settings.",
+      "apply": "Confirm adoption",
+      "recompute": "Reassess",
+      "solo": "Yes, a continuous solo 30-minute time trial",
+      "ordinary": "Ordinary training",
+      "skip": "Skip for now",
+      "select": "Select activity",
+      "start": "Test start (minutes from activity start)",
+      "check": "Check this segment",
+      "sent": "Submitted. See the next reply.",
+      "failure": "Submission failed. Please retry.",
+      "testDraft": "Prepare a test workout draft",
+      "zoneImpact": "Heart-rate, power or pace zones based on this metric may change; custom zones retain their configuration.",
+      "priorRecord": "Prior record",
+      "adopted": "This result has been adopted.",
+      "testSegment": "Analysis window",
+      "openAssessment": "View assessment",
+      "pass": "Pass",
+      "notMet": "Not met",
+      "checkResult": "{label}{amount} · {status}",
+      "limitations": {
+        "PARTIAL_EVIDENCE": "Some activities in scope are not ready; only the listed evidence was used.",
+        "CANDIDATE_LIST_LIMIT": "Only the latest 20 candidates are shown. Narrow the range or specify an activity.",
+        "APPLICATION_NOT_ENABLED": "This result is a preview; adoption is not enabled.",
+        "FIELD_ESTIMATE_NOT_LAB_MEASUREMENT": "This is a field estimate, not a laboratory measurement.",
+        "ORDINARY_ACTIVITY_LTHR": "Estimated from the final 20-minute mean HR of a valid 30-minute activity window. No maximal test is required; effort and conditions affect how representative it is.",
+        "USER_REPORTED_PROTOCOL": "The test protocol was confirmed by you.",
+        "SOURCE_VERSION_UNVERIFIED": "The source version cannot be verified; adoption is unavailable.",
+        "DERIVED_ACTIVITY_PEAKS": "Uses published activity peaks; raw tracks and timing were not revalidated in this assessment.",
+        "CYCLING_SPEED_ENVIRONMENT": "Cycling speed depends on terrain, wind and resistance; it is not a physiological threshold.",
+        "HR_WINDOW_AVERAGE": "No 1-second peak; reports the maximum of available window-average heart rates.",
+        "TP_EMPIRICAL_OFFSET": "Existing 5K pace +20 s/km heuristic; maximal effort is not verified.",
+        "VDOT_NOT_LAB_VO2MAX": "VDOT estimated from running distance and time; ordinary training may underestimate capacity.",
+        "DERIVED_ACTIVITY_ESTIMATES": "Re-aggregates activity estimates using current source preference and correction; raw running signals were not reprocessed.",
+        "DAILY_HEALTH_MEDIAN": "Median of selected daily resting-HR records; activity minimum HR is not a substitute.",
+        "OBSERVED_HR_NOT_MAXIMUM": "An observed peak is not physiological maximum HR and may include sensor error.",
+        "NO_VALIDATED_AEROBIC_METHOD": "No validated aerobic-threshold method; fixed fractions of LTHR/MaxHR are not substitutes.",
+        "USER_ADOPTED_ESTIMATE": "This is an estimate. You may adopt it as a personal reference setting; adoption is not scientific validation.",
+        "PREVIEW_METHOD": "This method currently provides previews only.",
+        "RECORDED_PERFORMANCE_NOT_MAXIMAL_CAPACITY": "Recorded performance may not represent your current maximal capacity.",
+        "FTP_PRODUCT_MAPPING_095_UNVALIDATED": "FTP uses an unvalidated 0.95 × CP mapping; adoption records your selected estimate.",
+        "unknown": "Method applicability limitations apply."
+      },
+      "methods": {
+        "lthr-activity-observation": "Activity-based LTHR estimate",
+        "lthr-30-minute": "30-minute field test",
+        "cycling-extended-cp": "Cycling extended CP (estimate)",
+        "running-extended-cp": "Running extended CP (estimate)",
+        "critical-speed": "Multi-activity distance-time fit (estimate)",
+        "running-5k-threshold-pace": "5K threshold pace mapping (estimate)",
+        "running-performance-vdot": "Running performance VDOT (estimate)",
+        "running-effective-vo2max": "Activity VDOT weighted estimate",
+        "observed-max-hr": "Observed activity heart-rate peak",
+        "daily-resting-hr": "Daily resting heart-rate median (estimate)",
+        "aerobic-threshold-unavailable": "Aerobic threshold: no validated method"
+      },
+      "statuses": {
+        "ESTIMATED": "New estimate",
+        "OBSERVATION_ONLY": "Observed result, not a verified physiological threshold",
+        "NEEDS_INPUT": "More information needed",
+        "WAITING_DATA": "Activity data is processing. Reassess after it completes.",
+        "UNAVAILABLE": "No estimate available",
+        "FAILED": "Assessment failed technically. Please retry."
+      },
+      "checks": {
+        "ORDERED_TIMESTAMPS": "Valid sample timeline",
+        "FULL_COVERAGE": "Full test coverage",
+        "TAIL_COVERAGE": "Final 20-minute coverage",
+        "MAX_GAP_SECONDS": "Longest signal gap",
+        "NO_KNOWN_PAUSE": "No excessive recorded pause",
+        "FIT_CONVERGED": "Fit converged",
+        "INDEPENDENT_ACTIVITIES": "Independent activities",
+        "FIT_R_SQUARED": "Distance-time fit R²",
+        "OBSERVED_DURATIONS": "Observed duration points"
+      },
+      "observations": {
+        "last20MinutesMeanHeartRate": "Final 20-minute mean HR",
+        "observedMaxHr": "Observed peak HR (not physiological maximum)",
+        "dPrime": "D′ (distance-model intercept)"
+      },
+      "sports": {
+        "RUN": "Running",
+        "CYCLING": "Cycling",
+        "SWIM": "Swimming",
+        "UNKNOWN": "General"
+      },
+      "evidence": {
+        "daily": "{count} daily health records",
+        "activities": "{included}/{total} activities included"
+      },
+      "tracking": {
+        "title": "Test workout",
+        "description": "Reassess after the activity syncs and notify you when results or necessary questions are available.",
+        "start": "Track test",
+        "stop": "Stop tracking",
+        "startMessage": "Track this test",
+        "stopMessage": "Stop tracking"
+      },
+      "reasons": {
+        "SCOPE_UNSUPPORTED": "This method needs a supported date range, not the requested scope.",
+        "AMBIGUOUS_SCOPE": "Select the activity or test segment.",
+        "TIMEZONE_REQUIRED": "Set your profile timezone first.",
+        "NO_MATCHING_ACTIVITY": "No activity was found in this range. Check dates or sync.",
+        "MISSING_SIGNAL": "Required valid data or independent records are missing. Check the method and evidence requirements.",
+        "QUALITY_REJECTED": "Data quality, coverage or fit checks did not pass.",
+        "PROTOCOL_UNKNOWN": "Confirm whether this was an actual 30-minute time trial.",
+        "PROTOCOL_UNCONFIRMED": "The test protocol is unconfirmed; this is an observation only.",
+        "PROTOCOL_MISMATCH": "Ordinary training does not meet this test protocol.",
+        "REFERENCE_REQUIRED": "A maximum heart rate reference is needed before adoption.",
+        "REFERENCE_CONFLICT": "The estimate conflicts with current reference metrics.",
+        "METHOD_UNAVAILABLE": "This method is not available in the product.",
+        "EXECUTION_FAILED": "The assessment failed technically. You can retry.",
+        "RESOURCE_LIMIT": "This request exceeds the processing limit. Narrow the range.",
+        "NON_CONVERGENCE": "The model did not converge reliably.",
+        "STALE": "Evidence or settings changed. Reassess before confirming.",
+        "CONFIRMATION_REQUIRED": "Confirm the specific displayed changes."
+      },
+      "adoption": {
+        "estimate": "Confirm to save this user-selected estimate with its method and evidence, preserving history. It will not be labelled a measured or verified physiological threshold.",
+        "maxHr": "Confirm to save the recorded peak as your MaxHR reference setting. It may be below your physiological maximum or affected by sensor error; it is not a verified maximum."
+      }
+    },
+    "trainingVisualization": {
+      "showData": "데이터 보기",
+      "bucket": "기간 / 분류",
+      "rowsRange": "총 {total}개 중 {start}–{end}",
+      "previousPage": "이전 페이지",
+      "nextPage": "다음 페이지",
+      "partialData": "데이터 조회 한도에 도달하여 불러온 부분만 표시합니다. 전체 결과를 보려면 기간을 줄여 주세요.",
+      "sampledData": "차트는 총 {total}개 중 {shown}개 지점을 샘플로 표시하며, 데이터 표에는 반환된 모든 행이 유지됩니다.",
+      "measures": {
+        "ACTIVITY_COUNT": "운동 횟수",
+        "DURATION_MIN": "운동 시간",
+        "DISTANCE_KM": "거리",
+        "AVG_SPEED_KMH": "평균 속도",
+        "AVG_HEART_RATE": "평균 심박수",
+        "AVG_POWER": "평균 파워",
+        "DAILY_LOAD": "훈련 부하",
+        "RUNNING_LOAD": "러닝 부하",
+        "CYCLING_LOAD": "사이클링 부하",
+        "SWIMMING_LOAD": "수영 부하",
+        "OTHER_LOAD": "기타 부하",
+        "CP": "임계 파워",
+        "W_PRIME": "무산소 작업 용량",
+        "FTP": "기능적 역치 파워",
+        "MAX_HR": "최대 심박수",
+        "RESTING_HR": "안정시 심박수",
+        "LTHR": "젖산염 역치 심박수",
+        "CS": "임계 속도",
+        "TP": "임계 속도",
+        "AET_PACE": "유산소 역치 페이스",
+        "VO2_MAX": "VO2최대",
+        "P_MAX": "최대 파워",
+        "WEIGHT": "체중",
+        "HEIGHT": "높이",
+        "AET_HR": "유산소 역치 심박수"
+      },
+      "sources": {
+        "ESTIMATED": "추정치 이력",
+        "AUTO": "자동 적용 기록",
+        "MANUAL": "수동 기록"
+      },
+      "exploration": {
+        "PLANNED": "계획",
+        "ACTUAL": "실제",
+        "bucket": "구간",
+        "range": "최소–최대",
+        "coverage": "기록 비율",
+        "showData": "데이터 보기",
+        "series": "계열",
+        "previous": "이전",
+        "next": "다음",
+        "paired": "짝지은 표본",
+        "records": "기록 수",
+        "missing": "사용 불가",
+        "touch": "차트를 눌러 값을 확인하세요.",
+        "interact": "방향키나 터치로 값을 확인하세요.",
+        "notes": {
+          "NO_DATA": "해당 데이터가 없습니다.",
+          "PARTIAL_DATA": "읽기 한도에 도달했습니다. 범위를 줄여 주세요.",
+          "TIME_WEIGHTED": "시간 가중 평균입니다. 누르면 범위와 기록 비율을 확인할 수 있습니다.",
+          "GAPS": "신호 누락이나 10초 초과 간격에서는 선이 끊어집니다.",
+          "DISTANCE_UNAVAILABLE": "실측 거리 데이터가 없습니다. 경과 시간으로 정렬해 주세요.",
+          "PROGRESS_TIME": "진행률은 경과 시간을 0–100%로 환산하며 거리나 강도가 같다는 뜻은 아닙니다.",
+          "RECORDED_START": "시작 시간이 없어 첫 샘플부터 표시합니다.",
+          "ZONE_SNAPSHOTS": "각 활동에 저장된 구간 경계를 사용합니다.",
+          "ZONE_SPLIT": "종목이나 구간 경계가 다르면 따로 표시합니다.",
+          "ZONE_COVERAGE": "비율은 기록된 구간 시간만을 기준으로 합니다.",
+          "LINKED_ONLY": "실제 값은 명확히 연결된 주요 활동만 포함합니다.",
+          "MISSING_ACTUAL": "연결되지 않거나 불명확한 실제 값은 0이 아닌 빈 값입니다.",
+          "PLAN_DATE": "실제 값은 훈련 예정 날짜에 집계합니다.",
+          "LOAD_METHODS": "계획 부하는 추정값이며 실제 부하는 PMC 설정을 따릅니다.",
+          "PAIRED_ONLY": "같은 활동 또는 시간 구간에 함께 존재하는 값만 표시합니다.",
+          "NOT_CAUSAL": "상관관계가 인과관계를 뜻하지는 않습니다.",
+          "HISTORY_PAIRS": "기록은 같은 현지 날짜의 값만 짝지으며 이전 값을 채우지 않습니다.",
+          "MULTI_AXES": "각 Y축은 자체 단위와 눈금을 사용합니다. 선이 교차한다고 값이 같거나 인과관계가 있는 것은 아닙니다."
+        },
+        "measures": {
+          "HEART_RATE": "심박수",
+          "POWER": "파워",
+          "SPEED": "속도",
+          "PACE": "페이스",
+          "CADENCE": "케이던스",
+          "ELEVATION": "고도",
+          "GRADE": "경사",
+          "DURATION_MIN": "운동 시간",
+          "DISTANCE_KM": "거리",
+          "LOAD": "부하",
+          "ACTIVITY_COUNT": "운동 횟수",
+          "AVG_SPEED_KMH": "평균 속도",
+          "AVG_HEART_RATE": "평균 심박수",
+          "AVG_POWER": "평균 파워",
+          "DAILY_LOAD": "훈련 부하",
+          "RUNNING_LOAD": "러닝 부하",
+          "CYCLING_LOAD": "사이클링 부하",
+          "SWIMMING_LOAD": "수영 부하",
+          "OTHER_LOAD": "기타 부하",
+          "CP": "임계 파워",
+          "W_PRIME": "무산소 작업 용량",
+          "FTP": "기능적 역치 파워",
+          "MAX_HR": "최대 심박수",
+          "RESTING_HR": "안정시 심박수",
+          "LTHR": "젖산염 역치 심박수",
+          "CS": "임계 속도",
+          "TP": "임계 속도",
+          "AET_PACE": "유산소 역치 페이스",
+          "VO2_MAX": "VO2최대",
+          "P_MAX": "최대 파워",
+          "WEIGHT": "체중",
+          "HEIGHT": "높이",
+          "AET_HR": "유산소 역치 심박수"
+        },
+        "axes": {
+          "ELAPSED_TIME": "경과 시간",
+          "DISTANCE": "거리",
+          "PROGRESS": "시간 진행률",
+          "DATE": "날짜",
+          "CATEGORY": "분류",
+          "NUMBER": "값"
+        },
+        "seriesDefault": "짝지은 표본",
+        "separate": "분리 표시",
+        "overlay": "겹쳐 보기"
+      }
+    }
+  },
+  "login": {
+    "platformTitle": "Trainingload.ai - 훈련 분석 관리 플랫폼"
+  },
+  "HomePage": {
+    "title": "집"
+  },
+  "AccountPage": {
+    "title": "Trainingload.ai · 계정 설정",
+    "innerTitle": "계정 설정",
+    "description": "계정 설정 관리",
+    "autoUpdateTitle": "자동 업데이트",
+    "autoUpdate": {
+      "title": "자동 업데이트",
+      "description": "추정값은 계속 업데이트됩니다. 활성화하면 최신 추정값이 현재 적용값으로 자동 반영되고, 비활성화하면 추정값은 참고용으로만 표시됩니다. 기본 값은 현재 적용값을, 오른쪽은 최신 추정값과 변화 방향을 표시합니다.",
+      "loading": "로드 중...",
+      "toast": {
+        "enabledSuccess": "자동 업데이트 활성화됨",
+        "disabledSuccess": "자동 업데이트가 비활성화되었습니다.",
+        "updateFailed": "업데이트하지 못했습니다. 나중에 다시 시도해 주세요."
+      },
+      "metrics": {
+        "cp": "크리티컬 파워(CP)",
+        "ftp": "기능적 임계 전력(FTP)",
+        "wPrime": "W' 무산소 작업 능력",
+        "pMax": "최대 출력(Pmax)",
+        "cs": "임계 속도(CS)",
+        "tp": "임계 속도(TP)",
+        "maxHr": "최대 심박수(최대 HR)",
+        "lthr": "젖산염 역치 HR(LTHR)",
+        "vVo2Max": "vVO2max"
+      }
+    }
+  },
+  "DashboardPage": {
+    "title": "Trainingload.ai · 대시보드"
+  },
+  "MapPage": {
+    "title": "Trainingload.ai · 지도"
+  },
+  "ActivitySharePoster": {
+    "titleFallback": "활동 포스터",
+    "activityFallback": "활동",
+    "loading": {
+      "activity": "활동 로드 중…",
+      "map": "지도 로드 중…"
+    },
+    "actions": {
+      "cancel": "취소",
+      "share": "공유하다",
+      "generating": "생성 중…",
+      "view": "보다"
+    },
+    "metrics": {
+      "duration": "지속",
+      "paceOrSpeed": "페이스/속도",
+      "elevationGain": "고도 상승",
+      "cadence": "운율",
+      "heartRate": "심박수",
+      "power": "힘"
+    }
+  },
+  "SettingsPage": {
+    "title": "Trainingload.ai · 설정",
+    "settings": "설정",
+    "description": "계정 설정 관리"
+  },
+  "MePage": {
+    "title": "Trainingload.ai · 나",
+    "guestName": "Trainingload.ai 운동선수",
+    "guestEmail": "계정 세부정보를 보려면 로그인하세요.",
+    "verified": "확인됨",
+    "unverified": "Unverified",
+    "quickLinksTitle": "빠른 액세스",
+    "quickLinksDescription": "가장 많이 사용하는 앱 부분으로 돌아가세요.",
+    "versionTitle": "버전",
+    "actions": {
+      "account": "계정"
+    },
+    "links": {
+      "analysis": {
+        "title": "분석 허브"
+      },
+      "map": {
+        "title": "지도"
+      },
+      "preferences": {
+        "title": "환경설정"
+      },
+      "account": {
+        "title": "계정"
+      }
+    }
+  },
+  "AnalysisHubPage": {
+    "eyebrow": "도구",
+    "title": "훈련 도구",
+    "description": "누적 진행 상황 및 부하 추세부터 성과 검토까지 교육 분석 도구를 위한 집중 작업 공간입니다.",
+    "soon": "곧",
+    "searchPlaceholder": "검색 도구",
+    "noResults": "도구를 찾을 수 없습니다.",
+    "groups": {
+      "training": "훈련량 및 부하",
+      "performance": "성능 및 지표"
+    },
+    "tools": {
+      "progression": {
+        "title": "진행",
+        "description": "누적 거리, 기간, 활동, 부하를 월별 또는 연도별로 비교하세요."
+      },
+      "activityStats": {
+        "title": "활동 통계",
+        "description": "훈련량, 빈도, 장기 활동 분포를 검토합니다."
+      },
+      "pmc": {
+        "title": "PMC 로드",
+        "description": "체력, 피로, 자세, 일일 훈련 부하 추세를 추적하세요."
+      },
+      "bestDistance": {
+        "title": "최적의 거리",
+        "description": "거리에 따른 최선의 노력과 최근 변경 사항을 검토합니다."
+      },
+      "heartRate": {
+        "title": "심박수",
+        "description": "추세, 영역 및 로드 관련 지표"
+      },
+      "power": {
+        "title": "힘",
+        "description": "전력 곡선, 영역 및 주요 전력 지표"
+      },
+      "pace": {
+        "title": "속도",
+        "description": "추세, 분할 및 영역 분포"
+      }
+    }
+  },
+  "ActivitiesPage": {
+    "title": "Trainingload.ai · 활동"
+  },
+  "WeekSummaryCell": {
+    "count": "세다",
+    "tss": "짐",
+    "distance": "거리",
+    "duration": "지속"
+  },
+  "AccountInner": {
+    "title": "계정",
+    "name": {
+      "label": "이름",
+      "description": "플랫폼에 표시되는 이름 업데이트",
+      "placeholder": "이름",
+      "updateButton": "업데이트",
+      "updating": "업데이트 중...",
+      "emptyError": "이름은 비워둘 수 없습니다.",
+      "lengthError": "이름은 20자를 초과할 수 없습니다.",
+      "invalidCharError": "이름에는 문자, 숫자, 한자, 공백, 하이픈, 밑줄만 사용할 수 있습니다.",
+      "updateSuccess": "이름이 업데이트되었습니다.",
+      "updateError": "이름을 업데이트하지 못했습니다."
+    },
+    "reviewAutomation": {
+      "title": "AI 검토 자동화",
+      "description": "AI가 자동으로 실행할 수 있는 검토 작업을 선택하세요.",
+      "accessRequired": "현재 인스턴스에서는 이 자동화 기능을 사용할 수 없습니다.",
+      "activityReview": "활동 검토",
+      "dailyReview": "일일 리뷰",
+      "weeklyReview": "주간 검토",
+      "monthlyReview": "월간 리뷰",
+      "planReview": "계획 검토",
+      "saved": "검토 설정이 저장되었습니다.",
+      "saveFailed": "검토 설정을 저장하지 못했습니다."
+    },
+    "dataExport": {
+      "title": "모든 데이터 내보내기",
+      "description": "활동, 건강 데이터, 훈련 계획, 설정을 버전이 지정된 ZIP으로 만들고 AI 분석용 영문 JSON Schema를 포함합니다.",
+      "entryDescription": "AI 분석 또는 장기 백업을 위한 전체 데이터 아카이브를 만듭니다.",
+      "openAction": "데이터 내보내기 관리",
+      "backToAccount": "계정 설정으로 돌아가기",
+      "modeLabel": "내보내기 모드",
+      "modes": {
+        "aiAnalysis": "AI 분석",
+        "aiAnalysisHint": "JSON, JSONL, CSV 데이터의 직접 분석에 최적화됩니다.",
+        "fullBackup": "전체 백업",
+        "fullBackupHint": "가장 넓은 범위의 이동 가능한 데이터와 원본 활동 파일을 보존합니다."
+      },
+      "privacyLabel": "위치 개인정보",
+      "privacy": {
+        "redact": "시작 및 종료 위치 숨기기",
+        "remove": "모든 GPS 좌표 제거",
+        "exact": "정확한 좌표 유지"
+      },
+      "privacyHint": "고빈도 활동 데이터를 변환할 때 적용됩니다.",
+      "includeOriginals": "원본 소스 파일 포함",
+      "includeOriginalsHint": "전체 백업에서만 사용할 수 있습니다. 활동 FIT, GPX, TCX와 보존된 건강 소스 파일을 추가하며 정확한 GPS, 기기 정보, 민감한 건강 데이터가 포함될 수 있습니다.",
+      "createAction": "내보내기 만들기",
+      "alreadyRunning": "내보내는 중",
+      "refresh": "새로고침",
+      "loading": "불러오는 중…",
+      "empty": "요청한 내보내기가 없습니다.",
+      "requestAccepted": "내보내기 요청이 대기열에 추가되었습니다.",
+      "requestFailed": "요청을 만들 수 없습니다.",
+      "deleteFailed": "내보내기를 제거할 수 없습니다.",
+      "deleteAction": "내보내기 제거",
+      "download": "다운로드 ({size})",
+      "preparing": "내보내기 준비 중…",
+      "progress": "{progress}% · {stage}",
+      "expiresAt": "{date}까지 다운로드할 수 있습니다.",
+      "failedHint": "재시도 후에도 생성에 실패했습니다.",
+      "boundary": "AI 대화와 AI가 생성한 리뷰는 제외됩니다. 활동 및 건강 데이터의 상세 기록은 확인과 추가 분석이 쉽도록 표준 CSV 파일로 제공됩니다.",
+      "statuses": {
+        "QUEUED": "대기 중",
+        "SNAPSHOTTING": "데이터 수집 중",
+        "PACKAGING": "ZIP 생성 중",
+        "UPLOADING": "다운로드 보호 중",
+        "READY": "다운로드 가능",
+        "RETRY_WAIT": "재시도 대기",
+        "FAILED": "내보내기 실패",
+        "EXPIRED": "내보내기 만료"
+      }
+    },
+    "deleteAccount": {
+      "sectionTitle": "계정 삭제",
+      "sectionDescription": "계정, 활동, 훈련 계획, 피트니스 데이터 및 코칭 대화를 영구적으로 삭제합니다. 이 작업은 취소할 수 없습니다.",
+      "signOutDescription": "현재 세션을 종료하고 로그인 화면으로 돌아갑니다. 계정과 데이터에는 영향을 주지 않습니다.",
+      "cancel": "취소",
+      "deleteAccountTitle": "계정을 영구적으로 삭제하시겠습니까?",
+      "deleteAccountDetail": "활동, 훈련 계획, 피트니스 데이터, 코칭 대화 및 모든 계정 데이터가 영구적으로 삭제되며 복원할 수 없습니다.",
+      "deleteContinue": "계속 삭제",
+      "deleteFinalTitle": "최종 확인",
+      "deleteFinalDetail": "제출하면 즉시 로그아웃되며 다시 로그인할 수 없습니다. 백그라운드 정리는 연결된 모든 데이터를 영구 삭제하며 일반적으로 24시간 이내, 예외적인 경우 최대 7일이 걸립니다. 자동 갱신은 취소되지만 현재 결제 기간은 자동 환불되지 않습니다.",
+      "deleteAccountAction": "계정을 영구적으로 삭제",
+      "deletingAccount": "계정 삭제 중…",
+      "deleteFailedMessage": "계정을 삭제하지 못했습니다. 나중에 다시 시도해 주세요.",
+      "deleteCancelRenewalAndContinue": "자동 갱신 취소 후 계속",
+      "deleteAcceptedTitle": "삭제 요청이 접수되었습니다",
+      "deleteAcceptedDetail": "로그아웃되었으며 계정에 더 이상 접근할 수 없습니다. 정리는 일반적으로 24시간 이내에 완료되며 최대 7일이 걸릴 수 있습니다. 완료되면 감사 및 피드백 이메일을 보내드립니다.",
+      "deleteBackToLogin": "로그인으로 돌아가기",
+      "localSectionTitle": "로컬 계정 삭제",
+      "localSectionDescription": "이 인스턴스에 저장된 로컬 계정과 모든 활동, 훈련 계획, 건강 데이터 및 코치 대화를 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
+      "localAction": "로컬 계정 영구 삭제",
+      "localFinalTitle": "이 로컬 계정을 삭제할까요?",
+      "localFinalDetail": "제출하면 로컬 접근이 즉시 종료되고 계정 데이터가 백그라운드에서 영구 삭제됩니다. 정리가 완료되면 이 인스턴스는 최초 설정 상태로 돌아갑니다.",
+      "localAcceptedTitle": "로컬 계정 삭제가 시작됨",
+      "localAcceptedDetail": "로컬 접근이 종료되었습니다. 인스턴스가 계정 데이터를 삭제하고 있으며 완료 후 최초 설정 상태로 돌아갑니다.",
+      "localBackToOnboarding": "설정 계속"
+    }
+  },
+  "ThirdPartyConnections": {
+    "title": "제3자 연결",
+    "trainingDataGroup": "훈련 데이터",
+    "providers": {
+      "intervalsIcu": {
+        "name": "Intervals.icu",
+        "description": "Intervals.icu 계정을 연결해 활동, 건강 데이터, 예정 운동을 동기화합니다"
+      }
+    },
+    "connected": "연결됨",
+    "connectProvider": "{provider} 연결",
+    "connecting": "연결 중...",
+    "disconnecting": "연결 해제 중...",
+    "disconnectSuccess": "연결이 끊어졌습니다.",
+    "connectError": "연결 실패",
+    "syncError": "동기화에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    "disconnectError": "연결 해제 실패",
+    "disconnectConfirmTitle": "{provider} 연결을 끊으시겠어요?",
+    "disconnectConfirmDescription": "이렇게 하면 {provider}에서 계정 연결이 해제되고 향후 동기화가 중단됩니다.",
+    "disconnectConfirmCancel": "취소",
+    "disconnectConfirmAction": "연결 끊기",
+    "intervalsIcu": {
+      "apiKeyLabel": "API 키",
+      "apiKeyPlaceholder": "API 키 붙여넣기",
+      "apiKeyHelp": "저장 후 최근 60일간의 활동 기록이 동기화됩니다. 이전 기록은 아직 자동으로 동기화되지 않습니다.",
+      "apiKeyHelpConnected": "저장된 API 키를 유지하려면 비워 두세요. 새 키를 입력하면 교체하기 전에 유효성을 검사하고 확인합니다.",
+      "apiKeyHelpOAuthConnected": "Enter an API key to replace the current OAuth authorization.",
+      "apiKeyRequired": "API 키를 입력하세요",
+      "authTypeLabel": "Current authorization:",
+      "oauthTab": "OAuth",
+      "apiKeyTab": "API Key",
+      "oauthTitle": "Authorize with Intervals.icu OAuth",
+      "oauthHelp": "You will be redirected to Intervals.icu to authorize access. After success, the sync settings below will be used.",
+      "oauthReplaceApiKeyHint": "This account is currently connected with an API key. OAuth authorization will replace the saved API key.",
+      "oauthAuthMode": "OAuth",
+      "apiKeyAuthMode": "API Key",
+      "oauthAthlete": "Intervals.icu account: {name}",
+      "connectWithOAuth": "Connect with OAuth",
+      "authorizeOAuth": "Authorize OAuth",
+      "upgradeToOAuth": "Upgrade to OAuth",
+      "reconnectOAuth": "Reauthorize OAuth",
+      "oauthConnectSuccess": "Intervals.icu OAuth connected",
+      "oauthConnectFailed": "Intervals.icu OAuth authorization failed",
+      "accountAlreadyConnected": "이 Intervals.icu 계정은 이미 다른 Trainingload.ai 계정에 연결되어 있습니다. 먼저 기존 계정에서 연결을 해제하세요.",
+      "syncActivities": "Sync now",
+      "syncActivitiesHelp": "Immediately sync the last 60 days of activity records from Intervals.icu to Trainingload.ai.",
+      "syncScheduledActivities": "Daily automatic sync",
+      "syncScheduledActivitiesHelp": "Automatically sync yesterday's activity records to Trainingload.ai before dawn.",
+      "syncWellness": "Sync wellness records",
+      "syncWellnessHelp": "Includes daily records such as weight, resting heart rate, sleep, and fatigue. Enable as needed.",
+      "exportActivities": "Automatically upload activity records",
+      "exportActivitiesHelp": "Activity records in Trainingload.ai will be automatically synced to Intervals.icu.",
+      "syncSportSettings": "Sync athlete profile and zones",
+      "syncSportSettingsHelp": "Sync athlete profile, power zones, heart-rate zones, and related sport settings from Intervals.icu to Trainingload.ai.",
+      "exportSportSettings": "Upload athlete profile and zones",
+      "exportSportSettingsHelp": "Sync athlete profile, power zones, heart-rate zones, and related sport settings from Trainingload.ai to Intervals.icu.",
+      "syncPlannedWorkouts": "Sync planned workouts",
+      "syncPlannedWorkoutsHelp": "Sync planned workouts from Intervals.icu to Trainingload.ai.",
+      "exportPlannedWorkouts": "Upload planned workouts",
+      "exportPlannedWorkoutsHelp": "Sync planned workouts from Trainingload.ai to Intervals.icu.",
+      "connectWithApiKey": "API 키 저장",
+      "saveSettings": "설정 저장",
+      "savingSettings": "저장 중...",
+      "disconnectOAuth": "OAuth 연결 끊기",
+      "disconnectApiKey": "API 키 연결 끊기",
+      "connectSuccess": "Intervals.icu가 연결됨",
+      "settingsSaved": "Intervals.icu 설정이 저장되었습니다.",
+      "connectAndSyncStarted": "Intervals.icu가 연결되었습니다. 최근 60일 동기화가 시작되었습니다. 완료되면 알림을 받게 됩니다.",
+      "initialSyncFailed": "Intervals.icu가 연결되었지만 첫 번째 동기화를 시작할 수 없습니다. 나중에 설정에서 다시 시도해 보세요.",
+      "openSettings": "설정",
+      "settingsTitle": "Intervals.icu 설정",
+      "settingsDescription": "Choose OAuth or API key authorization and configure sync settings.",
+      "manualSync": "지금 동기화",
+      "syncing": "동기화 중...",
+      "syncQueued": "Intervals.icu 동기화가 대기열에 있는 {count} 활동으로 시작되었습니다.",
+      "keyEnding": "API 키 끝: {last4}",
+      "lastSync": "마지막 동기화",
+      "neverSynced": "아직 동기화되지 않음",
+      "replaceKeyConfirmTitle": "API 키를 바꾸시겠습니까?",
+      "replaceKeyConfirmDescription": "이 API 키는 저장된 키와 다르며 다른 계정에 속할 수 있습니다. 저장하면 가져온 기록이 유지되며 향후 동기화에 새 키가 사용됩니다.",
+      "replaceKeyCancel": "취소",
+      "replaceKeyConfirmAction": "키 교체"
+    }
+  },
+  "UserProfile": {
+    "zonePreview": {
+      "title": "선택한 모델 미리보기",
+      "basis": "계산 기준: {basis}",
+      "zone": "구간",
+      "range": "페이스 범위",
+      "loading": "구간 불러오는 중…",
+      "error": "구간을 불러올 수 없습니다",
+      "retry": "다시 시도",
+      "empty": "사용 가능한 구간이 없습니다. 이 종목의 구간 설정과 필요한 지표를 확인하세요.",
+      "savedOverride": "이 종목에는 별도로 저장된 구간 설정이 있으며 자동 모델보다 우선 적용됩니다.",
+      "custom": "사용자 지정",
+      "unknown": "지정되지 않음",
+      "names": {
+        "easy": "이지런",
+        "marathon": "마라톤",
+        "threshold": "역치주",
+        "interval": "인터벌",
+        "repetition": "반복주",
+        "superOxygen": "저강도 유산소주",
+        "slow": "느린 달리기",
+        "moderate": "중강도 달리기",
+        "fast": "빠른 달리기",
+        "sprint": "레이스 / 스프린트",
+        "recovery": "회복",
+        "aerobic": "유산소",
+        "tempo": "템포",
+        "subThreshold": "역치 미만",
+        "superThreshold": "역치 초과",
+        "aerobicCapacity": "유산소 능력",
+        "anaerobicCapacity": "무산소 능력",
+        "easyIntensity": "편안함",
+        "moderateIntensity": "중강도",
+        "thresholdIntensity": "역치",
+        "intervalIntensity": "인터벌",
+        "repetitionIntensity": "반복",
+        "recoveryWalking": "회복 / 걷기",
+        "endurance": "지구력",
+        "highIntensity": "고강도",
+        "vo2": "최대 산소 섭취량",
+        "activeRecovery": "능동적 회복",
+        "anaerobic": "무산소",
+        "neuromuscular": "신경근"
+      },
+      "heartRateRange": "심박수 범위",
+      "powerRange": "파워 범위",
+      "hrr": "여유 심박수",
+      "estimated": "{basis} (추정)"
+    },
+    "title": "개인정보",
+    "description": "더 나은 활동 분석을 위해 개인 정보를 관리하세요.",
+    "estimatedLabel": "예상",
+    "loading": "로드 중...",
+    "tabs": {
+      "default": "기본",
+      "run": "달리다",
+      "cycling": "사이클링",
+      "swim": "헤엄"
+    },
+    "common": {
+      "cancel": "취소",
+      "confirm": "확인하다"
+    },
+    "validation": {
+      "rangeError": "{label}은 0에서 255 사이여야 합니다."
+    },
+    "updateButton": "프로필 업데이트",
+    "updating": "업데이트 중...",
+    "updateSuccess": "프로필이 업데이트되었습니다.",
+    "updateError": "프로필을 업데이트하지 못했습니다.",
+    "loadError": "프로필을 로드하지 못했습니다.",
+    "historyHint": "발효일 기준으로 정렬(내림차순)",
+    "save": "구하다",
+    "empty": "데이터 없음",
+    "historyTable": {
+      "columns": {
+        "effectiveDate": "발효일",
+        "value": "값",
+        "source": "Source"
+      },
+      "sourceLabels": {
+        "manual": "Manual",
+        "auto": "System estimate",
+        "imported": "Third-party sync",
+        "intervals_icu": "Intervals.icu sync",
+        "unknown": "Unknown source"
+      },
+      "validation": {
+        "completeRowFirst": "현재 행을 먼저 완료하세요.",
+        "birthdaySingleRow": "생년월일에는 하나의 기록만 허용됩니다.",
+        "rowEffectiveDateRequired": "행 {row}: 발효일은 필수입니다.",
+        "rowEffectiveDateInvalid": "행 {row}: 유효일이 잘못되었습니다.",
+        "rowValueRequired": "행 {row}: 값은 필수입니다.",
+        "rowNumberRequired": "행 {row}: 숫자를 입력하세요",
+        "rowPositiveRequired": "행 {row}: 0보다 큰 숫자를 입력하세요.",
+        "rowDateInvalid": "행 {row}: 유효한 날짜를 선택하세요.",
+        "rowGenderRequired": "행 {row}: 성별을 선택하세요."
+      }
+    },
+    "fitnessMetricDialog": {
+      "actions": {
+        "edit": "편집하다",
+        "apply": "적용하다"
+      },
+      "context": {
+        "default": "기본 측정항목(스포츠별 아님)",
+        "sport": "스포츠: {sport}"
+      },
+      "sections": {
+        "active": "활동적인",
+        "proposed": "자동 계산"
+      },
+      "labels": {
+        "value": "값",
+        "source": "원천",
+        "sport": "스포츠"
+      },
+      "manualInput": "수동 값",
+      "manualPlaceholder": "값을 입력하세요",
+      "source": {
+        "manual": "수동",
+        "auto": "자동"
+      }
+    },
+    "fields": {
+      "weight": {
+        "label": "체중(kg)",
+        "placeholder": "70.0"
+      },
+      "height": {
+        "label": "높이(cm)",
+        "placeholder": "175.0"
+      },
+      "age": {
+        "label": "나이",
+        "placeholder": "30"
+      },
+      "birthDate": {
+        "label": "생년월일",
+        "placeholder": "YYYY-MM-DD"
+      },
+      "gender": {
+        "label": "성별",
+        "placeholder": "성별을 선택하세요",
+        "options": {
+          "male": "남성",
+          "female": "여성",
+          "other": "다른"
+        }
+      },
+      "timezone": {
+        "label": "시간대",
+        "placeholder": "예를 들어 아시아/상하이"
+      },
+      "maxHeartRate": {
+        "label": "최대 심박수(bpm)",
+        "placeholder": "190"
+      },
+      "restingHeartRate": {
+        "label": "안정시 심박수(bpm)",
+        "placeholder": "60"
+      },
+      "lactateThresholdHeartRate": {
+        "label": "젖산염 역치 심박수(bpm)",
+        "placeholder": "140"
+      },
+      "heartRateZoneModel": {
+        "label": "심박수 구역",
+        "placeholder": "구역 선택",
+        "options": {
+          "friel": "조 프리엘(LTHR)",
+          "karvonen": "카르보넨(HRR)",
+          "mhr": "최대 심박수 (5개 구간)"
+        },
+        "help": {
+          "title": "심박수 구역 모델",
+          "description": "심박수 영역 모델은 심박수 데이터를 기반으로 훈련 강도 영역을 계산하는 방법을 결정합니다.",
+          "table": {
+            "model": "모델",
+            "basis": "기초",
+            "features": "특징"
+          },
+          "models": {
+            "friel": {
+              "name": "조 프리엘",
+              "basis": "젖산염 역치 HR(LTHR)",
+              "features": "지구력 훈련에 적합하며 대사 중단점을 반영합니다."
+            },
+            "karvonen": {
+              "name": "카르보넨",
+              "basis": "심박수 예비(HRR)",
+              "features": "안정시 심박수를 고려하여 일반 건강에 좋습니다."
+            },
+            "mhr": {
+              "name": "최대 심박수(MHR)",
+              "basis": "최대 심박수",
+              "features": "최대 심박수의 비율로 5개 구간을 나눕니다. 최대 심박수만 필요합니다."
+            }
+          },
+          "fallback": "신규 사용자와 모델을 설정하지 않은 경우 최대 심박수가 기본값입니다. 기존 선택은 유지됩니다. Karvonen은 안정 시 심박수가 없으면 최대 심박수를 사용합니다. Friel은 역치 심박수가 없으면 최대 심박수의 88%로 추정하고 추정값임을 표시합니다. 필요한 데이터가 부족하면 구간을 생성할 수 없습니다.",
+          "current": "현재의"
+        }
+      },
+      "runFtp": {
+        "label": "FTP 실행(W)",
+        "placeholder": "예를 들어 255"
+      },
+      "cyclingFtp": {
+        "label": "사이클링 FTP(W)",
+        "placeholder": "예를 들어 255"
+      },
+      "ftp": {
+        "label": "기능적 역치 파워 (W)",
+        "placeholder": "250"
+      },
+      "cp": {
+        "label": "임계 파워 (W)",
+        "placeholder": "예를 들어 250"
+      },
+      "wPrime": {
+        "label": "무산소 작업 용량 (J)",
+        "placeholder": "예를 들어 20000"
+      },
+      "PMax": {
+        "label": "최대 파워 (W)",
+        "placeholder": "예를 들어 1000"
+      },
+      "cs": {
+        "label": "임계 속도",
+        "placeholder": "예를 들어 4.0"
+      },
+      "tp": {
+        "label": "임계 속도"
+      },
+      "aerobicThresholdPaceSec": {
+        "label": "유산소 역치 페이스",
+        "placeholder": "예를 들어 300"
+      },
+      "vo2max": {
+        "label": "VO2최대",
+        "placeholder": "예를 들어 50",
+        "description": "시스템은 구역 생성을 위해 VO2max에서 vVO2max(VO2max에서의 속도)를 추정합니다."
+      },
+      "paceZoneModel": {
+        "label": "페이스 존 모델",
+        "placeholder": "모델 선택",
+        "options": {
+          "friel": "Joe Friel (임계 속도)",
+          "daniels": "잭 다니엘스(VO2max)"
+        }
+      },
+      "powerZoneModel": {
+        "label": "파워존 모델",
+        "placeholder": "모델 선택",
+        "options": {
+          "friel": "조 프리엘 바이크(7개 구역) FTP",
+          "vance": "Jim Vance Run(7개 구역) FTP",
+          "stryd": "Stryd Run(5개 구역) FTP"
+        }
+      },
+      "equipmentWeight": {
+        "label": "장비 중량(kg)",
+        "placeholder": "2.0"
+      },
+      "bikeWeight": {
+        "label": "자전거 무게(kg)",
+        "placeholder": "8.5"
+      },
+      "fitnessLevel": {
+        "label": "체력 수준",
+        "placeholder": "체력 수준 선택",
+        "options": {
+          "beginner": "초보자",
+          "intermediate": "중급",
+          "advanced": "고급의",
+          "elite": "엘리트"
+        }
+      },
+      "vo2maxCorrectionFactor": {
+        "label": "VO2Max 보정 계수",
+        "placeholder": "보정 계수(0.0 - 1.2)를 입력하세요.",
+        "description": "일반적으로 0.85에서 1.15 사이의 VO2Max 추정치를 보정하는 데 사용됩니다.",
+        "invalid": "0보다 크고 1.20 이하인 숫자를 입력하세요"
+      },
+      "defaultVdotSource": {
+        "label": "기본 VDOT 소스",
+        "placeholder": "소스 선택",
+        "description": "보정 VO₂max 또는 레이스 성과를 우선 소스로 선택합니다. 원시 심박수 추정치는 항상 개인 보정 계수를 적용한 뒤 사용됩니다.",
+        "options": {
+          "STANDARD": "레이스 결과",
+          "HEARTRATE": "심박수",
+          "FACTOR": "보정값"
+        }
+      },
+      "loadSources": {
+        "label": "로드 우선순위",
+        "placeholder": "파워 < 심박수 < 페이스",
+        "search": "소스 검색",
+        "description": "우선 순위에 따라 일일 훈련 부하를 선택하는 데 사용됩니다. 비어 있으면 기본값은 파워 < 심박수 < 페이스입니다.",
+        "options": {
+          "POWER": "힘",
+          "HEART_RATE": "심박수",
+          "PACE": "속도",
+          "SESSIONRPE": "세션 RPE"
+        }
+      },
+      "altitudeOptimizationModel": {
+        "label": "고도 최적화 모델",
+        "placeholder": "모델 선택",
+        "options": {
+          "NOSMOOTHING": "스무딩 없음",
+          "THRESHOLDMETHOD": "임계값 최적화",
+          "DOUGLASPEUCKERALGORITHM": "더글라스-포커 알고리즘"
+        }
+      },
+      "altitudeThreshold": {
+        "label": "고도 임계값(m)",
+        "placeholder": "예를 들어 100",
+        "default": "기본 3m"
+      }
+    },
+    "calibrateButton": "활동에서 보정",
+    "calibrateSuccess": "교정 성공",
+    "calibrateError": "교정 실패",
+    "calibrateModal": {
+      "title": "교정을 위한 활동 선택",
+      "description": "VO2Max 계수를 보정하려면 최대 노력 달리기 활동(예: 경주)을 선택하십시오. 보정 계수가 자동으로 계산됩니다.",
+      "noActivities": "실행 중인 활동이 없습니다.",
+      "date": "날짜",
+      "name": "이름",
+      "distance": "거리",
+      "duration": "지속",
+      "action": "행동",
+      "select": "선택하다"
+    },
+    "activitySelector": {
+      "filters": {
+        "sportType": "스포츠 종류",
+        "search": "검색 이름",
+        "dateRange": "기간",
+        "duration": "기간(분)",
+        "distance": "거리(km)",
+        "sportTypeOptions": {
+          "run": "달리다",
+          "cycling": "사이클링",
+          "all": "모두"
+        },
+        "placeholders": {
+          "min": "최소",
+          "max": "맥스"
+        }
+      },
+      "columns": {
+        "date": "날짜",
+        "name": "이름",
+        "sportType": "유형",
+        "distance": "거리",
+        "duration": "지속",
+        "vo2max": "VO2최대(V/H)",
+        "ratio": "비율"
+      },
+      "actions": {
+        "confirm": "선택하다",
+        "cancel": "취소"
+      }
+    },
+    "saving": "절약...",
+    "saveChanges": "변경 사항 저장",
+    "cpHistory": {
+      "title": "CP 연혁",
+      "noData": "사용 가능한 CP 기록 데이터가 없습니다.",
+      "current": "활동적인",
+      "updateAvailable": "새 CP 감지됨",
+      "updateButton": "{value} W로 업데이트",
+      "confirmUpdateTitle": "중요 전력 업데이트",
+      "confirmUpdateDesc": "크리티컬 파워(CP)를 최근 계산된 값인 {value} W로 업데이트하시겠습니까? 이는 향후 활동에도 적용됩니다.",
+      "updateSuccess": "CP가 성공적으로 업데이트되었습니다.",
+      "updateFailed": "CP를 업데이트하지 못했습니다."
+    },
+    "ftpHistory": {
+      "title": "FTP 기록",
+      "noData": "사용 가능한 FTP 기록 데이터가 없습니다.",
+      "current": "활동적인",
+      "updateAvailable": "새로운 FTP가 감지되었습니다.",
+      "updateButton": "{value} W로 업데이트",
+      "confirmUpdateTitle": "FTP 업데이트",
+      "confirmUpdateDesc": "FTP(Functional Threshold Power)를 최근 계산된 값인 {value} W로 업데이트하시겠습니까? 이는 향후 활동에도 적용됩니다.",
+      "updateSuccess": "FTP가 성공적으로 업데이트되었습니다.",
+      "updateFailed": "FTP를 업데이트하지 못했습니다."
+    }
+  },
+  "ZoneSettings": {
+    "title": "구역 설정",
+    "description": "트레이닝 존을 맞춤화하세요. 영역은 벤치마크 값의 백분율로 정의됩니다.",
+    "power": "힘",
+    "heartRate": "심박수",
+    "pace": "속도",
+    "reset": "다시 놓기",
+    "resetConfirmTitle": "영역 설정을 재설정하시겠습니까?",
+    "resetConfirmDesc": "이렇게 하면 맞춤 영역 설정이 삭제되고 시스템 기본값으로 되돌아갑니다. 이 작업은 취소할 수 없습니다.",
+    "cancel": "취소",
+    "resetSuccess": "영역 설정이 재설정되었습니다.",
+    "resetError": "영역 설정을 재설정하지 못했습니다.",
+    "ftpNoData": "사용 가능한 FTP(Functional Threshold Power) 데이터가 없습니다.",
+    "cpNoData": "사용 가능한 임계 전력(CP) 데이터가 없습니다.",
+    "csNoData": "사용 가능한 임계 속도(CS) 데이터가 없습니다.",
+    "hrrNoData": "최대 심박수 또는 휴식 중 심박수 누락(HRR을 계산할 수 없음)",
+    "comingSoon": "곧 출시 예정",
+    "benchmark": {
+      "ftp": "기능적 임계 전력(FTP)",
+      "cp": "크리티컬 파워(CP)",
+      "custom": "사용자 정의(절대)",
+      "maxHr": "최대 심박수",
+      "lthr": "젖산염 역치 HR",
+      "hrr": "심박수 예비(HRR)",
+      "rhr": "안정시 심박수",
+      "cs": "임계 속도(CS)"
+    },
+    "unsavedChanges": {
+      "title": "저장되지 않은 변경사항",
+      "description": "저장되지 않은 변경사항이 있습니다. 탭을 전환하면 해당 탭이 삭제됩니다. 확실합니까?",
+      "discard": "변경사항 취소",
+      "keep": "계속 편집하세요"
+    },
+    "editor": {
+      "loadError": "영역을 로드하지 못했습니다.",
+      "saveSuccess": "영역이 성공적으로 저장되었습니다.",
+      "saveError": "영역을 저장하지 못했습니다.",
+      "duplicateError": "영역 이름은 고유해야 합니다.",
+      "addZone": "영역 추가",
+      "saveChanges": "변경 사항 저장",
+      "saving": "절약...",
+      "selectSport": "스포츠 선택",
+      "selectBenchmark": "벤치마크 선택",
+      "referenceValue": "기준값",
+      "current": "(현재의)",
+      "currentUsed": "현재 적용중 : {benchmark}",
+      "columns": {
+        "order": "주문하다",
+        "name": "이름",
+        "minPercent": "최소 %",
+        "maxPercent": "최대 %",
+        "minAbsolute": "분({unit})",
+        "maxAbsolute": "맥스({unit})",
+        "ref": "참조"
+      },
+      "placeholders": {
+        "name": "이름",
+        "min": "최소",
+        "max": "맥스",
+        "minPercent": "최소 %",
+        "maxPercent": "최대 %"
+      },
+      "sports": {
+        "run": "달리다",
+        "cycling": "사이클링",
+        "swim": "헤엄"
+      }
+    }
+  },
+  "ActivityDetail": {
+    "title": "활동 상세",
+    "backButton": "뒤쪽에",
+    "configuration": "구성",
+    "loading": "로드 중...",
+    "processing": {
+      "title": "활동을 처리 중입니다.",
+      "description": "활동기록은 존재하지만 아직 분석 및 파생데이터 준비중입니다.",
+      "failedTitle": "활동 처리가 완료되지 않았습니다.",
+      "failedDescription": "활동이 생성되었지만 분석 파이프라인에 문제가 발생하여 세부정보 보기가 아직 준비되지 않았습니다.",
+      "currentStatus": "현황",
+      "pendingNote": "나중에 다시 오셔도 됩니다. 처리가 완료되면 알려드리겠습니다.",
+      "failedNote": "나중에 다시 시도하거나 활동 목록으로 돌아가 최종 처리 결과를 기다려 주세요.",
+      "status": {
+        "RECEIVED": "받았다",
+        "NORMALIZED": "정규화됨",
+        "DEDUPED": "중복 제거됨",
+        "MATERIALIZED": "구체화됨",
+        "PARQUET_READY": "분석 파일 준비됨",
+        "ANALYZING": "분석 중",
+        "READY": "준비가 된",
+        "PARTIAL_FAILED": "부분적으로 실패함",
+        "FAILED": "실패한"
+      }
+    },
+    "tabs": {
+      "overview": "개요",
+      "heartrate": "심박수",
+      "power": "힘",
+      "slope": "경사",
+      "lap": "랩",
+      "pace": "속도",
+      "runningDynamics": "러닝 다이내믹스",
+      "bestIntervals": "최고 기록"
+    },
+    "suspenseFallback": "로드 중...",
+    "activityFeed": "활동 피드",
+    "source": "출처",
+    "sourceUpload": "수동 업로드",
+    "coachReview": "코치 리뷰",
+    "bestIntervals": {
+      "title": "이 활동의 최고 기록",
+      "description": "시간 또는 거리별 최고 연속 기록을 확인합니다. 선택하면 경로에서 해당 구간을 표시합니다.",
+      "clear": "지우기",
+      "selected": "선택됨",
+      "location": "구간",
+      "timeSection": "지속 시간별",
+      "timeSectionDescription": "주요 지속 시간별 최고 평균 기록을 비교합니다. 값을 선택하면 지도에서 해당 구간을 표시합니다.",
+      "duration": "지속 시간",
+      "timeRange": "시간 구간",
+      "distanceSection": "거리별",
+      "distanceSectionDescription": "표준 달리기 거리에서 가장 빠른 연속 기록입니다.",
+      "distance": "거리",
+      "effortTime": "시간"
+    },
+    "activityAnalysis": {
+      "title": "활동 분석",
+      "gradeMedian": "경사도 중앙값",
+      "vam": "수직 상승 속도",
+      "cadence": "활성 케이던스",
+      "powerVariability": "파워 변동",
+      "coverage": "데이터 커버리지",
+      "power": "파워",
+      "hr": "심박수",
+      "pace": "페이스",
+      "profile": {
+        "FLAT": "평지",
+        "UPHILL": "오르막",
+        "DOWNHILL": "내리막",
+        "HILLY": "구릉",
+        "ROLLING": "기복"
+      }
+    },
+    "dataCharts": "데이터 차트",
+    "zoneTable": {
+      "zone": "구간",
+      "range": "범위",
+      "distribution": "분포",
+      "percentage": "비율",
+      "duration": "시간",
+      "noData": "구간 데이터 없음"
+    },
+    "dataChartsHint": "곡선을 눌러 값을 확인하세요. 펼치면 전체 세부 정보를 볼 수 있습니다.",
+    "untitledActivity": "제목 없는 활동",
+    "sportTypeRecalculateConfirmTitle": "스포츠 유형을 바꾸시겠습니까?",
+    "sportTypeRecalculateConfirmDescription": "스포츠 유형을 전환하면 이 활동의 ​​지표가 다시 계산됩니다. 계속하다?",
+    "sportTypeRecalculateConfirmCancel": "취소",
+    "sportTypeRecalculateConfirmContinue": "계속하다",
+    "sessionRpe": {
+      "chipLabel": "RPE",
+      "helpAriaLabel": "세션 RPE 정보",
+      "label": "세션 RPE",
+      "notSet": "설정되지 않음",
+      "notSetShort": "—",
+      "hint": "Subjective effort (1–10). 훈련 로드 우선순위에 세션 RPE가 포함될 때 사용됩니다.",
+      "placeholder": "예를 들어 7",
+      "save": "구하다",
+      "clear": "분명한",
+      "saved": "세션 RPE가 저장되었습니다.",
+      "cleared": "세션 RPE가 삭제되었습니다.",
+      "invalid": "1에서 10 사이의 숫자를 입력하세요.",
+      "failed": "세션 RPE를 업데이트할 수 없습니다."
+    }
+  },
+  "SwimOverview": {
+    "speed": "속도",
+    "strokes": "수영 영법",
+    "swolf": "스울프"
+  },
+  "ActivityNotFound": {
+    "title": "활동을 찾을 수 없음",
+    "description": "죄송합니다. 방문한 활동이 존재하지 않거나 삭제되었습니다.",
+    "backButton": "돌아가기",
+    "homeButton": "활동"
+  },
+  "ActivityMap": {
+    "locked": "잠김",
+    "unlocked": "잠금 해제됨"
+  },
+  "Overview": {
+    "noData": "사용 가능한 데이터가 없습니다.",
+    "stats": {
+      "avgSpeed": "평균 속도",
+      "avgPace": "평균 페이스",
+      "distance": "거리",
+      "elevation": "높이",
+      "enhancedElevation": "향상된 고도",
+      "climb": "오르다",
+      "descend": "하강",
+      "slope": "경사",
+      "enhancedSlope": "향상된 경사",
+      "avgHeartRate": "평균 심박수",
+      "avgPower": "평균 전력",
+      "avgCadence": "평균 케이던스",
+      "avgStepLength": "평균 단계 길이",
+      "avgStanceTime": "평균 자세 시간",
+      "temperature": "온도",
+      "aerobicEfficiencyPower": "전력 효율성",
+      "runningEffectiveness": "달리기 효과",
+      "efficiencyIndex": "효율성 지수"
+    }
+  },
+  "HeartRatePage": {
+    "title": "심박수 구역 분석",
+    "heartRate": "심박수",
+    "tabs": {
+      "mhr": "MHR",
+      "hrr": "HR",
+      "lthr": "LTHR"
+    },
+    "baseStats": {
+      "avg": "평균 심박수",
+      "max": "최대 심박수",
+      "reserve": "심박수 비축",
+      "intensity": "심박수 강도",
+      "avgPct": "평균 HR %",
+      "maxPct": "최대 심박수 %",
+      "energy": "에너지",
+      "trimp": "트림",
+      "tss": "TSS(시간)",
+      "powerDecoupling": "비밀번호:시간",
+      "paceDecoupling": "아빠:시",
+      "peakEpoc": "피크 EPOC",
+      "maxHeartRateRecovery": "최대 HR 회복"
+    },
+    "average": "평균",
+    "epocInfo": {
+      "title": "피크 EPOC",
+      "description": "운동 후 초과 산소 소비량(EPOC)은 신체를 정상적인 휴식 수준의 대사 기능으로 회복하는 데 필요한 산소의 양입니다. 피크 EPOC는 훈련 세션의 생리적 스트레스와 자극을 반영합니다.",
+      "source": "참조",
+      "firstbeatSource": "Firstbeat 과학 논문(Rusko 외. 2003)"
+    },
+    "charts": {
+      "zoneDistribution": {
+        "title": "심박수 구역 분포"
+      },
+      "timeSeries": {
+        "title": "심박수 시계열",
+        "description": "활동 전반에 걸쳐 심박수 추세와 구역 분포를 표시합니다."
+      },
+      "durationCurve": {
+        "title": "심박수 지속 시간 곡선",
+        "description": "다양한 기간 동안의 최대 심박수 표시",
+        "tooltip": {
+          "peak": "{days}일 피크"
+        }
+      }
+    },
+    "help": {
+      "zonesTip": "영역이 이상해 보이면 사용자 설정에서 최대 심박수를 확인하세요. 업데이트한 후 활동을 다시 업로드하면 영역이 새로 고쳐집니다."
+    },
+    "zones": {
+      "Z1": "회복/쉬움",
+      "Z2": "유산소/지구력",
+      "Z3": "속도",
+      "Z4": "한계점",
+      "Z5": "무산소성/VO2 최대"
+    },
+    "tooltip": {
+      "time": "시간",
+      "heartRate": "심박수",
+      "power": "힘",
+      "percentage": "백분율",
+      "duration": "지속",
+      "avgHeartRate": "평균",
+      "maxHeartRate": "맥스",
+      "minHeartRate": "최소",
+      "heartRateRange": "범위",
+      "connected": "연결됨",
+      "minutes": "분",
+      "pace": "속도",
+      "distance": "거리"
+    },
+    "trimpInfo": {
+      "title": "트레이닝 임펄스",
+      "description": "TRIMP(Training Impulse)는 Eric Banister가 제안했습니다. 이 애플리케이션은 주로 <highlight>TRIMPexp(지수형 심박수 측정)</highlight>을 사용합니다. (최대 심박수 및 안정시 심박수를 사용할 수 없는 경우 TRIMPavg(평균 심박수 조정)로 대체됩니다.)",
+      "details": "이 알고리즘은 혈중 젖산염 농도의 비선형 증가를 시뮬레이션하기 위해 지수 인자를 도입합니다. <highlight>심박수 강도가 증가함에 따라 훈련 스트레스는 기하급수적으로 증가합니다</highlight>, 따라서 고강도 훈련의 생리적 부하를 보다 정확하게 정량화합니다.",
+      "source": "알고리즘 소스",
+      "sourceLink": "fallrnr.com-TRIMPexp 지수 스케일링",
+      "rangeTitle": "부하 기준 범위",
+      "rangeSource": "참조: 퍼스트비트",
+      "ranges": {
+        "easy": "쉬움 / 회복",
+        "moderate": "중간 강도",
+        "hard": "고강도 / 임계값",
+        "severe": "극도의 강도 / 지구력"
+      },
+      "note": "참고: 이 페이지에 표시된 TRIMP 값은 TRIMP(100)이며 TSS와 같은 측정항목과 비교할 수 있도록 정규화되었습니다.",
+      "hrPercentage": "심박수 %",
+      "cumulativeTrimp": "누적 TRIMP",
+      "noData": "TRIMP 데이터 없음"
+    },
+    "decouplingInfo": {
+      "title": "호기성 디커플링",
+      "description": "유산소 디커플링은 유산소 효율성과 지구력을 측정하는 주요 척도입니다. 이는 일정한 힘이나 속도로 시간이 지남에 따라 발생하는 심장 드리프트를 나타냅니다.",
+      "details": "피로가 쌓이면 신체는 더 많은 근육 섬유를 동원하여 산소와 혈액 수요를 증가시킵니다. 이로 인해 <highlight>심박수가 상승하고 파워/페이스는 일정</highlight>로 유지됩니다. 디커플링이 높을수록 유산소 기반이 약하거나 피로 저항이 낮음을 나타냅니다.",
+      "pwHr": "Pw:Hr(전력:심박수)",
+      "pwHrFormula": "EF = 평균 전력 / 평균 HR; Pw:시간 = (EF1 - EF2) / EF1 × 100%",
+      "paHr": "Pa:Hr(페이스:심박수)",
+      "paHrFormula": "EF = 평균 속도 / 평균 HR; Pa:Hr = (EF1 - EF2) / EF1 × 100%",
+      "interpretation": "일반적으로 목표 이벤트 기간 동안 <highlight>5% 미만</highlight> 디커플링은 견고한 유산소 기반을 나타냅니다.",
+      "source": "원천",
+      "sourceLink": "순풍 코칭 - 에어로빅 디커플링이란 무엇입니까?",
+      "note": "참고: 이 지표를 사용하려면 꾸준한 유산소 노력이 필요합니다. 무산소 운동이나 인터벌 운동을 하면 계산이 왜곡됩니다."
+    },
+    "noData": "심박수 데이터 없음"
+  },
+  "PacePage": {
+    "title": "속도 분석",
+    "pace": "속도",
+    "header": {
+      "eyebrow": "측정항목",
+      "description": "속도 곡선, 임계 속도 예측 및 속도 영역을 검토합니다."
+    },
+    "stats": {
+      "avgPace": "평균 페이스",
+      "avgSpeed": "평균 속도",
+      "avgGap": "평균 격차",
+      "xPace": "엑스페이스",
+      "xGap": "xGAP",
+      "viPace": "VI(페이스)",
+      "viGap": "VI (갭)",
+      "aerobicEfficiency": "유산소 효율성",
+      "vo2max": "VO2max(추정)"
+    },
+    "charts": {
+      "zoneDistribution": {
+        "title": "페이스 존 분포",
+        "description": "페이스 존 전체의 시간 분포를 표시합니다."
+      }
+    },
+    "tooltip": {
+      "percentage": "백분율",
+      "duration": "지속"
+    },
+    "zones": {
+      "Z1": "Z1",
+      "Z2": "Z2",
+      "Z3": "Z3",
+      "Z4": "Z4",
+      "Z5": "Z5",
+      "Z6": "Z6",
+      "Z7": "Z7"
+    }
+  },
+  "HeartRatePowerRatio": {
+    "title": "전력 효율 계수",
+    "description": "분당 심박수 비율(전력/HR)에 대한 전력을 표시합니다. 값이 높을수록 전력 효율이 높음을 나타냅니다.",
+    "tooltip": {
+      "time": "시간",
+      "ratio": "전력 효율 계수",
+      "heartRate": "심박수",
+      "power": "힘",
+      "pace": "속도",
+      "distance": "거리"
+    },
+    "noData": "전력 효율 계수 데이터 없음"
+  },
+  "EpocChart": {
+    "title": "EPOC 추정",
+    "epoc": "EPOC(ml/kg)",
+    "heartRate": "심박수(bpm)",
+    "distance": "거리",
+    "peak": "정점"
+  },
+  "PaceChart": {
+    "title": "속도",
+    "tabs": {
+      "zones": "구역",
+      "curve": "곡선"
+    },
+    "description": "활동 전반에 걸쳐 속도 추세를 표시합니다.",
+    "tooltip": {
+      "time": "시간",
+      "pace": "속도"
+    },
+    "max": "맥스",
+    "cs": "임계 속도",
+    "noData": "속도 데이터 없음",
+    "viewType": {
+      "chart": "차트",
+      "list": "테이블"
+    },
+    "split": {
+      "label": "나뉘다",
+      "1km": "1킬로미터",
+      "3km": "3킬로미터",
+      "5km": "5km"
+    },
+    "table": {
+      "segment": "분절",
+      "pace": "페이스(분/km)"
+    },
+    "average": "평균",
+    "min": "최소"
+  },
+  "StrideChart": {
+    "title": "보폭",
+    "description": "활동 전반에 걸쳐 보폭 추세를 표시합니다.",
+    "tooltip": {
+      "time": "시간",
+      "stride": "보폭",
+      "pace": "속도",
+      "distance": "거리"
+    },
+    "average": "평균",
+    "max": "맥스",
+    "min": "최소",
+    "noData": "보폭 데이터 없음"
+  },
+  "RunningDynamicsPage": {
+    "average": "평균",
+    "metrics": {
+      "cadence": "케이던스",
+      "stepLength": "보폭",
+      "verticalOscillation": "수직 진폭",
+      "verticalRatio": "수직 비율",
+      "stanceTime": "지면 접촉 시간",
+      "flightTime": "체공 시간",
+      "flightRatio": "체공 비율",
+      "totalSteps": "총 걸음 수"
+    },
+    "units": {
+      "steps": "보"
+    }
+  },
+  "CadenceChart": {
+    "title": "운율",
+    "runningTitle": "케이던스",
+    "description": "활동 전반에 걸쳐 케이던스 추세를 표시합니다.",
+    "tooltip": {
+      "time": "시간",
+      "cadence": "운율",
+      "distance": "거리"
+    },
+    "average": "평균",
+    "max": "맥스",
+    "noData": "케이던스 데이터 없음",
+    "min": "최소"
+  },
+  "ElevationChart": {
+    "title": "높이",
+    "description": "활동 전반에 걸쳐 고도 추세를 표시합니다.",
+    "expand": "고도 차트 펼치기",
+    "tooltip": {
+      "time": "시간",
+      "enhancedAltitude": "标准 고도",
+      "altitude": "고도",
+      "distance": "거리"
+    },
+    "average": "평균 고도",
+    "max": "최대 고도",
+    "min": "최소 고도",
+    "noData": "고도 데이터 없음"
+  },
+  "TemperatureChart": {
+    "title": "온도",
+    "description": "활동 전반에 걸쳐 온도 추세를 보여줍니다.",
+    "tooltip": {
+      "time": "시간",
+      "temperature": "온도",
+      "distance": "거리"
+    },
+    "average": "평균 온도",
+    "max": "최대 온도",
+    "min": "최소 온도",
+    "noData": "온도 데이터 없음"
+  },
+  "PowerChart": {
+    "title": "힘",
+    "calculatedTitle": "추정 파워",
+    "calculatedBadge": "추정",
+    "calculatedDescription": "속도와 체중으로 추정하며 현재 평지 모델은 경사를 사용하지 않습니다",
+    "description": "활동 전반에 걸쳐 전력 추세를 표시합니다.",
+    "tooltip": {
+      "time": "시간",
+      "power": "힘",
+      "distance": "거리"
+    },
+    "average": "평균 전력",
+    "max": "최대 전력",
+    "min": "최소 전력",
+    "noData": "전력 데이터 없음"
+  },
+  "HeartRateChart": {
+    "title": "심박수",
+    "description": "활동 전반에 걸쳐 심박수 추세를 표시합니다.",
+    "tooltip": {
+      "time": "시간",
+      "heartRate": "심박수",
+      "distance": "거리"
+    },
+    "average": "평균 심박수",
+    "max": "최대 심박수",
+    "min": "최소 심박수",
+    "noData": "심박수 데이터 없음"
+  },
+  "HeartRateTable": {
+    "timeRangeHeartRate": "시간 범위/최대 평균 심박수",
+    "oneSecond": "1초",
+    "fiveSeconds": "5초",
+    "tenSeconds": "10초",
+    "twentySeconds": "20대",
+    "thirtySeconds": "30대",
+    "oneMinute": "1m",
+    "threeMinutes": "3m",
+    "fiveMinutes": "5m",
+    "tenMinutes": "10m",
+    "twentyMinutes": "20m",
+    "thirtyMinutes": "30m",
+    "sixtyMinutes": "60m",
+    "twoHours": "2시간",
+    "threeHours": "3시간",
+    "sixHours": "6시간"
+  },
+  "StanceTimeChart": {
+    "title": "자세 시간",
+    "description": "활동 전반에 걸쳐 지면에 닿는 데 걸리는 시간을 표시합니다.",
+    "tooltip": {
+      "time": "시간",
+      "stanceTime": "자세 시간",
+      "distance": "거리"
+    },
+    "average": "평균 자세 시간",
+    "max": "최대 자세 시간",
+    "noData": "자세 시간 데이터 없음",
+    "min": "최소 지면 접촉 시간"
+  },
+  "ActivityPowerPage": {
+    "title": "파워존 분석",
+    "average": "평균",
+    "basicStats": {
+      "avgPower": "평균 전력",
+      "maxPower": "최대 전력",
+      "normalizedPower": "정규화된 전력(NP)",
+      "trainingStressScore": "훈련 스트레스 점수(eTSS)",
+      "intensityFactor": "강도 계수(IF)",
+      "variabilityIndex": "변동성 지수(VI)",
+      "relativeIntensity": "상대 강도(RI)",
+      "powerWeightRatio": "전력/무게(WKG)",
+      "efficiencyFactor": "효율 계수(EF)",
+      "powerHeartRateRatio": "전력/HR(P/HR)"
+    },
+    "chart": {
+      "power": "힘",
+      "avgPower": "평균 전력",
+      "powerRange": "전력 범위",
+      "unknownZone": "알 수 없는 영역",
+      "noPowerData": "전력 데이터 없음",
+      "pdc": "전력 지속 시간 곡선"
+    },
+    "charts": {
+      "timeSeries": {
+        "title": "전력 시계열 차트",
+        "description": "시간 및 구역 분포에 따른 전력 추세 표시"
+      },
+      "zoneDistribution": {
+        "title": "파워존 분포",
+        "description": "파워존 전체의 시간 분포를 표시합니다."
+      },
+      "powerDurationCurve": {
+        "title": "전력 지속 시간 곡선",
+        "description": "다양한 기간에 걸쳐 최대 평균 전력을 표시합니다."
+      }
+    },
+    "zones": {
+      "Z1": "활성 복구",
+      "Z2": "지구력",
+      "Z3": "속도",
+      "Z4": "한계점",
+      "Z5": "VO2 최대",
+      "Z6": "무산소성",
+      "Z7": "신경근"
+    },
+    "tooltip": {
+      "percentage": "백분율",
+      "duration": "지속",
+      "minutes": "분",
+      "avgPower": "평균 전력",
+      "maxPower": "최대 전력",
+      "minPower": "최소 전력",
+      "powerRange": "전력 범위",
+      "power": "힘"
+    },
+    "powerDurationCurve": {
+      "title": "전력 지속 시간 곡선"
+    },
+    "unit": {
+      "watt": "여"
+    },
+    "noData": "전력 데이터 없음",
+    "powerInfo": {
+      "title": "전력 측정 정보",
+      "description": "FTP(Functional Threshold Power)는 1시간 동안 유지할 수 있는 최대 평균 파워입니다. CP(Critical Power)는 오랫동안 유지할 수 있는 이론적 전력 임계값입니다.",
+      "details": "표시된 값은 <br/><b>1의 두 부분으로 구성됩니다. 기본 값</b>: 현재 활동에 대한 TSS/IF 계산에 사용되는 설정 값입니다.<br/><b>2. 보조 값(소)</b>: 이 활동의 ​​데이터를 기반으로 추정된 eFTP/eCP 값입니다.",
+      "trademark": "FTP(Functional Threshold Power)는 Peaksware, LLC의 등록 상표입니다.",
+      "source": "원천",
+      "sourceLink": "트레이닝피크스"
+    },
+    "normalizedPowerInfo": {
+      "title": "NP(정규화된 전력)",
+      "description": "정규화된 파워(NP)는 운동의 실제 생리학적 대사 비용을 정량화하기 위해 설계된 파워 평균화 방법입니다.",
+      "details": "평균 파워와 달리 NP는 신체에 더 많은 스트레스를 유발하는 고강도 변동에 더 중점을 둡니다.<br></br><br></br><b>핵심 알고리즘:</b><br></br>1. 30초 이동 평균 전력을 계산합니다.<br></br>2. 이 값을 4승으로 올립니다(고강도의 효과 증폭).<br></br>3. 이들 4차 전력값의 평균을 계산합니다.<br></br>4. NP를 얻으려면 4번째 루트를 선택하세요.<br></br><br></br><b>유의성:</b><br></br>생리적 반응(젖산 축적, 글리코겐 고갈 등)은 운동 강도와 비선형적으로 관련되어 있습니다. NP는 이 가중치 알고리즘을 사용하여 간격, 스프린트 또는 기복이 심한 지형을 포함하는 운동의 훈련 부하를 보다 정확하게 반영합니다.",
+      "source": "원천",
+      "sourceLink": "트레이닝피크스",
+      "trademark": "정규화된 파워(NP), 훈련 스트레스 점수(TSS) 및 강도 계수(IF)는 Peaksware, LLC의 등록 상표입니다."
+    },
+    "xPowerInfo": {
+      "title": "엑스파워",
+      "description": "Skiba의 'xPower'는 생리적 긴장을 특성화하는 데 사용되는 지수 가중 이동 평균(25초)의 4제곱입니다.",
+      "details": "계산:<br></br>1. 순간적인 LNP<br></br>2를 얻기 위한 25초 EWMA 전력 평활화. LNP^4의 평균을 낸 다음 네 번째 근<br></br>3을 취합니다. BikeScore/ETSS 및 상대 강도(RI)<br></br><br></br>의 기초 Coggan의 NP와 유사하지만 알고리즘 세부 사항이 다르며 Skiba의 훈련 로드 시스템에서 더 많이 사용됩니다.",
+      "source": "원천",
+      "sourceLink": "스키바 / 골든치타"
+    },
+    "tssInfo": {
+      "title": "TSS(훈련 스트레스 점수)",
+      "description": "TSS는 Coggan 시스템에서 유래되었으며 운동으로 인해 신체에 가해지는 총 스트레스를 측정합니다.",
+      "details": "핵심 계산: <b>TSS = 100 × IF² × Hours</b><br></br>IF(강도 계수) = NP / FTP<br></br>NP(Normalized Power)는 유산소 대사 부하를 반영합니다.",
+      "source": "원천",
+      "sourceLink": "트레이닝피크스",
+      "trademark": "훈련 스트레스 점수(TSS), 강도 계수(IF) 및 정규화된 파워(NP)는 Peaksware, LLC의 등록 상표입니다."
+    },
+    "bikeScoreInfo": {
+      "title": "자전거점수",
+      "description": "BikeScore는 xPower 및 상대 강도(RI)를 사용하여 계산된 TSS와 동등한 Skiba/GoldenCheetah입니다.",
+      "details": "계산: <b>BikeScore = 100 × RI² × Hours</b><br></br>TSS와 유사하지만 Normalized Power 대신 xPower를 사용하고 FTP 대신 CP를 사용합니다.",
+      "source": "원천",
+      "sourceLink": "스키바 / 골든치타"
+    },
+    "intensityFactorInfo": {
+      "title": "IF(강도 계수)",
+      "description": "강도 계수(IF)는 기능적 역치 전력(FTP)에 대한 정규화된 전력(NP)의 비율입니다.",
+      "details": "계산: <b>IF = NP / FTP</b><br></br>IF를 통해 현재 체력 수준에 비해 라이딩의 강도가 얼마나 되었는지 알 수 있습니다.<br></br>IF가 1.0이면 1시간 동안 전력을 다해 노력하는 것입니다.",
+      "source": "원천",
+      "sourceLink": "트레이닝피크스",
+      "trademark": "IF(강도 계수), NP(정규화된 파워) 및 TSS(훈련 스트레스 점수)는 Peaksware, LLC의 등록 상표입니다."
+    },
+    "riInfo": {
+      "title": "RI(상대강도)",
+      "description": "RI(상대 강도)는 Skiba 시스템의 Coggan 시스템 IF(강도 계수)와 동일합니다.",
+      "details": "핵심 계산: <b>RI = xPower / CP</b><br></br>개인의 임계 전력과 관련된 강도 수준을 반영합니다.<br></br>RI가 1.0에 가까울수록 임계 강도를 나타내고, 1.0을 초과하면 임계치 이상을 나타냅니다.",
+      "source": "원천",
+      "sourceLink": "스키바 / 골든치타"
+    },
+    "viInfo": {
+      "title": "VI(변동성 지수)",
+      "description": "VI(가변성 지수)는 속도/전력 출력의 부드러움을 설명합니다.",
+      "details": "계산: <b>VI = NP / Avg Power</b> (또는 xPower / Avg Power)<br></br>VI가 1.0에 가까울수록 안정적인 출력을 나타냅니다. 값이 높을수록 전력 변동이 더 심하다는 것을 나타냅니다.<br></br>타임 트라이얼과 지구력 라이딩은 일반적으로 1에 가까운 VI를 목표로 합니다.",
+      "source": "원천",
+      "sourceLink": "트레이닝픽스/GoldenCheetah"
+    },
+    "wkgInfo": {
+      "title": "W/kg(무게 대비 출력 비율)",
+      "description": "W/kg은 체중 단위당 출력을 나타내며, 다양한 체중에 따른 사이클링 능력을 비교하기 위한 주요 지표입니다.",
+      "details": "계산: <b>평균 파워/무게</b><br></br>등반에 더 적합함; 평평한 도로는 공기역학의 영향을 더 많이 받습니다.<br></br> 다양한 체중의 라이더 간의 상대적 등반 능력을 비교할 수 있습니다.",
+      "source": "원천",
+      "sourceLink": "일반 사이클링 지표"
+    },
+    "efficiencyFactorInfo": {
+      "title": "효율 계수(EF)",
+      "description": "EF는 평균 심박수에 대한 정규화된 파워(NP)의 비율입니다. 유산소 지구력 영역에서의 효율성을 측정합니다.",
+      "details": "계산: <b>EF = 정규화된 파워(NP) / AvgHR</b><br/>동일 HR에서 더 높은 NP 또는 동일한 NP에서 더 낮은 HR은 유산소 기반이 더 강하다는 것을 의미합니다.<br/>지구력 라이딩 중에 관찰하는 것이 가장 좋습니다.",
+      "source": "원천",
+      "sourceLink": "트레이닝피크스",
+      "sourceLink2": "백과사전"
+    },
+    "powerHeartRateRatioInfo": {
+      "title": "전력/HR(출력/입력 비율)",
+      "description": "출력/입력 비율이라고도 알려진 파워/HR은 주어진 입력(심박수)에 대해 얼마나 많은 출력(파워)이 생성되는지를 측정합니다.",
+      "details": "많은 요인이 심박수에 영향을 주기는 하지만 체력이 좋아지면 이 수치는 높아집니다.<br/>지구력 라이딩 중에 관찰하는 것이 가장 좋습니다.",
+      "source": "원천",
+      "sourceLink": "일반 사이클링 지표"
+    }
+  },
+  "Activities": {
+    "title": "활동",
+    "loading": "활동 로드 중...",
+    "loadError": "활동을 로드하지 못했습니다.",
+    "noActivities": "활동을 찾을 수 없습니다.",
+    "uploadButton": "활동 업로드",
+    "filters": {
+      "all": "모두",
+      "cycling": "사이클링",
+      "running": "달리기",
+      "swimming": "수영"
+    },
+    "sortBy": {
+      "date": "날짜",
+      "distance": "거리",
+      "duration": "지속"
+    }
+  },
+  "activities": {
+    "activities": "활동",
+    "weeklyActivity": "주간 활동",
+    "lastWeek": "지난주",
+    "monthlyActivity": "월별 활동",
+    "monthlySummary": "월별 요약",
+    "yearlySummary": "연간 요약",
+    "totalCount": "총 활동",
+    "totalDistance": "총 거리",
+    "totalDuration": "총 기간",
+    "totalCalories": "총 칼로리",
+    "name": "이름",
+    "type": "유형",
+    "date": "날짜",
+    "startTime": "시작 시간",
+    "distance": "거리",
+    "duration": "지속",
+    "vo2max": "VO2최대",
+    "updated": "업데이트됨",
+    "actions": "행위",
+    "viewDetails": "보다",
+    "exportData": "내보내다",
+    "deleteActivity": "삭제",
+    "processingStatus": {
+      "processing": "처리",
+      "notReady": "이 활동은 아직 처리 중입니다. 준비가 된 후 열거나 내보내십시오."
+    },
+    "importFiles": "파일 가져오기",
+    "importActivityFiles": "활동 파일 가져오기",
+    "supportedFormatsDescription": "{formats} 형식으로 최대 {maxFiles} 파일 가져오기 지원",
+    "dropFilesHere": "여기에 파일을 드롭하세요.",
+    "dragOrClickToSelect": "여기로 파일을 드래그하거나 클릭하여 파일을 선택하세요.",
+    "supportedFormats": "지원되는 형식: {formats}",
+    "selectedFiles": "선택된 {count} 파일",
+    "cancel": "취소",
+    "uploading": "업로드 중",
+    "uploadWithCount": "{count} 파일 업로드",
+    "upload": "업로드",
+    "uploadSuccess": "업로드 성공",
+    "checkDuplicatesFailed": "중복 확인 실패",
+    "uploadFailed": "업로드 실패",
+    "unknownError": "알 수 없는 오류",
+    "importProgress": {
+      "title": "가져오기",
+      "description": "파일을 가져오기 위해 대기 중입니다. 백그라운드에서 처리하는 동안 계속 탐색할 수 있습니다.",
+      "completedTitle": "가져오기 완료",
+      "completedDescription": "이 일괄 처리가 완료되었습니다. 지금 이 창을 닫고 결과를 검토할 수 있습니다.",
+      "batchCreatedToast": "가져오기 배치가 생성되었습니다. 지금 {count} 파일 처리 중",
+      "openEntry": "가져오기 진행",
+      "laterHint": "나중에 다시 방문하여 언제든지 결과를 확인할 수 있습니다.",
+      "doneHint": "이 일괄 처리가 완료되었습니다.",
+      "notificationHint": "가져오기가 완료되면 알림을 받게 되므로 이 대화 상자에 머물 필요가 없습니다.",
+      "progressLabel": "진전",
+      "total": "총",
+      "success": "성공함",
+      "failed": "실패한",
+      "skipped": "건너뛰었습니다.",
+      "batchStatus": "배치 상태",
+      "postProcessStatus": "후처리 현황",
+      "itemListTitle": "파일 상태",
+      "itemsLoadFailed": "가져오기 항목을 로드하지 못했습니다. 나중에 다시 시도해 주세요.",
+      "waitingForItems": "가져오기 항목 상태 로드 중...",
+      "continueLater": "나중에 확인하세요",
+      "close": "닫다",
+      "item": "파일",
+      "waiting": "처리를 기다리는 중",
+      "ready": "활동이 준비되었습니다",
+      "activityStatus": "활동 상태: {status}",
+      "activityProcessingStatus": {
+        "received": "받았다",
+        "normalized": "정규화됨",
+        "deduped": "중복 제거됨",
+        "materialized": "구체화됨",
+        "parquetReady": "분석 파일 준비됨",
+        "analyzing": "분석 중",
+        "ready": "준비가 된",
+        "partialFailed": "부분적으로 실패함",
+        "failed": "실패한",
+        "unknown": "알려지지 않은"
+      },
+      "status": {
+        "batchQueued": "대기 중",
+        "batchRunning": "달리기",
+        "batchCompleted": "완전한",
+        "batchPartialFailed": "부분적으로 실패함",
+        "batchFailed": "실패한",
+        "batchCancelled": "취소",
+        "itemQueued": "대기 중",
+        "itemNormalizing": "정규화",
+        "itemMaterializing": "구체화하다",
+        "itemParquetBuilding": "건물 분석",
+        "itemDone": "완료",
+        "itemSkipped": "건너뛰었습니다.",
+        "itemFailed": "실패한",
+        "itemDead": "죽은",
+        "postPending": "보류 중",
+        "postRunning": "달리기",
+        "postCompleted": "완전한",
+        "postFailed": "실패한",
+        "postDead": "죽은",
+        "postWaiting": "시작을 기다리는 중"
+      }
+    },
+    "noActivitiesData": "활동 데이터 없음",
+    "confirmDeleteTitle": "삭제 확인",
+    "confirmDeleteDescription": "이 작업은 취소할 수 없습니다. 이 활동을 삭제하시겠습니까?",
+    "confirm": "확인하다",
+    "deleting": "삭제 중...",
+    "exportDialogTitle": "내보내기 유형 선택",
+    "exportDialogDescription": "내보내기 파일 형식을 선택하세요.",
+    "selectExportTypePlaceholder": "내보내기 유형 선택",
+    "exporting": "내보내는 중...",
+    "pageLabel": "{total} 중 {current} 페이지",
+    "prevPage": "이전의",
+    "nextPage": "다음",
+    "duplicateActivities": {
+      "title": "중복된 활동이 발견되었습니다.",
+      "description": "다음 파일에는 중복된 활동 데이터가 포함될 수 있습니다. 진행 방법을 선택하세요.",
+      "createNew": "새로 만들기",
+      "cancel": "업로드 취소",
+      "viewActivity": "활동 보기",
+      "duplicatesFound": "{count} 중복 항목 발견",
+      "fileName": "파일 이름",
+      "activityName": "활동 이름",
+      "sportType": "스포츠 종류",
+      "startTime": "시작 시간",
+      "distance": "거리",
+      "duration": "지속",
+      "actions": "행위",
+      "possibleDuplicates": "가능한 중복 활동",
+      "unnamedActivity": "이름 없는 활동",
+      "sportTypes": {
+        "RUN": "달리기",
+        "CYCLING": "사이클링",
+        "SWIM": "수영",
+        "UNKNOWN": "알려지지 않은"
+      }
+    }
+  },
+  "power": {
+    "title": "Trainingload.ai · 전력 분석",
+    "powerAnalysis": "전력 분석",
+    "header": {
+      "eyebrow": "측정항목",
+      "description": "파워 곡선, 최대 파워, 구역, 라이더 프로필을 검토하세요."
+    },
+    "maximumPower": "최대 출력",
+    "duration": "지속",
+    "unknown": "알려지지 않은",
+    "noData": "데이터 없음",
+    "tabs": {
+      "curve": "곡선",
+      "maximum": "최고",
+      "zones": "구역",
+      "profile": "윤곽"
+    },
+    "zones": "구역"
+  },
+  "PowerProfile": {
+    "table": {
+      "level": "수준",
+      "male": "남성",
+      "female": "여성"
+    },
+    "levels": {
+      "worldClass": "월드 클래스",
+      "exceptional": "특별한",
+      "excellent": "훌륭한",
+      "veryGood": "매우 좋은",
+      "good": "좋은",
+      "moderate": "보통의",
+      "fair": "공정한",
+      "novice": "초심자",
+      "untrained": "훈련받지 않은"
+    },
+    "missing": {
+      "title": "W/kg을 계산할 수 없습니다.",
+      "missingWeight": "무게가 설정되지 않아 전력을 W/kg으로 환산할 수 없습니다.",
+      "missingPowerData": "사용 가능한 전력 데이터가 없습니다(5초/1m/5m 또는 FTP).",
+      "missingData": "필수 데이터가 누락되어 W/kg을 추정할 수 없습니다.",
+      "action": "계정으로 이동"
+    },
+    "interpretation": {
+      "title": "프로필 해석",
+      "noDataHint": "체중 또는 전력 데이터가 누락되어 프로필에서 유형을 확인할 수 없습니다.",
+      "type": "유형",
+      "unknown": "알려지지 않은",
+      "text": "해석",
+      "reference": "참조",
+      "referenceTitle": "전원 프로필 만들기(Coggan)"
+    },
+    "types": {
+      "allRounder": {
+        "label": "만능",
+        "interpretation": "단기 버스트와 지속 전력의 균형이 유지됩니다. 일반적으로 다양한 형식에서 경쟁력이 있지만 단일 기간 동안 절대 최고가 아닐 수도 있습니다."
+      },
+      "pursuiter": {
+        "label": "추격자",
+        "interpretation": "강력한 무산소 능력과 탄탄한 유산소 파워. 고강도의 지속적인 노력(예: 트랙 추적/롤링 공격)에 적합합니다."
+      },
+      "sprinter": {
+        "label": "단거리 선수",
+        "interpretation": "뛰어난 신경근 및 무산소 능력. 짧은 고출력 버스트 및 반복적인 스프린트에 탁월합니다. 지속적인 힘은 지연되는 경향이 있습니다."
+      },
+      "timeTrialist": {
+        "label": "타임 트라이얼리스트",
+        "interpretation": "높은 지속 유산소/역치 파워. 타임 트라이얼, 긴 오르막 또는 꾸준한 노력에 적합합니다. 단기 버스트 전력은 상대적으로 약합니다."
+      }
+    }
+  },
+  "PowerTable": {
+    "timeRangePower": "시간 범위/최대 평균 전력",
+    "fiveSeconds": "5초",
+    "thirtySeconds": "30대",
+    "oneMinute": "1분",
+    "threeMinutes": "3분",
+    "fiveMinutes": "5분",
+    "twentyMinutes": "20분",
+    "thirtyMinutes": "30분",
+    "sixtyMinutes": "60분",
+    "twoHours": "2시간",
+    "threeHours": "3시간"
+  },
+  "PaceTable": {
+    "segment": "분절",
+    "pace": "속도",
+    "time": "시간"
+  },
+  "dashboard": {
+    "average": "평균",
+    "maximum": "최고",
+    "minimum": "최저한의",
+    "cadenceTrend": "케이던스 추세",
+    "currentCadence": "현재 케이던스",
+    "comparisonCadence": "비교 케이던스",
+    "current": "현재의",
+    "comparison": "비교",
+    "noData": "데이터 없음",
+    "heartRateTrend": "심박수 추세",
+    "count": "세다",
+    "duration": "지속",
+    "distance": "거리",
+    "climb": "고도 증가",
+    "calories": "칼로리",
+    "averageSpeed": "평균 속도",
+    "averagePower": "평균 전력",
+    "averageHeartRate": "평균 심박수",
+    "paceTrend": "속도 추세",
+    "powerTrend": "전력 추세",
+    "speedTrend": "속도 추세",
+    "overview": {
+      "title": "개요",
+      "addMetricTitle": "측정항목 추가",
+      "add": "추가하다",
+      "added": "추가됨",
+      "remove": "제거하다",
+      "recent30Days": "지난 30일",
+      "selectSportForComparableSpeed": "스포츠를 선택하면 같은 유형의 활동끼리 속도를 비교할 수 있습니다.",
+      "shrinkChart": "차트 축소",
+      "expandChart": "차트 펼치기",
+      "removeChart": "차트 삭제",
+      "groups": {
+        "fitness": "훈련",
+        "activity": "활동",
+        "weeklySummary": "주간 요약"
+      }
+    },
+    "fitnessStatus": {
+      "aboutMetric": "{title} 소개",
+      "edit": "공들여 나열한 것",
+      "save": "구하다",
+      "cancel": "취소",
+      "backButton": "뒤쪽에",
+      "remove": "제거하다",
+      "addMetric": "측정항목 추가",
+      "noMoreMetrics": "더 이상 측정항목이 없습니다.",
+      "saveSuccess": "저장됨",
+      "saveFailed": "저장 실패",
+      "estimatedLabel": "예상",
+      "manualLabel": "수동",
+      "previousWeekLabel": "이전",
+      "changeLabel": "변화",
+      "activityVo2MaxLabel": "활동 VO2Max",
+      "vo2Max": {
+        "title": "VO2 최대",
+        "description": "알려지지 않은",
+        "level": {
+          "EXCELLENT": "훌륭한",
+          "VERY_GOOD": "매우 좋은",
+          "GOOD": "좋은",
+          "FAIR": "공정한",
+          "POOR": "가난한"
+        },
+        "details": "증분 운동 중에 측정된 최대 산소 소비량입니다.",
+        "guide": {
+          "what": "VO2 Max란 무엇입니까?",
+          "whatContent": "VO2 Max(최대 산소 섭취량)는 유산소 지구력의 표준입니다. 이는 분당 격렬한 운동 중에 신체가 활용할 수 있는 최대 산소량을 나타냅니다. 값이 높을수록 유산소 능력이 더 우수함을 나타냅니다.",
+          "use": "해석하는 방법?",
+          "useContent": "일반 인구의 경우 최대 VO2 범위는 30~40ml/kg/min입니다. 엘리트 지구력 운동선수는 70-80을 초과할 수 있습니다. 나이가 들면서 자연스럽게 감소하지만 훈련을 통해 개선될 수 있습니다.",
+          "reference": "참조",
+          "referenceContent": "보통(30-40), 우수(>50), 엘리트(>70)",
+          "source": "출처: Jack Daniels VDOT / Firstbeat",
+          "algorithm": {
+            "title": "이 알고리즘은 Jack Daniels의 VDOT 이론을 기반으로 하며 다음 두 가지 계산 방법을 사용합니다.",
+            "standardTitle": "표준 모드:",
+            "standardContent": "최고 실행 성능의 VDOT 값을 VO2max 기준으로 직접 매핑합니다.",
+            "heartRateTitle": "심박수 모드:",
+            "heartRateContent": "Firstbeat 모델을 참조하여 심박수 백분율(%HRmax)을 통해 현재 산소 섭취량 백분율을 추정한 다음 속도와 결합하여 VO2max를 도출합니다.",
+            "note": "참고: 심박수 추정은 환경 온도, 지형, 신체 상태에 따라 달라질 수 있습니다. 단일 값보다는 장기적인 추세에 초점을 맞추는 것이 좋습니다."
+          }
+        }
+      },
+      "atl": {
+        "title": "피로(ATL)",
+        "description": "피로",
+        "details": "급성 훈련 부하(피로): 지난 7일 동안의 훈련 스트레스의 가중 평균입니다.",
+        "guide": {
+          "what": "ATL(피로)이란 무엇입니까?",
+          "whatContent": "ATL(급성 훈련 부하)은 지난 7일 동안의 훈련 스트레스에 대한 지수 가중 평균입니다. 이는 현재의 피로 수준을 반영합니다.",
+          "use": "사용하는 방법?",
+          "useContent": "ATL이 상승한다는 것은 최근 훈련 강도가 높고 피로가 누적되었음을 나타냅니다. 경주 전에는 ATL을 낮추어 피로를 줄이고 폼(TSB)을 높여야 합니다.",
+          "reference": "참조",
+          "referenceContent": "개인의 체력에 따라 다릅니다. 일반적으로 장기간 동안 CTL보다 크게 높게 유지되어서는 안 됩니다.",
+          "source": "출처: TrainingPeaks / Joe Friel"
+        }
+      },
+      "ctl": {
+        "title": "체력(CTL)",
+        "description": "적합",
+        "details": "만성 훈련 부하(피트니스): 지난 42일 동안의 훈련 스트레스의 가중 평균입니다.",
+        "guide": {
+          "what": "CTL(피트니스)란 무엇인가요?",
+          "whatContent": "CTL(만성 훈련 부하)은 지난 42일(6주) 동안의 훈련 스트레스에 대한 지수 가중 평균입니다. 이는 귀하의 현재 체력 기준을 나타냅니다.",
+          "use": "사용하는 방법?",
+          "useContent": "CTL이 높을수록 더 나은 체력과 더 높은 훈련 부하를 처리할 수 있는 능력이 있음을 나타냅니다. CTL을 구축하는 데는 시간이 걸립니다. 부상을 피하기 위해 점차적으로 늘리십시오.",
+          "reference": "참조",
+          "referenceContent": "초급(20-40), 중급(40-70), 엘리트(>100)",
+          "source": "출처: TrainingPeaks / Joe Friel"
+        }
+      },
+      "tsb": {
+        "title": "컨디션(TSB)",
+        "description": "형태",
+        "details": "훈련 스트레스 균형(양식): CTL - ATL. 상쾌함이나 피로를 나타냅니다.",
+        "status": {
+          "peak": "피크 (+15 ~ +25)",
+          "fresh": "신선함 (+5 ~ +15)",
+          "optimal": "최적 (-10 ~ -30)",
+          "highRisk": "고위험(< -30)",
+          "neutral": "중립 (-10 ~ +5)",
+          "transition": "전환 (> +25)"
+        },
+        "guide": {
+          "what": "TSB(양식)란 무엇입니까?",
+          "whatContent": "TSB(Training Stress Balance)는 체력(CTL)과 피로(ATL)의 차이입니다. 이는 귀하의 현재 준비 상태 또는 신선도를 나타냅니다.",
+          "use": "사용하는 방법?",
+          "useContent": "긍정적인 가치는 당신이 신선하고 경쟁할 준비가 되어 있다는 것을 의미합니다. 음수 값은 로딩 단계에 있음을 의미합니다. 테이퍼링은 TSB를 양의 범위로 가져오는 것을 목표로 합니다.",
+          "reference": "참조",
+          "referenceContent": "피크 존: +15 ~ +25; 신선함: +5 ~ +15; 전환: -10 ~ +5; 최적의 훈련: -30 ~ -10; 고위험: < -30",
+          "source": "출처: TrainingPeaks / Joe Friel"
+        }
+      },
+      "acRatio": {
+        "title": "A:C 비율",
+        "description": "최적",
+        "details": "급성:만성 작업 부하 비율. 훈련 부하 급증 위험을 측정합니다. 최적의 범위: 0.8 - 1.3.",
+        "guide": {
+          "what": "A:C 비율이란 무엇입니까?",
+          "whatContent": "급성:만성 작업 부하 비율은 단기 부하(최근 주)와 장기 부하(지난 4주)를 비교합니다. 부상 위험을 예측하는 지표입니다.",
+          "use": "사용하는 방법?",
+          "useContent": "비율을 0.8에서 1.3('스위트 스팟') 사이로 유지하세요. 스파이크 > 1.5는 너무 빨리 너무 많은 일을 하기 때문에 부상 위험을 크게 증가시킵니다.",
+          "reference": "참조",
+          "referenceContent": "최적: 0.8 - 1.3; 고위험: > 1.5",
+          "source": "출처: Tim Gabbett 박사"
+        },
+        "status": {
+          "low": "훈련 부족(<0.8)",
+          "optimal": "최적(0.8-1.3)",
+          "high": "지나친 접근(1.3-1.5)",
+          "danger": "과도함(>1.5)"
+        }
+      },
+      "monotony": {
+        "title": "단음",
+        "description": "낮은 위험",
+        "details": "훈련 가변성 측정(범위 0.29-1.0). 낮은 단조로움(< 0.6) indicates good variation, high monotony (> 0.8)은 과도한 훈련 위험을 증가시킵니다.",
+        "guide": {
+          "what": "단조로움이란 무엇입니까?",
+          "whatContent": "단조로움은 일일 훈련 부하의 변동성을 측정합니다. 평균 일일 부하 / 표준 편차로 계산됩니다.",
+          "use": "사용하는 방법?",
+          "useContent": "단조로움이 적다는 것은 좋은 변화(힘든 날과 쉬운 날이 섞여 있음)를 의미합니다. 단조로움이 크다는 것은 매일 같은 부하를 수행한다는 의미이며, 이는 지루함과 과도한 훈련으로 이어질 수 있습니다.",
+          "reference": "참조",
+          "referenceContent": "낮은 위험도: < 0.6; Moderate: 0.6-0.8; High Risk: > 0.8",
+          "source": "출처: 포스터 / 칼 포스터"
+        },
+        "status": {
+          "low": "건강함(<0.6)",
+          "moderate": "보통 (0.6-0.8)",
+          "high": "고위험(>0.8)"
+        }
+      },
+      "intensity": {
+        "title": "훈련 스트레인",
+        "description": "로드 측정항목",
+        "details": "훈련 변형률 = 총 부하 × 단조로움 / 0.5. 최근 훈련 부하의 포괄적인 스트레스를 반영합니다.",
+        "guide": {
+          "what": "훈련 스트레인이란 무엇입니까?",
+          "whatContent": "훈련 변형 = 총 주간 부하 * 단조로움. 이는 훈련 주간의 전반적인 스트레스를 정량화합니다.",
+          "use": "사용하는 방법?",
+          "useContent": "높은 변형률은 변화가 거의 없는 높은 하중을 나타냅니다. 이는 잠재적인 과도한 훈련이나 질병에 대한 강력한 표시입니다.",
+          "reference": "참조",
+          "referenceContent": "추세를 모니터링합니다. 스트레인의 갑작스러운 급증은 종종 질병이나 부상에 앞서 발생합니다.",
+          "source": "출처: 포스터 / 칼 포스터"
+        },
+        "status": {
+          "low": "낮은 변형률(< 600)",
+          "optimal": "최적(600 - 1000)",
+          "high": "높은 변형률(> 1000)"
+        }
+      },
+      "restDays": {
+        "title": "제안된 휴식",
+        "description": "TSB=0에 도달하려면",
+        "details": "균형 잡힌 훈련 부하(TSB=0)를 달성하는 데 필요한 예상 휴식 일수입니다.",
+        "unit": "날"
+      },
+      "ftp": {
+        "title": "FTP",
+        "description": "임계 전력",
+        "details": "FTP(Functional Threshold Power)는 약 1시간 동안 유지할 수 있는 최대 평균 파워입니다."
+      },
+      "cp": {
+        "title": "CP",
+        "description": "크리티컬 파워",
+        "details": "CP(임계 전력)는 훈련 영역 및 부하 분석에 자주 사용되는 주요 지구력 전력 지표입니다."
+      },
+      "pMax": {
+        "title": "실적 최대화",
+        "description": "피크 전력",
+        "details": "최대 순간 출력(PMax)은 질주 및 폭발 능력을 반영합니다."
+      },
+      "tp": {
+        "title": "TP",
+        "description": "임계 속도",
+        "details": "임계 페이스(TP)는 임계 달리기 성능을 반영하며 종종 훈련 페이스 영역을 설정하는 데 사용됩니다.",
+        "unit": "/km"
+      },
+      "cs": {
+        "title": "CS",
+        "description": "임계 속도",
+        "details": "임계 속도(CS)는 페이스 존을 설정하고 유산소 운동을 추적하는 데 자주 사용되는 주요 지구력 달리기 지표입니다.",
+        "unit": "/km"
+      },
+      "maxHr": {
+        "title": "최대 심박수",
+        "description": "최고",
+        "details": "HR 영역 및 강도 분석에 사용되는 최대 심박수입니다.",
+        "unit": "bpm"
+      },
+      "restingHr": {
+        "title": "휴식 HR",
+        "description": "휴식",
+        "details": "HR 예비(HRR) 및 훈련 부하 계산(예: TRIMP)에 사용되는 안정시 심박수입니다.",
+        "unit": "bpm"
+      },
+      "lthr": {
+        "title": "LTHR",
+        "description": "한계점",
+        "details": "HR 영역 및 지구력 강도 평가에 사용되는 젖산 역치 심박수입니다.",
+        "unit": "bpm"
+      },
+      "weekPressure": {
+        "title": "주간 부하",
+        "description": "훈련 부하",
+        "details": "이번 주의 총 훈련 부하입니다.",
+        "unit": "TSS"
+      },
+      "weekCount": {
+        "title": "주간 세션",
+        "description": "세다",
+        "details": "이번 주 활동 수."
+      },
+      "weekDuration": {
+        "title": "주간 기간",
+        "description": "지속",
+        "details": "이번 주의 총 훈련 시간입니다."
+      },
+      "weekDistance": {
+        "title": "주 거리",
+        "description": "거리",
+        "details": "이번주 총 거리입니다."
+      },
+      "weekSpeed": {
+        "title": "주간 속도",
+        "description": "평균 속도",
+        "details": "이번 주에 집계된 평균 속도입니다."
+      },
+      "weekPower": {
+        "title": "주간 전력",
+        "description": "평균 전력",
+        "details": "이번 주에 집계된 평균 전력입니다."
+      },
+      "weekHeartRate": {
+        "title": "주 HR",
+        "description": "평균 HR",
+        "details": "이번 주에 집계된 평균 심박수입니다."
+      },
+      "weekClimb": {
+        "title": "주간 등반",
+        "description": "오르다",
+        "details": "이번 주 총 상승(고도 상승)입니다."
+      },
+      "weekCalories": {
+        "title": "주 칼로리",
+        "description": "칼로리",
+        "details": "이번 주에 소모된 총 칼로리입니다."
+      },
+      "paceZones": {
+        "title": "Pace zones",
+        "description": "Current running threshold pace and training zones",
+        "details": "Pace zones are calculated from your current training profile.",
+        "noData": "No threshold pace is available yet. Complete a run with valid distance and time data.",
+        "dependency": "Current threshold pace (TP) is {pace} {unit}. Pace zones that depend on TP are recalculated when TP changes."
+      }
+    }
+  },
+  "bestDistance": {
+    "title": "최적의 거리",
+    "byDistance": "거리별",
+    "byTime": "시간별",
+    "rank": "계급",
+    "timeRange": "시간 범위",
+    "distance": "거리",
+    "allTimeBest": "역대 최고 {distance}",
+    "viewActivity": "활동 보기",
+    "period": "기간",
+    "time": "시간",
+    "pace": "속도",
+    "date": "날짜",
+    "activity": "활동",
+    "best": "최상의",
+    "details": "세부",
+    "noRecords": "{distance}에 대한 기록을 찾을 수 없습니다.",
+    "loading": "로드 중...",
+    "selectDistance": "실적을 보려면 거리를 선택하세요.",
+    "allTime": "모든 시간",
+    "noDistances": "이용 가능한 거리 없음",
+    "selectDistances": "거리 선택",
+    "selected": "선택된",
+    "distances": {
+      "halfMarathon": "하프 마라톤",
+      "marathon": "마라톤",
+      "cooperTest": "12분 달리기",
+      "ftp20": "20분 FTP",
+      "ftp60": "60분 FTP",
+      "1min": "1분",
+      "5min": "5분",
+      "20min": "20분",
+      "30min": "30분",
+      "1hour": "1시간",
+      "2hour": "2시간",
+      "3hour": "3시간",
+      "5hour": "5시간",
+      "8hour": "8시간"
+    }
+  },
+  "dateSelector": {
+    "day": "낮",
+    "week": "주",
+    "month": "월",
+    "year": "년도",
+    "addTime": "시간 추가",
+    "confirm": "OK",
+    "selectedCount": "{count} 선택됨",
+    "maxTimeRangesWarning": "최대 5개의 시간 범위를 선택할 수 있습니다.",
+    "minTimeRangesWarning": "최소 한 번 선택 항목을 유지해야 합니다.",
+    "last7Days": "지난 7일",
+    "last14Days": "지난 14일",
+    "last30Days": "최근 30일",
+    "last60Days": "최근 60일",
+    "last90Days": "최근 90일",
+    "today": "오늘",
+    "thisWeek": "이번 주",
+    "thisMonth": "이번 달",
+    "thisYear": "올해",
+    "lastYear": "작년",
+    "allTime": "모든 시간",
+    "customRange": "맞춤 범위"
+  },
+  "MobileAnalytics": {
+    "tabs": {
+      "navigationLabel": "분석 보기",
+      "curve": "곡선",
+      "maximum": "피크",
+      "zones": "구간",
+      "profile": "프로필"
+    }
+  },
+  "activityFilter": {
+    "all": "전체",
+    "allTypes": "모든 유형",
+    "run": "달리다",
+    "cycling": "사이클링",
+    "swim": "헤엄"
+  },
+  "sportType": {
+    "run": "달리기",
+    "cycling": "사이클링",
+    "swim": "수영",
+    "unknown": "알려지지 않은",
+    "confirmTitle": "스포츠 유형 확인",
+    "confirmDescription": "파일이 성공적으로 업로드되었습니다! 다음 활동에 대한 스포츠 유형을 확인하거나 수정하십시오.",
+    "skip": "건너뛰다",
+    "confirm": "설정 확인",
+    "setting": "환경...",
+    "confirmed": "스포츠 유형이 성공적으로 설정되었습니다.",
+    "confirmationFailed": "스포츠 유형을 설정하지 못했습니다."
+  },
+  "activityDetails": {
+    "duration": "지속",
+    "distance": "거리",
+    "avgSpeed": "평균 속도",
+    "editSportType": "스포츠 유형 편집",
+    "sportTypeUpdated": "스포츠 유형이 업데이트되었습니다.",
+    "sportTypeUpdateFailed": "스포츠 유형을 업데이트하지 못했습니다."
+  },
+  "topBar": {
+    "account": "계정",
+    "bestDistance": "최적의 거리",
+    "notifications": "알림",
+    "tools": "훈련 도구",
+    "signOut": "로그아웃"
+  },
+  "settings": {
+    "settings": "설정",
+    "description": "애플리케이션 기본 설정 및 단위 관리",
+    "units": "단위",
+    "application": "애플리케이션",
+    "language": "언어",
+    "languageDescription": "앱의 표시 언어 전환",
+    "unitSystem": "시스템 단위",
+    "unitSystemDescription": "기본 단위로 미터법 또는 영미 단위계를 선택하세요",
+    "metric": "미터법",
+    "imperial": "영미 단위계",
+    "distanceUnit": "거리 단위",
+    "distanceUnitDescription": "거리 표시 단위를 선택하세요.",
+    "speedUnit": "속도 단위",
+    "speedUnitDescription": "속도 표시 단위를 선택하세요.",
+    "powerUnit": "파워 단위",
+    "powerUnitDescription": "파워 표시에 사용할 단위를 선택하세요",
+    "theme": "주제",
+    "themeDescription": "앱의 모양 테마를 선택하세요",
+    "chartXaxis": "기본 차트 X축",
+    "chartXaxisDescription": "기본 X축으로 거리 또는 시간을 선택합니다.",
+    "timeFormat": "시간 형식",
+    "timeFormatDescription": "앱에서 시각을 표시하는 방식을 선택하세요",
+    "meters": "중",
+    "kilometers": "킬로미터",
+    "miles": "마일",
+    "kilometersPerHour": "km/h",
+    "milesPerHour": "마일/시",
+    "metersPerSecond": "밀리미터/초",
+    "watts": "W",
+    "wattsPerKilogram": "W/kg",
+    "light": "빛",
+    "dark": "어두운",
+    "system": "팔로우 시스템",
+    "selectUnitSystem": "단위계 선택",
+    "selectDistanceUnit": "거리 단위 선택",
+    "selectSpeedUnit": "속도 단위 선택",
+    "selectPowerUnit": "전원 장치 선택",
+    "selectTheme": "테마 선택",
+    "selectLanguage": "언어 선택",
+    "selectChartXaxis": "차트 X축 선택",
+    "selectTimeFormat": "시간 형식 선택",
+    "chartXaxisDistance": "거리",
+    "chartXaxisTime": "시간",
+    "timeFormat24h": "24시간",
+    "timeFormat12h": "12시간 AM/PM",
+    "update": "업데이트",
+    "updating": "업데이트 중",
+    "unitSystemUpdated": "단위 시스템이 업데이트되었습니다.",
+    "distanceUnitUpdated": "거리 단위가 업데이트되었습니다.",
+    "speedUnitUpdated": "속도 단위가 업데이트되었습니다.",
+    "powerUnitUpdated": "전원 장치가 업데이트되었습니다.",
+    "themeUpdated": "테마가 업데이트되었습니다.",
+    "chartXaxisUpdated": "기본 차트 X축이 업데이트되었습니다.",
+    "settingsUpdated": "설정이 업데이트되었습니다.",
+    "failedToUpdateUnitSystem": "단위 시스템을 업데이트하지 못했습니다.",
+    "failedToUpdateDistanceUnit": "거리 단위를 업데이트하지 못했습니다.",
+    "failedToUpdateSpeedUnit": "속도 단위를 업데이트하지 못했습니다.",
+    "failedToUpdatePowerUnit": "전원 장치를 업데이트하지 못했습니다.",
+    "failedToUpdateTheme": "테마를 업데이트하지 못했습니다.",
+    "failedToUpdateChartXaxis": "기본 차트 X축을 업데이트하지 못했습니다.",
+    "failedToUpdateSettings": "설정을 업데이트하지 못했습니다."
+  },
+  "PMC": {
+    "title": "Trainingload.ai · 성과관리",
+    "pmcAnalysis": "PMC 분석",
+    "header": {
+      "eyebrow": "측정항목",
+      "description": "체력, 피로도, ​​자세를 활용하여 부하 및 회복 리듬을 판단하세요."
+    },
+    "performanceManagementChart": "성과관리 차트 - 훈련량 분석",
+    "calculate": "재계산",
+    "recalculate": "재계산",
+    "calculating": "계산 중...",
+    "calculationComplete": "PMC 데이터 계산 완료, {count} 데이터 포인트 생성",
+    "calculationFailed": "PMC 데이터를 계산하지 못했습니다. 나중에 다시 시도해 주세요.",
+    "totalDataPoints": "총 데이터 포인트",
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "combinedAnalysis": "PMC 결합분석",
+    "combinedDescription": "체력(CTL), 피로(ATL), 체력(TSB)의 종합적인 추세",
+    "metricsExplanation": "PMC 측정항목 설명",
+    "abbr": {
+      "fitness": "CTL",
+      "fatigue": "ATL",
+      "form": "TSB"
+    },
+    "zoneHelp": {
+      "ariaLabel": "양식 영역 설명",
+      "title": "양식 영역 설명",
+      "danger": "위험 구역(빨간색): 형태 < -30. 부상/과도한 훈련 위험이 높습니다. 강렬함을 피하세요.",
+      "optimal": "최적의 훈련 영역(녹색): -30 ≤ 형태 < -10. 양질의 훈련과 점진적인 부하에 적합합니다.",
+      "neutral": "중립 영역(회색): -10 ≤ 형태 < +5. 유지보수 교육; 복구-부하 균형.",
+      "fresh": "프레시 존(파란색): +5 ≤ 형태 < +15. 신선한; 소규모 경주나 강도 테스트에 적합합니다.",
+      "peak": "피크 존(보라색): +15 ≤ 형태 < +25. 경주용 골드 윈도우; 최고의 형태.",
+      "transition": "전환 영역(주황색): 형식 ≥ +25. 비수기/부상 회복; 매우 안전하지만 체력이 낮습니다."
+    },
+    "acmpHelp": {
+      "title": "ACMP(ATL/CTL) 설명",
+      "formula": "ACMP = ATL / CTL.",
+      "sweet": "스위트 스팟(녹색): 0.8~1.3. 합리적인 부하; 부상 위험이 낮습니다.",
+      "danger": "위험(빨간색): ≥ 1.5. 로드 램핑이 너무 빠릅니다. 부상 위험이 더 높습니다.",
+      "advice": "가능하면 ACMP를 0.8~1.3 이내로 유지하세요. 부하-부상 관계는 스포츠에 따라 다릅니다. 주의해서 신청하세요."
+    },
+    "fitness": {
+      "title": "체력",
+      "description": "일일 훈련 부하의 42일 지수 평균입니다. 장기 부하를 모델링하며 체력이나 적응을 직접 측정하지 않습니다."
+    },
+    "fatigue": {
+      "title": "피로",
+      "description": "일일 훈련 부하의 7일 지수 평균입니다. 최근 부하를 모델링하며 피로를 직접 측정하지 않습니다."
+    },
+    "form": {
+      "title": "컨디션",
+      "description": "오늘의 체력에서 오늘의 피로를 뺀 값입니다. 모델링된 부하 균형을 설명하며 준비도, 회복 또는 건강을 직접 측정하지 않습니다."
+    },
+    "load": {
+      "title": "훈련 부하"
+    },
+    "noData": "사용 가능한 데이터가 없습니다.",
+    "fitnessChart": "피트니스 차트",
+    "fatigueChart": "피로 차트",
+    "formChart": "양식 차트"
+  },
+  "AIAnalysis": {
+    "generated": "AI 생성",
+    "analyzing": "활동 데이터 분석 중...",
+    "description": "이 활동의 구조화된 데이터를 바탕으로 훈련 분석을 생성합니다.",
+    "analysisFailed": "분석에 실패했습니다. 나중에 다시 시도해 주세요.",
+    "noAnalysisData": "분석 데이터가 없습니다.",
+    "aiCoach": "AI 코치",
+    "expand": "확장하다",
+    "aiDetailedAnalysis": "AI 상세 분석",
+    "useCache": "캐시 사용",
+    "regenerate": "재생성",
+    "emptyHint": "아직 코치 리뷰가 없습니다.",
+    "standardMode": "표준 모드 · 1×",
+    "deepMode": "심층 모드 · 3×",
+    "modelPurposeHint": "이번 요청에 기본 모델 또는 제공업체의 추론 모델을 선택합니다."
+  },
+  "Calendar": {
+    "page": {
+      "title": "Trainingload.ai · 캘린더"
+    }
+  },
+  "CalendarHeader": {
+    "addButton": "추가하다",
+    "plan": "계획",
+    "prevMonth": "이전의",
+    "today": "오늘",
+    "nextMonth": "다음",
+    "calendarLabel": "캘린더",
+    "viewByDay": "일별 보기",
+    "viewByWeek": "주별 보기",
+    "viewByMonth": "월별 보기",
+    "viewByYear": "연도별로 보기",
+    "weekMode": "주",
+    "monthMode": "월",
+    "calendarSubscriptionButton": "구독하다",
+    "calendarSubscriptionTitle": "훈련 계획을 구독하세요",
+    "calendarSubscriptionDescription": "현재 훈련 계획을 Mac, iOS 또는 다른 캘린더와 동기화하세요.",
+    "calendarSubscriptionOpen": "열려 있는",
+    "calendarSubscriptionCopy": "복사",
+    "calendarSubscriptionCopied": "캘린더 링크가 복사되었습니다.",
+    "calendarSubscriptionReset": "구독 링크 재설정",
+    "calendarSubscriptionResetDone": "구독링크 재설정",
+    "aiSubmitted": "생성 요청이 제출되었습니다.",
+    "aiSubmitFailed": "생성 요청을 제출하지 못했습니다."
+  },
+  "CalendarSettings": {
+    "title": "캘린더 설정",
+    "useDarkMode": "어두운 모드 사용",
+    "useDotBadge": "도트 배지 사용",
+    "use24HourFormat": "24시간 형식 사용",
+    "defaultView": "기본 보기",
+    "agendaViewGroupBy": "일정목록 보기 그룹 기준",
+    "view": {
+      "day": "낮",
+      "week": "주",
+      "month": "월",
+      "year": "년도",
+      "agenda": "의제"
+    },
+    "groupBy": {
+      "date": "날짜",
+      "color": "색상"
+    }
+  },
+  "CalendarViews": {
+    "yearUnavailable": "소형 장치에서는 연간 보기를 사용할 수 없습니다.",
+    "weekUnavailable": "소형 장치에서는 주간 보기를 사용할 수 없습니다.",
+    "switchToDayOrMonth": "일별 또는 월별 보기로 전환하세요."
+  },
+  "CalendarDialogs": {
+    "more": "더...",
+    "eventsOn": "{date} 이벤트",
+    "noEventsForDate": "해당 날짜에는 이벤트가 없습니다.",
+    "deleteSuccess": "이벤트가 삭제되었습니다.",
+    "deleteError": "일정을 삭제하는 중에 오류가 발생했습니다.",
+    "delete": "삭제",
+    "deleteTitle": "정말 확신하시나요?",
+    "deleteDescription": "이 작업은 취소할 수 없습니다. 이렇게 하면 이벤트가 영구적으로 삭제되고 당사 서버에서 이벤트 데이터가 제거됩니다.",
+    "cancel": "취소",
+    "continue": "계속하다",
+    "editEvent": "이벤트 편집",
+    "addEvent": "새 이벤트 추가",
+    "editEventDescription": "기존 이벤트를 수정하세요.",
+    "addEventDescription": "캘린더에 대한 새 이벤트를 만듭니다.",
+    "title": "제목",
+    "enterTitle": "제목을 입력하세요",
+    "variant": "변종",
+    "selectVariant": "변형을 선택하세요",
+    "description": "설명",
+    "enterDescription": "설명을 입력하세요",
+    "saveChanges": "변경 사항 저장",
+    "createEvent": "이벤트 만들기",
+    "eventUpdated": "이벤트가 업데이트되었습니다.",
+    "eventCreated": "이벤트가 성공적으로 생성되었습니다.",
+    "eventSaveFailed": "이벤트를 저장하지 못했습니다.",
+    "responsible": "책임이 있는",
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "multiDayProgress": "{totalDays} 중 {currentDay}일",
+    "at": "~에",
+    "edit": "편집하다"
+  },
+  "AgendaEvents": {
+    "searchPlaceholder": "명령을 입력하거나 검색하세요...",
+    "noResults": "검색된 결과가 없습니다.",
+    "at": "~에"
+  },
+  "CalendarGrid": {
+    "weekSummary": "요약"
+  },
+  "MonthYearPicker": {
+    "selectYear": "연도 선택"
+  },
+  "DayCell": {
+    "planTitle": "계획된 교육",
+    "activity": "활동",
+    "distance": "거리",
+    "duration": "지속",
+    "moreTraining": "훈련"
+  },
+  "CalendarExperience": {
+    "weekStripLabel": "이번 주",
+    "monthOverview": "월별 개요",
+    "selectedDateLabel": "선택한 날짜",
+    "viewDay": "요일 보기",
+    "selectedDay": "선택한 날짜",
+    "agendaLabel": "하루 일정",
+    "weeklySnapshot": "한 주 검토",
+    "trainingTab": "훈련",
+    "activityTab": "활동",
+    "activityCountShort": "세션",
+    "loadLabel": "짐",
+    "plannedBadge": "계획",
+    "moreActivities": "더",
+    "activitiesCount": "활동",
+    "plannedTraining": "예정된 세션",
+    "planCycleLabel": "계획주기",
+    "planWorkoutCount": "{count} 운동",
+    "openPlan": "공개 운동",
+    "noPlannedTraining": "오늘은 예정된 훈련이 없습니다.",
+    "activitiesTitle": "완료된 활동",
+    "noActivities": "이 날에는 완료된 활동이 없습니다.",
+    "vsLastWeekFlat": "지난주에 맞춰",
+    "vsLastWeekUp": "지난주보다",
+    "vsLastWeekDown": "지난주 이하",
+    "weekModeLabel": "주간 집중",
+    "monthModeLabel": "월별 개요",
+    "swipeHint": "탐색하려면 스와이프하세요.",
+    "planProgressTitle": "계획 진행",
+    "planProgressDescription": "현재 주기 · {start} - {end}",
+    "monthOverviewDescription": "{month} · 현재 표시되는 달",
+    "comparisonLabelPlan": "vs 동일한 길이의 사전 계획 기간",
+    "comparisonLabelMonth": "지난달 대비",
+    "summaryScope": {
+      "plan": "계획",
+      "month": "월"
+    },
+    "delta": {
+      "flat": "평평한",
+      "up": "위로",
+      "down": "아래에"
+    },
+    "sportLabels": {
+      "run": "달리기",
+      "cycling": "사이클링",
+      "swim": "수영",
+      "strength": "근력",
+      "other": "다른"
+    },
+    "sportTrainingName": "{sport} 훈련"
+  },
+  "NewUserDialog": {
+    "title": "시작하기 설정",
+    "description": "보다 정확한 분석을 위해 3단계를 완료하세요.",
+    "steps": {
+      "step1Label": "선호하는 스포츠를 선택하세요",
+      "step2Label": "심박수 설정",
+      "step3Label": "FTP 등 설정"
+    },
+    "selectPreferredSports": "선호하는 스포츠를 선택하세요(다중 선택)",
+    "selected": "선택된",
+    "sportOptions": {
+      "cycling": "사이클링",
+      "run": "달리기",
+      "swim": "수영"
+    },
+    "settings": {
+      "hintAdjust": "'사용자 설정 - 프로필'에서 언제든지 선호하는 스포츠를 조정할 수 있습니다."
+    },
+    "buttons": {
+      "skip": "건너뛰다",
+      "next": "다음",
+      "back": "뒤쪽에",
+      "finish": "마치다",
+      "applyEstimate": "견적 적용"
+    },
+    "step2": {
+      "title": "심박수 매개변수 설정"
+    },
+    "step3": {
+      "title": "FTP 및 기타 매개변수 설정"
+    },
+    "inputs": {
+      "maxHR": {
+        "label": "최대 심박수(bpm)",
+        "placeholder": "예를 들어 190"
+      },
+      "restHR": {
+        "label": "안정시 심박수(bpm)",
+        "placeholder": "예를 들어 60"
+      },
+      "age": {
+        "label": "나이(세)"
+      },
+      "estimatedMaxHR": {
+        "label": "예상 최대 심박수(bpm)"
+      },
+      "estimatedRestHR": {
+        "label": "예상 휴식 심박수(bpm)"
+      },
+      "runftp": {
+        "label": "FTP 실행(瓦特)",
+        "placeholder": "예를 들어 255"
+      },
+      "cyclingftp": {
+        "label": "사이클링 FTP(瓦特)",
+        "placeholder": "예를 들어 255"
+      },
+      "weight": {
+        "label": "무게(kg, 선택사항)",
+        "placeholder": "예를 들어 70"
+      }
+    },
+    "hint": {
+      "hrRanges": "제안: 최대 심박수는 일반적으로 150~210입니다. 휴식 HR은 일반적으로 45~75입니다.",
+      "otherSports": "주로 달리거나 수영하는 경우 나중에 설정 - 프로필에서 임계값 정보를 추가할 수 있습니다."
+    },
+    "quickEstimate": {
+      "title": "빠른 견적(연령 입력)",
+      "badge": "참조"
+    },
+    "info": {
+      "description": "이러한 추정치는 참고용일 뿐입니다. 정확한 개인 임계값을 위해 최대 심박수 및 휴식 심박수에 대한 실제 테스트를 수행한 후 '사용자 설정 - 프로필'에서 측정된 값을 업데이트하세요."
+    }
+  },
+  "AiDataConsent": {
+    "title": "AI와 데이터 공유",
+    "summary": "Trainingload.ai가 선택된 데이터를 AI 제공업체에 보내도록 허용할지 선택하세요.",
+    "recipientLabel": "수신자",
+    "recipientUnknown": "설정된 AI 서비스 제공업체",
+    "dataLabel": "전송되는 데이터",
+    "dataValue": "질문과 제출한 음성 전사, 그리고 직접적인 계정 식별자를 제거한 요청 관련 훈련 요약(종목, 시간, 거리·고도, 집계된 심박수 및 구간 데이터, 페이스, 파워, 케이던스, 훈련 부하, 회복 추세, 목표, 계획, 관련 프로필 설정). 전체 GPS 경로나 원시 HealthKit 샘플은 전송하지 않습니다.",
+    "purposeLabel": "목적",
+    "purposeValue": "개인화된 코칭, 계획 및 자동 훈련 리뷰를 생성합니다. 대화의 일부 정보는 대화 간 기억으로 추출되어 향후 대화나 상태 평가에 사용될 수 있습니다. 제공업체는 AI 결과를 반환하기 위해 이 데이터를 처리합니다.",
+    "processingLabel": "제공업체의 처리 방식 및 위치",
+    "processingValue": "DeepSeek는 AI 기능 제공을 위해 요청과 생성된 답변을 처리하며 중국 본토에서 이를 처리하거나 저장할 수 있습니다. 공개 약관은 엄격하게 비식별화되어 개인을 식별할 수 없는 입력과 출력을 서비스 운영·개발·개선에 제한적으로 사용할 수 있다고 설명합니다. 프롬프트에 이름, 연락처 또는 그 밖의 식별 정보를 입력하지 마세요.",
+    "protectionLabel": "저장 및 보호",
+    "protectionValue": "Trainingload.ai는 나중에 확인할 수 있도록 제출한 프롬프트와 AI 결과를 계정에 저장합니다. 요청은 전송 중 암호화됩니다. 저장된 기억을 확인, 수정 또는 삭제하고 기억 기능을 끌 수 있습니다. 끄면 새로운 기억의 쓰기와 읽기가 중단되며 기존 기억은 삭제할 때까지 보관됩니다. 사용자 데이터를 받는 제3자에게 개인정보처리방침에 설명된 것과 동일하거나 동등한 수준의 보호를 요구합니다. 보관 및 삭제에 관한 자세한 내용은 개인정보처리방침을 확인하세요.",
+    "choice": "선택 사항입니다. 거부해도 AI 이외 기능을 계속 사용할 수 있으며 모바일 또는 웹의 개인정보 및 AI에서 언제든 동의를 철회할 수 있습니다. 광고에는 사용하지 않습니다.",
+    "accept": "동의하고 AI 사용",
+    "decline": "나중에",
+    "settingsTitle": "개인정보 및 AI",
+    "toggleTitle": "AI 데이터 공유",
+    "settingsHint": "동의는 명시된 제공업체 및 정책 버전에 연결됩니다. 중요한 변경이 있으면 다시 동의해야 합니다.",
+    "enabled": "{recipient}에 대해 사용 중",
+    "decidedAt": "선택 기록: {date}",
+    "disabled": "꺼짐 — AI 제공업체에 새 데이터가 전송되지 않습니다",
+    "privacyPolicy": "개인정보 처리방침 읽기",
+    "reviewAction": "공유 내용 검토",
+    "error": "선택을 저장하지 못했습니다. 연결을 확인하고 다시 시도하세요."
+  },
+  "OnboardingPage": {
+    "hero": {
+      "badge": "시작하기",
+      "title": "Trainingload.ai 사용 시작",
+      "subtitle": "몇 가지 기본 사항은 계획과 검토를 개인적인 느낌으로 만드는 데 도움이 됩니다.",
+      "promise": "약 3분"
+    },
+    "setupHint": "나중에 프로필에서 이 설정을 변경할 수 있습니다.",
+    "intro": {
+      "badge": "훈련은 여기에서 시작됩니다",
+      "title": "일단 기본을 정해보세요. 모든 운동을 이해하기 쉽게 만드세요.",
+      "subtitle": "스포츠를 선택하고 몇 가지 세부정보를 추가한 다음 활동을 가져오세요. 우리는 이를 사용하여 계획을 따르고, 발생한 일을 이해하고, 다음에 무엇을 할지 결정하는 데 도움이 되는 훈련 부하, 강도 영역 및 검토를 계산합니다.",
+      "features": {
+        "load": {
+          "title": "훈련 부하",
+          "description": "얼마나 훈련했는지, 회복이 계속되고 있는지 확인하세요."
+        },
+        "zones": {
+          "title": "강도 구역",
+          "description": "심박수, 파워 또는 속도를 사용하여 쉬운 작업, 템포 및 힘든 작업을 구분합니다."
+        },
+        "thresholds": {
+          "title": "개인 기준",
+          "description": "선택적으로 더 나은 분석을 위해 FTP, 최대 심박수 및 기타 값을 추가하세요."
+        },
+        "ai": {
+          "title": "교육 복습",
+          "description": "명확한 피드백을 통해 계획된 작업과 완료된 작업을 비교하세요."
+        },
+        "import": {
+          "title": "활동 가져오기",
+          "description": "훈련 기록을 함께 보관하려면 파일을 업로드하거나 플랫폼을 연결하세요."
+        },
+        "plan": {
+          "title": "후속 조치 계획",
+          "description": "실제 완료 데이터를 사용하여 앞으로의 훈련을 조정하세요."
+        }
+      }
+    },
+    "displayUnits": {
+      "eyebrow": "표시 및 단위",
+      "title": "시스템 전체 단위를 설정하세요.",
+      "subtitle": "신체 및 훈련 값을 입력하기 전에 단위와 시간 형식을 선택하세요.",
+      "timezoneHint": "시간대: {timezone} · 프로필 또는 브라우저에서 자동으로 감지되었습니다."
+    },
+    "progress": {
+      "title": "설정 진행",
+      "count": "{total}의 {current}단계",
+      "steps": {
+        "1": "개요",
+        "2": "스포츠",
+        "3": "표시 및 단위",
+        "4": "프로필",
+        "5": "심박수",
+        "6": "임계값",
+        "7": "가져오기",
+        "8": "AI 데이터 공유"
+      }
+    },
+    "step1": {
+      "eyebrow": "스포츠를 선택하세요",
+      "title": "보통 어떤 훈련을 하시나요?",
+      "subtitle": "하나 이상의 스포츠를 선택하세요. 우리는 그들에게 중요한 지표의 우선순위를 정할 것입니다. 나중에 변경할 수 있습니다.",
+      "sports": {
+        "RUN": {
+          "title": "달리기",
+          "description": "속도, 심박수, 부하, 달리기 피트니스를 추적하세요."
+        },
+        "CYCLING": {
+          "title": "사이클링",
+          "description": "파워, FTP, 심박수, 사이클링 부하를 추적하세요."
+        },
+        "SWIM": {
+          "title": "수영",
+          "description": "수영을 기록하고 달리기 및 라이딩 훈련과 함께 검토하세요."
+        },
+        "STRENGTH": {
+          "title": "근력 운동",
+          "description": "운동, 세트, 반복 횟수, 중량, 운동 강도를 계획하고 기록하세요."
+        }
+      }
+    },
+    "step2": {
+      "eyebrow": "윤곽",
+      "title": "몇 가지 기본 세부정보를 추가합니다.",
+      "subtitle": "출생 연월, 체중, 신장은 심박수 추정과 신체 관련 지표를 개선합니다. 시간대는 이미 자동으로 감지되었습니다."
+    },
+    "step3": {
+      "eyebrow": "심박수",
+      "title": "심박수 범위를 설정하세요.",
+      "subtitle": "최대 및 안정시 심박수는 강도 영역을 정의하는 데 도움이 됩니다. 확실하지 않은 경우 견적부터 시작하십시오.",
+      "estimate": {
+        "title": "출생 연월로 추정",
+        "empty": "참조 값을 생성하려면 출생 연월을 입력하세요.",
+        "ready": "예상 최대 심박수: {max} bpm · 안정시 심박수: {rest} bpm"
+      }
+    },
+    "step4": {
+      "eyebrow": "임계값",
+      "title": "알고 있는 경우 임계값을 추가하세요.",
+      "subtitle": "이 단계는 선택 사항입니다. FTP 및 유사한 값을 사용하면 부하 및 강도 분석이 더욱 정확해지며 나중에 추가할 수 있습니다.",
+      "swimOnly": "선택한 스포츠에는 달리기 또는 사이클링 파워 임계값이 필요하지 않습니다."
+    },
+    "step5": {
+      "eyebrow": "수입 활동",
+      "title": "첫 번째 운동을 시작하세요.",
+      "subtitle": "FIT, TCX 또는 GPX 파일을 업로드하거나 이미 사용 중인 플랫폼을 연결하세요. 가져온 후 분석 및 리뷰를 볼 수 있습니다.",
+      "uploadMethod": {
+        "title": "파일 업로드",
+        "description": "이미 운동 파일이 있는 경우 이 방법을 사용하세요."
+      },
+      "platforms": {
+        "title": "플랫폼 연결",
+        "description": "가장 많이 사용하는 교육 플랫폼을 연결하세요. 새로운 활동은 자동으로 동기화될 수 있습니다."
+      },
+      "upload": {
+        "title": "활동 파일 업로드",
+        "description": "FIT, TCX, GPX를 지원합니다. 처리 후 분석 업데이트.",
+        "button": "파일 업로드"
+      },
+      "providers": {
+        "intervals_icu": {
+          "title": "Intervals.icu 연결",
+          "description": "OAuth로 활동 기록과 일일 훈련 데이터를 동기화합니다."
+        }
+      },
+      "connect": "연결하다",
+      "connecting": "연결 중...",
+      "connected": "연결됨",
+      "oauthConnected": "Intervals.icu 연결됨",
+      "oauthFailed": "Intervals.icu 인증 실패",
+      "error": "연결 실패"
+    },
+    "fields": {
+      "birthMonth": {
+        "label": "출생 연월",
+        "placeholder": "연도와 월 선택",
+        "help": "나이를 계산하고 초기 심박수 범위를 추정하는 데 사용됩니다."
+      },
+      "weight": {
+        "label": "무게",
+        "placeholder": "예를 들어 70",
+        "help": "선택 과목. 중량 대비 전력 및 관련 지표에 사용됩니다."
+      },
+      "height": {
+        "label": "신장",
+        "placeholder": "예: 175",
+        "help": "선택 사항. 신체 및 훈련 관련 지표에 사용됩니다."
+      },
+      "timezone": {
+        "label": "시간대",
+        "placeholder": "도시, 지역 또는 UTC+8 검색",
+        "help": "자동으로 감지됩니다. 훈련 날짜가 잘못된 것 같으면 조정하세요.",
+        "empty": "일치하는 시간대가 없습니다."
+      },
+      "maxHR": {
+        "label": "최대 심박수",
+        "placeholder": "예를 들어 190",
+        "help": "아직 모르는 경우 추정치를 사용하십시오."
+      },
+      "restHR": {
+        "label": "안정시 심박수",
+        "placeholder": "예를 들어 60",
+        "help": "일반적으로 아침 측정이 더 안정적입니다."
+      },
+      "runFtp": {
+        "label": "러닝 파워 임계값",
+        "placeholder": "예를 들어 255",
+        "help": "선택 과목. 러닝 파워로 훈련한다면 이것을 추가하세요."
+      },
+      "cyclingFtp": {
+        "label": "사이클링 FTP",
+        "placeholder": "예를 들어 255",
+        "help": "선택 과목. FTP를 알고 있다면 이것을 추가하세요."
+      }
+    },
+    "buttons": {
+      "getStarted": "시작하자",
+      "skipSetup": "설정 건너뛰기",
+      "next": "계속하다",
+      "back": "뒤쪽에",
+      "toImport": "수입 활동",
+      "toAiConsent": "AI 설정으로 계속",
+      "uploadLater": "나중에 업로드",
+      "applyEstimate": "견적 사용",
+      "finish": "시작"
+    },
+    "done": {
+      "toast": "설정 완료"
+    },
+    "errors": {
+      "birthMonth": "올바른 출생 연월을 입력하세요.",
+      "height": "올바른 신장을 입력하세요.",
+      "save": "저장할 수 없습니다. 다시 시도해 주세요."
+    }
+  },
+  "WelcomeDialog": {
+    "badge": {
+      "beta": "베타"
+    },
+    "title": "Trainingload.ai에 오신 것을 환영합니다.",
+    "description": "제품 경험을 연마하고 있습니다. 우리와 함께하고 지원해 주셔서 감사합니다.",
+    "sections": {
+      "testVersion": {
+        "title": "테스트 버전 알림",
+        "desc": "이것은 테스트 버전입니다. 데이터가 손실되거나 불안정할 수 있습니다. 주의 깊게 작동하고 중요한 데이터를 적시에 백업하십시오. 우리는 귀하의 데이터를 보존하고 안정성을 지속적으로 향상시키기 위해 최선을 다할 것입니다."
+      },
+      "free": {
+        "title": "기능은 무료입니다",
+        "desc": "공식 출시 전에는 모든 기능을 무료로 사용할 수 있습니다. 탐험을 즐겨보세요."
+      },
+      "feedback": {
+        "title": "귀하의 피드백이 중요합니다",
+        "desc": "문제가 발생하거나 제안 사항이 있는 경우 지속적으로 개선할 수 있도록 피드백을 공유해 주세요."
+      }
+    },
+    "buttons": {
+      "start": "시작"
+    }
+  },
+  "PlanTemplateDetail": {
+    "goal": {
+      "5K": "5K",
+      "10K": "10K",
+      "HALF_MARATHON": "하프 마라톤",
+      "MARATHON": "마라톤"
+    },
+    "backToGoal": "전체 {goal} 계획",
+    "createDraft": "초안 계획 만들기",
+    "creatingDraft": "초안 생성 중…",
+    "createDraftFailed": "초안 계획을 만들 수 없습니다. 일정을 확인한 후 다시 시도해 주세요.",
+    "checkingAccess": "기능 사용 가능 여부를 확인하는 중…",
+    "memberCoachSummary": "계획이 시작되면 AI 코치가 훈련 완료 상황, 훈련 부하, 회복 상태와 일정 변화를 반영해 적절한 시점에 조정을 제안합니다.",
+    "officialTraining": "공식 훈련",
+    "running": "러닝",
+    "personalizedPaceBadge": "이 계획은 개인화된 훈련 페이스를 사용합니다",
+    "examplePaceBadge": "신뢰할 수 있는 개인 기준이 생길 때까지 예시 페이스를 표시합니다"
+  },
+  "PlanTemplateCoachReminder": {
+    "label": "코치 알림",
+    "ready": "최근 훈련 기반이 이 계획에 적합합니다.",
+    "baseWarning": "시작하기 전에 이 능력 알림을 확인하세요.",
+    "caution": "시작할 수 있습니다. 능력 데이터가 더 쌓일 때까지 RPE로 강도를 안내합니다.",
+    "inputRequired": "지원되는 러닝 능력 기준값이 아직 없습니다.",
+    "notReady": "이 계획은 생성하기 전에 설정을 조정해야 합니다.",
+    "buildBlocked": "위 항목을 해결한 후 계획을 생성하세요.",
+    "capabilityRequired": "적합한 러닝 활동을 완료하면 시스템이 최근 레이스, VO₂max/VDOT, 역치 페이스 또는 임계 속도를 자동으로 사용합니다.",
+    "tenKBase": "최장 연속 러닝은 {actual}분입니다. 먼저 {required}분에 도달하거나 최근 5km 기록을 남기세요.",
+    "halfMarathonBase": "기록된 최장 러닝은 {actual}km입니다. 하프 마라톤 계획 전에 {required}km 달성을 고려하세요.",
+    "marathonLongRun": "기록된 최장 러닝은 {actual}km입니다. 마라톤 계획 전에 {required}km 달성을 고려하세요.",
+    "vo2MaxBelowRange": "현재 VO₂max는 {actual}로, 이 페이스 모델의 지원 하한 {required}보다 낮습니다. 페이스 설정에는 사용하지 않습니다.",
+    "vo2MaxLowForDistance": "현재 VO₂max는 {actual}로, 장거리 계획 주의선 {required}보다 낮습니다. 먼저 짧은 거리에서 훈련의 일관성을 쌓으세요.",
+    "goalNotSupported": "연결된 대회 목표는 {actual}이지만 현재 능력으로는 약 {required} 또는 그보다 느린 기록이 적절합니다.",
+    "goalNotSupportedGeneric": "현재 VO₂max로는 연결된 대회 목표를 아직 지원할 수 없습니다.",
+    "planPeriod": "대회까지 {actual}일만 남았지만 이 계획에는 {required}일이 필요합니다.",
+    "genericRequirement": "하나 이상의 시작 조건이 아직 충족되지 않았습니다.",
+    "personalizedPaces": "이 계획의 훈련 기준값은 VO₂max {value}입니다.",
+    "rpeFallback": "신뢰할 수 있는 페이스 기준값이 없으면 RPE와 대화 테스트로 훈련 강도를 안내합니다."
+  },
+  "CreatePlanDialog": {
+    "badge": "계획 만들기",
+    "title": "훈련 계획 만들기",
+    "description": "계획 작성 방법을 선택하세요.",
+    "options": {
+      "template": {
+        "title": "공식 트레이닝",
+        "desc": "목표를 선택한 뒤 전체 구조화 계획을 미리 보세요",
+        "badge": "AI 채팅 불필요"
+      },
+      "ai": {
+        "title": "AI 코치",
+        "desc": "AI Coach를 열고 다단계 질문을 통해 계획을 수립하세요.",
+        "badge": "AI 코치"
+      },
+      "manual": {
+        "title": "수동",
+        "desc": "수동으로 계획 만들기"
+      }
+    },
+    "buttons": {
+      "cancel": "취소"
+    }
+  },
+  "PlanEditorBase": {
+    "title": "계획 만들기",
+    "fields": {
+      "name": {
+        "label": "이름",
+        "placeholder": "계획 이름을 입력하세요"
+      },
+      "weeks": {
+        "label": "기간(주)"
+      },
+      "description": {
+        "label": "설명"
+      }
+    },
+    "buttons": {
+      "continue": "계속하다"
+    }
+  },
+  "PlanListDialog": {
+    "title": "계획 목록",
+    "badges": {
+      "active": "활동적인"
+    },
+    "states": {
+      "loading": "로드 중...",
+      "loadFailed": "로드 실패",
+      "empty": "아직 계획이 없습니다",
+      "cannotDeleteActive": "활성 계획을 삭제할 수 없습니다."
+    },
+    "buttons": {
+      "create": "계획 만들기",
+      "view": "보다",
+      "activate": "활성화",
+      "deactivate": "비활성화",
+      "delete": "삭제",
+      "cancel": "취소"
+    },
+    "activate": {
+      "title": "시작일 선택",
+      "description": "이 훈련 계획을 활성화하기 전에 시작 날짜를 선택하십시오.",
+      "confirm": "확인하다"
+    }
+  },
+  "PlanEditor": {
+    "title": {
+      "view": "계획 보기",
+      "edit": "계획 편집"
+    },
+    "sessions": {
+      "count": "{count, plural, =0 {0} 하나 {# session} 다른 {# sessions}}",
+      "add": "세션"
+    },
+    "grid": {
+      "weekDay": "주/요일",
+      "week": "주",
+      "weekLabel": "주 {week}"
+    },
+    "buttons": {
+      "edit": "편집하다",
+      "close": "닫다",
+      "save": "구하다",
+      "saving": "절약..."
+    }
+  },
+  "RichTextToolbar": {
+    "alignment": {
+      "tooltip": "텍스트 정렬",
+      "left": "왼쪽 정렬",
+      "center": "중앙 정렬",
+      "right": "오른쪽 정렬",
+      "justify": "신이 옳다고 하다"
+    },
+    "undo": "끄르다",
+    "redo": "다시 하다",
+    "bold": "용감한",
+    "shortcutBold": "(⌘ + B)",
+    "italic": "이탤릭체",
+    "shortcutItalic": "(⌘ + 나)",
+    "underline": "밑줄",
+    "shortcutUnderline": "(⌘ + U)",
+    "strikethrough": "취소선",
+    "shortcutStrikethrough": "(⌘ + Shift + X)",
+    "blockquote": "인용구",
+    "code": "암호",
+    "codeBlock": "코드 블록",
+    "bulletList": "글머리 기호 목록",
+    "orderedList": "주문목록",
+    "horizontalRule": "수평선",
+    "hardBreak": "줄 바꿈",
+    "headings": {
+      "tooltip": "제목",
+      "normal": "정상",
+      "levelLabel": "H{level}"
+    },
+    "colorHighlight": {
+      "tooltip": "텍스트 색상 및 하이라이트",
+      "mobileColorGroup": "색상",
+      "mobileHighlightGroup": "가장 밝은 부분",
+      "sectionTextColor": "색상",
+      "sectionBackground": "배경"
+    },
+    "palette": {
+      "default": "기본",
+      "gray": "회색",
+      "brown": "갈색",
+      "orange": "주황색",
+      "yellow": "노란색",
+      "green": "녹색",
+      "blue": "파란색",
+      "purple": "보라",
+      "pink": "분홍색",
+      "red": "빨간색"
+    },
+    "link": {
+      "button": "링크",
+      "tooltip": "링크",
+      "formTitle": "링크",
+      "formDescription": "선택한 텍스트에 링크 첨부",
+      "remove": "제거하다",
+      "update": "업데이트",
+      "confirm": "확인하다",
+      "placeholder": "https://example.com"
+    }
+  },
+  "PlanCreatePage": {
+    "title": "수동 계획 작성기",
+    "subtitle": "계획 정보, 날짜 선택, 운동 편집을 단계별로 완료하세요.",
+    "buttons": {
+      "cancel": "취소",
+      "back": "뒤쪽에",
+      "savePlan": "계획 저장",
+      "saving": "절약...",
+      "continueToCalendar": "날짜 선택 계속",
+      "continueToReview": "계속 검토하기",
+      "saveWorkout": "운동 저장",
+      "addStep": "단계 추가",
+      "addRepeat": "반복 추가"
+    },
+    "validation": {
+      "needWorkout": "저장하기 전에 콘텐츠가 포함된 운동을 하나 이상 추가하세요."
+    },
+    "steps": {
+      "1": {
+        "title": "기본 플랜 정보",
+        "description": "계획 이름, 기간, 설명부터 시작하세요."
+      },
+      "2": {
+        "title": "달력에서 날짜를 선택하세요",
+        "description": "해당 운동을 구성하려면 계획 기간 중 원하는 날짜를 선택하세요."
+      },
+      "3": {
+        "title": "운동 편집",
+        "description": "규칙 입력이나 구조화된 운동 빌더를 사용하세요."
+      },
+      "review": {
+        "title": "검토 및 저장",
+        "description": "계획 개요를 확인한 다음 라이브러리에 저장하세요."
+      }
+    },
+    "weekdays": {
+      "sun": "해",
+      "mon": "월",
+      "tue": "화요일",
+      "wed": "수요일",
+      "thu": "목",
+      "fri": "금",
+      "sat": "앉았다"
+    },
+    "baseInfo": {
+      "title": "계획 기본 사항",
+      "fields": {
+        "name": "계획 이름",
+        "weeks": "기간(주)",
+        "description": "설명"
+      },
+      "validation": {
+        "nameRequired": "계획 이름을 입력하세요.",
+        "nameTooLong": "계획 이름은 120자(영문 기준) 이하여야 합니다.",
+        "weeksMin": "기간은 1주일 이상이어야 합니다.",
+        "weeksMax": "기간은 24주를 초과할 수 없습니다.",
+        "weeksInvalid": "1~24주 사이의 정수를 입력하세요.",
+        "descriptionTooLong": "설명은 {max, number}자를 초과할 수 없습니다(일반 텍스트)."
+      }
+    },
+    "calendarSelection": {
+      "title": "편집할 요일을 선택하세요",
+      "summary": "총 {weeks}주, {count} 운동 일수가 구성됨",
+      "hint": "먼저 하루를 선택한 다음 해당 운동을 구성하세요. 언제든지 여기로 돌아와서 나머지 부분을 계속 채울 수 있습니다.",
+      "clickDay": "편집을 시작하려면 원하는 날짜를 클릭하세요.",
+      "hoverHint": "설정하려면 클릭하세요.",
+      "weekColumn": "주",
+      "weekLabel": "주 {week}",
+      "dayLabel": "{day}",
+      "filled": "구성됨",
+      "emptyDay": "운동을 추가하려면 클릭하세요.",
+      "restDay": "쉬는 날",
+      "chooseWorkoutType": "훈련 유형 선택",
+      "enduranceTypeHint": "달리기, 자전거 타기, 수영 또는 스트레칭.",
+      "strengthTypeHint": "운동, 세트, 중량, RPE별로 근력 운동을 구성하세요.",
+      "emptyDayHint": "해당 날짜에는 예정된 교육이 없습니다.",
+      "sessionLabel": "섹션 {index}",
+      "trainingDays": "훈련일",
+      "scheduleReview": "시간표 개요"
+    },
+    "editor": {
+      "title": "운동 수정 · 주 {week} · {day}",
+      "subtitle": "먼저 스포츠를 선택한 다음 규칙이나 구조화된 단계를 사용하여 운동을 구성하세요.",
+      "manualTitle": "구조화된 운동 빌더",
+      "preview": "운동 미리보기"
+    },
+    "cards": {
+      "step": "단계 모듈",
+      "repeat": "모듈 반복"
+    },
+    "fields": {
+      "stepType": "단계 유형",
+      "durationType": "기간 조건",
+      "durationValue": "기간 값",
+      "primaryTarget": "주요 타겟",
+      "targetType": "Target Type",
+      "targetSource": "Target Source",
+      "targetRelation": "Target Relation",
+      "targetValue": "Target Value",
+      "secondaryTarget": "2차 타겟",
+      "swimIntensityTarget": "강도 목표",
+      "repeatCount": "반복 횟수",
+      "targetValuePlaceholder": "목표값을 입력하세요.",
+      "cadencePlaceholder": "케이던스 입력",
+      "zonePlaceholder": "구역 선택",
+      "fromPlaceholder": "에서",
+      "toPlaceholder": "에게",
+      "selectPlaceholder": "선택하다",
+      "swimStroke": "뇌졸중",
+      "swimTrainingType": "훈련 유형",
+      "swimEquipment": "장비"
+    },
+    "durationKinds": {
+      "TIME": "시간",
+      "DISTANCE": "거리",
+      "OPEN": "열려 있는",
+      "CALORIES": "칼로리 소모량",
+      "HR_GREATER_THAN": "위의 심박수",
+      "HR_LESS_THAN": "아래 심박수",
+      "POWER_GREATER_THAN": "위의 힘",
+      "POWER_LESS_THAN": "아래의 전력",
+      "CADENCE_GREATER_THAN": "케이던스 초과",
+      "CADENCE_LESS_THAN": "케이던스 미만"
+    },
+    "stepTypes": {
+      "WARMUP": "워밍업",
+      "WORK": "일하다",
+      "RECOVERY": "회복",
+      "REST": "나머지",
+      "COOLDOWN": "쿨타임",
+      "OTHER": "다른"
+    },
+    "targets": {
+      "NONE": "대상 없음",
+      "SPEED": "속도",
+      "RUN_PACE": "속도",
+      "SWIM_PACE": "목표 속도",
+      "CYCLING_SPEED": "속도",
+      "CADENCE": "운율",
+      "RUN_CADENCE": "걸음수",
+      "CYCLING_CADENCE": "운율",
+      "HEART_RATE_ZONE": "심박수 구역",
+      "HEART_RATE_CUSTOM": "맞춤 심박수",
+      "POWER_ZONE": "파워존",
+      "POWER_CUSTOM": "맞춤형 전력"
+    },
+    "targetTypes": {
+      "NONE": "No target",
+      "HEART_RATE": "Heart rate",
+      "POWER": "Power",
+      "PACE": "Pace",
+      "UNSUPPORTED": "Unsupported"
+    },
+    "targetSources": {
+      "BASE": "Base value",
+      "ZONE": "Zone"
+    },
+    "targetRelations": {
+      "EQUAL": "Equals",
+      "GREATER_THAN": "Greater than",
+      "LESS_THAN": "Less than",
+      "RANGE": "Range"
+    },
+    "swim": {
+      "stroke": {
+        "FREESTYLE": "자유형",
+        "BREASTSTROKE": "평영",
+        "BACKSTROKE": "배영",
+        "BUTTERFLY": "나비",
+        "DRILL": "송곳",
+        "MEDLEY": "그러 모은"
+      },
+      "trainingType": {
+        "KICK": "차기",
+        "PULL": "당기다",
+        "DRILL": "송곳"
+      },
+      "equipment": {
+        "FINS": "지느러미",
+        "KICKBOARD": "킥보드",
+        "PADDLES": "패들",
+        "PULL_BUOY": "부표를 당겨",
+        "SNORKEL": "스노클"
+      }
+    },
+    "states": {
+      "emptyStructure": "아직 운동 단계가 없습니다. 단계나 반복 모듈을 추가하여 시작하세요.",
+      "noPreview": "저장하거나 확인하면 여기에 운동 차트 미리보기가 표시됩니다.",
+      "noTargetInput": "이 대상 유형에는 추가 입력이 필요하지 않습니다.",
+      "noZones": "사용 가능한 영역이 없습니다.",
+      "unsupportedTarget": "This legacy target type is not editable here yet",
+      "invalidRange": "시작 값은 끝 값보다 클 수 없습니다."
+    }
+  },
+  "SportCatalog": {
+    "families": {
+      "RUN": "러닝",
+      "CYCLING": "사이클링",
+      "SWIM": "수영",
+      "STRETCHING": "스트레칭",
+      "UNKNOWN": "기타"
+    },
+    "sports": {
+      "ROAD_RUNNING": "러닝",
+      "TRAIL_RUNNING": "트레일 러닝",
+      "TREADMILL_RUNNING": "트레드밀",
+      "ROAD_CYCLING": "사이클링",
+      "MOUNTAIN_BIKING": "산악 자전거",
+      "GRAVEL_CYCLING": "그래블 사이클링",
+      "INDOOR_CYCLING": "실내 사이클링",
+      "E_BIKING": "전기 자전거",
+      "POOL_SWIMMING": "수영장 수영",
+      "OPEN_WATER_SWIMMING": "오픈 워터 수영",
+      "STRETCHING": "스트레칭",
+      "WALKING": "걷기",
+      "HIKING": "하이킹",
+      "STRENGTH_TRAINING": "근력 운동",
+      "HIIT": "HIIT",
+      "YOGA": "요가",
+      "ROWING": "로잉",
+      "ELLIPTICAL": "일립티컬",
+      "OTHER": "기타"
+    }
+  },
+  "WorkoutEditor": {
+    "strength": {
+      "session": {
+        "title": "세션 설정",
+        "durationMinutes": "시간(분)",
+        "plannedSessionRpe": "예정 세션 RPE"
+      },
+      "exercise": {
+        "title": "운동 {number}",
+        "name": "운동",
+        "namePlaceholder": "예: 백 스쿼트…",
+        "equipment": "장비",
+        "equipmentPlaceholder": "예: 바벨…",
+        "remove": "운동 {number} 삭제"
+      },
+      "setGroup": {
+        "title": "세트 그룹 {number}",
+        "remove": "세트 그룹 {number} 삭제",
+        "setType": "세트 유형",
+        "sets": "세트 수",
+        "prescription": "수행 방식",
+        "seconds": "초",
+        "minReps": "최소 횟수",
+        "maxReps": "최대 횟수",
+        "load": "부하",
+        "loadValue": "부하 값",
+        "loadUnit": "단위",
+        "percent1rm": "1RM 비율",
+        "effort": "강도 목표",
+        "effortValue": "강도 값",
+        "restSeconds": "휴식(초)",
+        "setTypes": {
+          "warmup": "워밍업",
+          "work": "본 세트"
+        },
+        "prescriptions": {
+          "reps": "횟수",
+          "time": "시간"
+        },
+        "loads": {
+          "open": "부하 미지정",
+          "absolute": "중량",
+          "percent1rm": "%1RM",
+          "bodyweight": "맨몸",
+          "bodyweightOffset": "맨몸 ±"
+        },
+        "efforts": {
+          "none": "목표 없음",
+          "rpe": "RPE",
+          "rir": "RIR"
+        }
+      },
+      "preview": {
+        "title": "근력 운동",
+        "exerciseCount": "운동 {count}개",
+        "workingSetCount": "본 세트 {count}개",
+        "warmup": "워밍업",
+        "rest": "휴식 {seconds}초",
+        "openLoad": "부하 미지정",
+        "bodyweight": "맨몸",
+        "unnamedExercise": "이름 없는 운동",
+        "moreExercises": "운동 {count}개 더"
+      },
+      "buttons": {
+        "addSetGroup": "세트 그룹 추가",
+        "addExercise": "운동 추가"
+      }
+    },
+    "title": {
+      "view": "운동 보기",
+      "edit": "운동 편집",
+      "week": "주",
+      "weekLabel": "주 {week}",
+      "sessionLabel": "세션 {session}"
+    },
+    "tabs": {
+      "rules": "규칙",
+      "manual": "수동"
+    },
+    "chart": {
+      "placeholder": "규칙을 검증하거나 수동으로 구축하여 강도를 미리 봅니다."
+    },
+    "fields": {
+      "sportType": {
+        "label": "스포츠 종류",
+        "placeholder": "선택하다",
+        "options": {
+          "run": "달리다",
+          "cycling": "사이클링",
+          "swim": "헤엄"
+        }
+      },
+      "notes": {
+        "label": "메모",
+        "placeholder": "추가 참고 사항, 주의 사항 또는 알림..."
+      },
+      "rules": {
+        "label": "규칙",
+        "placeholder": "운동 텍스트나 구조화된 콘텐츠를 붙여넣으세요..."
+      }
+    },
+    "manual": {
+      "title": "수동으로 운동 만들기",
+      "empty": "아직 블록이 없습니다. 시작하려면 운동, 휴식 또는 반복 블록을 추가하세요.",
+      "blocks": {
+        "work": "일하다",
+        "rest": "나머지",
+        "repeat": "반복하다"
+      },
+      "labels": {
+        "child": "어린이"
+      },
+      "fields": {
+        "duration": "기간(초)",
+        "targetType": "대상 유형",
+        "targetValue": "목표값",
+        "targetValuePlaceholder": "목표값을 입력하세요",
+        "repeatCount": "반복 횟수"
+      },
+      "targets": {
+        "none": "대상 없음",
+        "powerPercent": "힘 %",
+        "powerWatts": "전력 W",
+        "cadence": "케이던스 rpm",
+        "heartRatePercent": "심박수 %",
+        "heartRateBpm": "심박수 bpm",
+        "paceKmh": "속도 km/h",
+        "gradeDeg": "등급 °"
+      },
+      "buttons": {
+        "addStep": "단계 추가",
+        "addWorkBlock": "작업 추가",
+        "addRestBlock": "휴식 추가",
+        "addRepeatBlock": "반복 추가",
+        "remove": "제거하다",
+        "removeBlock": "블록 제거"
+      }
+    },
+    "errors": {
+      "definition": {
+        "exerciseNameRequired": "각 운동의 이름을 입력하세요.",
+        "exerciseRequired": "운동을 하나 이상 추가하세요.",
+        "setGroupRequired": "각 운동에 세트 그룹을 하나 이상 추가하세요.",
+        "workSetRequired": "각 운동에 본 세트를 하나 이상 추가하세요."
+      },
+      "sportType": "스포츠 종류를 선택해주세요.",
+      "rules": "운동 규칙을 입력해주세요",
+      "validateFirst": "먼저 규칙을 확인하세요.",
+      "parseFailed": "운동 텍스트를 구문 분석하지 못했습니다.",
+      "invalidInput": "운동 입력을 확인하세요. 지속 시간, 반복 횟수, 목표값은 유효해야 하며 음수일 수 없습니다.",
+      "saveFailed": "저장 실패"
+    },
+    "buttons": {
+      "close": "닫다",
+      "delete": "삭제",
+      "uploadFit": "FIT 업로드",
+      "validate": "입력 검증",
+      "validating": "검증 중...",
+      "saveDraft": "초안 저장"
+    },
+    "mobile": {
+      "addWorkout": "훈련 추가",
+      "workoutType": "훈련 유형",
+      "scheduledAt": "일정",
+      "editMode": "편집 모드",
+      "manualMode": "수동 오케스트레이션",
+      "dslMode": "DSL 텍스트",
+      "sport": "운동 종류",
+      "endurance": "지구력 훈련",
+      "strength": "근력 훈련",
+      "stepLabel": "단계 {number}",
+      "repeatLabel": "반복 {number}",
+      "repeatSummary": "{count}회 반복 · {steps}단계",
+      "manualBuilderHint": "각 단계는 시간, 거리 또는 열린 종료 방식으로 구성하고 개별 강도 목표를 설정할 수 있습니다.",
+      "dslHint": "운동을 한 줄씩 작성하세요. 10m, 30s, 5km 같은 시간이나 거리를 사용할 수 있습니다.",
+      "dslPlaceholder": "warmup 10m\nwork 30m\ncooldown 5m"
+    },
+    "confirmDelete": {
+      "title": "세션을 삭제하시겠습니까?",
+      "description": "이렇게 하면 현재 계획 초안에서 운동이 제거됩니다.",
+      "cancel": "취소"
+    }
+  },
+  "PlanMutations": {
+    "success": {
+      "saved": "계획이 저장되었습니다",
+      "updated": "계획이 업데이트되었습니다.",
+      "workoutUpdated": "운동이 업데이트되었습니다.",
+      "activated": "계획이 활성화되었습니다",
+      "activationCancelled": "활성화가 취소되었습니다.",
+      "paused": "계획이 일시중지됨",
+      "completed": "계획 완료",
+      "cancelled": "계획이 비활성화되었습니다",
+      "deleted": "계획이 삭제되었습니다."
+    },
+    "errors": {
+      "noPlan": "저장할 계획 없음",
+      "saveFailed": "계획을 저장하지 못했습니다.",
+      "updateFailed": "계획을 업데이트하지 못했습니다.",
+      "workoutUpdateFailed": "운동을 업데이트하지 못했습니다.",
+      "activateFailed": "계획을 활성화하지 못했습니다.",
+      "cancelFailed": "계획을 비활성화하지 못했습니다.",
+      "pauseFailed": "계획을 일시중지하지 못했습니다.",
+      "completeFailed": "계획을 완료하지 못했습니다.",
+      "deleteFailed": "계획을 삭제하지 못했습니다."
+    }
+  },
+  "GlobalHeartRatePage": {
+    "title": "Trainingload.ai · 심박수 분석",
+    "heartRateAnalysis": "심박수 분석",
+    "header": {
+      "eyebrow": "측정항목",
+      "description": "심박수 곡선, ​​기준치 기준, 영역 분포를 검토합니다."
+    },
+    "tabs": {
+      "curve": "곡선",
+      "zones": "구역"
+    }
+  },
+  "GlobalHeartRateChart": {
+    "time": "시간",
+    "noData": "심박수 데이터 없음",
+    "maxHr": "최대 심박수",
+    "lthr": "LTHR"
+  },
+  "V2HomePage": {
+    "aiTodaySuggestion": {
+      "title": "스마트 코치 · 오늘의 제안",
+      "fallbackTitle": "오늘의 훈련 안내",
+      "weatherAttribution": "Trainingload.ai가 수정한 {serviceName} 데이터",
+      "loading": "스마트 코치가 생각하고 있습니다…",
+      "summary": {
+        "workout": "오늘은 \"{title}\"을 중심으로 진행하는 것이 좋습니다. 충분히 워밍업한 뒤 계획한 {sport} 훈련을 목표 강도로 수행하고, 예상 시간은 약 {duration}입니다. 호흡, 다리 감각, 심박 드리프트를 살피고 몸이 무겁다면 추가 볼륨보다 훈련 품질을 지켜주세요.",
+        "multi": "오늘은 계획된 세션이 {count}개 있습니다. \"{title}\"의 품질을 우선하고, 세션 사이에 보급과 회복 시간을 충분히 두세요. 뒤쪽 세션은 체감에 맞춰 조절하고 쉬운 훈련을 강도 훈련으로 바꾸지 않는 것이 좋습니다.",
+        "fatigue": "오늘 \"{title}\"이 예정되어 있지만 TSB {tsb}가 피로 누적을 가리킵니다. {sport} 세션은 계획의 낮은 범위에 맞추고, 워밍업 후에도 몸이 무겁다면 강도를 밀어붙이기보다 쉽게 마치거나 미루세요.",
+        "loadSpike": "이번 주 부하는 지난주 대비 {drift} 변했습니다. \"{title}\"은 계획한 상한 안에서 마치고 추가 훈련은 피하세요. 이후에는 보급, 수면, 가벼운 가동성 운동을 우선해 늘어난 부하를 흡수하는 데 집중하세요.",
+        "rest": "오늘은 계획된 훈련이 없습니다. 20-30분 정도 가볍게 움직이거나 완전히 쉬어도 좋습니다. 훈련 기록을 정리하고, 다음 핵심 세션을 위해 몸과 동기를 아껴두세요.",
+        "restFatigue": "오늘은 계획된 훈련이 없고 TSB {tsb}도 피로가 높은 편임을 보여줍니다. 가벼운 움직임, 수분 보충, 충분한 수면이 추가 훈련보다 더 중요합니다. 근육통이 남아 있다면 자극을 낮게 유지하세요.",
+        "restLoad": "오늘은 계획된 훈련이 없고 주간 부하는 {drift} 변했습니다. 오늘은 저강도 움직임만 하는 회복일로 두고, 내일 수면과 다리 감각을 확인한 뒤 정상 훈련 재개 여부를 판단하세요.",
+        "completed": "오늘 계획된 세션 {count}개를 완료했습니다. 이제 회복이 우선입니다. 수분과 탄수화물을 보충하고, 체감과 난이도를 기록하세요. 내일 훈련량은 수면, 근육통, 아침 컨디션을 보고 결정하는 것이 좋습니다."
+      },
+      "tags": {
+        "planCount": "계획 {count}개",
+        "restDay": "회복일",
+        "tsb": "TSB {value}",
+        "loadDrift": "부하 {value}",
+        "recentActivity": "최근 훈련"
+      }
+    },
+    "decisionStack": {
+      "title": "Pending plan change",
+      "confirm": "Apply change",
+      "dismiss": "Keep plan",
+      "confirmCancel": "Cancel",
+      "confirmTitle": "Apply this plan change?",
+      "confirmDescription": "The coach suggested changing the next session after today’s review. Nothing is written until you confirm.",
+      "postponeImpact": "Postpone “{name}” by one day",
+      "skipImpact": "Skip “{name}”",
+      "reduceVolumeImpact": "‘{name}’ 훈련량 줄이기: {after}",
+      "reduceIntensityImpact": "‘{name}’ 강도 낮추기: {after}",
+      "recoveryImpact": "‘{name}’을 회복 훈련으로 변경: {after}",
+      "applySuccess": "Plan updated from the coach review",
+      "applyFailed": "Could not apply the change. Try again.",
+      "rejectSuccess": "Kept the original plan",
+      "bringForward": "Show this card",
+      "unnamedWorkout": "Next session",
+      "startNext": "Start next plan",
+      "startNextTitle": "Cycle complete",
+      "startNextImpact": "Start the next plan from the “{name}” cycle summary",
+      "startNextConfirmTitle": "Start the next plan?",
+      "startNextConfirmDescription": "You’ll enter plan builder with this cycle’s summary as evidence. The completed plan is not changed.",
+      "startNextSuccess": "Ready to start the next plan",
+      "startNextDismiss": "Not now"
+    },
+    "recentActivity": {
+      "titleSection": "최근 활동",
+      "title": "최근 활동이 없습니다",
+      "time": "",
+      "summary": "최근 동기화하거나 업로드한 활동이 여기에 표시됩니다.",
+      "status": "--",
+      "viewReview": "리뷰 보기",
+      "untitled": "제목 없는 활동"
+    },
+    "timezonePrompt": {
+      "title": "시간대 변경이 감지되었습니다. 프로필 시간대를 {label}(으)로 업데이트할까요?",
+      "snoozeHint": "\"나중에\"를 선택하면 30일 동안 다시 묻지 않습니다.",
+      "update": "업데이트",
+      "later": "나중에",
+      "success": "프로필 시간대를 업데이트했습니다",
+      "error": "시간대를 업데이트하지 못했습니다"
+    },
+    "currentPlan": {
+      "title": "현재 계획",
+      "cycle": "훈련 블록",
+      "weekLabel": "현재 주차",
+      "todayFocus": "오늘 일정",
+      "noWorkoutToday": "오늘 예정된 훈련 없음"
+    },
+    "weekday": {
+      "mon": "월",
+      "tue": "화",
+      "wed": "수",
+      "thu": "목",
+      "fri": "금",
+      "sat": "토",
+      "sun": "일"
+    },
+    "today": {
+      "date": "오늘",
+      "weekday": ""
+    },
+    "summaryMetrics": {
+      "pmc": {
+        "title": "체력 부하",
+        "label": "훈련 부하",
+        "hint": "상태 업데이트 대기 중",
+        "fitness": "체력",
+        "fatigue": "피로",
+        "form": "컨디션"
+      },
+      "power": {
+        "title": "파워",
+        "label": "파워",
+        "hint": "프로필 업데이트 대기 중"
+      },
+      "speed": {
+        "title": "페이스",
+        "label": "페이스 추세",
+        "hint": "추세 업데이트 대기 중"
+      },
+      "hr": {
+        "title": "심박수",
+        "label": "심박",
+        "value": "심박 업데이트 대기 중",
+        "hint": "효율 업데이트 대기 중"
+      }
+    },
+    "common": {
+      "show": "보기",
+      "load": "부하",
+      "session": "세션"
+    },
+    "toast": {
+      "inProgress": "이 기능은 아직 다듬는 중입니다"
+    },
+    "load": {
+      "title": "부하",
+      "viewWeek": "이번 주 보기",
+      "settingsAria": "부하 설정",
+      "settingsTitle": "부하 설정",
+      "settingsDescription": "부하 모듈의 필터, 표시 항목, 범위를 설정합니다.",
+      "settingsPlaceholder": "설정 기능 준비 중",
+      "completed": "이번 주 부하",
+      "target": "지난주 부하",
+      "driftToday": "지난주 대비 변화",
+      "chartTitle": "주간 부하",
+      "weeklyTrainingLoad": "주간 부하",
+      "weeklySessionCount": "주간 횟수",
+      "loadUnit": "부하",
+      "goal": "목표",
+      "completedLabel": "완료됨",
+      "actual": "실제",
+      "expected": "계획",
+      "todayValues": "실제 {actual} · 계획 {planned}",
+      "chartAria": "이번 주 실제 및 계획 부하",
+      "noData": "이번 주 부하 데이터가 없습니다"
+    },
+    "summary": {
+      "title": "요약",
+      "viewAllMetrics": "모든 지표 보기",
+      "settingsAria": "요약 설정",
+      "settingsTitle": "요약 설정",
+      "settingsDescription": "표시할 지표와 순서를 설정합니다."
+    },
+    "currentState": {
+      "title": "현재 상태",
+      "settingsAria": "현재 상태 설정",
+      "settingsTitle": "현재 상태 설정",
+      "settingsDescription": "상태 카드의 표시 여부와 순서를 설정합니다.",
+      "hideMetric": "숨기기",
+      "emptyMetrics": "아직 지표가 없습니다. 톱니바퀴 아이콘에서 레이아웃 모드를 열고 카드를 추가하거나 순서를 바꿔보세요.",
+      "cards": {
+        "fitness": "체력",
+        "fatigue": "피로",
+        "form": "컨디션",
+        "readiness": "준비도"
+      },
+      "healthCard": {
+        "title": "건강",
+        "restingHeartRate": "안정시 심박",
+        "maxHeartRate": "최대 심박"
+      }
+    },
+    "todayExecution": {
+      "title": "오늘의 훈련",
+      "mobileTitle": "훈련",
+      "mobileMeta": "{weekday}  {count} 세션",
+      "meta": "{date}  {weekday}  계획 {count}개",
+      "enterToday": "보기",
+      "linked": "연결된 활동: {activity}",
+      "notLinked": "연결된 활동 없음",
+      "empty": "오늘 계획된 훈련이 없습니다",
+      "actionPending": "처리 중…",
+      "actionPostpone": "미루기",
+      "actionSkip": "건너뛰기",
+      "actionDelete": "삭제",
+      "deleteDisabledTip": "진행 중인 계획에서는 아직 단일 훈련 삭제를 지원하지 않습니다.",
+      "toastPostponeSuccess": "훈련을 미뤘습니다.",
+      "toastPostponeFailed": "훈련을 미루지 못했습니다. 다시 시도해 주세요.",
+      "toastSkipSuccess": "건너뛴 것으로 표시했습니다.",
+      "toastSkipFailed": "건너뛰지 못했습니다. 다시 시도해 주세요.",
+      "postponeConfirmTitle": "이 훈련을 미룰까요?",
+      "postponeConfirmDescription": "훈련을 미루면 이번 주 흐름과 이후 세션에 영향을 줄 수 있습니다. 꼭 필요할 때만 사용하세요.",
+      "postponeConfirmCancel": "취소",
+      "postponeConfirmAction": "그래도 미루기"
+    },
+    "upload": {
+      "title": "활동 업로드",
+      "cardTitle": "활동 파일 업로드",
+      "description": "FIT / TCX / GPX 활동 파일을 가져와 계획된 훈련에 연결하고 리뷰를 생성하세요.",
+      "selectFile": "활동 파일 선택",
+      "soonToast": "파일 업로드 기능이 곧 제공됩니다"
+    },
+    "empty": {
+      "header": "훈련 홈",
+      "title": "아직 진행 중인 훈련 계획이 없습니다",
+      "description": "AI 코치 계획을 만들면 오늘의 훈련, 주간 부하, 현재 상태, 최근 활동이 이곳에 표시됩니다.",
+      "createPlan": "계획 만들기",
+      "viewHistory": "기록 보기",
+      "getStarted": "시작하기",
+      "cards": {
+        "create": {
+          "title": "훈련 계획 만들기",
+          "description": "목표와 제약 조건을 입력하면 코치가 훈련 블록 초안을 작성합니다."
+        },
+        "upload": {
+          "title": "활동 업로드",
+          "description": "계획이 없어도 FIT / TCX / GPX 활동 파일을 먼저 가져올 수 있습니다."
+        },
+        "coach": {
+          "title": "코치에게 묻기",
+          "description": "방향이 애매할 때 코치에게 다음 단계를 물어보세요."
+        }
+      }
+    },
+    "header": {
+      "askCoach": "코치에게 묻기",
+      "weekTarget": "주간 목표",
+      "viewCurrentPlan": "현재 계획 보기"
+    },
+    "dynamic": {
+      "weekLabel": "{current} / {total}주차",
+      "sport": {
+        "run": "러닝",
+        "cycle": "라이딩",
+        "swim": "수영",
+        "other": "기타"
+      },
+      "status": {
+        "done": "완료",
+        "inProgress": "진행 중",
+        "skipped": "건너뜀",
+        "moved": "이동됨",
+        "planned": "계획됨"
+      },
+      "activityStatus": {
+        "processing": "처리 중",
+        "ready": "준비됨",
+        "partialFailed": "일부 문제",
+        "failed": "실패",
+        "unknown": "알 수 없음"
+      },
+      "dateLabel": "{month}/{day}",
+      "plannedWorkoutFallback": "오늘의 세션"
+    },
+    "todaySuggestionActions": {
+      "viewSuggestion": "오늘의 코치 조언 보기",
+      "workoutProposal": "Suggested workout",
+      "durationMinutes": "{minutes} min",
+      "independentWorkoutNote": "Confirming adds an independent workout for today without changing your training plan.",
+      "suggestionChanged": "Training facts changed, so today's advice was refreshed",
+      "sport": {
+        "run": "Run",
+        "cycling": "Ride",
+        "swim": "Swim",
+        "strength": "Strength",
+        "other": "Other"
+      },
+      "intensity": {
+        "very_easy": "Very easy",
+        "easy": "Easy",
+        "moderate": "Moderate",
+        "hard": "Hard"
+      },
+      "reasoning": "Why this recommendation",
+      "remindAt": "Remind me at",
+      "schedule": "Schedule",
+      "workoutFailed": "Could not create today’s workout",
+      "reminderScheduled": "Reminder scheduled",
+      "reminderFailed": "Could not schedule the reminder",
+      "actionFailed": "Could not update the suggestion",
+      "coachPrompt": "오늘의 코치 조언을 검토하고 다음에 무엇을 할지 함께 판단해 주세요.",
+      "trainingWindowClosed": "오늘은 새 훈련을 추가하기에 너무 늦었습니다",
+      "workoutAlreadyExists": "오늘 훈련이 이미 등록되어 있습니다"
+    }
+  },
+  "PlanActivationDialog": {
+    "title": "계획 활성화",
+    "description": "실제 시작일을 선택하세요. 운동 날짜는 이 날짜와 각 운동 오프셋을 기준으로 계산됩니다.",
+    "cancel": "취소",
+    "confirm": "확인하다"
+  },
+  "V2PlanPage": {
+    "weekday": {
+      "mon": "월",
+      "tue": "화요일",
+      "wed": "수요일",
+      "thu": "목",
+      "fri": "금",
+      "sat": "앉았다",
+      "sun": "해"
+    },
+    "status": {
+      "active": "활동적인",
+      "paused": "일시중지됨",
+      "completed": "완전한",
+      "cancelled": "취소",
+      "draft": "초안"
+    },
+    "header": {
+      "title": "계획",
+      "createPlan": "계획 만들기",
+      "currentCycle": "현재주기",
+      "viewOtherPlans": "다른 플랜 보기",
+      "remaining": "남은",
+      "remainingWeeks": "{weeks}주",
+      "manageAriaLabel": "계획 관리",
+      "weekStatus": "주 {current} / {total} · {status}",
+      "totalSessions": "{count} 총 세션수"
+    },
+    "empty": {
+      "title": "아직 활성화된 교육 계획이 없습니다.",
+      "description": "여기에서 주간 구조, 오늘의 운동 및 진행 상황을 확인하려면 훈련 계획을 만들거나 활성화하세요.",
+      "createPlan": "계획 만들기",
+      "viewHistory": "기록 보기",
+      "nextSteps": {
+        "title": "다음 단계",
+        "aiTitle": "AI로 생성",
+        "aiDescription": "편집 가능한 초안을 만들려면 목표, 블록 길이, 주간 가용성을 입력하세요.",
+        "historyTitle": "계획 내역 검토",
+        "historyDescription": "초안, 일시 중지된 계획 또는 완료된 계획을 계속 관리하세요.",
+        "coachTitle": "코치에게 물어보세요",
+        "coachDescription": "방향이 불분명할 경우 먼저 코치에게 추천을 요청하세요."
+      },
+      "includesTitle": "활성 계획에는 다음이 포함됩니다.",
+      "includes": {
+        "structure": "블록 및 주 구조",
+        "daily": "일일 운동 일정",
+        "review": "실행 및 검토 진입점"
+      }
+    },
+    "weekStrip": {
+      "currentPosition": "현재 {current}주차 / 총 {total}주",
+      "viewWeek": "{week}주차 보기",
+      "sessionsUnit": "세션 수",
+      "title": "블록 구조",
+      "action": "모든 계획",
+      "legend": "회색 막대는 계획 부하, 녹색 막대는 실제 부하를 동일한 축으로 표시합니다",
+      "ratioOfPlannedShort": "계획된 주 부하의 {pct}%",
+      "noPlannedLoadShort": "계획된 부하 없음",
+      "weekTooltip": "주 {week} · {done}/{total} 완료 · 실제 {actual} / 예상 {estimated} · 준수 {rate}%",
+      "weekTooltipSessions": "주 {week} · {done}/{total} 세션",
+      "state": {
+        "done": "완료",
+        "current": "현재의",
+        "next": "다음"
+      }
+    },
+    "weekLoad": {
+      "title": "주간 부하",
+      "currentWeek": "주 {week}",
+      "barHelpAria": "일일 부하 막대 계산 방법",
+      "barHeightHint": "보라색 꺾은선은 일일 실제 부하를, 빗금 막대는 계획 부하를 나타냅니다. 두 값은 같은 세로축 눈금을 사용합니다.",
+      "plannedSessions": "계획된 세션"
+    },
+    "workout": {
+      "title": "이번주 운동",
+      "empty": "이번주에는 운동 계획이 없습니다",
+      "session": "세션 {index}",
+      "editPlan": "계획 수정",
+      "unscheduled": "예정되지 않은",
+      "status": {
+        "overdue": "미완료",
+        "done": "완료",
+        "inProgress": "진행 중",
+        "skipped": "건너뛰었습니다.",
+        "moved": "연기됨",
+        "today": "예정",
+        "planned": "예정"
+      },
+      "linkedActivityLine": "연결된 활동",
+      "linkedActivityFallback": "활동"
+    },
+    "today": {
+      "title": "오늘의 운동",
+      "viewTodayPlan": "계획 보기",
+      "empty": "오늘은 계획된 운동이 없습니다"
+    },
+    "actions": {
+      "pending": "처리 중...",
+      "postpone": "연기하다",
+      "skip": "건너뛰다",
+      "delete": "삭제",
+      "deleteDisabledTip": "활성 계획에서 단일 운동 삭제는 아직 지원되지 않습니다.",
+      "postponeToday": "오늘 연기해",
+      "linkedBlockedTip": "먼저 활동 연결을 해제하세요. 연결된 동안에는 연기 및 건너뛰기가 비활성화됩니다.",
+      "postponeTodayBlockedTip": "오늘은 연기할 수 있는 운동이 없습니다(연결된 활동을 먼저 연결 해제해야 합니다)."
+    },
+    "toast": {
+      "noPostponableToday": "오늘은 운동을 미룰 수 없다",
+      "postponeTodaySuccess": "오늘 운동은 내일로 미뤘어요",
+      "postponeOneSuccess": "운동은 다음날로 연기",
+      "postponeFailed": "연기하지 못했습니다. 다시 시도해 주세요.",
+      "skipSuccess": "건너뛴 것으로 표시됨",
+      "skipFailed": "건너뛴 것으로 표시하지 못했습니다. 다시 시도해 주세요."
+    },
+    "goal": {
+      "title": "목표 진행",
+      "weekSessions": "주간 세션",
+      "completed": "완전한",
+      "progressTo": "진행 상황",
+      "dayNumber": "일 {day}",
+      "notStarted": "시작되지 않음"
+    },
+    "coach": {
+      "title": "코치 제안",
+      "description": "계획 상태: {status}. {completed}/{total} 세션을 완료했으며 약 {remainingWeeks}주 남았습니다. 실행 데이터를 계속 조정하세요.",
+      "ask": "코치에게 물어보세요"
+    },
+    "manage": {
+      "cancel": "취소",
+      "confirm": "확인하다",
+      "pause": {
+        "menu": "계획 일시 중지",
+        "title": "계획 일시 중지",
+        "description": "일시 중지하면 현재 구조와 실행 기록이 유지됩니다.",
+        "confirm": "정지시키다"
+      },
+      "complete": {
+        "menu": "완전한 계획",
+        "title": "완전한 계획",
+        "description": "이 계획을 완료됨으로 표시하면 기록에 계속 남아 있습니다.",
+        "confirm": "완벽한"
+      },
+      "delete": {
+        "menu": "계획 삭제",
+        "title": "계획 삭제",
+        "description": "이 작업은 취소할 수 없으며 이 훈련 블록의 연속성이 중단됩니다. 계속하기 전에 확인하세요.",
+        "confirm": "삭제"
+      }
+    },
+    "postponeConfirm": {
+      "title": "운동을 연기하시겠습니까?",
+      "todayDescription": "오늘 완료되지 않은 세션을 연기하면 이번 주의 로드 및 향후 세션에 영향을 미칠 수 있습니다.",
+      "singleDescription": "이 운동을 연기하면 예정된 훈련 리듬이 변경되고 계획 결과에 영향을 미칠 수 있습니다.",
+      "confirm": "어쨌든 연기하세요"
+    },
+    "workoutStatus": {
+      "done": "완료",
+      "inProgress": "진행 중",
+      "skipped": "건너뛰었습니다.",
+      "moved": "연기됨",
+      "planned": "예정",
+      "incomplete": "미완료",
+      "upcoming": "예정"
+    },
+    "movedBy": {
+      "user": "내가 연기",
+      "coach": "코치가 연기"
+    }
+  },
+  "UsagePage": {
+    "navTitle": "AI 활용",
+    "navDescription": "AI 제공업체 사용량",
+    "open": "사용량 보기",
+    "title": "AI 활용",
+    "description": "AI 제공업체 사용량",
+    "loading": "로드 중...",
+    "selfHost": {
+      "eyebrow": "셀프 호스팅 · 자체 API 키",
+      "title": "AI 제공업체가 사용량을 기록합니다",
+      "description": "이 인스턴스는 소유자가 설정한 AI 제공업체를 직접 호출합니다. Trainingload.ai는 요청을 중계하거나 제공업체의 사용 기록을 수집하지 않습니다.",
+      "statusSummary": "셀프 호스팅 AI 상태",
+      "currentProvider": "현재 AI 서비스",
+      "notConfigured": "설정되지 않음",
+      "statusReady": "설정됨",
+      "statusOff": "활성화되지 않음",
+      "statusIssue": "설정 오류",
+      "trainingloadMetering": "Trainingload.ai 사용량 측정",
+      "notApplicable": "해당 없음",
+      "providerRecords": "제공업체 사용 기록",
+      "providerDashboard": "AI 제공업체 대시보드",
+      "explanationTitle": "사용량 차트가 없는 이유는 무엇인가요?",
+      "providerUsage": "AI 제공업체가 사용량을 기록합니다. Trainingload.ai는 해당 기록을 읽을 수 없으므로 제공업체 대시보드에서 세부 정보를 확인하세요.",
+      "openSettings": "AI 설정 관리"
+    }
+  },
+  "PlanWorkoutActivityLink": {
+    "label": {
+      "unlinked": "링크 활동",
+      "linkedFallback": "활동"
+    },
+    "dropdown": {
+      "heading": "이날 활동",
+      "empty": "이 날에는 활동이 없습니다.",
+      "loading": "로드 중…",
+      "noScheduledDate": "이 운동은 아직 예정된 날짜가 없습니다.",
+      "durationMinutes": "~{minutes}분",
+      "linkedOtherPlanWorkout": "링크됨: {name}",
+      "activityFallback": "활동",
+      "sessionFallback": "계획된 운동",
+      "removeLink": "링크 삭제"
+    },
+    "confirm": {
+      "replaceTitle": "링크를 교체하시겠습니까?",
+      "replaceDescription": "'{activity}'은 이미 '{workout}'에 연결되어 있습니다. 이 계획된 세션으로 대체하시겠습니까?",
+      "confirm": "바꾸다",
+      "cancel": "취소"
+    },
+    "toast": {
+      "linkSuccess": "활동이 연결됨",
+      "linkFailed": "링크를 업데이트할 수 없습니다.",
+      "unlinkSuccess": "링크가 삭제되었습니다.",
+      "unlinkFailed": "링크를 삭제할 수 없습니다."
+    }
+  },
+  "ActivityPlanLink": {
+    "label": {
+      "unlinked": "링크 운동",
+      "auto": "자동"
+    },
+    "dropdown": {
+      "heading": "오늘 운동 계획하기",
+      "empty": "이 날에는 계획된 운동이 없습니다.",
+      "loading": "로드 중…",
+      "expectedDuration": "~{minutes}분 예정",
+      "occupiedBy": "링크됨: {title}",
+      "removeLink": "링크 삭제",
+      "sessionFallback": "세션 {index}",
+      "linkedFallback": "운동 계획"
+    },
+    "confirm": {
+      "replaceTitle": "링크를 교체하시겠습니까?",
+      "replaceDescription": "'{workout}'은 이미 '{other}'에 연결되어 있습니다. 이 활동으로 대체하시겠습니까?",
+      "confirm": "바꾸다",
+      "cancel": "취소"
+    },
+    "toast": {
+      "linkSuccess": "운동 연결됨",
+      "linkFailed": "링크를 업데이트할 수 없습니다.",
+      "unlinkSuccess": "링크가 삭제되었습니다.",
+      "unlinkFailed": "링크를 삭제할 수 없습니다."
+    }
+  },
+  "V2ActivitiesPage": {
+    "searchEntry": "활동, 소스 또는 운동 키워드 검색",
+    "feed": {
+      "title": "활동 피드",
+      "filter": "필터",
+      "refresh": "새로 고치다",
+      "refreshing": "상쾌하다...",
+      "pullToRefresh": "아래로 당겨 새로고침하세요.",
+      "releaseToRefresh": "새로고침하려면 손을 떼세요",
+      "pullBottomToRefresh": "맨 아래: 새로 고치려면 더 아래로 당깁니다.",
+      "releaseBottomToRefresh": "새로고침하려면 손을 떼세요",
+      "loadingMore": "더 로드 중...",
+      "noMore": "더 이상 활동이 없습니다."
+    },
+    "statsCard": {
+      "title": "활동 통계",
+      "subtitle": "{count} 활동 보기",
+      "open": "열려 있는"
+    },
+    "provider": {
+      "intervalsIcu": "Intervals.icu",
+      "manual": "수동"
+    },
+    "common": {
+      "unknownTime": "알 수 없는 시간",
+      "dateTime": "{month}/{day} {hh}:{mm}",
+      "load": "짐",
+      "untitledActivity": "제목 없는 활동"
+    },
+    "status": {
+      "processing": "처리",
+      "ready": "준비가 된",
+      "partialFailed": "부분적인 문제",
+      "failed": "실패한",
+      "unknown": "알려지지 않은"
+    },
+    "actions": {
+      "viewReview": "리뷰 보기",
+      "view": "보다",
+      "aiReview": "AI 검토",
+      "more": "추가 작업",
+      "openMenu": "메뉴 열기",
+      "export": "내보내다",
+      "delete": "삭제",
+      "exportFailed": "내보내기에 실패했습니다. 나중에 다시 시도해 주세요.",
+      "confirmDeleteTitle": "이 활동을 삭제하시겠습니까?",
+      "confirmDeleteDescription": "이 작업은 취소할 수 없습니다.",
+      "exportDialogTitle": "내보내기 유형 선택",
+      "exportDialogDescription": "내보낼 파일 형식을 선택합니다.",
+      "selectExportTypePlaceholder": "내보내기 형식 선택",
+      "confirm": "확인하다",
+      "cancel": "취소",
+      "deleting": "삭제 중...",
+      "exporting": "내보내는 중...",
+      "exportToProvider": "Export to {provider}",
+      "exportingToProvider": "Sending to {provider}...",
+      "exportToProviderSuccess": "Activity sent to {provider}",
+      "exportToProviderFailed": "Failed to send activity to {provider}"
+    },
+    "map": {
+      "description": "활동 지도",
+      "open": "활동 지도 열기"
+    },
+    "import": {
+      "title": "활동 업로드",
+      "cardTitle": "활동 파일 업로드",
+      "description": "FIT/TCX/GPX 활동 파일을 가져오고, 리뷰를 생성하고, 계획된 운동에 연결합니다.",
+      "selectFile": "활동 파일 선택",
+      "soonToast": "파일 업로드가 곧 제공됩니다"
+    },
+    "empty": {
+      "title": "아직 활동 데이터가 없습니다.",
+      "description": "FIT/TCX/GPX 활동 파일을 업로드하여 피드를 채우고, 운동을 검토하고, 계획에 연결하세요."
+    },
+    "mirror": {
+      "untitled": "원본 동기화를 기다리는 활동",
+      "discoveredVia": "Intervals.icu에서 발견",
+      "syncing": "원본 활동의 전체 데이터를 가져오는 중입니다.",
+      "connectionRequired": "현재 연결에서 전체 활동을 제공할 수 없습니다. 원본 연결을 확인하세요.",
+      "importDisabled": "원본은 연결되어 있지만 활동 자동 가져오기가 꺼져 있습니다.",
+      "reauthRequired": "원본 인증이 만료되었습니다. 다시 인증해 주세요.",
+      "notFound": "원본에서 고유하게 일치하는 활동을 찾지 못했습니다.",
+      "ambiguous": "일치할 수 있는 원본 활동이 여러 개라 자동 연결하지 않았습니다.",
+      "syncFailed": "원본 동기화를 완료하지 못했습니다. 연결을 확인하고 다시 시도하세요.",
+      "pending": "동기화 중",
+      "retry": "다시 시도",
+      "retrying": "다시 시도 중",
+      "connectSource": "원본 연결",
+      "reauthorizeSource": "원본 다시 인증",
+      "enableSourceImport": "원본 가져오기 켜기",
+      "checkSourceConnection": "원본 연결 확인"
+    }
+  },
+  "V2ActivitiesStatsPage": {
+    "title": "활동 통계",
+    "back": "활동으로 돌아가기",
+    "heatmapTitle": "{year} 활동 지도",
+    "chartTitle": "경향",
+    "metricChartTitle": "{metric} 추세",
+    "monthlyListTitle": "월간 활동",
+    "countSummary": "{count} 활동",
+    "emptyYear": "올해는 활동이 없습니다",
+    "untitledActivity": "제목 없는 활동",
+    "controls": {
+      "year": "년도",
+      "metric": "추세 지표"
+    },
+    "sport": {
+      "all": "모든 스포츠",
+      "RUN": "달리다",
+      "CYCLING": "사이클링",
+      "SWIM": "헤엄"
+    },
+    "heatmap": {
+      "range": "{start} ~ {end}",
+      "total": "{count} 활동",
+      "day": "{date}: {count} 활동",
+      "less": "더 적은",
+      "more": "더"
+    }
+  },
+  "V2PlansPage": {
+    "status": {
+      "active": "활동적인",
+      "scheduled": "예약됨",
+      "paused": "일시중지됨",
+      "completed": "완전한",
+      "cancelled": "취소",
+      "superseded": "대체됨",
+      "draft": "초안"
+    },
+    "header": {
+      "badge": "훈련 계획",
+      "title": "훈련 계획",
+      "description": "활성, 초안 및 기록 교육 계획을 관리합니다."
+    },
+    "overview": {
+      "title": "개요",
+      "active": "활동적인",
+      "completed": "완전한",
+      "averageSessionCompletion": "평균 세션 완료",
+      "averageLoadCompliance": "평균 부하 규정 준수"
+    },
+    "allPlans": {
+      "title": "모든 계획",
+      "count": "{count} 계획",
+      "empty": "아직 훈련 계획이 없습니다"
+    },
+    "create": {
+      "title": "계획 만들기",
+      "cardTitle": "새로운 훈련 계획 생성",
+      "description": "목표, 블록 길이, 주간 가용성부터 시작한 다음 코치가 계획 초안을 작성하도록 하세요.",
+      "button": "계획 만들기"
+    },
+    "recent": {
+      "title": "최근 계획",
+      "empty": "최근 계획 없음",
+      "itemMeta": "{weeks}주 · {sessions} 세션"
+    },
+    "statusGuide": {
+      "title": "현황안내",
+      "draft": "초안은 코치와 함께 편집하거나 다듬을 수 있습니다.",
+      "active": "활성 계획은 홈과 캘린더에 표시됩니다.",
+      "history": "완료, 일시중지 또는 취소된 계획은 기록에 남습니다.",
+      "askCoach": "훈련 방법을 잘 모르겠으면 먼저 코치에게 문의하세요."
+    },
+    "planRange": {
+      "startOn": "{date}에 시작",
+      "createdOn": "{date}에 생성됨"
+    },
+    "planProgress": {
+      "active": "주 {current} / {total}",
+      "scheduled": "시작일에 자동 전환 예정",
+      "paused": "{current} / {total} 주에 일시중지됨",
+      "completed": "{count} 세션 완료",
+      "cancelled": "취소",
+      "superseded": "새 계획으로 대체됨",
+      "draft": "초안 · {count} 세션"
+    },
+    "actions": {
+      "viewCurrentPlan": "현재 계획 보기",
+      "viewPlanDetail": "요금제 세부정보 보기"
+    },
+    "coachText": {
+      "active": "{completed}/{total} 세션을 완료했습니다. 실행 데이터를 계속 조정하세요.",
+      "scheduled": "이 계획은 예정된 시작일에 자동으로 전환됩니다.",
+      "paused": "이 계획은 일시중지되었으며 나중에 재개할 수 있습니다.",
+      "completed": "이 계획은 완료되었으며 검토 가능합니다.",
+      "cancelled": "이 계획은 취소되었으며 기록에 남아 있습니다.",
+      "superseded": "새 계획으로 전환되었습니다. 이 계획은 기록에 남습니다.",
+      "draft": "이 초안은 코치가 편집하거나 완료할 수 있습니다."
+    },
+    "stats": {
+      "sessionCompletion": "완료된 세션",
+      "loadCompliance": "부하 준수",
+      "plannedSessions": "계획된 세션",
+      "completed": "완전한"
+    },
+    "delete": {
+      "iconAria": "계획 삭제",
+      "cannotDeleteActive": "활성 계획을 삭제할 수 없습니다.",
+      "activeHint": "세부적인 제어"
+    },
+    "start": {
+      "iconAria": "계획 시작",
+      "disabledHasActivePlan": "이미 진행 중인 계획이 있습니다. 먼저 일시 중지하거나 종료하세요."
+    }
+  },
+  "V2DayPage": {
+    "weekdayShort": {
+      "mon": "월",
+      "tue": "화요일",
+      "wed": "수요일",
+      "thu": "목",
+      "fri": "금",
+      "sat": "앉았다",
+      "sun": "해"
+    },
+    "dynamic": {
+      "dateLabel": "{month}/{day}",
+      "status": {
+        "done": "완료",
+        "inProgress": "진행 중",
+        "skipped": "건너뛰었습니다.",
+        "moved": "움직이는",
+        "planned": "예정"
+      },
+      "noDetail": "아직 세부정보가 없습니다.",
+      "weekLabel": "주 {current} / {total}",
+      "readiness": "정상"
+    },
+    "header": {
+      "notInPlanRange": "계획 범위 외",
+      "notActivated": "활성화되지 않음",
+      "noPlan": "훈련 계획 없음",
+      "backHome": "집으로 돌아가기",
+      "selectDate": "날짜 선택",
+      "todayPlanMeta": "{date} · {weekday} · {week}",
+      "previousDay": "전날",
+      "nextDay": "내일"
+    },
+    "summary": {
+      "readiness": "보류 중"
+    },
+    "coach": {
+      "title": "코치 제안",
+      "askCoach": "코치에게 물어보세요",
+      "branchPrompt": "오늘의 계획, 완료 상태, 현재 교육 주기를 바탕으로 오늘 조정이 필요한지 결정하고 그 이유를 설명하도록 도와주세요."
+    },
+    "toast": {
+      "inProgress": "이 기능은 아직 개선 중입니다."
+    },
+    "overview": {
+      "title": "오늘의 개요",
+      "adjust": "조정하다",
+      "plannedLoad": "계획된 세션",
+      "completed": "완전한",
+      "plannedDuration": "계획된 기간",
+      "progress": "진전"
+    },
+    "timeline": {
+      "title": "운동 일정",
+      "addWorkout": "운동 추가",
+      "meta": "{duration} · {sessionCount} 세션",
+      "cardActionsSoon": "운동 활동이 곧 제공될 예정입니다.",
+      "linkedActivity": "연결된 활동: {activity}",
+      "linkedBlockedTip": "연결된 운동은 연기하거나 건너뛸 수 없습니다.",
+      "markedDoneToast": "완료로 표시됨",
+      "markDone": "완료로 표시",
+      "actionPending": "처리",
+      "actionPostpone": "연기하다",
+      "actionSkip": "건너뛰다",
+      "actionDelete": "삭제",
+      "deleteDisabledTip": "아직 삭제를 사용할 수 없습니다.",
+      "postponeSuccess": "다음 날로 연기되었습니다.",
+      "postponeFailed": "연기하지 못했습니다. 다시 시도해 주세요.",
+      "skipSuccess": "건너뛴 것으로 표시되었습니다.",
+      "skipFailed": "건너뛰지 못했습니다. 다시 시도해 주세요.",
+      "linkSoon": "활동 연결이 곧 제공될 예정입니다.",
+      "linkActivity": "링크 활동",
+      "adjustSoon": "운동 조정이 곧 제공될 예정입니다.",
+      "adjustWorkout": "운동 조정",
+      "empty": {
+        "title": "오늘은 계획된 운동이 없습니다.",
+        "description": "해당 날짜에는 예정된 운동이 없습니다. 검토를 위해 활동을 업로드하거나 계획 일정을 조정하세요."
+      }
+    },
+    "weekContext": {
+      "title": "주간 상황",
+      "empty": {
+        "title": "아직 주간 컨텍스트가 없습니다.",
+        "description": "해당 날짜에 계획된 운동 데이터가 없습니다. 운동이 저장된 후 주간 분포가 나타납니다."
+      }
+    },
+    "upload": {
+      "title": "활동 업로드",
+      "cardTitle": "활동 파일 업로드",
+      "description": "FIT/TCX/GPX 활동 파일을 업로드하고, 오늘의 운동에 연결하고, 리뷰를 생성하세요.",
+      "selectFile": "활동 파일 선택"
+    }
+  },
+  "V2ActivitiesSearchPage": {
+    "back": "활동으로 돌아가기",
+    "quickFilters": {
+      "recent7d": "지난 7일",
+      "recent30d": "지난 30일",
+      "run": "달리다",
+      "cycling": "타다",
+      "swim": "헤엄"
+    },
+    "feed": {
+      "title": "검색결과",
+      "total": "{count} 합계",
+      "filtering": "결과 업데이트 중...",
+      "loadingMore": "더 로드 중...",
+      "noMore": "더 이상 활동이 없습니다."
+    },
+    "empty": {
+      "title": "아직 활동 데이터가 없습니다.",
+      "description": "현재 필터와 일치하는 활동이 없습니다. 필터를 조정하거나 FIT/TCX/GPX 활동 파일을 먼저 업로드하세요."
+    },
+    "upload": {
+      "cardTitle": "활동 파일 업로드",
+      "description": "업로드된 활동이 여기에 표시되며 훈련 계획을 검토하거나 연결할 수 있습니다.",
+      "selectFile": "활동 파일 선택"
+    },
+    "provider": {
+      "intervalsIcu": "Intervals.icu",
+      "manual": "수동"
+    },
+    "common": {
+      "unknownTime": "알 수 없는 시간",
+      "dateTime": "{month}/{day} {hh}:{mm}",
+      "load": "짐",
+      "untitledActivity": "제목 없는 활동"
+    },
+    "status": {
+      "processing": "처리",
+      "ready": "준비가 된",
+      "partialFailed": "부분적인 문제",
+      "failed": "실패한",
+      "unknown": "알려지지 않은"
+    },
+    "actions": {
+      "viewReview": "리뷰 보기",
+      "aiReview": "AI 검토"
+    }
+  },
+  "V2MePage": {
+    "zones": {
+      "runThresholdPace": "달리기 임계 속도",
+      "cyclingFtp": "사이클링 FTP",
+      "thresholdHr": "임계값 HR"
+    },
+    "connections": {
+      "connected": "연결됨",
+      "available": "사용 가능",
+      "upload": "업로드"
+    },
+    "goal": {
+      "name": "현재 목표 없음",
+      "description": "여기에서 현재 주기와 목표를 표시하는 훈련 계획을 만드세요.",
+      "title": "현재 목표",
+      "edit": "편집하다"
+    },
+    "header": {
+      "badge": "내 프로필",
+      "description": "계획과 AI 제안이 더 잘 맞도록 훈련 기본 설정을 완료하세요."
+    },
+    "trainingZones": {
+      "title": "훈련 구역",
+      "manage": "관리하다"
+    },
+    "preferences": {
+      "title": "훈련 선호도",
+      "adjust": "조정하다",
+      "runFirst": {
+        "title": "먼저 실행",
+        "description": "분야 기본 설정이 없습니다."
+      },
+      "cycleSupport": {
+        "title": "사이클링 지원",
+        "description": "로드 소스가 설정되지 않았습니다."
+      }
+    },
+    "platformConnections": {
+      "title": "플랫폼 연결",
+      "manage": "관리하다"
+    },
+    "privacy": {
+      "title": "개인정보 보호 및 데이터",
+      "defaultPrivate": "기본적으로 비공개",
+      "deletable": "계정 데이터는 언제든지 삭제될 수 있습니다.",
+      "aiScope": "AI는 승인된 훈련 데이터만 사용합니다."
+    },
+    "settings": {
+      "title": "설정",
+      "trainingReminder": "훈련 알림",
+      "recoveryReminder": "회복 알림",
+      "unitsAndDisplay": "단위 및 디스플레이"
+    }
+  },
+  "V2CoachPage": {
+    "toast": {
+      "inProgress": "곧 출시 예정"
+    },
+    "dynamic": {
+      "stateHintGood": "이번주 실행 잘됐네요",
+      "stateHintWatch": "이번주 리듬 보기",
+      "stateHintDefault": "아직 계획 실행 데이터가 없습니다.",
+      "stateValue": "{done}/{total} 완료",
+      "activityScope": "{distanceKm}km 활동",
+      "unknownTime": "알 수 없는 시간",
+      "week": "주 {current}/{total}"
+    },
+    "dynamicPrompts": {
+      "p1": "오늘은 {workout}를 어떻게 실행해야 할까요?",
+      "p2": "주 {week}를 조정해야 합니까?",
+      "p3": "부하를 추가할 만큼 복구가 충분합니까?",
+      "p4": "내 최근 활동을 검토할 수 있도록 도와주세요."
+    },
+    "prompts": {
+      "p1": "이번 주의 초점을 맞추는 데 도움을 주세요",
+      "p2": "오늘은 무엇을 훈련해야 할까요?",
+      "p3": "복구 일정을 어떻게 예약해야 합니까?",
+      "p4": "최근 활동에 대해 조언해 주세요."
+    },
+    "header": {
+      "badge": "AI 코치",
+      "title": "교육 Q&A 및 계획 조정",
+      "description": "AI 코치에게 당신의 계획, 최근 활동, 프로필 상황을 물어보세요.",
+      "newChat": "새 채팅"
+    },
+    "currentContext": {
+      "title": "현재 상황",
+      "switch": "스위치",
+      "week": "사이클 없음",
+      "cycle": "활성 계획 없음",
+      "load": "이번주 완료"
+    },
+    "recommended": {
+      "title": "제안된 메시지",
+      "filled": "채워짐: {prompt}"
+    },
+    "entry": {
+      "title": "빠른 질문",
+      "intro": "AI 코치에게 목표, 피로도, ​​조정하고 싶은 사항을 알려주세요.",
+      "placeholder": "질문을 입력하세요"
+    },
+    "threads": {
+      "title": "최근 활동 컨텍스트",
+      "all": "모두",
+      "unavailable": "공개 활동: {title}",
+      "emptyTitle": "최근 활동 없음",
+      "emptyDescription": "활동을 업로드하거나 동기화하여 AI에 대한 교육 컨텍스트를 표시하세요.",
+      "untitledActivity": "제목 없는 활동"
+    },
+    "context": {
+      "title": "사용 가능한 컨텍스트",
+      "currentCycle": "현재 훈련 주기",
+      "thisWeek": "이번주 계획",
+      "recentActivities": "최근 활동 기록"
+    },
+    "constraints": {
+      "title": "경계",
+      "description": "AI 조언은 훈련 결정을 지원합니다. 통증, 질병, 뚜렷한 불편감이 있는 경우에는 먼저 전문가와 상담하세요."
+    }
+  },
+  "V2PlanDetailPage": {
+    "goal": {
+      "5K": "5K",
+      "10K": "10K",
+      "HALF_MARATHON": "하프 마라톤",
+      "MARATHON": "마라톤"
+    },
+    "mobile": {
+      "training": "훈련",
+      "currentWeek": "이번 주",
+      "openSessions": "미완료",
+      "today": "오늘",
+      "restDay": "쉬는 날",
+      "noPlannedWorkout": "오늘은 훈련 계획이 없습니다.",
+      "noOpenSession": "완료할 운동이 없습니다",
+      "showAll": "모두 표시",
+      "session": "세션",
+      "unscheduled": "일정 없음",
+      "plannedWorkout": "계획된 운동",
+      "overdue": "기한 지남",
+      "loadChart": {
+        "title": "훈련 부하",
+        "plannedLoad": "계획 부하",
+        "fitness": "체력",
+        "fatigue": "피로"
+      }
+    },
+    "status": {
+      "active": "활동적인",
+      "scheduled": "예약됨",
+      "paused": "일시중지됨",
+      "completed": "완전한",
+      "cancelled": "취소",
+      "superseded": "대체됨",
+      "draft": "초안"
+    },
+    "workoutStatus": {
+      "done": "완료",
+      "inProgress": "진행 중",
+      "skipped": "건너뛰었습니다.",
+      "moved": "연기됨",
+      "planned": "예정",
+      "incomplete": "미완료",
+      "upcoming": "예정"
+    },
+    "movedBy": {
+      "user": "내가 연기",
+      "coach": "코치가 연기"
+    },
+    "workout": {
+      "unscheduled": "예정되지 않은",
+      "linkedActivityLine": "연결된 활동",
+      "linkedActivityFallback": "활동"
+    },
+    "actions": {
+      "pending": "처리 중...",
+      "postpone": "연기하다",
+      "linkedBlockedTip": "먼저 활동 연결을 해제하세요. 연결된 동안에는 연기 및 건너뛰기가 비활성화됩니다."
+    },
+    "postponeConfirm": {
+      "title": "운동을 연기하시겠습니까?",
+      "description": "연기하면 주간 리듬이 변경되고 이후 세션에 영향을 미칠 수 있습니다.",
+      "cancel": "취소",
+      "confirm": "어쨌든 연기하세요"
+    },
+    "toast": {
+      "postponeSuccess": "운동은 다음날로 연기",
+      "postponeFailed": "연기하지 못했습니다. 다시 시도해 주세요."
+    },
+    "defaultPageTitle": "훈련 계획",
+    "lifecycle": {
+      "title": "계획 관리",
+      "pending": "처리 중...",
+      "description": {
+        "draft": "이 계획은 아직 시작되지 않았습니다. 일정이 준비되면 시작하거나 더 이상 필요하지 않은 경우 초안을 삭제하세요.",
+        "scheduled": "이 계획은 준비되었으며 예정된 시작일에 자동으로 전환됩니다. 현재 계획을 유지하려면 취소하세요.",
+        "active": "이 계획은 현재 실행 중입니다. 계획을 유지하려면 일시 중지하고, 실행을 중지하려면 종료하거나, 검토 후 수동으로 완료로 표시하세요.",
+        "paused": "이 계획은 일시중지되었습니다. 준비가 되면 다시 시작하고, 이 주기가 중단되면 종료하세요.",
+        "completed": "이 계획은 완료되었습니다. 역사적 기록으로 남아있습니다.",
+        "cancelled": "이 계획은 완료되기 전에 종료되었습니다. 역사적 기록으로 남아있습니다.",
+        "superseded": "새 계획으로 전환되었습니다. 이 계획과 완료 기록은 변경되지 않습니다."
+      },
+      "actions": {
+        "activate": "시작",
+        "resume": "재개",
+        "pause": "일시중지",
+        "complete": "완료",
+        "cancel": "종료",
+        "delete": "삭제"
+      },
+      "reasons": {
+        "pause": "계획 제어에서 일시중지됨",
+        "complete": "계획 관리에서 수동으로 완료로 표시됨"
+      },
+      "confirm": {
+        "cancel": {
+          "title": "이 계획을 종료하시겠습니까?",
+          "description": "그러면 현재 실행 흐름이 중지되고 계획이 취소된 기록으로 이동됩니다. 계획 기록은 그대로 유지됩니다.",
+          "confirm": "요금제 종료"
+        },
+        "activate": {
+          "title": "이 계획을 시작하시겠습니까?",
+          "description": "이 계획이 활성 실행 계획이 되기 전 시작 날짜를 선택하세요.",
+          "confirm": "계획 시작"
+        },
+        "resume": {
+          "title": "이 계획을 재개하시겠습니까?",
+          "description": "계획이 활성 실행 상태로 돌아가고 홈과 달력에 표시됩니다.",
+          "confirm": "계획 재개"
+        },
+        "pause": {
+          "title": "이 계획을 일시중지하시겠습니까?",
+          "description": "계획은 현재 일정과 진행 상황을 유지하지만 더 이상 활성 실행 계획으로 처리되지 않습니다.",
+          "confirm": "계획 일시 중지"
+        },
+        "complete": {
+          "title": "이 계획을 완료로 표시하시겠습니까?",
+          "description": "이는 계획이 완료된 것으로만 표시됩니다. 남은 운동은 실행되지 않습니다.",
+          "confirm": "완료로 표시"
+        },
+        "delete": {
+          "title": "이 계획 기록을 삭제하시겠습니까?",
+          "description": "이렇게 하면 계획 기록과 예정된 운동이 제거됩니다. 이 작업은 취소할 수 없습니다.",
+          "confirm": "기록 삭제"
+        },
+        "dismiss": "현재 상태 유지"
+      }
+    },
+    "notFound": {
+      "backToPlans": "계획으로 돌아가기",
+      "title": "계획을 찾을 수 없습니다",
+      "description": "이 계획은 삭제되었거나 액세스 권한이 없을 수 있습니다."
+    },
+    "header": {
+      "backToPlans": "계획으로 돌아가기",
+      "startOn": "시작 {date}",
+      "notActivated": "활성화되지 않음",
+      "noGoalDescription": "아직 목표 설명이 없습니다.",
+      "activatePlan": "계획 활성화",
+      "resumePlan": "계획 재개",
+      "activating": "활성화 중..."
+    },
+    "overview": {
+      "cycleLength": "주기 길이",
+      "weekCount": "{count}주",
+      "completionRate": "완성",
+      "plannedSessions": "계획된 세션",
+      "skipped": "건너뛰었습니다.",
+      "title": "개요"
+    },
+    "execution": {
+      "notStarted": "미완료",
+      "incomplete": "미완료",
+      "upcoming": "예정",
+      "inProgress": "진행 중",
+      "done": "완료",
+      "skipped": "건너뜀",
+      "postponed": "연기됨",
+      "title": "실행"
+    },
+    "weekBreakdown": {
+      "openDetailsAria": "공개: {title}",
+      "title": "주간 분석",
+      "weekLabel": "주 {week}",
+      "completedMeta": "{done}/{total} 완료",
+      "sessionsCount": "{count} 세션",
+      "dayMeta": "{day} · {date}",
+      "emptyDay": "예정된 운동 없음",
+      "sessionMeta": "세션 {index} · {sportType}",
+      "sportOnly": "{sportType}",
+      "sessionOnly": "세션 {index}",
+      "emptyPlanTitle": "이 계획에는 아직 운동이 없습니다.",
+      "emptyPlanDescription": "운동이 생성되거나 저장되면 여기에 주간 실행 세부정보가 표시됩니다.",
+      "postponeNeedActivate": "운동을 연기하기 전에 계획을 활성화하세요"
+    },
+    "sportType": {
+      "run": "달리다",
+      "cycling": "사이클링",
+      "swim": "헤엄"
+    },
+    "notes": {
+      "title": "메모",
+      "goalLabel": "목표",
+      "noGoal": "목표 없음",
+      "descriptionLabel": "설명",
+      "noDescription": "설명 없음"
+    },
+    "nextSteps": {
+      "title": "다음 단계"
+    },
+    "workoutDetail": {
+      "title": "운동 세부정보",
+      "meta": "{day} · {date} · {status}",
+      "dsl": "운동 텍스트",
+      "notes": "메모",
+      "openDay": "오픈 데이 뷰"
+    },
+    "coach": {
+      "title": "AI 코치",
+      "continueAsk": "이 계획을 계속하세요",
+      "description": "계획 상황에 맞춰 계속 채팅하세요",
+      "enter": "오픈 AI 코치"
+    },
+    "weekday": {
+      "mon": "월",
+      "tue": "화요일",
+      "wed": "수요일",
+      "thu": "목",
+      "fri": "금",
+      "sat": "앉았다",
+      "sun": "해"
+    },
+    "share": {
+      "title": "Share this plan",
+      "hint": "Create an unlisted link. Anyone with it can preview the schedule and import a draft.",
+      "derivedHint": "This plan was imported. Sharing it creates a new lineage from your copy.",
+      "share": "Share plan",
+      "shareAgain": "Share latest version",
+      "pending": "Working...",
+      "created": "Share link is ready",
+      "unchanged": "Nothing changed. Using the current version.",
+      "failed": "Could not share this plan",
+      "versionLabel": "Version {version}",
+      "copyLatest": "Copy latest link",
+      "copyVersion": "Copy this version",
+      "copiedLatest": "Latest link copied",
+      "copiedVersion": "This version link copied",
+      "copyFailed": "Could not copy the link",
+      "revokeVersion": "Revoke version",
+      "revokeLineage": "Revoke lineage",
+      "revokedVersion": "This version was revoked",
+      "revokedLineage": "The share lineage was revoked"
+    },
+    "providerAction": {
+      "exportPlan": "{provider}(으)로 보내기",
+      "exporting": "{provider}(으)로 보내는 중…",
+      "connectRequired": "이 계획을 보내기 전에 {provider}에 연결하세요."
+    }
+  },
+  "StrengthCatalog": {
+    "equipment": {
+      "bodyweight": "맨몸",
+      "dumbbell": "덤벨",
+      "barbell": "바벨",
+      "kettlebell": "케틀벨",
+      "resistance_band": "저항 밴드",
+      "machine": "머신",
+      "bench": "벤치",
+      "pull_up_bar": "철봉"
+    },
+    "exercise": {
+      "backSquat": "백 스쿼트",
+      "gobletSquat": "고블릿 스쿼트",
+      "squat": "스쿼트",
+      "deadlift": "데드리프트",
+      "romanianDeadlift": "루마니안 데드리프트",
+      "dumbbellRomanianDeadlift": "덤벨 루마니안 데드리프트",
+      "lunge": "런지",
+      "splitSquat": "스플릿 스쿼트",
+      "stepUp": "스텝업",
+      "hipThrust": "힙 스러스트",
+      "calfRaise": "카프 레이즈",
+      "benchPress": "벤치 프레스",
+      "overheadPress": "오버헤드 프레스",
+      "row": "로우",
+      "dumbbellRow": "덤벨 로우",
+      "pullUp": "풀업",
+      "latPulldown": "랫 풀다운",
+      "pushUp": "푸시업",
+      "plank": "플랭크",
+      "sidePlank": "사이드 플랭크",
+      "deadBug": "데드 버그",
+      "gluteBridge": "글루트 브리지"
+    }
+  },
+  "V2PlanCreatePage": {
+    "sport": {
+      "run": "달리다",
+      "cycle": "주기",
+      "swim": "헤엄",
+      "strength": "근력 운동"
+    },
+    "intent": {
+      "racePrep": {
+        "title": "경주 준비",
+        "description": "경주 날짜를 향해 나아가세요"
+      },
+      "fitnessBuild": {
+        "title": "체력 단련",
+        "description": "유산소 능력을 높이고 꾸준히 부하를 증가시키세요"
+      },
+      "skillFocus": {
+        "title": "스킬 포커스",
+        "description": "속도, 힘 또는 기술에 중점을 둡니다."
+      },
+      "returnToTraining": {
+        "title": "훈련으로 돌아가기",
+        "description": "낮은 위험으로 다시 시작"
+      },
+      "healthFatLoss": {
+        "title": "건강과 체지방 감소",
+        "description": "지속 가능한 루틴 구축"
+      }
+    },
+    "raceDistance": {
+      "run": {
+        "half": "하프 마라톤",
+        "full": "마라톤"
+      },
+      "cycle": {
+        "criterium": "기준",
+        "road": "로드 레이스"
+      }
+    },
+    "common": {
+      "joiner": ", "
+    },
+    "raceDiscipline": {
+      "run": "달리다",
+      "tri": "트라이애슬론",
+      "cycle": "사이클링"
+    },
+    "header": {
+      "backToPlans": "계획으로 돌아가기",
+      "badge": "계획 만들기",
+      "title": "AI로 훈련 계획 생성",
+      "description": "AI 코치를 계속하기 전에 목표, 주기, 제약 조건을 선택하세요."
+    },
+    "mainSport": {
+      "title": "계획 운동 구성",
+      "description": "하나 이상의 종목을 선택할 수 있으며 근력 운동은 주 목표를 보조합니다."
+    },
+    "trainingIntent": {
+      "title": "훈련 의도",
+      "description": "이 주기가 무엇을 해결해야 하는지 AI에게 알려주세요."
+    },
+    "raceInfo": {
+      "title": "경주 정보",
+      "discipline": "규율",
+      "distance": "거리"
+    },
+    "cycleConstraints": {
+      "title": "사이클 제약",
+      "cycleLength": "주기 길이",
+      "weekOption": "{value}주",
+      "daysPerWeek": "주당 일수",
+      "dailyMinutes": "세션당 시간(분)"
+    },
+    "strength": {
+      "title": "보조 근력 운동",
+      "description": "AI가 목표, 장비, 회복 여건에 맞춰 별도의 근력 세션을 배치합니다.",
+      "preference": {
+        "AUTO": "AI가 결정",
+        "INCLUDE": "근력 운동 포함",
+        "EXCLUDE": "근력 운동 제외"
+      },
+      "sessionsPerWeek": "주당 세션 수",
+      "minutesPerSession": "세션당 시간(분)",
+      "availableEquipment": "사용 가능한 장비"
+    },
+    "brief": {
+      "title": "계획 개요",
+      "sports": "스포츠: {value}",
+      "intent": "의도: {value}",
+      "cycle": "주기: {weeks}주 · {weeklyDays}일/주 · {dailyMinutes}분/세션",
+      "race": "경주: {discipline} · {distance}",
+      "strength": "근력 운동: {value}",
+      "equipment": "사용 가능한 장비: {value}",
+      "start": "계획 생성",
+      "handoff": "AI Coach는 위의 스포츠, 의도, 주기로 열립니다."
+    },
+    "nextFlow": {
+      "title": "다음",
+      "step1": "AI는 목표와 제약 사항을 확인합니다.",
+      "step2": "주 구조 및 훈련일 생성",
+      "step3": "계획에서 실행을 저장하고 추적합니다."
+    },
+    "alternative": {
+      "title": "아직 확실하지 않나요?",
+      "backToPlans": "먼저 계획으로 돌아가기"
+    }
+  },
+  "V2MetricsPage": {
+    "metricCards": {
+      "trainingLoad": {
+        "title": "훈련 부하",
+        "body": "CTL, ATL 및 피로 변경 사항을 검토합니다."
+      },
+      "power": {
+        "title": "힘",
+        "body": "FTP 및 파워존을 관리합니다."
+      },
+      "heartRate": {
+        "title": "심박수",
+        "body": "임계값 HR 및 드리프트를 확인하세요."
+      },
+      "pace": {
+        "title": "속도",
+        "body": "실행 임계값과 속도 추세를 검토합니다."
+      }
+    },
+    "toast": {
+      "inProgress": "곧 출시 예정"
+    },
+    "header": {
+      "badge": "측정항목",
+      "title": "훈련 지표",
+      "description": "부하, 파워, 심박수, 페이스를 한 화면에서 볼 수 있습니다.",
+      "coreMetric": "핵심 지표"
+    },
+    "loadTrend": {
+      "title": "부하 추세",
+      "viewLoad": "부하 보기",
+      "currentDone": "현재의 피로",
+      "emptyTitle": "아직 부하 추세가 없습니다.",
+      "emptyDescription": "활동을 업로드하거나 동기화하여 훈련 부하를 계산하고 추세를 표시하세요."
+    },
+    "entry": {
+      "title": "측정항목 진입점"
+    },
+    "recentTrends": {
+      "title": "최근 동향",
+      "fitnessUp": {
+        "title": "피트니스 트렌드"
+      },
+      "fatigueHigh": {
+        "title": "피로 상태"
+      },
+      "efficiencyStable": {
+        "title": "효율성 감시"
+      }
+    },
+    "explanation": {
+      "title": "에 대한",
+      "body": "이러한 지표는 활동 데이터와 개인 임계값을 바탕으로 계산되어 부하 및 회복을 판단하는 데 도움이 됩니다."
+    },
+    "weeklyFocus": {
+      "title": "이번 주",
+      "loadProgress": {
+        "label": "ACWR"
+      },
+      "hrDrift": {
+        "label": "회복 압력"
+      },
+      "intensityDistribution": {
+        "label": "단음"
+      }
+    }
+  },
+  "TimeFilters": {
+    "granularity": {
+      "placeholder": "세부사항 선택",
+      "day": "낮",
+      "week": "주",
+      "month": "월",
+      "year": "년도",
+      "allTime": "모든 시간"
+    },
+    "range": {
+      "placeholder": "기간 선택",
+      "allTime": "모든 역사",
+      "past7Days": "지난 7일",
+      "past1Month": "지난 1개월",
+      "past6Months": "지난 6개월",
+      "past1Year": "지난 1년"
+    }
+  },
+  "ChartAxis": {
+    "selectXAxis": "X축 선택",
+    "distance": "거리",
+    "time": "시간"
+  },
+  "HistoryComparisonChart": {
+    "title": "역사 동향",
+    "current": "현재의",
+    "history": "역사",
+    "empty": "기록 데이터 없음",
+    "series": {
+      "historyData": "이력 데이터"
+    }
+  },
+  "WorkoutPlanChart": {
+    "stepKind": {
+      "WARMUP": "워밍업",
+      "WORK": "메인 세트",
+      "RECOVERY": "회복",
+      "REST": "나머지",
+      "COOLDOWN": "쿨타임",
+      "OTHER": "다른"
+    },
+    "labels": {
+      "speed": "속도",
+      "pace": "속도",
+      "type": "유형",
+      "power": "힘",
+      "heartRate": "심박수",
+      "grade": "등급",
+      "relativeIntensity": "상대 강도",
+      "estimatedIf": "예상 강도 (IF)",
+      "schematic": "운동 구조 (개략도)",
+      "time": "시간"
+    },
+    "empty": "시각화 데이터 없음"
+  },
+  "ViewWorkoutDialog": {
+    "moreActions": "추가 작업",
+    "deleteWorkoutDescription": "이 예정 운동이 영구적으로 삭제됩니다. 업로드한 활동은 삭제되지 않습니다.",
+    "mobile": {
+      "plannedWorkout": "계획된 운동",
+      "workoutDetailMeta": "세션 세부정보",
+      "workoutDescriptionLabel": "설명",
+      "workoutChartLabel": "구조 미리보기",
+      "workoutStructureLabel": "훈련 구조",
+      "notLinked": "연결된 활동 없음",
+      "linked": "연결됨: {activity}",
+      "linkedActivityAction": "활동",
+      "linkActivityAction": "활동 연결",
+      "postpone": "연기",
+      "skip": "건너뛰기",
+      "exerciseFallback": "운동 {index}",
+      "noData": "아직 데이터가 없습니다",
+      "loading": "로드 중",
+      "pending": "처리 중…",
+      "cancel": "취소",
+      "confirmPostponeTitle": "훈련을 연기하시나요?",
+      "confirmPostponeMessage": "훈련 내용은 동일하게 유지되며 다음 예정일로 이동됩니다.",
+      "confirmSkipTitle": "훈련을 건너뛰시겠습니까?",
+      "confirmSkipMessage": "이 운동은 건너뛴 것으로 표시됩니다."
+    },
+    "title": "운동 보기",
+    "titleWithWeek": "운동 보기 · 주 {week} · {day}",
+    "sportTypeLabel": "스포츠 종류",
+    "notesLabel": "메모",
+    "rulesLabel": "규칙",
+    "notesPlaceholder": "추가 참고사항, 주의사항, 참고사항...",
+    "rulesPlaceholder": "운동 규칙이나 구조화된 콘텐츠...",
+    "loading": "로드 중...",
+    "close": "닫다",
+    "linkedBlockedTip": "연결된 운동은 연기하거나 건너뛸 수 없습니다.",
+    "actionPending": "처리",
+    "actionPostpone": "연기하다",
+    "actionSkip": "건너뛰다",
+    "actionDelete": "삭제",
+    "deleteDisabledTip": "아직 삭제를 사용할 수 없습니다.",
+    "postponeSuccess": "다음 날로 연기되었습니다.",
+    "postponeFailed": "연기하지 못했습니다. 다시 시도해 주세요.",
+    "skipSuccess": "건너뛴 것으로 표시되었습니다.",
+    "skipFailed": "건너뛰지 못했습니다. 다시 시도해 주세요.",
+    "markDone": "완료로 표시",
+    "undoStatus": "실행 취소 상태",
+    "statusToast": {
+      "DONE": "완료로 표시됨",
+      "PLANNED": "상태가 계획으로 재설정됨",
+      "SKIPPED": "건너뛴 것으로 표시됨",
+      "IN_PROGRESS": "진행중으로 표시됨",
+      "MOVED": "이동한 것으로 표시됨",
+      "failed": "상태를 업데이트하지 못했습니다."
+    },
+    "sport": {
+      "run": "달리다",
+      "cycling": "사이클링",
+      "swim": "헤엄"
+    },
+    "weekday": {
+      "sun": "해",
+      "mon": "월",
+      "tue": "화요일",
+      "wed": "수요일",
+      "thu": "목",
+      "fri": "금",
+      "sat": "앉았다"
+    }
+  },
+  "SharedUI": {
+    "close": "닫다",
+    "dialog": "대화",
+    "feedback": "피드백",
+    "help": "돕다",
+    "loadingEllipsis": "로드 중…",
+    "pickDate": "날짜를 선택하세요",
+    "platformTitleWithVersion": "Trainingload.ai - 훈련 분석 관리 플랫폼 버전: {version}",
+    "commandPaletteTitle": "명령 팔레트",
+    "commandPaletteDescription": "실행할 명령을 검색하세요..."
+  },
+  "DateTimePicker": {
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "placeholder": "MM/DD/YYYY hh:mm aa"
+  },
+  "AppError": {
+    "notFound": {
+      "eyebrow": "404 / 페이지 없음",
+      "title": "이 훈련 화면을 사용할 수 없습니다",
+      "description": "링크가 만료되었거나 해당 활동, 계획, 대시보드 보기가 더 이상 존재하지 않을 수 있습니다.",
+      "primary": "개요로 이동",
+      "secondary": "뒤로",
+      "helpTitle": "다음에 할 수 있는 일",
+      "helpBody": "개요로 돌아간 뒤 최신 활동 또는 계획 목록에서 다시 열어 보세요."
+    },
+    "serverError": {
+      "eyebrow": "500 / 복구 모드",
+      "title": "문제가 발생했습니다",
+      "description": "이 화면을 불러오는 중 오류가 발생했습니다. 데이터는 안전하며, 다시 시도하면 대부분 해결됩니다.",
+      "primary": "다시 시도",
+      "secondary": "개요로 이동",
+      "reference": "오류 참조",
+      "helpTitle": "계속 문제가 있나요?",
+      "helpBody": "문제가 반복되면 지원팀에 문의할 때 위의 오류 참조를 함께 알려 주세요."
+    }
+  },
+  "ErrorBoundary": {
+    "title": "오류가 발생했습니다",
+    "unknownError": "알 수 없는 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+    "loadFailed": "로드 실패",
+    "loadFailedDescription": "데이터를 로드하지 못했습니다. 나중에 다시 시도해 주세요.",
+    "retry": "다시 해 보다"
+  },
+  "HeartRateComparisonCard": {
+    "noHistoricalData": "사용 가능한 과거 데이터가 없습니다.",
+    "currentActivity": "현재 활동",
+    "historicalAvg": "과거 평균",
+    "historicalMax": "역사적 최대치",
+    "diff": "차이점",
+    "change": "변화",
+    "current": "현재의"
+  },
+  "PlanSummary": {
+    "title": "계획 검토",
+    "completionRate": "완성",
+    "completionHint": "{done} 완료 / {total} 합계",
+    "complianceRate": "부하 현황",
+    "complianceHint": "{actual} 실제 / {expected} 예상",
+    "statusBreakdown": "이동됨 / 건너뛰었음",
+    "statusHint": "연기 {moved} · 건너뜀 {skipped}",
+    "bySport": "스포츠별",
+    "weekly": "주간 부하",
+    "legend": "녹색 채우기 = 실제 주간 부하",
+    "weekTooltip": "주 {week} · 완료 {done}/{total} · 실제 {actual} / 예상 {estimated} · 규정 준수 {rate}%",
+    "weekEmpty": "주 {week} · 세션 없음",
+    "sport": {
+      "RUN": "달리다",
+      "CYCLING": "사이클링",
+      "SWIM": "헤엄",
+      "OTHER": "다른"
+    }
+  },
+  "WorkoutLoadEstimate": {
+    "sectionTitle": "예상 부하",
+    "expected": "예상됨 {value}",
+    "actual": "실제 {value}",
+    "deltaAbove": "+{pct}%",
+    "deltaBelow": "-{pct}%",
+    "source": {
+      "POWER": "힘",
+      "HR": "HR",
+      "PACE": "속도",
+      "RPE": "RPE"
+    },
+    "crossSourceTip": "{expected}에서 추정; 실제 측정은 {actual}을 통해 이루어집니다. 교차 트랙 비교 - 값은 여전히 ​​동일한 100 = 1h@threshold 스케일에 있지만 델타는 동일한 물리량을 측정하지 않습니다.",
+    "needThresholdsTip": "숫자 기반 견적을 얻으려면 FTP / LTHR / TP / CSS를 추가하세요.",
+    "partialEstimateTip": "임계값이 누락되었거나 기간을 추론해야 했기 때문에(*로 표시) 일부 단계는 RPE로 대체되었습니다.",
+    "mixedSourceTip": "이 운동은 목표 유형을 혼합합니다. 추정치는 전체에 걸쳐 집계됩니다.",
+    "table": {
+      "bucket": "원천",
+      "if": "만약에",
+      "duration": "지속",
+      "contribution": "짐"
+    }
+  },
+  "AuthError": {
+    "pageTitle": "로그인 오류",
+    "title": "인증을 계속할 수 없습니다",
+    "fallbackDescription": "인증 요청이 불완전하거나 만료되었습니다. 앱으로 돌아가 다시 시도해 주세요.",
+    "login": "로그인",
+    "home": "홈"
+  },
+  "PlanShareImportPage": {
+    "title": "Import training plan",
+    "loading": "Loading plan preview...",
+    "errorTitle": "This share could not be opened",
+    "errorText": "The link may be invalid, or the preview is temporarily unavailable.",
+    "goneTitle": "This share was revoked",
+    "goneText": "The author revoked this link. If you already imported it, your draft is unchanged.",
+    "retry": "Try again",
+    "backToPlans": "Back to plans",
+    "summary": "{weeks} weeks · {count} workouts · v{version}",
+    "workoutSlot": "Week {week}, day {day}",
+    "import": "Import as draft",
+    "importAndShare": "Import and share",
+    "importing": "Importing...",
+    "importError": "Import failed. Please try again.",
+    "importCta": "Sign in to import",
+    "publicBadge": "가져갈 수 있는 훈련 계획",
+    "disclaimer": "This is a schedule snapshot, not coaching for your current fitness. Review it before you start.",
+    "takeCta": "이 계획 가져가기",
+    "takeHint": "초안으로 추가됩니다. 진행 중인 계획은 그대로입니다.",
+    "statWeeks": "주",
+    "statDaysPerWeek": "주당 훈련",
+    "statWorkouts": "세션",
+    "rhythmTitle": "시즌이 어떻게 짜였는지",
+    "rhythmHint": "주를 선택하면 그날 세션을 볼 수 있습니다.",
+    "weekShort": "{week}주차",
+    "weekTitle": "{week}주차",
+    "weekSessions": "{count}개 세션",
+    "restDay": "휴식",
+    "notActivated": "캘린더에 활성화되지 않은 일정 스냅샷",
+    "goalLabel": "목표",
+    "descriptionLabel": "설명",
+    "overviewTitle": "개요",
+    "weekBreakdownTitle": "주간 계획",
+    "sessionsCount": "{count}회",
+    "emptyDay": "이날 예정된 운동이 없습니다",
+    "openDetailsAria": "{title} 열기",
+    "loadTitle": "예상 부하",
+    "loadHint": "운동 구조 기반의 일반 추정치이며, 당신의 임계값이 아닙니다. 가져온 뒤 다시 계산됩니다.",
+    "weekLoadTooltip": "{week}주차 · 부하 {load} · {count}회",
+    "loadBadge": "부하 {value}",
+    "loadGenericTip": "일반 추정 부하 {value}. 가져온 뒤 당신의 임계값으로 다시 계산됩니다.",
+    "dialogTitle": "운동 상세",
+    "dialogTitleWithWeek": "{week}주차 · {day}",
+    "notesLabel": "메모",
+    "chartLabel": "운동",
+    "close": "닫기",
+    "weekday": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "sport": {
+      "RUN": "Run",
+      "CYCLING": "Ride",
+      "SWIM": "Swim",
+      "STRETCHING": "Mobility"
+    }
+  },
+  "AiOperationErrors": {
+    "accessRequired": "AI를 사용할 수 없습니다. 인스턴스 설정 또는 계정 권한을 확인하세요.",
+    "inProgress": "다른 AI 작업이 진행 중입니다. 완료된 후 다시 시도해 주세요.",
+    "settlementPending": "이전 AI 작업이 아직 마무리 중입니다. 잠시 후 다시 시도해 주세요.",
+    "purposeUnavailable": "선택한 모델 등급은 일시적으로 사용할 수 없습니다."
+  },
+  "CoachTurnErrors": {
+    "modelUnavailable": "모델이 일시적으로 응답할 수 없습니다. 모델을 전환한 후 다시 시도해 주세요.",
+    "aborted": "응답이 중단되었습니다. 다시 보낼 수 있습니다.",
+    "business": "요청을 완료할 수 없습니다. 내용을 확인한 후 다시 시도해 주세요.",
+    "internal": "시스템에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+    "upstreamFailed": "코치 서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    "unsafeOutput": "응답을 안전하게 표시할 수 없습니다. 다시 생성해 주세요.",
+    "invalidStructuredOutput": "구조화된 콘텐츠를 생성하지 못했습니다. 다시 시도해 주세요.",
+    "unknown": "응답을 생성하는 중에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."
+  },
+  "ActivityLaps": {
+    "empty": "랩 데이터가 없습니다",
+    "groups": {
+      "lap": "랩",
+      "pace": "페이스",
+      "heartRate": "심박수",
+      "power": "파워",
+      "terrain": "지형",
+      "dynamics": "러닝 다이내믹스",
+      "other": "기타"
+    },
+    "summary": {
+      "average": "평균"
+    },
+    "columns": {
+      "lap": "랩",
+      "duration": "시간",
+      "distance": "거리",
+      "cumulativeTime": "누적 시간",
+      "pace": "페이스",
+      "speed": "속도",
+      "difference": "차이",
+      "avgHeartRate": "평균 심박수",
+      "maxHeartRate": "최대 심박수",
+      "avgPower": "평균 파워",
+      "maxPower": "최대 파워",
+      "elevation": "상승 / 하강",
+      "calories": "칼로리",
+      "avgRunCadence": "평균 케이던스",
+      "avgCadence": "평균 케이던스",
+      "avgStrideLength": "평균 보폭",
+      "avgGroundContactTime": "평균 지면 접촉",
+      "avgVerticalOscillation": "평균 수직 진폭",
+      "avgVerticalRatio": "평균 수직 비율",
+      "temperature": "온도"
+    }
+  },
+  "GuestAccess": {
+    "banner": "읽기 전용 게스트 액세스",
+    "createAccount": "내 계정으로 이동",
+    "aiReadOnly": "읽기 전용 게스트는 AI 채팅을 사용할 수 없습니다",
+    "readOnlyAction": "읽기 전용",
+    "loadError": "게스트 액세스를 불러올 수 없습니다. 다시 시도하세요.",
+    "retry": "다시 시도"
+  }
+}

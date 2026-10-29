@@ -1,0 +1,78 @@
+name: Bug report
+description: Report a reproducible problem in the public application or documentation.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues before filing a new report. For installation, upgrade, backup, restore, or runtime problems, use the dedicated Self-host support form.
+
+        Do not include API keys, passwords, cookies, private keys, database dumps, activity files, health data, GPS routes, or other personal data.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Provide the exact release tag or full commit SHA where the problem occurs.
+      placeholder: v1.1.13 or 40-character commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Client
+        - Server or API
+        - Activity import or analysis
+        - Training plans or calendar
+        - AI coach
+        - Maps
+        - Documentation
+        - Localization
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include operating system, architecture, browser, and relevant Docker versions without sharing secrets.
+      placeholder: Ubuntu 24.04, linux/amd64, Chrome 140, Docker 28, Compose 2.39
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest repeatable sequence, using sample or synthetic data where possible.
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include stable error codes and short, manually redacted log excerpts when useful.
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add redacted screenshots or links to related issues if they help reproduce the problem.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I have removed secrets, credentials, personal data, health data, activity files, and GPS routes from this report.
+          required: true

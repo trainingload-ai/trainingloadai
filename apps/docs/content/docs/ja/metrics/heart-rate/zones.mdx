@@ -1,0 +1,62 @@
+---
+title: Heart Rate Zones
+description: Karvonen (HRR)、Joe Friel (LTHR)、最大心拍を使った 3 つの主要モデルを説明します。
+keywords: ["Heart Rate Zones", "Karvonen", "HRR", "LTHR", "Max HR", "Joe Friel"]
+---
+
+# Heart Rate Zones
+
+**心拍ゾーン** は、内部負荷を表すもっとも一般的な言語です。強度ごとにどのエネルギーシステムが主に使われるか、どんな適応が期待できるかを把握しやすくします。
+
+Trainingload.ai は、データの有無と目的に応じて 3 つの主要モデルを使います。
+
+## 1. Karvonen モデル（HRR）
+
+Trainingload.ai の基本推奨モデルです。最大心拍だけでなく **安静時心拍** も使います。
+
+$$
+HRR = HR_{max} - HR_{rest}
+$$
+
+$$
+TargetHR = (HRR \times Intensity\%) + HR_{rest}
+$$
+
+体力が上がって安静時心拍が下がると、ゾーン境界も自然に変化します。
+
+| Zone   | 名称               | HRR %    | 主な用途             |
+| :----- | :----------------- | :------- | :------------------- |
+| **Z1** | Warm Up / Recovery | 50%-60%  | 回復、ウォームアップ |
+| **Z2** | Fat Burn / Aerobic | 60%-70%  | 有酸素ベース         |
+| **Z3** | Aerobic            | 70%-80%  | 有酸素持久力         |
+| **Z4** | Anaerobic          | 80%-90%  | 高強度耐性           |
+| **Z5** | VO2 Max            | 90%-100% | 短時間の高強度       |
+
+## 2. Joe Friel モデル（LTHR）
+
+乳酸閾値心拍（LTHR）を基準にした上級者向けモデルです。閾値付近のコントロールに向いています。
+
+LTHR を正しく測るには、30 分 TT などのきついテストが必要になることがあります。
+
+## 3. 最大心拍モデル
+
+安静時心拍や LTHR がない場合のフォールバックです。
+
+$$
+TargetHR = HR_{max} \times Intensity\%
+$$
+
+シンプルですが個人差を反映しにくいため、可能なら Karvonen または LTHR ベースに移行するのがおすすめです。
+
+## 使い分け
+
+| 状況                            | 推奨モデル |
+| :------------------------------ | :--------- |
+| 一般的なランナー / フィットネス | Karvonen   |
+| 本格的な持久系トレーニング      | Joe Friel  |
+| データが少ない初心者            | 最大心拍   |
+
+## 関連ツール
+
+- [心拍ゾーン計算ツール](/ja/heart-rate-zones-calculator)
+- [無料の最大心拍数計算ツール — HRmax 公式を比較](/ja/max-heart-rate-calculator)

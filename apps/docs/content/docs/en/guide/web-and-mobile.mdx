@@ -1,0 +1,118 @@
+---
+title: Web and Mobile
+description: Understand how the Trainingload.ai web app and mobile app share data, and choose the best surface for planning, recording, analysis, and daily execution.
+keywords:
+  ["Trainingload.ai mobile", "Trainingload.ai web app", "sync web and mobile"]
+---
+
+# Web and Mobile
+
+The web and mobile apps are two views of the same Trainingload.ai account. Plans, activities, profile values, thresholds, AI Coach sessions, notifications, and usage are stored on the server and become available on either surface after synchronization.
+
+## Before you switch devices
+
+- Sign in to the same Trainingload.ai account on both devices.
+- Confirm the time zone and units under your profile; calendar dates and displayed values depend on them.
+- Save the current edit before opening the same plan or profile field elsewhere.
+- Keep a network connection available for plans, AI Coach, imports, and processed analysis.
+
+## Use web when
+
+- Building or reviewing a multi-week plan.
+- Editing structured endurance or strength workouts.
+- Comparing detailed charts, maps, power, pace, heart rate, or PMC trends.
+- Managing provider connections and historical imports.
+- Reviewing a large activity feed or searching older training.
+
+## Use mobile when
+
+- Checking Today, Calendar, Coach, Plan, or Me during the training day.
+- Recording an outdoor workout from the phone.
+- Reviewing a completed session immediately after saving it.
+- Linking a completed activity to a planned workout.
+- Updating current state, checking notifications, or viewing plan execution away from a desktop.
+
+<DocsScreenshot
+  id="web-mobile-navigation"
+  title="Mobile navigation"
+  description="Today, Calendar, Coach, Plan, and Me provide the daily account workflow on mobile."
+  route="Main tabs"
+  platform="mobile"
+/>
+
+## What synchronizes
+
+| Data                      | Web                       | Mobile                                   | Notes                                                     |
+| ------------------------- | ------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| Profile, units, time zone | Read and edit             | Read and edit                            | Calendar dates depend on time zone.                       |
+| Activities and analysis   | Full detail               | Daily and detailed views                 | Processing may finish after the initial activity appears. |
+| Plans and workouts        | Full creation and editing | View, create, execute, and link          | Complex editing is usually easier on web.                 |
+| AI Coach                  | Sessions and actions      | Sessions and actions                     | Applied changes affect the same plan.                     |
+| Notifications and reviews | Available                 | Available                                | Review automation uses account preferences.               |
+| Provider connections      | Full management           | Selected connection and permission flows | Availability depends on provider and platform.            |
+
+## Refresh and conflict rules
+
+If you change the same plan or profile field on two devices, the most recent successful save becomes authoritative. Before making a second edit:
+
+1. Return to the list or detail screen.
+2. Pull to refresh on mobile or reload/refetch on web.
+3. Confirm that the latest value is visible.
+4. Apply the next change.
+
+Plan updates can reject an outdated edit when another request changed the same record. Refresh the plan and reapply the intended change instead of repeatedly submitting the stale version.
+
+## Continue work on another device
+
+1. Finish and save the current action on the first device.
+2. Open the corresponding list or detail screen on the second device.
+3. Pull to refresh on mobile or reload/refetch on web.
+4. Confirm the activity timestamp, plan version, or profile value you just changed.
+5. Continue editing only after the current server value is visible.
+
+## Offline expectations
+
+Mobile recording is designed to preserve the local recording while it is in progress and recover interrupted sessions where possible. Server-backed screens still require network access to fetch current plans, AI responses, and processed analysis.
+
+After reconnecting:
+
+- Let the recording or import finish uploading.
+- Avoid starting a duplicate upload for the same workout.
+- Confirm the activity appears once in Activities.
+- Open the activity and wait if analysis is still processing.
+
+## Verify synchronization
+
+- Both surfaces show the same profile units and time zone.
+- A completed activity appears once with the same start time and source.
+- The active plan and upcoming workout show the same status and latest edit.
+- An AI Coach action applied on one surface is reflected in the underlying plan on the other.
+- Notifications and completed reviews do not return as unread after refresh.
+
+## Troubleshooting
+
+### One device shows older data
+
+Return to the list or detail screen and refresh. Confirm network access and that both devices use the same account. Do not edit the stale copy until the latest server value appears.
+
+### A plan edit reports a version conflict
+
+Another successful request changed the plan first. Reload the plan, compare the current workout with your intended change, and apply the change again to the new version.
+
+### A mobile recording is missing on web
+
+Keep the mobile app available until the upload completes, then refresh Activities on web. If the activity is visible but charts are incomplete, processing is still running; do not upload a second copy.
+
+### Provider settings differ between surfaces
+
+Use **Account → Third Party Connections** on web for the complete management surface. Mobile may expose only selected authorization or permission flows.
+
+### Calendar dates differ
+
+Compare the account time zone on both devices and the activity's recorded start time. Correct the profile setting before moving or recreating a workout.
+
+## Next steps
+
+- Record with the phone using [Mobile Recording](/docs/guide/mobile-recording).
+- Create and execute plans with [Mobile Plans and Strength](/docs/guide/mobile-plans-and-strength).
+- Follow the complete account setup in [Getting Started](/docs/guide/getting-started).

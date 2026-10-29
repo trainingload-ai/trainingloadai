@@ -1,0 +1,50 @@
+---
+title: 连接 AI 客户端
+description: 选择 ChatGPT、Codex、Claude Code、Claude Desktop、Cursor、VS Code 或 opencode 的连接指南。
+---
+
+# 连接 AI 客户端
+
+所有客户端都使用同一个远程 Streamable HTTP 端点：
+
+```text
+https://api.trainingload.ai/mcp
+```
+
+TrainingLoad 使用 OAuth 2.1 discovery、PKCE S256、refresh token 轮换和 resource-bound access token。不要把 API Key 或 access token 写入配置文件。
+
+## 选择你的客户端
+
+| 客户端 | 最短连接方式 | 完整指南 |
+| --- | --- | --- |
+| ChatGPT | Plugins 中添加 custom MCP server | [ChatGPT](/zh/docs/mcp/clients/chatgpt) |
+| Codex | `codex mcp add trainingload --url https://api.trainingload.ai/mcp` | [Codex](/zh/docs/mcp/clients/codex) |
+| Claude Code | `claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp` | [Claude Code](/zh/docs/mcp/clients/claude-code) |
+| Claude Desktop | Customize → Connectors → Add custom connector | [Claude Desktop](/zh/docs/mcp/clients/claude-desktop) |
+| Cursor | 在 `~/.cursor/mcp.json` 添加远程服务 | [Cursor](/zh/docs/mcp/clients/cursor) |
+| VS Code | MCP: Add Server → HTTP | [VS Code](/zh/docs/mcp/clients/vscode) |
+| opencode | 在 `opencode.json` 中添加 `remote` 配置 | [opencode](/zh/docs/mcp/clients/opencode) |
+
+## 默认权限
+
+建议首次授权：
+
+```text
+openid profile email offline_access profile:read activity:read training:read plan:read competition:read
+```
+
+`health:read` 被刻意留在默认授权之外。只有希望客户端读取精简每日健康摘要时才增加它。
+
+## 所有客户端通用的验收步骤
+
+1. 能力目录中应出现 24 个 tools、3 个 resources 和 3 个 prompts；未授权 `health:read` 时，健康工具仍可显示为可发起增量授权的入口。
+2. 发送：“使用 TrainingLoad 总结我当前的训练状态，并说明使用的日期和时区。”
+3. 客户端应调用 `get_training_snapshot`，不能要求你粘贴 token。
+4. 结果应区分空值和 0，并显示 TrainingLoad 工具调用。
+5. 再问一个周期比较问题，确认客户端能调用 `compare_training_periods`。
+
+## 撤销或重新连接
+
+在 TrainingLoad 账号授权页面找到对应客户端，可查看 scopes、最近使用时间并撤销。撤销后，如果客户端仍显示旧状态，请在客户端断开或清除该 MCP 的 OAuth 会话，再重新连接。
+
+遇到问题请查看[故障排查](/zh/docs/mcp/troubleshooting)。

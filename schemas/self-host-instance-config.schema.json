@@ -1,0 +1,637 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/self-host-instance-config-v1.json",
+  "title": "Trainingload.ai signed self-host v1 instance configuration",
+  "description": "Operator-editable settings after parsing .env.selfhost. Values remain strings; the management CLI applies additional cross-field network, filesystem, and numeric range checks before invoking Docker Compose.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "SELF_HOST_AUTH_SECRET",
+    "SELF_HOST_DATABASE_PASSWORD",
+    "SELF_HOST_INTEGRATION_SECRET",
+    "SELF_HOST_SITE_ADDRESS",
+    "SELF_HOST_HTTP_BIND",
+    "SELF_HOST_MIGRATE_IMAGE",
+    "SELF_HOST_SERVER_IMAGE",
+    "SELF_HOST_CLIENT_IMAGE",
+    "SELF_HOST_VERSION",
+    "SELF_HOST_MODE",
+    "SELF_HOST_PROJECT_NAME"
+  ],
+  "$defs": {
+    "booleanString": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false"
+      ]
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "portString": {
+      "type": "string",
+      "pattern": "^(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+    },
+    "imageReference": {
+      "type": "string",
+      "pattern": "^(?:(?:localhost|[a-z0-9.-]+)(?::[0-9]+)?/)?[a-z0-9]+(?:[._-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)*(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127})?(?:@sha256:[a-f0-9]{64})?$",
+      "not": {
+        "pattern": "(?:^|:)[Ll][Aa][Tt][Ee][Ss][Tt](?:@|$)"
+      }
+    }
+  },
+  "properties": {
+    "AI_API_KEY": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "AI_BASE_URL": {
+      "type": "string"
+    },
+    "AI_DEFAULT_MODEL": {
+      "type": "string"
+    },
+    "AI_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "none",
+        "openai",
+        "openrouter",
+        "aliyun",
+        "dashscope",
+        "deepseek",
+        "custom-openai-compatible"
+      ],
+      "default": "none"
+    },
+    "AI_REASONING_MODEL": {
+      "type": "string"
+    },
+    "OPENAI_API_KEY": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "OPENAI_BASE_URL": {
+      "type": "string"
+    },
+    "OPENAI_DEFAULT_MODEL": {
+      "type": "string"
+    },
+    "OPENAI_REASONING_MODEL": {
+      "type": "string"
+    },
+    "OPENROUTER_API_KEY": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "OPENROUTER_BASE_URL": {
+      "type": "string"
+    },
+    "OPENROUTER_DEFAULT_MODEL": {
+      "type": "string"
+    },
+    "OPENROUTER_REASONING_MODEL": {
+      "type": "string"
+    },
+    "DASHSCOPE_API_KEY": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "DASHSCOPE_BASE_URL": {
+      "type": "string"
+    },
+    "DASHSCOPE_DEFAULT_MODEL": {
+      "type": "string"
+    },
+    "DASHSCOPE_REASONING_MODEL": {
+      "type": "string"
+    },
+    "DEEPSEEK_API_KEY": {
+      "type": "string",
+      "writeOnly": true
+    },
+    "DEEPSEEK_BASE_URL": {
+      "type": "string"
+    },
+    "DEEPSEEK_DEFAULT_MODEL": {
+      "type": "string"
+    },
+    "DEEPSEEK_REASONING_MODEL": {
+      "type": "string"
+    },
+    "ELEVATION_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "none",
+        "local-dem"
+      ],
+      "default": "none"
+    },
+    "ELEVATION_TILE_ZOOM": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22"
+      ],
+      "default": "13"
+    },
+    "MAP_ATTRIBUTION": {
+      "type": "string"
+    },
+    "MAP_MAX_ZOOM": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24"
+      ],
+      "default": "19"
+    },
+    "MAP_PROVIDER": {
+      "type": "string",
+      "enum": [
+        "none",
+        "openfreemap",
+        "osm-raster",
+        "custom-raster",
+        "custom-style",
+        "local"
+      ],
+      "default": "none"
+    },
+    "MAP_STYLE_URL": {
+      "type": "string"
+    },
+    "MAP_TILE_URL": {
+      "type": "string"
+    },
+    "SELF_HOST_ALLOW_INSECURE_HTTP": {
+      "$ref": "#/$defs/booleanString",
+      "default": "false"
+    },
+    "SELF_HOST_AUTH_SECRET": {
+      "type": "string",
+      "minLength": 32,
+      "writeOnly": true
+    },
+    "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS": {
+      "type": "string",
+      "pattern": "^[0-9]{3,6}$",
+      "default": "86400",
+      "description": "The management CLI enforces the inclusive 600-604800 second range."
+    },
+    "SELF_HOST_CLIENT_IMAGE": {
+      "$ref": "#/$defs/imageReference"
+    },
+    "SELF_HOST_DATABASE_NAME": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.~-]{0,62}$",
+      "default": "trainingload"
+    },
+    "SELF_HOST_DATABASE_PASSWORD": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._~-]{32,}$",
+      "writeOnly": true
+    },
+    "SELF_HOST_DATABASE_USER": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.~-]{0,62}$",
+      "default": "trainingload"
+    },
+    "SELF_HOST_DATA_ROOT": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "SELF_HOST_HTTP_BIND": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "SELF_HOST_HTTP_PORT": {
+      "$ref": "#/$defs/portString",
+      "default": "43210"
+    },
+    "SELF_HOST_INTEGRATION_SECRET": {
+      "type": "string",
+      "minLength": 32,
+      "writeOnly": true
+    },
+    "SELF_HOST_MODE": {
+      "type": "string",
+      "enum": [
+        "core-local",
+        "connected",
+        "extended"
+      ],
+      "default": "core-local"
+    },
+    "SELF_HOST_MIGRATE_IMAGE": {
+      "$ref": "#/$defs/imageReference"
+    },
+    "SELF_HOST_PROJECT_NAME": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$",
+      "default": "trainingload-selfhost"
+    },
+    "SELF_HOST_SERVER_IMAGE": {
+      "$ref": "#/$defs/imageReference"
+    },
+    "SELF_HOST_SITE_ADDRESS": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "SELF_HOST_VERSION": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "TELEMETRY_ENABLED": {
+      "type": "string",
+      "const": "false",
+      "default": "false",
+      "description": "The signed v1 release keeps server, client, and docs telemetry disabled."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "openai"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "OPENAI_API_KEY": {
+            "minLength": 1
+          },
+          "OPENAI_DEFAULT_MODEL": {
+            "minLength": 1
+          },
+          "OPENAI_REASONING_MODEL": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "OPENAI_API_KEY",
+          "OPENAI_DEFAULT_MODEL",
+          "OPENAI_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "custom-raster"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "MAP_TILE_URL": {
+            "minLength": 1
+          },
+          "MAP_ATTRIBUTION": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "MAP_TILE_URL",
+          "MAP_ATTRIBUTION"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "custom-style"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "MAP_STYLE_URL": {
+            "minLength": 1
+          },
+          "MAP_ATTRIBUTION": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "MAP_STYLE_URL",
+          "MAP_ATTRIBUTION"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "local"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "MAP_ATTRIBUTION": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "MAP_ATTRIBUTION"
+        ],
+        "anyOf": [
+          {
+            "properties": {
+              "MAP_STYLE_URL": {
+                "minLength": 1
+              }
+            },
+            "required": [
+              "MAP_STYLE_URL"
+            ]
+          },
+          {
+            "properties": {
+              "MAP_TILE_URL": {
+                "minLength": 1
+              }
+            },
+            "required": [
+              "MAP_TILE_URL"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "const": "mapbox"
+          }
+        },
+        "required": [
+          "MAP_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "MAP_PUBLIC_TOKEN": {
+            "pattern": "^pk\\."
+          }
+        },
+        "required": [
+          "MAP_PUBLIC_TOKEN"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "MAIL_PROVIDER": {
+            "const": "smtp"
+          }
+        },
+        "required": [
+          "MAIL_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "MAIL_HOST": {
+            "minLength": 1
+          },
+          "MAIL_USER": {
+            "minLength": 1
+          },
+          "MAIL_PASSWORD": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "MAIL_HOST",
+          "MAIL_PORT",
+          "MAIL_USER",
+          "MAIL_PASSWORD"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "openrouter"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "OPENROUTER_API_KEY": {
+            "minLength": 1
+          },
+          "OPENROUTER_DEFAULT_MODEL": {
+            "minLength": 1
+          },
+          "OPENROUTER_REASONING_MODEL": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "OPENROUTER_API_KEY",
+          "OPENROUTER_DEFAULT_MODEL",
+          "OPENROUTER_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "enum": [
+              "aliyun",
+              "dashscope"
+            ]
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "DASHSCOPE_API_KEY": {
+            "minLength": 1
+          },
+          "DASHSCOPE_DEFAULT_MODEL": {
+            "minLength": 1
+          },
+          "DASHSCOPE_REASONING_MODEL": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "DASHSCOPE_API_KEY",
+          "DASHSCOPE_DEFAULT_MODEL",
+          "DASHSCOPE_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "deepseek"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "DEEPSEEK_API_KEY": {
+            "minLength": 1
+          },
+          "DEEPSEEK_DEFAULT_MODEL": {
+            "minLength": 1
+          },
+          "DEEPSEEK_REASONING_MODEL": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "DEEPSEEK_API_KEY",
+          "DEEPSEEK_DEFAULT_MODEL",
+          "DEEPSEEK_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "AI_PROVIDER": {
+            "const": "custom-openai-compatible"
+          }
+        },
+        "required": [
+          "AI_PROVIDER"
+        ]
+      },
+      "then": {
+        "properties": {
+          "AI_API_KEY": {
+            "minLength": 1
+          },
+          "AI_BASE_URL": {
+            "minLength": 1
+          },
+          "AI_DEFAULT_MODEL": {
+            "minLength": 1
+          },
+          "AI_REASONING_MODEL": {
+            "minLength": 1
+          }
+        },
+        "required": [
+          "AI_API_KEY",
+          "AI_BASE_URL",
+          "AI_DEFAULT_MODEL",
+          "AI_REASONING_MODEL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "SELF_HOST_MODE": {
+            "const": "core-local"
+          }
+        },
+        "required": [
+          "SELF_HOST_MODE"
+        ]
+      },
+      "then": {
+        "properties": {
+          "MAP_PROVIDER": {
+            "enum": [
+              "none",
+              "local"
+            ]
+          },
+          "ELEVATION_PROVIDER": {
+            "enum": [
+              "none",
+              "local-dem"
+            ]
+          },
+          "MAIL_PROVIDER": {
+            "const": "none"
+          },
+          "TELEMETRY_ENABLED": {
+            "const": "false"
+          }
+        }
+      }
+    }
+  ]
+}

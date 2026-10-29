@@ -1,0 +1,13 @@
+{
+  "title": "Metrics",
+  "pages": [
+    "index",
+    "power",
+    "heart-rate",
+    "pace",
+    "training-load",
+    "pmc",
+    "physiology",
+    "maximal-oxygen-uptake"
+  ]
+}

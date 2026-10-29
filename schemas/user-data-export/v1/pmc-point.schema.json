@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trainingload.ai/schemas/export/v1/pmc-point.schema.json",
+  "title": "Performance management chart point",
+  "description": "One dated chronic load, acute load, and form snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "The local calendar date in YYYY-MM-DD format.",
+      "format": "date"
+    },
+    "sportType": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The sport scope of the load values."
+    },
+    "chronicTrainingLoad": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The exponentially weighted long-term training load."
+    },
+    "acuteTrainingLoad": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The exponentially weighted short-term training load."
+    },
+    "trainingStressBalance": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The form value calculated as chronic load minus acute load."
+    },
+    "trainingStressScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The training stress accumulated on this date."
+    },
+    "sportBreakdown": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The training stress values grouped by sport.",
+      "additionalProperties": true
+    },
+    "activityCount": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The number of activities on this date."
+    },
+    "totalDurationMinutes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The total activity duration in minutes."
+    }
+  },
+  "required": [
+    "date"
+  ]
+}
