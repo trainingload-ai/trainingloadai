@@ -588,8 +588,7 @@
 
 .resultMain,
 .resultSideCard,
-.step,
-.faqList {
+.step {
   border: 2px solid var(--lab-ink);
   background: var(--lab-panel);
   color: var(--lab-ink);
@@ -745,57 +744,6 @@
   color: var(--lab-muted);
   font-size: 0.82rem;
   line-height: 1.7;
-}
-
-.faqList {
-  margin-top: 1.5rem;
-}
-
-.faqItem + .faqItem {
-  border-top: 2px solid var(--lab-ink);
-}
-
-.faqItem summary {
-  display: flex;
-  cursor: pointer;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.15rem;
-  font-size: 0.86rem;
-  font-weight: 850;
-  list-style: none;
-}
-
-.faqItem summary::-webkit-details-marker {
-  display: none;
-}
-
-.faqItem summary::after {
-  display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  flex: none;
-  place-items: center;
-  border: 1.5px solid var(--lab-ink);
-  background: var(--lab-yellow);
-  color: #17201c;
-  content: "+";
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-weight: 900;
-}
-
-.faqItem[open] summary::after {
-  content: "−";
-}
-
-.faqAnswer {
-  max-width: 900px;
-  padding: 0 1.15rem 1.15rem;
-  color: var(--lab-muted);
-  font-size: 0.82rem;
-  line-height: 1.75;
-  white-space: pre-line;
 }
 
 .disclaimer {

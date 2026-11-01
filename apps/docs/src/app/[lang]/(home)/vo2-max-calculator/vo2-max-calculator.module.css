@@ -312,6 +312,9 @@
 
 .scorecard {
   scroll-margin-top: 9rem;
+  border: 0;
+  box-shadow: none;
+  border-radius: var(--tl-radius-surface);
 }
 
 .scoreHead {
@@ -843,12 +846,12 @@
   --vo2-line: var(--border);
   --vo2-ink: var(--foreground);
   position: relative;
-  border: 2px solid #e8e5d8;
-  border-radius: 0;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   padding: 0 28px 24px;
   background: #09130f;
   color: #f5f2e5;
-  box-shadow: 8px 8px 0 #e8e5d8;
+  box-shadow: none;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 .scoreHead {
@@ -1023,29 +1026,6 @@
   border-radius: var(--tl-radius-control-lg);
   color: var(--vo2-ink);
 }
-.faqList {
-  display: grid;
-  gap: 10px;
-  margin-top: 20px;
-}
-.faqItem {
-  background: var(--vo2-surface);
-  border: 1px solid var(--vo2-line);
-  border-radius: var(--tl-radius-surface);
-  padding: 20px;
-}
-.faqItem summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  font-weight: 650;
-  list-style: none;
-  cursor: pointer;
-}
-.faqItem summary::-webkit-details-marker {
-  display: none;
-}
 .faqIcon {
   width: 16px;
   flex: 0 0 16px;
@@ -1070,20 +1050,6 @@
   top: 1px;
   height: 14px;
   width: 2px;
-}
-.faqItem[open] .faqIcon::after {
-  display: none;
-}
-.faqItem p {
-  max-width: none;
-  font-size: 0.97rem;
-  line-height: 1.85;
-  margin-top: 16px;
-  color: var(--vo2-muted);
-}
-.faqItem summary:focus-visible {
-  outline: 2px solid var(--vo2-accent);
-  outline-offset: 5px;
 }
 .promo {
   border-radius: 0;
@@ -1199,7 +1165,9 @@
   }
   .scorecard {
     padding: 0 16px 20px;
-    box-shadow: 5px 5px 0 #e8e5d8;
+    box-shadow: none;
+    border: 0;
+    border-radius: var(--tl-radius-surface);
   }
   .scoreHead {
     margin-inline: -16px;

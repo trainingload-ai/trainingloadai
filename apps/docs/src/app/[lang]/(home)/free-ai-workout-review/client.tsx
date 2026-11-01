@@ -1,5 +1,6 @@
 "use client";
 
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -975,17 +976,16 @@ export function PublicReviewClient({
               <span className={styles.sectionEyebrow}>04 / FAQ</span>
               <h2 className={styles.sectionTitle}>{copy.faqTitle}</h2>
             </div>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {copy.faq.map((item, index) => (
-                <details
-                  className={styles.faqItem}
+                <ToolFaqItem
                   key={`${index}-${item.question}`}
+                  question={item.question}
                 >
-                  <summary>{item.question}</summary>
-                  <div className={styles.faqAnswer}>{item.answer}</div>
-                </details>
+                  {item.answer}
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </section>
 
           <section id="signup" className={styles.signupCard}>

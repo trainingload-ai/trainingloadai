@@ -127,16 +127,15 @@
 .select:focus-visible,
 .input:focus-visible,
 .choice:focus-visible,
-.faqItem summary:focus-visible,
 .posterActions > :is(button, a):focus-visible {
   outline: 2px solid var(--hr-accent);
   outline-offset: 3px;
 }
 
 .board {
-  border: 1px solid var(--hr-line);
+  border: 0;
   border-radius: var(--hr-radius);
-  background: var(--hr-surface);
+  background: var(--secondary);
   padding: clamp(1.15rem, 2vw, 1.6rem);
   scroll-margin-top: 6.5rem;
 }
@@ -294,11 +293,11 @@
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 6.5rem;
-  border: 2px solid var(--score-frame);
-  border-radius: 0;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: #07110f;
   color: var(--score-paper);
-  box-shadow: 8px 8px 0 var(--score-frame);
+  box-shadow: none;
 }
 
 :global(.dark) .poster {
@@ -326,17 +325,17 @@
   position: absolute;
   top: -1rem;
   left: 1.3rem;
-  border: 2px solid var(--score-paper);
+  border: 0;
   padding: 0.6rem 0.8rem;
-  background: var(--score-yellow);
-  color: #17201c;
-  box-shadow: 4px 4px 0 var(--score-paper);
+  background: transparent;
+  color: var(--score-paper);
+  box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1;
-  transform: rotate(-1deg);
+  transform: none;
 }
 
 .posterMark {
@@ -606,8 +605,7 @@
 }
 
 .sectionBody,
-.note,
-.faqAnswer {
+.note {
   color: var(--hr-muted);
   font-size: 1rem;
   line-height: 1.7;
@@ -683,8 +681,7 @@
 
 .formulaCard,
 .zoneCard,
-.relatedLink,
-.faqItem {
+.relatedLink {
   border: 1px solid var(--hr-line);
   border-radius: var(--tl-radius-surface);
   background: var(--hr-surface);
@@ -747,51 +744,6 @@
   text-decoration: underline;
 }
 
-.faqList {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-}
-
-.faqItem summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  cursor: pointer;
-  list-style: none;
-  padding: 0.95rem 1.05rem;
-  font-weight: 650;
-}
-
-.faqItem summary::-webkit-details-marker {
-  display: none;
-}
-
-.faqItem summary::after {
-  flex: 0 0 1rem;
-  color: var(--success);
-  content: "+";
-  font-size: 1.4rem;
-  font-weight: 400;
-  line-height: 1;
-  text-align: center;
-}
-
-.faqItem[open] summary::after {
-  content: "−";
-}
-
-.faqAnswer {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0 1.05rem 1rem;
-}
-
-.faqAnswer p {
-  margin: 0;
-}
-
 .relatedLink {
   display: flex;
   align-items: center;
@@ -799,6 +751,8 @@
   padding: 0.75rem 1rem;
   color: var(--hr-ink);
   font-size: 0.95rem;
+  border: 0;
+  background: var(--secondary);
 }
 
 .relatedMore {
@@ -931,9 +885,9 @@
 .chartBlock {
   margin-top: 1rem;
   overflow: hidden;
-  border: 1px solid var(--hr-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--hr-surface);
+  background: var(--secondary);
 }
 
 .formulaRows {
@@ -1180,24 +1134,17 @@
   font-weight: 550;
   line-height: 1.75;
 }
-.faqAnswer,
-.faqAnswer p,
 .sectionBody,
 .note {
   max-width: none;
-}
-.faqItem summary {
-  cursor: pointer;
-}
-.faqItem summary:focus-visible {
-  outline: 2px solid var(--hr-accent);
-  outline-offset: 3px;
 }
 .relatedLink {
   min-width: 0;
   min-height: 4.5rem;
   align-items: center;
   line-height: 1.65;
+  border: 0;
+  background: var(--secondary);
 }
 .posterActions > :is(a, button),
 .actions > :is(a, button),
@@ -1236,6 +1183,8 @@
   }
   .board {
     padding: 1.15rem;
+    border: 0;
+    background: var(--secondary);
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;

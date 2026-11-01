@@ -728,66 +728,69 @@ export function WorkoutEditorClient({
           </Field>
         </div>
         <div className={styles.actions}>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              editDraft((current) => ({
-                ...current,
-                modules: [...current.modules, createEmptyStep("work")],
-              }))
-            }
-          >
-            <Plus className="size-4" />
-            {t("builder.addStep")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              editDraft((current) => ({
-                ...current,
-                modules: [...current.modules, createEmptyRepeat()],
-              }))
-            }
-          >
-            <Repeat2 className="size-4" />
-            {t("builder.addInterval")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => loadExample("intervals")}
-          >
-            {t("builder.exampleIntervals")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => loadExample("pool")}
-          >
-            {t("builder.examplePool")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileRef.current?.click()}
-          >
-            <Upload className="size-4" />
-            {t("builder.importFile")}
-          </Button>
-          <input
-            ref={fileRef}
-            className={styles.fileInput}
-            type="file"
-            accept=".fit,.json,application/json"
-            aria-label={t("builder.importFile")}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = "";
-              void handleFile(file);
-            }}
-          />
+          <div className={styles.actionGroup}>
+            <Button
+              type="button"
+              onClick={() =>
+                editDraft((current) => ({
+                  ...current,
+                  modules: [...current.modules, createEmptyStep("work")],
+                }))
+              }
+            >
+              <Plus data-icon="inline-start" />
+              {t("builder.addStep")}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                editDraft((current) => ({
+                  ...current,
+                  modules: [...current.modules, createEmptyRepeat()],
+                }))
+              }
+            >
+              <Repeat2 data-icon="inline-start" />
+              {t("builder.addInterval")}
+            </Button>
+          </div>
+          <div className={styles.actionGroup}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => loadExample("intervals")}
+            >
+              {t("builder.exampleIntervals")}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => loadExample("pool")}
+            >
+              {t("builder.examplePool")}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => fileRef.current?.click()}
+            >
+              <Upload data-icon="inline-start" />
+              {t("builder.importFile")}
+            </Button>
+            <input
+              ref={fileRef}
+              className={styles.fileInput}
+              type="file"
+              accept=".fit,.json,application/json"
+              aria-label={t("builder.importFile")}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                void handleFile(file);
+              }}
+            />
+          </div>
         </div>
         {ftpError ? (
           <p role="alert" className={styles.error}>
@@ -816,6 +819,152 @@ export function WorkoutEditorClient({
         </details>
       </div>
 
+      <div className={styles.stepsColumn}>
+        {draft.modules.length === 0 ? (
+          <p className={styles.empty}>{t("builder.emptyStructure")}</p>
+        ) : null}
+        {draft.modules.map((block, blockIndex) => {
+          if (isRepeat(block)) {
+            return (
+              <div key={block.id} className={styles.repeatCard}>
+                <div className={styles.repeatHead}>
+                  <Field
+                    label={t("builder.repeatTimes")}
+                    htmlFor={`${block.id}-times`}
+                  >
+                    <Input
+                      id={`${block.id}-times`}
+                      className="w-24"
+                      inputMode="numeric"
+                      value={block.times}
+                      onChange={(event) => {
+                        const times = Math.max(
+                          1,
+                          Math.round(Number(event.target.value) || 1),
+                        );
+                        editDraft((current) =>
+                          updateModules(current, (modules) =>
+                            modules.map((item) =>
+                              item.id === block.id && isRepeat(item)
+                                ? { ...item, times }
+                                : item,
+                            ),
+                          ),
+                        );
+                      }}
+                    />
+                  </Field>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    onClick={() =>
+                      editDraft((current) =>
+                        updateModules(current, (modules) =>
+                          modules.filter((item) => item.id !== block.id),
+                        ),
+                      )
+                    }
+                  >
+                    <Trash2 className="size-4" />
+                    {t("builder.removeInterval")}
+                  </button>
+                </div>
+                <div className={styles.stepStack}>
+                  {block.steps.map((step) => (
+                    <StepFields
+                      key={step.id}
+                      step={step}
+                      ftp={ftpValue}
+                      t={t}
+                      onNeedFtp={() => setFtpError(true)}
+                      onChange={(next) =>
+                        editDraft((current) =>
+                          updateModules(current, (modules) =>
+                            modules.map((item) =>
+                              item.id === block.id && isRepeat(item)
+                                ? {
+                                    ...item,
+                                    steps: item.steps.map((child) =>
+                                      child.id === step.id ? next : child,
+                                    ),
+                                  }
+                                : item,
+                            ),
+                          ),
+                        )
+                      }
+                      onRemove={() =>
+                        editDraft((current) =>
+                          updateModules(current, (modules) =>
+                            modules.map((item) =>
+                              item.id === block.id && isRepeat(item)
+                                ? {
+                                    ...item,
+                                    steps: item.steps.filter(
+                                      (child) => child.id !== step.id,
+                                    ),
+                                  }
+                                : item,
+                            ),
+                          ),
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    editDraft((current) =>
+                      updateModules(current, (modules) =>
+                        modules.map((item) =>
+                          item.id === block.id && isRepeat(item)
+                            ? {
+                                ...item,
+                                steps: [...item.steps, createEmptyStep("work")],
+                              }
+                            : item,
+                        ),
+                      ),
+                    )
+                  }
+                >
+                  <Plus className="size-4" />
+                  {t("builder.addRepeatStep")}
+                </Button>
+              </div>
+            );
+          }
+
+          return (
+            <StepFields
+              key={block.id}
+              step={block}
+              ftp={ftpValue}
+              t={t}
+              onNeedFtp={() => setFtpError(true)}
+              onChange={(next) =>
+                editDraft((current) =>
+                  updateModules(current, (modules) =>
+                    modules.map((item, index) =>
+                      index === blockIndex ? next : item,
+                    ),
+                  ),
+                )
+              }
+              onRemove={() =>
+                editDraft((current) =>
+                  updateModules(current, (modules) =>
+                    modules.filter((item) => item.id !== block.id),
+                  ),
+                )
+              }
+            />
+          );
+        })}
+      </div>
       <div className={styles.previewColumn}>
         <div id="result" className={styles.printSheet}>
           <div className={styles.sheetBrand}>
@@ -1029,153 +1178,6 @@ export function WorkoutEditorClient({
         <a href={docsHref} className={styles.docsLink}>
           {t("builder.saveCta")}
         </a>
-      </div>
-
-      <div className={styles.stepsColumn}>
-        {draft.modules.length === 0 ? (
-          <p className={styles.empty}>{t("builder.emptyStructure")}</p>
-        ) : null}
-        {draft.modules.map((block, blockIndex) => {
-          if (isRepeat(block)) {
-            return (
-              <div key={block.id} className={styles.repeatCard}>
-                <div className={styles.repeatHead}>
-                  <Field
-                    label={t("builder.repeatTimes")}
-                    htmlFor={`${block.id}-times`}
-                  >
-                    <Input
-                      id={`${block.id}-times`}
-                      className="w-24"
-                      inputMode="numeric"
-                      value={block.times}
-                      onChange={(event) => {
-                        const times = Math.max(
-                          1,
-                          Math.round(Number(event.target.value) || 1),
-                        );
-                        editDraft((current) =>
-                          updateModules(current, (modules) =>
-                            modules.map((item) =>
-                              item.id === block.id && isRepeat(item)
-                                ? { ...item, times }
-                                : item,
-                            ),
-                          ),
-                        );
-                      }}
-                    />
-                  </Field>
-                  <button
-                    type="button"
-                    className={styles.textButton}
-                    onClick={() =>
-                      editDraft((current) =>
-                        updateModules(current, (modules) =>
-                          modules.filter((item) => item.id !== block.id),
-                        ),
-                      )
-                    }
-                  >
-                    <Trash2 className="size-4" />
-                    {t("builder.removeInterval")}
-                  </button>
-                </div>
-                <div className={styles.stepStack}>
-                  {block.steps.map((step) => (
-                    <StepFields
-                      key={step.id}
-                      step={step}
-                      ftp={ftpValue}
-                      t={t}
-                      onNeedFtp={() => setFtpError(true)}
-                      onChange={(next) =>
-                        editDraft((current) =>
-                          updateModules(current, (modules) =>
-                            modules.map((item) =>
-                              item.id === block.id && isRepeat(item)
-                                ? {
-                                    ...item,
-                                    steps: item.steps.map((child) =>
-                                      child.id === step.id ? next : child,
-                                    ),
-                                  }
-                                : item,
-                            ),
-                          ),
-                        )
-                      }
-                      onRemove={() =>
-                        editDraft((current) =>
-                          updateModules(current, (modules) =>
-                            modules.map((item) =>
-                              item.id === block.id && isRepeat(item)
-                                ? {
-                                    ...item,
-                                    steps: item.steps.filter(
-                                      (child) => child.id !== step.id,
-                                    ),
-                                  }
-                                : item,
-                            ),
-                          ),
-                        )
-                      }
-                    />
-                  ))}
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    editDraft((current) =>
-                      updateModules(current, (modules) =>
-                        modules.map((item) =>
-                          item.id === block.id && isRepeat(item)
-                            ? {
-                                ...item,
-                                steps: [...item.steps, createEmptyStep("work")],
-                              }
-                            : item,
-                        ),
-                      ),
-                    )
-                  }
-                >
-                  <Plus className="size-4" />
-                  {t("builder.addRepeatStep")}
-                </Button>
-              </div>
-            );
-          }
-
-          return (
-            <StepFields
-              key={block.id}
-              step={block}
-              ftp={ftpValue}
-              t={t}
-              onNeedFtp={() => setFtpError(true)}
-              onChange={(next) =>
-                editDraft((current) =>
-                  updateModules(current, (modules) =>
-                    modules.map((item, index) =>
-                      index === blockIndex ? next : item,
-                    ),
-                  ),
-                )
-              }
-              onRemove={() =>
-                editDraft((current) =>
-                  updateModules(current, (modules) =>
-                    modules.filter((item) => item.id !== block.id),
-                  ),
-                )
-              }
-            />
-          );
-        })}
       </div>
     </div>
   );

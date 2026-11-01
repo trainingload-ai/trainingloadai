@@ -1,3 +1,4 @@
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
@@ -277,18 +278,15 @@ export default async function RaceTimePredictorPage({
             <div className={styles.sectionHeading}>
               <h2 className={styles.sectionTitle}>{tPage("faqTitle")}</h2>
             </div>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {pageFaq.map((item) => (
-                <details key={item.question} className={styles.faqItem}>
-                  <summary>{item.question}</summary>
-                  <div className={styles.faqAnswer}>
-                    {item.answer.split(/\n\n+/).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </details>
+                <ToolFaqItem key={item.question} question={item.question}>
+                  {item.answer.split(/\n\n+/).map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </section>
 
           <section id="related" className={styles.section}>

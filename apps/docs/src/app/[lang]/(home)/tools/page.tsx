@@ -1,9 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import { JsonLd } from "@/components/JsonLd";
+import { ToolCatalogCard, toolToneStyle } from "@/components/ToolCatalogCard";
 import {
   ArrowRight,
   Bike,
@@ -59,14 +59,6 @@ const toolTones = {
   files: "var(--muted-foreground)",
   routes: "var(--success)",
 } as const;
-
-function toolToneStyle(tone: string): CSSProperties {
-  return {
-    "--tool-tone": tone,
-    "--tool-tone-soft": `color-mix(in srgb, ${tone} 12%, var(--card))`,
-    "--tool-tone-strong": `color-mix(in srgb, ${tone} 68%, var(--foreground))`,
-  } as CSSProperties;
-}
 
 export async function generateMetadata({
   params,
@@ -733,53 +725,20 @@ export default async function ToolsPage({
                   </span>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {group.tools.map((tool) => {
-                    const Icon = tool.icon;
-                    return (
-                      <Link
-                        key={tool.href}
-                        href={tool.href}
-                        data-tool-key={tool.key}
-                        style={toolToneStyle(tool.tone)}
-                        className="group flex min-h-[11rem] flex-col rounded-overlay bg-card p-4 transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-secondary dark:bg-secondary/75 dark:hover:bg-secondary"
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <span className="grid size-10 shrink-0 place-items-center rounded-control-lg bg-[var(--tool-tone-soft)] text-[var(--tool-tone-strong)]">
-                            <Icon aria-hidden="true" className="size-[18px]" />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <h4 className="line-clamp-2 text-sm font-semibold leading-5">
-                                {tool.title}
-                              </h4>
-                              <ArrowRight
-                                aria-hidden="true"
-                                className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-                              />
-                            </div>
-                            <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--tool-tone-strong)]">
-                              {tool.signal}
-                            </div>
-                          </div>
-                        </div>
-                        <p className="mt-3 line-clamp-3 text-[12.5px] leading-5 text-muted-foreground">
-                          {tool.description}
-                        </p>
-                        <div className="mt-auto flex items-center gap-2 pt-4 text-[11px] text-muted-foreground">
-                          <span
-                            aria-hidden="true"
-                            className="size-1.5 shrink-0 rounded-full bg-[var(--tool-tone)]"
-                          />
-                          <span className="font-semibold uppercase tracking-[0.1em]">
-                            {ui.output}
-                          </span>
-                          <span className="ml-auto max-w-[68%] truncate font-medium text-foreground/70">
-                            {tool.output}
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                  {group.tools.map((tool) => (
+                    <ToolCatalogCard
+                      key={tool.href}
+                      href={tool.href}
+                      toolKey={tool.key}
+                      headingLevel="h4"
+                      title={tool.title}
+                      description={tool.description}
+                      icon={tool.icon}
+                      tone={tool.tone}
+                      signal={tool.signal}
+                      output={{ label: ui.output, value: tool.output }}
+                    />
+                  ))}
                 </div>
               </section>
             ))}

@@ -4,11 +4,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { AlertCircle, ArrowRight, Download, Loader2 } from "lucide-react";
-import { TrackedLink } from "@/components/TrackedLink";
-import {
-  groupRelatedConverterDirections,
-  type ConverterDirection,
-} from "@/lib/converter-directions";
+import type { ConverterDirection } from "@/lib/converter-directions";
+import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
 import { withLocalePath } from "@/lib/locale-url";
 import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
@@ -447,23 +444,20 @@ export function ConverterDirectionClient({
                 </div>
               ) : null}
             </div>
+            <p className="text-center text-xs leading-5 text-muted-foreground">
+              {ui.feedbackTitle}{" "}
+              <a
+                href="mailto:support@trainingload.ai"
+                className="inline-block py-0.5 font-medium underline underline-offset-4 transition-colors hover:text-foreground focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              >
+                support@trainingload.ai
+              </a>
+            </p>
           </section>
         }
       >
         <ToolProductPreview lang={lang} kind="files" />
       </ToolHero>
-
-      <ToolCard className="flex flex-wrap items-center justify-between gap-3 py-4">
-        <h2 className="text-base font-bold text-neutral-950 dark:text-white">
-          {ui.feedbackTitle}
-        </h2>
-        <Link
-          href="mailto:support@trainingload.ai"
-          className="inline-flex h-9 shrink-0 items-center justify-center rounded-compact border border-emerald-600/30 bg-white px-3 text-sm font-bold text-emerald-800 hover:bg-emerald-50 dark:bg-card dark:text-emerald-200 dark:hover:bg-accent"
-        >
-          {ui.feedbackEmail}
-        </Link>
-      </ToolCard>
 
       <ToolSection id="how-to" title={ui.howToTitle}>
         <div className="grid gap-3 md:grid-cols-3">
@@ -561,9 +555,9 @@ export function ConverterDirectionClient({
         </ToolSection>
       ) : null}
 
-      <ConverterRelatedGroups
-        direction={direction}
-        relatedDirections={relatedDirections}
+      <ConverterRelatedTools
+        currentDirection={direction}
+        directions={relatedDirections}
         lang={lang}
       />
 
@@ -617,112 +611,5 @@ export function ConverterDirectionClient({
         }}
       />
     </ToolPageMain>
-  );
-}
-
-function ConverterRelatedLinkList({
-  links,
-}: {
-  links: Array<{ href: string; label: string }>;
-}) {
-  if (links.length === 0) return null;
-  return (
-    <div className="grid gap-3">
-      {links.map((link) => (
-        <TrackedLink
-          key={link.href}
-          href={link.href}
-          eventName="related_tool_clicked"
-          eventProperties={{
-            href: link.href,
-            label: link.label,
-            location: "tool_related_links",
-          }}
-          className={layout.relatedLink}
-        >
-          <span>{link.label}</span>
-          <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
-        </TrackedLink>
-      ))}
-    </div>
-  );
-}
-
-function ConverterRelatedGroups({
-  direction,
-  relatedDirections,
-  lang,
-}: {
-  direction: ConverterDirection;
-  relatedDirections: ConverterDirection[];
-  lang: string;
-}) {
-  const ui = direction.ui;
-  const { sameFrom, sameTo } = groupRelatedConverterDirections(
-    direction,
-    relatedDirections,
-  );
-
-  return (
-    <ToolSection id="other-tools" title={ui.otherToolsTitle}>
-      <div className={layout.related}>
-        {sameFrom.length > 0 ? (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-              {ui.relatedSameFromTitle}
-            </h3>
-            <ConverterRelatedLinkList
-              links={sameFrom.map((item) => ({
-                href: withLocalePath(lang, `/${item.slug}`),
-                label: item.ui.linkLabel,
-              }))}
-            />
-          </div>
-        ) : null}
-        {sameTo.length > 0 ? (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-              {ui.relatedSameToTitle}
-            </h3>
-            <ConverterRelatedLinkList
-              links={sameTo.map((item) => ({
-                href: withLocalePath(lang, `/${item.slug}`),
-                label: item.ui.linkLabel,
-              }))}
-            />
-          </div>
-        ) : null}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-            {ui.relatedHubTitle}
-          </h3>
-          <ConverterRelatedLinkList
-            links={[
-              {
-                href: withLocalePath(lang, "/converter"),
-                label: ui.relatedHub,
-              },
-            ]}
-          />
-        </div>
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-            {ui.relatedOtherTitle}
-          </h3>
-          <ConverterRelatedLinkList
-            links={[
-              {
-                href: withLocalePath(lang, "/fit-file-viewer"),
-                label: ui.relatedFitViewer,
-              },
-              {
-                href: withLocalePath(lang, "/fit-course-converter"),
-                label: ui.relatedFitCourse,
-              },
-            ]}
-          />
-        </div>
-      </div>
-    </ToolSection>
   );
 }

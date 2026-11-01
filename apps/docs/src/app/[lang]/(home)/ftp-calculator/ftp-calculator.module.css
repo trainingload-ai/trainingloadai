@@ -263,9 +263,9 @@
 }
 
 .board {
-  border: 1px solid var(--ftp-line);
+  border: 0;
   border-radius: var(--ftp-radius);
-  background: var(--ftp-surface);
+  background: var(--secondary);
   padding: clamp(1.35rem, 2.4vw, 1.85rem);
   scroll-margin-top: 6.5rem;
 }
@@ -299,8 +299,7 @@
 .boardLead,
 .sectionBody,
 .note,
-.detailBody,
-.faqAnswer {
+.detailBody {
   color: var(--ftp-muted);
   font-size: 1rem;
   line-height: 1.7;
@@ -489,14 +488,12 @@
   display: none;
 }
 
-.detail summary,
-.faqItem summary {
+.detail summary {
   cursor: pointer;
   list-style: none;
 }
 
-.detail summary::-webkit-details-marker,
-.faqItem summary::-webkit-details-marker {
+.detail summary::-webkit-details-marker {
   display: none;
 }
 
@@ -613,11 +610,11 @@
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
-  border: 2px solid var(--score-frame);
-  border-radius: 0;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: #07110f;
   color: var(--score-paper);
-  box-shadow: 8px 8px 0 var(--score-frame);
+  box-shadow: none;
 }
 
 :global(.dark) .poster {
@@ -645,17 +642,17 @@
   position: absolute;
   top: -1rem;
   left: 1.3rem;
-  border: 2px solid var(--score-paper);
+  border: 0;
   padding: 0.6rem 0.8rem;
-  background: var(--score-yellow);
-  color: #17201c;
-  box-shadow: 4px 4px 0 var(--score-paper);
+  background: transparent;
+  color: var(--score-paper);
+  box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1;
-  transform: rotate(-1deg);
+  transform: none;
 }
 
 .posterMark {
@@ -1174,35 +1171,13 @@
   margin-top: 1.35rem;
 }
 
-.detail,
-.faqList {
-  border: 1px solid var(--ftp-line);
-  border-radius: var(--ftp-radius);
-  background: var(--ftp-surface);
-}
-
-.faqList {
-  display: grid;
-  gap: 0.95rem;
-  margin-top: 1.75rem;
+.detail {
   border: 0;
-  border-radius: 0;
-  background: transparent;
-  overflow: visible;
-}
-
-.faqItem {
-  border: 1px solid var(--ftp-line);
   border-radius: var(--ftp-radius);
-  background: var(--ftp-surface);
+  background: var(--secondary);
 }
 
-.faqItem + .faqItem {
-  border-top: 1px solid var(--ftp-line);
-}
-
-.detail summary,
-.faqItem summary {
+.detail summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1212,16 +1187,7 @@
   font-weight: 600;
 }
 
-.faqItem summary {
-  padding: 1.35rem 1.45rem 1.1rem;
-  font-size: 1.16rem;
-  font-weight: 640;
-  letter-spacing: -0.02em;
-  line-height: 1.35;
-}
-
-.detail summary::after,
-.faqItem summary::after {
+.detail summary::after {
   color: var(--ftp-muted);
   content: "+";
   font-size: 1.15rem;
@@ -1229,13 +1195,7 @@
   line-height: 1;
 }
 
-.faqItem summary::after {
-  color: var(--success);
-  font-size: 1.4rem;
-}
-
-.detail[open] summary::after,
-.faqItem[open] summary::after {
+.detail[open] summary::after {
   content: "–";
 }
 
@@ -1484,20 +1444,6 @@
   line-height: 1.5;
 }
 
-.faqAnswer {
-  display: grid;
-  gap: 1.05rem;
-  padding: 0.2rem 1.45rem 1.6rem;
-  color: var(--ftp-ink);
-  font-size: 1.05rem;
-  line-height: 1.8;
-  white-space: normal;
-}
-
-.faqAnswer p {
-  margin: 0;
-}
-
 .relatedGrid {
   display: grid;
   gap: 0.7rem;
@@ -1507,7 +1453,8 @@
 .relatedLink {
   justify-content: flex-start;
   border-radius: var(--tl-radius-surface);
-  background: var(--ftp-surface);
+  background: var(--secondary);
+  border: 0;
 }
 
 .fileResults {
@@ -1517,9 +1464,9 @@
 }
 
 .fileCard {
-  border: 1px solid var(--ftp-line);
+  border: 0;
   border-radius: var(--tl-radius-overlay);
-  background: var(--ftp-canvas);
+  background: var(--secondary);
   padding: 1rem 1.05rem 1.15rem;
 }
 
@@ -1673,7 +1620,9 @@
     width: 100%;
   }
   .poster {
-    box-shadow: 5px 5px 0 var(--score-frame);
+    box-shadow: none;
+    border: 0;
+    border-radius: var(--tl-radius-surface);
   }
   .posterBrand {
     min-height: 2.8rem;
@@ -1684,7 +1633,11 @@
     left: 0.9rem;
     padding: 0.45rem 0.55rem;
     font-size: 0.64rem;
-    box-shadow: 3px 3px 0 var(--score-paper);
+    box-shadow: none;
+    border: 0;
+    transform: none;
+    background: transparent;
+    color: var(--score-paper);
   }
   .posterMark {
     font-size: 0.53rem;

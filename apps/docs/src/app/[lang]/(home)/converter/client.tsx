@@ -27,8 +27,8 @@ import {
   ToolHowToSection,
   ToolJumpNav,
   ToolPageMain,
-  ToolRelatedLinks,
 } from "@/components/ToolPageLayout";
+import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
 import {
   ToolFileDropzone,
   toolPrimaryActionButtonClass,
@@ -87,7 +87,6 @@ function parseFilenameFromContentDisposition(
 
 export function ConverterClient({ lang }: { lang: string }) {
   const t = useTranslations("converter.page");
-  const tCommon = useTranslations("commonLinks");
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState<TargetFormat>("gpx");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -489,28 +488,9 @@ export function ConverterClient({ lang }: { lang: string }) {
       <ToolFaqSection title={t("faqTitle")} items={normalizeFaqItems(faq)} />
 
       <div id="related" className="scroll-mt-24">
-        <ToolRelatedLinks
-          title={converterDirectionLinks[0]?.ui.otherToolsTitle ?? ui.related}
-          links={[
-            ...converterDirectionLinks.map((item) => ({
-              href: `${prefix}/${item.slug}`,
-              label: item.ui.linkLabel,
-            })),
-            {
-              href: `${prefix}/fit-file-viewer`,
-              label:
-                converterDirectionLinks[0]?.ui.relatedFitViewer ??
-                tCommon("fitFileViewerAction"),
-            },
-            {
-              href: `${prefix}/fit-course-converter`,
-              label: tCommon("fitCourseConverterAction"),
-            },
-            {
-              href: `${prefix}/tools`,
-              label: tCommon("allToolsAction"),
-            },
-          ]}
+        <ConverterRelatedTools
+          directions={converterDirectionLinks}
+          lang={lang}
         />
       </div>
 

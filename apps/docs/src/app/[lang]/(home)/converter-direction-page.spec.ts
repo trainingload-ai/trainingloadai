@@ -2,11 +2,18 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("Converter direction page", () => {
-  const source = readFileSync(new URL("./converter-direction-page.tsx", import.meta.url), "utf8");
-  const client = readFileSync(
-    new URL("../../../components/ConverterDirectionClient.tsx", import.meta.url),
+  const source = readFileSync(
+    new URL("./converter-direction-page.tsx", import.meta.url),
     "utf8",
   );
+  const client = ["ConverterDirectionClient", "ConverterRelatedTools"]
+    .map((name) =>
+      readFileSync(
+        new URL(`../../../components/${name}.tsx`, import.meta.url),
+        "utf8",
+      ),
+    )
+    .join("\n");
 
   it("keeps HowTo and FAQ JSON-LD in sync with direction copy", () => {
     expect(source).toContain("howToSchema");

@@ -1,3 +1,4 @@
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -475,22 +476,19 @@ export default async function Zone2HeartRateCalculatorPage({
             <div className={styles.sectionHeading}>
               <h2 className={styles.sectionTitle}>{tPage("faqTitle")}</h2>
             </div>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {pageFaq.map((item, index) => (
-                <details
+                <ToolFaqItem
                   key={item.question}
-                  className={styles.faqItem}
                   open={index < 4}
+                  question={item.question}
                 >
-                  <summary>{item.question}</summary>
-                  <div className={styles.faqAnswer}>
-                    {item.answer.split(/\n\n+/).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </details>
+                  {item.answer.split(/\n\n+/).map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </section>
 
           <Section id="related" title={ui.related}>

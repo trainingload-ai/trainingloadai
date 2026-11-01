@@ -1,3 +1,4 @@
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -190,9 +191,7 @@ export default async function PowerZonesCalculatorPage({
   const pageFaq = normalizeFaqItems(tPage.raw("faq"));
   const cogganRows = readCogganRows(tPage.raw("sections.coggan.rows"));
   const modelCards = readModelCards(tPage.raw("sections.models.cards"));
-  const workoutTargets = readWorkoutTargets(
-    tPage.raw("sections.targets.rows"),
-  );
+  const workoutTargets = readWorkoutTargets(tPage.raw("sections.targets.rows"));
 
   const ui = tPage.raw("ui") as {
     badge: string;
@@ -362,9 +361,7 @@ export default async function PowerZonesCalculatorPage({
                           {(["target", "percent", "use"] as const).map(
                             (header) => (
                               <th key={header} scope="col">
-                                {tPage(
-                                  `sections.targets.headers.${header}`,
-                                )}
+                                {tPage(`sections.targets.headers.${header}`)}
                               </th>
                             ),
                           )}
@@ -394,7 +391,9 @@ export default async function PowerZonesCalculatorPage({
                   <div className={styles.cardGrid}>
                     {(["ftp", "cp", "models"] as const).map((key) => (
                       <article className={styles.infoCard} key={key}>
-                        <h3>{tPage(`sections.reference.cards.${key}.title`)}</h3>
+                        <h3>
+                          {tPage(`sections.reference.cards.${key}.title`)}
+                        </h3>
                         <p>{tPage(`sections.reference.cards.${key}.body`)}</p>
                       </article>
                     ))}
@@ -462,12 +461,11 @@ export default async function PowerZonesCalculatorPage({
                   </p>
                   <details className={styles.formulaDetails}>
                     <summary>{tPage("formula.title")}</summary>
-                    <div className={styles.faqAnswer}>
-                      <p className={styles.formula}>
-                        {tPage("formula.equation")}
-                      </p>
-                      <p>{tPage("formula.body")}</p>
-                    </div>
+
+                    <p className={styles.formula}>
+                      {tPage("formula.equation")}
+                    </p>
+                    <p>{tPage("formula.body")}</p>
                   </details>
                 </Section>
 
@@ -533,18 +531,15 @@ export default async function PowerZonesCalculatorPage({
             <div className={styles.sectionHeading}>
               <h2 className={styles.sectionTitle}>{tPage("faqTitle")}</h2>
             </div>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {pageFaq.map((item) => (
-                <details key={item.question} className={styles.faqItem}>
-                  <summary>{item.question}</summary>
-                  <div className={styles.faqAnswer}>
-                    {item.answer.split(/\n\n+/).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </details>
+                <ToolFaqItem key={item.question} question={item.question}>
+                  {item.answer.split(/\n\n+/).map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </section>
 
           <Section id="related" title={ui.related}>

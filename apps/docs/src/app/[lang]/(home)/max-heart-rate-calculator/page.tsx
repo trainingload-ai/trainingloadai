@@ -1,3 +1,4 @@
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -262,18 +263,12 @@ export default async function MaxHeartRateCalculatorPage({
                     <p className={styles.note}>{tPage("quickAnswer.note")}</p>
                   </div>
                   <div className={styles.formulaGrid}>
-                    {(["adults", "women", "measured"] as const).map(
-                      (key) => (
-                        <article className={styles.formulaCard} key={key}>
-                          <h3>
-                            {tPage(`quickAnswer.bestFormula.${key}.label`)}
-                          </h3>
-                          <p>
-                            {tPage(`quickAnswer.bestFormula.${key}.value`)}
-                          </p>
-                        </article>
-                      ),
-                    )}
+                    {(["adults", "women", "measured"] as const).map((key) => (
+                      <article className={styles.formulaCard} key={key}>
+                        <h3>{tPage(`quickAnswer.bestFormula.${key}.label`)}</h3>
+                        <p>{tPage(`quickAnswer.bestFormula.${key}.value`)}</p>
+                      </article>
+                    ))}
                   </div>
                 </section>
 
@@ -290,7 +285,9 @@ export default async function MaxHeartRateCalculatorPage({
                       <thead>
                         <tr>
                           <th scope="col">{tPage("methodsHeaders.formula")}</th>
-                          <th scope="col">{tPage("methodsHeaders.equation")}</th>
+                          <th scope="col">
+                            {tPage("methodsHeaders.equation")}
+                          </th>
                           <th scope="col">{tPage("methodsHeaders.bestFor")}</th>
                         </tr>
                       </thead>
@@ -433,18 +430,15 @@ export default async function MaxHeartRateCalculatorPage({
             <div className={styles.sectionHeading}>
               <h2 className={styles.sectionTitle}>{tPage("faqTitle")}</h2>
             </div>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {pageFaq.map((item) => (
-                <details key={item.question} className={styles.faqItem}>
-                  <summary>{item.question}</summary>
-                  <div className={styles.faqAnswer}>
-                    {item.answer.split(/\n\n+/).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </details>
+                <ToolFaqItem key={item.question} question={item.question}>
+                  {item.answer.split(/\n\n+/).map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </section>
 
           <Section id="related" title={ui.related}>
