@@ -1,4 +1,41 @@
 {
+  "fileInspection": {
+    "checking": "Controllo del file…",
+    "recognized": "File {format} riconosciuto",
+    "activity": "{activities} attività · {laps, plural, one {# giro} other {# giri}} · {points} record",
+    "health": "{count, plural, one {# dato sanitario} other {# dati sanitari}}",
+    "network": "Impossibile connettersi al servizio file. Riprova.",
+    "failed": "Impossibile leggere il file ({status})."
+  },
+  "conversionQuality": {
+    "reference": "Riferimento",
+    "noGpsTitle": "Questo file non può essere convertito in una traccia GPS",
+    "noGps": "Nessuno dei {total} record contiene coordinate GPS utilizzabili. GPX richiede le coordinate. Per un’attività indoor, conserva il FIT originale o prova TCX.",
+    "inputWarningTitle": "Controlla i limiti della conversione",
+    "reviewTitle": "Controlla il risultato prima del download",
+    "reviewBody": "Il file è stato generato, ma devi esaminare i controlli seguenti. Scaricalo solo se accetti questi limiti.",
+    "downloadedWithWarnings": "Scaricato con i limiti indicati",
+    "pointsOmitted": "GPX esclude {count, plural, one {# record} other {# record}} senza coordinate GPS utilizzabili ({total} in totale).",
+    "metricsNotPreserved": "Non è stato possibile verificare la conservazione di questi dati: {metrics}. Conserva il file originale se ti servono.",
+    "sourceWarnings": "La lettura del file originale ha prodotto {count, plural, one {# avviso} other {# avvisi}}. Controlla l’attività originale prima di usare il file convertito.",
+    "outputWarnings": "La lettura del file convertito ha prodotto {count, plural, one {# avviso} other {# avvisi}}. Controlla il risultato prima di importarlo o condividerlo.",
+    "nonActivityDataOmitted": "I dati sanitari esterni all’attività non sono inclusi nel file convertito.",
+    "downloadAnyway": "Accetta i limiti e scarica",
+    "cancel": "Annulla download",
+    "outputInvalid": "Non è stato possibile verificare il file convertito. Il download è stato bloccato. Conserva l’originale, prova un altro formato o contatta l’assistenza con il riferimento qui sotto.",
+    "serviceFailed": "Il servizio di conversione non è riuscito a completare la richiesta. Il download non è stato avviato. Conserva l’originale, prova un altro formato o contatta l’assistenza con il riferimento qui sotto.",
+    "metrics": {
+      "heartRate": "frequenza cardiaca",
+      "cadence": "cadenza",
+      "power": "potenza",
+      "altitude": "altitudine",
+      "distance": "distanza",
+      "speed": "velocità",
+      "temperature": "temperatura",
+      "runningDynamics": "dinamiche di corsa",
+      "swimming": "metriche di nuoto"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - piani endurance adattivi basati sul carico di allenamento",
     "description": "Trainingload.ai aiuta runner e ciclisti a mantenere il piano in rotta confrontando allenamenti pianificati e completati, monitorando il carico e usando la revisione AI coach per modifiche confermate.",

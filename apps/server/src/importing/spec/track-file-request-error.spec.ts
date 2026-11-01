@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from '@jest/globals';
 import { TrackSwapError } from 'trackswap';
+import { TrackFileConversionError } from '../track-file-conversion';
 import {
   mapTrackFileRequestError,
   TRACK_FILE_REQUEST_ERROR,
@@ -105,6 +106,35 @@ describe('track file request errors', () => {
     expect(mapTrackFileRequestError(new Error('database unavailable'))).toBe(
       null,
     );
+  });
+
+  it('separates missing input GPS from a broken conversion result', () => {
+    const missingGps = mapTrackFileRequestError(
+      new TrackFileConversionError('GPX_COORDINATES_REQUIRED', 'no GPS'),
+    )!;
+    expect(missingGps.getStatus()).toBe(400);
+    expect(exceptionResponse(missingGps)).toMatchObject({
+      code: 'TRACK_FILE_GPX_COORDINATES_REQUIRED',
+      data: { category: 'FILE_INPUT' },
+    });
+    const broken = mapTrackFileRequestError(
+      new TrackFileConversionError('OUTPUT_INVALID', 'bad coordinates'),
+    )!;
+    expect(broken.getStatus()).toBe(500);
+    expect(exceptionResponse(broken)).toMatchObject({
+      code: 'TRACK_FILE_OUTPUT_INVALID',
+      data: { category: 'CONVERSION', origin: 'SERVICE' },
+    });
+  });
+
+  it('does not blame the file for an unexplained encoder failure', () => {
+    const mapped = mapTrackFileRequestError(
+      new TrackSwapError('ENCODE_FAILED', 'internal encoder issue', {
+        format: 'fit',
+      }),
+    )!;
+    expect(mapped.getStatus()).toBe(500);
+    expect(exceptionResponse(mapped).data.category).toBe('CONVERSION');
   });
 
   it('has a user-facing message in every supported server locale', () => {

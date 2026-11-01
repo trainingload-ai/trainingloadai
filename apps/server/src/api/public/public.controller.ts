@@ -26,6 +26,7 @@ import {
   PUBLIC_TRACK_SINGLE_FILE_OPTIONS,
 } from './public-upload-limits';
 import { EncodeWorkoutDto } from './dto/encode-workout.dto';
+import { TRACK_FILE_CONVERSION_REPORT_HEADER } from '@shared/track-file-contract';
 
 function readNumberEnv(key: string, fallback: number): number {
   const raw = process.env[key];
@@ -154,13 +155,17 @@ export class PublicController {
     );
     res.setHeader(
       'Access-Control-Expose-Headers',
-      'Content-Disposition, X-TrackSwap-Source-Format, X-TrackSwap-Target-Format',
+      `Content-Disposition, X-TrackSwap-Source-Format, X-TrackSwap-Target-Format, ${TRACK_FILE_CONVERSION_REPORT_HEADER}`,
     );
     res.setHeader(
       'X-TrackSwap-Source-Format',
       [...new Set(content.sourceFormats)].join(','),
     );
     res.setHeader('X-TrackSwap-Target-Format', body.type);
+    res.setHeader(
+      TRACK_FILE_CONVERSION_REPORT_HEADER,
+      JSON.stringify(content.report),
+    );
     res.setHeader(
       'Content-Disposition',
       createContentDisposition(content.filename),

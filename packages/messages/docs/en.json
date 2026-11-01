@@ -1,4 +1,33 @@
 {
+  "conversionQuality": {
+    "reference": "Reference",
+    "noGpsTitle": "This file cannot be converted to a GPS track",
+    "noGps": "The file has no usable GPS coordinates ({total, plural, one {# record} other {# records}}). GPX requires coordinates. Keep the original FIT file or try TCX for an indoor activity.",
+    "inputWarningTitle": "Check the conversion limits",
+    "reviewTitle": "Review the conversion before downloading",
+    "reviewBody": "The file was generated, but the checks below need your attention. Download only if these limits are acceptable.",
+    "downloadedWithWarnings": "Downloaded with the limitations shown below",
+    "pointsOmitted": "GPX excludes {count, plural, one {# record} other {# records}} without usable GPS coordinates ({total} in total).",
+    "metricsNotPreserved": "The output could not be verified to preserve: {metrics}. Keep the original file if you need these data.",
+    "sourceWarnings": "The source file produced {count, plural, one {# parsing warning} other {# parsing warnings}}. Check the original activity before using the converted file.",
+    "outputWarnings": "Reading the converted file produced {count, plural, one {# warning} other {# warnings}}. Check the result before importing or sharing it.",
+    "nonActivityDataOmitted": "Health records outside the activity are not included in the converted file.",
+    "downloadAnyway": "Accept limitations and download",
+    "cancel": "Cancel download",
+    "outputInvalid": "We could not verify the converted file. Download was blocked to avoid giving you an unusable result. Keep the original file and try another format, or contact support with the reference below.",
+    "serviceFailed": "The conversion service could not complete this request. No download was started. Keep the original file, try another format, or contact support with the reference below.",
+    "metrics": {
+      "heartRate": "heart rate",
+      "cadence": "cadence",
+      "power": "power",
+      "altitude": "altitude",
+      "distance": "distance",
+      "speed": "speed",
+      "temperature": "temperature",
+      "runningDynamics": "running dynamics",
+      "swimming": "swimming metrics"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - Adaptive Endurance Training Plans Built on Training Load",
     "description": "Trainingload.ai helps runners and cyclists keep training plans on track by comparing planned vs completed workouts, tracking training load, and using AI coach review for confirmed adjustments.",
@@ -13941,8 +13970,8 @@
   "fileInspection": {
     "checking": "Checking the file…",
     "recognized": "Recognized {format} file",
-    "activity": "{activities} activities · {laps} laps · {points} records",
-    "health": "{count} health records",
+    "activity": "{activities, plural, one {# activity} other {# activities}} · {laps, plural, one {# lap} other {# laps}} · {points, plural, one {# record} other {# records}}",
+    "health": "{count, plural, one {# health record} other {# health records}}",
     "network": "Could not connect to the file service. Please try again.",
     "failed": "Could not read the file ({status})."
   }

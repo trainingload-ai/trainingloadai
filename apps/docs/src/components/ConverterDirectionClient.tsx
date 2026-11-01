@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { AlertCircle, ArrowRight, Download, Loader2 } from "lucide-react";
 import { TrackedLink } from "@/components/TrackedLink";
@@ -44,6 +45,12 @@ import {
 import { captureToolFailure } from "@/lib/tool-sentry";
 import { elapsedMilliseconds, trackToolEvent } from "@/lib/tool-analytics";
 import { DOCS_BROWSER_API_BASE_URL } from "@/lib/docs-api-base-url";
+import {
+  ConversionInputNotice,
+  ConversionReviewNotice,
+} from "@/components/ConversionQualityNotice";
+import { useConversionDownload } from "@/hooks/use-conversion-download";
+import { conversionHasNoGps } from "@/lib/conversion-download";
 
 function parseFilenameFromContentDisposition(
   value: string | null,
@@ -80,6 +87,16 @@ export function ConverterDirectionClient({
   const [trainingPlanPromptOpen, setTrainingPlanPromptOpen] = useState(false);
   const { inspection, isInspecting, inspectionError, inspectFile } =
     useTrackFileInspection();
+  const tQuality = useTranslations("conversionQuality");
+  const noGps = conversionHasNoGps(inspection, direction.target);
+  const {
+    pending,
+    report,
+    reset: resetDownload,
+    acceptResponse,
+    downloadPending,
+    isCurrent,
+  } = useConversionDownload(direction.target);
 
   const sourceInfo = direction.sourceInfo;
   const targetInfo = direction.targetInfo;
@@ -119,6 +136,9 @@ export function ConverterDirectionClient({
       return;
     }
 
+    if (noGps) return;
+    const conversionRequestId = resetDownload();
+
     setError(null);
     setDownloadName(null);
     setIsSubmitting(true);
@@ -143,53 +163,55 @@ export function ConverterDirectionClient({
       if (!res.ok) {
         throw await buildToolRequestError(
           res,
-          ui.requestFailed.replace("{status}", String(res.status)),
+          res.status >= 500
+            ? tQuality("serviceFailed")
+            : ui.requestFailed.replace("{status}", String(res.status)),
           clientTraceId,
         );
       }
 
-      const blob = await res.blob();
       const headerName = parseFilenameFromContentDisposition(
         res.headers.get("content-disposition"),
       );
       const fallbackName = `${file.name.replace(/\.[^.]+$/, "")}.${direction.target}`;
       const filename = headerName || fallbackName;
 
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(objectUrl);
-
-      setDownloadName(filename);
-      const successProperties = {
-        action: "convert_file",
-        conversion: direction.slug,
-        source_format: direction.source,
-        target_format: direction.target,
-        tool: "activity_file_direction_converter",
-        ...fileAnalyticsProperties(file),
-      };
-      trackToolEvent("tool_completed", toolId, {
-        action: "convert_file",
-        duration_ms: elapsedMilliseconds(startedAt),
-        source_format: direction.source,
-        output_format: direction.target,
-        ...fileAnalyticsProperties(file),
-      });
-      trackToolEvent("tool_exported", toolId, {
-        action: "convert_file",
-        export_format: direction.target,
-      });
-      trackMarketingEvent("converter_training_plan_prompt_shown", {
-        ...successProperties,
-        filename_extension: direction.target,
-      });
-      setTrainingPlanPromptOpen(true);
+      await acceptResponse(
+        res,
+        filename,
+        conversionRequestId,
+        (hasWarnings) => {
+          setDownloadName(filename);
+          const successProperties = {
+            action: "convert_file",
+            conversion: direction.slug,
+            source_format: direction.source,
+            target_format: direction.target,
+            tool: "activity_file_direction_converter",
+            ...fileAnalyticsProperties(file),
+          };
+          trackToolEvent("tool_completed", toolId, {
+            action: "convert_file",
+            duration_ms: elapsedMilliseconds(startedAt),
+            source_format: direction.source,
+            output_format: direction.target,
+            ...fileAnalyticsProperties(file),
+          });
+          trackToolEvent("tool_exported", toolId, {
+            action: "convert_file",
+            export_format: direction.target,
+          });
+          if (!hasWarnings) {
+            trackMarketingEvent("converter_training_plan_prompt_shown", {
+              ...successProperties,
+              filename_extension: direction.target,
+            });
+            setTrainingPlanPromptOpen(true);
+          }
+        },
+      );
     } catch (e) {
+      if (!isCurrent(conversionRequestId)) return;
       const errorInfo = getErrorDebugInfo(e);
       const requestErrorInfo = getToolRequestErrorMeta(e);
       const isFileInputError = isFileInputToolRequestError(e);
@@ -253,11 +275,24 @@ export function ConverterDirectionClient({
         e instanceof ToolRequestError
           ? e.meta.clientTraceId || clientTraceId
           : clientTraceId;
-      setError(appendErrorReference(message, ref));
+      setError(appendErrorReference(message, ref, tQuality("reference")));
     } finally {
-      setIsSubmitting(false);
+      if (isCurrent(conversionRequestId)) setIsSubmitting(false);
     }
-  }, [direction, file, inspectionError, isInspecting, lang, toolId, ui]);
+  }, [
+    direction,
+    file,
+    inspectionError,
+    isInspecting,
+    lang,
+    toolId,
+    ui,
+    noGps,
+    resetDownload,
+    acceptResponse,
+    isCurrent,
+    tQuality,
+  ]);
 
   return (
     <ToolPageMain>
@@ -325,6 +360,8 @@ export function ConverterDirectionClient({
                     : undefined
                 }
                 onFileChange={(nextFile) => {
+                  resetDownload();
+                  setIsSubmitting(false);
                   setFile(nextFile);
                   setError(null);
                   setDownloadName(null);
@@ -344,6 +381,23 @@ export function ConverterDirectionClient({
                 error={inspectionError}
               />
 
+              {!report ? (
+                <ConversionInputNotice
+                  inspection={inspection}
+                  targetFormat={direction.target}
+                />
+              ) : null}
+              {report ? (
+                <ConversionReviewNotice
+                  report={report}
+                  awaitingConfirmation={Boolean(pending)}
+                  onDownload={downloadPending}
+                  onCancel={() => {
+                    resetDownload();
+                  }}
+                />
+              ) : null}
+
               <div className="space-y-3 pt-2">
                 {error ? (
                   <div
@@ -359,7 +413,11 @@ export function ConverterDirectionClient({
                   <Button
                     type="button"
                     disabled={
-                      isSubmitting || isInspecting || Boolean(inspectionError)
+                      isSubmitting ||
+                      isInspecting ||
+                      Boolean(inspectionError) ||
+                      noGps ||
+                      Boolean(pending)
                     }
                     className={toolPrimaryActionButtonClass}
                     onClick={onSubmit}
@@ -380,7 +438,7 @@ export function ConverterDirectionClient({
                 </div>
               </div>
 
-              {downloadName ? (
+              {downloadName && !report ? (
                 <div
                   aria-live="polite"
                   className="rounded-compact border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"

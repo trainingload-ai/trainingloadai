@@ -1,4 +1,33 @@
 {
+  "conversionQuality": {
+    "reference": "参照番号",
+    "noGpsTitle": "このファイルは GPS 軌跡に変換できません",
+    "noGps": "{total} 件の記録に有効な GPS 座標がありません。GPX 軌跡には座標が必要です。屋内トレーニングでは元の FIT ファイルを保存するか、TCX への変換をお試しください。",
+    "inputWarningTitle": "変換時の制限をご確認ください",
+    "reviewTitle": "ダウンロード前に変換結果をご確認ください",
+    "reviewBody": "ファイルは生成されましたが、以下の確認項目があります。制限を許容できる場合のみダウンロードしてください。",
+    "downloadedWithWarnings": "以下の制限を確認してダウンロードしました",
+    "pointsOmitted": "{total} 件中 {count} 件に有効な GPS 座標がなく、GPX ファイルから除外されます。",
+    "metricsNotPreserved": "次のデータの保持を変換後に確認できませんでした：{metrics}。必要な場合は元のファイルを保存してください。",
+    "sourceWarnings": "元のファイルの読み取りで {count} 件の警告が発生しました。変換ファイルを使用する前に元のアクティビティをご確認ください。",
+    "outputWarnings": "変換ファイルの読み取りで {count} 件の警告が発生しました。インポートや共有の前に結果をご確認ください。",
+    "nonActivityDataOmitted": "アクティビティ以外の健康記録は変換ファイルに含まれません。",
+    "downloadAnyway": "制限を了承してダウンロード",
+    "cancel": "ダウンロードをキャンセル",
+    "outputInvalid": "変換結果を検証できなかったため、ダウンロードを停止しました。元のファイルを保存し、別の形式を試すか、下記の参照番号を添えてサポートへお問い合わせください。",
+    "serviceFailed": "変換サービスで処理を完了できず、ダウンロードは開始されませんでした。元のファイルを保存し、別の形式を試すか、下記の参照番号を添えてサポートへお問い合わせください。",
+    "metrics": {
+      "heartRate": "心拍数",
+      "cadence": "ケイデンス",
+      "power": "パワー",
+      "altitude": "標高",
+      "distance": "距離",
+      "speed": "速度",
+      "temperature": "気温",
+      "runningDynamics": "ランニングダイナミクス",
+      "swimming": "水泳指標"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - トレーニング負荷に合わせて調整する持久系トレーニング計画",
     "description": "Trainingload.ai は、ランニングやサイクリングなどの持久系トレーニングで、計画、実績、トレーニング負荷、AI コーチレビューをつなげ、確認してから反映できる調整案を作ります。",

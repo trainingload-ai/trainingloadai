@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "Démarre le plan suivant à partir du bilan du cycle « {planTitle} ». Achèvement {completionRate}. Lis d'abord le bilan, puis demande-moi les objectifs et les contraintes."
   },
   "error": {
+    "track_file_output_invalid": "Le fichier converti n’a pas réussi la validation et son téléchargement a été bloqué. Conservez l’original et essayez un autre format ou contactez l’assistance.",
+    "track_file_conversion_service_failed": "Le service de conversion n’a pas pu terminer la demande. Aucun téléchargement n’a été lancé. Conservez l’original et essayez un autre format ou contactez l’assistance.",
+    "track_file_gpx_coordinates_required": "Cette activité ne contient pas de coordonnées GPS utilisables et ne peut pas être convertie en trace GPX. Conservez le fichier FIT original ou essayez TCX pour une activité en intérieur.",
     "activity_hash_id_cannot_be_empty": "Activity hashId cannot be empty",
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "Une erreur s’est produite de notre côté. Réessayez plus tard.",

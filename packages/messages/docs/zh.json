@@ -1,4 +1,33 @@
 {
+  "conversionQuality": {
+    "reference": "参考编号",
+    "noGpsTitle": "该文件无法转换为 GPS 轨迹",
+    "noGps": "{total} 条记录均没有可用的 GPS 坐标，而 GPX 轨迹必须包含坐标。室内训练请保留原始 FIT 文件，或尝试转换为 TCX。",
+    "inputWarningTitle": "请留意转换限制",
+    "reviewTitle": "下载前，请确认转换结果",
+    "reviewBody": "文件已生成，但以下检查项需要你留意。确认这些限制可以接受后，再下载使用。",
+    "downloadedWithWarnings": "已按以下限制下载文件",
+    "pointsOmitted": "{total} 条记录中有 {count} 条没有可用的 GPS 坐标，将不会包含在 GPX 文件中。",
+    "metricsNotPreserved": "转换后未能验证以下数据已保留：{metrics}。如果需要这些数据，请保留原始文件。",
+    "sourceWarnings": "源文件解析时产生了 {count} 项警告，使用转换文件前请复查原始活动。",
+    "outputWarnings": "转换文件回读时产生了 {count} 项警告，导入或分享前请检查结果。",
+    "nonActivityDataOmitted": "活动之外的健康记录不会包含在转换文件中。",
+    "downloadAnyway": "接受这些限制并下载",
+    "cancel": "取消下载",
+    "outputInvalid": "转换结果未通过校验，已阻止下载，以免提供不可用的文件。请保留原文件，尝试其他格式，或联系支持并提供下方参考编号。",
+    "serviceFailed": "转换服务未能完成处理，未启动下载。请保留原文件，尝试其他格式，或联系支持并提供下方参考编号。",
+    "metrics": {
+      "heartRate": "心率",
+      "cadence": "步频／踏频",
+      "power": "功率",
+      "altitude": "海拔",
+      "distance": "距离",
+      "speed": "速度",
+      "temperature": "温度",
+      "runningDynamics": "跑步动态",
+      "swimming": "游泳指标"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - 基于训练负荷的动态耐力训练计划",
     "description": "Trainingload.ai 把跑步、骑行等耐力训练的计划、完成情况、训练负荷和智能教练复盘连接起来，并生成需要确认的训练调整。",

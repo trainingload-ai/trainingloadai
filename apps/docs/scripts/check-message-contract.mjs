@@ -90,6 +90,17 @@ const englishMessages = JSON.parse(
   fs.readFileSync(path.join(messagesDirectory, "en.json"), "utf8"),
 );
 const toolCopyPaths = [];
+const functionalFileCopyPaths = [];
+collectStrings(
+  englishMessages.conversionQuality,
+  "conversionQuality",
+  functionalFileCopyPaths,
+);
+collectStrings(
+  englishMessages.fileInspection,
+  "fileInspection",
+  functionalFileCopyPaths,
+);
 for (const key of [
   "recordingAlt",
   "watchAlt",
@@ -120,15 +131,6 @@ for (const key of [
 ]) {
   toolCopyPaths.push({ path: `tssCalculator.client.report.${key}` });
 }
-for (const key of [
-  "checking",
-  "recognized",
-  "activity",
-  "health",
-  "network",
-  "failed",
-])
-  toolCopyPaths.push({ path: `fileInspection.${key}` });
 for (const kind of ["load", "files", "plans"]) {
   for (const key of ["title", "body"])
     toolCopyPaths.push({ path: `toolExperience.${kind}.hero.${key}` });
@@ -196,6 +198,16 @@ for (const locale of supportedLocales) {
     }
   }
 
+  // Conversion errors and loss warnings are functional UI in every supported locale.
+  for (const entry of functionalFileCopyPaths) {
+    const value = readPath(messages, entry.path);
+    if (typeof value !== "string" || !value.trim()) {
+      errors.push(`${locale}: missing conversion copy ${entry.path}`);
+    } else if (variables(entry.value) !== variables(value)) {
+      errors.push(`${locale}: mismatched placeholders in ${entry.path}`);
+    }
+  }
+
   if (indexedLocales.includes(locale)) {
     for (const entry of toolCopyPaths) {
       const value = readPath(messages, entry.path);
@@ -242,5 +254,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Docs message contract ok: ${supportedLocales.length} locales, ${requiredLocalizedStrings.length} required strings, ${toolCopyPaths.length} tool strings in ${indexedLocales.length} indexed locales`,
+  `Docs message contract ok: ${supportedLocales.length} locales, ${requiredLocalizedStrings.length} required strings, ${functionalFileCopyPaths.length} file-tool strings in every locale, ${toolCopyPaths.length} tool strings in ${indexedLocales.length} indexed locales`,
 );

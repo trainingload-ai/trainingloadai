@@ -53,6 +53,14 @@ const ENGLISH_STATUS_FALLBACKS: Partial<Record<number, string>> = {
   [HttpStatus.TOO_MANY_REQUESTS]: 'Too many requests, please try again later.',
 };
 
+// Only these fixed, user-facing messages are safe to expose for server errors.
+// Never honor arbitrary messageKey, messageArgs, or raw exception text for 5xx.
+const SAFE_SERVER_ERROR_MESSAGE_KEYS: Readonly<Record<string, string>> = {
+  TRACK_FILE_OUTPUT_INVALID: 'common.error.track_file_output_invalid',
+  TRACK_FILE_CONVERSION_FAILED:
+    'common.error.track_file_conversion_service_failed',
+};
+
 function normalizeErrorMessage(message: unknown): string | undefined {
   if (typeof message === 'string' && message.trim()) return message;
   if (Array.isArray(message)) {
@@ -195,8 +203,17 @@ export function getSafeHttpMessage(
   const i18n = I18nContext.current();
 
   if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    const safeKey =
+      typeof structuredResponse?.code === 'string' &&
+      Object.prototype.hasOwnProperty.call(
+        SAFE_SERVER_ERROR_MESSAGE_KEYS,
+        structuredResponse.code,
+      )
+        ? SAFE_SERVER_ERROR_MESSAGE_KEYS[structuredResponse.code]
+        : undefined;
     return (
-      getTranslation(i18n, 'common.error.internal') ??
+      (safeKey && getTranslation(i18n, safeKey)) ||
+      getTranslation(i18n, 'common.error.internal') ||
       'Something went wrong on our end. Please try again later.'
     );
   }

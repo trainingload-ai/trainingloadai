@@ -1,4 +1,41 @@
 {
+  "fileInspection": {
+    "checking": "Vérification du fichier…",
+    "recognized": "Fichier {format} reconnu",
+    "activity": "{activities, plural, one {# activité} other {# activités}} · {laps, plural, one {# tour} other {# tours}} · {points, plural, one {# enregistrement} other {# enregistrements}}",
+    "health": "{count, plural, one {# donnée de santé} other {# données de santé}}",
+    "network": "Impossible de joindre le service de fichiers. Veuillez réessayer.",
+    "failed": "Impossible de lire le fichier ({status})."
+  },
+  "conversionQuality": {
+    "reference": "Référence",
+    "noGpsTitle": "Ce fichier ne peut pas être converti en trace GPS",
+    "noGps": "Ce fichier n’a pas de coordonnées GPS utilisables ({total, plural, one {# enregistrement} other {# enregistrements}}). GPX exige des coordonnées. Pour une activité en intérieur, conservez le FIT original ou essayez TCX.",
+    "inputWarningTitle": "Vérifiez les limites de la conversion",
+    "reviewTitle": "Vérifiez le résultat avant de télécharger",
+    "reviewBody": "Le fichier a été généré, mais les vérifications suivantes nécessitent votre attention. Téléchargez-le uniquement si vous acceptez ces limites.",
+    "downloadedWithWarnings": "Téléchargé avec les limites indiquées",
+    "pointsOmitted": "GPX exclut {count, plural, one {# enregistrement} other {# enregistrements}} sans coordonnées GPS utilisables ({total} au total).",
+    "metricsNotPreserved": "La conservation des données suivantes n’a pas pu être vérifiée : {metrics}. Conservez le fichier original si vous en avez besoin.",
+    "sourceWarnings": "La lecture du fichier source a produit {count, plural, one {# avertissement} other {# avertissements}}. Vérifiez l’activité d’origine avant d’utiliser le fichier converti.",
+    "outputWarnings": "La lecture du fichier converti a produit {count, plural, one {# avertissement} other {# avertissements}}. Vérifiez le résultat avant de l’importer ou de le partager.",
+    "nonActivityDataOmitted": "Les données de santé extérieures à l’activité ne sont pas incluses dans le fichier converti.",
+    "downloadAnyway": "Accepter les limites et télécharger",
+    "cancel": "Annuler le téléchargement",
+    "outputInvalid": "Le fichier converti n’a pas pu être vérifié. Le téléchargement a été bloqué. Conservez l’original, essayez un autre format ou contactez l’assistance avec la référence ci-dessous.",
+    "serviceFailed": "Le service de conversion n’a pas pu terminer la demande. Aucun téléchargement n’a été lancé. Conservez l’original, essayez un autre format ou contactez l’assistance avec la référence ci-dessous.",
+    "metrics": {
+      "heartRate": "fréquence cardiaque",
+      "cadence": "cadence",
+      "power": "puissance",
+      "altitude": "altitude",
+      "distance": "distance",
+      "speed": "vitesse",
+      "temperature": "température",
+      "runningDynamics": "dynamique de course",
+      "swimming": "mesures de natation"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - plans d'endurance adaptatifs basés sur la charge d'entraînement",
     "description": "Trainingload.ai aide coureurs et cyclistes à garder leur plan sur la bonne trajectoire en comparant prévu et réalisé, en suivant la charge d'entraînement et en utilisant une revue AI coach pour confirmer les ajustements.",

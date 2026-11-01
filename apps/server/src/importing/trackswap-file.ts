@@ -6,7 +6,17 @@ import TrackSwap, {
   type TrackDocument,
   type TrackInput,
 } from 'trackswap';
-import type { TrackFileInspection } from '../../../../packages/shared/track-file-contract';
+import type {
+  TrackFileInspection,
+  TrackFileConversionResult,
+} from '@shared/track-file-contract';
+import {
+  assertTrackFileConvertible,
+  assessTrackFileConversion,
+  hasTrackCoordinates,
+  trackFileRecords,
+  TrackFileConversionError,
+} from './track-file-conversion';
 
 export type { FITPrimaryKind } from 'trackswap';
 
@@ -167,7 +177,11 @@ export async function transcodeTrackFile(
     expectedFormat?: TrackFileFormat;
     filename?: string;
   } = {},
-): Promise<{ content: Buffer; sourceFormat: TrackFileFormat }> {
+): Promise<{
+  content: Buffer;
+  sourceFormat: TrackFileFormat;
+  report: TrackFileConversionResult;
+}> {
   return withTrackSwap(async (trackSwap) => {
     const sourceFormat = asBuiltInFormat(trackSwap.detect(input));
     assertExpectedFormat({
@@ -175,11 +189,53 @@ export async function transcodeTrackFile(
       expectedFormat: options.expectedFormat,
       filename: options.filename,
     });
-    const content = await trackSwap.transcode(input, {
-      sourceFormat,
+    const document = await trackSwap.decode(input, { format: sourceFormat });
+    const source = document.facets.activity;
+    if (!source) {
+      throw new TrackFileValidationError(
+        'ACTIVITY_NOT_FOUND',
+        'No activity data',
+        { filename: options.filename },
+      );
+    }
+    assertTrackFileConvertible(source, targetFormat);
+    const content = await trackSwap.encodeActivity(source, {
       format: targetFormat,
     });
-    return { content, sourceFormat };
+    let outputDocument: TrackDocument;
+    try {
+      outputDocument = await trackSwap.decode(content, {
+        format: targetFormat,
+      });
+    } catch {
+      throw new TrackFileConversionError(
+        'OUTPUT_INVALID',
+        'Generated file cannot be read as an activity',
+      );
+    }
+    const output = outputDocument.facets.activity;
+    if (!output)
+      throw new TrackFileConversionError(
+        'OUTPUT_INVALID',
+        'Generated file has no activity data',
+      );
+    const health = document.facets.health;
+    const report = assessTrackFileConversion({
+      source,
+      output,
+      sourceFormat,
+      targetFormat,
+      sourceWarningCount: document.diagnostics.warnings.length,
+      outputWarningCount: outputDocument.diagnostics.warnings.length,
+      hasNonActivityData: Boolean(
+        health &&
+        (health.points.length ||
+          health.intervals.length ||
+          health.sessions.length ||
+          health.summaries.length),
+      ),
+    });
+    return { content, sourceFormat, report };
   });
 }
 
@@ -239,19 +295,16 @@ export async function inspectTrackFile(
         softwareVersion: document.metadata.softwareVersion,
       },
       activity:
-        activities.length > 0 || (activity?.routes?.length ?? 0) > 0
+        activities.length > 0 ||
+        (activity?.routes?.length ?? 0) > 0 ||
+        (activity?.points?.length ?? 0) > 0
           ? {
               activityCount: activities.length,
               lapCount: laps.length,
-              recordCount:
-                laps.reduce(
-                  (count, lap) => count + (lap.records?.length ?? 0),
-                  0,
-                ) +
-                (activity?.routes ?? []).reduce(
-                  (count, route) => count + (route.records?.length ?? 0),
-                  0,
-                ),
+              recordCount: trackFileRecords(activity!).length,
+              coordinateCount: trackFileRecords(activity!).filter(
+                hasTrackCoordinates,
+              ).length,
               sports,
               startTime: activities[0]?.startTime,
               totalDistance: activities.reduce(
