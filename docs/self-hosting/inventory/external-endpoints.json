@@ -2006,6 +2006,48 @@
       ]
     },
     {
+      "host": "startupfa.me",
+      "url": "https://startupfa.me/badge?t=small&theme=dark",
+      "references": [
+        {
+          "file": "apps/docs/src/components/Footer.tsx",
+          "line": 165
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "startupfa.me",
+      "url": "https://startupfa.me/badge?t=small&theme=light",
+      "references": [
+        {
+          "file": "apps/docs/src/components/Footer.tsx",
+          "line": 157
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "startupfa.me",
+      "url": "https://startupfa.me/s/trainingloadai?utm_source=www.trainingload.ai",
+      "references": [
+        {
+          "file": "apps/docs/src/components/Footer.tsx",
+          "line": 151
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "stats.g.doubleclick.net",
       "url": "https://stats.g.doubleclick.net",
       "references": [
