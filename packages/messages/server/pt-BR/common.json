@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "Comece o próximo plano a partir do resumo do ciclo “{planTitle}”. Conclusão {completionRate}. Leia o resumo primeiro e depois pergunte sobre metas e restrições."
   },
   "error": {
+    "track_file_output_invalid": "O arquivo convertido não passou na validação e seu download foi bloqueado. Guarde o original e tente outro formato ou entre em contato com o suporte.",
+    "track_file_conversion_service_failed": "O serviço de conversão não concluiu a solicitação. O download não foi iniciado. Guarde o original e tente outro formato ou entre em contato com o suporte.",
+    "track_file_gpx_coordinates_required": "Esta atividade não tem coordenadas GPS utilizáveis e não pode ser convertida em um trajeto GPX. Guarde o FIT original ou tente TCX para uma atividade indoor.",
     "activity_hash_id_cannot_be_empty": "Activity hashId cannot be empty",
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "Ocorreu um erro em nosso sistema. Tente novamente mais tarde.",

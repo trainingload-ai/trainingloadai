@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "基于上一周期《{planTitle}》的总结开启下一份计划。完成率 {completionRate}%。请先读周期总结，再问我目标和约束。"
   },
   "error": {
+    "track_file_output_invalid": "转换结果未通过校验，已阻止下载。请保留原文件，尝试其他格式，或联系技术支持。",
+    "track_file_conversion_service_failed": "转换服务未能完成处理，未启动下载。请保留原文件，尝试其他格式，或联系技术支持。",
+    "track_file_gpx_coordinates_required": "该活动没有可用的 GPS 坐标，无法生成 GPX 轨迹。室内训练请保留原始 FIT 文件，或尝试转换为 TCX。",
     "unsupported_key": "不支持的指标",
     "file_content_empty": "文件内容为空",
     "not_valid_fit_file": "不是有效的 FIT 文件",

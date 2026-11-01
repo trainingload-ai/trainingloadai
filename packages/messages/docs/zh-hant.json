@@ -1,4 +1,33 @@
 {
+  "conversionQuality": {
+    "reference": "參考編號",
+    "noGpsTitle": "此檔案無法轉換為 GPS 軌跡",
+    "noGps": "{total} 筆記錄均沒有可用的 GPS 座標，而 GPX 軌跡必須包含座標。室內訓練請保留原始 FIT 檔案，或嘗試轉換為 TCX。",
+    "inputWarningTitle": "請留意轉換限制",
+    "reviewTitle": "下載前，請確認轉換結果",
+    "reviewBody": "檔案已產生，但以下檢查項目需要你留意。確認這些限制可以接受後，再下載使用。",
+    "downloadedWithWarnings": "已依以下限制下載檔案",
+    "pointsOmitted": "{total} 筆記錄中有 {count} 筆沒有可用的 GPS 座標，將不會包含在 GPX 檔案中。",
+    "metricsNotPreserved": "轉換後未能驗證以下資料已保留：{metrics}。如果需要這些資料，請保留原始檔案。",
+    "sourceWarnings": "來源檔案解析時產生了 {count} 項警告，使用轉換檔案前請複查原始活動。",
+    "outputWarnings": "轉換檔案回讀時產生了 {count} 項警告，匯入或分享前請檢查結果。",
+    "nonActivityDataOmitted": "活動之外的健康記錄不會包含在轉換檔案中。",
+    "downloadAnyway": "接受這些限制並下載",
+    "cancel": "取消下載",
+    "outputInvalid": "轉換結果未通過驗證，已阻止下載，以免提供無法使用的檔案。請保留原始檔案，嘗試其他格式，或聯絡支援並提供下方參考編號。",
+    "serviceFailed": "轉換服務未能完成處理，未啟動下載。請保留原始檔案，嘗試其他格式，或聯絡支援並提供下方參考編號。",
+    "metrics": {
+      "heartRate": "心率",
+      "cadence": "步頻／踏頻",
+      "power": "功率",
+      "altitude": "海拔",
+      "distance": "距離",
+      "speed": "速度",
+      "temperature": "溫度",
+      "runningDynamics": "跑步動態",
+      "swimming": "游泳指標"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - 基於訓練負荷的動態耐力訓練計畫",
     "description": "Trainingload.ai 把跑步、騎行等耐力訓練的計畫、完成情況、訓練負荷和 AI 教練複盤連接起來，並生成需要確認的訓練調整。",

@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "Inizia il piano successivo dal riepilogo del ciclo «{planTitle}». Completamento {completionRate}. Leggi prima il riepilogo, poi chiedimi obiettivi e vincoli."
   },
   "error": {
+    "track_file_output_invalid": "Il file convertito non ha superato la verifica e il download è stato bloccato. Conserva l’originale e prova un altro formato o contatta l’assistenza.",
+    "track_file_conversion_service_failed": "Il servizio di conversione non è riuscito a completare la richiesta. Il download non è stato avviato. Conserva l’originale e prova un altro formato o contatta l’assistenza.",
+    "track_file_gpx_coordinates_required": "Questa attività non contiene coordinate GPS utilizzabili e non può essere convertita in una traccia GPX. Conserva il FIT originale o prova TCX per un’attività indoor.",
     "activity_hash_id_cannot_be_empty": "Activity hashId cannot be empty",
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "Si è verificato un errore nel sistema. Riprova più tardi.",

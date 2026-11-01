@@ -27,8 +27,8 @@ import {
   ToolHowToSection,
   ToolJumpNav,
   ToolPageMain,
-  ToolRelatedLinks,
 } from "@/components/ToolPageLayout";
+import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
 import {
   ToolFileDropzone,
   toolPrimaryActionButtonClass,
@@ -55,6 +55,12 @@ import {
 import { TrackFileInspectionStatus } from "@/components/TrackFileInspectionStatus";
 import { useTrackFileInspection } from "@/hooks/use-track-file-inspection";
 import { DOCS_BROWSER_API_BASE_URL } from "@/lib/docs-api-base-url";
+import {
+  ConversionInputNotice,
+  ConversionReviewNotice,
+} from "@/components/ConversionQualityNotice";
+import { useConversionDownload } from "@/hooks/use-conversion-download";
+import { conversionHasNoGps } from "@/lib/conversion-download";
 type TargetFormat = "gpx" | "fit" | "tcx";
 
 function parseFilenameFromContentDisposition(
@@ -81,7 +87,6 @@ function parseFilenameFromContentDisposition(
 
 export function ConverterClient({ lang }: { lang: string }) {
   const t = useTranslations("converter.page");
-  const tCommon = useTranslations("commonLinks");
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState<TargetFormat>("gpx");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,6 +95,16 @@ export function ConverterClient({ lang }: { lang: string }) {
   const [trainingPlanPromptOpen, setTrainingPlanPromptOpen] = useState(false);
   const { inspection, isInspecting, inspectionError, inspectFile } =
     useTrackFileInspection();
+  const tQuality = useTranslations("conversionQuality");
+  const noGps = conversionHasNoGps(inspection, targetFormat);
+  const {
+    pending,
+    report,
+    reset: resetDownload,
+    acceptResponse,
+    downloadPending,
+    isCurrent,
+  } = useConversionDownload(targetFormat);
 
   const onSubmit = useCallback(async () => {
     const startedAt = performance.now();
@@ -114,6 +129,9 @@ export function ConverterClient({ lang }: { lang: string }) {
       return;
     }
 
+    if (noGps) return;
+    const conversionRequestId = resetDownload();
+
     setError(null);
     setDownloadName(null);
     setIsSubmitting(true);
@@ -137,50 +155,52 @@ export function ConverterClient({ lang }: { lang: string }) {
       if (!res.ok) {
         throw await buildToolRequestError(
           res,
-          t("errors.requestFailed", { status: res.status }),
+          res.status >= 500
+            ? tQuality("serviceFailed")
+            : t("errors.requestFailed", { status: res.status }),
           clientTraceId,
         );
       }
 
-      const blob = await res.blob();
       const headerName = parseFilenameFromContentDisposition(
         res.headers.get("content-disposition"),
       );
       const fallbackName = `${file.name.replace(/\.[^.]+$/, "")}.${targetFormat}`;
       const filename = headerName || fallbackName;
 
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(objectUrl);
-
-      setDownloadName(filename);
-      const successProperties = {
-        action: "convert_file",
-        target_format: targetFormat,
-        tool: "activity_file_converter",
-        ...fileAnalyticsProperties(file),
-      };
-      trackToolEvent("tool_completed", "activity_file_converter", {
-        action: "convert_file",
-        duration_ms: elapsedMilliseconds(startedAt),
-        output_format: targetFormat,
-        ...fileAnalyticsProperties(file),
-      });
-      trackToolEvent("tool_exported", "activity_file_converter", {
-        action: "convert_file",
-        export_format: targetFormat,
-      });
-      trackMarketingEvent("converter_training_plan_prompt_shown", {
-        ...successProperties,
-        filename_extension: targetFormat,
-      });
-      setTrainingPlanPromptOpen(true);
+      await acceptResponse(
+        res,
+        filename,
+        conversionRequestId,
+        (hasWarnings) => {
+          setDownloadName(filename);
+          const successProperties = {
+            action: "convert_file",
+            target_format: targetFormat,
+            tool: "activity_file_converter",
+            ...fileAnalyticsProperties(file),
+          };
+          trackToolEvent("tool_completed", "activity_file_converter", {
+            action: "convert_file",
+            duration_ms: elapsedMilliseconds(startedAt),
+            output_format: targetFormat,
+            ...fileAnalyticsProperties(file),
+          });
+          trackToolEvent("tool_exported", "activity_file_converter", {
+            action: "convert_file",
+            export_format: targetFormat,
+          });
+          if (!hasWarnings) {
+            trackMarketingEvent("converter_training_plan_prompt_shown", {
+              ...successProperties,
+              filename_extension: targetFormat,
+            });
+            setTrainingPlanPromptOpen(true);
+          }
+        },
+      );
     } catch (e) {
+      if (!isCurrent(conversionRequestId)) return;
       const errorInfo = getErrorDebugInfo(e);
       const requestErrorInfo = getToolRequestErrorMeta(e);
       const isFileInputError = isFileInputToolRequestError(e);
@@ -231,7 +251,13 @@ export function ConverterClient({ lang }: { lang: string }) {
         ...analyticsProps,
       });
       if (e instanceof TypeError) {
-        setError(appendErrorReference(t("errors.network"), clientTraceId));
+        setError(
+          appendErrorReference(
+            t("errors.network"),
+            clientTraceId,
+            tQuality("reference"),
+          ),
+        );
         return;
       }
       const message =
@@ -240,11 +266,23 @@ export function ConverterClient({ lang }: { lang: string }) {
         e instanceof ToolRequestError
           ? e.meta.clientTraceId || clientTraceId
           : clientTraceId;
-      setError(appendErrorReference(message, ref));
+      setError(appendErrorReference(message, ref, tQuality("reference")));
     } finally {
-      setIsSubmitting(false);
+      if (isCurrent(conversionRequestId)) setIsSubmitting(false);
     }
-  }, [file, inspectionError, isInspecting, lang, t, targetFormat]);
+  }, [
+    file,
+    inspectionError,
+    isInspecting,
+    lang,
+    t,
+    targetFormat,
+    noGps,
+    resetDownload,
+    acceptResponse,
+    isCurrent,
+    tQuality,
+  ]);
 
   const faqRaw = t.raw("faq");
   const faq = Array.isArray(faqRaw) ? (faqRaw as unknown[]) : [];
@@ -292,9 +330,14 @@ export function ConverterClient({ lang }: { lang: string }) {
               </Label>
               <Select
                 value={targetFormat}
-                onValueChange={(value) =>
-                  setTargetFormat(value as TargetFormat)
-                }
+                onValueChange={(value) => {
+                  resetDownload();
+                  setError(null);
+                  setDownloadName(null);
+                  setTrainingPlanPromptOpen(false);
+                  setIsSubmitting(false);
+                  setTargetFormat(value as TargetFormat);
+                }}
               >
                 <SelectTrigger id="converter-target-format" className="w-full">
                   <SelectValue />
@@ -318,6 +361,8 @@ export function ConverterClient({ lang }: { lang: string }) {
               accept=".gpx,.fit,.tcx"
               trackingTool="activity_file_converter"
               onFileChange={(nextFile) => {
+                resetDownload();
+                setIsSubmitting(false);
                 setFile(nextFile);
                 void inspectFile(nextFile);
                 setError(null);
@@ -339,6 +384,23 @@ export function ConverterClient({ lang }: { lang: string }) {
               error={inspectionError}
             />
 
+            {!report ? (
+              <ConversionInputNotice
+                inspection={inspection}
+                targetFormat={targetFormat}
+              />
+            ) : null}
+            {report ? (
+              <ConversionReviewNotice
+                report={report}
+                awaitingConfirmation={Boolean(pending)}
+                onDownload={downloadPending}
+                onCancel={() => {
+                  resetDownload();
+                }}
+              />
+            ) : null}
+
             <div className="space-y-3 pt-2">
               {error ? (
                 <div
@@ -353,7 +415,11 @@ export function ConverterClient({ lang }: { lang: string }) {
                 <Button
                   type="button"
                   disabled={
-                    isSubmitting || isInspecting || Boolean(inspectionError)
+                    isSubmitting ||
+                    isInspecting ||
+                    Boolean(inspectionError) ||
+                    noGps ||
+                    Boolean(pending)
                   }
                   className={toolPrimaryActionButtonClass}
                   onClick={onSubmit}
@@ -374,7 +440,7 @@ export function ConverterClient({ lang }: { lang: string }) {
               </div>
             </div>
 
-            {downloadName ? (
+            {downloadName && !report ? (
               <div
                 aria-live="polite"
                 className="rounded-compact border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 text-sm text-emerald-700 dark:text-emerald-300"
@@ -422,28 +488,9 @@ export function ConverterClient({ lang }: { lang: string }) {
       <ToolFaqSection title={t("faqTitle")} items={normalizeFaqItems(faq)} />
 
       <div id="related" className="scroll-mt-24">
-        <ToolRelatedLinks
-          title={converterDirectionLinks[0]?.ui.otherToolsTitle ?? ui.related}
-          links={[
-            ...converterDirectionLinks.map((item) => ({
-              href: `${prefix}/${item.slug}`,
-              label: item.ui.linkLabel,
-            })),
-            {
-              href: `${prefix}/fit-file-viewer`,
-              label:
-                converterDirectionLinks[0]?.ui.relatedFitViewer ??
-                tCommon("fitFileViewerAction"),
-            },
-            {
-              href: `${prefix}/fit-course-converter`,
-              label: tCommon("fitCourseConverterAction"),
-            },
-            {
-              href: `${prefix}/tools`,
-              label: tCommon("allToolsAction"),
-            },
-          ]}
+        <ConverterRelatedTools
+          directions={converterDirectionLinks}
+          lang={lang}
         />
       </div>
 

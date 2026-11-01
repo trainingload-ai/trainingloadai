@@ -147,9 +147,9 @@
 .board,
 .explained,
 .modelCard {
-  border: 1px solid var(--hr-line);
+  border: 0;
   border-radius: var(--hr-radius);
-  background: var(--hr-surface);
+  background: var(--secondary);
   padding: clamp(1.15rem, 2vw, 1.5rem);
 }
 
@@ -169,7 +169,6 @@
 .sectionBody,
 .note,
 .hint,
-.faqAnswer,
 .modelCard p {
   color: var(--hr-muted);
   font-size: 0.95rem;
@@ -252,9 +251,10 @@
 
 .scorecard {
   overflow: hidden;
-  border: 1px solid var(--hr-line-strong);
-  border-radius: var(--hr-radius);
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: var(--hr-surface);
+  box-shadow: none;
 }
 
 .scoreHead {
@@ -557,53 +557,6 @@
   margin-top: 0.65rem;
 }
 
-.faqList {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.faqItem {
-  border: 1px solid var(--hr-line);
-  border-radius: var(--hr-radius);
-  background: var(--hr-surface);
-}
-
-.faqItem summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.15rem 1.25rem;
-  font-size: 1.05rem;
-  font-weight: 640;
-  letter-spacing: -0.02em;
-  line-height: 1.35;
-  cursor: pointer;
-}
-
-.faqItem summary::after {
-  color: var(--success);
-  content: "+";
-  font-size: 1.3rem;
-  font-weight: 400;
-  line-height: 1;
-}
-
-.faqItem[open] summary::after {
-  content: "–";
-}
-
-.faqAnswer {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0 1.25rem 1.2rem;
-}
-
-.faqAnswer p {
-  margin: 0;
-}
-
 .relatedGrid {
   display: grid;
   gap: 0.7rem;
@@ -626,9 +579,9 @@
   display: flex;
   align-items: center;
   min-height: 3rem;
-  border: 1px solid var(--hr-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--hr-surface);
+  background: var(--secondary);
   padding: 0.75rem 1rem;
   color: var(--hr-ink);
   font-weight: 620;
@@ -811,10 +764,11 @@
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 6.5rem;
-  border: 2px solid var(--score-frame);
+  border: 0;
   background: #07110f;
   color: var(--score-paper);
-  box-shadow: 8px 8px 0 var(--score-frame);
+  box-shadow: none;
+  border-radius: var(--tl-radius-surface);
 }
 
 :global(.dark) .poster {
@@ -836,17 +790,17 @@
   position: absolute;
   top: -1rem;
   left: 1.3rem;
-  border: 2px solid var(--score-paper);
+  border: 0;
   padding: 0.6rem 0.8rem;
-  background: var(--score-yellow);
-  color: #17201c;
-  box-shadow: 4px 4px 0 var(--score-paper);
+  background: transparent;
+  color: var(--score-paper);
+  box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1;
-  transform: rotate(-1deg);
+  transform: none;
 }
 
 .posterMark {
@@ -1202,24 +1156,17 @@
   font-weight: 550;
   line-height: 1.75;
 }
-.faqAnswer,
-.faqAnswer p,
 .sectionBody,
 .note {
   max-width: none;
-}
-.faqItem summary {
-  cursor: pointer;
-}
-.faqItem summary:focus-visible {
-  outline: 2px solid var(--hr-accent);
-  outline-offset: 3px;
 }
 .relatedLink {
   min-width: 0;
   min-height: 4.5rem;
   align-items: center;
   line-height: 1.65;
+  border: 0;
+  background: var(--secondary);
 }
 .posterActions > :is(a, button),
 .actions > :is(a, button),
@@ -1258,6 +1205,8 @@
   }
   .board {
     padding: 1.15rem;
+    border: 0;
+    background: var(--secondary);
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;

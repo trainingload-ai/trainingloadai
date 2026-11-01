@@ -82,7 +82,7 @@
   gap: 0.5rem;
   height: 40px;
   padding: 0.55rem 0.85rem;
-  border: 1px solid var(--tool-line);
+  border: 0;
   border-radius: var(--tl-radius-control);
   font-size: 0.85rem;
   font-weight: 650;
@@ -90,6 +90,7 @@
   transition:
     background-color 0.15s,
     border-color 0.15s;
+  background: var(--secondary);
 }
 .button:focus-visible {
   outline: 2px solid var(--tool-accent);
@@ -144,9 +145,9 @@
 }
 .card,
 .form {
-  border: 1px solid var(--tool-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--tool-surface);
+  background: var(--secondary);
   padding: 1.25rem;
   min-width: 0;
 }
@@ -169,21 +170,20 @@
 .form :global([data-slot="select-trigger"]) {
   height: 40px;
   border-radius: var(--tl-radius-control);
-  border-color: var(--tool-line);
-  background: var(--tool-canvas);
+  border-color: transparent;
+  background: var(--card);
   box-shadow: none;
 }
 .form :global([data-slot="file-dropzone"]) {
   min-height: 200px;
   padding: 1.5rem 1rem;
-  border-color: var(--tool-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--tool-canvas);
+  background: var(--card);
   color: inherit;
 }
 .form :global([data-slot="file-dropzone"]:hover),
 .form :global([data-slot="file-dropzone"][data-dragging="true"]) {
-  border-color: var(--tool-accent);
   background: color-mix(in srgb, var(--tool-accent) 8%, var(--tool-surface));
 }
 .form :global([data-slot="file-dropzone"]:focus-visible) {
@@ -198,8 +198,8 @@
 .form :global([data-slot="dropzone-action"]) {
   height: 40px;
   border-radius: var(--tl-radius-control);
-  border-color: var(--tool-line);
-  background: var(--tool-surface);
+  border-color: transparent;
+  background: var(--secondary);
   color: inherit;
 }
 .conversionDirection {
@@ -215,12 +215,18 @@
 }
 .faq {
   display: grid;
-  gap: 0.65rem;
+  min-width: 0;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  color: var(--foreground);
+}
+.section > .faq {
+  margin-top: 0;
 }
 .faq details {
-  border: 1px solid var(--tool-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--tool-surface);
+  background: var(--secondary);
   padding: 1rem 1.25rem;
 }
 .faq summary {
@@ -235,22 +241,31 @@
 .faq summary::-webkit-details-marker {
   display: none;
 }
+.faq summary:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: var(--tl-radius-control);
+}
+.faq summary > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .faq summary svg {
-  color: var(--tool-accent);
+  color: var(--brand);
   transition: transform 0.2s;
 }
 .faq details[open] summary svg {
   transform: rotate(45deg);
 }
-.faq summary:focus-visible {
-  outline: 2px solid var(--tool-accent);
-  outline-offset: 5px;
-}
 .answer {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
   margin-top: 1rem;
   line-height: 1.85;
   white-space: pre-line;
-  color: var(--tool-muted);
+  overflow-wrap: anywhere;
+  color: color-mix(in srgb, var(--foreground) 72%, var(--secondary));
 }
 .related {
   display: grid;
@@ -263,9 +278,9 @@
   gap: 1rem;
   min-height: 72px;
   padding: 1rem;
-  border: 1px solid var(--tool-line);
+  border: 0;
   border-radius: var(--tl-radius-control);
-  background: var(--tool-surface);
+  background: var(--secondary);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.6;

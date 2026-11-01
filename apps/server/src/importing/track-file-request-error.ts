@@ -1,5 +1,10 @@
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { TrackSwapError } from 'trackswap';
+import { TrackFileConversionError } from './track-file-conversion';
 import {
   TrackFileValidationError,
   type TrackFileFormat,
@@ -12,6 +17,7 @@ export const TRACK_FILE_REQUEST_ERROR = {
   FORMAT_MISMATCH: 'TRACK_FILE_FORMAT_MISMATCH',
   DECODE_FAILED: 'TRACK_FILE_DECODE_FAILED',
   ACTIVITY_REQUIRED: 'TRACK_FILE_ACTIVITY_REQUIRED',
+  GPX_COORDINATES_REQUIRED: 'TRACK_FILE_GPX_COORDINATES_REQUIRED',
   TCX_TIMESTAMPS_REQUIRED: 'TRACK_FILE_TCX_TIMESTAMPS_REQUIRED',
   TCX_LAPS_REQUIRED: 'TRACK_FILE_TCX_LAPS_REQUIRED',
   CONVERSION_FAILED: 'TRACK_FILE_CONVERSION_FAILED',
@@ -69,6 +75,10 @@ const ERROR_DEFINITIONS: Record<TrackFileRequestErrorCode, ErrorDefinition> = {
   TRACK_FILE_ACTIVITY_REQUIRED: {
     messageKey: 'common.error.track_file_activity_required',
     suggestedAction: 'SELECT_ACTIVITY_FILE',
+  },
+  TRACK_FILE_GPX_COORDINATES_REQUIRED: {
+    messageKey: 'common.error.track_file_gpx_coordinates_required',
+    suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
   },
   TRACK_FILE_TCX_TIMESTAMPS_REQUIRED: {
     messageKey: 'common.error.track_file_tcx_timestamps_required',
@@ -154,13 +164,47 @@ type TrackFileMappingContext = {
 };
 
 /**
- * 仅映射能明确归因于上传文件或请求选择的 TrackSwap 错误。
- * 返回 null 表示异常来源不确定，应继续作为服务端异常处理。
+ * 将已识别的输入问题与转换器异常分别映射为稳定的 4xx / 5xx 响应。
+ * 返回 null 表示异常来源不确定，交由通用服务端异常处理。
  */
 export function mapTrackFileRequestError(
   error: unknown,
   context: TrackFileMappingContext = {},
-): BadRequestException | null {
+): HttpException | null {
+  if (error instanceof TrackFileConversionError) {
+    const data = {
+      filename: context.filename,
+      targetFormat: context.targetFormat,
+    };
+    if (error.code === 'GPX_COORDINATES_REQUIRED') {
+      return trackFileBadRequest(
+        TRACK_FILE_REQUEST_ERROR.GPX_COORDINATES_REQUIRED,
+        { data },
+      );
+    }
+    if (error.code === 'RECORDS_REQUIRED') {
+      return trackFileBadRequest(TRACK_FILE_REQUEST_ERROR.RECORDS_REQUIRED, {
+        data,
+      });
+    }
+    if (error.code === 'TIMESTAMPS_REQUIRED') {
+      return trackFileBadRequest(
+        context.targetFormat === 'tcx'
+          ? TRACK_FILE_REQUEST_ERROR.TCX_TIMESTAMPS_REQUIRED
+          : TRACK_FILE_REQUEST_ERROR.TIMESTAMPS_REQUIRED,
+        { data },
+      );
+    }
+    return new InternalServerErrorException({
+      code: 'TRACK_FILE_OUTPUT_INVALID',
+      data: {
+        category: 'CONVERSION',
+        origin: 'SERVICE',
+        retryable: false,
+        suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
+      },
+    });
+  }
   if (error instanceof TrackFileValidationError) {
     if (error.code === 'FORMAT_MISMATCH') {
       const expectedFormat =
@@ -227,8 +271,14 @@ export function mapTrackFileRequestError(
         data: commonData,
       });
     }
-    return trackFileBadRequest(TRACK_FILE_REQUEST_ERROR.CONVERSION_FAILED, {
-      data: commonData,
+    return new InternalServerErrorException({
+      code: 'TRACK_FILE_CONVERSION_FAILED',
+      data: {
+        category: 'CONVERSION',
+        origin: 'SERVICE',
+        retryable: false,
+        suggestedAction: 'TRY_ANOTHER_OUTPUT_FORMAT',
+      },
     });
   }
 

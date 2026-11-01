@@ -174,9 +174,9 @@
 
 .board {
   min-width: 0;
-  border: 1px solid var(--z2-line);
+  border: 0;
   border-radius: var(--z2-radius);
-  background: var(--z2-surface);
+  background: var(--secondary);
   padding: clamp(1.35rem, 2.4vw, 1.85rem);
   scroll-margin-top: 8rem;
 }
@@ -192,7 +192,6 @@
 .sectionBody,
 .note,
 .detailBody,
-.faqAnswer,
 .hint {
   color: var(--z2-muted);
   font-size: 1rem;
@@ -329,11 +328,11 @@
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
-  border: 2px solid var(--score-frame);
-  border-radius: 0;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: #07110f;
   color: var(--score-paper);
-  box-shadow: 8px 8px 0 var(--score-frame);
+  box-shadow: none;
 }
 
 :global(.dark) .poster {
@@ -361,18 +360,18 @@
   position: absolute;
   top: -1rem;
   left: 1.3rem;
-  border: 2px solid var(--score-paper);
+  border: 0;
   padding: 0.6rem 0.8rem;
-  background: var(--score-yellow);
-  color: #17201c;
-  box-shadow: 4px 4px 0 var(--score-paper);
+  background: transparent;
+  color: var(--score-paper);
+  box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1.2;
   text-wrap: balance;
-  transform: rotate(-1deg);
+  transform: none;
 }
 
 .posterMark {
@@ -734,58 +733,6 @@
   text-underline-offset: 3px;
 }
 
-.faqList {
-  display: grid;
-  gap: 0.7rem;
-  margin-top: 1.35rem;
-}
-
-.faqItem {
-  border: 1px solid var(--z2-line);
-  border-radius: var(--tl-radius-surface);
-  background: var(--z2-surface);
-}
-
-.faqItem summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.2rem 1.3rem;
-  cursor: pointer;
-  font-size: 1.05rem;
-  font-weight: 640;
-  letter-spacing: -0.02em;
-  line-height: 1.35;
-  list-style: none;
-}
-
-.faqItem summary::-webkit-details-marker {
-  display: none;
-}
-
-.faqItem summary::after {
-  color: var(--success);
-  content: "+";
-  font-size: 1.4rem;
-  font-weight: 400;
-  line-height: 1;
-}
-
-.faqItem[open] summary::after {
-  content: "−";
-}
-
-.faqAnswer {
-  display: grid;
-  gap: 0.9rem;
-  padding: 0 1.3rem 1.3rem;
-}
-
-.faqAnswer p {
-  margin: 0;
-}
-
 .relatedGrid {
   display: grid;
   gap: 0.7rem;
@@ -958,6 +905,11 @@
     max-width: 14rem;
     font-size: 0.68rem;
     text-wrap: balance;
+    border: 0;
+    box-shadow: none;
+    transform: none;
+    background: transparent;
+    color: var(--score-paper);
   }
 }
 
@@ -1048,24 +1000,17 @@
   font-weight: 550;
   line-height: 1.75;
 }
-.faqAnswer,
-.faqAnswer p,
 .sectionBody,
 .note {
   max-width: none;
-}
-.faqItem summary {
-  cursor: pointer;
-}
-.faqItem summary:focus-visible {
-  outline: 2px solid var(--z2-accent);
-  outline-offset: 3px;
 }
 .relatedLink {
   min-width: 0;
   min-height: 4.5rem;
   align-items: center;
   line-height: 1.65;
+  border: 0;
+  background: var(--secondary);
 }
 .posterActions > :is(a, button),
 .actions > :is(a, button),
@@ -1104,6 +1049,8 @@
   }
   .board {
     padding: 1.15rem;
+    border: 0;
+    background: var(--secondary);
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;

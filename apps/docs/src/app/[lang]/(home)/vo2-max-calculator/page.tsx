@@ -1,3 +1,4 @@
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -534,17 +535,18 @@ export default async function Vo2MaxCalculatorPage({
             <p className={styles.articleBody}>
               {tPage("education.calculation")}
             </p>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {testKeys.map((key) => (
-                <details
+                <ToolFaqItem
                   key={key}
-                  className={styles.faqItem}
                   open={key === "cooper"}
+                  question={
+                    <>
+                      <span>{tPage(`tests.${key}.title`)}</span>
+                      <span className={styles.faqIcon} aria-hidden />
+                    </>
+                  }
                 >
-                  <summary>
-                    <span>{tPage(`tests.${key}.title`)}</span>
-                    <span className={styles.faqIcon} aria-hidden />
-                  </summary>
                   <div className={styles.testInstructions}>
                     <p>
                       <strong>
@@ -585,9 +587,9 @@ export default async function Vo2MaxCalculatorPage({
                       [{methodSources[key].number}]
                     </a>
                   </p>
-                </details>
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </Section>
 
           {methodRows.length > 0 ? (
@@ -658,23 +660,24 @@ export default async function Vo2MaxCalculatorPage({
             title={tPage("education.differences.title")}
             description={tPage("education.differences.intro")}
           >
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {differenceFaq.map((item, index) => (
-                <details
+                <ToolFaqItem
                   key={item.question}
-                  className={styles.faqItem}
                   open={index === 0}
+                  question={
+                    <>
+                      {item.question}
+                      <span className={styles.faqIcon} aria-hidden />
+                    </>
+                  }
                 >
-                  <summary>
-                    {item.question}
-                    <span className={styles.faqIcon} aria-hidden />
-                  </summary>
                   {item.answer.split("\n\n").map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
-                </details>
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
             <p className={styles.articleBody}>
               {tPage("education.differences.sources")}{" "}
               <a href="#vo2-source-garmin" className={styles.inlineLink}>
@@ -837,19 +840,23 @@ export default async function Vo2MaxCalculatorPage({
               title={tPage("faq.title")}
               description={tPage("faq.subtitle")}
             >
-              <div className={styles.faqList}>
+              <ToolFaqList>
                 {faqItems.map((item) => (
-                  <details key={item.name} className={styles.faqItem}>
-                    <summary>
-                      {item.name}
-                      <span className={styles.faqIcon} aria-hidden />
-                    </summary>
+                  <ToolFaqItem
+                    key={item.name}
+                    question={
+                      <>
+                        {item.name}
+                        <span className={styles.faqIcon} aria-hidden />
+                      </>
+                    }
+                  >
                     {item.text.split("\n\n").map((paragraph) => (
                       <p key={paragraph}>{paragraph}</p>
                     ))}
-                  </details>
+                  </ToolFaqItem>
                 ))}
-              </div>
+              </ToolFaqList>
             </Section>
           ) : null}
           <Vo2FooterCta />

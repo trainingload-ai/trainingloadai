@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "Start the next plan from the “{planTitle}” cycle summary. Completion {completionRate}. Read the summary first, then ask me about goals and constraints."
   },
   "error": {
+    "track_file_output_invalid": "The converted file failed validation, so its download was blocked. Keep the original file and try another format, or contact support.",
+    "track_file_conversion_service_failed": "The conversion service could not complete this request. No download was started. Keep the original file and try another format, or contact support.",
+    "track_file_gpx_coordinates_required": "This activity has no usable GPS coordinates, so it cannot be converted to a GPX track. Keep the original FIT file or try TCX for an indoor activity.",
     "unsupported_key": "Unsupported metric",
     "file_content_empty": "File content is empty",
     "not_valid_fit_file": "This is not a valid FIT file",

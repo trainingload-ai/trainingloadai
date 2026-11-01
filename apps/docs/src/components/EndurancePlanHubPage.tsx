@@ -14,6 +14,7 @@ import {
   Waves,
 } from "lucide-react";
 import { TrackedLink } from "@/components/TrackedLink";
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { localePrefix } from "@/lib/locale-url";
 import {
   breadcrumbSchema,
@@ -296,7 +297,7 @@ export function EndurancePlanHubPage({
 
       <section
         id="phases"
-        className="scroll-mt-24 border-y border-neutral-200/70 bg-white/70 px-4 py-12 md:px-6 md:py-16 dark:border-white/10 dark:bg-card/70"
+        className="scroll-mt-24 bg-background px-4 py-12 md:px-6 md:py-16"
       >
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
@@ -493,24 +494,17 @@ export function EndurancePlanHubPage({
               {page.faqSubtitle}
             </p>
           </div>
-          <div className="mt-8 divide-y divide-neutral-200 rounded-compact border border-neutral-200 bg-card px-5 dark:divide-white/10 dark:border-white/10 dark:bg-white/[0.04] md:px-7">
+          <ToolFaqList>
             {page.faq.map(([question, answer], index) => (
-              <details key={question} className="group py-5" open={index === 0}>
-                <summary className="flex cursor-pointer list-none items-start justify-between gap-5 text-lg font-black marker:content-none">
-                  <span>{question}</span>
-                  <span
-                    aria-hidden="true"
-                    className="mt-0.5 text-2xl font-light leading-none text-emerald-600 transition group-open:rotate-45 dark:text-emerald-300"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 max-w-4xl pr-10 text-sm leading-7 text-neutral-700 dark:text-neutral-300">
-                  {answer}
-                </p>
-              </details>
+              <ToolFaqItem
+                key={question}
+                question={question}
+                open={index === 0}
+              >
+                {answer}
+              </ToolFaqItem>
             ))}
-          </div>
+          </ToolFaqList>
         </div>
       </section>
 

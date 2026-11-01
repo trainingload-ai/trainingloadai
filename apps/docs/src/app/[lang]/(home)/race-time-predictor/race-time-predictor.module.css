@@ -153,17 +153,16 @@
 .footerCtaButton:focus-visible,
 .primaryAction:focus-visible,
 .relatedLink:focus-visible,
-.choice:focus-visible,
-.faqItem summary:focus-visible {
+.choice:focus-visible {
   outline: 2px solid var(--rtp-accent);
   outline-offset: 3px;
 }
 
 .board {
   min-width: 0;
-  border: 1px solid var(--rtp-line);
+  border: 0;
   border-radius: var(--rtp-radius);
-  background: var(--rtp-surface);
+  background: var(--secondary);
   padding: clamp(1.15rem, 2vw, 1.5rem);
   scroll-margin-top: 6.5rem;
 }
@@ -273,11 +272,11 @@
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
-  border: 2px solid var(--score-frame);
-  border-radius: 0;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: #07110f;
   color: var(--score-paper);
-  box-shadow: 8px 8px 0 var(--score-frame);
+  box-shadow: none;
 }
 
 :global(.dark) .poster {
@@ -305,17 +304,17 @@
   position: absolute;
   top: -1rem;
   left: 1.3rem;
-  border: 2px solid var(--score-paper);
+  border: 0;
   padding: 0.6rem 0.8rem;
-  background: var(--score-yellow);
-  color: #17201c;
-  box-shadow: 4px 4px 0 var(--score-paper);
+  background: transparent;
+  color: var(--score-paper);
+  box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1;
-  transform: rotate(-1deg);
+  transform: none;
 }
 
 .posterMark {
@@ -685,8 +684,7 @@ ol.educationList {
 }
 
 .sectionBody,
-.note,
-.faqAnswer {
+.note {
   color: var(--rtp-muted);
   font-size: 1rem;
   line-height: 1.7;
@@ -746,36 +744,6 @@ ol.educationList {
   font-weight: 650;
 }
 
-.faqList {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.faqItem {
-  border: 1px solid var(--rtp-line);
-  border-radius: var(--tl-radius-surface);
-  background: var(--rtp-surface);
-}
-
-.faqItem summary {
-  padding: 1rem 1.15rem;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.faqAnswer {
-  display: grid;
-  gap: 0.9rem;
-  padding: 0 1.15rem 1.15rem;
-  color: var(--rtp-ink);
-  font-size: 1.02rem;
-  line-height: 1.75;
-}
-
-.faqAnswer p {
-  margin: 0;
-}
-
 .relatedGrid {
   display: grid;
   gap: 0.7rem;
@@ -792,9 +760,9 @@ ol.educationList {
 .relatedLink {
   display: flex;
   justify-content: flex-start;
-  border: 1px solid var(--rtp-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--rtp-surface);
+  background: var(--secondary);
   padding: 0.9rem 1rem;
 }
 
@@ -967,32 +935,6 @@ ol.educationList {
 
 .posterWatts[data-wide="true"] {
   font-size: clamp(2.4rem, 6vw, 4.2rem);
-}
-
-.faqItem summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  list-style: none;
-}
-
-.faqItem summary::-webkit-details-marker {
-  display: none;
-}
-
-.faqItem summary::after {
-  flex: 0 0 1rem;
-  color: var(--success);
-  content: "+";
-  font-size: 1.4rem;
-  font-weight: 400;
-  line-height: 1;
-  text-align: center;
-}
-
-.faqItem[open] summary::after {
-  content: "–";
 }
 
 @media (min-width: 720px) {
@@ -1204,24 +1146,17 @@ ol.educationList {
   font-weight: 550;
   line-height: 1.75;
 }
-.faqAnswer,
-.faqAnswer p,
 .sectionBody,
 .note {
   max-width: none;
-}
-.faqItem summary {
-  cursor: pointer;
-}
-.faqItem summary:focus-visible {
-  outline: 2px solid var(--rtp-accent);
-  outline-offset: 3px;
 }
 .relatedLink {
   min-width: 0;
   min-height: 4.5rem;
   align-items: center;
   line-height: 1.65;
+  border: 0;
+  background: var(--secondary);
 }
 .posterActions > :is(a, button),
 .actions > :is(a, button),
@@ -1260,6 +1195,8 @@ ol.educationList {
   }
   .board {
     padding: 1.15rem;
+    border: 0;
+    background: var(--secondary);
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;

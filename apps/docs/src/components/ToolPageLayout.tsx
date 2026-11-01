@@ -1,8 +1,12 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { ArrowRight, Plus } from "lucide-react";
 import styles from "./calculators/tool-page.module.css";
 import { TrackedLink } from "@/components/TrackedLink";
 import { cn } from "@/lib/utils";
+import {
+  ToolCatalogCard,
+  type ToolCatalogCardProps,
+} from "@/components/ToolCatalogCard";
 
 export type ToolJumpLink = {
   href: string;
@@ -184,18 +188,41 @@ export function ToolFaqSection({
 
   return (
     <ToolSection id={id} title={title}>
-      <div className={styles.faq}>
+      <ToolFaqList>
         {items.map((item, idx) => (
-          <details key={`${idx}-${item.question}`}>
-            <summary>
-              <span>{item.question}</span>
-              <Plus className="size-5 shrink-0" aria-hidden />
-            </summary>
-            <div className={styles.answer}>{item.answer}</div>
-          </details>
+          <ToolFaqItem key={`${idx}-${item.question}`} question={item.question}>
+            {item.answer}
+          </ToolFaqItem>
         ))}
-      </div>
+      </ToolFaqList>
     </ToolSection>
+  );
+}
+
+export function ToolFaqList({ children }: { children: ReactNode }) {
+  return (
+    <div className={styles.faq} data-slot="tool-faq-list">
+      {children}
+    </div>
+  );
+}
+
+export function ToolFaqItem({
+  question,
+  children,
+  ...props
+}: Omit<ComponentProps<"details">, "children"> & {
+  question: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <details {...props} data-slot="tool-faq-item">
+      <summary>
+        <span>{question}</span>
+        <Plus className="size-5 shrink-0" aria-hidden />
+      </summary>
+      <div className={styles.answer}>{children}</div>
+    </details>
   );
 }
 
@@ -229,5 +256,65 @@ export function ToolRelatedLinks({
         ))}
       </div>
     </ToolSection>
+  );
+}
+
+export function ToolRelatedCards({
+  id,
+  title,
+  items,
+  more,
+}: {
+  id?: string;
+  title: string;
+  items: ToolCatalogCardProps[];
+  more?: ToolRelatedLink;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      className={cn(
+        styles.bleed,
+        "bg-secondary/55 px-4 py-12 dark:bg-background md:px-6 md:py-16",
+      )}
+    >
+      <div className={styles.shell}>
+        <section id={id} className={styles.section}>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2 className={styles.sectionTitle}>{title}</h2>
+            {more ? (
+              <TrackedLink
+                href={more.href}
+                eventName="related_tool_clicked"
+                eventProperties={{
+                  href: more.href,
+                  label: more.label,
+                  location: "tool_related_links",
+                }}
+                className="inline-flex min-h-9 items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              >
+                {more.label}
+                <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+              </TrackedLink>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {items.map((item) => (
+              <ToolCatalogCard
+                key={item.href}
+                {...item}
+                eventName="related_tool_clicked"
+                eventProperties={{
+                  href: item.href,
+                  label: item.title,
+                  location: "tool_related_links",
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

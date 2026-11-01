@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "Starte den nächsten Plan auf Basis der Zusammenfassung von „{planTitle}“. Abschluss {completionRate}. Lies zuerst die Zusammenfassung, dann frage mich nach Zielen und Rahmenbedingungen."
   },
   "error": {
+    "track_file_output_invalid": "Die konvertierte Datei hat die Prüfung nicht bestanden. Der Download wurde blockiert. Behalte die Originaldatei und versuche ein anderes Format oder kontaktiere den Support.",
+    "track_file_conversion_service_failed": "Der Konvertierungsdienst konnte die Anfrage nicht abschließen. Es wurde kein Download gestartet. Behalte die Originaldatei und versuche ein anderes Format oder kontaktiere den Support.",
+    "track_file_gpx_coordinates_required": "Diese Aktivität enthält keine nutzbaren GPS-Koordinaten und kann daher nicht in eine GPX-Strecke umgewandelt werden. Behalte die ursprüngliche FIT-Datei oder versuche TCX für ein Indoor-Training.",
     "activity_hash_id_cannot_be_empty": "Activity hashId cannot be empty",
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuche es später erneut.",

@@ -34,7 +34,7 @@ describe("VDOT calculator page source", () => {
     expect(page).toContain("<h1");
     expect(page.indexOf("<h1")).toBe(page.lastIndexOf("<h1"));
     expect(page).toContain("faqItems");
-    expect(page).toContain("<details");
+    expect(page).toContain("<ToolFaqItem");
     expect(page).toContain("method.rows");
     expect(page).toContain("methods={methods}");
     expect(page).toContain("relatedMore");

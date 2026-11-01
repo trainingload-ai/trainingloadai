@@ -64,6 +64,7 @@ describe("docs public API proxy", () => {
           "content-type": "text/plain",
           cookie: "must-not-forward=1",
           "x-client-trace-id": "trace-1",
+          "x-lang": "fr",
         },
       }),
       { params: Promise.resolve({ path: ["public", "convert"] }) },
@@ -80,6 +81,7 @@ describe("docs public API proxy", () => {
     expect(url.toString()).toBe("http://server:3001/public/convert?format=fit");
     const headers = new Headers(init.headers);
     expect(headers.get("x-client-trace-id")).toBe("trace-1");
+    expect(headers.get("x-lang")).toBe("fr");
     expect(headers.get("cookie")).toBeNull();
   });
 

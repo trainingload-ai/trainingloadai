@@ -32,6 +32,9 @@
     "cycleNextPlanPrompt": "이전 주기 「{planTitle}」 요약을 바탕으로 다음 계획을 시작합니다. 완료율 {completionRate}%. 먼저 요약을 읽고, 그다음 목표와 제약을 물어보세요."
   },
   "error": {
+    "track_file_output_invalid": "변환 결과가 검증을 통과하지 못해 다운로드를 차단했습니다. 원본 파일을 보관하고 다른 형식을 시도하거나 지원팀에 문의하세요.",
+    "track_file_conversion_service_failed": "변환 서비스가 처리를 완료하지 못했으며 다운로드가 시작되지 않았습니다. 원본 파일을 보관하고 다른 형식을 시도하거나 지원팀에 문의하세요.",
+    "track_file_gpx_coordinates_required": "이 활동에는 사용 가능한 GPS 좌표가 없어 GPX 경로로 변환할 수 없습니다. 실내 운동은 원본 FIT 파일을 보관하거나 TCX로 변환해 보세요.",
     "activity_hash_id_cannot_be_empty": "Activity hashId cannot be empty",
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "시스템에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",

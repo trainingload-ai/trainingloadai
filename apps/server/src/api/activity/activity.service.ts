@@ -19,6 +19,11 @@ import type {
   ActivityType,
   FileType,
 } from 'trackswap';
+import type {
+  TrackFileConversionReport,
+  TrackFileConversionResult,
+} from '@shared/track-file-contract';
+import { TrackFileConversionError } from '@/importing/track-file-conversion';
 import JSZip from 'jszip';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
@@ -603,6 +608,7 @@ export class ActivityService {
     filename: string;
     content: Buffer;
     sourceFormats: TrackFileFormat[];
+    report: TrackFileConversionReport;
   }> {
     let currentFilename: string | undefined;
     try {
@@ -614,6 +620,7 @@ export class ActivityService {
       const results: Array<{
         target: Buffer;
         sourceFormat: TrackFileFormat;
+        report: TrackFileConversionResult;
       }> = [];
       for (const file of files) {
         currentFilename = file.originalname;
@@ -624,9 +631,27 @@ export class ActivityService {
         results.push({
           target: converted.content,
           sourceFormat: converted.sourceFormat,
+          report: converted.report,
         });
       }
       const sourceFormats = results.map((result) => result.sourceFormat);
+      const report: TrackFileConversionReport = {
+        version: 1,
+        targetFormat: targetType,
+        files: results.map((result) => result.report),
+      };
+      const warningCodes = [
+        ...new Set(
+          report.files.flatMap((file) =>
+            file.warnings.map((warning) => warning.code),
+          ),
+        ),
+      ];
+      if (warningCodes.length > 0) {
+        this.logger.warn(
+          `[文件转换] target=${targetType} files=${files.length} warnings=${warningCodes.join(',')}`,
+        );
+      }
       if (results.length === 1) {
         const { target } = results[0];
         const filename = `convert_${dayjs().valueOf()}.${targetType}`;
@@ -635,6 +660,7 @@ export class ActivityService {
           filename,
           content: target,
           sourceFormats,
+          report,
         };
       }
       // 多文件 → zip
@@ -653,10 +679,19 @@ export class ActivityService {
         filename: zipFilename,
         content: zipContent,
         sourceFormats,
+        report,
       };
     } catch (e) {
       if (e instanceof HttpException) {
         throw e;
+      }
+      if (
+        e instanceof TrackFileConversionError &&
+        e.code === 'OUTPUT_INVALID'
+      ) {
+        this.logger.error(
+          `[文件转换] TRACK_FILE_OUTPUT_INVALID target=${targetType} reason=${e.reason}`,
+        );
       }
       const fileError = mapTrackFileRequestError(e, {
         expectedFormat: expectedSourceType,

@@ -21,6 +21,9 @@
     "cycleNextPlanPrompt": "前のサイクル「{planTitle}」のまとめから次のプランを開始します。完了率 {completionRate}%。まずまとめを読み、その後目標と制約を聞いてください。"
   },
   "error": {
+    "track_file_output_invalid": "変換結果が検証に合格しなかったため、ダウンロードを停止しました。元のファイルを保存し、別の形式を試すか、サポートへお問い合わせください。",
+    "track_file_conversion_service_failed": "変換サービスで処理を完了できず、ダウンロードは開始されませんでした。元のファイルを保存し、別の形式を試すか、サポートへお問い合わせください。",
+    "track_file_gpx_coordinates_required": "このアクティビティには有効な GPS 座標がないため、GPX 軌跡に変換できません。屋内トレーニングでは元の FIT ファイルを保存するか、TCX への変換をお試しください。",
     "internal": "システムで問題が発生しました。しばらくしてからもう一度お試しください。",
     "request_failed": "リクエストに失敗しました",
     "payload_too_large": "アップロードしたファイルが大きすぎます。",

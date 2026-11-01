@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { AlertCircle, ArrowRight, Download, Loader2 } from "lucide-react";
-import { TrackedLink } from "@/components/TrackedLink";
-import {
-  groupRelatedConverterDirections,
-  type ConverterDirection,
-} from "@/lib/converter-directions";
+import type { ConverterDirection } from "@/lib/converter-directions";
+import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
 import { withLocalePath } from "@/lib/locale-url";
 import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
@@ -44,6 +42,12 @@ import {
 import { captureToolFailure } from "@/lib/tool-sentry";
 import { elapsedMilliseconds, trackToolEvent } from "@/lib/tool-analytics";
 import { DOCS_BROWSER_API_BASE_URL } from "@/lib/docs-api-base-url";
+import {
+  ConversionInputNotice,
+  ConversionReviewNotice,
+} from "@/components/ConversionQualityNotice";
+import { useConversionDownload } from "@/hooks/use-conversion-download";
+import { conversionHasNoGps } from "@/lib/conversion-download";
 
 function parseFilenameFromContentDisposition(
   value: string | null,
@@ -80,6 +84,16 @@ export function ConverterDirectionClient({
   const [trainingPlanPromptOpen, setTrainingPlanPromptOpen] = useState(false);
   const { inspection, isInspecting, inspectionError, inspectFile } =
     useTrackFileInspection();
+  const tQuality = useTranslations("conversionQuality");
+  const noGps = conversionHasNoGps(inspection, direction.target);
+  const {
+    pending,
+    report,
+    reset: resetDownload,
+    acceptResponse,
+    downloadPending,
+    isCurrent,
+  } = useConversionDownload(direction.target);
 
   const sourceInfo = direction.sourceInfo;
   const targetInfo = direction.targetInfo;
@@ -119,6 +133,9 @@ export function ConverterDirectionClient({
       return;
     }
 
+    if (noGps) return;
+    const conversionRequestId = resetDownload();
+
     setError(null);
     setDownloadName(null);
     setIsSubmitting(true);
@@ -143,53 +160,55 @@ export function ConverterDirectionClient({
       if (!res.ok) {
         throw await buildToolRequestError(
           res,
-          ui.requestFailed.replace("{status}", String(res.status)),
+          res.status >= 500
+            ? tQuality("serviceFailed")
+            : ui.requestFailed.replace("{status}", String(res.status)),
           clientTraceId,
         );
       }
 
-      const blob = await res.blob();
       const headerName = parseFilenameFromContentDisposition(
         res.headers.get("content-disposition"),
       );
       const fallbackName = `${file.name.replace(/\.[^.]+$/, "")}.${direction.target}`;
       const filename = headerName || fallbackName;
 
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(objectUrl);
-
-      setDownloadName(filename);
-      const successProperties = {
-        action: "convert_file",
-        conversion: direction.slug,
-        source_format: direction.source,
-        target_format: direction.target,
-        tool: "activity_file_direction_converter",
-        ...fileAnalyticsProperties(file),
-      };
-      trackToolEvent("tool_completed", toolId, {
-        action: "convert_file",
-        duration_ms: elapsedMilliseconds(startedAt),
-        source_format: direction.source,
-        output_format: direction.target,
-        ...fileAnalyticsProperties(file),
-      });
-      trackToolEvent("tool_exported", toolId, {
-        action: "convert_file",
-        export_format: direction.target,
-      });
-      trackMarketingEvent("converter_training_plan_prompt_shown", {
-        ...successProperties,
-        filename_extension: direction.target,
-      });
-      setTrainingPlanPromptOpen(true);
+      await acceptResponse(
+        res,
+        filename,
+        conversionRequestId,
+        (hasWarnings) => {
+          setDownloadName(filename);
+          const successProperties = {
+            action: "convert_file",
+            conversion: direction.slug,
+            source_format: direction.source,
+            target_format: direction.target,
+            tool: "activity_file_direction_converter",
+            ...fileAnalyticsProperties(file),
+          };
+          trackToolEvent("tool_completed", toolId, {
+            action: "convert_file",
+            duration_ms: elapsedMilliseconds(startedAt),
+            source_format: direction.source,
+            output_format: direction.target,
+            ...fileAnalyticsProperties(file),
+          });
+          trackToolEvent("tool_exported", toolId, {
+            action: "convert_file",
+            export_format: direction.target,
+          });
+          if (!hasWarnings) {
+            trackMarketingEvent("converter_training_plan_prompt_shown", {
+              ...successProperties,
+              filename_extension: direction.target,
+            });
+            setTrainingPlanPromptOpen(true);
+          }
+        },
+      );
     } catch (e) {
+      if (!isCurrent(conversionRequestId)) return;
       const errorInfo = getErrorDebugInfo(e);
       const requestErrorInfo = getToolRequestErrorMeta(e);
       const isFileInputError = isFileInputToolRequestError(e);
@@ -253,11 +272,24 @@ export function ConverterDirectionClient({
         e instanceof ToolRequestError
           ? e.meta.clientTraceId || clientTraceId
           : clientTraceId;
-      setError(appendErrorReference(message, ref));
+      setError(appendErrorReference(message, ref, tQuality("reference")));
     } finally {
-      setIsSubmitting(false);
+      if (isCurrent(conversionRequestId)) setIsSubmitting(false);
     }
-  }, [direction, file, inspectionError, isInspecting, lang, toolId, ui]);
+  }, [
+    direction,
+    file,
+    inspectionError,
+    isInspecting,
+    lang,
+    toolId,
+    ui,
+    noGps,
+    resetDownload,
+    acceptResponse,
+    isCurrent,
+    tQuality,
+  ]);
 
   return (
     <ToolPageMain>
@@ -325,6 +357,8 @@ export function ConverterDirectionClient({
                     : undefined
                 }
                 onFileChange={(nextFile) => {
+                  resetDownload();
+                  setIsSubmitting(false);
                   setFile(nextFile);
                   setError(null);
                   setDownloadName(null);
@@ -344,6 +378,23 @@ export function ConverterDirectionClient({
                 error={inspectionError}
               />
 
+              {!report ? (
+                <ConversionInputNotice
+                  inspection={inspection}
+                  targetFormat={direction.target}
+                />
+              ) : null}
+              {report ? (
+                <ConversionReviewNotice
+                  report={report}
+                  awaitingConfirmation={Boolean(pending)}
+                  onDownload={downloadPending}
+                  onCancel={() => {
+                    resetDownload();
+                  }}
+                />
+              ) : null}
+
               <div className="space-y-3 pt-2">
                 {error ? (
                   <div
@@ -359,7 +410,11 @@ export function ConverterDirectionClient({
                   <Button
                     type="button"
                     disabled={
-                      isSubmitting || isInspecting || Boolean(inspectionError)
+                      isSubmitting ||
+                      isInspecting ||
+                      Boolean(inspectionError) ||
+                      noGps ||
+                      Boolean(pending)
                     }
                     className={toolPrimaryActionButtonClass}
                     onClick={onSubmit}
@@ -380,7 +435,7 @@ export function ConverterDirectionClient({
                 </div>
               </div>
 
-              {downloadName ? (
+              {downloadName && !report ? (
                 <div
                   aria-live="polite"
                   className="rounded-compact border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
@@ -389,23 +444,20 @@ export function ConverterDirectionClient({
                 </div>
               ) : null}
             </div>
+            <p className="text-center text-xs leading-5 text-muted-foreground">
+              {ui.feedbackTitle}{" "}
+              <a
+                href="mailto:support@trainingload.ai"
+                className="inline-block py-0.5 font-medium underline underline-offset-4 transition-colors hover:text-foreground focus-visible:rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              >
+                support@trainingload.ai
+              </a>
+            </p>
           </section>
         }
       >
         <ToolProductPreview lang={lang} kind="files" />
       </ToolHero>
-
-      <ToolCard className="flex flex-wrap items-center justify-between gap-3 py-4">
-        <h2 className="text-base font-bold text-neutral-950 dark:text-white">
-          {ui.feedbackTitle}
-        </h2>
-        <Link
-          href="mailto:support@trainingload.ai"
-          className="inline-flex h-9 shrink-0 items-center justify-center rounded-compact border border-emerald-600/30 bg-white px-3 text-sm font-bold text-emerald-800 hover:bg-emerald-50 dark:bg-card dark:text-emerald-200 dark:hover:bg-accent"
-        >
-          {ui.feedbackEmail}
-        </Link>
-      </ToolCard>
 
       <ToolSection id="how-to" title={ui.howToTitle}>
         <div className="grid gap-3 md:grid-cols-3">
@@ -503,9 +555,9 @@ export function ConverterDirectionClient({
         </ToolSection>
       ) : null}
 
-      <ConverterRelatedGroups
-        direction={direction}
-        relatedDirections={relatedDirections}
+      <ConverterRelatedTools
+        currentDirection={direction}
+        directions={relatedDirections}
         lang={lang}
       />
 
@@ -559,112 +611,5 @@ export function ConverterDirectionClient({
         }}
       />
     </ToolPageMain>
-  );
-}
-
-function ConverterRelatedLinkList({
-  links,
-}: {
-  links: Array<{ href: string; label: string }>;
-}) {
-  if (links.length === 0) return null;
-  return (
-    <div className="grid gap-3">
-      {links.map((link) => (
-        <TrackedLink
-          key={link.href}
-          href={link.href}
-          eventName="related_tool_clicked"
-          eventProperties={{
-            href: link.href,
-            label: link.label,
-            location: "tool_related_links",
-          }}
-          className={layout.relatedLink}
-        >
-          <span>{link.label}</span>
-          <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
-        </TrackedLink>
-      ))}
-    </div>
-  );
-}
-
-function ConverterRelatedGroups({
-  direction,
-  relatedDirections,
-  lang,
-}: {
-  direction: ConverterDirection;
-  relatedDirections: ConverterDirection[];
-  lang: string;
-}) {
-  const ui = direction.ui;
-  const { sameFrom, sameTo } = groupRelatedConverterDirections(
-    direction,
-    relatedDirections,
-  );
-
-  return (
-    <ToolSection id="other-tools" title={ui.otherToolsTitle}>
-      <div className={layout.related}>
-        {sameFrom.length > 0 ? (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-              {ui.relatedSameFromTitle}
-            </h3>
-            <ConverterRelatedLinkList
-              links={sameFrom.map((item) => ({
-                href: withLocalePath(lang, `/${item.slug}`),
-                label: item.ui.linkLabel,
-              }))}
-            />
-          </div>
-        ) : null}
-        {sameTo.length > 0 ? (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-              {ui.relatedSameToTitle}
-            </h3>
-            <ConverterRelatedLinkList
-              links={sameTo.map((item) => ({
-                href: withLocalePath(lang, `/${item.slug}`),
-                label: item.ui.linkLabel,
-              }))}
-            />
-          </div>
-        ) : null}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-            {ui.relatedHubTitle}
-          </h3>
-          <ConverterRelatedLinkList
-            links={[
-              {
-                href: withLocalePath(lang, "/converter"),
-                label: ui.relatedHub,
-              },
-            ]}
-          />
-        </div>
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-            {ui.relatedOtherTitle}
-          </h3>
-          <ConverterRelatedLinkList
-            links={[
-              {
-                href: withLocalePath(lang, "/fit-file-viewer"),
-                label: ui.relatedFitViewer,
-              },
-              {
-                href: withLocalePath(lang, "/fit-course-converter"),
-                label: ui.relatedFitCourse,
-              },
-            ]}
-          />
-        </div>
-      </div>
-    </ToolSection>
   );
 }

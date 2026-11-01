@@ -1,6 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { I18nContext } from 'nestjs-i18n';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   AllExceptionsFilter,
   getSafeHttpMessage,
@@ -124,6 +126,55 @@ describe('getSafeHttpMessage', () => {
         null,
       ),
     ).toBe('系统内部错误，请稍后重试。');
+  });
+
+  it.each(['en', 'zh', 'zh-hant', 'ja', 'de', 'fr', 'es', 'it', 'ko', 'pt-BR'])(
+    'translates safe conversion server errors in %s without exposing the exception',
+    (locale) => {
+      const messages = JSON.parse(
+        readFileSync(
+          resolve(
+            __dirname,
+            `../../../../../packages/messages/server/${locale}/common.json`,
+          ),
+          'utf8',
+        ),
+      ) as { error: Record<string, string> };
+      jest.spyOn(I18nContext, 'current').mockReturnValue({
+        lang: locale,
+        t: (key: string) =>
+          messages.error[key.replace(/^common\.error\./, '')] ?? key,
+      } as never);
+      for (const [code, key] of [
+        ['TRACK_FILE_OUTPUT_INVALID', 'track_file_output_invalid'],
+        [
+          'TRACK_FILE_CONVERSION_FAILED',
+          'track_file_conversion_service_failed',
+        ],
+      ]) {
+        expect(messages.error[key]).toEqual(expect.any(String));
+        expect(
+          getSafeHttpMessage(500, 'private encoder details', {
+            code,
+            messageKey: 'untrusted.key',
+            messageArgs: { secret: 'private' },
+          }),
+        ).toBe(messages.error[key]);
+      }
+    },
+  );
+
+  it('does not allow arbitrary 5xx message keys or prototype property names', () => {
+    mockI18n('zh');
+    for (const code of ['UNEXPECTED_ERROR', 'toString', '__proto__']) {
+      expect(
+        getSafeHttpMessage(500, 'private details', {
+          code,
+          messageKey: 'common.error.account_deletion_in_progress',
+          localized: true,
+        }),
+      ).toBe('系统内部错误，请稍后重试。');
+    }
   });
 
   it('keeps English details for English clients', () => {

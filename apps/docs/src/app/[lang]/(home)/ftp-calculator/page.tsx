@@ -1,3 +1,4 @@
+import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
@@ -215,9 +216,7 @@ export default async function FtpCalculatorPage({
   const pageFaq = normalizeFaqItems(tPage.raw("faq"));
   const definitionFaq = pageFaq[0];
   const zonesFaq = pageFaq[3];
-  const remainingFaq = pageFaq.filter(
-    (_, index) => index !== 0 && index !== 3,
-  );
+  const remainingFaq = pageFaq.filter((_, index) => index !== 0 && index !== 3);
   const protocolRows = readProtocolRows(tPage.raw("sections.protocols.rows"));
   const protocolDetails = readProtocolDetails(
     tPage.raw("sections.protocols.details"),
@@ -389,10 +388,7 @@ export default async function FtpCalculatorPage({
                       ["#protocols", ui.jump.protocols],
                       ["#levels", ui.jump.levels],
                       ["#categories", ui.jump.categories],
-                      [
-                        "#using-ftp",
-                        zonesFaq?.question ?? ui.jump.levels,
-                      ],
+                      ["#using-ftp", zonesFaq?.question ?? ui.jump.levels],
                       ["#faq", ui.jump.faq],
                     ] as const
                   ).map(([href, label]) => (
@@ -643,22 +639,19 @@ export default async function FtpCalculatorPage({
             <div className={styles.sectionHeading}>
               <h2 className={styles.sectionTitle}>{tPage("faqTitle")}</h2>
             </div>
-            <div className={styles.faqList}>
+            <ToolFaqList>
               {remainingFaq.map((item, index) => (
-                <details
+                <ToolFaqItem
                   key={item.question}
-                  className={styles.faqItem}
                   open={index < 4}
+                  question={item.question}
                 >
-                  <summary>{item.question}</summary>
-                  <div className={styles.faqAnswer}>
-                    {item.answer.split(/\n\n+/).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
-                  </div>
-                </details>
+                  {item.answer.split(/\n\n+/).map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </ToolFaqItem>
               ))}
-            </div>
+            </ToolFaqList>
           </section>
 
           <Section id="related" title={ui.related}>

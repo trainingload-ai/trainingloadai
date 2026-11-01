@@ -130,8 +130,7 @@
 .relatedLink:focus-visible,
 .promoButton:focus-visible,
 .unitOption:focus-visible,
-.detail summary:focus-visible,
-.faqItem summary:focus-visible {
+.detail summary:focus-visible {
   outline: 2px solid var(--lt-accent);
   outline-offset: 3px;
 }
@@ -238,9 +237,9 @@
 }
 
 .board {
-  border: 1px solid var(--lt-line);
+  border: 0;
   border-radius: var(--lt-radius);
-  background: var(--lt-surface);
+  background: var(--secondary);
   padding: clamp(1.35rem, 2.4vw, 1.85rem);
   scroll-margin-top: 6.5rem;
 }
@@ -262,8 +261,7 @@
 .boardLead,
 .sectionBody,
 .note,
-.detailBody,
-.faqAnswer {
+.detailBody {
   color: var(--lt-muted);
   font-size: 1rem;
   line-height: 1.7;
@@ -454,11 +452,11 @@
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
-  border: 2px solid var(--score-frame);
-  border-radius: 0;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: #07110f;
   color: var(--score-paper);
-  box-shadow: 8px 8px 0 var(--score-frame);
+  box-shadow: none;
 }
 
 :global(.dark) .poster {
@@ -486,17 +484,17 @@
   position: absolute;
   top: -1rem;
   left: 1.3rem;
-  border: 2px solid var(--score-paper);
+  border: 0;
   padding: 0.6rem 0.8rem;
-  background: var(--score-yellow);
-  color: #17201c;
-  box-shadow: 4px 4px 0 var(--score-paper);
+  background: transparent;
+  color: var(--score-paper);
+  box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1;
-  transform: rotate(-1deg);
+  transform: none;
 }
 
 .posterMark {
@@ -978,13 +976,12 @@
 }
 
 .detail {
-  border: 1px solid var(--lt-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--lt-surface);
+  background: var(--secondary);
 }
 
-.detail summary,
-.faqItem summary {
+.detail summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -993,8 +990,7 @@
   list-style: none;
 }
 
-.detail summary::after,
-.faqItem summary::after {
+.detail summary::after {
   flex: 0 0 1rem;
   color: var(--lt-muted);
   content: "+";
@@ -1004,18 +1000,11 @@
   text-align: center;
 }
 
-.faqItem summary::after {
-  color: var(--success);
-  font-size: 1.4rem;
-}
-
-.detail[open] summary::after,
-.faqItem[open] summary::after {
+.detail[open] summary::after {
   content: "–";
 }
 
-.detail summary::-webkit-details-marker,
-.faqItem summary::-webkit-details-marker {
+.detail summary::-webkit-details-marker {
   display: none;
 }
 
@@ -1214,35 +1203,6 @@
   color: #f4fff9;
 }
 
-.faqList {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.faqItem {
-  border: 1px solid var(--lt-line);
-  border-radius: var(--tl-radius-surface);
-  background: var(--lt-surface);
-}
-
-.faqItem summary {
-  padding: 1rem 1.15rem;
-  font-weight: 650;
-}
-
-.faqAnswer {
-  display: grid;
-  gap: 0.9rem;
-  padding: 0 1.15rem 1.15rem;
-  color: var(--lt-ink);
-  font-size: 1.02rem;
-  line-height: 1.75;
-}
-
-.faqAnswer p {
-  margin: 0;
-}
-
 .relatedGrid {
   display: grid;
   gap: 0.7rem;
@@ -1252,7 +1212,8 @@
 .relatedLink {
   justify-content: flex-start;
   border-radius: var(--tl-radius-surface);
-  background: var(--lt-surface);
+  background: var(--secondary);
+  border: 0;
 }
 
 .footerCta {
@@ -1402,7 +1363,9 @@
     width: 100%;
   }
   .poster {
-    box-shadow: 5px 5px 0 var(--score-frame);
+    box-shadow: none;
+    border: 0;
+    border-radius: var(--tl-radius-surface);
   }
   .posterBrand {
     min-height: 2.8rem;
@@ -1413,7 +1376,11 @@
     left: 0.9rem;
     padding: 0.45rem 0.55rem;
     font-size: 0.64rem;
-    box-shadow: 3px 3px 0 var(--score-paper);
+    box-shadow: none;
+    border: 0;
+    transform: none;
+    background: transparent;
+    color: var(--score-paper);
   }
   .posterMark {
     font-size: 0.53rem;
@@ -1581,9 +1548,9 @@
 .fitChart {
   margin: 1.5rem 0 2rem;
   padding: clamp(1rem, 3vw, 1.75rem);
-  border: 1px solid var(--lt-line);
+  border: 0;
   border-radius: var(--tl-radius-control);
-  background: var(--lt-surface);
+  background: var(--secondary);
 }
 .fitChartHeader {
   display: flex;
@@ -1771,9 +1738,9 @@
 }
 
 .infoCard {
-  border: 1px solid var(--lt-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
-  background: var(--lt-surface);
+  background: var(--secondary);
   padding: 1.05rem 1.1rem 1.15rem;
 }
 

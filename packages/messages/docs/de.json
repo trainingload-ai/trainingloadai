@@ -1,4 +1,41 @@
 {
+  "fileInspection": {
+    "checking": "Datei wird geprüft…",
+    "recognized": "{format}-Datei erkannt",
+    "activity": "{activities, plural, one {# Aktivität} other {# Aktivitäten}} · {laps, plural, one {# Runde} other {# Runden}} · {points, plural, one {# Datensatz} other {# Datensätze}}",
+    "health": "{count, plural, one {# Gesundheitsdatensatz} other {# Gesundheitsdatensätze}}",
+    "network": "Der Dateidienst ist nicht erreichbar. Bitte versuche es erneut.",
+    "failed": "Die Datei konnte nicht gelesen werden ({status})."
+  },
+  "conversionQuality": {
+    "reference": "Referenz",
+    "noGpsTitle": "Diese Datei kann nicht in eine GPS-Strecke umgewandelt werden",
+    "noGps": "In der Datei fehlen nutzbare GPS-Koordinaten ({total, plural, one {# Datensatz} other {# Datensätze}}). GPX benötigt Koordinaten. Behalte bei Indoor-Aktivitäten die ursprüngliche FIT-Datei oder versuche TCX.",
+    "inputWarningTitle": "Bitte beachte die Grenzen der Konvertierung",
+    "reviewTitle": "Prüfe das Ergebnis vor dem Herunterladen",
+    "reviewBody": "Die Datei wurde erstellt, aber die folgenden Prüfergebnisse erfordern deine Aufmerksamkeit. Lade sie nur herunter, wenn du diese Einschränkungen akzeptierst.",
+    "downloadedWithWarnings": "Mit den folgenden Einschränkungen heruntergeladen",
+    "pointsOmitted": "GPX lässt {count, plural, one {# Datensatz} other {# Datensätze}} ohne nutzbare GPS-Koordinaten aus ({total} insgesamt).",
+    "metricsNotPreserved": "Die Ausgabe konnte den Erhalt folgender Daten nicht bestätigen: {metrics}. Behalte die Originaldatei, wenn du diese Daten benötigst.",
+    "sourceWarnings": "Beim Lesen der Quelldatei {count, plural, one {wurde # Warnung gemeldet} other {wurden # Warnungen gemeldet}}. Prüfe die ursprüngliche Aktivität, bevor du die konvertierte Datei verwendest.",
+    "outputWarnings": "Beim erneuten Lesen der konvertierten Datei {count, plural, one {wurde # Warnung gemeldet} other {wurden # Warnungen gemeldet}}. Prüfe das Ergebnis vor dem Importieren oder Teilen.",
+    "nonActivityDataOmitted": "Gesundheitsdaten außerhalb der Aktivität sind nicht in der konvertierten Datei enthalten.",
+    "downloadAnyway": "Einschränkungen akzeptieren und herunterladen",
+    "cancel": "Download abbrechen",
+    "outputInvalid": "Die konvertierte Datei konnte nicht verifiziert werden. Der Download wurde blockiert. Behalte die Originaldatei, versuche ein anderes Format oder kontaktiere den Support mit der unten stehenden Referenz.",
+    "serviceFailed": "Der Konvertierungsdienst konnte die Anfrage nicht abschließen. Es wurde kein Download gestartet. Behalte die Originaldatei, versuche ein anderes Format oder kontaktiere den Support mit der unten stehenden Referenz.",
+    "metrics": {
+      "heartRate": "Herzfrequenz",
+      "cadence": "Schritt- oder Trittfrequenz",
+      "power": "Leistung",
+      "altitude": "Höhe",
+      "distance": "Distanz",
+      "speed": "Geschwindigkeit",
+      "temperature": "Temperatur",
+      "runningDynamics": "Laufdynamik",
+      "swimming": "Schwimmwerte"
+    }
+  },
   "metadata": {
     "title": "Trainingload.ai - adaptive Ausdauertrainingspläne auf Basis von Trainingsbelastung",
     "description": "Trainingload.ai hilft Läufern und Radfahrern, Trainingspläne mit geplanter vs. absolvierter Belastung, Training Load, AI-Coach-Review und bestätigten Anpassungen auf Kurs zu halten.",

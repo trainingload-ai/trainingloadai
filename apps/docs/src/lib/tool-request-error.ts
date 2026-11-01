@@ -7,6 +7,7 @@ type ErrorPayload = {
   data?: unknown;
   code?: unknown;
   errorCode?: unknown;
+  error_code?: unknown;
   path?: unknown;
 };
 
@@ -131,6 +132,7 @@ export async function buildToolRequestError(
     retryable:
       typeof data?.retryable === "boolean" ? data.retryable : undefined,
     serverCode:
+      normalizeServerCode(payload?.error_code) ??
       normalizeServerCode(payload?.errorCode) ??
       normalizeServerCode(payload?.code),
     serverRequestId: readServerRequestId(res.headers),
@@ -139,9 +141,13 @@ export async function buildToolRequestError(
   });
 }
 
-export function appendErrorReference(message: string, ref?: string) {
+export function appendErrorReference(
+  message: string,
+  ref?: string,
+  referenceLabel = "ref",
+) {
   if (!ref) return message;
-  return `${message} (ref: ${ref})`;
+  return `${message} (${referenceLabel}: ${ref})`;
 }
 
 export function getToolRequestErrorMeta(error: unknown) {

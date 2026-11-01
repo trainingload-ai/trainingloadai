@@ -21,6 +21,9 @@
     "cycleNextPlanPrompt": "基於上一週期《{planTitle}》的總結開啟下一份計畫。完成率 {completionRate}%。請先讀週期總結，再問我目標和約束。"
   },
   "error": {
+    "track_file_output_invalid": "轉換結果未通過驗證，已阻止下載。請保留原始檔案，嘗試其他格式，或聯絡技術支援。",
+    "track_file_conversion_service_failed": "轉換服務未能完成處理，未啟動下載。請保留原始檔案，嘗試其他格式，或聯絡技術支援。",
+    "track_file_gpx_coordinates_required": "此活動沒有可用的 GPS 座標，無法產生 GPX 軌跡。室內訓練請保留原始 FIT 檔案，或嘗試轉換為 TCX。",
     "internal": "系統發生錯誤，請稍後再試。",
     "request_failed": "請求失敗",
     "payload_too_large": "上傳的檔案過大。",
