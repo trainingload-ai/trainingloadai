@@ -15,7 +15,10 @@ import {
 import { ExternalProviderWebhookSignalService } from './external-provider-webhook-signal.service';
 import { RuntimeCapabilityService } from '@/runtime-capabilities/runtime-capability.service';
 
-export type ExternalProviderWebhookProcessResult = 'DONE' | 'IGNORED';
+export type ExternalProviderWebhookProcessResult =
+  | 'DONE'
+  | 'IGNORED'
+  | { deferUntil: Date; scopeKey: string };
 
 export type ExternalProviderWebhookHandler<Payload = Record<string, unknown>> =
   {
@@ -171,7 +174,16 @@ export class ExternalProviderWebhookDispatcherService
   ) {
     try {
       const result = await handler.process(event);
-      if (result === 'IGNORED') {
+      if (typeof result === 'object') {
+        if (!event.locked_at) throw new Error('PROVIDER_DEFER_CLAIM_MISSING');
+        await this.inbox.defer({
+          id: event.id,
+          attempts: event.attempts,
+          lockedAt: event.locked_at,
+          until: result.deferUntil,
+          scopeKey: result.scopeKey,
+        });
+      } else if (result === 'IGNORED') {
         await this.inbox.markIgnored(event.id);
       } else {
         await this.inbox.markDone(event.id);

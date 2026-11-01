@@ -2,6 +2,27 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ExternalProviderWebhookInboxService } from '../external-provider-webhook-inbox.service';
 
 describe('ExternalProviderWebhookInboxService', () => {
+  it('fences a rate-limit wait with the exact claim timestamp and leaves it pending', async () => {
+    const execute = jest.fn(async (_query: unknown) => 1);
+    const service = new ExternalProviderWebhookInboxService({
+      $executeRaw: execute,
+    } as never);
+    const lockedAt = new Date(),
+      until = new Date(Date.now() + 60000);
+    await service.defer({
+      id: 'event',
+      attempts: 8,
+      lockedAt,
+      until,
+      scopeKey: 'app:opaque',
+    });
+    const query = execute.mock.calls[0][0] as any;
+    expect(query.sql).toContain('attempts=GREATEST(attempts-1,0)');
+    expect(query.sql).toContain('locked_at=?');
+    expect(query.values).toContain(lockedAt);
+    expect(query.values).toContain(until);
+  });
+
   it('uses provider + dedupe key as the durable identity', async () => {
     const createMany = jest.fn(async () => ({ count: 1 }));
     const notify = jest.fn();

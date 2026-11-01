@@ -881,6 +881,10 @@
     "./importing/activity-data-migration-backup": {
       "types": "./src/importing/activity-data-migration-backup.ts",
       "default": "./src/importing/activity-data-migration-backup.ts"
+    },
+    "./integrations/external-provider/provider-rate-limit": {
+      "types": "./src/integrations/external-provider/provider-rate-limit.ts",
+      "default": "./src/integrations/external-provider/provider-rate-limit.ts"
     }
   }
 }
