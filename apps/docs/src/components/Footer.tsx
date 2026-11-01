@@ -147,6 +147,29 @@ export async function Footer({ lang }: { lang: string }) {
               </span>
             </span>
           </a>
+          <a
+            href="https://startupfa.me/s/trainingloadai?utm_source=www.trainingload.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex max-w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-secondary"
+          >
+            <Image
+              src="https://startupfa.me/badge?t=small&theme=light"
+              alt="Trainingload.ai - Featured on Startup Fame"
+              width={240}
+              height={36}
+              unoptimized
+              className="h-auto max-w-full dark:hidden"
+            />
+            <Image
+              src="https://startupfa.me/badge?t=small&theme=dark"
+              alt="Trainingload.ai - Featured on Startup Fame"
+              width={240}
+              height={36}
+              unoptimized
+              className="hidden h-auto max-w-full dark:block"
+            />
+          </a>
           <p className="mt-6 text-xs leading-5 text-muted-foreground">
             {t("copyright", { year })}
           </p>

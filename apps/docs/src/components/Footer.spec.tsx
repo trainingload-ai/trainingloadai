@@ -18,7 +18,10 @@ vi.mock("next-intl/server", () => ({
       namespace,
       messages: JSON.parse(
         readFileSync(
-          new URL(`../../../../packages/messages/docs/${locale}.json`, import.meta.url),
+          new URL(
+            `../../../../packages/messages/docs/${locale}.json`,
+            import.meta.url,
+          ),
           "utf8",
         ),
       ),
@@ -50,7 +53,7 @@ describe("compact footer navigation", () => {
       const links = [...html.matchAll(/<a\s[^>]*href="([^"]+)"/g)].map(
         (match) => match[1],
       );
-      expect(links.length).toBeLessThanOrEqual(30);
+      expect(links.length).toBeLessThanOrEqual(31);
       expect(new Set(links).size).toBe(links.length);
       expect(html.match(/<nav\s/g)).toHaveLength(5);
       expect(html).not.toMatch(/<button|<details/);
@@ -90,7 +93,10 @@ describe("compact footer navigation", () => {
     const messages = locales.map((lang) =>
       JSON.parse(
         readFileSync(
-          new URL(`../../../../packages/messages/docs/${lang}.json`, import.meta.url),
+          new URL(
+            `../../../../packages/messages/docs/${lang}.json`,
+            import.meta.url,
+          ),
           "utf8",
         ),
       ),
