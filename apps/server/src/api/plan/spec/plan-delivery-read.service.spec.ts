@@ -16,11 +16,9 @@ function fixture() {
   };
   const repository = { findFirst: jest.fn(async () => row) };
   let target = 140;
-  const service = new PlanDeliveryReadService(
-    repository as any,
-    { resolveWorkout: jest.fn(async (_user: any, value: any) => value) } as any,
-    {
-      buildPlanBlocksFromWorkoutSteps: () => [
+  const endurance = {
+    buildPlanBlocksFromWorkoutSteps: jest.fn(
+      (_rows: unknown, _sport: unknown) => [
         {
           type: 'work',
           steps: [
@@ -35,7 +33,12 @@ function fixture() {
           ],
         },
       ],
-    } as any,
+    ),
+  };
+  const service = new PlanDeliveryReadService(
+    repository as any,
+    { resolveWorkout: jest.fn(async (_user: any, value: any) => value) } as any,
+    endurance as any,
     {
       buildStrengthStructure: () => ({
         kind: 'STRENGTH',
@@ -52,6 +55,7 @@ function fixture() {
   );
   return {
     row,
+    endurance,
     repository,
     service,
     setTarget: (value: number) => (target = value),
@@ -75,6 +79,22 @@ describe('provider-neutral reviewed plan snapshot', () => {
     const f = fixture();
     f.repository.findFirst.mockResolvedValue(null);
     expect(await f.service.snapshot('other', 'workout')).toBeNull();
+  });
+  it('retains all stored leaf steps and refuses unrepresentable nested repeats', async () => {
+    const f = fixture();
+    f.row.steps = [
+      { id: 'r', parentId: null, stepType: 'REPEAT' },
+      { id: 'a', parentId: 'r', stepType: 'WORK' },
+      { id: 'b', parentId: 'r', stepType: 'REST' },
+    ];
+    await f.service.snapshot('owner', 'workout');
+    expect(
+      f.endurance.buildPlanBlocksFromWorkoutSteps.mock.calls[0][0],
+    ).toMatchObject([{ id: 'r', children: [{ id: 'a' }, { id: 'b' }] }]);
+    f.row.steps[1].stepType = 'REPEAT';
+    await expect(f.service.snapshot('owner', 'workout')).rejects.toThrow(
+      'WORKOUT_DELIVERY_NESTED_REPEAT_UNSUPPORTED',
+    );
   });
   it('binds the exact IR, local revision and date to the checksum', async () => {
     const f = fixture();

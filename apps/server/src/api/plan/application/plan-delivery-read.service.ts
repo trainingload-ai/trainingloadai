@@ -45,9 +45,7 @@ export class PlanDeliveryReadService {
       },
       include: {
         steps: {
-          where: { parentId: null },
           orderBy: { orderIndex: 'asc' },
-          include: { children: { orderBy: { orderIndex: 'asc' } } },
         },
         strengthExercises: {
           orderBy: { orderIndex: 'asc' },
@@ -58,7 +56,25 @@ export class PlanDeliveryReadService {
     if (!stored) return null;
     const row = await this.targets.resolveWorkout(userId, stored);
     // The definition resolver below validates JSON-backed annotations after hydration.
-    const persistedSteps: unknown = row.steps;
+    const flat = Array.isArray(row.steps) ? row.steps : [];
+    if (flat.length > 10000) throw new Error('WORKOUT_DELIVERY_STEP_LIMIT');
+    const nodes = new Map(
+      flat.map((step) => [step.id, { ...step, children: [] as unknown[] }]),
+    );
+    const roots: unknown[] = [];
+    for (const step of flat) {
+      const node = nodes.get(step.id)!;
+      if (!step.parentId) roots.push(node);
+      else {
+        const parent = nodes.get(step.parentId);
+        if (!parent || parent.stepType !== 'REPEAT' || parent.parentId)
+          throw new Error('WORKOUT_DELIVERY_STEP_PARENT_INVALID');
+        if (step.stepType === 'REPEAT')
+          throw new Error('WORKOUT_DELIVERY_NESTED_REPEAT_UNSUPPORTED');
+        parent.children.push(node);
+      }
+    }
+    const persistedSteps: unknown = roots;
     const structure: WorkoutStructure =
       row.structureKind === 'STRENGTH'
         ? this.strength.buildStrengthStructure(row.strengthExercises, {
