@@ -6155,5 +6155,42 @@
     "readOnlyAction": "Sola lettura",
     "loadError": "Impossibile caricare l’accesso ospite. Riprova.",
     "retry": "Riprova"
+  },
+  "RoutesPage": {
+    "title": "I miei percorsi",
+    "description": "Importa GPX, salva percorsi e controlla lo stato dell’invio.",
+    "import": "Importa percorso",
+    "newVersion": "Aggiorna versione GPX",
+    "name": "Nome",
+    "sport": "Sport",
+    "notes": "Note",
+    "fileHint": "GPX fino a 20 MiB. I segmenti sono conservati e le altitudini mancanti segnalate.",
+    "cancel": "Annulla",
+    "save": "Salva percorso",
+    "saving": "Salvataggio…",
+    "loading": "Caricamento…",
+    "retry": "Riprova",
+    "empty": "Nessun percorso salvato.",
+    "select": "Seleziona un percorso per visualizzare mappa e dettagli.",
+    "more": "Carica altro",
+    "download": "Scarica GPX originale",
+    "delete": "Elimina percorso",
+    "deleteHint": "Il percorso sarà nascosto. Gli invii irrisolti sono conservati per ritiro o verifica.",
+    "pendingDelete": "Percorso nascosto; alcuni invii richiedono attenzione.",
+    "deleted": "Percorso eliminato.",
+    "ascent": "Salita",
+    "missingElevation": "Altitudine mancante",
+    "geometry": "{points} punti · {segments} segmenti · Versione {revision}",
+    "changed": "Il percorso è cambiato. Aggiorna prima di riprovare.",
+    "invalidFile": "Impossibile salvare. Controlla formato GPX, coordinate, dimensioni e segmenti.",
+    "failed": "Operazione non riuscita. Riprova.",
+    "state": {
+      "PENDING": "In coda",
+      "ACCEPTED": "Accettato dal fornitore",
+      "VERIFIED": "Lettura verificata",
+      "UNKNOWN": "Esito sconosciuto; verifica richiesta",
+      "REJECTED": "Non accettato",
+      "REMOTE_DELETED": "Rimozione remota confermata"
+    }
   }
 }

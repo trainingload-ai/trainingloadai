@@ -6155,5 +6155,42 @@
     "readOnlyAction": "Somente leitura",
     "loadError": "Não foi possível carregar o acesso de visitante. Tente novamente.",
     "retry": "Tentar novamente"
+  },
+  "RoutesPage": {
+    "title": "Minhas rotas",
+    "description": "Importe GPX, salve rotas e confira o status dos envios.",
+    "import": "Importar rota",
+    "newVersion": "Atualizar versão GPX",
+    "name": "Nome",
+    "sport": "Esporte",
+    "notes": "Notas",
+    "fileHint": "GPX de até 20 MiB. Os segmentos são mantidos e a falta de elevação é indicada.",
+    "cancel": "Cancelar",
+    "save": "Salvar rota",
+    "saving": "Salvando…",
+    "loading": "Carregando…",
+    "retry": "Tentar novamente",
+    "empty": "Nenhuma rota salva.",
+    "select": "Selecione uma rota para ver o mapa e os detalhes.",
+    "more": "Carregar mais",
+    "download": "Baixar GPX original",
+    "delete": "Excluir rota",
+    "deleteHint": "A rota será ocultada. Envios não resolvidos serão mantidos para retirada ou conferência.",
+    "pendingDelete": "Rota oculta; alguns envios ainda precisam de atenção.",
+    "deleted": "Rota excluída.",
+    "ascent": "Subida",
+    "missingElevation": "Elevação ausente",
+    "geometry": "{points} pontos · {segments} segmentos · Versão {revision}",
+    "changed": "A rota foi alterada. Atualize antes de tentar novamente.",
+    "invalidFile": "Não foi possível salvar. Verifique o formato GPX, as coordenadas, o tamanho e os segmentos.",
+    "failed": "A operação falhou. Tente novamente.",
+    "state": {
+      "PENDING": "Na fila",
+      "ACCEPTED": "Aceito pelo provedor",
+      "VERIFIED": "Leitura verificada",
+      "UNKNOWN": "Resultado desconhecido; conferir",
+      "REJECTED": "Não aceito",
+      "REMOTE_DELETED": "Remoção remota confirmada"
+    }
   }
 }

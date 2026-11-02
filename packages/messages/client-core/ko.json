@@ -6155,5 +6155,42 @@
     "readOnlyAction": "읽기 전용",
     "loadError": "게스트 액세스를 불러올 수 없습니다. 다시 시도하세요.",
     "retry": "다시 시도"
+  },
+  "RoutesPage": {
+    "title": "내 경로",
+    "description": "GPX를 가져와 경로를 저장하고 전송 상태를 확인하세요.",
+    "import": "경로 가져오기",
+    "newVersion": "GPX 버전 업데이트",
+    "name": "이름",
+    "sport": "운동",
+    "notes": "메모",
+    "fileHint": "최대 20 MiB GPX. 원본 구간을 보존하고 누락된 고도를 표시합니다.",
+    "cancel": "취소",
+    "save": "경로 저장",
+    "saving": "저장 중…",
+    "loading": "불러오는 중…",
+    "retry": "다시 시도",
+    "empty": "저장된 경로가 없습니다.",
+    "select": "경로를 선택해 지도와 세부 정보를 확인하세요.",
+    "more": "더 불러오기",
+    "download": "원본 GPX 다운로드",
+    "delete": "경로 삭제",
+    "deleteHint": "경로가 숨겨집니다. 미확정 전송 기록은 철회 또는 대조를 위해 보존됩니다.",
+    "pendingDelete": "경로가 숨겨졌습니다. 일부 전송은 처리가 필요합니다.",
+    "deleted": "경로가 삭제되었습니다.",
+    "ascent": "상승 고도",
+    "missingElevation": "고도 없음",
+    "geometry": "{points}개 지점 · {segments}개 구간 · 버전 {revision}",
+    "changed": "경로가 변경되었습니다. 새로 고친 후 다시 시도하세요.",
+    "invalidFile": "저장할 수 없습니다. GPX 형식, 좌표, 크기 및 구간을 확인하세요.",
+    "failed": "작업에 실패했습니다. 다시 시도하세요.",
+    "state": {
+      "PENDING": "대기 중",
+      "ACCEPTED": "서비스에서 수락함",
+      "VERIFIED": "읽기 검증 완료",
+      "UNKNOWN": "결과 불명, 대조 필요",
+      "REJECTED": "수락되지 않음",
+      "REMOTE_DELETED": "원격 삭제 확인됨"
+    }
   }
 }

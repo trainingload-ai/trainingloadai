@@ -56,6 +56,7 @@
     "./workout-chart-intensity": "./workout-chart-intensity.ts",
     "./workout-structure": "./workout-structure.ts",
     "./workout-summary": "./workout-summary.ts",
-    "./plan-templates/workout-step-display": "./plan-templates/workout-step-display.ts"
+    "./plan-templates/workout-step-display": "./plan-templates/workout-step-display.ts",
+    "./routes": "./routes.ts"
   }
 }

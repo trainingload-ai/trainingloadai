@@ -1290,7 +1290,94 @@ const manifest = recordSchema({
   ],
 });
 
+const savedRoute = recordSchema({
+  id: "saved-route",
+  title: "Saved route",
+  description: "User-owned local route identity.",
+  properties: {
+    id: requiredString("Route identifier."),
+    headRevision: requiredInteger("Latest included immutable revision."),
+    createdAt: requiredString("Creation time.", "date-time"),
+    updatedAt: requiredString("Last local update.", "date-time"),
+    deletedAt: string("Local deletion tombstone.", "date-time"),
+  },
+  required: ["id", "headRevision", "createdAt", "updatedAt", "deletedAt"],
+});
+const savedRouteVersion = recordSchema({
+  id: "saved-route-version",
+  title: "Saved route version",
+  description:
+    "Immutable provider-neutral route facts. GPS is omitted outside exact-location full backups.",
+  properties: {
+    id: requiredString("Version identifier."),
+    routeId: requiredString("Route identity."),
+    revision: requiredInteger("Immutable revision."),
+    name: requiredString("Athlete-facing route name."),
+    description: requiredString("Route notes."),
+    sportCode: requiredString("Existing SportDefinition catalog code."),
+    geometry: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        type: { const: "MultiLineString" },
+        coordinates: {
+          type: "array",
+          minItems: 1,
+          maxItems: 32,
+          items: {
+            type: "array",
+            minItems: 2,
+            maxItems: 100000,
+            items: {
+              type: "array",
+              minItems: 2,
+              maxItems: 3,
+              prefixItems: [
+                { type: "number", minimum: -180, maximum: 180 },
+                { type: "number", minimum: -90, maximum: 90 },
+                { type: "number" },
+              ],
+              items: false,
+            },
+          },
+        },
+      },
+      required: ["type", "coordinates"],
+    },
+    distanceMeters: number(
+      "Distance measured within each segment; gaps are not joined.",
+    ),
+    elevationGainMeters: number("Ascent, absent when elevation is incomplete."),
+    elevationLossMeters: number(
+      "Descent, absent when elevation is incomplete.",
+    ),
+    pointCount: requiredInteger("Original point count."),
+    segmentCount: requiredInteger("Original segment count."),
+    hasCompleteElevation: boolean("Whether every point has elevation."),
+    rawSize: requiredInteger("Original GPX size in bytes."),
+    rawChecksum: requiredString("Original GPX SHA-256."),
+    checksum: requiredString("Local version SHA-256."),
+    createdAt: requiredString("Version creation time.", "date-time"),
+  },
+  required: [
+    "id",
+    "routeId",
+    "revision",
+    "name",
+    "description",
+    "sportCode",
+    "geometry",
+    "distanceMeters",
+    "pointCount",
+    "segmentCount",
+    "checksum",
+    "createdAt",
+  ],
+});
+
 export const USER_DATA_EXPORT_SCHEMAS = {
+  "saved-route": savedRoute,
+  "saved-route-version": savedRouteVersion,
   "user-profile": userProfile,
   "user-setting": userSetting,
   "athlete-memory": athleteMemory,

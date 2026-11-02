@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "9868115992d3d2e6226b9edec899e5c600f2206f84f0f0dbfebc5dadfe10a502",
+  "schemaChecksum": "1eba8b92105aa7a1487491f98f144d173579ffcaa60e0c50c4cc32fb8ac4d90a",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -96,6 +96,11 @@
       "id": "0019_workout_step_annotations",
       "file": "0019_workout_step_annotations/migration.sql",
       "sha256": "d9e17e2bcded9605220918bee03849af4cc70e2b738b9f5161c5d849d92baed6"
+    },
+    {
+      "id": "0020_saved_routes",
+      "file": "0020_saved_routes/migration.sql",
+      "sha256": "95400357a5f2a5fd616e083d7df35ab3087acc2d582be9b22285f2cf3cfe6f5b"
     }
   ]
 }

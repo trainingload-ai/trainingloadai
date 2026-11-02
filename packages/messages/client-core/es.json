@@ -6155,5 +6155,42 @@
     "readOnlyAction": "Solo lectura",
     "loadError": "No se pudo cargar el acceso de invitado. Inténtalo de nuevo.",
     "retry": "Reintentar"
+  },
+  "RoutesPage": {
+    "title": "Mis rutas",
+    "description": "Importa GPX, guarda rutas y revisa su envío.",
+    "import": "Importar ruta",
+    "newVersion": "Actualizar versión GPX",
+    "name": "Nombre",
+    "sport": "Deporte",
+    "notes": "Notas",
+    "fileHint": "GPX de hasta 20 MiB. Se conservan los segmentos y se indica la falta de altitud.",
+    "cancel": "Cancelar",
+    "save": "Guardar ruta",
+    "saving": "Guardando…",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "empty": "Aún no hay rutas guardadas.",
+    "select": "Selecciona una ruta para ver el mapa y los detalles.",
+    "more": "Cargar más",
+    "download": "Descargar GPX original",
+    "delete": "Eliminar ruta",
+    "deleteHint": "La ruta se ocultará. Los envíos pendientes se conservarán para retirarlos o conciliarlos.",
+    "pendingDelete": "Ruta oculta; algunos envíos aún requieren atención.",
+    "deleted": "Ruta eliminada.",
+    "ascent": "Ascenso",
+    "missingElevation": "Falta altitud",
+    "geometry": "{points} puntos · {segments} segmentos · Versión {revision}",
+    "changed": "La ruta ha cambiado. Actualiza antes de reintentar.",
+    "invalidFile": "No se pudo guardar. Revisa el formato GPX, las coordenadas, el tamaño y los segmentos.",
+    "failed": "La operación falló. Reintenta.",
+    "state": {
+      "PENDING": "En cola",
+      "ACCEPTED": "Aceptado por el proveedor",
+      "VERIFIED": "Lectura verificada",
+      "UNKNOWN": "Desconocido; requiere conciliación",
+      "REJECTED": "No aceptado",
+      "REMOTE_DELETED": "Eliminación remota confirmada"
+    }
   }
 }

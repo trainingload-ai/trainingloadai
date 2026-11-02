@@ -47,6 +47,7 @@ function archiveDependencies(prisma: object) {
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new UserQueryService(new UserIdentityRepository(prisma as never)),
     { batchGetActualLoad: async () => new Map() },
+    { exportData: async () => ({ routes: [], versions: [] }) } as never,
   ] as const;
 }
 
@@ -761,5 +762,92 @@ describe('UserDataExportArchiveService', () => {
       connection.disconnectSync?.();
       duckdb.closeSync();
     }
+  });
+});
+
+describe('route export privacy', () => {
+  it('excludes routes from AI exports and omits geometry/original files from approximate backups', async () => {
+    const now = new Date('2026-11-01T00:00:00Z'),
+      datasets: any[] = [];
+    const version = {
+      id: 'v1',
+      routeId: 'r',
+      userId: 'owner',
+      revision: 1,
+      name: 'River route',
+      description: '',
+      sportCode: 'ROAD_RUNNING',
+      geometry: {
+        type: 'MultiLineString',
+        coordinates: [
+          [
+            [120, 30],
+            [120.01, 30],
+          ],
+        ],
+      },
+      distanceMeters: 963,
+      elevationGainMeters: null,
+      elevationLossMeters: null,
+      pointCount: 2,
+      segmentCount: 1,
+      hasCompleteElevation: false,
+      rawStorageKey: 'private/source.gpx',
+      rawSize: 100,
+      rawChecksum: 'a'.repeat(64),
+      checksum: 'b'.repeat(64),
+      createdAt: now,
+    };
+    let queried = 0,
+      copied = 0;
+    const service: any = Object.create(UserDataExportArchiveService.prototype);
+    service.routes = {
+      exportData: async () => {
+        queried++;
+        return {
+          routes: [
+            {
+              id: 'r',
+              headRevision: 2,
+              createdAt: now,
+              updatedAt: now,
+              deletedAt: null,
+            },
+          ],
+          versions: [version],
+        };
+      },
+    };
+    service.storage = {
+      copyFileToPath: async () => {
+        copied++;
+      },
+    };
+    service.writeJsonlDataset = async (args: any) => datasets.push(args);
+    const job = {
+      userId: 'owner',
+      mode: 'AI',
+      dataCutoffAt: now,
+      includeOriginalFiles: true,
+      locationPrivacy: 'EXACT',
+    };
+    await service.writeRouteDatasets(job, 'unused', [], []);
+    expect(queried).toBe(0);
+    await service.writeRouteDatasets(
+      { ...job, mode: 'FULL_BACKUP', locationPrivacy: 'APPROXIMATE' },
+      'unused',
+      [],
+      [],
+    );
+    expect(copied).toBe(0);
+    expect(datasets[0].rows[0].headRevision).toBe(1);
+    const row = datasets[1].rows[0];
+    expect(row.geometry).toBeNull();
+    expect(row).not.toHaveProperty('rawStorageKey');
+    expect(row).not.toHaveProperty('userId');
+    const validate = schemaValidator(
+      USER_DATA_EXPORT_SCHEMAS['saved-route-version'],
+    );
+    expect(validate(row)).toBe(true);
   });
 });

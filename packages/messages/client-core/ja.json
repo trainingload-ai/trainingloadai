@@ -6155,5 +6155,42 @@
     "readOnlyAction": "読み取り専用",
     "loadError": "ゲストアクセスを読み込めませんでした。再試行してください。",
     "retry": "再試行"
+  },
+  "RoutesPage": {
+    "title": "保存したルート",
+    "description": "GPX を取り込み、ルートの保存と送信状況の確認ができます。",
+    "import": "ルートを取り込む",
+    "newVersion": "GPX のバージョンを更新",
+    "name": "名前",
+    "sport": "スポーツ",
+    "notes": "メモ",
+    "fileHint": "GPX は最大 20 MiB。元の区間を保持し、標高の欠損を表示します。",
+    "cancel": "キャンセル",
+    "save": "ルートを保存",
+    "saving": "保存中…",
+    "loading": "読み込み中…",
+    "retry": "再試行",
+    "empty": "保存したルートはありません。",
+    "select": "ルートを選択すると地図と詳細を表示します。",
+    "more": "さらに読み込む",
+    "download": "元の GPX をダウンロード",
+    "delete": "ルートを削除",
+    "deleteHint": "ルートを非表示にします。未確定の送信記録は取り消しや照合のため保持します。",
+    "pendingDelete": "ルートを非表示にしました。未処理の送信があります。",
+    "deleted": "ルートを削除しました。",
+    "ascent": "獲得標高",
+    "missingElevation": "標高なし",
+    "geometry": "{points} 点 · {segments} 区間 · バージョン {revision}",
+    "changed": "ルートが変更されました。更新してから再試行してください。",
+    "invalidFile": "保存できません。GPX の形式、座標、サイズ、区間を確認してください。",
+    "failed": "操作に失敗しました。再試行してください。",
+    "state": {
+      "PENDING": "待機中",
+      "ACCEPTED": "サービスが受け付け済み",
+      "VERIFIED": "読み戻し確認済み",
+      "UNKNOWN": "結果不明・照合が必要",
+      "REJECTED": "未受理",
+      "REMOTE_DELETED": "リモート削除を確認済み"
+    }
   }
 }

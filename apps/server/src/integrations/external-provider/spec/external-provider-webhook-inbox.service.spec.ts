@@ -2,6 +2,39 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ExternalProviderWebhookInboxService } from '../external-provider-webhook-inbox.service';
 
 describe('ExternalProviderWebhookInboxService', () => {
+  it('locks a precise current claim within mapping transactions and rejects expired or future leases', async () => {
+    const lockedAt = new Date(Date.now() - 1000),
+      query = jest.fn(async (_q: unknown) => [{ id: 'task' }]);
+    const service = new ExternalProviderWebhookInboxService({} as never);
+    const claim = {
+      id: 'task',
+      provider: 'garmin' as const,
+      externalUserId: 'account',
+      attempts: 2,
+      lockedAt,
+    };
+    expect(
+      await service.isCurrentClaim(claim, { $queryRaw: query } as never),
+    ).toBe(true);
+    const sql = query.mock.calls[0][0] as any;
+    expect(sql.sql).toContain('FOR UPDATE');
+    expect(sql.values).toEqual(
+      expect.arrayContaining(['task', 'garmin', 'account', 2, lockedAt]),
+    );
+    expect(
+      await service.isCurrentClaim(
+        { ...claim, lockedAt: new Date(Date.now() - 241000) },
+        { $queryRaw: query } as never,
+      ),
+    ).toBe(false);
+    expect(
+      await service.isCurrentClaim(
+        { ...claim, lockedAt: new Date(Date.now() + 10000) },
+        { $queryRaw: query } as never,
+      ),
+    ).toBe(false);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
   it('fences a rate-limit wait with the exact claim timestamp and leaves it pending', async () => {
     const execute = jest.fn(async (_query: unknown) => 1);
     const service = new ExternalProviderWebhookInboxService({

@@ -6,6 +6,7 @@ import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import { HealthFileQueryService } from '@/health-data/health-file-query.service';
 import { SensorFileQueryService } from './sensor-file-query.service';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
+import { RoutesReadService } from '../routes/routes-read.service';
 
 const STORAGE_GARBAGE_CONCURRENCY = 4;
 
@@ -34,6 +35,7 @@ export class StorageObjectGarbageCollectorService {
     private readonly sensorFiles: SensorFileQueryService,
     private readonly healthFiles: HealthFileQueryService,
     private readonly importJobs: ImportingJobService,
+    private readonly routes: RoutesReadService,
   ) {}
 
   async enqueueObjects(
@@ -178,7 +180,9 @@ export class StorageObjectGarbageCollectorService {
                       this.healthFiles.existsByParquetPath(row.objectKey),
                     ])
                   ).find(Boolean)
-                : null;
+                : row.bucket === 'private'
+                  ? await this.routes.existsByStorageKey(row.objectKey)
+                  : null;
           if (liveReference) {
             // 事务结果不确定时可能把已经生效的 staging path 放入清单；
             // 引用检查是最后一道安全门，只移除清单，绝不删除对象。

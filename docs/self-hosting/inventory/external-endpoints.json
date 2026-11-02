@@ -2717,8 +2717,26 @@
     },
     {
       "host": "www.topografix.com",
+      "url": "http://www.topografix.com/GPX/1/0",
+      "references": [
+        {
+          "file": "apps/server/src/routes/route-geometry.ts",
+          "line": 14
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.topografix.com",
       "url": "http://www.topografix.com/GPX/1/1",
       "references": [
+        {
+          "file": "apps/server/src/routes/route-geometry.ts",
+          "line": 15
+        },
         {
           "file": "scripts/selfhost/run-acceptance.mjs",
           "line": 391
@@ -2726,6 +2744,7 @@
       ],
       "capability": "web-asset-or-tooling",
       "owners": [
+        "apps",
         "scripts"
       ]
     },

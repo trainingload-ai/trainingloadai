@@ -30,6 +30,46 @@ export class ExternalProviderWebhookInboxService {
   checksum(value: Buffer | string) {
     return createHash('sha256').update(value).digest('hex');
   }
+  /** A transaction may fence local mapping writes with the same durable inbox lease. */
+  async isCurrentClaim(
+    args: {
+      id: string;
+      provider: ThirdPartyProvider;
+      externalUserId: string;
+      attempts: number;
+      lockedAt: Date;
+    },
+    tx?: PrismaTx,
+  ) {
+    const time = args.lockedAt?.getTime();
+    if (
+      !Number.isFinite(time) ||
+      time > Date.now() ||
+      Date.now() - time > 4 * 60000
+    )
+      return false;
+    if (tx) {
+      const rows = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT id FROM t_external_provider_webhook_event
+        WHERE id=${args.id} AND provider=${args.provider}::text::enum_third_party_provider
+        AND external_user_id=${args.externalUserId} AND status='PROCESSING'
+        AND attempts=${args.attempts} AND locked_at=${args.lockedAt} FOR UPDATE`);
+      return rows.length === 1;
+    }
+    return Boolean(
+      await this.prisma.externalProviderWebhookEvent.findFirst({
+        where: {
+          id: args.id,
+          provider: args.provider,
+          externalUserId: args.externalUserId,
+          status: 'PROCESSING',
+          attempts: args.attempts,
+          lockedAt: args.lockedAt,
+        },
+        select: { id: true },
+      }),
+    );
+  }
 
   /** 将事件持久化、去重，并主动唤醒统一 webhook dispatcher。 */
   async enqueue(args: {

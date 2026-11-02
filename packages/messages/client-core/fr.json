@@ -6155,5 +6155,42 @@
     "readOnlyAction": "Lecture seule",
     "loadError": "Impossible de charger l’accès invité. Réessayez.",
     "retry": "Réessayer"
+  },
+  "RoutesPage": {
+    "title": "Mes itinéraires",
+    "description": "Importez un GPX, enregistrez vos itinéraires et vérifiez leur envoi.",
+    "import": "Importer un itinéraire",
+    "newVersion": "Mettre à jour le GPX",
+    "name": "Nom",
+    "sport": "Sport",
+    "notes": "Notes",
+    "fileHint": "GPX de 20 MiB maximum. Les segments sont conservés et les altitudes manquantes signalées.",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "empty": "Aucun itinéraire enregistré.",
+    "select": "Sélectionnez un itinéraire pour afficher sa carte et ses détails.",
+    "more": "Charger plus",
+    "download": "Télécharger le GPX original",
+    "delete": "Supprimer cet itinéraire",
+    "deleteHint": "L’itinéraire sera masqué. Les envois non résolus sont conservés pour retrait ou vérification.",
+    "pendingDelete": "Itinéraire masqué ; certains envois restent à traiter.",
+    "deleted": "Itinéraire supprimé.",
+    "ascent": "Dénivelé positif",
+    "missingElevation": "Altitude manquante",
+    "geometry": "{points} points · {segments} segments · Version {revision}",
+    "changed": "L’itinéraire a changé. Actualisez avant de réessayer.",
+    "invalidFile": "Impossible d’enregistrer. Vérifiez le format GPX, les coordonnées, la taille et les segments.",
+    "failed": "L’opération a échoué. Réessayez.",
+    "state": {
+      "PENDING": "En attente",
+      "ACCEPTED": "Accepté par le fournisseur",
+      "VERIFIED": "Lecture vérifiée",
+      "UNKNOWN": "Résultat inconnu ; vérification requise",
+      "REJECTED": "Non accepté",
+      "REMOTE_DELETED": "Suppression distante confirmée"
+    }
   }
 }

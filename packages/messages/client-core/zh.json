@@ -6812,5 +6812,42 @@
     "readOnlyAction": "只读访问",
     "loadError": "无法加载访客访问，请重试。",
     "retry": "重试"
+  },
+  "RoutesPage": {
+    "title": "我的路线",
+    "description": "导入 GPX，保存路线并查看第三方交付状态。",
+    "import": "导入路线",
+    "newVersion": "更新 GPX 版本",
+    "name": "名称",
+    "sport": "运动",
+    "notes": "说明",
+    "fileHint": "GPX 最大 20 MiB。保留原始分段；缺失高程会明确显示。",
+    "cancel": "取消",
+    "save": "保存路线",
+    "saving": "正在保存…",
+    "loading": "正在加载…",
+    "retry": "重试",
+    "empty": "还没有保存的路线。",
+    "select": "选择路线查看地图和详情。",
+    "more": "加载更多",
+    "download": "下载原始 GPX",
+    "delete": "删除路线",
+    "deleteHint": "删除后路线将隐藏；尚未完成的第三方交付记录会保留，以便撤回或核对。",
+    "pendingDelete": "路线已隐藏，仍有第三方交付需要处理。",
+    "deleted": "路线已删除。",
+    "ascent": "爬升",
+    "missingElevation": "高程缺失",
+    "geometry": "{points} 个点 · {segments} 段 · 版本 {revision}",
+    "changed": "路线版本已变更，请刷新后重新操作。",
+    "invalidFile": "无法保存此文件，请检查 GPX 格式、坐标、大小及分段。",
+    "failed": "操作失败，请重试。",
+    "state": {
+      "PENDING": "排队中",
+      "ACCEPTED": "厂商已接受",
+      "VERIFIED": "已读回验证",
+      "UNKNOWN": "结果不明，需核对",
+      "REJECTED": "未接受",
+      "REMOTE_DELETED": "已确认远端移除"
+    }
   }
 }

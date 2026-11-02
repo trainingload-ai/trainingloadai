@@ -6,6 +6,7 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { HealthFileQueryModule } from '@/health-data/health-file-query.module';
 import { SensorFileQueryModule } from './sensor-file-query.module';
 import { StorageObjectGarbageCollectorService } from './parquet-garbage-collector.service';
+import { RoutesDataModule } from '../routes/routes-data.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { StorageObjectGarbageCollectorService } from './parquet-garbage-collecto
     ImportingJobModule,
     HealthFileQueryModule,
     SensorFileQueryModule,
+    RoutesDataModule,
   ],
   providers: [SensorDataService, StorageObjectGarbageCollectorService],
   exports: [

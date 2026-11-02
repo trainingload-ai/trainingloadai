@@ -17,6 +17,7 @@ import { PlanAccountDeletionModule } from '@/api/plan/plan-account-deletion.modu
 import { HealthFileQueryModule } from '@/health-data/health-file-query.module';
 import { ExternalProviderIntegrationModule } from '@/integrations/external-provider/external-provider-integration.module';
 import { UserAnalysisConfigModule } from './user-analysis-config.module';
+import { RoutesDataModule } from '../../routes/routes-data.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UserAnalysisConfigModule } from './user-analysis-config.module';
     PlanAccountDeletionModule,
     HealthFileQueryModule,
     ExternalProviderIntegrationModule,
+    RoutesDataModule,
     PrismaModule,
     UserAnalysisConfigModule,
   ],

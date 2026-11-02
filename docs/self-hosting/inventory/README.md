@@ -8,8 +8,8 @@
 | Inventory | Entries |
 | --- | ---: |
 | Environment variables | 284 |
-| External URL literals | 179 |
-| Filesystem write sites | 214 |
+| External URL literals | 180 |
+| Filesystem write sites | 216 |
 | Runtime variables missing from configuration docs | 221 |
 
 ## Undocumented runtime variables

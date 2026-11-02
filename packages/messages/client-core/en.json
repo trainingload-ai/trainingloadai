@@ -6812,5 +6812,42 @@
     "readOnlyAction": "Read-only access",
     "loadError": "Guest access could not be loaded. Try again.",
     "retry": "Retry"
+  },
+  "RoutesPage": {
+    "title": "My routes",
+    "description": "Import GPX, save routes and review delivery status.",
+    "import": "Import route",
+    "newVersion": "Update GPX version",
+    "name": "Name",
+    "sport": "Sport",
+    "notes": "Notes",
+    "fileHint": "GPX up to 20 MiB. Original segments are retained; missing elevation is shown explicitly.",
+    "cancel": "Cancel",
+    "save": "Save route",
+    "saving": "Saving…",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "empty": "No saved routes yet.",
+    "select": "Select a route to view its map and details.",
+    "more": "Load more",
+    "download": "Download original GPX",
+    "delete": "Delete route",
+    "deleteHint": "The route will be hidden. Unresolved deliveries are retained for withdrawal or reconciliation.",
+    "pendingDelete": "Route hidden; some provider deliveries still need attention.",
+    "deleted": "Route deleted.",
+    "ascent": "Ascent",
+    "missingElevation": "Elevation missing",
+    "geometry": "{points} points · {segments} segments · Version {revision}",
+    "changed": "The route changed. Refresh before trying again.",
+    "invalidFile": "Unable to save this file. Check its GPX format, coordinates, size and segments.",
+    "failed": "The operation failed. Please retry.",
+    "state": {
+      "PENDING": "Queued",
+      "ACCEPTED": "Accepted by provider",
+      "VERIFIED": "Readback verified",
+      "UNKNOWN": "Unknown; reconciliation needed",
+      "REJECTED": "Not accepted",
+      "REMOTE_DELETED": "Remote removal confirmed"
+    }
   }
 }

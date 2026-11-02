@@ -124,6 +124,7 @@ model SportDefinition {
   activities        Activity[]
   planWorkouts      PlanWorkout[]
   competitionEvents CompetitionEvent[]
+  routeVersions     SavedRouteVersion[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1156,6 +1157,8 @@ model T_user {
   email                             String
   emailVerified                     Boolean                            @map("email_verified")
   image                             String?
+  savedRoutes                       SavedRoute[]
+  routeExternalMappings             RouteExternalMapping[]
   /// 用户偏好语言（用于异步任务：通知/邮件/worker 等无法依赖请求头时的 i18n 选择）
   preferredLocale                   String?                            @map("preferred_locale")
   createdAt                         DateTime                           @map("created_at")
@@ -1424,6 +1427,7 @@ model ExternalProviderConnection {
   metadata  Json?   @map("metadata")
 
   planWorkoutMappings PlanWorkoutExternalMapping[]
+  routeMappings       RouteExternalMapping[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -6071,4 +6075,98 @@ model McpCapabilityAudit {
   @@index([userFingerprint, occurredAt])
   @@index([userFingerprint, clientFingerprint, occurredAt])
   @@map("t_mcp_capability_audit")
+}
+
+/// User-owned local route identity; delivery state belongs to separate provider mappings.
+model SavedRoute {
+  id               String                 @id @default(cuid())
+  userId           String                 @map("user_id")
+  user             T_user                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId        String                 @map("request_id") @db.VarChar(36)
+  creationChecksum String                 @map("creation_checksum") @db.VarChar(64)
+  headRevision     Int                    @default(1) @map("head_revision")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  deletedAt        DateTime?              @map("deleted_at")
+  versions         SavedRouteVersion[]
+  externalMappings RouteExternalMapping[]
+
+  @@unique([id, userId], map: "route_owner_unique")
+  @@unique([userId, requestId], map: "route_request_unique")
+  @@index([userId, deletedAt, updatedAt])
+  @@map("t_saved_route")
+}
+
+/// Immutable, complete local route version. Rendering samples do not replace this geometry.
+model SavedRouteVersion {
+  id                   String                 @id @default(cuid())
+  routeId              String                 @map("route_id")
+  userId               String                 @map("user_id")
+  route                SavedRoute             @relation(fields: [routeId, userId], references: [id, userId], onDelete: Cascade)
+  revision             Int
+  name                 String                 @db.VarChar(100)
+  description          String                 @default("") @db.VarChar(2000)
+  sportCode            String                 @map("sport_code")
+  sportDefinition      SportDefinition        @relation(fields: [sportCode], references: [code], onDelete: Restrict)
+  geometry             Json
+  distanceMeters       Float                  @map("distance_meters")
+  elevationGainMeters  Float?                 @map("elevation_gain_meters")
+  elevationLossMeters  Float?                 @map("elevation_loss_meters")
+  pointCount           Int                    @map("point_count")
+  segmentCount         Int                    @map("segment_count")
+  hasCompleteElevation Boolean                @map("has_complete_elevation")
+  rawStorageKey        String                 @map("raw_storage_key")
+  rawSize              Int                    @map("raw_size")
+  rawChecksum          String                 @map("raw_checksum") @db.VarChar(64)
+  checksum             String                 @db.VarChar(64)
+  createdAt            DateTime               @default(now()) @map("created_at")
+  mappings             RouteExternalMapping[]
+
+  @@unique([routeId, userId, revision], map: "route_revision_unique")
+  @@unique([id, routeId, userId], map: "route_version_owner_unique")
+  @@index([userId, createdAt])
+  @@index([rawStorageKey])
+  @@map("t_saved_route_version")
+}
+
+enum RouteDeliveryState {
+  PENDING
+  ACCEPTED
+  VERIFIED
+  UNKNOWN
+  REJECTED
+  REMOTE_DELETED
+
+  @@map("enum_route_delivery_state")
+}
+
+/// Provider-neutral account-scoped delivery. An acceptance receipt is not device verification.
+model RouteExternalMapping {
+  id                   String                      @id @default(cuid())
+  userId               String                      @map("user_id")
+  user                 T_user                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  routeId              String                      @map("route_id")
+  route                SavedRoute                  @relation(fields: [routeId, userId], references: [id, userId], onDelete: Cascade)
+  versionId            String?                     @map("version_id")
+  version              SavedRouteVersion?          @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  provider             ThirdPartyProvider
+  connectionId         String?                     @map("connection_id")
+  connection           ExternalProviderConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  accountRef           String                      @map("account_ref")
+  externalId           String?                     @map("external_id")
+  createdByApplication Boolean                     @default(true) @map("created_by_application")
+  adapterVersion       Int                         @default(1) @map("adapter_version")
+  state                RouteDeliveryState          @default(PENDING)
+  lastLocalChecksum    String?                     @map("last_local_checksum") @db.VarChar(64)
+  lastRemoteChecksum   String?                     @map("last_remote_checksum") @db.VarChar(64)
+  metadata             Json?
+  createdAt            DateTime                    @default(now()) @map("created_at")
+  updatedAt            DateTime                    @updatedAt @map("updated_at")
+
+  @@unique([userId, provider, accountRef, routeId], map: "route_delivery_identity_unique")
+  @@unique([provider, accountRef, externalId], map: "route_remote_identity_unique")
+  @@index([routeId, userId])
+  @@index([connectionId, state])
+  @@index([versionId])
+  @@map("t_route_external_mapping")
 }

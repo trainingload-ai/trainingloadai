@@ -68,6 +68,7 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "saxes": "6.0.0",
     "sharp": "0.35.5",
     "trackswap": "0.2.6",
     "tz-lookup": "^6.1.25",
@@ -889,6 +890,26 @@
     "./api/plan/application/plan-delivery-read.service": {
       "types": "./src/api/plan/application/plan-delivery-read.service.ts",
       "default": "./src/api/plan/application/plan-delivery-read.service.ts"
+    },
+    "./routes/routes.module": {
+      "types": "./src/routes/routes.module.ts",
+      "default": "./src/routes/routes.module.ts"
+    },
+    "./routes/routes-read.service": {
+      "types": "./src/routes/routes-read.service.ts",
+      "default": "./src/routes/routes-read.service.ts"
+    },
+    "./routes/routes.service": {
+      "types": "./src/routes/routes.service.ts",
+      "default": "./src/routes/routes.service.ts"
+    },
+    "./routes/routes-delivery-links.service": {
+      "types": "./src/routes/routes-delivery-links.service.ts",
+      "default": "./src/routes/routes-delivery-links.service.ts"
+    },
+    "./routes/route-geometry": {
+      "types": "./src/routes/route-geometry.ts",
+      "default": "./src/routes/route-geometry.ts"
     }
   }
 }

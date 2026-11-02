@@ -1,3 +1,4 @@
+import { RoutesReadService } from '../../routes/routes-read.service';
 import {
   BadRequestException,
   ConflictException,
@@ -70,6 +71,7 @@ export class AccountDeletionService {
     private readonly users: UserQueryService,
     @Inject(ACCOUNT_DELETION_LOCAL_DATA)
     private readonly deploymentLocalData: AccountDeletionLocalData,
+    private readonly routes: RoutesReadService,
   ) {}
 
   async preview(userId: string) {
@@ -117,9 +119,7 @@ export class AccountDeletionService {
     }
     await this.obligations.assertDeletionAllowed(args.userId);
     const subjectHash = accountDeletionSubjectHash(args.userId);
-    const extensionSnapshot = await this.obligations.snapshot(
-      args.userId,
-    );
+    const extensionSnapshot = await this.obligations.snapshot(args.userId);
 
     const result = await this.prisma.$transaction(
       async (tx) => {
@@ -313,6 +313,7 @@ export class AccountDeletionService {
       activitySources,
       importDrafts,
       healthSeriesFiles,
+      routeFiles,
       userDataExports,
     ] = await Promise.all([
       this.users.users(tx).findUnique({
@@ -342,6 +343,7 @@ export class AccountDeletionService {
         select: { fileKey: true, rawStorageKey: true },
       }),
       this.healthFiles.listParquetPathsForUser(userId),
+      this.routes.listStorageKeysForUser(userId, tx),
       tx.userDataExportJob.findMany({
         where: { userId },
         select: { artifactStorageKey: true },
@@ -377,6 +379,7 @@ export class AccountDeletionService {
       addPrivate(row.rawStorageKey);
     }
     for (const row of healthSeriesFiles) addPrivate(row.parquetPath);
+    for (const row of routeFiles) addPrivate(row.rawStorageKey);
     for (const row of userDataExports) addPrivate(row.artifactStorageKey);
 
     const avatarKey = this.internalAvatarStorageKey(user?.image);

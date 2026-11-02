@@ -6155,5 +6155,42 @@
     "readOnlyAction": "Nur Lesezugriff",
     "loadError": "Gastzugang konnte nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen"
+  },
+  "RoutesPage": {
+    "title": "Meine Routen",
+    "description": "GPX importieren, Routen speichern und Übertragungen prüfen.",
+    "import": "Route importieren",
+    "newVersion": "GPX-Version aktualisieren",
+    "name": "Name",
+    "sport": "Sport",
+    "notes": "Notizen",
+    "fileHint": "GPX bis 20 MiB. Abschnitte bleiben erhalten; fehlende Höhen werden angezeigt.",
+    "cancel": "Abbrechen",
+    "save": "Route speichern",
+    "saving": "Wird gespeichert…",
+    "loading": "Wird geladen…",
+    "retry": "Erneut versuchen",
+    "empty": "Noch keine Routen gespeichert.",
+    "select": "Route für Karte und Details auswählen.",
+    "more": "Mehr laden",
+    "download": "Original-GPX herunterladen",
+    "delete": "Route löschen",
+    "deleteHint": "Die Route wird ausgeblendet. Ungeklärte Übertragungen bleiben für Rücknahme oder Abgleich erhalten.",
+    "pendingDelete": "Route ausgeblendet; Übertragungen erfordern noch Aufmerksamkeit.",
+    "deleted": "Route gelöscht.",
+    "ascent": "Anstieg",
+    "missingElevation": "Höhen fehlen",
+    "geometry": "{points} Punkte · {segments} Abschnitte · Version {revision}",
+    "changed": "Die Route wurde geändert. Bitte aktualisieren.",
+    "invalidFile": "Datei konnte nicht gespeichert werden. GPX, Koordinaten, Größe und Abschnitte prüfen.",
+    "failed": "Vorgang fehlgeschlagen. Erneut versuchen.",
+    "state": {
+      "PENDING": "In Warteschlange",
+      "ACCEPTED": "Vom Anbieter angenommen",
+      "VERIFIED": "Rücklesung bestätigt",
+      "UNKNOWN": "Unbekannt; Abgleich nötig",
+      "REJECTED": "Nicht angenommen",
+      "REMOTE_DELETED": "Remote-Löschung bestätigt"
+    }
   }
 }

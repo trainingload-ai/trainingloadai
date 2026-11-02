@@ -6253,5 +6253,42 @@
     "readOnlyAction": "唯讀存取",
     "loadError": "無法載入訪客存取，請重試。",
     "retry": "重試"
+  },
+  "RoutesPage": {
+    "title": "我的路線",
+    "description": "匯入 GPX，儲存路線並查看第三方交付狀態。",
+    "import": "匯入路線",
+    "newVersion": "更新 GPX 版本",
+    "name": "名稱",
+    "sport": "運動",
+    "notes": "說明",
+    "fileHint": "GPX 最大 20 MiB。保留原始分段；缺少高程會明確顯示。",
+    "cancel": "取消",
+    "save": "儲存路線",
+    "saving": "正在儲存…",
+    "loading": "正在載入…",
+    "retry": "重試",
+    "empty": "尚未儲存路線。",
+    "select": "選擇路線以查看地圖和詳細資料。",
+    "more": "載入更多",
+    "download": "下載原始 GPX",
+    "delete": "刪除路線",
+    "deleteHint": "刪除後路線將隱藏；未完成的第三方交付記錄會保留，以供撤回或核對。",
+    "pendingDelete": "路線已隱藏，仍有第三方交付待處理。",
+    "deleted": "路線已刪除。",
+    "ascent": "爬升",
+    "missingElevation": "缺少高程",
+    "geometry": "{points} 個點 · {segments} 段 · 版本 {revision}",
+    "changed": "路線版本已變更，請重新整理後再試。",
+    "invalidFile": "無法儲存檔案，請檢查 GPX 格式、座標、大小和分段。",
+    "failed": "操作失敗，請重試。",
+    "state": {
+      "PENDING": "排隊中",
+      "ACCEPTED": "廠商已接受",
+      "VERIFIED": "已讀回驗證",
+      "UNKNOWN": "結果不明，待核對",
+      "REJECTED": "未接受",
+      "REMOTE_DELETED": "已確認遠端移除"
+    }
   }
 }

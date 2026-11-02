@@ -32,7 +32,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 427
+          "line": 430
         }
       ]
     },
@@ -2487,7 +2487,7 @@
         },
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 85
+          "line": 86
         },
         {
           "file": "apps/server/src/bootstrap/deployment-edition.ts",
@@ -3540,7 +3540,7 @@
         },
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 433
+          "line": 436
         }
       ]
     },
@@ -4711,7 +4711,7 @@
       "references": [
         {
           "file": "apps/server/src/sensor/parquet-garbage-collector.service.ts",
-          "line": 92
+          "line": 94
         }
       ]
     },
@@ -4884,7 +4884,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
-          "line": 432
+          "line": 435
         }
       ]
     },
@@ -5963,15 +5963,15 @@
       "references": [
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 81
+          "line": 82
         },
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 89
+          "line": 92
         },
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 90
+          "line": 93
         }
       ]
     },
@@ -5988,7 +5988,7 @@
       "references": [
         {
           "file": "apps/server/src/sensor/parquet-garbage-collector.service.ts",
-          "line": 91
+          "line": 93
         }
       ]
     },
