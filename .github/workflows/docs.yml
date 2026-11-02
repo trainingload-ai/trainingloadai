@@ -16,18 +16,7 @@ on:
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
   pull_request:
-    paths:
-      - ".github/workflows/docs.yml"
-      - "apps/docs/**"
-      - "packages/design-tokens/**"
-      - "packages/messages/docs/**"
-      - "packages/shared/**"
-      - "scripts/docs/**"
-      - ".npmrc"
-      - ".nvmrc"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
+    branches: [main]
 
 permissions:
   contents: read
