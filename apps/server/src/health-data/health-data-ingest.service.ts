@@ -779,7 +779,8 @@ export class HealthDataIngestService {
 
   /**
    * 替换权威原始 point 范围，但不投影到每日指标。缺失 point 会被软删除。
-   * 仅用于完整 provider/日期 point 快照，不得用于增量 webhook。
+   * 仅用于完整 provider/日期 point 快照；带 externalIdPrefix 时替换完整来源摘要，可处理日期修订。
+   * 不得传入不完整的增量记录。
    */
   async replaceProviderRawCandidates(args: {
     userId: string;
@@ -824,7 +825,7 @@ export class HealthDataIngestService {
           ...(args.connectionId !== undefined
             ? { connectionId: args.connectionId }
             : {}),
-          localDate: args.localDate,
+          ...(args.externalIdPrefix ? {} : { localDate: args.localDate }),
           metricType: { in: asHealthMetricTypes(metricTypes) },
           projectToDaily: false,
         };

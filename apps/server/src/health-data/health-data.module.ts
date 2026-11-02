@@ -1,3 +1,5 @@
+import { HealthObservationService } from './health-observation.service';
+import { ImportingJobModule } from '@/importing/importing-job.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { StorageModule } from '@/storage/storage.module';
@@ -18,6 +20,7 @@ import { TimezoneModule } from '@/timezone/timezone.module';
  */
 @Module({
   imports: [
+    ImportingJobModule,
     PrismaModule,
     StorageModule,
     SensorDataModule,
@@ -27,6 +30,7 @@ import { TimezoneModule } from '@/timezone/timezone.module';
   ],
   controllers: [HealthDataController],
   providers: [
+    HealthObservationService,
     HealthDataRepository,
     HealthDataIngestService,
     HealthDataQueryService,
@@ -34,6 +38,7 @@ import { TimezoneModule } from '@/timezone/timezone.module';
     HealthSessionAssociationService,
   ],
   exports: [
+    HealthObservationService,
     HealthDataIngestService,
     HealthDataQueryService,
     HealthSeriesStorageService,

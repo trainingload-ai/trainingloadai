@@ -68,6 +68,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: [
       "src/components/routes/**/*.test.{ts,tsx}",
+      "src/components/health/**/*.test.{ts,tsx}",
       "src/lib/ai-operation-errors.test.ts",
       "src/lib/api.test.ts",
       "src/lib/bff-upstream-headers.test.ts",

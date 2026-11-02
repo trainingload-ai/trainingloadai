@@ -1,5 +1,7 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
+
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import {
@@ -125,6 +127,7 @@ type HomeMetricOptionGroup = {
 export function HomeMetricsOverviewSection() {
   const publicDemo = usePublicDemo();
   const demoText = useGuestAccessText();
+  const recordsT = useTranslations("HealthRecords");
   const locale = useLocale();
   const copy = locale.startsWith("zh") ? COPY.zh : COPY.en;
   const healthCopy = getHealthOverviewCopy(locale);
@@ -470,6 +473,12 @@ export function HomeMetricsOverviewSection() {
           {copy.empty}
         </div>
       )}
+
+      <div className="flex justify-end">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/health">{recordsT("title")}</Link>
+        </Button>
+      </div>
 
       <AdaptiveDialog open={addOpen} onOpenChange={setAddOpen}>
         <AdaptiveDialogContent

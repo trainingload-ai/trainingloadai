@@ -1375,7 +1375,153 @@ const savedRouteVersion = recordSchema({
   ],
 });
 
+const healthObservation = {
+  ...recordSchema({
+    id: "health-observation",
+    title: "Health observation",
+    description:
+      "A complete pressure tuple or source-coded breathing observation; a date-only category has no fabricated duration.",
+    properties: {
+      id: requiredString("Observation ID."),
+      groupId: requiredString("Opaque source-group identity."),
+      provider: requiredString("Source provider."),
+      sourceNamespace: requiredString("Stable account/source namespace."),
+      sourceExternalId: requiredString("Original observation identity."),
+      sourceObjectId: string("Origin record."),
+      snapshotId: string("Origin snapshot."),
+      kind: { enum: ["BLOOD_PRESSURE", "BREATHING_VARIATION"] },
+      scope: { enum: ["MEASUREMENT", "DAILY", "INTERVAL"] },
+      localDate: requiredString("Source calendar date.", "date"),
+      timezone: string("IANA timezone when known."),
+      offsetSeconds: number("Original UTC offset in seconds."),
+      measuredAt: string("Actual measurement time.", "date-time"),
+      intervalStart: string("Actual interval start.", "date-time"),
+      intervalEnd: string("Actual interval end.", "date-time"),
+      systolicMmHg: number("Systolic pressure in mmHg."),
+      diastolicMmHg: number("Diastolic pressure in mmHg."),
+      pulseBpm: number("Pulse from this same measurement, when available."),
+      measurementOrigin: string("Device, manual or unknown origin."),
+      categorySystem: string("Original classification system."),
+      categoryCode: string(
+        "Original category, never a fabricated numerical grade.",
+      ),
+      sourceName: string("Source name."),
+      sourcePriority: number("Source selection priority."),
+      sourceUpdatedAt: requiredString("Source revision time.", "date-time"),
+    },
+    required: [
+      "id",
+      "groupId",
+      "provider",
+      "sourceNamespace",
+      "sourceExternalId",
+      "kind",
+      "scope",
+      "localDate",
+      "sourceUpdatedAt",
+    ],
+  }),
+  allOf: [
+    {
+      if: { properties: { kind: { const: "BLOOD_PRESSURE" } } },
+      then: {
+        properties: {
+          scope: { const: "MEASUREMENT" },
+          measuredAt: { type: "string", format: "date-time" },
+          systolicMmHg: {
+            type: "number",
+            exclusiveMinimum: 0,
+            exclusiveMaximum: 1000,
+          },
+          diastolicMmHg: {
+            type: "number",
+            exclusiveMinimum: 0,
+            exclusiveMaximum: 1000,
+          },
+          measurementOrigin: { enum: ["DEVICE", "MANUAL", "UNKNOWN"] },
+          intervalStart: { type: "null" },
+          intervalEnd: { type: "null" },
+          categorySystem: { type: "null" },
+          categoryCode: { type: "null" },
+        },
+        required: [
+          "measuredAt",
+          "systolicMmHg",
+          "diastolicMmHg",
+          "measurementOrigin",
+        ],
+      },
+    },
+    {
+      if: { properties: { kind: { const: "BREATHING_VARIATION" } } },
+      then: {
+        properties: {
+          scope: { enum: ["DAILY", "INTERVAL"] },
+          categorySystem: { type: "string", minLength: 1 },
+          categoryCode: { type: "string", pattern: "^[A-Z0-9_:-]{1,64}$" },
+          systolicMmHg: { type: "null" },
+          diastolicMmHg: { type: "null" },
+          pulseBpm: { type: "null" },
+          measurementOrigin: { type: "null" },
+          measuredAt: { type: "null" },
+        },
+        required: ["categorySystem", "categoryCode"],
+        allOf: [
+          {
+            if: { properties: { scope: { const: "DAILY" } } },
+            then: {
+              properties: {
+                intervalStart: { type: "null" },
+                intervalEnd: { type: "null" },
+              },
+            },
+            else: {
+              properties: {
+                intervalStart: { type: "string", format: "date-time" },
+                intervalEnd: { type: "string", format: "date-time" },
+              },
+              required: ["intervalStart", "intervalEnd"],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+const healthReportedQuantity = recordSchema({
+  id: "health-reported-quantity",
+  title: "Source-reported quantity",
+  description:
+    "Preserved amount with explicitly unspecified total/entry semantics; excluded from daily totals.",
+  properties: {
+    id: requiredString("Fact ID."),
+    localDate: requiredString("Source calendar date.", "date"),
+    metricType: requiredString("Metric identity."),
+    value: number("Source amount."),
+    unit: string("Source amount unit."),
+    provider: requiredString("Source provider."),
+    basis: { const: "UNSPECIFIED_REPORT" },
+    sourceName: string("Source name."),
+    sourceNamespace: string("Source namespace."),
+    sourceObjectId: string("Origin record."),
+    sourceExternalId: requiredString("Original fact identity."),
+    sourceUpdatedAt: string("Source revision time.", "date-time"),
+  },
+  required: [
+    "id",
+    "localDate",
+    "metricType",
+    "value",
+    "unit",
+    "provider",
+    "basis",
+    "sourceExternalId",
+  ],
+});
+
 export const USER_DATA_EXPORT_SCHEMAS = {
+  "health-observation": healthObservation,
+  "health-reported-quantity": healthReportedQuantity,
   "saved-route": savedRoute,
   "saved-route-version": savedRouteVersion,
   "user-profile": userProfile,

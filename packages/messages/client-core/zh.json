@@ -6849,5 +6849,51 @@
       "REJECTED": "未接受",
       "REMOTE_DELETED": "已确认远端移除"
     }
+  },
+  "HealthRecords": {
+    "title": "健康记录",
+    "description": "保留每条记录的来源、本地日期和单位，缺失值不补零。",
+    "range": "日期范围",
+    "days": "{count} 天",
+    "quantities": "营养、补水与皮温变化",
+    "loading": "正在加载…",
+    "retry": "重试",
+    "empty": "所选时段暂无记录。",
+    "deviationHint": "相对该来源基线的变化，不是绝对体温。",
+    "bloodPressure": "血压",
+    "pulse": "同次脉搏",
+    "alternateSource": "其他来源",
+    "breathing": "呼吸变化",
+    "breathingHint": "分类沿用来源定义，不转换为数值评分。",
+    "noOverallCategory": "未提供整晚分类",
+    "periods": "{count} 个原始时段",
+    "dateOnly": "来源仅提供日期与分类。",
+    "sourceReports": "来源报告的量值",
+    "reportHint": "来源尚未明确这些量值是单条摄入还是累计值，未计入每日补水合计。",
+    "truncated": "记录达到显示上限，请缩短时段查看完整详情。",
+    "connections": "连接设置",
+    "more": "显示更多",
+    "less": "收起",
+    "failed": "暂时无法加载观察记录。",
+    "metrics": {
+      "DIETARY_ENERGY_KCAL": "摄入能量",
+      "DIETARY_CARBOHYDRATE_G": "摄入碳水化合物",
+      "DIETARY_FAT_G": "摄入脂肪",
+      "DIETARY_PROTEIN_G": "摄入蛋白质",
+      "HYDRATION_ML": "饮水量",
+      "SKIN_TEMPERATURE_DELTA_C": "皮温变化"
+    },
+    "origins": {
+      "DEVICE": "设备测量",
+      "MANUAL": "手动录入",
+      "UNKNOWN": "未注明来源方式"
+    },
+    "categories": {
+      "MINIMAL": "极少",
+      "FEW": "少量",
+      "OCCASIONAL": "偶尔",
+      "FREQUENT": "频繁",
+      "UNMEASURABLE": "无法测量"
+    }
   }
 }

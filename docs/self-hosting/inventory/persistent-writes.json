@@ -550,133 +550,133 @@
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 1826,
+      "line": 1832,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(recordOutputDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 1827,
+      "line": 1833,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(lengthOutputDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 1828,
+      "line": 1834,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fs.mkdir(stagingDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 1866,
+      "line": 1872,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.rm(localParquet, { force: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 1877,
+      "line": 1883,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fs.rm(stagingDirectory, { recursive: true, force: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2013,
+      "line": 2019,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(outputDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2014,
+      "line": 2020,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fs.mkdir(stagingDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2128,
+      "line": 2134,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "localPaths.map((filePath) => fs.rm(filePath, { force: true })),"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2144,
+      "line": 2150,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fs.rm(stagingDirectory, { recursive: true, force: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2189,
+      "line": 2195,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(outputDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2258,
+      "line": 2264,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.writeFile(outputPath, generated.content);"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2335,
+      "line": 2341,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(healthDirectory, { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2467,
+      "line": 2473,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(path.dirname(filePath), { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2468,
+      "line": 2474,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.writeFile("
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2511,
+      "line": 2517,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(path.dirname(filePath), { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2512,
+      "line": 2518,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "const stream = createWriteStream(filePath, { encoding: 'utf8' });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2547,
+      "line": 2553,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "await fs.mkdir(path.dirname(filePath), { recursive: true });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2548,
+      "line": 2554,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "const stream = createWriteStream(filePath, { encoding: 'utf8' });"
     },
     {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
-      "line": 2662,
+      "line": 2668,
       "owner": "apps",
       "classification": "authoritative-or-export",
       "expression": "const output = createWriteStream(destination);"

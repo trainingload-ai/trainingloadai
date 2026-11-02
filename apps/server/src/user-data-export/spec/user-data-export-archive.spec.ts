@@ -42,7 +42,7 @@ function emptyModel() {
 function archiveDependencies(prisma: object) {
   return [
     new CompetitionQueryService(new CompetitionRepository(prisma as never)),
-    new HealthFileQueryService(new HealthDataRepository(prisma as never)),
+    new HealthFileQueryService(new HealthDataRepository({externalHealthObservation:emptyModel(),externalHealthSample:emptyModel(),...prisma} as never)),
     new ImportingJobService(new ImportingJobRepository(prisma as never)),
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new UserQueryService(new UserIdentityRepository(prisma as never)),
@@ -850,4 +850,15 @@ describe('route export privacy', () => {
     );
     expect(validate(row)).toBe(true);
   });
+});
+
+describe('supplemental health export boundaries',()=>{
+ it('keeps clinical groups and unspecified reports in full backups without leaking connection identifiers into AI exports',async()=>{
+  const now=new Date('2026-11-01T08:00:00Z'),datasets:any[]=[];let newReads=0;
+  const service:any=Object.create(UserDataExportArchiveService.prototype);
+  service.healthFiles={listExportDailyMetrics:async()=>[],listExportSessions:async()=>[],listExportReportedQuantities:async()=>{newReads++;return [];},listExportObservations:async()=>{newReads++;return [{id:'o',userId:'owner',connectionId:'private-connection',sourceNamespace:'fixture:account',sourceGroupKey:'a'.repeat(64),externalId:'bp:one',sourceObjectId:'source',snapshotId:null,provider:'MANUAL',kind:'BLOOD_PRESSURE',scope:'MEASUREMENT',localDate:new Date('2026-11-01T00:00:00Z'),timezone:null,offsetSeconds:28800,measuredAt:now,intervalStart:null,intervalEnd:null,systolicMmHg:120,diastolicMmHg:80,pulseBpm:null,measurementOrigin:'DEVICE',categorySystem:null,categoryCode:null,sourceName:'Device',sourcePriority:100,sourceUpdatedAt:now,createdAt:now,updatedAt:now,deletedAt:null}];}};
+  service.writeJsonlDataset=async(args:any)=>datasets.push(args);service.writeCsvDataset=async()=>{};
+  const job={userId:'owner',mode:'AI_ANALYSIS',dataCutoffAt:now};await service.writeHealthDatasets(job,'unused',[]);expect(newReads).toBe(0);expect(datasets.some(row=>row.id==='health-observations')).toBe(false);
+  await service.writeHealthDatasets({...job,mode:'FULL_BACKUP'},'unused',[]);const row=datasets.find(row=>row.id==='health-observations').rows[0];expect(row).not.toHaveProperty('connectionId');expect(row).not.toHaveProperty('userId');expect(row).toMatchObject({systolicMmHg:120,diastolicMmHg:80,pulseBpm:null,sourceObjectId:'source'});const validate=schemaValidator(USER_DATA_EXPORT_SCHEMAS['health-observation']);expect(validate(row)).toBe(true);
+ });
 });

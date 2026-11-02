@@ -57,6 +57,7 @@
     "./workout-structure": "./workout-structure.ts",
     "./workout-summary": "./workout-summary.ts",
     "./plan-templates/workout-step-display": "./plan-templates/workout-step-display.ts",
-    "./routes": "./routes.ts"
+    "./routes": "./routes.ts",
+    "./health-observations": "./health-observations.ts"
   }
 }

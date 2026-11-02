@@ -428,6 +428,12 @@ enum HealthMetricType {
   HRV_RMSSD_WEEKLY_AVG_MS
   FLOORS_ASCENDED
   FLOORS_DESCENDED
+  DIETARY_ENERGY_KCAL
+  DIETARY_CARBOHYDRATE_G
+  DIETARY_FAT_G
+  DIETARY_PROTEIN_G
+  HYDRATION_ML
+  SKIN_TEMPERATURE_DELTA_C
 
   @@map("enum_health_metric_type")
 }
@@ -1202,6 +1208,7 @@ model T_user {
   activityDataMigrations            ActivityDataMigration[]
   userZoneSettingVersions           UserZoneSettingVersion[]
   externalHealthSamples             ExternalHealthSample[]
+  externalHealthObservations        ExternalHealthObservation[]
   userDailyHealthMetrics            UserDailyHealthMetric[]
   canonicalHealthSnapshots          CanonicalHealthSnapshot[]
   healthSeriesFiles                 HealthSeriesFile[]
@@ -2452,12 +2459,14 @@ model ImportSourceObject {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  itemJobs                ImportItemJob[]
-  canonicalSnapshots      CanonicalActivitySnapshot[]
-  activitySources         ActivitySource[]
-  canonicalHealthSnapshot CanonicalHealthSnapshot?
-  externalHealthSamples   ExternalHealthSample[]
+  itemJobs                   ImportItemJob[]
+  canonicalSnapshots         CanonicalActivitySnapshot[]
+  activitySources            ActivitySource[]
+  canonicalHealthSnapshot    CanonicalHealthSnapshot?
+  externalHealthSamples      ExternalHealthSample[]
+  externalHealthObservations ExternalHealthObservation[]
 
+  @@unique([id, userId], map: "import_source_owner_identity_unique")
   @@unique([userId, sourceKind, sourceUid], name: "import_source_object_identity_unique")
   @@index([userId, sourceKind, createdAt(sort: Desc)])
   @@index([provider, externalId])
@@ -4695,7 +4704,9 @@ model CanonicalHealthSnapshot {
   seriesFiles    HealthSeriesFile[]
   sessions       ExternalHealthSession[]
   projectedFacts ExternalHealthSample[]
+  observations   ExternalHealthObservation[]
 
+  @@unique([id, userId], map: "health_snapshot_owner_identity_unique")
   @@index([userId, observedStart])
   @@index([userId, localDateStart])
   @@map("t_canonical_health_snapshot")
@@ -6169,4 +6180,72 @@ model RouteExternalMapping {
   @@index([connectionId, state])
   @@index([versionId])
   @@map("t_route_external_mapping")
+}
+
+/// Complete blood-pressure tuples or coded breathing observations, never arbitrary vendor payloads.
+model ExternalHealthObservation {
+  id                String                   @id @default(cuid())
+  userId            String                   @map("user_id")
+  user              T_user                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          HealthDataProvider
+  sourceNamespace   String                   @map("source_namespace") @db.VarChar(192)
+  sourceGroupKey    String                   @map("source_group_key") @db.VarChar(64)
+  externalId        String                   @map("external_id") @db.VarChar(512)
+  connectionId      String?                  @map("connection_id")
+  sourceObjectId    String?                  @map("source_object_id")
+  sourceObject      ImportSourceObject?      @relation(fields: [sourceObjectId], references: [id], onDelete: SetNull)
+  snapshotId        String?                  @map("snapshot_id")
+  snapshot          CanonicalHealthSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)
+  kind              HealthObservationKind
+  scope             HealthObservationScope
+  localDate         DateTime                 @map("local_date") @db.Date
+  timezone          String?
+  offsetSeconds     Int?                     @map("offset_seconds")
+  measuredAt        DateTime?                @map("measured_at")
+  intervalStart     DateTime?                @map("interval_start")
+  intervalEnd       DateTime?                @map("interval_end")
+  systolicMmHg      Float?                   @map("systolic_mmhg")
+  diastolicMmHg     Float?                   @map("diastolic_mmhg")
+  pulseBpm          Float?                   @map("pulse_bpm")
+  measurementOrigin HealthMeasurementOrigin? @map("measurement_origin")
+  categorySystem    String?                  @map("category_system") @db.VarChar(192)
+  categoryCode      String?                  @map("category_code") @db.VarChar(64)
+  sourceName        String?                  @map("source_name") @db.VarChar(200)
+  sourcePriority    Int?                     @map("source_priority")
+  sourceUpdatedAt   DateTime                 @map("source_updated_at")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+  deletedAt         DateTime?                @map("deleted_at")
+
+  @@unique([userId, provider, sourceNamespace, kind, externalId], map: "health_observation_identity_unique")
+  @@index([userId, sourceGroupKey])
+  @@index([userId, kind, localDate])
+  @@index([userId, sourceNamespace, localDate])
+  @@index([provider, connectionId])
+  @@index([sourceObjectId])
+  @@index([snapshotId])
+  @@map("t_external_health_observation")
+}
+
+enum HealthObservationKind {
+  BLOOD_PRESSURE
+  BREATHING_VARIATION
+
+  @@map("enum_health_observation_kind")
+}
+
+enum HealthObservationScope {
+  MEASUREMENT
+  DAILY
+  INTERVAL
+
+  @@map("enum_health_observation_scope")
+}
+
+enum HealthMeasurementOrigin {
+  DEVICE
+  MANUAL
+  UNKNOWN
+
+  @@map("enum_health_measurement_origin")
 }

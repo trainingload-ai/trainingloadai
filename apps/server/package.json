@@ -910,6 +910,14 @@
     "./routes/route-geometry": {
       "types": "./src/routes/route-geometry.ts",
       "default": "./src/routes/route-geometry.ts"
+    },
+    "./health-data/health-observation.service": {
+      "types": "./src/health-data/health-observation.service.ts",
+      "default": "./src/health-data/health-observation.service.ts"
+    },
+    "./health-data/health-observation.contract": {
+      "types": "./src/health-data/health-observation.contract.ts",
+      "default": "./src/health-data/health-observation.contract.ts"
     }
   }
 }
