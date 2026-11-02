@@ -39,6 +39,8 @@ export class ExternalProviderWebhookInboxService {
     dedupeKey: string;
     payload: Prisma.InputJsonValue;
     rawChecksum?: string;
+    /** Reviewed outbound operations remain unclaimable until their owner confirms them. */
+    initialStatus?: 'PENDING' | 'PREVIEW';
   }) {
     // 生成原始校验和
     const rawChecksum =
@@ -54,14 +56,14 @@ export class ExternalProviderWebhookInboxService {
           dedupeKey: args.dedupeKey,
           rawChecksum,
           payload: args.payload,
-          status: 'PENDING',
+          status: args.initialStatus ?? 'PENDING',
         },
       ],
       skipDuplicates: true,
     });
 
     if (created.count === 1) {
-      this.signal?.notify(args.provider);
+      if (args.initialStatus !== 'PREVIEW') this.signal?.notify(args.provider);
       return { accepted: true, enqueued: true, eventId };
     }
 
@@ -152,28 +154,50 @@ export class ExternalProviderWebhookInboxService {
     });
   }
 
-  markDone(id: string) {
-    return this.prisma.externalProviderWebhookEvent.update({
-      where: { id },
-      data: {
-        status: 'DONE',
-        processedAt: new Date(),
-        lockedAt: null,
-        lastError: null,
-      },
-    });
+  markDone(id: string, claim?: { attempts: number; lockedAt: Date }) {
+    const data = {
+      status: 'DONE',
+      processedAt: new Date(),
+      lockedAt: null,
+      lastError: null,
+    };
+    return claim
+      ? this.prisma.externalProviderWebhookEvent.updateMany({
+          where: {
+            id,
+            status: 'PROCESSING',
+            attempts: claim.attempts,
+            lockedAt: claim.lockedAt,
+          },
+          data,
+        })
+      : this.prisma.externalProviderWebhookEvent.update({
+          where: { id },
+          data,
+        });
   }
 
-  markIgnored(id: string) {
-    return this.prisma.externalProviderWebhookEvent.update({
-      where: { id },
-      data: {
-        status: 'IGNORED',
-        processedAt: new Date(),
-        lockedAt: null,
-        lastError: null,
-      },
-    });
+  markIgnored(id: string, claim?: { attempts: number; lockedAt: Date }) {
+    const data = {
+      status: 'IGNORED',
+      processedAt: new Date(),
+      lockedAt: null,
+      lastError: null,
+    };
+    return claim
+      ? this.prisma.externalProviderWebhookEvent.updateMany({
+          where: {
+            id,
+            status: 'PROCESSING',
+            attempts: claim.attempts,
+            lockedAt: claim.lockedAt,
+          },
+          data,
+        })
+      : this.prisma.externalProviderWebhookEvent.update({
+          where: { id },
+          data,
+        });
   }
 
   /** Existing waiting tasks are the durable cooldown record. No synthetic job or quota table. */
@@ -263,6 +287,7 @@ export class ExternalProviderWebhookInboxService {
     attempts: number;
     error: unknown;
     maxAttempts?: number;
+    lockedAt?: Date;
   }) {
     const maxAttempts = Math.max(1, args.maxAttempts ?? 8);
     const delay = Math.min(
@@ -271,14 +296,25 @@ export class ExternalProviderWebhookInboxService {
     );
     const message =
       args.error instanceof Error ? args.error.message : String(args.error);
-    return this.prisma.externalProviderWebhookEvent.update({
-      where: { id: args.id },
-      data: {
-        status: args.attempts >= maxAttempts ? 'DEAD' : 'FAILED',
-        availableAt: new Date(Date.now() + delay),
-        lockedAt: null,
-        lastError: message.slice(0, 1000),
-      },
-    });
+    const data = {
+      status: args.attempts >= maxAttempts ? 'DEAD' : 'FAILED',
+      availableAt: new Date(Date.now() + delay),
+      lockedAt: null,
+      lastError: message.slice(0, 1000),
+    };
+    return args.lockedAt
+      ? this.prisma.externalProviderWebhookEvent.updateMany({
+          where: {
+            id: args.id,
+            status: 'PROCESSING',
+            attempts: args.attempts,
+            lockedAt: args.lockedAt,
+          },
+          data,
+        })
+      : this.prisma.externalProviderWebhookEvent.update({
+          where: { id: args.id },
+          data,
+        });
   }
 }

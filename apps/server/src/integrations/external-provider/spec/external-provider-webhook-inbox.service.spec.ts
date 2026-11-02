@@ -23,6 +23,47 @@ describe('ExternalProviderWebhookInboxService', () => {
     expect(query.values).toContain(until);
   });
 
+  it('persists reviewed previews without waking a worker', async () => {
+    const createMany = jest.fn(async () => ({ count: 1 })),
+      notify = jest.fn();
+    const service = new ExternalProviderWebhookInboxService(
+      { externalProviderWebhookEvent: { createMany } } as never,
+      { notify } as never,
+    );
+    await service.enqueue({
+      provider: 'wahoo',
+      eventType: 'delivery',
+      dedupeKey: 'request',
+      payload: { ciphertext: 'fixture' },
+      initialStatus: 'PREVIEW',
+    });
+    expect(createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [expect.objectContaining({ status: 'PREVIEW' })],
+      }),
+    );
+    expect(notify).not.toHaveBeenCalled();
+  });
+  it('fences every terminal transition with the current claim', async () => {
+    const updateMany = jest.fn(async (_args: unknown) => ({ count: 0 }));
+    const service = new ExternalProviderWebhookInboxService({
+      externalProviderWebhookEvent: { updateMany },
+    } as never);
+    const lockedAt = new Date(),
+      claim = { attempts: 2, lockedAt };
+    await service.markDone('event', claim);
+    await service.markIgnored('event', claim);
+    await service.markFailed({
+      id: 'event',
+      ...claim,
+      error: new Error('fixture'),
+    });
+    for (const [args] of updateMany.mock.calls)
+      expect(args).toMatchObject({
+        where: { id: 'event', status: 'PROCESSING', attempts: 2, lockedAt },
+      });
+  });
+
   it('uses provider + dedupe key as the durable identity', async () => {
     const createMany = jest.fn(async () => ({ count: 1 }));
     const notify = jest.fn();

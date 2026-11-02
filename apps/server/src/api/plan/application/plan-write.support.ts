@@ -1828,6 +1828,10 @@ export class PlanWriteSupport {
       parentId: stepParentId,
       orderIndex: step.orderIndex,
       stepType: step.stepType,
+      stepAnnotations:
+        step.stepAnnotations == null
+          ? undefined
+          : (step.stepAnnotations as Prisma.InputJsonValue),
       name: step.name ?? null,
       notes: step.notes ?? null,
       intensity: step.intensity ?? null,

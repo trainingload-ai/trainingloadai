@@ -3,6 +3,10 @@ import { BusinessException } from '@/filters/business-exception/business.excepti
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import { I18nService } from 'nestjs-i18n';
 import {
+  encodeWorkoutStepAnnotations,
+  decodeWorkoutStepAnnotations,
+} from './workout-step-annotations';
+import {
   averageExpressionSpeedAsKmh,
   getExpressionSpeedUnitForSport,
   normalizeExpressionSpeedUnit,
@@ -129,6 +133,7 @@ export interface RepeatBlock {
 export type PlanBlock = WorkRestBlock | RepeatBlock;
 
 type WorkoutStepTreeRow = {
+  stepAnnotations?: unknown;
   stepType?: string | null;
   intensity?: string | null;
   durationType?: string | null;
@@ -197,6 +202,7 @@ function fitNumber(row: Record<string, unknown>, ...keys: string[]) {
 }
 
 export type WorkoutPlanStepDraft = {
+  stepAnnotations?: ReturnType<typeof encodeWorkoutStepAnnotations>;
   stepType: 'WORK' | 'REST' | 'REPEAT';
   orderIndex: number;
   name?: string | null;
@@ -449,6 +455,7 @@ export class WorkoutService {
         return {
           stepType,
           orderIndex,
+          stepAnnotations: encodeWorkoutStepAnnotations(step),
           intensity: stepIntensity,
           durationType,
           durationValue,
@@ -474,6 +481,7 @@ export class WorkoutService {
       return {
         stepType,
         orderIndex,
+        stepAnnotations: encodeWorkoutStepAnnotations(step),
         intensity: stepIntensity,
         durationType,
         durationValue,
@@ -576,6 +584,7 @@ export class WorkoutService {
   ): PlanBlock[] {
     // 从数据库 step 树反向恢复 PlanBlock，供详情页展示、编辑和导出时复用。
     const buildStep = (row: {
+      stepAnnotations?: unknown;
       intensity?: string | null;
       durationType?: string | null;
       durationValue?: number | null;
@@ -649,6 +658,7 @@ export class WorkoutService {
                       : 'SECONDS',
         },
       };
+      Object.assign(step, decodeWorkoutStepAnnotations(row.stepAnnotations));
       const zoneMeta = {
         zoneIndex: row.targetZoneIndex ?? undefined,
         zoneLabel: row.targetZoneLabel ?? undefined,

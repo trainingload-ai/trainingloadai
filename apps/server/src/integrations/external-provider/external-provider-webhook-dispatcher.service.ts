@@ -184,9 +184,19 @@ export class ExternalProviderWebhookDispatcherService
           scopeKey: result.scopeKey,
         });
       } else if (result === 'IGNORED') {
-        await this.inbox.markIgnored(event.id);
+        if (event.locked_at)
+          await this.inbox.markIgnored(event.id, {
+            attempts: event.attempts,
+            lockedAt: event.locked_at,
+          });
+        else await this.inbox.markIgnored(event.id);
       } else {
-        await this.inbox.markDone(event.id);
+        if (event.locked_at)
+          await this.inbox.markDone(event.id, {
+            attempts: event.attempts,
+            lockedAt: event.locked_at,
+          });
+        else await this.inbox.markDone(event.id);
       }
     } catch (error) {
       await this.inbox.markFailed({
@@ -194,6 +204,7 @@ export class ExternalProviderWebhookDispatcherService
         attempts: event.attempts,
         maxAttempts,
         error,
+        ...(event.locked_at ? { lockedAt: event.locked_at } : {}),
       });
       this.logger.warn(
         `[webhook-dispatcher] provider=${handler.provider} event=${event.id} 处理失败`,

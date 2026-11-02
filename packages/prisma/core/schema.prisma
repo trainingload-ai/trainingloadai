@@ -5859,6 +5859,8 @@ model PlanWorkoutStep {
   targetResolutionMode  PrescriptionResolutionMode  @default(LEGACY_SNAPSHOT) @map("target_resolution_mode")
   targetZoneSystemKey   String?                     @map("target_zone_system_key")
   targetZoneFingerprint String?                     @map("target_zone_fingerprint")
+  /// Versioned, validated existing IR swim attributes and secondary target.
+  stepAnnotations       Json?                       @map("step_annotations")
 
   @@index([workoutId, parentId, orderIndex])
   @@index([parentId])

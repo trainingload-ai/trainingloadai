@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "f92236a5eb10af574ecccb16fc194a052c1da057e70183154254ed0d4c506ccf",
+  "schemaChecksum": "9868115992d3d2e6226b9edec899e5c600f2206f84f0f0dbfebc5dadfe10a502",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -91,6 +91,11 @@
       "id": "0018_activity_sport_catalog",
       "file": "0018_activity_sport_catalog/migration.sql",
       "sha256": "8bec6231abde9d3ad097f386c91ee0a4f109e303ac38b97eff67736614bf31be"
+    },
+    {
+      "id": "0019_workout_step_annotations",
+      "file": "0019_workout_step_annotations/migration.sql",
+      "sha256": "d9e17e2bcded9605220918bee03849af4cc70e2b738b9f5161c5d849d92baed6"
     }
   ]
 }

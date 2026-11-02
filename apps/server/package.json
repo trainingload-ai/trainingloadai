@@ -885,6 +885,10 @@
     "./integrations/external-provider/provider-rate-limit": {
       "types": "./src/integrations/external-provider/provider-rate-limit.ts",
       "default": "./src/integrations/external-provider/provider-rate-limit.ts"
+    },
+    "./api/plan/application/plan-delivery-read.service": {
+      "types": "./src/api/plan/application/plan-delivery-read.service.ts",
+      "default": "./src/api/plan/application/plan-delivery-read.service.ts"
     }
   }
 }

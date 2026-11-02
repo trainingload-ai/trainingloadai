@@ -219,6 +219,23 @@ test("claimed batch and newly arrived jobs honor a durable cooldown after dispat
       $queryRawUnsafe: async (sql, ...values) =>
         (await db.query(sql, values)).rows,
       externalProviderWebhookEvent: {
+        updateMany: async (a) => ({
+          count: (
+            await db.query(
+              "UPDATE t_external_provider_webhook_event SET status=$2,processed_at=$3,locked_at=$4,last_error=$5 WHERE id=$1 AND status=$6 AND attempts=$7 AND locked_at=$8",
+              [
+                a.where.id,
+                a.data.status,
+                a.data.processedAt,
+                a.data.lockedAt,
+                a.data.lastError,
+                a.where.status,
+                a.where.attempts,
+                a.where.lockedAt,
+              ],
+            )
+          ).affectedRows,
+        }),
         count: async (a) =>
           Number(
             (
