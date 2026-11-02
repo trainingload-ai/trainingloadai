@@ -43,7 +43,12 @@ function fixture() {
         exercises: [],
       }),
     } as any,
-    { resolve: ({ structure }: any) => ({ structure }) } as any,
+    {
+      resolve: ({ structure }: any) => ({
+        structure,
+        text: `10s hr ${structure.kind === 'ENDURANCE' ? structure.blocks[0].steps[0].primaryTargetMeta.value : 'open'}bpm`,
+      }),
+    } as any,
   );
   return {
     row,
@@ -74,6 +79,7 @@ describe('provider-neutral reviewed plan snapshot', () => {
   it('binds the exact IR, local revision and date to the checksum', async () => {
     const f = fixture();
     const initial = await f.service.snapshot('owner', 'workout');
+    expect(initial?.text).toBe('10s hr 140bpm');
     expect((await f.service.snapshot('owner', 'workout'))?.checksum).toBe(
       initial?.checksum,
     );

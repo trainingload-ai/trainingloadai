@@ -18,6 +18,8 @@ export type PlanDeliverySnapshot = {
   sportDefinitionCode: string | null;
   scheduledDate: string | null;
   structure: WorkoutStructure;
+  /** Canonical athlete-facing prescription generated from the same resolved IR. */
+  text?: string;
   checksum: string;
 };
 
@@ -89,6 +91,7 @@ export class PlanDeliveryReadService {
       sportDefinitionCode: row.sportDefinitionCode,
       scheduledDate: row.scheduledDate?.toISOString().slice(0, 10) ?? null,
       structure: resolved.structure,
+      text: resolved.text,
     };
     return {
       ...data,
