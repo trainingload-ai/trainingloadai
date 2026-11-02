@@ -138,7 +138,17 @@ export class RoutesDeliveryLinksService {
         )
           throw new ConflictException('ROUTE_LOCAL_VERSION_CHANGED');
         if (
-          previous?.state === 'UNKNOWN' ||
+          (previous?.state === 'UNKNOWN' &&
+            !(
+              oldMetadata?.lastTaskId === input.claim.id &&
+              oldMetadata?.verification === 'READBACK' &&
+              metadata.verification === 'READBACK' &&
+              typeof oldMetadata?.verifiedAt === 'string' &&
+              metadata.verifiedAt === oldMetadata.verifiedAt &&
+              Date.now() - Date.parse(oldMetadata.verifiedAt) <= 15 * 60000 &&
+              previous.lastRemoteChecksum != null &&
+              input.remoteChecksum === previous.lastRemoteChecksum
+            )) ||
           (previous?.state === 'PENDING' &&
             oldMetadata?.lastTaskId !== input.claim.id)
         )

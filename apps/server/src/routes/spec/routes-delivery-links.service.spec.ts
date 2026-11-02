@@ -131,4 +131,30 @@ describe('provider-neutral route delivery mappings', () => {
       f.service.record({ ...f.input, state: 'PENDING' }),
     ).rejects.toThrow('ROUTE_LOCAL_VERSION_CHANGED');
   });
+  it('only resumes an unknown write for the same task after a fresh durable readback', async () => {
+    const f = fixture(),
+      verifiedAt = new Date().toISOString(),
+      remoteChecksum = 'b'.repeat(64);
+    Object.assign(f.mapping, {
+      state: 'UNKNOWN',
+      lastRemoteChecksum: remoteChecksum,
+      metadata: { lastTaskId: 'task', verification: 'READBACK', verifiedAt },
+    });
+    await expect(
+      f.service.record({
+        ...f.input,
+        state: 'PENDING',
+        remoteChecksum,
+        metadata: { lastTaskId: 'task', verification: 'READBACK', verifiedAt },
+      }),
+    ).resolves.toMatchObject({ state: 'PENDING' });
+    await expect(
+      f.service.record({
+        ...f.input,
+        state: 'PENDING',
+        remoteChecksum: 'c'.repeat(64),
+        metadata: { lastTaskId: 'task', verification: 'READBACK', verifiedAt },
+      }),
+    ).rejects.toThrow('ROUTE_DELIVERY_UNRESOLVED');
+  });
 });
