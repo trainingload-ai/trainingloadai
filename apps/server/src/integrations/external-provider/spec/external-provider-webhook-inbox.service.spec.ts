@@ -2,6 +2,49 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ExternalProviderWebhookInboxService } from '../external-provider-webhook-inbox.service';
 
 describe('ExternalProviderWebhookInboxService', () => {
+  it('uses the caller transaction for durable events and does not signal before commit', async () => {
+    const createMany = jest.fn(async () => ({ count: 1 })),
+      notify = jest.fn();
+    const service = new ExternalProviderWebhookInboxService(
+      {} as never,
+      { notify } as never,
+    );
+    const tx = { externalProviderWebhookEvent: { createMany } };
+    await service.enqueue(
+      {
+        provider: 'garmin',
+        eventType: 'disconnect',
+        dedupeKey: 'epoch',
+        payload: {},
+      },
+      tx as never,
+    );
+    expect(createMany).toHaveBeenCalledTimes(1);
+    expect(notify).not.toHaveBeenCalled();
+  });
+
+  it('queries non-runnable cooldown markers as well as delayed work', async () => {
+    const until = new Date(Date.now() + 120000);
+    const findFirst = jest.fn(async (_args: unknown) => ({
+      availableAt: until,
+    }));
+    const service = new ExternalProviderWebhookInboxService({
+      externalProviderWebhookEvent: { findFirst },
+    } as never);
+    expect(await service.rateLimitUntil('garmin', ['app:test'])).toEqual(until);
+    expect(findFirst.mock.calls[0][0]).toMatchObject({
+      where: {
+        AND: [
+          {
+            OR: expect.arrayContaining([
+              { eventType: 'provider_cooldown', status: 'DONE' },
+            ]),
+          },
+        ],
+      },
+    });
+  });
+
   it('locks a precise current claim within mapping transactions and rejects expired or future leases', async () => {
     const lockedAt = new Date(Date.now() - 1000),
       query = jest.fn(async (_q: unknown) => [{ id: 'task' }]);

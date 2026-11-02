@@ -72,21 +72,25 @@ export class ExternalProviderWebhookInboxService {
   }
 
   /** 将事件持久化、去重，并主动唤醒统一 webhook dispatcher。 */
-  async enqueue(args: {
-    provider: ThirdPartyProvider;
-    eventType: string;
-    externalUserId?: string | null;
-    dedupeKey: string;
-    payload: Prisma.InputJsonValue;
-    rawChecksum?: string;
-    /** Reviewed outbound operations remain unclaimable until their owner confirms them. */
-    initialStatus?: 'PENDING' | 'PREVIEW';
-  }) {
+  async enqueue(
+    args: {
+      provider: ThirdPartyProvider;
+      eventType: string;
+      externalUserId?: string | null;
+      dedupeKey: string;
+      payload: Prisma.InputJsonValue;
+      rawChecksum?: string;
+      /** Reviewed outbound operations remain unclaimable until their owner confirms them. */
+      initialStatus?: 'PENDING' | 'PREVIEW';
+    },
+    tx?: PrismaTx,
+  ) {
+    const events = (tx ?? this.prisma).externalProviderWebhookEvent;
     // 生成原始校验和
     const rawChecksum =
       args.rawChecksum ?? this.checksum(JSON.stringify(args.payload));
     const eventId = randomUUID();
-    const created = await this.prisma.externalProviderWebhookEvent.createMany({
+    const created = await events.createMany({
       data: [
         {
           id: eventId,
@@ -103,11 +107,14 @@ export class ExternalProviderWebhookInboxService {
     });
 
     if (created.count === 1) {
-      if (args.initialStatus !== 'PREVIEW') this.signal?.notify(args.provider);
+      // A transaction's event is not visible until commit; the polling fallback
+      // wakes it without racing a dispatcher against an uncommitted insert.
+      if (!tx && args.initialStatus !== 'PREVIEW')
+        this.signal?.notify(args.provider);
       return { accepted: true, enqueued: true, eventId };
     }
 
-    const existing = await this.prisma.externalProviderWebhookEvent.findUnique({
+    const existing = await events.findUnique({
       where: {
         provider_dedupeKey: {
           provider: args.provider,
@@ -240,7 +247,7 @@ export class ExternalProviderWebhookInboxService {
         });
   }
 
-  /** Existing waiting tasks are the durable cooldown record. No synthetic job or quota table. */
+  /** Waiting work and non-runnable control records retain response-driven cooldowns. */
   async rateLimitUntil(
     provider: ThirdPartyProvider,
     scopeKeys: string[],
@@ -257,7 +264,14 @@ export class ExternalProviderWebhookInboxService {
     ).externalProviderWebhookEvent.findFirst({
       where: {
         provider,
-        status: { in: ['PENDING', 'FAILED', 'PROCESSING'] },
+        AND: [
+          {
+            OR: [
+              { status: { in: ['PENDING', 'FAILED', 'PROCESSING'] } },
+              { eventType: 'provider_cooldown', status: 'DONE' },
+            ],
+          },
+        ],
         lastError: 'PROVIDER_RATE_LIMITED',
         availableAt: { gt: new Date() },
         OR: scopeKeys.map((key) => ({
@@ -293,7 +307,17 @@ export class ExternalProviderWebhookInboxService {
       until: args.until.toISOString(),
     });
     return (tx ?? this.prisma).$executeRaw(
-      Prisma.sql`UPDATE t_external_provider_webhook_event SET status='PENDING',available_at=GREATEST(available_at,${args.until}),last_error='PROVIDER_RATE_LIMITED',payload=jsonb_set(payload,'{__rateLimit}',COALESCE(payload->'__rateLimit','{}'::jsonb)||${marker}::jsonb),updated_at=NOW() WHERE provider=${args.provider}::text::enum_third_party_provider AND status IN ('PENDING','FAILED') AND event_type IN (${Prisma.join(args.eventTypes)}) ${args.externalUserId ? Prisma.sql`AND external_user_id=${args.externalUserId}` : Prisma.empty}`,
+      Prisma.sql`WITH cooldown AS (
+        INSERT INTO t_external_provider_webhook_event
+          (id,provider,event_type,external_user_id,dedupe_key,raw_checksum,payload,status,attempts,available_at,last_error,received_at,updated_at)
+        VALUES (${randomUUID()},${args.provider}::text::enum_third_party_provider,'provider_cooldown',NULL,
+          ${`cooldown:${args.scopeKey}`},${this.checksum(marker)},jsonb_build_object('__rateLimit',${marker}::jsonb),
+          'DONE',0,${args.until},'PROVIDER_RATE_LIMITED',NOW(),NOW())
+        ON CONFLICT (provider,dedupe_key) DO UPDATE SET
+          available_at=GREATEST(t_external_provider_webhook_event.available_at,EXCLUDED.available_at),
+          payload=EXCLUDED.payload,last_error='PROVIDER_RATE_LIMITED',updated_at=NOW()
+        RETURNING id
+      ) UPDATE t_external_provider_webhook_event SET status='PENDING',available_at=GREATEST(available_at,${args.until}),last_error='PROVIDER_RATE_LIMITED',payload=jsonb_set(payload,'{__rateLimit}',COALESCE(payload->'__rateLimit','{}'::jsonb)||${marker}::jsonb),updated_at=NOW() WHERE provider=${args.provider}::text::enum_third_party_provider AND status IN ('PENDING','FAILED') AND event_type IN (${Prisma.join(args.eventTypes)}) ${args.externalUserId ? Prisma.sql`AND external_user_id=${args.externalUserId}` : Prisma.empty}`,
     );
   }
 
