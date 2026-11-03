@@ -7,10 +7,7 @@ on:
       - "packages/messages/docs/**"
       - "scripts/docs/**"
   pull_request:
-    paths-ignore:
-      - "apps/docs/**"
-      - "packages/messages/docs/**"
-      - "scripts/docs/**"
+    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -29,6 +26,7 @@ jobs:
           node-version: 22.23.3
       - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
       - run: pnpm install --frozen-lockfile
+      - run: node --test scripts/ci/*.test.mjs
       - run: pnpm boundary:check
       - run: pnpm messages:check
       - run: pnpm selfhost:inventory:check
