@@ -3,6 +3,7 @@ import type {
   IntervalsIcuAthlete,
   IntervalsIcuSportSettings,
 } from '@/integrations/intervals-icu/intervals-icu.client';
+import { validateFitnessMetricCandidate } from '@/api/user/fitness-metric-validator';
 
 /** 从 athlete / sportSettings 抽出的正式运动设置写入项。 */
 export type IntervalsIcuSportSettingsMetricWrite = {
@@ -42,6 +43,12 @@ function pushMetric(
 ) {
   const parsed = numberValue(value);
   if (parsed == null) return;
+  const validation = validateFitnessMetricCandidate(
+    { type, value: parsed, sport },
+    {},
+    { requireReferenceMetrics: false },
+  );
+  if (!validation.valid) return;
   const parsed2 = value2 == null ? undefined : numberValue(value2);
   writes.push({
     type,

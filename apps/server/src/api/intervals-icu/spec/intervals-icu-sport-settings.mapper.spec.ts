@@ -39,4 +39,28 @@ describe('mapIntervalsIcuAthleteToSportSettingsMetrics', () => {
       ]),
     );
   });
+
+  it('ignores provider placeholders and values outside intrinsic metric bounds', () => {
+    const writes = mapIntervalsIcuAthleteToSportSettingsMetrics({
+      icu_resting_hr: 0,
+      sportSettings: [
+        {
+          types: ['Ride'],
+          ftp: 0,
+          indoor_ftp: 29,
+          max_hr: 0,
+          lthr: 0,
+          threshold_pace: 0,
+          p_max: 49,
+          w_prime: 499,
+        },
+        {
+          types: ['Run'],
+          threshold_pace: 0.2,
+        },
+      ],
+    });
+
+    expect(writes).toEqual([]);
+  });
 });

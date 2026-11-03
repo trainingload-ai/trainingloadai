@@ -119,9 +119,21 @@ describe('TrackSwap server file boundary', () => {
     );
   });
 
-  it('blocks the known coordinate corruption in TrackSwap 0.2.2 FIT activity encoding', async () => {
-    await expect(transcodeTrackFile(gpx, 'fit')).rejects.toMatchObject({
-      code: 'OUTPUT_INVALID',
+  it('preserves coordinates when encoding an activity as FIT', async () => {
+    const { content, report } = await transcodeTrackFile(gpx, 'fit');
+
+    expect(report).toMatchObject({
+      sourceFormat: 'gpx',
+      inputRecords: 1,
+      outputRecords: 1,
+      warnings: [],
+    });
+    await expect(inspectTrackFile(content)).resolves.toMatchObject({
+      format: 'fit',
+      activity: {
+        recordCount: 1,
+        coordinateCount: 1,
+      },
     });
   });
 });
