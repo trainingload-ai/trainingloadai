@@ -1867,6 +1867,12 @@ export class AiService {
         sid: handle.sessionId,
         entityId: params.triggerRef ?? null,
       });
+      handle.projector.finish('completed');
+      await this.coachRuns.checkpoint(handle, 'completed', undefined, {
+        resultType: params.taskType,
+        resultRef,
+      });
+      finalized = true;
       if (ownsUserOperation) {
         await this.operations.markDelivered({
           userId: params.userId,
@@ -1877,14 +1883,6 @@ export class AiService {
             taskKind: params.taskType,
           },
         });
-      }
-      handle.projector.finish('completed');
-      await this.coachRuns.checkpoint(handle, 'completed', undefined, {
-        resultType: params.taskType,
-        resultRef,
-      });
-      finalized = true;
-      if (ownsUserOperation) {
         try {
           await this.operations.complete(params.userId, handle.operationId);
         } catch (operationError) {

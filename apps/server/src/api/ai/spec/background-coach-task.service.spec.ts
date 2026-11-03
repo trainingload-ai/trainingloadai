@@ -135,6 +135,60 @@ describe('AiService background coach tasks', () => {
     expect(
       persistence.aiUsage.recordUsageEvent.mock.invocationCallOrder[0],
     ).toBeLessThan(persistence.operations.complete.mock.invocationCallOrder[0]);
+    expect(
+      persistence.coachRuns.checkpoint.mock.invocationCallOrder.at(-1),
+    ).toBeLessThan(
+      persistence.operations.markDelivered.mock.invocationCallOrder[0],
+    );
+    expect(
+      persistence.operations.markDelivered.mock.invocationCallOrder[0],
+    ).toBeLessThan(persistence.operations.complete.mock.invocationCallOrder[0]);
+  });
+
+  it('keeps a completed run durable when delivery fails so a retry can replay it', async () => {
+    const service = Object.create(AiService.prototype) as AiService;
+    Object.defineProperty(service, 'getCoachModel', {
+      value: () => 'fallback-model',
+    });
+    const persistence = installBackgroundPersistence(service);
+    persistence.operations.markDelivered.mockRejectedValueOnce(
+      new Error('delivery unavailable'),
+    );
+    const coachStream = jest.fn(async (input: Record<string, unknown>) => {
+      const task = input.backgroundTask as {
+        submitResult: (result: unknown) => Promise<void> | void;
+      };
+      await task.submitResult({ summary: '已完成。' });
+      return (async function* () {
+        yield {
+          type: 'result' as const,
+          subtype: 'success' as const,
+          is_error: false,
+          result: '',
+        };
+      })();
+    });
+    Object.defineProperty(service, 'coachStream', { value: coachStream });
+
+    await expect(
+      service.runBackgroundCoachTask({
+        userId: 'user-1',
+        lang: 'zh',
+        taskType: 'ATHLETE_CHECK_IN',
+        activeSkillName: 'readiness-check',
+        instructions: 'Assess today.',
+        validateResult: (result) => result as { summary: string },
+      }),
+    ).rejects.toThrow('delivery unavailable');
+
+    expect(persistence.coachRuns.checkpoint).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      'completed',
+      undefined,
+      expect.objectContaining({ resultType: 'ATHLETE_CHECK_IN' }),
+    );
+    expect(persistence.operations.fail).not.toHaveBeenCalled();
+    expect(persistence.operations.complete).not.toHaveBeenCalled();
   });
 
   it('audits a platform-funded run without admitting or charging a user operation', async () => {
@@ -256,6 +310,66 @@ describe('AiService background coach tasks', () => {
     });
     expect(coachStream).not.toHaveBeenCalled();
     expect(operations.markDelivered).not.toHaveBeenCalled();
+  });
+
+  it('finishes delivery from a durable replay without calling the model again', async () => {
+    const service = Object.create(AiService.prototype) as AiService;
+    Object.defineProperty(service, 'getCoachModel', {
+      value: () => 'fallback-model',
+    });
+    const coachStream = jest.fn();
+    const coachRuns = {
+      beginBackground: jest.fn(async () => ({
+        replay: {
+          runId: 'run-existing',
+          operationId: 'operation-existing',
+          result: {
+            resultType: 'ATHLETE_CHECK_IN',
+            result: { summary: '使用已完成结果。' },
+            usage: { inputTokens: 8, outputTokens: 2 },
+            provider: 'test-provider',
+            model: 'test-model',
+          },
+        },
+      })),
+    };
+    const operations = {
+      get: jest.fn(async () => ({
+        id: 'operation-existing',
+        status: 'STARTED',
+      })),
+      markDelivered: jest.fn(async () => ({ status: 'RUNNING' })),
+      complete: jest.fn(async () => ({ status: 'COMPLETED' })),
+    };
+    Object.defineProperty(service, 'coachRuns', { value: coachRuns });
+    Object.defineProperty(service, 'operations', { value: operations });
+    Object.defineProperty(service, 'coachStream', { value: coachStream });
+
+    await expect(
+      service.runBackgroundCoachTask({
+        userId: 'user-1',
+        lang: 'zh',
+        taskType: 'ATHLETE_CHECK_IN',
+        activeSkillName: 'readiness-check',
+        instructions: 'Assess today.',
+        validateResult: (result) => result as { summary: string },
+      }),
+    ).resolves.toMatchObject({ replayed: true });
+
+    expect(coachStream).not.toHaveBeenCalled();
+    expect(operations.markDelivered).toHaveBeenCalledWith({
+      userId: 'user-1',
+      operationId: 'operation-existing',
+      resultRef: {
+        kind: 'BACKGROUND_COACH_RUN',
+        runId: 'run-existing',
+        taskKind: 'ATHLETE_CHECK_IN',
+      },
+    });
+    expect(operations.complete).toHaveBeenCalledWith(
+      'user-1',
+      'operation-existing',
+    );
   });
 
   it('keeps an API-owned operation separate when replaying a durable task', async () => {
