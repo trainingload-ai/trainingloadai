@@ -13,6 +13,138 @@
 */
 @custom-variant dark (&:is(.dark *));
 
+/* Desktop chrome shares one neutral palette across the title bar, navigation,
+   and portalled menus. Web Cloud and browser self-host keep their own tokens. */
+:root[data-desktop-self-host="true"] {
+  --background: #ffffff;
+  --foreground: #242424;
+  --card: #f7f7f7;
+  --card-foreground: #242424;
+  --popover: #ffffff;
+  --popover-foreground: #242424;
+  --muted: #ededed;
+  --muted-foreground: #707070;
+  --accent: #e8e8e8;
+  --accent-foreground: #242424;
+  --border: #e4e4e4;
+  --input: #d8d8d8;
+  --sidebar: #f7f7f7;
+  --sidebar-foreground: #303030;
+  --sidebar-accent: #e5e5e5;
+  --sidebar-accent-foreground: #242424;
+  --sidebar-border: #e4e4e4;
+  --desktop-chrome: #f0f0f0;
+  --desktop-rail-selected: #dedede;
+  --desktop-workspace-radius: 14px;
+  --tl-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--tl-font-ui);
+}
+:root.dark[data-desktop-self-host="true"] {
+  --background: #191919;
+  --foreground: #e8e8e8;
+  --card: #222222;
+  --card-foreground: #e8e8e8;
+  --popover: #282828;
+  --popover-foreground: #e8e8e8;
+  --muted: #303030;
+  --muted-foreground: #a0a0a0;
+  --accent: #343434;
+  --accent-foreground: #f0f0f0;
+  --border: #303030;
+  --input: #424242;
+  --sidebar: #222222;
+  --sidebar-foreground: #dfdfdf;
+  --sidebar-accent: #343434;
+  --sidebar-accent-foreground: #f2f2f2;
+  --sidebar-border: #303030;
+  --desktop-chrome: #292929;
+  --desktop-rail-selected: #3b3b3b;
+}
+[data-desktop-self-host="true"] .desktop-titlebar,
+[data-desktop-self-host="true"] .desktop-rail {
+  background: var(--desktop-chrome);
+}
+[data-desktop-self-host="true"] .desktop-workspace-row {
+  background: var(--desktop-chrome);
+}
+[data-desktop-self-host="true"] .desktop-content {
+  background: var(--background);
+}
+[data-desktop-self-host="true"] .desktop-content,
+[data-desktop-self-host="true"] .desktop-context-pane {
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  border-top-left-radius: var(--desktop-workspace-radius);
+}
+[data-desktop-self-host="true"] .desktop-workspace-row:has([data-coach-pane-open="true"]) .desktop-content {
+  border-left-width: 0;
+  border-top-left-radius: 0;
+}
+[data-desktop-self-host="true"] .desktop-rail-control {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 10px;
+  color: var(--muted-foreground);
+  transition: color 120ms ease, background-color 120ms ease;
+}
+[data-desktop-self-host="true"] .desktop-rail-control > svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+[data-desktop-self-host="true"] .desktop-rail-control:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+[data-desktop-self-host="true"] .desktop-rail-control[aria-current="page"] {
+  color: var(--foreground);
+  background: var(--desktop-rail-selected);
+}
+[data-desktop-self-host="true"] .desktop-rail-control:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+[data-desktop-self-host="true"] .desktop-coach-composer,
+[data-desktop-self-host="true"] .desktop-coach-question-dock {
+  padding-bottom: 20px;
+}
+[data-desktop-self-host="true"] .desktop-coach-conversation {
+  --desktop-coach-fade-height: 32px;
+  padding-bottom: 0;
+}
+[data-desktop-self-host="true"] .desktop-coach-message-viewport {
+  /* Ease both ends of the fade so text does not meet a visible horizontal edge. */
+  --desktop-coach-message-mask: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--desktop-coach-fade-height)),
+    rgb(0 0 0 / 0.96) calc(100% - 28px),
+    rgb(0 0 0 / 0.77) calc(100% - 22px),
+    rgb(0 0 0 / 0.5) calc(100% - 16px),
+    rgb(0 0 0 / 0.23) calc(100% - 10px),
+    rgb(0 0 0 / 0.04) calc(100% - 4px),
+    transparent
+  );
+  -webkit-mask-image: var(--desktop-coach-message-mask);
+  mask-image: var(--desktop-coach-message-mask);
+}
+[data-desktop-self-host="true"] .desktop-coach-message-content {
+  padding-bottom: var(--desktop-coach-fade-height);
+}
+[data-desktop-self-host="true"] .desktop-coach-composer {
+  padding-top: 0;
+}
+[data-desktop-self-host="true"] .desktop-coach-scroll-button {
+  bottom: 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-desktop-self-host="true"] .desktop-rail-control { transition: none; }
+}
+
 @config '../../tailwind.config.ts';
 
 [data-nextjs-toast] {

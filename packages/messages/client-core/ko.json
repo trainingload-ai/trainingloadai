@@ -1021,6 +1021,30 @@
         "separate": "분리 표시",
         "overlay": "겹쳐 보기"
       }
+    },
+    "setup": {
+      "title": "AI가 아직 설정되지 않았습니다",
+      "description": "AI 제공업체와 모델을 설정하면 코치와 대화를 시작할 수 있습니다.",
+      "incompleteTitle": "AI 설정을 확인해 주세요",
+      "incompleteDescription": "제공업체, API 키 및 모델 설정을 확인해 주세요.",
+      "configure": "AI 설정",
+      "ownerRequired": "코치를 사용하려면 인스턴스 소유자에게 AI 설정을 요청하세요.",
+      "unavailableTitle": "AI 상태를 읽을 수 없습니다",
+      "unavailableDescription": "로컬 서비스가 실행 중인지 확인한 후 다시 시도하세요.",
+      "loading": "AI 상태를 불러오는 중…",
+      "retry": "다시 시도"
+    },
+    "externalLink": {
+      "title": "외부 링크를 열까요?",
+      "webDescription": "외부 웹사이트로 이동합니다.",
+      "desktopDescription": "시스템 기본 브라우저에서 이 웹사이트를 엽니다.",
+      "copy": "링크 복사",
+      "copied": "복사됨",
+      "open": "링크 열기",
+      "openInBrowser": "기본 브라우저에서 열기",
+      "opening": "여는 중…",
+      "openFailed": "브라우저를 열 수 없습니다. 다시 시도하거나 링크를 복사하세요.",
+      "copyFailed": "링크를 복사할 수 없습니다. 다시 시도하세요."
     }
   },
   "login": {
@@ -6238,5 +6262,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "뒤로",
+    "forward": "앞으로",
+    "navigation": "창 탐색",
+    "appName": "Trainingload.ai Personal"
   }
 }

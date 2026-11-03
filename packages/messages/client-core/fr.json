@@ -1021,6 +1021,30 @@
         "separate": "Graphiques séparés",
         "overlay": "Superposer"
       }
+    },
+    "setup": {
+      "title": "L’IA n’est pas encore configurée",
+      "description": "Choisissez un fournisseur d’IA et configurez vos modèles pour discuter avec votre coach.",
+      "incompleteTitle": "La configuration de l’IA doit être vérifiée",
+      "incompleteDescription": "Vérifiez le fournisseur, la clé API et les modèles.",
+      "configure": "Configurer l’IA",
+      "ownerRequired": "Demandez au propriétaire de l’instance de configurer l’IA pour utiliser le coach.",
+      "unavailableTitle": "Impossible de lire l’état de l’IA",
+      "unavailableDescription": "Vérifiez que le service local fonctionne, puis réessayez.",
+      "loading": "Chargement de l’état de l’IA…",
+      "retry": "Réessayer"
+    },
+    "externalLink": {
+      "title": "Ouvrir le lien externe ?",
+      "webDescription": "Vous allez consulter un site externe.",
+      "desktopDescription": "Ce site s’ouvrira dans le navigateur par défaut de votre système.",
+      "copy": "Copier le lien",
+      "copied": "Copié",
+      "open": "Ouvrir le lien",
+      "openInBrowser": "Ouvrir dans le navigateur",
+      "opening": "Ouverture…",
+      "openFailed": "Impossible d’ouvrir le navigateur. Réessayez ou copiez le lien.",
+      "copyFailed": "Impossible de copier le lien. Veuillez réessayer."
     }
   },
   "login": {
@@ -6238,5 +6262,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "Précédent",
+    "forward": "Suivant",
+    "navigation": "Navigation de la fenêtre",
+    "appName": "Trainingload.ai Personal"
   }
 }

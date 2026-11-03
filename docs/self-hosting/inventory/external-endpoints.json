@@ -240,7 +240,7 @@
       "references": [
         {
           "file": "apps/client/src/app/[locale]/(main)/settings/component/SelfHostAiSettings.tsx",
-          "line": 460
+          "line": 472
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -300,7 +300,7 @@
       "references": [
         {
           "file": "apps/client/src/components/layout/MainAppShell.tsx",
-          "line": 75
+          "line": 84
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",

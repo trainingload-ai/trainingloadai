@@ -1021,6 +1021,30 @@
         "separate": "Getrennte Diagramme",
         "overlay": "Überlagern"
       }
+    },
+    "setup": {
+      "title": "AI ist noch nicht konfiguriert",
+      "description": "Wähle einen AI-Anbieter und konfiguriere deine Modelle, um mit deinem Coach zu chatten.",
+      "incompleteTitle": "AI-Konfiguration überprüfen",
+      "incompleteDescription": "Prüfe Anbieter, API-Schlüssel und Modelleinstellungen.",
+      "configure": "AI konfigurieren",
+      "ownerRequired": "Bitte den Instanzbesitzer, AI zu konfigurieren, bevor du den Coach nutzt.",
+      "unavailableTitle": "AI-Status kann nicht geladen werden",
+      "unavailableDescription": "Prüfe, ob der lokale Dienst läuft, und versuche es erneut.",
+      "loading": "AI-Status wird geladen…",
+      "retry": "Erneut versuchen"
+    },
+    "externalLink": {
+      "title": "Externen Link öffnen?",
+      "webDescription": "Du wirst eine externe Website besuchen.",
+      "desktopDescription": "Diese Website wird im Standardbrowser deines Systems geöffnet.",
+      "copy": "Link kopieren",
+      "copied": "Kopiert",
+      "open": "Link öffnen",
+      "openInBrowser": "Im Standardbrowser öffnen",
+      "opening": "Wird geöffnet…",
+      "openFailed": "Der Browser konnte nicht geöffnet werden. Versuche es erneut oder kopiere den Link.",
+      "copyFailed": "Der Link konnte nicht kopiert werden. Versuche es erneut."
     }
   },
   "login": {
@@ -6238,5 +6262,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "Zurück",
+    "forward": "Vorwärts",
+    "navigation": "Fensternavigation",
+    "appName": "Trainingload.ai Personal"
   }
 }

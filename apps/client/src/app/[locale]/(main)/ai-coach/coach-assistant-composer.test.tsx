@@ -6,6 +6,7 @@ import { CoachComposer } from "./coach-assistant-composer";
 
 const runtime = vi.hoisted(() => ({
   isRunning: false,
+  isDesktopSelfHost: false,
   messages: [
     {
       role: "assistant",
@@ -27,6 +28,11 @@ vi.mock("./coach-chat-provider", () => ({
     select(runtime),
   useCoachActions: () => runtime,
 }));
+vi.mock("@/hooks/use-runtime-environment", () => ({
+  useRuntimeEnvironment: () => ({
+    isDesktopSelfHost: runtime.isDesktopSelfHost,
+  }),
+}));
 beforeEach(() => {
   vi.stubGlobal(
     "ResizeObserver",
@@ -43,13 +49,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe.each(["start", "footer", "embedded"] as const)(
-  "%s composer",
-  (variant) => {
+describe.each(
+  (["start", "footer", "embedded"] as const).flatMap((variant) =>
+    [[variant, false], [variant, true]] as const,
+  ),
+)(
+  "%s composer (desktop=%s)",
+  (variant, desktop) => {
     it.each([false, true])(
       "omits the status strip while retaining controls (running=%s)",
       (running) => {
         runtime.isRunning = running;
+        runtime.isDesktopSelfHost = desktop;
         const { container } = render(
           <NextIntlClientProvider locale="zh" messages={messages}>
             <CoachComposer variant={variant} />

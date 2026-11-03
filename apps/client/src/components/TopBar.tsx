@@ -4,7 +4,7 @@ import { useGuestAccessText } from "@deployment/managed-ui";
 
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { User, Wrench } from "lucide-react";
+import { ChevronsUpDown, User, Wrench } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuSub,
@@ -20,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Skeleton } from "./ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 import { useViewerSession } from "@/public-demo/use-viewer-session";
@@ -45,11 +48,15 @@ import {
 import { useSelfHostSessionPolicy } from "@/api/self-host-bootstrap";
 
 type TopBarProps = {
+  placement?: "header" | "sidebar" | "rail";
+  collapsed?: boolean;
   unauthenticatedHref?: string;
   reloadOnLocaleChange?: boolean;
 };
 
 function TopBarComponent({
+  placement = "header",
+  collapsed = false,
   unauthenticatedHref,
   reloadOnLocaleChange = false,
 }: TopBarProps) {
@@ -75,6 +82,7 @@ function TopBarComponent({
   const tPublicDemo = useGuestAccessText();
   const { canSignOut } = useSelfHostSessionPolicy();
   const showSessionPending = !hydrated || isPending;
+  const isSidebar = placement !== "header";
   const isAuthRoute = [
     "/setup",
     "/login",
@@ -129,56 +137,70 @@ function TopBarComponent({
   };
 
   const renderAccountMenuContent = () => (
-    <DropdownMenuContent align="end" className="w-56">
-      <ManagedAccountMenuItem />
-      <Link href="/analysis" passHref>
-        <DropdownMenuItem className="flex items-center gap-2">
-          <Wrench className="h-4 w-4 text-muted-foreground" />
-          <span>{t("tools")}</span>
-        </DropdownMenuItem>
-      </Link>
-      <DropdownMenuSeparator />
-      <Link href="/account" passHref>
-        <DropdownMenuItem>{t("account")}</DropdownMenuItem>
-      </Link>
-      <Link href="/competitions" passHref>
-        <DropdownMenuItem>{tCompetition("page.title")}</DropdownMenuItem>
-      </Link>
-      <Link href="/pace/best-distance" passHref>
-        <DropdownMenuItem>{t("bestDistance")}</DropdownMenuItem>
-      </Link>
-      <DropdownMenuSeparator />
-      <Link href="/settings" passHref>
-        <DropdownMenuItem>{tSettingsPage("settings")}</DropdownMenuItem>
-      </Link>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>{tSettings("theme")}</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <DropdownMenuItem onClick={() => setTheme("light")}>
-            {tSettings("light")}
+    <DropdownMenuContent
+      align={isSidebar ? "start" : "end"}
+      side={isSidebar ? "right" : "bottom"}
+      className="w-56"
+    >
+      <DropdownMenuGroup>
+        <ManagedAccountMenuItem />
+        <Link href="/analysis" passHref>
+          <DropdownMenuItem className="flex items-center gap-2">
+            <Wrench className="h-4 w-4 text-muted-foreground" />
+            <span>{t("tools")}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme("dark")}>
-            {tSettings("dark")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme("system")}>
-            {tSettings("system")}
-          </DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>{tSettings("language")}</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          {routing.locales.map((cur) => (
-            <DropdownMenuItem
-              key={cur}
-              onClick={() => onLocaleSelect(cur)}
-              className={cur === locale ? "font-medium" : undefined}
-            >
-              {localeNativeLabel(cur)}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
+        </Link>
+        <DropdownMenuSeparator />
+        <Link href="/account" passHref>
+          <DropdownMenuItem>{t("account")}</DropdownMenuItem>
+        </Link>
+        <Link href="/competitions" passHref>
+          <DropdownMenuItem>{tCompetition("page.title")}</DropdownMenuItem>
+        </Link>
+        <Link href="/pace/best-distance" passHref>
+          <DropdownMenuItem>{t("bestDistance")}</DropdownMenuItem>
+        </Link>
+        <DropdownMenuSeparator />
+        <Link href="/settings" passHref>
+          <DropdownMenuItem>{tSettingsPage("settings")}</DropdownMenuItem>
+        </Link>
+      </DropdownMenuGroup>
+      {!isSidebar ? (
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              {tSettings("theme")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                {tSettings("light")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                {tSettings("dark")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                {tSettings("system")}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              {tSettings("language")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              {routing.locales.map((cur) => (
+                <DropdownMenuItem
+                  key={cur}
+                  onClick={() => onLocaleSelect(cur)}
+                  className={cur === locale ? "font-medium" : undefined}
+                >
+                  {localeNativeLabel(cur)}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+      ) : null}
       {canSignOut ? (
         <>
           <DropdownMenuSeparator />
@@ -195,6 +217,74 @@ function TopBarComponent({
       ) : null}
     </DropdownMenuContent>
   );
+
+  if (isSidebar) {
+    return (
+      <div
+        className={cn(
+          "shrink-0",
+          placement === "rail"
+            ? "px-1 py-2"
+            : "border-b border-sidebar-border px-3 py-2",
+        )}
+      >
+        <div
+          className={cn(
+            "flex min-w-0 items-center gap-1",
+            collapsed && "flex-col",
+            placement === "rail" && "flex-col-reverse gap-2",
+          )}
+        >
+          {showSessionPending ? (
+            <Skeleton className="size-8 shrink-0 rounded-full" />
+          ) : session ? (
+            <DropdownMenu
+              open={desktopAccountMenuOpen}
+              onOpenChange={setDesktopAccountMenuOpen}
+            >
+              <DropdownMenuTrigger
+                variant="ghost"
+                size="sm"
+                aria-label={`${t("account")}: ${session.user.name}`}
+                title={session.user.name}
+                className={cn(
+                  "min-w-0 flex-1 justify-start gap-2 px-1",
+                  collapsed && "size-9 flex-none justify-center px-0",
+                  placement === "rail" && "desktop-rail-control",
+                )}
+              >
+                <Avatar className="size-7">
+                  <AvatarImage
+                    src={session.user.image ?? undefined}
+                    alt={session.user.name}
+                  />
+                  <AvatarFallback>
+                    {session.user.name.trim().slice(0, 1).toUpperCase() || (
+                      <User />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+                {!collapsed ? (
+                  <>
+                    <span className="min-w-0 flex-1 truncate text-left">
+                      {session.user.name}
+                    </span>
+                    <ChevronsUpDown aria-hidden="true" />
+                  </>
+                ) : null}
+              </DropdownMenuTrigger>
+              {renderAccountMenuContent()}
+            </DropdownMenu>
+          ) : null}
+          {!showSessionPending && session && !signingOut ? (
+            <NotificationDrawer
+              placement={placement === "rail" ? "rail" : "header"}
+            />
+          ) : null}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

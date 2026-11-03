@@ -5,7 +5,7 @@ import { useCallback, useSyncExternalStore } from "react";
 const LEGACY_STORAGE_KEY = "sidebar:collapsed:v1";
 const STORAGE_KEY_PREFIX = "sidebar:collapsed:v2";
 
-export type SidebarPreferenceMode = "compact" | "wide";
+export type SidebarPreferenceMode = "compact" | "wide" | "desktop-coach";
 
 function getStorageKey(mode: SidebarPreferenceMode) {
   return `${STORAGE_KEY_PREFIX}:${mode}`;
@@ -30,10 +30,7 @@ function subscribe(callback: () => void) {
   };
 }
 
-function readCollapsed(
-  mode: SidebarPreferenceMode,
-  defaultCollapsed: boolean,
-) {
+function readCollapsed(mode: SidebarPreferenceMode, defaultCollapsed: boolean) {
   try {
     const stored = window.localStorage.getItem(getStorageKey(mode));
     if (stored !== null) return stored === "1";

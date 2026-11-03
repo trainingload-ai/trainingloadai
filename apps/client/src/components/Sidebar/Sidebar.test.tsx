@@ -10,6 +10,15 @@ const mocks = vi.hoisted(() => ({
   replace: vi.fn(),
   searchParams: new URLSearchParams(),
   aiState: "enabled",
+  isDesktopSelfHost: false,
+}));
+
+vi.mock("@/hooks/use-runtime-environment", () => ({
+  useRuntimeEnvironment: () => ({ isDesktopSelfHost: mocks.isDesktopSelfHost }),
+}));
+
+vi.mock("@/components/TopBar", () => ({
+  TopBar: () => <div data-testid="sidebar-account-menu" />,
 }));
 
 vi.mock("@/api/runtime-capabilities", () => ({
@@ -47,6 +56,8 @@ vi.mock("next-intl", () => ({
   useTranslations: () => {
     const labels: Record<string, string> = {
       activities: "Activities",
+      analysis: "Training tools",
+      appName: "Trainingload.ai Personal",
       calendar: "Calendar",
       coach: "Coach",
       collapse: "Collapse sidebar",
@@ -91,6 +102,7 @@ beforeEach(() => {
   mocks.pathname = "/";
   mocks.searchParams = new URLSearchParams();
   mocks.aiState = "enabled";
+  mocks.isDesktopSelfHost = false;
   mocks.replace.mockReset();
   window.history.replaceState({}, "", "/");
   const values = new Map<string, string>();
@@ -110,12 +122,53 @@ beforeEach(() => {
 });
 
 describe("Sidebar app spaces", () => {
+  it("adds the account menu only for desktop self-host", () => {
+    const view = render(<Sidebar />);
+    expect(
+      screen.queryByTestId("sidebar-account-menu"),
+    ).not.toBeInTheDocument();
+    view.unmount();
+    mocks.isDesktopSelfHost = true;
+    render(<Sidebar />);
+    expect(screen.getByTestId("sidebar-account-menu")).toBeInTheDocument();
+  });
+  it("keeps desktop product navigation in the rail and only renders a secondary pane in Coach", () => {
+    mocks.isDesktopSelfHost = true;
+    const product = render(<Sidebar />);
+    for (const name of ["Home", "Plan", "Calendar", "Activities", "Overview"]) {
+      expect(screen.getByRole("link", { name })).toBeInTheDocument();
+    }
+    expect(screen.queryByText("Trainingload.ai")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("coach-history")).not.toBeInTheDocument();
+    product.unmount();
+    mocks.pathname = "/ai-coach";
+    render(<Sidebar />);
+    expect(screen.getByText("Trainingload.ai Personal")).toBeInTheDocument();
+    expect(screen.getByTestId("coach-history")).toBeInTheDocument();
+  });
+
   it("hides the coach workspace when the server disables AI", () => {
     mocks.aiState = "disabled";
     render(<Sidebar />);
 
     expect(
       screen.queryByRole("link", { name: "Coach" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps Coach at the top of the desktop rail when AI is not configured", () => {
+    mocks.isDesktopSelfHost = true;
+    mocks.aiState = "disabled";
+    render(<Sidebar />);
+
+    const navigation = screen.getByRole("navigation", {
+      name: "Primary navigation",
+    });
+    expect(navigation.querySelector("a")).toBe(
+      screen.getByRole("link", { name: "Coach" }),
+    );
+    expect(
+      screen.queryByRole("link", { name: "Training tools" }),
     ).not.toBeInTheDocument();
   });
 

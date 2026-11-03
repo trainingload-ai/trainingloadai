@@ -1021,6 +1021,30 @@
         "separate": "Gráficos separados",
         "overlay": "Sobrepor"
       }
+    },
+    "setup": {
+      "title": "A IA ainda não foi configurada",
+      "description": "Escolha um provedor de IA e configure os modelos para conversar com seu treinador.",
+      "incompleteTitle": "Verifique a configuração da IA",
+      "incompleteDescription": "Confira o provedor, a chave de API e os modelos.",
+      "configure": "Configurar IA",
+      "ownerRequired": "Peça ao proprietário da instância para configurar a IA antes de usar o treinador.",
+      "unavailableTitle": "Não foi possível ler o status da IA",
+      "unavailableDescription": "Verifique se o serviço local está em execução e tente novamente.",
+      "loading": "Carregando o status da IA…",
+      "retry": "Tentar novamente"
+    },
+    "externalLink": {
+      "title": "Abrir link externo?",
+      "webDescription": "Você está prestes a visitar um site externo.",
+      "desktopDescription": "Este site será aberto no navegador padrão do sistema.",
+      "copy": "Copiar link",
+      "copied": "Copiado",
+      "open": "Abrir link",
+      "openInBrowser": "Abrir no navegador",
+      "opening": "Abrindo…",
+      "openFailed": "Não foi possível abrir o navegador. Tente novamente ou copie o link.",
+      "copyFailed": "Não foi possível copiar o link. Tente novamente."
     }
   },
   "login": {
@@ -6238,5 +6262,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "Voltar",
+    "forward": "Avançar",
+    "navigation": "Navegação da janela",
+    "appName": "Trainingload.ai Personal"
   }
 }

@@ -1095,6 +1095,30 @@
         "separate": "分开展示",
         "overlay": "叠加展示"
       }
+    },
+    "setup": {
+      "title": "尚未配置 AI",
+      "description": "选择 AI 服务商并配置模型后，即可开始与教练对话。",
+      "incompleteTitle": "AI 配置需要完善",
+      "incompleteDescription": "请检查服务商、API Key 和模型设置后再使用教练。",
+      "configure": "配置 AI",
+      "ownerRequired": "请联系实例所有者配置 AI 后再使用教练。",
+      "unavailableTitle": "暂时无法读取 AI 状态",
+      "unavailableDescription": "请检查本地服务是否正常运行，然后重试。",
+      "loading": "正在读取 AI 状态…",
+      "retry": "重试"
+    },
+    "externalLink": {
+      "title": "打开外部链接？",
+      "webDescription": "即将访问外部网站。",
+      "desktopDescription": "将在系统默认浏览器中打开此网站。",
+      "copy": "复制链接",
+      "copied": "已复制",
+      "open": "打开链接",
+      "openInBrowser": "在默认浏览器中打开",
+      "opening": "正在打开…",
+      "openFailed": "无法打开默认浏览器，请重试或复制链接后打开。",
+      "copyFailed": "未能复制链接，请重试。"
     }
   },
   "AuthError": {
@@ -6895,5 +6919,11 @@
       "FREQUENT": "频繁",
       "UNMEASURABLE": "无法测量"
     }
+  },
+  "desktopChrome": {
+    "back": "后退",
+    "forward": "前进",
+    "navigation": "窗口导航",
+    "appName": "Trainingload.ai 个人版"
   }
 }

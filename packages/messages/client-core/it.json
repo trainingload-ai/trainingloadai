@@ -1021,6 +1021,30 @@
         "separate": "Grafici separati",
         "overlay": "Sovrapponi"
       }
+    },
+    "setup": {
+      "title": "L’IA non è ancora configurata",
+      "description": "Scegli un fornitore di IA e configura i modelli per parlare con il tuo allenatore.",
+      "incompleteTitle": "Controlla la configurazione dell’IA",
+      "incompleteDescription": "Verifica il fornitore, la chiave API e i modelli.",
+      "configure": "Configura IA",
+      "ownerRequired": "Chiedi al proprietario dell’istanza di configurare l’IA per usare l’allenatore.",
+      "unavailableTitle": "Impossibile leggere lo stato dell’IA",
+      "unavailableDescription": "Verifica che il servizio locale sia in esecuzione e riprova.",
+      "loading": "Caricamento dello stato dell’IA…",
+      "retry": "Riprova"
+    },
+    "externalLink": {
+      "title": "Aprire il link esterno?",
+      "webDescription": "Stai per visitare un sito esterno.",
+      "desktopDescription": "Il sito si aprirà nel browser predefinito del sistema.",
+      "copy": "Copia link",
+      "copied": "Copiato",
+      "open": "Apri link",
+      "openInBrowser": "Apri nel browser",
+      "opening": "Apertura…",
+      "openFailed": "Impossibile aprire il browser. Riprova o copia il link.",
+      "copyFailed": "Impossibile copiare il link. Riprova."
     }
   },
   "login": {
@@ -6238,5 +6262,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "Indietro",
+    "forward": "Avanti",
+    "navigation": "Navigazione della finestra",
+    "appName": "Trainingload.ai Personal"
   }
 }

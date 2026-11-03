@@ -1021,6 +1021,30 @@
         "separate": "個別表示",
         "overlay": "重ねて表示"
       }
+    },
+    "setup": {
+      "title": "AI がまだ設定されていません",
+      "description": "AI プロバイダーとモデルを設定すると、コーチとの対話を始められます。",
+      "incompleteTitle": "AI 設定を確認してください",
+      "incompleteDescription": "プロバイダー、API キー、モデルの設定を確認してください。",
+      "configure": "AI を設定",
+      "ownerRequired": "コーチを利用するには、インスタンスの所有者に AI の設定を依頼してください。",
+      "unavailableTitle": "AI の状態を取得できません",
+      "unavailableDescription": "ローカルサービスが動作していることを確認し、再試行してください。",
+      "loading": "AI の状態を読み込み中…",
+      "retry": "再試行"
+    },
+    "externalLink": {
+      "title": "外部リンクを開きますか？",
+      "webDescription": "外部サイトに移動します。",
+      "desktopDescription": "システムの既定のブラウザーでこのサイトを開きます。",
+      "copy": "リンクをコピー",
+      "copied": "コピー済み",
+      "open": "リンクを開く",
+      "openInBrowser": "既定のブラウザーで開く",
+      "opening": "開いています…",
+      "openFailed": "ブラウザーを開けませんでした。再試行するか、リンクをコピーしてください。",
+      "copyFailed": "リンクをコピーできませんでした。再試行してください。"
     }
   },
   "login": {
@@ -6238,5 +6262,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "戻る",
+    "forward": "進む",
+    "navigation": "ウィンドウナビゲーション",
+    "appName": "Trainingload.ai Personal"
   }
 }

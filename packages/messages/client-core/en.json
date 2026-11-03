@@ -1137,6 +1137,30 @@
         "separate": "Separate charts",
         "overlay": "Overlay"
       }
+    },
+    "setup": {
+      "title": "AI is not configured",
+      "description": "Choose an AI provider and configure your models to start chatting with your coach.",
+      "incompleteTitle": "AI configuration needs attention",
+      "incompleteDescription": "Check your provider, API key, and model settings to continue.",
+      "configure": "Configure AI",
+      "ownerRequired": "Ask the instance owner to configure AI before using the coach.",
+      "unavailableTitle": "Unable to read AI status",
+      "unavailableDescription": "Check that the local service is running, then try again.",
+      "loading": "Loading AI status…",
+      "retry": "Retry"
+    },
+    "externalLink": {
+      "title": "Open external link?",
+      "webDescription": "You are about to visit an external website.",
+      "desktopDescription": "This website will open in your system’s default browser.",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "open": "Open link",
+      "openInBrowser": "Open in default browser",
+      "opening": "Opening…",
+      "openFailed": "Unable to open your browser. Try again or copy the link to open it.",
+      "copyFailed": "Unable to copy the link. Please try again."
     }
   },
   "AuthError": {
@@ -6895,5 +6919,11 @@
       "FREQUENT": "Frequent",
       "UNMEASURABLE": "Unmeasurable"
     }
+  },
+  "desktopChrome": {
+    "back": "Back",
+    "forward": "Forward",
+    "navigation": "Window navigation",
+    "appName": "Trainingload.ai Personal"
   }
 }

@@ -115,6 +115,35 @@ describe("TopBar account presentation", () => {
     mocks.pathname = "/usage";
   });
 
+  it("keeps appearance and language in settings when the account menu moves to the sidebar", async () => {
+    const user = userEvent.setup();
+    mocks.canSignOut = false;
+    render(<TopBar placement="sidebar" />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "account: victor" }),
+    );
+
+    expect(
+      await screen.findByText("account", { selector: "[role=menuitem]" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("settings")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: "theme" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: "language" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("signOut")).not.toBeInTheDocument();
+  });
+
+  it("keeps an accessible account trigger when the desktop sidebar collapses", async () => {
+    render(<TopBar placement="sidebar" collapsed />);
+    expect(
+      await screen.findByRole("button", { name: "account: victor" }),
+    ).toHaveAttribute("title", "victor");
+  });
+
   it("keeps sign-out for a credential session", async () => {
     const user = userEvent.setup();
     render(<TopBar />);

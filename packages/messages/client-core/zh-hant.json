@@ -1021,6 +1021,30 @@
         "separate": "分開顯示",
         "overlay": "疊加顯示"
       }
+    },
+    "setup": {
+      "title": "尚未設定 AI",
+      "description": "選擇 AI 服務商並設定模型後，即可開始與教練對話。",
+      "incompleteTitle": "AI 設定需要完善",
+      "incompleteDescription": "請檢查服務商、API Key 和模型設定後再使用教練。",
+      "configure": "設定 AI",
+      "ownerRequired": "請聯絡執行個體擁有者設定 AI 後再使用教練。",
+      "unavailableTitle": "暫時無法讀取 AI 狀態",
+      "unavailableDescription": "請檢查本機服務是否正常執行，然後重試。",
+      "loading": "正在讀取 AI 狀態…",
+      "retry": "重試"
+    },
+    "externalLink": {
+      "title": "開啟外部連結？",
+      "webDescription": "即將造訪外部網站。",
+      "desktopDescription": "將在系統預設瀏覽器中開啟此網站。",
+      "copy": "複製連結",
+      "copied": "已複製",
+      "open": "開啟連結",
+      "openInBrowser": "在預設瀏覽器中開啟",
+      "opening": "正在開啟…",
+      "openFailed": "無法開啟預設瀏覽器，請重試或複製連結後開啟。",
+      "copyFailed": "無法複製連結，請重試。"
     }
   },
   "login": {
@@ -6336,5 +6360,11 @@
       "FREQUENT": "頻繁",
       "UNMEASURABLE": "無法測量"
     }
+  },
+  "desktopChrome": {
+    "back": "返回",
+    "forward": "前進",
+    "navigation": "視窗導覽",
+    "appName": "Trainingload.ai 個人版"
   }
 }

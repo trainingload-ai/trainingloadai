@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
+import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
 
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { MainAppFooter } from "@/components/MainAppFooter";
@@ -37,6 +38,7 @@ function MainSidebarFallback() {
 }
 
 export function MainAppShell({ children }: { children: React.ReactNode }) {
+  const { isDesktopSelfHost, desktop } = useRuntimeEnvironment();
   const [mobileSidePageOpen, setMobileSidePageOpen] = useState(false);
   const publicDemo = usePublicDemo();
   const demoText = useGuestAccessText();
@@ -56,7 +58,14 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
     <MobileNavigationProvider>
       {/* 新用户 onboarding 跳转 */}
       <MainOnboardingRedirect />
-      <div className="flex h-dvh-safe min-h-dvh-safe flex-col overflow-x-clip bg-background">
+      <div
+        className={cn(
+          "flex flex-col overflow-x-clip bg-background",
+          isDesktopSelfHost && desktop?.windowChrome
+            ? "h-full min-h-0"
+            : "h-dvh-safe min-h-dvh-safe",
+        )}
+      >
         <a
           href="#main-content"
           className="sr-only z-[100] rounded-md bg-background px-4 py-2 focus:not-sr-only focus:absolute focus:left-2 focus:top-2"
@@ -79,9 +88,11 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
             </a>
           </div>
         ) : null}
-        <div className="hidden tablet:block">
-          <TopBar />
-        </div>
+        {!isDesktopSelfHost ? (
+          <div className="hidden tablet:block">
+            <TopBar />
+          </div>
+        ) : null}
         <div
           className={cn(
             "relative flex min-h-0 w-full flex-1 flex-col transition-transform motion-reduce:transition-none pc:contents",
@@ -94,13 +105,23 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
           }}
         >
           <MobileNavigationHeader />
-          <div className="flex min-h-0 w-full flex-1 overflow-hidden">
+          <div
+            className={cn(
+              "flex min-h-0 w-full flex-1 overflow-hidden",
+              isDesktopSelfHost && "desktop-workspace-row",
+            )}
+          >
             <div className="shrink-0">
               <Suspense fallback={<MainSidebarFallback />}>
                 <Sidebar />
               </Suspense>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div
+              className={cn(
+                "flex min-h-0 flex-1 flex-col overflow-hidden",
+                isDesktopSelfHost && "desktop-content",
+              )}
+            >
               <MobileTopBarContent
                 id="main-content"
                 tabIndex={-1}

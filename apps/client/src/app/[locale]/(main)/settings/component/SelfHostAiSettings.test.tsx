@@ -72,6 +72,7 @@ function expectFieldRequirement(
 
 describe("SelfHostAiSettings", () => {
   beforeEach(() => {
+    window.history.replaceState({}, "", "/settings");
     vi.stubGlobal(
       "ResizeObserver",
       class ResizeObserver {
@@ -96,6 +97,13 @@ describe("SelfHostAiSettings", () => {
       apiKeyConfigured: true,
       updatedAt: "2026-10-19T00:00:00.000Z",
     });
+  });
+
+  it("opens the existing editor from the Coach configuration link", async () => {
+    window.history.replaceState({}, "", "/settings#self-host-ai");
+    render(<SelfHostAiSettings />);
+    expect(await screen.findByLabelText("provider")).toBeInTheDocument();
+    expect(screen.getByLabelText("apiKey")).toHaveValue("");
   });
 
   it("only exposes owner-managed AI settings on self-host deployments", () => {

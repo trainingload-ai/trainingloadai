@@ -3454,7 +3454,7 @@
       "references": [
         {
           "file": "apps/client/src/components/layout/MainAppShell.tsx",
-          "line": 75
+          "line": 84
         },
         {
           "file": "apps/client/src/lib/tiptap-utils.ts",
@@ -4100,7 +4100,7 @@
       "references": [
         {
           "file": "apps/client/src/app/[locale]/layout.tsx",
-          "line": 59
+          "line": 60
         }
       ]
     },
@@ -4138,6 +4138,10 @@
         {
           "file": "apps/client/src/app/[locale]/onboarding/OnboardingPageClient.tsx",
           "line": 1156
+        },
+        {
+          "file": "apps/client/src/hooks/use-runtime-environment.ts",
+          "line": 20
         },
         {
           "file": "apps/client/src/hooks/useSelfHostAiAccess.ts",
@@ -4261,7 +4265,7 @@
         },
         {
           "file": "apps/client/src/app/[locale]/layout.tsx",
-          "line": 58
+          "line": 59
         },
         {
           "file": "apps/client/src/lib/config.ts",
