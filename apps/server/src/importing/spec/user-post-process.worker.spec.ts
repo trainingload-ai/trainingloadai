@@ -1,6 +1,9 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { PMC_INVALIDATE_EVENT } from '@/training-load/events/pmc.events';
-import { UserPostProcessWorkerService } from '../user-post-process.worker';
+import {
+  importPostProcessPolicy,
+  UserPostProcessWorkerService,
+} from '../user-post-process.worker';
 import { ImportingJobService } from '../importing-job.service';
 import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { featureAccessSnapshot } from '@/access/feature-access.types';
@@ -32,6 +35,100 @@ jest.mock('@/api/activity/activity.service', () => ({
 }));
 
 describe('UserPostProcessWorkerService', () => {
+  it('only suppresses user-facing side effects when maintenance flags are explicitly true', () => {
+    expect(importPostProcessPolicy(undefined)).toEqual({
+      suppressAutomaticAiReview: false,
+      suppressThirdPartyExport: false,
+    });
+    expect(
+      importPostProcessPolicy({
+        suppressAutomaticAiReview: true,
+        suppressThirdPartyExport: true,
+      }),
+    ).toEqual({
+      suppressAutomaticAiReview: true,
+      suppressThirdPartyExport: true,
+    });
+    expect(
+      importPostProcessPolicy({
+        suppressAutomaticAiReview: 'true',
+        suppressThirdPartyExport: 1,
+      }),
+    ).toEqual({
+      suppressAutomaticAiReview: false,
+      suppressThirdPartyExport: false,
+    });
+  });
+
+  it('keeps metric refresh but skips AI review and third-party export for maintenance batches', async () => {
+    const prisma = {
+      userPostProcessJob: {
+        findUnique: jest.fn(async () => ({
+          recomputeFrom: null,
+          recomputeTo: null,
+          affectedSportTypes: [],
+        })),
+      },
+      importBatchJob: {
+        findUnique: jest.fn(async () => ({
+          requestContext: {
+            suppressAutomaticAiReview: true,
+            suppressThirdPartyExport: true,
+          },
+        })),
+      },
+    };
+    const service = new UserPostProcessWorkerService(
+      prisma as never,
+      { get: jest.fn(() => undefined) } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      undefined,
+      undefined,
+      createImportingJobs(prisma),
+      userQueries(prisma) as never,
+    );
+    const runBatchHeavyMetrics = jest.fn(async () => [42]);
+    const runBatchAiReviewWhenAllowed = jest.fn(async () => undefined);
+    const runBatchThirdPartyExports = jest.fn(async () => ({
+      failedProviders: [],
+      failedCount: 0,
+    }));
+    const sendBatchNotification = jest.fn(async () => undefined);
+    const completeClaimedJob = jest.fn(async () => undefined);
+    const resolveFinalBatchStatus = jest.fn(async () => 'COMPLETED');
+    Object.assign(service as object, {
+      runBatchHeavyMetrics,
+      runBatchAiReviewWhenAllowed,
+      runBatchThirdPartyExports,
+      sendBatchNotification,
+      completeClaimedJob,
+      resolveFinalBatchStatus,
+      logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    });
+
+    await (
+      service as unknown as { processJob: (...args: unknown[]) => unknown }
+    ).processJob({
+      id: 'post-maintenance',
+      userId: 'user-1',
+      batchJobId: 'batch-maintenance',
+    });
+
+    expect(runBatchHeavyMetrics).toHaveBeenCalled();
+    expect(runBatchAiReviewWhenAllowed).not.toHaveBeenCalled();
+    expect(runBatchThirdPartyExports).not.toHaveBeenCalled();
+    expect(sendBatchNotification).toHaveBeenCalledWith({
+      batchJobId: 'batch-maintenance',
+      userId: 'user-1',
+      exportOutcome: { failedProviders: [], failedCount: 0 },
+    });
+    expect(completeClaimedJob).toHaveBeenCalled();
+  });
+
   it('claims expired RUNNING jobs with a fresh lease token', async () => {
     const $queryRawUnsafe = jest.fn(async (..._args: unknown[]) => [
       {

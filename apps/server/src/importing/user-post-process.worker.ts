@@ -93,6 +93,25 @@ type HeavyMetricsTaskSummary = {
   skippedReasons: Record<string, number>;
 };
 
+type ImportPostProcessPolicy = {
+  suppressAutomaticAiReview: boolean;
+  suppressThirdPartyExport: boolean;
+};
+
+/**
+ * 维护/补数据批次仍需重算指标与 PMC，但不得再次触发面向用户的 AI 与外部回写。
+ * 只有显式 true 才关闭副作用，普通导入保持既有行为。
+ */
+export function importPostProcessPolicy(
+  requestContext: unknown,
+): ImportPostProcessPolicy {
+  const context = jsonRecord(requestContext);
+  return {
+    suppressAutomaticAiReview: context.suppressAutomaticAiReview === true,
+    suppressThirdPartyExport: context.suppressThirdPartyExport === true,
+  };
+}
+
 function addHeavyMetricsOutcome(
   summary: Record<string, HeavyMetricsTaskSummary>,
   outcome: MetricsTaskOutcome,
@@ -957,6 +976,12 @@ export class UserPostProcessWorkerService
       });
       if (!row) return;
 
+      const batch = await this.importJobs.batchJobs().findUnique({
+        where: { id: job.batchJobId },
+        select: { requestContext: true },
+      });
+      const postProcessPolicy = importPostProcessPolicy(batch?.requestContext);
+
       const sportTypes = asSportTypes(row.affectedSportTypes);
       const batchAnalysisActivityIds =
         sportTypes.length > 0
@@ -1065,20 +1090,41 @@ export class UserPostProcessWorkerService
           endDate: pmcEndDate,
         });
       }
-      // 由实例功能策略决定是否自动触发活动 AI 复盘。
-      await this.runBatchAiReviewWhenAllowed({
-        batchJobId: job.batchJobId,
-        userId: job.userId,
-        postProcessJobId: job.id,
-        activityIds: heavyActivityIds,
-      });
+      // 由实例功能策略与维护批次策略共同决定是否自动触发活动 AI 复盘。
+      if (postProcessPolicy.suppressAutomaticAiReview) {
+        this.logImportPipelineEvent({
+          batchJobId: job.batchJobId,
+          postProcessJobId: job.id,
+          userId: job.userId,
+          stage: 'NOTIFYING',
+          message: '维护批次已关闭自动活动 AI 复盘',
+        });
+      } else {
+        await this.runBatchAiReviewWhenAllowed({
+          batchJobId: job.batchJobId,
+          userId: job.userId,
+          postProcessJobId: job.id,
+          activityIds: heavyActivityIds,
+        });
+      }
       // 判断是否批量同步到第三方平台
-      const exportOutcome = await this.runBatchThirdPartyExports({
-        batchJobId: job.batchJobId,
-        userId: job.userId,
-        postProcessJobId: job.id,
-        activityIds: heavyActivityIds,
-      });
+      const exportOutcome = postProcessPolicy.suppressThirdPartyExport
+        ? { failedProviders: [], failedCount: 0 }
+        : await this.runBatchThirdPartyExports({
+            batchJobId: job.batchJobId,
+            userId: job.userId,
+            postProcessJobId: job.id,
+            activityIds: heavyActivityIds,
+          });
+      if (postProcessPolicy.suppressThirdPartyExport) {
+        this.logImportPipelineEvent({
+          batchJobId: job.batchJobId,
+          postProcessJobId: job.id,
+          userId: job.userId,
+          stage: 'POST_PROCESSING',
+          message: '维护批次已关闭第三方活动回写',
+        });
+      }
       // 发送批次完成通知
       await this.sendBatchNotification({
         batchJobId: job.batchJobId,
