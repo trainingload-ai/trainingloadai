@@ -449,7 +449,7 @@ describe('ImportBatchService', () => {
           accountRef: '0',
           externalId: 'activity-1',
           objectType: 'third_party_activity_file',
-          rawChecksum: expect.any(String),
+          rawChecksum: null,
           rawPayload: {
             listActivity: activity1,
             connectionId: 'connection-1',
@@ -469,7 +469,6 @@ describe('ImportBatchService', () => {
           accountRef: '0',
           externalId: 'activity-1',
           objectType: 'third_party_activity_file',
-          rawChecksum: expect.any(String),
           rawPayload: {
             listActivity: activity1,
             connectionId: 'connection-1',
@@ -482,6 +481,9 @@ describe('ImportBatchService', () => {
           sourceUpdatedAt: new Date('2026-07-06T10:30:00.000Z'),
         }),
       });
+      expect(
+        prisma.importSourceObject.upsert.mock.calls[0]?.[0]?.update,
+      ).not.toHaveProperty('rawChecksum');
       expect(prisma.importItemJob.create).toHaveBeenNthCalledWith(1, {
         data: {
           batchJobId: 'batch-1',

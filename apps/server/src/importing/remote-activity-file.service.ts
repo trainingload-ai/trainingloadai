@@ -30,6 +30,7 @@ export class RemoteActivityFileService {
       fileKey?: string | null;
       fileName?: string | null;
       rawStorageKey?: string | null;
+      rawChecksum?: string | null;
     };
     fallbackFileName: string;
     metadata?: Record<string, unknown>;
@@ -44,11 +45,27 @@ export class RemoteActivityFileService {
       const sourceChecksum = createHash('sha256')
         .update(existingBuffer)
         .digest('hex');
+      const fileName = args.sourceObject.fileName ?? args.fallbackFileName;
+      const rawStorageKey = args.sourceObject.rawStorageKey ?? existingKey;
+      if (
+        args.sourceObject.rawChecksum !== sourceChecksum ||
+        args.sourceObject.fileName !== fileName ||
+        args.sourceObject.rawStorageKey !== rawStorageKey
+      ) {
+        await this.importJobs.sourceObjects().update({
+          where: { id: args.sourceObject.id },
+          data: {
+            fileName,
+            rawStorageKey,
+            rawChecksum: sourceChecksum,
+          },
+        });
+      }
       return {
         buffer: existingBuffer,
         fileKey: existingKey,
-        fileName: args.sourceObject.fileName ?? args.fallbackFileName,
-        rawStorageKey: args.sourceObject.rawStorageKey ?? existingKey,
+        fileName,
+        rawStorageKey,
         sourceChecksum,
       };
     }

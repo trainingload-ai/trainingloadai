@@ -9,14 +9,18 @@ import { ImportingJobRepository } from '../persistence/importing-job.repository'
 describe('RemoteActivityFileService', () => {
   it('reuses a persisted source file without downloading it again', async () => {
     const download = jest.fn<() => Promise<DownloadedActivityFile>>();
+    const update = jest
+      .fn<(...args: unknown[]) => Promise<unknown>>()
+      .mockResolvedValue({});
+    const prisma = { importSourceObject: { update } };
     const service = new RemoteActivityFileService(
-      {} as never,
+      prisma as never,
       {
         getFileWithKey: jest
           .fn<() => Promise<Buffer>>()
           .mockResolvedValue(Buffer.from('fit')),
       } as never,
-      new ImportingJobService(new ImportingJobRepository({} as never)),
+      new ImportingJobService(new ImportingJobRepository(prisma as never)),
     );
     const result = await service.resolve({
       sourceObject: {
@@ -29,6 +33,15 @@ describe('RemoteActivityFileService', () => {
     });
     expect(result.fileKey).toBe('stored.fit');
     expect(download).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'source-1' },
+      data: {
+        fileName: 'a.fit',
+        rawStorageKey: 'stored.fit',
+        rawChecksum:
+          'da4270e3735a3418c9d462af2e17d045132dede43df058e85b1f0399fcf96f1b',
+      },
+    });
   });
 
   it('stores a downloaded file and records its evidence', async () => {
