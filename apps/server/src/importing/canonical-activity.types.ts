@@ -147,6 +147,28 @@ export interface CanonicalLength {
   messageIndex?: number | null;
 }
 
+export interface CanonicalStrengthExerciseLabel {
+  category: string;
+  /** FIT category-specific exercise-name enum value. */
+  categorySubtype?: number;
+  /** Stable Garmin FIT profile identifier such as `straightLegDeadlift`. */
+  name?: string;
+}
+
+/** Ordered active/rest phase from a structured strength-training activity. */
+export interface CanonicalStrengthSet {
+  sequenceIndex: number;
+  messageIndex?: number;
+  setType: 'ACTIVE' | 'REST' | 'UNKNOWN';
+  startTime?: string;
+  timestamp?: string;
+  durationSeconds?: number;
+  repetitions?: number;
+  /** FIT set weight is normalized to kilograms by the Garmin SDK. */
+  weightKg?: number;
+  exercises: CanonicalStrengthExerciseLabel[];
+}
+
 /** 标准化后的活动数据 */
 export interface CanonicalActivityPayload {
   /** 来源信息 */
@@ -161,6 +183,8 @@ export interface CanonicalActivityPayload {
   records: CanonicalRecord[];
   /** 长度信息 */
   lengths: CanonicalLength[];
+  /** 力量训练 active/rest 阶段；旧 canonical 快照可能没有该字段。 */
+  strengthSets?: CanonicalStrengthSet[];
   /** 元数据 */
   metadata?: Record<string, CanonicalJson>;
 }

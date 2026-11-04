@@ -1902,6 +1902,10 @@
   },
   "ActivityDetail": {
     "title": "活動詳情",
+    "genericDataNotice": {
+      "title": "通用訓練資料",
+      "description": "資料來源將其標記為通用訓練。Trainingload.ai 僅使用已記錄的時長、心率、熱量和負荷，不推斷距離、配速、功率或具體訓練類型。"
+    },
     "backButton": "返回",
     "configuration": "設定",
     "loading": "載入中…",

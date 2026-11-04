@@ -426,9 +426,12 @@ export class StrengthActivityService {
               exerciseId: created.id,
               plannedSetGroupId: set.plannedSetGroupId ?? null,
               setIndex: set.setIndex,
+              sourceSequenceIndex: set.sourceSequenceIndex ?? null,
               setType: set.setType,
               completedReps: set.completedReps ?? null,
               completedDurationSeconds: set.completedDurationSeconds ?? null,
+              startedAt: this.parseSessionDate(set.startedAt),
+              restAfterSeconds: set.restAfterSeconds ?? null,
               ...strengthLoadToColumns(set.load as StrengthLoadV1),
               actualRpe: set.actualRpe ?? null,
               actualRir: set.actualRir ?? null,
@@ -530,9 +533,12 @@ export class StrengthActivityService {
             exerciseId: created.id,
             plannedSetGroupId: null,
             setIndex: set.setIndex,
+            sourceSequenceIndex: set.sourceSequenceIndex ?? null,
             setType: set.setType,
             completedReps: set.completedReps ?? null,
             completedDurationSeconds: set.completedDurationSeconds ?? null,
+            startedAt: this.parseSessionDate(set.startedAt),
+            restAfterSeconds: set.restAfterSeconds ?? null,
             ...strengthLoadToColumns(set.load as StrengthLoadV1),
             actualRpe: set.actualRpe ?? null,
             actualRir: set.actualRir ?? null,
@@ -656,6 +662,9 @@ export class StrengthActivityService {
           ? { plannedSetGroupId: String(set.plannedSetGroupId) }
           : {}),
         setIndex: Number(set.setIndex),
+        ...(set.sourceSequenceIndex != null
+          ? { sourceSequenceIndex: Number(set.sourceSequenceIndex) }
+          : {}),
         setType: set.setType,
         ...(set.completedReps != null
           ? { completedReps: Number(set.completedReps) }
@@ -664,6 +673,13 @@ export class StrengthActivityService {
           ? {
               completedDurationSeconds: Number(set.completedDurationSeconds),
             }
+          : {}),
+        startedAt:
+          set.startedAt instanceof Date
+            ? set.startedAt.toISOString()
+            : (set.startedAt ?? null),
+        ...(set.restAfterSeconds != null
+          ? { restAfterSeconds: Number(set.restAfterSeconds) }
           : {}),
         load: strengthLoadFromColumns(set, 'ABSOLUTE'),
         ...(set.actualRpe != null ? { actualRpe: Number(set.actualRpe) } : {}),

@@ -23,7 +23,10 @@ export type { FITPrimaryKind } from 'trackswap';
 export const TRACK_FILE_FORMATS = ['fit', 'gpx', 'tcx'] as const;
 export type TrackFileFormat = (typeof TRACK_FILE_FORMATS)[number];
 
-export type TrackFileValidationCode = 'FORMAT_MISMATCH' | 'ACTIVITY_NOT_FOUND';
+export type TrackFileValidationCode =
+  | 'FORMAT_MISMATCH'
+  | 'ACTIVITY_NOT_FOUND'
+  | 'ACTIVITY_RECORD_COUNT_MISMATCH';
 
 export class TrackFileValidationError extends Error {
   constructor(
@@ -33,11 +36,39 @@ export class TrackFileValidationError extends Error {
       detectedFormat?: TrackFileFormat;
       expectedFormat?: TrackFileFormat;
       filename?: string;
+      decodedRecordCount?: number;
+      canonicalRecordCount?: number;
     } = {},
   ) {
     super(message);
     this.name = 'TrackFileValidationError';
   }
+}
+
+export function assertFITActivityRecordParity(args: {
+  detectedFormat: TrackFileFormat;
+  document: TrackDocument;
+  activity: FileType;
+  filename?: string;
+}): void {
+  if (args.detectedFormat !== 'fit') return;
+  const decodedRecordCount =
+    args.document.diagnostics.fit?.messageCounts.recordMesgs;
+  if (typeof decodedRecordCount !== 'number') return;
+
+  const canonicalRecordCount = trackFileRecords(args.activity).length;
+  if (decodedRecordCount === canonicalRecordCount) return;
+
+  throw new TrackFileValidationError(
+    'ACTIVITY_RECORD_COUNT_MISMATCH',
+    `FIT record count mismatch: decoded ${decodedRecordCount}, canonicalized ${canonicalRecordCount}`,
+    {
+      detectedFormat: args.detectedFormat,
+      filename: args.filename,
+      decodedRecordCount,
+      canonicalRecordCount,
+    },
+  );
 }
 
 export interface DecodedTrackFile {
@@ -154,6 +185,12 @@ export async function decodeTrackFile(
       { detectedFormat: decoded.detectedFormat, filename: options.filename },
     );
   }
+  assertFITActivityRecordParity({
+    detectedFormat: decoded.detectedFormat,
+    document: decoded.document,
+    activity,
+    filename: options.filename,
+  });
   if (options.filename && activity.metadata) {
     activity.metadata.fileName = options.filename;
   }

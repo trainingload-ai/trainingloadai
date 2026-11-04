@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useActivityId } from "@/hooks/useActivityId";
 import { useGetActivity } from "@/hooks/useActivities";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
+import { getActivityDetailPolicy } from "@/lib/activity-detail-policy";
 import { ActivityMetricGrid } from "./activity-metric-grid";
 
 type SummaryMetric = {
@@ -56,27 +57,18 @@ const Overview = React.memo(function Overview() {
 
   if (!activity) return null;
 
+  const isOther = getActivityDetailPolicy(activity).group === "OTHER";
   const isCycling = activity.sportType === "CYCLING";
   const paceOrSpeedMetric = isCycling ? "speed" : "pace";
-  const metrics: SummaryMetric[] = [
-    {
-      label: t("activities.distance"),
-      value: valueOrDash(activity.distance, "distance", systemUnit),
-      unit: getUnit("distance", systemUnit),
-    },
-    {
-      label: t("activities.duration"),
-      value: valueOrDash(
-        activity.movingTime ?? activity.elapsedTime ?? activity.duration,
-        "duration",
-        systemUnit,
-      ),
-    },
-    {
-      label: isCycling ? t("activityDetails.avgSpeed") : tOverview("avgPace"),
-      value: valueOrDash(activity.averageSpeed, paceOrSpeedMetric, systemUnit),
-      unit: getUnit(paceOrSpeedMetric, systemUnit),
-    },
+  const durationMetric: SummaryMetric = {
+    label: t("activities.duration"),
+    value: valueOrDash(
+      activity.movingTime ?? activity.elapsedTime ?? activity.duration,
+      "duration",
+      systemUnit,
+    ),
+  };
+  const heartRateMetrics: SummaryMetric[] = [
     {
       label: tOverview("avgHeartRate"),
       value: valueOrDash(activity.avgHeartRate, "heartRate", systemUnit),
@@ -87,16 +79,55 @@ const Overview = React.memo(function Overview() {
       value: valueOrDash(activity.maxHeartRate, "heartRate", systemUnit),
       unit: getUnit("heartRate", systemUnit),
     },
-    {
-      label: tOverview("avgPower"),
-      value: valueOrDash(
-        activity.avgPower ?? activity.averageWatts,
-        "power",
-        systemUnit,
-      ),
-      unit: getUnit("power", systemUnit),
-    },
   ];
+  const metrics: SummaryMetric[] = isOther
+    ? [
+        durationMetric,
+        ...heartRateMetrics,
+        {
+          label: t("HeartRatePage.tooltip.minHeartRate"),
+          value: valueOrDash(activity.minHeartRate, "heartRate", systemUnit),
+          unit: getUnit("heartRate", systemUnit),
+        },
+        {
+          label: t("dashboard.calories"),
+          value: valueOrDash(activity.calories, "count", systemUnit),
+          unit: "kcal",
+        },
+        {
+          label: t("V2ActivitiesPage.common.load"),
+          value: valueOrDash(activity.load, "count", systemUnit),
+        },
+      ]
+    : [
+        {
+          label: t("activities.distance"),
+          value: valueOrDash(activity.distance, "distance", systemUnit),
+          unit: getUnit("distance", systemUnit),
+        },
+        durationMetric,
+        {
+          label: isCycling
+            ? t("activityDetails.avgSpeed")
+            : tOverview("avgPace"),
+          value: valueOrDash(
+            activity.averageSpeed,
+            paceOrSpeedMetric,
+            systemUnit,
+          ),
+          unit: getUnit(paceOrSpeedMetric, systemUnit),
+        },
+        ...heartRateMetrics,
+        {
+          label: tOverview("avgPower"),
+          value: valueOrDash(
+            activity.avgPower ?? activity.averageWatts,
+            "power",
+            systemUnit,
+          ),
+          unit: getUnit("power", systemUnit),
+        },
+      ];
 
   return (
     <section>

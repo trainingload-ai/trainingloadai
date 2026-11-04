@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getSportDisplayName, type SportDefinition } from "@/api/sports";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
+import { activitySupportsDistance } from "@/lib/activity-presentation";
 import {
   isThirdPartyProviderBrand,
   ProviderFavicon,
@@ -166,7 +167,7 @@ function formatDateTime(
 }
 
 function formatDistance(meters: number | null) {
-  if (typeof meters !== "number") return "--";
+  if (typeof meters !== "number" || meters <= 0) return null;
   return `${(meters / 1000).toFixed(1)} km`;
 }
 
@@ -240,6 +241,10 @@ export function ActivityFeedCard({
     [activity.timezone, profile],
   );
   const statusText = visibleStatusLabel(t, activity.status);
+  const supportsDistance = activitySupportsDistance(sportCatalog, activity);
+  const distanceLabel = supportsDistance
+    ? formatDistance(activity.distance)
+    : null;
 
   const handleDelete = async () => {
     if (!activity.hashId || deleting) return;
@@ -291,14 +296,16 @@ export function ActivityFeedCard({
           displayTz,
           timeFormat,
         )}
-        distanceLabel={formatDistance(activity.distance)}
+        distanceLabel={distanceLabel}
         durationLabel={formatDuration(activity.duration)}
         load={activity.load == null ? null : Math.round(activity.load)}
         loadLabel={t("common.load")}
         loadPlacement="meta"
         note={activity.note}
-        mapThumbnailDarkUrl={activity.mapThumbnailDarkUrl}
-        mapThumbnailUrl={activity.mapThumbnailUrl}
+        mapThumbnailDarkUrl={
+          supportsDistance ? activity.mapThumbnailDarkUrl : null
+        }
+        mapThumbnailUrl={supportsDistance ? activity.mapThumbnailUrl : null}
         onOpen={previewOnly ? undefined : () => onOpen(activity.hashId)}
         headerAction={
           previewOnly ? undefined : (

@@ -1810,6 +1810,10 @@
   },
   "ActivityDetail": {
     "title": "Aktivitätsdetails",
+    "genericDataNotice": {
+      "title": "Allgemeine Trainingsdaten",
+      "description": "Die Quelle hat diese Einheit als allgemeines Training eingestuft. Trainingload.ai verwendet nur die aufgezeichnete Dauer, Herzfrequenz, Kalorien und Belastung und leitet weder Distanz, Tempo, Leistung noch die genaue Trainingsart ab."
+    },
     "backButton": "Zurück",
     "configuration": "Konfiguration",
     "loading": "Laden...",

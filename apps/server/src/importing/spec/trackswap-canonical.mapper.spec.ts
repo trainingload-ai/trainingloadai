@@ -2,7 +2,9 @@ import { describe, expect, it } from '@jest/globals';
 import { createHash } from 'crypto';
 import {
   buildCanonicalDedupeKey,
+  buildCanonicalDatasetChecksum,
   extractTrackSwapSubSport,
+  fitSubSportName,
   mapCanonicalPayloadToTrackSwapActivity,
   mapTrackSwapActivityToCanonicalPayload,
   mapTrackSwapSportType,
@@ -18,6 +20,7 @@ describe('mapTrackSwapSportType', () => {
     ['MTB', 'CYCLING'],
     ['swimming', 'SWIM'],
     ['stretching', 'STRETCHING'],
+    ['generic', 'UNKNOWN'],
     ['curling', 'UNKNOWN'],
     [null, 'UNKNOWN'],
   ])('maps %s to %s', (input, expected) => {
@@ -49,6 +52,13 @@ describe('extractTrackSwapSubSport', () => {
     expect(
       extractTrackSwapSubSport({ subSport: 'bad' } as never),
     ).toBeUndefined();
+  });
+});
+
+describe('fitSubSportName', () => {
+  it('normalizes Garmin SDK camelCase enum names for sport catalog lookup', () => {
+    expect(fitSubSportName('strengthTraining')).toBe('strength_training');
+    expect(fitSubSportName('indoorCycling')).toBe('indoor_cycling');
   });
 });
 
@@ -117,6 +127,34 @@ describe('mapTrackSwapActivityToCanonicalPayload', () => {
     avgCadence: 82,
     maxCadence: 94,
     totalCalories: 330,
+    strengthSets: [
+      {
+        index: 0,
+        messageIndex: 4,
+        setType: 'active',
+        startTime: '2026-06-29T00:10:00.000Z',
+        timestamp: '2026-06-29T00:05:00.000Z',
+        duration: 46.27,
+        repetitions: 10,
+        weight: 40,
+        exercises: [
+          { category: 'squat' },
+          {
+            category: 'hipRaise',
+            categorySubtype: 0,
+            name: 'barbellHipThrustOnFloor',
+          },
+        ],
+      },
+      {
+        index: 1,
+        messageIndex: 5,
+        setType: 'rest',
+        startTime: '2026-06-29T00:10:46.000Z',
+        duration: 90.4,
+        exercises: [],
+      },
+    ],
     startPositionLat: 31.2304,
     startPositionLong: 121.4737,
     endPositionLat: 31.231,
@@ -217,6 +255,28 @@ describe('mapTrackSwapActivityToCanonicalPayload', () => {
     expect(payload.source.sourceChecksum).toBe(containerChecksum);
   });
 
+  it('keeps the pre-strength dataset checksum shape for activities without sets', () => {
+    const payload = mapTrackSwapActivityToCanonicalPayload({
+      kind: 'FILE' as never,
+      sourceUid: 'upload-without-strength',
+      activity: { ...activity, strengthSets: undefined } as never,
+    });
+
+    expect(payload.identity.datasetChecksum).toBe(
+      buildCanonicalDatasetChecksum({
+        sportType: payload.summary.sportType,
+        startTime: payload.summary.startTime,
+        endTime: payload.summary.endTime,
+        distance: payload.summary.distance,
+        elapsedTime: payload.summary.elapsedTime,
+        timerTime: payload.summary.timerTime,
+        laps: payload.laps,
+        records: payload.records,
+        lengths: payload.lengths,
+      }),
+    );
+  });
+
   it('maps summary, source metadata, laps, records, and lengths into canonical payload', () => {
     const payload = mapTrackSwapActivityToCanonicalPayload({
       kind: 'GARMIN' as never,
@@ -310,6 +370,29 @@ describe('mapTrackSwapActivityToCanonicalPayload', () => {
         messageIndex: 7,
       }),
     ]);
+    expect(payload.strengthSets).toEqual([
+      expect.objectContaining({
+        sequenceIndex: 0,
+        messageIndex: 4,
+        setType: 'ACTIVE',
+        durationSeconds: 46.27,
+        repetitions: 10,
+        weightKg: 40,
+        exercises: [
+          { category: 'squat' },
+          {
+            category: 'hipRaise',
+            categorySubtype: 0,
+            name: 'barbellHipThrustOnFloor',
+          },
+        ],
+      }),
+      expect.objectContaining({
+        sequenceIndex: 1,
+        setType: 'REST',
+        durationSeconds: 90.4,
+      }),
+    ]);
     expect(payload.metadata).toMatchObject({
       importId: 'batch-1',
       trackswapSport: 'running',
@@ -317,6 +400,7 @@ describe('mapTrackSwapActivityToCanonicalPayload', () => {
       lapCount: 1,
       recordCount: 1,
       lengthCount: 1,
+      strengthSetCount: 2,
     });
   });
 
@@ -381,6 +465,17 @@ describe('mapTrackSwapActivityToCanonicalPayload', () => {
       avgSpeed: 3.2,
     });
     expect(restored.laps).toHaveLength(1);
+    expect(
+      (restored as never as { strengthSets: unknown[] }).strengthSets,
+    ).toEqual([
+      expect.objectContaining({
+        index: 0,
+        setType: 'active',
+        repetitions: 10,
+        weight: 40,
+      }),
+      expect.objectContaining({ index: 1, setType: 'rest' }),
+    ]);
     expect(restored.laps[0]).toMatchObject({
       index: 2,
       sport: 'RUN',
@@ -411,6 +506,23 @@ describe('mapTrackSwapActivityToCanonicalPayload', () => {
         }),
       ],
     });
+  });
+
+  it('includes structured strength sets in the canonical dataset checksum', () => {
+    const withStrength = mapTrackSwapActivityToCanonicalPayload({
+      kind: 'FILE' as never,
+      sourceUid: 'strength-file',
+      activity: activity as never,
+    });
+    const withoutStrength = mapTrackSwapActivityToCanonicalPayload({
+      kind: 'FILE' as never,
+      sourceUid: 'strength-file',
+      activity: { ...activity, strengthSets: [] } as never,
+    });
+
+    expect(withStrength.identity.datasetChecksum).not.toBe(
+      withoutStrength.identity.datasetChecksum,
+    );
   });
 
   it('preserves distinct lap indexes on records for route segmentation', () => {

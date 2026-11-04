@@ -13,6 +13,7 @@ import { useStore } from "@/lib/store";
 import { getCalendarSportSurfaceClass } from "./calendar-ui-utils";
 import { getSportDisplayName, type SportDefinition } from "@/api/sports";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
+import { activitySupportsDistance } from "@/lib/activity-presentation";
 
 interface DayCellProps {
   date: Dayjs;
@@ -116,34 +117,51 @@ const DayCell: React.FC<DayCellProps> = ({
               +{planWorkouts.length - planBars.length} {t("moreTraining")}
             </div>
           ) : null}
-          {activityBars.map((act, idx) => (
-            <Link
-              key={idx}
-              href={`/activities/${act.hashId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(event) => event.stopPropagation()}
-              className={cn(
-                "min-h-5 p-1 w-full rounded-xs text-mobile-caption pc:text-[11px] cursor-pointer",
-                getCalendarSportSurfaceClass(act.sportType),
-              )}
-              title={`${getLocalizedActivityTitle(act, tActivityTitle, t("activity"))} ｜ ${getSportDisplayName(sportCatalog, act, tSports)} ｜ ${t("distance")} ${formatValue(act.distance || 0, "distance", systemUnit)} ｜ ${t("duration")} ${formatValue(act.duration || 0, "duration", systemUnit)}`}
-            >
-              <div className="flex items-center gap-1 overflow-hidden">
-                {getSportTypeIcon(
-                  act.sportType as SportType,
-                  "w-3 h-3 shrink-0",
+          {activityBars.map((act, idx) => {
+            const showDistance = activitySupportsDistance(sportCatalog, act);
+            const meta = [
+              getSportDisplayName(sportCatalog, act, tSports),
+              showDistance
+                ? `${formatValue(act.distance || 0, "distance", systemUnit)} ${getUnit("distance", systemUnit)}`
+                : null,
+              `${formatValue(act.duration || 0, "duration", systemUnit)} ${getUnit("duration", systemUnit)}`,
+            ]
+              .filter(Boolean)
+              .join(" · ");
+            const title = [
+              getLocalizedActivityTitle(act, tActivityTitle, t("activity")),
+              getSportDisplayName(sportCatalog, act, tSports),
+              showDistance
+                ? `${t("distance")} ${formatValue(act.distance || 0, "distance", systemUnit)}`
+                : null,
+              `${t("duration")} ${formatValue(act.duration || 0, "duration", systemUnit)}`,
+            ]
+              .filter(Boolean)
+              .join(" ｜ ");
+
+            return (
+              <Link
+                key={idx}
+                href={`/activities/${act.hashId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className={cn(
+                  "min-h-5 p-1 w-full rounded-xs text-mobile-caption pc:text-[11px] cursor-pointer",
+                  getCalendarSportSurfaceClass(act.sportType),
                 )}
-                <span className="whitespace-nowrap truncate">
-                  {getSportDisplayName(sportCatalog, act, tSports)} ·{" "}
-                  {formatValue(act.distance || 0, "distance", systemUnit)}{" "}
-                  {getUnit("distance", systemUnit)} ·{" "}
-                  {formatValue(act.duration || 0, "duration", systemUnit)}{" "}
-                  {getUnit("duration", systemUnit)}
-                </span>
-              </div>
-            </Link>
-          ))}
+                title={title}
+              >
+                <div className="flex items-center gap-1 overflow-hidden">
+                  {getSportTypeIcon(
+                    act.sportType as SportType,
+                    "w-3 h-3 shrink-0",
+                  )}
+                  <span className="whitespace-nowrap truncate">{meta}</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -38,6 +38,7 @@ import {
   CompetitionEventDialog,
 } from "@/components/competition/competition-event-dialog";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
+import { activitySupportsDistance } from "@/lib/activity-presentation";
 
 type WeekStats = {
   count: number;
@@ -409,43 +410,55 @@ export function CalendarDaySheet({
               </div>
             ) : (
               <div className="space-y-2">
-                {activities.map((activity) => (
-                  <Link
-                    key={activity.hashId}
-                    href={`/activities/${activity.hashId}`}
-                    className="block rounded-md bg-background p-2.5 transition-colors hover:bg-slate-50 dark:bg-neutral-950 dark:hover:bg-neutral-900"
-                  >
-                    <div className="truncate text-sm font-semibold">
-                      {getLocalizedActivityTitle(
-                        activity,
-                        tActivityTitle,
-                        tDay("activity"),
-                      )}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-mobile-caption pc:text-xs opacity-80">
-                      <span>
-                        {formatValue(
-                          activity.distance || 0,
-                          "distance",
-                          systemUnit,
-                        )}{" "}
-                        {getUnit("distance", systemUnit)}
-                      </span>
-                      <span>
-                        {formatValue(
-                          activity.duration || 0,
-                          "duration",
-                          systemUnit,
+                {activities.map((activity) => {
+                  const showDistance = activitySupportsDistance(
+                    sportCatalog,
+                    activity,
+                  );
+                  return (
+                    <Link
+                      key={activity.hashId}
+                      href={`/activities/${activity.hashId}`}
+                      className="block rounded-md bg-background p-2.5 transition-colors hover:bg-slate-50 dark:bg-neutral-950 dark:hover:bg-neutral-900"
+                    >
+                      <div className="truncate text-sm font-semibold">
+                        {getLocalizedActivityTitle(
+                          activity,
+                          tActivityTitle,
+                          tDay("activity"),
                         )}
-                      </span>
-                      {activity.sportType ? (
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-mobile-caption pc:text-xs opacity-80">
+                        {showDistance ? (
+                          <span>
+                            {formatValue(
+                              activity.distance || 0,
+                              "distance",
+                              systemUnit,
+                            )}{" "}
+                            {getUnit("distance", systemUnit)}
+                          </span>
+                        ) : null}
                         <span>
-                          {getSportDisplayName(sportCatalog, activity, tSports)}
+                          {formatValue(
+                            activity.duration || 0,
+                            "duration",
+                            systemUnit,
+                          )}
                         </span>
-                      ) : null}
-                    </div>
-                  </Link>
-                ))}
+                        {activity.sportType ? (
+                          <span>
+                            {getSportDisplayName(
+                              sportCatalog,
+                              activity,
+                              tSports,
+                            )}
+                          </span>
+                        ) : null}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>

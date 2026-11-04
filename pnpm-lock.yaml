@@ -35,8 +35,8 @@ importers:
         specifier: 9.1.7
         version: 9.1.7
       trackswap:
-        specifier: 0.2.3
-        version: 0.2.3
+        specifier: 0.2.4
+        version: 0.2.4
       yaml:
         specifier: 2.9.0
         version: 2.9.0
@@ -709,8 +709,8 @@ importers:
         specifier: 0.35.5
         version: 0.35.5(@types/node@22.19.19)
       trackswap:
-        specifier: 0.2.3
-        version: 0.2.3
+        specifier: 0.2.4
+        version: 0.2.4
       tz-lookup:
         specifier: ^6.1.25
         version: 6.1.25
@@ -1919,6 +1919,9 @@ packages:
 
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
+
+  '@garmin/fitsdk@21.212.0':
+    resolution: {integrity: sha512-NnIcaBZyEqaNhCv9KvH2lc0/N+epmUO+6wp7ITI+wEaw3R7YtRLwS6qow3d2UTKKWbrUUZnsPEAgU+Obd8bD/g==}
 
   '@garmin/fitsdk@21.214.0':
     resolution: {integrity: sha512-c3ydrRYD0kPnX8USl+JEyJ9smhol3/JRxcU9QVZUvmb7ZBoGwhsqCAe7wXhwMJnMba97x4x+9J/yXr6WYUVaYQ==}
@@ -10530,8 +10533,8 @@ packages:
     resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
     engines: {node: '>=20'}
 
-  trackswap@0.2.3:
-    resolution: {integrity: sha512-6PjQTxt+GWyKqnhEPsMFJoGqpSyzAsyyY2p08DitgOIYPRDsXm/IndX6ZfGNi5Q+jXsM8EkXOjL2xWCn6JGFug==}
+  trackswap@0.2.4:
+    resolution: {integrity: sha512-YbulLt6Rxhf/aYXXnhuFOJpiIQ2j89qZErklMHq8UtDTIPSSpAyCmAOskQk0r9oOrYdV+pyQSsDloZe/1t1pVw==}
     engines: {node: '>=18.0.0'}
 
   trim-lines@3.0.1:
@@ -12181,6 +12184,8 @@ snapshots:
   '@formatjs/intl-localematcher@0.6.2':
     dependencies:
       tslib: 2.8.1
+
+  '@garmin/fitsdk@21.212.0': {}
 
   '@garmin/fitsdk@21.214.0': {}
 
@@ -22461,9 +22466,9 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  trackswap@0.2.3:
+  trackswap@0.2.4:
     dependencies:
-      '@garmin/fitsdk': 21.214.0
+      '@garmin/fitsdk': 21.212.0
       dayjs: 1.11.21
       geolib: 3.3.14
       htmlparser2: 10.1.0

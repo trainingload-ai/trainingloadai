@@ -14,6 +14,7 @@ import {
 import type { Activity } from "@/api/activities";
 import type { CompetitionEvent } from "@/api/competition-events";
 import type { PlanWorkout } from "@/api/plans";
+import { isGenericActivityClassification } from "@/lib/activity-presentation";
 import { cn } from "@/lib/utils";
 import {
   getPlannedWorkoutLoad,
@@ -110,7 +111,9 @@ function visibleTags({
       id: `activity-${activity.id}`,
       label: [
         sportLabel(translate, activity.sportType),
-        formatCompactDistance(activity.distance),
+        isGenericActivityClassification(activity)
+          ? null
+          : formatCompactDistance(activity.distance),
         formatCompactDuration(activity.duration),
       ]
         .filter(Boolean)

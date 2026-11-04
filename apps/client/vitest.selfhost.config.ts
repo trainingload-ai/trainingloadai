@@ -80,6 +80,7 @@ export default defineConfig({
       "src/app/[locale]/(main)/account/athlete-memory/AthleteMemorySettings.test.tsx",
       "src/app/[locale]/(main)/settings/component/SelfHostAiSettings.test.tsx",
       "src/app/[locale]/(main)/_home/components/home-suggestion-card-stack.test.tsx",
+      "src/app/[locale]/(main)/activities/[activityId]/components/ActivityStrengthSection.test.tsx",
       "src/components/ai-consent/AiDataConsentReminder.test.tsx",
       "src/components/layout/MainScrollPageShell.test.tsx",
       "src/components/plan/create-plan-mode-dialog.test.tsx",

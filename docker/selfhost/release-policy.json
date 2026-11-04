@@ -66,6 +66,10 @@
       "0014_better_auth_oauth_provider_17": {
         "phase": "expand",
         "releaseVersion": "1.1.16"
+      },
+      "0015_fit_strength_sets": {
+        "phase": "expand",
+        "releaseVersion": "1.1.16"
       }
     }
   }

@@ -16,6 +16,7 @@ import type {
   CanonicalLap,
   CanonicalLength,
   CanonicalRecord,
+  CanonicalStrengthSet,
 } from '../canonical-activity.types';
 
 function isoString(value?: string | number | Date | null) {
@@ -87,7 +88,11 @@ export function fitSubSportName(value: unknown) {
     value.trim() &&
     !/^\d+$/.test(value.trim())
   ) {
-    return value.trim();
+    return value
+      .trim()
+      .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+      .replace(/[\s-]+/g, '_')
+      .toLowerCase();
   }
   const code = Number(value);
   const names: Record<number, string> = {
@@ -125,6 +130,7 @@ export function mapTrackSwapSportType(input?: string | null): SportType {
     SWIMMING: 'SWIM',
     SWIM: 'SWIM',
     STRETCHING: 'STRETCHING',
+    GENERIC: 'UNKNOWN',
   };
 
   return mappings[normalized] ?? 'UNKNOWN';
@@ -243,6 +249,74 @@ function mapLength(length: ActivityLengthType): CanonicalLength {
   };
 }
 
+type TrackSwapStrengthSet = {
+  index?: unknown;
+  messageIndex?: unknown;
+  setType?: unknown;
+  startTime?: unknown;
+  timestamp?: unknown;
+  duration?: unknown;
+  repetitions?: unknown;
+  weight?: unknown;
+  exercises?: Array<{
+    category?: unknown;
+    categorySubtype?: unknown;
+    name?: unknown;
+  }>;
+};
+
+function finiteNumber(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function mapStrengthSets(activity: ActivityType): CanonicalStrengthSet[] {
+  const sets = (
+    activity as ActivityType & {
+      strengthSets?: TrackSwapStrengthSet[];
+    }
+  ).strengthSets;
+  if (!Array.isArray(sets)) return [];
+
+  return sets.map((set, index) => {
+    const rawSetType = String(set.setType ?? '')
+      .trim()
+      .toUpperCase();
+    const setType: CanonicalStrengthSet['setType'] =
+      rawSetType === 'ACTIVE'
+        ? 'ACTIVE'
+        : rawSetType === 'REST'
+          ? 'REST'
+          : 'UNKNOWN';
+    return {
+      sequenceIndex: finiteNumber(set.index) ?? index,
+      ...(finiteNumber(set.messageIndex) === undefined
+        ? {}
+        : { messageIndex: finiteNumber(set.messageIndex) }),
+      setType,
+      startTime: isoString(set.startTime as string | number | Date | null),
+      timestamp: isoString(set.timestamp as string | number | Date | null),
+      durationSeconds: finiteNumber(set.duration),
+      repetitions: finiteNumber(set.repetitions),
+      weightKg: finiteNumber(set.weight),
+      exercises: (set.exercises ?? [])
+        .map((exercise) => {
+          const category = String(exercise.category ?? '').trim();
+          if (!category) return null;
+          const categorySubtype = finiteNumber(exercise.categorySubtype);
+          const name = String(exercise.name ?? '').trim();
+          return {
+            category,
+            ...(categorySubtype === undefined ? {} : { categorySubtype }),
+            ...(name ? { name } : {}),
+          };
+        })
+        .filter((exercise) => exercise !== null),
+    };
+  });
+}
+
 export function buildCanonicalDedupeKey(input: {
   sourceUid: string;
   sportType: SportType;
@@ -274,6 +348,7 @@ export function buildCanonicalDatasetChecksum(input: {
   laps: CanonicalLap[];
   records: CanonicalRecord[];
   lengths: CanonicalLength[];
+  strengthSets?: CanonicalStrengthSet[];
 }) {
   return createHash('sha256').update(JSON.stringify(input)).digest('hex');
 }
@@ -326,6 +401,7 @@ export function mapTrackSwapActivityToCanonicalPayload(args: {
   const lengths = (activity.laps ?? []).flatMap((lap) =>
     (lap.lengths ?? []).map(mapLength),
   );
+  const strengthSets = mapStrengthSets(activity);
   const startCoordinate =
     coordinate(activity.startPositionLat, activity.startPositionLong) ??
     recordCoordinate(records, 'first');
@@ -344,6 +420,7 @@ export function mapTrackSwapActivityToCanonicalPayload(args: {
     laps,
     records,
     lengths,
+    ...(strengthSets.length > 0 ? { strengthSets } : {}),
   });
   const sourceChecksum =
     args.sourceChecksum &&
@@ -417,6 +494,7 @@ export function mapTrackSwapActivityToCanonicalPayload(args: {
     laps,
     records,
     lengths,
+    strengthSets,
     metadata: {
       ...(args.metadata ?? {}),
       ...(args.sourceChecksum && args.activityCount && args.activityCount > 1
@@ -428,6 +506,7 @@ export function mapTrackSwapActivityToCanonicalPayload(args: {
       lapCount: laps.length,
       recordCount: records.length,
       lengthCount: lengths.length,
+      strengthSetCount: strengthSets.length,
     },
   };
 }
@@ -573,6 +652,17 @@ export function mapCanonicalPayloadToTrackSwapActivity(
     numLaps: payload.summary.numLaps,
     numLengths: payload.summary.numLengths,
     numActiveLengths: payload.summary.numActiveLengths,
+    strengthSets: (payload.strengthSets ?? []).map((set) => ({
+      index: set.sequenceIndex,
+      messageIndex: set.messageIndex,
+      setType: set.setType.toLowerCase(),
+      startTime: set.startTime,
+      timestamp: set.timestamp,
+      duration: set.durationSeconds,
+      repetitions: set.repetitions,
+      weight: set.weightKg,
+      exercises: set.exercises,
+    })),
     laps,
   } as unknown as ActivityType;
 }

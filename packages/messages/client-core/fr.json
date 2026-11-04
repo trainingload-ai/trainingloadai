@@ -1810,6 +1810,10 @@
   },
   "ActivityDetail": {
     "title": "Détails de l’activité",
+    "genericDataNotice": {
+      "title": "Données d’entraînement générique",
+      "description": "La source a classé cette séance comme entraînement générique. Trainingload.ai utilise uniquement la durée, la fréquence cardiaque, les calories et la charge enregistrées ; aucune distance, allure, puissance ou activité précise n’est déduite."
+    },
     "backButton": "Dos",
     "configuration": "Configuration",
     "loading": "Chargement...",

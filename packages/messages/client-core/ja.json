@@ -1809,6 +1809,10 @@
   },
   "ActivityDetail": {
     "title": "アクティビティ詳細",
+    "genericDataNotice": {
+      "title": "汎用ワークアウトデータ",
+      "description": "データ提供元では汎用ワークアウトとして分類されています。Trainingload.ai は記録された時間、心拍数、消費カロリー、負荷のみを使用し、距離、ペース、パワー、具体的な種目は推測しません。"
+    },
     "backButton": "戻る",
     "configuration": "設定",
     "loading": "読み込み中...",

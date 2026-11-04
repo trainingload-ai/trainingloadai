@@ -167,11 +167,7 @@ export function getSportDisplayName(
   t: SportCatalogTranslator,
 ) {
   const code = value.subSportType ?? value.sportDefinitionCode;
-  const definition = code
-    ? catalog.find((sport) => sport.code === code)
-    : catalog.find(
-        (sport) => sport.family === value.sportType && sport.isDefaultForFamily,
-      );
+  const definition = resolveSportDefinition(catalog, value);
   if (definition) {
     return getLocalizedSportDefinitionName(definition, t);
   }
@@ -187,6 +183,22 @@ export function getSportDisplayName(
   return family && ["RUN", "CYCLING", "SWIM", "STRETCHING"].includes(family)
     ? getLocalizedSportFamilyName(family, t)
     : getLocalizedSportFamilyName("UNKNOWN", t);
+}
+
+export function resolveSportDefinition(
+  catalog: SportDefinition[],
+  value: {
+    sportType?: string | null;
+    subSportType?: string | null;
+    sportDefinitionCode?: string | null;
+  },
+) {
+  const code = value.subSportType ?? value.sportDefinitionCode;
+  return code
+    ? catalog.find((sport) => sport.code === code)
+    : catalog.find(
+        (sport) => sport.family === value.sportType && sport.isDefaultForFamily,
+      );
 }
 
 export function useSportCatalog(planning = false) {

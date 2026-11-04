@@ -31,6 +31,7 @@ describe('resolveActivityCoachSportContext', () => {
     expect(context.allowedMetricDomains).toEqual([
       'duration',
       'heart_rate',
+      'calories',
       'load',
       'session_rpe',
       'strength',
@@ -42,6 +43,25 @@ describe('resolveActivityCoachSportContext', () => {
         'cadence',
         'stride mechanics',
       ]),
+    );
+  });
+
+  it('treats generic workouts as recorded-data-only evidence', () => {
+    const context = resolveActivityCoachSportContext({
+      sportType: SportType.UNKNOWN,
+      sportDefinitionCode: 'OTHER',
+    });
+
+    expect(context.sportLabel).toBe('Generic workout');
+    expect(context.allowedMetricDomains).toEqual([
+      'duration',
+      'heart_rate',
+      'calories',
+      'load',
+      'session_rpe',
+    ]);
+    expect(context.forbiddenInferences).toEqual(
+      expect.arrayContaining(['exact workout modality']),
     );
   });
 });
@@ -206,9 +226,12 @@ describe('buildUnifiedActivityAnalysisInput', () => {
             sets: [
               {
                 setIndex: 0,
+                sourceSequenceIndex: 8,
                 setType: 'WORKING',
                 completedReps: 6,
-                completedDurationSeconds: null,
+                completedDurationSeconds: 46,
+                startedAt: new Date('2026-07-17T08:29:14.000Z'),
+                restAfterSeconds: 269,
                 loadType: 'ABSOLUTE',
                 loadValue: 50,
                 loadUnit: 'KG',
@@ -238,15 +261,69 @@ describe('buildUnifiedActivityAnalysisInput', () => {
       set_count: 1,
       completed_set_count: 1,
       completed_reps: 6,
+      timed_set_seconds: 46,
+      rest_seconds: 269,
       volume_load_kg: 300,
     });
     expect(input.strength?.exercises[0].sets[0]).toMatchObject({
+      source_sequence_index: 8,
       reps: 6,
+      duration_seconds: 46,
+      started_at: '2026-07-17T08:29:14.000Z',
+      rest_after_seconds: 269,
       load_type: 'ABSOLUTE',
       load_value: 50,
       load_unit: 'KG',
       rpe: 8,
       rir: 2,
     });
+  });
+
+  it('keeps recorded generic evidence without inventing a modality', async () => {
+    const input = await buildUnifiedActivityAnalysisInput(
+      {
+        sportType: SportType.UNKNOWN,
+        sportDefinitionCode: 'OTHER',
+        timerTime: 1800,
+        distance: 5000,
+        avgHeartRate: 112,
+        maxHeartRate: 148,
+        calories: 210,
+        avgPower: 240,
+        avgCadence: 88,
+        actualLoad: 18,
+        actualLoadSource: 'HEART_RATE',
+      } as never,
+      'user-1',
+      {},
+      { listRange: jest.fn(async () => []) },
+    );
+
+    expect(input.sport_context).toMatchObject({
+      sportCode: 'OTHER',
+      sportLabel: 'Generic workout',
+    });
+    expect(input.duration_min).toBe(30);
+    expect(input.hr).toMatchObject({ available: true, avg: 112, max: 148 });
+    expect(input.calories).toBe(210);
+    expect(input.activity_fatigue).toMatchObject({
+      actual_load: 18,
+      source: 'HEART_RATE',
+    });
+    expect(input.distance_km).toBeUndefined();
+    expect(input.power.avg).toBeUndefined();
+    expect(input.cadence.avg).toBeUndefined();
+  });
+
+  it('still marks generic heart-rate evidence available when only max HR exists', async () => {
+    const input = await buildUnifiedActivityAnalysisInput({
+      sportType: SportType.UNKNOWN,
+      sportDefinitionCode: 'OTHER',
+      timerTime: 600,
+      avgHeartRate: null,
+      maxHeartRate: 141,
+    } as never);
+
+    expect(input.hr).toMatchObject({ available: true, max: 141 });
   });
 });

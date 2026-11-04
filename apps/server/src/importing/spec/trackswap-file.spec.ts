@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  assertFITActivityRecordParity,
   decodeTrackFile,
   inspectTrackFile,
   transcodeTrackFile,
@@ -23,6 +24,59 @@ const fitFixture = (kind: string) =>
   readFileSync(join(__dirname, 'fixtures', `conversion-${kind}.fit`));
 
 describe('TrackSwap server file boundary', () => {
+  it('rejects a FIT document when canonicalization drops decoded records', () => {
+    expect(() =>
+      assertFITActivityRecordParity({
+        detectedFormat: 'fit',
+        document: {
+          schemaVersion: '2',
+          format: 'fit',
+          kinds: ['activity'],
+          source: { byteLength: 100 },
+          metadata: {},
+          facets: {},
+          diagnostics: {
+            durationMs: 1,
+            warnings: [],
+            fit: {
+              parserVersion: 'test',
+              messageCounts: { recordMesgs: 2 },
+              recognizedMessageCounts: {},
+              unknownMessageCounts: {},
+              invalidValueCounts: {},
+              warningCounts: {},
+              warnings: [],
+            },
+          },
+        },
+        activity: {
+          metadata: { originType: 'FIT', fileType: 'fit' },
+          activities: [
+            {
+              index: 0,
+              laps: [
+                {
+                  index: 0,
+                  records: [{ index: 0, lapIndex: 0 }],
+                  lengths: [],
+                },
+              ],
+            },
+          ],
+        },
+        filename: 'activity.fit',
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'ACTIVITY_RECORD_COUNT_MISMATCH',
+        details: expect.objectContaining({
+          decodedRecordCount: 2,
+          canonicalRecordCount: 1,
+        }),
+      }),
+    );
+  });
+
   it('uses content detection and reports a misleading extension', async () => {
     const decoded = await decodeTrackFile(gpx, { filename: 'activity.fit' });
 

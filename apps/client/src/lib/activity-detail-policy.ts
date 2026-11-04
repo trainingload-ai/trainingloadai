@@ -26,7 +26,7 @@ const setOf = <T extends string>(...values: T[]) => new Set<T>(values);
 /**
  * 活动详情策略
  * 逻辑为：根据活动类型，返回对应的活动详情策略
- * @returns 
+ * @returns
  */
 const POLICIES: Record<ActivityDetailSportGroup, ActivityDetailPolicy> = {
   RUN: {
@@ -97,7 +97,7 @@ const POLICIES: Record<ActivityDetailSportGroup, ActivityDetailPolicy> = {
   },
   OTHER: {
     group: "OTHER",
-    canEditSportType: false,
+    canEditSportType: true,
     showMap: false,
     overviewMetricIds: setOf("heartRate", "temperature"),
     dataChartIds: new Set(getActivityDetailOverviewChartIds("OTHER")),
@@ -124,8 +124,8 @@ export function getActivityDetailSportGroup(
 
 /**
  * 获取活动详情策略
- * @param activity 
- * @returns 
+ * @param activity
+ * @returns
  */
 export function getActivityDetailPolicy(
   activity: Pick<Activity, "sportType"> | null | undefined,
@@ -177,8 +177,8 @@ export function activityHasMetricData(
         anyLap(activity, (lap) =>
           Boolean(
             positive(lap.avgPower) ||
-              positive(lap.maxPower) ||
-              positive(lap.aePower),
+            positive(lap.maxPower) ||
+            positive(lap.aePower),
           ),
         )
       );
@@ -261,7 +261,8 @@ export function isActivityDetailTabVisible(
     );
   }
   if (tabId === "lap") return Boolean(activity?.laps?.length);
-  if (tabId === "heartrate") return activityHasMetricData(activity, "heartRate");
+  if (tabId === "heartrate")
+    return activityHasMetricData(activity, "heartRate");
   if (tabId === "power") return activityHasMetricData(activity, "power");
   if (tabId === "pace") return activityHasMetricData(activity, "pace");
   // 曲线数据是否真实存在由调用方的 metric availability 进一步判断。

@@ -2090,6 +2090,10 @@
   },
   "ActivityDetail": {
     "title": "Activity details",
+    "genericDataNotice": {
+      "title": "Generic workout data",
+      "description": "The source classified this as a generic workout. Trainingload.ai uses only the recorded duration, heart rate, calories, and load; it does not infer distance, pace, power, or the exact workout type."
+    },
     "backButton": "Back",
     "configuration": "Configuration",
     "loading": "Loading...",

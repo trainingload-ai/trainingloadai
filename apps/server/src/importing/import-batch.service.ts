@@ -935,7 +935,9 @@ export class ImportBatchService {
             accountRef: '0',
             externalId: item.externalId,
             objectType: 'third_party_activity_file',
-            rawChecksum: item.checksum,
+            // The discovery-list checksum is not a hash of the downloaded file.
+            // Keep it in metadata and fill rawChecksum only after file resolution.
+            rawChecksum: null,
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
@@ -960,7 +962,6 @@ export class ImportBatchService {
             accountRef: '0',
             externalId: item.externalId,
             objectType: 'third_party_activity_file',
-            rawChecksum: item.checksum,
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,

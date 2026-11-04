@@ -90,6 +90,15 @@ function createMaterializerPrisma(overrides?: Record<string, unknown>) {
       deleteMany: jest.fn(async () => ({ count: 0 })),
       createMany: jest.fn(async () => ({ count: 0 })),
     },
+    activityStrengthExercise: {
+      deleteMany: jest.fn(async () => ({ count: 0 })),
+      findFirst: jest.fn(async () => null),
+      create: jest.fn(async () => ({ id: 'strength-exercise-1' })),
+    },
+    activityStrengthSet: {
+      count: jest.fn(async () => 0),
+      createMany: jest.fn(async () => ({ count: 1 })),
+    },
     activityParquetFile: {
       findMany: jest.fn(async () => []),
       deleteMany: jest.fn(async () => ({ count: 0 })),
@@ -359,6 +368,57 @@ describe('CanonicalActivityMaterializer provider identity reuse', () => {
     ).resolves.toMatchObject({
       shouldRebuild: false,
       outcome: 'ASSOCIATED_NO_REBUILD',
+    });
+  });
+
+  it('rebuilds the same raw primary dataset when parser enrichment adds strength sets', async () => {
+    const ready = { ...legacyActivity(), processingStatus: 'READY' };
+    const enrichedPayload = {
+      ...intervalsPayload(),
+      source: {
+        ...intervalsPayload().source,
+        sourceChecksum: 'same-raw-checksum',
+      },
+      strengthSets: [
+        {
+          sequenceIndex: 0,
+          setType: 'ACTIVE',
+          durationSeconds: 30,
+          repetitions: 10,
+          exercises: [{ category: 'squat' }],
+        },
+      ],
+    } as CanonicalActivityPayload;
+    const primarySource = {
+      id: 'source-1',
+      activityId: ready.id,
+      isPrimary: true,
+      isActive: true,
+      sourceChecksum: 'same-raw-checksum',
+      activity: ready,
+      metadata: null,
+      canonicalSnapshot: { payload: enrichedPayload },
+    };
+    const { prisma, materializer } = createMaterializerPrisma();
+    prisma.activitySource.findUnique.mockResolvedValue(primarySource);
+    prisma.activitySource.findFirst.mockResolvedValue(primarySource);
+    prisma.activityStrengthSet.count.mockResolvedValue(0);
+
+    await expect(
+      materializer.materialize({
+        itemJobId: 'item-parser-enrichment',
+        userId: 'user-1',
+        payload: enrichedPayload,
+      }),
+    ).resolves.toMatchObject({
+      shouldRebuild: true,
+      primaryChanged: false,
+      primaryDatasetChanged: true,
+      outcome: 'PRIMARY_REBUILT',
+    });
+
+    expect(prisma.activityStrengthSet.count).toHaveBeenCalledWith({
+      where: { source: 'FIT', exercise: { activityId: 42 } },
     });
   });
 
@@ -915,6 +975,75 @@ describe('CanonicalActivityMaterializer provider identity reuse', () => {
     expect(prisma.activitySource.updateMany).not.toHaveBeenCalled();
     expect(prisma.activity.update).not.toHaveBeenCalled();
     expect(prisma.activityParquetFile.upsert).not.toHaveBeenCalled();
+  });
+
+  it('commits canonical FIT strength phases with the primary dataset transaction', async () => {
+    const { prisma, materializer } = createMaterializerPrisma();
+    const payload = {
+      ...intervalsPayload(),
+      strengthSets: [
+        {
+          sequenceIndex: 0,
+          setType: 'ACTIVE',
+          startTime: '2026-07-20T06:10:00.000Z',
+          durationSeconds: 46.2,
+          repetitions: 10,
+          weightKg: 40,
+          exercises: [
+            {
+              category: 'deadlift',
+              categorySubtype: 0,
+              name: 'barbellDeadlift',
+            },
+          ],
+        },
+        {
+          sequenceIndex: 1,
+          setType: 'REST',
+          durationSeconds: 90.4,
+          exercises: [],
+        },
+      ],
+    } as CanonicalActivityPayload;
+
+    await materializer.commitStagedDataset({
+      token: {
+        activityId: 42,
+        expectedPrimarySourceId: null,
+        canonicalSnapshotId: 'snapshot-1',
+        sportDefinitionCode: 'STRENGTH_TRAINING',
+        provider: null,
+        quality: {} as never,
+        matchingFields: {},
+      },
+      userId: 'user-1',
+      payload,
+      stagedParquetFiles: [],
+    });
+
+    expect(prisma.activityStrengthExercise.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        activityId: 42,
+        name: 'Barbell deadlift',
+        exerciseCode: 'deadlift',
+      }),
+    });
+    expect(prisma.activityStrengthSet.createMany).toHaveBeenCalledWith({
+      data: [
+        expect.objectContaining({
+          exerciseId: 'strength-exercise-1',
+          sourceSequenceIndex: 0,
+          completedReps: 10,
+          completedDurationSeconds: 46,
+          restAfterSeconds: 90,
+          loadType: 'ABSOLUTE',
+          loadValue: 40,
+          loadUnit: 'KG',
+          source: 'FIT',
+        }),
+      ],
+    });
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
   });
 
   it('turns a concurrent provider unique conflict into successful reuse', async () => {

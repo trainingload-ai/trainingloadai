@@ -30,6 +30,7 @@ import {
 import { acquireActivityWriteLock } from '@/prisma/activity-write-lock';
 import { sanitizeActivityRecordSpeeds } from '@/algorithm/instantaneous-speed';
 import { providerFromSourceKind } from './external-provider-identity';
+import { replaceCanonicalStrengthRows } from './canonical-strength.materializer';
 
 type ResolvedCanonicalMaxSpeeds = {
   activity: number | null | undefined;
@@ -746,6 +747,13 @@ export class CanonicalActivityMaterializer {
           ),
         });
       }
+      if (Array.isArray(args.payload.strengthSets)) {
+        await replaceCanonicalStrengthRows(
+          tx,
+          args.token.activityId,
+          args.payload.strengthSets,
+        );
+      }
 
       const previousMapThumb = await this.ingest
         .activityMapThumbJob(tx)
@@ -999,29 +1007,47 @@ export class CanonicalActivityMaterializer {
 
     if (association.activity) {
       const activity = association.activity;
-      const [existingSource, currentPrimary, currentParquetFiles] =
-        await Promise.all([
-          this.prisma.activitySource.findUnique({
-            where: {
-              activity_source_identity_unique: {
-                userId: args.userId,
-                sourceKind: args.payload.source.kind,
-                sourceUid: args.payload.source.sourceUid,
+      const incomingActiveStrengthSetCount = Array.isArray(
+        args.payload.strengthSets,
+      )
+        ? args.payload.strengthSets.filter((set) => set.setType === 'ACTIVE')
+            .length
+        : null;
+      const [
+        existingSource,
+        currentPrimary,
+        currentParquetFiles,
+        currentFitStrengthSetCount,
+      ] = await Promise.all([
+        this.prisma.activitySource.findUnique({
+          where: {
+            activity_source_identity_unique: {
+              userId: args.userId,
+              sourceKind: args.payload.source.kind,
+              sourceUid: args.payload.source.sourceUid,
+            },
+          },
+        }),
+        this.prisma.activitySource.findFirst({
+          where: { activityId: activity.id, isPrimary: true, isActive: true },
+          orderBy: { createdAt: 'asc' },
+          include: {
+            canonicalSnapshot: { select: { payload: true } },
+          },
+        }),
+        this.sensorFiles.parquetFiles().findMany({
+          where: { activityId: activity.id },
+          select: { type: true, pointCount: true },
+        }),
+        incomingActiveStrengthSetCount == null
+          ? Promise.resolve(0)
+          : this.prisma.activityStrengthSet.count({
+              where: {
+                source: 'FIT',
+                exercise: { activityId: activity.id },
               },
-            },
-          }),
-          this.prisma.activitySource.findFirst({
-            where: { activityId: activity.id, isPrimary: true, isActive: true },
-            orderBy: { createdAt: 'asc' },
-            include: {
-              canonicalSnapshot: { select: { payload: true } },
-            },
-          }),
-          this.sensorFiles.parquetFiles().findMany({
-            where: { activityId: activity.id },
-            select: { type: true, pointCount: true },
-          }),
-        ]);
+            }),
+      ]);
       const storedCurrentQuality = ((
         currentPrimary?.metadata as Record<string, unknown> | null
       )?.datasetQuality ?? null) as DatasetQuality | null;
@@ -1072,7 +1098,15 @@ export class CanonicalActivityMaterializer {
           }));
       const primaryDatasetChanged = Boolean(
         existingSource?.isPrimary &&
-        existingSource.sourceChecksum !== incomingChecksum,
+        (existingSource.sourceChecksum !== incomingChecksum ||
+          (currentPayload != null &&
+            currentPayload.identity.datasetChecksum !==
+              args.payload.identity.datasetChecksum) ||
+          (Array.isArray(args.payload.strengthSets) &&
+            args.payload.strengthSets.length > 0 &&
+            !Array.isArray(currentPayload?.strengthSets)) ||
+          (incomingActiveStrengthSetCount != null &&
+            currentFitStrengthSetCount !== incomingActiveStrengthSetCount)),
       );
       const primaryChanged = promote;
       // Activity/primary source 会先于 Parquet 落库。若 Parquet 或 LIGHT
@@ -1318,6 +1352,13 @@ export class CanonicalActivityMaterializer {
               ),
             ),
           });
+        }
+        if (Array.isArray(args.payload.strengthSets)) {
+          await replaceCanonicalStrengthRows(
+            tx,
+            created.id,
+            args.payload.strengthSets,
+          );
         }
 
         await this.ingest.activitySource(tx).create({
