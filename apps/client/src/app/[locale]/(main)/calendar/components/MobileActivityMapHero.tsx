@@ -16,22 +16,28 @@ export function MobileActivityMapHero({
   activity,
   activityId,
   meta,
+  showMap = true,
   title,
 }: {
   activity: Activity;
   activityId: string;
   meta: string;
+  showMap?: boolean;
   title: string;
 }) {
-  const layer = useActivityLayer(activityId);
+  const layer = useActivityLayer(activityId, showMap);
   const mapContainerId = React.useId().replaceAll(":", "");
   const hasRouteMap = Boolean(
-    layer.data?.center && layer.data.maps && layer.data.maps.length > 0,
+    showMap &&
+    layer.data?.center &&
+    layer.data.maps &&
+    layer.data.maps.length > 0,
   );
   const hasThumbnail = Boolean(
-    activity.mapThumbnailUrl || activity.mapThumbnailDarkUrl,
+    showMap && (activity.mapThumbnailUrl || activity.mapThumbnailDarkUrl),
   );
-  const hasMapVisual = hasRouteMap || hasThumbnail || layer.isLoading;
+  const hasMapVisual =
+    hasRouteMap || hasThumbnail || (showMap && layer.isLoading);
 
   return (
     <section

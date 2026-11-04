@@ -22,6 +22,7 @@ import {
 import type { Dayjs } from "dayjs";
 import { getSportDisplayName, useSportCatalog } from "@/api/sports";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
+import { activitySupportsDistance } from "@/lib/activity-presentation";
 
 function parsePlanBlocks(planWorkout?: PlanWorkout) {
   const blocks = planWorkout?.blocks;
@@ -143,6 +144,10 @@ export function SelectedDayPanel({
               const LeadingIcon = getCalendarItemLeadingIcon(
                 activity.sportType,
               );
+              const showDistance = activitySupportsDistance(
+                sportCatalog,
+                activity,
+              );
               return (
                 <Link
                   key={activity.hashId}
@@ -164,14 +169,16 @@ export function SelectedDayPanel({
                       )}
                     </div>
                     <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-mobile-caption pc:text-xs opacity-80">
-                      <span>
-                        {formatValue(
-                          activity.distance || 0,
-                          "distance",
-                          systemUnit,
-                        )}{" "}
-                        {getUnit("distance", systemUnit)}
-                      </span>
+                      {showDistance ? (
+                        <span>
+                          {formatValue(
+                            activity.distance || 0,
+                            "distance",
+                            systemUnit,
+                          )}{" "}
+                          {getUnit("distance", systemUnit)}
+                        </span>
+                      ) : null}
                       <span>
                         {formatValue(
                           activity.duration || 0,

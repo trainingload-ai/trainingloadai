@@ -11,9 +11,12 @@ export type ActivityStrengthSetV1 = {
   id?: string;
   plannedSetGroupId?: string;
   setIndex: number;
+  sourceSequenceIndex?: number;
   setType: StrengthSetType;
   completedReps?: number;
   completedDurationSeconds?: number;
+  startedAt?: string | null;
+  restAfterSeconds?: number;
   load: StrengthLoadV1;
   actualRpe?: number;
   actualRir?: number;

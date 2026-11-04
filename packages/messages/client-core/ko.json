@@ -1809,6 +1809,10 @@
   },
   "ActivityDetail": {
     "title": "활동 상세",
+    "genericDataNotice": {
+      "title": "일반 운동 데이터",
+      "description": "데이터 소스에서 이 활동을 일반 운동으로 분류했습니다. Trainingload.ai는 기록된 시간, 심박수, 칼로리, 부하만 사용하며 거리, 페이스, 파워 또는 정확한 운동 유형을 추정하지 않습니다."
+    },
     "backButton": "뒤쪽에",
     "configuration": "구성",
     "loading": "로드 중...",

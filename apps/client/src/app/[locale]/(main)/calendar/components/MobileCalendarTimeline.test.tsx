@@ -186,6 +186,37 @@ describe("MobileCalendarTimeline", () => {
     expect(screen.queryByText("TSS")).toBeNull();
   });
 
+  it("omits unsupported distance from a generic workout summary", () => {
+    const date = dayjs("2026-07-20");
+
+    render(
+      <MobileCalendarTimeline
+        days={[date]}
+        selectedDate={date}
+        onSelectDate={vi.fn()}
+        activitiesByDate={{
+          "2026-07-20": [
+            {
+              id: 1,
+              sportType: "UNKNOWN",
+              sportDefinitionCode: "OTHER",
+              distance: 10000,
+              duration: 1800,
+            },
+          ],
+        }}
+        workoutsByDate={{}}
+        competitionEventsByDate={{}}
+        tssByDate={{}}
+      />,
+    );
+
+    expect(
+      screen.getByText("CalendarExperience.sportLabels.other · 30 min"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/10\.0 km/)).not.toBeInTheDocument();
+  });
+
   it("shows actual and planned load independently like the mobile agenda", () => {
     const date = dayjs("2026-07-20");
 

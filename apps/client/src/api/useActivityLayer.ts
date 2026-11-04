@@ -10,6 +10,7 @@ export type ActivityLayerResponse = ActivitiesLayerResponse;
 
 export function useActivityLayer(
   activityId: string,
+  enabled = true,
 ): UseQueryResult<ActivityLayerResponse | undefined, Error> {
   return useQuery<ActivityLayerResponse | undefined, Error>({
     queryKey: queryKeys.activity.layer(activityId),
@@ -19,6 +20,6 @@ export function useActivityLayer(
       );
       return response;
     },
-    enabled: !!activityId, // Execute query only when activityId exists
+    enabled: enabled && !!activityId, // Execute query only when activityId exists
   });
 }

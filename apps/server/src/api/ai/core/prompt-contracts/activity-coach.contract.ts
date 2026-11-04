@@ -12,7 +12,7 @@ import { ATHLETE_FACING_COACH_VOICE_PROMPT_LINES } from './coach-voice.contract'
  * `buildActivityCoachSystemPrompt` 是登录复盘和公开 `/free-ai-workout-review` 的同一份核心提示词。
  * 公开工具只允许在这份核心后面追加约束，不得改写或替换核心正文。
  */
-export const ACTIVITY_AI_REVIEW_PROMPT_VERSION = 'activity_ai_review_v9';
+export const ACTIVITY_AI_REVIEW_PROMPT_VERSION = 'activity_ai_review_v10';
 
 export type ActivityCoachChatMessage = {
   role: 'system' | 'user';

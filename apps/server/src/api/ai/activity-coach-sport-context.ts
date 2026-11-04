@@ -4,6 +4,7 @@ export type ActivityCoachSportFamily = 'RUN' | 'CYCLING' | 'SWIM' | 'OTHER';
 
 export type ActivityCoachMetricDomain =
   | 'duration'
+  | 'calories'
   | 'distance'
   | 'elevation'
   | 'heart_rate'
@@ -26,6 +27,7 @@ export type ActivityCoachSportContext = {
 
 const ENDURANCE_BASE: ActivityCoachMetricDomain[] = [
   'duration',
+  'calories',
   'distance',
   'heart_rate',
   'load',
@@ -129,6 +131,7 @@ const SPECIALTIES: Record<
     allowedMetricDomains: [
       'duration',
       'heart_rate',
+      'calories',
       'load',
       'session_rpe',
       'strength',
@@ -167,7 +170,13 @@ const SPECIALTIES: Record<
   },
   HIIT: {
     sportLabel: 'HIIT',
-    allowedMetricDomains: ['duration', 'heart_rate', 'load', 'session_rpe'],
+    allowedMetricDomains: [
+      'duration',
+      'heart_rate',
+      'calories',
+      'load',
+      'session_rpe',
+    ],
     coachingFocus: ['work intensity', 'session RPE', 'recovery demand'],
     forbiddenInferences: [
       'distance, elevation, stride, or steady-state pacing',
@@ -175,7 +184,13 @@ const SPECIALTIES: Record<
   },
   YOGA: {
     sportLabel: 'Yoga',
-    allowedMetricDomains: ['duration', 'heart_rate', 'load', 'session_rpe'],
+    allowedMetricDomains: [
+      'duration',
+      'heart_rate',
+      'calories',
+      'load',
+      'session_rpe',
+    ],
     coachingFocus: ['session duration', 'recovery role', 'subjective effort'],
     forbiddenInferences: [
       'pace, distance, elevation, cadence, or power performance',
@@ -183,7 +198,13 @@ const SPECIALTIES: Record<
   },
   STRETCHING: {
     sportLabel: 'Stretching',
-    allowedMetricDomains: ['duration', 'heart_rate', 'load', 'session_rpe'],
+    allowedMetricDomains: [
+      'duration',
+      'heart_rate',
+      'calories',
+      'load',
+      'session_rpe',
+    ],
     coachingFocus: ['session duration', 'recovery role', 'subjective response'],
     forbiddenInferences: [
       'pace, distance, elevation, cadence, or power performance',
@@ -200,6 +221,25 @@ const SPECIALTIES: Record<
     allowedMetricDomains: [...ENDURANCE_BASE, 'power', 'cadence'],
     coachingFocus: ['cardiovascular effort', 'cadence', 'session load'],
     forbiddenInferences: ['GPS pace, elevation, or running stride mechanics'],
+  },
+  OTHER: {
+    sportLabel: 'Generic workout',
+    allowedMetricDomains: [
+      'duration',
+      'heart_rate',
+      'calories',
+      'load',
+      'session_rpe',
+    ],
+    coachingFocus: [
+      'duration',
+      'recorded heart-rate response',
+      'recorded load and recovery value',
+    ],
+    forbiddenInferences: [
+      'exact workout modality',
+      'pace, distance, elevation, cadence, stride, or power performance',
+    ],
   },
 };
 
@@ -232,8 +272,16 @@ export function resolveActivityCoachSportContext(activity: {
   > = {
     RUN: [...ENDURANCE_BASE, 'elevation', 'power', 'cadence', 'pace'],
     CYCLING: [...ENDURANCE_BASE, 'elevation', 'power', 'cadence'],
-    SWIM: ['duration', 'distance', 'heart_rate', 'cadence', 'load', 'swim'],
-    OTHER: ['duration', 'heart_rate', 'load', 'session_rpe'],
+    SWIM: [
+      'duration',
+      'calories',
+      'distance',
+      'heart_rate',
+      'cadence',
+      'load',
+      'swim',
+    ],
+    OTHER: ['duration', 'heart_rate', 'calories', 'load', 'session_rpe'],
   };
 
   return {

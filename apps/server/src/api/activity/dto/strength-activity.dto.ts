@@ -45,6 +45,11 @@ export class ActivityStrengthSetDto {
   @Min(0)
   setIndex!: number;
 
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sourceSequenceIndex?: number;
+
   @IsIn(['WARMUP', 'WORK'])
   setType!: 'WARMUP' | 'WORK';
 
@@ -57,6 +62,15 @@ export class ActivityStrengthSetDto {
   @IsInt()
   @Min(0)
   completedDurationSeconds?: number;
+
+  @IsOptional()
+  @IsString()
+  startedAt?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  restAfterSeconds?: number;
 
   @ValidateNested()
   @Type(() => StrengthActualLoadDto)

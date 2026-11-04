@@ -225,6 +225,7 @@ export interface UnifiedActivityAnalysisInput {
     completed_set_count: number;
     completed_reps: number;
     timed_set_seconds: number;
+    rest_seconds: number;
     volume_load_kg: number;
     volume_load_lb: number;
     exercises: Array<{
@@ -233,10 +234,13 @@ export interface UnifiedActivityAnalysisInput {
       equipment_code?: string;
       sets: Array<{
         set_index: number;
+        source_sequence_index?: number;
         set_type: string;
         completed: boolean;
         reps?: number;
         duration_seconds?: number;
+        started_at?: string;
+        rest_after_seconds?: number;
         load_type: string;
         load_value?: number;
         load_unit?: string;

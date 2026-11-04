@@ -121,4 +121,31 @@ describe("MobileCalendarDayContent", () => {
     expect(empty).toBeInTheDocument();
     expect(empty).not.toHaveClass("border-dashed");
   });
+
+  it("does not present distance for a generic workout", () => {
+    render(
+      <MobileCalendarDayContent
+        activities={[
+          {
+            ...activity,
+            activityName: "Generic workout",
+            sportType: "UNKNOWN",
+            sportDefinitionCode: "OTHER",
+            distance: 5000,
+            duration: 1800,
+          },
+        ]}
+        events={[]}
+        workouts={[]}
+        onActivityPress={vi.fn()}
+        onEventPress={vi.fn()}
+        onWorkoutPress={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText("CalendarExperience.sportLabels.other - 30 min"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/5\.0 km/)).not.toBeInTheDocument();
+  });
 });

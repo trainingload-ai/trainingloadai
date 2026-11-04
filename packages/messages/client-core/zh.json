@@ -2052,6 +2052,10 @@
   },
   "ActivityDetail": {
     "title": "活动详情",
+    "genericDataNotice": {
+      "title": "通用训练数据",
+      "description": "数据来源将其标记为通用训练。Trainingload.ai 仅使用已记录的时长、心率、热量和负荷，不推断距离、配速、功率或具体训练类型。"
+    },
     "backButton": "返回",
     "configuration": "配置",
     "loading": "加载中...",

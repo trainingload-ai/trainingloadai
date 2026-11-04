@@ -5611,9 +5611,12 @@ model ActivityStrengthSet {
   plannedSetGroup   PlanWorkoutSetGroup? @relation(fields: [plannedSetGroupId], references: [id], onDelete: SetNull)
 
   setIndex                  Int                                @map("set_index")
+  sourceSequenceIndex       Int?                               @map("source_sequence_index")
   setType                   StrengthSetType                    @map("set_type")
   completedReps             Int?                               @map("completed_reps")
   completedDurationSeconds  Int?                               @map("completed_duration_seconds")
+  startedAt                 DateTime?                          @map("started_at")
+  restAfterSeconds          Int?                               @map("rest_after_seconds")
   loadType                  StrengthLoadType                   @map("load_type")
   loadValue                 Float?                             @map("load_value")
   loadUnit                  StrengthLoadUnit?                  @map("load_unit")

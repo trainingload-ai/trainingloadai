@@ -95,9 +95,12 @@ export type ActivityForCoachUnifiedInput = Activity & {
     equipmentCode?: string | null;
     sets: Array<{
       setIndex: number;
+      sourceSequenceIndex?: number | null;
       setType: unknown;
       completedReps?: number | null;
       completedDurationSeconds?: number | null;
+      startedAt?: Date | null;
+      restAfterSeconds?: number | null;
       loadType: unknown;
       loadValue?: number | null;
       loadUnit?: unknown;
@@ -164,6 +167,7 @@ function buildStrengthEvidence(activity: ActivityForCoachUnifiedInput) {
   let completedSetCount = 0;
   let completedReps = 0;
   let timedSetSeconds = 0;
+  let restSeconds = 0;
   let volumeLoadKg = 0;
   let volumeLoadLb = 0;
 
@@ -176,6 +180,7 @@ function buildStrengthEvidence(activity: ActivityForCoachUnifiedInput) {
       if (set.completedAt) completedSetCount += 1;
       completedReps += set.completedReps ?? 0;
       timedSetSeconds += set.completedDurationSeconds ?? 0;
+      restSeconds += set.restAfterSeconds ?? 0;
       if (
         set.completedAt &&
         set.loadType === 'ABSOLUTE' &&
@@ -188,10 +193,13 @@ function buildStrengthEvidence(activity: ActivityForCoachUnifiedInput) {
       }
       return {
         set_index: set.setIndex,
+        source_sequence_index: set.sourceSequenceIndex ?? undefined,
         set_type: String(set.setType),
         completed: Boolean(set.completedAt),
         reps: set.completedReps ?? undefined,
         duration_seconds: set.completedDurationSeconds ?? undefined,
+        started_at: set.startedAt?.toISOString(),
+        rest_after_seconds: set.restAfterSeconds ?? undefined,
         load_type: String(set.loadType),
         load_value: set.loadValue ?? undefined,
         load_unit: set.loadUnit ? String(set.loadUnit) : undefined,
@@ -208,6 +216,7 @@ function buildStrengthEvidence(activity: ActivityForCoachUnifiedInput) {
     completed_set_count: completedSetCount,
     completed_reps: completedReps,
     timed_set_seconds: timedSetSeconds,
+    rest_seconds: restSeconds,
     volume_load_kg: round(volumeLoadKg, 1),
     volume_load_lb: round(volumeLoadLb, 1),
     exercises: mappedExercises,
@@ -347,11 +356,19 @@ export async function buildUnifiedActivityAnalysisInput(
         ? round(activity.poolLength, 0)
         : undefined,
     calories:
-      typeof activity.calories === 'number' ? activity.calories : undefined,
+      activityCoachAllows(sportContext, 'calories') &&
+      typeof activity.calories === 'number'
+        ? activity.calories
+        : undefined,
     max_hr_drop:
       typeof activity.maxHrDrop === 'number' ? activity.maxHrDrop : undefined,
     hr: {
-      available: Boolean(activity.avgHeartRate && activity.avgHeartRate > 0),
+      available:
+        activityCoachAllows(sportContext, 'heart_rate') &&
+        Boolean(
+          (activity.avgHeartRate && activity.avgHeartRate > 0) ||
+          (activity.maxHeartRate && activity.maxHeartRate > 0),
+        ),
       avg:
         activityCoachAllows(sportContext, 'heart_rate') && activity.avgHeartRate
           ? round(activity.avgHeartRate)

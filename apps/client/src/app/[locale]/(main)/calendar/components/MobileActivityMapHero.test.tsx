@@ -11,6 +11,7 @@ const layerState = vi.hoisted(() => ({
     isLoading: false,
   },
 }));
+const useActivityLayerMock = vi.hoisted(() => vi.fn());
 
 vi.mock("next/dynamic", () => ({
   default: () =>
@@ -20,7 +21,10 @@ vi.mock("next/dynamic", () => ({
 }));
 
 vi.mock("@/api/useActivityLayer", () => ({
-  useActivityLayer: () => layerState.value,
+  useActivityLayer: (...args: unknown[]) => {
+    useActivityLayerMock(...args);
+    return layerState.value;
+  },
 }));
 
 vi.mock("@/components/activities/map-thumbnail", () => ({
@@ -37,6 +41,25 @@ const activity = {
 describe("MobileActivityMapHero", () => {
   beforeEach(() => {
     layerState.value = { data: undefined, isLoading: false };
+    useActivityLayerMock.mockClear();
+  });
+
+  it("disables route loading and ignores thumbnails for unsupported sports", () => {
+    render(
+      <MobileActivityMapHero
+        activity={{ ...activity, mapThumbnailUrl: "https://example.test/map" }}
+        activityId="other-one"
+        meta="Other · Jul 18"
+        showMap={false}
+        title="Generic workout"
+      />,
+    );
+
+    expect(useActivityLayerMock).toHaveBeenCalledWith("other-one", false);
+    expect(screen.getByTestId("mobile-activity-map-hero")).toHaveClass(
+      "h-[190px]",
+    );
+    expect(screen.queryByTestId("map-thumbnail")).not.toBeInTheDocument();
   });
 
   it("uses the compact mobile hero when no route visual exists", () => {

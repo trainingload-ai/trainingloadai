@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "af8676fbfa92da71276870d4e41a781e01ef44cfe8963bb6083b153741af01ff",
+  "schemaChecksum": "3fc51110b2b43c1d021bfdd2431278e00d0be13176ef95077d01a4e9a89f488f",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -71,6 +71,11 @@
       "id": "0014_better_auth_oauth_provider_17",
       "file": "0014_better_auth_oauth_provider_17/migration.sql",
       "sha256": "989443c6cb180a0e2d5725a49f6a73d01103f90d92e6135eb2c5b35a97c27986"
+    },
+    {
+      "id": "0015_fit_strength_sets",
+      "file": "0015_fit_strength_sets/migration.sql",
+      "sha256": "169156d3879526063656a6b9dfafd04ad834b9cc2265166b4e964dd96a86521e"
     }
   ]
 }

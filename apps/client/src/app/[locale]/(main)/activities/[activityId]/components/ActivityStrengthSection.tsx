@@ -92,12 +92,14 @@ function SetRow({
     set.completedReps != null ||
     set.completedDurationSeconds != null ||
     set.actualRpe != null;
-  const actualAmount =
+  const actualAmounts = [
+    set.completedReps != null
+      ? `${set.completedReps} ${isZh ? "次" : "reps"}`
+      : null,
     set.completedDurationSeconds != null
       ? `${set.completedDurationSeconds}s`
-      : set.completedReps != null
-        ? `${set.completedReps} ${isZh ? "次" : "reps"}`
-        : null;
+      : null,
+  ].filter((value): value is string => Boolean(value));
 
   return (
     <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 border-t border-border/60 py-2.5 text-mobile-caption pc:text-xs first:border-t-0">
@@ -114,9 +116,20 @@ function SetRow({
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
           <span>
             {isZh ? "实际" : "Actual"}:{" "}
-            {actualAmount ?? (isZh ? "未记录" : "Not recorded")}
+            {actualAmounts.length > 0
+              ? actualAmounts.join(" · ")
+              : isZh
+                ? "未记录"
+                : "Not recorded"}
           </span>
-          {hasActual ? <span>{formatLoad(set.load, isZh)}</span> : null}
+          {hasActual && planned ? (
+            <span>{formatLoad(set.load, isZh)}</span>
+          ) : null}
+          {set.restAfterSeconds != null ? (
+            <span>
+              {isZh ? "休息" : "Rest"} {set.restAfterSeconds}s
+            </span>
+          ) : null}
           {set.actualRpe != null ? <span>RPE {set.actualRpe}</span> : null}
           {hasActual ? <span>{set.source}</span> : null}
         </div>
@@ -172,6 +185,24 @@ export function ActivityStrengthSection({ activity }: Props) {
     (count, exercise) => count + exercise.sets.length,
     0,
   );
+  const recordedActiveSeconds = displayExercises.reduce(
+    (total, exercise) =>
+      total +
+      exercise.sets.reduce(
+        (sum, set) => sum + Number(set.completedDurationSeconds ?? 0),
+        0,
+      ),
+    0,
+  );
+  const recordedRestSeconds = displayExercises.reduce(
+    (total, exercise) =>
+      total +
+      exercise.sets.reduce(
+        (sum, set) => sum + Number(set.restAfterSeconds ?? 0),
+        0,
+      ),
+    0,
+  );
 
   return (
     <Card>
@@ -186,6 +217,14 @@ export function ActivityStrengthSection({ activity }: Props) {
               ? `已完成 ${response.summary.completedSetCount}/${response.summary.setCount || displayedSetCount} 组 · ${response.summary.completedReps} 次`
               : `${response.summary.completedSetCount}/${response.summary.setCount || displayedSetCount} sets · ${response.summary.completedReps} reps`}
           </p>
+          {recordedActiveSeconds > 0 || recordedRestSeconds > 0 ? (
+            <p className="mt-1 text-mobile-caption pc:text-[11px] text-muted-foreground">
+              {isZh ? "动作" : "Active"} {recordedActiveSeconds}s
+              {recordedRestSeconds > 0
+                ? ` · ${isZh ? "休息" : "Rest"} ${recordedRestSeconds}s`
+                : ""}
+            </p>
+          ) : null}
         </div>
         <Badge variant="secondary">{isZh ? "只读" : "Read only"}</Badge>
       </CardHeader>
@@ -219,7 +258,11 @@ export function ActivityStrengthSection({ activity }: Props) {
             const exerciseKey = getStrengthExerciseKey(exercise);
             const exerciseName = exerciseKey
               ? tCatalog(exerciseKey)
-              : exercise.name;
+              : exercise.name === "Unrecognized exercise"
+                ? isZh
+                  ? "未识别动作"
+                  : "Unrecognized exercise"
+                : exercise.name;
             return (
               <div
                 key={exercise.id ?? exercise.name}

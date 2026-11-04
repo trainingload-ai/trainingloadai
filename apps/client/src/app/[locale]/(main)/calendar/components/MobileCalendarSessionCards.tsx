@@ -30,6 +30,7 @@ import {
   getLocalizedActivityTitle,
   type ActivityTitleTranslator,
 } from "@/lib/activity-title";
+import { isGenericActivityClassification } from "@/lib/activity-presentation";
 
 type Translate = (key: string) => string;
 
@@ -53,7 +54,9 @@ function formatCompactDuration(seconds?: number | null) {
 
 function activityDetail(activity: Activity, t: Translate) {
   const distance =
-    typeof activity.distance === "number" && activity.distance > 0
+    !isGenericActivityClassification(activity) &&
+    typeof activity.distance === "number" &&
+    activity.distance > 0
       ? `${(activity.distance / 1000).toFixed(1)} km`
       : null;
   return [
@@ -105,8 +108,16 @@ function ActivityThumbnail({ activity }: { activity: Activity }) {
   const visual = getActivitySportVisual(activity.sportType, definition);
   return (
     <MapThumbnail
-      lightUrl={activity.mapThumbnailUrl}
-      darkUrl={activity.mapThumbnailDarkUrl}
+      lightUrl={
+        isGenericActivityClassification(activity)
+          ? null
+          : activity.mapThumbnailUrl
+      }
+      darkUrl={
+        isGenericActivityClassification(activity)
+          ? null
+          : activity.mapThumbnailDarkUrl
+      }
       sizes="64px"
       className="h-14 w-16 rounded-lg"
       fallback={
@@ -181,11 +192,7 @@ const SelectedActivityCard = React.memo(function SelectedActivityCard({
   tActivityTitle: ActivityTitleTranslator;
 }) {
   const fallback = sportLabel(t, activity.sportType);
-  const title = getLocalizedActivityTitle(
-    activity,
-    tActivityTitle,
-    fallback,
-  );
+  const title = getLocalizedActivityTitle(activity, tActivityTitle, fallback);
   return (
     <button
       type="button"
@@ -226,11 +233,7 @@ const SheetActivityCard = React.memo(function SheetActivityCard({
   tActivityTitle: ActivityTitleTranslator;
 }) {
   const fallback = sportLabel(t, activity.sportType);
-  const title = getLocalizedActivityTitle(
-    activity,
-    tActivityTitle,
-    fallback,
-  );
+  const title = getLocalizedActivityTitle(activity, tActivityTitle, fallback);
   return (
     <button
       type="button"

@@ -6,16 +6,19 @@ import { CalendarCheck2, ExternalLink, Loader2, Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import type { Activity } from "@/api/activities";
+import { getSportDisplayName, useSportCatalog } from "@/api/sports";
 import { updateActivitySessionRpe } from "@/api/activity";
 import { getActivityPlanLink } from "@/api/activity-plan-link";
 import { useActivityMetricAvailability } from "@/api/useActivityMetric";
 import { ActivityDataChart } from "@/app/[locale]/(main)/activities/[activityId]/components/ActivityDataChart";
+import { ActivityStrengthSection } from "@/app/[locale]/(main)/activities/[activityId]/components/ActivityStrengthSection";
 import { Button } from "@/components/ui/button";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
 import { useGetActivity } from "@/hooks/useActivities";
 import { Link } from "@/i18n/navigation";
 import { getActivityDataChartsForSport } from "@/lib/activity-data-charts";
 import { getActivityDetailPolicy } from "@/lib/activity-detail-policy";
+import { GenericActivityDataNotice } from "@/components/activities/generic-activity-data-notice";
 import { invalidateActivityDerivedCaches } from "@/lib/query-invalidation";
 import { queryKeys } from "@/lib/query-keys";
 import { useStore } from "@/lib/store";
@@ -29,17 +32,19 @@ function StatCell({
   unit,
   value,
   index,
+  total,
 }: {
   label: string;
   unit?: string;
   value: string;
   index: number;
+  total: number;
 }) {
   return (
     <div
       className={`flex h-[68px] min-w-0 flex-col items-center justify-center px-1 text-center ${
         index % 3 !== 2 ? "border-r border-border/70" : ""
-      } ${index < 6 ? "border-b border-border/70" : ""}`}
+      } ${index < total - 3 ? "border-b border-border/70" : ""}`}
     >
       <div className="w-full truncate text-mobile-caption pc:text-[11px] font-medium text-muted-foreground">
         {label}
@@ -373,7 +378,9 @@ export function MobileActivityDetailSheetContent({
   const tDetail = useTranslations("ActivityDetail");
   const tActivityTitle = useTranslations("ActivityTitle");
   const tOverview = useTranslations("Overview.stats");
+  const tSports = useTranslations("SportCatalog");
   const { systemUnit } = useStore();
+  const { data: sportCatalog = [] } = useSportCatalog();
   const activityId = previewActivity.hashId ?? String(previewActivity.id ?? "");
   const detailQuery = useGetActivity(activityId);
   const activity = detailQuery.data ?? previewActivity;
@@ -389,6 +396,42 @@ export function MobileActivityDetailSheetContent({
       }).format(new Date(activity.startTime))
     : null;
   const sportType = String(activity.sportType ?? "").toUpperCase();
+  const detailPolicy = getActivityDetailPolicy(activity);
+  const isOther = detailPolicy.group === "OTHER";
+  const otherStats = [
+    {
+      label: t("activities.duration"),
+      value: valueOrDash(
+        activity.movingTime ?? activity.elapsedTime ?? activity.duration,
+        "duration",
+        systemUnit,
+      ),
+    },
+    {
+      label: tOverview("avgHeartRate"),
+      value: valueOrDash(activity.avgHeartRate, "heartRate", systemUnit),
+      unit: getUnit("heartRate", systemUnit),
+    },
+    {
+      label: t("HeartRatePage.tooltip.maxHeartRate"),
+      value: valueOrDash(activity.maxHeartRate, "heartRate", systemUnit),
+      unit: getUnit("heartRate", systemUnit),
+    },
+    {
+      label: t("HeartRatePage.tooltip.minHeartRate"),
+      value: valueOrDash(activity.minHeartRate, "heartRate", systemUnit),
+      unit: getUnit("heartRate", systemUnit),
+    },
+    {
+      label: t("dashboard.calories"),
+      value: valueOrDash(activity.calories, "count", systemUnit),
+      unit: "kcal",
+    },
+    {
+      label: tCalendar("loadLabel"),
+      value: valueOrDash(activity.load, "count", systemUnit),
+    },
+  ];
   const primaryStats =
     sportType === "CYCLING"
       ? [
@@ -460,52 +503,53 @@ export function MobileActivityDetailSheetContent({
               unit: getUnit("pace", systemUnit),
             },
           ];
-  const stats = [
-    ...primaryStats,
-    {
-      label: tOverview("avgHeartRate"),
-      value: valueOrDash(activity.avgHeartRate, "heartRate", systemUnit),
-      unit: getUnit("heartRate", systemUnit),
-    },
-    {
-      label: t("HeartRatePage.tooltip.maxHeartRate"),
-      value: valueOrDash(activity.maxHeartRate, "heartRate", systemUnit),
-      unit: getUnit("heartRate", systemUnit),
-    },
-    {
-      label: tOverview("avgPower"),
-      value: valueOrDash(
-        activity.avgPower ?? activity.averageWatts,
-        "power",
-        systemUnit,
-      ),
-      unit: getUnit("power", systemUnit),
-    },
-    {
-      label: t("ActivityPowerPage.basicStats.maxPower"),
-      value: valueOrDash(
-        activity.maxPower ?? activity.maxWatts,
-        "power",
-        systemUnit,
-      ),
-      unit: getUnit("power", systemUnit),
-    },
-    {
-      label: t("ActivitySharePoster.metrics.elevationGain"),
-      value: valueOrDash(
-        activity.elevationGain ?? activity.ascent,
-        "elevation",
-        systemUnit,
-      ),
-      unit: getUnit("elevation", systemUnit),
-    },
-    {
-      label: tCalendar("loadLabel"),
-      value: valueOrDash(activity.load, "count", systemUnit),
-      unit: "TSS",
-    },
-  ];
-  const dataChartIds = getActivityDetailPolicy(activity).dataChartIds;
+  const stats = isOther
+    ? otherStats
+    : [
+        ...primaryStats,
+        {
+          label: tOverview("avgHeartRate"),
+          value: valueOrDash(activity.avgHeartRate, "heartRate", systemUnit),
+          unit: getUnit("heartRate", systemUnit),
+        },
+        {
+          label: t("HeartRatePage.tooltip.maxHeartRate"),
+          value: valueOrDash(activity.maxHeartRate, "heartRate", systemUnit),
+          unit: getUnit("heartRate", systemUnit),
+        },
+        {
+          label: tOverview("avgPower"),
+          value: valueOrDash(
+            activity.avgPower ?? activity.averageWatts,
+            "power",
+            systemUnit,
+          ),
+          unit: getUnit("power", systemUnit),
+        },
+        {
+          label: t("ActivityPowerPage.basicStats.maxPower"),
+          value: valueOrDash(
+            activity.maxPower ?? activity.maxWatts,
+            "power",
+            systemUnit,
+          ),
+          unit: getUnit("power", systemUnit),
+        },
+        {
+          label: t("ActivitySharePoster.metrics.elevationGain"),
+          value: valueOrDash(
+            activity.elevationGain ?? activity.ascent,
+            "elevation",
+            systemUnit,
+          ),
+          unit: getUnit("elevation", systemUnit),
+        },
+        {
+          label: tCalendar("loadLabel"),
+          value: valueOrDash(activity.load, "count", systemUnit),
+        },
+      ];
+  const dataChartIds = detailPolicy.dataChartIds;
   const chartCandidates = React.useMemo(
     () =>
       getActivityDataChartsForSport(activity.sportType).filter((chart) =>
@@ -521,7 +565,8 @@ export function MobileActivityDetailSheetContent({
   const visibleCharts = chartCandidates.filter((chart) =>
     availableMetrics.has(chart.metric),
   );
-  const heroMeta = [activity.sportType, startLabel].filter(Boolean).join(" · ");
+  const sportLabel = getSportDisplayName(sportCatalog, activity, tSports);
+  const heroMeta = [sportLabel, startLabel].filter(Boolean).join(" · ");
 
   return (
     <div className="min-h-full bg-muted/20 pb-safe-or-8">
@@ -529,22 +574,32 @@ export function MobileActivityDetailSheetContent({
         activity={activity}
         activityId={activityId}
         meta={heroMeta}
+        showMap={detailPolicy.showMap}
         title={title}
       />
 
       <div className="relative z-10 -mt-2 overflow-hidden rounded-t-overlay border-b border-border/70 bg-background">
         <div className="grid grid-cols-3">
           {stats.map((stat, index) => (
-            <StatCell key={`${stat.label}-${index}`} index={index} {...stat} />
+            <StatCell
+              key={`${stat.label}-${index}`}
+              index={index}
+              total={stats.length}
+              {...stat}
+            />
           ))}
         </div>
       </div>
 
       <div className="space-y-4 px-3 pt-3">
+        <GenericActivityDataNotice activity={activity} />
+
         <MobileActivityWorkoutSummary
           activity={activity}
           activityId={activityId}
         />
+
+        <ActivityStrengthSection activity={activity} />
 
         {activityId && (chartsLoading || visibleCharts.length > 0) ? (
           <section className="space-y-3">
@@ -576,7 +631,9 @@ export function MobileActivityDetailSheetContent({
           </section>
         ) : null}
 
-        <ActivitySplits activity={activity} />
+        {detailPolicy.tabIds.has("lap") ? (
+          <ActivitySplits activity={activity} />
+        ) : null}
 
         {activity.thirdPartyProvider || activity.description ? (
           <section className="space-y-2 border-t border-border/70 pt-5">

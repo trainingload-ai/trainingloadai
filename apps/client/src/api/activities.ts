@@ -239,6 +239,7 @@ export interface Activity {
   maxWatts?: number;
   avgHeartRate?: number;
   maxHeartRate?: number;
+  minHeartRate?: number;
   vo2maxVdotByRace?: number;
   vo2maxVdotByHr?: number;
   vo2maxVdotByFactor?: number;

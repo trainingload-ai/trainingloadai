@@ -45,6 +45,7 @@ import { ActivityWeatherCard } from "./ActivityWeatherCard";
 import RunningDynamicsPage from "./running-dynamics/RunningDynamicsPage";
 import { ActivityAnalysisLinkProvider } from "./activity-analysis-link-context";
 import { BestIntervals } from "./BestIntervals";
+import { GenericActivityDataNotice } from "@/components/activities/generic-activity-data-notice";
 
 // 详情页 tabs 只维护稳定 value 和图标，显示文案统一从 i18n 读取。
 const tabItems = [
@@ -149,6 +150,9 @@ const CommonActivityDetail = () => {
             <div className="overflow-hidden rounded-md">
               <Overview />
             </div>
+            {activity ? (
+              <GenericActivityDataNotice activity={activity} />
+            ) : null}
           </section>
 
           <section className="relative overflow-hidden rounded-md bg-neutral-50 px-4 py-3.5 dark:bg-[#151817] md:px-5">
