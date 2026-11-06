@@ -44,7 +44,6 @@ export class ActivityInputFingerprintService {
         numLaps: true,
         numLengths: true,
         numActiveLengths: true,
-        sampleSec: true,
         minPower: true,
         maxPower: true,
         avgPower: true,
@@ -58,7 +57,6 @@ export class ActivityInputFingerprintService {
         cycles: true,
         work: true,
         strokes: true,
-        calories: true,
         sessionRpe: true,
         eftp: true,
         ecp: true,
@@ -119,7 +117,10 @@ export class ActivityInputFingerprintService {
       },
     });
 
-    // With record facts, these scalar columns are HEAVY output caches. The
+    // sampleSec and calories are derived caches, never raw inputs: HEAVY
+    // initializes the former and recomputes the latter even without records.
+    // Their underlying record/source facts are fingerprinted below instead.
+    // With record facts, these other scalar columns are HEAVY output caches. The
     // Parquet/source checksums fingerprint their facts; hashing the caches
     // makes a successful analysis invalidate its own snapshot.
     const hasRecordFacts = activity.parquetFiles.some(
@@ -137,7 +138,6 @@ export class ActivityInputFingerprintService {
       subSport: activity.subSport,
       timerTime: activity.timerTime,
       elapsedTime: activity.elapsedTime,
-      sampleSec: activity.sampleSec,
       parquetFiles: activity.parquetFiles,
       sources: activity.activitySources,
     };
@@ -215,7 +215,6 @@ export class ActivityInputFingerprintService {
       PROFILE: fitnessTimelineFingerprint({
         common,
         distance: activity.distance,
-        calories: summaryFallback(activity.calories),
         numLaps: activity.numLaps,
         numLengths: activity.numLengths,
       }),
