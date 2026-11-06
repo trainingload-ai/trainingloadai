@@ -383,6 +383,137 @@ function upgradeReleaseManifest({ rollback = true } = {}) {
   };
 }
 
+async function createSignedLegacySource() {
+  const directory = await createPreviousBundle();
+  await executeManagementCommand(options("init", directory), dependencies());
+  await useDigestBoundSourceImages(
+    directory,
+    Object.fromEntries(
+      Object.entries(previousReleaseManifest.images).map(([role, image]) => [
+        role,
+        image.reference,
+      ]),
+    ),
+  );
+  await fs.writeFile(
+    resolve(directory, "release-manifest.json"),
+    `${JSON.stringify(previousReleaseManifest)}\n`,
+  );
+  await fs.unlink(resolve(directory, "package.json"));
+  return directory;
+}
+
+test("init authenticates and records a legacy release without changing its config or data", async () => {
+  const directory = await createSignedLegacySource();
+  const configPath = resolve(directory, ".env.selfhost");
+  const configBefore = await fs.readFile(configPath);
+  const uploadPath = resolve(directory, "data/uploads/legacy.fit");
+  await fs.writeFile(uploadPath, "existing upload");
+  const statePath = resolve(directory, ".selfhost/current-release.json");
+  let verifications = 0;
+  const deps = (id) =>
+    dependencies({
+      randomUUID: () => id,
+      releaseVerifier: async (path) => {
+        assert.equal(path, directory);
+        verifications++;
+        return { manifest: previousReleaseManifest, signatureVerified: true };
+      },
+    });
+  const plan = await executeManagementCommand(
+    options("init", directory, { dryRun: true }),
+    deps("10100000-0000-4000-8000-000000000002"),
+  );
+  assert.equal(plan.ok, true, JSON.stringify(plan));
+  assert.equal(
+    plan.actions.find((a) => a.code === "INITIALIZE_RELEASE_STATE")?.status,
+    "planned",
+  );
+  await assert.rejects(fs.stat(statePath), { code: "ENOENT" });
+  const result = await executeManagementCommand(
+    options("init", directory),
+    deps("10200000-0000-4000-8000-000000000002"),
+  );
+  assert.equal(result.ok, true, JSON.stringify(result));
+  assert.equal(result.releaseVersion, PREVIOUS_VERSION);
+  const stateBefore = await fs.readFile(statePath);
+  const state = JSON.parse(stateBefore);
+  assert.equal(state.releaseVersion, PREVIOUS_VERSION);
+  assert.equal(state.sourceRevision, previousReleaseManifest.source.revision);
+  assert.deepEqual(
+    state.images,
+    Object.fromEntries(
+      Object.entries(previousReleaseManifest.images).map(([role, image]) => [
+        role,
+        image.reference,
+      ]),
+    ),
+  );
+  assert.equal((await fs.stat(statePath)).mode & 0o777, 0o600);
+  assert.deepEqual(await fs.readFile(configPath), configBefore);
+  assert.equal(await fs.readFile(uploadPath, "utf8"), "existing upload");
+  const again = await executeManagementCommand(
+    options("init", directory),
+    deps("10300000-0000-4000-8000-000000000002"),
+  );
+  assert.equal(again.status, "unchanged");
+  assert.deepEqual(await fs.readFile(statePath), stateBefore);
+  assert.equal(verifications, 2);
+});
+
+for (const failure of ["signature", "images", "lifecycle", "race"]) {
+  test(`init refuses legacy release-state initialization on ${failure}`, async () => {
+    const directory = await createSignedLegacySource();
+    const statePath = resolve(directory, ".selfhost/current-release.json");
+    if (failure === "images") {
+      await useDigestBoundSourceImages(directory);
+    }
+    if (failure === "lifecycle") {
+      await fs.writeFile(
+        resolve(directory, ".selfhost/upgrade-incomplete.json"),
+        "existing lifecycle marker",
+      );
+    }
+    const configBefore = await fs.readFile(resolve(directory, ".env.selfhost"));
+    const result = await executeManagementCommand(
+      options("init", directory),
+      dependencies({
+        randomUUID: () => "10400000-0000-4000-8000-000000000002",
+        releaseVerifier: async () => {
+          if (failure === "race") {
+            await fs.writeFile(statePath, "concurrently created state", {
+              mode: 0o600,
+            });
+          }
+          return {
+            manifest: previousReleaseManifest,
+            signatureVerified: failure !== "signature",
+          };
+        },
+      }),
+    );
+    assert.equal(result.ok, false, JSON.stringify(result));
+    assert.equal(
+      result.error.code,
+      failure === "lifecycle"
+        ? "SELF_HOST_UPGRADE_INCOMPLETE"
+        : failure === "race"
+          ? "SELF_HOST_INIT_CONFLICT"
+          : "SELF_HOST_RELEASE_STATE_INVALID",
+    );
+    assert.deepEqual(
+      await fs.readFile(resolve(directory, ".env.selfhost")),
+      configBefore,
+    );
+    if (failure === "race")
+      assert.equal(
+        await fs.readFile(statePath, "utf8"),
+        "concurrently created state",
+      );
+    else await assert.rejects(fs.stat(statePath), { code: "ENOENT" });
+  });
+}
+
 function lifecycleDocker({
   dataRoot,
   bundleRoot = null,

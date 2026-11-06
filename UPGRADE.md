@@ -4,6 +4,31 @@
 
 ## 升级
 
+### 旧版首次升级的管理元数据过渡
+
+从未升级过的 `1.1.15` / `1.1.17` 实例可能没有 `.selfhost/current-release.json`。这两个版本的 CLI 从原始
+release manifest 读取镜像时漏了 `migrate`，源预检因此可能返回 `SELF_HOST_UPGRADE_STATE_INVALID`。
+不要修改签名包、配置中的镜像或手工写入状态文件。
+
+先保留当前实例的 verified backup，并确认没有未完成的 restore/upgrade。使用 **1.1.18 或后续完整签名管理包**执行：
+
+```bash
+instance='/path/to/installed-instance'
+target='/path/to/trainingload-selfhost-1.1.18'
+"$target/self-host" init --directory "$instance" --dry-run --json
+"$target/self-host" init --directory "$instance" --json
+```
+
+只有 dry-run `ok: true`、计划包含 `INITIALIZE_RELEASE_STATE` 且没有其他待执行的配置或数据修复动作时，才执行对应实际命令。
+若还有其他修复动作，先按运维流程解决并重新 dry-run，不把它们混入元数据过渡。该入口会重新验证旧实例的完整签名
+bundle，要求旧配置的版本和三个镜像与签名 manifest 完全一致，再以 exclusive publish 创建缺失的 release-state。
+已有 state 不会被覆盖；配置、secret、数据库、uploads、运行版本和容器均不因这个过渡而改变。
+任何签名、镜像、生命周期或并发冲突都必须停止并运行 `doctor --json`，不能借此接管未知实例。
+
+完成后仍须按下面顺序重新执行**源 CLI dry-run、目标 CLI dry-run、实际升级**，不能跳过旧版预检。
+
+### 常规升级顺序
+
 1. 下载并解压目标 release bundle，不要覆盖当前运行目录；
 2. 先用当前实例的可信 CLI 对目标 bundle 执行兼容性 dry-run；
 3. 该验证通过后，改用目标 bundle 的 CLI，以 `--directory` 指向当前实例并再次 dry-run；

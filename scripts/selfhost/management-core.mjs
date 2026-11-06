@@ -3145,6 +3145,49 @@ async function probeTcpPort(bind, port, createServer = createNetServer) {
   });
 }
 
+async function initialReleaseState(context, values) {
+  if (
+    (await lstatOrNull(currentReleaseStatePath(context.instanceDirectory))) ||
+    !(await lstatOrNull(
+      resolve(context.instanceDirectory, "release-manifest.json"),
+    ))
+  ) {
+    return null;
+  }
+  await assertNoIncompleteLifecycle(context);
+  let verified;
+  try {
+    verified =
+      context.authenticatedBundle ??
+      (await context.releaseVerifier(context.instanceDirectory, {
+        verifySignature: (verification) =>
+          verifyReleaseEvidenceSignature(context, verification),
+      }));
+    if (verified.signatureVerified !== true)
+      throw new Error("source signature was not verified");
+    validateReleaseManifest(verified.manifest);
+  } catch (error) {
+    throw new SelfHostManagementError(
+      "SELF_HOST_RELEASE_STATE_INVALID",
+      "initial release state requires a complete, authenticated source bundle",
+      SELF_HOST_CLI_EXIT.CONFIG,
+      { cause: error },
+    );
+  }
+  const release = targetReleaseDescriptor(verified.manifest);
+  if (
+    values.get("SELF_HOST_VERSION") !== release.version ||
+    !releaseImagesEqual(release.images, releaseImagesFromConfig({ values }))
+  ) {
+    throw new SelfHostManagementError(
+      "SELF_HOST_RELEASE_STATE_INVALID",
+      "source configuration does not match the authenticated release images",
+      SELF_HOST_CLI_EXIT.STATE_CONFLICT,
+    );
+  }
+  return release;
+}
+
 async function initialize(context) {
   await requireBundleArtifacts(context.instanceDirectory, false);
   if (context.authenticatedBundle) {
@@ -3345,6 +3388,16 @@ async function initialize(context) {
       "Ensure every declared persistent data directory exists",
     ),
   );
+  const releaseState = await initialReleaseState(context, values);
+  if (releaseState) {
+    actions.push(
+      action(
+        "INITIALIZE_RELEASE_STATE",
+        context.dryRun ? "planned" : "completed",
+        "Record the existing authenticated release without changing its version or images",
+      ),
+    );
+  }
   if (!context.dryRun) {
     if (generatedConfig) {
       try {
@@ -3384,9 +3437,15 @@ async function initialize(context) {
     for (const directory of dataDirectories(dataRoot)) {
       await ensurePrivateDirectory(directory);
     }
+    if (releaseState) {
+      await writeCurrentReleaseState(context, releaseState, {
+        exclusive: true,
+      });
+    }
   }
 
   const changed =
+    Boolean(releaseState) ||
     Boolean(generatedConfig) ||
     Boolean(migratedConfig) ||
     markerMissing ||
@@ -8243,7 +8302,11 @@ async function writeRequiredFailureReport(context, report, originalError) {
   }
 }
 
-async function writeCurrentReleaseState(context, release) {
+async function writeCurrentReleaseState(
+  context,
+  release,
+  { exclusive = false } = {},
+) {
   const stateDirectory = resolve(context.instanceDirectory, ".selfhost");
   await ensurePrivateDirectory(stateDirectory);
   const path = currentReleaseStatePath(context.instanceDirectory);
@@ -8262,7 +8325,20 @@ async function writeCurrentReleaseState(context, release) {
     null,
     2,
   )}\n`;
-  if (await lstatOrNull(path)) await atomicReplace(path, payload, 0o600);
+  if (exclusive) {
+    try {
+      await writeJsonExclusive(context, path, JSON.parse(payload));
+    } catch (error) {
+      if (error?.code === "EEXIST") {
+        throw new SelfHostManagementError(
+          "SELF_HOST_INIT_CONFLICT",
+          "release state was created concurrently; initialization did not replace it",
+          SELF_HOST_CLI_EXIT.STATE_CONFLICT,
+        );
+      }
+      throw error;
+    }
+  } else if (await lstatOrNull(path)) await atomicReplace(path, payload, 0o600);
   else await writeJsonExclusive(context, path, JSON.parse(payload));
   return path;
 }
