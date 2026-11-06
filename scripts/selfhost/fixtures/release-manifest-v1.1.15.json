@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "1.1.15",
+  "configSchemaVersion": 1,
+  "composeSchemaVersion": 2,
+  "releaseKind": "self-host-v1-patch",
+  "source": {
+    "url": "https://github.com/trainingload-ai/trainingloadai",
+    "revision": "219100818ebe725c3c2d9de4391bba9cb473eb83"
+  },
+  "created": "2026-10-30T12:31:19+08:00",
+  "registry": "ghcr.io",
+  "license": "AGPL-3.0-only",
+  "runtimeIdentity": {
+    "uid": 10001,
+    "gid": 10001
+  },
+  "images": {
+    "migrate": {
+      "name": "trainingload-migrate",
+      "repository": "ghcr.io/trainingload-ai/trainingloadai/trainingload-migrate",
+      "digest": "sha256:964d74364825b5cf7b542ba91a81701cd3fdacc84f6c7fb9fd31f28bd49dc8be",
+      "reference": "ghcr.io/trainingload-ai/trainingloadai/trainingload-migrate@sha256:964d74364825b5cf7b542ba91a81701cd3fdacc84f6c7fb9fd31f28bd49dc8be",
+      "tags": ["1.1.15", "sha-219100818ebe725c3c2d9de4391bba9cb473eb83"],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "platformDigests": {
+        "linux/amd64": "sha256:473ca88736a500df376834a46a0388dd92665a63cb1c35f98b8616c10fc6cdec",
+        "linux/arm64": "sha256:930c9cf5fb84ff6adb342e2ae686049347dd1d36b8c5322ddb279bed49ea5468"
+      },
+      "evidence": {
+        "sbom": {
+          "format": "spdx-json",
+          "file": "migrate.sbom.json"
+        },
+        "provenance": {
+          "mode": "mode=max",
+          "file": "migrate.provenance.json"
+        },
+        "signature": {
+          "tool": "cosign",
+          "version": "v3.0.6",
+          "oidcIssuer": "https://token.actions.githubusercontent.com",
+          "identity": "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v1.1.15",
+          "verified": true
+        },
+        "vulnerability": {
+          "tool": "trivy",
+          "version": "v0.76.1",
+          "policy": "zero-fixable-critical-high",
+          "resultFile": "vulnerability-result.json",
+          "scans": {
+            "linux/amd64": {
+              "file": "vulnerability/migrate-amd64.sarif.json",
+              "sha256": "1f235b7adc027f791ba13accce41895da557f63236309d33a1ca900620cad7a4",
+              "findings": 0
+            },
+            "linux/arm64": {
+              "file": "vulnerability/migrate-arm64.sarif.json",
+              "sha256": "56c34dc16885bc0d4a73860bbf4650897812b4bba4f3bda383bd2488c8ddb651",
+              "findings": 0
+            }
+          }
+        }
+      }
+    },
+    "server": {
+      "name": "trainingload-server",
+      "repository": "ghcr.io/trainingload-ai/trainingloadai/trainingload-server",
+      "digest": "sha256:ea6b137b92a30f09a1a5ade3ef088eaf5451ff621941a205a99925592941a714",
+      "reference": "ghcr.io/trainingload-ai/trainingloadai/trainingload-server@sha256:ea6b137b92a30f09a1a5ade3ef088eaf5451ff621941a205a99925592941a714",
+      "tags": ["1.1.15", "sha-219100818ebe725c3c2d9de4391bba9cb473eb83"],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "platformDigests": {
+        "linux/amd64": "sha256:972573897258e3900e8dc2e8562941c20b3c31d034b127bf2516ba124db4a8d6",
+        "linux/arm64": "sha256:f86f405ab84fc03488f8c722de7f13f1bf794e54ab82f1ae4713ceaf2843045b"
+      },
+      "evidence": {
+        "sbom": {
+          "format": "spdx-json",
+          "file": "server.sbom.json"
+        },
+        "provenance": {
+          "mode": "mode=max",
+          "file": "server.provenance.json"
+        },
+        "signature": {
+          "tool": "cosign",
+          "version": "v3.0.6",
+          "oidcIssuer": "https://token.actions.githubusercontent.com",
+          "identity": "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v1.1.15",
+          "verified": true
+        },
+        "vulnerability": {
+          "tool": "trivy",
+          "version": "v0.76.1",
+          "policy": "zero-fixable-critical-high",
+          "resultFile": "vulnerability-result.json",
+          "scans": {
+            "linux/amd64": {
+              "file": "vulnerability/server-amd64.sarif.json",
+              "sha256": "c3eb32e74309a8cf48e494cbec1cbd0bb1aece872357667b493a01652c9b970e",
+              "findings": 0
+            },
+            "linux/arm64": {
+              "file": "vulnerability/server-arm64.sarif.json",
+              "sha256": "15d854a6f6bfe91b1f81c9eab470b694dd1c0ad32660d530a9d32bfd386e8a12",
+              "findings": 0
+            }
+          }
+        }
+      }
+    },
+    "client": {
+      "name": "trainingload-client",
+      "repository": "ghcr.io/trainingload-ai/trainingloadai/trainingload-client",
+      "digest": "sha256:4f84dfabcf3becd7e3e75c393b2794445a2576597f5c36fb118e4076c7c6344c",
+      "reference": "ghcr.io/trainingload-ai/trainingloadai/trainingload-client@sha256:4f84dfabcf3becd7e3e75c393b2794445a2576597f5c36fb118e4076c7c6344c",
+      "tags": ["1.1.15", "sha-219100818ebe725c3c2d9de4391bba9cb473eb83"],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "platformDigests": {
+        "linux/amd64": "sha256:1107708271d0ef9c93927cef891ac51db20952a4d2325ba76e45f39c39dc3926",
+        "linux/arm64": "sha256:076c329bcfc69007a9b40279da644d5d1ca81c6d10bf079586ff26ad26e3469f"
+      },
+      "evidence": {
+        "sbom": {
+          "format": "spdx-json",
+          "file": "client.sbom.json"
+        },
+        "provenance": {
+          "mode": "mode=max",
+          "file": "client.provenance.json"
+        },
+        "signature": {
+          "tool": "cosign",
+          "version": "v3.0.6",
+          "oidcIssuer": "https://token.actions.githubusercontent.com",
+          "identity": "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v1.1.15",
+          "verified": true
+        },
+        "vulnerability": {
+          "tool": "trivy",
+          "version": "v0.76.1",
+          "policy": "zero-fixable-critical-high",
+          "resultFile": "vulnerability-result.json",
+          "scans": {
+            "linux/amd64": {
+              "file": "vulnerability/client-amd64.sarif.json",
+              "sha256": "853b365793f33535052b39f6fafd377cf2f0ded88c912d80ee6515579a32fe47",
+              "findings": 0
+            },
+            "linux/arm64": {
+              "file": "vulnerability/client-arm64.sarif.json",
+              "sha256": "b803c1f4dfd06aa246b3751a6b61835c924be6fc376c1aab9cd54304109ff1ad",
+              "findings": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "upgrade": {
+    "supportedSourceVersions": ["1.1.14"],
+    "applicationRollbackTo": ["1.1.14"],
+    "backupRequired": true
+  },
+  "database": {
+    "schemaEpoch": 1,
+    "migrationPolicy": "expand-contract",
+    "migrationHead": "0013_better_auth_jwks_metadata",
+    "migrationInventorySha256": "e6df8f3209218fd0ce4f70e0fd69046c59d54d275a82e2cd30e0b014e0e7b309",
+    "compatibilityWindowMinorVersions": 2,
+    "databaseRollback": "unsupported",
+    "migrations": [
+      {
+        "id": "0001_core_baseline",
+        "checksum": "71a5eb7208621b2feda75352f2d1bbe4ea77417102fed5efeaa3fda7757c25d9",
+        "phase": "baseline",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0002_neutral_ai_operations",
+        "checksum": "919ec48d9e397840205fbd4a4bfc40b427bd21fe7f25b2fd0c4baf7de74a5c85",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0003_self_host_ai_configuration",
+        "checksum": "63f658a3602ee4830118633a84ffb2b0b904b000b0900e20691a63b6eb66d089",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0004_core_ai_usage_compatibility",
+        "checksum": "e1254493eaea07d65aaf39896d559bf5ce990f74991ef4918c34d8b3231fb6a0",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0005_self_host_ai_model_metadata",
+        "checksum": "c900103867bb702497d09c6e4711528e22e32a8c4181aada3630d62e204fd0bd",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0006_self_host_operation_analytics_consent",
+        "checksum": "e58462503358fddc85136b728035aca3f5d883a56c3f8283b8c4eed97953f0e0",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0007_single_owner",
+        "checksum": "f7ec8f8dbdbcd35bf20e750548ae205d960b83ceefee13a92468585f5848ec69",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0008_core_domain_invariants",
+        "checksum": "602864b942a9923019cbd6f46333541a58342286e72ed18bef806a685730cf9b",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0009_core_preference_defaults",
+        "checksum": "cd117ef12f38eca011253ee12cb8fac519a11b05d8bcebfd15f0b35cfe38d2c8",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0010_background_coach_runs",
+        "checksum": "1aa6f6e1da8ee5fb6371b513e8670aeeec9f56c16a7b9bb036e1365684425e91",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0011_background_coach_task_kinds",
+        "checksum": "c6fe4970ecf58769fd32d3e466058f7ef001e86e98b4f06c22fa70c5da8a4187",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0012_today_suggestion_action_loop",
+        "checksum": "3da79f4622beaea96b3f952c63411599aad7d33248e4fb3bfb3e334ba38c0e8c",
+        "phase": "expand",
+        "releaseVersion": "1.1.13"
+      },
+      {
+        "id": "0013_better_auth_jwks_metadata",
+        "checksum": "7b38cc693c52c0c5449b234ed75a05148ad937fe4dee90da8e7ea502458f5ee6",
+        "phase": "expand",
+        "releaseVersion": "1.1.15"
+      }
+    ]
+  },
+  "verification": {
+    "workflow": ".github/workflows/selfhost-images.yml",
+    "oidcIssuer": "https://token.actions.githubusercontent.com",
+    "digestAlgorithm": "sha256",
+    "evidenceFilesCoveredBy": "checksums.txt",
+    "releaseEvidenceSignature": {
+      "tool": "cosign",
+      "version": "v3.0.6",
+      "bundle": "checksums.bundle.json"
+    }
+  }
+}
