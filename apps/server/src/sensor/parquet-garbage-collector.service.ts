@@ -1,3 +1,4 @@
+import { ImportingJobService } from '@/importing/importing-job.service';
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -32,6 +33,7 @@ export class StorageObjectGarbageCollectorService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     private readonly sensorFiles: SensorFileQueryService,
     private readonly healthFiles: HealthFileQueryService,
+    private readonly importJobs: ImportingJobService,
   ) {}
 
   async enqueueObjects(
@@ -152,7 +154,7 @@ export class StorageObjectGarbageCollectorService {
               : row.bucket === 'default'
                 ? (
                     await Promise.all([
-                      this.prisma.importSourceObject.findFirst({
+                      this.importJobs.sourceObjects().findFirst({
                         where: {
                           OR: [
                             { fileKey: row.objectKey },

@@ -622,8 +622,8 @@
       "capability": "workers",
       "mode": "core-or-feature",
       "sensitive": false,
-      "documented": true,
-      "exampleDefault": "1",
+      "documented": false,
+      "exampleDefault": null,
       "owners": [
         "apps"
       ],
@@ -639,8 +639,8 @@
       "capability": "workers",
       "mode": "core-or-feature",
       "sensitive": false,
-      "documented": true,
-      "exampleDefault": "2",
+      "documented": false,
+      "exampleDefault": null,
       "owners": [
         "apps"
       ],
@@ -656,8 +656,8 @@
       "capability": "workers",
       "mode": "core-or-feature",
       "sensitive": false,
-      "documented": true,
-      "exampleDefault": "300",
+      "documented": false,
+      "exampleDefault": null,
       "owners": [
         "apps"
       ],
@@ -2259,7 +2259,7 @@
         },
         {
           "file": "apps/server/src/importing/activity-data-migration.service.ts",
-          "line": 97
+          "line": 104
         },
         {
           "file": "packages/prisma/core/runner/core-migration-runner.mjs",
@@ -4711,7 +4711,7 @@
       "references": [
         {
           "file": "apps/server/src/sensor/parquet-garbage-collector.service.ts",
-          "line": 90
+          "line": 92
         }
       ]
     },
@@ -5988,7 +5988,7 @@
       "references": [
         {
           "file": "apps/server/src/sensor/parquet-garbage-collector.service.ts",
-          "line": 89
+          "line": 91
         }
       ]
     },

@@ -1,3 +1,7 @@
+import { ImportingJobService } from './importing-job.service';
+import { UserQueryService } from '@/api/user/user-query.service';
+import { SensorFileQueryService } from '@/sensor/sensor-file-query.service';
+import { readPlanActivityLinksForMigration } from '@/api/plan/persistence/plan-activity-link.repository';
 import { Injectable } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type ActivityDataMigration } from '@prisma/client';
@@ -72,6 +76,9 @@ export class ActivityDataMigrationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly repair: FitActivityDataRepairService,
+    private readonly jobs: ImportingJobService,
+    private readonly users: UserQueryService,
+    private readonly files: SensorFileQueryService,
   ) {}
 
   private async lock(tx: Prisma.TransactionClient) {
@@ -127,7 +134,9 @@ export class ActivityDataMigrationService {
           throw new Error('ACTIVITY_MIGRATION_RUN_CONFLICT');
         return existing;
       }
-      const users = await tx.t_user.count({ where: { id: { in: userIds } } });
+      const users = await this.users
+        .users(tx)
+        .count({ where: { id: { in: userIds } } });
       if (users !== userIds.length)
         throw new Error('ACTIVITY_MIGRATION_USER_NOT_FOUND');
       await tx.activityDataMigration.createMany({
@@ -211,22 +220,19 @@ export class ActivityDataMigrationService {
             sessionRpe: true,
           },
         }),
-        tx.userFitnessMetric.findMany({
+        this.users.fitnessMetrics(tx).findMany({
           where: { userId, source: 'MANUAL' },
           orderBy: { id: 'asc' },
         }),
-        tx.userZoneSetting.findMany({
+        this.users.zoneSettings(tx).findMany({
           where: { userId },
           orderBy: { id: 'asc' },
         }),
-        tx.userBodyMetric.findMany({
+        this.users.bodyMetrics(tx).findMany({
           where: { userId },
           orderBy: { id: 'asc' },
         }),
-        tx.planWorkoutActivityLink.findMany({
-          where: { activity: { userId } },
-          orderBy: { id: 'asc' },
-        }),
+        readPlanActivityLinksForMigration(tx, userId),
         tx.activitySource.findMany({
           where: { userId, activity: { state: 1 } },
           orderBy: { id: 'asc' },
@@ -237,7 +243,7 @@ export class ActivityDataMigrationService {
             isActive: true,
           },
         }),
-        tx.activityParquetFile.findMany({
+        this.files.parquetFiles(tx).findMany({
           where: { activity: { userId } },
           orderBy: { id: 'asc' },
         }),
@@ -283,7 +289,7 @@ export class ActivityDataMigrationService {
           throw new Error('ACTIVITY_MIGRATION_USER_ANALYSIS_BUSY');
         }
         const before = await this.manifest(tx, row.userId);
-        const objects = await tx.importSourceObject.findMany({
+        const objects = await this.jobs.sourceObjects(tx).findMany({
           where: { userId: row.userId },
           select: { fileKey: true, rawStorageKey: true },
         });
@@ -352,7 +358,7 @@ export class ActivityDataMigrationService {
         });
       } else if (row.phase === 'WAIT_IMPORT') {
         const ids = row.importBatchIds as string[];
-        const batches = await this.prisma.importBatchJob.findMany({
+        const batches = await this.jobs.batchJobs().findMany({
           where: { id: { in: ids } },
           include: { postProcessJobs: true },
         });
@@ -469,7 +475,7 @@ export class ActivityDataMigrationService {
       });
       if (activities.some((a) => !a.startTime))
         throw new Error('ACTIVITY_MIGRATION_MISSING_ACTIVITY_TIME');
-      const legacy = await tx.userFitnessMetric.findFirst({
+      const legacy = await this.users.fitnessMetrics(tx).findFirst({
         where: {
           userId: row.userId,
           source: 'AUTO',
@@ -674,7 +680,7 @@ export class ActivityDataMigrationService {
       const batchIds = Array.isArray(row.importBatchIds)
         ? (row.importBatchIds as string[])
         : [];
-      await tx.importItemJob.updateMany({
+      await this.jobs.itemJobs(tx).updateMany({
         where: {
           batchJobId: { in: batchIds },
           status: { in: ['DEAD', 'FAILED'] },
@@ -689,14 +695,14 @@ export class ActivityDataMigrationService {
           lastErrorCode: null,
         },
       });
-      await tx.importBatchJob.updateMany({
+      await this.jobs.batchJobs(tx).updateMany({
         where: {
           id: { in: batchIds },
           status: { in: ['FAILED', 'PARTIAL_FAILED', 'CANCELLED'] },
         },
         data: { status: 'RUNNING', completedAt: null },
       });
-      await tx.userPostProcessJob.updateMany({
+      await this.jobs.postProcessJobs(tx).updateMany({
         where: {
           batchJobId: { in: batchIds },
           status: { in: ['DEAD', 'FAILED'] },
@@ -760,7 +766,7 @@ export class ActivityDataMigrationService {
           ? (row.importBatchIds as string[])
           : [];
         // Clearing tokens fences stale owners; their eventual commit must fail.
-        await tx.importItemJob.updateMany({
+        await this.jobs.itemJobs(tx).updateMany({
           where: {
             batchJobId: { in: ids },
             status: { notIn: ['DONE', 'SKIPPED', 'DEAD'] },
@@ -772,7 +778,7 @@ export class ActivityDataMigrationService {
             lastErrorCode: 'ACTIVITY_MIGRATION_USER_RESTARTED',
           },
         });
-        await tx.userPostProcessJob.updateMany({
+        await this.jobs.postProcessJobs(tx).updateMany({
           where: {
             batchJobId: { in: ids },
             status: { notIn: ['COMPLETED', 'DEAD'] },
@@ -799,7 +805,7 @@ export class ActivityDataMigrationService {
             },
           });
         const before = await this.manifest(tx, row.userId);
-        const objects = await tx.importSourceObject.findMany({
+        const objects = await this.jobs.sourceObjects(tx).findMany({
           where: { userId: row.userId },
           select: { fileKey: true, rawStorageKey: true },
         });

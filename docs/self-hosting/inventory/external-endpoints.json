@@ -186,7 +186,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 68
+          "line": 62
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -213,7 +213,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 62
+          "line": 56
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -1240,7 +1240,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 74
+          "line": 68
         }
       ],
       "capability": "web-asset-or-tooling",

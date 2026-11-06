@@ -1,3 +1,6 @@
+import { ImportingJobModule } from './importing-job.module';
+import { UserQueryModule } from '@/api/user/user-query.module';
+import { SensorFileQueryModule } from '@/sensor/sensor-file-query.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { existsSync } from 'node:fs';
@@ -35,6 +38,9 @@ const messagesPath = [
       },
     }),
     PrismaModule,
+    ImportingJobModule,
+    UserQueryModule,
+    SensorFileQueryModule,
     StorageModule,
   ],
   providers: [FitActivityDataRepairService, ActivityDataMigrationService],

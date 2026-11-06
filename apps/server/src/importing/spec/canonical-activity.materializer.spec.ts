@@ -1,3 +1,5 @@
+import { ImportingJobService } from '../importing-job.service';
+import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { CanonicalActivityMaterializer } from '../canonical-activity.materializer';
 import { ActivityAssociationService } from '../activity-association.service';
@@ -180,6 +182,7 @@ function createMaterializerPrisma(overrides?: Record<string, unknown>) {
       new ActivityDatasetSelectorService(),
       new SensorFileQueryService(new SensorFileRepository(prisma as never)),
       new ActivityIngestService(prisma as never),
+      new ImportingJobService(new ImportingJobRepository(prisma as never)),
     ),
   };
 }
@@ -249,6 +252,7 @@ describe('CanonicalActivityMaterializer sport resolution', () => {
       {} as never,
       new SensorFileQueryService(new SensorFileRepository({} as never)),
       new ActivityIngestService({} as never),
+      new ImportingJobService(new ImportingJobRepository({} as never)),
     );
 
     const code = await materializer.resolveSportDefinitionCode(

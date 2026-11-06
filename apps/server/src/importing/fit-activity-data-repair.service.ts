@@ -1,3 +1,4 @@
+import { ImportingJobService } from './importing-job.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import {
@@ -152,6 +153,7 @@ export class FitActivityDataRepairService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+    private readonly jobs: ImportingJobService,
   ) {}
 
   async scan(
@@ -176,7 +178,7 @@ export class FitActivityDataRepairService {
     const pageSize = Math.min(200, options.all ? 200 : options.limit);
 
     scan: while (true) {
-      const page = await this.prisma.importSourceObject.findMany({
+      const page = await this.jobs.sourceObjects().findMany({
         where: {
           ...(options.userId ? { userId: options.userId } : {}),
           ...(options.sourceKind ? { sourceKind: options.sourceKind } : {}),
@@ -342,7 +344,7 @@ export class FitActivityDataRepairService {
             result.noRecoverableData += 1;
             continue;
           }
-          const activeItem = await this.prisma.importItemJob.findFirst({
+          const activeItem = await this.jobs.itemJobs().findFirst({
             where: {
               sourceObjectId: sourceObject.id,
               status: { in: ACTIVE_ITEM_STATUSES },
@@ -501,7 +503,7 @@ export class FitActivityDataRepairService {
         });
         if (!migration)
           throw new Error('ACTIVITY_DATASET_REPAIR_MIGRATION_REQUIRED');
-        const active = await tx.importItemJob.findMany({
+        const active = await this.jobs.itemJobs(tx).findMany({
           where: {
             sourceObjectId: {
               in: group.map((candidate) => candidate.sourceObjectId),
@@ -521,7 +523,7 @@ export class FitActivityDataRepairService {
         const repairItems = selected.flatMap((candidate) =>
           candidate.payloads.map((payload) => ({ candidate, payload })),
         );
-        const batch = await tx.importBatchJob.create({
+        const batch = await this.jobs.batchJobs(tx).create({
           data: {
             userId: first.userId,
             sourceKind: first.sourceKind,
@@ -565,7 +567,7 @@ export class FitActivityDataRepairService {
         });
         for (let position = 0; position < repairItems.length; position += 1) {
           const { candidate, payload } = repairItems[position]!;
-          const item = await tx.importItemJob.create({
+          const item = await this.jobs.itemJobs(tx).create({
             data: {
               batchJobId: batch.id,
               userId: candidate.userId,

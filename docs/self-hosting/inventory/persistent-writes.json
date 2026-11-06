@@ -235,35 +235,35 @@
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2281,
+      "line": 1976,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2292,
+      "line": 1987,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2320,
+      "line": 2014,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "const tmpPath = path.join(os.tmpdir(), `${tableName}.parquet`);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2457,
+      "line": 2060,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2468,
+      "line": 2071,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"

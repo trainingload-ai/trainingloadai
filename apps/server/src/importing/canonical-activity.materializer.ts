@@ -1,3 +1,4 @@
+import { ImportingJobService } from './importing-job.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
@@ -252,6 +253,7 @@ export class CanonicalActivityMaterializer {
     private readonly datasetSelector: ActivityDatasetSelectorService,
     private readonly sensorFiles: SensorFileQueryService,
     private readonly ingest: ActivityIngestService,
+    private readonly jobs: ImportingJobService,
   ) {}
 
   /**
@@ -730,7 +732,7 @@ export class CanonicalActivityMaterializer {
         await acquireActivityWriteLock(tx, args.token.activityId);
       }
       if (args.itemJobId && args.itemLockToken) {
-        const owner = await tx.importItemJob.findFirst({
+        const owner = await this.jobs.itemJobs(tx).findFirst({
           where: {
             id: args.itemJobId,
             userId: args.userId,

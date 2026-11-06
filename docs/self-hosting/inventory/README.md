@@ -10,7 +10,7 @@
 | Environment variables | 284 |
 | External URL literals | 179 |
 | Filesystem write sites | 214 |
-| Runtime variables missing from configuration docs | 218 |
+| Runtime variables missing from configuration docs | 221 |
 
 ## Undocumented runtime variables
 
@@ -44,6 +44,9 @@
 - `ACTIVITY_RECOMPUTE_WORKER_ENABLED` — apps
 - `ACTIVITY_RECOMPUTE_WORKER_MAX_ATTEMPTS` — apps
 - `ACTIVITY_RECOMPUTE_WORKER_POLL_MS` — apps
+- `ACTIVITY_REPLAY_DATA_REPAIR_CONCURRENCY` — apps
+- `ACTIVITY_REPLAY_GLOBAL_CONCURRENCY` — apps
+- `ACTIVITY_REPLAY_LEASE_SECONDS` — apps
 - `ACTIVITY_WEATHER_WORKER_BATCH_SIZE` — apps
 - `ACTIVITY_WEATHER_WORKER_CONCURRENCY` — apps
 - `ACTIVITY_WEATHER_WORKER_LEASE_MS` — apps

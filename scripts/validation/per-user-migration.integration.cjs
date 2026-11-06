@@ -161,22 +161,20 @@ const result = { schemaVersion: 1, checks: [] };
     );
     const repair = new (core(
       "importing/fit-activity-data-repair.service",
-    ).FitActivityDataRepairService)(db, storageService);
+    ).FitActivityDataRepairService)(
+      db,
+      storageService,
+      app.get(core("importing/importing-job.service").ImportingJobService),
+    );
     const service = new (core(
       "importing/activity-data-migration.service",
-    ).ActivityDataMigrationService)(db, repair);
-    if (option("production-copy") === "true") {
-      await require("./production-copy-migration-checks.cjs")({
-        db,
-        app,
-        core,
-        option,
-        service,
-        sensor,
-        output,
-      });
-      return;
-    }
+    ).ActivityDataMigrationService)(
+      db,
+      repair,
+      app.get(core("importing/importing-job.service").ImportingJobService),
+      app.get(core("api/user/user-query.service").UserQueryService),
+      app.get(core("sensor/sensor-file-query.service").SensorFileQueryService),
+    );
     const source = await db.activitySource.findFirstOrThrow({
       where: {
         userId: option("fixture-user-id") || "FIXTURE_USER_REQUIRED",

@@ -1,3 +1,5 @@
+import { ImportingJobService } from '../../importing/importing-job.service';
+import { ImportingJobRepository } from '../../importing/persistence/importing-job.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { StorageObjectGarbageCollectorService } from '../parquet-garbage-collector.service';
 import { SensorFileQueryService } from '../sensor-file-query.service';
@@ -6,17 +8,19 @@ import { HealthFileQueryService } from '../../health-data/health-file-query.serv
 import { HealthDataRepository } from '../../health-data/persistence/health-data.repository';
 
 function createService(prisma: unknown, storage: unknown) {
+  const database = {
+    storageObjectRetention: { findFirst: jest.fn(async () => null) },
+    importSourceObject: { findFirst: jest.fn(async () => null) },
+    activitySource: { findFirst: jest.fn(async () => null) },
+    activity: { findFirst: jest.fn(async () => null) },
+    ...(prisma as object),
+  } as never;
   return new StorageObjectGarbageCollectorService(
-    {
-      storageObjectRetention: { findFirst: jest.fn(async () => null) },
-      importSourceObject: { findFirst: jest.fn(async () => null) },
-      activitySource: { findFirst: jest.fn(async () => null) },
-      activity: { findFirst: jest.fn(async () => null) },
-      ...(prisma as object),
-    } as never,
+    database,
     storage as never,
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new HealthFileQueryService(new HealthDataRepository(prisma as never)),
+    new ImportingJobService(new ImportingJobRepository(database)),
   );
 }
 

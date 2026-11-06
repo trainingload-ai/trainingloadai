@@ -1,4 +1,5 @@
 import type { Prisma, SportType } from '@prisma/client';
+import { readImportSportCatalog } from '@/sports/persistence/sport-catalog.repository';
 
 type Sport = { code: string; family: string; active: boolean };
 type Mapping = {
@@ -252,13 +253,8 @@ export async function scanUnknownActivitySports(
   tx: Prisma.TransactionClient,
   userId?: string,
 ) {
-  const [sports, mappings, activities] = await Promise.all([
-    tx.sportDefinition.findMany({
-      select: { code: true, family: true, active: true },
-    }),
-    tx.providerSportMapping.findMany({
-      where: { active: true, direction: { in: ['IMPORT', 'BOTH'] } },
-    }),
+  const [[sports, mappings], activities] = await Promise.all([
+    readImportSportCatalog(tx),
     tx.$queryRaw<
       Array<{
         id: number;
