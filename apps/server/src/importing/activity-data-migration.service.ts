@@ -362,6 +362,14 @@ export class ActivityDataMigrationService {
           where: { id: { in: ids } },
           include: { postProcessJobs: true },
         });
+        if (batches.some((b) => b.status === 'CANCELLED'))
+          throw new Error('ACTIVITY_MIGRATION_IMPORT_FAILED');
+        if (await this.queueReplay(row, false, true))
+          return {
+            completed: false,
+            waiting: 'ANALYSIS_RECOVERY',
+            userId: row.userId,
+          };
         if (
           batches.some(
             (b) =>
@@ -383,6 +391,99 @@ export class ActivityDataMigrationService {
           return { completed: false, waiting: 'IMPORT', userId: row.userId };
         }
         await this.queueReplay(row, false);
+      } else if (row.phase === 'WAIT_ANALYSIS_RECOVERY') {
+        const job = await this.prisma.activityRecomputeJob.findUniqueOrThrow({
+          where: { id: row.recomputeJobId! },
+        });
+        if (job.status === 'DEAD')
+          throw new Error(
+            job.lastErrorCode ?? 'ACTIVITY_MIGRATION_REPLAY_FAILED',
+          );
+        if (job.status !== 'COMPLETED')
+          return {
+            completed: false,
+            waiting: 'ANALYSIS_RECOVERY',
+            userId: row.userId,
+          };
+        await this.prisma.$transaction(async (tx) => {
+          await this.lock(tx);
+          await this.lockUser(tx, row.userId);
+          const recovery = (row.beforeManifest as any)?.analysisRecovery;
+          if (
+            !recovery ||
+            recovery.state !== 'QUEUED' ||
+            recovery.jobId !== row.recomputeJobId ||
+            !Array.isArray(recovery.activityIds) ||
+            !recovery.activityIds.length ||
+            !Array.isArray(recovery.itemIds) ||
+            !recovery.itemIds.length ||
+            recovery.activityIds.some(
+              (id: unknown) => !Number.isSafeInteger(id) || Number(id) <= 0,
+            ) ||
+            recovery.itemIds.some(
+              (id: unknown) => typeof id !== 'string' || !id,
+            ) ||
+            new Set(recovery.activityIds).size !==
+              recovery.activityIds.length ||
+            new Set(recovery.itemIds).size !== recovery.itemIds.length
+          )
+            throw new Error('ACTIVITY_MIGRATION_ANALYSIS_RECOVERY_INVALID');
+          const activities = await tx.activity.findMany({
+            where: {
+              id: { in: recovery.activityIds },
+              userId: row.userId,
+              state: 1,
+            },
+            select: { id: true, processingStatus: true },
+          });
+          if (
+            activities.length !== recovery.activityIds.length ||
+            activities.some((a) => a.processingStatus !== 'READY')
+          )
+            throw new Error('ACTIVITY_MIGRATION_ANALYSIS_RECOVERY_INCOMPLETE');
+          const batchIds = row.importBatchIds as string[];
+          if (
+            await this.jobs.batchJobs(tx).findFirst({
+              where: { id: { in: batchIds }, status: 'CANCELLED' },
+              select: { id: true },
+            })
+          )
+            throw new Error('ACTIVITY_MIGRATION_IMPORT_FAILED');
+          await this.jobs.itemJobs(tx).updateMany({
+            where: {
+              id: { in: recovery.itemIds },
+              userId: row.userId,
+              status: { in: ['FAILED', 'DEAD'] },
+            },
+            data: {
+              status: 'QUEUED',
+              attempts: 0,
+              availableAt: new Date(),
+              leaseExpiresAt: null,
+              lockToken: null,
+              lastError: null,
+              lastErrorCode: null,
+            },
+          });
+          await this.jobs.batchJobs(tx).updateMany({
+            where: {
+              id: { in: batchIds },
+              status: { in: ['FAILED', 'PARTIAL_FAILED'] },
+            },
+            data: { status: 'RUNNING', completedAt: null },
+          });
+          await tx.activityDataMigration.update({
+            where: { id: row.id },
+            data: {
+              phase: 'WAIT_IMPORT',
+              recomputeJobId: null,
+              beforeManifest: json({
+                ...(row.beforeManifest as object),
+                analysisRecovery: { ...recovery, state: 'COMPLETED' },
+              }),
+            },
+          });
+        });
       } else if (
         row.phase === 'WAIT_REPLAY' ||
         row.phase === 'WAIT_VERIFY_REPLAY'
@@ -464,10 +565,109 @@ export class ActivityDataMigrationService {
     }
   }
 
-  private async queueReplay(row: ActivityDataMigration, hot: boolean) {
-    await this.prisma.$transaction(async (tx) => {
+  private async queueReplay(
+    row: ActivityDataMigration,
+    hot: boolean,
+    recoverAnalysis = false,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
       await this.lock(tx);
       await this.lockUser(tx, row.userId);
+      let recovery: { activityIds: number[]; itemIds: string[] } | undefined;
+      if (recoverAnalysis) {
+        if ((row.beforeManifest as any)?.analysisRecovery) return false;
+        const failed = await this.jobs.itemJobs(tx).findMany({
+          where: {
+            batchJobId: { in: row.importBatchIds as string[] },
+            userId: row.userId,
+            status: { in: ['FAILED', 'DEAD'] },
+          },
+          select: { id: true, sourceRef: true },
+        });
+        let candidates = failed.filter((item) => {
+          const repair = (item.sourceRef as any)?.repair;
+          return (
+            repair?.migrationId === row.id &&
+            Number.isSafeInteger(repair.activityId) &&
+            repair.activityId > 0 &&
+            typeof repair.primarySourceId === 'string'
+          );
+        });
+        if (!candidates.length) return false;
+        const primaries = await tx.activitySource.findMany({
+          where: {
+            userId: row.userId,
+            isActive: true,
+            isPrimary: true,
+            activityId: {
+              in: candidates.map((i) => (i.sourceRef as any).repair.activityId),
+            },
+          },
+          select: { id: true, activityId: true, metadata: true },
+        });
+        // A failed LIGHT retry of this very item must finish through its own
+        // pipeline. Recovery is only for the older dataset blocking replacement.
+        candidates = candidates.filter((item) => {
+          const repair = (item.sourceRef as any).repair;
+          const primary = primaries.find(
+            (p) =>
+              p.id === repair.primarySourceId &&
+              p.activityId === repair.activityId,
+          );
+          return (
+            primary && (primary.metadata as any)?.repairItemJobId !== item.id
+          );
+        });
+        if (!candidates.length) return false;
+        const stalled = await tx.activity.findMany({
+          where: {
+            id: {
+              in: candidates.map((i) => (i.sourceRef as any).repair.activityId),
+            },
+            userId: row.userId,
+            state: 1,
+            processingStatus: { in: ['PARQUET_READY', 'ANALYZING'] },
+          },
+          select: { id: true },
+        });
+        if (!stalled.length) return false;
+        const now = new Date();
+        if (
+          (await tx.activityAnalysisLease.findFirst({
+            where: { userId: row.userId, leaseExpiresAt: { gt: now } },
+            select: { userId: true },
+          })) ||
+          (await this.jobs.itemJobs(tx).findFirst({
+            where: {
+              userId: row.userId,
+              OR: [
+                { status: 'QUEUED' },
+                {
+                  status: {
+                    in: [
+                      'NORMALIZING',
+                      'DEDUPING',
+                      'MATERIALIZING',
+                      'PARQUET_BUILDING',
+                      'ANALYZING',
+                    ],
+                  },
+                  leaseExpiresAt: { gt: now },
+                },
+              ],
+            },
+            select: { id: true },
+          }))
+        )
+          return false;
+        const ids = new Set(stalled.map((a) => a.id));
+        recovery = {
+          activityIds: [...ids],
+          itemIds: candidates
+            .filter((i) => ids.has((i.sourceRef as any).repair.activityId))
+            .map((i) => i.id),
+        };
+      }
       const activities = await tx.activity.findMany({
         where: { userId: row.userId, state: 1 },
         orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
@@ -517,7 +717,7 @@ export class ActivityDataMigrationService {
       const generation =
         (row.beforeManifest as Record<string, unknown> | null)?.generation ??
         'initial';
-      const dedupeKey = `activity-data-migration:${row.id}:${generation}:${hot ? 'verify' : 'replay'}`;
+      const dedupeKey = `activity-data-migration:${row.id}:${generation}:${recoverAnalysis ? 'recover-analysis' : hot ? 'verify' : 'replay'}`;
       const job = await tx.activityRecomputeJob.upsert({
         where: { dedupeKey },
         update: {},
@@ -525,7 +725,9 @@ export class ActivityDataMigrationService {
           dedupeKey,
           userId: row.userId,
           metricType: 'DATA_REPAIR',
-          reason: 'PER_USER_DATA_MIGRATION',
+          reason: recoverAnalysis
+            ? 'PER_USER_STALLED_ANALYSIS_RECOVERY'
+            : 'PER_USER_DATA_MIGRATION',
           affectedPipelines: ['FULL'],
           recomputeFrom: from,
           recomputeTo: new Date(),
@@ -546,6 +748,7 @@ export class ActivityDataMigrationService {
             schemaVersion: 2,
             migrationId: row.id,
             verificationReplay: hot,
+            ...(recoverAnalysis ? { analysisRecovery: true } : {}),
             includeActivityIds: activities.map((a) => a.id),
             suppressAthleteStateReassessment: true,
           },
@@ -555,11 +758,28 @@ export class ActivityDataMigrationService {
         where: { id: row.id },
         data: {
           status: hot ? 'VERIFYING' : 'MIGRATING',
-          phase: hot ? 'WAIT_VERIFY_REPLAY' : 'WAIT_REPLAY',
+          phase: recoverAnalysis
+            ? 'WAIT_ANALYSIS_RECOVERY'
+            : hot
+              ? 'WAIT_VERIFY_REPLAY'
+              : 'WAIT_REPLAY',
           recomputeJobId: job.id,
           replayFrom: from,
+          ...(recovery
+            ? {
+                beforeManifest: json({
+                  ...(row.beforeManifest as object),
+                  analysisRecovery: {
+                    ...recovery,
+                    state: 'QUEUED',
+                    jobId: job.id,
+                  },
+                }),
+              }
+            : {}),
         },
       });
+      return true;
     });
   }
 
