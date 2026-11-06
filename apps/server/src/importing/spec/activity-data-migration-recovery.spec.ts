@@ -18,7 +18,13 @@ function harness() {
   };
   const item = {
     id: 'item-1',
-    sourceRef: { repair: { migrationId: row.id, activityId: 1 } },
+    sourceRef: {
+      repair: {
+        migrationId: row.id,
+        activityId: 1,
+        primarySourceId: 'primary-1',
+      },
+    },
   };
   const state = {
     lease: false,
@@ -48,6 +54,11 @@ function harness() {
   };
   const tx = {
     $queryRaw: jest.fn(async () => []),
+    activitySource: {
+      findMany: jest.fn(async () => [
+        { id: 'primary-1', activityId: 1, metadata: {} },
+      ]),
+    },
     activityAnalysisLease: {
       findFirst: jest.fn(async () =>
         state.lease ? { userId: row.userId } : null,
@@ -144,6 +155,26 @@ describe('per-user stalled analysis recovery', () => {
   it('only considers failed repair items belonging to this migration', async () => {
     const h = harness();
     h.state.items[0].sourceRef.repair.migrationId = 'another-migration';
+    expect(await h.service.advance('run')).toMatchObject({ waiting: 'IMPORT' });
+    expect(h.tx.activityRecomputeJob.upsert).not.toHaveBeenCalled();
+  });
+
+  it('does not bypass a failed LIGHT stage of the same committed item', async () => {
+    const h = harness();
+    h.tx.activitySource.findMany.mockResolvedValueOnce([
+      {
+        id: 'primary-1',
+        activityId: 1,
+        metadata: { repairItemJobId: 'item-1' },
+      },
+    ]);
+    expect(await h.service.advance('run')).toMatchObject({ waiting: 'IMPORT' });
+    expect(h.tx.activityRecomputeJob.upsert).not.toHaveBeenCalled();
+  });
+
+  it('leaves a primary-source conflict for normal repair verification', async () => {
+    const h = harness();
+    h.tx.activitySource.findMany.mockResolvedValueOnce([]);
     expect(await h.service.advance('run')).toMatchObject({ waiting: 'IMPORT' });
     expect(h.tx.activityRecomputeJob.upsert).not.toHaveBeenCalled();
   });

@@ -584,12 +584,38 @@ export class ActivityDataMigrationService {
           },
           select: { id: true, sourceRef: true },
         });
-        const candidates = failed.filter((item) => {
+        let candidates = failed.filter((item) => {
           const repair = (item.sourceRef as any)?.repair;
           return (
             repair?.migrationId === row.id &&
             Number.isSafeInteger(repair.activityId) &&
-            repair.activityId > 0
+            repair.activityId > 0 &&
+            typeof repair.primarySourceId === 'string'
+          );
+        });
+        if (!candidates.length) return false;
+        const primaries = await tx.activitySource.findMany({
+          where: {
+            userId: row.userId,
+            isActive: true,
+            isPrimary: true,
+            activityId: {
+              in: candidates.map((i) => (i.sourceRef as any).repair.activityId),
+            },
+          },
+          select: { id: true, activityId: true, metadata: true },
+        });
+        // A failed LIGHT retry of this very item must finish through its own
+        // pipeline. Recovery is only for the older dataset blocking replacement.
+        candidates = candidates.filter((item) => {
+          const repair = (item.sourceRef as any).repair;
+          const primary = primaries.find(
+            (p) =>
+              p.id === repair.primarySourceId &&
+              p.activityId === repair.activityId,
+          );
+          return (
+            primary && (primary.metadata as any)?.repairItemJobId !== item.id
           );
         });
         if (!candidates.length) return false;
