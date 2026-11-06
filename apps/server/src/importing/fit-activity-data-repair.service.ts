@@ -34,6 +34,11 @@ const HEALTH_OBJECT_TYPES = [
   'third_party_mixed_fit',
 ];
 
+// Keep registration transactions short even when canonical payloads contain
+// high-frequency records. A multi-activity source remains atomic in one batch.
+const REPAIR_REGISTRATION_MAX_ITEMS = 5;
+const REPAIR_REGISTRATION_MAX_BYTES = 8 * 1024 * 1024;
+
 export const FIT_ACTIVITY_DATA_REPAIR_REASON =
   'FIT_CANONICAL_MATERIALIZATION_V2';
 
@@ -480,138 +485,168 @@ export class FitActivityDataRepairService {
     const batchIds: string[] = [];
     let queued = 0;
     let skippedActive = 0;
+    const registrationGroups: FitActivityRepairCandidate[][] = [];
     for (const group of groups.values()) {
-      const outcome = await this.prisma.$transaction(async (tx) => {
-        const migrationId =
-          group[0].repairs![group[0].payloads[0].source.sourceUid].migrationId;
-        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'activity-data-migration'}, 0))::text`;
-        const migration = await tx.activityDataMigration.findFirst({
-          where: {
-            id: migrationId,
-            userId: group[0].userId,
-            status: 'MIGRATING',
-          },
-          select: { id: true },
-        });
-        if (!migration)
-          throw new Error('ACTIVITY_DATASET_REPAIR_MIGRATION_REQUIRED');
-        const active = await this.jobs.itemJobs(tx).findMany({
-          where: {
-            sourceObjectId: {
-              in: group.map((candidate) => candidate.sourceObjectId),
-            },
-            status: { in: ACTIVE_ITEM_STATUSES },
-          },
-          select: { sourceObjectId: true },
-        });
-        const activeIds = new Set(active.map((item) => item.sourceObjectId));
-        const selected = group.filter(
-          (candidate) => !activeIds.has(candidate.sourceObjectId),
-        );
-        if (selected.length === 0) {
-          return { batchId: null, queued: 0, skipped: group.length };
+      let pending: FitActivityRepairCandidate[] = [];
+      let itemCount = 0;
+      let byteCount = 0;
+      for (const candidate of group) {
+        // Measure before acquiring a transaction/lock; never truncate a source
+        // to fit a batch, including a single source larger than the byte budget.
+        const bytes = Buffer.byteLength(JSON.stringify(candidate.payloads));
+        if (
+          pending.length &&
+          (itemCount + candidate.payloads.length >
+            REPAIR_REGISTRATION_MAX_ITEMS ||
+            byteCount + bytes > REPAIR_REGISTRATION_MAX_BYTES)
+        ) {
+          registrationGroups.push(pending);
+          pending = [];
+          itemCount = 0;
+          byteCount = 0;
         }
-        const first = selected[0]!;
-        const repairItems = selected.flatMap((candidate) =>
-          candidate.payloads.map((payload) => ({ candidate, payload })),
-        );
-        const batch = await this.jobs.batchJobs(tx).create({
-          data: {
-            userId: first.userId,
-            sourceKind: first.sourceKind,
-            status: 'QUEUED',
-            totalCount: repairItems.length,
-            requestContext: {
-              source: 'fit_activity_data_repair',
-              maintenanceReason: FIT_ACTIVITY_DATA_REPAIR_REASON,
-              suppressCompletionNotification: true,
-              suppressAutomaticAiReview: true,
-              suppressThirdPartyExport: true,
-              sourceObjectIds: selected.map(
-                (candidate) => candidate.sourceObjectId,
-              ),
-            } satisfies Prisma.InputJsonObject,
-            summary: {
-              repairCandidateCount: selected.length,
-              repairItemCount: repairItems.length,
-              missingRecordCount: selected.reduce(
-                (sum, candidate) =>
-                  sum +
-                  candidate.reasons.reduce(
-                    (reasonSum, reason) =>
-                      reasonSum + reason.missingRecordCount,
-                    0,
-                  ),
-                0,
-              ),
-              missingStrengthSetCount: selected.reduce(
-                (sum, candidate) =>
-                  sum +
-                  candidate.reasons.reduce(
-                    (reasonSum, reason) =>
-                      reasonSum + reason.missingStrengthSetCount,
-                    0,
-                  ),
-                0,
-              ),
-            } satisfies Prisma.InputJsonObject,
-          },
-        });
-        for (let position = 0; position < repairItems.length; position += 1) {
-          const { candidate, payload } = repairItems[position]!;
-          const item = await this.jobs.itemJobs(tx).create({
+        pending.push(candidate);
+        itemCount += candidate.payloads.length;
+        byteCount += bytes;
+      }
+      if (pending.length) registrationGroups.push(pending);
+    }
+    for (const group of registrationGroups) {
+      const outcome = await this.prisma.$transaction(
+        async (tx) => {
+          const migrationId =
+            group[0].repairs![group[0].payloads[0].source.sourceUid]
+              .migrationId;
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'activity-data-migration'}, 0))::text`;
+          const migration = await tx.activityDataMigration.findFirst({
+            where: {
+              id: migrationId,
+              userId: group[0].userId,
+              status: 'MIGRATING',
+            },
+            select: { id: true },
+          });
+          if (!migration)
+            throw new Error('ACTIVITY_DATASET_REPAIR_MIGRATION_REQUIRED');
+          const active = await this.jobs.itemJobs(tx).findMany({
+            where: {
+              sourceObjectId: {
+                in: group.map((candidate) => candidate.sourceObjectId),
+              },
+              status: { in: ACTIVE_ITEM_STATUSES },
+            },
+            select: { sourceObjectId: true },
+          });
+          const activeIds = new Set(active.map((item) => item.sourceObjectId));
+          const selected = group.filter(
+            (candidate) => !activeIds.has(candidate.sourceObjectId),
+          );
+          if (selected.length === 0) {
+            return { batchId: null, queued: 0, skipped: group.length };
+          }
+          const first = selected[0]!;
+          const repairItems = selected.flatMap((candidate) =>
+            candidate.payloads.map((payload) => ({ candidate, payload })),
+          );
+          const batch = await this.jobs.batchJobs(tx).create({
             data: {
-              batchJobId: batch.id,
-              userId: candidate.userId,
-              sourceObjectId: candidate.sourceObjectId,
-              sourceKind: candidate.sourceKind,
-              sourceUid: payload.source.sourceUid,
-              position,
+              userId: first.userId,
+              sourceKind: first.sourceKind,
               status: 'QUEUED',
-              sourceRef: importJsonValue({
-                kind: 'canonical_payload',
-                payload,
-                repair: candidate.repairs![payload.source.sourceUid],
-              }),
-            },
-          });
-          await tx.importEventLog.create({
-            data: {
-              batchJobId: batch.id,
-              itemJobId: item.id,
-              userId: candidate.userId,
-              stage: 'SOURCE_REGISTERED',
-              level: 'INFO',
-              message: '历史 FIT 活动分析数据修复已入队',
-              data: {
+              totalCount: repairItems.length,
+              requestContext: {
+                source: 'fit_activity_data_repair',
                 maintenanceReason: FIT_ACTIVITY_DATA_REPAIR_REASON,
-                sourceObjectId: candidate.sourceObjectId,
-                sourceUid: payload.source.sourceUid,
-                reasons: candidate.reasons,
-              } as Prisma.InputJsonValue,
+                suppressCompletionNotification: true,
+                suppressAutomaticAiReview: true,
+                suppressThirdPartyExport: true,
+                sourceObjectIds: selected.map(
+                  (candidate) => candidate.sourceObjectId,
+                ),
+              } satisfies Prisma.InputJsonObject,
+              summary: {
+                repairCandidateCount: selected.length,
+                repairItemCount: repairItems.length,
+                missingRecordCount: selected.reduce(
+                  (sum, candidate) =>
+                    sum +
+                    candidate.reasons.reduce(
+                      (reasonSum, reason) =>
+                        reasonSum + reason.missingRecordCount,
+                      0,
+                    ),
+                  0,
+                ),
+                missingStrengthSetCount: selected.reduce(
+                  (sum, candidate) =>
+                    sum +
+                    candidate.reasons.reduce(
+                      (reasonSum, reason) =>
+                        reasonSum + reason.missingStrengthSetCount,
+                      0,
+                    ),
+                  0,
+                ),
+              } satisfies Prisma.InputJsonObject,
             },
           });
-        }
-        // Batch creation and registration must commit together. A crash cannot
-        // leave an untracked import batch outside the user's migration ledger.
-        const ledger = await tx.activityDataMigration.findUniqueOrThrow({
-          where: { id: migrationId },
-        });
-        const previousIds = Array.isArray(ledger.importBatchIds)
-          ? (ledger.importBatchIds as string[])
-          : [];
-        await tx.activityDataMigration.update({
-          where: { id: migrationId },
-          data: {
-            importBatchIds: [...previousIds, batch.id],
-          },
-        });
-        return {
-          batchId: batch.id,
-          queued: selected.length,
-          skipped: group.length - selected.length,
-        };
-      });
+          for (let position = 0; position < repairItems.length; position += 1) {
+            const { candidate, payload } = repairItems[position]!;
+            const item = await this.jobs.itemJobs(tx).create({
+              data: {
+                batchJobId: batch.id,
+                userId: candidate.userId,
+                sourceObjectId: candidate.sourceObjectId,
+                sourceKind: candidate.sourceKind,
+                sourceUid: payload.source.sourceUid,
+                position,
+                status: 'QUEUED',
+                sourceRef: importJsonValue({
+                  kind: 'canonical_payload',
+                  payload,
+                  repair: candidate.repairs![payload.source.sourceUid],
+                }),
+              },
+            });
+            await tx.importEventLog.create({
+              data: {
+                batchJobId: batch.id,
+                itemJobId: item.id,
+                userId: candidate.userId,
+                stage: 'SOURCE_REGISTERED',
+                level: 'INFO',
+                message: '历史 FIT 活动分析数据修复已入队',
+                data: {
+                  maintenanceReason: FIT_ACTIVITY_DATA_REPAIR_REASON,
+                  sourceObjectId: candidate.sourceObjectId,
+                  sourceUid: payload.source.sourceUid,
+                  reasons: candidate.reasons,
+                } as Prisma.InputJsonValue,
+              },
+            });
+          }
+          // Batch creation and registration must commit together. A crash cannot
+          // leave an untracked import batch outside the user's migration ledger.
+          const ledger = await tx.activityDataMigration.findUniqueOrThrow({
+            where: { id: migrationId },
+          });
+          const previousIds = Array.isArray(ledger.importBatchIds)
+            ? (ledger.importBatchIds as string[])
+            : [];
+          await tx.activityDataMigration.update({
+            where: { id: migrationId },
+            data: {
+              importBatchIds: [...previousIds, batch.id],
+            },
+          });
+          return {
+            batchId: batch.id,
+            queued: selected.length,
+            skipped: group.length - selected.length,
+          };
+        },
+        { maxWait: 5000, timeout: 30_000 },
+      );
       if (outcome.batchId) batchIds.push(outcome.batchId);
       queued += outcome.queued;
       skippedActive += outcome.skipped;
