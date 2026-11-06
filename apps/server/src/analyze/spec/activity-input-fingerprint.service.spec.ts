@@ -107,6 +107,22 @@ function serviceFor(rows: Array<Record<string, unknown>>) {
 }
 
 describe('ActivityInputFingerprintService', () => {
+  it.each([true, false])(
+    'does not invalidate when HEAVY initializes its sample interval cache (records=%s)',
+    async (withRecords) => {
+      const baseline = activityFact({ sampleSec: null });
+      if (!withRecords) baseline.parquetFiles = [];
+      const { service } = serviceFor([baseline, { ...baseline, sampleSec: 1 }]);
+      expect(await service.resolve(42)).toEqual(await service.resolve(42));
+    },
+  );
+
+  it('does not treat recomputed calories as raw input for summary-only activities', async () => {
+    const baseline = activityFact({ parquetFiles: [], calories: 309 });
+    const { service } = serviceFor([baseline, { ...baseline, calories: 345 }]);
+    expect(await service.resolve(42)).toEqual(await service.resolve(42));
+  });
+
   it('does not invalidate record facts when HEAVY writes summary caches', async () => {
     const { service } = serviceFor([
       activityFact(),

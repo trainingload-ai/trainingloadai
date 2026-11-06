@@ -938,6 +938,60 @@ export class ActivityDataMigrationService {
       if (row.status !== 'FAILED')
         throw new Error('ACTIVITY_MIGRATION_NOT_FAILED');
       await this.lockUser(tx, row.userId);
+      if (
+        row.phase === 'WAIT_VERIFY_REPLAY' &&
+        [
+          'ACTIVITY_MIGRATION_IDEMPOTENCE_FAILED',
+          'ACTIVITY_MIGRATION_RESULTS_CHANGED',
+        ].includes(row.errorCode ?? '')
+      ) {
+        const job = row.recomputeJobId
+          ? await tx.activityRecomputeJob.findUnique({
+              where: { id: row.recomputeJobId },
+            })
+          : null;
+        if (
+          job?.status !== 'COMPLETED' ||
+          (await tx.activityAnalysisLease.findFirst({
+            where: { userId: row.userId, leaseExpiresAt: { gt: new Date() } },
+          }))
+        )
+          throw new Error('ACTIVITY_MIGRATION_USER_ANALYSIS_BUSY');
+        const current = await this.manifest(tx, row.userId);
+        const before = row.beforeManifest as Record<string, any>;
+        if (
+          current.protectedHash !== before.protectedHash ||
+          current.primaryHash !== before.primaryHash
+        )
+          throw new Error('ACTIVITY_MIGRATION_PROTECTED_DATA_CHANGED');
+        // A completed verification job cannot be consumed again. Preserve the
+        // original protection baseline and failure evidence, then require a new
+        // full replay plus zero-read verification under a fresh job generation.
+        return tx.activityDataMigration.update({
+          where: { id },
+          data: {
+            status: 'MIGRATING',
+            phase: 'WAIT_IMPORT',
+            recomputeJobId: null,
+            verification: Prisma.DbNull,
+            errorCode: null,
+            beforeManifest: json({
+              ...before,
+              generation: randomUUID(),
+              verificationRetryHistory: [
+                ...(before.verificationRetryHistory ?? []),
+                {
+                  at: new Date().toISOString(),
+                  generation: before.generation ?? 'initial',
+                  recomputeJobId: row.recomputeJobId,
+                  errorCode: row.errorCode,
+                  verification: row.verification,
+                },
+              ],
+            }),
+          },
+        });
+      }
       const batchIds = Array.isArray(row.importBatchIds)
         ? (row.importBatchIds as string[])
         : [];
