@@ -2259,7 +2259,7 @@
         },
         {
           "file": "apps/server/src/importing/activity-data-migration.service.ts",
-          "line": 104
+          "line": 105
         },
         {
           "file": "packages/prisma/core/runner/core-migration-runner.mjs",

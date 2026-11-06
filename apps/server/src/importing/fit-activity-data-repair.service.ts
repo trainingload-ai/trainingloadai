@@ -9,7 +9,10 @@ import {
 import { decodeTrackFile } from '@/importing/trackswap-file';
 import type { CanonicalActivityPayload } from '@/importing/canonical-activity.types';
 import { importJsonValue } from '@/importing/import-item-job.types';
-import { verifiedRawFileSha256 } from './raw-file-checksum';
+import {
+  resolveRawFileIntegrity,
+  type LegacyDiscoveryIntegrityAudit,
+} from './raw-file-checksum';
 import { mapTrackSwapActivityToCanonicalPayload } from '@/importing/source-adapters/trackswap-canonical.mapper';
 import {
   ACTIVITY_MATERIALIZATION_VERSION,
@@ -99,6 +102,7 @@ export type FitActivityRepairScanResult = {
   lastCandidateId: string | null;
   lastScannedId: string | null;
   failures: Array<{ sourceObjectId: string; code: string }>;
+  integrityAudits?: LegacyDiscoveryIntegrityAudit[];
   hasMore: boolean;
 };
 
@@ -177,6 +181,7 @@ export class FitActivityDataRepairService {
       lastCandidateId: null,
       lastScannedId: null,
       failures: [],
+      integrityAudits: [],
       hasMore: false,
     };
     let cursorId = options.afterId;
@@ -206,6 +211,7 @@ export class FitActivityDataRepairService {
           sourceKind: true,
           sourceUid: true,
           provider: true,
+          objectType: true,
           accountRef: true,
           externalId: true,
           fileName: true,
@@ -275,10 +281,9 @@ export class FitActivityDataRepairService {
             continue;
           }
           phase = 'RAW_CHECKSUM_MISMATCH';
-          const actualChecksum = verifiedRawFileSha256(
-            buffer,
-            sourceObject.rawChecksum,
-          );
+          const integrity = resolveRawFileIntegrity(buffer, sourceObject);
+          const actualChecksum = integrity.sha256;
+          if (integrity.audit) result.integrityAudits!.push(integrity.audit);
           phase = 'RAW_DECODE_FAILED';
           const decoded = await decodeTrackFile(buffer, {
             filename: sourceObject.fileName ?? `${sourceObject.sourceUid}.fit`,

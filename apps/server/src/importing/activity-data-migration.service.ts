@@ -7,6 +7,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type ActivityDataMigration } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { FitActivityDataRepairService } from './fit-activity-data-repair.service';
+import type { LegacyDiscoveryIntegrityAudit } from './raw-file-checksum';
 import {
   applyUnknownActivitySportRepairs,
   scanUnknownActivitySports,
@@ -341,6 +342,7 @@ export class ActivityDataMigrationService {
           migrationId: row.id,
           failFast: true,
         });
+        await this.recordIntegrityAudits(row, scan.integrityAudits ?? []);
         if (scan.failures.length) throw new Error(scan.failures[0].code);
         if (scan.alreadyQueued)
           return {
@@ -563,6 +565,45 @@ export class ActivityDataMigrationService {
       });
       throw Object.assign(new Error(code), { cause: error });
     }
+  }
+
+  private async recordIntegrityAudits(
+    row: ActivityDataMigration,
+    audits: LegacyDiscoveryIntegrityAudit[],
+  ) {
+    if (!audits.length) return;
+    await this.prisma.$transaction(async (tx) => {
+      await this.lock(tx);
+      const current = await tx.activityDataMigration.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      if (current.status !== 'MIGRATING' || current.phase !== 'RAW_SCAN')
+        throw new Error('ACTIVITY_MIGRATION_INTEGRITY_AUDIT_CONFLICT');
+      const before = (current.beforeManifest ?? {}) as Record<string, unknown>;
+      const previous = (before.rawFileIntegrityAudits ??
+        []) as LegacyDiscoveryIntegrityAudit[];
+      const bySource = new Map(previous.map((a) => [a.sourceObjectId, a]));
+      for (const audit of audits) {
+        const existing = bySource.get(audit.sourceObjectId);
+        if (
+          existing &&
+          (existing.observedFileSha256 !== audit.observedFileSha256 ||
+            existing.registeredDiscoveryChecksum !==
+              audit.registeredDiscoveryChecksum)
+        )
+          throw new Error('RAW_CHECKSUM_MISMATCH');
+        bySource.set(audit.sourceObjectId, audit);
+      }
+      await tx.activityDataMigration.update({
+        where: { id: row.id },
+        data: {
+          beforeManifest: json({
+            ...before,
+            rawFileIntegrityAudits: [...bySource.values()],
+          }),
+        },
+      });
+    });
   }
 
   private async queueReplay(
