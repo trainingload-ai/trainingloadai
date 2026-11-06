@@ -17,7 +17,13 @@
     "dev:selfhost": "SELF_HOST_MODE=core-local DEPLOYMENT_MODE=self-host nest start --watch --entryFile apps/server/src/main.self-host --path tsconfig.selfhost.json",
     "start:selfhost": "node dist-selfhost/apps/server/src/main.self-host.js",
     "selfhost:owner-bootstrap:prod": "node dist/apps/server/src/self-host/self-host-owner-bootstrap.command.js",
-    "selfhost:owner-recovery:prod": "node dist/apps/server/src/self-host/self-host-owner-recovery.command.js"
+    "selfhost:owner-recovery:prod": "node dist/apps/server/src/self-host/self-host-owner-recovery.command.js",
+    "prerepair:activity-fitness-timeline": "pnpm build:selfhost",
+    "repair:activity-fitness-timeline": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/analyze/repair-activity-fitness-timeline.command.js",
+    "pretest:fit-release-corpus": "pnpm build:selfhost",
+    "test:fit-release-corpus": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/fit-release-corpus.command.js",
+    "preactivity-data:migrate": "pnpm build:selfhost",
+    "activity-data:migrate": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/activity-data-migration.command.js"
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.70",
@@ -49,6 +55,7 @@
     "cron": "^4.4.0",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.3",
+    "dotenv-expand": "12.0.3",
     "express": "5.2.1",
     "form-data": "4.0.6",
     "geo-tz": "^8.1.7",
@@ -858,6 +865,22 @@
     "./workers/workers/review.worker": {
       "types": "./src/workers/workers/review.worker.ts",
       "default": "./src/workers/workers/review.worker.ts"
+    },
+    "./importing/activity-dataset-repair": {
+      "types": "./src/importing/activity-dataset-repair.ts",
+      "default": "./src/importing/activity-dataset-repair.ts"
+    },
+    "./importing/fit-activity-data-repair.service": {
+      "types": "./src/importing/fit-activity-data-repair.service.ts",
+      "default": "./src/importing/fit-activity-data-repair.service.ts"
+    },
+    "./importing/activity-data-migration.service": {
+      "types": "./src/importing/activity-data-migration.service.ts",
+      "default": "./src/importing/activity-data-migration.service.ts"
+    },
+    "./importing/activity-data-migration-backup": {
+      "types": "./src/importing/activity-data-migration-backup.ts",
+      "default": "./src/importing/activity-data-migration-backup.ts"
     }
   }
 }

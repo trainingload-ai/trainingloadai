@@ -50,7 +50,7 @@ describe('LthrObservationTask', () => {
       qualityTier: 'SINGLE_HIGH_QUALITY',
       fullCoverageRatio: 1,
       tailCoverageRatio: 1,
-      algorithmVersion: 1,
+      algorithmVersion: 2,
     });
 
     await task.post(result);
@@ -71,6 +71,41 @@ describe('LthrObservationTask', () => {
     await task.post(result);
 
     expect(result.outputs.lthrObservation).toBeUndefined();
-    expect(persistence.saveActivityLthrObservation).not.toHaveBeenCalled();
+    expect(persistence.saveActivityLthrObservation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        observation: undefined,
+      }),
+    );
   });
+
+  it('supports five-second HR updates mixed into one-second records', async () => {
+    const task = new LthrObservationTask({} as never);
+    const ctx = makeContext();
+    ctx.inputs.canonicalRecords = ctx.inputs.canonicalRecords!.map(
+      (row, index) => ({
+        ...row,
+        heartRate: index % 5 === 0 ? row.heartRate : undefined,
+      }),
+    );
+    const result = await task.exec(ctx);
+    expect(result.outputs.lthrObservation).toMatchObject({
+      value: 175,
+      sampleSeconds: 5,
+      windowStartSec: 1800,
+      windowEndSec: 3600,
+    });
+  });
+
+  it.each([-28_800, 14_400])(
+    'rejects a record timeline shifted outside the activity by %s seconds',
+    async (shift) => {
+      const task = new LthrObservationTask({} as never);
+      const ctx = makeContext();
+      ctx.inputs.canonicalRecords = ctx.inputs.canonicalRecords!.map((row) => ({
+        ...row,
+        tMs: row.tMs + shift * 1000,
+      }));
+      expect((await task.exec(ctx)).outputs.lthrObservation).toBeUndefined();
+    },
+  );
 });

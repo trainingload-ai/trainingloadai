@@ -1,3 +1,5 @@
+import { ImportingJobService } from '../../importing/importing-job.service';
+import { ImportingJobRepository } from '../../importing/persistence/importing-job.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { StorageObjectGarbageCollectorService } from '../parquet-garbage-collector.service';
 import { SensorFileQueryService } from '../sensor-file-query.service';
@@ -6,15 +8,43 @@ import { HealthFileQueryService } from '../../health-data/health-file-query.serv
 import { HealthDataRepository } from '../../health-data/persistence/health-data.repository';
 
 function createService(prisma: unknown, storage: unknown) {
+  const database = {
+    storageObjectRetention: { findFirst: jest.fn(async () => null) },
+    importSourceObject: { findFirst: jest.fn(async () => null) },
+    activitySource: { findFirst: jest.fn(async () => null) },
+    activity: { findFirst: jest.fn(async () => null) },
+    ...(prisma as object),
+  } as never;
   return new StorageObjectGarbageCollectorService(
-    prisma as never,
+    database,
     storage as never,
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new HealthFileQueryService(new HealthDataRepository(prisma as never)),
+    new ImportingJobService(new ImportingJobRepository(database)),
   );
 }
 
 describe('StorageObjectGarbageCollectorService', () => {
+  it('retains original files referenced by failed imports even when no activity was materialized', async () => {
+    const prisma = {
+      $queryRaw: jest.fn(async () => [
+        { id: 'g', objectKey: 'original.fit', bucket: 'default', attempts: 0 },
+      ]),
+      importSourceObject: {
+        findFirst: jest.fn(async () => ({ id: 'failed-import-source' })),
+      },
+      activityParquetFile: { findFirst: jest.fn(async () => null) },
+      healthSeriesFile: { findFirst: jest.fn(async () => null) },
+      storageObjectGarbage: {
+        delete: jest.fn(async () => ({})),
+        update: jest.fn(),
+      },
+    };
+    const storage = { deleteFile: jest.fn() };
+    const result = await createService(prisma, storage).runOnce();
+    expect(result.referenced).toBe(1);
+    expect(storage.deleteFile).not.toHaveBeenCalled();
+  });
   it('按 bucket 与 object key 去重写入延迟回收清单', async () => {
     const upsert = jest.fn(async () => ({}));
     const service = createService(
@@ -60,6 +90,31 @@ describe('StorageObjectGarbageCollectorService', () => {
     );
   });
 
+  it('never deletes a recovery object even when the pin appeared after claim', async () => {
+    const prisma = {
+      $queryRaw: jest.fn(async () => [
+        { id: 'g', objectKey: 'old.parquet', bucket: 'default', attempts: 0 },
+      ]),
+      storageObjectRetention: {
+        findFirst: jest.fn(async () => ({ id: 'hold' })),
+      },
+      storageObjectGarbage: {
+        update: jest.fn(async () => ({})),
+        delete: jest.fn(),
+      },
+    };
+    const storage = { deleteFile: jest.fn() };
+    await createService(prisma, storage).runOnce();
+    expect(storage.deleteFile).not.toHaveBeenCalled();
+    expect(prisma.storageObjectGarbage.delete).not.toHaveBeenCalled();
+    expect(prisma.storageObjectGarbage.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'g' },
+        data: expect.objectContaining({ lockedAt: null }),
+      }),
+    );
+  });
+
   it('删除未引用对象，并仅移除仍被引用对象的退休清单', async () => {
     const prisma = {
       $queryRaw: jest.fn(async () => [
@@ -90,10 +145,7 @@ describe('StorageObjectGarbageCollectorService', () => {
       },
     };
     const storage = { deleteFile: jest.fn(async () => undefined) };
-    const service = createService(
-      prisma as never,
-      storage as never,
-    );
+    const service = createService(prisma as never, storage as never);
 
     await expect(service.runOnce()).resolves.toEqual({
       claimed: 2,
@@ -132,10 +184,7 @@ describe('StorageObjectGarbageCollectorService', () => {
         throw new Error('storage unavailable');
       }),
     };
-    const service = createService(
-      prisma as never,
-      storage as never,
-    );
+    const service = createService(prisma as never, storage as never);
 
     await expect(service.runOnce()).resolves.toEqual({
       claimed: 1,
@@ -177,10 +226,7 @@ describe('StorageObjectGarbageCollectorService', () => {
       },
     };
     const storage = { deleteFile: jest.fn(async () => undefined) };
-    const service = createService(
-      prisma as never,
-      storage as never,
-    );
+    const service = createService(prisma as never, storage as never);
 
     await expect(service.runOnce()).resolves.toEqual({
       claimed: 1,
@@ -214,10 +260,7 @@ describe('StorageObjectGarbageCollectorService', () => {
       },
     };
     const storage = { deleteFile: jest.fn(async () => undefined) };
-    const service = createService(
-      prisma as never,
-      storage as never,
-    );
+    const service = createService(prisma as never, storage as never);
 
     await expect(service.runOnce()).resolves.toEqual({
       claimed: 1,
@@ -255,10 +298,7 @@ describe('StorageObjectGarbageCollectorService', () => {
         active -= 1;
       }),
     };
-    const service = createService(
-      prisma as never,
-      storage as never,
-    );
+    const service = createService(prisma as never, storage as never);
 
     await expect(service.runOnce()).resolves.toEqual({
       claimed: 9,

@@ -2,7 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { $Enums } from '@prisma/client';
 import type { MetricsContext } from '../context';
 import type { MetricsTask } from '../task';
-import { calculateObservedLthrCandidate } from '@/algorithm/fitness-lthr';
+import {
+  calculateObservedLthrCandidate,
+  lthrActivityDurationSeconds,
+  lthrObservationWithinActivity,
+} from '@/algorithm/fitness-lthr';
+import {
+  observedHeartRateSamples,
+  observedSampleSeconds,
+} from '@/algorithm/time-series-metrics';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
 
 @Injectable()
@@ -26,17 +34,20 @@ export class LthrObservationTask implements MetricsTask {
     if (!activity.startTime) return ctx;
     const rows = ctx.inputs.canonicalRecords ?? [];
     if (!rows.length) return ctx;
-    const sampleSeconds = ctx.cache.sampleSec ?? activity.sampleSec ?? 1;
+    const channel = observedHeartRateSamples(rows);
+    const sampleSeconds = observedSampleSeconds(channel);
     const startMs = activity.startTime.getTime();
-    const samples = rows.map((row) => ({
-      seconds: (row.tMs - startMs) / 1000,
-      heartRate:
-        row.heartRate != null && Number.isFinite(row.heartRate)
-          ? row.heartRate
-          : null,
-    }));
+    const duration = lthrActivityDurationSeconds(activity);
+    if (duration == null) return ctx;
+    const samples = channel
+      .map((row) => ({
+        seconds: (row.tMs - startMs) / 1000,
+        heartRate: row.value,
+      }))
+      .filter((row) => row.seconds >= 0 && row.seconds <= duration);
     const candidate = calculateObservedLthrCandidate(samples, sampleSeconds);
-    if (!candidate) return ctx;
+    if (!candidate || !lthrObservationWithinActivity(candidate, duration))
+      return ctx;
 
     const knownPausedSeconds =
       activity.elapsedTime != null && activity.timerTime != null
@@ -66,7 +77,7 @@ export class LthrObservationTask implements MetricsTask {
   async post(ctx: MetricsContext): Promise<MetricsContext> {
     const observation = ctx.outputs.lthrObservation;
     const { activity, userId } = ctx.inputs;
-    if (!observation || !userId || !activity.startTime) return ctx;
+    if (!userId || !activity.id) return ctx;
     await this.persistence.saveActivityLthrObservation({
       activity,
       userId,

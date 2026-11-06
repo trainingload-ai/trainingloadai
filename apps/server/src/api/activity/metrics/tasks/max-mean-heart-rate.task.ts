@@ -6,6 +6,7 @@ import { ActivityPeakMetricWriterService } from '../shared/peak-metric-writer.se
 import {
   computeMaxMeanObservedWindows,
   STANDARD_PEAK_DURATIONS,
+  observedHeartRateSamples,
 } from '@/algorithm/time-series-metrics';
 import { toPeakIntervalObservation } from '../shared/peak-window.util';
 
@@ -24,15 +25,7 @@ export class MaxMeanHeartRateTask implements MetricsTask {
     const records = ctx.inputs.canonicalRecords;
     if (!activity || !records || records.length < 2) return ctx;
     const rawWindows = computeMaxMeanObservedWindows(
-      records.map((record) => ({
-        tMs: record.tMs,
-        value:
-          typeof record.heartRate === 'number' &&
-          Number.isFinite(record.heartRate) &&
-          record.heartRate > 0
-            ? record.heartRate
-            : null,
-      })),
+      observedHeartRateSamples(records),
       STANDARD_PEAK_DURATIONS,
     );
     const timelineStartMs = Math.min(...records.map((record) => record.tMs));

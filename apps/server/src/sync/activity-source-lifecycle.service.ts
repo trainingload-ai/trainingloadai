@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import {
@@ -8,8 +8,11 @@ import {
   type SportType,
 } from '@prisma/client';
 import type { CanonicalActivityPayload } from '@/importing/canonical-activity.types';
-import { selectActivityGlobalRefreshScope } from '@/utils/activity-global-refresh-window';
-import { evaluateActivityDataset } from '@/importing/activity-dataset-selector.service';
+import { createActivityInputReplayJob } from '@/analyze/activity-recompute-job.writer';
+import {
+  ACTIVITY_DATASET_QUALITY_VERSION,
+  evaluateActivityDataset,
+} from '@/importing/activity-dataset-selector.service';
 import {
   additionalActivitySourceExternalIdFilters,
   externalIdForActivitySource,
@@ -34,9 +37,22 @@ function qualityScore(source: SourceCandidate) {
   const quality = metadata?.datasetQuality as
     | Record<string, unknown>
     | undefined;
+  const payload = source.canonicalSnapshot?.payload;
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    quality?.version !== ACTIVITY_DATASET_QUALITY_VERSION
+  ) {
+    try {
+      return evaluateActivityDataset(
+        payload as unknown as CanonicalActivityPayload,
+      ).score;
+    } catch {
+      return -1;
+    }
+  }
   const score = Number(quality?.score);
   if (Number.isFinite(score)) return score;
-  const payload = source.canonicalSnapshot?.payload;
   if (payload && typeof payload === 'object') {
     try {
       return evaluateActivityDataset(
@@ -490,40 +506,15 @@ export class ActivitySourceLifecycleService {
           })),
         });
       } else {
-        const refreshScope = selectActivityGlobalRefreshScope(
-          globalRefreshCandidates,
-        );
-        if (refreshScope.eligibleCount > 0) {
-          const batch = await this.importJobs.batchJobs(tx).create({
-            data: {
-              userId: args.userId,
-              sourceKind: ImportSourceKind.UNKNOWN,
-              status: 'POST_PROCESSING',
-              totalCount: 0,
-              completedAt: new Date(),
-              requestContext: {
-                trigger: 'activity_source_removed',
-                provider: args.provider,
-                globalRefreshCandidates: serializedRefreshCandidates,
-                suppressCompletionNotification: true,
-              },
-            },
-            select: { id: true },
-          });
-          await this.importJobs.postProcessJobs(tx).create({
-            data: {
-              userId: args.userId,
-              batchJobId: batch.id,
-              status: 'PENDING',
-              recomputeFrom: refreshScope.recomputeFrom,
-              recomputeTo: refreshScope.recomputeTo,
-              affectedSportTypes: refreshScope.sportTypes,
-              summary: {
-                trigger: 'activity_source_removed',
-                globalRefreshWindowDays: refreshScope.windowDays,
-                globalRefreshEligibleCount: refreshScope.eligibleCount,
-              },
-            },
+        const effectiveFrom = globalRefreshCandidates
+          .map((candidate) => candidate.startTime)
+          .sort((left, right) => left.getTime() - right.getTime())[0];
+        if (effectiveFrom) {
+          await createActivityInputReplayJob(tx, {
+            userId: args.userId,
+            effectiveFrom,
+            includeActivityIds: activityIds,
+            triggerSource: 'activity_source_removed_or_reselected',
           });
         }
       }

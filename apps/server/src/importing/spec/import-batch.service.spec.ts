@@ -39,6 +39,7 @@ describe('ImportBatchService', () => {
         findMany: jest.fn(async () => []),
       },
       importBatchJob: {
+        findFirst: jest.fn(async () => ({ id: 'batch-1', userId: 'user-1' })),
         create: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         findUnique: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         update: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
@@ -95,6 +96,61 @@ describe('ImportBatchService', () => {
     expect(prisma.importBatchJob.create).not.toHaveBeenCalled();
   });
 
+  it('does not expose persisted worker diagnostics or internal error codes', async () => {
+    const { prisma, service } = createService();
+    (prisma.importItemJob.findMany as jest.Mock).mockResolvedValueOnce([
+      {
+        id: 'item-1',
+        status: 'DEAD',
+        lastErrorCode: 'P2003',
+        lastError:
+          'Invalid prisma.create() at /Users/private/server.ts:42 SELECT password FROM users',
+      },
+      {
+        id: 'item-2',
+        status: 'SKIPPED',
+        lastErrorCode: 'spawned_child_items',
+        lastError: '/private/internal/path',
+      },
+    ] as never);
+    const result = await service.getBatchItems('batch-1', 'user-1');
+    expect(result.items[0]).toMatchObject({
+      lastErrorCode: 'IMPORT_PROCESSING_FAILED',
+      lastError: 'common.error.internal',
+    });
+    expect(result.items[1]).toMatchObject({
+      lastErrorCode: null,
+      lastError: null,
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /prisma|\/Users|\/private|SELECT|P2003/,
+    );
+  });
+
+  it('does not finish a batch while its remaining files are being registered', async () => {
+    const { prisma, service } = createService();
+    prisma.importBatchJob.findUnique.mockResolvedValueOnce({
+      id: 'batch-1',
+      userId: 'user-1',
+      totalCount: 73,
+      startedAt: null,
+    });
+    prisma.importItemJob.groupBy.mockResolvedValueOnce([
+      { status: 'DEAD', _count: { _all: 1 } },
+    ]);
+    await service.refreshBatchProgress('batch-1');
+    expect(prisma.importBatchJob.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          totalCount: 73,
+          status: 'RUNNING',
+          completedAt: null,
+        }),
+      }),
+    );
+    expect(prisma.userPostProcessJob.upsert).not.toHaveBeenCalled();
+  });
+
   it('registers uploaded files with bounded concurrent workers and stable positions', async () => {
     const logSpy = jest
       .spyOn(Logger.prototype, 'log')
@@ -120,6 +176,11 @@ describe('ImportBatchService', () => {
     try {
       await service.createFileImportBatch({
         userId: 'user-1',
+        postProcessPolicy: {
+          suppressAutomaticAiReview: true,
+          suppressAthleteStateReassessment: true,
+          suppressThirdPartyExport: true,
+        },
         files: [
           {
             originalname: 'first.fit',
@@ -137,6 +198,19 @@ describe('ImportBatchService', () => {
       });
 
       expect(storage.uploadFile).toHaveBeenCalledTimes(2);
+      expect(prisma.importBatchJob.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            requestContext: expect.objectContaining({
+              source: 'upload',
+              fileCount: 2,
+              suppressAutomaticAiReview: true,
+              suppressAthleteStateReassessment: true,
+              suppressThirdPartyExport: true,
+            }),
+          }),
+        }),
+      );
       expect(prisma.importItemJob.create).toHaveBeenCalledTimes(2);
       expect(
         prisma.importItemJob.create.mock.calls
@@ -186,7 +260,7 @@ describe('ImportBatchService', () => {
     );
   });
 
-  it('limits user metrics and PMC scope to activities from the latest 60 days', async () => {
+  it('covers the complete correctness range, including historical activities', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-07T00:00:00.000Z'));
     const { prisma, service } = createService();
     prisma.importBatchJob.findUnique.mockResolvedValue({
@@ -231,12 +305,11 @@ describe('ImportBatchService', () => {
         where: { batchJobId: 'batch-window' },
         update: {},
         create: expect.objectContaining({
-          recomputeFrom: new Date('2026-07-01T00:00:00.000Z'),
+          recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
           recomputeTo: new Date('2026-08-01T00:00:00.000Z'),
-          affectedSportTypes: ['RUN', 'SWIM'],
+          affectedSportTypes: ['CYCLING', 'RUN', 'SWIM'],
           summary: expect.objectContaining({
-            globalRefreshWindowDays: 60,
-            globalRefreshEligibleCount: 2,
+            correctnessReplayActivityCount: 3,
           }),
         }),
       });
@@ -245,7 +318,7 @@ describe('ImportBatchService', () => {
     }
   });
 
-  it('keeps old activity post-processing but skips user metrics and PMC scope', async () => {
+  it('replays an old-only import batch instead of leaving it unanalyzed', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-07T00:00:00.000Z'));
     const { prisma, service } = createService();
     prisma.importBatchJob.findUnique.mockResolvedValue({
@@ -279,12 +352,11 @@ describe('ImportBatchService', () => {
         where: { batchJobId: 'batch-old-only' },
         update: {},
         create: expect.objectContaining({
-          recomputeFrom: undefined,
-          recomputeTo: undefined,
-          affectedSportTypes: [],
+          recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
+          recomputeTo: new Date('2026-01-01T00:00:00.000Z'),
+          affectedSportTypes: ['RUN'],
           summary: expect.objectContaining({
-            globalRefreshWindowDays: 60,
-            globalRefreshEligibleCount: 0,
+            correctnessReplayActivityCount: 1,
           }),
         }),
       });
@@ -334,7 +406,7 @@ describe('ImportBatchService', () => {
     ).resolves.toBe(true);
   });
 
-  it('derives batch totals from the grouped status query', async () => {
+  it('preserves the declared total until all source items have been registered', async () => {
     const { prisma, service } = createService();
     const startedAt = new Date('2026-08-07T00:00:00.000Z');
     prisma.importBatchJob.findUnique.mockResolvedValue({
@@ -356,7 +428,7 @@ describe('ImportBatchService', () => {
     expect(prisma.importBatchJob.update).toHaveBeenCalledWith({
       where: { id: 'batch-progress' },
       data: {
-        totalCount: 4,
+        totalCount: 99,
         successCount: 2,
         failedCount: 0,
         skippedCount: 1,

@@ -1,5 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
+import { MetricSource, SportType, UserFitnessMetricType } from '@prisma/client';
 import { PMCService } from '../pmc.service';
 import { PmcRepository } from '../persistence/pmc.repository';
 import { ActivityReadService } from '../../api/activity/activity-read.service';
@@ -7,6 +9,8 @@ import { LoadReadoutService } from '../../api/activity/load-readout.service';
 import { UserQueryService } from '../../api/user/user-query.service';
 import { UserIdentityRepository } from '../../api/user/persistence/user-identity.repository';
 import { PMC_ALGORITHM_VERSION } from '../pmc-formula';
+
+dayjs.extend(utc);
 
 function pmcDependencies(prisma: object) {
   const activityRead = new ActivityReadService(prisma as never);
@@ -16,16 +20,20 @@ function pmcDependencies(prisma: object) {
   return [
     new PmcRepository(prisma as never),
     activityRead,
-    new LoadReadoutService(prisma as never, activityRead, users),
+    new LoadReadoutService(prisma as never, activityRead, users, {} as never),
     users,
   ] as const;
 }
 
-function createPmcService(prisma: object): PMCService {
+function createPmcService(
+  prisma: object,
+  overrides?: { userService?: object; analysisConfigs?: object },
+): PMCService {
   return new PMCService(
     prisma as never,
-    {} as never,
+    (overrides?.userService ?? {}) as never,
     ...pmcDependencies(prisma),
+    (overrides?.analysisConfigs ?? {}) as never,
   );
 }
 
@@ -51,6 +59,75 @@ type PmcInternals = {
   ): Promise<unknown>;
 };
 
+describe('PMCService.getVo2MaxHistory', () => {
+  it('uses the latest effective timeline value for the current VO2max card', async () => {
+    const getEffectiveUserFitnessMetric = jest.fn(async () => ({ value: 47 }));
+    const listVersions = jest.fn(async () => []);
+    const resolveFromVersions = jest.fn(() => ({
+      defaultVdotSource: 'FACTOR',
+    }));
+    const service = createPmcService(
+      {},
+      {
+        userService: { getEffectiveUserFitnessMetric },
+        analysisConfigs: { listVersions, resolveFromVersions },
+      },
+    );
+
+    const current = await (
+      service as unknown as {
+        getCurrentRunningVo2Max(userId: string): Promise<{
+          value?: number;
+        }>;
+      }
+    ).getCurrentRunningVo2Max('user-1');
+
+    expect(current.value).toBe(47);
+    expect(getEffectiveUserFitnessMetric).toHaveBeenCalledWith(
+      'user-1',
+      UserFitnessMetricType.VO2_MAX,
+      expect.any(Date),
+      SportType.UNKNOWN,
+    );
+  });
+
+  it('returns the causal AUTO timeline instead of non-effective estimates', async () => {
+    const findMany = jest.fn(async () => [
+      {
+        recordedAt: new Date('2026-11-01T10:00:00.000Z'),
+        value: 41.25,
+      },
+      {
+        recordedAt: new Date('2026-11-02T10:00:00.000Z'),
+        value: 42.5,
+      },
+    ]);
+    const service = createPmcService({
+      userFitnessMetric: { findMany },
+    });
+
+    const rows = await service.getVo2MaxHistory(
+      'user-1',
+      new Date('2026-11-01T00:00:00.000Z'),
+      new Date('2026-11-03T00:00:00.000Z'),
+    );
+
+    expect(rows).toEqual([
+      { date: new Date('2026-11-01T10:00:00.000Z'), value: 41.25 },
+      { date: new Date('2026-11-02T10:00:00.000Z'), value: 42.5 },
+    ]);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          type: UserFitnessMetricType.VO2_MAX,
+          source: MetricSource.AUTO,
+          sport: SportType.UNKNOWN,
+        }),
+      }),
+    );
+  });
+});
+
 describe('PMCService.getPMCData', () => {
   function createService(args: {
     history?: unknown[];
@@ -73,7 +150,7 @@ describe('PMCService.getPMCData', () => {
   }
 
   it('decays the last persisted CTL/ATL for missing days instead of returning zero', async () => {
-    const today = dayjs('2026-05-13').startOf('day');
+    const today = dayjs.utc('2026-05-13').startOf('day');
     const service = createService({
       seedRecord: {
         date: today.subtract(1, 'day').toDate(),
@@ -99,7 +176,7 @@ describe('PMCService.getPMCData', () => {
   });
 
   it('uses persisted rows when they exist in the requested range', async () => {
-    const today = dayjs('2026-05-13').startOf('day');
+    const today = dayjs.utc('2026-05-13').startOf('day');
     const service = createService({
       seedRecord: {
         date: today.subtract(1, 'day').toDate(),
@@ -144,7 +221,7 @@ describe('PMCService.getPMCData', () => {
   });
 
   it('calculates and persists before reading when the requested range includes today and today has no PMC row', async () => {
-    const today = dayjs().startOf('day');
+    const today = dayjs.utc().startOf('day');
     const service = createService({ hasTodayRecord: false });
     const calculateSpy = jest
       .spyOn(service, 'calculatePMC')
@@ -166,7 +243,7 @@ describe('PMCService.getPMCData', () => {
   });
 
   it('does not calculate or persist when a read-only caller disables current PMC materialization', async () => {
-    const today = dayjs().startOf('day');
+    const today = dayjs.utc().startOf('day');
     const service = createService({ hasTodayRecord: false });
     const calculateSpy = jest
       .spyOn(service, 'calculatePMC')
@@ -273,7 +350,7 @@ describe('PMCService.getStoredSliceAsOf', () => {
 describe('PMCService.calculatePMCMetrics', () => {
   it('continues from the persisted CTL/ATL seed before the recompute window', () => {
     const service = createPmcService({});
-    const date = dayjs('2026-08-01').startOf('day').toDate();
+    const date = dayjs.utc('2026-08-01').startOf('day').toDate();
 
     const rows = (service as unknown as PmcInternals).calculatePMCMetrics(
       [

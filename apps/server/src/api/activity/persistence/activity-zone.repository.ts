@@ -1,16 +1,17 @@
 import { Prisma, ZoneType } from '@prisma/client';
 import type { PrismaService } from '@/prisma/prisma.service';
 import { acquireActivityWriteLock } from '@/prisma/activity-write-lock';
+import type { PrismaTx } from '@/prisma/prisma-db';
 
 export async function replaceActivityZoneRows(
-  prisma: PrismaService,
+  prisma: PrismaService | PrismaTx,
   args: {
     activityId: number;
     zoneType: ZoneType;
     rows: Prisma.ActivityZoneCreateManyInput[];
   },
 ): Promise<void> {
-  await prisma.$transaction(async (tx) => {
+  const replace = async (tx: PrismaTx) => {
     await acquireActivityWriteLock(tx, args.activityId);
     await tx.activityZone.deleteMany({
       where: {
@@ -26,5 +27,10 @@ export async function replaceActivityZoneRows(
         zoneType: args.zoneType,
       })),
     });
-  });
+  };
+  if ('$transaction' in prisma) {
+    await prisma.$transaction(replace);
+    return;
+  }
+  await replace(prisma);
 }

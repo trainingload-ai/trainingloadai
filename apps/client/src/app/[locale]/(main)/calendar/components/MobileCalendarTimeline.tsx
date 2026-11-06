@@ -31,7 +31,8 @@ const TIMELINE_ROW_HEIGHT = 90;
 const TIMELINE_EDGE_THRESHOLD = TIMELINE_ROW_HEIGHT * 2;
 const TIMELINE_SELECTED_TOP_ROWS = 3;
 const TIMELINE_OVERSCAN_ROWS = 8;
-const MAX_VISIBLE_SESSIONS = 3;
+// Two single-line tags fit inside a 90px row with 12px vertical padding.
+const MAX_VISIBLE_SESSIONS = 2;
 
 type Translate = (key: string) => string;
 
@@ -336,17 +337,19 @@ export function MobileCalendarTimeline({
             return (
               <button
                 key={key}
+                data-date={key}
                 data-index={virtualRow.index}
                 data-tap-feedback="false"
                 type="button"
                 onClick={() => onSelectDate(date)}
                 aria-current={isToday ? "date" : undefined}
                 style={{
+                  height: TIMELINE_ROW_HEIGHT,
                   transform: `translateY(${virtualRow.start}px)`,
                   WebkitTapHighlightColor: "transparent",
                 }}
                 className={cn(
-                  "absolute left-0 top-0 grid h-[90px] w-full touch-manipulation grid-cols-[86px_minmax(0,1fr)] text-left focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                  "absolute left-0 top-0 grid h-[90px] min-h-0 w-full touch-manipulation grid-cols-[86px_minmax(0,1fr)] overflow-hidden text-left focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                   selected && "bg-emerald-500/[0.035]",
                 )}
               >
@@ -369,7 +372,7 @@ export function MobileCalendarTimeline({
                     />
                   ) : null}
                 </span>
-                <span className="relative flex min-w-0 items-start gap-2 border-b border-border/50 px-3 py-3">
+                <span className="relative flex min-h-0 min-w-0 items-start gap-2 overflow-hidden border-b border-border px-3 py-3">
                   {rangeCompetitions.slice(0, 2).map((event, lane) => (
                     <span
                       key={`rail-${event.id}`}
@@ -384,26 +387,32 @@ export function MobileCalendarTimeline({
                   ))}
                   <span
                     className={cn(
-                      "flex min-w-0 flex-1 flex-row flex-wrap items-start gap-1.5",
+                      "flex min-h-0 min-w-0 flex-1 flex-col items-start gap-1",
                       rangeCompetitions.length > 0 && "pl-4",
                     )}
                   >
-                    {tags.map((tag) => (
+                    {tags.map((tag, index) => (
                       <span
                         key={tag.id}
-                        className={cn(
-                          "max-w-full truncate rounded-compact border border-l-4 px-2 py-1 text-mobile-caption pc:text-xs font-medium leading-4",
-                          tagClassNames[tag.tone],
-                        )}
+                        className="flex h-[26px] w-full min-w-0 items-start gap-1"
                       >
-                        {tag.label}
+                        <span
+                          data-slot="calendar-session-tag"
+                          title={tag.label}
+                          className={cn(
+                            "min-w-0 max-w-full truncate rounded-compact border border-l-4 px-2 py-1 text-mobile-caption font-medium leading-4 pc:text-xs",
+                            tagClassNames[tag.tone],
+                          )}
+                        >
+                          {tag.label}
+                        </span>
+                        {overflowCount > 0 && index === tags.length - 1 ? (
+                          <span className="shrink-0 rounded-compact border border-border bg-muted px-2 py-1 text-mobile-caption font-medium leading-4 tabular-nums text-muted-foreground pc:text-xs">
+                            +{overflowCount}
+                          </span>
+                        ) : null}
                       </span>
                     ))}
-                    {overflowCount > 0 ? (
-                      <span className="rounded-compact border border-border/70 bg-muted px-2 py-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground">
-                        +{overflowCount}
-                      </span>
-                    ) : null}
                     {itemCount === 0 && rangeCompetitions.length === 0 ? (
                       <span className="text-mobile-caption pc:text-xs text-muted-foreground">
                         {t("rest")}

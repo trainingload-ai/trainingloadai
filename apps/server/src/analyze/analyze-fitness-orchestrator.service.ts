@@ -580,7 +580,7 @@ export class AnalyzeFitnessOrchestratorService {
 
   /**
    * Pre 刷新时：从 MMHR（ActivityPeakMetric: hr + TIME）观测峰值，与档案 MAX_HR 比较，更高则写入自动指标（全局 UNKNOWN）。
-   * 优先用 1s MMHR（与瞬时峰值最接近）；若无记录再回退到所有时长窗口 MMHR 的最大值。
+   * 已有基准时沿用 1s 峰值；首次初始化要求至少 5s 持续峰值，避免把单点传感器尖峰写成用户基准。
    * 不用 Activity.maxHeartRate：摘要字段可能被管道省略或与记录流不一致。
    */
   async observeMaxHrFromActivitiesAndUpdate(
@@ -608,24 +608,38 @@ export class AnalyzeFitnessOrchestratorService {
       lte: HR_MAX,
     };
 
-    let agg = await this.prisma.activityPeakMetric.aggregate({
-      _max: { value: true },
+    const current = await this.userService.getEffectiveUserFitnessMetric(
+      userId,
+      UserFitnessMetricType.MAX_HR,
+      undefined,
+      PrismaSportType.UNKNOWN,
+    );
+    const previous = current?.value != null ? Math.round(current.value) : 0;
+    const requiredWindowSeconds = previous ? 1 : 5;
+
+    let peak = await this.prisma.activityPeakMetric.findFirst({
       where: {
         type: PeakType.hr,
         scaleType: ScaleType.TIME,
-        scaleValue: 1,
+        scaleValue: requiredWindowSeconds,
         value: valueWhere,
         activity: readyOrScopedActivityWhere(
           { userId },
           scope.includeActivityIds,
         ),
       },
+      orderBy: { value: 'desc' },
+      select: {
+        activityId: true,
+        scaleValue: true,
+        value: true,
+        activity: { select: { hashId: true, startTime: true } },
+      },
     });
 
-    let raw = agg._max.value;
-    if (raw == null || !Number.isFinite(Number(raw))) {
-      agg = await this.prisma.activityPeakMetric.aggregate({
-        _max: { value: true },
+    // 历史数据可能没有 1s 窗口；已有基准时保留原来的兼容回退。
+    if (!peak && previous) {
+      peak = await this.prisma.activityPeakMetric.findFirst({
         where: {
           type: PeakType.hr,
           scaleType: ScaleType.TIME,
@@ -635,47 +649,42 @@ export class AnalyzeFitnessOrchestratorService {
             scope.includeActivityIds,
           ),
         },
+        orderBy: { value: 'desc' },
+        select: {
+          activityId: true,
+          scaleValue: true,
+          value: true,
+          activity: { select: { hashId: true, startTime: true } },
+        },
       });
-      raw = agg._max.value;
     }
 
-    if (raw == null || !Number.isFinite(Number(raw))) {
+    if (peak?.value == null || !Number.isFinite(Number(peak.value))) {
       this.logger.debug(
-        `[MaxHR] Pre 刷新观测：无有效 MMHR（ActivityPeakMetric hr/TIME），用户ID=${userId}`,
+        `[MaxHR] Pre 刷新观测：无有效 ${requiredWindowSeconds}s MMHR（ActivityPeakMetric hr/TIME），用户ID=${userId}`,
       );
       return;
     }
 
-    const observed = Math.round(Number(raw));
+    const observed = Math.round(Number(peak.value));
     if (observed < HR_MIN || observed > HR_MAX) return;
 
-    const current = await this.userService.getEffectiveUserFitnessMetric(
-      userId,
-      UserFitnessMetricType.MAX_HR,
-      undefined,
-      PrismaSportType.UNKNOWN,
-    );
-    const previous = current?.value != null ? Math.round(current.value) : 0;
-
-    // 普通活动峰值只能抬高已有基线，不能凭单次活动从零创建 MAX_HR。
-    if (!previous) {
+    if (previous && observed <= previous) {
       this.logger.debug(
-        `[MaxHR] 尚无可信基线，忽略普通活动峰值观测=${observed}, 用户ID=${userId}`,
-      );
-      return;
-    }
-
-    if (observed <= previous) {
-      this.logger.debug(
-        `[MaxHR] Pre 刷新观测：MMHR 峰值=${observed} 未超过档案=${previous || '—'}，跳过`,
+        `[MaxHR] Pre 刷新观测：MMHR 峰值=${observed} 未超过档案=${previous}，跳过`,
       );
       return;
     }
 
     this.logger.log(
-      `[MaxHR] Pre 刷新观测：MMHR 峰值心率=${observed} > 档案 MAX_HR=${previous || '—'}，更新为用户体能指标`,
+      previous
+        ? `[MaxHR] Pre 刷新观测：MMHR 峰值心率=${observed} > 档案 MAX_HR=${previous}，更新为用户体能指标`
+        : `[MaxHR] Pre 刷新观测：以 ${peak.scaleValue}s 持续峰值心率=${observed} 初始化用户自动基准`,
     );
 
+    const recordedAt = previous
+      ? calculationDate
+      : (peak.activity.startTime ?? calculationDate);
     await this.userService.upsertFitnessMetric(
       userId,
       UserFitnessMetricType.MAX_HR,
@@ -683,7 +692,16 @@ export class AnalyzeFitnessOrchestratorService {
       PrismaSportType.UNKNOWN,
       undefined,
       MetricSource.AUTO,
-      calculationDate,
+      recordedAt,
+      {
+        originPayload: {
+          method: 'OBSERVED_ACTIVITY_PEAK',
+          activityId: peak.activityId,
+          activityHashId: peak.activity.hashId,
+          windowSeconds: peak.scaleValue,
+          observationBpm: observed,
+        },
+      },
     );
   }
   /**

@@ -1,3 +1,5 @@
+import { ImportingJobService } from '../importing-job.service';
+import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { CanonicalActivityMaterializer } from '../canonical-activity.materializer';
 import { ActivityAssociationService } from '../activity-association.service';
@@ -6,6 +8,7 @@ import { SensorFileQueryService } from '../../sensor/sensor-file-query.service';
 import { SensorFileRepository } from '../../sensor/persistence/sensor-file.repository';
 import { ActivityIngestService } from '../../api/activity/activity-ingest.service';
 import type { CanonicalActivityPayload } from '../canonical-activity.types';
+import { datasetRepairFingerprint } from '../activity-dataset-repair';
 
 function intervalsPayload(): CanonicalActivityPayload {
   return {
@@ -155,6 +158,11 @@ function createMaterializerPrisma(overrides?: Record<string, unknown>) {
   const sportCatalog = {
     fromProvider: jest.fn(async () => null),
     resolve: jest.fn(async () => ({ code: 'ROAD_RUNNING' })),
+    get: jest.fn(async () => ({
+      code: 'ROAD_RUNNING',
+      family: 'RUN',
+      active: true,
+    })),
   };
   const timezoneInitializer = {
     initializeFromAvailableSignals: jest.fn<
@@ -174,11 +182,51 @@ function createMaterializerPrisma(overrides?: Record<string, unknown>) {
       new ActivityDatasetSelectorService(),
       new SensorFileQueryService(new SensorFileRepository(prisma as never)),
       new ActivityIngestService(prisma as never),
+      new ImportingJobService(new ImportingJobRepository(prisma as never)),
     ),
   };
 }
 
 describe('CanonicalActivityMaterializer sport resolution', () => {
+  it('normalizes an unknown family before storing the canonical snapshot and activity', async () => {
+    const { prisma, materializer } = createMaterializerPrisma();
+    jest
+      .spyOn(materializer, 'resolveSportDefinitionCode')
+      .mockResolvedValue('INDOOR_CYCLING');
+    (materializer as any).sportCatalog.get.mockResolvedValue({
+      code: 'INDOOR_CYCLING',
+      family: 'CYCLING',
+      active: true,
+    });
+    const payload = intervalsPayload();
+    payload.summary.sportType = 'UNKNOWN';
+    payload.source.externalId = undefined;
+    payload.source.sourceChecksum = 'unchanged-raw-source-checksum';
+    await materializer.materialize({
+      itemJobId: 'sport-repair-item',
+      userId: 'user-1',
+      payload,
+    });
+    const snapshot = (
+      prisma.canonicalActivitySnapshot.upsert.mock.calls[0][0] as any
+    ).create;
+    expect(snapshot.payload.summary.sportType).toBe('CYCLING');
+    expect(snapshot.payload.source.sourceChecksum).toBe(
+      'unchanged-raw-source-checksum',
+    );
+    expect(snapshot.payload.identity.dedupeKey).not.toBe(
+      payload.identity.dedupeKey,
+    );
+    expect(prisma.activity.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          sportType: 'CYCLING',
+          sportDefinitionCode: 'INDOOR_CYCLING',
+        }),
+      }),
+    );
+    expect(payload.summary.sportType).toBe('UNKNOWN');
+  });
   it('prefers the TrackSwap sport + FIT sub sport combination for uploads', async () => {
     const sportCatalog = {
       fromProvider: jest.fn(
@@ -204,6 +252,7 @@ describe('CanonicalActivityMaterializer sport resolution', () => {
       {} as never,
       new SensorFileQueryService(new SensorFileRepository({} as never)),
       new ActivityIngestService({} as never),
+      new ImportingJobService(new ImportingJobRepository({} as never)),
     );
 
     const code = await materializer.resolveSportDefinitionCode(
@@ -469,6 +518,62 @@ describe('CanonicalActivityMaterializer provider identity reuse', () => {
         metadata: expect.objectContaining({
           datasetQualityOrigin: 'legacy_activity_estimate_v1',
           datasetQuality: expect.objectContaining({ score: 0 }),
+        }),
+      },
+    });
+  });
+
+  it('upgrades stored v1 quality from the canonical snapshot before selection', async () => {
+    const currentPayload = intervalsPayload();
+    currentPayload.identity.datasetChecksum = 'same-checksum';
+    currentPayload.source.sourceChecksum = 'same-checksum';
+    currentPayload.summary.elapsedTime = 4;
+    currentPayload.records = Array.from({ length: 4 }, (_, index) => ({
+      index,
+      positionLat: 1,
+      positionLong: 2,
+      speed: 3,
+      heartRate: 150,
+      cadence: 170,
+    }));
+    const ready = { ...legacyActivity(), processingStatus: 'READY' };
+    const primarySource = {
+      id: 'legacy-primary',
+      activityId: ready.id,
+      isPrimary: true,
+      isActive: true,
+      sourceChecksum: 'same-checksum',
+      canonicalSnapshotId: 'snapshot-1',
+      activity: ready,
+      metadata: {
+        datasetQuality: {
+          version: 'v1',
+          score: 10,
+          powerCoverage: 0,
+        },
+      },
+      canonicalSnapshot: { payload: currentPayload },
+    };
+    const { prisma, materializer } = createMaterializerPrisma();
+    prisma.activitySource.findUnique.mockResolvedValue(primarySource);
+    prisma.activitySource.findFirst.mockResolvedValue(primarySource);
+
+    await materializer.materialize({
+      itemJobId: 'item-quality-upgrade',
+      userId: 'user-1',
+      payload: currentPayload,
+    });
+
+    expect(prisma.activitySource.update).toHaveBeenCalledWith({
+      where: { id: 'legacy-primary' },
+      data: {
+        metadata: expect.objectContaining({
+          datasetQualityOrigin: 'canonical_snapshot_v2',
+          datasetQuality: expect.objectContaining({
+            version: 'v2',
+            profile: 'RUN',
+            score: 85,
+          }),
         }),
       },
     });
@@ -976,6 +1081,98 @@ describe('CanonicalActivityMaterializer provider identity reuse', () => {
     expect(prisma.activity.update).not.toHaveBeenCalled();
     expect(prisma.activityParquetFile.upsert).not.toHaveBeenCalled();
   });
+
+  it.each(['SOURCE_SPORT_CONFLICT', 'SOURCE_ONLY_GENERIC_SPORT'])(
+    'rebuilds sensor data without reclassifying a deferred %s activity',
+    async (reason) => {
+      const { prisma, materializer } = createMaterializerPrisma({
+        importItemJob: { findFirst: jest.fn(async () => ({ id: 'item-1' })) },
+        activityDataMigration: {
+          findFirst: jest.fn(async () => ({
+            id: 'migration-1',
+            beforeManifest: {
+              sportRepairs: {
+                findings: [{ activityId: 42, status: 'UNRESOLVED', reason }],
+              },
+            },
+          })),
+        },
+      });
+      const activity = {
+        ...legacyActivity(),
+        state: 1,
+        sportType: 'UNKNOWN',
+        sportDefinitionCode: 'OTHER',
+        subSport: 'original-subtype',
+      };
+      const primary = {
+        id: 'source-1',
+        sourceChecksum: 'raw-checksum',
+        canonicalSnapshotId: 'old-snapshot',
+        canonicalSnapshot: {
+          payload: { summary: { sportType: 'UNKNOWN', subSportType: 'OTHER' } },
+        },
+      };
+      prisma.activity.findFirst.mockResolvedValue(activity);
+      prisma.activitySource.findFirst.mockResolvedValue(primary);
+      await materializer.commitStagedDataset({
+        userId: 'user-1',
+        itemJobId: 'item-1',
+        itemLockToken: 'owner-1',
+        token: {
+          activityId: 42,
+          expectedPrimarySourceId: 'source-1',
+          canonicalSnapshotId: 'new-snapshot',
+          sportDefinitionCode: 'ROAD_RUNNING',
+          provider: 'intervals_icu',
+          quality: {} as never,
+          matchingFields: {},
+          repair: {
+            migrationId: 'migration-1',
+            activityId: 42,
+            primarySourceId: 'source-1',
+            sourceChecksum: 'raw-checksum',
+            expectedFingerprint: datasetRepairFingerprint(
+              activity,
+              primary,
+              [],
+            ),
+          },
+        },
+        payload: intervalsPayload(),
+        stagedParquetFiles: [
+          {
+            activityId: 42,
+            type: 'record',
+            parquetPath: 'rebuilt/records.parquet',
+            pointCount: 10,
+            fileSize: 100,
+            storageStrategy: 'R2',
+            checksum: 'new-checksum',
+          },
+        ],
+      });
+      expect(prisma.activity.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            sportType: 'UNKNOWN',
+            sportDefinitionCode: 'OTHER',
+            subSport: 'original-subtype',
+            processingStatus: 'ANALYZING',
+            readyAt: null,
+          }),
+        }),
+      );
+      expect(prisma.activityParquetFile.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          update: expect.objectContaining({
+            parquetPath: 'rebuilt/records.parquet',
+            pointCount: 10,
+          }),
+        }),
+      );
+    },
+  );
 
   it('commits canonical FIT strength phases with the primary dataset transaction', async () => {
     const { prisma, materializer } = createMaterializerPrisma();

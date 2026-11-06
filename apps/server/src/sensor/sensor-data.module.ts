@@ -1,3 +1,4 @@
+import { ImportingJobModule } from '@/importing/importing-job.module';
 import { Module } from '@nestjs/common';
 import { SensorDataService } from './sensor-data.service';
 import { StorageModule } from '../storage/storage.module';
@@ -10,6 +11,7 @@ import { StorageObjectGarbageCollectorService } from './parquet-garbage-collecto
   imports: [
     StorageModule,
     PrismaModule,
+    ImportingJobModule,
     HealthFileQueryModule,
     SensorFileQueryModule,
   ],

@@ -47,7 +47,10 @@ describe('BindFitnessMetricsTask', () => {
       })),
       getEffectiveUserFitnessMetric: jest.fn(async () => null),
     };
-    const task = new BindFitnessMetricsTask(prisma as never, userService as never);
+    const task = new BindFitnessMetricsTask(
+      prisma as never,
+      userService as never,
+    );
 
     const prepared = await task.pre(context());
 
@@ -84,6 +87,61 @@ describe('BindFitnessMetricsTask', () => {
           restHrValue: 48,
           lthrValue: 173,
         }),
+      }),
+    );
+  });
+
+  it('preserves frozen VO2 when a dimension-limited replay skips Vo2MaxTask', async () => {
+    const prisma = {
+      activityVO2Max: {
+        findUnique: jest.fn(async () => ({
+          vo2maxVdotByRace: 49,
+          vo2maxVdotByHr: 47,
+          vo2maxVdotByFactor: 51,
+          vo2maxCorrectionFactor: 1,
+        })),
+      },
+      activityFitnessMetricsSnapshot: {
+        upsert: jest.fn(async () => ({ id: 'snapshot-1' })),
+      },
+    };
+    const task = new BindFitnessMetricsTask(prisma as never, {} as never);
+    const ctx = context();
+    ctx.cache = {
+      fitnessMetrics: {},
+      resolvedFitnessContext: {
+        analysisConfig: {
+          defaultVdotSource: 'FACTOR',
+          vo2maxCorrectionFactor: 1,
+          loadSources: ['POWER', 'HEART_RATE', 'PACE', 'SESSIONRPE'],
+          fingerprint: 'config-1',
+        },
+        calculationFingerprint: 'calculation-1',
+        provenanceFingerprint: 'provenance-1',
+        inputFingerprints: {
+          overall: 'input-1',
+          dimensions: {},
+        },
+        contextFingerprint: 'context-1',
+        zones: [],
+        bodyMetrics: [],
+      } as never,
+    };
+
+    await task.post(ctx);
+
+    expect(prisma.activityVO2Max.findUnique).toHaveBeenCalledWith({
+      where: { activityId: activity.id },
+      select: {
+        vo2maxVdotByRace: true,
+        vo2maxVdotByHr: true,
+        vo2maxVdotByFactor: true,
+        vo2maxCorrectionFactor: true,
+      },
+    });
+    expect(prisma.activityFitnessMetricsSnapshot.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({ resolvedVo2maxValue: 47 }),
       }),
     );
   });

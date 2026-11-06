@@ -28,6 +28,8 @@ import {
   type ExternalActivityMirrorDto,
   type ExternalActivityTimelineCursor,
 } from '@/importing/external-activity-mirror.service';
+import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
+import { resolveEffectiveActivityVo2Max } from '@/analyze/vo2max/vo2max-source';
 
 export interface ActivityFilters {
   sportType?: string;
@@ -240,7 +242,64 @@ export class ActivityQueryService {
     private readonly mapDerivation: ActivityMapDerivationService,
     private readonly activityWeather: ActivityWeatherService,
     private readonly externalActivityMirrors: ExternalActivityMirrorService,
+    private readonly analysisConfigs: UserAnalysisConfigService,
   ) {}
+
+  private async resolveAiVo2max<
+    T extends {
+      userId: string;
+      startTime: Date;
+      vo2max?: unknown;
+      fitnessMetricsSnapshot?: {
+        resolutionVersion: number;
+        resolvedVo2maxValue: unknown;
+        resolvedVo2maxSource: string | null;
+      } | null;
+    },
+  >(rows: T[]) {
+    if (!rows.length) return [];
+    const service = this.analysisConfigs;
+    const versionsByUser = new Map<
+      string,
+      Awaited<ReturnType<UserAnalysisConfigService['listVersions']>>
+    >();
+    for (const userId of new Set(rows.map((row) => row.userId))) {
+      const last = rows
+        .filter((row) => row.userId === userId)
+        .reduce(
+          (latest, row) => (row.startTime > latest ? row.startTime : latest),
+          new Date(0),
+        );
+      versionsByUser.set(userId, await service.listVersions(userId, last));
+    }
+    return rows.map((row) => {
+      const snapshot = row.fitnessMetricsSnapshot;
+      if ((snapshot?.resolutionVersion ?? 0) >= 4) {
+        return {
+          ...row,
+          aiVo2max:
+            snapshot?.resolvedVo2maxValue == null
+              ? null
+              : Number(snapshot.resolvedVo2maxValue),
+          aiVo2maxSource: snapshot?.resolvedVo2maxSource ?? null,
+        };
+      }
+      const config = service.resolveFromVersions(
+        versionsByUser.get(row.userId) ?? [],
+        row.startTime,
+      );
+      const resolved = resolveEffectiveActivityVo2Max(
+        row.vo2max as never,
+        config?.defaultVdotSource,
+        config?.vo2maxCorrectionFactor,
+      );
+      return {
+        ...row,
+        aiVo2max: resolved?.value ?? null,
+        aiVo2maxSource: resolved?.source ?? null,
+      };
+    });
+  }
 
   private planLinkUiVisibleForActivity(
     startTime: Date | null | undefined,
@@ -1021,12 +1080,18 @@ export class ActivityQueryService {
       where,
       orderBy: { startTime: 'desc' },
       take,
-      include: { trimp: true, vo2max: true, coggan: true },
+      include: {
+        trimp: true,
+        vo2max: true,
+        coggan: true,
+        fitnessMetricsSnapshot: true,
+      },
     });
     const loads = await this.loadReadout.batchGetActualLoad(
       rows.map((row) => row.id),
     );
-    return rows.map((row) => ({
+    const vo2Rows = await this.resolveAiVo2max(rows);
+    return vo2Rows.map((row) => ({
       ...row,
       aiLoad: loads.get(row.id)?.actualLoad ?? null,
       aiLoadSource: loads.get(row.id)?.actualLoadSource ?? null,
@@ -1088,7 +1153,12 @@ export class ActivityQueryService {
       ...(loadSort
         ? { take: MAX_AI_LOAD_SORT_CANDIDATES + 1 }
         : { skip, take }),
-      include: { trimp: true, coggan: true },
+      include: {
+        trimp: true,
+        coggan: true,
+        vo2max: true,
+        fitnessMetricsSnapshot: true,
+      },
     });
     if (loadSort && rows.length > MAX_AI_LOAD_SORT_CANDIDATES) {
       throw new ActivityLoadSortLimitError();
@@ -1096,7 +1166,8 @@ export class ActivityQueryService {
     const loads = await this.loadReadout.batchGetActualLoad(
       rows.map((row) => row.id),
     );
-    const enriched = rows.map((row) => ({
+    const vo2Rows = await this.resolveAiVo2max(rows);
+    const enriched = vo2Rows.map((row) => ({
       ...row,
       aiLoad: loads.get(row.id)?.actualLoad ?? null,
       aiLoadSource: loads.get(row.id)?.actualLoadSource ?? null,

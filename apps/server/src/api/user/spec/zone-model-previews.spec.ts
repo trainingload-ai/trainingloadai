@@ -11,6 +11,7 @@ function setup(profile: Record<string, unknown>, saved = false) {
     {} as never,
     {} as never,
     {} as never,
+    {} as never,
   );
   const read = jest
     .spyOn(service, 'getComposedUserProfile')

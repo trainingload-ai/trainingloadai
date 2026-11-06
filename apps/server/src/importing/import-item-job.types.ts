@@ -4,6 +4,7 @@ import type {
   Prisma,
 } from '@prisma/client';
 import type { CanonicalActivityPayload } from './canonical-activity.types';
+import type { ActivityDatasetRepair } from './activity-dataset-repair';
 
 /** Prisma Json 字段的对象形态。 */
 export type ImportJsonRecord = Record<string, unknown>;
@@ -16,6 +17,7 @@ export type ImportItemSourceRef = {
   /** 直通 canonical 载荷（fan-out 子任务）。 */
   kind?: 'canonical_payload' | string;
   payload?: CanonicalActivityPayload;
+  repair?: ActivityDatasetRepair;
   externalId?: string | number;
   fileKey?: string;
   fileName?: string;

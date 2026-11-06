@@ -6,10 +6,25 @@ import { UserQueryService } from '../user-query.service';
 import { UserIdentityRepository } from '../persistence/user-identity.repository';
 
 function userServiceDependencies(prisma: object) {
+  const users = new UserQueryService(
+    new UserIdentityRepository(prisma as never),
+  );
   return [
     {} as never,
     { emitAsync: jest.fn(async () => []) } as never,
-    new UserQueryService(new UserIdentityRepository(prisma as never)),
+    users,
+    {
+      resolveAt: jest.fn(async () => ({
+        loadSources: ['POWER', 'HEART_RATE', 'PACE', 'SESSIONRPE'],
+        altitudeOptimizationModel: 'THRESHOLDMETHOD',
+        altitudeThreshold: null,
+        defaultVdotSource: 'FACTOR',
+        vo2maxCorrectionFactor: 1,
+        heartRateZoneModel: 'MHR',
+        paceZoneModel: 'DANIELS',
+        powerZoneModel: 'FRIEL',
+      })),
+    } as never,
   ] as const;
 }
 

@@ -131,6 +131,9 @@ test("PGlite applies the Core baseline exactly once and serializes concurrent st
       { id: "0013_better_auth_jwks_metadata", source: "baseline" },
       { id: "0014_better_auth_oauth_provider_17", source: "baseline" },
       { id: "0015_fit_strength_sets", source: "baseline" },
+      { id: "0016_chronological_fitness_replay", source: "baseline" },
+      { id: "0017_activity_data_migration", source: "baseline" },
+      { id: "0018_activity_sport_catalog", source: "baseline" },
     ]);
     const relation = await query(
       databaseUrl,
@@ -271,13 +274,30 @@ test("Core empty install contains sports, import mappings and live fitness revis
           "SELECT count(*)::int AS n FROM t_sport_definition",
         )
       ).rows[0].n,
-      19,
+      27,
     );
     const mapping = await query(
       databaseUrl,
       "SELECT count(*)::int AS n FROM t_provider_sport_mapping WHERE provider='upload'",
     );
     assert.ok(mapping.rows[0].n > 0);
+    const replaySchema = await query(
+      databaseUrl,
+      `SELECT
+        to_regclass('public.t_activity_analysis_lease')::text AS lease,
+        to_regclass('public.t_user_fitness_metric_projection_audit')::text AS audit,
+        EXISTS (
+          SELECT 1 FROM pg_trigger
+          WHERE tgrelid = 'public.t_user_auto_update_config'::regclass
+            AND tgname = 'fitness_revision'
+            AND NOT tgisinternal
+        ) AS auto_update_fenced`,
+    );
+    assert.deepEqual(replaySchema.rows[0], {
+      lease: "t_activity_analysis_lease",
+      audit: "t_user_fitness_metric_projection_audit",
+      auto_update_fenced: true,
+    });
     await query(
       databaseUrl,
       `INSERT INTO t_user (id,name,email,email_verified,created_at,updated_at) VALUES ('owner','Owner','owner@self-host.invalid',true,now(),now());

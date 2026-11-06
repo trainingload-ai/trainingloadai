@@ -6,6 +6,7 @@ import { UserQueryService } from '@/api/user/user-query.service';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import { I18nService } from 'nestjs-i18n';
 import {
+  $Enums,
   ImportBatchJobStatus,
   ImportItemJobStatus,
   ImportPipelineStage,
@@ -13,12 +14,7 @@ import {
   Prisma,
   ThirdPartyProvider,
 } from '@prisma/client';
-import { asImportJsonRecord } from './import-item-job.types';
 import type { IntervalsIcuActivityListItem } from '@/integrations/intervals-icu/intervals-icu.client';
-import {
-  selectActivityGlobalRefreshScope,
-  type ActivityGlobalRefreshCandidate,
-} from '@/utils/activity-global-refresh-window';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
 import { ExternalActivitySourceRouter } from './external-activity-source-router.service';
 
@@ -386,6 +382,11 @@ export class ImportBatchService {
     userId: string;
     files: Express.Multer.File[];
     req?: Express.Request;
+    postProcessPolicy?: {
+      suppressAutomaticAiReview?: boolean;
+      suppressAthleteStateReassessment?: boolean;
+      suppressThirdPartyExport?: boolean;
+    };
   }) {
     // 检查当前用户是否可以导入
     await this.assertUserCanImport(args.userId);
@@ -397,12 +398,21 @@ export class ImportBatchService {
     const batch = await this.importJobs.batchJobs().create({
       data: {
         userId: args.userId,
-        sourceKind: 'FILE',
-        status: 'QUEUED',
+        sourceKind: $Enums.ImportSourceKind.FILE,
+        status: $Enums.ImportBatchJobStatus.QUEUED,
         totalCount: args.files.length,
         requestContext: {
           source: 'upload',
           fileCount: args.files.length,
+          ...(args.postProcessPolicy?.suppressAutomaticAiReview === true
+            ? { suppressAutomaticAiReview: true }
+            : {}),
+          ...(args.postProcessPolicy?.suppressAthleteStateReassessment === true
+            ? { suppressAthleteStateReassessment: true }
+            : {}),
+          ...(args.postProcessPolicy?.suppressThirdPartyExport === true
+            ? { suppressThirdPartyExport: true }
+            : {}),
         } as Prisma.InputJsonValue,
       } satisfies Prisma.ImportBatchJobUncheckedCreateInput,
     });
@@ -414,7 +424,7 @@ export class ImportBatchService {
     this.logImportPipelineEvent({
       batchJobId: batch.id,
       userId: args.userId,
-      stage: 'BATCH_CREATED',
+      stage: $Enums.ImportPipelineStage.BATCH_CREATED,
       message: `已创建文件导入批次，共 ${args.files.length} 个源对象`,
       data: { totalCount: args.files.length },
     });
@@ -434,13 +444,13 @@ export class ImportBatchService {
           where: {
             import_source_object_identity_unique: {
               userId: args.userId,
-              sourceKind: 'FILE',
+              sourceKind: $Enums.ImportSourceKind.FILE,
               sourceUid,
             },
           },
           create: {
             userId: args.userId,
-            sourceKind: 'FILE',
+            sourceKind: $Enums.ImportSourceKind.FILE,
             sourceUid,
             objectType: 'activity_file',
             fileName: file.originalname,
@@ -471,10 +481,10 @@ export class ImportBatchService {
             batchJobId: batch.id,
             userId: args.userId,
             sourceObjectId: sourceObject.id,
-            sourceKind: 'FILE',
+            sourceKind: $Enums.ImportSourceKind.FILE,
             sourceUid,
             position: index,
-            status: 'QUEUED',
+            status: $Enums.ImportItemJobStatus.QUEUED,
             sourceRef: {
               fileName: file.originalname,
               fileKey: uploaded.fileKey,
@@ -1176,6 +1186,39 @@ export class ImportBatchService {
     }
 
     const postProcessJob = batch.postProcessJobs[0] ?? null;
+    const activityProcessingStatusCounts = batch._count.createdActivities
+      ? await this.prisma.activity.groupBy({
+          by: ['processingStatus'],
+          where: {
+            userId,
+            createdByBatchJobId: batch.id,
+          },
+          _count: { _all: true },
+        })
+      : [];
+    const countActivitiesWithStatus = (
+      ...statuses: $Enums.ActivityProcessingStatus[]
+    ) =>
+      activityProcessingStatusCounts.reduce(
+        (total, row) =>
+          row.processingStatus && statuses.includes(row.processingStatus)
+            ? total + row._count._all
+            : total,
+        0,
+      );
+    const readyActivities = countActivitiesWithStatus(
+      $Enums.ActivityProcessingStatus.READY,
+    );
+    const analysisFailedActivities = countActivitiesWithStatus(
+      $Enums.ActivityProcessingStatus.PARTIAL_FAILED,
+      $Enums.ActivityProcessingStatus.FAILED,
+    );
+    const processingActivities = Math.max(
+      0,
+      batch._count.createdActivities -
+        readyActivities -
+        analysisFailedActivities,
+    );
     const firstActivity =
       batch.successCount > 0
         ? await this.prisma.activity.findFirst({
@@ -1207,6 +1250,9 @@ export class ImportBatchService {
       counts: {
         items: batch._count.items,
         createdActivities: batch._count.createdActivities,
+        readyActivities,
+        processingActivities,
+        analysisFailedActivities,
         eventLogs: batch._count.eventLogs,
       },
       postProcessJob: postProcessJob
@@ -1286,8 +1332,16 @@ export class ImportBatchService {
         sourceUid: item.sourceUid,
         dedupeKey: item.dedupeKey,
         attempts: item.attempts,
-        lastErrorCode: item.lastErrorCode,
-        lastError: item.lastError,
+        // lastError is an operator diagnostic and can contain Prisma queries,
+        // filesystem paths and upstream response bodies. Never cross the API boundary.
+        lastErrorCode:
+          item.status === 'FAILED' || item.status === 'DEAD'
+            ? 'IMPORT_PROCESSING_FAILED'
+            : null,
+        lastError:
+          item.status === 'FAILED' || item.status === 'DEAD'
+            ? this.i18n.t('common.error.internal')
+            : null,
         startedAt: item.startedAt,
         completedAt: item.completedAt,
         createdAt: item.createdAt,
@@ -1332,15 +1386,47 @@ export class ImportBatchService {
     const forcedCandidates = Array.isArray(
       requestContext.globalRefreshCandidates,
     )
-      ? (requestContext.globalRefreshCandidates as ActivityGlobalRefreshCandidate[])
+      ? (requestContext.globalRefreshCandidates as Array<{
+          sportType?: string | null;
+          startTime?: Date | string | null;
+        }>)
       : [];
-    const refreshScope = selectActivityGlobalRefreshScope([
+    const correctnessCandidates = [
       ...batch.items.map((item) => ({
         sportType: item.activity?.sportType,
         startTime: item.activity?.startTime,
       })),
       ...forcedCandidates,
-    ]);
+    ]
+      .map((candidate) => ({
+        sportType: candidate.sportType,
+        startTime:
+          candidate.startTime instanceof Date
+            ? candidate.startTime
+            : candidate.startTime
+              ? new Date(candidate.startTime)
+              : null,
+      }))
+      .filter(
+        (
+          candidate,
+        ): candidate is {
+          sportType: string | null | undefined;
+          startTime: Date;
+        } =>
+          candidate.startTime instanceof Date &&
+          Number.isFinite(candidate.startTime.getTime()),
+      )
+      .sort(
+        (left, right) => left.startTime.getTime() - right.startTime.getTime(),
+      );
+    const sportTypes = Array.from(
+      new Set(
+        correctnessCandidates
+          .map((candidate) => candidate.sportType)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    );
 
     const job = await this.importJobs.ensurePostProcessJob({
       batchJobId: batch.id,
@@ -1348,17 +1434,16 @@ export class ImportBatchService {
         userId: batch.userId,
         batchJobId: batch.id,
         status: 'PENDING',
-        recomputeFrom: refreshScope.recomputeFrom,
-        recomputeTo: refreshScope.recomputeTo,
-        affectedSportTypes: refreshScope.sportTypes as Prisma.InputJsonValue,
+        recomputeFrom: correctnessCandidates[0]?.startTime,
+        recomputeTo: correctnessCandidates.at(-1)?.startTime,
+        affectedSportTypes: sportTypes as Prisma.InputJsonValue,
         summary: {
           batchStatus: batch.status,
           totalCount: batch.totalCount,
           successCount: batch.successCount,
           failedCount: batch.failedCount,
           skippedCount: batch.skippedCount,
-          globalRefreshWindowDays: refreshScope.windowDays,
-          globalRefreshEligibleCount: refreshScope.eligibleCount,
+          correctnessReplayActivityCount: correctnessCandidates.length,
         } as Prisma.InputJsonValue,
       } satisfies Prisma.UserPostProcessJobUncheckedCreateInput,
     });
@@ -1411,8 +1496,12 @@ export class ImportBatchService {
     // FAILED 仍在指数退避重试，不是终态；只有 DEAD 才计入批次失败数。
     const failedCount = countOf('DEAD');
     const skippedCount = countOf('SKIPPED');
+    // Items are registered while workers are already consuming the batch.
+    // Never shrink the declared count to the few items registered so far:
+    // doing so can start post-processing before the remaining files exist.
+    const totalCount = Math.max(batch.totalCount, actualTotalCount);
     const nextStatus = summarizeBatchStatus({
-      totalCount: actualTotalCount,
+      totalCount,
       successCount,
       failedCount,
       skippedCount,
@@ -1421,7 +1510,7 @@ export class ImportBatchService {
     const updated = await this.importJobs.batchJobs().update({
       where: { id: batchJobId },
       data: {
-        totalCount: actualTotalCount,
+        totalCount,
         successCount,
         failedCount,
         skippedCount,

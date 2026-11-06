@@ -3,6 +3,7 @@ import { aiToolError, requireSignedInUser } from '../tool.types';
 import { mutationToolFactory } from '../mutation-tool.factory';
 import { ACTIVITY_REVIEW_SKILLS } from '../tool-skill-scopes';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
+import { createActivityInputReplayJob } from '@/analyze/activity-recompute-job.writer';
 
 type Input = {
   hashId: string;
@@ -88,6 +89,7 @@ export const activitySessionRpeMutationBundle = mutationToolFactory<
       where: readyActivityWhere({ hashId, userId }),
       select: {
         id: true,
+        startTime: true,
         sessionRpe: true,
         activityName: true,
       },
@@ -104,11 +106,6 @@ export const activitySessionRpeMutationBundle = mutationToolFactory<
         ? activity.sessionRpe
         : null;
 
-    await tx.activity.update({
-      where: { id: activity.id },
-      data: { sessionRpe: newRpe },
-    });
-
     const title =
       String(activity.activityName ?? '').trim() || hashId.slice(0, 8);
 
@@ -117,6 +114,25 @@ export const activitySessionRpeMutationBundle = mutationToolFactory<
       (previousRpe != null &&
         newRpe != null &&
         Math.abs(previousRpe - newRpe) < 1e-9);
+
+    if (!same) {
+      await tx.activity.update({
+        where: { id: activity.id },
+        data: {
+          sessionRpe: newRpe,
+          processingStatus: 'ANALYZING',
+          processingUpdatedAt: new Date(),
+          readyAt: null,
+        },
+      });
+      await createActivityInputReplayJob(tx, {
+        userId,
+        effectiveFrom: activity.startTime,
+        includeActivityIds: [activity.id],
+        triggerSource: 'ai_activity_session_rpe_changed',
+        affectedPipelines: ['TRAINING_LOAD', 'PMC'],
+      });
+    }
 
     return {
       forwardData: {
@@ -147,12 +163,27 @@ export const activitySessionRpeMutationBundle = mutationToolFactory<
     };
     const row = await prisma.activity.findFirst({
       where: { id: d.activityId, userId },
-      select: { id: true },
+      select: { id: true, startTime: true },
     });
     if (!row) return;
+    // Undo handlers already run inside CoachActionService's transaction.
+    // Persist the invalidation job beside the restored RPE so neither write
+    // can become visible without the other.
     await prisma.activity.update({
       where: { id: d.activityId },
-      data: { sessionRpe: d.previousRpe },
+      data: {
+        sessionRpe: d.previousRpe,
+        processingStatus: 'ANALYZING',
+        processingUpdatedAt: new Date(),
+        readyAt: null,
+      },
+    });
+    await createActivityInputReplayJob(prisma, {
+      userId,
+      effectiveFrom: row.startTime,
+      includeActivityIds: [row.id],
+      triggerSource: 'ai_activity_session_rpe_undo',
+      affectedPipelines: ['TRAINING_LOAD', 'PMC'],
     });
   },
 });

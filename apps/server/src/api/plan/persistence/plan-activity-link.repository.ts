@@ -82,21 +82,30 @@ export class PlanActivityLinkRepository {
   }
 
   findMapping<T extends Prisma.PlanWorkoutExternalMappingFindFirstArgs>(
-    args?: Prisma.SelectSubset<T, Prisma.PlanWorkoutExternalMappingFindFirstArgs>,
+    args?: Prisma.SelectSubset<
+      T,
+      Prisma.PlanWorkoutExternalMappingFindFirstArgs
+    >,
     tx?: PlanDb,
   ) {
     return this.db(tx).planWorkoutExternalMapping.findFirst(args);
   }
 
   findMappingUnique<T extends Prisma.PlanWorkoutExternalMappingFindUniqueArgs>(
-    args: Prisma.SelectSubset<T, Prisma.PlanWorkoutExternalMappingFindUniqueArgs>,
+    args: Prisma.SelectSubset<
+      T,
+      Prisma.PlanWorkoutExternalMappingFindUniqueArgs
+    >,
     tx?: PlanDb,
   ) {
     return this.db(tx).planWorkoutExternalMapping.findUnique(args);
   }
 
   findMappings<T extends Prisma.PlanWorkoutExternalMappingFindManyArgs>(
-    args?: Prisma.SelectSubset<T, Prisma.PlanWorkoutExternalMappingFindManyArgs>,
+    args?: Prisma.SelectSubset<
+      T,
+      Prisma.PlanWorkoutExternalMappingFindManyArgs
+    >,
     tx?: PlanDb,
   ) {
     return this.db(tx).planWorkoutExternalMapping.findMany(args);
@@ -109,9 +118,7 @@ export class PlanActivityLinkRepository {
     return this.db(tx).planWorkoutExternalMapping.update(args);
   }
 
-  updateManyMappings<
-    T extends Prisma.PlanWorkoutExternalMappingUpdateManyArgs,
-  >(
+  updateManyMappings<T extends Prisma.PlanWorkoutExternalMappingUpdateManyArgs>(
     args: Prisma.SelectSubset<
       T,
       Prisma.PlanWorkoutExternalMappingUpdateManyArgs
@@ -134,4 +141,15 @@ export class PlanActivityLinkRepository {
   ) {
     return this.db(tx).planWorkoutExternalMapping.create(args);
   }
+}
+
+/** Transaction-scoped audit read used by the maintenance migration. */
+export function readPlanActivityLinksForMigration(
+  tx: Prisma.TransactionClient,
+  userId: string,
+) {
+  return tx.planWorkoutActivityLink.findMany({
+    where: { activity: { userId } },
+    orderBy: { id: 'asc' },
+  });
 }

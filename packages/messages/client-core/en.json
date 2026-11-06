@@ -228,16 +228,19 @@
     "receivedAt": "Received",
     "noBody": "No additional content",
     "openReview": "Open review",
+    "viewActivities": "View activities",
     "loadingMore": "Loading more…",
     "templates": {
       "general": "System notification",
       "importSuccess": "Import completed",
       "importWarning": "Import needs attention",
+      "importResult": "Import result",
       "reviewDigest": "Training review",
       "exportFailed": "Sync failed"
     },
     "summary": {
       "success": "Success",
+      "available": "Available",
       "failed": "Failed",
       "skipped": "Skipped",
       "reviewType": "Review type",
@@ -257,12 +260,14 @@
     },
     "kinds": {
       "IMPORT_BATCH_COMPLETED": {
-        "title": "Import batch completed",
-        "body": "Processed {total} source objects.\n\n- Success: {success}\n- Failed: {failed}\n- Skipped: {skipped}"
+        "title": "{success} activities are ready",
+        "preview": "File parsing, activity analysis, and training load updates are complete",
+        "body": "File parsing, activity analysis, and training load updates are complete."
       },
       "IMPORT_BATCH_PARTIAL_FAILED": {
-        "title": "Import batch completed with failures",
-        "body": "Processed {total} source objects.\n\n- Success: {success}\n- Failed: {failed}\n- Skipped: {skipped}"
+        "title": "{success} activities ready, {failed} unfinished",
+        "preview": "Some activities need attention before retrying",
+        "body": "Available activities have been parsed, analyzed, and updated. Review the unfinished items and try again."
       },
       "THIRD_PARTY_EXPORT_FAILED": {
         "title": "Could not sync to external service",
@@ -2091,8 +2096,8 @@
   "ActivityDetail": {
     "title": "Activity details",
     "genericDataNotice": {
-      "title": "Generic workout data",
-      "description": "The source classified this as a generic workout. Trainingload.ai uses only the recorded duration, heart rate, calories, and load; it does not infer distance, pace, power, or the exact workout type."
+      "title": "Workout type not confirmed",
+      "description": "This activity record and its available data are preserved. We show source data without guessing the workout type or missing measurements. You can correct the type from the activity menu."
     },
     "backButton": "Back",
     "configuration": "Configuration",
@@ -2433,7 +2438,9 @@
     "epoc": "EPOC (ml/kg)",
     "heartRate": "Heart Rate (bpm)",
     "distance": "Distance",
-    "peak": "Peak"
+    "time": "Time",
+    "peak": "Peak",
+    "noData": "No EPOC data"
   },
   "PaceChart": {
     "title": "pace",
@@ -2805,14 +2812,18 @@
     "uploadFailed": "Upload failed",
     "unknownError": "Unknown error",
     "importProgress": {
+      "processingFailed": "We couldn't finish processing this file. Please try again later, or contact support if the problem persists.",
       "title": "Importing",
       "description": "Your files have been queued for import. You can keep browsing while we process them in the background.",
       "completedTitle": "Import completed",
       "completedDescription": "This batch has finished processing. You can close this window and review the results now.",
+      "failedTitle": "Import not fully completed",
+      "failedDescription": "Some files did not finish activity analysis. Review the failed items and try again.",
       "batchCreatedToast": "Import batch created. Processing {count} files now",
       "openEntry": "Import Progress",
       "laterHint": "You can come back later and check the result at any time.",
       "doneHint": "This batch has finished processing.",
+      "failedHint": "This batch contains activities that did not finish processing.",
       "notificationHint": "You will receive a notification when the import is done, so there is no need to stay on this dialog.",
       "progressLabel": "Progress",
       "total": "Total",
@@ -4542,7 +4553,15 @@
       "YOGA": "Yoga",
       "ROWING": "Rowing",
       "ELLIPTICAL": "Elliptical",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "CROSSFIT": "CrossFit",
+      "PADEL": "Padel",
+      "ALPINE_SKIING": "Alpine skiing",
+      "SNOWBOARDING": "Snowboarding",
+      "MIXED_MARTIAL_ARTS": "Mixed martial arts",
+      "SOCCER": "Football",
+      "BASKETBALL": "Basketball",
+      "FISHING": "Fishing"
     }
   },
   "WorkoutEditor": {
@@ -4918,7 +4937,10 @@
       "completedLabel": "Completed",
       "actual": "Actual",
       "expected": "Planned",
-      "todayValues": "Actual {actual} · Planned {planned}",
+      "todayValues": "Today: actual {actual} · planned {planned}",
+      "totalValues": "Total: actual {actual} · planned {planned}",
+      "activityCount": "{count} activities",
+      "noPlanTarget": "No plan target",
       "chartAria": "Actual and planned load for the current week",
       "noData": "No load data for this week"
     },

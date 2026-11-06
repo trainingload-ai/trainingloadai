@@ -41,21 +41,24 @@ const toneStyles: Record<
   }
 > = {
   success: {
-    iconWrap: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-    icon: "text-emerald-700 dark:text-emerald-300",
-    chip: "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+    iconWrap:
+      "bg-[hsl(var(--emerald-500)/0.1)] text-[hsl(var(--emerald-700))] dark:text-[hsl(var(--emerald-300))]",
+    icon: "text-[hsl(var(--emerald-700))] dark:text-[hsl(var(--emerald-300))]",
+    chip: "bg-[hsl(var(--emerald-500)/0.1)] text-[hsl(var(--emerald-700))] dark:bg-[hsl(var(--emerald-500)/0.15)] dark:text-[hsl(var(--emerald-300))]",
     Icon: CheckCircle2,
   },
   warning: {
-    iconWrap: "bg-amber-500/12 text-amber-700 dark:text-amber-300",
-    icon: "text-amber-700 dark:text-amber-300",
-    chip: "bg-amber-500/12 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+    iconWrap:
+      "bg-[hsl(var(--amber-500)/0.12)] text-[hsl(var(--amber-700))] dark:text-[hsl(var(--amber-300))]",
+    icon: "text-[hsl(var(--amber-700))] dark:text-[hsl(var(--amber-300))]",
+    chip: "bg-[hsl(var(--amber-500)/0.12)] text-[hsl(var(--amber-800))] dark:bg-[hsl(var(--amber-500)/0.15)] dark:text-[hsl(var(--amber-300))]",
     Icon: AlertTriangle,
   },
   insight: {
-    iconWrap: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
-    icon: "text-sky-700 dark:text-sky-300",
-    chip: "bg-sky-500/10 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
+    iconWrap:
+      "bg-[hsl(var(--sky-500)/0.1)] text-[hsl(var(--sky-700))] dark:text-[hsl(var(--sky-300))]",
+    icon: "text-[hsl(var(--sky-700))] dark:text-[hsl(var(--sky-300))]",
+    chip: "bg-[hsl(var(--sky-500)/0.1)] text-[hsl(var(--sky-700))] dark:bg-[hsl(var(--sky-500)/0.15)] dark:text-[hsl(var(--sky-300))]",
     Icon: Sparkles,
   },
   neutral: {
@@ -114,6 +117,11 @@ export function NotificationDetailModal(props: {
     router.push(
       `/${locale}/ai-coach?sid=${encodeURIComponent(reviewSid)}${fitnessTarget?.branchId ? `&branchId=${encodeURIComponent(fitnessTarget.branchId)}` : ""}`,
     );
+  };
+  const openAction = () => {
+    if (!resolved?.actionHref) return;
+    props.onOpenChange(false);
+    router.push(`/${locale}${resolved.actionHref}`);
   };
 
   return (
@@ -189,6 +197,18 @@ export function NotificationDetailModal(props: {
                   onClick={openReview}
                 >
                   {fitnessTarget ? fitnessT("openAssessment") : t("openReview")}
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+              </footer>
+            ) : resolved.actionHref && resolved.actionLabel ? (
+              <footer className="shrink-0 border-t border-border/60 px-4 py-3">
+                <Button
+                  type="button"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  onClick={openAction}
+                >
+                  {resolved.actionLabel}
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Button>
               </footer>

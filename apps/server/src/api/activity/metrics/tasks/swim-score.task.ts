@@ -113,11 +113,22 @@ export class SwimScoreTask implements MetricsTask {
   async post(ctx: MetricsContext) {
     const result = ctx.outputs.swimScore;
     if (!result) return ctx;
-    await this.persistence.saveActivitySwimScore(
-      ctx.inputs.activity.id,
-      ctx.inputs.activity.sportType,
-      result,
-    );
+    if (ctx.persistenceTx) {
+      await this.persistence.saveActivitySwimScore(
+        ctx.inputs.activity.id,
+        ctx.inputs.activity.sportType,
+        result,
+        ctx.persistenceTx,
+      );
+    } else {
+      // Preserve the established three-argument contract for callers and
+      // tests that are not running inside the replay commit transaction.
+      await this.persistence.saveActivitySwimScore(
+        ctx.inputs.activity.id,
+        ctx.inputs.activity.sportType,
+        result,
+      );
+    }
     return ctx;
   }
 }

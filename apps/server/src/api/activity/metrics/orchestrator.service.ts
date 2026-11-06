@@ -1,3 +1,4 @@
+import { isPrismaSerializableConflict } from '@/prisma/prisma-transaction-errors';
 import { Injectable, Logger } from '@nestjs/common';
 import type {
   MetricsContext,
@@ -5,6 +6,7 @@ import type {
   MetricsTaskOutcome,
 } from './context';
 import type { MetricsTask } from './task';
+import type { Prisma } from '@prisma/client';
 
 const TASK_OUTPUT_KEYS: Partial<
   Record<MetricsTaskKey, Array<keyof MetricsContext['outputs']>>
@@ -142,7 +144,10 @@ function inferSkippedReason(key: MetricsTaskKey, ctx: MetricsContext): string {
     const threshold = ctx.cache.hrThreshold as
       | { maxHeartRate?: number; restingHeartRate?: number }
       | undefined;
-    if (!threshold?.maxHeartRate || !threshold?.restingHeartRate) {
+    if (
+      !threshold?.maxHeartRate ||
+      (!threshold?.restingHeartRate && !ctx.cache.loadRestingHeartRateDefault)
+    ) {
       return 'heart_rate_threshold_unavailable';
     }
     return 'insufficient_training_effect_inputs';
@@ -205,6 +210,11 @@ export type MetricsRunOptions = {
   failOnTaskError?: boolean;
 };
 
+export type ComputedMetricsRun = {
+  context: MetricsContext;
+  tasks: readonly MetricsTask[];
+};
+
 export class ActivityMetricsPipelineError extends Error {
   constructor(
     readonly taskErrors: MetricsContext['errors'],
@@ -251,6 +261,86 @@ export class ActivityMetricsOrchestratorService {
     }
 
     return current;
+  }
+
+  /** 只读取事实并计算内存结果；不会调用任何 task.post 持久化。 */
+  async computeStrict(
+    ctx: MetricsContext,
+    tasks: readonly MetricsTask[],
+  ): Promise<ComputedMetricsRun> {
+    let current = ctx;
+    for (const task of tasks) {
+      current = await this.computeOne(current, task);
+    }
+    if (Object.keys(current.errors).length > 0) {
+      throw new ActivityMetricsPipelineError(current.errors);
+    }
+    return { context: current, tasks };
+  }
+
+  /** 提交 computeStrict 产生的 mutation plan；调用方负责 revision fencing。 */
+  async commitComputed(
+    run: ComputedMetricsRun,
+    tx: Prisma.TransactionClient,
+  ): Promise<MetricsContext> {
+    let current: MetricsContext = { ...run.context, persistenceTx: tx };
+    for (const task of run.tasks) {
+      try {
+        current = await task.post(current);
+      } catch (error) {
+        if (isPrismaSerializableConflict(error)) throw error;
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        current = withTaskOutcome(
+          {
+            ...current,
+            errors: {
+              ...current.errors,
+              [task.key]: { message, stack },
+            },
+          },
+          { key: task.key, status: 'FAILED', reason: message },
+        );
+        break;
+      }
+    }
+    if (Object.keys(current.errors).length > 0) {
+      throw new ActivityMetricsPipelineError(current.errors);
+    }
+    const { persistenceTx: _transaction, ...committed } = current;
+    return committed;
+  }
+
+  private async computeOne(
+    ctx: MetricsContext,
+    task: MetricsTask,
+  ): Promise<MetricsContext> {
+    const key = task.key;
+    if (
+      ctx.inputs.measuredPowerEvidence === 'INSUFFICIENT' &&
+      POWER_DERIVED_TASKS.has(key)
+    ) {
+      return withTaskOutcome(ctx, {
+        key,
+        status: 'SKIPPED',
+        reason: 'no_reliable_measured_power',
+      });
+    }
+    try {
+      const prepared = await task.pre(ctx);
+      const computed = await task.exec(prepared);
+      return withTaskOutcome(computed, resolveTaskOutcome(key, computed));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      return withTaskOutcome(
+        {
+          ...ctx,
+          errors: { ...ctx.errors, [key]: { message, stack } },
+        },
+        { key, status: 'FAILED', reason: message },
+      );
+    }
   }
 
   private async runOne(

@@ -49,6 +49,144 @@ describe('AnalyzeFitnessOrchestratorService refresh failures', () => {
     );
   });
 
+  it('initializes MAX_HR from a sustained observed peak when no baseline exists', async () => {
+    const observedAt = new Date('2026-11-03T03:53:16.000Z');
+    const findFirst = jest.fn(async () => ({
+      activityId: 50,
+      scaleValue: 5,
+      value: 184,
+      activity: { hashId: 'activity-50', startTime: observedAt },
+    }));
+    const upsertFitnessMetric = jest.fn(async () => undefined);
+    const service = new AnalyzeFitnessOrchestratorService(
+      { activityPeakMetric: { findFirst } } as never,
+      {
+        checkAutoUpdatePermission: jest.fn(async () => true),
+        getEffectiveUserFitnessMetric: jest.fn(async () => null),
+        upsertFitnessMetric,
+      } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await service.observeMaxHrFromActivitiesAndUpdate(
+      'user-1',
+      new Date('2026-11-04T23:59:59.000Z'),
+    );
+
+    expect(findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ scaleValue: 5 }),
+      }),
+    );
+    expect(upsertFitnessMetric).toHaveBeenCalledWith(
+      'user-1',
+      'MAX_HR',
+      184,
+      SportType.UNKNOWN,
+      undefined,
+      MetricSource.AUTO,
+      observedAt,
+      {
+        originPayload: {
+          method: 'OBSERVED_ACTIVITY_PEAK',
+          activityId: 50,
+          activityHashId: 'activity-50',
+          windowSeconds: 5,
+          observationBpm: 184,
+        },
+      },
+    );
+  });
+
+  it('does not initialize MAX_HR from an uncorroborated one-second spike', async () => {
+    const upsertFitnessMetric = jest.fn(async () => undefined);
+    const findFirst = jest.fn(async () => null);
+    const service = new AnalyzeFitnessOrchestratorService(
+      { activityPeakMetric: { findFirst } } as never,
+      {
+        checkAutoUpdatePermission: jest.fn(async () => true),
+        getEffectiveUserFitnessMetric: jest.fn(async () => null),
+        upsertFitnessMetric,
+      } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await service.observeMaxHrFromActivitiesAndUpdate('user-1');
+
+    expect(findFirst).toHaveBeenCalledTimes(1);
+    expect(findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ scaleValue: 5 }),
+      }),
+    );
+    expect(upsertFitnessMetric).not.toHaveBeenCalled();
+  });
+
+  it('keeps one-second observations for raising an existing MAX_HR baseline', async () => {
+    const calculationDate = new Date('2026-11-04T23:59:59.000Z');
+    const upsertFitnessMetric = jest.fn(async () => undefined);
+    const service = new AnalyzeFitnessOrchestratorService(
+      {
+        activityPeakMetric: {
+          findFirst: jest.fn(async () => ({
+            activityId: 50,
+            scaleValue: 1,
+            value: 184,
+            activity: {
+              hashId: 'activity-50',
+              startTime: new Date('2026-11-03T03:53:16.000Z'),
+            },
+          })),
+        },
+      } as never,
+      {
+        checkAutoUpdatePermission: jest.fn(async () => true),
+        getEffectiveUserFitnessMetric: jest.fn(async () => ({ value: 180 })),
+        upsertFitnessMetric,
+      } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await service.observeMaxHrFromActivitiesAndUpdate(
+      'user-1',
+      calculationDate,
+    );
+
+    expect(upsertFitnessMetric).toHaveBeenCalledWith(
+      'user-1',
+      'MAX_HR',
+      184,
+      SportType.UNKNOWN,
+      undefined,
+      MetricSource.AUTO,
+      calculationDate,
+      expect.any(Object),
+    );
+  });
+
+  it('does not observe or write MAX_HR when automatic updates are disabled', async () => {
+    const findFirst = jest.fn();
+    const upsertFitnessMetric = jest.fn();
+    const service = new AnalyzeFitnessOrchestratorService(
+      { activityPeakMetric: { findFirst } } as never,
+      {
+        checkAutoUpdatePermission: jest.fn(async () => false),
+        getEffectiveUserFitnessMetric: jest.fn(),
+        upsertFitnessMetric,
+      } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await service.observeMaxHrFromActivitiesAndUpdate('user-1');
+
+    expect(findFirst).not.toHaveBeenCalled();
+    expect(upsertFitnessMetric).not.toHaveBeenCalled();
+  });
+
   it('promotes a corroborated passive LTHR estimate to AUTO', async () => {
     const findMany = jest.fn(async () => [
       {

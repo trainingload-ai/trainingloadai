@@ -1,6 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { PMC_INVALIDATE_EVENT } from '@/training-load/events/pmc.events';
-import { UserPostProcessWorkerService } from '../user-post-process.worker';
+import {
+  importPostProcessPolicy,
+  UserPostProcessWorkerService,
+} from '../user-post-process.worker';
 import { ImportingJobService } from '../importing-job.service';
 import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { featureAccessSnapshot } from '@/access/feature-access.types';
@@ -32,6 +34,128 @@ jest.mock('@/api/activity/activity.service', () => ({
 }));
 
 describe('UserPostProcessWorkerService', () => {
+  it('only suppresses user-facing side effects when maintenance flags are explicitly true', () => {
+    expect(importPostProcessPolicy(undefined)).toEqual({
+      suppressAutomaticAiReview: false,
+      suppressAthleteStateReassessment: false,
+      suppressThirdPartyExport: false,
+    });
+    expect(
+      importPostProcessPolicy({
+        suppressAutomaticAiReview: true,
+        suppressAthleteStateReassessment: true,
+        suppressThirdPartyExport: true,
+      }),
+    ).toEqual({
+      suppressAutomaticAiReview: true,
+      suppressAthleteStateReassessment: true,
+      suppressThirdPartyExport: true,
+    });
+    expect(
+      importPostProcessPolicy({
+        suppressAutomaticAiReview: 'true',
+        suppressAthleteStateReassessment: 'true',
+        suppressThirdPartyExport: 1,
+      }),
+    ).toEqual({
+      suppressAutomaticAiReview: false,
+      suppressAthleteStateReassessment: false,
+      suppressThirdPartyExport: false,
+    });
+  });
+
+  it('keeps metric refresh but skips AI review and third-party export for maintenance batches', async () => {
+    const recomputeFrom = new Date('2026-08-01T00:00:00.000Z');
+    const replay = jest.fn(async () => ({
+      runId: 'run-1',
+      processedActivities: 1,
+      completed: true,
+      nextCheckpoint: null,
+    }));
+    const prisma = {
+      userPostProcessJob: {
+        findUnique: jest.fn(async () => ({
+          recomputeFrom,
+          recomputeTo: recomputeFrom,
+          affectedSportTypes: ['RUN'],
+        })),
+        update: jest.fn(async () => ({})),
+      },
+      importItemJob: { findMany: jest.fn(async () => [{ activityId: 42 }]) },
+      activity: {
+        aggregate: jest.fn(async () => ({
+          _min: { startTime: recomputeFrom },
+          _max: { startTime: recomputeFrom },
+        })),
+      },
+      importBatchJob: {
+        findUnique: jest.fn(async () => ({
+          requestContext: {
+            suppressAutomaticAiReview: true,
+            suppressAthleteStateReassessment: true,
+            suppressThirdPartyExport: true,
+          },
+        })),
+      },
+    };
+    const emitAsync = jest.fn(async () => []);
+    const service = new UserPostProcessWorkerService(
+      prisma as never,
+      { get: jest.fn(() => undefined) } as never,
+      { replay } as never,
+      { emitAsync } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      undefined,
+      undefined,
+      createImportingJobs(prisma),
+      userQueries(prisma) as never,
+    );
+    const runBatchAiReviewWhenAllowed = jest.fn(async () => undefined);
+    const runBatchThirdPartyExports = jest.fn(async () => ({
+      failedProviders: [],
+      failedCount: 0,
+    }));
+    const sendBatchNotification = jest.fn(async () => undefined);
+    const completeClaimedJob = jest.fn(async () => undefined);
+    const resolveFinalBatchStatus = jest.fn(async () => 'COMPLETED');
+    Object.assign(service as object, {
+      runBatchAiReviewWhenAllowed,
+      runBatchThirdPartyExports,
+      sendBatchNotification,
+      completeClaimedJob,
+      resolveFinalBatchStatus,
+      logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    });
+
+    await (
+      service as unknown as { processJob: (...args: unknown[]) => unknown }
+    ).processJob({
+      id: 'post-maintenance',
+      userId: 'user-1',
+      batchJobId: 'batch-maintenance',
+    });
+
+    expect(replay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        effectiveFrom: recomputeFrom,
+        includeActivityIds: [42],
+        suppressAthleteStateReassessment: true,
+      }),
+    );
+    expect(runBatchAiReviewWhenAllowed).not.toHaveBeenCalled();
+    expect(emitAsync).not.toHaveBeenCalled();
+    expect(runBatchThirdPartyExports).not.toHaveBeenCalled();
+    expect(sendBatchNotification).toHaveBeenCalledWith({
+      batchJobId: 'batch-maintenance',
+      userId: 'user-1',
+      exportOutcome: { failedProviders: [], failedCount: 0 },
+    });
+    expect(completeClaimedJob).toHaveBeenCalled();
+  });
+
   it('claims expired RUNNING jobs with a fresh lease token', async () => {
     const $queryRawUnsafe = jest.fn(async (..._args: unknown[]) => [
       {
@@ -73,6 +197,11 @@ describe('UserPostProcessWorkerService', () => {
       $queryRawUnsafe.mock.calls[0];
     expect(sql).toContain("status='RUNNING'");
     expect(sql).toContain('lease_expires_at IS NULL');
+    expect(sql).toContain('started_at=COALESCE(j.started_at, $1)');
+    expect(sql).toContain('updated_at=$1');
+    expect(sql).not.toContain('NOW()');
+    expect(sql).toContain('>= b.total_count');
+    expect(sql).toContain("i.status NOT IN ('DONE','SKIPPED','DEAD')");
     expect(now).toBeInstanceOf(Date);
     expect(limit).toBe(3);
     expect(typeof token).toBe('string');
@@ -122,7 +251,7 @@ describe('UserPostProcessWorkerService', () => {
     expect(updateBatch).not.toHaveBeenCalled();
   });
 
-  it('skips user fitness and PMC when the batch has no activity inside the 60-day scope', async () => {
+  it('skips replay side effects when the batch has no analyzable activity', async () => {
     const refreshUserFitnessProfilePre = jest.fn();
     const refreshUserFitnessProfilePost = jest.fn();
     const emitAsync = jest.fn();
@@ -192,10 +321,14 @@ describe('UserPostProcessWorkerService', () => {
     );
   });
 
-  it('refreshes full READY user scope for a recent maintenance job without import items', async () => {
+  it('does not start correctness replay when a maintenance batch has no analysis items', async () => {
     const recomputeFrom = new Date('2026-08-01T00:00:00.000Z');
-    const refreshUserFitnessProfilePre = jest.fn(async () => undefined);
-    const refreshUserFitnessProfilePost = jest.fn(async () => undefined);
+    const replay = jest.fn(async () => ({
+      runId: 'run-1',
+      processedActivities: 0,
+      completed: true,
+      nextCheckpoint: null,
+    }));
     const emitAsync = jest.fn(async () => []);
     const prisma = {
       $transaction: jest.fn(async (callback: (tx: unknown) => unknown) =>
@@ -225,10 +358,7 @@ describe('UserPostProcessWorkerService', () => {
     const service = new UserPostProcessWorkerService(
       prisma as never,
       { get: jest.fn(() => undefined) } as never,
-      {
-        refreshUserFitnessProfilePre,
-        refreshUserFitnessProfilePost,
-      } as never,
+      { replay } as never,
       { emitAsync } as never,
       {} as never,
       {} as never,
@@ -252,16 +382,7 @@ describe('UserPostProcessWorkerService', () => {
       batchJobId: 'batch-maintenance',
     });
 
-    expect(refreshUserFitnessProfilePre).toHaveBeenCalledWith(
-      'user-1',
-      ['RUN'],
-      {},
-    );
-    expect(refreshUserFitnessProfilePost).toHaveBeenCalledWith('user-1', {});
-    expect(emitAsync).toHaveBeenCalledWith(
-      PMC_INVALIDATE_EVENT,
-      expect.objectContaining({ userId: 'user-1', startDate: recomputeFrom }),
-    );
+    expect(replay).not.toHaveBeenCalled();
   });
 
   it('moves the batch to a terminal failure state when post-processing is dead', async () => {
@@ -296,7 +417,7 @@ describe('UserPostProcessWorkerService', () => {
         ),
       } as never,
       {
-        refreshUserFitnessProfilePre: jest.fn(async () => {
+        replay: jest.fn(async () => {
           throw new Error('fitness unavailable');
         }),
       } as never,
@@ -435,174 +556,6 @@ describe('UserPostProcessWorkerService', () => {
     });
 
     expect(enqueueActivityAiReviewForImport).not.toHaveBeenCalled();
-  });
-
-  it('marks only failed HEAVY activities as partial before retrying post-process', async () => {
-    const prisma = {
-      importItemJob: {
-        findMany: jest.fn(async () => [{ activityId: 42 }]),
-      },
-      activity: {
-        update: jest.fn(async () => ({})),
-        updateMany: jest.fn(async () => ({ count: 1 })),
-      },
-    };
-    const service = new UserPostProcessWorkerService(
-      prisma as never,
-      {} as never,
-      {} as never,
-      {} as never,
-      {} as never,
-      {
-        runHeavyMetricsPipeline: jest.fn(async () => {
-          throw new Error('heavy failed');
-        }),
-      } as never,
-      {} as never,
-      undefined,
-      undefined,
-      createImportingJobs(prisma),
-      userQueries(prisma) as never,
-    );
-    (service as unknown as { logger: unknown }).logger = {
-      log: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    };
-
-    await expect(
-      (
-        service as unknown as {
-          runBatchHeavyMetrics: (...args: unknown[]) => unknown;
-        }
-      ).runBatchHeavyMetrics({
-        batchJobId: 'batch-1',
-        postProcessJobId: 'post-1',
-        userId: 'user-1',
-      }),
-    ).rejects.toThrow('Heavy metrics failed for 1/1 activities');
-
-    expect(prisma.activity.updateMany).toHaveBeenCalledWith({
-      where: { id: { in: [42] } },
-      data: expect.objectContaining({ processingStatus: 'PARTIAL_FAILED' }),
-    });
-  });
-
-  it('runs HEAVY activity pipelines with a concurrency limit of two', async () => {
-    let active = 0;
-    let peak = 0;
-    const prisma = {
-      importItemJob: {
-        findMany: jest.fn(async () =>
-          [1, 2, 3, 4, 5].map((activityId) => ({ activityId })),
-        ),
-      },
-      activity: {
-        update: jest.fn(async () => ({})),
-      },
-    };
-    const runHeavyMetricsPipeline = jest.fn(async () => {
-      active += 1;
-      peak = Math.max(peak, active);
-      await new Promise((resolve) => setTimeout(resolve, 2));
-      active -= 1;
-      return [];
-    });
-    const service = new UserPostProcessWorkerService(
-      prisma as never,
-      {} as never,
-      {} as never,
-      { emitAsync: jest.fn(async () => []) } as never,
-      {} as never,
-      { runHeavyMetricsPipeline } as never,
-      {} as never,
-      undefined,
-      undefined,
-      createImportingJobs(prisma),
-      userQueries(prisma) as never,
-    );
-    (service as unknown as { logger: unknown }).logger = {
-      log: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    };
-
-    await expect(
-      (
-        service as unknown as {
-          runBatchHeavyMetrics: (...args: unknown[]) => unknown;
-        }
-      ).runBatchHeavyMetrics({
-        batchJobId: 'batch-1',
-        postProcessJobId: 'post-1',
-        userId: 'user-1',
-      }),
-    ).resolves.toEqual([1, 2, 3, 4, 5]);
-
-    expect(peak).toBe(2);
-    expect(runHeavyMetricsPipeline).toHaveBeenCalledTimes(5);
-    expect(prisma.activity.update).toHaveBeenCalledTimes(5);
-  });
-
-  it('logs applied and skipped HEAVY tasks with a batch summary', async () => {
-    const prisma = {
-      importItemJob: {
-        findMany: jest.fn(async () => [{ activityId: 42 }]),
-      },
-      activity: {
-        update: jest.fn(async () => ({})),
-      },
-    };
-    const service = new UserPostProcessWorkerService(
-      prisma as never,
-      {} as never,
-      {} as never,
-      { emitAsync: jest.fn(async () => []) } as never,
-      {} as never,
-      {
-        runHeavyMetricsPipeline: jest.fn(async () => [
-          { key: 'recordsBootstrap', status: 'APPLIED' },
-          { key: 'paceBase', status: 'APPLIED' },
-          {
-            key: 'powerBase',
-            status: 'SKIPPED',
-            reason: 'no_power_samples',
-          },
-        ]),
-      } as never,
-      {} as never,
-      undefined,
-      undefined,
-      createImportingJobs(prisma),
-      userQueries(prisma) as never,
-    );
-    const log = jest.fn();
-    (service as unknown as { logger: unknown }).logger = {
-      log,
-      warn: jest.fn(),
-      error: jest.fn(),
-    };
-
-    await expect(
-      (
-        service as unknown as {
-          runBatchHeavyMetrics: (...args: unknown[]) => unknown;
-        }
-      ).runBatchHeavyMetrics({
-        batchJobId: 'batch-1',
-        postProcessJobId: 'post-1',
-        userId: 'user-1',
-      }),
-    ).resolves.toEqual([42]);
-
-    expect(log).toHaveBeenCalledWith(
-      expect.stringContaining('powerBase:no_power_samples'),
-    );
-    expect(log).toHaveBeenCalledWith(
-      expect.stringContaining(
-        '"powerBase":{"applied":0,"ignored":0,"skipped":1,"failed":0,"ignoredReasons":{},"skippedReasons":{"no_power_samples":1}}',
-      ),
-    );
   });
 
   it('delegates automatic activity exports to the provider registry', async () => {

@@ -1225,12 +1225,9 @@ export class SensorDataService implements OnModuleDestroy {
     //   )}`,
     // );
 
-    let timeExpr = `COALESCE(strftime(${tsExpr}, '%Y-%m-%d %H:%M:%S'), '')`;
-    if (timezone) {
-      const safeTimezone = timezone.replace(/'/g, "''");
-      // Use DuckDB timezone function to convert UTC timestamp to target timezone
-      timeExpr = `COALESCE(strftime(timezone('${safeTimezone}', ${tsExpr}), '%Y-%m-%d %H:%M:%S'), '')`;
-    }
+    // Parquet timestamps are UTC facts. Return explicit UTC even when callers
+    // supply a display timezone; formatting local time must happen at the UI boundary.
+    const timeExpr = `COALESCE(strftime(${tsExpr}, '%Y-%m-%dT%H:%M:%S.%gZ'), '')`;
 
     const metricExpressions = mapped.map((col, idx) => {
       const safeColumn = this.quoteIdentifier(col);
@@ -1967,313 +1964,8 @@ export class SensorDataService implements OnModuleDestroy {
 
     await conn.run(createSql);
 
-    // prepare batch insert statement
-    const fieldCount = 103; // match number of columns in CREATE TEMP TABLE
-    const placeholders = Array(fieldCount).fill('?').join(', ');
-    const insertSql = `INSERT INTO ${tableName} VALUES (${placeholders})`;
-    const prepared = await conn.prepare(insertSql);
     try {
-      for (const row of normalizedData) {
-        try {
-          let paramIndex = 1;
-
-          // bind system fields
-          this.bindValue(prepared, paramIndex++, row.activityId, 'integer');
-          this.bindValue(prepared, paramIndex++, row.hashId, 'varchar');
-
-          // bind RecordMesgType fields
-          this.bindTimestamp(prepared, paramIndex++, row.timestamp);
-          this.bindValue(prepared, paramIndex++, row.positionLat, 'double');
-          this.bindValue(prepared, paramIndex++, row.positionLong, 'double');
-          this.bindValue(prepared, paramIndex++, row.altitude, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.enhancedAltitude,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.heartRate, 'double');
-          this.bindValue(prepared, paramIndex++, row.cadence, 'double');
-          this.bindValue(prepared, paramIndex++, row.distance, 'double');
-          this.bindValue(prepared, paramIndex++, row.speed, 'double');
-          this.bindValue(prepared, paramIndex++, row.enhancedSpeed, 'double');
-          this.bindValue(prepared, paramIndex++, row.power, 'double');
-          this.bindValue(prepared, paramIndex++, row.calculatedPower, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.compressedSpeedDistance,
-            'double',
-          );
-          // bind other fields
-          this.bindValue(prepared, paramIndex++, row.grade, 'double');
-          this.bindValue(prepared, paramIndex++, row.resistance, 'double');
-          this.bindValue(prepared, paramIndex++, row.timeFromCourse, 'double');
-          this.bindValue(prepared, paramIndex++, row.cycleLength, 'double');
-          this.bindValue(prepared, paramIndex++, row.temperature, 'double');
-          this.bindValue(prepared, paramIndex++, row.speed1s, 'double');
-          this.bindValue(prepared, paramIndex++, row.cycles, 'double');
-          this.bindValue(prepared, paramIndex++, row.totalCycles, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.compressedAccumulatedPower,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.accumulatedPower,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.leftRightBalance,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.gpsAccuracy, 'double');
-          this.bindValue(prepared, paramIndex++, row.verticalSpeed, 'double');
-          this.bindValue(prepared, paramIndex++, row.calories, 'double');
-
-          // bind running dynamic fields
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.verticalOscillation,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.stanceTimePercent,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.stanceTime, 'double');
-
-          // bind power fields
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.leftTorqueEffectiveness,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.rightTorqueEffectiveness,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.leftPedalSmoothness,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.rightPedalSmoothness,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.combinedPedalSmoothness,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.leftPco, 'double');
-          this.bindValue(prepared, paramIndex++, row.rightPco, 'double');
-          this.bindValue(prepared, paramIndex++, row.leftPowerPhase, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.leftPowerPhasePeak,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.rightPowerPhase, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.rightPowerPhasePeak,
-            'double',
-          );
-
-          // 高级传感器
-          this.bindValue(prepared, paramIndex++, row.cadence256, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.fractionalCadence,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.totalHemoglobinConc,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.totalHemoglobinConcMin,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.totalHemoglobinConcMax,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.saturatedHemoglobinPercent,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.saturatedHemoglobinPercentMin,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.saturatedHemoglobinPercentMax,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.respirationRate, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.enhancedRespirationRate,
-            'double',
-          );
-
-          // 设备和环境
-          this.bindValue(prepared, paramIndex++, row.deviceIndex, 'double');
-          this.bindValue(prepared, paramIndex++, row.batterySoc, 'double');
-          this.bindValue(prepared, paramIndex++, row.motorPower, 'double');
-          this.bindValue(prepared, paramIndex++, row.cycleLength16, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.absolutePressure,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.coreTemperature, 'double');
-
-          // 活动类型和状态
-          this.bindValue(prepared, paramIndex++, row.sportType, 'varchar');
-          this.bindValue(prepared, paramIndex++, row.strokeType, 'varchar');
-          this.bindValue(prepared, paramIndex++, row.zone, 'double');
-          this.bindValue(prepared, paramIndex++, row.ballSpeed, 'double');
-          this.bindValue(prepared, paramIndex++, row.time128, 'double');
-
-          // 电动自行车
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.ebikeTravelRange,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.ebikeBatteryLevel,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.ebikeAssistMode, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.ebikeAssistLevelPercent,
-            'double',
-          );
-
-          // 潜水相关
-          this.bindValue(prepared, paramIndex++, row.depth, 'double');
-          this.bindValue(prepared, paramIndex++, row.nextStopDepth, 'double');
-          this.bindValue(prepared, paramIndex++, row.nextStopTime, 'double');
-          this.bindValue(prepared, paramIndex++, row.timeToSurface, 'double');
-          this.bindValue(prepared, paramIndex++, row.ndlTime, 'double');
-          this.bindValue(prepared, paramIndex++, row.cnsLoad, 'double');
-          this.bindValue(prepared, paramIndex++, row.n2Load, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.airTimeRemaining,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.pressureSac, 'double');
-          this.bindValue(prepared, paramIndex++, row.volumeSac, 'double');
-          this.bindValue(prepared, paramIndex++, row.rmv, 'double');
-          this.bindValue(prepared, paramIndex++, row.ascentRate, 'double');
-          this.bindValue(prepared, paramIndex++, row.po2, 'double');
-
-          // 高级指标
-          this.bindValue(prepared, paramIndex++, row.grit, 'double');
-          this.bindValue(prepared, paramIndex++, row.flow, 'double');
-          this.bindValue(prepared, paramIndex++, row.currentStress, 'double');
-          this.bindValue(prepared, paramIndex++, row.verticalRatio, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.stanceTimeBalance,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.stepLength, 'double');
-
-          // 计算字段（保持向后兼容）
-          this.bindValue(prepared, paramIndex++, row.climb, 'double');
-          this.bindValue(prepared, paramIndex++, row.descend, 'double');
-          this.bindValue(prepared, paramIndex++, row.enhancedClimb, 'double');
-          this.bindValue(prepared, paramIndex++, row.enhancedDescend, 'double');
-
-          // 兼容字段
-          this.bindValue(prepared, paramIndex++, row.index, 'double');
-          this.bindValue(prepared, paramIndex++, row?.lapIndex, 'double');
-          this.bindValue(prepared, paramIndex++, row.hdop, 'double');
-          this.bindValue(prepared, paramIndex++, row.vdop, 'double');
-          this.bindValue(prepared, paramIndex++, row.pdop, 'double');
-          this.bindValue(prepared, paramIndex++, row.turn, 'double');
-          this.bindValue(prepared, paramIndex++, row.description, 'varchar');
-          // 配速与坡度配速
-          this.bindValue(prepared, paramIndex++, row.pace, 'double');
-          this.bindValue(prepared, paramIndex++, row.gap, 'double');
-          this.bindValue(prepared, paramIndex++, row.aePace, 'double');
-          this.bindValue(prepared, paramIndex++, row.aePower, 'double');
-          // 生理指标
-          this.bindValue(prepared, paramIndex++, row.vo2, 'double');
-
-          // 参数数量断言：确保绑定的参数数与占位符一致
-          if (paramIndex !== fieldCount + 1) {
-            const boundCount = paramIndex - 1;
-            const err = new Error(
-              `[convertRecordToParquet] 字段数量不匹配：${boundCount} / ${fieldCount}`,
-            );
-            this.logger.error(err.message);
-            throw err;
-          }
-
-          await prepared.run();
-        } catch (error) {
-          this.logger.error(
-            `[convertRecordToParquet] 绑定行数据失败：${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-          this.logger.error(
-            `[convertRecordToParquet] 异常数据行：${JSON.stringify(
-              row,
-              null,
-              2,
-            )}`,
-          );
-          throw error;
-        }
-      }
+      await this.appendParquetRows(conn, tableName, normalizedData);
 
       // export Parquet（ZSTD 压缩）
       const copySql = `COPY ${tableName} TO '${tmpPath}' (FORMAT PARQUET, COMPRESSION ZSTD)`;
@@ -2299,7 +1991,6 @@ export class SensorDataService implements OnModuleDestroy {
       // release prepared statement resource
       // disconnect independent connection
       try {
-        prepared.destroySync?.();
         conn.disconnectSync?.();
       } catch {}
     }
@@ -2357,99 +2048,8 @@ export class SensorDataService implements OnModuleDestroy {
 
     await conn.run(createSql);
 
-    // dynamically generate insert statement placeholders
-    const fieldCount = 25; // 根据上面的字段数量调整
-    const placeholders = Array(fieldCount).fill('?').join(', ');
-    const insertSql = `INSERT INTO ${tableName} VALUES (${placeholders})`;
-    const prepared = await conn.prepare(insertSql);
     try {
-      for (const row of normalizedData) {
-        try {
-          let paramIndex = 1;
-          // bind system fields
-          this.bindValue(prepared, paramIndex++, row.activityId, 'integer');
-          this.bindValue(prepared, paramIndex++, row.hashId, 'varchar');
-          this.bindTimestamp(prepared, paramIndex++, row.timestamp);
-          this.bindValue(prepared, paramIndex++, row.index, 'integer');
-          this.bindValue(prepared, paramIndex++, row.messageIndex, 'integer');
-          this.bindValue(prepared, paramIndex++, row.event, 'varchar');
-          this.bindValue(prepared, paramIndex++, row.eventType, 'varchar');
-          this.bindTimestamp(prepared, paramIndex++, row.startTime);
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.totalElapsedTime,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.totalTimerTime, 'double');
-          this.bindValue(prepared, paramIndex++, row.totalStrokes, 'double');
-          this.bindValue(prepared, paramIndex++, row.avgSpeed, 'double');
-          this.bindValue(prepared, paramIndex++, row.swimStroke, 'varchar');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.avgSwimmingCadence,
-            'double',
-          );
-          this.bindValue(prepared, paramIndex++, row.eventGroup, 'varchar');
-          this.bindValue(prepared, paramIndex++, row.totalCalories, 'double');
-          this.bindValue(prepared, paramIndex++, row.lengthType, 'varchar');
-          this.bindValue(prepared, paramIndex++, row.playerScore, 'double');
-          this.bindValue(prepared, paramIndex++, row.opponentScore, 'double');
-          this.bindValue(prepared, paramIndex++, row.strokeCount, 'double');
-          this.bindValue(prepared, paramIndex++, row.zoneCount, 'double');
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.enhancedAvgRespirationRate,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.enHancedMaxRespirationRate,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.avgRespirationRate,
-            'double',
-          );
-          this.bindValue(
-            prepared,
-            paramIndex++,
-            row.maxRespirationRate,
-            'double',
-          );
-
-          // 参数数量断言：确保绑定的参数数与占位符一致
-          if (paramIndex !== fieldCount + 1) {
-            const boundCount = paramIndex - 1;
-            const err = new Error(
-              `[convertLengthToParquet] 字段数量不匹配：${boundCount} / ${fieldCount}`,
-            );
-            this.logger.error(err.message);
-            throw err;
-          }
-
-          await prepared.run();
-        } catch (error) {
-          this.logger.error(
-            `[convertLengthToParquet] 绑定行数据失败：${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-          this.logger.error(
-            `[convertLengthToParquet] 异常数据行：${JSON.stringify(
-              row,
-              null,
-              2,
-            )}`,
-          );
-          throw error;
-        }
-      }
+      await this.appendParquetRows(conn, tableName, normalizedData);
 
       // 导出为 Parquet（ZSTD 压缩）
       const copySql = `COPY ${tableName} TO '${tmpPath}' (FORMAT PARQUET, COMPRESSION ZSTD)`;
@@ -2475,83 +2075,81 @@ export class SensorDataService implements OnModuleDestroy {
       // 释放 prepared statement 资源
       // 断开独立连接
       try {
-        prepared.destroySync?.();
         conn.disconnectSync?.();
       } catch {}
     }
   }
 
-  /**
-   * 辅助方法：bind field to prepared statement
-   */
-  private bindValue(
-    prepared: DuckDBPreparedStatement,
-    index: number,
-    value: unknown,
-    type: 'integer' | 'double' | 'varchar',
-  ): void {
-    if (value == null || value === undefined) {
-      prepared.bindNull(index);
-      return;
-    }
-
-    switch (type) {
-      case 'integer':
-        {
-          const n = Number(value);
-          if (!Number.isFinite(n)) {
-            prepared.bindNull(index);
-          } else {
-            prepared.bindInteger(index, Math.trunc(n));
-          }
+  /** Append bounded vectors, avoiding one asynchronous SQL execution per sensor point. */
+  private async appendParquetRows(
+    conn: DuckDBConnection,
+    tableName: string,
+    rows: ParquetNormalizedRow[],
+  ): Promise<void> {
+    const { DuckDBDataChunk, DuckDBTypeId } = await loadDuckDBModule();
+    // Read the actual table schema so records and swim lengths share the same
+    // writer without a second, manually ordered list of 103/25 bindings.
+    const schema = await (await conn.run(`DESCRIBE ${tableName}`)).getRows();
+    const fields = schema.map((column) => String(column[0]));
+    const appender = await conn.createAppender(tableName);
+    const types = fields.map((_field, index) => appender.columnType(index));
+    let closed = false;
+    try {
+      for (let offset = 0; offset < rows.length; offset += 2048) {
+        const batch = rows.slice(offset, offset + 2048);
+        const chunk = DuckDBDataChunk.create(types, batch.length);
+        for (let column = 0; column < fields.length; column++) {
+          const field = fields[column];
+          const type = types[column].typeId;
+          chunk.setColumnValues(
+            column,
+            batch.map((row) => {
+              const value = row[field];
+              if (value == null) return null;
+              if (type === DuckDBTypeId.TIMESTAMP)
+                return this.parquetTimestamp(value);
+              if (type === DuckDBTypeId.VARCHAR) return String(value);
+              if (type === DuckDBTypeId.INTEGER) {
+                const number = Number(value);
+                return Number.isFinite(number) ? Math.trunc(number) : null;
+              }
+              if (type === DuckDBTypeId.DOUBLE)
+                return this.normalizeFloat(value);
+              throw new Error('PARQUET_COLUMN_TYPE_UNSUPPORTED');
+            }),
+          );
         }
-        break;
-      case 'double':
-        const normalizedValue = this.normalizeFloat(value);
-        if (normalizedValue == null) {
-          prepared.bindNull(index);
-        } else {
-          prepared.bindDouble(index, normalizedValue);
+        appender.appendDataChunk(chunk);
+        // Large files must yield to API requests and worker lease heartbeats.
+        await new Promise<void>((resolve) => setImmediate(resolve));
+      }
+      appender.closeSync();
+      closed = true;
+    } finally {
+      if (!closed) {
+        try {
+          appender.closeSync();
+        } catch {
+          /* Preserve the original write error. */
         }
-        break;
-      case 'varchar':
-        prepared.bindVarchar(index, String(value));
-        break;
+      }
     }
   }
 
-  /**
-   * bind timestamp to prepared statement
-   */
-  private bindTimestamp(
-    prepared: DuckDBPreparedStatement,
-    index: number,
-    timestamp: unknown,
-  ): void {
-    if (timestamp == null) {
-      prepared.bindNull(index);
-      return;
-    }
-
+  private parquetTimestamp(timestamp: unknown) {
+    if (timestamp == null) return null;
     let timestampMs: number;
-    if (typeof timestamp === 'bigint') {
-      timestampMs = Number(timestamp);
-    } else if (timestamp instanceof Date) {
-      timestampMs = timestamp.getTime();
-    } else if (typeof timestamp === 'number') {
-      timestampMs = timestamp;
-    } else if (typeof timestamp === 'string') {
+    if (typeof timestamp === 'bigint') timestampMs = Number(timestamp);
+    else if (timestamp instanceof Date) timestampMs = timestamp.getTime();
+    else if (typeof timestamp === 'number') timestampMs = timestamp;
+    else if (typeof timestamp === 'string')
       timestampMs = dayjs(timestamp).valueOf();
-    } else {
-      timestampMs = dayjs(String(timestamp)).valueOf();
-    }
-
-    const micros = BigInt(timestampMs * 1000); // 毫秒转微秒
+    else timestampMs = dayjs(String(timestamp)).valueOf();
+    const micros = BigInt(timestampMs * 1000);
     if (!this.duckDBTimestampValue) {
       throw new Error('DuckDB timestamp binding is not initialized');
     }
-    const timestampValue = new this.duckDBTimestampValue(micros);
-    prepared.bindTimestamp(index, timestampValue);
+    return new this.duckDBTimestampValue(micros);
   }
 
   /**

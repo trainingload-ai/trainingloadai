@@ -7,7 +7,6 @@ import { readAuthSecurityConfig } from './auth/auth-security-config';
 import { createBetterAuthRateLimitStorage } from './auth/auth-rate-limit-store';
 import { assertEmailLoginAllowed } from './auth/login-rate-limit';
 import { Logger } from '@nestjs/common';
-import { seedDefaultRestingHeartRateIfAbsent } from './api/user/persistence/user-fitness-defaults';
 const authLifecycleLogger = new Logger('BetterAuth');
 import { assertEmailAuthAccountNotBeingDeleted } from './auth/account-deletion-auth-guard';
 import { resolveRegistrationAttribution } from './auth/registration-attribution';
@@ -481,21 +480,6 @@ export const getAuthConfig = (): AuthInstance => {
                 ...resolveRegistrationAttribution(context, oauthState),
               },
             };
-          },
-          after: async (user) => {
-            const uid = user?.id;
-            if (!uid) return;
-            try {
-              authLifecycleLogger.log(
-                `user.create.after 触发，尝试默认静息心率 userId=${uid}`,
-              );
-              await seedDefaultRestingHeartRateIfAbsent(prismaAuthAdapter, uid);
-            } catch (e) {
-              authLifecycleLogger.error(
-                `新用户默认静息心率写入失败 userId=${uid}`,
-                e instanceof Error ? e.stack : String(e),
-              );
-            }
           },
         },
         update: {

@@ -9,12 +9,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import {
-  MetricSource,
   Prisma,
   SelfHostInitializationState,
-  SportType,
   UserAcquisitionSource,
-  UserFitnessMetricType,
   UserRegistrationMethod,
   UserRegistrationPlatform,
 } from '@prisma/client';
@@ -334,22 +331,6 @@ export class SelfHostBootstrapService implements OnApplicationBootstrap {
           acquisitionSource: UserAcquisitionSource.INTERNAL,
         },
       });
-      await this.users.fitnessMetrics(tx).create({
-        data: {
-          userId,
-          type: UserFitnessMetricType.RESTING_HR,
-          sport: SportType.UNKNOWN,
-          source: MetricSource.MANUAL,
-          value: 60,
-          recordedAt: new Date(
-            Date.UTC(
-              initializedAt.getUTCFullYear(),
-              initializedAt.getUTCMonth(),
-              initializedAt.getUTCDate(),
-            ),
-          ),
-        },
-      });
       await tx.selfHostInstance.upsert({
         where: { id: SELF_HOST_INSTANCE_ID },
         create: {
@@ -438,22 +419,6 @@ export class SelfHostBootstrapService implements OnApplicationBootstrap {
           password: passwordHash,
           createdAt: initializedAt,
           updatedAt: initializedAt,
-        },
-      });
-      await this.users.fitnessMetrics(tx).create({
-        data: {
-          userId,
-          type: UserFitnessMetricType.RESTING_HR,
-          sport: SportType.UNKNOWN,
-          source: MetricSource.MANUAL,
-          value: 60,
-          recordedAt: new Date(
-            Date.UTC(
-              initializedAt.getUTCFullYear(),
-              initializedAt.getUTCMonth(),
-              initializedAt.getUTCDate(),
-            ),
-          ),
         },
       });
       await tx.selfHostInstance.update({

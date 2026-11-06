@@ -9,6 +9,7 @@ import {
 } from '@/training-load/measured-power-evidence';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
 import { ActivityReadService } from './activity-read.service';
+import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
 
 /**
  * 活动「实际负荷」读取
@@ -57,6 +58,7 @@ export class LoadReadoutService {
     private readonly prisma: PrismaService,
     private readonly activityRead: ActivityReadService,
     private readonly users: UserQueryService,
+    private readonly analysisConfigs: UserAnalysisConfigService,
   ) {}
 
   /** 读取用户 loadSources 优先级（对齐 PMCService.getUserPMCLoadSources） */
@@ -93,6 +95,7 @@ export class LoadReadoutService {
       where: readyActivityWhere({ id: activityId }),
       select: {
         userId: true,
+        startTime: true,
         sportType: true,
         sportDefinitionCode: true,
         sessionRpe: true,
@@ -103,6 +106,13 @@ export class LoadReadoutService {
         bikeScore: { select: { bikeScore: true } },
         govss: { select: { govss: true } },
         swimScore: { select: { swimScore: true } },
+        fitnessMetricsSnapshot: {
+          select: {
+            resolutionVersion: true,
+            actualLoad: true,
+            actualLoadSource: true,
+          },
+        },
         activitySources: {
           where: { isActive: true, isPrimary: true },
           select: { metadata: true },
@@ -111,7 +121,11 @@ export class LoadReadoutService {
     });
     if (!activity) return { actualLoad: null, actualLoadSource: null };
 
-    const sources = await this.getUserLoadSources(activity.userId);
+    const frozen = this.frozenSnapshotLoad(activity.fitnessMetricsSnapshot);
+    if (frozen) return frozen;
+    const sources = (
+      await this.analysisConfigs.resolveAt(activity.userId, activity.startTime)
+    ).loadSources;
     return this.pickActualLoad(
       sources,
       activity.sportType,
@@ -147,6 +161,7 @@ export class LoadReadoutService {
       select: {
         id: true,
         userId: true,
+        startTime: true,
         sportType: true,
         sportDefinitionCode: true,
         sessionRpe: true,
@@ -157,6 +172,13 @@ export class LoadReadoutService {
         bikeScore: { select: { bikeScore: true } },
         govss: { select: { govss: true } },
         swimScore: { select: { swimScore: true } },
+        fitnessMetricsSnapshot: {
+          select: {
+            resolutionVersion: true,
+            actualLoad: true,
+            actualLoadSource: true,
+          },
+        },
         activitySources: {
           where: { isActive: true, isPrimary: true },
           select: { metadata: true },
@@ -165,16 +187,42 @@ export class LoadReadoutService {
     });
     if (!activities.length) return out;
 
-    const sourceCache = new Map<string, LoadSourceKey[]>();
+    const sourceCache = new Map<
+      string,
+      Awaited<ReturnType<UserAnalysisConfigService['listVersions']>>
+    >();
     const userIds = Array.from(new Set(activities.map((a) => a.userId)));
     for (const userId of userIds) {
-      sourceCache.set(userId, await this.getUserLoadSources(userId));
+      const latestStart = activities
+        .filter((activity) => activity.userId === userId)
+        .reduce(
+          (latest, activity) =>
+            activity.startTime > latest ? activity.startTime : latest,
+          new Date(0),
+        );
+      sourceCache.set(
+        userId,
+        await this.analysisConfigs.listVersions(userId, latestStart),
+      );
     }
 
     for (const activity of activities) {
-      const sources = sourceCache.get(activity.userId) ?? [
-        ...DEFAULT_LOAD_SOURCES,
-      ];
+      const frozen = this.frozenSnapshotLoad(activity.fitnessMetricsSnapshot);
+      if (frozen) {
+        out.set(activity.id, frozen);
+        continue;
+      }
+      const sources =
+        this.analysisConfigs.resolveFromVersions(
+          sourceCache.get(activity.userId) ?? [],
+          activity.startTime,
+        )?.loadSources ??
+        (
+          await this.analysisConfigs.resolveAt(
+            activity.userId,
+            activity.startTime,
+          )
+        ).loadSources;
       out.set(
         activity.id,
         this.pickActualLoad(
@@ -207,26 +255,49 @@ export class LoadReadoutService {
     activity: LoadActivityRow,
     sources: LoadSourceKey[],
   ): number {
-    return (
-      this.pickActualLoad(
-        sources,
-        activity.sportType,
-        activity.sportDefinitionCode ?? null,
-        computeNormalizedSessionRpeLoad({
-          rating: activity.sessionRpe,
-          timerTimeSeconds: activity.timerTime,
-          elapsedTimeSeconds: activity.elapsedTime,
-        }),
-        {
-          coggan: activity.coggan ?? null,
-          trimp: activity.trimp ?? null,
-          bikeScore: activity.bikeScore ?? null,
-          govss: activity.govss ?? null,
-          swimScore: activity.swimScore ?? null,
-          activitySources: activity.activitySources,
-        },
-      ).actualLoad ?? 0
+    return this.loadReadoutForActivity(activity, sources).actualLoad ?? 0;
+  }
+
+  loadReadoutForActivity(
+    activity: LoadActivityRow,
+    sources: LoadSourceKey[],
+  ): ActualLoadReadout {
+    return this.pickActualLoad(
+      sources,
+      activity.sportType,
+      activity.sportDefinitionCode ?? null,
+      computeNormalizedSessionRpeLoad({
+        rating: activity.sessionRpe,
+        timerTimeSeconds: activity.timerTime,
+        elapsedTimeSeconds: activity.elapsedTime,
+      }),
+      {
+        coggan: activity.coggan ?? null,
+        trimp: activity.trimp ?? null,
+        bikeScore: activity.bikeScore ?? null,
+        govss: activity.govss ?? null,
+        swimScore: activity.swimScore ?? null,
+        activitySources: activity.activitySources,
+      },
     );
+  }
+
+  private frozenSnapshotLoad(
+    snapshot: {
+      resolutionVersion: number;
+      actualLoad: unknown;
+      actualLoadSource: string | null;
+    } | null,
+  ): ActualLoadReadout | null {
+    if (!snapshot || Number(snapshot.resolutionVersion ?? 0) < 4) return null;
+    return {
+      actualLoad:
+        snapshot.actualLoad == null ? null : Number(snapshot.actualLoad),
+      actualLoadSource:
+        snapshot.actualLoadSource === 'SESSION_RPE'
+          ? 'SESSIONRPE'
+          : (snapshot.actualLoadSource as LoadSourceKey | null),
+    };
   }
 
   /**

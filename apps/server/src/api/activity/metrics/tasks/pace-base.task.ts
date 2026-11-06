@@ -82,6 +82,7 @@ export class PaceBaseTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const userId = ctx.inputs.userId;
     if (!activity?.id || !userId) return ctx;
+    if (ctx.cache.resolvedFitnessContext) return ctx;
     try {
       const csMetric =
         ctx.cache.fitnessMetrics?.[$Enums.UserFitnessMetricType.CS];
@@ -169,15 +170,19 @@ export class PaceBaseTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const base = ctx.outputs.paceBase;
     if (!activity?.id || !base) return ctx;
-    await this.persistence.saveActivityPaceActivityFields(activity.id, {
-      avgGap: base.avgGap,
-      avgSpeed: base.avgSpeed,
-      xPace: base.xPace,
-      xGap: base.xGap,
-      viPace: base.viPace,
-      viGap: base.viGap,
-      avgAerobicEfficiency: base.avgAerobicEfficiency,
-    });
+    await this.persistence.saveActivityPaceActivityFields(
+      activity.id,
+      {
+        avgGap: base.avgGap,
+        avgSpeed: base.avgSpeed,
+        xPace: base.xPace,
+        xGap: base.xGap,
+        viPace: base.viPace,
+        viGap: base.viGap,
+        avgAerobicEfficiency: base.avgAerobicEfficiency,
+      },
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

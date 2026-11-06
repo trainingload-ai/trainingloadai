@@ -12,6 +12,7 @@ export interface PMCData {
   fatigue: number;
   form: number;
   value: number;
+  activityCount?: number;
   running?: number;
   cycling?: number;
   swimming?: number;

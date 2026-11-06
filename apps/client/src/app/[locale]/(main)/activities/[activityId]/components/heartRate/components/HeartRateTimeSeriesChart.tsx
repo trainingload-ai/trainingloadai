@@ -25,6 +25,7 @@ import { formatSecondsToTime } from "@/utils/timeFormatter";
 import { getHeartRateZoneColor, POWER_ZONE_PALETTE } from "@/utils/util";
 import ChartContainer from "@/components/ChartContainer";
 import ChartInfo from "@/components/ChartInfo";
+import { resolveActivityChartXAxis } from "@/lib/activity-chart-axis";
 
 interface HeartRateTimeSeriesChartProps {
   // type: "MHR" | "LTHR" | "HRR";
@@ -50,13 +51,14 @@ const HeartRateTimeSeriesChart: React.FC<HeartRateTimeSeriesChartProps> = ({
     useElementSize<HTMLDivElement>();
   const chartWrapperRef = useRef<HTMLDivElement>(null);
   const cssVar = useCssVarResolver();
-  const chartXaxis = useStore((state) => state.chartXaxis);
+  const preferredChartXaxis = useStore((state) => state.chartXaxis);
   const systemUnit = useStore((state) => state.systemUnit);
 
   const { data, isLoading } = useActivityMetricSeries(
     activityId || "",
     "heartRate",
   );
+  const chartXaxis = resolveActivityChartXAxis(preferredChartXaxis, data?.rows);
 
   const { data: heartRateZones, isLoading: isLoadingZones } =
     useHeartRateZones(activityId);

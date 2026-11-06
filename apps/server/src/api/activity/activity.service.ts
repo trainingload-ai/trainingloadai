@@ -60,7 +60,6 @@ import { round } from 'lodash';
 import { AlgorithmService } from '@/analyze/algorithm.service';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { emitPmcInvalidate } from '@/training-load/events/pmc.events';
 import {
   findBestAverageForTime,
   findBestTimeForDistance,
@@ -69,10 +68,8 @@ import { UserService } from '../user/user.service';
 import { UserTimezoneInitializerService } from '@/timezone/user-timezone-initializer.service';
 import { resolveEffectiveActivityVo2Max } from '@/analyze/vo2max/vo2max-source';
 import { LoadReadoutService } from './load-readout.service';
-import { isActivityWithinGlobalRefreshWindow } from '@/utils/activity-global-refresh-window';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
-import { AnalyzeFitnessOrchestratorService } from '@/analyze/analyze-fitness-orchestrator.service';
-import { selectActivityGlobalRefreshScope } from '@/utils/activity-global-refresh-window';
+import { createActivityInputReplayJob } from '@/analyze/activity-recompute-job.writer';
 import { StorageObjectGarbageCollectorService } from '@/sensor/parquet-garbage-collector.service';
 
 function isSportType(value: string): value is $Enums.SportType {
@@ -121,6 +118,7 @@ import { PlanLinkMatcherService } from '@/api/plan/plan-link-matcher.service';
 import { PlanActivityLinkService } from '@/api/plan/application/plan-activity-link.service';
 import { TimezoneInferenceService } from '@/timezone/timezone-inference.service';
 import { ActivityWeatherService } from '@/weather/activity-weather.service';
+import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
 
 /** preprocessComputedFields 入参（避免位置参数混用体重与海拔阈值） */
 interface PreprocessComputedFieldsOptions {
@@ -157,40 +155,12 @@ export class ActivityService {
     private readonly planLinkMatcher: PlanLinkMatcherService,
     private readonly planActivityLinks: PlanActivityLinkService,
     private readonly timezoneInference: TimezoneInferenceService,
-    private readonly fitnessOrchestrator: AnalyzeFitnessOrchestratorService,
     private readonly storageGarbageCollector: StorageObjectGarbageCollectorService,
     private readonly sensorFiles: SensorFileQueryService,
     private readonly users: UserQueryService,
     private readonly activityWeather: ActivityWeatherService,
+    private readonly analysisConfigs: UserAnalysisConfigService,
   ) {}
-
-  /**
-   * 刷新因为活动变更而需要更新的全局数据。
-   * @param userId - 用户 ID。
-   * @param activities - 活动。
-   * @returns 刷新结果。
-   */
-  private async refreshUserGlobalsAfterActivityChanges(
-    userId: string,
-    activities: ReadonlyArray<{
-      sportType?: SportType | null;
-      startTime?: Date | null;
-    }>,
-  ): Promise<void> {
-    // 选择需要更新的全局数据
-    const refreshScope = selectActivityGlobalRefreshScope(activities);
-    if (refreshScope.eligibleCount === 0) return;
-
-    // 刷新用户健身档案
-    await this.fitnessOrchestrator.refreshUserFitnessProfile(
-      userId,
-      refreshScope.sportTypes,
-    );
-    // 刷新 PMC
-    // 发出 PMC 跨模块重算事件。只在写入提交之后发出。
-    // listener 放在 PMC 模块内；Activity / Import / Coach 不直接调 calculatePMC。
-    await emitPmcInvalidate(this.events, userId);
-  }
 
   /** Activity.timezone 为空且有起点坐标时，用 geo-tz 补写 IANA；已有来源时区不覆盖。 */
   private async applyGeoInferredTimezoneIfNeeded(
@@ -935,14 +905,19 @@ export class ActivityService {
       });
     }
     await tx.activity.delete({ where: { id: activity.id } });
+    await createActivityInputReplayJob(tx, {
+      userId,
+      effectiveFrom: activity.startTime,
+      triggerSource: 'activity_deleted',
+      affectedPipelines: ['FITNESS_TIMELINE', 'TRAINING_LOAD', 'PMC'],
+    });
     await this.planActivityLinks.restoreOrphanedAutoCompletedWorkouts(
       autoCompletedWorkoutIds,
       tx,
     );
 
     return {
-      afterCommit: () =>
-        this.refreshUserGlobalsAfterActivityChanges(userId, [activity]),
+      afterCommit: async () => undefined,
     };
   }
 
@@ -983,16 +958,24 @@ export class ActivityService {
       });
     }
 
-    await this.prisma.activity.update({
-      where: { id: activityWithLoadContext.id },
-      data: { sessionRpe: normalized } as Prisma.ActivityUpdateInput,
+    await this.prisma.$transaction(async (tx) => {
+      await tx.activity.update({
+        where: { id: activityWithLoadContext.id },
+        data: {
+          sessionRpe: normalized,
+          processingStatus: $Enums.ActivityProcessingStatus.ANALYZING,
+          processingUpdatedAt: new Date(),
+          readyAt: null,
+        } as Prisma.ActivityUpdateInput,
+      });
+      await createActivityInputReplayJob(tx, {
+        userId,
+        effectiveFrom: activityWithLoadContext.startTime,
+        includeActivityIds: [activityWithLoadContext.id],
+        triggerSource: 'activity_session_rpe_changed',
+        affectedPipelines: ['TRAINING_LOAD', 'PMC'],
+      });
     });
-    // RPE 是用户明确触发的负荷输入。近期活动每次保存都重算，亦可修复规则升级前的陈旧 PMC。
-    if (
-      isActivityWithinGlobalRefreshWindow(activityWithLoadContext.startTime)
-    ) {
-      await emitPmcInvalidate(this.events, userId);
-    }
 
     return {
       hashId: normalizedHashId,
@@ -1075,12 +1058,20 @@ export class ActivityService {
             where: { id: { in: thirdPartyActivityIds }, userId },
           });
         }
-        return tx.activity.deleteMany({
+        const deleted = await tx.activity.deleteMany({
           where: { id: { in: activityIds }, userId },
         });
+        const effectiveFrom = activities
+          .map((activity) => activity.startTime)
+          .sort((left, right) => left.getTime() - right.getTime())[0];
+        await createActivityInputReplayJob(tx, {
+          userId,
+          effectiveFrom,
+          triggerSource: 'activities_batch_deleted',
+          affectedPipelines: ['FITNESS_TIMELINE', 'TRAINING_LOAD', 'PMC'],
+        });
+        return deleted;
       });
-
-      await this.refreshUserGlobalsAfterActivityChanges(userId, activities);
 
       return { deleted: result.count };
     } catch (e) {
@@ -1554,6 +1545,12 @@ export class ActivityService {
       where,
       include: {
         vo2max: true,
+        fitnessMetricsSnapshot: {
+          select: {
+            resolutionVersion: true,
+            resolvedVo2maxValue: true,
+          },
+        },
       },
     });
 
@@ -1579,18 +1576,22 @@ export class ActivityService {
     if (typeof avgGap === 'number' && avgGap > 3) {
       avgGap = round((avgGap * 60) / 1000, 6);
     }
-    const vo2Preference = await this.users.profiles().findUnique({
-      where: { userId: activity.userId },
-      select: {
-        defaultVdotSource: true,
-        vo2maxCorrectionFactor: true,
-      },
-    });
-    const vo2max = resolveEffectiveActivityVo2Max(
-      activity.vo2max,
-      vo2Preference?.defaultVdotSource,
-      vo2Preference?.vo2maxCorrectionFactor,
-    )?.value;
+    const frozenVo2max = activity.fitnessMetricsSnapshot;
+    const historicalConfig =
+      (frozenVo2max?.resolutionVersion ?? 0) >= 4
+        ? null
+        : await this.analysisConfigs.resolveAt(
+            activity.userId,
+            activity.startTime,
+          );
+    const vo2max =
+      (frozenVo2max?.resolutionVersion ?? 0) >= 4
+        ? (frozenVo2max?.resolvedVo2maxValue ?? undefined)
+        : resolveEffectiveActivityVo2Max(
+            activity.vo2max,
+            historicalConfig?.defaultVdotSource,
+            historicalConfig?.vo2maxCorrectionFactor,
+          )?.value;
 
     // Aerobic Efficiency (EF) = Speed (m/min) / AvgHR
     const avgAerobicEfficiency = activity?.avgAerobicEfficiency;
@@ -2476,8 +2477,8 @@ export class ActivityService {
       accumulatedPower: record.accumulatedPower,
       speed: record.speed,
       heartRate: record.heartRate ?? undefined,
-      power: record.power || undefined,
-      cadence: record.cadence || undefined,
+      power: record.power ?? undefined,
+      cadence: record.cadence ?? undefined,
       totalCycles: record.totalCycles ?? undefined,
       temperature: record.temperature ?? undefined,
       altitude: record.altitude ?? undefined,
@@ -3029,16 +3030,34 @@ export class ActivityService {
           select: { id: true },
         });
         if (!ownedActivity) continue;
-        const result = await this.prisma.activity.updateMany({
-          where: { id: ownedActivity.id, userId },
-          data: {
-            sportType: finalSportType,
-            sportDefinitionCode:
-              activity.subSportType ??
-              activity.sportDefinitionCode ??
-              defaultSportDefinitionCode(finalSportType),
-            subSport: null,
-          },
+        const result = await this.prisma.$transaction(async (tx) => {
+          const updated = await tx.activity.updateMany({
+            where: { id: ownedActivity.id, userId },
+            data: {
+              sportType: finalSportType,
+              sportDefinitionCode:
+                activity.subSportType ??
+                activity.sportDefinitionCode ??
+                defaultSportDefinitionCode(finalSportType),
+              subSport: null,
+              processingStatus: 'ANALYZING',
+              processingUpdatedAt: new Date(),
+              readyAt: null,
+            },
+          });
+          if (updated.count > 0) {
+            const fact = await tx.activity.findUniqueOrThrow({
+              where: { id: ownedActivity.id },
+              select: { startTime: true },
+            });
+            await createActivityInputReplayJob(tx, {
+              userId: userId!,
+              effectiveFrom: fact.startTime,
+              includeActivityIds: [ownedActivity.id],
+              triggerSource: 'activity_sport_changed',
+            });
+          }
+          return updated;
         });
         if (result.count > 0) {
           await this.activityWeather
@@ -3053,17 +3072,6 @@ export class ActivityService {
               );
             });
         }
-        if (activity.sportType !== $Enums.SportType.UNKNOWN) {
-          // if sport type is changed, need to recompute metrics
-          this.recomputeActivityMetrics(activity.hashId, userId).catch((e) => {
-            this.logger.error(
-              `[批量设置运动类型] 触发指标复算失败，哈希ID=${
-                activity.hashId
-              }: ${e instanceof Error ? e.message : String(e)}`,
-            );
-          });
-        }
-
         totalUpdated += result.count;
         this.logger.log(
           `活动 ${activity.hashId} 已设置为 ${finalSportType}，更新记录数=${result.count}`,
@@ -3131,60 +3139,6 @@ export class ActivityService {
     } catch (e) {
       this.logger.error(
         `[按 hashId 推断运动类型] 失败：${
-          e instanceof Error ? e.message : String(e)
-        }`,
-      );
-      if (e instanceof HttpException) {
-        throw e;
-      }
-      throw new BusinessException({
-        code: BUSINESS_ERROR_CODE.COMMON,
-        message: this.i18n.t('error.common.internal_server_error', {
-          lang: I18nContext.current()?.lang,
-        }),
-      });
-    }
-  }
-
-  /**
-   * 由于运动类型改变，所以重新计算
-   * @param hashId
-   * @returns
-   */
-  private async recomputeActivityMetrics(hashId: string, userId?: string) {
-    if (!hashId || !userId) {
-      this.logger.error(
-        `[复算活动指标] 参数缺失：哈希ID=${hashId}，用户ID=${userId}`,
-      );
-      throw new BusinessException({
-        code: BUSINESS_ERROR_CODE.COMMON,
-        message: 'hashId and userId are required',
-      });
-    }
-    const entity = await this.prisma.activity.findFirst({
-      where: {
-        hashId,
-        state: 1,
-      },
-    });
-
-    if (!entity) {
-      this.logger.error(`[复算活动指标] 活动不存在：哈希ID=${hashId}`);
-      throw new BusinessException({
-        code: BUSINESS_ERROR_CODE.COMMON,
-        message: `Activity ${hashId} not found`,
-      });
-    }
-    try {
-      await this.analyzeAndPersistCore(entity, userId);
-      await this.fitnessOrchestrator.refreshUserFitnessProfile(
-        userId,
-        [entity.sportType],
-        { includeActivityIds: [entity.id] },
-      );
-    } catch (e) {
-      this.logger.error(
-        `[复算活动指标] 活动ID=${entity.id} 失败：${
           e instanceof Error ? e.message : String(e)
         }`,
       );

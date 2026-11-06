@@ -46,6 +46,7 @@ function archiveDependencies(prisma: object) {
     new ImportingJobService(new ImportingJobRepository(prisma as never)),
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new UserQueryService(new UserIdentityRepository(prisma as never)),
+    { batchGetActualLoad: async () => new Map() },
   ] as const;
 }
 

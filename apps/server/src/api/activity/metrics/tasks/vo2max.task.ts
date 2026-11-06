@@ -177,8 +177,11 @@ export class Vo2MaxTask implements MetricsTask {
       const effectiveDistance =
         activity.effectiveDistance ?? activity.distance ?? 0;
       const durationSec = activity.elapsedTime ?? 0;
-      const avgSpeed = activity.avgSpeed ?? 0;
-      const avgHeartRate = activity.avgHeartRate ?? 0;
+      // Use this run's computed inputs. HEAVY persists the rounded summary
+      // later, so reading the old row here makes the first replay differ from the next.
+      const avgSpeed = ctx.outputs.paceBase?.avgSpeed ?? activity.avgSpeed ?? 0;
+      const avgHeartRate =
+        ctx.outputs.heartRateBase?.avg ?? activity.avgHeartRate ?? 0;
 
       const res = this.vo2maxEngine.calculateRunActivityVo2Max(
         effectiveDistance || 0,
@@ -207,7 +210,7 @@ export class Vo2MaxTask implements MetricsTask {
     const result = ctx.outputs.vo2max;
     if (!result) return ctx;
 
-    await this.prisma.activityVO2Max.upsert({
+    await (ctx.persistenceTx ?? this.prisma).activityVO2Max.upsert({
       where: { activityId: activity.id },
       update: {
         sport: activity.sportType ?? $Enums.SportType.UNKNOWN,

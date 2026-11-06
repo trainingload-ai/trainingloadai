@@ -92,6 +92,7 @@ function ActivitySportTypeIcon({
     case "stretching":
       return <StretchHorizontal aria-hidden className={iconClassName} />;
     case "hiit":
+    case "other":
       return <ActivityIcon aria-hidden className={iconClassName} />;
     case "yoga":
       return <PersonStanding aria-hidden className={iconClassName} />;

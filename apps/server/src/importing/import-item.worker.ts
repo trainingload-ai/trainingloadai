@@ -10,6 +10,7 @@ import { createHash, randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobService } from './importing-job.service';
+import { ACTIVITY_MATERIALIZATION_VERSION, type ActivityDatasetRepair } from './activity-dataset-repair';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import {
   ActivityAnalyzeMode,
@@ -231,10 +232,10 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       )
       UPDATE t_import_item_job j
       SET status='NORMALIZING',
-          started_at=COALESCE(j.started_at, NOW()),
+          started_at=COALESCE(j.started_at, $1),
           lock_token=$3,
           lease_expires_at=$4,
-          updated_at=NOW()
+          updated_at=$1
       FROM picked
       WHERE j.id = picked.id
       RETURNING j.id, j.batch_job_id, j.user_id, j.source_object_id, j.source_kind, j.lock_token;
@@ -556,6 +557,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     sourceObjectId: string;
     payload: CanonicalActivityPayload;
     thirdPartyActivityId?: number;
+    repair?: ActivityDatasetRepair;
   }) {
     const payload = args.payload;
     const thirdPartyActivity = await this.thirdPartyProjector.project({
@@ -584,6 +586,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         args.jobId,
         $Enums.ImportItemJobStatus.MATERIALIZING,
       );
+      // 将 canonical payload 物化成 Activity
       const materialized = await this.materializer.materialize({
         itemJobId: args.jobId,
         userId: args.userId,
@@ -591,6 +594,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         sourceObjectId: args.sourceObjectId,
         payload,
         thirdPartyActivityId,
+        repair: args.repair,
       });
 
       // Activity 已经由任意 Provider 正式物化后，再尝试解析影子。影子本身从不
@@ -688,6 +692,8 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
             sourceObjectId: args.sourceObjectId,
             payload,
             stagedParquetFiles,
+            itemJobId: args.jobId,
+            itemLockToken: this.activeLeaseTokens.get(args.jobId),
           });
         } catch (error) {
           // 事务结果可能不确定，不能立即删对象。先进入延迟清单，GC
@@ -719,6 +725,18 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       }
       // Parquet 一旦成为 canonical 数据集即可异步排队。天气失败不能阻塞
       // 活动进入 ANALYZING/READY，也不能延长主导入链路。
+      const committedSource = await this.prisma.activitySource.findFirst({
+        where: { activityId: materialized.activity.id, userId: args.userId,
+          isPrimary: true, isActive: true, sourceUid: payload.source.sourceUid },
+      });
+      if (committedSource) {
+        await this.prisma.activitySource.updateMany({
+          where: { id: committedSource.id, canonicalSnapshotId: committedSource.canonicalSnapshotId,
+            sourceChecksum: committedSource.sourceChecksum, isPrimary: true },
+          data: { metadata: { ...(committedSource.metadata as Prisma.InputJsonObject),
+            materializationVersion: ACTIVITY_MATERIALIZATION_VERSION } },
+        });
+      }
       await this.activityWeather
         ?.schedule({
           activityId: materialized.activity.id,
@@ -767,7 +785,6 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * 处理一条已领取的导入项。
-   *
    * 顺序：续租 → 可选来源扩展前处理 → 标准化并物化活动 → 刷新批次进度。
    * 失败走退避重试；租约被别人抢走则不再写状态。
    */
@@ -847,6 +864,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         sourceObjectId: job.sourceObjectId,
         payload: resolved.directPayload,
         thirdPartyActivityId,
+        repair: asImportItemSourceRef(resolved.job.sourceRef).repair,
       });
     } else if (resolved.input) {
       if ('activityFile' in resolved.input && args.parsedExtensionFile) {
@@ -868,7 +886,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
 
       // 0 条 → SKIPPED；多条 → 拆成子 item；1 条 → 物化
       if (normalized.payloads.length === 0) {
-        await this.markStatus(job.id, 'SKIPPED', {
+        await this.markStatus(job.id, $Enums.ImportItemJobStatus.SKIPPED, {
           completedAt: new Date(),
           lastErrorCode: 'no_payloads',
           lastError: '适配器未返回标准活动载荷',
@@ -1097,13 +1115,13 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           where: {
             status: {
               in: [
-                'QUEUED',
-                'NORMALIZING',
-                'DEDUPING',
-                'MATERIALIZING',
-                'PARQUET_BUILDING',
-                'ANALYZING',
-                'FAILED',
+                $Enums.ImportItemJobStatus.QUEUED,
+                $Enums.ImportItemJobStatus.NORMALIZING,
+                $Enums.ImportItemJobStatus.DEDUPING,
+                $Enums.ImportItemJobStatus.MATERIALIZING,
+                $Enums.ImportItemJobStatus.PARQUET_BUILDING,
+                $Enums.ImportItemJobStatus.ANALYZING,
+                $Enums.ImportItemJobStatus.FAILED,
               ],
             },
           },

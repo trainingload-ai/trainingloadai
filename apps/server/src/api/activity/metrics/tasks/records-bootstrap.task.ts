@@ -124,12 +124,15 @@ export class RecordsBootstrapTask implements MetricsTask {
     }
 
     try {
-      await this.prisma.$executeRaw`
+      await (ctx.persistenceTx ?? this.prisma).$executeRaw`
         UPDATE "t_activity"
         SET "sample_sec" = ${sampleSec}
         WHERE "id" = ${activity.id}
       `;
     } catch (e) {
+      // PostgreSQL aborts the entire transaction after a failed statement.
+      // Preserve the original error so Replay can roll back and retry safely.
+      if (ctx.persistenceTx) throw e;
       this.logger.warn(
         `[recordsBootstrap] 保存 sampleSec 失败，活动ID=${activity.id}，sampleSec=${sampleSec}：${
           e instanceof Error ? e.message : String(e)

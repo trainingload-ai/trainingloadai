@@ -120,16 +120,19 @@
     "receivedAt": "受信",
     "noBody": "追加内容はありません",
     "openReview": "レビューを開く",
+    "viewActivities": "アクティビティを見る",
     "loadingMore": "さらに読み込み中…",
     "templates": {
       "general": "システム通知",
       "importSuccess": "インポート完了",
       "importWarning": "インポート注意",
+      "importResult": "インポート結果",
       "reviewDigest": "トレーニングレビュー",
       "exportFailed": "同期失敗"
     },
     "summary": {
       "success": "成功",
+      "available": "利用可能",
       "failed": "失敗",
       "skipped": "スキップ",
       "reviewType": "レビュー種別",
@@ -149,12 +152,14 @@
     },
     "kinds": {
       "IMPORT_BATCH_COMPLETED": {
-        "title": "インポートが完了しました",
-        "body": "{total} 件のソースを処理しました。\n\n- 成功：{success}\n- 失敗：{failed}\n- スキップ：{skipped}"
+        "title": "{success} 件のアクティビティが利用可能です",
+        "preview": "ファイル処理、分析、トレーニング負荷の更新が完了しました",
+        "body": "ファイル処理、アクティビティ分析、トレーニング負荷の更新が完了しました。"
       },
       "IMPORT_BATCH_PARTIAL_FAILED": {
-        "title": "インポート完了（一部失敗）",
-        "body": "{total} 件のソースを処理しました。\n\n- 成功：{success}\n- 失敗：{failed}\n- スキップ：{skipped}"
+        "title": "{success} 件が利用可能、{failed} 件が未完了です",
+        "preview": "一部のアクティビティを確認して再試行してください",
+        "body": "利用可能なアクティビティの処理、分析、更新は完了しました。未完了の項目を確認して再試行してください。"
       },
       "THIRD_PARTY_EXPORT_FAILED": {
         "title": "外部サービスと同期できませんでした",
@@ -1810,8 +1815,8 @@
   "ActivityDetail": {
     "title": "アクティビティ詳細",
     "genericDataNotice": {
-      "title": "汎用ワークアウトデータ",
-      "description": "データ提供元では汎用ワークアウトとして分類されています。Trainingload.ai は記録された時間、心拍数、消費カロリー、負荷のみを使用し、距離、ペース、パワー、具体的な種目は推測しません。"
+      "title": "運動の種類は未確認です",
+      "description": "アクティビティの記録と取得済みデータは保持されています。運動の種類や欠けている指標を推測せず、提供されたデータを表示します。種類はアクティビティのメニューから修正できます。"
     },
     "backButton": "戻る",
     "configuration": "設定",
@@ -2114,7 +2119,9 @@
     "epoc": "EPOC（ml/kg）",
     "heartRate": "Heart Rate (bpm)",
     "distance": "距離",
-    "peak": "ピーク"
+    "time": "時間",
+    "peak": "ピーク",
+    "noData": "EPOC データがありません"
   },
   "PaceChart": {
     "title": "ペース",
@@ -2486,14 +2493,18 @@
     "uploadFailed": "アップロード失敗",
     "unknownError": "不明なエラー",
     "importProgress": {
+      "processingFailed": "このファイルの処理を完了できませんでした。時間をおいて再試行し、解決しない場合はサポートにお問い合わせください。",
       "title": "インポート中",
       "description": "ファイルはインポートキューに追加されました。バックグラウンド処理中も閲覧を続けられます。",
       "completedTitle": "インポート完了",
       "completedDescription": "このバッチの処理が完了しました。このウィンドウを閉じて結果を確認できます。",
+      "failedTitle": "インポートが完全には完了していません",
+      "failedDescription": "一部のファイルでアクティビティ分析が完了しませんでした。失敗した項目を確認して再試行してください。",
       "batchCreatedToast": "インポートバッチを作成しました。現在 {count} ファイルを処理中です",
       "openEntry": "インポート進捗",
       "laterHint": "後で戻っていつでも結果を確認できます。",
       "doneHint": "このバッチの処理は完了しました。",
+      "failedHint": "このバッチには処理が完了していないアクティビティがあります。",
       "notificationHint": "インポート完了時に通知されるため、このダイアログを開いたままにする必要はありません。",
       "progressLabel": "進捗",
       "total": "合計",
@@ -4099,7 +4110,15 @@
       "YOGA": "ヨガ",
       "ROWING": "ローイング",
       "ELLIPTICAL": "エリプティカル",
-      "OTHER": "その他"
+      "OTHER": "その他",
+      "CROSSFIT": "CrossFit",
+      "PADEL": "パデル",
+      "ALPINE_SKIING": "アルペンスキー",
+      "SNOWBOARDING": "スノーボード",
+      "MIXED_MARTIAL_ARTS": "総合格闘技",
+      "SOCCER": "サッカー",
+      "BASKETBALL": "バスケットボール",
+      "FISHING": "釣り"
     }
   },
   "WorkoutEditor": {
@@ -4465,7 +4484,10 @@
       "completedLabel": "完了",
       "actual": "実績",
       "expected": "計画",
-      "todayValues": "実績 {actual}・計画 {planned}",
+      "todayValues": "今日：実績 {actual}・計画 {planned}",
+      "totalValues": "合計：実績 {actual}・計画 {planned}",
+      "activityCount": "{count} 件のアクティビティ",
+      "noPlanTarget": "プラン目標なし",
       "chartAria": "今週の実績負荷と計画負荷",
       "noData": "今週の負荷データはありません"
     },

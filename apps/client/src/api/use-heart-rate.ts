@@ -295,6 +295,7 @@ export function useHeartRateBase(activityId: string) {
 }
 
 export interface EpocDataPoint {
+  time: number;
   distance: number;
   epoc: number;
   hr: number;

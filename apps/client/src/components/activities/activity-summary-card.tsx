@@ -62,7 +62,9 @@ function SportIcon({ visual }: { visual: ActivitySportVisual }) {
       {visual === "stretching" ? (
         <StretchHorizontal className={className} />
       ) : null}
-      {visual === "hiit" ? <Activity className={className} /> : null}
+      {visual === "hiit" || visual === "other" ? (
+        <Activity className={className} />
+      ) : null}
       {visual === "yoga" ? <PersonStanding className={className} /> : null}
       {visual === "rowing" ? <ShipWheel className={className} /> : null}
       {visual === "elliptical" ? <Orbit className={className} /> : null}

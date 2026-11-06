@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { IsDateString, IsOptional } from 'class-validator';
 import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
 import { CurrentUserId } from '@/utils/decorators/current-user-id.decorator';
 import { PMCService } from './pmc.service';
 import { OAuthHybridAuthGuard } from '@/oauth/oauth-hybrid-auth.guard';
@@ -18,6 +19,8 @@ import {
   CurrentPublicDemo,
   type PublicDemoRequestContext,
 } from '@/public-demo/current-public-demo.decorator';
+
+dayjs.extend(utc);
 
 class GetPMCDataDto {
   @IsOptional()
@@ -55,19 +58,19 @@ export class PMCController {
   ) {
     // 默认查询最近60天的数据
     const defaultEndDate = new Date();
-    const defaultStartDate = dayjs().subtract(60, 'day').toDate();
+    const defaultStartDate = dayjs.utc().subtract(60, 'day').toDate();
 
     const endDate =
       query.endDate && query.startDate
-        ? dayjs(query.endDate).toDate()
+        ? dayjs.utc(query.endDate).toDate()
         : defaultEndDate;
     const startDate =
       query.endDate && query.startDate
-        ? dayjs(query.startDate).toDate()
+        ? dayjs.utc(query.startDate).toDate()
         : defaultStartDate;
 
     // Fetch data with extra 6 days for rolling window calculation
-    const extendedStartDate = dayjs(startDate).subtract(6, 'day').toDate();
+    const extendedStartDate = dayjs.utc(startDate).subtract(6, 'day').toDate();
 
     const result = await this.pmcService.getPMCData(
       userId,
@@ -79,12 +82,12 @@ export class PMCController {
     // Create a map for quick lookup by date string YYYY-MM-DD
     const resultMap = new Map<string, any>();
     result.forEach((r) => {
-      resultMap.set(dayjs(r.date).format('YYYY-MM-DD'), r);
+      resultMap.set(dayjs.utc(r.date).format('YYYY-MM-DD'), r);
     });
 
     const formattedResults = [];
-    let currentDate = dayjs(startDate);
-    const end = dayjs(endDate);
+    let currentDate = dayjs.utc(startDate).startOf('day');
+    const end = dayjs.utc(endDate).startOf('day');
 
     while (currentDate.isBefore(end) || currentDate.isSame(end)) {
       const dateStr = currentDate.format('YYYY-MM-DD');
@@ -108,6 +111,7 @@ export class PMCController {
         fatigue: currentRecord?.atl || 0,
         form: currentRecord?.tsb || 0,
         value: currentRecord?.dailyValue || 0,
+        activityCount: currentRecord?.activityCount || 0,
         running: currentRecord?.runningValue || 0,
         cycling: currentRecord?.cyclingValue || 0,
         swimming: currentRecord?.swimmingValue || 0,
@@ -163,10 +167,10 @@ export class PMCController {
     @CurrentUserId() userId: string,
   ) {
     const startDate = query.startDate
-      ? dayjs(query.startDate).startOf('day').toDate()
+      ? dayjs.utc(query.startDate).startOf('day').toDate()
       : undefined;
     const endDate = query.endDate
-      ? dayjs(query.endDate).endOf('day').toDate()
+      ? dayjs.utc(query.endDate).endOf('day').toDate()
       : undefined;
     return this.pmcService.getVo2MaxHistory(userId, startDate, endDate);
   }
@@ -178,10 +182,10 @@ export class PMCController {
     @CurrentUserId() userId: string,
   ) {
     const startDate = query.startDate
-      ? dayjs(query.startDate).startOf('day').toDate()
+      ? dayjs.utc(query.startDate).startOf('day').toDate()
       : undefined;
     const endDate = query.endDate
-      ? dayjs(query.endDate).endOf('day').toDate()
+      ? dayjs.utc(query.endDate).endOf('day').toDate()
       : undefined;
     return this.pmcService.getVo2MaxActivityHistory(userId, startDate, endDate);
   }

@@ -8,6 +8,8 @@ import { useGetActivity } from "@/hooks/useActivities";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
 import { getActivityDetailPolicy } from "@/lib/activity-detail-policy";
 import { ActivityMetricGrid } from "./activity-metric-grid";
+import { useSportCatalog } from "@/api/sports";
+import { getOtherActivitySummaryCapabilities } from "@/lib/activity-presentation";
 
 type SummaryMetric = {
   label: string;
@@ -54,10 +56,15 @@ const Overview = React.memo(function Overview() {
   const activityId = useActivityId();
   const { data: activity } = useGetActivity(activityId || "");
   const { systemUnit } = useStore();
+  const { data: sportCatalog = [] } = useSportCatalog();
 
   if (!activity) return null;
 
   const isOther = getActivityDetailPolicy(activity).group === "OTHER";
+  const otherCapabilities = getOtherActivitySummaryCapabilities(
+    sportCatalog,
+    activity,
+  );
   const isCycling = activity.sportType === "CYCLING";
   const paceOrSpeedMetric = isCycling ? "speed" : "pace";
   const durationMetric: SummaryMetric = {
@@ -83,6 +90,24 @@ const Overview = React.memo(function Overview() {
   const metrics: SummaryMetric[] = isOther
     ? [
         durationMetric,
+        ...(otherCapabilities.showDistance
+          ? [
+              {
+                label: t("activities.distance"),
+                value: valueOrDash(activity.distance, "distance", systemUnit),
+                unit: getUnit("distance", systemUnit),
+              },
+            ]
+          : []),
+        ...(otherCapabilities.showSpeed
+          ? [
+              {
+                label: t("activityDetails.avgSpeed"),
+                value: valueOrDash(activity.averageSpeed, "speed", systemUnit),
+                unit: getUnit("speed", systemUnit),
+              },
+            ]
+          : []),
         ...heartRateMetrics,
         {
           label: t("HeartRatePage.tooltip.minHeartRate"),

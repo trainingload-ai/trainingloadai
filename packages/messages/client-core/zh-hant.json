@@ -120,16 +120,19 @@
     "receivedAt": "收到時間",
     "noBody": "冇額外內容",
     "openReview": "查看複盤",
+    "viewActivities": "查看活動",
     "loadingMore": "載入更多…",
     "templates": {
       "general": "系統通知",
       "importSuccess": "導入完成",
       "importWarning": "導入提醒",
+      "importResult": "導入結果",
       "reviewDigest": "訓練複盤",
       "exportFailed": "同步失敗"
     },
     "summary": {
       "success": "成功",
+      "available": "可用活動",
       "failed": "失敗",
       "skipped": "跳過",
       "reviewType": "複盤類型",
@@ -149,12 +152,14 @@
     },
     "kinds": {
       "IMPORT_BATCH_COMPLETED": {
-        "title": "導入已完成",
-        "body": "已處理 {total} 個來源。\n\n- 成功：{success}\n- 失敗：{failed}\n- 跳過：{skipped}"
+        "title": "{success} 個活動已可用",
+        "preview": "檔案解析、活動分析及訓練負荷更新均已完成",
+        "body": "檔案解析、活動分析及訓練負荷更新均已完成。"
       },
       "IMPORT_BATCH_PARTIAL_FAILED": {
-        "title": "導入完成（含失敗項）",
-        "body": "已處理 {total} 個來源。\n\n- 成功：{success}\n- 失敗：{failed}\n- 跳過：{skipped}"
+        "title": "{success} 個活動已可用，{failed} 個未完成",
+        "preview": "部分活動需要處理後重試",
+        "body": "可處理的活動已完成解析、分析及負荷更新。請檢查未完成項後重試。"
       },
       "THIRD_PARTY_EXPORT_FAILED": {
         "title": "未能同步到外部服務",
@@ -1903,8 +1908,8 @@
   "ActivityDetail": {
     "title": "活動詳情",
     "genericDataNotice": {
-      "title": "通用訓練資料",
-      "description": "資料來源將其標記為通用訓練。Trainingload.ai 僅使用已記錄的時長、心率、熱量和負荷，不推斷距離、配速、功率或具體訓練類型。"
+      "title": "運動類型待確認",
+      "description": "活動紀錄和既有資料已保留。這裡僅顯示來源提供的資料，不猜測具體項目或缺少的指標；可在活動選單中修正運動類型。"
     },
     "backButton": "返回",
     "configuration": "設定",
@@ -2207,7 +2212,9 @@
     "epoc": "EPOC (ml/kg)",
     "heartRate": "心率（bpm）",
     "distance": "距離",
-    "peak": "峰值"
+    "time": "時間",
+    "peak": "峰值",
+    "noData": "暫無 EPOC 資料"
   },
   "PaceChart": {
     "title": "配速",
@@ -2579,14 +2586,18 @@
     "uploadFailed": "上載失敗",
     "unknownError": "未知錯誤",
     "importProgress": {
+      "processingFailed": "系統暫時無法完成此檔案的處理，請稍後重試。若仍失敗，請聯絡技術支援。",
       "title": "匯入中",
       "description": "你嘅檔案已排入匯入隊列。我哋會喺背景處理，你可以繼續瀏覽。",
       "completedTitle": "匯入完成",
       "completedDescription": "呢一批已完成處理。你而家可以關閉視窗並查看結果。",
+      "failedTitle": "匯入未完全完成",
+      "failedDescription": "部分檔案未能完成活動分析。請查看失敗項目並依提示重試。",
       "batchCreatedToast": "已建立匯入批次。正處理 {count} 個檔案",
       "openEntry": "匯入進度",
       "laterHint": "你可以稍後隨時返嚟查看結果。",
       "doneHint": "呢一批已完成處理。",
+      "failedHint": "呢一批仍有尚未完成嘅活動。",
       "notificationHint": "匯入完成後你會收到通知，所以毋須一直留喺呢個對話框。",
       "progressLabel": "進度",
       "total": "總數",
@@ -4193,7 +4204,15 @@
       "YOGA": "瑜伽",
       "ROWING": "划船",
       "ELLIPTICAL": "橢圓機",
-      "OTHER": "其他"
+      "OTHER": "其他",
+      "CROSSFIT": "CrossFit 混合體能",
+      "PADEL": "板式網球",
+      "ALPINE_SKIING": "高山滑雪",
+      "SNOWBOARDING": "單板滑雪",
+      "MIXED_MARTIAL_ARTS": "綜合格鬥",
+      "SOCCER": "足球",
+      "BASKETBALL": "籃球",
+      "FISHING": "釣魚"
     }
   },
   "WorkoutEditor": {
@@ -4559,7 +4578,10 @@
       "completedLabel": "已完成",
       "actual": "實際",
       "expected": "計劃",
-      "todayValues": "實際 {actual} · 計劃 {planned}",
+      "todayValues": "今日：實際 {actual} · 計劃 {planned}",
+      "totalValues": "合計：實際 {actual} · 計劃 {planned}",
+      "activityCount": "{count} 項活動",
+      "noPlanTarget": "暫無計劃目標",
       "chartAria": "本週實際負荷與計劃負荷",
       "noData": "本週暫無負荷資料"
     },

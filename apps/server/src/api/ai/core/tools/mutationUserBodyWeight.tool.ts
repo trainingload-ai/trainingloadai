@@ -14,6 +14,11 @@ import {
   requireSignedInUser,
   type AiToolContext,
 } from '../tool.types';
+import {
+  emitUserFitnessContextChanged,
+  UserFitnessContextChangedEvent,
+} from '@/api/user/events/user-fitness.events';
+import { BodyMetricType } from '@prisma/client';
 
 const KG_PER_LB = 0.45359237;
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
@@ -204,9 +209,10 @@ export const userBodyWeightMutationBundle = mutationToolFactory<
         effectiveDate: resolved.dateKey,
         changed: result.changed,
       },
+      afterCommit: result.afterCommit,
     };
   },
-  async undo({ prisma, users, userId, reverseData }) {
+  async undo({ prisma, users, userId, reverseData, events }) {
     const data = reverseData as {
       metricId: string;
       operation: 'create' | 'update';
@@ -230,7 +236,16 @@ export const userBodyWeightMutationBundle = mutationToolFactory<
     }
     if (data.operation === 'create') {
       await users.bodyMetrics(prisma).delete({ where: { id: row.id } });
-      return;
+      return () =>
+        emitUserFitnessContextChanged(
+          events,
+          new UserFitnessContextChangedEvent(
+            userId,
+            'BODY',
+            [new Date(data.writtenEffectiveAt).getTime()],
+            [BodyMetricType.WEIGHT],
+          ),
+        );
     }
     if (data.previousValue == null || data.previousEffectiveAt == null) return;
     await users.bodyMetrics(prisma).update({
@@ -240,6 +255,19 @@ export const userBodyWeightMutationBundle = mutationToolFactory<
         effectiveDate: new Date(data.previousEffectiveAt),
       },
     });
+    return () =>
+      emitUserFitnessContextChanged(
+        events,
+        new UserFitnessContextChangedEvent(
+          userId,
+          'BODY',
+          [
+            new Date(data.previousEffectiveAt!).getTime(),
+            new Date(data.writtenEffectiveAt).getTime(),
+          ],
+          [BodyMetricType.WEIGHT],
+        ),
+      );
   },
 });
 

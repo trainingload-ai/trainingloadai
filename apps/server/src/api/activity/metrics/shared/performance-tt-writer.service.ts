@@ -5,6 +5,7 @@ import type { Activity, ScaleType, SportType } from '@prisma/client';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import type { PeakIntervalObservation } from '../context';
+import type { PrismaTx } from '@/prisma/prisma-db';
 
 @Injectable()
 export class ActivityPerformanceTTWriterService {
@@ -17,8 +18,9 @@ export class ActivityPerformanceTTWriterService {
     entries: Record<string, number | undefined>;
     targetScaleType: ScaleType;
     windows?: Record<string, PeakIntervalObservation | undefined>;
+    tx?: PrismaTx;
   }) {
-    const { activity, entries, targetScaleType, windows } = args;
+    const { activity, entries, targetScaleType, windows, tx } = args;
     try {
       const calculatedAt =
         activity.startTime ?? activity.timestamp ?? new Date();
@@ -69,11 +71,12 @@ export class ActivityPerformanceTTWriterService {
         }
       }
 
-      await this.prisma.activityPerformanceTT.deleteMany({
+      const db = tx ?? this.prisma;
+      await db.activityPerformanceTT.deleteMany({
         where: { activityId: activity.id, targetScaleType },
       });
       if (data.length > 0) {
-        await this.prisma.activityPerformanceTT.createMany({
+        await db.activityPerformanceTT.createMany({
           data,
           skipDuplicates: true,
         });

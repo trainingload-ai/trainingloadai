@@ -1,4 +1,5 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import { ImportingJobService } from './importing-job.service';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { SensorFileQueryService } from '@/sensor/sensor-file-query.service';
@@ -21,9 +22,14 @@ import type {
 import type { StagedActivityParquetFile } from '@/sensor/sensor-data.service';
 import { SportCatalogService } from '@/sports/sport-catalog.service';
 import type { SportFamily } from '@/sports/sport-catalog.types';
+import {
+  buildCanonicalDatasetChecksum,
+  buildCanonicalDedupeKey,
+} from './source-adapters/trackswap-canonical.mapper';
 import { UserTimezoneInitializerService } from '@/timezone/user-timezone-initializer.service';
 import { ActivityAssociationService } from './activity-association.service';
 import {
+  ACTIVITY_DATASET_QUALITY_VERSION,
   ActivityDatasetSelectorService,
   type DatasetQuality,
 } from './activity-dataset-selector.service';
@@ -31,6 +37,11 @@ import { acquireActivityWriteLock } from '@/prisma/activity-write-lock';
 import { sanitizeActivityRecordSpeeds } from '@/algorithm/instantaneous-speed';
 import { providerFromSourceKind } from './external-provider-identity';
 import { replaceCanonicalStrengthRows } from './canonical-strength.materializer';
+import {
+  ACTIVITY_MATERIALIZATION_VERSION,
+  datasetRepairFingerprint,
+  type ActivityDatasetRepair,
+} from './activity-dataset-repair';
 
 type ResolvedCanonicalMaxSpeeds = {
   activity: number | null | undefined;
@@ -105,6 +116,7 @@ export type CanonicalDatasetCommitToken = {
   mappingType?: 'EXACT' | 'FUZZY' | 'MANUAL';
   confidence?: number;
   matchingFields: Record<string, unknown>;
+  repair?: ActivityDatasetRepair;
 };
 
 type MaterializeResult = {
@@ -241,7 +253,36 @@ export class CanonicalActivityMaterializer {
     private readonly datasetSelector: ActivityDatasetSelectorService,
     private readonly sensorFiles: SensorFileQueryService,
     private readonly ingest: ActivityIngestService,
+    private readonly jobs: ImportingJobService,
   ) {}
+
+  /**
+   * 解析最终活动名称。显式名称优先；只有需要生成兜底名称时，才补齐用户时区信号。
+   * 时区初始化可能写入用户时区，因此该方法保持异步并使用 resolve 命名。
+   */
+  private async resolveActivityName(args: {
+    userId: string;
+    summary: CanonicalActivityPayload['summary'];
+  }): Promise<string> {
+    // 如果活动名称显式指定，则直接返回
+    const explicitName = normalizeActivityName(args.summary.name);
+    if (explicitName) return explicitName;
+
+    // 如果活动名称未显式指定，则根据用户时区生成兜底名称 先获取用户时区
+    // 如果用户时区未指定，则根据用户可用的信号初始化用户时区
+    // 然后根据用户时区生成兜底名称
+    const timezone =
+      args.summary.timezone ??
+      (
+        await this.timezoneInitializer.initializeFromAvailableSignals(
+          args.userId,
+        )
+      ).timezone;
+    return buildFallbackActivityName({
+      ...args.summary,
+      timezone,
+    });
+  }
 
   private async bindSource(args: {
     activityId: number;
@@ -258,6 +299,23 @@ export class CanonicalActivityMaterializer {
     const sourceUpdatedAt = args.payload.summary.endTime
       ? new Date(args.payload.summary.endTime)
       : null;
+    const previous = await this.ingest.activitySource(args.client).findUnique({
+      where: {
+        activity_source_identity_unique: {
+          userId: args.userId,
+          sourceKind: args.payload.source.kind,
+          sourceUid: args.payload.source.sourceUid,
+        },
+      },
+      select: { sourceChecksum: true, metadata: true },
+    });
+    const sameVersion =
+      previous?.sourceChecksum ===
+      (args.payload.source.sourceChecksum ??
+        args.payload.identity.datasetChecksum)
+        ? (previous?.metadata as Record<string, unknown> | null)
+            ?.materializationVersion
+        : undefined;
     return this.ingest.activitySource(args.client).upsert({
       where: {
         activity_source_identity_unique: {
@@ -282,6 +340,7 @@ export class CanonicalActivityMaterializer {
           args.payload.identity.datasetChecksum,
         metadata: {
           ...(args.payload.metadata ?? {}),
+          materializationVersion: sameVersion ?? 0,
           checksumAlgorithm: 'sha256',
           ...(args.quality ? { datasetQuality: args.quality } : {}),
         } as Prisma.InputJsonValue,
@@ -309,6 +368,7 @@ export class CanonicalActivityMaterializer {
           args.payload.identity.datasetChecksum,
         metadata: {
           ...(args.payload.metadata ?? {}),
+          materializationVersion: sameVersion ?? 0,
           checksumAlgorithm: 'sha256',
           ...(args.quality ? { datasetQuality: args.quality } : {}),
         } as Prisma.InputJsonValue,
@@ -319,7 +379,7 @@ export class CanonicalActivityMaterializer {
       },
     });
   }
-
+  // 确定运动定义代码
   async resolveSportDefinitionCode(
     payload: CanonicalActivityPayload,
     provider: ThirdPartyProvider | null,
@@ -663,11 +723,28 @@ export class CanonicalActivityMaterializer {
     sourceObjectId?: string | null;
     payload: CanonicalActivityPayload;
     stagedParquetFiles: StagedActivityParquetFile[];
+    itemJobId?: string;
+    itemLockToken?: string;
   }): Promise<Activity> {
     const resolvedMaxSpeeds = resolveCanonicalMaxSpeeds(args.payload);
     return this.prisma.$transaction(async (tx) => {
       if (typeof tx.$executeRawUnsafe === 'function') {
         await acquireActivityWriteLock(tx, args.token.activityId);
+      }
+      if (args.itemJobId && args.itemLockToken) {
+        const owner = await this.jobs.itemJobs(tx).findFirst({
+          where: {
+            id: args.itemJobId,
+            userId: args.userId,
+            lockToken: args.itemLockToken,
+            status: 'PARQUET_BUILDING',
+            leaseExpiresAt: { gt: new Date() },
+          },
+          select: { id: true },
+        });
+        if (!owner) throw new Error('ACTIVITY_DATASET_REPAIR_ITEM_FENCED');
+      } else if (args.token.repair) {
+        throw new Error('ACTIVITY_DATASET_REPAIR_ITEM_FENCED');
       }
 
       const [activity, currentPrimary] = await Promise.all([
@@ -681,6 +758,7 @@ export class CanonicalActivityMaterializer {
             isActive: true,
           },
           orderBy: { createdAt: 'asc' },
+          include: { canonicalSnapshot: { select: { payload: true } } },
         }),
       ]);
       if (!activity) {
@@ -693,6 +771,58 @@ export class CanonicalActivityMaterializer {
           `Canonical primary changed while staging activity ${args.token.activityId}`,
         );
       }
+      let preserveDeferredSport = false;
+      if (args.token.repair) {
+        const files = await this.sensorFiles.parquetFiles(tx).findMany({
+          where: { activityId: activity.id },
+        });
+        const migration = await tx.activityDataMigration.findFirst({
+          where: {
+            id: args.token.repair.migrationId,
+            userId: args.userId,
+            status: 'MIGRATING',
+          },
+          select: { id: true, beforeManifest: true },
+        });
+        if (
+          !migration ||
+          !currentPrimary ||
+          activity.state !== 1 ||
+          currentPrimary.id !== args.token.repair.primarySourceId ||
+          datasetRepairFingerprint(activity, currentPrimary, files) !==
+            args.token.repair.expectedFingerprint
+        ) {
+          throw new Error('ACTIVITY_DATASET_REPAIR_CONFLICT');
+        }
+        const manifest = migration.beforeManifest as Prisma.JsonObject | null;
+        const report = manifest?.sportRepairs as Prisma.JsonObject | undefined;
+        const findings = report?.findings;
+        // Rebuilding sensor facts must not silently decide a deferred sport conflict.
+        preserveDeferredSport =
+          Array.isArray(findings) &&
+          findings.some(
+            (finding) =>
+              finding !== null &&
+              typeof finding === 'object' &&
+              !Array.isArray(finding) &&
+              finding.activityId === activity.id &&
+              finding.status === 'UNRESOLVED',
+          );
+      }
+
+      const previousSummary = (
+        currentPrimary?.canonicalSnapshot?.payload as unknown as
+          | CanonicalActivityPayload
+          | undefined
+      )?.summary;
+      const preserveSport =
+        args.token.repair &&
+        (preserveDeferredSport ||
+          (previousSummary &&
+            (activity.sportType !== previousSummary.sportType ||
+              (previousSummary.subSportType &&
+                activity.sportDefinitionCode !==
+                  previousSummary.subSportType))));
 
       await this.ingest.activitySource(tx).updateMany({
         where: {
@@ -714,6 +844,15 @@ export class CanonicalActivityMaterializer {
         quality: args.token.quality,
         client: tx,
       });
+      await this.ingest.activitySource(tx).update({
+        where: { id: source.id },
+        data: {
+          metadata: {
+            ...(source.metadata as Prisma.InputJsonObject),
+            materializationVersion: ACTIVITY_MATERIALIZATION_VERSION,
+          },
+        },
+      });
 
       const updated = await this.ingest.activity(tx).update({
         where: { id: args.token.activityId },
@@ -725,6 +864,13 @@ export class CanonicalActivityMaterializer {
             args.token.provider,
             resolvedMaxSpeeds.activity,
           ),
+          ...(preserveSport
+            ? {
+                sportType: activity.sportType,
+                sportDefinitionCode: activity.sportDefinitionCode,
+                subSport: activity.subSport,
+              }
+            : {}),
           processingStatus: ActivityProcessingStatus.ANALYZING,
           processingUpdatedAt: new Date(),
           readyAt: null,
@@ -957,7 +1103,11 @@ export class CanonicalActivityMaterializer {
       return updated;
     });
   }
-
+  /**
+   * 将 canonical payload 物化成 Activity
+   * @param args
+   * @returns
+   */
   async materialize(args: {
     itemJobId: string;
     userId: string;
@@ -966,6 +1116,7 @@ export class CanonicalActivityMaterializer {
     payload: CanonicalActivityPayload;
     thirdPartyActivityId?: number;
     conflictRecoveryAttempt?: boolean;
+    repair?: ActivityDatasetRepair;
   }): Promise<MaterializeResult> {
     // 实体化顺序：按来源复用 -> 按 dedupeKey 复用 -> 创建新 activity，并绑定 activitySource。
     const provider =
@@ -973,29 +1124,80 @@ export class CanonicalActivityMaterializer {
         ? ThirdPartyProvider.upload
         : (args.payload.source.provider ??
           providerFromSourceKind(args.payload.source.kind));
-    const snapshot = await this.upsertCanonicalSnapshot(args);
-    const explicitActivityName = normalizeActivityName(
-      args.payload.summary.name,
-    );
-    const titleTimezone =
-      args.payload.summary.timezone ??
-      (explicitActivityName
-        ? null
-        : (
-            await this.timezoneInitializer.initializeFromAvailableSignals(
-              args.userId,
-            )
-          ).timezone);
-    const activityName = buildFallbackActivityName({
-      ...args.payload.summary,
-      timezone: titleTimezone,
-    });
+    // 确定运动定义代码
     const sportDefinitionCode = await this.resolveSportDefinitionCode(
       args.payload,
       provider,
     );
+    // Retain the source subtype so a later repair preserves subtype-only edits.
+    args = {
+      ...args,
+      payload: {
+        ...args.payload,
+        summary: { ...args.payload.summary, subSportType: sportDefinitionCode },
+      },
+    };
+    if (
+      (!args.payload.summary.sportType ||
+        args.payload.summary.sportType === 'UNKNOWN') &&
+      sportDefinitionCode !== 'OTHER'
+    ) {
+      const definition = await this.sportCatalog.get(sportDefinitionCode);
+      if (definition && definition.family !== 'UNKNOWN') {
+        const summary = {
+          ...args.payload.summary,
+          sportType: definition.family,
+        };
+        const datasetChecksum = buildCanonicalDatasetChecksum({
+          sportType: summary.sportType,
+          startTime: summary.startTime,
+          endTime: summary.endTime,
+          distance: summary.distance,
+          elapsedTime: summary.elapsedTime,
+          timerTime: summary.timerTime,
+          laps: args.payload.laps ?? [],
+          records: args.payload.records ?? [],
+          lengths: args.payload.lengths ?? [],
+          strengthSets: args.payload.strengthSets,
+        });
+        args = {
+          ...args,
+          payload: {
+            ...args.payload,
+            summary,
+            source: {
+              ...args.payload.source,
+              sourceChecksum:
+                args.payload.source.sourceChecksum ===
+                args.payload.identity.datasetChecksum
+                  ? datasetChecksum
+                  : args.payload.source.sourceChecksum,
+            },
+            identity: {
+              ...args.payload.identity,
+              datasetChecksum,
+              dedupeKey: buildCanonicalDedupeKey({
+                sourceUid: args.payload.source.sourceUid,
+                sportType: summary.sportType,
+                startTime: summary.startTime,
+                distance: summary.distance,
+                elapsedTime: summary.elapsedTime,
+              }),
+            },
+          },
+        };
+      }
+    }
+    const snapshot = await this.upsertCanonicalSnapshot(args);
+    const activityName = await this.resolveActivityName({
+      userId: args.userId,
+      summary: args.payload.summary,
+    });
+    // 确定数据集质量
     const quality = this.datasetSelector.evaluate(args.payload);
+    // 确定最大速度
     const resolvedMaxSpeeds = resolveCanonicalMaxSpeeds(args.payload);
+    // 确定校验和
     const incomingChecksum =
       args.payload.source.sourceChecksum ??
       args.payload.identity.datasetChecksum;
@@ -1004,9 +1206,15 @@ export class CanonicalActivityMaterializer {
       payload: args.payload,
       thirdPartyActivityId: args.thirdPartyActivityId,
     });
+    if (args.repair && !association.activity) {
+      throw new Error('ACTIVITY_DATASET_REPAIR_TARGET_MISMATCH');
+    }
 
     if (association.activity) {
       const activity = association.activity;
+      if (args.repair && activity.id !== args.repair.activityId) {
+        throw new Error('ACTIVITY_DATASET_REPAIR_TARGET_MISMATCH');
+      }
       const incomingActiveStrengthSetCount = Array.isArray(
         args.payload.strengthSets,
       )
@@ -1037,7 +1245,12 @@ export class CanonicalActivityMaterializer {
         }),
         this.sensorFiles.parquetFiles().findMany({
           where: { activityId: activity.id },
-          select: { type: true, pointCount: true },
+          select: {
+            type: true,
+            pointCount: true,
+            parquetPath: true,
+            checksum: true,
+          },
         }),
         incomingActiveStrengthSetCount == null
           ? Promise.resolve(0)
@@ -1048,22 +1261,64 @@ export class CanonicalActivityMaterializer {
               },
             }),
       ]);
+      const repairCommitted =
+        args.repair &&
+        (currentPrimary?.metadata as Record<string, unknown> | null)
+          ?.repairItemJobId === args.itemJobId;
+      if (args.repair && !repairCommitted) {
+        const migration = await this.prisma.activityDataMigration.findFirst({
+          where: {
+            id: args.repair.migrationId,
+            userId: args.userId,
+            status: 'MIGRATING',
+          },
+          select: { id: true },
+        });
+        if (
+          !migration ||
+          activity.state !== 1 ||
+          !currentPrimary ||
+          existingSource?.id !== currentPrimary.id ||
+          currentPrimary.id !== args.repair.primarySourceId ||
+          incomingChecksum !== args.repair.sourceChecksum ||
+          datasetRepairFingerprint(
+            activity,
+            currentPrimary,
+            currentParquetFiles,
+          ) !== args.repair.expectedFingerprint
+        ) {
+          throw new Error('ACTIVITY_DATASET_REPAIR_CONFLICT');
+        }
+      }
+      if (args.repair) {
+        args.payload.metadata = {
+          ...args.payload.metadata,
+          repairItemJobId: args.itemJobId,
+        };
+      }
       const storedCurrentQuality = ((
         currentPrimary?.metadata as Record<string, unknown> | null
       )?.datasetQuality ?? null) as DatasetQuality | null;
       const currentPayload = currentPrimary?.canonicalSnapshot
         ?.payload as unknown as CanonicalActivityPayload | undefined;
       const currentQuality =
-        storedCurrentQuality ??
-        (currentPayload
+        currentPayload &&
+        storedCurrentQuality?.version !== ACTIVITY_DATASET_QUALITY_VERSION
           ? this.datasetSelector.evaluate(currentPayload)
-          : currentPrimary
-            ? this.datasetSelector.evaluateLegacyActivity(
-                activity,
-                currentParquetFiles,
-              )
-            : null);
-      if (currentPrimary && !storedCurrentQuality && currentQuality) {
+          : (storedCurrentQuality ??
+            (currentPayload
+              ? this.datasetSelector.evaluate(currentPayload)
+              : currentPrimary
+                ? this.datasetSelector.evaluateLegacyActivity(
+                    activity,
+                    currentParquetFiles,
+                  )
+                : null));
+      if (
+        currentPrimary &&
+        currentQuality &&
+        storedCurrentQuality?.version !== currentQuality.version
+      ) {
         const metadata =
           currentPrimary.metadata &&
           typeof currentPrimary.metadata === 'object' &&
@@ -1077,7 +1332,7 @@ export class CanonicalActivityMaterializer {
               ...metadata,
               datasetQuality: currentQuality,
               datasetQualityOrigin: currentPayload
-                ? 'canonical_snapshot_backfill'
+                ? 'canonical_snapshot_v2'
                 : 'legacy_activity_estimate_v1',
             } as Prisma.InputJsonValue,
           },
@@ -1124,7 +1379,10 @@ export class CanonicalActivityMaterializer {
         (existingSource?.isPrimary || sameChecksum || !currentPrimary),
       );
       const shouldRebuild =
-        primaryChanged || primaryDatasetChanged || recoveryRequired;
+        primaryChanged ||
+        primaryDatasetChanged ||
+        recoveryRequired ||
+        Boolean(args.repair && !repairCommitted);
       const isPrimary = Boolean(existingSource?.isPrimary || promote);
 
       if (
@@ -1190,6 +1448,7 @@ export class CanonicalActivityMaterializer {
               associationReason: association.reason,
               ...(association.matchingFields ?? {}),
             },
+            repair: args.repair,
           },
         };
       }

@@ -112,8 +112,7 @@ export class ActivityMetricsPreloaderService {
     },
   ): Promise<MetricsContext> {
     const { activity } = ctx.inputs;
-    const listKey =
-      `list:${args.type}:${args.scaleType}` as PeakMetricListKey;
+    const listKey = `list:${args.type}:${args.scaleType}` as PeakMetricListKey;
     const existing = ctx.cache.peakMetricLists?.[listKey];
     if (existing) return ctx;
 
@@ -149,9 +148,7 @@ export class ActivityMetricsPreloaderService {
     type: PeakType;
     scaleType: ScaleType;
   }): Promise<{
-    peakMetricLists: Partial<
-      Record<PeakMetricListKey, PeakMetricListItem[]>
-    >;
+    peakMetricLists: Partial<Record<PeakMetricListKey, PeakMetricListItem[]>>;
   } | null> {
     const rows = await this.prisma.activityPeakMetric.findMany({
       where: {
@@ -176,8 +173,7 @@ export class ActivityMetricsPreloaderService {
 
     if (list.length === 0) return null;
 
-    const listKey =
-      `list:${args.type}:${args.scaleType}` as PeakMetricListKey;
+    const listKey = `list:${args.type}:${args.scaleType}` as PeakMetricListKey;
     return { peakMetricLists: { [listKey]: list } };
   }
 }

@@ -86,8 +86,35 @@ export function calculateFieldLthr(
   };
 }
 
-export const LTHR_OBSERVATION_ALGORITHM_VERSION = 1;
+export const LTHR_OBSERVATION_ALGORITHM_VERSION = 2;
 export const LTHR_OBSERVATION_SCAN_STEP_SECONDS = 30;
+
+export function lthrActivityDurationSeconds(activity: {
+  startTime?: Date | null;
+  endTime?: Date | null;
+  elapsedTime?: number | null;
+  timerTime?: number | null;
+}): number | null {
+  const duration =
+    activity.startTime && activity.endTime
+      ? (activity.endTime.getTime() - activity.startTime.getTime()) / 1000
+      : Math.max(activity.elapsedTime ?? 0, activity.timerTime ?? 0);
+  return Number.isFinite(duration) && duration > 0 ? duration : null;
+}
+
+export function lthrObservationWithinActivity(
+  observation: { windowStartSec: number; windowEndSec: number },
+  duration: number | null,
+): boolean {
+  return (
+    duration != null &&
+    Number.isFinite(observation.windowStartSec) &&
+    Number.isFinite(observation.windowEndSec) &&
+    observation.windowStartSec >= 0 &&
+    observation.windowEndSec > observation.windowStartSec &&
+    observation.windowEndSec <= duration
+  );
+}
 
 export type ObservedLthrCandidate = {
   value: number;

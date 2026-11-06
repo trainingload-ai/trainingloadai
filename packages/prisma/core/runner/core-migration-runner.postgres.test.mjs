@@ -139,6 +139,7 @@ postgresTest(
         { id: "0013_better_auth_jwks_metadata", source: "baseline" },
         { id: "0014_better_auth_oauth_provider_17", source: "baseline" },
         { id: "0015_fit_strength_sets", source: "baseline" },
+        { id: "0016_chronological_fitness_replay", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,

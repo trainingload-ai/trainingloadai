@@ -30,6 +30,7 @@ export type NotificationDisplay = {
   tone: NotificationTone;
   summary: NotificationSummaryItem[];
   actionLabel?: string;
+  actionHref?: string;
 };
 
 export type ThirdPartyExportFailedData = {
@@ -96,27 +97,49 @@ export function resolveNotificationDisplay(
   ) {
     const d = (item.data ?? {}) as ImportBatchData;
     const total = valueToString(d.totalCount);
-    const success = valueToString(d.successCount);
-    const failed = valueToString(d.failedCount);
-    const skipped = valueToString(d.skippedCount);
+    const successCount = Number(d.successCount ?? 0);
+    const failedCount = Number(d.failedCount ?? 0);
+    const skippedCount = Number(d.skippedCount ?? 0);
+    const success = valueToString(successCount);
+    const failed = valueToString(failedCount);
+    const skipped = valueToString(skippedCount);
     const isWarning = kind === "IMPORT_BATCH_PARTIAL_FAILED";
+    const summary: NotificationSummaryItem[] = [
+      { label: t("summary.available"), value: success, tone: "success" },
+    ];
+    if (failedCount > 0) {
+      summary.push({
+        label: t("summary.failed"),
+        value: failed,
+        tone: "warning",
+      });
+    }
+    if (skippedCount > 0) {
+      summary.push({
+        label: t("summary.skipped"),
+        value: skipped,
+        tone: "neutral",
+      });
+    }
     return {
-      title: t(`kinds.${kind}.title`),
+      title: t(`kinds.${kind}.title`, { total, success, failed, skipped }),
       bodyMarkdown: t(`kinds.${kind}.body`, {
         total,
         success,
         failed,
         skipped,
       }),
-      eyebrow: t(
-        isWarning ? "templates.importWarning" : "templates.importSuccess",
-      ),
+      preview: t(`kinds.${kind}.preview`, {
+        total,
+        success,
+        failed,
+        skipped,
+      }),
+      eyebrow: t("templates.importResult"),
       tone: isWarning ? "warning" : "success",
-      summary: [
-        { label: t("summary.success"), value: success, tone: "success" },
-        { label: t("summary.failed"), value: failed, tone: "warning" },
-        { label: t("summary.skipped"), value: skipped, tone: "neutral" },
-      ],
+      summary,
+      actionLabel: t("viewActivities"),
+      actionHref: "/activities",
     };
   }
 

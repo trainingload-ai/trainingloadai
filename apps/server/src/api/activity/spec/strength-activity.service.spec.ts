@@ -5,7 +5,6 @@ import { PlanRepository } from '@/api/plan/persistence/plan.repository';
 import { PlanWorkoutRepository } from '@/api/plan/persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '@/api/plan/persistence/plan-activity-link.repository';
 import { CoachContextRepository } from '@/api/plan/persistence/coach-context.repository';
-import { PMC_INVALIDATE_EVENT } from '@/training-load/events/pmc.events';
 import { StrengthActivityService } from '../strength-activity.service';
 
 function createPlanQuery(prisma: object) {
@@ -19,12 +18,11 @@ function createPlanQuery(prisma: object) {
   );
 }
 
-function createService(prisma: object, events?: object) {
+function createService(prisma: object) {
   return new StrengthActivityService(
     prisma as never,
     new WorkoutPersistenceService(new PlanWorkoutRepository({} as never)),
     createPlanQuery(prisma),
-    events as never,
   );
 }
 
@@ -350,6 +348,7 @@ describe('StrengthActivityService', () => {
       activity: { update: jest.fn(async () => ({})) },
       planWorkout: { update: jest.fn(async () => ({})) },
       planWorkoutActivityLink: { update: jest.fn(async () => ({})) },
+      activityRecomputeJob: { create: jest.fn(async () => ({})) },
     };
     const prisma = {
       activity: {
@@ -372,8 +371,7 @@ describe('StrengthActivityService', () => {
         callback(tx),
       ),
     };
-    const emitAsync = jest.fn(async () => []);
-    const service = createService(prisma, { emitAsync });
+    const service = createService(prisma);
 
     const result = await service.finish('strength-activity', 'user-1', {
       durationSeconds: 1800,
@@ -393,17 +391,20 @@ describe('StrengthActivityService', () => {
         elapsedTime: 1800,
         sessionRpe: 7,
         status: 'FINISHED',
-        processingStatus: 'READY',
+        processingStatus: 'ANALYZING',
+        readyAt: null,
       }),
     });
     expect(tx.planWorkout.update).toHaveBeenCalledWith({
       where: { id: 'workout-1' },
       data: expect.objectContaining({ status: 'DONE' }),
     });
-    expect(emitAsync).toHaveBeenCalledWith(
-      PMC_INVALIDATE_EVENT,
-      expect.objectContaining({ userId: 'user-1' }),
-    );
+    expect(tx.activityRecomputeJob.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: 'user-1',
+        metricType: 'ACTIVITY_INPUT',
+      }),
+    });
   });
 
   it('finishes a free strength activity without updating a plan workout', async () => {
@@ -411,6 +412,7 @@ describe('StrengthActivityService', () => {
       activity: { update: jest.fn(async () => ({})) },
       planWorkout: { update: jest.fn(async () => ({})) },
       planWorkoutActivityLink: { update: jest.fn(async () => ({})) },
+      activityRecomputeJob: { create: jest.fn(async () => ({})) },
     };
     const prisma = {
       activity: {
@@ -442,7 +444,10 @@ describe('StrengthActivityService', () => {
     });
     expect(tx.activity.update).toHaveBeenCalledWith({
       where: { id: 43 },
-      data: expect.objectContaining({ processingStatus: 'READY' }),
+      data: expect.objectContaining({
+        processingStatus: 'ANALYZING',
+        readyAt: null,
+      }),
     });
     expect(tx.planWorkout.update).not.toHaveBeenCalled();
     expect(tx.planWorkoutActivityLink.update).not.toHaveBeenCalled();

@@ -28,12 +28,36 @@ function createService(args?: {
   const users = {
     profiles: () => prisma.userProfile,
   };
+  const analysisConfigs = {
+    resolveAt: jest.fn(async (userId: string) => ({
+      loadSources: String(
+        args?.profileByUserId?.[userId]?.loadSources ??
+          'POWER,HEART_RATE,PACE,SESSIONRPE',
+      )
+        .split(',')
+        .map((value) => value.trim().toUpperCase()),
+    })),
+    listVersions: jest.fn(async (userId: string) => [
+      {
+        loadSources: String(
+          args?.profileByUserId?.[userId]?.loadSources ??
+            'POWER,HEART_RATE,PACE,SESSIONRPE',
+        )
+          .split(',')
+          .map((value) => value.trim().toUpperCase()),
+      },
+    ]),
+    resolveFromVersions: jest.fn(
+      (versions: Array<{ loadSources: string[] }>) => versions.at(-1) ?? null,
+    ),
+  };
   const service = new LoadReadoutService(
     prisma as never,
     activityRead as never,
     users as never,
+    analysisConfigs as never,
   );
-  return { service, prisma };
+  return { service, prisma, analysisConfigs };
 }
 
 function activity(overrides: Record<string, unknown> = {}) {
@@ -267,7 +291,7 @@ describe('LoadReadoutService.getActualLoadForActivity', () => {
 
 describe('LoadReadoutService.batchGetActualLoad', () => {
   it('loads user preferences once per user and returns readouts by activity id', async () => {
-    const { service, prisma } = createService({
+    const { service, prisma, analysisConfigs } = createService({
       profileByUserId: {
         'user-1': { loadSources: 'PACE,POWER' },
         'user-2': { loadSources: 'HEART_RATE,SESSIONRPE' },
@@ -305,7 +329,8 @@ describe('LoadReadoutService.batchGetActualLoad', () => {
       where: readyActivityWhere({ id: { in: [101, 102, 201] } }),
       select: expect.any(Object),
     });
-    expect(prisma.userProfile.findUnique).toHaveBeenCalledTimes(2);
+    expect(analysisConfigs.listVersions).toHaveBeenCalledTimes(2);
+    expect(prisma.userProfile.findUnique).not.toHaveBeenCalled();
     expect(readouts.get(101)).toEqual({
       actualLoad: 45,
       actualLoadSource: 'PACE',

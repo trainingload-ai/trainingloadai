@@ -2,6 +2,18 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 
+/** Transaction-scoped catalog read used by the standalone maintenance auditor. */
+export function readImportSportCatalog(tx: Prisma.TransactionClient) {
+  return Promise.all([
+    tx.sportDefinition.findMany({
+      select: { code: true, family: true, active: true },
+    }),
+    tx.providerSportMapping.findMany({
+      where: { active: true, direction: { in: ['IMPORT', 'BOTH'] } },
+    }),
+  ]);
+}
+
 @Injectable()
 export class SportCatalogRepository {
   constructor(private readonly prisma: PrismaService) {}

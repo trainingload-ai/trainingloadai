@@ -3,6 +3,33 @@ import { SportCatalogService } from '../sport-catalog.service';
 import { SportCatalogRepository } from '../persistence/sport-catalog.repository';
 
 describe('SportCatalogService', () => {
+  it('recognizes legacy camelCase FIT sub_sport names against the existing catalog', async () => {
+    const findMappingFirst = jest
+      .fn<() => Promise<any>>()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        externalCode: 'TRAINING',
+        externalSubCode: 'STRENGTH_TRAINING',
+        sport: { code: 'STRENGTH_TRAINING', family: 'UNKNOWN' },
+      });
+    const service = new SportCatalogService({ findMappingFirst } as never);
+    await expect(
+      service.fromProvider({
+        provider: 'upload',
+        externalCode: 'training',
+        externalSubCode: 'strengthTraining',
+      }),
+    ).resolves.toMatchObject({ sport: { code: 'STRENGTH_TRAINING' } });
+    expect(findMappingFirst).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          externalSubCode: {
+            in: expect.arrayContaining(['STRENGTH_TRAINING']),
+          },
+        }),
+      }),
+    );
+  });
   function createService() {
     const sports = [
       {
@@ -58,20 +85,22 @@ describe('SportCatalogService', () => {
         findMany: jest.fn(async () => sports),
       },
       providerSportMapping: {
-        findFirst: jest.fn(async ({ where }: { where: Record<string, unknown> }) => {
-          const mapping = mappings.find(
-            (item) =>
-              item.provider === where.provider &&
-              (where.sportCode
-                ? item.sportCode === where.sportCode
-                : item.externalCode === where.externalCode),
-          );
-          if (!mapping) return null;
-          return {
-            ...mapping,
-            sport: sports.find((sport) => sport.code === mapping.sportCode),
-          };
-        }),
+        findFirst: jest.fn(
+          async ({ where }: { where: Record<string, unknown> }) => {
+            const mapping = mappings.find(
+              (item) =>
+                item.provider === where.provider &&
+                (where.sportCode
+                  ? item.sportCode === where.sportCode
+                  : item.externalCode === where.externalCode),
+            );
+            if (!mapping) return null;
+            return {
+              ...mapping,
+              sport: sports.find((sport) => sport.code === mapping.sportCode),
+            };
+          },
+        ),
       },
     };
     return new SportCatalogService(new SportCatalogRepository(prisma as never));

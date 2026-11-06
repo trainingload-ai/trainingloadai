@@ -1,9 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { MetricSource, SportType, UserFitnessMetricType } from '@prisma/client';
-import {
-  USER_FITNESS_INVALIDATED_EVENT,
-  USER_VO2_MAX_SETTINGS_CHANGED_EVENT,
-} from '@/api/user/events/user-fitness.events';
+import { USER_FITNESS_INVALIDATED_EVENT } from '@/api/user/events/user-fitness.events';
 import { UserFitnessInvalidateListener } from '../user-fitness-invalidate.listener';
 
 describe('UserFitnessInvalidateListener', () => {
@@ -20,7 +17,6 @@ describe('UserFitnessInvalidateListener', () => {
         fitnessMetricActivityRecomputeEnabled: true,
         isAutoUpdateMetricSupported: () => true,
       } as never,
-      {} as never,
     );
 
     await listener.handle({
@@ -54,7 +50,6 @@ describe('UserFitnessInvalidateListener', () => {
         fitnessMetricActivityRecomputeEnabled: false,
         isAutoUpdateMetricSupported: () => true,
       } as never,
-      {} as never,
     );
 
     await listener.handle({
@@ -66,21 +61,5 @@ describe('UserFitnessInvalidateListener', () => {
     });
 
     expect(scheduleFitnessMetricChangeRecompute).not.toHaveBeenCalled();
-  });
-
-  it('refreshes the canonical VO2 max immediately after its settings change', async () => {
-    const updateGlobalMetrics = jest.fn(async () => undefined);
-    const listener = new UserFitnessInvalidateListener(
-      {} as never,
-      { fitnessMetricActivityRecomputeEnabled: false } as never,
-      { updateGlobalMetrics } as never,
-    );
-
-    await listener.handleVo2MaxSettingsChanged({ userId: 'user-1' });
-
-    expect(updateGlobalMetrics).toHaveBeenCalledWith('user-1');
-    expect(USER_VO2_MAX_SETTINGS_CHANGED_EVENT).toBe(
-      'user.vo2MaxSettingsChanged',
-    );
   });
 });

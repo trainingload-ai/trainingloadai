@@ -178,12 +178,46 @@ describe("MobileCalendarTimeline", () => {
     expect(
       screen
         .getByText("CalendarExperience.sportLabels.run · 10.0 km · 1h")
-        .closest(".flex-wrap"),
+        .closest(".flex-col"),
     ).not.toBeNull();
     expect(
       screen.getByText("actualLoad").parentElement?.parentElement,
     ).toHaveClass("self-center");
     expect(screen.queryByText("TSS")).toBeNull();
+  });
+
+  it("limits a busy fixed-height day to two tags and counts every remaining session", () => {
+    const date = dayjs("2026-11-03");
+    const onSelectDate = vi.fn();
+    render(
+      <MobileCalendarTimeline
+        days={[date]}
+        selectedDate={date}
+        onSelectDate={onSelectDate}
+        activitiesByDate={{
+          "2026-11-03": Array.from({ length: 17 }, (_, index) => ({
+            id: index + 1,
+            sportType: "RUN",
+            distance: 16400 + index * 100,
+            duration: 5200,
+          })),
+        }}
+        workoutsByDate={{}}
+        competitionEventsByDate={{}}
+        tssByDate={{ "2026-11-03": 1034 }}
+      />,
+    );
+
+    const row = screen.getByRole("button");
+    expect(row).toHaveStyle({ height: "90px" });
+    expect(row).toHaveClass("overflow-hidden");
+    expect(
+      row.querySelectorAll('[data-slot="calendar-session-tag"]'),
+    ).toHaveLength(2);
+    expect(screen.getByText("+15")).toBeVisible();
+    expect(screen.getByText("1034")).toBeVisible();
+    fireEvent.click(screen.getByText("+15"));
+    expect(onSelectDate).toHaveBeenCalledWith(date);
   });
 
   it("omits unsupported distance from a generic workout summary", () => {

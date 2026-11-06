@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 280 |
+| Environment variables | 284 |
 | External URL literals | 179 |
 | Filesystem write sites | 214 |
-| Runtime variables missing from configuration docs | 217 |
+| Runtime variables missing from configuration docs | 221 |
 
 ## Undocumented runtime variables
 
@@ -44,6 +44,9 @@
 - `ACTIVITY_RECOMPUTE_WORKER_ENABLED` — apps
 - `ACTIVITY_RECOMPUTE_WORKER_MAX_ATTEMPTS` — apps
 - `ACTIVITY_RECOMPUTE_WORKER_POLL_MS` — apps
+- `ACTIVITY_REPLAY_DATA_REPAIR_CONCURRENCY` — apps
+- `ACTIVITY_REPLAY_GLOBAL_CONCURRENCY` — apps
+- `ACTIVITY_REPLAY_LEASE_SECONDS` — apps
 - `ACTIVITY_WEATHER_WORKER_BATCH_SIZE` — apps
 - `ACTIVITY_WEATHER_WORKER_CONCURRENCY` — apps
 - `ACTIVITY_WEATHER_WORKER_LEASE_MS` — apps
@@ -115,6 +118,7 @@
 - `DESKTOP_INTERNAL_CREDENTIAL` — apps
 - `DOCS_INTERNAL_API_URL` — apps
 - `DOMAIN_BASE` — apps
+- `FIT_CORPUS_ENV_FILE` — apps
 - `FITNESS_ASSESSMENT_ENABLED` — apps
 - `FITNESS_DISABLED_METHODS` — apps
 - `FITNESS_ESTIMATE_APPLY_ENABLED` — apps

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "3fc51110b2b43c1d021bfdd2431278e00d0be13176ef95077d01a4e9a89f488f",
+  "schemaChecksum": "f92236a5eb10af574ecccb16fc194a052c1da057e70183154254ed0d4c506ccf",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -76,6 +76,21 @@
       "id": "0015_fit_strength_sets",
       "file": "0015_fit_strength_sets/migration.sql",
       "sha256": "169156d3879526063656a6b9dfafd04ad834b9cc2265166b4e964dd96a86521e"
+    },
+    {
+      "id": "0016_chronological_fitness_replay",
+      "file": "0016_chronological_fitness_replay/migration.sql",
+      "sha256": "0c565ebf60637197b3a495d91f139090bbaa827d118eb0afe2fe9bde3a264f1b"
+    },
+    {
+      "id": "0017_activity_data_migration",
+      "file": "0017_activity_data_migration/migration.sql",
+      "sha256": "5d058fff32db4eb83039a962df25935c5821b9e7873348e3f3bf38210020b9bd"
+    },
+    {
+      "id": "0018_activity_sport_catalog",
+      "file": "0018_activity_sport_catalog/migration.sql",
+      "sha256": "8bec6231abde9d3ad097f386c91ee0a4f109e303ac38b97eff67736614bf31be"
     }
   ]
 }

@@ -8,6 +8,7 @@ import { computeAerobicDecoupling } from '@/algorithm/AerobicDecoupling';
 import {
   averageKnownValues,
   resampleObservedValues,
+  observedHeartRateSamples,
 } from '@/algorithm/time-series-metrics';
 import { calculateMaxHrDrop } from '@/algorithm/heart-rate';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
@@ -53,6 +54,8 @@ export class HeartRateBaseTask implements MetricsTask {
     if (!userId || !activity?.id || !activity.startTime) return ctx;
 
     let next = ctx;
+
+    if (next.cache.resolvedFitnessContext) return next;
 
     if (
       !next.cache.profile ||
@@ -107,17 +110,7 @@ export class HeartRateBaseTask implements MetricsTask {
     if (!sensorData.length || hrRecords.length < 2) return ctx;
 
     const avg = averageKnownValues(
-      resampleObservedValues(
-        sensorData.map((record) => ({
-          tMs: record.tMs,
-          value:
-            typeof record.heartRate === 'number' &&
-            Number.isFinite(record.heartRate) &&
-            record.heartRate > 0
-              ? record.heartRate
-              : null,
-        })),
-      ).values,
+      resampleObservedValues(observedHeartRateSamples(rows)).values,
     );
     if (!(avg > 0)) return ctx;
     const base = {
@@ -152,7 +145,11 @@ export class HeartRateBaseTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const base = ctx.outputs.heartRateBase;
     if (!activity?.id || !base) return ctx;
-    await this.persistence.saveActivityHeartRateBaseFields(activity.id, base);
+    await this.persistence.saveActivityHeartRateBaseFields(
+      activity.id,
+      base,
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

@@ -1,3 +1,4 @@
+import { ImportingJobService } from '@/importing/importing-job.service';
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -32,6 +33,7 @@ export class StorageObjectGarbageCollectorService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     private readonly sensorFiles: SensorFileQueryService,
     private readonly healthFiles: HealthFileQueryService,
+    private readonly importJobs: ImportingJobService,
   ) {}
 
   async enqueueObjects(
@@ -117,6 +119,26 @@ export class StorageObjectGarbageCollectorService {
       STORAGE_GARBAGE_CONCURRENCY,
       async (row) => {
         try {
+          // Recovery pins outlive successful migration jobs. Recheck even after
+          // claim so a pin committed while a GC page was loading is respected.
+          const retained = await this.prisma.storageObjectRetention.findFirst({
+            where: {
+              bucket: row.bucket,
+              objectKey: row.objectKey,
+              releasedAt: null,
+            },
+            select: { id: true },
+          });
+          if (retained) {
+            await this.sensorFiles.garbage().update({
+              where: { id: row.id },
+              data: {
+                lockedAt: null,
+                availableAt: new Date(Date.now() + 3_600_000),
+              },
+            });
+            return;
+          }
           // 同名 key 在不同 bucket 中是不同对象，只检查该 bucket 对应的 manifest。
           const liveReference =
             row.bucket === 'public'
@@ -132,6 +154,23 @@ export class StorageObjectGarbageCollectorService {
               : row.bucket === 'default'
                 ? (
                     await Promise.all([
+                      this.importJobs.sourceObjects().findFirst({
+                        where: {
+                          OR: [
+                            { fileKey: row.objectKey },
+                            { rawStorageKey: row.objectKey },
+                          ],
+                        },
+                        select: { id: true },
+                      }),
+                      this.prisma.activitySource.findFirst({
+                        where: { fileKey: row.objectKey },
+                        select: { id: true },
+                      }),
+                      this.prisma.activity.findFirst({
+                        where: { fileKey: row.objectKey },
+                        select: { id: true },
+                      }),
                       this.sensorFiles.parquetFiles().findFirst({
                         where: { parquetPath: row.objectKey },
                         select: { id: true },
@@ -200,6 +239,12 @@ export class StorageObjectGarbageCollectorService {
         SELECT candidate."id"
         FROM "t_storage_object_garbage" AS candidate
         WHERE candidate."available_at" <= NOW()
+          AND NOT EXISTS (
+            SELECT 1 FROM "t_storage_object_retention" retention
+            WHERE retention."bucket" = candidate."bucket"
+              AND retention."object_key" = candidate."object_key"
+              AND retention."released_at" IS NULL
+          )
           AND (
             candidate."locked_at" IS NULL
             OR candidate."locked_at" < ${staleBefore}

@@ -27,9 +27,7 @@ describe('PmcInvalidateListener', () => {
     const startDate = new Date('2026-08-01T00:00:00.000Z');
     const endDate = new Date('2026-08-18T00:00:00.000Z');
 
-    await listener.handle(
-      new PmcInvalidateEvent('user-1', startDate, endDate),
-    );
+    await listener.handle(new PmcInvalidateEvent('user-1', startDate, endDate));
 
     expect(calculatePMC).toHaveBeenCalledWith({
       userId: 'user-1',
@@ -37,5 +35,28 @@ describe('PmcInvalidateListener', () => {
       endDate,
     });
     expect(recalculatePMC).not.toHaveBeenCalled();
+  });
+
+  it('can suppress Athlete State side effects without skipping PMC', async () => {
+    const recalculatePMC = jest.fn(async () => true);
+    const calculatePMC = jest.fn(async () => []);
+    const emitAsync = jest.fn(async () => []);
+    const listener = new PmcInvalidateListener(
+      { recalculatePMC, calculatePMC } as never,
+      { emitAsync } as never,
+    );
+    const startDate = new Date('2026-08-01T00:00:00.000Z');
+    const endDate = new Date('2026-08-18T00:00:00.000Z');
+
+    await listener.handle(
+      new PmcInvalidateEvent('user-1', startDate, endDate, true),
+    );
+
+    expect(calculatePMC).toHaveBeenCalledWith({
+      userId: 'user-1',
+      startDate,
+      endDate,
+    });
+    expect(emitAsync).not.toHaveBeenCalled();
   });
 });

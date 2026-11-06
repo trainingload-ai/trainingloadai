@@ -669,6 +669,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.4.2
+      dotenv-expand:
+        specifier: 12.0.3
+        version: 12.0.3
       express:
         specifier: 5.2.1
         version: 5.2.1

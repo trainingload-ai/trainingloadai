@@ -428,6 +428,12 @@ const activity = recordSchema({
       "The normalized activity training stress score.",
     ),
     intensityFactor: number("The dimensionless intensity factor."),
+    actualLoad: number(
+      "The activity load selected at analysis time using the then-effective load-source order.",
+    ),
+    actualLoadSource: string(
+      "The frozen source used for actualLoad: POWER, HEART_RATE, PACE, or SESSIONRPE.",
+    ),
     perceivedExertion: number(
       "The user-reported rating of perceived exertion.",
     ),

@@ -128,6 +128,7 @@ export class PaceGovssTask implements MetricsTask {
       activity.id,
       activity.sportType,
       govss,
+      ctx.persistenceTx,
     );
     return ctx;
   }

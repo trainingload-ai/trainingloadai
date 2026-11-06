@@ -144,4 +144,16 @@ describe('composed user profile helpers', () => {
     expect(swim.tp).toBeUndefined();
     expect(swim.defaultVdotSource).toBeUndefined();
   });
+
+  it('calculates age at the activity instant instead of wall-clock now', () => {
+    const profile = composeUserProfile({
+      sport: SportType.RUN,
+      base: null,
+      bodyMetrics: [{ type: BodyMetricType.BIRTHDAY, value: '2000-06-15' }],
+      fitnessMetrics: [],
+      asOf: new Date('2020-06-14T12:00:00.000Z'),
+    });
+
+    expect(profile.age).toBe(19);
+  });
 });

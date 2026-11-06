@@ -19,6 +19,7 @@ import { Link } from "@/i18n/navigation";
 import { getActivityDataChartsForSport } from "@/lib/activity-data-charts";
 import { getActivityDetailPolicy } from "@/lib/activity-detail-policy";
 import { GenericActivityDataNotice } from "@/components/activities/generic-activity-data-notice";
+import { getOtherActivitySummaryCapabilities } from "@/lib/activity-presentation";
 import { invalidateActivityDerivedCaches } from "@/lib/query-invalidation";
 import { queryKeys } from "@/lib/query-keys";
 import { useStore } from "@/lib/store";
@@ -398,6 +399,10 @@ export function MobileActivityDetailSheetContent({
   const sportType = String(activity.sportType ?? "").toUpperCase();
   const detailPolicy = getActivityDetailPolicy(activity);
   const isOther = detailPolicy.group === "OTHER";
+  const otherCapabilities = getOtherActivitySummaryCapabilities(
+    sportCatalog,
+    activity,
+  );
   const otherStats = [
     {
       label: t("activities.duration"),
@@ -504,7 +509,28 @@ export function MobileActivityDetailSheetContent({
             },
           ];
   const stats = isOther
-    ? otherStats
+    ? [
+        otherStats[0],
+        ...(otherCapabilities.showDistance
+          ? [
+              {
+                label: t("activities.distance"),
+                value: valueOrDash(activity.distance, "distance", systemUnit),
+                unit: getUnit("distance", systemUnit),
+              },
+            ]
+          : []),
+        ...(otherCapabilities.showSpeed
+          ? [
+              {
+                label: t("activityDetails.avgSpeed"),
+                value: valueOrDash(activity.averageSpeed, "speed", systemUnit),
+                unit: getUnit("speed", systemUnit),
+              },
+            ]
+          : []),
+        ...otherStats.slice(1),
+      ]
     : [
         ...primaryStats,
         {

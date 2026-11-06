@@ -12,14 +12,15 @@ import {
   MetricSource,
   PMCExtremeType,
   Gender,
+  BodyMetricType,
 } from '@prisma/client';
 import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
 import { round } from 'lodash';
 import {
   computeBanisterWithFit,
   computePowerIndex,
 } from '@/algorithm/banister';
-import { TimeDecayEstimator } from '@/algorithm/time-decay';
 import {
   normalizeVo2MaxSourcePreference,
   resolveEffectiveActivityVo2Max,
@@ -39,6 +40,31 @@ import {
   PMC_ALGORITHM_VERSION,
   timeConstantDecayFactor,
 } from './pmc-formula';
+import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
+import {
+  activityLocalDate,
+  localDateKeyToUtcDate,
+  resolveActivityAnalysisTimezone,
+} from './activity-local-date';
+
+dayjs.extend(utc);
+
+/**
+ * PMC 的 `date` 不是一个瞬时时刻，而是用 UTC 零点承载的日历日期。
+ * 因此所有 PMC 游标、分组键和查询边界都必须使用 UTC；如果使用宿主机
+ * 本地时区，同一条数据库记录会在不同时区的实例上落入不同日期。
+ */
+function pmcDayStart(value: Date | string | number = new Date()) {
+  return dayjs.utc(value).startOf('day');
+}
+
+function pmcDayEnd(value: Date | string | number = new Date()) {
+  return dayjs.utc(value).endOf('day');
+}
+
+function pmcDateKey(value: Date | string | number) {
+  return dayjs.utc(value).format('YYYY-MM-DD');
+}
 
 export type { PmcListRangeOptions, PmcLoadSums };
 
@@ -135,6 +161,7 @@ export class PMCService {
     private readonly activityRead: ActivityReadService,
     private readonly loadReadout: LoadReadoutService,
     private readonly users: UserQueryService,
+    private readonly analysisConfigs: UserAnalysisConfigService,
   ) {}
 
   async listRange(
@@ -245,61 +272,29 @@ export class PMCService {
   }
 
   private async getCurrentRunningVo2Max(userId: string) {
-    const [profile, rows] = await Promise.all([
-      this.users.profiles().findUnique({
-        where: { userId },
-        select: {
-          defaultVdotSource: true,
-          vo2maxCorrectionFactor: true,
-        },
-      }),
-      this.activityRead.findMany({
-        where: readyActivityWhere({
-          userId,
-          sportType: SportType.RUN,
-          startTime: { gte: dayjs().subtract(180, 'day').toDate() },
-          vo2max: {
-            OR: [
-              { vo2maxVdotByHr: { gt: 0 } },
-              { vo2maxVdotByFactor: { gt: 0 } },
-              { vo2maxVdotByRace: { gt: 0 } },
-            ],
-          },
-        }),
-        select: {
-          startTime: true,
-          vo2max: {
-            select: {
-              vo2maxVdotByHr: true,
-              vo2maxVdotByFactor: true,
-              vo2maxVdotByRace: true,
-            },
-          },
-        },
-      }),
+    const [configVersions, effectiveMetric] = await Promise.all([
+      this.analysisConfigs.listVersions(userId, new Date()),
+      this.userService.getEffectiveUserFitnessMetric(
+        userId,
+        UserFitnessMetricType.VO2_MAX,
+        new Date(),
+        SportType.UNKNOWN,
+      ),
     ]);
-
-    const points = rows
-      .map((row) => {
-        const resolved = resolveEffectiveActivityVo2Max(
-          row.vo2max,
-          profile?.defaultVdotSource,
-          profile?.vo2maxCorrectionFactor,
-        );
-        return resolved && row.startTime
-          ? { date: row.startTime, value: resolved.value }
-          : undefined;
-      })
-      .filter((point): point is { date: Date; value: number } => !!point);
-    const value = TimeDecayEstimator.calculate(points, {
-      decayDays: 40,
-      truncationMultiple: 3,
-      referenceDate: dayjs().endOf('day').toDate(),
-    });
+    const currentConfig = this.analysisConfigs.resolveFromVersions(
+      configVersions,
+      new Date(),
+    );
+    const value = effectiveMetric?.value;
 
     return {
-      value: value == null ? undefined : round(value, 2),
-      preference: normalizeVo2MaxSourcePreference(profile?.defaultVdotSource),
+      value:
+        value == null || !Number.isFinite(Number(value)) || Number(value) <= 0
+          ? undefined
+          : round(Number(value), 2),
+      preference: normalizeVo2MaxSourcePreference(
+        currentConfig?.defaultVdotSource,
+      ),
     };
   }
 
@@ -328,12 +323,13 @@ export class PMCService {
     } = params;
 
     // Normal calculation start date, considering CTL time constant
-    let normalStartDate = dayjs(startDate)
+    let normalStartDate = dayjs
+      .utc(startDate)
       .subtract(ctlTimeConstant, 'day')
       .startOf('day')
       .toDate();
 
-    const normalEndDate = dayjs(endDate).endOf('day').toDate();
+    const normalEndDate = pmcDayEnd(endDate).toDate();
 
     let seedRecord = await this.pmc.findFirst({
       where: { userId, date: { lt: normalStartDate } },
@@ -349,15 +345,13 @@ export class PMCService {
       });
 
       if (earliestActivity) {
-        normalStartDate = dayjs(earliestActivity.startTime)
-          .startOf('day')
-          .toDate();
+        normalStartDate = pmcDayStart(earliestActivity.startTime).toDate();
       }
       seedRecord = null;
     }
 
     this.logger.log(
-      `[PMCService] 开始计算用户${userId}的PMC数据，  时间范围 ${dayjs(normalStartDate).format('YYYY MM DD HH:mm:ss')} 至 ${dayjs(normalEndDate).format('YYYY MM DD HH:mm:ss')}`,
+      `[PMCService] 开始计算用户${userId}的PMC数据，时间范围 ${dayjs.utc(normalStartDate).format('YYYY MM DD HH:mm:ss')} 至 ${dayjs.utc(normalEndDate).format('YYYY MM DD HH:mm:ss')}`,
     );
     const dailyLoad = await this.calculateDailyLoad(
       userId,
@@ -394,8 +388,10 @@ export class PMCService {
   async recalculatePMC(userId: string): Promise<boolean> {
     this.logger.log(`开始手动计算用户${userId}过去60天的数据`);
     // tomorrow
-    const endDate = dayjs().add(1, 'day').endOf('day').toDate();
-    const startDate = dayjs().subtract(60, 'day').startOf('day').toDate();
+    const endDate = pmcDayEnd(dayjs.utc().add(1, 'day').toDate()).toDate();
+    const startDate = pmcDayStart(
+      dayjs.utc().subtract(60, 'day').toDate(),
+    ).toDate();
 
     await this.calculatePMC({
       userId,
@@ -416,8 +412,8 @@ export class PMCService {
 
     const promise = this.calculatePMC({
       userId,
-      startDate: dayjs().subtract(60, 'day').startOf('day').toDate(),
-      endDate: dayjs().add(1, 'day').endOf('day').toDate(),
+      startDate: pmcDayStart(dayjs.utc().subtract(60, 'day').toDate()).toDate(),
+      endDate: pmcDayEnd(dayjs.utc().add(1, 'day').toDate()).toDate(),
       recalculateAll: true,
     }).then(() => undefined);
 
@@ -430,7 +426,7 @@ export class PMCService {
   }
 
   async ensureCurrentPMC(userId: string): Promise<void> {
-    const todayStart = dayjs().startOf('day');
+    const todayStart = pmcDayStart();
     const todayRecord = await this.pmc.findFirst({
       where: {
         userId,
@@ -454,9 +450,9 @@ export class PMCService {
     startDate: Date,
     endDate: Date,
   ): Promise<void> {
-    const todayStart = dayjs().startOf('day');
-    const normalStartDate = dayjs(startDate).startOf('day');
-    const normalEndDate = dayjs(endDate).endOf('day');
+    const todayStart = pmcDayStart();
+    const normalStartDate = pmcDayStart(startDate);
+    const normalEndDate = pmcDayEnd(endDate);
 
     if (
       normalStartDate.isAfter(todayStart, 'day') ||
@@ -524,8 +520,8 @@ export class PMCService {
       `获取 PMC 数据：用户ID=${userId}，开始=${startDate.toISOString()}，结束=${endDate.toISOString()}`,
     );
 
-    const normalStartDate = dayjs(startDate).startOf('day').toDate();
-    const normalEndDate = dayjs(endDate).endOf('day').toDate();
+    const normalStartDate = pmcDayStart(startDate).toDate();
+    const normalEndDate = pmcDayEnd(endDate).toDate();
     if (options?.ensureCurrent !== false) {
       await this.ensurePMCForQueryRange(userId, normalStartDate, normalEndDate);
     }
@@ -547,7 +543,7 @@ export class PMCService {
     const toMap = (rows: PMCData[]) => {
       const map = new Map<string, (typeof rows)[number]>();
       for (const r of rows) {
-        map.set(dayjs(r.date).format('YYYY-MM-DD'), r);
+        map.set(pmcDateKey(r.date), r);
       }
       return map;
     };
@@ -560,18 +556,18 @@ export class PMCService {
     const atlDecayFactor = timeConstantDecayFactor(
       this.DEFAULT_ATL_TIME_CONSTANT,
     );
-    const rangeStart = dayjs(normalStartDate).startOf('day');
+    const rangeStart = pmcDayStart(normalStartDate);
     let cursor = seedRecord
-      ? dayjs(seedRecord.date).startOf('day').add(1, 'day')
+      ? pmcDayStart(seedRecord.date).add(1, 'day')
       : rangeStart;
     let prevCTL = Number(seedRecord?.CTL ?? 0);
     let prevATL = Number(seedRecord?.ATL ?? 0);
 
     while (
-      cursor.isBefore(dayjs(normalEndDate)) ||
-      cursor.isSame(dayjs(normalEndDate))
+      cursor.isBefore(pmcDayEnd(normalEndDate)) ||
+      cursor.isSame(pmcDayEnd(normalEndDate))
     ) {
-      const key = cursor.format('YYYY-MM-DD');
+      const key = pmcDateKey(cursor.valueOf());
       const row = historyMap.get(key);
       const rowCTL = Number(row?.CTL);
       const rowATL = Number(row?.ATL);
@@ -629,8 +625,10 @@ export class PMCService {
       vo2MaxClassification = this.getVo2MaxThresholds(vo2Max, age, gender);
     }
 
-    const endDate = dayjs().endOf('day').toDate();
-    const startDate = dayjs().subtract(6, 'day').startOf('day').toDate();
+    const endDate = pmcDayEnd().toDate();
+    const startDate = pmcDayStart(
+      dayjs.utc().subtract(6, 'day').toDate(),
+    ).toDate();
 
     // 获取近 7 天的 PMC 数据
     const pmcData = await this.getPMCData(userId, startDate, endDate, options);
@@ -638,10 +636,8 @@ export class PMCService {
     const filledLoad: number[] = [];
 
     for (let i = 0; i < 7; i++) {
-      const d = dayjs().subtract(i, 'day').format('YYYY-MM-DD');
-      const record = pmcData.find(
-        (r) => dayjs(r.date).format('YYYY-MM-DD') === d,
-      );
+      const d = pmcDateKey(dayjs.utc().subtract(i, 'day').valueOf());
+      const record = pmcData.find((r) => pmcDateKey(r.date) === d);
       const val = record?.dailyValue || 0;
       filledLoad.push(val);
     }
@@ -724,17 +720,19 @@ export class PMCService {
    */
   async getVo2MaxHistory(userId: string, startDate?: Date, endDate?: Date) {
     const normalStartDate = startDate
-      ? dayjs(startDate).startOf('day').toDate()
-      : dayjs().startOf('day').subtract(1, 'year').toDate();
+      ? pmcDayStart(startDate).toDate()
+      : pmcDayStart().subtract(1, 'year').toDate();
     const normalEndDate = endDate
-      ? dayjs(endDate).endOf('day').toDate()
-      : dayjs().endOf('day').toDate();
+      ? pmcDayEnd(endDate).toDate()
+      : pmcDayEnd().toDate();
 
     const history = await this.users.fitnessMetrics().findMany({
       where: {
         userId,
         type: UserFitnessMetricType.VO2_MAX,
-        source: MetricSource.ESTIMATED,
+        // Causal replay persists the rolling user timeline as AUTO. ESTIMATED
+        // is only the non-effective audit track used while auto update is off.
+        source: MetricSource.AUTO,
         sport: SportType.UNKNOWN,
         recordedAt: {
           gte: normalStartDate,
@@ -754,11 +752,11 @@ export class PMCService {
     endDate?: Date,
   ) {
     const normalStartDate = startDate
-      ? dayjs(startDate).startOf('day').toDate()
-      : dayjs().startOf('day').subtract(1, 'year').toDate();
+      ? pmcDayStart(startDate).toDate()
+      : pmcDayStart().subtract(1, 'year').toDate();
     const normalEndDate = endDate
-      ? dayjs(endDate).endOf('day').toDate()
-      : dayjs().endOf('day').toDate();
+      ? pmcDayEnd(endDate).toDate()
+      : pmcDayEnd().toDate();
 
     const rows = await this.activityRead.findMany({
       where: readyActivityWhere({
@@ -786,23 +784,43 @@ export class PMCService {
             vo2maxVdotByRace: true,
           },
         },
+        fitnessMetricsSnapshot: {
+          select: {
+            resolutionVersion: true,
+            resolvedVo2maxValue: true,
+            resolvedVo2maxSource: true,
+          },
+        },
       },
     });
 
-    const profile = await this.users.profiles().findUnique({
-      where: { userId },
-      select: {
-        defaultVdotSource: true,
-        vo2maxCorrectionFactor: true,
-      },
-    });
+    const configVersions = await this.analysisConfigs.listVersions(
+      userId,
+      normalEndDate,
+    );
 
     return rows
       .map((row) => {
+        if ((row.fitnessMetricsSnapshot?.resolutionVersion ?? 0) >= 4) {
+          const value = row.fitnessMetricsSnapshot?.resolvedVo2maxValue;
+          return value != null && Number(value) > 0
+            ? {
+                date: row.startTime,
+                value: Number(value),
+                source:
+                  row.fitnessMetricsSnapshot.resolvedVo2maxSource ??
+                  'UNAVAILABLE',
+              }
+            : undefined;
+        }
+        const config = this.analysisConfigs.resolveFromVersions(
+          configVersions,
+          row.startTime,
+        );
         const resolved = resolveEffectiveActivityVo2Max(
           row.vo2max,
-          profile?.defaultVdotSource,
-          profile?.vo2maxCorrectionFactor,
+          config?.defaultVdotSource,
+          config?.vo2maxCorrectionFactor,
         );
         return resolved
           ? {
@@ -826,8 +844,8 @@ export class PMCService {
     startDate: Date,
     endDate: Date,
   ): Promise<PMCData[]> {
-    const normalStartDate = dayjs(startDate).startOf('day').toDate();
-    const normalEndDate = dayjs(endDate).endOf('day').toDate();
+    const normalStartDate = pmcDayStart(startDate).toDate();
+    const normalEndDate = pmcDayEnd(endDate).toDate();
     return await this.pmc.findMany({
       where: {
         userId,
@@ -853,14 +871,16 @@ export class PMCService {
     startDate: Date,
     endDate: Date,
   ): Promise<DailyLoadData[]> {
-    const normalStartDate = dayjs(startDate).startOf('day').toDate();
-    const normalEndDate = dayjs(endDate).endOf('day').toDate();
+    const normalStartDate = pmcDayStart(startDate).toDate();
+    const normalEndDate = pmcDayEnd(endDate).toDate();
+    const firstDateKey = pmcDateKey(normalStartDate);
+    const lastDateKey = pmcDateKey(normalEndDate);
     const activities = await this.activityRead.findMany({
       where: readyActivityWhere({
         userId,
         startTime: {
-          gte: normalStartDate,
-          lte: normalEndDate,
+          gte: dayjs.utc(normalStartDate).subtract(1, 'day').toDate(),
+          lte: dayjs.utc(normalEndDate).add(1, 'day').toDate(),
         },
       }),
       orderBy: {
@@ -885,25 +905,47 @@ export class PMCService {
       Array<(typeof activities)[number]>
     >();
 
+    const [configVersions, bodyMetricRows] = await Promise.all([
+      this.analysisConfigs.listVersions(userId, normalEndDate),
+      this.userService.listBodyMetricEvidenceAt(
+        userId,
+        dayjs.utc(normalEndDate).add(1, 'day').toDate(),
+      ),
+    ]);
+
     for (const activity of activities) {
-      const dateKey = dayjs(activity.startTime).format('YYYY-MM-DD');
+      const snapshot = activity.fitnessMetricsSnapshot;
+      let dateKey = snapshot?.pmcLocalDate ?? null;
+      if (!dateKey) {
+        const timezoneRow = bodyMetricRows.find(
+          (row) =>
+            row.type === BodyMetricType.TIMEZONE &&
+            row.effectiveDate <= activity.startTime,
+        );
+        const timezoneName = resolveActivityAnalysisTimezone({
+          activityTimezone: activity.timezone,
+          bodyMetrics: timezoneRow
+            ? [{ type: timezoneRow.type, value: timezoneRow.value }]
+            : [],
+        });
+        dateKey = activityLocalDate(activity.startTime, timezoneName);
+      }
+      if (dateKey < firstDateKey || dateKey > lastDateKey) continue;
       if (!dailyActivities.has(dateKey)) {
         dailyActivities.set(dateKey, []);
       }
       dailyActivities.get(dateKey)!.push(activity);
     }
 
-    const loadSources = await this.getUserPMCLoadSources(userId);
-
     // 按天计算
     const dailyLoadData: DailyLoadData[] = [];
-    let currentDate = dayjs(startDate);
+    let currentDate = dayjs.utc(normalStartDate);
 
     while (
-      currentDate.isBefore(dayjs(endDate)) ||
-      currentDate.isSame(dayjs(endDate))
+      currentDate.isBefore(dayjs.utc(normalEndDate)) ||
+      currentDate.isSame(dayjs.utc(normalEndDate), 'day')
     ) {
-      const dateKey = currentDate.format('YYYY-MM-DD');
+      const dateKey = pmcDateKey(currentDate.valueOf());
       const dayActivities = dailyActivities.get(dateKey) || [];
 
       let totalDuration = 0;
@@ -915,10 +957,26 @@ export class PMCService {
       let otherValue = 0;
       for (const activity of dayActivities) {
         try {
-          const dayValue = this.loadReadout.loadValueForActivity(
-            activity,
-            loadSources,
-          );
+          const snapshot = activity.fitnessMetricsSnapshot;
+          let dayValue: number;
+          if ((snapshot?.resolutionVersion ?? 0) >= 4) {
+            dayValue = snapshot?.actualLoad ?? 0;
+          } else {
+            const historicalConfig =
+              this.analysisConfigs.resolveFromVersions(
+                configVersions,
+                activity.startTime,
+              ) ??
+              (await this.analysisConfigs.resolveAt(
+                userId,
+                activity.startTime,
+              ));
+            dayValue =
+              this.loadReadout.loadReadoutForActivity(
+                activity,
+                historicalConfig.loadSources,
+              ).actualLoad ?? 0;
+          }
           dailyValue += dayValue;
 
           switch (activity.sportType) {
@@ -949,7 +1007,7 @@ export class PMCService {
       }
 
       dailyLoadData.push({
-        date: currentDate.startOf('day').toDate(),
+        date: localDateKeyToUtcDate(dateKey),
         dailyValue,
         cyclingValue,
         runningValue,
@@ -1054,14 +1112,15 @@ export class PMCService {
       where: { userId },
     });
     const startDate =
-      (range._min.date as Date | null) ?? dayjs().subtract(60, 'day').toDate();
+      (range._min.date as Date | null) ??
+      dayjs.utc().subtract(60, 'day').toDate();
     const endDate = (range._max.date as Date | null) ?? new Date();
 
     // 根据时间范围取得 PMC 的天数据
     const series = await this.getPMCData(
       userId,
-      dayjs(startDate).startOf('day').toDate(),
-      dayjs(endDate).endOf('day').toDate(),
+      pmcDayStart(startDate).toDate(),
+      pmcDayEnd(endDate).toDate(),
       options,
     );
     let maxCTL = 0;
@@ -1124,23 +1183,23 @@ export class PMCService {
 
     const valueMap = new Map<string, number>();
     for (const d of dailyValues) {
-      const key = dayjs(d.date).format('YYYY-MM-DD');
+      const key = pmcDateKey(d.date);
       valueMap.set(key, Number.isFinite(d.value) ? d.value : 0);
     }
 
     const dateKeys: string[] = [];
     const scores: number[] = [];
-    let cursor = dayjs(startDate).startOf('day');
-    const last = dayjs(endDate).startOf('day');
+    let cursor = pmcDayStart(startDate);
+    const last = pmcDayStart(endDate);
     while (cursor.isBefore(last) || cursor.isSame(last)) {
-      const key = cursor.format('YYYY-MM-DD');
+      const key = pmcDateKey(cursor.valueOf());
       dateKeys.push(key);
       scores.push(valueMap.get(key) ?? 0);
       cursor = cursor.add(1, 'day');
     }
 
-    const normalStartDate = dayjs(startDate).startOf('day').toDate();
-    const normalEndDate = dayjs(endDate).endOf('day').toDate();
+    const normalStartDate = pmcDayStart(startDate).toDate();
+    const normalEndDate = pmcDayEnd(endDate).toDate();
     const peaks = await this.prisma.activityPeakMetric.findMany({
       where: {
         type: PeakType.power,
@@ -1174,7 +1233,7 @@ export class PMCService {
       if (!Number.isFinite(duration) || !Number.isFinite(avgPower)) continue;
       const pix = computePowerIndex(avgPower, duration);
       if (pix <= 0) continue;
-      const key = dayjs(p.activity.startTime).format('YYYY-MM-DD');
+      const key = pmcDateKey(p.activity.startTime);
       const prev = testByDay.get(key) ?? 0;
       if (pix > prev) testByDay.set(key, pix);
     }

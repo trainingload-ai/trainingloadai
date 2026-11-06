@@ -11,6 +11,7 @@ export class PmcInvalidateEvent {
     public readonly userId: string,
     public readonly startDate?: Date,
     public readonly endDate?: Date,
+    public readonly suppressAthleteStateReassessment = false,
   ) {}
 }
 
@@ -18,10 +19,16 @@ export async function emitPmcInvalidate(
   events: EventEmitter2 | undefined,
   userId: string,
   window?: { startDate: Date; endDate?: Date },
+  options?: { suppressAthleteStateReassessment?: boolean },
 ) {
   if (!events) return;
   await events.emitAsync(
     PMC_INVALIDATE_EVENT,
-    new PmcInvalidateEvent(userId, window?.startDate, window?.endDate),
+    new PmcInvalidateEvent(
+      userId,
+      window?.startDate,
+      window?.endDate,
+      options?.suppressAthleteStateReassessment === true,
+    ),
   );
 }

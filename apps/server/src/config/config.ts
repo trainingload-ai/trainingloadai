@@ -86,9 +86,7 @@ const config = () => ({
     process.env.LOCAL_STORAGE_CACHE_PATH || '/data/cache/storage',
 
   elevation: {
-    provider:
-      process.env.ELEVATION_PROVIDER ||
-      undefined,
+    provider: process.env.ELEVATION_PROVIDER || undefined,
     dataPath: process.env.ELEVATION_DATA_PATH || '/data/elevation',
     tileZoom: parseInt(process.env.ELEVATION_TILE_ZOOM, 10) || 13,
   },
@@ -254,6 +252,21 @@ const config = () => ({
         : 3,
   },
 
+  activityReplay: {
+    globalConcurrency: parsePositiveInt(
+      process.env.ACTIVITY_REPLAY_GLOBAL_CONCURRENCY,
+      2,
+    ),
+    dataRepairConcurrency: parsePositiveInt(
+      process.env.ACTIVITY_REPLAY_DATA_REPAIR_CONCURRENCY,
+      1,
+    ),
+    leaseSeconds: Math.max(
+      120,
+      parsePositiveInt(process.env.ACTIVITY_REPLAY_LEASE_SECONDS, 5 * 60),
+    ),
+  },
+
   activityAiReviewWorker: {
     enabled:
       (process.env.ACTIVITY_AI_REVIEW_WORKER_ENABLED ?? 'true') === 'true',
@@ -364,7 +377,6 @@ const config = () => ({
         ? Number(process.env.ACTIVITY_RECOMPUTE_NIGHTLY_JITTER_MINUTES)
         : 60,
   },
-
 });
 
 export type ConfigType = typeof config;

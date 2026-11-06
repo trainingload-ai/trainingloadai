@@ -19,6 +19,7 @@ import type { GOVSSResult } from '@/algorithm/GOVSS';
 import type { MeasuredPowerEvidence } from '@/training-load/measured-power-evidence';
 import type { SensorData } from '@/analyze/analyze.interface';
 import type { UserProfileResponse } from '@/api/user/user.interface';
+import type { ResolvedFitnessContext } from '@/analyze/resolved-fitness-context';
 
 export type CanonicalActivityRecord = {
   time: string;
@@ -141,6 +142,8 @@ export type MetricsContext = {
     canonicalRecords?: CanonicalActivityRecord[];
   };
   cache: {
+    /** Replay 在活动开始时解析出的不可变上下文；存在时 task 禁止再查当前用户档案。 */
+    resolvedFitnessContext?: ResolvedFitnessContext;
     profile?: UserProfileResponse;
     hrThreshold?: UserHeartRateThreshold;
     fitnessMetrics?: Partial<
@@ -153,6 +156,11 @@ export type MetricsContext = {
         } | null
       >
     >;
+    /**
+     * Versioned RHR fallback used only by TRIMP/EPOC. It is deliberately
+     * excluded from profile/hrThreshold/zone resolution.
+     */
+    loadRestingHeartRateDefault?: number;
     heartRateZoneSetting?: UserZoneSetting;
     heartRateSensorData?: Array<{
       time: string;
@@ -291,6 +299,8 @@ export type MetricsContext = {
     [k: string]: unknown;
   };
   errors: Partial<Record<MetricsTaskKey, { message: string; stack?: string }>>;
+  /** 仅在短提交事务中设置；task.post 必须优先使用它。 */
+  persistenceTx?: import('@prisma/client').Prisma.TransactionClient;
   /** 每个 task 的实际执行结果，用于批量导入可观测性与跳过原因汇总。 */
   taskOutcomes?: Partial<Record<MetricsTaskKey, MetricsTaskOutcome>>;
 };

@@ -1,6 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { ActivityAnalyzeMode } from '../metrics/activity-analyze-mode';
 import { ActivityMetricsPipelineService } from '../metrics/activity-metrics-pipeline.service';
+import type { ResolvedFitnessContext } from '@/analyze/resolved-fitness-context';
 
 function createHarness() {
   const prisma = {
@@ -75,6 +76,39 @@ function createHarness() {
 }
 
 describe('ActivityMetricsPipelineService', () => {
+  it('keeps threshold calculation available independently of zone distributions', async () => {
+    const { service, activity } = createHarness();
+    const resolved = {
+      profile: {},
+      metrics: {
+        FTP: { value: 250, value2: null, source: 'AUTO' },
+        CP: { value: 265, value2: null, source: 'AUTO' },
+      },
+      zones: [],
+    } as unknown as ResolvedFitnessContext;
+    const context = await (
+      service as unknown as {
+        buildContext(
+          activity: unknown,
+          userId: string,
+          resolved: ResolvedFitnessContext,
+        ): Promise<{
+          cache: {
+            powerPreload: {
+              context: { FTP: number; CP: number };
+              powerZones: { zones: unknown[] };
+            };
+          };
+        }>;
+      }
+    ).buildContext(activity, 'user-1', resolved);
+    expect(context.cache.powerPreload.context).toMatchObject({
+      FTP: 250,
+      CP: 265,
+    });
+    expect(context.cache.powerPreload.powerZones.zones).toEqual([]);
+  });
+
   it.each([
     [
       ActivityAnalyzeMode.LIGHT,
@@ -109,6 +143,7 @@ describe('ActivityMetricsPipelineService', () => {
         'powerZones',
         'powerCogganBike',
         'trainingEffect',
+        'vo2Max',
         'calories',
       ],
     ],
