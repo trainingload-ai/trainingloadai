@@ -1,6 +1,5 @@
 import { ImportingJobService } from './importing-job.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { createHash } from 'node:crypto';
 import {
   ImportItemJobStatus,
   type ImportSourceKind,
@@ -10,6 +9,7 @@ import {
 import { decodeTrackFile } from '@/importing/trackswap-file';
 import type { CanonicalActivityPayload } from '@/importing/canonical-activity.types';
 import { importJsonValue } from '@/importing/import-item-job.types';
+import { verifiedRawFileSha256 } from './raw-file-checksum';
 import { mapTrackSwapActivityToCanonicalPayload } from '@/importing/source-adapters/trackswap-canonical.mapper';
 import {
   ACTIVITY_MATERIALIZATION_VERSION,
@@ -254,6 +254,7 @@ export class FitActivityDataRepairService {
 
         let phase:
           | 'RAW_FILE_UNAVAILABLE'
+          | 'RAW_CHECKSUM_MISMATCH'
           | 'RAW_DECODE_FAILED'
           | 'RAW_CANONICAL_MAPPING_FAILED' = 'RAW_FILE_UNAVAILABLE';
         try {
@@ -268,21 +269,11 @@ export class FitActivityDataRepairService {
             if (options.failFast) break scan;
             continue;
           }
-          const actualChecksum = createHash('sha256')
-            .update(buffer)
-            .digest('hex');
-          if (
-            sourceObject.rawChecksum &&
-            actualChecksum !== sourceObject.rawChecksum
-          ) {
-            result.failedSourceObjectIds.push(sourceObject.id);
-            result.failures.push({
-              sourceObjectId: sourceObject.id,
-              code: 'RAW_CHECKSUM_MISMATCH',
-            });
-            if (options.failFast) break scan;
-            continue;
-          }
+          phase = 'RAW_CHECKSUM_MISMATCH';
+          const actualChecksum = verifiedRawFileSha256(
+            buffer,
+            sourceObject.rawChecksum,
+          );
           phase = 'RAW_DECODE_FAILED';
           const decoded = await decodeTrackFile(buffer, {
             filename: sourceObject.fileName ?? `${sourceObject.sourceUid}.fit`,
@@ -440,7 +431,8 @@ export class FitActivityDataRepairService {
           }
         } catch {
           if (phase === 'RAW_FILE_UNAVAILABLE') result.unavailableRawFiles += 1;
-          else result.invalidFitFiles += 1;
+          else if (phase !== 'RAW_CHECKSUM_MISMATCH')
+            result.invalidFitFiles += 1;
           result.failedSourceObjectIds.push(sourceObject.id);
           result.failures.push({
             sourceObjectId: sourceObject.id,
