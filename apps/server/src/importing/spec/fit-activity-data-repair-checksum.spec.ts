@@ -62,3 +62,50 @@ describe('repair scanner source integrity', () => {
     },
   );
 });
+
+describe('repair scanner discovery checksum compatibility', () => {
+  beforeEach(() => jest.resetAllMocks());
+  it('records observed file integrity separately from the legacy list digest', async () => {
+    const checksum = '1'.repeat(40),
+      { service, source } = scanner(checksum);
+    Object.assign(source, {
+      sourceKind: 'INTERVALS_ICU',
+      provider: 'intervals_icu',
+      objectType: 'third_party_activity_file',
+      metadata: { listChecksum: checksum },
+      activitySources: [{ sourceChecksum: null }],
+    });
+    jest
+      .mocked(decodeTrackFile)
+      .mockResolvedValueOnce({ detectedFormat: 'gpx' } as never);
+    const result = await service.scan({ all: false, limit: 1, failFast: true });
+    expect(result.failures).toEqual([]);
+    expect(result.integrityAudits).toEqual([
+      {
+        sourceObjectId: source.id,
+        basis: 'LEGACY_DISCOVERY_CHECKSUM',
+        registeredDiscoveryChecksum: checksum,
+        observedFileSha256: sha256,
+        fileChecksumStatus: 'OBSERVED_LEGACY_FILE',
+      },
+    ]);
+    expect(source.rawChecksum).toBe(checksum);
+  });
+  it('does not reclassify a checksum once a primary file identity is registered', async () => {
+    const checksum = '1'.repeat(40),
+      { service, source } = scanner(checksum);
+    Object.assign(source, {
+      sourceKind: 'INTERVALS_ICU',
+      provider: 'intervals_icu',
+      objectType: 'third_party_activity_file',
+      metadata: { listChecksum: checksum },
+      activitySources: [{ sourceChecksum: 'registered-raw-file' }],
+    });
+    const result = await service.scan({ all: false, limit: 1, failFast: true });
+    expect(result.failures).toEqual([
+      { sourceObjectId: source.id, code: 'RAW_CHECKSUM_MISMATCH' },
+    ]);
+    expect(result.integrityAudits).toEqual([]);
+    expect(decodeTrackFile).not.toHaveBeenCalled();
+  });
+});
