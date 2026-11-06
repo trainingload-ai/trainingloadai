@@ -135,6 +135,23 @@ describe('SensorDataService canonical Parquet staging', () => {
     expect(execute).toHaveBeenCalledTimes(2);
   });
 
+  it.each(['Asia/Shanghai', 'America/La_Paz', undefined])(
+    'returns explicit UTC sensor times regardless of display timezone %s',
+    (timezone) => {
+      const { service } = createService();
+      const sql = (
+        service as unknown as SensorDataInternals
+      ).buildRecordSeriesSQL(
+        '/tmp/records.parquet',
+        ['heartRate'],
+        timezone,
+        new Set(['timestamp', 'heartRate']),
+      );
+      expect(sql).toContain('%Y-%m-%dT%H:%M:%S.%gZ');
+      expect(sql).not.toContain('timezone(');
+    },
+  );
+
   it('loads multiple activity manifests with one query and preserves input order', async () => {
     const { service, prisma } = createService();
     prisma.activityParquetFile.findMany.mockResolvedValueOnce([

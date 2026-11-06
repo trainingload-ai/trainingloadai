@@ -37,6 +37,7 @@ import {
   selectedIntervalRange,
   useActivityAnalysisLink,
 } from "../activity-analysis-link-context";
+import { resolveActivityChartXAxis } from "@/lib/activity-chart-axis";
 
 interface OverviewHeartRateChartProps {
   activityId: string;
@@ -50,11 +51,14 @@ const OverviewHeartRateChart: React.FC<OverviewHeartRateChartProps> = ({
   expanded = false,
 }) => {
   const t = useTranslations("HeartRateChart");
-  const { chartXaxis, systemUnit } = useStore((state) => state);
+  const { chartXaxis: preferredChartXaxis, systemUnit } = useStore(
+    (state) => state,
+  );
   const { data, isLoading } = useActivityMetricSeries(
     activityId || "",
     "heartRate",
   );
+  const chartXaxis = resolveActivityChartXAxis(preferredChartXaxis, data?.rows);
   const { data: heartRateZoneData } = useHeartRateZones(activityId);
 
   const unit = "bpm";

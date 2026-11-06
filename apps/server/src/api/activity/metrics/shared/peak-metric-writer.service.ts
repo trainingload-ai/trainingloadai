@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import type { PeakIntervalObservation, PeakMetricKey } from '../context';
+import type { PrismaTx } from '@/prisma/prisma-db';
 
 @Injectable()
 export class ActivityPeakMetricWriterService {
@@ -22,8 +23,9 @@ export class ActivityPeakMetricWriterService {
     type: PeakType;
     scaleType: ScaleType;
     windows?: Record<string, PeakIntervalObservation | undefined>;
+    tx?: PrismaTx;
   }) {
-    const { activity, intervals, type, scaleType, windows } = args;
+    const { activity, intervals, type, scaleType, windows, tx } = args;
     try {
       const calculatedAt =
         activity.startTime ?? activity.timestamp ?? new Date();
@@ -77,11 +79,12 @@ export class ActivityPeakMetricWriterService {
         }
       }
 
-      await this.prisma.activityPeakMetric.deleteMany({
+      const db = tx ?? this.prisma;
+      await db.activityPeakMetric.deleteMany({
         where: { activityId: activity.id, type, scaleType },
       });
       if (data.length > 0) {
-        await this.prisma.activityPeakMetric.createMany({
+        await db.activityPeakMetric.createMany({
           data,
           skipDuplicates: true,
         });

@@ -26,8 +26,6 @@ import {
   ActivityProcessingStatus,
   fetchImportBatch,
   fetchImportBatchItems,
-  isTerminalImportBatchStatus,
-  isTerminalPostProcessStatus,
   type ImportBatchJobStatus,
   type ImportBatchSummary,
   type ImportItemJobStatus,
@@ -37,6 +35,13 @@ import { queryKeys } from "@/lib/query-keys";
 import { invalidateAfterActivityPipelineComplete } from "@/lib/query-invalidation";
 import { trackCompletedImportBatch } from "@deployment/managed-ui";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
+import {
+  getImportBatchActivityProgress,
+  hasImportItemFailure,
+  isImportPipelineSettled,
+  isImportPipelineSuccessful,
+  resolveImportItemDisplayStatus,
+} from "./import-batch-progress-model";
 
 const RECENT_IMPORT_BATCH_STORAGE_KEY = "recent-import-batch-ids";
 const RECENT_IMPORT_BATCHES_UPDATED_EVENT = "recent-import-batches-updated";
@@ -151,51 +156,38 @@ export function ImportBatchProgressDialog({
       if (!batchId) return false;
       if (!batch) return 2000;
 
-      const batchDone = isTerminalImportBatchStatus(batch.status);
-      const needsPostProcess = batch.successCount > 0;
-      const postDone =
-        !needsPostProcess ||
-        (batch.postProcessJob != null &&
-          isTerminalPostProcessStatus(batch.postProcessJob.status));
-
-      return batchDone && postDone ? false : 2000;
+      return isImportPipelineSettled(batch) ? false : 2000;
     },
   });
 
   const batch = batchQuery.data;
-  const completedCount =
-    (batch?.successCount ?? 0) +
-    (batch?.failedCount ?? 0) +
-    (batch?.skippedCount ?? 0);
+  const activityProgress = getImportBatchActivityProgress(batch);
+  const completedCount = activityProgress.settled;
   const progressPercent = batch?.totalCount
     ? Math.min(100, Math.round((completedCount / batch.totalCount) * 100))
     : 0;
-  const batchDone = batch ? isTerminalImportBatchStatus(batch.status) : false;
-  const needsPostProcess = (batch?.successCount ?? 0) > 0;
-  const postProcessDone =
-    !needsPostProcess ||
-    (batch?.postProcessJob != null &&
-      isTerminalPostProcessStatus(batch.postProcessJob.status));
-  const overallDone = batchDone && postProcessDone;
+  const pipelineSettled = isImportPipelineSettled(batch);
+  const pipelineSuccessful = isImportPipelineSuccessful(batch);
+  const pipelineFailed = pipelineSettled && !pipelineSuccessful;
 
   const itemsQuery = useQuery({
     queryKey: queryKeys.import.batchItems(batchId),
     queryFn: () => fetchImportBatchItems(batchId!),
     enabled: !!batchId && open,
     refetchOnWindowFocus: false,
-    refetchInterval: batchId && open && !overallDone ? 3000 : false,
+    refetchInterval: batchId && open && !pipelineSettled ? 3000 : false,
   });
 
   useEffect(() => {
     // 首次观察到整体完成时刷新依赖导入结果的页面数据，避免列表仍显示旧活动状态。
-    if (!batchId || !overallDone) return;
+    if (!batchId || !pipelineSettled) return;
     if (settledBatchIdRef.current === batchId) return;
 
     settledBatchIdRef.current = batchId;
 
     void invalidateAfterActivityPipelineComplete(queryClient, { batchId });
     onOverallDone?.(batchId);
-  }, [batchId, onOverallDone, overallDone, queryClient]);
+  }, [batchId, onOverallDone, pipelineSettled, queryClient]);
 
   const visibleItems = useMemo(
     () => itemsQuery.data?.items ?? [],
@@ -203,13 +195,21 @@ export function ImportBatchProgressDialog({
   );
 
   useEffect(() => {
-    if (!batchId || !batch || !overallDone || batch.successCount <= 0) return;
+    if (!batchId || !batch || !pipelineSuccessful || batch.successCount <= 0)
+      return;
     if (open && itemsQuery.isLoading) return;
     if (analyticsBatchIdRef.current === batchId) return;
 
     analyticsBatchIdRef.current = batchId;
     trackCompletedImportBatch(batch, visibleItems);
-  }, [batch, batchId, itemsQuery.isLoading, open, overallDone, visibleItems]);
+  }, [
+    batch,
+    batchId,
+    itemsQuery.isLoading,
+    open,
+    pipelineSuccessful,
+    visibleItems,
+  ]);
 
   const getBatchStatusLabel = (status?: ImportBatchSummary["status"]) => {
     if (!status) return "-";
@@ -252,7 +252,7 @@ export function ImportBatchProgressDialog({
     ) {
       return "bg-[hsl(var(--red-100))] text-[hsl(var(--red-700))] dark:bg-[hsl(var(--red-950)/0.4)] dark:text-[hsl(var(--red-300))]";
     }
-    if (status === "DONE" || status === "COMPLETED") {
+    if (status === "DONE" || status === "COMPLETED" || status === "READY") {
       return "bg-[hsl(var(--emerald-100))] text-[hsl(var(--emerald-700))] dark:bg-[hsl(var(--emerald-950)/0.4)] dark:text-[hsl(var(--emerald-300))]";
     }
     if (status === "SKIPPED") {
@@ -269,30 +269,38 @@ export function ImportBatchProgressDialog({
       >
         <AdaptiveDialogHeader className="shrink-0">
           <AdaptiveDialogTitle>
-            {overallDone
+            {pipelineSuccessful
               ? t("importProgress.completedTitle")
-              : t("importProgress.title")}
+              : pipelineFailed
+                ? t("importProgress.failedTitle")
+                : t("importProgress.title")}
           </AdaptiveDialogTitle>
           <AdaptiveDialogDescription>
-            {overallDone
+            {pipelineSuccessful
               ? t("importProgress.completedDescription")
-              : t("importProgress.description")}
+              : pipelineFailed
+                ? t("importProgress.failedDescription")
+                : t("importProgress.description")}
           </AdaptiveDialogDescription>
         </AdaptiveDialogHeader>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto overscroll-contain p-4">
           <div className="rounded-md border bg-neutral-100 dark:bg-muted/45 p-4">
             <div className="flex items-start gap-3">
-              {overallDone ? (
+              {pipelineSuccessful ? (
                 <CheckCircle2 className="mt-0.5 h-5 w-5 text-[hsl(var(--emerald-600))]" />
+              ) : pipelineFailed ? (
+                <AlertCircle className="mt-0.5 h-5 w-5 text-[hsl(var(--red-600))]" />
               ) : (
                 <BellRing className="mt-0.5 h-5 w-5 text-[hsl(var(--blue-600))]" />
               )}
               <div className="space-y-1">
                 <p className="text-sm font-medium">
-                  {overallDone
+                  {pipelineSuccessful
                     ? t("importProgress.doneHint")
-                    : t("importProgress.laterHint")}
+                    : pipelineFailed
+                      ? t("importProgress.failedHint")
+                      : t("importProgress.laterHint")}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {t("importProgress.notificationHint")}
@@ -312,7 +320,7 @@ export function ImportBatchProgressDialog({
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-[hsl(var(--emerald-500))] transition-all"
+                className="h-full rounded-full bg-[hsl(var(--emerald-500))] transition-[width]"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -329,10 +337,10 @@ export function ImportBatchProgressDialog({
             </div>
             <div className="rounded-md border p-3">
               <div className="text-mobile-caption pc:text-xs text-muted-foreground">
-                {t("importProgress.success")}
+                {t("importProgress.ready")}
               </div>
               <div className="mt-1 text-lg font-semibold text-[hsl(var(--emerald-600))]">
-                {batch?.successCount ?? 0}
+                {activityProgress.ready}
               </div>
             </div>
             <div className="rounded-md border p-3">
@@ -340,7 +348,7 @@ export function ImportBatchProgressDialog({
                 {t("importProgress.failed")}
               </div>
               <div className="mt-1 text-lg font-semibold text-[hsl(var(--red-600))]">
-                {batch?.failedCount ?? 0}
+                {activityProgress.failed}
               </div>
             </div>
             <div className="rounded-md border p-3">
@@ -428,10 +436,9 @@ export function ImportBatchProgressDialog({
                               : null) ??
                             `${t("importProgress.item")} ${item.position + 1}`}
                         </div>
-                        <div className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
-                          {item.lastError
-                            ? item.lastError
-                            : item.activity?.processingStatus
+                        {!hasImportItemFailure(item) && (
+                          <div className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
+                            {item.activity?.processingStatus
                               ? t("importProgress.activityStatus", {
                                   status: getActivityProcessingStatusLabel(
                                     item.activity.processingStatus,
@@ -440,29 +447,34 @@ export function ImportBatchProgressDialog({
                               : item.activity?.readyAt
                                 ? t("importProgress.ready")
                                 : t("importProgress.waiting")}
-                        </div>
+                          </div>
+                        )}
                       </div>
                       {(() => {
-                        const displayStatus: ImportItemJobStatus =
-                          item.status === "QUEUED" && item.activity?.readyAt
-                            ? "DONE"
-                            : item.status;
+                        const displayStatus =
+                          resolveImportItemDisplayStatus(item);
                         return (
                           <span
                             className={cn(
                               "shrink-0 rounded-full px-2 py-1 text-mobile-caption pc:text-xs font-medium",
-                              getStatusTone(displayStatus),
+                              getStatusTone(displayStatus.status),
                             )}
                           >
-                            {getItemStatusLabel(displayStatus)}
+                            {displayStatus.kind === "activity"
+                              ? getActivityProcessingStatusLabel(
+                                  displayStatus.status,
+                                )
+                              : getItemStatusLabel(displayStatus.status)}
                           </span>
                         );
                       })()}
                     </div>
-                    {item.lastError && (
+                    {hasImportItemFailure(item) && (
                       <div className="mt-2 flex items-start gap-2 text-mobile-caption pc:text-xs text-red-600 dark:text-red-300">
                         <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                        <span className="break-words">{item.lastError}</span>
+                        <span className="break-words">
+                          {t("importProgress.processingFailed")}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -489,7 +501,7 @@ export function ImportBatchProgressDialog({
             )}
             onClick={() => onOpenChange(false)}
           >
-            {overallDone
+            {pipelineSettled
               ? t("importProgress.close")
               : t("importProgress.continueLater")}
           </Button>

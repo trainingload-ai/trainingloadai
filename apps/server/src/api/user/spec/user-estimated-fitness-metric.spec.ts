@@ -10,11 +10,15 @@ import { UserService } from '../user.service';
 import { UserQueryService } from '../user-query.service';
 import { UserIdentityRepository } from '../persistence/user-identity.repository';
 
-function userServiceDependencies(prisma: object) {
+function userServiceDependencies(prisma: object, autoEnabled = true) {
   return [
     {} as never,
     { emitAsync: jest.fn(async () => []) } as never,
     new UserQueryService(new UserIdentityRepository(prisma as never)),
+    {
+      resolveAutoUpdateAt: jest.fn(async () => autoEnabled),
+      recordAutoUpdateVersion: jest.fn(async () => ({})),
+    } as never,
   ] as const;
 }
 
@@ -36,6 +40,9 @@ type FitnessMetricRow = {
   originChecksum: null;
   originPayload: null;
   originSyncedAt: null;
+  projectionVersion: number | null;
+  projectionRunId: string | null;
+  projectionFingerprint: string | null;
 };
 
 function createMetric(
@@ -57,6 +64,9 @@ function createMetric(
     originChecksum: null,
     originPayload: null,
     originSyncedAt: null,
+    projectionVersion: null,
+    projectionRunId: null,
+    projectionFingerprint: null,
     ...data,
   };
 }
@@ -64,6 +74,7 @@ function createMetric(
 function createService(options?: {
   autoEnabled?: boolean;
   estimatedRows?: FitnessMetricRow[];
+  autoRows?: FitnessMetricRow[];
   currentMetric?: FitnessMetricRow | null;
 }) {
   const created: FitnessMetricRow[] = [];
@@ -97,6 +108,9 @@ function createService(options?: {
         }) => {
           if (args?.where?.source === MetricSource.ESTIMATED) {
             return options?.estimatedRows ?? [];
+          }
+          if (args?.where?.source === MetricSource.AUTO) {
+            return options?.autoRows ?? [];
           }
           if (
             typeof args?.where?.source === 'object' &&
@@ -140,12 +154,51 @@ function createService(options?: {
     prisma as never,
     {} as never,
     { get: jest.fn() } as never,
-    ...userServiceDependencies(prisma),
+    ...userServiceDependencies(prisma, options?.autoEnabled ?? true),
   );
   return { service, prisma, created };
 }
 
 describe('UserService estimated fitness metric tracks', () => {
+  it('returns the effective AUTO timeline for metric charts', async () => {
+    const autoRows = [
+      createMetric({
+        id: 'vo2-auto-1',
+        type: UserFitnessMetricType.VO2_MAX,
+        sport: SportType.UNKNOWN,
+        source: MetricSource.AUTO,
+        value: 42,
+      }),
+    ];
+    const { service, prisma } = createService({
+      estimatedRows: [
+        createMetric({
+          id: 'vo2-estimate-1',
+          type: UserFitnessMetricType.VO2_MAX,
+          sport: SportType.UNKNOWN,
+          source: MetricSource.ESTIMATED,
+          value: 99,
+        }),
+      ],
+      autoRows,
+    });
+
+    const rows = await service.listAutoFitnessMetricsForChart(
+      'user-1',
+      UserFitnessMetricType.VO2_MAX,
+      SportType.UNKNOWN,
+    );
+
+    expect(rows).toEqual([
+      expect.objectContaining({ id: 'vo2-auto-1', value: 42 }),
+    ]);
+    expect(prisma.userFitnessMetric.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ source: MetricSource.AUTO }),
+      }),
+    );
+  });
+
   it('always writes ESTIMATED and does not update AUTO when auto update is disabled', async () => {
     const { service, created } = createService({ autoEnabled: false });
 

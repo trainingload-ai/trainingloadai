@@ -23,6 +23,7 @@ export type LoadComparisonChartPoint = {
   label: string;
   actual: number;
   planned: number;
+  activityCount?: number;
   selectionKey?: string;
 };
 
@@ -35,6 +36,7 @@ export function LoadComparisonChart({
   selectedKey,
   onPointSelect,
   xAxisHeight = 30,
+  activityCountLabel,
 }: {
   data: LoadComparisonChartPoint[];
   actualLabel: string;
@@ -44,6 +46,7 @@ export function LoadComparisonChart({
   selectedKey?: string;
   onPointSelect?: (key: string) => void;
   xAxisHeight?: number;
+  activityCountLabel?: (count: number) => string;
 }) {
   const patternId = `load-comparison-${useId().replace(/:/g, "")}`;
   const config = {
@@ -146,9 +149,15 @@ export function LoadComparisonChart({
             }}
             content={
               <ChartTooltipContent
-                labelFormatter={(label, payload) =>
-                  String(payload?.[0]?.payload?.key ?? label)
-                }
+                labelFormatter={(label, payload) => {
+                  const point = payload?.[0]?.payload as
+                    | LoadComparisonChartPoint
+                    | undefined;
+                  const date = String(point?.key ?? label);
+                  return activityCountLabel && point?.activityCount != null
+                    ? `${date} · ${activityCountLabel(point.activityCount)}`
+                    : date;
+                }}
               />
             }
           />

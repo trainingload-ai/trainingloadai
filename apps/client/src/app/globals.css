@@ -203,7 +203,6 @@
 
     /* Neutral */
     --neutral-50: 0 0% 95%;
-    --neutral-100: 0 0% 90%;
     --neutral-200: 0 0% 80%;
     --neutral-300: 0 0% 70%;
     --neutral-400: 0 0% 60%;
@@ -256,7 +255,8 @@
 
   /* Neutral */
   --neutral-50: 0 0% 98%;
-  --neutral-100: 0 0% 96.1%;
+  /* Match activity cards: 70% muted over the off-white page (#ECEEE8). */
+  --neutral-100: 80 15% 92.2%;
   --neutral-200: 0 0% 89.8%;
   --neutral-300: 0 0% 83.1%;
   --neutral-400: 0 0% 63.9%;

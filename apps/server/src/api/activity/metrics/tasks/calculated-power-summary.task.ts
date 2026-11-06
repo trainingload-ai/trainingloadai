@@ -55,13 +55,15 @@ export class CalculatedPowerSummaryTask implements MetricsTask {
       );
     if (values.length === 0) return ctx;
 
-    const profile = ctx.inputs.userId
-      ? await this.userService.getComposedUserProfile(
-          ctx.inputs.userId,
-          activity.sportType,
-          activity.startTime ?? undefined,
-        )
-      : undefined;
+    const profile =
+      ctx.cache.profile ??
+      (ctx.inputs.userId && !ctx.cache.resolvedFitnessContext
+        ? await this.userService.getComposedUserProfile(
+            ctx.inputs.userId,
+            activity.sportType,
+            activity.startTime ?? undefined,
+          )
+        : undefined);
     const gradeSampleCount = records.filter(
       (record) =>
         typeof record.grade === 'number' && Number.isFinite(record.grade),
@@ -128,7 +130,9 @@ export class CalculatedPowerSummaryTask implements MetricsTask {
       | CalculatedPowerSummary
       | undefined;
     if (!summary) {
-      await this.prisma.activityCalculatedPower.deleteMany({
+      await (
+        ctx.persistenceTx ?? this.prisma
+      ).activityCalculatedPower.deleteMany({
         where: { activityId: activity.id },
       });
       return ctx;
@@ -144,7 +148,7 @@ export class CalculatedPowerSummaryTask implements MetricsTask {
       parameters: summary.parameters as Prisma.InputJsonValue,
       calculatedAt: new Date(),
     };
-    await this.prisma.activityCalculatedPower.upsert({
+    await (ctx.persistenceTx ?? this.prisma).activityCalculatedPower.upsert({
       where: { activityId: activity.id },
       create: {
         activity: { connect: { id: activity.id } },

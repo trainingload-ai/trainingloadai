@@ -1,3 +1,4 @@
+import { isPrismaSerializableConflict } from '@/prisma/prisma-transaction-errors';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { Activity } from '@prisma/client';
@@ -9,6 +10,11 @@ import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-excep
 import type { HeartRateAnalysisResult } from './heart-rate/heart-rate.types';
 import type { computeEPOCFromHR } from '@/algorithm/epoc';
 import { replaceActivityZoneRows } from '@/prisma/activity-zone-write';
+import type { PrismaTx } from '@/prisma/prisma-db';
+import {
+  lthrActivityDurationSeconds,
+  lthrObservationWithinActivity,
+} from '@/algorithm/fitness-lthr';
 
 export type ActivityTrainingEffectMetrics = ReturnType<
   typeof computeEPOCFromHR
@@ -35,10 +41,11 @@ export class AnalyzePersistenceService {
       re?: number;
       ei?: number;
     },
+    tx?: PrismaTx,
   ) {
     if (!activityId) return;
     try {
-      await this.prisma.activity.update({
+      await (tx ?? this.prisma).activity.update({
         where: { id: activityId },
         data: {
           avgPower: data.avgPower ?? undefined,
@@ -48,6 +55,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存功率基础字段] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -61,7 +69,11 @@ export class AnalyzePersistenceService {
   }
 
   /** 功率分区 ActivityZone.POWER（PowerZonesTask.post） */
-  async saveActivityPowerZoneRows(activityId: number, zones: UserZoneValue[]) {
+  async saveActivityPowerZoneRows(
+    activityId: number,
+    zones: UserZoneValue[],
+    tx?: PrismaTx,
+  ) {
     if (!activityId) return;
     try {
       const powerZoneRows = (zones || []).map((z, index) => {
@@ -80,12 +92,13 @@ export class AnalyzePersistenceService {
           avg: z?.avg ?? undefined,
         };
       });
-      await replaceActivityZoneRows(this.prisma, {
+      await replaceActivityZoneRows(tx ?? this.prisma, {
         activityId,
         zoneType: ZoneType.POWER,
         rows: powerZoneRows,
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存功率分区] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -102,10 +115,11 @@ export class AnalyzePersistenceService {
     activityId: number,
     sportType: $Enums.SportType,
     coggan: import('@/algorithm/coggan').CogganResult,
+    tx?: PrismaTx,
   ) {
     if (!activityId || !coggan) return;
     try {
-      await this.prisma.activityCoggan.upsert({
+      await (tx ?? this.prisma).activityCoggan.upsert({
         where: { activityId: activityId },
         update: {
           sport: sportType,
@@ -145,6 +159,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存 Coggan] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -161,10 +176,11 @@ export class AnalyzePersistenceService {
     activityId: number,
     sportType: $Enums.SportType,
     bikeScore: import('@/algorithm/BikeScore').BikeScoreResult,
+    tx?: PrismaTx,
   ) {
     if (!activityId || !bikeScore) return;
     try {
-      await this.prisma.activityBikeScore.upsert({
+      await (tx ?? this.prisma).activityBikeScore.upsert({
         where: { activityId: activityId },
         update: {
           sport: sportType,
@@ -202,6 +218,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存 BikeScore] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -227,6 +244,7 @@ export class AnalyzePersistenceService {
       coverageRatio: number;
       parameters: Record<string, unknown>;
     },
+    tx?: PrismaTx,
   ) {
     const data = {
       sport: sportType,
@@ -240,26 +258,36 @@ export class AnalyzePersistenceService {
       parameters: result.parameters as Prisma.InputJsonValue,
       calculatedAt: new Date(),
     };
-    await this.prisma.activitySwimScore.upsert({
+    await (tx ?? this.prisma).activitySwimScore.upsert({
       where: { activityId },
       update: data,
       create: { activityId, ...data },
     });
   }
 
-  async saveActivityLthrObservation(args: {
-    activity: Pick<Activity, 'id' | 'sportType' | 'startTime'>;
-    userId: string;
-    observation: import('@/api/activity/metrics/context').MetricsContext['outputs']['lthrObservation'] &
-      object;
-  }) {
+  async saveActivityLthrObservation(
+    args: {
+      activity: Pick<Activity, 'id' | 'sportType' | 'startTime'> &
+        Partial<Pick<Activity, 'elapsedTime' | 'timerTime' | 'endTime'>>;
+      userId: string;
+      observation: import('@/api/activity/metrics/context').MetricsContext['outputs']['lthrObservation'];
+    },
+    tx?: PrismaTx,
+  ) {
     const { activity, userId, observation } = args;
     if (
       !observation ||
       !activity.startTime ||
+      !lthrObservationWithinActivity(
+        observation,
+        lthrActivityDurationSeconds(activity),
+      ) ||
       (activity.sportType !== $Enums.SportType.RUN &&
         activity.sportType !== $Enums.SportType.CYCLING)
     ) {
+      await (tx ?? this.prisma).activityLthrObservation.deleteMany({
+        where: { activityId: activity.id, protocol: 'OBSERVED' },
+      });
       return;
     }
     const data = {
@@ -283,7 +311,7 @@ export class AnalyzePersistenceService {
       observedAt: activity.startTime,
       calculatedAt: new Date(),
     };
-    await this.prisma.activityLthrObservation.upsert({
+    await (tx ?? this.prisma).activityLthrObservation.upsert({
       where: {
         activityId_algorithmVersion: {
           activityId: activity.id,
@@ -297,16 +325,24 @@ export class AnalyzePersistenceService {
         ...data,
       },
     });
+    await (tx ?? this.prisma).activityLthrObservation.deleteMany({
+      where: {
+        activityId: activity.id,
+        protocol: 'OBSERVED',
+        algorithmVersion: { not: observation.algorithmVersion },
+      },
+    });
   }
 
   async saveActivityGovssRow(
     activityId: number,
     sportType: $Enums.SportType,
     govss: import('@/algorithm/GOVSS').GOVSSResult,
+    tx?: PrismaTx,
   ) {
     if (!activityId || !govss) return;
     try {
-      await this.prisma.activityGOVSS.upsert({
+      await (tx ?? this.prisma).activityGOVSS.upsert({
         where: { activityId },
         update: {
           sport: sportType,
@@ -342,6 +378,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存 GOVSS] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -366,10 +403,11 @@ export class AnalyzePersistenceService {
       viGap?: number;
       avgAerobicEfficiency?: number;
     },
+    tx?: PrismaTx,
   ) {
     if (!activityId) return;
     try {
-      await this.prisma.activity.update({
+      await (tx ?? this.prisma).activity.update({
         where: { id: activityId },
         data: {
           avgGAP: data.avgGap,
@@ -382,6 +420,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存配速基础字段] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -398,6 +437,7 @@ export class AnalyzePersistenceService {
   async saveActivityPaceZoneRows(
     activityId: number,
     zones: import('@/utils/zones').UserZoneValue[],
+    tx?: PrismaTx,
   ) {
     if (!activityId) return;
     try {
@@ -416,12 +456,13 @@ export class AnalyzePersistenceService {
           avg: z?.avg ?? undefined,
         };
       });
-      await replaceActivityZoneRows(this.prisma, {
+      await replaceActivityZoneRows(tx ?? this.prisma, {
         activityId,
         zoneType: ZoneType.PACE,
         rows: paceZoneRows,
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存配速分区] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -441,10 +482,11 @@ export class AnalyzePersistenceService {
       HeartRateAnalysisResult,
       'avg' | 'max' | 'min' | 'paHr' | 'pwHr' | 'maxHrDrop'
     >,
+    tx?: PrismaTx,
   ) {
     if (!activityId) return;
     try {
-      await this.prisma.activity.update({
+      await (tx ?? this.prisma).activity.update({
         where: { id: activityId },
         data: {
           avgHeartRate: data.avg ? Math.round(data.avg) : undefined,
@@ -456,6 +498,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存心率基础] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -481,6 +524,7 @@ export class AnalyzePersistenceService {
       max?: number;
       avg?: number;
     }>,
+    tx?: PrismaTx,
   ) {
     if (!activityId) return;
     try {
@@ -496,12 +540,13 @@ export class AnalyzePersistenceService {
         max: z.max ?? undefined,
         avg: z.avg ?? undefined,
       }));
-      await replaceActivityZoneRows(this.prisma, {
+      await replaceActivityZoneRows(tx ?? this.prisma, {
         activityId,
         zoneType: ZoneType.HEART_RATE,
         rows: hrZoneRows,
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存心率分区] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -518,10 +563,11 @@ export class AnalyzePersistenceService {
   async saveActivityHeartRateTrimpRow(
     activityId: number,
     data: Pick<HeartRateAnalysisResult, 'TRIMP' | 'TRIMP100' | 'TRIMPZonal'>,
+    tx?: PrismaTx,
   ) {
     if (!activityId || data.TRIMP === undefined) return;
     try {
-      await this.prisma.activityTrimp.upsert({
+      await (tx ?? this.prisma).activityTrimp.upsert({
         where: { activityId },
         update: {
           trimp: data.TRIMP,
@@ -537,6 +583,7 @@ export class AnalyzePersistenceService {
         },
       });
     } catch (e) {
+      if (tx && isPrismaSerializableConflict(e)) throw e;
       this.logger.error(
         `[保存心率 TRIMP] 活动ID=${activityId} 失败：${
           e instanceof Error ? e.message : String(e)
@@ -559,13 +606,14 @@ export class AnalyzePersistenceService {
   async saveActivityTrainingEffect(
     activity: Pick<Activity, 'id' | 'sportType'>,
     teMetrics: ActivityTrainingEffectMetrics,
+    tx?: PrismaTx,
   ) {
     const metrics = teMetrics;
     if (!metrics) return;
     this.logger.debug(
       `[保存训练效应] 活动ID=${activity.id} 开始写入训练效应数据`,
     );
-    await this.prisma.activityTrainingEffect.upsert({
+    await (tx ?? this.prisma).activityTrainingEffect.upsert({
       where: { activityId: activity.id },
       update: {
         sport: activity.sportType ?? SportType.UNKNOWN,

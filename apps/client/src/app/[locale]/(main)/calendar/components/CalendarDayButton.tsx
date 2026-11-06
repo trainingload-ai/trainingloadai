@@ -95,11 +95,12 @@ export function CalendarDayButton({
         "group relative flex h-[100px] flex-col items-center rounded-md p-1 text-center transition-all md:h-[112px] md:items-stretch md:px-2.5 md:py-2 md:text-left",
         "touch-manipulation select-none",
         isSelected
-          ? "bg-background text-foreground ring-1 ring-[hsl(var(--emerald-300)/0.7)] dark:bg-neutral-950/90 dark:ring-[hsl(var(--emerald-700)/0.6)]"
+          ? "bg-card text-foreground ring-2 ring-ring"
           : inPlanRange
             ? "bg-[hsl(var(--emerald-100)/0.75)] text-foreground hover:bg-[hsl(var(--emerald-100)/0.9)] dark:bg-[hsl(var(--emerald-900)/0.32)] dark:hover:bg-[hsl(var(--emerald-900)/0.42)]"
-            : "bg-background/45 text-foreground hover:bg-background/80 dark:bg-neutral-950/25 dark:hover:bg-neutral-950/55",
-        !isCurrentMonth && "opacity-35",
+            : "bg-card text-foreground hover:bg-secondary",
+        !isCurrentMonth && !isSelected && "bg-secondary",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       )}
     >
       <div className="relative z-10 flex w-full items-start justify-between gap-2">
@@ -107,7 +108,9 @@ export function CalendarDayButton({
           <span
             className={cn(
               "text-[15px] font-semibold tracking-tight md:text-[15px]",
-              isSelected ? "text-foreground" : "text-foreground",
+              isCurrentMonth || isSelected
+                ? "text-foreground"
+                : "text-muted-foreground",
             )}
           >
             {date.format("D")}
@@ -123,7 +126,12 @@ export function CalendarDayButton({
             />
           ) : null}
         </div>
-        <div className="text-mobile-unit pc:text-[10px] font-medium tabular-nums text-muted-foreground">
+        <div
+          className={cn(
+            "text-mobile-unit pc:text-[10px] font-semibold tabular-nums",
+            tss > 0 ? "text-load" : "text-muted-foreground",
+          )}
+        >
           {tss > 0 ? Math.round(tss) : "--"}
         </div>
       </div>
@@ -196,7 +204,7 @@ export function CalendarDayButton({
           ) : null}
 
           {activities.length > 0 ? (
-            <div className="flex h-5 min-w-0 items-center truncate whitespace-nowrap rounded-md bg-neutral-100 px-2 text-mobile-unit pc:text-[10px] font-semibold text-muted-foreground transition-colors group-hover:bg-neutral-200 dark:bg-muted/45 dark:group-hover:bg-muted md:text-mobile-caption">
+            <div className="flex h-5 min-w-0 items-center truncate whitespace-nowrap rounded-md bg-muted px-2 text-mobile-unit pc:text-[10px] font-semibold text-secondary-foreground md:text-mobile-caption">
               {t("activityTab")} +{activities.length}
             </div>
           ) : null}

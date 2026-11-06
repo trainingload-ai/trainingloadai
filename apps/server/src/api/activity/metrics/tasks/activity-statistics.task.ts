@@ -35,7 +35,7 @@ export class ActivityStatisticsTask implements MetricsTask {
     const result = ctx.outputs.activityStatistics;
     if (!activityId || !result) return ctx;
 
-    await this.prisma.$transaction(async (tx) => {
+    const persist = async (tx: Prisma.TransactionClient) => {
       await tx.activityMetricDistribution.deleteMany({
         where: { activityId },
       });
@@ -96,7 +96,9 @@ export class ActivityStatisticsTask implements MetricsTask {
         update: data,
         create: { activityId, ...data },
       });
-    });
+    };
+    if (ctx.persistenceTx) await persist(ctx.persistenceTx);
+    else await this.prisma.$transaction(persist);
     return ctx;
   }
 }

@@ -1,5 +1,6 @@
 import type { EventEmitter2 } from '@nestjs/event-emitter';
 import type {
+  BodyMetricType,
   MetricSource,
   SportType,
   UserFitnessMetricType,
@@ -13,6 +14,7 @@ import type {
 export const USER_FITNESS_INVALIDATED_EVENT = 'user.fitnessInvalidated';
 export const USER_VO2_MAX_SETTINGS_CHANGED_EVENT = 'user.vo2MaxSettingsChanged';
 export const USER_ZONE_SETTING_CHANGED_EVENT = 'user.zoneSettingChanged';
+export const USER_FITNESS_CONTEXT_CHANGED_EVENT = 'user.fitnessContextChanged';
 
 export class UserFitnessInvalidatedEvent {
   constructor(
@@ -34,6 +36,16 @@ export class UserZoneSettingChangedEvent {
     public readonly sportType: SportType,
     public readonly zoneType: ZoneType,
     public readonly deleted: boolean,
+    public readonly changedAt: Date = new Date(),
+  ) {}
+}
+
+export class UserFitnessContextChangedEvent {
+  constructor(
+    public readonly userId: string,
+    public readonly contextType: 'BODY' | 'PROFILE',
+    public readonly changedTimes: number[],
+    public readonly bodyMetricTypes: BodyMetricType[] = [],
   ) {}
 }
 
@@ -59,4 +71,12 @@ export async function emitUserZoneSettingChanged(
 ) {
   if (!events) return;
   await events.emitAsync(USER_ZONE_SETTING_CHANGED_EVENT, event);
+}
+
+export async function emitUserFitnessContextChanged(
+  events: EventEmitter2 | undefined,
+  event: UserFitnessContextChangedEvent,
+) {
+  if (!events) return;
+  await events.emitAsync(USER_FITNESS_CONTEXT_CHANGED_EVENT, event);
 }

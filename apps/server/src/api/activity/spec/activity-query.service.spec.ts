@@ -60,6 +60,14 @@ function createService(overrides?: {
     mapDerivation as never,
     { read: jest.fn(async () => null) } as never,
     externalActivityMirrors as never,
+    {
+      listVersions: jest.fn(async () => []),
+      resolveFromVersions: jest.fn(() => null),
+      resolveFromVersionsOrDefault: jest.fn(() => ({
+        defaultVdotSource: 'FACTOR',
+        vo2maxCorrectionFactor: 1,
+      })),
+    } as never,
   );
   return { service, prisma, mapDerivation, externalActivityMirrors };
 }

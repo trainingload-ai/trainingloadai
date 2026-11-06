@@ -691,7 +691,7 @@ export class UsersController {
     const safeStart = startDate ? new Date(startDate) : undefined;
     const safeEnd = endDate ? new Date(endDate) : undefined;
 
-    const rows = await this.userService.listEstimatedFitnessMetricsForChart(
+    const rows = await this.userService.listAutoFitnessMetricsForChart(
       userId,
       type,
       type === UserFitnessMetricType.VO2_MAX ? SportType.UNKNOWN : sportType,
@@ -1204,9 +1204,9 @@ export class UsersController {
       headers: fromNodeHeaders(req.headers),
     });
 
-    // 3. Mark as verified + 确保默认静息心率（OTP 注册走 signUpEmail，与 better-auth hook 双保险）
+    // 3. Mark as verified. RHR 缺失时由活动分析使用带 provenance 的计算默认值，
+    // 不再向用户指标写入伪装成 MANUAL 的 60 bpm。
     if (res?.user?.id) {
-      await this.userService.ensureDefaultRestingHeartRate(res.user.id);
       await this.users.users().update({
         where: { id: res.user.id },
         data: { emailVerified: true },

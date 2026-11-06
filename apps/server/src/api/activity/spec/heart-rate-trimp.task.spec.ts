@@ -11,9 +11,9 @@ import {
 } from '@/algorithm/trimp';
 
 function context(): MetricsContext {
-  const records = Array.from({ length: 60 }, (_, index) => ({
-    time: new Date(Date.UTC(2026, 7, 2, 0, index)).toISOString(),
-    tMs: Date.UTC(2026, 7, 2, 0, index),
+  const records = Array.from({ length: 3601 }, (_, index) => ({
+    time: new Date(Date.UTC(2026, 7, 2, 0, 0, index)).toISOString(),
+    tMs: Date.UTC(2026, 7, 2, 0, 0, index),
     heartRate: 150,
   }));
   return {
@@ -29,7 +29,7 @@ function context(): MetricsContext {
       canonicalRecords: records,
     },
     cache: {
-      sampleSec: 60,
+      sampleSec: 1,
       profile: {
         gender: Gender.MALE,
         maxHeartRate: 190,
@@ -133,7 +133,7 @@ describe('HeartRateTrimpTask', () => {
     expect(result.outputs.heartRateTrimp?.TRIMP100).toBeGreaterThan(0);
   });
 
-  it('keeps TRIMP100 at zero when MAXHR and age are unavailable', async () => {
+  it('does not persist a zero when MAXHR and age are unavailable', async () => {
     const persistence = { saveActivityHeartRateTrimpRow: jest.fn() };
     const task = new HeartRateTrimpTask(persistence as never, {} as never);
     const ctx = context();
@@ -154,6 +154,50 @@ describe('HeartRateTrimpTask', () => {
 
     const result = await task.exec(ctx);
 
-    expect(result.outputs.heartRateTrimp?.TRIMP100).toBe(0);
+    expect(result.outputs.heartRateTrimp).toBeUndefined();
+    await task.post(result);
+    expect(persistence.saveActivityHeartRateTrimpRow).not.toHaveBeenCalled();
+  });
+
+  it('gives five-second HR updates the same duration as dense one-second HR', async () => {
+    const task = new HeartRateTrimpTask({} as never, {} as never);
+    const dense = await task.exec(context());
+    const sparse = context();
+    sparse.inputs.canonicalRecords = sparse.inputs.canonicalRecords!.map(
+      (row, index) => ({
+        ...row,
+        heartRate: index % 5 === 0 ? row.heartRate : undefined,
+      }),
+    );
+    const result = await task.exec(sparse);
+    expect(result.outputs.heartRateTrimp?.TRIMP).toBeGreaterThan(0);
+    expect(result.outputs.heartRateTrimp?.TRIMP).toBe(
+      dense.outputs.heartRateTrimp?.TRIMP,
+    );
+  });
+
+  it('uses the versioned 60 bpm default only through the load fallback cache', async () => {
+    const persistence = { saveActivityHeartRateTrimpRow: jest.fn() };
+    const task = new HeartRateTrimpTask(persistence as never, {} as never);
+    const ctx = context();
+    ctx.cache.profile = {
+      ...ctx.cache.profile,
+      restingHeartRate: undefined,
+    };
+    ctx.cache.fitnessMetrics = {
+      [$Enums.UserFitnessMetricType.MAX_HR]: { value: 194, value2: null },
+    };
+    ctx.cache.hrThreshold = {
+      maxHeartRate: 194,
+      restingHeartRate: null,
+      lactateThresholdHeartRate: null,
+    };
+    ctx.cache.loadRestingHeartRateDefault = 60;
+
+    const result = await task.exec(ctx);
+
+    expect(result.outputs.heartRateTrimp?.HRR).toBe(134);
+    expect(ctx.cache.profile.restingHeartRate).toBeUndefined();
+    expect(ctx.cache.hrThreshold.restingHeartRate).toBeNull();
   });
 });

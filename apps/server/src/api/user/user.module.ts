@@ -16,6 +16,7 @@ import { CalendarCleanupModule } from '@/api/calendar/calendar-cleanup.module';
 import { PlanAccountDeletionModule } from '@/api/plan/plan-account-deletion.module';
 import { HealthFileQueryModule } from '@/health-data/health-file-query.module';
 import { ExternalProviderIntegrationModule } from '@/integrations/external-provider/external-provider-integration.module';
+import { UserAnalysisConfigModule } from './user-analysis-config.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ExternalProviderIntegrationModule } from '@/integrations/external-provi
     HealthFileQueryModule,
     ExternalProviderIntegrationModule,
     PrismaModule,
+    UserAnalysisConfigModule,
   ],
   controllers: [UsersController],
   providers: [
@@ -39,6 +41,6 @@ import { ExternalProviderIntegrationModule } from '@/integrations/external-provi
     RegistrationOtpService,
     OAuthAuthorizationsService,
   ],
-  exports: [UserService, AccountDeletionService],
+  exports: [UserService, UserAnalysisConfigModule, AccountDeletionService],
 })
 export class UsersModule {}

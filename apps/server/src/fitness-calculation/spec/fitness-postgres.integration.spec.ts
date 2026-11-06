@@ -58,6 +58,7 @@ suite('fitness PostgreSQL transactions (isolated database only)', () => {
       {} as never,
       eventEmitter as never,
       queries,
+      {} as never,
     );
     const sensor = {
       getFitnessRecordSeries: async () =>

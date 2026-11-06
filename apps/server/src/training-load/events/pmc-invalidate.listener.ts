@@ -1,9 +1,12 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
 import { PMCService } from '../pmc.service';
 import { PMC_INVALIDATE_EVENT, type PmcInvalidateEvent } from './pmc.events';
 import { emitAthleteStateReassessRequested } from '@/athlete-state/athlete-state.events';
+
+dayjs.extend(utc);
 
 @Injectable()
 export class PmcInvalidateListener {
@@ -18,7 +21,7 @@ export class PmcInvalidateListener {
   async handle(event: PmcInvalidateEvent) {
     if (event.startDate) {
       const endDate =
-        event.endDate ?? dayjs().add(1, 'day').endOf('day').toDate();
+        event.endDate ?? dayjs.utc().add(1, 'day').endOf('day').toDate();
       this.logger.log(
         `[pmc.invalidate] windowed recalculate userId=${event.userId}`,
       );
@@ -27,10 +30,12 @@ export class PmcInvalidateListener {
         startDate: event.startDate,
         endDate,
       });
-      await emitAthleteStateReassessRequested(this.events, {
-        userId: event.userId,
-        triggerType: 'PMC_UPDATED',
-      });
+      if (!event.suppressAthleteStateReassessment) {
+        await emitAthleteStateReassessRequested(this.events, {
+          userId: event.userId,
+          triggerType: 'PMC_UPDATED',
+        });
+      }
       return;
     }
 
@@ -38,9 +43,11 @@ export class PmcInvalidateListener {
       `[pmc.invalidate] full window recalculate userId=${event.userId}`,
     );
     await this.pmc.recalculatePMC(event.userId);
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: event.userId,
-      triggerType: 'PMC_UPDATED',
-    });
+    if (!event.suppressAthleteStateReassessment) {
+      await emitAthleteStateReassessRequested(this.events, {
+        userId: event.userId,
+        triggerType: 'PMC_UPDATED',
+      });
+    }
   }
 }

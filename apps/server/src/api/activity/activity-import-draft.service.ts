@@ -20,6 +20,7 @@ import {
   type CanonicalActivityPayload,
 } from '@/importing';
 import { ImportingJobService } from '@/importing/importing-job.service';
+import { createActivityInputReplayJob } from '@/analyze/activity-recompute-job.writer';
 import { FileSourceAdapter } from '@/importing/source-adapters/file-source.adapter';
 import { ActivityReadService } from './activity-read.service';
 import { ActivityAnalyzeMode, ActivityService } from './activity.service';
@@ -506,16 +507,35 @@ export class ActivityImportDraftService {
       // 提交接口是幂等的；首次响应若在后续关联阶段丢失，重试仍应把用户
       // 最新选择的 RPE 对齐到已提交活动，而不是静默返回旧草稿值。
       if (row.sessionRpe !== sessionRpe) {
-        await this.prisma.$transaction([
-          this.prisma.activity.updateMany({
-            where: { id: row.committedActivityId, userId: args.userId },
-            data: { sessionRpe },
-          }),
-          this.prisma.activityImportDraft.update({
+        await this.prisma.$transaction(async (tx) => {
+          const activity = await tx.activity.findFirst({
+            where: { id: row.committedActivityId!, userId: args.userId },
+            select: { id: true, startTime: true },
+          });
+          if (!activity) {
+            throw new NotFoundException('Committed activity not found');
+          }
+          await tx.activity.update({
+            where: { id: activity.id },
+            data: {
+              sessionRpe,
+              processingStatus: $Enums.ActivityProcessingStatus.ANALYZING,
+              processingUpdatedAt: new Date(),
+              readyAt: null,
+            },
+          });
+          await tx.activityImportDraft.update({
             where: { id: row.id },
             data: { sessionRpe },
-          }),
-        ]);
+          });
+          await createActivityInputReplayJob(tx, {
+            userId: args.userId,
+            effectiveFrom: activity.startTime,
+            includeActivityIds: [activity.id],
+            triggerSource: 'activity_import_draft_rpe_changed',
+            affectedPipelines: ['TRAINING_LOAD', 'PMC'],
+          });
+        });
         row = await this.getDraftRow(args.draftId, args.userId);
       }
       const activityHashId = await this.activityRead.findHashIdById(

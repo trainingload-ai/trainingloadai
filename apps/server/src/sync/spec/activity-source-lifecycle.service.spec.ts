@@ -39,19 +39,19 @@ describe('ActivitySourceLifecycleService', () => {
         ...base,
         id: 'low',
         createdAt: new Date('2026-01-01'),
-        metadata: { datasetQuality: { score: 40 } },
+        metadata: { datasetQuality: { version: 'v2', score: 40 } },
       },
       {
         ...base,
         id: 'high',
         createdAt: new Date('2026-01-02'),
-        metadata: { datasetQuality: { score: 80 } },
+        metadata: { datasetQuality: { version: 'v2', score: 80 } },
       },
       {
         ...base,
         id: 'no-snapshot',
         createdAt: new Date('2025-01-01'),
-        metadata: { datasetQuality: { score: 100 } },
+        metadata: { datasetQuality: { version: 'v2', score: 100 } },
         canonicalSnapshot: null,
       },
     ] as never);
@@ -110,7 +110,7 @@ describe('ActivitySourceLifecycleService', () => {
       sourceObjectId: 'source-object-1',
       isPrimary: false,
       createdAt: new Date('2026-01-01'),
-      metadata: { datasetQuality: { score: 50 } },
+      metadata: { datasetQuality: { version: 'v2', score: 50 } },
       canonicalSnapshot: { payload },
     };
     const tx = {
@@ -210,7 +210,7 @@ describe('ActivitySourceLifecycleService', () => {
       sourceObjectId: `source-object-${activityId}`,
       isPrimary: false,
       createdAt: new Date('2026-01-01'),
-      metadata: { datasetQuality: { score: 50 } },
+      metadata: { datasetQuality: { version: 'v2', score: 50 } },
       canonicalSnapshot: { payload },
     }));
     const tx = {
@@ -282,7 +282,7 @@ describe('ActivitySourceLifecycleService', () => {
     });
   });
 
-  it('queues one maintenance post-process for a recent hidden activity', async () => {
+  it('queues one persisted replay for a recent hidden activity', async () => {
     const tx = {
       activityThirdPartyMapping: {
         findMany: jest
@@ -322,6 +322,9 @@ describe('ActivitySourceLifecycleService', () => {
       userPostProcessJob: {
         create: jest.fn(async () => ({ id: 'maintenance-post' })),
       },
+      activityRecomputeJob: {
+        create: jest.fn(async () => ({ id: 'replay-hidden' })),
+      },
     };
     const service = createService({
       thirdPartyActivity: {
@@ -339,18 +342,19 @@ describe('ActivitySourceLifecycleService', () => {
       }),
     ).resolves.toMatchObject({ activities: 1, requeuedActivities: 0 });
 
-    expect(tx.importBatchJob.create).toHaveBeenCalledTimes(1);
+    expect(tx.importBatchJob.create).not.toHaveBeenCalled();
     expect(tx.importItemJob.create).not.toHaveBeenCalled();
-    expect(tx.userPostProcessJob.create).toHaveBeenCalledWith({
+    expect(tx.userPostProcessJob.create).not.toHaveBeenCalled();
+    expect(tx.activityRecomputeJob.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
-        batchJobId: 'maintenance-batch',
-        affectedSportTypes: ['RUN'],
+        reason: 'ACTIVITY_INPUT_CHANGED',
         recomputeFrom: expect.any(Date),
+        triggerSource: 'activity_source_removed_or_reselected',
       }),
     });
   });
 
-  it('does not refresh global metrics for a hidden activity older than 60 days', async () => {
+  it('queues correctness replay for a hidden activity older than 60 days', async () => {
     const tx = {
       activityThirdPartyMapping: {
         findMany: jest
@@ -386,6 +390,9 @@ describe('ActivitySourceLifecycleService', () => {
       importBatchJob: { create: jest.fn() },
       importItemJob: { create: jest.fn() },
       userPostProcessJob: { create: jest.fn() },
+      activityRecomputeJob: {
+        create: jest.fn(async () => ({ id: 'replay-old-hidden' })),
+      },
     };
     const service = createService({
       thirdPartyActivity: {
@@ -403,6 +410,12 @@ describe('ActivitySourceLifecycleService', () => {
 
     expect(tx.importBatchJob.create).not.toHaveBeenCalled();
     expect(tx.userPostProcessJob.create).not.toHaveBeenCalled();
+    expect(tx.activityRecomputeJob.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        recomputeFrom: new Date('2020-01-01T00:00:00.000Z'),
+        triggerSource: 'activity_source_removed_or_reselected',
+      }),
+    });
   });
 
   it('does not widen a missing targeted identity into provider-wide source removal', async () => {
@@ -533,7 +546,7 @@ describe('ActivitySourceLifecycleService', () => {
       sourceObjectId: 'source-object-1',
       isPrimary: false,
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
-      metadata: { datasetQuality: { score: 50 } },
+      metadata: { datasetQuality: { version: 'v2', score: 50 } },
       canonicalSnapshot: { payload },
     };
     const tx = {

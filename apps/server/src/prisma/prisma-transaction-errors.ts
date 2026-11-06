@@ -13,10 +13,17 @@ export const MAX_SERIALIZABLE_ATTEMPTS = 3;
 export function isPrismaSerializableConflict(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
   const candidate = error as PrismaLikeError;
-  if (candidate.code === 'P2034' || candidate.code === '40001') return true;
+  if (
+    candidate.code === 'P2034' ||
+    candidate.code === '40001' ||
+    candidate.code === '40P01'
+  )
+    return true;
   if (candidate.code !== 'P2010' || !candidate.meta) return false;
   if (typeof candidate.meta !== 'object') return false;
-  return (candidate.meta as { code?: unknown }).code === '40001';
+  return ['40001', '40P01'].includes(
+    String((candidate.meta as { code?: unknown }).code),
+  );
 }
 
 /** Bounded exponential backoff plus jitter for SERIALIZABLE retries. */

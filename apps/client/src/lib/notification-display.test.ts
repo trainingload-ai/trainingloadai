@@ -3,6 +3,48 @@ import type { NotificationItem } from "@/api/notifications";
 import { resolveNotificationDisplay } from "./notification-display";
 
 describe("resolveNotificationDisplay", () => {
+  it("renders an import result as an actionable activity outcome without duplicate zero counts", () => {
+    const item: NotificationItem = {
+      id: "notification-import-1",
+      kind: "IMPORT_BATCH_COMPLETED",
+      title: "Import completed",
+      bodyMarkdown: "server body",
+      data: {
+        totalCount: 73,
+        successCount: 73,
+        failedCount: 0,
+        skippedCount: 0,
+      },
+      createdAt: "2026-11-05T09:24:08.000Z",
+    };
+    const display = resolveNotificationDisplay(item, (key, values) => {
+      const translations: Record<string, string> = {
+        "templates.importResult": "导入结果",
+        "summary.available": "可用活动",
+        "summary.failed": "失败",
+        "summary.skipped": "跳过",
+        viewActivities: "查看活动",
+      };
+      if (key === "kinds.IMPORT_BATCH_COMPLETED.title") {
+        return `${values?.success} 个活动已可用`;
+      }
+      if (key === "kinds.IMPORT_BATCH_COMPLETED.body") {
+        return "文件解析、活动分析和训练负荷更新均已完成。";
+      }
+      if (key === "kinds.IMPORT_BATCH_COMPLETED.preview") {
+        return "解析、分析和负荷更新均已完成";
+      }
+      return translations[key] ?? key;
+    });
+
+    expect(display.title).toBe("73 个活动已可用");
+    expect(display.summary).toEqual([
+      { label: "可用活动", value: "73", tone: "success" },
+    ]);
+    expect(display.actionHref).toBe("/activities");
+    expect(display.actionLabel).toBe("查看活动");
+  });
+
   it("renders a review title from the current UI locale instead of stored text", () => {
     const item: NotificationItem = {
       id: "notification-1",

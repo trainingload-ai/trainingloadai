@@ -74,7 +74,7 @@ export function PlanWeekLoadChart({
             </span>
           </div>
           <span>
-            {tLoad("todayValues", {
+            {tLoad("totalValues", {
               actual: formatLoad(actual),
               planned: formatLoad(planned),
             })}

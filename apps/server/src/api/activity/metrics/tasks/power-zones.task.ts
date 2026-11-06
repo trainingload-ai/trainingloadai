@@ -54,7 +54,11 @@ export class PowerZonesTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const zones = ctx.outputs.powerZoneDistribution;
     if (!activity?.id || !zones) return ctx;
-    await this.persistence.saveActivityPowerZoneRows(activity.id, zones);
+    await this.persistence.saveActivityPowerZoneRows(
+      activity.id,
+      zones,
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

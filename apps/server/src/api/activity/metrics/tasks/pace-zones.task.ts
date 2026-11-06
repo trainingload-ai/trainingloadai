@@ -61,7 +61,11 @@ export class PaceZonesTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const zones = ctx.outputs.paceZoneDistribution;
     if (!activity?.id || !zones) return ctx;
-    await this.persistence.saveActivityPaceZoneRows(activity.id, zones);
+    await this.persistence.saveActivityPaceZoneRows(
+      activity.id,
+      zones,
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

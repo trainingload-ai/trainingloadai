@@ -8,6 +8,7 @@ generated/
 .env*
 !.env.example
 data/
+.local/
 .selfhost/
 /ai_docs/
 *.tsbuildinfo

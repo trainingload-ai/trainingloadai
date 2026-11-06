@@ -719,6 +719,17 @@ enum PlanLoadSource {
   @@map("enum_plan_load_source")
 }
 
+/// 已完成活动最终采用的实际负荷轨道。该值按活动发生时的配置固化，
+/// 不得被用户之后修改的 loadSources 重新解释。
+enum ActivityActualLoadSource {
+  POWER
+  HEART_RATE
+  PACE
+  SESSION_RPE
+
+  @@map("enum_activity_actual_load_source")
+}
+
 // 训练计划 step 类型
 // - WORK: 正常训练步骤
 // - REST: 恢复/休息步骤
@@ -937,6 +948,56 @@ model UserAutoUpdateConfig {
   @@map("t_user_auto_update_config")
 }
 
+/// 影响活动分析的全局配置时间线。UserProfile 保持当前状态读取模型，
+/// 历史分析必须按活动发生时刻解析本表。
+model UserAnalysisConfigVersion {
+  id String @id @default(cuid())
+
+  userId String @map("user_id")
+  user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  version     Int      @map("version")
+  effectiveAt DateTime @map("effective_at")
+  source      String   @default("USER_PROFILE")
+  fingerprint String   @map("fingerprint")
+
+  loadSources               String?                   @map("load_sources")
+  altitudeOptimizationModel AltitudeOptimizationModel @map("altitude_optimization_model")
+  altitudeThreshold         Float?                    @map("altitude_threshold")
+  defaultVdotSource         DefaultVdotSource         @map("default_vdot_source")
+  vo2maxCorrectionFactor    Float?                    @map("vo2max_correction_factor")
+  heartRateZoneModel        HeartRateZoneModel        @map("heart_rate_zone_model")
+  paceZoneModel             PaceZoneModel             @map("pace_zone_model")
+  powerZoneModel            PowerZoneModel            @map("power_zone_model")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, version])
+  @@index([userId, effectiveAt(sort: Desc), version(sort: Desc)])
+  @@map("t_user_analysis_config_version")
+}
+
+/// 自动更新开关同样是时变策略。UserAutoUpdateConfig 只服务当前 UI，
+/// Replay 按观测发生时刻读取本表。
+model UserAutoUpdateConfigVersion {
+  id String @id @default(cuid())
+
+  userId String @map("user_id")
+  user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  metric      UserFitnessMetricType
+  enabled     Boolean
+  version     Int                   @map("version")
+  effectiveAt DateTime              @map("effective_at")
+  source      String                @default("USER_SETTING")
+  fingerprint String                @map("fingerprint")
+  createdAt   DateTime              @default(now()) @map("created_at")
+
+  @@unique([userId, metric, version])
+  @@index([userId, metric, effectiveAt(sort: Desc), version(sort: Desc)])
+  @@map("t_user_auto_update_config_version")
+}
+
 // Unified user fitness metric record table
 // Replaces UserPowerThreshold, UserHeartRateThreshold, UserPaceThreshold
 model UserFitnessMetric {
@@ -964,10 +1025,73 @@ model UserFitnessMetric {
   originPayload    Json?               @map("origin_payload")
   originSyncedAt   DateTime?           @map("origin_synced_at")
 
+  // 系统时间线投影的所有权与幂等信息。MANUAL/第三方权威输入保持为空。
+  projectionVersion     Int?    @map("projection_version")
+  projectionRunId       String? @map("projection_run_id")
+  projectionFingerprint String? @map("projection_fingerprint")
+
   @@unique([userId, type, source, sport, recordedAt])
   @@index([userId, type, source, sport, recordedAt])
   @@index([originProvider, originExternalId])
   @@map("t_user_fitness_metric")
+}
+
+/// 被顺序重放替代的系统指标投影审计。有效时间线仍只保存在 UserFitnessMetric，
+/// 因此旧应用版本不会重新选择已失效的 AUTO 行。
+model UserFitnessMetricProjectionAudit {
+  id String @id @default(cuid())
+
+  userId String @map("user_id")
+  user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  originalMetricId String                @map("original_metric_id")
+  sport            SportType             @default(UNKNOWN)
+  type             UserFitnessMetricType @map("type")
+  value            Float                 @map("value")
+  value2           Float?                @map("value2")
+  source           MetricSource          @map("source")
+  recordedAt       DateTime              @map("recorded_at")
+
+  projectionVersion     Int?    @map("projection_version")
+  projectionRunId       String? @map("projection_run_id")
+  projectionFingerprint String? @map("projection_fingerprint")
+  originPayload         Json?   @map("origin_payload")
+
+  changeSource      ChangeSource?       @map("change_source")
+  originProvider    ThirdPartyProvider? @map("origin_provider")
+  originExternalId  String?             @map("origin_external_id")
+  originChecksum    String?             @map("origin_checksum")
+  originSyncedAt    DateTime?           @map("origin_synced_at")
+  originalCreatedAt DateTime            @map("original_created_at")
+
+  replacementRunId  String   @map("replacement_run_id")
+  replacementReason String   @map("replacement_reason")
+  archivedAt        DateTime @default(now()) @map("archived_at")
+
+  @@unique([originalMetricId, replacementRunId])
+  @@index([userId, type, sport, recordedAt])
+  @@index([replacementRunId])
+  @@map("t_user_fitness_metric_projection_audit")
+}
+
+/// 跨 UserPostProcessJob / ActivityRecomputeJob 的共享用户级分析租约。
+/// 活跃行数量同时构成跨实例全局容量上限。
+model ActivityAnalysisLease {
+  userId String @id @map("user_id")
+  user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ownerToken     String   @unique @map("owner_token")
+  sourceJobType  String   @map("source_job_type")
+  sourceJobId    String   @map("source_job_id")
+  priority       Int      @default(100)
+  leaseExpiresAt DateTime @map("lease_expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([leaseExpiresAt])
+  @@index([sourceJobType, priority, leaseExpiresAt])
+  @@map("t_activity_analysis_lease")
 }
 
 model UserZoneSettingVersion {
@@ -1027,100 +1151,105 @@ enum SelfHostInitializationState {
 }
 
 model T_user {
-  id                              String                           @id
-  name                            String
-  email                           String
-  emailVerified                   Boolean                          @map("email_verified")
-  image                           String?
+  id                                String                             @id
+  name                              String
+  email                             String
+  emailVerified                     Boolean                            @map("email_verified")
+  image                             String?
   /// 用户偏好语言（用于异步任务：通知/邮件/worker 等无法依赖请求头时的 i18n 选择）
-  preferredLocale                 String?                          @map("preferred_locale")
-  createdAt                       DateTime                         @map("created_at")
-  updatedAt                       DateTime                         @map("updated_at")
+  preferredLocale                   String?                            @map("preferred_locale")
+  createdAt                         DateTime                           @map("created_at")
+  updatedAt                         DateTime                           @map("updated_at")
   /// 最近一次成功创建登录会话的时间；独立持久化，避免 Session 清理后丢失历史。
-  lastLoginAt                     DateTime?                        @map("last_login_at")
+  lastLoginAt                       DateTime?                          @map("last_login_at")
   /// 首次创建账户的平台；只在注册时写入，后续跨端登录不得覆盖。
-  registrationPlatform            UserRegistrationPlatform         @default(UNKNOWN) @map("registration_platform")
+  registrationPlatform              UserRegistrationPlatform           @default(UNKNOWN) @map("registration_platform")
   /// 首次创建账户使用的认证方式，与注册平台相互独立。
-  registrationMethod              UserRegistrationMethod           @default(UNKNOWN) @map("registration_method")
+  registrationMethod                UserRegistrationMethod             @default(UNKNOWN) @map("registration_method")
   /// 首次注册对应的获客渠道；无可靠证据时保持 UNKNOWN。
-  acquisitionSource               UserAcquisitionSource            @default(UNKNOWN) @map("acquisition_source")
-  sessions                        T_user_sessions[]
-  accounts                        T_user_accounts[]
-  oauthClients                    oauthClient[]
-  oauthAccessTokens               oauthAccessToken[]
-  oauthRefreshTokens              oauthRefreshToken[]
-  oauthConsents                   oauthConsent[]
-  activities                      Activity[]
-  activityLthrObservations        ActivityLthrObservation[]
-  activityWeatherSnapshots        ActivityWeatherSnapshot[]
-  activityMergeAudits             ActivityMergeAudit[]
-  userProfile                     UserProfile?
-  thirdPartyActivity              ThirdPartyActivity[]
-  pmcData                         PMCData[]
-  plans                           Plan[]
-  planProposalPreviews            PlanProposalPreview[]
-  planTemplatePreviews            PlanTemplatePreview[]
-  planShareLineages               PlanShareLineage[]
-  competitionEvents               CompetitionEvent[]
-  competitionImpactAssessments    CompetitionImpactAssessment[]
-  isNewUser                       Boolean                          @default(true) @map("is_new_user")
-  userSettings                    UserSetting[]
-  userBodyMetric                  UserBodyMetric[]
-  fitnessAssessmentTasks          FitnessAssessmentTask[]
-  fitnessCalculations             FitnessCalculation[]
-  fitnessEvidenceRevision         FitnessEvidenceRevision?
-  userFitnessMetrics              UserFitnessMetric[]
-  userZoneSettingVersions         UserZoneSettingVersion[]
-  externalHealthSamples           ExternalHealthSample[]
-  userDailyHealthMetrics          UserDailyHealthMetric[]
-  canonicalHealthSnapshots        CanonicalHealthSnapshot[]
-  healthSeriesFiles               HealthSeriesFile[]
-  externalHealthSessions          ExternalHealthSession[]
-  canonicalHealthSessions         CanonicalHealthSession[]
-  userBestMetrics                 UserBestMetric[]
-  userBestTTs                     UserBestTT[]
-  userZoneSettings                UserZoneSetting[]
-  aiCoachSessions                 AiCoachSession[]
-  athleteMemoryFacts              AthleteMemoryFact[]
-  athleteMemoryEvidence           AthleteMemoryEvidence[]
-  athleteMemoryEvents             AthleteMemoryEvent[]
-  aiCoachMemoryExtractionJobs     AiCoachMemoryExtractionJob[]
-  athleteStateAssessments         AthleteStateAssessment[]
-  coachAssessmentCases            CoachAssessmentCase[]
-  aiUsageEvents                   AiUsageEvent[]
-  aiOperations                    AiOperation[]
-  aiTodaySuggestions              AiTodaySuggestion[]
-  todaySuggestionEngagementState  TodaySuggestionEngagementState?
-  aiPlanExecutionAdvices          AiPlanExecutionAdvice[]
-  coachActions                    CoachAction[]
-  coachContexts                   CoachContext[]
-  coachSummaries                  CoachSummary[]
-  reviewSchedules                 ReviewSchedule[]
-  reviewJobs                      ReviewJob[]
-  reviewDigests                   ReviewDigest[]
-  notifications                   Notification[]
-  importBatchJobs                 ImportBatchJob[]
-  importItemJobs                  ImportItemJob[]
-  importSourceObjects             ImportSourceObject[]
-  originActivitySyncRequests      OriginActivitySyncRequest[]
-  canonicalSnapshots              CanonicalActivitySnapshot[]
-  activitySources                 ActivitySource[]
-  userPostProcessJobs             UserPostProcessJob[]
-  activityRecomputeJobs           ActivityRecomputeJob[]
-  importEventLogs                 ImportEventLog[]
-  activityImportDrafts            ActivityImportDraft[]
-  userAutoUpdateConfigs           UserAutoUpdateConfig[]
-  activityFitnessMetricsSnapshots ActivityFitnessMetricsSnapshot[]
-  activityAiReviews               ActivityAiReview[]
-  activityMapThumbJobs            ActivityMapThumbJob[]
-  calendarSubscriptions           CalendarSubscription[]
-  externalProviderConnections     ExternalProviderConnection[]
-  externalOAuthStates             ExternalOAuthState[]
-  planWorkouts                    PlanWorkout[]
-  planWorkoutExternalMappings     PlanWorkoutExternalMapping[]
-  accountDeletionJob              AccountDeletionJob?
-  userDataExportJobs              UserDataExportJob[]
-  selfHostOwnership               SelfHostInstance?
+  acquisitionSource                 UserAcquisitionSource              @default(UNKNOWN) @map("acquisition_source")
+  sessions                          T_user_sessions[]
+  accounts                          T_user_accounts[]
+  oauthClients                      oauthClient[]
+  oauthAccessTokens                 oauthAccessToken[]
+  oauthRefreshTokens                oauthRefreshToken[]
+  oauthConsents                     oauthConsent[]
+  activities                        Activity[]
+  activityLthrObservations          ActivityLthrObservation[]
+  activityWeatherSnapshots          ActivityWeatherSnapshot[]
+  activityMergeAudits               ActivityMergeAudit[]
+  userProfile                       UserProfile?
+  thirdPartyActivity                ThirdPartyActivity[]
+  pmcData                           PMCData[]
+  plans                             Plan[]
+  planProposalPreviews              PlanProposalPreview[]
+  planTemplatePreviews              PlanTemplatePreview[]
+  planShareLineages                 PlanShareLineage[]
+  competitionEvents                 CompetitionEvent[]
+  competitionImpactAssessments      CompetitionImpactAssessment[]
+  isNewUser                         Boolean                            @default(true) @map("is_new_user")
+  userSettings                      UserSetting[]
+  userBodyMetric                    UserBodyMetric[]
+  fitnessAssessmentTasks            FitnessAssessmentTask[]
+  fitnessCalculations               FitnessCalculation[]
+  fitnessEvidenceRevision           FitnessEvidenceRevision?
+  userFitnessMetrics                UserFitnessMetric[]
+  userFitnessMetricProjectionAudits UserFitnessMetricProjectionAudit[]
+  activityAnalysisLease             ActivityAnalysisLease?
+  activityDataMigrations            ActivityDataMigration[]
+  userZoneSettingVersions           UserZoneSettingVersion[]
+  externalHealthSamples             ExternalHealthSample[]
+  userDailyHealthMetrics            UserDailyHealthMetric[]
+  canonicalHealthSnapshots          CanonicalHealthSnapshot[]
+  healthSeriesFiles                 HealthSeriesFile[]
+  externalHealthSessions            ExternalHealthSession[]
+  canonicalHealthSessions           CanonicalHealthSession[]
+  userBestMetrics                   UserBestMetric[]
+  userBestTTs                       UserBestTT[]
+  userZoneSettings                  UserZoneSetting[]
+  aiCoachSessions                   AiCoachSession[]
+  athleteMemoryFacts                AthleteMemoryFact[]
+  athleteMemoryEvidence             AthleteMemoryEvidence[]
+  athleteMemoryEvents               AthleteMemoryEvent[]
+  aiCoachMemoryExtractionJobs       AiCoachMemoryExtractionJob[]
+  athleteStateAssessments           AthleteStateAssessment[]
+  coachAssessmentCases              CoachAssessmentCase[]
+  aiUsageEvents                     AiUsageEvent[]
+  aiOperations                      AiOperation[]
+  aiTodaySuggestions                AiTodaySuggestion[]
+  todaySuggestionEngagementState    TodaySuggestionEngagementState?
+  aiPlanExecutionAdvices            AiPlanExecutionAdvice[]
+  coachActions                      CoachAction[]
+  coachContexts                     CoachContext[]
+  coachSummaries                    CoachSummary[]
+  reviewSchedules                   ReviewSchedule[]
+  reviewJobs                        ReviewJob[]
+  reviewDigests                     ReviewDigest[]
+  notifications                     Notification[]
+  importBatchJobs                   ImportBatchJob[]
+  importItemJobs                    ImportItemJob[]
+  importSourceObjects               ImportSourceObject[]
+  originActivitySyncRequests        OriginActivitySyncRequest[]
+  canonicalSnapshots                CanonicalActivitySnapshot[]
+  activitySources                   ActivitySource[]
+  userPostProcessJobs               UserPostProcessJob[]
+  activityRecomputeJobs             ActivityRecomputeJob[]
+  importEventLogs                   ImportEventLog[]
+  activityImportDrafts              ActivityImportDraft[]
+  userAutoUpdateConfigs             UserAutoUpdateConfig[]
+  userAnalysisConfigVersions        UserAnalysisConfigVersion[]
+  userAutoUpdateConfigVersions      UserAutoUpdateConfigVersion[]
+  activityFitnessMetricsSnapshots   ActivityFitnessMetricsSnapshot[]
+  activityAiReviews                 ActivityAiReview[]
+  activityMapThumbJobs              ActivityMapThumbJob[]
+  calendarSubscriptions             CalendarSubscription[]
+  externalProviderConnections       ExternalProviderConnection[]
+  externalOAuthStates               ExternalOAuthState[]
+  planWorkouts                      PlanWorkout[]
+  planWorkoutExternalMappings       PlanWorkoutExternalMapping[]
+  accountDeletionJob                AccountDeletionJob?
+  userDataExportJobs                UserDataExportJob[]
+  selfHostOwnership                 SelfHostInstance?
 
   /// 非空表示账户已进入不可逆异步删除流程；此时必须拒绝创建新会话和业务写入。
   accountDeletionRequestedAt DateTime? @map("account_deletion_requested_at")
@@ -2561,6 +2690,7 @@ model UserPostProcessJob {
   recomputeTo        DateTime? @map("recompute_to")
   affectedSportTypes Json?     @map("affected_sport_types")
   summary            Json?     @map("summary")
+  replayCheckpoint   Json?     @map("replay_checkpoint")
 
   startedAt   DateTime? @map("started_at")
   completedAt DateTime? @map("completed_at")
@@ -2681,12 +2811,18 @@ model ActivityRecomputeJob {
   recomputeTo   DateTime @map("recompute_to")
   lookbackDays  Int      @map("lookback_days")
 
-  status      ActivityRecomputeJobStatus @default(SCHEDULED) @map("status")
-  availableAt DateTime                   @map("available_at")
+  status           ActivityRecomputeJobStatus @default(SCHEDULED) @map("status")
+  availableAt      DateTime                   @map("available_at")
+  priority         Int                        @default(100)
+  replayCheckpoint Json?                      @map("replay_checkpoint")
+  lockToken        String?                    @map("lock_token")
+  leaseExpiresAt   DateTime?                  @map("lease_expires_at")
 
-  attempts    Int     @default(0) @map("attempts")
-  maxAttempts Int     @default(3) @map("max_attempts")
-  lastError   String? @map("last_error") @db.Text
+  attempts      Int     @default(0) @map("attempts")
+  maxAttempts   Int     @default(3) @map("max_attempts")
+  lastError     String? @map("last_error") @db.Text
+  lastErrorCode String? @map("last_error_code") @db.VarChar(64)
+  failureStats  Json?   @map("failure_stats")
 
   dedupeKey      String  @unique @map("dedupe_key")
   triggerSource  String? @map("trigger_source")
@@ -2698,7 +2834,8 @@ model ActivityRecomputeJob {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@index([status, availableAt])
+  @@index([status, availableAt, leaseExpiresAt])
+  @@index([priority(sort: Desc), status, availableAt])
   @@index([userId, status])
   @@index([userId, metricType, sportType, recomputeFrom, recomputeTo], map: "t_activity_recompute_job_metric_window_idx")
   @@map("t_activity_recompute_job")
@@ -3548,11 +3685,24 @@ model ActivityFitnessMetricsSnapshot {
   userId String @map("user_id")
   user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  sport             SportType @default(UNKNOWN)
-  recordedAt        DateTime  @map("recorded_at")
-  resolvedAt        DateTime  @default(now()) @map("resolved_at")
-  resolutionVersion Int       @default(2) @map("resolution_version")
-  provenance        Json?
+  sport                      SportType                 @default(UNKNOWN)
+  recordedAt                 DateTime                  @map("recorded_at")
+  resolvedAt                 DateTime                  @default(now()) @map("resolved_at")
+  resolutionVersion          Int                       @default(4) @map("resolution_version")
+  provenance                 Json?
+  calculationFingerprint     String?                   @map("calculation_fingerprint")
+  provenanceFingerprint      String?                   @map("provenance_fingerprint")
+  inputFingerprint           String?                   @map("input_fingerprint")
+  inputDimensionFingerprints Json?                     @map("input_dimension_fingerprints")
+  contextFingerprint         String?                   @map("context_fingerprint")
+  analysisConfigFingerprint  String?                   @map("analysis_config_fingerprint")
+  resolvedLoadSources        Json?                     @map("resolved_load_sources")
+  actualLoad                 Float?                    @map("actual_load")
+  actualLoadSource           ActivityActualLoadSource? @map("actual_load_source")
+  resolvedVo2maxValue        Float?                    @map("resolved_vo2max_value")
+  resolvedVo2maxSource       String?                   @map("resolved_vo2max_source")
+  analysisTimezone           String?                   @map("analysis_timezone")
+  pmcLocalDate               String?                   @map("pmc_local_date") @db.VarChar(10)
 
   ftpValue    Float? @map("ftp_value")
   ftpValue2   Float? @map("ftp_value2")
@@ -4024,8 +4174,52 @@ model ActivityParquetFile {
   @@map("t_activity_parquet_file")
 }
 
+/// Per-user maintenance ledger. A failed or unverified user blocks the next one.
+model ActivityDataMigration {
+  id                 String   @id @default(cuid())
+  userId             String   @map("user_id")
+  user               T_user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runKey             String   @map("run_key")
+  version            String
+  sequence           Int
+  status             String   @default("PENDING")
+  phase              String   @default("RAW_SCAN")
+  backupEvidence     Json     @map("backup_evidence")
+  beforeManifest     Json?    @map("before_manifest")
+  verification       Json?
+  rawCursor          String?  @map("raw_cursor")
+  importBatchIds     Json     @default("[]") @map("import_batch_ids")
+  recomputeJobId     String?  @map("recompute_job_id")
+  replayFrom         DateTime? @map("replay_from")
+  errorCode          String?  @map("error_code")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  verifiedAt         DateTime? @map("verified_at")
+  retainedObjects    StorageObjectRetention[]
+
+  @@unique([runKey, userId])
+  @@unique([runKey, sequence])
+  @@index([status, runKey, sequence])
+  @@map("t_activity_data_migration")
+}
+
+/// A verified migration keeps its old objects until an explicit recovery-window release.
+model StorageObjectRetention {
+  id           String   @id @default(cuid())
+  migrationId  String   @map("migration_id")
+  migration    ActivityDataMigration @relation(fields: [migrationId], references: [id], onDelete: Cascade)
+  bucket       String   @default("default")
+  objectKey    String   @map("object_key")
+  createdAt    DateTime @default(now()) @map("created_at")
+  releasedAt   DateTime? @map("released_at")
+
+  @@unique([migrationId, bucket, objectKey])
+  @@index([bucket, objectKey, releasedAt])
+  @@map("t_storage_object_retention")
+}
+
 /// 已被替换或 staging 失败的对象存储文件延迟回收清单。
-/// 删除对象前必须再次确认 objectKey 未被任何在线 manifest 引用。
+/// 删除对象前必须再次确认 objectKey 未被在线 manifest 或恢复保留记录引用。
 model StorageObjectGarbage {
   id          String    @id @default(cuid())
   createdAt   DateTime  @default(now()) @map("created_at")

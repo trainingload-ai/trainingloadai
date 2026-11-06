@@ -126,20 +126,6 @@ function useMetricHistoryData({
           .slice(-totalWeeks);
       }
 
-      if (metricKey === "vo2Max") {
-        const startDateParam = startDate.format("YYYY-MM-DD");
-        const endDateParam = endDate.format("YYYY-MM-DD");
-        const params = new URLSearchParams({
-          startDate: startDateParam,
-          endDate: endDateParam,
-        });
-        return (
-          (await apiFetch<HistoryItem[]>(
-            `/pmc/vo2max-history?${params.toString()}`,
-          )) ?? []
-        );
-      }
-
       const data = await apiFetch<HistoryItem[]>(
         `/pmc/data?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
       );
@@ -311,7 +297,7 @@ function MetricHistoryChartData({
     if (!isFitnessMetric) return undefined;
     return buildManualMetricSegments({
       endDate,
-      manualRows,
+      manualRows: manualRows?.filter((row) => row.source === "MANUAL"),
       startDate,
     });
   }, [endDate, isFitnessMetric, manualRows, startDate]);

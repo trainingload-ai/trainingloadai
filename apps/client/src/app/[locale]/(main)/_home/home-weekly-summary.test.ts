@@ -1,9 +1,45 @@
 import type { V2HomePlanWorkout } from "@/api/v2-home";
 import {
+  buildHomeWeeklyActualSummary,
   buildHomeWeeklySummary,
   formatHomeMonthDay,
   formatHomeWeekday,
 } from "./home-weekly-summary";
+
+describe("buildHomeWeeklyActualSummary", () => {
+  it("counts imported activities by PMC day independently of plan workouts", () => {
+    expect(
+      buildHomeWeeklyActualSummary([
+        { activityCount: 1 },
+        { activityCount: 14 },
+        {},
+      ]),
+    ).toEqual({
+      activityCount: 15,
+      activityCountsByDay: [1, 14, 0, 0, 0, 0, 0],
+      load: 0,
+    });
+  });
+
+  it("uses the chart's daily PMC values for the weekly total without rounding each day", () => {
+    expect(
+      buildHomeWeeklyActualSummary([
+        { actual: 14.69, activityCount: 1 },
+        { actual: 1049.9676, activityCount: 17 },
+        { actual: 0 },
+        {},
+        { actual: Number.NaN },
+        { actual: -1 },
+        { actual: 0 },
+        { actual: 999 },
+      ]),
+    ).toEqual({
+      activityCount: 18,
+      activityCountsByDay: [1, 17, 0, 0, 0, 0, 0],
+      load: 1064.6576,
+    });
+  });
+});
 
 function workout(
   input: Partial<V2HomePlanWorkout> & Pick<V2HomePlanWorkout, "id">,

@@ -52,7 +52,7 @@ export class SportCatalogService {
   }): Promise<ProviderSportResolution | null> {
     const externalCode = this.normalizeExternal(args.externalCode);
     const externalSubCode = this.normalizeExternal(args.externalSubCode ?? '');
-    const mapping = await this.catalog.findMappingFirst({
+    let mapping = await this.catalog.findMappingFirst({
       where: {
         provider: args.provider as ThirdPartyProvider,
         externalCode,
@@ -67,6 +67,39 @@ export class SportCatalogService {
         { priority: 'desc' },
       ],
     });
+    if (!mapping) {
+      const variants = (value: string | number | null | undefined) =>
+        Array.from(
+          new Set([
+            this.normalizeExternal(value ?? ''),
+            this.normalizeExternal(
+              String(value ?? '').replace(/([a-z\d])([A-Z])/g, '$1_$2'),
+            ),
+          ]),
+        );
+      const codes = variants(args.externalCode);
+      const subs = [...new Set([...variants(args.externalSubCode), ''])];
+      if (
+        codes.length > 1 ||
+        subs.some((sub) => ![externalSubCode, ''].includes(sub))
+      ) {
+        mapping = await this.catalog.findMappingFirst({
+          where: {
+            provider: args.provider as ThirdPartyProvider,
+            externalCode: { in: codes },
+            externalSubCode: { in: subs },
+            direction: { in: ['IMPORT', 'BOTH'] },
+            active: true,
+            sport: { active: true },
+          },
+          include: { sport: true },
+          orderBy: [
+            { externalSubCode: args.externalSubCode ? 'desc' : 'asc' },
+            { priority: 'desc' },
+          ],
+        });
+      }
+    }
     if (!mapping) return null;
     return {
       sport: mapping.sport,

@@ -33,6 +33,21 @@ test("normal text color pairs satisfy WCAG AA", () => {
   assert.ok(contrast(colors.dark.brandForeground, colors.dark.brand) >= 4.5);
 });
 
+test("secondary text and load values stay readable on product surfaces", () => {
+  for (const scheme of Object.values(colors)) {
+    for (const surface of [
+      scheme.background,
+      scheme.card,
+      scheme.muted,
+      scheme.secondary,
+    ]) {
+      assert.ok(contrast(scheme.mutedForeground, surface) >= 4.5);
+      assert.ok(contrast(scheme.load, surface) >= 4.5);
+    }
+    assert.ok(contrast(scheme.card, scheme.muted) >= 1.15);
+  }
+});
+
 test("product radii stay compact while overlays remain distinct", () => {
   assert.ok(radii.compact < radii.control);
   assert.ok(radii.control <= 8);

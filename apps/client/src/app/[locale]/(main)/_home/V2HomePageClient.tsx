@@ -40,6 +40,7 @@ import {
 import { TimezoneProfilePromptDialog } from "./components/timezone-profile-prompt-dialog";
 import { HomeSuggestionCardStack } from "./components/home-suggestion-card-stack";
 import {
+  buildHomeWeeklyActualSummary,
   buildHomeWeeklySummary,
   formatHomeMonthDay,
   formatHomeWeekday,
@@ -55,7 +56,6 @@ import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import { useDeviceTimezone } from "@/hooks/use-device-timezone";
 import { useIsMobile, useMobileViewport } from "@/hooks/use-mobile";
 import { useStore, type TimeFormat } from "@/lib/store";
-import { useDashboardWeeklySummaryPair } from "@/api/charts";
 import { queryKeys } from "@/lib/query-keys";
 import { MobilePullToRefresh } from "@/components/mobile-app/components/MobilePullToRefresh";
 import { useMobileNavigation } from "@/components/mobile-app/components/MobileNavigationProvider";
@@ -167,8 +167,6 @@ function buildHomeData(t: TranslateFn) {
       weekTargetLoad: 0,
     },
     loadComparison: {
-      currentWeekLoad: 0,
-      previousWeekLoad: 0,
       days: [
         { day: t("weekday.mon"), planned: 0, actual: null },
         { day: t("weekday.tue"), planned: 0, actual: null },
@@ -325,11 +323,8 @@ function LoadComparisonChart({
   );
   const { data: pmcData, isLoading } = usePMCData({ startDate, endDate });
   const chartPoints = useMemo(() => {
-    const actualByDate = new Map(
-      (pmcData ?? []).map((item) => [
-        String(item.date).slice(0, 10),
-        Number(item.value) || 0,
-      ]),
+    const pmcByDate = new Map(
+      (pmcData ?? []).map((item) => [String(item.date).slice(0, 10), item]),
     );
     const plannedByDate = new Map<string, number>();
     for (const workout of plannedWorkouts) {
@@ -343,11 +338,13 @@ function LoadComparisonChart({
       plannedByDate.set(key, (plannedByDate.get(key) ?? 0) + workoutLoad);
     }
     return dateKeys.map((key, index) => {
+      const pmc = pmcByDate.get(key);
       return {
         key,
         label: homeData.loadComparison.days[index]?.day ?? key,
-        actual: actualByDate.get(key) ?? 0,
+        actual: Number(pmc?.value) || 0,
         planned: plannedByDate.get(key) ?? 0,
+        activityCount: pmc?.activityCount ?? 0,
       };
     });
   }, [dateKeys, homeData.loadComparison.days, plannedWorkouts, pmcData]);
@@ -358,14 +355,21 @@ function LoadComparisonChart({
     () => buildHomeWeeklySummary(plannedWorkouts),
     [plannedWorkouts],
   );
+  const weeklyActualSummary = useMemo(
+    () => buildHomeWeeklyActualSummary(chartPoints),
+    [chartPoints],
+  );
+  const sessionCountScale = Math.max(
+    1,
+    ...weeklyActualSummary.activityCountsByDay,
+    ...weeklySummary.sessionBars.map((item) => item.planned),
+  );
   const loadProgress =
     weeklySummary.plannedLoad > 0
       ? Math.min(
           100,
           Math.round(
-            (homeData.loadComparison.currentWeekLoad /
-              weeklySummary.plannedLoad) *
-              100,
+            (weeklyActualSummary.load / weeklySummary.plannedLoad) * 100,
           ),
         )
       : 0;
@@ -387,33 +391,44 @@ function LoadComparisonChart({
           </div>
           <div className="mt-2 flex items-end justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <div className="text-2xl font-semibold leading-none tabular-nums">
-                {homeData.loadComparison.currentWeekLoad}
+              <div
+                data-testid="home-weekly-load"
+                className="text-2xl font-semibold leading-none tabular-nums text-load"
+              >
+                {isLoading ? "—" : Math.round(weeklyActualSummary.load)}
               </div>
               <div className="mt-1 text-[10px] text-muted-foreground">
                 {t("load.loadUnit")}
               </div>
             </div>
-            <div className="shrink-0 text-right">
-              <div className="text-[10px] text-muted-foreground">
-                {t("load.goal")} {weeklySummary.plannedLoad}
+            {weeklySummary.plannedLoad > 0 ? (
+              <div className="shrink-0 text-right">
+                <div className="text-[10px] text-muted-foreground">
+                  {t("load.goal")} {weeklySummary.plannedLoad}
+                </div>
+                <div className="mt-0.5 text-sm font-semibold tabular-nums text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))]">
+                  {loadProgress}%
+                </div>
               </div>
-              <div className="mt-0.5 text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
-                {loadProgress}%
+            ) : (
+              <div className="max-w-24 shrink-0 text-right text-[10px] leading-4 text-muted-foreground">
+                {t("load.noPlanTarget")}
               </div>
+            )}
+          </div>
+          {weeklySummary.plannedLoad > 0 ? (
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+              <div
+                aria-label={t("load.weeklyTrainingLoad")}
+                aria-valuemax={100}
+                aria-valuemin={0}
+                aria-valuenow={loadProgress}
+                className="h-full rounded-full bg-[hsl(var(--emerald-500))] dark:bg-[hsl(var(--emerald-400))]"
+                role="progressbar"
+                style={{ width: `${loadProgress}%` }}
+              />
             </div>
-          </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-            <div
-              aria-label={t("load.weeklyTrainingLoad")}
-              aria-valuemax={100}
-              aria-valuemin={0}
-              aria-valuenow={loadProgress}
-              className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400"
-              role="progressbar"
-              style={{ width: `${loadProgress}%` }}
-            />
-          </div>
+          ) : null}
         </div>
 
         <div className="flex min-w-0 flex-col rounded-md bg-neutral-100 px-3 py-2.5 dark:bg-muted/45">
@@ -424,23 +439,35 @@ function LoadComparisonChart({
             <div className="shrink-0 text-right">
               <div className="flex items-baseline justify-end gap-1">
                 <span className="text-2xl font-semibold leading-none tabular-nums">
-                  {weeklySummary.completedSessions}
+                  {weeklyActualSummary.activityCount}
                 </span>
-                <span className="text-xs tabular-nums text-muted-foreground">
-                  / {weeklySummary.plannedSessions}
-                </span>
+                {weeklySummary.plannedSessions > 0 ? (
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    / {weeklySummary.plannedSessions}
+                  </span>
+                ) : null}
               </div>
               <div className="mt-1 text-[9px] text-muted-foreground">
-                {t("load.completedLabel")} / {t("load.goal")}
+                {weeklySummary.plannedSessions > 0
+                  ? `${t("load.completedLabel")} / ${t("load.goal")}`
+                  : t("load.completedLabel")}
               </div>
             </div>
           </div>
           <div className="mt-auto flex items-end justify-between gap-1 pt-1">
             {weeklySummary.sessionBars.map((bar, index) => {
-              const plannedHeight =
-                bar.planned > 0 ? Math.min(30, 18 + bar.planned * 8) : 6;
+              const actual =
+                weeklyActualSummary.activityCountsByDay[index] ?? 0;
+              const plannedHeight = Math.max(
+                6,
+                Math.round(
+                  (Math.max(actual, bar.planned) / sessionCountScale) * 30,
+                ),
+              );
               const completedRatio =
-                bar.planned > 0 ? bar.completed / bar.planned : 0;
+                Math.max(actual, bar.planned) > 0
+                  ? actual / Math.max(actual, bar.planned)
+                  : 0;
               return (
                 <div
                   key={dateKeys[index]}
@@ -452,7 +479,7 @@ function LoadComparisonChart({
                     style={{ height: plannedHeight }}
                   >
                     <div
-                      className="w-full bg-emerald-500 dark:bg-emerald-400"
+                      className="w-full bg-[hsl(var(--emerald-500))] dark:bg-[hsl(var(--emerald-400))]"
                       style={{ height: plannedHeight * completedRatio }}
                     />
                   </div>
@@ -515,6 +542,7 @@ function LoadComparisonChart({
             actualLabel={t("load.actual")}
             plannedLabel={t("load.expected")}
             ariaLabel={t("load.chartAria")}
+            activityCountLabel={(count) => t("load.activityCount", { count })}
           />
         ) : (
           <div className="mx-4 grid h-44 place-items-center text-sm text-muted-foreground">
@@ -997,7 +1025,7 @@ function RecentActivityPanel({
                   sizes="96px"
                   className="h-20 w-24"
                   fallback={
-                    <div className="flex h-full w-full items-center justify-center border border-zinc-200/80 bg-zinc-100/80 text-muted-foreground dark:border-white/[0.06] dark:bg-zinc-800/70">
+                    <div className="flex h-full w-full items-center justify-center bg-secondary text-muted-foreground">
                       <Route className="h-5 w-5" aria-hidden="true" />
                     </div>
                   }
@@ -1408,7 +1436,7 @@ export default function V2HomePageClient({
   const queryClient = useQueryClient();
   const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
-  const { dashboardFilters, timeFormat } = useStore();
+  const { timeFormat } = useStore();
   const deviceTimezone = useDeviceTimezone();
   const publicDemo = usePublicDemo();
   const aiConsent = useAiDataConsent({ enabled: !publicDemo.active });
@@ -1419,9 +1447,6 @@ export default function V2HomePageClient({
     title: <ThemeLogo width={120} height={24} />,
   });
   const baseHomeData = useMemo(() => buildHomeData(t), [t]);
-  const selectedSportType = dashboardFilters.selectedSportType;
-  const { data: weeklySummaryPair } =
-    useDashboardWeeklySummaryPair(selectedSportType);
   const shouldVerifyEmptyInitialData =
     !initialData.activePlan &&
     !initialData.recentActivity &&
@@ -1458,12 +1483,6 @@ export default function V2HomePageClient({
     retry: false,
   });
   const resolvedTodayAdvice = todayAdvice ?? sourceData.aiTodaySuggestion;
-  const currentWeekLoad = Math.round(
-    weeklySummaryPair?.weekPressure?.current ?? 0,
-  );
-  const previousWeekLoad = Math.round(
-    weeklySummaryPair?.weekPressure?.previous ?? 0,
-  );
   const homeData = useMemo(() => {
     if (!activePlan) {
       return {
@@ -1473,11 +1492,6 @@ export default function V2HomePageClient({
           advice: resolvedTodayAdvice,
           fallbackTitle: t("aiTodaySuggestion.fallbackTitle"),
         }),
-        loadComparison: {
-          ...baseHomeData.loadComparison,
-          currentWeekLoad,
-          previousWeekLoad,
-        },
         summaryMetrics: buildSummaryMetrics(baseHomeData, sourceData, t),
         recentActivity: buildRecentActivity(
           baseHomeData,
@@ -1573,11 +1587,6 @@ export default function V2HomePageClient({
         weekday: formatHomeWeekday(locale, dateKey),
         plannedWorkouts,
       },
-      loadComparison: {
-        ...baseHomeData.loadComparison,
-        currentWeekLoad,
-        previousWeekLoad,
-      },
       summaryMetrics: buildSummaryMetrics(baseHomeData, sourceData, t),
       recentActivity: buildRecentActivity(
         baseHomeData,
@@ -1589,9 +1598,7 @@ export default function V2HomePageClient({
   }, [
     activePlan,
     baseHomeData,
-    currentWeekLoad,
     locale,
-    previousWeekLoad,
     resolvedTodayAdvice,
     sourceData,
     t,

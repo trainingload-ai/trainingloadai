@@ -10,9 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobService } from './importing-job.service';
-import { AnalyzeFitnessOrchestratorService } from '@/analyze/analyze-fitness-orchestrator.service';
+import { ChronologicalActivityReplayService } from '@/analyze/chronological-activity-replay.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { emitPmcInvalidate } from '@/training-load/events/pmc.events';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { ActivityService } from '@/api/activity/activity.service';
 import { UserService } from '@/api/user/user.service';
@@ -20,9 +19,7 @@ import { UserQueryService } from '@/api/user/user-query.service';
 import { ThirdPartyAutoExportOrchestratorService } from '@/workers/third-party-auto-export-orchestrator.service';
 import { WorkerDrainProgress } from '@/workers/worker-drain-progress';
 import { SportType, type ImportPipelineStage } from '@prisma/client';
-import dayjs = require('dayjs');
 import { randomUUID } from 'node:crypto';
-import type { MetricsTaskOutcome } from '@/api/activity/metrics/context';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
 import {
   FEATURE_ACCESS_POLICY,
@@ -35,7 +32,6 @@ import {
   type ImportCompletionPresenter,
 } from './import-completion-presenter.port';
 
-const HEAVY_METRICS_CONCURRENCY = 2;
 const AI_REVIEW_ENQUEUE_CONCURRENCY = 3;
 
 function jsonRecord(value: unknown): Record<string, unknown> {
@@ -79,22 +75,21 @@ function countField(value: unknown) {
   return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
+function replayCheckpointEffectiveFrom(value: unknown): Date | null {
+  const raw = jsonRecord(value).nextEffectiveFrom;
+  if (typeof raw !== 'string') return null;
+  const parsed = new Date(raw);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
+}
+
 type ThirdPartyExportOutcome = {
   failedProviders: string[];
   failedCount: number;
 };
 
-type HeavyMetricsTaskSummary = {
-  applied: number;
-  ignored: number;
-  skipped: number;
-  failed: number;
-  ignoredReasons: Record<string, number>;
-  skippedReasons: Record<string, number>;
-};
-
 type ImportPostProcessPolicy = {
   suppressAutomaticAiReview: boolean;
+  suppressAthleteStateReassessment: boolean;
   suppressThirdPartyExport: boolean;
 };
 
@@ -108,39 +103,10 @@ export function importPostProcessPolicy(
   const context = jsonRecord(requestContext);
   return {
     suppressAutomaticAiReview: context.suppressAutomaticAiReview === true,
+    suppressAthleteStateReassessment:
+      context.suppressAthleteStateReassessment === true,
     suppressThirdPartyExport: context.suppressThirdPartyExport === true,
   };
-}
-
-function addHeavyMetricsOutcome(
-  summary: Record<string, HeavyMetricsTaskSummary>,
-  outcome: MetricsTaskOutcome,
-) {
-  const row = (summary[outcome.key] ??= {
-    applied: 0,
-    ignored: 0,
-    skipped: 0,
-    failed: 0,
-    ignoredReasons: {},
-    skippedReasons: {},
-  });
-  if (outcome.status === 'APPLIED') {
-    row.applied += 1;
-    return;
-  }
-  if (outcome.status === 'FAILED') {
-    row.failed += 1;
-    return;
-  }
-  if (outcome.status === 'IGNORED') {
-    row.ignored += 1;
-    const reason = outcome.reason ?? 'unspecified';
-    row.ignoredReasons[reason] = (row.ignoredReasons[reason] ?? 0) + 1;
-    return;
-  }
-  row.skipped += 1;
-  const reason = outcome.reason ?? 'unspecified';
-  row.skippedReasons[reason] = (row.skippedReasons[reason] ?? 0) + 1;
 }
 
 function exportReasonText(reason: unknown) {
@@ -226,7 +192,7 @@ export class UserPostProcessWorkerService
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly fitnessOrchestrator: AnalyzeFitnessOrchestratorService,
+    private readonly chronologicalReplay: ChronologicalActivityReplayService,
     private readonly events: EventEmitter2,
     private readonly notificationDomain: NotificationDomainService,
     private readonly activityService: ActivityService,
@@ -349,16 +315,25 @@ export class UserPostProcessWorkerService
             AND (lease_expires_at IS NULL OR lease_expires_at <= $1)
           )
         )
+        AND EXISTS (
+          SELECT 1 FROM t_import_batch_job b
+          WHERE b.id = t_user_post_process_job.batch_job_id
+            AND (SELECT COUNT(*) FROM t_import_item_job i WHERE i.batch_job_id = b.id) >= b.total_count
+            AND NOT EXISTS (
+              SELECT 1 FROM t_import_item_job i
+              WHERE i.batch_job_id = b.id AND i.status NOT IN ('DONE','SKIPPED','DEAD')
+            )
+        )
         ORDER BY created_at ASC
         LIMIT $2
         FOR UPDATE SKIP LOCKED
       )
       UPDATE t_user_post_process_job j
       SET status='RUNNING',
-          started_at=COALESCE(j.started_at, NOW()),
+          started_at=COALESCE(j.started_at, $1),
           lock_token=$3,
           lease_expires_at=$4,
-          updated_at=NOW()
+          updated_at=$1
       FROM picked
       WHERE j.id = picked.id
       RETURNING j.id, j.user_id, j.batch_job_id, j.lock_token;
@@ -613,8 +588,6 @@ export class UserPostProcessWorkerService
   private async getBatchAnalysisActivityIds(args: {
     batchJobId: string;
     userId: string;
-    refreshFrom?: Date | null;
-    refreshTo?: Date | null;
   }): Promise<number[]> {
     const doneItems = await this.importJobs.itemJobs().findMany({
       where: {
@@ -623,16 +596,6 @@ export class UserPostProcessWorkerService
         status: 'DONE',
         activityId: { not: null },
         analysisRequired: true,
-        ...(args.refreshFrom
-          ? {
-              activity: {
-                startTime: {
-                  gte: args.refreshFrom,
-                  ...(args.refreshTo ? { lte: args.refreshTo } : {}),
-                },
-              },
-            }
-          : {}),
       },
       select: { activityId: true },
     });
@@ -643,121 +606,6 @@ export class UserPostProcessWorkerService
           .filter((id: unknown): id is number => typeof id === 'number'),
       ),
     );
-  }
-
-  private async runBatchHeavyMetrics(args: {
-    batchJobId: string;
-    userId: string;
-    postProcessJobId: string;
-  }): Promise<number[]> {
-    const activityIds = await this.getBatchAnalysisActivityIds(args);
-
-    if (!activityIds.length) return [];
-
-    this.logImportPipelineEvent({
-      batchJobId: args.batchJobId,
-      postProcessJobId: args.postProcessJobId,
-      userId: args.userId,
-      stage: 'ANALYZING',
-      message: `开始执行导入后第二段重度分析，共 ${activityIds.length} 个活动`,
-      data: { activityCount: activityIds.length },
-    });
-
-    const failures: Array<{ activityId: number; error: string }> = [];
-    const taskSummary: Record<string, HeavyMetricsTaskSummary> = {};
-    // 重度指标会同时占用 CPU 与数据库连接；固定为两个 runner，消除完全串行
-    // 瀑布的同时避免大批量导入瞬间打满资源。
-    await forEachWithConcurrency(
-      activityIds,
-      HEAVY_METRICS_CONCURRENCY,
-      async (activityId) => {
-        try {
-          const outcomes = await this.activityService.runHeavyMetricsPipeline(
-            activityId,
-            args.userId,
-          );
-          for (const outcome of outcomes ?? []) {
-            addHeavyMetricsOutcome(taskSummary, outcome);
-          }
-          const appliedTasks = (outcomes ?? [])
-            .filter((outcome) => outcome.status === 'APPLIED')
-            .map((outcome) => outcome.key);
-          const skippedTasks = (outcomes ?? [])
-            .filter((outcome) => outcome.status === 'SKIPPED')
-            .map(
-              (outcome) => `${outcome.key}:${outcome.reason ?? 'unspecified'}`,
-            );
-          const ignoredTasks = (outcomes ?? [])
-            .filter((outcome) => outcome.status === 'IGNORED')
-            .map(
-              (outcome) => `${outcome.key}:${outcome.reason ?? 'unspecified'}`,
-            );
-          await this.prisma.activity.update({
-            where: { id: activityId },
-            data: {
-              processingStatus: 'READY',
-              processingUpdatedAt: new Date(),
-              readyAt: new Date(),
-            },
-          });
-          this.logImportPipelineEvent({
-            batchJobId: args.batchJobId,
-            postProcessJobId: args.postProcessJobId,
-            userId: args.userId,
-            stage: 'ANALYZING',
-            message: `活动 ${activityId} 重度指标完成，生成 ${appliedTasks.length} 项，忽略 ${ignoredTasks.length} 项，跳过 ${skippedTasks.length} 项`,
-            data: { activityId, appliedTasks, ignoredTasks, skippedTasks },
-          });
-        } catch (e) {
-          failures.push({
-            activityId,
-            error: e instanceof Error ? e.message : String(e),
-          });
-          this.logImportPipelineEvent({
-            batchJobId: args.batchJobId,
-            postProcessJobId: args.postProcessJobId,
-            userId: args.userId,
-            stage: 'ANALYZING',
-            message: `活动 ${activityId} 重度指标失败`,
-            data: {
-              activityId,
-              error: e instanceof Error ? e.message : String(e),
-            },
-            level: 'ERROR',
-          });
-        }
-      },
-    );
-
-    if (failures.length > 0) {
-      await this.prisma.activity.updateMany({
-        where: { id: { in: failures.map((failure) => failure.activityId) } },
-        data: {
-          processingStatus: 'PARTIAL_FAILED',
-          processingUpdatedAt: new Date(),
-          readyAt: null,
-        },
-      });
-      const preview = failures.slice(0, 3).map((f) => f.activityId);
-      throw new Error(
-        `Heavy metrics failed for ${failures.length}/${activityIds.length} activities, sample activityIds=${preview.join(',')}`,
-      );
-    }
-
-    this.logImportPipelineEvent({
-      batchJobId: args.batchJobId,
-      postProcessJobId: args.postProcessJobId,
-      userId: args.userId,
-      stage: 'ANALYZING',
-      message: `导入后第二段重度分析完成，共 ${activityIds.length} 个活动`,
-      data: { activityCount: activityIds.length, taskSummary },
-    });
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: args.userId,
-      triggerType: 'ACTIVITY_READY',
-      triggerRef: args.postProcessJobId,
-    });
-    return activityIds;
   }
 
   private async hasActivityReviewAccess(userId: string): Promise<boolean> {
@@ -972,6 +820,7 @@ export class UserPostProcessWorkerService
           recomputeFrom: true,
           recomputeTo: true,
           affectedSportTypes: true,
+          replayCheckpoint: true,
         },
       });
       if (!row) return;
@@ -983,112 +832,92 @@ export class UserPostProcessWorkerService
       const postProcessPolicy = importPostProcessPolicy(batch?.requestContext);
 
       const sportTypes = asSportTypes(row.affectedSportTypes);
-      const batchAnalysisActivityIds =
-        sportTypes.length > 0
-          ? await this.getBatchAnalysisActivityIds({
-              batchJobId: job.batchJobId,
-              userId: job.userId,
-              refreshFrom: row.recomputeFrom,
-              refreshTo: row.recomputeTo,
-            })
-          : [];
-      // 历史合并/删除等维护任务没有 import item，但仍需刷新最近 60 天内
-      // 已 READY 的用户全局指标。空数组不能作为 include scope，否则等价于
-      // “一个活动也不读”。普通导入仍用 item IDs 纳入尚未 READY 的本批活动。
-      const fitnessScope = batchAnalysisActivityIds.length
-        ? { includeActivityIds: batchAnalysisActivityIds }
-        : {};
+      const batchAnalysisActivityIds = await this.getBatchAnalysisActivityIds({
+        batchJobId: job.batchJobId,
+        userId: job.userId,
+      });
+      const batchActivityRange = batchAnalysisActivityIds.length
+        ? await this.prisma.activity.aggregate({
+            where: { id: { in: batchAnalysisActivityIds } },
+            _min: { startTime: true },
+            _max: { startTime: true },
+          })
+        : null;
+      const replayFrom =
+        replayCheckpointEffectiveFrom(row.replayCheckpoint) ??
+        row.recomputeFrom ??
+        batchActivityRange?._min.startTime;
+      // 新导入的历史活动可能改变滚动指标，并继续影响批次之后已经存在的活动。
+      // recomputeTo 只保留原批次审计范围，正确性重放必须检查完整后缀。
+      const replayTo = new Date();
+      const heavyActivityIds = batchAnalysisActivityIds;
 
       this.logImportPipelineEvent({
         batchJobId: job.batchJobId,
         postProcessJobId: job.id,
         userId: job.userId,
         stage: 'POST_PROCESSING',
-        message: '批次完成后刷新用户前置阈值指标',
+        message: '按活动时间顺序重放用户指标与重度分析',
         data: {
           sportTypes,
           recomputeFrom: row.recomputeFrom?.toISOString() ?? null,
           recomputeTo: row.recomputeTo?.toISOString() ?? null,
         },
       });
-      // 前置刷新，
-      if (sportTypes.length > 0) {
-        await this.fitnessOrchestrator.refreshUserFitnessProfilePre(
-          job.userId,
-          sportTypes,
-          fitnessScope,
-        );
-      }
-
-      // 轻度分析已写入各活动 VO2Max；批次聚合用户全局 VO2Max，供重度配速区间（Daniels 等）使用。
-      this.logImportPipelineEvent({
-        batchJobId: job.batchJobId,
-        postProcessJobId: job.id,
-        userId: job.userId,
-        stage: 'POST_PROCESSING',
-        message: '聚合用户全局 VO2Max（供重度配速区间）',
-      });
-      if (sportTypes.length > 0) {
-        await this.fitnessOrchestrator.refreshUserFitnessProfilePost(
-          job.userId,
-          fitnessScope,
-        );
-      }
-
-      // 跑第二段重度指标，依赖用户阈值与分区配置
-      const heavyActivityIds = await this.runBatchHeavyMetrics({
-        batchJobId: job.batchJobId,
-        userId: job.userId,
-        postProcessJobId: job.id,
-      });
-
-      // LIGHT 阶段已经生成 Peak Pace，但同一用户的多个导入批次可能并发
-      // 进入 ANALYZING。前置刷新只允许读取 READY 活动和当前批次，因此每个
-      // 批次都可能只看到自己的峰值，无法凑齐跨活动的 CS 拟合样本。当前批次
-      // HEAVY 完成并标记 READY 后再做一次全 READY 范围收敛；最后完成的批次
-      // 会看到此前已完成的批次，并把 TP/CS 和全局 VO2Max 正确落库。
-      if (heavyActivityIds.length > 0 && sportTypes.length > 0) {
-        this.logImportPipelineEvent({
-          batchJobId: job.batchJobId,
-          postProcessJobId: job.id,
+      if (replayFrom && batchAnalysisActivityIds.length > 0) {
+        const replayResult = await this.chronologicalReplay.replay({
           userId: job.userId,
-          stage: 'POST_PROCESSING',
-          message: '活动就绪后收敛刷新用户阈值与全局能力指标',
-          data: { sportTypes, activityCount: heavyActivityIds.length },
+          sourceJobType: 'USER_POST_PROCESS',
+          sourceJobId: job.id,
+          effectiveFrom: replayFrom,
+          effectiveTo: replayTo,
+          includeActivityIds: batchAnalysisActivityIds,
+          maxActivities: 100,
+          sourceLockToken: job.lockToken,
+          suppressAthleteStateReassessment:
+            postProcessPolicy.suppressAthleteStateReassessment,
         });
-        await this.fitnessOrchestrator.refreshUserFitnessProfilePre(
-          job.userId,
-          sportTypes,
-        );
-        await this.fitnessOrchestrator.refreshUserFitnessProfilePost(
-          job.userId,
-        );
-      }
-
-      this.logImportPipelineEvent({
-        batchJobId: job.batchJobId,
-        postProcessJobId: job.id,
-        userId: job.userId,
-        stage: 'POST_PROCESSING',
-        message: '开始刷新 PMC',
-        data: {
-          recomputeFrom: row.recomputeFrom?.toISOString() ?? null,
-          recomputeTo: row.recomputeTo?.toISOString() ?? null,
-        },
-      });
-
-      // 判断是否更新 PMC
-      if (row.recomputeFrom) {
-        const importRangeEnd = row.recomputeTo ?? new Date();
-        const currentPMCEnd = dayjs().add(1, 'day').endOf('day').toDate();
-        const pmcEndDate = dayjs(importRangeEnd).isAfter(currentPMCEnd)
-          ? importRangeEnd
-          : currentPMCEnd;
-
-        await emitPmcInvalidate(this.events, job.userId, {
-          startDate: row.recomputeFrom,
-          endDate: pmcEndDate,
-        });
+        if (!replayResult.completed) {
+          const yielded = await this.importJobs.postProcessJobs().updateMany({
+            where: {
+              id: job.id,
+              status: 'RUNNING',
+              ...(job.lockToken ? { lockToken: job.lockToken } : {}),
+            },
+            data: {
+              status: 'PENDING',
+              availableAt: new Date(Date.now() + 1_000),
+              lockToken: null,
+              leaseExpiresAt: null,
+              lastError: null,
+            },
+          });
+          if (yielded.count !== 1) {
+            throw new Error(`User post-process lease lost: ${job.id}`);
+          }
+          this.logImportPipelineEvent({
+            batchJobId: job.batchJobId,
+            postProcessJobId: job.id,
+            userId: job.userId,
+            stage: 'POST_PROCESSING',
+            message: '顺序重放已保存分页 checkpoint，任务主动让出',
+            data: {
+              processedActivities: replayResult.processedActivities,
+              nextCheckpoint: replayResult.nextCheckpoint,
+            },
+          });
+          return;
+        }
+        if (
+          heavyActivityIds.length > 0 &&
+          !postProcessPolicy.suppressAthleteStateReassessment
+        ) {
+          await emitAthleteStateReassessRequested(this.events, {
+            userId: job.userId,
+            triggerType: 'ACTIVITY_READY',
+            triggerRef: job.id,
+          });
+        }
       }
       // 由实例功能策略与维护批次策略共同决定是否自动触发活动 AI 复盘。
       if (postProcessPolicy.suppressAutomaticAiReview) {
@@ -1146,6 +975,26 @@ export class UserPostProcessWorkerService
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      if (msg === 'ACTIVITY_ANALYSIS_CAPACITY_UNAVAILABLE') {
+        await this.importJobs.postProcessJobs().updateMany({
+          where: {
+            id: job.id,
+            status: 'RUNNING',
+            ...(job.lockToken ? { lockToken: job.lockToken } : {}),
+          },
+          data: {
+            status: 'PENDING',
+            availableAt: new Date(Date.now() + 5_000),
+            lockToken: null,
+            leaseExpiresAt: null,
+            lastError: null,
+          },
+        });
+        this.logger.log(
+          `[用户后处理] 全局重放容量已满，任务让出且不计失败 job=${job.id}`,
+        );
+        return;
+      }
       const attempts = await this.failClaimedJob(job, msg);
       if (attempts == null) {
         this.logger.warn(

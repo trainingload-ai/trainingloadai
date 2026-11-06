@@ -31,3 +31,26 @@ export function activitySupportsDistance(
     String(activity.sportType ?? "").toUpperCase(),
   );
 }
+
+/** OTHER-family sports still display measurements explicitly supported by their catalog entry. */
+export function getOtherActivitySummaryCapabilities(
+  catalog: SportDefinition[],
+  activity: ActivitySportIdentity & {
+    distance?: number | null;
+    averageSpeed?: number | null;
+  },
+) {
+  const definition = resolveSportDefinition(catalog, activity);
+  return {
+    showDistance:
+      definition?.supportsDistance === true &&
+      typeof activity.distance === "number" &&
+      Number.isFinite(activity.distance) &&
+      activity.distance > 0,
+    showSpeed:
+      definition?.supportsSpeed === true &&
+      typeof activity.averageSpeed === "number" &&
+      Number.isFinite(activity.averageSpeed) &&
+      activity.averageSpeed > 0,
+  };
+}

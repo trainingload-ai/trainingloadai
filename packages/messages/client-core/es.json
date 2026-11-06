@@ -115,16 +115,19 @@
     "receivedAt": "Recibió",
     "noBody": "Sin contenido adicional",
     "openReview": "Abrir revisión",
+    "viewActivities": "Ver actividades",
     "loadingMore": "Cargando más…",
     "templates": {
       "general": "Notificación del sistema",
       "importSuccess": "Importación completada",
       "importWarning": "La importación necesita atención",
+      "importResult": "Resultado de importación",
       "reviewDigest": "Revisión de entrenamiento",
       "exportFailed": "Error de sincronización"
     },
     "summary": {
       "success": "Éxito",
+      "available": "Disponibles",
       "failed": "Fallido",
       "skipped": "Saltado",
       "reviewType": "Tipo de reseña",
@@ -144,12 +147,14 @@
     },
     "kinds": {
       "IMPORT_BATCH_COMPLETED": {
-        "title": "Lote de importación completado",
-        "body": "Objetos fuente {total} procesados.\n\n- Éxito: {success}\n- Fallido: {failed}\n- Saltado: {skipped}"
+        "title": "{success} actividades disponibles",
+        "preview": "El procesamiento, el análisis y la actualización de carga han finalizado",
+        "body": "El procesamiento de archivos, el análisis de actividades y la actualización de la carga han finalizado."
       },
       "IMPORT_BATCH_PARTIAL_FAILED": {
-        "title": "Lote de importación completado con errores",
-        "body": "Objetos fuente {total} procesados.\n\n- Éxito: {success}\n- Fallido: {failed}\n- Saltado: {skipped}"
+        "title": "{success} actividades disponibles, {failed} sin completar",
+        "preview": "Algunas actividades requieren atención antes de reintentar",
+        "body": "Las actividades disponibles se procesaron, analizaron y actualizaron. Revisa las no completadas e inténtalo de nuevo."
       },
       "THIRD_PARTY_EXPORT_FAILED": {
         "title": "No se pudo sincronizar con el servicio externo",
@@ -1811,8 +1816,8 @@
   "ActivityDetail": {
     "title": "Detalles de la actividad",
     "genericDataNotice": {
-      "title": "Datos de entrenamiento genérico",
-      "description": "La fuente clasificó esta sesión como entrenamiento genérico. Trainingload.ai solo utiliza la duración, la frecuencia cardíaca, las calorías y la carga registradas; no infiere la distancia, el ritmo, la potencia ni el tipo exacto de entrenamiento."
+      "title": "Tipo de actividad sin confirmar",
+      "description": "La actividad y sus datos disponibles se conservan. Mostramos los datos de origen sin adivinar el deporte ni las métricas ausentes. Puedes corregir el tipo desde el menú de la actividad."
     },
     "backButton": "Atrás",
     "configuration": "Configuración",
@@ -2114,7 +2119,9 @@
     "epoc": "EPOC (ml/kg)",
     "heartRate": "Frecuencia cardíaca (lpm)",
     "distance": "Distancia",
-    "peak": "Cima"
+    "time": "Tiempo",
+    "peak": "Cima",
+    "noData": "Sin datos de EPOC"
   },
   "PaceChart": {
     "title": "paso",
@@ -2486,14 +2493,18 @@
     "uploadFailed": "Error al subir",
     "unknownError": "Error desconocido",
     "importProgress": {
+      "processingFailed": "No pudimos terminar de procesar este archivo. Inténtalo más tarde o contacta con soporte si el problema persiste.",
       "title": "Importador",
       "description": "Sus archivos han sido puestos en cola para su importación. Puedes seguir navegando mientras los procesamos en segundo plano.",
       "completedTitle": "Importación completada",
       "completedDescription": "Este lote ha terminado de procesarse. Puede cerrar esta ventana y revisar los resultados ahora.",
+      "failedTitle": "La importación no se completó por completo",
+      "failedDescription": "Algunos archivos no terminaron el análisis de actividad. Revisa los elementos fallidos e inténtalo de nuevo.",
       "batchCreatedToast": "Lote de importación creado. Procesando archivos {count} ahora",
       "openEntry": "Progreso de la importación",
       "laterHint": "Puedes volver más tarde y comprobar el resultado en cualquier momento.",
       "doneHint": "Este lote ha terminado de procesarse.",
+      "failedHint": "Este lote contiene actividades que no terminaron de procesarse.",
       "notificationHint": "Recibirá una notificación cuando finalice la importación, por lo que no es necesario permanecer en este cuadro de diálogo.",
       "progressLabel": "Progreso",
       "total": "Total",
@@ -4099,7 +4110,15 @@
       "YOGA": "Yoga",
       "ROWING": "Remo",
       "ELLIPTICAL": "Elíptica",
-      "OTHER": "Otros"
+      "OTHER": "Otros",
+      "CROSSFIT": "CrossFit",
+      "PADEL": "Pádel",
+      "ALPINE_SKIING": "Esquí alpino",
+      "SNOWBOARDING": "Snowboard",
+      "MIXED_MARTIAL_ARTS": "Artes marciales mixtas",
+      "SOCCER": "Fútbol",
+      "BASKETBALL": "Baloncesto",
+      "FISHING": "Pesca"
     }
   },
   "WorkoutEditor": {
@@ -4465,7 +4484,10 @@
       "completedLabel": "Completado",
       "actual": "Real",
       "expected": "Plan",
-      "todayValues": "Real {actual} · Plan {planned}",
+      "todayValues": "Hoy: real {actual} · plan {planned}",
+      "totalValues": "Total: real {actual} · plan {planned}",
+      "activityCount": "{count} actividades",
+      "noPlanTarget": "Sin objetivo de plan",
       "chartAria": "Carga real y planificada de la semana actual",
       "noData": "No hay datos de carga para esta semana"
     },

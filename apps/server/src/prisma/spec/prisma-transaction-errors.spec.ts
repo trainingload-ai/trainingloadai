@@ -32,6 +32,8 @@ describe('isPrismaSerializableConflict', () => {
   it('accepts Prisma P2034 and PostgreSQL 40001 shapes', () => {
     expect(isPrismaSerializableConflict(serializationFailure())).toBe(true);
     expect(isPrismaSerializableConflict({ code: '40001' })).toBe(true);
+    expect(isPrismaSerializableConflict({code:'40P01'})).toBe(true);
+    expect(isPrismaSerializableConflict({code:'P2010',meta:{code:'40P01'}})).toBe(true);
     expect(isPrismaSerializableConflict(rawQuerySerializationFailure())).toBe(
       true,
     );

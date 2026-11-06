@@ -680,6 +680,8 @@ export class CoachToolsService {
       coggan?: { bikeStress?: number | null } | null;
       trimp?: { trimp100?: number | null } | null;
       vo2max?: unknown;
+      aiVo2max?: number | null;
+      aiVo2maxSource?: string | null;
     },
     extras?: {
       mapThumbnailUrl?: string;
@@ -724,11 +726,14 @@ export class CoachToolsService {
             : null,
       };
     }
-    const vo2 = resolveEffectiveActivityVo2Max(
-      a.vo2max as never,
-      extras?.vo2MaxPreference,
-      extras?.vo2MaxCorrectionFactor,
-    )?.value;
+    const vo2 =
+      typeof a.aiVo2max === 'number'
+        ? a.aiVo2max
+        : resolveEffectiveActivityVo2Max(
+            a.vo2max as never,
+            extras?.vo2MaxPreference,
+            extras?.vo2MaxCorrectionFactor,
+          )?.value;
     return {
       hashId: a.hashId,
       sportType: String(a.sportType),

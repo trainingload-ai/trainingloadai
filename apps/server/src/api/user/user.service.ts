@@ -35,12 +35,12 @@ import { round } from 'lodash';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 import {
+  emitUserFitnessContextChanged,
   emitUserFitnessInvalidated,
   emitUserZoneSettingChanged,
-  emitUserVo2MaxSettingsChanged,
+  UserFitnessContextChangedEvent,
   UserFitnessInvalidatedEvent,
   UserZoneSettingChangedEvent,
-  UserVo2MaxSettingsChangedEvent,
 } from './events/user-fitness.events';
 import { UserQueryService } from './user-query.service';
 import {
@@ -50,7 +50,6 @@ import {
   UserZoneSetting,
 } from '@/utils/zones';
 import { resolveLthrForCalculation } from '@shared/lthr';
-import { seedDefaultRestingHeartRateIfAbsent } from './persistence/user-fitness-defaults';
 import {
   resolveSupportedLocale,
   type SupportedAppLocale,
@@ -73,6 +72,7 @@ import { normalizeIanaTimezone } from '@/timezone/user-timezone-initializer.serv
 import { normalizeZoneSettingRows } from './zone-setting-order';
 import type { PrismaTx } from '@/prisma/prisma-db';
 import { validateManualWeightKg } from './body-metric-validator';
+import { UserAnalysisConfigService } from './user-analysis-config.service';
 
 const AUTO_UPDATE_METRIC_TYPES: UserFitnessMetricType[] = [
   UserFitnessMetricType.FTP,
@@ -100,6 +100,30 @@ type AutoFitnessMetricCandidate = {
   type: UserFitnessMetricType;
   value: number;
   value2?: number;
+};
+
+export type TimelineFitnessProjection = {
+  type: UserFitnessMetricType;
+  sport: SportType;
+  value: number;
+  value2?: number | null;
+  effectiveAt: Date;
+  projectionVersion: number;
+  projectionFingerprint: string;
+  originPayload?: Prisma.InputJsonValue;
+};
+
+export type ApplyTimelineProjectionBatchInput = {
+  userId: string;
+  projectionRunId: string;
+  replacementReason: string;
+  replaceFrom: Date;
+  replaceTo?: Date | null;
+  scopes: readonly {
+    type: UserFitnessMetricType;
+    sport: SportType;
+  }[];
+  projections: readonly TimelineFitnessProjection[];
 };
 
 const FITNESS_WRITE_TRANSACTION_OPTIONS = {
@@ -137,8 +161,8 @@ export class UserService {
   private readonly logger = new Logger(UserService.name);
   private readonly fitnessWriteTails = new Map<string, Promise<void>>();
 
-  /** 产品策略：体能指标变更不再触发活动记录增量复算（仍保留 PMC 等在写入点的更新）。 */
-  readonly fitnessMetricActivityRecomputeEnabled = false;
+  /** MANUAL/legacy AUTO 指标变更统一进入因果时间线 Replay。 */
+  readonly fitnessMetricActivityRecomputeEnabled = true;
 
   constructor(
     private prisma: PrismaService,
@@ -147,7 +171,12 @@ export class UserService {
     private readonly activitySourceLifecycle: ActivitySourceLifecycleService,
     private readonly events: EventEmitter2,
     private readonly users: UserQueryService,
+    private readonly analysisConfigs: UserAnalysisConfigService,
   ) {}
+
+  private analysisConfigVersions() {
+    return this.analysisConfigs;
+  }
 
   /**
    * Serialize writes for one user before opening an interactive transaction.
@@ -403,6 +432,375 @@ export class UserService {
     return AUTO_UPDATE_METRIC_TYPES.includes(type);
   }
 
+  /**
+   * 原子替换系统生成的有效 AUTO 时间线。
+   *
+   * 该入口刻意绕过 persistFitnessMetricBySource：
+   * - 保留活动结束的精确 UTC 时刻；
+   * - 被替代行先进入不可变审计，再物理删除，保证旧版本读取安全；
+   * - 不发送 FITNESS_METRIC_CHANGED，避免 Projector 自己触发自己。
+   */
+  async applyTimelineProjectionBatch(
+    input: ApplyTimelineProjectionBatchInput,
+    transaction?: Prisma.TransactionClient,
+  ) {
+    const execute = async (tx: Prisma.TransactionClient) => {
+      await lockFitnessUser(tx, input.userId);
+      if (
+        !Number.isFinite(input.replaceFrom.getTime()) ||
+        (input.replaceTo != null &&
+          (!Number.isFinite(input.replaceTo.getTime()) ||
+            input.replaceTo < input.replaceFrom))
+      ) {
+        throw new Error('INVALID_TIMELINE_PROJECTION_RANGE');
+      }
+
+      const desiredByKey = new Map<string, TimelineFitnessProjection>();
+      for (const projection of input.projections) {
+        if (
+          !Number.isFinite(projection.value) ||
+          projection.value <= 0 ||
+          !Number.isFinite(projection.effectiveAt.getTime()) ||
+          projection.effectiveAt < input.replaceFrom ||
+          (input.replaceTo != null && projection.effectiveAt > input.replaceTo)
+        ) {
+          throw new Error('INVALID_TIMELINE_PROJECTION_VALUE');
+        }
+        const key = [
+          projection.type,
+          projection.sport,
+          projection.effectiveAt.toISOString(),
+        ].join(':');
+        if (desiredByKey.has(key)) {
+          throw new Error('DUPLICATE_TIMELINE_PROJECTION_CHANGE_POINT');
+        }
+        desiredByKey.set(key, projection);
+      }
+
+      const scopes = Array.from(
+        new Map(
+          [...input.scopes, ...input.projections].map((projection) => [
+            `${projection.type}:${projection.sport}`,
+            { type: projection.type, sport: projection.sport },
+          ]),
+        ).values(),
+      );
+      if (scopes.length === 0) {
+        return { archived: 0, deleted: 0, written: 0, unchanged: 0 };
+      }
+
+      const existing = await this.users.fitnessMetrics(tx).findMany({
+        where: {
+          userId: input.userId,
+          source: MetricSource.AUTO,
+          OR: scopes,
+          recordedAt: {
+            gte: input.replaceFrom,
+            ...(input.replaceTo ? { lte: input.replaceTo } : {}),
+          },
+        },
+      });
+
+      const retainedIds = new Set<string>();
+      const replaced = existing.filter((row) => {
+        const key = [row.type, row.sport, row.recordedAt.toISOString()].join(
+          ':',
+        );
+        const desired = desiredByKey.get(key);
+        const unchanged =
+          desired?.projectionFingerprint === row.projectionFingerprint &&
+          desired.projectionVersion === row.projectionVersion &&
+          Math.abs(desired.value - row.value) <= 0.001 &&
+          Math.abs((desired.value2 ?? 0) - (row.value2 ?? 0)) <= 0.001;
+        if (unchanged) retainedIds.add(row.id);
+        return !unchanged;
+      });
+
+      for (const row of replaced) {
+        await tx.userFitnessMetricProjectionAudit.upsert({
+          where: {
+            originalMetricId_replacementRunId: {
+              originalMetricId: row.id,
+              replacementRunId: input.projectionRunId,
+            },
+          },
+          update: {},
+          create: {
+            userId: row.userId,
+            originalMetricId: row.id,
+            sport: row.sport,
+            type: row.type,
+            value: row.value,
+            value2: row.value2,
+            source: row.source,
+            recordedAt: row.recordedAt,
+            projectionVersion: row.projectionVersion,
+            projectionRunId: row.projectionRunId,
+            projectionFingerprint: row.projectionFingerprint,
+            originPayload:
+              row.originPayload == null
+                ? Prisma.JsonNull
+                : (row.originPayload as Prisma.InputJsonValue),
+            changeSource: row.changeSource,
+            originProvider: row.originProvider,
+            originExternalId: row.originExternalId,
+            originChecksum: row.originChecksum,
+            originSyncedAt: row.originSyncedAt,
+            originalCreatedAt: row.createdAt,
+            replacementRunId: input.projectionRunId,
+            replacementReason: input.replacementReason,
+          },
+        });
+      }
+      if (replaced.length > 0) {
+        await this.users.fitnessMetrics(tx).deleteMany({
+          where: { id: { in: replaced.map((row) => row.id) } },
+        });
+      }
+
+      let written = 0;
+      for (const projection of desiredByKey.values()) {
+        const alreadyPresent = existing.some(
+          (row) =>
+            retainedIds.has(row.id) &&
+            row.type === projection.type &&
+            row.sport === projection.sport &&
+            row.recordedAt.getTime() === projection.effectiveAt.getTime(),
+        );
+        if (alreadyPresent) continue;
+        await this.users.fitnessMetrics(tx).create({
+          data: {
+            userId: input.userId,
+            type: projection.type,
+            sport: projection.sport,
+            value: projection.value,
+            value2: projection.value2 ?? null,
+            source: MetricSource.AUTO,
+            recordedAt: projection.effectiveAt,
+            changeSource: ChangeSource.SYSTEM_CALCULATED,
+            originPayload: projection.originPayload ?? Prisma.JsonNull,
+            projectionVersion: projection.projectionVersion,
+            projectionRunId: input.projectionRunId,
+            projectionFingerprint: projection.projectionFingerprint,
+          },
+        });
+        written += 1;
+      }
+      return {
+        archived: replaced.length,
+        deleted: replaced.length,
+        written,
+        unchanged: retainedIds.size,
+      };
+    };
+
+    if (transaction) return execute(transaction);
+    return this.serializeFitnessWrite(input.userId, () =>
+      this.prisma.$transaction(execute, FITNESS_WRITE_TRANSACTION_OPTIONS),
+    );
+  }
+
+  /**
+   * 为因果重放提供按精确时刻排序的指标事实。
+   * 数据访问留在 UsersModule 内，AnalyzeModule 只消费领域结果。
+   */
+  listTimelineFitnessMetrics(userId: string, at: Date) {
+    return this.users.fitnessMetrics().findMany({
+      where: {
+        userId,
+        source: { in: [MetricSource.MANUAL, MetricSource.AUTO] },
+        recordedAt: { lte: at },
+      },
+      orderBy: [{ recordedAt: 'asc' }, { createdAt: 'asc' }],
+    });
+  }
+
+  findNextManualFitnessMetric(args: {
+    userId: string;
+    type: UserFitnessMetricType;
+    sport: SportType;
+    after: Date;
+    beforeOrAt: Date;
+  }) {
+    return this.users.fitnessMetrics().findFirst({
+      where: {
+        userId: args.userId,
+        type: args.type,
+        source: MetricSource.MANUAL,
+        sport: args.sport,
+        recordedAt: { gt: args.after, lte: args.beforeOrAt },
+      },
+      orderBy: [{ recordedAt: 'asc' }, { createdAt: 'asc' }],
+      select: { recordedAt: true },
+    });
+  }
+
+  listBodyMetricEvidenceAt(userId: string, at: Date) {
+    return this.users.bodyMetrics().findMany({
+      where: { userId, effectiveDate: { lte: at } },
+      orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
+    });
+  }
+
+  /** 保存未获自动传播许可的活动估算证据；不参与生效值选择，也不发复算事件。 */
+  async saveTimelineEstimatesBatch(
+    input: ApplyTimelineProjectionBatchInput,
+    transaction?: Prisma.TransactionClient,
+  ) {
+    const execute = async (tx: Prisma.TransactionClient) => {
+      await lockFitnessUser(tx, input.userId);
+      if (
+        !Number.isFinite(input.replaceFrom.getTime()) ||
+        (input.replaceTo != null &&
+          (!Number.isFinite(input.replaceTo.getTime()) ||
+            input.replaceTo < input.replaceFrom))
+      ) {
+        throw new Error('INVALID_TIMELINE_ESTIMATE_RANGE');
+      }
+
+      const desiredByKey = new Map<string, TimelineFitnessProjection>();
+      for (const estimate of input.projections) {
+        if (
+          !Number.isFinite(estimate.value) ||
+          estimate.value <= 0 ||
+          !Number.isFinite(estimate.effectiveAt.getTime()) ||
+          estimate.effectiveAt < input.replaceFrom ||
+          (input.replaceTo != null && estimate.effectiveAt > input.replaceTo)
+        ) {
+          throw new Error('INVALID_TIMELINE_ESTIMATE_VALUE');
+        }
+        const key = [
+          estimate.type,
+          estimate.sport,
+          estimate.effectiveAt.toISOString(),
+        ].join(':');
+        if (desiredByKey.has(key)) {
+          throw new Error('DUPLICATE_TIMELINE_ESTIMATE_CHANGE_POINT');
+        }
+        desiredByKey.set(key, estimate);
+      }
+
+      const scopes = Array.from(
+        new Map(
+          [...input.scopes, ...input.projections].map((projection) => [
+            `${projection.type}:${projection.sport}`,
+            { type: projection.type, sport: projection.sport },
+          ]),
+        ).values(),
+      );
+      if (scopes.length === 0) {
+        return { archived: 0, deleted: 0, written: 0, unchanged: 0 };
+      }
+
+      const existing = await this.users.fitnessMetrics(tx).findMany({
+        where: {
+          userId: input.userId,
+          source: MetricSource.ESTIMATED,
+          OR: scopes,
+          recordedAt: {
+            gte: input.replaceFrom,
+            ...(input.replaceTo ? { lte: input.replaceTo } : {}),
+          },
+        },
+      });
+      const retainedIds = new Set<string>();
+      const replaced = existing.filter((row) => {
+        const key = [row.type, row.sport, row.recordedAt.toISOString()].join(
+          ':',
+        );
+        const desired = desiredByKey.get(key);
+        const unchanged =
+          desired?.projectionFingerprint === row.projectionFingerprint &&
+          desired.projectionVersion === row.projectionVersion &&
+          Math.abs(desired.value - row.value) <= 0.001 &&
+          Math.abs((desired.value2 ?? 0) - (row.value2 ?? 0)) <= 0.001;
+        if (unchanged) retainedIds.add(row.id);
+        return !unchanged;
+      });
+
+      for (const row of replaced) {
+        await tx.userFitnessMetricProjectionAudit.upsert({
+          where: {
+            originalMetricId_replacementRunId: {
+              originalMetricId: row.id,
+              replacementRunId: input.projectionRunId,
+            },
+          },
+          update: {},
+          create: {
+            userId: row.userId,
+            originalMetricId: row.id,
+            sport: row.sport,
+            type: row.type,
+            value: row.value,
+            value2: row.value2,
+            source: row.source,
+            recordedAt: row.recordedAt,
+            projectionVersion: row.projectionVersion,
+            projectionRunId: row.projectionRunId,
+            projectionFingerprint: row.projectionFingerprint,
+            originPayload:
+              row.originPayload == null
+                ? Prisma.JsonNull
+                : (row.originPayload as Prisma.InputJsonValue),
+            changeSource: row.changeSource,
+            originProvider: row.originProvider,
+            originExternalId: row.originExternalId,
+            originChecksum: row.originChecksum,
+            originSyncedAt: row.originSyncedAt,
+            originalCreatedAt: row.createdAt,
+            replacementRunId: input.projectionRunId,
+            replacementReason: input.replacementReason,
+          },
+        });
+      }
+      if (replaced.length > 0) {
+        await this.users.fitnessMetrics(tx).deleteMany({
+          where: { id: { in: replaced.map((row) => row.id) } },
+        });
+      }
+
+      let written = 0;
+      for (const estimate of desiredByKey.values()) {
+        const alreadyPresent = existing.some(
+          (row) =>
+            retainedIds.has(row.id) &&
+            row.type === estimate.type &&
+            row.sport === estimate.sport &&
+            row.recordedAt.getTime() === estimate.effectiveAt.getTime(),
+        );
+        if (alreadyPresent) continue;
+        await this.users.fitnessMetrics(tx).create({
+          data: {
+            userId: input.userId,
+            type: estimate.type,
+            sport: estimate.sport,
+            source: MetricSource.ESTIMATED,
+            value: estimate.value,
+            value2: estimate.value2 ?? null,
+            recordedAt: estimate.effectiveAt,
+            changeSource: ChangeSource.SYSTEM_CALCULATED,
+            originPayload: estimate.originPayload ?? Prisma.JsonNull,
+            projectionVersion: estimate.projectionVersion,
+            projectionRunId: input.projectionRunId,
+            projectionFingerprint: estimate.projectionFingerprint,
+          },
+        });
+        written += 1;
+      }
+      return {
+        archived: replaced.length,
+        deleted: replaced.length,
+        written,
+        unchanged: retainedIds.size,
+      };
+    };
+    if (transaction) return execute(transaction);
+    return this.serializeFitnessWrite(input.userId, () =>
+      this.prisma.$transaction(execute, FITNESS_WRITE_TRANSACTION_OPTIONS),
+    );
+  }
+
   private async getAutoUpdateEnabledMap(userId: string) {
     const rows = await this.prisma.userAutoUpdateConfig.findMany({
       where: {
@@ -428,12 +826,6 @@ export class UserService {
   }
 
   /**
-   * 新用户默认静息心率 60 bpm；若已有 MANUAL 记录则跳过（幂等）。
-   */
-  async ensureDefaultRestingHeartRate(userId: string): Promise<void> {
-    await seedDefaultRestingHeartRateIfAbsent(this.prisma, userId);
-  }
-  /**
    * 检查用户是否开启自动更新
    * @param userId
    * @param metric
@@ -442,8 +834,16 @@ export class UserService {
   async checkAutoUpdatePermission(
     userId: string,
     metric: UserFitnessMetricType,
+    at?: Date,
   ) {
     if (!this.isAutoUpdateMetricSupported(metric)) return true;
+    if (at) {
+      return this.analysisConfigVersions().resolveAutoUpdateAt(
+        userId,
+        metric,
+        at,
+      );
+    }
     const row = await this.prisma.userAutoUpdateConfig.findUnique({
       where: {
         userId_metric: {
@@ -467,41 +867,63 @@ export class UserService {
         message: this.i18n.t('common.error.query_condition_error'),
       });
     }
-    const previous = await this.prisma.userAutoUpdateConfig.findUnique({
-      where: {
-        userId_metric: {
-          userId,
-          metric,
-        },
-      },
-      select: { enabled: true },
-    });
-    const saved = await this.prisma.userAutoUpdateConfig.upsert({
-      where: {
-        userId_metric: {
-          userId,
-          metric,
-        },
-      },
-      update: { enabled },
-      create: {
-        userId,
-        metric,
-        enabled,
-      },
-      select: { metric: true, enabled: true },
-    });
+    const changedAt = new Date();
+    const result = await this.serializeFitnessWrite(userId, () =>
+      this.runFitnessWriteTransaction(userId, async (tx) => {
+        const previous = await tx.userAutoUpdateConfig.findUnique({
+          where: {
+            userId_metric: {
+              userId,
+              metric,
+            },
+          },
+          select: { enabled: true },
+        });
+        const saved = await tx.userAutoUpdateConfig.upsert({
+          where: {
+            userId_metric: {
+              userId,
+              metric,
+            },
+          },
+          update: { enabled },
+          create: {
+            userId,
+            metric,
+            enabled,
+          },
+          select: { metric: true, enabled: true },
+        });
+        if (previous?.enabled !== saved.enabled) {
+          await this.analysisConfigVersions().recordAutoUpdateVersion({
+            userId,
+            metric,
+            enabled: saved.enabled,
+            effectiveAt: changedAt,
+            source: 'USER_SETTING',
+            tx,
+          });
+        }
+        return {
+          saved,
+          shouldPromote: saved.enabled && previous?.enabled !== true,
+        };
+      }),
+    );
 
-    if (saved.enabled && previous?.enabled !== true) {
-      await this.promoteLatestEstimatedMetricsToAuto(userId, saved.metric);
+    if (result.shouldPromote) {
+      await this.promoteLatestEstimatedMetricsToAuto(
+        userId,
+        result.saved.metric,
+      );
     }
 
-    return saved;
+    return result.saved;
   }
 
   /**
-   * 开启自动更新时，将各运动轨道最新的系统估算立即应用到 AUTO。
-   * AUTO 使用今天作为生效日；同日存在 MANUAL 时仍由生效值选择规则让 MANUAL 胜出。
+   * 开启自动更新时，将各运动轨道最新的系统估算从当前精确时刻起应用到 AUTO。
+   * 不能回填原估算时刻，也不能压缩到当天零点，否则会改写用户开启权限前的历史。
    */
   private async promoteLatestEstimatedMetricsToAuto(
     userId: string,
@@ -520,7 +942,7 @@ export class UserService {
       if (!latestBySport.has(row.sport)) latestBySport.set(row.sport, row);
     }
 
-    const recordedAt = dayjs().startOf('day').toDate();
+    const recordedAt = new Date();
     await Promise.all(
       Array.from(latestBySport.values()).map(async (estimated) => {
         const validation = validateFitnessMetricCandidate(
@@ -1396,8 +1818,9 @@ export class UserService {
           zones: { orderBy: { order: 'asc' } },
         },
       });
+      let changedAt: Date | null = null;
       if (existing) {
-        await tx.userZoneSettingVersion.create({
+        const version = await tx.userZoneSettingVersion.create({
           data: {
             userId,
             sportType,
@@ -1417,7 +1840,9 @@ export class UserService {
               })),
             },
           },
+          select: { createdAt: true },
         });
+        changedAt = version.createdAt;
       }
       const deleted = await tx.userZoneSetting.deleteMany({
         where: {
@@ -1426,12 +1851,18 @@ export class UserService {
           zoneType,
         },
       });
-      return { deleted, changed: Boolean(existing) };
+      return { deleted, changed: Boolean(existing), changedAt };
     });
     if (result.changed) {
       await emitUserZoneSettingChanged(
         this.events,
-        new UserZoneSettingChangedEvent(userId, sportType, zoneType, true),
+        new UserZoneSettingChangedEvent(
+          userId,
+          sportType,
+          zoneType,
+          true,
+          result.changedAt ?? new Date(),
+        ),
       );
     }
     return result.deleted;
@@ -1637,8 +2068,9 @@ export class UserService {
         });
       }
 
+      let changedAt: Date | null = null;
       if (changed) {
-        await tx.userZoneSettingVersion.create({
+        const version = await tx.userZoneSettingVersion.create({
           data: {
             userId,
             sportType,
@@ -1652,7 +2084,9 @@ export class UserService {
             rawPayload: (origin?.originPayload ??
               snapshotPayload) as Prisma.InputJsonValue,
           },
+          select: { createdAt: true },
         });
+        changedAt = version.createdAt;
       }
 
       const setting = await tx.userZoneSetting.findUnique({
@@ -1661,12 +2095,18 @@ export class UserService {
           zones: { orderBy: { order: 'asc' } },
         },
       });
-      return { setting, changed };
+      return { setting, changed, changedAt };
     });
     if (result.changed) {
       await emitUserZoneSettingChanged(
         this.events,
-        new UserZoneSettingChangedEvent(userId, sportType, zoneType, false),
+        new UserZoneSettingChangedEvent(
+          userId,
+          sportType,
+          zoneType,
+          false,
+          result.changedAt ?? new Date(),
+        ),
       );
     }
     return result.setting;
@@ -1763,7 +2203,7 @@ export class UserService {
     return rows.map((row) => row.sport);
   }
 
-  async listEstimatedFitnessMetricsForChart(
+  async listAutoFitnessMetricsForChart(
     userId: string,
     type: UserFitnessMetricType,
     sportType?: SportType,
@@ -1783,7 +2223,7 @@ export class UserService {
       where: {
         userId,
         type,
-        source: MetricSource.ESTIMATED,
+        source: MetricSource.AUTO,
         sport: sportType ?? SportType.UNKNOWN,
         ...(recordedAtFilter ? { recordedAt: recordedAtFilter } : {}),
       },
@@ -2462,17 +2902,35 @@ export class UserService {
     // 截止时间
     const cutoff = at ?? dayjs().toDate();
     // 加载用户基本信息、身体指标、健身指标
-    const [base, bodyMetrics, fitnessMetrics] = await Promise.all([
-      this.users.profiles(tx).findUnique({ where: { userId } }),
-      this.loadComposedBodyMetrics(userId, cutoff, tx),
-      this.loadComposedFitnessMetrics(userId, responseSport, cutoff, tx),
-    ]);
+    const [currentBase, historicalConfig, bodyMetrics, fitnessMetrics] =
+      await Promise.all([
+        this.users.profiles(tx).findUnique({ where: { userId } }),
+        at
+          ? this.analysisConfigVersions().resolveAt(userId, cutoff, tx)
+          : Promise.resolve(null),
+        this.loadComposedBodyMetrics(userId, cutoff, at != null, tx),
+        this.loadComposedFitnessMetrics(userId, responseSport, cutoff, tx),
+      ]);
+    const base = historicalConfig
+      ? {
+          ...currentBase,
+          loadSources: historicalConfig.loadSources.join(','),
+          altitudeOptimizationModel: historicalConfig.altitudeOptimizationModel,
+          altitudeThreshold: historicalConfig.altitudeThreshold,
+          defaultVdotSource: historicalConfig.defaultVdotSource,
+          vo2maxCorrectionFactor: historicalConfig.vo2maxCorrectionFactor,
+          heartRateZoneModel: historicalConfig.heartRateZoneModel,
+          paceZoneModel: historicalConfig.paceZoneModel,
+          powerZoneModel: historicalConfig.powerZoneModel,
+        }
+      : currentBase;
     // 组合用户档案
     return composeUserProfile({
       sport: responseSport,
       base,
       bodyMetrics,
       fitnessMetrics,
+      asOf: cutoff,
     });
   }
 
@@ -2485,6 +2943,7 @@ export class UserService {
   private async loadComposedBodyMetrics(
     userId: string,
     cutoff: Date,
+    strictAsOf: boolean,
     tx?: PrismaTx,
   ) {
     // 身体指标类型
@@ -2497,7 +2956,7 @@ export class UserService {
       },
       orderBy: { effectiveDate: 'desc' },
     });
-    if (recent.length > 0) return recent;
+    if (recent.length > 0 || strictAsOf) return recent;
     return this.users.bodyMetrics(tx).findMany({
       where: {
         userId,
@@ -2537,7 +2996,8 @@ export class UserService {
    *   - 适用于“分析/重新计算”；向过去找最近值，同一时间 MANUAL 优先
    *
    * 返回值：
-   * - 找不到则返回 null（静息心率在“活动绑定路径”里会用 60 作为兜底，与新用户默认一致）
+   * - 找不到则返回 null；60 bpm 的版本化默认值只由 TRIMP/EPOC
+   *   任务显式使用，不能进入通用 Profile、区间或阈值解析。
    */
   async getUserHeartRateThreshold(
     userId: string,
@@ -2599,16 +3059,17 @@ export class UserService {
 
     return {
       maxHeartRate: snapshot?.maxHrValue ?? maxHrMetric?.value ?? null,
-      restingHeartRate:
-        snapshot?.restHrValue ??
-        restingHrMetric?.value ??
-        (snapshot ? 60 : null),
+      restingHeartRate: snapshot?.restHrValue ?? restingHrMetric?.value ?? null,
       lactateThresholdHeartRate:
         snapshot?.lthrValue ?? lthrMetric?.value ?? null,
     };
   }
 
   async updateUserProfile(userId: string, body: UpdateUserProfileRequest) {
+    const changedAt = new Date();
+    const previousProfile = await this.users.profiles().findUnique({
+      where: { userId },
+    });
     const updateData: {
       loadSources?: string | null;
       preferredSports?: string | null;
@@ -2628,7 +3089,6 @@ export class UserService {
       updateData.loadSources =
         normalized.length > 0 ? normalized.join(',') : null;
     }
-
     if (body.preferredSports !== undefined) {
       const normalized = normalizePreferredSports(
         body.preferredSports.map((value) => String(value)),
@@ -2675,6 +3135,8 @@ export class UserService {
       updateData.powerZoneModel = body.powerZoneModel as $Enums.PowerZoneModel;
     }
 
+    let timezoneChanged = false;
+    let timezoneValue: string | null = null;
     if (body.timezone !== undefined) {
       const trimmed = String(body.timezone).trim();
       if (trimmed) {
@@ -2686,30 +3148,65 @@ export class UserService {
             message: this.i18n.t('common.error.invalid_timezone'),
           });
         }
-        await this.users.bodyMetrics().create({
-          data: {
-            userId,
-            type: BodyMetricType.TIMEZONE,
-            value: trimmed,
-            effectiveDate: new Date(),
-          },
-        });
+        const previousTimezone = await this.getPreferredTimezone(userId);
+        if (previousTimezone !== trimmed) {
+          timezoneValue = trimmed;
+          timezoneChanged = true;
+        }
       }
     }
 
-    await this.users.profiles().upsert({
-      where: { userId },
-      update: updateData,
-      create: { userId, ...updateData },
-    });
-
-    if (
-      body.defaultVdotSource !== undefined ||
-      body.vo2maxCorrectionFactor !== undefined
-    ) {
-      await emitUserVo2MaxSettingsChanged(
+    const calculationProfileKeys = [
+      'loadSources',
+      'altitudeOptimizationModel',
+      'altitudeThreshold',
+      'defaultVdotSource',
+      'vo2maxCorrectionFactor',
+      'heartRateZoneModel',
+      'paceZoneModel',
+      'powerZoneModel',
+    ] as const;
+    const profileCalculationChanged = calculationProfileKeys.some(
+      (key) =>
+        key in updateData &&
+        (previousProfile?.[key] ?? null) !== (updateData[key] ?? null),
+    );
+    await this.serializeFitnessWrite(userId, () =>
+      this.runFitnessWriteTransaction(userId, async (tx) => {
+        await this.users.profiles(tx).upsert({
+          where: { userId },
+          update: updateData,
+          create: { userId, ...updateData },
+        });
+        if (profileCalculationChanged) {
+          await this.analysisConfigVersions().recordCurrentVersion({
+            userId,
+            effectiveAt: changedAt,
+            source: 'USER_PROFILE',
+            tx,
+          });
+        }
+        if (timezoneValue) {
+          await this.users.bodyMetrics(tx).create({
+            data: {
+              userId,
+              type: BodyMetricType.TIMEZONE,
+              value: timezoneValue,
+              effectiveDate: changedAt,
+            },
+          });
+        }
+      }),
+    );
+    if (timezoneChanged) {
+      await emitUserFitnessContextChanged(
         this.events,
-        new UserVo2MaxSettingsChangedEvent(userId),
+        new UserFitnessContextChangedEvent(
+          userId,
+          'BODY',
+          [changedAt.getTime()],
+          [BodyMetricType.TIMEZONE],
+        ),
       );
     }
 
@@ -2750,7 +3247,7 @@ export class UserService {
       },
       orderBy: { effectiveDate: 'desc' },
     });
-    if (!bodyMetrics || bodyMetrics.length === 0) {
+    if ((!bodyMetrics || bodyMetrics.length === 0) && at == null) {
       bodyMetrics = await this.users.bodyMetrics().findMany({
         where: {
           userId,
@@ -2811,6 +3308,26 @@ export class UserService {
       })
       .filter((m) => Number.isFinite(m.effectiveDate.getTime()));
 
+    const existing = await this.users.bodyMetrics().findMany({
+      where: { userId, type },
+      orderBy: [{ effectiveDate: 'asc' }, { createdAt: 'asc' }],
+      select: { effectiveDate: true, value: true },
+    });
+    const before = existing.map((row) => ({
+      effectiveDate: row.effectiveDate.toISOString(),
+      value: String(row.value),
+    }));
+    const after = [...normalized]
+      .sort(
+        (left, right) =>
+          left.effectiveDate.getTime() - right.effectiveDate.getTime(),
+      )
+      .map((row) => ({
+        effectiveDate: row.effectiveDate.toISOString(),
+        value: row.value,
+      }));
+    if (stableStringify(before) === stableStringify(after)) return true;
+
     await this.prisma.$transaction(async (tx) => {
       await this.users.bodyMetrics(tx).deleteMany({
         where: { userId, type },
@@ -2830,6 +3347,14 @@ export class UserService {
         });
       }
     });
+    const changedTimes = [
+      ...existing.map((row) => row.effectiveDate.getTime()),
+      ...normalized.map((row) => row.effectiveDate.getTime()),
+    ];
+    await emitUserFitnessContextChanged(
+      this.events,
+      new UserFitnessContextChangedEvent(userId, 'BODY', changedTimes, [type]),
+    );
     return true;
   }
 
@@ -2909,15 +3434,31 @@ export class UserService {
           },
         });
       }
+      const changed =
+        previousValue !== String(weightKg) ||
+        previousEffectiveAt.getTime() !== options.effectiveAt.getTime();
       return {
         id: existing.id,
         operation: 'update' as const,
-        changed:
-          previousValue !== String(weightKg) ||
-          previousEffectiveAt.getTime() !== options.effectiveAt.getTime(),
+        changed,
         previousValue,
         previousEffectiveAt,
         weightKg,
+        afterCommit: changed
+          ? () =>
+              emitUserFitnessContextChanged(
+                this.events,
+                new UserFitnessContextChangedEvent(
+                  options.userId,
+                  'BODY',
+                  [
+                    previousEffectiveAt.getTime(),
+                    options.effectiveAt.getTime(),
+                  ],
+                  [BodyMetricType.WEIGHT],
+                ),
+              )
+          : async () => undefined,
       };
     }
 
@@ -2938,6 +3479,16 @@ export class UserService {
       previousValue: null,
       previousEffectiveAt: null,
       weightKg,
+      afterCommit: () =>
+        emitUserFitnessContextChanged(
+          this.events,
+          new UserFitnessContextChangedEvent(
+            options.userId,
+            'BODY',
+            [options.effectiveAt.getTime()],
+            [BodyMetricType.WEIGHT],
+          ),
+        ),
     };
   }
 
@@ -3085,6 +3636,18 @@ export class UserService {
       changed.push(candidate.type);
     }
 
+    if (changed.length > 0) {
+      await emitUserFitnessContextChanged(
+        this.events,
+        new UserFitnessContextChangedEvent(
+          userId,
+          'BODY',
+          [effectiveDate.getTime()],
+          [...new Set(changed)],
+        ),
+      );
+    }
+
     return changed;
   }
 
@@ -3128,16 +3691,22 @@ export class UserService {
       activity.vo2max.vo2maxVdotByRace / activity.vo2max.vo2maxVdotByHr;
     newFactor = Math.max(0.01, Math.min(1.2, newFactor));
 
-    await this.users.profiles().update({
-      where: { userId },
-      data: {
-        vo2maxCorrectionFactor: newFactor,
-      },
-    });
-
-    await emitUserVo2MaxSettingsChanged(
-      this.events,
-      new UserVo2MaxSettingsChangedEvent(userId),
+    const changedAt = new Date();
+    await this.serializeFitnessWrite(userId, () =>
+      this.runFitnessWriteTransaction(userId, async (tx) => {
+        await this.users.profiles(tx).update({
+          where: { userId },
+          data: {
+            vo2maxCorrectionFactor: newFactor,
+          },
+        });
+        await this.analysisConfigVersions().recordCurrentVersion({
+          userId,
+          effectiveAt: changedAt,
+          source: 'VO2MAX_CALIBRATION',
+          tx,
+        });
+      }),
     );
 
     return newFactor;
@@ -3173,23 +3742,33 @@ export class UserService {
         type: BodyMetricType.WEIGHT,
         effectiveDate: args.date,
       },
-      select: { id: true },
+      select: { id: true, value: true },
     });
     if (existing) {
+      if (String(existing.value) === String(args.bodyMassKg)) return;
       await this.users.bodyMetrics().update({
         where: { id: existing.id },
         data: { value: String(args.bodyMassKg) },
       });
-      return;
+    } else {
+      await this.users.bodyMetrics().create({
+        data: {
+          userId: args.userId,
+          type: BodyMetricType.WEIGHT,
+          value: String(args.bodyMassKg),
+          effectiveDate: args.date,
+        },
+      });
     }
-    await this.users.bodyMetrics().create({
-      data: {
-        userId: args.userId,
-        type: BodyMetricType.WEIGHT,
-        value: String(args.bodyMassKg),
-        effectiveDate: args.date,
-      },
-    });
+    await emitUserFitnessContextChanged(
+      this.events,
+      new UserFitnessContextChangedEvent(
+        args.userId,
+        'BODY',
+        [args.date.getTime()],
+        [BodyMetricType.WEIGHT],
+      ),
+    );
   }
 
   async upsertAppleHealthFitnessMetrics(args: {

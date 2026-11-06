@@ -7,9 +7,6 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { emitPmcInvalidate } from '@/training-load/events/pmc.events';
-import { isActivityWithinGlobalRefreshWindow } from '@/utils/activity-global-refresh-window';
-import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 
 /**
@@ -51,7 +48,8 @@ export type CoachActionUndoHandler = (args: {
   users: UserQueryService;
   userId: string;
   reverseData: unknown;
-}) => Promise<void>;
+  events?: EventEmitter2;
+}) => Promise<void | (() => Promise<void>)>;
 
 export type RecordCoachActionInput<UiPayload> = {
   userId: string;
@@ -112,7 +110,6 @@ export class CoachActionService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly activityRead: ActivityReadService,
     private readonly users: UserQueryService,
     @Optional() private readonly events?: EventEmitter2,
   ) {}
@@ -171,12 +168,6 @@ export class CoachActionService {
     if (transaction.replay) return transaction.replay;
     const { action, exec } = transaction;
 
-    if (input.type === CoachActionType.ACTIVITY_SESSION_RPE) {
-      await this.awaitPmcRecalculateForActivity(
-        input.userId,
-        this.activityIdFromReverseData(exec.reverseData),
-      );
-    }
     if (exec.afterCommit) {
       try {
         await exec.afterCommit();
@@ -213,7 +204,7 @@ export class CoachActionService {
    */
   async undo(args: { userId: string; id: string }) {
     const now = new Date();
-    const { action, undoneAt } = await this.prisma.$transaction(
+    const { action, undoneAt, afterCommit } = await this.prisma.$transaction(
       async (tx) => {
         const action = await tx.coachAction.findUnique({
           where: { id: args.id },
@@ -265,23 +256,19 @@ export class CoachActionService {
             'Coach action undo window closed',
           );
         }
-        await handler({
+        const afterCommit = await handler({
           prisma: tx,
           users: this.users,
           userId: action.userId,
           reverseData: action.reverseData,
+          events: this.events,
         });
-        return { action, undoneAt: now };
+        return { action, undoneAt: now, afterCommit };
       },
       { timeout: 60_000 },
     );
 
-    if (action.type === CoachActionType.ACTIVITY_SESSION_RPE) {
-      await this.awaitPmcRecalculateForActivity(
-        action.userId,
-        this.activityIdFromReverseData(action.reverseData),
-      );
-    }
+    if (typeof afterCommit === 'function') await afterCommit();
 
     this.logger.log(
       `[AI][教练][撤销] 用户ID=${args.userId} actionId=${action.id} type=${action.type}`,
@@ -291,38 +278,6 @@ export class CoachActionService {
       id: action.id,
       undoneAt,
     };
-  }
-
-  /**
-   * Session RPE 变更后刷新 PMC；失败仅记录日志（与 activity.service await 路径一致，避免客户端抢先 refetch 读到旧数据）。
-   */
-  private activityIdFromReverseData(reverseData: unknown): number | null {
-    if (!reverseData || typeof reverseData !== 'object') return null;
-    const value = (reverseData as { activityId?: unknown }).activityId;
-    return typeof value === 'number' && Number.isSafeInteger(value) && value > 0
-      ? value
-      : null;
-  }
-
-  private async awaitPmcRecalculateForActivity(
-    userId: string,
-    activityId: number | null,
-  ): Promise<void> {
-    if (!activityId) return;
-    try {
-      const activity = await this.activityRead.findFirst({
-        where: { id: activityId, userId },
-        select: { startTime: true },
-      });
-      if (!isActivityWithinGlobalRefreshWindow(activity?.startTime)) return;
-      await emitPmcInvalidate(this.events, userId);
-    } catch (e) {
-      this.logger.warn(
-        `[CoachAction] PMC recalculate failed userId=${userId}: ${
-          e instanceof Error ? e.message : String(e)
-        }`,
-      );
-    }
   }
 
   /**

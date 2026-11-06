@@ -104,7 +104,7 @@ export class CaloriesTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const out = ctx.outputs.calories;
     if (!activity || !out) return ctx;
-    await this.prisma.activity.update({
+    await (ctx.persistenceTx ?? this.prisma).activity.update({
       where: { id: activity.id },
       data: { calories: out.calories, fatCalories: out.fatCalories },
     });

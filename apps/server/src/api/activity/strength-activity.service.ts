@@ -16,9 +16,7 @@ import { WorkoutPersistenceService } from '@/api/plan/workout-persistence.servic
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
 import { summarizeStrengthWorkout } from '@/api/workout/strength/strength-dsl';
 import { generateRandomDights } from '@/utils';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { emitPmcInvalidate } from '@/training-load/events/pmc.events';
-import { isActivityWithinGlobalRefreshWindow } from '@/utils/activity-global-refresh-window';
+import { createActivityInputReplayJob } from '@/analyze/activity-recompute-job.writer';
 import type { StrengthLoadV1 } from '../../../../../packages/shared/strength-workout-ir';
 import {
   strengthLoadFromColumns,
@@ -61,7 +59,6 @@ export class StrengthActivityService {
     private readonly prisma: PrismaService,
     private readonly workoutPersistence: WorkoutPersistenceService,
     private readonly planQuery: PlanQueryService,
-    private readonly events: EventEmitter2,
   ) {}
 
   /**
@@ -247,8 +244,8 @@ export class StrengthActivityService {
   }
 
   /**
-   * 结束会话：活动标 FINISHED + READY。
-   * 若挂了计划课次，课次标 DONE。有 session RPE 时按窗口刷新 PMC。
+   * 结束会话：活动标 FINISHED + ANALYZING，并原子创建顺序重放任务。
+   * 若挂了计划课次，课次标 DONE；只有 Replay 提交完整负荷快照后才标 READY。
    */
   async finish(
     activityHashId: string,
@@ -292,9 +289,9 @@ export class StrengthActivityService {
           elapsedTime: durationSeconds,
           ...(input.sessionRpe != null ? { sessionRpe: input.sessionRpe } : {}),
           status: ActivityStatus.FINISHED,
-          processingStatus: ActivityProcessingStatus.READY,
+          processingStatus: ActivityProcessingStatus.ANALYZING,
           processingUpdatedAt: finishedAt,
-          readyAt: finishedAt,
+          readyAt: null,
         },
       });
       if (link) {
@@ -313,21 +310,14 @@ export class StrengthActivityService {
           tx,
         );
       }
+      await createActivityInputReplayJob(tx, {
+        userId,
+        effectiveFrom: activity.startTime,
+        includeActivityIds: [activity.id],
+        triggerSource: 'strength_activity_finished',
+        affectedPipelines: ['TRAINING_LOAD', 'PMC'],
+      });
     });
-    if (
-      input.sessionRpe != null &&
-      isActivityWithinGlobalRefreshWindow(activity.startTime)
-    ) {
-      try {
-        await emitPmcInvalidate(this.events, userId);
-      } catch (error) {
-        this.logger.warn(
-          `Failed to recalculate PMC after strength activity ${activityHashId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
 
     return {
       activityId: activity.id,

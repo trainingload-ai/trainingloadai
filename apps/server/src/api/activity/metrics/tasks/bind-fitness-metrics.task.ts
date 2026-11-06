@@ -4,8 +4,13 @@ import type { MetricsTask } from '../task';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UserService } from '@/api/user/user.service';
 import { $Enums, Prisma, type UserFitnessMetric } from '@prisma/client';
+import { resolveEffectiveActivityVo2Max } from '@/algorithm/vo2max-source';
+import {
+  activityLocalDate,
+  resolveActivityAnalysisTimezone,
+} from '@/training-load/activity-local-date';
 
-const FITNESS_SNAPSHOT_RESOLUTION_VERSION = 2;
+import { FITNESS_CONTEXT_RESOLUTION_VERSION } from '@/analyze/resolved-fitness-context';
 
 function positive(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value > 0
@@ -203,22 +208,90 @@ export class BindFitnessMetricsTask implements MetricsTask {
     const lthr = metrics[$Enums.UserFitnessMetricType.LTHR] ?? null;
     const restHr = metrics[$Enums.UserFitnessMetricType.RESTING_HR] ?? null;
     const cs = metrics[$Enums.UserFitnessMetricType.CS] ?? null;
-    const provenance = Object.fromEntries(
+    const metricProvenance = Object.fromEntries(
       Object.entries(metrics).map(([type, metric]) => [
         type,
-        metric?.provenance ?? { value: { mode: 'UNAVAILABLE' } },
+        metric
+          ? {
+              value: metric.value,
+              value2: metric.value2,
+              provenance: metric.provenance ?? null,
+            }
+          : {
+              value: null,
+              value2: null,
+              provenance: { value: { mode: 'UNAVAILABLE' } },
+            },
       ]),
     );
+    const resolved = ctx.cache.resolvedFitnessContext;
+    // A dimension-limited Replay (for example RPE/LOAD only) deliberately
+    // skips Vo2MaxTask. In that case preserve the activity's already-computed
+    // candidates instead of overwriting the frozen VO2 value with null.
+    const vo2maxOutput =
+      ctx.outputs.vo2max !== undefined
+        ? ctx.outputs.vo2max
+        : resolved
+          ? await (ctx.persistenceTx ?? this.prisma).activityVO2Max.findUnique({
+              where: { activityId: activity.id },
+              select: {
+                vo2maxVdotByRace: true,
+                vo2maxVdotByHr: true,
+                vo2maxVdotByFactor: true,
+                vo2maxCorrectionFactor: true,
+              },
+            })
+          : undefined;
+    const resolvedVo2max = resolveEffectiveActivityVo2Max(
+      vo2maxOutput,
+      resolved?.analysisConfig.defaultVdotSource,
+      resolved?.analysisConfig.vo2maxCorrectionFactor,
+    );
+    const analysisTimezone = resolved
+      ? resolveActivityAnalysisTimezone({
+          activityTimezone: activity.timezone,
+          bodyMetrics: resolved.bodyMetrics,
+        })
+      : null;
+    const pmcLocalDate =
+      analysisTimezone && activity.startTime
+        ? activityLocalDate(activity.startTime, analysisTimezone)
+        : null;
+    const provenance = resolved
+      ? {
+          metrics: metricProvenance,
+          zones: resolved.zones,
+          bodyMetrics: resolved.bodyMetrics,
+        }
+      : metricProvenance;
 
-    await this.prisma.activityFitnessMetricsSnapshot.upsert({
+    await (
+      ctx.persistenceTx ?? this.prisma
+    ).activityFitnessMetricsSnapshot.upsert({
       where: { activityId: activity.id },
       update: {
         userId,
         sport,
         recordedAt,
         resolvedAt: new Date(),
-        resolutionVersion: FITNESS_SNAPSHOT_RESOLUTION_VERSION,
+        resolutionVersion:
+          resolved?.resolutionVersion ?? FITNESS_CONTEXT_RESOLUTION_VERSION,
         provenance: provenance as Prisma.InputJsonValue,
+        calculationFingerprint: resolved?.calculationFingerprint ?? null,
+        provenanceFingerprint: resolved?.provenanceFingerprint ?? null,
+        inputFingerprint: resolved?.inputFingerprints.overall ?? null,
+        inputDimensionFingerprints:
+          (resolved?.inputFingerprints.dimensions as Prisma.InputJsonValue) ??
+          Prisma.JsonNull,
+        contextFingerprint: resolved?.contextFingerprint ?? null,
+        analysisConfigFingerprint: resolved?.analysisConfig.fingerprint ?? null,
+        resolvedLoadSources:
+          (resolved?.analysisConfig.loadSources as Prisma.InputJsonValue) ??
+          Prisma.JsonNull,
+        resolvedVo2maxValue: resolvedVo2max?.value ?? null,
+        resolvedVo2maxSource: resolvedVo2max?.source ?? null,
+        analysisTimezone,
+        pmcLocalDate,
         ftpValue: ftp?.value ?? null,
         ftpValue2: ftp?.value2 ?? null,
         cpValue: cp?.value ?? null,
@@ -235,8 +308,24 @@ export class BindFitnessMetricsTask implements MetricsTask {
         sport,
         recordedAt,
         resolvedAt: new Date(),
-        resolutionVersion: FITNESS_SNAPSHOT_RESOLUTION_VERSION,
+        resolutionVersion:
+          resolved?.resolutionVersion ?? FITNESS_CONTEXT_RESOLUTION_VERSION,
         provenance: provenance as Prisma.InputJsonValue,
+        calculationFingerprint: resolved?.calculationFingerprint ?? null,
+        provenanceFingerprint: resolved?.provenanceFingerprint ?? null,
+        inputFingerprint: resolved?.inputFingerprints.overall ?? null,
+        inputDimensionFingerprints:
+          (resolved?.inputFingerprints.dimensions as Prisma.InputJsonValue) ??
+          Prisma.JsonNull,
+        contextFingerprint: resolved?.contextFingerprint ?? null,
+        analysisConfigFingerprint: resolved?.analysisConfig.fingerprint ?? null,
+        resolvedLoadSources:
+          (resolved?.analysisConfig.loadSources as Prisma.InputJsonValue) ??
+          Prisma.JsonNull,
+        resolvedVo2maxValue: resolvedVo2max?.value ?? null,
+        resolvedVo2maxSource: resolvedVo2max?.source ?? null,
+        analysisTimezone,
+        pmcLocalDate,
         ftpValue: ftp?.value ?? null,
         ftpValue2: ftp?.value2 ?? null,
         cpValue: cp?.value ?? null,

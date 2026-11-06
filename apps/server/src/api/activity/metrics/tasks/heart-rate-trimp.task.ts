@@ -13,6 +13,11 @@ import { resolveLthrForCalculation } from '@shared/lthr';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
 import { UserService } from '@/api/user/user.service';
 import { pickPositiveThreshold } from '../fitness-metric-priority';
+import { DEFAULT_RESTING_HEART_RATE_BPM } from '@/algorithm/fitness-timeline';
+import {
+  observedHeartRateSamples,
+  resampleObservedValues,
+} from '@/algorithm/time-series-metrics';
 
 @Injectable()
 export class HeartRateTrimpTask implements MetricsTask {
@@ -71,23 +76,8 @@ export class HeartRateTrimpTask implements MetricsTask {
     const rows = ctx.inputs.canonicalRecords ?? [];
     if (!rows.length) return ctx;
 
-    const sampleSec =
-      ctx.cache.sampleSec != null &&
-      Number.isFinite(ctx.cache.sampleSec) &&
-      ctx.cache.sampleSec > 0
-        ? ctx.cache.sampleSec
-        : 1;
-
     // 使用上游计算结果；缺失时再从 canonical records 兜底计算。
     const zoneValues = ctx.outputs.heartRateZones?.zone?.zones ?? [];
-    const zoneDurationSec = zoneValues.reduce(
-      (sum, z) =>
-        sum +
-        (typeof z.duration === 'number' && Number.isFinite(z.duration)
-          ? z.duration
-          : 0),
-      0,
-    );
 
     let hrRecords: number[] | undefined;
     const getHrRecords = () => {
@@ -103,8 +93,9 @@ export class HeartRateTrimpTask implements MetricsTask {
         ? ctx.outputs.heartRateBase.avg
         : undefined;
     const avg = reusableAvg ?? mean(getHrRecords());
-    const durationSec =
-      zoneDurationSec > 0 ? zoneDurationSec : getHrRecords().length * sampleSec;
+    const durationSec = resampleObservedValues(
+      observedHeartRateSamples(rows),
+    ).coveredSeconds;
     if (
       !Number.isFinite(avg) ||
       avg <= 0 ||
@@ -119,12 +110,16 @@ export class HeartRateTrimpTask implements MetricsTask {
       effectiveMetrics[UserFitnessMetricType.MAX_HR]?.value,
       profile?.maxHeartRate,
       hrThreshold?.maxHeartRate,
-      estimateMaxHeartRate(profile?.age),
+      ctx.cache.resolvedFitnessContext
+        ? undefined
+        : estimateMaxHeartRate(profile?.age),
     );
     const restHr = pickPositiveThreshold(
       effectiveMetrics[UserFitnessMetricType.RESTING_HR]?.value,
+      ctx.cache.loadRestingHeartRateDefault,
       profile?.restingHeartRate,
       hrThreshold?.restingHeartRate,
+      DEFAULT_RESTING_HEART_RATE_BPM,
     );
     const lthr = pickPositiveThreshold(
       effectiveMetrics[UserFitnessMetricType.LTHR]?.value,
@@ -132,6 +127,10 @@ export class HeartRateTrimpTask implements MetricsTask {
       hrThreshold?.lactateThresholdHeartRate,
       hrThreshold?.lthr,
     );
+
+    // A missing threshold is unavailable, not a successfully calculated zero.
+    // The HEAVY commit removes any obsolete persisted result when no output exists.
+    if (!maxHr || !restHr || maxHr <= restHr) return ctx;
 
     const HRR =
       restHr && maxHr && Number.isFinite(restHr) && Number.isFinite(maxHr)
@@ -189,7 +188,11 @@ export class HeartRateTrimpTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const trimp = ctx.outputs.heartRateTrimp;
     if (!activity?.id || !trimp || trimp.TRIMP === undefined) return ctx;
-    await this.persistence.saveActivityHeartRateTrimpRow(activity.id, trimp);
+    await this.persistence.saveActivityHeartRateTrimpRow(
+      activity.id,
+      trimp,
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

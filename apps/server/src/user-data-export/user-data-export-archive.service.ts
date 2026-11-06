@@ -15,6 +15,7 @@ import { HealthFileQueryService } from '@/health-data/health-file-query.service'
 import { ImportingJobService } from '@/importing/importing-job.service';
 import { SensorFileQueryService } from '@/sensor/sensor-file-query.service';
 import { UserQueryService } from '@/api/user/user-query.service';
+import { LoadReadoutService } from '@/api/activity/load-readout.service';
 import { PMCService } from '@/training-load/pmc.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { isPublicUserSettingCategory } from '@/api/user/public-user-setting-policy';
@@ -326,6 +327,7 @@ export class UserDataExportArchiveService {
     private readonly importJobs: ImportingJobService,
     private readonly sensorFiles: SensorFileQueryService,
     private readonly users: UserQueryService,
+    private readonly loadReadout: LoadReadoutService,
   ) {}
 
   async build(
@@ -849,6 +851,9 @@ export class UserDataExportArchiveService {
       },
       orderBy: [{ startTime: 'asc' }, { createdAt: 'asc' }],
     });
+    const actualLoads = await this.loadReadout.batchGetActualLoad(
+      activities.map((activity) => activity.id),
+    );
     const activityRows = activities.map((activity) => ({
       id: activity.hashId,
       name: activity.activityName,
@@ -868,6 +873,8 @@ export class UserDataExportArchiveService {
       averageCadenceRpm: activity.avgCadence,
       trainingStressScore: activity.coggan?.bikeStress ?? null,
       intensityFactor: activity.coggan?.intensityFactor ?? null,
+      actualLoad: actualLoads.get(activity.id)?.actualLoad ?? null,
+      actualLoadSource: actualLoads.get(activity.id)?.actualLoadSource ?? null,
       perceivedExertion: activity.sessionRpe,
       notes: activity.description,
       // Activities are not currently linked to competition events, so a race
@@ -921,6 +928,8 @@ export class UserDataExportArchiveService {
         'averageCadenceRpm',
         'trainingStressScore',
         'intensityFactor',
+        'actualLoad',
+        'actualLoadSource',
         'perceivedExertion',
       ],
       rows: activityRows,
@@ -2544,11 +2553,13 @@ export class UserDataExportArchiveService {
     const archiverModule = await import('archiver');
     const direct = archiverModule as unknown;
     const first = (direct as { default?: unknown })?.default;
-    const archiver = (typeof direct === 'function'
-      ? direct
-      : typeof first === 'function'
-        ? first
-        : (first as { default?: unknown } | undefined)?.default) as typeof import('archiver');
+    const archiver = (
+      typeof direct === 'function'
+        ? direct
+        : typeof first === 'function'
+          ? first
+          : (first as { default?: unknown } | undefined)?.default
+    ) as typeof import('archiver');
     if (typeof archiver !== 'function') {
       throw new Error('Archiver runtime did not expose a callable factory');
     }

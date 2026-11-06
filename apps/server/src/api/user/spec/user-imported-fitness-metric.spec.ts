@@ -14,6 +14,7 @@ import { BusinessException } from '@/filters/business-exception/business.excepti
 import { PrismaService } from '@/prisma/prisma.service';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 import { UserQueryService } from '../user-query.service';
+import { UserAnalysisConfigService } from '../user-analysis-config.service';
 import { UserService } from '../user.service';
 
 type AsyncFn = (...args: unknown[]) => Promise<unknown>;
@@ -67,6 +68,7 @@ async function createServiceWithStoredCp(cp: number) {
         provide: UserQueryService,
         useValue: { fitnessMetrics: () => fitnessMetrics },
       },
+      { provide: UserAnalysisConfigService, useValue: {} },
     ],
   }).compile();
   const service = moduleRef.get(UserService);

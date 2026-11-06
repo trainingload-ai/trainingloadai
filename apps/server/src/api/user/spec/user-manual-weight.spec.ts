@@ -3,12 +3,13 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { I18nService } from 'nestjs-i18n';
-import { ChangeSource, MetricSource } from '@prisma/client';
+import { ChangeSource } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 import { UserQueryService } from '../user-query.service';
 import { UserService } from '../user.service';
 import { UserIdentityRepository } from '../persistence/user-identity.repository';
+import { UserAnalysisConfigService } from '../user-analysis-config.service';
 
 type AsyncFn = (...args: any[]) => Promise<any>;
 
@@ -39,6 +40,7 @@ async function createFixture(
         provide: UserQueryService,
         useValue: { bodyMetrics: () => bodyMetrics },
       },
+      { provide: UserAnalysisConfigService, useValue: {} },
     ],
   }).compile();
   const tx = { $queryRaw: jest.fn(async () => []) };
@@ -199,6 +201,7 @@ describe('UserService Coach fitness metric history', () => {
       {} as never,
       { emitAsync: jest.fn(async () => []) } as never,
       users,
+      {} as never,
     );
     const tx = {
       userFitnessMetric: delegate,

@@ -19,11 +19,11 @@ export function getPlannedWorkoutLoad(workouts: readonly PlanWorkout[]) {
 
 function LoadValue({ label, value }: { label: string; value: number }) {
   return (
-    <span className="flex items-baseline justify-end gap-1">
-      <span className="text-[9px] font-medium text-zinc-400 dark:text-zinc-500">
+    <span className="flex items-baseline justify-end gap-1 whitespace-nowrap">
+      <span className="text-[9px] font-medium text-muted-foreground">
         {label}
       </span>
-      <span className="text-sm font-semibold tabular-nums text-foreground">
+      <span className="text-sm font-semibold tabular-nums text-load">
         {Math.round(value)}
       </span>
     </span>
@@ -51,9 +51,7 @@ export const MobileCalendarDayLoad = memo(function MobileCalendarDayLoad({
 
   return (
     <span className="flex shrink-0 self-center flex-col items-end gap-0.5">
-      {actual > 0 ? (
-        <LoadValue label={t("actualLoad")} value={actual} />
-      ) : null}
+      {actual > 0 ? <LoadValue label={t("actualLoad")} value={actual} /> : null}
       {planned > 0 ? (
         <LoadValue label={t("plannedLoad")} value={planned} />
       ) : null}

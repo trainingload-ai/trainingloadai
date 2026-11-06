@@ -64,6 +64,9 @@ describe('ImportItemWorkerService leases', () => {
       $queryRawUnsafe.mock.calls[0];
     expect(sql).toContain("status IN ('NORMALIZING','DEDUPING'");
     expect(sql).toContain('lease_expires_at IS NULL');
+    expect(sql).toContain('started_at=COALESCE(j.started_at, $1)');
+    expect(sql).toContain('updated_at=$1');
+    expect(sql).not.toContain('NOW()');
     expect(now).toBeInstanceOf(Date);
     expect(limit).toBe(2);
     expect(typeof token).toBe('string');

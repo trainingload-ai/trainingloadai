@@ -82,7 +82,9 @@ function SportIcon({ visual }: { visual: ActivitySportVisual }) {
       {visual === "stretching" ? (
         <StretchHorizontal className={className} />
       ) : null}
-      {visual === "hiit" ? <ActivityIcon className={className} /> : null}
+      {visual === "hiit" || visual === "other" ? (
+        <ActivityIcon className={className} />
+      ) : null}
       {visual === "yoga" ? <PersonStanding className={className} /> : null}
       {visual === "rowing" ? <ShipWheel className={className} /> : null}
       {visual === "elliptical" ? <Orbit className={className} /> : null}
@@ -99,7 +101,8 @@ function activityFallbackClass(visual: ActivitySportVisual) {
     return "text-stone-500 dark:text-stone-300";
   if (visual === "stretching" || visual === "yoga")
     return "text-violet-700/55 dark:text-violet-200/70";
-  if (visual === "unknown") return "text-muted-foreground";
+  if (visual === "unknown" || visual === "other")
+    return "text-muted-foreground";
   return "text-emerald-700/55 dark:text-emerald-200/70";
 }
 

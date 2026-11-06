@@ -95,6 +95,9 @@ export interface ImportBatchSummary {
   counts?: {
     items: number;
     createdActivities: number;
+    readyActivities?: number;
+    processingActivities?: number;
+    analysisFailedActivities?: number;
     eventLogs: number;
   };
   postProcessJob: ImportBatchPostProcessJob | null;

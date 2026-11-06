@@ -172,3 +172,11 @@ describe('ActivityMetricsOrchestratorService', () => {
     );
   });
 });
+
+
+it('preserves a transaction conflict so the caller can retry the whole commit',async()=>{
+  const service=new ActivityMetricsOrchestratorService();const conflict={code:'P2034'};
+  const post=jest.fn(async()=>{throw conflict});const current=context();
+  await expect(service.commitComputed({context:current,tasks:[{...task('heartRateBase',async c=>c),post}]},{} as never)).rejects.toBe(conflict);
+  expect(current.errors).toEqual({});
+});

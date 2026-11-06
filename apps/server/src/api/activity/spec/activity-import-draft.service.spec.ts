@@ -40,13 +40,33 @@ function createService(queryResults: unknown[], executeResults: number[] = []) {
   const uploadFile = jest.fn();
   const batchCreate = jest.fn<() => Promise<{ id: string }>>();
   const itemCreate = jest.fn<() => Promise<{ id: string }>>();
+  const activityFindFirst = jest.fn();
+  const activityUpdate = jest.fn();
+  const draftUpdate = jest.fn();
+  const recomputeCreate = jest.fn();
+  const tx = {
+    activity: { findFirst: activityFindFirst, update: activityUpdate },
+    activityImportDraft: { update: draftUpdate },
+    activityRecomputeJob: { create: recomputeCreate },
+  };
+  const transaction = jest.fn(async (callback: unknown) => {
+    if (typeof callback === 'function') {
+      return (callback as (value: typeof tx) => Promise<unknown>)(tx);
+    }
+    return Promise.all(callback as Promise<unknown>[]);
+  });
+  const findHashIdById = jest.fn();
   const service = new ActivityImportDraftService(
-    { $queryRaw: queryRaw, $executeRaw: executeRaw } as never,
+    {
+      $queryRaw: queryRaw,
+      $executeRaw: executeRaw,
+      $transaction: transaction,
+    } as never,
     { uploadFile } as never,
     {} as never,
     {} as never,
     {} as never,
-    { findHashIdById: jest.fn() } as never,
+    { findHashIdById } as never,
     { refreshBatchProgress: jest.fn() } as never,
     { t: jest.fn((key: string) => key) } as never,
     {
@@ -54,7 +74,19 @@ function createService(queryResults: unknown[], executeResults: number[] = []) {
       itemJobs: () => ({ create: itemCreate, update: jest.fn() }),
     } as never,
   );
-  return { batchCreate, executeRaw, itemCreate, service, uploadFile };
+  return {
+    activityFindFirst,
+    activityUpdate,
+    batchCreate,
+    draftUpdate,
+    executeRaw,
+    findHashIdById,
+    itemCreate,
+    recomputeCreate,
+    service,
+    transaction,
+    uploadFile,
+  };
 }
 
 function watchFile() {
@@ -152,5 +184,55 @@ describe('ActivityImportDraftService idempotency', () => {
         leaseExpiresAt: expect.any(Date),
       }),
     });
+  });
+
+  it('persists a replay job when a committed draft changes RPE', async () => {
+    const committed = {
+      ...draftRow(),
+      status: 'COMMITTED',
+      committedActivityId: 42,
+      sessionRpe: 2,
+    };
+    const updated = { ...committed, sessionRpe: 6 };
+    const {
+      activityFindFirst,
+      activityUpdate,
+      draftUpdate,
+      findHashIdById,
+      recomputeCreate,
+      service,
+    } = createService([[committed], [updated]]);
+    activityFindFirst.mockResolvedValue({
+      id: 42,
+      startTime: new Date('2026-08-19T10:00:00.000Z'),
+    });
+    activityUpdate.mockResolvedValue({ id: 42 });
+    draftUpdate.mockResolvedValue({ id: committed.id });
+    recomputeCreate.mockResolvedValue({ id: 'replay-rpe' });
+    findHashIdById.mockResolvedValue('activity-hash');
+
+    const result = await service.commitDraft({
+      draftId: committed.id,
+      sessionRpe: 6,
+      userId,
+    });
+
+    expect(activityUpdate).toHaveBeenCalledWith({
+      where: { id: 42 },
+      data: expect.objectContaining({
+        sessionRpe: 6,
+        processingStatus: 'ANALYZING',
+        readyAt: null,
+      }),
+    });
+    expect(recomputeCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId,
+        reason: 'ACTIVITY_INPUT_CHANGED',
+        triggerSource: 'activity_import_draft_rpe_changed',
+        affectedPipelines: ['TRAINING_LOAD', 'PMC'],
+      }),
+    });
+    expect(result.activityHashId).toBe('activity-hash');
   });
 });

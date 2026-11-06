@@ -100,7 +100,23 @@
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 55
+          "line": 54
+        },
+        {
+          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
+          "line": 449
+        },
+        {
+          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
+          "line": 450
+        },
+        {
+          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
+          "line": 451
+        },
+        {
+          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
+          "line": 452
         }
       ],
       "capability": "ai",
@@ -170,7 +186,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 62
+          "line": 68
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -197,7 +213,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 56
+          "line": 62
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -823,7 +839,7 @@
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 44
+          "line": 43
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1082,7 +1098,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 141
+          "line": 139
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
@@ -1100,7 +1116,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 131
+          "line": 129
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
@@ -1150,7 +1166,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 138
+          "line": 136
         }
       ],
       "capability": "third-party-sync",
@@ -1224,7 +1240,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 68
+          "line": 74
         }
       ],
       "capability": "web-asset-or-tooling",

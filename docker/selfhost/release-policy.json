@@ -70,6 +70,10 @@
       "0015_fit_strength_sets": {
         "phase": "expand",
         "releaseVersion": "1.1.16"
+      },
+      "0016_chronological_fitness_replay": {
+        "phase": "expand",
+        "releaseVersion": "1.1.16"
       }
     }
   }

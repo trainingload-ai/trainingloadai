@@ -21,6 +21,7 @@ function createService(
     {
       zoneSettings: () => ({ findUnique: jest.fn(async () => saved) }),
     } as never,
+    {} as never,
   );
   jest
     .spyOn(service, 'getComposedUserProfile')

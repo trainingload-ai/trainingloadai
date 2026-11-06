@@ -25,24 +25,27 @@ const toneStyles: Record<
   }
 > = {
   success: {
-    row: "border-emerald-500/20 bg-emerald-50/80 hover:bg-emerald-50 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:hover:bg-emerald-400/15",
-    iconWrap: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-    icon: "text-emerald-700 dark:text-emerald-300",
-    chip: "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+    row: "border-[hsl(var(--emerald-500)/0.2)] bg-[hsl(var(--emerald-50)/0.8)] hover:bg-[hsl(var(--emerald-50))] dark:border-[hsl(var(--emerald-400)/0.25)] dark:bg-[hsl(var(--emerald-400)/0.1)] dark:hover:bg-[hsl(var(--emerald-400)/0.15)]",
+    iconWrap:
+      "bg-[hsl(var(--emerald-500)/0.1)] text-[hsl(var(--emerald-700))] dark:text-[hsl(var(--emerald-300))]",
+    icon: "text-[hsl(var(--emerald-700))] dark:text-[hsl(var(--emerald-300))]",
+    chip: "bg-[hsl(var(--emerald-500)/0.1)] text-[hsl(var(--emerald-700))] dark:bg-[hsl(var(--emerald-500)/0.15)] dark:text-[hsl(var(--emerald-300))]",
     Icon: CheckCircle2,
   },
   warning: {
-    row: "border-amber-500/25 bg-amber-50/85 hover:bg-amber-50 dark:border-amber-400/25 dark:bg-amber-400/10 dark:hover:bg-amber-400/15",
-    iconWrap: "bg-amber-500/12 text-amber-700 dark:text-amber-300",
-    icon: "text-amber-700 dark:text-amber-300",
-    chip: "bg-amber-500/12 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+    row: "border-[hsl(var(--amber-500)/0.25)] bg-[hsl(var(--amber-50)/0.85)] hover:bg-[hsl(var(--amber-50))] dark:border-[hsl(var(--amber-400)/0.25)] dark:bg-[hsl(var(--amber-400)/0.1)] dark:hover:bg-[hsl(var(--amber-400)/0.15)]",
+    iconWrap:
+      "bg-[hsl(var(--amber-500)/0.12)] text-[hsl(var(--amber-700))] dark:text-[hsl(var(--amber-300))]",
+    icon: "text-[hsl(var(--amber-700))] dark:text-[hsl(var(--amber-300))]",
+    chip: "bg-[hsl(var(--amber-500)/0.12)] text-[hsl(var(--amber-800))] dark:bg-[hsl(var(--amber-500)/0.15)] dark:text-[hsl(var(--amber-300))]",
     Icon: AlertTriangle,
   },
   insight: {
-    row: "border-sky-500/20 bg-sky-50/80 hover:bg-sky-50 dark:border-sky-400/25 dark:bg-sky-400/10 dark:hover:bg-sky-400/15",
-    iconWrap: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
-    icon: "text-sky-700 dark:text-sky-300",
-    chip: "bg-sky-500/10 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
+    row: "border-[hsl(var(--sky-500)/0.2)] bg-[hsl(var(--sky-50)/0.8)] hover:bg-[hsl(var(--sky-50))] dark:border-[hsl(var(--sky-400)/0.25)] dark:bg-[hsl(var(--sky-400)/0.1)] dark:hover:bg-[hsl(var(--sky-400)/0.15)]",
+    iconWrap:
+      "bg-[hsl(var(--sky-500)/0.1)] text-[hsl(var(--sky-700))] dark:text-[hsl(var(--sky-300))]",
+    icon: "text-[hsl(var(--sky-700))] dark:text-[hsl(var(--sky-300))]",
+    chip: "bg-[hsl(var(--sky-500)/0.1)] text-[hsl(var(--sky-700))] dark:bg-[hsl(var(--sky-500)/0.15)] dark:text-[hsl(var(--sky-300))]",
     Icon: Sparkles,
   },
   neutral: {
@@ -138,7 +141,7 @@ export function NotificationListRow({
                   {display.eyebrow}
                 </span>
                 {isUnread ? (
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--emerald-500))]" />
                 ) : null}
               </div>
               <div
@@ -157,7 +160,7 @@ export function NotificationListRow({
               {isUnread ? (
                 <Badge
                   variant="secondary"
-                  className="hidden rounded-full bg-emerald-500/10 px-1.5 py-0 text-mobile-unit pc:text-[10px] text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 sm:inline-flex"
+                  className="hidden rounded-full bg-[hsl(var(--emerald-500)/0.1)] px-1.5 py-0 text-mobile-unit pc:text-[10px] text-[hsl(var(--emerald-700))] dark:bg-[hsl(var(--emerald-500)/0.15)] dark:text-[hsl(var(--emerald-300))] sm:inline-flex"
                 >
                   {unreadLabel}
                 </Badge>

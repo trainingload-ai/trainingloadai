@@ -1225,12 +1225,9 @@ export class SensorDataService implements OnModuleDestroy {
     //   )}`,
     // );
 
-    let timeExpr = `COALESCE(strftime(${tsExpr}, '%Y-%m-%d %H:%M:%S'), '')`;
-    if (timezone) {
-      const safeTimezone = timezone.replace(/'/g, "''");
-      // Use DuckDB timezone function to convert UTC timestamp to target timezone
-      timeExpr = `COALESCE(strftime(timezone('${safeTimezone}', ${tsExpr}), '%Y-%m-%d %H:%M:%S'), '')`;
-    }
+    // Parquet timestamps are UTC facts. Return explicit UTC even when callers
+    // supply a display timezone; formatting local time must happen at the UI boundary.
+    const timeExpr = `COALESCE(strftime(${tsExpr}, '%Y-%m-%dT%H:%M:%S.%gZ'), '')`;
 
     const metricExpressions = mapped.map((col, idx) => {
       const safeColumn = this.quoteIdentifier(col);

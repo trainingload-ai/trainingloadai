@@ -16,6 +16,8 @@ describe('mapTrackSwapSportType', () => {
     ['running', 'RUN'],
     ['TRAIL_RUNNING', 'RUN'],
     ['walk', 'RUN'],
+    ['hiking', 'RUN'],
+    ['biking', 'CYCLING'],
     ['indoor_bike', 'CYCLING'],
     ['MTB', 'CYCLING'],
     ['swimming', 'SWIM'],

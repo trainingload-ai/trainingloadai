@@ -19,7 +19,8 @@ export class EstimatedPowerMetricsTask implements MetricsTask {
     const { activity } = ctx.inputs;
     if (!activity?.id) return ctx;
 
-    const listKey = `list:${PeakType.power}:${ScaleType.TIME}` as PeakMetricListKey;
+    const listKey =
+      `list:${PeakType.power}:${ScaleType.TIME}` as PeakMetricListKey;
     const existing = ctx.cache.peakMetricLists?.[listKey];
     if (existing) return ctx;
 
@@ -45,7 +46,8 @@ export class EstimatedPowerMetricsTask implements MetricsTask {
   }
 
   async exec(ctx: MetricsContext): Promise<MetricsContext> {
-    const listKey = `list:${PeakType.power}:${ScaleType.TIME}` as PeakMetricListKey;
+    const listKey =
+      `list:${PeakType.power}:${ScaleType.TIME}` as PeakMetricListKey;
     const list = ctx.cache.peakMetricLists?.[listKey];
     // MMP 数据点太少的话，估算结果不可靠，不予计算
     if (!list || list.length < 10) return ctx;

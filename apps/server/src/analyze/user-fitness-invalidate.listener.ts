@@ -2,14 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MetricSource } from '@prisma/client';
 import {
+  USER_FITNESS_CONTEXT_CHANGED_EVENT,
   USER_FITNESS_INVALIDATED_EVENT,
-  USER_VO2_MAX_SETTINGS_CHANGED_EVENT,
+  USER_ZONE_SETTING_CHANGED_EVENT,
+  type UserFitnessContextChangedEvent,
   type UserFitnessInvalidatedEvent,
-  type UserVo2MaxSettingsChangedEvent,
+  type UserZoneSettingChangedEvent,
 } from '@/api/user/events/user-fitness.events';
 import { ActivityRecomputeJobService } from './activity-recompute-job.service';
 import { UserService } from '@/api/user/user.service';
-import { AnalyzeFitnessOrchestratorService } from './analyze-fitness-orchestrator.service';
 
 @Injectable()
 export class UserFitnessInvalidateListener {
@@ -18,12 +19,41 @@ export class UserFitnessInvalidateListener {
   constructor(
     private readonly jobs: ActivityRecomputeJobService,
     private readonly users: UserService,
-    private readonly fitness: AnalyzeFitnessOrchestratorService,
   ) {}
 
-  @OnEvent(USER_VO2_MAX_SETTINGS_CHANGED_EVENT)
-  async handleVo2MaxSettingsChanged(event: UserVo2MaxSettingsChangedEvent) {
-    await this.fitness.updateGlobalMetrics(event.userId);
+  // VO2 source/correction settings are versioned analysis configuration.
+  // They apply to activities from the change time forward and deliberately do
+  // not reinterpret old activities or append a wall-clock "final" VO2 value.
+
+  @OnEvent(USER_ZONE_SETTING_CHANGED_EVENT, { suppressErrors: false })
+  async handleZoneSettingChanged(event: UserZoneSettingChangedEvent) {
+    await this.jobs.scheduleContextChangeRecompute({
+      userId: event.userId,
+      contextType: `ZONE_${event.zoneType}` as
+        | 'ZONE_HEART_RATE'
+        | 'ZONE_POWER'
+        | 'ZONE_PACE',
+      sportType: event.sportType,
+      changedTimes: [event.changedAt.getTime()],
+      triggerPayload: {
+        zoneType: event.zoneType,
+        deleted: event.deleted,
+      },
+    });
+  }
+
+  @OnEvent(USER_FITNESS_CONTEXT_CHANGED_EVENT, { suppressErrors: false })
+  async handleFitnessContextChanged(event: UserFitnessContextChangedEvent) {
+    if (event.changedTimes.length === 0) return;
+    await this.jobs.scheduleContextChangeRecompute({
+      userId: event.userId,
+      contextType: 'PROFILE',
+      changedTimes: event.changedTimes,
+      triggerPayload: {
+        contextType: event.contextType,
+        bodyMetricTypes: event.bodyMetricTypes,
+      },
+    });
   }
 
   // emitAsync callers must observe enqueue failures so durable outboxes can retry.

@@ -30,6 +30,8 @@ import {
 import { useStore } from "@/lib/store";
 import CardLoader from "@/components/ui/CardLoader";
 import { formatBySettings } from "@/lib/utils";
+import { formatSecondsToTime } from "@/utils/timeFormatter";
+import { resolveActivityChartXAxis } from "@/lib/activity-chart-axis";
 const chartConfig = {
   hr: {
     theme: {
@@ -58,6 +60,7 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useEpocData(activityId, true);
+  const chartXaxis = resolveActivityChartXAxis("distance", data);
 
   const axisColor = cssVar("var(--muted-foreground)");
   const gridColor = cssVar("var(--border)");
@@ -72,12 +75,16 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
 
   const uPlotData = useMemo(() => {
     if (!data || data.length === 0) return null;
-    // Keep base unit consistent with formatBySettings distance expectations (meters)
-    const distances = data.map((d) => d.distance);
+    const firstTime = Number(data[0]?.time) || 0;
+    const xValues = data.map((d) =>
+      chartXaxis === "distance"
+        ? Number(d.distance) || 0
+        : (Number(d.time) - firstTime) / 1000,
+    );
     const epocValues = data.map((d) => d.epoc);
     const hrValues = data.map((d) => d.hr);
-    return [distances, epocValues, hrValues] as [number[], ...number[][]];
-  }, [data]);
+    return [xValues, epocValues, hrValues] as [number[], ...number[][]];
+  }, [chartXaxis, data]);
 
   const options = useMemo<uPlot.Options>(() => {
     return {
@@ -129,19 +136,12 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
       ],
       series: [
         {
-          label: t("distance"),
+          label: t(chartXaxis),
           value: (self, rawValue) => {
             if (rawValue == null || Number.isNaN(Number(rawValue))) return "--";
-            // Format using user system unit
-            try {
-              // lazy import to avoid top-level circulars
-
-              return formatBySettings(Number(rawValue), "distance", {
-                systemUnit,
-              });
-            } catch {
-              return `${Number(rawValue).toFixed(2)}`;
-            }
+            return chartXaxis === "distance"
+              ? formatBySettings(Number(rawValue), "distance", { systemUnit })
+              : formatSecondsToTime(Number(rawValue), { showHours: true });
           },
         },
         {
@@ -165,7 +165,7 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
       axes: createAxes({
         axisStroke: axisColor,
         gridStroke: gridColor,
-        chartXaxis: "distance",
+        chartXaxis,
         systemUnit,
       }),
       hooks: {
@@ -199,20 +199,30 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
         ],
       },
     } as uPlot.Options;
-  }, [axisColor, epocColor, gridColor, height, hrColor, systemUnit, t, width]);
+  }, [
+    axisColor,
+    chartXaxis,
+    epocColor,
+    gridColor,
+    height,
+    hrColor,
+    systemUnit,
+    t,
+    width,
+  ]);
 
   const tooltipContent = useMemo(() => {
     if (cursorIdx === null || !uPlotData) return null;
-    const distance = uPlotData[0][cursorIdx];
+    const xValue = uPlotData[0][cursorIdx];
     const epoc = uPlotData[1][cursorIdx];
     const hr = uPlotData[2][cursorIdx];
 
     return (
       <div className="border-border/50 bg-background grid min-w-32 items-start gap-1.5 rounded-md border px-2.5 py-1.5 text-mobile-caption pc:text-xs shadow-xl">
         <div className="font-medium">
-          {formatBySettings(distance, "distance", {
-            systemUnit,
-          })}
+          {chartXaxis === "distance"
+            ? formatBySettings(xValue, "distance", { systemUnit })
+            : formatSecondsToTime(xValue, { showHours: true })}
         </div>
         <div className="grid gap-1.5">
           <div className="flex w-full flex-wrap items-stretch gap-2 items-center">
@@ -242,7 +252,7 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
         </div>
       </div>
     );
-  }, [cursorIdx, epocColor, hrColor, systemUnit, t, uPlotData]);
+  }, [chartXaxis, cursorIdx, epocColor, hrColor, systemUnit, t, uPlotData]);
 
   if (isLoading) {
     return (
@@ -278,9 +288,7 @@ export const EpocChart = ({ compact = false }: { compact?: boolean }) => {
         </>
       ) : (
         <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-          {!data || data.length === 0
-            ? t("noData") || "No data available"
-            : null}
+          {!data || data.length === 0 ? t("noData") : null}
         </div>
       )}
     </div>

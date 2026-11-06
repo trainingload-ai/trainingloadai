@@ -19,6 +19,6 @@ import { UserQueryModule } from '@/api/user/user-query.module';
   ],
   controllers: [PMCController],
   providers: [PmcRepository, PMCService, PmcInvalidateListener],
-  exports: [PMCService],
+  exports: [PMCService, PmcRepository],
 })
 export class PMCModule {}

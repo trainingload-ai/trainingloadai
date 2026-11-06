@@ -32,15 +32,21 @@ export class PowerCogganBikeTask implements MetricsTask {
     }
 
     const { context } = preload;
-    const ftp = context.FTP ?? 0;
-    const cp = context.CP ?? 0;
+    const ftp = context.FTP;
+    const cp = context.CP;
 
-    const coggan = this.powerEngine.computeCogganMetrics(agg, ftp, st);
-    const bikeScore = this.powerEngine.computeBikeScoreMetrics(
-      toSensorData(canonical),
-      agg,
-      cp,
-    );
+    const coggan =
+      typeof ftp === 'number' && Number.isFinite(ftp) && ftp > 0
+        ? this.powerEngine.computeCogganMetrics(agg, ftp, st)
+        : undefined;
+    const bikeScore =
+      typeof cp === 'number' && Number.isFinite(cp) && cp > 0
+        ? this.powerEngine.computeBikeScoreMetrics(
+            toSensorData(canonical),
+            agg,
+            cp,
+          )
+        : undefined;
 
     return {
       ...ctx,
@@ -70,6 +76,7 @@ export class PowerCogganBikeTask implements MetricsTask {
         activity.id,
         sportType,
         coggan,
+        ctx.persistenceTx,
       );
     }
     if (bikeScore) {
@@ -77,6 +84,7 @@ export class PowerCogganBikeTask implements MetricsTask {
         activity.id,
         sportType,
         bikeScore,
+        ctx.persistenceTx,
       );
     }
     return ctx;

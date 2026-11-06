@@ -1,5 +1,34 @@
 export type TimedValueSample = { tMs: number; value: number | null };
 
+/** FIT channels can update independently: an absent HR field is not a new HR sample. */
+export function observedHeartRateSamples(
+  records: ReadonlyArray<{ tMs: number; heartRate?: number | null }>,
+): TimedValueSample[] {
+  return records
+    .filter((record) => record.heartRate != null)
+    .map((record) => ({
+      tMs: record.tMs,
+      // Keep explicit invalid readings as barriers; never hold a value across them.
+      value:
+        Number.isFinite(record.heartRate) &&
+        record.heartRate! >= 30 &&
+        record.heartRate! <= 240
+          ? record.heartRate!
+          : null,
+    }));
+}
+
+export function observedSampleSeconds(
+  samples: readonly TimedValueSample[],
+): number {
+  const gaps = samples
+    .slice(1)
+    .map((sample, index) => (sample.tMs - samples[index].tMs) / 1000)
+    .filter((gap) => gap > 0 && gap <= DEFAULT_MAX_OBSERVATION_GAP_SECONDS)
+    .sort((left, right) => left - right);
+  return gaps[Math.floor(gaps.length / 2)] ?? 1;
+}
+
 export const DEFAULT_MAX_OBSERVATION_GAP_SECONDS = 10;
 export const STANDARD_PEAK_DURATIONS: Record<string, number> = {
   '1s': 1,

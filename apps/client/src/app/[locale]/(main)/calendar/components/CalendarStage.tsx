@@ -150,7 +150,7 @@ export function CalendarStage({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-md bg-neutral-100 dark:bg-muted/45 p-2.5 md:p-3",
+        "overflow-hidden rounded-md bg-neutral-100 p-2.5 dark:bg-muted/70 md:p-3",
         className,
       )}
     >

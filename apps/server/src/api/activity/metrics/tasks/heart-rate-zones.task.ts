@@ -4,6 +4,7 @@ import type { MetricsTask } from '../task';
 import { fillTimedValuesToZones } from '@/utils/zones';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
 import { UserService } from '@/api/user/user.service';
+import { observedHeartRateSamples } from '@/algorithm/time-series-metrics';
 
 @Injectable()
 export class HeartRateZonesTask implements MetricsTask {
@@ -19,6 +20,8 @@ export class HeartRateZonesTask implements MetricsTask {
     if (!userId || !activity?.id) return ctx;
 
     let next = ctx;
+
+    if (next.cache.resolvedFitnessContext) return next;
 
     if (!next.cache.heartRateZoneSetting) {
       const profile =
@@ -52,15 +55,7 @@ export class HeartRateZonesTask implements MetricsTask {
     if (!zoneSetting?.zones?.length || !rows.length) return ctx;
 
     const zoneValues = fillTimedValuesToZones(
-      rows.map((record) => ({
-        tMs: record.tMs,
-        value:
-          typeof record.heartRate === 'number' &&
-          Number.isFinite(record.heartRate) &&
-          record.heartRate > 0
-            ? record.heartRate
-            : null,
-      })),
+      observedHeartRateSamples(rows),
       zoneSetting.zones,
     );
     if (!zoneValues.some((zone) => (zone.duration ?? 0) > 0)) return ctx;
@@ -83,7 +78,11 @@ export class HeartRateZonesTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const zones = ctx.outputs.heartRateZones?.zone?.zones;
     if (!activity?.id || !zones?.length) return ctx;
-    await this.persistence.saveActivityHeartRateZoneRows(activity.id, zones);
+    await this.persistence.saveActivityHeartRateZoneRows(
+      activity.id,
+      zones,
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

@@ -120,16 +120,19 @@
     "receivedAt": "Erhalten",
     "noBody": "Kein zusätzlicher Inhalt",
     "openReview": "Rückblick öffnen",
+    "viewActivities": "Aktivitäten ansehen",
     "loadingMore": "Mehr laden…",
     "templates": {
       "general": "Systembenachrichtigung",
       "importSuccess": "Import abgeschlossen",
       "importWarning": "Import braucht Aufmerksamkeit",
+      "importResult": "Importergebnis",
       "reviewDigest": "Trainingsrückblick",
       "exportFailed": "Sync fehlgeschlagen"
     },
     "summary": {
       "success": "Erfolg",
+      "available": "Verfügbar",
       "failed": "Fehlgeschlagen",
       "skipped": "Übersprungen",
       "reviewType": "Rückblickstyp",
@@ -149,12 +152,14 @@
     },
     "kinds": {
       "IMPORT_BATCH_COMPLETED": {
-        "title": "Importstapel abgeschlossen",
-        "body": "{total} Quellobjekte verarbeitet.\n\n- Erfolgreich: {success}\n- Fehlgeschlagen: {failed}\n- Übersprungen: {skipped}"
+        "title": "{success} Aktivitäten sind verfügbar",
+        "preview": "Dateiverarbeitung, Analyse und Belastungsaktualisierung sind abgeschlossen",
+        "body": "Dateiverarbeitung, Aktivitätsanalyse und Aktualisierung der Trainingsbelastung sind abgeschlossen."
       },
       "IMPORT_BATCH_PARTIAL_FAILED": {
-        "title": "Importstapel mit Fehlern abgeschlossen",
-        "body": "{total} Quellobjekte verarbeitet.\n\n- Erfolgreich: {success}\n- Fehlgeschlagen: {failed}\n- Übersprungen: {skipped}"
+        "title": "{success} Aktivitäten verfügbar, {failed} nicht abgeschlossen",
+        "preview": "Einige Aktivitäten müssen vor dem erneuten Versuch geprüft werden",
+        "body": "Verfügbare Aktivitäten wurden verarbeitet, analysiert und aktualisiert. Prüfe die nicht abgeschlossenen Einträge und versuche es erneut."
       },
       "THIRD_PARTY_EXPORT_FAILED": {
         "title": "Synchronisierung mit externem Dienst fehlgeschlagen",
@@ -1811,8 +1816,8 @@
   "ActivityDetail": {
     "title": "Aktivitätsdetails",
     "genericDataNotice": {
-      "title": "Allgemeine Trainingsdaten",
-      "description": "Die Quelle hat diese Einheit als allgemeines Training eingestuft. Trainingload.ai verwendet nur die aufgezeichnete Dauer, Herzfrequenz, Kalorien und Belastung und leitet weder Distanz, Tempo, Leistung noch die genaue Trainingsart ab."
+      "title": "Sportart noch nicht bestätigt",
+      "description": "Die Aktivität und ihre vorhandenen Daten bleiben erhalten. Wir zeigen Quelldaten, ohne die Sportart oder fehlende Messwerte zu erraten. Du kannst die Sportart im Aktivitätsmenü korrigieren."
     },
     "backButton": "Zurück",
     "configuration": "Konfiguration",
@@ -2114,7 +2119,9 @@
     "epoc": "EPOC (ml/kg)",
     "heartRate": "Herzfrequenz (Schläge pro Minute)",
     "distance": "Distanz",
-    "peak": "Gipfel"
+    "time": "Zeit",
+    "peak": "Gipfel",
+    "noData": "Keine EPOC-Daten"
   },
   "PaceChart": {
     "title": "Tempo",
@@ -2486,14 +2493,18 @@
     "uploadFailed": "Der Upload ist fehlgeschlagen",
     "unknownError": "Unbekannter Fehler",
     "importProgress": {
+      "processingFailed": "Diese Datei konnte nicht vollständig verarbeitet werden. Bitte versuche es später erneut oder kontaktiere den Support, wenn das Problem bestehen bleibt.",
       "title": "Importieren",
       "description": "Ihre Dateien wurden zum Import in die Warteschlange gestellt. Sie können weitersurfen, während wir sie im Hintergrund verarbeiten.",
       "completedTitle": "Import abgeschlossen",
       "completedDescription": "Die Verarbeitung dieses Stapels ist abgeschlossen. Sie können dieses Fenster schließen und die Ergebnisse jetzt überprüfen.",
+      "failedTitle": "Import nicht vollständig abgeschlossen",
+      "failedDescription": "Einige Dateien konnten nicht vollständig analysiert werden. Prüfen Sie die fehlgeschlagenen Einträge und versuchen Sie es erneut.",
       "batchCreatedToast": "Importstapel erstellt. {count}-Dateien werden jetzt verarbeitet",
       "openEntry": "Importfortschritt",
       "laterHint": "Sie können später noch einmal vorbeikommen und das Ergebnis jederzeit überprüfen.",
       "doneHint": "Die Verarbeitung dieses Stapels ist abgeschlossen.",
+      "failedHint": "Dieser Stapel enthält Aktivitäten, deren Verarbeitung nicht abgeschlossen wurde.",
       "notificationHint": "Sie erhalten eine Benachrichtigung, wenn der Import abgeschlossen ist. Sie müssen also nicht in diesem Dialog bleiben.",
       "progressLabel": "Fortschritt",
       "total": "Gesamt",
@@ -4099,7 +4110,15 @@
       "YOGA": "Yoga",
       "ROWING": "Rudern",
       "ELLIPTICAL": "Crosstrainer",
-      "OTHER": "Sonstige"
+      "OTHER": "Sonstige",
+      "CROSSFIT": "CrossFit",
+      "PADEL": "Padel",
+      "ALPINE_SKIING": "Ski alpin",
+      "SNOWBOARDING": "Snowboarden",
+      "MIXED_MARTIAL_ARTS": "Mixed Martial Arts",
+      "SOCCER": "Fußball",
+      "BASKETBALL": "Basketball",
+      "FISHING": "Angeln"
     }
   },
   "WorkoutEditor": {
@@ -4465,7 +4484,10 @@
       "completedLabel": "Abgeschlossen",
       "actual": "Ist",
       "expected": "Plan",
-      "todayValues": "Ist {actual} · Plan {planned}",
+      "todayValues": "Heute: Ist {actual} · Plan {planned}",
+      "totalValues": "Gesamt: Ist {actual} · Plan {planned}",
+      "activityCount": "{count} Aktivitäten",
+      "noPlanTarget": "Kein Planziel",
       "chartAria": "Tatsächliche und geplante Belastung der aktuellen Woche",
       "noData": "Keine Belastungsdaten für diese Woche"
     },

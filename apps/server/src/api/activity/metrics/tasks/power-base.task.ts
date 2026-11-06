@@ -96,6 +96,7 @@ export class PowerBaseTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const userId = ctx.inputs.userId;
     if (!activity?.id || !userId) return ctx;
+    if (ctx.cache.resolvedFitnessContext) return ctx;
     const ftpMetric =
       ctx.cache.fitnessMetrics?.[$Enums.UserFitnessMetricType.FTP];
     const cpMetric =
@@ -191,12 +192,16 @@ export class PowerBaseTask implements MetricsTask {
     const activity = ctx.inputs.activity;
     const base = ctx.outputs.powerBase;
     if (!activity?.id || !base) return ctx;
-    await this.persistence.saveActivityPowerActivityFields(activity.id, {
-      avgPower: base.avgPower,
-      efficiencyIndexPower: base.efficiencyIndexPower,
-      re: base.re,
-      ei: base.ei,
-    });
+    await this.persistence.saveActivityPowerActivityFields(
+      activity.id,
+      {
+        avgPower: base.avgPower,
+        efficiencyIndexPower: base.efficiencyIndexPower,
+        re: base.re,
+        ei: base.ei,
+      },
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }

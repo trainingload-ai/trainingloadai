@@ -7,6 +7,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { UserService } from '@/api/user/user.service';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
 import { computeEPOCFromHR } from '@/algorithm/epoc';
+import { DEFAULT_RESTING_HEART_RATE_BPM } from '@/algorithm/fitness-timeline';
 
 @Injectable()
 export class TrainingEffectTask implements MetricsTask {
@@ -19,6 +20,7 @@ export class TrainingEffectTask implements MetricsTask {
   async pre(ctx: MetricsContext) {
     const { activity, userId } = ctx.inputs;
     if (!userId) return ctx;
+    if (ctx.cache.resolvedFitnessContext) return ctx;
 
     const [profile, hrThreshold, snap] = await Promise.all([
       this.userService.getComposedUserProfile(
@@ -84,13 +86,18 @@ export class TrainingEffectTask implements MetricsTask {
 
     let { maxHeartRate = null, restingHeartRate = null } =
       ctx.cache.hrThreshold ?? {};
+    if (!restingHeartRate) {
+      restingHeartRate =
+        ctx.cache.loadRestingHeartRateDefault ?? DEFAULT_RESTING_HEART_RATE_BPM;
+    }
     if (!maxHeartRate || !restingHeartRate) {
       const profile = ctx.cache.profile;
       if (!maxHeartRate) maxHeartRate = profile?.maxHeartRate;
       if (!restingHeartRate) restingHeartRate = profile?.restingHeartRate;
     }
 
-    if (!maxHeartRate || !restingHeartRate) return ctx;
+    if (!maxHeartRate || !restingHeartRate || maxHeartRate <= restingHeartRate)
+      return ctx;
 
     const rows = ctx.inputs.canonicalRecords ?? [];
     if (!rows.length) return ctx;
@@ -98,14 +105,20 @@ export class TrainingEffectTask implements MetricsTask {
     const sampleSec = ctx.cache.sampleSec ?? 1;
     const hrRows = rows
       .filter(
-        (r) => r.heartRate != null && r.speed != null && r.distance != null,
+        (r) =>
+          Number.isFinite(r.tMs) &&
+          r.heartRate != null &&
+          Number.isFinite(r.heartRate) &&
+          r.heartRate >= 30 &&
+          r.heartRate <= 240,
       )
       .map((r) => ({
-        time: r.time,
+        time: new Date(r.tMs).toISOString(),
         hr: r.heartRate,
         speed: r.speed,
-        distance: Number(r.distance),
+        distance: r.distance,
       }));
+    if (hrRows.length < 2) return ctx;
     const m = computeEPOCFromHR(hrRows, maxHeartRate, restingHeartRate);
     const teMetrics = m ? { ...m, sampleSec } : null;
     return { ...ctx, outputs: { ...ctx.outputs, trainingEffect: teMetrics } };
@@ -117,6 +130,7 @@ export class TrainingEffectTask implements MetricsTask {
     await this.analyzePersistence.saveActivityTrainingEffect(
       activity,
       teMetrics,
+      ctx.persistenceTx,
     );
     return ctx;
   }

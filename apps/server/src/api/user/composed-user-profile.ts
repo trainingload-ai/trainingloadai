@@ -161,9 +161,11 @@ export function composeUserProfile(args: {
   base: ComposedProfileBase;
   bodyMetrics: ComposedBodyMetric[];
   fitnessMetrics: EffectiveFitnessMetricCandidate[];
+  /** 档案被解析的真实时间点；历史活动的年龄必须以活动发生时为准。 */
+  asOf?: Date;
 }): UserProfileResponse {
   // 读取用户身体指标
-  const body = readBodySnapshot(args.bodyMetrics);
+  const body = readBodySnapshot(args.bodyMetrics, args.asOf);
   // 读取用户心率指标
   const heartRate = readHeartRateSnapshot(args.fitnessMetrics, args.sport);
   const power =
@@ -213,7 +215,7 @@ function optionalNumber(value: string | null | undefined) {
   return value ? Number(value) : undefined;
 }
 
-function readBodySnapshot(rows: ComposedBodyMetric[]) {
+function readBodySnapshot(rows: ComposedBodyMetric[], asOf?: Date) {
   const map = latestBodyByType(rows);
   const birthday = map.get(BodyMetricType.BIRTHDAY)?.value;
   const birthDate =
@@ -229,7 +231,7 @@ function readBodySnapshot(rows: ComposedBodyMetric[]) {
     birthDate,
     age:
       birthDate && dayjs(birthDate).isValid()
-        ? dayjs().diff(dayjs(birthDate), 'year')
+        ? dayjs(asOf ?? new Date()).diff(dayjs(birthDate), 'year')
         : undefined,
     gender: genderValue
       ? (String(genderValue).toLowerCase() as Gender)

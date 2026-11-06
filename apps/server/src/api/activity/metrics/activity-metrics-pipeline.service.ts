@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { $Enums, type Activity } from '@prisma/client';
+import { $Enums, ZoneType, type Activity, type Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { resolveMeasuredPowerEvidence } from '@/training-load/measured-power-evidence';
 import { ActivityAnalyzeMode } from './activity-analyze-mode';
-import type { MetricsContext, MetricsTaskOutcome } from './context';
+import type {
+  AnalyzeUserContext,
+  MetricsContext,
+  MetricsTaskOutcome,
+} from './context';
 import { ActivityMetricsOrchestratorService } from './orchestrator.service';
+import type { ComputedMetricsRun } from './orchestrator.service';
 import type { MetricsTask } from './task';
 import { BindFitnessMetricsTask } from './tasks/bind-fitness-metrics.task';
 import { CalculatedPowerSummaryTask } from './tasks/calculated-power-summary.task';
@@ -29,6 +34,8 @@ import { Vo2MaxTask } from './tasks/vo2max.task';
 import { SwimScoreTask } from './tasks/swim-score.task';
 import { LthrObservationTask } from './tasks/lthr-observation.task';
 import { ActivityStatisticsTask } from './tasks/activity-statistics.task';
+import type { ResolvedFitnessContext } from '@/analyze/resolved-fitness-context';
+import type { ActivityMetricDimension } from '@/analyze/activity-impact-resolver';
 
 /** Activity capability 的 metrics pipeline 公共入口。 */
 @Injectable()
@@ -64,11 +71,94 @@ export class ActivityMetricsPipelineService {
   private async buildContext(
     activity: Activity,
     userId: string,
+    resolved?: ResolvedFitnessContext,
   ): Promise<MetricsContext> {
     const activitySources = await this.prisma.activitySource.findMany({
       where: { activityId: activity.id, isActive: true, isPrimary: true },
       select: { metadata: true },
     });
+    const fitnessMetrics = resolved
+      ? Object.fromEntries(
+          Object.entries(resolved.metrics).map(([type, metric]) => [
+            type,
+            metric?.value != null
+              ? {
+                  value: metric.value,
+                  value2: metric.value2,
+                  provenance: {
+                    value: {
+                      source: metric.source,
+                      effectiveAt: metric.effectiveAt?.toISOString() ?? null,
+                      sourceMetricId: metric.sourceMetricId ?? null,
+                      evidenceFingerprint: metric.evidenceFingerprint,
+                      reason: metric.reason ?? null,
+                    },
+                  },
+                }
+              : null,
+          ]),
+        )
+      : undefined;
+    const metric = (type: $Enums.UserFitnessMetricType) =>
+      resolved?.metrics[type]?.value ?? undefined;
+    const metric2 = (type: $Enums.UserFitnessMetricType) =>
+      resolved?.metrics[type]?.value2 ?? undefined;
+    const resolvedRestingHeartRate =
+      resolved?.metrics[$Enums.UserFitnessMetricType.RESTING_HR];
+    const restingHeartRate =
+      resolvedRestingHeartRate?.source === 'DEFAULT'
+        ? undefined
+        : (resolvedRestingHeartRate?.value ?? undefined);
+    const loadRestingHeartRateDefault =
+      resolvedRestingHeartRate?.source === 'DEFAULT'
+        ? (resolvedRestingHeartRate.value ?? undefined)
+        : undefined;
+    const profile = resolved
+      ? {
+          ...resolved.profile,
+          ftp: metric($Enums.UserFitnessMetricType.FTP),
+          cp: metric($Enums.UserFitnessMetricType.CP),
+          wPrime:
+            metric($Enums.UserFitnessMetricType.W_PRIME) ??
+            metric2($Enums.UserFitnessMetricType.CP),
+          Pmax: metric($Enums.UserFitnessMetricType.P_MAX),
+          maxHeartRate: metric($Enums.UserFitnessMetricType.MAX_HR),
+          restingHeartRate,
+          lthr: metric($Enums.UserFitnessMetricType.LTHR),
+          cs: metric($Enums.UserFitnessMetricType.CS),
+          dPrime: metric2($Enums.UserFitnessMetricType.CS),
+          tp: metric($Enums.UserFitnessMetricType.TP),
+          vo2max: metric($Enums.UserFitnessMetricType.VO2_MAX),
+        }
+      : undefined;
+    const analyzeContext: AnalyzeUserContext | undefined = profile
+      ? {
+          userWeight: profile.weight,
+          userHeight: profile.height,
+          age: profile.age,
+          gender: profile.gender,
+          LTHR: profile.lthr,
+          MHR: profile.maxHeartRate,
+          RHR: profile.restingHeartRate,
+          FTP: profile.ftp,
+          CP: profile.cp,
+          CS: profile.cs,
+          TP: profile.tp,
+          rpe: activity.sessionRpe ?? undefined,
+          vo2maxCorrectionFactor: profile.vo2maxCorrectionFactor,
+        }
+      : undefined;
+    const zone = (type: ZoneType) =>
+      resolved?.zones.find(
+        (candidate) =>
+          candidate.zoneType === type &&
+          (candidate.sport === activity.sportType ||
+            candidate.sport === $Enums.SportType.UNKNOWN),
+      )?.setting;
+    const heartRateZoneSetting = zone(ZoneType.HEART_RATE);
+    const powerZoneSetting = zone(ZoneType.POWER);
+    const paceZoneSetting = zone(ZoneType.PACE);
+
     return {
       inputs: {
         activity,
@@ -78,7 +168,33 @@ export class ActivityMetricsPipelineService {
         timezone: activity.timezone,
         measuredPowerEvidence: resolveMeasuredPowerEvidence(activitySources),
       },
-      cache: {},
+      cache: resolved
+        ? {
+            resolvedFitnessContext: resolved,
+            profile,
+            fitnessMetrics,
+            loadRestingHeartRateDefault,
+            hrThreshold: {
+              maxHeartRate: profile?.maxHeartRate ?? null,
+              restingHeartRate: profile?.restingHeartRate ?? null,
+              lactateThresholdHeartRate: profile?.lthr ?? null,
+              lthr: profile?.lthr ?? null,
+            },
+            heartRateZoneSetting,
+            powerPreload: analyzeContext
+              ? {
+                  powerZones: powerZoneSetting ?? { zones: [] },
+                  context: analyzeContext,
+                }
+              : undefined,
+            pacePreload: analyzeContext
+              ? {
+                  paceZones: paceZoneSetting ?? { zones: [] },
+                  context: analyzeContext,
+                }
+              : undefined,
+          }
+        : {},
       outputs: {},
       errors: {},
     };
@@ -116,6 +232,7 @@ export class ActivityMetricsPipelineService {
         this.powerZonesTask,
         this.powerCogganBikeTask,
         this.trainingEffectTask,
+        this.vo2MaxTask,
         this.caloriesTask,
       ];
     }
@@ -144,6 +261,50 @@ export class ActivityMetricsPipelineService {
       this.powerCogganBikeTask,
       this.caloriesTask,
     ];
+  }
+
+  private tasksForHeavyDimensions(
+    dimensions: readonly ActivityMetricDimension[] | undefined,
+  ): MetricsTask[] {
+    const full = this.tasksFor(ActivityAnalyzeMode.HEAVY);
+    if (
+      !dimensions?.length ||
+      dimensions.includes('FULL') ||
+      dimensions.includes('PROFILE')
+    ) {
+      return full;
+    }
+    const needsRecords = dimensions.some((dimension) =>
+      ['HEART_RATE', 'POWER', 'PACE', 'VO2_MAX'].includes(dimension),
+    );
+    const keys = new Set([
+      ...(needsRecords ? ['recordsBootstrap'] : []),
+      'bindFitnessMetrics',
+      ...(dimensions.includes('HEART_RATE')
+        ? [
+            'heartRateBase',
+            'heartRateZones',
+            'heartRateTrimp',
+            'trainingEffect',
+            'vo2Max',
+            'calories',
+          ]
+        : []),
+      ...(dimensions.includes('VO2_MAX') ? ['vo2Max'] : []),
+      ...(dimensions.includes('POWER')
+        ? [
+            'calculatedPowerSummary',
+            'powerBase',
+            'powerZones',
+            'powerCogganBike',
+            'calories',
+          ]
+        : []),
+      ...(dimensions.includes('PACE')
+        ? ['paceBase', 'paceZones', 'paceGovss', 'swimScore']
+        : []),
+    ]);
+    return full.filter((task) => keys.has(task.key));
   }
 
   async runByMode(args: {
@@ -218,6 +379,87 @@ export class ActivityMetricsPipelineService {
       mode: ActivityAnalyzeMode.HEAVY,
     });
     return Object.values(result?.taskOutcomes ?? {});
+  }
+
+  async computeHeavy(args: {
+    activity: Activity;
+    userId: string;
+    resolvedContext: ResolvedFitnessContext;
+    dimensions?: readonly ActivityMetricDimension[];
+  }): Promise<ComputedMetricsRun> {
+    const context = await this.buildContext(
+      args.activity,
+      args.userId,
+      args.resolvedContext,
+    );
+    return this.orchestrator.computeStrict(
+      context,
+      this.tasksForHeavyDimensions(args.dimensions),
+    );
+  }
+
+  async commitComputedHeavy(
+    run: ComputedMetricsRun,
+    tx: Prisma.TransactionClient,
+  ) {
+    const activityId = run.context.inputs.activity.id;
+    const outputs = run.context.outputs;
+    const ran = new Set(run.tasks.map((task) => task.key));
+    if (ran.has('powerCogganBike') && !outputs.powerCoggan) {
+      await tx.activityCoggan.deleteMany({ where: { activityId } });
+    }
+    if (ran.has('powerCogganBike') && !outputs.powerBikeScore) {
+      await tx.activityBikeScore.deleteMany({ where: { activityId } });
+    }
+    if (ran.has('heartRateTrimp') && !outputs.heartRateTrimp) {
+      await tx.activityTrimp.deleteMany({ where: { activityId } });
+    }
+    if (ran.has('trainingEffect') && !outputs.trainingEffect) {
+      await tx.activityTrainingEffect.deleteMany({ where: { activityId } });
+    }
+    if (ran.has('vo2Max') && !outputs.vo2max) {
+      await tx.activityVO2Max.deleteMany({ where: { activityId } });
+    }
+    if (ran.has('paceGovss') && !outputs.paceGovss) {
+      await tx.activityGOVSS.deleteMany({ where: { activityId } });
+    }
+    if (ran.has('swimScore') && !outputs.swimScore) {
+      await tx.activitySwimScore.deleteMany({ where: { activityId } });
+    }
+    const unavailableZones = [
+      ran.has('heartRateZones') && !outputs.heartRateZones
+        ? ZoneType.HEART_RATE
+        : null,
+      ran.has('powerZones') && !outputs.powerZoneDistribution
+        ? ZoneType.POWER
+        : null,
+      ran.has('paceZones') && !outputs.paceZoneDistribution
+        ? ZoneType.PACE
+        : null,
+    ].filter((value): value is ZoneType => value != null);
+    if (unavailableZones.length > 0) {
+      await tx.activityZone.deleteMany({
+        where: { activityId, zoneType: { in: unavailableZones } },
+      });
+    }
+    return this.orchestrator.commitComputed(run, tx);
+  }
+
+  async commitResolvedSnapshot(args: {
+    activity: Activity;
+    userId: string;
+    resolvedContext: ResolvedFitnessContext;
+    tx: Prisma.TransactionClient;
+  }) {
+    const context = await this.buildContext(
+      args.activity,
+      args.userId,
+      args.resolvedContext,
+    );
+    const run = await this.orchestrator.computeStrict(context, [
+      this.bindFitnessMetricsTask,
+    ]);
+    return this.orchestrator.commitComputed(run, args.tx);
   }
 
   private async contextForActivity(activityId: number, userId: string) {

@@ -49,6 +49,7 @@ export function isFitnessMetricKey(metricKey: MetricKey) {
     metricKey === "pMax" ||
     metricKey === "tp" ||
     metricKey === "cs" ||
+    metricKey === "vo2Max" ||
     metricKey === "maxHr" ||
     metricKey === "restingHr" ||
     metricKey === "lthr"
@@ -70,6 +71,8 @@ export function getFitnessMetricType(
       return "TP";
     case "cs":
       return "CS";
+    case "vo2Max":
+      return "VO2_MAX";
     case "maxHr":
       return "MAX_HR";
     case "restingHr":

@@ -53,16 +53,16 @@ function buildHeatmapWeeks({
     explicitStart?.isValid() && explicitEnd?.isValid()
       ? explicitStart
       : mode === "year" && year
-      ? dayjs(`${year}-01-01`).startOf("day")
-      : today.subtract(Math.max((daysBack ?? 91) - 1, 0), "day");
+        ? dayjs(`${year}-01-01`).startOf("day")
+        : today.subtract(Math.max((daysBack ?? 91) - 1, 0), "day");
   const rangeEnd =
     explicitStart?.isValid() && explicitEnd?.isValid()
       ? explicitEnd
       : mode === "year" && year
-      ? dayjs(`${year}-12-31`).isAfter(today)
-        ? today
-        : dayjs(`${year}-12-31`).startOf("day")
-      : today;
+        ? dayjs(`${year}-12-31`).isAfter(today)
+          ? today
+          : dayjs(`${year}-12-31`).startOf("day")
+        : today;
   const gridStart = startOfWeek(rangeStart);
   const gridEnd = endOfWeek(rangeEnd);
   const weeks: HeatmapDay[][] = [];
@@ -98,18 +98,29 @@ function getLevel(count: number) {
   return 4;
 }
 
-function levelClass(level: number, variant: HeatmapVariant) {
+export function activityContributionLevelClass(
+  level: number,
+  variant: HeatmapVariant,
+) {
   if (variant === "showcase") {
-    if (level === 1) return "bg-emerald-200/90 dark:bg-emerald-900/70";
-    if (level === 2) return "bg-emerald-400/85 dark:bg-emerald-700/80";
-    if (level === 3) return "bg-emerald-600/85 dark:bg-emerald-500/85";
-    if (level === 4) return "bg-emerald-800/90 dark:bg-emerald-300";
-    return "bg-neutral-300/75 dark:bg-[#333631]";
+    if (level === 1)
+      return "bg-[hsl(var(--emerald-200)/0.9)] dark:bg-[hsl(var(--emerald-900)/0.7)]";
+    if (level === 2)
+      return "bg-[hsl(var(--emerald-400)/0.85)] dark:bg-[hsl(var(--emerald-700)/0.8)]";
+    if (level === 3)
+      return "bg-[hsl(var(--emerald-600)/0.85)] dark:bg-[hsl(var(--emerald-500)/0.85)]";
+    if (level === 4)
+      return "bg-[hsl(var(--emerald-800)/0.9)] dark:bg-[hsl(var(--emerald-300))]";
+    return "bg-[hsl(var(--neutral-300)/0.75)] dark:bg-[#333631]";
   }
-  if (level === 1) return "bg-sky-300/75 dark:bg-sky-900";
-  if (level === 2) return "bg-sky-500/75 dark:bg-sky-700";
-  if (level === 3) return "bg-sky-700/85 dark:bg-sky-500";
-  if (level === 4) return "bg-sky-950 dark:bg-sky-300";
+  if (level === 1)
+    return "bg-[hsl(var(--sky-300)/0.75)] dark:bg-[hsl(var(--sky-900))]";
+  if (level === 2)
+    return "bg-[hsl(var(--sky-500)/0.75)] dark:bg-[hsl(var(--sky-700))]";
+  if (level === 3)
+    return "bg-[hsl(var(--sky-700)/0.85)] dark:bg-[hsl(var(--sky-500))]";
+  if (level === 4)
+    return "bg-[hsl(var(--sky-950))] dark:bg-[hsl(var(--sky-300))]";
   return "bg-background ring-border/80 dark:bg-background/40";
 }
 
@@ -175,7 +186,7 @@ function ShowcaseHeatmap({
                     compact
                       ? "max-w-[10px] rounded-micro"
                       : "max-w-[13px] rounded-xs",
-                    levelClass(level, "showcase"),
+                    activityContributionLevelClass(level, "showcase"),
                     !day.inRange && "opacity-30",
                   )}
                 />
@@ -258,10 +269,7 @@ export function ActivityContributionHeatmap({
     () =>
       days.reduce((sum, day) => {
         const date = dayjs(day.date);
-        if (
-          date.isBefore(rangeStart, "day") ||
-          date.isAfter(rangeEnd, "day")
-        ) {
+        if (date.isBefore(rangeStart, "day") || date.isAfter(rangeEnd, "day")) {
           return sum;
         }
         return sum + day.count;
@@ -290,82 +298,82 @@ export function ActivityContributionHeatmap({
           t={t}
         />
       ) : (
-      <div
-        className={cn(
-          compact
-            ? "flex justify-center overflow-hidden"
-            : isShowcase
-              ? "overflow-x-auto overflow-y-hidden pb-1"
-            : "overflow-x-auto overflow-y-hidden pb-1",
-        )}
-      >
-        <table
-          role={compact ? "presentation" : "grid"}
-          aria-readonly="true"
-          className="min-w-max table-fixed border-separate"
-          style={{ borderSpacing: spacing }}
+        <div
+          className={cn(
+            compact
+              ? "flex justify-center overflow-hidden"
+              : isShowcase
+                ? "overflow-x-auto overflow-y-hidden pb-1"
+                : "overflow-x-auto overflow-y-hidden pb-1",
+          )}
         >
-          {!compact && !isShowcase ? (
-            <thead>
-              <tr style={{ height: 13 }}>
-                <td style={{ width: labelWidth }} />
-                {weeks.map((week, weekIndex) => (
-                  <td
-                    key={weekIndex}
-                    className="relative text-mobile-unit pc:text-[10px] leading-none text-muted-foreground"
-                    style={{ width: cellSize }}
-                  >
-                    {weekMonthLabel(week, locale)}
-                  </td>
-                ))}
-              </tr>
-            </thead>
-          ) : null}
-          <tbody>
-            {Array.from({ length: 7 }, (_, dayIndex) => (
-              <tr key={dayIndex} style={{ height: cellSize }}>
-                {!compact && !isShowcase ? (
-                  <td
-                    className="relative pr-2 text-right text-mobile-unit pc:text-[10px] leading-none text-muted-foreground"
-                    style={{ width: labelWidth }}
-                  >
-                    {weekdayLabel(dayIndex, locale)}
-                  </td>
-                ) : null}
-                {weeks.map((week, weekIndex) => {
-                  const day = week[dayIndex];
-                  const level = day.inRange ? getLevel(day.count) : 0;
-                  return (
+          <table
+            role={compact ? "presentation" : "grid"}
+            aria-readonly="true"
+            className="min-w-max table-fixed border-separate"
+            style={{ borderSpacing: spacing }}
+          >
+            {!compact && !isShowcase ? (
+              <thead>
+                <tr style={{ height: 13 }}>
+                  <td style={{ width: labelWidth }} />
+                  {weeks.map((week, weekIndex) => (
                     <td
-                      key={`${weekIndex}:${day.date}`}
-                      role={compact ? undefined : "gridcell"}
-                      aria-label={
-                        compact
-                          ? undefined
-                          : t("day", {
-                              date: day.date,
-                              count: day.inRange ? day.count : 0,
-                            })
-                      }
-                      title={t("day", {
-                        date: day.date,
-                        count: day.inRange ? day.count : 0,
-                      })}
-                      className={cn(
-                        "rounded-micro ring-1 ring-inset ring-black/5 dark:ring-white/5",
-                        isShowcase && "rounded-xs ring-0",
-                        levelClass(level, variant),
-                        !day.inRange && "opacity-30",
-                      )}
-                      style={{ width: cellSize, height: cellSize }}
-                    />
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                      key={weekIndex}
+                      className="relative text-mobile-unit pc:text-[10px] leading-none text-muted-foreground"
+                      style={{ width: cellSize }}
+                    >
+                      {weekMonthLabel(week, locale)}
+                    </td>
+                  ))}
+                </tr>
+              </thead>
+            ) : null}
+            <tbody>
+              {Array.from({ length: 7 }, (_, dayIndex) => (
+                <tr key={dayIndex} style={{ height: cellSize }}>
+                  {!compact && !isShowcase ? (
+                    <td
+                      className="relative pr-2 text-right text-mobile-unit pc:text-[10px] leading-none text-muted-foreground"
+                      style={{ width: labelWidth }}
+                    >
+                      {weekdayLabel(dayIndex, locale)}
+                    </td>
+                  ) : null}
+                  {weeks.map((week, weekIndex) => {
+                    const day = week[dayIndex];
+                    const level = day.inRange ? getLevel(day.count) : 0;
+                    return (
+                      <td
+                        key={`${weekIndex}:${day.date}`}
+                        role={compact ? undefined : "gridcell"}
+                        aria-label={
+                          compact
+                            ? undefined
+                            : t("day", {
+                                date: day.date,
+                                count: day.inRange ? day.count : 0,
+                              })
+                        }
+                        title={t("day", {
+                          date: day.date,
+                          count: day.inRange ? day.count : 0,
+                        })}
+                        className={cn(
+                          "rounded-micro ring-1 ring-inset ring-black/5 dark:ring-white/5",
+                          isShowcase && "rounded-xs ring-0",
+                          activityContributionLevelClass(level, variant),
+                          !day.inRange && "opacity-30",
+                        )}
+                        style={{ width: cellSize, height: cellSize }}
+                      />
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
       {!compact && !isShowcase ? (
         <div className="mt-2 flex items-center justify-end gap-1 text-mobile-unit pc:text-[10px] text-muted-foreground">
@@ -375,7 +383,7 @@ export function ActivityContributionHeatmap({
               key={level}
               className={cn(
                 "size-3 rounded-xs ring-1 ring-inset ring-black/5 dark:ring-white/5",
-                levelClass(level, variant),
+                activityContributionLevelClass(level, variant),
               )}
             />
           ))}
