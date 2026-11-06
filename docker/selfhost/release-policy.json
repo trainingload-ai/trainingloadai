@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.16",
+  "releaseVersion": "1.1.17",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [

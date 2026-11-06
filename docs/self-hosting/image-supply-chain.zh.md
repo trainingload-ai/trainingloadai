@@ -134,7 +134,7 @@ Acceptance/RC 解包器还会把 tar 的普通文件展开大小映射回同一�
 
 ```bash
 IMAGE=ghcr.io/OWNER/REPOSITORY/trainingload-server
-VERSION=1.1.16
+VERSION=1.1.17
 DIGEST=sha256:REPLACE_WITH_RELEASE_MANIFEST_DIGEST
 SOURCE=https://github.com/OWNER/REPOSITORY
 

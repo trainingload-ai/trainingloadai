@@ -1,18 +1,18 @@
 services:
   migrate:
-    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-migrate:${SELF_HOST_VERSION:-1.1.16}
+    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-migrate:${SELF_HOST_VERSION:-1.1.17}
     pull_policy: build
     build:
       context: .
       dockerfile: packages/prisma/Dockerfile
       args: &common-build-args
-        RELEASE_VERSION: ${SELF_HOST_VERSION:-1.1.16}
+        RELEASE_VERSION: ${SELF_HOST_VERSION:-1.1.17}
         SOURCE_REVISION: ${SELF_HOST_SOURCE_REVISION:-local}
         SOURCE_URL: ${SELF_HOST_SOURCE_URL:-local://trainingloadai}
         SELF_HOST_SCHEMA_VERSION: "1"
 
   server:
-    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-server:${SELF_HOST_VERSION:-1.1.16}
+    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-server:${SELF_HOST_VERSION:-1.1.17}
     pull_policy: build
     build:
       context: .
@@ -20,13 +20,13 @@ services:
       args: *common-build-args
 
   client:
-    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-client:${SELF_HOST_VERSION:-1.1.16}
+    image: ${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-client:${SELF_HOST_VERSION:-1.1.17}
     pull_policy: build
     build:
       context: .
       dockerfile: apps/client/Dockerfile
       args:
-        RELEASE_VERSION: ${SELF_HOST_VERSION:-1.1.16}
+        RELEASE_VERSION: ${SELF_HOST_VERSION:-1.1.17}
         SOURCE_REVISION: ${SELF_HOST_SOURCE_REVISION:-local}
         SOURCE_URL: ${SELF_HOST_SOURCE_URL:-local://trainingloadai}
         SELF_HOST_SCHEMA_VERSION: "1"
