@@ -1131,42 +1131,42 @@
     },
     {
       "file": "scripts/selfhost/management-core.mjs",
-      "line": 7044,
+      "line": 7103,
       "owner": "scripts",
       "classification": "runtime-write",
       "expression": "walk(\"/data/uploads\",0);process.stdout.write(\"SELF_HOST_UPLOAD_BYTES=\"+bytes);`,"
     },
     {
       "file": "scripts/selfhost/management-core.mjs",
-      "line": 7328,
+      "line": 7387,
       "owner": "scripts",
       "classification": "runtime-write",
       "expression": "await fs.unlink(markerPath);"
     },
     {
       "file": "scripts/selfhost/management-core.mjs",
-      "line": 7531,
+      "line": 7590,
       "owner": "scripts",
       "classification": "runtime-write",
       "expression": "await fs.unlink(paths.lock);"
     },
     {
       "file": "scripts/selfhost/management-core.mjs",
-      "line": 7637,
+      "line": 7696,
       "owner": "scripts",
       "classification": "runtime-write",
       "expression": "await lockHandle.writeFile(`${context.operationId}\\n`, \"utf8\");"
     },
     {
       "file": "scripts/selfhost/management-core.mjs",
-      "line": 7642,
+      "line": 7701,
       "owner": "scripts",
       "classification": "ephemeral",
       "expression": "await fs.mkdir(paths.staging, { mode: 0o700 });"
     },
     {
       "file": "scripts/selfhost/management-core.mjs",
-      "line": 7707,
+      "line": 7766,
       "owner": "scripts",
       "classification": "ephemeral",
       "expression": "await fs.rename(paths.staging, paths.destination);"

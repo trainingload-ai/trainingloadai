@@ -5323,7 +5323,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "trainingload-selfhost-client:1.1.17",
+      "exampleDefault": "trainingload-selfhost-client:1.1.18",
       "owners": [
         "compose.yml"
       ],
@@ -5549,7 +5549,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "trainingload-selfhost-migrate:1.1.17",
+      "exampleDefault": "trainingload-selfhost-migrate:1.1.18",
       "owners": [
         "compose.yml"
       ],
@@ -5729,7 +5729,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "trainingload-selfhost-server:1.1.17",
+      "exampleDefault": "trainingload-selfhost-server:1.1.18",
       "owners": [
         "compose.yml"
       ],
@@ -5850,7 +5850,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "1.1.17",
+      "exampleDefault": "1.1.18",
       "owners": [
         "compose.build.yml",
         "compose.yml"

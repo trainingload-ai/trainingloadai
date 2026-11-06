@@ -28,6 +28,10 @@ Use the declared package exports. Keep the single-owner Self-host boundary expli
 日常值班、故障和支持交接先阅读 `SELF_HOST_OPERATIONS.md`。RC evidence package 是审核容器，不是可直接运行的实例目录；
 部署其中的 release archive 仍须按 `SELF_HOSTING.md` 先验证 RC 外层、release archive 外层和 release bundle 内层三层证据。
 
+已签名 `1.1.15` / `1.1.17` 的首次升级若因缺失 release-state 触发已知源 CLI 元数据缺陷，只能按 `UPGRADE.md`
+使用 `1.1.18` 或后续已验签管理包的 `init --dry-run` / `init` 规范化缺失状态。该入口必须重验旧包签名、版本与三张镜像，
+不得覆盖已有状态或绕过 lifecycle marker；完成后重新从源 CLI 升级 dry-run 开始，绝不手写状态或跳过失败预检。
+
 - 不要自行拼接 `docker compose` 命令或复制状态判断；
 - `init`、`start`、`stop` 等变更操作先执行同参数的 `--dry-run`；
 - 首次部署只接受 exact-version bundle；必须验证 `checksums.txt`、Cosign identity 和 `checksums.bundle.json`，不得使用
