@@ -3,8 +3,12 @@
   "releaseVersion": "1.1.16",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
-    "supportedSourceVersions": ["1.1.15"],
-    "applicationRollbackTo": ["1.1.15"],
+    "supportedSourceVersions": [
+      "1.1.15"
+    ],
+    "applicationRollbackTo": [
+      "1.1.15"
+    ],
     "backupRequired": true
   },
   "database": {
@@ -72,6 +76,14 @@
         "releaseVersion": "1.1.16"
       },
       "0016_chronological_fitness_replay": {
+        "phase": "expand",
+        "releaseVersion": "1.1.16"
+      },
+      "0017_activity_data_migration": {
+        "phase": "expand",
+        "releaseVersion": "1.1.16"
+      },
+      "0018_activity_sport_catalog": {
         "phase": "expand",
         "releaseVersion": "1.1.16"
       }
