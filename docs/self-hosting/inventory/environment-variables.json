@@ -2255,11 +2255,11 @@
         },
         {
           "file": "apps/server/src/importing/activity-data-migration.command.ts",
-          "line": 26
+          "line": 36
         },
         {
           "file": "apps/server/src/importing/activity-data-migration.service.ts",
-          "line": 105
+          "line": 109
         },
         {
           "file": "packages/prisma/core/runner/core-migration-runner.mjs",
