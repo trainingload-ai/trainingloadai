@@ -2266,6 +2266,7 @@ async function readReleaseMetadata(instanceDirectory) {
               : null,
           images: payload.images
             ? {
+                migrate: payload.images.migrate?.reference,
                 server: payload.images.server?.reference,
                 client: payload.images.client?.reference,
               }

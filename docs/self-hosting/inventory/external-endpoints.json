@@ -144,7 +144,7 @@
       "references": [
         {
           "file": "scripts/selfhost/management-core.mjs",
-          "line": 4459
+          "line": 4460
         }
       ],
       "capability": "product-internal",

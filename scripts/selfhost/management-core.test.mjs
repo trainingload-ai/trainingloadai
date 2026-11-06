@@ -16,6 +16,7 @@ import { afterEach, test } from "node:test";
 import Ajv2020 from "ajv/dist/2020.js";
 import YAML from "yaml";
 import packageManifest from "../../package.json" with { type: "json" };
+import previousReleaseManifest from "./fixtures/release-manifest-v1.1.15.json" with { type: "json" };
 import { verifyBackupBundle } from "./backup-artifact.mjs";
 import {
   defaultStreamRunner,
@@ -338,10 +339,13 @@ test("host platform policy matches the four release matrix targets", () => {
   }
 });
 
-async function useDigestBoundSourceImages(directory) {
+async function useDigestBoundSourceImages(
+  directory,
+  references = sourceImageReferences,
+) {
   const path = resolve(directory, ".env.selfhost");
   let text = await fs.readFile(path, "utf8");
-  for (const [name, reference] of Object.entries(sourceImageReferences)) {
+  for (const [name, reference] of Object.entries(references)) {
     text = text.replace(
       new RegExp(`^SELF_HOST_${name.toUpperCase()}_IMAGE=.*$`, "m"),
       `SELF_HOST_${name.toUpperCase()}_IMAGE=${reference}`,
@@ -4530,6 +4534,76 @@ test("restore re-arms its blocking marker when durable completion fails", async 
     "SELF_HOST_LIFECYCLE_MARKER_CLEAR_FAILED",
   );
 });
+
+for (const mismatch of [false, true]) {
+  test(
+    mismatch
+      ? "first upgrade rejects a mismatched migration image from the release manifest"
+      : "first upgrade from release manifest includes the migration image without release state",
+    async () => {
+      const directory = await createPreviousBundle();
+      await executeManagementCommand(
+        options("init", directory),
+        dependencies(),
+      );
+      const references = Object.fromEntries(
+        Object.entries(previousReleaseManifest.images).map(([role, image]) => [
+          role,
+          image.reference,
+        ]),
+      );
+      if (mismatch) {
+        references.migrate = `example/tampered-migrate@sha256:${"f".repeat(64)}`;
+      }
+      await useDigestBoundSourceImages(directory, references);
+      await fs.writeFile(
+        resolve(directory, "release-manifest.json"),
+        `${JSON.stringify(previousReleaseManifest, null, 2)}\n`,
+      );
+      await fs.unlink(resolve(directory, "package.json"));
+      const statePath = resolve(directory, ".selfhost/current-release.json");
+      await assert.rejects(fs.stat(statePath), { code: "ENOENT" });
+
+      const target = upgradeReleaseManifest();
+      target.configSchemaVersion = previousReleaseManifest.configSchemaVersion;
+      target.composeSchemaVersion =
+        previousReleaseManifest.composeSchemaVersion;
+      target.database.schemaEpoch =
+        previousReleaseManifest.database.schemaEpoch;
+      const docker = lifecycleDocker({ dataRoot: resolve(directory, "data") });
+      const result = await executeManagementCommand(
+        options("upgrade", directory, {
+          releasePath: "/verified/release-evidence",
+          dryRun: true,
+        }),
+        dependencies({
+          runner: docker.runner,
+          streamRunner: docker.streamRunner,
+          statfs: abundantDisk,
+          releaseVerifier: async () => ({
+            manifest: target,
+            signatureVerified: true,
+          }),
+          randomUUID: () => "86900000-0000-4000-8000-000000000025",
+        }),
+      );
+      assert.equal(result.ok, !mismatch, JSON.stringify(result));
+      if (mismatch) {
+        assert.equal(result.error.code, "SELF_HOST_UPGRADE_STATE_INVALID");
+      } else {
+        assert.equal(result.status, "planned");
+      }
+      assert.equal(
+        docker.calls.some(
+          (args) =>
+            args[0] === "pull" || args.includes("stop") || args.includes("up"),
+        ),
+        false,
+      );
+      await assert.rejects(fs.stat(statePath), { code: "ENOENT" });
+    },
+  );
+}
 
 test("upgrade dry-run, verified upgrade, and application-only rollback share one lifecycle", async () => {
   const directory = await createPreviousBundle();
