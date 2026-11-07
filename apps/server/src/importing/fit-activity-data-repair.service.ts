@@ -437,6 +437,9 @@ export class FitActivityDataRepairService {
           result.firstCandidateId ??= sourceObject.id;
           result.lastCandidateId = sourceObject.id;
           if (!options.all && result.candidates.length >= options.limit) {
+            // The candidate limit can end a full page before the loop's normal
+            // pagination check. Require another page, even if it proves empty.
+            result.hasMore = true;
             break scan;
           }
         } catch {

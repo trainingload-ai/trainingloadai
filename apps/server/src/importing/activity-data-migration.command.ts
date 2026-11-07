@@ -10,6 +10,16 @@ async function main() {
   const action = option('action') ?? 'status';
   const runKey = option('run-key');
   if (!runKey) throw new Error('ACTIVITY_MIGRATION_RUN_KEY_REQUIRED');
+  const deferredIds = option('deferred-migration-ids');
+  const deferralReason = option('deferral-reason');
+  if (
+    (deferredIds !== undefined || deferralReason !== undefined) &&
+    (!['advance', 'run'].includes(action) || !deferredIds || !deferralReason)
+  )
+    throw new Error('ACTIVITY_MIGRATION_DEFERRAL_INVALID');
+  const deferral = deferredIds
+    ? { migrationIds: deferredIds.split(','), reason: deferralReason! }
+    : undefined;
   if (!['status', 'audit-sports'].includes(action) && !apply)
     throw new Error('ACTIVITY_MIGRATION_APPLY_REQUIRED');
   const app = await NestFactory.createApplicationContext(
@@ -51,7 +61,7 @@ async function main() {
       const evidence = await readVerifiedMigrationBackup(path);
       await service.prepare(runKey, version, users, evidence);
     } else if (action === 'advance') {
-      await service.advance(runKey);
+      await service.advance(runKey, deferral);
     } else if (action === 'run') {
       const seconds = Number(option('timeout-seconds') ?? 3600);
       if (!Number.isFinite(seconds) || seconds <= 0)
@@ -59,7 +69,7 @@ async function main() {
       const deadline = Date.now() + seconds * 1000;
       let previous = '';
       while (Date.now() < deadline) {
-        const progress = await service.advance(runKey);
+        const progress = await service.advance(runKey, deferral);
         const rendered = JSON.stringify(progress);
         if (rendered !== previous) console.log(rendered);
         previous = rendered;

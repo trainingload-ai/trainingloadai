@@ -49,6 +49,10 @@ export type BackupEvidence = {
   purpose: 'production' | 'local-validation';
   databaseIdentity: string;
 };
+export type MigrationDeferral = {
+  migrationIds: string[];
+  reason: string;
+};
 
 export function assertMigrationBackup(
   evidence: BackupEvidence,
@@ -261,7 +265,18 @@ export class ActivityDataMigrationService {
     };
   }
 
-  private async start(runKey: string) {
+  private async start(runKey: string, deferral?: MigrationDeferral) {
+    const deferredIds = deferral?.migrationIds ?? [];
+    if (
+      deferral &&
+      (!deferredIds.length ||
+        deferredIds.length > 100 ||
+        new Set(deferredIds).size !== deferredIds.length ||
+        deferredIds.some((id) => !/^[A-Za-z0-9_-]{1,100}$/.test(id)) ||
+        !deferral.reason?.trim() ||
+        deferral.reason.length > 500)
+    )
+      throw new Error('ACTIVITY_MIGRATION_DEFERRAL_INVALID');
     return this.prisma.$transaction(
       async (tx) => {
         await this.lock(tx);
@@ -272,14 +287,101 @@ export class ActivityDataMigrationService {
         if (!row) return null;
         if (row.status === 'FAILED')
           throw new Error('ACTIVITY_MIGRATION_PREVIOUS_USER_FAILED');
-        const other = await tx.activityDataMigration.findFirst({
+        const others = await tx.activityDataMigration.findMany({
           where: {
             id: { not: row.id },
             status: { in: ['MIGRATING', 'VERIFYING', 'FAILED'] },
           },
-          select: { id: true },
         });
-        if (other) throw new Error('ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE');
+        if (
+          others.some(
+            (other) =>
+              other.status !== 'FAILED' ||
+              other.userId === row.userId ||
+              !deferredIds.includes(other.id),
+          )
+        )
+          throw new Error('ACTIVITY_MIGRATION_ANOTHER_RUN_ACTIVE');
+        if (deferredIds.some((id) => !others.some((other) => other.id === id)))
+          throw new Error('ACTIVITY_MIGRATION_DEFERRAL_INVALID');
+        for (const other of others) {
+          // A failed migration can still have automatically retrying children.
+          // Deferral never cancels those jobs or releases recovery objects.
+          const batchIds = Array.isArray(other.importBatchIds)
+            ? (other.importBatchIds as string[])
+            : [];
+          const lease = await tx.activityAnalysisLease.findFirst({
+            where: { userId: other.userId, leaseExpiresAt: { gt: new Date() } },
+          });
+          const item = batchIds.length
+            ? await this.jobs.itemJobs(tx).findFirst({
+                where: {
+                  batchJobId: { in: batchIds },
+                  status: { notIn: ['DONE', 'SKIPPED', 'DEAD', 'CANCELLED'] },
+                },
+              })
+            : null;
+          const post = batchIds.length
+            ? await this.jobs.postProcessJobs(tx).findFirst({
+                where: {
+                  batchJobId: { in: batchIds },
+                  status: { notIn: ['COMPLETED', 'DEAD'] },
+                },
+              })
+            : null;
+          const replay = other.recomputeJobId
+            ? await tx.activityRecomputeJob.findUnique({
+                where: { id: other.recomputeJobId },
+                select: { status: true },
+              })
+            : null;
+          if (
+            lease ||
+            item ||
+            post ||
+            (other.recomputeJobId &&
+              (!replay || !['COMPLETED', 'DEAD'].includes(replay.status)))
+          )
+            throw new Error('ACTIVITY_MIGRATION_DEFERRED_USER_BUSY');
+        }
+        if (others.length) {
+          const before = row.beforeManifest as Record<string, any> | null;
+          const audit = {
+            reason: deferral!.reason.trim(),
+            migrations: others
+              .map((other) => ({
+                id: other.id,
+                userId: other.userId,
+                runKey: other.runKey,
+                phase: other.phase,
+                errorCode: other.errorCode,
+                checkpointFingerprint: hash({
+                  rawCursor: other.rawCursor,
+                  importBatchIds: other.importBatchIds,
+                  recomputeJobId: other.recomputeJobId,
+                  beforeManifest: other.beforeManifest,
+                }),
+              }))
+              .sort((a, b) => a.id.localeCompare(b.id)),
+          };
+          const history = before?.deferredFailureAudits ?? [];
+          if (
+            !history.length ||
+            hash(history.at(-1).decision) !== hash(audit)
+          ) {
+            row.beforeManifest = json({
+              ...before,
+              deferredFailureAudits: [
+                ...history,
+                { at: new Date().toISOString(), decision: audit },
+              ],
+            });
+            await tx.activityDataMigration.update({
+              where: { id: row.id },
+              data: { beforeManifest: row.beforeManifest },
+            });
+          }
+        }
         if (row.status !== 'PENDING') return row;
         await this.lockUser(tx, row.userId);
         if (
@@ -289,7 +391,10 @@ export class ActivityDataMigrationService {
         ) {
           throw new Error('ACTIVITY_MIGRATION_USER_ANALYSIS_BUSY');
         }
-        const before = await this.manifest(tx, row.userId);
+        const before = {
+          ...((row.beforeManifest as Record<string, any> | null) ?? {}),
+          ...(await this.manifest(tx, row.userId)),
+        };
         const objects = await this.jobs.sourceObjects(tx).findMany({
           where: { userId: row.userId },
           select: { fileKey: true, rawStorageKey: true },
@@ -329,8 +434,8 @@ export class ActivityDataMigrationService {
   }
 
   /** One bounded step; the CLI holds a session advisory lock across scan + step. */
-  async advance(runKey: string) {
-    const row = await this.start(runKey);
+  async advance(runKey: string, deferral?: MigrationDeferral) {
+    const row = await this.start(runKey, deferral);
     if (!row) return { completed: true };
     try {
       if (row.phase === 'RAW_SCAN') {
