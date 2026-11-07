@@ -25,6 +25,7 @@
     "src/main.self-host.ts",
     "src/analyze/repair-activity-fitness-timeline.command.ts",
     "src/importing/fit-release-corpus.command.ts",
+    "src/importing/activity-data-migration.command.ts",
     "src/self-host/self-host-owner-bootstrap.command.ts",
     "src/self-host/self-host-owner-recovery.command.ts"
   ],

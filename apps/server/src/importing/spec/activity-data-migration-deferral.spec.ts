@@ -2,6 +2,7 @@ jest.mock('../unknown-activity-sport-repair', () => ({
   applyUnknownActivitySportRepairs: async () => ({ repaired: 0 }),
 }));
 import { ActivityDataMigrationService } from '../activity-data-migration.service';
+import { ImportItemJobStatus } from '@prisma/client';
 
 function harness() {
   const row: any = {
@@ -82,6 +83,16 @@ const decision = {
 };
 
 describe('explicit per-run migration deferral', () => {
+  it('queries only supported terminal import item states before deferring', async () => {
+    const h = harness();
+    h.failed.importBatchIds = ['batch'];
+    await h.start(decision);
+    const excluded = h.items.findFirst.mock.calls[0][0].where.status.notIn;
+    expect(excluded).toEqual(['DONE', 'SKIPPED', 'DEAD']);
+    for (const status of excluded)
+      expect(Object.values(ImportItemJobStatus)).toContain(status);
+  });
+
   it('preserves the deferral audit while initializing the current protection baseline', async () => {
     const h = harness();
     h.row.status = 'PENDING';

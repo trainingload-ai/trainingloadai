@@ -317,7 +317,7 @@ export class ActivityDataMigrationService {
             ? await this.jobs.itemJobs(tx).findFirst({
                 where: {
                   batchJobId: { in: batchIds },
-                  status: { notIn: ['DONE', 'SKIPPED', 'DEAD', 'CANCELLED'] },
+                  status: { notIn: ['DONE', 'SKIPPED', 'DEAD'] },
                 },
               })
             : null;
