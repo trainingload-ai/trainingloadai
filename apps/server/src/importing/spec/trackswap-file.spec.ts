@@ -162,13 +162,26 @@ describe('TrackSwap server file boundary', () => {
     expect(report.outputRecords).toBe(1);
   });
 
-  it('keeps indoor TCX records and reports metrics that fail the round-trip check', async () => {
-    const { report } = await transcodeTrackFile(fitFixture('indoor'), 'tcx');
+  it('preserves indoor TCX heart rate and reports unsupported cadence', async () => {
+    const input = fitFixture('indoor');
+    const source = await decodeTrackFile(input);
+    const { content, report } = await transcodeTrackFile(input, 'tcx');
+    const decoded = await decodeTrackFile(content, { filename: 'indoor.tcx' });
+    const heartRates = (activity: typeof source.activity) =>
+      (activity.activities ?? []).flatMap((session) =>
+        (session.laps ?? []).flatMap((lap) =>
+          (lap.records ?? []).map((record) => record.heartRate),
+        ),
+      );
+    const expectedHeartRates = heartRates(source.activity);
+    expect(expectedHeartRates).toHaveLength(2);
+    expect(expectedHeartRates.every((value) => Number(value) > 0)).toBe(true);
+    expect(heartRates(decoded.activity)).toEqual(expectedHeartRates);
     expect(report.outputRecords).toBe(2);
     expect(report.warnings).toContainEqual(
       expect.objectContaining({
         code: 'METRICS_NOT_PRESERVED',
-        metrics: expect.arrayContaining(['heartRate', 'cadence']),
+        metrics: ['cadence'],
       }),
     );
   });
