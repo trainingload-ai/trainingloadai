@@ -141,7 +141,7 @@ Resolved context 包含：
 
 ### UsersModule
 
-`applyTimelineProjectionBatch` 原子归档、删除和写入有效 AUTO。该入口不会发送 `FITNESS_METRIC_CHANGED`，防止 Projector 递归触发自身。
+`applyTimelineProjectionBatch` 原子归档、删除和写入有效 AUTO。写入前使用与其它体能指标相同的 `validateFitnessMetricCandidate`（含 CP 行 `value2` 所携带的 W′）。超界或相对关系不成立的 AUTO/ESTIMATED 投影只记日志并跳过，不改写数值，也不成为生效行。该入口不会发送 `FITNESS_METRIC_CHANGED`，防止 Projector 递归触发自身。功率模型在 `FitnessTimelineObservationService.powerModel` 出口同样整组拒绝不自洽结果。
 
 ## 6. Replay 事务与并发
 
