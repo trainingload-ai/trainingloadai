@@ -67,6 +67,11 @@ import {
   type FitnessMetricValidationContext,
   validateFitnessMetricCandidate,
 } from './fitness-metric-validator';
+import {
+  derivedPowerMetricNeedsEvidence,
+  hasPowerPeakEvidence,
+  isDerivedPowerMetric,
+} from './power-metric-evidence';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
 import { normalizeIanaTimezone } from '@/timezone/user-timezone-initializer.service';
 import { normalizeZoneSettingRows } from './zone-setting-order';
@@ -1166,7 +1171,9 @@ export class UserService {
           estimated.value2 ?? undefined,
           MetricSource.AUTO,
           recordedAt,
-          undefined,
+          estimated.originPayload == null
+            ? undefined
+            : { originPayload: estimated.originPayload },
           true,
         );
       }),
@@ -1260,8 +1267,18 @@ export class UserService {
     sport: SportType,
     candidates: AutoFitnessMetricCandidate[],
     recordedAt: Date = dayjs().endOf('day').toDate(),
+    origin?: FitnessMetricPersistOrigin,
   ) {
     if (candidates.length === 0) return [];
+    if (
+      candidates.some((candidate) => isDerivedPowerMetric(candidate.type)) &&
+      !hasPowerPeakEvidence(origin?.originPayload)
+    ) {
+      this.logger.warn(
+        `[体能指标校验] 拒绝缺少功率曲线证据的自动写入：用户ID=${userId}, 运动=${sport}`,
+      );
+      return [];
+    }
     const changedMetrics: UserFitnessMetric[] = [];
     const result = await this.serializeFitnessWrite(userId, async () => {
       const autoUpdateEnabled = await this.getAutoUpdateEnabledMap(userId);
@@ -1299,6 +1316,7 @@ export class UserService {
                 sport,
                 source: MetricSource.AUTO,
                 recordedAt,
+                origin,
                 autoUpdateEnabled:
                   autoUpdateEnabled.get(candidate.type) ?? true,
               },
@@ -1449,6 +1467,15 @@ export class UserService {
       for (const changed of changedMetrics)
         this.triggerRecomputeByFitnessMetricChange(changed);
       return result;
+    }
+    if (
+      derivedPowerMetricNeedsEvidence(source, type) &&
+      !hasPowerPeakEvidence(origin?.originPayload)
+    ) {
+      this.logger.warn(
+        `[体能指标校验] 拒绝缺少功率曲线证据的写入：用户ID=${userId}, 类型=${type}, 来源=${source}, 运动=${sport}`,
+      );
+      return null;
     }
     const originData = this.buildOriginWriteData(source, origin);
     // 先根据 recordedAt 来获取当前最新的

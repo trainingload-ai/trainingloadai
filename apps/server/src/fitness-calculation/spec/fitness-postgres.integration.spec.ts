@@ -289,6 +289,12 @@ suite('fitness PostgreSQL transactions (isolated database only)', () => {
             { type: 'W_PRIME', value: 84_655 },
           ],
           new Date('2026-10-13T00:00:00.000Z'),
+          {
+            originPayload: {
+              method: 'CP_MODEL',
+              peaks: [{ seconds: 1200, watts: 330, activityId: 1 }],
+            },
+          },
         ),
       ).rejects.toThrow('simulated power model publication failure');
       expect(
