@@ -61,7 +61,6 @@ type HomeFaq = {
 };
 
 type HeroVisibleCopy = {
-  eyebrow: string;
   subtitleBefore: string;
   subtitleHighlight: string;
   subtitleAfter: string;
@@ -304,38 +303,19 @@ export default async function HomePage({
       <section className="relative overflow-hidden bg-card px-4 pb-12 pt-10 text-foreground md:px-6 md:pb-16 md:pt-14">
         <div className="relative mx-auto max-w-7xl">
           <div className="mx-auto max-w-5xl text-center">
-            <Link
-              href={`${prefix}/plan`}
-              className="inline-flex rounded-full bg-brand px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-brand-foreground transition-colors hover:bg-brand/85"
-            >
-              {heroVisible.eyebrow}
-            </Link>
-
-            <h1 className="font-display mx-auto mt-8 max-w-4xl text-balance text-[2.75rem] font-bold leading-[1.02] tracking-[-0.035em] text-foreground md:text-[3.75rem] lg:text-[4.25rem]">
-              <span className="flex flex-col items-center gap-1 md:gap-2">
-                <span>{heroTitleLines[0]}</span>
-                <span className="mx-auto inline-block bg-brand px-2 text-brand-foreground">
-                  {heroTitleLines[1]}
+            <h1 className="font-display mx-auto max-w-4xl text-balance text-[2.75rem] font-bold leading-[1.05] tracking-[-0.035em] text-foreground md:text-[3.75rem] lg:text-[4.25rem]">
+              {heroTitleLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
                 </span>
-              </span>
+              ))}
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-7 text-muted-foreground md:text-base">
+            <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-muted-foreground md:text-base">
               {heroVisible.subtitleBefore}
-              <span className="font-semibold text-brand">
-                {heroVisible.subtitleHighlight}
-              </span>
+              {heroVisible.subtitleHighlight}
               {heroVisible.subtitleAfter}
             </p>
-            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <TrackedLink
-                href={`${prefix}/plan`}
-                eventName="home_plan_hub_click"
-                eventProperties={{ placement: "hero" }}
-                className="group inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-control border border-input bg-card px-5 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px sm:w-auto"
-              >
-                {heroVisible.planCta}
-                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
-              </TrackedLink>
+            <div className="mt-7 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-6">
               <Link href={appUrl} className="w-full sm:w-auto">
                 <Button
                   variant="brand"
@@ -345,26 +325,34 @@ export default async function HomePage({
                   <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
                 </Button>
               </Link>
+              <TrackedLink
+                href={`${prefix}/plan`}
+                eventName="home_plan_hub_click"
+                eventProperties={{ placement: "hero" }}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-control px-3 text-sm font-medium text-foreground underline-offset-4 transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:w-auto"
+              >
+                {heroVisible.planCta}
+              </TrackedLink>
             </div>
 
-            <p className="mt-5 text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-muted-foreground">
               {heroVisible.iphoneSupport}
             </p>
           </div>
 
-          <div className="mx-auto mt-10 w-full max-w-5xl border-t border-border/80 pt-7">
-            <HomeHeroWorksWith
-              label={heroVisible.worksWith.label}
-              moreLabel={heroVisible.worksWith.more}
-            />
-          </div>
-
-          <div className="relative mx-auto mt-10 max-w-6xl md:mt-12">
+          <div className="relative mx-auto mt-8 max-w-6xl md:mt-10">
             <HomeHeroDemoPreview
               key={demoUrl}
               copy={heroVisible.demoPreview}
               demoUrl={demoUrl}
               lang={lang}
+            />
+          </div>
+
+          <div className="mx-auto mt-8 w-full max-w-5xl md:mt-10">
+            <HomeHeroWorksWith
+              label={heroVisible.worksWith.label}
+              moreLabel={heroVisible.worksWith.more}
             />
           </div>
         </div>
@@ -406,8 +394,7 @@ export default async function HomePage({
       <section id="faq" className="marketing-section w-full bg-background">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(240px,0.34fr)_1fr] lg:items-start lg:gap-10">
           <div className="lg:sticky lg:top-24">
-            <div className="marketing-eyebrow">FAQ</div>
-            <h2 className="marketing-title">{t("faq.title")}</h2>
+            <h2 className="marketing-title mt-0">{t("faq.title")}</h2>
             <p className="marketing-copy">{t("faq.subtitle")}</p>
           </div>
 

@@ -461,10 +461,10 @@ export function HomeHeroWorksWith({
 }) {
   return (
     <div className="w-full">
-      <div className="text-center text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="text-center text-sm font-medium text-muted-foreground">
         {label}
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-6 opacity-80">
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-4 opacity-80">
         {livePlatforms.map((platform) => (
           <IntegrationLogo
             key={platform.id}
@@ -479,7 +479,7 @@ export function HomeHeroWorksWith({
             )}
           />
         ))}
-        <span className="text-base text-muted-foreground">
+        <span className="whitespace-nowrap text-sm text-muted-foreground">
           {moreLabel}
         </span>
       </div>

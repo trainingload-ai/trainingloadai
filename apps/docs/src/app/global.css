@@ -125,7 +125,7 @@
   }
 
   .marketing-eyebrow {
-    @apply text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground;
+    @apply text-sm font-medium normal-case tracking-normal text-muted-foreground;
   }
 
   .marketing-title {
