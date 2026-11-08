@@ -296,7 +296,10 @@ describe('FitnessTimelineObservationService', () => {
     );
   });
 
-  function powerPeaks(points: Array<{ seconds: number; value: number }>) {
+  function powerPeaks(
+    points: Array<{ seconds: number; value: number }>,
+    coverage: number | 'unknown' = 1,
+  ) {
     return points.map((point) => ({
       activityId: 7,
       sport: SportType.RUN,
@@ -308,17 +311,21 @@ describe('FitnessTimelineObservationService', () => {
         sportType: SportType.RUN,
         sportDefinitionCode: 'RUNNING',
         startTime: new Date('2026-01-01T10:00:00.000Z'),
-        activitySources: [],
+        activitySources:
+          coverage === 'unknown'
+            ? []
+            : [{ metadata: { datasetQuality: { powerCoverage: coverage } } }],
       },
     }));
   }
 
   async function observePower(
     points: Array<{ seconds: number; value: number }>,
+    coverage: number | 'unknown' = 1,
   ) {
     const { service, activityPeakMetric } = fixture();
     activityPeakMetric.findMany.mockResolvedValueOnce(
-      powerPeaks(points) as never,
+      powerPeaks(points, coverage) as never,
     );
     const prepared = await service.prepare('user-1', [7]);
     const observations = await service.calculate({
@@ -343,6 +350,18 @@ describe('FitnessTimelineObservationService', () => {
     { seconds: 1200, value: 330 },
     { seconds: 3600, value: 280 },
   ];
+
+  it.each([
+    ['unknown', 'unknown'],
+    ['insufficient', 0],
+  ] as const)(
+    'does not emit a power model when measured power is %s',
+    async (_label, coverage) => {
+      const observations = await observePower(modeledCurve, coverage);
+
+      expect(observations).toEqual([]);
+    },
+  );
 
   it('publishes an in-range power model', async () => {
     const observations = await observePower(modeledCurve);

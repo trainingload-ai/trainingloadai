@@ -1,4 +1,8 @@
 import { isPrismaSerializableConflict } from '@/prisma/prisma-transaction-errors';
+import {
+  permitsMeasuredPowerFitness,
+  permitsPowerDerivedMetrics,
+} from '@/training-load/measured-power-evidence';
 import { Injectable, Logger } from '@nestjs/common';
 import type {
   MetricsContext,
@@ -33,13 +37,34 @@ const TASK_OUTPUT_KEYS: Partial<
   vo2Max: ['vo2max'],
 };
 
-const POWER_DERIVED_TASKS = new Set<MetricsTaskKey>([
-  'maxMeanPower',
-  'estimatedPowerMetrics',
+/** 负荷任务：明确覆盖不足才跳过，历史未知来源仍可使用已有实测功率。 */
+const POWER_LOAD_TASKS = new Set<MetricsTaskKey>([
   'powerBase',
   'powerZones',
   'powerCogganBike',
 ]);
+
+/** 体能任务：只有可靠实测功率可以写入峰值或 CP/FTP/W′/Pmax。 */
+const POWER_FITNESS_TASKS = new Set<MetricsTaskKey>([
+  'maxMeanPower',
+  'estimatedPowerMetrics',
+]);
+
+const NO_RELIABLE_MEASURED_POWER = 'no_reliable_measured_power';
+
+function powerDerivedSkipReason(
+  ctx: MetricsContext,
+  key: MetricsTaskKey,
+): string | null {
+  const evidence = ctx.inputs.measuredPowerEvidence;
+  if (POWER_FITNESS_TASKS.has(key) && !permitsMeasuredPowerFitness(evidence)) {
+    return NO_RELIABLE_MEASURED_POWER;
+  }
+  if (POWER_LOAD_TASKS.has(key) && !permitsPowerDerivedMetrics(evidence)) {
+    return NO_RELIABLE_MEASURED_POWER;
+  }
+  return null;
+}
 
 function positiveSampleCount(
   ctx: MetricsContext,
@@ -311,21 +336,33 @@ export class ActivityMetricsOrchestratorService {
     return committed;
   }
 
+  private skipPowerDerivedTask(
+    ctx: MetricsContext,
+    key: MetricsTaskKey,
+  ): MetricsContext | null {
+    const reason = powerDerivedSkipReason(ctx, key);
+    if (!reason) return null;
+    if (
+      POWER_FITNESS_TASKS.has(key) &&
+      ![...POWER_FITNESS_TASKS].some(
+        (taskKey) => ctx.taskOutcomes?.[taskKey]?.reason === reason,
+      )
+    ) {
+      const evidence = ctx.inputs.measuredPowerEvidence ?? 'UNKNOWN';
+      this.logger.log(
+        `[CP] 活动缺少可靠实测功率，跳过 MMP/CP：活动=${ctx.inputs.activity?.id ?? 'unknown'}，证据=${evidence}，原因=${reason}`,
+      );
+    }
+    return withTaskOutcome(ctx, { key, status: 'SKIPPED', reason });
+  }
+
   private async computeOne(
     ctx: MetricsContext,
     task: MetricsTask,
   ): Promise<MetricsContext> {
     const key = task.key;
-    if (
-      ctx.inputs.measuredPowerEvidence === 'INSUFFICIENT' &&
-      POWER_DERIVED_TASKS.has(key)
-    ) {
-      return withTaskOutcome(ctx, {
-        key,
-        status: 'SKIPPED',
-        reason: 'no_reliable_measured_power',
-      });
-    }
+    const skipped = this.skipPowerDerivedTask(ctx, key);
+    if (skipped) return skipped;
     try {
       const prepared = await task.pre(ctx);
       const computed = await task.exec(prepared);
@@ -349,17 +386,18 @@ export class ActivityMetricsOrchestratorService {
   ): Promise<MetricsContext> {
     // 指标任务是尽力而为：单个指标失败会写入 ctx.errors，但不阻断后续指标计算。
     const key = task.key;
-    if (
-      ctx.inputs.measuredPowerEvidence === 'INSUFFICIENT' &&
-      POWER_DERIVED_TASKS.has(key)
-    ) {
-      return withTaskOutcome(ctx, {
-        key,
-        status: 'SKIPPED',
-        reason: 'no_reliable_measured_power',
-      });
-    }
+    const skipped = this.skipPowerDerivedTask(ctx, key);
+    if (skipped && !POWER_FITNESS_TASKS.has(key)) return skipped;
     try {
+      if (skipped) {
+        // 重新分析时清掉以前写入的功率峰值和活动 eCP，避免未知来源继续进模型。
+        const cleared = await task.post(skipped);
+        return withTaskOutcome(cleared, {
+          key,
+          status: 'SKIPPED',
+          reason: NO_RELIABLE_MEASURED_POWER,
+        });
+      }
       let next = ctx;
       next = await task.pre(next);
       next = await task.exec(next);

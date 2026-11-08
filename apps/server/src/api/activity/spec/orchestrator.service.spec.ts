@@ -1,4 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { Logger } from '@nestjs/common';
 import { SportType } from '@prisma/client';
 import type { MetricsContext } from '../metrics/context';
 import type { MetricsTask } from '../metrics/task';
@@ -171,12 +172,69 @@ describe('ActivityMetricsOrchestratorService', () => {
       }),
     );
   });
+
+  it('未知功率证据不能进入 MMP/CP，但负荷任务仍可运行', async () => {
+    const log = jest
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    const fitness = jest.fn(async (ctx: MetricsContext) => ctx);
+    const load = jest.fn(async (ctx: MetricsContext) => ctx);
+    const clear = jest.fn(async (ctx: MetricsContext) => ctx);
+    const service = new ActivityMetricsOrchestratorService();
+    const input = context();
+    input.inputs.measuredPowerEvidence = 'UNKNOWN';
+
+    const result = await service.run(input, [
+      { ...task('maxMeanPower', fitness), post: clear },
+      { ...task('estimatedPowerMetrics', fitness), post: clear },
+      task('powerBase', load),
+    ]);
+
+    expect(fitness).not.toHaveBeenCalled();
+    expect(clear).toHaveBeenCalledTimes(2);
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(result.taskOutcomes?.maxMeanPower).toEqual({
+      key: 'maxMeanPower',
+      status: 'SKIPPED',
+      reason: 'no_reliable_measured_power',
+    });
+    expect(result.taskOutcomes?.estimatedPowerMetrics?.status).toBe('SKIPPED');
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('no_reliable_measured_power'),
+    );
+    log.mockRestore();
+  });
+
+  it('可靠实测功率允许计算 MMP 和 CP', async () => {
+    const fitness = jest.fn(async (ctx: MetricsContext) => ctx);
+    const service = new ActivityMetricsOrchestratorService();
+    const input = context();
+    input.inputs.measuredPowerEvidence = 'RELIABLE';
+
+    await service.run(input, [
+      task('maxMeanPower', fitness),
+      task('estimatedPowerMetrics', fitness),
+    ]);
+
+    expect(fitness).toHaveBeenCalledTimes(2);
+  });
 });
 
-
-it('preserves a transaction conflict so the caller can retry the whole commit',async()=>{
-  const service=new ActivityMetricsOrchestratorService();const conflict={code:'P2034'};
-  const post=jest.fn(async()=>{throw conflict});const current=context();
-  await expect(service.commitComputed({context:current,tasks:[{...task('heartRateBase',async c=>c),post}]},{} as never)).rejects.toBe(conflict);
+it('preserves a transaction conflict so the caller can retry the whole commit', async () => {
+  const service = new ActivityMetricsOrchestratorService();
+  const conflict = { code: 'P2034' };
+  const post = jest.fn(async () => {
+    throw conflict;
+  });
+  const current = context();
+  await expect(
+    service.commitComputed(
+      {
+        context: current,
+        tasks: [{ ...task('heartRateBase', async (c) => c), post }],
+      },
+      {} as never,
+    ),
+  ).rejects.toBe(conflict);
   expect(current.errors).toEqual({});
 });

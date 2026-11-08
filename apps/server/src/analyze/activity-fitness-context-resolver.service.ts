@@ -40,6 +40,10 @@ import {
 import { generateHeartRateZonesFromProfile } from '@/heart-rate/heart-rate.utils';
 import { generatePowerZonesFromProfile } from '@/power/util';
 import { generatePaceZonesFromProfile } from '@/api/pace/pace.utils';
+import {
+  permitsMeasuredPowerFitness,
+  resolveMeasuredPowerEvidence,
+} from '@/training-load/measured-power-evidence';
 
 const METRICS: readonly UserFitnessMetricType[] = [
   UserFitnessMetricType.FTP,
@@ -269,10 +273,16 @@ export class ActivityFitnessContextResolverService {
         }),
       });
     };
-    add(UserFitnessMetricType.FTP, activity.eftp);
-    add(UserFitnessMetricType.CP, activity.ecp, activity.ewPrime);
-    add(UserFitnessMetricType.W_PRIME, activity.ewPrime);
-    add(UserFitnessMetricType.P_MAX, activity.epmax);
+    const sources = await this.prisma.activitySource.findMany({
+      where: { activityId: activity.id, isActive: true, isPrimary: true },
+      select: { metadata: true },
+    });
+    if (permitsMeasuredPowerFitness(resolveMeasuredPowerEvidence(sources))) {
+      add(UserFitnessMetricType.FTP, activity.eftp);
+      add(UserFitnessMetricType.CP, activity.ecp, activity.ewPrime);
+      add(UserFitnessMetricType.W_PRIME, activity.ewPrime);
+      add(UserFitnessMetricType.P_MAX, activity.epmax);
+    }
     const maxHr = await this.prisma.activityPeakMetric.findFirst({
       where: {
         activityId: activity.id,
