@@ -3,6 +3,7 @@ import { PeakType, ScaleType } from '@prisma/client';
 import type { MetricsContext } from '../context';
 import type { MetricsTask } from '../task';
 import { ActivityPeakMetricWriterService } from '../shared/peak-metric-writer.service';
+import { suppressIsolatedPowerSpikes } from '@/algorithm/fitness-cp';
 import {
   computeMaxMeanObservedWindows,
   STANDARD_PEAK_DURATIONS,
@@ -25,16 +26,25 @@ export class MaxMeanPowerTask implements MetricsTask {
     }
     if (!activity || !records || records.length < 2) return ctx;
 
-    const rawWindows = computeMaxMeanObservedWindows(
+    // A 1s mean is the sample itself. An isolated multi-kW FIT spike has to be
+    // removed here, before the window is stored; calculateCp also refuses
+    // inconsistent peaks, but those lists are often merged across activities.
+    const powerSamples = suppressIsolatedPowerSpikes(
       records.map((record) => ({
         tMs: record.tMs,
         // 峰值只读取功率计样本。calculatedPower 留在独立列，不能进入 PeakType.power。
-        value:
+        power:
           typeof record.power === 'number' &&
           Number.isFinite(record.power) &&
           record.power >= 0
             ? record.power
             : null,
+      })),
+    );
+    const rawWindows = computeMaxMeanObservedWindows(
+      powerSamples.map((sample) => ({
+        tMs: sample.tMs,
+        value: sample.power,
       })),
       STANDARD_PEAK_DURATIONS,
     );
