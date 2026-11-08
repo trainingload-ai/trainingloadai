@@ -1,6 +1,29 @@
-import { describe, expect, it, jest } from '@jest/globals';
+import { afterEach, describe, expect, it, jest } from '@jest/globals';
+import { Logger } from '@nestjs/common';
 import { PeakType, ScaleType, SportType } from '@prisma/client';
+import { calculateCp } from '@/algorithm/fitness-cp';
 import { FitnessTimelineObservationService } from '../fitness-timeline-observation.service';
+
+jest.mock('@/algorithm/fitness-cp', () => {
+  const actual = jest.requireActual<typeof import('@/algorithm/fitness-cp')>(
+    '@/algorithm/fitness-cp',
+  );
+  return {
+    ...actual,
+    calculateCp: jest.fn((...args: Parameters<typeof actual.calculateCp>) =>
+      actual.calculateCp(...args),
+    ),
+  };
+});
+
+const actualCp = jest.requireActual<typeof import('@/algorithm/fitness-cp')>(
+  '@/algorithm/fitness-cp',
+);
+
+afterEach(() => {
+  jest.mocked(calculateCp).mockReset();
+  jest.mocked(calculateCp).mockImplementation(actualCp.calculateCp);
+});
 
 function fixture(lthrRows: object[] = []) {
   const activityPeakMetric = {
@@ -271,5 +294,121 @@ describe('FitnessTimelineObservationService', () => {
         }),
       ]),
     );
+  });
+
+  function powerPeaks(points: Array<{ seconds: number; value: number }>) {
+    return points.map((point) => ({
+      activityId: 7,
+      sport: SportType.RUN,
+      type: PeakType.power,
+      scaleType: ScaleType.TIME,
+      scaleValue: point.seconds,
+      value: point.value,
+      activity: {
+        sportType: SportType.RUN,
+        sportDefinitionCode: 'RUNNING',
+        startTime: new Date('2026-01-01T10:00:00.000Z'),
+        activitySources: [],
+      },
+    }));
+  }
+
+  async function observePower(
+    points: Array<{ seconds: number; value: number }>,
+  ) {
+    const { service, activityPeakMetric } = fixture();
+    activityPeakMetric.findMany.mockResolvedValueOnce(
+      powerPeaks(points) as never,
+    );
+    const prepared = await service.prepare('user-1', [7]);
+    const observations = await service.calculate({
+      userId: 'user-1',
+      effectiveAt: new Date('2026-01-01T11:00:00.000Z'),
+      eligibleActivityIds: [7],
+      profile: {},
+      currentMaxHr: null,
+      currentRestingHr: null,
+      prepared,
+    });
+    return observations.filter((row) =>
+      ['CP', 'FTP', 'W_PRIME', 'P_MAX'].includes(row.metric),
+    );
+  }
+
+  const modeledCurve = [
+    { seconds: 30, value: 800 },
+    { seconds: 60, value: 650 },
+    { seconds: 180, value: 500 },
+    { seconds: 600, value: 430 },
+    { seconds: 1200, value: 330 },
+    { seconds: 3600, value: 280 },
+  ];
+
+  it('publishes an in-range power model', async () => {
+    const observations = await observePower(modeledCurve);
+
+    expect(observations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          metric: 'CP',
+          sport: SportType.RUN,
+          value: 401,
+        }),
+        expect.objectContaining({
+          metric: 'FTP',
+          sport: SportType.RUN,
+          value: 381,
+        }),
+        expect.objectContaining({
+          metric: 'P_MAX',
+          sport: SportType.RUN,
+          value: 800,
+        }),
+        expect.objectContaining({
+          metric: 'W_PRIME',
+          sport: SportType.RUN,
+          value: 84655,
+        }),
+      ]),
+    );
+  });
+
+  it('does not emit a power model whose W′ or Pmax is outside product bounds', async () => {
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    jest.mocked(calculateCp).mockReturnValue({
+      valid: true,
+      reason: undefined,
+      cp: 280,
+      ftp: 266,
+      wPrime: 124430,
+      pMax: 4200,
+      iterations: 1,
+      converged: true,
+    });
+
+    const observations = await observePower(modeledCurve);
+
+    expect(observations).toEqual([]);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("W'=124430"));
+    warn.mockRestore();
+  });
+
+  it('does not emit a power model that breaks the CP/FTP relationship', async () => {
+    jest.mocked(calculateCp).mockReturnValue({
+      valid: true,
+      reason: undefined,
+      cp: 250,
+      ftp: 80,
+      wPrime: 20000,
+      pMax: 800,
+      iterations: 1,
+      converged: true,
+    });
+
+    const observations = await observePower(modeledCurve);
+
+    expect(observations).toEqual([]);
   });
 });

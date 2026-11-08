@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   MetricSource,
   PeakType,
@@ -173,6 +173,8 @@ function observation(args: {
 
 @Injectable()
 export class FitnessTimelineObservationService {
+  private readonly logger = new Logger(FitnessTimelineObservationService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly analysisConfigs: UserAnalysisConfigService,
@@ -381,6 +383,18 @@ export class FitnessTimelineObservationService {
         .sort((left, right) => left.seconds - right.seconds);
       const result = calculateCp(points);
       if (!result.valid || !(result.cp > 0) || !(result.ftp > 0)) continue;
+      const rejection = this.powerModelRejection(sport, {
+        cp: result.cp,
+        ftp: result.ftp,
+        wPrime: result.wPrime,
+        pMax: result.pMax,
+      });
+      if (rejection) {
+        this.logger.warn(
+          `[CP] 拒绝不自洽的功率模型结果：用户=${args.userId}, 运动=${sport}, CP=${result.cp}, FTP=${result.ftp}, Pmax=${result.pMax}, W'=${result.wPrime}, 原因=${rejection}`,
+        );
+        continue;
+      }
       const activityIds = [...best.values()].map((row) => row.activityId);
       const evidence = {
         method: 'CP_MODEL',
@@ -434,6 +448,45 @@ export class FitnessTimelineObservationService {
       }
     }
     return out;
+  }
+
+  /** 与 recalculateUserCPAndFTP 相同：任一 CP/FTP/W′/Pmax 不成立则整组不发布。 */
+  private powerModelRejection(
+    sport: SportType,
+    model: {
+      cp: number;
+      ftp: number;
+      wPrime?: number | null;
+      pMax?: number | null;
+    },
+  ): string | null {
+    const wPrime =
+      model.wPrime != null && model.wPrime > 0 ? model.wPrime : null;
+    const pMax = model.pMax != null && model.pMax > 0 ? model.pMax : null;
+    const context = {
+      [UserFitnessMetricType.CP]: model.cp,
+      [UserFitnessMetricType.FTP]: model.ftp,
+      ...(pMax != null ? { [UserFitnessMetricType.P_MAX]: pMax } : {}),
+      ...(wPrime != null ? { [UserFitnessMetricType.W_PRIME]: wPrime } : {}),
+    };
+    const candidates: Array<{ type: UserFitnessMetricType; value: number }> = [
+      { type: UserFitnessMetricType.CP, value: model.cp },
+      { type: UserFitnessMetricType.FTP, value: model.ftp },
+    ];
+    if (pMax != null) {
+      candidates.push({ type: UserFitnessMetricType.P_MAX, value: pMax });
+    }
+    if (wPrime != null) {
+      candidates.push({ type: UserFitnessMetricType.W_PRIME, value: wPrime });
+    }
+    for (const candidate of candidates) {
+      const validation = validateFitnessMetricCandidate(
+        { ...candidate, sport, source: MetricSource.AUTO },
+        context,
+      );
+      if (validation.valid === false) return validation.reason;
+    }
+    return null;
   }
 
   private async paceModels(args: ObservationCalculationArgs) {

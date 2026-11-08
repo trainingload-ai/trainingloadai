@@ -439,6 +439,8 @@ export class UserService {
    * - 保留活动结束的精确 UTC 时刻；
    * - 被替代行先进入不可变审计，再物理删除，保证旧版本读取安全；
    * - 不发送 FITNESS_METRIC_CHANGED，避免 Projector 自己触发自己。
+   * 写入前仍调用 validateFitnessMetricCandidate。超界或相对关系不成立的
+   * 投影只记日志并跳过，不改写成其它数值，也不能成为生效 AUTO。
    */
   async applyTimelineProjectionBatch(
     input: ApplyTimelineProjectionBatchInput,
@@ -476,6 +478,12 @@ export class UserService {
         }
         desiredByKey.set(key, projection);
       }
+      await this.retainValidTimelineProjections(
+        tx,
+        input,
+        desiredByKey,
+        MetricSource.AUTO,
+      );
 
       const scopes = Array.from(
         new Map(
@@ -679,6 +687,12 @@ export class UserService {
         }
         desiredByKey.set(key, estimate);
       }
+      await this.retainValidTimelineProjections(
+        tx,
+        input,
+        desiredByKey,
+        MetricSource.ESTIMATED,
+      );
 
       const scopes = Array.from(
         new Map(
@@ -799,6 +813,185 @@ export class UserService {
     return this.serializeFitnessWrite(input.userId, () =>
       this.prisma.$transaction(execute, FITNESS_WRITE_TRANSACTION_OPTIONS),
     );
+  }
+
+  /**
+   * DATA_REPAIR 重放会直接写 AUTO/ESTIMATED，不能只靠读取时过滤。
+   * 候选只减不增：同一时刻互相冲突的一组会被一起拒绝，已拒绝的值不会再回到上下文。
+   */
+  private async retainValidTimelineProjections(
+    tx: Prisma.TransactionClient,
+    input: ApplyTimelineProjectionBatchInput,
+    desiredByKey: Map<string, TimelineFitnessProjection>,
+    source: MetricSource,
+  ) {
+    const projections = [...desiredByKey.values()];
+    if (projections.length === 0) return;
+
+    const upperBound = projections.reduce(
+      (max, projection) =>
+        projection.effectiveAt > max ? projection.effectiveAt : max,
+      projections[0].effectiveAt,
+    );
+    const rows = await this.users.fitnessMetrics(tx).findMany({
+      where: {
+        userId: input.userId,
+        recordedAt: { lte: upperBound },
+        OR: [
+          { source: MetricSource.MANUAL },
+          {
+            source: MetricSource.AUTO,
+            recordedAt: { lt: input.replaceFrom },
+          },
+        ],
+      },
+    });
+    const persisted = rows.filter((row) => {
+      const recordedAt = row.recordedAt;
+      if (
+        !(recordedAt instanceof Date) ||
+        !Number.isFinite(recordedAt.getTime()) ||
+        recordedAt > upperBound
+      ) {
+        return false;
+      }
+      if (row.source === MetricSource.MANUAL) return true;
+      return (
+        row.source === MetricSource.AUTO &&
+        recordedAt.getTime() < input.replaceFrom.getTime()
+      );
+    });
+
+    let active = projections;
+    const rejected = new Map<TimelineFitnessProjection, string>();
+    while (active.length > 0) {
+      const survivors: TimelineFitnessProjection[] = [];
+      let removed = false;
+      for (const projection of active) {
+        const reason = this.explainTimelineProjectionRejection(
+          projection,
+          this.timelineProjectionValidationContext({
+            persisted,
+            batch: active,
+            at: projection.effectiveAt,
+            sport: projection.sport,
+            source,
+          }),
+          source,
+        );
+        if (reason) {
+          rejected.set(projection, reason);
+          removed = true;
+          continue;
+        }
+        rejected.delete(projection);
+        survivors.push(projection);
+      }
+      const stalled = survivors.length >= active.length;
+      active = survivors;
+      if (!removed || stalled) break;
+    }
+
+    for (const [projection, reason] of rejected) {
+      this.logger.warn(
+        `[体能指标校验] 拒绝时间线${source === MetricSource.AUTO ? '投影' : '估算'}：用户ID=${input.userId}, 类型=${projection.type}, 运动=${projection.sport}, 值=${projection.value}, value2=${projection.value2 ?? ''}, 原因=${reason}, 生效时间=${projection.effectiveAt.toISOString()}`,
+      );
+    }
+    if (rejected.size === 0) return;
+
+    desiredByKey.clear();
+    for (const projection of active) {
+      desiredByKey.set(
+        [
+          projection.type,
+          projection.sport,
+          projection.effectiveAt.toISOString(),
+        ].join(':'),
+        projection,
+      );
+    }
+  }
+
+  private explainTimelineProjectionRejection(
+    projection: TimelineFitnessProjection,
+    context: FitnessMetricValidationContext,
+    source: MetricSource,
+  ): string | null {
+    const validation = validateFitnessMetricCandidate(
+      {
+        type: projection.type,
+        value: projection.value,
+        value2: projection.value2,
+        sport: projection.sport,
+        source,
+      },
+      context,
+      { requireReferenceMetrics: true },
+    );
+    if (validation.valid === false) return validation.reason;
+    if (
+      projection.type === UserFitnessMetricType.CP &&
+      projection.value2 != null
+    ) {
+      const wPrime = validateFitnessMetricCandidate(
+        {
+          type: UserFitnessMetricType.W_PRIME,
+          value: projection.value2,
+          sport: projection.sport,
+          source,
+        },
+        context,
+        { requireReferenceMetrics: true },
+      );
+      if (wPrime.valid === false) return `cp_value2:${wPrime.reason}`;
+    }
+    return null;
+  }
+
+  private timelineProjectionValidationContext(args: {
+    persisted: ReadonlyArray<{
+      type: UserFitnessMetricType;
+      sport: SportType;
+      source: string;
+      value: unknown;
+      recordedAt: Date;
+    }>;
+    batch: readonly TimelineFitnessProjection[];
+    at: Date;
+    sport: SportType;
+    source: MetricSource;
+  }): FitnessMetricValidationContext {
+    const atTime = args.at.getTime();
+    const candidates = [
+      ...args.persisted
+        .filter((row) => row.recordedAt.getTime() <= atTime)
+        .map((row) => ({
+          type: row.type,
+          sport: row.sport,
+          source: row.source,
+          value: Number(row.value),
+          recordedAt: row.recordedAt,
+        })),
+      ...args.batch
+        .filter((row) => row.effectiveAt.getTime() <= atTime)
+        .map((row) => ({
+          type: row.type,
+          sport: row.sport,
+          source: args.source,
+          value: row.value,
+          recordedAt: row.effectiveAt,
+        })),
+    ];
+    const context: FitnessMetricValidationContext = {};
+    for (const type of Object.values(UserFitnessMetricType)) {
+      const selected = selectEffectiveFitnessMetric(
+        candidates,
+        type,
+        args.sport,
+      );
+      if (selected?.value != null) context[type] = Number(selected.value);
+    }
+    return context;
   }
 
   private async getAutoUpdateEnabledMap(userId: string) {
