@@ -9,8 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import "./home.css";
 import {
   absoluteAlternatesForPath,
   absoluteLocalizedUrl,
@@ -85,12 +84,6 @@ type PageModuleCopy = {
 };
 
 const PAGE_MODULE_ORDER = [2, 1, 3, 0] as const;
-
-const homePrimaryButtonClass =
-  "h-11 w-full border-0 px-5 text-sm font-medium shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:bg-primary/90 dark:shadow-none sm:w-auto";
-
-const homeOutlineButtonClass =
-  "h-11 w-full border-input bg-card px-5 text-sm font-medium hover:bg-muted hover:text-foreground sm:w-auto";
 
 export async function generateMetadata({
   params,
@@ -298,65 +291,52 @@ export default async function HomePage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-foreground">
+    <main className="home-page">
       <JsonLd id="home-structured-data" data={structuredData} />
-      <section className="relative overflow-hidden bg-card px-4 pb-12 pt-10 text-foreground md:px-6 md:pb-16 md:pt-14">
-        <div className="relative mx-auto max-w-7xl">
-          <div className="mx-auto max-w-5xl text-center">
-            <h1 className="font-display mx-auto max-w-4xl text-balance text-[2.75rem] font-bold leading-[1.05] tracking-[-0.035em] text-foreground md:text-[3.75rem] lg:text-[4.25rem]">
-              {heroTitleLines.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-muted-foreground md:text-base">
-              {heroVisible.subtitleBefore}
-              {heroVisible.subtitleHighlight}
-              {heroVisible.subtitleAfter}
-            </p>
-            <div className="mt-7 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-6">
-              <Link href={appUrl} className="w-full sm:w-auto">
-                <Button
-                  variant="brand"
-                  className="group min-h-11 w-full shrink-0 gap-2 px-5 text-sm font-semibold active:translate-y-px sm:w-auto"
-                >
-                  {heroVisible.startCta}
-                  <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
-                </Button>
-              </Link>
-              <TrackedLink
-                href={`${prefix}/plan`}
-                eventName="home_plan_hub_click"
-                eventProperties={{ placement: "hero" }}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-control px-3 text-sm font-medium text-foreground underline-offset-4 transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:w-auto"
-              >
-                {heroVisible.planCta}
-              </TrackedLink>
-            </div>
-
-            <p className="mt-4 text-sm text-muted-foreground">
-              {heroVisible.iphoneSupport}
-            </p>
+      <section className="home-container home-hero">
+        <div className="home-hero-copy">
+          <h1>
+            {heroTitleLines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </h1>
+          <p className="home-lead">
+            {heroVisible.subtitleBefore}
+            {heroVisible.subtitleHighlight}
+            {heroVisible.subtitleAfter}
+          </p>
+          <div className="home-actions">
+            <Link href={appUrl} className="home-button">
+              {heroVisible.startCta}
+            </Link>
+            <TrackedLink
+              href={`${prefix}/plan`}
+              eventName="home_plan_hub_click"
+              eventProperties={{ placement: "hero" }}
+              className="home-text-link"
+            >
+              {heroVisible.planCta}
+            </TrackedLink>
           </div>
-
-          <div className="relative mx-auto mt-8 max-w-6xl md:mt-10">
-            <HomeHeroDemoPreview
-              key={demoUrl}
-              copy={heroVisible.demoPreview}
-              demoUrl={demoUrl}
-              lang={lang}
-            />
-          </div>
-
-          <div className="mx-auto mt-8 w-full max-w-5xl md:mt-10">
-            <HomeHeroWorksWith
-              label={heroVisible.worksWith.label}
-              moreLabel={heroVisible.worksWith.more}
-            />
-          </div>
+          <p className="home-support">{heroVisible.iphoneSupport}</p>
+        </div>
+        <div className="home-hero-stage">
+          <HomeHeroDemoPreview
+            key={demoUrl}
+            copy={heroVisible.demoPreview}
+            demoUrl={demoUrl}
+            lang={lang}
+          />
         </div>
       </section>
+      <div className="home-container home-logo-band">
+        <HomeHeroWorksWith
+          label={heroVisible.worksWith.label}
+          moreLabel={heroVisible.worksWith.more}
+        />
+      </div>
 
       <HomeTrainingPlanSpotlight copy={planSpotlight} prefix={prefix} />
 
@@ -374,31 +354,27 @@ export default async function HomePage({
 
       <HomeOpenSourceSection copy={openSource} prefix={prefix} />
 
-      <section className="marketing-section bg-secondary/70 text-foreground">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="marketing-eyebrow">{t("platforms.eyebrow")}</div>
-            <h2 className="marketing-title">{t("platforms.title")}</h2>
-            <p className="marketing-copy mx-auto max-w-2xl">
-              {t("platforms.subtitle")}
-            </p>
+      <section className="home-surface">
+        <div className="home-container home-split home-split-tight">
+          <div className="home-split-copy">
+            <h2>{t("platforms.title")}</h2>
+            <p className="home-lead">{t("platforms.eyebrow")}</p>
+            <p className="home-copy">{t("platforms.subtitle")}</p>
           </div>
-          <div className="mx-auto mt-10 max-w-6xl">
-            <HomePlatformShowcase
-              comingSoonLabel={t("platforms.comingSoonLabel")}
-            />
-          </div>
+          <HomePlatformShowcase
+            comingSoonLabel={t("platforms.comingSoonLabel")}
+          />
         </div>
       </section>
 
-      <section id="faq" className="marketing-section w-full bg-background">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(240px,0.34fr)_1fr] lg:items-start lg:gap-10">
-          <div className="lg:sticky lg:top-24">
-            <h2 className="marketing-title mt-0">{t("faq.title")}</h2>
-            <p className="marketing-copy">{t("faq.subtitle")}</p>
+      <section id="faq" className="home-faq">
+        <div className="home-container home-faq-grid">
+          <div>
+            <h2>{t("faq.title")}</h2>
+            <p className="home-copy">{t("faq.subtitle")}</p>
           </div>
 
-          <div className="rounded-overlay bg-card px-5 shadow-xs ring-1 ring-border/70 md:px-6">
+          <div className="home-faq-list">
             <Accordion type="single" collapsible className="w-full">
               {visibleFaqs.map((item, i) => (
                 <AccordionItem key={item.q} value={`faq-${i}`}>
@@ -417,32 +393,21 @@ export default async function HomePage({
 
       <PricingPreviewSection lang={lang} appUrl={appUrl} />
 
-      <section className="client-demo-radius marketing-section bg-background">
-        <div className="mx-auto max-w-7xl">
-          <div className="relative overflow-hidden rounded-feature bg-brand p-7 text-brand-foreground sm:p-8 md:p-10 lg:p-12">
-            <div className="relative z-10 flex flex-col items-center justify-center text-center">
-              <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-brand-foreground md:text-3xl lg:text-[2.5rem]">
-                {t("bottomCta.title")}
-              </h2>
-              <p className="mx-auto mt-4 max-w-[560px] text-sm leading-6 text-brand-foreground/70 md:text-base md:leading-7">
-                {t("bottomCta.subtitle")}
-              </p>
-              <div className="mt-7 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row md:mt-8 md:gap-5">
-                <Link href={`${prefix}/plan`} className="w-full sm:w-auto">
-                  <Button className={homePrimaryButtonClass}>
-                    {t("bottomCta.button")}
-                    <ArrowRight className="ml-2 size-4" />
-                  </Button>
-                </Link>
-                <Link href={appUrl} className="w-full sm:w-auto">
-                  <Button variant="outline" className={homeOutlineButtonClass}>
-                    {t("bottomCta.secondaryButton")}
-                  </Button>
-                </Link>
-              </div>
-              <p className="mt-5 text-sm text-brand-foreground/70">
-                {bottomTrialNote}
-              </p>
+      <section className="home-close">
+        <div className="home-container">
+          <div className="home-close-panel">
+            <div>
+              <h2>{t("bottomCta.title")}</h2>
+              <p className="home-copy">{t("bottomCta.subtitle")}</p>
+              <p className="home-close-note">{bottomTrialNote}</p>
+            </div>
+            <div className="home-close-actions">
+              <Link href={`${prefix}/plan`} className="home-button">
+                {t("bottomCta.button")}
+              </Link>
+              <Link href={appUrl} className="home-text-link">
+                {t("bottomCta.secondaryButton")}
+              </Link>
             </div>
           </div>
         </div>

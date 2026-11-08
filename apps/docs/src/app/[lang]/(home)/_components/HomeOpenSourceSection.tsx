@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, CodeXml, Database, Scale } from "lucide-react";
+import { CodeXml, Database, Scale } from "lucide-react";
 import { SiGithub } from "@icons-pack/react-simple-icons";
 
 const PUBLIC_REPOSITORY_URL =
@@ -29,48 +29,46 @@ export function HomeOpenSourceSection({
   prefix: string;
 }) {
   return (
-    <section className="marketing-section border-y border-border/80 bg-card text-foreground">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:items-start lg:gap-16">
-        <div className="order-1 lg:order-2 lg:sticky lg:top-24">
-          <div className="marketing-eyebrow">{copy.eyebrow}</div>
-          <h2 className="marketing-title max-w-xl">{copy.title}</h2>
-          <p className="marketing-copy max-w-2xl">{copy.body}</p>
+    <section>
+      <div className="home-container home-split">
+        <div className="home-split-copy">
+          <h2>{copy.title}</h2>
+          <p className="home-meta-line">
+            {copy.eyebrow.split(/\s*·\s*/).map((part) => (
+              <span key={part}>{part}</span>
+            ))}
+          </p>
+          <p className="home-copy">{copy.body}</p>
 
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <div className="home-actions">
             <a
               href={PUBLIC_REPOSITORY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+              className="home-button"
             >
-              <SiGithub aria-hidden="true" className="size-4" />
+              <SiGithub aria-hidden="true" className="mr-2 size-4" />
               {copy.sourceCta}
-              <ArrowUpRight aria-hidden="true" className="size-4" />
             </a>
-            <Link
-              href={`${prefix}/docs/self-host`}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-input bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-            >
+            <Link href={`${prefix}/docs/self-host`} className="home-text-link">
               {copy.docsCta}
-              <ArrowUpRight aria-hidden="true" className="size-4" />
             </Link>
           </div>
-
         </div>
 
-        <div className="order-2 overflow-hidden rounded-feature border border-border/80 bg-background lg:order-1">
+        <div className="home-frame">
           <div className="flex flex-col gap-4 border-b border-border/80 px-5 py-5 sm:flex-row sm:items-center sm:justify-between md:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-control bg-secondary text-foreground">
                 <SiGithub aria-hidden="true" className="size-[18px]" />
               </span>
               <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {copy.repositoryLabel}
                 </p>
-                <p className="mt-1 truncate font-mono text-sm font-semibold text-foreground">
+                <code className="mt-1 block truncate text-sm font-semibold text-foreground">
                   trainingload-ai/trainingloadai
-                </p>
+                </code>
               </div>
             </div>
             <span className="w-fit rounded-compact border border-border bg-card px-2.5 py-1 font-mono text-xs font-medium text-muted-foreground">

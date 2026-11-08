@@ -1,0 +1,35 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "shape": "Split Studio",
+  "theme": "brand",
+  "genre": "editorial",
+  "axes": "warm paper/geometric sans/green",
+  "hero": "Stage",
+  "nav": "kept site header",
+  "footer": "kept site footer",
+  "imagery": "the live product demo",
+  "entry": "left headline, demo on the right",
+  "fingerprint": "trainingload-home-stage-demo",
+  "sections": [
+   "hero",
+   "plans",
+   "product",
+   "mcp",
+   "open source",
+   "platforms",
+   "faq",
+   "pricing",
+   "close"
+  ],
+  "signature": "the live training demo",
+  "prompt": "athlete homepage to try the training product",
+  "waived": [
+   "47b"
+  ],
+  "photos": [],
+  "date": "2026-11-08"
+ }
+]

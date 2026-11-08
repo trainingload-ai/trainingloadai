@@ -36,18 +36,12 @@ export async function PricingPreviewSection({
     : t("subtitle", newUserGift);
 
   return (
-    <section className="marketing-section w-full bg-secondary/70 text-foreground">
-      <div className="marketing-container">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="marketing-eyebrow">
-            {previewEyebrow}
-          </div>
-          <h2 className="marketing-title mx-auto mt-3">
-            {previewTitle}
-          </h2>
-          <p className="marketing-copy mx-auto mt-4 max-w-2xl">
-            {previewSubtitle}
-          </p>
+    <section className="home-surface">
+      <div className="home-container home-split-tight">
+        <div className="home-split-copy">
+          <h2>{previewEyebrow}</h2>
+          <p className="home-lead">{previewTitle}</p>
+          <p className="home-copy">{previewSubtitle}</p>
         </div>
 
         <PricingPlansSection

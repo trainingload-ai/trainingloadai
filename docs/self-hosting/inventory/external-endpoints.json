@@ -374,7 +374,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 158
+          "line": 151
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
@@ -991,7 +991,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 240
+          "line": 233
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
@@ -2923,11 +2923,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 105
+          "line": 98
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 154
+          "line": 147
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",

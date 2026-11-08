@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
 import { TrackedLink } from "@/components/TrackedLink";
 import { publicDemoDestination } from "@/lib/public-demo-url";
@@ -215,10 +215,8 @@ function ProductScreens({
         addressAriaLabel={`${copy.webAlt}: ${destination.address}`}
         compact
         className={[
-          "bg-card",
-          wide
-            ? "rounded-[4px] shadow-[0_38px_90px_-58px_rgba(15,23,42,0.65)] dark:shadow-black/70"
-            : "rounded-compact shadow-[0_24px_65px_-42px_rgba(15,23,42,0.58)] dark:shadow-black/55",
+          "home-shadow bg-card",
+          wide ? "rounded-[4px]" : "rounded-compact",
         ].join(" ")}
       >
         <ProductImagePair
@@ -230,7 +228,7 @@ function ProductScreens({
       </ProductBrowserWindow>
       <div
         className={[
-          "absolute bottom-0 right-0 z-20 min-w-[82px] overflow-hidden border border-border bg-card shadow-[0_28px_70px_-34px_rgba(15,23,42,0.68)] dark:shadow-black/70",
+          "home-shadow absolute bottom-0 right-0 z-20 min-w-[82px] overflow-hidden border border-border bg-card",
           wide
             ? "w-[31%] max-w-[220px] rounded-[1.05rem] sm:w-[28%] sm:min-w-[96px] sm:rounded-[1.4rem] lg:w-[25%]"
             : "w-[24%] max-w-[190px] rounded-[1.15rem] sm:rounded-[1.55rem]",
@@ -434,31 +432,25 @@ export function HomeProductShowcase({
   return (
     <section
       ref={rootRef}
-      className="marketing-section relative overflow-hidden bg-background text-foreground"
+      className="home-surface-2"
       onPointerEnter={() => setPointerPaused(true)}
       onPointerLeave={() => setPointerPaused(false)}
       onFocusCapture={() => setFocusPaused(true)}
       onBlurCapture={handleFocusLeave}
     >
-      <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:items-end lg:gap-12">
-          <div>
-            <div className="marketing-eyebrow">{copy.eyebrow}</div>
-            <h2 className="marketing-title max-w-xl leading-[1.06]">
-              {copy.title}
-            </h2>
-          </div>
-          <p className="max-w-2xl text-[15px] leading-7 text-muted-foreground md:text-base lg:justify-self-end">
-            {copy.subtitle}
-          </p>
+      <div className="home-container home-split home-split-proof">
+        <div className="home-split-copy">
+          <h2>{copy.title}</h2>
+          <p className="home-lead">{copy.eyebrow}</p>
+          <p className="home-copy">{copy.subtitle}</p>
         </div>
 
-        <div className="mt-9 grid overflow-hidden rounded-overlay bg-card shadow-xs ring-1 ring-border/70 md:mt-10 lg:grid-cols-[minmax(17rem,0.36fr)_minmax(0,0.64fr)]">
+        <div className="grid min-w-0 lg:grid-cols-[minmax(17rem,0.4fr)_minmax(0,0.6fr)]">
           <div
             role="tablist"
             aria-label={copy.title}
             aria-orientation="vertical"
-            className="order-2 grid bg-card sm:grid-cols-2 lg:order-1 lg:grid-cols-1 lg:grid-rows-4"
+            className="order-2 grid sm:grid-cols-2 lg:order-1 lg:grid-cols-1 lg:grid-rows-4"
           >
             {modules.map((module, index) => {
               const active = index === activeIndex;
@@ -494,7 +486,7 @@ export function HomeProductShowcase({
                     </span>
                     <span
                       className={[
-                        "text-[10px] font-black uppercase tracking-[0.16em]",
+                        "text-sm font-semibold",
                         active ? "text-foreground" : "text-muted-foreground",
                       ].join(" ")}
                     >
@@ -576,10 +568,9 @@ export function HomeProductShowcase({
                 href={activeModule.href}
                 eventName={activeModule.eventName}
                 eventProperties={{ placement: "product_showcase" }}
-                className="inline-flex shrink-0 items-center gap-2 text-sm font-black text-foreground transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="home-text-link"
               >
                 {activeModule.cta}
-                <ArrowRight className="size-4" />
               </TrackedLink>
             </div>
           </div>

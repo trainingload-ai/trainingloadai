@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -91,10 +90,7 @@ export function HomeHeroDemoPreview({
   }, [ready]);
 
   return (
-    <section
-      aria-label={copy.title}
-      className="overflow-hidden rounded-feature border border-border/80 bg-neutral-950 shadow-[0_32px_90px_-54px_rgba(25,27,24,0.62)] dark:shadow-black/75"
-    >
+    <section aria-label={copy.title} className="home-demo">
       <ProductBrowserChrome
         address={demoOrigin.replace(/^https?:\/\//, "")}
         center={
@@ -112,7 +108,7 @@ export function HomeHeroDemoPreview({
         }
       />
 
-      <div className="relative h-[620px] overflow-hidden bg-neutral-100 dark:bg-neutral-950 sm:h-[680px] lg:h-[720px]">
+      <div className="home-demo-viewport">
         <div
           className={`absolute inset-0 transition-opacity duration-300 motion-reduce:transition-none ${ready ? "opacity-0" : "opacity-100"}`}
           aria-hidden={ready}
@@ -143,8 +139,8 @@ export function HomeHeroDemoPreview({
             />
           </picture>
           {timedOut ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-neutral-950/20 p-4 text-foreground backdrop-blur-md dark:bg-black/55 sm:p-6">
-              <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-overlay border border-border/80 bg-card/[0.94] p-5 text-center shadow-[0_24px_80px_-32px_rgba(25,27,24,0.58)] backdrop-blur-xl dark:bg-card/[0.9] dark:shadow-black/60 sm:p-6">
+            <div className="home-demo-fallback absolute inset-0 flex items-center justify-center p-4 text-foreground sm:p-6">
+              <div className="home-shadow flex w-full max-w-sm flex-col items-center gap-4 rounded-overlay border border-border/80 bg-card p-5 text-center sm:p-6">
                 <p className="text-sm leading-6 text-muted-foreground">
                   {copy.fallback}
                 </p>
@@ -155,7 +151,6 @@ export function HomeHeroDemoPreview({
                   className="inline-flex min-h-10 w-fit items-center justify-center gap-1.5 rounded-control bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/88 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:translate-y-px"
                 >
                   {copy.open}
-                  <ArrowUpRight className="size-4" aria-hidden="true" />
                 </TrackedLink>
               </div>
             </div>

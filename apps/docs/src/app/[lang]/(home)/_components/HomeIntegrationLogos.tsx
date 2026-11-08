@@ -460,11 +460,8 @@ export function HomeHeroWorksWith({
   moreLabel: string;
 }) {
   return (
-    <div className="w-full">
-      <div className="text-center text-sm font-medium text-muted-foreground">
-        {label}
-      </div>
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-4 opacity-80">
+    <figure className="home-logos">
+      <div className="home-logos-row">
         {livePlatforms.map((platform) => (
           <IntegrationLogo
             key={platform.id}
@@ -483,7 +480,8 @@ export function HomeHeroWorksWith({
           {moreLabel}
         </span>
       </div>
-    </div>
+      <figcaption>{label}</figcaption>
+    </figure>
   );
 }
 
@@ -520,18 +518,13 @@ function PlatformLogoRow({
       )}
     >
       {comingSoonLabel ? (
-        <p className="mb-6 text-center text-sm font-medium text-muted-foreground">
-          {comingSoonLabel}
-        </p>
+        <p className="home-coming">{comingSoonLabel}</p>
       ) : null}
-      <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-10 md:gap-x-12 lg:gap-x-10 xl:gap-x-12">
+      <ul className="home-logo-grid">
         {platforms.map((platform) => (
           <li
             key={platform.id}
-            className={cn(
-              "flex shrink-0 items-center justify-center px-1",
-              isPlannedRow ? "h-14 md:h-16" : "h-12 md:h-14",
-            )}
+            className="home-logo-cell"
             title={platform.name}
           >
             <IntegrationLogo
