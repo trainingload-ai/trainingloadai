@@ -210,4 +210,110 @@ describe('measured power spike filter', () => {
     expect(spiked.find((peak) => peak.seconds === 1200)?.value).toBe(200);
     expect(spiked).toEqual(steady);
   });
+
+  it('keeps a flat multi-second sprint above 2 kW', () => {
+    const powers = suppressIsolatedPowerSpikes(
+      Array.from({ length: 80 }, (_, second) => ({
+        seconds: second,
+        power: second >= 20 && second < 28 ? 2400 : 250,
+      })),
+    ).map((sample) => sample.power);
+
+    expect(Math.max(...powers.filter((power) => power != null))).toBe(2400);
+  });
+
+  it('drops a startup discharge that peaks near 2931 W and then falls smoothly', () => {
+    const decay = [
+      1113, 1680, 2133, 2487, 2750, 2931, 2808, 2742, 2669, 2595, 2512, 2419,
+      2333, 2229, 2131, 2032, 1934, 1835, 1742, 1649, 1557, 1467, 1382, 1302,
+      1223, 1146, 1073, 1004, 939, 877, 819, 764, 712, 667, 621, 579, 540, 502,
+      466, 433,
+    ];
+    const samples = [
+      ...Array.from({ length: 6 }, (_, second) => ({
+        seconds: second,
+        power: 0,
+      })),
+      ...decay.map((power, index) => ({ seconds: 6 + index, power })),
+      ...Array.from({ length: 1300 }, (_, index) => ({
+        seconds: 50 + index,
+        power: 320,
+      })),
+    ];
+    const filtered = suppressIsolatedPowerSpikes(samples);
+    const remaining = filtered
+      .map((sample) => sample.power)
+      .filter((power) => power != null);
+
+    expect(Math.max(...remaining)).toBeLessThan(500);
+    const fit = requireFit(
+      calculateCp(
+        measuredPowerPeaks(filtered).map((peak) => ({
+          seconds: peak.seconds,
+          value: peak.value,
+        })),
+      ),
+    );
+    expect(fit.cp).toBeGreaterThan(200);
+    expect(fit.cp).toBeLessThan(400);
+    expect(fit.pMax).toBeLessThan(600);
+  });
+
+  it('drops a startup discharge that peaks near 3877 W across a short recording gap', () => {
+    const samples = [
+      { seconds: 5, power: 1660 },
+      { seconds: 7, power: 2510 },
+      { seconds: 8, power: 3186 },
+      { seconds: 9, power: 3710 },
+      { seconds: 16, power: 3877 },
+      { seconds: 17, power: 3698 },
+      { seconds: 18, power: 3524 },
+      { seconds: 19, power: 3349 },
+      { seconds: 20, power: 3166 },
+      { seconds: 21, power: 2990 },
+      { seconds: 22, power: 2822 },
+      { seconds: 23, power: 2649 },
+      ...Array.from({ length: 1300 }, (_, index) => ({
+        seconds: 90 + index,
+        power: 280,
+      })),
+    ];
+    const filtered = suppressIsolatedPowerSpikes(samples);
+    const remaining = filtered
+      .map((sample) => sample.power)
+      .filter((power) => power != null);
+
+    expect(Math.max(...remaining)).toBe(280);
+    expect(remaining.some((power) => power >= 2000)).toBe(false);
+  });
+
+  it('refuses the mean-maximal curve left behind by those startup discharges', () => {
+    const spiked = calculateCp([
+      point(1, 2931),
+      point(5, 2780),
+      point(30, 1890),
+      point(60, 1123),
+      point(180, 543),
+      point(600, 321),
+      point(1200, 287),
+    ]);
+    const higher = calculateCp([
+      point(1, 3877),
+      point(5, 3523),
+      point(30, 893),
+      point(60, 808),
+      point(180, 468),
+      point(600, 274),
+      point(1200, 211),
+    ]);
+
+    expect(spiked.valid).toBe(false);
+    expect(higher.valid).toBe(false);
+    expect(
+      spiked.reason === 'MISSING_SIGNAL' || (spiked.pMax ?? 0) < 1000,
+    ).toBe(true);
+    expect(
+      higher.reason === 'MISSING_SIGNAL' || (higher.pMax ?? 0) < 1500,
+    ).toBe(true);
+  });
 });

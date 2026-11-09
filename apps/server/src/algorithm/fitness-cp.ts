@@ -10,6 +10,16 @@ const MAX_PLAUSIBLE_POWER_SAMPLE_WATTS = 3000;
  */
 const ISOLATED_SAMPLE_SPIKE_WATTS = 2000;
 const ISOLATED_SAMPLE_SPIKE_RATIO = 4;
+/**
+ * A startup glitch can hold several seconds above ~2 kW and then fall smoothly
+ * through the recording ceiling. Adjacent samples match, so the one-sample
+ * spike test keeps the tail. A flat sprint does not fall like that.
+ */
+const DISCHARGE_SEED_WATTS = 2200;
+const DISCHARGE_TAIL_WATTS = 450;
+const DISCHARGE_LINK_SECONDS = 8;
+const DISCHARGE_MIN_SPAN_SECONDS = 6;
+const DISCHARGE_MIN_DECAY_STEPS = 5;
 
 type PowerPoint = { seconds: number; value: number };
 
@@ -35,12 +45,92 @@ const PMAX_ABOVE_SHORT_MEAN = 2.5;
 const PMAX_ABOVE_CP = 10;
 const W_PRIME_ABOVE_OBSERVED_WORK = 4;
 const SHORT_REFIT_SECONDS = 15;
+/** Short means several times the best ≥10 min power are the tail of a spike, not a sprint. */
+const AEROBIC_ANCHOR_SECONDS = 600;
+const VERY_SHORT_ABOVE_AEROBIC = 6;
+const SHORT_ABOVE_AEROBIC = 3.2;
+
+function sampleTimeSeconds(
+  sample: { tMs?: number; seconds?: number },
+  index: number,
+): number {
+  if (typeof sample.tMs === 'number' && Number.isFinite(sample.tMs)) {
+    return sample.tMs / 1000;
+  }
+  if (typeof sample.seconds === 'number' && Number.isFinite(sample.seconds)) {
+    return sample.seconds;
+  }
+  return index;
+}
+
+/**
+ * Blank a multi-second discharge that starts above ~2 kW and falls smoothly.
+ * Recording gaps up to a few seconds still belong to the same burst. A flat
+ * sprint never accumulates the required falling steps.
+ */
+function dischargeBurstMask(
+  samples: readonly { power: number | null; tMs?: number; seconds?: number }[],
+): boolean[] {
+  const drop = new Array<boolean>(samples.length).fill(false);
+  const time = samples.map((sample, index) => sampleTimeSeconds(sample, index));
+  const linked = (left: number, right: number) =>
+    time[right] > time[left] &&
+    time[right] - time[left] <= DISCHARGE_LINK_SECONDS;
+  let index = 0;
+  while (index < samples.length) {
+    const power = samples[index].power;
+    if (drop[index] || power == null || power < DISCHARGE_SEED_WATTS) {
+      index++;
+      continue;
+    }
+    let start = index;
+    while (start > 0 && linked(start - 1, start)) {
+      const previous = samples[start - 1].power;
+      const current = samples[start].power ?? 0;
+      if (previous == null) {
+        start--;
+        continue;
+      }
+      if (previous < DISCHARGE_TAIL_WATTS) break;
+      if (previous > current * 1.25) break;
+      start--;
+    }
+    let end = index;
+    let decaySteps = 0;
+    let peak = power;
+    while (end + 1 < samples.length && linked(end, end + 1)) {
+      const current = samples[end].power;
+      const next = samples[end + 1].power;
+      if (next == null || current == null) {
+        end++;
+        continue;
+      }
+      if (next < DISCHARGE_TAIL_WATTS) break;
+      if (current > 1200 && next < current * 0.6) break;
+      if (next <= current - 25) decaySteps++;
+      if (next > peak) peak = next;
+      end++;
+    }
+    const endPower = samples[end].power ?? peak;
+    if (
+      time[end] - time[start] >= DISCHARGE_MIN_SPAN_SECONDS &&
+      decaySteps >= DISCHARGE_MIN_DECAY_STEPS &&
+      endPower <= peak * 0.8
+    ) {
+      for (let cursor = start; cursor <= end; cursor++) drop[cursor] = true;
+    }
+    index = end + 1;
+  }
+  return drop;
+}
 
 /**
  * A sample above the recording ceiling is unknown. An isolated multi-kW sample
  * between ordinary neighbors is replaced by those neighbors, so the glitch
  * does not become a one-second maximum and does not punch out the only long
- * window. A real sprint stays elevated on the neighboring samples and is kept.
+ * window. A smooth multi-second discharge from above ~2 kW is removed entirely,
+ * including the tail that has already fallen through the ceiling. A real sprint
+ * stays elevated on the neighboring samples and does not decay that way.
  *
  * This belongs on the series that builds mean-maximal power. The one-second
  * window mean is the sample itself, and the eCP kernel later reads that peak
@@ -49,7 +139,9 @@ const SHORT_REFIT_SECONDS = 15;
 export function suppressIsolatedPowerSpikes<T extends { power: number | null }>(
   samples: readonly T[],
 ): Array<Omit<T, 'power'> & { power: number | null }> {
+  const discharge = dischargeBurstMask(samples);
   return samples.map((sample, index) => {
+    if (discharge[index]) return { ...sample, power: null };
     const power = sample.power;
     if (typeof power !== 'number' || !Number.isFinite(power)) return sample;
     if (power > MAX_PLAUSIBLE_POWER_SAMPLE_WATTS) {
@@ -218,7 +310,17 @@ function sanitizeMeanMaximalPower(points: PowerPoint[]): PowerPoint[] {
       changed = true;
     }
   }
-  return rows;
+  const aerobic = rows.filter(
+    (point) => point.seconds >= AEROBIC_ANCHOR_SECONDS,
+  );
+  if (aerobic.length === 0) return rows;
+  const anchor = Math.max(...aerobic.map((point) => point.value));
+  return rows.filter((point) => {
+    if (point.seconds > 60) return true;
+    const multiple =
+      point.seconds <= 15 ? VERY_SHORT_ABOVE_AEROBIC : SHORT_ABOVE_AEROBIC;
+    return point.value <= anchor * multiple;
+  });
 }
 
 function denseMeanMaximalPower(points: PowerPoint[]): number[] {
