@@ -25,6 +25,7 @@ import {
   resolveMeasuredPowerEvidence,
 } from '@/training-load/measured-power-evidence';
 import { validateFitnessMetricCandidate } from '@/api/user/fitness-metric-validator';
+import { powerModelOriginPayload } from '@/api/user/power-metric-evidence';
 import {
   selectLthrEstimate,
   shouldApplyLthrAutoUpdate,
@@ -312,7 +313,10 @@ export class AnalyzeFitnessOrchestratorService {
       },
     });
 
-    const bestByDuration = new Map<number, number>();
+    const bestByDuration = new Map<
+      number,
+      { watts: number; activityId: number }
+    >();
     const skippedActivityIds = new Set<number>();
     for (const row of peakRows) {
       if (
@@ -325,12 +329,15 @@ export class AnalyzeFitnessOrchestratorService {
         }
         continue;
       }
-      const value = Number(row.value);
-      if (!Number.isFinite(value) || value <= 0) continue;
-      bestByDuration.set(
-        row.scaleValue,
-        Math.max(bestByDuration.get(row.scaleValue) ?? 0, value),
-      );
+      const watts = Number(row.value);
+      if (!Number.isFinite(watts) || watts <= 0) continue;
+      const current = bestByDuration.get(row.scaleValue);
+      if (!current || watts > current.watts) {
+        bestByDuration.set(row.scaleValue, {
+          watts,
+          activityId: row.activityId,
+        });
+      }
     }
 
     if (skippedActivityIds.size > 0) {
@@ -348,7 +355,11 @@ export class AnalyzeFitnessOrchestratorService {
     }
 
     const points = Array.from(bestByDuration.entries())
-      .map(([duration, power]) => ({ duration, power }))
+      .map(([duration, peak]) => ({
+        duration,
+        power: peak.watts,
+        activityId: peak.activityId,
+      }))
       .filter(
         (p: { duration: number; power: number }) =>
           p.duration > 0 && p.power > 0,
@@ -412,6 +423,15 @@ export class AnalyzeFitnessOrchestratorService {
         sportType,
         candidates,
         calculationDate,
+        {
+          originPayload: powerModelOriginPayload(
+            points.map((point) => ({
+              seconds: point.duration,
+              watts: point.power,
+              activityId: point.activityId,
+            })),
+          ),
+        },
       );
       return;
     } catch (e) {

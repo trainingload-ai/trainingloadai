@@ -9,6 +9,7 @@ import {
 import { UserService } from '../user.service';
 import { UserQueryService } from '../user-query.service';
 import { UserIdentityRepository } from '../persistence/user-identity.repository';
+import { powerModelOriginPayload } from '../power-metric-evidence';
 
 function userServiceDependencies(prisma: object, autoEnabled = true) {
   return [
@@ -216,6 +217,12 @@ describe('UserService estimated fitness metric tracks', () => {
     expect(created[0]?.value).toBe(172);
   });
 
+  const cyclingPowerEvidence = {
+    originPayload: powerModelOriginPayload([
+      { seconds: 1200, watts: 300, activityId: 9 },
+    ]),
+  };
+
   it('writes ESTIMATED and AUTO when auto update is enabled', async () => {
     const { service, created } = createService({ autoEnabled: true });
 
@@ -227,12 +234,39 @@ describe('UserService estimated fitness metric tracks', () => {
       undefined,
       MetricSource.AUTO,
       new Date('2026-08-04T12:00:00.000Z'),
+      cyclingPowerEvidence,
     );
 
     expect(created.map((row) => row.source)).toEqual([
       MetricSource.ESTIMATED,
       MetricSource.AUTO,
     ]);
+    expect(created.every((row) => row.originPayload)).toBe(true);
+  });
+
+  it('does not publish an automatic power metric without peak evidence', async () => {
+    const { service, prisma, created } = createService({ autoEnabled: true });
+
+    await expect(
+      service.upsertFitnessMetric(
+        'user-1',
+        UserFitnessMetricType.CP,
+        250,
+        SportType.CYCLING,
+        undefined,
+        MetricSource.AUTO,
+        new Date('2026-08-04T12:00:00.000Z'),
+      ),
+    ).resolves.toBeNull();
+    await expect(
+      service.upsertAutoFitnessMetrics('user-1', SportType.CYCLING, [
+        { type: UserFitnessMetricType.CP, value: 250 },
+        { type: UserFitnessMetricType.FTP, value: 238 },
+      ]),
+    ).resolves.toEqual([]);
+
+    expect(created).toHaveLength(0);
+    expect(prisma.userFitnessMetric.create).not.toHaveBeenCalled();
   });
 
   it('publishes one power model with one transaction and one user lock', async () => {
@@ -249,6 +283,7 @@ describe('UserService estimated fitness metric tracks', () => {
         { type: UserFitnessMetricType.W_PRIME, value: 84_655 },
       ],
       recordedAt,
+      cyclingPowerEvidence,
     );
 
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);

@@ -358,6 +358,7 @@ describe('AnalyzeFitnessOrchestratorService refresh failures', () => {
     const powers = [800, 650, 500, 430, 330, 280];
     const findMany = jest.fn(async () =>
       durations.map((scaleValue, index) => ({
+        activityId: 1000 + index,
         scaleValue,
         value: powers[index],
         activity: {
@@ -394,6 +395,16 @@ describe('AnalyzeFitnessOrchestratorService refresh failures', () => {
         { type: 'W_PRIME', value: 84_655 },
       ],
       calculationDate,
+      {
+        originPayload: {
+          method: 'CP_MODEL',
+          peaks: durations.map((seconds, index) => ({
+            seconds,
+            watts: powers[index],
+            activityId: 1000 + index,
+          })),
+        },
+      },
     );
     expect(upsertFitnessMetric).not.toHaveBeenCalled();
   });
