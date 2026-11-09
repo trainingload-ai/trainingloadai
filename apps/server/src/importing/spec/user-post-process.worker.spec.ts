@@ -78,7 +78,9 @@ describe('UserPostProcessWorkerService', () => {
           recomputeFrom,
           recomputeTo: recomputeFrom,
           affectedSportTypes: ['RUN'],
+          replayCheckpoint: null,
         })),
+        findMany: jest.fn(async () => []),
         update: jest.fn(async () => ({})),
       },
       importItemJob: { findMany: jest.fn(async () => [{ activityId: 42 }]) },
@@ -206,6 +208,351 @@ describe('UserPostProcessWorkerService', () => {
     expect(limit).toBe(3);
     expect(typeof token).toBe('string');
     expect(leaseExpiresAt).toBeInstanceOf(Date);
+  });
+
+  it('does not claim a user who already has a live RUNNING post-process job', async () => {
+    const $queryRawUnsafe = jest.fn(async () => []);
+    const prisma = { $queryRawUnsafe };
+    const service = new UserPostProcessWorkerService(
+      prisma as never,
+      { get: jest.fn(() => 60_000) } as never,
+      {} as never,
+      { emitAsync: jest.fn(async () => []) } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      undefined,
+      undefined,
+      createImportingJobs(prisma),
+      userQueries(prisma) as never,
+    );
+
+    await (
+      service as unknown as { claimBatch: (...args: unknown[]) => unknown }
+    ).claimBatch(5);
+
+    const sql = String($queryRawUnsafe.mock.calls[0]?.[0]);
+    expect(sql).toContain('running.user_id = j.user_id');
+    expect(sql).toContain('running.id <> j.id');
+    expect(sql).toContain("running.status = 'RUNNING'");
+    expect(sql).toContain('running.lease_expires_at IS NOT NULL');
+    expect(sql).toContain('running.lease_expires_at > $1');
+    expect(sql).toContain('lease_expires_at IS NULL');
+    expect(sql).toContain('lease_expires_at <= $1');
+    expect(sql).not.toContain('NOW()');
+  });
+
+  it('still claims different users in one batch while taking only the earliest job per user', async () => {
+    const $queryRawUnsafe = jest.fn(async () => [
+      {
+        id: 'post-a',
+        user_id: 'user-a',
+        batch_job_id: 'batch-a',
+        lock_token: 'token-a',
+      },
+      {
+        id: 'post-b',
+        user_id: 'user-b',
+        batch_job_id: 'batch-b',
+        lock_token: 'token-b',
+      },
+    ]);
+    const prisma = { $queryRawUnsafe };
+    const service = new UserPostProcessWorkerService(
+      prisma as never,
+      { get: jest.fn(() => 60_000) } as never,
+      {} as never,
+      { emitAsync: jest.fn(async () => []) } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      undefined,
+      undefined,
+      createImportingJobs(prisma),
+      userQueries(prisma) as never,
+    );
+
+    await expect(
+      (
+        service as unknown as { claimBatch: (...args: unknown[]) => unknown }
+      ).claimBatch(5),
+    ).resolves.toEqual([
+      {
+        id: 'post-a',
+        userId: 'user-a',
+        batchJobId: 'batch-a',
+        lockToken: 'token-a',
+      },
+      {
+        id: 'post-b',
+        userId: 'user-b',
+        batchJobId: 'batch-b',
+        lockToken: 'token-b',
+      },
+    ]);
+    const [sql, , limit] = $queryRawUnsafe.mock.calls[0] as [
+      string,
+      unknown,
+      number,
+    ];
+    expect(limit).toBe(5);
+    expect(sql).toContain('LIMIT $2');
+    expect(sql).toContain('FOR UPDATE SKIP LOCKED');
+    expect(sql).toContain('running.user_id = j.user_id');
+    expect(sql).toContain('earlier.user_id = j.user_id');
+    expect(sql).toContain('earlier.created_at < j.created_at');
+    expect(sql).toContain('ORDER BY j.created_at ASC, j.id ASC');
+    expect(sql).not.toMatch(
+      /NOT EXISTS \(\s*SELECT 1\s+FROM t_user_post_process_job running\s+WHERE running\.status = 'RUNNING'\s*\)/,
+    );
+  });
+
+  it('replays the earliest same-user window once and lets the sibling skip replay', async () => {
+    const earlier = new Date('2026-07-01T00:00:00.000Z');
+    const later = new Date('2026-08-01T00:00:00.000Z');
+    const openFrom = new Date('2026-06-01T00:00:00.000Z');
+    const pagingFrom = new Date('2026-05-01T00:00:00.000Z');
+    const checkpoints = new Map<string, unknown>();
+    const rows: Record<
+      string,
+      {
+        recomputeFrom: Date;
+        recomputeTo: Date;
+        affectedSportTypes: string[];
+        replayCheckpoint: unknown;
+      }
+    > = {
+      'post-later': {
+        recomputeFrom: later,
+        recomputeTo: later,
+        affectedSportTypes: ['RUN'],
+        replayCheckpoint: null,
+      },
+      'post-earlier': {
+        recomputeFrom: earlier,
+        recomputeTo: earlier,
+        affectedSportTypes: ['CYCLING'],
+        replayCheckpoint: null,
+      },
+    };
+    const updateMany = jest.fn(
+      async (args: {
+        where: { id?: string };
+        data: { replayCheckpoint?: unknown };
+      }) => {
+        if (args.where.id && args.data.replayCheckpoint) {
+          checkpoints.set(args.where.id, args.data.replayCheckpoint);
+        }
+        return { count: 1 };
+      },
+    );
+    const replay = jest.fn(async () => ({
+      runId: 'run-1',
+      processedActivities: 2,
+      completed: true,
+      nextCheckpoint: null,
+    }));
+    const prisma = {
+      userPostProcessJob: {
+        findUnique: jest.fn(async (args: { where: { id: string } }) => {
+          const row = rows[args.where.id];
+          if (!row) return null;
+          return {
+            ...row,
+            replayCheckpoint:
+              checkpoints.get(args.where.id) ?? row.replayCheckpoint,
+          };
+        }),
+        findMany: jest.fn(async () => [
+          {
+            id: 'post-paging',
+            batchJobId: 'batch-paging',
+            recomputeFrom: pagingFrom,
+            recomputeTo: pagingFrom,
+            replayCheckpoint: {
+              nextEffectiveFrom: '2026-05-02T00:00:00.000Z',
+            },
+            batchJob: {
+              totalCount: 1,
+              _count: { items: 1 },
+              items: [],
+            },
+          },
+          {
+            id: 'post-open',
+            batchJobId: 'batch-open',
+            recomputeFrom: openFrom,
+            recomputeTo: openFrom,
+            replayCheckpoint: null,
+            batchJob: {
+              totalCount: 2,
+              _count: { items: 1 },
+              items: [{ id: 'item-open' }],
+            },
+          },
+          {
+            id: 'post-earlier',
+            batchJobId: 'batch-earlier',
+            recomputeFrom: earlier,
+            recomputeTo: earlier,
+            replayCheckpoint: null,
+            batchJob: {
+              totalCount: 1,
+              _count: { items: 1 },
+              items: [],
+            },
+          },
+        ]),
+        updateMany,
+      },
+      importItemJob: {
+        findMany: jest.fn(
+          async (args?: { where?: { batchJobId?: string } }) => {
+            switch (args?.where?.batchJobId) {
+              case 'batch-later':
+                return [{ activityId: 42 }];
+              case 'batch-earlier':
+                return [{ activityId: 7 }];
+              case 'batch-open':
+                return [{ activityId: 99 }];
+              case 'batch-paging':
+                return [{ activityId: 100 }];
+              default:
+                return [];
+            }
+          },
+        ),
+      },
+      activity: {
+        aggregate: jest.fn(async () => ({
+          _min: { startTime: later },
+          _max: { startTime: later },
+        })),
+      },
+      importBatchJob: {
+        findUnique: jest.fn(async () => ({ requestContext: {} })),
+      },
+    };
+    const service = new UserPostProcessWorkerService(
+      prisma as never,
+      { get: jest.fn(() => undefined) } as never,
+      { replay } as never,
+      { emitAsync: jest.fn(async () => []) } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      undefined,
+      undefined,
+      createImportingJobs(prisma),
+      userQueries(prisma) as never,
+    );
+    const runBatchAiReviewWhenAllowed = jest.fn(async () => undefined);
+    const runBatchThirdPartyExports = jest.fn(async () => ({
+      failedProviders: [],
+      failedCount: 0,
+    }));
+    const sendBatchNotification = jest.fn(async () => undefined);
+    const completeClaimedJob = jest.fn(async () => undefined);
+    const resolveFinalBatchStatus = jest.fn(async () => 'COMPLETED');
+    Object.assign(service as object, {
+      runBatchAiReviewWhenAllowed,
+      runBatchThirdPartyExports,
+      sendBatchNotification,
+      completeClaimedJob,
+      resolveFinalBatchStatus,
+      logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    });
+    const processJob = (
+      service as unknown as {
+        processJob: (...args: unknown[]) => Promise<void>;
+      }
+    ).processJob.bind(service);
+
+    await processJob({
+      id: 'post-later',
+      userId: 'user-1',
+      batchJobId: 'batch-later',
+      lockToken: 'lock-later',
+    });
+
+    expect(replay).toHaveBeenCalledTimes(1);
+    expect(replay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        sourceJobId: 'post-later',
+        effectiveFrom: earlier,
+        includeActivityIds: [42, 7],
+      }),
+    );
+    expect(updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: 'post-earlier',
+          userId: 'user-1',
+          status: { in: ['PENDING', 'FAILED'] },
+        },
+        data: {
+          replayCheckpoint: expect.objectContaining({
+            replaySatisfiedFrom: earlier.toISOString(),
+            replaySatisfiedThrough: expect.any(String),
+            replaySatisfiedBy: 'post-later',
+          }),
+        },
+      }),
+    );
+    expect(updateMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ id: 'post-open' }),
+      }),
+    );
+    expect(updateMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ id: 'post-paging' }),
+      }),
+    );
+    expect(runBatchAiReviewWhenAllowed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        batchJobId: 'batch-later',
+        activityIds: [42],
+      }),
+    );
+    expect(runBatchThirdPartyExports).toHaveBeenCalledWith(
+      expect.objectContaining({
+        batchJobId: 'batch-later',
+        activityIds: [42],
+      }),
+    );
+    expect(sendBatchNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ batchJobId: 'batch-later', userId: 'user-1' }),
+    );
+
+    await processJob({
+      id: 'post-earlier',
+      userId: 'user-1',
+      batchJobId: 'batch-earlier',
+      lockToken: 'lock-earlier',
+    });
+
+    expect(replay).toHaveBeenCalledTimes(1);
+    expect(runBatchAiReviewWhenAllowed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        batchJobId: 'batch-earlier',
+        activityIds: [7],
+      }),
+    );
+    expect(runBatchThirdPartyExports).toHaveBeenCalledWith(
+      expect.objectContaining({
+        batchJobId: 'batch-earlier',
+        activityIds: [7],
+      }),
+    );
+    expect(sendBatchNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        batchJobId: 'batch-earlier',
+        userId: 'user-1',
+      }),
+    );
+    expect(completeClaimedJob).toHaveBeenCalledTimes(2);
   });
 
   it('fences final batch publication after the lease moves to another worker', async () => {

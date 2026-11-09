@@ -18,7 +18,7 @@ import { UserService } from '@/api/user/user.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { ThirdPartyAutoExportOrchestratorService } from '@/workers/third-party-auto-export-orchestrator.service';
 import { WorkerDrainProgress } from '@/workers/worker-drain-progress';
-import { SportType, type ImportPipelineStage } from '@prisma/client';
+import { Prisma, SportType, type ImportPipelineStage } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
 import {
@@ -81,6 +81,80 @@ function replayCheckpointEffectiveFrom(value: unknown): Date | null {
   const parsed = new Date(raw);
   return Number.isFinite(parsed.getTime()) ? parsed : null;
 }
+
+function checkpointInstant(value: unknown, key: string): Date | null {
+  const raw = jsonRecord(value)[key];
+  if (typeof raw !== 'string') return null;
+  const parsed = new Date(raw);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
+}
+
+/** 本任务自己的分页或未冲掉的 PMC 窗口必须接着跑，不能当成已被兄弟任务覆盖。 */
+function hasOwnReplayCursor(value: unknown) {
+  const record = jsonRecord(value);
+  return (
+    typeof record.nextEffectiveFrom === 'string' ||
+    typeof record.pendingPmcRecomputeFrom === 'string' ||
+    typeof record.pendingPmcRecomputeTo === 'string'
+  );
+}
+
+/**
+ * 兄弟任务写入的水位：一次已完成的顺序重放覆盖了
+ * [replaySatisfiedFrom, replaySatisfiedThrough]。
+ */
+function replayWindowCovered(args: {
+  checkpoint: unknown;
+  effectiveFrom: Date | null;
+  effectiveTo: Date | null;
+}) {
+  if (hasOwnReplayCursor(args.checkpoint)) return false;
+  const from = checkpointInstant(args.checkpoint, 'replaySatisfiedFrom');
+  const through = checkpointInstant(args.checkpoint, 'replaySatisfiedThrough');
+  if (!from || !through || !args.effectiveFrom || !args.effectiveTo)
+    return false;
+  return (
+    from.getTime() <= args.effectiveFrom.getTime() &&
+    args.effectiveTo.getTime() <= through.getTime()
+  );
+}
+
+function postProcessClaimableSql(alias: string) {
+  return `(
+    (${alias}.status IN ('PENDING','FAILED') AND ${alias}.available_at <= $1)
+    OR (
+      ${alias}.status = 'RUNNING'
+      AND (${alias}.lease_expires_at IS NULL OR ${alias}.lease_expires_at <= $1)
+    )
+  )`;
+}
+
+function postProcessBatchReadySql(batchIdSql: string) {
+  return `EXISTS (
+    SELECT 1 FROM t_import_batch_job b
+    WHERE b.id = ${batchIdSql}
+      AND (SELECT COUNT(*) FROM t_import_item_job i WHERE i.batch_job_id = b.id) >= b.total_count
+      AND NOT EXISTS (
+        SELECT 1 FROM t_import_item_job i
+        WHERE i.batch_job_id = b.id AND i.status NOT IN ('DONE','SKIPPED','DEAD')
+      )
+  )`;
+}
+
+const TERMINAL_IMPORT_ITEM_STATUSES = ['DONE', 'SKIPPED', 'DEAD'] as const;
+
+type ReadySiblingPostProcessJob = {
+  id: string;
+  batchJobId: string;
+  recomputeFrom: Date | null;
+  recomputeTo: Date | null;
+  replayCheckpoint: unknown;
+  batchJob: {
+    totalCount: number;
+    _count: { items: number };
+    items: Array<{ id: string }>;
+  } | null;
+};
 
 type ThirdPartyExportOutcome = {
   failedProviders: string[];
@@ -292,7 +366,9 @@ export class UserPostProcessWorkerService
   }
 
   private async claimBatch(batchSize: number) {
-    // SKIP LOCKED 让多个 worker 实例可以安全抢占不同 job，不会互相阻塞。
+    // 同一用户同时只领一条。已有未过期 RUNNING 时整户跳过；多条可领时只锁最早的一条。
+    // 两个副本会抢这同一行，SKIP LOCKED 不会把该用户的另一条也标成 RUNNING。
+    // 其它用户的最早一条仍可在同一批里并行领取。过期 RUNNING 仍可被原任务重新认领。
     const now = new Date();
     const lockToken = randomUUID();
     const leaseExpiresAt = new Date(now.getTime() + this.leaseMs());
@@ -306,25 +382,32 @@ export class UserPostProcessWorkerService
     >(
       `
       WITH picked AS (
-        SELECT id
-        FROM t_user_post_process_job
-        WHERE (
-          (status IN ('PENDING','FAILED') AND available_at <= $1)
-          OR (
-            status='RUNNING'
-            AND (lease_expires_at IS NULL OR lease_expires_at <= $1)
+        SELECT j.id
+        FROM t_user_post_process_job j
+        WHERE ${postProcessClaimableSql('j')}
+          AND ${postProcessBatchReadySql('j.batch_job_id')}
+          AND NOT EXISTS (
+            SELECT 1
+            FROM t_user_post_process_job running
+            WHERE running.user_id = j.user_id
+              AND running.id <> j.id
+              AND running.status = 'RUNNING'
+              AND running.lease_expires_at IS NOT NULL
+              AND running.lease_expires_at > $1
           )
-        )
-        AND EXISTS (
-          SELECT 1 FROM t_import_batch_job b
-          WHERE b.id = t_user_post_process_job.batch_job_id
-            AND (SELECT COUNT(*) FROM t_import_item_job i WHERE i.batch_job_id = b.id) >= b.total_count
-            AND NOT EXISTS (
-              SELECT 1 FROM t_import_item_job i
-              WHERE i.batch_job_id = b.id AND i.status NOT IN ('DONE','SKIPPED','DEAD')
-            )
-        )
-        ORDER BY created_at ASC
+          AND NOT EXISTS (
+            SELECT 1
+            FROM t_user_post_process_job earlier
+            WHERE earlier.user_id = j.user_id
+              AND earlier.id <> j.id
+              AND ${postProcessClaimableSql('earlier')}
+              AND ${postProcessBatchReadySql('earlier.batch_job_id')}
+              AND (
+                earlier.created_at < j.created_at
+                OR (earlier.created_at = j.created_at AND earlier.id < j.id)
+              )
+          )
+        ORDER BY j.created_at ASC, j.id ASC
         LIMIT $2
         FOR UPDATE SKIP LOCKED
       )
@@ -796,6 +879,136 @@ export class UserPostProcessWorkerService
         failures.length,
     };
   }
+
+  /**
+   * 顺序重放按用户时间轴读取全部活动，不按 affectedSportTypes 裁剪。
+   * 同用户其它已就绪批次只把起点前移，并把它尚未 READY 的活动并进同一次重放。
+   */
+  private async expandReplayWithReadySiblings(args: {
+    jobId: string;
+    userId: string;
+    effectiveFrom: Date;
+    activityIds: number[];
+  }) {
+    const siblings = await this.listCoalescibleSiblingJobs(
+      args.userId,
+      args.jobId,
+    );
+    let effectiveFrom = args.effectiveFrom;
+    const activityIds = new Set(args.activityIds);
+    const covered: ReadySiblingPostProcessJob[] = [];
+    for (const sibling of siblings) {
+      const siblingFrom = sibling.recomputeFrom;
+      if (!siblingFrom) continue;
+      if (siblingFrom.getTime() < effectiveFrom.getTime()) {
+        effectiveFrom = siblingFrom;
+      }
+      const siblingActivityIds = await this.getBatchAnalysisActivityIds({
+        batchJobId: sibling.batchJobId,
+        userId: args.userId,
+      });
+      for (const activityId of siblingActivityIds) activityIds.add(activityId);
+      covered.push(sibling);
+    }
+    return {
+      effectiveFrom,
+      activityIds: Array.from(activityIds),
+      siblings: covered.filter(
+        (sibling) =>
+          sibling.recomputeFrom != null &&
+          sibling.recomputeFrom.getTime() >= effectiveFrom.getTime(),
+      ),
+    };
+  }
+
+  private async listCoalescibleSiblingJobs(userId: string, jobId: string) {
+    const rows = (await this.importJobs.postProcessJobs().findMany({
+      where: {
+        userId,
+        id: { not: jobId },
+        status: { in: ['PENDING', 'FAILED'] },
+        availableAt: { lte: new Date() },
+      },
+      select: {
+        id: true,
+        batchJobId: true,
+        recomputeFrom: true,
+        recomputeTo: true,
+        replayCheckpoint: true,
+        batchJob: {
+          select: {
+            totalCount: true,
+            _count: { select: { items: true } },
+            items: {
+              where: {
+                status: { notIn: [...TERMINAL_IMPORT_ITEM_STATUSES] },
+              },
+              select: { id: true },
+              take: 1,
+            },
+          },
+        },
+      },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    })) as ReadySiblingPostProcessJob[];
+    return rows.filter((row) => {
+      const batch = row.batchJob;
+      if (!batch) return false;
+      if (batch._count.items < batch.totalCount || batch.items.length > 0) {
+        return false;
+      }
+      if (hasOwnReplayCursor(row.replayCheckpoint)) return false;
+      if (
+        replayWindowCovered({
+          checkpoint: row.replayCheckpoint,
+          effectiveFrom: row.recomputeFrom,
+          effectiveTo: row.recomputeTo ?? row.recomputeFrom,
+        })
+      ) {
+        return false;
+      }
+      return row.recomputeFrom != null;
+    });
+  }
+
+  private async markSiblingReplaysSatisfied(args: {
+    userId: string;
+    sourceJobId: string;
+    effectiveFrom: Date;
+    satisfiedThrough: Date;
+    siblings: ReadySiblingPostProcessJob[];
+  }) {
+    const satisfiedFrom = args.effectiveFrom.toISOString();
+    const satisfiedThrough = args.satisfiedThrough.toISOString();
+    for (const sibling of args.siblings) {
+      const siblingFrom = sibling.recomputeFrom;
+      const siblingTo = sibling.recomputeTo ?? siblingFrom;
+      if (
+        !siblingFrom ||
+        !siblingTo ||
+        siblingFrom.getTime() < args.effectiveFrom.getTime() ||
+        siblingTo.getTime() > args.satisfiedThrough.getTime()
+      ) {
+        continue;
+      }
+      await this.importJobs.postProcessJobs().updateMany({
+        where: {
+          id: sibling.id,
+          userId: args.userId,
+          status: { in: ['PENDING', 'FAILED'] },
+        },
+        data: {
+          replayCheckpoint: {
+            ...jsonRecord(sibling.replayCheckpoint),
+            replaySatisfiedFrom: satisfiedFrom,
+            replaySatisfiedThrough: satisfiedThrough,
+            replaySatisfiedBy: args.sourceJobId,
+          } as Prisma.InputJsonValue,
+        },
+      });
+    }
+  }
+
   /**
    * 用户后处理任务
    * @param job
@@ -843,35 +1056,91 @@ export class UserPostProcessWorkerService
             _max: { startTime: true },
           })
         : null;
-      const replayFrom =
+      const ownReplayFrom =
         replayCheckpointEffectiveFrom(row.replayCheckpoint) ??
         row.recomputeFrom ??
-        batchActivityRange?._min.startTime;
+        batchActivityRange?._min.startTime ??
+        null;
+      const ownReplayTo =
+        row.recomputeTo ?? batchActivityRange?._max.startTime ?? ownReplayFrom;
       // 新导入的历史活动可能改变滚动指标，并继续影响批次之后已经存在的活动。
       // recomputeTo 只保留原批次审计范围，正确性重放必须检查完整后缀。
-      const replayTo = new Date();
       const heavyActivityIds = batchAnalysisActivityIds;
-
-      this.logImportPipelineEvent({
-        batchJobId: job.batchJobId,
-        postProcessJobId: job.id,
-        userId: job.userId,
-        stage: 'POST_PROCESSING',
-        message: '按活动时间顺序重放用户指标与重度分析',
-        data: {
-          sportTypes,
-          recomputeFrom: row.recomputeFrom?.toISOString() ?? null,
-          recomputeTo: row.recomputeTo?.toISOString() ?? null,
-        },
+      const replayCovered = replayWindowCovered({
+        checkpoint: row.replayCheckpoint,
+        effectiveFrom: ownReplayFrom,
+        effectiveTo: ownReplayTo,
       });
-      if (replayFrom && batchAnalysisActivityIds.length > 0) {
+      const continueOwnCursor = hasOwnReplayCursor(row.replayCheckpoint);
+      let replayFrom = ownReplayFrom;
+      let replayActivityIds = batchAnalysisActivityIds;
+      let coalescedSiblings: ReadySiblingPostProcessJob[] = [];
+      if (
+        !replayCovered &&
+        !continueOwnCursor &&
+        ownReplayFrom &&
+        batchAnalysisActivityIds.length > 0
+      ) {
+        const expanded = await this.expandReplayWithReadySiblings({
+          jobId: job.id,
+          userId: job.userId,
+          effectiveFrom: ownReplayFrom,
+          activityIds: batchAnalysisActivityIds,
+        });
+        replayFrom = expanded.effectiveFrom;
+        replayActivityIds = expanded.activityIds;
+        coalescedSiblings = expanded.siblings;
+      }
+
+      if (replayCovered) {
+        this.logImportPipelineEvent({
+          batchJobId: job.batchJobId,
+          postProcessJobId: job.id,
+          userId: job.userId,
+          stage: 'POST_PROCESSING',
+          message: '同用户顺序重放已覆盖本批次窗口，跳过重复重放',
+          data: {
+            sportTypes,
+            recomputeFrom: row.recomputeFrom?.toISOString() ?? null,
+            recomputeTo: row.recomputeTo?.toISOString() ?? null,
+            replaySatisfiedFrom:
+              checkpointInstant(
+                row.replayCheckpoint,
+                'replaySatisfiedFrom',
+              )?.toISOString() ?? null,
+            replaySatisfiedThrough:
+              checkpointInstant(
+                row.replayCheckpoint,
+                'replaySatisfiedThrough',
+              )?.toISOString() ?? null,
+          },
+        });
+      } else if (replayFrom && batchAnalysisActivityIds.length > 0) {
+        this.logImportPipelineEvent({
+          batchJobId: job.batchJobId,
+          postProcessJobId: job.id,
+          userId: job.userId,
+          stage: 'POST_PROCESSING',
+          message: '按活动时间顺序重放用户指标与重度分析',
+          data: {
+            sportTypes,
+            recomputeFrom: row.recomputeFrom?.toISOString() ?? null,
+            recomputeTo: row.recomputeTo?.toISOString() ?? null,
+            effectiveFrom: replayFrom.toISOString(),
+            coalescedSiblingCount: coalescedSiblings.length,
+          },
+        });
+      }
+      if (!replayCovered && replayFrom && batchAnalysisActivityIds.length > 0) {
+        const effectiveFrom = replayFrom;
+        const replayTo = new Date();
         const replayResult = await this.chronologicalReplay.replay({
           userId: job.userId,
           sourceJobType: 'USER_POST_PROCESS',
           sourceJobId: job.id,
-          effectiveFrom: replayFrom,
+          effectiveFrom,
           effectiveTo: replayTo,
-          includeActivityIds: batchAnalysisActivityIds,
+          includeActivityIds: replayActivityIds,
           maxActivities: 100,
           sourceLockToken: job.lockToken,
           suppressAthleteStateReassessment:
@@ -908,6 +1177,13 @@ export class UserPostProcessWorkerService
           });
           return;
         }
+        await this.markSiblingReplaysSatisfied({
+          userId: job.userId,
+          sourceJobId: job.id,
+          effectiveFrom,
+          satisfiedThrough: replayTo,
+          siblings: coalescedSiblings,
+        });
         if (
           heavyActivityIds.length > 0 &&
           !postProcessPolicy.suppressAthleteStateReassessment
