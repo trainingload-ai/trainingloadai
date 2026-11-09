@@ -91,16 +91,17 @@ flowchart LR
     Server --> Files[Local file storage]
     Server -. optional outbound .-> AI[Owner-selected AI provider]
     Server -. optional outbound .-> Intervals[Intervals.icu API]
+    Server -. optional outbound .-> Garmin[Garmin Personal API]
 ```
 
-The browser reaches one Client port. The Server and PostgreSQL stay on the private Compose network. Uploaded files use local storage, notifications stay in the application, and AI providers plus Intervals.icu are optional outbound connections.
+The browser reaches one Client port. The Server and PostgreSQL stay on the private Compose network. Uploaded files use local storage, notifications stay in the application, and AI providers, Intervals.icu, and Garmin Personal API are optional outbound connections. COROS MCP is not enabled on Self-host.
 
 ### Self-host boundaries
 
 | Area | Self-host behavior |
 | --- | --- |
 | AI | OpenAI, DeepSeek, OpenRouter, DashScope, or a custom OpenAI-compatible service |
-| Imports | FIT, TCX, GPX, and an Intervals.icu personal API key |
+| Imports | FIT, TCX, GPX, Intervals.icu personal API key, and Garmin Personal API |
 | Maps | MapLibre with OpenFreeMap, OSM-compatible, or custom map configuration |
 | Storage | PostgreSQL plus local uploaded-file storage |
 | Product access | Core training features and BYOK AI are available directly |
