@@ -51,6 +51,7 @@ import {
   estimateCalculatedPower,
   measuredPowerCoverage,
 } from '@/algorithm/power';
+import { cropContaminatedActivityTail } from '@/algorithm/activity-evidence-trim';
 import { sanitizeActivityRecordSpeeds } from '@/algorithm/instantaneous-speed';
 import { HeartRateBaseResultDto } from './dto/heart-base.dto';
 import { HeartRateDurationCurvePoint } from '@/heart-rate/heart-rate.interfaces';
@@ -2660,6 +2661,8 @@ export class ActivityService {
       if (this.shouldRecalculateField(records, 'speed')) {
         this.calculateSpeedIfMissing(records);
       }
+      // 车速尾段仍在原始速度上可见。整段裁掉后再做速度清洗。
+      records = cropContaminatedActivityTail(records, sportType).records;
       records = sanitizeActivityRecordSpeeds(records, sportType);
       // 按 Elevate 链路平滑海拔并重算 grade；跑步/骑行使用运动专项距离窗口。
       records = this.applyElevationSmoothingAndGrade(records, sportType);
