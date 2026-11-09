@@ -1,15 +1,17 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.18",
+  "releaseVersion": "1.1.19",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [
       "1.1.15",
-      "1.1.17"
+      "1.1.17",
+      "1.1.18"
     ],
     "applicationRollbackTo": [
       "1.1.15",
-      "1.1.17"
+      "1.1.17",
+      "1.1.18"
     ],
     "backupRequired": true
   },

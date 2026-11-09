@@ -13,7 +13,7 @@ import {
 test("repository image contract is internally consistent", async () => {
   const result = await validateRepository();
   assert.deepEqual(result.errors, []);
-  assert.equal(result.releaseVersion, "1.1.18");
+  assert.equal(result.releaseVersion, "1.1.19");
 });
 
 test("rejects an unpinned base image and root runner", async () => {
