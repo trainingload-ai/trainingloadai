@@ -122,6 +122,38 @@ describe('contaminated run tail evidence trim', () => {
   const clean = jogging(900);
   const contaminated = [...clean, ...vehicleTail(900, 35)];
 
+  it('extends the exclusion through the acceleration into a confirmed vehicle tail', () => {
+    const jog = Array.from({ length: 1500 }, (_, second) =>
+      point(second, { speed: 3.1, power: 220, cadence: 170 }),
+    );
+    const burst = Array.from({ length: 8 }, (_, offset) =>
+      point(1500 + offset, { speed: 8.4, power: 522, cadence: 61 }),
+    );
+    const settled = Array.from({ length: 30 }, (_, offset) =>
+      point(1508 + offset, { speed: 3.1, power: 210, cadence: 80 }),
+    );
+    const ramp = [4.8, 6.4, 8, 10, 11.5, 12].map((speed, offset) =>
+      point(1538 + offset, {
+        speed,
+        power: 221 + offset * 120,
+        cadence: undefined,
+      }),
+    );
+    const vehicle = Array.from({ length: 24 }, (_, offset) =>
+      point(1544 + offset, {
+        speed: 12.2 + offset * 0.15,
+        power: 948 + offset * 13,
+        cadence: undefined,
+      }),
+    );
+    const samples = [...jog, ...burst, ...settled, ...ramp, ...vehicle];
+    const trim = detectContaminatedRunTail(samples, 'RUN');
+
+    expect(trim?.startIndex).toBe(1538);
+    expect(peaksOf(fitnessEvidenceRecords(samples, 'RUN'))['1s']).toBe(522);
+    expect(peaksOf(samples)['1s']).toBeGreaterThan(1000);
+  });
+
   it('excludes a normal run followed by a short car-speed tail', () => {
     const trim = detectContaminatedRunTail(contaminated, 'RUN');
 

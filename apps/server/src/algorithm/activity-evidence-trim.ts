@@ -22,6 +22,9 @@ import { instantaneousSpeedPolicy } from '@shared/instantaneous-speed';
  * - 至少再满足一条：车速段里至少 70% 的踏频缺失或低于 30；或者尾段功率中位数
  *   至少是非尾段中位数的 2 倍，且至少是非尾段 95 分位的 1.5 倍
  *   （非尾段至少 20 个功率样本，尾段至少 5 个）。
+ * - 车速段成立后，排除窗口沿末尾连续样本向前延伸，盖住速度仍高于
+ *   车速段之前 99 分位速度的加速过程。速度回到该活动自身的跑速后停止，
+ *   因此更早、已经被正常跑速隔开的短暂加速不会被剪掉。
  */
 export const CONTAMINATED_RUN_TAIL_TRIM = Object.freeze({
   speedMetersPerSecond: instantaneousSpeedPolicy('RUN').maxSpeedMetersPerSecond,
@@ -38,6 +41,8 @@ export const CONTAMINATED_RUN_TAIL_TRIM = Object.freeze({
   minPowerP95Ratio: 1.5,
   minBodyPowerSamples: 20,
   minTailPowerSamples: 5,
+  /** 加速进车：相对车速段之前速度分布的分位。 */
+  approachSpeedPercentile: 0.99,
 });
 
 export type ActivityTrimSample = {
@@ -108,10 +113,16 @@ export function detectContaminatedRunTail(
 
   const corroboration = corroborate(prepared, start, vehicleEnd);
   if (!corroboration) return null;
+  const evidenceStart = extendThroughVehicleApproach(prepared, start);
+  const retainedBodySeconds =
+    (prepared[evidenceStart].tMs - prepared[0].tMs) / 1000;
+  if (retainedBodySeconds < CONTAMINATED_RUN_TAIL_TRIM.minBodySeconds) {
+    return null;
+  }
   return {
-    startIndex: start,
+    startIndex: evidenceStart,
     vehicleEndIndex: vehicleEnd,
-    excludedSampleCount: prepared.length - start,
+    excludedSampleCount: prepared.length - evidenceStart,
     vehicleDurationSeconds,
     corroboration,
     reason: 'exclude-contaminated-tail',
@@ -151,6 +162,31 @@ function prepareSample(
     cadenceAbsent: isCadenceAbsent(sample.cadence),
     power: finiteNonNegative(sample.power),
   };
+}
+
+function extendThroughVehicleApproach(
+  samples: readonly PreparedSample[],
+  vehicleStart: number,
+) {
+  const bodySpeeds: number[] = [];
+  for (let index = 0; index < vehicleStart; index += 1) {
+    if (samples[index].speed != null) bodySpeeds.push(samples[index].speed);
+  }
+  if (bodySpeeds.length < CONTAMINATED_RUN_TAIL_TRIM.minBodyPowerSamples) {
+    return vehicleStart;
+  }
+  bodySpeeds.sort((left, right) => left - right);
+  const departure = quantile(
+    bodySpeeds,
+    CONTAMINATED_RUN_TAIL_TRIM.approachSpeedPercentile,
+  );
+  let start = vehicleStart;
+  while (start > 0) {
+    const speed = samples[start - 1].speed;
+    if (speed == null || speed <= departure) break;
+    start -= 1;
+  }
+  return start;
 }
 
 function vehicleRunStart(
