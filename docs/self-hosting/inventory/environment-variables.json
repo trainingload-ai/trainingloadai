@@ -1496,7 +1496,7 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 447
+          "line": 449
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1856,7 +1856,7 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 451
+          "line": 453
         }
       ]
     },
@@ -1928,7 +1928,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 124
+          "line": 132
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -2499,7 +2499,19 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 444
+          "line": 446
+        },
+        {
+          "file": "apps/server/src/integrations/personal/personal-worker.service.ts",
+          "line": 21
+        },
+        {
+          "file": "apps/server/src/runtime-capabilities/runtime-capability.resolver.ts",
+          "line": 522
+        },
+        {
+          "file": "apps/server/src/self-host/self-host-owner.guard.ts",
+          "line": 31
         }
       ]
     },
@@ -2558,7 +2570,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 54
+          "line": 55
         }
       ]
     },
@@ -2758,7 +2770,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 99
+          "line": 101
         }
       ]
     },
@@ -3104,7 +3116,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 95
+          "line": 97
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3112,7 +3124,7 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 453
+          "line": 455
         }
       ]
     },
@@ -3425,7 +3437,7 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 450
+          "line": 452
         },
         {
           "file": "apps/server/src/oauth/oauth-bearer.service.ts",
@@ -3454,7 +3466,7 @@
       "references": [
         {
           "file": "apps/client/src/components/layout/MainAppShell.tsx",
-          "line": 84
+          "line": 86
         },
         {
           "file": "apps/client/src/lib/tiptap-utils.ts",
@@ -3494,7 +3506,11 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 449
+          "line": 451
+        },
+        {
+          "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
+          "line": 384
         }
       ]
     },
@@ -3974,6 +3990,10 @@
         {
           "file": "apps/server/src/auth.ts",
           "line": 52
+        },
+        {
+          "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
+          "line": 384
         }
       ]
     },
@@ -4028,7 +4048,7 @@
       "references": [
         {
           "file": "apps/client/src/api/runtime-capabilities.ts",
-          "line": 135
+          "line": 137
         }
       ]
     },
@@ -4121,7 +4141,7 @@
         },
         {
           "file": "apps/client/src/api/runtime-capabilities.ts",
-          "line": 90
+          "line": 92
         },
         {
           "file": "apps/client/src/api/self-host-bootstrap.ts",
@@ -4313,7 +4333,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 88
+          "line": 90
         },
         {
           "file": "apps/server/src/bootstrap/self-host-network-security.ts",
@@ -4732,7 +4752,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 127
+          "line": 135
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -4748,7 +4768,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 99
+          "line": 101
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -5623,7 +5643,11 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 445
+          "line": 447
+        },
+        {
+          "file": "apps/server/src/integrations/personal/personal-worker.service.ts",
+          "line": 23
         },
         {
           "file": "apps/server/src/maps/activity-map-thumbnail-provider.ts",
@@ -5647,7 +5671,7 @@
         },
         {
           "file": "apps/server/src/self-host/self-host-owner.guard.ts",
-          "line": 30
+          "line": 32
         },
         {
           "file": "compose.build.yml",
@@ -6013,7 +6037,7 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 448
+          "line": 450
         }
       ]
     },
@@ -6194,11 +6218,11 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 55
+          "line": 56
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 452
+          "line": 454
         }
       ]
     },

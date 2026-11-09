@@ -10,6 +10,7 @@ import { LocalOnboardingCompletionModule } from './onboarding/local-onboarding-c
 import { LocalAccountProviderLifecycleModule } from './api/user/local-account-provider-lifecycle.module';
 import { SelfHostAiOperationPersistenceModule } from './deployment/self-host-ai-operation-persistence.module';
 import { DisabledExternalProgramImportModule } from './deployment/disabled-external-program-import.module';
+import { PersonalIntegrationsModule } from './api/personal/personal.module';
 
 /** 可公开、自托管构建的唯一组合入口。 */
 @Module({
@@ -22,6 +23,7 @@ import { DisabledExternalProgramImportModule } from './deployment/disabled-exter
     LocalAccountProviderLifecycleModule,
     SelfHostModule,
     SelfHostWorkersModule,
+    PersonalIntegrationsModule,
     ThirdPartySchedulerModule,
     AppModule,
   ],

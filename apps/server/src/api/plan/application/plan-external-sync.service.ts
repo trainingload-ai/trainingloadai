@@ -153,6 +153,85 @@ export class PlanExternalSyncService {
     return this.links.findMapping(args);
   }
 
+  /** Persist a verified delivery and its exact local revision inside the caller's outbox transaction. */
+  async recordVerifiedDelivery(
+    args: {
+      userId: string;
+      workoutId: string;
+      revision: number;
+      provider: 'coros';
+      connectionId: string;
+      accountId: string;
+      externalId: string;
+      destination: string;
+      localChecksum: string;
+      remoteChecksum: string;
+      rawRemote: Prisma.InputJsonValue;
+      localContentVerified: boolean;
+    },
+    tx: PlanDb,
+  ) {
+    const current = await this.workouts.findFirst(
+      {
+        where: { id: args.workoutId, userId: args.userId },
+        select: { id: true, revision: true },
+      },
+      tx,
+    );
+    const syncState = !current
+      ? 'LOCAL_DELETED'
+      : current.revision === args.revision
+        ? args.localContentVerified
+          ? 'SYNCED'
+          : 'CONFLICT'
+        : 'LOCAL_CHANGED';
+    const data = {
+      connectionId: args.connectionId,
+      externalAthleteId: args.accountId,
+      externalEventId: args.externalId,
+      externalSourceKey: `coros:${args.accountId}:${args.workoutId}`,
+      origin: 'LOCAL' as const,
+      syncState: syncState as
+        | 'SYNCED'
+        | 'LOCAL_CHANGED'
+        | 'LOCAL_DELETED'
+        | 'CONFLICT',
+      lastLocalChecksum: args.localChecksum,
+      lastRemoteChecksum: args.remoteChecksum,
+      lastSyncedChecksum: args.localContentVerified ? args.localChecksum : null,
+      lastPushedAt: new Date(),
+      lastError: args.localContentVerified
+        ? null
+        : 'PROVIDER_LOCAL_CONTENT_UNVERIFIED',
+      rawRemote: args.rawRemote,
+      metadata: {
+        workoutRevision: args.revision,
+        destination: args.destination,
+        deliveredWorkoutId: args.workoutId,
+        localContentVerified: args.localContentVerified,
+      },
+    };
+    return this.links.upsertMapping(
+      {
+        where: {
+          userId_provider_externalSourceKey: {
+            userId: args.userId,
+            provider: args.provider,
+            externalSourceKey: data.externalSourceKey,
+          },
+        },
+        create: {
+          userId: args.userId,
+          provider: args.provider,
+          planWorkoutId: current?.id ?? null,
+          ...data,
+        },
+        update: data,
+      },
+      tx,
+    );
+  }
+
   findMappingUnique<T extends Prisma.PlanWorkoutExternalMappingFindUniqueArgs>(
     args: Prisma.SelectSubset<
       T,

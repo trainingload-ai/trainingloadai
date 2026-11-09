@@ -194,6 +194,8 @@ enum ThirdPartyActivityProcessingStatus {
 // Third-party provider enum
 enum ThirdPartyProvider {
   intervals_icu
+  garmin
+  coros
   upload
   unknown
 
@@ -204,6 +206,8 @@ enum ThirdPartyProvider {
 enum ImportSourceKind {
   FILE
   INTERVALS_ICU
+  GARMIN_PERSONAL_API
+  COROS_MCP
   UNKNOWN
 
   @@map("enum_import_source_kind")
@@ -376,6 +380,8 @@ enum BodyMetricType {
 
 enum HealthDataProvider {
   INTERVALS_ICU
+  GARMIN
+  COROS
   HEALTH_CONNECT
   MANUAL
 
@@ -1435,6 +1441,7 @@ model ExternalProviderConnection {
 
   planWorkoutMappings PlanWorkoutExternalMapping[]
   routeMappings       RouteExternalMapping[]
+  personalJobs PersonalProviderJob[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1444,6 +1451,32 @@ model ExternalProviderConnection {
   @@index([provider, externalAthleteId, status])
   @@index([userId, status])
   @@map("t_external_provider_connection")
+}
+
+/// Personal integrations use durable discovery/checkpoint and delivery jobs.
+/// Payload/result never contain credentials or signed download URLs.
+model PersonalProviderJob {
+  id String @id @default(cuid())
+  connectionId String @map("connection_id")
+  connection ExternalProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  requestId String @map("request_id")
+  dedupKey String? @map("dedup_key")
+  kind String
+  status String @default("QUEUED")
+  payload Json
+  result Json?
+  errorCode String? @map("error_code")
+  attempts Int @default(0)
+  nextAttemptAt DateTime @default(now()) @map("next_attempt_at")
+  leaseUntil DateTime? @map("lease_until")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([connectionId, requestId])
+  @@unique([connectionId, dedupKey])
+  @@index([status, nextAttemptAt])
+  @@index([connectionId, createdAt])
+  @@map("t_personal_provider_job")
 }
 
 model ExternalOAuthState {

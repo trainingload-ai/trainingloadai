@@ -62,6 +62,12 @@ function workout(
     sessionIndex: 1,
     linkedActivityTitle: null,
     estimatedLoad: null,
+    structure: {
+      kind: "FREEFORM",
+      version: 1,
+      text: "",
+    },
+    estimatedLoadInputs: null,
     ...overrides,
   };
 }

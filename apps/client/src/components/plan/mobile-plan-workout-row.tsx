@@ -9,7 +9,12 @@ import {
 import { memo, useMemo } from "react";
 import dayjs from "dayjs";
 import { useLocale, useTranslations } from "next-intl";
-import type { PlanWorkout, TrainingPlanDetail } from "@/api/plans";
+import type {
+  PlanWorkout,
+  PlanWorkoutEstimatedLoadInputs,
+  TrainingPlanDetail,
+} from "@/api/plans";
+import type { WorkoutStructure } from "@shared/workout-structure";
 import {
   buildWorkoutListNotes,
   buildWorkoutListTitle,
@@ -108,7 +113,16 @@ function stepDuration(step: Record<string, unknown>) {
   return 60;
 }
 
-export function buildMobileWorkoutSegments(workout: PlanWorkout) {
+/** 迷你结构图所需最小字段；首页/计划/日历共用 */
+export type WorkoutMiniChartWorkout = {
+  structure: WorkoutStructure;
+  sportType: PlanWorkout["sportType"] | string;
+  text?: string | null;
+  estimatedLoadInputs?: PlanWorkoutEstimatedLoadInputs | null;
+};
+
+export function buildMobileWorkoutSegments(workout: WorkoutMiniChartWorkout) {
+
   if (workout.structure.kind !== "ENDURANCE") return [];
   const segments: MobileWorkoutSegment[] = [];
   const steps: WorkRestStep[] = [];
@@ -192,7 +206,7 @@ export const WorkoutMiniChart = memo(function WorkoutMiniChart({
   workout,
 }: {
   fallbackText?: string | null;
-  workout: PlanWorkout | null;
+  workout: WorkoutMiniChartWorkout | null;
 }) {
   const segments = useMemo(() => {
     const structured = workout ? buildMobileWorkoutSegments(workout) : [];

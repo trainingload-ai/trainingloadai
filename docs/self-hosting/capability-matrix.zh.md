@@ -21,6 +21,19 @@
 | MCP / agent API    | `AgentCapabilitiesModule`                           |       否 | `disabled`        | v1 Compose 固定关闭                   | v1 不暴露 agent capability 入口                                                                                                                 | `SELF_HOST_AGENT_*`       | 默认无新增 audit 数据                     |
 | Background workers | owning feature module                               |   条件式 | local queue in DB | 依赖对应 capability                   | capability 关闭时 worker 不 claim 任务                                                                                                          | `SELF_HOST_WORKER_*`      | 状态随 DB；临时文件不备份                 |
 
+## Self-host 个人连接
+
+Self-host 现已支持 Garmin Personal API；**不开启** COROS MCP。完整行为见
+[个人平台连接](personal-integrations.zh.md)。闭源/托管产品另行使用 Garmin Developer API。
+
+| Capability | Owner | 默认行为 | 凭据与持久状态 |
+| --- | --- | --- | --- |
+| `garmin-personal-api-key` | `PersonalIntegrationsModule` | 单 Owner 在账号页连接；只读；默认关闭健康读取 | 复用既有集成密钥加密，任务与导入进度保存到 DB |
+| `coros-mcp` | （未启用） | Self-host 不开启；文档与产品入口不作为可用能力宣传 | — |
+
+`garmin-personal-api-key` 不启用通用 `third-party-sync`，不新增宿主环境变量，也不对外开放本实例的 MCP / agent API。
+厂商凭据无效仅使对应连接失效，不清除 Trainingload.ai 登录会话。
+
 ## 基线缺口状态
 
 SH2 已关闭无 AI key 构造失败、默认遥测 exporter、self-host billing 校验和 capability 驱动 UI；

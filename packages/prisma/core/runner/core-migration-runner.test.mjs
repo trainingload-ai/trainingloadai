@@ -137,6 +137,7 @@ test("PGlite applies the Core baseline exactly once and serializes concurrent st
       { id: "0019_workout_step_annotations", source: "baseline" },
       { id: "0020_saved_routes", source: "baseline" },
       { id: "0021_health_observations", source: "baseline" },
+      { id: "0022_personal_integrations", source: "baseline" },
     ]);
     const relation = await query(
       databaseUrl,
@@ -174,6 +175,25 @@ test("PGlite applies the Core baseline exactly once and serializes concurrent st
       "SELECT to_regclass('public.t_oauth_resource')::text AS relation",
     );
     assert.equal(oauthResourceRelation.rows[0]?.relation, "t_oauth_resource");
+  });
+});
+
+test("personal jobs enforce single-connection execution, idempotency and disconnect cleanup", async () => {
+  await withPglite(async (databaseUrl) => {
+    await runCoreMigrations({ databaseUrl, dialect: "pglite" });
+    await query(databaseUrl, `INSERT INTO t_user(id,name,email,email_verified,created_at,updated_at) VALUES ('personal-owner','Fixture','fixture@example.test',true,now(),now())`);
+    await query(databaseUrl, `INSERT INTO t_external_provider_connection(id,user_id,provider,credential_ciphertext,updated_at) VALUES ('personal-connection','personal-owner','garmin','fixture-ciphertext',now())`);
+    await query(databaseUrl, `INSERT INTO t_personal_provider_job(id,connection_id,request_id,kind,status,payload,updated_at) VALUES ('one','personal-connection','request-one','SYNC','RUNNING','{}',now())`);
+    await assert.rejects(query(databaseUrl, `INSERT INTO t_personal_provider_job(id,connection_id,request_id,kind,status,payload,updated_at) VALUES ('two','personal-connection','request-two','SYNC','RUNNING','{}',now())`), error => error.code === '23505');
+    await query(databaseUrl, `UPDATE t_personal_provider_job SET status='SUCCEEDED' WHERE id='one'`);
+    await query(databaseUrl, `INSERT INTO t_personal_provider_job(id,connection_id,request_id,kind,status,payload,updated_at) VALUES ('two','personal-connection','request-two','SYNC','RUNNING','{}',now())`);
+    await assert.rejects(query(databaseUrl, `INSERT INTO t_personal_provider_job(id,connection_id,request_id,kind,status,payload,updated_at) VALUES ('three','personal-connection','request-one','SYNC','QUEUED','{}',now())`), error => error.code === '23505');
+    await query(databaseUrl, `INSERT INTO t_personal_provider_job(id,connection_id,request_id,dedup_key,kind,status,payload,updated_at) VALUES ('delivery-one','personal-connection','click-one','same-content','WRITE','PREVIEW','{}',now())`);
+    await assert.rejects(query(databaseUrl, `INSERT INTO t_personal_provider_job(id,connection_id,request_id,dedup_key,kind,status,payload,updated_at) VALUES ('delivery-two','personal-connection','click-two','same-content','WRITE','PREVIEW','{}',now())`),error=>error.code==='23505');
+    const due = await query(databaseUrl, `WITH zone AS MATERIALIZED (SELECT set_config('TimeZone','Asia/Shanghai',true)), inserted AS (INSERT INTO t_personal_provider_job(id,connection_id,request_id,kind,status,payload,updated_at) SELECT 'utc-default','personal-connection','utc-default','SYNC','QUEUED','{}',now() AT TIME ZONE 'UTC' FROM zone RETURNING next_attempt_at) SELECT next_attempt_at <= (now() AT TIME ZONE 'UTC') + interval '1 second' AS due FROM inserted`);
+    assert.equal(due.rows[0].due,true);
+    await query(databaseUrl, `DELETE FROM t_external_provider_connection WHERE id='personal-connection'`);
+    assert.equal((await query(databaseUrl, `SELECT count(*)::int AS count FROM t_personal_provider_job`)).rows[0].count, 0);
   });
 });
 

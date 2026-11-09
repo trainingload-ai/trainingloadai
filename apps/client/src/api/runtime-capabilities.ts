@@ -14,6 +14,8 @@ export type RuntimeCapabilityName =
   | "weather"
   | "third-party-sync"
   | "intervals-icu-api-key"
+  | "garmin-personal-api-key"
+  | "coros-mcp"
   | "agent-api"
   | "public-demo";
 

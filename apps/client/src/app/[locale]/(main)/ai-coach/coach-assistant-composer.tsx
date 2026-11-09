@@ -255,18 +255,18 @@ export function CoachPromptExamples() {
           </button>
         ))}
       </div>
-      <div className="hidden space-y-3 pt-2 pc:block">
+      <div className="hidden space-y-3 border-0 bg-transparent p-0 pt-2 shadow-none pc:block">
         <div className="text-center text-sm font-medium text-foreground">
           {t("examplesTitle")}
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2 border-0 bg-transparent p-0 shadow-none">
           {visiblePrompts.map((prompt) => (
             <Button
               key={prompt}
               type="button"
               size="compact"
-              variant="outline"
-              className="whitespace-nowrap bg-neutral-100 px-3 shadow-none transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
+              variant="secondary"
+              className="whitespace-nowrap border-0 bg-neutral-100 px-3 shadow-none transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
               disabled={publicDemo.active}
               title={publicDemo.active ? demoText("readOnlyAction") : undefined}
               onClick={() => {

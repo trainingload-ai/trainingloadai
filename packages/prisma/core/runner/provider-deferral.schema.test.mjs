@@ -62,13 +62,13 @@ test("existing inbox SQL fences deferral, preserves payload, and leaves local/ot
   const db = await PGlite.create();
   try {
     await db.exec(
-      `CREATE TYPE enum_third_party_provider AS ENUM ('garmin','coros'); CREATE TABLE t_external_provider_webhook_event(id text PRIMARY KEY,provider enum_third_party_provider,event_type text,external_user_id text,status text,available_at timestamp(3),attempts int,locked_at timestamp(3),processed_at timestamp(3),last_error text,payload jsonb,updated_at timestamp(3));`,
+      `CREATE TYPE enum_third_party_provider AS ENUM ('garmin','coros'); CREATE TABLE t_external_provider_webhook_event(id text PRIMARY KEY,provider enum_third_party_provider,event_type text,external_user_id text,status text,available_at timestamp(3),attempts int,locked_at timestamp(3),processed_at timestamp(3),last_error text,payload jsonb,updated_at timestamp(3),dedupe_key text,raw_checksum text,received_at timestamp(3),UNIQUE(provider,dedupe_key));`,
     );
     const lockedAt = new Date(Math.floor(Date.now() / 1000) * 1000),
       until = new Date(Date.now() + 120000);
     const add = (id, provider, type, status, attempts = 0) =>
       db.query(
-        "INSERT INTO t_external_provider_webhook_event VALUES($1,$2,$3,$4,$5,now(),$6,$7,NULL,NULL,$8::jsonb,now())",
+        "INSERT INTO t_external_provider_webhook_event(id,provider,event_type,external_user_id,status,available_at,attempts,locked_at,processed_at,last_error,payload,updated_at) VALUES($1,$2,$3,$4,$5,now(),$6,$7,NULL,NULL,$8::jsonb,now())",
         [
           id,
           provider,
@@ -90,7 +90,7 @@ test("existing inbox SQL fences deferral, preserves payload, and leaves local/ot
         findFirst: async (a) => {
           const scopes = a.where.OR.map((value) => value.payload.equals);
           const result = await db.query(
-            "SELECT max(available_at) AS \"availableAt\" FROM t_external_provider_webhook_event WHERE provider=$1 AND status IN ('PENDING','FAILED','PROCESSING') AND last_error='PROVIDER_RATE_LIMITED' AND available_at>$2 AND (payload#>>'{__rateLimit,scopeKey}')=ANY($3::text[])",
+            "SELECT max(available_at) AS \"availableAt\" FROM t_external_provider_webhook_event WHERE provider=$1 AND (status IN ('PENDING','FAILED','PROCESSING') OR (status='DONE' AND event_type='provider_cooldown')) AND last_error='PROVIDER_RATE_LIMITED' AND available_at>$2 AND (payload#>>'{__rateLimit,scopeKey}')=ANY($3::text[])",
             [a.where.provider, a.where.availableAt.gt, scopes],
           );
           return result.rows[0]?.availableAt ? result.rows[0] : null;
@@ -191,7 +191,7 @@ test("claimed batch and newly arrived jobs honor a durable cooldown after dispat
   const db = await PGlite.create();
   try {
     await db.exec(`CREATE TYPE enum_third_party_provider AS ENUM ('garmin','coros');
-      CREATE TABLE t_external_provider_webhook_event(id text PRIMARY KEY,provider enum_third_party_provider NOT NULL,event_type text NOT NULL,external_user_id text,status text NOT NULL,available_at timestamp(3) NOT NULL DEFAULT now(),attempts int NOT NULL DEFAULT 0,locked_at timestamp(3),processed_at timestamp(3),last_error text,payload jsonb NOT NULL,updated_at timestamp(3) NOT NULL DEFAULT now(),received_at timestamp(3) NOT NULL DEFAULT now());`);
+      CREATE TABLE t_external_provider_webhook_event(id text PRIMARY KEY,provider enum_third_party_provider NOT NULL,event_type text NOT NULL,external_user_id text,status text NOT NULL,available_at timestamp(3) NOT NULL DEFAULT now(),attempts int NOT NULL DEFAULT 0,locked_at timestamp(3),processed_at timestamp(3),last_error text,payload jsonb NOT NULL,updated_at timestamp(3) NOT NULL DEFAULT now(),received_at timestamp(3) NOT NULL DEFAULT now(),dedupe_key text,raw_checksum text,UNIQUE(provider,dedupe_key));`);
     const add = (id, type, provider = "garmin") =>
       db.query(
         "INSERT INTO t_external_provider_webhook_event(id,provider,event_type,external_user_id,status,payload) VALUES($1,$2,$3,$4,$5,$6::jsonb)",
@@ -259,10 +259,9 @@ test("claimed batch and newly arrived jobs honor a durable cooldown after dispat
         findFirst: async (a) => {
           const row = (
             await db.query(
-              `SELECT max(available_at) AS "availableAt" FROM t_external_provider_webhook_event WHERE provider=$1 AND status=ANY($2::text[]) AND last_error='PROVIDER_RATE_LIMITED' AND available_at>$3 AND (payload#>>'{__rateLimit,scopeKey}')=ANY($4::text[])`,
+              `SELECT max(available_at) AS "availableAt" FROM t_external_provider_webhook_event WHERE provider=$1 AND (status IN ('PENDING','FAILED','PROCESSING') OR (status='DONE' AND event_type='provider_cooldown')) AND last_error='PROVIDER_RATE_LIMITED' AND available_at>$2 AND (payload#>>'{__rateLimit,scopeKey}')=ANY($3::text[])`,
               [
                 a.where.provider,
-                a.where.status.in,
                 a.where.availableAt.gt,
                 a.where.OR.map((v) => v.payload.equals),
               ],
@@ -367,9 +366,9 @@ test("claimed batch and newly arrived jobs honor a durable cooldown after dispat
       )
     ).rows[0].count;
     assert.equal(Number(waiting), 3);
-    // Advance the persisted deadlines without blocking the test or worker.
+    // Advance both business jobs and the non-runnable cooldown marker.
     await db.query(
-      "UPDATE t_external_provider_webhook_event SET available_at=now()-interval '1 second' WHERE status='PENDING'",
+      "UPDATE t_external_provider_webhook_event SET available_at=now()-interval '1 second' WHERE last_error='PROVIDER_RATE_LIMITED'",
     );
     await start().drainAll();
     assert.equal(outboundCalls, 4);

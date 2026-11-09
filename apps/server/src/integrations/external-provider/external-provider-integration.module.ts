@@ -9,10 +9,12 @@ import { ExternalProviderWebhookInboxService } from './external-provider-webhook
 import { ExternalProviderWebhookDispatcherService } from './external-provider-webhook-dispatcher.service';
 import { ExternalProviderWebhookSignalService } from './external-provider-webhook-signal.service';
 import { ExternalProviderStatusQueryService } from './external-provider-status-query.service';
+import { ExternalProviderCredentialVault } from './external-provider-credential-vault.service';
 
 @Module({
   imports: [ConfigModule, PrismaModule],
   providers: [
+    ExternalProviderCredentialVault,
     ExternalProviderConnectionService,
     ExternalProviderOAuthStateService,
     ExternalOAuthStateRepository,
@@ -23,6 +25,7 @@ import { ExternalProviderStatusQueryService } from './external-provider-status-q
     ExternalProviderStatusQueryService,
   ],
   exports: [
+    ExternalProviderCredentialVault,
     ExternalProviderConnectionService,
     ExternalProviderOAuthStateService,
     ExternalProviderWebhookInboxService,

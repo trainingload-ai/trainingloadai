@@ -62,6 +62,27 @@ describe('self-host AppModule dependency injection', () => {
     );
 
     const { SelfHostAppModule } = await import('../self-host-app.module');
+    const { AppModule } = await import('../app.module');
+    const { PersonalIntegrationsModule } =
+      await import('../api/personal/personal.module');
+    const importedModules = (root: any, visited = new Set<any>()): Set<any> => {
+      if (!root || visited.has(root)) return visited;
+      visited.add(root);
+      if (root.module) importedModules(root.module, visited);
+      for (const child of root.imports ??
+        Reflect.getMetadata('imports', root) ??
+        [])
+        importedModules(child.forwardRef ? child.forwardRef() : child, visited);
+      return visited;
+    };
+    // ManagedAppModule composes the common AppModule, never SelfHostAppModule.
+    // Verify the real module graph so an accidental transitive import is caught.
+    expect(importedModules(AppModule).has(PersonalIntegrationsModule)).toBe(
+      false,
+    );
+    expect(
+      importedModules(SelfHostAppModule).has(PersonalIntegrationsModule),
+    ).toBe(true);
     try {
       const moduleRef = await Test.createTestingModule({
         imports: [SelfHostAppModule],

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange, type OnSelectHandler } from "react-day-picker";
@@ -68,6 +68,21 @@ export function DatePickerWithRange({
     if (startNewRangeOnOpen && awaitingRangeEndRef.current && range?.from) {
       const nextRange = { from: range.from, to: undefined };
       awaitingRangeEndRef.current = false;
+      setSelectedDate(nextRange);
+      onDateChange?.(nextRange);
+      return;
+    }
+    // react-day-picker v9 defaults to min=0, so the first click on an empty
+    // range yields { from, to: same day }. Treat that as range-start-only and
+    // keep the popover open so the user can still pick the end date.
+    const isEmptySelection = !selectedDate?.from && !selectedDate?.to;
+    if (
+      isEmptySelection &&
+      range?.from &&
+      range?.to &&
+      isSameDay(range.from, range.to)
+    ) {
+      const nextRange = { from: range.from, to: undefined };
       setSelectedDate(nextRange);
       onDateChange?.(nextRange);
       return;

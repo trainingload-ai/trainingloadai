@@ -23,6 +23,47 @@ const payload = {
 };
 
 describe('ActivitySourceLifecycleService', () => {
+  it('scopes a personal removal to this account and all file-session source UIDs', async () => {
+    const readThirdParty = jest.fn<any>().mockResolvedValue([]);
+    const readSources = jest.fn<any>().mockResolvedValue([]);
+    const tx = { activitySource: { findMany: readSources } };
+    const prisma = {
+      thirdPartyActivity: { findMany: readThirdParty },
+      $transaction: async (fn: any) => fn(tx),
+    };
+    await createService(prisma).deactivateProviderData({
+      userId: 'owner',
+      provider: 'garmin',
+      externalIds: ['42'],
+      sourceUids: ['garmin:account-a:42'],
+    });
+    expect(readSources).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          userId: 'owner',
+          provider: 'garmin',
+          OR: [
+            { sourceUid: 'garmin:account-a:42' },
+            { sourceUid: { startsWith: 'garmin:account-a:42#' } },
+          ],
+        }),
+      }),
+    );
+    expect(readThirdParty).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: expect.arrayContaining([
+            {
+              rawData: {
+                path: ['importProjection', 'sourceUid'],
+                string_starts_with: 'garmin:account-a:42#',
+              },
+            },
+          ]),
+        }),
+      }),
+    );
+  });
   it('selects the highest-quality source with a replayable snapshot', () => {
     const base = {
       activityId: 1,

@@ -1,5 +1,6 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { isPersonalProviderPath } from '@/utils/personal-provider-http-privacy';
 
 const SENSITIVE_LOG_KEY =
   /(^otp$|one[-_]?time|verification[-_]?code|password|passcode|token|secret|authorization|cookie|credential|api[-_]?key|url|uri)/i;
@@ -48,11 +49,13 @@ export class LoggerMiddleware implements NestMiddleware {
     const isSelfHostBootstrapRoute = requestPath.startsWith(
       '/api/self-host/bootstrap',
     );
+    const isPersonalIntegrationRoute = isPersonalProviderPath(requestPath);
     const isPrivacyRestricted =
       isPublicAiReview ||
       isIntervalsIcuWebhook ||
       isSensitiveBearerRoute ||
       isSensitiveOperationsRoute ||
+      isPersonalIntegrationRoute ||
       isSelfHostBootstrapRoute;
     const declaredBodyBytes = req.get('content-length') || 'unknown';
 

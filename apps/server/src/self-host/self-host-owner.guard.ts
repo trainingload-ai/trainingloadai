@@ -27,7 +27,10 @@ export class SelfHostOwnerGuard implements CanActivate {
   constructor(private readonly prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (!process.env.SELF_HOST_MODE?.trim()) {
+    if (
+      process.env.DEPLOYMENT_MODE === 'cloud' ||
+      !process.env.SELF_HOST_MODE?.trim()
+    ) {
       throw new NotFoundException('Self-host settings are not available');
     }
     const userId = requestUserId(context.switchToHttp().getRequest());

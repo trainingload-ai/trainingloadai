@@ -47,7 +47,7 @@ function effectivePort(url: URL): string {
   return url.protocol === 'https:' ? '443' : '80';
 }
 
-function matchesConfiguredBrowserOrigin(
+export function matchesConfiguredBrowserOrigin(
   requestOrigin: string | undefined,
   expectedOrigin: URL | null,
 ): boolean {

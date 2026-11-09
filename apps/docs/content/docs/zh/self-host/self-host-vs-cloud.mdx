@@ -27,7 +27,7 @@ Trainingload.ai 云服务和自托管解决的是不同的运维需求。两者�
 | AI             | 使用托管产品的配置和账号用量规则   | 默认关闭；Owner 提供供应商 API Key，并直接承担供应商费用               |
 | 会员与 AI 积分 | 使用云端会员、积分余额和积分补充包 | 不启用 Trainingload.ai 会员计费或积分包；实际 API 用量由 AI 服务商结算 |
 | AI 数据路径    | 由托管服务配置决定                 | 只有启用 BYOK AI 后，请求才会发送给所选供应商                          |
-| 第三方能力     | 以托管产品和账号实际提供为准       | 仅支持用户自己的 Intervals.icu API Key；其他第三方同步和社交登录关闭   |
+| 第三方能力     | 托管产品连接能力，含 Garmin Developer API | Intervals.icu API Key 与 Garmin Personal API；不开启 COROS MCP；其他 OAuth 同步与社交登录关闭 |
 | Apple Watch    | 托管产品支持                       | v1 不支持；不会注册手表配对、首页快照和训练上传接口                    |
 | 可用性         | 由 Trainingload.ai 运维            | 单实例部署，不内置高可用和自动故障转移                                 |
 | 备份与恢复     | 由托管服务负责                     | 由你创建、转移、保留并演练可验证备份                                   |
@@ -54,7 +54,7 @@ Trainingload.ai 云服务和自托管解决的是不同的运维需求。两者�
 
 自托管 Server 使用独立的构建入口和 Dockerfile。发行镜像不包含 Trainingload.ai 云端使用的支付 Controller、Webhook、对账任务或 Creem/Waffo SDK；`BILLING_PROVIDER` 也不能在自托管镜像中重新开启这些能力。
 
-Intervals.icu 也是显式的出站连接。每个用户可以在 Client 中填写自己的个人 API Key；活动、计划课、wellness 或运动设置只会按该用户启用的同步选项发送或读取。自托管不启用 Intervals.icu OAuth、webhook，也不提供 Strava、Polar、COROS、Suunto、Wahoo、Garmin 账号连接或社交登录。
+Intervals.icu 与 Garmin Personal API 是 Self-host 的显式出站连接。Owner 在 Client 填写本人 Key，并按所选选项同步。自托管不启用 Intervals.icu OAuth、webhook，不开启 COROS MCP，也不提供 Strava、Polar、Suunto、Wahoo 或社交登录。闭源/托管产品另行提供 Garmin Developer API；Self-host 使用 Garmin Personal API。
 
 原生 Apple Watch App 不在自托管 v1 的支持边界内。自托管 Server 不会初始化 Watch 设备凭据，也不会暴露手表配对、首页快照或训练上传接口。
 

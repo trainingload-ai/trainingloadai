@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "b09e6c53f764c9556ef0673825f7607edd32c6af0e454ad7b9b682dbff984585",
+  "schemaChecksum": "9b8104cdc40b9877f47fc68d48b4786ce5791ae8ffb32a9132d267e0a2288895",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -106,6 +106,11 @@
       "id": "0021_health_observations",
       "file": "0021_health_observations/migration.sql",
       "sha256": "9ba58a8e3bd7ee2bef4b65d3e4746c896c2138c433a0d7113b80cdf2cb73b0d3"
+    },
+    {
+      "id": "0022_personal_integrations",
+      "file": "0022_personal_integrations/migration.sql",
+      "sha256": "224b7ecc0020079952d6f121606e3d4725f51184322b05af3be12e568eb67dd4"
     }
   ]
 }

@@ -20,6 +20,7 @@ import { MobileRouteTransition } from "@/components/mobile-app/components/Mobile
 import { MobileTabBar } from "@/components/mobile-app/components/MobileTabBar";
 import { MobileTopBarContent } from "@/components/mobile-app/components/MobileTopBar";
 import { MainOnboardingRedirect } from "@/components/onboarding/MainOnboardingRedirect";
+import { PersonalFocusSync } from "@/components/third-party/personal-focus-sync";
 import {
   MOBILE_SIDE_PAGE_EVENT,
   MOBILE_SIDE_PAGE_OFFSET,
@@ -58,6 +59,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }) {
     <MobileNavigationProvider>
       {/* 新用户 onboarding 跳转 */}
       <MainOnboardingRedirect />
+      <PersonalFocusSync />
       <div
         className={cn(
           "flex flex-col overflow-x-clip bg-background",

@@ -122,7 +122,7 @@ export function HomeSuggestionDeck({
               data-deck-card={card.id}
               aria-hidden={!isFront || undefined}
               className={cn(
-                "min-h-[150px] min-w-0 overflow-hidden rounded-surface p-3 text-left text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "flex h-[150px] min-h-[150px] max-h-[150px] min-w-0 flex-col overflow-hidden rounded-surface p-3 text-left text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 card.className,
               )}
               style={{
@@ -170,10 +170,7 @@ export function HomeSuggestionDeck({
                 aria-label={card.label}
                 tabIndex={isFront ? 0 : -1}
                 disabled={disabled || switching}
-                className={cn(
-                  "flex w-full flex-col text-left focus-visible:outline-none",
-                  card.actions && isFront ? "min-h-[82px]" : "min-h-[126px]",
-                )}
+                className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden text-left focus-visible:outline-none"
                 onClick={() => {
                   if (suppressClick.current) {
                     suppressClick.current = false;
@@ -193,12 +190,12 @@ export function HomeSuggestionDeck({
                   step(event.key === "ArrowRight" ? 1 : -1);
                 }}
               >
-                <span className="flex flex-1 flex-col justify-between gap-2">
+                <span className="flex min-h-0 min-w-0 flex-1 flex-col justify-between gap-1 overflow-hidden">
                   {card.content}
                 </span>
               </button>
               {isFront && card.actions ? (
-                <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5">
+                <div className="flex min-h-8 flex-wrap items-center gap-1.5">
                   {card.actions}
                 </div>
               ) : null}

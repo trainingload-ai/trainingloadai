@@ -231,9 +231,11 @@ function mapCapability(
     'local',
     'mapbox',
   ];
-  const provider = providers.includes(rawProvider as RuntimeMapProvider) && !(selfHost && rawProvider === 'mapbox')
-    ? (rawProvider as RuntimeMapProvider)
-    : 'invalid';
+  const provider =
+    providers.includes(rawProvider as RuntimeMapProvider) &&
+    !(selfHost && rawProvider === 'mapbox')
+      ? (rawProvider as RuntimeMapProvider)
+      : 'invalid';
   const configuredStyleUrl = value(env, 'MAP_STYLE_URL') || null;
   const configuredTileUrl = value(env, 'MAP_TILE_URL') || null;
   const configuredAttribution = value(env, 'MAP_ATTRIBUTION') || null;
@@ -507,6 +509,22 @@ export function resolveRuntimeCapabilities(
     capabilities['intervals-icu-api-key'].issues = [
       'EXTERNAL_PROVIDER_CREDENTIAL_SECRET must contain at least 32 characters',
     ];
+  }
+  for (const name of ['garmin-personal-api-key', 'coros-mcp'] as const) {
+    capabilities[name] = {
+      ...capabilities['intervals-icu-api-key'],
+      name,
+      required: false,
+      provider:
+        name === 'coros-mcp' ? 'coros-official-mcp' : 'garmin-personal-api',
+    };
+    // Only the Self-host composition root installs personal adapters.
+    if (!selfHost || env.DEPLOYMENT_MODE === 'cloud')
+      capabilities[name] = capability({
+        name,
+        provider: 'none',
+        state: 'disabled',
+      });
   }
   capabilities['agent-api'] = capability({
     name: 'agent-api',
