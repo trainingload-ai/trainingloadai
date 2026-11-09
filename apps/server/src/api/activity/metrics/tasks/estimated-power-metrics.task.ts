@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { $Enums, PeakType, ScaleType } from '@prisma/client';
 import { calculateCp } from '@/algorithm/fitness-cp';
+import { permitsMeasuredPowerFitness } from '@/training-load/measured-power-evidence';
 import type { MetricsContext, PeakMetricListKey } from '../context';
 import type { MetricsTask } from '../task';
 import { ActivityMetricsPreloaderService } from '../preloader.service';
@@ -46,6 +47,9 @@ export class EstimatedPowerMetricsTask implements MetricsTask {
   }
 
   async exec(ctx: MetricsContext): Promise<MetricsContext> {
+    if (!permitsMeasuredPowerFitness(ctx.inputs.measuredPowerEvidence)) {
+      return ctx;
+    }
     const listKey =
       `list:${PeakType.power}:${ScaleType.TIME}` as PeakMetricListKey;
     const list = ctx.cache.peakMetricLists?.[listKey];
@@ -81,10 +85,19 @@ export class EstimatedPowerMetricsTask implements MetricsTask {
 
   async post(ctx: MetricsContext): Promise<MetricsContext> {
     const { activity } = ctx.inputs;
+    if (!activity?.id) return ctx;
+    const db = ctx.persistenceTx ?? this.prisma;
+    if (!permitsMeasuredPowerFitness(ctx.inputs.measuredPowerEvidence)) {
+      await db.activity.update({
+        where: { id: activity.id },
+        data: { ecp: null, eftp: null, ewPrime: null, epmax: null },
+      });
+      return ctx;
+    }
     const out = ctx.outputs.estimatedPowerMetrics;
     if (!out) return ctx;
 
-    await this.prisma.activity.update({
+    await db.activity.update({
       where: { id: activity.id },
       data: {
         ecp: out.ecp,

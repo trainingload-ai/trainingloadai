@@ -300,6 +300,7 @@ describe('AnalyzeFitnessOrchestratorService refresh failures', () => {
   it('excludes power peaks whose original source has no measured power', async () => {
     const findMany = jest.fn(async () =>
       [1, 5, 10, 60, 300, 1200].map((scaleValue) => ({
+        activityId: 88,
         scaleValue,
         value: 100,
         activity: {
@@ -324,6 +325,32 @@ describe('AnalyzeFitnessOrchestratorService refresh failures', () => {
     );
 
     expect(upsertFitnessMetric).not.toHaveBeenCalled();
+  });
+
+  it('does not project CP from peaks whose measured-power evidence is unknown', async () => {
+    const findMany = jest.fn(async () =>
+      [1, 5, 10, 60, 300, 1200].map((scaleValue) => ({
+        activityId: 77,
+        scaleValue,
+        value: 100,
+        activity: { activitySources: [] },
+      })),
+    );
+    const upsertAutoFitnessMetrics = jest.fn(async () => []);
+    const service = new AnalyzeFitnessOrchestratorService(
+      { activityPeakMetric: { findMany } } as never,
+      { upsertAutoFitnessMetrics } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await service.recalculateUserCPAndFTP(
+      'user-unknown-power',
+      SportType.CYCLING,
+      new Date('2026-08-13T00:00:00.000Z'),
+    );
+
+    expect(upsertAutoFitnessMetrics).not.toHaveBeenCalled();
   });
 
   it('publishes a CP model as one atomic batch instead of parallel metric transactions', async () => {

@@ -7,6 +7,7 @@ import {
   computeMaxMeanObservedWindows,
   STANDARD_PEAK_DURATIONS,
 } from '@/algorithm/time-series-metrics';
+import { permitsMeasuredPowerFitness } from '@/training-load/measured-power-evidence';
 import { toPeakIntervalObservation } from '../shared/peak-window.util';
 
 @Injectable()
@@ -19,11 +20,15 @@ export class MaxMeanPowerTask implements MetricsTask {
   async exec(ctx: MetricsContext) {
     const activity = ctx.inputs.activity;
     const records = ctx.inputs.canonicalRecords;
+    if (!permitsMeasuredPowerFitness(ctx.inputs.measuredPowerEvidence)) {
+      return ctx;
+    }
     if (!activity || !records || records.length < 2) return ctx;
 
     const rawWindows = computeMaxMeanObservedWindows(
       records.map((record) => ({
         tMs: record.tMs,
+        // 峰值只读取功率计样本。calculatedPower 留在独立列，不能进入 PeakType.power。
         value:
           typeof record.power === 'number' &&
           Number.isFinite(record.power) &&
@@ -75,6 +80,17 @@ export class MaxMeanPowerTask implements MetricsTask {
   }
   async post(ctx: MetricsContext) {
     const activity = ctx.inputs.activity;
+    if (!activity?.id) return ctx;
+    if (!permitsMeasuredPowerFitness(ctx.inputs.measuredPowerEvidence)) {
+      await this.peakWriter.replacePeakMetrics({
+        activity,
+        intervals: {},
+        type: PeakType.power,
+        scaleType: ScaleType.TIME,
+        tx: ctx.persistenceTx,
+      });
+      return ctx;
+    }
     const intervals = ctx.outputs.maxMeanPower;
     if (!intervals) return ctx;
 
@@ -84,6 +100,7 @@ export class MaxMeanPowerTask implements MetricsTask {
       windows: ctx.outputs.maxMeanPowerWindows,
       type: PeakType.power,
       scaleType: ScaleType.TIME,
+      tx: ctx.persistenceTx,
     });
     return ctx;
   }

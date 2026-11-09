@@ -21,7 +21,7 @@ import { BUSINESS_ERROR_CODE } from '../filters/business-exception/business-exce
 import { resolveEffectiveActivityVo2Max } from './vo2max/vo2max-source';
 import { readyOrScopedActivityWhere } from '@/utils/activity-ready-where';
 import {
-  permitsPowerDerivedMetrics,
+  permitsMeasuredPowerFitness,
   resolveMeasuredPowerEvidence,
 } from '@/training-load/measured-power-evidence';
 import { validateFitnessMetricCandidate } from '@/api/user/fitness-metric-validator';
@@ -298,6 +298,7 @@ export class AnalyzeFitnessOrchestratorService {
         scaleType: ScaleType.TIME,
       },
       select: {
+        activityId: true,
         scaleValue: true,
         value: true,
         activity: {
@@ -312,12 +313,16 @@ export class AnalyzeFitnessOrchestratorService {
     });
 
     const bestByDuration = new Map<number, number>();
+    const skippedActivityIds = new Set<number>();
     for (const row of peakRows) {
       if (
-        !permitsPowerDerivedMetrics(
+        !permitsMeasuredPowerFitness(
           resolveMeasuredPowerEvidence(row.activity.activitySources),
         )
       ) {
+        if (Number.isInteger(row.activityId) && row.activityId > 0) {
+          skippedActivityIds.add(row.activityId);
+        }
         continue;
       }
       const value = Number(row.value);
@@ -325,6 +330,13 @@ export class AnalyzeFitnessOrchestratorService {
       bestByDuration.set(
         row.scaleValue,
         Math.max(bestByDuration.get(row.scaleValue) ?? 0, value),
+      );
+    }
+
+    if (skippedActivityIds.size > 0) {
+      const ids = [...skippedActivityIds];
+      this.logger.log(
+        `[CP] 功率模型忽略缺少可靠实测功率的活动：用户=${userId}，运动=${sportType}，活动=${ids.slice(0, 8).join(',')}，数量=${ids.length}，原因=no_reliable_measured_power`,
       );
     }
 

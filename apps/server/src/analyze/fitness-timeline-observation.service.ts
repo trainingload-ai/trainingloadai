@@ -19,7 +19,7 @@ import {
   type FitnessTimelineObservation,
 } from '@/algorithm/fitness-timeline';
 import {
-  permitsPowerDerivedMetrics,
+  permitsMeasuredPowerFitness,
   resolveMeasuredPowerEvidence,
 } from '@/training-load/measured-power-evidence';
 import { resolveEffectiveActivityVo2Max } from './vo2max/vo2max-source';
@@ -359,14 +359,16 @@ export class FitnessTimelineObservationService {
     const out: FitnessTimelineObservation[] = [];
     for (const sport of [SportType.RUN, SportType.CYCLING]) {
       const best = new Map<number, { value: number; activityId: number }>();
+      const skippedActivityIds = new Set<number>();
       for (const row of rows) {
         if (row.sport !== sport || row.value == null || row.value <= 0)
           continue;
         if (
-          !permitsPowerDerivedMetrics(
+          !permitsMeasuredPowerFitness(
             resolveMeasuredPowerEvidence(row.activity.activitySources),
           )
         ) {
+          skippedActivityIds.add(row.activityId);
           continue;
         }
         const current = best.get(row.scaleValue);
@@ -377,7 +379,15 @@ export class FitnessTimelineObservationService {
           });
         }
       }
-      if (best.size <= 4) continue;
+      if (best.size <= 4) {
+        if (skippedActivityIds.size > 0) {
+          const ids = [...skippedActivityIds];
+          this.logger.log(
+            `[CP] 功率模型忽略缺少可靠实测功率的活动：用户=${args.userId}，运动=${sport}，活动=${ids.slice(0, 8).join(',')}，数量=${ids.length}，原因=no_reliable_measured_power`,
+          );
+        }
+        continue;
+      }
       const points = [...best.entries()]
         .map(([seconds, row]) => ({ seconds, value: row.value }))
         .sort((left, right) => left.seconds - right.seconds);
