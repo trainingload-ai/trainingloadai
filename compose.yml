@@ -9,7 +9,7 @@ x-logging: &default-logging
 x-server-environment: &server-environment
   NODE_ENV: production
   DEPLOYMENT_MODE: self-host
-  APP_VERSION: ${SELF_HOST_VERSION:-1.1.18}
+  APP_VERSION: ${SELF_HOST_VERSION:-1.1.19}
   NODE_OPTIONS: --max-old-space-size=256 --max-semi-space-size=4
   PORT: "3001"
   SELF_HOST_MODE: ${SELF_HOST_MODE:-connected}
