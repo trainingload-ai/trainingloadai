@@ -14,9 +14,8 @@ import {
 } from '../time-series-metrics';
 import {
   CONTAMINATED_RUN_TAIL_TRIM,
+  cropContaminatedActivityTail,
   detectContaminatedRunTail,
-  fitnessEvidenceRecords,
-  omitContaminatedRunTailPower,
   type ActivityTrimSample,
 } from '../activity-evidence-trim';
 
@@ -150,7 +149,9 @@ describe('contaminated run tail evidence trim', () => {
     const trim = detectContaminatedRunTail(samples, 'RUN');
 
     expect(trim?.startIndex).toBe(1538);
-    expect(peaksOf(fitnessEvidenceRecords(samples, 'RUN'))['1s']).toBe(522);
+    expect(
+      peaksOf(cropContaminatedActivityTail(samples, 'RUN').records)['1s'],
+    ).toBe(522);
     expect(peaksOf(samples)['1s']).toBeGreaterThan(1000);
   });
 
@@ -164,14 +165,18 @@ describe('contaminated run tail evidence trim', () => {
       reason: 'exclude-contaminated-tail',
     });
     expect(trim?.vehicleDurationSeconds).toBe(34);
-    expect(fitnessEvidenceRecords(contaminated, 'RUN')).toHaveLength(900);
+    expect(
+      cropContaminatedActivityTail(contaminated, 'RUN').records,
+    ).toHaveLength(900);
   });
 
   it('leaves a clean run unchanged', () => {
     expect(detectContaminatedRunTail(clean, 'RUN')).toBeNull();
-    expect(fitnessEvidenceRecords(clean, 'RUN')).toBe(clean);
-    expect(omitContaminatedRunTailPower(clean, 'RUN')).toBe(clean);
-    expect(peaksOf(fitnessEvidenceRecords(clean, 'RUN'))).toEqual(
+    expect(cropContaminatedActivityTail(clean, 'RUN')).toEqual({
+      records: clean,
+      trim: null,
+    });
+    expect(peaksOf(cropContaminatedActivityTail(clean, 'RUN').records)).toEqual(
       peaksOf(clean),
     );
   });
@@ -292,29 +297,42 @@ describe('contaminated run tail evidence trim', () => {
     ).toBeNull();
   });
 
-  it('drops tail power before speed sanitization and keeps the running body', () => {
-    const prepared = omitContaminatedRunTailPower(contaminated, 'RUN');
+  it('crops every channel of the tail before speed sanitization', () => {
+    const tagged = contaminated.map((sample, index) => ({
+      ...sample,
+      heartRate: index >= 900 ? 114 : 150,
+      distance: index >= 900 ? 13_400 + index : 1_000 + index,
+      positionLat: index >= 900 ? 55.2 : 55.0,
+      positionLong: index >= 900 ? 37.8 : 37.6,
+    }));
+    const prepared = cropContaminatedActivityTail(tagged, 'RUN').records;
 
-    expect(prepared.slice(0, 900)).toEqual(contaminated.slice(0, 900));
-    expect(
-      prepared.slice(900).every((sample) => sample.power === undefined),
-    ).toBe(true);
-    expect(prepared[910].speed).toBeGreaterThan(
-      CONTAMINATED_RUN_TAIL_TRIM.speedMetersPerSecond,
+    expect(prepared).toHaveLength(900);
+    expect(prepared.at(-1)).toBe(tagged[899]);
+    expect(prepared.some((sample) => sample.heartRate === 114)).toBe(false);
+    expect(prepared.some((sample) => sample.positionLat === 55.2)).toBe(false);
+    expect(prepared.some((sample) => sample.positionLong === 37.8)).toBe(false);
+    expect(Math.max(...prepared.map((sample) => sample.distance))).toBeLessThan(
+      2_000,
     );
+    expect(
+      prepared.every(
+        (sample) =>
+          (sample.speed ?? 0) <=
+          CONTAMINATED_RUN_TAIL_TRIM.speedMetersPerSecond,
+      ),
+    ).toBe(true);
 
     const sanitized = sanitizeActivityRecordSpeeds(prepared, 'RUN');
+    expect(sanitized).toHaveLength(900);
     expect(sanitized[100].speed).toBeCloseTo(contaminated[100].speed ?? 0, 6);
     expect(sanitized[100].power).toBe(contaminated[100].power);
-    expect(sanitized[910].speed).toBeLessThanOrEqual(
-      CONTAMINATED_RUN_TAIL_TRIM.speedMetersPerSecond,
-    );
-    expect(sanitized[910].power).toBeUndefined();
+    expect(sanitized[100].heartRate).toBe(150);
   });
 
   it('builds mean-maximal power and the power model without the car-speed tail', () => {
     const dirtyPeaks = peaksOf(contaminated);
-    const trimmed = fitnessEvidenceRecords(contaminated, 'RUN');
+    const trimmed = cropContaminatedActivityTail(contaminated, 'RUN').records;
     const trimmedPeaks = peaksOf(trimmed);
     const cleanPeaks = peaksOf(clean);
     const dirtyModel = powerModel(contaminated);

@@ -3,7 +3,7 @@ import { PeakType, ScaleType } from '@prisma/client';
 import type { MetricsContext } from '../context';
 import type { MetricsTask } from '../task';
 import { ActivityPeakMetricWriterService } from '../shared/peak-metric-writer.service';
-import { detectContaminatedRunTail } from '@/algorithm/activity-evidence-trim';
+import { cropContaminatedActivityTail } from '@/algorithm/activity-evidence-trim';
 import { suppressIsolatedPowerSpikes } from '@/algorithm/fitness-cp';
 import {
   computeMaxMeanObservedWindows,
@@ -27,18 +27,18 @@ export class MaxMeanPowerTask implements MetricsTask {
     }
     if (!activity || !records || records.length < 2) return ctx;
 
-    const trim = detectContaminatedRunTail(
+    const cropped = cropContaminatedActivityTail(
       records,
       activity.sportType ?? ctx.inputs.sportType,
     );
-    const evidenceRecords = trim ? records.slice(0, trim.startIndex) : records;
+    const evidenceRecords = cropped.records;
+    const trim = cropped.trim;
     if (evidenceRecords.length < 2) return ctx;
 
     // A 1s mean is the sample itself. An isolated multi-kW FIT spike has to be
     // removed here, before the window is stored; calculateCp also refuses
     // inconsistent peaks, but those lists are often merged across activities.
-    // The vehicle-tail trim above is a different exclusion: a sustained
-    // end-of-run speed anomaly, not a one-sample spike.
+    // A sustained vehicle tail is cropped earlier, as a whole record suffix.
     const powerSamples = suppressIsolatedPowerSpikes(
       evidenceRecords.map((record) => ({
         tMs: record.tMs,

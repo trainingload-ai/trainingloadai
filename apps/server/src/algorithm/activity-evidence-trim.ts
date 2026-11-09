@@ -1,14 +1,15 @@
 import { instantaneousSpeedPolicy } from '@shared/instantaneous-speed';
 
 /**
- * 自动 activity trim：把污染尾段排除出体能证据（Ignore Part）。
+ * 自动 activity trim：从污染尾段的起点把记录裁到结束（Ignore Part / crop）。
  *
- * 针对跑步结束后手表仍在记录、运动员已经上车的尾段。它不删除活动，
- * 不改坐标、距离、心率或踏频，也不替代已有的实测功率可信度门和病态
- * eCP 拒绝。孤立的 1 秒启动毛刺由瞬时速度清洗处理，不属于这里。
+ * 针对跑步结束后手表仍在记录、运动员已经上车的尾段。活动实体保留，
+ * 只丢掉这段结尾。裁掉的样本不再进入准备后的序列，因此功率、速度、
+ * 距离增量、地图坐标、心率和踏频都不会留下。它不替代实测功率可信度门
+ * 和病态 eCP 拒绝。孤立的 1 秒启动毛刺由瞬时速度清洗处理，不属于这里。
  *
  * 必须在跑步速度清洗之前判断。清洗会把高于跑步上限的持续速度改写掉，
- * 但设备功率仍会进入平均最大功率。
+ * 尾段一旦被改写就无法再靠车速识别。
  *
  * 阈值：
  * - 只处理 RUN。这个速度区间对骑行是合理的。
@@ -56,7 +57,7 @@ export type ActivityTrimSample = {
 };
 
 export type ContaminatedRunTailTrim = {
-  /** 第一个被排除出体能证据的样本下标。证据窗口是 [0, startIndex)。 */
+  /** 第一个被裁掉的样本下标。保留的准备序列是 [0, startIndex)。 */
   startIndex: number;
   vehicleEndIndex: number;
   excludedSampleCount: number;
@@ -129,27 +130,17 @@ export function detectContaminatedRunTail(
   };
 }
 
-/** 平均最大功率使用的证据窗口。没有污染尾段时返回原数组。 */
-export function fitnessEvidenceRecords<T extends ActivityTrimSample>(
+/**
+ * 裁掉污染尾段的全部样本。没有尾段时返回原数组。
+ * 功率、速度、距离、坐标、心率、踏频都在被丢弃的样本上，不再另做按字段清除。
+ */
+export function cropContaminatedActivityTail<T extends ActivityTrimSample>(
   samples: readonly T[],
   sportType?: string | null,
-): readonly T[] {
+): { records: T[]; trim: ContaminatedRunTailTrim | null } {
   const trim = detectContaminatedRunTail(samples, sportType);
-  return trim ? samples.slice(0, trim.startIndex) : samples;
-}
-
-/**
- * 从准备后的功率通道去掉污染尾段。速度、坐标和其它通道保持不变，
- * 以便随后的速度清洗和地图统计照旧运行。
- */
-export function omitContaminatedRunTailPower<
-  T extends ActivityTrimSample & { power?: number | null },
->(samples: readonly T[], sportType?: string | null): T[] {
-  const trim = detectContaminatedRunTail(samples, sportType);
-  if (!trim) return samples as T[];
-  return samples.map((sample, index) =>
-    index < trim.startIndex ? sample : { ...sample, power: undefined },
-  );
+  if (!trim) return { records: samples as T[], trim: null };
+  return { records: samples.slice(0, trim.startIndex), trim };
 }
 
 function prepareSample(
