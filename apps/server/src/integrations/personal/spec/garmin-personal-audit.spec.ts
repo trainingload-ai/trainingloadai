@@ -497,7 +497,17 @@ describe('Garmin discovery and authoritative absence', () => {
     const page = Array.from({ length: 99 }, (_, i) => ({ id: String(i) }));
     h.garmin.activities.mockResolvedValue(page);
     await h.service.run(h.parent as never, connection as never);
-    expect(h.jobs.findMany).not.toHaveBeenCalled();
+    // Serial FIT release may inspect ACTIVITY children, but absence evaluation
+    // (requestId prefix scan) must wait until the final offset page.
+    expect(h.jobs.findMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          requestId: expect.objectContaining({
+            startsWith: expect.any(String),
+          }),
+        }),
+      }),
+    );
     const progress = h.jobs.updateMany.mock.calls.at(-1)![0].data.result;
     expect(progress).toMatchObject({
       offset: 99,

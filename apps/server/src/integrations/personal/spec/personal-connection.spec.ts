@@ -39,6 +39,11 @@ function harness() {
     personalProviderJob: {
       findMany: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
     },
+    userBodyMetric: {
+      findFirst: jest
+        .fn<() => Promise<any>>()
+        .mockResolvedValue({ value: 'UTC' }),
+    },
     $transaction: async (work: (transaction: typeof tx) => Promise<unknown>) =>
       work(tx),
   };

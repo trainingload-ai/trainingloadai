@@ -194,13 +194,11 @@ describe('personal provider contracts', () => {
       parsePersonalSettings(
         { ...defaultPersonalSettings, allowWrites: true },
         'garmin',
+        'UTC',
       ),
     ).toThrow('PROVIDER_DIRECTION_UNSUPPORTED');
     expect(() =>
-      parsePersonalSettings(
-        { ...defaultPersonalSettings, timezone: 'Moon/Base' },
-        'coros',
-      ),
+      parsePersonalSettings(defaultPersonalSettings, 'coros', 'Moon/Base'),
     ).toThrow('PROVIDER_TIMEZONE_INVALID');
   });
 });
