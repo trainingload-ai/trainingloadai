@@ -91,16 +91,17 @@ flowchart LR
     Server --> Files[本地文件存储]
     Server -. 可选出站请求 .-> AI[Owner 选择的 AI Provider]
     Server -. 可选出站请求 .-> Intervals[Intervals.icu API]
+    Server -. 可选出站请求 .-> Garmin[Garmin Personal API]
 ```
 
-浏览器只访问一个 Client 端口，Server 和 PostgreSQL 留在 Compose 私有网络中。上传文件使用本地存储，通知保留在应用内；AI Provider 与 Intervals.icu 都是可选的出站连接。
+浏览器只访问一个 Client 端口，Server 和 PostgreSQL 留在 Compose 私有网络中。上传文件使用本地存储，通知保留在应用内；AI Provider、Intervals.icu 与 Garmin Personal API 都是可选的出站连接。Self-host 不开启 COROS MCP。
 
 ### Self-host 产品边界
 
 | 区域 | Self-host 行为 |
 | --- | --- |
 | AI | 支持 OpenAI、DeepSeek、OpenRouter、DashScope 和自定义 OpenAI-compatible 服务 |
-| 导入 | FIT、TCX、GPX 和 Intervals.icu 个人 API Key |
+| 导入 | FIT、TCX、GPX、Intervals.icu 个人 API Key，以及 Garmin Personal API |
 | 地图 | MapLibre，可使用 OpenFreeMap、兼容 OSM 的地图服务或自定义地图配置 |
 | 存储 | PostgreSQL 与本地上传文件存储 |
 | 产品访问 | 核心训练功能与 BYOK AI 可直接使用 |
