@@ -49,6 +49,10 @@ function harness() {
   };
   const db = {
     personalProviderJob: jobs,
+    externalProviderConnection: {
+      findUnique: jest.fn<any>().mockResolvedValue(connection),
+      updateMany: jest.fn<any>().mockResolvedValue({ count: 1 }),
+    },
     $transaction: async (work: any) => work(tx),
   };
   const connections = {
@@ -76,6 +80,7 @@ function harness() {
   };
   const service = new PersonalWriteService(
     db as never,
+    { model: (tx?: any) => (tx ?? db).externalProviderConnection } as never,
     connections as never,
     coros as never,
     plans as never,

@@ -30,7 +30,6 @@ describe('ExternalProviderConnection table ownership boundary', () => {
       if (rel.includes('/spec/')) continue;
       if (rel.startsWith('integrations/external-provider/persistence/'))
         continue;
-      if (rel.startsWith('integrations/personal/')) continue;
       const text = readFileSync(file, 'utf8');
       const lines = text.split('\n');
       lines.forEach((line, index) => {

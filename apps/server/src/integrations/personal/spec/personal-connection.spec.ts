@@ -58,6 +58,8 @@ function harness() {
   };
   const service = new PersonalConnectionService(
     db as never,
+    { model: (tx?: any) => (tx ?? db).externalProviderConnection } as never,
+    { preferredTimezone: async () => 'UTC' } as never,
     {
       encrypt: () => 'fixture-sealed',
       fingerprint: () => 'new-version',

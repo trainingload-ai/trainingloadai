@@ -57,12 +57,22 @@ function harness() {
   const lifecycle = {
     deactivateProviderData: jest.fn<any>().mockResolvedValue({}),
   };
+  const prisma = {
+    personalProviderJob: jobs,
+    importSourceObject: source,
+    externalProviderConnection: {
+      updateMany: jest.fn<any>().mockResolvedValue({ count: 1 }),
+      findMany: jest.fn<any>().mockResolvedValue([]),
+      findUnique: jest.fn<any>().mockResolvedValue(null),
+    },
+  };
   const service = new PersonalSyncService(
-    { personalProviderJob: jobs, importSourceObject: source } as never,
+    prisma as never,
+    { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as never,
     connections as never,
     {} as never,
     {} as never,
-    {} as never,
+    { sourceObjects: () => source } as never,
     health as never,
     {} as never,
     lifecycle as never,

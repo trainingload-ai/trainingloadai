@@ -104,10 +104,11 @@ function harness() {
   };
   const service = new PersonalSyncService(
     db as never,
+    { model: (tx?: any) => (tx ?? db).externalProviderConnection } as never,
     connections as never,
     garmin as never,
     imports as never,
-    {} as never,
+    { sourceObjects: () => db.importSourceObject } as never,
     health as never,
     {} as never,
     lifecycle as never,
@@ -372,8 +373,14 @@ describe('Garmin transport and connection lifecycle', () => {
       $queryRaw: async () => [{ locked: true }],
       externalProviderConnection: { findUnique: async () => row },
     };
+    const prisma = {
+      $transaction: async (fn: any) => fn(tx),
+      externalProviderConnection: tx.externalProviderConnection,
+    };
     const service = new PersonalConnectionService(
-      { $transaction: async (fn: any) => fn(tx) } as never,
+      prisma as never,
+      { model: (client?: any) => (client ?? prisma).externalProviderConnection } as never,
+      { preferredTimezone: async () => 'UTC' } as never,
       {
         decrypt: () =>
           JSON.stringify({
@@ -396,18 +403,21 @@ describe('Garmin transport and connection lifecycle', () => {
     const decrypt = jest.fn<any>().mockImplementation(() => {
       throw new Error('damaged cipher');
     });
+    const prisma = {
+      externalProviderConnection: {
+        findUnique: async () => connection,
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          $executeRaw: async () => 1,
+          externalProviderConnection: { updateMany: remove },
+          personalProviderJob: { updateMany: async () => ({ count: 1 }) },
+        }),
+    };
     const service = new PersonalConnectionService(
-      {
-        externalProviderConnection: {
-          findUnique: async () => connection,
-        },
-        $transaction: async (fn: any) =>
-          fn({
-            $executeRaw: async () => 1,
-            externalProviderConnection: { updateMany: remove },
-            personalProviderJob: { updateMany: async () => ({ count: 1 }) },
-          }),
-      } as never,
+      prisma as never,
+      { model: (client?: any) => (client ?? prisma).externalProviderConnection } as never,
+      { preferredTimezone: async () => 'UTC' } as never,
       { decrypt } as never,
       {} as never,
       {} as never,
@@ -430,19 +440,22 @@ describe('Garmin transport and connection lifecycle', () => {
     );
   });
   it('does not delete a concurrently replaced connection', async () => {
+    const prisma = {
+      externalProviderConnection: {
+        findUnique: async () => connection,
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          $executeRaw: async () => 1,
+          externalProviderConnection: {
+            updateMany: async () => ({ count: 0 }),
+          },
+        }),
+    };
     const service = new PersonalConnectionService(
-      {
-        externalProviderConnection: {
-          findUnique: async () => connection,
-        },
-        $transaction: async (fn: any) =>
-          fn({
-            $executeRaw: async () => 1,
-            externalProviderConnection: {
-              updateMany: async () => ({ count: 0 }),
-            },
-          }),
-      } as never,
+      prisma as never,
+      { model: (client?: any) => (client ?? prisma).externalProviderConnection } as never,
+      { preferredTimezone: async () => 'UTC' } as never,
       {} as never,
       {} as never,
       {} as never,

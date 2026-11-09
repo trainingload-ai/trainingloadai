@@ -47,8 +47,24 @@ function harness() {
       .fn<() => Promise<unknown>>()
       .mockResolvedValue({ workoutId: 'remote' }),
   };
+  const prisma = {
+    personalProviderJob: jobs,
+    externalProviderConnection: {
+      findUnique: jest.fn<any>().mockResolvedValue(null),
+      updateMany: jest.fn<any>().mockResolvedValue({ count: 1 }),
+    },
+    $transaction: async (fn: any) =>
+      fn({
+        externalProviderConnection: {
+          findUnique: jest.fn<any>().mockResolvedValue(null),
+          updateMany: jest.fn<any>().mockResolvedValue({ count: 1 }),
+        },
+        personalProviderJob: jobs,
+      }),
+  };
   const service = new PersonalWriteService(
-    { personalProviderJob: jobs } as never,
+    prisma as never,
+    { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as never,
     connections as never,
     coros as never,
     {} as never,

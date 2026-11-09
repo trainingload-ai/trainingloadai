@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 import { z } from 'zod';
-import { BodyMetricType, Prisma, type ExternalProviderConnection } from '@prisma/client';
+import { Prisma, type ExternalProviderConnection } from '@prisma/client';
 import type {
   PersonalProvider,
   PersonalRegion,
   PersonalSettings,
 } from '@shared/personal-integrations';
 import { PrismaService } from '@/prisma/prisma.service';
+import { AthleteClockService } from '@/timezone/athlete-clock.service';
+import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { ExternalProviderCredentialVault } from '../external-provider/external-provider-credential-vault.service';
 import { ExternalProviderOAuthStateService } from '../external-provider/external-provider-oauth-state.service';
 import {
@@ -22,7 +24,6 @@ import {
 } from '../coros-mcp/coros-mcp.client';
 import { PersonalProviderError, record, requireId } from './personal-errors';
 import { validTimezone } from './personal-dates';
-import { normalizeIanaTimezone } from '@/timezone/user-timezone-initializer.service';
 import { personalSyncJobResult } from './personal-sync-summary';
 import { personalAccountRef } from './personal-identity';
 import { matchesConfiguredBrowserOrigin } from '@/self-host/self-host-local-access-policy';
@@ -97,6 +98,8 @@ export function parsePersonalSettings(
 export class PersonalConnectionService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly providerConnections: ExternalProviderConnectionService,
+    private readonly clock: AthleteClockService,
     private readonly vault: ExternalProviderCredentialVault,
     private readonly states: ExternalProviderOAuthStateService,
     private readonly garmin: GarminPersonalClient,
@@ -105,12 +108,7 @@ export class PersonalConnectionService {
 
   /** Personal sync windows follow the account TIMEZONE metric, not a per-connection override. */
   async resolveAccountTimezone(userId: string): Promise<string> {
-    const timezoneMetric = await this.prisma.userBodyMetric.findFirst({
-      where: { userId, type: BodyMetricType.TIMEZONE },
-      orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
-      select: { value: true },
-    });
-    return validTimezone(normalizeIanaTimezone(timezoneMetric?.value) ?? 'UTC');
+    return validTimezone((await this.clock.preferredTimezone(userId)) ?? 'UTC');
   }
   /**
    * Find a personal connection
@@ -119,7 +117,7 @@ export class PersonalConnectionService {
    * @returns
    */
   async find(userId: string, provider: PersonalProvider) {
-    const row = await this.prisma.externalProviderConnection.findUnique({
+    const row = await this.providerConnections.model().findUnique({
       where: { userId_provider: { userId, provider } },
     });
     if (row && !isPersonalConnection(row))
@@ -239,7 +237,7 @@ export class PersonalConnectionService {
       // Preserve metadata reservations committed by another worker before
       // reauthorization. The account lock also covers the first insertion.
       await tx.$executeRaw`SELECT id FROM t_external_provider_connection WHERE user_id=${userId} AND provider::text=${provider} FOR UPDATE`;
-      const current = await tx.externalProviderConnection.findUnique({
+      const current = await this.providerConnections.model(tx).findUnique({
         where: { userId_provider: { userId, provider } },
       });
       if (current && !isPersonalConnection(current))
@@ -296,10 +294,10 @@ export class PersonalConnectionService {
         } as unknown as Prisma.InputJsonValue,
       };
       if (!current)
-        return tx.externalProviderConnection.create({
+        return this.providerConnections.model(tx).create({
           data: { userId, provider, ...data },
         });
-      const changed = await tx.externalProviderConnection.updateMany({
+      const changed = await this.providerConnections.model(tx).updateMany({
         where: {
           id: current.id,
           credentialFingerprint: current.credentialFingerprint,
@@ -312,7 +310,7 @@ export class PersonalConnectionService {
           undefined,
           409,
         );
-      return tx.externalProviderConnection.findUniqueOrThrow({
+      return this.providerConnections.model(tx).findUniqueOrThrow({
         where: { id: current.id },
       });
     });
@@ -561,7 +559,7 @@ export class PersonalConnectionService {
       await this.resolveAccountTimezone(userId),
     );
     const row = await this.require(userId, provider);
-    const changed = await this.prisma.externalProviderConnection.updateMany({
+    const changed = await this.providerConnections.model().updateMany({
       where: { id: row.id, updatedAt: row.updatedAt },
       data: {
         syncActivities: settings.activities,
@@ -585,7 +583,7 @@ export class PersonalConnectionService {
     // deletion still cascades these records; disconnect is not data deletion.
     await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`personal-connect:${userId}:${provider}`}, 0))`;
-      const removed = await tx.externalProviderConnection.updateMany({
+      const removed = await this.providerConnections.model(tx).updateMany({
         where: { id: row.id, credentialFingerprint: row.credentialFingerprint },
         data: {
           status: 'DISCONNECTED',
@@ -657,7 +655,7 @@ export class PersonalConnectionService {
         >`SELECT pg_try_advisory_xact_lock(hashtextextended(${`personal-token:${connectionId}`}, 0)) AS locked`;
         if (!lock.locked)
           throw new PersonalProviderError('PROVIDER_BUSY', 5000, 409);
-        let connection = await tx.externalProviderConnection.findUnique({
+        let connection = await this.providerConnections.model(tx).findUnique({
           where: { id: connectionId },
         });
         if (
@@ -700,7 +698,7 @@ export class PersonalConnectionService {
             );
             credential.refreshToken ??= old.refreshToken;
           }
-          const changed = await tx.externalProviderConnection.updateMany({
+          const changed = await this.providerConnections.model(tx).updateMany({
             where: {
               id: connection.id,
               credentialCiphertext: connection.credentialCiphertext,
@@ -734,7 +732,7 @@ export class PersonalConnectionService {
     connectionId: string,
     work: (connection: ExternalProviderConnection, token: string) => Promise<T>,
   ): Promise<T> {
-    const observed = await this.prisma.externalProviderConnection.findUnique({
+    const observed = await this.providerConnections.model().findUnique({
       where: { id: connectionId },
     });
     try {
@@ -758,7 +756,7 @@ export class PersonalConnectionService {
         isPersonalConnection(observed)
       ) {
         await this.prisma.$transaction(async (tx) => {
-          const invalidated = await tx.externalProviderConnection.updateMany({
+          const invalidated = await this.providerConnections.model(tx).updateMany({
             where: {
               id: connectionId,
               status: 'ACTIVE',

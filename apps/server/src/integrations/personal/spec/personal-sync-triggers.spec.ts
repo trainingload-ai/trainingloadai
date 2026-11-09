@@ -135,6 +135,7 @@ describe('personal sync enqueueFocus / dawn', () => {
     };
     const service = new PersonalSyncService(
       prisma,
+      { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as any,
       {
         require: async () => connection,
         resolveAccountTimezone: async () => 'Asia/Shanghai',

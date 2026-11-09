@@ -139,6 +139,8 @@ function fixture() {
   };
   const service = new PersonalConnectionService(
     db as never,
+    { model: (tx?: any) => (tx ?? db).externalProviderConnection } as never,
+    { preferredTimezone: async () => 'UTC' } as never,
     {
       encrypt: (s: string) => `sealed:${s}`,
       decrypt: (s: string) => s.slice(7),
@@ -163,6 +165,7 @@ function fixture() {
     );
   const sync = new PersonalSyncService(
     db as never,
+    { model: (tx?: any) => (tx ?? db).externalProviderConnection } as never,
     service,
     {} as never,
     {} as never,
@@ -251,6 +254,7 @@ describe('personal connection lifecycle regressions', () => {
       const f = fixture();
       const writes = new PersonalWriteService(
         f.db as never,
+        { model: (tx?: any) => (tx ?? f.db).externalProviderConnection } as never,
         f.service,
         f.coros as never,
         {} as never,
@@ -309,6 +313,7 @@ describe('personal connection lifecycle regressions', () => {
     const f = fixture();
     const writes = new PersonalWriteService(
       f.db as never,
+      { model: (tx?: any) => (tx ?? f.db).externalProviderConnection } as never,
       f.service,
       f.coros as never,
       {} as never,

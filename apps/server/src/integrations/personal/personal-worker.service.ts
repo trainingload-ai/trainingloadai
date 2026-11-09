@@ -8,6 +8,7 @@ import type { PersonalProviderJob } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SELF_HOST_MODES } from '@/runtime-capabilities/runtime-capability.types';
 import type { ThirdPartyScheduledTask } from '@/third-party-scheduler/third-party-scheduled-task';
+import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { PersonalSyncService } from './personal-sync.service';
 import { PersonalWriteService } from './personal-write.service';
 import { isPersonalConnection } from './personal-connection.service';
@@ -33,6 +34,7 @@ export class PersonalWorkerService
   private running = false;
   constructor(
     private readonly prisma: PrismaService,
+    private readonly providerConnections: ExternalProviderConnectionService,
     private readonly sync: PersonalSyncService,
     private readonly writes: PersonalWriteService,
   ) {}
@@ -102,7 +104,7 @@ export class PersonalWorkerService
       });
       if (!job) return;
       const connection =
-        await this.prisma.externalProviderConnection.findUnique({
+        await this.providerConnections.model().findUnique({
           where: { id: job.connectionId },
         });
       if (!connection || !isPersonalConnection(connection)) return;
@@ -182,7 +184,7 @@ export class PersonalWorkerService
         data: { nextAttemptAt },
       });
     }
-    await this.prisma.externalProviderConnection.updateMany({
+    await this.providerConnections.model().updateMany({
       where: {
         id: job.connectionId,
         ...(typeof record(job.payload).credentialVersion === 'string'

@@ -5,7 +5,7 @@ function fixture(){
  const jobs:any[]=[],connection:any={id:'connection',externalAthleteId:'remote',credentialFingerprint:'generation',metadata:{region:'global',settings:{timezone:'Asia/Shanghai',activities:true,wellness:false}}};
  const prisma:any={personalProviderJob:{upsert:async({create}:any)=>{const job={...create,id:'job',status:'QUEUED'};jobs.push(job);return job;}},externalProviderConnection:{updateMany:async()=>({count:1})}};
  const client:any={request:()=>{throw new Error('must only enqueue');}};
- const service=new PersonalSyncService(prisma,{require:async()=>connection,resolveAccountTimezone:async()=>'Asia/Shanghai'} as any,client,{} as any,{} as any,{} as any,{} as any,{} as any,{} as any);
+ const service=new PersonalSyncService(prisma,{model:(tx?:any)=>(tx??prisma).externalProviderConnection} as any,{require:async()=>connection,resolveAccountTimezone:async()=>'Asia/Shanghai'} as any,client,{} as any,{} as any,{} as any,{} as any,{} as any,{} as any);
  return {service,jobs};
 }
 describe('personal history defaults remain provider scoped',()=>{

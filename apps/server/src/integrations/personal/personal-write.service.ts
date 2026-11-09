@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 import { z } from 'zod';
 import { PrismaService } from '@/prisma/prisma.service';
+import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import {
   CorosMcpClient,
   COROS_WRITE_TOOLS,
@@ -62,6 +63,7 @@ function localWorkoutChecksum(workout: {
 export class PersonalWriteService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly providerConnections: ExternalProviderConnectionService,
     private readonly connections: PersonalConnectionService,
     private readonly coros: CorosMcpClient,
     private readonly plans: PlanExternalSyncService,
@@ -581,7 +583,7 @@ export class PersonalWriteService {
       // This also fences the final receipt and mapping against a connection
       // replacement between the preflight read and this transaction.
       await tx.$executeRaw`SELECT id FROM t_external_provider_connection WHERE id=${connection.id} FOR UPDATE`;
-      const active = await tx.externalProviderConnection.findUnique({
+      const active = await this.providerConnections.model(tx).findUnique({
         where: { id: connection.id },
       });
       if (

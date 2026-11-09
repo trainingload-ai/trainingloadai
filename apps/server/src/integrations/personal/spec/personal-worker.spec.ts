@@ -22,19 +22,21 @@ describe('personal delivery worker recovery', () => {
     const query = jest
       .fn<any>()
       .mockResolvedValue([{ id: 'read', reconcile: false }]);
+    const prisma = {
+      personalProviderJob: { updateMany, findUnique: async () => job },
+      externalProviderConnection: {
+        findUnique: async () => ({
+          id: 'connection',
+          provider: 'garmin',
+          metadata: { connectionMode: 'personal_api' },
+        }),
+        updateMany: async () => ({ count: 1 }),
+      },
+      $queryRaw: query,
+    };
     const worker = new PersonalWorkerService(
-      {
-        personalProviderJob: { updateMany, findUnique: async () => job },
-        externalProviderConnection: {
-          findUnique: async () => ({
-            id: 'connection',
-            provider: 'garmin',
-            metadata: { connectionMode: 'personal_api' },
-          }),
-          updateMany: async () => ({ count: 1 }),
-        },
-        $queryRaw: query,
-      } as never,
+      prisma as never,
+      { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as never,
       {
         run: async () => {
           throw new PersonalProviderError('PROVIDER_RATE_LIMITED', 120000, 429);
@@ -95,6 +97,7 @@ describe('personal delivery worker recovery', () => {
     };
     const worker = new PersonalWorkerService(
       db as never,
+      { model: (tx?: any) => (tx ?? db).externalProviderConnection } as never,
       {} as never,
       writes as never,
     );
@@ -111,6 +114,7 @@ describe('personal delivery worker recovery', () => {
     const interval = jest.spyOn(globalThis, 'setInterval');
     const worker = new PersonalWorkerService(
       { $queryRaw: query } as never,
+      { model: () => ({}) } as never,
       { schedule } as never,
       {} as never,
     );
@@ -144,19 +148,21 @@ describe('personal ACTIVITY download retries', () => {
     const query = jest
       .fn<any>()
       .mockResolvedValue([{ id: 'activity', reconcile: false }]);
+    const prisma = {
+      personalProviderJob: { updateMany, findUnique: async () => job },
+      externalProviderConnection: {
+        findUnique: async () => ({
+          id: 'connection',
+          provider: 'garmin',
+          metadata: { connectionMode: 'personal_api' },
+        }),
+        updateMany: async () => ({ count: 1 }),
+      },
+      $queryRaw: query,
+    };
     const worker = new PersonalWorkerService(
-      {
-        personalProviderJob: { updateMany, findUnique: async () => job },
-        externalProviderConnection: {
-          findUnique: async () => ({
-            id: 'connection',
-            provider: 'garmin',
-            metadata: { connectionMode: 'personal_api' },
-          }),
-          updateMany: async () => ({ count: 1 }),
-        },
-        $queryRaw: query,
-      } as never,
+      prisma as never,
+      { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as never,
       {
         run: async () => {
           throw new PersonalProviderError('PROVIDER_REQUEST_FAILED');

@@ -54,8 +54,18 @@ describe('Garmin Personal health checkpoints', () => {
           return { count: 1 };
         }),
       };
+      const prisma = {
+        importSourceObject: sources,
+        personalProviderJob: jobs,
+        externalProviderConnection: {
+          updateMany: async () => ({ count: 1 }),
+          findMany: async () => [],
+          findUnique: async () => null,
+        },
+      };
       const service = new PersonalSyncService(
-        { importSourceObject: sources, personalProviderJob: jobs } as any,
+        prisma as any,
+        { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as any,
         {
           require: async () => connection,
           resolveAccountTimezone: async () => 'UTC',
@@ -63,7 +73,7 @@ describe('Garmin Personal health checkpoints', () => {
         } as any,
         { get } as any,
         {} as any,
-        {} as any,
+        { sourceObjects: () => sources } as any,
         { replaceProviderDailyCandidates: async () => ({}) } as any,
         {} as any,
         {} as any,

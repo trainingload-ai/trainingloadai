@@ -7,6 +7,7 @@ import { StorageModule } from '@/storage/storage.module';
 import { SyncModule } from '@/sync/sync.module';
 import { PlanModule } from '@/api/plan/plan.module';
 import { UsersModule } from '@/api/user/user.module';
+import { TimezoneModule } from '@/timezone/timezone.module';
 import { GarminPersonalClient } from '@/integrations/garmin-personal/garmin-personal.client';
 import { CorosMcpClient } from '@/integrations/coros-mcp/coros-mcp.client';
 import { PersonalConnectionService } from '@/integrations/personal/personal-connection.service';
@@ -31,6 +32,7 @@ import {
     SyncModule,
     PlanModule,
     UsersModule,
+    TimezoneModule,
   ],
   controllers: [
     GarminPersonalController,

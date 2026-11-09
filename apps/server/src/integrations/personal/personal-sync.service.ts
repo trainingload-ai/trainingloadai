@@ -13,6 +13,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import { ImportBatchService } from '@/importing/import-batch.service';
 import { ImportingJobService } from '@/importing/importing-job.service';
+import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { HealthDataIngestService } from '@/health-data/health-data-ingest.service';
 import { GarminPersonalClient } from '../garmin-personal/garmin-personal.client';
 import { corosRecordPageLimit } from '../coros-mcp/coros-mcp.client';
@@ -51,6 +52,7 @@ const json = (value: unknown) =>
 export class PersonalSyncService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly providerConnections: ExternalProviderConnectionService,
     private readonly connections: PersonalConnectionService,
     private readonly garmin: GarminPersonalClient,
     private readonly imports: ImportBatchService,
@@ -140,7 +142,7 @@ export class PersonalSyncService {
         409,
       );
     if (job.status === 'QUEUED')
-      await this.prisma.externalProviderConnection.updateMany({
+      await this.providerConnections.model().updateMany({
         where: {
           id: connection.id,
           credentialFingerprint: connection.credentialFingerprint,
@@ -190,7 +192,7 @@ export class PersonalSyncService {
         }),
       },
     });
-    await this.prisma.externalProviderConnection.updateMany({
+    await this.providerConnections.model().updateMany({
       where: {
         id: connection.id,
         credentialFingerprint: connection.credentialFingerprint,
@@ -262,7 +264,7 @@ export class PersonalSyncService {
       },
     });
     if (job.status === 'QUEUED')
-      await this.prisma.externalProviderConnection.updateMany({
+      await this.providerConnections.model().updateMany({
         where: { id: connection.id },
         data: { lastSyncStartedAt: new Date() },
       });
@@ -270,7 +272,7 @@ export class PersonalSyncService {
   }
   /** Dawn sync in each account TIMEZONE at/after 03:00; not a fifteen-minute poll. */
   async schedule() {
-    const rows = await this.prisma.externalProviderConnection.findMany({
+    const rows = await this.providerConnections.model().findMany({
       where: {
         provider: { in: ['garmin', 'coros'] },
         status: 'ACTIVE',
@@ -349,7 +351,7 @@ export class PersonalSyncService {
           }),
         },
       });
-      await this.prisma.externalProviderConnection.updateMany({
+      await this.providerConnections.model().updateMany({
         where: { id: row.id },
         data: { lastSyncStartedAt: new Date() },
       });
@@ -747,7 +749,7 @@ export class PersonalSyncService {
       !(await this.checkpoint(job, counts, 0, failed ? 'FAILED' : 'SUCCEEDED'))
     )
       return;
-    await this.prisma.externalProviderConnection.updateMany({
+    await this.providerConnections.model().updateMany({
       where: {
         id: connection.id,
         credentialFingerprint: connection.credentialFingerprint,
@@ -878,7 +880,7 @@ export class PersonalSyncService {
       // Serialize reservations with each other and with credential replacement.
       // updatedAt alone is not a lock: two writes can share a millisecond.
       await tx.$executeRaw`SELECT id FROM t_external_provider_connection WHERE id=${expected.id} FOR UPDATE`;
-      const connection = await tx.externalProviderConnection.findUnique({
+      const connection = await this.providerConnections.model(tx).findUnique({
         where: { id: expected.id },
       });
       if (
@@ -913,7 +915,7 @@ export class PersonalSyncService {
           429,
         );
       reservations.push(now);
-      const updated = await tx.externalProviderConnection.updateMany({
+      const updated = await this.providerConnections.model(tx).updateMany({
         where: { id: connection.id, updatedAt: connection.updatedAt },
         data: {
           metadata: json({
@@ -1118,7 +1120,7 @@ export class PersonalSyncService {
         previous.credentialVersion === connection.credentialFingerprint &&
         typeof previous.sourceObjectId === 'string'
       ) {
-        const saved = await this.prisma.importSourceObject.findFirst({
+        const saved = await this.importJobs.sourceObjects().findFirst({
           where: {
             id: previous.sourceObjectId,
             userId: connection.userId,
@@ -1356,7 +1358,7 @@ export class PersonalSyncService {
     const sourceUid = `${connection.provider}:${personalAccountRef(connection)}:health:${day}${version}`;
     const sourceKind =
       connection.provider === 'garmin' ? 'GARMIN_PERSONAL_API' : 'COROS_MCP';
-    return this.prisma.importSourceObject.upsert({
+    return this.importJobs.sourceObjects().upsert({
       where: {
         import_source_object_identity_unique: {
           userId: connection.userId,

@@ -29,7 +29,6 @@ describe('Importing job table ownership boundary', () => {
       const rel = relative(SRC_ROOT, file).split('\\').join('/');
       if (rel.includes('/spec/')) continue;
       if (rel.startsWith('importing/persistence/')) continue;
-      if (rel.startsWith('integrations/personal/')) continue;
       const text = readFileSync(file, 'utf8');
       const lines = text.split('\n');
       lines.forEach((line, index) => {

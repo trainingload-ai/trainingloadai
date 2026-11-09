@@ -63,8 +63,13 @@ describe('Garmin personal transport', () => {
     expect(request).toHaveBeenCalledTimes(2);
   });
   it('refreshes and retries an authorized READ at most once', async () => {
+    const prisma = {
+      externalProviderConnection: { findUnique: async () => null },
+    };
     const service = new PersonalConnectionService(
-      { externalProviderConnection: { findUnique: async () => null } } as never,
+      prisma as never,
+      { model: (client?: any) => (client ?? prisma).externalProviderConnection } as never,
+      { preferredTimezone: async () => 'UTC' } as never,
       null!,
       null!,
       null!,
