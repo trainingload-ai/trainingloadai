@@ -2503,7 +2503,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-worker.service.ts",
-          "line": 21
+          "line": 22
         },
         {
           "file": "apps/server/src/runtime-capabilities/runtime-capability.resolver.ts",
@@ -3510,7 +3510,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
-          "line": 384
+          "line": 382
         }
       ]
     },
@@ -3993,7 +3993,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
-          "line": 384
+          "line": 382
         }
       ]
     },
@@ -5647,7 +5647,7 @@
         },
         {
           "file": "apps/server/src/integrations/personal/personal-worker.service.ts",
-          "line": 23
+          "line": 24
         },
         {
           "file": "apps/server/src/maps/activity-map-thumbnail-provider.ts",
