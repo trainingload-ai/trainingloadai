@@ -5,6 +5,7 @@
 export const PLAN_FINALIZED_EVENT = 'plan.finalized';
 export const PLAN_COMPLETED_EVENT = 'plan.completed';
 export const PLAN_DRAFT_CHANGED_EVENT = 'plan.draftChanged';
+export const PLAN_WORKOUTS_CHANGED_EVENT = 'plan.workoutsChanged';
 
 export type PlanFinalizedStatus = 'COMPLETED' | 'CANCELLED';
 export type PlanProgressLabel = 'UP' | 'STABLE' | 'DOWN';
@@ -38,5 +39,14 @@ export class PlanDraftChangedEvent {
   constructor(
     public readonly userId: string,
     public readonly planId: string,
+  ) {}
+}
+
+export class PlanWorkoutsChangedEvent {
+  constructor(
+    public readonly userId: string,
+    public readonly reason: string,
+    public readonly workoutIds: string[] = [],
+    public readonly planId: string | null = null,
   ) {}
 }

@@ -369,7 +369,10 @@ describe('HealthDataIngestService', () => {
           value: 10000,
           sourceBreakdown: expect.objectContaining({
             MANUAL: expect.objectContaining({ value: 10000 }),
-            HEALTH_CONNECT: expect.objectContaining({ value: 9000, priority: 40 }),
+            HEALTH_CONNECT: expect.objectContaining({
+              value: 9000,
+              priority: 40,
+            }),
           }),
         }),
       }),
@@ -619,6 +622,32 @@ describe('HealthDataIngestService', () => {
 
     expect(peak).toBe(4);
     expect(prisma.externalHealthSample.upsert).toHaveBeenCalledTimes(7);
+  });
+
+  it('retires the original day when a complete raw source summary moves local dates', async () => {
+    const { prisma, service } = createService();
+    prisma.externalHealthSample.findMany.mockResolvedValueOnce([
+      { externalId: 'source:hydration:one', dailyMetricId: null },
+    ]);
+    prisma.externalHealthSample.updateMany.mockResolvedValueOnce({ count: 1 });
+    await service.replaceProviderRawCandidates({
+      userId: 'user-1',
+      provider: 'MANUAL',
+      connectionId: 'connection-1',
+      localDate: new Date('2026-11-02T00:00:00Z'),
+      managedMetricTypes: ['HYDRATION_ML'],
+      externalIdPrefix: 'source:hydration:',
+      candidates: [],
+    });
+    const where = prisma.externalHealthSample.updateMany.mock.calls[0][0].where;
+    expect(where).not.toHaveProperty('localDate');
+    expect(where).toMatchObject({
+      userId: 'user-1',
+      provider: 'MANUAL',
+      connectionId: 'connection-1',
+      projectToDaily: false,
+      externalId: { startsWith: 'source:hydration:' },
+    });
   });
 
   it('tombstones raw points missing from an authoritative provider day', async () => {

@@ -42,6 +42,10 @@ export class HealthFileQueryService {
     });
   }
 
+  listExportReportedQuantities(userId:string,cutoff:Date){return this.health.samples().findMany({where:{userId,createdAt:{lte:cutoff},deletedAt:null,projectToDaily:false,metricType:'HYDRATION_ML',metadata:{path:['basis'],equals:'UNSPECIFIED_REPORT'}},orderBy:[{localDate:'asc'},{id:'asc'}]});}
+
+  listExportObservations(userId:string,cutoff:Date){return this.health.observations().findMany({where:{userId,createdAt:{lte:cutoff},deletedAt:null},orderBy:[{localDate:'asc'},{id:'asc'}]});}
+
   listExportDailyMetrics(userId: string, cutoff: Date) {
     return this.health.dailyMetrics().findMany({
       where: { userId, createdAt: { lte: cutoff } },

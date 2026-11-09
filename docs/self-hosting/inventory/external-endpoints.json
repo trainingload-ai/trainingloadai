@@ -104,19 +104,19 @@
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 449
-        },
-        {
-          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
-          "line": 450
-        },
-        {
-          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
           "line": 451
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
           "line": 452
+        },
+        {
+          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
+          "line": 453
+        },
+        {
+          "file": "apps/server/src/importing/fit-release-corpus.command.ts",
+          "line": 454
         }
       ],
       "capability": "ai",
@@ -159,6 +159,20 @@
         {
           "file": "compose.yml",
           "line": 219
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "compose.yml"
+      ]
+    },
+    {
+      "host": "127.0.0.1:43210",
+      "url": "http://127.0.0.1:43210",
+      "references": [
+        {
+          "file": "compose.yml",
+          "line": 22
         }
       ],
       "capability": "product-internal",
@@ -240,7 +254,7 @@
       "references": [
         {
           "file": "apps/client/src/app/[locale]/(main)/settings/component/SelfHostAiSettings.tsx",
-          "line": 460
+          "line": 472
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -300,7 +314,7 @@
       "references": [
         {
           "file": "apps/client/src/components/layout/MainAppShell.tsx",
-          "line": 75
+          "line": 86
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
@@ -569,6 +583,34 @@
       ]
     },
     {
+      "host": "connect.garmin.cn",
+      "url": "https://connect.garmin.cn/app/settings/personalApiToken",
+      "references": [
+        {
+          "file": "apps/client/src/components/third-party/personal-connection-dialog.tsx",
+          "line": 322
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "connect.garmin.com",
+      "url": "https://connect.garmin.com/app/settings/personalApiToken",
+      "references": [
+        {
+          "file": "apps/client/src/components/third-party/personal-connection-dialog.tsx",
+          "line": 323
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "cyklopedia.cc",
       "url": "https://cyklopedia.cc/cycling-tips/efficiency-factor/",
       "references": [
@@ -808,7 +850,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 128
+          "line": 136
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -1453,6 +1495,62 @@
       ]
     },
     {
+      "host": "mcp.coros.com",
+      "url": "https://mcp.coros.com",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/coros-mcp/coros-mcp.client.ts",
+          "line": 10
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "mcpcn.coros.com",
+      "url": "https://mcpcn.coros.com",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/coros-mcp/coros-mcp.client.ts",
+          "line": 11
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "mcpeu.coros.com",
+      "url": "https://mcpeu.coros.com",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/coros-mcp/coros-mcp.client.ts",
+          "line": 12
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "mcpus.coros.com",
+      "url": "https://mcpus.coros.com",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/coros-mcp/coros-mcp.client.ts",
+          "line": 13
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "medium.com",
       "url": "https://medium.com/strava-engineering/an-improved-gap-model-8b07ae8886c3",
       "references": [
@@ -1472,7 +1570,7 @@
       "references": [
         {
           "file": "apps/client/Dockerfile",
-          "line": 42
+          "line": 43
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1513,6 +1611,34 @@
         {
           "file": "apps/server/src/algorithm/BikeScore.ts",
           "line": 158
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "personal.connectapi.garmin.cn",
+      "url": "https://personal.connectapi.garmin.cn",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/garmin-personal/garmin-personal.client.ts",
+          "line": 18
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "personal.connectapi.garmin.com",
+      "url": "https://personal.connectapi.garmin.com",
+      "references": [
+        {
+          "file": "apps/server/src/integrations/garmin-personal/garmin-personal.client.ts",
+          "line": 17
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2717,8 +2843,26 @@
     },
     {
       "host": "www.topografix.com",
+      "url": "http://www.topografix.com/GPX/1/0",
+      "references": [
+        {
+          "file": "apps/server/src/routes/route-geometry.ts",
+          "line": 14
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "www.topografix.com",
       "url": "http://www.topografix.com/GPX/1/1",
       "references": [
+        {
+          "file": "apps/server/src/routes/route-geometry.ts",
+          "line": 15
+        },
         {
           "file": "scripts/selfhost/run-acceptance.mjs",
           "line": 391
@@ -2726,6 +2870,7 @@
       ],
       "capability": "web-asset-or-tooling",
       "owners": [
+        "apps",
         "scripts"
       ]
     },

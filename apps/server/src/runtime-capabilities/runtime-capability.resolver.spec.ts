@@ -27,6 +27,21 @@ function coreLocal(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
 }
 
 describe('runtime capability resolver', () => {
+  it('keeps personal Garmin and COROS disabled in Cloud even with integration secrets and general sync enabled', () => {
+    const snapshot = resolveRuntimeCapabilities({
+      DEPLOYMENT_MODE: 'cloud',
+      EXTERNAL_PROVIDER_CREDENTIAL_SECRET: 'b'.repeat(32),
+      THIRD_PARTY_SYNC_ENABLED: 'true',
+      GARMIN_CLIENT_ID: 'fixture',
+      GARMIN_CLIENT_SECRET: 'fixture',
+    });
+    expect(snapshot.deployment).not.toBe('self-host');
+    for (const name of ['garmin-personal-api-key', 'coros-mcp'] as const)
+      expect(snapshot.capabilities[name]).toMatchObject({
+        state: 'disabled',
+        provider: 'none',
+      });
+  });
   it('accepts Core Local without commercial credentials', () => {
     const snapshot = resolveRuntimeCapabilities(coreLocal());
     expect(snapshot).toMatchObject({

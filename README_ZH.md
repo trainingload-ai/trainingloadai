@@ -144,6 +144,8 @@ pnpm screenshots:readme
 
 ## 文档
 
+Self-host 现已支持通过 [Garmin Personal API](apps/docs/content/docs/zh/self-host/garmin-personal-api.mdx) 连接 Garmin。Self-host 不开启 COROS MCP。闭源/托管产品另行提供 Garmin Developer API。
+
 - [架构与部署组合](ARCHITECTURE.md)
 - [安装与配置 Self-host](SELF_HOSTING.md)
 - [实例运维与故障处理](SELF_HOST_OPERATIONS.md)

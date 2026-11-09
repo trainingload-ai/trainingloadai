@@ -7,6 +7,7 @@ describe('ExternalProviderWebhookDispatcherService', () => {
     const inbox = {
       claim: jest.fn<(...args: unknown[]) => Promise<unknown[]>>(),
       countOutstanding: jest.fn(async () => 0),
+      defer: jest.fn(async () => 1),
       markDone: jest.fn(async () => ({})),
       markIgnored: jest.fn(async () => ({})),
       markFailed: jest.fn(async () => ({})),
@@ -57,6 +58,36 @@ describe('ExternalProviderWebhookDispatcherService', () => {
 
     expect(inbox.markDone).toHaveBeenCalledWith('event-1');
     expect(inbox.markIgnored).toHaveBeenCalledWith('event-2');
+  });
+
+  it('defers quota waits without declaring success or failure', async () => {
+    const { inbox, service } = createService();
+    const lockedAt = new Date(),
+      until = new Date(Date.now() + 60000);
+    inbox.claim.mockResolvedValue([
+      {
+        id: 'limited',
+        event_type: 'file',
+        attempts: 8,
+        locked_at: lockedAt,
+        payload: {},
+      },
+    ]);
+    service.register({
+      provider: 'wahoo',
+      label: 'test',
+      process: async () => ({ deferUntil: until, scopeKey: 'app:opaque' }),
+    });
+    await service.drainAll();
+    expect(inbox.defer).toHaveBeenCalledWith({
+      id: 'limited',
+      attempts: 8,
+      lockedAt,
+      until,
+      scopeKey: 'app:opaque',
+    });
+    expect(inbox.markDone).not.toHaveBeenCalled();
+    expect(inbox.markFailed).not.toHaveBeenCalled();
   });
 
   it('owns retry transitions when a provider adapter throws', async () => {

@@ -78,9 +78,11 @@ The public application has no Cloud password, signup, or OAuth pages. An expired
 
 ## Connect Intervals.icu
 
-Self-hosting supports one training-platform connection: the Owner provides their own **Intervals.icu personal API key**. An Intervals.icu OAuth client, redirect URI, and webhook are neither required nor supported. Other training-platform connections stay hidden, and the server rejects their endpoints as well.
+Self-host connects Intervals.icu with the Owner's **personal API key**. An Intervals.icu OAuth client, redirect URI and webhook are neither required nor supported.
 
-To connect:
+Self-host also supports [Garmin Personal API](/docs/self-host/garmin-personal-api). COROS MCP is not enabled. No extra host secret is required for either personal connection.
+
+To connect Intervals.icu:
 
 1. Open [Intervals.icu Settings](https://intervals.icu/settings) and copy the personal API key near the bottom of the page. The **Get API Key** button in the Client connection dialog opens this page directly.
 2. Choose **Intervals.icu** in the onboarding Import activity step, or later open **Account → Third-party connections → Intervals.icu**.
@@ -133,7 +135,7 @@ The release schema still accepts complete provider groups in `.env.selfhost` for
 - The data root contains the instance marker and expected subdirectories, without unrelated files.
 - The AI settings page is visible only to the instance Owner.
 - After saving AI settings, the field is cleared and the page shows only that a key is configured.
-- The self-host third-party connection page shows only Intervals.icu, and its dialog offers API-key authentication without OAuth.
+- The self-host third-party connection page shows Intervals.icu and Garmin Personal API (API-key flows, no OAuth). COROS MCP is not shown as available.
 - The **AI Usage** page shows no membership checkout, credit balance, or credit packs and does not call `/billing/*` endpoints.
 - After an Intervals.icu key is saved, the field is cleared, only the final four characters are shown, and a manual sync succeeds.
 - Disabling AI prevents new provider calls without affecting non-AI product features.

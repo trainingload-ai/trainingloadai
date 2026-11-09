@@ -301,10 +301,13 @@ export class FitActivityDataRepairService {
                 0,
               ),
               strengthSetCount: Array.isArray(
-                (activity as { strengthSets?: unknown[] }).strengthSets,
+                (activity as unknown as { strengthSets?: unknown[] })
+                  .strengthSets,
               )
                 ? (
-                    activity as { strengthSets: Array<{ setType?: string }> }
+                    activity as unknown as {
+                      strengthSets: Array<{ setType?: string }>;
+                    }
                   ).strengthSets.filter(
                     (set) =>
                       String(set.setType ?? 'UNKNOWN').toUpperCase() !== 'REST',

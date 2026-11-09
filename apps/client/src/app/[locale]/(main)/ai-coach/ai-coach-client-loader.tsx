@@ -9,6 +9,8 @@ import {
   useRuntimeCapabilities,
 } from "@/api/runtime-capabilities";
 import { Button } from "@/components/ui/button";
+import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
+import { DesktopCoachCapabilityState } from "./desktop-coach-capability-state";
 
 const AiCoachClient = dynamic(
   () => import("./coach-client").then((module) => module.AiCoachClient),
@@ -21,7 +23,17 @@ const AiCoachClient = dynamic(
 export function AiCoachClientLoader() {
   const runtime = useRuntimeCapabilities();
   const capability = runtime.data?.capabilities.ai;
+  const { isDesktopSelfHost } = useRuntimeEnvironment();
   const t = useTranslations("AiCoachPage.transcript");
+  if (isDesktopSelfHost && !runtimeCapabilityAvailable(capability)) {
+    return (
+      <DesktopCoachCapabilityState
+        capability={capability}
+        loading={runtime.isPending}
+        onRetry={() => void runtime.refetch()}
+      />
+    );
+  }
   if (!runtimeCapabilityAvailable(capability)) {
     const selfHosted = runtime.data?.deployment === "self-host";
     return (

@@ -83,4 +83,17 @@
 - 已完成：磁盘满/配额/只读/权限稳定错误码；数据库 metadata 默认 dry-run 且经 size + checksum 验证的安全 reconcile。
 - 待完成：真实容器 recreate 测试（当前 host 无 Docker，必须由 clean-room runner / CI 出具证据）。
 
+## Self-host 个人平台连接
+
+Core migration `0022_personal_integrations` 增加个人来源枚举与 `t_personal_provider_job`。
+Self-host **已支持** Garmin Personal API；**不开启** COROS MCP。闭源/托管产品另行使用 Garmin Developer API。
+
+Garmin 连接凭据仍在 `ExternalProviderConnection` 中加密保存；任务表保存发现检查点、导入关联与租约。
+下载文件继续使用既有 private uploads 与导入流水线，不引入新的主机数据目录。这些状态随 PostgreSQL 备份。
+
+断开连接会在同一事务中清除凭据并将连接标为 `DISCONNECTED`，取消尚未发出的任务，保留已导入事实。
+已经开始的统一文件导入仍可能完成。离线备份中的凭据密文不会因断开被抹去；恢复可用凭据需要原实例集成密钥。
+
+实现与验收口径见 [个人平台连接](personal-integrations.zh.md)。
+
 原始写入点清单由 `pnpm selfhost:inventory` 生成到 `inventory/persistent-writes.json`。

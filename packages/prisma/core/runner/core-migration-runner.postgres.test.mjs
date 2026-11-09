@@ -140,6 +140,12 @@ postgresTest(
         { id: "0014_better_auth_oauth_provider_17", source: "baseline" },
         { id: "0015_fit_strength_sets", source: "baseline" },
         { id: "0016_chronological_fitness_replay", source: "baseline" },
+        { id: "0017_activity_data_migration", source: "baseline" },
+        { id: "0018_activity_sport_catalog", source: "baseline" },
+        { id: "0019_workout_step_annotations", source: "baseline" },
+        { id: "0020_saved_routes", source: "baseline" },
+        { id: "0021_health_observations", source: "baseline" },
+        { id: "0022_personal_integrations", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,

@@ -40,6 +40,7 @@ import { PlanProposalApplyService } from './application/plan-proposal-apply.serv
 import { PlanScheduledActivationWorker } from './application/plan-scheduled-activation.worker';
 import { NotificationDomainModule } from '@/notification/notification-domain.module';
 import { PlanWorkoutTargetResolver } from './application/plan-workout-target-resolver.service';
+import { PlanDeliveryReadService } from './application/plan-delivery-read.service';
 
 /**
  * 计划模块。不要在这里 import ReviewModule。
@@ -91,6 +92,7 @@ import { PlanWorkoutTargetResolver } from './application/plan-workout-target-res
     PlanProposalApplyService,
     PlanScheduledActivationWorker,
     PlanWorkoutTargetResolver,
+    PlanDeliveryReadService,
     PlanImportDraftService,
   ],
   exports: [
@@ -111,6 +113,7 @@ import { PlanWorkoutTargetResolver } from './application/plan-workout-target-res
     PlanProposalService,
     PlanProposalApplyService,
     PlanWorkoutTargetResolver,
+    PlanDeliveryReadService,
   ],
 })
 export class PlanModule {}

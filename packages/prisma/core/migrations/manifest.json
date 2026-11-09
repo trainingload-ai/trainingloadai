@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "f92236a5eb10af574ecccb16fc194a052c1da057e70183154254ed0d4c506ccf",
+  "schemaChecksum": "9b8104cdc40b9877f47fc68d48b4786ce5791ae8ffb32a9132d267e0a2288895",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -91,6 +91,26 @@
       "id": "0018_activity_sport_catalog",
       "file": "0018_activity_sport_catalog/migration.sql",
       "sha256": "8bec6231abde9d3ad097f386c91ee0a4f109e303ac38b97eff67736614bf31be"
+    },
+    {
+      "id": "0019_workout_step_annotations",
+      "file": "0019_workout_step_annotations/migration.sql",
+      "sha256": "d9e17e2bcded9605220918bee03849af4cc70e2b738b9f5161c5d849d92baed6"
+    },
+    {
+      "id": "0020_saved_routes",
+      "file": "0020_saved_routes/migration.sql",
+      "sha256": "95400357a5f2a5fd616e083d7df35ab3087acc2d582be9b22285f2cf3cfe6f5b"
+    },
+    {
+      "id": "0021_health_observations",
+      "file": "0021_health_observations/migration.sql",
+      "sha256": "9ba58a8e3bd7ee2bef4b65d3e4746c896c2138c433a0d7113b80cdf2cb73b0d3"
+    },
+    {
+      "id": "0022_personal_integrations",
+      "file": "0022_personal_integrations/migration.sql",
+      "sha256": "224b7ecc0020079952d6f121606e3d4725f51184322b05af3be12e568eb67dd4"
     }
   ]
 }

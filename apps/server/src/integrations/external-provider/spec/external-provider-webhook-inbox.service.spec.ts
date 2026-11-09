@@ -2,6 +2,144 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ExternalProviderWebhookInboxService } from '../external-provider-webhook-inbox.service';
 
 describe('ExternalProviderWebhookInboxService', () => {
+  it('uses the caller transaction for durable events and does not signal before commit', async () => {
+    const createMany = jest.fn(async () => ({ count: 1 })),
+      notify = jest.fn();
+    const service = new ExternalProviderWebhookInboxService(
+      {} as never,
+      { notify } as never,
+    );
+    const tx = { externalProviderWebhookEvent: { createMany } };
+    await service.enqueue(
+      {
+        provider: 'garmin',
+        eventType: 'disconnect',
+        dedupeKey: 'epoch',
+        payload: {},
+      },
+      tx as never,
+    );
+    expect(createMany).toHaveBeenCalledTimes(1);
+    expect(notify).not.toHaveBeenCalled();
+  });
+
+  it('queries non-runnable cooldown markers as well as delayed work', async () => {
+    const until = new Date(Date.now() + 120000);
+    const findFirst = jest.fn(async (_args: unknown) => ({
+      availableAt: until,
+    }));
+    const service = new ExternalProviderWebhookInboxService({
+      externalProviderWebhookEvent: { findFirst },
+    } as never);
+    expect(await service.rateLimitUntil('garmin', ['app:test'])).toEqual(until);
+    expect(findFirst.mock.calls[0][0]).toMatchObject({
+      where: {
+        AND: [
+          {
+            OR: expect.arrayContaining([
+              { eventType: 'provider_cooldown', status: 'DONE' },
+            ]),
+          },
+        ],
+      },
+    });
+  });
+
+  it('locks a precise current claim within mapping transactions and rejects expired or future leases', async () => {
+    const lockedAt = new Date(Date.now() - 1000),
+      query = jest.fn(async (_q: unknown) => [{ id: 'task' }]);
+    const service = new ExternalProviderWebhookInboxService({} as never);
+    const claim = {
+      id: 'task',
+      provider: 'garmin' as const,
+      externalUserId: 'account',
+      attempts: 2,
+      lockedAt,
+    };
+    expect(
+      await service.isCurrentClaim(claim, { $queryRaw: query } as never),
+    ).toBe(true);
+    const sql = query.mock.calls[0][0] as any;
+    expect(sql.sql).toContain('FOR UPDATE');
+    expect(sql.values).toEqual(
+      expect.arrayContaining(['task', 'garmin', 'account', 2, lockedAt]),
+    );
+    expect(
+      await service.isCurrentClaim(
+        { ...claim, lockedAt: new Date(Date.now() - 241000) },
+        { $queryRaw: query } as never,
+      ),
+    ).toBe(false);
+    expect(
+      await service.isCurrentClaim(
+        { ...claim, lockedAt: new Date(Date.now() + 10000) },
+        { $queryRaw: query } as never,
+      ),
+    ).toBe(false);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+  it('fences a rate-limit wait with the exact claim timestamp and leaves it pending', async () => {
+    const execute = jest.fn(async (_query: unknown) => 1);
+    const service = new ExternalProviderWebhookInboxService({
+      $executeRaw: execute,
+    } as never);
+    const lockedAt = new Date(),
+      until = new Date(Date.now() + 60000);
+    await service.defer({
+      id: 'event',
+      attempts: 8,
+      lockedAt,
+      until,
+      scopeKey: 'app:opaque',
+    });
+    const query = execute.mock.calls[0][0] as any;
+    expect(query.sql).toContain('attempts=GREATEST(attempts-1,0)');
+    expect(query.sql).toContain('locked_at=?');
+    expect(query.values).toContain(lockedAt);
+    expect(query.values).toContain(until);
+  });
+
+  it('persists reviewed previews without waking a worker', async () => {
+    const createMany = jest.fn(async () => ({ count: 1 })),
+      notify = jest.fn();
+    const service = new ExternalProviderWebhookInboxService(
+      { externalProviderWebhookEvent: { createMany } } as never,
+      { notify } as never,
+    );
+    await service.enqueue({
+      provider: 'wahoo',
+      eventType: 'delivery',
+      dedupeKey: 'request',
+      payload: { ciphertext: 'fixture' },
+      initialStatus: 'PREVIEW',
+    });
+    expect(createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [expect.objectContaining({ status: 'PREVIEW' })],
+      }),
+    );
+    expect(notify).not.toHaveBeenCalled();
+  });
+  it('fences every terminal transition with the current claim', async () => {
+    const updateMany = jest.fn(async (_args: unknown) => ({ count: 0 }));
+    const service = new ExternalProviderWebhookInboxService({
+      externalProviderWebhookEvent: { updateMany },
+    } as never);
+    const lockedAt = new Date(),
+      claim = { attempts: 2, lockedAt };
+    await service.markDone('event', claim);
+    await service.markIgnored('event', claim);
+    await service.markFailed({
+      id: 'event',
+      ...claim,
+      error: new Error('fixture'),
+    });
+    for (const [args] of updateMany.mock.calls)
+      expect(args).toMatchObject({
+        where: { id: 'event', status: 'PROCESSING', attempts: 2, lockedAt },
+      });
+  });
+
   it('uses provider + dedupe key as the durable identity', async () => {
     const createMany = jest.fn(async () => ({ count: 1 }));
     const notify = jest.fn();

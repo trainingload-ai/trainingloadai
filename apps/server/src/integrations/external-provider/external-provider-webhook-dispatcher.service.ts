@@ -15,7 +15,10 @@ import {
 import { ExternalProviderWebhookSignalService } from './external-provider-webhook-signal.service';
 import { RuntimeCapabilityService } from '@/runtime-capabilities/runtime-capability.service';
 
-export type ExternalProviderWebhookProcessResult = 'DONE' | 'IGNORED';
+export type ExternalProviderWebhookProcessResult =
+  | 'DONE'
+  | 'IGNORED'
+  | { deferUntil: Date; scopeKey: string };
 
 export type ExternalProviderWebhookHandler<Payload = Record<string, unknown>> =
   {
@@ -171,10 +174,29 @@ export class ExternalProviderWebhookDispatcherService
   ) {
     try {
       const result = await handler.process(event);
-      if (result === 'IGNORED') {
-        await this.inbox.markIgnored(event.id);
+      if (typeof result === 'object') {
+        if (!event.locked_at) throw new Error('PROVIDER_DEFER_CLAIM_MISSING');
+        await this.inbox.defer({
+          id: event.id,
+          attempts: event.attempts,
+          lockedAt: event.locked_at,
+          until: result.deferUntil,
+          scopeKey: result.scopeKey,
+        });
+      } else if (result === 'IGNORED') {
+        if (event.locked_at)
+          await this.inbox.markIgnored(event.id, {
+            attempts: event.attempts,
+            lockedAt: event.locked_at,
+          });
+        else await this.inbox.markIgnored(event.id);
       } else {
-        await this.inbox.markDone(event.id);
+        if (event.locked_at)
+          await this.inbox.markDone(event.id, {
+            attempts: event.attempts,
+            lockedAt: event.locked_at,
+          });
+        else await this.inbox.markDone(event.id);
       }
     } catch (error) {
       await this.inbox.markFailed({
@@ -182,6 +204,7 @@ export class ExternalProviderWebhookDispatcherService
         attempts: event.attempts,
         maxAttempts,
         error,
+        ...(event.locked_at ? { lockedAt: event.locked_at } : {}),
       });
       this.logger.warn(
         `[webhook-dispatcher] provider=${handler.provider} event=${event.id} 处理失败`,

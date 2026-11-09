@@ -5,6 +5,8 @@ export interface HealthDataProviderPolicyExtension {
 const corePriority: Readonly<Record<string, number>> = {
   MANUAL: 100,
   INTERVALS_ICU: 60,
+  GARMIN: 55,
+  COROS: 40,
   HEALTH_CONNECT: 30,
 };
 

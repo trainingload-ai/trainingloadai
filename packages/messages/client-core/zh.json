@@ -1095,6 +1095,30 @@
         "separate": "分开展示",
         "overlay": "叠加展示"
       }
+    },
+    "setup": {
+      "title": "尚未配置 AI",
+      "description": "选择 AI 服务商并配置模型后，即可开始与教练对话。",
+      "incompleteTitle": "AI 配置需要完善",
+      "incompleteDescription": "请检查服务商、API Key 和模型设置后再使用教练。",
+      "configure": "配置 AI",
+      "ownerRequired": "请联系实例所有者配置 AI 后再使用教练。",
+      "unavailableTitle": "暂时无法读取 AI 状态",
+      "unavailableDescription": "请检查本地服务是否正常运行，然后重试。",
+      "loading": "正在读取 AI 状态…",
+      "retry": "重试"
+    },
+    "externalLink": {
+      "title": "打开外部链接？",
+      "webDescription": "即将访问外部网站。",
+      "desktopDescription": "将在系统默认浏览器中打开此网站。",
+      "copy": "复制链接",
+      "copied": "已复制",
+      "open": "打开链接",
+      "openInBrowser": "在默认浏览器中打开",
+      "opening": "正在打开…",
+      "openFailed": "无法打开默认浏览器，请重试或复制链接后打开。",
+      "copyFailed": "未能复制链接，请重试。"
     }
   },
   "AuthError": {
@@ -6812,5 +6836,94 @@
     "readOnlyAction": "只读访问",
     "loadError": "无法加载访客访问，请重试。",
     "retry": "重试"
+  },
+  "RoutesPage": {
+    "title": "我的路线",
+    "description": "导入 GPX，保存路线并查看第三方交付状态。",
+    "import": "导入路线",
+    "newVersion": "更新 GPX 版本",
+    "name": "名称",
+    "sport": "运动",
+    "notes": "说明",
+    "fileHint": "GPX 最大 20 MiB。保留原始分段；缺失高程会明确显示。",
+    "cancel": "取消",
+    "save": "保存路线",
+    "saving": "正在保存…",
+    "loading": "正在加载…",
+    "retry": "重试",
+    "empty": "还没有保存的路线。",
+    "select": "选择路线查看地图和详情。",
+    "more": "加载更多",
+    "download": "下载原始 GPX",
+    "delete": "删除路线",
+    "deleteHint": "删除后路线将隐藏；尚未完成的第三方交付记录会保留，以便撤回或核对。",
+    "pendingDelete": "路线已隐藏，仍有第三方交付需要处理。",
+    "deleted": "路线已删除。",
+    "ascent": "爬升",
+    "missingElevation": "高程缺失",
+    "geometry": "{points} 个点 · {segments} 段 · 版本 {revision}",
+    "changed": "路线版本已变更，请刷新后重新操作。",
+    "invalidFile": "无法保存此文件，请检查 GPX 格式、坐标、大小及分段。",
+    "failed": "操作失败，请重试。",
+    "state": {
+      "PENDING": "排队中",
+      "ACCEPTED": "厂商已接受",
+      "VERIFIED": "已读回验证",
+      "UNKNOWN": "结果不明，需核对",
+      "REJECTED": "未接受",
+      "REMOTE_DELETED": "已确认远端移除"
+    }
+  },
+  "HealthRecords": {
+    "title": "健康记录",
+    "description": "保留每条记录的来源、本地日期和单位，缺失值不补零。",
+    "range": "日期范围",
+    "days": "{count} 天",
+    "quantities": "营养、补水与皮温变化",
+    "loading": "正在加载…",
+    "retry": "重试",
+    "empty": "所选时段暂无记录。",
+    "deviationHint": "相对该来源基线的变化，不是绝对体温。",
+    "bloodPressure": "血压",
+    "pulse": "同次脉搏",
+    "alternateSource": "其他来源",
+    "breathing": "呼吸变化",
+    "breathingHint": "分类沿用来源定义，不转换为数值评分。",
+    "noOverallCategory": "未提供整晚分类",
+    "periods": "{count} 个原始时段",
+    "dateOnly": "来源仅提供日期与分类。",
+    "sourceReports": "来源报告的量值",
+    "reportHint": "来源尚未明确这些量值是单条摄入还是累计值，未计入每日补水合计。",
+    "truncated": "记录达到显示上限，请缩短时段查看完整详情。",
+    "connections": "连接设置",
+    "more": "显示更多",
+    "less": "收起",
+    "failed": "暂时无法加载观察记录。",
+    "metrics": {
+      "DIETARY_ENERGY_KCAL": "摄入能量",
+      "DIETARY_CARBOHYDRATE_G": "摄入碳水化合物",
+      "DIETARY_FAT_G": "摄入脂肪",
+      "DIETARY_PROTEIN_G": "摄入蛋白质",
+      "HYDRATION_ML": "饮水量",
+      "SKIN_TEMPERATURE_DELTA_C": "皮温变化"
+    },
+    "origins": {
+      "DEVICE": "设备测量",
+      "MANUAL": "手动录入",
+      "UNKNOWN": "未注明来源方式"
+    },
+    "categories": {
+      "MINIMAL": "极少",
+      "FEW": "少量",
+      "OCCASIONAL": "偶尔",
+      "FREQUENT": "频繁",
+      "UNMEASURABLE": "无法测量"
+    }
+  },
+  "desktopChrome": {
+    "back": "后退",
+    "forward": "前进",
+    "navigation": "窗口导航",
+    "appName": "Trainingload.ai 个人版"
   }
 }

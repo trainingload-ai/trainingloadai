@@ -13,7 +13,7 @@ body:
     attributes:
       label: Version or commit
       description: Provide the exact release tag or full commit SHA where the problem occurs.
-      placeholder: v1.1.19 or 40-character commit SHA
+      placeholder: v1.1.20 or 40-character commit SHA
     validations:
       required: true
   - type: dropdown

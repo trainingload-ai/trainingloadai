@@ -133,18 +133,33 @@ Owner 显式确认账号删除后，异步流程清理该账号的数据；完�
 ./self-host backup --output first-verified-backup --json
 ```
 
-## Intervals.icu API Key
+## 个人平台连接
 
-Self-host 只开放 Intervals.icu 个人 API Key 连接。Owner 可在首次引导的“导入活动”步骤，或在
+Self-host 支持两类个人连接：Intervals.icu API Key，以及 Garmin Personal API。
+均在“账号 → 第三方连接”配置，复用现有实例集成密钥，不增加宿主环境变量，也不接收厂商密码。
+Self-host **不开启** COROS MCP。闭源/托管产品另行使用 Garmin Developer API。
+实现细节见 [个人接入说明](docs/self-hosting/personal-integrations.zh.md)。
+
+### Intervals.icu API Key
+
+Owner 可在首次引导的“导入活动”步骤，或在
 “账号 → 第三方连接 → Intervals.icu”中填写自己的 Key 并选择同步方向；不需要 Intervals.icu OAuth client、
 redirect URI 或 webhook。Intervals.icu OAuth
-以及 Strava、Polar、COROS、Suunto、Wahoo、Garmin 和其他第三方连接入口保持隐藏，对应服务端路由仍受
+以及 Strava、Polar、COROS、Suunto、Wahoo 和其他第三方 OAuth 入口保持隐藏，对应服务端路由仍受
 `third-party-sync` capability 拒绝。
 
 用户 Key 只提交到本地 `server`，使用安装器生成的 `SELF_HOST_INTEGRATION_SECRET` 通过 AES-256-GCM
 加密后保存到 PostgreSQL，后续只返回末四位。这个能力需要 Server 主动访问 `intervals.icu`，因此不是纯离线能力；
 API Key 不应写入共享 `.env.selfhost`。官方认证约定是 HTTP Basic，用户名固定为 `API_KEY`，密码为个人 Key，
 Server 的 Intervals.icu client 已按该格式发送。
+
+### Garmin Personal API
+
+Owner 可在“账号 → 第三方连接 → Garmin”用本人 Personal API Key 连接全球区或中国区账号，
+导入已完成活动（FIT 等）并可选读取健康数据。只读，不写回 Garmin；不需要 Garmin 密码或 Cookie。
+步骤与范围见文档站 [Garmin Personal API](apps/docs/content/docs/zh/self-host/garmin-personal-api.mdx)。
+
+Garmin Key 同样只提交到本地 `server`，复用同一集成密钥加密保存，不新增宿主环境变量，也不应写入共享 `.env.selfhost`。
 
 备份包含 PostgreSQL 中的 Key 密文，实例密钥需在安全位置单独保存。恢复数据库时同时恢复原始认证和集成密钥，
 已有凭据才能继续解密；管理工具不会打印或导出这些密钥。完整流程见 [备份恢复](BACKUP_RESTORE.md)。

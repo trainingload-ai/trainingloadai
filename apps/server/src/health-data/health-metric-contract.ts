@@ -102,6 +102,11 @@ register(['ACTIVE_ENERGY_KCAL', 'TOTAL_ENERGY_KCAL'], {
   aggregations: ['LATEST', 'SUM'],
   min: 0,
 });
+register(['DIETARY_ENERGY_KCAL'], {units:['kcal'],aggregations:['LATEST','SUM'],min:0});
+register(['DIETARY_CARBOHYDRATE_G','DIETARY_FAT_G','DIETARY_PROTEIN_G'], {units:['g'],aggregations:['LATEST','SUM'],min:0});
+register(['HYDRATION_ML'], {units:['mL'],aggregations:['LATEST','SUM'],min:0});
+// A deviation is signed and is not an absolute body temperature.
+register(['SKIN_TEMPERATURE_DELTA_C'], {units:['delta_degC'],aggregations:['LATEST','AVG']});
 register(['WALKING_RUNNING_DISTANCE_M'], {
   units: ['m'],
   aggregations: ['LATEST', 'SUM'],

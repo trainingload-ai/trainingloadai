@@ -9,7 +9,7 @@ x-logging: &default-logging
 x-server-environment: &server-environment
   NODE_ENV: production
   DEPLOYMENT_MODE: self-host
-  APP_VERSION: ${SELF_HOST_VERSION:-1.1.19}
+  APP_VERSION: ${SELF_HOST_VERSION:-1.1.20}
   NODE_OPTIONS: --max-old-space-size=256 --max-semi-space-size=4
   PORT: "3001"
   SELF_HOST_MODE: ${SELF_HOST_MODE:-connected}
@@ -19,7 +19,7 @@ x-server-environment: &server-environment
   NEXT_PUBLIC_API_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
   NEXT_PUBLIC_APP_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
   NEXT_PUBLIC_BASE_URL: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
-  TRUSTED_ORIGINS: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210}
+  TRUSTED_ORIGINS: ${SELF_HOST_SITE_ADDRESS:-http://localhost:43210},http://127.0.0.1:43210
   SELF_HOST_HTTP_BIND: ${SELF_HOST_HTTP_BIND:-127.0.0.1}
   SELF_HOST_ALLOW_INSECURE_HTTP: ${SELF_HOST_ALLOW_INSECURE_HTTP:-false}
   SELF_HOST_OPERATIONS_PATH: /data/operations

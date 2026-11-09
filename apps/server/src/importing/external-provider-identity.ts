@@ -9,5 +9,7 @@ export function providerFromSourceKind(
 ): ThirdPartyProvider | null {
   if (kind === 'UNKNOWN') return null;
   if (kind === 'FILE') return 'upload';
+  if (kind === 'GARMIN_PERSONAL_API') return 'garmin';
+  if (kind === 'COROS_MCP') return 'coros';
   return kind.toLowerCase() as ThirdPartyProvider;
 }

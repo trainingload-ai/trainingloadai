@@ -198,9 +198,15 @@ export function CoachThread({
                           ? "overflow-y-auto pc:overflow-y-hidden"
                           : "overflow-y-auto",
                       ),
+                  !embedded && !isEmpty && "desktop-coach-conversation",
                 )}
               >
                 <ConversationContent
+                  scrollClassName={
+                    !embedded && !isEmpty
+                      ? "desktop-coach-message-viewport"
+                      : undefined
+                  }
                   className={cn(
                     "mx-auto flex w-full flex-col p-0",
                     embedded
@@ -209,6 +215,7 @@ export function CoachThread({
                           "max-w-lg gap-4 sm:max-w-[920px] sm:gap-6",
                           isEmpty && "h-full min-h-0",
                         ),
+                    !embedded && !isEmpty && "desktop-coach-message-content",
                   )}
                 >
                   {isLoading ? (
@@ -241,6 +248,7 @@ export function CoachThread({
                   ) : null}
                 </ConversationContent>
                 <ConversationScrollButton
+                  className={!embedded ? "desktop-coach-scroll-button" : undefined}
                   aria-label={t("timeline.scrollToBottom")}
                 />
               </Conversation>

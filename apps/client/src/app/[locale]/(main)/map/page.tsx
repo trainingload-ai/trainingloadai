@@ -1,5 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import { useStore } from "@/lib/store";
 import { useTranslations } from "next-intl";
@@ -21,6 +23,7 @@ const MapBoxMap = dynamic(() => import("./MapBoxMap/MapBoxMap"), {
 
 const MapPage = () => {
   const t = useTranslations("MapPage");
+  const routesT = useTranslations("RoutesPage");
   useSetPageTitle(t("title"));
   const { mapFilters, setMapTime, setMapSportType } = useStore();
 
@@ -33,13 +36,18 @@ const MapPage = () => {
         {/* 顶部内嵌筛选器：覆盖在地图上方，不占用地图高度 */}
         <div className="absolute left-0 right-0 top-0 z-20 px-safe-or-4 pt-safe-or-2">
           <div>
-            <SubHeader
-              time={mapFilters.time}
-              setTime={setMapTime}
-              selectedSportType={mapFilters.selectedSportType}
-              setSportType={setMapSportType}
-              exclude={["nav"]}
-            />
+            <div className="flex flex-col items-start gap-2">
+              <Button asChild variant="secondary" size="sm">
+                <Link href="/routes">{routesT("title")}</Link>
+              </Button>
+              <SubHeader
+                time={mapFilters.time}
+                setTime={setMapTime}
+                selectedSportType={mapFilters.selectedSportType}
+                setSportType={setMapSportType}
+                exclude={["nav"]}
+              />
+            </div>
           </div>
         </div>
       </div>

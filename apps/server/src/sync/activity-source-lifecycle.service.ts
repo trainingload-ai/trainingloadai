@@ -164,12 +164,35 @@ export class ActivitySourceLifecycleService {
     provider: ThirdPartyProvider;
     thirdPartyActivityIds?: number[];
     externalIds?: string[];
+    sourceUids?: string[];
   }) {
     const providerWide =
-      !args.thirdPartyActivityIds?.length && !args.externalIds?.length;
+      !args.thirdPartyActivityIds?.length &&
+      !args.externalIds?.length &&
+      !args.sourceUids?.length;
     const thirdPartyWhere: Prisma.ThirdPartyActivityWhereInput = {
       userId: args.userId,
       provider: args.provider,
+      ...(args.sourceUids?.length
+        ? {
+            OR: args.sourceUids.flatMap((sourceUid) => [
+              {
+                rawData: {
+                  path: ['importProjection', 'sourceUid'],
+                  equals: sourceUid,
+                },
+              },
+              // File adapters append #<session index>, including #0 for a
+              // single session. Keep the separator to avoid matching another ID.
+              {
+                rawData: {
+                  path: ['importProjection', 'sourceUid'],
+                  string_starts_with: `${sourceUid}#`,
+                },
+              },
+            ]),
+          }
+        : {}),
       ...(args.thirdPartyActivityIds?.length
         ? { id: { in: args.thirdPartyActivityIds } }
         : {}),
@@ -189,17 +212,25 @@ export class ActivitySourceLifecycleService {
       ]),
     );
     const sourceUids = Array.from(
-      new Set(
-        thirdPartyActivities
+      new Set([
+        ...(args.sourceUids ?? []),
+        ...thirdPartyActivities
           .map((item) => projectionSourceUid(item.rawData))
           .filter((value): value is string => Boolean(value)),
-      ),
+      ]),
     );
-    const sourceFilters = targetedSourceFilters({
-      provider: args.provider,
-      externalIds,
-      sourceUids,
-    });
+    const sourceFilters = args.sourceUids?.length
+      ? args.sourceUids.flatMap<Prisma.ActivitySourceWhereInput>(
+          (sourceUid) => [
+            { sourceUid },
+            { sourceUid: { startsWith: `${sourceUid}#` } },
+          ],
+        )
+      : targetedSourceFilters({
+          provider: args.provider,
+          externalIds,
+          sourceUids,
+        });
 
     return this.prisma.$transaction(async (tx) => {
       const mappings = thirdPartyActivityIds.length

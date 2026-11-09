@@ -124,6 +124,7 @@ model SportDefinition {
   activities        Activity[]
   planWorkouts      PlanWorkout[]
   competitionEvents CompetitionEvent[]
+  routeVersions     SavedRouteVersion[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -193,6 +194,8 @@ enum ThirdPartyActivityProcessingStatus {
 // Third-party provider enum
 enum ThirdPartyProvider {
   intervals_icu
+  garmin
+  coros
   upload
   unknown
 
@@ -203,6 +206,8 @@ enum ThirdPartyProvider {
 enum ImportSourceKind {
   FILE
   INTERVALS_ICU
+  GARMIN_PERSONAL_API
+  COROS_MCP
   UNKNOWN
 
   @@map("enum_import_source_kind")
@@ -375,6 +380,8 @@ enum BodyMetricType {
 
 enum HealthDataProvider {
   INTERVALS_ICU
+  GARMIN
+  COROS
   HEALTH_CONNECT
   MANUAL
 
@@ -427,6 +434,12 @@ enum HealthMetricType {
   HRV_RMSSD_WEEKLY_AVG_MS
   FLOORS_ASCENDED
   FLOORS_DESCENDED
+  DIETARY_ENERGY_KCAL
+  DIETARY_CARBOHYDRATE_G
+  DIETARY_FAT_G
+  DIETARY_PROTEIN_G
+  HYDRATION_ML
+  SKIN_TEMPERATURE_DELTA_C
 
   @@map("enum_health_metric_type")
 }
@@ -1156,6 +1169,8 @@ model T_user {
   email                             String
   emailVerified                     Boolean                            @map("email_verified")
   image                             String?
+  savedRoutes                       SavedRoute[]
+  routeExternalMappings             RouteExternalMapping[]
   /// 用户偏好语言（用于异步任务：通知/邮件/worker 等无法依赖请求头时的 i18n 选择）
   preferredLocale                   String?                            @map("preferred_locale")
   createdAt                         DateTime                           @map("created_at")
@@ -1199,6 +1214,7 @@ model T_user {
   activityDataMigrations            ActivityDataMigration[]
   userZoneSettingVersions           UserZoneSettingVersion[]
   externalHealthSamples             ExternalHealthSample[]
+  externalHealthObservations        ExternalHealthObservation[]
   userDailyHealthMetrics            UserDailyHealthMetric[]
   canonicalHealthSnapshots          CanonicalHealthSnapshot[]
   healthSeriesFiles                 HealthSeriesFile[]
@@ -1424,6 +1440,8 @@ model ExternalProviderConnection {
   metadata  Json?   @map("metadata")
 
   planWorkoutMappings PlanWorkoutExternalMapping[]
+  routeMappings       RouteExternalMapping[]
+  personalJobs PersonalProviderJob[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1433,6 +1451,32 @@ model ExternalProviderConnection {
   @@index([provider, externalAthleteId, status])
   @@index([userId, status])
   @@map("t_external_provider_connection")
+}
+
+/// Personal integrations use durable discovery/checkpoint and delivery jobs.
+/// Payload/result never contain credentials or signed download URLs.
+model PersonalProviderJob {
+  id String @id @default(cuid())
+  connectionId String @map("connection_id")
+  connection ExternalProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  requestId String @map("request_id")
+  dedupKey String? @map("dedup_key")
+  kind String
+  status String @default("QUEUED")
+  payload Json
+  result Json?
+  errorCode String? @map("error_code")
+  attempts Int @default(0)
+  nextAttemptAt DateTime @default(now()) @map("next_attempt_at")
+  leaseUntil DateTime? @map("lease_until")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([connectionId, requestId])
+  @@unique([connectionId, dedupKey])
+  @@index([status, nextAttemptAt])
+  @@index([connectionId, createdAt])
+  @@map("t_personal_provider_job")
 }
 
 model ExternalOAuthState {
@@ -2448,12 +2492,14 @@ model ImportSourceObject {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  itemJobs                ImportItemJob[]
-  canonicalSnapshots      CanonicalActivitySnapshot[]
-  activitySources         ActivitySource[]
-  canonicalHealthSnapshot CanonicalHealthSnapshot?
-  externalHealthSamples   ExternalHealthSample[]
+  itemJobs                   ImportItemJob[]
+  canonicalSnapshots         CanonicalActivitySnapshot[]
+  activitySources            ActivitySource[]
+  canonicalHealthSnapshot    CanonicalHealthSnapshot?
+  externalHealthSamples      ExternalHealthSample[]
+  externalHealthObservations ExternalHealthObservation[]
 
+  @@unique([id, userId], map: "import_source_owner_identity_unique")
   @@unique([userId, sourceKind, sourceUid], name: "import_source_object_identity_unique")
   @@index([userId, sourceKind, createdAt(sort: Desc)])
   @@index([provider, externalId])
@@ -4691,7 +4737,9 @@ model CanonicalHealthSnapshot {
   seriesFiles    HealthSeriesFile[]
   sessions       ExternalHealthSession[]
   projectedFacts ExternalHealthSample[]
+  observations   ExternalHealthObservation[]
 
+  @@unique([id, userId], map: "health_snapshot_owner_identity_unique")
   @@index([userId, observedStart])
   @@index([userId, localDateStart])
   @@map("t_canonical_health_snapshot")
@@ -5859,6 +5907,8 @@ model PlanWorkoutStep {
   targetResolutionMode  PrescriptionResolutionMode  @default(LEGACY_SNAPSHOT) @map("target_resolution_mode")
   targetZoneSystemKey   String?                     @map("target_zone_system_key")
   targetZoneFingerprint String?                     @map("target_zone_fingerprint")
+  /// Versioned, validated existing IR swim attributes and secondary target.
+  stepAnnotations       Json?                       @map("step_annotations")
 
   @@index([workoutId, parentId, orderIndex])
   @@index([parentId])
@@ -6069,4 +6119,166 @@ model McpCapabilityAudit {
   @@index([userFingerprint, occurredAt])
   @@index([userFingerprint, clientFingerprint, occurredAt])
   @@map("t_mcp_capability_audit")
+}
+
+/// User-owned local route identity; delivery state belongs to separate provider mappings.
+model SavedRoute {
+  id               String                 @id @default(cuid())
+  userId           String                 @map("user_id")
+  user             T_user                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId        String                 @map("request_id") @db.VarChar(36)
+  creationChecksum String                 @map("creation_checksum") @db.VarChar(64)
+  headRevision     Int                    @default(1) @map("head_revision")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  deletedAt        DateTime?              @map("deleted_at")
+  versions         SavedRouteVersion[]
+  externalMappings RouteExternalMapping[]
+
+  @@unique([id, userId], map: "route_owner_unique")
+  @@unique([userId, requestId], map: "route_request_unique")
+  @@index([userId, deletedAt, updatedAt])
+  @@map("t_saved_route")
+}
+
+/// Immutable, complete local route version. Rendering samples do not replace this geometry.
+model SavedRouteVersion {
+  id                   String                 @id @default(cuid())
+  routeId              String                 @map("route_id")
+  userId               String                 @map("user_id")
+  route                SavedRoute             @relation(fields: [routeId, userId], references: [id, userId], onDelete: Cascade)
+  revision             Int
+  name                 String                 @db.VarChar(100)
+  description          String                 @default("") @db.VarChar(2000)
+  sportCode            String                 @map("sport_code")
+  sportDefinition      SportDefinition        @relation(fields: [sportCode], references: [code], onDelete: Restrict)
+  geometry             Json
+  distanceMeters       Float                  @map("distance_meters")
+  elevationGainMeters  Float?                 @map("elevation_gain_meters")
+  elevationLossMeters  Float?                 @map("elevation_loss_meters")
+  pointCount           Int                    @map("point_count")
+  segmentCount         Int                    @map("segment_count")
+  hasCompleteElevation Boolean                @map("has_complete_elevation")
+  rawStorageKey        String                 @map("raw_storage_key")
+  rawSize              Int                    @map("raw_size")
+  rawChecksum          String                 @map("raw_checksum") @db.VarChar(64)
+  checksum             String                 @db.VarChar(64)
+  createdAt            DateTime               @default(now()) @map("created_at")
+  mappings             RouteExternalMapping[]
+
+  @@unique([routeId, userId, revision], map: "route_revision_unique")
+  @@unique([id, routeId, userId], map: "route_version_owner_unique")
+  @@index([userId, createdAt])
+  @@index([rawStorageKey])
+  @@map("t_saved_route_version")
+}
+
+enum RouteDeliveryState {
+  PENDING
+  ACCEPTED
+  VERIFIED
+  UNKNOWN
+  REJECTED
+  REMOTE_DELETED
+
+  @@map("enum_route_delivery_state")
+}
+
+/// Provider-neutral account-scoped delivery. An acceptance receipt is not device verification.
+model RouteExternalMapping {
+  id                   String                      @id @default(cuid())
+  userId               String                      @map("user_id")
+  user                 T_user                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  routeId              String                      @map("route_id")
+  route                SavedRoute                  @relation(fields: [routeId, userId], references: [id, userId], onDelete: Cascade)
+  versionId            String?                     @map("version_id")
+  version              SavedRouteVersion?          @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  provider             ThirdPartyProvider
+  connectionId         String?                     @map("connection_id")
+  connection           ExternalProviderConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  accountRef           String                      @map("account_ref")
+  externalId           String?                     @map("external_id")
+  createdByApplication Boolean                     @default(true) @map("created_by_application")
+  adapterVersion       Int                         @default(1) @map("adapter_version")
+  state                RouteDeliveryState          @default(PENDING)
+  lastLocalChecksum    String?                     @map("last_local_checksum") @db.VarChar(64)
+  lastRemoteChecksum   String?                     @map("last_remote_checksum") @db.VarChar(64)
+  metadata             Json?
+  createdAt            DateTime                    @default(now()) @map("created_at")
+  updatedAt            DateTime                    @updatedAt @map("updated_at")
+
+  @@unique([userId, provider, accountRef, routeId], map: "route_delivery_identity_unique")
+  @@unique([provider, accountRef, externalId], map: "route_remote_identity_unique")
+  @@index([routeId, userId])
+  @@index([connectionId, state])
+  @@index([versionId])
+  @@map("t_route_external_mapping")
+}
+
+/// Complete blood-pressure tuples or coded breathing observations, never arbitrary vendor payloads.
+model ExternalHealthObservation {
+  id                String                   @id @default(cuid())
+  userId            String                   @map("user_id")
+  user              T_user                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          HealthDataProvider
+  sourceNamespace   String                   @map("source_namespace") @db.VarChar(192)
+  sourceGroupKey    String                   @map("source_group_key") @db.VarChar(64)
+  externalId        String                   @map("external_id") @db.VarChar(512)
+  connectionId      String?                  @map("connection_id")
+  sourceObjectId    String?                  @map("source_object_id")
+  sourceObject      ImportSourceObject?      @relation(fields: [sourceObjectId], references: [id], onDelete: SetNull)
+  snapshotId        String?                  @map("snapshot_id")
+  snapshot          CanonicalHealthSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)
+  kind              HealthObservationKind
+  scope             HealthObservationScope
+  localDate         DateTime                 @map("local_date") @db.Date
+  timezone          String?
+  offsetSeconds     Int?                     @map("offset_seconds")
+  measuredAt        DateTime?                @map("measured_at")
+  intervalStart     DateTime?                @map("interval_start")
+  intervalEnd       DateTime?                @map("interval_end")
+  systolicMmHg      Float?                   @map("systolic_mmhg")
+  diastolicMmHg     Float?                   @map("diastolic_mmhg")
+  pulseBpm          Float?                   @map("pulse_bpm")
+  measurementOrigin HealthMeasurementOrigin? @map("measurement_origin")
+  categorySystem    String?                  @map("category_system") @db.VarChar(192)
+  categoryCode      String?                  @map("category_code") @db.VarChar(64)
+  sourceName        String?                  @map("source_name") @db.VarChar(200)
+  sourcePriority    Int?                     @map("source_priority")
+  sourceUpdatedAt   DateTime                 @map("source_updated_at")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+  deletedAt         DateTime?                @map("deleted_at")
+
+  @@unique([userId, provider, sourceNamespace, kind, externalId], map: "health_observation_identity_unique")
+  @@index([userId, sourceGroupKey])
+  @@index([userId, kind, localDate])
+  @@index([userId, sourceNamespace, localDate])
+  @@index([provider, connectionId])
+  @@index([sourceObjectId])
+  @@index([snapshotId])
+  @@map("t_external_health_observation")
+}
+
+enum HealthObservationKind {
+  BLOOD_PRESSURE
+  BREATHING_VARIATION
+
+  @@map("enum_health_observation_kind")
+}
+
+enum HealthObservationScope {
+  MEASUREMENT
+  DAILY
+  INTERVAL
+
+  @@map("enum_health_observation_scope")
+}
+
+enum HealthMeasurementOrigin {
+  DEVICE
+  MANUAL
+  UNKNOWN
+
+  @@map("enum_health_measurement_origin")
 }

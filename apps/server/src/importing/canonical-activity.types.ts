@@ -21,7 +21,8 @@ export interface CanonicalSourceRef {
   fileName?: string;
   fileKey?: string;
   rawStorageKey?: string;
-  /** 原始活动数据集字节的 SHA-256；JSON-only 来源使用稳定 canonical hash。 */
+  /** 原始输入的 SHA-256；JSON 或文件与结构化字段的复合来源使用稳定内容 hash。
+   * 复合来源另在 metadata.rawFileChecksum 保留原始文件的字节校验值。 */
   sourceChecksum?: string;
 }
 

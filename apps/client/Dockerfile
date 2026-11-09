@@ -37,6 +37,7 @@ COPY packages/design-tokens/ ./packages/design-tokens/
 COPY packages/messages/package.json ./packages/messages/package.json
 COPY packages/messages/catalog.mjs packages/messages/catalog.d.mts ./packages/messages/
 COPY packages/messages/client-core/ ./packages/messages/client-core/
+COPY packages/messages/personal-integrations/ ./packages/messages/personal-integrations/
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry

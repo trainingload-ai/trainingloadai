@@ -3,7 +3,10 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useViewerSession } from "@/public-demo/use-viewer-session";
-import { MobileButtonRow, MobileGroupedList } from "@/components/mobile-app/components/MobileGroupedList";
+import {
+  MobileButtonRow,
+  MobileGroupedList,
+} from "@/components/mobile-app/components/MobileGroupedList";
 
 import { Link } from "@/i18n/navigation";
 import type { ImportBatchItem, ImportBatchSummary } from "@/api/activities";
@@ -200,19 +203,49 @@ export function toAnalyticsActivityType(
   return "other";
 }
 
-export function AccountAuthenticationSettings() { return null; }
-export function MobileEmailPanel() { return null; }
-export function MobilePasswordPanel() { return null; }
-export function MobileAccountSettingsPanel({ onOpen }: {
-  onOpen: (panel: "account-nickname" | "account-email" | "account-password") => void;
+export function AccountAuthenticationSettings() {
+  return null;
+}
+export function MobileEmailPanel() {
+  return null;
+}
+export function MobilePasswordPanel() {
+  return null;
+}
+export function MobileAccountSettingsPanel({
+  onOpen,
+}: {
+  onOpen: (
+    panel: "account-nickname" | "account-email" | "account-password",
+  ) => void;
 }) {
   const t = useTranslations("AccountInner");
   const session = useViewerSession();
-  return <MobileGroupedList><MobileButtonRow tall label={t("name.label")}
-    value={session.data?.user.name || "—"} onClick={() => onOpen("account-nickname")} />
-  </MobileGroupedList>;
+  return (
+    <MobileGroupedList>
+      <MobileButtonRow
+        tall
+        label={t("name.label")}
+        value={session.data?.user.name || "—"}
+        onClick={() => onOpen("account-nickname")}
+      />
+    </MobileGroupedList>
+  );
 }
 
-export function useGuestAccessText() { return useTranslations("GuestAccess"); }
+export function useGuestAccessText() {
+  return useTranslations("GuestAccess");
+}
 
-export function DeploymentUnauthenticatedAccountAction(_props: {href?:string; mobile?:boolean}) { return null; }
+export function DeploymentUnauthenticatedAccountAction(_props: {
+  href?: string;
+  mobile?: boolean;
+}) {
+  return null;
+}
+
+export function RouteDeliveryActions(_props: {
+  route: import("@shared/routes").SavedRouteDetail;
+}) {
+  return null;
+}

@@ -199,6 +199,8 @@ function buildHomeData(t: TranslateFn) {
         rawNotes: string | null;
         rawName: string | null;
         rawSportType: "RUN" | "CYCLING" | "SWIM" | "STRETCHING" | "UNKNOWN";
+        structure: V2HomePlanWorkout["structure"];
+        estimatedLoadInputs: V2HomePlanWorkout["estimatedLoadInputs"];
       }>,
     },
     summaryMetrics: [
@@ -822,7 +824,12 @@ function TodayExecutionPanel({
                 meta={meta}
                 chart={
                   <WorkoutMiniChart
-                    workout={null}
+                    workout={{
+                      structure: workout.structure,
+                      sportType: workout.rawSportType,
+                      text: workout.rawText,
+                      estimatedLoadInputs: workout.estimatedLoadInputs,
+                    }}
                     fallbackText={workout.rawText}
                   />
                 }
@@ -1555,6 +1562,8 @@ export default function V2HomePageClient({
               | "SWIM"
               | "STRETCHING"
               | "UNKNOWN",
+            structure: item.structure,
+            estimatedLoadInputs: item.estimatedLoadInputs ?? null,
           }))
         : [];
 

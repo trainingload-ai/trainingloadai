@@ -21,6 +21,7 @@ import { ActivityIngestModule } from '@/api/activity/activity-ingest.module';
 import { UserQueryModule } from '@/api/user/user-query.module';
 import { ExternalActivitySourceRouter } from './external-activity-source-router.service';
 import { ExternalActivityMirrorService } from './external-activity-mirror.service';
+import { PersonalFileSourceAdapter } from './source-adapters/personal-file-source.adapter';
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { ExternalActivityMirrorService } from './external-activity-mirror.servic
       useFactory: (
         file: FileSourceAdapter,
         intervalsIcu: IntervalsIcuSourceAdapter,
-      ) => new SourceAdapterRegistry([file, intervalsIcu]),
+      ) => new SourceAdapterRegistry([file, intervalsIcu, new PersonalFileSourceAdapter('GARMIN_PERSONAL_API'), new PersonalFileSourceAdapter('COROS_MCP')]),
     },
     CanonicalActivityMaterializer,
     ImportBatchService,

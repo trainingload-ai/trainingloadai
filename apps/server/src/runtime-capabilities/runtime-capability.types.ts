@@ -15,6 +15,8 @@ export const RUNTIME_CAPABILITY_NAMES = [
   'weather',
   'third-party-sync',
   'intervals-icu-api-key',
+  'garmin-personal-api-key',
+  'coros-mcp',
   'agent-api',
   'public-demo',
 ] as const;

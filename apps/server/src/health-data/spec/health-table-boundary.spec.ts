@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 
 const SRC_ROOT = join(__dirname, '../..');
 const FORBIDDEN =
-  /(?:\(prisma\s+as\s+any\)|\bprisma|\btx)\.(userDailyHealthMetric|externalHealthSample|externalHealthSession|externalHealthSessionSegment|canonicalHealthSession|canonicalHealthSnapshot|healthSeriesFile)\b/;
+  /(?:\(prisma\s+as\s+any\)|\bprisma|\btx)\.(userDailyHealthMetric|externalHealthSample|externalHealthObservation|externalHealthSession|externalHealthSessionSegment|canonicalHealthSession|canonicalHealthSnapshot|healthSeriesFile)\b/;
 
 function walk(dir: string, files: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {

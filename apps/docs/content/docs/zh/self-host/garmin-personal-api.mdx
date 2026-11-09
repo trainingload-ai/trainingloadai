@@ -1,0 +1,70 @@
+---
+title: Garmin Personal API
+description: 使用本人的 Garmin 个人 Key，在自托管实例中连接账号、同步活动并读取睡眠与恢复数据。
+seoTitle: "Garmin Personal API：自托管活动与恢复数据接入"
+seoDescription: 在 Self-host 用 Garmin Personal API Key 连接账号，导入活动、读取恢复数据，并了解地区与只读限制。
+keywords: ["Garmin Personal API", "Garmin 自托管", "Garmin 个人 Key", "Garmin 活动导入"]
+---
+
+# Garmin Personal API
+
+Self-host 现已支持用 Garmin Personal API Key 连接 Garmin：导入已完成活动，并可读取睡眠、HRV、静息心率等恢复数据。
+
+本流程仅用于 Self-host。闭源/托管产品使用 Garmin Developer API，不跑 Personal API 同步。
+
+## 连接本人账号
+
+1. 在 Garmin Connect Web 的[个人 API Key 设置](https://connect.garmin.com/app/settings/personalApiToken)创建 Key。中国区账号使用对应地区的 Garmin Connect。
+2. 打开“账号 → 第三方连接 → Garmin → 连接设置”。
+3. 选择账号地区，核对 Garmin 账号使用的 IANA 时区，例如 `Asia/Shanghai`。
+4. 选择是否导入活动、读取睡眠与恢复数据，以及是否定期同步；粘贴 Key 并连接。
+5. 点击“立即同步”。留空日期默认最近 30 天，也可以选择历史范围。
+
+Trainingload.ai 不需要 Garmin 密码或浏览器 Cookie。Key 仅提交到自己的 Server，加密后保存在实例数据库中，不要发到聊天、Issue 或日志里。地区不会自动切换，避免把凭据发送到其他地区。
+
+Garmin Key 创建后仅显示一次，可选 30、90、180 天或一年有效期；撤销或到期后需要更换。后台使用 Key 换取有效期最长 24 小时的访问令牌，没有 OAuth refresh token。[官方 FAQ](https://developer.garmin.com/gc-developer-program/personal/personal-faq/)
+
+## 同步后能看到什么
+
+| 内容 | 本地处理 |
+| --- | --- |
+| 已完成活动 | 下载原始 ZIP，在限额内解包 FIT/TCX/GPX，交给现有活动导入和去重流程 |
+| 睡眠、HRV、静息心率、步数 | 仅将识别出的明确字段和单位写入统一健康事实；缺失值不写成 0 |
+| 体重、压力、血氧、Body Battery | 读取可用字段，保留厂商含义，不覆盖本地 ATL、CTL、TSB |
+| 心率区间、体能年龄、补水等 | 可在“高级数据与操作”中按日期读取，不自动改动本地运动设置 |
+| 营养和经期 | 不参与定期同步；高级读取需要单独勾选确认 |
+
+厂商可能因设备、记录情况或接口权限而返回空数据。当前字段映射还需要真实账号样例核对，测试中的模拟数据不代表每种设备已经验证。
+
+高级读取覆盖当前官方列出的 GET 数据类型。活动的 `workouts` 接口描述已完成活动中的训练内容，不能用来创建未来课次。[官方 Swagger](https://developer.garmin.com/gc-developer-program/personal/swagger-docs/)
+
+## 历史、进度与错误
+
+- 活动默认每 30 分钟检查近期记录；健康数据每 6 小时检查。只有启用相应设置才会安排任务。
+- 日期按账号时区解释，数据库保存绝对时刻的 UTC 值；健康日期标签保持原日期，不重复偏移。
+- “已加入队列”表示请求已保存。活动必须完成下载、解析和本地导入，才计入“已导入”。
+- 页面刷新或 Server 重启不会清空任务。限流会等待再试，失败会保留稳定错误码。
+- ZIP 文件超限、目录穿越、嵌套归档或多份无法确定归属的活动文件会被拒绝。
+- 令牌失效最多重新换取并重试一次。需要重新连接时，使用“更换 Key 或重新授权”，不会退出你的 Trainingload.ai 会话。
+- 新的同步会复核活动详情与原始文件，更新已变化的同一来源。完整分页后连续两次确认缺失、相隔至少 30 分钟，且详情接口返回未找到，才撤销该 Garmin 来源；其他来源保留。
+- 健康原文独立保存，明确空数据会更新对应日期的旧指标。权限不足、未找到、字段变化或日期不符会保留旧值并报告错误；其他成功读取的数据仍可导入。
+
+历史范围最多一次选择十年，实际耗时取决于活动量和厂商限制。不要把发现的记录数当成成功导入数。
+
+## 只读和个人使用
+
+Garmin 将 Personal API 定位于访问本人数据。本连接只用于自己的单 Owner 实例，不接收其他用户的 Key 来搭建商业多用户服务。[官方介绍](https://developer.garmin.com/gc-developer-program/personal/personal-api/)
+
+当前公开个人接口没有训练课写入或 webhook 契约。Trainingload.ai 不会通过非官方账号登录方式补出这些能力，也不会把“读取训练”称作“发送训练”。
+
+## 断开与备份
+
+断开会清除当前连接凭据、停止此连接后续任务，保留已导入的数据。已经进入统一导入流水线的文件仍可能完成处理。需要删除这些记录时，应使用活动或账号的数据删除功能。
+
+备份包含数据库密文；恢复时需要保留原实例集成密钥。断开不能抹去已经存在的离线备份。无需新增 Garmin 宿主环境变量，也不要把个人 Key 写进共享 `.env.selfhost`。
+
+## 继续阅读
+
+- [自托管配置](/zh/docs/self-host/configuration)
+- [自托管还是云服务](/zh/docs/self-host/self-host-vs-cloud)
+- [Garmin 官方 Python 参考实现](https://github.com/garmin/connect-personal-api-python)

@@ -22,16 +22,25 @@ export function getThirdPartyProviderName(providerId: string) {
   ]?.name;
 }
 
+const badgeRowFrame = "h-11 w-[76px] px-2";
+const badgeGridFrame = "h-9 w-[76px] px-2";
+
 export function getThirdPartyProviderLogoFrameClassName(
   providerId: string,
   connected: boolean,
   layout: "grid" | "row",
 ) {
-  const rowFrame = "h-11 w-[76px] px-2";
-  if (providerId === "intervals_icu" && layout === "row") {
-    return `${rowFrame} border-border bg-white dark:border-neutral-700`;
+  if (providerId === "garmin") {
+    // Solid Garmin-blue badge tile; white wordmark fills the icon slot.
+    return `${layout === "row" ? badgeRowFrame : badgeGridFrame} border-transparent bg-[#007DC3]`;
   }
-  return `${layout === "row" ? rowFrame : "w-9 px-0"} ${
+  if (providerId === "coros") {
+    return `${layout === "row" ? badgeRowFrame : badgeGridFrame} border-border bg-white dark:border-neutral-700 dark:bg-neutral-900`;
+  }
+  if (providerId === "intervals_icu" && layout === "row") {
+    return `${badgeRowFrame} border-border bg-white dark:border-neutral-700`;
+  }
+  return `${layout === "row" ? badgeRowFrame : "w-9 px-0"} ${
     connected
       ? "border-border bg-background dark:border-neutral-600 dark:bg-neutral-900/80"
       : "border-transparent bg-neutral-200/90 dark:bg-neutral-800/80"
@@ -42,6 +51,10 @@ export function getThirdPartyProviderLogoSizeClassName(
   providerId: string,
   layout: "grid" | "row",
 ) {
+  if (providerId === "garmin" || providerId === "coros") {
+    // Wide wordmark inside the badge tile (not a 20×20 square).
+    return layout === "row" ? "h-5 w-auto max-w-full" : "h-4 w-auto max-w-full";
+  }
   if (layout === "row" && providerId === "intervals_icu") return "size-7";
   return "h-5 w-5";
 }
@@ -50,6 +63,10 @@ export function getThirdPartyProviderIconClassName(
   providerId: string,
   connected: boolean,
 ) {
+  if (providerId === "garmin" || providerId === "coros") {
+    // Brand PNGs already carry the correct light/dark treatment.
+    return "";
+  }
   if (providerId === "intervals_icu") {
     return connected ? "" : "grayscale opacity-55";
   }

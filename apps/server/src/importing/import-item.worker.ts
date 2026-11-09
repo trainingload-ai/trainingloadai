@@ -486,6 +486,43 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       };
     }
 
+    if (
+      job.sourceKind === 'GARMIN_PERSONAL_API' ||
+      job.sourceKind === 'COROS_MCP'
+    ) {
+      // The personal worker registers a cached file only after download succeeds.
+      const fileKey =
+        job.sourceObject.fileKey ?? readImportString(sourceRef.fileKey);
+      if (!fileKey) throw new Error('Personal provider file missing');
+      const buffer = await this.storage.getFileWithKey(fileKey);
+      if (!buffer) throw new Error('Personal provider file unavailable');
+      const fileName =
+        job.sourceObject.fileName ??
+        readImportString(sourceRef.fileName) ??
+        `${job.sourceObject.externalId}.fit`;
+      return {
+        job,
+        input: {
+          kind: job.sourceKind,
+          sourceUid: job.sourceUid,
+          provider: job.sourceObject.provider,
+          accountRef: job.sourceObject.accountRef ?? undefined,
+          externalId: job.sourceObject.externalId ?? undefined,
+          activityFile: {
+            buffer,
+            originalname: fileName,
+            size: buffer.length,
+            mimetype: 'application/octet-stream',
+          } as Express.Multer.File,
+          fileKey,
+          rawStorageKey: fileKey,
+          sourceChecksum: createHash('sha256').update(buffer).digest('hex'),
+          rawPayload: job.sourceObject.rawPayload ?? undefined,
+          metadata: asImportJsonRecordOrUndefined(job.sourceObject.metadata),
+        },
+      };
+    }
+
     if (this.extension?.supportsNormalize(job.sourceKind)) {
       const prepared =
         await this.extension.prepareNormalizeInput(jobWithSource);

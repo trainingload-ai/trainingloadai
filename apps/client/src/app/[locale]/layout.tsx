@@ -14,6 +14,7 @@ import { ThemeProvider } from "next-themes";
 import { getMessages } from "next-intl/server";
 import { LocalePreferenceSync } from "@/components/locale-preference-sync";
 import { DEFAULT_RENDER_TIME_ZONE } from "@/i18n/config";
+import { DesktopWindowFrame } from "@/components/layout/DesktopWindowFrame";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -75,7 +76,7 @@ export default async function LocaleLayout({
               <Suspense fallback={null}>
                 <AnalyticsProvider />
               </Suspense>
-              {children}
+              <DesktopWindowFrame>{children}</DesktopWindowFrame>
             </NextIntlClientProvider>
             <Toaster position="top-center" />
             <GoogleAnalytics />

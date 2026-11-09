@@ -1,3 +1,4 @@
+import { RoutesDataModule } from '../routes/routes-data.module';
 import { Module } from '@nestjs/common';
 
 import { ActivityModule } from '@/api/activity/activity.module';
@@ -19,6 +20,7 @@ import { UserDataExportWorker } from './user-data-export.worker';
 @Module({
   imports: [
     PrismaModule,
+    RoutesDataModule,
     StorageModule,
     PlanModule,
     CompetitionModule,

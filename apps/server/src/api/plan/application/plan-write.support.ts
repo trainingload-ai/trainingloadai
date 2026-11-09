@@ -75,7 +75,9 @@ import type { PlanDb } from '../persistence/plan-db';
 import { ActivityReadService } from '../../activity/activity-read.service';
 import {
   PLAN_DRAFT_CHANGED_EVENT,
+  PLAN_WORKOUTS_CHANGED_EVENT,
   PlanDraftChangedEvent,
+  PlanWorkoutsChangedEvent,
 } from '../events/plan.events';
 import {
   clampCurrentIndexes,
@@ -580,9 +582,15 @@ export class PlanWriteSupport {
     dto: CreateScheduledWorkoutDto,
     _meta?: CoachEventMeta,
   ) {
-    return this.prisma.$transaction((tx) =>
+    const created = await this.prisma.$transaction((tx) =>
       this.createIndependentWorkoutInTransaction(userId, dto, tx),
     );
+    await this.emitWorkoutsChanged(
+      userId,
+      'independent_create',
+      created.workout?.id ? [created.workout.id] : [],
+    );
+    return created;
   }
 
   /** Capability-owned transactional entry used by audited Coach actions. */
@@ -682,6 +690,7 @@ export class PlanWriteSupport {
 
     await this.assertWorkoutHasNoActivityLink(workoutId);
     await this.workouts.delete({ where: { id: workoutId } });
+    await this.emitWorkoutsChanged(userId, 'independent_delete', [workoutId]);
 
     return { success: true as const };
   }
@@ -775,9 +784,14 @@ export class PlanWriteSupport {
       return full;
     });
 
-    return {
-      workout: this.normalizePlanWorkoutRow(result),
-    };
+    const workout = this.normalizePlanWorkoutRow(result);
+    await this.emitWorkoutsChanged(
+      userId,
+      'plan_workout_create',
+      workout?.id ? [workout.id] : [],
+      planId,
+    );
+    return { workout };
   }
 
   async attachWorkoutToPlan(
@@ -872,6 +886,12 @@ export class PlanWriteSupport {
       return row;
     });
 
+    await this.emitWorkoutsChanged(
+      userId,
+      'workout_attach_to_plan',
+      [workoutId],
+      planId,
+    );
     return {
       workout: this.normalizePlanWorkoutRow(updated),
     };
@@ -949,6 +969,28 @@ export class PlanWriteSupport {
     } catch (error) {
       this.logger.warn(
         `Failed to emit plan.draftChanged ${plan.id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
+  /** Fire after committed create/update/delete/move of planned workouts. */
+  private async emitWorkoutsChanged(
+    userId: string,
+    reason: string,
+    workoutIds: string[] = [],
+    planId: string | null = null,
+  ) {
+    if (!this.events) return;
+    try {
+      await this.events.emitAsync(
+        PLAN_WORKOUTS_CHANGED_EVENT,
+        new PlanWorkoutsChangedEvent(userId, reason, workoutIds, planId),
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to emit plan.workoutsChanged user=${userId} reason=${reason}: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
@@ -1828,6 +1870,10 @@ export class PlanWriteSupport {
       parentId: stepParentId,
       orderIndex: step.orderIndex,
       stepType: step.stepType,
+      stepAnnotations:
+        step.stepAnnotations == null
+          ? undefined
+          : (step.stepAnnotations as Prisma.InputJsonValue),
       name: step.name ?? null,
       notes: step.notes ?? null,
       intensity: step.intensity ?? null,
@@ -2904,9 +2950,15 @@ export class PlanWriteSupport {
       await this.attachActualLoadToWorkout(result);
       return { workout: this.normalizePlanWorkoutRow(result) };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    if (options?.tx) return run(options.tx);
+    const result = await this.prisma.$transaction(run, { timeout: 60_000 });
+    await this.emitWorkoutsChanged(
+      userId,
+      'workout_status_update',
+      [workoutId],
+      planId,
+    );
+    return result;
   }
 
   /** 向现有计划追加一节课；ACTIVE/PAUSED 计划也允许通过已确认的教练决策调用。 */
@@ -3008,9 +3060,15 @@ export class PlanWriteSupport {
       });
       return { workout: this.normalizePlanWorkoutRow(result) };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    if (options?.tx) return run(options.tx);
+    const created = await this.prisma.$transaction(run, { timeout: 60_000 });
+    await this.emitWorkoutsChanged(
+      userId,
+      'workout_add',
+      created.workout?.id ? [created.workout.id] : [],
+      planId,
+    );
+    return created;
   }
 
   private postponeMovedBy(meta?: CoachEventMeta): 'USER' | 'COACH' {
@@ -3300,8 +3358,15 @@ export class PlanWriteSupport {
     const txResult = options?.tx
       ? await run(options.tx)
       : await this.prisma.$transaction(run);
-    const afterCommit = () =>
-      this.emitDraftChanged(userId, txResult.snapshotPlan);
+    const afterCommit = async () => {
+      await this.emitDraftChanged(userId, txResult.snapshotPlan);
+      await this.emitWorkoutsChanged(
+        userId,
+        'workout_update',
+        [workoutId],
+        planId,
+      );
+    };
     if (!options?.tx) await afterCommit();
     return {
       workout: txResult.workout,
@@ -3391,7 +3456,15 @@ export class PlanWriteSupport {
     const result = options?.tx
       ? await run(options.tx)
       : await this.prisma.$transaction(run, { timeout: 60_000 });
-    if (!options?.tx) await this.emitDraftChanged(userId, result.plan);
+    if (!options?.tx) {
+      await this.emitDraftChanged(userId, result.plan);
+      await this.emitWorkoutsChanged(
+        userId,
+        'workouts_batch_update',
+        changes.map((c) => c.workoutId),
+        planId,
+      );
+    }
     return result;
   }
 
@@ -3400,6 +3473,12 @@ export class PlanWriteSupport {
       await this.emitDraftChanged(
         userId,
         await this.assertPlanOwnership(userId, planId),
+      );
+      await this.emitWorkoutsChanged(
+        userId,
+        'workouts_committed',
+        [],
+        planId,
       );
     } catch (error) {
       // The transaction has already committed; notification failure must not report a failed apply.

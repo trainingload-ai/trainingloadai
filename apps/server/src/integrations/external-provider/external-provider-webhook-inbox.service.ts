@@ -1,6 +1,7 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { createHash, randomUUID } from 'crypto';
-import type { Prisma, ThirdPartyProvider } from '@prisma/client';
+import { Prisma, type ThirdPartyProvider } from '@prisma/client';
+import type { PrismaTx } from '@/prisma/prisma-db';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ExternalProviderWebhookSignalService } from './external-provider-webhook-signal.service';
 
@@ -11,6 +12,7 @@ export type ExternalProviderWebhookInboxEvent<
   event_type: string;
   external_user_id: string | null;
   attempts: number;
+  locked_at?: Date;
   payload: Payload;
 };
 
@@ -28,21 +30,67 @@ export class ExternalProviderWebhookInboxService {
   checksum(value: Buffer | string) {
     return createHash('sha256').update(value).digest('hex');
   }
+  /** A transaction may fence local mapping writes with the same durable inbox lease. */
+  async isCurrentClaim(
+    args: {
+      id: string;
+      provider: ThirdPartyProvider;
+      externalUserId: string;
+      attempts: number;
+      lockedAt: Date;
+    },
+    tx?: PrismaTx,
+  ) {
+    const time = args.lockedAt?.getTime();
+    if (
+      !Number.isFinite(time) ||
+      time > Date.now() ||
+      Date.now() - time > 4 * 60000
+    )
+      return false;
+    if (tx) {
+      const rows = await tx.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT id FROM t_external_provider_webhook_event
+        WHERE id=${args.id} AND provider=${args.provider}::text::enum_third_party_provider
+        AND external_user_id=${args.externalUserId} AND status='PROCESSING'
+        AND attempts=${args.attempts} AND locked_at=${args.lockedAt} FOR UPDATE`);
+      return rows.length === 1;
+    }
+    return Boolean(
+      await this.prisma.externalProviderWebhookEvent.findFirst({
+        where: {
+          id: args.id,
+          provider: args.provider,
+          externalUserId: args.externalUserId,
+          status: 'PROCESSING',
+          attempts: args.attempts,
+          lockedAt: args.lockedAt,
+        },
+        select: { id: true },
+      }),
+    );
+  }
 
   /** 将事件持久化、去重，并主动唤醒统一 webhook dispatcher。 */
-  async enqueue(args: {
-    provider: ThirdPartyProvider;
-    eventType: string;
-    externalUserId?: string | null;
-    dedupeKey: string;
-    payload: Prisma.InputJsonValue;
-    rawChecksum?: string;
-  }) {
+  async enqueue(
+    args: {
+      provider: ThirdPartyProvider;
+      eventType: string;
+      externalUserId?: string | null;
+      dedupeKey: string;
+      payload: Prisma.InputJsonValue;
+      rawChecksum?: string;
+      /** Reviewed outbound operations remain unclaimable until their owner confirms them. */
+      initialStatus?: 'PENDING' | 'PREVIEW';
+    },
+    tx?: PrismaTx,
+  ) {
+    const events = (tx ?? this.prisma).externalProviderWebhookEvent;
     // 生成原始校验和
     const rawChecksum =
       args.rawChecksum ?? this.checksum(JSON.stringify(args.payload));
     const eventId = randomUUID();
-    const created = await this.prisma.externalProviderWebhookEvent.createMany({
+    const created = await events.createMany({
       data: [
         {
           id: eventId,
@@ -52,18 +100,21 @@ export class ExternalProviderWebhookInboxService {
           dedupeKey: args.dedupeKey,
           rawChecksum,
           payload: args.payload,
-          status: 'PENDING',
+          status: args.initialStatus ?? 'PENDING',
         },
       ],
       skipDuplicates: true,
     });
 
     if (created.count === 1) {
-      this.signal?.notify(args.provider);
+      // A transaction's event is not visible until commit; the polling fallback
+      // wakes it without racing a dispatcher against an uncommitted insert.
+      if (!tx && args.initialStatus !== 'PREVIEW')
+        this.signal?.notify(args.provider);
       return { accepted: true, enqueued: true, eventId };
     }
 
-    const existing = await this.prisma.externalProviderWebhookEvent.findUnique({
+    const existing = await events.findUnique({
       where: {
         provider_dedupeKey: {
           provider: args.provider,
@@ -150,28 +201,149 @@ export class ExternalProviderWebhookInboxService {
     });
   }
 
-  markDone(id: string) {
-    return this.prisma.externalProviderWebhookEvent.update({
-      where: { id },
-      data: {
-        status: 'DONE',
-        processedAt: new Date(),
-        lockedAt: null,
-        lastError: null,
-      },
-    });
+  markDone(id: string, claim?: { attempts: number; lockedAt: Date }) {
+    const data = {
+      status: 'DONE',
+      processedAt: new Date(),
+      lockedAt: null,
+      lastError: null,
+    };
+    return claim
+      ? this.prisma.externalProviderWebhookEvent.updateMany({
+          where: {
+            id,
+            status: 'PROCESSING',
+            attempts: claim.attempts,
+            lockedAt: claim.lockedAt,
+          },
+          data,
+        })
+      : this.prisma.externalProviderWebhookEvent.update({
+          where: { id },
+          data,
+        });
   }
 
-  markIgnored(id: string) {
-    return this.prisma.externalProviderWebhookEvent.update({
-      where: { id },
-      data: {
-        status: 'IGNORED',
-        processedAt: new Date(),
-        lockedAt: null,
-        lastError: null,
+  markIgnored(id: string, claim?: { attempts: number; lockedAt: Date }) {
+    const data = {
+      status: 'IGNORED',
+      processedAt: new Date(),
+      lockedAt: null,
+      lastError: null,
+    };
+    return claim
+      ? this.prisma.externalProviderWebhookEvent.updateMany({
+          where: {
+            id,
+            status: 'PROCESSING',
+            attempts: claim.attempts,
+            lockedAt: claim.lockedAt,
+          },
+          data,
+        })
+      : this.prisma.externalProviderWebhookEvent.update({
+          where: { id },
+          data,
+        });
+  }
+
+  /** Waiting work and non-runnable control records retain response-driven cooldowns. */
+  async rateLimitUntil(
+    provider: ThirdPartyProvider,
+    scopeKeys: string[],
+    tx?: PrismaTx,
+  ): Promise<Date | null> {
+    if (
+      !scopeKeys.length ||
+      scopeKeys.length > 10 ||
+      scopeKeys.some((key) => !/^[a-z0-9:_-]{1,200}$/.test(key))
+    )
+      throw new Error('PROVIDER_RETRY_SCOPE_INVALID');
+    const row = await (
+      tx ?? this.prisma
+    ).externalProviderWebhookEvent.findFirst({
+      where: {
+        provider,
+        AND: [
+          {
+            OR: [
+              { status: { in: ['PENDING', 'FAILED', 'PROCESSING'] } },
+              { eventType: 'provider_cooldown', status: 'DONE' },
+            ],
+          },
+        ],
+        lastError: 'PROVIDER_RATE_LIMITED',
+        availableAt: { gt: new Date() },
+        OR: scopeKeys.map((key) => ({
+          payload: { path: ['__rateLimit', 'scopeKey'], equals: key },
+        })),
       },
+      orderBy: { availableAt: 'desc' },
+      select: { availableAt: true },
     });
+    return row?.availableAt ?? null;
+  }
+
+  /** Postpone existing eligible work; in-flight owners must still recheck before outbound I/O. */
+  async pausePending(
+    args: {
+      provider: ThirdPartyProvider;
+      until: Date;
+      scopeKey: string;
+      eventTypes: string[];
+      externalUserId?: string;
+    },
+    tx?: PrismaTx,
+  ) {
+    if (
+      !Number.isFinite(args.until.getTime()) ||
+      !/^[a-z0-9:_-]{1,200}$/.test(args.scopeKey) ||
+      !args.eventTypes.length ||
+      args.eventTypes.length > 100
+    )
+      throw new Error('PROVIDER_DEFER_INVALID');
+    const marker = JSON.stringify({
+      scopeKey: args.scopeKey,
+      until: args.until.toISOString(),
+    });
+    return (tx ?? this.prisma).$executeRaw(
+      Prisma.sql`WITH cooldown AS (
+        INSERT INTO t_external_provider_webhook_event
+          (id,provider,event_type,external_user_id,dedupe_key,raw_checksum,payload,status,attempts,available_at,last_error,received_at,updated_at)
+        VALUES (${randomUUID()},${args.provider}::text::enum_third_party_provider,'provider_cooldown',NULL,
+          ${`cooldown:${args.scopeKey}`},${this.checksum(marker)},jsonb_build_object('__rateLimit',${marker}::jsonb),
+          'DONE',0,${args.until},'PROVIDER_RATE_LIMITED',NOW(),NOW())
+        ON CONFLICT (provider,dedupe_key) DO UPDATE SET
+          available_at=GREATEST(t_external_provider_webhook_event.available_at,EXCLUDED.available_at),
+          payload=EXCLUDED.payload,last_error='PROVIDER_RATE_LIMITED',updated_at=NOW()
+        RETURNING id
+      ) UPDATE t_external_provider_webhook_event SET status='PENDING',available_at=GREATEST(available_at,${args.until}),last_error='PROVIDER_RATE_LIMITED',payload=jsonb_set(payload,'{__rateLimit}',COALESCE(payload->'__rateLimit','{}'::jsonb)||${marker}::jsonb),updated_at=NOW() WHERE provider=${args.provider}::text::enum_third_party_provider AND status IN ('PENDING','FAILED') AND event_type IN (${Prisma.join(args.eventTypes)}) ${args.externalUserId ? Prisma.sql`AND external_user_id=${args.externalUserId}` : Prisma.empty}`,
+    );
+  }
+
+  /** Atomically release only this claim and preserve the processing-failure retry budget. */
+  async defer(args: {
+    id: string;
+    attempts: number;
+    lockedAt: Date;
+    until: Date;
+    scopeKey: string;
+  }) {
+    if (
+      !Number.isFinite(args.until.getTime()) ||
+      !Number.isFinite(args.lockedAt?.getTime()) ||
+      !Number.isSafeInteger(args.attempts) ||
+      args.attempts < 1 ||
+      !/^[a-z0-9:_-]{1,200}$/.test(args.scopeKey)
+    )
+      throw new Error('PROVIDER_DEFER_INVALID');
+    const marker = JSON.stringify({
+      scopeKey: args.scopeKey,
+      until: args.until.toISOString(),
+    });
+    return this.prisma.$executeRaw(
+      Prisma.sql`UPDATE t_external_provider_webhook_event SET status='PENDING',available_at=GREATEST(available_at,${args.until}),attempts=GREATEST(attempts-1,0),locked_at=NULL,processed_at=NULL,last_error='PROVIDER_RATE_LIMITED',payload=jsonb_set(payload,'{__rateLimit}',${marker}::jsonb || jsonb_build_object('count',LEAST(1000,COALESCE((payload->'__rateLimit'->>'count')::int,0)+1))),updated_at=NOW() WHERE id=${args.id} AND status='PROCESSING' AND attempts=${args.attempts} AND locked_at=${args.lockedAt}`,
+    );
   }
 
   markFailed(args: {
@@ -179,6 +351,7 @@ export class ExternalProviderWebhookInboxService {
     attempts: number;
     error: unknown;
     maxAttempts?: number;
+    lockedAt?: Date;
   }) {
     const maxAttempts = Math.max(1, args.maxAttempts ?? 8);
     const delay = Math.min(
@@ -187,14 +360,25 @@ export class ExternalProviderWebhookInboxService {
     );
     const message =
       args.error instanceof Error ? args.error.message : String(args.error);
-    return this.prisma.externalProviderWebhookEvent.update({
-      where: { id: args.id },
-      data: {
-        status: args.attempts >= maxAttempts ? 'DEAD' : 'FAILED',
-        availableAt: new Date(Date.now() + delay),
-        lockedAt: null,
-        lastError: message.slice(0, 1000),
-      },
-    });
+    const data = {
+      status: args.attempts >= maxAttempts ? 'DEAD' : 'FAILED',
+      availableAt: new Date(Date.now() + delay),
+      lockedAt: null,
+      lastError: message.slice(0, 1000),
+    };
+    return args.lockedAt
+      ? this.prisma.externalProviderWebhookEvent.updateMany({
+          where: {
+            id: args.id,
+            status: 'PROCESSING',
+            attempts: args.attempts,
+            lockedAt: args.lockedAt,
+          },
+          data,
+        })
+      : this.prisma.externalProviderWebhookEvent.update({
+          where: { id: args.id },
+          data,
+        });
   }
 }

@@ -27,7 +27,7 @@ Cloud and self-hosted Trainingload.ai serve different operational needs. The tra
 | AI                        | Managed product configuration and account usage rules  | Off by default; the Owner supplies a provider API key and pays that provider directly                  |
 | Membership and AI credits | Cloud memberships, credit balances, and credit packs   | No Trainingload.ai membership billing or credit packs; the AI provider meters and bills actual usage   |
 | AI data path              | Governed by the managed service configuration          | Sent to the selected provider only after you enable BYOK AI                                            |
-| Integrations              | Available according to the managed product and account | Only a user's own Intervals.icu API key is supported; other third-party sync and social login stay off |
+| Integrations              | Managed product connections, including Garmin Developer API | Intervals.icu API key and Garmin Personal API; COROS MCP off; other OAuth sync and social login stay off |
 | Apple Watch app           | Supported by the managed product                       | Not available in v1; Watch pairing, dashboard, and workout-upload routes are not registered            |
 | Availability              | Operated by Trainingload.ai                            | Single-instance deployment without built-in high availability or automatic failover                    |
 | Backup and recovery       | Managed service responsibility                         | You create, move, retain, and test verified backups                                                    |
@@ -54,7 +54,7 @@ Self-hosting does not make an external AI provider local. When the Owner enables
 
 The self-host server has its own build entrypoint and Dockerfile. Its release image does not contain the payment controllers, webhooks, reconciliation jobs, or Creem/Waffo SDKs used by Trainingload.ai Cloud, and `BILLING_PROVIDER` cannot turn those capabilities back on in a self-host image.
 
-Intervals.icu is also an explicit outbound connection. Each user can enter their own personal API key in the Client; activities, planned workouts, wellness, or sport settings are read or sent only according to that user's selected sync options. Self-hosting does not enable Intervals.icu OAuth or webhooks, and does not offer Strava, Polar, COROS, Suunto, Wahoo, Garmin account connections, or social login.
+Intervals.icu and Garmin Personal API are explicit outbound connections on Self-host. Each Owner enters their own key in the Client; sync follows the options they enable. Self-hosting does not enable Intervals.icu OAuth or webhooks, does not enable COROS MCP, and does not offer Strava, Polar, Suunto, Wahoo, or social login. The managed/closed-source product adds Garmin Developer API; Self-host uses Garmin Personal API instead.
 
 The native Apple Watch app is outside the self-host v1 boundary. A self-host server does not initialize Watch device credentials or expose Watch pairing, dashboard, or workout-upload endpoints.
 

@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { I18nContext } from 'nestjs-i18n';
+import { isPersonalProviderPath, personalProviderDiagnosticUrl } from '@/utils/personal-provider-http-privacy';
 
 type StructuredExceptionResponse = Record<string, unknown> & {
   code?: unknown;
@@ -263,6 +264,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
+    const diagnosticUrl = personalProviderDiagnosticUrl(request.url);
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
     const structuredResponse =
@@ -292,18 +294,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message,
       data: structuredResponse?.data ?? null,
       date: new Date().getTime(),
-      path: request.url,
+      path: diagnosticUrl,
     };
 
     if (status >= 500) {
       this.logger.error(
-        `[HTTP异常] ${request.method} ${request.url}`,
-        exception.stack,
+        `[HTTP异常] ${request.method} ${diagnosticUrl}`,
+        isPersonalProviderPath(request.url) ? stableCode ?? 'PROVIDER_REQUEST_FAILED' : exception.stack,
         'HTTP异常过滤器',
       );
     } else {
       this.logger.warn(
-        `[HTTP异常] ${request.method} ${request.url} - ${status}${stableCode ? ` - ${stableCode}` : ''} - ${message}`,
+        `[HTTP异常] ${request.method} ${diagnosticUrl} - ${status}${stableCode ? ` - ${stableCode}` : ''} - ${message}`,
         'HTTP异常过滤器',
       );
     }
@@ -324,6 +326,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
+    const diagnosticUrl = personalProviderDiagnosticUrl(request.url);
 
     // Multer reports an interrupted multipart upload as a plain Error. The
     // client has already gone away, so this is an expected transport event:
@@ -331,7 +334,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // to a closed socket.
     if (isClientAbortException(exception, request)) {
       this.logger.log(
-        `[客户端取消请求] ${request.method} ${request.url} - 请求体传输未完成`,
+        `[客户端取消请求] ${request.method} ${diagnosticUrl} - 请求体传输未完成`,
         '全局异常过滤器',
       );
       return;
@@ -356,8 +359,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(
-        `[未捕获异常] ${rawMessage}`,
-        exception instanceof Error ? exception.stack : null,
+        isPersonalProviderPath(request.url) ? `[未捕获异常] ${request.method} ${diagnosticUrl} - ${status}` : `[未捕获异常] ${rawMessage}`,
+        !isPersonalProviderPath(request.url) && exception instanceof Error ? exception.stack : null,
         '全局异常过滤器',
       );
     } else if (status === HttpStatus.PAYLOAD_TOO_LARGE) {
@@ -367,7 +370,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     } else {
       this.logger.warn(
-        `[未捕获异常] ${request.method} ${request.url} - ${status} - ${message}`,
+        `[未捕获异常] ${request.method} ${diagnosticUrl} - ${status} - ${message}`,
         '全局异常过滤器',
       );
     }
@@ -377,7 +380,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
       data: null,
       date: new Date().getTime(),
-      path: request.url,
+      path: diagnosticUrl,
     });
   }
 }

@@ -22,6 +22,7 @@ import { AiModule } from './api/ai/ai.module';
 import { SyncModule } from './sync/sync.module';
 import { WorkoutModule } from './api/workout/workout.module';
 import { PlanModule } from './api/plan/plan.module';
+import { RoutesModule } from './routes/routes.module';
 import { AnalyzeModule } from './analyze/analyze.module';
 import { PaceModule } from './api/pace/pace.module';
 import { PublicModule } from './api/public/public.module';
@@ -83,11 +84,14 @@ const envFilePath = [
           throw new Error('Configured server message catalog does not exist');
         }
         if (process.env.DEPLOYMENT_MODE === 'cloud' && !explicitCatalog) {
-          throw new Error('Cloud requires an explicit composed server message catalog');
+          throw new Error(
+            'Cloud requires an explicit composed server message catalog',
+          );
         }
         const candidates = [
           ...(process.env.SERVER_MESSAGE_CATALOG_PATH?.trim()
-            ? [path.resolve(process.env.SERVER_MESSAGE_CATALOG_PATH)] : []),
+            ? [path.resolve(process.env.SERVER_MESSAGE_CATALOG_PATH)]
+            : []),
           // apps/server is the normal workspace and container working directory.
           path.resolve(process.cwd(), '../../packages/messages/server'),
           // Repository-root commands remain supported for maintenance tooling.
@@ -167,6 +171,7 @@ const envFilePath = [
     SyncModule,
     WorkoutModule,
     PlanModule,
+    RoutesModule,
     AnalyzeModule,
     PaceModule,
     PublicModule,

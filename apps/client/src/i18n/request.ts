@@ -2,6 +2,8 @@ import { getRequestConfig } from "next-intl/server";
 import { DEFAULT_RENDER_TIME_ZONE } from "./config";
 import { routing } from "./routing";
 import { loadDeploymentMessages } from "@deployment/managed-messages";
+import personalEn from "../../../../packages/messages/personal-integrations/en.json";
+import personalZh from "../../../../packages/messages/personal-integrations/zh.json";
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -40,7 +42,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: messages,
+    // New integration namespaces have explicit English fallback for other locales.
+    messages: { ...messages, PersonalIntegrations: locale === "zh" ? personalZh : personalEn },
     timeZone: DEFAULT_RENDER_TIME_ZONE,
   };
 });

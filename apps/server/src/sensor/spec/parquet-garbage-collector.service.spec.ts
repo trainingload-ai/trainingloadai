@@ -7,7 +7,11 @@ import { SensorFileRepository } from '../persistence/sensor-file.repository';
 import { HealthFileQueryService } from '../../health-data/health-file-query.service';
 import { HealthDataRepository } from '../../health-data/persistence/health-data.repository';
 
-function createService(prisma: unknown, storage: unknown) {
+function createService(
+  prisma: unknown,
+  storage: unknown,
+  routes: unknown = { existsByStorageKey: async () => false },
+) {
   const database = {
     storageObjectRetention: { findFirst: jest.fn(async () => null) },
     importSourceObject: { findFirst: jest.fn(async () => null) },
@@ -21,6 +25,7 @@ function createService(prisma: unknown, storage: unknown) {
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new HealthFileQueryService(new HealthDataRepository(prisma as never)),
     new ImportingJobService(new ImportingJobRepository(database)),
+    routes as never,
   );
 }
 
@@ -43,6 +48,36 @@ describe('StorageObjectGarbageCollectorService', () => {
     const storage = { deleteFile: jest.fn() };
     const result = await createService(prisma, storage).runOnce();
     expect(result.referenced).toBe(1);
+    expect(storage.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('keeps a private route source referenced under its canonical key alias', async () => {
+    const prisma = {
+      $queryRaw: jest.fn(async () => [
+        {
+          id: 'g',
+          objectKey: 'route-sources/live.gpx',
+          bucket: 'private',
+          attempts: 0,
+        },
+      ]),
+      storageObjectGarbage: {
+        delete: jest.fn(async () => ({})),
+        update: jest.fn(async () => ({})),
+      },
+    };
+    const storage = { deleteFile: jest.fn() },
+      routes = { existsByStorageKey: jest.fn(async () => true) };
+    const service = createService(prisma, storage, routes);
+    expect(await service.runOnce()).toEqual({
+      claimed: 1,
+      deleted: 0,
+      referenced: 1,
+      failed: 0,
+    });
+    expect(routes.existsByStorageKey).toHaveBeenCalledWith(
+      'route-sources/live.gpx',
+    );
     expect(storage.deleteFile).not.toHaveBeenCalled();
   });
   it('按 bucket 与 object key 去重写入延迟回收清单', async () => {

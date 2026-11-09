@@ -1,17 +1,19 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.19",
+  "releaseVersion": "1.1.20",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [
       "1.1.15",
       "1.1.17",
-      "1.1.18"
+      "1.1.18",
+      "1.1.19"
     ],
     "applicationRollbackTo": [
       "1.1.15",
       "1.1.17",
-      "1.1.18"
+      "1.1.18",
+      "1.1.19"
     ],
     "backupRequired": true
   },
@@ -90,6 +92,22 @@
       "0018_activity_sport_catalog": {
         "phase": "expand",
         "releaseVersion": "1.1.16"
+      },
+      "0019_workout_step_annotations": {
+        "phase": "expand",
+        "releaseVersion": "1.1.20"
+      },
+      "0020_saved_routes": {
+        "phase": "expand",
+        "releaseVersion": "1.1.20"
+      },
+      "0021_health_observations": {
+        "phase": "expand",
+        "releaseVersion": "1.1.20"
+      },
+      "0022_personal_integrations": {
+        "phase": "expand",
+        "releaseVersion": "1.1.20"
       }
     }
   }

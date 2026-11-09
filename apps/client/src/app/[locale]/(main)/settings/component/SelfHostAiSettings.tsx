@@ -187,6 +187,8 @@ export function SelfHostAiSettings({
   const update = useUpdateSelfHostAiConfiguration();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const canOpenFromLink =
+    surface === "settings" && isSelfHost && Boolean(configuration.data);
   const isOnboarding = surface === "onboarding";
   const isAccount = surface === "account";
   const providerPreset = getSelfHostAiProviderPreset(form.provider);
@@ -199,6 +201,16 @@ export function SelfHostAiSettings({
     form.reasoningModel,
   );
   const webSearchSupported = providerPreset.webSearch !== "unsupported";
+
+  useEffect(() => {
+    if (!canOpenFromLink) return;
+    const openLinkedConfiguration = () => {
+      if (window.location.hash === "#self-host-ai") setSettingsOpen(true);
+    };
+    openLinkedConfiguration();
+    window.addEventListener("hashchange", openLinkedConfiguration);
+    return () => window.removeEventListener("hashchange", openLinkedConfiguration);
+  }, [canOpenFromLink]);
 
   useEffect(() => {
     if (!configuration.data) return;
@@ -781,7 +793,7 @@ export function SelfHostAiSettings({
   const providerEnabledInConfiguration = savedProvider !== "none";
 
   return (
-    <section className="min-w-0 border-t border-border pt-5">
+    <section id="self-host-ai" className="min-w-0 scroll-mt-4 border-t border-border pt-5">
       <div className="mb-3 flex items-start gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-foreground dark:bg-muted/45">
           <Bot className="h-4 w-4" aria-hidden="true" />

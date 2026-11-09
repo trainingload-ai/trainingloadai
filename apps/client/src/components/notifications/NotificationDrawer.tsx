@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useViewerSession } from "@/public-demo/use-viewer-session";
@@ -98,7 +99,9 @@ function SheetBody(props: {
 }
 
 /** 桌面端右侧 Sheet；移动端请使用 `/notifications` 全屏列表页 */
-export function NotificationDrawer() {
+export function NotificationDrawer({
+  placement = "header",
+}: { placement?: "header" | "rail" } = {}) {
   const t = useTranslations("topBar");
   const tN = useTranslations("notifications");
   const queryClient = useQueryClient();
@@ -195,11 +198,14 @@ export function NotificationDrawer() {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="relative"
+            className={cn(
+              "relative",
+              placement === "rail" && "desktop-rail-control",
+            )}
             aria-label={tN("title")}
           >
             <NotificationUnreadDot show={unreadCount > 0} />
-            <Bell className="h-4 w-4 text-foreground" />
+            <Bell className="h-4 w-4 text-foreground" aria-hidden="true" />
           </Button>
         </SheetTrigger>
         <SheetContent

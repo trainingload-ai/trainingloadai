@@ -549,16 +549,16 @@ export function HomeSuggestionCardStack({
               content: (
                 <>
                   {item.kind === "suggestion" ? (
-                    <span className="space-y-1">
-                      <span className="block line-clamp-1 text-sm font-semibold leading-5">
+                    <span className="flex min-w-0 flex-col gap-1 overflow-hidden">
+                      <span className="block truncate text-sm font-semibold leading-5">
                         {details?.headline || suggestion.title}
                       </span>
-                      <span className="block line-clamp-2 text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
-                        {suggestion.summary}
+                      <span className="line-clamp-2 min-h-0 min-w-0 overflow-hidden break-words text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
+                        {details?.summary || suggestion.summary}
                       </span>
                     </span>
                   ) : (
-                    <span className="line-clamp-5 text-sm font-medium leading-5">
+                    <span className="line-clamp-2 min-w-0 overflow-hidden break-words text-sm font-medium leading-5">
                       {item.kind === "decision"
                         ? decisionSummary(item.decision)
                         : item.kind === "inquiry"
@@ -567,7 +567,7 @@ export function HomeSuggestionCardStack({
                     </span>
                   )}
                   {item.kind === "inquiry" ? (
-                    <span className="line-clamp-2 text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
+                    <span className="line-clamp-1 overflow-hidden text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
                       {item.inquiry.reason}
                     </span>
                   ) : null}
@@ -583,9 +583,9 @@ export function HomeSuggestionCardStack({
                           : item.kind === "guidance"
                             ? [t("aiTodaySuggestion.title")]
                             : (details?.evidence
-                                .slice(0, 3)
+                                .slice(0, 2)
                                 .map((evidence) => evidence.label) ??
-                              suggestion.tags.slice(0, 3))
+                              suggestion.tags.slice(0, 2))
                     }
                   />
                 </>
@@ -980,11 +980,11 @@ export function HomeSuggestionCardStack({
 
 function CardTags({ tags }: { tags: string[] }) {
   return (
-    <span className="flex flex-wrap gap-1.5">
+    <span className="flex min-w-0 flex-nowrap gap-1.5 overflow-hidden">
       {tags.map((tag, index) => (
         <span
           key={`${tag}-${index}`}
-          className="rounded-md bg-white/90 px-2 py-1 text-mobile-caption text-muted-foreground dark:bg-black/28 pc:text-[11px]"
+          className="max-w-[9.5rem] truncate rounded-md bg-white/90 px-2 py-1 text-mobile-caption text-muted-foreground dark:bg-black/28 pc:text-[11px]"
         >
           {tag}
         </span>

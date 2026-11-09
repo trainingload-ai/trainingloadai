@@ -15,6 +15,10 @@ export class HealthDataRepository {
     return prismaModel(this.prisma, tx).userDailyHealthMetric;
   }
 
+  observations(tx?: PrismaClientSlice<'externalHealthObservation'>) {
+    return prismaModel(this.prisma,tx).externalHealthObservation;
+  }
+
   samples(tx?: PrismaClientSlice<'externalHealthSample'>) {
     return prismaModel(this.prisma, tx).externalHealthSample;
   }

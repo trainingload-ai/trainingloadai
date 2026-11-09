@@ -144,6 +144,8 @@ Cross-package dependencies must use declared package exports rather than unpubli
 
 ## Documentation
 
+Self-host supports connecting Garmin with a [Garmin Personal API](apps/docs/content/docs/en/self-host/garmin-personal-api.mdx) key. COROS MCP is not enabled on Self-host. The managed/closed-source product adds Garmin Developer API separately.
+
 - [Architecture and deployment composition](ARCHITECTURE.md)
 - [Install and configure self-host](SELF_HOSTING.md)
 - [Operate and troubleshoot an instance](SELF_HOST_OPERATIONS.md)

@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import {
   checkLocalBrowserRequest,
+  matchesConfiguredBrowserOrigin,
   resolveSelfHostAccessMode,
 } from './self-host-local-access-policy';
 
@@ -67,5 +68,21 @@ describe('self-host local access policy', () => {
       ok: false,
       reason: 'SAME_ORIGIN_REQUIRED',
     });
+  });
+
+  it('treats localhost and 127.0.0.1 as equivalent app origins for OAuth returnUrl', () => {
+    const expected = new URL('http://localhost:43210');
+    expect(
+      matchesConfiguredBrowserOrigin('http://127.0.0.1:43210', expected),
+    ).toBe(true);
+    expect(
+      matchesConfiguredBrowserOrigin('http://localhost:43210', expected),
+    ).toBe(true);
+    expect(
+      matchesConfiguredBrowserOrigin('http://127.0.0.1:43211', expected),
+    ).toBe(false);
+    expect(
+      matchesConfiguredBrowserOrigin('https://127.0.0.1:43210', expected),
+    ).toBe(false);
   });
 });

@@ -13,7 +13,7 @@ body:
     attributes:
       label: Self-host 版本
       description: 填写 `self-host --version` 输出或精确 release tag。
-      placeholder: 1.1.19
+      placeholder: 1.1.20
     validations:
       required: true
   - type: input

@@ -147,7 +147,7 @@ export function CoachQuestionDock({
         className={
           embedded
             ? "pointer-events-none absolute inset-x-0 bottom-0 z-30 px-3 pb-3"
-            : "pointer-events-none absolute inset-x-0 bottom-0 z-30 mx-auto w-full max-w-lg px-2 pb-safe-or-1 sm:max-w-[920px] sm:px-3"
+            : "desktop-coach-question-dock pointer-events-none absolute inset-x-0 bottom-0 z-30 mx-auto w-full max-w-lg px-2 pb-safe-or-1 sm:max-w-[920px] sm:px-3"
         }
       >
         <div

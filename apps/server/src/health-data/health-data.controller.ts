@@ -1,3 +1,5 @@
+import { SessionOnly } from '@/oauth/session-only.decorator';
+import { HealthObservationService } from './health-observation.service';
 import {
   Controller,
   DefaultValuePipe,
@@ -14,7 +16,10 @@ import { PUBLIC_DEMO_CAPABILITIES } from '@shared/public-demo-policy';
 /** 每日及日内健康投影的鉴权只读 HTTP API。 */
 @Controller('health-data')
 export class HealthDataController {
-  constructor(private readonly healthDataQuery: HealthDataQueryService) {}
+  constructor(
+    private readonly healthDataQuery: HealthDataQueryService,
+    private readonly observations: HealthObservationService,
+  ) {}
 
   /** 返回有界的每日概览；服务层会限制请求范围。 */
   @Get('overview')
@@ -36,5 +41,14 @@ export class HealthDataController {
     @Query('endDate') endDate?: string,
   ) {
     return this.healthDataQuery.getIntraday(userId, key, endDate);
+  }
+  @Get('observations')
+  @SessionOnly()
+  observationsOverview(
+    @CurrentUserId() userId: string,
+    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.observations.overview(userId, days, endDate);
   }
 }

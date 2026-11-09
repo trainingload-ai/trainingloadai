@@ -6,10 +6,14 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { useIntervalsIcuStatus } from "@/api/intervals-icu";
+import { usePersonalConnection } from "@/api/personal-integrations";
 import {
   runtimeCapabilityAvailable,
-  useRuntimeCapability,
+  useRuntimeCapabilities,
 } from "@/api/runtime-capabilities";
+import type { PersonalProvider } from "@shared/personal-integrations";
+import { CorosBrandIcon } from "@/components/icons/coros";
+import { GarminBrandIcon } from "@/components/icons/garmin";
 import { IntervalsIcuBrandIcon } from "@/components/icons/intervals-icu";
 import { Badge } from "@/components/ui/badge";
 import type { ThirdPartyConnectionItem } from "@/components/third-party/third-party-connection-card";
@@ -34,6 +38,14 @@ const IntervalsIcuConnectionDialog = dynamic(
   () =>
     import("@/components/third-party/intervals-icu-connection-dialog").then(
       (module) => module.IntervalsIcuConnectionDialog,
+    ),
+  { ssr: false },
+);
+
+const PersonalConnectionDialog = dynamic(
+  () =>
+    import("@/components/third-party/personal-connection-dialog").then(
+      (module) => module.PersonalConnectionDialog,
     ),
   { ssr: false },
 );
@@ -87,6 +99,11 @@ function ImportMethodHeader({
   );
 }
 
+/**
+ * Shares ThirdPartyConnectionList with Account, but composes its own provider
+ * list: Account builds the full self-host set; onboarding previously hardcoded
+ * Intervals.icu only. Keep bind dialogs / capability gates aligned with Account.
+ */
 export function OnboardingImportStep({
   onConnectionStatusChange,
   onUploaded,
@@ -96,32 +113,105 @@ export function OnboardingImportStep({
 }) {
   const t = useTranslations("OnboardingPage");
   const thirdPartyT = useTranslations("ThirdPartyConnections");
+  const personalT = useTranslations("PersonalIntegrations");
+  const runtimeCapabilities = useRuntimeCapabilities();
   const intervalsIcuAvailable = runtimeCapabilityAvailable(
-    useRuntimeCapability("intervals-icu-api-key"),
+    runtimeCapabilities.data?.capabilities["intervals-icu-api-key"],
   );
+  const selfHost = runtimeCapabilities.data?.deployment === "self-host";
+  const garminAvailable =
+    selfHost &&
+    runtimeCapabilities.data?.capabilities["garmin-personal-api-key"]?.state ===
+      "enabled";
+  const corosAvailable =
+    selfHost &&
+    runtimeCapabilities.data?.capabilities["coros-mcp"]?.state === "enabled";
+  const platformsAvailable =
+    intervalsIcuAvailable || garminAvailable || corosAvailable;
+
   const { data: status = { connected: false } } = useIntervalsIcuStatus(
     intervalsIcuAvailable,
   );
+  const garmin = usePersonalConnection("garmin", garminAvailable);
+  const coros = usePersonalConnection("coros", corosAvailable);
+
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [personalOpen, setPersonalOpen] = useState<PersonalProvider | null>(
+    null,
+  );
 
   useEffect(() => {
-    onConnectionStatusChange(Boolean(status.connected));
-  }, [onConnectionStatusChange, status.connected]);
+    const url = new URL(window.location.href);
+    if (corosAvailable && url.searchParams.get("personalProvider") === "coros") {
+      setPersonalOpen("coros");
+    }
+  }, [corosAvailable]);
 
-  const item: ThirdPartyConnectionItem = {
-    provider: "intervals_icu",
-    name: thirdPartyT("providers.intervalsIcu.name"),
-    description: t("step5.providers.intervals_icu.apiKeyDescription"),
-    icon: IntervalsIcuBrandIcon,
-    connected: Boolean(status.connected),
-    connectedLabel: t("step5.connected"),
-    showName: true,
-    actionIcon: <Link2 className="mr-2 h-4 w-4" />,
-    actionLabel: status.connected ? t("step5.connected") : t("step5.connect"),
-    actionVariant: status.connected ? "outline" : "default",
-    disabled: Boolean(status.connected),
-    onAction: () => setDialogOpen(true),
-  };
+  useEffect(() => {
+    onConnectionStatusChange(
+      Boolean(status.connected) ||
+        Boolean(garmin.data?.connected) ||
+        Boolean(coros.data?.connected),
+    );
+  }, [
+    coros.data?.connected,
+    garmin.data?.connected,
+    onConnectionStatusChange,
+    status.connected,
+  ]);
+
+  const intervalsItem: ThirdPartyConnectionItem | null = intervalsIcuAvailable
+    ? {
+        provider: "intervals_icu",
+        name: thirdPartyT("providers.intervalsIcu.name"),
+        description: t("step5.providers.intervals_icu.apiKeyDescription"),
+        icon: IntervalsIcuBrandIcon,
+        connected: Boolean(status.connected),
+        connectedLabel: t("step5.connected"),
+        showName: true,
+        actionIcon: <Link2 className="mr-2 h-4 w-4" />,
+        actionLabel: status.connected
+          ? t("step5.connected")
+          : t("step5.connect"),
+        actionVariant: status.connected ? "outline" : "default",
+        disabled: Boolean(status.connected),
+        onAction: () => setDialogOpen(true),
+      }
+    : null;
+
+  const personalItems: ThirdPartyConnectionItem[] = (
+    ["garmin", "coros"] as const
+  )
+    .filter((provider) =>
+      provider === "garmin" ? garminAvailable : corosAvailable,
+    )
+    .map((provider) => {
+      const connected = Boolean(
+        (provider === "garmin" ? garmin : coros).data?.connected,
+      );
+      return {
+        provider,
+        name: provider === "garmin" ? "Garmin" : "COROS",
+        description: personalT(`${provider}.description`),
+        icon: provider === "garmin" ? GarminBrandIcon : CorosBrandIcon,
+        connected,
+        connectedLabel: t("step5.connected"),
+        // Wordmark badges already include the brand name.
+        showName: false,
+        actionIcon: connected ? undefined : (
+          <Link2 className="mr-2 h-4 w-4" />
+        ),
+        actionLabel: connected ? t("step5.connected") : t("step5.connect"),
+        actionVariant: connected ? "outline" : "default",
+        disabled: connected,
+        onAction: () => setPersonalOpen(provider),
+      };
+    });
+
+  const items = [
+    ...(intervalsItem ? [intervalsItem] : []),
+    ...personalItems,
+  ];
 
   return (
     <StepShell>
@@ -141,7 +231,7 @@ export function OnboardingImportStep({
             skipProgressAfterUpload
           />
         </section>
-        {intervalsIcuAvailable ? (
+        {platformsAvailable ? (
           <section className="rounded-surface bg-background/70 p-4">
             <ImportMethodHeader
               icon={<Link2 className="h-5 w-5 text-muted-foreground" />}
@@ -149,7 +239,7 @@ export function OnboardingImportStep({
               description={t("step5.platforms.description")}
             />
             <ThirdPartyConnectionList
-              items={[item]}
+              items={items}
               layout="row"
               className="grid gap-3"
             />
@@ -164,6 +254,18 @@ export function OnboardingImportStep({
           showDisconnect={false}
           handleOAuthResult={false}
           oauthEnabled={false}
+        />
+      ) : null}
+      {personalOpen &&
+      (personalOpen === "garmin" ? garminAvailable : corosAvailable) ? (
+        <PersonalConnectionDialog
+          key={personalOpen}
+          provider={personalOpen}
+          open
+          returnUrl={getImportStepUrl()}
+          onOpenChange={(open) => {
+            if (!open) setPersonalOpen(null);
+          }}
         />
       ) : null}
     </StepShell>

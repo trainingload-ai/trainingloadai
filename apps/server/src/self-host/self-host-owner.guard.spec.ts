@@ -16,10 +16,13 @@ function context(request: object): ExecutionContext {
 
 describe('SelfHostOwnerGuard', () => {
   const originalMode = process.env.SELF_HOST_MODE;
+  const originalDeployment = process.env.DEPLOYMENT_MODE;
 
   afterEach(() => {
     if (originalMode === undefined) delete process.env.SELF_HOST_MODE;
     else process.env.SELF_HOST_MODE = originalMode;
+    if (originalDeployment === undefined) delete process.env.DEPLOYMENT_MODE;
+    else process.env.DEPLOYMENT_MODE = originalDeployment;
   });
 
   function guard(instance: { state: string; ownerUserId: string } | null) {
@@ -34,6 +37,15 @@ describe('SelfHostOwnerGuard', () => {
     delete process.env.SELF_HOST_MODE;
     await expect(
       guard(null).canActivate(context({ session: { user: { id: 'owner' } } })),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+  it('rejects Cloud even if stale self-host mode is present', async () => {
+    process.env.DEPLOYMENT_MODE = 'cloud';
+    process.env.SELF_HOST_MODE = 'core-local';
+    await expect(
+      guard({ state: 'READY', ownerUserId: 'owner' }).canActivate(
+        context({ session: { user: { id: 'owner' } } }),
+      ),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 

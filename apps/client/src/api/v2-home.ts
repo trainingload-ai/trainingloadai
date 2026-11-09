@@ -1,7 +1,11 @@
 import type { FitnessStatusData, PMCExtremes } from "@/api/usePMC";
 import type { UserProfile } from "@/api/settings";
-import type { TrainingPlanDetail } from "@/api/plans";
+import type {
+  PlanWorkoutEstimatedLoadInputs,
+  TrainingPlanDetail,
+} from "@/api/plans";
 import type { V2ActivityListItem } from "@/api/v2-activities";
+import type { WorkoutStructure } from "@shared/workout-structure";
 import { ApiFetchError } from "@/lib/api-error";
 import { getPendingAuthFailure, handleUnauthorized } from "@/lib/auth-failure";
 
@@ -25,6 +29,10 @@ export type V2HomePlanWorkout = {
   sessionIndex: number;
   linkedActivityTitle: string | null;
   estimatedLoad: number | null;
+  /** 结构化课次（与计划/日历缩略图同一数据源） */
+  structure: WorkoutStructure;
+  /** 期望负荷估算输入；迷你图强度高度用 */
+  estimatedLoadInputs?: PlanWorkoutEstimatedLoadInputs | null;
 };
 
 export type V2HomeActivePlan = {
@@ -292,6 +300,8 @@ export function mapTrainingPlanToHomePlan(
       sessionIndex: workout.sessionIndex,
       linkedActivityTitle: firstLink ? `#${firstLink.activityId}` : null,
       estimatedLoad: workout.estimatedLoad ?? null,
+      structure: workout.structure,
+      estimatedLoadInputs: workout.estimatedLoadInputs ?? null,
     } satisfies V2HomePlanWorkout;
   });
 

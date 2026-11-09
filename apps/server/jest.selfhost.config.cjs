@@ -3,6 +3,8 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
   testMatch: [
+    '<rootDir>/integrations/personal/**/*.spec.ts',
+    '<rootDir>/sync/spec/activity-source-lifecycle.service.spec.ts',
     '<rootDir>/spec/self-host-app-module-di.spec.ts',
     '<rootDir>/self-host/**/*.spec.ts',
     '<rootDir>/runtime-capabilities/**/*.spec.ts',

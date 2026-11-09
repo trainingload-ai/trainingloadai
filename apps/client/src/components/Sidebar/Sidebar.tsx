@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import React from "react";
 import { Resizable } from "re-resizable";
+import { DesktopRailLink } from "./DesktopRailLink";
 import {
   CalendarDays,
   ChevronsLeft,
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/tooltip";
 import { usePersistedSidebarCollapsed } from "@/hooks/use-persisted-sidebar-collapsed";
 import { useCompactSidebarViewport } from "@/hooks/use-mobile";
+import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
+import { TopBar } from "@/components/TopBar";
 import {
   AccessOptionsDialog,
   useAccessNavigationGuard,
@@ -79,6 +82,7 @@ function CoachHistoryListSkeleton() {
 }
 
 function DesktopSidebar() {
+  const { isDesktopSelfHost } = useRuntimeEnvironment();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,15 +96,22 @@ function DesktopSidebar() {
     locationSid: readSidFromLocationSearch(),
   });
   const t = useTranslations("sidebar");
+  const desktopT = useTranslations("desktopChrome");
   const compactViewport = useCompactSidebarViewport();
   const compactMode = compactViewport ?? true;
   const { collapsed, toggleCollapsed } = usePersistedSidebarCollapsed({
-    mode: compactMode ? "compact" : "wide",
-    defaultCollapsed: compactMode,
+    mode: isDesktopSelfHost
+      ? "desktop-coach"
+      : compactMode
+        ? "compact"
+        : "wide",
+    defaultCollapsed: isDesktopSelfHost ? false : compactMode,
   });
   const { setWidth: setSidebarWidth, width: sidebarWidth } =
     usePersistedSidebarWidth();
-  const productSidebarCollapsed = !isCoachSpace && collapsed;
+  const productSidebarCollapsed =
+    !isDesktopSelfHost && !isCoachSpace && collapsed;
+  const desktopPaneHidden = isDesktopSelfHost && collapsed;
   const vipGate = useAccessNavigationGuard();
   const aiAvailable = runtimeCapabilityAvailable(useRuntimeCapability("ai"));
   const [lastProductHref, setLastProductHref] = React.useState("/");
@@ -185,178 +196,273 @@ function DesktopSidebar() {
   );
 
   return (
-    <Resizable
-      as="aside"
-      size={{
-        width: productSidebarCollapsed ? 64 : sidebarWidth,
-        height: "100%",
-      }}
-      minWidth={productSidebarCollapsed ? 64 : SIDEBAR_WIDTH_LIMITS.min}
-      maxWidth={productSidebarCollapsed ? 64 : SIDEBAR_WIDTH_LIMITS.max}
-      enable={
-        productSidebarCollapsed
-          ? false
-          : {
-              right: true,
-            }
+    <div
+      data-coach-pane-open={
+        isDesktopSelfHost ? isCoachSpace && !collapsed : undefined
       }
-      handleClasses={{
-        right:
-          "group/resize touch-none outline-none focus-visible:outline-none",
-      }}
-      handleStyles={{
-        right: {
-          cursor: "col-resize",
-          right: -7,
-          width: 14,
-          zIndex: 40,
-        },
-      }}
-      handleComponent={{
-        right: productSidebarCollapsed ? (
-          <span />
-        ) : (
-          <SidebarResizeHandle
-            currentWidth={sidebarWidth}
-            isResizing={isResizing}
-            label={t("resize")}
-            maxWidth={SIDEBAR_WIDTH_LIMITS.max}
-            minWidth={SIDEBAR_WIDTH_LIMITS.min}
-            onCommit={setSidebarWidth}
-          />
-        ),
-      }}
-      onResizeStart={() => {
-        setIsResizing(true);
-      }}
-      onResizeStop={(_event, _direction, elementRef) => {
-        setIsResizing(false);
-        const inlineWidth = Number.parseFloat(elementRef.style.width);
-        setSidebarWidth(
-          Number.isFinite(inlineWidth)
-            ? inlineWidth
-            : elementRef.getBoundingClientRect().width,
-        );
-      }}
-      className={cn(
-        "relative hidden h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground tablet:flex",
-        isResizing
-          ? "transition-none"
-          : "transition-[width] duration-200 motion-reduce:transition-none",
-      )}
+      className={
+        isDesktopSelfHost
+          ? "desktop-navigation flex h-full shrink-0"
+          : "contents"
+      }
     >
-      <TooltipProvider delayDuration={180}>
-        <SidebarSpaceSwitcher
-          coachHref={COACH_SPACE_HREF}
-          collapsed={productSidebarCollapsed}
-          isCoachSpace={isCoachSpace}
-          productHref={lastProductHref}
-          onCoachClick={openCoachSpace}
-          showCoach={aiAvailable}
-        />
-
-        {isCoachSpace ? (
-          <div className="flex min-h-0 flex-1 flex-col">
-            <CoachSidebarHistoryList
-              activeSid={activeSid}
-              onNewChat={startNewCoachConversation}
-              onSelectSession={selectCoachSession}
-              onSessionDeleted={handleCoachSessionDeleted}
-              onViewAll={openFullCoachHistory}
-            />
-            <nav
-              aria-label={t("secondaryNavigationLabel")}
-              className="shrink-0 border-t border-border/70 p-3"
-            >
-              <SidebarLink
-                href="/settings"
-                label={t("settings")}
-                icon={<SettingsIcon />}
-                active={false}
-                collapsed={false}
+      {isDesktopSelfHost ? (
+        <TooltipProvider delayDuration={180}>
+          <nav
+            className="desktop-rail flex h-full w-[52px] shrink-0 flex-col items-stretch pt-2"
+            aria-label={t("navigationLabel")}
+          >
+            <div className="space-y-2 px-2">
+              <DesktopRailLink
+                active={isCoachSpace}
+                href={COACH_SPACE_HREF}
+                icon={Sparkles}
+                label={t("coach")}
+                onClick={openCoachSpace}
               />
-            </nav>
-          </div>
-        ) : (
-          <>
-            <nav
-              aria-label={t("navigationLabel")}
-              className="flex flex-col gap-1 px-3 py-2"
-            >
-              <SidebarLink
+              <DesktopRailLink
                 href="/"
                 label={t("home")}
-                icon={<House />}
+                icon={House}
                 active={active("home")}
-                collapsed={productSidebarCollapsed}
               />
-              <SidebarLink
+              <DesktopRailLink
                 href="/plan"
                 label={t("plan")}
-                icon={<NotebookText />}
+                icon={NotebookText}
                 active={active("plan")}
-                collapsed={productSidebarCollapsed}
               />
-              <SidebarLink
+              <DesktopRailLink
                 href="/calendar"
                 label={t("calendar")}
-                icon={<CalendarDays />}
+                icon={CalendarDays}
                 active={active("calendar")}
-                collapsed={productSidebarCollapsed}
               />
-              <SidebarLink
+              <DesktopRailLink
                 href="/activities"
                 label={t("activities")}
-                icon={<ListChecks />}
+                icon={ListChecks}
                 active={active("activities")}
-                collapsed={productSidebarCollapsed}
               />
-              <SidebarLink
+              <DesktopRailLink
                 href="/dashboard"
                 label={t("dashboard")}
-                icon={<Gauge />}
+                icon={Gauge}
                 active={active("dashboard")}
-                collapsed={productSidebarCollapsed}
               />
-            </nav>
-            <nav
-              aria-label={t("secondaryNavigationLabel")}
-              className="mt-auto px-3 pb-1"
-            >
-              <SidebarLink
-                href="/settings"
-                label={t("settings")}
-                icon={<SettingsIcon />}
-                active={active("settings")}
-                collapsed={productSidebarCollapsed}
-              />
-            </nav>
-            <div className="p-3 pt-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-center text-muted-foreground"
-                onClick={toggleCollapsed}
-                aria-label={
-                  productSidebarCollapsed ? t("expand") : t("collapse")
-                }
-              >
-                {productSidebarCollapsed ? (
-                  <ChevronsRight className="h-4 w-4" />
-                ) : (
-                  <ChevronsLeft className="h-4 w-4" />
-                )}
-              </Button>
             </div>
-          </>
-        )}
-      </TooltipProvider>
+            <div className="mt-auto space-y-1">
+              <div className="px-2">
+                <DesktopRailLink
+                  active={["settings", "account"].includes(route)}
+                  href="/settings"
+                  icon={SettingsIcon}
+                  label={t("settings")}
+                />
+              </div>
+              <TopBar placement="rail" collapsed />
+            </div>
+          </nav>
+        </TooltipProvider>
+      ) : null}
+      {!isDesktopSelfHost || isCoachSpace ? (
+        <Resizable
+          as="aside"
+          size={{
+            width: productSidebarCollapsed ? 64 : sidebarWidth,
+            height: "100%",
+          }}
+          minWidth={productSidebarCollapsed ? 64 : SIDEBAR_WIDTH_LIMITS.min}
+          maxWidth={productSidebarCollapsed ? 64 : SIDEBAR_WIDTH_LIMITS.max}
+          enable={
+            productSidebarCollapsed
+              ? false
+              : {
+                  right: true,
+                }
+          }
+          handleClasses={{
+            right:
+              "group/resize touch-none outline-none focus-visible:outline-none",
+          }}
+          handleStyles={{
+            right: {
+              cursor: "col-resize",
+              right: -7,
+              width: 14,
+              zIndex: 40,
+            },
+          }}
+          handleComponent={{
+            right: productSidebarCollapsed ? (
+              <span />
+            ) : (
+              <SidebarResizeHandle
+                currentWidth={sidebarWidth}
+                isResizing={isResizing}
+                label={t("resize")}
+                maxWidth={SIDEBAR_WIDTH_LIMITS.max}
+                minWidth={SIDEBAR_WIDTH_LIMITS.min}
+                onCommit={setSidebarWidth}
+              />
+            ),
+          }}
+          onResizeStart={() => {
+            setIsResizing(true);
+          }}
+          onResizeStop={(_event, _direction, elementRef) => {
+            setIsResizing(false);
+            const inlineWidth = Number.parseFloat(elementRef.style.width);
+            setSidebarWidth(
+              Number.isFinite(inlineWidth)
+                ? inlineWidth
+                : elementRef.getBoundingClientRect().width,
+            );
+          }}
+          className={cn(
+            "relative hidden h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground tablet:flex",
+            isDesktopSelfHost && "desktop-context-pane",
+            isResizing
+              ? "transition-none"
+              : "transition-[width] duration-200 motion-reduce:transition-none",
+          )}
+          style={desktopPaneHidden ? { display: "none" } : undefined}
+        >
+          <TooltipProvider delayDuration={180}>
+            {isDesktopSelfHost ? (
+              <div className="flex h-12 shrink-0 items-center px-4 text-sm font-semibold">
+                {isDesktopSelfHost ? desktopT("appName") : "Trainingload.ai"}
+              </div>
+            ) : (
+              <SidebarSpaceSwitcher
+                coachHref={COACH_SPACE_HREF}
+                collapsed={productSidebarCollapsed}
+                isCoachSpace={isCoachSpace}
+                productHref={lastProductHref}
+                onCoachClick={openCoachSpace}
+                showCoach={aiAvailable}
+              />
+            )}
 
-      <AccessOptionsDialog
-        open={vipGate.pricingOpen}
-        onOpenChange={vipGate.setPricingOpen}
-      />
-    </Resizable>
+            {isCoachSpace ? (
+              <div className="flex min-h-0 flex-1 flex-col">
+                <CoachSidebarHistoryList
+                  activeSid={activeSid}
+                  onNewChat={startNewCoachConversation}
+                  onSelectSession={selectCoachSession}
+                  onSessionDeleted={handleCoachSessionDeleted}
+                  onViewAll={openFullCoachHistory}
+                />
+                {!isDesktopSelfHost ? (
+                  <nav
+                    aria-label={t("secondaryNavigationLabel")}
+                    className="shrink-0 border-t border-border/70 p-3"
+                  >
+                    <SidebarLink
+                      href="/settings"
+                      label={t("settings")}
+                      icon={<SettingsIcon />}
+                      active={false}
+                      collapsed={false}
+                    />
+                  </nav>
+                ) : null}
+              </div>
+            ) : (
+              <>
+                <div
+                  className={
+                    isDesktopSelfHost
+                      ? "px-4 pb-1 pt-2 text-xs font-medium text-muted-foreground"
+                      : "hidden"
+                  }
+                >
+                  {t("trainingSpace")}
+                </div>
+                <nav
+                  aria-label={t("navigationLabel")}
+                  className="flex flex-col gap-1 px-3 py-2"
+                >
+                  <SidebarLink
+                    href="/"
+                    label={t("home")}
+                    icon={<House />}
+                    active={active("home")}
+                    collapsed={productSidebarCollapsed}
+                  />
+                  <SidebarLink
+                    href="/plan"
+                    label={t("plan")}
+                    icon={<NotebookText />}
+                    active={active("plan")}
+                    collapsed={productSidebarCollapsed}
+                  />
+                  <SidebarLink
+                    href="/calendar"
+                    label={t("calendar")}
+                    icon={<CalendarDays />}
+                    active={active("calendar")}
+                    collapsed={productSidebarCollapsed}
+                  />
+                  <SidebarLink
+                    href="/activities"
+                    label={t("activities")}
+                    icon={<ListChecks />}
+                    active={active("activities")}
+                    collapsed={productSidebarCollapsed}
+                  />
+                  <SidebarLink
+                    href="/dashboard"
+                    label={t("dashboard")}
+                    icon={<Gauge />}
+                    active={active("dashboard")}
+                    collapsed={productSidebarCollapsed}
+                  />
+                </nav>
+                {!isDesktopSelfHost ? (
+                  <>
+                    <nav
+                      aria-label={t("secondaryNavigationLabel")}
+                      className="mt-auto px-3 pb-1"
+                    >
+                      <SidebarLink
+                        href="/settings"
+                        label={t("settings")}
+                        icon={<SettingsIcon />}
+                        active={active("settings")}
+                        collapsed={productSidebarCollapsed}
+                      />
+                    </nav>
+                    <div className="p-3 pt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-center text-muted-foreground"
+                        onClick={toggleCollapsed}
+                        aria-label={
+                          productSidebarCollapsed ? t("expand") : t("collapse")
+                        }
+                      >
+                        {productSidebarCollapsed ? (
+                          <ChevronsRight className="h-4 w-4" />
+                        ) : (
+                          <ChevronsLeft className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                ) : null}
+              </>
+            )}
+          </TooltipProvider>
+
+          <AccessOptionsDialog
+            open={vipGate.pricingOpen}
+            onOpenChange={vipGate.setPricingOpen}
+          />
+        </Resizable>
+      ) : null}
+    </div>
   );
 }
 

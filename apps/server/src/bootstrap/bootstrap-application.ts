@@ -16,6 +16,7 @@ import { isCorsOriginAllowed, parseOriginList } from './cors-origin';
 import { CORS_ALLOWED_HEADERS } from './cors-options';
 import { desktopInternalCredentialMiddleware } from './desktop-internal-credential.middleware';
 import { registerIntervalsIcuWebhookBodyParser } from './intervals-icu-webhook-body-parser';
+import { registerPersonalProviderBodyParser } from './personal-provider-body-parser';
 import { createGlobalValidationPipe } from './runtime-safety';
 import { resolveTrustProxySetting } from './self-host-network-security';
 import { MANAGED_STARTUP, type ManagedStartup } from './managed-startup.port';
@@ -71,6 +72,7 @@ export async function bootstrapApplication(
   });
 
   registerIntervalsIcuWebhookBodyParser(app);
+  registerPersonalProviderBodyParser(app);
   app.enableShutdownHooks();
   app.useGlobalPipes(createGlobalValidationPipe());
   app.useGlobalInterceptors(app.get(ResponseInterceptor));

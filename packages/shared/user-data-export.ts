@@ -1290,7 +1290,240 @@ const manifest = recordSchema({
   ],
 });
 
+const savedRoute = recordSchema({
+  id: "saved-route",
+  title: "Saved route",
+  description: "User-owned local route identity.",
+  properties: {
+    id: requiredString("Route identifier."),
+    headRevision: requiredInteger("Latest included immutable revision."),
+    createdAt: requiredString("Creation time.", "date-time"),
+    updatedAt: requiredString("Last local update.", "date-time"),
+    deletedAt: string("Local deletion tombstone.", "date-time"),
+  },
+  required: ["id", "headRevision", "createdAt", "updatedAt", "deletedAt"],
+});
+const savedRouteVersion = recordSchema({
+  id: "saved-route-version",
+  title: "Saved route version",
+  description:
+    "Immutable provider-neutral route facts. GPS is omitted outside exact-location full backups.",
+  properties: {
+    id: requiredString("Version identifier."),
+    routeId: requiredString("Route identity."),
+    revision: requiredInteger("Immutable revision."),
+    name: requiredString("Athlete-facing route name."),
+    description: requiredString("Route notes."),
+    sportCode: requiredString("Existing SportDefinition catalog code."),
+    geometry: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        type: { const: "MultiLineString" },
+        coordinates: {
+          type: "array",
+          minItems: 1,
+          maxItems: 32,
+          items: {
+            type: "array",
+            minItems: 2,
+            maxItems: 100000,
+            items: {
+              type: "array",
+              minItems: 2,
+              maxItems: 3,
+              prefixItems: [
+                { type: "number", minimum: -180, maximum: 180 },
+                { type: "number", minimum: -90, maximum: 90 },
+                { type: "number" },
+              ],
+              items: false,
+            },
+          },
+        },
+      },
+      required: ["type", "coordinates"],
+    },
+    distanceMeters: number(
+      "Distance measured within each segment; gaps are not joined.",
+    ),
+    elevationGainMeters: number("Ascent, absent when elevation is incomplete."),
+    elevationLossMeters: number(
+      "Descent, absent when elevation is incomplete.",
+    ),
+    pointCount: requiredInteger("Original point count."),
+    segmentCount: requiredInteger("Original segment count."),
+    hasCompleteElevation: boolean("Whether every point has elevation."),
+    rawSize: requiredInteger("Original GPX size in bytes."),
+    rawChecksum: requiredString("Original GPX SHA-256."),
+    checksum: requiredString("Local version SHA-256."),
+    createdAt: requiredString("Version creation time.", "date-time"),
+  },
+  required: [
+    "id",
+    "routeId",
+    "revision",
+    "name",
+    "description",
+    "sportCode",
+    "geometry",
+    "distanceMeters",
+    "pointCount",
+    "segmentCount",
+    "checksum",
+    "createdAt",
+  ],
+});
+
+const healthObservation = {
+  ...recordSchema({
+    id: "health-observation",
+    title: "Health observation",
+    description:
+      "A complete pressure tuple or source-coded breathing observation; a date-only category has no fabricated duration.",
+    properties: {
+      id: requiredString("Observation ID."),
+      groupId: requiredString("Opaque source-group identity."),
+      provider: requiredString("Source provider."),
+      sourceNamespace: requiredString("Stable account/source namespace."),
+      sourceExternalId: requiredString("Original observation identity."),
+      sourceObjectId: string("Origin record."),
+      snapshotId: string("Origin snapshot."),
+      kind: { enum: ["BLOOD_PRESSURE", "BREATHING_VARIATION"] },
+      scope: { enum: ["MEASUREMENT", "DAILY", "INTERVAL"] },
+      localDate: requiredString("Source calendar date.", "date"),
+      timezone: string("IANA timezone when known."),
+      offsetSeconds: number("Original UTC offset in seconds."),
+      measuredAt: string("Actual measurement time.", "date-time"),
+      intervalStart: string("Actual interval start.", "date-time"),
+      intervalEnd: string("Actual interval end.", "date-time"),
+      systolicMmHg: number("Systolic pressure in mmHg."),
+      diastolicMmHg: number("Diastolic pressure in mmHg."),
+      pulseBpm: number("Pulse from this same measurement, when available."),
+      measurementOrigin: string("Device, manual or unknown origin."),
+      categorySystem: string("Original classification system."),
+      categoryCode: string(
+        "Original category, never a fabricated numerical grade.",
+      ),
+      sourceName: string("Source name."),
+      sourcePriority: number("Source selection priority."),
+      sourceUpdatedAt: requiredString("Source revision time.", "date-time"),
+    },
+    required: [
+      "id",
+      "groupId",
+      "provider",
+      "sourceNamespace",
+      "sourceExternalId",
+      "kind",
+      "scope",
+      "localDate",
+      "sourceUpdatedAt",
+    ],
+  }),
+  allOf: [
+    {
+      if: { properties: { kind: { const: "BLOOD_PRESSURE" } } },
+      then: {
+        properties: {
+          scope: { const: "MEASUREMENT" },
+          measuredAt: { type: "string", format: "date-time" },
+          systolicMmHg: {
+            type: "number",
+            exclusiveMinimum: 0,
+            exclusiveMaximum: 1000,
+          },
+          diastolicMmHg: {
+            type: "number",
+            exclusiveMinimum: 0,
+            exclusiveMaximum: 1000,
+          },
+          measurementOrigin: { enum: ["DEVICE", "MANUAL", "UNKNOWN"] },
+          intervalStart: { type: "null" },
+          intervalEnd: { type: "null" },
+          categorySystem: { type: "null" },
+          categoryCode: { type: "null" },
+        },
+        required: [
+          "measuredAt",
+          "systolicMmHg",
+          "diastolicMmHg",
+          "measurementOrigin",
+        ],
+      },
+    },
+    {
+      if: { properties: { kind: { const: "BREATHING_VARIATION" } } },
+      then: {
+        properties: {
+          scope: { enum: ["DAILY", "INTERVAL"] },
+          categorySystem: { type: "string", minLength: 1 },
+          categoryCode: { type: "string", pattern: "^[A-Z0-9_:-]{1,64}$" },
+          systolicMmHg: { type: "null" },
+          diastolicMmHg: { type: "null" },
+          pulseBpm: { type: "null" },
+          measurementOrigin: { type: "null" },
+          measuredAt: { type: "null" },
+        },
+        required: ["categorySystem", "categoryCode"],
+        allOf: [
+          {
+            if: { properties: { scope: { const: "DAILY" } } },
+            then: {
+              properties: {
+                intervalStart: { type: "null" },
+                intervalEnd: { type: "null" },
+              },
+            },
+            else: {
+              properties: {
+                intervalStart: { type: "string", format: "date-time" },
+                intervalEnd: { type: "string", format: "date-time" },
+              },
+              required: ["intervalStart", "intervalEnd"],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+const healthReportedQuantity = recordSchema({
+  id: "health-reported-quantity",
+  title: "Source-reported quantity",
+  description:
+    "Preserved amount with explicitly unspecified total/entry semantics; excluded from daily totals.",
+  properties: {
+    id: requiredString("Fact ID."),
+    localDate: requiredString("Source calendar date.", "date"),
+    metricType: requiredString("Metric identity."),
+    value: number("Source amount."),
+    unit: string("Source amount unit."),
+    provider: requiredString("Source provider."),
+    basis: { const: "UNSPECIFIED_REPORT" },
+    sourceName: string("Source name."),
+    sourceNamespace: string("Source namespace."),
+    sourceObjectId: string("Origin record."),
+    sourceExternalId: requiredString("Original fact identity."),
+    sourceUpdatedAt: string("Source revision time.", "date-time"),
+  },
+  required: [
+    "id",
+    "localDate",
+    "metricType",
+    "value",
+    "unit",
+    "provider",
+    "basis",
+    "sourceExternalId",
+  ],
+});
+
 export const USER_DATA_EXPORT_SCHEMAS = {
+  "health-observation": healthObservation,
+  "health-reported-quantity": healthReportedQuantity,
+  "saved-route": savedRoute,
+  "saved-route-version": savedRouteVersion,
   "user-profile": userProfile,
   "user-setting": userSetting,
   "athlete-memory": athleteMemory,

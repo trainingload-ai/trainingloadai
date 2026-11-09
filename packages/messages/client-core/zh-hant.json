@@ -1021,6 +1021,30 @@
         "separate": "分開顯示",
         "overlay": "疊加顯示"
       }
+    },
+    "setup": {
+      "title": "尚未設定 AI",
+      "description": "選擇 AI 服務商並設定模型後，即可開始與教練對話。",
+      "incompleteTitle": "AI 設定需要完善",
+      "incompleteDescription": "請檢查服務商、API Key 和模型設定後再使用教練。",
+      "configure": "設定 AI",
+      "ownerRequired": "請聯絡執行個體擁有者設定 AI 後再使用教練。",
+      "unavailableTitle": "暫時無法讀取 AI 狀態",
+      "unavailableDescription": "請檢查本機服務是否正常執行，然後重試。",
+      "loading": "正在讀取 AI 狀態…",
+      "retry": "重試"
+    },
+    "externalLink": {
+      "title": "開啟外部連結？",
+      "webDescription": "即將造訪外部網站。",
+      "desktopDescription": "將在系統預設瀏覽器中開啟此網站。",
+      "copy": "複製連結",
+      "copied": "已複製",
+      "open": "開啟連結",
+      "openInBrowser": "在預設瀏覽器中開啟",
+      "opening": "正在開啟…",
+      "openFailed": "無法開啟預設瀏覽器，請重試或複製連結後開啟。",
+      "copyFailed": "無法複製連結，請重試。"
     }
   },
   "login": {
@@ -6253,5 +6277,94 @@
     "readOnlyAction": "唯讀存取",
     "loadError": "無法載入訪客存取，請重試。",
     "retry": "重試"
+  },
+  "RoutesPage": {
+    "title": "我的路線",
+    "description": "匯入 GPX，儲存路線並查看第三方交付狀態。",
+    "import": "匯入路線",
+    "newVersion": "更新 GPX 版本",
+    "name": "名稱",
+    "sport": "運動",
+    "notes": "說明",
+    "fileHint": "GPX 最大 20 MiB。保留原始分段；缺少高程會明確顯示。",
+    "cancel": "取消",
+    "save": "儲存路線",
+    "saving": "正在儲存…",
+    "loading": "正在載入…",
+    "retry": "重試",
+    "empty": "尚未儲存路線。",
+    "select": "選擇路線以查看地圖和詳細資料。",
+    "more": "載入更多",
+    "download": "下載原始 GPX",
+    "delete": "刪除路線",
+    "deleteHint": "刪除後路線將隱藏；未完成的第三方交付記錄會保留，以供撤回或核對。",
+    "pendingDelete": "路線已隱藏，仍有第三方交付待處理。",
+    "deleted": "路線已刪除。",
+    "ascent": "爬升",
+    "missingElevation": "缺少高程",
+    "geometry": "{points} 個點 · {segments} 段 · 版本 {revision}",
+    "changed": "路線版本已變更，請重新整理後再試。",
+    "invalidFile": "無法儲存檔案，請檢查 GPX 格式、座標、大小和分段。",
+    "failed": "操作失敗，請重試。",
+    "state": {
+      "PENDING": "排隊中",
+      "ACCEPTED": "廠商已接受",
+      "VERIFIED": "已讀回驗證",
+      "UNKNOWN": "結果不明，待核對",
+      "REJECTED": "未接受",
+      "REMOTE_DELETED": "已確認遠端移除"
+    }
+  },
+  "HealthRecords": {
+    "title": "健康記錄",
+    "description": "保留每筆記錄的來源、本地日期和單位，缺少值不補零。",
+    "range": "日期範圍",
+    "days": "{count} 天",
+    "quantities": "營養、補水與皮溫變化",
+    "loading": "正在載入…",
+    "retry": "重試",
+    "empty": "所選期間暫無記錄。",
+    "deviationHint": "相對該來源基準的變化，不是絕對體溫。",
+    "bloodPressure": "血壓",
+    "pulse": "同次脈搏",
+    "alternateSource": "其他來源",
+    "breathing": "呼吸變化",
+    "breathingHint": "分類沿用來源定義，不轉換為數值評分。",
+    "noOverallCategory": "未提供整晚分類",
+    "periods": "{count} 個原始時段",
+    "dateOnly": "來源僅提供日期與分類。",
+    "sourceReports": "來源報告的量值",
+    "reportHint": "來源尚未明確這些量值是單筆攝入還是累計值，未計入每日補水合計。",
+    "truncated": "記錄達到顯示上限，請縮短期間以查看完整資料。",
+    "connections": "連線設定",
+    "more": "顯示更多",
+    "less": "收合",
+    "failed": "暫時無法載入觀察記錄。",
+    "metrics": {
+      "DIETARY_ENERGY_KCAL": "攝入能量",
+      "DIETARY_CARBOHYDRATE_G": "攝入碳水化合物",
+      "DIETARY_FAT_G": "攝入脂肪",
+      "DIETARY_PROTEIN_G": "攝入蛋白質",
+      "HYDRATION_ML": "飲水量",
+      "SKIN_TEMPERATURE_DELTA_C": "皮溫變化"
+    },
+    "origins": {
+      "DEVICE": "裝置測量",
+      "MANUAL": "手動輸入",
+      "UNKNOWN": "未註明來源方式"
+    },
+    "categories": {
+      "MINIMAL": "極少",
+      "FEW": "少量",
+      "OCCASIONAL": "偶爾",
+      "FREQUENT": "頻繁",
+      "UNMEASURABLE": "無法測量"
+    }
+  },
+  "desktopChrome": {
+    "back": "返回",
+    "forward": "前進",
+    "navigation": "視窗導覽",
+    "appName": "Trainingload.ai 個人版"
   }
 }

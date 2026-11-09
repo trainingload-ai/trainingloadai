@@ -21,6 +21,7 @@ import {
   sampleCoachPromptExamples,
 } from "./coach-chat-view-model";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
+import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
 
 function CoachComposerContext() {
   const context = useCoachThread(
@@ -41,6 +42,7 @@ export function CoachComposer({
   const t = useTranslations("AiCoachPage");
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
+  const { isDesktopSelfHost } = useRuntimeEnvironment();
   const demoReadOnly = publicDemo.active;
   const isRunning = useCoachThread((state) => state.isRunning);
   const actions = useCoachActions();
@@ -59,6 +61,7 @@ export function CoachComposer({
           : isEmbedded
             ? "mx-auto w-full max-w-none px-3 pb-3 pt-2"
             : "mx-auto w-full max-w-lg px-2 pb-safe-or-1 pt-2 sm:max-w-[920px] sm:px-3",
+        !isStart && !isEmbedded && "desktop-coach-composer",
       )}
     >
       <PromptInput
@@ -113,12 +116,14 @@ export function CoachComposer({
                   <Button
                     type="button"
                     variant="outline"
-                    size="composer"
+                    size={isDesktopSelfHost ? "icon-sm" : "composer"}
+                    className={cn(isDesktopSelfHost && "rounded-full")}
                     aria-label={t("actions.stop")}
+                    title={t("actions.stop")}
                     onClick={() => void actions.stop()}
                   >
-                    <Square className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">
+                    <Square fill={isDesktopSelfHost ? "currentColor" : "none"} aria-hidden="true" />
+                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
                       {t("actions.stop")}
                     </span>
                   </Button>
@@ -129,14 +134,14 @@ export function CoachComposer({
                     type="submit"
                     disabled={demoReadOnly || !draft.trim()}
                     title={
-                      demoReadOnly ? demoText("readOnlyAction") : undefined
+                      demoReadOnly ? demoText("readOnlyAction") : t("actions.send")
                     }
-                    size="composer"
-                    className="relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary"
+                    size={isDesktopSelfHost ? "icon-sm" : "composer"}
+                    className={cn("relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary", isDesktopSelfHost && "rounded-full")}
                     aria-label={t("actions.send")}
                   >
-                    <ArrowUp className="h-4 w-4" />
-                    <span className="hidden sm:inline">
+                    <ArrowUp aria-hidden="true" />
+                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
                       {t("actions.send")}
                     </span>
                   </Button>
@@ -179,13 +184,14 @@ export function CoachComposer({
                   <Button
                     type="button"
                     variant="outline"
-                    size="composer-compact"
-                    className="shrink-0"
+                    size={isDesktopSelfHost ? "icon-sm" : "composer-compact"}
+                    className={cn("shrink-0", isDesktopSelfHost && "rounded-full")}
                     aria-label={t("actions.stop")}
+                    title={t("actions.stop")}
                     onClick={() => void actions.stop()}
                   >
-                    <Square className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">
+                    <Square fill={isDesktopSelfHost ? "currentColor" : "none"} aria-hidden="true" />
+                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
                       {t("actions.stop")}
                     </span>
                   </Button>
@@ -196,14 +202,14 @@ export function CoachComposer({
                     type="submit"
                     disabled={demoReadOnly || !draft.trim()}
                     title={
-                      demoReadOnly ? demoText("readOnlyAction") : undefined
+                      demoReadOnly ? demoText("readOnlyAction") : t("actions.send")
                     }
-                    size="composer-compact"
-                    className="relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary"
+                    size={isDesktopSelfHost ? "icon-sm" : "composer-compact"}
+                    className={cn("relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary", isDesktopSelfHost && "rounded-full")}
                     aria-label={t("actions.send")}
                   >
-                    <ArrowUp className="h-4 w-4" />
-                    <span className="hidden sm:inline">
+                    <ArrowUp aria-hidden="true" />
+                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
                       {t("actions.send")}
                     </span>
                   </Button>
@@ -249,18 +255,18 @@ export function CoachPromptExamples() {
           </button>
         ))}
       </div>
-      <div className="hidden space-y-3 pt-2 pc:block">
+      <div className="hidden space-y-3 border-0 bg-transparent p-0 pt-2 shadow-none pc:block">
         <div className="text-center text-sm font-medium text-foreground">
           {t("examplesTitle")}
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2 border-0 bg-transparent p-0 shadow-none">
           {visiblePrompts.map((prompt) => (
             <Button
               key={prompt}
               type="button"
               size="compact"
-              variant="outline"
-              className="whitespace-nowrap bg-neutral-100 px-3 shadow-none transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
+              variant="secondary"
+              className="whitespace-nowrap border-0 bg-neutral-100 px-3 shadow-none transition-colors hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
               disabled={publicDemo.active}
               title={publicDemo.active ? demoText("readOnlyAction") : undefined}
               onClick={() => {

@@ -306,7 +306,9 @@ async function verifyDecoderParity(corpusRoot: string, files: string[]) {
         (activity.laps ?? []).flatMap((lap) => lap.records ?? []),
       );
       const canonicalSets = activities.flatMap(
-        (activity) => activity.strengthSets ?? [],
+        (activity) =>
+          (activity as unknown as { strengthSets?: unknown[] }).strengthSets ??
+          [],
       );
       aggregate.officialRecords += records.length;
       aggregate.canonicalRecords += canonicalRecords.length;

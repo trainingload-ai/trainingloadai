@@ -101,3 +101,29 @@ export function useHealthIntraday(
     { enabled, staleTime: 5 * 60 * 1000 },
   );
 }
+
+export function useHealthObservations(
+  days = 30,
+  endDate = localDateKey(),
+  enabled = true,
+) {
+  return useSimpleApiQuery<
+    import("@shared/health-observations").HealthObservationOverview
+  >(
+    ["health-data", "observations", String(days), endDate],
+    async () =>
+      (await apiFetch<
+        import("@shared/health-observations").HealthObservationOverview
+      >(
+        `/health-data/observations?${new URLSearchParams({ days: String(days), endDate })}`,
+        { suppressErrorToast: true },
+      )) ?? {
+        startDate: "",
+        endDate: "",
+        items: [],
+        reports: [],
+        truncated: false,
+      },
+    { enabled, staleTime: 5 * 60 * 1000 },
+  );
+}

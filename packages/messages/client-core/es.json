@@ -1021,6 +1021,30 @@
         "separate": "Gráficos separados",
         "overlay": "Superponer"
       }
+    },
+    "setup": {
+      "title": "La IA aún no está configurada",
+      "description": "Elige un proveedor de IA y configura los modelos para hablar con tu entrenador.",
+      "incompleteTitle": "Revisa la configuración de IA",
+      "incompleteDescription": "Comprueba el proveedor, la clave API y los modelos.",
+      "configure": "Configurar IA",
+      "ownerRequired": "Pide al propietario de la instancia que configure la IA para usar el entrenador.",
+      "unavailableTitle": "No se puede consultar el estado de la IA",
+      "unavailableDescription": "Comprueba que el servicio local esté en ejecución e inténtalo de nuevo.",
+      "loading": "Cargando el estado de la IA…",
+      "retry": "Reintentar"
+    },
+    "externalLink": {
+      "title": "¿Abrir enlace externo?",
+      "webDescription": "Vas a visitar un sitio web externo.",
+      "desktopDescription": "Este sitio se abrirá en el navegador predeterminado del sistema.",
+      "copy": "Copiar enlace",
+      "copied": "Copiado",
+      "open": "Abrir enlace",
+      "openInBrowser": "Abrir en el navegador",
+      "opening": "Abriendo…",
+      "openFailed": "No se pudo abrir el navegador. Inténtalo de nuevo o copia el enlace.",
+      "copyFailed": "No se pudo copiar el enlace. Inténtalo de nuevo."
     }
   },
   "login": {
@@ -6155,5 +6179,94 @@
     "readOnlyAction": "Solo lectura",
     "loadError": "No se pudo cargar el acceso de invitado. Inténtalo de nuevo.",
     "retry": "Reintentar"
+  },
+  "RoutesPage": {
+    "title": "Mis rutas",
+    "description": "Importa GPX, guarda rutas y revisa su envío.",
+    "import": "Importar ruta",
+    "newVersion": "Actualizar versión GPX",
+    "name": "Nombre",
+    "sport": "Deporte",
+    "notes": "Notas",
+    "fileHint": "GPX de hasta 20 MiB. Se conservan los segmentos y se indica la falta de altitud.",
+    "cancel": "Cancelar",
+    "save": "Guardar ruta",
+    "saving": "Guardando…",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "empty": "Aún no hay rutas guardadas.",
+    "select": "Selecciona una ruta para ver el mapa y los detalles.",
+    "more": "Cargar más",
+    "download": "Descargar GPX original",
+    "delete": "Eliminar ruta",
+    "deleteHint": "La ruta se ocultará. Los envíos pendientes se conservarán para retirarlos o conciliarlos.",
+    "pendingDelete": "Ruta oculta; algunos envíos aún requieren atención.",
+    "deleted": "Ruta eliminada.",
+    "ascent": "Ascenso",
+    "missingElevation": "Falta altitud",
+    "geometry": "{points} puntos · {segments} segmentos · Versión {revision}",
+    "changed": "La ruta ha cambiado. Actualiza antes de reintentar.",
+    "invalidFile": "No se pudo guardar. Revisa el formato GPX, las coordenadas, el tamaño y los segmentos.",
+    "failed": "La operación falló. Reintenta.",
+    "state": {
+      "PENDING": "En cola",
+      "ACCEPTED": "Aceptado por el proveedor",
+      "VERIFIED": "Lectura verificada",
+      "UNKNOWN": "Desconocido; requiere conciliación",
+      "REJECTED": "No aceptado",
+      "REMOTE_DELETED": "Eliminación remota confirmada"
+    }
+  },
+  "HealthRecords": {
+    "title": "Health records",
+    "description": "Measurements retain their source, local date and units. Missing values remain blank.",
+    "range": "Date range",
+    "days": "{count} days",
+    "quantities": "Nutrition, hydration and temperature change",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "empty": "No records in this period.",
+    "deviationHint": "Change relative to this source’s baseline, not an absolute body temperature.",
+    "bloodPressure": "Blood pressure",
+    "pulse": "Pulse",
+    "alternateSource": "Other source",
+    "breathing": "Breathing variations",
+    "breathingHint": "Categories follow the source’s definitions and are not converted into numerical grades.",
+    "noOverallCategory": "No overall category provided",
+    "periods": "{count} recorded intervals",
+    "dateOnly": "The source supplied a date and category only.",
+    "sourceReports": "Source-reported amounts",
+    "reportHint": "The source has not specified whether these amounts are entries or totals. They are excluded from daily hydration totals.",
+    "truncated": "The result limit was reached. Choose a shorter period to see complete details.",
+    "connections": "Connection settings",
+    "more": "Show more",
+    "less": "Show less",
+    "failed": "Unable to load observation records.",
+    "metrics": {
+      "DIETARY_ENERGY_KCAL": "Dietary energy",
+      "DIETARY_CARBOHYDRATE_G": "Carbohydrate intake",
+      "DIETARY_FAT_G": "Fat intake",
+      "DIETARY_PROTEIN_G": "Protein intake",
+      "HYDRATION_ML": "Water intake",
+      "SKIN_TEMPERATURE_DELTA_C": "Skin temperature change"
+    },
+    "origins": {
+      "DEVICE": "Device measurement",
+      "MANUAL": "Manual entry",
+      "UNKNOWN": "Unspecified origin"
+    },
+    "categories": {
+      "MINIMAL": "Minimal",
+      "FEW": "Few",
+      "OCCASIONAL": "Occasional",
+      "FREQUENT": "Frequent",
+      "UNMEASURABLE": "Unmeasurable"
+    }
+  },
+  "desktopChrome": {
+    "back": "Atrás",
+    "forward": "Adelante",
+    "navigation": "Navegación de ventana",
+    "appName": "Trainingload.ai Personal"
   }
 }
