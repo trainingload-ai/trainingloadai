@@ -1,6 +1,6 @@
 {
   "name": "trainingloadai",
-  "version": "1.1.19",
+  "version": "1.1.20",
   "private": true,
   "description": "Open-source, self-hosted endurance training analysis and AI coaching platform.",
   "homepage": "https://trainingload.ai",
@@ -81,7 +81,7 @@
     "messages:check": "node packages/messages/check-client-baseline.mjs",
     "docs:dev": "pnpm --dir apps/docs dev",
     "docs:build": "pnpm --dir apps/docs build",
-    "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* · (en|zh)$'",
+    "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* \u00b7 (en|zh)$'",
     "prisma:generate": "pnpm --dir packages/prisma exec prisma generate --schema core/schema.prisma",
     "prisma:migrate": "pnpm --dir packages/prisma core:migrate",
     "boundary:check": "node scripts/audit-public.mjs",

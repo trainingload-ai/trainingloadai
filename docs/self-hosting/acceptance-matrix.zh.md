@@ -66,10 +66,10 @@ Idle mandatory containers 的总内存上限为 2 GiB；初装权威数据上限
 
 ```bash
 gh workflow run selfhost-acceptance.yml \
-  --ref v1.1.19 \
+  --ref v1.1.20 \
   -f release_run_id='<current-run-id>' \
   -f release_revision='<current-40-char-sha>' \
-  -f release_version='1.1.19' \
+  -f release_version='1.1.20' \
   -f previous_release_run_id='<previous-run-id>' \
   -f previous_release_revision='<previous-40-char-sha>' \
   -f previous_release_version='1.1.15'
@@ -96,7 +96,7 @@ bundle 必须保留 fault doctor、通过 secret scan、要求 operator review�
 下载 aggregate artifact 后，先验证 exact identity，再验证全部文件：
 
 ```bash
-version='1.1.19'
+version='1.1.20'
 identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-acceptance.yml@refs/tags/v$version"
 cosign verify-blob \
   --bundle acceptance-checksums.bundle.json \
