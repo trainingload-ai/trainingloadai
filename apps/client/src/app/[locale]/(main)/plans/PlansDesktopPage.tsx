@@ -480,9 +480,11 @@ export default function PlansDesktopPage() {
   );
   const adviceFallbackSummary = activePlan
     ? getCoachText(t, activePlan)
-    : hasDraftPlan || plans.length === 0
-      ? t("statusGuide.draft")
-      : t("statusGuide.history");
+    : plans.length === 0
+      ? t("statusGuide.empty")
+      : hasDraftPlan
+        ? t("statusGuide.draft")
+        : t("statusGuide.history");
   const coachParams = new URLSearchParams({
     intent: "plans-overview",
     source: "plans",
@@ -627,11 +629,15 @@ export default function PlansDesktopPage() {
               surface="PLAN_SIDEBAR"
               planId={activePlan?.id}
               fallbackSummary={adviceFallbackSummary}
-              fallbackTags={[
-                activePlan
-                  ? getStatusLabel(t, activePlan.status)
-                  : t("statusGuide.title"),
-              ]}
+              fallbackTags={
+                plans.length === 0
+                  ? []
+                  : [
+                      activePlan
+                        ? getStatusLabel(t, activePlan.status)
+                        : t("statusGuide.title"),
+                    ]
+              }
             />
           </div>
         </div>

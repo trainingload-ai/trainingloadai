@@ -5073,6 +5073,7 @@
     },
     "statusGuide": {
       "title": "Guida allo stato",
+      "empty": "Non hai ancora un piano. Di' al coach il tuo obiettivo e la disponibilità settimanale per iniziare a crearlo.",
       "draft": "Le bozze possono essere modificate o perfezionate con il coach.",
       "active": "I piani attivi vengono visualizzati su Home e Calendario.",
       "history": "I piani completati, sospesi o annullati rimangono nella cronologia.",

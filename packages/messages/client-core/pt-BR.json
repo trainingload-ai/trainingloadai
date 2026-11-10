@@ -5073,6 +5073,7 @@
     },
     "statusGuide": {
       "title": "Guia de status",
+      "empty": "Ainda não há um plano. Conte ao treinador seu objetivo e sua disponibilidade semanal para começar a criar um.",
       "draft": "Os rascunhos podem ser editados ou refinados com o treinador.",
       "active": "Os planos ativos aparecem na página inicial e no calendário.",
       "history": "Planos concluídos, pausados ​​ou cancelados ficam no histórico.",

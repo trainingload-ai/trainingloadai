@@ -5073,6 +5073,7 @@
     },
     "statusGuide": {
       "title": "Statusleitfaden",
+      "empty": "Noch kein Plan. Nenne dem Coach dein Ziel und deine wöchentliche Zeit, um einen zu erstellen.",
       "draft": "Entwürfe können mit dem Coach bearbeitet oder verfeinert werden.",
       "active": "Aktive Pläne werden auf der Startseite und im Kalender angezeigt.",
       "history": "Abgeschlossene, pausierte oder stornierte Pläne bleiben im Verlauf.",
