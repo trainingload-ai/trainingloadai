@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType, ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -65,6 +65,42 @@ export function thirdPartyProviderIconClassName(
   return getThirdPartyProviderIconClassName(provider, connected);
 }
 
+function ConnectedStatusDot({ label }: { label?: string }) {
+  return (
+    <span
+      role="status"
+      aria-label={label}
+      className="absolute right-3 top-3 z-10 shrink-0 rounded-full bg-[hsl(var(--emerald-500))]"
+      style={{
+        width: 10,
+        height: 10,
+        backgroundColor: "hsl(var(--emerald-500))",
+      }}
+    />
+  );
+}
+
+function ConnectionStatusMark({
+  label,
+  pending,
+}: {
+  label?: string;
+  pending: boolean;
+}) {
+  if (pending) {
+    return (
+      <span
+        role="status"
+        aria-label={label}
+        className="absolute right-2.5 top-2.5 z-10 text-[hsl(var(--emerald-500))]"
+      >
+        <Loader2 className="size-3.5 animate-spin" aria-hidden />
+      </span>
+    );
+  }
+  return <ConnectedStatusDot label={label} />;
+}
+
 export function ThirdPartyConnectionCard({
   actionIcon,
   actionLabel,
@@ -89,10 +125,13 @@ export function ThirdPartyConnectionCard({
     return (
       <div
         className={cn(
-          "flex flex-col gap-3 rounded-control-lg bg-background/70 p-3 transition-colors hover:bg-background sm:flex-row sm:items-center",
+          "relative flex flex-col gap-3 rounded-control-lg bg-background/70 p-3 transition-colors hover:bg-background sm:flex-row sm:items-center",
           className,
         )}
       >
+        {connected ? (
+          <ConnectionStatusMark label={connectedLabel} pending={isLoading} />
+        ) : null}
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <div
             className={cn(
@@ -117,11 +156,6 @@ export function ThirdPartyConnectionCard({
               >
                 {name}
               </div>
-              {connected && connectedLabel ? (
-                <Badge variant="secondary" className="shrink-0">
-                  {connectedLabel}
-                </Badge>
-              ) : null}
             </div>
             <p className="mt-1 line-clamp-2 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
               {description}
@@ -145,10 +179,13 @@ export function ThirdPartyConnectionCard({
   return (
     <div
       className={cn(
-        "flex h-full flex-col rounded-md bg-background/80 p-3 dark:bg-background/35",
+        "relative flex h-full flex-col rounded-md bg-background/80 p-3 dark:bg-background/35",
         className,
       )}
     >
+      {connected ? (
+        <ConnectionStatusMark label={connectedLabel} pending={isLoading} />
+      ) : null}
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <div
@@ -172,14 +209,6 @@ export function ThirdPartyConnectionCard({
           >
             {name}
           </div>
-          {connected && connectedLabel ? (
-            <Badge
-              variant="secondary"
-              className="px-2 py-0.5 text-mobile-unit pc:text-[10px]"
-            >
-              {connectedLabel}
-            </Badge>
-          ) : null}
         </div>
       </div>
       <div className="mt-3 flex flex-1 flex-col gap-4">
