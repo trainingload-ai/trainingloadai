@@ -118,7 +118,7 @@ export class PersonalConnectionService {
    */
   async find(userId: string, provider: PersonalProvider) {
     const row = await this.providerConnections.model().findUnique({
-      where: { userId_provider: { userId, provider } },
+      where: { userId_provider_region: { userId, provider, region: '' } },
     });
     if (row && !isPersonalConnection(row))
       throw new PersonalProviderError(
@@ -238,7 +238,7 @@ export class PersonalConnectionService {
       // reauthorization. The account lock also covers the first insertion.
       await tx.$executeRaw`SELECT id FROM t_external_provider_connection WHERE user_id=${userId} AND provider::text=${provider} FOR UPDATE`;
       const current = await this.providerConnections.model(tx).findUnique({
-        where: { userId_provider: { userId, provider } },
+        where: { userId_provider_region: { userId, provider, region: '' } },
       });
       if (current && !isPersonalConnection(current))
         throw new PersonalProviderError(

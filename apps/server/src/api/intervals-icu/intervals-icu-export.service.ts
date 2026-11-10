@@ -123,9 +123,10 @@ export class IntervalsIcuExportService {
 
     const connection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId: args.userId,
           provider: PROVIDER,
+          region: '',
         },
       },
     });

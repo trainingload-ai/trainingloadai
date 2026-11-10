@@ -5073,6 +5073,7 @@
     },
     "statusGuide": {
       "title": "guía de estado",
+      "empty": "Todavía no hay un plan. Cuéntale al entrenador tu objetivo y tu disponibilidad semanal para empezar a crearlo.",
       "draft": "Los borradores se pueden editar o perfeccionar con el entrenador.",
       "active": "Los planes activos aparecen en Inicio y Calendario.",
       "history": "Los planes completados, pausados ​​o cancelados permanecen en el historial.",

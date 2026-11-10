@@ -1,6 +1,5 @@
 {
   "schemaVersion": 1,
-  "schemaChecksum": "9b8104cdc40b9877f47fc68d48b4786ce5791ae8ffb32a9132d267e0a2288895",
   "migrations": [
     {
       "id": "0001_core_baseline",
@@ -111,6 +110,12 @@
       "id": "0022_personal_integrations",
       "file": "0022_personal_integrations/migration.sql",
       "sha256": "224b7ecc0020079952d6f121606e3d4725f51184322b05af3be12e568eb67dd4"
+    },
+    {
+      "id": "0023_external_provider_connection_region",
+      "file": "0023_external_provider_connection_region/migration.sql",
+      "sha256": "b8a80748058fd4520f8436cfa6d7a00ada3e0922d33af359f4731d1628a5f6b4"
     }
-  ]
+  ],
+  "schemaChecksum": "9cea1bc2b8c5de3fe1380082d1570fec9d88f976b48bf28490d799491631632d"
 }

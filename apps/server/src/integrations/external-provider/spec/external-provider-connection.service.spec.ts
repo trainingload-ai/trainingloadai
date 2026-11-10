@@ -6,10 +6,16 @@ import { ExternalProviderConnectionRepository } from '../persistence/external-pr
 describe('ExternalProviderConnectionService model port', () => {
   it('finds a connection through the repository accessor', async () => {
     const findUnique = async (args: {
-      where: { userId_provider: { userId: string; provider: string } };
+      where: {
+        userId_provider_region: {
+          userId: string;
+          provider: string;
+          region: string;
+        };
+      };
     }) => ({
       id: 'conn-1',
-      userId: args.where.userId_provider.userId,
+      userId: args.where.userId_provider_region.userId,
     });
     const service = new ExternalProviderConnectionService({
       externalProviderConnection: { findUnique },

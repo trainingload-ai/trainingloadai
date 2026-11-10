@@ -5073,6 +5073,7 @@
     },
     "statusGuide": {
       "title": "Guide d'état",
+      "empty": "Aucun plan pour le moment. Indiquez votre objectif et vos disponibilités au coach pour en créer un.",
       "draft": "Les brouillons peuvent être édités ou affinés avec le coach.",
       "active": "Les forfaits actifs apparaissent dans Accueil et Calendrier.",
       "history": "Les plans terminés, suspendus ou annulés restent dans l'historique.",

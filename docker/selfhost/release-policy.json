@@ -110,6 +110,10 @@
       "0022_personal_integrations": {
         "phase": "expand",
         "releaseVersion": "1.1.20"
+      },
+      "0023_external_provider_connection_region": {
+        "phase": "expand",
+        "releaseVersion": "1.1.21"
       }
     }
   }

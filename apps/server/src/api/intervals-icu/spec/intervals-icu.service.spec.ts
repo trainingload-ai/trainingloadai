@@ -543,9 +543,10 @@ describe('IntervalsIcuService', () => {
       expect(prisma.externalProviderConnection.findUnique).toHaveBeenCalledWith(
         {
           where: {
-            userId_provider: {
+            userId_provider_region: {
               userId: 'user-1',
               provider: 'intervals_icu',
+              region: '',
             },
           },
         },
