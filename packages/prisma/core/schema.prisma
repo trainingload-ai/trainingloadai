@@ -1416,6 +1416,7 @@ model ExternalProviderConnection {
   user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   provider          ThirdPartyProvider @map("provider")
+  region            String             @default("") @map("region")
   externalAthleteId String?            @map("external_athlete_id")
 
   credentialCiphertext  String  @map("credential_ciphertext")
@@ -1446,7 +1447,7 @@ model ExternalProviderConnection {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([userId, provider])
+  @@unique([userId, provider, region])
   @@index([provider, status])
   @@index([provider, externalAthleteId, status])
   @@index([userId, status])
