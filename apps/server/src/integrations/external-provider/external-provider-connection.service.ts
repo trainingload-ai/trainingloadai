@@ -26,7 +26,7 @@ export class ExternalProviderConnectionService {
   /** 该 user+provider 的任意连接行（不限状态）。 */
   find(userId: string, provider: ThirdPartyProvider) {
     return this.model().findUnique({
-      where: { userId_provider: { userId, provider } },
+      where: { userId_provider_region: { userId, provider, region: '' } },
     });
   }
 

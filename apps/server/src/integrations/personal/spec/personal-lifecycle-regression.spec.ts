@@ -47,7 +47,7 @@ function fixture() {
   let jobs: any[] = [];
   const matches = (value: any, where: any): boolean =>
     Object.entries(where).every(([key, wanted]: any) => {
-      if (key === 'userId_provider') return true;
+      if (key === 'userId_provider_region') return true;
       // structuredClone creates Dates outside Jest's VM realm.
       if (typeof wanted?.getTime === 'function')
         return value[key]?.getTime() === wanted.getTime();

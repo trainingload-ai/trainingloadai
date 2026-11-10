@@ -559,9 +559,10 @@ export class IntervalsIcuService {
     // 查找已存在的连接
     const existingConnection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
@@ -633,9 +634,10 @@ export class IntervalsIcuService {
     // 更新/创建连接
     const connection = await this.providerConnections.model().upsert({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
       create: {
@@ -712,9 +714,10 @@ export class IntervalsIcuService {
   async connect(userId: string, dto: ConnectIntervalsIcuDto) {
     const existingConnection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
@@ -824,9 +827,10 @@ export class IntervalsIcuService {
 
     const connection = await this.providerConnections.model().upsert({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
       create: {
@@ -906,9 +910,10 @@ export class IntervalsIcuService {
 
     const latestConnection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
@@ -924,9 +929,10 @@ export class IntervalsIcuService {
   async updateSettings(userId: string, dto: UpdateIntervalsIcuSettingsDto) {
     const connection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
@@ -954,9 +960,10 @@ export class IntervalsIcuService {
   async getStatus(userId: string) {
     const connection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
@@ -969,9 +976,10 @@ export class IntervalsIcuService {
   async disconnect(userId: string) {
     const connection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
@@ -1144,9 +1152,10 @@ export class IntervalsIcuService {
   async syncLatest(userId: string, dto?: SyncIntervalsIcuDto) {
     const connection = await this.providerConnections.model().findUnique({
       where: {
-        userId_provider: {
+        userId_provider_region: {
           userId,
           provider: 'intervals_icu',
+          region: '',
         },
       },
     });
