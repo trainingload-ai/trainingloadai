@@ -53,7 +53,7 @@ export function TimelineRowSettings({
         <Button
           variant="ghost"
           size="compact"
-          className="max-w-full justify-start px-0"
+          className="min-w-0 flex-1 justify-start px-0"
           aria-label={t("configureChart", { metric: label })}
         >
           <span

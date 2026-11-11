@@ -204,30 +204,17 @@ export const TimelineChart = memo(function TimelineChart({
       data-timeline-row={config.id}
     >
       <div className="flex flex-col justify-center gap-0.5 pl-3">
-        <TimelineRowSettings
-          config={config}
-          metrics={metrics}
-          color={config.color ?? getMetricColor(metric.colorMetric)}
-          onChange={onChange}
-          onRemove={onRemove}
-          onMove={onMove}
-          canMoveUp={canMoveUp}
-          canMoveDown={canMoveDown}
-        />
-        <div className="flex items-center gap-1 tabular-nums">
-          <span className="text-base font-semibold">
-            {value === null ? "—" : metric.format(value)}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {metric.unit}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          {metric.calculated ? (
-            <span className="text-[10px] text-muted-foreground">
-              {t("calculated")}
-            </span>
-          ) : null}
+        <div className="flex min-w-0 items-center gap-1">
+          <TimelineRowSettings
+            config={config}
+            metrics={metrics}
+            color={config.color ?? getMetricColor(metric.colorMetric)}
+            onChange={onChange}
+            onRemove={onRemove}
+            onMove={onMove}
+            canMoveUp={canMoveUp}
+            canMoveDown={canMoveDown}
+          />
           <ChartExpandDialog
             title={label}
             triggerLabel={t("expandChart", { metric: label })}
@@ -243,6 +230,19 @@ export const TimelineChart = memo(function TimelineChart({
             />
           </ChartExpandDialog>
         </div>
+        <div className="flex items-center gap-1 tabular-nums">
+          <span className="text-base font-semibold">
+            {value === null ? "—" : metric.format(value)}
+          </span>
+          <span className="text-[11px] text-muted-foreground">
+            {metric.unit}
+          </span>
+        </div>
+        {metric.calculated ? (
+          <span className="text-[10px] text-muted-foreground">
+            {t("calculated")}
+          </span>
+        ) : null}
       </div>
       <div role="img" aria-label={`${label} (${metric.unit})`}>
         <TimelinePlot

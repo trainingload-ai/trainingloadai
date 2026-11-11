@@ -160,6 +160,32 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     exact: true,
   });
   await expect(timeline.getByRole("img")).toHaveCount(4);
+  const lapGroups = timeline.getByRole("group", { name: "分段", exact: true });
+  expect(
+    await lapGroups.evaluate(
+      (element) => element.scrollWidth > element.clientWidth,
+    ),
+  ).toBe(true);
+  expect(
+    (await lapGroups.getByRole("button").first().boundingBox())!.width,
+  ).toBeGreaterThanOrEqual(144);
+  await lapGroups.getByRole("button").last().click();
+  expect(
+    await lapGroups.evaluate((element) => element.scrollLeft),
+  ).toBeGreaterThan(0);
+  const settingsBounds = (await timeline
+    .getByRole("button", { name: "配置海拔图表" })
+    .boundingBox())!;
+  const expandBounds = (await timeline
+    .getByRole("button", { name: "放大海拔图表" })
+    .boundingBox())!;
+  expect(
+    Math.abs(
+      settingsBounds.y +
+        settingsBounds.height / 2 -
+        (expandBounds.y + expandBounds.height / 2),
+    ),
+  ).toBeLessThan(2);
   await expect(page.locator(".maplibregl-canvas")).toHaveCount(1);
   const position = timeline.getByRole("slider");
   await position.focus();
@@ -175,6 +201,13 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     await expect(
       timeline.getByRole("group", { name: mode }).getByRole("button").first(),
     ).toBeVisible();
+    const zoneColors = await timeline
+      .getByRole("group", { name: mode })
+      .getByRole("button")
+      .evaluateAll((buttons) =>
+        buttons.map((button) => getComputedStyle(button).backgroundColor),
+      );
+    expect(new Set(zoneColors).size).toBeGreaterThan(1);
   }
   await timeline.getByRole("combobox", { name: "分组方式" }).click();
   await page.getByRole("option", { name: "分段", exact: true }).click();
@@ -208,7 +241,19 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await page.getByRole("option", { name: "10 秒", exact: true }).click();
   await page.keyboard.press("Escape");
   await timeline.getByRole("button", { name: "添加图表", exact: true }).click();
-  await page.getByRole("menuitem", { name: "功率", exact: true }).click();
+  const addDialog = page.getByRole("dialog", { name: "添加图表", exact: true });
+  await expect(addDialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(timeline.getByRole("img")).toHaveCount(4);
+  await expect(
+    timeline.getByRole("button", { name: "添加图表", exact: true }),
+  ).toBeFocused();
+  await timeline.getByRole("button", { name: "添加图表", exact: true }).click();
+  await addDialog.screenshot({
+    path: test.info().outputPath("timeline-add-dialog.png"),
+  });
+  await addDialog.getByRole("button", { name: "功率", exact: true }).click();
+  await expect(addDialog).toHaveCount(0);
   await expect(timeline.getByRole("img")).toHaveCount(5);
   await timeline.getByRole("button", { name: "配置功率图表" }).click();
   await page.getByRole("button", { name: "删除图表", exact: true }).click();

@@ -1982,7 +1982,8 @@
     "moveDown": "下移",
     "removeChart": "刪除圖表",
     "addChart": "新增圖表",
-    "expandChart": "放大{metric}圖表"
+    "expandChart": "放大{metric}圖表",
+    "addChartDescription": "選擇本次活動的可用指標，可重複新增同一指標。"
   },
   "ActivityDetail": {
     "title": "活動詳情",

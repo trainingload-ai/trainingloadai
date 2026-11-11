@@ -9,7 +9,7 @@ import {
   type PointerEvent,
 } from "react";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, Plus, RotateCcw } from "lucide-react";
+import { MoreHorizontal, RotateCcw } from "lucide-react";
 import type { Activity } from "@/api/activities";
 import { useHeartRateZones } from "@/api/use-heart-rate";
 import { useActivityPowerZones } from "@/api/use-power";
@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatSecondsToTime } from "@/utils/timeFormatter";
+import { getPowerZoneColorByZone } from "@/utils/util";
 import {
   coordinateAtTrackTime,
   groupTimelineByZone,
@@ -53,6 +54,7 @@ import {
 import { useSetTimelineMapFocus } from "../activity-analysis-link-context";
 import { useActivityTimeline } from "./use-activity-timeline";
 import { TimelineChart } from "./timeline-chart";
+import { TimelineAddChartDialog } from "./timeline-add-chart-dialog";
 
 const timeLabel = (value: number) => formatSecondsToTime(Math.round(value));
 
@@ -161,12 +163,15 @@ export default function ActivityTimeline({
     return groupTimelineByZone(
       model.groupingSeries[layout.grouping],
       Array.isArray(zones)
-        ? zones.map((zone, index) =>
+        ? zones.map((zone, index) => ({
+            ...zone,
+            color: getPowerZoneColorByZone(zone.color, index + 1),
             // Heart-rate and power distribution use an open-ended last zone.
-            layout.grouping !== "pace" && index === zones.length - 1
-              ? { ...zone, max: undefined }
-              : zone,
-          )
+            max:
+              layout.grouping !== "pace" && index === zones.length - 1
+                ? undefined
+                : zone.max,
+          }))
         : [],
       model.duration,
     );
@@ -187,6 +192,34 @@ export default function ActivityTimeline({
         return metric ? [{ config, metric }] : [];
       }),
     [layout.rows, model],
+  );
+  const visibleGroups = useMemo(
+    () =>
+      groups.flatMap((group) => {
+        const start = xAtTime(group.range[0]);
+        const end = xAtTime(group.range[1]);
+        if (
+          start === null ||
+          end === null ||
+          end <= viewport[0] ||
+          start >= viewport[1]
+        )
+          return [];
+        return [
+          {
+            ...group,
+            left: Math.max(
+              0,
+              ((start - viewport[0]) / (viewport[1] - viewport[0])) * 100,
+            ),
+            width:
+              ((Math.min(end, viewport[1]) - Math.max(start, viewport[0])) /
+                (viewport[1] - viewport[0])) *
+              100,
+          },
+        ];
+      }),
+    [groups, xAtTime, viewport],
   );
 
   const hover = (time: number | null) => {
@@ -294,7 +327,7 @@ export default function ActivityTimeline({
       data-timeline-start={viewport[0]}
       data-timeline-end={viewport[1]}
     >
-      <div className="grid h-10 grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
+      <div className="grid min-h-16 grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
         <div className="flex items-center gap-1 px-2">
           <Select
             value={layout.grouping}
@@ -363,23 +396,12 @@ export default function ActivityTimeline({
           </DropdownMenu>
         </div>
         <div
-          className="relative h-8 overflow-hidden"
+          key={layout.grouping}
+          className="flex min-w-0 items-center gap-2 overflow-x-auto overscroll-x-contain py-2"
           role="group"
           aria-label={t("groups." + layout.grouping)}
         >
-          {groups.map((group) => {
-            const rawStart = xAtTime(group.range[0]),
-              rawEnd = xAtTime(group.range[1]);
-            if (
-              rawStart === null ||
-              rawEnd === null ||
-              rawEnd <= viewport[0] ||
-              rawStart >= viewport[1]
-            )
-              return null;
-            const from = Math.max(rawStart, viewport[0]),
-              to = Math.min(rawEnd, viewport[1]);
-            if (to <= from) return null;
+          {visibleGroups.map((group) => {
             const selected =
               range?.[0] === group.range[0] && range[1] === group.range[1];
             return (
@@ -389,13 +411,11 @@ export default function ActivityTimeline({
                 aria-label={`${group.label} ${timeLabel(group.range[0])}–${timeLabel(group.range[1])}`}
                 aria-pressed={selected}
                 data-selected={selected}
-                className="absolute top-1 h-6 overflow-hidden rounded-xs border border-border bg-muted px-0.5 text-[11px] data-[selected=true]:border-foreground data-[selected=true]:font-semibold"
+                className="flex min-w-36 shrink-0 flex-col items-start gap-1 rounded-sm border border-border bg-muted px-3 py-2 text-xs hover:border-foreground/40 focus-visible:outline-2 focus-visible:outline-ring data-[selected=true]:border-foreground"
                 style={{
-                  left: `${percent(from)}%`,
-                  width: `${((to - from) / (viewport[1] - viewport[0])) * 100}%`,
                   ...(group.color
                     ? {
-                        backgroundColor: `color-mix(in srgb, ${group.color} 18%, var(--background))`,
+                        backgroundColor: `color-mix(in srgb, ${group.color} 20%, var(--background))`,
                       }
                     : {}),
                 }}
@@ -404,11 +424,14 @@ export default function ActivityTimeline({
                   setRange(selected ? null : group.range);
                 }}
               >
-                {group.label}
+                <span className="font-medium">{group.label}</span>
+                <span className="text-[11px] tabular-nums">
+                  {timeLabel(group.range[0])}–{timeLabel(group.range[1])}
+                </span>
               </button>
             );
           })}
-          {!groups.length ? (
+          {!visibleGroups.length ? (
             <span
               className="flex h-full items-center text-xs text-muted-foreground"
               role="status"
@@ -419,6 +442,24 @@ export default function ActivityTimeline({
         </div>
       </div>
       <div className="relative">
+        <div
+          className="pointer-events-none absolute inset-y-0 left-40 right-3 overflow-hidden"
+          aria-hidden
+        >
+          {visibleGroups.map((group) =>
+            group.color ? (
+              <span
+                key={group.id}
+                className="absolute inset-y-0"
+                style={{
+                  left: `${group.left}%`,
+                  width: `${group.width}%`,
+                  backgroundColor: `color-mix(in srgb, ${group.color} 7%, transparent)`,
+                }}
+              />
+            ) : null,
+          )}
+        </div>
         {visibleRows.map(({ config, metric }, index) => (
           <TimelineChart
             key={config.id}
@@ -550,42 +591,18 @@ export default function ActivityTimeline({
           ))}
         </div>
       ) : null}
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          variant="ghost"
-          size="sm"
-          className="w-full rounded-none"
-          aria-label={t("addChart")}
-        >
-          <Plus />
-          {t("addChart")}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuGroup>
-            {model.metrics.map((metric) => (
-              <DropdownMenuItem
-                key={metric.id}
-                onSelect={() =>
-                  setLayout((value) => ({
-                    ...value,
-                    rows: [
-                      ...value.rows,
-                      {
-                        id: crypto.randomUUID(),
-                        metric: metric.id,
-                        height: 86,
-                        smoothing: 0,
-                      },
-                    ],
-                  }))
-                }
-              >
-                {t(`metrics.${metric.id}`)}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <TimelineAddChartDialog
+        metrics={model.metrics}
+        onAdd={(metric) =>
+          setLayout((value) => ({
+            ...value,
+            rows: [
+              ...value.rows,
+              { id: crypto.randomUUID(), metric, height: 86, smoothing: 0 },
+            ],
+          }))
+        }
+      />
     </section>
   );
 }

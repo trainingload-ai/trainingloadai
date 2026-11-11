@@ -1890,7 +1890,8 @@
     "moveDown": "Move down",
     "removeChart": "Remove chart",
     "addChart": "Add chart",
-    "expandChart": "Expand {metric}"
+    "expandChart": "Expand {metric}",
+    "addChartDescription": "Choose an available metric for this activity. You can add the same metric more than once."
   },
   "ActivityDetail": {
     "title": "Dettagli dell’attività",

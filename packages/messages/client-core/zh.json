@@ -2127,7 +2127,8 @@
     "moveDown": "下移",
     "removeChart": "删除图表",
     "addChart": "添加图表",
-    "expandChart": "放大{metric}图表"
+    "expandChart": "放大{metric}图表",
+    "addChartDescription": "选择本次活动的可用指标，可重复添加同一指标。"
   },
   "ActivityDetail": {
     "title": "活动详情",
