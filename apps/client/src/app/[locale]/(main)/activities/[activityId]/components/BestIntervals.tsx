@@ -2,7 +2,6 @@
 
 import type { ActivityPeakMetric } from "@/api/activities";
 import { useState, useEffect, useMemo } from "react";
-import { Columns3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getBrowserLocalStorage } from "@/lib/browser-storage";
@@ -291,15 +290,22 @@ function BestIntervalTable({
                     {label(column)}
                   </TableHead>
                 ))}
-                <TableHead className="sticky right-0 w-12 bg-card px-2">
+                <TableHead
+                  className="sticky right-0 w-20 px-2"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--muted) 40%, var(--card))",
+                  }}
+                >
                   <Button
                     variant="ghost"
-                    size="icon-compact"
+                    size="compact"
+                    className="text-xs text-muted-foreground hover:text-foreground"
                     aria-label={t("editColumns")}
                     title={t("editColumns")}
                     onClick={() => setEditing(true)}
                   >
-                    <Columns3 />
+                    {t("editColumns")}
                   </Button>
                 </TableHead>
               </TableRow>

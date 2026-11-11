@@ -465,18 +465,58 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     name: "编辑列",
     exact: true,
   });
+  await expect(columnEditor.getByRole("checkbox")).toHaveCount(0);
   await columnEditor
-    .getByRole("checkbox", { name: "平均心率", exact: true })
-    .uncheck();
-  await columnEditor
-    .getByRole("checkbox", { name: "平均功率", exact: true })
-    .check();
-  await columnEditor
-    .getByRole("button", { name: "上移平均功率", exact: true })
+    .getByRole("button", { name: "移除平均心率", exact: true })
     .click();
+  await expect(
+    columnEditor.getByRole("button", { name: "添加平均心率", exact: true }),
+  ).toBeVisible();
   await columnEditor
-    .getByRole("button", { name: "上移平均功率", exact: true })
+    .getByRole("button", { name: "添加平均功率", exact: true })
     .click();
+  const powerHandle = columnEditor.getByRole("button", {
+    name: "拖动平均功率",
+    exact: true,
+  });
+  const source = (await powerHandle.boundingBox())!;
+  const target = (await columnEditor
+    .getByRole("button", { name: "拖动最大心率", exact: true })
+    .boundingBox())!;
+  await page.mouse.move(
+    source.x + source.width / 2,
+    source.y + source.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    source.x + source.width / 2,
+    source.y + source.height / 2 - 8,
+  );
+  await page.mouse.move(
+    target.x + target.width / 2,
+    target.y + target.height / 2,
+    { steps: 10 },
+  );
+  await page.mouse.up();
+  const handles = columnEditor.getByRole("button", { name: /^拖动/ });
+  await expect(handles.nth(4)).toHaveAttribute("aria-label", "拖动平均功率");
+  await expect(powerHandle).not.toHaveAttribute("aria-pressed", "true");
+  await powerHandle.focus();
+  await page.keyboard.press("Space");
+  await expect(powerHandle).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  );
+  const lifted = (await powerHandle.boundingBox())!;
+  await page.keyboard.press("ArrowUp");
+  await expect
+    .poll(async () => (await powerHandle.boundingBox())!.y)
+    .toBeLessThan(lifted.y);
+  await page.keyboard.press("Space");
+  await expect(handles.nth(3)).toHaveAttribute("aria-label", "拖动平均功率");
   await columnEditor.screenshot({
     path: test.info().outputPath("best-efforts-columns.png"),
   });
@@ -506,15 +546,14 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     path: test.info().outputPath("best-efforts-dark.png"),
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  expect(
-    await table.evaluate(
-      (element) =>
-        element.parentElement!.scrollWidth > element.parentElement!.clientWidth,
-    ),
-  ).toBe(true);
-  await best.screenshot({
-    path: test.info().outputPath("best-efforts-mobile.png"),
+  await expect(
+    page.getByRole("heading", { name: activity.activityName, exact: true }),
+  ).toBeVisible();
+  await expect(best).toHaveCount(0);
+  await page.screenshot({
+    path: test.info().outputPath("activity-mobile.png"),
   });
+  await page.setViewportSize({ width: 1440, height: 1100 });
   await page.getByRole("tab", { name: "总览", exact: true }).click();
   await expect(timeline).toHaveCount(0);
   await expect(page.locator(".maplibregl-canvas")).toHaveCount(1);

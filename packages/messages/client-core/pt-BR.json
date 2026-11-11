@@ -1966,9 +1966,7 @@
       "distance": "Distância",
       "effortTime": "Tempo",
       "editColumns": "Edit columns",
-      "columnsDescription": "Choose columns and use the arrows to reorder. Interval statistics use valid sample duration; missing data is not filled with zero.",
-      "moveColumnUp": "Move {column} up",
-      "moveColumnDown": "Move {column} down",
+      "columnsDescription": "Drag a handle to reorder. Add from the right; use the trash button to remove.",
       "restoreColumns": "Reset defaults",
       "cancelColumns": "Cancel",
       "saveColumns": "Apply",
@@ -1976,7 +1974,13 @@
       "averagePace": "Average pace",
       "averageSpeed": "Average speed",
       "timeRange": "Time range",
-      "estimatedPower": "Estimated power"
+      "estimatedPower": "Estimated power",
+      "visibleColumns": "Visible",
+      "availableColumns": "Available",
+      "dragColumn": "Drag {column}",
+      "dragColumnInstructions": "Press Space to pick up, use the arrow keys to reorder, then press Space to drop. Press Escape to cancel.",
+      "removeColumn": "Remove {column}",
+      "addColumn": "Add {column}"
     },
     "activityAnalysis": {
       "title": "Análise da atividade",
