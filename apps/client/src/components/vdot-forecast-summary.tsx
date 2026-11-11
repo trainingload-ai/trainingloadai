@@ -96,10 +96,13 @@ export function VdotForecastSummary({
 
   return (
     <div
-      className="flex flex-col gap-3 text-sm"
+      className="flex flex-col gap-3 text-sm pc:flex-row pc:items-center pc:gap-6"
       data-testid="vdot-forecast-summary"
     >
-      <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
+      <div
+        className="flex flex-wrap items-end gap-x-8 gap-y-3 pc:shrink-0"
+        data-testid="vdot-current-and-forecast"
+      >
         <div className="flex flex-col gap-1">
           <span className="text-xs text-muted-foreground">{t("current")}</span>
           <span className="text-4xl font-bold leading-none tracking-tight text-foreground tabular-nums">
@@ -111,7 +114,10 @@ export function VdotForecastSummary({
         {projection}
       </div>
       {final ? (
-        <div className="flex items-center justify-between gap-4">
+        <div
+          className="flex items-center justify-between gap-4 pc:min-w-0 pc:flex-1"
+          data-testid="vdot-forecast-context"
+        >
           <div className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
             <p className="tabular-nums">
               {t("interval", {
