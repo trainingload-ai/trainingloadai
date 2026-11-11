@@ -26,6 +26,8 @@ export type VdotForecastResult = {
   lastObservationAt: string | null;
   history: VdotForecastWeek[];
   estimatedCurrentLevel: number | null;
+  /** Personal-model daily display curve; weekly summaries remain four weeks. */
+  dailyForecasts?: Array<{ date: string; point: number; lower80: number; upper80: number }>;
   forecasts: Array<{
     week: number;
     startDate: string;

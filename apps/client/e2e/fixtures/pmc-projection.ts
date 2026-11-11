@@ -18,6 +18,7 @@ export function pmcFixture(
   scenario: PmcProjectionScenario = "AUTO",
   historyDays = 60,
   state: "ready" | "partial" | "cold" | "missing" | "empty" = "ready",
+  forecastDays: 28 | 30 = 28,
 ): PmcProjectionResult {
   const today = "2026-11-11";
   const loads = new Map<string, number | null>();
@@ -68,7 +69,7 @@ export function pmcFixture(
       if (point.date === shiftPmcDay(today, -4)) point.load = null;
     }
   }
-  for (let i = 0; i <= 28; i++) {
+  for (let i = 0; i <= forecastDays; i++) {
     const date = shiftPmcDay(today, i);
     const weekday = new Date(date).getUTCDay();
     if (weekday === 2 || weekday === 4 || weekday === 6)
@@ -82,6 +83,7 @@ export function pmcFixture(
   if (state === "empty") plans.clear();
   const result = {
     ...projectPmc({
+      forecastDays,
       today,
       scenario,
       historyStart:
@@ -97,7 +99,7 @@ export function pmcFixture(
     }),
     asOf: "2026-11-11T04:00:00Z",
     today,
-    targetDate: shiftPmcDay(today, 28),
+    targetDate: shiftPmcDay(today, forecastDays),
     timezone: "Asia/Shanghai",
     scope,
     scenario,

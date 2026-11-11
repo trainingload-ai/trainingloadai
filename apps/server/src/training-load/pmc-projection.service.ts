@@ -34,6 +34,7 @@ export interface PmcProjectionOptions {
   scope?: PmcProjectionScope;
   scenario?: PmcProjectionScenario;
   historyDays?: 60 | 90;
+  forecastDays?: 28 | 30;
 }
 
 @Injectable()
@@ -60,7 +61,8 @@ export class PmcProjectionService {
     const today = dayjs(now).tz(timezoneName).format('YYYY-MM-DD');
     const loadStart = shiftPmcDay(today, -90);
     const historyStart = shiftPmcDay(today, -historyDays);
-    const targetDate = shiftPmcDay(today, 28);
+    const forecastDays = options.forecastDays ?? 28;
+    const targetDate = shiftPmcDay(today, forecastDays);
     const sport = scope === 'ALL' ? undefined : SportType[scope];
     const [prior, oldestPmc, rows, workouts] = await Promise.all([
       this.pmc.findMany({
@@ -237,6 +239,7 @@ export class PmcProjectionService {
     }
     const result = {
       ...projectPmc({
+        forecastDays,
         today,
         scenario,
         historyStart: firstRecorded,

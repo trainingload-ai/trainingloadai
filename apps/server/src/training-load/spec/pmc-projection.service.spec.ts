@@ -134,6 +134,22 @@ describe('PMC projection evidence service', () => {
     expect(result.current?.ctl).toBeNull();
     expect(result.forecast.every((point) => point.ctl === null)).toBe(true);
   });
+  it('reads plans through the requested 30th day and computes that final day', async () => {
+    const f = fixture();
+    const result = await f.service.get(
+      'athlete-a',
+      { scenario: 'REST', forecastDays: 30 },
+      new Date('2026-11-10T23:00:00Z'),
+    );
+    expect(result.targetDate).toBe('2026-12-11');
+    expect(result.forecast).toHaveLength(30);
+    expect(f.plans.list).toHaveBeenCalledWith(
+      'athlete-a',
+      new Date('2026-11-11T00:00:00Z'),
+      new Date('2026-12-11T00:00:00Z'),
+      undefined,
+    );
+  });
   it('uses a local calendar date and keeps a stable result reference when only the read timestamp changes', async () => {
     const f = fixture();
     const first = await f.service.get(

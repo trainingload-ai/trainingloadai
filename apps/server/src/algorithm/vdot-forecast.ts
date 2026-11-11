@@ -6,7 +6,7 @@ import type {
 } from '@shared/vdot-forecast';
 
 export const VDOT_FORECAST_VERSION = 'vdot-damped-weekly-v1';
-export const VDOT_PERSONAL_FORECAST_VERSION = 'vdot-personal-weekly-v1';
+export const VDOT_PERSONAL_FORECAST_VERSION = 'vdot-personal-weekly-v2';
 const DAY_MS = 86_400_000;
 
 export type VdotObservation = {
@@ -103,6 +103,7 @@ function advance(state: State, parameters: VdotForecastParameters): State {
 export function predictVdotWeeks(
   weeks: VdotForecastWeek[],
   parameters: VdotForecastParameters,
+  horizonWeeks = 4,
 ) {
   const first = weeks.findIndex((week) => week.value !== null);
   if (first < 0) throw new Error('VDOT_FORECAST_NO_OBSERVATIONS');
@@ -130,7 +131,7 @@ export function predictVdotWeeks(
     };
   }
   const currentLevel = state.level;
-  const predictions = Array.from({ length: 4 }, () => {
+  const predictions = Array.from({ length: horizonWeeks }, () => {
     state = advance(state, parameters);
     return {
       point: state.level,
@@ -207,6 +208,12 @@ function emptyForecast(history: ReturnType<typeof prepareVdotHistory>) {
   return {
     ...history,
     currentLevel: null as number | null,
+    dailyForecasts: [] as Array<{
+      date: string;
+      point: number;
+      lower80: number;
+      upper80: number;
+    }>,
     forecasts: [] as Array<{
       week: number;
       startDate: string;
@@ -223,9 +230,14 @@ function forecastWithParameters(
   cutoffDate: string,
   parameters: VdotForecastParameters,
   intervalScales: number[],
+  dailyHorizon = 0,
 ) {
-  const result = predictVdotWeeks(history.weeks, parameters);
-  const forecasts = result.predictions.map((prediction, index) => {
+  const result = predictVdotWeeks(
+    history.weeks,
+    parameters,
+    Math.max(4, Math.ceil(dailyHorizon / 7)),
+  );
+  const forecasts = result.predictions.slice(0, 4).map((prediction, index) => {
     const width = prediction.standardDeviation * intervalScales[index];
     return {
       week: index + 1,
@@ -236,8 +248,33 @@ function forecastWithParameters(
       upper80: prediction.point + width,
     };
   });
+  // Interpolate model-computed states; the fifth state supports days 29–30.
+  const states = [
+    { point: result.currentLevel, standardDeviation: 0 },
+    ...result.predictions,
+  ];
+  const dailyForecasts = Array.from({ length: dailyHorizon }, (_, index) => {
+    const day = index + 1;
+    const left = Math.floor(day / 7);
+    const fraction = day / 7 - left;
+    const from = states[left],
+      to = states[Math.ceil(day / 7)];
+    const point = from.point + fraction * (to.point - from.point);
+    const width =
+      intervalScales.at(-1)! *
+      Math.sqrt(
+        (1 - fraction) * from.standardDeviation ** 2 +
+          fraction * to.standardDeviation ** 2,
+      );
+    return {
+      date: shiftVdotDate(cutoffDate, day),
+      point,
+      lower80: point - width,
+      upper80: point + width,
+    };
+  });
   if (
-    !forecasts.every(
+    ![...forecasts, ...dailyForecasts].every(
       (point) =>
         [point.point, point.lower80, point.upper80].every(Number.isFinite) &&
         point.point >= 10 &&
@@ -247,7 +284,12 @@ function forecastWithParameters(
   ) {
     return { ...emptyForecast(history), status: 'MODEL_UNAVAILABLE' as const };
   }
-  return { ...history, currentLevel: result.currentLevel, forecasts };
+  return {
+    ...history,
+    currentLevel: result.currentLevel,
+    forecasts,
+    dailyForecasts,
+  };
 }
 
 /** Fit only to this user's comparable, pre-cutoff weekly observations. */
@@ -316,6 +358,7 @@ export function calculatePersonalVdotForecast(
       cutoffDate,
       parameters,
       [1.281552, 1.281552, 1.281552, 1.281552],
+      30,
     ),
     parameters,
   };

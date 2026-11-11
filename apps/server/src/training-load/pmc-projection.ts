@@ -40,6 +40,7 @@ export function advancePmc(ctl: number, atl: number, load: number) {
 }
 
 export interface PmcProjectionInputs {
+  forecastDays?: 28 | 30;
   today: string;
   scenario: PmcProjectionScenario;
   historyStart: string | null;
@@ -64,6 +65,7 @@ export function projectPmc(
   | 'issues'
 > {
   const { today, loads, plans, scenario, historyStart } = input;
+  const forecastDays = input.forecastDays ?? 28;
   const issues = new Set<PmcProjectionIssue>();
   const historyDays = historyStart
     ? Math.max(0, dayDistance(historyStart, today))
@@ -113,7 +115,7 @@ export function projectPmc(
   let todayProjection: PmcProjectionPoint | null = null;
   const forecast: PmcProjectionPoint[] = [];
   // Today is advanced once from yesterday's seed, with completed load replacing linked plans.
-  for (let i = 0; i <= 28; i++) {
+  for (let i = 0; i <= forecastDays; i++) {
     const date = shiftPmcDay(today, i);
     const actual = i === 0 && loads.has(today) ? loads.get(today)! : 0;
     const plan = plans.get(date);
@@ -167,7 +169,7 @@ export function projectPmc(
   const unknownDays = forecast.filter((point) => point.load === null).length;
   return {
     availability:
-      projectedDays === 28
+      projectedDays === forecastDays
         ? 'READY'
         : projectedDays
           ? 'PARTIAL'

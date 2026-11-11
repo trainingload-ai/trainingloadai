@@ -37,6 +37,23 @@ for (const scenario of [
       timezone: "Asia/Shanghai",
       source: "FACTOR",
       modelVersion: "fixture",
+      dailyForecasts:
+        scenario.direction === "unavailable"
+          ? []
+          : Array.from({ length: 30 }, (_, index) => ({
+              date: new Date(Date.UTC(2026, 10, 11 + index))
+                .toISOString()
+                .slice(0, 10),
+              point: 43 + ((index + 1) / 7) * scenario.step,
+              lower80:
+                43 +
+                ((index + 1) / 7) * scenario.step -
+                (0.9 + ((index + 1) / 7) * 0.2),
+              upper80:
+                43 +
+                ((index + 1) / 7) * scenario.step +
+                (0.9 + ((index + 1) / 7) * 0.2),
+            })),
       lastObservationAt: "2026-11-10",
       history: [],
       estimatedCurrentLevel: 43,
@@ -205,7 +222,7 @@ for (const scenario of [
           `四周后预计最大摄氧量 ${scenario.value}, ${scenario.label}`,
         ),
     ).toBeVisible();
-    await expect(page.getByText("所选历史范围 + 未来四周预测")).toBeVisible();
+    await expect(page.getByText("所选历史范围 + 未来 7 天预测")).toBeVisible();
     // Mounting the chart can resize and recenter the dialog. Measure both
     // sections in the same frame, then wait for the responsive layout.
     await expect
@@ -225,7 +242,16 @@ for (const scenario of [
         }, testInfo.project.name === "desktop"),
       )
       .toBe(true);
-    await page.getByRole("tab", { name: "60天", exact: true }).click();
+    const historyChart = page.getByTestId("metric-history-chart-view");
+    for (const [tab, end] of [
+      ["7天", "2026-11-17"],
+      ["14天", "2026-11-24"],
+      ["30天", "2026-12-10"],
+      ["60天", "2026-12-10"],
+    ]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      await expect(historyChart).toHaveAttribute("data-forecast-end", end);
+    }
     await expect(
       page.locator("[data-uplot-chart] canvas").last(),
     ).toBeVisible();

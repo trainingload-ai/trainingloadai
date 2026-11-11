@@ -6384,6 +6384,7 @@
     "coachPrompt": "Explique mon VO2max actuel, son évolution et toute prévision disponible à quatre semaines, puis donne des conseils fondés sur mes entraînements récents.",
     "chartLabel": "VO2max prévu",
     "historyAndForecast": "Historique sélectionné + prévision sur quatre semaines",
+    "historyAndForecastDays": "Historique sélectionné + prévision sur {days} jours",
     "INSUFFICIENT_HISTORY": "Davantage de données de course sont nécessaires pour une prévision sur quatre semaines.",
     "STALE_HISTORY": "De nouvelles données de course actualiseront cette prévision.",
     "INCOMPARABLE_HISTORY": "Davantage de données avec la méthode VO2max actuelle sont nécessaires.",

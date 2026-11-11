@@ -22,6 +22,7 @@ for (const [metric, state] of [
       "AUTO",
       60,
       state === "network" ? "ready" : state,
+      30,
     );
     const title =
       metric === "atl"
@@ -66,6 +67,7 @@ for (const [metric, state] of [
         reads++;
         expect(url.searchParams.get("scope")).toBe("ALL");
         expect(url.searchParams.get("scenario")).toBe("AUTO");
+        expect(url.searchParams.get("forecastDays")).toBe("30");
         if (fail) return route.abort("failed");
         return json(fixture);
       }
@@ -98,6 +100,16 @@ for (const [metric, state] of [
       await expect(panel.locator("canvas")).toHaveCount(1);
       await expect(panel.getByText("预测", { exact: true })).toBeVisible();
       await expect(panel.getByTestId("pmc-metric-switch")).toHaveCount(0);
+      await expect(chart.getByText(title, { exact: true })).toHaveCount(0);
+      for (const [tab, end] of [
+        ["7天", "2026-11-18"],
+        ["14天", "2026-11-25"],
+        ["30天", "2026-12-11"],
+        ["60天", "2026-12-11"],
+      ]) {
+        await panel.getByRole("tab", { name: tab, exact: true }).click();
+        await expect(chart).toHaveAttribute("data-forecast-end", end);
+      }
       await panel.getByRole("tab", { name: "30天", exact: true }).click();
       await expect(
         panel.getByRole("tab", { name: "30天", exact: true }),

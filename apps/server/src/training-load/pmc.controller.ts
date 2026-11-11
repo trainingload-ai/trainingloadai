@@ -51,6 +51,10 @@ class GetPmcProjectionDto {
   @IsOptional()
   @IsIn(['60', '90'])
   historyDays?: string;
+
+  @IsOptional()
+  @IsIn(['28', '30'])
+  forecastDays?: string;
 }
 
 @Controller('pmc')
@@ -77,6 +81,7 @@ export class PMCController {
       scope: query.scope,
       scenario: query.scenario,
       historyDays: query.historyDays === '90' ? 90 : 60,
+      forecastDays: query.forecastDays === '30' ? 30 : 28,
     });
   }
 

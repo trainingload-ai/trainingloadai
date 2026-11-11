@@ -12,13 +12,17 @@ export function usePmcProjection(
   scenario: PmcProjectionScenario,
   historyDays: 60 | 90,
   enabled = true,
+  forecastDays: 28 | 30 = 28,
 ) {
   return useQuery({
     enabled,
-    queryKey: queryKeys.pmc.projection(scope, scenario, historyDays),
+    queryKey: [
+      ...queryKeys.pmc.projection(scope, scenario, historyDays),
+      forecastDays,
+    ],
     queryFn: async () => {
       const result = await apiFetch<PmcProjectionResult>(
-        `/pmc/projection?${new URLSearchParams({ scope, scenario, historyDays: String(historyDays) })}`,
+        `/pmc/projection?${new URLSearchParams({ scope, scenario, historyDays: String(historyDays), forecastDays: String(forecastDays) })}`,
         { suppressErrorToast: true },
       );
       if (!result) throw new Error("PMC_PROJECTION_UNAVAILABLE");

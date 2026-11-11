@@ -21,6 +21,7 @@ import { MetricHistoryRangeTabs } from "./MetricHistoryRangeTabs";
 import { formatMetricRangeLabel } from "./metric-history-chart-view-model";
 import type { MetricHistoryPanelProps } from "./MetricHistoryDialog";
 import type { RangeDays } from "./metric-history-chart-types";
+import { metricForecastEnd } from "@/lib/metric-forecast-window";
 
 const Chart = dynamic(
   () => import("@/components/charts/pmc/PMCProjectionChart"),
@@ -54,11 +55,19 @@ export function PmcMetricHistoryPanel({
   )
     ? (selectedSport as PmcProjectionScope)
     : "ALL";
-  const query = usePmcProjection(scope, "AUTO", 60, enabled);
+  const query = usePmcProjection(scope, "AUTO", 60, enabled, 30);
   const result = useMemo(
     () =>
       query.data
-        ? { ...query.data, history: query.data.history.slice(-Number(range)) }
+        ? {
+            ...query.data,
+            targetDate: metricForecastEnd(query.data.today, range),
+            history: query.data.history.slice(-Number(range)),
+            forecast: query.data.forecast.filter(
+              (point) =>
+                point.date <= metricForecastEnd(query.data!.today, range),
+            ),
+          }
         : null,
     [query.data, range],
   );

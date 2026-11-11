@@ -12,12 +12,12 @@ export const PMC_METRIC_TOKENS = {
 } as const;
 
 export const PMC_TSB_ZONES = [
-  { min: -Infinity, max: -30, token: "--red-400" },
-  { min: -30, max: -10, token: "--emerald-500" },
-  { min: -10, max: 5, token: "--slate-300" },
-  { min: 5, max: 15, token: "--sky-500" },
-  { min: 15, max: 25, token: "--violet-500" },
-  { min: 25, max: Infinity, token: "--amber-500" },
+  { min: -Infinity, max: -30, token: "--red-400", label: "highRisk" },
+  { min: -30, max: -10, token: "--emerald-500", label: "optimal" },
+  { min: -10, max: 5, token: "--slate-300", label: "neutral" },
+  { min: 5, max: 15, token: "--sky-500", label: "fresh" },
+  { min: 15, max: 25, token: "--violet-500", label: "peak" },
+  { min: 25, max: Infinity, token: "--amber-500", label: "transition" },
 ] as const;
 
 export function pmcAccentToken(metric: PmcMetric, value?: number | null) {

@@ -7040,6 +7040,7 @@
     "coachPrompt": "帮我解读最大摄氧量的当前水平、历史变化和可用的四周预测，并结合近期训练给出建议。",
     "chartLabel": "预计最大摄氧量",
     "historyAndForecast": "所选历史范围 + 未来四周预测",
+    "historyAndForecastDays": "所选历史范围 + 未来 {days} 天预测",
     "INSUFFICIENT_HISTORY": "积累更多跑步记录后，可查看四周预测。",
     "STALE_HISTORY": "有新的跑步记录后更新预测。",
     "INCOMPARABLE_HISTORY": "指标计算方式变更，积累新记录后更新预测。",

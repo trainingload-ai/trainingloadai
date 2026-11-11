@@ -6384,6 +6384,7 @@
     "coachPrompt": "Erkläre meinen aktuellen VO2max, seine bisherige Entwicklung und eine gegebenenfalls verfügbare Vier-Wochen-Prognose. Gib mir darauf und auf meinem jüngsten Training basierende Empfehlungen.",
     "chartLabel": "VO2max-Prognose",
     "historyAndForecast": "Ausgewählter Verlauf + Vier-Wochen-Prognose",
+    "historyAndForecastDays": "Ausgewählter Verlauf + {days}-Tage-Prognose",
     "INSUFFICIENT_HISTORY": "Für eine Vier-Wochen-Prognose sind weitere Laufdaten nötig.",
     "STALE_HISTORY": "Neue Laufdaten aktualisieren diese Prognose.",
     "INCOMPARABLE_HISTORY": "Weitere Daten mit der aktuellen VO2max-Methode sind nötig.",

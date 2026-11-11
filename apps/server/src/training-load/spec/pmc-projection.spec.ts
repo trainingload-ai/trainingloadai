@@ -55,6 +55,21 @@ describe('conditional PMC projection', () => {
       result.forecast.every((point) => point.tsb === point.ctl! - point.atl!),
     ).toBe(true);
   });
+  it('computes days 29 and 30 when a detail dialog requests a month', () => {
+    const result = projectPmc(input({ scenario: 'REST', forecastDays: 30 }));
+    const start = advancePmc(45, 50, 20);
+    expect(result.forecast).toHaveLength(30);
+    expect(result.availability).toBe('READY');
+    expect(result.forecast.at(-1)?.date).toBe('2026-12-11');
+    expect(result.forecast.at(-1)?.ctl).toBeCloseTo(
+      start.ctl * Math.exp(-30 / 42),
+      12,
+    );
+    expect(result.forecast.at(-1)?.atl).toBeCloseTo(
+      start.atl * Math.exp(-30 / 7),
+      12,
+    );
+  });
   it('overrides, rather than adds, habit load on a scheduled day and preserves explicit zero', () => {
     const result = projectPmc(
       input({

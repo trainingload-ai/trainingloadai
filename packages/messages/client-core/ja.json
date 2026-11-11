@@ -6383,6 +6383,7 @@
     "coachPrompt": "現在の最大酸素摂取量とこれまでの変化、利用可能な4週間の予測を解説し、最近のトレーニングを踏まえてアドバイスしてください。",
     "chartLabel": "最大酸素摂取量 予測",
     "historyAndForecast": "選択した履歴 + 今後4週間の予測",
+    "historyAndForecastDays": "選択した履歴 + {days}日間の予測",
     "INSUFFICIENT_HISTORY": "4週間の予測には、さらにランニング記録が必要です。",
     "STALE_HISTORY": "新しいランニング記録で予測が更新されます。",
     "INCOMPARABLE_HISTORY": "現在の 最大酸素摂取量 算出方法での記録がさらに必要です。",

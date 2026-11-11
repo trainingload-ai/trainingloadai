@@ -6383,6 +6383,7 @@
     "coachPrompt": "현재 최대산소섭취량과 과거 변화, 이용 가능한 4주 예측을 설명하고 최근 훈련을 바탕으로 조언해 주세요.",
     "chartLabel": "최대산소섭취량 예측",
     "historyAndForecast": "선택한 기록 + 향후 4주 예측",
+    "historyAndForecastDays": "선택한 과거 기록 + {days}일 예측",
     "INSUFFICIENT_HISTORY": "4주 예측을 위해 더 많은 러닝 기록이 필요합니다.",
     "STALE_HISTORY": "새 러닝 기록이 추가되면 예측이 업데이트됩니다.",
     "INCOMPARABLE_HISTORY": "현재 최대산소섭취량 산출 방식으로 계산된 기록이 더 필요합니다.",

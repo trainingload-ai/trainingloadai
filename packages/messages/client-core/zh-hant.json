@@ -6481,6 +6481,7 @@
     "coachPrompt": "幫我解讀最大攝氧量的目前水準、歷史變化和可用的四週預測，並結合近期訓練提供建議。",
     "chartLabel": "預計最大攝氧量",
     "historyAndForecast": "所選歷史範圍 + 未來四週預測",
+    "historyAndForecastDays": "所選歷史範圍 + 未來 {days} 天預測",
     "INSUFFICIENT_HISTORY": "累積更多跑步紀錄後，可查看四週預測。",
     "STALE_HISTORY": "有新的跑步紀錄後更新預測。",
     "INCOMPARABLE_HISTORY": "指標計算方式變更，累積新記錄後更新預測。",

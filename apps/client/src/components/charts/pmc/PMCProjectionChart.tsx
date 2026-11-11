@@ -38,6 +38,7 @@ export default function PMCProjectionChart({
   tools?: React.ReactNode;
 }) {
   const t = useTranslations("PmcProjection");
+  const zoneText = useTranslations("dashboard.fitnessStatus.tsb.status");
   const format = useFormatter();
   const color = useThemeColor();
   const syncKey = useId();
@@ -212,6 +213,19 @@ export default function PMCProjectionChart({
                   ctx.globalAlpha = 0.065;
                   ctx.fillStyle = color(zone.token);
                   ctx.fillRect(bbox.left, top, bbox.width, bottom - top);
+                  const ratio = window.devicePixelRatio || 1;
+                  if (bottom - top >= 18 * ratio) {
+                    ctx.globalAlpha = 1;
+                    ctx.font = `${11 * ratio}px sans-serif`;
+                    ctx.textAlign = "right";
+                    ctx.textBaseline = "top";
+                    ctx.fillStyle = color("--muted-foreground");
+                    ctx.fillText(
+                      zoneText(zone.label),
+                      bbox.left + bbox.width - 8 * ratio,
+                      top + 4 * ratio,
+                    );
+                  }
                 }
               }
               ctx.globalAlpha = 1;
@@ -252,7 +266,18 @@ export default function PMCProjectionChart({
         },
       };
     },
-    [color, data, result.today, points, syncKey, focus, format, t, showLoad],
+    [
+      color,
+      data,
+      result.today,
+      points,
+      syncKey,
+      focus,
+      format,
+      t,
+      zoneText,
+      showLoad,
+    ],
   );
   const mainOptions = useMemo(
     () => options(main.size.width, main.size.height, "main"),
@@ -269,6 +294,7 @@ export default function PMCProjectionChart({
       aria-label={t("chartTitle")}
       data-testid="pmc-projection-chart"
       data-metric={focus}
+      data-forecast-end={points.at(-1)?.date}
     >
       {!compact || tools || refreshError ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -320,15 +346,17 @@ export default function PMCProjectionChart({
         </div>
       ) : null}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-        <span className="flex items-center gap-2">
-          <span
-            className="w-4 border-t-2"
-            style={{
-              borderColor: color(PMC_METRIC_TOKENS[focus]),
-            }}
-          />
-          {t(`metrics.${focus}`)}
-        </span>
+        {!compact ? (
+          <span className="flex items-center gap-2">
+            <span
+              className="w-4 border-t-2"
+              style={{
+                borderColor: color(PMC_METRIC_TOKENS[focus]),
+              }}
+            />
+            {t(`metrics.${focus}`)}
+          </span>
+        ) : null}
         <span className="ml-auto flex items-center gap-2">
           <span className="w-4 border-t border-current" />
           {t("actual")}
@@ -342,7 +370,7 @@ export default function PMCProjectionChart({
         className="relative overflow-hidden rounded-surface bg-neutral-50/80 dark:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         tabIndex={0}
         role="group"
-        aria-label={`${t("chartTitle")}. ${t("keyboardHint")}`}
+        aria-label={`${t("chartTitle")}. ${t("keyboardHint")}${focus === "tsb" ? `. ${PMC_TSB_ZONES.map((zone) => zoneText(zone.label)).join("; ")}` : ""}`}
         onFocus={() => setTooltipVisible(true)}
         onBlur={() => {
           touchTooltip.current = false;
