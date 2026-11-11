@@ -231,7 +231,7 @@
         "bodyWeightUpdate": "Registrar peso corporal",
         "trainingDataCoverage": "Cobertura de datos",
         "coachTaskResult": "Resultado de tarea",
-        "metricForecast": "Consultar predicción de VDOT a cuatro semanas"
+        "metricForecast": "Consultar predicción de VO2max a cuatro semanas"
       },
       "skills": {
         "integrationSupport": "Conexión y sincronización",
@@ -810,7 +810,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "Cycling speed depends on terrain, wind and resistance; it is not a physiological threshold.",
         "HR_WINDOW_AVERAGE": "No 1-second peak; reports the maximum of available window-average heart rates.",
         "TP_EMPIRICAL_OFFSET": "Existing 5K pace +20 s/km heuristic; maximal effort is not verified.",
-        "VDOT_NOT_LAB_VO2MAX": "VDOT estimated from running distance and time; ordinary training may underestimate capacity.",
+        "VDOT_NOT_LAB_VO2MAX": "VO2max reference estimated from running distance and time; ordinary training may underestimate capacity. This differs from laboratory measurement.",
         "DERIVED_ACTIVITY_ESTIMATES": "Re-aggregates activity estimates using current source preference and correction; raw running signals were not reprocessed.",
         "DAILY_HEALTH_MEDIAN": "Median of selected daily resting-HR records; activity minimum HR is not a substitute.",
         "OBSERVED_HR_NOT_MAXIMUM": "An observed peak is not physiological maximum HR and may include sensor error.",
@@ -828,8 +828,8 @@
         "running-extended-cp": "Running extended CP (estimate)",
         "critical-speed": "Multi-activity distance-time fit (estimate)",
         "running-5k-threshold-pace": "5K threshold pace mapping (estimate)",
-        "running-performance-vdot": "Running performance VDOT (estimate)",
-        "running-effective-vo2max": "Activity VDOT weighted estimate",
+        "running-performance-vdot": "Running performance VO2max (estimate)",
+        "running-effective-vo2max": "Activity VO2max weighted estimate",
         "observed-max-hr": "Observed activity heart-rate peak",
         "daily-resting-hr": "Daily resting heart-rate median (estimate)",
         "aerobic-threshold-unavailable": "Aerobic threshold: no validated method"
@@ -1663,7 +1663,7 @@
         "invalid": "Introduce un número mayor que 0 y no superior a 1,20"
       },
       "defaultVdotSource": {
-        "label": "Fuente VDOT predeterminada",
+        "label": "Fuente VO2max predeterminada",
         "placeholder": "Seleccionar fuente",
         "description": "Elige el VO₂max corregido o el rendimiento en carrera como fuente preferida. Las estimaciones brutas de frecuencia cardíaca siempre se corrigen con el factor personal antes de usarse.",
         "options": {
@@ -2881,11 +2881,11 @@
           "useContent": "Para la población general, el VO2 máx oscila entre 30 y 40 ml/kg/min. Los deportistas de resistencia de élite pueden superar los 70-80. Naturalmente disminuye con la edad, pero puede mejorarse con entrenamiento.",
           "reference": "Referencia",
           "referenceContent": "Promedio(30-40), Excelente(>50), Elite(>70)",
-          "source": "Fuente: Jack Daniels VDOT / Firstbeat",
+          "source": "Fuente: Jack Daniels VO2max / Firstbeat",
           "algorithm": {
-            "title": "El algoritmo se basa en la teoría VDOT de Jack Daniels y utiliza dos métodos de cálculo:",
+            "title": "El algoritmo se basa en la teoría VO2max de Jack Daniels y utiliza dos métodos de cálculo:",
             "standardTitle": "Modo estándar:",
-            "standardContent": "Mapea directamente los valores VDOT del mejor rendimiento en carrera como referencia de VO2max.",
+            "standardContent": "Mapea directamente los valores VO2max del mejor rendimiento en carrera como referencia de VO2max.",
             "heartRateTitle": "Modo de frecuencia cardíaca:",
             "heartRateContent": "Hace referencia al modelo Firstbeat, que estima el porcentaje actual de consumo de oxígeno a través del porcentaje de frecuencia cardíaca (% FCmáx) y luego lo combina con el ritmo para obtener el VO2máx.",
             "note": "Nota: La estimación de la frecuencia cardíaca depende de la temperatura ambiental, el terreno y la condición física. Se recomienda centrarse en tendencias a largo plazo en lugar de valores únicos."
@@ -3854,7 +3854,7 @@
     "inputRequired": "Aún no hay disponible una referencia de capacidad de carrera compatible.",
     "notReady": "Este plan necesita un ajuste antes de poder generarse.",
     "buildBlocked": "Resuelve los puntos anteriores antes de generar el plan.",
-    "capabilityRequired": "Completa una actividad de carrera adecuada; el sistema usará automáticamente una carrera reciente, el VO₂máx/VDOT, el ritmo de umbral o la velocidad crítica.",
+    "capabilityRequired": "Completa una actividad de carrera adecuada; el sistema usará automáticamente una carrera reciente, el VO₂máx/VO2max, el ritmo de umbral o la velocidad crítica.",
     "tenKBase": "Tu carrera continua más larga es de {actual} min; alcanza primero {required} min o registra un 5K reciente.",
     "halfMarathonBase": "Tu carrera más larga registrada es de {actual} km. Considera alcanzar {required} km antes de empezar un plan de media maratón.",
     "marathonLongRun": "Tu carrera más larga registrada es de {actual} km. Considera alcanzar {required} km antes de empezar un plan de maratón.",
@@ -6375,19 +6375,19 @@
     "appName": "Trainingload.ai Personal"
   },
   "VdotForecast": {
-    "expected": "VDOT estimado en cuatro semanas: {value}",
+    "expected": "VO2max estimado en cuatro semanas: {value}",
     "interval": "Intervalo de predicción del 80%: {lower}–{upper}",
-    "basis": "Basado en el VDOT histórico hasta el {date}.",
+    "basis": "Basado en el VO2max histórico hasta el {date}.",
     "askCoach": "Preguntar al entrenador",
-    "coachPrompt": "Explícame mi predicción de VDOT a cuatro semanas, incluido el valor estimado y el intervalo de predicción.",
-    "chartLabel": "VDOT previsto",
+    "coachPrompt": "Explícame mi VO2max actual, su evolución y cualquier predicción disponible a cuatro semanas, y dame recomendaciones basadas en mis entrenamientos recientes.",
+    "chartLabel": "VO2max previsto",
     "historyAndForecast": "Historial seleccionado + predicción a cuatro semanas",
     "INSUFFICIENT_HISTORY": "Se necesitan más registros de carrera para predecir cuatro semanas.",
     "STALE_HISTORY": "Los nuevos registros de carrera actualizarán esta predicción.",
-    "INCOMPARABLE_HISTORY": "Se necesitan más registros con el método VDOT actual.",
+    "INCOMPARABLE_HISTORY": "Se necesitan más registros con el método VO2max actual.",
     "MODEL_UNAVAILABLE": "La predicción no está disponible en este momento.",
     "currentEstimate": "Estimación actual",
-    "current": "VDOT actual",
+    "current": "VO2max actual",
     "inFourWeeks": "Estimado en cuatro semanas",
     "higher": "Se prevé un aumento respecto al actual",
     "lower": "Se prevé un descenso respecto al actual",

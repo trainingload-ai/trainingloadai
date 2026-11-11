@@ -4,8 +4,9 @@ import { openCoachFixture } from "./fixtures/coach-page";
 for (const scenario of [
   { direction: "up", step: 0.275, value: "44.1", label: "预计高于当前" },
   { direction: "down", step: -0.275, value: "41.9", label: "预计低于当前" },
+  { direction: "unavailable", step: 0, value: "", label: "" },
 ]) {
-  test(`home VDOT ${scenario.direction} card and detail share the four-week value`, async ({
+  test(`home VO2max ${scenario.direction} card and detail share the four-week value`, async ({
     page,
   }, testInfo) => {
     const errors: string[] = [];
@@ -29,7 +30,8 @@ for (const scenario of [
     }));
     const forecast = {
       forecastId: "visual-fixture",
-      status: "READY",
+      status:
+        scenario.direction === "unavailable" ? "INSUFFICIENT_HISTORY" : "READY",
       cutoffDate: "2026-11-10",
       asOf: "2026-11-11T03:00:00Z",
       timezone: "Asia/Shanghai",
@@ -38,18 +40,23 @@ for (const scenario of [
       lastObservationAt: "2026-11-10",
       history: [],
       estimatedCurrentLevel: 43,
-      forecasts: Array.from({ length: 4 }, (_, index) => ({
-        week: index + 1,
-        startDate: new Date(Date.UTC(2026, 10, 11 + index * 7))
-          .toISOString()
-          .slice(0, 10),
-        endDate: new Date(Date.UTC(2026, 10, 17 + index * 7))
-          .toISOString()
-          .slice(0, 10),
-        point: 43 + (index + 1) * scenario.step,
-        lower80: 43 + (index + 1) * scenario.step - (0.9 + (index + 1) * 0.2),
-        upper80: 43 + (index + 1) * scenario.step + (0.9 + (index + 1) * 0.2),
-      })),
+      forecasts:
+        scenario.direction === "unavailable"
+          ? []
+          : Array.from({ length: 4 }, (_, index) => ({
+              week: index + 1,
+              startDate: new Date(Date.UTC(2026, 10, 11 + index * 7))
+                .toISOString()
+                .slice(0, 10),
+              endDate: new Date(Date.UTC(2026, 10, 17 + index * 7))
+                .toISOString()
+                .slice(0, 10),
+              point: 43 + (index + 1) * scenario.step,
+              lower80:
+                43 + (index + 1) * scenario.step - (0.9 + (index + 1) * 0.2),
+              upper80:
+                43 + (index + 1) * scenario.step + (0.9 + (index + 1) * 0.2),
+            })),
     };
     await page.route("**/*", async (route) => {
       const url = new URL(route.request().url());
@@ -122,8 +129,43 @@ for (const scenario of [
         .scrollIntoViewIfNeeded();
     }
     const card = page.locator('[data-metric="vo2Max"]').first();
+    if (scenario.direction === "unavailable") {
+      await expect(
+        card.getByText("积累更多跑步记录后，可查看四周预测。", { exact: true }),
+      ).toBeVisible();
+      await card.screenshot({
+        path: testInfo.outputPath("oxygen-unavailable-card.png"),
+        animations: "disabled",
+        scale: "css",
+      });
+      await card.click();
+      const summary = page.getByTestId("vdot-forecast-summary");
+      await expect(
+        summary.getByText("当前最大摄氧量", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        summary.getByText("积累更多跑步记录后，可查看四周预测。", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(summary).not.toContainText("VDOT");
+      await summary.screenshot({
+        path: testInfo.outputPath("oxygen-unavailable-summary.png"),
+        animations: "disabled",
+        scale: "css",
+      });
+      await page.getByRole("link", { name: "问教练", exact: true }).click();
+      await expect(page.getByRole("textbox")).toHaveValue(
+        "帮我解读最大摄氧量的当前水平、历史变化和可用的四周预测，并结合近期训练给出建议。",
+      );
+      expect(
+        await page.evaluate(() => window.coachStreamFixture.requests),
+      ).toBe(0);
+      expect(errors).toEqual([]);
+      return;
+    }
     const prediction = card.getByLabel(
-      `四周后预计 VDOT ${scenario.value}, ${scenario.label}`,
+      `四周后预计最大摄氧量 ${scenario.value}, ${scenario.label}`,
     );
     await expect(prediction).toBeVisible();
     await card.scrollIntoViewIfNeeded();
@@ -148,6 +190,9 @@ for (const scenario of [
     );
     await prediction.click();
     await expect(page.getByTestId("vdot-forecast-summary")).toBeVisible();
+    await expect(page.getByTestId("vdot-forecast-summary")).not.toContainText(
+      "VDOT",
+    );
     await expect(
       page
         .getByTestId("vdot-forecast-summary")
@@ -156,7 +201,9 @@ for (const scenario of [
     await expect(
       page
         .getByTestId("vdot-forecast-summary")
-        .getByLabel(`四周后预计 VDOT ${scenario.value}, ${scenario.label}`),
+        .getByLabel(
+          `四周后预计最大摄氧量 ${scenario.value}, ${scenario.label}`,
+        ),
     ).toBeVisible();
     await expect(page.getByText("所选历史范围 + 未来四周预测")).toBeVisible();
     const valuesBox = await page
@@ -183,13 +230,11 @@ for (const scenario of [
     await expect(
       page.locator("[data-uplot-chart] canvas").last(),
     ).toBeVisible();
-    await page
-      .getByTestId("vdot-forecast-summary")
-      .screenshot({
-        path: testInfo.outputPath("vdot-summary-light.png"),
-        animations: "disabled",
-        scale: "css",
-      });
+    await page.getByTestId("vdot-forecast-summary").screenshot({
+      path: testInfo.outputPath("vdot-summary-light.png"),
+      animations: "disabled",
+      scale: "css",
+    });
     await page.screenshot({
       path: testInfo.outputPath("vdot-detail-light.png"),
       fullPage: true,
@@ -198,13 +243,11 @@ for (const scenario of [
     await page.evaluate(() => {
       document.documentElement.classList.add("dark");
     });
-    await page
-      .getByTestId("vdot-forecast-summary")
-      .screenshot({
-        path: testInfo.outputPath("vdot-summary-dark.png"),
-        animations: "disabled",
-        scale: "css",
-      });
+    await page.getByTestId("vdot-forecast-summary").screenshot({
+      path: testInfo.outputPath("vdot-summary-dark.png"),
+      animations: "disabled",
+      scale: "css",
+    });
     await page.screenshot({
       path: testInfo.outputPath("vdot-detail-dark.png"),
       fullPage: true,
@@ -212,7 +255,7 @@ for (const scenario of [
     });
     await page.getByRole("link", { name: "问教练", exact: true }).click();
     await expect(page.getByRole("textbox")).toHaveValue(
-      "帮我解读四周 VDOT 预测，包括预计水平和预测区间。",
+      "帮我解读最大摄氧量的当前水平、历史变化和可用的四周预测，并结合近期训练给出建议。",
     );
     expect(await page.evaluate(() => window.coachStreamFixture.requests)).toBe(
       0,

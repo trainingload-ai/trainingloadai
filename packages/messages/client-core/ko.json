@@ -236,7 +236,7 @@
         "bodyWeightUpdate": "체중 기록",
         "trainingDataCoverage": "훈련 데이터 범위",
         "coachTaskResult": "백그라운드 작업 결과",
-        "metricForecast": "4주 VDOT 예측 조회"
+        "metricForecast": "4주 최대산소섭취량 예측 조회"
       },
       "skills": {
         "integrationSupport": "기기 연결 및 동기화",
@@ -810,7 +810,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "Cycling speed depends on terrain, wind and resistance; it is not a physiological threshold.",
         "HR_WINDOW_AVERAGE": "No 1-second peak; reports the maximum of available window-average heart rates.",
         "TP_EMPIRICAL_OFFSET": "Existing 5K pace +20 s/km heuristic; maximal effort is not verified.",
-        "VDOT_NOT_LAB_VO2MAX": "VDOT estimated from running distance and time; ordinary training may underestimate capacity.",
+        "VDOT_NOT_LAB_VO2MAX": "VO2max reference estimated from running distance and time; ordinary training may underestimate capacity. This differs from laboratory measurement.",
         "DERIVED_ACTIVITY_ESTIMATES": "Re-aggregates activity estimates using current source preference and correction; raw running signals were not reprocessed.",
         "DAILY_HEALTH_MEDIAN": "Median of selected daily resting-HR records; activity minimum HR is not a substitute.",
         "OBSERVED_HR_NOT_MAXIMUM": "An observed peak is not physiological maximum HR and may include sensor error.",
@@ -828,8 +828,8 @@
         "running-extended-cp": "Running extended CP (estimate)",
         "critical-speed": "Multi-activity distance-time fit (estimate)",
         "running-5k-threshold-pace": "5K threshold pace mapping (estimate)",
-        "running-performance-vdot": "Running performance VDOT (estimate)",
-        "running-effective-vo2max": "Activity VDOT weighted estimate",
+        "running-performance-vdot": "Running performance VO2max (estimate)",
+        "running-effective-vo2max": "Activity VO2max weighted estimate",
         "observed-max-hr": "Observed activity heart-rate peak",
         "daily-resting-hr": "Daily resting heart-rate median (estimate)",
         "aerobic-threshold-unavailable": "Aerobic threshold: no validated method"
@@ -1662,7 +1662,7 @@
         "invalid": "0보다 크고 1.20 이하인 숫자를 입력하세요"
       },
       "defaultVdotSource": {
-        "label": "기본 VDOT 소스",
+        "label": "기본 최대산소섭취량 소스",
         "placeholder": "소스 선택",
         "description": "보정 VO₂max 또는 레이스 성과를 우선 소스로 선택합니다. 원시 심박수 추정치는 항상 개인 보정 계수를 적용한 뒤 사용됩니다.",
         "options": {
@@ -2880,11 +2880,11 @@
           "useContent": "일반 인구의 경우 최대 VO2 범위는 30~40ml/kg/min입니다. 엘리트 지구력 운동선수는 70-80을 초과할 수 있습니다. 나이가 들면서 자연스럽게 감소하지만 훈련을 통해 개선될 수 있습니다.",
           "reference": "참조",
           "referenceContent": "보통(30-40), 우수(>50), 엘리트(>70)",
-          "source": "출처: Jack Daniels VDOT / Firstbeat",
+          "source": "출처: Jack Daniels 최대산소섭취량 / Firstbeat",
           "algorithm": {
-            "title": "이 알고리즘은 Jack Daniels의 VDOT 이론을 기반으로 하며 다음 두 가지 계산 방법을 사용합니다.",
+            "title": "이 알고리즘은 Jack Daniels의 최대산소섭취량 이론을 기반으로 하며 다음 두 가지 계산 방법을 사용합니다.",
             "standardTitle": "표준 모드:",
-            "standardContent": "최고 실행 성능의 VDOT 값을 VO2max 기준으로 직접 매핑합니다.",
+            "standardContent": "최고 실행 성능의 최대산소섭취량 값을 VO2max 기준으로 직접 매핑합니다.",
             "heartRateTitle": "심박수 모드:",
             "heartRateContent": "Firstbeat 모델을 참조하여 심박수 백분율(%HRmax)을 통해 현재 산소 섭취량 백분율을 추정한 다음 속도와 결합하여 VO2max를 도출합니다.",
             "note": "참고: 심박수 추정은 환경 온도, 지형, 신체 상태에 따라 달라질 수 있습니다. 단일 값보다는 장기적인 추세에 초점을 맞추는 것이 좋습니다."
@@ -3853,7 +3853,7 @@
     "inputRequired": "지원되는 러닝 능력 기준값이 아직 없습니다.",
     "notReady": "이 계획은 생성하기 전에 설정을 조정해야 합니다.",
     "buildBlocked": "위 항목을 해결한 후 계획을 생성하세요.",
-    "capabilityRequired": "적합한 러닝 활동을 완료하면 시스템이 최근 레이스, VO₂max/VDOT, 역치 페이스 또는 임계 속도를 자동으로 사용합니다.",
+    "capabilityRequired": "적합한 러닝 활동을 완료하면 시스템이 최근 레이스, VO₂max/최대산소섭취량, 역치 페이스 또는 임계 속도를 자동으로 사용합니다.",
     "tenKBase": "최장 연속 러닝은 {actual}분입니다. 먼저 {required}분에 도달하거나 최근 5km 기록을 남기세요.",
     "halfMarathonBase": "기록된 최장 러닝은 {actual}km입니다. 하프 마라톤 계획 전에 {required}km 달성을 고려하세요.",
     "marathonLongRun": "기록된 최장 러닝은 {actual}km입니다. 마라톤 계획 전에 {required}km 달성을 고려하세요.",
@@ -6374,19 +6374,19 @@
     "appName": "Trainingload.ai Personal"
   },
   "VdotForecast": {
-    "expected": "4주 후 예상 VDOT {value}",
+    "expected": "4주 후 예상 최대산소섭취량 {value}",
     "interval": "80% 예측 구간 {lower}–{upper}",
-    "basis": "{date}까지의 VDOT 기록을 기반으로 추정했습니다.",
+    "basis": "{date}까지의 최대산소섭취량 기록을 기반으로 추정했습니다.",
     "askCoach": "코치에게 질문",
-    "coachPrompt": "4주 VDOT 예측의 예상 값과 예측 구간을 설명해 주세요.",
-    "chartLabel": "VDOT 예측",
+    "coachPrompt": "현재 최대산소섭취량과 과거 변화, 이용 가능한 4주 예측을 설명하고 최근 훈련을 바탕으로 조언해 주세요.",
+    "chartLabel": "최대산소섭취량 예측",
     "historyAndForecast": "선택한 기록 + 향후 4주 예측",
     "INSUFFICIENT_HISTORY": "4주 예측을 위해 더 많은 러닝 기록이 필요합니다.",
     "STALE_HISTORY": "새 러닝 기록이 추가되면 예측이 업데이트됩니다.",
-    "INCOMPARABLE_HISTORY": "현재 VDOT 산출 방식으로 계산된 기록이 더 필요합니다.",
+    "INCOMPARABLE_HISTORY": "현재 최대산소섭취량 산출 방식으로 계산된 기록이 더 필요합니다.",
     "MODEL_UNAVAILABLE": "현재 예측을 사용할 수 없습니다.",
     "currentEstimate": "현재 추정치",
-    "current": "현재 VDOT",
+    "current": "현재 최대산소섭취량",
     "inFourWeeks": "4주 후 예상",
     "higher": "현재보다 상승 예상",
     "lower": "현재보다 하락 예상",

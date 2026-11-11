@@ -51,10 +51,14 @@ export function CoachComposer({
   const searchParams = useSearchParams();
   const forecastText = useTranslations("VdotForecast");
   useEffect(() => {
-    if (searchParams?.get("vdotQuestion") !== "1") return;
+    const metricInquiry =
+      searchParams?.get("metricQuestion") === "vo2Max" ||
+      searchParams?.get("vdotQuestion") === "1";
+    if (!metricInquiry) return;
     setDraft((previous) => previous || forecastText("coachPrompt"));
     const next = new URL(window.location.href);
     next.searchParams.delete("vdotQuestion");
+    next.searchParams.delete("metricQuestion");
     window.history.replaceState(
       window.history.state,
       "",

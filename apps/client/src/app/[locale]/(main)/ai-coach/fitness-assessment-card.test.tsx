@@ -154,7 +154,7 @@ describe("generic fitness result presentation", () => {
       render(<FitnessAssessmentCard input={r} onAction={() => {}} />);
       expect(
         screen.getByText(
-          `${metric === "VO2_MAX" ? "VDOT" : metric}: — → ${value} ${unit}`,
+          `${metric === "VO2_MAX" ? "最大摄氧量" : metric}: — → ${value} ${unit}`,
         ),
       ).toBeInTheDocument();
       expect(
@@ -262,7 +262,7 @@ describe("fitness translations and legacy VDOT", () => {
     ];
     r.applyOptions[0].changes = r.candidates;
     render(<FitnessAssessmentCard input={r} onAction={() => {}} />);
-    expect(screen.getByText("VDOT: 48 → 50 index")).toBeInTheDocument();
+    expect(screen.getByText("最大摄氧量: 48 → 50 index")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "确认采用" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重新评估" })).toBeEnabled();
   });

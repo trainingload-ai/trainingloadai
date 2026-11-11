@@ -15,9 +15,9 @@ export const metricForecastTool: AiToolDef<
 > = buildAiTool({
   name: 'metric.forecast',
   description:
-    "Read the signed-in runner's four-week VDOT forecast. Use for future VO2max/VDOT, next month, expected improvement or decline. Returns the same forecast as the home card, including weekly estimates, calibrated 80% intervals, cutoff and evidence coverage. Explain returned numbers and status. The model uses historical VDOT only. Training changes require a different model. An unavailable result has no numerical forecast.",
+    "Read the signed-in runner's four-week VO2max forecast. The athlete-facing product name is 最大摄氧量 in Simplified Chinese or VO2max in English. Use for next month or expected improvement/decline. Returns weekly estimates, calibrated 80% intervals, cutoff and evidence coverage from the same service as the home card. A full metric interpretation also needs the authoritative current metric and relevant history. The forecast uses historical metric values only; it cannot quantify proposed training changes. An unavailable result has no numerical forecast.",
   searchHint:
-    'future forecast prediction next month four weeks VO2max VDOT 一个月 四周 预测 提升 趋势',
+    'future forecast prediction next month four weeks VO2max 最大摄氧量 一个月 四周 预测 提升 趋势',
   cost: 'low',
   maxResultChars: 8_000,
   isEnabled: async (ctx) => hasSignedInUser(ctx),

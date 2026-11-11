@@ -33,23 +33,23 @@ function show(compact = false, currentValue = "43") {
   );
 }
 
-describe("VDOT forecast presentation", () => {
+describe("VO2max forecast presentation", () => {
   it("pairs the current value with the same fourth-week forecast on the card and detail", () => {
     forecast();
     const compact = show(true);
     expect(
       screen.getByLabelText(
-        "In four weeks, estimated VDOT 44.2, Expected above current",
+        "In four weeks, estimated VO2max 44.2, Expected above current",
       ),
     ).toHaveClass("text-success");
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
     compact.unmount();
     show();
-    expect(screen.getByText("Current VDOT")).toBeInTheDocument();
+    expect(screen.getByText("Current VO2max")).toBeInTheDocument();
     expect(screen.getByText("43")).toBeInTheDocument();
     expect(
       screen.getByLabelText(
-        "In four weeks, estimated VDOT 44.2, Expected above current",
+        "In four weeks, estimated VO2max 44.2, Expected above current",
       ),
     ).toBeInTheDocument();
     expect(
@@ -57,7 +57,7 @@ describe("VDOT forecast presentation", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ask coach" })).toHaveAttribute(
       "href",
-      "/ai-coach?vdotQuestion=1",
+      "/ai-coach?metricQuestion=vo2Max",
     );
   });
 
@@ -77,7 +77,7 @@ describe("VDOT forecast presentation", () => {
     forecast();
     show(true, "-");
     expect(
-      screen.getByLabelText("In four weeks, estimated VDOT 44.2"),
+      screen.getByLabelText("In four weeks, estimated VO2max 44.2"),
     ).toHaveClass("text-muted-foreground");
   });
 
@@ -96,6 +96,9 @@ describe("VDOT forecast presentation", () => {
     expect(
       screen.queryByText("Expected in four weeks"),
     ).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ask coach" })).toHaveAttribute(
+      "href",
+      "/ai-coach?metricQuestion=vo2Max",
+    );
   });
 });

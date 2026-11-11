@@ -236,7 +236,7 @@
         "bodyWeightUpdate": "記錄體重",
         "trainingDataCoverage": "訓練資料覆蓋",
         "coachTaskResult": "後台任務結果",
-        "metricForecast": "讀取四週 VDOT 預測"
+        "metricForecast": "讀取四週最大攝氧量預測"
       },
       "skills": {
         "integrationSupport": "裝置連接與同步",
@@ -810,7 +810,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "騎行速度受地形、風和阻力影響，不能直接作為生理閾值。",
         "HR_WINDOW_AVERAGE": "缺少 1 秒峰值，顯示的是已有心率窗口均值中的最高值。",
         "TP_EMPIRICAL_OFFSET": "使用 5K 配速加 20 秒/公里的既有經驗公式，未確認全力程度。",
-        "VDOT_NOT_LAB_VO2MAX": "根據跑步距離與時間估算 VDOT；普通訓練可能低估能力。",
+        "VDOT_NOT_LAB_VO2MAX": "根據跑步距離與時間估算最大攝氧量參考值；一般訓練可能低估能力，與實驗室測量存在差異。",
         "DERIVED_ACTIVITY_ESTIMATES": "重新匯總範圍內活動的已有估計，並使用當前來源偏好與修正系數；未重新分析原始跑步信號。",
         "DAILY_HEALTH_MEDIAN": "使用已選健康來源的每日靜息心率中位數；不能從運動中的最低心率代替。",
         "OBSERVED_HR_NOT_MAXIMUM": "實測峰值只能說明此次觀察到的心率，不等於生理最大心率，可能包含設備誤差。",
@@ -828,8 +828,8 @@
         "running-extended-cp": "跑步擴展臨界功率模型（估計）",
         "critical-speed": "多活動距離—時間擬合（估計）",
         "running-5k-threshold-pace": "5K 表現換算閾值配速（估計）",
-        "running-performance-vdot": "跑步表現等效 VDOT（估計）",
-        "running-effective-vo2max": "活動 VDOT 時間加權估計",
+        "running-performance-vdot": "跑步表現等效最大攝氧量（估計）",
+        "running-effective-vo2max": "活動最大攝氧量時間加權估計",
         "observed-max-hr": "活動心率峰值觀察",
         "daily-resting-hr": "每日靜息心率中位數（估計）",
         "aerobic-threshold-unavailable": "有氧閾值：尚無已驗證方法"
@@ -1754,7 +1754,7 @@
         "invalid": "請輸入大於 0 且不超過 1.20 的數字"
       },
       "defaultVdotSource": {
-        "label": "預設 VDOT 來源",
+        "label": "預設最大攝氧量來源",
         "placeholder": "選擇來源",
         "description": "選擇校正後的最大攝氧量或比賽表現作為首選來源。原始心率估算一律先套用個人因子校正。",
         "options": {
@@ -2973,11 +2973,11 @@
           "useContent": "一般人最大攝氧量約 30–40 ml/kg/min，頂尖耐力運動員可超過 70–80。會隨年齡自然下降，但可透過訓練提升。",
           "reference": "參考範圍",
           "referenceContent": "一般（30–40）、優秀（>50）、頂尖（>70）",
-          "source": "來源：Jack Daniels VDOT / Firstbeat",
+          "source": "來源：Jack Daniels 跑步模型 / Firstbeat",
           "algorithm": {
-            "title": "演算法基於 Jack Daniels 嘅 VDOT 理論，分兩種計算方式：",
+            "title": "此演算法根據 Jack Daniels 跑步表現模型，分為兩種計算方式：",
             "standardTitle": "標準模式：",
-            "standardContent": "由最佳跑步成績直接對應 VDOT 值作為最大攝氧量參考。",
+            "standardContent": "根據最佳跑步成績估算最大攝氧量參考值。",
             "heartRateTitle": "心率模式：",
             "heartRateContent": "參考 Firstbeat 模型，透過心率百分比（%HRmax）推算目前攝氧量百分比，再結合配速反推最大攝氧量。",
             "note": "注：心率估算易受環境溫度、地形同身體狀態影響，建議關注長期趨勢而唔係單次數值。"
@@ -3947,7 +3947,7 @@
     "inputRequired": "目前尚無模型支援的跑步能力基準。",
     "notReady": "目前計劃設定需要調整後才能產生。",
     "buildBlocked": "請先處理以上事項，再產生計劃。",
-    "capabilityRequired": "請完成合適的跑步活動；系統會自動使用近期賽事、最大攝氧量/VDOT、閾值配速或臨界速度。",
+    "capabilityRequired": "請完成合適的跑步活動；系統會自動使用近期賽事、最大攝氧量、閾值配速或臨界速度。",
     "tenKBase": "目前最長連續跑 {actual} 分鐘，建議先達到 {required} 分鐘，或完成一次近期 5K。",
     "halfMarathonBase": "系統記錄的最長跑是 {actual} 公里，建議先完成一次 {required} 公里再開始半馬計劃。",
     "marathonLongRun": "系統記錄的最長跑是 {actual} 公里，建議先完成一次 {required} 公里再開始全馬計劃。",
@@ -6472,19 +6472,19 @@
     "appName": "Trainingload.ai 個人版"
   },
   "VdotForecast": {
-    "expected": "四週後預計 VDOT {value}",
+    "expected": "四週後預計最大攝氧量 {value}",
     "interval": "80% 預測區間 {lower}–{upper}",
-    "basis": "依據截至 {date} 的歷史 VDOT 走勢推算。",
+    "basis": "根據截至 {date} 的歷史趨勢推算。",
     "askCoach": "問教練",
-    "coachPrompt": "幫我解讀四週 VDOT 預測，包括預計水平和預測區間。",
-    "chartLabel": "預計 VDOT",
+    "coachPrompt": "幫我解讀最大攝氧量的目前水準、歷史變化和可用的四週預測，並結合近期訓練提供建議。",
+    "chartLabel": "預計最大攝氧量",
     "historyAndForecast": "所選歷史範圍 + 未來四週預測",
     "INSUFFICIENT_HISTORY": "累積更多跑步紀錄後，可查看四週預測。",
     "STALE_HISTORY": "有新的跑步紀錄後更新預測。",
-    "INCOMPARABLE_HISTORY": "按新的 VDOT 口徑累積紀錄後更新預測。",
+    "INCOMPARABLE_HISTORY": "指標計算方式變更，累積新記錄後更新預測。",
     "MODEL_UNAVAILABLE": "預測暫時無法使用。",
     "currentEstimate": "目前估計水平",
-    "current": "目前 VDOT",
+    "current": "目前最大攝氧量",
     "inFourWeeks": "四週後預計",
     "higher": "預計高於目前",
     "lower": "預計低於目前",

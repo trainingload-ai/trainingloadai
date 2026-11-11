@@ -63,7 +63,7 @@ export const trainingAnalysisQueryProperties = {
       ],
     },
     description:
-      'ACTIVITIES supports ACTIVITY_COUNT, DURATION_MIN, DISTANCE_KM, AVG_SPEED_KMH, AVG_HEART_RATE, AVG_POWER. PMC supports DAILY_LOAD, ATL, CTL, TSB and sport loads. METRICS supports CP, W_PRIME, FTP, MAX_HR, RESTING_HR, LTHR, AET_HR, CS, TP, AET_PACE, VO2_MAX (the product VDOT), P_MAX, HEIGHT (cm), WEIGHT (kg). Metric buckets use the latest record, never sums or invented daily values. ACTIVITY_SERIES supports up to 3 signal measures: HEART_RATE, POWER, SPEED, PACE, CADENCE, ELEVATION, GRADE. RELATIONSHIP uses exactly 2 measures.',
+      'ACTIVITIES supports ACTIVITY_COUNT, DURATION_MIN, DISTANCE_KM, AVG_SPEED_KMH, AVG_HEART_RATE, AVG_POWER. PMC supports DAILY_LOAD, ATL, CTL, TSB and sport loads. METRICS supports CP, W_PRIME, FTP, MAX_HR, RESTING_HR, LTHR, AET_HR, CS, TP, AET_PACE, VO2_MAX (最大摄氧量 / VO2max), P_MAX, HEIGHT (cm), WEIGHT (kg). Metric buckets use the latest record, never sums or invented daily values. ACTIVITY_SERIES supports up to 3 signal measures: HEART_RATE, POWER, SPEED, PACE, CADENCE, ELEVATION, GRADE. RELATIONSHIP uses exactly 2 measures.',
   },
   sportTypes: {
     type: 'array',

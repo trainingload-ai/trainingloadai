@@ -113,27 +113,29 @@ export function VdotForecastSummary({
         </div>
         {projection}
       </div>
-      {final ? (
-        <div
-          className="flex items-center justify-between gap-4 pc:min-w-0 pc:flex-1"
-          data-testid="vdot-forecast-context"
-        >
-          <div className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
-            <p className="tabular-nums">
-              {t("interval", {
-                lower: number(final.lower80),
-                upper: number(final.upper80),
-              })}
-            </p>
-            <p>{t("basis", { date: forecast!.cutoffDate })}</p>
-          </div>
-          <Button variant="default" size="sm" asChild className="shrink-0">
-            <Link href="/ai-coach?vdotQuestion=1">{t("askCoach")}</Link>
-          </Button>
+      <div
+        className="flex items-center justify-between gap-4 pc:min-w-0 pc:flex-1"
+        data-testid="vdot-forecast-context"
+      >
+        <div className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
+          {final ? (
+            <>
+              <p className="tabular-nums">
+                {t("interval", {
+                  lower: number(final.lower80),
+                  upper: number(final.upper80),
+                })}
+              </p>
+              <p>{t("basis", { date: forecast!.cutoffDate })}</p>
+            </>
+          ) : (
+            unavailable
+          )}
         </div>
-      ) : (
-        unavailable
-      )}
+        <Button variant="default" size="sm" asChild className="shrink-0">
+          <Link href="/ai-coach?metricQuestion=vo2Max">{t("askCoach")}</Link>
+        </Button>
+      </div>
     </div>
   );
 }
