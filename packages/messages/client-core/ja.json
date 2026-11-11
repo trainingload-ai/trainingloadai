@@ -1837,7 +1837,7 @@
     }
   },
   "ActivityTimeline": {
-    "title": "Activity timeline",
+    "title": "タイムライン",
     "axis": "Horizontal axis",
     "time": "Time",
     "distance": "Distance",
@@ -1903,9 +1903,8 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "deviceLaps": "Device laps",
-    "customSegments": "Custom segments",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries."
+    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {
     "title": "アクティビティ詳細",
@@ -1937,7 +1936,7 @@
       }
     },
     "tabs": {
-      "timeline": "Activity timeline",
+      "timeline": "タイムライン",
       "overview": "概要",
       "heartrate": "心拍数",
       "power": "パワー",
@@ -1961,11 +1960,22 @@
       "timeSection": "時間別",
       "timeSectionDescription": "主要な継続時間ごとの最高平均パフォーマンスを比較します。数値を選択すると地図上の区間を表示します。",
       "duration": "継続時間",
-      "timeRange": "時間帯",
+      "timeRange": "Time range",
       "distanceSection": "距離別",
       "distanceSectionDescription": "標準的なランニング距離での最速連続パフォーマンスです。",
       "distance": "距離",
-      "effortTime": "タイム"
+      "effortTime": "タイム",
+      "editColumns": "Edit columns",
+      "columnsDescription": "Choose columns and use the arrows to reorder. Interval statistics use valid sample duration; missing data is not filled with zero.",
+      "moveColumnUp": "Move {column} up",
+      "moveColumnDown": "Move {column} down",
+      "restoreColumns": "Reset defaults",
+      "cancelColumns": "Cancel",
+      "saveColumns": "Apply",
+      "actualDistance": "Interval distance",
+      "averagePace": "Average pace",
+      "averageSpeed": "Average speed",
+      "estimatedPower": "Estimated power"
     },
     "activityAnalysis": {
       "title": "アクティビティ分析",

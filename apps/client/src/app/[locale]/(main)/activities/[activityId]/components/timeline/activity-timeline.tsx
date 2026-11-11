@@ -53,6 +53,11 @@ import { TimelineSegmentsDialog } from "./timeline-segments-dialog";
 import { TimelineSegmentHeader } from "./timeline-segment-header";
 import { useStore } from "@/lib/store";
 import type { TimelineSegment } from "@shared/activity-timeline";
+import {
+  TIMELINE_END_PADDING,
+  TIMELINE_HORIZONTAL_PADDING,
+  TIMELINE_PLOT_LEFT,
+} from "./timeline-layout";
 
 const timeLabel = (value: number) => formatSecondsToTime(Math.round(value));
 
@@ -140,7 +145,10 @@ export default function ActivityTimeline({
     () => zoom ?? [0, model?.duration ?? 1],
     [zoom, model?.duration],
   );
-  const plotWidth = Math.max(1, (scrollSize.width || 1084) - 172);
+  const plotWidth = Math.max(
+    1,
+    (scrollSize.width || 1084) - TIMELINE_HORIZONTAL_PADDING,
+  );
   const scale = useMemo(
     () =>
       buildTimelineSegmentScale(
@@ -165,7 +173,7 @@ export default function ActivityTimeline({
       selectedSegmentId,
     ],
   );
-  const sceneWidth = scale.width + 172;
+  const sceneWidth = scale.width + TIMELINE_HORIZONTAL_PADDING;
   const plotViewport = useMemo<TimelineRange>(() => {
     const start = Math.min(scrollOffset, Math.max(0, scale.width - plotWidth));
     return [start, start + plotWidth];
@@ -458,7 +466,7 @@ export default function ActivityTimeline({
   const currentX = current === null ? null : xAtTime(current);
   const fromX = activeRange ? xAtTime(activeRange[0]) : null;
   const toX = activeRange ? xAtTime(activeRange[1]) : null;
-  const tickCount = Math.max(6, Math.ceil((sceneWidth - 172) / 180) + 1);
+  const tickCount = Math.max(6, Math.ceil(scale.width / 180) + 1);
   const ticks = Array.from(
     { length: tickCount },
     (_, index) => (index * scale.width) / (tickCount - 1),
@@ -466,22 +474,28 @@ export default function ActivityTimeline({
   return (
     <section
       aria-label={t("title")}
-      className="overflow-hidden rounded-md border border-border bg-background"
+      className="overflow-hidden rounded-surface border border-border/70 bg-card"
       data-timeline-start={viewport[0]}
       data-timeline-end={viewport[1]}
     >
       <div
         ref={bindScroll}
-        className="overflow-x-auto overscroll-x-contain"
+        className="overflow-x-auto overflow-y-hidden overscroll-x-contain"
         data-timeline-scroll
         onScroll={(event) => setScrollOffset(event.currentTarget.scrollLeft)}
       >
         <div style={{ width: sceneWidth, minWidth: "100%" }}>
-          <div className="grid min-h-[120px] grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
-            <div className="sticky left-0 z-20 flex h-full flex-col items-stretch justify-between gap-2 border-r border-border bg-background px-3 py-3">
+          <div
+            className="grid min-h-[120px] items-center border-b border-border/60"
+            style={{
+              gridTemplateColumns: `${TIMELINE_PLOT_LEFT}px minmax(0,1fr)`,
+              paddingRight: TIMELINE_END_PADDING,
+            }}
+          >
+            <div className="sticky left-0 z-20 flex h-full flex-col items-stretch gap-3 border-r border-border/45 bg-card p-3">
               <div className="flex items-center justify-between gap-1">
                 <span
-                  className="px-1 text-xs font-medium"
+                  className="text-xs font-medium text-muted-foreground"
                   title={t("segmentScaleDescription")}
                 >
                   {t("segments")}
@@ -528,17 +542,10 @@ export default function ActivityTimeline({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {analysis.custom
-                  ? t("customSegments")
-                  : model.laps.length
-                    ? t("deviceLaps")
-                    : t("fullActivity")}
-              </span>
               <Button
                 variant="ghost"
                 size="compact"
-                className="justify-start px-0"
+                className="-ml-2 self-start text-muted-foreground hover:text-foreground [&_svg]:size-3.5"
                 disabled={!analysis.canEdit}
                 onClick={beginEdit}
               >
@@ -578,13 +585,14 @@ export default function ActivityTimeline({
           </div>
           <div className="relative">
             <div
-              className="pointer-events-none absolute inset-y-0 left-40 right-3 overflow-hidden"
+              className="pointer-events-none absolute inset-y-0 overflow-hidden"
+              style={{ left: TIMELINE_PLOT_LEFT, right: TIMELINE_END_PADDING }}
               aria-hidden
             >
               {visibleGroups.map((group) => (
                 <span
                   key={group.id}
-                  className="absolute inset-y-0 border-l border-border/40"
+                  className="absolute inset-y-0 border-l border-border/25"
                   style={{ left: `${group.left}%` }}
                 />
               ))}
@@ -619,7 +627,10 @@ export default function ActivityTimeline({
               <div
                 ref={plotRef}
                 className="absolute inset-y-0 cursor-crosshair touch-pan-y focus-visible:outline-2 focus-visible:outline-ring overflow-hidden"
-                style={{ left: 160 + plotViewport[0], width: plotWidth }}
+                style={{
+                  left: TIMELINE_PLOT_LEFT + plotViewport[0],
+                  width: plotWidth,
+                }}
                 role="slider"
                 tabIndex={0}
                 aria-label={t("inspect")}
@@ -689,15 +700,10 @@ export default function ActivityTimeline({
                 {fromX !== null && toX !== null && !zoom ? (
                   <span
                     data-timeline-selection
-                    className="pointer-events-none absolute inset-y-0 border-x border-foreground/30 bg-foreground/5"
+                    className="pointer-events-none absolute inset-y-0 border-x border-foreground/25 bg-foreground/4"
                     style={{
                       left: `${percent(fromX)}%`,
                       width: `${((toX - fromX) / plotWidth) * 100}%`,
-                      ...(selectedSegmentId
-                        ? {
-                            backgroundColor: `color-mix(in srgb, ${groups.find((group) => group.id === selectedSegmentId)?.color ?? "var(--foreground)"} 6%, transparent)`,
-                          }
-                        : {}),
                     }}
                   />
                 ) : null}
@@ -714,13 +720,17 @@ export default function ActivityTimeline({
           </div>
           {visibleRows.length ? (
             <div
-              className="relative ml-40 mr-3 h-6 text-[11px] text-muted-foreground tabular-nums"
+              className="relative h-8 border-t border-border/45 text-[11px] text-muted-foreground tabular-nums"
+              style={{
+                marginLeft: TIMELINE_PLOT_LEFT,
+                marginRight: TIMELINE_END_PADDING,
+              }}
               aria-hidden
             >
               {ticks.map((value, index) => (
                 <span
                   key={index}
-                  className="absolute top-1"
+                  className="absolute top-2.5 whitespace-nowrap"
                   style={{
                     left: `${(index / (ticks.length - 1)) * 100}%`,
                     transform:
@@ -731,6 +741,17 @@ export default function ActivityTimeline({
                           : "translateX(-50%)",
                   }}
                 >
+                  <span
+                    className="absolute -top-2.5 h-1.5 border-l border-border/60"
+                    style={{
+                      left:
+                        index === 0
+                          ? 0
+                          : index === ticks.length - 1
+                            ? "100%"
+                            : "50%",
+                    }}
+                  />
                   {axis === "time"
                     ? timeLabel(scale.timeAt(value))
                     : (() => {

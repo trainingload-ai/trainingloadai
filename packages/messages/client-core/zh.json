@@ -2075,7 +2075,7 @@
     }
   },
   "ActivityTimeline": {
-    "title": "活动时间线",
+    "title": "时间线",
     "axis": "横轴",
     "time": "时间",
     "distance": "距离",
@@ -2141,9 +2141,8 @@
     "segmentsSaveError": "保存失败，修改仍保留在此处，请重试。",
     "dominantHeartRateDescription": "本段内停留时间最长的心率区间，占比按有效区间采样时间计算。",
     "dominantPowerDescription": "本段内停留时间最长的功率区间，占比按有效区间采样时间计算。",
-    "deviceLaps": "设备圈段",
-    "customSegments": "自定义分段",
-    "segmentScaleDescription": "短分段按最小宽度展开，顶部与曲线同步对齐；时间或距离刻度可能不等距，统计按实际起止时间计算。"
+    "segmentScaleDescription": "短分段按最小宽度展开，顶部与曲线同步对齐；时间或距离刻度可能不等距，统计按实际起止时间计算。",
+    "chartColorDescription": "为这条图表选择线条颜色。"
   },
   "ActivityDetail": {
     "title": "活动详情",
@@ -2175,7 +2174,7 @@
       }
     },
     "tabs": {
-      "timeline": "活动时间线",
+      "timeline": "时间线",
       "overview": "总览",
       "heartrate": "心率",
       "power": "功率",
@@ -2199,11 +2198,22 @@
       "timeSection": "按时间",
       "timeSectionDescription": "比较不同持续时间内的最高平均表现。点击数值可在地图定位对应路段。",
       "duration": "持续时间",
-      "timeRange": "时间段",
+      "timeRange": "时间范围",
       "distanceSection": "按距离",
       "distanceSectionDescription": "查看标准跑步距离的最快连续表现。",
       "distance": "距离",
-      "effortTime": "用时"
+      "effortTime": "用时",
+      "editColumns": "编辑列",
+      "columnsDescription": "勾选要显示的列，用箭头调整顺序。区间统计按有效采样时间计算，缺失数据不补零。",
+      "moveColumnUp": "上移{column}",
+      "moveColumnDown": "下移{column}",
+      "restoreColumns": "恢复默认",
+      "cancelColumns": "取消",
+      "saveColumns": "应用",
+      "actualDistance": "区间距离",
+      "averagePace": "平均配速",
+      "averageSpeed": "平均速度",
+      "estimatedPower": "估算功率"
     },
     "activityAnalysis": {
       "title": "活动分析",

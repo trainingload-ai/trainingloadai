@@ -64,6 +64,30 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     maxHeartRate: 176,
     averageCadence: 85,
     elevationGain: 70,
+    activityPeakMetrics: [
+      {
+        id: "distance-400",
+        type: "pace",
+        scaleType: "DISTANCE",
+        scaleValue: 400,
+        value: 3.8,
+        startElapsedSec: 480,
+        endElapsedSec: 585,
+        startDistanceM: 1400,
+        endDistanceM: 1800,
+      },
+      {
+        id: "time-60",
+        type: "pace",
+        scaleType: "TIME",
+        scaleValue: 60,
+        value: 3.8,
+        startElapsedSec: 480,
+        endElapsedSec: 540,
+        startDistanceM: 1400,
+        endDistanceM: 1628,
+      },
+    ],
     laps: [
       [0, 480],
       [480, 720],
@@ -172,16 +196,33 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     content:
       ".tsqd-parent-container, nextjs-portal { display: none !important; }",
   });
+  await expect(page.getByRole("tablist").getByRole("tab").last()).toHaveText(
+    "时间线",
+  );
   await page
-    .getByRole("tab", { name: "活动时间线", exact: true })
+    .getByRole("tab", { name: "时间线", exact: true })
     .click({ timeout: 20000 });
   const timeline = page.getByRole("region", {
-    name: "活动时间线",
+    name: "时间线",
     exact: true,
   });
   await expect(timeline.getByRole("img")).toHaveCount(4);
+  await expect(timeline.getByText("设备圈段", { exact: true })).toHaveCount(0);
+  await expect(timeline.getByText("自定义分段", { exact: true })).toHaveCount(
+    0,
+  );
   const lapGroups = timeline.getByRole("group", { name: "分段", exact: true });
   const scroller = timeline.locator("[data-timeline-scroll]");
+  const expectNoVerticalOverflow = async () => {
+    await expect
+      .poll(() =>
+        scroller.evaluate(
+          (element) => element.scrollHeight - element.clientHeight,
+        ),
+      )
+      .toBe(0);
+  };
+  await expectNoVerticalOverflow();
   expect(
     await scroller.evaluate(
       (element) => element.scrollWidth > element.clientWidth,
@@ -275,6 +316,7 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await timeline.getByRole("button", { name: "时间线选项" }).click();
   await page.getByRole("menuitemradio", { name: "距离", exact: true }).click();
   await expectSelectionAligned();
+  await expectNoVerticalOverflow();
   await timeline.getByRole("button", { name: "时间线选项" }).click();
   await page.getByRole("menuitemradio", { name: "时间", exact: true }).click();
   const plot = timeline.locator(".cursor-crosshair");
@@ -300,7 +342,21 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await page.getByRole("menuitem", { name: "恢复全程" }).click();
   await expect(timeline).toHaveAttribute("data-timeline-start", "0");
   await timeline.getByRole("button", { name: "配置海拔图表" }).click();
-  await page.getByLabel("颜色", { exact: true }).fill("#456789");
+  await page.getByRole("button", { name: "选择颜色", exact: true }).click();
+  await page.getByRole("button", { name: "#3b82f6", exact: true }).click();
+  await page.getByRole("button", { name: "选择颜色", exact: true }).click();
+  await page.getByLabel("Hex", { exact: true }).fill("#45");
+  await expect(
+    page.getByRole("group", { name: "颜色", exact: true }),
+  ).toContainText("#3B82F6");
+  await page.getByLabel("Hex", { exact: true }).fill("#456789");
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("heading", { name: "颜色面板", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("dialog", { name: "配置海拔图表", exact: true })
+    .screenshot({ path: test.info().outputPath("timeline-settings.png") });
   await page.getByRole("combobox", { name: "图表高度" }).click();
   await page.getByRole("option", { name: "较高", exact: true }).click();
   await page.getByRole("combobox", { name: "平滑", exact: true }).click();
@@ -321,6 +377,17 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await addDialog.getByRole("button", { name: "功率", exact: true }).click();
   await expect(addDialog).toHaveCount(0);
   await expect(timeline.getByRole("img")).toHaveCount(5);
+  await timeline.getByRole("button", { name: "配置功率图表" }).click();
+  await page.getByRole("combobox", { name: "图表高度" }).click();
+  await page.getByRole("option", { name: "紧凑", exact: true }).click();
+  await page.keyboard.press("Escape");
+  const compactPowerRow = timeline.locator("[data-timeline-row]").filter({
+    has: page.getByRole("button", { name: "配置功率图表" }),
+  });
+  await expect
+    .poll(async () => (await compactPowerRow.boundingBox())?.height)
+    .toBe(65);
+  await expectNoVerticalOverflow();
   await timeline.getByRole("button", { name: "配置功率图表" }).click();
   await page.getByRole("button", { name: "删除图表", exact: true }).click();
   await expect(timeline.getByRole("img")).toHaveCount(4);
@@ -369,6 +436,84 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   expect(compactPlot.width).toBeGreaterThan(300);
   await timeline.screenshot({
     path: test.info().outputPath("timeline-1024.png"),
+  });
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.evaluate(() => document.documentElement.classList.remove("dark"));
+  await page.getByRole("tab", { name: "最佳表现", exact: true }).click();
+  const best = page.getByRole("tabpanel", { name: "最佳表现", exact: true });
+  const table = best.getByRole("table");
+  const firstRow = table.getByRole("row").nth(1);
+  const intervalRows = rows.filter((row) => {
+    const elapsed = (Date.parse(row.time) - start) / 1000;
+    return elapsed >= 480 && elapsed < 585;
+  });
+  const expectedAverage = Math.round(
+    intervalRows.reduce((sum, row) => sum + row.heartRate!, 0) /
+      intervalRows.length,
+  );
+  const expectedMaximum = Math.round(
+    Math.max(...intervalRows.map((row) => row.heartRate!)),
+  );
+  await expect(firstRow.getByRole("cell").nth(4)).toHaveText(
+    `${expectedAverage} bpm`,
+  );
+  await expect(firstRow.getByRole("cell").nth(5)).toHaveText(
+    `${expectedMaximum} bpm`,
+  );
+  await best.getByRole("button", { name: "编辑列", exact: true }).click();
+  const columnEditor = page.getByRole("dialog", {
+    name: "编辑列",
+    exact: true,
+  });
+  await columnEditor
+    .getByRole("checkbox", { name: "平均心率", exact: true })
+    .uncheck();
+  await columnEditor
+    .getByRole("checkbox", { name: "平均功率", exact: true })
+    .check();
+  await columnEditor
+    .getByRole("button", { name: "上移平均功率", exact: true })
+    .click();
+  await columnEditor
+    .getByRole("button", { name: "上移平均功率", exact: true })
+    .click();
+  await columnEditor.screenshot({
+    path: test.info().outputPath("best-efforts-columns.png"),
+  });
+  await columnEditor.getByRole("button", { name: "应用", exact: true }).click();
+  await expect(table.getByRole("columnheader").nth(3)).toHaveText("平均功率");
+  await expect(firstRow.getByRole("cell").nth(3)).toHaveText("300 W");
+  await expect(
+    table.getByRole("columnheader", { name: "平均心率", exact: true }),
+  ).toHaveCount(0);
+  await best.getByRole("button", { name: /^配速 · 400/ }).click();
+  await expect(
+    best.getByRole("button", { name: /^配速 · 400/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("tab", { name: "按时间", exact: true }).click();
+  await expect(
+    best.getByRole("columnheader", { name: "平均心率", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "按距离", exact: true }).click();
+  await expect(
+    best.getByRole("columnheader", { name: "平均心率", exact: true }),
+  ).toHaveCount(0);
+  await best.screenshot({
+    path: test.info().outputPath("best-efforts-light.png"),
+  });
+  await page.evaluate(() => document.documentElement.classList.add("dark"));
+  await best.screenshot({
+    path: test.info().outputPath("best-efforts-dark.png"),
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await table.evaluate(
+      (element) =>
+        element.parentElement!.scrollWidth > element.parentElement!.clientWidth,
+    ),
+  ).toBe(true);
+  await best.screenshot({
+    path: test.info().outputPath("best-efforts-mobile.png"),
   });
   await page.getByRole("tab", { name: "总览", exact: true }).click();
   await expect(timeline).toHaveCount(0);

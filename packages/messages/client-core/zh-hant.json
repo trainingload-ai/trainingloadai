@@ -1930,7 +1930,7 @@
     }
   },
   "ActivityTimeline": {
-    "title": "活動時間軸",
+    "title": "時間線",
     "axis": "橫軸",
     "time": "時間",
     "distance": "距離",
@@ -1996,9 +1996,8 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "deviceLaps": "裝置圈段",
-    "customSegments": "自訂分段",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries."
+    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {
     "title": "活動詳情",
@@ -2030,7 +2029,7 @@
       }
     },
     "tabs": {
-      "timeline": "活動時間軸",
+      "timeline": "時間線",
       "overview": "概覽",
       "heartrate": "心率",
       "power": "功率",
@@ -2054,11 +2053,22 @@
       "timeSection": "按時間",
       "timeSectionDescription": "比較唔同持續時間內嘅最高平均表現。撳數值可以喺地圖定位對應路段。",
       "duration": "持續時間",
-      "timeRange": "時間段",
+      "timeRange": "Time range",
       "distanceSection": "按距離",
       "distanceSectionDescription": "查看標準跑步距離嘅最快連續表現。",
       "distance": "距離",
-      "effortTime": "用時"
+      "effortTime": "用時",
+      "editColumns": "Edit columns",
+      "columnsDescription": "Choose columns and use the arrows to reorder. Interval statistics use valid sample duration; missing data is not filled with zero.",
+      "moveColumnUp": "Move {column} up",
+      "moveColumnDown": "Move {column} down",
+      "restoreColumns": "Reset defaults",
+      "cancelColumns": "Cancel",
+      "saveColumns": "Apply",
+      "actualDistance": "Interval distance",
+      "averagePace": "Average pace",
+      "averageSpeed": "Average speed",
+      "estimatedPower": "Estimated power"
     },
     "activityAnalysis": {
       "title": "活動分析",

@@ -16,6 +16,7 @@ interface ChartExpandDialogProps {
   title: string;
   children?: React.ReactNode;
   triggerLabel?: string;
+  triggerClassName?: string;
   contentClassName?: string;
 }
 
@@ -23,6 +24,7 @@ const ChartExpandDialog: React.FC<ChartExpandDialogProps> = ({
   title,
   children,
   triggerLabel,
+  triggerClassName,
   contentClassName,
 }) => {
   const [open, setOpen] = useState(false);
@@ -56,7 +58,10 @@ const ChartExpandDialog: React.FC<ChartExpandDialogProps> = ({
         size="icon-responsive"
         aria-label={effectiveTriggerLabel}
         title={effectiveTriggerLabel}
-        className="touch-manipulation border-0 bg-muted/70 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring pc:bg-transparent pc:hover:bg-muted [&_svg]:size-3.5"
+        className={cn(
+          "touch-manipulation border-0 bg-muted/70 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring pc:bg-transparent pc:hover:bg-muted [&_svg]:size-3.5",
+          triggerClassName,
+        )}
         onClick={() => setOpen(true)}
       >
         <Maximize2 />

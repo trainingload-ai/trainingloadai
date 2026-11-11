@@ -52,13 +52,13 @@ import { GenericActivityDataNotice } from "@/components/activities/generic-activ
 // 详情页 tabs 只维护稳定 value 和图标，显示文案统一从 i18n 读取。
 const tabItems = [
   { value: "overview", icon: BarChart3 },
-  { value: "timeline", icon: ChartLine },
   { value: "lap", icon: ListOrdered },
   { value: "heartrate", icon: HeartPulse },
   { value: "power", icon: Zap },
   { value: "pace", icon: Gauge },
   { value: "runningDynamics", icon: Footprints },
   { value: "bestIntervals", icon: Trophy },
+  { value: "timeline", icon: ChartLine },
 ] as const;
 
 const ActivityTimeline = dynamic(() => import("./timeline/activity-timeline"));

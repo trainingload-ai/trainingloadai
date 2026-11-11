@@ -2118,7 +2118,7 @@
     }
   },
   "ActivityTimeline": {
-    "title": "Activity timeline",
+    "title": "Timeline",
     "axis": "Horizontal axis",
     "time": "Time",
     "distance": "Distance",
@@ -2184,9 +2184,8 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "deviceLaps": "Device laps",
-    "customSegments": "Custom segments",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries."
+    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {
     "title": "Activity details",
@@ -2218,7 +2217,7 @@
       }
     },
     "tabs": {
-      "timeline": "Activity timeline",
+      "timeline": "Timeline",
       "overview": "Overview",
       "heartrate": "Heart Rate",
       "power": "Power",
@@ -2245,7 +2244,19 @@
       "distanceSection": "By distance",
       "distanceSectionDescription": "Fastest continuous efforts over standard running distances.",
       "distance": "Distance",
-      "effortTime": "Time"
+      "effortTime": "Time",
+      "editColumns": "Edit columns",
+      "columnsDescription": "Choose columns and use the arrows to reorder. Interval statistics use valid sample duration; missing data is not filled with zero.",
+      "moveColumnUp": "Move {column} up",
+      "moveColumnDown": "Move {column} down",
+      "restoreColumns": "Reset defaults",
+      "cancelColumns": "Cancel",
+      "saveColumns": "Apply",
+      "actualDistance": "Interval distance",
+      "averagePace": "Average pace",
+      "averageSpeed": "Average speed",
+      "timeRange": "Time range",
+      "estimatedPower": "Estimated power"
     },
     "activityAnalysis": {
       "title": "Activity analysis",

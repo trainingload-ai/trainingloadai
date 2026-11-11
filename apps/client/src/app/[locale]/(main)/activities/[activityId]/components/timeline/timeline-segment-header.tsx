@@ -44,7 +44,7 @@ export function TimelineSegmentHeader({
     <div
       data-segment-id={group.id}
       data-selected={selected}
-      className="absolute inset-y-0 border-r border-border/70 bg-background transition-colors data-[selected=true]:bg-muted/60"
+      className="absolute inset-y-0 border-r border-border/40 bg-card transition-colors data-[selected=true]:bg-muted/45"
       style={{ left: `${left}%`, width: `${width}%` }}
     >
       <button
@@ -119,7 +119,7 @@ export function TimelineSegmentHeader({
         </div>
       </button>
       <span
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-70"
         style={{ backgroundColor: group.color }}
         aria-hidden
       />

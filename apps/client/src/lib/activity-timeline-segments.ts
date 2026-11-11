@@ -95,13 +95,15 @@ export function buildTimelineSegmentScale(
   };
 }
 
-export function timelineWeightedAverage(
+export function timelineMetricStatistics(
   points: TimelinePoint[],
   range: TimelineRange,
 ) {
   const gap = timelineGapLimit(points);
   let sum = 0,
     covered = 0;
+  let minimum = Infinity,
+    maximum = -Infinity;
   for (
     let index = Math.max(0, timelineLowerBound(points, range[0]) - 1);
     index < points.length - 1;
@@ -116,9 +118,20 @@ export function timelineWeightedAverage(
     if (seconds > 0) {
       sum += point.value * seconds;
       covered += seconds;
+      minimum = Math.min(minimum, point.value);
+      maximum = Math.max(maximum, point.value);
     }
   }
-  return covered > 0 ? sum / covered : null;
+  return covered > 0
+    ? { average: sum / covered, minimum, maximum, coveredSeconds: covered }
+    : null;
+}
+
+export function timelineWeightedAverage(
+  points: TimelinePoint[],
+  range: TimelineRange,
+) {
+  return timelineMetricStatistics(points, range)?.average ?? null;
 }
 
 export function timelineDominantZone(

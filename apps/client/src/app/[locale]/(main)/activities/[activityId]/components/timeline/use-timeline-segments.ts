@@ -48,7 +48,6 @@ export function useTimelineSegments(
     segments: query.data?.segments ?? native,
     canEdit: query.isSuccess && !publicDemo.active,
     revision: query.data?.revision ?? 0,
-    custom: !!query.data && query.data.segments !== null,
     saving: mutation.isPending,
     save: (segments: TimelineSegment[] | null, revision: number) =>
       mutation.mutateAsync({ segments, revision }),

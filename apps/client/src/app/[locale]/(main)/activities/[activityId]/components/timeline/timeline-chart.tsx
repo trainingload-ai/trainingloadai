@@ -27,6 +27,11 @@ import type { TimelineSegmentScale } from "@/lib/activity-timeline-segments";
 import ChartExpandDialog from "../charts/chart-expand-dialog";
 import { TimelineRowSettings } from "./timeline-row-settings";
 import type { TimelineMetric } from "./use-activity-timeline";
+import {
+  TIMELINE_AXIS_WIDTH,
+  TIMELINE_END_PADDING,
+  TIMELINE_LABEL_WIDTH,
+} from "./timeline-layout";
 
 const Chart = memo(UplotReact);
 
@@ -138,11 +143,17 @@ const TimelinePlot = memo(function TimelinePlot({
             }
           : { show: false },
         {
-          size: 36,
+          size: TIMELINE_AXIS_WIDTH,
           font: DEFAULT_AXIS_FONT,
           stroke: axisStroke,
           ticks: { show: false },
-          grid: { show: true, stroke: gridStroke, width: 1 },
+          grid: {
+            show: true,
+            stroke: `color-mix(in srgb, ${gridStroke} 55%, transparent)`,
+            width: 1,
+            dash: [3, 4],
+          },
+          space: expanded ? 40 : Math.max(28, config.height / 3),
           values: (_plot, values) => values.map(metric.format),
           gap: 5,
         },
@@ -216,10 +227,14 @@ export const TimelineChart = memo(function TimelineChart({
       : timelineValueAt(metric.points, current, metric.gap);
   return (
     <div
-      className="group grid grid-cols-[124px_minmax(0,1fr)] border-b border-border/60 pr-3"
+      className="group grid border-b border-border/35 bg-muted/20 dark:bg-muted/25"
+      style={{
+        gridTemplateColumns: `${TIMELINE_LABEL_WIDTH}px minmax(0,1fr)`,
+        paddingRight: TIMELINE_END_PADDING,
+      }}
       data-timeline-row={config.id}
     >
-      <div className="sticky left-0 z-10 flex flex-col justify-center gap-0.5 bg-background pl-3">
+      <div className="sticky left-0 z-10 flex flex-col justify-center gap-1.5 bg-card px-3 py-1">
         <div className="flex min-w-0 items-center gap-1">
           <TimelineRowSettings
             config={config}
@@ -234,6 +249,7 @@ export const TimelineChart = memo(function TimelineChart({
           <ChartExpandDialog
             title={label}
             triggerLabel={t("expandChart", { metric: label })}
+            triggerClassName="size-7 rounded-control text-muted-foreground/60 hover:text-foreground pc:size-7 [&_svg]:size-3.5"
           >
             <TimelinePlot
               metric={metric}
@@ -249,25 +265,29 @@ export const TimelineChart = memo(function TimelineChart({
             />
           </ChartExpandDialog>
         </div>
-        <div className="flex items-center gap-1 tabular-nums">
-          <span className="text-base font-semibold">
+        <div className="flex min-w-0 items-baseline gap-1 pl-3 tabular-nums">
+          <span className="truncate text-xl font-medium leading-5">
             {value === null ? "—" : metric.format(value)}
           </span>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="shrink-0 text-[11px] text-muted-foreground">
             {metric.unit}
+            {metric.calculated ? (
+              <span className="ml-1 text-[10px]">{t("calculated")}</span>
+            ) : null}
           </span>
         </div>
-        {metric.calculated ? (
-          <span className="text-[10px] text-muted-foreground">
-            {t("calculated")}
-          </span>
-        ) : null}
       </div>
       <div
         role="img"
         aria-label={`${label} (${metric.unit})`}
-        className="sticky left-[124px] justify-self-start"
-        style={{ width: Math.max(1, viewWidth - 136) }}
+        className="sticky justify-self-start"
+        style={{
+          left: TIMELINE_LABEL_WIDTH,
+          width: Math.max(
+            1,
+            viewWidth - TIMELINE_LABEL_WIDTH - TIMELINE_END_PADDING,
+          ),
+        }}
       >
         <TimelinePlot
           metric={metric}

@@ -93,6 +93,8 @@ export default defineConfig({
       "src/lib/activity-chart-axis.test.ts",
       "src/lib/activity-timeline.test.ts",
       "src/lib/activity-timeline-segments.test.ts",
+      "src/lib/activity-best-interval-columns.test.ts",
+      "src/app/[locale]/(main)/activities/[activityId]/components/BestIntervals.test.ts",
       "src/app/[locale]/(main)/ai-coach/ai-coach-client-loader.test.tsx",
       "src/app/[locale]/(main)/ai-coach/coach-turn-error-model.test.ts",
       "src/app/[locale]/(main)/ai-coach/coach-turn-error-card.test.tsx",

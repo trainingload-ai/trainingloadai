@@ -1838,7 +1838,7 @@
     }
   },
   "ActivityTimeline": {
-    "title": "Activity timeline",
+    "title": "Linha do tempo",
     "axis": "Horizontal axis",
     "time": "Time",
     "distance": "Distance",
@@ -1904,9 +1904,8 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "deviceLaps": "Device laps",
-    "customSegments": "Custom segments",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries."
+    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {
     "title": "Detalhes da atividade",
@@ -1938,7 +1937,7 @@
       }
     },
     "tabs": {
-      "timeline": "Activity timeline",
+      "timeline": "Linha do tempo",
       "overview": "Visão geral",
       "heartrate": "Frequência cardíaca",
       "power": "Poder",
@@ -1965,7 +1964,19 @@
       "distanceSection": "Por distância",
       "distanceSectionDescription": "Esforços contínuos mais rápidos em distâncias comuns de corrida.",
       "distance": "Distância",
-      "effortTime": "Tempo"
+      "effortTime": "Tempo",
+      "editColumns": "Edit columns",
+      "columnsDescription": "Choose columns and use the arrows to reorder. Interval statistics use valid sample duration; missing data is not filled with zero.",
+      "moveColumnUp": "Move {column} up",
+      "moveColumnDown": "Move {column} down",
+      "restoreColumns": "Reset defaults",
+      "cancelColumns": "Cancel",
+      "saveColumns": "Apply",
+      "actualDistance": "Interval distance",
+      "averagePace": "Average pace",
+      "averageSpeed": "Average speed",
+      "timeRange": "Time range",
+      "estimatedPower": "Estimated power"
     },
     "activityAnalysis": {
       "title": "Análise da atividade",

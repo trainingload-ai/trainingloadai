@@ -1837,7 +1837,7 @@
     }
   },
   "ActivityTimeline": {
-    "title": "Activity timeline",
+    "title": "타임라인",
     "axis": "Horizontal axis",
     "time": "Time",
     "distance": "Distance",
@@ -1903,9 +1903,8 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "deviceLaps": "Device laps",
-    "customSegments": "Custom segments",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries."
+    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {
     "title": "활동 상세",
@@ -1937,7 +1936,7 @@
       }
     },
     "tabs": {
-      "timeline": "Activity timeline",
+      "timeline": "타임라인",
       "overview": "개요",
       "heartrate": "심박수",
       "power": "힘",
@@ -1961,11 +1960,22 @@
       "timeSection": "지속 시간별",
       "timeSectionDescription": "주요 지속 시간별 최고 평균 기록을 비교합니다. 값을 선택하면 지도에서 해당 구간을 표시합니다.",
       "duration": "지속 시간",
-      "timeRange": "시간 구간",
+      "timeRange": "Time range",
       "distanceSection": "거리별",
       "distanceSectionDescription": "표준 달리기 거리에서 가장 빠른 연속 기록입니다.",
       "distance": "거리",
-      "effortTime": "시간"
+      "effortTime": "시간",
+      "editColumns": "Edit columns",
+      "columnsDescription": "Choose columns and use the arrows to reorder. Interval statistics use valid sample duration; missing data is not filled with zero.",
+      "moveColumnUp": "Move {column} up",
+      "moveColumnDown": "Move {column} down",
+      "restoreColumns": "Reset defaults",
+      "cancelColumns": "Cancel",
+      "saveColumns": "Apply",
+      "actualDistance": "Interval distance",
+      "averagePace": "Average pace",
+      "averageSpeed": "Average speed",
+      "estimatedPower": "Estimated power"
     },
     "activityAnalysis": {
       "title": "활동 분석",

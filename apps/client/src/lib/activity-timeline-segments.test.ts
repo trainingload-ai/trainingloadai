@@ -3,10 +3,33 @@ import {
   buildTimelineSegmentScale,
   timelineWeightedAverage,
   timelineDominantZone,
+  timelineMetricStatistics,
 } from "./activity-timeline-segments";
 import { validTimelineSegments } from "@shared/activity-timeline";
 
 describe("activity analysis segments", () => {
+  it("calculates interval extrema and time-weighted averages without crossing gaps or extrapolating", () => {
+    const points = [
+      { time: 0, value: 120 },
+      { time: 2, value: 180 },
+      { time: 5, value: 140 },
+      { time: 100, value: 220 },
+      { time: 102, value: 100 },
+    ];
+    expect(timelineMetricStatistics(points, [1, 5])).toEqual({
+      average: 165,
+      maximum: 180,
+      minimum: 120,
+      coveredSeconds: 4,
+    });
+    expect(timelineMetricStatistics(points, [5, 100])).toBeNull();
+    expect(timelineMetricStatistics(points, [100, 103])).toEqual({
+      average: 220,
+      maximum: 220,
+      minimum: 220,
+      coveredSeconds: 2,
+    });
+  });
   const segments = [
     { id: "a", name: "", start: 0, end: 300 },
     { id: "b", name: "", start: 300, end: 303 },

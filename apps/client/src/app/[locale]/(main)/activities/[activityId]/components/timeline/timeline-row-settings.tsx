@@ -4,8 +4,7 @@ import { useId } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, ChevronDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { ColorPicker } from "@/components/ui/colorPicker";
 import {
   Popover,
   PopoverContent,
@@ -53,106 +52,132 @@ export function TimelineRowSettings({
         <Button
           variant="ghost"
           size="compact"
-          className="min-w-0 flex-1 justify-start px-0"
+          className="min-w-0 flex-1 justify-between gap-1 border border-transparent px-0 text-muted-foreground hover:text-foreground data-[state=open]:text-foreground has-[>svg]:px-0 [&_svg]:size-3"
           aria-label={t("configureChart", { metric: label })}
         >
-          <span
-            className="h-0.5 w-2 shrink-0"
-            style={{ background: color }}
-            aria-hidden
-          />
-          <span className="truncate">{label}</span>
-          <ChevronDown aria-hidden />
+          <span className="flex min-w-0 items-center gap-1.5">
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={{ background: color }}
+              aria-hidden
+            />
+            <span className="truncate">{label}</span>
+          </span>
+          <ChevronDown className="text-muted-foreground/60" aria-hidden />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
+        side="right"
+        sideOffset={12}
+        className="w-80 p-0"
         aria-label={t("configureChart", { metric: label })}
       >
-        <FieldGroup className="gap-3">
-          <Field>
-            <FieldLabel htmlFor={`${id}-metric`}>{t("metric")}</FieldLabel>
-            <Select
-              value={config.metric}
-              onValueChange={(metric) =>
-                onChange({
-                  metric: metric as TimelineMetricId,
-                  color: undefined,
-                })
-              }
-            >
-              <SelectTrigger id={`${id}-metric`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {metrics.map((metric) => (
-                    <SelectItem key={metric.id} value={metric.id}>
-                      {t(`metrics.${metric.id}`)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${id}-color`}>{t("color")}</FieldLabel>
-            <Input
-              id={`${id}-color`}
-              type="color"
+        <div className="border-b border-border/60 px-4 py-3">
+          <h3 className="text-xs font-semibold">
+            {t("configureChart", { metric: label })}
+          </h3>
+        </div>
+        <div className="grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-x-3 gap-y-3 p-4">
+          <label
+            className="text-xs text-muted-foreground"
+            htmlFor={`${id}-metric`}
+          >
+            {t("metric")}
+          </label>
+          <Select
+            value={config.metric}
+            onValueChange={(metric) =>
+              onChange({
+                metric: metric as TimelineMetricId,
+                color: undefined,
+              })
+            }
+          >
+            <SelectTrigger id={`${id}-metric`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {metrics.map((metric) => (
+                  <SelectItem key={metric.id} value={metric.id}>
+                    {t(`metrics.${metric.id}`)}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-muted-foreground" id={`${id}-color`}>
+            {t("color")}
+          </span>
+          <div
+            className="flex h-8 items-center gap-2"
+            role="group"
+            aria-labelledby={`${id}-color`}
+          >
+            <ColorPicker
               value={color}
-              onChange={(event) => onChange({ color: event.target.value })}
+              onChange={(color) => onChange({ color })}
+              description={t("chartColorDescription")}
+              className="size-7 shrink-0"
             />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${id}-height`}>{t("height")}</FieldLabel>
-            <Select
-              value={String(config.height)}
-              onValueChange={(height) => onChange({ height: Number(height) })}
-            >
-              <SelectTrigger id={`${id}-height`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[64, 86, 128, 180].map((height) => (
-                    <SelectItem key={height} value={String(height)}>
-                      {t(`heights.${height}`)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${id}-smoothing`}>
-              {t("smoothing")}
-            </FieldLabel>
-            <Select
-              value={String(config.smoothing)}
-              onValueChange={(smoothing) =>
-                onChange({ smoothing: Number(smoothing) })
-              }
-            >
-              <SelectTrigger id={`${id}-smoothing`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[0, 5, 10, 30, 60].map((seconds) => (
-                    <SelectItem key={seconds} value={String(seconds)}>
-                      {seconds ? t("seconds", { seconds }) : t("raw")}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-        </FieldGroup>
-        <div className="mt-4 flex items-center justify-between gap-2">
+            <span className="font-mono text-xs text-muted-foreground">
+              {color.toUpperCase()}
+            </span>
+          </div>
+          <label
+            className="text-xs text-muted-foreground"
+            htmlFor={`${id}-height`}
+          >
+            {t("height")}
+          </label>
+          <Select
+            value={String(config.height)}
+            onValueChange={(height) => onChange({ height: Number(height) })}
+          >
+            <SelectTrigger id={`${id}-height`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {[64, 86, 128, 180].map((height) => (
+                  <SelectItem key={height} value={String(height)}>
+                    {t(`heights.${height}`)}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <label
+            className="text-xs text-muted-foreground"
+            htmlFor={`${id}-smoothing`}
+          >
+            {t("smoothing")}
+          </label>
+          <Select
+            value={String(config.smoothing)}
+            onValueChange={(smoothing) =>
+              onChange({ smoothing: Number(smoothing) })
+            }
+          >
+            <SelectTrigger id={`${id}-smoothing`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {[0, 5, 10, 30, 60].map((seconds) => (
+                  <SelectItem key={seconds} value={String(seconds)}>
+                    {seconds ? t("seconds", { seconds }) : t("raw")}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center justify-between gap-2 border-t border-border/60 px-3 py-2">
           <div className="flex gap-1">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-compact"
               aria-label={t("moveUp")}
               disabled={!canMoveUp}
@@ -161,7 +186,7 @@ export function TimelineRowSettings({
               <ArrowUp />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-compact"
               aria-label={t("moveDown")}
               disabled={!canMoveDown}
@@ -170,7 +195,12 @@ export function TimelineRowSettings({
               <ArrowDown />
             </Button>
           </div>
-          <Button variant="ghost" size="compact" onClick={onRemove}>
+          <Button
+            variant="ghost"
+            size="compact"
+            className="text-muted-foreground hover:bg-destructive/5 hover:text-destructive"
+            onClick={onRemove}
+          >
             <Trash2 />
             {t("removeChart")}
           </Button>

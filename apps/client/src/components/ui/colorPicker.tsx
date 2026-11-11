@@ -18,18 +18,23 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslations } from "next-intl";
 import { Paintbrush } from "lucide-react";
-import { useState } from "react";
+import { useId, useState, useEffect } from "react";
 
 export function ColorPicker({
   value,
   onChange,
   className,
+  description,
 }: {
   value?: string;
   onChange: (value: string) => void;
   className?: string;
+  description?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [hex, setHex] = useState(value ?? "");
+  const hexId = useId();
+  useEffect(() => setHex(value ?? ""), [value]);
   const t = useTranslations("ColorPicker");
 
   // Standard training zone colors + common colors
@@ -75,14 +80,16 @@ export function ColorPicker({
           {t("paletteTitle")}
         </h4>
         <p className="text-mobile-caption pc:text-xs text-muted-foreground">
-          {t("paletteDescription")}
+          {description ?? t("paletteDescription")}
         </p>
       </div>
       <div className="grid grid-cols-5 gap-2">
         {colors.map((color) => (
           <button
             key={color}
-            className="h-8 w-8 rounded-full border border-border cursor-pointer hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            type="button"
+            aria-pressed={value?.toLowerCase() === color}
+            className="h-8 w-8 rounded-full border border-border cursor-pointer hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 aria-pressed:ring-2 aria-pressed:ring-ring aria-pressed:ring-offset-2"
             style={{ backgroundColor: color }}
             onClick={() => {
               onChange(color);
@@ -94,12 +101,23 @@ export function ColorPicker({
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <div className="text-mobile-caption pc:text-xs text-muted-foreground w-12">
+        <label
+          htmlFor={hexId}
+          className="text-mobile-caption pc:text-xs text-muted-foreground w-12"
+        >
           {t("hex")}
-        </div>
+        </label>
         <Input
-          value={value || ""}
-          onChange={(e) => onChange(e.target.value)}
+          id={hexId}
+          value={hex}
+          maxLength={7}
+          spellCheck={false}
+          onChange={(e) => {
+            const next = e.target.value;
+            setHex(next);
+            if (/^#[0-9a-f]{6}$/i.test(next)) onChange(next);
+          }}
+          onBlur={() => setHex(value ?? "")}
           className="h-8 text-mobile-caption pc:text-xs"
           placeholder="#000000"
         />
