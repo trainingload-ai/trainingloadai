@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import {
+  OPTIONAL_RECOVERY_EVIDENCE_KINDS,
+  isOptionalRecoveryEvidence,
+} from '@/athlete-state/domain/optional-evidence';
 import { AthleteStateFeatureFlags } from '@/athlete-state/athlete-state-feature-flags.service';
 import type { CoachAssessmentInquiry } from '@shared/coach-assessment';
 import { safeParseAskUserQuestionData } from '@shared/ai-coach-schema';
@@ -25,7 +29,11 @@ export class CoachAssessmentCaseQueryService {
         status: 'WAITING_FOR_USER',
         expiresAt: { gt: new Date() },
         questions: {
-          some: { status: 'PENDING', expiresAt: { gt: new Date() } },
+          some: {
+            status: 'PENDING',
+            expiresAt: { gt: new Date() },
+            evidenceKind: { notIn: [...OPTIONAL_RECOVERY_EVIDENCE_KINDS] },
+          },
         },
       },
       orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
@@ -35,11 +43,16 @@ export class CoachAssessmentCaseQueryService {
         currentOutcome: true,
         assessment: { select: { state: true, confidence: true } },
         questions: {
-          where: { status: 'PENDING', expiresAt: { gt: new Date() } },
+          where: {
+            status: 'PENDING',
+            expiresAt: { gt: new Date() },
+            evidenceKind: { notIn: [...OPTIONAL_RECOVERY_EVIDENCE_KINDS] },
+          },
           orderBy: { createdAt: 'asc' },
           take: 1,
           select: {
             id: true,
+            evidenceKind: true,
             question: true,
             reason: true,
             decisionImpact: true,
@@ -48,7 +61,8 @@ export class CoachAssessmentCaseQueryService {
       },
     });
     const pending = row?.questions[0];
-    if (!row || !pending) return null;
+    if (!row || !pending || isOptionalRecoveryEvidence(pending.evidenceKind))
+      return null;
     const parsed = safeParseAskUserQuestionData({
       questions: [pending.question],
     });

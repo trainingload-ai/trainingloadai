@@ -2,6 +2,7 @@ import type {
   TodaySuggestionIntentType,
   TodaySuggestionRecommendationKind,
   TodaySuggestionWorkout,
+  TodaySuggestionFeedback,
 } from '@shared/ai-today-suggestion-contract';
 import type { TodayAdviceCoachState } from '../coach-state-context.service';
 import type { ActivityEvidenceSnapshot } from '../core/training-data-coverage-query.service';
@@ -10,13 +11,14 @@ import type {
   WeatherAttribution,
 } from '@/weather/weather.types';
 
+export const TODAY_SUGGESTION_POLICY_VERSION = 'today-activity-first-v5';
+
 export type TodaySuggestionConstraintCode =
   | 'NEVER_RECORDED_ACTIVITY'
   | 'LAST_ACTIVITY_OVER_30_DAYS'
   | 'ACTIVITY_PROCESSING_PENDING'
   | 'TODAY_WORKOUT_COMPLETED'
   | 'TODAY_WORKOUT_AVAILABLE'
-  | 'TODAY_TRAINING_WINDOW_CLOSED'
   | 'NO_ACTIVE_PLAN'
   | 'WAITING_FOR_USER'
   | 'WAITING_FOR_DATA'
@@ -33,6 +35,8 @@ export type TodaySuggestionWorkoutFact = {
   status: string;
   plannedDurationSeconds: number | null;
   linkedActivityCount: number;
+  revision?: number;
+  updatedAt?: string | null;
 };
 
 export type TodaySuggestionConstraintProjection = {
@@ -43,13 +47,13 @@ export type TodaySuggestionConstraintProjection = {
   edition: 'self-host' | 'cloud';
   allowAi: boolean;
   featureAllowed: boolean;
+  aiState?: string;
   factHash: string;
   constraintHash: string;
   continuityHash: string;
   validUntil: Date;
   localTime: string;
   minutesUntilDayEnd: number;
-  newWorkoutWindowOpen: boolean;
   constraints: TodaySuggestionConstraintCode[];
   requiredToolNames: string[];
   lightContext: Record<string, unknown>;
@@ -63,6 +67,8 @@ export type TodaySuggestionConstraintProjection = {
   tomorrowWorkouts: TodaySuggestionWorkoutFact[];
   latestActivityId: string | null;
   latestActivityAt: string | null;
+  todayActivityCount?: number;
+  coverageDiagnosis?: Record<string, unknown> | null;
   activityEvidence: ActivityEvidenceSnapshot;
   coachState: TodayAdviceCoachState;
   pendingInquiry: {
@@ -71,6 +77,11 @@ export type TodaySuggestionConstraintProjection = {
   } | null;
   activeDecisionId: string | null;
   highConcern: boolean;
+  userFeedback?: {
+    feedback: TodaySuggestionFeedback;
+    recordedAt: string;
+    quietUntil: string | null;
+  } | null;
   weatherImpact: TodayWeatherImpact;
   weatherAttribution: WeatherAttribution | null;
 };
@@ -87,10 +98,15 @@ export type TodaySuggestionDraft = {
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   uncertainty?: string;
   evidenceCodes: string[];
-  preferredIntent: TodaySuggestionIntentType;
+  preferredIntent: TodaySuggestionIntentType | null;
   secondaryIntents: TodaySuggestionIntentType[];
   generatedWorkout?: TodaySuggestionWorkout;
   tags: string[];
+  coachDecisionHandling?: Array<{
+    decisionId: string;
+    handling: 'FOLLOW' | 'CONDITIONAL' | 'DEPART' | 'HISTORY' | 'IGNORE';
+    reason: string | null;
+  }>;
 };
 
 export type TodaySuggestionAgentRun = {
@@ -101,3 +117,15 @@ export type TodaySuggestionAgentRun = {
   operationId: string;
   replayed: boolean;
 };
+
+export function hasRecentTrainingActivity(
+  projection: TodaySuggestionConstraintProjection,
+) {
+  return (
+    !(projection.constraints ?? []).includes('LAST_ACTIVITY_OVER_30_DAYS') &&
+    Boolean(
+      projection.latestActivityId ||
+      projection.activityEvidence?.activities?.readyCount > 0,
+    )
+  );
+}

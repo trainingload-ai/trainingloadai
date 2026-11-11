@@ -21,7 +21,6 @@ function projection(
     validUntil: new Date(Date.now() + 60 * 60_000),
     localTime: '12:00',
     minutesUntilDayEnd: 720,
-    newWorkoutWindowOpen: true,
     constraints: ['NO_ACTIVE_PLAN'],
     requiredToolNames: [],
     lightContext: {},
@@ -109,13 +108,19 @@ describe('TodaySuggestionDeliveryPolicy', () => {
         }),
       ]),
     );
-    expect(result.secondaryIntents).toHaveLength(2);
+    expect(result.secondaryIntents).toHaveLength(1);
+    expect(
+      result.secondaryIntents.some(
+        (intent) => intent.type === 'SCHEDULE_REMINDER',
+      ),
+    ).toBe(false);
   });
 
   it('forces the existing assessment case and removes write actions', () => {
     const result = new TodaySuggestionDeliveryPolicy().build({
       projection: projection({
         constraints: ['WAITING_FOR_USER'],
+        highConcern: true,
         pendingInquiry: { caseId: 'case-1', questionId: 'question-1' },
       }),
       draft: draft({
@@ -133,7 +138,9 @@ describe('TodaySuggestionDeliveryPolicy', () => {
       label: 'Update status',
       caseId: 'case-1',
     });
-    expect(result.secondaryIntents).toEqual([]);
+    expect(result.secondaryIntents.map((intent) => intent.type)).toEqual([
+      'ASK_COACH',
+    ]);
   });
 
   it('blocks workout creation for high concern state', () => {
@@ -155,13 +162,12 @@ describe('TodaySuggestionDeliveryPolicy', () => {
     ).toBe(true);
   });
 
-  it('blocks new workouts and late reminders after the daily training window closes', () => {
+  it('allows evening workouts and optional reminders when they still fit the day', () => {
     const result = new TodaySuggestionDeliveryPolicy().build({
       projection: projection({
         localTime: '22:50',
         minutesUntilDayEnd: 70,
-        newWorkoutWindowOpen: false,
-        constraints: ['TODAY_TRAINING_WINDOW_CLOSED'],
+        constraints: [],
       }),
       draft: draft({
         secondaryIntents: ['SCHEDULE_REMINDER', 'ASK_COACH'],
@@ -172,8 +178,9 @@ describe('TodaySuggestionDeliveryPolicy', () => {
       generatedAt: new Date(),
     });
 
-    expect(result.primaryIntent).toBeNull();
+    expect(result.primaryIntent?.type).toBe('CREATE_TODAY_WORKOUT');
     expect(result.secondaryIntents.map((intent) => intent.type)).toEqual([
+      'SCHEDULE_REMINDER',
       'ASK_COACH',
     ]);
     expect(result.evidence.map((item) => item.code)).not.toContain(

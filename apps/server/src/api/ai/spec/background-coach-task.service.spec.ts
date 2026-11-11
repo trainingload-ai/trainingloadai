@@ -596,9 +596,18 @@ describe('AiService background coach tasks', () => {
       value: runBackgroundCoachTask,
     });
 
-    await expect(
+    const results = await Promise.all([
       service.processQueuedActivityAiReview('review-1'),
-    ).resolves.toMatchObject({ outcome: 'SUCCEEDED', activityId: 42 });
+      service.processQueuedActivityAiReview('review-1', {
+        callerManagedOperationId: 'caller-operation',
+      }),
+    ]);
+    expect(results).toEqual([
+      expect.objectContaining({ outcome: 'SUCCEEDED', activityId: 42 }),
+      expect.objectContaining({ outcome: 'SUCCEEDED', activityId: 42 }),
+    ]);
+    expect(runBackgroundCoachTask).toHaveBeenCalledTimes(1);
+    expect(persistGeneratedReview).toHaveBeenCalledTimes(1);
     expect(runBackgroundCoachTask).toHaveBeenCalledWith(
       expect.objectContaining({
         taskType: 'ACTIVITY_REVIEW',

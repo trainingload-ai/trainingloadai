@@ -10,6 +10,8 @@ describe('TodaySuggestionReminderService', () => {
           locale: 'en',
           date: '2026-10-28',
           continuityHash: 'continuity-1',
+          signatureHash: 'facts',
+          constraintHash: 'constraints',
           validUntil: new Date('2026-10-28T16:00:00.000Z'),
           structuredResult,
         })),
@@ -30,6 +32,14 @@ describe('TodaySuggestionReminderService', () => {
       service: new TodaySuggestionReminderService(
         prisma as never,
         notifications as never,
+        {
+          project: jest.fn(async () => ({
+            date: '2026-10-28',
+            factHash: 'facts',
+            constraintHash: 'constraints',
+            highConcern: false,
+          })),
+        } as never,
       ),
       prisma,
       notifications,

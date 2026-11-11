@@ -98,7 +98,10 @@ export class TodaySuggestionDeliveryPolicy {
           code,
           label: label(projection.locale, pair[0], pair[1]),
           evidenceRefs: [
-            `constraint:${projection.constraintHash.slice(0, 16)}`,
+            `fact:${projection.factHash}`,
+            ...(projection.constraints.includes(code as never)
+              ? [`constraint:${projection.constraintHash}`]
+              : []),
           ],
         };
       });
@@ -108,10 +111,7 @@ export class TodaySuggestionDeliveryPolicy {
       draft,
       args.generationToken,
     );
-    const candidates = [
-      ...draft.secondaryIntents,
-      'SCHEDULE_REMINDER' as const,
-    ];
+    const candidates = draft.secondaryIntents;
     const secondaryIntents = candidates
       .filter((intent, index) => candidates.indexOf(intent) === index)
       .map((intent) =>
@@ -123,6 +123,32 @@ export class TodaySuggestionDeliveryPolicy {
 
     const forced = this.forcedSafetyIntent(projection);
     const primaryIntent = forced ?? preferred;
+    let validUntil = projection.validUntil.getTime();
+    if (
+      args.state === 'FACT_FALLBACK' ||
+      args.reasonCode === 'AI_NOT_CONFIGURED'
+    ) {
+      validUntil = Math.min(validUntil, Date.now() + 60_000);
+    }
+    if (
+      projection.constraints.some((code) =>
+        ['ACTIVITY_PROCESSING_PENDING', 'WAITING_FOR_DATA'].includes(code),
+      )
+    ) {
+      validUntil = Math.min(validUntil, Date.now() + 30_000);
+    }
+    if (draft.recommendation.kind === 'TRAIN') {
+      const duration =
+        draft.generatedWorkout?.summary.durationSeconds ??
+        (draft.recommendation.durationMinutes
+          ? draft.recommendation.durationMinutes * 60
+          : (projection.todayWorkouts.find((workout) =>
+              ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
+            )?.plannedDurationSeconds ?? 1_800));
+      const latestStart = projection.validUntil.getTime() - duration * 1_000;
+      if (latestStart > Date.now())
+        validUntil = Math.min(validUntil, latestStart);
+    }
     return {
       version: 2,
       suggestionId: args.generationToken,
@@ -130,6 +156,7 @@ export class TodaySuggestionDeliveryPolicy {
         state: args.state,
         reasonCode: args.reasonCode,
         generatedAt: args.generatedAt?.toISOString() ?? null,
+        cached: false,
       },
       headline: draft.headline,
       summary: draft.summary,
@@ -138,30 +165,28 @@ export class TodaySuggestionDeliveryPolicy {
       ...(draft.uncertainty ? { uncertainty: draft.uncertainty } : {}),
       evidence,
       primaryIntent,
-      secondaryIntents: projection.pendingInquiry
-        ? []
-        : forced
-          ? secondaryIntents.filter(
-              (intent) =>
-                !['CREATE_TODAY_WORKOUT', 'SCHEDULE_REMINDER'].includes(
-                  intent.type,
-                ),
-            )
-          : secondaryIntents,
+      secondaryIntents: forced
+        ? secondaryIntents.filter(
+            (intent) =>
+              !['CREATE_TODAY_WORKOUT', 'SCHEDULE_REMINDER'].includes(
+                intent.type,
+              ),
+          )
+        : secondaryIntents,
       ...(projection.pendingInquiry
         ? { assessmentCaseRef: projection.pendingInquiry }
         : {}),
       ...(projection.activeDecisionId
         ? { decisionRef: { decisionId: projection.activeDecisionId } }
         : {}),
-      validUntil: projection.validUntil.toISOString(),
+      validUntil: new Date(validUntil).toISOString(),
     };
   }
 
   private forcedSafetyIntent(
     projection: TodaySuggestionConstraintProjection,
   ): TodaySuggestionIntent | null {
-    if (projection.pendingInquiry) {
+    if (projection.highConcern && projection.pendingInquiry) {
       return {
         type: 'OPEN_ASSESSMENT',
         label: label(projection.locale, '补充状态', 'Update status'),
@@ -190,19 +215,30 @@ export class TodaySuggestionDeliveryPolicy {
   }
 
   private resolveIntent(
-    type: TodaySuggestionIntentType,
+    type: TodaySuggestionIntentType | null,
     projection: TodaySuggestionConstraintProjection,
     draft: TodaySuggestionDraft,
     generationToken: string,
   ): TodaySuggestionIntent | null {
+    if (!type) return null;
+    if (
+      ['REST_TODAY', 'TRAINED_ELSEWHERE', 'DATA_PENDING'].includes(
+        projection.userFeedback?.feedback ?? '',
+      ) &&
+      [
+        'CREATE_TODAY_WORKOUT',
+        'OPEN_TODAY_WORKOUT',
+        'SCHEDULE_REMINDER',
+      ].includes(type)
+    ) {
+      return null;
+    }
     const todayWorkout = projection.todayWorkouts.find((workout) =>
       ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
     );
     switch (type) {
       case 'OPEN_TODAY_WORKOUT':
-        return todayWorkout &&
-          (projection.newWorkoutWindowOpen !== false ||
-            todayWorkout.status === 'IN_PROGRESS')
+        return todayWorkout
           ? {
               type,
               label: label(
@@ -288,13 +324,7 @@ export class TodaySuggestionDeliveryPolicy {
             }
           : null;
       case 'CREATE_TODAY_WORKOUT':
-        if (
-          todayWorkout ||
-          projection.highConcern ||
-          projection.pendingInquiry ||
-          projection.newWorkoutWindowOpen === false ||
-          !draft.generatedWorkout
-        ) {
+        if (todayWorkout || projection.highConcern || !draft.generatedWorkout) {
           return null;
         }
         return {
@@ -312,7 +342,6 @@ export class TodaySuggestionDeliveryPolicy {
           preview: draft.generatedWorkout,
         };
       case 'SCHEDULE_REMINDER': {
-        if (projection.newWorkoutWindowOpen === false) return null;
         const earliest = new Date(Date.now() + 5 * 60_000);
         if (earliest.getTime() >= projection.validUntil.getTime()) return null;
         return {

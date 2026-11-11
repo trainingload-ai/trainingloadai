@@ -125,8 +125,12 @@ export function HomeSuggestionCardStack({
     details?.primaryIntent,
     ...(details?.secondaryIntents ?? []),
   ].filter(isUsableTodaySuggestionIntent);
-  const primaryIntent = availableIntents[0] ?? null;
-  const secondaryIntents = availableIntents.slice(1);
+  const primaryIntent = isUsableTodaySuggestionIntent(details?.primaryIntent)
+    ? details.primaryIntent
+    : null;
+  const secondaryIntents = (details?.secondaryIntents ?? []).filter(
+    isUsableTodaySuggestionIntent,
+  );
   const workoutIntent = availableIntents.find(
     (
       intent,
@@ -206,9 +210,12 @@ export function HomeSuggestionCardStack({
     onSuccess: async () => {
       setOpen(false);
       toast.success(t("decisionStack.rejectSuccess"));
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.ai.pendingDecisions(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.ai.pendingDecisions(),
+        }),
+        queryClient.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
+      ]);
     },
   });
   const openInquiryMutation = useMutation({
@@ -230,9 +237,12 @@ export function HomeSuggestionCardStack({
     mutationFn: dismissCoachAssessmentCase,
     onSuccess: async () => {
       setOpen(false);
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.ai.pendingDecisions(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.ai.pendingDecisions(),
+        }),
+        queryClient.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
+      ]);
     },
   });
   const workoutMutation = useMutation({
@@ -447,14 +457,6 @@ export function HomeSuggestionCardStack({
         return;
     }
   };
-  const openTodaySuggestionCoach = async () => {
-    if (!details || publicDemo.active) return;
-    await recordTodaySuggestionInteraction(details.suggestionId, {
-      kind: "INTENT_SELECTED",
-      intentType: "ASK_COACH",
-    }).catch(() => undefined);
-    navigateToTodaySuggestionCoach();
-  };
   const openSuggestionDetails = () => {
     applyMutation.reset();
     rejectMutation.reset();
@@ -520,7 +522,7 @@ export function HomeSuggestionCardStack({
                   : item.kind === "inquiry"
                     ? `${item.inquiry.title} · ${item.inquiry.question.question} · ${item.inquiry.reason}`
                     : item.kind === "guidance"
-                      ? `${t("aiTodaySuggestion.title")} · ${item.guidance.rationale}`
+                      ? `${t("aiTodaySuggestion.reviewTitle")} · ${item.guidance.rationale}`
                       : details
                         ? `${details.headline} · ${suggestion.summary}`
                         : suggestion.title,
@@ -581,7 +583,7 @@ export function HomeSuggestionCardStack({
                               item.inquiry.question.header,
                             ]
                           : item.kind === "guidance"
-                            ? [t("aiTodaySuggestion.title")]
+                            ? [t("aiTodaySuggestion.reviewTitle")]
                             : (details?.evidence
                                 .slice(0, 2)
                                 .map((evidence) => evidence.label) ??
@@ -593,14 +595,6 @@ export function HomeSuggestionCardStack({
               actions:
                 item.kind === "suggestion" && details ? (
                   <>
-                    <Button
-                      type="button"
-                      size="xs"
-                      disabled={busy || publicDemo.active}
-                      onClick={() => void openTodaySuggestionCoach()}
-                    >
-                      {t("todaySuggestionActions.viewSuggestion")}
-                    </Button>
                     {quickIntent ? (
                       <Button
                         key={quickIntent.type}
@@ -650,7 +644,7 @@ export function HomeSuggestionCardStack({
                 : openedInquiry
                   ? openedInquiry.title
                   : openedGuidance
-                    ? t("aiTodaySuggestion.title")
+                    ? t("aiTodaySuggestion.reviewTitle")
                     : details?.headline || suggestion.title}
             </ResponsiveModalTitle>
             <ResponsiveModalDescription>

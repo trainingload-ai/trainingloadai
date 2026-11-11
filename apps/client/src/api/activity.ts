@@ -12,6 +12,7 @@ import type {
 } from "../../../../packages/shared/strength-activity";
 import type { StrengthLoadV1 } from "../../../../packages/shared/strength-workout-ir";
 import type { AiModelPurpose, AiOperationResult } from "@/api/ai-operations";
+import { aiOperationErrorCode } from "@/lib/ai-operation-errors";
 
 function getProxyApiUrl(url: string): string {
   return typeof window === "undefined" ? url : `/api/proxy${url}`;
@@ -171,14 +172,19 @@ export const getAiInfoStream = async (
   let buffer = "";
   const processLine = (line: string) => {
     if (line.trim() === "" || !line.startsWith("data: ")) return;
+    const payload = line.substring(6).trim();
+    if (payload === "[DONE]") return;
     let data: Record<string, unknown>;
     try {
-      const parsed = JSON.parse(line.substring(6));
+      const parsed = JSON.parse(payload);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         return;
       }
       data = parsed as Record<string, unknown>;
     } catch (error) {
+      // Nest SSE can encode a thrown admission error as a plain data line.
+      const code = aiOperationErrorCode(payload);
+      if (code) throw new ApiFetchError(code, 409, code, undefined, true);
       console.error("Error parsing SSE data", error, line);
       return;
     }

@@ -106,12 +106,22 @@ function mount(
     </QueryClientProvider>,
   );
 }
-async function openDecision() {
-  const card = await screen.findByRole("button", {
-    name: `decisionStack.title · ${decision.rationale}`,
-  });
-  fireEvent.click(card);
+async function focusCard(label: string) {
+  if (!screen.queryByRole("button", { name: label })) {
+    const selector = await screen.findByRole("button", {
+      name: (name) =>
+        name.startsWith("decisionStack.bringForward") && name.endsWith(label),
+    });
+    fireEvent.click(selector);
+  }
+  return screen.findByRole("button", { name: label });
+}
+async function openCard(label: string) {
+  fireEvent.click(await focusCard(label));
   return screen.findByRole("dialog");
+}
+async function openDecision() {
+  return openCard(`decisionStack.title · ${decision.rationale}`);
 }
 beforeEach(() => {
   vi.clearAllMocks();
@@ -144,9 +154,7 @@ describe("home suggestion cards and decision details", () => {
 
   it("shows summary-only cards and applies a decision only from its detail sheet", async () => {
     mount();
-    await screen.findByRole("button", {
-      name: `decisionStack.title · ${decision.rationale}`,
-    });
+    await focusCard(`decisionStack.title · ${decision.rationale}`);
     expect(
       screen.queryByRole("button", { name: "decisionStack.confirm" }),
     ).not.toBeInTheDocument();
@@ -285,25 +293,15 @@ describe("home suggestion cards and decision details", () => {
     ).toBeVisible();
     expect(screen.getByText("No recorded activity yet")).toBeVisible();
     expect(screen.getByText("No active plan")).toBeVisible();
-    fireEvent.click(
-      screen.getByRole("button", {
+    expect(
+      screen.queryByRole("button", {
         name: "todaySuggestionActions.viewSuggestion",
       }),
+    ).not.toBeInTheDocument();
+    await openCard(
+      "Complete the facts needed for today · Import an activity or tell the coach about your available time and how you feel today.",
     );
-    await waitFor(() =>
-      expect(mocks.push).toHaveBeenCalledWith(
-        expect.stringContaining("/ai-coach?"),
-      ),
-    );
-    expect(mocks.recordSuggestionInteraction).toHaveBeenCalledWith(
-      "suggestion-1",
-      { kind: "INTENT_SELECTED", intentType: "ASK_COACH" },
-    );
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Complete the facts needed for today · Import an activity or tell the coach about your available time and how you feel today.",
-      }),
-    );
+    expect(mocks.push).not.toHaveBeenCalled();
     const sheet = await screen.findByRole("dialog");
     expect(
       within(sheet).getByText("todaySuggestionActions.reasoning"),
@@ -580,10 +578,8 @@ describe("home suggestion cards and decision details", () => {
       },
     });
     mount();
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: "aiTodaySuggestion.title · Two sessions were missed; resume with an easy run.",
-      }),
+    await openCard(
+      "aiTodaySuggestion.reviewTitle · Two sessions were missed; resume with an easy run.",
     );
     const sheet = await screen.findByRole("dialog");
     expect(
@@ -633,9 +629,9 @@ describe("home suggestion cards and decision details", () => {
     });
 
     mount();
-    const card = await screen.findByRole("button", {
-      name: `${inquiry.title} · ${inquiry.question.question} · ${inquiry.reason}`,
-    });
+    const card = await focusCard(
+      `${inquiry.title} · ${inquiry.question.question} · ${inquiry.reason}`,
+    );
     expect(within(card).getByText(inquiry.question.question)).toBeVisible();
     expect(within(card).getByText(inquiry.reason)).toBeVisible();
 

@@ -22,6 +22,7 @@ import { featureAllowed, useFeatureAccess } from "@/api/feature-access";
 import { queryKeys } from "@/lib/query-keys";
 import { ManagedActivityReviewAccessPrompt } from "@deployment/managed-ui";
 import { AiDataConsentPrompt } from "@/components/ai-consent/AiDataConsentPrompt";
+import { Button } from "@/components/ui/button";
 import {
   ActivityCoachDialogBody,
   preloadActivityCoachConversation,
@@ -36,7 +37,9 @@ function pickLocalizedMarkdown(raw: string, locale: string) {
       const obj = parsed as Record<string, unknown>;
       const zh = typeof obj.zh === "string" ? obj.zh : undefined;
       const en = typeof obj.en === "string" ? obj.en : undefined;
-      return locale === "zh" ? (zh ?? en ?? raw) : (en ?? zh ?? raw);
+      return locale.toLowerCase().startsWith("zh")
+        ? (zh ?? en ?? raw)
+        : (en ?? zh ?? raw);
     }
   } catch {
     /* 流式过程中可能尚未构成完整 JSON，直接展示原文 */
@@ -63,15 +66,16 @@ const AIAnalysis = () => {
   const queryClient = useQueryClient();
   const activityId = useActivityId();
   const [open, setOpen] = useState(false);
+  const [streamAttempt, setStreamAttempt] = useState<{
+    activityId: string;
+    restartKey: number;
+  } | null>(null);
   const locale = useLocale();
-  const lang = locale === "en" ? "en" : "zh";
+  const lang = locale;
   const access = useFeatureAccess();
   const consent = useAiDataConsent();
   const accessLoading = access.isLoading || consent.isLoading;
-  const hasReviewAccess = featureAllowed(
-    access.data,
-    "ai.activityReview",
-  );
+  const hasReviewAccess = featureAllowed(access.data, "ai.activityReview");
   const hasAiDataConsent = consent.data?.granted === true;
 
   const reviewQuery = useQuery({
@@ -82,7 +86,12 @@ const AIAnalysis = () => {
       const d = query.state.data;
       if (!d || d.found !== true) return false;
       const st = d.status;
-      if (st === "PENDING" || st === "RUNNING") return 3000;
+      if (
+        !(d.markdown ?? "").trim() &&
+        hasReviewAccess &&
+        (st == null || ["PENDING", "RUNNING", "FAILED"].includes(st))
+      )
+        return 3000;
       return false;
     },
   });
@@ -93,18 +102,44 @@ const AIAnalysis = () => {
 
   const workerPending =
     review?.found === true &&
-    (review.status === "PENDING" || review.status === "RUNNING") &&
+    ["PENDING", "RUNNING", "FAILED"].includes(review.status ?? "") &&
     !hasStoredMarkdown;
 
   const reviewSettled = !accessLoading && !reviewQuery.isLoading;
-  const streamEnabled =
+  const streamEligible =
     Boolean(activityId) &&
     hasReviewAccess &&
     hasAiDataConsent &&
     reviewSettled &&
-    !hasStoredMarkdown &&
-    !workerPending &&
     !reviewQuery.isError;
+  const workerFailed =
+    review?.found === true && ["DEAD", "SKIPPED"].includes(review.status ?? "");
+  useEffect(() => {
+    if (
+      streamEligible &&
+      !hasStoredMarkdown &&
+      !workerPending &&
+      !workerFailed
+    ) {
+      setStreamAttempt((previous) =>
+        previous?.activityId === activityId
+          ? previous
+          : { activityId: activityId!, restartKey: 0 },
+      );
+    }
+  }, [
+    streamEligible,
+    hasStoredMarkdown,
+    workerPending,
+    workerFailed,
+    activityId,
+  ]);
+  // Once started, keep this request alive while canonical status changes to RUNNING.
+  const streamEnabled =
+    Boolean(activityId) &&
+    hasReviewAccess &&
+    hasAiDataConsent &&
+    streamAttempt?.activityId === activityId;
 
   const {
     data: aiInfo,
@@ -112,7 +147,12 @@ const AIAnalysis = () => {
     error,
     isDone: streamDone,
     operation,
-  } = useAiAnalysisStream(activityId ?? "", true, 0, streamEnabled);
+  } = useAiAnalysisStream(
+    activityId ?? "",
+    true,
+    streamAttempt?.restartKey ?? 0,
+    streamEnabled,
+  );
 
   const reviewMarkdown =
     reviewQuery.data?.found === true
@@ -136,7 +176,7 @@ const AIAnalysis = () => {
   }, [activityId, lang, operation?.status, queryClient]);
 
   const markdownBody = useMemo(
-    () => pickLocalizedMarkdown(aiInfo || reviewMarkdown, lang),
+    () => pickLocalizedMarkdown(reviewMarkdown || aiInfo, lang),
     [aiInfo, reviewMarkdown, lang],
   );
 
@@ -153,7 +193,7 @@ const AIAnalysis = () => {
   const reviewFailed =
     !hasContent &&
     !loadingCombined &&
-    (reviewQuery.isError || Boolean(error) || (streamEnabled && streamDone));
+    (reviewQuery.isError || Boolean(error) || workerFailed);
   const showFreeUpsell =
     !accessLoading && !hasReviewAccess && !hasContent && !loadingCombined;
 
@@ -186,9 +226,25 @@ const AIAnalysis = () => {
           {showFreeUpsell ? (
             <ManagedActivityReviewAccessPrompt />
           ) : reviewFailed ? (
-            <p className="text-mobile-caption pc:text-xs text-muted-foreground">
-              {error instanceof Error ? error.message : t("analysisFailed")}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-mobile-caption pc:text-xs text-muted-foreground">
+                {error instanceof Error ? error.message : t("analysisFailed")}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (reviewQuery.isError) void reviewQuery.refetch();
+                  if (activityId)
+                    setStreamAttempt((previous) => ({
+                      activityId,
+                      restartKey: (previous?.restartKey ?? 0) + 1,
+                    }));
+                }}
+              >
+                {t("regenerate")}
+              </Button>
+            </div>
           ) : hasContent ? (
             <button
               type="button"

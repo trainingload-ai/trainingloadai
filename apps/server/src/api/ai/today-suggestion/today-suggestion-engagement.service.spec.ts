@@ -38,6 +38,7 @@ describe('TodaySuggestionEngagementService', () => {
       aiTodaySuggestion: {
         findFirst: jest.fn(async () => ({
           date: '2026-10-28',
+          keyContext: { timezone: 'Asia/Shanghai' },
           continuityHash: 'continuity-1',
           validUntil: new Date('2026-10-28T16:00:00.000Z'),
           structuredResult: {
@@ -182,6 +183,24 @@ describe('TodaySuggestionEngagementService', () => {
     ).rejects.toThrow('TODAY_SUGGESTION_INTENT_NOT_OFFERED');
   });
 
+  it('rejects a late interaction without rolling an old generation back into place', async () => {
+    const { service, table } = harness();
+    table.update.mockRejectedValueOnce({ code: 'P2025' } as never);
+    await expect(
+      service.recordInteraction({
+        userId: 'user-1',
+        generationToken: 'generation-1',
+        input: { kind: 'FEEDBACK', feedback: 'REST_TODAY' },
+      }),
+    ).rejects.toThrow('TODAY_SUGGESTION_NOT_FOUND');
+    expect(table.upsert).not.toHaveBeenCalled();
+    expect(table.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: 'user-1', generationToken: 'generation-1' },
+      }),
+    );
+  });
+
   it('sets a quiet period for explicit rest and later feedback', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-10-28T01:00:00.000Z'));
     const { service, getState } = harness();
@@ -194,5 +213,15 @@ describe('TodaySuggestionEngagementService', () => {
     expect(getState()?.quietUntil).toEqual(
       new Date('2026-10-28T16:00:00.000Z'),
     );
+    await service.rollover({
+      userId: 'user-1',
+      generationToken: 'after-feedback',
+      continuityHash: 'changed-facts',
+      suggestionDate: '2026-10-28',
+    });
+    expect(await service.feedbackForDate('user-1', '2026-10-28')).toMatchObject(
+      { feedback: 'REST_TODAY' },
+    );
+    expect(await service.feedbackForDate('user-1', '2026-10-29')).toBeNull();
   });
 });

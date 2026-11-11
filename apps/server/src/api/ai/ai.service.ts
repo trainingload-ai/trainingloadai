@@ -2033,7 +2033,31 @@ export class AiService {
    * Agent runtime. Activity owns evidence and result persistence; AI owns the
    * model, skill/tool execution, run timeline, operation and replay behavior.
    */
-  async processQueuedActivityAiReview(
+  private activityReviewTasks = new Map<
+    string,
+    ReturnType<AiService['generateActivityAiReview']>
+  >();
+
+  processQueuedActivityAiReview(
+    reviewId: string,
+    options?: {
+      callerManagedOperationId?: string;
+      allowWithoutConsent?: boolean;
+    },
+  ) {
+    const tasks = (this.activityReviewTasks ??= new Map());
+    const running = tasks.get(reviewId);
+    if (running) return running;
+    const task = this.generateActivityAiReview(reviewId, options);
+    tasks.set(reviewId, task);
+    const release = () => {
+      if (tasks.get(reviewId) === task) tasks.delete(reviewId);
+    };
+    void task.then(release, release);
+    return task;
+  }
+
+  private async generateActivityAiReview(
     reviewId: string,
     options?: {
       callerManagedOperationId?: string;
@@ -2229,6 +2253,7 @@ export class AiService {
         trigger: $Enums.ActivityAiReviewTrigger.MANUAL,
         language: requestedLang,
         metadata: { source: 'activity-review-sse', purpose },
+        runInline: true,
       });
       const generated = await this.processQueuedActivityAiReview(queued.id, {
         callerManagedOperationId: operationId,

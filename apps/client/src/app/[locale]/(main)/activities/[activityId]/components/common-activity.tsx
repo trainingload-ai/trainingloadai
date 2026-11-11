@@ -61,7 +61,21 @@ const tabItems = [
   { value: "timeline", icon: ChartLine },
 ] as const;
 
-const ActivityTimeline = dynamic(() => import("./timeline/activity-timeline"));
+function TimelineLoading() {
+  const t = useTranslations("ActivityDetail");
+  return (
+    <div
+      role="status"
+      className="flex min-h-72 items-center justify-center text-sm text-muted-foreground"
+    >
+      {t("loading")}
+    </div>
+  );
+}
+
+const ActivityTimeline = dynamic(() => import("./timeline/activity-timeline"), {
+  loading: TimelineLoading,
+});
 
 const RUNNING_DYNAMICS_METRICS = [
   "cadence",

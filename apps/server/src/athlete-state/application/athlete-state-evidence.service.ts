@@ -371,11 +371,7 @@ export class AthleteStateEvidenceService {
         kind: 'RECENT_SLEEP',
         reason:
           'Recent sleep evidence is missing or has no stable provider baseline.',
-        requiredForDecision: subjectiveItems.some((item) =>
-          ['fatigue', 'recovery', 'sleep_quality', 'sleep_duration'].includes(
-            String(item.category),
-          ),
-        ),
+        requiredForDecision: false,
       });
     }
     if (!baselines.some((baseline) => baseline.sampleCount >= 14)) {

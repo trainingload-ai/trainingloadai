@@ -62,6 +62,7 @@ export type TodaySuggestionDeliveryReason =
   | "GENERATED"
   | "CACHE_HIT"
   | "COACH_STATE_UNAVAILABLE"
+  | "FACTS_CHANGED"
   | "AI_DISABLED"
   | "AI_NOT_CONFIGURED"
   | "ACCESS_DENIED"
@@ -131,6 +132,7 @@ export type TodaySuggestionV2 = {
     state: TodaySuggestionDeliveryState;
     reasonCode: TodaySuggestionDeliveryReason;
     generatedAt: string | null;
+    cached?: boolean;
   };
   headline: string;
   summary: string;

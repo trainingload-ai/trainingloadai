@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { asRecord, dayDiffByYmd } from './core/ai-common.util';
+import { ATHLETE_STATE_POLICY_VERSION } from '@/athlete-state/athlete-state-policy';
+import { isOptionalRecoveryEvidence } from '@/athlete-state/domain/optional-evidence';
 
 export type TodayAdviceCoachDecision = {
   id: string;
@@ -190,10 +192,31 @@ export class CoachStateContextService {
           evidenceHash: true,
           decisionId: true,
           expiresAt: true,
-          assessment: { select: { state: true, decisionReadiness: true } },
+          assessment: {
+            select: {
+              state: true,
+              decisionReadiness: true,
+              policyVersion: true,
+              evidenceRequests: true,
+              safetyFlags: true,
+            },
+          },
         },
       });
-      if (row) {
+      const requests = Array.isArray(row?.assessment.evidenceRequests)
+        ? row.assessment.evidenceRequests
+        : [];
+      const legacyOptionalInquiry =
+        row?.assessment.policyVersion !== ATHLETE_STATE_POLICY_VERSION &&
+        requests.length > 0 &&
+        requests.every((request) =>
+          isOptionalRecoveryEvidence(String(asRecord(request)?.kind ?? '')),
+        ) &&
+        !(
+          Array.isArray(row?.assessment.safetyFlags) &&
+          row.assessment.safetyFlags.length
+        );
+      if (row && !legacyOptionalInquiry) {
         athleteState = {
           caseId: row.id,
           caseStatus: row.status,

@@ -1,22 +1,19 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
-import {
-  getAiInfo,
-  getAiInfoStream,
-} from "@/api/activity";
+import { getAiInfo, getAiInfoStream } from "@/api/activity";
 import { queryKeys } from "@/lib/query-keys";
 import { useEffect, useState } from "react";
-import {
-  fetchAiOperation,
-  type AiOperationResult,
-} from "@/api/ai-operations";
+import { fetchAiOperation, type AiOperationResult } from "@/api/ai-operations";
 import {
   aiOperationRequestFingerprint,
   operationIdForRequest,
   clearPendingAiOperation,
 } from "@/lib/ai-operation-recovery";
-import { localizedAiOperationError } from "@/lib/ai-operation-errors";
+import {
+  aiOperationErrorCode,
+  localizedAiOperationError,
+} from "@/lib/ai-operation-errors";
 
 export function useAiAnalysis(activityId: string, useCache = true) {
   const locale = useLocale();
@@ -77,6 +74,7 @@ export function useAiAnalysisStream(
     const controller = new AbortController();
     const { signal } = controller;
     let active = true;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
     const requestFingerprint = aiOperationRequestFingerprint({
       activityId,
       locale,
@@ -96,74 +94,89 @@ export function useAiAnalysisStream(
     setData("");
     setOperation(null);
 
-    const queue: string[] = [];
-    let isProcessingQueue = false;
-
-    const processQueue = async () => {
-      if (isProcessingQueue || queue.length === 0 || !active) return;
-      isProcessingQueue = true;
-
-      while (queue.length > 0 && active) {
-        const chunk = queue.shift();
-        if (chunk) {
-          setData((prev) => prev + chunk);
-          // Adjust delay based on chunk length to smooth out large chunks
-          // Basic delay: 100ms, max delay: 500ms (approx 5x slower than before)
-          const delay = Math.min(Math.max(chunk.length * 10, 100), 500);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
+    const waitForResult = () => {
+      if (!active) return;
+      const stored = queryClient.getQueryData<{
+        markdown?: string;
+        status?: string;
+      }>(queryKeys.activity.aiReview(activityId, locale));
+      if (stored?.markdown?.trim()) {
+        setData(stored.markdown);
+        setError(null);
+        setIsLoading(false);
+        setIsDone(true);
+        return;
       }
-
-      isProcessingQueue = false;
-      // If new items arrived while processing, restart
-      if (queue.length > 0 && active) {
-        processQueue();
+      if (stored?.status === "DEAD" || stored?.status === "SKIPPED") {
+        setIsLoading(false);
+        setIsDone(true);
+        return;
+      }
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.activity.aiReview(activityId, locale),
+      });
+      if (
+        stored?.status &&
+        ["PENDING", "RUNNING", "FAILED"].includes(stored.status)
+      ) {
+        retryTimer = setTimeout(waitForResult, 3_000);
+      } else {
+        void request();
       }
     };
-
-    getAiInfoStream(
-      activityId,
-      (chunk) => {
-        if (active) {
-          queue.push(chunk);
-          processQueue();
-        }
-      },
-      locale,
-      useCache,
-      signal,
-      purpose,
-      setOperation,
-      operationId,
-    )
-      .then(() => {
-        if (active) {
-          setIsDone(false);
-          // Wait for queue to empty before setting isLoading to false
-          const checkQueue = setInterval(() => {
-            if (queue.length === 0) {
-              clearInterval(checkQueue);
-              if (active) {
-                setIsLoading(false);
-                setIsDone(true);
-              }
-            }
-          }, 100);
-        }
-      })
-      .catch((e) => {
-        if (active) {
-          if (e instanceof DOMException && e.name === "AbortError") {
-            return;
+    const request = () =>
+      getAiInfoStream(
+        activityId,
+        (chunk) => {
+          if (active) {
+            setData((previous) => previous + chunk);
           }
-          const localized = localizedAiOperationError(e, operationErrorT);
-          setError(localized ? new Error(localized) : e);
-          setIsLoading(false);
-        }
-      });
+        },
+        locale,
+        useCache,
+        signal,
+        purpose,
+        setOperation,
+        operationId,
+      )
+        .then(() => {
+          if (active) {
+            setIsLoading(false);
+            setIsDone(true);
+          }
+        })
+        .catch((e) => {
+          if (active) {
+            if (e instanceof DOMException && e.name === "AbortError") {
+              return;
+            }
+            if (
+              [
+                "AI_OPERATION_IN_PROGRESS",
+                "AI_OPERATION_COMPLETION_PENDING",
+                "AI_OPERATION_SETTLEMENT_PENDING",
+              ].includes(aiOperationErrorCode(e) ?? "")
+            ) {
+              setError(null);
+              setIsLoading(true);
+              setIsDone(false);
+              void queryClient.invalidateQueries({
+                queryKey: queryKeys.activity.aiReview(activityId, locale),
+              });
+              retryTimer = setTimeout(waitForResult, 3_000);
+              return;
+            }
+            const localized = localizedAiOperationError(e, operationErrorT);
+            setError(localized ? new Error(localized) : e);
+            setIsLoading(false);
+          }
+        });
+
+    void request();
 
     return () => {
       active = false;
+      if (retryTimer) clearTimeout(retryTimer);
       controller.abort();
     };
   }, [
@@ -174,6 +187,7 @@ export function useAiAnalysisStream(
     restartKey,
     enabled,
     purpose,
+    queryClient,
   ]);
 
   useEffect(() => {

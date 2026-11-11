@@ -4903,6 +4903,8 @@
     "aiTodaySuggestion": {
       "title": "智能教练 今日建议",
       "fallbackTitle": "今日训练提示",
+      "loadFailed": "今日建议暂时无法加载，请稍后重试。",
+      "reviewTitle": "训练复盘",
       "weatherAttribution": "{serviceName} 数据经 Trainingload.ai 处理",
       "loading": "智能教练正在思考中…",
       "summary": {

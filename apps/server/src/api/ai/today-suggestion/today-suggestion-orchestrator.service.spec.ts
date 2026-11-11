@@ -35,16 +35,15 @@ describe('TodaySuggestionOrchestratorService', () => {
     ).factFallback({
       locale: 'zh',
       localTime: '23:13',
-      newWorkoutWindowOpen: false,
       tomorrowWorkouts: [],
       todayWorkouts: [],
       activePlan: null,
       pendingInquiry: null,
-      constraints: ['TODAY_TRAINING_WINDOW_CLOSED'],
+      constraints: [],
     } as TodaySuggestionConstraintProjection);
 
-    expect(draft.headline).toBe('回顾今天，再为明天做准备');
-    expect(draft.summary).toContain('今天没有可确认的计划训练或活动完成记录');
+    expect(draft.headline).toBe('暂无近期训练记录');
+    expect(draft.summary).toContain('暂不据此推断你停止了训练');
     expect(draft.summary).not.toContain('23:13');
     expect(draft.summary).not.toContain('20:00');
     expect(draft.preferredIntent).toBe('ASK_COACH');
@@ -53,6 +52,7 @@ describe('TodaySuggestionOrchestratorService', () => {
   it('serializes identical requests into one Agent run and one generation', async () => {
     let stored: Record<string, any> | null = null;
     const prisma = {
+      $transaction: jest.fn(async (fn) => fn(prisma)),
       aiTodaySuggestion: {
         findUnique: jest.fn(async () => stored),
         update: jest.fn(async ({ data }) => {
@@ -120,7 +120,6 @@ describe('TodaySuggestionOrchestratorService', () => {
       })),
     };
     const engagement = {
-      previewContinuityStage: jest.fn(async () => 1),
       rollover: jest.fn(async () => ({})),
     };
     const workoutGenerator = { generate: jest.fn() };
@@ -150,6 +149,7 @@ describe('TodaySuggestionOrchestratorService', () => {
   it('composes a daily judgment with exactly one Workout from the dedicated generator', async () => {
     let stored: Record<string, any> | null = null;
     const prisma = {
+      $transaction: jest.fn(async (fn) => fn(prisma)),
       aiTodaySuggestion: {
         findUnique: jest.fn(async () => null),
         update: jest.fn(),
@@ -173,7 +173,6 @@ describe('TodaySuggestionOrchestratorService', () => {
       validUntil: new Date(Date.now() + 60 * 60_000),
       localTime: '10:00',
       minutesUntilDayEnd: 840,
-      newWorkoutWindowOpen: true,
       constraints: ['NO_ACTIVE_PLAN'],
       requiredToolNames: [],
       lightContext: {},
@@ -244,7 +243,6 @@ describe('TodaySuggestionOrchestratorService', () => {
       })),
     };
     const engagement = {
-      previewContinuityStage: jest.fn(async () => 0),
       rollover: jest.fn(async () => ({})),
     };
     const service = new TodaySuggestionOrchestratorService(
@@ -309,6 +307,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       tags: [],
     };
     const prisma = {
+      $transaction: jest.fn(async (fn) => fn(prisma)),
       aiTodaySuggestion: {
         findUnique: jest.fn(async () => cached),
         update: jest.fn(async () => cached),

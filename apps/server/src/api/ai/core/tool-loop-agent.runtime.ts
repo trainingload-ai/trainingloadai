@@ -1160,7 +1160,7 @@ export async function* streamCoachAnswer(args: {
         instructions: systemPromptFor(thinking),
         allowSystemInMessages: true,
         tools: allAiSdkTools,
-        toolChoice: 'auto',
+        toolChoice: ctx.backgroundTask ? 'required' : 'auto',
         temperature: 0.35,
         stopWhen: [
           ({ steps }) => coachStepBudgetReached(steps, maxSteps),
@@ -1231,7 +1231,11 @@ export async function* streamCoachAnswer(args: {
             activeTools: deliveryOnly
               ? []
               : (activeTools as Array<keyof typeof allAiSdkTools>),
-            toolChoice: deliveryOnly ? 'none' : 'auto',
+            toolChoice: ctx.backgroundTask
+              ? 'required'
+              : deliveryOnly
+                ? 'none'
+                : 'auto',
             providerOptions: buildCoachStreamProviderOptions({
               thinking,
               provider,

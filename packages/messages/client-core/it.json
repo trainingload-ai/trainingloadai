@@ -4475,6 +4475,8 @@
     "aiTodaySuggestion": {
       "title": "Coach intelligente · Consiglio di oggi",
       "fallbackTitle": "Indicazione di allenamento di oggi",
+      "loadFailed": "I consigli di oggi non sono temporaneamente disponibili. Riprova più tardi.",
+      "reviewTitle": "Riepilogo allenamento",
       "weatherAttribution": "Dati {serviceName} modificati da Trainingload.ai",
       "loading": "Il coach intelligente sta riflettendo…",
       "summary": {

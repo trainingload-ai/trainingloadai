@@ -55,6 +55,16 @@ describe('Athlete State prompt parsers', () => {
     ).toBe(false);
   });
 
+  it('treats a sleep-only request as optional rather than waiting for the athlete', () => {
+    expect(parseAthleteStateAssessment(assessment())).toMatchObject({
+      ok: true,
+      data: {
+        decisionReadiness: 'INSUFFICIENT_BUT_SAFE',
+        evidenceRequests: [],
+      },
+    });
+  });
+
   it('does not let UNKNOWN carry high confidence or irrelevant questions', () => {
     const parsed = parseAthleteStateAssessment(
       assessment({

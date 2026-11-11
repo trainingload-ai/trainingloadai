@@ -6,6 +6,7 @@ import {
 import { Prisma, type AthleteStateAssessment } from '@prisma/client';
 import { createHash, randomUUID } from 'node:crypto';
 import { PrismaService } from '@/prisma/prisma.service';
+import { normalizeAssessmentEvidenceRequests } from '@/athlete-state/domain/optional-evidence';
 import {
   ATHLETE_STATE_POLICY,
   ACTIVE_COACH_ASSESSMENT_CASE_STATUSES,
@@ -31,61 +32,6 @@ import { emitCoachAssessmentDecisionRequested } from './coach-assessment.events'
 
 const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value));
-
-function localizedFallbackRequest(locale: string): AthleteStateEvidenceRequest {
-  const zh = locale.toLowerCase().startsWith('zh');
-  return {
-    kind: 'RECENT_SLEEP',
-    reason: zh
-      ? '当前恢复证据不足，近期睡眠会直接影响今天是否需要保守调整。'
-      : 'Recovery evidence is incomplete, and recent sleep could change today’s conservative recommendation.',
-    decisionImpact: zh
-      ? '用于区分短暂疲劳与需要减量的恢复不足。'
-      : 'Helps distinguish transient fatigue from under-recovery that merits reducing training.',
-    question: {
-      id: 'recent_sleep',
-      header: zh ? '昨晚睡眠' : 'Last night',
-      question: zh
-        ? '昨晚的睡眠和平时相比怎么样？'
-        : 'How was your sleep last night compared with usual?',
-      options: zh
-        ? [
-            {
-              value: 'worse',
-              label: '明显更差',
-              description: '睡眠时长或质量明显低于平时。',
-            },
-            {
-              value: 'about_usual',
-              label: '和平时差不多',
-              description: '没有明显变化。',
-            },
-            {
-              value: 'better',
-              label: '比平时更好',
-              description: '睡得更足或醒来更精神。',
-            },
-          ]
-        : [
-            {
-              value: 'worse',
-              label: 'Clearly worse',
-              description: 'Sleep duration or quality was clearly below usual.',
-            },
-            {
-              value: 'about_usual',
-              label: 'About usual',
-              description: 'There was no meaningful change.',
-            },
-            {
-              value: 'better',
-              label: 'Better than usual',
-              description: 'You slept longer or woke feeling fresher.',
-            },
-          ],
-    },
-  };
-}
 
 function evidenceFamily(kind: string): string {
   const normalized = kind.trim().toUpperCase();
@@ -186,10 +132,13 @@ export class CoachAssessmentCaseService {
     outcome?: CoachAssessmentOutcome | null;
   }) {
     const now = new Date();
-    const request =
-      input.result.evidenceRequests[0] ??
-      localizedFallbackRequest(input.locale);
-    const needsQuestion = input.result.decisionReadiness === 'NEEDS_USER_INPUT';
+    input = {
+      ...input,
+      result: normalizeAssessmentEvidenceRequests(input.result),
+    };
+    const request = input.result.evidenceRequests[0];
+    const needsQuestion =
+      Boolean(request) && input.result.decisionReadiness === 'NEEDS_USER_INPUT';
     const needsData = input.result.decisionReadiness === 'WAITING_FOR_SYNC';
     const dedupeKey = createHash('sha256')
       .update(
@@ -621,6 +570,10 @@ export class CoachAssessmentCaseService {
     hasActivePlan: boolean;
     locale: string;
   }) {
+    input = {
+      ...input,
+      result: normalizeAssessmentEvidenceRequests(input.result),
+    };
     const assessmentCase = await this.queries.requireOwned(
       input.userId,
       input.caseId,

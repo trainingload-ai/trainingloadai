@@ -4475,6 +4475,8 @@
     "aiTodaySuggestion": {
       "title": "Entrenador inteligente · Recomendación de hoy",
       "fallbackTitle": "Orientación de entrenamiento para hoy",
+      "loadFailed": "Las recomendaciones de hoy no están disponibles temporalmente. Inténtalo más tarde.",
+      "reviewTitle": "Resumen del entrenamiento",
       "weatherAttribution": "Datos de {serviceName} modificados por Trainingload.ai",
       "loading": "El entrenador inteligente está pensando…",
       "summary": {

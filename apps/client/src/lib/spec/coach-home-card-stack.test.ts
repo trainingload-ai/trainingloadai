@@ -13,10 +13,27 @@ describe("coach home card stack", () => {
     ]);
   });
 
-  it("puts pending decisions in front of today’s suggestion", () => {
+  it("keeps urgent safety items first without hiding the daily judgment", () => {
+    const items = buildCoachHomeStackItems(
+      [
+        { id: "urgent", riskTier: "HIGH" },
+        { id: "ordinary", riskTier: "LOW" },
+      ],
+      3,
+      null,
+      { caseId: "safety-case", state: "HIGH_CONCERN" },
+    );
+    expect(items.map((item) => item.id)).toEqual([
+      "urgent",
+      "inquiry-safety-case",
+      "suggestion",
+    ]);
+  });
+
+  it("keeps today’s judgment ahead of ordinary pending decisions", () => {
     const items = buildCoachHomeStackItems(decisions.slice(0, 1));
-    expect(items.map((item) => item.kind)).toEqual(["decision", "suggestion"]);
-    expect(items[0]).toMatchObject({ id: "d-high" });
+    expect(items.map((item) => item.kind)).toEqual(["suggestion", "decision"]);
+    expect(items[1]).toMatchObject({ id: "d-high" });
   });
 
   it("hides extra decisions so at most 3 cards show, with suggestion always kept", () => {
@@ -26,9 +43,9 @@ describe("coach home card stack", () => {
     );
     expect(visible).toHaveLength(3);
     expect(visible.map((item) => item.id)).toEqual([
+      "suggestion",
       "d-high",
       "d-later",
-      "suggestion",
     ]);
   });
 
@@ -47,13 +64,13 @@ describe("coach home card stack", () => {
   it("keeps ordinary decisions ahead of guidance under the visible-card cap", () => {
     const items = buildCoachHomeStackItems(decisions, 3, { id: "g-1" });
     expect(items.map((item) => item.kind)).toEqual([
-      "decision",
-      "decision",
       "suggestion",
+      "decision",
+      "decision",
     ]);
   });
 
-  it("puts a state Inquiry ahead of an ordinary decision and guidance", () => {
+  it("keeps ordinary inquiries optional behind the daily judgment", () => {
     const items = buildCoachHomeStackItems(
       [{ id: "ordinary", riskTier: "LOW" }],
       4,
@@ -61,10 +78,10 @@ describe("coach home card stack", () => {
       { caseId: "case-1" },
     );
     expect(items.map((item) => item.kind)).toEqual([
-      "inquiry",
-      "decision",
-      "guidance",
       "suggestion",
+      "decision",
+      "inquiry",
+      "guidance",
     ]);
   });
 });

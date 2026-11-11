@@ -260,6 +260,8 @@ export class ActivityAiReviewService {
     trigger: $Enums.ActivityAiReviewTrigger;
     language?: string;
     metadata?: Record<string, unknown>;
+    /** Inline execution already owns admission; do not expose it to the worker. */
+    runInline?: boolean;
   }) {
     this.capabilities?.require('ai');
     const language = resolveSupportedLocale(args.language ?? 'zh');
@@ -277,21 +279,23 @@ export class ActivityAiReviewService {
       });
 
     if (
-      args.trigger !== $Enums.ActivityAiReviewTrigger.MANUAL &&
       existing?.evidenceHash === evidenceHash &&
       existing.promptVersion === ACTIVITY_AI_REVIEW_PROMPT_VERSION &&
       existing.evidenceVersion === ACTIVITY_COACH_EVIDENCE_VERSION &&
-      (existing.status === $Enums.ActivityAiReviewStatus.SUCCEEDED ||
-        existing.status === $Enums.ActivityAiReviewStatus.PENDING)
+      (existing.status === $Enums.ActivityAiReviewStatus.RUNNING ||
+        (args.trigger !== $Enums.ActivityAiReviewTrigger.MANUAL &&
+          existing.status !== $Enums.ActivityAiReviewStatus.SKIPPED))
     ) {
       return { id: existing.id, status: existing.status };
     }
 
     const resetPending = {
-      status: $Enums.ActivityAiReviewStatus.PENDING,
+      status: args.runInline
+        ? $Enums.ActivityAiReviewStatus.RUNNING
+        : $Enums.ActivityAiReviewStatus.PENDING,
       attempts: 0,
-      lockedAt: null,
-      startedAt: null,
+      lockedAt: args.runInline ? new Date() : null,
+      startedAt: args.runInline ? new Date() : null,
       finishedAt: null,
       failedAt: null,
     };
@@ -320,8 +324,9 @@ export class ActivityAiReviewService {
       data: {
         activityId: args.activityId,
         userId: args.userId,
-        status: $Enums.ActivityAiReviewStatus.PENDING,
+        ...resetPending,
         trigger: args.trigger,
+        availableAt: new Date(),
         language,
         promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
         evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,

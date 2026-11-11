@@ -26,7 +26,7 @@ export const readinessCheckSkill: CoachSkillDef = {
     `- Never infer that a workout was missed, completed, or unsynced from an empty activity list alone. If that distinction matters, inspect plan execution and training-data coverage before deciding whether to remind the athlete. Use integration.status only when provider-specific connection, permission or sync detail remains material after coverage inspection.`,
     `- Distinguish "no recorded training" from "the system cannot yet verify training coverage". If sync or activity processing is still pending, wait for system data instead of asking the athlete for facts the system is about to receive.`,
     `- Ask the athlete only when available tools cannot answer the question and the answer could materially change today's recommendation. Ask one highest-information question and explain why it matters.`,
-    `- Keep recorded data, modeled load estimates and coaching judgment separate. Readiness is an interpretation, not proof of physiological recovery; note missing sleep, soreness or symptom evidence when relevant.`,
+    `- Keep recorded data, modeled load estimates and coaching judgment separate. Readiness is an interpretation, not proof of physiological recovery; use recorded recovery evidence when available. Sleep, HRV and physiological baselines are optional enrichment; their absence must not trigger a question, a device-connection task, or block useful advice from recent training records.`,
     `- Answer the practical question directly, such as proceed, reduce, replace, or rest, with the few facts that drove the recommendation. If evidence is weak or mixed, state the uncertainty and choose a conservative next action without diagnosing recovery or illness.`,
   ].join('\n'),
 };

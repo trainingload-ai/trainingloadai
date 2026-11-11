@@ -7,6 +7,7 @@ import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
 } from './today-suggestion.types';
+import { hasRecentTrainingActivity } from './today-suggestion.types';
 
 const RECOMMENDATION_KINDS = new Set<TodaySuggestionRecommendationKind>([
   'TRAIN',
@@ -72,11 +73,17 @@ export function validateTodaySuggestionDraft(
     throw new Error('TODAY_SUGGESTION_INVALID_DRAFT');
   }
   const kind = String(recommendation.kind ?? '').toUpperCase();
-  const preferredIntent = String(row.preferredIntent ?? '').toUpperCase();
+  const preferredIntent =
+    row.preferredIntent == null
+      ? null
+      : String(row.preferredIntent).toUpperCase();
   if (!RECOMMENDATION_KINDS.has(kind as TodaySuggestionRecommendationKind)) {
     throw new Error('TODAY_SUGGESTION_INVALID_RECOMMENDATION');
   }
-  if (!isTodaySuggestionIntentType(preferredIntent)) {
+  if (
+    preferredIntent !== null &&
+    !isTodaySuggestionIntentType(preferredIntent)
+  ) {
     throw new Error('TODAY_SUGGESTION_INVALID_INTENT');
   }
   const rawIntensity = String(recommendation.intensity ?? '').toUpperCase();
@@ -115,9 +122,27 @@ export function validateTodaySuggestionDraft(
       ? { uncertainty: optionalText(row.uncertainty, 240) }
       : {}),
     evidenceCodes: stringList(row.evidenceCodes, 6, 64),
-    preferredIntent,
+    preferredIntent: isTodaySuggestionIntentType(preferredIntent)
+      ? preferredIntent
+      : null,
     secondaryIntents,
     tags: stringList(row.tags, 5, 32),
+    ...(Array.isArray(row.coachDecisionHandling)
+      ? {
+          coachDecisionHandling: row.coachDecisionHandling.map((item) => {
+            const handling = record(item);
+            return {
+              decisionId: String(handling?.decisionId ?? ''),
+              handling: String(
+                handling?.handling ?? '',
+              ).toUpperCase() as NonNullable<
+                TodaySuggestionDraft['coachDecisionHandling']
+              >[number]['handling'],
+              reason: optionalText(handling?.reason, 320) ?? null,
+            };
+          }),
+        }
+      : {}),
   };
 }
 
@@ -132,17 +157,48 @@ export function validateTodaySuggestionDraftForProjection(
 ): TodaySuggestionDraft {
   const draft = validateTodaySuggestionDraft(raw);
   if (
+    draft.recommendation.kind === 'TRAIN' &&
+    (projection.constraints ?? []).includes('TODAY_WORKOUT_COMPLETED')
+  ) {
+    throw new Error(
+      'TODAY_SUGGESTION_OUTPUT_REJECTED_UNREQUESTED_EXTRA_TRAINING',
+    );
+  }
+  if (
+    hasRecentTrainingActivity(projection) &&
+    (draft.recommendation.kind === 'SYNC_DATA' ||
+      ['OPEN_IMPORT', 'OPEN_PROVIDER_SETTINGS'].includes(draft.preferredIntent))
+  ) {
+    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_UNNECESSARY_DATA_TASK');
+  }
+  if (
+    hasRecentTrainingActivity(projection) &&
+    !projection.highConcern &&
+    (['CHECK_IN', 'REVIEW_ACTIVITY'].includes(draft.recommendation.kind) ||
+      draft.preferredIntent === 'OPEN_ASSESSMENT')
+  ) {
+    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_UNNECESSARY_CHECK_IN');
+  }
+  if (
+    ['REST_TODAY', 'TRAINED_ELSEWHERE', 'DATA_PENDING'].includes(
+      projection.userFeedback?.feedback ?? '',
+    ) &&
+    (draft.recommendation.kind === 'TRAIN' ||
+      [
+        'CREATE_TODAY_WORKOUT',
+        'OPEN_TODAY_WORKOUT',
+        'SCHEDULE_REMINDER',
+      ].includes(draft.preferredIntent))
+  ) {
+    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_EXPLICIT_FEEDBACK');
+  }
+  if (
     projection.highConcern &&
-    (draft.recommendation.intensity === 'HARD' ||
+    (draft.recommendation.kind === 'TRAIN' ||
+      draft.recommendation.intensity === 'HARD' ||
       draft.preferredIntent === 'CREATE_TODAY_WORKOUT')
   ) {
     throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_HIGH_CONCERN');
-  }
-  if (
-    projection.pendingInquiry &&
-    draft.preferredIntent !== 'OPEN_ASSESSMENT'
-  ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_PENDING_ASSESSMENT');
   }
   if (
     projection.todayWorkouts.some((workout) =>
@@ -153,15 +209,56 @@ export function validateTodaySuggestionDraftForProjection(
     throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_DUPLICATE_WORKOUT');
   }
   if (
-    projection.newWorkoutWindowOpen === false &&
-    (draft.recommendation.kind === 'TRAIN' ||
-      draft.preferredIntent === 'CREATE_TODAY_WORKOUT' ||
-      (draft.preferredIntent === 'OPEN_TODAY_WORKOUT' &&
-        !projection.todayWorkouts.some(
-          (workout) => workout.status === 'IN_PROGRESS',
-        )))
+    draft.recommendation.kind === 'TRAIN' &&
+    !(
+      draft.preferredIntent === 'OPEN_TODAY_WORKOUT' &&
+      projection.todayWorkouts.some(
+        (workout) => workout.status === 'IN_PROGRESS',
+      )
+    ) &&
+    Number.isFinite(projection.minutesUntilDayEnd) &&
+    (draft.recommendation.durationMinutes ??
+      (projection.todayWorkouts.find((workout) =>
+        ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
+      )?.plannedDurationSeconds ?? 1_800) / 60) > projection.minutesUntilDayEnd
   ) {
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_WINDOW_CLOSED');
+    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_INSUFFICIENT_TIME');
   }
+  for (const decision of projection.coachState?.decisions ?? []) {
+    if (!['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance))
+      continue;
+    const handling = draft.coachDecisionHandling?.find(
+      (item) => item.decisionId === decision.id,
+    );
+    const allowed =
+      decision.stateRole === 'ACTIVE_PROPOSAL'
+        ? ['FOLLOW', 'CONDITIONAL', 'DEPART']
+        : ['REJECTED_HISTORY', 'APPLIED_HISTORY'].includes(decision.stateRole)
+          ? ['HISTORY']
+          : ['IGNORE'];
+    if (
+      !handling ||
+      !allowed.includes(handling.handling) ||
+      (handling.handling === 'DEPART' && !handling.reason)
+    ) {
+      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION');
+    }
+  }
+  const factualEvidence = new Set<string>(projection.constraints ?? []);
+  if (hasRecentTrainingActivity(projection))
+    factualEvidence.add('RECENT_ACTIVITY');
+  if (projection.activePlan) factualEvidence.add('PLAN_CONTEXT');
+  const load = record(projection.lightContext?.load);
+  if (load && Object.values(load).some((value) => typeof value === 'number'))
+    factualEvidence.add('RECENT_LOAD');
+  const competition = record(projection.lightContext?.competition);
+  if (
+    Array.isArray(competition?.activeInfluences) &&
+    competition.activeInfluences.length
+  )
+    factualEvidence.add('COMPETITION_CONTEXT');
+  draft.evidenceCodes = draft.evidenceCodes.filter((code) =>
+    factualEvidence.has(code),
+  );
   return draft;
 }
