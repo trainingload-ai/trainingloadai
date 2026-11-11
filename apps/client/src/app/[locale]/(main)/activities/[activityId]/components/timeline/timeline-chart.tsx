@@ -24,7 +24,10 @@ import {
 } from "@/lib/activity-timeline";
 import { formatSecondsToTime } from "@/utils/timeFormatter";
 import type { TimelineRowConfig } from "@/hooks/useActivityTimelineLayout";
-import type { TimelineScale } from "@/lib/activity-timeline-segments";
+import {
+  timelineMetricStatistics,
+  type TimelineScale,
+} from "@/lib/activity-timeline-segments";
 import ChartExpandDialog from "../charts/chart-expand-dialog";
 import { TimelineRowSettings } from "./timeline-row-settings";
 import type { TimelineMetric } from "./use-activity-timeline";
@@ -205,6 +208,7 @@ export const TimelineChart = memo(function TimelineChart({
   plotViewport,
   viewWidth,
   current,
+  statisticsRange,
   metrics,
   onChange,
   onRemove,
@@ -214,6 +218,7 @@ export const TimelineChart = memo(function TimelineChart({
 }: PlotProps & {
   viewWidth: number;
   current: number | null;
+  statisticsRange: TimelineRange | null;
   metrics: TimelineMetric[];
   onChange: (change: Partial<TimelineRowConfig>) => void;
   onRemove: () => void;
@@ -227,6 +232,31 @@ export const TimelineChart = memo(function TimelineChart({
     current === null
       ? null
       : timelineValueAt(metric.points, current, metric.gap);
+  const statistics = useMemo(() => {
+    if (!statisticsRange) return null;
+    const values = timelineMetricStatistics(metric.points, statisticsRange);
+    return (
+      values && {
+        ...values,
+        average: metric.average
+          ? metric.average(statisticsRange)
+          : values.average,
+      }
+    );
+  }, [metric, statisticsRange]);
+  const plotWidth = Math.max(
+    1,
+    viewWidth - TIMELINE_LABEL_WIDTH - TIMELINE_END_PADDING,
+  );
+  const cursorPosition = current === null ? null : scale.positionAt(current);
+  const readingX =
+    cursorPosition === null
+      ? null
+      : ((cursorPosition - plotViewport[0]) /
+          (plotViewport[1] - plotViewport[0])) *
+        plotWidth;
+  const showReading =
+    readingX !== null && readingX >= 0 && readingX <= plotWidth;
   return (
     <div
       className="group grid border-b border-border/35 bg-muted/20 dark:bg-muted/25"
@@ -236,7 +266,7 @@ export const TimelineChart = memo(function TimelineChart({
       }}
       data-timeline-row={config.id}
     >
-      <div className="sticky left-0 z-10 flex flex-col justify-center gap-1.5 bg-card px-3 py-1">
+      <div className="sticky left-0 z-10 flex flex-col justify-center gap-1 bg-card px-3 py-1">
         <div className="flex min-w-0 items-center gap-1">
           <TimelineRowSettings
             config={config}
@@ -263,28 +293,43 @@ export const TimelineChart = memo(function TimelineChart({
             />
           </ChartExpandDialog>
         </div>
-        <div className="flex min-w-0 items-baseline gap-1 pl-3 tabular-nums">
-          <span className="truncate text-xl font-medium leading-5">
-            {value === null ? "—" : metric.format(value)}
-          </span>
-          <span className="shrink-0 text-[11px] text-muted-foreground">
-            {metric.unit}
-            {metric.calculated ? (
-              <span className="ml-1 text-[10px]">{t("calculated")}</span>
-            ) : null}
-          </span>
+        <div className="h-6">
+          {statisticsRange ? (
+            <dl
+              data-timeline-statistics
+              data-statistics-start={statisticsRange[0]}
+              data-statistics-end={statisticsRange[1]}
+              aria-label={`${t("statistics.range")} · ${label} (${metric.unit})`}
+              className="grid grid-cols-3 gap-1 tabular-nums"
+              title={`${metric.unit}${metric.calculated ? ` · ${t("calculated")}` : ""}`}
+            >
+              {(["average", "minimum", "maximum"] as const).map((key) => {
+                const stat = statistics?.[key] ?? null;
+                return (
+                  <div key={key} className="min-w-0">
+                    <dt className="truncate text-[10px] leading-3 text-muted-foreground">
+                      {t(`statistics.${key}`)}
+                    </dt>
+                    <dd
+                      className="truncate text-xs font-medium leading-3"
+                      aria-label={`${t(`statistics.${key}`)} ${stat === null ? "—" : metric.format(stat)} ${metric.unit}`}
+                    >
+                      {stat === null ? "—" : metric.format(stat)}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          ) : null}
         </div>
       </div>
       <div
         role="img"
         aria-label={`${label} (${metric.unit})`}
-        className="sticky justify-self-start"
+        className="sticky justify-self-start overflow-hidden"
         style={{
           left: TIMELINE_LABEL_WIDTH,
-          width: Math.max(
-            1,
-            viewWidth - TIMELINE_LABEL_WIDTH - TIMELINE_END_PADDING,
-          ),
+          width: plotWidth,
         }}
       >
         <TimelinePlot
@@ -294,6 +339,32 @@ export const TimelineChart = memo(function TimelineChart({
           scale={scale}
           plotViewport={plotViewport}
         />
+        {showReading ? (
+          <div
+            data-timeline-reading
+            className="pointer-events-none absolute top-1.5 z-20 flex items-baseline gap-1 whitespace-nowrap rounded-control border border-foreground bg-foreground px-2 py-1 text-xs text-background tabular-nums"
+            style={{
+              left:
+                readingX! > plotWidth * 0.65
+                  ? readingX! - 8
+                  : Math.max(44, readingX! + 8),
+              transform:
+                readingX! > plotWidth * 0.65 ? "translateX(-100%)" : undefined,
+            }}
+          >
+            <span className="font-semibold">
+              {value === null ? "—" : metric.format(value)}
+            </span>
+            <span className="text-[10px] text-background/75">
+              {metric.unit}
+            </span>
+            {metric.calculated ? (
+              <span className="text-[10px] text-background/75">
+                {t("calculated")}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );

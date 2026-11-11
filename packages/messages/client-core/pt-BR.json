@@ -1905,7 +1905,13 @@
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
     "segmentScaleDescription": "Segmentos normais seguem a proporção de tempo ou distância, com mínimo de 32 px para os muito curtos. Passe o cursor ou foque os segmentos estreitos para ver todas as estatísticas.",
-    "chartColorDescription": "Choose the line color for this chart."
+    "chartColorDescription": "Choose the line color for this chart.",
+    "statistics": {
+      "average": "Média",
+      "minimum": "Mín.",
+      "maximum": "Máx.",
+      "range": "Estatísticas do intervalo"
+    }
   },
   "ActivityDetail": {
     "title": "Detalhes da atividade",

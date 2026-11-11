@@ -1997,7 +1997,13 @@
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
     "segmentScaleDescription": "一般分段依時間或距離比例顯示，極短分段保留至少 32 像素；窄分段可懸停或聚焦查看完整統計。",
-    "chartColorDescription": "Choose the line color for this chart."
+    "chartColorDescription": "Choose the line color for this chart.",
+    "statistics": {
+      "average": "平均",
+      "minimum": "最小",
+      "maximum": "最大",
+      "range": "範圍統計"
+    }
   },
   "ActivityDetail": {
     "title": "活動詳情",

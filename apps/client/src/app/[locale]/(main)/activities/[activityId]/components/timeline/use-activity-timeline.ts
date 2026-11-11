@@ -27,7 +27,9 @@ import {
   timelineGapLimit,
   timelineLaps,
   type TimelinePoint,
+  type TimelineRange,
 } from "@/lib/activity-timeline";
+import { timelineWeightedAverage } from "@/lib/activity-timeline-segments";
 import type { TimelineTrackResponse } from "@shared/activity-timeline";
 
 export type TimelineMetric = {
@@ -39,6 +41,7 @@ export type TimelineMetric = {
   format: (value: number) => string;
   inverted?: boolean;
   calculated?: boolean;
+  average?: (range: TimelineRange) => number | null;
 };
 
 const METRICS: MetricId[] = [
@@ -219,6 +222,8 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
       .map((definition) => {
         const points = definition.points.map((point) => {
           let value = point.value;
+          if (definition.id === "heartRate" && value !== null && value <= 0)
+            value = null;
           if (value !== null && definition.id === "pace")
             value =
               value > 0.5
@@ -253,6 +258,18 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
           calculated:
             definition.id === "power" &&
             byMetric.get("power")?.metadata.powerSource === "CALCULATED",
+          average:
+            definition.id === "pace"
+              ? (range: TimelineRange) => {
+                  const speed = timelineWeightedAverage(
+                    definition.points,
+                    range,
+                  );
+                  return speed !== null && speed > 0
+                    ? (systemUnit === "imperial" ? 1609.344 : 1000) / speed
+                    : null;
+                }
+              : undefined,
           format: (value: number) =>
             definition.id === "pace"
               ? formatSecondsToTime(Math.round(value))

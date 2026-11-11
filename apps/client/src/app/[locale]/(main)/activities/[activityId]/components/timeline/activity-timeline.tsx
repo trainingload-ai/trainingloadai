@@ -108,6 +108,7 @@ export default function ActivityTimeline({
   const [range, setRange] = useState<TimelineRange | null>(null);
   const [zoom, setZoom] = useState<TimelineRange | null>(null);
   const [preview, setPreview] = useState<TimelineRange | null>(null);
+  const [showFullStatistics, setShowFullStatistics] = useState(false);
   const plotRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const { ref: observeScroll, size: scrollSize } =
@@ -130,6 +131,11 @@ export default function ActivityTimeline({
     axis === "distance" ? distance!.at(-1)!.value! : (model?.duration ?? 0);
   const current = hovered ?? pinned;
   const activeRange = preview ?? range;
+  const statisticsRange = useMemo<TimelineRange | null>(
+    () =>
+      activeRange ?? (showFullStatistics && model ? [0, model.duration] : null),
+    [activeRange, showFullStatistics, model],
+  );
   const coordinateAtTime = useCallback(
     (time: number) =>
       axis === "time"
@@ -433,6 +439,7 @@ export default function ActivityTimeline({
     setSelectedSegmentId(null);
     setRange(null);
     setPreview(null);
+    setShowFullStatistics(true);
   };
   const finishPointer = (event: PointerEvent) => {
     const start = drag.current;
@@ -449,6 +456,7 @@ export default function ActivityTimeline({
         Math.max(start.time, time),
       ];
       setSelectedSegmentId(null);
+      setShowFullStatistics(false);
       setRange(selected);
       setZoom(selected);
     }
@@ -596,6 +604,7 @@ export default function ActivityTimeline({
                   selected={selectedSegmentId === group.id}
                   onSelect={() => {
                     stopHover();
+                    setShowFullStatistics(false);
                     const selected = selectedSegmentId === group.id;
                     setSelectedSegmentId(selected ? null : group.id);
                     setRange(selected ? null : group.range);
@@ -637,6 +646,7 @@ export default function ActivityTimeline({
                 plotViewport={plotViewport}
                 viewWidth={scrollSize.width || 1084}
                 current={current}
+                statisticsRange={statisticsRange}
                 onChange={(change) => updateRow(config.id, change)}
                 onRemove={() =>
                   setLayout((value) => ({

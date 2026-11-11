@@ -207,6 +207,7 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     exact: true,
   });
   await expect(timeline.getByRole("img")).toHaveCount(4);
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(0);
   await expect(timeline.getByText("设备圈段", { exact: true })).toHaveCount(0);
   await expect(timeline.getByText("自定义分段", { exact: true })).toHaveCount(
     0,
@@ -258,6 +259,33 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     .boundingBox())!.width;
   expect(tailWidth).toBeCloseTo(32, 0);
   await tail.click();
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(4);
+  const cadenceStatistics = timeline.locator(
+    '[data-timeline-row="cadence"] [data-timeline-statistics]',
+  );
+  await expect(cadenceStatistics.locator("dd")).toHaveText([
+    "164",
+    "164",
+    "164",
+  ]);
+  const hoverPlot = (await timeline
+    .locator(".cursor-crosshair")
+    .boundingBox())!;
+  await page.mouse.move(hoverPlot.x + hoverPlot.width * 0.4, hoverPlot.y + 30);
+  await expect(timeline.locator("[data-timeline-reading]")).toHaveCount(4);
+  const readingBounds = (await timeline
+    .locator("[data-timeline-reading]")
+    .first()
+    .boundingBox())!;
+  expect(readingBounds.x).toBeGreaterThanOrEqual(hoverPlot.x);
+  expect(readingBounds.x + readingBounds.width).toBeLessThanOrEqual(
+    hoverPlot.x + hoverPlot.width,
+  );
+  await expect(cadenceStatistics.locator("dd")).toHaveText([
+    "164",
+    "164",
+    "164",
+  ]);
   expect(
     (await timeline.locator('[data-segment-id="lap:8"]').boundingBox())!.width,
   ).toBeCloseTo(tailWidth, 5);
@@ -276,6 +304,9 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     path: test.info().outputPath("timeline-short-segment-tooltip.png"),
   });
   await page.keyboard.press("Escape");
+  await tail.click();
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(0);
+  await tail.click();
   await page.mouse.move(0, 0);
   await page.keyboard.press("Shift+Tab");
   await page.keyboard.press("Tab");
@@ -350,6 +381,16 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     expect(selection.width).toBeCloseTo(segment.width, 0);
   };
   await expectSelectionAligned();
+  const meanSpeed =
+    rows.slice(96, 144).reduce((total, row) => total + row.speed, 0) / 48;
+  const paceSeconds = Math.round(1000 / meanSpeed);
+  await expect(
+    timeline
+      .locator('[data-timeline-row="pace"] [data-timeline-statistics] dd')
+      .first(),
+  ).toHaveText(
+    `${Math.floor(paceSeconds / 60)}:${String(paceSeconds % 60).padStart(2, "0")}`,
+  );
   await timeline.getByRole("button", { name: "时间线选项" }).click();
   await page.getByRole("menuitemradio", { name: "距离", exact: true }).click();
   await expectSelectionAligned();
@@ -377,6 +418,9 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     steps: 8,
   });
   await page.mouse.up();
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(4);
+  await expect(cadenceStatistics.locator("dd").nth(1)).toHaveText("164");
+  await expect(cadenceStatistics.locator("dd").nth(2)).toHaveText("164");
   await expect(timeline).not.toHaveAttribute("data-timeline-start", "0");
   const zoomStart = await timeline.getAttribute("data-timeline-start");
   const zoomEnd = await timeline.getAttribute("data-timeline-end");
@@ -391,6 +435,17 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await timeline.getByRole("button", { name: "时间线选项" }).click();
   await page.getByRole("menuitem", { name: "恢复全程" }).click();
   await expect(timeline).toHaveAttribute("data-timeline-start", "0");
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(4);
+  await expect(cadenceStatistics).toHaveAttribute("data-statistics-start", "0");
+  await expect(cadenceStatistics).toHaveAttribute(
+    "data-statistics-end",
+    String(duration),
+  );
+  await expect(cadenceStatistics.locator("dd")).toHaveText([
+    "170",
+    "164",
+    "182",
+  ]);
   await timeline.getByRole("button", { name: "配置海拔图表" }).click();
   await page.getByRole("button", { name: "选择颜色", exact: true }).click();
   await page.getByRole("button", { name: "#3b82f6", exact: true }).click();
@@ -474,6 +529,14 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     )
     .not.toBe(initialPlot);
   await page.keyboard.press("Escape");
+  const readingPlot = (await plot.boundingBox())!;
+  await page.mouse.move(
+    readingPlot.x + readingPlot.width * 0.5,
+    readingPlot.y + 20,
+  );
+  await expect(
+    timeline.locator("[data-timeline-reading]").first(),
+  ).toBeVisible();
   await timeline.screenshot({
     path: test.info().outputPath("timeline-light.png"),
   });
