@@ -206,26 +206,25 @@ for (const scenario of [
         ),
     ).toBeVisible();
     await expect(page.getByText("所选历史范围 + 未来四周预测")).toBeVisible();
-    const valuesBox = await page
-      .getByTestId("vdot-current-and-forecast")
-      .boundingBox();
-    const contextBox = await page
-      .getByTestId("vdot-forecast-context")
-      .boundingBox();
-    expect(valuesBox).not.toBeNull();
-    expect(contextBox).not.toBeNull();
-    if (testInfo.project.name === "desktop") {
-      expect(Math.max(valuesBox!.y, contextBox!.y)).toBeLessThan(
-        Math.min(
-          valuesBox!.y + valuesBox!.height,
-          contextBox!.y + contextBox!.height,
-        ),
-      );
-    } else {
-      expect(contextBox!.y).toBeGreaterThanOrEqual(
-        valuesBox!.y + valuesBox!.height,
-      );
-    }
+    // Mounting the chart can resize and recenter the dialog. Measure both
+    // sections in the same frame, then wait for the responsive layout.
+    await expect
+      .poll(() =>
+        page.getByTestId("vdot-forecast-summary").evaluate((root, desktop) => {
+          const values = root
+            .querySelector('[data-testid="vdot-current-and-forecast"]')
+            ?.getBoundingClientRect();
+          const context = root
+            .querySelector('[data-testid="vdot-forecast-context"]')
+            ?.getBoundingClientRect();
+          if (!values || !context) return false;
+          return desktop
+            ? Math.max(values.top, context.top) <
+                Math.min(values.bottom, context.bottom)
+            : context.top >= values.bottom;
+        }, testInfo.project.name === "desktop"),
+      )
+      .toBe(true);
     await page.getByRole("tab", { name: "60天", exact: true }).click();
     await expect(
       page.locator("[data-uplot-chart] canvas").last(),
