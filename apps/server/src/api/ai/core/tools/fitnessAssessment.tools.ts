@@ -33,7 +33,7 @@ export const fitnessMethodsTool = buildAiTool({
   // 完整目录包含各方法的原理与解释，避免默认预算截掉后面的指标说明。
   maxResultChars: 24_000,
   description:
-    'Discover current fitness estimators, their rationale, interpretation and execution requirements. Includes LTHR from ordinary activities (lthr-activity-observation, no maximal test required), CP/FTP, CS/CSS, TP, VO2_MAX (VDOT), P_MAX, MAX_HR and RESTING_HR. Query the current catalog for a new assessment; historical method results may be outdated. Requirements describe calculator inputs; interpretation explains real-training estimates. Activate fitness-assessment to calculate from the requested data. Stored settings are not a new calculation.',
+    'Discover current fitness estimators, their rationale, interpretation and execution requirements. Includes LTHR from ordinary activities (lthr-activity-observation, no maximal test required), CP/FTP, CS/CSS, TP, VO2_MAX (最大摄氧量 / VO2max), P_MAX, MAX_HR and RESTING_HR. Query the current catalog for a new assessment; historical method results may be outdated. Requirements describe calculator inputs; interpretation explains real-training estimates. Activate fitness-assessment to calculate from the requested data. Stored settings are not a new calculation.',
   parameters: {
     type: 'object',
     additionalProperties: false,

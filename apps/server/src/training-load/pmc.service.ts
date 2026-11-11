@@ -41,6 +41,7 @@ import {
   timeConstantDecayFactor,
 } from './pmc-formula';
 import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
+import { VdotForecastService } from './vdot-forecast.service';
 import {
   activityLocalDate,
   localDateKeyToUtcDate,
@@ -162,7 +163,12 @@ export class PMCService {
     private readonly loadReadout: LoadReadoutService,
     private readonly users: UserQueryService,
     private readonly analysisConfigs: UserAnalysisConfigService,
+    private readonly vdotForecast: VdotForecastService,
   ) {}
+
+  getVdotForecast(userId: string) {
+    return this.vdotForecast.getForecast(userId);
+  }
 
   async listRange(
     userId: string,

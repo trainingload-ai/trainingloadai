@@ -23,6 +23,9 @@ export function FitnessAssessmentCard({
 }) {
   const locale = useLocale();
   const t = useTranslations("AiCoachPage.fitnessAssessment");
+  const metricText = useTranslations("dashboard.fitnessStatus");
+  const metricLabel = (metric: Parameters<typeof fitnessMetricLabel>[0]) =>
+    fitnessMetricLabel(metric, metricText("vo2Max.title"));
   const [busy, setBusy] = useState(false),
     [sent, setSent] = useState(false),
     [error, setError] = useState(false),
@@ -69,7 +72,7 @@ export function FitnessAssessmentCard({
         <p>{t(`statuses.${r.status}`)}</p>
         {r.candidates.map((c) => (
           <p key={c.metric} className="font-medium tabular-nums">
-            {fitnessMetricLabel(c.metric)}: {c.currentValue ?? "—"} → {c.value}{" "}
+            {metricLabel(c.metric)}: {c.currentValue ?? "—"} → {c.value}{" "}
             {c.unit}
             {c.currentRecordedAt
               ? ` (${t("priorRecord")}: ${c.currentRecordedAt.slice(0, 10)})`
@@ -129,7 +132,7 @@ export function FitnessAssessmentCard({
               {o.changes
                 .map(
                   (c) =>
-                    `${fitnessMetricLabel(c.metric)} ${c.currentValue ?? "—"} → ${c.value} ${c.unit}`,
+                    `${metricLabel(c.metric)} ${c.currentValue ?? "—"} → ${c.value} ${c.unit}`,
                 )
                 .join(", ")}
             </p>

@@ -10,13 +10,7 @@
       "1.1.19",
       "1.1.20"
     ],
-    "applicationRollbackTo": [
-      "1.1.15",
-      "1.1.17",
-      "1.1.18",
-      "1.1.19",
-      "1.1.20"
-    ],
+    "applicationRollbackTo": ["1.1.15", "1.1.17", "1.1.18", "1.1.19", "1.1.20"],
     "backupRequired": true
   },
   "database": {
@@ -116,6 +110,10 @@
         "releaseVersion": "1.1.21"
       },
       "0024_activity_analysis_segments": {
+        "phase": "expand",
+        "releaseVersion": "1.1.21"
+      },
+      "0025_vdot_forecast_snapshot": {
         "phase": "expand",
         "releaseVersion": "1.1.21"
       }

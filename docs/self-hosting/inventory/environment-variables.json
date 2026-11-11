@@ -2262,6 +2262,14 @@
           "line": 109
         },
         {
+          "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+          "line": 51
+        },
+        {
+          "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+          "line": 53
+        },
+        {
           "file": "packages/prisma/core/runner/core-migration-runner.mjs",
           "line": 16
         }
@@ -2571,6 +2579,23 @@
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
           "line": 55
+        }
+      ]
+    },
+    {
+      "name": "DOTENV_CONFIG_PATH",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+          "line": 19
         }
       ]
     },

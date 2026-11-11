@@ -3,6 +3,8 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
   testMatch: [
+    '<rootDir>/algorithm/spec/vdot-forecast.spec.ts',
+    '<rootDir>/training-load/spec/vdot-forecast.service.spec.ts',
     '<rootDir>/integrations/personal/**/*.spec.ts',
     '<rootDir>/sync/spec/activity-source-lifecycle.service.spec.ts',
     '<rootDir>/spec/self-host-app-module-di.spec.ts',
@@ -29,8 +31,10 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
-    '^@prisma/client$': '<rootDir>/../../../packages/prisma/generated/core/index.js',
-    '^@deployment/provider-catalog$': '<rootDir>/deployment/provider-catalog.ts',
+    '^@prisma/client$':
+      '<rootDir>/../../../packages/prisma/generated/core/index.js',
+    '^@deployment/provider-catalog$':
+      '<rootDir>/deployment/provider-catalog.ts',
     '^@/public-demo/(.*)$': '<rootDir>/self-host/public-demo/$1',
     '^@/(.*)$': '<rootDir>/$1',
     '^@shared/(.*)$': '<rootDir>/../../../packages/shared/$1',

@@ -451,6 +451,34 @@
       "expression": "await fsp.unlink(stagingPath).catch(() => undefined);"
     },
     {
+      "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+      "line": 82,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "writeFileSync(values.output, JSON.stringify(series), { mode: 0o600 });"
+    },
+    {
+      "file": "apps/server/src/training-load/vdot-forecast-fit.command.ts",
+      "line": 62,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "writeFileSync("
+    },
+    {
+      "file": "apps/server/src/training-load/vdot-forecast-fit.command.ts",
+      "line": 68,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "writeFileSync(values.output!, JSON.stringify(report.artifact, null, 2), {"
+    },
+    {
+      "file": "apps/server/src/training-load/vdot-forecast-fit.command.ts",
+      "line": 87,
+      "owner": "apps",
+      "classification": "operator-artifact",
+      "expression": "writeFileSync("
+    },
+    {
       "file": "apps/server/src/user-data-export/user-data-export-archive.service.ts",
       "line": 339,
       "owner": "apps",

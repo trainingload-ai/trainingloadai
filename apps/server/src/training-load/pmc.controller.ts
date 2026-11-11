@@ -12,6 +12,7 @@ import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import { CurrentUserId } from '@/utils/decorators/current-user-id.decorator';
 import { PMCService } from './pmc.service';
+import { VdotForecastService } from './vdot-forecast.service';
 import { OAuthHybridAuthGuard } from '@/oauth/oauth-hybrid-auth.guard';
 import { AllowPublicDemo } from '@/public-demo/allow-public-demo.decorator';
 import { PUBLIC_DEMO_CAPABILITIES } from '@shared/public-demo-policy';
@@ -35,7 +36,15 @@ class GetPMCDataDto {
 @Controller('pmc')
 @UseGuards(OAuthHybridAuthGuard)
 export class PMCController {
-  constructor(private readonly pmcService: PMCService) {}
+  constructor(
+    private readonly pmcService: PMCService,
+    private readonly vdotForecast: VdotForecastService,
+  ) {}
+
+  @Get('vdot-forecast')
+  getVdotForecast(@CurrentUserId() userId: string) {
+    return this.vdotForecast.getForecast(userId);
+  }
 
   /**
    * 手动触发重新计算

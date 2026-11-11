@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 284 |
+| Environment variables | 285 |
 | External URL literals | 189 |
-| Filesystem write sites | 216 |
-| Runtime variables missing from configuration docs | 221 |
+| Filesystem write sites | 220 |
+| Runtime variables missing from configuration docs | 222 |
 
 ## Undocumented runtime variables
 
@@ -118,6 +118,7 @@
 - `DESKTOP_INTERNAL_CREDENTIAL` — apps
 - `DOCS_INTERNAL_API_URL` — apps
 - `DOMAIN_BASE` — apps
+- `DOTENV_CONFIG_PATH` — apps
 - `FIT_CORPUS_ENV_FILE` — apps
 - `FITNESS_ASSESSMENT_ENABLED` — apps
 - `FITNESS_DISABLED_METHODS` — apps

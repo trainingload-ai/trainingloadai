@@ -180,13 +180,13 @@ const METHODS: readonly FitnessMethod[] = [
     sports: ['RUN'],
     recipe: 'PERFORMANCE_VDOT',
     description:
-      'Estimate VDOT from recorded running distance/time. In this product VDOT is stored as VO2_MAX; this is a method for the same metric, not a separate setting.',
+      'Estimate a running-performance VO2max reference from recorded distance/time, stored as VO2_MAX. The athlete-facing product name is 最大摄氧量 / VO2max.',
     rationale:
       'The Daniels/Gilbert performance relationship divides the estimated oxygen cost of the recorded speed by the fraction associated with its duration. This produces an equivalent running-performance index (VDOT), rather than a laboratory measurement of oxygen uptake; the product stores it under VO2_MAX.',
     interpretation: [
       'Valid distance and time from an ordinary run or a suitable window within it are enough to compute a performance estimate. The function name and race-derived relationship do not require the activity to be a race or a confirmed maximal test.',
-      'A non-maximal run expresses demonstrated performance and may yield a lower VDOT than the athlete could achieve racing. That affects interpretation rather than computability; the unused capacity cannot be recovered by inventing an effort adjustment. Terrain, timing and conditions also affect comparability.',
-      'A new estimate above the existing VDOT may still be a useful reference even without maximal effort. Compare the values and identify their evidence and methods; a lower result from an easy run alone does not demonstrate a fitness decline. The athlete decides whether to adopt the new reference.',
+      'A non-maximal run expresses demonstrated performance and may yield a lower VO2max reference than the athlete could achieve racing. That affects interpretation rather than computability; the unused capacity cannot be recovered by inventing an effort adjustment. Terrain, timing and conditions also affect comparability.',
+      'A new estimate above the existing VO2max reference may still be a useful reference even without maximal effort. Compare the values and identify their evidence and methods; a lower result from an easy run alone does not demonstrate a fitness decline. The athlete decides whether to adopt the new reference.',
     ],
     requirements: [
       'A 1500m–marathon distance peak with plausible recorded speed and duration',
@@ -202,13 +202,13 @@ const METHODS: readonly FitnessMethod[] = [
     sports: ['RUN'],
     recipe: 'ACTIVITY_VO2',
     description:
-      'Recompute VDOT (canonical metric VO2_MAX) from activity estimates with current source preference, correction factor and time decay; does not reprocess raw sensors.',
+      'Recompute VO2max (canonical metric VO2_MAX) from activity estimates with current source preference, correction factor and time decay; does not reprocess raw sensors.',
     rationale:
       'Activity estimates can infer effective aerobic performance from ordinary running, including pace relative to heart-rate effort where that source is selected. This recipe combines the existing per-activity estimates with time-decay weighting so newer evidence contributes more; it does not require the athlete to reach maximal oxygen uptake.',
     interpretation: [
       'Routine training is a normal source for this estimator. Existing valid per-activity estimates in the requested scope are its inputs; no race or maximal test is an additional requirement. A single valid activity can contribute a result, while more comparable observations can provide context for day-to-day variability.',
       "The result inherits each source's assumptions, including heart-rate reference, sensor quality, pace, conditions and correction settings where applicable. Time weighting summarizes observations; it does not make their physiological accuracy certain or revalidate the raw recordings.",
-      "Compare with the existing VDOT reference and distinguish a result from the selected activity from an aggregate over a date range. A difference can reflect fitness, conditions or source/settings changes. Present that context without withholding the computable estimate; adoption is the athlete's choice.",
+      "Compare with the existing VO2max reference and distinguish a result from the selected activity from an aggregate over a date range. A difference can reflect fitness, conditions or source/settings changes. Present that context without withholding the computable estimate; adoption is the athlete's choice.",
     ],
     requirements: [
       'READY activities with valid VO2 estimate provenance',

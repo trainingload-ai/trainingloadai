@@ -34,6 +34,7 @@ function createPmcService(
     (overrides?.userService ?? {}) as never,
     ...pmcDependencies(prisma),
     (overrides?.analysisConfigs ?? {}) as never,
+    {} as never,
   );
 }
 

@@ -433,7 +433,10 @@ export function fitnessDateTime(
   });
 }
 
-/** Product terminology: VO2_MAX is the canonical storage key for VDOT. */
-export function fitnessMetricLabel(metric: FitnessCandidate["metric"]) {
-  return metric === "VO2_MAX" || metric === "VDOT" ? "VDOT" : metric;
+/** Keep canonical and legacy results under the localized product metric name. */
+export function fitnessMetricLabel(
+  metric: FitnessCandidate["metric"],
+  vo2MaxLabel = "VO2max",
+) {
+  return metric === "VO2_MAX" || metric === "VDOT" ? vo2MaxLabel : metric;
 }

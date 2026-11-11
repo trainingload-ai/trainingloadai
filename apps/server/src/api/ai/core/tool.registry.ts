@@ -25,6 +25,7 @@ import { docsGetTool } from './tools/docsGet.tool';
 import { activitySearchTool } from './tools/activitySearch.tool';
 import { skillActivateTool } from './tools/skillActivate.tool';
 import { metricHistoryTool } from './tools/metricHistory.tool';
+import { metricForecastTool } from './tools/metricForecast.tool';
 import { currentTimeTool } from './tools/currentTime.tool';
 import { metricCurrentTool } from './tools/metricCurrent.tool';
 import { metricCompareTool } from './tools/metricCompare.tool';
@@ -189,6 +190,7 @@ export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   activitySearchTool,
   activityDayViewTool,
   metricHistoryTool,
+  metricForecastTool,
   metricCurrentTool,
   metricCompareTool,
   currentTimeTool,

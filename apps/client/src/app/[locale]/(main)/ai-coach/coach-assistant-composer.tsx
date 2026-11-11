@@ -3,6 +3,7 @@
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useCoachThread, useCoachActions } from "./coach-chat-provider";
 import {
   PromptInput,
@@ -47,6 +48,23 @@ export function CoachComposer({
   const isRunning = useCoachThread((state) => state.isRunning);
   const actions = useCoachActions();
   const [draft, setDraft] = useState("");
+  const searchParams = useSearchParams();
+  const forecastText = useTranslations("VdotForecast");
+  useEffect(() => {
+    const metricInquiry =
+      searchParams?.get("metricQuestion") === "vo2Max" ||
+      searchParams?.get("vdotQuestion") === "1";
+    if (!metricInquiry) return;
+    setDraft((previous) => previous || forecastText("coachPrompt"));
+    const next = new URL(window.location.href);
+    next.searchParams.delete("vdotQuestion");
+    next.searchParams.delete("metricQuestion");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${next.pathname}${next.search}${next.hash}`,
+    );
+  }, [forecastText, searchParams]);
   const isStart = variant === "start";
   const isEmbedded = variant === "embedded";
   const modelPurposeLabel = thinkingEnabled

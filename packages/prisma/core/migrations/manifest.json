@@ -120,7 +120,12 @@
       "id": "0024_activity_analysis_segments",
       "file": "0024_activity_analysis_segments/migration.sql",
       "sha256": "43c65c215d6ac439ca737301185c48c7229e35eb605a2bb9bf9ff8969046d4d4"
+    },
+    {
+      "id": "0025_vdot_forecast_snapshot",
+      "file": "0025_vdot_forecast_snapshot/migration.sql",
+      "sha256": "0413de7bf1976a214da7edc1c337fcae1efba1788ce1d2cc32b4fd94cd83d14f"
     }
   ],
-  "schemaChecksum": "7bd6b38d7bdcbebfe89bd2d09d0d572bcfd9909acfdc78a34afc9885dcc6743f"
+  "schemaChecksum": "fc458b6896b91463b639fc31ddfb52570b4790187b75489072cf4bb78b21d124"
 }

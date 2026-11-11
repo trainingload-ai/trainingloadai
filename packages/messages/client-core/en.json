@@ -343,7 +343,8 @@
         "metricUpdate": "Update fitness metrics",
         "bodyWeightUpdate": "Record body weight",
         "trainingDataCoverage": "Training data coverage",
-        "coachTaskResult": "Background task result"
+        "coachTaskResult": "Background task result",
+        "metricForecast": "Read four-week VO2max forecast"
       },
       "skills": {
         "integrationSupport": "Device connection and sync",
@@ -925,7 +926,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "Cycling speed depends on terrain, wind and resistance; it is not a physiological threshold.",
         "HR_WINDOW_AVERAGE": "No 1-second peak; reports the maximum of available window-average heart rates.",
         "TP_EMPIRICAL_OFFSET": "Existing 5K pace +20 s/km heuristic; maximal effort is not verified.",
-        "VDOT_NOT_LAB_VO2MAX": "VDOT estimated from running distance and time; ordinary training may underestimate capacity.",
+        "VDOT_NOT_LAB_VO2MAX": "VO2max reference estimated from running distance and time; ordinary training may underestimate capacity. This differs from laboratory measurement.",
         "DERIVED_ACTIVITY_ESTIMATES": "Re-aggregates activity estimates using current source preference and correction; raw running signals were not reprocessed.",
         "DAILY_HEALTH_MEDIAN": "Median of selected daily resting-HR records; activity minimum HR is not a substitute.",
         "OBSERVED_HR_NOT_MAXIMUM": "An observed peak is not physiological maximum HR and may include sensor error.",
@@ -943,8 +944,8 @@
         "running-extended-cp": "Running extended CP (estimate)",
         "critical-speed": "Multi-activity distance-time fit (estimate)",
         "running-5k-threshold-pace": "5K threshold pace mapping (estimate)",
-        "running-performance-vdot": "Running performance VDOT (estimate)",
-        "running-effective-vo2max": "Activity VDOT weighted estimate",
+        "running-performance-vdot": "Running performance VO2max (estimate)",
+        "running-effective-vo2max": "Activity VO2max weighted estimate",
         "observed-max-hr": "Observed activity heart-rate peak",
         "daily-resting-hr": "Daily resting heart-rate median (estimate)",
         "aerobic-threshold-unavailable": "Aerobic threshold: no validated method"
@@ -1942,7 +1943,7 @@
         "invalid": "Enter a number greater than 0 and no more than 1.20"
       },
       "defaultVdotSource": {
-        "label": "Default VDOT Source",
+        "label": "Default VO2max Source",
         "placeholder": "Select source",
         "description": "Choose corrected VO₂max or race performance as the preferred source. Raw heart-rate estimates are always corrected before use.",
         "options": {
@@ -3203,11 +3204,11 @@
           "useContent": "For general population, VO2 max ranges from 30-40 ml/kg/min. Elite endurance athletes can exceed 70-80. It naturally declines with age but can be improved with training.",
           "reference": "Reference",
           "referenceContent": "Average(30-40), Excellent(>50), Elite(>70)",
-          "source": "Source: Jack Daniels VDOT / Firstbeat",
+          "source": "Source: Jack Daniels running-performance model / Firstbeat",
           "algorithm": {
-            "title": "The algorithm is based on Jack Daniels' VDOT theory and uses two calculation methods:",
+            "title": "The algorithm is based on Jack Daniels’ running-performance model and uses two calculation methods:",
             "standardTitle": "Standard Mode:",
-            "standardContent": "Directly maps VDOT values from best running performance as a VO2max reference.",
+            "standardContent": "Estimates a VO2max reference from best running performance.",
             "heartRateTitle": "Heart Rate Mode:",
             "heartRateContent": "References the Firstbeat model, estimating current oxygen uptake percentage via heart rate percentage (%HRmax), then combining with pace to derive VO2max.",
             "note": "Note: Heart rate estimation is susceptible to environmental temperature, terrain, and physical condition. It is recommended to focus on long-term trends rather than single values."
@@ -4296,7 +4297,7 @@
     "inputRequired": "No supported running capability anchor is available yet.",
     "notReady": "This plan needs an adjustment before it can be generated.",
     "buildBlocked": "Resolve the items above before generating the plan.",
-    "capabilityRequired": "Complete a suitable running activity; the system will automatically use a recent race, VO₂max/VDOT, threshold pace, or critical speed.",
+    "capabilityRequired": "Complete a suitable running activity; the system will automatically use a recent race, VO2max, threshold pace, or critical speed.",
     "tenKBase": "Your longest continuous run is {actual} min; first reach {required} min or record a recent 5K.",
     "halfMarathonBase": "Your longest recorded run is {actual} km. Consider reaching {required} km before starting a half-marathon plan.",
     "marathonLongRun": "Your longest recorded run is {actual} km. Consider reaching {required} km before starting a marathon plan.",
@@ -7029,5 +7030,25 @@
     "forward": "Forward",
     "navigation": "Window navigation",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "In four weeks, estimated VO2max {value}",
+    "interval": "80% prediction interval {lower}–{upper}",
+    "referenceInterval": "Reference range {lower}–{upper}",
+    "basis": "Based on historical VO2max through {date}.",
+    "askCoach": "Ask coach",
+    "coachPrompt": "Please explain my current VO2max, its recent history and any available four-week forecast, and give advice based on my recent training.",
+    "chartLabel": "Forecast VO2max",
+    "historyAndForecast": "Selected history + four-week forecast",
+    "INSUFFICIENT_HISTORY": "More running records are needed for a four-week forecast.",
+    "STALE_HISTORY": "New running records will update this forecast.",
+    "INCOMPARABLE_HISTORY": "More records with the current VO2max method are needed.",
+    "MODEL_UNAVAILABLE": "Forecast is currently unavailable.",
+    "currentEstimate": "Current estimate",
+    "current": "Current VO2max",
+    "inFourWeeks": "Expected in four weeks",
+    "higher": "Expected above current",
+    "lower": "Expected below current",
+    "unchanged": "Expected to stay level"
   }
 }

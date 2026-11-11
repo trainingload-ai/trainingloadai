@@ -1256,6 +1256,7 @@ model T_user {
   userAnalysisConfigVersions        UserAnalysisConfigVersion[]
   userAutoUpdateConfigVersions      UserAutoUpdateConfigVersion[]
   activityFitnessMetricsSnapshots   ActivityFitnessMetricsSnapshot[]
+  vdotForecastSnapshots              VdotForecastSnapshot[]
   activityAiReviews                 ActivityAiReview[]
   activityMapThumbJobs              ActivityMapThumbJob[]
   calendarSubscriptions             CalendarSubscription[]
@@ -3949,6 +3950,20 @@ model ActivityTrimp {
   @@unique([activityId])
   @@index([activityId, sport])
   @@map("t_activity_trimp")
+}
+
+model VdotForecastSnapshot {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  user        T_user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fingerprint String
+  input       Json
+  result      Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, fingerprint])
+  @@index([userId, createdAt])
+  @@map("t_vdot_forecast_snapshot")
 }
 
 model ActivityVO2Max {

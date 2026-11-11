@@ -301,7 +301,8 @@
         "metricUpdate": "更新体能指标",
         "bodyWeightUpdate": "记录体重",
         "trainingDataCoverage": "训练数据覆盖",
-        "coachTaskResult": "后台任务结果"
+        "coachTaskResult": "后台任务结果",
+        "metricForecast": "读取四周最大摄氧量预测"
       },
       "skills": {
         "integrationSupport": "设备连接与同步",
@@ -883,7 +884,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "骑行速度受地形、风和阻力影响，不能直接作为生理阈值。",
         "HR_WINDOW_AVERAGE": "缺少 1 秒峰值，显示的是已有心率窗口均值中的最高值。",
         "TP_EMPIRICAL_OFFSET": "使用 5K 配速加 20 秒/公里的既有经验公式，未确认全力程度。",
-        "VDOT_NOT_LAB_VO2MAX": "根据跑步距离与时间估算 VDOT；普通训练可能低估能力。",
+        "VDOT_NOT_LAB_VO2MAX": "根据跑步距离与时间估算最大摄氧量参考值；普通训练可能低估能力，与实验室测量存在差异。",
         "DERIVED_ACTIVITY_ESTIMATES": "重新汇总范围内活动的已有估计，并使用当前来源偏好与修正系数；未重新分析原始跑步信号。",
         "DAILY_HEALTH_MEDIAN": "使用已选健康来源的每日静息心率中位数；不能从运动中的最低心率代替。",
         "OBSERVED_HR_NOT_MAXIMUM": "实测峰值只能说明此次观察到的心率，不等于生理最大心率，可能包含设备误差。",
@@ -901,8 +902,8 @@
         "running-extended-cp": "跑步扩展临界功率模型（估计）",
         "critical-speed": "多活动距离—时间拟合（估计）",
         "running-5k-threshold-pace": "5K 表现换算阈值配速（估计）",
-        "running-performance-vdot": "跑步表现等效 VDOT（估计）",
-        "running-effective-vo2max": "活动 VDOT 时间加权估计",
+        "running-performance-vdot": "跑步表现估计最大摄氧量",
+        "running-effective-vo2max": "活动最大摄氧量时间加权估计",
         "observed-max-hr": "活动心率峰值观察",
         "daily-resting-hr": "每日静息心率中位数（估计）",
         "aerobic-threshold-unavailable": "有氧阈值：尚无已验证方法"
@@ -1870,7 +1871,7 @@
         "invalid": "请输入大于 0 且不超过 1.20 的数字"
       },
       "defaultVdotSource": {
-        "label": "默认 VDOT 来源",
+        "label": "默认最大摄氧量来源",
         "placeholder": "选择来源",
         "description": "选择校正后的最大摄氧量或比赛表现作为首选来源。原始心率估算始终先经过个人因子校正。",
         "options": {
@@ -3122,11 +3123,11 @@
           "useContent": "一般人的最大摄氧量在 30-40 ml/kg/min 之间，优秀耐力运动员可达 70-80 以上。该数值随年龄增长自然下降，但可通过训练提升。",
           "reference": "参考范围",
           "referenceContent": "一般(30-40), 优秀(>50), 顶尖(>70)",
-          "source": "来源：Jack Daniels VDOT / Firstbeat",
+          "source": "来源：Jack Daniels 跑步模型 / Firstbeat",
           "algorithm": {
-            "title": "该算法基于 Jack Daniels 的 VDOT 理论，分为两种计算方式：",
+            "title": "该算法基于 Jack Daniels 跑步表现模型，分为两种计算方式：",
             "standardTitle": "标准模式：",
-            "standardContent": "基于最佳跑步成绩直接对应 VDOT 值作为最大摄氧量参考。",
+            "standardContent": "根据最佳跑步成绩估算最大摄氧量参考值。",
             "heartRateTitle": "心率模式：",
             "heartRateContent": "参考 Firstbeat 模型，通过心率百分比 (%HRmax) 推算当前的摄氧量百分比，进而结合配速反推最大摄氧量。",
             "note": "注：心率估算易受环境温度、地形和身体状态等因素影响，建议关注长期趋势而非单次数值。"
@@ -4277,7 +4278,7 @@
     "inputRequired": "目前还没有模型支持的跑步能力基准。",
     "notReady": "当前计划设置需要调整后才能生成。",
     "buildBlocked": "请先处理以上事项，再生成计划。",
-    "capabilityRequired": "请完成合适的跑步活动；系统会自动使用近期比赛、最大摄氧量/VDOT、阈值配速或临界速度。",
+    "capabilityRequired": "请完成合适的跑步活动；系统会自动使用近期比赛、最大摄氧量、阈值配速或临界速度。",
     "tenKBase": "目前最长连续跑 {actual} 分钟，建议先达到 {required} 分钟，或完成一次近期 5K。",
     "halfMarathonBase": "系统记录的最长跑是 {actual} 公里，建议先完成一次 {required} 公里再开始半马计划。",
     "marathonLongRun": "系统记录的最长跑是 {actual} 公里，建议先完成一次 {required} 公里再开始全马计划。",
@@ -7028,5 +7029,25 @@
     "forward": "前进",
     "navigation": "窗口导航",
     "appName": "Trainingload.ai 个人版"
+  },
+  "VdotForecast": {
+    "expected": "四周后预计最大摄氧量 {value}",
+    "interval": "80% 预测区间 {lower}–{upper}",
+    "referenceInterval": "参考范围 {lower}–{upper}",
+    "basis": "依据截至 {date} 的历史走势推算。",
+    "askCoach": "问教练",
+    "coachPrompt": "帮我解读最大摄氧量的当前水平、历史变化和可用的四周预测，并结合近期训练给出建议。",
+    "chartLabel": "预计最大摄氧量",
+    "historyAndForecast": "所选历史范围 + 未来四周预测",
+    "INSUFFICIENT_HISTORY": "积累更多跑步记录后，可查看四周预测。",
+    "STALE_HISTORY": "有新的跑步记录后更新预测。",
+    "INCOMPARABLE_HISTORY": "指标计算方式变更，积累新记录后更新预测。",
+    "MODEL_UNAVAILABLE": "预测暂时不可用。",
+    "currentEstimate": "当前估计水平",
+    "current": "当前最大摄氧量",
+    "inFourWeeks": "四周后预计",
+    "higher": "预计高于当前",
+    "lower": "预计低于当前",
+    "unchanged": "预计与当前持平"
   }
 }

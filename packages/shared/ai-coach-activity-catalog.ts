@@ -46,6 +46,7 @@ export const COACH_TOOL_LABELS = {
   "web.fetch": "webFetch",
   "metric.current": "metricCurrent",
   "metric.history": "metricHistory",
+  "metric.forecast": "metricForecast",
   "metric.compare": "metricCompare",
   "profile.current": "profile",
   "profile.zones": "thresholds",
