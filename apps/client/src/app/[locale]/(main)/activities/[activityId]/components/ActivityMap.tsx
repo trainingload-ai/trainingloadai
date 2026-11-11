@@ -84,9 +84,8 @@ const ActivityMap = React.memo(() => {
         className="h-[clamp(220px,22vw,310px)] min-h-0 aspect-auto lg:min-h-0"
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/30 to-transparent" />
-      <div className="pointer-events-none absolute left-4 top-4 rounded-md bg-background/88 px-3 py-2 shadow-sm backdrop-blur-md ring-1 ring-white/25">
-        <ThemeLogo width={120} height={20} />
+      <div className="pointer-events-none absolute left-2 top-2 rounded-control bg-background/85 px-1.5 py-1">
+        <ThemeLogo width={96} />
       </div>
 
       <Button

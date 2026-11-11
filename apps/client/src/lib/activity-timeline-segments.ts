@@ -1,4 +1,3 @@
-import type { TimelineSegment } from "@shared/activity-timeline";
 import {
   timelineGapLimit,
   timelineLowerBound,
@@ -7,91 +6,82 @@ import {
   type TimelineZone,
 } from "./activity-timeline";
 
-export type TimelineSegmentScale = {
+export type TimelineScale = {
   width: number;
-  positionAt: (time: number) => number;
-  timeAt: (position: number) => number;
+  positionAt: (time: number) => number | null;
+  timeAt: (position: number) => number | null;
+  coordinateAt: (position: number) => number;
 };
 
-function interpolate(
-  knots: [number, number][],
-  input: number,
-  inverse = false,
-) {
-  const key = inverse ? 1 : 0;
-  const value = inverse ? 0 : 1;
-  let low = 0,
-    high = knots.length;
-  while (low < high) {
-    const middle = (low + high) >>> 1;
-    if (knots[middle][key] < input) low = middle + 1;
-    else high = middle;
-  }
-  const right = Math.max(1, Math.min(knots.length - 1, low));
-  const before = knots[right - 1],
-    after = knots[right];
-  return (
-    before[value] +
-    ((input - before[key]) / (after[key] - before[key])) *
-      (after[value] - before[value])
-  );
-}
+export const TIMELINE_MIN_SEGMENT_WIDTH = 32;
 
-/** A shared piecewise scale gives short laps readable widths in every chart. */
-export function buildTimelineSegmentScale(
-  segments: TimelineSegment[],
-  viewport: TimelineRange,
+/** Keep ordinary spans proportional, with a small shared floor for short segments. */
+export function buildTimelineScale(
+  domain: TimelineRange,
   baseWidth: number,
   coordinate: (time: number) => number | null,
-  selectedId: string | null,
-): TimelineSegmentScale {
-  if (viewport[1] <= viewport[0]) {
-    const width = Math.max(1, baseWidth);
-    return {
-      width,
-      positionAt: (time) => (time - viewport[0]) * width,
-      timeAt: (position) => viewport[0] + position / width,
-    };
-  }
+  inverse: (coordinate: number) => number | null,
+  segmentRanges: TimelineRange[] = [],
+): TimelineScale {
+  const proportionalWidth = Math.max(1, baseWidth);
+  const span = domain[1] - domain[0];
+  const ranges = segmentRanges
+    .map(
+      ([start, end]): TimelineRange => [
+        Math.max(domain[0], start),
+        Math.min(domain[1], end),
+      ],
+    )
+    .filter(
+      ([start, end]) =>
+        Number.isFinite(start) && Number.isFinite(end) && end > start,
+    );
   const boundaries = [
-    ...new Set([
-      viewport[0],
-      viewport[1],
-      ...segments
-        .flatMap((segment) => [segment.start, segment.end])
-        .filter((time) => time > viewport[0] && time < viewport[1]),
-    ]),
+    ...new Set([domain[0], domain[1], ...ranges.flat()]),
   ].sort((a, b) => a - b);
-  const spans = boundaries.slice(1).map((end, index) => {
-    const start = boundaries[index];
-    const segment = segments.find(
-      (segment) => segment.start <= start && segment.end >= end,
+  const positions = [0];
+  for (let index = 1; index < boundaries.length; index++) {
+    const start = boundaries[index - 1],
+      end = boundaries[index];
+    const isSegment = ranges.some(([from, to]) => from <= start && to >= end);
+    positions.push(
+      positions[index - 1] +
+        Math.max(
+          span > 0 ? ((end - start) / span) * proportionalWidth : 0,
+          isSegment ? TIMELINE_MIN_SEGMENT_WIDTH : 0,
+        ),
     );
-    const from = coordinate(start),
-      to = coordinate(end);
-    const weight =
-      from !== null && to !== null ? Math.max(0, to - from) : end - start;
-    return { start, end, segment, weight };
-  });
-  const total = spans.reduce((sum, span) => sum + span.weight, 0);
-  const knots: [number, number][] = [[viewport[0], 0]];
-  let width = 0;
-  for (const span of spans) {
-    const proportion =
-      total > 0
-        ? span.weight / total
-        : (span.end - span.start) / (viewport[1] - viewport[0]);
-    width += Math.max(
-      0.001,
-      baseWidth * proportion,
-      span.segment ? (span.segment.id === selectedId ? 208 : 144) : 0,
-    );
-    knots.push([span.end, width]);
   }
+  const width = Math.max(1, positions.at(-1) ?? proportionalWidth);
+  const interpolate = (value: number, input: number[], output: number[]) => {
+    if (input.length < 2) return output[0];
+    let low = 1,
+      high = input.length - 1;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      if (input[middle] < value) low = middle + 1;
+      else high = middle;
+    }
+    const before = Math.max(0, low - 1),
+      after = low;
+    const length = input[after] - input[before];
+    return length > 0
+      ? output[before] +
+          ((value - input[before]) / length) * (output[after] - output[before])
+      : output[before];
+  };
+  const coordinateAt = (position: number) =>
+    interpolate(position, positions, boundaries);
   return {
     width,
-    positionAt: (time) => interpolate(knots, time),
-    timeAt: (position) => interpolate(knots, position, true),
+    coordinateAt,
+    positionAt: (time) => {
+      const value = coordinate(time);
+      return value !== null && Number.isFinite(value) && span > 0
+        ? interpolate(value, boundaries, positions)
+        : null;
+    },
+    timeAt: (position) => (span > 0 ? inverse(coordinateAt(position)) : null),
   };
 }
 

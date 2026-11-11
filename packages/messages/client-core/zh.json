@@ -2141,7 +2141,7 @@
     "segmentsSaveError": "保存失败，修改仍保留在此处，请重试。",
     "dominantHeartRateDescription": "本段内停留时间最长的心率区间，占比按有效区间采样时间计算。",
     "dominantPowerDescription": "本段内停留时间最长的功率区间，占比按有效区间采样时间计算。",
-    "segmentScaleDescription": "短分段按最小宽度展开，顶部与曲线同步对齐；时间或距离刻度可能不等距，统计按实际起止时间计算。",
+    "segmentScaleDescription": "常规分段按时间或距离比例显示，极短分段保留至少 32 像素；窄分段悬停或聚焦可查看完整统计。",
     "chartColorDescription": "为这条图表选择线条颜色。"
   },
   "ActivityDetail": {

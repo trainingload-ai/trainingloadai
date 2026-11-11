@@ -8,6 +8,8 @@ export const createInnerYAxisLabelsPlugin = ({
   scale = "y",
   align = "left",
   font = DEFAULT_AXIS_FONT,
+  background,
+  inset = 4,
 }: {
   axisStroke: string;
   formatValue: (v: number) => string;
@@ -15,6 +17,8 @@ export const createInnerYAxisLabelsPlugin = ({
   scale?: string;
   align?: "left" | "right";
   font?: string;
+  background?: string;
+  inset?: number;
 }): uPlot.Plugin => ({
   hooks: {
     draw: (u: uPlot) => {
@@ -44,7 +48,7 @@ export const createInnerYAxisLabelsPlugin = ({
       const step = ySpan / (tickCount - 1);
 
       const xPos =
-        align === "left" ? bbox.left + 4 : bbox.left + bbox.width - 4;
+        align === "left" ? bbox.left + inset : bbox.left + bbox.width - inset;
 
       for (let i = 0; i < tickCount; i++) {
         const v = yMin + i * step;
@@ -53,13 +57,16 @@ export const createInnerYAxisLabelsPlugin = ({
 
         const label = formatValue(v);
 
-        if (i === tickCount - 1) {
-          ctx.textBaseline = "top";
-          ctx.fillText(label, xPos, py + 4);
-        } else {
-          ctx.textBaseline = "bottom";
-          ctx.fillText(label, xPos, py - 4);
+        const atTop = py - bbox.top < finalSize + 4;
+        const textY = atTop ? py + 4 : py - 4;
+        ctx.textBaseline = atTop ? "top" : "bottom";
+        if (background) {
+          ctx.strokeStyle = background;
+          ctx.lineWidth = 4;
+          ctx.lineJoin = "round";
+          ctx.strokeText(label, xPos, textY);
         }
+        ctx.fillText(label, xPos, textY);
       }
       ctx.restore();
     },
@@ -126,6 +133,8 @@ export const createInnerYAxisTickDesign = ({
   yAlign = "left",
   font = DEFAULT_AXIS_FONT,
   fontSizePx = 12,
+  labelBackground,
+  labelInset,
   chartXaxis,
   systemUnit,
 }: {
@@ -137,6 +146,8 @@ export const createInnerYAxisTickDesign = ({
   yAlign?: "left" | "right";
   font?: string;
   fontSizePx?: number;
+  labelBackground?: string;
+  labelInset?: number;
   chartXaxis?: "distance" | "time" | string;
   systemUnit?: "metric" | "imperial";
 }): { axes: uPlot.Axis[]; plugins: uPlot.Plugin[] } => {
@@ -158,6 +169,8 @@ export const createInnerYAxisTickDesign = ({
       tickCount,
       align: yAlign,
       font: resolvedFont,
+      background: labelBackground,
+      inset: labelInset,
     }),
   ];
 

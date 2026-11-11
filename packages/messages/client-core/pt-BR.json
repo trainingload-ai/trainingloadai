@@ -1904,7 +1904,7 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "segmentScaleDescription": "Segmentos normais seguem a proporção de tempo ou distância, com mínimo de 32 px para os muito curtos. Passe o cursor ou foque os segmentos estreitos para ver todas as estatísticas.",
     "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {

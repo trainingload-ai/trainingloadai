@@ -1903,7 +1903,7 @@
     "segmentsSaveError": "Could not save segments. Your changes are still here; try again.",
     "dominantHeartRateDescription": "Heart-rate zone with the most recorded time in this segment; percentage of valid zone samples.",
     "dominantPowerDescription": "Power zone with the most recorded time in this segment; percentage of valid zone samples.",
-    "segmentScaleDescription": "Short segments expand to a minimum width in both the header and charts. Time or distance ticks may be unevenly spaced; statistics use the actual time boundaries.",
+    "segmentScaleDescription": "일반 구간은 시간 또는 거리 비율로 표시하며 매우 짧은 구간은 최소 32px 너비를 유지합니다. 좁은 구간에 마우스를 올리거나 포커스하면 전체 통계를 볼 수 있습니다.",
     "chartColorDescription": "Choose the line color for this chart."
   },
   "ActivityDetail": {

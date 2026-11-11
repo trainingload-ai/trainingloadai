@@ -238,12 +238,49 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   expect(firstLap.width / secondLap.width).toBeCloseTo(2, 1);
   expect(firstLap.x).toBeCloseTo(fullPlot.x, 0);
   expect(secondLap.x - fullPlot.x).toBeCloseTo(firstLap.width, 0);
+  await expect(timeline.locator('[data-segment-id="lap:1"]')).toHaveAttribute(
+    "data-segment-detail",
+    "full",
+  );
+  await expect(timeline.locator('[data-segment-id="lap:3"]')).toHaveAttribute(
+    "data-segment-detail",
+    "compact",
+  );
+  const insidePlot = (await timeline
+    .getByRole("img")
+    .first()
+    .locator(".u-over")
+    .boundingBox())!;
+  expect(insidePlot.x).toBeCloseTo(fullPlot.x, 0);
   const tail = lapGroups.getByRole("button", { name: /^第 8 圈/ });
+  const tailWidth = (await timeline
+    .locator('[data-segment-id="lap:8"]')
+    .boundingBox())!.width;
+  expect(tailWidth).toBeCloseTo(32, 0);
   await tail.click();
   expect(
     (await timeline.locator('[data-segment-id="lap:8"]').boundingBox())!.width,
-  ).toBeGreaterThanOrEqual(208);
-  await expect(tail).toContainText("0:03");
+  ).toBeCloseTo(tailWidth, 5);
+  await expect(timeline.locator('[data-segment-id="lap:8"]')).toHaveAttribute(
+    "data-segment-detail",
+    "marker",
+  );
+  await page.mouse.move(0, 0);
+  await tail.hover();
+  await expect(page.getByRole("tooltip")).toContainText("0:03");
+  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveAttribute(
+    "data-side",
+    "top",
+  );
+  await page.locator('[data-slot="tooltip-content"]').screenshot({
+    path: test.info().outputPath("timeline-short-segment-tooltip.png"),
+  });
+  await page.keyboard.press("Escape");
+  await page.mouse.move(0, 0);
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("tooltip")).toContainText("0:03");
+  await page.keyboard.press("Escape");
   expect(
     await scroller.evaluate((element) => element.scrollLeft),
   ).toBeGreaterThan(0);
@@ -317,6 +354,19 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await page.getByRole("menuitemradio", { name: "距离", exact: true }).click();
   await expectSelectionAligned();
   await expectNoVerticalOverflow();
+  const firstDistanceLap = (await timeline
+    .locator('[data-segment-id="lap:1"]')
+    .boundingBox())!;
+  const secondDistanceLap = (await timeline
+    .locator('[data-segment-id="lap:2"]')
+    .boundingBox())!;
+  expect(firstDistanceLap.width / secondDistanceLap.width).toBeCloseTo(
+    rows[96].distance / (rows[144].distance - rows[96].distance),
+    3,
+  );
+  expect(
+    (await timeline.locator('[data-segment-id="lap:8"]').boundingBox())!.width,
+  ).toBeCloseTo(32, 0);
   await timeline.getByRole("button", { name: "时间线选项" }).click();
   await page.getByRole("menuitemradio", { name: "时间", exact: true }).click();
   const plot = timeline.locator(".cursor-crosshair");

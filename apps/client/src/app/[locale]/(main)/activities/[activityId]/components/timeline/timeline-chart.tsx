@@ -12,6 +12,7 @@ import {
   DEFAULT_AXIS_FONT,
   resolveAxisColors,
 } from "@/components/charts/uplot/uPlotConfig";
+import { createInnerYAxisTickDesign } from "@/components/charts/uplot/uPlotPlugins";
 import { getMetricColor } from "@/lib/chart-data-utils";
 import {
   downsampleTimeline,
@@ -23,15 +24,11 @@ import {
 } from "@/lib/activity-timeline";
 import { formatSecondsToTime } from "@/utils/timeFormatter";
 import type { TimelineRowConfig } from "@/hooks/useActivityTimelineLayout";
-import type { TimelineSegmentScale } from "@/lib/activity-timeline-segments";
+import type { TimelineScale } from "@/lib/activity-timeline-segments";
 import ChartExpandDialog from "../charts/chart-expand-dialog";
 import { TimelineRowSettings } from "./timeline-row-settings";
 import type { TimelineMetric } from "./use-activity-timeline";
-import {
-  TIMELINE_AXIS_WIDTH,
-  TIMELINE_END_PADDING,
-  TIMELINE_LABEL_WIDTH,
-} from "./timeline-layout";
+import { TIMELINE_END_PADDING, TIMELINE_LABEL_WIDTH } from "./timeline-layout";
 
 const Chart = memo(UplotReact);
 
@@ -39,12 +36,8 @@ type PlotProps = {
   metric: TimelineMetric;
   config: TimelineRowConfig;
   axis: "time" | "distance";
-  distance: TimelinePoint[];
-  distanceGap: number;
-  viewport: TimelineRange;
-  scale: TimelineSegmentScale;
+  scale: TimelineScale;
   plotViewport: TimelineRange;
-  viewWidth: number;
   expanded?: boolean;
 };
 
@@ -52,9 +45,6 @@ const TimelinePlot = memo(function TimelinePlot({
   metric,
   config,
   axis,
-  distance,
-  distanceGap,
-  viewport,
   scale,
   plotViewport,
   expanded = false,
@@ -62,18 +52,23 @@ const TimelinePlot = memo(function TimelinePlot({
   const { ref, size } = useElementSize<HTMLDivElement>();
   const cssVar = useCssVarResolver();
   const xRange = useMemo<TimelineRange>(
-    () =>
-      expanded
-        ? [scale.positionAt(viewport[0]), scale.positionAt(viewport[1])]
-        : plotViewport,
-    [expanded, scale, viewport, plotViewport],
+    () => (expanded ? [0, scale.width] : plotViewport),
+    [expanded, scale.width, plotViewport],
   );
-  const data = useMemo((): uPlot.AlignedData => {
+  const projected = useMemo(() => {
     const points: TimelinePoint[] = [];
     let previous: TimelinePoint | undefined;
+    let disconnected = false;
     for (const point of smoothTimeline(metric.points, config.smoothing)) {
       const x = scale.positionAt(point.time);
-      if (previous && point.time - previous.time > metric.gap) {
+      if (x === null) {
+        disconnected = true;
+        continue;
+      }
+      if (
+        previous &&
+        (disconnected || point.time - previous.time > metric.gap)
+      ) {
         const lastX = points.at(-1)?.time;
         if (lastX !== undefined && x > lastX)
           points.push({ time: (lastX + x) / 2, value: null });
@@ -81,23 +76,41 @@ const TimelinePlot = memo(function TimelinePlot({
       if (!points.length || x > points[points.length - 1].time)
         points.push({ time: x, value: point.value });
       previous = point;
+      disconnected = false;
     }
-    const from = Math.max(0, timelineLowerBound(points, xRange[0]) - 1);
+    return points;
+  }, [metric, config.smoothing, scale]);
+  const data = useMemo((): uPlot.AlignedData => {
+    const from = Math.max(0, timelineLowerBound(projected, xRange[0]) - 1);
     const to = Math.min(
-      points.length,
-      timelineLowerBound(points, xRange[1]) + 1,
+      projected.length,
+      timelineLowerBound(projected, xRange[1]) + 1,
     );
     const drawn = downsampleTimeline(
-      points.slice(from, to),
+      projected.slice(from, to),
       Math.max(400, size.width * 3),
     );
     return [
       drawn.map((point) => point.time),
       drawn.map((point) => point.value),
     ];
-  }, [metric, config.smoothing, size.width, xRange, scale]);
+  }, [projected, size.width, xRange]);
   const options = useMemo((): uPlot.Options => {
     const { axisStroke, gridStroke } = resolveAxisColors(cssVar);
+    const inner = createInnerYAxisTickDesign({
+      axisStroke,
+      gridStroke,
+      formatXValue: (value) =>
+        axis === "time"
+          ? formatSecondsToTime(Math.round(scale.coordinateAt(value)))
+          : String(Math.round(scale.coordinateAt(value))),
+      formatYValue: metric.format,
+      tickCount: expanded ? 5 : config.height >= 128 ? 3 : 2,
+      fontSizePx: 11,
+      yAlign: "left",
+      labelInset: 8,
+      labelBackground: `color-mix(in srgb, ${cssVar("var(--card)")} 80%, ${cssVar("var(--muted)")} 20%)`,
+    });
     return {
       width: Math.max(1, size.width),
       height: expanded ? Math.max(320, size.height) : config.height,
@@ -122,28 +135,21 @@ const TimelinePlot = memo(function TimelinePlot({
       axes: [
         expanded
           ? {
+              ...inner.axes[0],
               stroke: axisStroke,
               font: DEFAULT_AXIS_FONT,
               grid: { show: false },
               values: (_u, values) =>
                 values.map((value) =>
                   axis === "time"
-                    ? formatSecondsToTime(Math.round(scale.timeAt(value)))
-                    : String(
-                        Math.round(
-                          timelineValueAt(
-                            distance,
-                            scale.timeAt(value),
-                            distanceGap,
-                            true,
-                          ) ?? 0,
-                        ),
-                      ),
+                    ? formatSecondsToTime(Math.round(scale.coordinateAt(value)))
+                    : String(Math.round(scale.coordinateAt(value))),
                 ),
             }
           : { show: false },
         {
-          size: TIMELINE_AXIS_WIDTH,
+          ...inner.axes[1],
+          size: 0,
           font: DEFAULT_AXIS_FONT,
           stroke: axisStroke,
           ticks: { show: false },
@@ -153,11 +159,11 @@ const TimelinePlot = memo(function TimelinePlot({
             width: 1,
             dash: [3, 4],
           },
-          space: expanded ? 40 : Math.max(28, config.height / 3),
-          values: (_plot, values) => values.map(metric.format),
+          values: () => [],
           gap: 5,
         },
       ],
+      plugins: inner.plugins,
       series: [
         {},
         {
@@ -175,8 +181,6 @@ const TimelinePlot = memo(function TimelinePlot({
     expanded,
     xRange,
     scale,
-    distance,
-    distanceGap,
     metric,
     size.width,
     size.height,
@@ -197,9 +201,6 @@ export const TimelineChart = memo(function TimelineChart({
   metric,
   config,
   axis,
-  distance,
-  distanceGap,
-  viewport,
   scale,
   plotViewport,
   viewWidth,
@@ -211,6 +212,7 @@ export const TimelineChart = memo(function TimelineChart({
   canMoveUp,
   canMoveDown,
 }: PlotProps & {
+  viewWidth: number;
   current: number | null;
   metrics: TimelineMetric[];
   onChange: (change: Partial<TimelineRowConfig>) => void;
@@ -255,12 +257,8 @@ export const TimelineChart = memo(function TimelineChart({
               metric={metric}
               config={config}
               axis={axis}
-              distance={distance}
-              distanceGap={distanceGap}
-              viewport={viewport}
               scale={scale}
               plotViewport={plotViewport}
-              viewWidth={viewWidth}
               expanded
             />
           </ChartExpandDialog>
@@ -293,12 +291,8 @@ export const TimelineChart = memo(function TimelineChart({
           metric={metric}
           config={config}
           axis={axis}
-          distance={distance}
-          distanceGap={distanceGap}
-          viewport={viewport}
           scale={scale}
           plotViewport={plotViewport}
-          viewWidth={viewWidth}
         />
       </div>
     </div>

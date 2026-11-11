@@ -32,6 +32,7 @@ import {
   coordinateAtTrackTime,
   sliceTrackByTime,
   timelineValueAt,
+  timelineTimeAtDistance,
   timelineLowerBound,
   type TimelineRange,
 } from "@/lib/activity-timeline";
@@ -44,7 +45,7 @@ import { useActivityTimeline } from "./use-activity-timeline";
 import { TimelineChart } from "./timeline-chart";
 import { TimelineAddChartDialog } from "./timeline-add-chart-dialog";
 import {
-  buildTimelineSegmentScale,
+  buildTimelineScale,
   timelineWeightedAverage,
   timelineDominantZone,
 } from "@/lib/activity-timeline-segments";
@@ -136,6 +137,17 @@ export default function ActivityTimeline({
         : timelineValueAt(distance ?? [], time, model?.distanceGap ?? 0, true),
     [axis, distance, model?.distanceGap],
   );
+  const timeAtCoordinate = useCallback(
+    (value: number) =>
+      axis === "time"
+        ? value
+        : timelineTimeAtDistance(
+            distance ?? [],
+            value,
+            model?.distanceGap ?? 0,
+          ),
+    [axis, distance, model?.distanceGap],
+  );
   const viewport = useMemo<TimelineRange>(() => {
     const from = zoom ? coordinateAtTime(zoom[0]) : null;
     const to = zoom ? coordinateAtTime(zoom[1]) : null;
@@ -149,11 +161,21 @@ export default function ActivityTimeline({
     1,
     (scrollSize.width || 1084) - TIMELINE_HORIZONTAL_PADDING,
   );
+  const segmentRanges = useMemo<TimelineRange[]>(
+    () =>
+      analysis.segments.flatMap((segment) => {
+        const start = coordinateAtTime(segment.start),
+          end = coordinateAtTime(segment.end);
+        return start !== null && end !== null
+          ? [[start, end] as TimelineRange]
+          : [];
+      }),
+    [analysis.segments, coordinateAtTime],
+  );
   const scale = useMemo(
     () =>
-      buildTimelineSegmentScale(
-        analysis.segments,
-        timeViewport,
+      buildTimelineScale(
+        viewport,
         zoom
           ? plotWidth
           : Math.max(
@@ -161,16 +183,17 @@ export default function ActivityTimeline({
               Math.min(12000, Math.max(1268, model?.duration ?? 0)),
             ),
         coordinateAtTime,
-        selectedSegmentId,
+        timeAtCoordinate,
+        segmentRanges,
       ),
     [
-      analysis.segments,
-      timeViewport,
+      viewport,
       plotWidth,
       zoom,
       model?.duration,
       coordinateAtTime,
-      selectedSegmentId,
+      timeAtCoordinate,
+      segmentRanges,
     ],
   );
   const sceneWidth = scale.width + TIMELINE_HORIZONTAL_PADDING;
@@ -187,6 +210,7 @@ export default function ActivityTimeline({
     const scroller = scrollRef.current;
     if (!scroller || pinned === null) return;
     const position = scale.positionAt(pinned);
+    if (position === null) return;
     if (position < scroller.scrollLeft) scroller.scrollLeft = position;
     else if (position > scroller.scrollLeft + plotWidth)
       scroller.scrollLeft = position - plotWidth;
@@ -199,6 +223,7 @@ export default function ActivityTimeline({
     if (!scroller || !selected) return;
     const start = scale.positionAt(selected.start),
       end = scale.positionAt(selected.end);
+    if (start === null || end === null) return;
     if (start < scroller.scrollLeft) scroller.scrollLeft = start;
     else if (end > scroller.scrollLeft + plotWidth)
       scroller.scrollLeft = end - plotWidth;
@@ -323,6 +348,7 @@ export default function ActivityTimeline({
           : "—";
       return {
         id: segment.id,
+        number: index + 1,
         label: segment.name || t("lap", { number: index + 1 }),
         range,
         color: primaryZone?.color,
@@ -367,11 +393,13 @@ export default function ActivityTimeline({
         if (end <= start) return [];
         const left = scale.positionAt(start),
           right = scale.positionAt(end);
+        if (left === null || right === null) return [];
         return [
           {
             ...group,
             left: (left / scale.width) * 100,
             width: ((right - left) / scale.width) * 100,
+            pixelWidth: right - left,
           },
         ];
       }),
@@ -564,6 +592,7 @@ export default function ActivityTimeline({
                   group={group}
                   left={group.left}
                   width={group.width}
+                  pixelWidth={group.pixelWidth}
                   selected={selectedSegmentId === group.id}
                   onSelect={() => {
                     stopHover();
@@ -604,9 +633,6 @@ export default function ActivityTimeline({
                 metric={metric}
                 metrics={model.metrics}
                 axis={axis}
-                distance={model.distance}
-                distanceGap={model.distanceGap}
-                viewport={timeViewport}
                 scale={scale}
                 plotViewport={plotViewport}
                 viewWidth={scrollSize.width || 1084}
@@ -719,49 +745,49 @@ export default function ActivityTimeline({
             ) : null}
           </div>
           {visibleRows.length ? (
-            <div
-              className="relative h-8 border-t border-border/45 text-[11px] text-muted-foreground tabular-nums"
-              style={{
-                marginLeft: TIMELINE_PLOT_LEFT,
-                marginRight: TIMELINE_END_PADDING,
-              }}
-              aria-hidden
-            >
-              {ticks.map((value, index) => (
-                <span
-                  key={index}
-                  className="absolute top-2.5 whitespace-nowrap"
-                  style={{
-                    left: `${(index / (ticks.length - 1)) * 100}%`,
-                    transform:
-                      index === 0
-                        ? undefined
-                        : index === ticks.length - 1
-                          ? "translateX(-100%)"
-                          : "translateX(-50%)",
-                  }}
-                >
+            <div className="relative h-8" aria-hidden>
+              <div
+                className="sticky left-0 z-10 h-full bg-card"
+                style={{ width: TIMELINE_PLOT_LEFT }}
+              />
+              <div
+                className="absolute inset-y-0 border-t border-border/45 text-[11px] text-muted-foreground tabular-nums"
+                style={{
+                  left: TIMELINE_PLOT_LEFT,
+                  right: TIMELINE_END_PADDING,
+                }}
+              >
+                {ticks.map((value, index) => (
                   <span
-                    className="absolute -top-2.5 h-1.5 border-l border-border/60"
+                    key={index}
+                    className="absolute top-2.5 whitespace-nowrap"
                     style={{
-                      left:
+                      left: `${(index / (ticks.length - 1)) * 100}%`,
+                      transform:
                         index === 0
-                          ? 0
+                          ? undefined
                           : index === ticks.length - 1
-                            ? "100%"
-                            : "50%",
+                            ? "translateX(-100%)"
+                            : "translateX(-50%)",
                     }}
-                  />
-                  {axis === "time"
-                    ? timeLabel(scale.timeAt(value))
-                    : (() => {
-                        const distance = coordinateAtTime(scale.timeAt(value));
-                        return distance === null
-                          ? "—"
-                          : formatDistance(distance);
-                      })()}
-                </span>
-              ))}
+                  >
+                    <span
+                      className="absolute -top-2.5 h-1.5 border-l border-border/60"
+                      style={{
+                        left:
+                          index === 0
+                            ? 0
+                            : index === ticks.length - 1
+                              ? "100%"
+                              : "50%",
+                      }}
+                    />
+                    {axis === "time"
+                      ? timeLabel(scale.coordinateAt(value))
+                      : formatDistance(scale.coordinateAt(value))}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
