@@ -34,6 +34,20 @@ function show(compact = false, currentValue = "43") {
 }
 
 describe("VO2max forecast presentation", () => {
+  it("labels the personal model range as a reference without claiming calibrated coverage", () => {
+    mocks.query.mockReturnValue({
+      isPending: false,
+      data: {
+        status: "READY",
+        cutoffDate: "2026-11-10",
+        intervalKind: "REFERENCE",
+        forecasts: [{ week: 4, point: 44.1, lower80: 42.1, upper80: 45.2 }],
+      },
+    });
+    show();
+    expect(screen.getByText("Reference range 42.1–45.2")).toBeInTheDocument();
+    expect(screen.queryByText(/80%/)).not.toBeInTheDocument();
+  });
   it("pairs the current value with the same fourth-week forecast on the card and detail", () => {
     forecast();
     const compact = show(true);

@@ -365,10 +365,15 @@ export function MetricHistoryChartView({
             </div>
             {week && typeof lower === "number" && typeof upper === "number" ? (
               <div className="text-muted-foreground">
-                {tForecast("interval", {
-                  lower: lower.toFixed(1),
-                  upper: upper.toFixed(1),
-                })}
+                {tForecast(
+                  forecast?.intervalKind === "REFERENCE"
+                    ? "referenceInterval"
+                    : "interval",
+                  {
+                    lower: lower.toFixed(1),
+                    upper: upper.toFixed(1),
+                  },
+                )}
               </div>
             ) : null}
           </div>,

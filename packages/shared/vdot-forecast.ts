@@ -20,6 +20,9 @@ export type VdotForecastResult = {
   timezone: string;
   source: "FACTOR" | "RACE" | null;
   modelVersion: string | null;
+  modelKind?: "PERSONAL_HISTORY" | "VALIDATED_MODEL" | null;
+  /** Older snapshots without this field contain calibrated 80% intervals. */
+  intervalKind?: "REFERENCE" | "CALIBRATED_80" | null;
   lastObservationAt: string | null;
   history: VdotForecastWeek[];
   estimatedCurrentLevel: number | null;

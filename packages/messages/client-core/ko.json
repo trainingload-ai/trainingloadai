@@ -6376,6 +6376,7 @@
   "VdotForecast": {
     "expected": "4주 후 예상 최대산소섭취량 {value}",
     "interval": "80% 예측 구간 {lower}–{upper}",
+    "referenceInterval": "참고 범위 {lower}–{upper}",
     "basis": "{date}까지의 최대산소섭취량 기록을 기반으로 추정했습니다.",
     "askCoach": "코치에게 질문",
     "coachPrompt": "현재 최대산소섭취량과 과거 변화, 이용 가능한 4주 예측을 설명하고 최근 훈련을 바탕으로 조언해 주세요.",

@@ -121,10 +121,15 @@ export function VdotForecastSummary({
           {final ? (
             <>
               <p className="tabular-nums">
-                {t("interval", {
-                  lower: number(final.lower80),
-                  upper: number(final.upper80),
-                })}
+                {t(
+                  forecast?.intervalKind === "REFERENCE"
+                    ? "referenceInterval"
+                    : "interval",
+                  {
+                    lower: number(final.lower80),
+                    upper: number(final.upper80),
+                  },
+                )}
               </p>
               <p>{t("basis", { date: forecast!.cutoffDate })}</p>
             </>

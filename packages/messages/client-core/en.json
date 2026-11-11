@@ -7034,6 +7034,7 @@
   "VdotForecast": {
     "expected": "In four weeks, estimated VO2max {value}",
     "interval": "80% prediction interval {lower}–{upper}",
+    "referenceInterval": "Reference range {lower}–{upper}",
     "basis": "Based on historical VO2max through {date}.",
     "askCoach": "Ask coach",
     "coachPrompt": "Please explain my current VO2max, its recent history and any available four-week forecast, and give advice based on my recent training.",

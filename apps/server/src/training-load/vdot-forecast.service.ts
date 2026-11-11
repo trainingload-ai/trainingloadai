@@ -19,9 +19,11 @@ import { readyActivityWhere } from '@/utils/activity-ready-where';
 import { resolveEffectiveActivityVo2Max } from '@/algorithm/vo2max-source';
 import {
   calculateVdotForecast,
+  calculatePersonalVdotForecast,
   isValidatedVdotArtifact,
   shiftVdotDate,
   VDOT_FORECAST_VERSION,
+  VDOT_PERSONAL_FORECAST_VERSION,
   type VdotObservation,
 } from '@/algorithm/vdot-forecast';
 import { resolveActivityAnalysisTimezone } from './activity-local-date';
@@ -183,18 +185,26 @@ export class VdotForecastService {
     ]);
     const activeArtifact =
       artifact && artifact.trainedThrough <= cutoffDate ? artifact : null;
-    const calculated = calculateVdotForecast(
-      observations,
-      cutoffDate,
-      activeArtifact,
-    );
+    const usePersonalModel = !this.config
+      .get<string>('VDOT_FORECAST_MODEL_PATH')
+      ?.trim();
+    const personal = usePersonalModel
+      ? calculatePersonalVdotForecast(observations, cutoffDate)
+      : null;
+    const calculated =
+      personal ??
+      calculateVdotForecast(observations, cutoffDate, activeArtifact);
+    const modelVersion = usePersonalModel
+      ? VDOT_PERSONAL_FORECAST_VERSION
+      : (activeArtifact?.modelVersion ?? null);
     const fingerprint = createHash('sha256')
       .update(
         JSON.stringify({
           userId,
           cutoffDate,
           zone,
-          algorithm: VDOT_FORECAST_VERSION,
+          algorithm: [VDOT_FORECAST_VERSION, modelVersion],
+          personalParameters: personal?.parameters ?? null,
           artifact,
           observations,
         }),
@@ -207,7 +217,9 @@ export class VdotForecastService {
       cutoffDate,
       timezone: zone,
       source: calculated.latest?.source ?? null,
-      modelVersion: activeArtifact?.modelVersion ?? null,
+      modelVersion,
+      modelKind: usePersonalModel ? 'PERSONAL_HISTORY' : 'VALIDATED_MODEL',
+      intervalKind: usePersonalModel ? 'REFERENCE' : 'CALIBRATED_80',
       lastObservationAt: calculated.latest?.date ?? null,
       history: calculated.weeks,
       estimatedCurrentLevel: calculated.currentLevel,
@@ -223,6 +235,7 @@ export class VdotForecastService {
         input: {
           observations,
           artifact,
+          personalParameters: personal?.parameters ?? null,
           cutoffDate,
           timezone: zone,
         } as Prisma.InputJsonValue,

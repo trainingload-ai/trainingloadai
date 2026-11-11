@@ -6376,6 +6376,7 @@
   "VdotForecast": {
     "expected": "4週間後の推定 最大酸素摂取量 {value}",
     "interval": "80%予測区間 {lower}–{upper}",
+    "referenceInterval": "参考範囲 {lower}–{upper}",
     "basis": "{date} までの 最大酸素摂取量 履歴に基づく推定です。",
     "askCoach": "コーチに聞く",
     "coachPrompt": "現在の最大酸素摂取量とこれまでの変化、利用可能な4週間の予測を解説し、最近のトレーニングを踏まえてアドバイスしてください。",

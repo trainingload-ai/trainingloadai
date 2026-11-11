@@ -6474,6 +6474,7 @@
   "VdotForecast": {
     "expected": "四週後預計最大攝氧量 {value}",
     "interval": "80% 預測區間 {lower}–{upper}",
+    "referenceInterval": "參考範圍 {lower}–{upper}",
     "basis": "根據截至 {date} 的歷史趨勢推算。",
     "askCoach": "問教練",
     "coachPrompt": "幫我解讀最大攝氧量的目前水準、歷史變化和可用的四週預測，並結合近期訓練提供建議。",

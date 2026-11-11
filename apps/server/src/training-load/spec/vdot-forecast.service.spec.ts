@@ -6,6 +6,7 @@ import { VdotForecastService } from '../vdot-forecast.service';
 import {
   shiftVdotDate,
   VDOT_FORECAST_VERSION,
+  VDOT_PERSONAL_FORECAST_VERSION,
 } from '@/algorithm/vdot-forecast';
 import { metricForecastTool } from '@/api/ai/core/tools/metricForecast.tool';
 
@@ -131,11 +132,51 @@ describe('VDOT forecast query and snapshots', () => {
     expect(points).toHaveLength(42);
   });
 
-  it('keeps an unvalidated model unavailable and avoids storing an invented projection', async () => {
+  it('runs the built-in personal model without external files and snapshots its fitted parameters', async () => {
     const { service, prisma } = dependencies('');
     const result = await service.getForecast('runner-one', now);
     expect(result).toMatchObject({
+      status: 'READY',
+      modelVersion: VDOT_PERSONAL_FORECAST_VERSION,
+      modelKind: 'PERSONAL_HISTORY',
+      intervalKind: 'REFERENCE',
+    });
+    expect(result.forecasts).toHaveLength(4);
+    expect(result.forecasts[3].point).toBeCloseTo(43);
+    const storedInput =
+      prisma.vdotForecastSnapshot.upsert.mock.calls[0][0].create.input;
+    expect(storedInput.artifact).toBeNull();
+    expect(storedInput.personalParameters.observationVariance).toBeGreaterThan(
+      0,
+    );
+    expect(
+      await service.getForecast('runner-one', new Date(now.getTime() + 60_000)),
+    ).toEqual(result);
+  });
+
+  it('keeps an explicitly configured unvalidated model unavailable', async () => {
+    const invalidPath = join(directory, 'invalid.json');
+    writeFileSync(
+      invalidPath,
+      JSON.stringify({
+        ...model,
+        validation: { ...model.validation, users: 1 },
+      }),
+    );
+    const { service, prisma } = dependencies(invalidPath);
+    const result = await service.getForecast('runner-one', now);
+    expect(result).toMatchObject({
       status: 'MODEL_UNAVAILABLE',
+      forecasts: [],
+    });
+    expect(prisma.vdotForecastSnapshot.upsert).not.toHaveBeenCalled();
+  });
+
+  it('keeps the personal model behind the same history coverage gate', async () => {
+    const { service, rows, prisma } = dependencies('');
+    rows.splice(0, rows.length - 2);
+    expect(await service.getForecast('runner-one', now)).toMatchObject({
+      status: 'INSUFFICIENT_HISTORY',
       forecasts: [],
     });
     expect(prisma.vdotForecastSnapshot.upsert).not.toHaveBeenCalled();

@@ -6377,6 +6377,7 @@
   "VdotForecast": {
     "expected": "VO2max stimato tra quattro settimane: {value}",
     "interval": "Intervallo di previsione all’80%: {lower}–{upper}",
+    "referenceInterval": "Intervallo indicativo {lower}–{upper}",
     "basis": "Basato sul VO2max storico fino al {date}.",
     "askCoach": "Chiedi al coach",
     "coachPrompt": "Spiegami il mio VO2max attuale, la sua evoluzione e le eventuali previsioni a quattro settimane, e dammi consigli basati sugli allenamenti recenti.",

@@ -7033,6 +7033,7 @@
   "VdotForecast": {
     "expected": "四周后预计最大摄氧量 {value}",
     "interval": "80% 预测区间 {lower}–{upper}",
+    "referenceInterval": "参考范围 {lower}–{upper}",
     "basis": "依据截至 {date} 的历史走势推算。",
     "askCoach": "问教练",
     "coachPrompt": "帮我解读最大摄氧量的当前水平、历史变化和可用的四周预测，并结合近期训练给出建议。",

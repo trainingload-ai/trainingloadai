@@ -1,5 +1,6 @@
 import {
   calculateVdotForecast,
+  calculatePersonalVdotForecast,
   isValidatedVdotArtifact,
   predictVdotWeeks,
   prepareVdotHistory,
@@ -46,6 +47,86 @@ function validatedFixture(): VdotForecastArtifact {
 }
 
 describe('weekly VDOT forecasting', () => {
+  const recentObservations = (slope = 0) =>
+    Array.from({ length: 42 }, (_, index) => ({
+      date: shiftVdotDate(cutoff, -82 + index * 2),
+      value: 43 + index * slope,
+      source: 'FACTOR' as const,
+      seriesKey: 'factor-1',
+    }));
+
+  it('fits the personal model without a population artifact and keeps stable history flat', () => {
+    const result = calculatePersonalVdotForecast(recentObservations(), cutoff);
+    expect(result.status).toBe('READY');
+    expect(result.forecasts).toHaveLength(4);
+    for (const point of result.forecasts) {
+      expect(point.point).toBeCloseTo(43);
+      expect(point.lower80).toBeLessThan(point.point);
+      expect(point.upper80).toBeGreaterThan(point.point);
+    }
+    expect(result.forecasts[3].endDate).toBe('2026-12-08');
+  });
+
+  it.each([-0.05, 0.05])(
+    'learns a personal trend of %s and damps its future changes',
+    (slope) => {
+      const rows = recentObservations(slope);
+      const result = calculatePersonalVdotForecast(rows, cutoff);
+      expect(result.status).toBe('READY');
+      const changes = result.forecasts.map(
+        (point, index) =>
+          point.point -
+          (index ? result.forecasts[index - 1].point : result.currentLevel!),
+      );
+      expect(Math.sign(changes[0])).toBe(Math.sign(slope));
+      expect(Math.abs(changes[3])).toBeLessThan(Math.abs(changes[0]));
+      const extra = {
+        ...rows[0],
+        date: shiftVdotDate(cutoff, 1),
+        value: 99,
+        seriesKey: 'future',
+      };
+      expect(calculatePersonalVdotForecast([...rows, extra], cutoff)).toEqual(
+        result,
+      );
+    },
+  );
+
+  it('keeps personal predictions unavailable for sparse, stale and incomparable evidence', () => {
+    expect(calculatePersonalVdotForecast([], cutoff).status).toBe(
+      'INSUFFICIENT_HISTORY',
+    );
+    expect(calculatePersonalVdotForecast(observations(), cutoff).status).toBe(
+      'STALE_HISTORY',
+    );
+    const result = calculatePersonalVdotForecast(
+      [
+        ...recentObservations(),
+        { date: cutoff, value: 44, source: 'FACTOR', seriesKey: 'changed' },
+      ],
+      cutoff,
+    );
+    expect(result).toMatchObject({
+      status: 'INCOMPARABLE_HISTORY',
+      forecasts: [],
+    });
+  });
+
+  it('widens the personal reference range for noisy history and later horizons', () => {
+    const stable = calculatePersonalVdotForecast(recentObservations(), cutoff);
+    const noisy = calculatePersonalVdotForecast(
+      recentObservations().map((row, i) => ({
+        ...row,
+        value: row.value + 3 * Math.sin(i / 4),
+      })),
+      cutoff,
+    );
+    const width = (result: typeof stable, index: number) =>
+      result.forecasts[index].upper80 - result.forecasts[index].lower80;
+    expect(width(noisy, 3)).toBeGreaterThan(width(stable, 3));
+    expect(width(noisy, 3)).toBeGreaterThan(width(noisy, 0));
+  });
+
   it('keeps constant observations flat and adds observation noise to future intervals', () => {
     const rows = observations().concat([
       { date: cutoff, value: 43, source: 'FACTOR', seriesKey: 'factor-1' },

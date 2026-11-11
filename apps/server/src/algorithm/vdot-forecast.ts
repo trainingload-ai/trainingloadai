@@ -6,6 +6,7 @@ import type {
 } from '@shared/vdot-forecast';
 
 export const VDOT_FORECAST_VERSION = 'vdot-damped-weekly-v1';
+export const VDOT_PERSONAL_FORECAST_VERSION = 'vdot-personal-weekly-v1';
 const DAY_MS = 86_400_000;
 
 export type VdotObservation = {
@@ -202,13 +203,8 @@ export function isValidatedVdotArtifact(
   );
 }
 
-export function calculateVdotForecast(
-  observations: VdotObservation[],
-  cutoffDate: string,
-  artifact: VdotForecastArtifact | null,
-) {
-  const history = prepareVdotHistory(observations, cutoffDate);
-  const empty = {
+function emptyForecast(history: ReturnType<typeof prepareVdotHistory>) {
+  return {
     ...history,
     currentLevel: null as number | null,
     forecasts: [] as Array<{
@@ -220,12 +216,17 @@ export function calculateVdotForecast(
       upper80: number;
     }>,
   };
-  if (history.status !== 'READY') return empty;
-  if (!isValidatedVdotArtifact(artifact))
-    return { ...empty, status: 'MODEL_UNAVAILABLE' as const };
-  const result = predictVdotWeeks(history.weeks, artifact.parameters);
+}
+
+function forecastWithParameters(
+  history: ReturnType<typeof prepareVdotHistory>,
+  cutoffDate: string,
+  parameters: VdotForecastParameters,
+  intervalScales: number[],
+) {
+  const result = predictVdotWeeks(history.weeks, parameters);
   const forecasts = result.predictions.map((prediction, index) => {
-    const width = prediction.standardDeviation * artifact.intervalScales[index];
+    const width = prediction.standardDeviation * intervalScales[index];
     return {
       week: index + 1,
       startDate: shiftVdotDate(cutoffDate, index * 7 + 1),
@@ -244,7 +245,95 @@ export function calculateVdotForecast(
         point.lower80 >= 0,
     )
   ) {
-    return { ...empty, status: 'MODEL_UNAVAILABLE' as const };
+    return { ...emptyForecast(history), status: 'MODEL_UNAVAILABLE' as const };
   }
   return { ...history, currentLevel: result.currentLevel, forecasts };
+}
+
+/** Fit only to this user's comparable, pre-cutoff weekly observations. */
+function fitPersonalParameters(weeks: VdotForecastWeek[]) {
+  const observed = weeks.flatMap((week, index) =>
+    week.value === null ? [] : [{ index, value: week.value }],
+  );
+  const slopes = observed
+    .slice(1)
+    .map(
+      (point, index) =>
+        (point.value - observed[index].value) /
+        (point.index - observed[index].index),
+    );
+  const typicalSlope = vdotMedian(slopes);
+  const deviation = vdotMedian(
+    slopes.map((slope) => Math.abs(slope - typicalSlope)),
+  );
+  // A robust scale estimate, with a non-zero floor for constant or rounded data.
+  const observationVariance = Math.max(0.04, (1.4826 * deviation) ** 2 / 2);
+  let bestError = Infinity;
+  let chosen!: VdotForecastParameters;
+  // Level-only is a real candidate: weak/noisy evidence need not imply a trend.
+  for (const phi of [0, 0.8, 0.9, 0.98]) {
+    for (const levelRatio of [0.01, 0.1, 1]) {
+      for (const trendRatio of phi === 0 ? [0] : [0.001, 0.01]) {
+        const parameters = {
+          phi,
+          observationVariance,
+          levelVariance: observationVariance * levelRatio,
+          trendVariance: observationVariance * trendRatio,
+        };
+        // Every validation target is forecast from earlier calendar weeks only.
+        // The common variance scale cancels from the point predictions.
+        const errors = observed.slice(3).map((point) => {
+          const predicted = predictVdotWeeks(
+            weeks.slice(0, point.index),
+            parameters,
+          );
+          return Math.abs(predicted.predictions[0].point - point.value);
+        });
+        const error =
+          errors.reduce((sum, value) => sum + value, 0) / errors.length;
+        if (error < bestError) {
+          bestError = error;
+          chosen = parameters;
+        }
+      }
+    }
+  }
+  return chosen;
+}
+
+/** Built-in personal trend model; its model-based range is not empirically calibrated. */
+export function calculatePersonalVdotForecast(
+  observations: VdotObservation[],
+  cutoffDate: string,
+) {
+  const history = prepareVdotHistory(observations, cutoffDate);
+  if (history.status !== 'READY')
+    return { ...emptyForecast(history), parameters: null };
+  const parameters = fitPersonalParameters(history.weeks);
+  return {
+    ...forecastWithParameters(
+      history,
+      cutoffDate,
+      parameters,
+      [1.281552, 1.281552, 1.281552, 1.281552],
+    ),
+    parameters,
+  };
+}
+
+export function calculateVdotForecast(
+  observations: VdotObservation[],
+  cutoffDate: string,
+  artifact: VdotForecastArtifact | null,
+) {
+  const history = prepareVdotHistory(observations, cutoffDate);
+  if (history.status !== 'READY') return emptyForecast(history);
+  if (!isValidatedVdotArtifact(artifact))
+    return { ...emptyForecast(history), status: 'MODEL_UNAVAILABLE' as const };
+  return forecastWithParameters(
+    history,
+    cutoffDate,
+    artifact.parameters,
+    artifact.intervalScales,
+  );
 }
