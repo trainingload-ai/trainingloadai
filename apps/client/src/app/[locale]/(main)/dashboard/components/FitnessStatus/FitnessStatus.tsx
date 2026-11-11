@@ -294,6 +294,7 @@ const FitnessStatus = () => {
           unit={metricDialogOpen.unit}
           description={metricDialogOpen.description}
           links={metricDialogOpen.links}
+          mobileSheet={["atl", "ctl", "tsb"].includes(metricDialogOpen.key)}
         />
       ) : null}
     </div>

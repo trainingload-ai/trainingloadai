@@ -11,8 +11,10 @@ export function usePmcProjection(
   scope: PmcProjectionScope,
   scenario: PmcProjectionScenario,
   historyDays: 60 | 90,
+  enabled = true,
 ) {
   return useQuery({
+    enabled,
     queryKey: queryKeys.pmc.projection(scope, scenario, historyDays),
     queryFn: async () => {
       const result = await apiFetch<PmcProjectionResult>(

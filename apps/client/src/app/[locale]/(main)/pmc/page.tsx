@@ -26,9 +26,11 @@ import { Link } from "@/i18n/navigation";
 import { useStore } from "@/lib/store";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import { useMobileMetricSubpageNavigation } from "@/components/metrics/use-mobile-metric-subpage-navigation";
+import { useThemeColor } from "@/components/charts/uplot/useElementSize";
+import { pmcAccentToken } from "@/components/charts/pmc/pmc-visuals";
 
 const ProjectionChart = dynamic(
-  () => import("./components/PMCProjectionChart"),
+  () => import("@/components/charts/pmc/PMCProjectionChart"),
   {
     ssr: false,
     loading: () => <Skeleton className="h-[460px] w-full rounded-md" />,
@@ -39,6 +41,7 @@ const metrics = ["ctl", "atl", "tsb"] as const;
 export default function PMCPage() {
   const t = useTranslations("PmcProjection");
   const format = useFormatter();
+  const color = useThemeColor();
   const search = useSearchParams();
   const storedScope = useStore((state) => state.pmcFilters.selectedSportType);
   const setScope = useStore((state) => state.setPmcSportType);
@@ -129,9 +132,18 @@ export default function PMCPage() {
             {metrics.map((metric) => (
               <div
                 key={metric}
-                className="flex min-w-0 flex-col gap-4 rounded-md bg-muted p-3 md:p-4"
+                className="flex min-w-0 flex-col gap-4 rounded-surface bg-neutral-100 p-3 dark:bg-muted/45 md:p-4"
               >
-                <dt className="text-xs font-medium text-muted-foreground md:text-sm">
+                <dt className="flex items-center gap-2 text-xs font-medium text-muted-foreground md:text-sm">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor: color(
+                        pmcAccentToken(metric, result.current?.[metric]),
+                      ),
+                    }}
+                    aria-hidden
+                  />
                   {t(`metrics.${metric}`)}
                 </dt>
                 <dd

@@ -14,16 +14,28 @@ import {
   projectionChartPoints,
   projectionChartSeries,
 } from "./pmc-projection-model";
+import {
+  PMC_METRIC_TOKENS,
+  PMC_TSB_ZONES,
+  type PmcMetric,
+} from "./pmc-visuals";
 
 type Panel = "main" | "load";
-type Metric = "tsb" | "ctl" | "atl";
 
 export default function PMCProjectionChart({
   result,
   refreshError = false,
+  metric,
+  showLoad = true,
+  compact = false,
+  tools,
 }: {
   result: PmcProjectionResult;
   refreshError?: boolean;
+  metric?: PmcMetric;
+  showLoad?: boolean;
+  compact?: boolean;
+  tools?: React.ReactNode;
 }) {
   const t = useTranslations("PmcProjection");
   const format = useFormatter();
@@ -33,7 +45,8 @@ export default function PMCProjectionChart({
   const load = useElementSize<HTMLDivElement>();
   const plotRefs = useRef<uPlot[]>([]);
   const touchTooltip = useRef(false);
-  const [focus, setFocus] = useState<Metric>("tsb");
+  const [selectedMetric, setSelectedMetric] = useState<PmcMetric>("tsb");
+  const focus = metric ?? selectedMetric;
   const [selectedDate, setSelectedDate] = useState(result.today);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const points = useMemo(
@@ -70,12 +83,7 @@ export default function PMCProjectionChart({
       const fg = color("--muted-foreground");
       const tonal = (alpha: number) =>
         `color-mix(in srgb, ${fg} ${alpha * 100}%, transparent)`;
-      const metricColor =
-        focus === "ctl"
-          ? color("--sky-600")
-          : focus === "atl"
-            ? color("--violet-500")
-            : fg;
+      const metricColor = color(PMC_METRIC_TOKENS[focus]);
       const todayX = Date.parse(`${result.today}T00:00:00Z`) / 1000;
       const x = data.main[0];
       const line = (
@@ -91,6 +99,10 @@ export default function PMCProjectionChart({
         dash: future ? [5, 4] : [],
         spanGaps: false,
         paths: uPlot.paths.spline!(),
+        fill:
+          focus !== "tsb"
+            ? `color-mix(in srgb, ${stroke} 5%, transparent)`
+            : undefined,
         points: { show: false },
       });
       return {
@@ -113,6 +125,8 @@ export default function PMCProjectionChart({
           y: {
             auto: true,
             range: (_u, min, max) => {
+              if (!Number.isFinite(min) || !Number.isFinite(max))
+                return panel === "main" && focus === "tsb" ? [-10, 10] : [0, 1];
               if (panel === "load") return [0, Math.max(1, max) * 1.15];
               const pad = Math.max(2, (max - min) * 0.14);
               return [
@@ -126,7 +140,7 @@ export default function PMCProjectionChart({
         },
         axes: [
           {
-            show: panel === "load",
+            show: panel === "load" || !showLoad,
             stroke: fg,
             grid: { show: false },
             space: width < 500 ? 95 : 125,
@@ -186,7 +200,22 @@ export default function PMCProjectionChart({
               const { ctx, bbox } = u;
               const xpos = u.valToPos(todayX, "x", true);
               ctx.save();
-              ctx.fillStyle = tonal(0.04);
+              if (panel === "main" && focus === "tsb") {
+                const min = u.scales.y.min ?? 0,
+                  max = u.scales.y.max ?? 1;
+                for (const zone of PMC_TSB_ZONES) {
+                  const low = Math.max(min, zone.min),
+                    high = Math.min(max, zone.max);
+                  if (low >= high) continue;
+                  const top = u.valToPos(high, "y", true),
+                    bottom = u.valToPos(low, "y", true);
+                  ctx.globalAlpha = 0.065;
+                  ctx.fillStyle = color(zone.token);
+                  ctx.fillRect(bbox.left, top, bbox.width, bottom - top);
+                }
+              }
+              ctx.globalAlpha = 1;
+              ctx.fillStyle = tonal(0.025);
               ctx.fillRect(
                 xpos,
                 bbox.top,
@@ -223,7 +252,7 @@ export default function PMCProjectionChart({
         },
       };
     },
-    [color, data, result.today, points, syncKey, focus, format, t],
+    [color, data, result.today, points, syncKey, focus, format, t, showLoad],
   );
   const mainOptions = useMemo(
     () => options(main.size.width, main.size.height, "main"),
@@ -241,58 +270,61 @@ export default function PMCProjectionChart({
       data-testid="pmc-projection-chart"
       data-metric={focus}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <h2 className="text-sm font-semibold">{t("chartTitle")}</h2>
-          {refreshError ? (
-            <span
-              role="status"
-              data-testid="pmc-update-status"
-              className="text-xs text-muted-foreground"
-              title={t("updated", {
-                time: format.dateTime(new Date(result.asOf), {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: result.timezone,
-                }),
-              })}
+      {!compact || tools || refreshError ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {!compact ? (
+              <h2 className="text-sm font-semibold">{t("chartTitle")}</h2>
+            ) : null}
+            {refreshError ? (
+              <span
+                role="status"
+                data-testid="pmc-update-status"
+                className="text-xs text-muted-foreground"
+                title={t("updated", {
+                  time: format.dateTime(new Date(result.asOf), {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: result.timezone,
+                  }),
+                })}
+              >
+                {t("updateFailedShort")}
+              </span>
+            ) : null}
+          </div>
+          {metric ? (
+            tools
+          ) : (
+            <ToggleGroup
+              type="single"
+              value={focus}
+              onValueChange={(value) => {
+                if (value === "tsb" || value === "ctl" || value === "atl")
+                  setSelectedMetric(value);
+              }}
+              size="sm"
+              variant="outline"
+              aria-label={t("metricSwitch")}
+              data-testid="pmc-metric-switch"
             >
-              {t("updateFailedShort")}
-            </span>
-          ) : null}
+              {(["tsb", "ctl", "atl"] as const).map((metric) => (
+                <ToggleGroupItem key={metric} value={metric}>
+                  {t(`metricNames.${metric}`)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          )}
         </div>
-        <ToggleGroup
-          type="single"
-          value={focus}
-          onValueChange={(value) => {
-            if (value === "tsb" || value === "ctl" || value === "atl")
-              setFocus(value);
-          }}
-          size="sm"
-          variant="outline"
-          aria-label={t("metricSwitch")}
-          data-testid="pmc-metric-switch"
-        >
-          {(["tsb", "ctl", "atl"] as const).map((metric) => (
-            <ToggleGroupItem key={metric} value={metric}>
-              {t(`metricNames.${metric}`)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
         <span className="flex items-center gap-2">
           <span
             className="w-4 border-t-2"
             style={{
-              borderColor:
-                focus === "ctl"
-                  ? color("--sky-600")
-                  : focus === "atl"
-                    ? color("--violet-500")
-                    : color("--muted-foreground"),
+              borderColor: color(PMC_METRIC_TOKENS[focus]),
             }}
           />
           {t(`metrics.${focus}`)}
@@ -307,7 +339,7 @@ export default function PMCProjectionChart({
         </span>
       </div>
       <div
-        className="relative overflow-hidden rounded-md bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative overflow-hidden rounded-surface bg-neutral-50/80 dark:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         tabIndex={0}
         role="group"
         aria-label={`${t("chartTitle")}. ${t("keyboardHint")}`}
@@ -383,7 +415,14 @@ export default function PMCProjectionChart({
             {t("today")} · {dateLabel(result.today)}
           </span>
         </div>
-        <div ref={main.ref} className="h-[260px] w-full min-w-0 md:h-[320px]">
+        <div
+          ref={main.ref}
+          className={
+            compact
+              ? "h-[220px] w-full min-w-0 md:h-[290px]"
+              : "h-[260px] w-full min-w-0 md:h-[320px]"
+          }
+        >
           {main.size.width > 0 ? (
             <UplotReact
               options={mainOptions}
@@ -394,18 +433,27 @@ export default function PMCProjectionChart({
             />
           ) : null}
         </div>
-        <p className="px-4 pt-2 text-xs text-muted-foreground">{t("load")}</p>
-        <div ref={load.ref} className="h-[105px] w-full min-w-0 md:h-[110px]">
-          {load.size.width > 0 ? (
-            <UplotReact
-              options={loadOptions}
-              data={data.load}
-              onCreate={(plot) => {
-                plotRefs.current[1] = plot;
-              }}
-            />
-          ) : null}
-        </div>
+        {showLoad ? (
+          <>
+            <p className="px-4 pt-2 text-xs text-muted-foreground">
+              {t("load")}
+            </p>
+            <div
+              ref={load.ref}
+              className="h-[105px] w-full min-w-0 md:h-[110px]"
+            >
+              {load.size.width > 0 ? (
+                <UplotReact
+                  options={loadOptions}
+                  data={data.load}
+                  onCreate={(plot) => {
+                    plotRefs.current[1] = plot;
+                  }}
+                />
+              ) : null}
+            </div>
+          </>
+        ) : null}
         {tooltipVisible && selected ? (
           <div
             className="pointer-events-none absolute right-3 top-10 z-10 grid min-w-40 gap-1.5 rounded-md border border-border/50 bg-background px-3 py-2 text-xs shadow-md"
@@ -418,11 +466,21 @@ export default function PMCProjectionChart({
               {selected.basis === "ACTUAL" ? t("actual") : t("projected")}
             </p>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-1 tabular-nums">
-              <dt style={{ color: color("--sky-600") }}>
+              <dt className="flex items-center gap-1.5">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: color("--sky-500") }}
+                  aria-hidden
+                />
                 {t("metricNames.ctl")}
               </dt>
               <dd className="text-right">{number(selected.ctl)}</dd>
-              <dt style={{ color: color("--violet-500") }}>
+              <dt className="flex items-center gap-1.5">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: color("--violet-500") }}
+                  aria-hidden
+                />
                 {t("metricNames.atl")}
               </dt>
               <dd className="text-right">{number(selected.atl)}</dd>

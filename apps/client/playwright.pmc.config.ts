@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: /pmc-projection\.spec\.ts/,
+  testMatch: /pmc-(projection|metric-dialog)\.spec\.ts/,
   workers: 1,
   timeout: 180_000,
   expect: { timeout: 20_000 },
