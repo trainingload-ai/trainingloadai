@@ -68,6 +68,7 @@ export async function invalidateActivePlanAndPlanDetails(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
+    qc.invalidateQueries({ queryKey: queryKeys.pmc.projections() }),
     qc.invalidateQueries({ queryKey: queryKeys.root.planDetail }),
   ]);
 }
@@ -79,6 +80,7 @@ export async function invalidatePlanListsAndActive(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.list() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
+    qc.invalidateQueries({ queryKey: queryKeys.pmc.projections() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.legacyPlans() }),
   ]);
 }
@@ -102,6 +104,7 @@ export async function invalidateAfterPlanMutation(
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.list() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
+    qc.invalidateQueries({ queryKey: queryKeys.pmc.projections() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.legacyPlans() }),
   ];
 

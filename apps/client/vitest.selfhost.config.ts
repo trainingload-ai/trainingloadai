@@ -76,6 +76,8 @@ export default defineConfig({
       "src/lib/today-suggestion-refresh.test.ts",
       "src/lib/spec/coach-home-card-stack.test.ts",
       "src/components/vdot-forecast-summary.test.tsx",
+      "src/lib/pmc-coach-context.test.ts",
+      "src/app/[locale]/(main)/pmc/components/pmc-projection-model.test.ts",
       "src/components/routes/**/*.test.{ts,tsx}",
       "src/components/MapBoxMap/**/*.test.{ts,tsx}",
       "src/components/health/**/*.test.{ts,tsx}",

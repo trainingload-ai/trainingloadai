@@ -302,7 +302,8 @@
         "bodyWeightUpdate": "记录体重",
         "trainingDataCoverage": "训练数据覆盖",
         "coachTaskResult": "后台任务结果",
-        "metricForecast": "读取四周最大摄氧量预测"
+        "metricForecast": "读取四周最大摄氧量预测",
+        "pmcProjection": "读取四周体能负荷预测"
       },
       "skills": {
         "integrationSupport": "设备连接与同步",
@@ -7049,5 +7050,52 @@
     "higher": "预计高于当前",
     "lower": "预计低于当前",
     "unchanged": "预计与当前持平"
+  },
+  "PmcProjection": {
+    "title": "体能管理",
+    "scopeLabel": "运动范围",
+    "scopes": {
+      "ALL": "全部运动",
+      "RUN": "跑步",
+      "CYCLING": "骑行",
+      "SWIM": "游泳"
+    },
+    "scenarios": {
+      "AUTO": "计划优先",
+      "HABIT": "近期习惯",
+      "REST": "暂停训练"
+    },
+    "basis": {
+      "PLAN": "已排训练",
+      "HABIT": "近期训练习惯",
+      "MIXED": "已排训练＋近期习惯",
+      "REST": "暂停训练",
+      "UNKNOWN": "依据不足"
+    },
+    "metrics": {
+      "ctl": "体能（CTL）",
+      "atl": "疲劳（ATL）",
+      "tsb": "状态（TSB）"
+    },
+    "chartTitle": "训练负荷与走势",
+    "actual": "已记录",
+    "projected": "预测",
+    "today": "今天",
+    "load": "每日负荷",
+    "keyboardHint": "可用左右方向键查看日期。",
+    "updated": "数据截至 {time}",
+    "failed": "暂时无法读取训练负荷，请重试。",
+    "retry": "重试",
+    "empty": "尚无已记录的训练负荷，连接设备或导入活动后可查看历史。",
+    "askCoach": "问教练",
+    "coachPrompt": "帮我解读{scope}的当前训练负荷、历史变化，以及按“{scenario}”预测的未来四周走势，并结合近期训练和恢复给出建议。",
+    "updateFailedShort": "更新失败，保留上次结果",
+    "noForecast": "暂无预测",
+    "metricNames": {
+      "ctl": "体能",
+      "atl": "疲劳",
+      "tsb": "状态"
+    },
+    "metricSwitch": "切换指标"
   }
 }

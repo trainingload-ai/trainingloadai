@@ -1,9 +1,9 @@
+import { PlanProjectionReadModule } from './application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { PlanController } from './plan.controller';
 import { PlanService } from './plan.service';
 import { PlanLinkMatcherService } from './plan-link-matcher.service';
-import { PlanLoadEstimatorService } from './plan-load-estimator.service';
 import { PlanSummaryService } from './plan-summary.service';
 import { CoachContextService } from './coach-context.service';
 import { PlanExecutionContextService } from './plan-execution-context.service';
@@ -20,8 +20,6 @@ import { PlanShareService } from './plan-share.service';
 import { PlanShareAuthController } from './plan-share-auth.controller';
 import { PublicPlanShareController } from './public-plan-share.controller';
 import { PMCModule } from '@/training-load/pmc.module';
-import { PlanRepository } from './persistence/plan.repository';
-import { PlanWorkoutRepository } from './persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from './persistence/plan-activity-link.repository';
 import { CoachContextRepository } from './persistence/coach-context.repository';
 import { PlanShareRepository } from './persistence/plan-share.repository';
@@ -39,7 +37,6 @@ import { PlanProposalService } from './application/plan-proposal.service';
 import { PlanProposalApplyService } from './application/plan-proposal-apply.service';
 import { PlanScheduledActivationWorker } from './application/plan-scheduled-activation.worker';
 import { NotificationDomainModule } from '@/notification/notification-domain.module';
-import { PlanWorkoutTargetResolver } from './application/plan-workout-target-resolver.service';
 import { PlanDeliveryReadService } from './application/plan-delivery-read.service';
 
 /**
@@ -49,6 +46,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
 @Module({
   imports: [
     PrismaModule,
+    PlanProjectionReadModule,
     LoadReadoutModule,
     UsersModule,
     UserQueryModule,
@@ -66,8 +64,6 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PublicPlanShareController,
   ],
   providers: [
-    PlanRepository,
-    PlanWorkoutRepository,
     PlanActivityLinkRepository,
     CoachContextRepository,
     PlanShareRepository,
@@ -83,7 +79,6 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PlanShareService,
     WorkoutPersistenceService,
     PlanLinkMatcherService,
-    PlanLoadEstimatorService,
     PlanSummaryService,
     CoachContextService,
     PlanExecutionContextService,
@@ -91,28 +86,25 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PlanProposalService,
     PlanProposalApplyService,
     PlanScheduledActivationWorker,
-    PlanWorkoutTargetResolver,
     PlanDeliveryReadService,
     PlanImportDraftService,
   ],
   exports: [
+    PlanProjectionReadModule,
     PlanService,
     PlanLifecycleService,
     PlanWorkoutCommandService,
-    PlanWorkoutRepository,
     PlanActivityLinkService,
     PlanQueryService,
     PlanExternalSyncService,
     PlanShareService,
     PlanLinkMatcherService,
-    PlanLoadEstimatorService,
     PlanSummaryService,
     CoachContextService,
     PlanExecutionContextService,
     WorkoutPersistenceService,
     PlanProposalService,
     PlanProposalApplyService,
-    PlanWorkoutTargetResolver,
     PlanDeliveryReadService,
   ],
 })

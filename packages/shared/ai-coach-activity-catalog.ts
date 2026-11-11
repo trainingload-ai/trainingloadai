@@ -52,6 +52,7 @@ export const COACH_TOOL_LABELS = {
   "profile.zones": "thresholds",
   "profile.zone_ranges": "zones",
   "pmc.range": "loadTrend",
+  "pmc.projection": "pmcProjection",
   "plan.by_id": "planRead",
   "plan.active": "planActive",
   "plan.recent": "planRecent",

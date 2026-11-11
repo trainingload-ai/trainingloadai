@@ -1,9 +1,15 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import {
+  PMC_COACH_SEARCH_KEYS,
+  pmcSelectionFromSearch,
+} from "@/lib/pmc-coach-context";
+import type { PmcProjectionSelection } from "@shared/pmc-projection";
+
 import { useGuestAccessText } from "@deployment/managed-ui";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useCoachThread, useCoachActions } from "./coach-chat-provider";
 import {
   PromptInput,
@@ -65,6 +71,32 @@ export function CoachComposer({
       `${next.pathname}${next.search}${next.hash}`,
     );
   }, [forecastText, searchParams]);
+  const pmcText = useTranslations("PmcProjection");
+  const [pmcSelection, setPmcSelection] =
+    useState<PmcProjectionSelection | null>(null);
+  const consumedPmc = useRef(false);
+  useEffect(() => {
+    if (consumedPmc.current || !searchParams) return;
+    const selection = pmcSelectionFromSearch(searchParams);
+    if (!selection) return;
+    consumedPmc.current = true;
+    if (!draft.trim()) {
+      setDraft(
+        pmcText("coachPrompt", {
+          scope: pmcText(`scopes.${selection.scope}`),
+          scenario: pmcText(`scenarios.${selection.scenario}`),
+        }),
+      );
+      setPmcSelection(selection);
+    }
+    const next = new URL(window.location.href);
+    for (const key of PMC_COACH_SEARCH_KEYS) next.searchParams.delete(key);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${next.pathname}${next.search}${next.hash}`,
+    );
+  }, [draft, pmcText, searchParams]);
   const isStart = variant === "start";
   const isEmbedded = variant === "embedded";
   const modelPurposeLabel = thinkingEnabled
@@ -86,7 +118,25 @@ export function CoachComposer({
         onSubmit={({ text }) => {
           if (!demoReadOnly && !isRunning && text.trim()) {
             setDraft("");
-            void actions.append(text);
+            void actions.append(
+              pmcSelection
+                ? {
+                    role: "user",
+                    content: [
+                      { type: "text", text },
+                      {
+                        type: "data",
+                        name: "coach-user-tool-result",
+                        data: {
+                          toolUseId: "client:pmc_projection_context",
+                          content: pmcSelection,
+                        },
+                      },
+                    ],
+                  }
+                : text,
+            );
+            setPmcSelection(null);
           }
         }}
         className={cn(
@@ -140,8 +190,15 @@ export function CoachComposer({
                     title={t("actions.stop")}
                     onClick={() => void actions.stop()}
                   >
-                    <Square fill={isDesktopSelfHost ? "currentColor" : "none"} aria-hidden="true" />
-                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
+                    <Square
+                      fill={isDesktopSelfHost ? "currentColor" : "none"}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className={
+                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
+                      }
+                    >
                       {t("actions.stop")}
                     </span>
                   </Button>
@@ -152,14 +209,23 @@ export function CoachComposer({
                     type="submit"
                     disabled={demoReadOnly || !draft.trim()}
                     title={
-                      demoReadOnly ? demoText("readOnlyAction") : t("actions.send")
+                      demoReadOnly
+                        ? demoText("readOnlyAction")
+                        : t("actions.send")
                     }
                     size={isDesktopSelfHost ? "icon-sm" : "composer"}
-                    className={cn("relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary", isDesktopSelfHost && "rounded-full")}
+                    className={cn(
+                      "relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary",
+                      isDesktopSelfHost && "rounded-full",
+                    )}
                     aria-label={t("actions.send")}
                   >
                     <ArrowUp aria-hidden="true" />
-                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
+                    <span
+                      className={
+                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
+                      }
+                    >
                       {t("actions.send")}
                     </span>
                   </Button>
@@ -203,13 +269,23 @@ export function CoachComposer({
                     type="button"
                     variant="outline"
                     size={isDesktopSelfHost ? "icon-sm" : "composer-compact"}
-                    className={cn("shrink-0", isDesktopSelfHost && "rounded-full")}
+                    className={cn(
+                      "shrink-0",
+                      isDesktopSelfHost && "rounded-full",
+                    )}
                     aria-label={t("actions.stop")}
                     title={t("actions.stop")}
                     onClick={() => void actions.stop()}
                   >
-                    <Square fill={isDesktopSelfHost ? "currentColor" : "none"} aria-hidden="true" />
-                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
+                    <Square
+                      fill={isDesktopSelfHost ? "currentColor" : "none"}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className={
+                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
+                      }
+                    >
                       {t("actions.stop")}
                     </span>
                   </Button>
@@ -220,14 +296,23 @@ export function CoachComposer({
                     type="submit"
                     disabled={demoReadOnly || !draft.trim()}
                     title={
-                      demoReadOnly ? demoText("readOnlyAction") : t("actions.send")
+                      demoReadOnly
+                        ? demoText("readOnlyAction")
+                        : t("actions.send")
                     }
                     size={isDesktopSelfHost ? "icon-sm" : "composer-compact"}
-                    className={cn("relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary", isDesktopSelfHost && "rounded-full")}
+                    className={cn(
+                      "relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary",
+                      isDesktopSelfHost && "rounded-full",
+                    )}
                     aria-label={t("actions.send")}
                   >
                     <ArrowUp aria-hidden="true" />
-                    <span className={isDesktopSelfHost ? "sr-only" : "hidden sm:inline"}>
+                    <span
+                      className={
+                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
+                      }
+                    >
                       {t("actions.send")}
                     </span>
                   </Button>
