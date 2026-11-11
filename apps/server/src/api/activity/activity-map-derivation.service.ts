@@ -48,6 +48,20 @@ export class ActivityMapDerivationService {
     return normalizeActivityPolylines(legacy?.polyline);
   }
 
+  async getTimelineTrackByHash(hashId: string, userId: string) {
+    const activity = await this.prisma.activity.findFirst({
+      where: readyActivityWhere({ hashId, userId }),
+      select: { id: true },
+    });
+    if (!activity) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.ACTIVITY_NOT_FOUND,
+        message: this.i18n.t('common.error.activity_not_found'),
+      });
+    }
+    return this.sensorData.getActivityTimelineTrack(activity.id);
+  }
+
   private async persistPolylines(
     activityId: number,
     value: unknown,

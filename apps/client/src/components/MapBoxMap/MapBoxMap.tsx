@@ -1,5 +1,6 @@
 "use client";
 import CardLoader from "../ui/CardLoader";
+import type { RouteCoordinate } from "./activity-route-focus";
 import { cn } from "@/lib/utils";
 import {
   ActivityLayer,
@@ -18,6 +19,9 @@ interface MapBoxMapProps {
   showInteractionOverlay?: boolean;
   focusDistanceM?: number | null;
   focusRangeM?: readonly [number, number] | null;
+  focusCoordinate?: RouteCoordinate | null;
+  focusTracks?: RouteCoordinate[][] | null;
+  autoFitFocus?: boolean;
 }
 
 const MapBoxMap = ({
@@ -31,6 +35,9 @@ const MapBoxMap = ({
   showInteractionOverlay = true,
   focusDistanceM = null,
   focusRangeM = null,
+  focusCoordinate,
+  focusTracks,
+  autoFitFocus = true,
 }: MapBoxMapProps) => {
   // 地图实例和图层生命周期都由 hook 管理，组件只提供容器和交互遮罩。
   const { isMapConfigLoading } = useActivityLayerManager({
@@ -41,6 +48,9 @@ const MapBoxMap = ({
     lockedFitBoundsPadding,
     focusDistanceM,
     focusRangeM,
+    focusCoordinate,
+    focusTracks,
+    autoFitFocus,
   });
   return (
     <div

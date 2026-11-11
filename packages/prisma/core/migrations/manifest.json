@@ -115,7 +115,12 @@
       "id": "0023_external_provider_connection_region",
       "file": "0023_external_provider_connection_region/migration.sql",
       "sha256": "b8a80748058fd4520f8436cfa6d7a00ada3e0922d33af359f4731d1628a5f6b4"
+    },
+    {
+      "id": "0024_activity_analysis_segments",
+      "file": "0024_activity_analysis_segments/migration.sql",
+      "sha256": "43c65c215d6ac439ca737301185c48c7229e35eb605a2bb9bf9ff8969046d4d4"
     }
   ],
-  "schemaChecksum": "9cea1bc2b8c5de3fe1380082d1570fec9d88f976b48bf28490d799491631632d"
+  "schemaChecksum": "7bd6b38d7bdcbebfe89bd2d09d0d572bcfd9909acfdc78a34afc9885dcc6743f"
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { encode } from "@mapbox/polyline";
 import { useTranslations } from "next-intl";
 import MapBoxMap from "@/components/MapBoxMap/MapBoxMap";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { useActivityLayer } from "@/api/useActivityLayer";
 import {
   useActivityAnalysisLink,
   useActivityMapFocusDistance,
+  useTimelineMapFocus,
 } from "./activity-analysis-link-context";
 
 const DESKTOP_MAP_PADDING = {
@@ -32,6 +34,21 @@ const ActivityMap = React.memo(() => {
   const activityId = useActivityId();
   const mapContainerId = React.useId().replaceAll(":", "");
   const { data: activityLayer, isLoading } = useActivityLayer(activityId || "");
+  const focus = useTimelineMapFocus();
+  const timeline = focus?.activityId === activityId ? focus : null;
+  const segments = timeline?.segments;
+  const layer = React.useMemo(() => {
+    if (!activityLayer || !segments?.length) return activityLayer;
+    return {
+      ...activityLayer,
+      maps: segments
+        .filter((segment) => segment.length > 1)
+        .map((segment) => ({
+          hashId: activityId || "",
+          polyline: encode(segment.map((point) => [point[2], point[1]])),
+        })),
+    };
+  }, [activityLayer, segments, activityId]);
   const { selectedInterval } = useActivityAnalysisLink();
   const hoveredDistanceM = useActivityMapFocusDistance();
   const selectedRangeM = React.useMemo<readonly [number, number] | null>(() => {
@@ -52,7 +69,7 @@ const ActivityMap = React.memo(() => {
   return (
     <section className="relative overflow-hidden rounded-md bg-zinc-900 ring-1 ring-border/60">
       <MapBoxMap
-        activityLayer={activityLayer}
+        activityLayer={layer}
         containerId={`activity-detail-${mapContainerId}`}
         isLoading={isLoading}
         interactive={!isMapLocked}
@@ -61,12 +78,14 @@ const ActivityMap = React.memo(() => {
         showInteractionOverlay={false}
         focusDistanceM={hoveredDistanceM}
         focusRangeM={selectedRangeM}
+        focusCoordinate={timeline ? timeline.coordinate : undefined}
+        focusTracks={timeline ? timeline.tracks : undefined}
+        autoFitFocus={!timeline}
         className="h-[clamp(220px,22vw,310px)] min-h-0 aspect-auto lg:min-h-0"
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/30 to-transparent" />
-      <div className="pointer-events-none absolute left-4 top-4 rounded-md bg-background/88 px-3 py-2 shadow-sm backdrop-blur-md ring-1 ring-white/25">
-        <ThemeLogo width={120} height={20} />
+      <div className="pointer-events-none absolute left-2 top-2 rounded-control bg-background/85 px-1.5 py-1">
+        <ThemeLogo width={96} />
       </div>
 
       <Button

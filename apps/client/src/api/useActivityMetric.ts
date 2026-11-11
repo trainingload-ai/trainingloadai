@@ -1,6 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
+import { ACTIVITY_ANALYSIS_CACHE } from "@/lib/activity-analysis-cache";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -87,12 +88,14 @@ export type FetchMetricResponse = {
   };
 };
 
-async function fetchActivityMetricSeries(
+export async function fetchActivityMetricSeries(
   activityId: string,
   metric: MetricId,
+  signal?: AbortSignal,
 ): Promise<MetricSeriesResult> {
   const response = await apiFetch<FetchMetricResponse>(
     buildActivityMetricUrl(activityId, metric),
+    { signal },
   );
 
   if (!response?.rows?.length) {
@@ -113,9 +116,11 @@ export function useActivityMetricSeries(
   enabled: boolean = true,
 ) {
   return useQuery<MetricSeriesResult>({
+    ...ACTIVITY_ANALYSIS_CACHE,
     queryKey: queryKeys.activity.metricSeries(activityId, metric),
 
-    queryFn: () => fetchActivityMetricSeries(activityId, metric!),
+    queryFn: ({ signal }) =>
+      fetchActivityMetricSeries(activityId, metric!, signal),
     enabled: !!activityId && !!metric && enabled,
   });
 }
@@ -127,8 +132,10 @@ export function useActivityMetricAvailability(
   const uniqueMetrics = Array.from(new Set(metrics));
   const queries = useQueries({
     queries: uniqueMetrics.map((metric) => ({
+      ...ACTIVITY_ANALYSIS_CACHE,
       queryKey: queryKeys.activity.metricSeries(activityId, metric),
-      queryFn: () => fetchActivityMetricSeries(activityId, metric),
+      queryFn: ({ signal }) =>
+        fetchActivityMetricSeries(activityId, metric, signal),
       enabled: Boolean(activityId),
     })),
   });

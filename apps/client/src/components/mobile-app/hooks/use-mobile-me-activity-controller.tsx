@@ -9,7 +9,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { removeActivityAnalysisCaches } from "@/lib/activity-analysis-cache";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -75,6 +80,7 @@ export function MobileMeActivityProvider({
   children: ReactNode;
 }) {
   const t = useTranslations("MobileApp.meDashboard");
+  const queryClient = useQueryClient();
   const tActivityTitle = useTranslations("ActivityTitle");
   const isMobile = useMobileViewport();
   const [weeks, setWeeks] = useState<MobileMeRange>(4);
@@ -182,6 +188,10 @@ export function MobileMeActivityProvider({
     setDeleting(true);
     try {
       await deleteMobileMeActivity(deleteTarget);
+      await removeActivityAnalysisCaches(
+        queryClient,
+        deleteTarget.hashId || String(deleteTarget.id),
+      );
       setDeleteConfirmOpen(false);
       setDeleteTarget(null);
       await Promise.all([overview.refetch(), feed.refetch()]);

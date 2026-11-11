@@ -114,6 +114,10 @@
       "0023_external_provider_connection_region": {
         "phase": "expand",
         "releaseVersion": "1.1.21"
+      },
+      "0024_activity_analysis_segments": {
+        "phase": "expand",
+        "releaseVersion": "1.1.21"
       }
     }
   }

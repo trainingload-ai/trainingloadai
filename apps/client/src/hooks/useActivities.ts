@@ -1,7 +1,12 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Activity } from "@/api/activities";
+import {
+  ACTIVITY_ANALYSIS_CACHE,
+  refreshActivityAnalysisCaches,
+} from "@/lib/activity-analysis-cache";
 import {
   fetchActivities,
   fetchActivity,
@@ -50,9 +55,18 @@ export function splitActivityDateRange(
 
 // Single activity detail query Hook
 export function useGetActivity(id: string) {
+  const client = useQueryClient();
   return useQuery({
+    gcTime: ACTIVITY_ANALYSIS_CACHE.gcTime,
     queryKey: queryKeys.activity.detail(id),
-    queryFn: () => fetchActivity(id),
+    queryFn: async () => {
+      const previous = client.getQueryData<Activity>(
+        queryKeys.activity.detail(id),
+      );
+      const next = await fetchActivity(id);
+      await refreshActivityAnalysisCaches(client, id, previous, next);
+      return next;
+    },
     enabled: !!id,
   });
 }

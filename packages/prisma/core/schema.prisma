@@ -3577,6 +3577,7 @@ model Activity {
   epmax                  Float?                          @map("e_pmax")
   // Related laps
   laps                   ActivityLap[]
+  analysisSegments       ActivityAnalysisSegments?
 
   // Related Parquet file info
   parquetFiles       ActivityParquetFile[]
@@ -4124,6 +4125,18 @@ model UserBestTT {
   @@unique([userId, sport, targetScaleType, targetScaleValue])
   @@index([userId, sport])
   @@map("t_user_best_tt")
+}
+
+// User-owned analysis boundaries. Imported device laps and FIT remain immutable.
+model ActivityAnalysisSegments {
+  activityId Int      @id @map("activity_id")
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  revision   Int      @default(1)
+  segments   Json
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("t_activity_analysis_segments")
 }
 
 // User fitness metrics history (merged from previous individual tables)

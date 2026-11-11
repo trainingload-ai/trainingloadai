@@ -77,6 +77,38 @@ describe('ActivityMapDerivationService', () => {
     expect(thumbJobs.enqueueForActivity).not.toHaveBeenCalled();
   });
 
+  it('scopes timeline GPS reads to a ready activity owned by the viewer', async () => {
+    const findFirst = jest.fn(async () => ({ id: 7 }));
+    const getActivityTimelineTrack = jest.fn(async () => ({
+      status: 'unavailable',
+      reason: 'NO_TRACK',
+    }));
+    const service = new ActivityMapDerivationService(
+      { activity: { findFirst } } as never,
+      { getActivityTimelineTrack } as never,
+      {} as never,
+      { t: jest.fn((key: string) => key) } as never,
+    );
+    await expect(
+      service.getTimelineTrackByHash('hash-7', 'demo-owner'),
+    ).resolves.toEqual({ status: 'unavailable', reason: 'NO_TRACK' });
+    expect(findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ hashId: 'hash-7', userId: 'demo-owner' }),
+          ]),
+        }),
+      }),
+    );
+    expect(getActivityTimelineTrack).toHaveBeenCalledWith(7);
+    findFirst.mockResolvedValueOnce(null as never);
+    await expect(
+      service.getTimelineTrackByHash('other-owner', 'demo-owner'),
+    ).rejects.toThrow();
+    expect(getActivityTimelineTrack).toHaveBeenCalledTimes(1);
+  });
+
   it('does not fail the post-import path when thumbnail scheduling fails', async () => {
     const prisma = {
       $queryRaw: jest.fn(async () => [{ polyline: 'encoded-route' }]),

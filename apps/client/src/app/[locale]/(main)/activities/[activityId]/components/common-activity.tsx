@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   BarChart3,
+  ChartLine,
   Footprints,
   Gauge,
   HeartPulse,
@@ -11,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 
@@ -56,7 +58,10 @@ const tabItems = [
   { value: "pace", icon: Gauge },
   { value: "runningDynamics", icon: Footprints },
   { value: "bestIntervals", icon: Trophy },
+  { value: "timeline", icon: ChartLine },
 ] as const;
+
+const ActivityTimeline = dynamic(() => import("./timeline/activity-timeline"));
 
 const RUNNING_DYNAMICS_METRICS = [
   "cadence",
@@ -224,6 +229,16 @@ const CommonActivityDetail = () => {
                 </div>
               ) : null}
             </div>
+          </TabsContent>
+
+          <TabsContent value="timeline">
+            {activity ? (
+              <ActivityTimeline
+                key={activityId}
+                activity={activity}
+                activityId={activityId || ""}
+              />
+            ) : null}
           </TabsContent>
 
           <TabsContent value="bestIntervals" className="space-y-3">
