@@ -183,6 +183,13 @@ for (const scenario of [
     await expect(
       page.locator("[data-uplot-chart] canvas").last(),
     ).toBeVisible();
+    await page
+      .getByTestId("vdot-forecast-summary")
+      .screenshot({
+        path: testInfo.outputPath("vdot-summary-light.png"),
+        animations: "disabled",
+        scale: "css",
+      });
     await page.screenshot({
       path: testInfo.outputPath("vdot-detail-light.png"),
       fullPage: true,
@@ -191,6 +198,13 @@ for (const scenario of [
     await page.evaluate(() => {
       document.documentElement.classList.add("dark");
     });
+    await page
+      .getByTestId("vdot-forecast-summary")
+      .screenshot({
+        path: testInfo.outputPath("vdot-summary-dark.png"),
+        animations: "disabled",
+        scale: "css",
+      });
     await page.screenshot({
       path: testInfo.outputPath("vdot-detail-dark.png"),
       fullPage: true,
