@@ -105,6 +105,7 @@ export default function ActivityTimeline({
   const [scrollOffset, setScrollOffset] = useState(0);
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
+  const [keyboardInspecting, setKeyboardInspecting] = useState(false);
   const [range, setRange] = useState<TimelineRange | null>(null);
   const [zoom, setZoom] = useState<TimelineRange | null>(null);
   const [preview, setPreview] = useState<TimelineRange | null>(null);
@@ -130,6 +131,7 @@ export default function ActivityTimeline({
   const maxX =
     axis === "distance" ? distance!.at(-1)!.value! : (model?.duration ?? 0);
   const current = hovered ?? pinned;
+  const readingTime = hovered ?? (keyboardInspecting ? pinned : null);
   const activeRange = preview ?? range;
   const statisticsRange = useMemo<TimelineRange | null>(
     () =>
@@ -435,6 +437,7 @@ export default function ActivityTimeline({
   };
   const reset = () => {
     stopHover();
+    setKeyboardInspecting(false);
     setZoom(null);
     setSelectedSegmentId(null);
     setRange(null);
@@ -450,6 +453,7 @@ export default function ActivityTimeline({
     setPreview(null);
     if (time === null) return;
     setPinned(time);
+    if (!start.moved) hover(time);
     if (start.moved && Math.abs(time - start.time) >= 1) {
       const selected: TimelineRange = [
         Math.min(start.time, time),
@@ -499,7 +503,7 @@ export default function ActivityTimeline({
         ) : null}
       </section>
     );
-  const currentX = current === null ? null : xAtTime(current);
+  const currentX = readingTime === null ? null : xAtTime(readingTime);
   const fromX = activeRange ? xAtTime(activeRange[0]) : null;
   const toX = activeRange ? xAtTime(activeRange[1]) : null;
   const tickCount = Math.max(6, Math.ceil(scale.width / 180) + 1);
@@ -645,7 +649,7 @@ export default function ActivityTimeline({
                 scale={scale}
                 plotViewport={plotViewport}
                 viewWidth={scrollSize.width || 1084}
-                current={current}
+                current={readingTime}
                 statisticsRange={statisticsRange}
                 onChange={(change) => updateRow(config.id, change)}
                 onRemove={() =>
@@ -676,6 +680,9 @@ export default function ActivityTimeline({
                 aria-valuetext={
                   current === null ? t("fullActivity") : timeLabel(current)
                 }
+                onBlur={() => {
+                  setKeyboardInspecting(false);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Escape") {
                     reset();
@@ -683,12 +690,14 @@ export default function ActivityTimeline({
                   }
                   if (event.key === "Home" || event.key === "End") {
                     event.preventDefault();
+                    setKeyboardInspecting(true);
                     stopHover();
                     setPinned(event.key === "Home" ? 0 : model.duration);
                     return;
                   }
                   if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
                   event.preventDefault();
+                  setKeyboardInspecting(true);
                   stopHover();
                   const index = timelineLowerBound(pointTimes, pinned ?? 0);
                   const next = Math.max(
@@ -703,12 +712,14 @@ export default function ActivityTimeline({
                 onDoubleClick={reset}
                 onPointerDown={(event) => {
                   if (event.button !== 0 || !event.isPrimary) return;
+                  setKeyboardInspecting(false);
                   const time = atPointer(event);
                   if (time === null) return;
                   drag.current = { time, x: event.clientX, moved: false };
                   event.currentTarget.setPointerCapture(event.pointerId);
                 }}
                 onPointerMove={(event) => {
+                  setKeyboardInspecting(false);
                   const time = atPointer(event);
                   hover(time);
                   if (
@@ -724,6 +735,7 @@ export default function ActivityTimeline({
                   }
                 }}
                 onPointerLeave={() => {
+                  setKeyboardInspecting(false);
                   if (!drag.current) hover(null);
                 }}
                 onPointerUp={finishPointer}
@@ -747,6 +759,7 @@ export default function ActivityTimeline({
                 currentX >= plotViewport[0] &&
                 currentX <= plotViewport[1] ? (
                   <span
+                    data-timeline-cursor
                     className="pointer-events-none absolute inset-y-0 border-l border-foreground/60"
                     style={{ left: `${percent(currentX)}%` }}
                   />

@@ -293,7 +293,15 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     "data-segment-detail",
     "marker",
   );
+  await page.mouse.click(hoverPlot.x + hoverPlot.width * 0.4, hoverPlot.y + 30);
   await page.mouse.move(0, 0);
+  await expect(timeline.locator("[data-timeline-reading]")).toHaveCount(0);
+  await expect(timeline.locator("[data-timeline-cursor]")).toHaveCount(0);
+  await expect(cadenceStatistics.locator("dd")).toHaveText([
+    "164",
+    "164",
+    "164",
+  ]);
   await tail.hover();
   await expect(page.getByRole("tooltip")).toContainText("0:03");
   await expect(page.locator('[data-slot="tooltip-content"]')).toHaveAttribute(
@@ -303,6 +311,7 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await page.locator('[data-slot="tooltip-content"]').screenshot({
     path: test.info().outputPath("timeline-short-segment-tooltip.png"),
   });
+  await tail.focus();
   await page.keyboard.press("Escape");
   await tail.click();
   await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(0);
@@ -441,6 +450,15 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     "data-statistics-end",
     String(duration),
   );
+  await expect(cadenceStatistics.locator("dd")).toHaveText([
+    "170",
+    "164",
+    "182",
+  ]);
+  await timeline.getByRole("slider").press("Home");
+  await expect(timeline.locator("[data-timeline-reading]")).toHaveCount(4);
+  await page.keyboard.press("Tab");
+  await expect(timeline.locator("[data-timeline-reading]")).toHaveCount(0);
   await expect(cadenceStatistics.locator("dd")).toHaveText([
     "170",
     "164",
