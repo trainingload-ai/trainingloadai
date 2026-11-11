@@ -5,6 +5,7 @@ export type ActivityDetailSportGroup = "RUN" | "CYCLING" | "SWIM" | "OTHER";
 
 export type ActivityDetailTabId =
   | "overview"
+  | "timeline"
   | "bestIntervals"
   | "lap"
   | "heartrate"
@@ -56,6 +57,7 @@ const POLICIES: Record<ActivityDetailSportGroup, ActivityDetailPolicy> = {
     dataChartIds: new Set(getActivityDetailOverviewChartIds("RUN")),
     tabIds: setOf(
       "overview",
+      "timeline",
       "bestIntervals",
       "lap",
       "heartrate",
@@ -85,7 +87,14 @@ const POLICIES: Record<ActivityDetailSportGroup, ActivityDetailPolicy> = {
       "ei",
     ),
     dataChartIds: new Set(getActivityDetailOverviewChartIds("CYCLING")),
-    tabIds: setOf("overview", "bestIntervals", "lap", "heartrate", "power"),
+    tabIds: setOf(
+      "overview",
+      "timeline",
+      "bestIntervals",
+      "lap",
+      "heartrate",
+      "power",
+    ),
   },
   SWIM: {
     group: "SWIM",
@@ -246,6 +255,8 @@ export function isActivityDetailTabVisible(
   const policy = getActivityDetailPolicy(activity);
   if (!policy.tabIds.has(tabId)) return false;
   if (tabId === "overview") return true;
+  if (tabId === "timeline")
+    return policy.group === "RUN" || policy.group === "CYCLING";
   if (tabId === "bestIntervals") {
     return (
       activity?.activityPeakMetrics?.some(

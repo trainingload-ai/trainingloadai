@@ -49,6 +49,8 @@ export const queryKeys = {
       ["aiAnalysis", activityId, locale, useCache] as const,
     /** 单活动地图 layer（非首页聚合图层） */
     layer: (activityId: string) => ["activity-layer", activityId] as const,
+    timelineTrack: (activityId: string) =>
+      ["activity", activityId, "timeline-track"] as const,
     planLink: (activityId: string) =>
       ["activity-plan-link", activityId] as const,
     stats: (year?: number) => ["activity-stats", year] as const,

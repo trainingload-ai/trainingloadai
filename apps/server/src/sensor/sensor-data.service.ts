@@ -17,6 +17,10 @@ import { round } from 'lodash';
 import { ConfigService } from '@nestjs/config';
 import { SensorFileQueryService } from './sensor-file-query.service';
 import { loadDuckDBModule } from '@/runtime/duckdb-runtime';
+import type {
+  TimelineTrackPoint,
+  TimelineTrackResponse,
+} from '@shared/activity-timeline';
 
 export interface SensorRecord extends ActivityRecordType {
   activityId: number;
@@ -797,6 +801,81 @@ export class SensorDataService implements OnModuleDestroy {
       );
       return { status: 'unavailable', reason: 'MISSING_TRACK_TIME' };
     }
+  }
+
+  async getActivityTimelineTrack(
+    activityId: number,
+  ): Promise<TimelineTrackResponse> {
+    const info = await this.getActivityParquetInfo(activityId, 'record');
+    if (!info) return { status: 'unavailable', reason: 'NO_TRACK' };
+    const [localPath] = await this.ensureLocalParquetFiles([info.parquetPath]);
+    const columns = await this.getParquetColumns(localPath);
+    if (
+      !['timestamp', 'positionLat', 'positionLong'].every((column) =>
+        columns.has(column),
+      )
+    ) {
+      return { status: 'unavailable', reason: 'NO_TRACK' };
+    }
+    const file = localPath.replace(/'/g, "''");
+    const lap = columns.has('lapIndex')
+      ? 'COALESCE(try_cast(lapIndex AS BIGINT), 0)'
+      : '0';
+    // Detect missing fixes before sampling. The endpoint budget includes every
+    // segment endpoint, so a long activity keeps both its beginning and end.
+    const rows = await this.executeQuery(`
+      WITH raw AS (
+        SELECT epoch_ms(try_cast(timestamp AS TIMESTAMP)) AS t,
+          try_cast(positionLong AS DOUBLE) AS lon,
+          try_cast(positionLat AS DOUBLE) AS lat, ${lap} AS lap
+        FROM read_parquet('${file}', union_by_name=true)
+      ), unique_times AS (
+        SELECT *, COALESCE(isfinite(lon) AND isfinite(lat)
+          AND lon BETWEEN -180 AND 180 AND lat BETWEEN -90 AND 90, false) AS valid
+        FROM raw WHERE t IS NOT NULL
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY t ORDER BY
+          valid DESC, lon, lat, lap) = 1
+      ), boundaries AS (
+        SELECT *, CASE WHEN NOT COALESCE(LAG(valid) OVER w, false)
+          OR t - LAG(t) OVER w > 30000
+          OR lap IS DISTINCT FROM LAG(lap) OVER w THEN 1 ELSE 0 END AS starts
+        FROM unique_times WINDOW w AS (ORDER BY t)
+      ), grouped AS (
+        SELECT *, SUM(starts) OVER (ORDER BY t) AS segment FROM boundaries
+      ), numbered AS (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY segment ORDER BY t) AS rn,
+          COUNT(*) OVER (PARTITION BY segment) AS n
+        FROM grouped WHERE valid
+      ), stats AS (
+        SELECT COUNT(*) AS total, COALESCE(SUM(LEAST(n, 2)) FILTER (WHERE rn = 1), 0) AS endpoints
+        FROM numbered
+      )
+      SELECT segment, t, lon, lat FROM numbered CROSS JOIN stats
+      WHERE endpoints <= 6000 AND (rn = 1 OR rn = n OR
+        (endpoints < 6000 AND rn > 1 AND rn < n AND
+          (rn - 1) % GREATEST(1, CEIL(total / GREATEST(1, 6000 - endpoints))) = 0))
+      UNION ALL
+      SELECT -1, 0, 0, 0 FROM stats WHERE endpoints > 6000
+      ORDER BY 1, 2
+    `);
+    if (rows[0] && Number(rows[0][0]) === -1) {
+      return { status: 'unavailable', reason: 'TOO_FRAGMENTED' };
+    }
+    const segments: TimelineTrackPoint[][] = [];
+    let previousSegment: number | null = null;
+    for (const row of rows) {
+      const segment = Number(row[0]);
+      if (segment !== previousSegment) segments.push([]);
+      segments[segments.length - 1].push([
+        Number(row[1]),
+        Number(row[2]),
+        Number(row[3]),
+      ]);
+      previousSegment = segment;
+    }
+    return segments.length
+      ? { status: 'available', segments }
+      : { status: 'unavailable', reason: 'NO_TRACK' };
   }
 
   /**

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   BarChart3,
+  ChartLine,
   Footprints,
   Gauge,
   HeartPulse,
@@ -11,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 
@@ -50,6 +52,7 @@ import { GenericActivityDataNotice } from "@/components/activities/generic-activ
 // 详情页 tabs 只维护稳定 value 和图标，显示文案统一从 i18n 读取。
 const tabItems = [
   { value: "overview", icon: BarChart3 },
+  { value: "timeline", icon: ChartLine },
   { value: "lap", icon: ListOrdered },
   { value: "heartrate", icon: HeartPulse },
   { value: "power", icon: Zap },
@@ -57,6 +60,8 @@ const tabItems = [
   { value: "runningDynamics", icon: Footprints },
   { value: "bestIntervals", icon: Trophy },
 ] as const;
+
+const ActivityTimeline = dynamic(() => import("./timeline/activity-timeline"));
 
 const RUNNING_DYNAMICS_METRICS = [
   "cadence",
@@ -224,6 +229,16 @@ const CommonActivityDetail = () => {
                 </div>
               ) : null}
             </div>
+          </TabsContent>
+
+          <TabsContent value="timeline">
+            {activity ? (
+              <ActivityTimeline
+                key={activityId}
+                activity={activity}
+                activityId={activityId || ""}
+              />
+            ) : null}
           </TabsContent>
 
           <TabsContent value="bestIntervals" className="space-y-3">

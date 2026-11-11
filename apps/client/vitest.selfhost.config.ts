@@ -91,6 +91,7 @@ export default defineConfig({
       "src/lib/auth-callback.test.ts",
       "src/lib/today-suggestion-coach-context.test.ts",
       "src/lib/activity-chart-axis.test.ts",
+      "src/lib/activity-timeline.test.ts",
       "src/app/[locale]/(main)/ai-coach/ai-coach-client-loader.test.tsx",
       "src/app/[locale]/(main)/ai-coach/coach-turn-error-model.test.ts",
       "src/app/[locale]/(main)/ai-coach/coach-turn-error-card.test.tsx",

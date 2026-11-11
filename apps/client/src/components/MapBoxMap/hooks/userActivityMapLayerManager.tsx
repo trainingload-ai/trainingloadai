@@ -10,6 +10,7 @@ import {
   coordinateAtRouteDistance,
   decodeActivityTracks,
   sliceRouteByDistance,
+  type RouteCoordinate,
 } from "../activity-route-focus";
 
 interface Track {
@@ -34,6 +35,9 @@ interface UseActivityLayerManagerProps {
   lockedFitBoundsPadding?: ActivityMapPadding;
   focusDistanceM?: number | null;
   focusRangeM?: readonly [number, number] | null;
+  focusCoordinate?: RouteCoordinate | null;
+  focusTracks?: RouteCoordinate[][] | null;
+  autoFitFocus?: boolean;
 }
 
 const FOCUS_SOURCE_ID = "activity-focus-source";
@@ -51,6 +55,9 @@ export const useActivityLayerManager = ({
   lockedFitBoundsPadding = 50,
   focusDistanceM = null,
   focusRangeM = null,
+  focusCoordinate,
+  focusTracks,
+  autoFitFocus = true,
 }: UseActivityLayerManagerProps) => {
   const mapRef = useRef<null | mapengine.Map>(null);
   const focusMarkerRef = useRef<null | mapengine.Marker>(null);
@@ -237,7 +244,11 @@ export const useActivityLayerManager = ({
       setLayerVisibility(FOCUS_ENDPOINT_LAYER_ID, false);
       setLayerVisibility(FOCUS_ENDPOINT_LABEL_LAYER_ID, false);
 
-      if (hadFocusRangeRef.current && activityLayer.bounds?.length === 2) {
+      if (
+        autoFitFocus &&
+        hadFocusRangeRef.current &&
+        activityLayer.bounds?.length === 2
+      ) {
         const [[swLat, swLng], [neLat, neLng]] = activityLayer.bounds;
         map.fitBounds(
           [
@@ -254,16 +265,18 @@ export const useActivityLayerManager = ({
       hadFocusRangeRef.current = false;
     };
     const updateFocusedRoute = () => {
-      if (!focusRangeM) {
+      if (focusTracks === null || (focusTracks === undefined && !focusRangeM)) {
         restoreWholeRoute();
         return;
       }
 
-      const focusedTracks = sliceRouteByDistance(
-        decodeActivityTracks(activityLayer.maps),
-        focusRangeM[0],
-        focusRangeM[1],
-      );
+      const focusedTracks =
+        focusTracks ??
+        sliceRouteByDistance(
+          decodeActivityTracks(activityLayer.maps),
+          focusRangeM![0],
+          focusRangeM![1],
+        );
       if (!focusedTracks.length) {
         restoreWholeRoute();
         return;
@@ -413,7 +426,7 @@ export const useActivityLayerManager = ({
 
       const bounds = new mapengine.LngLatBounds();
       focusedTracks.flat().forEach((coordinate) => bounds.extend(coordinate));
-      if (!bounds.isEmpty()) {
+      if (autoFitFocus && !bounds.isEmpty()) {
         map.fitBounds(bounds, {
           padding: lockedFitBoundsPadding,
           maxZoom: 17,
@@ -428,20 +441,34 @@ export const useActivityLayerManager = ({
     return () => {
       map.off("load", updateFocusedRoute);
     };
-  }, [activityLayer, focusRangeM, lockedFitBoundsPadding]);
+  }, [
+    activityLayer,
+    focusRangeM,
+    focusTracks,
+    autoFitFocus,
+    lockedFitBoundsPadding,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !activityLayer || focusDistanceM == null) {
+    if (
+      !map ||
+      !activityLayer ||
+      (focusCoordinate === undefined
+        ? focusDistanceM == null
+        : focusCoordinate === null)
+    ) {
       focusMarkerRef.current?.remove();
       focusMarkerRef.current = null;
       return;
     }
     const updateMarker = () => {
-      const coordinate = coordinateAtRouteDistance(
-        decodeActivityTracks(activityLayer.maps),
-        focusDistanceM,
-      );
+      const coordinate =
+        focusCoordinate ??
+        coordinateAtRouteDistance(
+          decodeActivityTracks(activityLayer.maps),
+          focusDistanceM!,
+        );
       if (!coordinate) return;
       if (!focusMarkerRef.current) {
         focusMarkerRef.current = attachFocusMarker(
@@ -461,7 +488,7 @@ export const useActivityLayerManager = ({
     return () => {
       map.off("load", updateMarker);
     };
-  }, [activityLayer, focusDistanceM]);
+  }, [activityLayer, focusDistanceM, focusCoordinate]);
 
   return { map: mapRef.current, isMapConfigLoading };
 };

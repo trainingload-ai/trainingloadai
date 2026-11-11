@@ -1929,6 +1929,61 @@
       }
     }
   },
+  "ActivityTimeline": {
+    "title": "活動時間軸",
+    "axis": "橫軸",
+    "time": "時間",
+    "distance": "距離",
+    "fullActivity": "全程",
+    "laps": "記錄圈段",
+    "lap": "第 {number} 圈",
+    "calculated": "估算功率",
+    "empty": "本次活動沒有可用的時間序列記錄。",
+    "error": "活動資料載入失敗。",
+    "retry": "重試",
+    "metrics": {
+      "elevation": "海拔",
+      "pace": "配速",
+      "speed": "速度",
+      "power": "功率",
+      "heartRate": "心率",
+      "cadence": "步頻",
+      "pedaling": "踏頻",
+      "stride": "步幅",
+      "stanceTime": "觸地時間",
+      "temperature": "溫度"
+    },
+    "grouping": "分組方式",
+    "groups": {
+      "laps": "分段",
+      "heartRate": "心率區間",
+      "power": "功率區間",
+      "pace": "配速區間"
+    },
+    "timelineOptions": "時間軸選項",
+    "resetZoom": "恢復全程",
+    "inspect": "查看時間軸，拖曳選取放大",
+    "loadingGroups": "正在載入分組…",
+    "noGroups": "本次活動暫無對應分組。",
+    "configureChart": "設定{metric}圖表",
+    "metric": "指標",
+    "color": "顏色",
+    "height": "圖表高度",
+    "smoothing": "平滑",
+    "raw": "原始資料",
+    "seconds": "{seconds} 秒",
+    "heights": {
+      "64": "緊湊",
+      "86": "標準",
+      "128": "較高",
+      "180": "加高"
+    },
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "removeChart": "刪除圖表",
+    "addChart": "新增圖表",
+    "expandChart": "放大{metric}圖表"
+  },
   "ActivityDetail": {
     "title": "活動詳情",
     "genericDataNotice": {
@@ -1959,6 +2014,7 @@
       }
     },
     "tabs": {
+      "timeline": "活動時間軸",
       "overview": "概覽",
       "heartrate": "心率",
       "power": "功率",

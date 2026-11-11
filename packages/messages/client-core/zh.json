@@ -2074,6 +2074,61 @@
       }
     }
   },
+  "ActivityTimeline": {
+    "title": "活动时间线",
+    "axis": "横轴",
+    "time": "时间",
+    "distance": "距离",
+    "fullActivity": "全程",
+    "laps": "记录圈段",
+    "lap": "第 {number} 圈",
+    "calculated": "估算功率",
+    "empty": "本次活动没有可用的时序记录。",
+    "error": "活动数据加载失败。",
+    "retry": "重试",
+    "metrics": {
+      "elevation": "海拔",
+      "pace": "配速",
+      "speed": "速度",
+      "power": "功率",
+      "heartRate": "心率",
+      "cadence": "步频",
+      "pedaling": "踏频",
+      "stride": "步幅",
+      "stanceTime": "触地时间",
+      "temperature": "温度"
+    },
+    "grouping": "分组方式",
+    "groups": {
+      "laps": "分段",
+      "heartRate": "心率区间",
+      "power": "功率区间",
+      "pace": "配速区间"
+    },
+    "timelineOptions": "时间线选项",
+    "resetZoom": "恢复全程",
+    "inspect": "查看时间线，拖选放大",
+    "loadingGroups": "分组加载中…",
+    "noGroups": "本次活动暂无对应分组。",
+    "configureChart": "配置{metric}图表",
+    "metric": "指标",
+    "color": "颜色",
+    "height": "图表高度",
+    "smoothing": "平滑",
+    "raw": "原始数据",
+    "seconds": "{seconds} 秒",
+    "heights": {
+      "64": "紧凑",
+      "86": "标准",
+      "128": "较高",
+      "180": "加高"
+    },
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "removeChart": "删除图表",
+    "addChart": "添加图表",
+    "expandChart": "放大{metric}图表"
+  },
   "ActivityDetail": {
     "title": "活动详情",
     "genericDataNotice": {
@@ -2104,6 +2159,7 @@
       }
     },
     "tabs": {
+      "timeline": "活动时间线",
       "overview": "总览",
       "heartrate": "心率",
       "power": "功率",

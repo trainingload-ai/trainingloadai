@@ -87,7 +87,7 @@ export type FetchMetricResponse = {
   };
 };
 
-async function fetchActivityMetricSeries(
+export async function fetchActivityMetricSeries(
   activityId: string,
   metric: MetricId,
 ): Promise<MetricSeriesResult> {

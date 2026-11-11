@@ -193,77 +193,77 @@
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1456,
+      "line": 1535,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "const cacheDir = path.join(os.tmpdir(), 'parquet-cache');"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1457,
+      "line": 1536,
       "owner": "apps",
       "classification": "cache",
       "expression": "await fsp.mkdir(cacheDir, { recursive: true });"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1499,
+      "line": 1578,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fsp.writeFile(stagingPath, buffer, { flag: 'wx' });"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1500,
+      "line": 1579,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fsp.rename(stagingPath, cachePath);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1502,
+      "line": 1581,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "await fsp.unlink(stagingPath).catch(() => undefined);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1825,
+      "line": 1904,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "const tmpPath = path.join(os.tmpdir(), `${tableName}.parquet`);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1976,
+      "line": 2055,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 1987,
+      "line": 2066,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2014,
+      "line": 2093,
       "owner": "apps",
       "classification": "ephemeral",
       "expression": "const tmpPath = path.join(os.tmpdir(), `${tableName}.parquet`);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2060,
+      "line": 2139,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"
     },
     {
       "file": "apps/server/src/sensor/sensor-data.service.ts",
-      "line": 2071,
+      "line": 2150,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "await fsp.unlink(tmpPath).catch(() => void 0);"

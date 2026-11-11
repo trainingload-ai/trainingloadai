@@ -873,6 +873,15 @@ export class ActivityController {
     };
   }
 
+  @Get(':hashId/timeline-track')
+  @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.ACTIVITIES_READ)
+  async getTimelineTrack(
+    @ActivityHashId() hashId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.activityMapDerivation.getTimelineTrackByHash(hashId, userId);
+  }
+
   /**
    * 获取单个活动详情（优先按 hashId，兼容尚未生成 hashId 的数字 id）
    */

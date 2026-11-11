@@ -2,6 +2,23 @@
 
 import type { ActivityPeakMetric } from "@/api/activities";
 import React from "react";
+import type { TimelineTrackPoint } from "@shared/activity-timeline";
+import type { RouteCoordinate } from "@/components/MapBoxMap/activity-route-focus";
+
+export type TimelineMapFocus = {
+  activityId: string;
+  segments: TimelineTrackPoint[][];
+  coordinate: RouteCoordinate | null;
+  tracks: RouteCoordinate[][] | null;
+};
+const TimelineMapContext = React.createContext<TimelineMapFocus | null>(null);
+const SetTimelineMapContext = React.createContext<
+  (focus: TimelineMapFocus | null) => void
+>(() => undefined);
+
+export const useTimelineMapFocus = () => React.useContext(TimelineMapContext);
+export const useSetTimelineMapFocus = () =>
+  React.useContext(SetTimelineMapContext);
 
 type ActivityAnalysisLinkValue = {
   setHoveredDistanceM: (distance: number | null) => void;
@@ -21,6 +38,8 @@ export function ActivityAnalysisLinkProvider({
 }: React.PropsWithChildren) {
   const [selectedInterval, setSelectedInterval] =
     React.useState<ActivityPeakMetric | null>(null);
+  const [timelineFocus, setTimelineFocus] =
+    React.useState<TimelineMapFocus | null>(null);
   const setHoveredDistanceM = React.useCallback((distance: number | null) => {
     window.dispatchEvent(
       new CustomEvent("activity-analysis-distance", { detail: distance }),
@@ -36,7 +55,11 @@ export function ActivityAnalysisLinkProvider({
   );
   return (
     <ActivityAnalysisLinkContext.Provider value={value}>
-      {children}
+      <SetTimelineMapContext.Provider value={setTimelineFocus}>
+        <TimelineMapContext.Provider value={timelineFocus}>
+          {children}
+        </TimelineMapContext.Provider>
+      </SetTimelineMapContext.Provider>
     </ActivityAnalysisLinkContext.Provider>
   );
 }

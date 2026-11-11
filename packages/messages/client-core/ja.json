@@ -1836,6 +1836,61 @@
       }
     }
   },
+  "ActivityTimeline": {
+    "title": "Activity timeline",
+    "axis": "Horizontal axis",
+    "time": "Time",
+    "distance": "Distance",
+    "fullActivity": "Full activity",
+    "laps": "Laps",
+    "lap": "Lap {number}",
+    "calculated": "Estimated",
+    "empty": "No recorded time series are available for this activity.",
+    "error": "Unable to load activity data.",
+    "retry": "Retry",
+    "metrics": {
+      "elevation": "Elevation",
+      "pace": "Pace",
+      "speed": "Speed",
+      "power": "Power",
+      "heartRate": "Heart rate",
+      "cadence": "Cadence",
+      "pedaling": "Cadence",
+      "stride": "Stride length",
+      "stanceTime": "Ground contact",
+      "temperature": "Temperature"
+    },
+    "grouping": "Grouping",
+    "groups": {
+      "laps": "Laps",
+      "heartRate": "Heart rate zones",
+      "power": "Power zones",
+      "pace": "Pace zones"
+    },
+    "timelineOptions": "Timeline options",
+    "resetZoom": "Show full activity",
+    "inspect": "Inspect timeline and drag to zoom",
+    "loadingGroups": "Loading groups…",
+    "noGroups": "No groups are available for this activity.",
+    "configureChart": "Configure {metric}",
+    "metric": "Metric",
+    "color": "Color",
+    "height": "Chart height",
+    "smoothing": "Smoothing",
+    "raw": "Raw data",
+    "seconds": "{seconds} seconds",
+    "heights": {
+      "64": "Compact",
+      "86": "Standard",
+      "128": "Tall",
+      "180": "Extra tall"
+    },
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "removeChart": "Remove chart",
+    "addChart": "Add chart",
+    "expandChart": "Expand {metric}"
+  },
   "ActivityDetail": {
     "title": "アクティビティ詳細",
     "genericDataNotice": {
@@ -1866,6 +1921,7 @@
       }
     },
     "tabs": {
+      "timeline": "Activity timeline",
       "overview": "概要",
       "heartrate": "心拍数",
       "power": "パワー",
