@@ -566,6 +566,47 @@ export class TodaySuggestionOrchestratorService {
       (projection.todayActivityCount ?? 0) > 0 ||
       projection.constraints.includes('TODAY_WORKOUT_COMPLETED')
     ) {
+      const recent =
+        (projection.todayActivityCount ?? 0) > 0 &&
+        Array.isArray(projection.lightContext.recentActivities)
+          ? projection.lightContext.recentActivities.find(
+              (item) => item.hashId === projection.latestActivityId,
+            )
+          : null;
+      const recordedFacts: string[] = [];
+      if (recent && Number.isFinite(recent.distanceKm) && recent.distanceKm > 0)
+        recordedFacts.push(
+          zh
+            ? `${recent.distanceKm.toFixed(1)} 公里`
+            : `${recent.distanceKm.toFixed(1)} km`,
+        );
+      if (
+        recent &&
+        Number.isFinite(recent.durationMinutes) &&
+        recent.durationMinutes > 0
+      )
+        recordedFacts.push(
+          zh
+            ? `约 ${Math.round(recent.durationMinutes)} 分钟`
+            : `about ${Math.round(recent.durationMinutes)} minutes`,
+        );
+      if (
+        recent &&
+        Number.isFinite(recent.avgHeartRate) &&
+        recent.avgHeartRate > 0
+      )
+        recordedFacts.push(
+          zh
+            ? `平均心率 ${Math.round(recent.avgHeartRate)}`
+            : `average heart rate ${Math.round(recent.avgHeartRate)} bpm`,
+        );
+      const activitySummary = recordedFacts.length
+        ? zh
+          ? `今天这次活动记录为 ${recordedFacts.join('，')}。`
+          : `Today's recorded activity: ${recordedFacts.join(', ')}. `
+        : zh
+          ? '今天已有完成记录。'
+          : 'Training is recorded today. ';
       return {
         headline: current
           ? zh
@@ -579,8 +620,8 @@ export class TodaySuggestionOrchestratorService {
             ? `今天已有活动记录，「${current.name}」尚未标记完成。暂不自动重复或补做这节训练；活动关联和处理结果更新后，建议会同步变化。`
             : `Activity is recorded today, while ${current.name} is not marked complete. Do not automatically repeat or make up this session; activity processing and matching will update the advice.`
           : zh
-            ? '今天已有完成记录，接下来以恢复为主，不需要额外补练。明天继续结合近期负荷与原有安排执行。'
-            : 'Training is recorded today. Prioritize recovery without extra make-up training, and use recent load and the existing schedule for tomorrow.',
+            ? `${activitySummary}今天先不追加训练；如果还想活动，保持轻松走动和放松即可。${projection.activePlan ? '后续训练继续衔接已有课表。' : '现有记录不足以判断长期训练水平，不据此认定停训或要求补练。'}`
+            : `${activitySummary}Avoid extra training for now; easy walking and gentle movement are enough if you want to stay active. ${projection.activePlan ? 'Continue with the existing schedule next.' : 'The available records do not establish your long-term training level or a training break.'}`,
         recommendation: { kind: 'RECOVER' },
         confidence: 'MEDIUM',
         evidenceCodes: ['RECENT_ACTIVITY'],
@@ -655,7 +696,11 @@ export class TodaySuggestionOrchestratorService {
   ): TodaySuggestionDeliveryReason {
     if (aborted) return 'UPSTREAM_TIMEOUT';
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes('OUTPUT_REJECTED') || message.includes('INVALID_')) {
+    if (
+      message.includes('OUTPUT_REJECTED') ||
+      message.includes('INVALID_') ||
+      message.includes('BACKGROUND_COACH_TASK_RESULT_MISSING')
+    ) {
       return 'OUTPUT_REJECTED';
     }
     if (

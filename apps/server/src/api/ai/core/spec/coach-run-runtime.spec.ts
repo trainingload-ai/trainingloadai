@@ -6,12 +6,14 @@ import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
 import { streamCoachAnswer } from '../tool-loop-agent.runtime';
 
 let modelAttempts = 0;
+let latestAgentConfig: any;
 let executeBeforeFailure = false;
 jest.mock('ai', () => ({
   ...jest.requireActual<typeof import('ai')>('ai'),
   ToolLoopAgent: class {
     constructor(private readonly config: { tools: ToolSet }) {
       modelAttempts += 1;
+      latestAgentConfig = config;
     }
     async stream() {
       const { tools } = this.config;
@@ -65,6 +67,39 @@ const tool = (overrides: Partial<AiToolDef> = {}): AiToolDef => ({
 });
 
 describe('real execution lifecycle / fallback fences', () => {
+  it.each([false, true])(
+    'keeps structured submission required only for background tasks (background=%s)',
+    async (background) => {
+      const context = ctx(async () => undefined);
+      if (background)
+        context.backgroundTask = {
+          taskType: 'TODAY_SUGGESTION',
+          allowedToolNames: ['coach_task_submit_result'],
+          requiredToolNames: [],
+          completedToolNames: new Set(),
+          submitResult: () => undefined,
+        };
+      const drain = async () => {
+        for await (const _event of streamCoachAnswer({
+          tools: [tool({ name: 'coach_task_submit_result' })],
+          ctx: context,
+          model: 'test-explicit',
+          messages: [
+            { role: 'user', content: 'Generate the structured task result.' },
+          ],
+        })) {
+          /* drain */
+        }
+      };
+      await expect(drain()).rejects.toThrow('rate limited');
+      const expected = background ? 'required' : 'auto';
+      expect(latestAgentConfig.toolChoice).toBe(expected);
+      const step = latestAgentConfig.prepareStep({ stepNumber: 0, steps: [] });
+      expect(step.toolChoice).toBe(expected);
+      expect(step.activeTools).toContain('coach_task_submit_result');
+    },
+  );
+
   const previousFallback = process.env.OPENROUTER_DEFAULT_FALLBACK_MODELS;
   afterEach(() => {
     modelAttempts = 0;

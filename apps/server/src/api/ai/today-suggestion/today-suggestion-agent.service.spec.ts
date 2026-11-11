@@ -61,7 +61,7 @@ describe('TodaySuggestionAgentService', () => {
       'Allowed intent names: OPEN_TODAY_WORKOUT',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
-      'whole-day recommendation',
+      'actual activities, remaining workouts and recent training load',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
       'Evening training is valid',

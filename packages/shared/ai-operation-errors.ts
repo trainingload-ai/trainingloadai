@@ -8,6 +8,7 @@
 export const AI_OPERATION_ERROR_CODES = [
   "AI_ACCESS_REQUIRED",
   "AI_OPERATION_IN_PROGRESS",
+  "AI_OPERATION_COMPLETION_PENDING",
   "AI_OPERATION_SETTLEMENT_PENDING",
   "AI_MODEL_PURPOSE_UNAVAILABLE",
 ] as const;
@@ -23,6 +24,7 @@ export type AiOperationErrorReason =
 const REASONS = {
   AI_ACCESS_REQUIRED: "accessRequired",
   AI_OPERATION_IN_PROGRESS: "inProgress",
+  AI_OPERATION_COMPLETION_PENDING: "settlementPending",
   AI_OPERATION_SETTLEMENT_PENDING: "settlementPending",
   AI_MODEL_PURPOSE_UNAVAILABLE: "purposeUnavailable",
 } as const satisfies Record<AiOperationErrorCode, AiOperationErrorReason>;

@@ -69,6 +69,10 @@ export default defineConfig({
     include: [
       "src/app/**/_home/**/*.test.{ts,tsx}",
       "src/lib/query-invalidation.test.ts",
+      "src/api/activity-review-stream.test.ts",
+      "src/hooks/useAiAnalysis.test.tsx",
+      "src/app/**/activities/**/AIAnalysis.test.tsx",
+      "src/app/**/activities/**/common-activity.test.tsx",
       "src/lib/today-suggestion-refresh.test.ts",
       "src/lib/spec/coach-home-card-stack.test.ts",
       "src/components/routes/**/*.test.{ts,tsx}",

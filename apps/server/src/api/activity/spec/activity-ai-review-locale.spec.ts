@@ -1,5 +1,9 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { ActivityAiReviewService } from '../activity-ai-review.service';
+import {
+  ACTIVITY_AI_REVIEW_PROMPT_VERSION,
+  ACTIVITY_COACH_EVIDENCE_VERSION,
+} from '@/api/ai/activity-coach.constants';
 
 jest.mock('@/api/ai/core/coach-upstream.adapter', () => ({
   createCoachClient: () => ({}),
@@ -8,6 +12,80 @@ jest.mock('@/api/ai/core/coach-upstream.adapter', () => ({
 }));
 
 describe('ActivityAiReviewService locale lookup', () => {
+  it.each(['RUNNING', 'FAILED', 'DEAD'])(
+    'preserves the existing %s execution for unchanged import evidence',
+    async (status) => {
+      const existing = {
+        id: 'review-1',
+        status,
+        evidenceHash: 'same',
+        promptVersion: ACTIVITY_AI_REVIEW_PROMPT_VERSION,
+        evidenceVersion: ACTIVITY_COACH_EVIDENCE_VERSION,
+      };
+      const update = jest.fn();
+      const create = jest.fn();
+      const service = Object.create(
+        ActivityAiReviewService.prototype,
+      ) as ActivityAiReviewService;
+      Object.defineProperties(service, {
+        prisma: {
+          value: {
+            activityAiReview: {
+              findFirst: async () => existing,
+              update,
+              create,
+            },
+          },
+        },
+        buildCoachEvidenceBundle: {
+          value: async () => ({ evidenceSnapshot: {}, evidenceHash: 'same' }),
+        },
+      });
+      await expect(
+        service.enqueueForActivity({
+          activityId: 42,
+          userId: 'user-1',
+          trigger: 'IMPORT',
+        }),
+      ).resolves.toEqual({ id: 'review-1', status });
+      expect(update).not.toHaveBeenCalled();
+      expect(create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('creates an inline review with a lease so workers cannot claim the same generation', async () => {
+    const create = jest.fn(async (_args: unknown) => ({
+      id: 'review-1',
+      status: 'RUNNING',
+    }));
+    const service = Object.create(
+      ActivityAiReviewService.prototype,
+    ) as ActivityAiReviewService;
+    Object.defineProperties(service, {
+      prisma: {
+        value: { activityAiReview: { findFirst: async () => null, create } },
+      },
+      buildCoachEvidenceBundle: {
+        value: async () => ({ evidenceSnapshot: {}, evidenceHash: 'same' }),
+      },
+    });
+    await service.enqueueForActivity({
+      activityId: 42,
+      userId: 'user-1',
+      trigger: 'MANUAL',
+      runInline: true,
+    });
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: 'RUNNING',
+          lockedAt: expect.any(Date),
+          availableAt: expect.any(Date),
+        }),
+      }),
+    );
+  });
+
   it.each(['en', 'de', 'fr', 'es', 'pt-BR', 'it', 'ko', 'ja', 'zh', 'zh-hant'])(
     'reads the review stored for %s',
     async (language) => {

@@ -45,7 +45,8 @@ export class TodaySuggestionAgentService {
       allowWithoutConsent: args.allowWithoutConsent,
       instructions: [
         'Produce a structured today-suggestion draft. This is one branch of the normal Coach Agent loop.',
-        "Build a useful whole-day recommendation from today's plan, actual completion and activities, readiness or load, a meaningful review of what happened, and the handoff to tomorrow. As the day progresses, prefer reviewing confirmed facts and clarifying missing completion data over inventing another workout.",
+        'Decide what is useful for the rest of today from actual activities, remaining workouts and recent training load. Complete this judgment yourself and explain its basis directly; do not turn completion checks or reviews into tasks for the athlete.',
+        'Write 2-4 concise athlete-facing sentences. Lead with the concrete next action, then explain the most relevant activity or load facts and why they support it. Do not quote the exact current clock time in athlete-facing prose because this advice may remain cached; use natural context such as tonight instead. A recorded activity alone does not mean the day must be a rest day. Use its duration, distance, intensity and remaining sessions. Mention tomorrow only when it changes the advice; never invent an existing plan. Missing historical records do not prove a training break or detraining.',
         'The server projection below is authoritative but intentionally compact. Call only the read tools whose evidence can materially change the decision.',
         'Hard constraints require evidence acquisition or restrict unsafe conclusions; they never map directly to canned athlete-facing copy.',
         'Do not output URLs, provider credentials, write-operation parameters, workout fields, or workout DSL. Internal decision ids are allowed only inside coachDecisionHandling. The dedicated workout-generator skill owns the Workout artifact.',

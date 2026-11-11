@@ -24,6 +24,24 @@ export function isAiOperationErrorCode(
   return CODES.has(value as AiOperationErrorCode);
 }
 
+/** Admission/lease contention is a wait condition, not a failed model attempt. */
+export function isAiOperationBusyError(error: unknown): boolean {
+  const response = error instanceof HttpException ? error.getResponse() : error;
+  const code =
+    typeof response === 'string'
+      ? response
+      : response && typeof response === 'object' && 'code' in response
+        ? response.code
+        : error instanceof Error
+          ? error.message
+          : null;
+  return (
+    code === 'AI_OPERATION_IN_PROGRESS' ||
+    code === 'AI_OPERATION_COMPLETION_PENDING' ||
+    code === 'AI_OPERATION_SETTLEMENT_PENDING'
+  );
+}
+
 export function aiOperationError(
   code: AiOperationErrorCode,
   data?: Record<string, unknown>,

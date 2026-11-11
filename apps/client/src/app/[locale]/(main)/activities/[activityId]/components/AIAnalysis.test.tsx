@@ -109,6 +109,86 @@ vi.mock("./activity-coach-dialog-body", () => ({
 }));
 
 describe("AIAnalysis feature access", () => {
+  it.each(["PENDING", "RUNNING", "FAILED"])(
+    "keeps %s reviews loading without starting a competing request",
+    (status) => {
+      mocks.accessAllowed = true;
+      mocks.reviewQuery.data = { found: true, status, markdown: "" };
+      const { rerender } = render(<AIAnalysis />);
+      expect(screen.getByText("analyzing")).toBeInTheDocument();
+      expect(screen.queryByText("analysisFailed")).not.toBeInTheDocument();
+      expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith(
+        "activity-1",
+        true,
+        0,
+        false,
+      );
+      mocks.reviewQuery.data = {
+        found: true,
+        status: "SUCCEEDED",
+        markdown: "训练已完成，接下来保持轻松恢复。",
+      };
+      rerender(<AIAnalysis />);
+      expect(
+        screen.getByRole("button", { name: /训练已完成/ }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("keeps an admitted request alive when backend status changes to RUNNING", () => {
+    mocks.accessAllowed = true;
+    mocks.useAiAnalysisStream.mockReturnValue({
+      data: "",
+      isLoading: true,
+      isDone: false,
+      error: null,
+      operation: null,
+    });
+    const { rerender } = render(<AIAnalysis />);
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith(
+      "activity-1",
+      true,
+      0,
+      true,
+    );
+    mocks.reviewQuery.data = { found: true, status: "RUNNING", markdown: "" };
+    rerender(<AIAnalysis />);
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith(
+      "activity-1",
+      true,
+      0,
+      true,
+    );
+    expect(screen.getByText("analyzing")).toBeInTheDocument();
+  });
+
+  it("does not report an empty operation replay as analysis failure", () => {
+    mocks.accessAllowed = true;
+    render(<AIAnalysis />);
+    expect(screen.queryByText("analysisFailed")).not.toBeInTheDocument();
+    expect(screen.getByText("analyzing")).toBeInTheDocument();
+  });
+
+  it("retries a terminal failure inside the card without navigating", () => {
+    mocks.accessAllowed = true;
+    mocks.reviewQuery.data = { found: true, status: "DEAD", markdown: "" };
+    render(<AIAnalysis />);
+    expect(screen.getByText("analysisFailed")).toBeInTheDocument();
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith(
+      "activity-1",
+      true,
+      0,
+      false,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "regenerate" }));
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith(
+      "activity-1",
+      true,
+      1,
+      true,
+    );
+  });
+
   beforeEach(() => {
     mocks.accessAllowed = false;
     mocks.consentGranted = true;
@@ -168,7 +248,12 @@ describe("AIAnalysis feature access", () => {
     expect(
       screen.queryByRole("button", { name: "managed access prompt" }),
     ).not.toBeInTheDocument();
-    expect(mocks.useAiAnalysisStream).toHaveBeenCalledTimes(1);
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith(
+      "activity-1",
+      true,
+      0,
+      true,
+    );
     expect(mocks.useAiAnalysisStream).toHaveBeenCalledWith(
       "activity-1",
       true,

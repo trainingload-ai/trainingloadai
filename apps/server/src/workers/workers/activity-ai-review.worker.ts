@@ -11,6 +11,16 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { AiService } from '@/api/ai/ai.service';
 import { RuntimeCapabilityService } from '@/runtime-capabilities/runtime-capability.service';
 import { RuntimeJobSupervisor } from '@/runtime-capabilities/runtime-job-supervisor.service';
+import { isAiOperationBusyError } from '@/api/ai/ai-operation.error';
+
+type ReviewJob = {
+  id: string;
+  activityId: number;
+  userId: string;
+  attempts?: number;
+  maxAttempts?: number;
+  lockedAt?: Date;
+};
 
 function backoffMs(attempts: number) {
   const base = 60_000;
@@ -95,6 +105,9 @@ export class ActivityAiReviewWorkerService
         id: string;
         activity_id: number;
         user_id: string;
+        attempts: number;
+        max_attempts: number;
+        locked_at: Date;
       }>
     >`
       WITH picked AS (
@@ -105,30 +118,33 @@ export class ActivityAiReviewWorkerService
             OR (
               status = 'RUNNING'
               AND locked_at IS NOT NULL
-              AND locked_at <= ${staleBefore}
+              AND locked_at <= (${staleBefore}::timestamptz AT TIME ZONE 'UTC')
             )
           )
-          AND available_at <= ${now}
+          AND available_at <= (${now}::timestamptz AT TIME ZONE 'UTC')
         ORDER BY available_at ASC, created_at ASC
         LIMIT ${batchSize}
         FOR UPDATE SKIP LOCKED
       )
       UPDATE t_activity_ai_review r
       SET status='RUNNING',
-          locked_at=NOW(),
-          started_at=COALESCE(r.started_at, NOW()),
+          locked_at=(NOW() AT TIME ZONE 'UTC'),
+          started_at=COALESCE(r.started_at, NOW() AT TIME ZONE 'UTC'),
           finished_at=NULL,
           failed_at=NULL,
-          updated_at=NOW()
+          updated_at=(NOW() AT TIME ZONE 'UTC')
       FROM picked
       WHERE r.id = picked.id
-      RETURNING r.id, r.activity_id, r.user_id;
+      RETURNING r.id, r.activity_id, r.user_id, r.attempts, r.max_attempts, r.locked_at;
     `;
 
     return rows.map((r) => ({
       id: r.id,
       activityId: r.activity_id,
       userId: r.user_id,
+      attempts: r.attempts,
+      maxAttempts: r.max_attempts,
+      lockedAt: r.locked_at,
     }));
   }
 
@@ -176,11 +192,7 @@ export class ActivityAiReviewWorkerService
     }）`;
   }
 
-  private async executeJob(job: {
-    id: string;
-    activityId: number;
-    userId: string;
-  }) {
+  private async executeJob(job: ReviewJob) {
     try {
       const reviewResult = await this.ai.processQueuedActivityAiReview(job.id);
       return {
@@ -189,47 +201,57 @@ export class ActivityAiReviewWorkerService
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      const row = await this.prisma.activityAiReview.update({
-        where: { id: job.id },
+      // Never let a late worker failure overwrite an inline success or a new lease.
+      const where = {
+        id: job.id,
+        status: $Enums.ActivityAiReviewStatus.RUNNING,
+        ...(job.lockedAt ? { lockedAt: job.lockedAt } : {}),
+      };
+      if (isAiOperationBusyError(e)) {
+        const delay = 15_000;
+        await this.prisma.activityAiReview.updateMany({
+          where,
+          data: {
+            status: $Enums.ActivityAiReviewStatus.PENDING,
+            availableAt: new Date(Date.now() + delay),
+            lockedAt: null,
+            failedAt: null,
+            finishedAt: null,
+            errorCode: null,
+            errorMessage: null,
+          },
+        });
+        return { outcome: 'DEFERRED' as const, delay };
+      }
+      const attempts = (job.attempts ?? 0) + 1;
+      const maxAttempts =
+        job.maxAttempts ??
+        this.configService.get<number>('activityAiReviewWorker.maxAttempts') ??
+        3;
+      const terminal = attempts >= maxAttempts;
+      const delay = backoffMs(attempts);
+      await this.prisma.activityAiReview.updateMany({
+        where,
         data: {
-          status: $Enums.ActivityAiReviewStatus.FAILED,
-          attempts: { increment: 1 },
+          status: terminal
+            ? $Enums.ActivityAiReviewStatus.DEAD
+            : $Enums.ActivityAiReviewStatus.FAILED,
+          attempts,
+          availableAt: new Date(Date.now() + delay),
           failedAt: new Date(),
           finishedAt: new Date(),
           lockedAt: null,
           errorCode: 'GENERATION_FAILED',
           errorMessage: msg.slice(0, 4000),
         },
-        select: { attempts: true, maxAttempts: true },
       });
-      const attempts = row.attempts ?? 0;
-      const maxAttempts =
-        row.maxAttempts ??
-        this.configService.get<number>('activityAiReviewWorker.maxAttempts') ??
-        3;
-
-      if (attempts >= maxAttempts) {
-        await this.prisma.activityAiReview.update({
-          where: { id: job.id },
-          data: {
-            status: $Enums.ActivityAiReviewStatus.DEAD,
-            finishedAt: new Date(),
-          },
-        });
+      if (terminal) {
         return {
           outcome: 'DEAD' as const,
           error: msg,
         };
       }
 
-      const delay = backoffMs(attempts);
-      await this.prisma.activityAiReview.update({
-        where: { id: job.id },
-        data: {
-          availableAt: new Date(Date.now() + delay),
-          lockedAt: null,
-        },
-      });
       return {
         outcome: 'RETRY' as const,
         attempts,
@@ -240,11 +262,7 @@ export class ActivityAiReviewWorkerService
   }
 
   private async orchestrateClaimedJob(
-    job: {
-      id: string;
-      activityId: number;
-      userId: string;
-    },
+    job: ReviewJob,
     progress: {
       sequence: number;
       batchPosition: number;
@@ -263,6 +281,11 @@ export class ActivityAiReviewWorkerService
     const progressText = `本轮第=${progress.sequence} 当前批次=${progress.batchPosition}/${progress.batchTotal}${this.formatQueueSnapshot(queueAfterExecution, false)}`;
 
     switch (result.outcome) {
+      case 'DEFERRED':
+        this.logger.log(
+          `[活动AI复盘队列][编排] 等待执行 ${progressText} 复盘ID=${job.id} 延迟毫秒=${result.delay}`,
+        );
+        return;
       case 'DEAD':
         this.logger.error(
           `[活动AI复盘队列][编排] 任务进入 DEAD ${progressText} 复盘ID=${job.id} 耗时=${elapsedMs}ms 错误=${result.error}`,

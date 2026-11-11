@@ -29,6 +29,7 @@ import { CoachRunProjector } from './core/coach-run-projector';
 import { stableJson } from './core/ai-common.util';
 import { CoachMemoryExtractionEnqueuer } from './memory/coach-memory-extraction-enqueuer.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { aiOperationError } from './ai-operation.error';
 import {
   COACH_ASSESSMENT_ANSWERED_EVENT,
   type CoachAssessmentAnsweredEvent,
@@ -638,7 +639,7 @@ export class CoachRunStore {
     const replay = existing ? replayFrom(existing) : null;
     if (replay) return replay;
     if (existing?.status === 'running') {
-      throw new ConflictException('Background Coach task is already executing');
+      throw aiOperationError('AI_OPERATION_IN_PROGRESS');
     }
     if (
       existing &&
@@ -825,9 +826,7 @@ export class CoachRunStore {
         const raced = await findExisting();
         const racedReplay = raced ? replayFrom(raced) : null;
         if (racedReplay) return racedReplay;
-        throw new ConflictException(
-          'Background Coach task is already executing',
-        );
+        throw aiOperationError('AI_OPERATION_IN_PROGRESS');
       }
       throw error;
     }

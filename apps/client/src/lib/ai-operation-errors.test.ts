@@ -15,9 +15,9 @@ describe("AI operation error mapping", () => {
     expect(aiOperationErrorCode("AI_MODEL_PURPOSE_UNAVAILABLE")).toBe(
       "AI_MODEL_PURPOSE_UNAVAILABLE",
     );
-    expect(aiOperationErrorCode(new Error("AI_MODEL_PURPOSE_UNAVAILABLE"))).toBe(
-      "AI_MODEL_PURPOSE_UNAVAILABLE",
-    );
+    expect(
+      aiOperationErrorCode(new Error("AI_MODEL_PURPOSE_UNAVAILABLE")),
+    ).toBe("AI_MODEL_PURPOSE_UNAVAILABLE");
     expect(
       aiOperationErrorCode(
         new ApiFetchError(
@@ -39,10 +39,7 @@ describe("AI operation error mapping", () => {
 
   it("localizes operation failures instead of returning raw codes", () => {
     expect(
-      localizedAiOperationError(
-        "AI_ACCESS_REQUIRED",
-        (key) => `i18n:${key}`,
-      ),
+      localizedAiOperationError("AI_ACCESS_REQUIRED", (key) => `i18n:${key}`),
     ).toBe("i18n:accessRequired");
   });
 
@@ -57,6 +54,7 @@ describe("AI operation error mapping", () => {
     ).toEqual({
       AI_ACCESS_REQUIRED: "accessRequired",
       AI_OPERATION_IN_PROGRESS: "inProgress",
+      AI_OPERATION_COMPLETION_PENDING: "settlementPending",
       AI_OPERATION_SETTLEMENT_PENDING: "settlementPending",
       AI_MODEL_PURPOSE_UNAVAILABLE: "purposeUnavailable",
     });

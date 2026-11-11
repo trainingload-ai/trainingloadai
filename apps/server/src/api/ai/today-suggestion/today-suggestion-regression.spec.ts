@@ -159,6 +159,30 @@ describe('activity-first today suggestion regressions', () => {
   );
   afterEach(() => jest.useRealTimers());
 
+  it('keeps fallback grounded in the actual morning session without inventing a plan', async () => {
+    const { service, execution, recentActivities, agent } = harness();
+    execution.day.unlinkedActivities.push({
+      hashId: 'morning-run',
+      startTime: '2026-11-11T01:07:00Z',
+    } as never);
+    recentActivities.unshift({
+      hashId: 'morning-run',
+      startTime: '2026-11-11T01:07:00Z',
+      distanceKm: 10.01,
+      durationMinutes: 52.25,
+      avgHeartRate: 172,
+    });
+    agent.run.mockRejectedValueOnce(
+      new Error('BACKGROUND_COACH_TASK_RESULT_MISSING'),
+    );
+    const result = await service.get(args);
+    expect(result.delivery.reasonCode).toBe('OUTPUT_REJECTED');
+    expect(result.summary).toContain('10.0 公里');
+    expect(result.summary).toContain('52 分钟');
+    expect(result.summary).toContain('172');
+    expect(result.summary).not.toContain('原有安排');
+    expect(result.summary).not.toContain('停训两周');
+  });
   it('updates the cached judgment after an explicit rest choice and retains that choice', async () => {
     const { service, agent, engagement } = harness();
     const first = await service.get(args);
