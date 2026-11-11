@@ -32,6 +32,7 @@ import {
   type AiTodaySuggestionResponse,
 } from "@/api/ai-today-suggestion";
 import { useQuery } from "@tanstack/react-query";
+import { createTodaySuggestionRefetchInterval } from "@shared/today-suggestion-refresh";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getV2ActivitiesFeed,
@@ -1468,7 +1469,15 @@ export default function V2HomePageClient({
   });
   const sourceData = latestHomeData ?? initialData;
   const activePlan = sourceData.activePlan;
-  const { data: todayAdvice, isPending: isTodayAdvicePending } = useQuery({
+  const adviceRefetchInterval = useMemo(
+    () => createTodaySuggestionRefetchInterval(),
+    [],
+  );
+  const {
+    data: todayAdvice,
+    isPending: isTodayAdvicePending,
+    isError: isTodayAdviceError,
+  } = useQuery({
     queryKey: [
       "v2-home-today-advice",
       locale,
@@ -1486,6 +1495,7 @@ export default function V2HomePageClient({
     enabled: deviceTimezone !== null && canUseAiSuggestion,
     meta: { errorSurface: "silent" },
     staleTime: 15 * 60 * 1000,
+    refetchInterval: adviceRefetchInterval,
     refetchOnWindowFocus: "always",
     retry: false,
   });
@@ -1618,6 +1628,18 @@ export default function V2HomePageClient({
     (!aiConsent.isFetchedAfterMount ||
       (hasAiDataConsent && isTodayAdvicePending));
   const displayedHomeData = useMemo(() => {
+    if (isTodayAdviceError && !todayAdvice) {
+      return {
+        ...homeData,
+        aiTodaySuggestion: {
+          ...homeData.aiTodaySuggestion,
+          title: t("aiTodaySuggestion.fallbackTitle"),
+          summary: t("aiTodaySuggestion.loadFailed"),
+          tags: [],
+          details: null,
+        },
+      };
+    }
     if (isTodayAdviceLoading) {
       return {
         ...homeData,
@@ -1644,6 +1666,8 @@ export default function V2HomePageClient({
     hasAiDataConsent,
     homeData,
     isTodayAdviceLoading,
+    isTodayAdviceError,
+    todayAdvice,
     publicDemo.active,
     t,
     tAiConsent,

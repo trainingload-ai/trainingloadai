@@ -10,6 +10,8 @@ import type {
 } from '@shared/ai-today-suggestion-contract';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
+import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
+import { ConflictException } from '@nestjs/common';
 
 function parseV2(value: unknown): TodaySuggestionV2 | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -24,6 +26,7 @@ export class TodaySuggestionReminderService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationDomainService,
+    private readonly projector: TodaySuggestionConstraintProjector,
   ) {}
 
   async schedule(args: {
@@ -42,6 +45,29 @@ export class TodaySuggestionReminderService {
     const result = parseV2(suggestion.structuredResult);
     if (!result)
       throw new NotFoundException('TODAY_SUGGESTION_RESULT_NOT_FOUND');
+    const keyContext =
+      suggestion.keyContext &&
+      typeof suggestion.keyContext === 'object' &&
+      !Array.isArray(suggestion.keyContext)
+        ? (suggestion.keyContext as Record<string, unknown>)
+        : {};
+    const current = await this.projector.project({
+      userId: args.userId,
+      locale: suggestion.locale,
+      timezone:
+        typeof keyContext.timezone === 'string'
+          ? keyContext.timezone
+          : undefined,
+      allowAi: true,
+    });
+    if (
+      current.date !== suggestion.date ||
+      current.factHash !== suggestion.signatureHash ||
+      current.constraintHash !== suggestion.constraintHash ||
+      current.highConcern
+    ) {
+      throw new ConflictException('TODAY_SUGGESTION_FACTS_CHANGED');
+    }
     const reminderOffered = [
       result.primaryIntent,
       ...result.secondaryIntents,

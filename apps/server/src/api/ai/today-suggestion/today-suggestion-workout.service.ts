@@ -19,6 +19,7 @@ import { PlanWorkoutRepository } from '@/api/plan/persistence/plan-workout.repos
 import { CoachActionService } from '../core/coach-action.service';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
 import { todaySuggestionProposalToken } from './today-suggestion-delivery-policy';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 
 function parseV2(value: unknown): TodaySuggestionV2 | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -142,6 +143,45 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
         'TODAY_SUGGESTION_WORKOUT_NOT_OFFERED',
       );
     }
+    // A retry of a completed click returns the existing workout before revalidating
+    // the facts changed by that very creation.
+    const completed =
+      await this.prisma.todaySuggestionEngagementState.findUnique({
+        where: { userId: args.userId },
+      });
+    if (
+      completed?.generationToken === args.generationToken &&
+      completed.workoutId &&
+      completed.workoutActionId
+    ) {
+      const [workout, action] = await Promise.all([
+        this.planWorkouts.findFirst({
+          where: { id: completed.workoutId, userId: args.userId, planId: null },
+        }),
+        this.prisma.coachAction.findFirst({
+          where: {
+            id: completed.workoutActionId,
+            userId: args.userId,
+            undoneAt: null,
+          },
+        }),
+      ]);
+      if (workout && action)
+        return {
+          workoutId: workout.id,
+          actionId: action.id,
+          undoUntil: action.undoUntil?.toISOString() ?? null,
+          intent: {
+            type: 'OPEN_TODAY_WORKOUT',
+            label: suggestion.locale.startsWith('zh')
+              ? '打开今日训练'
+              : "Open today's workout",
+            workoutId: workout.id,
+            scheduledDate: suggestion.date,
+            planId: null,
+          },
+        };
+    }
     const projection = await this.projector.project({
       userId: args.userId,
       locale: suggestion.locale,
@@ -152,15 +192,17 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
       projection.date !== suggestion.date ||
       projection.factHash !== suggestion.signatureHash ||
       projection.constraintHash !== suggestion.constraintHash ||
-      projection.highConcern ||
-      projection.pendingInquiry
+      projection.highConcern
     ) {
       throw new ConflictException({
         code: 'TODAY_SUGGESTION_FACTS_CHANGED',
         message: 'TODAY_SUGGESTION_FACTS_CHANGED',
       });
     }
-    if (projection.newWorkoutWindowOpen === false) {
+    if (
+      (intent.preview.summary.durationSeconds ?? 1_800) / 60 >
+      projection.minutesUntilDayEnd
+    ) {
       throw new ConflictException({
         code: 'TODAY_SUGGESTION_TRAINING_WINDOW_CLOSED',
         message: 'TODAY_SUGGESTION_TRAINING_WINDOW_CLOSED',
@@ -209,6 +251,10 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
       type: CoachActionType.INDEPENDENT_WORKOUT_CREATE,
       riskTier: CoachActionRiskTier.LOW,
       replay: async (tx) => {
+        await acquireHashtextAdvisoryXactLock(
+          tx,
+          `today-workout:${args.userId}:${suggestion.date}`,
+        );
         const state = await tx.todaySuggestionEngagementState.findUnique({
           where: { userId: args.userId },
         });
@@ -217,6 +263,22 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
           !state.workoutId ||
           !state.workoutActionId
         ) {
+          const existing = await this.planWorkouts.findFirst(
+            {
+              where: {
+                userId: args.userId,
+                scheduledDate: new Date(`${suggestion.date}T00:00:00Z`),
+                status: { in: ['PLANNED', 'IN_PROGRESS'] },
+                OR: [{ planId: null }, { plan: { status: 'ACTIVE' } }],
+              },
+            },
+            tx,
+          );
+          if (existing)
+            throw new ConflictException({
+              code: 'TODAY_WORKOUT_ALREADY_EXISTS',
+              message: 'TODAY_WORKOUT_ALREADY_EXISTS',
+            });
           return null;
         }
         const [workout, priorAction] = await Promise.all([
@@ -314,7 +376,9 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
       undoUntil: action.undoUntil?.toISOString() ?? null,
       intent: {
         type: 'OPEN_TODAY_WORKOUT',
-        label: intent.label,
+        label: suggestion.locale.startsWith('zh')
+          ? '打开今日训练'
+          : "Open today's workout",
         workoutId: action.payloadForUi.workoutId,
         scheduledDate: suggestion.date,
         planId: null,

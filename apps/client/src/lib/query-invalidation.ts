@@ -16,6 +16,7 @@ export async function invalidateActivityDerivedCaches(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: queryKeys.pmc.fitnessStatus() }),
     qc.invalidateQueries({ queryKey: queryKeys.pmc.extremes() }),
     qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
+    qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.home.recentActivities() }),
     qc.invalidateQueries({ queryKey: queryKeys.coach.recentActivities() }),
     qc.invalidateQueries({ queryKey: queryKeys.timezone.prompt() }),
@@ -56,6 +57,8 @@ export const invalidateAfterActivityImportComplete =
 /** 当前激活计划 + 所有 plan-detail 子查询（推迟/跳过等仅刷新计划树） */
 export async function invalidateActivePlanAndPlanDetails(qc: QueryClient) {
   await Promise.all([
+    qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
+    qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
     qc.invalidateQueries({ queryKey: queryKeys.root.planDetail }),
   ]);
@@ -64,6 +67,8 @@ export async function invalidateActivePlanAndPlanDetails(qc: QueryClient) {
 /** 仅刷新计划列表与当前 ACTIVE（创建计划等轻量变更） */
 export async function invalidatePlanListsAndActive(qc: QueryClient) {
   await Promise.all([
+    qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
+    qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.list() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.legacyPlans() }),
@@ -85,6 +90,8 @@ export async function invalidateAfterPlanMutation(
   const includeTrees = options?.includePlanDetailTrees !== false;
 
   const tasks: Promise<unknown>[] = [
+    qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
+    qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.list() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.legacyPlans() }),

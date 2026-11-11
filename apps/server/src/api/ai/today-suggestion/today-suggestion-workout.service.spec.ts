@@ -55,6 +55,8 @@ describe('TodaySuggestionWorkoutService', () => {
       secondaryIntents: [],
     };
     const prisma = {
+      todaySuggestionEngagementState: { findUnique: jest.fn(async () => null) },
+      coachAction: { findFirst: jest.fn() },
       aiTodaySuggestion: {
         findFirst: jest.fn(async () => ({
           locale: 'en',

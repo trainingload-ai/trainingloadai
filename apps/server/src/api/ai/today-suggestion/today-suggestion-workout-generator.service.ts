@@ -65,14 +65,6 @@ export class TodaySuggestionWorkoutGeneratorService {
       funding: 'PLATFORM',
       triggerType: 'HOME_TODAY_SUGGESTION_WORKOUT',
       triggerRef: `${projection.date}:${projection.locale}`,
-      dedupeKey: [
-        'today-suggestion-workout-v1',
-        projection.factHash,
-        projection.constraintHash,
-        projection.locale,
-        stableJson(draft.recommendation),
-        draft.summary,
-      ].join(':'),
       allowedToolNames: [
         'workout.intensity_strategy',
         'coach_task_submit_result',

@@ -14,6 +14,7 @@
     "./ai-model": "./ai-model.ts",
     "./ai-operation-errors": "./ai-operation-errors.ts",
     "./ai-today-suggestion-contract": "./ai-today-suggestion-contract.ts",
+    "./today-suggestion-refresh": "./today-suggestion-refresh.ts",
     "./athlete-memory": "./athlete-memory.ts",
     "./calculated-power": "./calculated-power.ts",
     "./coach-adjustment-decision": "./coach-adjustment-decision.ts",

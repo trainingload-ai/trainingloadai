@@ -1340,7 +1340,7 @@
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 293
+          "line": 302
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1534,7 +1534,7 @@
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 294
+          "line": 303
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1685,7 +1685,7 @@
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 295
+          "line": 304
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -2479,11 +2479,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 289
+          "line": 298
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 327
+          "line": 338
         },
         {
           "file": "apps/server/src/app.module.ts",

@@ -123,7 +123,7 @@ describe('CoachAssessmentCaseService', () => {
     });
   });
 
-  it('uses a neutral fallback when the model requests input without a valid question', async () => {
+  it('does not invent a sleep question when the model requests input without a valid question', async () => {
     const created = await service.createForAssessment({
       userId: 'athlete',
       assessment: assessment as never,
@@ -131,11 +131,9 @@ describe('CoachAssessmentCaseService', () => {
       triggerType: 'TEST',
       locale: 'zh-CN',
     });
-    expect(created?.status).toBe('WAITING_FOR_USER');
+    expect(created?.status).toBe('RESOLVED');
     const data = (create.mock.calls[0][0] as any).data as Record<string, any>;
-    expect(data.questionCount).toBe(1);
-    expect(data.questions.create.evidenceKind).toBe('RECENT_SLEEP');
-    expect(data.questions.create.question.question).toContain('昨晚');
+    expect(data.questions).toBeUndefined();
   });
 
   it('keeps sync-dependent evidence in WAITING_FOR_DATA with a follow-up', async () => {
@@ -311,13 +309,13 @@ describe('CoachAssessmentCaseService', () => {
       },
     };
     const distinctRequest = {
-      kind: 'RECENT_SLEEP',
-      reason: 'Sleep would reduce uncertainty.',
-      decisionImpact: 'May support recovery.',
+      kind: 'PAIN_LOCATION',
+      reason: 'The athlete reported pain.',
+      decisionImpact: 'The location affects whether running is appropriate.',
       question: {
-        id: 'recent_sleep',
-        header: 'Sleep',
-        question: 'How did you sleep?',
+        id: 'pain_location',
+        header: 'Pain',
+        question: 'Where is the reported pain?',
         options: [],
       },
     };
@@ -339,7 +337,7 @@ describe('CoachAssessmentCaseService', () => {
     expect(advanced.status).toBe('WAITING_FOR_USER');
     expect(questionCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ evidenceKind: 'RECENT_SLEEP' }),
+        data: expect.objectContaining({ evidenceKind: 'PAIN_LOCATION' }),
       }),
     );
   });

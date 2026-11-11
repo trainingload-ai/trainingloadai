@@ -4922,6 +4922,8 @@
     "aiTodaySuggestion": {
       "title": "AI Coach · Today's Suggestion",
       "fallbackTitle": "Today's training guidance",
+      "loadFailed": "Today's advice is temporarily unavailable. Please try again shortly.",
+      "reviewTitle": "Training review",
       "weatherAttribution": "{serviceName} data modified by Trainingload.ai",
       "loading": "AI Coach is thinking…",
       "summary": {

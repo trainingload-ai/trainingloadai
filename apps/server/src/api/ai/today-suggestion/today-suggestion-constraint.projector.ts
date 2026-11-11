@@ -5,109 +5,30 @@ import {
 } from '@/access/feature-access-policy.port';
 import { featureAllowed } from '@/access/feature-access.types';
 import { PlanExecutionContextService } from '@/api/plan/plan-execution-context.service';
+import { PlanWorkoutRepository } from '@/api/plan/persistence/plan-workout.repository';
 import { sha256Hex, stableJson } from '../core/ai-common.util';
 import { CoachAssessmentCaseQueryService } from '../athlete-state/coach-assessment-case-query.service';
 import { CoachStateContextService } from '../coach-state-context.service';
-import { TrainingDataCoverageQueryService } from '../core/training-data-coverage-query.service';
+import {
+  TrainingDataCoverageQueryService,
+  toAgentTrainingDataCoverageSnapshot,
+} from '../core/training-data-coverage-query.service';
 import { WeatherContextService } from '@/weather/weather-context.service';
 import type { TodayWeatherLocation } from '@/weather/weather.types';
 import { RuntimeCapabilityService } from '@/runtime-capabilities/runtime-capability.service';
+import { TodaySuggestionEngagementService } from './today-suggestion-engagement.service';
+import { TODAY_SUGGESTION_POLICY_VERSION } from './today-suggestion.types';
 import type {
   TodaySuggestionConstraintCode,
   TodaySuggestionConstraintProjection,
   TodaySuggestionWorkoutFact,
 } from './today-suggestion.types';
 
-function nextDate(date: string) {
-  const parsed = new Date(`${date}T00:00:00.000Z`);
-  parsed.setUTCDate(parsed.getUTCDate() + 1);
-  return parsed.toISOString().slice(0, 10);
-}
-
-function timeZoneOffsetMs(at: Date, timeZone: string) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(at);
-  const value = Object.fromEntries(
-    parts.map((part) => [part.type, part.value]),
-  );
-  return (
-    Date.UTC(
-      Number(value.year),
-      Number(value.month) - 1,
-      Number(value.day),
-      Number(value.hour),
-      Number(value.minute),
-      Number(value.second),
-    ) - at.getTime()
-  );
-}
-
-/** End of the projected local day, represented as the first instant of the next day. */
-export function todaySuggestionValidUntil(
-  date: string,
-  timezone: string | null,
-) {
-  const [year, month, day] = nextDate(date).split('-').map(Number);
-  const wallClockUtc = Date.UTC(year, month - 1, day);
-  if (!timezone) return new Date(wallClockUtc);
-  try {
-    let candidate = new Date(wallClockUtc);
-    for (let index = 0; index < 2; index += 1) {
-      candidate = new Date(
-        wallClockUtc - timeZoneOffsetMs(candidate, timezone),
-      );
-    }
-    return candidate;
-  } catch {
-    return new Date(wallClockUtc);
-  }
-}
-
-export const TODAY_SUGGESTION_NEW_WORKOUT_CUTOFF_LOCAL_MINUTES = 20 * 60;
-
-function localTime(at: Date, timezone: string | null) {
-  try {
-    return new Intl.DateTimeFormat('en-GB', {
-      timeZone: timezone || 'UTC',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-    }).format(at);
-  } catch {
-    return at.toISOString().slice(11, 16);
-  }
-}
-
-export function todaySuggestionTimeContext(
-  date: string,
-  timezone: string | null,
-  now = new Date(),
-) {
-  const validUntil = todaySuggestionValidUntil(date, timezone);
-  const currentLocalTime = localTime(now, timezone);
-  const [localHour, localMinute] = currentLocalTime.split(':').map(Number);
-  const localMinutesSinceMidnight = localHour * 60 + localMinute;
-  const minutesUntilDayEnd = Math.max(
-    0,
-    Math.floor((validUntil.getTime() - now.getTime()) / 60_000),
-  );
-  return {
-    validUntil,
-    localTime: currentLocalTime,
-    minutesUntilDayEnd,
-    newWorkoutWindowOpen:
-      localMinutesSinceMidnight <
-      TODAY_SUGGESTION_NEW_WORKOUT_CUTOFF_LOCAL_MINUTES,
-  };
-}
+import { nextDate, todaySuggestionTimeContext } from './today-suggestion-time';
+export {
+  todaySuggestionTimeContext,
+  todaySuggestionValidUntil,
+} from './today-suggestion-time';
 
 function workoutFact(
   workout: Awaited<
@@ -143,6 +64,8 @@ export class TodaySuggestionConstraintProjector {
     private readonly runtimeCapabilities: RuntimeCapabilityService,
     @Inject(FEATURE_ACCESS_POLICY)
     private readonly featureAccess: FeatureAccessPolicy,
+    private readonly engagement: TodaySuggestionEngagementService,
+    private readonly workouts: PlanWorkoutRepository,
   ) {}
 
   async project(args: {
@@ -157,7 +80,16 @@ export class TodaySuggestionConstraintProjector {
       surface: 'HOME_TODAY',
       timezone: args.timezone,
     });
-    const [coachState, pendingInquiry, coverage, access] = await Promise.all([
+    const date = execution.anchor.anchorDate;
+    const [
+      coachState,
+      pendingInquiry,
+      coverage,
+      access,
+      userFeedback,
+      independent,
+      recentActivities,
+    ] = await Promise.all([
       this.coachState.build({
         userId: args.userId,
         contextId: execution.contextId,
@@ -170,11 +102,40 @@ export class TodaySuggestionConstraintProjector {
         windowDays: 35,
       }),
       this.featureAccess.evaluate(args.userId, ['ai.todaySuggestion']),
+      this.engagement.feedbackForDate(args.userId, execution.anchor.anchorDate),
+      this.workouts.findMany({
+        where: {
+          userId: args.userId,
+          planId: null,
+          scheduledDate: {
+            gte: new Date(`${date}T00:00:00Z`),
+            lte: new Date(`${nextDate(date)}T00:00:00Z`),
+          },
+        },
+        orderBy: [{ scheduledDate: 'asc' }, { sessionIndex: 'asc' }],
+        select: {
+          id: true,
+          planId: true,
+          scheduledDate: true,
+          name: true,
+          notes: true,
+          text: true,
+          sportType: true,
+          status: true,
+          plannedDurationSeconds: true,
+          revision: true,
+          updatedAt: true,
+          _count: { select: { links: { where: { unlinkedAt: null } } } },
+        },
+      }),
+      this.trainingDataCoverage.recentActivityFacts(
+        args.userId,
+        new Date(Date.parse(`${date}T00:00:00Z`) - 35 * 86_400_000),
+      ),
     ]);
     const featureAllowedForUser = featureAllowed(access, 'ai.todaySuggestion');
     const runtime = this.runtimeCapabilities.snapshot();
     const aiCapability = runtime.capabilities.ai;
-    const date = execution.anchor.anchorDate;
     const timezone = execution.anchor.timezone;
     const timeContext = todaySuggestionTimeContext(date, timezone);
     const weather = args.location
@@ -188,6 +149,38 @@ export class TodaySuggestionConstraintProjector {
     const todayWorkouts = execution.day.plannedWorkouts.map(workoutFact);
     const tomorrowWorkouts =
       execution.tomorrow.plannedWorkouts.map(workoutFact);
+    for (const row of independent) {
+      const scheduledDate =
+        row.scheduledDate?.toISOString().slice(0, 10) ?? null;
+      const fact: TodaySuggestionWorkoutFact = {
+        id: row.id,
+        planId: null,
+        scheduledDate,
+        name:
+          row.name?.trim() ||
+          row.notes?.trim() ||
+          row.text.slice(0, 100) ||
+          'Workout',
+        sportType: row.sportType,
+        status: row.status,
+        plannedDurationSeconds: row.plannedDurationSeconds,
+        linkedActivityCount: row._count.links,
+        revision: row.revision,
+        updatedAt: row.updatedAt.toISOString(),
+      };
+      (scheduledDate === date ? todayWorkouts : tomorrowWorkouts).push(fact);
+    }
+    const needsCoverageDiagnosis =
+      !recentActivities.length ||
+      coverage.activities.processing.some((row) => row.count > 0);
+    const coverageDiagnosis = needsCoverageDiagnosis
+      ? toAgentTrainingDataCoverageSnapshot(
+          await this.trainingDataCoverage.snapshot({
+            userId: args.userId,
+            windowDays: 35,
+          }),
+        )
+      : null;
     const constraints: TodaySuggestionConstraintCode[] = [];
     const latestReadyAt = coverage.activities.latestReadyAt;
     const daysSinceLatestReady = latestReadyAt
@@ -207,7 +200,13 @@ export class TodaySuggestionConstraintProjector {
       constraints.push('ACTIVITY_PROCESSING_PENDING');
     }
     if (!execution.plan) constraints.push('NO_ACTIVE_PLAN');
-    if (todayWorkouts.some((workout) => workout.status === 'DONE')) {
+    const scheduledToday = todayWorkouts.filter(
+      (workout) => workout.status !== 'MOVED',
+    );
+    if (
+      scheduledToday.length > 0 &&
+      scheduledToday.every((workout) => workout.status === 'DONE')
+    ) {
       constraints.push('TODAY_WORKOUT_COMPLETED');
     }
     if (
@@ -217,14 +216,9 @@ export class TodaySuggestionConstraintProjector {
     ) {
       constraints.push('TODAY_WORKOUT_AVAILABLE');
     }
-    if (!timeContext.newWorkoutWindowOpen) {
-      constraints.push('TODAY_TRAINING_WINDOW_CLOSED');
-    }
-    const caseStatus = String(
-      coachState.athleteState?.caseStatus ?? '',
-    ).toUpperCase();
-    if (caseStatus === 'WAITING_FOR_USER') constraints.push('WAITING_FOR_USER');
-    if (caseStatus === 'WAITING_FOR_DATA') constraints.push('WAITING_FOR_DATA');
+    if (pendingInquiry) constraints.push('WAITING_FOR_USER');
+    if (coverageDiagnosis?.signals.syncInProgress)
+      constraints.push('WAITING_FOR_DATA');
     const highConcern =
       String(coachState.athleteState?.state ?? '').toUpperCase() ===
         'HIGH_CONCERN' ||
@@ -251,6 +245,7 @@ export class TodaySuggestionConstraintProjector {
         ['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance),
     );
     const factProjection = {
+      policyVersion: TODAY_SUGGESTION_POLICY_VERSION,
       date,
       timezone,
       executionFactHash: execution.factHash,
@@ -266,11 +261,15 @@ export class TodaySuggestionConstraintProjector {
         status: workout.status,
         scheduledDate: workout.scheduledDate,
         linkedActivityCount: workout.linkedActivityCount,
+        revision: workout.revision,
+        updatedAt: workout.updatedAt,
       })),
       tomorrowWorkouts: tomorrowWorkouts.map((workout) => ({
         id: workout.id,
         status: workout.status,
         scheduledDate: workout.scheduledDate,
+        revision: workout.revision,
+        updatedAt: workout.updatedAt,
       })),
       coachState: coachState.athleteState,
       decisions: coachState.decisions.map((decision) => ({
@@ -284,6 +283,16 @@ export class TodaySuggestionConstraintProjector {
         readyCount: coverage.activities.readyCount,
         processing: coverage.activities.processing,
       },
+      recentActivities,
+      coverageDiagnosis: coverageDiagnosis
+        ? {
+            signals: coverageDiagnosis.signals,
+            integrations: coverageDiagnosis.integrations,
+            imports: coverageDiagnosis.imports,
+          }
+        : null,
+      coachReadStatus: coachState.decisionReadStatus,
+      coachReviews: coachState.recentReviews,
       allowAi: args.allowAi,
       featureAllowed: featureAllowedForUser,
       edition: process.env.DEPLOYMENT_MODE === 'cloud' ? 'cloud' : 'self-host',
@@ -294,7 +303,7 @@ export class TodaySuggestionConstraintProjector {
         reasoningModel: process.env.AI_REASONING_MODEL?.trim() || null,
         webSearchEnabled: process.env.AI_WEB_SEARCH_ENABLED === 'true',
       },
-      newWorkoutWindowOpen: timeContext.newWorkoutWindowOpen,
+      userFeedback,
     };
     const constraintProjection = {
       constraints: [...constraints].sort(),
@@ -314,15 +323,17 @@ export class TodaySuggestionConstraintProjector {
       coachStateEvidenceHash: coachState.athleteState?.evidenceHash ?? null,
       activeDecisionId: activeDecision?.id ?? null,
     };
-    const requiredToolNames = constraints.some((constraint) =>
-      [
-        'NEVER_RECORDED_ACTIVITY',
-        'LAST_ACTIVITY_OVER_30_DAYS',
-        'ACTIVITY_PROCESSING_PENDING',
-      ].includes(constraint),
-    )
-      ? ['training.data_coverage']
-      : [];
+    const requiredToolNames =
+      !coverageDiagnosis &&
+      constraints.some((constraint) =>
+        [
+          'NEVER_RECORDED_ACTIVITY',
+          'LAST_ACTIVITY_OVER_30_DAYS',
+          'ACTIVITY_PROCESSING_PENDING',
+        ].includes(constraint),
+      )
+        ? ['training.data_coverage']
+        : [];
     const edition =
       process.env.DEPLOYMENT_MODE === 'cloud' ? 'cloud' : 'self-host';
     return {
@@ -334,12 +345,20 @@ export class TodaySuggestionConstraintProjector {
       allowAi: args.allowAi,
       featureAllowed: featureAllowedForUser,
       factHash: sha256Hex(stableJson(factProjection)),
+      aiState: aiCapability.state,
       constraintHash: sha256Hex(stableJson(constraintProjection)),
       continuityHash: sha256Hex(stableJson(continuityProjection)),
-      validUntil: timeContext.validUntil,
+      validUntil: new Date(
+        Math.min(
+          timeContext.validUntil.getTime(),
+          coachState.athleteState?.expiresAt &&
+            Date.parse(coachState.athleteState.expiresAt) > Date.now()
+            ? Date.parse(coachState.athleteState.expiresAt)
+            : timeContext.validUntil.getTime(),
+        ),
+      ),
       localTime: timeContext.localTime,
       minutesUntilDayEnd: timeContext.minutesUntilDayEnd,
-      newWorkoutWindowOpen: timeContext.newWorkoutWindowOpen,
       constraints,
       requiredToolNames,
       activePlan: execution.plan
@@ -352,8 +371,14 @@ export class TodaySuggestionConstraintProjector {
         : null,
       todayWorkouts,
       tomorrowWorkouts,
-      latestActivityId: latestActivity?.hashId ?? null,
-      latestActivityAt: latestActivity?.startTime ?? latestReadyAt,
+      latestActivityId:
+        latestActivity?.hashId ?? recentActivities[0]?.hashId ?? null,
+      latestActivityAt:
+        latestActivity?.startTime ??
+        recentActivities[0]?.startTime ??
+        latestReadyAt,
+      todayActivityCount: dayActivities.length,
+      coverageDiagnosis,
       activityEvidence: coverage,
       coachState,
       pendingInquiry: pendingInquiry
@@ -364,13 +389,16 @@ export class TodaySuggestionConstraintProjector {
         : null,
       activeDecisionId: activeDecision?.id ?? null,
       highConcern,
+      userFeedback,
       weatherImpact: weather.impact,
       weatherAttribution: weather.attribution,
       lightContext: {
+        policyVersion: TODAY_SUGGESTION_POLICY_VERSION,
         locale: args.locale,
         date,
         timezone,
-        newWorkoutWindowOpen: timeContext.newWorkoutWindowOpen,
+        localTime: timeContext.localTime,
+        minutesUntilDayEnd: timeContext.minutesUntilDayEnd,
         edition,
         constraints,
         plan: execution.plan
@@ -383,9 +411,25 @@ export class TodaySuggestionConstraintProjector {
           : null,
         todayWorkouts,
         tomorrowWorkouts,
-        dayCompletionState: execution.day.completionState,
+        planCompletionState: execution.day.completionState,
+        todayExecution: {
+          scheduledCount: scheduledToday.length,
+          completedCount: scheduledToday.filter(
+            (workout) => workout.status === 'DONE',
+          ).length,
+          remainingCount: scheduledToday.filter((workout) =>
+            ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
+          ).length,
+          skippedCount: scheduledToday.filter(
+            (workout) => workout.status === 'SKIPPED',
+          ).length,
+          recordedActivityCount: dayActivities.length,
+        },
         load: execution.recentLoad,
         recentActivity: latestActivity,
+        todayActivities: dayActivities,
+        recentActivities,
+        coverageDiagnosis,
         activityCoverage: {
           readyCount: coverage.activities.readyCount,
           latestReadyAt,
@@ -395,9 +439,15 @@ export class TodaySuggestionConstraintProjector {
           ),
         },
         athleteState: coachState.athleteState,
+        pendingInquiry: pendingInquiry
+          ? { caseId: pendingInquiry.caseId }
+          : null,
+        userFeedback,
         relevantDecisions: coachState.decisions.filter((decision) =>
           ['TODAY', 'TOMORROW', 'UNKNOWN'].includes(decision.relevance),
         ),
+        coachDecisionReadStatus: coachState.decisionReadStatus,
+        recentReviews: coachState.recentReviews,
         competition: execution.competitionContext,
         weather: weather.impact,
       },

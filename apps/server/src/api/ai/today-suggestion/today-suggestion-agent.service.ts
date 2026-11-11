@@ -26,17 +26,10 @@ export class TodaySuggestionAgentService {
 
   async run(args: {
     projection: TodaySuggestionConstraintProjection;
-    continuityStage: 1 | 2 | 3;
     signal?: AbortSignal;
     allowWithoutConsent?: boolean;
   }): Promise<TodaySuggestionAgentRun> {
     const { projection } = args;
-    const stageRule =
-      args.continuityStage === 1
-        ? 'This is the first unresolved delivery. Give a complete, practical recommendation.'
-        : args.continuityStage === 2
-          ? 'The previous presented suggestion was not explicitly resolved and facts are unchanged. Lower the time, complexity, or activation barrier without claiming the athlete ignored it.'
-          : 'The previous presented suggestions were not explicitly resolved and facts are unchanged. Identify one real barrier worth clarifying (time, fatigue, pain, or willingness); ask only when the answer changes the action.';
     const result = await this.ai.runBackgroundCoachTask({
       userId: projection.userId,
       lang: projection.locale,
@@ -46,14 +39,6 @@ export class TodaySuggestionAgentService {
       funding: 'PLATFORM',
       triggerType: 'HOME_TODAY_SUGGESTION',
       triggerRef: `${projection.date}:${projection.locale}`,
-      dedupeKey: [
-        'today-suggestion-v2',
-        projection.factHash,
-        projection.constraintHash,
-        projection.continuityHash,
-        String(args.continuityStage),
-        projection.locale,
-      ].join(':'),
       allowedToolNames: ALLOWED_TOOLS,
       requiredToolNames: projection.requiredToolNames,
       signal: args.signal,
@@ -63,14 +48,21 @@ export class TodaySuggestionAgentService {
         "Build a useful whole-day recommendation from today's plan, actual completion and activities, readiness or load, a meaningful review of what happened, and the handoff to tomorrow. As the day progresses, prefer reviewing confirmed facts and clarifying missing completion data over inventing another workout.",
         'The server projection below is authoritative but intentionally compact. Call only the read tools whose evidence can materially change the decision.',
         'Hard constraints require evidence acquisition or restrict unsafe conclusions; they never map directly to canned athlete-facing copy.',
-        'Do not output URLs, database ids, provider credentials, write-operation parameters, workout fields, or workout DSL. You decide whether a workout is appropriate; the dedicated workout-generator skill owns the Workout artifact.',
-        'If a waiting assessment case exists, select OPEN_ASSESSMENT and do not invent a second question. If HIGH_CONCERN exists, do not select CREATE_TODAY_WORKOUT.',
+        'Do not output URLs, provider credentials, write-operation parameters, workout fields, or workout DSL. Internal decision ids are allowed only inside coachDecisionHandling. The dedicated workout-generator skill owns the Workout artifact.',
+        'Give the best supported training judgment even when a pendingInquiry exists. Do not duplicate its question. OPEN_ASSESSMENT is an optional secondary action unless HIGH_CONCERN requires clarification before proceeding. If HIGH_CONCERN exists, do not select CREATE_TODAY_WORKOUT.',
         'If a usable workout already exists today, prefer OPEN_TODAY_WORKOUT instead of CREATE_TODAY_WORKOUT.',
         `Allowed intent names: ${TODAY_SUGGESTION_INTENT_TYPES.join(', ')}. Never invent an intent name.`,
-        'TODAY_TRAINING_WINDOW_CLOSED means the athlete local time is 20:00 or later. It only restricts actions and must never become the subject of the headline, summary, or evidence: do not quote the clock time or explain the cutoff. Do not recommend starting or making up a workout, recommendation.kind must not be TRAIN, and CREATE_TODAY_WORKOUT and SCHEDULE_REMINDER are forbidden. Prefer an evidence-backed daily review, recovery, plan review, data check, or tomorrow handoff. OPEN_ACTIVITY_REVIEW, OPEN_PLAN, OPEN_IMPORT, OPEN_PROVIDER_SETTINGS, ASK_COACH, and VIEW_TOMORROW remain available when supported by facts. A workout already IN_PROGRESS may still use OPEN_TODAY_WORKOUT.',
+        'Local time and minutesUntilDayEnd are scheduling context, not a universal training cutoff. Evening training is valid. Fit a new session within the remaining day, do not make up a missed session automatically, and respect all remaining workouts. A recorded activity does not prove every scheduled workout is complete; use todayExecution and individual statuses.',
         'Evidence codes must refer to facts actually present in the projection or facts returned by a tool. Use 2-3 meaningful evidence codes when possible.',
-        stageRule,
-        'Submit exactly: {"headline":"...","summary":"...","recommendation":{"kind":"TRAIN|RECOVER|REST|CHECK_IN|SYNC_DATA|ADJUST_PLAN|REVIEW_ACTIVITY","durationMinutes":30,"intensity":"VERY_EASY|EASY|MODERATE|HARD","details":["..."]},"confidence":"HIGH|MEDIUM|LOW","uncertainty":"optional","evidenceCodes":["..."],"preferredIntent":"one allowed intent name listed above","secondaryIntents":["..."],"tags":["..."]}. Do not generate or return any Workout fields. CREATE_TODAY_WORKOUT only requests the dedicated workout-generator skill to compose one standard Workout afterward.',
+        'Recent activity records are sufficient for useful daily coaching. Sleep, HRV and physiological baselines are optional: use recorded values when available and otherwise omit them. Do not ask for sleep feedback or wearable setup, and do not make missing optional data the subject of the suggestion.',
+        'Deliver the actual training judgment on the home page now. Do not promise to read data later or ask the athlete to open an activity, read a review, click a suggestion or answer a routine question before receiving advice. Perform necessary reads yourself. Review and coach links are optional supporting actions.',
+        'Not opening or clicking a suggestion is normal. Never infer a barrier, reduce the recommendation, or ask for motivation solely from presentation or click history.',
+        'If recent usable activities exist, do not select SYNC_DATA, OPEN_IMPORT or OPEN_PROVIDER_SETTINGS as the main recommendation. A missing or disconnected provider is irrelevant when recorded training already supports daily coaching.',
+        'Honor explicit userFeedback: REST_TODAY means no training prompt today; TRAINED_ELSEWHERE means training happened even if not recorded here; DATA_PENDING means wait for system data without asking the athlete; LATER means do not chase a response. Never infer completion from merely opening a link.',
+        'The current workout schedule is authoritative for what is actually scheduled. ACTIVE_PROPOSAL decisions are unapplied alternatives: coordinate them with the schedule and never stack incompatible workouts. Rejected decisions are history and must not be proposed again without new facts; applied decisions are already reflected in current facts. Recent reviews are context for the same daily judgment, not a reason to send the athlete elsewhere for an answer.',
+        'For each relevantDecisions item return coachDecisionHandling: {decisionId,handling,reason}. ACTIVE_PROPOSAL allows FOLLOW, CONDITIONAL or DEPART (DEPART requires a fact-grounded reason); REJECTED_HISTORY and APPLIED_HISTORY require HISTORY; INTERNAL_DRAFT and SUPERSEDED_HISTORY require IGNORE. Do not expose these internal fields in athlete-facing copy.',
+        'When recent activities exist, recommendation.kind should express the actual training decision (TRAIN, RECOVER, REST or ADJUST_PLAN), not an instruction to read a review or complete setup. preferredIntent may be null: useful advice does not require a button or a response.',
+        'Submit exactly: {"headline":"...","summary":"...","recommendation":{"kind":"TRAIN|RECOVER|REST|CHECK_IN|SYNC_DATA|ADJUST_PLAN|REVIEW_ACTIVITY","durationMinutes":30,"intensity":"VERY_EASY|EASY|MODERATE|HARD","details":["..."]},"confidence":"HIGH|MEDIUM|LOW","uncertainty":"optional","evidenceCodes":["..."],"preferredIntent":null,"secondaryIntents":["..."],"tags":["..."],"coachDecisionHandling":[]}. preferredIntent can instead be one allowed intent name when useful. Do not generate or return any Workout fields. CREATE_TODAY_WORKOUT only requests the dedicated workout-generator skill to compose one standard Workout afterward.',
         `Write athlete-facing fields in locale ${projection.locale}.`,
         `SERVER_PROJECTION_BEGIN\n${stableJson(projection.lightContext)}\nSERVER_PROJECTION_END`,
       ].join('\n\n'),

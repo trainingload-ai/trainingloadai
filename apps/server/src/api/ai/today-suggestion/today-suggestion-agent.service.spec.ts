@@ -38,9 +38,9 @@ describe('TodaySuggestionAgentService', () => {
       todayWorkouts: [],
     } as TodaySuggestionConstraintProjection;
 
-    await expect(
-      service.run({ projection, continuityStage: 3 }),
-    ).resolves.toMatchObject({ runId: 'run-1' });
+    await expect(service.run({ projection })).resolves.toMatchObject({
+      runId: 'run-1',
+    });
     expect(runBackgroundCoachTask).toHaveBeenCalledWith(
       expect.objectContaining({
         taskType: 'TODAY_SUGGESTION',
@@ -52,7 +52,9 @@ describe('TodaySuggestionAgentService', () => {
           'integration.status',
           'plan.execution_context',
         ]),
-        instructions: expect.stringContaining('Identify one real barrier'),
+        instructions: expect.stringContaining(
+          'Not opening or clicking a suggestion is normal',
+        ),
       }),
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
@@ -62,10 +64,10 @@ describe('TodaySuggestionAgentService', () => {
       'whole-day recommendation',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
-      'do not quote the clock time',
+      'Evening training is valid',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
-      'must never become the subject',
+      'use todayExecution and individual statuses',
     );
     expect(runBackgroundCoachTask.mock.calls[0][0].instructions).toContain(
       'dedicated workout-generator skill',

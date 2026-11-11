@@ -3,6 +3,7 @@ import { ImportBatchJobStatus, ImportSourceKind } from '@prisma/client';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { ImportingJobService } from '@/importing/importing-job.service';
 import { ExternalProviderStatusQueryService } from '@/integrations/external-provider/external-provider-status-query.service';
+import { readyActivityWhere } from '@/utils/activity-ready-where';
 
 const ACTIVE_IMPORT_BATCH_STATUSES: ImportBatchJobStatus[] = [
   ImportBatchJobStatus.QUEUED,
@@ -114,6 +115,44 @@ export class TrainingDataCoverageQueryService {
     private readonly importJobs: ImportingJobService,
     private readonly integrations: ExternalProviderStatusQueryService,
   ) {}
+
+  /** Bounded training facts, independent of plans or wearable recovery data. */
+  async recentActivityFacts(userId: string, since: Date) {
+    const rows = await this.activities.findMany({
+      where: readyActivityWhere({
+        userId,
+        startTime: { gte: since, lte: new Date() },
+      }),
+      orderBy: [{ startTime: 'desc' }, { id: 'desc' }],
+      take: 12,
+      select: {
+        hashId: true,
+        activityName: true,
+        sportType: true,
+        startTime: true,
+        timerTime: true,
+        distance: true,
+        avgHeartRate: true,
+        avgPower: true,
+        sessionRpe: true,
+        updatedAt: true,
+        readyAt: true,
+      },
+    });
+    return rows.map((row) => ({
+      hashId: row.hashId,
+      title: row.activityName,
+      sportType: row.sportType,
+      durationMinutes: row.timerTime == null ? null : row.timerTime / 60,
+      distanceKm: row.distance == null ? null : row.distance / 1_000,
+      avgHeartRate: row.avgHeartRate,
+      avgPower: row.avgPower,
+      sessionRpe: row.sessionRpe,
+      startTime: row.startTime?.toISOString() ?? null,
+      updatedAt: row.updatedAt.toISOString(),
+      readyAt: row.readyAt?.toISOString() ?? null,
+    }));
+  }
 
   /**
    * Lightweight evidence for the always-present coaching context. This query

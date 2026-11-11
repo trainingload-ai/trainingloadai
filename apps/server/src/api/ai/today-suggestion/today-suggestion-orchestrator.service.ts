@@ -7,6 +7,8 @@ import type {
   TodaySuggestionV2,
 } from '@shared/ai-today-suggestion-contract';
 import { isTodaySuggestionWorkout } from '@shared/ai-today-suggestion-contract';
+import { stableJson } from '../core/ai-common.util';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TodaySuggestionAgentService } from './today-suggestion-agent.service';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
@@ -17,6 +19,7 @@ import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
 } from './today-suggestion.types';
+import { hasRecentTrainingActivity } from './today-suggestion.types';
 import type { TodayWeatherLocation } from '@/weather/weather.types';
 
 export type TodaySuggestionResponseV2 = TodaySuggestionV2 & {
@@ -92,7 +95,22 @@ function keyContext(
     continuityHash: projection.continuityHash,
     edition: projection.edition,
     timezone: projection.timezone,
+    weatherImpact: projection.weatherImpact,
   });
+}
+
+function cachedWeatherMatches(
+  value: unknown,
+  projection: TodaySuggestionConstraintProjection,
+) {
+  const context =
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  return (
+    stableJson(context.weatherImpact ?? { status: 'unavailable' }) ===
+    stableJson(projection.weatherImpact ?? { status: 'unavailable' })
+  );
 }
 
 function keyContextTimezone(value: unknown): string | null {
@@ -126,21 +144,22 @@ export class TodaySuggestionOrchestratorService {
     allowWithoutConsent?: boolean;
     signal?: AbortSignal;
   }) {
-    return this.serialized(`${args.userId}:${args.locale}`, () =>
-      this.generate(args),
-    );
+    return this.serialized(args.userId, () => this.generate(args));
   }
 
-  private async generate(args: {
-    userId: string;
-    locale: string;
-    timezone?: string | null;
-    location?: TodayWeatherLocation | null;
-    allowAi: boolean;
-    allowWithoutConsent?: boolean;
-    signal?: AbortSignal;
-  }): Promise<TodaySuggestionResponseV2> {
-    const projection = await this.projector.project(args);
+  private async generate(
+    args: {
+      userId: string;
+      locale: string;
+      timezone?: string | null;
+      location?: TodayWeatherLocation | null;
+      allowAi: boolean;
+      allowWithoutConsent?: boolean;
+      signal?: AbortSignal;
+    },
+    revisionRetry = 0,
+  ): Promise<TodaySuggestionResponseV2> {
+    let projection = await this.projector.project(args);
     const cached = await this.prisma.aiTodaySuggestion.findUnique({
       where: {
         ai_today_suggestion_user_locale_date_unique: {
@@ -151,16 +170,24 @@ export class TodaySuggestionOrchestratorService {
       },
     });
     const cachedResult = storedV2(cached?.structuredResult);
+    const cachedIsGenerated =
+      cachedResult?.delivery.state === 'GENERATED' ||
+      cachedResult?.delivery.state === 'CACHED';
     const cachedFallbackStillFresh = Boolean(
       cached && Date.now() - cached.generatedAt.getTime() < 60_000,
     );
     if (
       cached &&
       cachedResult &&
-      (cachedResult.delivery.state !== 'FACT_FALLBACK' ||
+      (cachedIsGenerated ||
+        (cachedResult.delivery.state === 'AI_UNAVAILABLE' &&
+          ['AI_DISABLED', 'ACCESS_DENIED'].includes(
+            cachedResult.delivery.reasonCode,
+          )) ||
         cachedFallbackStillFresh) &&
       cached.constraintHash === projection.constraintHash &&
       cached.signatureHash === projection.factHash &&
+      cachedWeatherMatches(cached.keyContext, projection) &&
       cached.validUntil &&
       cached.validUntil.getTime() > Date.now()
     ) {
@@ -179,20 +206,20 @@ export class TodaySuggestionOrchestratorService {
       return this.present(
         {
           ...cachedResult,
-          delivery: {
-            state: 'CACHED',
-            reasonCode: 'CACHE_HIT',
-            generatedAt: cached.generatedAt.toISOString(),
-          },
+          delivery: cachedIsGenerated
+            ? {
+                state: 'CACHED',
+                reasonCode: 'CACHE_HIT',
+                generatedAt: cached.generatedAt.toISOString(),
+                cached: true,
+              }
+            : { ...cachedResult.delivery, cached: true },
         },
         cached.tags,
       );
     }
 
-    const continuityStage = await this.engagement.previewContinuityStage(
-      args.userId,
-      projection.continuityHash,
-    );
+    // Viewing a card is optional and must never alter the training prescription.
     let draft: TodaySuggestionDraft;
     let state: TodaySuggestionDeliveryState;
     let reasonCode: TodaySuggestionDeliveryReason;
@@ -206,6 +233,18 @@ export class TodaySuggestionOrchestratorService {
       draft = this.factFallback(projection);
       state = 'AI_UNAVAILABLE';
       reasonCode = projection.allowAi ? 'ACCESS_DENIED' : 'AI_DISABLED';
+    } else if (
+      ['not_configured', 'disabled', 'misconfigured'].includes(
+        projection.aiState ?? '',
+      )
+    ) {
+      draft = this.factFallback(projection);
+      state = 'AI_UNAVAILABLE';
+      reasonCode = 'AI_NOT_CONFIGURED';
+    } else if (projection.coachState?.decisionReadStatus === 'UNAVAILABLE') {
+      draft = this.factFallback(projection);
+      state = 'FACT_FALLBACK';
+      reasonCode = 'COACH_STATE_UNAVAILABLE';
     } else {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort('timeout'), 60_000);
@@ -215,7 +254,6 @@ export class TodaySuggestionOrchestratorService {
       try {
         const run = await this.agent.run({
           projection,
-          continuityStage,
           signal: controller.signal,
           allowWithoutConsent: args.allowWithoutConsent,
         });
@@ -236,7 +274,7 @@ export class TodaySuggestionOrchestratorService {
             );
             draft = {
               ...draft,
-              preferredIntent: 'ASK_COACH',
+              preferredIntent: null,
               secondaryIntents: draft.secondaryIntents.filter(
                 (intent) => intent !== 'CREATE_TODAY_WORKOUT',
               ),
@@ -265,13 +303,31 @@ export class TodaySuggestionOrchestratorService {
       }
     }
 
+    const latest = await this.projector.project(args);
+    if (
+      latest.factHash !== projection.factHash ||
+      latest.constraintHash !== projection.constraintHash ||
+      !cachedWeatherMatches(keyContext(projection), latest)
+    ) {
+      if (revisionRetry < 1) return this.generate(args, revisionRetry + 1);
+      projection = latest;
+      draft = this.factFallback(latest);
+      state = 'FACT_FALLBACK';
+      reasonCode = 'FACTS_CHANGED';
+      generatedAt = null;
+      runId = null;
+      workoutRunId = null;
+      provider = null;
+      model = null;
+    }
+
     const generationToken = deterministicGenerationToken([
       args.userId,
       args.locale,
       projection.factHash,
       projection.constraintHash,
       projection.continuityHash,
-      String(continuityStage),
+      stableJson(projection.weatherImpact ?? { status: 'unavailable' }),
       state,
       reasonCode,
       runId ?? 'no-run',
@@ -291,7 +347,7 @@ export class TodaySuggestionOrchestratorService {
         ? { weatherAttribution: projection.weatherAttribution }
         : {}),
     };
-    const persisted = await this.prisma.aiTodaySuggestion.upsert({
+    const write = {
       where: {
         ai_today_suggestion_user_locale_date_unique: {
           userId: args.userId,
@@ -312,7 +368,7 @@ export class TodaySuggestionOrchestratorService {
         resultVersion: 2,
         structuredResult: jsonValue(result),
         generationToken,
-        validUntil: projection.validUntil,
+        validUntil: new Date(result.validUntil),
         runId,
         provider,
         model,
@@ -328,132 +384,260 @@ export class TodaySuggestionOrchestratorService {
         resultVersion: 2,
         structuredResult: jsonValue(result),
         generationToken,
-        validUntil: projection.validUntil,
+        validUntil: new Date(result.validUntil),
         runId,
         provider,
         model,
         generatedAt: generatedAt ?? new Date(),
       },
+    };
+    const persisted = await this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(
+        tx,
+        `today-advice:${args.userId}:${args.locale}:${projection.date}`,
+      );
+      const current = await tx.aiTodaySuggestion.findUnique({
+        where: write.where,
+      });
+      const currentResult = storedV2(current?.structuredResult);
+      if (
+        state !== 'GENERATED' &&
+        current &&
+        currentResult &&
+        ['GENERATED', 'CACHED'].includes(currentResult.delivery.state) &&
+        current.signatureHash === projection.factHash &&
+        current.constraintHash === projection.constraintHash &&
+        current.validUntil &&
+        current.validUntil.getTime() > Date.now() &&
+        cachedWeatherMatches(current.keyContext, projection)
+      ) {
+        return current;
+      }
+      return tx.aiTodaySuggestion.upsert(write);
     });
+    const persistedResult = storedV2(persisted.structuredResult) ?? result;
     await this.engagement.rollover({
       userId: args.userId,
-      generationToken,
+      generationToken: persisted.generationToken,
       continuityHash: projection.continuityHash,
       suggestionDate: projection.date,
     });
     this.logger.log(
       `[AI][today-suggestion-v2] outcome userId=${args.userId} date=${projection.date} state=${state} reason=${reasonCode} runId=${runId ?? 'none'}`,
     );
-    return this.present(result, persisted.tags);
+    return this.present(
+      persisted.generationToken === generationToken
+        ? persistedResult
+        : {
+            ...persistedResult,
+            delivery: {
+              ...persistedResult.delivery,
+              state: 'CACHED',
+              reasonCode: 'CACHE_HIT',
+              cached: true,
+            },
+          },
+      persisted.tags,
+    );
   }
 
   private factFallback(
     projection: TodaySuggestionConstraintProjection,
   ): TodaySuggestionDraft {
     const zh = projection.locale.toLowerCase().startsWith('zh');
+    if (projection.highConcern) {
+      return {
+        headline: zh ? '今天先保持保守安排' : 'Keep today conservative',
+        summary: zh
+          ? '当前已有状态信号需要优先处理。今天先休息，暂不开始高强度训练；现有教练判断可作为进一步调整的依据。'
+          : 'Current recorded concerns take priority. Rest today and avoid starting an intense session; the existing coach decision can guide any further adjustment.',
+        recommendation: { kind: 'REST' },
+        confidence: 'MEDIUM',
+        evidenceCodes: ['HIGH_CONCERN'],
+        preferredIntent: projection.activeDecisionId
+          ? 'OPEN_DECISION'
+          : 'ASK_COACH',
+        secondaryIntents: [],
+        tags: [zh ? '优先恢复' : 'Recovery first'],
+      };
+    }
+    if (projection.userFeedback?.feedback === 'REST_TODAY') {
+      return {
+        headline: zh
+          ? '今天按你的选择休息'
+          : 'Keep today as your chosen rest day',
+        summary: zh
+          ? '今天以休息为主，不需要补做训练。明天再结合近期训练负荷和计划安排下一次训练。'
+          : 'Keep today for rest without making up training. Use your recent training load and plan to decide the next session tomorrow.',
+        recommendation: { kind: 'REST' },
+        confidence: 'HIGH',
+        evidenceCodes: [],
+        preferredIntent: projection.tomorrowWorkouts.length
+          ? 'VIEW_TOMORROW'
+          : null,
+        secondaryIntents: [],
+        tags: [zh ? '今日休息' : 'Rest today'],
+      };
+    }
+    if (
+      ['TRAINED_ELSEWHERE', 'DATA_PENDING'].includes(
+        projection.userFeedback?.feedback ?? '',
+      )
+    ) {
+      return {
+        headline: zh
+          ? '今天先恢复，不追加训练'
+          : 'Recover today without adding training',
+        summary: zh
+          ? '已记录你对今天训练情况的反馈。今天先恢复，不因平台暂时缺少记录而补练；后续有新活动数据时会自动更新判断。'
+          : 'Your training feedback is recorded. Recover without making up training because a record is missing here; new activity data will update the recommendation.',
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'MEDIUM',
+        evidenceCodes: [],
+        preferredIntent: projection.tomorrowWorkouts.length
+          ? 'VIEW_TOMORROW'
+          : null,
+        secondaryIntents: [],
+        tags: [zh ? '恢复' : 'Recovery'],
+      };
+    }
+    if (projection.coachState?.decisionReadStatus === 'UNAVAILABLE') {
+      return {
+        headline: zh
+          ? '暂按已确认的安排保守执行'
+          : 'Keep to the confirmed schedule conservatively',
+        summary: zh
+          ? '最新教练调整暂时不可用。今天先维持已确认的低负担安排，不临时追加或补做训练。'
+          : 'The latest coach adjustments are temporarily unavailable. Keep to confirmed low-demand activity without adding or making up training.',
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'LOW',
+        evidenceCodes: [],
+        preferredIntent: projection.activePlan ? 'OPEN_PLAN' : null,
+        secondaryIntents: [],
+        tags: [],
+      };
+    }
     const current = projection.todayWorkouts.find((workout) =>
       ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
     );
-    if (projection.pendingInquiry) {
+    if (projection.activeDecisionId) {
       return {
-        headline: zh ? '先补充当前状态' : 'Update your current status',
+        headline: zh
+          ? '以当前课表为准，调整尚未应用'
+          : 'The current schedule stands; the adjustment is not applied',
         summary: zh
-          ? '当前判断还缺少一项会影响今天安排的信息。补充后，教练会结合计划、训练记录和身体状态重新判断。'
-          : "One detail that can change today's recommendation is still missing. Update it so the coach can reassess the plan and your current state.",
-        recommendation: { kind: 'CHECK_IN' },
-        confidence: 'HIGH',
-        evidenceCodes: ['WAITING_FOR_USER'],
-        preferredIntent: 'OPEN_ASSESSMENT',
-        secondaryIntents: [],
-        tags: [zh ? '状态待补充' : 'Status needed'],
+          ? '教练提出的调整尚未写入课表。今天继续以已确认的安排为准，不把原安排与调整方案叠加执行；确认调整后，建议会随课表更新。'
+          : 'The proposed adjustment is not applied to your schedule. Follow the confirmed schedule without combining it with the alternative; accepting the adjustment will update the advice.',
+        recommendation: { kind: 'ADJUST_PLAN' },
+        confidence: 'MEDIUM',
+        evidenceCodes: projection.activePlan ? ['PLAN_CONTEXT'] : [],
+        preferredIntent: projection.activePlan ? 'OPEN_PLAN' : null,
+        secondaryIntents: ['OPEN_DECISION'],
+        tags: [],
       };
     }
-    const trainingWindowClosed = projection.newWorkoutWindowOpen === false;
     if (
       current &&
-      (!trainingWindowClosed || current.status === 'IN_PROGRESS')
+      !(projection.todayActivityCount ?? 0) &&
+      (current.plannedDurationSeconds ?? 1_800) / 60 <=
+        (projection.minutesUntilDayEnd ?? 1_440)
     ) {
       return {
-        headline: zh ? '按今天的安排开始' : "Start today's scheduled workout",
+        headline: zh ? '按今天的安排执行' : "Follow today's scheduled workout",
         summary: zh
-          ? `今天已安排「${current.name}」。开始前根据体感确认强度；若有疼痛或明显疲劳，先调整或休息。`
-          : `You have ${current.name} scheduled today. Check how you feel before starting, and reduce or rest if pain or unusual fatigue is present.`,
-        recommendation: { kind: 'TRAIN' },
+          ? `今天已安排「${current.name}」。按原定内容和强度执行即可，不额外加量；若出现疼痛或明显不适，停止训练。`
+          : `${current.name} is scheduled today. Follow its prescribed content and intensity without adding volume; stop if pain or clear discomfort develops.`,
+        recommendation: {
+          kind: 'TRAIN',
+          ...(current.plannedDurationSeconds
+            ? {
+                durationMinutes: Math.ceil(current.plannedDurationSeconds / 60),
+              }
+            : {}),
+        },
         confidence: 'MEDIUM',
         evidenceCodes: ['TODAY_WORKOUT_AVAILABLE'],
         preferredIntent: 'OPEN_TODAY_WORKOUT',
-        secondaryIntents: ['ASK_COACH', 'SCHEDULE_REMINDER'],
-        tags: [zh ? '今日训练' : "Today's workout"],
+        secondaryIntents: [],
+        tags: [zh ? '今日安排' : "Today's schedule"],
       };
     }
-    if (trainingWindowClosed && current) {
+    if (
+      (projection.todayActivityCount ?? 0) > 0 ||
+      projection.constraints.includes('TODAY_WORKOUT_COMPLETED')
+    ) {
       return {
-        headline: zh
-          ? '先确认今天的计划完成情况'
-          : "Confirm today's plan completion",
-        summary: zh
-          ? `今天安排了「${current.name}」，但目前没有确认完成。先核对是否已经训练、数据是否仍在同步；如果确实没有完成，也不必临时补做，再结合明天的计划调整。`
-          : `${current.name} was scheduled today but is not confirmed complete. Check whether it was done or is still syncing. If it was missed, do not make it up now; adjust it with tomorrow's plan.`,
-        recommendation: { kind: 'REVIEW_ACTIVITY' },
-        confidence: 'MEDIUM',
-        evidenceCodes: ['TODAY_WORKOUT_AVAILABLE'],
-        preferredIntent: projection.activePlan ? 'OPEN_PLAN' : 'ASK_COACH',
-        secondaryIntents: ['ASK_COACH'],
-        tags: [zh ? '完成情况待确认' : 'Completion to confirm'],
-      };
-    }
-    if (projection.latestActivityId) {
-      return {
-        headline: zh
-          ? '回顾今天的训练，再衔接明天'
-          : "Review today's training and connect it to tomorrow",
-        summary: zh
-          ? '今天已有活动记录。先看实际强度、完成质量和身体反应，再决定明天维持、调整还是恢复。'
-          : 'An activity is recorded today. Review its actual intensity, execution quality, and physical response before deciding whether tomorrow should continue, adjust, or recover.',
-        recommendation: { kind: 'REVIEW_ACTIVITY' },
+        headline: current
+          ? zh
+            ? '今天已有活动，不自动重复训练'
+            : 'Activity is recorded; avoid repeating training'
+          : zh
+            ? '今天已有训练，接下来以恢复为主'
+            : 'Training is recorded; prioritize recovery next',
+        summary: current
+          ? zh
+            ? `今天已有活动记录，「${current.name}」尚未标记完成。暂不自动重复或补做这节训练；活动关联和处理结果更新后，建议会同步变化。`
+            : `Activity is recorded today, while ${current.name} is not marked complete. Do not automatically repeat or make up this session; activity processing and matching will update the advice.`
+          : zh
+            ? '今天已有完成记录，接下来以恢复为主，不需要额外补练。明天继续结合近期负荷与原有安排执行。'
+            : 'Training is recorded today. Prioritize recovery without extra make-up training, and use recent load and the existing schedule for tomorrow.',
+        recommendation: { kind: 'RECOVER' },
         confidence: 'MEDIUM',
         evidenceCodes: ['RECENT_ACTIVITY'],
-        preferredIntent: 'OPEN_ACTIVITY_REVIEW',
-        secondaryIntents: projection.tomorrowWorkouts.length
-          ? ['VIEW_TOMORROW', 'ASK_COACH']
-          : ['ASK_COACH'],
-        tags: [zh ? '今日复盘' : 'Daily review'],
+        preferredIntent: null,
+        secondaryIntents: projection.latestActivityId
+          ? ['OPEN_ACTIVITY_REVIEW']
+          : [],
+        tags: [],
+      };
+    }
+    if (hasRecentTrainingActivity(projection) || current) {
+      return {
+        headline: zh ? '今天保持轻松节奏' : 'Keep today easy',
+        summary: zh
+          ? '当前先以轻松活动或休息为主，不临时追加高强度训练，也不补做临近结束的课次。后续结合近期负荷和已有安排继续。'
+          : 'Keep to easy activity or rest for now, without adding intensity or squeezing in a session near the end of the day. Continue using recent load and your existing schedule.',
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'LOW',
+        evidenceCodes: hasRecentTrainingActivity(projection)
+          ? ['RECENT_ACTIVITY']
+          : [],
+        preferredIntent: null,
+        secondaryIntents: projection.activePlan ? ['OPEN_PLAN'] : [],
+        tags: [],
+      };
+    }
+    if (
+      projection.constraints.includes('ACTIVITY_PROCESSING_PENDING') ||
+      projection.constraints.includes('WAITING_FOR_DATA')
+    ) {
+      return {
+        headline: zh ? '活动数据正在更新' : 'Activity data is updating',
+        summary: zh
+          ? '活动数据仍在处理或同步。暂不据此判定漏练，也不安排补练；处理完成后会自动更新建议，无需额外反馈。'
+          : 'Activity data is still processing or syncing. This does not establish a missed workout or a need to make it up. Advice will update when processing finishes; no extra feedback is needed.',
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'LOW',
+        evidenceCodes: ['ACTIVITY_PROCESSING_PENDING'],
+        preferredIntent: null,
+        secondaryIntents: [],
+        tags: [],
       };
     }
     const noActivity = projection.constraints.includes(
       'NEVER_RECORDED_ACTIVITY',
     );
-    if (trainingWindowClosed && !noActivity) {
-      return {
-        headline: zh
-          ? '回顾今天，再为明天做准备'
-          : 'Review today and prepare for tomorrow',
-        summary: zh
-          ? '今天没有可确认的计划训练或活动完成记录。先核对数据是否完整；如果今天确实没有训练，也不必临时补做，明天再结合计划和身体状态安排。'
-          : "There is no confirmed planned workout or completed activity for today. Check whether the data is complete. If you did not train, do not make it up now; use tomorrow's plan and readiness to decide the next step.",
-        recommendation: { kind: 'CHECK_IN' },
-        confidence: 'LOW',
-        evidenceCodes: projection.constraints.filter(
-          (code) => code !== 'TODAY_TRAINING_WINDOW_CLOSED',
-        ),
-        preferredIntent: projection.tomorrowWorkouts.length
-          ? 'VIEW_TOMORROW'
-          : 'ASK_COACH',
-        secondaryIntents: projection.activePlan ? ['OPEN_PLAN'] : [],
-        tags: [zh ? '今日回顾' : 'Daily review'],
-      };
-    }
     return {
       headline: zh
-        ? '先补齐今天判断需要的信息'
-        : 'Complete the facts needed for today',
+        ? '暂无近期训练记录'
+        : 'No recent training records are available',
       summary: noActivity
         ? zh
           ? '目前还没有可用于判断近期训练状态的活动记录。你可以先导入活动，或直接告诉教练今天的时间和身体感受。'
           : 'There is no recorded activity to assess recent training yet. Import an activity or tell the coach about your available time and how you feel today.'
         : zh
-          ? '当前事实不足以形成可靠的训练强度建议。可以查看计划、补充活动记录，或让教练继续判断。'
-          : 'The current facts are not enough for a reliable intensity recommendation. Review the plan, add activity data, or continue with the coach.',
+          ? '近期没有新的活动记录，暂不据此推断你停止了训练。已有历史记录可以保留；如需基于最近训练生成建议，可以导入近期活动。'
+          : 'No recent activities are recorded here; this does not imply you stopped training. Importing a recent activity can support advice based on your latest training.',
       recommendation: { kind: noActivity ? 'SYNC_DATA' : 'CHECK_IN' },
       confidence: 'LOW',
       evidenceCodes: projection.constraints,
@@ -475,9 +659,8 @@ export class TodaySuggestionOrchestratorService {
       return 'OUTPUT_REJECTED';
     }
     if (
-      message.includes('NOT_CONFIGURED') ||
-      message.includes('API_KEY') ||
-      message.includes('provider')
+      message.includes('AI_NOT_CONFIGURED') ||
+      message.includes('SELF_HOST_AI_CREDENTIAL_UNAVAILABLE')
     ) {
       return 'AI_NOT_CONFIGURED';
     }
@@ -507,7 +690,7 @@ export class TodaySuggestionOrchestratorService {
           : result.delivery.state === 'GENERATED'
             ? 'generated'
             : 'fallback',
-      shouldRefresh: result.delivery.state === 'GENERATED',
+      shouldRefresh: false,
       generatedAt: result.delivery.generatedAt,
       reason: result.recommendation.kind.toLowerCase(),
       tone:

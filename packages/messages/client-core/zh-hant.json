@@ -4568,6 +4568,8 @@
     "aiTodaySuggestion": {
       "title": "智能教練 今日建議",
       "fallbackTitle": "今日訓練提示",
+      "loadFailed": "今日建議暫時無法載入，請稍後重試。",
+      "reviewTitle": "訓練回顧",
       "weatherAttribution": "{serviceName} 資料經 Trainingload.ai 處理",
       "loading": "智能教練正在思考中…",
       "summary": {

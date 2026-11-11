@@ -67,6 +67,10 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: [
+      "src/app/**/_home/**/*.test.{ts,tsx}",
+      "src/lib/query-invalidation.test.ts",
+      "src/lib/today-suggestion-refresh.test.ts",
+      "src/lib/spec/coach-home-card-stack.test.ts",
       "src/components/routes/**/*.test.{ts,tsx}",
       "src/components/health/**/*.test.{ts,tsx}",
       "src/lib/runtime-environment.test.ts",

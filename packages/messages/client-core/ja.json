@@ -4474,6 +4474,8 @@
     "aiTodaySuggestion": {
       "title": "スマートコーチ · 今日の提案",
       "fallbackTitle": "今日のトレーニングヒント",
+      "loadFailed": "今日のアドバイスを読み込めません。しばらくしてから再度お試しください。",
+      "reviewTitle": "トレーニングの振り返り",
       "weatherAttribution": "{serviceName} のデータを Trainingload.ai が加工",
       "loading": "スマートコーチが考えています…",
       "summary": {

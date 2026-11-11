@@ -24,13 +24,119 @@ describe('validateTodaySuggestionDraft', () => {
     highConcern: false,
     pendingInquiry: null,
     todayWorkouts: [],
-    newWorkoutWindowOpen: true,
   } as unknown as TodaySuggestionConstraintProjection;
 
   it('accepts a bounded structured draft and drops unknown fields', () => {
     expect(validateTodaySuggestionDraft({ ...valid, url: '/admin' })).toEqual(
       valid,
     );
+  });
+
+  it('requires explicit handling of an unapplied or rejected coach decision', () => {
+    const withDecision = {
+      ...projection,
+      coachState: {
+        decisions: [
+          {
+            id: 'decision-1',
+            stateRole: 'ACTIVE_PROPOSAL',
+            relevance: 'TODAY',
+          },
+        ],
+      },
+    } as TodaySuggestionConstraintProjection;
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(valid, withDecision),
+    ).toThrow('COACH_DECISION');
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          coachDecisionHandling: [
+            { decisionId: 'decision-1', handling: 'CONDITIONAL', reason: null },
+          ],
+        },
+        withDecision,
+      ).recommendation.kind,
+    ).toBe('TRAIN');
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          coachDecisionHandling: [
+            { decisionId: 'decision-1', handling: 'DEPART', reason: null },
+          ],
+        },
+        withDecision,
+      ),
+    ).toThrow('COACH_DECISION');
+    const rejected = {
+      ...withDecision,
+      coachState: {
+        decisions: [
+          {
+            id: 'decision-1',
+            stateRole: 'REJECTED_HISTORY',
+            relevance: 'TODAY',
+          },
+        ],
+      },
+    } as TodaySuggestionConstraintProjection;
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          coachDecisionHandling: [
+            { decisionId: 'decision-1', handling: 'FOLLOW' },
+          ],
+        },
+        rejected,
+      ),
+    ).toThrow('COACH_DECISION');
+  });
+
+  it('does not equate an unplanned activity with finishing all training for the day', () => {
+    expect(
+      validateTodaySuggestionDraftForProjection(valid, {
+        ...projection,
+        constraints: [],
+        todayActivityCount: 1,
+        latestActivityId: 'short-walk',
+      }).recommendation.kind,
+    ).toBe('TRAIN');
+  });
+
+  it.each(['OPEN_IMPORT', 'OPEN_PROVIDER_SETTINGS'])(
+    'rejects %s as a prerequisite when recent training is already recorded',
+    (preferredIntent) => {
+      expect(() =>
+        validateTodaySuggestionDraftForProjection(
+          {
+            ...valid,
+            recommendation: { kind: 'SYNC_DATA' },
+            preferredIntent,
+          },
+          {
+            ...projection,
+            constraints: [],
+            activityEvidence: { activities: { readyCount: 10 } },
+          } as TodaySuggestionConstraintProjection,
+        ),
+      ).toThrow('UNNECESSARY_DATA_TASK');
+    },
+  );
+
+  it('does not turn missing optional context into a routine check-in', () => {
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          recommendation: { kind: 'CHECK_IN' },
+          preferredIntent: 'ASK_COACH',
+        },
+        { ...projection, latestActivityId: 'today-activity' },
+      ),
+    ).toThrow('UNNECESSARY_CHECK_IN');
   });
 
   it('rejects arbitrary intent names while leaving Workout generation to its dedicated skill', () => {
@@ -64,12 +170,12 @@ describe('validateTodaySuggestionDraft', () => {
         highConcern: true,
       }),
     ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_HIGH_CONCERN');
-    expect(() =>
+    expect(
       validateTodaySuggestionDraftForProjection(valid, {
         ...projection,
         pendingInquiry: { caseId: 'case-1', questionId: 'question-1' },
-      }),
-    ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_PENDING_ASSESSMENT');
+      }).recommendation.kind,
+    ).toBe('TRAIN');
     expect(() =>
       validateTodaySuggestionDraftForProjection(valid, {
         ...projection,
@@ -90,29 +196,28 @@ describe('validateTodaySuggestionDraft', () => {
     expect(() =>
       validateTodaySuggestionDraftForProjection(valid, {
         ...projection,
-        newWorkoutWindowOpen: false,
+        minutesUntilDayEnd: 10,
       }),
-    ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_WINDOW_CLOSED');
+    ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_INSUFFICIENT_TIME');
   });
 
-  it('allows a fact-based daily review after the training window closes', () => {
+  it('delivers recovery guidance with an optional review link in the evening', () => {
     expect(
       validateTodaySuggestionDraftForProjection(
         {
           ...valid,
           headline: "Review today's training",
-          recommendation: { kind: 'REVIEW_ACTIVITY' },
+          recommendation: { kind: 'RECOVER' },
           preferredIntent: 'OPEN_ACTIVITY_REVIEW',
           secondaryIntents: ['ASK_COACH'],
         },
         {
           ...projection,
           latestActivityId: 'activity-1',
-          newWorkoutWindowOpen: false,
         },
       ),
     ).toMatchObject({
-      recommendation: { kind: 'REVIEW_ACTIVITY' },
+      recommendation: { kind: 'RECOVER' },
       preferredIntent: 'OPEN_ACTIVITY_REVIEW',
     });
   });

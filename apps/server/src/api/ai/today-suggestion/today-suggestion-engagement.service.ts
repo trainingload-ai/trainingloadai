@@ -5,6 +5,15 @@ import type {
 } from '@shared/ai-today-suggestion-contract';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
+import { isTodaySuggestionFeedback } from '@shared/ai-today-suggestion-contract';
+import { todaySuggestionValidUntil } from './today-suggestion-time';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+
+type InteractionArgs = {
+  userId: string;
+  generationToken: string;
+  input: TodaySuggestionInteractionInput;
+};
 
 function offeredIntentTypes(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -32,20 +41,27 @@ export class TodaySuggestionEngagementService {
     private readonly notifications: NotificationDomainService,
   ) {}
 
-  async previewContinuityStage(userId: string, continuityHash: string) {
+  async feedbackForDate(userId: string, date: string) {
     const state = await this.prisma.todaySuggestionEngagementState.findUnique({
       where: { userId },
     });
+    const feedback = state?.resolution?.startsWith('FEEDBACK:')
+      ? state.resolution.slice('FEEDBACK:'.length)
+      : null;
     if (
-      !state ||
-      state.continuityHash !== continuityHash ||
-      !state.firstPresentedAt ||
-      state.resolvedAt ||
-      (state.quietUntil && state.quietUntil.getTime() > Date.now())
-    ) {
-      return 1 as const;
-    }
-    return Math.min(3, state.unresolvedStreak + 2) as 1 | 2 | 3;
+      state?.suggestionDate !== date ||
+      !state.resolvedAt ||
+      !isTodaySuggestionFeedback(feedback) ||
+      (feedback === 'DATA_PENDING' &&
+        state.quietUntil &&
+        state.quietUntil.getTime() <= Date.now())
+    )
+      return null;
+    return {
+      feedback,
+      recordedAt: state.resolvedAt.toISOString(),
+      quietUntil: state.quietUntil?.toISOString() ?? null,
+    };
   }
 
   async rollover(args: {
@@ -55,15 +71,24 @@ export class TodaySuggestionEngagementService {
     suggestionDate: string;
   }) {
     return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(
+        tx,
+        `today-advice-feedback:${args.userId}`,
+      );
       const current = await tx.todaySuggestionEngagementState.findUnique({
         where: { userId: args.userId },
       });
       if (current?.generationToken === args.generationToken) return current;
+      if (current && current.suggestionDate > args.suggestionDate)
+        return current;
       const continuesUnresolved = Boolean(
         current?.firstPresentedAt &&
         !current.resolvedAt &&
         current.continuityHash === args.continuityHash,
       );
+      const preserveFeedback =
+        current?.suggestionDate === args.suggestionDate &&
+        current?.resolution?.startsWith('FEEDBACK:');
       if (current?.reminderId) {
         const now = new Date();
         await this.notifications.cancelFutureTrainingReminderById(
@@ -89,10 +114,13 @@ export class TodaySuggestionEngagementService {
           suggestionDate: args.suggestionDate,
           firstPresentedAt: null,
           lastPresentedAt: null,
-          resolvedAt: null,
-          resolution: null,
+          resolvedAt: preserveFeedback ? current.resolvedAt : null,
+          resolution: preserveFeedback ? current.resolution : null,
           selectedIntent: null,
-          quietUntil: continuesUnresolved ? current?.quietUntil : null,
+          quietUntil:
+            preserveFeedback || continuesUnresolved
+              ? current?.quietUntil
+              : null,
           unresolvedStreak: continuesUnresolved
             ? Math.min(2, (current?.unresolvedStreak ?? 0) + 1)
             : 0,
@@ -106,11 +134,24 @@ export class TodaySuggestionEngagementService {
     });
   }
 
-  async recordInteraction(args: {
-    userId: string;
-    generationToken: string;
-    input: TodaySuggestionInteractionInput;
-  }) {
+  async recordInteraction(args: InteractionArgs) {
+    try {
+      return await this.recordCurrentInteraction(args);
+    } catch (error) {
+      // A newer generation may replace the engagement after the read.
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('TODAY_SUGGESTION_NOT_FOUND');
+      }
+      throw error;
+    }
+  }
+
+  private async recordCurrentInteraction(args: InteractionArgs) {
     const suggestion = await this.prisma.aiTodaySuggestion.findFirst({
       where: {
         userId: args.userId,
@@ -122,15 +163,10 @@ export class TodaySuggestionEngagementService {
         continuityHash: true,
         validUntil: true,
         structuredResult: true,
+        keyContext: true,
       },
     });
     if (!suggestion) throw new NotFoundException('TODAY_SUGGESTION_NOT_FOUND');
-    await this.rollover({
-      userId: args.userId,
-      generationToken: args.generationToken,
-      continuityHash: suggestion.continuityHash ?? '',
-      suggestionDate: suggestion.date,
-    });
     const now = new Date();
     if (args.input.kind === 'PRESENTED') {
       const current =
@@ -139,7 +175,7 @@ export class TodaySuggestionEngagementService {
           select: { firstPresentedAt: true },
         });
       const state = await this.prisma.todaySuggestionEngagementState.update({
-        where: { userId: args.userId },
+        where: { userId: args.userId, generationToken: args.generationToken },
         data: {
           firstPresentedAt: current?.firstPresentedAt ?? now,
           lastPresentedAt: now,
@@ -155,23 +191,33 @@ export class TodaySuggestionEngagementService {
       ) {
         throw new NotFoundException('TODAY_SUGGESTION_INTENT_NOT_OFFERED');
       }
+      const current =
+        await this.prisma.todaySuggestionEngagementState.findUnique({
+          where: { userId: args.userId },
+        });
+      const preserveFeedback = current?.resolution?.startsWith('FEEDBACK:');
       const state = await this.prisma.todaySuggestionEngagementState.update({
-        where: { userId: args.userId },
+        where: { userId: args.userId, generationToken: args.generationToken },
         data: {
           selectedIntent: args.input.intentType,
-          resolvedAt: now,
-          resolution: `INTENT:${args.input.intentType}`,
+          resolvedAt: preserveFeedback ? current.resolvedAt : now,
+          resolution: preserveFeedback
+            ? current.resolution
+            : `INTENT:${args.input.intentType}`,
         },
       });
       return this.publicState(state);
     }
     const quietUntil = this.feedbackQuietUntil(
       args.input.feedback,
-      suggestion.validUntil,
+      todaySuggestionValidUntil(
+        suggestion.date,
+        this.storedTimezone(suggestion.keyContext),
+      ),
       now,
     );
     const state = await this.prisma.todaySuggestionEngagementState.update({
-      where: { userId: args.userId },
+      where: { userId: args.userId, generationToken: args.generationToken },
       data: {
         resolvedAt: now,
         resolution: `FEEDBACK:${args.input.feedback}`,
@@ -193,6 +239,13 @@ export class TodaySuggestionEngagementService {
       return new Date(now.getTime() + 2 * 60 * 60_000);
     }
     return null;
+  }
+
+  private storedTimezone(value: unknown) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      return null;
+    const timezone = (value as Record<string, unknown>).timezone;
+    return typeof timezone === 'string' ? timezone : null;
   }
 
   private publicState(state: {

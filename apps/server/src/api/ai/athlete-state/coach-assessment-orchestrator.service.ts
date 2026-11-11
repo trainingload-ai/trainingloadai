@@ -6,6 +6,7 @@ import { AthleteStateQueries } from '@/athlete-state/application/athlete-state-q
 import { AthleteStateFeatureFlags } from '@/athlete-state/athlete-state-feature-flags.service';
 import { ATHLETE_STATE_POLICY } from '@/athlete-state/athlete-state-policy';
 import type { AthleteStateAssessmentResult } from '@/athlete-state/domain/athlete-state.contracts';
+import { normalizeAssessmentEvidenceRequests } from '@/athlete-state/domain/optional-evidence';
 import {
   ATHLETE_STATE_REASSESS_REQUESTED_EVENT,
   type AthleteStateReassessRequestedEvent,
@@ -217,6 +218,7 @@ export class CoachAssessmentOrchestratorService {
       // than this worker's losing, potentially non-identical model sample.
       if (saved.reused) result = assessmentResult(saved.assessment);
     }
+    result = normalizeAssessmentEvidenceRequests(result);
     if (!this.flags.caseEnabled()) return { assessment, result };
 
     let planContext: Awaited<
