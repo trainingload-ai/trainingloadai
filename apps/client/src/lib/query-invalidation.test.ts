@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
-import type { QueryClient } from "@tanstack/react-query";
+import { describe, expect, it } from "vitest";
+import { QueryClient } from "@tanstack/react-query";
 import {
   invalidateAfterActivityPipelineComplete,
   invalidateAfterPlanMutation,
@@ -16,11 +16,16 @@ describe("today advice cache invalidation", () => {
   ])(
     "refreshes independent advice when activity or plan facts change",
     async (invalidate) => {
-      const invalidateQueries = vi.fn(async () => undefined);
-      await invalidate({ invalidateQueries } as unknown as QueryClient);
-      expect(invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["v2-home-today-advice"],
-      });
+      const client = new QueryClient();
+      const queryKey = ["v2-home-today-advice", "zh"];
+      try {
+        client.setQueryData(queryKey, { suggestionId: "before-change" });
+        expect(client.getQueryState(queryKey)?.isInvalidated).toBe(false);
+        await invalidate(client);
+        expect(client.getQueryState(queryKey)?.isInvalidated).toBe(true);
+      } finally {
+        client.clear();
+      }
     },
   );
 });
