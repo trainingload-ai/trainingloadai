@@ -48,6 +48,7 @@ export function SortableFitnessStatCard({
   onSpanChange,
   onRemove,
   subContent,
+  valueAccessory,
   showSpanControls = true,
 }: {
   stat: FitnessStatCard;
@@ -55,6 +56,7 @@ export function SortableFitnessStatCard({
   onSpanChange: (span: FitnessStatusMetricSpan) => void;
   onRemove?: () => void;
   subContent: React.ReactNode;
+  valueAccessory?: React.ReactNode;
   /** 为 false 时隐藏宽度 ± 按钮（仅竖向单列布局时使用） */
   showSpanControls?: boolean;
 }) {
@@ -170,6 +172,7 @@ export function SortableFitnessStatCard({
       <FitnessStatusStatCard
         stat={stat}
         subContent={subContent}
+        valueAccessory={valueAccessory}
         rightAccessory={
           <button
             type="button"

@@ -14,36 +14,46 @@ vi.mock("@/i18n/navigation", () => ({
   ),
 }));
 
-function show(compact = false) {
+function forecast(point = 44.15) {
+  mocks.query.mockReturnValue({
+    isPending: false,
+    data: {
+      status: "READY",
+      cutoffDate: "2026-11-10",
+      estimatedCurrentLevel: 48,
+      forecasts: [{ week: 4, point, lower80: 42.1, upper80: 45.2 }],
+    },
+  });
+}
+function show(compact = false, currentValue = "43") {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <VdotForecastSummary compact={compact} />
+      <VdotForecastSummary compact={compact} currentValue={currentValue} />
     </NextIntlClientProvider>,
   );
 }
 
 describe("VDOT forecast presentation", () => {
-  it("shows the same fourth-week value on the compact card and detail, with a draft-only coach link", () => {
-    mocks.query.mockReturnValue({
-      isPending: false,
-      data: {
-        status: "READY",
-        cutoffDate: "2026-11-10",
-        forecasts: [{ week: 4, point: 44.15, lower80: 43.1, upper80: 45.2 }],
-      },
-    });
+  it("pairs the current value with the same fourth-week forecast on the card and detail", () => {
+    forecast();
     const compact = show(true);
     expect(
-      screen.getByText("In four weeks, estimated VDOT 44.2"),
-    ).toBeInTheDocument();
+      screen.getByLabelText(
+        "In four weeks, estimated VDOT 44.2, Expected above current",
+      ),
+    ).toHaveClass("text-success");
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
     compact.unmount();
     show();
+    expect(screen.getByText("Current VDOT")).toBeInTheDocument();
+    expect(screen.getByText("43")).toBeInTheDocument();
     expect(
-      screen.getByText("In four weeks, estimated VDOT 44.2"),
+      screen.getByLabelText(
+        "In four weeks, estimated VDOT 44.2, Expected above current",
+      ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("80% prediction interval 43.1–45.2"),
+      screen.getByText("80% prediction interval 42.1–45.2"),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ask coach" })).toHaveAttribute(
       "href",
@@ -51,19 +61,41 @@ describe("VDOT forecast presentation", () => {
     );
   });
 
-  it("reports unavailable evidence without numerical projections", () => {
+  it.each([
+    [41.9, "Expected below current", "text-destructive"],
+    [43.04, "Expected to stay level", "text-muted-foreground"],
+  ])(
+    "communicates a forecast of %s without relying on color alone",
+    (point, direction, color) => {
+      forecast(point);
+      show(true);
+      expect(screen.getByLabelText(new RegExp(direction))).toHaveClass(color);
+    },
+  );
+
+  it("does not infer a change when the displayed current value is unavailable", () => {
+    forecast();
+    show(true, "-");
+    expect(
+      screen.getByLabelText("In four weeks, estimated VDOT 44.2"),
+    ).toHaveClass("text-muted-foreground");
+  });
+
+  it("keeps the current value visible while evidence is unavailable", () => {
     mocks.query.mockReturnValue({
       isPending: false,
       data: { status: "INSUFFICIENT_HISTORY", forecasts: [] },
     });
     show();
+    expect(screen.getByText("43")).toBeInTheDocument();
     expect(
       screen.getByText(
         "More running records are needed for a four-week forecast.",
       ),
     ).toBeInTheDocument();
     expect(
-      screen.queryByTestId("vdot-forecast-summary"),
+      screen.queryByText("Expected in four weeks"),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });

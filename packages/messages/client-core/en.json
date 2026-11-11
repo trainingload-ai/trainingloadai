@@ -7043,6 +7043,11 @@
     "STALE_HISTORY": "New running records will update this forecast.",
     "INCOMPARABLE_HISTORY": "More records with the current VDOT method are needed.",
     "MODEL_UNAVAILABLE": "Forecast is currently unavailable.",
-    "currentEstimate": "Current estimate"
+    "currentEstimate": "Current estimate",
+    "current": "Current VDOT",
+    "inFourWeeks": "Expected in four weeks",
+    "higher": "Expected above current",
+    "lower": "Expected below current",
+    "unchanged": "Expected to stay level"
   }
 }

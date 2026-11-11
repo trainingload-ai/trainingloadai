@@ -6385,6 +6385,11 @@
     "STALE_HISTORY": "새 러닝 기록이 추가되면 예측이 업데이트됩니다.",
     "INCOMPARABLE_HISTORY": "현재 VDOT 산출 방식으로 계산된 기록이 더 필요합니다.",
     "MODEL_UNAVAILABLE": "현재 예측을 사용할 수 없습니다.",
-    "currentEstimate": "현재 추정치"
+    "currentEstimate": "현재 추정치",
+    "current": "현재 VDOT",
+    "inFourWeeks": "4주 후 예상",
+    "higher": "현재보다 상승 예상",
+    "lower": "현재보다 하락 예상",
+    "unchanged": "현재 수준 유지 예상"
   }
 }

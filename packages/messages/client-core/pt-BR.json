@@ -6386,6 +6386,11 @@
     "STALE_HISTORY": "Novos registros de corrida atualizarão esta previsão.",
     "INCOMPARABLE_HISTORY": "São necessários mais registros com o método VDOT atual.",
     "MODEL_UNAVAILABLE": "A previsão está indisponível no momento.",
-    "currentEstimate": "Estimativa atual"
+    "currentEstimate": "Estimativa atual",
+    "current": "VDOT atual",
+    "inFourWeeks": "Estimado em quatro semanas",
+    "higher": "Previsão acima do valor atual",
+    "lower": "Previsão abaixo do valor atual",
+    "unchanged": "Previsão de estabilidade"
   }
 }

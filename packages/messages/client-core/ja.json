@@ -6385,6 +6385,11 @@
     "STALE_HISTORY": "新しいランニング記録で予測が更新されます。",
     "INCOMPARABLE_HISTORY": "現在の VDOT 算出方法での記録がさらに必要です。",
     "MODEL_UNAVAILABLE": "現在、予測を利用できません。",
-    "currentEstimate": "現在の推定値"
+    "currentEstimate": "現在の推定値",
+    "current": "現在の VDOT",
+    "inFourWeeks": "4週間後の予測",
+    "higher": "現在より上昇する見込み",
+    "lower": "現在より低下する見込み",
+    "unchanged": "現在と同程度の見込み"
   }
 }

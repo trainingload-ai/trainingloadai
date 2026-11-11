@@ -51,18 +51,20 @@ export function MetricHistoryPanel({
       {showHeader && (
         <div className="flex flex-row gap-4">
           <div className="text-base font-semibold text-foreground">{title}</div>
-          <div className="text-base font-bold text-primary">
-            {currentValue}
-            <span className="text-mobile-caption pc:text-xs font-normal text-muted-foreground ml-1">
-              {unit}
-            </span>
-          </div>
+          {metricKey !== "vo2Max" ? (
+            <div className="text-base font-bold text-primary">
+              {currentValue}
+              <span className="text-mobile-caption pc:text-xs font-normal text-muted-foreground ml-1">
+                {unit}
+              </span>
+            </div>
+          ) : null}
         </div>
       )}
 
       <div className="flex-1 flex flex-col min-h-0 gap-6 py-4">
         {metricKey === "vo2Max" ? (
-          <VdotForecastSummary enabled={enabled} />
+          <VdotForecastSummary currentValue={currentValue} enabled={enabled} />
         ) : null}
         <div className="w-full shrink-0">
           {metricKey !== "paceZones" ? (
@@ -127,16 +129,18 @@ export function MetricHistoryDialog({
         contentClassName="pt-2"
       >
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex shrink-0 items-baseline gap-1.5 px-1 pt-1">
-            <span className="text-2xl font-bold tabular-nums text-foreground">
-              {currentValue}
-            </span>
-            {unit ? (
-              <span className="text-mobile-caption text-muted-foreground">
-                {unit}
+          {metricKey !== "vo2Max" ? (
+            <div className="flex shrink-0 items-baseline gap-1.5 px-1 pt-1">
+              <span className="text-2xl font-bold tabular-nums text-foreground">
+                {currentValue}
               </span>
-            ) : null}
-          </div>
+              {unit ? (
+                <span className="text-mobile-caption text-muted-foreground">
+                  {unit}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           <MetricHistoryPanel
             enabled={open}
             metricKey={metricKey}

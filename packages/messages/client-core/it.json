@@ -6386,6 +6386,11 @@
     "STALE_HISTORY": "Nuovi dati di corsa aggiorneranno questa previsione.",
     "INCOMPARABLE_HISTORY": "Servono altri dati con il metodo VDOT attuale.",
     "MODEL_UNAVAILABLE": "La previsione non è al momento disponibile.",
-    "currentEstimate": "Stima attuale"
+    "currentEstimate": "Stima attuale",
+    "current": "VDOT attuale",
+    "inFourWeeks": "Previsto tra quattro settimane",
+    "higher": "Previsto sopra il valore attuale",
+    "lower": "Previsto sotto il valore attuale",
+    "unchanged": "Previsto stabile"
   }
 }

@@ -6386,6 +6386,11 @@
     "STALE_HISTORY": "Neue Laufdaten aktualisieren diese Prognose.",
     "INCOMPARABLE_HISTORY": "Weitere Daten mit der aktuellen VDOT-Methode sind nötig.",
     "MODEL_UNAVAILABLE": "Die Prognose ist derzeit nicht verfügbar.",
-    "currentEstimate": "Aktuelle Schätzung"
+    "currentEstimate": "Aktuelle Schätzung",
+    "current": "Aktueller VDOT",
+    "inFourWeeks": "Erwartet in vier Wochen",
+    "higher": "Voraussichtlich höher als aktuell",
+    "lower": "Voraussichtlich niedriger als aktuell",
+    "unchanged": "Voraussichtlich unverändert"
   }
 }

@@ -234,14 +234,7 @@ export default function FitnessStateMiniCards() {
           monotonyFillPercent={monotonyFillPercent}
         />
       );
-      return stat.key === "vo2Max" ? (
-        <div className="flex min-w-0 flex-col gap-1">
-          {content}
-          <VdotForecastSummary compact />
-        </div>
-      ) : (
-        content
-      );
+      return content;
     },
     [
       acRatioFillPercent,
@@ -262,6 +255,11 @@ export default function FitnessStateMiniCards() {
   );
 
   const isStatsPending = isPMCPending || isWeeklyPending;
+
+  const valueAccessory = (stat: FitnessStatCard) =>
+    stat.key === "vo2Max" ? (
+      <VdotForecastSummary compact currentValue={stat.value} />
+    ) : null;
 
   const handleSaveLayout = React.useCallback(() => {
     if (publicDemo.active) return;
@@ -379,6 +377,7 @@ export default function FitnessStateMiniCards() {
                       span={1}
                       showSpanControls={false}
                       subContent={subContent(stat)}
+                      valueAccessory={valueAccessory(stat)}
                       onSpanChange={() => {}}
                       onRemove={() => {
                         setDraftLayout(
@@ -396,6 +395,7 @@ export default function FitnessStateMiniCards() {
                   <FitnessStatusStatCard
                     stat={activeDragItem.stat}
                     subContent={subContent(activeDragItem.stat)}
+                    valueAccessory={valueAccessory(activeDragItem.stat)}
                     rightAccessory={
                       <button
                         type="button"
@@ -422,6 +422,7 @@ export default function FitnessStateMiniCards() {
               onClick={stat.onClick}
               className="border-0 bg-neutral-100 p-1 shadow-none hover:cursor-pointer hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
               subContent={subContent(stat)}
+              valueAccessory={valueAccessory(stat)}
               rightAccessory={
                 stat.onClick ? (
                   <button className="cursor-pointer rounded-full p-1 text-muted-foreground transition-colors hover:bg-neutral-200 hover:text-foreground dark:hover:bg-muted">

@@ -6483,6 +6483,11 @@
     "STALE_HISTORY": "有新的跑步紀錄後更新預測。",
     "INCOMPARABLE_HISTORY": "按新的 VDOT 口徑累積紀錄後更新預測。",
     "MODEL_UNAVAILABLE": "預測暫時無法使用。",
-    "currentEstimate": "目前估計水平"
+    "currentEstimate": "目前估計水平",
+    "current": "目前 VDOT",
+    "inFourWeeks": "四週後預計",
+    "higher": "預計高於目前",
+    "lower": "預計低於目前",
+    "unchanged": "預計與目前持平"
   }
 }
