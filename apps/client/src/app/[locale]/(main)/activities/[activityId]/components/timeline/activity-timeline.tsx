@@ -16,6 +16,7 @@ import { useActivityPowerZones } from "@/api/use-power";
 import { useResolvedPaceZones } from "@/api/use-pace";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useElementSize } from "@/components/charts/uplot/useElementSize";
 import {
   Select,
   SelectContent,
@@ -80,6 +81,16 @@ export default function ActivityTimeline({
   const [zoom, setZoom] = useState<TimelineRange | null>(null);
   const [preview, setPreview] = useState<TimelineRange | null>(null);
   const plotRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const { ref: observeScroll, size: scrollSize } =
+    useElementSize<HTMLDivElement>();
+  const bindScroll = useCallback(
+    (node: HTMLDivElement | null) => {
+      scrollRef.current = node;
+      observeScroll(node);
+    },
+    [observeScroll],
+  );
   const drag = useRef<{ time: number; x: number; moved: boolean } | null>(null);
   const frame = useRef<number | null>(null);
   const pendingHover = useRef<number | null>(null);
@@ -103,6 +114,28 @@ export default function ActivityTimeline({
     const to = zoom ? xAtTime(zoom[1]) : null;
     return from !== null && to !== null && to > from ? [from, to] : [0, maxX];
   }, [zoom, xAtTime, maxX]);
+  // The header, every plot and the ticks use this single scrollable surface.
+  // Keep roughly one pixel per second, bounded for very long activities.
+  const sceneWidth = Math.max(
+    scrollSize.width,
+    zoom ? 0 : Math.min(12000, Math.max(1440, (model?.duration ?? 0) + 172)),
+  );
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+  }, [axis, zoom]);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const plot = plotRef.current;
+    const x = pinned === null ? null : xAtTime(pinned);
+    if (!scroller || !plot || x === null || viewport[1] <= viewport[0]) return;
+    const position =
+      160 +
+      ((x - viewport[0]) / (viewport[1] - viewport[0])) * plot.clientWidth;
+    if (position < scroller.scrollLeft + 160)
+      scroller.scrollLeft = Math.max(0, position - 160);
+    else if (position > scroller.scrollLeft + scroller.clientWidth - 12)
+      scroller.scrollLeft = position - scroller.clientWidth + 12;
+  }, [pinned, viewport, xAtTime, sceneWidth]);
   const percent = (x: number) =>
     ((x - viewport[0]) / (viewport[1] - viewport[0])) * 100;
   const pointTimes = useMemo(
@@ -310,9 +343,11 @@ export default function ActivityTimeline({
   const currentX = current === null ? null : xAtTime(current);
   const fromX = activeRange ? xAtTime(activeRange[0]) : null;
   const toX = activeRange ? xAtTime(activeRange[1]) : null;
+  const tickCount = Math.max(6, Math.ceil((sceneWidth - 172) / 180) + 1);
   const ticks = Array.from(
-    { length: 6 },
-    (_, index) => viewport[0] + (index * (viewport[1] - viewport[0])) / 5,
+    { length: tickCount },
+    (_, index) =>
+      viewport[0] + (index * (viewport[1] - viewport[0])) / (tickCount - 1),
   );
   const zonesLoading = {
     laps: false,
@@ -327,270 +362,290 @@ export default function ActivityTimeline({
       data-timeline-start={viewport[0]}
       data-timeline-end={viewport[1]}
     >
-      <div className="grid min-h-16 grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
-        <div className="flex items-center gap-1 px-2">
-          <Select
-            value={layout.grouping}
-            onValueChange={(grouping) =>
-              setLayout((value) => ({
-                ...value,
-                grouping: grouping as TimelineGrouping,
-              }))
-            }
-          >
-            <SelectTrigger
-              className="min-w-0 flex-1"
-              aria-label={t("grouping")}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {(["laps", "heartRate", "power", "pace"] as const).map(
-                  (mode) => (
-                    <SelectItem key={mode} value={mode}>
-                      {t(`groups.${mode}`)}
-                    </SelectItem>
-                  ),
-                )}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              variant="ghost"
-              size="icon-xs"
-              aria-label={t("timelineOptions")}
-            >
-              <MoreHorizontal />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuRadioGroup
-                value={axis}
-                onValueChange={(value) =>
-                  setLayout((layout) => ({
-                    ...layout,
-                    axis: value as "time" | "distance",
+      <div
+        ref={bindScroll}
+        className="overflow-x-auto overscroll-x-contain"
+        data-timeline-scroll
+      >
+        <div style={{ width: sceneWidth, minWidth: "100%" }}>
+          <div className="grid min-h-14 grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
+            <div className="sticky left-0 z-20 flex h-full items-center gap-1 bg-background px-2">
+              <Select
+                value={layout.grouping}
+                onValueChange={(grouping) =>
+                  setLayout((value) => ({
+                    ...value,
+                    grouping: grouping as TimelineGrouping,
                   }))
                 }
-                aria-label={t("axis")}
               >
-                <DropdownMenuRadioItem value="time">
-                  {t("time")}
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="distance"
-                  disabled={!model.distance.length}
+                <SelectTrigger
+                  className="min-w-0 flex-1"
+                  aria-label={t("grouping")}
                 >
-                  {t("distance")}
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={reset} disabled={!zoom && !range}>
-                  <RotateCcw />
-                  {t("resetZoom")}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div
-          key={layout.grouping}
-          className="flex min-w-0 items-center gap-2 overflow-x-auto overscroll-x-contain py-2"
-          role="group"
-          aria-label={t("groups." + layout.grouping)}
-        >
-          {visibleGroups.map((group) => {
-            const selected =
-              range?.[0] === group.range[0] && range[1] === group.range[1];
-            return (
-              <button
-                key={group.id}
-                type="button"
-                aria-label={`${group.label} ${timeLabel(group.range[0])}–${timeLabel(group.range[1])}`}
-                aria-pressed={selected}
-                data-selected={selected}
-                className="flex min-w-36 shrink-0 flex-col items-start gap-1 rounded-sm border border-border bg-muted px-3 py-2 text-xs hover:border-foreground/40 focus-visible:outline-2 focus-visible:outline-ring data-[selected=true]:border-foreground"
-                style={{
-                  ...(group.color
-                    ? {
-                        backgroundColor: `color-mix(in srgb, ${group.color} 20%, var(--background))`,
-                      }
-                    : {}),
-                }}
-                onClick={() => {
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {(["laps", "heartRate", "power", "pace"] as const).map(
+                      (mode) => (
+                        <SelectItem key={mode} value={mode}>
+                          {t(`groups.${mode}`)}
+                        </SelectItem>
+                      ),
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={t("timelineOptions")}
+                >
+                  <MoreHorizontal />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuRadioGroup
+                    value={axis}
+                    onValueChange={(value) =>
+                      setLayout((layout) => ({
+                        ...layout,
+                        axis: value as "time" | "distance",
+                      }))
+                    }
+                    aria-label={t("axis")}
+                  >
+                    <DropdownMenuRadioItem value="time">
+                      {t("time")}
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="distance"
+                      disabled={!model.distance.length}
+                    >
+                      {t("distance")}
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onSelect={reset}
+                      disabled={!zoom && !range}
+                    >
+                      <RotateCcw />
+                      {t("resetZoom")}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div
+              className="relative h-10 min-w-0"
+              role="group"
+              aria-label={t("groups." + layout.grouping)}
+            >
+              {visibleGroups.map((group) => {
+                const selected =
+                  range?.[0] === group.range[0] && range[1] === group.range[1];
+                const pixelWidth = (group.width / 100) * (sceneWidth - 172);
+                return (
+                  <button
+                    key={group.id}
+                    type="button"
+                    aria-label={`${group.label} ${timeLabel(group.range[0])}–${timeLabel(group.range[1])}`}
+                    aria-pressed={selected}
+                    title={`${group.label} ${timeLabel(group.range[0])}–${timeLabel(group.range[1])}`}
+                    data-selected={selected}
+                    className="absolute inset-y-0 flex flex-col items-center justify-center gap-0.5 overflow-hidden rounded-xs border border-border bg-muted text-xs hover:border-foreground/40 focus-visible:outline-2 focus-visible:outline-ring data-[selected=true]:border-foreground"
+                    style={{
+                      left: `${group.left}%`,
+                      width: `${group.width}%`,
+                      ...(group.color
+                        ? {
+                            backgroundColor: `color-mix(in srgb, ${group.color} 20%, var(--background))`,
+                          }
+                        : {}),
+                    }}
+                    onClick={() => {
+                      stopHover();
+                      setRange(selected ? null : group.range);
+                    }}
+                  >
+                    {pixelWidth >= 44 ? (
+                      <span className="truncate max-w-full px-1 font-medium">
+                        {group.label}
+                      </span>
+                    ) : null}
+                    {pixelWidth >= 128 ? (
+                      <span className="truncate max-w-full px-1 text-[11px] tabular-nums">
+                        {timeLabel(group.range[0])}–{timeLabel(group.range[1])}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+              {!visibleGroups.length ? (
+                <span
+                  className="flex h-full items-center text-xs text-muted-foreground"
+                  role="status"
+                >
+                  {zonesLoading ? t("loadingGroups") : t("noGroups")}
+                </span>
+              ) : null}
+            </div>
+          </div>
+          <div className="relative">
+            <div
+              className="pointer-events-none absolute inset-y-0 left-40 right-3 overflow-hidden"
+              aria-hidden
+            >
+              {visibleGroups.map((group) =>
+                group.color ? (
+                  <span
+                    key={group.id}
+                    className="absolute inset-y-0"
+                    style={{
+                      left: `${group.left}%`,
+                      width: `${group.width}%`,
+                      backgroundColor: `color-mix(in srgb, ${group.color} 7%, transparent)`,
+                    }}
+                  />
+                ) : null,
+              )}
+            </div>
+            {visibleRows.map(({ config, metric }, index) => (
+              <TimelineChart
+                key={config.id}
+                config={config}
+                metric={metric}
+                metrics={model.metrics}
+                axis={axis}
+                distance={model.distance}
+                distanceGap={model.distanceGap}
+                viewport={viewport}
+                current={current}
+                onChange={(change) => updateRow(config.id, change)}
+                onRemove={() =>
+                  setLayout((value) => ({
+                    ...value,
+                    rows: value.rows.filter((row) => row.id !== config.id),
+                  }))
+                }
+                onMove={(direction) => moveRow(config.id, direction)}
+                canMoveUp={index > 0}
+                canMoveDown={index < visibleRows.length - 1}
+              />
+            ))}
+            {visibleRows.length ? (
+              <div
+                ref={plotRef}
+                className="absolute inset-y-0 left-40 right-3 cursor-crosshair touch-pan-y focus-visible:outline-2 focus-visible:outline-ring"
+                role="slider"
+                tabIndex={0}
+                aria-label={t("inspect")}
+                aria-valuemin={0}
+                aria-valuemax={model.duration}
+                aria-valuenow={current ?? 0}
+                aria-valuetext={
+                  current === null ? t("fullActivity") : timeLabel(current)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    reset();
+                    return;
+                  }
+                  if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+                  event.preventDefault();
                   stopHover();
-                  setRange(selected ? null : group.range);
+                  const index = timelineLowerBound(pointTimes, pinned ?? 0);
+                  const next = Math.max(
+                    0,
+                    Math.min(
+                      pointTimes.length - 1,
+                      index + (event.key === "ArrowRight" ? 1 : -1),
+                    ),
+                  );
+                  setPinned(pointTimes[next]?.time ?? null);
+                }}
+                onDoubleClick={reset}
+                onPointerDown={(event) => {
+                  if (event.button !== 0 || !event.isPrimary) return;
+                  const time = atPointer(event);
+                  if (time === null) return;
+                  drag.current = { time, x: event.clientX, moved: false };
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                }}
+                onPointerMove={(event) => {
+                  const time = atPointer(event);
+                  hover(time);
+                  if (
+                    drag.current &&
+                    time !== null &&
+                    Math.abs(event.clientX - drag.current.x) > 5
+                  ) {
+                    drag.current.moved = true;
+                    setPreview([
+                      Math.min(time, drag.current.time),
+                      Math.max(time, drag.current.time),
+                    ]);
+                  }
+                }}
+                onPointerLeave={() => {
+                  if (!drag.current) hover(null);
+                }}
+                onPointerUp={finishPointer}
+                onPointerCancel={() => {
+                  drag.current = null;
+                  setPreview(null);
+                  stopHover();
                 }}
               >
-                <span className="font-medium">{group.label}</span>
-                <span className="text-[11px] tabular-nums">
-                  {timeLabel(group.range[0])}–{timeLabel(group.range[1])}
-                </span>
-              </button>
-            );
-          })}
-          {!visibleGroups.length ? (
-            <span
-              className="flex h-full items-center text-xs text-muted-foreground"
-              role="status"
+                {fromX !== null && toX !== null && !zoom ? (
+                  <span
+                    className="pointer-events-none absolute inset-y-0 border-x border-foreground/20 bg-foreground/5"
+                    style={{
+                      left: `${percent(fromX)}%`,
+                      width: `${((toX - fromX) / (viewport[1] - viewport[0])) * 100}%`,
+                    }}
+                  />
+                ) : null}
+                {currentX !== null &&
+                currentX >= viewport[0] &&
+                currentX <= viewport[1] ? (
+                  <span
+                    className="pointer-events-none absolute inset-y-0 border-l border-foreground/60"
+                    style={{ left: `${percent(currentX)}%` }}
+                  />
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+          {visibleRows.length ? (
+            <div
+              className="relative ml-40 mr-3 h-6 text-[11px] text-muted-foreground tabular-nums"
+              aria-hidden
             >
-              {zonesLoading ? t("loadingGroups") : t("noGroups")}
-            </span>
+              {ticks.map((value, index) => (
+                <span
+                  key={index}
+                  className="absolute top-1"
+                  style={{
+                    left: `${(index / (ticks.length - 1)) * 100}%`,
+                    transform:
+                      index === 0
+                        ? undefined
+                        : index === ticks.length - 1
+                          ? "translateX(-100%)"
+                          : "translateX(-50%)",
+                  }}
+                >
+                  {axis === "time" ? timeLabel(value) : formatDistance(value)}
+                </span>
+              ))}
+            </div>
           ) : null}
         </div>
       </div>
-      <div className="relative">
-        <div
-          className="pointer-events-none absolute inset-y-0 left-40 right-3 overflow-hidden"
-          aria-hidden
-        >
-          {visibleGroups.map((group) =>
-            group.color ? (
-              <span
-                key={group.id}
-                className="absolute inset-y-0"
-                style={{
-                  left: `${group.left}%`,
-                  width: `${group.width}%`,
-                  backgroundColor: `color-mix(in srgb, ${group.color} 7%, transparent)`,
-                }}
-              />
-            ) : null,
-          )}
-        </div>
-        {visibleRows.map(({ config, metric }, index) => (
-          <TimelineChart
-            key={config.id}
-            config={config}
-            metric={metric}
-            metrics={model.metrics}
-            axis={axis}
-            distance={model.distance}
-            distanceGap={model.distanceGap}
-            viewport={viewport}
-            current={current}
-            onChange={(change) => updateRow(config.id, change)}
-            onRemove={() =>
-              setLayout((value) => ({
-                ...value,
-                rows: value.rows.filter((row) => row.id !== config.id),
-              }))
-            }
-            onMove={(direction) => moveRow(config.id, direction)}
-            canMoveUp={index > 0}
-            canMoveDown={index < visibleRows.length - 1}
-          />
-        ))}
-        {visibleRows.length ? (
-          <div
-            ref={plotRef}
-            className="absolute inset-y-0 left-40 right-3 cursor-crosshair touch-pan-y focus-visible:outline-2 focus-visible:outline-ring"
-            role="slider"
-            tabIndex={0}
-            aria-label={t("inspect")}
-            aria-valuemin={0}
-            aria-valuemax={model.duration}
-            aria-valuenow={current ?? 0}
-            aria-valuetext={
-              current === null ? t("fullActivity") : timeLabel(current)
-            }
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                reset();
-                return;
-              }
-              if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-              event.preventDefault();
-              stopHover();
-              const index = timelineLowerBound(pointTimes, pinned ?? 0);
-              const next = Math.max(
-                0,
-                Math.min(
-                  pointTimes.length - 1,
-                  index + (event.key === "ArrowRight" ? 1 : -1),
-                ),
-              );
-              setPinned(pointTimes[next]?.time ?? null);
-            }}
-            onDoubleClick={reset}
-            onPointerDown={(event) => {
-              if (event.button !== 0 || !event.isPrimary) return;
-              const time = atPointer(event);
-              if (time === null) return;
-              drag.current = { time, x: event.clientX, moved: false };
-              event.currentTarget.setPointerCapture(event.pointerId);
-            }}
-            onPointerMove={(event) => {
-              const time = atPointer(event);
-              hover(time);
-              if (
-                drag.current &&
-                time !== null &&
-                Math.abs(event.clientX - drag.current.x) > 5
-              ) {
-                drag.current.moved = true;
-                setPreview([
-                  Math.min(time, drag.current.time),
-                  Math.max(time, drag.current.time),
-                ]);
-              }
-            }}
-            onPointerLeave={() => {
-              if (!drag.current) hover(null);
-            }}
-            onPointerUp={finishPointer}
-            onPointerCancel={() => {
-              drag.current = null;
-              setPreview(null);
-              stopHover();
-            }}
-          >
-            {fromX !== null && toX !== null && !zoom ? (
-              <span
-                className="pointer-events-none absolute inset-y-0 border-x border-foreground/20 bg-foreground/5"
-                style={{
-                  left: `${percent(fromX)}%`,
-                  width: `${((toX - fromX) / (viewport[1] - viewport[0])) * 100}%`,
-                }}
-              />
-            ) : null}
-            {currentX !== null &&
-            currentX >= viewport[0] &&
-            currentX <= viewport[1] ? (
-              <span
-                className="pointer-events-none absolute inset-y-0 border-l border-foreground/60"
-                style={{ left: `${percent(currentX)}%` }}
-              />
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-      {visibleRows.length ? (
-        <div
-          className="relative ml-40 mr-3 h-6 text-[11px] text-muted-foreground tabular-nums"
-          aria-hidden
-        >
-          {ticks.map((value, index) => (
-            <span
-              key={index}
-              className="absolute top-1"
-              style={{
-                left: `${index * 20}%`,
-                transform:
-                  index === 0
-                    ? undefined
-                    : index === 5
-                      ? "translateX(-100%)"
-                      : "translateX(-50%)",
-              }}
-            >
-              {axis === "time" ? timeLabel(value) : formatDistance(value)}
-            </span>
-          ))}
-        </div>
-      ) : null}
       <TimelineAddChartDialog
         metrics={model.metrics}
         onAdd={(metric) =>

@@ -161,18 +161,33 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   });
   await expect(timeline.getByRole("img")).toHaveCount(4);
   const lapGroups = timeline.getByRole("group", { name: "分段", exact: true });
+  const scroller = timeline.locator("[data-timeline-scroll]");
   expect(
-    await lapGroups.evaluate(
+    await scroller.evaluate(
       (element) => element.scrollWidth > element.clientWidth,
     ),
   ).toBe(true);
-  expect(
-    (await lapGroups.getByRole("button").first().boundingBox())!.width,
-  ).toBeGreaterThanOrEqual(144);
+  const firstLap = (await lapGroups.getByRole("button").first().boundingBox())!;
+  const secondLap = (await lapGroups.getByRole("button").nth(1).boundingBox())!;
+  const fullPlot = (await timeline.locator(".cursor-crosshair").boundingBox())!;
+  expect(firstLap.width / secondLap.width).toBeCloseTo(2, 1);
+  expect(firstLap.x).toBeCloseTo(fullPlot.x, 0);
+  expect(secondLap.x - fullPlot.x).toBeCloseTo(
+    (fullPlot.width * 480) / duration,
+    0,
+  );
   await lapGroups.getByRole("button").last().click();
   expect(
-    await lapGroups.evaluate((element) => element.scrollLeft),
+    await scroller.evaluate((element) => element.scrollLeft),
   ).toBeGreaterThan(0);
+  const scrolledLap = (await lapGroups
+    .getByRole("button")
+    .first()
+    .boundingBox())!;
+  const scrolledPlot = (await timeline
+    .locator(".cursor-crosshair")
+    .boundingBox())!;
+  expect(scrolledLap.x).toBeCloseTo(scrolledPlot.x, 0);
   const settingsBounds = (await timeline
     .getByRole("button", { name: "配置海拔图表" })
     .boundingBox())!;

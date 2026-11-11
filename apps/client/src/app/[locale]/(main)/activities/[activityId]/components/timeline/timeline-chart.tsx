@@ -203,7 +203,7 @@ export const TimelineChart = memo(function TimelineChart({
       className="group grid grid-cols-[124px_minmax(0,1fr)] border-b border-border/60 pr-3"
       data-timeline-row={config.id}
     >
-      <div className="flex flex-col justify-center gap-0.5 pl-3">
+      <div className="sticky left-0 z-10 flex flex-col justify-center gap-0.5 bg-background pl-3">
         <div className="flex min-w-0 items-center gap-1">
           <TimelineRowSettings
             config={config}
