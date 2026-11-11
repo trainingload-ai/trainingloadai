@@ -285,24 +285,33 @@ export function ImportBatchProgressDialog({
         </AdaptiveDialogHeader>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto overscroll-contain p-4">
-          <div className="rounded-md border bg-neutral-100 dark:bg-muted/45 p-4">
-            <div className="flex items-start gap-3">
+          <div role="status" className="rounded-md bg-muted p-3">
+            <div className="flex items-start gap-2.5">
               {pipelineSuccessful ? (
-                <CheckCircle2 className="mt-0.5 h-5 w-5 text-[hsl(var(--emerald-600))]" />
+                <CheckCircle2
+                  aria-hidden="true"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--emerald-600))]"
+                />
               ) : pipelineFailed ? (
-                <AlertCircle className="mt-0.5 h-5 w-5 text-[hsl(var(--red-600))]" />
+                <AlertCircle
+                  aria-hidden="true"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-destructive"
+                />
               ) : (
-                <BellRing className="mt-0.5 h-5 w-5 text-[hsl(var(--blue-600))]" />
+                <BellRing
+                  aria-hidden="true"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                />
               )}
-              <div className="space-y-1">
-                <p className="text-sm font-medium">
+              <div className="min-w-0 space-y-1">
+                <p className="text-sm font-medium leading-5">
                   {pipelineSuccessful
                     ? t("importProgress.doneHint")
                     : pipelineFailed
                       ? t("importProgress.failedHint")
                       : t("importProgress.laterHint")}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
                   {t("importProgress.notificationHint")}
                 </p>
               </div>
