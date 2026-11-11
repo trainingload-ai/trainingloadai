@@ -127,7 +127,7 @@ export function VdotForecastSummary({
             </p>
             <p>{t("basis", { date: forecast!.cutoffDate })}</p>
           </div>
-          <Button variant="outline" size="sm" asChild className="shrink-0">
+          <Button variant="default" size="sm" asChild className="shrink-0">
             <Link href="/ai-coach?vdotQuestion=1">{t("askCoach")}</Link>
           </Button>
         </div>
