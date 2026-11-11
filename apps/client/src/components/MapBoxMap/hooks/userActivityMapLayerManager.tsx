@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as mapengine from "@deployment/map-engine";
 import { useStore } from "@/lib/store";
 import { useTheme } from "next-themes";
@@ -47,6 +47,33 @@ const FOCUS_ENDPOINT_LAYER_ID = "activity-focus-endpoints";
 const FOCUS_ENDPOINT_LABEL_LAYER_ID = "activity-focus-endpoint-labels";
 const FOCUS_COLOR = "#2f7d61";
 
+function useStablePadding(padding: ActivityMapPadding) {
+  const top = typeof padding === "number" ? padding : (padding.top ?? 0);
+  const bottom = typeof padding === "number" ? padding : (padding.bottom ?? 0);
+  const left = typeof padding === "number" ? padding : (padding.left ?? 0);
+  const right = typeof padding === "number" ? padding : (padding.right ?? 0);
+  return useMemo(
+    () => ({ top, bottom, left, right }),
+    [top, bottom, left, right],
+  );
+}
+
+function syncMapStyle(map: mapengine.Map, update: () => void) {
+  const apply = () => {
+    map.off("idle", apply);
+    update();
+  };
+  map.on("style.load", apply);
+  // Source updates can temporarily make isStyleLoaded() false after the
+  // initial load; wait for idle in that case, not an already-fired load event.
+  if (map.isStyleLoaded()) apply();
+  else map.once("idle", apply);
+  return () => {
+    map.off("style.load", apply);
+    map.off("idle", apply);
+  };
+}
+
 export const useActivityLayerManager = ({
   activityLayer,
   containerId = "map-container",
@@ -59,7 +86,8 @@ export const useActivityLayerManager = ({
   focusTracks,
   autoFitFocus = true,
 }: UseActivityLayerManagerProps) => {
-  const mapRef = useRef<null | mapengine.Map>(null);
+  const [map, setMap] = useState<mapengine.Map | null>(null);
+  const mapRef = useRef<mapengine.Map | null>(null);
   const focusMarkerRef = useRef<null | mapengine.Marker>(null);
   const hadFocusRangeRef = useRef(false);
   const { systemUnit } = useStore();
@@ -68,161 +96,146 @@ export const useActivityLayerManager = ({
     useRuntimeMapConfiguration();
   const mapProvider = useMemo(
     () => (mapConfig ? createMapProvider(mapConfig) : null),
-    [mapConfig],
+    [
+      mapConfig?.provider,
+      mapConfig?.styleUrl,
+      mapConfig?.tileUrl,
+      mapConfig?.attribution,
+      mapConfig?.maxZoom,
+      mapConfig?.publicToken,
+    ],
   );
+  const centerLng = activityLayer?.center?.[0];
+  const centerLat = activityLayer?.center?.[1];
+  const swLat = activityLayer?.bounds?.[0]?.[0];
+  const swLng = activityLayer?.bounds?.[0]?.[1];
+  const neLat = activityLayer?.bounds?.[1]?.[0];
+  const neLng = activityLayer?.bounds?.[1]?.[1];
+  const bounds = useMemo<[[number, number], [number, number]] | null>(
+    () =>
+      swLat != null && swLng != null && neLat != null && neLng != null
+        ? [
+            [swLng, swLat],
+            [neLng, neLat],
+          ]
+        : null,
+    [swLat, swLng, neLat, neLng],
+  );
+  const padding = useStablePadding(fitBoundsPadding);
+  const lockedPadding = useStablePadding(lockedFitBoundsPadding);
+  const lastFramingRef = useRef<{
+    map: mapengine.Map;
+    bounds: typeof bounds;
+    padding: mapengine.PaddingOptions;
+    interactive: boolean;
+  } | null>(null);
+
+  // Route/focus updates must not tear down the basemap or reset its camera.
   useEffect(() => {
-    let resizeObserver: ResizeObserver | undefined;
+    if (centerLng == null || centerLat == null || !mapProvider) return;
+    mapengine.configureMapEngine(mapConfig ?? undefined);
+    const currentMap = new mapengine.Map({
+      container: containerId,
+      style: mapProvider.style(theme === "dark" ? "dark" : "light"),
+      center: [centerLng, centerLat],
+      zoom: 9,
+      interactive: false,
+      maxZoom: mapConfig?.maxZoom ?? 18,
+      ...mapengine.getMapAttributionOptions(mapProvider.attributionControl),
+    });
+    currentMap.addControl(
+      new mapengine.ScaleControl({ maxWidth: 120, unit: "metric" }),
+      "bottom-left",
+    );
     let styleFallbackTimer: ReturnType<typeof setTimeout> | undefined;
-    // 初始化地图
-    if (activityLayer?.center && mapProvider) {
-      mapengine.configureMapEngine(mapConfig ?? undefined);
-      // const [Lat, Lng] = ;
-
-      mapRef.current = new mapengine.Map({
-        container: containerId,
-        style: mapProvider.style(theme === "dark" ? "dark" : "light"),
-        center: activityLayer.center, // center 现在已经是 [lng, lat] 格式，可以直接使用
-        zoom: 9, // starting zoom
-        interactive: interactive, // 初始化时设置交互状态
-        maxZoom: mapConfig?.maxZoom ?? 18,
-        ...mapengine.getMapAttributionOptions(mapProvider.attributionControl),
-      });
-      mapRef.current.addControl(
-        new mapengine.ScaleControl({ maxWidth: 120, unit: "metric" }),
-        "bottom-left",
-      );
-      const currentMap = mapRef.current;
-      const clearStyleFallback = () => {
-        if (!styleFallbackTimer) return;
-        clearTimeout(styleFallbackTimer);
-        styleFallbackTimer = undefined;
-      };
-      if (!mapProvider.routeOnly) {
-        // A valid style is ready before all visible source tiles finish. Clear
-        // the failure timeout at the style boundary so slow tiles do not make
-        // us replace an already working basemap with the route-only style.
-        currentMap.once("style.load", clearStyleFallback);
-        styleFallbackTimer = setTimeout(() => {
-          if (!currentMap.isStyleLoaded()) {
-            currentMap.setStyle(
-              routeOnlyStyle(theme === "dark" ? "dark" : "light"),
-            );
-          }
-        }, 8_000);
-      }
-
-      resizeObserver = new ResizeObserver(() => {
-        mapRef.current?.resize();
-      });
-      resizeObserver.observe(mapRef.current.getContainer());
-
-      mapRef.current?.on("load", () => {
-        clearStyleFallback();
-        if (activityLayer?.maps?.length) {
-          addLayersToMap(
-            mapRef.current as mapengine.Map,
-            activityLayer.maps,
-            systemUnit,
+    const clearStyleFallback = () => {
+      clearTimeout(styleFallbackTimer);
+      styleFallbackTimer = undefined;
+    };
+    if (!mapProvider.routeOnly) {
+      currentMap.once("style.load", clearStyleFallback);
+      styleFallbackTimer = setTimeout(() => {
+        if (!currentMap.isStyleLoaded()) {
+          currentMap.setStyle(
+            routeOnlyStyle(theme === "dark" ? "dark" : "light"),
           );
-          // 强制重新渲染图层
-          //   mapRef.current?.triggerRepaint();
-
-          //   // 添加缩放监听器来确保图层在低缩放级别保持可见
-          //   const handleZoom = () => {
-          //     const currentZoom = mapRef.current?.getZoom();
-
-          //     // 在低缩放级别时强制显示图层
-          //     if (currentZoom < 3 && mapRef.current?.getLayer("activities-layer")) {
-          //       mapRef.current.setLayoutProperty("activities-layer", "visibility", "visible");
-          //       mapRef.current.setPaintProperty("activities-layer", "line-opacity", 1.0);
-          //     }
-          //   };
-
-          //   mapRef.current?.on("zoom", handleZoom);
-          //   mapRef.current?.on("zoomend", handleZoom);
         }
-      });
-      // 设置地图边界以包含整个轨迹
-      if (activityLayer?.bounds && activityLayer.bounds.length === 2) {
-        // bounds 从后端返回格式: [[lat, lng], [lat, lng]] - [西南角, 东北角]
-        // mapbox fitBounds 需要格式: [[lng, lat], [lng, lat]]
-        const [[swLat, swLng], [neLat, neLng]] = activityLayer.bounds;
-        mapRef.current.fitBounds(
-          [
-            [swLng, swLat], // 西南角：[经度, 纬度]
-            [neLng, neLat], // 东北角：[经度, 纬度]
-          ],
-          {
-            padding: fitBoundsPadding,
-            maxZoom: 15, // 最大缩放级别，避免过度放大
-          },
-        );
-      }
+      }, 8_000);
     }
-
+    const resizeObserver = new ResizeObserver(() => currentMap.resize());
+    resizeObserver.observe(currentMap.getContainer());
+    mapRef.current = currentMap;
+    setMap(currentMap);
     return () => {
-      if (styleFallbackTimer) clearTimeout(styleFallbackTimer);
-      resizeObserver?.disconnect();
+      clearStyleFallback();
+      resizeObserver.disconnect();
       focusMarkerRef.current?.remove();
       focusMarkerRef.current = null;
-      mapRef.current?.remove();
+      hadFocusRangeRef.current = false;
+      currentMap.remove();
+      if (mapRef.current === currentMap) mapRef.current = null;
     };
   }, [
-    activityLayer?.center,
+    centerLng,
+    centerLat,
     containerId,
-    fitBoundsPadding,
     mapConfig?.maxZoom,
     mapProvider,
-    systemUnit,
     theme,
-    activityLayer?.bounds,
-    activityLayer?.maps,
   ]);
 
-  // 控制地图交互功能
   useEffect(() => {
-    if (mapRef.current) {
-      if (interactive) {
-        // 启用所有交互
-        mapRef.current.scrollZoom.enable();
-        mapRef.current.boxZoom.enable();
-        mapRef.current.dragRotate.enable();
-        mapRef.current.dragPan.enable();
-        mapRef.current.keyboard.enable();
-        mapRef.current.doubleClickZoom.enable();
-        mapRef.current.touchZoomRotate.enable();
-      } else {
-        // 禁用所有交互
-        mapRef.current.scrollZoom.disable();
-        mapRef.current.boxZoom.disable();
-        mapRef.current.dragRotate.disable();
-        mapRef.current.dragPan.disable();
-        mapRef.current.keyboard.disable();
-        mapRef.current.doubleClickZoom.disable();
-        mapRef.current.touchZoomRotate.disable();
+    if (!map || mapRef.current !== map) return;
+    const updateRoute = () =>
+      addLayersToMap(map, activityLayer?.maps ?? [], systemUnit);
+    return syncMapStyle(map, updateRoute);
+  }, [map, activityLayer?.maps, systemUnit]);
 
-        // 锁定时恢复到初始边界
-        if (activityLayer?.bounds && activityLayer.bounds.length === 2) {
-          const [[swLat, swLng], [neLat, neLng]] = activityLayer.bounds;
-          mapRef.current.fitBounds(
-            [
-              [swLng, swLat], // 西南角：[经度, 纬度]
-              [neLng, neLat], // 东北角：[经度, 纬度]
-            ],
-            {
-              padding: lockedFitBoundsPadding,
-              maxZoom: 15, // 最大缩放级别，避免过度放大
-              duration: 800, // 添加动画效果，800ms
-            },
-          );
-        }
-      }
+  useEffect(() => {
+    if (!map || mapRef.current !== map) return;
+    const controls = [
+      map.scrollZoom,
+      map.boxZoom,
+      map.dragRotate,
+      map.dragPan,
+      map.keyboard,
+      map.doubleClickZoom,
+      map.touchZoomRotate,
+    ];
+    for (const control of controls) {
+      if (interactive) control.enable();
+      else control.disable();
     }
-  }, [interactive, activityLayer?.bounds, lockedFitBoundsPadding]);
+  }, [map, interactive]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !activityLayer) return;
+    if (!map || mapRef.current !== map || !bounds) return;
+    const currentPadding = interactive ? padding : lockedPadding;
+    const previous = lastFramingRef.current;
+    lastFramingRef.current = {
+      map,
+      bounds,
+      padding: currentPadding,
+      interactive,
+    };
+    const changedRoute = previous?.map !== map || previous.bounds !== bounds;
+    const locking = previous?.interactive === true && !interactive;
+    if (
+      changedRoute ||
+      locking ||
+      (previous?.interactive === interactive &&
+        previous.padding !== currentPadding)
+    ) {
+      map.fitBounds(bounds, {
+        padding: currentPadding,
+        maxZoom: 15,
+        duration: changedRoute ? 0 : 800,
+      });
+    }
+  }, [map, bounds, interactive, padding, lockedPadding]);
+
+  useEffect(() => {
+    if (!map || mapRef.current !== map || !activityLayer) return;
 
     const setLayerVisibility = (layerId: string, visible: boolean) => {
       if (map.getLayer(layerId)) {
@@ -256,7 +269,7 @@ export const useActivityLayerManager = ({
             [neLng, neLat],
           ],
           {
-            padding: lockedFitBoundsPadding,
+            padding: lockedPadding,
             maxZoom: 15,
             duration: 650,
           },
@@ -428,31 +441,28 @@ export const useActivityLayerManager = ({
       focusedTracks.flat().forEach((coordinate) => bounds.extend(coordinate));
       if (autoFitFocus && !bounds.isEmpty()) {
         map.fitBounds(bounds, {
-          padding: lockedFitBoundsPadding,
+          padding: lockedPadding,
           maxZoom: 17,
           duration: 650,
         });
       }
-      hadFocusRangeRef.current = true;
+      hadFocusRangeRef.current = autoFitFocus && !bounds.isEmpty();
     };
 
-    if (map.loaded()) updateFocusedRoute();
-    else map.once("load", updateFocusedRoute);
-    return () => {
-      map.off("load", updateFocusedRoute);
-    };
+    return syncMapStyle(map, updateFocusedRoute);
   }, [
+    map,
     activityLayer,
     focusRangeM,
     focusTracks,
     autoFitFocus,
-    lockedFitBoundsPadding,
+    lockedPadding,
   ]);
 
   useEffect(() => {
-    const map = mapRef.current;
     if (
       !map ||
+      mapRef.current !== map ||
       !activityLayer ||
       (focusCoordinate === undefined
         ? focusDistanceM == null
@@ -483,12 +493,8 @@ export const useActivityLayerManager = ({
       }
       focusMarkerRef.current.setLngLat(coordinate);
     };
-    if (map.loaded()) updateMarker();
-    else map.once("load", updateMarker);
-    return () => {
-      map.off("load", updateMarker);
-    };
-  }, [activityLayer, focusDistanceM, focusCoordinate]);
+    return syncMapStyle(map, updateMarker);
+  }, [map, activityLayer, focusDistanceM, focusCoordinate]);
 
-  return { map: mapRef.current, isMapConfigLoading };
+  return { map, isMapConfigLoading };
 };

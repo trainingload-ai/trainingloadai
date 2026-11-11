@@ -118,46 +118,44 @@ export const addDistanceMarkers = (
   map: mapengine.Map,
   markers: DistanceMarker[],
 ) => {
-  if (!markers || markers.length === 0) return;
-
-  // 添加数据源
-  map.addSource("distance-markers-source", {
-    type: "geojson",
-    data: {
-      type: "FeatureCollection",
-      features: markers,
-    },
-  });
+  const data = { type: "FeatureCollection" as const, features: markers };
+  const source = map.getSource("distance-markers-source") as
+    | mapengine.GeoJSONSource
+    | undefined;
+  if (source) source.setData(data);
+  else map.addSource("distance-markers-source", { type: "geojson", data });
 
   // 添加背景圆圈图层
-  map.addLayer({
-    id: "distance-markers-circle",
-    type: "circle",
-    source: "distance-markers-source",
-    paint: {
-      "circle-radius": 8,
-      "circle-color": "#ffffff",
-      "circle-stroke-width": 2,
-      "circle-stroke-color": "rgb(222, 129, 59)", // 与轨迹颜色一致
-    },
-  });
+  if (!map.getLayer("distance-markers-circle"))
+    map.addLayer({
+      id: "distance-markers-circle",
+      type: "circle",
+      source: "distance-markers-source",
+      paint: {
+        "circle-radius": 8,
+        "circle-color": "#ffffff",
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "rgb(222, 129, 59)", // 与轨迹颜色一致
+      },
+    });
 
   // 添加文字标签图层
-  map.addLayer({
-    id: "distance-markers-label",
-    type: "symbol",
-    source: "distance-markers-source",
-    layout: {
-      "text-field": ["get", "label"],
-      "text-size": 10,
-      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-      "text-allow-overlap": true,
-      "text-ignore-placement": true,
-    },
-    paint: {
-      "text-color": "rgb(222, 129, 59)",
-    },
-  });
+  if (!map.getLayer("distance-markers-label"))
+    map.addLayer({
+      id: "distance-markers-label",
+      type: "symbol",
+      source: "distance-markers-source",
+      layout: {
+        "text-field": ["get", "label"],
+        "text-size": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+      },
+      paint: {
+        "text-color": "rgb(222, 129, 59)",
+      },
+    });
 };
 
 export const addLayers = (map: mapengine.Map, routes: [number, number][][]) => {
@@ -287,60 +285,66 @@ export const addLayersToMap = (
   };
 
   // 添加数据源
-  map.addSource("activities-source", {
-    type: "geojson",
-    data: geojsonData,
-    // 添加配置来确保在所有缩放级别都显示数据
-    tolerance: 0, // 减少简化
-    buffer: 0, // 减少缓冲区
-    lineMetrics: true, // 启用线条度量
-    generateId: true, // 生成ID
-  });
+  const source = map.getSource("activities-source") as
+    | mapengine.GeoJSONSource
+    | undefined;
+  if (source) source.setData(geojsonData);
+  else
+    map.addSource("activities-source", {
+      type: "geojson",
+      data: geojsonData,
+      // 添加配置来确保在所有缩放级别都显示数据
+      tolerance: 0, // 减少简化
+      buffer: 0, // 减少缓冲区
+      lineMetrics: true, // 启用线条度量
+      generateId: true, // 生成ID
+    });
 
   // 添加轨迹图层
-  map.addLayer({
-    id: "activities-layer",
-    type: "line",
-    source: "activities-source",
-    minzoom: 0, // 确保在所有缩放级别都可见
-    maxzoom: 24, // 设置最大缩放级别
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-      visibility: "visible", // 明确设置为可见
-    },
-    paint: {
-      "line-color": "rgb(222, 129, 59)", // 橙色轨迹线
-      "line-width": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0,
-        2,
-        1,
-        2,
-        2,
-        3,
-        3,
-        5,
-        4,
-        6,
-        8,
-        6,
-        12,
-        6,
-        16,
-        4,
-        18,
-        2,
-      ],
-      "line-opacity": 0.8,
-      "line-blur": 0, // 确保线条清晰
-      "line-gap-width": 0, // 无间隙
-    },
-    // 添加过滤器确保所有特征都显示
-    filter: ["!=", ["get", "state"], -1], // 显示所有非隐藏状态的轨迹
-  });
+  if (!map.getLayer("activities-layer"))
+    map.addLayer({
+      id: "activities-layer",
+      type: "line",
+      source: "activities-source",
+      minzoom: 0, // 确保在所有缩放级别都可见
+      maxzoom: 24, // 设置最大缩放级别
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+        visibility: "visible", // 明确设置为可见
+      },
+      paint: {
+        "line-color": "rgb(222, 129, 59)", // 橙色轨迹线
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          0,
+          2,
+          1,
+          2,
+          2,
+          3,
+          3,
+          5,
+          4,
+          6,
+          8,
+          6,
+          12,
+          6,
+          16,
+          4,
+          18,
+          2,
+        ],
+        "line-opacity": 0.8,
+        "line-blur": 0, // 确保线条清晰
+        "line-gap-width": 0, // 无间隙
+      },
+      // 添加过滤器确保所有特征都显示
+      filter: ["!=", ["get", "state"], -1], // 显示所有非隐藏状态的轨迹
+    });
 
   upsertRouteEndpointLayer(map, {
     sourceId: "activity-route-endpoints-source",

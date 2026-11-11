@@ -76,6 +76,7 @@ export default defineConfig({
       "src/lib/today-suggestion-refresh.test.ts",
       "src/lib/spec/coach-home-card-stack.test.ts",
       "src/components/routes/**/*.test.{ts,tsx}",
+      "src/components/MapBoxMap/**/*.test.{ts,tsx}",
       "src/components/health/**/*.test.{ts,tsx}",
       "src/lib/runtime-environment.test.ts",
       "src/components/layout/DesktopWindowFrame.test.tsx",
