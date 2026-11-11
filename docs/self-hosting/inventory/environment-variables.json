@@ -6507,18 +6507,6 @@
           "line": 204
         }
       ]
-    },
-    {
-      "name": "VDOT_FORECAST_MODEL_PATH",
-      "capability": "core-runtime",
-      "mode": "core-or-feature",
-      "sensitive": false,
-      "documented": true,
-      "exampleDefault": "",
-      "owners": [
-        "deployment-template"
-      ],
-      "references": []
     }
   ]
 }
