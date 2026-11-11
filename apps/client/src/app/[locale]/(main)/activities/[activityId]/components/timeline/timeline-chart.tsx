@@ -23,6 +23,7 @@ import {
 } from "@/lib/activity-timeline";
 import { formatSecondsToTime } from "@/utils/timeFormatter";
 import type { TimelineRowConfig } from "@/hooks/useActivityTimelineLayout";
+import type { TimelineSegmentScale } from "@/lib/activity-timeline-segments";
 import ChartExpandDialog from "../charts/chart-expand-dialog";
 import { TimelineRowSettings } from "./timeline-row-settings";
 import type { TimelineMetric } from "./use-activity-timeline";
@@ -36,6 +37,9 @@ type PlotProps = {
   distance: TimelinePoint[];
   distanceGap: number;
   viewport: TimelineRange;
+  scale: TimelineSegmentScale;
+  plotViewport: TimelineRange;
+  viewWidth: number;
   expanded?: boolean;
 };
 
@@ -46,19 +50,24 @@ const TimelinePlot = memo(function TimelinePlot({
   distance,
   distanceGap,
   viewport,
+  scale,
+  plotViewport,
   expanded = false,
 }: PlotProps) {
   const { ref, size } = useElementSize<HTMLDivElement>();
   const cssVar = useCssVarResolver();
+  const xRange = useMemo<TimelineRange>(
+    () =>
+      expanded
+        ? [scale.positionAt(viewport[0]), scale.positionAt(viewport[1])]
+        : plotViewport,
+    [expanded, scale, viewport, plotViewport],
+  );
   const data = useMemo((): uPlot.AlignedData => {
     const points: TimelinePoint[] = [];
     let previous: TimelinePoint | undefined;
     for (const point of smoothTimeline(metric.points, config.smoothing)) {
-      const x =
-        axis === "time"
-          ? point.time
-          : timelineValueAt(distance, point.time, distanceGap, true);
-      if (x === null) continue;
+      const x = scale.positionAt(point.time);
       if (previous && point.time - previous.time > metric.gap) {
         const lastX = points.at(-1)?.time;
         if (lastX !== undefined && x > lastX)
@@ -68,10 +77,10 @@ const TimelinePlot = memo(function TimelinePlot({
         points.push({ time: x, value: point.value });
       previous = point;
     }
-    const from = Math.max(0, timelineLowerBound(points, viewport[0]) - 1);
+    const from = Math.max(0, timelineLowerBound(points, xRange[0]) - 1);
     const to = Math.min(
       points.length,
-      timelineLowerBound(points, viewport[1]) + 1,
+      timelineLowerBound(points, xRange[1]) + 1,
     );
     const drawn = downsampleTimeline(
       points.slice(from, to),
@@ -81,15 +90,7 @@ const TimelinePlot = memo(function TimelinePlot({
       drawn.map((point) => point.time),
       drawn.map((point) => point.value),
     ];
-  }, [
-    metric,
-    config.smoothing,
-    axis,
-    distance,
-    distanceGap,
-    size.width,
-    viewport,
-  ]);
+  }, [metric, config.smoothing, size.width, xRange, scale]);
   const options = useMemo((): uPlot.Options => {
     const { axisStroke, gridStroke } = resolveAxisColors(cssVar);
     return {
@@ -105,11 +106,11 @@ const TimelinePlot = memo(function TimelinePlot({
         x: {
           time: false,
           auto: false,
-          min: viewport[0],
-          max: viewport[1],
+          min: xRange[0],
+          max: xRange[1],
           range: expanded
-            ? (_plot, min, max) => [min ?? viewport[0], max ?? viewport[1]]
-            : [viewport[0], viewport[1]],
+            ? (_plot, min, max) => [min ?? xRange[0], max ?? xRange[1]]
+            : [xRange[0], xRange[1]],
         },
         y: { dir: metric.inverted ? -1 : 1 },
       },
@@ -122,8 +123,17 @@ const TimelinePlot = memo(function TimelinePlot({
               values: (_u, values) =>
                 values.map((value) =>
                   axis === "time"
-                    ? formatSecondsToTime(Math.round(value))
-                    : String(Math.round(value)),
+                    ? formatSecondsToTime(Math.round(scale.timeAt(value)))
+                    : String(
+                        Math.round(
+                          timelineValueAt(
+                            distance,
+                            scale.timeAt(value),
+                            distanceGap,
+                            true,
+                          ) ?? 0,
+                        ),
+                      ),
                 ),
             }
           : { show: false },
@@ -152,7 +162,10 @@ const TimelinePlot = memo(function TimelinePlot({
     config.height,
     config.color,
     expanded,
-    viewport,
+    xRange,
+    scale,
+    distance,
+    distanceGap,
     metric,
     size.width,
     size.height,
@@ -176,6 +189,9 @@ export const TimelineChart = memo(function TimelineChart({
   distance,
   distanceGap,
   viewport,
+  scale,
+  plotViewport,
+  viewWidth,
   current,
   metrics,
   onChange,
@@ -226,6 +242,9 @@ export const TimelineChart = memo(function TimelineChart({
               distance={distance}
               distanceGap={distanceGap}
               viewport={viewport}
+              scale={scale}
+              plotViewport={plotViewport}
+              viewWidth={viewWidth}
               expanded
             />
           </ChartExpandDialog>
@@ -244,7 +263,12 @@ export const TimelineChart = memo(function TimelineChart({
           </span>
         ) : null}
       </div>
-      <div role="img" aria-label={`${label} (${metric.unit})`}>
+      <div
+        role="img"
+        aria-label={`${label} (${metric.unit})`}
+        className="sticky left-[124px] justify-self-start"
+        style={{ width: Math.max(1, viewWidth - 136) }}
+      >
         <TimelinePlot
           metric={metric}
           config={config}
@@ -252,6 +276,9 @@ export const TimelineChart = memo(function TimelineChart({
           distance={distance}
           distanceGap={distanceGap}
           viewport={viewport}
+          scale={scale}
+          plotViewport={plotViewport}
+          viewWidth={viewWidth}
         />
       </div>
     </div>

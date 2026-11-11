@@ -1,7 +1,6 @@
 import { normalizeTimelineLayout } from "@/hooks/useActivityTimelineLayout";
 import { describe, expect, it } from "vitest";
 import {
-  groupTimelineByZone,
   smoothTimeline,
   normalizeTimelineSeries,
   timelineOrigin,
@@ -131,27 +130,8 @@ describe("time-based GPS focus", () => {
   });
 });
 
-describe("timeline zone grouping and smoothing", () => {
-  it("keeps the time order, half-open boundaries and separate repeated zones", () => {
-    const points = [120, 130, 150, 160, 120, 125].map((value, time) => ({
-      time,
-      value,
-    }));
-    const groups = groupTimelineByZone(
-      points,
-      [
-        { name: "Z1", min: 0, max: 150 },
-        { name: "Z2", min: 150 },
-      ],
-      5,
-    );
-    expect(groups.map(({ label, range }) => ({ label, range }))).toEqual([
-      { label: "Z1", range: [0, 2] },
-      { label: "Z2", range: [2, 4] },
-      { label: "Z1", range: [4, 5] },
-    ]);
-  });
-  it("does not merge zones across a missing sample or a long data outage", () => {
+describe("timeline smoothing and layouts", () => {
+  it("resets smoothing across a missing sample or long data outage", () => {
     const points = [
       { time: 0, value: 120 },
       { time: 1, value: null },
@@ -160,15 +140,6 @@ describe("timeline zone grouping and smoothing", () => {
       { time: 80, value: 125 },
       { time: 81, value: 125 },
     ];
-    expect(
-      groupTimelineByZone(points, [{ name: "Z1" }], 81).map(
-        (group) => group.range,
-      ),
-    ).toEqual([
-      [0, 1],
-      [2, 3],
-      [80, 81],
-    ]);
     expect(smoothTimeline(points, 10).map((point) => point.value)).toEqual([
       120,
       null,
@@ -200,6 +171,6 @@ describe("timeline zone grouping and smoothing", () => {
     expect(layout.rows).toEqual([
       { id: "custom", metric: "power", height: 86, smoothing: 0 },
     ]);
-    expect(layout.grouping).toBe("power");
+    expect("grouping" in layout).toBe(false);
   });
 });

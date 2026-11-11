@@ -28,6 +28,7 @@ import { UserQueryModule } from '@/api/user/user-query.module';
 import { RunningPlanBaselineQueryService } from './running-plan-baseline-query.service';
 import { WeatherModule } from '@/weather/weather.module';
 import { ActivitySeriesQueryService } from './activity-series-query.service';
+import { ActivityAnalysisSegmentsService } from './activity-analysis-segments.service';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { ActivitySeriesQueryService } from './activity-series-query.service';
   // 静态 /activities/timeline 必须先于旧的 /activities/:hashId 动态路由注册。
   controllers: [ActivityTimelineController, ActivityController],
   providers: [
+    ActivityAnalysisSegmentsService,
     ActivitySeriesQueryService,
     ActivityService,
     ActivityImportDraftService,

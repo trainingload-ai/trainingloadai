@@ -16,7 +16,6 @@ export const TIMELINE_METRICS = [
   "temperature",
 ] as const;
 export type TimelineMetricId = (typeof TIMELINE_METRICS)[number];
-export type TimelineGrouping = "laps" | "heartRate" | "power" | "pace";
 export type TimelineRowConfig = {
   id: string;
   metric: TimelineMetricId;
@@ -25,7 +24,6 @@ export type TimelineRowConfig = {
   color?: string;
 };
 export type TimelineLayout = {
-  grouping: TimelineGrouping;
   axis: "time" | "distance";
   rows: TimelineRowConfig[];
 };
@@ -35,7 +33,6 @@ export function defaultTimelineLayout(running: boolean): TimelineLayout {
     ? ["elevation", "pace", "heartRate", "cadence"]
     : ["elevation", "speed", "power", "heartRate", "pedaling"];
   return {
-    grouping: "laps",
     axis: "time",
     rows: metrics.map((metric) => ({
       id: metric,
@@ -81,11 +78,6 @@ export function normalizeTimelineLayout(
       })
     : fallback.rows;
   return {
-    grouping: ["laps", "heartRate", "power", "pace"].includes(
-      source.grouping ?? "",
-    )
-      ? source.grouping!
-      : "laps",
     axis: source.axis === "distance" ? "distance" : "time",
     rows,
   };

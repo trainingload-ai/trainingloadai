@@ -9,22 +9,13 @@ import {
   type PointerEvent,
 } from "react";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, RotateCcw } from "lucide-react";
+import { MoreHorizontal, RotateCcw, Pencil } from "lucide-react";
 import type { Activity } from "@/api/activities";
 import { useHeartRateZones } from "@/api/use-heart-rate";
 import { useActivityPowerZones } from "@/api/use-power";
-import { useResolvedPaceZones } from "@/api/use-pace";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useElementSize } from "@/components/charts/uplot/useElementSize";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,23 +30,29 @@ import { formatSecondsToTime } from "@/utils/timeFormatter";
 import { getPowerZoneColorByZone } from "@/utils/util";
 import {
   coordinateAtTrackTime,
-  groupTimelineByZone,
   sliceTrackByTime,
-  timelineTimeAtDistance,
   timelineValueAt,
   timelineLowerBound,
   type TimelineRange,
-  type TimelineGroup,
 } from "@/lib/activity-timeline";
 import {
   useActivityTimelineLayout,
-  type TimelineGrouping,
   type TimelineRowConfig,
 } from "@/hooks/useActivityTimelineLayout";
 import { useSetTimelineMapFocus } from "../activity-analysis-link-context";
 import { useActivityTimeline } from "./use-activity-timeline";
 import { TimelineChart } from "./timeline-chart";
 import { TimelineAddChartDialog } from "./timeline-add-chart-dialog";
+import {
+  buildTimelineSegmentScale,
+  timelineWeightedAverage,
+  timelineDominantZone,
+} from "@/lib/activity-timeline-segments";
+import { useTimelineSegments } from "./use-timeline-segments";
+import { TimelineSegmentsDialog } from "./timeline-segments-dialog";
+import { TimelineSegmentHeader } from "./timeline-segment-header";
+import { useStore } from "@/lib/store";
+import type { TimelineSegment } from "@shared/activity-timeline";
 
 const timeLabel = (value: number) => formatSecondsToTime(Math.round(value));
 
@@ -74,7 +71,32 @@ export default function ActivityTimeline({
   );
   const heartRateZones = useHeartRateZones(activityId);
   const powerZones = useActivityPowerZones(activityId);
-  const paceZones = useResolvedPaceZones(activityId);
+  const systemUnit = useStore((state) => state.systemUnit);
+  const nativeSegments = useMemo<TimelineSegment[]>(
+    () =>
+      model?.laps.length
+        ? model.laps.map((lap) => ({
+            id: `lap:${lap.id}`,
+            name: "",
+            start: lap.range[0],
+            end: lap.range[1],
+          }))
+        : model?.duration
+          ? [{ id: "full-activity", name: "", start: 0, end: model.duration }]
+          : [],
+    [model],
+  );
+  const analysis = useTimelineSegments(activityId, nativeSegments);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(
+    null,
+  );
+  const [editing, setEditing] = useState(false);
+  const [editingRevision, setEditingRevision] = useState(0);
+  const beginEdit = () => {
+    setEditingRevision(analysis.revision);
+    setEditing(true);
+  };
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [range, setRange] = useState<TimelineRange | null>(null);
@@ -102,7 +124,7 @@ export default function ActivityTimeline({
     axis === "distance" ? distance!.at(-1)!.value! : (model?.duration ?? 0);
   const current = hovered ?? pinned;
   const activeRange = preview ?? range;
-  const xAtTime = useCallback(
+  const coordinateAtTime = useCallback(
     (time: number) =>
       axis === "time"
         ? time
@@ -110,34 +132,70 @@ export default function ActivityTimeline({
     [axis, distance, model?.distanceGap],
   );
   const viewport = useMemo<TimelineRange>(() => {
-    const from = zoom ? xAtTime(zoom[0]) : null;
-    const to = zoom ? xAtTime(zoom[1]) : null;
+    const from = zoom ? coordinateAtTime(zoom[0]) : null;
+    const to = zoom ? coordinateAtTime(zoom[1]) : null;
     return from !== null && to !== null && to > from ? [from, to] : [0, maxX];
-  }, [zoom, xAtTime, maxX]);
-  // The header, every plot and the ticks use this single scrollable surface.
-  // Keep roughly one pixel per second, bounded for very long activities.
-  const sceneWidth = Math.max(
-    scrollSize.width,
-    zoom ? 0 : Math.min(12000, Math.max(1440, (model?.duration ?? 0) + 172)),
+  }, [zoom, coordinateAtTime, maxX]);
+  const timeViewport = useMemo<TimelineRange>(
+    () => zoom ?? [0, model?.duration ?? 1],
+    [zoom, model?.duration],
   );
+  const plotWidth = Math.max(1, (scrollSize.width || 1084) - 172);
+  const scale = useMemo(
+    () =>
+      buildTimelineSegmentScale(
+        analysis.segments,
+        timeViewport,
+        zoom
+          ? plotWidth
+          : Math.max(
+              plotWidth,
+              Math.min(12000, Math.max(1268, model?.duration ?? 0)),
+            ),
+        coordinateAtTime,
+        selectedSegmentId,
+      ),
+    [
+      analysis.segments,
+      timeViewport,
+      plotWidth,
+      zoom,
+      model?.duration,
+      coordinateAtTime,
+      selectedSegmentId,
+    ],
+  );
+  const sceneWidth = scale.width + 172;
+  const plotViewport = useMemo<TimelineRange>(() => {
+    const start = Math.min(scrollOffset, Math.max(0, scale.width - plotWidth));
+    return [start, start + plotWidth];
+  }, [scrollOffset, scale.width, plotWidth]);
+  const xAtTime = scale.positionAt;
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+    setScrollOffset(0);
   }, [axis, zoom]);
   useEffect(() => {
     const scroller = scrollRef.current;
-    const plot = plotRef.current;
-    const x = pinned === null ? null : xAtTime(pinned);
-    if (!scroller || !plot || x === null || viewport[1] <= viewport[0]) return;
-    const position =
-      160 +
-      ((x - viewport[0]) / (viewport[1] - viewport[0])) * plot.clientWidth;
-    if (position < scroller.scrollLeft + 160)
-      scroller.scrollLeft = Math.max(0, position - 160);
-    else if (position > scroller.scrollLeft + scroller.clientWidth - 12)
-      scroller.scrollLeft = position - scroller.clientWidth + 12;
-  }, [pinned, viewport, xAtTime, sceneWidth]);
-  const percent = (x: number) =>
-    ((x - viewport[0]) / (viewport[1] - viewport[0])) * 100;
+    if (!scroller || pinned === null) return;
+    const position = scale.positionAt(pinned);
+    if (position < scroller.scrollLeft) scroller.scrollLeft = position;
+    else if (position > scroller.scrollLeft + plotWidth)
+      scroller.scrollLeft = position - plotWidth;
+  }, [pinned, scale, plotWidth]);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const selected = analysis.segments.find(
+      (segment) => segment.id === selectedSegmentId,
+    );
+    if (!scroller || !selected) return;
+    const start = scale.positionAt(selected.start),
+      end = scale.positionAt(selected.end);
+    if (start < scroller.scrollLeft) scroller.scrollLeft = start;
+    else if (end > scroller.scrollLeft + plotWidth)
+      scroller.scrollLeft = end - plotWidth;
+  }, [selectedSegmentId, analysis.segments, scale, plotWidth]);
+  const percent = (x: number) => ((x - plotViewport[0]) / plotWidth) * 100;
   const pointTimes = useMemo(
     () =>
       [
@@ -180,40 +238,107 @@ export default function ActivityTimeline({
     },
     [setMapFocus],
   );
-  const groups = useMemo<TimelineGroup[]>(() => {
+  const groups = useMemo(() => {
     if (!model) return [];
-    if (layout.grouping === "laps")
-      return model.laps.map((lap) => ({
-        id: String(lap.id),
-        label: t("lap", { number: lap.index }),
-        range: lap.range,
-      }));
-    const zones = {
-      heartRate: heartRateZones.data?.zones,
-      power: powerZones.data?.zones,
-      pace: paceZones.data?.zones,
-    }[layout.grouping];
-    return groupTimelineByZone(
-      model.groupingSeries[layout.grouping],
-      Array.isArray(zones)
-        ? zones.map((zone, index) => ({
-            ...zone,
-            color: getPowerZoneColorByZone(zone.color, index + 1),
-            // Heart-rate and power distribution use an open-ended last zone.
-            max:
-              layout.grouping !== "pace" && index === zones.length - 1
-                ? undefined
-                : zone.max,
-          }))
-        : [],
-      model.duration,
+    const hrZones = (heartRateZones.data?.zones ?? []).map(
+      (zone, index, all) => ({
+        ...zone,
+        shortName: `Z${index + 1}`,
+        max: index === all.length - 1 ? undefined : zone.max,
+        color: getPowerZoneColorByZone(zone.color, index + 1),
+      }),
     );
+    const pwZones = (powerZones.data?.zones ?? []).map((zone, index, all) => ({
+      ...zone,
+      shortName: `Z${index + 1}`,
+      max: index === all.length - 1 ? undefined : zone.max,
+      color: getPowerZoneColorByZone(zone.color, index + 1),
+    }));
+    return analysis.segments.map((segment, index) => {
+      const range: TimelineRange = [segment.start, segment.end];
+      const original = nativeSegments.find(
+        (native) =>
+          native.id === segment.id &&
+          native.start === segment.start &&
+          native.end === segment.end,
+      );
+      const lap = original
+        ? activity.laps?.find((lap) => `lap:${lap.id}` === original.id)
+        : undefined;
+      const startDistance = timelineValueAt(
+        model.distance,
+        segment.start,
+        model.distanceGap,
+        true,
+      );
+      const endDistance = timelineValueAt(
+        model.distance,
+        segment.end,
+        model.distanceGap,
+        true,
+      );
+      const distanceM =
+        lap?.distance ??
+        (startDistance !== null && endDistance !== null
+          ? Math.max(0, endDistance - startDistance)
+          : null);
+      const speed =
+        lap?.avgSpeed ??
+        timelineWeightedAverage(model.summarySeries.speed, range);
+      const heartRate =
+        lap?.avgHeartRate ??
+        timelineWeightedAverage(model.summarySeries.heartRate, range);
+      const power =
+        (model.metrics.find((metric) => metric.id === "power")?.calculated
+          ? null
+          : lap?.avgPower) ??
+        timelineWeightedAverage(model.summarySeries.power, range);
+      const hrZone = timelineDominantZone(
+        model.summarySeries.heartRate,
+        hrZones,
+        range,
+      );
+      const powerZone = timelineDominantZone(
+        model.summarySeries.power,
+        pwZones,
+        range,
+      );
+      const primaryZone =
+        activity.sportType === "RUN"
+          ? (hrZone ?? powerZone)
+          : (powerZone ?? hrZone);
+      const pace =
+        speed !== null && speed > 0
+          ? activity.sportType === "RUN"
+            ? `${timeLabel((systemUnit === "imperial" ? 1609.344 : 1000) / speed)} ${systemUnit === "imperial" ? "min/mi" : "min/km"}`
+            : `${(speed * (systemUnit === "imperial" ? 2.236936 : 3.6)).toFixed(1)} ${systemUnit === "imperial" ? "mph" : "km/h"}`
+          : "—";
+      return {
+        id: segment.id,
+        label: segment.name || t("lap", { number: index + 1 }),
+        range,
+        color: primaryZone?.color,
+        duration: timeLabel(segment.end - segment.start),
+        distance: distanceM === null ? "—" : formatDistance(distanceM),
+        pace,
+        heartRate: heartRate === null ? "—" : `${Math.round(heartRate)} bpm`,
+        power:
+          power === null
+            ? "—"
+            : `${model.metrics.find((metric) => metric.id === "power")?.calculated ? "≈" : ""}${Math.round(power)} W`,
+        hrZone,
+        powerZone,
+      };
+    });
   }, [
     model,
-    layout.grouping,
     heartRateZones.data,
     powerZones.data,
-    paceZones.data,
+    analysis.segments,
+    nativeSegments,
+    activity,
+    systemUnit,
+    formatDistance,
     t,
   ]);
   const visibleRows = useMemo(
@@ -229,30 +354,20 @@ export default function ActivityTimeline({
   const visibleGroups = useMemo(
     () =>
       groups.flatMap((group) => {
-        const start = xAtTime(group.range[0]);
-        const end = xAtTime(group.range[1]);
-        if (
-          start === null ||
-          end === null ||
-          end <= viewport[0] ||
-          start >= viewport[1]
-        )
-          return [];
+        const start = Math.max(group.range[0], timeViewport[0]);
+        const end = Math.min(group.range[1], timeViewport[1]);
+        if (end <= start) return [];
+        const left = scale.positionAt(start),
+          right = scale.positionAt(end);
         return [
           {
             ...group,
-            left: Math.max(
-              0,
-              ((start - viewport[0]) / (viewport[1] - viewport[0])) * 100,
-            ),
-            width:
-              ((Math.min(end, viewport[1]) - Math.max(start, viewport[0])) /
-                (viewport[1] - viewport[0])) *
-              100,
+            left: (left / scale.width) * 100,
+            width: ((right - left) / scale.width) * 100,
           },
         ];
       }),
-    [groups, xAtTime, viewport],
+    [groups, timeViewport, scale],
   );
 
   const hover = (time: number | null) => {
@@ -271,16 +386,15 @@ export default function ActivityTimeline({
   const atPointer = (event: PointerEvent) => {
     const rect = plotRef.current!.getBoundingClientRect();
     const x =
-      viewport[0] +
+      plotViewport[0] +
       Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)) *
-        (viewport[1] - viewport[0]);
-    return axis === "time"
-      ? x
-      : timelineTimeAtDistance(distance ?? [], x, model?.distanceGap);
+        plotWidth;
+    return scale.timeAt(x);
   };
   const reset = () => {
     stopHover();
     setZoom(null);
+    setSelectedSegmentId(null);
     setRange(null);
     setPreview(null);
   };
@@ -298,6 +412,7 @@ export default function ActivityTimeline({
         Math.min(start.time, time),
         Math.max(start.time, time),
       ];
+      setSelectedSegmentId(null);
       setRange(selected);
       setZoom(selected);
     }
@@ -346,15 +461,8 @@ export default function ActivityTimeline({
   const tickCount = Math.max(6, Math.ceil((sceneWidth - 172) / 180) + 1);
   const ticks = Array.from(
     { length: tickCount },
-    (_, index) =>
-      viewport[0] + (index * (viewport[1] - viewport[0])) / (tickCount - 1),
+    (_, index) => (index * scale.width) / (tickCount - 1),
   );
-  const zonesLoading = {
-    laps: false,
-    heartRate: heartRateZones.isPending,
-    power: powerZones.isPending,
-    pace: paceZones.isPending,
-  }[layout.grouping];
   return (
     <section
       aria-label={t("title")}
@@ -366,130 +474,104 @@ export default function ActivityTimeline({
         ref={bindScroll}
         className="overflow-x-auto overscroll-x-contain"
         data-timeline-scroll
+        onScroll={(event) => setScrollOffset(event.currentTarget.scrollLeft)}
       >
         <div style={{ width: sceneWidth, minWidth: "100%" }}>
-          <div className="grid min-h-14 grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
-            <div className="sticky left-0 z-20 flex h-full items-center gap-1 bg-background px-2">
-              <Select
-                value={layout.grouping}
-                onValueChange={(grouping) =>
-                  setLayout((value) => ({
-                    ...value,
-                    grouping: grouping as TimelineGrouping,
-                  }))
-                }
-              >
-                <SelectTrigger
-                  className="min-w-0 flex-1"
-                  aria-label={t("grouping")}
+          <div className="grid min-h-[120px] grid-cols-[160px_minmax(0,1fr)] items-center border-b border-border/60 pr-3">
+            <div className="sticky left-0 z-20 flex h-full flex-col items-stretch justify-between gap-2 border-r border-border bg-background px-3 py-3">
+              <div className="flex items-center justify-between gap-1">
+                <span
+                  className="px-1 text-xs font-medium"
+                  title={t("segmentScaleDescription")}
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {(["laps", "heartRate", "power", "pace"] as const).map(
-                      (mode) => (
-                        <SelectItem key={mode} value={mode}>
-                          {t(`groups.${mode}`)}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label={t("timelineOptions")}
-                >
-                  <MoreHorizontal />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuRadioGroup
-                    value={axis}
-                    onValueChange={(value) =>
-                      setLayout((layout) => ({
-                        ...layout,
-                        axis: value as "time" | "distance",
-                      }))
-                    }
-                    aria-label={t("axis")}
+                  {t("segments")}
+                </span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={t("timelineOptions")}
                   >
-                    <DropdownMenuRadioItem value="time">
-                      {t("time")}
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="distance"
-                      disabled={!model.distance.length}
+                    <MoreHorizontal />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuRadioGroup
+                      value={axis}
+                      onValueChange={(value) =>
+                        setLayout((layout) => ({
+                          ...layout,
+                          axis: value as "time" | "distance",
+                        }))
+                      }
+                      aria-label={t("axis")}
                     >
-                      {t("distance")}
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      onSelect={reset}
-                      disabled={!zoom && !range}
-                    >
-                      <RotateCcw />
-                      {t("resetZoom")}
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <DropdownMenuRadioItem value="time">
+                        {t("time")}
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="distance"
+                        disabled={!model.distance.length}
+                      >
+                        {t("distance")}
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onSelect={reset}
+                        disabled={!zoom && !range}
+                      >
+                        <RotateCcw />
+                        {t("resetZoom")}
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {analysis.custom
+                  ? t("customSegments")
+                  : model.laps.length
+                    ? t("deviceLaps")
+                    : t("fullActivity")}
+              </span>
+              <Button
+                variant="ghost"
+                size="compact"
+                className="justify-start px-0"
+                disabled={!analysis.canEdit}
+                onClick={beginEdit}
+              >
+                <Pencil />
+                {t("editSegments")}
+              </Button>
             </div>
             <div
-              className="relative h-10 min-w-0"
+              className="relative h-[120px] min-w-0"
               role="group"
-              aria-label={t("groups." + layout.grouping)}
+              aria-label={t("segments")}
             >
-              {visibleGroups.map((group) => {
-                const selected =
-                  range?.[0] === group.range[0] && range[1] === group.range[1];
-                const pixelWidth = (group.width / 100) * (sceneWidth - 172);
-                return (
-                  <button
-                    key={group.id}
-                    type="button"
-                    aria-label={`${group.label} ${timeLabel(group.range[0])}–${timeLabel(group.range[1])}`}
-                    aria-pressed={selected}
-                    title={`${group.label} ${timeLabel(group.range[0])}–${timeLabel(group.range[1])}`}
-                    data-selected={selected}
-                    className="absolute inset-y-0 flex flex-col items-center justify-center gap-0.5 overflow-hidden rounded-xs border border-border bg-muted text-xs hover:border-foreground/40 focus-visible:outline-2 focus-visible:outline-ring data-[selected=true]:border-foreground"
-                    style={{
-                      left: `${group.left}%`,
-                      width: `${group.width}%`,
-                      ...(group.color
-                        ? {
-                            backgroundColor: `color-mix(in srgb, ${group.color} 20%, var(--background))`,
-                          }
-                        : {}),
-                    }}
-                    onClick={() => {
-                      stopHover();
-                      setRange(selected ? null : group.range);
-                    }}
-                  >
-                    {pixelWidth >= 44 ? (
-                      <span className="truncate max-w-full px-1 font-medium">
-                        {group.label}
-                      </span>
-                    ) : null}
-                    {pixelWidth >= 128 ? (
-                      <span className="truncate max-w-full px-1 text-[11px] tabular-nums">
-                        {timeLabel(group.range[0])}–{timeLabel(group.range[1])}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
+              {visibleGroups.map((group) => (
+                <TimelineSegmentHeader
+                  key={group.id}
+                  group={group}
+                  left={group.left}
+                  width={group.width}
+                  selected={selectedSegmentId === group.id}
+                  onSelect={() => {
+                    stopHover();
+                    const selected = selectedSegmentId === group.id;
+                    setSelectedSegmentId(selected ? null : group.id);
+                    setRange(selected ? null : group.range);
+                  }}
+                />
+              ))}
               {!visibleGroups.length ? (
                 <span
                   className="flex h-full items-center text-xs text-muted-foreground"
                   role="status"
                 >
-                  {zonesLoading ? t("loadingGroups") : t("noGroups")}
+                  {t("noSegments")}
                 </span>
               ) : null}
             </div>
@@ -499,19 +581,13 @@ export default function ActivityTimeline({
               className="pointer-events-none absolute inset-y-0 left-40 right-3 overflow-hidden"
               aria-hidden
             >
-              {visibleGroups.map((group) =>
-                group.color ? (
-                  <span
-                    key={group.id}
-                    className="absolute inset-y-0"
-                    style={{
-                      left: `${group.left}%`,
-                      width: `${group.width}%`,
-                      backgroundColor: `color-mix(in srgb, ${group.color} 7%, transparent)`,
-                    }}
-                  />
-                ) : null,
-              )}
+              {visibleGroups.map((group) => (
+                <span
+                  key={group.id}
+                  className="absolute inset-y-0 border-l border-border/40"
+                  style={{ left: `${group.left}%` }}
+                />
+              ))}
             </div>
             {visibleRows.map(({ config, metric }, index) => (
               <TimelineChart
@@ -522,7 +598,10 @@ export default function ActivityTimeline({
                 axis={axis}
                 distance={model.distance}
                 distanceGap={model.distanceGap}
-                viewport={viewport}
+                viewport={timeViewport}
+                scale={scale}
+                plotViewport={plotViewport}
+                viewWidth={scrollSize.width || 1084}
                 current={current}
                 onChange={(change) => updateRow(config.id, change)}
                 onRemove={() =>
@@ -539,7 +618,8 @@ export default function ActivityTimeline({
             {visibleRows.length ? (
               <div
                 ref={plotRef}
-                className="absolute inset-y-0 left-40 right-3 cursor-crosshair touch-pan-y focus-visible:outline-2 focus-visible:outline-ring"
+                className="absolute inset-y-0 cursor-crosshair touch-pan-y focus-visible:outline-2 focus-visible:outline-ring overflow-hidden"
+                style={{ left: 160 + plotViewport[0], width: plotWidth }}
                 role="slider"
                 tabIndex={0}
                 aria-label={t("inspect")}
@@ -552,6 +632,12 @@ export default function ActivityTimeline({
                 onKeyDown={(event) => {
                   if (event.key === "Escape") {
                     reset();
+                    return;
+                  }
+                  if (event.key === "Home" || event.key === "End") {
+                    event.preventDefault();
+                    stopHover();
+                    setPinned(event.key === "Home" ? 0 : model.duration);
                     return;
                   }
                   if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
@@ -602,16 +688,22 @@ export default function ActivityTimeline({
               >
                 {fromX !== null && toX !== null && !zoom ? (
                   <span
-                    className="pointer-events-none absolute inset-y-0 border-x border-foreground/20 bg-foreground/5"
+                    data-timeline-selection
+                    className="pointer-events-none absolute inset-y-0 border-x border-foreground/30 bg-foreground/5"
                     style={{
                       left: `${percent(fromX)}%`,
-                      width: `${((toX - fromX) / (viewport[1] - viewport[0])) * 100}%`,
+                      width: `${((toX - fromX) / plotWidth) * 100}%`,
+                      ...(selectedSegmentId
+                        ? {
+                            backgroundColor: `color-mix(in srgb, ${groups.find((group) => group.id === selectedSegmentId)?.color ?? "var(--foreground)"} 6%, transparent)`,
+                          }
+                        : {}),
                     }}
                   />
                 ) : null}
                 {currentX !== null &&
-                currentX >= viewport[0] &&
-                currentX <= viewport[1] ? (
+                currentX >= plotViewport[0] &&
+                currentX <= plotViewport[1] ? (
                   <span
                     className="pointer-events-none absolute inset-y-0 border-l border-foreground/60"
                     style={{ left: `${percent(currentX)}%` }}
@@ -639,13 +731,45 @@ export default function ActivityTimeline({
                           : "translateX(-50%)",
                   }}
                 >
-                  {axis === "time" ? timeLabel(value) : formatDistance(value)}
+                  {axis === "time"
+                    ? timeLabel(scale.timeAt(value))
+                    : (() => {
+                        const distance = coordinateAtTime(scale.timeAt(value));
+                        return distance === null
+                          ? "—"
+                          : formatDistance(distance);
+                      })()}
                 </span>
               ))}
             </div>
           ) : null}
         </div>
       </div>
+      {editing ? (
+        <TimelineSegmentsDialog
+          segments={analysis.segments}
+          native={nativeSegments}
+          selectedId={selectedSegmentId}
+          duration={model.duration}
+          saving={analysis.saving}
+          onClose={() => setEditing(false)}
+          onSave={async (segments) => {
+            const unchanged =
+              segments.length === nativeSegments.length &&
+              segments.every((segment, index) => {
+                const native = nativeSegments[index];
+                return (
+                  native.id === segment.id &&
+                  native.name === segment.name &&
+                  native.start === segment.start &&
+                  native.end === segment.end
+                );
+              });
+            await analysis.save(unchanged ? null : segments, editingRevision);
+            reset();
+          }}
+        />
+      ) : null}
       <TimelineAddChartDialog
         metrics={model.metrics}
         onAdd={(metric) =>

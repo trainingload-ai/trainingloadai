@@ -47,6 +47,8 @@ import { PlanService } from '@/api/plan/plan.service';
 import { ReplaceActivityPlanLinkDto } from '@/api/plan/dto/replace-activity-plan-link.dto';
 import { CommitActivityImportDraftDto } from './dto/activity-import-draft.dto';
 import { UpdateActivitySessionRpeDto } from './dto/update-activity-session-rpe.dto';
+import { ActivityAnalysisSegmentsService } from './activity-analysis-segments.service';
+import { ReplaceTimelineSegmentsDto } from './dto/replace-timeline-segments.dto';
 import { ActivityAiReviewService } from './activity-ai-review.service';
 import { createContentDisposition } from '@/utils/filename.util';
 import { OAuthHybridAuthGuard } from '@/oauth/oauth-hybrid-auth.guard';
@@ -86,6 +88,7 @@ export class ActivityController {
     private readonly activityService: ActivityService,
     private readonly activityQuery: ActivityQueryService,
     private readonly activityMapDerivation: ActivityMapDerivationService,
+    private readonly analysisSegments: ActivityAnalysisSegmentsService,
     private readonly activityImportDraftService: ActivityImportDraftService,
     private readonly importBatchService: ImportBatchService,
     private readonly powerService: powerService,
@@ -880,6 +883,17 @@ export class ActivityController {
     @CurrentUserId() userId: string,
   ) {
     return this.activityMapDerivation.getTimelineTrackByHash(hashId, userId);
+  }
+
+  @Get(':hashId/timeline-segments')
+  @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.ACTIVITIES_READ)
+  getTimelineSegments(@ActivityHashId() hashId: string, @CurrentUserId() userId: string) {
+    return this.analysisSegments.get(hashId, userId);
+  }
+
+  @Put(':hashId/timeline-segments')
+  replaceTimelineSegments(@ActivityHashId() hashId: string, @CurrentUserId() userId: string, @Body() dto: ReplaceTimelineSegmentsDto) {
+    return this.analysisSegments.replace(hashId, userId, dto);
   }
 
   /**

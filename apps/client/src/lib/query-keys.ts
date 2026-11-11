@@ -51,6 +51,8 @@ export const queryKeys = {
     layer: (activityId: string) => ["activity-layer", activityId] as const,
     timelineTrack: (activityId: string) =>
       ["activity", activityId, "timeline-track"] as const,
+    timelineSegments: (activityId: string) =>
+      ["activity", activityId, "timeline-segments"] as const,
     planLink: (activityId: string) =>
       ["activity-plan-link", activityId] as const,
     stats: (year?: number) => ["activity-stats", year] as const,

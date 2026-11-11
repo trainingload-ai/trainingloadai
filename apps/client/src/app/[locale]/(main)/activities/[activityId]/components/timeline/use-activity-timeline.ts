@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useQueries,
   useQuery,
@@ -68,6 +68,11 @@ const EMPTY_TRACK: Extract<
 
 export function useActivityTimeline(activity: Activity, activityId: string) {
   const systemUnit = useStore((state) => state.systemUnit);
+  const formatDistance = useCallback(
+    (value: number) =>
+      `${formatValue(value, "distance", systemUnit)} ${getUnit("distance", systemUnit)}`,
+    [systemUnit],
+  );
   const running = activity.sportType === "RUN";
   const requested = METRICS;
   const queries = useQueries({
@@ -273,7 +278,8 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
       duration,
       origin,
       laps: timelineLaps(activity.laps ?? [], origin, duration),
-      groupingSeries: {
+      summarySeries: {
+        speed: series("speed"),
         heartRate: series("heartRate").map((point) => ({
           ...point,
           value: point.value !== null && point.value > 0 ? point.value : null,
@@ -284,11 +290,6 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
             ? "calculatedPower"
             : "power",
         ),
-        pace: series("speed").map((point) => ({
-          time: point.time,
-          value:
-            point.value !== null && point.value > 0 ? 1 / point.value : null,
-        })),
       },
     };
   }, [origin, readyOrigin, systemUnit, activity, running, data]);
@@ -301,8 +302,7 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
     },
     segments:
       track.data?.status === "available" ? track.data.segments : EMPTY_TRACK,
-    formatDistance: (value: number) =>
-      `${formatValue(value, "distance", systemUnit)} ${getUnit("distance", systemUnit)}`,
+    formatDistance,
     distance: model?.distance ?? EMPTY_POINTS,
   };
 }

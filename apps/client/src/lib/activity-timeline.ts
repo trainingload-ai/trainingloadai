@@ -268,55 +268,11 @@ export function sliceTrackByTime(
 
 export type TimelineZone = {
   name: string;
+  shortName?: string;
   min?: number;
   max?: number;
   color?: string;
 };
-export type TimelineGroup = {
-  id: string;
-  label: string;
-  range: TimelineRange;
-  color?: string;
-};
-
-export function groupTimelineByZone(
-  points: TimelinePoint[],
-  zones: TimelineZone[],
-  duration: number,
-): TimelineGroup[] {
-  const gap = timelineGapLimit(points);
-  const groups: TimelineGroup[] = [];
-  for (let index = 0; index < points.length; index++) {
-    const point = points[index];
-    const next = points[index + 1];
-    if (point.value === null || !next || next.time - point.time > gap) continue;
-    const zoneIndex = zones.findIndex(
-      (zone) =>
-        point.value! >= (zone.min ?? -Infinity) &&
-        point.value! < (zone.max ?? Infinity),
-    );
-    if (zoneIndex < 0) continue;
-    const end = Math.min(duration, next.time);
-    if (end <= point.time) continue;
-    const zone = zones[zoneIndex];
-    const previous = groups.at(-1);
-    if (
-      previous?.id.startsWith(`${zoneIndex}:`) &&
-      previous.range[1] === point.time
-    ) {
-      previous.range = [previous.range[0], end];
-    } else {
-      groups.push({
-        id: `${zoneIndex}:${point.time}`,
-        label: zone.name.toUpperCase(),
-        range: [point.time, end],
-        color: zone.color,
-      });
-    }
-  }
-  return groups;
-}
-
 export function smoothTimeline(
   points: TimelinePoint[],
   window: number,

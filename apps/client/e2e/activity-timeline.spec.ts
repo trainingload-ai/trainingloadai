@@ -13,6 +13,10 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   const start = Date.parse("2026-11-10T07:00:00Z");
   const duration = 2040;
   let distance = 0;
+  let savedSegments: { revision: number; segments: unknown[] | null } = {
+    revision: 0,
+    segments: null,
+  };
   const rows = Array.from({ length: duration / 5 + 1 }, (_, index) => {
     const time = index * 5;
     const hard = [
@@ -67,7 +71,8 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
       [900, 1140],
       [1140, 1320],
       [1320, 1560],
-      [1560, duration],
+      [1560, duration - 3],
+      [duration - 3, duration],
     ].map(([from, to], index) => ({
       id: index + 1,
       index,
@@ -105,6 +110,21 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
           },
         },
       });
+    if (path === "/activities/timeline-run/timeline-segments") {
+      if (route.request().method() === "PUT") {
+        const payload = route.request().postDataJSON();
+        if (payload.revision !== savedSegments.revision)
+          return route.fulfill({
+            status: 409,
+            json: { message: "TIMELINE_SEGMENTS_STALE" },
+          });
+        savedSegments = {
+          revision: savedSegments.revision + 1,
+          segments: payload.segments,
+        };
+      }
+      return route.fulfill({ json: { data: savedSegments } });
+    }
     if (path === "/activities/timeline-run/timeline-track")
       return route.fulfill({
         json: { data: { status: "available", segments: [track] } },
@@ -167,16 +187,22 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
       (element) => element.scrollWidth > element.clientWidth,
     ),
   ).toBe(true);
-  const firstLap = (await lapGroups.getByRole("button").first().boundingBox())!;
-  const secondLap = (await lapGroups.getByRole("button").nth(1).boundingBox())!;
+  const firstLap = (await timeline
+    .locator('[data-segment-id="lap:1"]')
+    .boundingBox())!;
+  const secondLap = (await timeline
+    .locator('[data-segment-id="lap:2"]')
+    .boundingBox())!;
   const fullPlot = (await timeline.locator(".cursor-crosshair").boundingBox())!;
   expect(firstLap.width / secondLap.width).toBeCloseTo(2, 1);
   expect(firstLap.x).toBeCloseTo(fullPlot.x, 0);
-  expect(secondLap.x - fullPlot.x).toBeCloseTo(
-    (fullPlot.width * 480) / duration,
-    0,
-  );
-  await lapGroups.getByRole("button").last().click();
+  expect(secondLap.x - fullPlot.x).toBeCloseTo(firstLap.width, 0);
+  const tail = lapGroups.getByRole("button", { name: /^第 8 圈/ });
+  await tail.click();
+  expect(
+    (await timeline.locator('[data-segment-id="lap:8"]').boundingBox())!.width,
+  ).toBeGreaterThanOrEqual(208);
+  await expect(tail).toContainText("0:03");
   expect(
     await scroller.evaluate((element) => element.scrollLeft),
   ).toBeGreaterThan(0);
@@ -187,7 +213,31 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   const scrolledPlot = (await timeline
     .locator(".cursor-crosshair")
     .boundingBox())!;
-  expect(scrolledLap.x).toBeCloseTo(scrolledPlot.x, 0);
+  expect(scrolledLap.x).toBeLessThan(scrolledPlot.x);
+  expect(scrolledPlot.width).toBeLessThan(1200);
+  await expect(
+    timeline.getByRole("combobox", { name: "分组方式" }),
+  ).toHaveCount(0);
+  await timeline.getByRole("button", { name: "编辑分段", exact: true }).click();
+  const editor = page.getByRole("dialog", { name: "编辑分段", exact: true });
+  await editor.getByLabel("分段名称", { exact: true }).fill("收尾");
+  await editor.getByLabel("起点（分:秒）", { exact: true }).fill("33:56");
+  await expect(
+    editor.getByRole("button", { name: "保存分段", exact: true }),
+  ).toBeDisabled();
+  await editor.getByLabel("起点（分:秒）", { exact: true }).fill("33:57");
+  await editor.screenshot({
+    path: test.info().outputPath("timeline-segment-editor.png"),
+  });
+  await editor.getByRole("button", { name: "保存分段", exact: true }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(timeline.getByRole("button", { name: /^收尾 / })).toBeVisible();
+  expect(savedSegments.revision).toBe(1);
+  expect(savedSegments.segments?.at(-1)).toMatchObject({
+    name: "收尾",
+    start: duration - 3,
+    end: duration,
+  });
   const settingsBounds = (await timeline
     .getByRole("button", { name: "配置海拔图表" })
     .boundingBox())!;
@@ -204,28 +254,29 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await expect(page.locator(".maplibregl-canvas")).toHaveCount(1);
   const position = timeline.getByRole("slider");
   await position.focus();
+  await page.keyboard.press("Home");
   await page.keyboard.press("ArrowRight");
   await expect(position).toHaveAttribute("aria-valuetext", "0:05");
   await timeline.getByRole("button", { name: /第 2 圈 8:00/ }).click();
   await expect(
     timeline.getByRole("button", { name: /第 2 圈 8:00/ }),
   ).toHaveAttribute("aria-pressed", "true");
-  for (const mode of ["心率区间", "功率区间", "配速区间"]) {
-    await timeline.getByRole("combobox", { name: "分组方式" }).click();
-    await page.getByRole("option", { name: mode, exact: true }).click();
-    await expect(
-      timeline.getByRole("group", { name: mode }).getByRole("button").first(),
-    ).toBeVisible();
-    const zoneColors = await timeline
-      .getByRole("group", { name: mode })
-      .getByRole("button")
-      .evaluateAll((buttons) =>
-        buttons.map((button) => getComputedStyle(button).backgroundColor),
-      );
-    expect(new Set(zoneColors).size).toBeGreaterThan(1);
-  }
-  await timeline.getByRole("combobox", { name: "分组方式" }).click();
-  await page.getByRole("option", { name: "分段", exact: true }).click();
+  const expectSelectionAligned = async () => {
+    const segment = (await timeline
+      .locator('[data-segment-id="lap:2"]')
+      .boundingBox())!;
+    const selection = (await timeline
+      .locator("[data-timeline-selection]")
+      .boundingBox())!;
+    expect(selection.x).toBeCloseTo(segment.x, 0);
+    expect(selection.width).toBeCloseTo(segment.width, 0);
+  };
+  await expectSelectionAligned();
+  await timeline.getByRole("button", { name: "时间线选项" }).click();
+  await page.getByRole("menuitemradio", { name: "距离", exact: true }).click();
+  await expectSelectionAligned();
+  await timeline.getByRole("button", { name: "时间线选项" }).click();
+  await page.getByRole("menuitemradio", { name: "时间", exact: true }).click();
   const plot = timeline.locator(".cursor-crosshair");
   const bounds = (await plot.boundingBox())!;
   await page.mouse.move(bounds.x + bounds.width * 0.15, bounds.y + 20);
