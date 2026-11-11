@@ -109,7 +109,6 @@ export default function ActivityTimeline({
   const [range, setRange] = useState<TimelineRange | null>(null);
   const [zoom, setZoom] = useState<TimelineRange | null>(null);
   const [preview, setPreview] = useState<TimelineRange | null>(null);
-  const [showFullStatistics, setShowFullStatistics] = useState(false);
   const plotRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const { ref: observeScroll, size: scrollSize } =
@@ -134,9 +133,8 @@ export default function ActivityTimeline({
   const readingTime = hovered ?? (keyboardInspecting ? pinned : null);
   const activeRange = preview ?? range;
   const statisticsRange = useMemo<TimelineRange | null>(
-    () =>
-      activeRange ?? (showFullStatistics && model ? [0, model.duration] : null),
-    [activeRange, showFullStatistics, model],
+    () => activeRange ?? (model ? [0, model.duration] : null),
+    [activeRange, model],
   );
   const coordinateAtTime = useCallback(
     (time: number) =>
@@ -442,7 +440,6 @@ export default function ActivityTimeline({
     setSelectedSegmentId(null);
     setRange(null);
     setPreview(null);
-    setShowFullStatistics(true);
   };
   const finishPointer = (event: PointerEvent) => {
     const start = drag.current;
@@ -460,7 +457,6 @@ export default function ActivityTimeline({
         Math.max(start.time, time),
       ];
       setSelectedSegmentId(null);
-      setShowFullStatistics(false);
       setRange(selected);
       setZoom(selected);
     }
@@ -608,7 +604,6 @@ export default function ActivityTimeline({
                   selected={selectedSegmentId === group.id}
                   onSelect={() => {
                     stopHover();
-                    setShowFullStatistics(false);
                     const selected = selectedSegmentId === group.id;
                     setSelectedSegmentId(selected ? null : group.id);
                     setRange(selected ? null : group.range);

@@ -207,7 +207,20 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
     exact: true,
   });
   await expect(timeline.getByRole("img")).toHaveCount(4);
-  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(0);
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(4);
+  const initialStatistics = timeline.locator(
+    '[data-timeline-row="cadence"] [data-timeline-statistics]',
+  );
+  await expect(initialStatistics).toHaveAttribute("data-statistics-start", "0");
+  await expect(initialStatistics).toHaveAttribute(
+    "data-statistics-end",
+    String(duration),
+  );
+  await expect(initialStatistics.locator("dd")).toHaveText([
+    "170",
+    "164",
+    "182",
+  ]);
   await expect(timeline.getByText("设备圈段", { exact: true })).toHaveCount(0);
   await expect(timeline.getByText("自定义分段", { exact: true })).toHaveCount(
     0,
@@ -314,7 +327,12 @@ test("PC activity timeline shares axes, selection and real map lifecycle", async
   await tail.focus();
   await page.keyboard.press("Escape");
   await tail.click();
-  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(0);
+  await expect(timeline.locator("[data-timeline-statistics]")).toHaveCount(4);
+  await expect(cadenceStatistics.locator("dd")).toHaveText([
+    "170",
+    "164",
+    "182",
+  ]);
   await tail.click();
   await page.mouse.move(0, 0);
   await page.keyboard.press("Shift+Tab");
