@@ -75,6 +75,7 @@ export default defineConfig({
       "src/app/**/activities/**/common-activity.test.tsx",
       "src/lib/today-suggestion-refresh.test.ts",
       "src/lib/spec/coach-home-card-stack.test.ts",
+      "src/components/vdot-forecast-summary.test.tsx",
       "src/components/routes/**/*.test.{ts,tsx}",
       "src/components/MapBoxMap/**/*.test.{ts,tsx}",
       "src/components/health/**/*.test.{ts,tsx}",

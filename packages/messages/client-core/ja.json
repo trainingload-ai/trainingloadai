@@ -235,7 +235,8 @@
         "metricUpdate": "体力指標を更新",
         "bodyWeightUpdate": "体重を記録",
         "trainingDataCoverage": "トレーニングデータ範囲",
-        "coachTaskResult": "バックグラウンドタスク結果"
+        "coachTaskResult": "バックグラウンドタスク結果",
+        "metricForecast": "4週間の VDOT 予測を取得"
       },
       "skills": {
         "integrationSupport": "デバイス接続と同期",
@@ -6371,5 +6372,19 @@
     "forward": "進む",
     "navigation": "ウィンドウナビゲーション",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "4週間後の推定 VDOT {value}",
+    "interval": "80%予測区間 {lower}–{upper}",
+    "basis": "{date} までの VDOT 履歴に基づく推定です。",
+    "askCoach": "コーチに聞く",
+    "coachPrompt": "4週間後の VDOT 予測について、推定値と予測区間を説明してください。",
+    "chartLabel": "VDOT 予測",
+    "historyAndForecast": "選択した履歴 + 今後4週間の予測",
+    "INSUFFICIENT_HISTORY": "4週間の予測には、さらにランニング記録が必要です。",
+    "STALE_HISTORY": "新しいランニング記録で予測が更新されます。",
+    "INCOMPARABLE_HISTORY": "現在の VDOT 算出方法での記録がさらに必要です。",
+    "MODEL_UNAVAILABLE": "現在、予測を利用できません。",
+    "currentEstimate": "現在の推定値"
   }
 }

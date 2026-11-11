@@ -235,7 +235,8 @@
         "metricUpdate": "체력 지표 수정",
         "bodyWeightUpdate": "체중 기록",
         "trainingDataCoverage": "훈련 데이터 범위",
-        "coachTaskResult": "백그라운드 작업 결과"
+        "coachTaskResult": "백그라운드 작업 결과",
+        "metricForecast": "4주 VDOT 예측 조회"
       },
       "skills": {
         "integrationSupport": "기기 연결 및 동기화",
@@ -6371,5 +6372,19 @@
     "forward": "앞으로",
     "navigation": "창 탐색",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "4주 후 예상 VDOT {value}",
+    "interval": "80% 예측 구간 {lower}–{upper}",
+    "basis": "{date}까지의 VDOT 기록을 기반으로 추정했습니다.",
+    "askCoach": "코치에게 질문",
+    "coachPrompt": "4주 VDOT 예측의 예상 값과 예측 구간을 설명해 주세요.",
+    "chartLabel": "VDOT 예측",
+    "historyAndForecast": "선택한 기록 + 향후 4주 예측",
+    "INSUFFICIENT_HISTORY": "4주 예측을 위해 더 많은 러닝 기록이 필요합니다.",
+    "STALE_HISTORY": "새 러닝 기록이 추가되면 예측이 업데이트됩니다.",
+    "INCOMPARABLE_HISTORY": "현재 VDOT 산출 방식으로 계산된 기록이 더 필요합니다.",
+    "MODEL_UNAVAILABLE": "현재 예측을 사용할 수 없습니다.",
+    "currentEstimate": "현재 추정치"
   }
 }

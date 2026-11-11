@@ -15,9 +15,11 @@ export const trainingAnalyticsSkill: CoachSkillDef = {
     'activity.series',
     'pmc.range',
     'metric.history',
+    'metric.forecast',
     'profile.current',
   ],
   prompt: [
+    'For future VDOT/VO2max or expected progress next month, call metric.forecast. Use its four-week values, dates, source and intervals exactly. READY contains a historical-VDOT projection. Other statuses require an explanation of missing, stale, incomparable or unavailable evidence. Separate exercise encouragement from the returned numerical projection. Quantified effects of changing training need a model with training inputs. Use estimatedCurrentLevel when explaining model-relative changes, and metric.current for the adopted current metric.',
     'First identify the analytical relationship: a single lookup, trend over time, comparison, composition, distribution, relationship, or an activity segment. Use the smallest query that answers it.',
     'Use training.aggregate when a number or short textual comparison is clearer. Use present_training_visualization when shape, change, composition, or repeated values matter. A user asking for a chart is a strong preference, but choose a compatible view rather than forcing a chart type.',
     'Prefer a line or area view for time trends, bars for category or activity comparisons, stacked bars for composition over time, metric strips for one compact result, and tables when exact values or sparse data matter. These are judgment aids, not a required call sequence.',

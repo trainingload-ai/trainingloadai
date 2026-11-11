@@ -15,6 +15,7 @@ export const fitnessAssessmentSkill: CoachSkillDef = {
     'activity.byHashId',
     'metric.current',
     'metric.history',
+    'metric.forecast',
     'profile.current',
     'ask_user_question',
     'plan.active',
@@ -26,6 +27,7 @@ export const fitnessAssessmentSkill: CoachSkillDef = {
     'coach_decision_apply',
   ],
   prompt: [
+    'A request for VDOT in four weeks or next month is a future forecast. Call metric.forecast and explain its returned status, estimates and 80% prediction intervals. Do not substitute a current fitness assessment or invent future values when the forecast is unavailable. The forecast uses historical VDOT, so it cannot quantify the effects of a proposed training change.',
     'Complete the requested assessment using the selected evidence and the method catalog, including its rationale and interpretation, not just requirements. Use applicable deterministic calculators when their execution requirements are met. Other evidence-based estimates may be explained with their actual inputs, derivation and assumptions, clearly distinguished from tool results; never fabricate inputs or calculations.',
     'Treat saved metric history as settings/history, not a new assessment. Preserve the confirmed metric, sport, time scope, and user facts when resuming a task; a request to update from recent data creates a new preview rather than write permission.',
     'The catalog describes implemented methods for the requested metric, not an exhaustive account of valid estimation. CSS is swim CS. VO2_MAX is the single stored metric represented to runners as VDOT; VDOT is an alias, not a second profile metric. Unsupported methods are software capability limits.',

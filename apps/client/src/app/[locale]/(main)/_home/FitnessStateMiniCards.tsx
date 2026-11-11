@@ -3,6 +3,7 @@
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import React from "react";
+import { VdotForecastSummary } from "@/components/vdot-forecast-summary";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronRight, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -213,25 +214,35 @@ export default function FitnessStateMiniCards() {
   }, [activeDragKey, draftLayout, statsByKey]);
 
   const subContent = React.useCallback(
-    (stat: FitnessStatCard) => (
-      <FitnessStatusCardSubContent
-        stat={stat}
-        t={t}
-        weeklySummaryPair={weeklySummaryPair}
-        formatWeeklyValue={formatWeeklyValue}
-        fitnessData={fitnessData}
-        atlPercent={atlPercent}
-        ctlPercent={ctlPercent}
-        tsbZone={tsbZone}
-        tsbDomainMin={tsbDomainMin}
-        tsbDomainMax={tsbDomainMax}
-        tsbFillPercent={tsbFillPercent}
-        acRatioZone={acRatioZone}
-        acRatioFillPercent={acRatioFillPercent}
-        monotonyZone={monotonyZone}
-        monotonyFillPercent={monotonyFillPercent}
-      />
-    ),
+    (stat: FitnessStatCard) => {
+      const content = (
+        <FitnessStatusCardSubContent
+          stat={stat}
+          t={t}
+          weeklySummaryPair={weeklySummaryPair}
+          formatWeeklyValue={formatWeeklyValue}
+          fitnessData={fitnessData}
+          atlPercent={atlPercent}
+          ctlPercent={ctlPercent}
+          tsbZone={tsbZone}
+          tsbDomainMin={tsbDomainMin}
+          tsbDomainMax={tsbDomainMax}
+          tsbFillPercent={tsbFillPercent}
+          acRatioZone={acRatioZone}
+          acRatioFillPercent={acRatioFillPercent}
+          monotonyZone={monotonyZone}
+          monotonyFillPercent={monotonyFillPercent}
+        />
+      );
+      return stat.key === "vo2Max" ? (
+        <div className="flex min-w-0 flex-col gap-1">
+          {content}
+          <VdotForecastSummary compact />
+        </div>
+      ) : (
+        content
+      );
+    },
     [
       acRatioFillPercent,
       acRatioZone,

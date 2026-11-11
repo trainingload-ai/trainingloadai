@@ -343,7 +343,8 @@
         "metricUpdate": "Update fitness metrics",
         "bodyWeightUpdate": "Record body weight",
         "trainingDataCoverage": "Training data coverage",
-        "coachTaskResult": "Background task result"
+        "coachTaskResult": "Background task result",
+        "metricForecast": "Read four-week VDOT forecast"
       },
       "skills": {
         "integrationSupport": "Device connection and sync",
@@ -7029,5 +7030,19 @@
     "forward": "Forward",
     "navigation": "Window navigation",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "In four weeks, estimated VDOT {value}",
+    "interval": "80% prediction interval {lower}–{upper}",
+    "basis": "Based on historical VDOT through {date}.",
+    "askCoach": "Ask coach",
+    "coachPrompt": "Please explain my four-week VDOT forecast, including the expected value and prediction range.",
+    "chartLabel": "Forecast VDOT",
+    "historyAndForecast": "Selected history + four-week forecast",
+    "INSUFFICIENT_HISTORY": "More running records are needed for a four-week forecast.",
+    "STALE_HISTORY": "New running records will update this forecast.",
+    "INCOMPARABLE_HISTORY": "More records with the current VDOT method are needed.",
+    "MODEL_UNAVAILABLE": "Forecast is currently unavailable.",
+    "currentEstimate": "Current estimate"
   }
 }

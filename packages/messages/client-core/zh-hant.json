@@ -235,7 +235,8 @@
         "metricUpdate": "更新體能指標",
         "bodyWeightUpdate": "記錄體重",
         "trainingDataCoverage": "訓練資料覆蓋",
-        "coachTaskResult": "後台任務結果"
+        "coachTaskResult": "後台任務結果",
+        "metricForecast": "讀取四週 VDOT 預測"
       },
       "skills": {
         "integrationSupport": "裝置連接與同步",
@@ -6469,5 +6470,19 @@
     "forward": "前進",
     "navigation": "視窗導覽",
     "appName": "Trainingload.ai 個人版"
+  },
+  "VdotForecast": {
+    "expected": "四週後預計 VDOT {value}",
+    "interval": "80% 預測區間 {lower}–{upper}",
+    "basis": "依據截至 {date} 的歷史 VDOT 走勢推算。",
+    "askCoach": "問教練",
+    "coachPrompt": "幫我解讀四週 VDOT 預測，包括預計水平和預測區間。",
+    "chartLabel": "預計 VDOT",
+    "historyAndForecast": "所選歷史範圍 + 未來四週預測",
+    "INSUFFICIENT_HISTORY": "累積更多跑步紀錄後，可查看四週預測。",
+    "STALE_HISTORY": "有新的跑步紀錄後更新預測。",
+    "INCOMPARABLE_HISTORY": "按新的 VDOT 口徑累積紀錄後更新預測。",
+    "MODEL_UNAVAILABLE": "預測暫時無法使用。",
+    "currentEstimate": "目前估計水平"
   }
 }

@@ -16,6 +16,7 @@ export const metricExplainerSkill: CoachSkillDef = {
     'metric.current',
     'metric.compare',
     'metric.history',
+    'metric.forecast',
     'training.aggregate',
     'present_training_visualization',
     'training.readiness',
@@ -24,6 +25,7 @@ export const metricExplainerSkill: CoachSkillDef = {
     'activity.series',
   ],
   prompt: [
+    'For personal four-week VDOT projections, read metric.forecast and explain its values, target weeks, 80% prediction intervals and evidence status. Do not generate a numerical future estimate when the tool returns no forecast. Historical VDOT extrapolation does not measure the effect of changing training.',
     'When asked to calculate or estimate a user fitness metric from evidence, discover fitness.methods and activate fitness-assessment. Stored profile values are not a new calculation.',
     `Answer the athlete's actual question: a stable concept may need only a concise definition, while product methodology or a personal interpretation should be grounded in official docs and relevant athlete data.`,
     `- Available evidence includes docs for product definitions, profile.current for threshold/zone/load context, metric.current for the current snapshot, metric.compare for manual-versus-estimated values, metric.history for change over time, and activity/readiness tools for personal implications. Choose only what can change the answer.`,

@@ -8,6 +8,7 @@ import { LoadReadoutModule } from '@/api/activity/load-readout.module';
 import { PmcRepository } from './persistence/pmc.repository';
 import { PmcInvalidateListener } from './events/pmc-invalidate.listener';
 import { UserQueryModule } from '@/api/user/user-query.module';
+import { VdotForecastService } from './vdot-forecast.service';
 
 @Module({
   imports: [
@@ -18,7 +19,12 @@ import { UserQueryModule } from '@/api/user/user-query.module';
     LoadReadoutModule,
   ],
   controllers: [PMCController],
-  providers: [PmcRepository, PMCService, PmcInvalidateListener],
-  exports: [PMCService, PmcRepository],
+  providers: [
+    PmcRepository,
+    PMCService,
+    PmcInvalidateListener,
+    VdotForecastService,
+  ],
+  exports: [PMCService, PmcRepository, VdotForecastService],
 })
 export class PMCModule {}

@@ -59,6 +59,7 @@
     "./workout-summary": "./workout-summary.ts",
     "./plan-templates/workout-step-display": "./plan-templates/workout-step-display.ts",
     "./routes": "./routes.ts",
-    "./health-observations": "./health-observations.ts"
+    "./health-observations": "./health-observations.ts",
+    "./vdot-forecast": "./vdot-forecast.ts"
   }
 }

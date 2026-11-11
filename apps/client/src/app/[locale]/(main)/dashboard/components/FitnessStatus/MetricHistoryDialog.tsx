@@ -8,6 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowUpRight } from "lucide-react";
 import { MetricHistoryChartByKey } from "./MetricHistoryChart";
 import type { MetricKey } from "./metric-history-chart-types";
+import { VdotForecastSummary } from "@/components/vdot-forecast-summary";
 
 export interface MetricHistoryDialogProps {
   open: boolean;
@@ -60,6 +61,9 @@ export function MetricHistoryPanel({
       )}
 
       <div className="flex-1 flex flex-col min-h-0 gap-6 py-4">
+        {metricKey === "vo2Max" ? (
+          <VdotForecastSummary enabled={enabled} />
+        ) : null}
         <div className="w-full shrink-0">
           {metricKey !== "paceZones" ? (
             <MetricHistoryChartByKey metricKey={metricKey} enabled={enabled} />

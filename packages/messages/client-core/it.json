@@ -230,7 +230,8 @@
         "metricUpdate": "Aggiornare i parametri fisici",
         "bodyWeightUpdate": "Registrare il peso",
         "trainingDataCoverage": "Copertura dei dati",
-        "coachTaskResult": "Risultato attività"
+        "coachTaskResult": "Risultato attività",
+        "metricForecast": "Leggi la previsione VDOT a quattro settimane"
       },
       "skills": {
         "integrationSupport": "Connessione e sincronizzazione",
@@ -6372,5 +6373,19 @@
     "forward": "Avanti",
     "navigation": "Navigazione della finestra",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "VDOT stimato tra quattro settimane: {value}",
+    "interval": "Intervallo di previsione all’80%: {lower}–{upper}",
+    "basis": "Basato sul VDOT storico fino al {date}.",
+    "askCoach": "Chiedi al coach",
+    "coachPrompt": "Spiegami la previsione del VDOT a quattro settimane, inclusi il valore stimato e l’intervallo di previsione.",
+    "chartLabel": "VDOT previsto",
+    "historyAndForecast": "Storico selezionato + previsione a quattro settimane",
+    "INSUFFICIENT_HISTORY": "Servono altri dati di corsa per una previsione a quattro settimane.",
+    "STALE_HISTORY": "Nuovi dati di corsa aggiorneranno questa previsione.",
+    "INCOMPARABLE_HISTORY": "Servono altri dati con il metodo VDOT attuale.",
+    "MODEL_UNAVAILABLE": "La previsione non è al momento disponibile.",
+    "currentEstimate": "Stima attuale"
   }
 }
