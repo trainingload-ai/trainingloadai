@@ -18,8 +18,11 @@ export function useTimelineSegments(
   const path = `/activities/${encodeURIComponent(activityId)}/timeline-segments`;
   const query = useQuery({
     queryKey,
-    queryFn: () =>
-      apiFetch<TimelineSegmentsResponse>(path, { suppressErrorToast: true }),
+    queryFn: ({ signal }) =>
+      apiFetch<TimelineSegmentsResponse>(path, {
+        suppressErrorToast: true,
+        signal,
+      }),
     retry: false,
     meta: { errorSurface: "silent" },
   });
@@ -45,7 +48,12 @@ export function useTimelineSegments(
     },
   });
   return {
-    segments: query.data?.segments ?? native,
+    segments: query.data ? (query.data.segments ?? native) : [],
+    loading: query.isPending,
+    error: query.isError,
+    hasData: query.data !== undefined,
+    retrying: query.isFetching,
+    retry: query.refetch,
     canEdit: query.isSuccess && !publicDemo.active,
     revision: query.data?.revision ?? 0,
     saving: mutation.isPending,

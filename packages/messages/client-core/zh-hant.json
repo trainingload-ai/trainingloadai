@@ -2003,7 +2003,15 @@
       "minimum": "最小",
       "maximum": "最大",
       "range": "範圍統計"
-    }
+    },
+    "metricLoading": "正在載入{metric}資料…",
+    "metricError": "{metric}資料載入失敗。",
+    "metricEmpty": "本次活動沒有{metric}資料。",
+    "metricStale": "{metric}資料更新失敗，正在顯示上次結果。",
+    "retryMetric": "重試{metric}圖表",
+    "segmentsLoading": "正在載入分段…",
+    "segmentsError": "分段載入失敗，請重試。",
+    "segmentsStale": "分段更新失敗，正在顯示上次結果。"
   },
   "ActivityDetail": {
     "title": "活動詳情",

@@ -9,9 +9,11 @@ import {
   type MetricId,
 } from "@/api/useActivityMetric";
 import { queryKeys } from "@/lib/query-keys";
+import { ACTIVITY_ANALYSIS_CACHE } from "@/lib/activity-analysis-cache";
 import {
   normalizeTimelineSeries,
   timelineTimestamp,
+  timelineGapLimit,
 } from "@/lib/activity-timeline";
 import { timelineMetricStatistics } from "@/lib/activity-timeline-segments";
 import {
@@ -47,8 +49,10 @@ export function useBestIntervalStatistics(
   const { data, pending } = useQueries({
     combine,
     queries: requested.map((metric) => ({
+      ...ACTIVITY_ANALYSIS_CACHE,
       queryKey: queryKeys.activity.metricSeries(activityId, metric),
-      queryFn: () => fetchActivityMetricSeries(activityId, metric),
+      queryFn: ({ signal }) =>
+        fetchActivityMetricSeries(activityId, metric, signal),
     })),
   });
   return useMemo(() => {
@@ -72,7 +76,13 @@ export function useBestIntervalStatistics(
                     : point.value,
               }),
             );
-      return { metric, points, calculated, loading: pending[index] };
+      return {
+        metric,
+        points,
+        gap: timelineGapLimit(points),
+        calculated,
+        loading: pending[index],
+      };
     });
     return new Map(
       peaks.map((peak) => [
@@ -81,10 +91,11 @@ export function useBestIntervalStatistics(
           series.map((series) => [
             series.metric,
             {
-              ...timelineMetricStatistics(series.points, [
-                peak.startElapsedSec!,
-                peak.endElapsedSec!,
-              ]),
+              ...timelineMetricStatistics(
+                series.points,
+                [peak.startElapsedSec!, peak.endElapsedSec!],
+                series.gap,
+              ),
               calculated: series.calculated,
               loading: series.loading,
             },
@@ -92,7 +103,7 @@ export function useBestIntervalStatistics(
         ) as Map<
           MetricId,
           {
-            average?: number;
+            average?: number | null;
             maximum?: number;
             calculated: boolean;
             loading: boolean;

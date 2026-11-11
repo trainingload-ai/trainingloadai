@@ -34,6 +34,7 @@ import {
   timelineValueAt,
   timelineTimeAtDistance,
   timelineLowerBound,
+  timelineGapLimit,
   type TimelineRange,
 } from "@/lib/activity-timeline";
 import {
@@ -293,6 +294,11 @@ export default function ActivityTimeline({
       max: index === all.length - 1 ? undefined : zone.max,
       color: getPowerZoneColorByZone(zone.color, index + 1),
     }));
+    const summaryGaps = {
+      speed: timelineGapLimit(model.summarySeries.speed),
+      heartRate: timelineGapLimit(model.summarySeries.heartRate),
+      power: timelineGapLimit(model.summarySeries.power),
+    };
     return analysis.segments.map((segment, index) => {
       const range: TimelineRange = [segment.start, segment.end];
       const original = nativeSegments.find(
@@ -323,24 +329,38 @@ export default function ActivityTimeline({
           : null);
       const speed =
         lap?.avgSpeed ??
-        timelineWeightedAverage(model.summarySeries.speed, range);
+        timelineWeightedAverage(
+          model.summarySeries.speed,
+          range,
+          summaryGaps.speed,
+        );
       const heartRate =
         lap?.avgHeartRate ??
-        timelineWeightedAverage(model.summarySeries.heartRate, range);
+        timelineWeightedAverage(
+          model.summarySeries.heartRate,
+          range,
+          summaryGaps.heartRate,
+        );
       const power =
         (model.metrics.find((metric) => metric.id === "power")?.calculated
           ? null
           : lap?.avgPower) ??
-        timelineWeightedAverage(model.summarySeries.power, range);
+        timelineWeightedAverage(
+          model.summarySeries.power,
+          range,
+          summaryGaps.power,
+        );
       const hrZone = timelineDominantZone(
         model.summarySeries.heartRate,
         hrZones,
         range,
+        summaryGaps.heartRate,
       );
       const powerZone = timelineDominantZone(
         model.summarySeries.power,
         pwZones,
         range,
+        summaryGaps.power,
       );
       const primaryZone =
         activity.sportType === "RUN"
@@ -514,6 +534,23 @@ export default function ActivityTimeline({
       data-timeline-start={viewport[0]}
       data-timeline-end={viewport[1]}
     >
+      {analysis.error ? (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 border-b border-border/60 px-3 py-2 text-xs text-muted-foreground"
+        >
+          <span>{t(analysis.hasData ? "segmentsStale" : "segmentsError")}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 shrink-0"
+            disabled={analysis.retrying}
+            onClick={() => void analysis.retry()}
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      ) : null}
       <div
         ref={bindScroll}
         className="overflow-x-auto overflow-y-hidden overscroll-x-contain"
@@ -610,12 +647,12 @@ export default function ActivityTimeline({
                   }}
                 />
               ))}
-              {!visibleGroups.length ? (
+              {!visibleGroups.length && !analysis.error ? (
                 <span
                   className="flex h-full items-center text-xs text-muted-foreground"
                   role="status"
                 >
-                  {t("noSegments")}
+                  {t(analysis.loading ? "segmentsLoading" : "noSegments")}
                 </span>
               ) : null}
             </div>
@@ -639,7 +676,7 @@ export default function ActivityTimeline({
                 key={config.id}
                 config={config}
                 metric={metric}
-                metrics={model.metrics}
+                metrics={model.availableMetrics}
                 axis={axis}
                 scale={scale}
                 plotViewport={plotViewport}
@@ -836,7 +873,7 @@ export default function ActivityTimeline({
         />
       ) : null}
       <TimelineAddChartDialog
-        metrics={model.metrics}
+        metrics={model.availableMetrics}
         onAdd={(metric) =>
           setLayout((value) => ({
             ...value,

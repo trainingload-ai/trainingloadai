@@ -30,6 +30,8 @@ import {
 } from "@/lib/activity-timeline-segments";
 import ChartExpandDialog from "../charts/chart-expand-dialog";
 import { TimelineRowSettings } from "./timeline-row-settings";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { TimelineMetric } from "./use-activity-timeline";
 import { TIMELINE_END_PADDING, TIMELINE_LABEL_WIDTH } from "./timeline-layout";
 
@@ -234,7 +236,11 @@ export const TimelineChart = memo(function TimelineChart({
       : timelineValueAt(metric.points, current, metric.gap);
   const statistics = useMemo(() => {
     if (!statisticsRange) return null;
-    const values = timelineMetricStatistics(metric.points, statisticsRange);
+    const values = timelineMetricStatistics(
+      metric.points,
+      statisticsRange,
+      metric.gap,
+    );
     return (
       values && {
         ...values,
@@ -256,7 +262,10 @@ export const TimelineChart = memo(function TimelineChart({
           (plotViewport[1] - plotViewport[0])) *
         plotWidth;
   const showReading =
-    readingX !== null && readingX >= 0 && readingX <= plotWidth;
+    metric.hasData &&
+    readingX !== null &&
+    readingX >= 0 &&
+    readingX <= plotWidth;
   return (
     <div
       className="group grid border-b border-border/35 bg-muted/20 dark:bg-muted/25"
@@ -265,6 +274,7 @@ export const TimelineChart = memo(function TimelineChart({
         paddingRight: TIMELINE_END_PADDING,
       }}
       data-timeline-row={config.id}
+      data-metric-state={metric.state}
     >
       <div className="sticky left-0 z-10 flex flex-col justify-center gap-1 bg-card px-3 py-1">
         <div className="flex min-w-0 items-center gap-1">
@@ -324,21 +334,74 @@ export const TimelineChart = memo(function TimelineChart({
         </div>
       </div>
       <div
-        role="img"
-        aria-label={`${label} (${metric.unit})`}
-        className="sticky justify-self-start overflow-hidden"
+        className={cn(
+          "sticky justify-self-start overflow-hidden",
+          metric.state === "error" && "pointer-events-none z-20",
+        )}
         style={{
           left: TIMELINE_LABEL_WIDTH,
           width: plotWidth,
         }}
       >
-        <TimelinePlot
-          metric={metric}
-          config={config}
-          axis={axis}
-          scale={scale}
-          plotViewport={plotViewport}
-        />
+        <div
+          role="img"
+          aria-label={`${label} (${metric.unit})`}
+          style={{ height: config.height }}
+        >
+          {metric.hasData ? (
+            <TimelinePlot
+              metric={metric}
+              config={config}
+              axis={axis}
+              scale={scale}
+              plotViewport={plotViewport}
+            />
+          ) : null}
+        </div>
+        {metric.state !== "ready" ? (
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-0 z-20 flex px-3",
+              metric.hasData
+                ? "items-start justify-end pt-1.5"
+                : "items-center justify-center",
+            )}
+          >
+            <div
+              role={metric.state === "error" ? "alert" : "status"}
+              className={cn(
+                "flex min-w-0 items-center gap-2 text-xs text-muted-foreground",
+                metric.hasData &&
+                  "rounded-control border border-border/60 bg-card/95 px-2 py-1",
+              )}
+            >
+              <span>
+                {t(
+                  metric.state === "error"
+                    ? metric.hasData
+                      ? "metricStale"
+                      : "metricError"
+                    : metric.state === "loading"
+                      ? "metricLoading"
+                      : "metricEmpty",
+                  { metric: label },
+                )}
+              </span>
+              {metric.state === "error" ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="pointer-events-auto h-7 shrink-0"
+                  aria-label={t("retryMetric", { metric: label })}
+                  disabled={metric.retrying}
+                  onClick={metric.retry}
+                >
+                  {t("retry")}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
         {showReading ? (
           <div
             data-timeline-reading

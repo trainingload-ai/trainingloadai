@@ -88,49 +88,65 @@ export function buildTimelineScale(
 export function timelineMetricStatistics(
   points: TimelinePoint[],
   range: TimelineRange,
+  gap = timelineGapLimit(points),
 ) {
-  const gap = timelineGapLimit(points);
+  if (range[1] <= range[0]) return null;
   let sum = 0,
     covered = 0;
   let minimum = Infinity,
     maximum = -Infinity;
   for (
     let index = Math.max(0, timelineLowerBound(points, range[0]) - 1);
-    index < points.length - 1;
+    index < points.length;
     index++
   ) {
     const point = points[index],
       next = points[index + 1];
-    if (point.time >= range[1]) break;
-    if (point.value === null || next.time - point.time > gap) continue;
+    if (point.time > range[1]) break;
+    if (point.value === null) continue;
     const seconds =
-      Math.min(next.time, range[1]) - Math.max(point.time, range[0]);
+      next && next.time - point.time <= gap
+        ? Math.max(
+            0,
+            Math.min(next.time, range[1]) - Math.max(point.time, range[0]),
+          )
+        : 0;
     if (seconds > 0) {
       sum += point.value * seconds;
       covered += seconds;
+    }
+    // Observed boundary samples contribute extrema, even when the final sample
+    // has no following interval. They never add invented average coverage.
+    if (point.time >= range[0] || seconds > 0) {
       minimum = Math.min(minimum, point.value);
       maximum = Math.max(maximum, point.value);
     }
   }
-  return covered > 0
-    ? { average: sum / covered, minimum, maximum, coveredSeconds: covered }
+  return minimum !== Infinity
+    ? {
+        average: covered > 0 ? sum / covered : null,
+        minimum,
+        maximum,
+        coveredSeconds: covered,
+      }
     : null;
 }
 
 export function timelineWeightedAverage(
   points: TimelinePoint[],
   range: TimelineRange,
+  gap = timelineGapLimit(points),
 ) {
-  return timelineMetricStatistics(points, range)?.average ?? null;
+  return timelineMetricStatistics(points, range, gap)?.average ?? null;
 }
 
 export function timelineDominantZone(
   points: TimelinePoint[],
   zones: TimelineZone[],
   range: TimelineRange,
+  gap = timelineGapLimit(points),
 ) {
   const durations = zones.map(() => 0);
-  const gap = timelineGapLimit(points);
   for (
     let index = Math.max(0, timelineLowerBound(points, range[0]) - 1);
     index < points.length - 1;

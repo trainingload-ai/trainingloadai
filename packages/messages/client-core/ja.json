@@ -1910,7 +1910,15 @@
       "minimum": "最小",
       "maximum": "最大",
       "range": "範囲の統計"
-    }
+    },
+    "metricLoading": "{metric}を読み込み中…",
+    "metricError": "{metric}を読み込めませんでした。",
+    "metricEmpty": "このアクティビティには{metric}データがありません。",
+    "metricStale": "{metric}を更新できませんでした。前回のデータを表示しています。",
+    "retryMetric": "{metric}グラフを再試行",
+    "segmentsLoading": "区間を読み込み中…",
+    "segmentsError": "区間を読み込めませんでした。再試行してください。",
+    "segmentsStale": "区間を更新できませんでした。前回のデータを表示しています。"
   },
   "ActivityDetail": {
     "title": "アクティビティ詳細",

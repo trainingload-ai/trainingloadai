@@ -14,6 +14,7 @@ import {
 } from "@/api/useActivityMetric";
 import { apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
+import { ACTIVITY_ANALYSIS_CACHE } from "@/lib/activity-analysis-cache";
 import type { TimelineMetricId } from "@/hooks/useActivityTimelineLayout";
 import { useStore } from "@/lib/store";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
@@ -42,6 +43,10 @@ export type TimelineMetric = {
   inverted?: boolean;
   calculated?: boolean;
   average?: (range: TimelineRange) => number | null;
+  state: "loading" | "error" | "empty" | "ready";
+  hasData: boolean;
+  retrying: boolean;
+  retry: () => void;
 };
 
 const METRICS: MetricId[] = [
@@ -58,11 +63,29 @@ const METRICS: MetricId[] = [
 ];
 const combineQueries = (results: UseQueryResult<MetricSeriesResult>[]) => ({
   data: results.map((result) => result.data),
+  states: results.map((result) => ({
+    pending: result.isPending,
+    error: result.isError,
+    fetching: result.isFetching,
+    refetch: result.refetch,
+  })),
   loading: results.some((result) => result.isPending),
   errors: results
     .filter((result) => result.isError)
     .map((result) => result.refetch),
 });
+const METRIC_SOURCES: Record<TimelineMetricId, MetricId[]> = {
+  elevation: ["enhancedAltitude", "altitude"],
+  pace: ["speed"],
+  speed: ["speed"],
+  heartRate: ["heartRate"],
+  power: ["power"],
+  cadence: ["cadence"],
+  pedaling: ["cadence"],
+  stride: ["stepLength"],
+  stanceTime: ["stanceTime"],
+  temperature: ["temperature"],
+};
 const EMPTY_POINTS: TimelinePoint[] = [];
 const EMPTY_TRACK: Extract<
   TimelineTrackResponse,
@@ -81,16 +104,20 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
   const queries = useQueries({
     combine: combineQueries,
     queries: requested.map((metric) => ({
+      ...ACTIVITY_ANALYSIS_CACHE,
       queryKey: queryKeys.activity.metricSeries(activityId, metric),
-      queryFn: () => fetchActivityMetricSeries(activityId, metric),
+      queryFn: ({ signal }) =>
+        fetchActivityMetricSeries(activityId, metric, signal),
+      meta: { errorSurface: "inline" },
     })),
   });
   const track = useQuery({
+    ...ACTIVITY_ANALYSIS_CACHE,
     queryKey: queryKeys.activity.timelineTrack(activityId),
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       apiFetch<TimelineTrackResponse>(
         `/activities/${encodeURIComponent(activityId)}/timeline-track`,
-        { suppressErrorToast: true },
+        { suppressErrorToast: true, signal },
       ),
     enabled: !activity.trainer,
     retry: false,
@@ -146,6 +173,8 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
           declaredDuration === null || point.time <= declaredDuration + 5,
       );
     const elevation = series("enhancedAltitude");
+    const hasEnhancedAltitude =
+      elevation.filter((point) => point.value !== null).length >= 2;
     const definitions: {
       id: TimelineMetricId;
       points: TimelinePoint[];
@@ -154,9 +183,7 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
     }[] = [
       {
         id: "elevation",
-        points: elevation.some((point) => point.value !== null)
-          ? elevation
-          : series("altitude"),
+        points: hasEnhancedAltitude ? elevation : series("altitude"),
         type: "elevation",
         colorMetric: "altitude",
       },
@@ -218,78 +245,102 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
         colorMetric: "cadence",
       },
     ];
-    const metrics: TimelineMetric[] = definitions
-      .map((definition) => {
-        const points = definition.points.map((point) => {
-          let value = point.value;
-          if (definition.id === "heartRate" && value !== null && value <= 0)
-            value = null;
-          if (value !== null && definition.id === "pace")
-            value =
-              value > 0.5
-                ? (systemUnit === "imperial" ? 1609.344 : 1000) / value
-                : null;
-          if (value !== null && definition.type === "cadence" && running)
-            value *= 2;
-          if (value !== null && definition.id === "speed")
-            value *= systemUnit === "imperial" ? 2.236936 : 3.6;
-          if (
-            value !== null &&
-            definition.id === "elevation" &&
-            systemUnit === "imperial"
-          )
-            value *= 3.28084;
-          if (value !== null && definition.id === "stride")
-            value = (value / 1000) * (systemUnit === "imperial" ? 3.28084 : 1);
-          return { ...point, value };
-        });
-        return {
-          id: definition.id,
-          points,
-          gap: timelineGapLimit(points),
-          colorMetric: definition.colorMetric,
-          unit:
-            definition.type === "cadence"
-              ? running
-                ? "spm"
-                : "rpm"
-              : getUnit(definition.type, systemUnit),
-          inverted: definition.id === "pace",
-          calculated:
-            definition.id === "power" &&
-            byMetric.get("power")?.metadata.powerSource === "CALCULATED",
-          average:
-            definition.id === "pace"
-              ? (range: TimelineRange) => {
-                  const speed = timelineWeightedAverage(
-                    definition.points,
-                    range,
-                  );
-                  return speed !== null && speed > 0
-                    ? (systemUnit === "imperial" ? 1609.344 : 1000) / speed
-                    : null;
-                }
-              : undefined,
-          format: (value: number) =>
-            definition.id === "pace"
-              ? formatSecondsToTime(Math.round(value))
-              : definition.id === "speed"
-                ? value.toFixed(1)
-                : definition.id === "stride" || definition.id === "temperature"
-                  ? value.toFixed(1)
-                  : String(Math.round(value)),
-        };
-      })
-      .filter(
-        (metric) =>
-          metric.points.filter((point) => point.value !== null).length >= 2,
+    const metrics: TimelineMetric[] = definitions.map((definition) => {
+      const points = definition.points.map((point) => {
+        let value = point.value;
+        if (definition.id === "heartRate" && value !== null && value <= 0)
+          value = null;
+        if (value !== null && definition.id === "pace")
+          value =
+            value > 0.5
+              ? (systemUnit === "imperial" ? 1609.344 : 1000) / value
+              : null;
+        if (value !== null && definition.type === "cadence" && running)
+          value *= 2;
+        if (value !== null && definition.id === "speed")
+          value *= systemUnit === "imperial" ? 2.236936 : 3.6;
+        if (
+          value !== null &&
+          definition.id === "elevation" &&
+          systemUnit === "imperial"
+        )
+          value *= 3.28084;
+        if (value !== null && definition.id === "stride")
+          value = (value / 1000) * (systemUnit === "imperial" ? 3.28084 : 1);
+        return { ...point, value };
+      });
+      const gap = timelineGapLimit(points);
+      const hasData =
+        points.filter((point) => point.value !== null).length >= 2;
+      const sourceMetrics =
+        definition.id === "elevation" && hasData
+          ? [
+              hasEnhancedAltitude
+                ? ("enhancedAltitude" as const)
+                : ("altitude" as const),
+            ]
+          : METRIC_SOURCES[definition.id];
+      const sources = sourceMetrics.map(
+        (metric) => queries.states[METRICS.indexOf(metric)],
       );
+      const state = sources.some((source) => source.error)
+        ? ("error" as const)
+        : hasData
+          ? ("ready" as const)
+          : sources.some((source) => source.pending)
+            ? ("loading" as const)
+            : ("empty" as const);
+      return {
+        id: definition.id,
+        state,
+        hasData,
+        retrying: sources.some((source) => source.fetching),
+        retry: () => {
+          for (const source of sources) if (source.error) void source.refetch();
+        },
+        points,
+        gap,
+        colorMetric: definition.colorMetric,
+        unit:
+          definition.type === "cadence"
+            ? running
+              ? "spm"
+              : "rpm"
+            : getUnit(definition.type, systemUnit),
+        inverted: definition.id === "pace",
+        calculated:
+          definition.id === "power" &&
+          byMetric.get("power")?.metadata.powerSource === "CALCULATED",
+        average:
+          definition.id === "pace"
+            ? (range: TimelineRange) => {
+                const speed = timelineWeightedAverage(
+                  definition.points,
+                  range,
+                  gap,
+                );
+                return speed !== null && speed > 0
+                  ? (systemUnit === "imperial" ? 1609.344 : 1000) / speed
+                  : null;
+              }
+            : undefined,
+        format: (value: number) =>
+          definition.id === "pace"
+            ? formatSecondsToTime(Math.round(value))
+            : definition.id === "speed"
+              ? value.toFixed(1)
+              : definition.id === "stride" || definition.id === "temperature"
+                ? value.toFixed(1)
+                : String(Math.round(value)),
+      };
+    });
     const distance = timelineDistanceIndex(series("distance"));
     let duration = declaredDuration ?? 0;
     for (const metric of metrics)
       duration = Math.max(duration, metric.points.at(-1)?.time ?? 0);
     return {
       metrics,
+      availableMetrics: metrics.filter((metric) => metric.hasData),
       distance,
       distanceGap: timelineGapLimit(distance),
       duration,
@@ -309,7 +360,15 @@ export function useActivityTimeline(activity: Activity, activityId: string) {
         ),
       },
     };
-  }, [origin, readyOrigin, systemUnit, activity, running, data]);
+  }, [
+    origin,
+    readyOrigin,
+    systemUnit,
+    activity,
+    running,
+    data,
+    queries.states,
+  ]);
   return {
     model,
     loading,

@@ -1911,7 +1911,15 @@
       "minimum": "Mín.",
       "maximum": "Máx.",
       "range": "Estatísticas do intervalo"
-    }
+    },
+    "metricLoading": "Carregando {metric}…",
+    "metricError": "Não foi possível carregar {metric}.",
+    "metricEmpty": "Esta atividade não tem dados de {metric}.",
+    "metricStale": "Não foi possível atualizar {metric}. Exibindo os dados anteriores.",
+    "retryMetric": "Tentar novamente o gráfico de {metric}",
+    "segmentsLoading": "Carregando segmentos…",
+    "segmentsError": "Não foi possível carregar os segmentos. Tente novamente.",
+    "segmentsStale": "Não foi possível atualizar os segmentos. Exibindo os dados anteriores."
   },
   "ActivityDetail": {
     "title": "Detalhes da atividade",

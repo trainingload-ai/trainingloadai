@@ -29,7 +29,12 @@ export function TimelineAddChartDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="w-full rounded-none">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full rounded-none"
+          disabled={!metrics.length}
+        >
           <Plus data-icon="inline-start" />
           {t("addChart")}
         </Button>

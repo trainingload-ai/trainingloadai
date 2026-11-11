@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
+import { invalidateActivityAnalysisCaches } from "./activity-analysis-cache";
 
 /**
  * 活动入库 / PMC 依赖侧缓存（不含导入批次自身 query）。
@@ -41,7 +42,11 @@ export async function invalidateAfterActivityPipelineComplete(
       }),
     );
   }
-  await Promise.all([...extra, invalidateActivityDerivedCaches(qc)]);
+  await Promise.all([
+    ...extra,
+    invalidateActivityDerivedCaches(qc),
+    invalidateActivityAnalysisCaches(qc),
+  ]);
 }
 
 /** 与计划文档命名对齐：导入流水线完成后刷新活动衍生缓存 */

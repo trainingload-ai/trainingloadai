@@ -239,7 +239,7 @@ function BestIntervalTable({
       column === "maxHeartRate" || column === "maxPower"
         ? summary?.maximum
         : summary?.average;
-    if (value === undefined || !Number.isFinite(value)) return "—";
+    if (value == null || !Number.isFinite(value)) return "—";
     switch (column) {
       case "pace":
         return value > 0

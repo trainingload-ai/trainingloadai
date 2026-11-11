@@ -1910,7 +1910,15 @@
       "minimum": "최소",
       "maximum": "최대",
       "range": "구간 통계"
-    }
+    },
+    "metricLoading": "{metric} 불러오는 중…",
+    "metricError": "{metric} 데이터를 불러오지 못했습니다.",
+    "metricEmpty": "이 활동에는 {metric} 데이터가 없습니다.",
+    "metricStale": "{metric} 데이터를 새로고침하지 못했습니다. 이전 데이터를 표시합니다.",
+    "retryMetric": "{metric} 차트 다시 시도",
+    "segmentsLoading": "구간 불러오는 중…",
+    "segmentsError": "구간을 불러오지 못했습니다. 다시 시도하세요.",
+    "segmentsStale": "구간을 새로고침하지 못했습니다. 이전 데이터를 표시합니다."
   },
   "ActivityDetail": {
     "title": "활동 상세",

@@ -1911,7 +1911,15 @@
       "minimum": "Min.",
       "maximum": "Max.",
       "range": "Bereichsstatistik"
-    }
+    },
+    "metricLoading": "{metric} wird geladen…",
+    "metricError": "{metric} konnte nicht geladen werden.",
+    "metricEmpty": "Keine Daten für {metric} in dieser Aktivität.",
+    "metricStale": "{metric} konnte nicht aktualisiert werden. Vorherige Daten werden angezeigt.",
+    "retryMetric": "{metric}-Diagramm erneut laden",
+    "segmentsLoading": "Abschnitte werden geladen…",
+    "segmentsError": "Abschnitte konnten nicht geladen werden. Erneut versuchen.",
+    "segmentsStale": "Abschnitte konnten nicht aktualisiert werden. Vorherige Daten werden angezeigt."
   },
   "ActivityDetail": {
     "title": "Aktivitätsdetails",

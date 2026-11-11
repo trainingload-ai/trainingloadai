@@ -3,6 +3,8 @@
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import * as React from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { removeActivityAnalysisCaches } from "@/lib/activity-analysis-cache";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Download, Eye, MoreHorizontal, Trash2, Upload } from "lucide-react";
@@ -216,6 +218,7 @@ export function ActivityFeedCard({
   const tActivityTitle = useTranslations("ActivityTitle");
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
+  const queryClient = useQueryClient();
   const sportLabel = getSportDisplayName(sportCatalog, activity, tSports);
   const displayTitle = getLocalizedActivityTitle(
     activity,
@@ -251,7 +254,10 @@ export function ActivityFeedCard({
     try {
       setDeleting(true);
       const deleted = await deleteActivity(activity.hashId);
-      if (deleted) onDeleted?.(activity.hashId);
+      if (deleted) {
+        await removeActivityAnalysisCaches(queryClient, activity.hashId);
+        onDeleted?.(activity.hashId);
+      }
     } finally {
       setDeleting(false);
       setConfirmOpen(false);

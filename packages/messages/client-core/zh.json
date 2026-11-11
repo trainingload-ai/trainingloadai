@@ -2148,7 +2148,15 @@
       "minimum": "最小",
       "maximum": "最大",
       "range": "范围统计"
-    }
+    },
+    "metricLoading": "{metric}数据加载中…",
+    "metricError": "{metric}数据加载失败。",
+    "metricEmpty": "本次活动没有{metric}数据。",
+    "metricStale": "{metric}数据更新失败，正在显示上次结果。",
+    "retryMetric": "重试{metric}图表",
+    "segmentsLoading": "正在加载分段…",
+    "segmentsError": "分段加载失败，请重试。",
+    "segmentsStale": "分段更新失败，正在显示上次结果。"
   },
   "ActivityDetail": {
     "title": "活动详情",

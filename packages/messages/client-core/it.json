@@ -1911,7 +1911,15 @@
       "minimum": "Min.",
       "maximum": "Max.",
       "range": "Statistiche dell’intervallo"
-    }
+    },
+    "metricLoading": "Caricamento di {metric}…",
+    "metricError": "Impossibile caricare {metric}.",
+    "metricEmpty": "Nessun dato di {metric} per questa attività.",
+    "metricStale": "Impossibile aggiornare {metric}. Sono mostrati i dati precedenti.",
+    "retryMetric": "Riprova il grafico {metric}",
+    "segmentsLoading": "Caricamento dei segmenti…",
+    "segmentsError": "Impossibile caricare i segmenti. Riprova.",
+    "segmentsStale": "Impossibile aggiornare i segmenti. Sono mostrati i dati precedenti."
   },
   "ActivityDetail": {
     "title": "Dettagli dell’attività",

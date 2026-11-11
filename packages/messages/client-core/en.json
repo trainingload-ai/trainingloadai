@@ -2191,7 +2191,15 @@
       "minimum": "Min",
       "maximum": "Max",
       "range": "Range statistics"
-    }
+    },
+    "metricLoading": "Loading {metric}…",
+    "metricError": "Could not load {metric}.",
+    "metricEmpty": "No {metric} data for this activity.",
+    "metricStale": "Could not refresh {metric}. Showing the previous data.",
+    "retryMetric": "Retry {metric} chart",
+    "segmentsLoading": "Loading segments…",
+    "segmentsError": "Could not load segments. Try again.",
+    "segmentsStale": "Could not refresh segments. Showing the previous data."
   },
   "ActivityDetail": {
     "title": "Activity details",

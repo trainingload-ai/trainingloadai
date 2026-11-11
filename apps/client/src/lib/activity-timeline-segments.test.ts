@@ -23,13 +23,54 @@ describe("activity analysis segments", () => {
       minimum: 120,
       coveredSeconds: 4,
     });
-    expect(timelineMetricStatistics(points, [5, 100])).toBeNull();
+    expect(timelineMetricStatistics(points, [5, 100])).toEqual({
+      average: null,
+      minimum: 140,
+      maximum: 220,
+      coveredSeconds: 0,
+    });
     expect(timelineMetricStatistics(points, [100, 103])).toEqual({
       average: 220,
       maximum: 220,
-      minimum: 220,
+      minimum: 100,
       coveredSeconds: 2,
     });
+  });
+  it("includes observed final and selection-boundary extrema without adding average coverage", () => {
+    const points = [
+      { time: 0, value: 120 },
+      { time: 1, value: 130 },
+      { time: 2, value: 200 },
+    ];
+    expect(timelineMetricStatistics(points, [0, 2])).toEqual({
+      average: 125,
+      minimum: 120,
+      maximum: 200,
+      coveredSeconds: 2,
+    });
+    expect(timelineMetricStatistics(points, [1, 2])).toEqual({
+      average: 130,
+      minimum: 130,
+      maximum: 200,
+      coveredSeconds: 1,
+    });
+    expect(
+      timelineMetricStatistics(
+        [
+          { time: 0, value: 120 },
+          { time: 1, value: 130 },
+          { time: 2, value: 0 },
+        ],
+        [0, 5],
+      ),
+    ).toEqual({ average: 125, minimum: 0, maximum: 130, coveredSeconds: 2 });
+    expect(timelineMetricStatistics(points, [2, 3])).toEqual({
+      average: null,
+      minimum: 200,
+      maximum: 200,
+      coveredSeconds: 0,
+    });
+    expect(timelineMetricStatistics(points, [2.1, 3])).toBeNull();
   });
   const segments = [
     { id: "a", name: "", start: 0, end: 300 },

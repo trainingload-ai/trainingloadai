@@ -99,6 +99,9 @@ export function TimelineRowSettings({
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
+                {!metrics.some((metric) => metric.id === config.metric) ? (
+                  <SelectItem value={config.metric}>{label}</SelectItem>
+                ) : null}
                 {metrics.map((metric) => (
                   <SelectItem key={metric.id} value={metric.id}>
                     {t(`metrics.${metric.id}`)}
