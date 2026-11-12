@@ -14,6 +14,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkMacSigning, notaryArguments } from "./macos-signing.mjs";
 import { runtimeSourceCommit } from "../src/runtime/core-source.mjs";
+import { runMacStapler } from "./macos-ticket.mjs";
 
 const desktop = join(dirname(fileURLToPath(import.meta.url)), "..");
 const signing = checkMacSigning();
@@ -136,8 +137,8 @@ try {
     submissionZip,
   ]);
   notarize(submissionZip, "application");
-  run("xcrun", ["stapler", "staple", app]);
-  run("xcrun", ["stapler", "validate", app]);
+  await runMacStapler("staple", app);
+  await runMacStapler("validate", app);
   run("spctl", ["--assess", "--type", "execute", "--verbose=2", app]);
   rmSync(submissionZip);
   step("create compressed DMG and ZIP");
@@ -155,8 +156,8 @@ try {
     dmg,
   ]);
   notarize(dmg, "dmg");
-  run("xcrun", ["stapler", "staple", dmg]);
-  run("xcrun", ["stapler", "validate", dmg]);
+  await runMacStapler("staple", dmg);
+  await runMacStapler("validate", dmg);
   run("hdiutil", ["verify", dmg]);
   run("spctl", [
     "--assess",
@@ -193,19 +194,13 @@ try {
       dmg,
     ]);
     attached = true;
-    for (const command of [
-      [
-        "codesign",
-        [
-          "--verify",
-          "--deep",
-          "--strict",
-          join(mounted, "Trainingload.ai.app"),
-        ],
-      ],
-      ["xcrun", ["stapler", "validate", join(mounted, "Trainingload.ai.app")]],
-    ])
-      run(...command);
+    run("codesign", [
+      "--verify",
+      "--deep",
+      "--strict",
+      join(mounted, "Trainingload.ai.app"),
+    ]);
+    await runMacStapler("validate", join(mounted, "Trainingload.ai.app"));
   } finally {
     if (attached) run("hdiutil", ["detach", mounted]);
   }
@@ -216,7 +211,7 @@ try {
     "--strict",
     join(extracted, "Trainingload.ai.app"),
   ]);
-  run("xcrun", ["stapler", "validate", join(extracted, "Trainingload.ai.app")]);
+  await runMacStapler("validate", join(extracted, "Trainingload.ai.app"));
   rmSync(mounted, { recursive: true });
   rmSync(extracted, { recursive: true });
   run("codesign", ["--verify", "--deep", "--strict", "--verbose=2", app]);
