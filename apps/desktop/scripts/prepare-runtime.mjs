@@ -203,7 +203,12 @@ try {
     directoryBytes(serverDist) +
     dependencies.sourceBytes;
   // A hard budget makes future dependency growth visible before packaging.
-  const maxBytes = 280 * 1024 * 1024;
+  // Linux x64's upstream native libraries are larger (CI baseline 284.4 MiB).
+  // Keep the measured macOS budget unchanged and bound Linux separately.
+  const maxBytes =
+    (process.platform === "linux" && process.arch === "x64" ? 290 : 280) *
+    1024 *
+    1024;
   if (bytes > maxBytes)
     throw new Error(`Desktop runtime exceeds ${maxBytes} bytes: ${bytes}`);
   const report = {
