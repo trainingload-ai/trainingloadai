@@ -12,3 +12,6 @@ data/
 .selfhost/
 /ai_docs/
 *.tsbuildinfo
+
+# Desktop generated artifacts and build provenance
+/apps/desktop/build/

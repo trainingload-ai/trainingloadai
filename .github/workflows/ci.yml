@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       NEXT_TELEMETRY_DISABLED: '1'
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
       NEXT_BUILD_CPUS: '2'
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/trainingload
     steps:
@@ -33,7 +34,10 @@ jobs:
       - run: pnpm selfhost:docs-contract
       - run: pnpm --dir packages/prisma exec prisma validate --schema core/schema.prisma
       - run: pnpm prisma:generate
-      - run: pnpm build:selfhost
+      - run: pnpm --dir apps/desktop core:build
+      - run: pnpm --dir apps/desktop test
+      - run: pnpm --dir apps/desktop runtime:prepare
+      - run: pnpm --dir apps/desktop runtime:smoke
       - run: pnpm --dir apps/server test:core
       - run: pnpm test:selfhost
       - run: pnpm --dir packages/prisma core:migrate:test

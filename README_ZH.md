@@ -160,3 +160,7 @@ Self-host 现已支持通过 [Garmin Personal API](apps/docs/content/docs/zh/sel
 参与项目或提交 Pull Request 前，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [行为准则](CODE_OF_CONDUCT.md)。产品和部署问题见 [SUPPORT.md](SUPPORT.md)。安全漏洞必须按照 [SECURITY.md](SECURITY.md) 中的私密流程报告，不要发布到公开 Issue。
 
 Trainingload.ai 公共代码使用 [AGPL-3.0-only](LICENSE)。外部贡献默认采用相同许可证。任何将外部贡献用于单独商业许可证的行为，都必须事先取得独立书面授权。
+
+## 桌面应用
+
+Electron 桌面端已纳入本仓库，源码位于 [`apps/desktop`](apps/desktop/README.md)，使用同一工作区的前端、后端与数据库迁移。执行 `pnpm desktop:build` 构建，`pnpm desktop:start` 启动。独立打包、数据目录与签名状态见桌面端文档。

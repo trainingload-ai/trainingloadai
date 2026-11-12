@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Trainingload.ai app icon</title>
+  <defs>
+    <linearGradient id="trainingload-gradient" x1="280" y1="240" x2="770" y2="790" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00DDB0"/>
+      <stop offset="1" stop-color="#009689"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#080B0B"/>
+  <g transform="translate(92 92) scale(8.4)" fill="url(#trainingload-gradient)">
+    <path d="M20 18H76L72 30H64L60 42H56L40 82H18L22 70H26L30 58H34L38 46H42L46 34H14L16 28H20Z"/>
+    <path d="M68 42H74V50H72V58H68V66H64V70H88L86 76H82L80 82H46L50 70H54V62H58V54H62V46H68Z"/>
+  </g>
+</svg>
