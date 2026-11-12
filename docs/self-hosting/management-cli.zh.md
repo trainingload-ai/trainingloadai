@@ -128,7 +128,7 @@ Doctor 检查、诊断隐私边界与支持流程见 [Doctor 与 diagnostics](./
   "dryRun": false,
   "startedAt": "2026-10-17T00:00:00.000Z",
   "finishedAt": "2026-10-17T00:00:01.000Z",
-  "releaseVersion": "1.1.21",
+  "releaseVersion": "1.1.22",
   "summary": "Self-host services are ready",
   "actions": [],
   "details": {},
