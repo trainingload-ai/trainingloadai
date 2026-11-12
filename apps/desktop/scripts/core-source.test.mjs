@@ -15,8 +15,36 @@ import {
   assertCoreResources,
   assertDesktopClientBuild,
   selectCoreSource,
+  runtimeSourceCommit,
 } from "../src/runtime/core-source.mjs";
 import { resolveDesktopRuntimeEntries } from "../dist/runtime/runtime-entry.js";
+
+test("release provenance reads the Core commit from the runtime manifest", () => {
+  const commit = "a".repeat(40);
+  const manifest = { schemaVersion: 1, core: { version: "1.1.22", commit } };
+  const report = JSON.parse(
+    JSON.stringify({ sourceCommit: runtimeSourceCommit(manifest, commit) }),
+  );
+  assert.equal(report.sourceCommit, commit);
+});
+
+test("release provenance rejects absent, misplaced and stale commit evidence", () => {
+  const commit = "a".repeat(40);
+  for (const manifest of [
+    {},
+    { schemaVersion: 1, commit },
+    { schemaVersion: 1, core: { commit: null } },
+    { schemaVersion: 1, core: { commit: "short" } },
+    { schemaVersion: 1, core: { commit: "b".repeat(40) } },
+  ])
+    assert.throws(() => runtimeSourceCommit(manifest, commit), {
+      code: "DESKTOP_CORE_COMMIT_MISMATCH",
+    });
+  assert.throws(
+    () => runtimeSourceCommit({ schemaVersion: 1, core: { commit } }, ""),
+    { code: "DESKTOP_CORE_COMMIT_MISMATCH" },
+  );
+});
 
 function fixture() {
   const root = realpathSync(
