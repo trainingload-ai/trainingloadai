@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getImageProps } from "next/image";
 
 import { TrackedLink } from "@/components/TrackedLink";
 import { ProductBrowserChrome } from "@/components/ProductBrowserChrome";
@@ -30,12 +31,65 @@ export function HomeHeroDemoPreview({
 }) {
   const [ready, setReady] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const [loadDemo, setLoadDemo] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { resolvedTheme } = useTheme();
   const demoOrigin = useMemo(() => new URL(demoUrl).origin, [demoUrl]);
   const previewLocale = ["en", "zh", "zh-hant", "ja"].includes(lang)
     ? lang
     : "en";
+
+  const previewImage = (mobile: boolean, dark = false) =>
+    getImageProps({
+      src: `/5k-training-plan/${mobile ? "mobile" : "web"}-home${dark ? "-dark" : ""}-v2-${previewLocale}.png`,
+      alt: "",
+      width: mobile ? 1320 : 1440,
+      height: mobile ? 2868 : 960,
+      sizes: mobile ? "100vw" : "(min-width: 1280px) 1152px, 100vw",
+      loading: "eager",
+      fetchPriority: "high",
+    }).props;
+
+  useEffect(() => {
+    if (loadDemo) return;
+    const preview = previewRef.current;
+    if (!preview) return;
+
+    let visible = false;
+    let idle: number | undefined;
+    let fallback: number | undefined;
+    const cancelPending = () => {
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      if (fallback !== undefined) window.clearTimeout(fallback);
+      idle = undefined;
+      fallback = undefined;
+    };
+    const schedule = () => {
+      cancelPending();
+      if (!visible || document.readyState !== "complete") return;
+
+      if (typeof window.requestIdleCallback === "function") {
+        idle = window.requestIdleCallback(() => setLoadDemo(true), {
+          timeout: 1500,
+        });
+      } else {
+        fallback = window.setTimeout(() => setLoadDemo(true), 100);
+      }
+    };
+
+    window.addEventListener("load", schedule);
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      schedule();
+    });
+    observer.observe(preview);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("load", schedule);
+      cancelPending();
+    };
+  }, [loadDemo]);
 
   const sendEmbedContext = useCallback(() => {
     if (
@@ -82,13 +136,13 @@ export function HomeHeroDemoPreview({
   }, [ready, sendEmbedContext]);
 
   useEffect(() => {
-    if (ready) return;
+    if (!loadDemo || ready) return;
     const timeout = window.setTimeout(
       () => setTimedOut(true),
       READY_TIMEOUT_MS,
     );
     return () => window.clearTimeout(timeout);
-  }, [ready]);
+  }, [loadDemo, ready]);
 
   return (
     <section
@@ -112,7 +166,10 @@ export function HomeHeroDemoPreview({
         }
       />
 
-      <div className="relative h-[620px] overflow-hidden bg-neutral-100 dark:bg-neutral-950 sm:h-[680px] lg:h-[720px]">
+      <div
+        ref={previewRef}
+        className="relative h-[620px] overflow-hidden bg-neutral-100 dark:bg-neutral-950 sm:h-[680px] lg:h-[720px]"
+      >
         <div
           className={`absolute inset-0 transition-opacity duration-300 motion-reduce:transition-none ${ready ? "opacity-0" : "opacity-100"}`}
           aria-hidden={ready}
@@ -121,24 +178,23 @@ export function HomeHeroDemoPreview({
           <picture>
             <source
               media="(prefers-color-scheme: dark) and (max-width: 639px)"
-              srcSet={`/5k-training-plan/mobile-home-dark-v2-${previewLocale}.png`}
+              srcSet={previewImage(true, true).srcSet}
+              sizes="100vw"
             />
             <source
               media="(prefers-color-scheme: dark)"
-              srcSet={`/5k-training-plan/web-home-dark-v2-${previewLocale}.png`}
+              srcSet={previewImage(false, true).srcSet}
+              sizes="(min-width: 1280px) 1152px, 100vw"
             />
             <source
               media="(max-width: 639px)"
-              srcSet={`/5k-training-plan/mobile-home-v2-${previewLocale}.png`}
+              srcSet={previewImage(true).srcSet}
+              sizes="100vw"
             />
-            {/* The app screenshots are already release-rendered PNG assets;
-                picture avoids preloading four theme/breakpoint variants. */}
+            {/* Only the matching theme/breakpoint is downloaded. Next's image
+                endpoint supplies a resized, compressed version of the PNG. */}
             <img
-              src={`/5k-training-plan/web-home-v2-${previewLocale}.png`}
-              alt=""
-              width={1440}
-              height={960}
-              fetchPriority="high"
+              {...previewImage(false)}
               className="absolute inset-0 h-full w-full object-cover object-top"
             />
           </picture>
@@ -162,17 +218,19 @@ export function HomeHeroDemoPreview({
           ) : null}
         </div>
 
-        <iframe
-          ref={iframeRef}
-          src={demoUrl}
-          title={copy.title}
-          loading="eager"
-          referrerPolicy="strict-origin-when-cross-origin"
-          sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-          tabIndex={ready ? 0 : -1}
-          aria-hidden={!ready}
-          className={`absolute inset-0 h-full w-full border-0 bg-background transition-opacity duration-300 motion-reduce:transition-none ${ready ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
-        />
+        {loadDemo ? (
+          <iframe
+            ref={iframeRef}
+            src={demoUrl}
+            title={copy.title}
+            loading="eager"
+            referrerPolicy="strict-origin-when-cross-origin"
+            sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+            tabIndex={ready ? 0 : -1}
+            aria-hidden={!ready}
+            className={`absolute inset-0 h-full w-full border-0 bg-background transition-opacity duration-300 motion-reduce:transition-none ${ready ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+          />
+        ) : null}
       </div>
     </section>
   );

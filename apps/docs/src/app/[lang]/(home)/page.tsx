@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { i18n } from "@/lib/i18n";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import { JsonLd } from "@/components/JsonLd";
 import {
@@ -92,6 +93,10 @@ const homePrimaryButtonClass =
 
 const homeOutlineButtonClass =
   "h-11 w-full border-input bg-card px-5 text-sm font-medium hover:bg-muted hover:text-foreground sm:w-auto";
+
+export function generateStaticParams() {
+  return i18n.languages.map((lang) => ({ lang }));
+}
 
 export async function generateMetadata({
   params,

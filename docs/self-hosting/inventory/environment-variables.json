@@ -3790,11 +3790,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 106
+          "line": 111
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 155
+          "line": 160
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
@@ -3950,7 +3950,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 96
+          "line": 98
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
@@ -4056,7 +4056,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 162
+          "line": 164
         }
       ]
     },
@@ -4322,7 +4322,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 159
+          "line": 161
         },
         {
           "file": "apps/docs/src/lib/posthog-client.ts",
