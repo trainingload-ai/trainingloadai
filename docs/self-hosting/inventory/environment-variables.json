@@ -289,7 +289,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 82
+          "line": 85
         }
       ]
     },
@@ -1639,7 +1639,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 163
+          "line": 173
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -4294,7 +4294,7 @@
         },
         {
           "file": "apps/client/next.config.ts",
-          "line": 111
+          "line": 120
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/ActivitiesPageClient.tsx",
@@ -6223,6 +6223,23 @@
         {
           "file": "apps/server/src/config/config.ts",
           "line": 123
+        }
+      ]
+    },
+    {
+      "name": "TRAININGLOAD_DESKTOP_BUILD",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 21
         }
       ]
     },

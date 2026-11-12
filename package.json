@@ -84,10 +84,13 @@
     "messages:check": "node packages/messages/check-client-baseline.mjs",
     "docs:dev": "pnpm --dir apps/docs dev",
     "docs:build": "pnpm --dir apps/docs build",
-    "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* \u00b7 (en|zh)$'",
+    "screenshots:readme": "SELF_HOST_README_CAPTURE=1 pnpm --dir apps/client exec playwright test --config=playwright.marketing-5k.config.ts --grep 'dark Web (home|calendar|coach).* · (en|zh)$'",
     "prisma:generate": "pnpm --dir packages/prisma exec prisma generate --schema core/schema.prisma",
     "prisma:migrate": "pnpm --dir packages/prisma core:migrate",
     "boundary:check": "node scripts/audit-public.mjs",
-    "self-host": "node scripts/selfhost/cli.mjs"
+    "self-host": "node scripts/selfhost/cli.mjs",
+    "desktop:build": "pnpm --dir apps/desktop core:build && pnpm --dir apps/desktop build",
+    "desktop:start": "pnpm --dir apps/desktop start",
+    "desktop:package": "pnpm --dir apps/desktop dist:local"
   }
 }

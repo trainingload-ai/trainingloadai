@@ -1,0 +1,37 @@
+{
+  "name": "@trainingloadai/desktop",
+  "productName": "Trainingload.ai",
+  "version": "1.1.22",
+  "description": "Trainingload.ai desktop self-host app",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "icons:generate": "node scripts/generate-icons.mjs",
+    "core:build": "node scripts/build-core.mjs",
+    "core:check": "node scripts/start-desktop.mjs --check",
+    "build": "tsc -p tsconfig.json && node scripts/build-locales.mjs && node scripts/build-startup-assets.mjs && node scripts/write-core-source.mjs",
+    "start": "node scripts/start-desktop.mjs",
+    "test": "pnpm run build && node --test 'dist/**/*.test.js' 'scripts/*.test.mjs'",
+    "runtime:prepare": "pnpm run build && node scripts/prepare-runtime.mjs",
+    "runtime:smoke": "node scripts/smoke-runtime.mjs",
+    "pack": "pnpm run runtime:prepare && pnpm run runtime:smoke && electron-builder --config electron-builder.config.cjs --dir --publish never",
+    "dist:local": "pnpm run runtime:prepare && pnpm run runtime:smoke && electron-builder --config electron-builder.config.cjs --publish never",
+    "dist:mac:dmg": "pnpm run pack && node scripts/package-macos-dmg.mjs",
+    "signing:mac:check": "node scripts/macos-signing.mjs",
+    "dist:mac:signed": "node scripts/release-macos.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-socket": "0.2.11",
+    "electron-updater": "6.8.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.2",
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0",
+    "sharp": "0.35.5",
+    "typescript": "5.9.3"
+  }
+}
