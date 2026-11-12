@@ -1,10 +1,15 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { ArrowUpRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
-import { ProductVisualPlaceholder } from "@/components/ProductVisualPlaceholder";
-import { resolveDocsScreenshot } from "@/lib/docs-screenshot";
+import { cn } from "@/lib/utils";
+import {
+  resolveDocsScreenshot,
+  type DocsScreenshotMedia,
+} from "@/lib/docs-screenshot";
+import styles from "./DocsScreenshot.module.css";
 
 type DocsScreenshotProps = {
   id: string;
@@ -19,19 +24,49 @@ type DocsScreenshotProps = {
   demoLabel?: string;
 };
 
-/**
- * Stable screenshot slot for product documentation.
- *
- * The manifest is the source of truth for capture status, assets, and Demo
- * destinations. Pending captures render an honest link to the relevant live
- * Demo page instead of a simulated product interface.
- */
+function ScreenshotImage({
+  media,
+  alt,
+}: {
+  media: DocsScreenshotMedia;
+  alt: string;
+}) {
+  return (
+    <div style={{ aspectRatio: `${media.width} / ${media.height}` }}>
+      <img
+        src={media.imageSrc}
+        alt={alt}
+        width={media.width}
+        height={media.height}
+        loading="lazy"
+        decoding="async"
+        className={cn(
+          "block h-auto w-full",
+          media.darkImageSrc && "dark:hidden",
+        )}
+      />
+      {media.darkImageSrc ? (
+        <img
+          src={media.darkImageSrc}
+          alt={alt}
+          width={media.width}
+          height={media.height}
+          loading="lazy"
+          decoding="async"
+          className="hidden h-auto w-full dark:block"
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/** Theme-specific real product captures, paired only for the same feature. */
 export function DocsScreenshot({
   id,
   title,
   description,
   route,
-  platform = "web",
+  platform,
   platformLabel,
   imageSrc,
   imageAlt,
@@ -40,88 +75,78 @@ export function DocsScreenshot({
 }: DocsScreenshotProps) {
   const locale = useLocale();
   const t = useTranslations("docsScreenshot");
-  const {
-    capture,
-    imageSrc: resolvedImageSrc,
-    destination,
-  } = resolveDocsScreenshot({
+  const { capture, desktop, mobile, destination } = resolveDocsScreenshot({
     id,
     locale,
     imageSrc,
     appPath,
   });
-  const visual = resolvedImageSrc ? (
-    <ProductVisualPlaceholder
-      label={title}
-      imageSrc={resolvedImageSrc}
-      imageAlt={imageAlt ?? title}
-      imageAspectRatio={capture?.aspectRatio}
-      showLabelOverlay={false}
-      className={
-        platform === "web" ? "rounded-none border-0 shadow-none" : undefined
-      }
-    />
-  ) : (
-    <div className="flex min-h-64 flex-col justify-between gap-8 bg-card p-6 text-left sm:p-8">
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          {t("demoLabel")}
-        </div>
-        <div className="mt-3 text-xl font-semibold text-foreground">
-          {title}
-        </div>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
-      </div>
+  const paired = Boolean(desktop && mobile);
+  const displayPlatform = platform ?? capture?.platform ?? "web";
+  const linkLabel =
+    demoLabel ?? t(displayPlatform === "mobile" ? "openWebDemo" : "openDemo");
+  const platformName = (value: "web" | "mobile") =>
+    t(value === "web" ? "webPlatform" : "mobilePlatform");
+  const navigation = [desktop, mobile]
+    .filter((media): media is DocsScreenshotMedia => Boolean(media))
+    .map((media) => {
+      const label =
+        !paired && platformLabel ? platformLabel : platformName(media.platform);
+      const path =
+        media.captureId === id ? (route ?? media.navigation) : media.navigation;
+      return `${label}${path ? ` · ${path}` : ""}`;
+    })
+    .join("　·　");
+
+  return (
+    <figure className="not-prose my-8" data-docs-screenshot={id}>
       <a
         href={destination.href}
         target="_blank"
         rel="noopener noreferrer"
-        className="group inline-flex w-fit items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label={`${demoLabel ?? t("openDemo")}: ${title}`}
+        aria-label={`${linkLabel}: ${title}`}
+        data-docs-demo-link
+        className="block rounded-feature focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
       >
-        {demoLabel ?? t("openDemo")}
-        <ArrowUpRight
-          aria-hidden="true"
-          className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-        />
-      </a>
-    </div>
-  );
-
-  return (
-    <figure className="not-prose my-8" data-docs-screenshot={id}>
-      {platform === "web" ? (
-        <ProductBrowserWindow
-          address={destination.address}
-          addressHref={destination.href}
-          addressAriaLabel={`${title}: ${destination.address}`}
+        <div
+          className={cn(styles.composition, paired && styles.paired)}
+          data-docs-paired={paired || undefined}
         >
-          {visual}
-        </ProductBrowserWindow>
-      ) : (
-        visual
-      )}
-      <figcaption className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-        {resolvedImageSrc ? <p>{description}</p> : null}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-          <span>
-            {platformLabel ?? (platform === "mobile" ? "Mobile" : "Web")}
-            {route ? ` · ${route}` : ""}
-          </span>
-          {resolvedImageSrc ? (
-            <a
-              href={destination.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          {desktop ? (
+            <ProductBrowserWindow
+              address={destination.address}
+              className={styles.browser}
+              chromeClassName={styles.chrome}
             >
-              {demoLabel ?? t("openDemo")}
-              <ArrowUpRight aria-hidden="true" className="size-3.5" />
-            </a>
+              <ScreenshotImage
+                media={desktop}
+                alt={`${imageAlt ?? title} — ${platformName("web")}`}
+              />
+            </ProductBrowserWindow>
+          ) : null}
+          {mobile ? (
+            <div className={styles.phone}>
+              <ScreenshotImage
+                media={mobile}
+                alt={`${imageAlt ?? title} — ${platformName("mobile")}`}
+              />
+            </div>
+          ) : null}
+          {!desktop && !mobile ? (
+            <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-feature border bg-card p-6 text-center">
+              <span className="font-medium">{title}</span>
+              <span className="text-sm text-muted-foreground">{linkLabel}</span>
+            </div>
           ) : null}
         </div>
+      </a>
+      <figcaption className="mt-4 space-y-1 text-center text-sm leading-6 text-muted-foreground">
+        <p>{description}</p>
+        {navigation ? <p className="text-xs">{navigation}</p> : null}
+        <p className="inline-flex items-center justify-center gap-1 text-xs">
+          {linkLabel}
+          <ArrowUpRight aria-hidden="true" className="size-3" />
+        </p>
       </figcaption>
     </figure>
   );

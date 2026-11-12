@@ -95,7 +95,10 @@
   },
   "docsScreenshot": {
     "demoLabel": "ライブデモ",
-    "openDemo": "デモでこのページを開く"
+    "openDemo": "デモでこのページを開く",
+    "openWebDemo": "Web デモで関連機能を見る",
+    "webPlatform": "Web 版",
+    "mobilePlatform": "モバイル版"
   },
   "SiteError": {
     "notFound": {

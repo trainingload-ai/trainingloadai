@@ -1,45 +1,58 @@
-# Product screenshot workflow
+# Documentation screenshots
 
-The screenshot manifest is the capture contract for public tutorials. It keeps
-the article, product route, required state, privacy rules, and final asset path
-together so screenshots do not become anonymous files that silently drift from
-the UI.
+`manifest.json` connects each published `DocsScreenshot` to its real product
+route, capture state, localized image files, dimensions, and data source. The
+component and Markdown export both resolve images from this manifest; authors do
+not need to repeat `imageSrc` in MDX.
 
-## Status values
+## Capture and update
 
-- `pending` — the tutorial intentionally renders a visual placeholder.
-- `ready` — a reviewed asset exists under `public/<asset>` and can be wired to
-  the matching `<DocsScreenshot imageSrc="/<asset>" ... />`.
+1. Follow the tutorial in the current web or native mobile app using synthetic
+   athlete data. Mock responses are allowed; render the actual product components.
+2. Capture the whole application viewport. Web images must retain the app header,
+   navigation, page identity, and the relevant action. Do not capture only a dialog
+   or graph. Native images retain the screen header, safe areas, and available
+   navigation. Do not include desktop browser or operating-system chrome.
+3. For a dialog that obscures or blurs its page, also show the page and opening
+   action before the dialog in the tutorial. A larger dialog image alone does not
+   explain where to start.
+4. Use a readable viewport, normally 1280×960 for web. A different height is fine
+   when needed to show context. Native captures come from the simulator at the
+   device's own resolution and display at a maximum width of 390 CSS pixels.
+5. Check every image for loading or error states, development overlays, clipped
+   controls, real names, private email addresses, tokens, provider identifiers,
+   and private GPS locations. Never publish an image with these artifacts.
+6. Capture the actual light and dark product themes in English and Simplified
+   Chinese. Keep the viewport and operation state identical across themes. Never
+   invert colors or use filters to manufacture a dark screenshot. Save WebP assets
+   under `apps/docs/public/docs/`. Set `localizedAssets.en`, `localizedAssets.zh`,
+   `localizedDarkAssets.en`, `localizedDarkAssets.zh`, the default `asset` and
+   `darkAsset`, `aspectRatio`, `viewport`, `capturedAt`, `sourceVersion`, and
+   `dataSource`.
+7. Keep the caption and operation path accurate for the pictured state. Reuse one
+   image for several articles only when it genuinely illustrates the same state.
+   Use a stable Demo route, avoiding synthetic fixture IDs and non-existent paths.
+8. Set `companionId` only for the same feature on the other platform. The component
+   follows this reference once, places the full web viewport behind the phone,
+   and uses the article's existing Demo target for the whole group. A source
+   capture used only as a companion does not need its own MDX reference. Keep
+   platform-exclusive functions as a single full screenshot.
+9. Set `status` to `ready` only after reviewing all four locale/theme images.
+   Remove obsolete entries when neither an article nor a companion uses them.
+10. Run `pnpm --dir apps/docs screenshots:check`, `pnpm --dir apps/docs test`, and
+    `pnpm --dir apps/docs build`. Inspect desktop, 390px, and 320px articles in
+    both themes, including first load, theme switching, and keyboard activation.
 
-Do not mark a capture `ready` before the asset is committed. `pnpm docs:check`
-verifies that every ready asset exists.
+The build checks every published screenshot reference. Unknown IDs, pending
+captures, missing locale/theme files, invalid image files, mismatched dimensions
+or proportions, invalid pairings, and isolated web crops fail the check.
+`pending` is for unpublished capture work;
+it must not be used as a published substitute for an image.
 
-## Capture procedure
-
-1. Open the exact route and product state from `manifest.json`.
-2. Use a synthetic athlete account with no personal identifiers.
-3. Set the viewport to the manifest default: 1440×960 for web or 390×844 for
-   mobile, unless the capture defines another size.
-4. Hide email addresses, connection identifiers, tokens, precise home
-   locations, and real athlete names.
-5. Capture the smallest state that proves the tutorial step. Avoid browser
-   chrome and unrelated navigation when they do not help orientation.
-6. Crop only after capture; do not stretch the image or change the UI's aspect
-   ratio.
-7. Save a WebP asset at `apps/docs/public/<asset>` using the exact manifest path.
-8. Add `imageSrc="/<asset>"` and useful `imageAlt` text to the matching
-   `DocsScreenshot` in the English and Simplified Chinese article.
-9. Change the manifest status to `ready`, run `pnpm docs:check`, and inspect the
-   rendered page in light and dark themes.
-
-## Review checklist
-
-- The screenshot matches the current UI labels and control positions.
-- The state is understandable without relying on surrounding prose.
-- Text remains readable at the article's normal content width.
-- No private or production data is visible.
-- Alt text describes what the reader should find or verify.
-- A mobile screenshot includes safe-area content but not unnecessary device
-  chrome.
-- The same asset remains accurate for every locale that reuses it; otherwise,
-  create a locale-specific capture and document that choice in the manifest.
+The entire screenshot group is one keyboard-accessible Demo link. Do not add an
+image lightbox, Preview overlay, nested link, or “View original image” action.
+Center the description, operation paths, and Demo hint below the image. Keep
+images proportional at narrow widths without clipping or horizontal scrolling.
+The product images and device frames follow the docs theme, including the system
+preference. Markdown export contains standard images for both platforms using
+their light source files, the description, and one Demo link.

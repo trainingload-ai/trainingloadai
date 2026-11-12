@@ -1,9 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "defaults": {
-    "webViewport": "1440x960",
-    "mobileViewport": "390x844",
-    "dataPolicy": "Use synthetic athlete data; hide email, tokens, exact home location, and third-party account identifiers."
+    "webViewport": "1280x960",
+    "mobileViewport": "402x874 (native simulator, 3x)",
+    "dataPolicy": "Use synthetic athlete data. Never expose real email addresses, tokens, third-party account identifiers, or private GPS locations.",
+    "composition": "Full app viewports. Match companion captures by feature. Display the web view as the main image with its native companion on the right; retain single-platform captures for exclusive capabilities."
   },
   "captures": [
     {
@@ -12,80 +13,241 @@
       "platform": "web",
       "status": "ready",
       "route": "/",
-      "state": "Web home with synthetic current plan, advice, scheduled workout, weekly load and current status; cropped above the health section",
+      "state": "Web home with synthetic current plan, advice, scheduled workout, weekly load and current status; full application viewport including navigation",
       "asset": "docs/daily/en/getting-started-home.webp",
       "localizedAssets": {
         "en": "docs/daily/en/getting-started-home.webp",
         "zh": "docs/daily/zh/getting-started-home.webp"
       },
-      "viewport": "1440x1300",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1216 / 900",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "darkAsset": "docs/daily/en/getting-started-home-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/getting-started-home-dark.webp",
+        "zh": "docs/daily/zh/getting-started-home-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "choose-path-mobile-today",
+      "navigation": {
+        "en": "Home",
+        "zh": "首页"
+      }
     },
     {
       "id": "choose-path-mobile-today",
       "article": "guide/choose-your-path",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/today",
+      "status": "ready",
+      "route": "/",
       "state": "Today tab showing the next planned workout",
-      "asset": "docs/getting-started/mobile-today.webp"
+      "asset": "docs/mobile/en/today.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/today.webp",
+        "zh": "docs/mobile/zh/today.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/today",
+      "darkAsset": "docs/mobile/en/today-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/today-dark.webp",
+        "zh": "docs/mobile/zh/today-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "getting-started-web-home",
+      "navigation": {
+        "en": "Today",
+        "zh": "今日"
+      }
     },
     {
       "id": "web-mobile-navigation",
       "article": "guide/web-and-mobile",
       "platform": "mobile",
-      "status": "pending",
+      "status": "ready",
       "route": "/",
       "state": "Authenticated tab navigation with Today, Calendar, Coach, Plan, and Me",
-      "asset": "docs/platform/mobile-navigation.webp"
+      "asset": "docs/mobile/en/today.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/today.webp",
+        "zh": "docs/mobile/zh/today.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/today",
+      "darkAsset": "docs/mobile/en/today-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/today-dark.webp",
+        "zh": "docs/mobile/zh/today-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "getting-started-web-home"
     },
     {
       "id": "product-tour-web-home",
       "article": "guide/product-tour",
       "platform": "web",
-      "status": "pending",
-      "route": "/home",
+      "status": "ready",
+      "route": "/",
       "state": "Home workspace showing plan, recent activity, and training state",
-      "asset": "docs/product-tour/web-home.webp"
+      "asset": "docs/daily/en/getting-started-home.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/getting-started-home.webp",
+        "zh": "docs/daily/zh/getting-started-home.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/daily/en/getting-started-home-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/getting-started-home-dark.webp",
+        "zh": "docs/daily/zh/getting-started-home-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "choose-path-mobile-today"
     },
     {
       "id": "mobile-recording-ready",
       "article": "guide/mobile-recording",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/record",
-      "state": "Recording screen ready, with permission status and sport selected",
-      "asset": "docs/mobile/recording-ready.webp"
+      "status": "ready",
+      "route": "/",
+      "state": "Native Today workout details sheet with sport, structure preview, and Start today’s workout action, before beginning a recording",
+      "asset": "docs/mobile/en/mobile-recording-ready.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/mobile-recording-ready.webp",
+        "zh": "docs/mobile/zh/mobile-recording-ready.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/today",
+      "darkAsset": "docs/mobile/en/mobile-recording-ready-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/mobile-recording-ready-dark.webp",
+        "zh": "docs/mobile/zh/mobile-recording-ready-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "mobile-manual-plan-schedule",
       "article": "guide/mobile-plans-and-strength",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/plans/create",
-      "state": "Manual plan schedule step with endurance and strength sessions arranged across multiple weeks",
-      "asset": "docs/mobile/manual-plan-schedule.webp"
+      "status": "ready",
+      "route": "/plans/create/manual",
+      "state": "Full native manual-plan schedule step after entering a plan name; empty days show add controls and week navigation",
+      "asset": "docs/mobile/en/mobile-manual-plan-schedule.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/mobile-manual-plan-schedule.webp",
+        "zh": "docs/mobile/zh/mobile-manual-plan-schedule.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "darkAsset": "docs/mobile/en/mobile-manual-plan-schedule-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/mobile-manual-plan-schedule-dark.webp",
+        "zh": "docs/mobile/zh/mobile-manual-plan-schedule-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "manual-plan-location",
+      "navigation": {
+        "en": "Plan → Create manually → Schedule",
+        "zh": "计划 → 手动创建 → 编排课表"
+      }
     },
     {
       "id": "mobile-strength-session",
       "article": "guide/mobile-plans-and-strength",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/strength/{activityId}",
-      "state": "Active strength session with elapsed time, exercise sets, completion controls, and optional session RPE",
-      "asset": "docs/mobile/strength-session.webp"
+      "status": "ready",
+      "route": "/plan",
+      "state": "Full native strength session paused, with timer, one completed set, remaining set inputs, and resume/finish actions",
+      "asset": "docs/mobile/en/mobile-strength-session.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/mobile-strength-session.webp",
+        "zh": "docs/mobile/zh/mobile-strength-session.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/strength/docs-strength",
+      "darkAsset": "docs/mobile/en/mobile-strength-session-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/mobile-strength-session-dark.webp",
+        "zh": "docs/mobile/zh/mobile-strength-session-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "integrations-connections",
       "article": "guide/integrations",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/account",
       "state": "Third-party connections section with provider status cards",
-      "asset": "docs/integrations/connections.webp"
+      "asset": "docs/captures/en/integrations-connections.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/integrations-connections.webp",
+        "zh": "docs/captures/zh/integrations-connections.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/integrations-connections-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/integrations-connections-dark.webp",
+        "zh": "docs/captures/zh/integrations-connections-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "mobile-permission-sources",
+      "navigation": {
+        "en": "Account → Third Party Connections",
+        "zh": "账号 → 第三方连接"
+      }
     },
     {
       "id": "activity-timeline-selection",
@@ -99,10 +261,20 @@
         "en": "docs/activities/en/activity-timeline-selection.webp",
         "zh": "docs/activities/zh/activity-timeline-selection.webp"
       },
-      "viewport": "1440x1680",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x1200",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1088 / 831"
+      "aspectRatio": "1280 / 1200",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/activities/en/activity-timeline-selection-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/activities/en/activity-timeline-selection-dark.webp",
+        "zh": "docs/activities/zh/activity-timeline-selection-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "activity-timeline-full",
@@ -116,19 +288,47 @@
         "en": "docs/activities/en/activity-timeline-full.webp",
         "zh": "docs/activities/zh/activity-timeline-full.webp"
       },
-      "viewport": "1440x1680",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x1200",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1088 / 500"
+      "aspectRatio": "1280 / 1200",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/activities/en/activity-timeline-full-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/activities/en/activity-timeline-full-dark.webp",
+        "zh": "docs/activities/zh/activity-timeline-full-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "manual-workout-editor",
       "article": "planning/manual-workout-editor",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/plans/create/manual",
       "state": "Manual workout dialog with sport selector, structured builder, notes, and preview",
-      "asset": "docs/planning/manual-workout-editor.webp"
+      "asset": "docs/captures/en/manual-workout-editor.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/manual-workout-editor.webp",
+        "zh": "docs/captures/zh/manual-workout-editor.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/manual-workout-editor-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/manual-workout-editor-dark.webp",
+        "zh": "docs/captures/zh/manual-workout-editor-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "activity-detail-review",
@@ -142,19 +342,49 @@
         "en": "docs/activities/en/activity-detail-review.webp",
         "zh": "docs/activities/zh/activity-detail-review.webp"
       },
-      "viewport": "1440x1680",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x1200",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1088 / 770"
+      "aspectRatio": "1280 / 1200",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/activities/en/activity-detail-review-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/activities/en/activity-detail-review-dark.webp",
+        "zh": "docs/activities/zh/activity-detail-review-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "activity-detail-mobile"
     },
     {
       "id": "activities-feed-review",
       "article": "guide/activity-feed-search",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/activities",
-      "state": "Activity feed with Ready and processing activities, filters, load values, and one plan-link control",
-      "asset": "docs/activities/feed-review.webp"
+      "state": "Activity feed with completed synthetic sessions, search and filters, load values, and the file import entry; full application viewport",
+      "asset": "docs/captures/en/activities-feed-review.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/activities-feed-review.webp",
+        "zh": "docs/captures/zh/activities-feed-review.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Isolated managed client composition rendering real activity feed components with synthetic activity props; no API or database writes",
+      "darkAsset": "docs/captures/en/activities-feed-review-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/activities-feed-review-dark.webp",
+        "zh": "docs/captures/zh/activities-feed-review-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "activity-feed-mobile"
     },
     {
       "id": "today-execution-overview",
@@ -168,11 +398,21 @@
         "en": "docs/daily/en/getting-started-home.webp",
         "zh": "docs/daily/zh/getting-started-home.webp"
       },
-      "viewport": "1440x1300",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1216 / 900",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "darkAsset": "docs/daily/en/getting-started-home-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/getting-started-home-dark.webp",
+        "zh": "docs/daily/zh/getting-started-home-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "choose-path-mobile-today"
     },
     {
       "id": "calendar-plan-actual",
@@ -186,20 +426,48 @@
         "en": "docs/daily/en/calendar-plan-actual.webp",
         "zh": "docs/daily/zh/calendar-plan-actual.webp"
       },
-      "viewport": "1440x1300",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1216 / 820",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "darkAsset": "docs/daily/en/calendar-plan-actual-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/calendar-plan-actual-dark.webp",
+        "zh": "docs/daily/zh/calendar-plan-actual-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "calendar-overview-mobile"
     },
     {
       "id": "dashboard-trend-review",
       "article": "guide/dashboard",
       "platform": "web",
-      "status": "pending",
-      "route": "/home",
+      "status": "ready",
+      "route": "/dashboard",
       "state": "Dashboard with time and sport filters, fitness status, and overview cards for a synthetic athlete",
-      "asset": "docs/dashboard/trend-review.webp"
+      "asset": "docs/analysis/en/dashboard-trend-review.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/dashboard-trend-review.webp",
+        "zh": "docs/analysis/zh/dashboard-trend-review.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/analysis/en/dashboard-trend-review-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/dashboard-trend-review-dark.webp",
+        "zh": "docs/analysis/zh/dashboard-trend-review-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "profile-thresholds-calibration",
@@ -208,74 +476,192 @@
       "status": "ready",
       "route": "/account",
       "state": "Profile settings with time zone, units, current thresholds, load-source priority, and sport-specific zones",
-      "asset": "docs/settings/profile-thresholds-calibration-en.png",
-      "aspectRatio": "896 / 385",
+      "asset": "docs/captures/en/profile-thresholds-calibration.webp",
+      "aspectRatio": "1280 / 960",
       "localizedAssets": {
-        "zh": "docs/settings/profile-thresholds-calibration-zh.png"
-      }
-    },
-    {
-      "id": "activity-import-batch",
-      "article": "guide/upload-activity-files",
-      "platform": "web",
-      "status": "pending",
-      "route": "/activities",
-      "state": "Import batch dialog with one completed file, one duplicate warning, and one failed file with a synthetic filename",
-      "asset": "docs/activities/import-batch.webp"
+        "en": "docs/captures/en/profile-thresholds-calibration.webp",
+        "zh": "docs/captures/zh/profile-thresholds-calibration.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/profile-thresholds-calibration-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/profile-thresholds-calibration-dark.webp",
+        "zh": "docs/captures/zh/profile-thresholds-calibration-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "profile-settings-mobile"
     },
     {
       "id": "ai-coach-contextual-review",
       "article": "guide/ai-coach",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/ai-coach",
       "state": "Activity or plan review conversation showing evidence, recommendation, and a confirmation card",
-      "asset": "docs/coach/contextual-review.webp"
+      "asset": "docs/captures/en/ai-coach-contextual-review.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/ai-coach-contextual-review.webp",
+        "zh": "docs/captures/zh/ai-coach-contextual-review.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/ai-coach-contextual-review-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/ai-coach-contextual-review-dark.webp",
+        "zh": "docs/captures/zh/ai-coach-contextual-review-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "coach-review-mobile"
     },
     {
       "id": "strength-workout-builder",
       "article": "planning/strength-workouts",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/plans/create/manual",
       "state": "Strength workout builder with one exercise, warm-up group, and work group",
-      "asset": "docs/planning/strength-workout-builder.webp"
+      "asset": "docs/captures/en/strength-workout-builder.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/strength-workout-builder.webp",
+        "zh": "docs/captures/zh/strength-workout-builder.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/strength-workout-builder-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/strength-workout-builder-dark.webp",
+        "zh": "docs/captures/zh/strength-workout-builder-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "plan-active-summary",
       "article": "planning/plan-lifecycle",
       "platform": "web",
-      "status": "pending",
-      "route": "/plans/{planId}",
+      "status": "ready",
+      "route": "/plan",
       "state": "Active plan detail showing status, week structure, and expected-versus-actual load",
-      "asset": "docs/planning/active-plan-summary.webp"
+      "asset": "docs/captures/en/plan-active-summary.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/plan-active-summary.webp",
+        "zh": "docs/captures/zh/plan-active-summary.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/plan-active-summary-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/plan-active-summary-dark.webp",
+        "zh": "docs/captures/zh/plan-active-summary-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "plan-overview-mobile"
     },
     {
       "id": "plan-create-paths",
       "article": "guide/create-training-plan",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/plans/create",
-      "state": "Plan creation entry showing manual and AI-assisted paths with a synthetic goal brief",
-      "asset": "docs/planning/create-paths.webp"
+      "state": "Full AI plan-creation page with sport, goal, training schedule, and strength preferences",
+      "asset": "docs/captures/en/plan-create-paths.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/plan-create-paths.webp",
+        "zh": "docs/captures/zh/plan-create-paths.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/plan-create-paths-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/plan-create-paths-dark.webp",
+        "zh": "docs/captures/zh/plan-create-paths-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "active-plan-execution",
       "article": "guide/manage-active-plan",
       "platform": "web",
-      "status": "pending",
-      "route": "/plans/current",
+      "status": "ready",
+      "route": "/plan",
       "state": "Current plan showing today's workout, status controls, one linked completed activity, and expected-versus-actual load",
-      "asset": "docs/planning/active-plan-execution.webp"
+      "asset": "docs/captures/en/plan-active-summary.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/plan-active-summary.webp",
+        "zh": "docs/captures/zh/plan-active-summary.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/plan-active-summary-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/plan-active-summary-dark.webp",
+        "zh": "docs/captures/zh/plan-active-summary-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "plan-overview-mobile"
     },
     {
       "id": "training-analysis-decision",
       "article": "guide/training-analysis-workflow",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/pmc",
       "state": "PMC range with CTL, ATL, TSB, recent activities, and an overlapping active-plan period for a synthetic athlete",
-      "asset": "docs/analysis/training-decision.webp"
+      "asset": "docs/analysis/en/pmc-forecast-overview.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/analysis/en/pmc-forecast-overview-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview-dark.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "pmc-history-mobile"
     },
     {
       "id": "pmc-forecast-overview",
@@ -289,11 +675,20 @@
         "en": "docs/analysis/en/pmc-forecast-overview.webp",
         "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
       },
-      "viewport": "1440x1200",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1084 / 744",
-      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)",
+      "darkAsset": "docs/analysis/en/pmc-forecast-overview-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview-dark.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "pmc-forecast-date",
@@ -307,11 +702,20 @@
         "en": "docs/analysis/en/pmc-forecast-date.webp",
         "zh": "docs/analysis/zh/pmc-forecast-date.webp"
       },
-      "viewport": "1440x1200",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1084 / 744",
-      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)",
+      "darkAsset": "docs/analysis/en/pmc-forecast-date-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/pmc-forecast-date-dark.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-date-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "pmc-forecast-unavailable",
@@ -325,11 +729,20 @@
         "en": "docs/analysis/en/pmc-forecast-unavailable.webp",
         "zh": "docs/analysis/zh/pmc-forecast-unavailable.webp"
       },
-      "viewport": "1440x1200",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1084 / 744",
-      "dataSource": "https://demo.trainingload.ai/pmc (2026-11-12)"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/analysis/en/pmc-forecast-unavailable-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/pmc-forecast-unavailable-dark.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-unavailable-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "pmc-marathon-window",
@@ -343,11 +756,20 @@
         "en": "docs/analysis/en/pmc-forecast-overview.webp",
         "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
       },
-      "viewport": "1440x1200",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1084 / 744",
-      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO)"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO)",
+      "darkAsset": "docs/analysis/en/pmc-forecast-overview-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview-dark.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "effective-vo2max-trend",
@@ -361,155 +783,474 @@
         "en": "docs/analysis/en/effective-vo2max-trend.webp",
         "zh": "docs/analysis/zh/effective-vo2max-trend.webp"
       },
-      "viewport": "1440x1200",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "720 / 658",
-      "dataSource": "apps/client/e2e/vdot-forecast.spec.ts (upward synthetic example; REFERENCE range; 2026-11-11)"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/vdot-forecast.spec.ts (upward synthetic example; REFERENCE range; 2026-11-11)",
+      "darkAsset": "docs/analysis/en/effective-vo2max-trend-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/analysis/en/effective-vo2max-trend-dark.webp",
+        "zh": "docs/analysis/zh/effective-vo2max-trend-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "ai-adjustment-confirmation",
       "article": "guide/ai-marathon-plan-adjustments",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/ai-coach",
       "state": "Plan-aware AI Coach conversation with evidence, one conservative workout adjustment, and an unconfirmed action card",
-      "asset": "docs/analysis/ai-adjustment-confirmation.webp"
+      "asset": "docs/captures/en/ai-adjustment-confirmation.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/ai-adjustment-confirmation.webp",
+        "zh": "docs/captures/zh/ai-adjustment-confirmation.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/ai-adjustment-confirmation-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/ai-adjustment-confirmation-dark.webp",
+        "zh": "docs/captures/zh/ai-adjustment-confirmation-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "competition-event-details",
       "article": "guide/competitions",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/competitions",
       "state": "Competition detail with importance, goal, countdown, and current plan impact",
-      "asset": "docs/competitions/event-details.webp"
+      "asset": "docs/captures/en/competition-event-details.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/competition-event-details.webp",
+        "zh": "docs/captures/zh/competition-event-details.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/competition-event-details-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/competition-event-details-dark.webp",
+        "zh": "docs/captures/zh/competition-event-details-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "review-automation-mobile",
       "article": "guide/notifications-and-reviews",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/account/review-automation",
+      "status": "ready",
+      "route": "/account",
       "state": "Review automation settings for activity, daily, weekly, monthly, and plan reviews",
-      "asset": "docs/reviews/mobile-review-automation.webp"
+      "asset": "docs/mobile/en/review-automation-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/review-automation-mobile.webp",
+        "zh": "docs/mobile/zh/review-automation-mobile.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/account/review-automation",
+      "darkAsset": "docs/mobile/en/review-automation-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/review-automation-mobile-dark.webp",
+        "zh": "docs/mobile/zh/review-automation-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "review-automation-web"
     },
     {
       "id": "analysis-hub-tools",
       "article": "guide/performance-analysis-pages",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/analysis",
       "state": "Synthetic athlete signed in; Analysis hub shows training and performance groups, searchable available tools, and the Progression card marked Coming soon",
-      "asset": "docs/analysis/analysis-hub-tools.webp"
+      "asset": "docs/captures/en/analysis-hub-tools.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/analysis-hub-tools.webp",
+        "zh": "docs/captures/zh/analysis-hub-tools.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/captures/en/analysis-hub-tools-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/analysis-hub-tools-dark.webp",
+        "zh": "docs/captures/zh/analysis-hub-tools-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "power-analysis-tabs",
       "article": "guide/performance-analysis-pages",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/power",
       "state": "Cycling selected with two synthetic comparison ranges, visible Curve, Maximum, Zones, and Profile tabs, and qualifying power activities",
-      "asset": "docs/analysis/power-analysis-tabs.webp"
+      "asset": "docs/captures/en/power-analysis-tabs.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/power-analysis-tabs.webp",
+        "zh": "docs/captures/zh/power-analysis-tabs.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/captures/en/power-analysis-tabs-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/power-analysis-tabs-dark.webp",
+        "zh": "docs/captures/zh/power-analysis-tabs-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "activity-stats-year",
       "article": "guide/activity-history-insights",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/activities/stats",
       "state": "Running filter selected; a complete synthetic year shows contribution heatmap, distance metric, monthly aggregation, and multiple year choices",
-      "asset": "docs/activities/activity-stats-year.webp"
+      "asset": "docs/captures/en/activity-stats-year.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/activity-stats-year.webp",
+        "zh": "docs/captures/zh/activity-stats-year.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/captures/en/activity-stats-year-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/activity-stats-year-dark.webp",
+        "zh": "docs/captures/zh/activity-stats-year-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "best-distance-records",
       "article": "guide/activity-history-insights",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/pace/best-distance",
       "state": "Running, By Distance, all-time, and 10 km target selected with several ranked synthetic records linked to source activities",
-      "asset": "docs/activities/best-distance-records.webp"
+      "asset": "docs/captures/en/best-distance-records.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/best-distance-records.webp",
+        "zh": "docs/captures/zh/best-distance-records.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "darkAsset": "docs/captures/en/best-distance-records-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/best-distance-records-dark.webp",
+        "zh": "docs/captures/zh/best-distance-records-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "activity-history-map",
       "article": "guide/activity-history-insights",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/map",
-      "state": "Recent running filter selected with synthetic GPS routes away from private locations and one route selected for its activity poster",
-      "asset": "docs/activities/activity-history-map.webp"
+      "state": "Full map workspace with a synthetic park loop and time/sport filters; no athlete location used",
+      "asset": "docs/captures/en/activity-history-map.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/activity-history-map.webp",
+        "zh": "docs/captures/zh/activity-history-map.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real Self-host web map with synthetic public-park route and OpenStreetMap raster basemap",
+      "darkAsset": "docs/captures/en/activity-history-map-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/activity-history-map-dark.webp",
+        "zh": "docs/captures/zh/activity-history-map-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "account-security-status",
       "article": "guide/account-permissions-and-usage",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/account",
       "state": "Synthetic verified account with password status visible; hide the email username and all private identifiers",
-      "asset": "docs/account/security-status.webp"
+      "asset": "docs/captures/en/account-security-status.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/account-security-status.webp",
+        "zh": "docs/captures/zh/account-security-status.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/account-security-status-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/account-security-status-dark.webp",
+        "zh": "docs/captures/zh/account-security-status-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "mobile-permission-sources",
       "article": "guide/account-permissions-and-usage",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/account/connections",
-      "state": "Health and Location local-source states plus a mix of connected and disconnected third-party providers; no provider account identifiers",
-      "asset": "docs/account/mobile-permission-sources.webp"
+      "status": "ready",
+      "route": "/account",
+      "state": "Full native Data authorization screen showing Location and training platform sources; HealthKit is disabled in this isolated demo build",
+      "asset": "docs/mobile/en/mobile-permission-sources.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/mobile-permission-sources.webp",
+        "zh": "docs/mobile/zh/mobile-permission-sources.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/account/connections",
+      "darkAsset": "docs/mobile/en/mobile-permission-sources-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/mobile-permission-sources-dark.webp",
+        "zh": "docs/mobile/zh/mobile-permission-sources-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "integrations-connections",
+      "navigation": {
+        "en": "Me → Menu → Data authorization",
+        "zh": "我的 → 菜单 → 数据授权"
+      }
     },
     {
       "id": "ai-usage-ledger",
       "article": "guide/account-permissions-and-usage",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/usage",
       "state": "Synthetic active plan with remaining grant, seven-day token and call trends, and both debit and credit ledger events",
-      "asset": "docs/account/ai-usage-ledger.webp"
+      "asset": "docs/captures/en/ai-usage-ledger.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/ai-usage-ledger.webp",
+        "zh": "docs/captures/zh/ai-usage-ledger.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/ai-usage-ledger-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/ai-usage-ledger-dark.webp",
+        "zh": "docs/captures/zh/ai-usage-ledger-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "usage-ledger-mobile"
     },
     {
       "id": "strava-oauth-settings",
       "article": "guide/connect-third-party-platforms",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/account",
       "state": "Synthetic Strava account disconnected; initial 60-day sync and all ongoing data-direction settings visible; no athlete identifier",
-      "asset": "docs/connections/strava-oauth-settings.webp"
+      "asset": "docs/captures/en/strava-oauth-settings.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/strava-oauth-settings.webp",
+        "zh": "docs/captures/zh/strava-oauth-settings.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/strava-oauth-settings-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/strava-oauth-settings-dark.webp",
+        "zh": "docs/captures/zh/strava-oauth-settings-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "strava-oauth-mobile",
+      "navigation": {
+        "en": "Account → Third Party Connections → Strava",
+        "zh": "账号 → 第三方连接 → Strava"
+      }
     },
     {
       "id": "intervals-icu-auth-methods",
       "article": "guide/connect-third-party-platforms",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/account",
       "state": "Synthetic Intervals.icu connection dialog showing OAuth and API Key tabs; API key field empty and no secret visible",
-      "asset": "docs/connections/intervals-icu-auth-methods.webp"
+      "asset": "docs/captures/en/intervals-icu-auth-methods.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/intervals-icu-auth-methods.webp",
+        "zh": "docs/captures/zh/intervals-icu-auth-methods.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/intervals-icu-auth-methods-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/intervals-icu-auth-methods-dark.webp",
+        "zh": "docs/captures/zh/intervals-icu-auth-methods-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "intervals-auth-mobile"
     },
     {
       "id": "mobile-provider-settings",
       "article": "guide/connect-third-party-platforms",
       "platform": "mobile",
-      "status": "pending",
-      "route": "/account/connections",
+      "status": "ready",
+      "route": "/account",
       "state": "Synthetic connected provider sheet with sync directions, Save settings, Sync now, and Disconnect; no provider account identifier",
-      "asset": "docs/connections/mobile-provider-settings.webp"
+      "asset": "docs/mobile/en/mobile-provider-settings.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/mobile-provider-settings.webp",
+        "zh": "docs/mobile/zh/mobile-provider-settings.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "dataSource": "Native iOS simulator running current mobile components with isolated App Store demo transport; synthetic athlete and documentation-only provider/strength responses",
+      "capturedRoute": "/account/connections",
+      "darkAsset": "docs/mobile/en/mobile-provider-settings-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/mobile-provider-settings-dark.webp",
+        "zh": "docs/mobile/zh/mobile-provider-settings-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "strava-oauth-settings",
+      "navigation": {
+        "en": "Data authorization → Strava → Manage connections",
+        "zh": "数据授权 → Strava → 管理连接"
+      }
     },
     {
       "id": "garmin-history-import",
       "article": "guide/connect-third-party-platforms",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/account",
-      "state": "Synthetic completed Garmin history-import job showing stage counts; temporary download URL field blank and no private archive metadata",
-      "asset": "docs/connections/garmin-history-import.webp"
+      "state": "Full account workspace with Garmin file-import tab before choosing an export ZIP or temporary download link; no archive submitted",
+      "asset": "docs/captures/en/garmin-history-import.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/garmin-history-import.webp",
+        "zh": "docs/captures/zh/garmin-history-import.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/garmin-history-import-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/garmin-history-import-dark.webp",
+        "zh": "docs/captures/zh/garmin-history-import-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "garmin-history-mobile"
     },
     {
       "id": "strength-dsl-rules-input",
       "article": "planning/strength-workout-dsl",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/plans/create/manual",
       "state": "Strength Training selected with a validated two-exercise synthetic DSL example; Rules tab and parsed strength preview visible; no athlete data",
-      "asset": "docs/planning/strength-dsl-rules-input.webp"
+      "asset": "docs/captures/en/strength-dsl-rules-input.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/strength-dsl-rules-input.webp",
+        "zh": "docs/captures/zh/strength-dsl-rules-input.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/strength-dsl-rules-input-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/strength-dsl-rules-input-dark.webp",
+        "zh": "docs/captures/zh/strength-dsl-rules-input-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "today-suggestion-details",
@@ -523,11 +1264,20 @@
         "en": "docs/daily/en/today-suggestion-details.webp",
         "zh": "docs/daily/zh/today-suggestion-details.webp"
       },
-      "viewport": "1440x1300",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "512 / 458",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "darkAsset": "docs/daily/en/today-suggestion-details-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/today-suggestion-details-dark.webp",
+        "zh": "docs/daily/zh/today-suggestion-details-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "today-workout-preview",
@@ -541,11 +1291,20 @@
         "en": "docs/daily/en/today-workout-preview.webp",
         "zh": "docs/daily/zh/today-workout-preview.webp"
       },
-      "viewport": "1440x1300",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "512 / 562",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "darkAsset": "docs/daily/en/today-workout-preview-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/today-workout-preview-dark.webp",
+        "zh": "docs/daily/zh/today-workout-preview-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
     },
     {
       "id": "calendar-activity-details",
@@ -559,11 +1318,21 @@
         "en": "docs/daily/en/calendar-activity-details.webp",
         "zh": "docs/daily/zh/calendar-activity-details.webp"
       },
-      "viewport": "1440x1300",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "1216 / 820",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+      "aspectRatio": "1280 / 960",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "darkAsset": "docs/daily/en/calendar-activity-details-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/calendar-activity-details-dark.webp",
+        "zh": "docs/daily/zh/calendar-activity-details-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "calendar-overview-mobile"
     },
     {
       "id": "activity-import-entry",
@@ -571,17 +1340,516 @@
       "platform": "web",
       "status": "ready",
       "route": "/activities",
-      "state": "File upload dialog in a synthetic account; no files submitted",
+      "state": "Full Activities workspace with file-upload dialog open, before selecting files or submitting an upload",
       "asset": "docs/daily/en/activity-import-entry.webp",
       "localizedAssets": {
         "en": "docs/daily/en/activity-import-entry.webp",
         "zh": "docs/daily/zh/activity-import-entry.webp"
       },
-      "viewport": "1440x1100",
-      "capturedAt": "2026-11-12",
+      "viewport": "1280x900",
+      "capturedAt": "2026-11-13",
       "sourceVersion": "1.1.22",
-      "aspectRatio": "600 / 366",
-      "dataSource": "apps/client/e2e/fixtures/coach-page.ts; actual file upload dialog"
+      "aspectRatio": "1280 / 900",
+      "dataSource": "apps/client/e2e/fixtures/coach-page.ts; actual file upload dialog",
+      "darkAsset": "docs/daily/en/activity-import-entry-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/activity-import-entry-dark.webp",
+        "zh": "docs/daily/zh/activity-import-entry-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "id": "garmin-oauth-settings",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "web",
+      "route": "/account",
+      "state": "Full account workspace with the Garmin OAuth tab, activity and health options, and adjacent file-import tab; disconnected synthetic account",
+      "status": "ready",
+      "asset": "docs/captures/en/garmin-oauth-settings.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/garmin-oauth-settings.webp",
+        "zh": "docs/captures/zh/garmin-oauth-settings.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/captures/en/garmin-oauth-settings-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/garmin-oauth-settings-dark.webp",
+        "zh": "docs/captures/zh/garmin-oauth-settings-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "garmin-oauth-mobile"
+    },
+    {
+      "id": "activity-upload-location",
+      "article": "guide/upload-activity-files",
+      "platform": "web",
+      "route": "/activities",
+      "state": "Full Activities page before opening the upload dialog, including app navigation and the file-upload action",
+      "status": "ready",
+      "asset": "docs/daily/en/activity-upload-location.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/activity-upload-location.webp",
+        "zh": "docs/daily/zh/activity-upload-location.webp"
+      },
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "viewport": "1280x900",
+      "aspectRatio": "1280 / 900",
+      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "darkAsset": "docs/daily/en/activity-upload-location-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/activity-upload-location-dark.webp",
+        "zh": "docs/daily/zh/activity-upload-location-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "id": "manual-plan-location",
+      "article": "planning/manual-workout-editor",
+      "platform": "web",
+      "status": "ready",
+      "route": "/plans/create/manual",
+      "state": "Full manual-plan schedule before opening the workout editor; day-level Add Session actions and navigation visible",
+      "asset": "docs/captures/en/manual-plan-location.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/manual-plan-location.webp",
+        "zh": "docs/captures/zh/manual-plan-location.webp"
+      },
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real web manual-plan builder with synthetic E2E data; full application viewport",
+      "darkAsset": "docs/captures/en/manual-plan-location-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/manual-plan-location-dark.webp",
+        "zh": "docs/captures/zh/manual-plan-location-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "companionId": "mobile-manual-plan-schedule",
+      "navigation": {
+        "en": "Plans → Manual Plan Builder → Date Selection",
+        "zh": "计划 → 手动创建计划 → 编排课表"
+      }
+    },
+    {
+      "id": "strava-oauth-mobile",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/account",
+      "state": "Strava authorization settings",
+      "asset": "docs/mobile/en/strava-oauth-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/strava-oauth-mobile.webp",
+        "zh": "docs/mobile/zh/strava-oauth-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/strava-oauth-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/strava-oauth-mobile-dark.webp",
+        "zh": "docs/mobile/zh/strava-oauth-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Data authorization → Strava",
+        "zh": "数据授权 → Strava"
+      }
+    },
+    {
+      "id": "intervals-auth-mobile",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/account",
+      "state": "Intervals.icu authorization settings",
+      "asset": "docs/mobile/en/intervals-auth-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/intervals-auth-mobile.webp",
+        "zh": "docs/mobile/zh/intervals-auth-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/intervals-auth-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/intervals-auth-mobile-dark.webp",
+        "zh": "docs/mobile/zh/intervals-auth-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Data authorization → Intervals.icu",
+        "zh": "数据授权 → Intervals.icu"
+      }
+    },
+    {
+      "id": "garmin-oauth-mobile",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/account",
+      "state": "Garmin OAuth settings",
+      "asset": "docs/mobile/en/garmin-oauth-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/garmin-oauth-mobile.webp",
+        "zh": "docs/mobile/zh/garmin-oauth-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/garmin-oauth-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/garmin-oauth-mobile-dark.webp",
+        "zh": "docs/mobile/zh/garmin-oauth-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Data authorization → Garmin → Manage connections",
+        "zh": "数据授权 → Garmin → 管理连接"
+      }
+    },
+    {
+      "id": "garmin-history-mobile",
+      "article": "guide/connect-third-party-platforms",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/account",
+      "state": "Garmin historical file import",
+      "asset": "docs/mobile/en/garmin-history-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/garmin-history-mobile.webp",
+        "zh": "docs/mobile/zh/garmin-history-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/garmin-history-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/garmin-history-mobile-dark.webp",
+        "zh": "docs/mobile/zh/garmin-history-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Garmin → History import",
+        "zh": "Garmin → 历史导入"
+      }
+    },
+    {
+      "id": "plan-overview-mobile",
+      "article": "guide/manage-active-plan",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/plan",
+      "state": "Current plan overview and scheduled sessions",
+      "asset": "docs/mobile/en/plan-overview-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/plan-overview-mobile.webp",
+        "zh": "docs/mobile/zh/plan-overview-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/plan-overview-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/plan-overview-mobile-dark.webp",
+        "zh": "docs/mobile/zh/plan-overview-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Plan",
+        "zh": "计划"
+      }
+    },
+    {
+      "id": "calendar-overview-mobile",
+      "article": "guide/calendar",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/calendar",
+      "state": "Calendar with synthetic planned and recorded training",
+      "asset": "docs/mobile/en/calendar-overview-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/calendar-overview-mobile.webp",
+        "zh": "docs/mobile/zh/calendar-overview-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/calendar-overview-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/calendar-overview-mobile-dark.webp",
+        "zh": "docs/mobile/zh/calendar-overview-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Calendar",
+        "zh": "日历"
+      }
+    },
+    {
+      "id": "coach-review-mobile",
+      "article": "guide/ai-coach",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/ai-coach",
+      "state": "Coach conversation reviewing planned training",
+      "asset": "docs/mobile/en/coach-review-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/coach-review-mobile.webp",
+        "zh": "docs/mobile/zh/coach-review-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/coach-review-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/coach-review-mobile-dark.webp",
+        "zh": "docs/mobile/zh/coach-review-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Coach",
+        "zh": "教练"
+      }
+    },
+    {
+      "id": "activity-feed-mobile",
+      "article": "guide/activity-feed-search",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/activities",
+      "state": "Activity feed with synthetic training records",
+      "asset": "docs/mobile/en/activity-feed-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/activity-feed-mobile.webp",
+        "zh": "docs/mobile/zh/activity-feed-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/activity-feed-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/activity-feed-mobile-dark.webp",
+        "zh": "docs/mobile/zh/activity-feed-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Me → Activity records",
+        "zh": "我的 → 活动记录"
+      }
+    },
+    {
+      "id": "activity-detail-mobile",
+      "article": "guide/activity-detail",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/activities",
+      "state": "Activity overview with summary and analysis navigation",
+      "asset": "docs/mobile/en/activity-detail-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/activity-detail-mobile.webp",
+        "zh": "docs/mobile/zh/activity-detail-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/activity-detail-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/activity-detail-mobile-dark.webp",
+        "zh": "docs/mobile/zh/activity-detail-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Activities → Open an activity",
+        "zh": "活动记录 → 打开活动"
+      }
+    },
+    {
+      "id": "profile-settings-mobile",
+      "article": "guide/profile-thresholds-zones",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/account",
+      "state": "Personal profile and threshold settings",
+      "asset": "docs/mobile/en/profile-settings-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/profile-settings-mobile.webp",
+        "zh": "docs/mobile/zh/profile-settings-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/profile-settings-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/profile-settings-mobile-dark.webp",
+        "zh": "docs/mobile/zh/profile-settings-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Account → Personal information",
+        "zh": "账户 → 个人信息"
+      }
+    },
+    {
+      "id": "usage-ledger-mobile",
+      "article": "guide/account-permissions-and-usage",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/usage",
+      "state": "Membership and AI credit usage",
+      "asset": "docs/mobile/en/usage-ledger-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/usage-ledger-mobile.webp",
+        "zh": "docs/mobile/zh/usage-ledger-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/usage-ledger-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/usage-ledger-mobile-dark.webp",
+        "zh": "docs/mobile/zh/usage-ledger-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Me → Membership → Usage",
+        "zh": "我的 → 会员 → 用量"
+      }
+    },
+    {
+      "id": "pmc-history-mobile",
+      "article": "guide/training-analysis-workflow",
+      "platform": "mobile",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Recorded CTL, ATL and TSB history; no mobile forecast implied",
+      "asset": "docs/mobile/en/pmc-history-mobile.webp",
+      "localizedAssets": {
+        "en": "docs/mobile/en/pmc-history-mobile.webp",
+        "zh": "docs/mobile/zh/pmc-history-mobile.webp"
+      },
+      "viewport": "1206x2622",
+      "aspectRatio": "1206 / 2622",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
+      "darkAsset": "docs/mobile/en/pmc-history-mobile-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/mobile/en/pmc-history-mobile-dark.webp",
+        "zh": "docs/mobile/zh/pmc-history-mobile-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Today → PMC",
+        "zh": "今日 → PMC"
+      }
+    },
+    {
+      "id": "review-automation-web",
+      "article": "guide/notifications-and-reviews",
+      "platform": "web",
+      "status": "ready",
+      "route": "/account",
+      "state": "Account review-automation controls with all review intervals visible",
+      "asset": "docs/captures/en/review-automation-web.webp",
+      "localizedAssets": {
+        "en": "docs/captures/en/review-automation-web.webp",
+        "zh": "docs/captures/zh/review-automation-web.webp"
+      },
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "capturedAt": "2026-11-13",
+      "sourceVersion": "1.1.22",
+      "dataSource": "Real web account controls with isolated synthetic E2E responses",
+      "darkAsset": "docs/captures/en/review-automation-web-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/captures/en/review-automation-web-dark.webp",
+        "zh": "docs/captures/zh/review-automation-web-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "navigation": {
+        "en": "Account → AI review automation",
+        "zh": "账号 → AI 复盘自动化"
+      }
     }
   ]
 }

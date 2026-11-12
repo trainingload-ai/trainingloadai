@@ -109,7 +109,10 @@
   },
   "docsScreenshot": {
     "demoLabel": "Live-Demo",
-    "openDemo": "Diese Seite in der Demo öffnen"
+    "openDemo": "Diese Seite in der Demo öffnen",
+    "openWebDemo": "Diese Funktion in der Web-Demo ansehen",
+    "webPlatform": "Web",
+    "mobilePlatform": "Mobil"
   },
   "SiteError": {
     "notFound": {

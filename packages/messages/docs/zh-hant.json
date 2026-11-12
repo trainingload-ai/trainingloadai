@@ -95,7 +95,10 @@
   },
   "docsScreenshot": {
     "demoLabel": "線上 Demo",
-    "openDemo": "在 Demo 中開啟此頁面"
+    "openDemo": "在 Demo 中開啟此頁面",
+    "openWebDemo": "在網頁版 Demo 中查看相關功能",
+    "webPlatform": "網頁端",
+    "mobilePlatform": "行動版"
   },
   "SiteError": {
     "notFound": {

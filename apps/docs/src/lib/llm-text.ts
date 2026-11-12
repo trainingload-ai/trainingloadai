@@ -37,7 +37,7 @@ function stringAttributes(node: MarkdownNode) {
 
 function screenshotNodes(node: MarkdownNode, locale: string): MarkdownNode[] {
   const attributes = stringAttributes(node);
-  const { imageSrc, destination } = resolveDocsScreenshot({
+  const { images, destination } = resolveDocsScreenshot({
     id: attributes.id ?? "",
     locale,
     imageSrc: attributes.imageSrc,
@@ -58,11 +58,16 @@ function screenshotNodes(node: MarkdownNode, locale: string): MarkdownNode[] {
       children: [{ type: "text", value: attributes.description }],
     });
   }
-  if (imageSrc) {
+  for (const image of images) {
+    const platform = image.platform === "web" ? "Web" : "Mobile";
     nodes.push({
       type: "paragraph",
       children: [
-        { type: "image", url: imageSrc, alt: attributes.imageAlt ?? title },
+        {
+          type: "image",
+          url: image.imageSrc,
+          alt: `${attributes.imageAlt ?? title}${images.length > 1 ? ` — ${platform}` : ""}`,
+        },
       ],
     });
   }

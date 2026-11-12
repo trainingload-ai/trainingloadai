@@ -101,7 +101,10 @@
   },
   "docsScreenshot": {
     "demoLabel": "在线 Demo",
-    "openDemo": "在 Demo 中打开此页面"
+    "openDemo": "在 Demo 中打开此页面",
+    "openWebDemo": "在网页版 Demo 中查看相关功能",
+    "webPlatform": "网页端",
+    "mobilePlatform": "移动端"
   },
   "SiteError": {
     "notFound": {

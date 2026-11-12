@@ -109,7 +109,10 @@
   },
   "docsScreenshot": {
     "demoLabel": "라이브 데모",
-    "openDemo": "데모에서 이 페이지 열기"
+    "openDemo": "데모에서 이 페이지 열기",
+    "openWebDemo": "웹 데모에서 관련 기능 보기",
+    "webPlatform": "웹",
+    "mobilePlatform": "모바일"
   },
   "SiteError": {
     "notFound": {

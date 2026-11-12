@@ -2,7 +2,14 @@
 title: 连接 Strava、Garmin 与 COROS：同步训练分步指南
 description: 连接 Strava、Garmin、COROS、Polar、Suunto 或 Wahoo 导入训练。按 OAuth、API Key 和 Garmin 历史导入步骤操作，核对第一次同步结果，并避免同一条训练重复导入。
 keywords:
-  ["连接 Strava", "连接 Garmin", "连接 COROS", "Polar 同步", "导入 Wahoo 训练", "Garmin 历史导入"]
+  [
+    "连接 Strava",
+    "连接 Garmin",
+    "连接 COROS",
+    "Polar 同步",
+    "导入 Wahoo 训练",
+    "Garmin 历史导入",
+  ]
 ---
 
 # 连接 Strava、Garmin 与 COROS：同步训练分步指南
@@ -23,19 +30,28 @@ keywords:
 
 网页端打开**账号 → 第三方平台连接**，再选择平台卡片。
 
-移动端打开**我的 → 账号 → 连接**。OAuth 会在系统浏览器中打开平台授权页，批准后再返回 App。Strava、Polar、COROS、Suunto、Wahoo 和 Intervals.icu 可以在移动端管理；Garmin 历史导入需要使用网页端。
+移动端打开**我的 → 菜单 → 数据授权**。OAuth 会在系统浏览器中打开平台授权页，批准后再返回 App。Strava、Polar、COROS、Suunto、Wahoo、Intervals.icu 和 Garmin 授权连接可以在移动端管理；Garmin 历史 ZIP 和临时下载链接导入也可在移动端 Garmin 设置中完成。
 
 如果连接页没有显示某个平台卡片，当前账号暂时无法直接连接它。可以先从来源平台导出 FIT、TCX 或 GPX 文件，再上传到活动列表。
 
-| 平台          | 网页端 | 移动端 | 授权方式            | 常见首次操作           |
-| ------------- | ------ | ------ | ------------------- | ---------------------- |
-| Strava        | 支持   | 支持   | OAuth               | 按选择导入最近 60 天   |
-| Polar         | 支持   | 支持   | OAuth               | 按选择导入最近 30 天   |
-| COROS         | 支持   | 支持   | OAuth               | 分别同步活动和健康数据 |
-| Intervals.icu | 支持   | 支持   | OAuth 或 API Key    | 导入近期活动           |
-| Suunto        | 支持   | 支持   | OAuth               | 首次导入近期训练       |
-| Wahoo         | 支持   | 支持   | OAuth               | 连接、保存方向后同步   |
-| Garmin        | 支持   | 不支持 | Garmin 临时导出链接 | 启动一次历史导入任务   |
+<DocsScreenshot
+  id="integrations-connections"
+  title="从账号设置找到平台连接"
+  description="在账号页面下方找到“第三方连接”，再打开需要配置的平台。"
+  route="账号 → 第三方连接"
+  platformLabel="网页端"
+/>
+
+| 平台            | 网页端 | 移动端 | 授权方式                                | 常见首次操作                         |
+| --------------- | ------ | ------ | --------------------------------------- | ------------------------------------ |
+| Strava          | 支持   | 支持   | OAuth                                   | 按选择导入最近 60 天                 |
+| Polar           | 支持   | 支持   | OAuth                                   | 按选择导入最近 30 天                 |
+| COROS           | 支持   | 支持   | OAuth                                   | 分别同步活动和健康数据               |
+| Intervals.icu   | 支持   | 支持   | OAuth 或 API Key                        | 导入近期活动                         |
+| Suunto          | 支持   | 支持   | OAuth                                   | 首次导入近期训练                     |
+| Wahoo           | 支持   | 支持   | OAuth                                   | 连接、保存方向后同步                 |
+| Garmin 授权同步 | 支持   | 支持   | OAuth                                   | 连接后接收新的活动和已授权的健康数据 |
+| Garmin 历史导入 | 支持   | 支持   | 上传 Garmin 导出 ZIP 或使用临时下载链接 | 补充较早的活动记录                   |
 
 ## 连接 Strava
 
@@ -141,21 +157,22 @@ Trainingload.ai 不会再次显示已保存的完整 Key，连接后只显示末
 
 移动端和网页端使用同一个已保存连接，因此一端修改的设置会影响另一端。
 
-1. 打开**我的 → 账号 → 连接**并选择平台。
+1. 打开**我的 → 菜单 → 数据授权**并选择平台。
 2. Strava 或 Polar 在授权前显示首次同步选项时，先完成选择。
 3. 在系统浏览器中授权，并允许它返回 App。
 4. 重新打开平台，配置当前支持的数据方向。
 5. 点击**保存设置**；只有需要补偿核对时才点击**立即同步**。
 6. COROS 的活动和健康数据需要分别同步。
 
-Intervals.icu 使用独立的移动端设置面板；Garmin 历史导入是网页端专属流程。
+Intervals.icu 使用独立的移动端设置面板；Garmin 设置中也提供历史 ZIP 和临时下载链接导入。
 
 <DocsScreenshot
   id="mobile-provider-settings"
   title="移动端平台设置"
   description="已连接平台的同步方向、手动同步和断开连接操作。"
-  route="我的 → 账号 → 连接"
+  route="我的 → 菜单 → 数据授权"
   platformLabel="移动端"
+  platform="mobile"
 />
 
 ## 连接 Garmin 接收新数据
@@ -168,11 +185,20 @@ Intervals.icu 使用独立的移动端设置面板；Garmin 历史导入是网�
 
 此连接只接收新数据。较早的活动请用下方的**文件导入**。如果页面没有 OAuth 授权选项，可以使用文件导入；自托管用户请使用 [Garmin Personal API](/zh/docs/self-host/garmin-personal-api)。
 
+<DocsScreenshot
+  id="garmin-oauth-settings"
+  title="Garmin 的新数据同步设置"
+  description="在 OAuth 授权页选择新活动和健康与恢复数据；较早的记录使用旁边的文件导入。"
+  imageAlt="完整账号页面中的 Garmin 设置弹窗，显示 OAuth 授权和文件导入两个标签页"
+  route="账号 → 第三方平台连接 → Garmin → OAuth 授权"
+  platformLabel="网页端"
+/>
+
 ## 导入 Garmin 历史
 
 历史导入用于补充旧活动，不会替你开启后续同步。需要接收新训练时，请使用上方的 Garmin OAuth 连接。
 
-1. 在网页端打开**账号 → 第三方平台连接 → Garmin**。
+1. 网页端打开**账号 → 第三方平台连接 → Garmin**，或在移动端打开**我的 → 菜单 → 数据授权 → Garmin → 历史导入**。
 2. 从弹窗打开 [Garmin 官方数据导出页](https://www.garmin.com/account/datamanagement/exportdata/)并申请导出。
 3. 等待 Garmin 邮件。下载邮件的等待时间由 Garmin 决定。
 4. 选择一种导入方式：下载 Garmin 完整导出 ZIP 后直接上传，或复制邮件中**下载**按钮背后的链接。
@@ -228,7 +254,7 @@ OAuth 成功返回并不等于活动已经导入。授权、数据接收和活�
 
 ### 连接 Garmin 之后会持续同步吗？
 
-不会。这里的 Garmin 是按官方导出做一次性历史导入，不是长期在线连接。导入之后的新训练，请走 Strava、COROS 等持续连接，或上传 FIT / TCX / GPX。
+通过 **OAuth 授权**连接后，可以按已保存的同步设置接收新活动和已授权的健康数据。**历史文件导入**只用于补充旧记录，不会开启后续同步。两种方式可以配合使用，但不要反复导入同一批活动。
 
 ### 怎样连接 COROS 或 Polar？
 

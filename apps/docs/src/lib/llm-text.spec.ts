@@ -106,6 +106,29 @@ describe("renderLLMText", () => {
     expect(text).not.toContain("<DocsScreenshot");
   });
 
+  it("exports both platforms as light images and one shared Demo link", async () => {
+    const text = await renderLLMText(
+      {
+        url: "/zh/docs/guide/integrations",
+        data: {
+          title: "连接训练平台",
+          getText: async () =>
+            '<DocsScreenshot id="integrations-connections" title="平台连接" description="选择同步方向。" />',
+        },
+      },
+      "https://www.trainingload.ai",
+    );
+    expect(text).toContain(
+      "![平台连接 — Web](https://www.trainingload.ai/docs/captures/zh/integrations-connections.webp)",
+    );
+    expect(text).toContain(
+      "![平台连接 — Mobile](https://www.trainingload.ai/docs/mobile/zh/mobile-permission-sources.webp)",
+    );
+    expect(text.match(/\[Demo\]\(/g)).toHaveLength(1);
+    expect(text).not.toContain("-dark.webp");
+    expect(text).not.toContain("<DocsScreenshot");
+  });
+
   it("keeps captures without an asset usable through their Demo link", async () => {
     const text = await renderLLMText(
       {

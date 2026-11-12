@@ -6,13 +6,14 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "pnpm i18n:check && pnpm seo:check && next build --webpack",
+    "build": "pnpm i18n:check && pnpm seo:check && pnpm screenshots:check && next build --webpack",
     "dev": "next dev --turbo --port 3000",
     "start": "next start",
     "test": "vitest run",
     "postinstall": "fumadocs-mdx",
     "i18n:check": "node scripts/check-message-contract.mjs",
     "seo:check": "node scripts/check-docs-seo.mjs",
+    "screenshots:check": "node scripts/check-docs-screenshots.mjs",
     "og:generate": "node scripts/generate-open-graph-assets.mjs",
     "geo:check": "node scripts/geo-check.mjs"
   },
