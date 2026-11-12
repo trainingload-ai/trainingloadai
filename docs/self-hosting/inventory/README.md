@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 285 |
+| Environment variables | 286 |
 | External URL literals | 189 |
 | Filesystem write sites | 220 |
-| Runtime variables missing from configuration docs | 222 |
+| Runtime variables missing from configuration docs | 223 |
 
 ## Undocumented runtime variables
 
@@ -223,6 +223,7 @@
 - `THIRD_PARTY_WEBHOOK_WORKER_MAX_ATTEMPTS` — apps
 - `THIRD_PARTY_WEBHOOK_WORKER_POLL_MS` — apps
 - `THIRD_PARTY_WEBHOOK_WORKER_STALE_AFTER_MS` — apps
+- `TRAININGLOAD_DESKTOP_BUILD` — apps
 - `TZ` — apps
 - `USER_DATA_EXPORT_RETENTION_DAYS` — apps
 - `USER_DATA_EXPORT_WORKER_BATCH_SIZE` — apps

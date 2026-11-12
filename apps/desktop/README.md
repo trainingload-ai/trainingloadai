@@ -37,9 +37,31 @@ pnpm --dir apps/desktop dist:local
 pnpm --dir apps/desktop dist:mac:dmg
 ```
 
-Artifacts are written to `apps/desktop/build/release/`. Build on the intended OS and architecture. macOS arm64 has been exercised locally; Windows and Linux installer workflows still need platform acceptance. Local macOS packages are unsigned and unnotarized. Signing credentials belong in release infrastructure, never in this repository.
+Artifacts are written to `apps/desktop/build/release/`. Build on the intended OS and architecture. macOS arm64 has been exercised locally; Windows and Linux installer workflows still need platform acceptance. The local commands above produce unsigned, unnotarized macOS packages. Signing credentials belong in Keychain or release infrastructure, never in this repository.
 
 The production graph is collected explicitly, with the same checkout's migration runner and generated Prisma Client. Runtime pruning retains DuckDB, PGlite, geo-tz's default historical data, and image processing. macOS universal native libraries retain only the intended architecture, identical dependency-free libvips assets are shared, and TypeScript/build-only files are removed. Runtime files remain real files rather than ASAR entries. The runtime budget is 280 MiB, with a separate 290 MiB Linux x64 limit for its larger upstream native libraries (CI baseline: 284.4 MiB). Budgets and the relocated smoke test detect dependency growth or missing files. `runtime-size.json` records version, commit, source fingerprint, and sizes; installed apps use bundled files exclusively.
+
+## Signed macOS distribution
+
+Install a **Developer ID Application** certificate with its matching private key in the Mac's login Keychain. Apple Development and App Store distribution certificates do not serve this direct-download release workflow. A Developer ID Installer certificate is only needed for a `.pkg`, which this workflow does not produce.
+
+Store notarization authorization locally using `xcrun notarytool store-credentials <profile> --apple-id <account> --team-id <team> --keychain ~/Library/Keychains/login.keychain-db`. Enter the app-specific password only at the secure interactive prompt; never put it in a command argument, shell history, repository, or chat. The account holder completes credential creation and any required agreements. See [Apple's certificate instructions](https://developer.apple.com/help/account/certificates/create-developer-id-certificates) and [notarization documentation](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
+
+```sh
+export APPLE_TEAM_ID="YOURTEAMID"
+export APPLE_KEYCHAIN_PROFILE="your-local-notary-profile"
+# Optional: APPLE_KEYCHAIN for a non-default login Keychain.
+# If several valid certificates match, explicitly set the certificate SHA-1:
+# export TRAININGLOAD_MAC_SIGNING_IDENTITY="40_HEXADECIMAL_CHARACTERS"
+pnpm desktop:build
+pnpm --dir apps/desktop signing:mac:check
+pnpm --dir apps/desktop test
+pnpm --dir apps/desktop dist:mac:signed
+```
+
+Preflight requires exactly one valid Developer ID Application identity for the selected team and working notarization authorization. The release command enables Hardened Runtime, signs nested native code and the application, submits the application to Apple, staples and verifies its ticket, creates the compressed LZMA DMG, signs/notarizes/staples that disk image, and creates a ZIP containing the stapled app. It checks signatures and Gatekeeper and computes checksums after stapling. `--publish never` prevents release publication. Final artifacts and `release.json` appear in a new timestamped `apps/desktop/build/release-signed/` directory only after all checks pass; failed staging and notarization IDs are retained for diagnosis. The local unsigned flow remains available separately.
+
+Desktop Core builds disable Next's disk image and ISR caches and keep a bounded 50 MiB in-memory response cache. This prevents changes to sealed application resources during use; normal browser Self-host builds keep their existing disk-cache behavior. Packaging rejects a client built with the ordinary Self-host cache configuration. The relocated smoke test exercises images and routes and checks that no application files changed.
 
 ## Native integration and startup
 

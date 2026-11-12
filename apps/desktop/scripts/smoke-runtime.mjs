@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
-import { randomBytes } from "node:crypto";
-import { constants, cpSync, mkdtempSync, rmSync } from "node:fs";
+import { createHash, randomBytes } from "node:crypto";
+import {
+  constants,
+  cpSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  readlinkSync,
+  rmSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -17,6 +25,24 @@ cpSync(source, app, {
   verbatimSymlinks: true,
   mode: constants.COPYFILE_FICLONE,
 });
+function resourceFingerprint(root) {
+  const hash = createHash("sha256");
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true }).sort(
+      (a, b) => a.name.localeCompare(b.name),
+    )) {
+      const path = join(directory, entry.name);
+      hash.update(path.slice(root.length)).update("\0");
+      if (entry.isSymbolicLink()) hash.update(readlinkSync(path));
+      else if (entry.isDirectory()) walk(path);
+      else hash.update(readFileSync(path));
+      hash.update("\0");
+    }
+  };
+  walk(root);
+  return hash.digest("hex");
+}
+const originalResources = resourceFingerprint(app);
 const load = (file) => import(pathToFileURL(join(app, file)).href);
 const children = [];
 const startup = new AbortController();
@@ -186,6 +212,12 @@ try {
     connection.closeSync();
     duckdb.closeSync();
   }
+  await Promise.all(children.map((child) => child.stop()));
+  assert.equal(
+    resourceFingerprint(app),
+    originalResources,
+    "runtime must not modify signed application resources",
+  );
   console.log(
     JSON.stringify({
       ok: true,
@@ -199,6 +231,7 @@ try {
         "geo-tz",
         "sharp",
         "DuckDB",
+        "immutable application resources",
       ],
     }),
   );

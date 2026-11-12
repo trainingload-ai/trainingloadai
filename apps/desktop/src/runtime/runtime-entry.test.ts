@@ -19,6 +19,16 @@ test("packaged runtime resolves only bundled entries, including paths with space
       await mkdir(dirname(path), { recursive: true });
       await writeFile(path, "");
     }
+    await mkdir(join(dirname(client), ".next"));
+    await writeFile(
+      join(dirname(client), ".next/required-server-files.json"),
+      JSON.stringify({
+        config: {
+          experimental: { isrFlushToDisk: false },
+          images: { maximumDiskCacheSize: 0 },
+        },
+      }),
+    );
     await writeFile(
       join(database, "package.json"),
       JSON.stringify({

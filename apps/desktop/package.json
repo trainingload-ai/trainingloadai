@@ -18,7 +18,9 @@
     "runtime:smoke": "node scripts/smoke-runtime.mjs",
     "pack": "pnpm run runtime:prepare && pnpm run runtime:smoke && electron-builder --config electron-builder.config.cjs --dir --publish never",
     "dist:local": "pnpm run runtime:prepare && pnpm run runtime:smoke && electron-builder --config electron-builder.config.cjs --publish never",
-    "dist:mac:dmg": "pnpm run pack && node scripts/package-macos-dmg.mjs"
+    "dist:mac:dmg": "pnpm run pack && node scripts/package-macos-dmg.mjs",
+    "signing:mac:check": "node scripts/macos-signing.mjs",
+    "dist:mac:signed": "node scripts/release-macos.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.8",

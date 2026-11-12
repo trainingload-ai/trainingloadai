@@ -5,7 +5,11 @@ import { desktop, core, validateCoreSource } from "./core-path.mjs";
 
 const before = validateCoreSource();
 const run = (args) =>
-  execFileSync("pnpm", args, { cwd: core, stdio: "inherit" });
+  execFileSync("pnpm", args, {
+    cwd: core,
+    stdio: "inherit",
+    env: { ...process.env, TRAININGLOAD_DESKTOP_BUILD: "1" },
+  });
 run(["prisma:generate"]);
 run(["build:selfhost"]);
 const source = validateCoreSource();

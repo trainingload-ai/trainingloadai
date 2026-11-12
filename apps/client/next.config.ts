@@ -18,6 +18,9 @@ loadEnvConfig(workspaceRoot, isDev, console, true);
 const isCoachE2e =
   process.env.NODE_ENV === "development" && process.env.COACH_E2E === "1";
 const isSelfHostBuild = Boolean(process.env.NEXT_PUBLIC_SELF_HOST_MODE?.trim());
+const isDesktopBuild = process.env.TRAININGLOAD_DESKTOP_BUILD === "1";
+if (isDesktopBuild && !isSelfHostBuild)
+  throw new Error("Desktop requires the Self-host client build");
 const deploymentAuthClientPluginsPath = isSelfHostBuild
   ? resolve(__dirname, "src/deployment/auth-client-plugins.ts")
   : resolve(
@@ -86,9 +89,13 @@ const imageHostnames = Array.from(
 
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
-  // Self-host keeps durable response data on disk; do not reserve Next's
-  // default in-process cache in every local instance.
-  cacheMaxMemorySize: isSelfHostBuild ? 0 : undefined,
+  // Signed desktop resources are immutable. Keep Next's bounded default
+  // memory cache there; ordinary Self-host instances retain disk caching.
+  cacheMaxMemorySize: isDesktopBuild
+    ? 50 * 1024 * 1024
+    : isSelfHostBuild
+      ? 0
+      : undefined,
   // Docker 运行时只需要文件追踪生成的最小 standalone 目录。
   // monorepo 依赖位于 client 上级，因此追踪根目录必须指向 workspace 根。
   output: "standalone",
@@ -100,7 +107,9 @@ const nextConfig: NextConfig = {
       "../../packages/messages/client-core/**/*.json",
       ...(isSelfHostBuild
         ? []
-        : ["../../packages/managed-client/.generated/messages/client/**/*.json"]),
+        : [
+            "../../packages/managed-client/.generated/messages/client/**/*.json",
+          ]),
       "../../packages/shared/**/*",
     ],
   },
@@ -120,6 +129,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     externalDir: true,
+    isrFlushToDisk: isDesktopBuild ? false : undefined,
     // Self-host/runtime images do not ship server source maps. Keep this
     // explicit so a Next.js default change cannot make private source easier
     // to recover from the standalone artifact.
@@ -176,6 +186,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    maximumDiskCacheSize: isDesktopBuild ? 0 : undefined,
     remotePatterns: imageHostnames.map((hostname) => ({
       protocol: "https",
       hostname,

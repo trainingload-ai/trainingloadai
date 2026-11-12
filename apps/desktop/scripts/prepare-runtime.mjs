@@ -14,7 +14,10 @@ import { execFileSync } from "node:child_process";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { core, coreRelease, validateCoreSource } from "./core-path.mjs";
-import { assertCoreResources } from "../src/runtime/core-source.mjs";
+import {
+  assertCoreResources,
+  assertDesktopClientBuild,
+} from "../src/runtime/core-source.mjs";
 import {
   collectRuntimePackages,
   directoryBytes,
@@ -53,6 +56,7 @@ if (versions.some((item) => item.version !== coreRelease.version))
 const source = validateCoreSource(true);
 const { commit } = source;
 assertCoreResources(source, join(desktop, "dist/core-source.json"));
+assertDesktopClientBuild(join(standalone, clientRelative, "server.js"));
 for (const path of [
   join(desktop, "dist/main.js"),
   join(serverDist, "apps/server/src/main.self-host.js"),

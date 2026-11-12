@@ -2,6 +2,7 @@ import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   assertCoreResources,
+  assertDesktopClientBuild,
   readCoreSource,
   resolveCoreMigrationRunner,
 } from "./core-source.mjs";
@@ -32,6 +33,14 @@ export async function resolveDesktopRuntimeEntries(
   if (packagedAppRoot) {
     // Installed apps must be self-contained; never fall back to a developer's
     // workspace or an environment-provided entrypoint.
+    const client = await firstExisting(
+      [
+        resolve(packagedAppRoot, "runtime/client/apps/client/server.js"),
+        resolve(packagedAppRoot, "runtime/client/server.js"),
+      ],
+      "DESKTOP_CLIENT_ENTRY_MISSING",
+    );
+    assertDesktopClientBuild(client);
     return {
       databaseRunner: resolveCoreMigrationRunner(
         resolve(packagedAppRoot, "node_modules/@trainingloadai/database"),
@@ -45,13 +54,7 @@ export async function resolveDesktopRuntimeEntries(
         ],
         "DESKTOP_SERVER_ENTRY_MISSING",
       ),
-      client: await firstExisting(
-        [
-          resolve(packagedAppRoot, "runtime/client/apps/client/server.js"),
-          resolve(packagedAppRoot, "runtime/client/server.js"),
-        ],
-        "DESKTOP_CLIENT_ENTRY_MISSING",
-      ),
+      client,
     };
   }
   const source = readCoreSource(desktopDirectory, { requireBuild: true });
@@ -70,6 +73,7 @@ export async function resolveDesktopRuntimeEntries(
   const manifest = JSON.parse(
     await readFile(resolve(client, "../package.json"), "utf8"),
   );
+  assertDesktopClientBuild(client);
   if (manifest.version !== source.version)
     throw Object.assign(
       new Error(

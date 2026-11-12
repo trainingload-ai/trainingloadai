@@ -165,6 +165,20 @@ export function assertCoreResources(source, manifest) {
     );
 }
 
+/** Next must never write caches inside a signed application bundle. */
+export function assertDesktopClientBuild(clientEntry) {
+  const manifest = resolve(clientEntry, "../.next/required-server-files.json");
+  const config = existsSync(manifest) ? json(manifest).config : null;
+  if (
+    config?.experimental?.isrFlushToDisk !== false ||
+    config?.images?.maximumDiskCacheSize !== 0
+  )
+    fail(
+      "DESKTOP_CLIENT_MUTABLE_BUILD",
+      "The client build writes caches into application resources. Run pnpm desktop:build.",
+    );
+}
+
 export function resolveCoreMigrationRunner(packageDirectory) {
   const metadata = json(join(packageDirectory, "package.json"));
   const exported = metadata.exports?.["./core-migration-runner"];

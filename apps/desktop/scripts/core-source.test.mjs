@@ -13,6 +13,7 @@ import test from "node:test";
 import {
   readCoreSource,
   assertCoreResources,
+  assertDesktopClientBuild,
   selectCoreSource,
 } from "../src/runtime/core-source.mjs";
 import { resolveDesktopRuntimeEntries } from "../dist/runtime/runtime-entry.js";
@@ -48,6 +49,15 @@ function fixture() {
   file("packages/messages/client-core/en.json", "{}");
   file("apps/server/dist-selfhost/apps/server/src/main.self-host.js");
   file("apps/client/.next/standalone/apps/client/server.js");
+  file(
+    "apps/client/.next/standalone/apps/client/.next/required-server-files.json",
+    JSON.stringify({
+      config: {
+        experimental: { isrFlushToDisk: false },
+        images: { maximumDiskCacheSize: 0 },
+      },
+    }),
+  );
   file(
     "apps/client/.next/standalone/apps/client/package.json",
     JSON.stringify({ version: "1.1.22" }),
@@ -109,6 +119,34 @@ test("independent Core or per-service overrides are rejected before startup", ()
           }),
         { code: "DESKTOP_CORE_SPLIT_OVERRIDE" },
       );
+  } finally {
+    f.cleanup();
+  }
+});
+
+test("ordinary Self-host builds cannot be packaged as immutable desktop resources", () => {
+  const f = fixture();
+  try {
+    const entry = join(
+      f.root,
+      "apps/client/.next/standalone/apps/client/server.js",
+    );
+    assert.doesNotThrow(() => assertDesktopClientBuild(entry));
+    for (const config of [
+      {
+        experimental: { isrFlushToDisk: true },
+        images: { maximumDiskCacheSize: 0 },
+      },
+      { experimental: { isrFlushToDisk: false }, images: {} },
+    ]) {
+      f.file(
+        "apps/client/.next/standalone/apps/client/.next/required-server-files.json",
+        JSON.stringify({ config }),
+      );
+      assert.throws(() => assertDesktopClientBuild(entry), {
+        code: "DESKTOP_CLIENT_MUTABLE_BUILD",
+      });
+    }
   } finally {
     f.cleanup();
   }

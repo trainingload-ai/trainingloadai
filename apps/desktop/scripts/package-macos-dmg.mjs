@@ -1,8 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
-  constants,
-  cpSync,
   createReadStream,
   mkdirSync,
   mkdtempSync,
@@ -56,11 +54,12 @@ const destination = join(
 try {
   const contents = join(temporary, "contents");
   mkdirSync(contents);
-  cpSync(app, join(contents, "Trainingload.ai.app"), {
-    recursive: true,
-    verbatimSymlinks: true,
-    mode: constants.COPYFILE_FICLONE,
-  });
+  // Preserve notarization tickets, extended attributes and resource forks.
+  execFileSync("ditto", [
+    "--clone",
+    app,
+    join(contents, "Trainingload.ai.app"),
+  ]);
   symlinkSync("/Applications", join(contents, "Applications"), "dir");
   const image = join(temporary, "installer.dmg");
   execFileSync(
