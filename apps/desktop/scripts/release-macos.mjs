@@ -13,6 +13,7 @@ import {
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkMacSigning, notaryArguments } from "./macos-signing.mjs";
+import { runtimeSourceCommit } from "../src/runtime/core-source.mjs";
 
 const desktop = join(dirname(fileURLToPath(import.meta.url)), "..");
 const signing = checkMacSigning();
@@ -100,6 +101,13 @@ async function checksum(file) {
 try {
   step("prepare and smoke-test runtime");
   run("pnpm", ["run", "runtime:prepare"]);
+  // Reject missing or stale provenance before signing or Apple submissions.
+  const sourceCommit = runtimeSourceCommit(
+    JSON.parse(readFileSync(join(desktop, "build/app/runtime-size.json"), "utf8")),
+    environment.GITHUB_ACTIONS === "true"
+      ? environment.GITHUB_SHA ?? ""
+      : undefined,
+  );
   run("pnpm", ["run", "runtime:smoke"]);
   step("sign application");
   run("pnpm", [
@@ -238,12 +246,15 @@ try {
   const report = {
     ok: true,
     version,
-    sourceCommit: JSON.parse(
-      readFileSync(
-        join(app, "Contents/Resources/app/runtime-size.json"),
-        "utf8",
+    sourceCommit: runtimeSourceCommit(
+      JSON.parse(
+        readFileSync(
+          join(app, "Contents/Resources/app/runtime-size.json"),
+          "utf8",
+        ),
       ),
-    ).commit,
+      sourceCommit,
+    ),
     platform: "darwin",
     arch: process.arch,
     teamId: signing.teamId,

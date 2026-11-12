@@ -13,9 +13,17 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { runtimeSourceCommit } from "../src/runtime/core-source.mjs";
 
 const desktop = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const source = resolve(process.argv[2] ?? join(desktop, "build/app"));
+// Every hosted PR/main smoke test exercises the real manifest contract without
+// importing signing credentials or waiting for a signed release to find errors.
+if (process.env.GITHUB_ACTIONS === "true")
+  runtimeSourceCommit(
+    JSON.parse(readFileSync(join(source, "runtime-size.json"), "utf8")),
+    process.env.GITHUB_SHA ?? "",
+  );
 const temporary = mkdtempSync(join(tmpdir(), "Trainingload packaged 验证-"));
 const app = join(temporary, "app");
 // Relocation outside the repository prevents missing dependencies from being

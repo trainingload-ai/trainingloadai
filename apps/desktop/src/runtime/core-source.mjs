@@ -12,6 +12,22 @@ import { join, relative, resolve } from "node:path";
 function fail(code, message) {
   throw Object.assign(new Error(message), { code });
 }
+
+/** Runtime manifests keep source provenance inside the owning Core record. */
+export function runtimeSourceCommit(manifest, expectedCommit) {
+  const commit = manifest?.core?.commit;
+  if (
+    manifest?.schemaVersion !== 1 ||
+    !/^[a-f0-9]{40}$/i.test(commit ?? "") ||
+    (expectedCommit !== undefined && commit !== expectedCommit)
+  )
+    fail(
+      "DESKTOP_CORE_COMMIT_MISMATCH",
+      "Runtime core.commit must identify the expected Public source commit.",
+    );
+  return commit;
+}
+
 const json = (path) => JSON.parse(readFileSync(path, "utf8"));
 const corePaths = [
   "apps/client",
