@@ -185,7 +185,7 @@
       "fitCourseConverter": "FIT 코스 변환기"
     },
     "brandDescription": "훈련 계획, 실제 운동, 훈련 부하와 회복 상태를 한곳에서 확인하세요.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "App Store에서 다운로드"
   },
   "tools": {
@@ -1848,7 +1848,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -2952,7 +2952,7 @@
         "more": "등"
       },
       "sportWords": ["러닝", "사이클링", "수영", "트라이애슬론"],
-      "iphoneSupport": "iPhone 및 Apple Watch 지원",
+      "iphoneSupport": "iPhone 지원",
       "appStoreCta": "App Store에서 다운로드"
     },
     "planSpotlight": {
@@ -3548,10 +3548,9 @@
       },
       "heroProduct": {
         "title": "훈련을 기록하고\n성장 과정을 확인하세요.",
-        "body": "iPhone이나 Apple Watch로 기록하고 Trainingload.ai에서 운동 수행, 심박수, 훈련 부하를 함께 살펴보세요.",
+        "body": "iPhone으로 기록하고 Trainingload.ai에서 운동 수행, 심박수, 훈련 부하를 함께 살펴보세요.",
         "link": "AI 코치 알아보기",
-        "phoneAlt": "iPhone의 실시간 운동 기록 화면",
-        "watchAlt": "Apple Watch의 실시간 운동 데이터"
+        "phoneAlt": "iPhone의 실시간 운동 기록 화면"
       },
       "footerCta": {
         "title": "현재를 이해하고 다음 훈련을 준비하세요.",

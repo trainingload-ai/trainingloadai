@@ -1,6 +1,6 @@
 ---
 title: Self-hosting
-description: Run Trainingload.ai on infrastructure you control with local file storage, owner-managed AI, verified backups, and explicit operational boundaries.
+description: Use Trainingload.ai on your own computer or server, save your training data, import activities, and optionally configure AI Coach.
 seoTitle: "Trainingload.ai Self-Hosting: Install and Operate Locally"
 seoDescription: Install a signed Trainingload.ai self-host release, keep uploads on your own storage, configure a BYOK AI provider, and manage backups and upgrades safely.
 keywords:
@@ -14,9 +14,16 @@ keywords:
 
 # Self-hosting
 
-Self-hosting runs Trainingload.ai on a machine you control. The product request path contains the `client` web app and the `server` API. PostgreSQL stores structured data, local storage keeps uploaded files, and the Client exposes the browser-facing port.
+Self-hosting lets you use Trainingload.ai on your own computer or server. Your activities, training plans, and uploaded files stay on your device, and you review and manage training in a browser.
 
-The supported v1 distribution is an exact-version, signed release bundle managed through Docker Compose. You do not need to build the source repository or assemble containers by hand.
+One self-hosted instance is for one person. You look after the device, software updates, and backups. If you would prefer to open the app and get started directly, read [Self-hosted vs Cloud](/docs/self-host/self-host-vs-cloud) first.
+
+## What you can do
+
+- Import activities and review their details, timeline, and training load.
+- Arrange training in the calendar and compare planned with completed workouts.
+- Upload FIT, GPX, or TCX files, or connect Intervals.icu and Garmin Personal API with personal keys.
+- Configure your own AI service to use AI Coach, or leave AI off.
 
 ## Choose where to start
 
@@ -24,12 +31,12 @@ The supported v1 distribution is an exact-version, signed release bundle managed
   <Card
     title="Self-hosted vs Cloud"
     href="/docs/self-host/self-host-vs-cloud"
-    description="Compare responsibility, data location, AI, backups, and feature boundaries before deploying."
+    description="Compare setup, data storage, activity imports, and AI costs."
   />
   <Card
     title="Quick start"
     href="/docs/self-host/installation"
-    description="Verify a signed bundle, install the instance, claim the owner, and create the first backup."
+    description="Download the release, install the app, create your local account, and save your first backup."
   />
   <Card
     title="Configuration"
@@ -44,13 +51,13 @@ The supported v1 distribution is an exact-version, signed release bundle managed
   <Card
     title="Troubleshooting"
     href="/docs/self-host/troubleshooting"
-    description="Start with stable diagnostics and recover without bypassing data-safety controls."
+    description="Resolve common startup, connection, and sync problems."
   />
 </Cards>
 
 ## Connect Garmin
 
-Self-host supports connecting Garmin with a personal API key. Import completed activities and optionally read recovery data on your own instance. COROS MCP is not enabled on Self-host. The managed product uses Garmin Developer API instead.
+If you have a Garmin Personal API key, you can connect Garmin to import completed activities and read available recovery data. The guide below covers the steps and supported data.
 
 <Cards>
   <Card
@@ -60,26 +67,20 @@ Self-host supports connecting Garmin with a personal API key. Import completed a
   />
 </Cards>
 
-## What runs locally
+## What to prepare before installing
 
-| Layer         | Role                                                                 |
-| ------------- | -------------------------------------------------------------------- |
-| `client`      | Local browser UI and BFF for every web product request               |
-| `server`      | Authentication, product APIs, AI orchestration, and background work  |
-| PostgreSQL    | Accounts, activities, plans, settings, and other structured records  |
-| Local storage | Uploaded activity files and application-owned persistent files       |
-| One-shot jobs | File permissions and database migrations during lifecycle operations |
+- A device that meets the [installation requirements](/docs/self-host/installation), with Docker Compose installed.
+- Enough disk space for your training data and uploaded files.
+- A separate place to keep backups so you can recover if the device fails.
 
-Docs is deployed separately and is not included in the application Compose stack or images. AI is off by default and becomes an outbound dependency only after the owner explicitly configures a provider.
+Use an official, versioned, signed release bundle and follow the guide to verify it before installing. You do not need to build the source or assemble containers yourself. Docker Compose is the currently supported installation method.
 
-The browser does not call `server` directly. Product, authentication, and AI requests first reach the same-origin `client` BFF and then cross the private container network to `server`. The Client is the only browser entry point; PostgreSQL and the `server` port are not published on the host.
+## Where your data goes
 
-## Support boundary
+Activities, plans, and uploaded files are saved on your device. Connecting a training platform sends or receives data according to the sync options you choose. Using an external AI service sends the training information needed for that request to your chosen provider.
 
-Docker Compose is the only formally supported self-host deployment for v1 because installation, migration, readiness, backup, restore, upgrade, rollback, and diagnostics share one verified lifecycle.
-
-A native Node.js, PostgreSQL, and reverse-proxy deployment is technically possible, but there is no signed native bundle or equivalent lifecycle contract yet. Podman, Kubernetes, and Helm are also not supported release targets. Running directly from source is for development and verification, not production installation.
+AI is off by default. To enable it, follow the [configuration guide](/docs/self-host/configuration) and enter your own provider API key. That provider charges for API usage.
 
 ## Next step
 
-Read [Self-hosted vs Cloud](/docs/self-host/self-host-vs-cloud), then continue to the [quick start](/docs/self-host/installation) if the operational tradeoff fits your needs.
+Ready to install? Follow the [installation guide](/docs/self-host/installation). If you are still deciding how to use Trainingload.ai, start with [Self-hosted vs Cloud](/docs/self-host/self-host-vs-cloud).

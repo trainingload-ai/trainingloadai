@@ -8,65 +8,55 @@ keywords: ["Garmin Personal API", "Garmin self-hosted", "Garmin personal key", "
 
 # Garmin Personal API
 
-Self-host supports connecting Garmin with a Personal API key. Import completed activities and optionally read sleep, HRV, resting heart rate, and other recovery data on your own instance.
+In a self-hosted instance, use your own Garmin Personal API key to import completed activities and available sleep, HRV, resting heart rate, and other data from your device and account.
 
-This Personal API flow is Self-host only. The managed/closed-source product uses Garmin Developer API instead and does not run Personal API sync jobs.
+This page covers self-hosting only. For Cloud authorization and history import, use the [platform connection guide](/docs/guide/connect-third-party-platforms#connect-garmin-for-new-data).
 
 ## Connect your own account
 
-1. Create a key in [Garmin Connect personal API settings](https://connect.garmin.com/app/settings/personalApiToken). Use the corresponding Garmin Connect site for a China-region account.
-2. Open **Account → Third-party connections → Garmin → Connection settings**.
-3. Choose the account region and check the IANA time zone used by Garmin, such as `Europe/London`.
-4. Select activity imports, sleep and recovery reading, and automatic sync as required. Enter the key and connect.
-5. Select **Sync now**. Empty dates mean the last 30 days; a historical range can also be selected.
+1. Create a key in Garmin Connect's [personal API key settings](https://connect.garmin.com/app/settings/personalApiToken). Use the matching Garmin Connect region for a China account.
+2. In Trainingload.ai, open **Account → Third Party Connections → Garmin → Connection settings**.
+3. Choose the account region and confirm its time zone, such as `Asia/Shanghai`.
+4. Choose activity import, sleep and recovery data, and scheduled sync as needed. Paste the key and connect.
+5. Select **Sync now**. Blank dates default to the most recent 30 days; you can also choose a historical range.
 
-Trainingload.ai does not need your Garmin password or browser cookies. The key goes only to your own Server and is encrypted in its database. Never post it in chat, issues or logs. Regions are not switched automatically.
+You do not need to supply a Garmin password or browser cookies. The key is encrypted in your own instance. Do not send it in chat, issues, or logs. Keep it safe after creation and replace it if revoked or expired; use the expiry options shown by Garmin.
 
-Garmin displays a new key once. Keys can expire after 30, 90 or 180 days, or one year; replace expired or revoked keys. The Server exchanges the key for an access token lasting at most 24 hours. There is no OAuth refresh token. [Official FAQ](https://developer.garmin.com/gc-developer-program/personal/personal-faq/)
+## What to check after syncing
 
-## Data and local behavior
-
-| Data | Local behavior |
+| Data | Result to check |
 | --- | --- |
-| Completed activities | Download original ZIP files, safely extract FIT/TCX/GPX, then use the existing activity import and deduplication pipeline |
-| Sleep, HRV, resting heart rate and steps | Ingest recognized fields with explicit units; missing values stay missing |
-| Weight, stress, oxygen and Body Battery | Preserve vendor meaning without replacing local ATL, CTL or TSB |
-| Heart-rate zones, fitness age and hydration | Read by date through advanced tools; do not automatically change local athlete settings |
-| Nutrition and menstrual data | Excluded from scheduled sync; advanced reading requires separate confirmation |
+| Completed activities | A matching record appears in Activities; open it to inspect the source, time, and available charts |
+| Sleep, HRV, resting heart rate, steps | The relevant date shows data supplied by Garmin; missing values are not filled with zero |
+| Weight, stress, oxygen saturation, Body Battery | Garmin's meaning is preserved; these values do not replace ATL, CTL, or TSB |
+| Additional metrics | Read by date in **Advanced data and operations**, without automatically changing local sport settings |
+| Nutrition and menstrual data | Excluded from scheduled sync; additional reads require separate confirmation |
 
-Empty data can reflect device support, missing records or upstream access. Field mappings still need real-account samples; mock tests do not prove support for every device.
+Availability depends on device records, region, and Garmin permissions. Not every account has every item in this table. Check the sync result after connecting. Unrecognized data produces an error; an empty result does not mean zero.
 
-Advanced reading covers the data types in Garmin's documented GET catalog. An activity's `workouts` endpoint describes training performed within that completed activity, not future-workout creation. [Official Swagger](https://developer.garmin.com/gc-developer-program/personal/swagger-docs/)
+This connection reads personal data. It does not create or send future workouts to Garmin.
 
-## History, progress and failures
+## History and progress
 
-- Automatic activity checks run approximately every 30 minutes; health checks approximately every 6 hours, when enabled.
-- Dates use the account time zone. Absolute timestamps are stored in UTC; health date labels are not shifted again.
-- Queued means the request was saved. An activity counts as imported only after download, parsing and local processing complete.
-- Jobs survive page reloads and Server restarts. Rate-limited work waits; failures retain stable codes.
-- Oversized, traversing, nested or ambiguous activity archives are rejected.
-- An expired token is exchanged and a read retried at most once. Use **Replace key or reauthorize** if needed; provider failure does not sign you out of Trainingload.ai.
-- Activity discovery uses the selected `startDate`–`endDate` window with offset pagination (up to 99 per page), not one calendar day per list call.
-- FIT download uses `Accept: application/zip, application/x-zip-compressed, application/octet-stream`. Sending only `application/zip` yields HTTP 406.
-- A new sync rechecks activity details and original files to update the same source. Removal requires complete pagination, two missing observations at least 30 minutes apart, and an explicit not-found response from activity details. Other sources remain intact.
-- Health sources are retained independently. Explicit empty data updates the corresponding daily metric scope. Permission errors, not-found responses, unknown layouts and mismatched dates preserve existing values and report errors; other successfully read resources can still be imported.
+- Choose the relevant dates; ranges use the account time zone.
+- **Queued** means the request was saved. An activity counts as **Imported** only after download and import finish.
+- Refreshing does not clear a running task. Wait for a large import instead of repeatedly submitting it.
+- One history request can cover up to ten years. Duration depends on activity volume and Garmin limits.
+- Syncing again checks and updates existing Garmin records rather than creating a new copy every time.
+- Read the displayed error if an item fails. Other successfully read items may still finish importing.
 
-A history request may span up to ten years. Duration depends on activity volume and provider limits. Discovered records are not the same as successfully imported activities.
+Enable the relevant options in connection settings for scheduled sync. A discovered-record count is not a successful-import count.
 
-## Read-only personal use
+## Expired keys, disconnection, and backups
 
-Garmin positions Personal API for access to your own data. This connector is for a single Owner's personal instance, not a commercial service collecting other users' keys. [Official introduction](https://developer.garmin.com/gc-developer-program/personal/personal-api/)
+Use **Replace key or reauthorize** when a key expires or is revoked. Check the region and account before entering its replacement.
 
-The documented personal API provides no workout-writing or webhook contract. Trainingload.ai does not use an unofficial account-login library to invent these capabilities.
+Disconnecting stops future sync but does not erase offline backups you already saved. Follow the [backup and recovery guide](/docs/self-host/operations) to keep the original instance keys safe with your database backup. Restored connections need those keys.
 
-## Disconnect and backups
+This connection is for your own Garmin data. Do not collect other people's keys to provide a multi-user service from one personal instance. See the [official Garmin Personal API introduction](https://developer.garmin.com/gc-developer-program/personal/personal-api/) for more information.
 
-Disconnecting removes the current credentials and stops future connector jobs while keeping imported records. Files already handed to the shared import pipeline may finish processing. Delete those records through activity or account data controls when required.
+## Next steps
 
-Backups contain encrypted credentials and require the original instance integration key on restore. Disconnecting cannot erase offline backups. No Garmin-specific host environment variable is added; do not put your personal key in a shared `.env.selfhost`.
-
-## Continue reading
-
-- [Self-host configuration](/docs/self-host/configuration)
-- [Self-hosted vs Cloud](/docs/self-host/self-host-vs-cloud)
-- [Garmin's official Python reference](https://github.com/garmin/connect-personal-api-python)
+- [Activity Detail](/docs/guide/activity-detail): check a workout after syncing.
+- [Connect data](/docs/guide/connect-data): choose a primary source and avoid duplicates.
+- [Self-host troubleshooting](/docs/self-host/troubleshooting): investigate connection or sync errors.

@@ -13,7 +13,9 @@ keywords:
 
 # Training App Integrations: Strava Garmin COROS Sync
 
-**Training app integrations** are the connection cards that decide how workouts enter Trainingload.ai. Use this page to choose a path: live Strava or COROS sync, a one-time Garmin history import, Intervals.icu OAuth or API key, or a FIT / TCX / GPX upload. For the exact authorize-and-verify clicks, open [Connect Strava, Garmin, and COROS](/docs/guide/connect-third-party-platforms).
+Choose where to import your training records from, then decide whether you need ongoing sync or a one-time history import. This page covers Cloud connections; follow [Connect a platform](/docs/guide/connect-third-party-platforms) for the steps.
+
+For self-hosting, use the separate [Intervals.icu settings](/docs/self-host/configuration#connect-intervalsicu) and [Garmin Personal API guide](/docs/self-host/garmin-personal-api), or upload activity files directly.
 
 Provider availability and supported directions can change. Use the controls shown in the connection dialog as the final authority.
 
@@ -42,7 +44,7 @@ Provider availability and supported directions can change. Use the controls show
 | Intervals.icu   | Activity synchronization and compatible planned-workout workflows | OAuth or API key, depending on account setup    |
 | Suunto          | Ongoing workout import and supported guide workflows              | OAuth connection with sync settings             |
 | Wahoo           | Ongoing Wahoo workout import                                      | OAuth connection with sync settings             |
-| Garmin          | One-time historical activity import                               | Import action, not a persistent connection card |
+| Garmin          | New training sync or older activity history                       | OAuth connection or file import                |
 | FIT / TCX / GPX | Individual files or exports from unsupported sources              | Manual upload                                   |
 
 ## Connect a provider
@@ -69,7 +71,7 @@ During a large import:
 
 ## Garmin historical import
 
-Garmin is presented as a one-time history import rather than a persistent connection. Start the import from the Garmin card, follow the dialog instructions, and return to the same dialog to check the latest job status.
+On the Garmin page, **OAuth** receives new activities and authorized health summaries. **File import** supplies older training records. These are separate actions; choose the one you need.
 
 ## Disconnecting
 
@@ -108,11 +110,11 @@ The connection dialog is authoritative for the current account, provider, and pl
 
 ### Which training app integrations does Trainingload.ai support?
 
-Strava, Polar, COROS, Intervals.icu, Suunto, and Wahoo can stay connected. Garmin is a one-time history import. FIT, TCX, and GPX cover one-off files or unsupported watches.
+Strava, Polar, COROS, Intervals.icu, Suunto, and Wahoo can stay connected. Garmin offers an OAuth connection for new data and file import for history. FIT, TCX, and GPX cover one-off files or unsupported watches.
 
 ### Strava integration or Garmin import?
 
-Choose Strava (or another live provider) if you want new workouts to keep arriving. Choose Garmin history import when you need an archive once. After that archive, new Garmin files still need a live path or a manual upload.
+Use Garmin OAuth for new Garmin workouts and history import for older records. If the same workouts also reach Strava, choose one primary import path to avoid duplicates.
 
 ### Can I enable two integrations for the same watch?
 

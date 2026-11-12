@@ -161,10 +161,11 @@
 
 .heroDevices {
   position: relative;
-  padding: 0 1.75rem 0.5rem 0;
+  padding-bottom: 0.5rem;
 }
 
 .heroPhone {
+  margin-inline: auto;
   max-width: 11.5rem;
   padding: 5px;
   overflow: hidden;
@@ -180,35 +181,8 @@
   border-radius: 1.15rem;
 }
 
-.heroWatch {
-  position: absolute;
-  right: 0;
-  bottom: 1.5rem;
-  width: 54%;
-  padding: 5px;
-  border: 1px solid #778079;
-  border-radius: 24%;
-  background: #202522;
-  box-shadow: 0 6px 16px rgb(0 0 0 / 25%);
-}
 
-.heroWatch::after {
-  position: absolute;
-  top: 26%;
-  right: -4px;
-  width: 3px;
-  height: 15%;
-  border-radius: var(--tl-radius-micro);
-  background: #778079;
-  content: "";
-}
 
-.heroWatch img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 20%;
-}
 
 .heroProductCopy h2 {
   margin-top: 0.75rem;
