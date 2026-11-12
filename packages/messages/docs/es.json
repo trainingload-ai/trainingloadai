@@ -109,7 +109,6 @@
     "ask": "Lee {url}. Quiero hacer preguntas sobre esta documentación."
   },
   "docsScreenshot": {
-    "openImage": "Abrir imagen a tamaño completo",
     "demoLabel": "Demo en vivo",
     "openDemo": "Abrir esta página en la demo"
   },

@@ -94,7 +94,6 @@
     "ask": "{url} を読んでください。このドキュメントについて質問したいです。"
   },
   "docsScreenshot": {
-    "openImage": "元のサイズで開く",
     "demoLabel": "ライブデモ",
     "openDemo": "デモでこのページを開く"
   },

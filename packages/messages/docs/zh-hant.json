@@ -94,7 +94,6 @@
     "ask": "請閱讀 {url}，我想詢問這篇文件的內容。"
   },
   "docsScreenshot": {
-    "openImage": "查看原圖",
     "demoLabel": "線上 Demo",
     "openDemo": "在 Demo 中開啟此頁面"
   },

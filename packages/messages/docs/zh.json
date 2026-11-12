@@ -100,7 +100,6 @@
     "ask": "请阅读 {url}，我想询问这篇文档的内容。"
   },
   "docsScreenshot": {
-    "openImage": "查看原图",
     "demoLabel": "在线 Demo",
     "openDemo": "在 Demo 中打开此页面"
   },

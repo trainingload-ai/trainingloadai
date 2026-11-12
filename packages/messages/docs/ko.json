@@ -108,7 +108,6 @@
     "ask": "{url}을 읽어 주세요. 이 문서에 대해 질문하고 싶습니다."
   },
   "docsScreenshot": {
-    "openImage": "원본 이미지 열기",
     "demoLabel": "라이브 데모",
     "openDemo": "데모에서 이 페이지 열기"
   },

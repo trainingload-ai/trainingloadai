@@ -109,7 +109,6 @@
     "ask": "Lis {url}. Je souhaite poser des questions sur cette documentation."
   },
   "docsScreenshot": {
-    "openImage": "Ouvrir l’image en taille réelle",
     "demoLabel": "Démo en direct",
     "openDemo": "Ouvrir cette page dans la démo"
   },

@@ -101,7 +101,6 @@
     "ask": "Read {url}. I want to ask questions about this documentation."
   },
   "docsScreenshot": {
-    "openImage": "Open full-size image",
     "demoLabel": "Live Demo",
     "openDemo": "Open this page in Demo"
   },

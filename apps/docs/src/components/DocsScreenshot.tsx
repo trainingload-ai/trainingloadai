@@ -111,25 +111,15 @@ export function DocsScreenshot({
             {route ? ` · ${route}` : ""}
           </span>
           {resolvedImageSrc ? (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <a
-                href={resolvedImageSrc}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {t("openImage")}
-              </a>
-              <a
-                href={destination.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {demoLabel ?? t("openDemo")}
-                <ArrowUpRight aria-hidden="true" className="size-3.5" />
-              </a>
-            </div>
+            <a
+              href={destination.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {demoLabel ?? t("openDemo")}
+              <ArrowUpRight aria-hidden="true" className="size-3.5" />
+            </a>
           ) : null}
         </div>
       </figcaption>
