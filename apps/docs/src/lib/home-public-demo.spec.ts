@@ -1,5 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import {
+  isPublicDemoEmbedContextMessage,
+  PUBLIC_DEMO_EMBED_CONTEXT_MESSAGE,
+} from "@shared/public-demo-policy";
 
 const page = readFileSync(
   new URL("../app/[lang]/(home)/page.tsx", import.meta.url),
@@ -12,14 +16,6 @@ const preview = readFileSync(
   ),
   "utf8",
 );
-const provider = readFileSync(
-  new URL(
-    "../../../client/src/public-demo/public-demo-provider.tsx",
-    import.meta.url,
-  ),
-  "utf8",
-);
-
 describe("homepage public Demo handoff", () => {
   it("makes the real Demo the first product proof in the hero", () => {
     expect(page).toContain("<HomeHeroDemoPreview");
@@ -34,7 +30,7 @@ describe("homepage public Demo handoff", () => {
     expect(preview).toContain("<iframe");
     expect(page).toContain("key={demoUrl}");
     expect(preview).toContain("title={copy.title}");
-    expect(preview).toContain("mobile-home-v2-${previewLocale}.png");
+    expect(preview).toContain("(max-width: 639px)");
     expect(preview).toContain("READY_TIMEOUT_MS");
     expect(preview).toContain("PUBLIC_DEMO_FRAME_READY_MESSAGE");
     expect(preview).toContain("PUBLIC_DEMO_EMBED_CONTEXT_MESSAGE");
@@ -54,12 +50,21 @@ describe("homepage public Demo handoff", () => {
     expect(preview).toContain(
       'sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"',
     );
-    expect(provider).toContain("window.parent === window");
-    expect(provider).toContain("window.parent.postMessage");
-    expect(provider).toContain("PUBLIC_DEMO_FRAME_READY_MESSAGE");
-    expect(provider).toContain("isPublicDemoEmbedContextMessage");
-    expect(provider).toContain("event.source !== window.parent");
-    expect(provider).toContain("setTheme(event.data.theme)");
-    expect(provider).toContain("locale: event.data.locale");
+    // The hosted Demo provider is Managed code. Public docs own the sender
+    // and shared protocol, so exercise that contract without reading a
+    // private source file that is absent from a clean Public checkout.
+    const message = {
+      type: PUBLIC_DEMO_EMBED_CONTEXT_MESSAGE,
+      version: 1,
+      locale: "zh",
+      theme: "dark",
+    };
+    expect(isPublicDemoEmbedContextMessage(message)).toBe(true);
+    expect(isPublicDemoEmbedContextMessage({ ...message, version: 2 })).toBe(
+      false,
+    );
+    expect(
+      isPublicDemoEmbedContextMessage({ ...message, theme: "unknown" }),
+    ).toBe(false);
   });
 });

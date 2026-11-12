@@ -388,7 +388,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 159
+          "line": 164
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
@@ -1033,7 +1033,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 241
+          "line": 246
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
@@ -3068,11 +3068,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 106
+          "line": 111
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 155
+          "line": 160
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
@@ -3228,7 +3228,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 96
+          "line": 98
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",

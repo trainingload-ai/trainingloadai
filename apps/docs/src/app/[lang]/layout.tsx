@@ -20,6 +20,8 @@ import { DocsRootProvider } from "@/components/DocsRootProvider";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { homeOpenGraphImage, homeTwitterImage } from "@/lib/social-metadata";
 import { isDocsTelemetryEnabled } from "@/lib/telemetry-config.mjs";
+import { selectClientMessages } from "@/lib/client-messages";
+import { docsFontVariables } from "@/lib/docs-fonts";
 
 const { provider } = defineI18nUI(i18n, {
   translations: {
@@ -163,12 +165,15 @@ export default async function Layout({
   );
 
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={lang} className={docsFontVariables} suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className="flex min-h-screen flex-col font-sans"
       >
-        <NextIntlClientProvider locale={lang} messages={messages}>
+        <NextIntlClientProvider
+          locale={lang}
+          messages={selectClientMessages(messages)}
+        >
           <Suspense fallback={null}>
             <AnalyticsProvider locale={lang} />
           </Suspense>
@@ -179,7 +184,9 @@ export default async function Layout({
             <LocaleSuggestion />
           </DocsRootProvider>
         </NextIntlClientProvider>
-        {isProd && telemetryEnabled && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+        {isProd && telemetryEnabled && gaId ? (
+          <GoogleAnalytics gaId={gaId} />
+        ) : null}
       </body>
     </html>
   );

@@ -162,7 +162,6 @@ function ProductImagePair({
         height={dimensions.height}
         sizes={sizes}
         priority={priority}
-        unoptimized
         alt={alt}
       />
       <Image
@@ -172,7 +171,6 @@ function ProductImagePair({
         height={dimensions.height}
         sizes={sizes}
         priority={priority}
-        unoptimized
         alt=""
         aria-hidden="true"
       />

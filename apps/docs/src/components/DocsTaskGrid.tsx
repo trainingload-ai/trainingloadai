@@ -18,6 +18,7 @@ export function DocsTaskCard({
   action,
   imageSrc,
   imageAlt,
+  preload = false,
   className,
 }: {
   href: string;
@@ -27,6 +28,7 @@ export function DocsTaskCard({
   action: string;
   imageSrc?: string;
   imageAlt?: string;
+  preload?: boolean;
   className?: string;
 }) {
   return (
@@ -43,6 +45,7 @@ export function DocsTaskCard({
           <Image
             src={imageSrc}
             alt={imageAlt ?? ""}
+            preload={preload}
             fill
             sizes="(min-width: 768px) 420px, 100vw"
             className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.015] motion-reduce:transform-none motion-reduce:transition-none"
