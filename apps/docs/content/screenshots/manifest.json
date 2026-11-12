@@ -251,22 +251,94 @@
       "asset": "docs/analysis/training-decision.webp"
     },
     {
+      "id": "pmc-forecast-overview",
+      "article": "guide/pmc-forecast",
+      "platform": "web",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Synthetic running fixture with recorded history, current cards and plan/habit-based forecast; Form selected",
+      "asset": "docs/analysis/en/pmc-forecast-overview.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)"
+    },
+    {
+      "id": "pmc-forecast-date",
+      "article": "guide/pmc-forecast",
+      "platform": "web",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Same synthetic running fixture; Fitness selected and keyboard inspection seven days ahead with load basis in tooltip",
+      "asset": "docs/analysis/en/pmc-forecast-date.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-date.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-date.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)"
+    },
+    {
+      "id": "pmc-forecast-unavailable",
+      "article": "guide/pmc-forecast",
+      "platform": "web",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Public Demo as captured; recorded history remains visible and next-day tooltip verified No forecast available",
+      "asset": "docs/analysis/en/pmc-forecast-unavailable.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-unavailable.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-unavailable.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "https://demo.trainingload.ai/pmc (2026-11-12)"
+    },
+    {
       "id": "pmc-marathon-window",
       "article": "guide/pmc-marathon-adjustment",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/pmc",
-      "state": "Six-week synthetic marathon block with CTL, ATL, TSB, a recent overload, and the next key workout date",
-      "asset": "docs/analysis/pmc-marathon-window.webp"
+      "state": "Synthetic running forecast fixture rendered in the real app; see article for assumptions",
+      "asset": "docs/analysis/en/pmc-forecast-overview.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO)"
     },
     {
       "id": "effective-vo2max-trend",
       "article": "guide/effective-vo2max-for-endurance",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/dashboard",
-      "state": "Running-only VO2Max metric history with several comparable Ready activities and one visible outlier",
-      "asset": "docs/analysis/effective-vo2max-trend.webp"
+      "state": "Synthetic running forecast fixture rendered in the real app; see article for assumptions",
+      "asset": "docs/analysis/en/effective-vo2max-trend.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/effective-vo2max-trend.webp",
+        "zh": "docs/analysis/zh/effective-vo2max-trend.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "720 / 658",
+      "dataSource": "apps/client/e2e/vdot-forecast.spec.ts (upward synthetic example; REFERENCE range; 2026-11-11)"
     },
     {
       "id": "ai-adjustment-confirmation",
