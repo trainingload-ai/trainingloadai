@@ -48,7 +48,28 @@ function notarize(file, label) {
         "submit",
         file,
         ...notaryArguments(signing),
-        "--wait",
+        "--output-format",
+        "json",
+      ],
+      true,
+    ),
+  );
+  const submission = { artifact: label, id: result.id, status: "Submitted" };
+  submissions.push(submission);
+  writeFileSync(
+    join(staging, "notarization.json"),
+    JSON.stringify(submissions, null, 2) + "\n",
+  );
+  // Persist the submission ID before waiting, including on runner timeout.
+  step(`Apple submission ${result.id}`);
+  const completed = JSON.parse(
+    run(
+      "xcrun",
+      [
+        "notarytool",
+        "wait",
+        result.id,
+        ...notaryArguments(signing),
         "--timeout",
         "30m",
         "--output-format",
@@ -57,14 +78,14 @@ function notarize(file, label) {
       true,
     ),
   );
-  submissions.push({ artifact: label, id: result.id, status: result.status });
+  submission.status = completed.status;
   writeFileSync(
     join(staging, "notarization.json"),
     JSON.stringify(submissions, null, 2) + "\n",
   );
-  if (result.status !== "Accepted")
+  if (completed.status !== "Accepted")
     throw new Error(
-      `Apple notarization ${result.status}; submission ${result.id}. See ${join(staging, "notarization.json")}`,
+      `Apple notarization ${completed.status}; submission ${result.id}. See ${join(staging, "notarization.json")}`,
     );
 }
 
@@ -217,6 +238,12 @@ try {
   const report = {
     ok: true,
     version,
+    sourceCommit: JSON.parse(
+      readFileSync(
+        join(app, "Contents/Resources/app/runtime-size.json"),
+        "utf8",
+      ),
+    ).commit,
     platform: "darwin",
     arch: process.arch,
     teamId: signing.teamId,

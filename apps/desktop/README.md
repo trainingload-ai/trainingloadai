@@ -63,6 +63,32 @@ Preflight requires exactly one valid Developer ID Application identity for the s
 
 Desktop Core builds disable Next's disk image and ISR caches and keep a bounded 50 MiB in-memory response cache. This prevents changes to sealed application resources during use; normal browser Self-host builds keep their existing disk-cache behavior. Packaging rejects a client built with the ordinary Self-host cache configuration. The relocated smoke test exercises images and routes and checks that no application files changed.
 
+## GitHub-hosted macOS releases
+
+`Desktop macOS verification` builds, tests, smoke-tests and packages arm64 on the standard `macos-15` runner for pull requests. It receives no signing secrets. Existing required `core` and `docs` checks remain unchanged.
+
+`Desktop macOS signed release` is manually dispatched from `main`. It builds and tests before importing credentials, then runs the same signed-release command in a temporary runner Keychain. The `desktop-macos-release` GitHub Environment must have a custom deployment branch rule allowing **only `main`**. Configure these five Environment Secrets, not repository-wide secrets:
+
+| Secret                     | Value                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `DESKTOP_MAC_P12_BASE64`   | Base64 of one encrypted Developer ID Application identity, including its private key |
+| `DESKTOP_MAC_P12_PASSWORD` | Password protecting that `.p12` export                                               |
+| `DESKTOP_MAC_APPLE_ID`     | Apple developer account email                                                        |
+| `DESKTOP_MAC_APP_PASSWORD` | App-specific password for notarization                                               |
+| `DESKTOP_MAC_TEAM_ID`      | Team identifier from the Developer ID certificate                                    |
+
+The operator exports only the intended Developer ID Application identity from the login Keychain to a password-protected `.p12` **outside all source repositories**. Keep the private key and passwords out of chat. After the reviewed workflow and helpers are merged into `main`, the operator can configure all five Secrets from their own local terminal:
+
+```sh
+bash apps/desktop/scripts/configure-macos-cloud.sh /absolute/path/to/identity.p12 trainingload-ai/trainingloadai
+```
+
+This helper checks the public repository, administrator permissions, server-enforced main-only Environment policy and merged workflow before collecting credentials. Password prompts are hidden; credentials go to `gh secret set` through stdin and are encrypted by GitHub CLI. The operator confirms the exact destination before upload. The exported file remains under the operator's control.
+
+In GitHub Actions, choose **Desktop macOS signed release → Run workflow → main**. Successful notarized DMG/ZIP installers, checksums and verification reports are uploaded to a **draft** GitHub Release named `desktop-v<version>`. Existing releases are never overwritten and publication remains a maintainer action. Native installers are not stored as Actions artifacts; only small JSON evidence reports are retained there for one day. Standard hosted macOS compute is free for public repositories; avoid larger runners and monitor independent storage quotas. Certificates are removed and the runner Keychain search list restored in an always-run cleanup step.
+
+Apple submissions are recorded before waiting for a result, so failed or timed-out jobs retain their notarization IDs in the evidence artifact. The workflow does not automatically resubmit queued requests. Cloud builds do not depend on the maintainer's Mac remaining online. This initial workflow produces macOS arm64; Intel and Windows remain separate platform work.
+
 ## Native integration and startup
 
 - The product name is Trainingload.ai and the macOS application identifier is `ai.trainingload.personal`. These identities and the data directory are preserved when moving the source into Public.
@@ -90,4 +116,4 @@ The helper transfers existing keys only over private IPC. Matching keys are re-e
 
 The electron-updater adapter checks only when the packaged release contains a configured `resources/app-update.yml`. It does not automatically download, install on quit, accept prereleases, or downgrade. Installation waits for the local services and database to stop. Development previews never contact an update feed.
 
-Formal distribution still requires signing/notarization, a controlled update feed, clean-machine acceptance, and cross-version upgrade testing with actual signed packages. Source and local packaging do not constitute signed-release acceptance.
+Use the signed macOS workflow for direct distribution. A controlled update feed, clean-machine acceptance, and cross-version upgrade testing with actual signed packages remain separate release work. Source and unsigned local packaging do not constitute signed-release acceptance.
