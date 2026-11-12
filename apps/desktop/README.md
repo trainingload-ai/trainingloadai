@@ -43,6 +43,8 @@ The production graph is collected explicitly, with the same checkout's migration
 
 ## Signed macOS distribution
 
+The pinned `@electron/osx-sign` 1.3.3 dependency has a pnpm patch that scans entries sequentially. Its upstream recursive parallel scan can exhaust file descriptors on hosted Macs with an unpacked dependency graph. A regression test runs the installed signer against more than 1,500 files with a 64-descriptor limit and checks binary discovery, framework ordering and temporary-file cleanup. Keep the patch until a compatible upstream signer bounds this work.
+
 Install a **Developer ID Application** certificate with its matching private key in the Mac's login Keychain. Apple Development and App Store distribution certificates do not serve this direct-download release workflow. A Developer ID Installer certificate is only needed for a `.pkg`, which this workflow does not produce.
 
 Store notarization authorization locally using `xcrun notarytool store-credentials <profile> --apple-id <account> --team-id <team> --keychain ~/Library/Keychains/login.keychain-db`. Enter the app-specific password only at the secure interactive prompt; never put it in a command argument, shell history, repository, or chat. The account holder completes credential creation and any required agreements. See [Apple's certificate instructions](https://developer.apple.com/help/account/certificates/create-developer-id-certificates) and [notarization documentation](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
