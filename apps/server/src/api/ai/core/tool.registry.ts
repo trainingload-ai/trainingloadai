@@ -1,3 +1,4 @@
+import { pmcProjectionTool } from './tools/pmcProjection.tool';
 import {
   fitnessMethodsTool,
   fitnessEvidenceTool,
@@ -180,6 +181,7 @@ export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   trainingAggregateTool,
   presentTrainingVisualizationTool,
   pmcRangeTool,
+  pmcProjectionTool,
   zonesProfileTool,
   zoneRangesProfileTool,
   workoutIntensityStrategyTool,

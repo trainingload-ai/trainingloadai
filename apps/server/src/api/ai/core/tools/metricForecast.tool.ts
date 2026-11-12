@@ -32,5 +32,8 @@ export const metricForecastTool: AiToolDef<
     },
   },
   execute: async (ctx) => ctx.pmc.getVdotForecast(ctx.session.user.id),
-  summarizeForModel: ({ output }) => output,
+  summarizeForModel: ({ output }) => {
+    const { dailyForecasts, ...summary } = output;
+    return summary;
+  },
 });

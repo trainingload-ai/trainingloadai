@@ -91,6 +91,26 @@ describe('weekly VDOT forecasting', () => {
       );
     },
   );
+  it('provides a 30-day personal curve while preserving the four weekly summaries', () => {
+    const result = calculatePersonalVdotForecast(
+      recentObservations(0.05),
+      cutoff,
+    );
+    expect(result.forecasts).toHaveLength(4);
+    expect(result.dailyForecasts).toHaveLength(30);
+    expect(result.dailyForecasts.at(-1)?.date).toBe('2026-12-10');
+    for (const week of result.forecasts) {
+      expect(result.dailyForecasts[week.week * 7 - 1]).toMatchObject({
+        date: week.endDate,
+        point: week.point,
+        lower80: week.lower80,
+        upper80: week.upper80,
+      });
+    }
+    expect(result.dailyForecasts[29].point).toBeGreaterThan(
+      result.dailyForecasts[27].point,
+    );
+  });
 
   it('keeps personal predictions unavailable for sparse, stale and incomparable evidence', () => {
     expect(calculatePersonalVdotForecast([], cutoff).status).toBe(

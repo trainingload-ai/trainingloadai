@@ -1,3 +1,5 @@
+import { PmcProjectionService } from './pmc-projection.service';
+import { PlanProjectionReadModule } from '@/api/plan/application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../api/user/user.module';
@@ -13,6 +15,7 @@ import { VdotForecastService } from './vdot-forecast.service';
 @Module({
   imports: [
     PrismaModule,
+    PlanProjectionReadModule,
     UsersModule,
     UserQueryModule,
     OAuthModule,
@@ -24,7 +27,13 @@ import { VdotForecastService } from './vdot-forecast.service';
     PMCService,
     PmcInvalidateListener,
     VdotForecastService,
+    PmcProjectionService,
   ],
-  exports: [PMCService, PmcRepository, VdotForecastService],
+  exports: [
+    PMCService,
+    PmcRepository,
+    VdotForecastService,
+    PmcProjectionService,
+  ],
 })
 export class PMCModule {}

@@ -344,7 +344,8 @@
         "bodyWeightUpdate": "Record body weight",
         "trainingDataCoverage": "Training data coverage",
         "coachTaskResult": "Background task result",
-        "metricForecast": "Read four-week VO2max forecast"
+        "metricForecast": "Read four-week VO2max forecast",
+        "pmcProjection": "Read four-week PMC outlook"
       },
       "skills": {
         "integrationSupport": "Device connection and sync",
@@ -7040,6 +7041,7 @@
     "coachPrompt": "Please explain my current VO2max, its recent history and any available four-week forecast, and give advice based on my recent training.",
     "chartLabel": "Forecast VO2max",
     "historyAndForecast": "Selected history + four-week forecast",
+    "historyAndForecastDays": "Selected history + {days}-day forecast",
     "INSUFFICIENT_HISTORY": "More running records are needed for a four-week forecast.",
     "STALE_HISTORY": "New running records will update this forecast.",
     "INCOMPARABLE_HISTORY": "More records with the current VO2max method are needed.",
@@ -7050,5 +7052,52 @@
     "higher": "Expected above current",
     "lower": "Expected below current",
     "unchanged": "Expected to stay level"
+  },
+  "PmcProjection": {
+    "title": "Fitness management",
+    "scopeLabel": "Sport",
+    "scopes": {
+      "ALL": "All sports",
+      "RUN": "Running",
+      "CYCLING": "Cycling",
+      "SWIM": "Swimming"
+    },
+    "scenarios": {
+      "AUTO": "Plans first",
+      "HABIT": "Recent habits",
+      "REST": "Pause training"
+    },
+    "basis": {
+      "PLAN": "Scheduled training",
+      "HABIT": "Recent training habits",
+      "MIXED": "Scheduled training + recent habits",
+      "REST": "Pause training",
+      "UNKNOWN": "Not enough evidence"
+    },
+    "metrics": {
+      "ctl": "Fitness (CTL)",
+      "atl": "Fatigue (ATL)",
+      "tsb": "Form (TSB)"
+    },
+    "chartTitle": "Training load and outlook",
+    "actual": "Recorded",
+    "projected": "Projected",
+    "today": "Today",
+    "load": "Daily load",
+    "keyboardHint": "Use arrow keys to inspect dates.",
+    "updated": "Data through {time}",
+    "failed": "Could not load this outlook. Try again.",
+    "retry": "Retry",
+    "empty": "No recorded training load yet. Sync or import activities to see your history.",
+    "askCoach": "Ask coach",
+    "coachPrompt": "Please explain my current training load, historical changes and four-week outlook for {scope}, using {scenario}, and advise me based on my recent training and recovery.",
+    "updateFailedShort": "Update failed; showing the previous result",
+    "noForecast": "No forecast available",
+    "metricNames": {
+      "ctl": "Fitness",
+      "atl": "Fatigue",
+      "tsb": "Form"
+    },
+    "metricSwitch": "Select metric"
   }
 }

@@ -236,7 +236,8 @@
         "bodyWeightUpdate": "체중 기록",
         "trainingDataCoverage": "훈련 데이터 범위",
         "coachTaskResult": "백그라운드 작업 결과",
-        "metricForecast": "4주 최대산소섭취량 예측 조회"
+        "metricForecast": "4주 최대산소섭취량 예측 조회",
+        "pmcProjection": "Read four-week PMC outlook"
       },
       "skills": {
         "integrationSupport": "기기 연결 및 동기화",
@@ -6382,6 +6383,7 @@
     "coachPrompt": "현재 최대산소섭취량과 과거 변화, 이용 가능한 4주 예측을 설명하고 최근 훈련을 바탕으로 조언해 주세요.",
     "chartLabel": "최대산소섭취량 예측",
     "historyAndForecast": "선택한 기록 + 향후 4주 예측",
+    "historyAndForecastDays": "선택한 과거 기록 + {days}일 예측",
     "INSUFFICIENT_HISTORY": "4주 예측을 위해 더 많은 러닝 기록이 필요합니다.",
     "STALE_HISTORY": "새 러닝 기록이 추가되면 예측이 업데이트됩니다.",
     "INCOMPARABLE_HISTORY": "현재 최대산소섭취량 산출 방식으로 계산된 기록이 더 필요합니다.",
@@ -6392,5 +6394,52 @@
     "higher": "현재보다 상승 예상",
     "lower": "현재보다 하락 예상",
     "unchanged": "현재 수준 유지 예상"
+  },
+  "PmcProjection": {
+    "title": "Fitness management",
+    "scopeLabel": "Sport",
+    "scopes": {
+      "ALL": "All sports",
+      "RUN": "Running",
+      "CYCLING": "Cycling",
+      "SWIM": "Swimming"
+    },
+    "scenarios": {
+      "AUTO": "Plans first",
+      "HABIT": "Recent habits",
+      "REST": "Pause training"
+    },
+    "basis": {
+      "PLAN": "Scheduled training",
+      "HABIT": "Recent training habits",
+      "MIXED": "Scheduled training + recent habits",
+      "REST": "Pause training",
+      "UNKNOWN": "Not enough evidence"
+    },
+    "metrics": {
+      "ctl": "Fitness (CTL)",
+      "atl": "Fatigue (ATL)",
+      "tsb": "Form (TSB)"
+    },
+    "chartTitle": "Training load and outlook",
+    "actual": "Recorded",
+    "projected": "Projected",
+    "today": "Today",
+    "load": "Daily load",
+    "keyboardHint": "Use arrow keys to inspect dates.",
+    "updated": "Data through {time}",
+    "failed": "Could not load this outlook. Try again.",
+    "retry": "Retry",
+    "empty": "No recorded training load yet. Sync or import activities to see your history.",
+    "askCoach": "Ask coach",
+    "coachPrompt": "Please explain my current training load, historical changes and four-week outlook for {scope}, using {scenario}, and advise me based on my recent training and recovery.",
+    "updateFailedShort": "Update failed; showing the previous result",
+    "noForecast": "No forecast available",
+    "metricNames": {
+      "ctl": "Fitness",
+      "atl": "Fatigue",
+      "tsb": "Form"
+    },
+    "metricSwitch": "Select metric"
   }
 }

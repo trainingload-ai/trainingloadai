@@ -1,4 +1,8 @@
 import type { VdotForecastResult } from "@shared/vdot-forecast";
+import {
+  metricForecastDays,
+  metricForecastEnd,
+} from "@/lib/metric-forecast-window";
 import React from "react";
 import uPlot from "uplot";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -280,10 +284,13 @@ export function MetricHistoryChartView({
           upper80: forecast.estimatedCurrentLevel,
         });
       }
-      for (const week of forecast.forecasts) {
+      const endDate = metricForecastEnd(forecast.cutoffDate, rangeDays);
+      const curve = forecast.dailyForecasts?.length
+        ? forecast.dailyForecasts
+        : forecast.forecasts.map((week) => ({ ...week, date: week.endDate }));
+      for (const week of curve.filter((point) => point.date <= endDate)) {
         forecastByX.set(
-          dayjs.tz(week.endDate, forecast.timezone).endOf("day").valueOf() /
-            1000,
+          dayjs.tz(week.date, forecast.timezone).endOf("day").valueOf() / 1000,
           week,
         );
       }
@@ -325,6 +332,7 @@ export function MetricHistoryChartView({
     periodStart,
     vo2ActivityPoints,
     forecast,
+    rangeDays,
   ]);
 
   const renderTooltip = React.useCallback(
@@ -346,6 +354,14 @@ export function MetricHistoryChartView({
 
       const prediction = metricKey === "vo2Max" ? uplotData[4]?.[idx] : null;
       if (typeof prediction === "number") {
+        const isFuture =
+          forecast &&
+          Number(xVal) >
+            dayjs
+              .tz(forecast.cutoffDate, forecast.timezone)
+              .endOf("day")
+              .valueOf() /
+              1000;
         const week = forecast?.forecasts.find(
           (item) =>
             dayjs.tz(item.endDate, forecast.timezone).endOf("day").valueOf() /
@@ -360,10 +376,12 @@ export function MetricHistoryChartView({
               {week ? `${week.startDate} – ${week.endDate}` : dateLabel}
             </div>
             <div>
-              {tForecast(week ? "chartLabel" : "currentEstimate")}{" "}
+              {tForecast(isFuture ? "chartLabel" : "currentEstimate")}{" "}
               {prediction.toFixed(1)}
             </div>
-            {week && typeof lower === "number" && typeof upper === "number" ? (
+            {isFuture &&
+            typeof lower === "number" &&
+            typeof upper === "number" ? (
               <div className="text-muted-foreground">
                 {tForecast(
                   forecast?.intervalKind === "REFERENCE"
@@ -674,7 +692,7 @@ export function MetricHistoryChartView({
                 width: 2,
                 dash: [5, 4],
                 spanGaps: true,
-                points: { show: true, size: 5 },
+                points: { show: !forecast?.dailyForecasts?.length, size: 5 },
               },
               {
                 label: "upper80",
@@ -733,10 +751,23 @@ export function MetricHistoryChartView({
   ]);
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div
+      className="flex flex-col gap-1.5"
+      data-testid="metric-history-chart-view"
+      data-forecast-end={
+        forecast && uplotData[0].length
+          ? dayjs
+              .unix(Number(uplotData[0].at(-1)))
+              .tz(forecast.timezone)
+              .format("YYYY-MM-DD")
+          : undefined
+      }
+    >
       {forecast ? (
         <p className="text-xs text-muted-foreground">
-          {tForecast("historyAndForecast")}
+          {tForecast("historyAndForecastDays", {
+            days: metricForecastDays(rangeDays),
+          })}
         </p>
       ) : null}
       <ChartContainer

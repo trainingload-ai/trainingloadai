@@ -224,6 +224,7 @@ export class VdotForecastService {
       history: calculated.weeks,
       estimatedCurrentLevel: calculated.currentLevel,
       forecasts: calculated.forecasts,
+      dailyForecasts: calculated.dailyForecasts,
     };
     if (result.status !== 'READY') return result;
     const row = await this.prisma.vdotForecastSnapshot.upsert({
