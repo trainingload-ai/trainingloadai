@@ -83,7 +83,18 @@
     "language": "言語",
     "openMainMenu": "メインメニューを開く"
   },
+  "docsActions": {
+    "copy": "Markdown をコピー",
+    "copied": "コピーしました",
+    "copying": "コピー中…",
+    "copyError": "コピーできませんでした。Markdown を開いて再試行してください。",
+    "open": "開く",
+    "viewMarkdown": "Markdown を表示",
+    "openIn": "{name} で開く",
+    "ask": "{url} を読んでください。このドキュメントについて質問したいです。"
+  },
   "docsScreenshot": {
+    "openImage": "元のサイズで開く",
     "demoLabel": "ライブデモ",
     "openDemo": "デモでこのページを開く"
   },

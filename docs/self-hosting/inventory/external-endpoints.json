@@ -560,7 +560,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 177
+          "line": 201
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -574,7 +574,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 195
+          "line": 219
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2032,7 +2032,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
-          "line": 217
+          "line": 216
         },
         {
           "file": "apps/docs/src/lib/seo-schema.ts",
@@ -2092,7 +2092,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 113
+          "line": 137
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2255,7 +2255,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 212
+          "line": 236
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3273,6 +3273,10 @@
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
           "line": 23
+        },
+        {
+          "file": "apps/docs/src/lib/llm-text.ts",
+          "line": 164
         }
       ],
       "capability": "product-internal",
@@ -3502,15 +3506,15 @@
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 122
+          "line": 146
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 186
+          "line": 210
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 203
+          "line": 227
         },
         {
           "file": "apps/server/src/maps/local-route-thumbnail.renderer.ts",

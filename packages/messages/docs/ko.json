@@ -97,7 +97,18 @@
     "language": "언어",
     "openMainMenu": "기본 메뉴 열기"
   },
+  "docsActions": {
+    "copy": "Markdown 복사",
+    "copied": "복사됨",
+    "copying": "복사 중…",
+    "copyError": "복사하지 못했습니다. Markdown을 열고 다시 시도하세요.",
+    "open": "열기",
+    "viewMarkdown": "Markdown 보기",
+    "openIn": "{name}에서 열기",
+    "ask": "{url}을 읽어 주세요. 이 문서에 대해 질문하고 싶습니다."
+  },
   "docsScreenshot": {
+    "openImage": "원본 이미지 열기",
     "demoLabel": "라이브 데모",
     "openDemo": "데모에서 이 페이지 열기"
   },

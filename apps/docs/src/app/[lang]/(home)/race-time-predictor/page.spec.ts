@@ -17,12 +17,16 @@ describe("Race time predictor page", () => {
     expect(source).toContain("/half-marathon-training-plan");
     expect(source).toContain("/marathon-training-plan");
     expect(source).toContain("<RaceAppPromo");
-    expect(source).toContain("<ProductPreview");
+    expect(source).toContain('id="faq"');
+    expect(source).toContain('id="related"');
     expect(source.indexOf("<RaceTimePredictorClient")).toBeLessThan(
-      source.indexOf("<RaceAppPromo"),
-    );
-    expect(source.indexOf("<RaceAppPromo")).toBeLessThan(
       source.indexOf('id="faq"'),
+    );
+    expect(source.indexOf('id="faq"')).toBeLessThan(
+      source.indexOf('id="related"'),
+    );
+    expect(source.indexOf('id="related"')).toBeLessThan(
+      source.indexOf("<RaceAppPromo"),
     );
     expect(source).not.toContain("permanentRedirect");
     expect(source).not.toMatch(/-copy\.ts/);

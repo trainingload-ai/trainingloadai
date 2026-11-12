@@ -1,126 +1,119 @@
 ---
-title: Connect Data
-description: Connect training data to Trainingload.ai so completed workouts can feed activity analysis, training load, plans, calendar views, and AI Coach reviews.
-keywords:
-  [
-    "connect training data",
-    "Strava sync",
-    "activity import",
-    "Trainingload.ai data",
-  ]
+title: Connect Training Data
+description: Choose a source, import a known workout, follow processing, check duplicates and sensor coverage, and verify that the recorded result is ready for review.
+seoTitle: "Connect and Verify Training Data | Trainingload.ai"
+seoDescription: "Choose platform sync, an activity file or mobile recording. Follow the import result, check source, duplicates and missing sensors, then review the recorded workout."
+keywords: ["connect training data", "activity import", "FIT upload", "workout synchronization", "Trainingload.ai guide"]
 ---
 
-# Connect Data
+# Connect Training Data
 
-Trainingload.ai needs completed workouts before it can analyze execution, load, and readiness. You can bring data in through platform sync or by uploading files.
+Use this workflow to move a known workout into Trainingload.ai and verify the recorded result. Choose the route that matches where the original activity is stored, then check the individual activity rather than relying only on a connection-success message.
 
-## Before you begin
+[Browse activities in Demo](https://demo.trainingload.ai/en/activities). Importing files or authorizing a provider requires your own account. The upload screenshot uses a synthetic account in the real app.
 
-- Decide which provider should be the primary source for new activities.
-- Avoid connecting multiple services that forward the same device activity unless you are prepared to review duplicates.
-- Confirm that the source account contains the workouts and sensor fields you expect.
-- For file import, keep the original GPX, TCX, or FIT files unchanged.
+## 1. Choose a source
 
-## Choose an import path
+| Route | When to use it | Verify afterwards |
+| --- | --- | --- |
+| Supported platform connection | A source platform stores the activities you want to import or synchronize | Its offered direction, date range and job result, then the imported activity. |
+| Original FIT, TCX or GPX file | A specific workout, an archive, or a source without a usable connection | Per-file inspection and import-batch result. |
+| Mobile recording | You record a workout with the Trainingload.ai app | The finished recording's synchronization and resulting activity. |
 
-Use a provider connection for ongoing automatic imports. Use file upload for a historical archive, an unsupported recording source, or a specific retry.
+For provider capabilities and authorization, use [Platform Connection Options](/docs/guide/integrations) and [Connect Third-Party Platforms](/docs/guide/connect-third-party-platforms). Use the operations actually offered by your deployment and account. A one-time history import and ongoing synchronization are different capabilities.
 
-For provider-by-provider setup and disconnect behavior, follow [Connect Third-Party Platforms](/docs/guide/connect-third-party-platforms). Use [Integrations and Imports](/docs/guide/integrations) to compare all import paths. For files, follow [Upload Activity Files](/docs/guide/upload-activity-files).
+## 2. Set one primary route for a known workout
 
-## What happens after data arrives
+Identify the date, sport and approximate duration of one source workout. If the same session passes from a device into several services, choose which route should supply it before starting a bulk backfill.
 
-Imported workouts go through a processing pipeline:
+Keep the original recording available. A converted or summary-only file can contain different fields from the original FIT export. Activity import requires an activity recording; an all-day health-only export is a different data type.
 
-1. **Receive** the source activity or file.
-2. **Normalize** the data into a common activity format.
-3. **Check duplicates** so repeated uploads do not create confusing history.
-4. **Materialize** the activity in your account.
-5. **Build analysis data** for charts, maps, and metrics.
-6. **Compute training metrics** such as load, pace, power, heart rate, and PMC signals.
+## 3. Import through the chosen route
 
-<Mermaid
-  chart={`flowchart LR
-  Source[Provider or file] --> Receive[Receive]
-  Receive --> Normalize[Normalize]
-  Normalize --> Duplicate[Duplicate check]
-  Duplicate --> Activity[Activity record]
-  Activity --> Analysis[Charts and metrics]
-  Analysis --> Review[Plan and AI review]`}
+### File upload
+
+1. Open **Activities** and choose its upload entry.
+2. Select the original file and wait for the format inspection.
+3. Check the detected format and any validation error. An extension alone does not establish the actual file format.
+4. Continue with upload and inspect any duplicate prompt.
+5. Follow the per-file results in the batch-progress dialog. Reopen the recent batch if you closed the dialog.
+
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Choose the original activity file"
+  description="Synthetic Web account. The upload dialog accepts activity files and provides a separate confirmation action. Selecting a file and completing its import are separate steps."
+  imageAlt="Activity upload dialog with the file selection area and upload action"
+  route="Activities → Upload"
+  demoLabel="Browse existing Demo activities"
 />
 
-You may see an activity before every chart is ready. If analysis is still running, wait for the status to finish and refresh the page.
+Use [Upload Activity Files](/docs/guide/upload-activity-files) for the complete inspection, duplicate and batch-state workflow.
 
-## Platform sync
+### Platform synchronization
 
-If you connect a supported third-party provider, new activities can be brought into Trainingload.ai without manual file upload.
+Open the platform's connection settings, read the offered data direction, complete authorization and run its initial import or synchronization when provided. Wait for that job's result, then locate the known workout in Activities.
 
-Use platform sync when:
+Synchronization requirements and backfill ranges differ by provider. An account marked connected does not prove that the expected historical workout has already arrived. Enter credentials only in the platform's connection flow.
 
-- You record workouts on another service.
-- You want recent activities to appear automatically.
-- You want AI Coach and plans to use the latest completed training.
+### Mobile recording
 
-If a synced activity looks incomplete, check the original source first. Missing heart rate, power, GPS, or elevation data usually comes from the source file or device permissions.
+Finish and save the recording, then let the app synchronize it. Check recovery or pending-upload state before starting another recording of the same workout. Follow [Mobile Recording](/docs/guide/mobile-recording).
 
-## File upload
+## 4. Distinguish import progress from activity analysis
 
-Use file upload when:
+| What you see | What to check |
+| --- | --- |
+| An import item is queued or being processed | Wait for its terminal result in the import batch. |
+| Done or an activity link | Open the activity and inspect its own analysis state. |
+| Skipped as a duplicate | Confirm which existing activity matched. |
+| Partial failure | Identify which file or analysis failed and use the available results. |
+| Failed | Read the item's error before retrying the original file or provider operation. |
 
-- You have a GPX / TCX / FIT file.
-- You want to import historical workouts.
-- You recorded a workout outside the connected platform.
-- You need to retry or test a specific activity.
+An activity can appear before every chart or derived metric finishes. Missing sensor data, a processing request failure and an unsupported source file need different responses.
 
-See [Upload Activity Files](/docs/guide/upload-activity-files) for the step-by-step flow.
+## 5. Verify the recorded activity
 
-## Data quality checklist
+Check source, sport, local date, duration and distance. Then inspect only the measurements the recording actually contains.
 
-For the best analysis, make sure your files contain:
+| Source evidence | What it can support |
+| --- | --- |
+| GPS samples | A recorded route and location-based context. |
+| Heart-rate samples | Heart-rate charts and supported derived analysis. |
+| Power samples | Power charts and threshold-based analysis. Estimated power is labelled separately. |
+| Usable time-series records | Detailed charts, timeline inspection and range statistics where supported. |
 
-- Accurate start time and time zone when available.
-- Distance and duration.
-- GPS track for outdoor routes.
-- Heart rate if you want HR zones, TRIMP, EF, or decoupling.
-- Power if you want FTP/CP/NP/VI and power-based TSS.
-- Elevation if you want GAP, NGP, route analysis, or climb context.
+A source connection cannot supply measurements that were never recorded or shared. If an expected field is missing, compare the source platform and original file before repeating the import.
 
-## How connected data is used
+## 6. Connect the activity to daily use
 
-Once processed, workouts can appear in:
+Open [Activity Detail](/docs/guide/activity-detail) to review it. Use the calendar to check its local date and associate it with the intended planned workout. Then inspect [PMC](/docs/guide/pmc-forecast) using the relevant sport and available history.
 
-- **Activities**: feed, search, detail pages, charts, and map.
-- **Dashboard**: summary cards and trend views.
-- **PMC**: CTL, ATL, TSB, and related load metrics.
-- **Plans**: actual workouts can link back to planned sessions.
-- **AI Coach**: reviews can reference real completed training.
+Activity synchronization does not by itself mean that sleep, HRV or every all-day health measurement was imported. Check each available data category separately.
 
-For day-to-day activity management, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+## Check the result
 
-## Connect Suunto
+The known workout should appear once through the intended route, with a clear import and analysis result, the correct source and date, and sensor coverage you can explain. If it belongs to a planned session, confirm the link after checking its identity.
 
-Open **Account → Third Party Connections → Suunto**, then select **Connect with OAuth**. After you approve workout access on Suunto, Trainingload.ai queues an initial import of recent workouts. New workouts are imported through Suunto notifications with scheduled reconciliation as a fallback.
+## Common questions
 
-You can return to the Suunto settings dialog to run a manual sync, disable automatic synchronization, reconnect an expired authorization, or disconnect the account. Disconnecting stops future imports but does not delete activities that were already imported.
+### A provider is connected but the activity is missing
 
-## Verify the connection
+Check its supported range, source account, operation result and activity-list filters. Use an offered manual synchronization once, then wait for the job before starting another import.
 
-- The connection card shows the expected account and connected state.
-- A known recent workout appears once in Activities with the correct provider.
-- The activity reaches Ready or exposes a specific processing failure.
-- Expected sensor data is present in Activity Detail.
-- Disconnecting or disabling automatic sync does not delete already imported activities.
+### The same workout appears twice
 
-## Troubleshooting
+Compare source, start time, duration and recording coverage. Investigate duplicate forwarding before deleting a record, especially if one copy is linked to a plan.
 
-- **Authorization returns to a disconnected state:** retry from the connection card and confirm the provider account granted workout access.
-- **No activities arrive:** run a supported manual sync, widen the activity date search, and verify that the source contains eligible workouts.
-- **The same workout appears twice:** identify which connected services forwarded it before deleting or changing the import path.
-- **Sensor fields are absent:** inspect the original provider activity; a connection cannot import fields the provider did not supply.
-- **A connection expired:** reconnect it rather than repeatedly uploading copies of the same activity.
+### The chart is empty after import
 
-## Next steps
+Check activity processing and whether the source contains usable samples. Summary values alone do not provide every chart. Use the displayed retry action for an actual request failure.
 
-- [Connect Third-Party Platforms](/docs/guide/connect-third-party-platforms)
-- [Integrations and Imports](/docs/guide/integrations)
-- [Activities Feed and Search](/docs/guide/activity-feed-search)
+### Will disconnecting remove my imported history?
+
+Provider disconnection and activity deletion are separate operations. Read the connection dialog's effect before confirming, then check existing activities independently.
+
+## Continue
+
+- [Upload Activity Files](/docs/guide/upload-activity-files)
 - [Activity Detail](/docs/guide/activity-detail)
+- [Calendar](/docs/guide/calendar)

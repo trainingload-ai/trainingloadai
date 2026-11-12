@@ -21,7 +21,7 @@ function getSiteUrl() {
 
 export const revalidate = false;
 
-const LAST_UPDATED = "2026-10-27";
+const LAST_UPDATED = "2026-11-12";
 
 function demoteMarkdownHeadings(markdown: string, depth: number) {
   return markdown.replace(/^(#{1,6})(?=\s)/gm, (heading) =>

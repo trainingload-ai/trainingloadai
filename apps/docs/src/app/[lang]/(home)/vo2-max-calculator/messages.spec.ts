@@ -5,9 +5,9 @@ import { describe, expect, it } from "vitest";
 import { seoDisplayUnits } from "@/lib/seo-metadata";
 import { i18n, SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 
-const LOCKED_TITLE = "VO2 Max Calculator | Cooper, Rockport & Beep";
+const LOCKED_TITLE = "VO2max Calculator | Cooper, Rockport & Beep";
 const LOCKED_DESCRIPTION =
-  "Free VO2 max from Cooper, Rockport, or Beep field tests, plus age- and sex-based fitness norms — not a VDOT race predictor.";
+  "Free VO2max from Cooper, Rockport, or Beep field tests, plus age- and sex-based fitness norms — not a VDOT race predictor.";
 
 function messages(locale: string) {
   return JSON.parse(
@@ -75,12 +75,12 @@ describe("vo2 max calculator keyword locks", () => {
   it("locks the English title, H1, and description", () => {
     const copy = messages("en");
     expect(copy.metadata.title).toBe(LOCKED_TITLE);
-    expect(copy.metadata.title.startsWith("VO2 Max Calculator")).toBe(true);
-    expect(copy.metadata.title).not.toMatch(/^VO2max Calculator/i);
-    expect(copy.page.title).toBe("VO2 Max Calculator");
+    expect(copy.metadata.title.startsWith("VO2max Calculator")).toBe(true);
+    expect(copy.metadata.title).not.toMatch(/^VO2 Max Calculator/i);
+    expect(copy.page.title).toBe("VO2max Calculator");
     expect(copy.metadata.description).toBe(LOCKED_DESCRIPTION);
-    expect(copy.metadata.keywords).toContain("VO2 Max calculator");
-    expect(copy.metadata.keywords).toContain("vo2max calculator");
+    expect(copy.metadata.keywords).toContain("VO2max calculator");
+    expect(copy.metadata.keywords).toContain("vo2 max calculator");
     expect(JSON.stringify(copy).toLowerCase()).not.toContain(
       "race-pace calculator",
     );

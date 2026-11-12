@@ -20,7 +20,7 @@ PMC metrics describe accumulated training pressure. They do not decide whether a
 
 ## 1. Open the correct PMC window
 
-Open **Analysis → PMC**, choose **Running**, and set a range that includes both the load build and the recent change you want to understand. Avoid judging a marathon block from a single day or an all-time chart.
+Open **Analysis → PMC / Fitness management** and choose **Running**. Use the recorded history to locate the load build and recent change, then inspect the relevant future dates. Follow [Read PMC History and Forecasts](/docs/guide/pmc-forecast) for metric selection, date inspection and forecast assumptions. For a closer window, open a Fitness, Fatigue or Form card on the dashboard and choose its history tab.
 
 Read the three signals together:
 
@@ -30,8 +30,10 @@ Read the three signals together:
 
 <DocsScreenshot
   id="pmc-marathon-window"
-  title="Marathon-block PMC window"
-  description="Use one running-only range to connect CTL, ATL, and TSB with the recent overload and the next key workout."
+  title="Read the running load window"
+  description="Synthetic running example. Read current CTL, ATL and TSB together, then inspect recorded history and the conditional future outlook."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Running PMC example with current values, recorded history, future outlook and daily load"
   route="Analysis → PMC"
 />
 
@@ -112,7 +114,7 @@ You can take this summary to [AI Coach](/docs/guide/ai-coach) and ask for one co
 
 ## Troubleshooting
 
-- **PMC is empty:** confirm that activities are Ready, broaden the range, clear an incorrect sport filter, then use the page's calculate action once.
+- **PMC is empty:** confirm that activities are Ready, check the sport scope and whether the activities have usable training load. Use Retry if the page reports a request failure.
 - **Values changed after editing settings:** identify the threshold or load-source change and reinterpret the full comparison window consistently.
 - **A single activity creates an extreme spike:** open it and inspect duration, sensor data, sport classification, duplicates, and selected load source.
 - **The plan and chart use different dates:** verify account time zone and the activity start time.

@@ -83,7 +83,18 @@
     "language": "語言",
     "openMainMenu": "開啟主選單"
   },
+  "docsActions": {
+    "copy": "複製 Markdown",
+    "copied": "已複製",
+    "copying": "複製中…",
+    "copyError": "複製失敗，請開啟 Markdown 後重試。",
+    "open": "開啟",
+    "viewMarkdown": "查看 Markdown",
+    "openIn": "在 {name} 中開啟",
+    "ask": "請閱讀 {url}，我想詢問這篇文件的內容。"
+  },
   "docsScreenshot": {
+    "openImage": "查看原圖",
     "demoLabel": "線上 Demo",
     "openDemo": "在 Demo 中開啟此頁面"
   },

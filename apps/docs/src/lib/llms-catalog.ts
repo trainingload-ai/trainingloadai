@@ -192,6 +192,36 @@ export const llmProductPages: LlmToolPage[] = [
 
 export const llmGuidePages: LlmToolPage[] = [
   {
+    title: "Get Started with Your First Activity",
+    path: "/api/docs-markdown/en/guide/getting-started",
+    description:
+      "Check account settings, choose one data route, import a known activity, verify processing and source, then continue to daily use, plans or AI Coach.",
+  },
+  {
+    title: "Connect and Verify Training Data",
+    path: "/api/docs-markdown/en/guide/connect-data",
+    description:
+      "Choose platform sync, original activity files or mobile recording; follow import and analysis states; verify date, source, duplicates and sensor coverage.",
+  },
+  {
+    title: "Calendar and Plan vs Actual",
+    path: "/api/docs-markdown/en/guide/calendar",
+    description:
+      "Find a date, separate scheduled workouts from recorded activities, link the intended recording, and check summary scope and missing load.",
+  },
+  {
+    title: "Activity Detail",
+    path: "/api/docs-markdown/en/guide/activity-detail",
+    description:
+      "Review a completed workout using analysis tabs, sensor and load context, route, plan association, and optional AI Coach review, with a linked demo activity.",
+  },
+  {
+    title: "Activity Timeline and Segment Analysis",
+    path: "/api/docs-markdown/en/guide/activity-timeline",
+    description:
+      "Analyze running and cycling on desktop web with synchronized charts, point readings, range statistics, route highlights, chart settings, and editable analysis segments. Includes real screenshots and a read-only demo.",
+  },
+  {
     title: "Self-hosting",
     path: "/api/docs-markdown/en/self-host",
     description:
@@ -243,7 +273,7 @@ export const llmGuidePages: LlmToolPage[] = [
     title: "Today and Current Status",
     path: "/api/docs-markdown/en/guide/today-and-current-state",
     description:
-      "Use current plan, completed-workout, training-load, and athlete-state context to decide what needs attention today.",
+      "Read advice and its evidence, open the relevant workout, inspect an offered independent-workout preview, set a reminder when offered, and verify recorded training.",
   },
   {
     title: "Connect Third-Party Platforms",
@@ -262,6 +292,18 @@ export const llmGuidePages: LlmToolPage[] = [
     path: "/api/docs-markdown/en/guide/training-analysis-workflow",
     description:
       "Review plan-versus-actual execution, load response, performance trends, and the next evidence-based training decision.",
+  },
+  {
+    title: "PMC History and Forecasts",
+    path: "/api/docs-markdown/en/guide/pmc-forecast",
+    description:
+      "Choose a sport, inspect current CTL, ATL and TSB, distinguish recorded load from conditional forecasts, check daily load and its basis, and understand missing future values.",
+  },
+  {
+    title: "Effective VO2max History and Forecasts",
+    path: "/api/docs-markdown/en/guide/effective-vo2max-for-endurance",
+    description:
+      "Use history tabs and activity estimates, distinguish the current value from the four-week outlook and reference range, and handle unavailable or outdated running observations.",
   },
   {
     title: "TrainingPeaks Alternative for Training Load",

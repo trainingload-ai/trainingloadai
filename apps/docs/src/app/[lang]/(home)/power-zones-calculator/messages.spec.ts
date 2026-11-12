@@ -102,7 +102,7 @@ describe("power zones calculator messages", () => {
       "功率區間計算器",
     );
     expect(zhHant.powerZonesCalculator.page.title).toBe(
-      "騎行功率區間計算器",
+      "騎乘功率區間計算器",
     );
     for (const lang of ["zh", "ja", "zh-hant"] as const) {
       const copy = messages[lang].powerZonesCalculator;
