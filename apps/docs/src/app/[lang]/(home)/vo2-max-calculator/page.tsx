@@ -374,15 +374,6 @@ export default async function Vo2MaxCalculatorPage({
                           loading="eager"
                         />
                       </div>
-                      <div className={styles.heroWatch}>
-                        <Image
-                          src={`/ftp-calculator/watch-${["en", "zh", "zh-hant", "ja"].includes(lang) ? lang : "en"}.png`}
-                          alt={tPage("heroProduct.watchAlt")}
-                          width={416}
-                          height={496}
-                          sizes="128px"
-                        />
-                      </div>
                     </div>
                     <div className={styles.heroProductCopy}>
                       <p className={styles.kicker}>Trainingload.ai</p>

@@ -7,7 +7,9 @@ keywords:
 
 # 训练平台对接怎么选：Strava、Garmin、COROS 对照
 
-**训练平台对接**决定训练如何进入 Trainingload.ai。先选路径：Strava 或 COROS 持续同步、Garmin 一次性历史导入、Intervals.icu 的 OAuth 或 API Key，或上传 FIT / TCX / GPX。具体授权和验证点击见[连接 Strava、Garmin 与 COROS](/zh/docs/guide/connect-third-party-platforms)。
+先选择你保存训练记录的平台，再决定是持续同步新训练，还是一次性补充历史活动。本页介绍云服务的连接方式；具体步骤见[连接平台指南](/zh/docs/guide/connect-third-party-platforms)。
+
+自托管用户请查看[Intervals.icu 设置](/zh/docs/self-host/configuration#连接-intervalsicu)和[Garmin Personal API](/zh/docs/self-host/garmin-personal-api)，或直接上传活动文件。
 
 平台能力和支持的方向可能调整，连接弹窗里实际显示的操作始终是最终依据。
 
@@ -37,7 +39,7 @@ keywords:
 | Intervals.icu   | 活动同步和兼容计划课程流程    | OAuth 或 API Key       |
 | Suunto          | 持续导入训练和兼容 Guide 流程 | OAuth 与同步设置       |
 | Wahoo           | 持续导入 Wahoo 训练           | OAuth 与同步设置       |
-| Garmin          | 一次性历史活动导入            | 导入任务，不是长期连接 |
+| Garmin          | 新训练同步或补充历史活动      | OAuth 授权或文件导入   |
 | FIT / TCX / GPX | 单个文件或其他平台导出        | 手动上传               |
 
 ## 连接平台
@@ -59,7 +61,7 @@ keywords:
 
 ## Garmin 历史导入
 
-Garmin 在当前界面中是一次性历史导入，而不是持续连接。通过 Garmin 卡片启动任务，并回到同一弹窗查看最近任务状态。
+Garmin 页面中的 **OAuth 授权**用于接收新活动和已授权的健康摘要；**文件导入**用于补充更早的训练记录。两项操作彼此独立，请按需要选择。
 
 ## 断开连接
 
@@ -98,11 +100,11 @@ Garmin 在当前界面中是一次性历史导入，而不是持续连接。通�
 
 ### Trainingload.ai 支持哪些训练平台对接？
 
-Strava、Polar、COROS、Intervals.icu、Suunto、Wahoo 可以保持连接。Garmin 是一次性历史导入。FIT、TCX、GPX 用于单文件或不支持的手表。
+Strava、Polar、COROS、Intervals.icu、Suunto、Wahoo 可以保持连接。Garmin 支持新数据授权连接和历史文件导入。FIT、TCX、GPX 用于单文件或不支持的手表。
 
 ### 选 Strava 对接还是 Garmin 导入？
 
-要让新训练持续进来，选 Strava 或其他在线平台。只要一份历史存档，选 Garmin 历史导入。之后的新 Garmin 文件仍需在线路径或手动上传。
+想接收新 Garmin 训练时，使用 Garmin OAuth 连接；需要补充旧记录时，使用历史文件导入。如果同一训练也会经过 Strava，请选择一条主要导入路径，避免重复。
 
 ### 同一块表能开两个对接吗？
 

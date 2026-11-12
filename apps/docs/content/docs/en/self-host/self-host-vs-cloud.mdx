@@ -1,6 +1,6 @@
 ---
 title: Self-hosted vs Cloud
-description: Compare the managed Cloud service with self-host v1 across setup, data control, AI, integrations, availability, backup, and support.
+description: Compare setup, data storage, activity imports, AI costs, and maintenance to choose the right version for you.
 seoTitle: "Trainingload.ai Self-Hosted vs Cloud: Which Should You Use?"
 seoDescription: Compare Trainingload.ai Cloud and self-hosting by setup effort, data location, local files, BYOK AI, integrations, backups, upgrades, and availability.
 keywords:
@@ -14,52 +14,55 @@ keywords:
 
 # Self-hosted vs Cloud
 
-Cloud and self-hosted Trainingload.ai serve different operational needs. The training workflow may feel familiar in both, but the person responsible for security, availability, updates, and recovery changes completely.
+Choose Cloud to start using Trainingload.ai directly. Choose self-hosting if you want to keep your training data on your own computer or server and are willing to install and maintain the application.
 
 ## Quick comparison
 
-| Question                  | Cloud                                                  | Self-host v1                                                                                           |
-| ------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Setup                     | Create an account and start using the managed service  | Prepare a supported host, verify a signed release, and install it                                      |
-| Maintenance               | Trainingload.ai operates the service                   | You monitor the host and run updates                                                                   |
-| Structured data           | Stored in the managed service                          | Stored in PostgreSQL on your declared data root                                                        |
-| Uploaded files            | Managed storage                                        | Local storage under your declared data root                                                            |
-| AI                        | Managed product configuration and account usage rules  | Off by default; the Owner supplies a provider API key and pays that provider directly                  |
-| Membership and AI credits | Cloud memberships, credit balances, and credit packs   | No Trainingload.ai membership billing or credit packs; the AI provider meters and bills actual usage   |
-| AI data path              | Governed by the managed service configuration          | Sent to the selected provider only after you enable BYOK AI                                            |
-| Integrations              | Managed product connections, including Garmin Developer API | Intervals.icu API key and Garmin Personal API; COROS MCP off; other OAuth sync and social login stay off |
-| Apple Watch app           | Supported by the managed product                       | Not available in v1; Watch pairing, dashboard, and workout-upload routes are not registered            |
-| Availability              | Operated by Trainingload.ai                            | Single-instance deployment without built-in high availability or automatic failover                    |
-| Backup and recovery       | Managed service responsibility                         | You create, move, retain, and test verified backups                                                    |
-| Updates                   | Managed rollout                                        | You verify a target bundle, back up, and run the supported upgrade flow                                |
+| What matters to you | Cloud | Self-hosted |
+| --- | --- | --- |
+| Getting started | Open the app and create an account | Download a release bundle and follow the installation guide on your own device |
+| Where your data lives | Trainingload.ai's Cloud service | Your device, including activities, plans, and uploaded files |
+| Importing training | Connect a supported training platform or upload activity files | Upload activity files, or connect Intervals.icu and Garmin Personal API with your own keys |
+| Using AI Coach | Use the AI allowance included with your account plan | Off by default; configure your own AI service and pay that provider |
+| Accounts | Use your Cloud account | One person per self-hosted instance |
+| Backups and recovery | Trainingload.ai maintains the Cloud service | You save backups and restore them when needed |
+| Software updates | Trainingload.ai updates the service | You follow the upgrade guide to install a new release |
 
-## Choose Cloud when
+## Which fits your needs?
 
-- you want the shortest setup path;
-- you do not want to operate PostgreSQL, storage, TLS, monitoring, or backups;
-- managed integrations matter more than controlling the host;
-- another person or team cannot reliably own upgrades and recovery drills.
+**Choose Cloud** if you want to spend your time training and reviewing workouts, without installing software, running updates, or managing backups yourself.
 
-## Choose self-hosting when
+**Choose self-hosting** if you want to store your own training data, can maintain a device to run the application, and will keep it updated and backed up. Self-hosting is for personal use; one instance cannot contain multiple users.
 
-- local placement of structured data and uploaded files is a hard requirement;
-- you can maintain a supported machine and keep it patched;
-- you accept a single-instance v1 topology;
-- you can keep verified backups in a separate failure domain and test restores;
-- you prefer to bring your own AI provider key, or keep AI disabled.
+## Check how you will import training
 
-## Important boundaries
+Self-hosting currently supports:
 
-Self-hosting does not make an external AI provider local. When the Owner enables OpenAI, DeepSeek, OpenRouter, DashScope, or another compatible API, the relevant AI request leaves your host and is processed under that provider's terms.
+- uploading **FIT, GPX, and TCX** activity files;
+- connecting **Intervals.icu** with a personal API key;
+- connecting **Garmin Personal API** with a personal API key.
 
-The self-host server has its own build entrypoint and Dockerfile. Its release image does not contain the payment controllers, webhooks, reconciliation jobs, or Creem/Waffo SDKs used by Trainingload.ai Cloud, and `BILLING_PROVIDER` cannot turn those capabilities back on in a self-host image.
+If you rely on a particular training platform, check [Connect data](/docs/guide/connect-data) and the [self-hosted connection settings](/docs/self-host/configuration#connect-intervalsicu) first. Cloud and self-hosting offer different connection methods. If another platform can export a supported activity file, you can upload that file instead.
 
-Intervals.icu and Garmin Personal API are explicit outbound connections on Self-host. Each Owner enters their own key in the Client; sync follows the options they enable. Self-hosting does not enable Intervals.icu OAuth or webhooks, does not enable COROS MCP, and does not offer Strava, Polar, Suunto, Wahoo, or social login. The managed/closed-source product adds Garmin Developer API; Self-host uses Garmin Personal API instead.
+**Trainingload.ai does not currently support an Apple Watch app.**
 
-The native Apple Watch app is outside the self-host v1 boundary. A self-host server does not initialize Watch device credentials or expose Watch pairing, dashboard, or workout-upload endpoints.
+## How AI works and what it costs
 
-Self-host v1 also does not include automatic high availability, automatic backups, automatic upgrades, or zero-downtime database migrations. These are operator responsibilities, not hidden background services.
+AI is off by default. You can use non-AI features without configuring it. To use AI Coach, choose a provider in settings and enter your own API key; see [Configure AI](/docs/self-host/configuration#configure-ai-in-the-client).
+
+Self-hosting does not use Trainingload.ai Cloud memberships or AI credits. Your chosen AI provider charges you for its API usage.
+
+When you use an external AI service, the training information needed for that request is sent to that provider. Installing the application locally does not make an external AI service run locally. Syncing with a training platform also needs an internet connection.
+
+## What you will need to maintain
+
+- Keep enough free space on the device and run the application when you need it.
+- Back up before updating, and keep a copy away from the device running the application.
+- Check that your backups can be restored so you have a usable copy if the device fails.
+- Follow the [management and upgrade guide](/docs/self-host/operations) to update the application.
 
 ## Next step
 
-If self-hosting is still the right fit, follow the [quick start](/docs/self-host/installation). Otherwise, use the managed Cloud service and continue with [Getting started](/docs/guide/getting-started).
+For Cloud, [open the app](https://app.trainingload.ai/en) and follow [Getting started](/docs/guide/getting-started) to import your first activity.
+
+For self-hosting, start with the [installation guide](/docs/self-host/installation). Installation, backup, and upgrade steps are covered in their own guides.

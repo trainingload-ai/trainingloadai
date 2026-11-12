@@ -186,7 +186,7 @@
       "fitCourseConverter": "Conversor de percurso FIT"
     },
     "brandDescription": "Planos, treinos realizados, carga e recuperação reunidos em um só lugar.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "Baixar na App Store"
   },
   "tools": {
@@ -1878,7 +1878,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -2986,7 +2986,7 @@
         "more": "e mais…"
       },
       "sportWords": ["Corrida", "Ciclismo", "Natação", "Triathlon"],
-      "iphoneSupport": "Disponível para iPhone e Apple Watch",
+      "iphoneSupport": "Disponível para iPhone",
       "appStoreCta": "Baixar na App Store"
     },
     "planSpotlight": {
@@ -3590,10 +3590,9 @@
       },
       "heroProduct": {
         "title": "Registre seus treinos.\nVeja o quanto evoluiu.",
-        "body": "Grave com iPhone ou Apple Watch e reúna desempenho, frequência cardíaca e carga no Trainingload.ai.",
+        "body": "Grave com iPhone e reúna desempenho, frequência cardíaca e carga no Trainingload.ai.",
         "link": "Conheça o treinador de IA",
-        "phoneAlt": "Registro de treino ao vivo no iPhone",
-        "watchAlt": "Dados de treino ao vivo no Apple Watch"
+        "phoneAlt": "Registro de treino ao vivo no iPhone"
       },
       "footerCta": {
         "title": "Entenda onde você está. Planeje o próximo passo.",

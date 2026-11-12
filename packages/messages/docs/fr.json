@@ -186,7 +186,7 @@
       "fitCourseConverter": "Convertisseur de parcours FIT"
     },
     "brandDescription": "Plans, séances réalisées, charge et récupération réunis au même endroit.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "Télécharger dans l’App Store"
   },
   "tools": {
@@ -1878,7 +1878,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -2989,7 +2989,7 @@
         "more": "et plus…"
       },
       "sportWords": ["Course à pied", "Cyclisme", "Natation", "Triathlon"],
-      "iphoneSupport": "Disponible sur iPhone et Apple Watch",
+      "iphoneSupport": "Disponible sur iPhone",
       "appStoreCta": "Télécharger dans l’App Store"
     },
     "planSpotlight": {
@@ -3597,10 +3597,9 @@
       },
       "heroProduct": {
         "title": "Enregistrez vos séances.\nSuivez votre progression.",
-        "body": "Enregistrez avec l’iPhone ou l’Apple Watch et retrouvez performances, fréquence cardiaque et charge d’entraînement dans Trainingload.ai.",
+        "body": "Enregistrez avec l’iPhone et retrouvez performances, fréquence cardiaque et charge d’entraînement dans Trainingload.ai.",
         "link": "Découvrir le coach IA",
-        "phoneAlt": "Enregistrement d’une séance en direct sur iPhone",
-        "watchAlt": "Données d’entraînement en direct sur Apple Watch"
+        "phoneAlt": "Enregistrement d’une séance en direct sur iPhone"
       },
       "footerCta": {
         "title": "Situez votre niveau. Préparez la prochaine étape.",

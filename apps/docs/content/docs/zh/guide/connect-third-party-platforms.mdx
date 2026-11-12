@@ -7,7 +7,9 @@ keywords:
 
 # 连接 Strava、Garmin 与 COROS：同步训练分步指南
 
-本页是**连接 Strava**、导入 Garmin 历史、以及 COROS、Polar、Suunto、Wahoo、Intervals.icu 的操作说明：去哪里授权、保留哪些同步选项、怎样证明第一条训练已经进来。多数平台用 OAuth；Intervals.icu 也支持 API Key；Garmin 是一次性历史导入，不是长期在线连接。
+本页介绍云服务中的平台连接：完成授权、选择同步内容，再找到第一条导入的活动。Garmin 的 OAuth 连接用于接收新数据，文件导入用于补充历史记录。
+
+如果你使用自托管版，请查看[Intervals.icu 设置](/zh/docs/self-host/configuration#连接-intervalsicu)和[Garmin Personal API](/zh/docs/self-host/garmin-personal-api)。自托管版不提供下文列出的全部平台连接。
 
 ## 开始前
 
@@ -23,7 +25,7 @@ keywords:
 
 移动端打开**我的 → 账号 → 连接**。OAuth 会在系统浏览器中打开平台授权页，批准后再返回 App。Strava、Polar、COROS、Suunto、Wahoo 和 Intervals.icu 可以在移动端管理；Garmin 历史导入需要使用网页端。
 
-部分平台需要对当前部署开放接口。如果页面没有 COROS 卡片，说明当前尚不可用，可先上传 FIT、TCX 或 GPX 文件。
+如果连接页没有显示某个平台卡片，当前账号暂时无法直接连接它。可以先从来源平台导出 FIT、TCX 或 GPX 文件，再上传到活动列表。
 
 | 平台          | 网页端 | 移动端 | 授权方式            | 常见首次操作           |
 | ------------- | ------ | ------ | ------------------- | ---------------------- |
@@ -77,7 +79,7 @@ Polar 手动同步检查的是支持的近期窗口，并不是完整账号归�
 3. 点击网页端的**同步日常数据**，或移动端的**立即同步健康数据**，单独核对日常/健康数据。
 4. 查看卡片上的最后同步状态和错误信息。
 
-COROS 的活动与日常数据是两个独立操作。活动同步成功，不代表健康数据同步也已执行。如果页面没有 COROS 卡片，则当前部署尚未开放该连接。
+COROS 的活动与日常数据是两个独立操作。活动同步成功，不代表健康数据同步也已执行。如果页面没有 COROS 卡片，可先使用活动文件上传。
 
 ## 连接 Intervals.icu
 
@@ -156,13 +158,23 @@ Intervals.icu 使用独立的移动端设置面板；Garmin 历史导入是网�
   platformLabel="移动端"
 />
 
+## 连接 Garmin 接收新数据
+
+1. 打开**账号 → 第三方平台连接 → Garmin**。
+2. 选择**OAuth 授权**，在 Garmin 中完成授权，再返回 Trainingload.ai。
+3. 确认页面显示**Garmin 已连接**。
+4. 按需要开启**新活动**或**健康与恢复**，并保存设置。
+5. 完成一次新的训练后，检查活动列表中的来源和记录内容。
+
+此连接只接收新数据。较早的活动请用下方的**文件导入**。如果页面没有 OAuth 授权选项，可以使用文件导入；自托管用户请使用 [Garmin Personal API](/zh/docs/self-host/garmin-personal-api)。
+
 ## 导入 Garmin 历史
 
-Garmin 历史导入是一次性归档流程，不是持续运行的 Garmin 连接。
+历史导入用于补充旧活动，不会替你开启后续同步。需要接收新训练时，请使用上方的 Garmin OAuth 连接。
 
 1. 在网页端打开**账号 → 第三方平台连接 → Garmin**。
 2. 从弹窗打开 [Garmin 官方数据导出页](https://www.garmin.com/account/datamanagement/exportdata/)并申请导出。
-3. 等待 Garmin 邮件。通常约需 48 小时，也可能更久。
+3. 等待 Garmin 邮件。下载邮件的等待时间由 Garmin 决定。
 4. 选择一种导入方式：下载 Garmin 完整导出 ZIP 后直接上传，或复制邮件中**下载**按钮背后的链接。
 5. 在 Garmin 历史导入弹窗中选择**上传文件**或**使用 URL**，然后点击**开始导入**。大型导出包通常使用 URL 更省时。
 6. 回到弹窗查看排队、下载、扫描、导入、完成、部分失败或失败状态。

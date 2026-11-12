@@ -5,13 +5,13 @@ description: Securely connect your TrainingLoad account to ChatGPT, Codex, Claud
 
 # TrainingLoad MCP
 
-TrainingLoad MCP lets an AI client answer questions with your own training data. It is a goal-oriented read-only product surface rather than a raw collection of endpoints: a client can establish your current state, compare training blocks, inspect plan execution, review fitness trends, or diagnose sync readiness, then tie each conclusion to returned evidence.
+Connect your training data to ChatGPT, Codex, Claude, or another compatible AI client with TrainingLoad MCP. Ask about recent load, plan completion, performance trends, or sync problems without copying individual activity records. MCP reads data; it does not change your training schedule.
 
 **Server URL:** `https://api.trainingload.ai/mcp`
 
 No API key is required. The client opens TrainingLoad OAuth, where you review the client name and requested scopes. You can revoke access later from your account.
 
-## What the 24 read-only tools cover
+## Training information you can read
 
 | Question | Primary capabilities |
 | --- | --- |
@@ -26,25 +26,21 @@ No API key is required. The client opens TrainingLoad OAuth, where you review th
 
 See [Tool reference](/docs/mcp/tools) for every field and scope. Clients can also discover three built-in [resources and prompts](/docs/mcp/resources-and-prompts) for metric interpretation, safety boundaries, and repeatable analysis workflows.
 
-## How a transparent answer is produced
+## Questions to try
 
-For “Why does this week feel harder than last week?”, a client should:
+- “Compare this week's volume and load with last week. Which activities explain the main changes?”
+- “How much of this week's plan did I complete, and which workouts still have no linked activity?”
+- “How have my recent running metrics changed? Which dates lack comparable data?”
 
-1. Call `get_training_snapshot` for one consistent current-state view.
-2. Call `compare_training_periods` or `get_training_load` to verify the week-over-week difference.
-3. Call `list_planned_workouts` only if the upcoming schedule matters.
-4. State the date range, supporting facts, and missing data without turning correlation into a medical conclusion.
+When reading an answer, check its date range, referenced activities, and missing data. Trends can support a training discussion; they do not establish a medical conclusion.
 
-This aggregate-first, detail-on-demand pattern is more reliable and easier to verify than a chain of unrelated low-level calls.
+## Limits to understand before connecting
 
-## Product boundaries
-
-- **Read-only:** no activity, plan, competition, profile, integration, or account mutations.
-- **Current athlete only:** every identifier and query is bound to the OAuth user.
-- **Reduced data:** no email, internal user ID, precise GPS, raw sensor stream, third-party credential, or complete FIT data.
-- **Bounded access:** time series and lists enforce windows, result limits, or opaque cursors.
-- **Health isolation:** `health:read` is excluded from the default grant.
-- **Verifiable conclusions:** names, descriptions, and notes are untrusted data, never model instructions.
+- **Read-only:** clients cannot change activities, plans, competitions, profiles, connections, or accounts.
+- **Your data only:** clients can query only records belonging to your authorized account.
+- **Training summaries:** tools do not provide precise GPS, raw sensor streams, provider credentials, or complete FIT files.
+- **Separate health permission:** `health:read` is not included by default.
+- **Revocable access:** remove a client's permission from your account when you no longer use it.
 
 ## Start here
 

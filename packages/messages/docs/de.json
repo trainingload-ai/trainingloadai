@@ -185,7 +185,7 @@
       "fitCourseConverter": "FIT-Course-Konverter"
     },
     "brandDescription": "Trainingspläne, absolvierte Einheiten, Belastung und Erholung an einem Ort.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "Im App Store laden"
   },
   "tools": {
@@ -1869,7 +1869,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -2980,7 +2980,7 @@
         "more": "& mehr…"
       },
       "sportWords": ["Laufen", "Radsport", "Schwimmen", "Triathlon"],
-      "iphoneSupport": "Für iPhone und Apple Watch",
+      "iphoneSupport": "Für iPhone",
       "appStoreCta": "Im App Store laden"
     },
     "planSpotlight": {
@@ -3588,10 +3588,9 @@
       },
       "heroProduct": {
         "title": "Training aufzeichnen.\nDie eigene Entwicklung sehen.",
-        "body": "Zeichnen Sie mit iPhone oder Apple Watch auf und betrachten Sie Leistung, Puls und Trainingsbelastung gemeinsam in Trainingload.ai.",
+        "body": "Zeichnen Sie mit iPhone auf und betrachten Sie Leistung, Puls und Trainingsbelastung gemeinsam in Trainingload.ai.",
         "link": "KI-Coach kennenlernen",
-        "phoneAlt": "Laufende Trainingsaufzeichnung auf dem iPhone",
-        "watchAlt": "Live-Trainingswerte auf der Apple Watch"
+        "phoneAlt": "Laufende Trainingsaufzeichnung auf dem iPhone"
       },
       "footerCta": {
         "title": "Den Ausgangspunkt kennen. Den nächsten Schritt planen.",

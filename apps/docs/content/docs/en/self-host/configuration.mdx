@@ -5,18 +5,18 @@ description: Choose the local data path, control network exposure, and configure
 
 # Configure a self-host instance
 
-The v1 configuration model deliberately separates host-level settings from product settings. The local data path, ports, and Client bind must be known before containers start. The AI provider can be changed later by the Owner inside the Client.
+Choose the data location and local access port before installation. After installation, select or change an AI provider in the application settings.
 
 ## Before you begin
 
 - Use only settings declared in the release bundle's `.env.example` and instance schema.
 - Run the matching `--dry-run --json` before every lifecycle mutation.
 - Do not paste `.env.selfhost`, passwords, API keys, or tokens into chat, an issue, or a shared terminal transcript.
-- Treat an existing instance data path as authoritative data, not as a directory to replace or clean manually.
+- The existing data directory contains your training records. Do not replace or empty it manually.
 
 ## Choose the local data path
 
-The default is `./data` inside the release directory. It contains PostgreSQL data, uploads, operation records, backups, and caches. The application mounts uploads from that host path into `/data/uploads`; v1 does not require an object-storage service.
+The default is `./data` inside the release directory. It contains PostgreSQL data, uploads, operation records, backups, and caches. The application mounts uploads from that host path into `/data/uploads`; you do not need a separate object-storage service.
 
 To choose another path before the first installation:
 
@@ -68,13 +68,13 @@ Validate host changes through the lifecycle entry point:
 
 ### Local request path
 
-The browser calls the same-origin Client BFF. It forwards API calls, cookies, uploads, and streaming responses to Server over the private Compose network. Browser-provided forwarding headers are stripped; Self-host does not trust an arbitrary proxy client address.
+Access the application in a browser at its configured local address. The database and internal application services do not need public ports. Do not expose them to the internet to work around a connection problem.
 
-## Single-owner access
+## Your personal account
 
-The first page asks for one username, then opens onboarding. Existing sessions belong to that same Owner. A database uniqueness constraint and server transactions reject a second user. There is no setting that enables public registration or multiple accounts.
+Enter a username on first opening, then follow setup. One instance is for one person; it does not support public registration or multiple accounts.
 
-The public application has no Cloud password, signup, or OAuth pages. An expired local session is restored automatically. If the Owner confirms account deletion, the asynchronous deletion flow removes that account's data and returns the instance to username setup after completion. Keep backups and instance configuration separate from account deletion.
+Self-hosting uses a local account rather than the Cloud signup or social-login flow. An expired local session is restored automatically. Confirming account deletion removes that account's data and returns the instance to username setup when finished. Manage backups and instance configuration separately; deleting an account does not remove those files.
 
 ## Connect Intervals.icu
 
@@ -114,16 +114,16 @@ An OpenAI API key is separate from a ChatGPT Plus or Pro subscription. A ChatGPT
 - The browser sends the key only to your local `server`.
 - The server derives an encryption key from the instance auth secret and stores the provider key in PostgreSQL with AES-256-GCM.
 - Later API responses return only whether a key is configured; they never return the plaintext key.
-- Owner-managed settings take precedence over deployment-level AI environment variables and apply immediately on the single-server v1 runtime.
+- AI settings saved in the application apply immediately and take priority over environment-variable settings.
 - Choosing **None** deletes the stored provider credential and disables AI.
 
 Restore the original instance authentication secret with the database. A different secret cannot decrypt existing AI credentials or authentication state; confirm the original configuration before restarting.
 
 ### Data leaving the host
 
-Core Local can run with AI disabled. Enabling any external provider is an explicit outbound exception: prompts and the training context required for that request are sent to the selected provider. Review that provider's retention, privacy, location, and billing terms before enabling it.
+You can use activities, plans, and analysis with AI disabled. When you enable an external AI provider, the question and training information needed for a response are sent to that provider. Check its retention, privacy, location, and billing terms first.
 
-A self-hosted instance does not use Trainingload.ai memberships, AI credits, or credit packs. The Client's **AI Usage** page does not call Cloud billing endpoints; it explains the BYOK billing boundary instead. Review actual API usage, balance, and charges in the configured AI provider's dashboard.
+Self-hosting does not use Trainingload.ai Cloud memberships or AI credits. **AI Usage** explains how using your own provider is billed. Check actual API usage, balance, and invoices in that provider's dashboard.
 
 ## Environment fallback for automated provisioning
 

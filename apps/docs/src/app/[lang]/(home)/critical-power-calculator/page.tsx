@@ -380,15 +380,6 @@ export default async function CriticalPowerCalculatorPage({
                         decoding="async"
                       />
                     </div>
-                    <div className={styles.heroWatch}>
-                      <img
-                        src={`/ftp-calculator/watch-${["zh", "zh-hant", "ja"].includes(lang) ? lang : "en"}.png`}
-                        alt={tPage("heroProduct.watchAlt")}
-                        width={416}
-                        height={496}
-                        decoding="async"
-                      />
-                    </div>
                   </div>
                   <div className={styles.heroProductCopy}>
                     <p className={styles.kicker}>Trainingload.ai</p>

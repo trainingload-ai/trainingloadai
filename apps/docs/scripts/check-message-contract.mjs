@@ -103,7 +103,6 @@ collectStrings(
 );
 for (const key of [
   "recordingAlt",
-  "watchAlt",
   "planAlt",
   "webPlanAlt",
   "webLoadAlt",

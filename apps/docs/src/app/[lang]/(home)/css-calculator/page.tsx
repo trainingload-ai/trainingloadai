@@ -392,15 +392,6 @@ export default async function CssCalculatorPage({
                         decoding="async"
                       />
                     </div>
-                    <div className={styles.heroWatch}>
-                      <Image
-                        src={`/ftp-calculator/watch-${phoneLocale}.png`}
-                        sizes="(max-width: 640px) 22vw, 128px"
-                        alt={tPage("heroProduct.watchAlt")}
-                        width={416}
-                        height={496}
-                      />
-                    </div>
                   </div>
                   <div className={styles.heroProductCopy}>
                     <p className={styles.kicker}>Trainingload.ai</p>
