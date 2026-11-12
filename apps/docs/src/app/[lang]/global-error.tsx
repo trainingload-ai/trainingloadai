@@ -9,6 +9,7 @@ import "@/app/global.css";
 import { CustomHeader } from "@/components/CustomHeader";
 import { SiteErrorState } from "@/components/site-error-state";
 import enMessages from "../../../../../packages/messages/docs/en.json";
+import { docsFontVariables } from "@/lib/docs-fonts";
 
 export default function GlobalError({
   error,
@@ -22,10 +23,20 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={docsFontVariables} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col font-sans">
-        <NextIntlClientProvider locale="en" messages={enMessages}>
+        <NextIntlClientProvider
+          locale="en"
+          messages={{
+            nav: enMessages.nav,
+            header: enMessages.header,
+            banner: { release: enMessages.banner.release },
+            runningPlanPages: { labels: enMessages.runningPlanPages.labels },
+            SiteError: enMessages.SiteError,
+          }}
+        >
           <RootProvider
+            search={{ enabled: false }}
             theme={{
               enabled: true,
               defaultTheme: "light",

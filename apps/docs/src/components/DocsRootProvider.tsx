@@ -27,6 +27,7 @@ export function DocsRootProvider({
 
   return (
     <RootProvider
+      search={{ preload: false }}
       theme={{
         enabled: true,
         defaultTheme: "light",
