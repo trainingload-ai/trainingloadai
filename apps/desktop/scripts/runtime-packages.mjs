@@ -57,7 +57,20 @@ function copy(source, target) {
  * No install hooks, development dependencies, or workspace files are copied.
  * Each package keeps its own dependency versions and required peer context.
  */
-export function collectRuntimePackages(root, overrides = {}) {
+export function collectRuntimePackages(
+  root,
+  overrides = {},
+  runtime = {
+    platform: process.platform,
+    arch: process.arch,
+    libc:
+      process.platform === "linux"
+        ? process.report.getReport().header.glibcVersionRuntime
+          ? "glibc"
+          : "musl"
+        : undefined,
+  },
+) {
   const packages = new Map();
   const optionalPeers = [];
   let sourceBytes = 0;
@@ -146,8 +159,9 @@ export function collectRuntimePackages(root, overrides = {}) {
         (!values.includes(`!${current}`) &&
           (values.every((v) => v.startsWith("!")) || values.includes(current)));
       if (
-        !matches(metadata.os, process.platform) ||
-        !matches(metadata.cpu, process.arch)
+        !matches(metadata.os, runtime.platform) ||
+        !matches(metadata.cpu, runtime.arch) ||
+        (runtime.platform === "linux" && !matches(metadata.libc, runtime.libc))
       ) {
         if (name in (pkg.optionalDependencies ?? {})) continue;
         throw new Error(`Unsupported native dependency: ${name}`);
