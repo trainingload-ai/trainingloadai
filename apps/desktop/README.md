@@ -67,6 +67,8 @@ Desktop Core builds disable Next's disk image and ISR caches and keep a bounded 
 
 ## GitHub-hosted macOS releases
 
+Ticket stapling and validation retry Apple's connection-loss error (`stapler` exit 68 with `NSURLErrorDomain -1005`) up to three attempts, waiting 10 and 20 seconds. Invalid tickets and other errors fail immediately. These retries never re-sign artifacts or submit another notarization request.
+
 `Desktop macOS verification` builds, tests, smoke-tests and packages arm64 on the standard `macos-15` runner for pull requests. It receives no signing secrets. Existing required `core` and `docs` checks remain unchanged.
 
 `Desktop macOS signed release` is manually dispatched from `main`. It builds and tests before importing credentials, then runs the same signed-release command in a temporary runner Keychain. The `desktop-macos-release` GitHub Environment must have a custom deployment branch rule allowing **only `main`**. Configure these five Environment Secrets, not repository-wide secrets:
