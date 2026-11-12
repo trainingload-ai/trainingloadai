@@ -1,0 +1,138 @@
+---
+title: Analyze a Workout with Timeline
+description: Use Trainingload.ai's desktop activity timeline to inspect synchronized charts, select a workout segment, compare range statistics, and locate the effort on the route.
+seoTitle: "Activity Timeline and Segment Analysis | Trainingload.ai"
+seoDescription: "Follow the activity timeline workflow for running and cycling. Select an effort, inspect its statistics and route, configure charts, and save analysis segments."
+keywords: ["activity timeline", "workout segment analysis", "running interval analysis", "cycling charts", "Trainingload.ai timeline"]
+---
+
+# Analyze a Workout with Timeline
+
+Timeline aligns an activity's recorded streams on a shared horizontal axis. Use it to inspect one moment or compare a selected effort's pace, power, heart rate, cadence, and route. The range statistics and the point reading answer different questions.
+
+This guide covers **desktop Web** for running and cycling. The available charts depend on the activity's recorded data. For the broader review workflow, start with [Activity Detail](/docs/guide/activity-detail).
+
+## Open the example
+
+[Open the 10 km race demo activity](https://demo.trainingload.ai/en/activities/17921623926005309429), then select **Timeline** below the route. The activity opens in Overview first. The demo is read-only, so saved segment editing is disabled.
+
+For your own activity, wait for processing to complete and confirm it has recorded samples. Summary-only activities do not provide a synchronized timeline. Indoor sessions can have usable charts without GPS. Check your sport, thresholds, and units before interpreting the data.
+
+## 1. Read the full activity
+
+After selecting **Timeline**, locate the segment headers at the top, metric controls and range statistics on the left, and aligned charts on the right. The horizontal axis starts in time mode. The route remains above the tabs when the activity has location data.
+
+Long activities extend beyond the visible chart width. Scroll horizontally to see later times. Range statistics still describe the full activity until you select a range. In the screenshots, the empty Elevation chart has been removed through chart settings.
+
+Initially, the left-side **Average**, **Min**, and **Max** describe the full activity. A metric with no usable samples may be absent, and gaps within a stream appear as breaks in its chart.
+
+<DocsScreenshot
+  id="activity-timeline-full"
+  title="Start with the full activity and aligned charts"
+  description="The left column summarizes the current range. Each chart shares the same horizontal position, so the effort can be compared across pace, heart rate, and cadence."
+  imageAlt="The full race timeline with aligned charts and full-activity range statistics"
+  route="Activity detail → Timeline"
+  demoLabel="Open this timeline example"
+/>
+
+## 2. Inspect a moment
+
+Move the pointer across a chart. Read the floating value inside each chart at the same horizontal position. Where GPS is available, the map shows the corresponding position.
+
+Click to keep a location selected. Moving the pointer out of the charts hides the temporary hover readings. The left-side range statistics stay attached to the full activity or selected range.
+
+You can focus the timeline's positioning control and use the left and right arrow keys to inspect samples, or **Home** and **End** to reach its boundaries. Keyboard readings hide when the control loses focus.
+
+| Question | Where to look |
+| --- | --- |
+| What was recorded at this moment? | The point reading inside each chart. |
+| What was typical across this effort? | The average in the left-side range statistics. |
+| What were the valid recorded extremes? | The minimum and maximum for that same range. |
+
+## 3. Select an effort and compare it
+
+You can select a recorded lap or draw your own range.
+
+1. Select a segment header to highlight that segment and update its statistics. Select it again to clear the segment selection.
+2. To inspect a different range, drag horizontally across a chart and release. The shared chart range zooms to your selection.
+3. Compare the selected range's average, minimum, and maximum with the visible effort. Move the pointer to inspect individual samples within it.
+4. Check the highlighted route section when location data is available. Use the surrounding map to understand where the selected effort took place.
+
+<DocsScreenshot
+  id="activity-timeline-selection"
+  title="Compare a selected effort with its route"
+  description="Selecting a segment updates the range statistics and highlights the corresponding chart interval and route section. Hover readings remain separate from the range summary."
+  imageAlt="A selected race segment with updated range statistics and its highlighted route section"
+  route="Activity detail → Timeline → Select a segment"
+  demoLabel="Inspect the same demo activity"
+/>
+
+For a long steady effort, check whether pace or power remains similar while heart rate changes. For repeated intervals, compare work periods and recoveries with the session's purpose. Explain the pattern using duration, terrain, stops, and available sensor data.
+
+## 4. Return to the full activity or change the axis
+
+Open **Timeline options** next to **Segments** and choose **Show full activity** to clear the range and restore the full chart view. Double-clicking a chart or pressing **Escape** in the timeline also resets the selection and zoom.
+
+In the same menu, switch **Horizontal axis** between **Time** and **Distance**. Distance requires a usable cumulative distance record. The selected effort keeps its original time boundaries when the axis changes.
+
+## 5. Configure the charts
+
+Select a metric name, such as **Pace** or **Heart rate**, to open its settings. You can choose the available metric, line color, chart height, and smoothing. Use **Move up**, **Move down**, or **Remove chart** to arrange the visible rows.
+
+Use **Add chart** at the bottom to add another available stream. You can add the same metric more than once, for example to compare raw and smoothed displays. **Expand** opens a larger view of an individual chart.
+
+Smoothing changes the drawn curve. Point readings and range statistics retain their recorded-data meaning. The chart layout is stored in this browser's preferences and does not change the source activity.
+
+## 6. Edit analysis segments in your account
+
+Use **Edit segments** when you want analysis ranges that differ from the device laps. This requires a signed-in account with permission to edit the activity.
+
+1. Open **Edit segments** and review each segment's name, start, and end.
+2. Rename a segment or change its boundaries. The editor also offers **Add segment in a gap**, **Split in half**, **Merge next**, and **Remove** where applicable.
+3. Keep the boundaries inside the activity, with each start before its end and no overlapping segments.
+4. Select **Save segments**, then inspect the updated segment statistics. **Cancel** closes the draft without saving.
+
+Saved analysis segments leave the original file, device laps, and whole-activity load intact. Modified boundaries use the recorded streams to recalculate that range's statistics. **Restore device laps** returns the editor's definitions to the original lap ranges, which you can then save.
+
+If another window has changed the definitions, close and reopen the editor to load the latest version before editing again. A failed save keeps the draft available for retry. The public demo disables this editing workflow.
+
+## Check the result
+
+After selecting an effort, confirm its boundaries, range statistics, and route section refer to the same part of the activity. Restore the full view and confirm the statistics return to the full activity. If you saved analysis segments in your account, reopen the activity and verify the definitions remain available.
+
+## Common questions
+
+### Why do the left-side numbers stay unchanged as I move the pointer?
+
+They summarize the full activity or selected range. Use the floating chart readings for the point under the pointer.
+
+### Why are there gaps or dashes?
+
+A missing stream, a sampling gap, or an invalid value can leave a gap or a dash. Recorded zero speed, cadence, or power can be valid. A stopped sample has no usable pace, and missing heart-rate samples are not replaced with zero.
+
+### Why does a lap differ after I edit its boundaries?
+
+An unchanged device lap can use its imported summary. A modified or custom analysis segment is recalculated from the valid recorded samples in that range. Missing coverage and the chosen boundaries affect the result.
+
+### Why is a power value labelled Estimated?
+
+That stream uses estimated power. Keep its source in mind when comparing it with a power-meter recording or interpreting intensity.
+
+### Why does the route not highlight the selected range?
+
+The activity may lack valid GPS at those times, or the map may be unavailable. Continue with the recorded charts and check the map state separately.
+
+### Why can I not see Timeline on my phone?
+
+This workflow is provided on desktop Web. Use mobile activity detail and data charts for the views supported by that app and sport, or open the activity on desktop.
+
+### What if a chart fails to load?
+
+Use its retry action when offered. Other loaded charts can remain usable. If a refresh fails, the page may keep the previous result and display that state. Check missing data separately from a failed request.
+
+## Continue
+
+- [Activity Detail](/docs/guide/activity-detail)
+- [Aerobic Decoupling](/docs/metrics/heart-rate/aerobic-decoupling)
+- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+- [Weekly Training Review](/docs/workflow/weekly-review)

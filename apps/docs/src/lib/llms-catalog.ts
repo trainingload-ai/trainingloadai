@@ -192,6 +192,18 @@ export const llmProductPages: LlmToolPage[] = [
 
 export const llmGuidePages: LlmToolPage[] = [
   {
+    title: "Activity Detail",
+    path: "/api/docs-markdown/en/guide/activity-detail",
+    description:
+      "Review a completed workout using analysis tabs, sensor and load context, route, plan association, and optional AI Coach review, with a linked demo activity.",
+  },
+  {
+    title: "Activity Timeline and Segment Analysis",
+    path: "/api/docs-markdown/en/guide/activity-timeline",
+    description:
+      "Analyze running and cycling on desktop web with synchronized charts, point readings, range statistics, route highlights, chart settings, and editable analysis segments. Includes real screenshots and a read-only demo.",
+  },
+  {
     title: "Self-hosting",
     path: "/api/docs-markdown/en/self-host",
     description:

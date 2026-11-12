@@ -89,7 +89,18 @@
     "language": "语言",
     "openMainMenu": "打开主菜单"
   },
+  "docsActions": {
+    "copy": "复制 Markdown",
+    "copied": "已复制",
+    "copying": "复制中…",
+    "copyError": "复制失败，请打开 Markdown 后重试。",
+    "open": "打开",
+    "viewMarkdown": "查看 Markdown",
+    "openIn": "在 {name} 中打开",
+    "ask": "请阅读 {url}，我想询问这篇文档的内容。"
+  },
   "docsScreenshot": {
+    "openImage": "查看原图",
     "demoLabel": "在线 Demo",
     "openDemo": "在 Demo 中打开此页面"
   },

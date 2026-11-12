@@ -79,6 +79,40 @@
       "asset": "docs/integrations/connections.webp"
     },
     {
+      "id": "activity-timeline-selection",
+      "article": "guide/activity-timeline",
+      "platform": "web",
+      "status": "ready",
+      "route": "/activities/17921623926005309429",
+      "state": "First device lap selected (0:00–7:23), range statistics and route highlight; empty Elevation chart removed via UI",
+      "asset": "docs/activities/en/activity-timeline-selection.webp",
+      "localizedAssets": {
+        "en": "docs/activities/en/activity-timeline-selection.webp",
+        "zh": "docs/activities/zh/activity-timeline-selection.webp"
+      },
+      "viewport": "1440x1680",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1088 / 831"
+    },
+    {
+      "id": "activity-timeline-full",
+      "article": "guide/activity-timeline",
+      "platform": "web",
+      "status": "ready",
+      "route": "/activities/17921623926005309429",
+      "state": "Timeline in full-activity range, first laps visible with horizontal scrolling; empty Elevation chart removed via UI",
+      "asset": "docs/activities/en/activity-timeline-full.webp",
+      "localizedAssets": {
+        "en": "docs/activities/en/activity-timeline-full.webp",
+        "zh": "docs/activities/zh/activity-timeline-full.webp"
+      },
+      "viewport": "1440x1680",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1088 / 500"
+    },
+    {
       "id": "manual-workout-editor",
       "article": "planning/manual-workout-editor",
       "platform": "web",
@@ -91,10 +125,18 @@
       "id": "activity-detail-review",
       "article": "guide/activity-detail",
       "platform": "web",
-      "status": "pending",
-      "route": "/activities/{activityId}",
-      "state": "Ready activity detail with summary, time-series charts, load source, route context, and plan link",
-      "asset": "docs/activities/activity-detail-review.webp"
+      "status": "ready",
+      "route": "/activities/17921623926005309429",
+      "state": "Overview with summary, route and analysis tabs",
+      "asset": "docs/activities/en/activity-detail-review.webp",
+      "localizedAssets": {
+        "en": "docs/activities/en/activity-detail-review.webp",
+        "zh": "docs/activities/zh/activity-detail-review.webp"
+      },
+      "viewport": "1440x1680",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1088 / 770"
     },
     {
       "id": "activities-feed-review",

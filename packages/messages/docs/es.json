@@ -98,7 +98,18 @@
     "language": "Idioma",
     "openMainMenu": "Abrir menú principal"
   },
+  "docsActions": {
+    "copy": "Copiar Markdown",
+    "copied": "Copiado",
+    "copying": "Copiando…",
+    "copyError": "No se pudo copiar. Abre el Markdown e inténtalo de nuevo.",
+    "open": "Abrir",
+    "viewMarkdown": "Ver Markdown",
+    "openIn": "Abrir en {name}",
+    "ask": "Lee {url}. Quiero hacer preguntas sobre esta documentación."
+  },
   "docsScreenshot": {
+    "openImage": "Abrir imagen a tamaño completo",
     "demoLabel": "Demo en vivo",
     "openDemo": "Abrir esta página en la demo"
   },
