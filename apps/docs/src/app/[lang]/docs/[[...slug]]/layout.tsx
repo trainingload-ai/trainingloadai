@@ -1,3 +1,3 @@
 import { createClientMessagesLayout } from "@/components/ClientMessages";
 
-export default createClientMessagesLayout(["docsScreenshot"]);
+export default createClientMessagesLayout(["docsScreenshot", "docsActions"]);

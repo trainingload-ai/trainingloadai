@@ -1,133 +1,101 @@
 ---
-title: Getting Started
-description: "Learn the core Trainingload.ai workflow: set up your profile, bring in training data, review load, manage plans, and ask the AI coach for context-aware guidance."
-keywords:
-  [
-    "Trainingload.ai guide",
-    "getting started",
-    "training load app",
-    "AI coach",
-    "training plan",
-  ]
+title: Get Started with Your First Activity
+description: Set your account preferences, choose a data source, import one activity, and check the recorded result before continuing to plans and AI Coach.
+seoTitle: "Getting Started and First Activity Guide | Trainingload.ai"
+seoDescription: "Follow the first-use workflow for Trainingload.ai. Check timezone and units, import one workout, verify its processing and source, then choose your next step."
+keywords: ["Trainingload.ai getting started", "first activity import", "training analysis setup", "training data", "Trainingload.ai guide"]
 ---
 
-# Getting Started
+# Get Started with Your First Activity
 
-Trainingload.ai is built around a simple loop:
+Start by bringing one completed workout into Trainingload.ai and confirming that it was recorded correctly. That activity can then support review, training-load context and comparison with a planned workout.
 
-1. Set up your athlete profile and thresholds.
-2. Import or sync completed workouts.
-3. Review training load, intensity, and recovery signals.
-4. Create or activate a training plan.
-5. Use AI Coach to review execution and adjust the plan when needed.
-
-The product is most useful when plans and real workouts stay connected. A workout file on its own tells you what happened; a plan-linked workout tells you whether the training matched the intent.
+[Explore the read-only Demo](https://demo.trainingload.ai/en). The screenshot uses synthetic training data in the real app to show how a populated home page fits together. Your initial account can have empty sections while you complete setup.
 
 ## Before you begin
 
-- Create and verify your account.
-- Have one original GPX, TCX, or FIT activity file, or access to a supported provider account.
-- Use current threshold values when known; leave unknown values unset rather than guessing.
-- Set aside enough time for one activity to finish processing before judging the result.
+Prepare one original FIT, TCX or GPX activity file, or access to a supported source platform containing a known workout. Choose a session whose date, sport and approximate duration you can recognize.
+
+For the Cloud service, sign in and complete any account-verification steps shown. For a Self-host instance, complete the [Self-host installation and owner setup](/docs/self-host/installation) first, then use that instance's account. Available platform connections depend on the deployment and its configured providers.
+
+## 1. Check the profile and display settings
+
+Open **Settings / Account** on Web, or **Me / Account** in the mobile app. Check the account timezone and unit preferences before comparing calendar dates or pace values.
+
+Enter reliable profile information and any thresholds you already know. Keep the sport associated with each threshold correct. For the full editing workflow, use [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones).
+
+If you need help estimating a threshold, use the relevant tool and review the result before saving it. An uncertain threshold is a reason to qualify an intensity or load interpretation.
+
+## 2. Choose one route for the first activity
+
+| Your starting point | Next step |
+| --- | --- |
+| You have an original activity file | Open Activities and use the upload entry. |
+| Your workouts are in a supported online platform | Open that platform's connection settings and follow its authorization and synchronization flow. |
+| You are already recording in the mobile app | Finish and synchronize a recording, then find it in Activities. |
+
+Use [Connect Training Data](/docs/guide/connect-data) to choose a route. The same workout can pass through several services, so identify the source you intend to keep before starting a history import.
+
+## 3. Import and wait for processing
+
+For a file, open **Activities**, choose the upload action, select the original file and review the format inspection. Continue with the import, then inspect each item's result in the batch-progress dialog. If a duplicate is detected, compare it with the existing activity before deciding whether a separate copy is needed.
+
+For a connected platform, follow the initial-sync or import action offered by its settings. A connected account and a completed import are separate states. Find the expected workout in Activities after the job runs.
+
+Detailed file selection, duplicate choices and batch states are covered in [Upload Activity Files](/docs/guide/upload-activity-files).
+
+## 4. Verify the first recorded result
+
+1. Find the activity by its date and sport in **Activities**.
+2. Check the source, start time, distance and duration against the original recording.
+3. Wait for **Ready**, or inspect any partial-analysis or failure message.
+4. Open activity detail and check the available route, laps and sensor charts.
+5. Confirm that the activity appears on the expected local date in the calendar.
+
+A file with summary values alone can produce fewer charts than a file containing recorded samples. Missing GPS or heart rate should be explained by the source data, processing state or an explicit error.
+
+Use the [Activity Detail guide](/docs/guide/activity-detail) to review the result, then the [Timeline guide](/docs/guide/activity-timeline) when you need to inspect one effort.
 
 <DocsScreenshot
   id="getting-started-web-home"
-  title="Training workspace after setup"
-  description="A processed activity and plan context make the dashboard, calendar, and AI review useful together."
+  title="See where the recorded activity fits into daily use"
+  description="Synthetic Web example with today's advice, a current plan, scheduled training and load context. These sections fill as the relevant records become available."
+  imageAlt="Trainingload.ai home page with advice, a planned workout and current load context"
   route="Home"
+  demoLabel="Explore the Demo home page"
 />
 
-## 1. Set up your account
+## 5. Choose the next task
 
-After signing in, open **Settings** or **Me** and check:
+- To understand recorded load, open [PMC history and forecasts](/docs/guide/pmc-forecast). New or incomplete history can limit the outlook.
+- To organize future training, [create a plan](/docs/guide/create-training-plan), review its dates and workouts, then activate it when appropriate. Templates, manual editing and AI-assisted drafts are separate creation paths.
+- To use the day-to-day workflow, open [Today and Current Status](/docs/guide/today-and-current-state).
+- To ask about a workout, open [AI Coach](/docs/guide/ai-coach) with a specific activity or plan question. Review data-sharing choices and any proposed edits before applying them.
 
-- Time zone, because calendar days and reminders depend on it.
-- Unit preference, so distance, pace, power, and elevation display correctly.
-- Language and theme preferences.
-- Athlete profile values such as body weight and sport preferences.
+## Check the result
 
-## 2. Add thresholds and zones
+The first-use task is complete when the account timezone and units are appropriate, one identifiable activity has a clear processing result, and its detail and calendar date agree with the recording. Keep any missing sensor coverage or uncertain threshold in your interpretation.
 
-Trainingload.ai uses threshold settings to calculate intensity and load. Add the values you know first; you can refine them later.
+## Common questions
 
-- Cycling: FTP, CP, and power zones.
-- Running: threshold pace, heart-rate zones, and pace zones.
-- Heart rate: max HR, resting HR, or LTHR when available.
+### Why is the home page less populated than the screenshot?
 
-For the full setup flow, see [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones).
+The example contains a plan and recorded activities. A new account fills these sections as you add the corresponding records. Use the first activity's processing result to verify import success.
 
-If you are unsure, start with the calculators and update the values after a recent test or race:
+### Why is a chart or forecast empty?
 
-- [Estimate FTP training load from an activity file](/ftp-calculator)
-- [Fit Critical Power for training load planning](/critical-power-calculator)
-- [Calculate heart-rate training load zones](/heart-rate-zones-calculator)
-- [Calculate VDOT to calibrate running training load](/vdot-calculator)
+Check the required sensor data, processing status and history window. An available activity does not guarantee every analysis or forecast has enough evidence.
 
-## 3. Bring in completed workouts
+### Why is the activity on the wrong day?
 
-You can import activity files or connect a supported platform. Trainingload.ai analyzes the activity, computes metrics, and makes the workout available in the activity feed, dashboard, calendar, and AI Coach context.
+Compare its start time and timezone with the account's display timezone. Confirm the date context before moving or linking a planned workout.
 
-Supported file-based workflow:
+### Why can I not upload or change something in Demo?
 
-- Upload GPX / TCX / FIT files.
-- Review duplicate warnings when they appear.
-- Wait for the import batch to finish processing.
-- Open the activity detail page once analysis is ready.
+Demo supports browsing the examples. Importing files, connecting your platforms and saving changes require your own account or Self-host instance.
 
-## 4. Review your training load
+## Continue
 
-Use the dashboard and PMC pages to understand the training trend:
-
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
-- [CTL](/docs/metrics/pmc/chronic-training-load) for longer-term load.
-- [ATL](/docs/metrics/pmc/acute-training-load) for the recent-load trend.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for the difference between longer and recent modeled load.
-
-Treat these as evidence, not verdicts. The best decisions usually combine load, workout quality, sleep, soreness, and the goal of the current training block.
-
-## 5. Create a plan
-
-Open **Plans** to create a plan manually or with AI. A useful plan should include:
-
-- Goal and date range.
-- Sport type.
-- Weekly structure.
-- Individual workouts with clear intent.
-- Expected load when enough target information is available.
-
-Once a plan is active, the **Plan** page becomes your daily training workspace.
-
-## 6. Use AI Coach
-
-AI Coach can discuss your training with context from workouts, plans, and load trends. Good questions include:
-
-- “How did this week compare with my plan?”
-- “Should I adjust tomorrow’s workout?”
-- “Why did my long run feel harder than expected?”
-- “Which session should I prioritize if I only have four days this week?”
-
-AI suggestions that change a plan should be reviewed before applying. Trainingload.ai is designed to keep the final decision visible to you.
-
-## Verify your setup
-
-You are ready for normal use when:
-
-- The account time zone and units are correct.
-- At least one activity is Ready and opens in Activity Detail.
-- The dashboard and calendar show that activity on the expected date.
-- A draft or active plan contains at least one valid workout.
-- AI Coach can reference the intended activity or plan context.
-
-## Troubleshooting
-
-- **The activity is missing:** check the import batch, provider connection, date range, and duplicate result.
-- **Charts or load are incomplete:** wait for Ready, inspect source sensor data, and confirm thresholds.
-- **The activity appears on the wrong date:** fix account and activity time-zone context before changing the plan.
-- **The plan cannot save:** correct the first workout validation message and keep every session inside the plan period.
-- **AI Coach is generic:** ask from the relevant activity or plan page after its data is ready.
-
-## Next steps
-
-- [Choose Your Path](/docs/guide/choose-your-path)
+- [Connect Training Data](/docs/guide/connect-data)
+- [Today and Current Status](/docs/guide/today-and-current-state)
 - [Create a Training Plan](/docs/guide/create-training-plan)
-- [Training Analysis Workflow](/docs/guide/training-analysis-workflow)

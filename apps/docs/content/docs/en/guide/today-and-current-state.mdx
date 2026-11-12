@@ -1,110 +1,137 @@
 ---
-title: Today and Current Status
-description: Use Today on mobile or Home on web to review today's advice, execute planned workouts, link activities, compare load, and customize current-status metrics.
-keywords:
-  [
-    "Trainingload.ai Today",
-    "daily training workflow",
-    "current training status",
-  ]
+title: Use Today's Advice and Current Status
+description: Read today's recommendation and its evidence, open the relevant workout, check recorded activity, and use the available Coach, workout and reminder actions deliberately.
+seoTitle: "Today's Advice and Daily Training Guide | Trainingload.ai"
+seoDescription: "Learn how to read today's advice, inspect its evidence, open a planned workout, preview an offered session, set a reminder and verify recorded training."
+keywords: ["today training advice", "daily training workflow", "workout recommendation", "current training status", "Trainingload.ai guide"]
 ---
 
-# Today and Current Status
+# Use Today's Advice and Current Status
 
-Today is the daily execution surface on mobile; the web Home page presents the same account context in a wider layout. Use it to decide what needs attention now, open the planned workout, and verify that completed work returns to the plan.
+Use **Home** on Web or **Today** in the mobile app to orient your day. Read the recommendation with the current plan, recorded activity and load context, then choose the action that fits what actually happened.
+
+[Open the Demo home page](https://demo.trainingload.ai/en). Demo supports browsing; actions that save workouts, reminders or plan changes require your own account. The screenshots are synthetic examples in the real Web app. Mobile uses its own sheets and recording controls.
 
 ## Before you begin
 
-- Complete onboarding and sign in to the same account used on web.
-- Set the correct time zone so “today” and plan dates agree.
-- Activate a plan if you expect a scheduled workout.
-- Let recent activities finish processing so load and current-status cards are current.
-- Link completed activities when plan-versus-actual context matters.
+Check the account timezone, active plan and whether recent activities have finished processing. For AI features, review the data-sharing choice and the AI configuration or access shown by your deployment. A plan is useful context when present; a day without a scheduled workout has a different starting point.
 
-## 1. Read today's advice as context
+## 1. Read the day before taking an action
 
-Open **Today** on mobile or **Home** on web. The advice summary can use available plan, recent activity, and load context. It is a starting point, not medical clearance or an automatic plan change.
+On Home, check the date and current plan. Locate today's scheduled workouts, the recent activity and the current-state or weekly-load section. A workout listed for today is an intended session. A recorded activity is evidence of training that took place.
 
-Check that the date and active plan are correct. If the advice appears generic, wait for activity processing, update profile data, or open **Ask the coach** with a specific question.
+If the activity has not synchronized yet, resolve that state before interpreting a recommendation that appears to omit it. Follow [Connect Training Data](/docs/guide/connect-data) when needed.
 
 <DocsScreenshot
   id="today-execution-overview"
-  title="Today execution overview"
-  description="Review today's advice, the planned workout and its link status, weekly load, and selected current-status cards in one daily flow."
-  route="Today"
-  platform="mobile"
+  title="Put advice, planned training and recorded activity together"
+  description="Synthetic Web example. Read the current plan and scheduled training alongside the recommendation and load context, then open the specific item you want to investigate."
+  imageAlt="Home page with today's advice, a scheduled workout and current training status"
+  route="Home"
+  demoLabel="Explore this workflow in Demo"
 />
 
-## 2. Open the planned workout
+## 2. Open the advice and inspect its evidence
 
-In **Training**, select a workout to inspect:
+Select the advice card to open its detail sheet. Read the complete recommendation, any uncertainty, and **Why this recommendation** when available. The displayed actions can vary with the day's evidence.
 
-- Sport, planned duration, and status.
-- Workout chart and structured steps when available.
-- Coaching notes.
-- Linked activity state.
+- An existing planned session can offer an action to open that workout.
+- A missing-data situation can offer a connection, import or activity-review entry.
+- A question or decision can open the corresponding Coach flow.
+- A proposed independent workout or reminder appears only when offered for that suggestion.
 
-For an open endurance workout, **Start planned workout** opens recording with plan and workout context. For a supported strength workout, it opens the strength-session flow instead.
+<DocsScreenshot
+  id="today-suggestion-details"
+  title="Read the reason before choosing the next step"
+  description="Synthetic Web example. The detail sheet shows the full advice and its supporting context, with explicit actions for the scheduled workout and Coach."
+  imageAlt="Today's advice detail sheet showing the recommendation, evidence and next-step actions"
+  route="Home → Advice details"
+  demoLabel="Browse the Demo home page"
+/>
 
-If an unfinished local recording exists, choose whether to continue it, finish and recover it, or discard it before starting another recording. Do not create a second copy merely to bypass the recovery prompt.
+Opening the sheet does not itself create a workout or apply a plan change. If the advice is replaced after new activity or plan information arrives, read the updated version before acting.
 
-## 3. Link, postpone, or skip deliberately
+## 3. Follow the action for this situation
 
-The workout action sheet supports the actions currently valid for the workout:
+### Open an existing workout
 
-- **Activity / Link activity** — open an existing linked activity or choose the completed activity that fulfilled the workout.
-- **Postpone** — move an eligible open workout forward by one day after confirmation.
-- **Skip** — mark the planned workout skipped after confirmation.
+Use the offered workout action, then check its date, sport, structure, notes and status. For completed training, check the activity association rather than relying only on the workout's completion label.
 
-Postpone and Skip change plan execution state. They do not edit or delete a completed activity. After either action, check the active plan and Calendar because the surrounding week may now need review.
+In the mobile app, supported planned sessions can enter endurance recording or strength execution. Use [Mobile Recording](/docs/guide/mobile-recording) or [Mobile Plans and Strength](/docs/guide/mobile-plans-and-strength) for the relevant execution flow.
 
-## 4. Compare this week with last week
+### Review an offered independent workout
 
-Use the weekly-load comparison as a prompt to investigate change. Confirm that the date boundary and sport context are appropriate, then open the underlying activities or PMC view before changing a plan.
+When the sheet contains **Suggested workout**, open its preview and inspect the sport, duration, intensity and structure. If you choose its add or schedule action, it creates an independent workout for today. Check the resulting daily-workout view. The existing training plan remains a separate schedule.
 
-A higher or lower weekly number does not by itself say whether the week was successful. Compare it with planned workload, completion quality, subjective state, and the purpose of the training block.
+An expired suggestion, changed training facts, an already-present workout or a closed training window can prevent creation. Use the latest displayed result before trying again.
 
-## 5. Customize Current status on mobile
+<DocsScreenshot
+  id="today-workout-preview"
+  title="Inspect the proposed session before adding it"
+  description="Synthetic Web example for a day without a scheduled session. The preview shows the workout structure and an explicit action to add today's independent workout."
+  imageAlt="Suggested workout preview with its structure, an independent-workout explanation and the add action"
+  route="Home → Advice → Workout preview"
+  demoLabel="Browse the Demo home page"
+/>
 
-Current status can show VO2Max, ATL, CTL, TSB, load ratio, monotony, intensity, rest days, and weekly summary metrics when data is available.
+### Set an offered reminder
 
-1. Select the gear button beside **Current status**.
-2. Remove metrics that do not support your daily decisions.
-3. Select **Add metric** and choose a metric card.
-4. Long-press the drag handle to reorder the selected metrics.
-5. Keep at least one metric, then select **Done**.
+On Web, choose the reminder action, select **Remind me at**, then **Schedule**. Use a time within the range the interface accepts and wait for success feedback. A reminder prompts a later review; it does not complete training.
 
-Selecting a Current status card opens its detail and recent series. Use **Learn** to open the corresponding metric documentation.
+Mobile offers supported reminder offsets. Notification delivery also depends on the app's notification and device-permission settings. Check the available reminder options instead of assuming every day offers the same times.
 
-## 6. Refresh after cross-device changes
+### Ask Coach or review a pending decision
 
-Pull down on Today to refresh plan, advice, load, current status, and recent activity queries. Refresh after editing a plan on web, completing an import, or applying an AI Coach action.
+Use the offered Coach action to continue with the advice context. Review the question and relevant records before sending. A pending adjustment or assessment opens its own detail flow; read the affected workout and the effect of the displayed confirmation action.
 
-Do not continue editing stale plan data when another device has just saved a change. Confirm the newest workout date and status first.
+Opening an activity or plan is navigation. Creating a workout, saving a reminder or confirming a proposed adjustment changes account state. Check the result of each action separately.
 
-## Verify the daily workflow
+## 4. Record what actually happened
 
-- Today shows the correct account date and active plan.
-- The intended workout opens with the correct sport, structure, and status.
-- Starting the workout carries plan context into endurance recording or strength execution.
-- A completed activity is linked once to the intended workout.
-- Postponed or skipped state also appears in Calendar and the active plan.
-- Current-status metric selection and order remain after reopening Today.
-- Recent load and activity panels update after refresh.
+After training, synchronize or import the activity, wait for processing and associate it with the intended scheduled session. Compare planned content with the recorded duration, distance, intensity and available load.
 
-## Troubleshooting
+If a workout was moved, shortened, skipped or completed outside the plan, preserve that context. Use the [Calendar guide](/docs/guide/calendar) and [Manage an Active Plan](/docs/guide/manage-active-plan) to update the relevant record.
 
-- **No workout appears:** confirm an active plan exists, its start date covers today, and the workout was not already moved, skipped, or completed.
-- **Today uses the wrong date:** correct the account time zone, then restart or refresh both surfaces.
-- **Advice is missing or generic:** wait for activity processing, check AI entitlement/usage, and provide plan and current-state context.
-- **Start training is unavailable:** only eligible open workouts can start; inspect status and sport support.
-- **The wrong activity is linked:** open the activity action, remove or replace the link, and verify start time and sport before confirming.
-- **Postpone or Skip fails:** refresh the plan; a version-aware update may reject an action based on stale data.
-- **A Current status card is empty:** widen the data window, import supported activities, and confirm the threshold or sensor evidence required by that metric.
-- **Changes made on web do not appear:** pull to refresh and confirm both devices use the same account.
+## 5. Use mobile feedback and current-state cards
 
-## Next steps
+The mobile advice sheet can offer feedback for resting today, training elsewhere, pending synchronization or reviewing later. This supplies context for the advice. A completed activity still needs to be recorded and synchronized through its normal route.
 
-- Record an endurance session with [Mobile Recording](/docs/guide/mobile-recording).
-- Execute strength and plan workflows with [Mobile Plans and Strength](/docs/guide/mobile-plans-and-strength).
-- Review the whole week in [Calendar](/docs/guide/calendar).
+For mobile current-state customization, open the settings control beside **Current Status**, add or remove supported metrics, arrange the selected cards and finish editing. Open a card for its detail and use its documentation entry to understand the metric.
+
+For load and capability histories, continue with [PMC](/docs/guide/pmc-forecast) and [VO2Max](/docs/guide/effective-vo2max-for-endurance). A current card, a historical point and a future estimate describe different evidence.
+
+## 6. Refresh after changes
+
+The mobile Today view supports pull-to-refresh. After importing activity or changing a plan on another device, refresh and verify the date, status and association before continuing an edit. The Web view can also update when returning to it; inspect the latest visible content.
+
+## Check the result
+
+You should be able to identify the day's planned session, the recorded activity, the advice's supporting context and the effect of the action you selected. Confirm that a saved workout, association or reminder appears in the expected place.
+
+## Common questions
+
+### Why is today's advice missing or unavailable?
+
+Check data-sharing choices, AI configuration or access, request status and available training evidence. Use an explicit error or retry state instead of treating a loading or fallback display as a fresh generated recommendation.
+
+### Why did the advice change?
+
+New activity, a changed plan, updated context or expiry can cause it to refresh. Recheck the current version before applying a previous proposal.
+
+### Why is there no workout action?
+
+Actions depend on the suggestion and current evidence. Verify the active plan, scheduled date and workout status, then use the calendar or plan to locate the intended session.
+
+### Why does the recommendation omit a workout I completed?
+
+Check synchronization, activity processing, local date and plan association. In mobile, provide the relevant feedback while the missing record is being resolved.
+
+### Can I use the advice as an automatic plan change?
+
+Read the offered action and verify its result. A recommendation, an independent workout and a proposed plan adjustment have different effects. Follow [AI Coach](/docs/guide/ai-coach) for review and confirmation.
+
+## Continue
+
+- [Calendar](/docs/guide/calendar)
+- [Connect Training Data](/docs/guide/connect-data)
+- [Manage an Active Plan](/docs/guide/manage-active-plan)

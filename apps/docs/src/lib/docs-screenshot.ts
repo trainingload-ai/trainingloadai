@@ -33,6 +33,7 @@ function inferredAppPath(id: string) {
 }
 
 function stableCaptureRoute(route: string | undefined) {
+  if (route === "/") return "";
   const segments = String(route ?? "")
     .split("/")
     .filter((segment) => segment && !/^\{.+\}$/.test(segment));

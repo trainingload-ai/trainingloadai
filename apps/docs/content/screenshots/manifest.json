@@ -10,10 +10,19 @@
       "id": "getting-started-web-home",
       "article": "guide/getting-started",
       "platform": "web",
-      "status": "pending",
-      "route": "/home",
-      "state": "Signed in with one processed activity and an active or draft plan",
-      "asset": "docs/getting-started/web-home.webp"
+      "status": "ready",
+      "route": "/",
+      "state": "Web home with synthetic current plan, advice, scheduled workout, weekly load and current status; cropped above the health section",
+      "asset": "docs/daily/en/getting-started-home.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/getting-started-home.webp",
+        "zh": "docs/daily/zh/getting-started-home.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 900",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
     },
     {
       "id": "choose-path-mobile-today",
@@ -150,20 +159,38 @@
     {
       "id": "today-execution-overview",
       "article": "guide/today-and-current-state",
-      "platform": "mobile",
-      "status": "pending",
-      "route": "/today",
-      "state": "Synthetic athlete with one open planned workout, weekly load comparison, selected current-status cards, and a recent Ready activity",
-      "asset": "docs/daily/today-execution-overview.webp"
+      "platform": "web",
+      "status": "ready",
+      "route": "/",
+      "state": "Same synthetic Web home as the first-use guide; native mobile controls are described separately",
+      "asset": "docs/daily/en/getting-started-home.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/getting-started-home.webp",
+        "zh": "docs/daily/zh/getting-started-home.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 900",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
     },
     {
       "id": "calendar-plan-actual",
       "article": "guide/calendar",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/calendar",
-      "state": "Calendar and selected-day panel showing planned workouts, completed activities, and daily load",
-      "asset": "docs/calendar/plan-actual.webp"
+      "state": "Synthetic calendar on 2026-10-30 with one planned workout and one recorded activity; Training tab selected",
+      "asset": "docs/daily/en/calendar-plan-actual.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/calendar-plan-actual.webp",
+        "zh": "docs/daily/zh/calendar-plan-actual.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 820",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
     },
     {
       "id": "dashboard-trend-review",
@@ -483,6 +510,78 @@
       "route": "/plans/create/manual",
       "state": "Strength Training selected with a validated two-exercise synthetic DSL example; Rules tab and parsed strength preview visible; no athlete data",
       "asset": "docs/planning/strength-dsl-rules-input.webp"
+    },
+    {
+      "id": "today-suggestion-details",
+      "article": "guide/today-and-current-state",
+      "platform": "web",
+      "status": "ready",
+      "route": "/",
+      "state": "Structured advice with evidence, uncertainty and explicit actions to open the scheduled workout or Coach",
+      "asset": "docs/daily/en/today-suggestion-details.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/today-suggestion-details.webp",
+        "zh": "docs/daily/zh/today-suggestion-details.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "512 / 458",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+    },
+    {
+      "id": "today-workout-preview",
+      "article": "guide/today-and-current-state",
+      "platform": "web",
+      "status": "ready",
+      "route": "/",
+      "state": "Synthetic day without scheduled training; independent workout structure preview and explicit add action; no workout was saved",
+      "asset": "docs/daily/en/today-workout-preview.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/today-workout-preview.webp",
+        "zh": "docs/daily/zh/today-workout-preview.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "512 / 562",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+    },
+    {
+      "id": "calendar-activity-details",
+      "article": "guide/calendar",
+      "platform": "web",
+      "status": "ready",
+      "route": "/calendar",
+      "state": "Same synthetic date and records, with Activities tab selected",
+      "asset": "docs/daily/en/calendar-activity-details.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/calendar-activity-details.webp",
+        "zh": "docs/daily/zh/calendar-activity-details.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 820",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+    },
+    {
+      "id": "activity-import-entry",
+      "article": "guide/connect-data",
+      "platform": "web",
+      "status": "ready",
+      "route": "/activities",
+      "state": "File upload dialog in a synthetic account; no files submitted",
+      "asset": "docs/daily/en/activity-import-entry.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/activity-import-entry.webp",
+        "zh": "docs/daily/zh/activity-import-entry.webp"
+      },
+      "viewport": "1440x1100",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "600 / 366",
+      "dataSource": "apps/client/e2e/fixtures/coach-page.ts; actual file upload dialog"
     }
   ]
 }

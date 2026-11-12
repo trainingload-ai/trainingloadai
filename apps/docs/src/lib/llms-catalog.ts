@@ -192,6 +192,24 @@ export const llmProductPages: LlmToolPage[] = [
 
 export const llmGuidePages: LlmToolPage[] = [
   {
+    title: "Get Started with Your First Activity",
+    path: "/api/docs-markdown/en/guide/getting-started",
+    description:
+      "Check account settings, choose one data route, import a known activity, verify processing and source, then continue to daily use, plans or AI Coach.",
+  },
+  {
+    title: "Connect and Verify Training Data",
+    path: "/api/docs-markdown/en/guide/connect-data",
+    description:
+      "Choose platform sync, original activity files or mobile recording; follow import and analysis states; verify date, source, duplicates and sensor coverage.",
+  },
+  {
+    title: "Calendar and Plan vs Actual",
+    path: "/api/docs-markdown/en/guide/calendar",
+    description:
+      "Find a date, separate scheduled workouts from recorded activities, link the intended recording, and check summary scope and missing load.",
+  },
+  {
     title: "Activity Detail",
     path: "/api/docs-markdown/en/guide/activity-detail",
     description:
@@ -255,7 +273,7 @@ export const llmGuidePages: LlmToolPage[] = [
     title: "Today and Current Status",
     path: "/api/docs-markdown/en/guide/today-and-current-state",
     description:
-      "Use current plan, completed-workout, training-load, and athlete-state context to decide what needs attention today.",
+      "Read advice and its evidence, open the relevant workout, inspect an offered independent-workout preview, set a reminder when offered, and verify recorded training.",
   },
   {
     title: "Connect Third-Party Platforms",

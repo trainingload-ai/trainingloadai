@@ -2,6 +2,50 @@ import { describe, expect, it, vi } from "vitest";
 import { renderLLMText } from "@/lib/llm-text";
 
 describe("renderLLMText", () => {
+  it("keeps an explicit home capture route when its ID contains workout", async () => {
+    const text = await renderLLMText(
+      {
+        url: "/zh/docs/guide/today-and-current-state",
+        data: {
+          title: "今日",
+          getText: async () =>
+            '<DocsScreenshot id="today-workout-preview" title="预览课次" />',
+        },
+      },
+      "https://www.trainingload.ai",
+    );
+
+    expect(text).toContain("[Demo](https://demo.trainingload.ai/zh)");
+    expect(text).not.toContain("https://demo.trainingload.ai/zh/plans");
+  });
+
+  it("exports homepage task cards as readable headings, images and navigation", async () => {
+    const text = await renderLLMText(
+      {
+        url: "/zh/docs",
+        data: {
+          title: "文档",
+          getText: async () =>
+            `<DocsTaskGrid>\n\n<DocsTaskCard preload title="验证第一条活动" description="检查来源与处理结果。" href="/zh/docs/guide/getting-started" action="开始使用" imageSrc="/docs/daily/zh/getting-started-home.webp" imageAlt="训练首页示例" />\n\n<DocsTaskCard title="连接数据" href="/zh/docs/guide/connect-data" />\n\n</DocsTaskGrid>`,
+        },
+      },
+      "https://www.trainingload.ai",
+    );
+
+    expect(text).toContain("## 验证第一条活动");
+    expect(text).toContain("检查来源与处理结果。");
+    expect(text).toContain(
+      "![训练首页示例](https://www.trainingload.ai/docs/daily/zh/getting-started-home.webp)",
+    );
+    expect(text).toContain(
+      "[开始使用](https://www.trainingload.ai/zh/docs/guide/getting-started)",
+    );
+    expect(text).toContain(
+      "[连接数据](https://www.trainingload.ai/zh/docs/guide/connect-data)",
+    );
+    expect(text).not.toContain("<DocsTask");
+  });
+
   it("includes processed documentation content without duplicating its H1", async () => {
     const getText = vi.fn(async () =>
       [
@@ -62,14 +106,14 @@ describe("renderLLMText", () => {
     expect(text).not.toContain("<DocsScreenshot");
   });
 
-  it("keeps pending captures usable without exporting nonexistent images", async () => {
+  it("keeps captures without an asset usable through their Demo link", async () => {
     const text = await renderLLMText(
       {
         url: "/docs/guide/getting-started",
         data: {
           title: "Start",
           getText: async () =>
-            `<Callout>\n\n<DocsScreenshot id="getting-started-web-home" title="Home" description="Check today." appPath="/calendar" />\n\n</Callout>`,
+            `<Callout>\n\n<DocsScreenshot id="unavailable-test-capture" title="Home" description="Check today." appPath="/calendar" />\n\n</Callout>`,
         },
       },
       "https://www.trainingload.ai",
