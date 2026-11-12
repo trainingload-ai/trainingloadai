@@ -27,6 +27,11 @@ overrides:
   ip-address: '>=10.3.1'
   '@modelcontextprotocol/sdk': '>=1.32.0'
 
+patchedDependencies:
+  '@electron/osx-sign@1.3.3':
+    hash: mlzlgp6gok6xvxookup2m2rmby
+    path: apps/desktop/patches/osx-sign-1.3.3.patch
+
 importers:
 
   .:
@@ -24281,7 +24286,7 @@ snapshots:
       "@electron/fuses": 1.8.0
       "@electron/get": 3.1.0
       "@electron/notarize": 2.5.0
-      "@electron/osx-sign": 1.3.3
+      "@electron/osx-sign": 1.3.3(patch_hash=mlzlgp6gok6xvxookup2m2rmby)
       "@electron/rebuild": 4.2.1
       "@electron/universal": 2.0.3
       "@malept/flatpak-bundler": 0.4.0
@@ -24479,7 +24484,7 @@ snapshots:
       retry: 0.12.0
   err-code@2.0.3: {}
   retry@0.12.0: {}
-  "@electron/osx-sign@1.3.3":
+  "@electron/osx-sign@1.3.3(patch_hash=mlzlgp6gok6xvxookup2m2rmby)":
     dependencies:
       compare-version: 0.1.2
       debug: 4.4.3
