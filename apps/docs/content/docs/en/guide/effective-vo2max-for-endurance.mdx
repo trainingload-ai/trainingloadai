@@ -1,120 +1,123 @@
 ---
-title: Effective VO2max for Endurance Decisions
-description: How to interpret effective VO2max trends with training load and plan execution context.
-keywords:
-  [
-    "effective VO2max",
-    "training analysis",
-    "endurance decisions",
-    "training load response",
-  ]
+title: Understand Effective VO2max in Endurance Training
+description: Open the VO2Max detail view, inspect activity estimates and history, distinguish the current value from the four-week forecast, and read the displayed uncertainty.
+seoTitle: "VO2Max History and Forecast Guide | Trainingload.ai"
+seoDescription: "Learn how to use VO2Max history tabs, activity estimates, the four-week outlook and its reference range, including missing or outdated forecast data."
+keywords: ["effective VO2max", "VO2max forecast", "VO2max history", "running performance trend", "Trainingload.ai guide"]
 ---
 
-# Effective VO2max for Endurance Decisions
+# Understand Effective VO2max in Endurance Training
 
-Trainingload.ai estimates VO2max/VDOT from available activity evidence. Treat the result as a performance-response trend, not a laboratory measurement, diagnosis, or daily readiness score. Its value comes from comparing similar activities over time and interpreting the trend with execution and load.
+Trainingload.ai uses available activity evidence to estimate an effective VO2max / VDOT value. The detail view helps you inspect its history and, when enough comparable running history is available, a conditional outlook. These are model estimates rather than laboratory measurements or guaranteed future results.
+
+[Open the dashboard in Demo](https://demo.trainingload.ai/en/dashboard), then select the **VO2Max** card. The Demo's current records determine whether a forecast is available. The forecast screenshot below uses synthetic example data rendered by the app.
 
 ## Before you begin
 
-- Import several recent, comparable endurance activities and wait until they are Ready.
-- Check maximum heart rate, running thresholds, units, and sport type in your profile.
-- Prefer activities with reliable pace or power and heart-rate streams.
-- Exclude warm-ups, recovery walks, sensor failures, and unlike sports from a like-for-like comparison.
-- Choose a review question, such as whether the current running block is producing a stable positive response.
+- Import recent running activities and wait for processing to complete.
+- Check maximum heart rate, the selected estimation source and any correction factor used in your profile.
+- Use activities with reliable inputs and comparable purposes. Note changes in sensors, terrain or estimation settings.
+- Keep the distinction between activity estimates, the current value and the forecast when recording your conclusion.
 
-## 1. Open the trend, not just the current value
+The forecast uses eligible running observations. Changing the dashboard sport filter does not create a cycling or swimming forecast.
 
-Open **Dashboard**, select one sport, and choose a time range that contains several comparable sessions. Select the **VO2Max** fitness-status card to open its history.
+## 1. Open the VO2Max detail view
 
-The current value is a snapshot. The history is more useful because it shows whether estimates are stable, drifting, or dominated by one activity.
+On the dashboard, find **VO2Max** and select its card. The detail view contains the current value, any available four-week outlook, the chart, history-range tabs, explanatory text and **Ask Coach**.
+
+The current value can remain visible even when a forecast is unavailable. Check the availability message and whether the chart actually contains future estimates.
+
+## 2. Choose a history window
+
+Use **7**, **14**, **30** or **60** day tabs to choose the recorded history you want to inspect. Start with a window containing several comparable activities.
+
+When a forecast is available, the chart also shows a future window matching the selected tab, capped at 30 days. For example, the 7-day tab shows a shorter future section than the 30-day tab. The summary's **In four weeks** value still refers to its four-week endpoint.
 
 <DocsScreenshot
   id="effective-vo2max-trend"
-  title="VO2Max response trend"
-  description="Review a running-only history with comparable Ready activities, then investigate any outlier before interpreting the direction."
-  route="Dashboard → VO2Max"
+  title="Read the current value, history and future estimates separately"
+  description="Synthetic running example. The detail view shows the current value, a four-week estimate and reference range, with a 60-day history window and the available future curve below."
+  imageSrc="/docs/analysis/en/effective-vo2max-trend.webp"
+  imageAlt="VO2Max detail example showing current value, four-week estimate, reference range, historical activity points and a future curve"
+  route="Dashboard → VO2Max → 60 days"
 />
 
-## 2. Check whether the activities are comparable
+## 3. Identify which value you are reading
 
-Open the activities behind the trend and compare:
+| Display | What it represents |
+| --- | --- |
+| Current VO2Max | The current value shown by the product. |
+| Historical values and activity points | The estimates or records available for dates in the selected history window. |
+| Current estimated level | A model's estimated level at its historical cutoff when the chart offers that reading. |
+| In four weeks | The endpoint of the available four-week forecast. |
+| Reference range or 80% prediction interval | The range associated with the forecast, labelled according to the model in use. |
 
-- Sport and workout purpose.
-- Duration and terrain.
-- Pace or power quality.
-- Heart-rate availability and sensor reliability.
-- Heat, altitude, wind, fatigue, and race effort.
-- The estimation source shown for the activity when available.
+The current product value and model-estimated level can differ. Read the label and date before comparing them. A future point does not represent a completed workout.
 
-A race-derived estimate, a heart-rate-and-speed estimate, and a corrected estimate are not interchangeable observations. Trainingload.ai can store multiple VO2max/VDOT estimates from different evidence; note which one produced the value you are interpreting.
+Move over a historical or future point to inspect the chart's available readings. For an unusual historical point, use its date to find the original activity in **Activities**. Check the recording and estimation source before deciding that your fitness changed.
 
-## 3. Classify the pattern
+## 4. Read the forecast and its range
 
-Use several comparable points rather than a single threshold.
+When the outlook is available, the summary shows **In four weeks**, a direction relative to the current value, the associated range and the history cutoff date. Read these together.
 
-### Gradual improvement with stable execution
+A **reference range** is not a calibrated 80% prediction interval. If the page explicitly labels an **80% prediction interval**, retain that label when reporting it. Neither label promises that your future value will fall inside the band.
 
-The block may be producing a useful response. Confirm that key workouts are being completed and that the improvement is not caused by a threshold, correction-factor, or sensor change. Usually no immediate plan change is needed.
+The forecast follows historical observations and the model's assumptions. It is separate from PMC's schedule-based load outlook. Adding a future workout does not by itself demonstrate that VO2Max will improve by the displayed amount.
 
-### Flat trend with high recent load
+Use the estimate as context for a review, then compare it with recorded workout execution and training load. Follow [PMC History and Forecasts](/docs/guide/pmc-forecast) for the load workflow.
 
-Do not automatically add more volume. Compare [ATL](/docs/metrics/pmc/acute-training-load), [TSB](/docs/metrics/pmc/training-stress-balance), plan completion, and session quality. The safest first response may be to hold load, reduce one non-essential intensity exposure, and review the next comparable workout.
+## 5. Handle an unavailable forecast
 
-### Decline across comparable sessions
+Read the displayed state before changing settings.
 
-Inspect fatigue, conditions, illness, missed recovery, and data quality. If execution is also deteriorating, protect the next key session with a small reversible adjustment. If only one point fell, investigate the activity instead of rewriting the week.
+| Message | Next step |
+| --- | --- |
+| More running history is needed | Continue accumulating eligible processed running records. A current value alone does not supply enough forecast evidence. |
+| New running records are needed | Check whether the most recent eligible observations are outdated, then import recent activity. |
+| The calculation method changed | Check source and correction settings. New comparable observations may be needed. |
+| Forecast unavailable | Keep using available history and inspect the request or data state. |
 
-### One abrupt outlier
+A blank history chart can also mean the selected 7-day window contains no observations. Try a longer history window before concluding that all records are missing. Missing estimates are not zero values.
 
-Open that activity. Check the heart-rate stream, speed or power, pauses, sport classification, maximum-heart-rate setting, and whether the effort was truly comparable. Exclude the point from your decision mentally until its cause is understood.
+Avoid changing maximum heart rate or correction settings simply to obtain a preferred forecast. A settings change can alter comparability as well as the displayed values.
 
-## 4. Combine response with training pressure
+## 6. Ask Coach about the evidence
 
-Use two questions together:
+Select **Ask Coach** in the detail view. The prepared question asks about the current level, historical changes and any available four-week outlook. Review and send it when it matches your question.
 
-1. **What pressure was applied?** Read CTL, ATL, TSB, and session load.
-2. **What response is visible?** Read effective VO2max/VDOT trend, workout execution, and subjective state.
+Add the dates and activities you want explained. Ask the coach to separate recorded evidence from estimates, and to identify missing context. Opening this link does not send a question automatically or apply a plan change.
 
-This creates four useful cases:
+Before confirming a proposed change, check the activity evidence, plan context and the normal [AI Coach confirmation flow](/docs/guide/ai-coach).
 
-| Load context           | Response trend      | Practical interpretation                                                      |
-| ---------------------- | ------------------- | ----------------------------------------------------------------------------- |
-| Rising as planned      | Stable or improving | Continue and review at the scheduled checkpoint.                              |
-| High or rising quickly | Declining           | Investigate recovery, data quality, and workout execution before adding load. |
-| Low or interrupted     | Declining           | Check consistency, missed training, illness, and detraining context.          |
-| Stable                 | One outlier         | Inspect the activity; do not treat it as a block-level result.                |
+## Check the result
 
-## 5. Make one reviewable decision
+Record the history window, input source, relevant dates, current value, forecast availability and the range label. You should be able to explain which observations support a trend and which portion remains a forecast.
 
-Choose one of four outcomes:
+## Common questions
 
-- **Continue:** the trend and execution support the current block.
-- **Hold:** keep load stable until the next comparable session.
-- **Reduce one stressor:** shorten, move, or simplify one future workout.
-- **Fix the evidence:** correct settings or data before deciding.
+### Why does the four-week summary stay the same when I select 7 days?
 
-Record the reason, the exact change, and the next comparable activity that will validate it. Do not recalibrate merely to make the chart match an expected number.
+The tab changes the chart window. The summary still describes the four-week endpoint, while the chart can show a shorter part of the available outlook.
 
-## Verify the interpretation
+### Why is there a current value but no forecast?
 
-- The trend uses one sport and a relevant date range.
-- At least several activities are comparable in purpose and data quality.
-- Any abrupt outlier was opened and investigated.
-- Estimation source or settings changes are separated from real performance change.
-- Load, plan execution, and subjective context support the interpretation.
-- The decision has a defined next review point.
+The current display and forecast have different evidence requirements. The forecast can be unavailable because running observations are insufficient, stale, incomparable or unavailable to the model.
 
-## Troubleshooting
+### Why does a single activity differ from the trend?
 
-- **The VO2Max card is empty:** confirm that supported Ready activities contain the required pace/power and heart-rate evidence, then widen the range.
-- **The trend jumps after changing profile values:** maximum heart rate, correction factor, thresholds, or recalculation may change estimates. Compare only under a known, consistent setup.
-- **Running and cycling disagree:** review each sport separately; they use different activity evidence and should not be merged into one performance conclusion.
-- **A hard race and easy run produce very different values:** compare estimation source and workout purpose. Favor repeated comparable observations over unlike sessions.
-- **The value differs from a watch or lab result:** methods and inputs differ. Use each series consistently rather than forcing exact agreement.
-- **The decline comes with pain or illness:** use real symptoms and qualified guidance; the estimate cannot provide medical clearance.
+An activity estimate and a model's current level summarize different evidence. Check the source, sensor quality, terrain and purpose of that activity. Compare several suitable records rather than treating one point as a training-block result.
 
-## Next steps
+### Will a planned workout change this prediction?
 
-- Read [Maximal Oxygen Uptake](/docs/metrics/maximal-oxygen-uptake) for the metric model and estimation limits.
-- Use [PMC for Marathon Adjustments](/docs/guide/pmc-marathon-adjustment) to interpret training pressure.
-- Bring the evidence to [AI Marathon Plan Adjustments](/docs/guide/ai-marathon-plan-adjustments).
+PMC estimates future load from applicable scheduled inputs and habits. The VO2Max outlook is based on its historical observation model. Do not treat the two forecasts as the same calculation.
+
+### Why does it differ from my watch or a laboratory result?
+
+They can use different methods, inputs and dates. Keep each series consistent. Read [VO2 Max](/docs/metrics/maximal-oxygen-uptake) for measurement and estimation concepts.
+
+## Continue
+
+- [PMC History and Forecasts](/docs/guide/pmc-forecast)
+- [Activity Detail](/docs/guide/activity-detail)
+- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+- [Weekly Training Review](/docs/workflow/weekly-review)

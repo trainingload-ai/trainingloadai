@@ -21,7 +21,7 @@ export const revalidate = false;
 
 // Build date for the llms.txt index. Keep in sync with the geo self-check
 // script (scripts/geo-check.mjs) so the file does not drift silently.
-const LAST_UPDATED = "2026-10-27";
+const LAST_UPDATED = "2026-11-12";
 
 export async function GET() {
   const siteUrl = getSiteUrl();

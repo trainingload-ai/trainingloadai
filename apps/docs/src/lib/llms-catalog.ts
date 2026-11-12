@@ -264,6 +264,18 @@ export const llmGuidePages: LlmToolPage[] = [
       "Review plan-versus-actual execution, load response, performance trends, and the next evidence-based training decision.",
   },
   {
+    title: "PMC History and Forecasts",
+    path: "/api/docs-markdown/en/guide/pmc-forecast",
+    description:
+      "Choose a sport, inspect current CTL, ATL and TSB, distinguish recorded load from conditional forecasts, check daily load and its basis, and understand missing future values.",
+  },
+  {
+    title: "Effective VO2max History and Forecasts",
+    path: "/api/docs-markdown/en/guide/effective-vo2max-for-endurance",
+    description:
+      "Use history tabs and activity estimates, distinguish the current value from the four-week outlook and reference range, and handle unavailable or outdated running observations.",
+  },
+  {
     title: "TrainingPeaks Alternative for Training Load",
     path: "/api/docs-markdown/en/guide/trainingpeaks-alternative-for-training-load",
     description:
