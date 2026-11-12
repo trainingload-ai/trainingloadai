@@ -38,4 +38,5 @@ jobs:
       - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
       - run: pnpm install --frozen-lockfile
       - run: node --test scripts/docs/*.test.mjs
+      - run: pnpm --dir apps/docs test
       - run: pnpm docs:build
