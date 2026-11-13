@@ -71,7 +71,7 @@
     "@tiptap/starter-kit": "^2.11.3",
     "@types/mapbox__polyline": "^1.0.5",
     "ai": "^6.0.143",
-    "better-auth": "1.7.7",
+    "better-auth": "1.7.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
