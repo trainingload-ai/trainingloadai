@@ -86,6 +86,17 @@ export function importMacCloudCredentials(
     join(temporary, "original-keychains.json"),
     JSON.stringify(originalKeychains),
   );
+  const originalDefault = run("security", ["default-keychain", "-d", "user"])
+    .trim()
+    .replace(/^"|"$/g, "");
+  if (!isAbsolute(originalDefault))
+    throw new Error(
+      "DESKTOP_CLOUD_KEYCHAIN_DEFAULT: an original default keychain is required",
+    );
+  writeFileSync(
+    join(temporary, "original-default-keychain.json"),
+    JSON.stringify(originalDefault),
+  );
   const password = randomBytes(32).toString("hex");
   run("security", ["create-keychain", "-p", password, keychain]);
   run("security", ["set-keychain-settings", "-lut", "21600", keychain]);
@@ -117,6 +128,9 @@ export function importMacCloudCredentials(
     keychain,
     ...originalKeychains,
   ]);
+  // The native credential check must use a fresh, unlocked OS store, not
+  // depend on the hosted runner's login Keychain state. CI context is required.
+  run("security", ["default-keychain", "-d", "user", "-s", keychain]);
   // notarytool accepts its secure interactive password prompt through stdin.
   // Keep the app password out of argv and all command output.
   run(
@@ -151,6 +165,19 @@ export function cleanupMacCloudCredentials(
     "trainingload-desktop-signing",
   );
   if (!existsSync(temporary)) return;
+  const originalDefault = join(temporary, "original-default-keychain.json");
+  if (existsSync(originalDefault))
+    execute(
+      "security",
+      [
+        "default-keychain",
+        "-d",
+        "user",
+        "-s",
+        JSON.parse(readFileSync(originalDefault, "utf8")),
+      ],
+      { stdio: "pipe" },
+    );
   const original = join(temporary, "original-keychains.json");
   if (existsSync(original))
     execute(
