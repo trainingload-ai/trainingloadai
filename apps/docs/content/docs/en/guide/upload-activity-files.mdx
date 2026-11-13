@@ -1,6 +1,6 @@
 ---
 title: Upload Activity Files
-description: Upload GPX, TCX, or FIT activity files to Trainingload.ai and understand duplicate checks, import batches, processing status, and post-import analysis.
+description: Upload FIT, TCX or GPX files from the web Activities page, follow import progress, find your recordings, and resolve duplicate or failed uploads.
 keywords:
   [
     "upload FIT file",
@@ -13,98 +13,79 @@ keywords:
 
 # Upload Activity Files
 
-Use file upload when you have activity files from a watch, bike computer, training platform, or exported archive.
+Upload a recording exported from your watch, bike computer or training platform to see its details, charts and training load in Trainingload.ai. These steps use the web app.
 
-Trainingload.ai supports the file-based workflow used by the activity import screen. After upload, files are processed as an import batch so you can see progress and failures clearly.
+## Prepare your files [#before-uploading]
 
-## Before uploading
-
-Check that the file is one of the supported activity formats:
-
-- GPX
-- TCX
-- FIT
-
-Before upload, the server uses TrackSwap to inspect the file contents and report the actual format, activity count, laps, and record points. The filename extension is only a hint: if GPX content is named `.fit`, for example, the interface shows `FIT → GPX` and processes the real content.
-
-For better analysis, prefer original files from the device or platform. Screenshots, CSV exports without time series, and manually edited files may not include enough data for charts or load metrics. A FIT file containing only health or all-day monitoring data, with no activity records, cannot be imported through the activity upload flow.
-
-## Convert between formats
-
-If another platform requires a different format, use the [FIT, GPX, and TCX converter](/converter) first. The general converter detects the source from the file contents. Direction-specific converter pages also validate the detected source format, preventing a misleading filename from being converted in the wrong direction. Conversion responses expose the TrackSwap-detected source format as well.
+Use FIT, TCX or GPX workout files. You can upload up to 100 files at once. Original files exported from your device or platform give you the best chance of retaining heart rate, power and route data.
 
 ## Upload from Activities
 
-1. Open **Activities**.
-2. Choose the upload action.
-3. Select one or more files.
-4. Confirm the upload.
-5. Keep the import progress dialog open or return later from the recent import batch button.
+1. Click **Activities** in the left sidebar to open the Activities page.
+2. In the **Upload activity files** card on the far right, click **Choose activity files**.
 
 <DocsScreenshot
   id="activity-upload-location"
   title="Find the upload action on Activities"
-  description="Open Activities, then select Choose activity files."
+  description="Click Activities in the left sidebar, then Choose activity files in the card on the far right."
   imageAlt="The complete Activities page with app navigation and the Choose activity files button"
-  route="Activities → Choose activity files"
+  route="Left sidebar: Activities → Right-hand card: Choose activity files"
 />
+
+3. Drag the files you want to import into the dialog, or click the file-selection area to choose them.
+4. Click **Upload** in the bottom-right corner of the dialog.
 
 <DocsScreenshot
   id="activity-import-entry"
-  title="Select files before starting the import batch"
-  description="Synthetic Web account. Choose original activity files, review their inspection result, then use the upload action. Batch progress is shown separately after submission."
+  title="Select files and upload"
+  description="Drag files into the dialog or click to choose them, then click Upload in the bottom-right corner."
   imageAlt="Activity upload dialog with file selection and a separate upload action"
-  route="Activities → Upload"
+  route="Upload dialog: Choose files → Upload"
   demoLabel="Browse existing Demo activities"
 />
 
-If Trainingload.ai detects possible duplicates, review the duplicate warning before continuing. You can cancel, keep the existing activity, or force a new import when you intentionally want a separate copy.
+The import progress dialog opens after upload and shows the result for each file.
 
-## Import statuses
+## Follow import progress [#import-statuses]
 
-During import, each item may move through states such as:
+You can keep browsing while the files are imported. If you close the dialog, click **Import Progress** on the Activities page to reopen it.
 
-- **Queued**: waiting to be processed.
-- **Normalizing**: converting the source file into the internal activity format.
-- **Materializing**: creating or updating the activity record.
-- **Parquet building**: preparing time-series data for charts and analysis.
-- **Done**: import completed.
-- **Skipped**: not imported, usually because it matched an existing activity.
-- **Failed**: the file could not be processed.
+| Status shown | What to do |
+| --- | --- |
+| Queued, Normalizing, Materializing, Building analysis | Your files are still being processed. Wait for the import to finish. |
+| Done | Return to Activities to find the recording. |
+| Skipped | A matching recording usually already exists. Look for it in Activities. |
+| Failed, Dead | Read the message beside the file and try the troubleshooting steps below. |
 
-The batch can finish as completed, partially failed, failed, or cancelled.
+## Find your imported activities [#after-upload]
 
-## After upload
+Once the import is complete, click **Activities** in the left sidebar. Find your recording by its workout date and click it to view duration, distance, charts and training load.
 
-Once processing is complete:
-
-- Open the new activity from the import dialog or activity feed.
-- Check whether key metrics are present.
-- Confirm sport type if it was inferred incorrectly.
-- Link the activity to a planned workout if it belongs to a training plan.
-- Ask AI Coach to review the session if you want context.
-
-For ongoing review and filtering, see [Activities Feed and Search](/docs/guide/activity-feed-search).
-
-## Verify the result
-
-- Every selected file has a terminal Done, Skipped, Failed, or cancelled result.
-- A Done file creates one activity with the expected start time, sport, and duration.
-- A Skipped duplicate points to an activity that already exists.
-- Activity Detail shows only the metrics supported by the source data.
-- The imported activity is linked to a plan only after its identity is confirmed.
+See [Activities Feed and Search](/docs/guide/activity-feed-search) and [Activity Details](/docs/guide/activity-detail) for a page tour.
 
 ## Troubleshooting
 
-If a file fails:
+### The Upload button is disabled
 
-- Export the original activity again from the source platform.
-- Avoid editing the file manually before upload.
-- Check whether the file contains time-series data.
-- Check the detected format and any extension mismatch shown beside the file.
-- Try importing one file at a time to isolate the failing file.
+Choose your files first. If they are still being checked, wait a moment. If a file shows an error, follow the message or remove that file before trying again.
 
-If analysis looks incomplete, the file may lack heart rate, power, GPS, elevation, or pace data. Trainingload.ai can still show the activity, but some metrics may be unavailable or estimated.
+### I see a duplicate warning
+
+If the workout is already in Activities, you can keep the existing recording or cancel the upload. Only force a new import if you want to keep a separate copy.
+
+### A file fails to upload or import
+
+Read the message beside the file. Try exporting the original FIT, TCX or GPX file from your device or platform again, then upload that file on its own. Changing a filename extension does not convert the file.
+
+Screenshots, ordinary CSV spreadsheets, and FIT files containing only all-day health data cannot be used here to import a workout recording.
+
+### My recording has no heart rate, power or route
+
+Wait for activity processing to finish first. Charts need the corresponding data in the original recording. An indoor workout without GPS, for example, will not show a route. Check the source platform and try exporting its original workout file again.
+
+## Need another file format? [#convert-between-formats]
+
+Uploads support FIT, TCX and GPX, so conversion is usually unnecessary. If you also need the file for another platform, use the [FIT, GPX and TCX converter](/converter).
 
 ## Next steps
 
