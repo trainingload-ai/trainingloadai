@@ -1,3 +1,4 @@
+import { AthleteStateUpdatesModule } from './updates/athlete-state-updates.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { HealthDataModule } from '@/health-data/health-data.module';
@@ -13,6 +14,7 @@ import { AthleteStateMemoryInvalidationListener } from './application/athlete-st
 
 @Module({
   imports: [
+    AthleteStateUpdatesModule,
     PrismaModule,
     HealthDataModule,
     LoadReadoutModule,

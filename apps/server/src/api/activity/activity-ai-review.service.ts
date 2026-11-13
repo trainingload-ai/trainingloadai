@@ -428,17 +428,6 @@ export class ActivityAiReviewService {
       .evidenceSnapshot as unknown as Prisma.InputJsonValue;
 
     await this.prisma.$transaction(async (tx) => {
-      await this.aiUsage.recordUsageEventInTransaction(tx, {
-        userId: args.prepared.review.userId,
-        operationId: args.operationId,
-        callKey: `${args.operationId}:background-aggregate`,
-        kind: $Enums.AiUsageKind.ACTIVITY_ANALYSIS,
-        provider: args.provider,
-        model: args.model,
-        usage: args.usage,
-        entityId: String(args.prepared.review.activityId),
-        now,
-      });
       await tx.activityAiReview.update({
         where: { id: args.prepared.review.id },
         data: {

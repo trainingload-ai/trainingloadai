@@ -1218,7 +1218,9 @@
       "monthlyReview": "Revisión mensual",
       "planReview": "Revisión del plan",
       "saved": "Revisar la configuración guardada",
-      "saveFailed": "No se pudo guardar la configuración de revisión"
+      "saveFailed": "No se pudo guardar la configuración de revisión",
+      "athleteState": "Evaluación automática del estado",
+      "athleteStateDetail": "Actualiza el estado con cambios relevantes de entrenamiento o recuperación. La plataforma cubre el coste de las evaluaciones automáticas con IA."
     },
     "dataExport": {
       "title": "Exportar todos los datos",

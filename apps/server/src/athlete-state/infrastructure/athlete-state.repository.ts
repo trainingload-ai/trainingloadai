@@ -1,3 +1,7 @@
+import {
+  guardAthleteStateWrite,
+  guardedAthleteStateWrite,
+} from '@/athlete-state/updates/athlete-state-execution-context';
 import { Injectable } from '@nestjs/common';
 import {
   CoachAssessmentCaseStatus,
@@ -71,6 +75,7 @@ export class AthleteStateRepository {
     model?: string;
     promptVersion?: string;
     preserveCaseId?: string;
+    preserveCaseIds?: string[];
   }) {
     const promptVersion = args.promptVersion ?? ATHLETE_STATE_PROMPT_VERSION;
     const uniqueWhere = {
@@ -83,6 +88,7 @@ export class AthleteStateRepository {
     } as const;
     try {
       return await this.prisma.$transaction(async (tx) => {
+        await guardAthleteStateWrite(tx);
         const existing = await tx.athleteStateAssessment.findUnique({
           where: uniqueWhere,
         });
@@ -129,8 +135,17 @@ export class AthleteStateRepository {
           await tx.coachAssessmentCase.updateMany({
             where: {
               assessmentId: { in: previous.map((row) => row.id) },
-              ...(args.preserveCaseId
-                ? { id: { not: args.preserveCaseId } }
+              ...(args.preserveCaseIds?.length || args.preserveCaseId
+                ? {
+                    id: {
+                      notIn: [
+                        ...new Set([
+                          ...(args.preserveCaseIds ?? []),
+                          ...(args.preserveCaseId ? [args.preserveCaseId] : []),
+                        ]),
+                      ],
+                    },
+                  }
                 : {}),
               status: { in: [...ACTIVE_COACH_ASSESSMENT_CASE_STATUSES] },
             },
@@ -159,6 +174,7 @@ export class AthleteStateRepository {
   async invalidateForUser(userId: string) {
     const now = new Date();
     return this.prisma.$transaction(async (tx) => {
+      await guardAthleteStateWrite(tx);
       const assessments = await tx.athleteStateAssessment.updateMany({
         where: { userId, supersededAt: null },
         data: { supersededAt: now },

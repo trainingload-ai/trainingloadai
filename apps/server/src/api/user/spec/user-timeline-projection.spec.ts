@@ -75,6 +75,13 @@ describe('UserService.applyTimelineProjectionBatch', () => {
       events as never,
       users,
       analysisConfigs(prisma, users),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
     const effectiveAt = new Date('2026-01-01T12:34:56.789Z');
 
@@ -181,6 +188,13 @@ describe('UserService.applyTimelineProjectionBatch', () => {
       { emitAsync: jest.fn(async () => []) } as never,
       users,
       analysisConfigs(prisma, users),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
 
     const result = await service.saveTimelineEstimatesBatch(
@@ -236,6 +250,13 @@ describe('UserService.applyTimelineProjectionBatch', () => {
       { emitAsync: jest.fn(async () => []) } as never,
       users,
       analysisConfigs(prisma, users),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
     const asOf = new Date('2020-01-01T00:00:00.000Z');
 
@@ -335,6 +356,13 @@ describe('UserService.applyTimelineProjectionBatch', () => {
       { emitAsync: jest.fn(async () => []) } as never,
       users,
       analysisConfigs(prisma, users),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
     return { service, tx, created };
   }

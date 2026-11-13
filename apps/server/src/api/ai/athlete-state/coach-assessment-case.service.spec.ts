@@ -55,6 +55,7 @@ describe('CoachAssessmentCaseService', () => {
     branching as never,
     queries as never,
     events as never,
+    { requestUpdate: jest.fn(async () => ({})) } as never,
   );
 
   beforeEach(() => {

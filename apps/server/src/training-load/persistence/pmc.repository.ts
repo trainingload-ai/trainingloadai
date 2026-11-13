@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -33,7 +34,10 @@ export type PmcLoadSums = {
 
 @Injectable()
 export class PmcRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly updates: AthleteStateUpdates,
+  ) {}
 
   findFirst<T extends Prisma.PMCDataFindFirstArgs>(
     args?: Prisma.SelectSubset<T, Prisma.PMCDataFindFirstArgs>,
@@ -154,46 +158,82 @@ export class PmcRepository {
     userId: string,
     results: PmcDailyUpsertRow[],
     version: string,
+    requestStateUpdate = false,
   ) {
-    const operations = results.map((result) =>
-      this.prisma.pMCData.upsert({
-        where: {
-          userId_date: {
-            userId,
-            date: result.date,
-          },
-        },
-        update: {
-          dailyValue: result.dailyValue,
-          CTL: result.ctl,
-          ATL: result.atl,
-          TSB: result.tsb,
-          cyclingValue: result.cyclingValue,
-          runningValue: result.runningValue,
-          swimmingValue: result.swimmingValue,
-          otherValue: result.otherValue,
-          activityCount: result.activityCount,
-          totalDuration: result.totalDuration,
-          version,
-          updatedAt: new Date(),
-        },
-        create: {
-          userId,
-          date: result.date,
-          dailyValue: result.dailyValue,
-          CTL: result.ctl,
-          ATL: result.atl,
-          TSB: result.tsb,
-          cyclingValue: result.cyclingValue,
-          runningValue: result.runningValue,
-          swimmingValue: result.swimmingValue,
-          otherValue: result.otherValue,
-          activityCount: result.activityCount,
-          totalDuration: result.totalDuration,
-          version,
-        },
-      }),
+    return this.prisma.$transaction(
+      async (tx) => {
+        const since = new Date(Date.now() - 35 * 86_400_000);
+        const through = new Date();
+        const read = () =>
+          tx.pMCData.findMany({
+            where: { userId, date: { gte: since, lte: through } },
+            orderBy: { date: 'asc' },
+            select: {
+              date: true,
+              dailyValue: true,
+              CTL: true,
+              ATL: true,
+              TSB: true,
+              cyclingValue: true,
+              runningValue: true,
+              swimmingValue: true,
+              otherValue: true,
+              activityCount: true,
+              totalDuration: true,
+            },
+          });
+        const before = requestStateUpdate ? await read() : null;
+        const operations = results.map((result) =>
+          tx.pMCData.upsert({
+            where: {
+              userId_date: {
+                userId,
+                date: result.date,
+              },
+            },
+            update: {
+              dailyValue: result.dailyValue,
+              CTL: result.ctl,
+              ATL: result.atl,
+              TSB: result.tsb,
+              cyclingValue: result.cyclingValue,
+              runningValue: result.runningValue,
+              swimmingValue: result.swimmingValue,
+              otherValue: result.otherValue,
+              activityCount: result.activityCount,
+              totalDuration: result.totalDuration,
+              version,
+              updatedAt: new Date(),
+            },
+            create: {
+              userId,
+              date: result.date,
+              dailyValue: result.dailyValue,
+              CTL: result.ctl,
+              ATL: result.atl,
+              TSB: result.tsb,
+              cyclingValue: result.cyclingValue,
+              runningValue: result.runningValue,
+              swimmingValue: result.swimmingValue,
+              otherValue: result.otherValue,
+              activityCount: result.activityCount,
+              totalDuration: result.totalDuration,
+              version,
+            },
+          }),
+        );
+        const saved = await Promise.all(operations);
+        if (
+          requestStateUpdate &&
+          JSON.stringify(before) !== JSON.stringify(await read())
+        )
+          await this.updates.requestUpdate(
+            { userId, triggerType: 'PMC_UPDATED' },
+            tx,
+          );
+        return saved;
+      },
+      { timeout: 30_000 },
     );
-    return this.prisma.$transaction(operations);
   }
 }

@@ -45,6 +45,7 @@ export type AthleteStateEvidenceSnapshot = {
   localDate: string;
   timezone: string;
   recordedFacts: {
+    fitness?: Array<Record<string, unknown>>;
     physiology: Record<string, RecordedMetricPoint[]>;
     training: {
       activities: Array<Record<string, unknown>>;

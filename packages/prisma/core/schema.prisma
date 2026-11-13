@@ -314,6 +314,8 @@ enum SettingCategory {
   FITNESS_STATUS_LAYOUT
   /// AI 复盘模式开关（0/1 or false/true）
   AI_REVIEW_MODE
+  /// Automatic Athlete State assessments; unset means enabled.
+  ATHLETE_STATE_AUTO_ENABLED
   /// 第三方 AI 数据共享同意（版本化 JSON，由专用接口写入）
   AI_DATA_CONSENT
   /// 跨对话 Athlete Memory 用户开关（版本化 JSON，由专用接口写入）
@@ -1228,6 +1230,7 @@ model T_user {
   athleteMemoryEvidence             AthleteMemoryEvidence[]
   athleteMemoryEvents               AthleteMemoryEvent[]
   aiCoachMemoryExtractionJobs       AiCoachMemoryExtractionJob[]
+  athleteStateUpdates               AthleteStateUpdate?
   athleteStateAssessments           AthleteStateAssessment[]
   coachAssessmentCases              CoachAssessmentCase[]
   aiUsageEvents                     AiUsageEvent[]
@@ -1256,7 +1259,7 @@ model T_user {
   userAnalysisConfigVersions        UserAnalysisConfigVersion[]
   userAutoUpdateConfigVersions      UserAutoUpdateConfigVersion[]
   activityFitnessMetricsSnapshots   ActivityFitnessMetricsSnapshot[]
-  vdotForecastSnapshots              VdotForecastSnapshot[]
+  vdotForecastSnapshots             VdotForecastSnapshot[]
   activityAiReviews                 ActivityAiReview[]
   activityMapThumbJobs              ActivityMapThumbJob[]
   calendarSubscriptions             CalendarSubscription[]
@@ -1443,7 +1446,7 @@ model ExternalProviderConnection {
 
   planWorkoutMappings PlanWorkoutExternalMapping[]
   routeMappings       RouteExternalMapping[]
-  personalJobs PersonalProviderJob[]
+  personalJobs        PersonalProviderJob[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1458,21 +1461,21 @@ model ExternalProviderConnection {
 /// Personal integrations use durable discovery/checkpoint and delivery jobs.
 /// Payload/result never contain credentials or signed download URLs.
 model PersonalProviderJob {
-  id String @id @default(cuid())
-  connectionId String @map("connection_id")
-  connection ExternalProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  requestId String @map("request_id")
-  dedupKey String? @map("dedup_key")
-  kind String
-  status String @default("QUEUED")
-  payload Json
-  result Json?
-  errorCode String? @map("error_code")
-  attempts Int @default(0)
-  nextAttemptAt DateTime @default(now()) @map("next_attempt_at")
-  leaseUntil DateTime? @map("lease_until")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String                     @id @default(cuid())
+  connectionId  String                     @map("connection_id")
+  connection    ExternalProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  requestId     String                     @map("request_id")
+  dedupKey      String?                    @map("dedup_key")
+  kind          String
+  status        String                     @default("QUEUED")
+  payload       Json
+  result        Json?
+  errorCode     String?                    @map("error_code")
+  attempts      Int                        @default(0)
+  nextAttemptAt DateTime                   @default(now()) @map("next_attempt_at")
+  leaseUntil    DateTime?                  @map("lease_until")
+  createdAt     DateTime                   @default(now()) @map("created_at")
+  updatedAt     DateTime                   @updatedAt @map("updated_at")
 
   @@unique([connectionId, requestId])
   @@unique([connectionId, dedupKey])
@@ -4251,26 +4254,26 @@ model ActivityParquetFile {
 
 /// Per-user maintenance ledger. A failed or unverified user blocks the next one.
 model ActivityDataMigration {
-  id                 String   @id @default(cuid())
-  userId             String   @map("user_id")
-  user               T_user   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  runKey             String   @map("run_key")
-  version            String
-  sequence           Int
-  status             String   @default("PENDING")
-  phase              String   @default("RAW_SCAN")
-  backupEvidence     Json     @map("backup_evidence")
-  beforeManifest     Json?    @map("before_manifest")
-  verification       Json?
-  rawCursor          String?  @map("raw_cursor")
-  importBatchIds     Json     @default("[]") @map("import_batch_ids")
-  recomputeJobId     String?  @map("recompute_job_id")
-  replayFrom         DateTime? @map("replay_from")
-  errorCode          String?  @map("error_code")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-  verifiedAt         DateTime? @map("verified_at")
-  retainedObjects    StorageObjectRetention[]
+  id              String                   @id @default(cuid())
+  userId          String                   @map("user_id")
+  user            T_user                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runKey          String                   @map("run_key")
+  version         String
+  sequence        Int
+  status          String                   @default("PENDING")
+  phase           String                   @default("RAW_SCAN")
+  backupEvidence  Json                     @map("backup_evidence")
+  beforeManifest  Json?                    @map("before_manifest")
+  verification    Json?
+  rawCursor       String?                  @map("raw_cursor")
+  importBatchIds  Json                     @default("[]") @map("import_batch_ids")
+  recomputeJobId  String?                  @map("recompute_job_id")
+  replayFrom      DateTime?                @map("replay_from")
+  errorCode       String?                  @map("error_code")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
+  verifiedAt      DateTime?                @map("verified_at")
+  retainedObjects StorageObjectRetention[]
 
   @@unique([runKey, userId])
   @@unique([runKey, sequence])
@@ -4280,13 +4283,13 @@ model ActivityDataMigration {
 
 /// A verified migration keeps its old objects until an explicit recovery-window release.
 model StorageObjectRetention {
-  id           String   @id @default(cuid())
-  migrationId  String   @map("migration_id")
-  migration    ActivityDataMigration @relation(fields: [migrationId], references: [id], onDelete: Cascade)
-  bucket       String   @default("default")
-  objectKey    String   @map("object_key")
-  createdAt    DateTime @default(now()) @map("created_at")
-  releasedAt   DateTime? @map("released_at")
+  id          String                @id @default(cuid())
+  migrationId String                @map("migration_id")
+  migration   ActivityDataMigration @relation(fields: [migrationId], references: [id], onDelete: Cascade)
+  bucket      String                @default("default")
+  objectKey   String                @map("object_key")
+  createdAt   DateTime              @default(now()) @map("created_at")
+  releasedAt  DateTime?             @map("released_at")
 
   @@unique([migrationId, bucket, objectKey])
   @@index([bucket, objectKey, releasedAt])
@@ -6310,4 +6313,28 @@ enum HealthMeasurementOrigin {
   UNKNOWN
 
   @@map("enum_health_measurement_origin")
+}
+
+/// One durable coalescing scheduler per athlete; no health values or answer text.
+model AthleteStateUpdate {
+  userId           String    @id @map("user_id")
+  user             T_user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           String    @default("PENDING")
+  requestedVersion Int       @default(0) @map("requested_version")
+  runningVersion   Int       @default(0) @map("running_version")
+  completedVersion Int       @default(0) @map("completed_version")
+  availableAt      DateTime? @map("available_at") @db.Timestamptz(3)
+  nextAvailableAt  DateTime? @map("next_available_at") @db.Timestamptz(3)
+  pendingTriggers  Json      @default("[]") @map("pending_triggers")
+  runningTriggers  Json      @default("[]") @map("running_triggers")
+  leaseToken       String?   @map("lease_token")
+  leaseExpiresAt   DateTime? @map("lease_expires_at") @db.Timestamptz(3)
+  heartbeatAt      DateTime? @map("heartbeat_at") @db.Timestamptz(3)
+  attempts         Int       @default(0)
+  lastError        String?   @map("last_error")
+  updatedAt        DateTime  @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  @@index([status, availableAt], map: "t_athlete_state_update_due_idx")
+  @@index([status, leaseExpiresAt], map: "t_athlete_state_update_lease_idx")
+  @@map("t_athlete_state_update")
 }

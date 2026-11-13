@@ -99,7 +99,6 @@ function createAiService(args?: {
     args?.guard ?? new ReviewModelCallGuard(),
     undefined,
     { isGranted: jest.fn(async () => true) } as never,
-    { recordUsageEvent } as never,
     { runBackgroundCoachTask: create } as never,
   );
   return { service, recordUsageEvent, create };
@@ -191,23 +190,14 @@ describe('ReviewDigestService AI usage accounting', () => {
   };
 
   it('records automatic digest generation as platform-paid usage', async () => {
-    const { service, recordUsageEvent } = createAiService();
+    const { service, recordUsageEvent, create } = createAiService();
 
     await expect(service.generateAiSummaryMarkdown(request)).resolves.toEqual(
       expect.objectContaining({ markdown: '## AI review', model: 'model' }),
     );
-    expect(recordUsageEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userId: 'user-1',
-        kind: 'REVIEW_WEEKLY',
-        provider: 'openrouter',
-        model: 'model',
-        usage: expect.objectContaining({
-          inputTokens: 900,
-          cachedInputTokens: 300,
-          outputTokens: 100,
-        }),
-      }),
+    expect(recordUsageEvent).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ funding: 'PLATFORM' }),
     );
   });
 

@@ -93,4 +93,23 @@ export class CoachAssessmentCaseQueryService {
       },
     });
   }
+  async answerEvidence(userId: string, questionId: string) {
+    const question = await this.prisma.coachAssessmentQuestion.findFirst({
+      where: {
+        id: questionId,
+        case: { userId },
+        answerMessageId: { not: null },
+      },
+    });
+    return question?.answer
+      ? [
+          {
+            evidenceKind: question.evidenceKind,
+            answer: question.answer,
+            eventStart: question.eventStart?.toISOString() ?? null,
+            eventEnd: question.eventEnd?.toISOString() ?? null,
+          },
+        ]
+      : undefined;
+  }
 }

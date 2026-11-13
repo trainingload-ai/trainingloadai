@@ -57,6 +57,7 @@ describe('IntervalsIcuWebhookService', () => {
       resolveConnectionCredential: jest.fn(),
     } as unknown as jest.Mocked<IntervalsIcuCredentialService>;
     const userService = {
+      getPreferredTimezone: jest.fn(async () => 'Asia/Shanghai'),
       upsertImportedFitnessMetric: jest.fn(),
     } as unknown as jest.Mocked<UserService>;
     const inbox = {
@@ -202,14 +203,48 @@ describe('IntervalsIcuWebhookService', () => {
         managedMetricTypes: [
           'BODY_MASS_KG',
           'RESTING_HEART_RATE_BPM',
-          'HRV_SDNN_MS',
+          'HRV_RMSSD_MS',
         ],
         candidates: expect.arrayContaining([
           expect.objectContaining({
-            metricType: 'HRV_SDNN_MS',
+            metricType: 'HRV_RMSSD_MS',
             value: 35,
+            timezone: 'Asia/Shanghai',
+            startTime: new Date('2026-07-04T16:00:00.000Z'),
+            endTime: new Date('2026-07-05T16:00:00.000Z'),
           }),
         ]),
+      }),
+    );
+  });
+
+  it('uses the source account timezone for wellness before the local account fallback', async () => {
+    const { healthDataIngest, prisma, service, userService } = createService();
+    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce({
+      id: 'connection-1',
+      userId: 'user-1',
+      externalAthleteId: 'athlete-1',
+      syncWellness: true,
+      metadata: { profile: { athlete: { timezone: 'America/New_York' } } },
+    } as never);
+    await service.processEvent({
+      type: 'WELLNESS_UPDATED',
+      athlete_id: 'athlete-1',
+      records: [{ id: '2026-03-08', weight: 70 }],
+    });
+    expect(userService.getPreferredTimezone).not.toHaveBeenCalled();
+    expect(
+      healthDataIngest.replaceProviderDailyCandidates,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        localDate: new Date('2026-03-08T00:00:00Z'),
+        candidates: [
+          expect.objectContaining({
+            timezone: 'America/New_York',
+            startTime: new Date('2026-03-08T05:00:00Z'),
+            endTime: new Date('2026-03-09T04:00:00Z'),
+          }),
+        ],
       }),
     );
   });

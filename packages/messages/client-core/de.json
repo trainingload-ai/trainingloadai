@@ -1218,7 +1218,9 @@
       "monthlyReview": "Monatlicher Rückblick",
       "planReview": "Planüberprüfung",
       "saved": "Überprüfungseinstellungen gespeichert",
-      "saveFailed": "Überprüfungseinstellungen konnten nicht gespeichert werden"
+      "saveFailed": "Überprüfungseinstellungen konnten nicht gespeichert werden",
+      "athleteState": "Automatische Zustandsbewertung",
+      "athleteStateDetail": "Aktualisiert den Trainingszustand bei relevanten Trainings- oder Erholungsdaten. Die Plattform trägt die Kosten automatischer KI-Bewertungen."
     },
     "dataExport": {
       "title": "Alle Daten exportieren",

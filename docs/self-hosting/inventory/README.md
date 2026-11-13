@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 286 |
-| External URL literals | 189 |
+| Environment variables | 287 |
+| External URL literals | 191 |
 | Filesystem write sites | 220 |
-| Runtime variables missing from configuration docs | 223 |
+| Runtime variables missing from configuration docs | 224 |
 
 ## Undocumented runtime variables
 
@@ -92,6 +92,7 @@
 - `ALIYUN_STREAM_IDLE_TIMEOUT_MS` — apps
 - `ANALYZE_RECOMPUTE_WINDOW_DAYS` — apps
 - `APP_VERSION` — apps
+- `ATHLETE_STATE_UPDATE_DELAY_MS` — apps
 - `AUTH_SECRET` — apps
 - `BETTER_AUTH_URL` — apps
 - `CALENDAR_FEED_PUBLIC_URL` — apps

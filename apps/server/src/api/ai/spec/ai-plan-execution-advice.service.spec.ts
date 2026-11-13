@@ -29,7 +29,6 @@ describe('plan execution advice grounding', () => {
     };
     const service = new AiPlanExecutionAdviceService(
       aiService as never,
-      aiUsage as never,
       prisma as never,
       planExecutionContext as never,
       createAiFallbackI18n(),

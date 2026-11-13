@@ -130,7 +130,9 @@ export interface IntervalsIcuWellness {
   updated?: string | null;
   weight?: number | null;
   restingHR?: number | null;
+  /** rMSSD in milliseconds; distinct from SDNN. */
   hrv?: number | null;
+  /** SDNN in milliseconds. */
   hrvSDNN?: number | null;
   sleepSecs?: number | null;
   sleepScore?: number | null;
@@ -142,6 +144,8 @@ export interface IntervalsIcuWellness {
   mood?: number | null;
   readiness?: number | null;
   sportInfo?: IntervalsIcuSportInfo[] | null;
+  tempWeight?: boolean;
+  tempRestingHR?: boolean;
 }
 
 /** OpenAPI `SportInfo`（嵌在 Wellness.sportInfo）。 */

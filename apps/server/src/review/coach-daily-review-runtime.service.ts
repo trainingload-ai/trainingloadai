@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { $Enums } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AiService } from '@/api/ai/ai.service';
-import { AiUsageService } from '@/api/ai/ai-usage.service';
 import { CoachBranchingService } from '@/api/ai/coach-branching.service';
 import { CoachContextService } from '@/api/plan/coach-context.service';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
@@ -65,7 +64,6 @@ export class CoachDailyReviewRuntimeService {
     private readonly coachContext: CoachContextService,
     private readonly branching: CoachBranchingService,
     private readonly aiService: AiService,
-    private readonly aiUsage: AiUsageService,
     private readonly userService: UserService,
     private readonly i18n: I18nService,
     private readonly planQuery: PlanQueryService,
@@ -266,11 +264,7 @@ export class CoachDailyReviewRuntimeService {
         composition,
       },
     });
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: args.userId,
-      triggerType: 'REVIEW_DAILY',
-      triggerRef: args.digestId,
-    });
+
     return finalJudgment.decision === 'ADJUST'
       ? {
           skipped: false,
@@ -316,14 +310,7 @@ export class CoachDailyReviewRuntimeService {
           }),
         { failureReason: reviewUsageFailureReason },
       );
-      await this.aiUsage.recordUsageEvent({
-        userId: args.userId,
-        kind: $Enums.AiUsageKind.REVIEW_DAILY,
-        provider: result.provider,
-        model: result.model,
-        usage: result.usage,
-        sid: 'coach-daily-review-runtime-v4',
-      });
+
       return {
         decision: result.decision,
         presentation: result.presentation,

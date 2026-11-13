@@ -6,7 +6,6 @@ import type {
 } from '@/athlete-state/domain/athlete-state.contracts';
 import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
 import { getCoachModel } from '../core/coach-upstream.adapter';
-import { AiUsageService } from '../ai-usage.service';
 import { AiService } from '../ai.service';
 import {
   ATHLETE_STATE_ASSESSMENT_SYSTEM,
@@ -29,7 +28,6 @@ function reviewModel() {
 export class AthleteStateModelService {
   constructor(
     private readonly consent: AiDataConsentService,
-    private readonly usage: AiUsageService,
     private readonly ai: AiService,
   ) {}
 
@@ -146,6 +144,7 @@ export class AthleteStateModelService {
       triggerType: input.taskType,
       triggerRef: input.entityId,
       usageKind: AiUsageKind.OTHER,
+      funding: 'PLATFORM',
       model,
       allowedToolNames: input.allowedToolNames,
       instructions: [
@@ -171,18 +170,7 @@ export class AthleteStateModelService {
         return parsed.data;
       },
     });
-    if (!task.replayed) {
-      await this.usage.recordUsageEvent({
-        userId: input.userId,
-        operationId: task.operationId,
-        callKey: `${task.operationId}:background-aggregate`,
-        kind: AiUsageKind.OTHER,
-        provider: task.provider,
-        model: task.model,
-        usage: task.usage,
-        entityId: input.entityId,
-      });
-    }
+
     return {
       result: task.result,
       model: task.model,

@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { describe, expect, it, jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
@@ -32,6 +33,7 @@ function createService() {
     service: new HealthDataIngestService(
       prisma as never,
       new HealthDataRepository(prisma as never),
+      { requestUpdate: jest.fn(async () => ({})) } as never,
     ),
   };
 }
@@ -55,6 +57,10 @@ describe('HealthDataIngestService', () => {
         providers: [
           HealthDataIngestService,
           HealthDataRepository,
+          {
+            provide: AthleteStateUpdates,
+            useValue: { requestUpdate: jest.fn(async () => ({})) },
+          },
           { provide: PrismaService, useValue: prisma },
         ],
       }).compile();

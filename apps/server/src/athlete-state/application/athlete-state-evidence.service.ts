@@ -1,3 +1,4 @@
+import { AthleteStateFitnessFacts } from '../updates/athlete-state-fitness-facts.service';
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { HealthDataQueryService } from '@/health-data/health-data-query.service';
@@ -24,6 +25,7 @@ const PHYSIOLOGY_METRICS = new Set([
   'SLEEP_ASLEEP_SECONDS',
   'SLEEP_SCORE',
   'STRESS_LEVEL_AVG',
+  'VO2_MAX',
 ]);
 
 const SUBJECTIVE_CATEGORIES = [
@@ -97,6 +99,7 @@ export class AthleteStateEvidenceService {
     private readonly loadReadout: LoadReadoutService,
     private readonly pmc: PMCService,
     private readonly memory: AthleteMemoryQueryService,
+    private readonly fitnessFacts: AthleteStateFitnessFacts,
   ) {}
 
   async build(input: {
@@ -421,6 +424,7 @@ export class AthleteStateEvidenceService {
       }
     }
 
+    const fitness = await this.fitnessFacts.read(input.userId, asOf);
     const snapshot: AthleteStateEvidenceSnapshot = {
       schemaVersion: 1,
       policyVersion: ATHLETE_STATE_POLICY_VERSION,
@@ -428,6 +432,7 @@ export class AthleteStateEvidenceService {
       localDate,
       timezone: input.timezone,
       recordedFacts: {
+        fitness,
         physiology,
         training: { activities, pmc: pmcFacts },
         subjective: subjectiveItems,

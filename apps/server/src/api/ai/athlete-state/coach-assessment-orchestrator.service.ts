@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import type { AthleteStateAssessment } from '@prisma/client';
@@ -123,7 +124,6 @@ export function shouldModelFollowupOutcome(input: {
 @Injectable()
 export class CoachAssessmentOrchestratorService {
   private readonly logger = new Logger(CoachAssessmentOrchestratorService.name);
-  private readonly running = new Map<string, Promise<unknown>>();
 
   constructor(
     private readonly commands: AthleteStateCommands,
@@ -135,54 +135,20 @@ export class CoachAssessmentOrchestratorService {
     private readonly cases: CoachAssessmentCaseService,
     private readonly caseQueries: CoachAssessmentCaseQueryService,
     private readonly consent: AiDataConsentService,
+    private readonly updates: AthleteStateUpdates,
     @Inject(FEATURE_ACCESS_POLICY)
     private readonly access: FeatureAccessPolicy,
   ) {}
 
-  @OnEvent(ATHLETE_STATE_REASSESS_REQUESTED_EVENT)
+  @OnEvent(ATHLETE_STATE_REASSESS_REQUESTED_EVENT, { suppressErrors: false })
   handleRequested(event: AthleteStateReassessRequestedEvent) {
-    void this.runOnce(event.userId, () =>
-      this.assess({
-        userId: event.userId,
-        triggerType: event.triggerType,
-        triggerRef: event.triggerRef,
-      }),
-    ).catch((error) => {
-      const response =
-        error instanceof HttpException ? error.getResponse() : null;
-      const code =
-        response && typeof response === 'object' && 'code' in response
-          ? response.code
-          : null;
-      const context = `user=${event.userId} triggerType=${event.triggerType} triggerRef=${event.triggerRef ?? 'none'}`;
-      if (
-        code === BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED ||
-        code === 'AI_ACCESS_REQUIRED'
-      ) {
-        this.logger.debug(
-          `Athlete State reassessment skipped ${context} reason=${error instanceof Error ? error.message : String(code)}`,
-        );
-        return;
-      }
-      this.logger.warn(
-        `Athlete State reassessment failed ${context} error=${error instanceof Error ? error.message : String(error)}`,
-      );
-    });
+    return this.updates.requestUpdate(event);
   }
 
   @OnEvent(COACH_ASSESSMENT_ANSWERED_EVENT, { suppressErrors: false })
   async handleAnswer(event: CoachAssessmentAnsweredEvent) {
     try {
-      await this.runOnce(event.userId, () =>
-        this.continueAfterAnswer({
-          userId: event.userId,
-          caseId: event.caseId,
-          questionId: event.questionId,
-          promptMessageId: event.promptMessageId,
-          answerMessageId: event.answerMessageId,
-          reply: event.reply,
-        }),
-      );
+      await this.continueAfterAnswer(event);
     } catch (error) {
       // The answer message and structured Question answer are already durable.
       // A transient model/source failure therefore becomes a scheduled retry,
@@ -198,8 +164,17 @@ export class CoachAssessmentOrchestratorService {
     triggerRef?: string;
     scopedAnswers?: Array<Record<string, unknown>>;
     preserveCaseId?: string;
+    answerQuestionId?: string;
+    scopeCaseIds?: string[];
+    answerQuestionIds?: string[];
+    explicit?: boolean;
   }) {
     if (!this.flags.evidenceEnabled()) return { disabled: true };
+    const skip = await this.updates.eligibility(
+      input.userId,
+      input.explicit === true,
+    );
+    if (skip) return { skipped: true, reason: skip };
     // Evidence includes private Memory and health data. Check eligibility
     // before even reading it; the model layer rechecks consent before I/O.
     await this.consent.assertGranted(input.userId);
@@ -213,11 +188,34 @@ export class CoachAssessmentOrchestratorService {
       this.users.getPreferredTimezone(input.userId),
       this.users.getPreferredLocale(input.userId),
     ]);
-    const scopedAnswers =
-      input.scopedAnswers ??
-      (input.preserveCaseId
-        ? await this.scopedAnswersForCase(input.userId, input.preserveCaseId)
-        : undefined);
+    const caseIds = [
+      ...new Set([
+        ...(input.scopeCaseIds ?? []),
+        ...(input.preserveCaseId ? [input.preserveCaseId] : []),
+      ]),
+    ];
+    const questionIds = [
+      ...new Set([
+        ...(input.answerQuestionIds ?? []),
+        ...(input.answerQuestionId && !input.preserveCaseId
+          ? [input.answerQuestionId]
+          : []),
+      ]),
+    ];
+    const scopedAnswers = input.scopedAnswers ?? [
+      ...(
+        await Promise.all(
+          caseIds.map((id) => this.scopedAnswersForCase(input.userId, id)),
+        )
+      ).flatMap((answers) => answers ?? []),
+      ...(
+        await Promise.all(
+          questionIds.map((id) =>
+            this.caseQueries.answerEvidence(input.userId, id),
+          ),
+        )
+      ).flatMap((answers) => answers ?? []),
+    ];
     const evidence = await this.commands.buildEvidence({
       userId: input.userId,
       timezone: timezone ?? 'UTC',
@@ -247,6 +245,7 @@ export class CoachAssessmentOrchestratorService {
         result,
         model: modeled.model,
         preserveCaseId: input.preserveCaseId,
+        preserveCaseIds: caseIds,
       });
       assessment = saved.assessment;
       // Another process may have persisted the same evidence first. The Case
@@ -422,12 +421,14 @@ export class CoachAssessmentOrchestratorService {
         input.caseId,
         question.id,
       );
-      await this.assess({
+      await this.cases.persistLateAnswer({
         userId: input.userId,
-        triggerType: 'LATE_CASE_ANSWER',
-        triggerRef: input.answerMessageId,
-        scopedAnswers: [scopedAnswer],
+        caseId: input.caseId,
+        questionId: question.id,
+        answerMessageId: input.answerMessageId,
+        answer: scopedAnswer.answer,
       });
+      await this.updates.wake(input.userId);
       return;
     }
     if (question.status !== 'PENDING') return;
@@ -444,22 +445,7 @@ export class CoachAssessmentOrchestratorService {
       },
     });
     if (!persisted.accepted) return;
-    const scopedAnswers = assessmentCase.questions
-      .filter((item) => item.status === 'ANSWERED' && item.answer)
-      .map((item) => ({
-        evidenceKind: item.evidenceKind,
-        answer: item.answer,
-        eventStart: item.eventStart?.toISOString() ?? null,
-        eventEnd: item.eventEnd?.toISOString() ?? null,
-      }));
-    scopedAnswers.push(scopedAnswer);
-    await this.assess({
-      userId: input.userId,
-      triggerType: 'CASE_ANSWER',
-      triggerRef: input.answerMessageId,
-      scopedAnswers,
-      preserveCaseId: input.caseId,
-    });
+    await this.updates.wake(input.userId);
   }
 
   private persistAnswer(input: {
@@ -482,21 +468,5 @@ export class CoachAssessmentOrchestratorService {
         eventStart: item.eventStart?.toISOString() ?? null,
         eventEnd: item.eventEnd?.toISOString() ?? null,
       }));
-  }
-
-  private runOnce<T>(userId: string, task: () => Promise<T>): Promise<T> {
-    const current = this.running.get(userId);
-    // Serialize per athlete instead of dropping the newer trigger. In
-    // particular, a structured answer must never be lost merely because a
-    // health-sync or Memory invalidation assessment is already running.
-    const queued = (
-      current ? current.catch(() => undefined) : Promise.resolve()
-    )
-      .then(task)
-      .finally(() => {
-        if (this.running.get(userId) === queued) this.running.delete(userId);
-      });
-    this.running.set(userId, queued);
-    return queued;
   }
 }

@@ -9,6 +9,7 @@ import { ImportBatchService } from '@/importing/import-batch.service';
 import { HealthDataIngestService } from '@/health-data/health-data-ingest.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { UserService } from '@/api/user/user.service';
+import { normalizeIanaTimezone } from '@/timezone/user-timezone-initializer.service';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
@@ -64,6 +65,7 @@ type IntervalsIcuFingerprintConnection = Pick<
 import {
   dateKeyFromWellness,
   INTERVALS_ICU_AUTHORITATIVE_DAILY_METRIC_TYPES,
+  INTERVALS_ICU_WELLNESS_SYNC_FIELDS,
   mapIntervalsIcuWellnessToHealthCandidates,
 } from './intervals-icu-health.mapper';
 import {
@@ -243,15 +245,17 @@ export class IntervalsIcuService {
     const normalizedAthleteId = cleanString(externalAthleteId);
     if (!normalizedAthleteId || normalizedAthleteId === '0') return;
 
-    const conflictingConnection = await this.providerConnections.model().findFirst({
-      where: {
-        provider: 'intervals_icu',
-        externalAthleteId: normalizedAthleteId,
-        status: 'ACTIVE',
-        userId: { not: userId },
-      },
-      select: { userId: true },
-    });
+    const conflictingConnection = await this.providerConnections
+      .model()
+      .findFirst({
+        where: {
+          provider: 'intervals_icu',
+          externalAthleteId: normalizedAthleteId,
+          status: 'ACTIVE',
+          userId: { not: userId },
+        },
+        select: { userId: true },
+      });
     if (conflictingConnection) {
       throw thirdPartyError(
         THIRD_PARTY_ERRORS.INTERVALS_ICU.ACCOUNT_ALREADY_CONNECTED,
@@ -557,15 +561,17 @@ export class IntervalsIcuService {
     // 验证运动员 ID 是否可用
     await this.assertExternalAthleteAvailable(userId, externalAthleteId);
     // 查找已存在的连接
-    const existingConnection = await this.providerConnections.model().findUnique({
-      where: {
-        userId_provider_region: {
-          userId,
-          provider: 'intervals_icu',
-          region: '',
+    const existingConnection = await this.providerConnections
+      .model()
+      .findUnique({
+        where: {
+          userId_provider_region: {
+            userId,
+            provider: 'intervals_icu',
+            region: '',
+          },
         },
-      },
-    });
+      });
     // 获取历史同步设置
     const existingMetadata = intervalsIcuMetadataOf(existingConnection);
     // 获取历史计划课同步设置
@@ -712,15 +718,17 @@ export class IntervalsIcuService {
    * 并在需要时排队首同步与计划课同步。
    */
   async connect(userId: string, dto: ConnectIntervalsIcuDto) {
-    const existingConnection = await this.providerConnections.model().findUnique({
-      where: {
-        userId_provider_region: {
-          userId,
-          provider: 'intervals_icu',
-          region: '',
+    const existingConnection = await this.providerConnections
+      .model()
+      .findUnique({
+        where: {
+          userId_provider_region: {
+            userId,
+            provider: 'intervals_icu',
+            region: '',
+          },
         },
-      },
-    });
+      });
     const apiKey = optionalApiKey(dto.apiKey);
     const existingMetadata = intervalsIcuMetadataOf(existingConnection);
     const existingPlanSync = intervalsIcuPlanSyncOf(existingMetadata);
@@ -1044,28 +1052,25 @@ export class IntervalsIcuService {
         credential,
         {
           ...window,
-          fields: [
-            'id',
-            'weight',
-            'restingHR',
-            'hrvSDNN',
-            'sleepSecs',
-            'sleepScore',
-            'avgSleepingHR',
-            'steps',
-            'vo2max',
-          ],
+          fields: INTERVALS_ICU_WELLNESS_SYNC_FIELDS,
         },
       );
       const metricTypes = new Set<string>();
       const dates = new Set<string>();
       let sampleCount = 0;
+      const wellnessTimezone =
+        normalizeIanaTimezone(
+          intervalsIcuMetadataOf(connection).profile?.athlete?.timezone,
+        ) ??
+        normalizeIanaTimezone(args.timezone) ??
+        (await this.userService?.getPreferredTimezone(args.userId));
       for (const record of wellnessRecords) {
         const dateKey = dateKeyFromWellness(record);
         if (!dateKey) continue;
         const candidates = mapIntervalsIcuWellnessToHealthCandidates({
           externalAthleteId: connection.externalAthleteId,
           connectionId: connection.id,
+          timezone: wellnessTimezone,
           record,
         });
         await this.healthDataIngest.replaceProviderDailyCandidates({
@@ -1090,10 +1095,12 @@ export class IntervalsIcuService {
       };
 
       const completedAt = new Date();
-      const latestConnection = await this.providerConnections.model().findUnique({
-        where: { id: connection.id },
-        select: { metadata: true },
-      });
+      const latestConnection = await this.providerConnections
+        .model()
+        .findUnique({
+          where: { id: connection.id },
+          select: { metadata: true },
+        });
       const existingMetadata = intervalsIcuMetadataOf(latestConnection);
       await this.providerConnections.model().update({
         where: { id: connection.id },

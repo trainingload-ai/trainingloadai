@@ -1217,7 +1217,9 @@
       "monthlyReview": "월간 리뷰",
       "planReview": "계획 검토",
       "saved": "검토 설정이 저장되었습니다.",
-      "saveFailed": "검토 설정을 저장하지 못했습니다."
+      "saveFailed": "검토 설정을 저장하지 못했습니다.",
+      "athleteState": "선수 상태 자동 평가",
+      "athleteStateDetail": "관련 훈련 또는 회복 데이터가 변경되면 상태를 업데이트합니다. 자동 AI 평가 비용은 플랫폼이 부담합니다."
     },
     "dataExport": {
       "title": "모든 데이터 내보내기",

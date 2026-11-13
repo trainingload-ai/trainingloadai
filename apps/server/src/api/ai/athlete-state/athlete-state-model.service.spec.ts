@@ -5,7 +5,7 @@ import {
 import { AthleteStateModelService } from './athlete-state-model.service';
 
 describe('AthleteStateModelService unified Agent execution', () => {
-  it('runs assessment through the background ToolLoopAgent and records its usage', async () => {
+  it('runs assessment through the background ToolLoopAgent without duplicating executor usage', async () => {
     const consent = { assertGranted: jest.fn().mockResolvedValue(undefined) };
     const usage = { recordUsageEvent: jest.fn().mockResolvedValue(undefined) };
     const runBackgroundCoachTask = jest.fn(async (input) => ({
@@ -34,7 +34,6 @@ describe('AthleteStateModelService unified Agent execution', () => {
     }));
     const service = new AthleteStateModelService(
       consent as never,
-      usage as never,
       { runBackgroundCoachTask } as never,
     );
 
@@ -61,13 +60,9 @@ describe('AthleteStateModelService unified Agent execution', () => {
         ]),
       }),
     );
-    expect(usage.recordUsageEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        operationId: 'operation-1',
-        callKey: 'operation-1:background-aggregate',
-        provider: 'test-provider',
-        model: 'test-model',
-      }),
+    expect(usage.recordUsageEvent).not.toHaveBeenCalled();
+    expect(runBackgroundCoachTask).toHaveBeenCalledWith(
+      expect.objectContaining({ funding: 'PLATFORM' }),
     );
   });
 });

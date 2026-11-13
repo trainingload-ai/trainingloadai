@@ -1,3 +1,5 @@
+import { AthleteStateUpdateWorker } from './athlete-state/athlete-state-update.worker';
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { FitnessCalculationModule } from '@/fitness-calculation/fitness-calculation.module';
 import { FitnessAssessmentApplyService } from './fitness-assessment-apply.service';
 import { FitnessAssessmentFollowupService } from './fitness-assessment-followup.service';
@@ -57,6 +59,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
 
 @Module({
   imports: [
+    AthleteStateUpdatesModule,
     PrismaModule,
     FitnessCalculationModule,
     NotificationDomainModule,
@@ -81,6 +84,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
   ],
   controllers: [AiController, CoachBranchingController, AiOperationsController],
   providers: [
+    AthleteStateUpdateWorker,
     DeepSeekWebEvidenceAdapter,
     ProviderWebEvidenceAdapter,
     {

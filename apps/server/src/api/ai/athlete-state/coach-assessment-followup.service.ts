@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import {
   Injectable,
   Logger,
@@ -24,6 +25,7 @@ export class CoachAssessmentFollowupService
     private readonly prisma: PrismaService,
     private readonly flags: AthleteStateFeatureFlags,
     private readonly orchestrator: CoachAssessmentOrchestratorService,
+    private readonly updates: AthleteStateUpdates,
     @Optional() private readonly capabilities?: RuntimeCapabilityService,
   ) {}
 
@@ -65,11 +67,7 @@ export class CoachAssessmentFollowupService
   }
 
   async poll() {
-    if (
-      this.running ||
-      !this.enabled()
-    )
-      return;
+    if (this.running || !this.enabled()) return;
     this.running = true;
     try {
       const now = new Date();
@@ -88,28 +86,29 @@ export class CoachAssessmentFollowupService
         select: { id: true, userId: true, revision: true, status: true },
       });
       for (const item of due) {
-        const claimed = await this.prisma.coachAssessmentCase.updateMany({
-          where: {
-            id: item.id,
-            revision: item.revision,
-            followUpAt: { lte: now },
-          },
-          data: { followUpAt: null, revision: { increment: 1 } },
-        });
-        if (claimed.count !== 1) continue;
-        try {
-          await this.orchestrator.assess({
-            userId: item.userId,
-            triggerType: 'FOLLOW_UP',
-            triggerRef: item.id,
-            preserveCaseId: item.status === 'RESOLVED' ? undefined : item.id,
+        await this.prisma.$transaction(async (tx) => {
+          const claimed = await tx.coachAssessmentCase.updateMany({
+            where: {
+              id: item.id,
+              revision: item.revision,
+              followUpAt: { lte: now },
+            },
+            data: { followUpAt: null, revision: { increment: 1 } },
           });
-        } catch (error) {
-          this.logger.warn(
-            `Athlete State follow-up failed case=${item.id} error=${error instanceof Error ? error.message : String(error)}`,
+          if (claimed.count !== 1) return;
+          await this.updates.requestUpdate(
+            {
+              userId: item.userId,
+              triggerType: 'FOLLOW_UP',
+              triggerRef: item.id,
+              preserveCaseId: item.status === 'RESOLVED' ? undefined : item.id,
+              mode: 'immediate',
+            },
+            tx,
           );
-        }
+        });
       }
+
       const expired = await this.prisma.coachAssessmentCase.findMany({
         where: {
           status: {

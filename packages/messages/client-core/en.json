@@ -1495,7 +1495,9 @@
       "monthlyReview": "Monthly review",
       "planReview": "Plan review",
       "saved": "Review settings saved",
-      "saveFailed": "Failed to save review settings"
+      "saveFailed": "Failed to save review settings",
+      "athleteState": "Automatic athlete state assessment",
+      "athleteStateDetail": "Update coaching state when relevant training or recovery facts change. Automatic AI costs are covered by the platform."
     },
     "dataExport": {
       "title": "Export all data",

@@ -12,6 +12,13 @@ function setup(profile: Record<string, unknown>, saved = false) {
     {} as never,
     {} as never,
     {} as never,
+    {
+      observe: async (
+        _userId: unknown,
+        _tx: unknown,
+        write: () => Promise<unknown>,
+      ) => write(),
+    } as never,
   );
   const read = jest
     .spyOn(service, 'getComposedUserProfile')

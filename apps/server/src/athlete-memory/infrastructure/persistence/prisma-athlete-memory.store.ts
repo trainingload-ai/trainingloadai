@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { Injectable } from '@nestjs/common';
 import {
   AthleteMemoryEpistemicStatus,
@@ -98,7 +99,10 @@ function candidateData(
  */
 @Injectable()
 export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly updates: AthleteStateUpdates,
+  ) {}
 
   async applyOperations(input: {
     jobId: string;
@@ -470,6 +474,24 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
       if (completed.count !== 1) {
         throw new MemoryValidationError('Extraction job lease was lost');
       }
+      if (applied > 0) {
+        const answer = await tx.coachAssessmentQuestion.findFirst({
+          where: {
+            answerMessageId: input.sourceMessageId,
+            case: { userId: input.userId },
+          },
+          select: { id: true },
+        });
+        if (!answer)
+          await this.updates.requestUpdate(
+            {
+              userId: input.userId,
+              triggerType: 'MEMORY_CHANGED',
+              triggerRef: input.sourceMessageId,
+            },
+            tx,
+          );
+      }
       return { applied, idempotent: false };
     });
   }
@@ -627,6 +649,14 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
           idempotencyKey: `user-correct:${input.factId}:${updated.version}`,
         },
       });
+      await this.updates.requestUpdate(
+        {
+          userId: input.userId,
+          triggerType: 'MEMORY_CHANGED',
+          triggerRef: input.factId,
+        },
+        tx,
+      );
       return updated as unknown as MemoryFactRecord;
     });
   }
@@ -714,6 +744,14 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
           where: { userId: input.userId, id: { in: jobIds } },
         });
       }
+      await this.updates.requestUpdate(
+        {
+          userId: input.userId,
+          triggerType: 'MEMORY_CHANGED',
+          triggerRef: input.factId,
+        },
+        tx,
+      );
       return true;
     });
   }
@@ -727,6 +765,11 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
         where: { userId },
       });
       await tx.aiCoachMemoryExtractionJob.deleteMany({ where: { userId } });
+      if (deleted.count)
+        await this.updates.requestUpdate(
+          { userId, triggerType: 'MEMORY_CHANGED' },
+          tx,
+        );
       return deleted.count;
     });
   }
@@ -864,6 +907,11 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
           sourceMessageId: { in: input.sourceMessageIds },
         },
       });
+      if (retracted)
+        await this.updates.requestUpdate(
+          { userId: input.userId, triggerType: 'MEMORY_CHANGED' },
+          tx,
+        );
       return retracted;
     };
     return transaction

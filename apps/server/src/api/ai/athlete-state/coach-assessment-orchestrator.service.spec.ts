@@ -29,6 +29,10 @@ function createOrchestrator() {
       throw new Error('MODEL_TEST_STOP');
     }),
   };
+  const updates = {
+    eligibility: jest.fn(async () => null),
+    requestUpdate: jest.fn(async (_input: unknown) => ({ status: 'PENDING' })),
+  };
   const service = new CoachAssessmentOrchestratorService(
     commands as never,
     queries as never,
@@ -42,9 +46,10 @@ function createOrchestrator() {
     {} as never,
     {} as never,
     consent as never,
+    updates as never,
     access as never,
   );
-  return { service, consent, access, commands, users, queries, model };
+  return { service, consent, access, commands, users, queries, model, updates };
 }
 
 describe('Athlete State assessment eligibility', () => {
@@ -99,59 +104,26 @@ describe('Athlete State assessment eligibility', () => {
     expect(f.commands.buildEvidence).not.toHaveBeenCalled();
   });
 
-  it('logs expected background denials as skips with the originating event', async () => {
+  it('persists background requests without reading evidence or calling a model inline', async () => {
     const f = createOrchestrator();
-    f.consent.assertGranted.mockRejectedValueOnce(
-      new BusinessException({
-        code: BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED,
-        message: 'AI_DATA_CONSENT_REQUIRED',
-      }),
-    );
-    const debug = jest
-      .spyOn(Logger.prototype, 'debug')
-      .mockImplementation(() => {});
-    const warn = jest
-      .spyOn(Logger.prototype, 'warn')
-      .mockImplementation(() => {});
-    try {
-      f.service.handleRequested({
-        ...input,
-        requestedAt: new Date().toISOString(),
-      });
-      await new Promise<void>((resolve) => setImmediate(resolve));
-      expect(debug).toHaveBeenCalledWith(
-        expect.stringContaining('triggerType=ACTIVITY_READY triggerRef=batch'),
-      );
-      expect(warn).not.toHaveBeenCalled();
-    } finally {
-      debug.mockRestore();
-      warn.mockRestore();
-    }
+    const event = { ...input, requestedAt: new Date().toISOString() };
+    await f.service.handleRequested(event);
+    expect(f.updates.requestUpdate).toHaveBeenCalledWith(event);
+    expect(f.commands.buildEvidence).not.toHaveBeenCalled();
+    expect(f.model.assess).not.toHaveBeenCalled();
   });
-
-  it('keeps unexpected background failures visible with the originating event', async () => {
+  it('propagates queue persistence failures so the durable source can retry', async () => {
     const f = createOrchestrator();
-    f.consent.assertGranted.mockRejectedValueOnce(
-      new Error('CONSENT_STORE_UNAVAILABLE'),
+    f.updates.requestUpdate.mockRejectedValueOnce(
+      new Error('QUEUE_UNAVAILABLE'),
     );
-    const warn = jest
-      .spyOn(Logger.prototype, 'warn')
-      .mockImplementation(() => {});
-    try {
+    await expect(
       f.service.handleRequested({
         ...input,
         requestedAt: new Date().toISOString(),
-      });
-      await new Promise<void>((resolve) => setImmediate(resolve));
-      expect(warn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'triggerType=ACTIVITY_READY triggerRef=batch error=CONSENT_STORE_UNAVAILABLE',
-        ),
-      );
-      expect(f.commands.buildEvidence).not.toHaveBeenCalled();
-    } finally {
-      warn.mockRestore();
-    }
+      }),
+    ).rejects.toThrow('QUEUE_UNAVAILABLE');
+    expect(f.commands.buildEvidence).not.toHaveBeenCalled();
   });
 });
 

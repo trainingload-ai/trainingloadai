@@ -29,6 +29,7 @@ export class AthleteStateCommands {
     model?: string;
     promptVersion?: string;
     preserveCaseId?: string;
+    preserveCaseIds?: string[];
   }) {
     return this.repository.saveAssessment(input);
   }

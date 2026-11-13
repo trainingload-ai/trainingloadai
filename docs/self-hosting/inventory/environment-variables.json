@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2101
+          "line": 2110
         }
       ]
     },
@@ -800,7 +800,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 426
+          "line": 428
         }
       ]
     },
@@ -905,7 +905,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 580
+          "line": 582
         }
       ]
     },
@@ -939,7 +939,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1134
+          "line": 1136
         }
       ]
     },
@@ -1057,7 +1057,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 925
+          "line": 927
         }
       ]
     },
@@ -1078,7 +1078,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2832
+          "line": 2846
         }
       ]
     },
@@ -1099,23 +1099,23 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2528
+          "line": 2542
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2589
+          "line": 2603
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2676
+          "line": 2690
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2728
+          "line": 2742
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2816
+          "line": 2830
         }
       ]
     },
@@ -1225,11 +1225,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 503
+          "line": 505
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 924
+          "line": 926
         }
       ]
     },
@@ -1466,7 +1466,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai-plan-execution-advice.service.ts",
-          "line": 205
+          "line": 203
         }
       ]
     },
@@ -1622,7 +1622,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai-plan-execution-advice.service.ts",
-          "line": 206
+          "line": 204
         }
       ]
     },
@@ -1770,6 +1770,23 @@
         {
           "file": "apps/server/src/runtime-capabilities/runtime-capability.service.ts",
           "line": 20
+        }
+      ]
+    },
+    {
+      "name": "ATHLETE_STATE_UPDATE_DELAY_MS",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/athlete-state/updates/athlete-state-update-queue.service.ts",
+          "line": 35
         }
       ]
     },
@@ -1983,11 +2000,11 @@
       "references": [
         {
           "file": "apps/server/src/review/coach-daily-review-runtime.service.ts",
-          "line": 524
+          "line": 511
         },
         {
           "file": "apps/server/src/review/coach-period-review-runtime.service.ts",
-          "line": 559
+          "line": 539
         }
       ]
     },
@@ -2043,7 +2060,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 447
+          "line": 449
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2077,7 +2094,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 452
+          "line": 454
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2715,7 +2732,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1234
+          "line": 1236
         },
         {
           "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",
@@ -2972,7 +2989,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 330
+          "line": 334
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -2993,7 +3010,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 299
+          "line": 303
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3014,7 +3031,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 308
+          "line": 312
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3035,7 +3052,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 317
+          "line": 321
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3454,7 +3471,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 318
+          "line": 322
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -3519,7 +3536,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 338
+          "line": 342
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -4002,11 +4019,11 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 339
+          "line": 343
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 390
+          "line": 394
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -4400,7 +4417,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 349
+          "line": 353
         },
         {
           "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
@@ -4425,7 +4442,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 350
+          "line": 354
         },
         {
           "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
@@ -4455,7 +4472,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 447
+          "line": 449
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -5035,7 +5052,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-digest.service.ts",
-          "line": 626
+          "line": 624
         }
       ]
     },
@@ -5052,11 +5069,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/athlete-state/athlete-state-model.service.ts",
-          "line": 23
+          "line": 22
         },
         {
           "file": "apps/server/src/review/review-digest.service.ts",
-          "line": 631
+          "line": 629
         }
       ]
     },
@@ -5632,7 +5649,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 438
+          "line": 440
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",

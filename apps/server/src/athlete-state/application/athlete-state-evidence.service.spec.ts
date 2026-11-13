@@ -77,6 +77,7 @@ describe('AthleteStateEvidenceService', () => {
     loadReadout as never,
     pmc as never,
     memory as never,
+    { read: async () => [] } as never,
   );
 
   it('uses athlete-local dates, stable hashes, event time and explicit nulls', async () => {

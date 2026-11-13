@@ -16,6 +16,13 @@ function createService(tp: number | undefined = 1000 / 355, saved = false) {
     {} as never,
     {} as never,
     {} as never,
+    {
+      observe: async (
+        _userId: unknown,
+        _tx: unknown,
+        write: () => Promise<unknown>,
+      ) => write(),
+    } as never,
   );
   jest
     .spyOn(service, 'getComposedUserProfile')

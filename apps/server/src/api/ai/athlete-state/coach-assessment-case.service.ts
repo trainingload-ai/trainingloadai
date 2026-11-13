@@ -1,4 +1,12 @@
 import {
+  ATHLETE_STATE_UPDATE_WAKE,
+  AthleteStateUpdates,
+} from '@/athlete-state/updates/athlete-state-updates.service';
+import {
+  guardAthleteStateWrite,
+  guardedAthleteStateWrite,
+} from '@/athlete-state/updates/athlete-state-execution-context';
+import {
   ConflictException,
   Injectable,
   NotFoundException,
@@ -118,6 +126,7 @@ export class CoachAssessmentCaseService {
     private readonly branching: CoachBranchingService,
     private readonly queries: CoachAssessmentCaseQueryService,
     private readonly events: EventEmitter2,
+    private readonly updates: AthleteStateUpdates,
   ) {}
 
   async createForAssessment(input: {
@@ -197,58 +206,62 @@ export class CoachAssessmentCaseService {
           }
         : { kind: 'OUTCOME', ...(input.outcome ?? {}) };
     try {
-      const created = await this.prisma.coachAssessmentCase.create({
-        data: {
-          userId: input.userId,
-          status: needsQuestion
-            ? 'WAITING_FOR_USER'
-            : needsData
-              ? 'WAITING_FOR_DATA'
-              : input.outcome?.requiresPlanDecision
-                ? 'DECISION_READY'
-                : 'RESOLVED',
-          triggerType: input.triggerType,
-          triggerRef: input.triggerRef ?? null,
-          asOf: input.assessment.asOf,
-          timezone: input.assessment.timezone,
-          evidenceHash: input.assessment.evidenceHash,
-          dedupeKey,
-          assessmentId: input.assessment.id,
-          contextId: input.contextId ?? null,
-          planExecutionFactHash: input.planExecutionFactHash ?? null,
-          currentOutcome: json(currentOutcome),
-          followUpAt: needsData
-            ? new Date(now.getTime() + 6 * 3_600_000)
-            : input.outcome?.followUpHours
-              ? new Date(
-                  now.getTime() + input.outcome.followUpHours * 3_600_000,
-                )
-              : null,
-          expiresAt,
-          ...(needsQuestion
-            ? {
-                questionCount: 1,
-                questions: {
-                  create: {
-                    evidenceKind: request.kind,
-                    reason: request.reason,
-                    decisionImpact: request.decisionImpact,
-                    question: json(request.question),
-                    eventStart: new Date(
-                      input.assessment.asOf.getTime() - 36 * 3_600_000,
-                    ),
-                    eventEnd: input.assessment.asOf,
-                    expiresAt,
+      const created = await guardedAthleteStateWrite(this.prisma, (db) =>
+        db.coachAssessmentCase.create({
+          data: {
+            userId: input.userId,
+            status: needsQuestion
+              ? 'WAITING_FOR_USER'
+              : needsData
+                ? 'WAITING_FOR_DATA'
+                : input.outcome?.requiresPlanDecision
+                  ? 'DECISION_READY'
+                  : 'RESOLVED',
+            triggerType: input.triggerType,
+            triggerRef: input.triggerRef ?? null,
+            asOf: input.assessment.asOf,
+            timezone: input.assessment.timezone,
+            evidenceHash: input.assessment.evidenceHash,
+            dedupeKey,
+            assessmentId: input.assessment.id,
+            contextId: input.contextId ?? null,
+            planExecutionFactHash: input.planExecutionFactHash ?? null,
+            currentOutcome: json(currentOutcome),
+            followUpAt: needsData
+              ? new Date(now.getTime() + 6 * 3_600_000)
+              : input.outcome?.followUpHours
+                ? new Date(
+                    now.getTime() + input.outcome.followUpHours * 3_600_000,
+                  )
+                : null,
+            expiresAt,
+            ...(needsQuestion
+              ? {
+                  questionCount: 1,
+                  questions: {
+                    create: {
+                      evidenceKind: request.kind,
+                      reason: request.reason,
+                      decisionImpact: request.decisionImpact,
+                      question: json(request.question),
+                      eventStart: new Date(
+                        input.assessment.asOf.getTime() - 36 * 3_600_000,
+                      ),
+                      eventEnd: input.assessment.asOf,
+                      expiresAt,
+                    },
                   },
-                },
-              }
-            : {
-                resolvedAt:
-                  needsData || input.outcome?.requiresPlanDecision ? null : now,
-              }),
-        },
-        include: { questions: { orderBy: { createdAt: 'asc' } } },
-      });
+                }
+              : {
+                  resolvedAt:
+                    needsData || input.outcome?.requiresPlanDecision
+                      ? null
+                      : now,
+                }),
+          },
+          include: { questions: { orderBy: { createdAt: 'asc' } } },
+        }),
+      );
       if (created.status === 'DECISION_READY') {
         await emitCoachAssessmentDecisionRequested(this.events, {
           userId: input.userId,
@@ -290,15 +303,17 @@ export class CoachAssessmentCaseService {
         questionMessageId: question.promptMessageId,
       };
     }
-    const claimed = await this.prisma.coachAssessmentCase.updateMany({
-      where: {
-        id: caseId,
-        userId,
-        revision: assessmentCase.revision,
-        status: 'WAITING_FOR_USER',
-      },
-      data: { status: 'ASSESSING', revision: { increment: 1 } },
-    });
+    const claimed = await guardedAthleteStateWrite(this.prisma, (db) =>
+      db.coachAssessmentCase.updateMany({
+        where: {
+          id: caseId,
+          userId,
+          revision: assessmentCase.revision,
+          status: 'WAITING_FOR_USER',
+        },
+        data: { status: 'ASSESSING', revision: { increment: 1 } },
+      }),
+    );
     if (claimed.count !== 1) {
       assessmentCase = await this.queries.requireOwned(userId, caseId);
       if (assessmentCase?.status === 'ASSESSING') {
@@ -365,6 +380,7 @@ export class CoachAssessmentCaseService {
         revision: 1,
       };
       await this.prisma.$transaction(async (tx) => {
+        await guardAthleteStateWrite(tx);
         await tx.aiCoachSession.upsert({
           where: { userId_id: { userId, id: sessionId } },
           create: {
@@ -477,10 +493,12 @@ export class CoachAssessmentCaseService {
         questionMessageId,
       };
     } catch (error) {
-      await this.prisma.coachAssessmentCase.updateMany({
-        where: { id: caseId, userId, status: 'ASSESSING' },
-        data: { status: 'WAITING_FOR_USER', revision: { increment: 1 } },
-      });
+      await guardedAthleteStateWrite(this.prisma, (db) =>
+        db.coachAssessmentCase.updateMany({
+          where: { id: caseId, userId, status: 'ASSESSING' },
+          data: { status: 'WAITING_FOR_USER', revision: { increment: 1 } },
+        }),
+      );
       throw error;
     }
   }
@@ -494,6 +512,7 @@ export class CoachAssessmentCaseService {
       now.getTime() + ATHLETE_STATE_POLICY.repeatCooldownHours * 3_600_000,
     );
     await this.prisma.$transaction(async (tx) => {
+      await guardAthleteStateWrite(tx);
       await tx.coachAssessmentQuestion.updateMany({
         where: { caseId, status: 'PENDING' },
         data: { status: 'SKIPPED', answeredAt: now },
@@ -524,6 +543,7 @@ export class CoachAssessmentCaseService {
   }) {
     const now = new Date();
     return this.prisma.$transaction(async (tx) => {
+      await guardAthleteStateWrite(tx);
       const changed = await tx.coachAssessmentQuestion.updateMany({
         where: {
           id: input.questionId,
@@ -556,7 +576,55 @@ export class CoachAssessmentCaseService {
       if (caseChanged.count !== 1) {
         throw new ConflictException('Assessment case changed');
       }
+      await this.updates.requestUpdate(
+        {
+          userId: input.userId,
+          triggerType: 'CASE_ANSWER',
+          triggerRef: input.answerMessageId,
+          preserveCaseId: input.caseId,
+          answerQuestionId: input.questionId,
+          explicit: true,
+          mode: 'immediate',
+        },
+        tx,
+      );
       return { accepted: true };
+    });
+  }
+
+  async persistLateAnswer(input: {
+    userId: string;
+    caseId: string;
+    questionId: string;
+    answerMessageId: string;
+    answer: unknown;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const saved = await tx.coachAssessmentQuestion.updateMany({
+        where: {
+          id: input.questionId,
+          caseId: input.caseId,
+          case: { userId: input.userId },
+          answerMessageId: null,
+        },
+        data: {
+          answer: json(input.answer),
+          answerMessageId: input.answerMessageId,
+          answeredAt: new Date(),
+        },
+      });
+      if (saved.count !== 1) return;
+      await this.updates.requestUpdate(
+        {
+          userId: input.userId,
+          triggerType: 'LATE_CASE_ANSWER',
+          triggerRef: input.answerMessageId,
+          answerQuestionId: input.questionId,
+          explicit: true,
+          mode: 'immediate',
+        },
+        tx,
+      );
     });
   }
 
@@ -608,6 +676,7 @@ export class CoachAssessmentCaseService {
       now.getTime() + ATHLETE_STATE_POLICY.caseMaxAgeHours * 3_600_000,
     );
     await this.prisma.$transaction(async (tx) => {
+      await guardAthleteStateWrite(tx);
       const updated = await tx.coachAssessmentCase.updateMany({
         where: {
           id: input.caseId,
@@ -707,24 +776,27 @@ export class CoachAssessmentCaseService {
 
   async deferReassessment(userId: string, caseId: string) {
     const now = new Date();
-    await this.prisma.coachAssessmentCase.updateMany({
-      where: {
-        id: caseId,
-        userId,
-        status: 'ASSESSING',
-        expiresAt: { gt: now },
-      },
-      data: {
-        status: 'WAITING_FOR_DATA',
-        followUpAt: new Date(now.getTime() + 15 * 60_000),
-        revision: { increment: 1 },
-      },
-    });
+    await guardedAthleteStateWrite(this.prisma, (db) =>
+      db.coachAssessmentCase.updateMany({
+        where: {
+          id: caseId,
+          userId,
+          status: 'ASSESSING',
+          expiresAt: { gt: now },
+        },
+        data: {
+          status: 'WAITING_FOR_DATA',
+          followUpAt: new Date(now.getTime() + 15 * 60_000),
+          revision: { increment: 1 },
+        },
+      }),
+    );
   }
 
   async expireLateQuestion(userId: string, caseId: string, questionId: string) {
     const now = new Date();
     await this.prisma.$transaction(async (tx) => {
+      await guardAthleteStateWrite(tx);
       await tx.coachAssessmentQuestion.updateMany({
         where: { id: questionId, caseId, status: 'PENDING' },
         data: { status: 'EXPIRED' },
@@ -780,20 +852,23 @@ export class CoachAssessmentCaseService {
               ATHLETE_STATE_POLICY.repeatCooldownHours * 3_600_000,
           )
         : null;
-    await this.prisma.coachAssessmentCase.updateMany({
-      where: { userId, decisionId },
-      data: {
-        status: completed ? 'RESOLVED' : 'SUPERSEDED',
-        resolvedAt: now,
-        cooldownUntil,
-        followUpAt: null,
-        revision: { increment: 1 },
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await guardAthleteStateWrite(tx);
+      await tx.coachAssessmentCase.updateMany({
+        where: { userId, decisionId },
+        data: {
+          status: completed ? 'RESOLVED' : 'SUPERSEDED',
+          resolvedAt: now,
+          cooldownUntil,
+          followUpAt: null,
+          revision: { increment: 1 },
+        },
+      });
+      await this.updates.requestUpdate(
+        { userId, triggerType: `DECISION_${change}`, triggerRef: decisionId },
+        tx,
+      );
     });
-    await emitAthleteStateReassessRequested(this.events, {
-      userId,
-      triggerType: `DECISION_${change}`,
-      triggerRef: decisionId,
-    });
+    await this.events.emitAsync(ATHLETE_STATE_UPDATE_WAKE, { userId });
   }
 }

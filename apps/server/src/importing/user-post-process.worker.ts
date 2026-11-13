@@ -1177,13 +1177,9 @@ export class UserPostProcessWorkerService
           });
           return;
         }
-        await this.markSiblingReplaysSatisfied({
-          userId: job.userId,
-          sourceJobId: job.id,
-          effectiveFrom,
-          satisfiedThrough: replayTo,
-          siblings: coalescedSiblings,
-        });
+        // Persist the assessment request before declaring sibling replays
+        // satisfied. A queue failure must leave the durable source retryable.
+
         if (
           heavyActivityIds.length > 0 &&
           !postProcessPolicy.suppressAthleteStateReassessment
@@ -1194,6 +1190,13 @@ export class UserPostProcessWorkerService
             triggerRef: job.id,
           });
         }
+        await this.markSiblingReplaysSatisfied({
+          userId: job.userId,
+          sourceJobId: job.id,
+          effectiveFrom,
+          satisfiedThrough: replayTo,
+          siblings: coalescedSiblings,
+        });
       }
       // 由实例功能策略与维护批次策略共同决定是否自动触发活动 AI 复盘。
       if (postProcessPolicy.suppressAutomaticAiReview) {

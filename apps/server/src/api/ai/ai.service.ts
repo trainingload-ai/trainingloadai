@@ -235,7 +235,9 @@ type BackgroundCoachTaskRun<T> = {
   provider: string | null;
   model: string;
   runId: string;
+  /** Durable run audit identity; not necessarily a billable operation. */
   operationId: string;
+  billingOperationId: string | null;
   replayed: boolean;
 };
 
@@ -1664,6 +1666,7 @@ export class AiService {
     const inputHash = sha256Hex(
       stableJson({
         taskType: params.taskType,
+        funding: params.funding ?? 'USER',
         activeSkillName: params.activeSkillName,
         lang: params.lang,
         model,
@@ -1676,6 +1679,8 @@ export class AiService {
     const callerManagedOperationId = String(
       params.callerManagedOperationId ?? '',
     ).trim();
+    if (platformFunded && callerManagedOperationId)
+      throw new Error('PLATFORM_TASK_CANNOT_USE_USER_OPERATION');
     const ownsUserOperation = !platformFunded && !callerManagedOperationId;
     const operationId = callerManagedOperationId || crypto.randomUUID();
     const begun = await this.coachRuns.beginBackground({
@@ -1721,6 +1726,9 @@ export class AiService {
         model: stored.model,
         runId: begun.replay.runId,
         operationId: callerManagedOperationId || begun.replay.operationId,
+        billingOperationId: platformFunded
+          ? null
+          : callerManagedOperationId || begun.replay.operationId,
         replayed: true,
       };
     }
@@ -1898,6 +1906,7 @@ export class AiService {
         model: actualModel,
         runId,
         operationId: handle.operationId,
+        billingOperationId: platformFunded ? null : handle.operationId,
         replayed: false,
       };
     } catch (error) {
@@ -2104,6 +2113,11 @@ export class AiService {
       userId: prepared.review.userId,
       lang: prepared.lang,
       taskType: 'ACTIVITY_REVIEW',
+      funding:
+        options?.callerManagedOperationId ||
+        prepared.review.trigger === 'MANUAL'
+          ? 'USER'
+          : 'PLATFORM',
       activeSkillName: 'activity-review',
       usageKind: AiUsageKind.ACTIVITY_ANALYSIS,
       model,
@@ -3027,6 +3041,7 @@ export class AiService {
       userId: params.userId,
       lang: params.lang,
       taskType: params.taskType ?? 'ATHLETE_CHECK_IN',
+      funding: 'PLATFORM',
       activeSkillName: 'readiness-check',
       triggerType: params.triggerType,
       triggerRef: params.triggerRef,
@@ -3175,6 +3190,7 @@ export class AiService {
       userId: params.userId,
       lang: params.lang,
       taskType: `PLAN_${scale.toUpperCase()}_REVIEW`,
+      funding: 'PLATFORM',
       activeSkillName: skillName,
       signal: params.signal,
       usageKind,
@@ -3274,6 +3290,7 @@ export class AiService {
       userId: params.userId,
       lang: params.lang,
       taskType: `PLAN_${params.scale.toUpperCase()}_REVIEW_ADJUSTMENT`,
+      funding: 'PLATFORM',
       activeSkillName: 'plan-review-adjustment',
       instructions: prompt,
       allowedToolNames: [],

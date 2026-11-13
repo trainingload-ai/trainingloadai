@@ -1,3 +1,4 @@
+import { withAutomaticStateUpdatesSuppressed } from '@/athlete-state/updates/athlete-state-update-scope';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
@@ -288,83 +289,93 @@ export class ChronologicalActivityReplayService {
   async replay(
     request: ChronologicalReplayRequest,
   ): Promise<ChronologicalReplayResult> {
-    const startedAt = Date.now();
-    this.logger.log(
-      `[activity-replay] started ${JSON.stringify({
-        userId: request.userId,
-        sourceJobType: request.sourceJobType,
-        sourceJobId: request.sourceJobId,
-        effectiveFrom: request.effectiveFrom.toISOString(),
-        effectiveTo: request.effectiveTo?.toISOString() ?? null,
-        includeActivityCount: request.includeActivityIds?.length ?? 0,
-        maxActivities: request.maxActivities ?? 100,
-      })}`,
-    );
-    const lease = await this.leases.acquire({
-      userId: request.userId,
-      sourceJobType: request.sourceJobType,
-      sourceJobId: request.sourceJobId,
-      priority: request.priority ?? 100,
-      dataRepair: request.dataRepair ?? false,
-    });
-    if (!lease) throw new Error('ACTIVITY_ANALYSIS_CAPACITY_UNAVAILABLE');
-
-    let fenced = false;
-    const heartbeat = setInterval(() => {
-      void this.leases
-        .heartbeat(lease)
-        .then((owned) => {
-          if (!owned) fenced = true;
-        })
-        .catch((error) => {
-          fenced = true;
-          this.logger.error(
-            `[activity-replay] lease heartbeat failed user=${request.userId}: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
+    return withAutomaticStateUpdatesSuppressed(
+      request.suppressAthleteStateReassessment === true,
+      async () => {
+        const startedAt = Date.now();
+        this.logger.log(
+          `[activity-replay] started ${JSON.stringify({
+            userId: request.userId,
+            sourceJobType: request.sourceJobType,
+            sourceJobId: request.sourceJobId,
+            effectiveFrom: request.effectiveFrom.toISOString(),
+            effectiveTo: request.effectiveTo?.toISOString() ?? null,
+            includeActivityCount: request.includeActivityIds?.length ?? 0,
+            maxActivities: request.maxActivities ?? 100,
+          })}`,
+        );
+        const lease = await this.leases.acquire({
+          userId: request.userId,
+          sourceJobType: request.sourceJobType,
+          sourceJobId: request.sourceJobId,
+          priority: request.priority ?? 100,
+          dataRepair: request.dataRepair ?? false,
         });
-    }, 60_000);
-    heartbeat.unref?.();
-    try {
-      await this.drainPendingPmcInvalidation(request, lease);
-      let lastError: unknown;
-      for (let attempt = 1; attempt <= 3; attempt += 1) {
-        if (fenced) throw new Error('ACTIVITY_ANALYSIS_LEASE_FENCED');
+        if (!lease) throw new Error('ACTIVITY_ANALYSIS_CAPACITY_UNAVAILABLE');
+
+        let fenced = false;
+        const heartbeat = setInterval(() => {
+          void this.leases
+            .heartbeat(lease)
+            .then((owned) => {
+              if (!owned) fenced = true;
+            })
+            .catch((error) => {
+              fenced = true;
+              this.logger.error(
+                `[activity-replay] lease heartbeat failed user=${request.userId}: ${
+                  error instanceof Error ? error.message : String(error)
+                }`,
+              );
+            });
+        }, 60_000);
+        heartbeat.unref?.();
         try {
-          const result = await this.replayOnce(request, lease, () => fenced);
-          this.logger.log(
-            `[activity-replay] page-completed ${JSON.stringify({
-              userId: request.userId,
-              sourceJobType: request.sourceJobType,
-              sourceJobId: request.sourceJobId,
-              runId: result.runId,
-              durationMs: Date.now() - startedAt,
-              processedActivities: result.processedActivities,
-              highFrequencyReads: result.highFrequencyReads,
-              fingerprintHits: result.fingerprintHits,
-              projectionChanges: result.projectionChanges,
-              estimatedOnlyChanges: result.estimatedOnlyChanges,
-              pmcRecomputeFrom: result.pmcRecomputeFrom?.toISOString() ?? null,
-              completed: result.completed,
-              nextCheckpoint: result.nextCheckpoint,
-            })}`,
-          );
-          return result;
-        } catch (error) {
-          lastError = error;
-          if (!(error instanceof FitnessEvidenceRevisionDriftError))
-            throw error;
-          this.logger.warn(
-            `[activity-replay] evidence revision drift; restarting user=${request.userId} attempt=${attempt}`,
-          );
+          await this.drainPendingPmcInvalidation(request, lease);
+          let lastError: unknown;
+          for (let attempt = 1; attempt <= 3; attempt += 1) {
+            if (fenced) throw new Error('ACTIVITY_ANALYSIS_LEASE_FENCED');
+            try {
+              const result = await this.replayOnce(
+                request,
+                lease,
+                () => fenced,
+              );
+              this.logger.log(
+                `[activity-replay] page-completed ${JSON.stringify({
+                  userId: request.userId,
+                  sourceJobType: request.sourceJobType,
+                  sourceJobId: request.sourceJobId,
+                  runId: result.runId,
+                  durationMs: Date.now() - startedAt,
+                  processedActivities: result.processedActivities,
+                  highFrequencyReads: result.highFrequencyReads,
+                  fingerprintHits: result.fingerprintHits,
+                  projectionChanges: result.projectionChanges,
+                  estimatedOnlyChanges: result.estimatedOnlyChanges,
+                  pmcRecomputeFrom:
+                    result.pmcRecomputeFrom?.toISOString() ?? null,
+                  completed: result.completed,
+                  nextCheckpoint: result.nextCheckpoint,
+                })}`,
+              );
+              return result;
+            } catch (error) {
+              lastError = error;
+              if (!(error instanceof FitnessEvidenceRevisionDriftError))
+                throw error;
+              this.logger.warn(
+                `[activity-replay] evidence revision drift; restarting user=${request.userId} attempt=${attempt}`,
+              );
+            }
+          }
+          throw lastError;
+        } finally {
+          clearInterval(heartbeat);
+          await this.leases.release(lease);
         }
-      }
-      throw lastError;
-    } finally {
-      clearInterval(heartbeat);
-      await this.leases.release(lease);
-    }
+      },
+    );
   }
 
   private async replayOnce(

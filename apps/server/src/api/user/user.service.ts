@@ -1,3 +1,4 @@
+import { AthleteStateFitnessFacts } from '@/athlete-state/updates/athlete-state-fitness-facts.service';
 import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import dayjs = require('dayjs');
 import { createHash } from 'crypto';
@@ -177,6 +178,7 @@ export class UserService {
     private readonly events: EventEmitter2,
     private readonly users: UserQueryService,
     private readonly analysisConfigs: UserAnalysisConfigService,
+    private readonly stateFitness: AthleteStateFitnessFacts,
   ) {}
 
   private analysisConfigVersions() {
@@ -218,7 +220,7 @@ export class UserService {
   ): Promise<T> {
     return this.prisma.$transaction(async (tx) => {
       await lockFitnessUser(tx, userId);
-      return operation(tx);
+      return this.stateFitness.observe(userId, tx, () => operation(tx));
     }, FITNESS_WRITE_TRANSACTION_OPTIONS);
   }
 

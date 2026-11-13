@@ -918,6 +918,34 @@
       ]
     },
     {
+      "host": "forum.intervals.icu",
+      "url": "https://forum.intervals.icu/t/hrv-wellness-fields/2754",
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu-health.mapper.ts",
+          "line": 11
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "forum.intervals.icu",
+      "url": "https://forum.intervals.icu/t/intervals-icu-api-integration-cookbook/80090",
+      "references": [
+        {
+          "file": "apps/server/src/api/intervals-icu/intervals-icu-health.mapper.ts",
+          "line": 10
+        }
+      ],
+      "capability": "third-party-sync",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "fumadocs.dev",
       "url": "https://fumadocs.dev/docs/ui/navigation/links",
       "references": [
@@ -1144,7 +1172,7 @@
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
-          "line": 301
+          "line": 305
         }
       ],
       "capability": "third-party-sync",
@@ -1162,7 +1190,7 @@
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
-          "line": 296
+          "line": 300
         }
       ],
       "capability": "third-party-sync",
@@ -1204,7 +1232,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 331
+          "line": 335
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -1338,7 +1366,7 @@
       "references": [
         {
           "file": "apps/server/src/api/user/user.controller.ts",
-          "line": 1108
+          "line": 1117
         }
       ],
       "capability": "product-internal",
@@ -1386,7 +1414,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 318
+          "line": 322
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",
@@ -1404,7 +1432,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 340
+          "line": 344
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",

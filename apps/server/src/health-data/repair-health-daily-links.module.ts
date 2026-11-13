@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { HealthDataIngestService } from './health-data-ingest.service';
@@ -12,7 +13,20 @@ import { HealthDataRepository } from './persistence/health-data.repository';
  */
 @Module({
   imports: [PrismaModule],
-  providers: [HealthDataRepository, HealthDataIngestService],
+  providers: [
+    HealthDataRepository,
+    HealthDataIngestService,
+    {
+      provide: AthleteStateUpdates,
+      // A historical link repair only rebuilds facts; it must not enqueue AI.
+      useValue: {
+        requestUpdate: async () => ({
+          status: 'SKIPPED',
+          reason: 'MAINTENANCE',
+        }),
+      },
+    },
+  ],
   exports: [HealthDataRepository, HealthDataIngestService],
 })
 export class RepairHealthDailyLinksModule {}
