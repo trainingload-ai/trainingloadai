@@ -1,3 +1,4 @@
+import { withAutomaticStateUpdatesSuppressed } from '../../athlete-state.events';
 import { featureAccessSnapshot } from '@/access/feature-access.types';
 import {
   AthleteStateUpdates,
@@ -47,6 +48,19 @@ function fixture(setting?: string, granted = true, allowed = true) {
 }
 const request = { userId: 'athlete', triggerType: 'HEALTH_FACT_CHANGED' };
 describe('Athlete State update eligibility and dispatch', () => {
+  it('suppresses maintenance ingestion across async writers without affecting ordinary updates', async () => {
+    const f = fixture();
+    const result = await withAutomaticStateUpdatesSuppressed(true, async () => {
+      await Promise.resolve();
+      return f.service.requestUpdate(request);
+    });
+    expect(result).toEqual({ status: 'SKIPPED', reason: 'MAINTENANCE' });
+    expect(f.consent.getStatus).not.toHaveBeenCalled();
+    expect(f.access.evaluate).not.toHaveBeenCalled();
+    expect(f.queue.requestUpdate).not.toHaveBeenCalled();
+    await f.service.requestUpdate(request);
+    expect(f.queue.requestUpdate).toHaveBeenCalledTimes(1);
+  });
   it('defaults the independent setting to on and never consults a credit ledger', async () => {
     const f = fixture();
     await f.service.requestUpdate(request);
