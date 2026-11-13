@@ -150,6 +150,8 @@ postgresTest(
           id: "0023_external_provider_connection_region",
           source: "baseline",
         },
+        { id: "0024_activity_analysis_segments", source: "baseline" },
+        { id: "0025_vdot_forecast_snapshot", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,

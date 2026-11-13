@@ -1,3 +1,4 @@
+import { useVdotForecast } from "@/api/vdot-forecast";
 import React from "react";
 import { useSimpleApiQuery } from "@/hooks/useApiQuery";
 import { apiFetch } from "@/lib/api";
@@ -239,6 +240,9 @@ function MetricHistoryChartData({
       return cloned;
     });
   }, [comparisonHistory, config.dataKey, ignoreZeroValues]);
+  const { data: vdotForecast } = useVdotForecast(
+    enabled && metricKey === "vo2Max",
+  );
   const { data: vo2ActivityHistory } = useSimpleApiQuery<HistoryItem[]>(
     [
       "metric-history-vo2-activity",
@@ -329,6 +333,7 @@ function MetricHistoryChartData({
   return (
     <MetricHistoryChartView
       metricKey={metricKey}
+      forecast={vdotForecast?.status === "READY" ? vdotForecast : undefined}
       history={displayHistory}
       comparisonHistory={displayComparisonHistory}
       periodStart={startDate.toISOString()}

@@ -289,7 +289,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 82
+          "line": 85
         }
       ]
     },
@@ -1639,7 +1639,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 163
+          "line": 173
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -2262,6 +2262,14 @@
           "line": 109
         },
         {
+          "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+          "line": 51
+        },
+        {
+          "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+          "line": 53
+        },
+        {
           "file": "packages/prisma/core/runner/core-migration-runner.mjs",
           "line": 16
         }
@@ -2571,6 +2579,23 @@
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
           "line": 55
+        }
+      ]
+    },
+    {
+      "name": "DOTENV_CONFIG_PATH",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/training-load/vdot-forecast-export.command.ts",
+          "line": 19
         }
       ]
     },
@@ -3765,11 +3790,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 106
+          "line": 111
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 155
+          "line": 160
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
@@ -3925,7 +3950,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 96
+          "line": 98
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
@@ -4031,7 +4056,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 162
+          "line": 164
         }
       ]
     },
@@ -4269,7 +4294,7 @@
         },
         {
           "file": "apps/client/next.config.ts",
-          "line": 111
+          "line": 120
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/ActivitiesPageClient.tsx",
@@ -4297,7 +4322,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 159
+          "line": 161
         },
         {
           "file": "apps/docs/src/lib/posthog-client.ts",
@@ -5347,7 +5372,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "trainingload-selfhost-client:1.1.21",
+      "exampleDefault": "trainingload-selfhost-client:1.1.22",
       "owners": [
         "compose.yml"
       ],
@@ -5573,7 +5598,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "trainingload-selfhost-migrate:1.1.21",
+      "exampleDefault": "trainingload-selfhost-migrate:1.1.22",
       "owners": [
         "compose.yml"
       ],
@@ -5757,7 +5782,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "trainingload-selfhost-server:1.1.21",
+      "exampleDefault": "trainingload-selfhost-server:1.1.22",
       "owners": [
         "compose.yml"
       ],
@@ -5878,7 +5903,7 @@
       "mode": "core-or-feature",
       "sensitive": false,
       "documented": true,
-      "exampleDefault": "1.1.21",
+      "exampleDefault": "1.1.22",
       "owners": [
         "compose.build.yml",
         "compose.yml"
@@ -6198,6 +6223,23 @@
         {
           "file": "apps/server/src/config/config.ts",
           "line": 123
+        }
+      ]
+    },
+    {
+      "name": "TRAININGLOAD_DESKTOP_BUILD",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 21
         }
       ]
     },

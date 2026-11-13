@@ -1,3 +1,4 @@
+import "katex/dist/katex.css";
 import { Suspense, type ReactNode } from "react";
 import { CustomHeader } from "@/components/CustomHeader";
 import { Footer } from "@/components/Footer";

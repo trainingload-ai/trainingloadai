@@ -10,10 +10,19 @@
       "id": "getting-started-web-home",
       "article": "guide/getting-started",
       "platform": "web",
-      "status": "pending",
-      "route": "/home",
-      "state": "Signed in with one processed activity and an active or draft plan",
-      "asset": "docs/getting-started/web-home.webp"
+      "status": "ready",
+      "route": "/",
+      "state": "Web home with synthetic current plan, advice, scheduled workout, weekly load and current status; cropped above the health section",
+      "asset": "docs/daily/en/getting-started-home.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/getting-started-home.webp",
+        "zh": "docs/daily/zh/getting-started-home.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 900",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
     },
     {
       "id": "choose-path-mobile-today",
@@ -79,6 +88,40 @@
       "asset": "docs/integrations/connections.webp"
     },
     {
+      "id": "activity-timeline-selection",
+      "article": "guide/activity-timeline",
+      "platform": "web",
+      "status": "ready",
+      "route": "/activities/17921623926005309429",
+      "state": "First device lap selected (0:00–7:23), range statistics and route highlight; empty Elevation chart removed via UI",
+      "asset": "docs/activities/en/activity-timeline-selection.webp",
+      "localizedAssets": {
+        "en": "docs/activities/en/activity-timeline-selection.webp",
+        "zh": "docs/activities/zh/activity-timeline-selection.webp"
+      },
+      "viewport": "1440x1680",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1088 / 831"
+    },
+    {
+      "id": "activity-timeline-full",
+      "article": "guide/activity-timeline",
+      "platform": "web",
+      "status": "ready",
+      "route": "/activities/17921623926005309429",
+      "state": "Timeline in full-activity range, first laps visible with horizontal scrolling; empty Elevation chart removed via UI",
+      "asset": "docs/activities/en/activity-timeline-full.webp",
+      "localizedAssets": {
+        "en": "docs/activities/en/activity-timeline-full.webp",
+        "zh": "docs/activities/zh/activity-timeline-full.webp"
+      },
+      "viewport": "1440x1680",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1088 / 500"
+    },
+    {
       "id": "manual-workout-editor",
       "article": "planning/manual-workout-editor",
       "platform": "web",
@@ -91,10 +134,18 @@
       "id": "activity-detail-review",
       "article": "guide/activity-detail",
       "platform": "web",
-      "status": "pending",
-      "route": "/activities/{activityId}",
-      "state": "Ready activity detail with summary, time-series charts, load source, route context, and plan link",
-      "asset": "docs/activities/activity-detail-review.webp"
+      "status": "ready",
+      "route": "/activities/17921623926005309429",
+      "state": "Overview with summary, route and analysis tabs",
+      "asset": "docs/activities/en/activity-detail-review.webp",
+      "localizedAssets": {
+        "en": "docs/activities/en/activity-detail-review.webp",
+        "zh": "docs/activities/zh/activity-detail-review.webp"
+      },
+      "viewport": "1440x1680",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1088 / 770"
     },
     {
       "id": "activities-feed-review",
@@ -108,20 +159,38 @@
     {
       "id": "today-execution-overview",
       "article": "guide/today-and-current-state",
-      "platform": "mobile",
-      "status": "pending",
-      "route": "/today",
-      "state": "Synthetic athlete with one open planned workout, weekly load comparison, selected current-status cards, and a recent Ready activity",
-      "asset": "docs/daily/today-execution-overview.webp"
+      "platform": "web",
+      "status": "ready",
+      "route": "/",
+      "state": "Same synthetic Web home as the first-use guide; native mobile controls are described separately",
+      "asset": "docs/daily/en/getting-started-home.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/getting-started-home.webp",
+        "zh": "docs/daily/zh/getting-started-home.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 900",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
     },
     {
       "id": "calendar-plan-actual",
       "article": "guide/calendar",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/calendar",
-      "state": "Calendar and selected-day panel showing planned workouts, completed activities, and daily load",
-      "asset": "docs/calendar/plan-actual.webp"
+      "state": "Synthetic calendar on 2026-10-30 with one planned workout and one recorded activity; Training tab selected",
+      "asset": "docs/daily/en/calendar-plan-actual.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/calendar-plan-actual.webp",
+        "zh": "docs/daily/zh/calendar-plan-actual.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 820",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
     },
     {
       "id": "dashboard-trend-review",
@@ -209,22 +278,94 @@
       "asset": "docs/analysis/training-decision.webp"
     },
     {
+      "id": "pmc-forecast-overview",
+      "article": "guide/pmc-forecast",
+      "platform": "web",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Synthetic running fixture with recorded history, current cards and plan/habit-based forecast; Form selected",
+      "asset": "docs/analysis/en/pmc-forecast-overview.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)"
+    },
+    {
+      "id": "pmc-forecast-date",
+      "article": "guide/pmc-forecast",
+      "platform": "web",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Same synthetic running fixture; Fitness selected and keyboard inspection seven days ahead with load basis in tooltip",
+      "asset": "docs/analysis/en/pmc-forecast-date.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-date.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-date.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)"
+    },
+    {
+      "id": "pmc-forecast-unavailable",
+      "article": "guide/pmc-forecast",
+      "platform": "web",
+      "status": "ready",
+      "route": "/pmc",
+      "state": "Public Demo as captured; recorded history remains visible and next-day tooltip verified No forecast available",
+      "asset": "docs/analysis/en/pmc-forecast-unavailable.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-unavailable.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-unavailable.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "https://demo.trainingload.ai/pmc (2026-11-12)"
+    },
+    {
       "id": "pmc-marathon-window",
       "article": "guide/pmc-marathon-adjustment",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/pmc",
-      "state": "Six-week synthetic marathon block with CTL, ATL, TSB, a recent overload, and the next key workout date",
-      "asset": "docs/analysis/pmc-marathon-window.webp"
+      "state": "Synthetic running forecast fixture rendered in the real app; see article for assumptions",
+      "asset": "docs/analysis/en/pmc-forecast-overview.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/pmc-forecast-overview.webp",
+        "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1084 / 744",
+      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO)"
     },
     {
       "id": "effective-vo2max-trend",
       "article": "guide/effective-vo2max-for-endurance",
       "platform": "web",
-      "status": "pending",
+      "status": "ready",
       "route": "/dashboard",
-      "state": "Running-only VO2Max metric history with several comparable Ready activities and one visible outlier",
-      "asset": "docs/analysis/effective-vo2max-trend.webp"
+      "state": "Synthetic running forecast fixture rendered in the real app; see article for assumptions",
+      "asset": "docs/analysis/en/effective-vo2max-trend.webp",
+      "localizedAssets": {
+        "en": "docs/analysis/en/effective-vo2max-trend.webp",
+        "zh": "docs/analysis/zh/effective-vo2max-trend.webp"
+      },
+      "viewport": "1440x1200",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "720 / 658",
+      "dataSource": "apps/client/e2e/vdot-forecast.spec.ts (upward synthetic example; REFERENCE range; 2026-11-11)"
     },
     {
       "id": "ai-adjustment-confirmation",
@@ -369,6 +510,78 @@
       "route": "/plans/create/manual",
       "state": "Strength Training selected with a validated two-exercise synthetic DSL example; Rules tab and parsed strength preview visible; no athlete data",
       "asset": "docs/planning/strength-dsl-rules-input.webp"
+    },
+    {
+      "id": "today-suggestion-details",
+      "article": "guide/today-and-current-state",
+      "platform": "web",
+      "status": "ready",
+      "route": "/",
+      "state": "Structured advice with evidence, uncertainty and explicit actions to open the scheduled workout or Coach",
+      "asset": "docs/daily/en/today-suggestion-details.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/today-suggestion-details.webp",
+        "zh": "docs/daily/zh/today-suggestion-details.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "512 / 458",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+    },
+    {
+      "id": "today-workout-preview",
+      "article": "guide/today-and-current-state",
+      "platform": "web",
+      "status": "ready",
+      "route": "/",
+      "state": "Synthetic day without scheduled training; independent workout structure preview and explicit add action; no workout was saved",
+      "asset": "docs/daily/en/today-workout-preview.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/today-workout-preview.webp",
+        "zh": "docs/daily/zh/today-workout-preview.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "512 / 562",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+    },
+    {
+      "id": "calendar-activity-details",
+      "article": "guide/calendar",
+      "platform": "web",
+      "status": "ready",
+      "route": "/calendar",
+      "state": "Same synthetic date and records, with Activities tab selected",
+      "asset": "docs/daily/en/calendar-activity-details.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/calendar-activity-details.webp",
+        "zh": "docs/daily/zh/calendar-activity-details.webp"
+      },
+      "viewport": "1440x1300",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "1216 / 820",
+      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures"
+    },
+    {
+      "id": "activity-import-entry",
+      "article": "guide/connect-data",
+      "platform": "web",
+      "status": "ready",
+      "route": "/activities",
+      "state": "File upload dialog in a synthetic account; no files submitted",
+      "asset": "docs/daily/en/activity-import-entry.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/activity-import-entry.webp",
+        "zh": "docs/daily/zh/activity-import-entry.webp"
+      },
+      "viewport": "1440x1100",
+      "capturedAt": "2026-11-12",
+      "sourceVersion": "1.1.22",
+      "aspectRatio": "600 / 366",
+      "dataSource": "apps/client/e2e/fixtures/coach-page.ts; actual file upload dialog"
     }
   ]
 }

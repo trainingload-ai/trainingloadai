@@ -235,7 +235,9 @@
         "metricUpdate": "体力指標を更新",
         "bodyWeightUpdate": "体重を記録",
         "trainingDataCoverage": "トレーニングデータ範囲",
-        "coachTaskResult": "バックグラウンドタスク結果"
+        "coachTaskResult": "バックグラウンドタスク結果",
+        "metricForecast": "4週間の 最大酸素摂取量 予測を取得",
+        "pmcProjection": "Read four-week PMC outlook"
       },
       "skills": {
         "integrationSupport": "デバイス接続と同期",
@@ -809,7 +811,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "Cycling speed depends on terrain, wind and resistance; it is not a physiological threshold.",
         "HR_WINDOW_AVERAGE": "No 1-second peak; reports the maximum of available window-average heart rates.",
         "TP_EMPIRICAL_OFFSET": "Existing 5K pace +20 s/km heuristic; maximal effort is not verified.",
-        "VDOT_NOT_LAB_VO2MAX": "VDOT estimated from running distance and time; ordinary training may underestimate capacity.",
+        "VDOT_NOT_LAB_VO2MAX": "VO2max reference estimated from running distance and time; ordinary training may underestimate capacity. This differs from laboratory measurement.",
         "DERIVED_ACTIVITY_ESTIMATES": "Re-aggregates activity estimates using current source preference and correction; raw running signals were not reprocessed.",
         "DAILY_HEALTH_MEDIAN": "Median of selected daily resting-HR records; activity minimum HR is not a substitute.",
         "OBSERVED_HR_NOT_MAXIMUM": "An observed peak is not physiological maximum HR and may include sensor error.",
@@ -827,8 +829,8 @@
         "running-extended-cp": "Running extended CP (estimate)",
         "critical-speed": "Multi-activity distance-time fit (estimate)",
         "running-5k-threshold-pace": "5K threshold pace mapping (estimate)",
-        "running-performance-vdot": "Running performance VDOT (estimate)",
-        "running-effective-vo2max": "Activity VDOT weighted estimate",
+        "running-performance-vdot": "Running performance VO2max (estimate)",
+        "running-effective-vo2max": "Activity VO2max weighted estimate",
         "observed-max-hr": "Observed activity heart-rate peak",
         "daily-resting-hr": "Daily resting heart-rate median (estimate)",
         "aerobic-threshold-unavailable": "Aerobic threshold: no validated method"
@@ -1660,7 +1662,7 @@
         "invalid": "0 より大きく 1.20 以下の数値を入力してください"
       },
       "defaultVdotSource": {
-        "label": "デフォルト VDOT ソース",
+        "label": "デフォルト 最大酸素摂取量 ソース",
         "placeholder": "ソースを選択",
         "description": "補正 VO₂max またはレースパフォーマンスを優先ソースに選びます。心拍数による生の推定値は、必ず個人補正係数を適用してから使用されます。",
         "options": {
@@ -2879,11 +2881,11 @@
           "useContent": "For general population, VO2 max ranges from 30-40 ml/kg/min. Elite endurance athletes can exceed 70-80. It naturally declines with age but can be improved with training.",
           "reference": "参照",
           "referenceContent": "Average(30-40), Excellent(>50), Elite(>70)",
-          "source": "Source: Jack Daniels VDOT / Firstbeat",
+          "source": "Source: Jack Daniels running-performance model / Firstbeat",
           "algorithm": {
-            "title": "The algorithm is based on Jack Daniels' VDOT theory and uses two calculation methods:",
+            "title": "The algorithm is based on Jack Daniels’ running-performance model and uses two calculation methods:",
             "standardTitle": "Standard Mode:",
-            "standardContent": "Directly maps VDOT values from best running performance as a VO2max reference.",
+            "standardContent": "Estimates a VO2max reference from best running performance.",
             "heartRateTitle": "Heart Rate Mode:",
             "heartRateContent": "References the Firstbeat model, estimating current oxygen uptake percentage via heart rate percentage (%HRmax), then combining with pace to derive VO2max.",
             "note": "Note: Heart rate estimation is susceptible to environmental temperature, terrain, and physical condition. It is recommended to focus on long-term trends rather than single values."
@@ -3852,7 +3854,7 @@
     "inputRequired": "対応しているランニング能力の基準値がまだありません。",
     "notReady": "このプランは生成前に設定の調整が必要です。",
     "buildBlocked": "上記の項目を解決してからプランを生成してください。",
-    "capabilityRequired": "対象となるランニングアクティビティを完了してください。システムが直近のレース、VO₂max/VDOT、閾値ペース、またはクリティカルスピードを自動で使用します。",
+    "capabilityRequired": "対象となるランニングアクティビティを完了してください。システムが直近のレース、VO₂max/最大酸素摂取量、閾値ペース、またはクリティカルスピードを自動で使用します。",
     "tenKBase": "最長連続ランは{actual}分です。まず{required}分に到達するか、最近の5 kmを記録してください。",
     "halfMarathonBase": "記録されている最長ランは{actual} kmです。ハーフマラソンプランを始める前に{required} km到達を検討してください。",
     "marathonLongRun": "記録されている最長ランは{actual} kmです。マラソンプランを始める前に{required} km到達を検討してください。",
@@ -6371,5 +6373,73 @@
     "forward": "進む",
     "navigation": "ウィンドウナビゲーション",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "4週間後の推定 最大酸素摂取量 {value}",
+    "interval": "80%予測区間 {lower}–{upper}",
+    "referenceInterval": "参考範囲 {lower}–{upper}",
+    "basis": "{date} までの 最大酸素摂取量 履歴に基づく推定です。",
+    "askCoach": "コーチに聞く",
+    "coachPrompt": "現在の最大酸素摂取量とこれまでの変化、利用可能な4週間の予測を解説し、最近のトレーニングを踏まえてアドバイスしてください。",
+    "chartLabel": "最大酸素摂取量 予測",
+    "historyAndForecast": "選択した履歴 + 今後4週間の予測",
+    "historyAndForecastDays": "選択した履歴 + {days}日間の予測",
+    "INSUFFICIENT_HISTORY": "4週間の予測には、さらにランニング記録が必要です。",
+    "STALE_HISTORY": "新しいランニング記録で予測が更新されます。",
+    "INCOMPARABLE_HISTORY": "現在の 最大酸素摂取量 算出方法での記録がさらに必要です。",
+    "MODEL_UNAVAILABLE": "現在、予測を利用できません。",
+    "currentEstimate": "現在の推定値",
+    "current": "現在の 最大酸素摂取量",
+    "inFourWeeks": "4週間後の予測",
+    "higher": "現在より上昇する見込み",
+    "lower": "現在より低下する見込み",
+    "unchanged": "現在と同程度の見込み"
+  },
+  "PmcProjection": {
+    "title": "Fitness management",
+    "scopeLabel": "Sport",
+    "scopes": {
+      "ALL": "All sports",
+      "RUN": "Running",
+      "CYCLING": "Cycling",
+      "SWIM": "Swimming"
+    },
+    "scenarios": {
+      "AUTO": "Plans first",
+      "HABIT": "Recent habits",
+      "REST": "Pause training"
+    },
+    "basis": {
+      "PLAN": "Scheduled training",
+      "HABIT": "Recent training habits",
+      "MIXED": "Scheduled training + recent habits",
+      "REST": "Pause training",
+      "UNKNOWN": "Not enough evidence"
+    },
+    "metrics": {
+      "ctl": "Fitness (CTL)",
+      "atl": "Fatigue (ATL)",
+      "tsb": "Form (TSB)"
+    },
+    "chartTitle": "Training load and outlook",
+    "actual": "Recorded",
+    "projected": "Projected",
+    "today": "Today",
+    "load": "Daily load",
+    "keyboardHint": "Use arrow keys to inspect dates.",
+    "updated": "Data through {time}",
+    "failed": "Could not load this outlook. Try again.",
+    "retry": "Retry",
+    "empty": "No recorded training load yet. Sync or import activities to see your history.",
+    "askCoach": "Ask coach",
+    "coachPrompt": "Please explain my current training load, historical changes and four-week outlook for {scope}, using {scenario}, and advise me based on my recent training and recovery.",
+    "updateFailedShort": "Update failed; showing the previous result",
+    "noForecast": "No forecast available",
+    "metricNames": {
+      "ctl": "Fitness",
+      "atl": "Fatigue",
+      "tsb": "Form"
+    },
+    "metricSwitch": "Select metric"
   }
 }

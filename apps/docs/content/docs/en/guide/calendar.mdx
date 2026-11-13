@@ -1,167 +1,115 @@
 ---
-title: Calendar
-description: Use the Trainingload.ai calendar to review planned workouts, completed activities, daily load, weekly summaries, and plan progress in one date-based view.
-keywords:
-  [
-    "training calendar",
-    "workout calendar",
-    "planned workouts",
-    "completed activities",
-    "Trainingload.ai calendar",
-  ]
+title: Compare Planned and Recorded Training in Calendar
+description: Choose a day, inspect its planned workouts and completed activities, link the correct recording, and check the date and scope of load summaries.
+seoTitle: "Training Calendar and Plan vs Actual Guide | Trainingload.ai"
+seoDescription: "Use the calendar to find planned and completed training, open daily details, associate an activity with its workout, and verify dates, status and load."
+keywords: ["training calendar", "plan vs actual", "link workout activity", "daily training review", "Trainingload.ai guide"]
 ---
 
-# Calendar
+# Compare Planned and Recorded Training in Calendar
 
-The calendar brings planned workouts and completed activities into one date-based view. It is useful when you want to see how the training plan and real training line up across days and weeks.
+Calendar puts future intentions and recorded training into a shared date context. A planned workout and an activity on the same date are separate records. Use their detail and association to establish whether the recording represents that planned session.
 
-Use it to answer:
-
-- What is scheduled today?
-- What did I actually complete?
-- How much load landed on this day or week?
-- Did missed or moved workouts change the rhythm of the plan?
-- Which day should I open for more detail?
+[Open Calendar in Demo](https://demo.trainingload.ai/en/calendar). The screenshots use synthetic plan and activity data in the real Web app. Navigate to a relevant date in Demo; saving associations or schedule changes requires your own account.
 
 ## Before you begin
 
-- Set the account time zone correctly.
-- Let newly imported activities finish processing.
-- Activate a plan if you expect planned workouts to appear.
-- Confirm the plan start date before comparing relative plan days with calendar dates.
+Check the account timezone and activity start time. For planned training, verify the active plan's start date and workout schedule. Let imported activities finish processing before judging missing load or analysis.
 
-## Daily review workflow
+The following workflow uses Web. Narrow screens can use the offered week or month controls and a day sheet; mobile apps use their corresponding date and workout entries.
 
-1. Return to Today, then navigate to the week or month you need.
-2. Select a date and separate planned training from completed activity.
-3. Open the planned workout to understand intent.
-4. Open the completed activity to verify what actually happened.
-5. Link them from the supported plan or activity control when they belong together.
+## 1. Find and select the day
+
+Use the previous/next controls or the month selector to locate the date, or return to **Today**. Check the visible month or week, then select a day.
+
+The selected date determines the day panel. A date can contain planned sessions, independent scheduled workouts, recorded activities or a combination of them. Check the item labels before opening one.
 
 <DocsScreenshot
   id="calendar-plan-actual"
-  title="Planned and completed training in the calendar"
-  description="The selected-day panel keeps planned workouts, completed activities, and daily load in the same date context without treating them as identical."
-  route="Calendar"
+  title="Locate planned sessions and actual activity on the same date"
+  description="Synthetic Web example. Calendar shows planned workouts alongside recorded activity and daily load, while the selected-day view provides their separate details."
+  imageAlt="Calendar example showing planned workouts, a recorded activity and the selected date's training context"
+  route="Calendar → Select a day"
+  demoLabel="Open the Demo calendar"
 />
 
-## Month and week views
+## 2. Read the day panel
 
-The calendar shows a month view on larger screens. On mobile, it can use a week-focused view so each day remains readable.
+Use **Training** to inspect the scheduled workout and **Activities** to inspect the recording. Review the selected date, displayed load and item counts. Choose **View day** when you need the complete day view.
 
-Use navigation controls to:
+| Record | Check before comparing |
+| --- | --- |
+| Planned workout | Purpose, scheduled date, sport, structure, notes and execution status. |
+| Completed activity | Start time, source, sport, recorded duration/distance, processing and sensor coverage. |
+| Association | Whether the correct activity is actually linked to the intended workout. |
 
-- Move to the previous or next month.
-- Move to the previous or next week on mobile week view.
-- Jump back to today.
-- Pick another month.
+A completion label alone does not identify the recording. Open [Activity Detail](/docs/guide/activity-detail) to investigate the actual effort.
 
-The selected date controls the detail panel on the side or bottom of the screen.
+<DocsScreenshot
+  id="calendar-activity-details"
+  title="Switch to the recording for the selected day"
+  description="The same synthetic calendar date with Activities selected. Open the recorded activity to inspect its actual duration, distance and analysis before linking it."
+  imageAlt="Selected calendar day with the Activities tab showing its recorded workout"
+  route="Calendar → Selected day → Activities"
+  demoLabel="Open the Demo calendar"
+/>
 
-## What each day can show
+## 3. Associate the correct activity with a workout
 
-A calendar day can include:
+In your account, open the scheduled workout's detail and its **Link activity** entry.
 
-- Planned workouts from the active plan.
-- Completed activities.
-- Daily load.
-- Visual indicators for plan range.
-- Sport-specific styling for workouts or activities.
+1. Confirm the workout has a scheduled date and the correct sport.
+2. Check the recording's start time in activity detail first. In the offered list for that day, compare title and duration to identify that recording.
+3. Select the matching recording and wait for success feedback.
+4. If it belongs to another planned session, read the **Replace link?** confirmation before replacing it.
+5. Reopen the workout and activity to verify the association.
 
-Calendar markers are meant for scanning. Open the day panel or activity detail page when you need exact metrics.
+If no candidate appears, check synchronization, the activity's local date, the workout schedule and sport. Resolve those differences before selecting an unrelated activity.
 
-## Selected day panel
+To fix an incorrect association, use the existing link's **Remove link** or choose the intended activity. Removing an association and deleting an activity have different effects. Demo disables these write actions.
 
-The selected day panel shows the details for one date.
+## 4. Compare intended and recorded work
 
-It can include:
+Compare purpose and structure first, then the recorded duration, distance, intensity and available load. Record why a session was shortened, replaced or skipped. Additional activity can be real training even when it was not part of the original plan.
 
-- Selected date.
-- Daily load.
-- Activity count.
-- Planned workout count.
-- Planned workout cards or charts.
-- Completed activity list.
-- Link to the full day page.
+A missing expected or actual load is a data condition to investigate. Check thresholds, sport and processing before treating it as zero. Follow [Manage an Active Plan](/docs/guide/manage-active-plan) for completion, skip, postpone and other execution actions offered by the current workout state.
 
-Open a planned workout to inspect the workout description and chart. Open a completed activity to review its activity detail page.
+## 5. Check the summary scope
 
-## Training and activity tabs
+Calendar can offer **Plan** and **Month** summaries. Read the active scope and displayed date boundaries before comparing counts, distance, duration or load.
 
-The day panel separates planned training and completed activities.
+Plan progress uses the active cycle. A month overview uses the visible calendar month. Their comparison windows differ, so use the displayed context instead of assuming every summary describes the same period.
 
-Use **Training** to review:
+Use [Weekly Review](/docs/workflow/weekly-review) for the broader review and [PMC](/docs/guide/pmc-forecast) when the question concerns accumulated load and a conditional outlook.
 
-- Planned workouts.
-- Workout structure.
-- Sport type.
-- Session details.
+## Check the result
 
-Use **Activity** to review:
+The selected day, day panel and opened records should agree on the date. The planned workout and activity should have the intended association, and any load comparison should name its scope and missing data.
 
-- Completed workouts for the selected day.
-- Distance and duration.
-- Sport type.
-- Links to activity details.
+## Common questions
 
-This separation helps avoid confusing "what was planned" with "what happened."
+### Why is the activity on a different date?
 
-## Summary scope
+Compare the activity start time and timezone with the account's display timezone, then check the plan start and scheduled date. Confirm the date before moving a workout.
 
-The calendar can summarize training by plan progress or by calendar month.
+### Why is the plan workout missing?
 
-When an active plan exists, the plan scope helps you review the current plan period. Without an active plan, the month scope still gives a useful overview.
+Check the active plan, its date range and the individual workout's schedule and status. A moved or skipped session may no longer appear where you expected.
 
-Summary metrics can include:
+### Why are two records shown for one training session?
 
-- Activity count.
-- Training load.
-- Distance.
-- Duration.
-- Comparison with the previous period.
+The planned session and actual activity are separate records. Confirm their association. If two actual activities also exist, inspect source forwarding and duplicate import before deleting anything.
 
-Use these summaries to spot patterns, not to judge one day in isolation.
+### Why can I not link the activity in Demo?
 
-## Calendar vs current plan
+Demo permits inspection of the examples. Association and schedule changes require the appropriate account permissions.
 
-Use the calendar when you want date context across multiple days.
+### What if a change is rejected?
 
-Use the current plan page when you want to execute or adjust the plan:
+Read the error and refresh the latest plan or activity state before retrying. Verify that the intended association or schedule actually changed.
 
-- Mark workouts done or skipped.
-- Move unfinished workouts.
-- Compare expected and actual load in the plan workflow.
-- Ask AI Coach for plan follow-up.
+## Continue
 
-The calendar is for orientation; the current plan page is for execution.
-
-## Verify the result
-
-- The selected date, detail panel, and visible week or month agree.
-- Planned workouts appear only inside the activated plan range.
-- Completed activities use their correct local calendar date.
-- Opening each item leads to the expected workout or activity.
-- Daily and period summaries use the scope currently shown in the UI.
-
-## Troubleshooting
-
-If a workout or activity appears on an unexpected day:
-
-- Check your profile time zone.
-- Check the activity start time and activity time zone.
-- Confirm the plan start date.
-- Confirm the activity has finished processing.
-- Check whether search or calendar data needs refreshing.
-
-If planned workouts are missing:
-
-- Confirm a plan is active.
-- Check whether the selected date is inside the active plan range.
-- Open the plan detail page to confirm the workout schedule.
-
-## Next steps
-
+- [Today and Current Status](/docs/guide/today-and-current-state)
 - [Manage an Active Plan](/docs/guide/manage-active-plan)
 - [Activity Detail](/docs/guide/activity-detail)
-- [Activities Feed and Search](/docs/guide/activity-feed-search)
-- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)

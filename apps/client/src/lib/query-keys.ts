@@ -167,6 +167,9 @@ export const queryKeys = {
   },
 
   pmc: {
+    projections: () => ["pmc-data", "projection"] as const,
+    projection: (scope: string, scenario: string, historyDays: number) =>
+      ["pmc-data", "projection", scope, scenario, historyDays] as const,
     data: () => queryKeys.root.pmcData,
     fitnessStatus: () => queryKeys.root.fitnessStatus,
     extremes: () => queryKeys.root.pmcExtremes,

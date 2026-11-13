@@ -1,3 +1,4 @@
+import "katex/dist/katex.css";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { Suspense, type CSSProperties, type ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";

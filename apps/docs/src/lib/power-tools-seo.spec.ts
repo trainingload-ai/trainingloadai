@@ -1,42 +1,44 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import en from "../../../../packages/messages/docs/en.json";
+import { llmFreeToolPages } from "./llms-catalog";
 
 describe("power tool SEO ownership", () => {
-  it("locks FTP, CP, and power-zone calculator heads in the keyword map", async () => {
-    const source = await readFile(
-      new URL("../../../../../SEO_KEYWORD_MAP.md", import.meta.url),
-      "utf8",
-    );
+  it("keeps distinct calculator heads in shipped metadata and the AI catalog", () => {
+    const calculators = [
+      {
+        path: "/ftp-calculator",
+        copy: en.estimateCp,
+        heads: ["ftp calculator"],
+      },
+      {
+        path: "/critical-power-calculator",
+        copy: en.criticalPowerCalculator,
+        heads: ["critical power calculator"],
+      },
+      {
+        path: "/power-zones-calculator",
+        copy: en.powerZonesCalculator,
+        heads: ["power zone calculator", "power zones calculator"],
+      },
+    ];
+    const allHeads = calculators.flatMap(({ heads }) => heads);
 
-    expect(source).toMatch(
-      /\| `\/ftp-calculator`\s+\|[^|]+\|\s+FTP calculator\s+\|/,
-    );
-    expect(source).toContain(
-      "FTP Calculator | 20-Min, Ramp Test, W/kg & Zones",
-    );
-    expect(source).toContain("cycling FTP calculator");
-    expect(source).toContain("×0.95");
-    expect(source).toContain("FTP 计算器");
-    expect(source).toContain("FTP計算機");
-    expect(source).toContain("FTP 計算器");
+    for (const { path, copy, heads } of calculators) {
+      const keywords = copy.metadata.keywords.map((keyword) =>
+        keyword.toLowerCase(),
+      );
+      expect(keywords.filter((keyword) => allHeads.includes(keyword))).toEqual(
+        heads,
+      );
+      expect(copy.metadata.title.toLowerCase()).toContain(heads[0]);
+      expect(copy.page.title.toLowerCase()).toContain(heads[0]);
 
-    expect(source).toMatch(
-      /\| `\/critical-power-calculator`\s+\|[^|]+\|\s+critical power calculator\s+\|/,
-    );
-    expect(source).toContain("Critical Power Calculator | CP & W′ from 2–3 Efforts");
-    expect(source).toContain("临界功率计算器");
-    expect(source).toContain("クリティカルパワー計算機");
-    expect(source).toContain("臨界功率計算器");
-
-    expect(source).toMatch(
-      /\| `\/power-zones-calculator`\s+\|[^|]+\|\s+power zones calculator\s+\|/,
-    );
-    expect(source).toContain("Power Zones Calculator | FTP, Coggan & 7 Zones");
-    expect(source).toContain("cycling power zones calculator");
-    expect(source).toContain("power zone calculator");
-    expect(source).toContain("功率区间计算器");
-    expect(source).toContain("パワーゾーン計算機");
-    expect(source).toContain("功率區間計算器");
+      const entries = llmFreeToolPages.filter((entry) => entry.path === path);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].title).toBe(copy.page.title);
+      expect(entries[0].description.length).toBeGreaterThan(0);
+    }
   });
 
   it("keeps race-distance overlay files out of these calculator pages", async () => {

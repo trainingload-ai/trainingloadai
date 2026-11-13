@@ -97,7 +97,18 @@
     "language": "Sprache",
     "openMainMenu": "Hauptmenü öffnen"
   },
+  "docsActions": {
+    "copy": "Markdown kopieren",
+    "copied": "Kopiert",
+    "copying": "Wird kopiert…",
+    "copyError": "Kopieren fehlgeschlagen. Markdown öffnen und erneut versuchen.",
+    "open": "Öffnen",
+    "viewMarkdown": "Markdown anzeigen",
+    "openIn": "In {name} öffnen",
+    "ask": "Lies {url}. Ich möchte Fragen zu dieser Dokumentation stellen."
+  },
   "docsScreenshot": {
+    "openImage": "Bild in voller Größe öffnen",
     "demoLabel": "Live-Demo",
     "openDemo": "Diese Seite in der Demo öffnen"
   },

@@ -21,6 +21,11 @@ const docsScreenshot = readFileSync(
   "utf8",
 );
 
+const screenshotModel = readFileSync(
+  new URL("./docs-screenshot.ts", import.meta.url),
+  "utf8",
+);
+
 describe("shared product browser chrome", () => {
   it("keeps one accessible, theme-aware window treatment", () => {
     expect(chrome).toContain("grid-cols-[1fr_auto_1fr]");
@@ -38,10 +43,10 @@ describe("shared product browser chrome", () => {
   });
 
   it("uses real manifest assets and honest Demo links for pending captures", () => {
-    expect(docsScreenshot).toContain("screenshotManifest.captures");
-    expect(docsScreenshot).toContain('capture?.status === "ready"');
+    expect(screenshotModel).toContain("screenshotManifest.captures");
+    expect(screenshotModel).toContain('capture?.status === "ready"');
     expect(docsScreenshot).toContain('useTranslations("docsScreenshot")');
-    expect(docsScreenshot).toContain("stableCaptureRoute(capture?.route)");
+    expect(screenshotModel).toContain("stableCaptureRoute(capture?.route)");
     expect(docsScreenshot).toContain("href={destination.href}");
   });
 });

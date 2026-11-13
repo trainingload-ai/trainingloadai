@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const forbiddenPackages = ['@starshards/managed-', '@managed-commercial/', '@managed-server/', '@managed-shared/', '@managed-client/', '@aws-sdk/', '@creem_io/', '@waffo/', 'mapbox-gl', 'nodemailer'];
-const privateRoots = ['ai_docs', 'apps/desktop', 'apps/mobile', 'apps/operations', 'packages/managed-', 'packages/messages/client-managed', 'packages/messages/server-managed', 'packages/prisma/managed', 'packages/prisma/migrations', 'cloud-docs', 'operations', 'electron-client', 'trainingload_mobile_app', 'docsv2', 'exampleFile', 'uploads', 'backups'];
+const privateRoots = ['ai_docs', 'apps/mobile', 'apps/operations', 'packages/managed-', 'packages/messages/client-managed', 'packages/messages/server-managed', 'packages/prisma/managed', 'packages/prisma/migrations', 'cloud-docs', 'operations', 'electron-client', 'trainingload_mobile_app', 'docsv2', 'exampleFile', 'uploads', 'backups'];
 
 export async function auditPublicRepository(directory) {
   const root = resolve(directory);
@@ -17,6 +17,7 @@ export async function auditPublicRepository(directory) {
     async function walk(path = '') {
       for (const entry of await fs.readdir(resolve(root, path), { withFileTypes: true })) {
         if (['node_modules', '.next', '.next-dev', 'dist', 'dist-selfhost', '.git', 'generated', '.generated'].includes(entry.name)) continue;
+        if (path === 'apps/desktop' && entry.name === 'build') continue;
         const file = path ? `${path}/${entry.name}` : entry.name;
         if (entry.isDirectory()) await walk(file); else files.push(file);
       }
@@ -59,7 +60,7 @@ export async function auditPublicRepository(directory) {
       const imports = [...source.matchAll(/(?:from\s*|import\s*\(|require\s*\()\s*['"]([^'"]+)['"]/g)].map(match => match[1]);
       for (const dependency of imports) if (forbiddenPackages.some(prefix => dependency === prefix || dependency.startsWith(prefix))) findings.push(`Private import: ${file}: ${dependency}`);
     }
-    if (/^(apps\/client|apps\/server|apps\/docs|packages\/[^/]+)\/package.json$/.test(file)) {
+    if (/^(apps\/client|apps\/server|apps\/docs|apps\/desktop|packages\/[^/]+)\/package.json$/.test(file)) {
       const manifest = JSON.parse(await fs.readFile(resolve(root, file), 'utf8'));
       if (manifest.license !== 'AGPL-3.0-only') findings.push(`Incorrect license: ${file}`);
       for (const name of Object.keys({ ...manifest.dependencies, ...manifest.devDependencies })) {

@@ -235,7 +235,9 @@
         "metricUpdate": "Fitnesskennzahlen aktualisieren",
         "bodyWeightUpdate": "Körpergewicht erfassen",
         "trainingDataCoverage": "Trainingsdaten-Abdeckung",
-        "coachTaskResult": "Hintergrundaufgabe"
+        "coachTaskResult": "Hintergrundaufgabe",
+        "metricForecast": "VO2max-Vier-Wochen-Prognose lesen",
+        "pmcProjection": "Read four-week PMC outlook"
       },
       "skills": {
         "integrationSupport": "Geräteverbindung und Synchronisierung",
@@ -809,7 +811,7 @@
         "CYCLING_SPEED_ENVIRONMENT": "Cycling speed depends on terrain, wind and resistance; it is not a physiological threshold.",
         "HR_WINDOW_AVERAGE": "No 1-second peak; reports the maximum of available window-average heart rates.",
         "TP_EMPIRICAL_OFFSET": "Existing 5K pace +20 s/km heuristic; maximal effort is not verified.",
-        "VDOT_NOT_LAB_VO2MAX": "VDOT estimated from running distance and time; ordinary training may underestimate capacity.",
+        "VDOT_NOT_LAB_VO2MAX": "VO2max reference estimated from running distance and time; ordinary training may underestimate capacity. This differs from laboratory measurement.",
         "DERIVED_ACTIVITY_ESTIMATES": "Re-aggregates activity estimates using current source preference and correction; raw running signals were not reprocessed.",
         "DAILY_HEALTH_MEDIAN": "Median of selected daily resting-HR records; activity minimum HR is not a substitute.",
         "OBSERVED_HR_NOT_MAXIMUM": "An observed peak is not physiological maximum HR and may include sensor error.",
@@ -827,8 +829,8 @@
         "running-extended-cp": "Running extended CP (estimate)",
         "critical-speed": "Multi-activity distance-time fit (estimate)",
         "running-5k-threshold-pace": "5K threshold pace mapping (estimate)",
-        "running-performance-vdot": "Running performance VDOT (estimate)",
-        "running-effective-vo2max": "Activity VDOT weighted estimate",
+        "running-performance-vdot": "Running performance VO2max (estimate)",
+        "running-effective-vo2max": "Activity VO2max weighted estimate",
         "observed-max-hr": "Observed activity heart-rate peak",
         "daily-resting-hr": "Daily resting heart-rate median (estimate)",
         "aerobic-threshold-unavailable": "Aerobic threshold: no validated method"
@@ -1662,7 +1664,7 @@
         "invalid": "Gib eine Zahl größer als 0 und höchstens 1,20 ein"
       },
       "defaultVdotSource": {
-        "label": "Standard-VDOT-Quelle",
+        "label": "Standard-VO2max-Quelle",
         "placeholder": "Quelle auswählen",
         "description": "Wähle den korrigierten VO₂max oder die Wettkampfleistung als bevorzugte Quelle. Rohe Herzfrequenzschätzungen werden vor der Verwendung immer mit dem persönlichen Korrekturfaktor angepasst.",
         "options": {
@@ -2880,11 +2882,11 @@
           "useContent": "Für die Allgemeinbevölkerung liegt der VO2max zwischen 30 und 40 ml/kg/min. Elite-Ausdauersportler können 70-80 überschreiten. Mit zunehmendem Alter lässt es natürlich nach, kann aber durch Training verbessert werden.",
           "reference": "Referenz",
           "referenceContent": "Durchschnittlich (30–40), Ausgezeichnet (>50), Elite (>70)",
-          "source": "Quelle: Jack Daniels VDOT / Firstbeat",
+          "source": "Quelle: Jack Daniels VO2max / Firstbeat",
           "algorithm": {
-            "title": "Der Algorithmus basiert auf der VDOT-Theorie von Jack Daniels und verwendet zwei Berechnungsmethoden:",
+            "title": "Der Algorithmus basiert auf der VO2max-Theorie von Jack Daniels und verwendet zwei Berechnungsmethoden:",
             "standardTitle": "Standardmodus:",
-            "standardContent": "Ordnet VDOT-Werte der besten Laufleistung direkt als VO2max-Referenz zu.",
+            "standardContent": "Ordnet VO2max-Werte der besten Laufleistung direkt als VO2max-Referenz zu.",
             "heartRateTitle": "Herzfrequenzmodus:",
             "heartRateContent": "Bezieht sich auf das Firstbeat-Modell, das den aktuellen Prozentsatz der Sauerstoffaufnahme über den Prozentsatz der Herzfrequenz (% HFmax) schätzt und dann mit der Geschwindigkeit kombiniert, um den VO2max abzuleiten.",
             "note": "Hinweis: Die Schätzung der Herzfrequenz hängt von der Umgebungstemperatur, dem Gelände und der körperlichen Verfassung ab. Es empfiehlt sich, sich auf langfristige Trends und nicht auf Einzelwerte zu konzentrieren."
@@ -3853,7 +3855,7 @@
     "inputRequired": "Es ist noch kein unterstützter Anker für deine Laufleistung verfügbar.",
     "notReady": "Dieser Plan muss angepasst werden, bevor er erstellt werden kann.",
     "buildBlocked": "Kläre die oben genannten Punkte, bevor du den Plan erstellst.",
-    "capabilityRequired": "Absolviere eine geeignete Laufeinheit; das System verwendet automatisch ein aktuelles Rennergebnis, VO₂max/VDOT, Schwellentempo oder Critical Speed.",
+    "capabilityRequired": "Absolviere eine geeignete Laufeinheit; das System verwendet automatisch ein aktuelles Rennergebnis, VO2max, Schwellentempo oder Critical Speed.",
     "tenKBase": "Dein längster durchgehender Lauf dauert {actual} Min.; erreiche zuerst {required} Min. oder zeichne einen aktuellen 5-km-Lauf auf.",
     "halfMarathonBase": "Dein längster aufgezeichneter Lauf beträgt {actual} km. Erwäge vor einem Halbmarathonplan zunächst {required} km zu erreichen.",
     "marathonLongRun": "Dein längster aufgezeichneter Lauf beträgt {actual} km. Erwäge vor einem Marathonplan zunächst {required} km zu erreichen.",
@@ -6372,5 +6374,73 @@
     "forward": "Vorwärts",
     "navigation": "Fensternavigation",
     "appName": "Trainingload.ai Personal"
+  },
+  "VdotForecast": {
+    "expected": "Geschätzter VO2max in vier Wochen: {value}",
+    "interval": "80%-Prognoseintervall {lower}–{upper}",
+    "referenceInterval": "Orientierungsbereich {lower}–{upper}",
+    "basis": "Basierend auf dem historischen VO2max bis {date}.",
+    "askCoach": "Coach fragen",
+    "coachPrompt": "Erkläre meinen aktuellen VO2max, seine bisherige Entwicklung und eine gegebenenfalls verfügbare Vier-Wochen-Prognose. Gib mir darauf und auf meinem jüngsten Training basierende Empfehlungen.",
+    "chartLabel": "VO2max-Prognose",
+    "historyAndForecast": "Ausgewählter Verlauf + Vier-Wochen-Prognose",
+    "historyAndForecastDays": "Ausgewählter Verlauf + {days}-Tage-Prognose",
+    "INSUFFICIENT_HISTORY": "Für eine Vier-Wochen-Prognose sind weitere Laufdaten nötig.",
+    "STALE_HISTORY": "Neue Laufdaten aktualisieren diese Prognose.",
+    "INCOMPARABLE_HISTORY": "Weitere Daten mit der aktuellen VO2max-Methode sind nötig.",
+    "MODEL_UNAVAILABLE": "Die Prognose ist derzeit nicht verfügbar.",
+    "currentEstimate": "Aktuelle Schätzung",
+    "current": "Aktueller VO2max",
+    "inFourWeeks": "Erwartet in vier Wochen",
+    "higher": "Voraussichtlich höher als aktuell",
+    "lower": "Voraussichtlich niedriger als aktuell",
+    "unchanged": "Voraussichtlich unverändert"
+  },
+  "PmcProjection": {
+    "title": "Fitness management",
+    "scopeLabel": "Sport",
+    "scopes": {
+      "ALL": "All sports",
+      "RUN": "Running",
+      "CYCLING": "Cycling",
+      "SWIM": "Swimming"
+    },
+    "scenarios": {
+      "AUTO": "Plans first",
+      "HABIT": "Recent habits",
+      "REST": "Pause training"
+    },
+    "basis": {
+      "PLAN": "Scheduled training",
+      "HABIT": "Recent training habits",
+      "MIXED": "Scheduled training + recent habits",
+      "REST": "Pause training",
+      "UNKNOWN": "Not enough evidence"
+    },
+    "metrics": {
+      "ctl": "Fitness (CTL)",
+      "atl": "Fatigue (ATL)",
+      "tsb": "Form (TSB)"
+    },
+    "chartTitle": "Training load and outlook",
+    "actual": "Recorded",
+    "projected": "Projected",
+    "today": "Today",
+    "load": "Daily load",
+    "keyboardHint": "Use arrow keys to inspect dates.",
+    "updated": "Data through {time}",
+    "failed": "Could not load this outlook. Try again.",
+    "retry": "Retry",
+    "empty": "No recorded training load yet. Sync or import activities to see your history.",
+    "askCoach": "Ask coach",
+    "coachPrompt": "Please explain my current training load, historical changes and four-week outlook for {scope}, using {scenario}, and advise me based on my recent training and recovery.",
+    "updateFailedShort": "Update failed; showing the previous result",
+    "noForecast": "No forecast available",
+    "metricNames": {
+      "ctl": "Fitness",
+      "atl": "Fatigue",
+      "tsb": "Form"
+    },
+    "metricSwitch": "Select metric"
   }
 }

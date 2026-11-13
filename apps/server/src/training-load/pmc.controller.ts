@@ -1,3 +1,9 @@
+import {
+  PMC_PROJECTION_SCOPES,
+  PMC_PROJECTION_SCENARIOS,
+  type PmcProjectionScope,
+  type PmcProjectionScenario,
+} from '@shared/pmc-projection';
 import { computeTrainingLoadMonotony } from '@/algorithm/utils';
 import {
   Controller,
@@ -7,11 +13,12 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { IsDateString, IsOptional } from 'class-validator';
+import { IsDateString, IsIn, IsOptional } from 'class-validator';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import { CurrentUserId } from '@/utils/decorators/current-user-id.decorator';
 import { PMCService } from './pmc.service';
+import { VdotForecastService } from './vdot-forecast.service';
 import { OAuthHybridAuthGuard } from '@/oauth/oauth-hybrid-auth.guard';
 import { AllowPublicDemo } from '@/public-demo/allow-public-demo.decorator';
 import { PUBLIC_DEMO_CAPABILITIES } from '@shared/public-demo-policy';
@@ -32,10 +39,51 @@ class GetPMCDataDto {
   endDate?: string;
 }
 
+class GetPmcProjectionDto {
+  @IsOptional()
+  @IsIn(PMC_PROJECTION_SCOPES)
+  scope?: PmcProjectionScope;
+
+  @IsOptional()
+  @IsIn(PMC_PROJECTION_SCENARIOS)
+  scenario?: PmcProjectionScenario;
+
+  @IsOptional()
+  @IsIn(['60', '90'])
+  historyDays?: string;
+
+  @IsOptional()
+  @IsIn(['28', '30'])
+  forecastDays?: string;
+}
+
 @Controller('pmc')
 @UseGuards(OAuthHybridAuthGuard)
 export class PMCController {
-  constructor(private readonly pmcService: PMCService) {}
+  constructor(
+    private readonly pmcService: PMCService,
+    private readonly vdotForecast: VdotForecastService,
+  ) {}
+
+  @Get('vdot-forecast')
+  getVdotForecast(@CurrentUserId() userId: string) {
+    return this.vdotForecast.getForecast(userId);
+  }
+
+  @Get('projection')
+  @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.TRAINING_READ)
+  async getProjection(
+    @Query(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    query: GetPmcProjectionDto,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.pmcService.getProjection(userId, {
+      scope: query.scope,
+      scenario: query.scenario,
+      historyDays: query.historyDays === '90' ? 90 : 60,
+      forecastDays: query.forecastDays === '30' ? 30 : 28,
+    });
+  }
 
   /**
    * 手动触发重新计算

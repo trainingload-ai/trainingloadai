@@ -1,0 +1,38 @@
+name: Desktop macOS verification
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-macos-verify-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  macos-arm64:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_BUILD_CPUS: "2"
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/trainingload
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
+        with:
+          node-version: 22.23.3
+      - name: Require the standard arm64 Mac runner
+        run: test "$(uname -m)" = arm64
+      - run: corepack enable && corepack prepare pnpm@9.0.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm desktop:build
+      - run: pnpm --dir apps/desktop test
+      - run: pnpm --dir apps/desktop core:check
+      - name: Package and smoke-test the native runtime without signing credentials
+        run: pnpm --dir apps/desktop pack

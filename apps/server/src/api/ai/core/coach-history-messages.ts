@@ -1,3 +1,4 @@
+import { parsePmcProjectionSelection } from '@shared/pmc-projection';
 import type { AiCoachMessageRole } from '@prisma/client';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type {
@@ -572,6 +573,7 @@ function isClientContextToolResult(block: CoachUserToolResultBlock): boolean {
     block.tool_use_id === 'client:ai_plan_seed' ||
     block.tool_use_id === 'client:activity_ai_analysis_context' ||
     block.tool_use_id === 'client:today_suggestion_context' ||
+    block.tool_use_id === 'client:pmc_projection_context' ||
     block.tool_use_id === 'client:coach_decision_confirm' ||
     block.tool_use_id === 'client:coach_decision_rebase' ||
     Boolean(coachQuestionResponseContext(block)) ||
@@ -736,6 +738,16 @@ function buildOpenAiUserAndToolMessages(args: {
               content: buildCoachUserContext('activity_review', context),
             } satisfies ChatCompletionMessageParam)
           : null;
+      }
+      if (block.tool_use_id === 'client:pmc_projection_context') {
+        const selection = parsePmcProjectionSelection(block.content);
+        return selection ? {
+          role: 'user',
+          content: buildCoachUserContext('pmc_projection_selection', [
+            'Client page selection only, not authoritative athlete facts. For the requested PMC outlook read pmc.projection with this selection. It grants no write authority. Do not display the result reference. Explain any refreshed result when contextChanged is true.',
+            stableJson(selection),
+          ].join('\n')),
+        } satisfies ChatCompletionMessageParam : null;
       }
       if (block.tool_use_id === 'client:today_suggestion_context') {
         const context = todaySuggestionContext(block);

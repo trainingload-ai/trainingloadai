@@ -38,7 +38,7 @@ const localizedSeoPositioning: Record<
   },
   "zh-hant": {
     titleTerm: "智能教練",
-    keywords: ["跑步與騎行訓練應用", "訓練負荷"],
+    keywords: ["跑步與騎乘訓練應用", "訓練負荷"],
   },
   ja: {
     titleTerm: "AIコーチ",
@@ -243,17 +243,22 @@ describe("homepage product positioning", () => {
 
   it("keeps the English hero concise, natural, and keyword-specific", () => {
     const home = messages("en").home;
+    const subtitle = [
+      home.heroVisible.subtitleBefore,
+      home.heroVisible.subtitleHighlight,
+      home.heroVisible.subtitleAfter,
+    ].join("");
 
     expect(home.hero.title).toBe("A training plan that keeps up with you");
     expect(home.hero.titleLines).toEqual([
       "A training plan that",
       "keeps up with you",
     ]);
-    expect(home.hero.subtitle).toBe(home.heroVisible.subtitle);
-    expect(home.hero.subtitle).toContain("runners and cyclists");
-    expect(home.hero.subtitle).toContain("training load");
-    expect(home.hero.subtitle).toContain("AI Coach");
-    expect(home.hero.subtitle).not.toContain("based on that context");
+    expect(subtitle).toContain("open-source training core");
+    expect(subtitle).toContain("runners and cyclists");
+    expect(subtitle).toContain("training load");
+    expect(subtitle).toContain("AI Coach");
+    expect(subtitle).not.toContain("based on that context");
   });
 
   it("keeps the embedded home preview aligned with the current client UI", () => {

@@ -8,7 +8,7 @@ import {
   MessageCircleIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { useCopyButton } from "fumadocs-ui/utils/use-copy-button";
+import { useTranslations } from "next-intl";
 import { buttonVariants } from "./ui/button";
 import {
   Popover,
@@ -27,44 +27,66 @@ export function LLMCopyButton({
 }: {
   markdownUrl: string;
 }) {
-  const [isLoading, setLoading] = useState(false);
-  const [checked, onClick] = useCopyButton(async () => {
-    const cached = cache.get(markdownUrl);
-    if (cached) return navigator.clipboard.writeText(cached);
+  const t = useTranslations("docsActions");
+  const [status, setStatus] = useState<"idle" | "loading" | "copied" | "error">(
+    "idle",
+  );
 
-    setLoading(true);
-
+  async function copyMarkdown() {
+    setStatus("loading");
     try {
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/plain": fetch(markdownUrl).then(async (res) => {
-            const content = await res.text();
-            cache.set(markdownUrl, content);
-
-            return content;
-          }),
-        }),
-      ]);
-    } finally {
-      setLoading(false);
+      if (!navigator.clipboard) throw new Error("Clipboard unavailable");
+      const content = cache.has(markdownUrl)
+        ? Promise.resolve(cache.get(markdownUrl)!)
+        : fetch(markdownUrl).then(async (response) => {
+            if (!response.ok) throw new Error("Markdown request failed");
+            const text = await response.text();
+            cache.set(markdownUrl, text);
+            return text;
+          });
+      // Start the clipboard operation within the click gesture for Safari.
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "text/plain": content }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(await content);
+      }
+      setStatus("copied");
+    } catch {
+      setStatus("error");
     }
-  });
+  }
 
   return (
-    <button
-      disabled={isLoading}
-      className={cn(
-        buttonVariants({
-          variant: "secondary",
-          size: "sm",
-          className: "gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground",
-        }),
-      )}
-      onClick={onClick}
-    >
-      {checked ? <Check /> : <Copy />}
-      Copy Markdown
-    </button>
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        disabled={status === "loading"}
+        className={cn(
+          buttonVariants({
+            variant: "secondary",
+            size: "sm",
+            className:
+              "gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground",
+          }),
+        )}
+        onClick={copyMarkdown}
+      >
+        {status === "copied" ? <Check /> : <Copy />}
+        {t(
+          status === "copied"
+            ? "copied"
+            : status === "loading"
+              ? "copying"
+              : "copy",
+        )}
+      </button>
+      {status === "error" ? (
+        <span role="alert" className="text-sm text-destructive">
+          {t("copyError")}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -86,18 +108,20 @@ export function ViewOptions({
    */
   githubUrl?: string;
 }) {
+  const t = useTranslations("docsActions");
   const items = useMemo(() => {
-    const fullMarkdownUrl =
-      typeof window !== "undefined"
-        ? new URL(markdownUrl, window.location.origin)
-        : "loading";
-    const q = `Read ${fullMarkdownUrl}, I want to ask questions about it.`;
+    const q = t("ask", { url: markdownUrl });
 
     return [
+      {
+        title: t("viewMarkdown"),
+        href: new URL(markdownUrl).pathname,
+        icon: <ExternalLinkIcon />,
+      },
       ...(githubUrl
         ? [
             {
-              title: "Open in GitHub",
+              title: t("openIn", { name: "GitHub" }),
               href: githubUrl,
               icon: (
                 <svg fill="currentColor" role="img" viewBox="0 0 24 24">
@@ -109,7 +133,7 @@ export function ViewOptions({
           ]
         : []),
       {
-        title: "Open in Scira AI",
+        title: t("openIn", { name: "Scira AI" }),
         href: `https://scira.ai/?${new URLSearchParams({
           q,
         })}`,
@@ -173,7 +197,7 @@ export function ViewOptions({
         ),
       },
       {
-        title: "Open in ChatGPT",
+        title: t("openIn", { name: "ChatGPT" }),
         href: `https://chatgpt.com/?${new URLSearchParams({
           hints: "search",
           q,
@@ -191,7 +215,7 @@ export function ViewOptions({
         ),
       },
       {
-        title: "Open in Claude",
+        title: t("openIn", { name: "Claude" }),
         href: `https://claude.ai/new?${new URLSearchParams({
           q,
         })}`,
@@ -208,14 +232,14 @@ export function ViewOptions({
         ),
       },
       {
-        title: "Open in T3 Chat",
+        title: t("openIn", { name: "T3 Chat" }),
         href: `https://t3.chat/new?${new URLSearchParams({
           q,
         })}`,
         icon: <MessageCircleIcon />,
       },
     ];
-  }, [githubUrl, markdownUrl]);
+  }, [githubUrl, markdownUrl, t]);
 
   return (
     <Popover>
@@ -228,7 +252,7 @@ export function ViewOptions({
           }),
         )}
       >
-        Open
+        {t("open")}
         <ChevronDown className="size-3.5 text-fd-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">

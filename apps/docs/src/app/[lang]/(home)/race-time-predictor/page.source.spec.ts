@@ -35,13 +35,14 @@ describe("Race time predictor page source", () => {
     expect(client).toContain("/vdot-calculator");
     expect(client).not.toContain("Riegel");
     expect(page).toContain("readRaceTimeShare");
-    expect(page).toContain("<ProductPreview");
     expect(css).toContain("@media (max-width: 680px)");
     expect(css).toContain("@media (max-width: 560px)");
     expect(css).toContain("@media (max-width: 420px)");
     expect(css).toContain("print-color-adjust: exact");
     expect(promo).toContain('toolId: "race_time_predictor"');
     expect(promo).toContain("<CalculatorPromo");
+    expect(promo).toContain('toolId="race_time_predictor"');
+    expect(promo).toContain('namespace="raceTimePredictor.page.promo"');
     expect(promo).toContain('variant="recording"');
     expect(file).toContain("bestRaceWindow");
     expect(file).toContain("readThresholdFile");

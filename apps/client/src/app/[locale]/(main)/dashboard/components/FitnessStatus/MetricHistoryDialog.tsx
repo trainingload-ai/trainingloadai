@@ -2,12 +2,16 @@ import React from "react";
 import {
   AdaptiveDialog,
   AdaptiveDialogContent,
+  AdaptiveDialogTitle,
 } from "@/components/ui/adaptive-dialog";
 import { MobileSheet } from "@/components/mobile-app/components/MobileSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowUpRight } from "lucide-react";
 import { MetricHistoryChartByKey } from "./MetricHistoryChart";
 import type { MetricKey } from "./metric-history-chart-types";
+import { VdotForecastSummary } from "@/components/vdot-forecast-summary";
+import { isPmcMetric } from "@/components/charts/pmc/pmc-visuals";
+import { PmcMetricHistoryPanel } from "./PmcMetricHistoryPanel";
 
 export interface MetricHistoryDialogProps {
   open: boolean;
@@ -31,6 +35,7 @@ export interface MetricHistoryPanelProps {
   links?: MetricHistoryDialogProps["links"];
   enabled?: boolean;
   showHeader?: boolean;
+  showMetricTitle?: boolean;
   containerClassName?: string;
 }
 
@@ -43,23 +48,44 @@ export function MetricHistoryPanel({
   links,
   enabled = true,
   showHeader = true,
+  showMetricTitle = true,
   containerClassName,
 }: MetricHistoryPanelProps) {
+  if (isPmcMetric(metricKey))
+    return (
+      <PmcMetricHistoryPanel
+        metricKey={metricKey}
+        title={title}
+        currentValue={currentValue}
+        unit={unit}
+        description={description}
+        links={links}
+        enabled={enabled}
+        showHeader={showHeader}
+        showMetricTitle={showMetricTitle}
+        containerClassName={containerClassName}
+      />
+    );
   return (
     <div className={`flex flex-col ${containerClassName ?? ""}`}>
       {showHeader && (
         <div className="flex flex-row gap-4">
           <div className="text-base font-semibold text-foreground">{title}</div>
-          <div className="text-base font-bold text-primary">
-            {currentValue}
-            <span className="text-mobile-caption pc:text-xs font-normal text-muted-foreground ml-1">
-              {unit}
-            </span>
-          </div>
+          {metricKey !== "vo2Max" ? (
+            <div className="text-base font-bold text-primary">
+              {currentValue}
+              <span className="text-mobile-caption pc:text-xs font-normal text-muted-foreground ml-1">
+                {unit}
+              </span>
+            </div>
+          ) : null}
         </div>
       )}
 
       <div className="flex-1 flex flex-col min-h-0 gap-6 py-4">
+        {metricKey === "vo2Max" ? (
+          <VdotForecastSummary currentValue={currentValue} enabled={enabled} />
+        ) : null}
         <div className="w-full shrink-0">
           {metricKey !== "paceZones" ? (
             <MetricHistoryChartByKey metricKey={metricKey} enabled={enabled} />
@@ -123,16 +149,18 @@ export function MetricHistoryDialog({
         contentClassName="pt-2"
       >
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex shrink-0 items-baseline gap-1.5 px-1 pt-1">
-            <span className="text-2xl font-bold tabular-nums text-foreground">
-              {currentValue}
-            </span>
-            {unit ? (
-              <span className="text-mobile-caption text-muted-foreground">
-                {unit}
+          {metricKey !== "vo2Max" && !isPmcMetric(metricKey) ? (
+            <div className="flex shrink-0 items-baseline gap-1.5 px-1 pt-1">
+              <span className="text-2xl font-bold tabular-nums text-foreground">
+                {currentValue}
               </span>
-            ) : null}
-          </div>
+              {unit ? (
+                <span className="text-mobile-caption text-muted-foreground">
+                  {unit}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           <MetricHistoryPanel
             enabled={open}
             metricKey={metricKey}
@@ -141,7 +169,8 @@ export function MetricHistoryDialog({
             unit={unit}
             description={description}
             links={links}
-            showHeader={false}
+            showHeader={isPmcMetric(metricKey)}
+            showMetricTitle={false}
             containerClassName="min-h-0 flex-1"
           />
         </div>
@@ -152,10 +181,21 @@ export function MetricHistoryDialog({
   return (
     <AdaptiveDialog open={open} onOpenChange={onOpenChange}>
       <AdaptiveDialogContent
-        desktopClassName="sm:max-w-[70vw] lg:max-w-[50vw] max-h-[85vh] flex flex-col p-0"
-        mobileClassName="max-h-[85vh] overflow-hidden"
+        desktopClassName={
+          isPmcMetric(metricKey)
+            ? "sm:max-w-4xl max-h-[85dvh] overflow-y-auto flex flex-col p-0"
+            : "sm:max-w-[70vw] lg:max-w-[50vw] max-h-[85vh] flex flex-col p-0"
+        }
+        mobileClassName={
+          isPmcMetric(metricKey)
+            ? "max-h-[90dvh] overflow-y-auto"
+            : "max-h-[85vh] overflow-hidden"
+        }
       >
-        <div className="p-4">
+        {isPmcMetric(metricKey) ? (
+          <AdaptiveDialogTitle className="sr-only">{title}</AdaptiveDialogTitle>
+        ) : null}
+        <div className={isPmcMetric(metricKey) ? "p-5 md:p-6" : "p-4"}>
           <MetricHistoryPanel
             enabled={open}
             metricKey={metricKey}

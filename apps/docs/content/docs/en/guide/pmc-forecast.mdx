@@ -1,0 +1,146 @@
+---
+title: Read PMC History and Forecasts
+description: Use Trainingload.ai's fitness-management page to compare CTL, ATL and TSB, inspect a date, distinguish recorded load from forecasts, and ask AI Coach with the selected context.
+seoTitle: "PMC History and Forecast Guide | Trainingload.ai"
+seoDescription: "Follow the PMC workflow to choose a sport, inspect CTL, ATL and TSB, check daily load and forecast assumptions, and understand missing predictions."
+keywords: ["PMC forecast", "CTL ATL TSB", "fitness fatigue form", "training load forecast", "Trainingload.ai guide"]
+---
+
+# Read PMC History and Forecasts
+
+PMC puts recorded training load and a conditional outlook in one place. Use it to investigate how training pressure has changed and what the available future inputs would imply. A forecast is an estimate based on those inputs. It does not confirm that a workout has happened or that a particular training decision is appropriate.
+
+[Open fitness management in Demo](https://demo.trainingload.ai/en/pmc). The public Demo is read-only. Select the sport you want to inspect after opening it. The screenshots with forecast curves use synthetic example data rendered by the app. Demo values and forecast availability depend on its current records.
+
+## Before you begin
+
+- Import completed activities and wait for their training load to finish processing.
+- Check the activity classification, thresholds, load-source settings and account timezone.
+- For plan-based forecasts, use scheduled workouts with usable expected load. A draft or unscheduled workout does not automatically provide a future daily load.
+- Keep recorded training, planned training and estimated habits separate when explaining the chart.
+
+## 1. Open fitness management and choose a sport
+
+Open **PMC / Fitness management** from the analysis tools. At the top right, use **Sport** to choose All sports, Running, Cycling or Swimming. The three current-value cards and chart use that scope.
+
+Start with one sport when investigating a specific training block. Check the scope again when moving between the dashboard, PMC and the related activities.
+
+The main PMC page normally shows 60 days of history and an outlook extending 28 days into the future. It provides one selected metric at a time, with daily load below it.
+
+<DocsScreenshot
+  id="pmc-forecast-overview"
+  title="Find current values, the selected metric and daily load"
+  description="Synthetic running example. Current CTL, ATL and TSB sit above the chart. Solid recorded values and dashed forecast values share the same dates, with daily load below."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Running PMC example with three current-value cards, recorded and forecast TSB, and daily training load"
+  route="Analysis → PMC → Running"
+/>
+
+## 2. Read the current values before the outlook
+
+Use the three cards together.
+
+| Value | What it describes | What it does not establish |
+| --- | --- | --- |
+| Fitness / CTL | Longer-term accumulated training load | A measured performance improvement. |
+| Fatigue / ATL | The more responsive recent-load signal | A diagnosis of how tired you feel. |
+| Form / TSB | The relationship between longer-term and recent load | Guaranteed readiness for a workout or race. |
+
+The cards describe the recorded current state. Moving over a future date does not replace them with forecast values. To understand their calculation, read [CTL](/docs/metrics/pmc/chronic-training-load), [ATL](/docs/metrics/pmc/acute-training-load) and [TSB](/docs/metrics/pmc/training-stress-balance).
+
+## 3. Switch metrics and inspect one date
+
+1. Choose **Form**, **Fitness** or **Fatigue** above the chart.
+2. Move the pointer over the date you want to inspect. The tooltip includes the date, recorded or projected status, CTL, ATL, TSB and daily load.
+3. For a future date, read the displayed basis as well as the number.
+4. Compare the metric with the load panel at that same date. A line movement and a daily load are different quantities.
+
+The chart is also keyboard accessible. Focus the chart and use the left and right arrow keys to move by date. **Escape** hides the tooltip. On a touch screen, tap a date in the chart to inspect it.
+
+<DocsScreenshot
+  id="pmc-forecast-date"
+  title="Check a future date and its load basis"
+  description="Synthetic running example. The selected future date is labelled Projected and includes its daily-load basis. The top cards continue to show the recorded current state."
+  imageSrc="/docs/analysis/en/pmc-forecast-date.webp"
+  imageAlt="PMC Fitness chart with a future-date tooltip showing projected CTL, ATL, TSB, load and its basis"
+  route="PMC → Fitness → Inspect a date"
+/>
+
+## 4. Separate recorded history from a conditional forecast
+
+Use the legend and the **Today** boundary to orient yourself. Recorded values use a solid line. Available future estimates use a dashed line. The daily-load panel uses filled bars for recorded load and a lighter treatment for future load.
+
+The normal forecast prioritizes usable scheduled training. Where there is no applicable scheduled input, it can use a sufficiently recent and usable training pattern. Inspect the tooltip to see which basis applies to a date.
+
+| Displayed basis | How to interpret it |
+| --- | --- |
+| Scheduled training | Future load comes from the applicable scheduled workouts. |
+| Recent training habits | The forecast uses an estimate of the recent training pattern. It is not a new workout in your calendar. |
+| Pause training | The displayed scenario assumes no additional training for those days. |
+| No forecast | The available inputs do not support a value for that date. |
+
+Opening the chart does not schedule training or save a plan change. A day with no scheduled workout is not automatically a confirmed rest day. Missing load must not be read as zero load.
+
+If a forecast becomes unavailable partway through the outlook, later values can remain blank because they depend on the missing earlier input. Importing new activities or changing the schedule can change the outlook.
+
+## 5. Understand a blank future region
+
+Historical values can remain useful when no future curve is available. Common causes include a short or stale training history, missing recorded load, or scheduled workouts without a usable expected load.
+
+<DocsScreenshot
+  id="pmc-forecast-unavailable"
+  title="Recorded history can remain visible without a forecast"
+  description="The public Demo at capture time. Its recorded history is visible, while the future region has no usable curve. An empty forecast region is not a prediction of zero training."
+  imageSrc="/docs/analysis/en/pmc-forecast-unavailable.webp"
+  imageAlt="Public Demo PMC showing recorded history and a blank future region after Today"
+  route="Demo → PMC"
+/>
+
+Check the date and scope, then verify recent activities and the relevant schedule. If a tooltip says **No forecast available**, preserve that uncertainty. If the page says **Update failed; showing the previous result**, the visible chart is the last result rather than a successful refresh. An initial request failure provides **Retry**.
+
+## 6. Ask Coach with this context
+
+Choose **Ask Coach** at the top of the page. The linked question carries the selected sport and outlook context into AI Coach. Review the prepared question before sending it. Opening the link does not itself apply a training change.
+
+Include the real issue you are investigating, such as a change in recent load or the timing of a planned session. Check the activities and future assumptions used in the answer. Follow the normal confirmation flow for any proposed plan or workout edits.
+
+For a marathon-specific review, continue with [Use PMC for Marathon Adjustments](/docs/guide/pmc-marathon-adjustment).
+
+## Use the dashboard for a closer time window
+
+The dashboard's Fitness, Fatigue and Form cards open an individual metric view. These views offer **7**, **14**, **30** and **60** day history tabs. The visible future window follows the selected tab, up to 30 days. This differs from the main PMC page's broader outlook.
+
+Choose a time window before interpreting the chart, and keep the distinction between the current value and the selected future date.
+
+## Check the result
+
+You should be able to name the sport, date, metric, recorded or projected status, and load basis for the point you inspected. A useful explanation connects the curve to actual activities or scheduled inputs and states where evidence is missing.
+
+## Common questions
+
+### Why do the cards stay unchanged when I inspect the future?
+
+They are current recorded values. Use the tooltip for the selected future date.
+
+### Why did the forecast change after I completed a workout?
+
+The actual load and plan association can update the inputs. Confirm the activity is processed and linked to the intended workout before comparing results.
+
+### Why does a dashboard card show a different chart window?
+
+Its history tab also controls a shorter visible forecast window. The main PMC page has its own broader range. Compare the same sport and date rather than the position of a point on the screen.
+
+### Can I choose forecast scenarios from the chart?
+
+The main page offers sport and metric selection. Its ordinary visit chooses the applicable plan and habit inputs automatically. Some coach or shared links can carry a different scenario. Read the date's displayed basis instead of assuming every view uses the same assumptions.
+
+### Do the colored TSB bands prove I am ready?
+
+They are reference bands for reading load context. They do not incorporate every factor affecting your actual condition or performance.
+
+## Continue
+
+- [Activity Detail](/docs/guide/activity-detail)
+- [Weekly Training Review](/docs/workflow/weekly-review)
+- [Understand Effective VO2max in Endurance Training](/docs/guide/effective-vo2max-for-endurance)
+- [AI Coach](/docs/guide/ai-coach)

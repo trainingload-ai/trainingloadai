@@ -160,3 +160,7 @@ Self-host supports connecting Garmin with a [Garmin Personal API](apps/docs/cont
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) before participating. Use [SUPPORT.md](SUPPORT.md) for product and deployment questions. Report vulnerabilities through the private process in [SECURITY.md](SECURITY.md), never through a public issue.
 
 Trainingload.ai public code is licensed under [AGPL-3.0-only](LICENSE). External contributions are accepted under the same license. A separate written agreement is required before a contribution can be used under a separate commercial license.
+
+## Desktop application
+
+The AGPL desktop app lives in [`apps/desktop`](apps/desktop/README.md). It packages this same checkout's Client, Server, and migrations with Electron and PGlite. Build with `pnpm desktop:build` and run with `pnpm desktop:start`; see the desktop README for local packaging and signing status.

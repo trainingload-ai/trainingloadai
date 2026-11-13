@@ -90,7 +90,18 @@
     "language": "Language",
     "openMainMenu": "Open main menu"
   },
+  "docsActions": {
+    "copy": "Copy Markdown",
+    "copied": "Copied",
+    "copying": "Copying…",
+    "copyError": "Could not copy. Open Markdown and try again.",
+    "open": "Open",
+    "viewMarkdown": "View Markdown",
+    "openIn": "Open in {name}",
+    "ask": "Read {url}. I want to ask questions about this documentation."
+  },
   "docsScreenshot": {
+    "openImage": "Open full-size image",
     "demoLabel": "Live Demo",
     "openDemo": "Open this page in Demo"
   },

@@ -3,6 +3,7 @@
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import React from "react";
+import { VdotForecastSummary } from "@/components/vdot-forecast-summary";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronRight, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -213,25 +214,28 @@ export default function FitnessStateMiniCards() {
   }, [activeDragKey, draftLayout, statsByKey]);
 
   const subContent = React.useCallback(
-    (stat: FitnessStatCard) => (
-      <FitnessStatusCardSubContent
-        stat={stat}
-        t={t}
-        weeklySummaryPair={weeklySummaryPair}
-        formatWeeklyValue={formatWeeklyValue}
-        fitnessData={fitnessData}
-        atlPercent={atlPercent}
-        ctlPercent={ctlPercent}
-        tsbZone={tsbZone}
-        tsbDomainMin={tsbDomainMin}
-        tsbDomainMax={tsbDomainMax}
-        tsbFillPercent={tsbFillPercent}
-        acRatioZone={acRatioZone}
-        acRatioFillPercent={acRatioFillPercent}
-        monotonyZone={monotonyZone}
-        monotonyFillPercent={monotonyFillPercent}
-      />
-    ),
+    (stat: FitnessStatCard) => {
+      const content = (
+        <FitnessStatusCardSubContent
+          stat={stat}
+          t={t}
+          weeklySummaryPair={weeklySummaryPair}
+          formatWeeklyValue={formatWeeklyValue}
+          fitnessData={fitnessData}
+          atlPercent={atlPercent}
+          ctlPercent={ctlPercent}
+          tsbZone={tsbZone}
+          tsbDomainMin={tsbDomainMin}
+          tsbDomainMax={tsbDomainMax}
+          tsbFillPercent={tsbFillPercent}
+          acRatioZone={acRatioZone}
+          acRatioFillPercent={acRatioFillPercent}
+          monotonyZone={monotonyZone}
+          monotonyFillPercent={monotonyFillPercent}
+        />
+      );
+      return content;
+    },
     [
       acRatioFillPercent,
       acRatioZone,
@@ -251,6 +255,11 @@ export default function FitnessStateMiniCards() {
   );
 
   const isStatsPending = isPMCPending || isWeeklyPending;
+
+  const valueAccessory = (stat: FitnessStatCard) =>
+    stat.key === "vo2Max" ? (
+      <VdotForecastSummary compact currentValue={stat.value} />
+    ) : null;
 
   const handleSaveLayout = React.useCallback(() => {
     if (publicDemo.active) return;
@@ -368,6 +377,7 @@ export default function FitnessStateMiniCards() {
                       span={1}
                       showSpanControls={false}
                       subContent={subContent(stat)}
+                      valueAccessory={valueAccessory(stat)}
                       onSpanChange={() => {}}
                       onRemove={() => {
                         setDraftLayout(
@@ -385,6 +395,7 @@ export default function FitnessStateMiniCards() {
                   <FitnessStatusStatCard
                     stat={activeDragItem.stat}
                     subContent={subContent(activeDragItem.stat)}
+                    valueAccessory={valueAccessory(activeDragItem.stat)}
                     rightAccessory={
                       <button
                         type="button"
@@ -411,6 +422,7 @@ export default function FitnessStateMiniCards() {
               onClick={stat.onClick}
               className="border-0 bg-neutral-100 p-1 shadow-none hover:cursor-pointer hover:bg-neutral-200 dark:bg-muted/45 dark:hover:bg-muted"
               subContent={subContent(stat)}
+              valueAccessory={valueAccessory(stat)}
               rightAccessory={
                 stat.onClick ? (
                   <button className="cursor-pointer rounded-full p-1 text-muted-foreground transition-colors hover:bg-neutral-200 hover:text-foreground dark:hover:bg-muted">

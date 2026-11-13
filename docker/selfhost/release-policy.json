@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.21",
+  "releaseVersion": "1.1.22",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [
@@ -8,14 +8,16 @@
       "1.1.17",
       "1.1.18",
       "1.1.19",
-      "1.1.20"
+      "1.1.20",
+      "1.1.21"
     ],
     "applicationRollbackTo": [
       "1.1.15",
       "1.1.17",
       "1.1.18",
       "1.1.19",
-      "1.1.20"
+      "1.1.20",
+      "1.1.21"
     ],
     "backupRequired": true
   },
@@ -113,11 +115,15 @@
       },
       "0023_external_provider_connection_region": {
         "phase": "expand",
-        "releaseVersion": "1.1.21"
+        "releaseVersion": "1.1.22"
       },
       "0024_activity_analysis_segments": {
         "phase": "expand",
-        "releaseVersion": "1.1.21"
+        "releaseVersion": "1.1.22"
+      },
+      "0025_vdot_forecast_snapshot": {
+        "phase": "expand",
+        "releaseVersion": "1.1.22"
       }
     }
   }

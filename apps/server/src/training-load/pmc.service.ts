@@ -1,4 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  PmcProjectionService,
+  type PmcProjectionOptions,
+} from './pmc-projection.service';
+import {
+  Injectable,
+  Logger,
+  Optional,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import estimateRestDays from '@/algorithm/restDays';
 import { computeTrainingLoadMonotony } from '@/algorithm/utils';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -41,6 +50,7 @@ import {
   timeConstantDecayFactor,
 } from './pmc-formula';
 import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
+import { VdotForecastService } from './vdot-forecast.service';
 import {
   activityLocalDate,
   localDateKeyToUtcDate,
@@ -162,7 +172,19 @@ export class PMCService {
     private readonly loadReadout: LoadReadoutService,
     private readonly users: UserQueryService,
     private readonly analysisConfigs: UserAnalysisConfigService,
+    private readonly vdotForecast: VdotForecastService,
+    @Optional() private readonly projection?: PmcProjectionService,
   ) {}
+
+  getVdotForecast(userId: string) {
+    return this.vdotForecast.getForecast(userId);
+  }
+
+  async getProjection(userId: string, options: PmcProjectionOptions) {
+    if (!this.projection)
+      throw new ServiceUnavailableException('PMC_PROJECTION_UNAVAILABLE');
+    return this.projection.get(userId, options);
+  }
 
   async listRange(
     userId: string,

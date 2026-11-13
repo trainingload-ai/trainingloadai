@@ -15,6 +15,14 @@ export async function invalidateActivityDerivedCaches(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: queryKeys.pmc.data() }),
     qc.invalidateQueries({ queryKey: queryKeys.pmc.fitnessStatus() }),
     qc.invalidateQueries({ queryKey: queryKeys.pmc.extremes() }),
+    qc.invalidateQueries({ queryKey: ["pmc", "vdot-forecast"] }),
+    // The metric dialog keeps separate caches for automatic history, activity
+    // observations and effective/manual history across ranges and sports.
+    qc.invalidateQueries({ queryKey: ["metric-history-vo2Max"] }),
+    qc.invalidateQueries({ queryKey: ["metric-history-vo2-activity"] }),
+    qc.invalidateQueries({
+      queryKey: ["fitness-metric-manual-history", "vo2Max"],
+    }),
     qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.home.recentActivities() }),
@@ -60,6 +68,7 @@ export async function invalidateActivePlanAndPlanDetails(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: queryKeys.home.v2() }),
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
+    qc.invalidateQueries({ queryKey: queryKeys.pmc.projections() }),
     qc.invalidateQueries({ queryKey: queryKeys.root.planDetail }),
   ]);
 }
@@ -71,6 +80,7 @@ export async function invalidatePlanListsAndActive(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.list() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
+    qc.invalidateQueries({ queryKey: queryKeys.pmc.projections() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.legacyPlans() }),
   ]);
 }
@@ -94,6 +104,7 @@ export async function invalidateAfterPlanMutation(
     qc.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.list() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.active() }),
+    qc.invalidateQueries({ queryKey: queryKeys.pmc.projections() }),
     qc.invalidateQueries({ queryKey: queryKeys.plans.legacyPlans() }),
   ];
 

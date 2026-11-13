@@ -1,7 +1,14 @@
+import type { VdotForecastResult } from "@shared/vdot-forecast";
+import {
+  metricForecastDays,
+  metricForecastEnd,
+} from "@/lib/metric-forecast-window";
 import React from "react";
 import uPlot from "uplot";
 import { renderToStaticMarkup } from "react-dom/server";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { useLocale, useTranslations } from "next-intl";
 import ChartContainer from "@/components/ChartContainer";
 import {
@@ -35,8 +42,12 @@ import {
   getMetricYRange,
 } from "./metric-history-chart-view-model";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 type MetricHistoryChartViewProps = {
   metricKey: MetricKey;
+  forecast?: VdotForecastResult;
   history: HistoryItem[] | undefined;
   comparisonHistory?: HistoryItem[];
   periodStart: string;
@@ -62,6 +73,7 @@ type MetricHistoryChartViewProps = {
 
 export function MetricHistoryChartView({
   metricKey,
+  forecast,
   history,
   comparisonHistory,
   periodStart,
@@ -86,6 +98,7 @@ export function MetricHistoryChartView({
 }: MetricHistoryChartViewProps) {
   const t = useTranslations("dashboard.fitnessStatus");
   const tDashboard = useTranslations("dashboard");
+  const tForecast = useTranslations("VdotForecast");
   const locale = useLocale();
   const { systemUnit } = useStore();
   const chartLabel = title || t(`${metricKey}.title`);
@@ -101,16 +114,18 @@ export function MetricHistoryChartView({
     return new Intl.DateTimeFormat(locale, {
       month: "2-digit",
       day: "2-digit",
+      timeZone: forecast?.timezone,
     });
-  }, [locale]);
+  }, [locale, forecast?.timezone]);
 
   const tooltipDateFormatter = React.useMemo(() => {
     return new Intl.DateTimeFormat(locale, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
+      timeZone: forecast?.timezone,
     });
-  }, [locale]);
+  }, [locale, forecast?.timezone]);
 
   const numberFormatter = React.useMemo(() => {
     return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
@@ -252,6 +267,35 @@ export function MetricHistoryChartView({
       if (Number.isFinite(x)) allX.add(x);
     }
 
+    const forecastByX = new Map<
+      number,
+      { point: number; lower80: number; upper80: number }
+    >();
+    if (forecast?.status === "READY") {
+      const anchor =
+        dayjs
+          .tz(forecast.cutoffDate, forecast.timezone)
+          .endOf("day")
+          .valueOf() / 1000;
+      if (forecast.estimatedCurrentLevel !== null) {
+        forecastByX.set(anchor, {
+          point: forecast.estimatedCurrentLevel,
+          lower80: forecast.estimatedCurrentLevel,
+          upper80: forecast.estimatedCurrentLevel,
+        });
+      }
+      const endDate = metricForecastEnd(forecast.cutoffDate, rangeDays);
+      const curve = forecast.dailyForecasts?.length
+        ? forecast.dailyForecasts
+        : forecast.forecasts.map((week) => ({ ...week, date: week.endDate }));
+      for (const week of curve.filter((point) => point.date <= endDate)) {
+        forecastByX.set(
+          dayjs.tz(week.date, forecast.timezone).endOf("day").valueOf() / 1000,
+          week,
+        );
+      }
+      for (const x of forecastByX.keys()) allX.add(x);
+    }
     const xVals = Array.from(allX).sort((a, b) => a - b);
     const yVals = xVals.map((x) => lineValueByX.get(x) ?? null);
     const pointVals = xVals.map((x) => pointValueByX.get(x) ?? null);
@@ -270,7 +314,15 @@ export function MetricHistoryChartView({
       const raw = previousByDayOffset.get(offset)?.[dataKey];
       return typeof raw === "number" && Number.isFinite(raw) ? raw : null;
     });
-    return [xVals, yVals, pointVals, previousVals];
+    return [
+      xVals,
+      yVals,
+      pointVals,
+      previousVals,
+      xVals.map((x) => forecastByX.get(x)?.point ?? null),
+      xVals.map((x) => forecastByX.get(x)?.upper80 ?? null),
+      xVals.map((x) => forecastByX.get(x)?.lower80 ?? null),
+    ];
   }, [
     comparisonHistory,
     comparisonPeriodStart,
@@ -279,6 +331,8 @@ export function MetricHistoryChartView({
     metricKey,
     periodStart,
     vo2ActivityPoints,
+    forecast,
+    rangeDays,
   ]);
 
   const renderTooltip = React.useCallback(
@@ -298,6 +352,52 @@ export function MetricHistoryChartView({
         new Date(Number(xVal) * 1000),
       );
 
+      const prediction = metricKey === "vo2Max" ? uplotData[4]?.[idx] : null;
+      if (typeof prediction === "number") {
+        const isFuture =
+          forecast &&
+          Number(xVal) >
+            dayjs
+              .tz(forecast.cutoffDate, forecast.timezone)
+              .endOf("day")
+              .valueOf() /
+              1000;
+        const week = forecast?.forecasts.find(
+          (item) =>
+            dayjs.tz(item.endDate, forecast.timezone).endOf("day").valueOf() /
+              1000 ===
+            xVal,
+        );
+        const lower = uplotData[6]?.[idx];
+        const upper = uplotData[5]?.[idx];
+        contentEl.innerHTML = renderToStaticMarkup(
+          <div className="flex flex-col gap-1.5">
+            <div className="font-medium">
+              {week ? `${week.startDate} – ${week.endDate}` : dateLabel}
+            </div>
+            <div>
+              {tForecast(isFuture ? "chartLabel" : "currentEstimate")}{" "}
+              {prediction.toFixed(1)}
+            </div>
+            {isFuture &&
+            typeof lower === "number" &&
+            typeof upper === "number" ? (
+              <div className="text-muted-foreground">
+                {tForecast(
+                  forecast?.intervalKind === "REFERENCE"
+                    ? "referenceInterval"
+                    : "interval",
+                  {
+                    lower: lower.toFixed(1),
+                    upper: upper.toFixed(1),
+                  },
+                )}
+              </div>
+            ) : null}
+          </div>,
+        );
+        return;
+      }
       const content = (
         <>
           <div className="font-medium">{dateLabel}</div>
@@ -370,6 +470,8 @@ export function MetricHistoryChartView({
       metricValueFormatter,
       showComparison,
       tDashboard,
+      tForecast,
+      forecast,
       tooltipDateFormatter,
       uplotData,
     ],
@@ -464,6 +566,56 @@ export function MetricHistoryChartView({
     };
   }, [cssVar, manualSegments]);
 
+  const forecastPlugin = React.useMemo(
+    (): uPlot.Plugin => ({
+      hooks: {
+        drawClear: [
+          (u) => {
+            if (metricKey !== "vo2Max" || !forecast) return;
+            const points = Array.from(u.data[0])
+              .map((x, index) => ({
+                x,
+                upper: u.data[5]?.[index],
+                lower: u.data[6]?.[index],
+              }))
+              .filter(
+                (point) =>
+                  typeof point.upper === "number" &&
+                  typeof point.lower === "number",
+              );
+            if (points.length < 2) return;
+            const ctx = u.ctx;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
+            ctx.clip();
+            ctx.beginPath();
+            points.forEach((point, index) => {
+              const x = u.valToPos(point.x, "x", true);
+              const y = u.valToPos(point.upper!, "y", true);
+              if (index === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+            });
+            [...points]
+              .reverse()
+              .forEach((point) =>
+                ctx.lineTo(
+                  u.valToPos(point.x, "x", true),
+                  u.valToPos(point.lower!, "y", true),
+                ),
+              );
+            ctx.closePath();
+            ctx.globalAlpha = 0.12;
+            ctx.fillStyle = cssVar("var(--foreground)");
+            ctx.fill();
+            ctx.restore();
+          },
+        ],
+      },
+    }),
+    [cssVar, forecast, metricKey],
+  );
+
   const uplotOptions = React.useMemo((): uPlot.Options => {
     const { axisStroke, gridStroke } = resolveAxisColors(cssVar);
 
@@ -534,6 +686,26 @@ export function MetricHistoryChartView({
                 spanGaps: true,
                 points: { show: false },
               },
+              {
+                label: tForecast("chartLabel"),
+                stroke: cssVar("var(--foreground)"),
+                width: 2,
+                dash: [5, 4],
+                spanGaps: true,
+                points: { show: !forecast?.dailyForecasts?.length, size: 5 },
+              },
+              {
+                label: "upper80",
+                stroke: "transparent",
+                width: 0,
+                points: { show: false },
+              },
+              {
+                label: "lower80",
+                stroke: "transparent",
+                width: 0,
+                points: { show: false },
+              },
             ]
           : [
               {},
@@ -554,6 +726,7 @@ export function MetricHistoryChartView({
             ],
       plugins: [
         zonesPlugin,
+        forecastPlugin,
         tooltipPlugin,
         ...(manualSegmentsPlugin ? [manualSegmentsPlugin] : []),
         ...yAxisPlugins,
@@ -569,6 +742,8 @@ export function MetricHistoryChartView({
     cssVar,
     tooltipPlugin,
     zonesPlugin,
+    forecastPlugin,
+    tForecast,
     manualSegmentsPlugin,
     metricValueFormatter,
     metricKey,
@@ -576,34 +751,54 @@ export function MetricHistoryChartView({
   ]);
 
   return (
-    <ChartContainer
-      infoContent={
-        isWeeklyMetric ? null : (
-          <MetricHistoryRangeTabs
-            allowedRangeDays={allowedRangeDays}
-            disabled={isLoading}
-            onValueChange={onRangeDaysChange}
-            rangeDays={rangeDays}
-            rangeLabel={rangeLabel}
-          />
-        )
+    <div
+      className="flex flex-col gap-1.5"
+      data-testid="metric-history-chart-view"
+      data-forecast-end={
+        forecast && uplotData[0].length
+          ? dayjs
+              .unix(Number(uplotData[0].at(-1)))
+              .tz(forecast.timezone)
+              .format("YYYY-MM-DD")
+          : undefined
       }
-      height={height}
-      isLoading={isLoading}
-      title={title}
-      accentColor={accentColor}
-      titleIcon={titleIcon}
-      appearance={appearance}
     >
-      <MetricHistoryChartCanvas
-        chartAreaSize={chartAreaSize}
+      {forecast ? (
+        <p className="text-xs text-muted-foreground">
+          {tForecast("historyAndForecastDays", {
+            days: metricForecastDays(rangeDays),
+          })}
+        </p>
+      ) : null}
+      <ChartContainer
+        infoContent={
+          isWeeklyMetric ? null : (
+            <MetricHistoryRangeTabs
+              allowedRangeDays={allowedRangeDays}
+              disabled={isLoading}
+              onValueChange={onRangeDaysChange}
+              rangeDays={rangeDays}
+              rangeLabel={rangeLabel}
+            />
+          )
+        }
+        height={height}
         isLoading={isLoading}
-        noDataLabel={tDashboard("noData")}
-        options={uplotOptions}
-        setChartWrapperNode={setChartWrapperNode}
-        tooltip={tooltip}
-        uplotData={uplotData}
-      />
-    </ChartContainer>
+        title={title}
+        accentColor={accentColor}
+        titleIcon={titleIcon}
+        appearance={appearance}
+      >
+        <MetricHistoryChartCanvas
+          chartAreaSize={chartAreaSize}
+          isLoading={isLoading}
+          noDataLabel={tDashboard("noData")}
+          options={uplotOptions}
+          setChartWrapperNode={setChartWrapperNode}
+          tooltip={tooltip}
+          uplotData={uplotData}
+        />
+      </ChartContainer>
+    </div>
   );
 }

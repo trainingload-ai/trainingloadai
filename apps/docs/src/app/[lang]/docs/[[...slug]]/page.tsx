@@ -157,7 +157,6 @@ function getAdjacentDocsPages(lang: string, docsPath: string) {
   };
 }
 
-
 function getBreadcrumbItems(
   lang: string,
   slug: string[] | undefined,
@@ -263,9 +262,9 @@ export default async function Page(props: {
       <DocsDescription className="max-w-3xl text-[15px] leading-7 text-muted-foreground md:text-base">
         {page.data.description}
       </DocsDescription>
-      <div className="flex flex-row items-center gap-2 border-b border-border pb-6 pt-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-6 pt-2">
         <LLMCopyButton markdownUrl={markdownUrl} />
-        <ViewOptions markdownUrl={markdownUrl} />
+        <ViewOptions markdownUrl={`${getSiteUrl()}${markdownUrl}`} />
       </div>
       <DocsBody className="docs-prose">
         <MDXContent
@@ -323,6 +322,9 @@ export async function generateMetadata(props: {
       alternates: {
         canonical,
         languages: docsAlternatesForPath(siteUrl, "/docs", slug),
+        types: {
+          "text/markdown": `${siteUrl}${docsMarkdownApiPath(lang, slug)}`,
+        },
       },
       robots: isReviewedLocale
         ? undefined
@@ -367,6 +369,9 @@ export async function generateMetadata(props: {
     alternates: {
       canonical,
       languages: docsAlternatesForPath(siteUrl, docsPath, slug),
+      types: {
+        "text/markdown": `${siteUrl}${docsMarkdownApiPath(lang, slug)}`,
+      },
     },
     robots: isReviewedLocale
       ? undefined

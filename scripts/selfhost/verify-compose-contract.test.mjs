@@ -185,7 +185,7 @@ test("rejects any bundled gateway configuration", () => {
 test("rejects an example that hand-copies a database URL", async () => {
   const errors = validateEnvironmentExample(
     `${await readFile(resolve(repositoryRoot, contract.environmentExample), "utf8")}\nDATABASE_URL=postgres://secret`,
-    "1.1.21",
+    "1.1.22",
     contract,
   );
   assert.ok(errors.some((error) => error.code === "PRODUCTION_ENV"));
@@ -193,6 +193,6 @@ test("rejects an example that hand-copies a database URL", async () => {
 
 test("rejects hidden Compose profile controls", async () => {
   const example = await readFile(resolve(repositoryRoot, contract.environmentExample), "utf8");
-  const errors = validateEnvironmentExample(`${example}\nCOMPOSE_PROFILES=docs\n`, "1.1.21", contract);
+  const errors = validateEnvironmentExample(`${example}\nCOMPOSE_PROFILES=docs\n`, "1.1.22", contract);
   assert.ok(errors.some(x => x.code === "COMPOSE_CONTROL"));
 });

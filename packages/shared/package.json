@@ -1,6 +1,6 @@
 {
   "name": "@trainingloadai/shared",
-  "version": "1.1.21",
+  "version": "1.1.22",
   "private": true,
   "type": "module",
   "license": "AGPL-3.0-only",
@@ -59,6 +59,8 @@
     "./workout-summary": "./workout-summary.ts",
     "./plan-templates/workout-step-display": "./plan-templates/workout-step-display.ts",
     "./routes": "./routes.ts",
-    "./health-observations": "./health-observations.ts"
+    "./health-observations": "./health-observations.ts",
+    "./vdot-forecast": "./vdot-forecast.ts",
+    "./pmc-projection": "./pmc-projection.ts"
   }
 }

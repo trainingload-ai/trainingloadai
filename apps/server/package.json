@@ -1,6 +1,6 @@
 {
   "name": "@trainingloadai/server",
-  "version": "1.1.21",
+  "version": "1.1.22",
   "description": "",
   "author": "",
   "private": true,
@@ -23,7 +23,9 @@
     "pretest:fit-release-corpus": "pnpm build:selfhost",
     "test:fit-release-corpus": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/fit-release-corpus.command.js",
     "preactivity-data:migrate": "pnpm build:selfhost",
-    "activity-data:migrate": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/activity-data-migration.command.js"
+    "activity-data:migrate": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/activity-data-migration.command.js",
+    "vdot:fit": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-fit.command.ts",
+    "vdot:export": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-export.command.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.70",
