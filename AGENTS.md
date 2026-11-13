@@ -4,6 +4,7 @@ Use the declared package exports. Keep the single-owner Self-host boundary expli
 
 ## Public repository change policy
 
+- Write pull request titles, descriptions, and review replies in English.
 - Submit every source or documentation change through a pull request targeting `main`; never push changes directly to `main`.
 - Only `@berber1016` performs the final merge. Agents may create and update pull requests and monitor checks, but must not merge them or enable auto-merge, even when their GitHub credentials belong to the maintainer.
 - Preserve the required `core` and `docs` checks for every pull request to `main`. Do not add pull request path filters to these workflows.
