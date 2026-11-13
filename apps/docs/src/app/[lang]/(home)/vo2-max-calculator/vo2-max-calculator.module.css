@@ -733,10 +733,10 @@
 }
 .heroDevices {
   position: relative;
-  padding-right: 42px;
   padding-bottom: 10px;
 }
 .heroPhone {
+  margin-inline: auto;
   max-width: 184px;
   padding: 5px;
   border: 1px solid var(--vo2-line-strong);
@@ -749,32 +749,6 @@
   width: 100%;
   height: auto;
   border-radius: 19px;
-}
-.heroWatch {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 54%;
-  padding: 5px;
-  border: 1px solid #778079;
-  border-radius: 24%;
-  background: #202522;
-}
-.heroWatch img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 20%;
-}
-.heroWatch::after {
-  content: "";
-  position: absolute;
-  right: -4px;
-  top: 26%;
-  width: 3px;
-  height: 15%;
-  border-radius: var(--tl-radius-micro);
-  background: #778079;
 }
 .heroProductCopy h2 {
   font-size: 1.35rem;
@@ -1147,12 +1121,6 @@
   .heroProduct {
     grid-template-columns: minmax(120px, 42%) 1fr;
     gap: 20px;
-  }
-  .heroDevices {
-    padding-right: 25px;
-  }
-  .heroWatch {
-    width: 80px;
   }
   .heroProductCopy h2 {
     font-size: 1.1rem;

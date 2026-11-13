@@ -231,7 +231,7 @@ export const llmGuidePages: LlmToolPage[] = [
     title: "Self-hosted vs Cloud",
     path: "/api/docs-markdown/en/self-host/self-host-vs-cloud",
     description:
-      "Compare operational responsibility, data location, local file storage, BYOK AI, integrations, backups, and availability.",
+      "Choose Cloud or self-hosting by comparing setup, data storage, activity imports, AI costs, backups, and updates. Apple Watch app support is currently unavailable.",
   },
   {
     title: "Self-host Quick Start",
@@ -258,10 +258,10 @@ export const llmGuidePages: LlmToolPage[] = [
       "Compare reviewed official templates, manual plans, and AI-assisted plan drafts, including preview, activation, and expected-load behavior.",
   },
   {
-    title: "Plan Lifecycle, Sharing, and Import",
+    title: "Manage Plan Status, Sharing, and Imports",
     path: "/api/docs-markdown/en/planning/plan-lifecycle",
     description:
-      "Understand plan states, unlisted version-aware sharing, shared-plan draft imports, VDOT-generated imports, revocation, and activation safeguards.",
+      "Activate, pause, finish, or cancel a plan; share a schedule, revoke a link, and import a separate draft before reviewing its dates and targets.",
   },
   {
     title: "Web and Mobile",
@@ -279,7 +279,7 @@ export const llmGuidePages: LlmToolPage[] = [
     title: "Connect Third-Party Platforms",
     path: "/api/docs-markdown/en/guide/connect-third-party-platforms",
     description:
-      "Connect Strava, Polar, COROS, Intervals.icu, Suunto, and Wahoo, or import Garmin history, with explicit synchronization directions.",
+      "Connect supported Cloud platforms, receive new Garmin data through OAuth, or import older Garmin files. Self-hosting uses separate Intervals.icu and Garmin Personal API guides.",
   },
   {
     title: "AI Coach",

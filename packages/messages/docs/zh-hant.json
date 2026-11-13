@@ -94,9 +94,11 @@
     "ask": "請閱讀 {url}，我想詢問這篇文件的內容。"
   },
   "docsScreenshot": {
-    "openImage": "查看原圖",
     "demoLabel": "線上 Demo",
-    "openDemo": "在 Demo 中開啟此頁面"
+    "openDemo": "在 Demo 中開啟此頁面",
+    "openWebDemo": "在網頁版 Demo 中查看相關功能",
+    "webPlatform": "網頁端",
+    "mobilePlatform": "行動版"
   },
   "SiteError": {
     "notFound": {
@@ -180,7 +182,7 @@
     "support": "支援",
     "copyright": "© {year} Trainingload.ai. 保留所有權利。",
     "brandDescription": "把訓練計畫、實際完成、訓練負荷與恢復狀態放在一起。",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "從 App Store 下載"
   },
   "tools": {
@@ -740,11 +742,10 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
         "benefits": ["訓練中的實時數據", "訓練後的分析與回顧"],
         "cta": "瞭解智能教練",
-        "phoneAlt": "Trainingload.ai iPhone 實時訓練記錄頁面",
-        "watchAlt": "Trainingload.ai Apple Watch 實時訓練記錄頁面"
+        "phoneAlt": "Trainingload.ai iPhone 實時訓練記錄頁面"
       },
       "formula": {
         "title": "這些瓦特是怎麼算出來的？",
@@ -1170,11 +1171,10 @@
       },
       "heroProduct": {
         "title": "記錄騎乘，了解你的功率。",
-        "body": "用 iPhone 或 Apple Watch 記錄訓練，在 Trainingload.ai 中結合功率資料、訓練負荷與恢復情況，安排下一次騎乘。",
+        "body": "用 iPhone 記錄訓練，在 Trainingload.ai 中結合功率資料、訓練負荷與恢復情況，安排下一次騎乘。",
         "benefits": ["即時查看訓練資料", "騎乘結束後回顧表現"],
         "cta": "了解智慧教練",
-        "phoneAlt": "iPhone 上的 Trainingload.ai 即時訓練記錄頁面",
-        "watchAlt": "Apple Watch 上的即時訓練指標"
+        "phoneAlt": "iPhone 上的 Trainingload.ai 即時訓練記錄頁面"
       },
       "chart": {
         "title": "看懂 CP 是怎麼算出來的",
@@ -1543,11 +1543,10 @@
       "proof": ["無需註冊", "支援活動檔案", "可列印、分享成績單"],
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次進步。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率和訓練負荷，回看這次表現。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率和訓練負荷，回看這次表現。",
         "benefits": ["訓練中的實時資料", "訓練後的分析與回顧"],
         "cta": "瞭解智能教練",
-        "phoneAlt": "iPhone 上 Trainingload.ai 的即時訓練記錄",
-        "watchAlt": "Apple Watch 上的即時訓練數據"
+        "phoneAlt": "iPhone 上 Trainingload.ai 的即時訓練記錄"
       },
       "promo": {
         "kicker": "Trainingload.ai",
@@ -2098,7 +2097,7 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
         "cta": "閱讀心率區間說明",
         "phoneAlt": "手機上顯示範例活動的心率區間設定"
       },
@@ -2935,7 +2934,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -3691,11 +3690,10 @@
       },
       "heroProduct": {
         "title": "記錄訓練，看懂自己的 FTP",
-        "body": "用 iPhone 或 Apple Watch 記錄訓練，結束後分析功率資料、估算 FTP，為下一次訓練提供參考。",
+        "body": "用 iPhone 記錄訓練，結束後分析功率資料、估算 FTP，為下一次訓練提供參考。",
         "benefits": ["運動資料，即時掌握", "有效功率，支援 FTP 估算"],
         "cta": "瞭解智慧教練",
-        "phoneAlt": "Trainingload.ai iPhone 即時訓練紀錄頁面",
-        "watchAlt": "Trainingload.ai Apple Watch 即時訓練資料頁面"
+        "phoneAlt": "Trainingload.ai iPhone 即時訓練紀錄頁面"
       },
       "footerCta": {
         "title": "把 FTP 用到下一次騎乘。",
@@ -4074,7 +4072,7 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
         "zonesAlt": "手機上的最大心率訓練區間，數值為範例",
         "cta": "查看 AI 教練"
       },
@@ -4457,7 +4455,7 @@
         "more": "等平台…"
       },
       "sportWords": ["跑步", "騎乘", "游泳", "鐵三"],
-      "iphoneSupport": "支援 iPhone 與 Apple Watch",
+      "iphoneSupport": "支援 iPhone",
       "appStoreCta": "從 App Store 下載"
     },
     "planSpotlight": {
@@ -5040,10 +5038,9 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，\n看見有氧能力的變化。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合表現、心率與訓練負荷，回看每一次進步。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合表現、心率與訓練負荷，回看每一次進步。",
         "link": "了解智慧教練",
-        "phoneAlt": "iPhone 即時訓練紀錄頁面",
-        "watchAlt": "Apple Watch 即時訓練資料"
+        "phoneAlt": "iPhone 即時訓練紀錄頁面"
       },
       "footerCta": {
         "title": "知道自己的起點，安排下一次進步。",
@@ -5685,7 +5682,7 @@
       "proof": ["無需註冊", "即時計算", "列印或分享"],
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
         "cta": "閱讀 Daniels 配速說明",
         "imageAlt": "VDOT 計算器"
       },
@@ -10183,7 +10180,7 @@
       "proof": ["免註冊", "即時結果", "列印或分享"],
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
         "cta": "打開馬拉松計劃",
         "phoneAlt": "Trainingload 計畫中的節奏跑和配速目標。示例資料，不是個人成績。"
       },
@@ -11255,10 +11252,9 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，\n看懂長期累積。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合訓練負荷與恢復情況，安排下一次訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合訓練負荷與恢復情況，安排下一次訓練。",
         "cta": "了解訓練負荷",
-        "phoneAlt": "Trainingload.ai iPhone 即時訓練記錄頁面",
-        "watchAlt": "Trainingload.ai Apple Watch 即時訓練數據頁面"
+        "phoneAlt": "Trainingload.ai iPhone 即時訓練記錄頁面"
       },
       "chart": {
         "title": "這段時間，負荷如何變化",
@@ -11350,9 +11346,8 @@
       },
       "heroProduct": {
         "phoneAlt": "Trainingload.ai 在 iPhone 上記錄跑步",
-        "watchAlt": "Trainingload.ai 在 Apple Watch 上記錄跑步",
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，再到 Trainingload.ai 搭配心率、配速、功率與訓練負荷回顧練習。",
+        "body": "用 iPhone 記錄活動，再到 Trainingload.ai 搭配心率、配速、功率與訓練負荷回顧練習。",
         "benefits": [
           "跑步檔案保留在目前裝置",
           "可選擇跑步中連續的一段紀錄",
@@ -12713,9 +12708,8 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次表現。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合心率、配速、功率與負荷回看訓練。",
         "phoneAlt": "手機上的即時訓練畫面，顯示心率",
-        "watchAlt": "手錶上的即時心率",
         "benefits": [
           "訓練時能看到心率",
           "由你決定是否把 bpm 範圍存進自訂區間",
@@ -13300,11 +13294,10 @@
       },
       "heroProduct": {
         "title": "記錄每次訓練，讀懂每次進步。",
-        "body": "用 iPhone 或 Apple Watch 記錄活動，在 Trainingload.ai 中結合配速、心率與訓練負荷，回看這次表現。",
+        "body": "用 iPhone 記錄活動，在 Trainingload.ai 中結合配速、心率與訓練負荷，回看這次表現。",
         "benefits": ["訓練中的即時資料", "訓練後的分析與回顧"],
         "cta": "瞭解智能教練",
-        "phoneAlt": "iPhone 上的 Trainingload.ai 即時訓練記錄頁面",
-        "watchAlt": "Apple Watch 上的即時訓練指標"
+        "phoneAlt": "iPhone 上的 Trainingload.ai 即時訓練記錄頁面"
       },
       "source": {
         "label": "數據來源",
@@ -13354,7 +13347,6 @@
   },
   "calculatorProduct": {
     "recordingAlt": "Trainingload.ai iPhone 即時訓練記錄範例",
-    "watchAlt": "Trainingload.ai Apple Watch 即時訓練資料範例",
     "planAlt": "Trainingload.ai 原生 App 深色模式游泳計畫範例",
     "webPlanAlt": "Trainingload.ai 網頁版游泳訓練計畫範例",
     "webLoadAlt": "Trainingload.ai 網頁版訓練負荷趨勢範例",

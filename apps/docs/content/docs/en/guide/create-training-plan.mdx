@@ -14,11 +14,11 @@ keywords:
 
 Trainingload.ai supports three plan creation paths:
 
-- **Official template**: preview a reviewed plan, fit it to your calendar, then create a draft without a runtime model call.
+- **Official template**: preview a reviewed plan, fit it to your calendar, then create a draft without using AI credits.
 - **Manual plan**: you build the plan week by week.
 - **AI-assisted plan**: you provide a brief, then AI Coach drafts a plan for review.
 
-All three paths produce the same core object: a structured training plan with weeks, days, workouts, sport types, planned workout text, and optional notes.
+Each path saves a training plan draft. Review its weekly schedule, workout sports, content, and notes before deciding whether to activate it.
 
 ## Before you create a plan
 
@@ -41,8 +41,8 @@ Thresholds and recent activity history help Trainingload.ai estimate plan load a
 
 <DocsScreenshot
   id="plan-create-paths"
-  title="Official template, AI-assisted, and manual plan creation"
-  description="Choose a reviewed template, ask AI Coach to draft around your constraints, or build the schedule manually. Every result remains reviewable as a draft."
+  title="Describe a training goal for AI Coach"
+  description="The AI plan form collects your sport, goal, cycle, and strength preferences before Coach generates a draft."
   route="Plans → Create plan"
 />
 
@@ -52,11 +52,11 @@ Use an official template when its entry criteria and weekly frequency already fi
 
 The full template preview is free. Choose a start date and training days before creating a draft; PLUS or PRO is required to create it. Preview and creation do not call a model or consume AI credits.
 
-AI still affects the workflow in three explicit stages:
+When using an official template:
 
-1. The Plan Prompt creates an offline structured candidate, followed by schema checks, training-rule validation, and human review before the official version is frozen.
-2. At preview time, deterministic rules use your recent running, chosen days, saved capability metrics, and optional race result to map dates and resolve pace ranges only when the evidence supports them. Finish and Improve plans fall back to RPE and the talk test; Target plans also require a saved goal race and reliable current capability.
-3. After creation, AI Coach can compare planned and completed work, explain load and recovery, and propose reviewable adjustments. It does not silently rewrite the frozen template.
+1. Official templates are prepared and reviewed before publication. You preview an existing template rather than asking AI to generate a new one.
+2. The preview schedules workouts around your start date and training days, using recent running, saved fitness metrics, and an optional race result to set pace targets when possible. Finish and Improve plans use RPE and the talk test when reliable pace data is missing. Target plans also need a saved goal race and a reliable record of your current ability.
+3. After creation, AI Coach can compare planned and completed work, explain load and recovery, and propose reviewable adjustments. Review those changes before applying them to your plan.
 
 ## Manual plan
 
@@ -149,12 +149,12 @@ Then use [Manage an Active Plan](/docs/guide/manage-active-plan) to execute the 
 - **A workout is on the wrong day:** check week, day, session order, plan duration, and eventual activation start date.
 - **The AI draft is too generic:** provide recent baseline, availability, equipment, competition facts, and constraints, then request a revised draft rather than saving it unchanged.
 - **An Improve preview has no pace target:** save a reliable recent race or supported running capability metric. Without an eligible anchor, the template intentionally uses RPE and the talk test rather than inventing pace.
-- **A Target preview cannot be created:** confirm that a matching running race with a target time is saved, the race day is one of the selected training days, the full frozen period fits, and current capability supports the goal.
+- **A Target preview cannot be created:** confirm that a matching running race with a target time is saved, the race day is one of the selected training days, the complete plan period fits before the race, and current capability supports the goal.
 - **The plan cannot save:** fix the first validation message, including empty workouts, invalid structure, or a workout outside the plan period.
 - **Activation maps to unexpected dates:** cancel the confirmation, correct the start date or time zone, and review the mapping again.
 
 ## Next steps
 
 - [Manual workout editor guide](/docs/planning/manual-workout-editor)
-- [Plan Lifecycle](/docs/planning/plan-lifecycle)
+- [Manage Plan Status](/docs/planning/plan-lifecycle)
 - [Manage an Active Plan](/docs/guide/manage-active-plan)

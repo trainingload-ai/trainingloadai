@@ -30,7 +30,7 @@ export function DocsRootProvider({
       search={{ preload: false }}
       theme={{
         enabled: true,
-        defaultTheme: "light",
+        defaultTheme: "system",
         enableSystem: true,
       }}
       i18n={{ ...i18n, onLocaleChange: changeLocale }}

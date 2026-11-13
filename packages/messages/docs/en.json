@@ -101,9 +101,11 @@
     "ask": "Read {url}. I want to ask questions about this documentation."
   },
   "docsScreenshot": {
-    "openImage": "Open full-size image",
     "demoLabel": "Live Demo",
-    "openDemo": "Open this page in Demo"
+    "openDemo": "Open this page in Demo",
+    "openWebDemo": "Explore this feature in the web Demo",
+    "webPlatform": "Web",
+    "mobilePlatform": "Mobile"
   },
   "SiteError": {
     "notFound": {
@@ -187,7 +189,7 @@
     "support": "Support",
     "copyright": "© {year} Trainingload.ai. All rights reserved.",
     "brandDescription": "Training plans, completed workouts, training load, and recovery—together in one place.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "Download on the App Store"
   },
   "tools": {
@@ -748,11 +750,10 @@
       },
       "heroProduct": {
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "benefits": ["Live training metrics", "Analysis after every session"],
         "cta": "Explore the AI coach",
-        "phoneAlt": "Trainingload.ai live workout recording on iPhone",
-        "watchAlt": "Trainingload.ai live workout recording on Apple Watch"
+        "phoneAlt": "Trainingload.ai live workout recording on iPhone"
       },
       "formula": {
         "title": "How are the watt ranges calculated?",
@@ -1178,14 +1179,13 @@
       },
       "heroProduct": {
         "title": "Record your ride. Understand your power.",
-        "body": "Record with iPhone or Apple Watch. Bring power data, training load, and recovery together in Trainingload.ai to plan your next ride.",
+        "body": "Record with iPhone. Bring power data, training load, and recovery together in Trainingload.ai to plan your next ride.",
         "benefits": [
           "Live training metrics",
           "Review your performance after each ride"
         ],
         "cta": "Explore the AI coach",
-        "phoneAlt": "Trainingload.ai live workout recording on iPhone",
-        "watchAlt": "Live training metrics on Apple Watch"
+        "phoneAlt": "Trainingload.ai live workout recording on iPhone"
       },
       "chart": {
         "title": "See how your CP is calculated",
@@ -1560,11 +1560,10 @@
       ],
       "heroProduct": {
         "title": "Record your training. Understand your progress.",
-        "body": "Record with iPhone or Apple Watch. Review pace, heart rate, power, and training load together in Trainingload.ai.",
+        "body": "Record with iPhone. Review pace, heart rate, power, and training load together in Trainingload.ai.",
         "benefits": ["Live training metrics", "Analysis after every activity"],
         "cta": "Explore the AI coach",
-        "phoneAlt": "Trainingload.ai live workout recording on iPhone",
-        "watchAlt": "Live training metrics on Apple Watch"
+        "phoneAlt": "Trainingload.ai live workout recording on iPhone"
       },
       "promo": {
         "kicker": "Trainingload.ai",
@@ -2115,7 +2114,7 @@
       },
       "heroProduct": {
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "cta": "Read the heart-rate zone guide",
         "phoneAlt": "Phone showing heart-rate zone settings from a sample activity"
       },
@@ -2974,7 +2973,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -3737,14 +3736,13 @@
       },
       "heroProduct": {
         "title": "Record your ride. Understand your FTP.",
-        "body": "Record with iPhone or Apple Watch. Trainingload.ai analyzes your power data after the activity to estimate FTP and guide your next session.",
+        "body": "Record with iPhone. Trainingload.ai analyzes your power data after the activity to estimate FTP and guide your next session.",
         "benefits": [
           "Live training metrics",
           "FTP estimates from valid power data"
         ],
         "cta": "Explore the AI coach",
-        "phoneAlt": "Trainingload.ai live workout recording on iPhone",
-        "watchAlt": "Trainingload.ai live workout metrics on Apple Watch"
+        "phoneAlt": "Trainingload.ai live workout recording on iPhone"
       },
       "footerCta": {
         "title": "Put your FTP to work on your next ride.",
@@ -4126,7 +4124,7 @@
       },
       "heroProduct": {
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "zonesAlt": "Phone showing max-heart-rate training zones with sample values",
         "cta": "See the AI coach"
       },
@@ -4509,7 +4507,7 @@
         "more": "& more..."
       },
       "sportWords": ["Running", "Cycling", "Swimming", "Triathlon"],
-      "iphoneSupport": "Available on iPhone and Apple Watch",
+      "iphoneSupport": "Available on iPhone",
       "appStoreCta": "Download on the App Store"
     },
     "planSpotlight": {
@@ -5099,10 +5097,9 @@
       },
       "heroProduct": {
         "title": "Record your training.\nSee your fitness develop.",
-        "body": "Record with iPhone or Apple Watch. Bring performance, heart rate, and training load together in Trainingload.ai to follow your progress.",
+        "body": "Record with iPhone. Bring performance, heart rate, and training load together in Trainingload.ai to follow your progress.",
         "link": "Explore the AI coach",
-        "phoneAlt": "iPhone live workout recording screen",
-        "watchAlt": "Apple Watch live workout metrics"
+        "phoneAlt": "iPhone live workout recording screen"
       },
       "footerCta": {
         "title": "Know your starting point. Plan your next step.",
@@ -5745,7 +5742,7 @@
       "proof": ["No sign-up required", "Instant results", "Print or share"],
       "heroProduct": {
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "cta": "Read the Daniels pace guide",
         "imageAlt": "VDOT calculator"
       },
@@ -10682,7 +10679,7 @@
       "proof": ["No sign-up required", "Instant results", "Print or share"],
       "heroProduct": {
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "cta": "Open the marathon plan",
         "phoneAlt": "Trainingload plan with a tempo run and pace targets. Example data, not a personal record."
       },
@@ -11756,10 +11753,9 @@
       },
       "heroProduct": {
         "title": "Record your training.\nSee the bigger picture.",
-        "body": "Record with iPhone or Apple Watch. Bring training load and recovery together in Trainingload.ai to plan your next session.",
+        "body": "Record with iPhone. Bring training load and recovery together in Trainingload.ai to plan your next session.",
         "cta": "Explore training load",
-        "phoneAlt": "Trainingload.ai live workout recording on iPhone",
-        "watchAlt": "Trainingload.ai live workout metrics on Apple Watch"
+        "phoneAlt": "Trainingload.ai live workout recording on iPhone"
       },
       "chart": {
         "title": "Your load over this period",
@@ -11851,9 +11847,8 @@
       },
       "heroProduct": {
         "phoneAlt": "A run being recorded in Trainingload.ai on iPhone",
-        "watchAlt": "Trainingload.ai recording a run on Apple Watch",
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "benefits": [
           "Your activity files stay on this device",
           "Use a continuous segment from your run",
@@ -13240,9 +13235,8 @@
       },
       "heroProduct": {
         "title": "Record each session. Understand your effort.",
-        "body": "Record with iPhone or Apple Watch, then review heart rate, pace, power, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review heart rate, pace, power, and training load in Trainingload.ai.",
         "phoneAlt": "Phone showing a live workout with heart rate",
-        "watchAlt": "Watch showing live heart rate during a workout",
         "benefits": [
           "Heart rate stays visible while you train",
           "Save the bpm range in custom zones when you choose to",
@@ -13831,14 +13825,13 @@
       },
       "heroProduct": {
         "title": "Record every session. Understand your progress.",
-        "body": "Record with iPhone or Apple Watch, then review your pace, heart rate, and training load in Trainingload.ai.",
+        "body": "Record with iPhone, then review your pace, heart rate, and training load in Trainingload.ai.",
         "benefits": [
           "Live training metrics",
           "Post-workout analysis and review"
         ],
         "cta": "Explore the AI coach",
-        "phoneAlt": "Trainingload.ai live workout recording on iPhone",
-        "watchAlt": "Live training metrics on Apple Watch"
+        "phoneAlt": "Trainingload.ai live workout recording on iPhone"
       },
       "source": {
         "label": "Data source",
@@ -13888,7 +13881,6 @@
   },
   "calculatorProduct": {
     "recordingAlt": "Trainingload.ai live workout recording on iPhone with sample data",
-    "watchAlt": "Trainingload.ai live workout metrics on Apple Watch with sample data",
     "planAlt": "A sample swimming plan in the native Trainingload.ai app, in dark mode",
     "webPlanAlt": "A sample swimming plan in the Trainingload.ai web app",
     "webLoadAlt": "Sample training load trends in the Trainingload.ai web app",

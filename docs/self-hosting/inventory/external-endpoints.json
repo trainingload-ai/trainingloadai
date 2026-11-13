@@ -1250,7 +1250,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 527
+          "line": 518
         },
         {
           "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
@@ -1808,7 +1808,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 534
+          "line": 525
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3276,7 +3276,7 @@
         },
         {
           "file": "apps/docs/src/lib/llm-text.ts",
-          "line": 164
+          "line": 174
         }
       ],
       "capability": "product-internal",
@@ -3560,7 +3560,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 613
+          "line": 604
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3578,7 +3578,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 463
+          "line": 454
         }
       ],
       "capability": "web-asset-or-tooling",

@@ -24,6 +24,10 @@ const requiredLocalizedStrings = [
   "languageSuggestion.dismiss",
   "header.searchDocs",
   "header.openDocsMenu",
+  "docsScreenshot.openDemo",
+  "docsScreenshot.openWebDemo",
+  "docsScreenshot.webPlatform",
+  "docsScreenshot.mobilePlatform",
   "alternatives.ctaTitle",
   "alternatives.ctaText",
   "home.bottomCta.secondaryButton",
@@ -103,7 +107,6 @@ collectStrings(
 );
 for (const key of [
   "recordingAlt",
-  "watchAlt",
   "planAlt",
   "webPlanAlt",
   "webLoadAlt",

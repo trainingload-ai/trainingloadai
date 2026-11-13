@@ -208,7 +208,7 @@
     background-color: color-mix(in srgb, var(--background) 92%, transparent);
   }
 
-  .docs-system-shell [data-card] {
+  .docs-system-shell [data-card="true"] {
     border-radius: var(--tl-radius-surface);
     padding: var(--tl-space-five);
     box-shadow: none;

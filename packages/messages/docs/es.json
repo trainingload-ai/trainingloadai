@@ -109,9 +109,11 @@
     "ask": "Lee {url}. Quiero hacer preguntas sobre esta documentación."
   },
   "docsScreenshot": {
-    "openImage": "Abrir imagen a tamaño completo",
     "demoLabel": "Demo en vivo",
-    "openDemo": "Abrir esta página en la demo"
+    "openDemo": "Abrir esta página en la demo",
+    "openWebDemo": "Ver esta función en la demo web",
+    "webPlatform": "Web",
+    "mobilePlatform": "Móvil"
   },
   "SiteError": {
     "notFound": {
@@ -186,7 +188,7 @@
       "fitCourseConverter": "Convertidor de rutas FIT"
     },
     "brandDescription": "Planes, entrenamientos realizados, carga y recuperación, todo en un mismo lugar.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "Descargar en App Store"
   },
   "tools": {
@@ -1878,7 +1880,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -2989,7 +2991,7 @@
         "more": "y más…"
       },
       "sportWords": ["Running", "Ciclismo", "Natación", "Triatlón"],
-      "iphoneSupport": "Disponible para iPhone y Apple Watch",
+      "iphoneSupport": "Disponible para iPhone",
       "appStoreCta": "Descargar en App Store"
     },
     "planSpotlight": {
@@ -3597,10 +3599,9 @@
       },
       "heroProduct": {
         "title": "Registra tus sesiones.\nMira cómo avanzas.",
-        "body": "Graba con iPhone o Apple Watch y reúne rendimiento, frecuencia cardíaca y carga en Trainingload.ai.",
+        "body": "Graba con iPhone y reúne rendimiento, frecuencia cardíaca y carga en Trainingload.ai.",
         "link": "Conoce al entrenador de IA",
-        "phoneAlt": "Grabación de actividad en directo en iPhone",
-        "watchAlt": "Datos de entrenamiento en directo en Apple Watch"
+        "phoneAlt": "Grabación de actividad en directo en iPhone"
       },
       "footerCta": {
         "title": "Conoce tu punto de partida. Planea el siguiente paso.",

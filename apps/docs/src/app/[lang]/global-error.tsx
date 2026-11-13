@@ -39,7 +39,7 @@ export default function GlobalError({
             search={{ enabled: false }}
             theme={{
               enabled: true,
-              defaultTheme: "light",
+              defaultTheme: "system",
               enableSystem: true,
             }}
           >

@@ -43,7 +43,7 @@ describe("CSS calculator page source", () => {
     expect(promo).toContain("/css-calculator/phone-plan-");
     expect(promo).toContain("/css-calculator/web-plan-");
     expect(page).toContain("/ftp-calculator/recording-");
-    expect(page).toContain("/ftp-calculator/watch-");
+    expect(page).not.toContain("/ftp-calculator/watch-");
     expect(promo).not.toMatch(/4\.8|★/);
   });
 });

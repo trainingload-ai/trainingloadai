@@ -94,9 +94,11 @@
     "ask": "{url} を読んでください。このドキュメントについて質問したいです。"
   },
   "docsScreenshot": {
-    "openImage": "元のサイズで開く",
     "demoLabel": "ライブデモ",
-    "openDemo": "デモでこのページを開く"
+    "openDemo": "デモでこのページを開く",
+    "openWebDemo": "Web デモで関連機能を見る",
+    "webPlatform": "Web 版",
+    "mobilePlatform": "モバイル版"
   },
   "SiteError": {
     "notFound": {
@@ -180,7 +182,7 @@
       "cssCalculator": "臨界泳速計算機"
     },
     "brandDescription": "トレーニング計画、実績、負荷、回復状態を一か所で確認できます。",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "App Store からダウンロード"
   },
   "tools": {
@@ -740,11 +742,10 @@
       },
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
+        "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
         "benefits": ["運動中のリアルタイムデータ", "トレーニング後の分析"],
         "cta": "AI コーチを見る",
-        "phoneAlt": "Trainingload.ai の iPhone 運動記録画面",
-        "watchAlt": "Trainingload.ai の Apple Watch 運動記録画面"
+        "phoneAlt": "Trainingload.ai の iPhone 運動記録画面"
       },
       "formula": {
         "title": "ワット範囲はどう計算する？",
@@ -1170,14 +1171,13 @@
       },
       "heroProduct": {
         "title": "ライドを記録。パワーを知る。",
-        "body": "iPhoneやApple Watchで記録。Trainingload.aiでパワーデータ、トレーニング負荷、回復状況をまとめて確認し、次のライドを計画できます。",
+        "body": "iPhoneで記録。Trainingload.aiでパワーデータ、トレーニング負荷、回復状況をまとめて確認し、次のライドを計画できます。",
         "benefits": [
           "トレーニングデータをリアルタイム表示",
           "ライド後にパフォーマンスを振り返る"
         ],
         "cta": "AIコーチを見る",
-        "phoneAlt": "iPhoneのTrainingload.aiトレーニング記録画面",
-        "watchAlt": "Apple Watchのリアルタイムトレーニング指標"
+        "phoneAlt": "iPhoneのTrainingload.aiトレーニング記録画面"
       },
       "chart": {
         "title": "CPの計算過程を見る",
@@ -1548,14 +1548,13 @@
       ],
       "heroProduct": {
         "title": "記録を残し、変化を知る。",
-        "body": "iPhone や Apple Watch で記録。Trainingload.ai でペース、心拍数、パワー、トレーニング負荷をまとめて振り返れます。",
+        "body": "iPhone で記録。Trainingload.ai でペース、心拍数、パワー、トレーニング負荷をまとめて振り返れます。",
         "benefits": [
           "トレーニング中のリアルタイム指標",
           "終了後の分析と振り返り"
         ],
         "cta": "AI コーチを見る",
-        "phoneAlt": "iPhone の Trainingload.ai で表示されるライブ記録",
-        "watchAlt": "Apple Watch のライブトレーニング数値"
+        "phoneAlt": "iPhone の Trainingload.ai で表示されるライブ記録"
       },
       "promo": {
         "kicker": "Trainingload.ai",
@@ -2106,7 +2105,7 @@
       },
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
+        "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
         "cta": "心拍ゾーンの説明を読む",
         "phoneAlt": "サンプル活動の心拍ゾーン設定を表示したスマホ"
       },
@@ -2955,7 +2954,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -3711,14 +3710,13 @@
       },
       "heroProduct": {
         "title": "記録したライドからFTPを知る",
-        "body": "iPhoneやApple Watchで記録。終了後のパワーデータからFTPを推定し、次のトレーニングに役立てます。",
+        "body": "iPhoneで記録。終了後のパワーデータからFTPを推定し、次のトレーニングに役立てます。",
         "benefits": [
           "運動中のデータをリアルタイム表示",
           "有効なパワー記録からFTPを推定"
         ],
         "cta": "AIコーチを見る",
-        "phoneAlt": "Trainingload.aiのiPhoneリアルタイム記録画面",
-        "watchAlt": "Trainingload.aiのApple Watchリアルタイム記録画面"
+        "phoneAlt": "Trainingload.aiのiPhoneリアルタイム記録画面"
       },
       "footerCta": {
         "title": "次のライドに、FTPを活かそう。",
@@ -4097,7 +4095,7 @@
       },
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
+        "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
         "zonesAlt": "サンプル値の最大心拍数ゾーンを表示した電話",
         "cta": "AIコーチを見る"
       },
@@ -4480,7 +4478,7 @@
         "more": "など"
       },
       "sportWords": ["ランニング", "サイクリング", "スイミング", "トライアスロン"],
-      "iphoneSupport": "iPhone・Apple Watch に対応",
+      "iphoneSupport": "iPhone に対応",
       "appStoreCta": "App Store からダウンロード"
     },
     "planSpotlight": {
@@ -5063,10 +5061,9 @@
       },
       "heroProduct": {
         "title": "トレーニングを記録。\n体力の変化を見つける。",
-        "body": "iPhone や Apple Watch で運動を記録。Trainingload.ai でパフォーマンス、心拍数、トレーニング負荷を合わせて振り返れます。",
+        "body": "iPhone で運動を記録。Trainingload.ai でパフォーマンス、心拍数、トレーニング負荷を合わせて振り返れます。",
         "link": "AI コーチを見る",
-        "phoneAlt": "iPhone のトレーニング記録画面",
-        "watchAlt": "Apple Watch のリアルタイム運動データ"
+        "phoneAlt": "iPhone のトレーニング記録画面"
       },
       "footerCta": {
         "title": "現在地を知り、次の一歩へ。",
@@ -5708,7 +5705,7 @@
       "proof": ["登録不要", "すぐに計算", "印刷・共有"],
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
+        "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
         "cta": "Daniels のペース解説を読む",
         "imageAlt": "VDOT計算機"
       },
@@ -10408,7 +10405,7 @@
       "proof": ["登録不要", "すぐに結果", "印刷または共有"],
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
+        "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
         "cta": "マラソン計画を開く",
         "phoneAlt": "テンポ走とペース目標が表示された Trainingload の計画。個人記録ではなく例のデータです。"
       },
@@ -11482,10 +11479,9 @@
       },
       "heroProduct": {
         "title": "毎回の記録から、\n積み重ねを知る。",
-        "body": "iPhone や Apple Watch で運動を記録。Trainingload.ai で負荷と回復を振り返り、次のトレーニングにつなげましょう。",
+        "body": "iPhone で運動を記録。Trainingload.ai で負荷と回復を振り返り、次のトレーニングにつなげましょう。",
         "cta": "トレーニング負荷を詳しく見る",
-        "phoneAlt": "iPhone の Trainingload.ai 運動記録画面",
-        "watchAlt": "Apple Watch の Trainingload.ai リアルタイム運動データ"
+        "phoneAlt": "iPhone の Trainingload.ai 運動記録画面"
       },
       "chart": {
         "title": "この期間の負荷の変化",
@@ -11577,9 +11573,8 @@
       },
       "heroProduct": {
         "phoneAlt": "iPhone でランニングを記録する Trainingload.ai",
-        "watchAlt": "Apple Watch でランニングを記録する Trainingload.ai",
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch でランニングを記録し、Trainingload.ai で心拍数、ペース、パワー、トレーニング負荷と一緒に振り返れます。",
+        "body": "iPhone でランニングを記録し、Trainingload.ai で心拍数、ペース、パワー、トレーニング負荷と一緒に振り返れます。",
         "benefits": [
           "ランニングファイルは端末内に保存",
           "走った区間を選んで計算",
@@ -12961,9 +12956,8 @@
       },
       "heroProduct": {
         "title": "練習を記録し、走りを理解する。",
-        "body": "iPhone や Apple Watch で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
+        "body": "iPhone で活動を記録し、Trainingload.ai で心拍数、ペース、パワー、負荷を振り返れます。",
         "phoneAlt": "心拍が表示されたリアルタイム運動のスマホ画面",
-        "watchAlt": "運動中の心拍を示すウォッチ",
         "benefits": [
           "運動中に心拍が見える",
           "bpm の幅を保存するかは自分で決める",
@@ -13552,11 +13546,10 @@
       },
       "heroProduct": {
         "title": "毎回の練習を記録し、進歩を知る。",
-        "body": "iPhone や Apple Watch で記録し、Trainingload.ai でペース・心拍数・トレーニング負荷から練習を振り返りましょう。",
+        "body": "iPhone で記録し、Trainingload.ai でペース・心拍数・トレーニング負荷から練習を振り返りましょう。",
         "benefits": ["練習中のリアルタイムデータ", "練習後の分析と振り返り"],
         "cta": "AI コーチを見る",
-        "phoneAlt": "iPhoneのTrainingload.aiトレーニング記録画面",
-        "watchAlt": "Apple Watchのリアルタイムトレーニング指標"
+        "phoneAlt": "iPhoneのTrainingload.aiトレーニング記録画面"
       },
       "source": {
         "label": "データの入力",
@@ -13606,7 +13599,6 @@
   },
   "calculatorProduct": {
     "recordingAlt": "Trainingload.ai iPhone のリアルタイム記録画面（サンプルデータ）",
-    "watchAlt": "Trainingload.ai Apple Watch のトレーニング指標（サンプルデータ）",
     "planAlt": "Trainingload.ai ネイティブアプリのダークモードの水泳プラン例",
     "webPlanAlt": "Trainingload.ai Web アプリの水泳プラン例",
     "webLoadAlt": "Trainingload.ai Web アプリのトレーニング負荷の推移例",
