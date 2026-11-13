@@ -139,6 +139,7 @@ test("denied secure-storage access is not reported as a mismatched identity or r
     });
     const before = await readFile(path, "utf8");
     for (const unavailable of [false, true]) {
+      let legacyLoads = 0;
       const vault = new DesktopCredentialVault(path, {
         ...adapter,
         isEncryptionAvailable: () => !unavailable,
@@ -149,7 +150,10 @@ test("denied secure-storage access is not reported as a mismatched identity or r
       await assert.rejects(
         resolveInstanceCredentials({
           vault,
-          legacyVaults: async () => [],
+          legacyVaults: async () => {
+            legacyLoads++;
+            return [];
+          },
           initialized: true,
           validateAuthSecret: async () => true,
         }),
@@ -160,6 +164,7 @@ test("denied secure-storage access is not reported as a mismatched identity or r
             : "DESKTOP_CREDENTIALS_UNREADABLE"),
       );
       assert.equal(await readFile(path, "utf8"), before);
+      assert.equal(legacyLoads, unavailable ? 0 : 1);
     }
   } finally {
     await rm(root, { recursive: true, force: true });

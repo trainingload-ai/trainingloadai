@@ -22,6 +22,13 @@ export async function resolveInstanceCredentials(options: {
       authSecret = await candidate.get(AUTH);
       integrationSecret = await candidate.get(INTEGRATION);
     } catch (error) {
+      // A locked/denied OS store cannot accept an import either. Stop rather
+      // than trying the same Keychain again through another profile.
+      if (
+        (error as { code?: string })?.code ===
+        "DESKTOP_SECURE_STORAGE_UNAVAILABLE"
+      )
+        throw error;
       unreadable ??= error;
       return null;
     }
@@ -51,11 +58,6 @@ export async function resolveInstanceCredentials(options: {
     }
   }
   if (unreadable) {
-    if (
-      (unreadable as { code?: string }).code ===
-      "DESKTOP_SECURE_STORAGE_UNAVAILABLE"
-    )
-      throw unreadable;
     throw Object.assign(
       new Error(
         "The existing desktop credentials could not be read from OS secure storage",
