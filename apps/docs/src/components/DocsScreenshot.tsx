@@ -87,9 +87,17 @@ export function DocsScreenshot({
       <figcaption className="mt-4 space-y-1 text-center text-sm leading-6 text-muted-foreground">
         <p>{description}</p>
         {navigation ? <p className="text-xs">{navigation}</p> : null}
-        <p className="inline-flex items-center justify-center gap-1 text-xs">
-          {linkLabel}
-          <ArrowUpRight aria-hidden="true" className="size-3" />
+        <p>
+          <a
+            href={destination.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${linkLabel}: ${title}`}
+            className="inline-flex items-center justify-center gap-1 rounded-sm text-xs font-medium text-foreground underline underline-offset-4 hover:decoration-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            {linkLabel}
+            <ArrowUpRight aria-hidden="true" className="size-3" />
+          </a>
         </p>
       </figcaption>
     </figure>
