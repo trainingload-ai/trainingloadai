@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -99,6 +99,27 @@ test("persists a fresh identity once and keeps it across subsequent launches", a
       await vault.get("integration-credential-secret"),
       first.integrationSecret,
     );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("an existing database with no saved vault never receives replacement credentials", async () => {
+  const root = await mkdtemp(join(tmpdir(), "desktop-missing-identity-"));
+  try {
+    const path = join(root, "vault.json");
+    const vault = new DesktopCredentialVault(path, adapter);
+    await assert.rejects(
+      resolveInstanceCredentials({
+        vault,
+        legacyVaults: async () => [],
+        initialized: true,
+        validateAuthSecret: async () => true,
+      }),
+      (error: { code?: string }) =>
+        error.code === "DESKTOP_INSTANCE_SECRET_MISMATCH",
+    );
+    await assert.rejects(access(path), { code: "ENOENT" });
   } finally {
     await rm(root, { recursive: true, force: true });
   }

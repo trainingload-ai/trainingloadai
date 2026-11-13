@@ -587,7 +587,8 @@ async function startDesktop() {
     });
   }
 
-  const probe = await pglite.authKeyProbe();
+  const credentialState = await pglite.credentialState();
+  const probe = credentialState.encryptedAuthKey;
   const vault = new DesktopCredentialVault(
     join(dataRoot.root, "credential-vault.json"),
     safeStorage,
@@ -607,18 +608,30 @@ async function startDesktop() {
   const { authSecret, integrationSecret } = await resolveInstanceCredentials({
     vault,
     legacyVaults: async () => {
-      const candidates: Array<Pick<DesktopCredentialVault, "get">> = [
-        // Old releases stored their vault in their own application profile.
-        // Never try the generic Electron profile with the release's Keychain key.
-        new DesktopCredentialVault(
-          join(applicationUserDataPath, "credential-vault.json"),
-          safeStorage,
-        ),
-      ];
+      const candidates: Array<Pick<DesktopCredentialVault, "get">> = [];
+      // A foreign profile needs a DB probe. Without one, only the vault
+      // already bound to this data root can be recovered by the old runtime.
+      if (probe !== null)
+        candidates.push(
+          // Old releases stored their vault in their own application profile.
+          // Never try the generic Electron profile with the release's Keychain key.
+          new DesktopCredentialVault(
+            join(applicationUserDataPath, "credential-vault.json"),
+            safeStorage,
+          ),
+        );
       if (legacyExecutable) {
         for (const path of new Set([
           join(dataRoot.root, "credential-vault.json"),
-          join(app.getPath("appData"), "Electron", "credential-vault.json"),
+          ...(probe !== null
+            ? [
+                join(
+                  app.getPath("appData"),
+                  "Electron",
+                  "credential-vault.json",
+                ),
+              ]
+            : []),
         ])) {
           let pending: ReturnType<typeof readLegacyCredentials> | undefined;
           candidates.push({
@@ -641,7 +654,7 @@ async function startDesktop() {
       }
       return candidates;
     },
-    initialized: probe !== null,
+    initialized: credentialState.initialized,
     validateAuthSecret: async (secret) => {
       if (authCrypto === null) return true;
       try {

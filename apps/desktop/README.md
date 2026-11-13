@@ -113,6 +113,8 @@ Instance secrets are encrypted in the data root's `credential-vault.json` and va
 
 An absent vault/value must not access OS secure storage. A new database does not search for credentials in legacy profiles, and an already matching primary vault does not invoke a legacy runtime. The release never tries to decrypt the generic Electron profile with the release's OS key. Denied/unavailable secure storage is reported separately from a readable key that does not match the database; restart/reinstall is not presented as a repair for a credential mismatch.
 
+Existing instance or user records prevent credential regeneration even when no JWT signing-key record exists yet. Without an encrypted database probe, unrelated profile vaults are not imported; only the vault already bound to the data root can be recovered with the explicitly selected original runtime.
+
 An older source preview can have used Electron's original OS credential namespace. When a one-time migration is needed, launch the installed app with the original trusted runtime:
 
 ```sh
