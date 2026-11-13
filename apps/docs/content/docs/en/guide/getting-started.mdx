@@ -1,101 +1,103 @@
 ---
-title: Get Started with Your First Activity
-description: Set your account preferences, choose a data source, import one activity, and check the recorded result before continuing to plans and AI Coach.
-seoTitle: "Getting Started and First Activity Guide | Trainingload.ai"
-seoDescription: "Follow the first-use workflow for Trainingload.ai. Check timezone and units, import one workout, verify its processing and source, then choose your next step."
-keywords: ["Trainingload.ai getting started", "first activity import", "training analysis setup", "training data", "Trainingload.ai guide"]
+title: Import Your First Activity
+description: Connect a training platform or upload a workout file, then open the imported activity to explore its analysis.
+seoTitle: "Quickstart: Import Your First Activity | Trainingload.ai"
+seoDescription: "Connect a training platform or upload FIT, TCX or GPX files to import your first activity, then view its details and training load."
+keywords: ["Trainingload.ai quickstart", "first activity import", "import workouts", "FIT file upload"]
 ---
 
-# Get Started with Your First Activity
+# Import Your First Activity [#get-started-with-your-first-activity]
 
-Start by bringing one completed workout into Trainingload.ai and confirming that it was recorded correctly. That activity can then support review, training-load context and comparison with a planned workout.
-
-[Explore the read-only Demo](https://demo.trainingload.ai/en). The screenshot uses sample training data in the real app to show how a populated home page fits together. Your initial account can have empty sections while you complete setup.
+Import a recording from your watch, bike computer or training platform to see its activity details, charts and training load in Trainingload.ai. This guide walks through platform sync and file uploads in the web app.
 
 ## Before you begin
 
-Prepare one original FIT, TCX or GPX activity file, or access to a supported source platform containing a known workout. Choose a session whose date, sport and approximate duration you can recognize.
+[Open Trainingload.ai](https://app.trainingload.ai/en) and sign in to your own account. If you self-host, open your own instance instead. To see the interface first, [browse the Demo](https://demo.trainingload.ai/en). Demo data is read-only; uploads and edits are disabled.
 
-For Cloud, sign in and complete any account-verification steps shown. For self-hosting, follow the [installation guide](/docs/self-host/installation) and create your local account first. The two versions offer different platform connections; check the relevant guide before connecting.
+## 1. Choose how to import [#2-choose-one-route-for-the-first-activity]
 
-## 1. Check the profile and display settings
-
-Open **Settings / Account** on Web, or **Me / Account** in the mobile app. Check the account timezone and unit preferences before comparing calendar dates or pace values.
-
-Enter reliable profile information and any thresholds you already know. Keep the sport associated with each threshold correct. For the full editing workflow, use [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones).
-
-If you need help estimating a threshold, use the relevant tool and review the result before saving it. An uncertain threshold is a reason to qualify an intensity or load interpretation.
-
-## 2. Choose one route for the first activity
-
-| Your starting point | Next step |
+| Where is your recording? | What to do next |
 | --- | --- |
-| You have an original activity file | Open Activities and use the upload entry. |
-| Your workouts are in a supported online platform | Open that platform's connection settings and follow its authorization and synchronization flow. |
-| You are already recording in the mobile app | Finish and synchronize a recording, then find it in Activities. |
+| Already on Strava, Garmin or another training platform | [Connect the platform](#connect-a-training-platform) |
+| Exported as a FIT, TCX or GPX file | [Upload the file](#upload-a-workout-file) |
+| You want to record your next workout on your phone | Follow [Mobile Recording](/docs/guide/mobile-recording) |
 
-Use [Connect Training Data](/docs/guide/connect-data) to choose a route. The same workout can pass through several services, so identify the source you intend to keep before starting a history import.
+For self-hosting, see [Configuration](/docs/self-host/configuration) for supported connections. You can also use the file-upload steps below.
 
-## 3. Import and wait for processing
+## 2. Import your recording [#3-import-and-wait-for-processing]
 
-For a file, open **Activities**, choose the upload action, select the original file and review the format inspection. Continue with the import, then inspect each item's result in the batch-progress dialog. If a duplicate is detected, compare it with the existing activity before deciding whether a separate copy is needed.
+### Option 1: Connect a training platform [#connect-a-training-platform]
 
-For a connected platform, follow the initial-sync or import action offered by its settings. A connected account and a completed import are separate states. Find the expected workout in Activities after the job runs.
+1. Select **Settings** in the web app's sidebar and find **Third Party Connections**.
+2. Choose the platform that holds your recordings and follow the dialog to connect it.
+3. Use its initial-import or manual-sync option if needed.
+4. Open **Activities** in the sidebar to find the synced recordings.
 
-Detailed file selection, duplicate choices and batch states are covered in [Upload Activity Files](/docs/guide/upload-activity-files).
-
-## 4. Verify the first recorded result
-
-1. Find the activity by its date and sport in **Activities**.
-2. Check the source, start time, distance and duration against the original recording.
-3. Wait for **Ready**, or inspect any partial-analysis or failure message.
-4. Open activity detail and check the available route, laps and sensor charts.
-5. Confirm that the activity appears on the expected local date in the calendar.
-
-A file with summary values alone can produce fewer charts than a file containing recorded samples. Missing GPS or heart rate should be explained by the source data, processing state or an explicit error.
-
-Use the [Activity Detail guide](/docs/guide/activity-detail) to review the result, then the [Timeline guide](/docs/guide/activity-timeline) when you need to inspect one effort.
+Each platform supports a different history range. See [Connect Strava, Garmin and other platforms](/docs/guide/connect-third-party-platforms) for its connection and history-import steps.
 
 <DocsScreenshot
-  id="getting-started-web-home"
-  title="See where the recorded activity fits into daily use"
-  description="Synthetic Web example with today's advice, a current plan, scheduled training and load context. These sections fill as the relevant records become available."
-  imageAlt="Trainingload.ai home page with advice, a planned workout and current load context"
-  route="Home"
-  demoLabel="Explore the Demo home page"
+  id="integrations-connections"
+  title="Choose a training platform"
+  description="Find Third Party Connections in Settings, then select the platform that holds your recordings."
+  route="Settings → Third Party Connections"
+  demoLabel="Browse platforms in Demo"
 />
 
-## 5. Choose the next task
+### Option 2: Upload a workout file [#upload-a-workout-file]
 
-- To understand recorded load, open [PMC history and forecasts](/docs/guide/pmc-forecast). New or incomplete history can limit the outlook.
-- To organize future training, [create a plan](/docs/guide/create-training-plan), review its dates and workouts, then activate it when appropriate. Templates, manual editing and AI-assisted drafts are separate creation paths.
-- To use the day-to-day workflow, open [Today and Current Status](/docs/guide/today-and-current-state).
-- To ask about a workout, open [AI Coach](/docs/guide/ai-coach) with a specific activity or plan question. Review data-sharing choices and any proposed edits before applying them.
+Export a FIT, TCX or GPX file from your watch, bike computer or training platform, then:
 
-## Check the result
+1. Open **Activities** in the sidebar.
+2. Select **Choose activity files** to open the import dialog.
 
-The first-use task is complete when the account timezone and units are appropriate, one identifiable activity has a clear processing result, and its detail and calendar date agree with the recording. Keep any missing sensor coverage or uncertain threshold in your interpretation.
+<DocsScreenshot
+  id="activity-upload-location"
+  title="Find the upload button in Activities"
+  description="Open Activities and select Choose activity files."
+  route="Activities → Choose activity files"
+  demoLabel="Browse activities in Demo"
+/>
+
+3. Click the file-selection area and choose your files, or drag them into the dialog.
+4. Wait for the file check to finish, then select **Upload**.
+5. Wait for the import to finish in the progress dialog, then open the new recording from Activities.
+
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Select files and upload"
+  description="Choose one or more workout files, wait for the check, then select Upload."
+  route="Activities → Choose activity files"
+  demoLabel="Browse activities in Demo"
+/>
+
+If you see a duplicate warning, you can keep the existing recording rather than import the same workout twice. See [Upload Activity Files](/docs/guide/upload-activity-files) for file formats, duplicate choices and failed imports.
+
+## 3. Open your imported activity [#4-verify-the-first-recorded-result]
+
+Find the workout by date in **Activities** and open its details. You can see duration, distance, training load, and the charts and route supported by the recording. See [Activity Details](/docs/guide/activity-detail) for a tour of the page.
+
+A newly imported activity may still be processing. Wait for analysis to finish before viewing the full results. Heart rate, power and route charts need the corresponding recorded data; a recording without GPS will not show a route.
 
 ## Common questions
 
-### Why is the home page less populated than the screenshot?
+### I connected a platform but cannot see my activities
 
-The example contains a plan and recorded activities. A new account fills these sections as you add the corresponding records. Use the first activity's processing result to verify import success.
+Check that the platform is connected and review the date filters in Activities. Past workouts may need a separate history import. Follow the platform's options, or export a workout file and upload it to Trainingload.ai.
 
-### Why is a chart or forecast empty?
+### My activity has no heart rate or route
 
-Check the required sensor data, processing status and history window. An available activity does not guarantee every analysis or forecast has enough evidence.
+Wait for processing to finish. If the original file has no heart rate, power or GPS data, the corresponding charts will not appear. If the source platform shows those measurements, try exporting the original activity file and uploading it again.
 
-### Why is the activity on the wrong day?
+### The activity appears on the wrong date
 
-Compare its start time and timezone with the account's display timezone. Confirm the date context before moving or linking a planned workout.
+Check your account time zone and the recording's start time. See [Profile, Thresholds and Zones](/docs/guide/profile-thresholds-zones) for time zone and unit settings.
 
-### Why can I not upload or change something in Demo?
+### Why can I not upload in Demo?
 
-Demo supports browsing the examples. Importing files, connecting your platforms and saving changes require your own account or Self-host instance.
+Demo is for browsing sample data. To import your own recordings, [open the main app](https://app.trainingload.ai/en) and sign in to your own account.
 
-## Continue
+## Next steps [#5-choose-the-next-task]
 
-- [Connect Training Data](/docs/guide/connect-data)
-- [Today and Current Status](/docs/guide/today-and-current-state)
-- [Create a Training Plan](/docs/guide/create-training-plan)
+- [Explore changes in training load](/docs/guide/pmc-forecast)
+- [Create a training plan](/docs/guide/create-training-plan)
+- [Ask AI Coach about this workout](/docs/guide/ai-coach)
