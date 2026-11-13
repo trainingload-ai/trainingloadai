@@ -71,9 +71,11 @@ export class DesktopCredentialVault {
 
   get(name: string): Promise<string | null> {
     return this.serialize(async () => {
-      this.assertAvailable();
       const encrypted = (await this.read()).values[name];
       if (!encrypted) return null;
+      // Even an availability check can access Keychain and show system UI.
+      // A missing file/value must not request access to an unrelated old key.
+      this.assertAvailable();
       return this.safeStorage.decryptString(Buffer.from(encrypted, "base64"));
     });
   }
@@ -84,6 +86,7 @@ export class DesktopCredentialVault {
 
   setMany(values: Record<string, string>): Promise<void> {
     return this.serialize(async () => {
+      if (Object.keys(values).length === 0) return;
       this.assertAvailable();
       const payload = await this.read();
       for (const [name, value] of Object.entries(values)) {
@@ -97,8 +100,8 @@ export class DesktopCredentialVault {
 
   delete(name: string): Promise<void> {
     return this.serialize(async () => {
-      this.assertAvailable();
       const payload = await this.read();
+      if (!Object.hasOwn(payload.values, name)) return;
       delete payload.values[name];
       await this.write(payload);
     });

@@ -7,24 +7,29 @@ import { isAbsolute } from "node:path";
 export async function readLegacyCredentials(
   executable: string,
   reader: string,
+  vaultPath: string,
 ) {
-  if (!isAbsolute(executable))
-    throw new Error("Legacy Electron path must be absolute");
+  if (!isAbsolute(executable) || !isAbsolute(vaultPath))
+    throw new Error("Legacy Electron and vault paths must be absolute");
   return new Promise<{ authSecret: string; integrationSecret: string }>(
     (resolve, reject) => {
-      const child = spawn(executable, [reader], {
-        env: {
-          PATH: process.env.PATH,
-          HOME: process.env.HOME,
-          USERPROFILE: process.env.USERPROFILE,
-          APPDATA: process.env.APPDATA,
-          LOCALAPPDATA: process.env.LOCALAPPDATA,
-          SYSTEMROOT: process.env.SYSTEMROOT,
-          TMPDIR: process.env.TMPDIR,
-          TEMP: process.env.TEMP,
+      const child = spawn(
+        executable,
+        [reader, `--trainingload-legacy-vault=${vaultPath}`],
+        {
+          env: {
+            PATH: process.env.PATH,
+            HOME: process.env.HOME,
+            USERPROFILE: process.env.USERPROFILE,
+            APPDATA: process.env.APPDATA,
+            LOCALAPPDATA: process.env.LOCALAPPDATA,
+            SYSTEMROOT: process.env.SYSTEMROOT,
+            TMPDIR: process.env.TMPDIR,
+            TEMP: process.env.TEMP,
+          },
+          stdio: ["ignore", "ignore", "ignore", "ipc"],
         },
-        stdio: ["ignore", "ignore", "ignore", "ipc"],
-      });
+      );
       const timeout = setTimeout(() => {
         child.kill();
         reject(new Error("Legacy credential migration timed out"));
@@ -49,6 +54,8 @@ export async function readLegacyCredentials(
           clearTimeout(timeout);
           if (
             message.type !== "credentials" ||
+            typeof message.authSecret !== "string" ||
+            typeof message.integrationSecret !== "string" ||
             !message.authSecret ||
             !message.integrationSecret
           ) {

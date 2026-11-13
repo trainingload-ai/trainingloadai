@@ -10,27 +10,27 @@ const INTEGRATION = "integration-credential-secret";
  */
 export async function resolveInstanceCredentials(options: {
   vault: DesktopCredentialVault;
-  legacyVaults: Array<Pick<DesktopCredentialVault, "get">>;
+  legacyVaults: () => Promise<Array<Pick<DesktopCredentialVault, "get">>>;
   initialized: boolean;
   validateAuthSecret: (secret: string) => Promise<boolean>;
 }) {
-  let unreadable = false;
-  for (const candidate of [options.vault, ...options.legacyVaults]) {
+  let unreadable: unknown;
+  async function readCandidate(candidate: Pick<DesktopCredentialVault, "get">) {
     let authSecret: string | null;
     let integrationSecret: string | null;
     try {
       authSecret = await candidate.get(AUTH);
       integrationSecret = await candidate.get(INTEGRATION);
-    } catch {
-      unreadable = true;
-      continue;
+    } catch (error) {
+      unreadable ??= error;
+      return null;
     }
-    if (!authSecret && !integrationSecret) continue;
-    if (options.initialized && (!authSecret || !integrationSecret)) continue;
+    if (!authSecret && !integrationSecret) return null;
+    if (options.initialized && (!authSecret || !integrationSecret)) return null;
     const incomplete = !authSecret || !integrationSecret;
     authSecret ??= randomBytes(32).toString("base64url");
     integrationSecret ??= randomBytes(32).toString("base64url");
-    if (!(await options.validateAuthSecret(authSecret))) continue;
+    if (!(await options.validateAuthSecret(authSecret))) return null;
     if (candidate !== options.vault || incomplete) {
       await options.vault.setMany({
         [AUTH]: authSecret,
@@ -39,10 +39,36 @@ export async function resolveInstanceCredentials(options: {
     }
     return { authSecret, integrationSecret };
   }
-  if (options.initialized || unreadable) {
+
+  const current = await readCandidate(options.vault);
+  if (current) return current;
+  // A new database gets its own identity. Do not import a developer's keys
+  // just because another profile happens to exist on this machine.
+  if (options.initialized) {
+    for (const candidate of await options.legacyVaults()) {
+      const result = await readCandidate(candidate);
+      if (result) return result;
+    }
+  }
+  if (unreadable) {
+    if (
+      (unreadable as { code?: string }).code ===
+      "DESKTOP_SECURE_STORAGE_UNAVAILABLE"
+    )
+      throw unreadable;
     throw Object.assign(
       new Error(
-        "找不到与本地数据库匹配的身份密钥。请使用原版本迁移密钥；现有数据和密钥均未重置。",
+        "The existing desktop credentials could not be read from OS secure storage",
+      ),
+      {
+        code: "DESKTOP_CREDENTIALS_UNREADABLE",
+      },
+    );
+  }
+  if (options.initialized) {
+    throw Object.assign(
+      new Error(
+        "No readable credentials match the existing desktop database; migrate with the original trusted runtime",
       ),
       { code: "DESKTOP_INSTANCE_SECRET_MISMATCH" },
     );

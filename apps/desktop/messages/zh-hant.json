@@ -69,5 +69,9 @@
   "downloadDetail": "目前版本 {version}。下載完成後，您可以選擇何時重新啟動並安裝。",
   "download": "下載更新",
   "updateFailed": "更新未完成",
-  "updateFailedDetail": "請檢查網路後重試。目前版本和本機資料會保留。"
+  "updateFailedDetail": "請檢查網路後重試。目前版本和本機資料會保留。",
+  "secureStorageUnavailable": "系統安全儲存暫時無法使用。請解鎖登入鑰匙圈後再試。應用程式不會取代或重設現有金鑰。",
+  "credentialsUnreadable": "無法解密已儲存的憑證。如果先前使用過開發版或未簽署版本，請使用原本可信任的執行環境遷移金鑰。現有資料和金鑰均已保留。",
+  "credentialsMismatch": "找不到與現有本機資料庫相符的金鑰。需要遷移原執行個體的金鑰；重新安裝或重新啟動無法修復此問題。現有資料已保留。",
+  "macSignatureRequired": "此 macOS 應用程式沒有有效的 Developer ID Application 簽章。請安裝正式簽署的版本；本機預覽請使用隔離的原始碼開發命令。應用程式尚未開啟本機資料庫或讀取憑證。"
 }

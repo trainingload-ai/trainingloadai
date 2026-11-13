@@ -32,6 +32,9 @@ import { ChildSupervisor } from "./runtime/child-supervisor.js";
 import { DesktopCredentialVault } from "./runtime/credential-vault.js";
 import { resolveInstanceCredentials } from "./runtime/instance-credentials.js";
 import { readLegacyCredentials } from "./runtime/legacy-credential-migration.js";
+import { desktopLaunchProfile } from "./runtime/launch-profile.js";
+import { checkDesktopCredentials } from "./runtime/credential-check.js";
+import { assertMacReleaseIdentity } from "./runtime/mac-release-identity.js";
 import {
   initializeDataRoot,
   resolveDefaultDataRoot,
@@ -75,11 +78,15 @@ const applicationIcon = resolve(
     ? "../assets/macos/icon.png"
     : "../assets/icon.png",
 );
-// Preserve the launch profile; development runs use Electron's existing profile.
 const customUserDataPath = app.commandLine.getSwitchValue("user-data-dir");
-const applicationUserDataPath = customUserDataPath
-  ? resolve(customUserDataPath)
-  : app.getPath("userData");
+const credentialCheck = app.commandLine.getSwitchValue("credential-check");
+const launchProfile = desktopLaunchProfile({
+  packaged: app.isPackaged,
+  appData: app.getPath("appData"),
+  userData: app.getPath("userData"),
+  customUserData: customUserDataPath,
+});
+const applicationUserDataPath = launchProfile.userData;
 mkdirSync(applicationUserDataPath, { recursive: true });
 app.setPath("userData", applicationUserDataPath);
 const pglite = new DesktopPgliteService();
@@ -161,7 +168,7 @@ async function resolveDataRoot(): Promise<string> {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
 
-  if (customUserDataPath) return join(applicationUserDataPath, "data");
+  if (launchProfile.isolated) return join(applicationUserDataPath, "data");
   return resolveDefaultDataRoot(
     join(app.getPath("appData"), "Trainingload.ai"),
   );
@@ -581,37 +588,11 @@ async function startDesktop() {
   }
 
   const probe = await pglite.authKeyProbe();
-  const legacyProfiles = [applicationUserDataPath];
-  if (!customUserDataPath)
-    legacyProfiles.push(join(app.getPath("appData"), "Electron"));
   const vault = new DesktopCredentialVault(
     join(dataRoot.root, "credential-vault.json"),
     safeStorage,
   );
-  const legacyVaults: Array<Pick<DesktopCredentialVault, "get">> = [
-    ...new Set(legacyProfiles),
-  ].map(
-    (profile) =>
-      new DesktopCredentialVault(
-        join(profile, "credential-vault.json"),
-        safeStorage,
-      ),
-  );
   const legacyExecutable = app.commandLine.getSwitchValue("legacy-electron");
-  if (legacyExecutable) {
-    const legacy = await readLegacyCredentials(
-      legacyExecutable,
-      join(appDirectory, "runtime/legacy-credential-reader.cjs"),
-    );
-    legacyVaults.push({
-      get: async (name) =>
-        name === "instance-auth-secret"
-          ? legacy.authSecret
-          : name === "integration-credential-secret"
-            ? legacy.integrationSecret
-            : null,
-    });
-  }
   const authCrypto =
     probe === null
       ? null
@@ -625,7 +606,41 @@ async function startDesktop() {
     authCrypto?.parseEnvelope(encryptedAuthKey)?.version ?? 0;
   const { authSecret, integrationSecret } = await resolveInstanceCredentials({
     vault,
-    legacyVaults,
+    legacyVaults: async () => {
+      const candidates: Array<Pick<DesktopCredentialVault, "get">> = [
+        // Old releases stored their vault in their own application profile.
+        // Never try the generic Electron profile with the release's Keychain key.
+        new DesktopCredentialVault(
+          join(applicationUserDataPath, "credential-vault.json"),
+          safeStorage,
+        ),
+      ];
+      if (legacyExecutable) {
+        for (const path of new Set([
+          join(dataRoot.root, "credential-vault.json"),
+          join(app.getPath("appData"), "Electron", "credential-vault.json"),
+        ])) {
+          let pending: ReturnType<typeof readLegacyCredentials> | undefined;
+          candidates.push({
+            get: async (name) => {
+              // Run the original, explicitly selected runtime only if this
+              // candidate is needed. Keys never go to stdout or plaintext files.
+              const legacy = await (pending ??= readLegacyCredentials(
+                legacyExecutable,
+                join(appDirectory, "runtime/legacy-credential-reader.cjs"),
+                path,
+              ));
+              return name === "instance-auth-secret"
+                ? legacy.authSecret
+                : name === "integration-credential-secret"
+                  ? legacy.integrationSecret
+                  : null;
+            },
+          });
+        }
+      }
+      return candidates;
+    },
     initialized: probe !== null,
     validateAuthSecret: async (secret) => {
       if (authCrypto === null) return true;
@@ -836,14 +851,26 @@ async function reportDesktopFailure(error: unknown) {
   if (reportingFailure || shuttingDown) return;
   reportingFailure = true;
   const code = (error as { code?: string })?.code ?? "DESKTOP_START_FAILED";
-  const message = error instanceof Error ? error.message : String(error);
+  const credentialMessages: Record<string, string> = {
+    DESKTOP_SECURE_STORAGE_UNAVAILABLE: "secureStorageUnavailable",
+    DESKTOP_CREDENTIALS_UNREADABLE: "credentialsUnreadable",
+    DESKTOP_INSTANCE_SECRET_MISMATCH: "credentialsMismatch",
+    DESKTOP_MAC_SIGNATURE_REQUIRED: "macSignatureRequired",
+  };
+  const message = credentialMessages[code]
+    ? t(credentialMessages[code])
+    : error instanceof Error
+      ? error.message
+      : String(error);
   console.error(JSON.stringify({ ok: false, error: { code, message } }));
   await stopDesktop().catch(() => undefined);
   await dialog.showMessageBox({
     type: "error",
     title: t("startError", appValues),
     message: t("startFailed"),
-    detail: t("startFailedDetail", { code, message }),
+    detail: credentialMessages[code]
+      ? `${code}\n\n${message}`
+      : t("startFailedDetail", { code, message }),
     buttons: [t("exit")],
   });
   shuttingDown = true;
@@ -876,15 +903,58 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-registerDesktopIpc();
+if (!credentialCheck) registerDesktopIpc();
 
 void (
   hasSingleInstanceLock
-    ? app.whenReady().then(() => {
+    ? app.whenReady().then(async () => {
         // macOS initializes its keychain namespace before ready. Change the
         // development display name afterwards so existing encrypted credentials
         // remain readable. Packaged builds get their identity from productName.
         app.setName("Trainingload.ai");
+        if (credentialCheck) {
+          // Release acceptance is deliberately separate from business startup.
+          // It cannot create an Owner or touch the normal data-root preference.
+          try {
+            if (!customUserDataPath)
+              throw new Error("An explicit test profile is required");
+            if (app.isPackaged && process.platform === "darwin")
+              await assertMacReleaseIdentity(process.execPath);
+            const result = await checkDesktopCredentials(
+              applicationUserDataPath,
+              credentialCheck,
+              safeStorage,
+            );
+            await writeFile(
+              join(applicationUserDataPath, "credential-check-report.json"),
+              JSON.stringify(result),
+              { mode: 0o600 },
+            );
+            app.exit(0);
+          } catch (error) {
+            if (customUserDataPath) {
+              await writeFile(
+                join(applicationUserDataPath, "credential-check-report.json"),
+                JSON.stringify({
+                  ok: false,
+                  error: {
+                    code:
+                      (error as { code?: string })?.code ??
+                      "DESKTOP_CREDENTIAL_CHECK_FAILED",
+                  },
+                }),
+                { mode: 0o600 },
+              ).catch(() => undefined);
+            }
+            app.exit(1);
+          }
+          return;
+        }
+        i18n.setLocale(
+          i18n.resolve(undefined, app.getPreferredSystemLanguages().join(",")),
+        );
+        if (app.isPackaged && process.platform === "darwin")
+          await assertMacReleaseIdentity(process.execPath);
         registerDesktopMenu();
         return startDesktop();
       })

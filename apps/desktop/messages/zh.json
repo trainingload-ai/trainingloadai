@@ -69,5 +69,9 @@
   "downloadDetail": "当前版本 {version}。下载完成后，你可以选择何时重启安装。",
   "download": "下载更新",
   "updateFailed": "更新未完成",
-  "updateFailedDetail": "请检查网络后重试。当前版本和本地数据会保留。"
+  "updateFailedDetail": "请检查网络后重试。当前版本和本地数据会保留。",
+  "secureStorageUnavailable": "系统安全存储暂不可用。请解锁登录钥匙串后重试。应用不会替换或重置现有密钥。",
+  "credentialsUnreadable": "无法解密已保存的凭据。如果此前使用过开发版或未签名版，请使用原可信运行时迁移密钥。现有数据和密钥均已保留。",
+  "credentialsMismatch": "没有找到与现有本地数据库匹配的密钥。需要迁移原实例的密钥；重新安装或重启无法修复此问题。现有数据已保留。",
+  "macSignatureRequired": "此 macOS 应用没有有效的 Developer ID Application 签名。请安装正式签名包；本地预览请使用隔离的源码开发命令。应用尚未打开本地数据库或读取凭据。"
 }

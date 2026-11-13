@@ -21,6 +21,8 @@ For an isolated test profile:
 pnpm desktop:start -- --user-data-dir=/absolute/path/to/test-profile
 ```
 
+Source development uses `Trainingload.ai/development` under the OS application-data directory, with its database under that profile's `data/`. It never reads the release profile's data-directory preference or opens the release database by default. Installed releases retain the existing `Trainingload.ai/user/data` convention. This isolates files without renaming either the release or original Electron OS credential namespace. Older development data is retained in place and is not automatically adopted by the new development profile.
+
 Development, translations, startup theme tokens, server/client entrypoints, and the migration runner all use this repository checkout. There is no external Core checkout, separate version pin, or per-service entry override. Desktop, Client, Server, and database package versions must match the repository version. A business-source fingerprint detects stale builds and generated desktop resources; changes to Client, Server, schema, or shared messages require `pnpm desktop:build` again. Native-only edits need `pnpm --dir apps/desktop build`.
 
 This is the desktop source workflow. It is separate from installing or operating a signed Docker Self-host release bundle; follow the repository Self-host documentation for those instances.
@@ -38,6 +40,8 @@ pnpm --dir apps/desktop dist:mac:dmg
 ```
 
 Artifacts are written to `apps/desktop/build/release/`. Build on the intended OS and architecture. macOS arm64 has been exercised locally; Windows and Linux installer workflows still need platform acceptance. The local commands above produce unsigned, unnotarized macOS packages. Signing credentials belong in Keychain or release infrastructure, never in this repository.
+
+Unsigned/ad-hoc packaged macOS copies are packaging evidence, not runnable release previews: startup rejects them before opening the release database or requesting its Keychain key. Use `desktop:start` for isolated source development or the Developer ID signed workflow for native acceptance and distribution. This prevents local test packages from taking over the release's credential namespace.
 
 The production graph is collected explicitly, with the same checkout's migration runner and generated Prisma Client. Runtime pruning retains DuckDB, PGlite, geo-tz's default historical data, and image processing. macOS universal native libraries retain only the intended architecture, identical dependency-free libvips assets are shared, and TypeScript/build-only files are removed. Runtime files remain real files rather than ASAR entries. The runtime budget is 280 MiB, with a separate 290 MiB Linux x64 limit for its larger upstream native libraries (CI baseline: 284.4 MiB). Budgets and the relocated smoke test detect dependency growth or missing files. `runtime-size.json` records version, commit, source fingerprint, and sizes; installed apps use bundled files exclusively.
 
@@ -107,6 +111,8 @@ Apple submissions are recorded before waiting for a result, so failed or timed-o
 
 Instance secrets are encrypted in the data root's `credential-vault.json` and validated against the database before reuse. Existing owner identity and signing records are retained. Never reset the database or disable encryption to bypass `DESKTOP_INSTANCE_SECRET_MISMATCH`.
 
+An absent vault/value must not access OS secure storage. A new database does not search for credentials in legacy profiles, and an already matching primary vault does not invoke a legacy runtime. The release never tries to decrypt the generic Electron profile with the release's OS key. Denied/unavailable secure storage is reported separately from a readable key that does not match the database; restart/reinstall is not presented as a repair for a credential mismatch.
+
 An older source preview can have used Electron's original OS credential namespace. When a one-time migration is needed, launch the installed app with the original trusted runtime:
 
 ```sh
@@ -120,4 +126,8 @@ The helper transfers existing keys only over private IPC. Matching keys are re-e
 
 The electron-updater adapter checks only when the packaged release contains a configured `resources/app-update.yml`. It does not automatically download, install on quit, accept prereleases, or downgrade. Installation waits for the local services and database to stop. Development previews never contact an update feed.
 
-Use the signed macOS workflow for direct distribution. A controlled update feed, clean-machine acceptance, and cross-version upgrade testing with actual signed packages remain separate release work. Source and unsigned local packaging do not constitute signed-release acceptance.
+Use the signed macOS workflow for direct distribution. Before notarization, it launches the actual signed executable in a new temporary profile to create and reopen a synthetic encrypted credential, then checks relocation and a newly signed copy with a changed bundle build version and the same designated requirement. No database, Owner or normal user profile is opened. Native operations have a 30-second timeout: an interactive Keychain prompt fails acceptance instead of waiting for a person. The release report contains only pass/fail check names; no keys or native logs are exported.
+
+A controlled update feed, clean-machine GUI acceptance, and business-data upgrades across actual released versions remain separate release work. The signed credential check covers OS key access, not those broader workflows. Source and unsigned local packaging do not constitute signed-release acceptance.
+
+macOS may still require explicit authorization when migrating a key created by an unsigned/differently signed application, or when the login Keychain is locked. Signing a new release cannot retroactively grant access to the old item's ACL. Do not delete the Keychain item, reset local identity, store keys as plaintext, or allow all applications to bypass this protection. A fresh `--user-data-dir` isolates files but does **not** create a fresh OS Keychain; clean-install acceptance needs a fresh macOS user/runner.

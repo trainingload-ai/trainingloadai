@@ -38,7 +38,7 @@ test("imports the database-matching legacy identity without changing either lega
     const before = await readFile(join(root, "old-profile.json"), "utf8");
     const result = await resolveInstanceCredentials({
       vault,
-      legacyVaults: [wrong, original],
+      legacyVaults: async () => [wrong, original],
       initialized: true,
       validateAuthSecret: async (value) => value === "matching",
     });
@@ -70,7 +70,7 @@ test("refuses to regenerate an initialized database identity when every candidat
     await assert.rejects(
       resolveInstanceCredentials({
         vault,
-        legacyVaults: [],
+        legacyVaults: async () => [],
         initialized: true,
         validateAuthSecret: async () => false,
       }),
@@ -89,7 +89,7 @@ test("persists a fresh identity once and keeps it across subsequent launches", a
     const vault = new DesktopCredentialVault(join(root, "vault.json"), adapter);
     const options = {
       vault,
-      legacyVaults: [],
+      legacyVaults: async () => [],
       initialized: false,
       validateAuthSecret: async () => true,
     };
@@ -99,6 +99,68 @@ test("persists a fresh identity once and keeps it across subsequent launches", a
       await vault.get("integration-credential-secret"),
       first.integrationSecret,
     );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("fresh databases and valid primary vaults never access legacy profiles", async () => {
+  const root = await mkdtemp(join(tmpdir(), "desktop-identity-isolation-"));
+  try {
+    const vault = new DesktopCredentialVault(join(root, "vault.json"), adapter);
+    let legacyReads = 0;
+    const options = {
+      vault,
+      legacyVaults: async () => {
+        legacyReads++;
+        throw new Error("must not access legacy OS keys");
+      },
+      initialized: false,
+      validateAuthSecret: async () => true,
+    };
+    const fresh = await resolveInstanceCredentials(options);
+    assert.deepEqual(
+      await resolveInstanceCredentials({ ...options, initialized: true }),
+      fresh,
+    );
+    assert.equal(legacyReads, 0);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("denied secure-storage access is not reported as a mismatched identity or replaced", async () => {
+  const root = await mkdtemp(join(tmpdir(), "desktop-identity-denied-"));
+  try {
+    const path = join(root, "vault.json");
+    await new DesktopCredentialVault(path, adapter).setMany({
+      "instance-auth-secret": "original",
+      "integration-credential-secret": "integration",
+    });
+    const before = await readFile(path, "utf8");
+    for (const unavailable of [false, true]) {
+      const vault = new DesktopCredentialVault(path, {
+        ...adapter,
+        isEncryptionAvailable: () => !unavailable,
+        decryptString: () => {
+          throw new Error("access denied");
+        },
+      });
+      await assert.rejects(
+        resolveInstanceCredentials({
+          vault,
+          legacyVaults: async () => [],
+          initialized: true,
+          validateAuthSecret: async () => true,
+        }),
+        (error: { code?: string }) =>
+          error.code ===
+          (unavailable
+            ? "DESKTOP_SECURE_STORAGE_UNAVAILABLE"
+            : "DESKTOP_CREDENTIALS_UNREADABLE"),
+      );
+      assert.equal(await readFile(path, "utf8"), before);
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }
