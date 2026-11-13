@@ -2,6 +2,8 @@
 
 Use the declared package exports. Keep the single-owner Self-host boundary explicit. Run boundary checks, tests, and both relevant builds.
 
+Use English for new or updated code comments and logger messages.
+
 ## Public repository change policy
 
 - Write pull request titles, descriptions, and review replies in English.

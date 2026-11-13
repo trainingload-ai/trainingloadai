@@ -15,6 +15,7 @@ import {
   ATHLETE_STATE_UPDATE_WAKE,
 } from '@/athlete-state/updates/athlete-state-updates.service';
 import { withAthleteStateLease } from '@/athlete-state/updates/athlete-state-execution-context';
+import { AthleteStateUpdateSkipReason } from '@/athlete-state/updates/athlete-state-update.types';
 import { CoachAssessmentOrchestratorService } from './coach-assessment-orchestrator.service';
 
 @Injectable()
@@ -97,46 +98,27 @@ export class AthleteStateUpdateWorker implements OnModuleInit, OnModuleDestroy {
         }
         let completed = 0;
         await withAthleteStateLease(job, async () => {
-          // Scoped Case requests must survive cross-provider coalescing. Plain
-          // fact requests need only one assessment of the latest evidence.
-          const byCase = new Map<string, (typeof eligible)[number]>();
-          const late = eligible.filter(
-            (item) => item.answerQuestionId && !item.preserveCaseId,
-          );
-          for (const item of eligible) {
-            if (!item.preserveCaseId) continue;
-            const previous = byCase.get(item.preserveCaseId);
-            byCase.set(item.preserveCaseId, {
-              ...item,
-              explicit: item.explicit || previous?.explicit,
-            });
-          }
-          const requests = byCase.size
-            ? [...byCase.values()]
-            : late.length
-              ? late.slice(-1)
-              : eligible.slice(-1);
-          const scopeCaseIds = [...byCase.keys()];
-          const answerQuestionIds = [
-            ...new Set(late.map((item) => item.answerQuestionId!)),
-          ];
-          for (const trigger of requests) {
+          if (eligible.length) {
             if (leaseLost) throw new Error('ATHLETE_STATE_UPDATE_LEASE_LOST');
             await this.queue.heartbeat(job);
+            const trigger = eligible[eligible.length - 1];
             const result = await this.orchestrator.assess({
               userId: job.user_id,
-              ...trigger,
-              scopeCaseIds,
-              answerQuestionIds,
+              triggerType: trigger.triggerType,
+              triggerRef: trigger.triggerRef,
+              explicit: eligible.some((item) => item.explicit === true),
+              requestVersion: job.running_version,
             });
-            if ('skipped' in result && result.skipped)
+            if (result && 'skipped' in result && result.skipped)
               lastReason = result.reason;
             else completed += 1;
           }
         });
         await this.queue.finish(
           job,
-          completed ? undefined : (lastReason ?? 'NO_ELIGIBLE_REQUESTS'),
+          completed
+            ? undefined
+            : (lastReason ?? AthleteStateUpdateSkipReason.NO_ELIGIBLE_REQUESTS),
         );
         this.logger.debug(
           `Athlete State update completed task=${job.user_id} version=${job.running_version} triggers=${job.running_triggers.length} elapsedMs=${Date.now() - started}`,
@@ -150,7 +132,10 @@ export class AthleteStateUpdateWorker implements OnModuleInit, OnModuleDestroy {
             : null;
         if (
           code === 'AI_DATA_CONSENT_REQUIRED' ||
-          code === 'AI_ACCESS_REQUIRED'
+          code === 'AI_ACCESS_REQUIRED' ||
+          Object.values(AthleteStateUpdateSkipReason).includes(
+            code as AthleteStateUpdateSkipReason,
+          )
         ) {
           await this.queue.finish(job, code);
           this.logger.debug(

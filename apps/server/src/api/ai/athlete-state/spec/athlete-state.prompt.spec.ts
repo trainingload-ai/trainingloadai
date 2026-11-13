@@ -1,10 +1,10 @@
+import { athleteStateSkill } from '../../core/skills/athleteState.skill';
 import { describe, expect, it } from '@jest/globals';
 import {
-  ATHLETE_STATE_ASSESSMENT_SYSTEM,
   enforceCoachAssessmentOutcomeSafety,
   parseAthleteStateAssessment,
   parseCoachAssessmentOutcome,
-} from './athlete-state.prompt';
+} from '../athlete-state.prompt';
 
 function assessment(overrides: Record<string, unknown> = {}) {
   return JSON.stringify({
@@ -37,10 +37,10 @@ function assessment(overrides: Record<string, unknown> = {}) {
 
 describe('Athlete State prompt parsers', () => {
   it('forbids diagnosis and single-metric overtraining conclusions', () => {
-    expect(ATHLETE_STATE_ASSESSMENT_SYSTEM).toContain(
+    expect(athleteStateSkill.prompt).toContain(
       'Never diagnose disease or injury',
     );
-    expect(ATHLETE_STATE_ASSESSMENT_SYSTEM).toContain(
+    expect(athleteStateSkill.prompt).toContain(
       'Never use one metric alone to claim overtraining',
     );
   });

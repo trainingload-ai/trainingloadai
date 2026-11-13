@@ -1,35 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AthleteStateEvidenceService } from './athlete-state-evidence.service';
 import { AthleteStateRepository } from '../infrastructure/athlete-state.repository';
 import type {
   AthleteStateAssessmentResult,
-  BuiltAthleteStateEvidence,
+  AssessmentEvidence,
 } from '../domain/athlete-state.contracts';
 
 @Injectable()
 export class AthleteStateCommands {
-  constructor(
-    private readonly evidence: AthleteStateEvidenceService,
-    private readonly repository: AthleteStateRepository,
-  ) {}
-
-  buildEvidence(input: {
-    userId: string;
-    asOf?: Date;
-    timezone: string;
-    scopedAnswers?: Array<Record<string, unknown>>;
-  }) {
-    return this.evidence.build(input);
-  }
+  constructor(private readonly repository: AthleteStateRepository) {}
 
   saveAssessment(input: {
     userId: string;
-    evidence: BuiltAthleteStateEvidence;
+    evidence: AssessmentEvidence;
     result: AthleteStateAssessmentResult;
     model?: string;
     promptVersion?: string;
-    preserveCaseId?: string;
-    preserveCaseIds?: string[];
   }) {
     return this.repository.saveAssessment(input);
   }

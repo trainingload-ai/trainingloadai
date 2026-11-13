@@ -5,6 +5,7 @@ import type {
   FitnessConfirmation,
   FitnessTrackingReply,
 } from '@shared/fitness-assessment';
+import type { HealthDataQueryService } from '@/health-data/health-data-query.service';
 import type { PrismaService } from '@/prisma/prisma.service';
 import type { UserService } from '@/api/user/user.service';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
@@ -44,6 +45,7 @@ export type JsonSchemaObject = {
 };
 
 export type AiToolContext = {
+  healthData?: HealthDataQueryService;
   fitnessCalculations?: FitnessCalculationService;
   fitnessApply?: FitnessAssessmentApplyService;
   fitnessFollowup?: FitnessAssessmentFollowupService;
@@ -92,7 +94,14 @@ export type AiToolContext = {
    * 任务只能通过 `coach_task_submit_result` 提交最终结果；校验失败会抛错并让
    * Agent 在同一轮内修复。这个出口不写领域事实，也不授予任何 mutation 权限。
    */
+  athleteState?: {
+    recordRead: (tool: string, input: unknown, output: unknown) => void;
+    submit: (
+      result: unknown,
+    ) => Promise<{ assessmentId: string; state: string; confidence: number }>;
+  };
   backgroundTask?: {
+    resultToolName?: string;
     taskType: string;
     /** Explicit read-tool policy for this task; result submission is added separately. */
     allowedToolNames: readonly string[];

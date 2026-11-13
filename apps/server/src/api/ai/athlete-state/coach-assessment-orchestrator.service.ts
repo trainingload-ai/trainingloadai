@@ -1,143 +1,28 @@
-import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
-import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import type { AthleteStateAssessment } from '@prisma/client';
-import { AthleteStateCommands } from '@/athlete-state/application/athlete-state-commands.service';
-import { AthleteStateQueries } from '@/athlete-state/application/athlete-state-queries.service';
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { AthleteStateFeatureFlags } from '@/athlete-state/athlete-state-feature-flags.service';
-import { ATHLETE_STATE_POLICY } from '@/athlete-state/athlete-state-policy';
-import type { AthleteStateAssessmentResult } from '@/athlete-state/domain/athlete-state.contracts';
-import { normalizeAssessmentEvidenceRequests } from '@/athlete-state/domain/optional-evidence';
 import {
   ATHLETE_STATE_REASSESS_REQUESTED_EVENT,
   type AthleteStateReassessRequestedEvent,
 } from '@/athlete-state/athlete-state.events';
 import { UserService } from '@/api/user/user.service';
-import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
+import { AiService } from '../ai.service';
 import {
-  FEATURE_ACCESS_POLICY,
-  type FeatureAccessPolicy,
-} from '@/access/feature-access-policy.port';
-import { featureAllowed } from '@/access/feature-access.types';
-import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
-import { aiOperationError } from '../ai-operation.error';
-import { PlanExecutionContextService } from '@/api/plan/plan-execution-context.service';
-import { AthleteStateModelService } from './athlete-state-model.service';
-import {
-  CoachAssessmentCaseService,
-  selectUnaskedRequest,
-} from './coach-assessment-case.service';
-import { CoachAssessmentCaseQueryService } from './coach-assessment-case-query.service';
-import {
-  COACH_ASSESSMENT_ANSWERED_EVENT,
-  type CoachAssessmentAnsweredEvent,
-} from './coach-assessment.events';
+  ATHLETE_STATE_SKILL,
+  ATHLETE_STATE_TASK,
+  ATHLETE_STATE_TOOLS,
+  ATHLETE_STATE_ANSWER_TOOL,
+} from '../core/skills/athleteState.skill';
 
-function array(value: unknown): Array<Record<string, unknown>> {
-  return Array.isArray(value)
-    ? value.filter((item): item is Record<string, unknown> =>
-        Boolean(item && typeof item === 'object' && !Array.isArray(item)),
-      )
-    : [];
-}
-
-function strings(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string')
-    : [];
-}
-
-function assessmentResult(
-  row: AthleteStateAssessment,
-): AthleteStateAssessmentResult {
-  return {
-    state: row.state,
-    confidence: row.confidence,
-    decisionReadiness: row.decisionReadiness,
-    dimensions: array(row.dimensions),
-    hypotheses: array(row.hypotheses),
-    evidenceRequests: array(
-      row.evidenceRequests,
-    ) as AthleteStateAssessmentResult['evidenceRequests'],
-    safetyFlags: array(row.safetyFlags),
-    limitations: strings(row.limitations),
-  };
-}
-
-function boundedPlanFacts(
-  context: Awaited<ReturnType<PlanExecutionContextService['buildContext']>>,
-) {
-  const workout = (value: (typeof context.nextWorkouts)[number]) => ({
-    id: value.id,
-    scheduledDate: value.scheduledDate,
-    sportType: value.sportType,
-    status: value.status,
-    name: value.name,
-    plannedDurationSeconds: value.plannedDurationSeconds,
-    expectedLoad: value.expectedLoad,
-  });
-  return {
-    factHash: context.factHash,
-    contextId: context.contextId,
-    plan: context.plan
-      ? {
-          id: context.plan.id,
-          title: context.plan.title,
-          status: context.plan.status,
-          currentWeekIndex: context.plan.currentWeekIndex,
-        }
-      : null,
-    day: {
-      date: context.day.date,
-      completionState: context.day.completionState,
-      plannedWorkouts: context.day.plannedWorkouts.map(workout),
-    },
-    tomorrow: {
-      date: context.tomorrow.date,
-      plannedWorkouts: context.tomorrow.plannedWorkouts.map(workout),
-    },
-    nextWorkouts: context.nextWorkouts.map(workout),
-    recentLoad: context.recentLoad,
-    activeCompetitionInfluences:
-      context.competitionContext.activeInfluences.slice(0, 3),
-  };
-}
-
-export function shouldModelFollowupOutcome(input: {
-  result: AthleteStateAssessmentResult;
-  questionCount: number;
-  previousEvidenceKinds: string[];
-}) {
-  if (input.result.decisionReadiness === 'WAITING_FOR_SYNC') return false;
-  if (input.result.decisionReadiness !== 'NEEDS_USER_INPUT') return true;
-  const canAskAgain =
-    input.questionCount < ATHLETE_STATE_POLICY.questionBudget &&
-    Boolean(
-      selectUnaskedRequest(
-        input.result.evidenceRequests,
-        input.previousEvidenceKinds,
-      ),
-    );
-  return !canAskAgain;
-}
-
+/** Scheduling adapter only; the shared Skill runtime owns evidence, questions and answers. */
 @Injectable()
 export class CoachAssessmentOrchestratorService {
-  private readonly logger = new Logger(CoachAssessmentOrchestratorService.name);
-
   constructor(
-    private readonly commands: AthleteStateCommands,
-    private readonly queries: AthleteStateQueries,
-    private readonly flags: AthleteStateFeatureFlags,
+    private readonly ai: AiService,
     private readonly users: UserService,
-    private readonly planExecution: PlanExecutionContextService,
-    private readonly model: AthleteStateModelService,
-    private readonly cases: CoachAssessmentCaseService,
-    private readonly caseQueries: CoachAssessmentCaseQueryService,
-    private readonly consent: AiDataConsentService,
+    private readonly flags: AthleteStateFeatureFlags,
     private readonly updates: AthleteStateUpdates,
-    @Inject(FEATURE_ACCESS_POLICY)
-    private readonly access: FeatureAccessPolicy,
   ) {}
 
   @OnEvent(ATHLETE_STATE_REASSESS_REQUESTED_EVENT, { suppressErrors: false })
@@ -145,328 +30,62 @@ export class CoachAssessmentOrchestratorService {
     return this.updates.requestUpdate(event);
   }
 
-  @OnEvent(COACH_ASSESSMENT_ANSWERED_EVENT, { suppressErrors: false })
-  async handleAnswer(event: CoachAssessmentAnsweredEvent) {
-    try {
-      await this.continueAfterAnswer(event);
-    } catch (error) {
-      // The answer message and structured Question answer are already durable.
-      // A transient model/source failure therefore becomes a scheduled retry,
-      // never a Case stranded forever in ASSESSING.
-      await this.cases.deferReassessment(event.userId, event.caseId);
-      throw error;
-    }
-  }
-
   async assess(input: {
     userId: string;
     triggerType: string;
     triggerRef?: string;
-    scopedAnswers?: Array<Record<string, unknown>>;
-    preserveCaseId?: string;
-    answerQuestionId?: string;
-    scopeCaseIds?: string[];
-    answerQuestionIds?: string[];
+    requestVersion?: number;
     explicit?: boolean;
   }) {
-    if (!this.flags.evidenceEnabled()) return { disabled: true };
-    const skip = await this.updates.eligibility(
+    if (!this.flags.evidenceEnabled() || !this.flags.assessmentShadowEnabled())
+      return { disabled: true };
+    const reason = await this.updates.eligibility(
       input.userId,
       input.explicit === true,
     );
-    if (skip) return { skipped: true, reason: skip };
-    // Evidence includes private Memory and health data. Check eligibility
-    // before even reading it; the model layer rechecks consent before I/O.
-    await this.consent.assertGranted(input.userId);
-    const access = await this.access.evaluate(input.userId, ['ai.coach']);
-    if (!featureAllowed(access, 'ai.coach')) {
-      throw aiOperationError('AI_ACCESS_REQUIRED', {
-        reason: 'FEATURE_ACCESS_REQUIRED',
-      });
-    }
-    const [timezone, locale] = await Promise.all([
-      this.users.getPreferredTimezone(input.userId),
-      this.users.getPreferredLocale(input.userId),
-    ]);
-    const caseIds = [
-      ...new Set([
-        ...(input.scopeCaseIds ?? []),
-        ...(input.preserveCaseId ? [input.preserveCaseId] : []),
-      ]),
-    ];
-    const questionIds = [
-      ...new Set([
-        ...(input.answerQuestionIds ?? []),
-        ...(input.answerQuestionId && !input.preserveCaseId
-          ? [input.answerQuestionId]
-          : []),
-      ]),
-    ];
-    const scopedAnswers = input.scopedAnswers ?? [
-      ...(
-        await Promise.all(
-          caseIds.map((id) => this.scopedAnswersForCase(input.userId, id)),
-        )
-      ).flatMap((answers) => answers ?? []),
-      ...(
-        await Promise.all(
-          questionIds.map((id) =>
-            this.caseQueries.answerEvidence(input.userId, id),
-          ),
-        )
-      ).flatMap((answers) => answers ?? []),
-    ];
-    const evidence = await this.commands.buildEvidence({
+    if (reason) return { skipped: true, reason };
+    const lang = (await this.users.getPreferredLocale(input.userId)) ?? 'en';
+    const task = await this.ai.runBackgroundCoachTask({
       userId: input.userId,
-      timezone: timezone ?? 'UTC',
-      scopedAnswers,
-    });
-    if (!this.flags.assessmentShadowEnabled()) {
-      return { evidenceHash: evidence.evidenceHash, shadowDisabled: true };
-    }
-    let assessment = await this.queries.reusable({
-      userId: input.userId,
-      evidenceHash: evidence.evidenceHash,
-    });
-    let result: AthleteStateAssessmentResult;
-    if (assessment) {
-      result = assessmentResult(assessment);
-    } else {
-      const modeled = await this.model.assess({
-        userId: input.userId,
-        evidenceHash: evidence.evidenceHash,
-        snapshot: evidence.modelSnapshot,
-        language: locale,
-      });
-      result = modeled.result;
-      const saved = await this.commands.saveAssessment({
-        userId: input.userId,
-        evidence,
-        result,
-        model: modeled.model,
-        preserveCaseId: input.preserveCaseId,
-        preserveCaseIds: caseIds,
-      });
-      assessment = saved.assessment;
-      // Another process may have persisted the same evidence first. The Case
-      // must always use the result stored with the immutable Assessment rather
-      // than this worker's losing, potentially non-identical model sample.
-      if (saved.reused) result = assessmentResult(saved.assessment);
-    }
-    result = normalizeAssessmentEvidenceRequests(result);
-    if (!this.flags.caseEnabled()) return { assessment, result };
-
-    let planContext: Awaited<
-      ReturnType<PlanExecutionContextService['buildContext']>
-    > | null = null;
-    try {
-      planContext = await this.planExecution.buildContext({
-        userId: input.userId,
-        surface: 'COACH_CHAT',
-        timezone: timezone ?? 'UTC',
-      });
-    } catch (error) {
-      // Athlete State is independent from plan-execution evaluation. A plan
-      // read failure must not erase an otherwise valid state assessment or
-      // force the model to infer that no plan exists.
-      this.logger.warn(
-        `Plan execution context unavailable user=${input.userId} error=${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-    const planFacts = planContext
-      ? boundedPlanFacts(planContext)
-      : {
-          unavailable: true,
-          reason: 'PLAN_EXECUTION_CONTEXT_UNAVAILABLE',
-        };
-    const hasActivePlan = Boolean(planContext?.plan);
-    if (input.preserveCaseId) {
-      const existingCase = await this.caseQueries.requireOwned(
-        input.userId,
-        input.preserveCaseId,
-      );
-      const shouldModelOutcome = shouldModelFollowupOutcome({
-        result,
-        questionCount:
-          existingCase?.questionCount ?? ATHLETE_STATE_POLICY.questionBudget,
-        previousEvidenceKinds:
-          existingCase?.questions.map((question) => question.evidenceKind) ??
-          [],
-      });
-      const modeledOutcome = !shouldModelOutcome
-        ? null
-        : (
-            await this.model.outcome({
-              userId: input.userId,
-              caseId: input.preserveCaseId,
-              assessment: result,
-              planExecutionFacts: planFacts,
-              hasActivePlan,
-              language: locale,
-            })
-          ).result;
-      const outcome = modeledOutcome
-        ? {
-            ...modeledOutcome,
-            requiresPlanDecision:
-              this.flags.planDecisionEnabled() &&
-              modeledOutcome.requiresPlanDecision,
-          }
-        : null;
-      await this.cases.advance({
-        userId: input.userId,
-        caseId: input.preserveCaseId,
-        assessment,
-        result,
-        outcome,
-        planExecutionFactHash: planContext?.factHash ?? null,
-        hasActivePlan,
-        locale,
-      });
-      return { assessment, result, outcome };
-    }
-
-    if (
-      result.state === 'STABLE' &&
-      result.decisionReadiness === 'SUFFICIENT'
-    ) {
-      return { assessment, result, case: null };
-    }
-    const modeledOutcome =
-      result.decisionReadiness === 'NEEDS_USER_INPUT' ||
-      result.decisionReadiness === 'WAITING_FOR_SYNC'
-        ? null
-        : (
-            await this.model.outcome({
-              userId: input.userId,
-              caseId: assessment.id,
-              assessment: result,
-              planExecutionFacts: planFacts,
-              hasActivePlan,
-              language: locale,
-            })
-          ).result;
-    const outcome = modeledOutcome
-      ? {
-          ...modeledOutcome,
-          requiresPlanDecision:
-            this.flags.planDecisionEnabled() &&
-            modeledOutcome.requiresPlanDecision,
-        }
-      : null;
-    const assessmentCase = await this.cases.createForAssessment({
-      userId: input.userId,
-      assessment,
-      result,
+      lang,
+      taskType: ATHLETE_STATE_TASK,
+      activeSkillName: ATHLETE_STATE_SKILL,
+      funding: 'PLATFORM',
+      allowedToolNames: this.flags.homeInquiryEnabled()
+        ? ATHLETE_STATE_TOOLS
+        : ATHLETE_STATE_TOOLS.filter((name) => name !== 'ask_user_question'),
+      requiredToolNames: ['training.data_coverage'],
+      resultToolName: ATHLETE_STATE_ANSWER_TOOL,
+      resumeHistory: true,
+      allowUserInteraction: this.flags.homeInquiryEnabled(),
+      dedupeKey:
+        input.requestVersion == null
+          ? undefined
+          : `state-update:${input.requestVersion}`,
       triggerType: input.triggerType,
       triggerRef: input.triggerRef,
-      locale,
-      contextId: planContext?.contextId ?? null,
-      planExecutionFactHash: planContext?.factHash ?? null,
-      outcome,
-    });
-    return { assessment, result, case: assessmentCase, outcome };
-  }
-
-  async continueAfterAnswer(input: {
-    userId: string;
-    caseId: string;
-    questionId: string;
-    promptMessageId: string;
-    answerMessageId: string;
-    reply: {
-      kind: string;
-      answers?: Record<string, string | string[]>;
-      notes?: Record<string, string>;
-      skippedQuestionIds?: string[];
-    };
-  }) {
-    const assessmentCase = await this.caseQueries.requireOwned(
-      input.userId,
-      input.caseId,
-    );
-    if (!assessmentCase) return;
-    const question = assessmentCase.questions.find(
-      (item) =>
-        item.id === input.questionId &&
-        item.promptMessageId === input.promptMessageId,
-    );
-    if (!question) return;
-    const now = new Date();
-    if (question.status === 'ANSWERED') return;
-    if (input.reply.kind === 'coach_question_skip') {
-      await this.cases.dismiss(input.userId, input.caseId);
-      return;
-    }
-    const scopedAnswer = {
-      evidenceKind: question.evidenceKind,
-      answer: {
-        answers: input.reply.answers ?? {},
-        notes: input.reply.notes ?? {},
-        skippedQuestionIds: input.reply.skippedQuestionIds ?? [],
-      },
-      eventStart: question.eventStart?.toISOString() ?? null,
-      eventEnd: question.eventEnd?.toISOString() ?? now.toISOString(),
-    };
-    const late =
-      question.status === 'EXPIRED' ||
-      question.status === 'SUPERSEDED' ||
-      question.expiresAt <= now ||
-      assessmentCase.expiresAt <= now ||
-      assessmentCase.status === 'EXPIRED' ||
-      assessmentCase.status === 'SUPERSEDED';
-    if (late) {
-      await this.cases.expireLateQuestion(
-        input.userId,
-        input.caseId,
-        question.id,
-      );
-      await this.cases.persistLateAnswer({
-        userId: input.userId,
-        caseId: input.caseId,
-        questionId: question.id,
-        answerMessageId: input.answerMessageId,
-        answer: scopedAnswer.answer,
-      });
-      await this.updates.wake(input.userId);
-      return;
-    }
-    if (question.status !== 'PENDING') return;
-    // The answer is committed before any new model call. This makes a retry
-    // idempotent and gives Memory extraction the same durable user message.
-    const persisted = await this.persistAnswer({
-      userId: input.userId,
-      caseId: input.caseId,
-      questionId: question.id,
-      answerMessageId: input.answerMessageId,
-      answer: {
-        answers: input.reply.answers ?? {},
-        notes: input.reply.notes ?? {},
+      instructions: [
+        'Refresh the athlete’s current state using the athlete-state Skill and the existing conversation.',
+        'Read current authoritative facts through tools. Prior dialogue preserves context but does not freeze old measurements or recommendations.',
+        `UPDATE_EVENT_DATA=${JSON.stringify({ type: input.triggerType, ref: input.triggerRef, version: input.requestVersion })}`,
+      ].join('\n'),
+      validateResult: (value) => {
+        if (
+          !value ||
+          typeof value !== 'object' ||
+          !('assessmentId' in value) ||
+          typeof value.assessmentId !== 'string'
+        )
+          throw new Error('ATHLETE_STATE_RESULT_REQUIRED');
+        return value as {
+          assessmentId: string;
+          state: string;
+          confidence: number;
+        };
       },
     });
-    if (!persisted.accepted) return;
-    await this.updates.wake(input.userId);
-  }
-
-  private persistAnswer(input: {
-    userId: string;
-    caseId: string;
-    questionId: string;
-    answerMessageId: string;
-    answer: unknown;
-  }) {
-    return this.cases.persistAnswer(input);
-  }
-
-  private async scopedAnswersForCase(userId: string, caseId: string) {
-    const assessmentCase = await this.caseQueries.requireOwned(userId, caseId);
-    return assessmentCase?.questions
-      .filter((item) => item.status === 'ANSWERED' && item.answer)
-      .map((item) => ({
-        evidenceKind: item.evidenceKind,
-        answer: item.answer,
-        eventStart: item.eventStart?.toISOString() ?? null,
-        eventEnd: item.eventEnd?.toISOString() ?? null,
-      }));
+    return task.awaitingInput
+      ? { awaitingInput: true, sessionId: task.sessionId }
+      : task.result;
   }
 }

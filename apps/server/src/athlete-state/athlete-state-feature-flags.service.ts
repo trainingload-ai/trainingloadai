@@ -1,34 +1,34 @@
 import { Injectable } from '@nestjs/common';
-
-function enabled(name: string) {
-  const value = process.env[name] ?? process.env[name.toLowerCase()];
-  if (value == null || value.trim() === '') return true;
-  return value.trim().toLowerCase() === 'true';
-}
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AthleteStateFeatureFlags {
+  constructor(private readonly config: ConfigService) {}
+
   evidenceEnabled() {
-    return enabled('ATHLETE_STATE_EVIDENCE_ENABLED');
+    return this.config.get<boolean>('athleteState.evidenceEnabled', true);
   }
 
   assessmentShadowEnabled() {
-    return enabled('ATHLETE_STATE_ASSESSMENT_SHADOW_ENABLED');
+    return this.config.get<boolean>(
+      'athleteState.assessmentShadowEnabled',
+      true,
+    );
   }
 
   caseEnabled() {
-    return enabled('COACH_ASSESSMENT_CASE_ENABLED');
+    return this.config.get<boolean>('athleteState.caseEnabled', true);
   }
 
   homeInquiryEnabled() {
-    return enabled('COACH_ASSESSMENT_HOME_INQUIRY_ENABLED');
+    return this.config.get<boolean>('athleteState.homeInquiryEnabled', true);
   }
 
   planDecisionEnabled() {
-    return enabled('COACH_ASSESSMENT_PLAN_DECISION_ENABLED');
+    return this.config.get<boolean>('athleteState.planDecisionEnabled', true);
   }
 
   followupEnabled() {
-    return enabled('COACH_ASSESSMENT_FOLLOWUP_ENABLED');
+    return this.config.get<boolean>('athleteState.followupEnabled', true);
   }
 }

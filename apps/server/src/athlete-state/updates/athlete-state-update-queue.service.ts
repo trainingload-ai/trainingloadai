@@ -6,8 +6,6 @@ import type { PrismaTx } from '@/prisma/prisma-db';
 export type StateUpdateTrigger = {
   triggerType: string;
   triggerRef?: string;
-  preserveCaseId?: string;
-  answerQuestionId?: string;
   explicit?: boolean;
 };
 export type StateUpdateRequest = StateUpdateTrigger & {
@@ -57,8 +55,6 @@ export class AthleteStateUpdateQueue {
     const trigger: StateUpdateTrigger = {
       triggerType: input.triggerType,
       triggerRef: input.triggerRef,
-      preserveCaseId: input.preserveCaseId,
-      answerQuestionId: input.answerQuestionId,
       explicit: input.explicit === true ? true : undefined,
     };
     const rows = await tx.$queryRawUnsafe<StateUpdateJob[]>(

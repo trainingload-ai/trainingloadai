@@ -10,6 +10,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { Prisma, type AthleteStateAssessment } from '@prisma/client';
 import { createHash, randomUUID } from 'node:crypto';
@@ -24,6 +25,7 @@ import type {
   AthleteStateEvidenceRequest,
 } from '@/athlete-state/domain/athlete-state.contracts';
 import type { CoachAssessmentOutcome } from './athlete-state.prompt';
+import { AthleteStateInquiryService } from './athlete-state-inquiry.service';
 import { CoachBranchingService } from '../coach-branching.service';
 import { CoachAssessmentCaseQueryService } from './coach-assessment-case-query.service';
 import { buildStoredCoachUiMessageEnvelope } from '../core/coach-history-messages';
@@ -127,6 +129,7 @@ export class CoachAssessmentCaseService {
     private readonly queries: CoachAssessmentCaseQueryService,
     private readonly events: EventEmitter2,
     private readonly updates: AthleteStateUpdates,
+    @Optional() private readonly inquiries?: AthleteStateInquiryService,
   ) {}
 
   async createForAssessment(input: {
@@ -286,6 +289,8 @@ export class CoachAssessmentCaseService {
     userId: string,
     caseId: string,
   ): Promise<OpenCoachAssessmentCaseResult> {
+    const interaction = await this.inquiries?.open(userId, caseId);
+    if (interaction) return interaction;
     let assessmentCase = await this.queries.requireOwned(userId, caseId);
     if (!assessmentCase)
       throw new NotFoundException('Assessment case not found');
@@ -354,6 +359,7 @@ export class CoachAssessmentCaseService {
         questions: [question.question],
         metadata: {
           source: 'athlete_state_assessment',
+          skill: 'athlete-state',
           assessmentCaseId: caseId,
           assessmentQuestionId: question.id,
         },
@@ -422,6 +428,7 @@ export class CoachAssessmentCaseService {
             sessionId,
             branchId,
             originMessageId: `assessment-case:${caseId}`,
+            taskKind: 'ATHLETE_STATE_UPDATE',
             status: 'awaiting_input',
             revision: 1,
             pendingInteraction: json(interaction),
@@ -504,6 +511,8 @@ export class CoachAssessmentCaseService {
   }
 
   async dismiss(userId: string, caseId: string) {
+    const interaction = await this.inquiries?.dismiss(userId, caseId);
+    if (interaction) return interaction;
     const assessmentCase = await this.queries.requireOwned(userId, caseId);
     if (!assessmentCase)
       throw new NotFoundException('Assessment case not found');
@@ -576,18 +585,7 @@ export class CoachAssessmentCaseService {
       if (caseChanged.count !== 1) {
         throw new ConflictException('Assessment case changed');
       }
-      await this.updates.requestUpdate(
-        {
-          userId: input.userId,
-          triggerType: 'CASE_ANSWER',
-          triggerRef: input.answerMessageId,
-          preserveCaseId: input.caseId,
-          answerQuestionId: input.questionId,
-          explicit: true,
-          mode: 'immediate',
-        },
-        tx,
-      );
+
       return { accepted: true };
     });
   }
@@ -614,17 +612,6 @@ export class CoachAssessmentCaseService {
         },
       });
       if (saved.count !== 1) return;
-      await this.updates.requestUpdate(
-        {
-          userId: input.userId,
-          triggerType: 'LATE_CASE_ANSWER',
-          triggerRef: input.answerMessageId,
-          answerQuestionId: input.questionId,
-          explicit: true,
-          mode: 'immediate',
-        },
-        tx,
-      );
     });
   }
 
@@ -823,6 +810,15 @@ export class CoachAssessmentCaseService {
     sessionId: string;
     branchId?: string | null;
   }) {
+    if (
+      await this.inquiries?.assertBound(
+        input.userId,
+        input.caseId,
+        input.sessionId,
+        input.branchId,
+      )
+    )
+      return;
     const assessmentCase = await this.prisma.coachAssessmentCase.findFirst({
       where: { id: input.caseId, userId: input.userId },
       select: { sessionId: true, branchId: true },

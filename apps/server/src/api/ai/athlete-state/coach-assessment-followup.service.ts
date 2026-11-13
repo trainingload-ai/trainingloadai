@@ -101,7 +101,6 @@ export class CoachAssessmentFollowupService
               userId: item.userId,
               triggerType: 'FOLLOW_UP',
               triggerRef: item.id,
-              preserveCaseId: item.status === 'RESOLVED' ? undefined : item.id,
               mode: 'immediate',
             },
             tx,

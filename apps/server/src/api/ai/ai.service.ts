@@ -1,4 +1,8 @@
-import { loadReferencedCoachQuestion } from './core/coach-question-reference';
+import { HealthDataQueryService } from '@/health-data/health-data-query.service';
+import {
+  loadReferencedCoachQuestion,
+  restoreReferencedQuestion,
+} from './core/coach-question-reference';
 import { fitnessConfirmationFromQuestion } from './fitness-assessment-confirmation';
 import { parseFitnessUserAction } from '@shared/fitness-assessment';
 import { FitnessCalculationService } from '@/fitness-calculation/fitness-calculation.service';
@@ -35,6 +39,13 @@ import { I18nService } from 'nestjs-i18n';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
+import { AthleteStateAgentService } from './athlete-state/athlete-state-agent.service';
+import {
+  ATHLETE_STATE_SKILL,
+  ATHLETE_STATE_TASK,
+  ATHLETE_STATE_ANSWER_TOOL,
+  ATHLETE_STATE_TOOLS,
+} from './core/skills/athleteState.skill';
 import { streamCoachAnswer } from './core/tool-loop-agent.runtime';
 import { previewTextForLog } from './core/safe-json-preview';
 import { sha256Hex, stableJson } from './core/ai-common.util';
@@ -239,6 +250,8 @@ type BackgroundCoachTaskRun<T> = {
   operationId: string;
   billingOperationId: string | null;
   replayed: boolean;
+  awaitingInput?: boolean;
+  sessionId?: string;
 };
 
 type AnonymousCoachTaskRun<T> = {
@@ -401,7 +414,15 @@ export class AiService {
     private readonly athleteMemory?: AthleteMemoryQueryService,
     @Optional()
     private readonly memoryCommands?: ApplyMemoryOperationsService,
+    @Optional() private readonly athleteStateAgent?: AthleteStateAgentService,
+    @Optional() private readonly healthData?: HealthDataQueryService,
   ) {}
+
+  async assertAthleteStateAccess(userId: string) {
+    if (!this.athleteStateAgent)
+      throw new Error('ATHLETE_STATE_RUNTIME_UNAVAILABLE');
+    await this.athleteStateAgent.assertEligible(userId);
+  }
 
   /**
    * 获取 AI Coach 所使用的模型名称（按上游 provider 读取环境变量）
@@ -1171,8 +1192,12 @@ export class AiService {
     model?: string;
     /** Server-owned tasks reuse the same Agent without interactive history or write tools. */
     executionMode?: 'interactive' | 'background';
+    resumeHistory?: boolean;
+    runtimeRunId?: string;
+    platformFunded?: boolean;
     activeSkillName?: string;
     backgroundTask?: {
+      resultToolName?: string;
       taskType: string;
       allowedToolNames: readonly string[];
       requiredToolNames?: readonly string[];
@@ -1194,8 +1219,14 @@ export class AiService {
     if (!params.allowWithoutConsent) {
       await this.aiDataConsent.assertGranted(userId);
     }
+    if (params.activeSkillName === ATHLETE_STATE_SKILL)
+      await this.assertAthleteStateAccess(userId);
     let ambientMemory: AmbientMemoryContext | undefined;
-    if (userId && this.athleteMemory) {
+    if (
+      userId &&
+      this.athleteMemory &&
+      params.activeSkillName !== ATHLETE_STATE_SKILL
+    ) {
       const athleteTimezone =
         (await this.userService.getPreferredTimezone(userId)) ?? 'UTC';
       ambientMemory = await this.athleteMemory.buildAmbientContext({
@@ -1217,7 +1248,7 @@ export class AiService {
     const safeSid = String(sid ?? '').trim() || 'default';
     let historyRows: StoredCoachMessageRow[] = [];
     let summary = '';
-    if (userId && !background) {
+    if (userId && (!background || params.resumeHistory)) {
       const branchId = String(params.branchId ?? '').trim();
       const ctx = branchId
         ? await this.loadCoachBranchContextFromDb(userId, branchId)
@@ -1286,7 +1317,12 @@ export class AiService {
           assessmentContext,
           content,
         );
-        restoredSkill = question?.metadata?.skill ?? null;
+        restoreReferencedQuestion(historyRows, question, block.tool_use_id);
+        restoredSkill =
+          question?.metadata?.skill ??
+          (question?.metadata?.source === 'athlete_state_assessment'
+            ? ATHLETE_STATE_SKILL
+            : null);
         if (fitnessEnabled) {
           const confirmation = fitnessConfirmationFromQuestion(
             question,
@@ -1401,14 +1437,16 @@ export class AiService {
       )
     )
       restoredSkill = 'fitness-assessment';
-    const activeSkill = background
-      ? getCoachSkillByName(params.activeSkillName ?? '')
-      : resolveCoachActiveSkill({
-          prompt,
-          intent,
-          message: params.message,
-          restoredSkill,
-        });
+    const activeSkill =
+      background ||
+      (params.platformFunded && params.activeSkillName === ATHLETE_STATE_SKILL)
+        ? getCoachSkillByName(params.activeSkillName ?? '')
+        : resolveCoachActiveSkill({
+            prompt,
+            intent,
+            message: params.message,
+            restoredSkill,
+          });
     if (background && !activeSkill) {
       throw new Error(
         `Unknown background coach skill: ${params.activeSkillName ?? '(empty)'}`,
@@ -1438,6 +1476,7 @@ export class AiService {
       userService: this.userService,
       i18n: this.i18n,
       coachTools: this.coachTools,
+      healthData: this.healthData,
       coachActions: this.coachActions,
       coachBranching: this.coachBranching,
       planService: this.planService,
@@ -1464,34 +1503,47 @@ export class AiService {
       webEvidenceBudget: { searchCalls: 0, fetchCalls: 0 },
       athleteStateSafetyMode,
       backgroundTask: params.backgroundTask,
-      aiOperationId: params.operationId ?? null,
+      athleteState:
+        activeSkill?.name === ATHLETE_STATE_SKILL && this.athleteStateAgent
+          ? this.athleteStateAgent.openTurn({
+              userId,
+              sessionId: safeSid,
+              runId: params.runtimeRunId ?? crypto.randomUUID(),
+              timezone:
+                (await this.userService.getPreferredTimezone(userId)) ?? 'UTC',
+              asOf: currentTurnStartedAt,
+              onSubmitted: params.backgroundTask?.submitResult,
+            })
+          : undefined,
+      aiOperationId: params.platformFunded
+        ? null
+        : (params.operationId ?? null),
       aiUsageKind: params.usageKind ?? AiUsageKind.COACH_CHAT,
       lang,
       signal,
     };
+    // State continuations keep the same tool boundary as their passive run.
+    const allowedToolNames = background
+      ? [
+          params.backgroundTask?.resultToolName ?? 'coach_task_submit_result',
+          ...(params.backgroundTask?.allowedToolNames ?? []),
+        ]
+      : activeSkill?.name === ATHLETE_STATE_SKILL
+        ? [...ATHLETE_STATE_TOOLS]
+        : undefined;
     const enabledTools = await getCoachTools({
       ctx: toolCtx,
       activeSkill,
       scopeBySkill: false,
-      ...(background
-        ? {
-            candidateToolNames: [
-              'coach_task_submit_result',
-              ...(params.backgroundTask?.allowedToolNames ?? []),
-            ],
-          }
-        : {}),
+      ...(allowedToolNames ? { candidateToolNames: allowedToolNames } : {}),
     });
-    const tools = background
-      ? enabledTools.filter((tool) => {
-          if (tool.name === 'coach_task_submit_result') return true;
-          return (
-            params.backgroundTask?.allowedToolNames.includes(tool.name) ===
-              true &&
+    const tools = allowedToolNames
+      ? enabledTools.filter(
+          (tool) =>
+            allowedToolNames.includes(tool.name) &&
             tool.kind !== 'mutation' &&
-            tool.kind !== 'draft'
-          );
-        })
+            tool.kind !== 'draft',
+        )
       : enabledTools;
 
     const provider = getCoachUpstreamProvider();
@@ -1608,6 +1660,9 @@ export class AiService {
     allowedToolNames?: readonly string[];
     /** Evidence tools that must complete before structured result submission. */
     requiredToolNames?: readonly string[];
+    resumeHistory?: boolean;
+    allowUserInteraction?: boolean;
+    resultToolName?: string;
     signal?: AbortSignal;
     allowWithoutConsent?: boolean;
     usageKind?: AiUsageKind;
@@ -1648,8 +1703,12 @@ export class AiService {
     const prompt = [
       'This is a server-owned background coach task, not an interactive user message.',
       'Use the normal Coach tools to inspect authoritative facts. Do not assume missing training means rest before checking data coverage.',
-      'Do not call mutation or UI presentation tools. Do not write a conversational answer.',
-      'Finish by calling coach_task_submit_result exactly once with the complete task-specific result.',
+      params.allowUserInteraction
+        ? 'Use ask_user_question only for necessary athlete facts unavailable to read tools. Otherwise submit the structured result. Never modify plans.'
+        : 'Do not call mutation or UI presentation tools. Do not write a conversational answer.',
+      params.resultToolName
+        ? `Finish by calling ${params.resultToolName} exactly once with the complete task-specific result, or wait for an explicitly permitted user question.`
+        : 'Finish by calling coach_task_submit_result exactly once with the complete task-specific result.',
       `Task type: ${params.taskType}`,
       params.instructions,
     ].join('\n\n');
@@ -1672,6 +1731,11 @@ export class AiService {
         model,
         allowedToolNames: [...allowedToolNames],
         requiredToolNames,
+        ...(params.resumeHistory ? { resumeHistory: true } : {}),
+        ...(params.allowUserInteraction ? { allowUserInteraction: true } : {}),
+        ...(params.resultToolName
+          ? { resultToolName: params.resultToolName }
+          : {}),
         instructions: prompt,
       }),
     );
@@ -1819,9 +1883,13 @@ export class AiService {
         intent: params.activeSkillName,
         operationId: handle.operationId,
         executionMode: 'background',
+        resumeHistory: params.resumeHistory,
+        runtimeRunId: runId,
+        platformFunded,
         activeSkillName: params.activeSkillName,
         backgroundTask: {
           taskType: params.taskType,
+          resultToolName: params.resultToolName,
           allowedToolNames,
           requiredToolNames,
           completedToolNames,
@@ -1849,7 +1917,11 @@ export class AiService {
         }
       }
       await projectionQueue;
-      if (submitted === undefined) {
+      const awaitingInput =
+        submitted === undefined &&
+        params.allowUserInteraction === true &&
+        Boolean(handle.projector.pendingInteraction);
+      if (submitted === undefined && !awaitingInput) {
         throw new Error('BACKGROUND_COACH_TASK_RESULT_MISSING');
       }
       const usage = aggregateCoachUsage(usageEvents);
@@ -1875,11 +1947,16 @@ export class AiService {
         sid: handle.sessionId,
         entityId: params.triggerRef ?? null,
       });
-      handle.projector.finish('completed');
-      await this.coachRuns.checkpoint(handle, 'completed', undefined, {
-        resultType: params.taskType,
-        resultRef,
-      });
+      handle.projector.finish(awaitingInput ? 'awaiting_input' : 'completed');
+      await this.coachRuns.checkpoint(
+        handle,
+        awaitingInput ? 'awaiting_input' : 'completed',
+        undefined,
+        {
+          resultType: params.taskType,
+          resultRef,
+        },
+      );
       finalized = true;
       if (ownsUserOperation) {
         await this.operations.markDelivered({
@@ -1901,6 +1978,8 @@ export class AiService {
       }
       return {
         result: submitted,
+        awaitingInput,
+        sessionId: handle.sessionId,
         usage,
         provider,
         model: actualModel,

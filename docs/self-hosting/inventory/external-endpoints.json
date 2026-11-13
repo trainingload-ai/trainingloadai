@@ -1168,7 +1168,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 139
+          "line": 171
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
@@ -1186,7 +1186,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 129
+          "line": 161
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
@@ -1236,7 +1236,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 136
+          "line": 168
         }
       ],
       "capability": "third-party-sync",

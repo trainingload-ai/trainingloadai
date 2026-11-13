@@ -20,6 +20,7 @@ import { zonesProfileTool } from './tools/zonesProfile.tool';
 import { zoneRangesProfileTool } from './tools/zoneRangesProfile.tool';
 import { workoutIntensityStrategyTool } from './tools/workoutIntensityStrategy.tool';
 import { compareBlocksTool } from './tools/compareBlocks.tool';
+import { healthSummaryTool } from './tools/healthSummary.tool';
 import { trainingReadinessTool } from './tools/trainingReadiness.tool';
 import { docsSearchTool } from './tools/docsSearch.tool';
 import { docsGetTool } from './tools/docsGet.tool';
@@ -35,6 +36,7 @@ import { trainingBaselineTool } from './tools/trainingBaseline.tool';
 import { trainingPlanContextTool } from './tools/trainingPlanContext.tool';
 import { bestsSummaryTool } from './tools/bestsSummary.tool';
 import { profileCurrentTool } from './tools/profileCurrent.tool';
+import { athleteStateAnswerTool } from './tools/athleteStateAnswer.tool';
 import { askUserQuestionTool } from './tools/askUserQuestion.tool';
 import { presentCoachPlanDraftTool } from './tools/presentCoachPlanDraft.tool';
 import { planActiveTool } from './tools/planActive.tool';
@@ -155,6 +157,7 @@ export function scopeToolsByActiveSkill(
 /** Static catalog: inspecting names must not execute permission checks or tools. */
 export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   coachTaskSubmitResultTool,
+  athleteStateAnswerTool,
   askUserQuestionTool,
   fitnessMethodsTool,
   fitnessEvidenceTool,
@@ -187,6 +190,7 @@ export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   workoutIntensityStrategyTool,
   compareBlocksTool,
   trainingReadinessTool,
+  healthSummaryTool,
   docsSearchTool,
   docsGetTool,
   activitySearchTool,

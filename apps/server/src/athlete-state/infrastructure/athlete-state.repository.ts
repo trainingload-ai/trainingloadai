@@ -11,7 +11,7 @@ import {
 import { PrismaService } from '@/prisma/prisma.service';
 import type {
   AthleteStateAssessmentResult,
-  BuiltAthleteStateEvidence,
+  AssessmentEvidence,
 } from '../domain/athlete-state.contracts';
 import {
   ATHLETE_STATE_POLICY_VERSION,
@@ -70,12 +70,10 @@ export class AthleteStateRepository {
 
   async saveAssessment(args: {
     userId: string;
-    evidence: BuiltAthleteStateEvidence;
+    evidence: AssessmentEvidence;
     result: AthleteStateAssessmentResult;
     model?: string;
     promptVersion?: string;
-    preserveCaseId?: string;
-    preserveCaseIds?: string[];
   }) {
     const promptVersion = args.promptVersion ?? ATHLETE_STATE_PROMPT_VERSION;
     const uniqueWhere = {
@@ -89,6 +87,20 @@ export class AthleteStateRepository {
     try {
       return await this.prisma.$transaction(async (tx) => {
         await guardAthleteStateWrite(tx);
+        // Serialize background and interactive submissions for this athlete.
+        await tx.$queryRawUnsafe(
+          'SELECT id FROM t_user WHERE id = $1 FOR UPDATE',
+          args.userId,
+        );
+        const newer = await tx.athleteStateAssessment.findFirst({
+          where: {
+            userId: args.userId,
+            supersededAt: null,
+            asOf: { gt: new Date(args.evidence.snapshot.asOf) },
+          },
+          orderBy: { asOf: 'desc' },
+        });
+        if (newer) return { assessment: newer, reused: true };
         const existing = await tx.athleteStateAssessment.findUnique({
           where: uniqueWhere,
         });
@@ -135,18 +147,6 @@ export class AthleteStateRepository {
           await tx.coachAssessmentCase.updateMany({
             where: {
               assessmentId: { in: previous.map((row) => row.id) },
-              ...(args.preserveCaseIds?.length || args.preserveCaseId
-                ? {
-                    id: {
-                      notIn: [
-                        ...new Set([
-                          ...(args.preserveCaseIds ?? []),
-                          ...(args.preserveCaseId ? [args.preserveCaseId] : []),
-                        ]),
-                      ],
-                    },
-                  }
-                : {}),
               status: { in: [...ACTIVE_COACH_ASSESSMENT_CASE_STATUSES] },
             },
             data: {

@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { CoachAssessmentFollowupService } from './coach-assessment-followup.service';
+import { CoachAssessmentFollowupService } from '../coach-assessment-followup.service';
 
 describe('CoachAssessmentFollowupService', () => {
   it('does not scan follow-ups when AI is disabled', async () => {
@@ -66,7 +66,6 @@ describe('CoachAssessmentFollowupService', () => {
         userId: 'athlete',
         triggerType: 'FOLLOW_UP',
         triggerRef: 'case-1',
-        preserveCaseId: undefined,
         mode: 'immediate',
       },
       expect.anything(),

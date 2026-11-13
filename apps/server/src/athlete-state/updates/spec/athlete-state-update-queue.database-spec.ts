@@ -156,13 +156,13 @@ for (const engine of engines)
       const job = (await queue.claim())!;
       await request({
         mode: 'immediate',
-        preserveCaseId: 'case',
+        triggerRef: 'case',
         explicit: true,
       });
       expect(await queue.claim()).toBeNull();
       await queue.finish(job);
       const next = (await queue.claim())!;
-      expect(next.running_triggers[0].preserveCaseId).toBe('case');
+      expect(next.running_triggers[0].triggerRef).toBe('case');
     });
     it('rolls back a request together with its fact transaction', async () => {
       await expect(
@@ -202,13 +202,13 @@ for (const engine of engines)
       await queue.finish(recovered);
     });
     it('backs off failures, preserves context, and revives a dead task on new facts', async () => {
-      await request({ mode: 'immediate', preserveCaseId: 'case' });
+      await request({ mode: 'immediate', triggerRef: 'case' });
       const job = (await queue.claim())!;
       await queue.fail(job, 'ASSESSMENT_FAILED');
       expect(await queue.claim()).toBeNull();
       const row = (await query('SELECT * FROM t_athlete_state_update')).rows[0];
       expect(row.status).toBe('RETRY_WAIT');
-      expect(row.pending_triggers[0].preserveCaseId).toBe('case');
+      expect(row.pending_triggers[0].triggerRef).toBe('case');
       await query(
         "UPDATE t_athlete_state_update SET status = 'DEAD', attempts = 8",
       );

@@ -6,6 +6,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { PrismaTx } from '@/prisma/prisma-db';
 import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
+import { AiDataConsentState } from '@/ai-data-consent/ai-data-consent.types';
+import { AthleteStateUpdateSkipReason } from './athlete-state-update.types';
 import {
   FEATURE_ACCESS_POLICY,
   type FeatureAccessPolicy,
@@ -15,6 +17,7 @@ import {
   AthleteStateUpdateQueue,
   type StateUpdateRequest,
 } from './athlete-state-update-queue.service';
+import { $Enums } from '@prisma/client';
 
 export const ATHLETE_STATE_UPDATE_WAKE = 'athlete-state.update-wake.v1';
 export const athleteStateAutoEnabled = (value?: string | null) =>
@@ -35,34 +38,43 @@ export class AthleteStateUpdates {
     @Inject(FEATURE_ACCESS_POLICY) private readonly access: FeatureAccessPolicy,
     @Optional() private readonly events?: EventEmitter2,
   ) {}
-
+  /**
+   * Check if the athlete is eligible for an athlete state update.
+   * @param userId Athlete whose access is checked.
+   * @param explicit User-initiated answers bypass only the automation preference.
+   * @param tx Optional transaction containing the source data change.
+   * @returns A stable skip reason, or null when eligible.
+   */
   async eligibility(
     userId: string,
     explicit = false,
     tx?: PrismaTx,
-  ): Promise<string | null> {
+  ): Promise<AthleteStateUpdateSkipReason | null> {
     if (!explicit) {
       const setting = await (tx ?? this.prisma).userSetting.findUnique({
         where: {
-          userId_category: { userId, category: 'ATHLETE_STATE_AUTO_ENABLED' },
+          userId_category: {
+            userId,
+            category: $Enums.SettingCategory.ATHLETE_STATE_AUTO_ENABLED,
+          },
         },
         select: { value: true },
       });
       if (!athleteStateAutoEnabled(setting?.value))
-        return 'AUTOMATION_DISABLED';
+        return AthleteStateUpdateSkipReason.AUTOMATION_DISABLED;
     }
     const consent = await this.consent.getStatus(userId, tx);
     if (!consent.granted)
-      return consent.state === 'UNAVAILABLE'
-        ? 'AI_PROVIDER_UNAVAILABLE'
-        : 'AI_DATA_CONSENT_REQUIRED';
+      return consent.state === AiDataConsentState.UNAVAILABLE
+        ? AthleteStateUpdateSkipReason.AI_PROVIDER_UNAVAILABLE
+        : AthleteStateUpdateSkipReason.AI_DATA_CONSENT_REQUIRED;
     if (
       !featureAllowed(
         await this.access.evaluate(userId, ['ai.coach']),
         'ai.coach',
       )
     )
-      return 'FEATURE_ACCESS_REQUIRED';
+      return AthleteStateUpdateSkipReason.FEATURE_ACCESS_REQUIRED;
     return null;
   }
 
@@ -72,7 +84,10 @@ export class AthleteStateUpdates {
 
   async requestUpdate(input: StateUpdateRequest, tx?: PrismaTx) {
     if (!input.explicit && automaticStateUpdatesSuppressed())
-      return { status: 'SKIPPED' as const, reason: 'MAINTENANCE' };
+      return {
+        status: 'SKIPPED' as const,
+        reason: AthleteStateUpdateSkipReason.MAINTENANCE,
+      };
     const reason = await this.eligibility(
       input.userId,
       input.explicit === true,
@@ -98,7 +113,7 @@ export class AthleteStateUpdates {
       )
         return {
           status: 'SKIPPED' as const,
-          reason: 'OUTSIDE_EVIDENCE_WINDOW',
+          reason: AthleteStateUpdateSkipReason.OUTSIDE_EVIDENCE_WINDOW,
         };
     }
     const job = await this.queue.requestUpdate(input, tx);

@@ -1,5 +1,5 @@
 import { HttpException } from '@nestjs/common';
-import { AthleteStateUpdateWorker } from './athlete-state-update.worker';
+import { AthleteStateUpdateWorker } from '../athlete-state-update.worker';
 
 function fixture(triggers: any[] = [{ triggerType: 'HEALTH_FACT_CHANGED' }]) {
   const job = {
@@ -55,25 +55,24 @@ describe('Athlete State shared runner', () => {
     expect(f.orchestrator.assess).toHaveBeenCalledTimes(1);
     expect(f.queue.finish).toHaveBeenCalledWith(f.job, undefined);
   });
-  it('preserves multiple Cases and late answers while coalescing duplicate Case reasons', async () => {
+  it('coalesces legacy trigger envelopes into one versioned Skill turn without Case or answer parameters', async () => {
     const f = fixture([
-      { triggerType: 'CASE_ANSWER', preserveCaseId: 'case-a', explicit: true },
-      { triggerType: 'FOLLOW_UP', preserveCaseId: 'case-a' },
-      { triggerType: 'CASE_ANSWER', preserveCaseId: 'case-b', explicit: true },
       {
-        triggerType: 'LATE_CASE_ANSWER',
-        answerQuestionId: 'late-question',
+        triggerType: 'CASE_ANSWER',
+        preserveCaseId: 'legacy-case',
         explicit: true,
       },
+      { triggerType: 'HEALTH_FACT_CHANGED' },
     ]);
     await f.worker.tick();
-    expect(f.orchestrator.assess).toHaveBeenCalledTimes(2);
-    for (const [input] of f.orchestrator.assess.mock.calls)
-      expect(input).toMatchObject({
-        scopeCaseIds: ['case-a', 'case-b'],
-        answerQuestionIds: ['late-question'],
-        explicit: true,
-      });
+    expect(f.orchestrator.assess).toHaveBeenCalledTimes(1);
+    expect(f.orchestrator.assess.mock.calls[0][0]).toEqual({
+      userId: 'athlete',
+      triggerType: 'HEALTH_FACT_CHANGED',
+      triggerRef: undefined,
+      explicit: true,
+      requestVersion: 3,
+    });
   });
   it('shares the same executor when two immediate requests arrive concurrently', async () => {
     const f = fixture();

@@ -49,11 +49,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 326
+          "line": 358
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 327
+          "line": 359
         }
       ]
     },
@@ -70,7 +70,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 320
+          "line": 352
         }
       ]
     },
@@ -87,11 +87,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 330
+          "line": 362
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 331
+          "line": 363
         }
       ]
     },
@@ -99,6 +99,103 @@
       "name": "ACCOUNT_DELETION_WORKER_POLL_MS",
       "capability": "workers",
       "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 354
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 355
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_MODEL",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/ai/ai.service.ts",
+          "line": 2189
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_BATCH_SIZE",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 310
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 311
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_CONCURRENCY",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 314
+        },
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 315
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_ENABLED",
+      "capability": "ai",
+      "mode": "optional",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 304
+        }
+      ]
+    },
+    {
+      "name": "ACTIVITY_AI_REVIEW_WORKER_LOCK_TIMEOUT_MS",
+      "capability": "ai",
+      "mode": "optional",
       "sensitive": false,
       "documented": false,
       "exampleDefault": null,
@@ -117,103 +214,6 @@
       ]
     },
     {
-      "name": "ACTIVITY_AI_REVIEW_MODEL",
-      "capability": "ai",
-      "mode": "optional",
-      "sensitive": false,
-      "documented": false,
-      "exampleDefault": null,
-      "owners": [
-        "apps"
-      ],
-      "references": [
-        {
-          "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2110
-        }
-      ]
-    },
-    {
-      "name": "ACTIVITY_AI_REVIEW_WORKER_BATCH_SIZE",
-      "capability": "ai",
-      "mode": "optional",
-      "sensitive": false,
-      "documented": false,
-      "exampleDefault": null,
-      "owners": [
-        "apps"
-      ],
-      "references": [
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 278
-        },
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 279
-        }
-      ]
-    },
-    {
-      "name": "ACTIVITY_AI_REVIEW_WORKER_CONCURRENCY",
-      "capability": "ai",
-      "mode": "optional",
-      "sensitive": false,
-      "documented": false,
-      "exampleDefault": null,
-      "owners": [
-        "apps"
-      ],
-      "references": [
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 282
-        },
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 283
-        }
-      ]
-    },
-    {
-      "name": "ACTIVITY_AI_REVIEW_WORKER_ENABLED",
-      "capability": "ai",
-      "mode": "optional",
-      "sensitive": false,
-      "documented": false,
-      "exampleDefault": null,
-      "owners": [
-        "apps"
-      ],
-      "references": [
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 272
-        }
-      ]
-    },
-    {
-      "name": "ACTIVITY_AI_REVIEW_WORKER_LOCK_TIMEOUT_MS",
-      "capability": "ai",
-      "mode": "optional",
-      "sensitive": false,
-      "documented": false,
-      "exampleDefault": null,
-      "owners": [
-        "apps"
-      ],
-      "references": [
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 290
-        },
-        {
-          "file": "apps/server/src/config/config.ts",
-          "line": 291
-        }
-      ]
-    },
-    {
       "name": "ACTIVITY_AI_REVIEW_WORKER_MAX_ATTEMPTS",
       "capability": "ai",
       "mode": "optional",
@@ -226,11 +226,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 286
+          "line": 318
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 287
+          "line": 319
         }
       ]
     },
@@ -247,11 +247,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 274
+          "line": 306
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 275
+          "line": 307
         }
       ]
     },
@@ -268,7 +268,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 297
+          "line": 329
         },
         {
           "file": "apps/server/src/maps/activity-map-thumbnail-provider.ts",
@@ -306,11 +306,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 306
+          "line": 338
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 307
+          "line": 339
         }
       ]
     },
@@ -327,11 +327,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 310
+          "line": 342
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 311
+          "line": 343
         }
       ]
     },
@@ -348,7 +348,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 300
+          "line": 332
         }
       ]
     },
@@ -365,11 +365,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 314
+          "line": 346
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 315
+          "line": 347
         }
       ]
     },
@@ -386,11 +386,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 302
+          "line": 334
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 303
+          "line": 335
         }
       ]
     },
@@ -407,7 +407,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 369
+          "line": 401
         }
       ]
     },
@@ -424,11 +424,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 357
+          "line": 389
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 358
+          "line": 390
         }
       ]
     },
@@ -445,11 +445,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 376
+          "line": 408
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 377
+          "line": 409
         }
       ]
     },
@@ -466,15 +466,15 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 371
+          "line": 403
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 372
+          "line": 404
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 373
+          "line": 405
         }
       ]
     },
@@ -491,11 +491,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 361
+          "line": 393
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 362
+          "line": 394
         }
       ]
     },
@@ -512,7 +512,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 364
+          "line": 396
         }
       ]
     },
@@ -529,11 +529,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 242
+          "line": 274
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 243
+          "line": 275
         }
       ]
     },
@@ -550,11 +550,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 246
+          "line": 278
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 247
+          "line": 279
         }
       ]
     },
@@ -571,7 +571,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 236
+          "line": 268
         }
       ]
     },
@@ -588,11 +588,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 250
+          "line": 282
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 251
+          "line": 283
         }
       ]
     },
@@ -609,11 +609,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 238
+          "line": 270
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 239
+          "line": 271
         }
       ]
     },
@@ -630,7 +630,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 261
+          "line": 293
         }
       ]
     },
@@ -647,7 +647,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 257
+          "line": 289
         }
       ]
     },
@@ -664,7 +664,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 266
+          "line": 298
         }
       ]
     },
@@ -681,7 +681,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 46
+          "line": 78
         }
       ]
     },
@@ -698,7 +698,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 52
+          "line": 84
         }
       ]
     },
@@ -715,7 +715,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 56
+          "line": 88
         }
       ]
     },
@@ -732,7 +732,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 66
+          "line": 98
         }
       ]
     },
@@ -749,7 +749,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 60
+          "line": 92
         }
       ]
     },
@@ -766,7 +766,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 48
+          "line": 80
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2079
+          "line": 2112
         }
       ]
     },
@@ -800,7 +800,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 428
+          "line": 449
         }
       ]
     },
@@ -905,7 +905,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 582
+          "line": 603
         }
       ]
     },
@@ -939,7 +939,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1136
+          "line": 1157
         }
       ]
     },
@@ -1057,7 +1057,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 927
+          "line": 948
         }
       ]
     },
@@ -1074,11 +1074,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1016
+          "line": 1027
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2846
+          "line": 2925
         }
       ]
     },
@@ -1095,27 +1095,27 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1018
+          "line": 1029
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2542
+          "line": 2621
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2603
+          "line": 2682
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2690
+          "line": 2769
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2742
+          "line": 2821
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2830
+          "line": 2909
         }
       ]
     },
@@ -1225,11 +1225,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 505
+          "line": 526
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 926
+          "line": 947
         }
       ]
     },
@@ -1301,7 +1301,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1054
+          "line": 1065
         }
       ]
     },
@@ -1643,7 +1643,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 33
+          "line": 65
         }
       ]
     },
@@ -1660,7 +1660,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 39
+          "line": 71
         }
       ]
     },
@@ -1748,11 +1748,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 229
+          "line": 261
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 230
+          "line": 262
         }
       ]
     },
@@ -1774,6 +1774,40 @@
       ]
     },
     {
+      "name": "ATHLETE_STATE_ASSESSMENT_SHADOW_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "ATHLETE_STATE_EVIDENCE_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 31
+        }
+      ]
+    },
+    {
       "name": "ATHLETE_STATE_UPDATE_DELAY_MS",
       "capability": "core-runtime",
       "mode": "core-or-feature",
@@ -1786,7 +1820,7 @@
       "references": [
         {
           "file": "apps/server/src/athlete-state/updates/athlete-state-update-queue.service.ts",
-          "line": 35
+          "line": 33
         }
       ]
     },
@@ -1815,11 +1849,11 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 72
+          "line": 104
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 151
+          "line": 183
         }
       ]
     },
@@ -1848,7 +1882,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 150
+          "line": 182
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1971,6 +2005,74 @@
       ]
     },
     {
+      "name": "COACH_ASSESSMENT_CASE_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "name": "COACH_ASSESSMENT_FOLLOWUP_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "name": "COACH_ASSESSMENT_HOME_INQUIRY_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "COACH_ASSESSMENT_PLAN_DECISION_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/config/config.ts",
+          "line": 47
+        }
+      ]
+    },
+    {
       "name": "COACH_E2E",
       "capability": "core-runtime",
       "mode": "core-or-feature",
@@ -2060,7 +2162,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 449
+          "line": 470
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2094,7 +2196,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 454
+          "line": 475
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2161,7 +2263,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 29
+          "line": 61
         }
       ]
     },
@@ -2178,7 +2280,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 25
+          "line": 57
         }
       ]
     },
@@ -2195,7 +2297,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 30
+          "line": 62
         }
       ]
     },
@@ -2212,7 +2314,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 28
+          "line": 60
         }
       ]
     },
@@ -2229,7 +2331,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 26
+          "line": 58
         }
       ]
     },
@@ -2246,7 +2348,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 24
+          "line": 56
         }
       ]
     },
@@ -2305,7 +2407,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 27
+          "line": 59
         }
       ]
     },
@@ -2629,7 +2731,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 90
+          "line": 122
         }
       ]
     },
@@ -2647,7 +2749,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 89
+          "line": 121
         },
         {
           "file": "compose.yml",
@@ -2669,7 +2771,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 91
+          "line": 123
         },
         {
           "file": "compose.yml",
@@ -2694,7 +2796,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 153
+          "line": 185
         }
       ]
     },
@@ -2732,7 +2834,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1236
+          "line": 1267
         },
         {
           "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",
@@ -2829,11 +2931,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 182
+          "line": 214
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 183
+          "line": 215
         }
       ]
     },
@@ -2850,11 +2952,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 186
+          "line": 218
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 187
+          "line": 219
         }
       ]
     },
@@ -2871,7 +2973,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 176
+          "line": 208
         }
       ]
     },
@@ -2888,11 +2990,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 194
+          "line": 226
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 195
+          "line": 227
         }
       ]
     },
@@ -2909,11 +3011,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 190
+          "line": 222
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 191
+          "line": 223
         }
       ]
     },
@@ -2930,11 +3032,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 178
+          "line": 210
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 179
+          "line": 211
         }
       ]
     },
@@ -2955,7 +3057,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 149
+          "line": 181
         }
       ]
     },
@@ -2972,7 +3074,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 129
+          "line": 161
         }
       ]
     },
@@ -2993,7 +3095,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 135
+          "line": 167
         }
       ]
     },
@@ -3014,7 +3116,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 131
+          "line": 163
         }
       ]
     },
@@ -3035,7 +3137,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 132
+          "line": 164
         }
       ]
     },
@@ -3056,7 +3158,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 133
+          "line": 165
         }
       ]
     },
@@ -3073,7 +3175,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 138
+          "line": 170
         }
       ]
     },
@@ -3090,7 +3192,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 143
+          "line": 175
         }
       ]
     },
@@ -3107,7 +3209,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 142
+          "line": 174
         }
       ]
     },
@@ -3124,7 +3226,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 73
+          "line": 105
         }
       ]
     },
@@ -3141,7 +3243,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 86
+          "line": 118
         }
       ]
     },
@@ -3162,7 +3264,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 84
+          "line": 116
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -4472,7 +4574,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 449
+          "line": 470
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -4814,7 +4916,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 22
+          "line": 28
         }
       ]
     },
@@ -4967,7 +5069,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 79
+          "line": 111
         }
       ]
     },
@@ -4984,7 +5086,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 76
+          "line": 108
         }
       ]
     },
@@ -5001,7 +5103,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 78
+          "line": 110
         }
       ]
     },
@@ -5018,7 +5120,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 77
+          "line": 109
         }
       ]
     },
@@ -5035,7 +5137,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 80
+          "line": 112
         }
       ]
     },
@@ -5067,10 +5169,6 @@
         "apps"
       ],
       "references": [
-        {
-          "file": "apps/server/src/api/ai/athlete-state/athlete-state-model.service.ts",
-          "line": 22
-        },
         {
           "file": "apps/server/src/review/review-digest.service.ts",
           "line": 629
@@ -5209,11 +5307,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 162
+          "line": 194
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 163
+          "line": 195
         }
       ]
     },
@@ -5230,11 +5328,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 166
+          "line": 198
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 167
+          "line": 199
         }
       ]
     },
@@ -5251,7 +5349,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 156
+          "line": 188
         }
       ]
     },
@@ -5268,11 +5366,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 170
+          "line": 202
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 171
+          "line": 203
         }
       ]
     },
@@ -5289,11 +5387,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 158
+          "line": 190
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 159
+          "line": 191
         }
       ]
     },
@@ -5649,7 +5747,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 440
+          "line": 461
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -5681,7 +5779,7 @@
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 298
+          "line": 330
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -6075,7 +6173,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 82
+          "line": 114
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -6108,7 +6206,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 105
+          "line": 137
         }
       ]
     },
@@ -6125,7 +6223,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 95
+          "line": 127
         }
       ]
     },
@@ -6142,7 +6240,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 101
+          "line": 133
         }
       ]
     },
@@ -6159,7 +6257,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 97
+          "line": 129
         }
       ]
     },
@@ -6188,7 +6286,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 115
+          "line": 147
         }
       ]
     },
@@ -6205,7 +6303,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 119
+          "line": 151
         }
       ]
     },
@@ -6222,7 +6320,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 111
+          "line": 143
         }
       ]
     },
@@ -6239,7 +6337,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 123
+          "line": 155
         }
       ]
     },
@@ -6315,11 +6413,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 350
+          "line": 382
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 351
+          "line": 383
         }
       ]
     },
@@ -6336,11 +6434,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 342
+          "line": 374
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 343
+          "line": 375
         }
       ]
     },
@@ -6357,7 +6455,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 336
+          "line": 368
         }
       ]
     },
@@ -6374,11 +6472,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 346
+          "line": 378
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 347
+          "line": 379
         }
       ]
     },
@@ -6395,11 +6493,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 338
+          "line": 370
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 339
+          "line": 371
         }
       ]
     },
@@ -6433,11 +6531,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 207
+          "line": 239
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 208
+          "line": 240
         }
       ]
     },
@@ -6454,11 +6552,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 211
+          "line": 243
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 212
+          "line": 244
         }
       ]
     },
@@ -6475,7 +6573,7 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 201
+          "line": 233
         }
       ]
     },
@@ -6492,11 +6590,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 219
+          "line": 251
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 220
+          "line": 252
         }
       ]
     },
@@ -6513,11 +6611,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 215
+          "line": 247
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 216
+          "line": 248
         }
       ]
     },
@@ -6534,11 +6632,11 @@
       "references": [
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 203
+          "line": 235
         },
         {
           "file": "apps/server/src/config/config.ts",
-          "line": 204
+          "line": 236
         }
       ]
     }

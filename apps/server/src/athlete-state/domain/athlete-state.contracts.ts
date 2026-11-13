@@ -38,42 +38,6 @@ export type AthleteStateEvidenceRequest = {
   };
 };
 
-export type AthleteStateEvidenceSnapshot = {
-  schemaVersion: 1;
-  policyVersion: string;
-  asOf: string;
-  localDate: string;
-  timezone: string;
-  recordedFacts: {
-    fitness?: Array<Record<string, unknown>>;
-    physiology: Record<string, RecordedMetricPoint[]>;
-    training: {
-      activities: Array<Record<string, unknown>>;
-      pmc: Array<Record<string, unknown>>;
-    };
-    subjective: Array<Record<string, unknown>>;
-    scopedAnswers: Array<Record<string, unknown>>;
-  };
-  deterministicFeatures: {
-    physiology: RobustBaseline[];
-    trainingLoad: Record<string, unknown>;
-    recoverySpacing: Record<string, unknown>;
-    performanceResponse: Array<Record<string, unknown>>;
-  };
-  modeledMetrics: {
-    pmc: Array<Record<string, unknown>>;
-  };
-  missingEvidence: Array<{
-    kind: string;
-    reason: string;
-    requiredForDecision: boolean;
-  }>;
-  freshness: {
-    latestSourceAt: string | null;
-    sourceDates: Record<string, string | null>;
-  };
-};
-
 export type AthleteStateAssessmentResult = {
   state: AthleteStateStatus;
   confidence: number;
@@ -85,11 +49,8 @@ export type AthleteStateAssessmentResult = {
   limitations: string[];
 };
 
-export type BuiltAthleteStateEvidence = {
-  /** Redacted immutable snapshot safe to persist on the Assessment. */
-  snapshot: AthleteStateEvidenceSnapshot;
-  /** Bounded model-only view; never persisted because it includes Memory claims. */
-  modelSnapshot: AthleteStateEvidenceSnapshot;
+export type AssessmentEvidence = {
+  snapshot: { asOf: string; timezone: string };
   evidenceHash: string;
   latestSourceAt: Date | null;
   expiresAt: Date;

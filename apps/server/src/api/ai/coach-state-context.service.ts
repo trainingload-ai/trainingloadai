@@ -72,8 +72,8 @@ export type TodayAdviceCoachState = {
   decisions: TodayAdviceCoachDecision[];
   recentReviews: TodayAdviceCoachReview[];
   athleteState: {
-    caseId: string;
-    caseStatus: string;
+    caseId: string | null;
+    caseStatus: string | null;
     assessmentId: string;
     state: string;
     decisionReadiness: string;
@@ -170,6 +170,25 @@ export class CoachStateContextService {
 
     let athleteState: TodayAdviceCoachState['athleteState'] = null;
     try {
+      const latest = await this.prisma.athleteStateAssessment?.findFirst({
+        where: {
+          userId: args.userId,
+          supersededAt: null,
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: [{ asOf: 'desc' }, { createdAt: 'desc' }],
+      });
+      if (latest)
+        athleteState = {
+          caseId: null,
+          caseStatus: null,
+          assessmentId: latest.id,
+          state: latest.state,
+          decisionReadiness: latest.decisionReadiness,
+          evidenceHash: latest.evidenceHash,
+          decisionId: null,
+          expiresAt: latest.expiresAt.toISOString(),
+        };
       const row = await this.prisma.coachAssessmentCase?.findFirst({
         where: {
           userId: args.userId,
@@ -216,7 +235,11 @@ export class CoachStateContextService {
           Array.isArray(row?.assessment.safetyFlags) &&
           row.assessment.safetyFlags.length
         );
-      if (row && !legacyOptionalInquiry) {
+      if (
+        row &&
+        !legacyOptionalInquiry &&
+        (!latest || latest.id === row.assessmentId)
+      ) {
         athleteState = {
           caseId: row.id,
           caseStatus: row.status,
