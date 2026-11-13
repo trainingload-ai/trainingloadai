@@ -5,8 +5,7 @@
  * provider 内合并，再根据 provider 优先级选择每日投影；`sourceBreakdown` 会保留
  * 每个有效 provider 的结果。任何软删除都会触发确定性重建。
  */
-import { Injectable, Optional } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable } from '@nestjs/common';
 import {
   HealthMetricType,
   Prisma,
@@ -18,7 +17,6 @@ import type { PrismaClientSlice, PrismaTx } from '@/prisma/prisma-db';
 import { HealthDataRepository } from './persistence/health-data.repository';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
 import { assertHealthMetricCandidate } from './health-metric-contract';
-import { emitAthleteStateReassessRequested } from '@/athlete-state/athlete-state.events';
 import { healthDataProviderPriority } from './health-data-provider-policy.port';
 
 const HEALTH_CANDIDATE_INGEST_CONCURRENCY = 4;
@@ -349,7 +347,6 @@ export class HealthDataIngestService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly health: HealthDataRepository,
-    @Optional() private readonly events?: EventEmitter2,
   ) {}
 
   /** 可由 PrismaService 或事务共同使用的 upsert 实现。 */
@@ -769,11 +766,10 @@ export class HealthDataIngestService {
       },
       { timeout: 30_000 },
     );
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: args.userId,
-      triggerType: 'HEALTH_DATA_AGGREGATED',
-      triggerRef: `${dateKey}:${metricTypes.sort().join(',')}`,
-    });
+    // Measurements remain available as evidence for authorized coaching.
+    // Replacing a daily record (including backfills and unchanged polls) is
+    // not itself a request to run a paid AI assessment. Activity, Review and
+    // athlete feedback own the explicit coaching triggers.
     return result;
   }
 

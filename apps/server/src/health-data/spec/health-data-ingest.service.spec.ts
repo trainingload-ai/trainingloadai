@@ -1,4 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { Test } from '@nestjs/testing';
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
+import { PrismaService } from '@/prisma/prisma.service';
+import { ATHLETE_STATE_REASSESS_REQUESTED_EVENT } from '@/athlete-state/athlete-state.events';
 import {
   consolidateHealthCandidates,
   HealthDataIngestService,
@@ -33,6 +37,81 @@ function createService() {
 }
 
 describe('HealthDataIngestService', () => {
+  it.each([
+    ['BODY_MASS_KG', 70, 'kg'],
+    ['RESTING_HEART_RATE_BPM', 55, 'bpm'],
+    ['HRV_SDNN_MS', 40, 'ms'],
+    ['SLEEP_ASLEEP_SECONDS', 28000, 's'],
+    ['SLEEP_SCORE', 80, 'score'],
+    ['SLEEP_AVG_HEART_RATE_BPM', 55, 'bpm'],
+    ['STEP_COUNT', 2000, 'count'],
+    ['VO2_MAX', 50, 'ml/kg/min'],
+  ] as const)(
+    'persists %s measurements without starting a background AI assessment',
+    async (metricType, value, unit) => {
+      const { prisma } = createService();
+      const module = await Test.createTestingModule({
+        imports: [EventEmitterModule.forRoot()],
+        providers: [
+          HealthDataIngestService,
+          HealthDataRepository,
+          { provide: PrismaService, useValue: prisma },
+        ],
+      }).compile();
+      await module.init();
+      const requested = jest.fn();
+      module
+        .get(EventEmitter2)
+        .on(ATHLETE_STATE_REASSESS_REQUESTED_EVENT, requested);
+      const date = new Date('2026-06-20T00:00:00.000Z');
+      const candidate = {
+        provider: 'INTERVALS_ICU' as const,
+        metricType,
+        externalId: `wellness:${metricType}`,
+        localDate: date,
+        startTime: date,
+        endTime: new Date('2026-06-21T00:00:00.000Z'),
+        value,
+        unit,
+      };
+      prisma.externalHealthSample.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { ...candidate, sourcePriority: 60, aggregation: 'LATEST' },
+        ]);
+      prisma.externalHealthSample.upsert.mockResolvedValueOnce({
+        id: 'sample',
+      });
+      prisma.externalHealthSample.updateMany.mockResolvedValue({ count: 0 });
+      prisma.userDailyHealthMetric.upsert.mockResolvedValueOnce({
+        id: 'daily',
+      });
+      try {
+        await module
+          .get(HealthDataIngestService)
+          .replaceProviderDailyCandidates({
+            userId: 'athlete',
+            provider: 'INTERVALS_ICU',
+            localDate: date,
+            managedMetricTypes: [metricType],
+            candidates: [candidate],
+          });
+        expect(prisma.externalHealthSample.upsert).toHaveBeenCalledTimes(1);
+        expect(prisma.userDailyHealthMetric.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            update: expect.objectContaining({
+              value,
+              selectedProvider: 'INTERVALS_ICU',
+            }),
+          }),
+        );
+        expect(requested).not.toHaveBeenCalled();
+      } finally {
+        await module.close();
+      }
+    },
+  );
+
   it('keeps only the highest-quality semantic source within one provider', () => {
     const result = consolidateHealthCandidates([
       {

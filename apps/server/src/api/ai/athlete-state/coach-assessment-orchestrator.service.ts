@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import type { AthleteStateAssessment } from '@prisma/client';
 import { AthleteStateCommands } from '@/athlete-state/application/athlete-state-commands.service';
@@ -12,6 +12,14 @@ import {
   type AthleteStateReassessRequestedEvent,
 } from '@/athlete-state/athlete-state.events';
 import { UserService } from '@/api/user/user.service';
+import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
+import {
+  FEATURE_ACCESS_POLICY,
+  type FeatureAccessPolicy,
+} from '@/access/feature-access-policy.port';
+import { featureAllowed } from '@/access/feature-access.types';
+import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
+import { aiOperationError } from '../ai-operation.error';
 import { PlanExecutionContextService } from '@/api/plan/plan-execution-context.service';
 import { AthleteStateModelService } from './athlete-state-model.service';
 import {
@@ -126,6 +134,9 @@ export class CoachAssessmentOrchestratorService {
     private readonly model: AthleteStateModelService,
     private readonly cases: CoachAssessmentCaseService,
     private readonly caseQueries: CoachAssessmentCaseQueryService,
+    private readonly consent: AiDataConsentService,
+    @Inject(FEATURE_ACCESS_POLICY)
+    private readonly access: FeatureAccessPolicy,
   ) {}
 
   @OnEvent(ATHLETE_STATE_REASSESS_REQUESTED_EVENT)
@@ -136,11 +147,27 @@ export class CoachAssessmentOrchestratorService {
         triggerType: event.triggerType,
         triggerRef: event.triggerRef,
       }),
-    ).catch((error) =>
+    ).catch((error) => {
+      const response =
+        error instanceof HttpException ? error.getResponse() : null;
+      const code =
+        response && typeof response === 'object' && 'code' in response
+          ? response.code
+          : null;
+      const context = `user=${event.userId} triggerType=${event.triggerType} triggerRef=${event.triggerRef ?? 'none'}`;
+      if (
+        code === BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED ||
+        code === 'AI_ACCESS_REQUIRED'
+      ) {
+        this.logger.debug(
+          `Athlete State reassessment skipped ${context} reason=${error instanceof Error ? error.message : String(code)}`,
+        );
+        return;
+      }
       this.logger.warn(
-        `Athlete State reassessment failed user=${event.userId} error=${error instanceof Error ? error.message : String(error)}`,
-      ),
-    );
+        `Athlete State reassessment failed ${context} error=${error instanceof Error ? error.message : String(error)}`,
+      );
+    });
   }
 
   @OnEvent(COACH_ASSESSMENT_ANSWERED_EVENT, { suppressErrors: false })
@@ -173,6 +200,15 @@ export class CoachAssessmentOrchestratorService {
     preserveCaseId?: string;
   }) {
     if (!this.flags.evidenceEnabled()) return { disabled: true };
+    // Evidence includes private Memory and health data. Check eligibility
+    // before even reading it; the model layer rechecks consent before I/O.
+    await this.consent.assertGranted(input.userId);
+    const access = await this.access.evaluate(input.userId, ['ai.coach']);
+    if (!featureAllowed(access, 'ai.coach')) {
+      throw aiOperationError('AI_ACCESS_REQUIRED', {
+        reason: 'FEATURE_ACCESS_REQUIRED',
+      });
+    }
     const [timezone, locale] = await Promise.all([
       this.users.getPreferredTimezone(input.userId),
       this.users.getPreferredLocale(input.userId),
