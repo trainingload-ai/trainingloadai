@@ -42,12 +42,9 @@ export class DesktopPgliteService {
     });
   }
 
-  async authKeyProbe(): Promise<string | null> {
+  async credentialState() {
     if (!this.database) throw new Error("PGlite is not running");
-    const result = await this.database.query<{ private_key: string }>(
-      "SELECT private_key FROM t_jwks ORDER BY created_at DESC LIMIT 1",
-    );
-    return result.rows[0]?.private_key ?? null;
+    return readDesktopCredentialState(this.database);
   }
 
   async stop(): Promise<void> {
@@ -59,6 +56,25 @@ export class DesktopPgliteService {
     this.socket = undefined;
     this.database = undefined;
   }
+}
+
+/** Read only existence, not Owner/bootstrap values. No signing key yet does
+ * not mean a database with an existing instance or user record is new.
+ */
+export async function readDesktopCredentialState(
+  database: Pick<PGlite, "query">,
+) {
+  const result = await database.query<{
+    initialized: boolean;
+    encryptedAuthKey: string | null;
+  }>(`
+    SELECT
+      EXISTS (SELECT 1 FROM t_self_host_instance)
+        OR EXISTS (SELECT 1 FROM t_user)
+        OR EXISTS (SELECT 1 FROM t_jwks) AS initialized,
+      (SELECT private_key FROM t_jwks ORDER BY created_at DESC LIMIT 1) AS "encryptedAuthKey"
+  `);
+  return result.rows[0];
 }
 
 export async function restorePgliteBackup(

@@ -31,6 +31,33 @@ test("stores only encrypted credential material and can delete it", async () => 
   }
 });
 
+test("absent values, deletions and empty writes never request OS secure-storage access", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "trainingload-desktop-no-keychain-"),
+  );
+  try {
+    const path = join(root, "vault.json");
+    const fail = () => {
+      throw new Error("unexpected Keychain access");
+    };
+    const vault = new DesktopCredentialVault(path, {
+      isEncryptionAvailable: fail,
+      encryptString: fail,
+      decryptString: fail,
+    });
+    assert.equal(await vault.get("absent"), null);
+    await vault.delete("absent");
+    await vault.setMany({});
+    assert.deepEqual(await readdir(root), []);
+    await new DesktopCredentialVault(path, testStorage).set("existing", "keep");
+    assert.equal(await vault.get("absent"), null);
+    await vault.delete("existing");
+    assert.deepEqual(JSON.parse(await readFile(path, "utf8")).values, {});
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("concurrent startup secrets and interleaved mutations survive reopening", async () => {
   const root = await mkdtemp(join(tmpdir(), "trainingload-desktop-vault-"));
   try {

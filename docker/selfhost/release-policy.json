@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.22",
+  "releaseVersion": "1.1.23",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [
@@ -9,7 +9,8 @@
       "1.1.18",
       "1.1.19",
       "1.1.20",
-      "1.1.21"
+      "1.1.21",
+      "1.1.22"
     ],
     "applicationRollbackTo": [
       "1.1.15",
@@ -17,7 +18,8 @@
       "1.1.18",
       "1.1.19",
       "1.1.20",
-      "1.1.21"
+      "1.1.21",
+      "1.1.22"
     ],
     "backupRequired": true
   },
