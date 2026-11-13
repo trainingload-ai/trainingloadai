@@ -56,3 +56,8 @@ images proportional at narrow widths without clipping or horizontal scrolling.
 The product images and device frames follow the docs theme, including the system
 preference. Markdown export contains standard images for both platforms using
 their light source files, the description, and one Demo link.
+
+Homepage `DocsTaskCard` entries use `screenshotId` to resolve the same themed,
+paired media. Their entire card still opens the linked guide; do not nest a Demo
+link inside a card. Export their light source images with the guide link, and
+include these capture references in the same build-time validation.

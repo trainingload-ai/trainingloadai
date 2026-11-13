@@ -46,6 +46,32 @@ describe("renderLLMText", () => {
     expect(text).not.toContain("<DocsTask");
   });
 
+  it("exports paired task-card media while keeping its guide destination", async () => {
+    const text = await renderLLMText(
+      {
+        url: "/zh/docs",
+        data: {
+          title: "文档",
+          getText: async () =>
+            '<DocsTaskCard title="接入数据" screenshotId="integrations-connections" imageAlt="连接训练平台" href="/zh/docs/guide/connect-data" action="连接数据" />',
+        },
+      },
+      "https://www.trainingload.ai",
+    );
+    expect(text).toContain(
+      "![连接训练平台 — Web](https://www.trainingload.ai/docs/captures/zh/integrations-connections.webp)",
+    );
+    expect(text).toContain(
+      "![连接训练平台 — Mobile](https://www.trainingload.ai/docs/mobile/zh/mobile-permission-sources.webp)",
+    );
+    expect(text).toContain(
+      "[连接数据](https://www.trainingload.ai/zh/docs/guide/connect-data)",
+    );
+    expect(text).not.toContain("demo.trainingload.ai");
+    expect(text).not.toContain("-dark.webp");
+    expect(text).not.toContain("<DocsTaskCard");
+  });
+
   it("includes processed documentation content without duplicating its H1", async () => {
     const getText = vi.fn(async () =>
       [

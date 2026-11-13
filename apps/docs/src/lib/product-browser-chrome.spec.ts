@@ -13,7 +13,7 @@ const surfaces = [
   "../app/[lang]/(home)/_components/PmcProductPreview.tsx",
   "../app/[lang]/(home)/features/page.tsx",
   "../app/[lang]/(home)/5k-training-plan/_components/FiveKProductPreview.tsx",
-  "../components/DocsScreenshot.tsx",
+  "../components/DocsScreenshotVisual.tsx",
 ].map((path) => readFileSync(new URL(path, import.meta.url), "utf8"));
 
 const docsScreenshot = readFileSync(

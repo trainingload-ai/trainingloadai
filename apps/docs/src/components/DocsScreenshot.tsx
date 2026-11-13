@@ -1,15 +1,12 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
 import { ArrowUpRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
-import { cn } from "@/lib/utils";
+import { DocsScreenshotVisual } from "@/components/DocsScreenshotVisual";
 import {
   resolveDocsScreenshot,
   type DocsScreenshotMedia,
 } from "@/lib/docs-screenshot";
-import styles from "./DocsScreenshot.module.css";
 
 type DocsScreenshotProps = {
   id: string;
@@ -23,42 +20,6 @@ type DocsScreenshotProps = {
   appPath?: string;
   demoLabel?: string;
 };
-
-function ScreenshotImage({
-  media,
-  alt,
-}: {
-  media: DocsScreenshotMedia;
-  alt: string;
-}) {
-  return (
-    <div style={{ aspectRatio: `${media.width} / ${media.height}` }}>
-      <img
-        src={media.imageSrc}
-        alt={alt}
-        width={media.width}
-        height={media.height}
-        loading="lazy"
-        decoding="async"
-        className={cn(
-          "block h-auto w-full",
-          media.darkImageSrc && "dark:hidden",
-        )}
-      />
-      {media.darkImageSrc ? (
-        <img
-          src={media.darkImageSrc}
-          alt={alt}
-          width={media.width}
-          height={media.height}
-          loading="lazy"
-          decoding="async"
-          className="hidden h-auto w-full dark:block"
-        />
-      ) : null}
-    </div>
-  );
-}
 
 /** Theme-specific real product captures, paired only for the same feature. */
 export function DocsScreenshot({
@@ -108,37 +69,20 @@ export function DocsScreenshot({
         data-docs-demo-link
         className="block rounded-feature focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
       >
-        <div
-          className={cn(styles.composition, paired && styles.paired)}
-          data-docs-paired={paired || undefined}
-        >
-          {desktop ? (
-            <ProductBrowserWindow
-              address={destination.address}
-              className={styles.browser}
-              chromeClassName={styles.chrome}
-            >
-              <ScreenshotImage
-                media={desktop}
-                alt={`${imageAlt ?? title} — ${platformName("web")}`}
-              />
-            </ProductBrowserWindow>
-          ) : null}
-          {mobile ? (
-            <div className={styles.phone}>
-              <ScreenshotImage
-                media={mobile}
-                alt={`${imageAlt ?? title} — ${platformName("mobile")}`}
-              />
-            </div>
-          ) : null}
-          {!desktop && !mobile ? (
-            <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-feature border bg-card p-6 text-center">
-              <span className="font-medium">{title}</span>
-              <span className="text-sm text-muted-foreground">{linkLabel}</span>
-            </div>
-          ) : null}
-        </div>
+        <DocsScreenshotVisual
+          desktop={desktop}
+          mobile={mobile}
+          address={destination.address}
+          imageAlt={imageAlt ?? title}
+          webLabel={platformName("web")}
+          mobileLabel={platformName("mobile")}
+        />
+        {!desktop && !mobile ? (
+          <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-feature border bg-card p-6 text-center">
+            <span className="font-medium">{title}</span>
+            <span className="text-sm text-muted-foreground">{linkLabel}</span>
+          </div>
+        ) : null}
       </a>
       <figcaption className="mt-4 space-y-1 text-center text-sm leading-6 text-muted-foreground">
         <p>{description}</p>

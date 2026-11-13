@@ -74,6 +74,21 @@ test("rejects a missing dark companion image", async (t) => {
   assert.ok(errors.some((error) => error.includes("mobile-dark.webp")));
 });
 
+test("validates task-card capture references and their companion themes", async (t) => {
+  const { root } = await fixture(t);
+  const article = path.join(root, "content/docs/en/test.mdx");
+  await fs.writeFile(article, '<DocsTaskCard screenshotId="web" title="Connections" />');
+  assert.deepEqual((await checkDocsScreenshots(root)).errors, []);
+  await fs.unlink(path.join(root, "public/images/mobile-dark.webp"));
+  assert.ok(
+    (await checkDocsScreenshots(root)).errors.some((error) => error.includes("mobile-dark.webp")),
+  );
+  await fs.writeFile(article, '<DocsTaskCard screenshotId="unknown" title="Connections" />');
+  assert.ok(
+    (await checkDocsScreenshots(root)).errors.some((error) => error.includes("no manifest entry")),
+  );
+});
+
 test("rejects unreadable files and companions that do not exist", async (t) => {
   const { root, captures, write } = await fixture(t);
   await fs.writeFile(path.join(root, "public/images/web-dark.webp"), "not an image");

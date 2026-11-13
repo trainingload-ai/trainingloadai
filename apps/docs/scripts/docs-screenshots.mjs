@@ -23,7 +23,8 @@ async function filesIn(directory) {
 
 function screenshotNodes(node) {
   return [
-    ...(node.type === "mdxJsxFlowElement" && node.name === "DocsScreenshot"
+    ...(node.type === "mdxJsxFlowElement" &&
+      ["DocsScreenshot", "DocsTaskCard"].includes(node.name)
       ? [node]
       : []),
     ...(node.children ?? []).flatMap(screenshotNodes),
@@ -154,7 +155,8 @@ export async function checkDocsScreenshots(docsRoot) {
     for (const node of screenshotNodes(tree)) {
       references++;
       const id = node.attributes.find(
-        (attribute) => attribute.name === "id",
+        (attribute) =>
+          attribute.name === (node.name === "DocsTaskCard" ? "screenshotId" : "id"),
       )?.value;
       const capture = captures.get(id);
       const prefix = `${relative}: ${id ?? "missing ID"}`;
