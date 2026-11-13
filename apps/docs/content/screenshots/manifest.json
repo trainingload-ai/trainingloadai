@@ -245,8 +245,8 @@
       ],
       "companionId": "mobile-permission-sources",
       "navigation": {
-        "en": "Account → Third Party Connections",
-        "zh": "账号 → 第三方连接"
+        "en": "Top-right avatar → Third Party Connections",
+        "zh": "右上角头像 → 第三方连接"
       }
     },
     {
