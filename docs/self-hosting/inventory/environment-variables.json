@@ -2918,7 +2918,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 101
+          "line": 119
         }
       ]
     },
@@ -3264,7 +3264,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 97
+          "line": 115
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -4485,7 +4485,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 90
+          "line": 108
         },
         {
           "file": "apps/server/src/bootstrap/self-host-network-security.ts",
@@ -4920,7 +4920,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 101
+          "line": 119
         },
         {
           "file": "apps/server/src/config/config.ts",
