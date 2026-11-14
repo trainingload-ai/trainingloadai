@@ -3365,6 +3365,20 @@
       ]
     },
     {
+      "host": "www.trainingload.ai",
+      "url": "https://www.trainingload.ai/${locale.startsWith(",
+      "references": [
+        {
+          "file": "apps/client/src/app/[locale]/(main)/activities/components/ExternalActivityMirrorCard.tsx",
+          "line": 126
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "www.trainingpeaks.com",
       "url": "https://www.trainingpeaks.com/blog/power-profiling/",
       "references": [

@@ -5094,7 +5094,7 @@
     },
     "mirror": {
       "untitled": "원본 동기화를 기다리는 활동",
-      "discoveredVia": "Intervals.icu에서 발견",
+      "discoveredVia": "{provider}에서 발견",
       "syncing": "원본 활동의 전체 데이터를 가져오는 중입니다.",
       "connectionRequired": "현재 연결에서 전체 활동을 제공할 수 없습니다. 원본 연결을 확인하세요.",
       "importDisabled": "원본은 연결되어 있지만 활동 자동 가져오기가 꺼져 있습니다.",
@@ -5108,7 +5108,9 @@
       "connectSource": "원본 연결",
       "reauthorizeSource": "원본 다시 인증",
       "enableSourceImport": "원본 가져오기 켜기",
-      "checkSourceConnection": "원본 연결 확인"
+      "checkSourceConnection": "원본 연결 확인",
+      "dataUnavailable": "현재 활동 요약만 제공되며 상세 기록을 가져오지 못했습니다.",
+      "why": "왜 그런가요?"
     }
   },
   "V2ActivitiesStatsPage": {

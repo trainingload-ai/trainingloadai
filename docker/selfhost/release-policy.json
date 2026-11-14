@@ -130,6 +130,10 @@
       "0026_athlete_state_updates": {
         "phase": "expand",
         "releaseVersion": "1.1.23"
+      },
+      "0027_scope_fitness_setting_evidence": {
+        "phase": "expand",
+        "releaseVersion": "1.1.23"
       }
     }
   }

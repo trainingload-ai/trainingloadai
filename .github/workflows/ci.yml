@@ -13,11 +13,26 @@ permissions:
 jobs:
   core:
     runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17.10-bookworm@sha256:9b18b78397054fce88a9552e9d5a3ad5bb7fd258c5b3cc1c5028e46373d6ea8f
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: trainingload
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d trainingload"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
       NEXT_BUILD_CPUS: "2"
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/trainingload
+      CORE_MIGRATION_TEST_POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/trainingload
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -42,4 +57,5 @@ jobs:
       - run: pnpm test:athlete-state:database
       - run: pnpm test:selfhost
       - run: pnpm --dir packages/prisma core:migrate:test
+      - run: pnpm --dir packages/prisma core:migrate:test:postgres
       - run: node --test scripts/selfhost/*.test.mjs

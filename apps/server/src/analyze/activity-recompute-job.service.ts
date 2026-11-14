@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma, SportType, UserFitnessMetricType } from '@prisma/client';
 import { UserService } from '@/api/user/user.service';
+import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
@@ -151,90 +153,73 @@ export class ActivityRecomputeJobService {
   private async upsertScheduledJob(
     data: Prisma.ActivityRecomputeJobUncheckedCreateInput,
   ) {
-    const current = await this.prisma.activityRecomputeJob.findUnique({
-      where: { dedupeKey: data.dedupeKey },
-      select: {
-        id: true,
-        status: true,
-        recomputeFrom: true,
-        recomputeTo: true,
-      },
-    });
-    if (current?.status === 'RUNNING') {
-      this.logger.log(
-        `[活动复算] 已有运行中任务，为新证据创建后继任务：任务ID=${current.id}, key=${data.dedupeKey}`,
-      );
-      return this.upsertScheduledJob({
-        ...data,
-        dedupeKey: `${data.dedupeKey}:followup`,
-      });
-    }
-
-    const merged = current
-      ? {
-          ...data,
-          recomputeFrom:
-            current.recomputeFrom < data.recomputeFrom
-              ? current.recomputeFrom
-              : data.recomputeFrom,
-          recomputeTo:
-            current.recomputeTo > data.recomputeTo
-              ? current.recomputeTo
-              : data.recomputeTo,
-        }
-      : data;
-    if (current) {
-      const job = await this.prisma.activityRecomputeJob.update({
-        where: { id: current.id },
-        data: merged,
-      });
-      return { scheduled: true as const, job };
-    }
-
-    try {
-      const job = await this.prisma.activityRecomputeJob.create({
-        data: merged,
-      });
-      return { scheduled: true as const, job };
-    } catch (error) {
-      if (
-        !(error instanceof Prisma.PrismaClientKnownRequestError) ||
-        error.code !== 'P2002'
-      ) {
-        throw error;
-      }
-      const concurrent = await this.prisma.activityRecomputeJob.findUnique({
-        where: { dedupeKey: data.dedupeKey },
-        select: {
-          id: true,
-          status: true,
-          recomputeFrom: true,
-          recomputeTo: true,
+    return withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
+          let dedupeKey = data.dedupeKey;
+          while (true) {
+            // Seed the row without aborting this transaction on a dedupe race.
+            // Only this unique constraint is ignored; other failures still escape.
+            // Raw Date parameters are timestamptz; these columns store UTC timestamps.
+            await tx.$executeRaw`
+              INSERT INTO t_activity_recompute_job
+                (id, user_id, metric_type, recompute_from, recompute_to,
+                 lookback_days, available_at, dedupe_key, created_at, updated_at)
+              VALUES (${randomUUID()}, ${data.userId}, ${data.metricType},
+                (${data.recomputeFrom}::timestamptz AT TIME ZONE 'UTC'),
+                (${data.recomputeTo}::timestamptz AT TIME ZONE 'UTC'),
+                ${data.lookbackDays},
+                (${data.availableAt}::timestamptz AT TIME ZONE 'UTC'),
+                ${dedupeKey}, NOW() AT TIME ZONE 'UTC', NOW() AT TIME ZONE 'UTC')
+              ON CONFLICT (dedupe_key) DO NOTHING
+            `;
+            // The worker claims this same row with FOR UPDATE SKIP LOCKED.
+            // Read Committed sees the latest status and range after any lock wait.
+            const [current] = await tx.$queryRaw<
+              Array<{
+                id: string;
+                status: string;
+                recomputeFrom: Date;
+                recomputeTo: Date;
+              }>
+            >`
+              SELECT id, status::text AS status,
+                recompute_from AS "recomputeFrom", recompute_to AS "recomputeTo"
+              FROM t_activity_recompute_job
+              WHERE dedupe_key = ${dedupeKey}
+              FOR UPDATE
+            `;
+            // A concurrent cleanup may remove an existing row before we lock it.
+            if (!current) continue;
+            if (current.status === 'RUNNING') {
+              dedupeKey += ':followup';
+              continue;
+            }
+            const job = await tx.activityRecomputeJob.update({
+              where: { id: current.id },
+              data: {
+                ...data,
+                dedupeKey,
+                recomputeFrom:
+                  current.recomputeFrom < data.recomputeFrom
+                    ? current.recomputeFrom
+                    : data.recomputeFrom,
+                recomputeTo:
+                  current.recomputeTo > data.recomputeTo
+                    ? current.recomputeTo
+                    : data.recomputeTo,
+              },
+            });
+            return { scheduled: true as const, job };
+          }
         },
-      });
-      if (!concurrent) throw error;
-      if (concurrent.status === 'RUNNING') {
-        return this.upsertScheduledJob({
-          ...data,
-          dedupeKey: `${data.dedupeKey}:followup`,
-        });
-      }
-      const job = await this.prisma.activityRecomputeJob.update({
-        where: { id: concurrent.id },
-        data: {
-          ...data,
-          recomputeFrom:
-            concurrent.recomputeFrom < data.recomputeFrom
-              ? concurrent.recomputeFrom
-              : data.recomputeFrom,
-          recomputeTo:
-            concurrent.recomputeTo > data.recomputeTo
-              ? concurrent.recomputeTo
-              : data.recomputeTo,
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+          maxWait: 10_000,
+          timeout: 10_000,
         },
-      });
-      return { scheduled: true as const, job };
-    }
+      ),
+    );
   }
 
   async scheduleFitnessMetricChangeRecompute(

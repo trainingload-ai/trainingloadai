@@ -5095,7 +5095,7 @@
     },
     "mirror": {
       "untitled": "Atividade aguardando sincronização da origem",
-      "discoveredVia": "Descoberta pelo Intervals.icu",
+      "discoveredVia": "Descoberta pelo {provider}",
       "syncing": "Buscando a atividade na origem.",
       "connectionRequired": "A integração atual não pode fornecer a atividade completa. Verifique a conexão de origem.",
       "importDisabled": "A origem está conectada, mas a importação automática de atividades está desativada.",
@@ -5109,7 +5109,9 @@
       "connectSource": "Conectar origem",
       "reauthorizeSource": "Reautorizar origem",
       "enableSourceImport": "Ativar importação da origem",
-      "checkSourceConnection": "Verificar conexão de origem"
+      "checkSourceConnection": "Verificar conexão de origem",
+      "dataUnavailable": "Apenas o resumo da atividade está disponível; não foi possível obter os registros detalhados.",
+      "why": "Por quê?"
     }
   },
   "V2ActivitiesStatsPage": {

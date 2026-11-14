@@ -5548,7 +5548,7 @@
     },
     "mirror": {
       "untitled": "Activity awaiting source sync",
-      "discoveredVia": "Discovered via Intervals.icu",
+      "discoveredVia": "Discovered via {provider}",
       "syncing": "The source activity is being fetched.",
       "connectionRequired": "The current integration cannot provide the complete activity. Check the source connection.",
       "importDisabled": "The source is connected, but automatic activity import is disabled.",
@@ -5562,7 +5562,9 @@
       "connectSource": "Connect source",
       "reauthorizeSource": "Reauthorize source",
       "enableSourceImport": "Enable source import",
-      "checkSourceConnection": "Check source connection"
+      "checkSourceConnection": "Check source connection",
+      "dataUnavailable": "Only the activity summary is available; detailed records could not be retrieved.",
+      "why": "Why?"
     }
   },
   "V2ActivitiesStatsPage": {

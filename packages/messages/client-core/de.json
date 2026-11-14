@@ -5095,7 +5095,7 @@
     },
     "mirror": {
       "untitled": "Aktivität wartet auf Quellsynchronisierung",
-      "discoveredVia": "Über Intervals.icu gefunden",
+      "discoveredVia": "Über {provider} gefunden",
       "syncing": "Die Aktivität wird von der Quelle abgerufen.",
       "connectionRequired": "Die aktuelle Integration kann die vollständige Aktivität nicht liefern. Prüfe die Quellverbindung.",
       "importDisabled": "Die Quelle ist verbunden, aber der automatische Aktivitätsimport ist deaktiviert.",
@@ -5109,7 +5109,9 @@
       "connectSource": "Quelle verbinden",
       "reauthorizeSource": "Quelle erneut autorisieren",
       "enableSourceImport": "Quellimport aktivieren",
-      "checkSourceConnection": "Quellverbindung prüfen"
+      "checkSourceConnection": "Quellverbindung prüfen",
+      "dataUnavailable": "Nur die Aktivitätsübersicht ist verfügbar; detaillierte Aufzeichnungen konnten nicht abgerufen werden.",
+      "why": "Warum?"
     }
   },
   "V2ActivitiesStatsPage": {

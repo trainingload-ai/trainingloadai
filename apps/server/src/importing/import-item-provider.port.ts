@@ -6,6 +6,19 @@ import type { SourceNormalizeInput } from './source-adapters/source-adapter.inte
 
 export const IMPORT_ITEM_EXTENSION = Symbol('IMPORT_ITEM_EXTENSION');
 
+/** The activity exists, but this source cannot currently supply a dataset. */
+export class ImportSourceDataUnavailableError extends Error {
+  constructor(
+    readonly code: string,
+    readonly stage: string,
+    readonly retryable: boolean,
+    readonly status?: number,
+  ) {
+    super(`${code}: ${stage}${status ? ` (HTTP ${status})` : ''}`);
+    this.name = 'ImportSourceDataUnavailableError';
+  }
+}
+
 export type ImportItemExtensionJob = {
   id: string;
   batchJobId: string;
