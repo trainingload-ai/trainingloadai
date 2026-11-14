@@ -10,6 +10,8 @@ export const TOOL_ANALYTICS_SCHEMA_VERSION = PRODUCT_ANALYTICS_SCHEMA_VERSION;
 export type ToolId = ProductAnalyticsToolId;
 
 export type ToolEventName =
+  | "tool_input_rejected"
+  | "tool_no_result"
   | "tool_viewed"
   | "tool_started"
   | "tool_completed"
@@ -38,6 +40,10 @@ export type ToolErrorCode =
   | "unknown";
 
 type SafeToolEventProperties = {
+  input_origin?: "example" | "example_edited" | "user";
+  engine_version?: string;
+  reason_code?: string;
+  method_id?: string;
   action?: string;
   duration_ms?: number;
   destination?: ToolAppDestination;

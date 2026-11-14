@@ -326,7 +326,7 @@
         },
         {
           "file": "apps/docs/src/lib/analytics.ts",
-          "line": 151
+          "line": 176
         },
         {
           "file": "apps/docs/src/lib/plan-share.ts",
@@ -674,7 +674,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 461
+          "line": 481
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -766,7 +766,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 224
+          "line": 228
         }
       ],
       "capability": "telemetry",
@@ -780,10 +780,24 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 246
+          "line": 250
         }
       ],
       "capability": "telemetry",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1371/journal.pone.0199794",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
+          "line": 178
+        }
+      ],
+      "capability": "web-asset-or-tooling",
       "owners": [
         "apps"
       ]
@@ -994,6 +1008,20 @@
         {
           "file": "apps/server/src/pipe/index.ts",
           "line": 4
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/fmmattioni/lactater/tree/${LACTATE_REFERENCE_COMMIT",
+      "references": [
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
+          "line": 171
         }
       ],
       "capability": "auth",
@@ -1278,7 +1306,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 518
+          "line": 520
         },
         {
           "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
@@ -1836,7 +1864,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 525
+          "line": 527
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2477,7 +2505,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 247
+          "line": 251
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2713,7 +2741,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 213
+          "line": 217
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3071,12 +3099,16 @@
           "line": 14
         },
         {
-          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 119
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
+          "line": 32
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 170
+          "line": 120
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 171
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
@@ -3180,11 +3212,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 71
+          "line": 72
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 123
+          "line": 124
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",

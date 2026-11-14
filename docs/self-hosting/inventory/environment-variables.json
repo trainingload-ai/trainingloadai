@@ -1941,7 +1941,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 221
+          "line": 225
         }
       ]
     },
@@ -3888,12 +3888,16 @@
           "line": 14
         },
         {
-          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 119
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
+          "line": 32
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 170
+          "line": 120
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
+          "line": 171
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
@@ -3997,11 +4001,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 71
+          "line": 72
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tools/page.tsx",
-          "line": 123
+          "line": 124
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
@@ -6101,7 +6105,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 215
+          "line": 219
         }
       ]
     },
@@ -6118,7 +6122,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 217
+          "line": 221
         }
       ]
     },

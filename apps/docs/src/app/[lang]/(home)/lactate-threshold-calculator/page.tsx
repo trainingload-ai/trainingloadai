@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
+import { getLactateCopy } from "@/lib/lactate-curve-copy";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import { formatClock, formatPaceClock, KM_PER_MILE } from "@/lib/running-pace";
 import {
@@ -269,6 +270,7 @@ export default async function LactateThresholdCalculatorPage({
   >;
 
   const relatedLinks = [
+    [`${prefix}/lactate-curve-calculator`, getLactateCopy(lang).title],
     [
       `${prefix}/heart-rate-zones-calculator`,
       tCommon("heartRateZonesCalculatorAction"),

@@ -79,9 +79,31 @@ function toGa4Event(
   const pagePath =
     typeof payload.page_path === "string" ? payload.page_path : undefined;
   const locale =
-    typeof payload.lang === "string"
-      ? payload.lang
-      : localeFromPath(pagePath);
+    typeof payload.lang === "string" ? payload.lang : localeFromPath(pagePath);
+
+  const lactateContext =
+    payload.tool_id === "lactate_curve_calculator"
+      ? cleanProperties({
+          input_origin: payload.input_origin,
+          input_method: payload.input_method,
+          engine_version: payload.engine_version,
+          status: payload.status,
+          stage: payload.stage,
+        })
+      : {};
+
+  if (eventName === "tool_input_rejected" || eventName === "tool_no_result") {
+    return {
+      name: eventName,
+      properties: cleanProperties({
+        tool_name: toolName,
+        page_path: pagePath,
+        locale,
+        reason_code: payload.reason_code,
+        ...lactateContext,
+      }),
+    };
+  }
 
   if (eventName === "tool_started" || eventName === "tool_completed") {
     return {
@@ -91,6 +113,7 @@ function toGa4Event(
         tool_category: ga4ToolCategory(toolName),
         page_path: pagePath,
         locale,
+        ...lactateContext,
         result_type:
           typeof payload.output_format === "string"
             ? payload.output_format
@@ -115,6 +138,7 @@ function toGa4Event(
         page_path: pagePath,
         locale,
         error_code: TOOL_ERROR_CODES[rawCode] ?? "unknown",
+        ...lactateContext,
       }),
     };
   }
@@ -141,6 +165,7 @@ function toGa4Event(
                 ? "save_result"
                 : "start_free",
         locale,
+        ...lactateContext,
       }),
     };
   }
