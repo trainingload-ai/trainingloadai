@@ -30,6 +30,7 @@ export const integrationStatusTool: AiToolDef<Input, Output> = buildAiTool({
   searchHint:
     'third party integration connection sync import export planned workouts device',
   applicableSkills: [
+    'athlete-state',
     'integration-support',
     'readiness-check',
     'week-review',

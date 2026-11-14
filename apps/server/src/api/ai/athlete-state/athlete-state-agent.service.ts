@@ -7,7 +7,10 @@ import {
   ATHLETE_STATE_POLICY_VERSION,
   ATHLETE_STATE_PROMPT_VERSION,
 } from '@/athlete-state/athlete-state-policy';
-import { parseAthleteStateAssessment } from './athlete-state.prompt';
+import {
+  parseAthleteStateSkillResult,
+  ATHLETE_STATE_FACT_TOOLS,
+} from './athlete-state-result.contract';
 
 export type AthleteStateReadReceipt = {
   tool: string;
@@ -57,15 +60,13 @@ export class AthleteStateAgentService {
         await this.assertEligible(input.userId);
         if (!reads.some((read) => read.tool === 'training.data_coverage'))
           throw new Error('ATHLETE_STATE_COVERAGE_REQUIRED');
-        const parsed = parseAthleteStateAssessment(JSON.stringify(raw));
-        if (!parsed.ok)
-          throw new Error(
-            'error' in parsed ? parsed.error : 'Invalid state assessment',
-          );
-        if (parsed.data.evidenceRequests.length)
-          throw new Error(
-            'Use ask_user_question for missing athlete facts before submitting the assessment',
-          );
+        const parsed = parseAthleteStateSkillResult(raw);
+        if (!parsed.success) throw parsed.error;
+        if (
+          parsed.value.state !== 'UNKNOWN' &&
+          !reads.some((read) => ATHLETE_STATE_FACT_TOOLS.has(read.tool))
+        )
+          throw new Error('ATHLETE_STATE_FACTS_REQUIRED');
         const snapshot = {
           schemaVersion: 2 as const,
           policyVersion: ATHLETE_STATE_POLICY_VERSION,
@@ -87,7 +88,8 @@ export class AthleteStateAgentService {
                 ATHLETE_STATE_POLICY.assessmentMaxAgeHours * 3_600_000,
             ),
           },
-          result: parsed.data,
+          // The legacy database field is retained for older Case records only.
+          result: { ...parsed.value, evidenceRequests: [] },
           promptVersion: ATHLETE_STATE_PROMPT_VERSION,
         });
         accepted = {

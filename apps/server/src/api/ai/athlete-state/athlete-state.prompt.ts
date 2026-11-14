@@ -127,6 +127,7 @@ function parseJson(raw: string): ParseResult<Record<string, unknown>> {
   }
 }
 
+/** Legacy Case snapshot parser. Agent Skill results use the strict result contract. */
 export function parseAthleteStateAssessment(
   raw: string,
 ): ParseResult<AthleteStateAssessmentResult> {
