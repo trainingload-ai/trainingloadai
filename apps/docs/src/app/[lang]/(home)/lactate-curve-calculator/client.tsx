@@ -897,16 +897,8 @@ export function LactateCurveCalculatorClient({
                     {unitOptions.find((option) => option.value === unit)?.label}
                     )
                   </th>
-                  <th scope="col">
-                    {c.lactate}
-                    <br />
-                    mmol/L
-                  </th>
-                  <th scope="col">
-                    {c.heartRate}
-                    <br />
-                    bpm
-                  </th>
+                  <th scope="col">{c.lactate} (mmol/L)</th>
+                  <th scope="col">{c.heartRate} (bpm)</th>
                   <th scope="col">
                     <span className="sr-only">{c.remove}</span>
                   </th>

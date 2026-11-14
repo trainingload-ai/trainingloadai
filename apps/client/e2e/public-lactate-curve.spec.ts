@@ -273,6 +273,43 @@ test("inspects the full example chart with pointer, touch and keyboard without s
     '[data-testid="lactate-stage-point"][data-series="lactate"]',
   );
   await expect(points).toHaveCount(8);
+  const figure = page.getByRole("figure", { name: "乳酸曲线", exact: true });
+  const hint = figure.getByText("悬停、点选或键盘聚焦样本，查看阶段数据", {
+    exact: true,
+  });
+  const action = page
+    .getByRole("button", { name: "加载示例 →", exact: true })
+    .locator("..");
+  const [plotBox, legendBox, hintBox, figureBox, actionBox] = await Promise.all(
+    [
+      figure.locator(".recharts-responsive-container").last().boundingBox(),
+      figure.locator("figcaption").boundingBox(),
+      hint.boundingBox(),
+      figure.boundingBox(),
+      action.boundingBox(),
+    ],
+  );
+  expect(legendBox!.y).toBeGreaterThanOrEqual(
+    plotBox!.y + plotBox!.height - 0.5,
+  );
+  expect(hintBox!.y).toBeGreaterThanOrEqual(
+    legendBox!.y + legendBox!.height - 0.5,
+  );
+  expect(figureBox!.y + figureBox!.height).toBeGreaterThanOrEqual(
+    hintBox!.y + hintBox!.height - 0.5,
+  );
+  expect(actionBox!.y).toBeGreaterThanOrEqual(hintBox!.y + hintBox!.height + 8);
+  await figure.locator("..").screenshot({
+    path: info.outputPath("lactate-example-layout.png"),
+    style: "header { visibility: hidden !important; }",
+  });
+  await page
+    .getByRole("region", { name: "测试数据", exact: true })
+    .getByRole("table")
+    .screenshot({
+      path: info.outputPath("lactate-input-table.png"),
+      style: "header { visibility: hidden !important; }",
+    });
   await points.nth(4).hover();
   const tooltip = page.getByRole("tooltip");
   await expect(tooltip).toBeVisible();
@@ -319,6 +356,42 @@ test("renders each indexed language and the measured-data metadata", async ({
         .locator('script[type="application/ld+json"]')
         .allTextContents(),
     ).not.toHaveLength(0);
+    const methods = page.locator("#methods");
+    await expect(methods.locator("article")).toHaveCount(8);
+    for (const card of await methods.locator("article").all()) {
+      await expect(card.locator("dl > div")).toHaveCount(2);
+      await expect(card.locator("a").first()).toHaveAttribute(
+        "target",
+        "_blank",
+      );
+    }
+    const bibliography = methods.locator("details");
+    await bibliography.locator("summary").click();
+    await expect(bibliography.locator("ol > li")).toHaveCount(9);
+    await expect(methods).not.toContainText(/\{[a-z]+\}/);
+    if (prefix === "/zh") {
+      await methods.screenshot({
+        path: test.info().outputPath("lactate-method-sources.png"),
+        style: "header { visibility: hidden !important; }",
+      });
+      const recording = page
+        .locator("details")
+        .filter({ has: page.locator("table caption.sr-only") });
+      await recording.locator("summary").click();
+      const caption = recording.locator("caption");
+      await expect(recording.getByRole("table")).toHaveAccessibleName(
+        (await caption.textContent()) ?? "",
+      );
+      expect(
+        await caption.evaluate(
+          (element) => element.getBoundingClientRect().height,
+        ),
+      ).toBeLessThanOrEqual(1);
+      await recording.screenshot({
+        path: test.info().outputPath("lactate-example-recording.png"),
+        style: "header { visibility: hidden !important; }",
+      });
+    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

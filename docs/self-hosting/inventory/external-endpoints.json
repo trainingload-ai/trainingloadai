@@ -790,11 +790,109 @@
     },
     {
       "host": "doi.org",
+      "url": "https://doi.org/10.1007/BF00421101",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 9
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1055/s-2007-1021309",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 42
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1055/s-2008-1025824",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 15
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1097/00005768-199808000-00014",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 49
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1113/jphysiol.1995.sp020959",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 28
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1152/jappl.1985.59.6.1936",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 35
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
       "url": "https://doi.org/10.1371/journal.pone.0199794",
       "references": [
         {
-          "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
-          "line": 178
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 56
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "doi.org",
+      "url": "https://doi.org/10.1371/journal.pone.0206846",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 63
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1021,7 +1119,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
-          "line": 171
+          "line": 220
         }
       ],
       "capability": "auth",
@@ -1929,6 +2027,20 @@
         {
           "file": "apps/docs/src/lib/heart-rate-llm.ts",
           "line": 91
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/2408033/",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/lactate-method-context.ts",
+          "line": 21
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3100,7 +3212,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-curve-calculator/page.tsx",
-          "line": 32
+          "line": 55
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",

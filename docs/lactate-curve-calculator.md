@@ -73,6 +73,13 @@ use the site's existing English fallback/noindex policy. The route is included
 in sitemap, tools catalog and LLM catalog; physiology docs and the estimation
 tool link to it. The OG illustration is labeled as illustrative.
 
+The methods section identifies each criterion's research background, links to
+nine papers and explains protocol-dependent interpretation. It distinguishes
+the original oxygen-uptake Log-log model from this intensity-based application,
+fitted/observed Dmax anchors and the inclusive 0.4 mmol/L rule from the strict
+wording in Jamnick (2018). The software reference and physiological evidence are
+separate. Paper links open another tab to retain the current test input.
+
 ## Analytics and privacy
 
 Tool ID `lactate_curve_calculator` is shared by Docs and App's source allowlist.
