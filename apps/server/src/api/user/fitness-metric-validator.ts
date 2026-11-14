@@ -53,8 +53,6 @@ export function validateFitnessMetricCandidate(
   const cp = positive(context[UserFitnessMetricType.CP]);
   const ftp = positive(context[UserFitnessMetricType.FTP]);
   const pMax = positive(context[UserFitnessMetricType.P_MAX]);
-  const cs = positive(context[UserFitnessMetricType.CS]);
-  const tp = positive(context[UserFitnessMetricType.TP]);
 
   if (type === UserFitnessMetricType.LTHR) {
     if (options.requireReferenceMetrics && !maxHr) {
@@ -119,19 +117,8 @@ export function validateFitnessMetricCandidate(
     return invalid('threshold_power_above_pmax');
   }
 
-  if (type === UserFitnessMetricType.TP && cs) {
-    const ratio = value / cs;
-    if (ratio < 0.7 || ratio > 1.05) {
-      return invalid('tp_not_consistent_with_cs');
-    }
-  }
-  if (type === UserFitnessMetricType.CS && tp) {
-    const ratio = tp / value;
-    if (ratio < 0.7 || ratio > 1.05) {
-      return invalid('cs_not_consistent_with_tp');
-    }
-  }
-
+  // TP and CS are independently updated and may use different evidence windows.
+  // Validate their own bounds without requiring the other metric to change.
   return { valid: true };
 }
 
