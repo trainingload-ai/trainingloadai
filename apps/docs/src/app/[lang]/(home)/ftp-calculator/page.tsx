@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -418,7 +419,10 @@ export default async function FtpCalculatorPage({
               <p className={styles.methodGroupLead}>
                 {tPage("sections.protocols.groups.direct.description")}
               </p>
-              <div className={styles.tableWrap}>
+              <ScrollableRegion
+                label={tPage("sections.protocols.caption")}
+                className={styles.tableWrap}
+              >
                 <table className={`${styles.table} ${styles.tableWide}`}>
                   <caption className="sr-only">
                     {tPage("sections.protocols.caption")}
@@ -445,7 +449,7 @@ export default async function FtpCalculatorPage({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollableRegion>
               <p className={styles.note}>
                 {tPage("sections.protocols.example")}
               </p>
@@ -522,7 +526,10 @@ export default async function FtpCalculatorPage({
           </Section>
 
           <Section id="levels" title={tPage("sections.levels.title")}>
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("sections.levels.caption")}
+              className={styles.tableWrap}
+            >
               <table className={`${styles.table} ${styles.tableMid}`}>
                 <caption className="sr-only">
                   {tPage("sections.levels.caption")}
@@ -546,7 +553,7 @@ export default async function FtpCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.sourceNote}>
               {tPage("sections.levels.source")}
             </p>
@@ -557,7 +564,10 @@ export default async function FtpCalculatorPage({
             title={tPage("sections.categories.title")}
             description={tPage("sections.categories.description")}
           >
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("sections.categories.caption")}
+              className={styles.tableWrap}
+            >
               <table className={`${styles.table} ${styles.tableWide}`}>
                 <caption className="sr-only">
                   {tPage("sections.categories.caption")}
@@ -598,7 +608,7 @@ export default async function FtpCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.note}>
               {tPage("sections.categories.wattNote")}
             </p>

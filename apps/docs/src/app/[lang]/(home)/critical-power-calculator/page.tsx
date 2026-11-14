@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -288,7 +289,10 @@ export default async function CriticalPowerCalculatorPage({
           <CriticalPowerCalculatorClient
             methods={
               <Fragment key="cp-methods">
-                <div className={styles.tableWrap}>
+                <ScrollableRegion
+                  label={tPage("sections.methods.caption")}
+                  className={styles.tableWrap}
+                >
                   <table className={styles.table}>
                     <caption className="sr-only">
                       {tPage("sections.methods.caption")}
@@ -315,7 +319,7 @@ export default async function CriticalPowerCalculatorPage({
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </ScrollableRegion>
                 <p className={styles.note}>
                   {tPage("sections.methods.example")}
                 </p>

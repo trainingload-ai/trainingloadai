@@ -288,7 +288,7 @@ export function PmcFitnessChartGuide({
               className="rounded-overlay border border-neutral-200 bg-card p-5 dark:border-white/10"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-300">
+                <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   0{index + 1}
                 </span>
                 <h3 className="font-black">{scenario}</h3>
@@ -342,7 +342,7 @@ export function PmcFitnessChartGuide({
                 <div className="flex items-start gap-3">
                   <CheckCircle2
                     aria-hidden="true"
-                    className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-300"
+                    className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-300"
                   />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">

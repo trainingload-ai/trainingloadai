@@ -25,8 +25,7 @@ export function ReleaseBanner({
   };
 
   return (
-    <aside
-      aria-label={t("ariaLabel")}
+    <div
       className={cn(
         "w-full border-y border-border/70 bg-background/95 text-foreground backdrop-blur supports-[backdrop-filter]:bg-background/85",
         className,
@@ -71,6 +70,6 @@ export function ReleaseBanner({
           />
         </a>
       </div>
-    </aside>
+    </div>
   );
 }

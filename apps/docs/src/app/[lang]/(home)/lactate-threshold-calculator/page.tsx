@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -435,7 +436,10 @@ export default async function LactateThresholdCalculatorPage({
             title={tPage("sections.chart.title")}
             description={tPage("sections.chart.description")}
           >
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("sections.chart.caption")}
+              className={styles.tableWrap}
+            >
               <table className={styles.table}>
                 <caption className="sr-only">
                   {tPage("sections.chart.caption")}
@@ -481,7 +485,7 @@ export default async function LactateThresholdCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.note}>{tPage("sections.chart.note")}</p>
           </Section>
 
@@ -490,7 +494,10 @@ export default async function LactateThresholdCalculatorPage({
             title={tPage("sections.protocols.title")}
             description={tPage("sections.protocols.description")}
           >
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("sections.protocols.caption")}
+              className={styles.tableWrap}
+            >
               <table className={styles.table}>
                 <caption className="sr-only">
                   {tPage("sections.protocols.caption")}
@@ -517,7 +524,7 @@ export default async function LactateThresholdCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <div className={styles.sourceLinks}>
               <span>{tPage("sections.protocols.sources")}:</span>
               <a

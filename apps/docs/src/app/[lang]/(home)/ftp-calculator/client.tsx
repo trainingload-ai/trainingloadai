@@ -14,6 +14,8 @@ import { Loader2, Printer, Share2, SlidersHorizontal } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -549,6 +551,7 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
     () => parsePositiveNumber(weightText),
     [weightText],
   );
+  const fields = useCommittedFields();
   const weightLimits = bodyMassLimits(units);
   const canonicalKg = useMemo(
     () => parsePositiveNumber(weightKgText),
@@ -560,6 +563,12 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
       weightRaw < weightLimits.min ||
       weightRaw > weightLimits.max);
   const bodyWeightKg = weightInvalid ? null : canonicalKg;
+  const showPowerError = powerInvalid && fields.isCommitted("power", powerText);
+  const powerError = showPowerError ? t("manual.invalidPower") : "";
+  const showWeightError = weightInvalid && fields.isCommitted("weight", weightText);
+  const weightError = showWeightError
+    ? (units === "imperial" ? t("manual.invalidWeightLb") : t("manual.invalidWeight"))
+    : "";
 
   function onWeightInput(value: string) {
     setWeightText(value);
@@ -896,7 +905,9 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
                 value={powerText}
                 placeholder={t("manual.powerPlaceholder")}
                 onChange={(event) => setPowerText(event.target.value)}
-                aria-invalid={powerInvalid}
+                aria-invalid={showPowerError}
+                aria-describedby={showPowerError ? "ftp-power-error" : undefined}
+                onBlur={() => fields.commit("power", powerText)}
               />
             </div>
             <div className={styles.field}>
@@ -915,20 +926,23 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
                     : t("manual.weightPlaceholder")
                 }
                 onChange={(event) => onWeightInput(event.target.value)}
-                aria-invalid={weightInvalid}
+                aria-invalid={showWeightError}
+                aria-describedby={showWeightError ? "ftp-weight-error" : undefined}
+                onBlur={() => fields.commit("weight", weightText)}
               />
             </div>
           </div>
-          {powerInvalid ? (
-            <p role="alert" className={styles.alert}>
-              {t("manual.invalidPower")}
+          {showPowerError ? (
+            <p id="ftp-power-error" className={styles.alert}>
+              {powerError}
             </p>
           ) : null}
-          {weightInvalid ? (
-            <p role="alert" className={styles.alert}>
-              {units === "imperial" ? t("manual.invalidWeightLb") : t("manual.invalidWeight")}
+          {showWeightError ? (
+            <p id="ftp-weight-error" className={styles.alert}>
+              {weightError}
             </p>
           ) : null}
+          <FieldErrorAnnouncement message={[powerError, weightError].filter(Boolean).join(" ")} />
         </TabsContent>
 
         <TabsContent value="file" className={styles.filePanel}>

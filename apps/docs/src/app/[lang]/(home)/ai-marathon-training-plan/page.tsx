@@ -1,9 +1,10 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import { JsonLd } from "@/components/JsonLd";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ContentFreshness } from "@/components/ContentFreshness";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import {
@@ -178,19 +179,24 @@ export default async function AiMarathonPlanPage({
             {ui.subtitle}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={appUrl}>
-              <Button className="h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400">
-                {ui.primary}
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
+            <Link
+              href={appUrl}
+              className={cn(
+                buttonVariants({}),
+                "h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400",
+              )}
+            >
+              {ui.primary}
+              <ArrowRight className="ml-2 size-4" />
             </Link>
-            <Link href={`${prefix}/ai-training-plan`}>
-              <Button
-                variant="outline"
-                className="h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
-              >
-                {ui.secondary}
-              </Button>
+            <Link
+              href={`${prefix}/ai-training-plan`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10",
+              )}
+            >
+              {ui.secondary}
             </Link>
           </div>
         </div>
@@ -275,42 +281,50 @@ export default async function AiMarathonPlanPage({
           ))}
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href={`${prefix}/marathon-training-plan`}>
-            <Button
-              variant="outline"
-              className="h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10"
-            >
-              {ui.docsAction}
-            </Button>
+          <Link
+            href={`${prefix}/marathon-training-plan`}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10",
+            )}
+          >
+            {ui.docsAction}
           </Link>
-          <Link href={`${prefix}/ai-half-marathon-training-plan`}>
-            <Button
-              variant="outline"
-              className="h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10"
-            >
-              {ui.siblingAction}
-            </Button>
+          <Link
+            href={`${prefix}/ai-half-marathon-training-plan`}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10",
+            )}
+          >
+            {ui.siblingAction}
           </Link>
-          <Link href={`${prefix}/vdot-calculator`}>
-            <Button
-              variant="outline"
-              className="h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10"
-            >
-              {tCommon("vdotCalculatorAction")}
-            </Button>
+          <Link
+            href={`${prefix}/vdot-calculator`}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10",
+            )}
+          >
+            {tCommon("vdotCalculatorAction")}
           </Link>
-          <Link href={`${prefix}/training-load`}>
-            <Button
-              variant="outline"
-              className="h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10"
-            >
-              {tCommon("trainingLoadAction")}
-            </Button>
+          <Link
+            href={`${prefix}/training-load`}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-10 rounded-compact border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 dark:border-white/20 dark:bg-transparent dark:text-neutral-200 dark:hover:bg-white/10",
+            )}
+          >
+            {tCommon("trainingLoadAction")}
           </Link>
-          <Link href={appUrl}>
-            <Button className="h-10 rounded-compact bg-neutral-950 px-4 text-xs font-semibold text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200">
-              {ui.productAction}
-            </Button>
+          <Link
+            href={appUrl}
+            className={cn(
+              buttonVariants({}),
+              "h-10 rounded-compact bg-neutral-950 px-4 text-xs font-semibold text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200",
+            )}
+          >
+            {ui.productAction}
           </Link>
         </div>
       </section>
@@ -326,11 +340,15 @@ export default async function AiMarathonPlanPage({
               {ui.ctaText}
             </p>
           </div>
-          <Link href={appUrl}>
-            <Button className="h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent">
-              {ui.primary}
-              <CalendarDays className="ml-2 size-4" />
-            </Button>
+          <Link
+            href={appUrl}
+            className={cn(
+              buttonVariants({}),
+              "h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent",
+            )}
+          >
+            {ui.primary}
+            <CalendarDays className="ml-2 size-4" />
           </Link>
         </div>
       </section>

@@ -1,9 +1,10 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, CheckCircle2, CircleDashed, Scale } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ContentFreshness } from "@/components/ContentFreshness";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
@@ -188,27 +189,33 @@ export default async function AlternativesPage({
             {t("definition")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={appUrl}>
-              <Button className="h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400">
-                {t("primary")}
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
+            <Link
+              href={appUrl}
+              className={cn(
+                buttonVariants({}),
+                "h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400",
+              )}
+            >
+              {t("primary")}
+              <ArrowRight className="ml-2 size-4" />
             </Link>
-            <Link href={`${prefix}/training-load`}>
-              <Button
-                variant="outline"
-                className="h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
-              >
-                {t("secondary")}
-              </Button>
+            <Link
+              href={`${prefix}/training-load`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10",
+              )}
+            >
+              {t("secondary")}
             </Link>
-            <Link href={`${prefix}/ai-training-plan`}>
-              <Button
-                variant="outline"
-                className="h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
-              >
-                {t("tertiary")}
-              </Button>
+            <Link
+              href={`${prefix}/ai-training-plan`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10",
+              )}
+            >
+              {t("tertiary")}
             </Link>
           </div>
         </div>
@@ -401,11 +408,15 @@ export default async function AlternativesPage({
               {t("ctaText")}
             </p>
           </div>
-          <Link href={appUrl}>
-            <Button className="h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent">
-              {t("primary")}
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
+          <Link
+            href={appUrl}
+            className={cn(
+              buttonVariants({}),
+              "h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent",
+            )}
+          >
+            {t("primary")}
+            <ArrowRight className="ml-2 size-4" />
           </Link>
         </div>
       </section>

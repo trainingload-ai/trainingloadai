@@ -1,4 +1,6 @@
 "use client";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
+
 import { InputSource } from "@/components/calculators/input-source";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -523,7 +525,10 @@ export function VdotCalculatorClient({
             <div className={styles.posterTables} id="equivalents">
               {result ? (
                 <>
-                  <div className={styles.tableWrap}>
+                  <ScrollableRegion
+                    label={t("raceEquivalents.title")}
+                    className={styles.tableWrap}
+                  >
                     <table className={styles.table}>
                       <caption className="sr-only">
                         {t("raceEquivalents.title")}
@@ -553,7 +558,7 @@ export function VdotCalculatorClient({
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollableRegion>
                   <p className={styles.note}>
                     <a
                       className={styles.textLink}

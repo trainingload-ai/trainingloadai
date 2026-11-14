@@ -100,6 +100,7 @@ export function McpTerminalDemo({
       <p className="sr-only">{copy.accessibleSummary}</p>
       <div
         aria-hidden="true"
+        inert
         data-mcp-scenario={scenarioIndex + 1}
         data-mcp-stage={visualStage}
         data-testid="mcp-terminal-demo"

@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getImageProps } from "next/image";
 
+import { ThemedImage, imageSetFromSrcSet } from "@/components/ThemedImage";
 import { TrackedLink } from "@/components/TrackedLink";
 import { ProductBrowserChrome } from "@/components/ProductBrowserChrome";
 import {
@@ -44,9 +45,8 @@ export function HomeHeroDemoPreview({
     getImageProps({
       src: `/5k-training-plan/${mobile ? "mobile" : "web"}-home${dark ? "-dark" : ""}-v2-${previewLocale}.png`,
       alt: "",
-      width: mobile ? 1320 : 1440,
+      width: mobile ? 390 : 1152,
       height: mobile ? 2868 : 960,
-      sizes: mobile ? "100vw" : "(min-width: 1280px) 1152px, 100vw",
       loading: "eager",
       fetchPriority: "high",
     }).props;
@@ -175,30 +175,23 @@ export function HomeHeroDemoPreview({
           aria-hidden={ready}
           inert={ready}
         >
-          <picture>
-            <source
-              media="(prefers-color-scheme: dark) and (max-width: 639px)"
-              srcSet={previewImage(true, true).srcSet}
-              sizes="100vw"
-            />
-            <source
-              media="(prefers-color-scheme: dark)"
-              srcSet={previewImage(false, true).srcSet}
-              sizes="(min-width: 1280px) 1152px, 100vw"
-            />
-            <source
-              media="(max-width: 639px)"
-              srcSet={previewImage(true).srcSet}
-              sizes="100vw"
-            />
-            {/* Only the matching theme/breakpoint is downloaded. Next's image
-                endpoint supplies a resized, compressed version of the PNG. */}
-            <img
-              {...previewImage(false)}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover object-top"
-            />
-          </picture>
+          <ThemedImage
+            light={imageSetFromSrcSet(previewImage(false).srcSet!)}
+            dark={imageSetFromSrcSet(previewImage(false, true).srcSet!)}
+            mobileLight={imageSetFromSrcSet(previewImage(true).srcSet!)}
+            mobileDark={imageSetFromSrcSet(previewImage(true, true).srcSet!)}
+            alt=""
+            width={1440}
+            height={960}
+            eager
+            preload={{
+              light: previewImage(false).srcSet!,
+              dark: previewImage(false, true).srcSet!,
+              mobileLight: previewImage(true).srcSet!,
+              mobileDark: previewImage(true, true).srcSet!,
+            }}
+            className="absolute inset-0 h-full w-full"
+          />
           {timedOut ? (
             <div className="absolute inset-0 flex items-center justify-center bg-neutral-950/20 p-4 text-foreground backdrop-blur-md dark:bg-black/55 sm:p-6">
               <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-overlay border border-border/80 bg-card/[0.94] p-5 text-center shadow-[0_24px_80px_-32px_rgba(25,27,24,0.58)] backdrop-blur-xl dark:bg-card/[0.9] dark:shadow-black/60 sm:p-6">

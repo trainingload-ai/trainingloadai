@@ -61,6 +61,7 @@ export function DocsTaskCard({
             webLabel={t("webPlatform")}
             mobileLabel={t("mobilePlatform")}
             preload={preload}
+            imageWidth={320}
           />
         </div>
       ) : null}

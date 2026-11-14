@@ -126,7 +126,11 @@ function PolarLogo({
       viewBox="0 0 122 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("inline-block shrink-0", logoToneClassName(tone), className)}
+      className={cn(
+        "inline-block shrink-0",
+        logoToneClassName(tone),
+        className,
+      )}
       aria-hidden="true"
     >
       <path
@@ -205,7 +209,11 @@ function WahooLogo({
       viewBox="0 0 273 67"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("inline-block shrink-0", logoToneClassName(tone), className)}
+      className={cn(
+        "inline-block shrink-0",
+        logoToneClassName(tone),
+        className,
+      )}
       aria-hidden="true"
     >
       <path
@@ -228,7 +236,11 @@ function WhoopLogo({
       viewBox="0 0 205 35"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("inline-block shrink-0", logoToneClassName(tone), className)}
+      className={cn(
+        "inline-block shrink-0",
+        logoToneClassName(tone),
+        className,
+      )}
       aria-hidden="true"
     >
       <path
@@ -291,7 +303,11 @@ function SuuntoLogo({
       viewBox="0 0 150 49"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("inline-block shrink-0", logoToneClassName(tone), className)}
+      className={cn(
+        "inline-block shrink-0",
+        logoToneClassName(tone),
+        className,
+      )}
       aria-hidden="true"
     >
       <g fill="none" fillRule="evenodd">
@@ -464,7 +480,7 @@ export function HomeHeroWorksWith({
       <div className="text-center text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-6 opacity-80">
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-6">
         {livePlatforms.map((platform) => (
           <IntegrationLogo
             key={platform.id}
@@ -479,9 +495,7 @@ export function HomeHeroWorksWith({
             )}
           />
         ))}
-        <span className="text-base text-muted-foreground">
-          {moreLabel}
-        </span>
+        <span className="text-base text-muted-foreground">{moreLabel}</span>
       </div>
     </div>
   );
@@ -514,10 +528,7 @@ function PlatformLogoRow({
 
   return (
     <div
-      className={cn(
-        isPlannedRow &&
-          "border-t border-border pt-10 md:pt-12",
-      )}
+      className={cn(isPlannedRow && "border-t border-border pt-10 md:pt-12")}
     >
       {comingSoonLabel ? (
         <p className="mb-6 text-center text-sm font-medium text-muted-foreground">

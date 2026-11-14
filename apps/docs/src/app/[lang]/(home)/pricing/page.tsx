@@ -223,7 +223,7 @@ export default async function PricingPage({
       <JsonLd id="pricing-structured-data" data={structuredData} />
 
       <section className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-300">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
           {t("eyebrow")}
         </p>
         <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">
@@ -238,6 +238,7 @@ export default async function PricingPage({
       </section>
 
       <PricingPlansSection
+        heading={t("billingToggle.label")}
         appUrl={appUrl}
         creditLabels={creditLabels}
         newUserGift={newUserGift}

@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -967,228 +967,258 @@ export function LactateThresholdCalculatorClient({
                 </TabsTrigger>
               ))}
             </TabsList>
-          </Tabs>
-          <fieldset className={styles.inputSources}>
-            <legend className="sr-only">{t("source.label")}</legend>
-            <span className={styles.inputSourceLabel} aria-hidden="true">
-              {t("source.label")}
-            </span>
-            <div className={styles.inputSourceOptions}>
-              {(["manual", "file"] as const).map((source) => (
-                <label key={source}>
-                  <input
-                    type="radio"
-                    name="lt-input-source"
-                    value={source}
-                    checked={inputTab === source}
-                    onChange={() => setInputTab(source)}
-                  />
-                  <span>{t(`source.${source}`)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          {inputTab === "file" ? (
-            <ThresholdFileInput
-              key={metric}
-              metric={metric}
-              onResult={useFileResult}
-              onReset={resetFileResult}
-            />
-          ) : (
-            <>
-              <p className={styles.fileHint}>
-                {t(`inputs.metric.hint.${metric}`)}
-              </p>
-              <div className={styles.formStack}>
-                {metric === "RACE" ? (
+            {METRICS.map((key) => (
+              <TabsContent key={key} value={key} className="mt-0">
+                {key === metric ? (
                   <>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-race-preset">
-                        {t("race.preset.label")}
-                      </Label>
-                      <Select
-                        value={racePreset}
-                        onValueChange={(value) =>
-                          setRacePreset(value as RacePresetKey)
-                        }
+                    <fieldset className={styles.inputSources}>
+                      <legend className="sr-only">{t("source.label")}</legend>
+                      <span
+                        className={styles.inputSourceLabel}
+                        aria-hidden="true"
                       >
-                        <SelectTrigger id="lt-race-preset" className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {RACE_PRESETS.map((preset) => (
-                            <SelectItem key={preset} value={preset}>
-                              {t(`race.presets.${preset}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {racePreset === "custom" ? (
-                      <div className={styles.field}>
-                        <Label htmlFor="lt-race-distance">
-                          {units === "imperial"
-                            ? t("race.distanceMi.label")
-                            : t("race.distanceKm.label")}
-                        </Label>
-                        <UnitInput
-                          id="lt-race-distance"
-                          suffix={distanceUnit}
-                          inputMode="decimal"
-                          placeholder={
-                            units === "imperial"
-                              ? t("race.distanceMi.placeholder")
-                              : t("race.distanceKm.placeholder")
-                          }
-                          value={raceDistanceText}
-                          onChange={(event) =>
-                            setRaceDistanceText(event.target.value)
-                          }
-                          aria-invalid={
-                            raceDistanceText.trim() !== "" &&
-                            !parsePositiveNumber(raceDistanceText)
-                          }
-                        />
+                        {t("source.label")}
+                      </span>
+                      <div className={styles.inputSourceOptions}>
+                        {(["manual", "file"] as const).map((source) => (
+                          <label key={source}>
+                            <input
+                              type="radio"
+                              name="lt-input-source"
+                              value={source}
+                              checked={inputTab === source}
+                              onChange={() => setInputTab(source)}
+                            />
+                            <span>{t(`source.${source}`)}</span>
+                          </label>
+                        ))}
                       </div>
-                    ) : null}
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-race-time">
-                        {t("race.time.label")}
-                      </Label>
-                      <Input
-                        id="lt-race-time"
-                        inputMode="text"
-                        placeholder={t("race.time.placeholder")}
-                        value={raceTimeText}
-                        onChange={(event) =>
-                          setRaceTimeText(event.target.value)
-                        }
-                        aria-invalid={
-                          raceTimeText.trim() !== "" && !raceTimeSeconds
-                        }
+                    </fieldset>
+                    {inputTab === "file" ? (
+                      <ThresholdFileInput
+                        key={metric}
+                        metric={metric}
+                        onResult={useFileResult}
+                        onReset={resetFileResult}
                       />
-                    </div>
+                    ) : (
+                      <>
+                        <p className={styles.fileHint}>
+                          {t(`inputs.metric.hint.${metric}`)}
+                        </p>
+                        <div className={styles.formStack}>
+                          {metric === "RACE" ? (
+                            <>
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-race-preset">
+                                  {t("race.preset.label")}
+                                </Label>
+                                <Select
+                                  value={racePreset}
+                                  onValueChange={(value) =>
+                                    setRacePreset(value as RacePresetKey)
+                                  }
+                                >
+                                  <SelectTrigger
+                                    id="lt-race-preset"
+                                    className="w-full"
+                                  >
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {RACE_PRESETS.map((preset) => (
+                                      <SelectItem key={preset} value={preset}>
+                                        {t(`race.presets.${preset}`)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              {racePreset === "custom" ? (
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-race-distance">
+                                    {units === "imperial"
+                                      ? t("race.distanceMi.label")
+                                      : t("race.distanceKm.label")}
+                                  </Label>
+                                  <UnitInput
+                                    id="lt-race-distance"
+                                    suffix={distanceUnit}
+                                    inputMode="decimal"
+                                    placeholder={
+                                      units === "imperial"
+                                        ? t("race.distanceMi.placeholder")
+                                        : t("race.distanceKm.placeholder")
+                                    }
+                                    value={raceDistanceText}
+                                    onChange={(event) =>
+                                      setRaceDistanceText(event.target.value)
+                                    }
+                                    aria-invalid={
+                                      raceDistanceText.trim() !== "" &&
+                                      !parsePositiveNumber(raceDistanceText)
+                                    }
+                                  />
+                                </div>
+                              ) : null}
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-race-time">
+                                  {t("race.time.label")}
+                                </Label>
+                                <Input
+                                  id="lt-race-time"
+                                  inputMode="text"
+                                  placeholder={t("race.time.placeholder")}
+                                  value={raceTimeText}
+                                  onChange={(event) =>
+                                    setRaceTimeText(event.target.value)
+                                  }
+                                  aria-invalid={
+                                    raceTimeText.trim() !== "" &&
+                                    !raceTimeSeconds
+                                  }
+                                />
+                              </div>
+                            </>
+                          ) : null}
+
+                          {metric === "HEART_RATE" ? (
+                            <div className={styles.field}>
+                              <Label htmlFor="lt-hr">
+                                {t("heartRate.avgHr20.label")}
+                              </Label>
+                              <UnitInput
+                                id="lt-hr"
+                                suffix="bpm"
+                                inputMode="numeric"
+                                placeholder={t("heartRate.avgHr20.placeholder")}
+                                value={avgHr20Text}
+                                onChange={(event) =>
+                                  setAvgHr20Text(event.target.value)
+                                }
+                                aria-invalid={
+                                  avgHr20Text.trim() !== "" && !avgHr20
+                                }
+                              />
+                            </div>
+                          ) : null}
+
+                          {metric === "POWER" ? (
+                            <>
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-protocol">
+                                  {t("power.protocol.label")}
+                                </Label>
+                                <Select
+                                  value={powerProtocol}
+                                  onValueChange={(value) =>
+                                    setPowerProtocol(value as PowerProtocol)
+                                  }
+                                >
+                                  <SelectTrigger
+                                    id="lt-protocol"
+                                    className="w-full"
+                                  >
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="20MIN">
+                                      {t("power.protocols.20min")}
+                                    </SelectItem>
+                                    <SelectItem value="8MIN">
+                                      {t("power.protocols.8min")}
+                                    </SelectItem>
+                                    <SelectItem value="60MIN">
+                                      {t("power.protocols.60min")}
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-power">
+                                  {t("power.avgPower.label")}
+                                </Label>
+                                <UnitInput
+                                  id="lt-power"
+                                  suffix="W"
+                                  inputMode="numeric"
+                                  placeholder={t("power.avgPower.placeholder")}
+                                  value={avgPowerText}
+                                  onChange={(event) =>
+                                    setAvgPowerText(event.target.value)
+                                  }
+                                  aria-invalid={
+                                    avgPowerText.trim() !== "" && !avgPower
+                                  }
+                                />
+                              </div>
+                            </>
+                          ) : null}
+
+                          {metric === "PACE" ? (
+                            <div className={styles.effortGrid}>
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-distance">
+                                  {units === "imperial"
+                                    ? t("pace.distanceMi.label")
+                                    : t("pace.distanceKm.label")}
+                                </Label>
+                                <UnitInput
+                                  id="lt-distance"
+                                  suffix={distanceUnit}
+                                  inputMode="decimal"
+                                  placeholder={
+                                    units === "imperial"
+                                      ? t("pace.distanceMi.placeholder")
+                                      : t("pace.distanceKm.placeholder")
+                                  }
+                                  value={distanceText}
+                                  onChange={(event) =>
+                                    setDistanceText(event.target.value)
+                                  }
+                                  aria-invalid={
+                                    distanceText.trim() !== "" &&
+                                    !parsePositiveNumber(distanceText)
+                                  }
+                                />
+                              </div>
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-time">
+                                  {t("pace.time.label")}
+                                </Label>
+                                <Input
+                                  id="lt-time"
+                                  inputMode="text"
+                                  placeholder={t("pace.time.placeholder")}
+                                  value={timeText}
+                                  onChange={(event) =>
+                                    setTimeText(event.target.value)
+                                  }
+                                  aria-invalid={
+                                    timeText.trim() !== "" && !timeSeconds
+                                  }
+                                />
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {warnings.length > 0 ? (
+                            <div role="status" className={styles.alert}>
+                              <ul>
+                                {warnings.map((warning) => (
+                                  <li key={warning}>{warning}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : null}
+                        </div>
+                      </>
+                    )}
                   </>
                 ) : null}
-
-                {metric === "HEART_RATE" ? (
-                  <div className={styles.field}>
-                    <Label htmlFor="lt-hr">
-                      {t("heartRate.avgHr20.label")}
-                    </Label>
-                    <UnitInput
-                      id="lt-hr"
-                      suffix="bpm"
-                      inputMode="numeric"
-                      placeholder={t("heartRate.avgHr20.placeholder")}
-                      value={avgHr20Text}
-                      onChange={(event) => setAvgHr20Text(event.target.value)}
-                      aria-invalid={avgHr20Text.trim() !== "" && !avgHr20}
-                    />
-                  </div>
-                ) : null}
-
-                {metric === "POWER" ? (
-                  <>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-protocol">
-                        {t("power.protocol.label")}
-                      </Label>
-                      <Select
-                        value={powerProtocol}
-                        onValueChange={(value) =>
-                          setPowerProtocol(value as PowerProtocol)
-                        }
-                      >
-                        <SelectTrigger id="lt-protocol" className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="20MIN">
-                            {t("power.protocols.20min")}
-                          </SelectItem>
-                          <SelectItem value="8MIN">
-                            {t("power.protocols.8min")}
-                          </SelectItem>
-                          <SelectItem value="60MIN">
-                            {t("power.protocols.60min")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-power">
-                        {t("power.avgPower.label")}
-                      </Label>
-                      <UnitInput
-                        id="lt-power"
-                        suffix="W"
-                        inputMode="numeric"
-                        placeholder={t("power.avgPower.placeholder")}
-                        value={avgPowerText}
-                        onChange={(event) =>
-                          setAvgPowerText(event.target.value)
-                        }
-                        aria-invalid={avgPowerText.trim() !== "" && !avgPower}
-                      />
-                    </div>
-                  </>
-                ) : null}
-
-                {metric === "PACE" ? (
-                  <div className={styles.effortGrid}>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-distance">
-                        {units === "imperial"
-                          ? t("pace.distanceMi.label")
-                          : t("pace.distanceKm.label")}
-                      </Label>
-                      <UnitInput
-                        id="lt-distance"
-                        suffix={distanceUnit}
-                        inputMode="decimal"
-                        placeholder={
-                          units === "imperial"
-                            ? t("pace.distanceMi.placeholder")
-                            : t("pace.distanceKm.placeholder")
-                        }
-                        value={distanceText}
-                        onChange={(event) =>
-                          setDistanceText(event.target.value)
-                        }
-                        aria-invalid={
-                          distanceText.trim() !== "" &&
-                          !parsePositiveNumber(distanceText)
-                        }
-                      />
-                    </div>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-time">{t("pace.time.label")}</Label>
-                      <Input
-                        id="lt-time"
-                        inputMode="text"
-                        placeholder={t("pace.time.placeholder")}
-                        value={timeText}
-                        onChange={(event) => setTimeText(event.target.value)}
-                        aria-invalid={timeText.trim() !== "" && !timeSeconds}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-
-                {warnings.length > 0 ? (
-                  <div role="status" className={styles.alert}>
-                    <ul>
-                      {warnings.map((warning) => (
-                        <li key={warning}>{warning}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
-            </>
-          )}
+              </TabsContent>
+            ))}
+          </Tabs>
         </section>
       </div>
 

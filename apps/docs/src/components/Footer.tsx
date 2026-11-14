@@ -23,9 +23,9 @@ function FooterLinkGroup({
 }) {
   return (
     <nav aria-labelledby={id} className="flex min-w-0 flex-col items-start">
-      <h3 id={id} className="mb-3 text-sm font-semibold text-foreground">
+      <h2 id={id} className="mb-3 text-sm font-semibold text-foreground">
         {title}
-      </h3>
+      </h2>
       <ul>
         {links.map((link) => (
           <li key={link.href}>
@@ -106,6 +106,7 @@ export async function Footer({ lang }: { lang: string }) {
         <div className="flex max-w-sm flex-col items-start">
           <Link
             href={withLocalePath(lang, "/")}
+            aria-label="Trainingload.ai"
             className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-secondary"
           >
             <Image
