@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
@@ -430,31 +432,32 @@ export function PowerZonesCalculatorClient({
             </div>
           </div>
         </section>
-        <div className={`${styles.posterActions} pz-share-actions`}>
-          <Select
-            value={model}
-            onValueChange={(value) => {
-              setModel(value as PowerZoneModel);
-              setExample(false);
-            }}
-          >
-            <SelectTrigger
-              aria-label={t("scorecard.switchModel")}
-              className={styles.modelAction}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POWER_ZONE_MODELS.map((key) => (
-                <SelectItem key={key} value={key}>
-                  {t(`inputs.model.options.${key.toLowerCase()}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <a href={guideHref} className={styles.secondaryAction}>
-            {t("scorecard.guide")}
-          </a>
+        <ToolResultActions
+          className="pz-share-actions"
+          leading={
+            <>
+              <Select
+                value={model}
+                onValueChange={(value) => {
+                  setModel(value as PowerZoneModel);
+                  setExample(false);
+                }}
+              >
+                <SelectTrigger aria-label={t("scorecard.switchModel")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {POWER_ZONE_MODELS.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {t(`inputs.model.options.${key.toLowerCase()}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <a href={guideHref}>{t("scorecard.guide")}</a>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -475,7 +478,7 @@ export function PowerZonesCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copiedLink ? t("scorecard.copied") : t("scorecard.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p role="alert" className={styles.inputError}>
             {t("scorecard.shareError")}

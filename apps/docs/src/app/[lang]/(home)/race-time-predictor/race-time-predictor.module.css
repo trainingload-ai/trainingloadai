@@ -263,30 +263,22 @@
 }
 
 .poster {
-  --score-frame: #17201c;
-  --score-paper: #f7f3e9;
-  --score-green: #76efa3;
-  --score-yellow: #f5cf58;
-  --score-coral: #ff766a;
+  composes: theme from "../../../../components/tool-scorecard.module.css";
   position: relative;
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
-  border: 0;
+  border: 1px solid var(--score-line, var(--border));
   border-radius: var(--tl-radius-surface);
-  background: #07110f;
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
 }
 
-:global(.dark) .poster {
-  --score-frame: #f5f0e4;
-}
-
 .posterSheet {
   background-image:
-    linear-gradient(rgb(118 239 163 / 8%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(118 239 163 / 8%) 1px, transparent 1px);
+    linear-gradient(var(--score-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--score-grid) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -295,8 +287,8 @@
   align-items: center;
   justify-content: flex-end;
   min-height: 3rem;
-  border-bottom: 2px solid rgb(247 243 233 / 42%);
-  background: #07110f;
+  border-bottom: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-bg, var(--card));
   padding: 0.75rem 1.3rem;
 }
 
@@ -334,7 +326,7 @@
 }
 
 .posterEyebrow {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 800;
@@ -361,7 +353,7 @@
 
 .posterProtocol {
   margin-top: 0.9rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.5;
@@ -369,7 +361,7 @@
 
 .pride {
   min-width: 0;
-  border-left: 1px solid rgb(247 243 233 / 30%);
+  border-left: 1px solid var(--score-line, var(--border));
   padding: 0.2rem 0 0.2rem 1.3rem;
 }
 
@@ -392,7 +384,7 @@
 
 .bandCaption {
   margin-top: 0.55rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   line-height: 1.45;
 }
@@ -407,7 +399,7 @@
 }
 
 .assumptionList li {
-  border: 1px solid rgb(247 243 233 / 28%);
+  border: 1px solid var(--score-line, var(--border));
   padding: 0.2rem 0.45rem;
   color: var(--score-paper);
   font-size: 0.68rem;
@@ -421,8 +413,8 @@
 }
 
 .predictWrap {
-  border-top: 2px solid rgb(247 243 233 / 42%);
-  background: #0d1813;
+  border-top: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-panel, var(--secondary));
   padding: 0.85rem 1.1rem 1rem;
   overflow-x: auto;
 }
@@ -438,14 +430,14 @@
 .predictTable th,
 .predictTable td {
   padding: 0.42rem 0.45rem;
-  border-bottom: 1px solid rgb(247 243 233 / 14%);
+  border-bottom: 1px solid var(--score-line, var(--border));
   text-align: left;
   font-size: 0.82rem;
   font-weight: 650;
 }
 
 .predictTable thead th {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.68rem;
   font-weight: 800;
@@ -454,7 +446,7 @@
 }
 
 .predictTable tr[data-highlight="true"] {
-  background: rgb(118 239 163 / 14%);
+  background: var(--score-highlight);
 }
 
 .predictTable tr[data-highlight="true"] td:nth-child(2) {
@@ -478,30 +470,10 @@
 
 .formulaEcho {
   padding: 0.7rem 1.2rem 0.95rem;
-  background: #07110f;
-  color: #b8c0b9;
+  background: var(--score-bg, var(--card));
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   line-height: 1.5;
-}
-
-.posterActions {
-  display: flex;
-  width: min(100%, 800px);
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.posterActions > :is(button, a) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.5rem;
-  min-height: 2.5rem;
-  gap: 0.45rem;
-  padding: 0 0.75rem;
-  box-shadow: none;
 }
 
 .primaryAction {
@@ -641,10 +613,10 @@ ol.educationList {
 .resultGuidance {
   display: grid;
   gap: 0.55rem;
-  border-top: 1px solid rgb(247 243 233 / 30%);
-  background: #07110f;
+  border-top: 1px solid var(--score-line, var(--border));
+  background: var(--score-bg, var(--card));
   padding: 1rem 1.2rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.8rem;
   line-height: 1.65;
 }
@@ -972,7 +944,7 @@ ol.educationList {
 
   .pride {
     border-left: 0;
-    border-top: 1px solid rgb(247 243 233 / 30%);
+    border-top: 1px solid var(--score-line, var(--border));
     padding: 0.9rem 0 0;
   }
 
@@ -1001,7 +973,7 @@ ol.educationList {
     grid-template-columns: 1fr 1fr;
     gap: 0.15rem 0.75rem;
     padding: 0.65rem 0;
-    border-bottom: 1px solid rgb(247 243 233 / 14%);
+    border-bottom: 1px solid var(--score-line, var(--border));
   }
 
   .predictTable td {
@@ -1016,7 +988,7 @@ ol.educationList {
   .predictTable td::before {
     display: block;
     margin-bottom: 0.12rem;
-    color: #b8c0b9;
+    color: var(--score-muted, var(--muted-foreground));
     content: attr(data-label);
     font-size: 0.62rem;
     font-weight: 800;
@@ -1041,10 +1013,6 @@ ol.educationList {
 }
 
 @media (max-width: 560px) {
-  .posterActions > :is(button, a) {
-    flex: 1 1 8rem;
-  }
-
   .predictTable tr {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1058,10 +1026,6 @@ ol.educationList {
   .choice,
   .unitOption {
     min-height: 2.25rem;
-  }
-
-  .posterActions > :is(button, a) {
-    flex-basis: 100%;
   }
 
   .timeGrid,
@@ -1088,8 +1052,7 @@ ol.educationList {
   :global(body:has(#result)):has(.page) footer,
   .page > :not(.shell),
   .stack > :not(.work),
-  .work > :not(.posterWrap),
-  .posterActions {
+  .work > :not(.posterWrap) {
     display: none !important;
   }
 
@@ -1158,13 +1121,6 @@ ol.educationList {
   border: 0;
   background: var(--secondary);
 }
-.posterActions > :is(a, button),
-.actions > :is(a, button),
-.shareRow > :is(a, button) {
-  min-height: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]),
 .board :global([data-slot="select-trigger"]) {
   height: 2.5rem;
@@ -1200,9 +1156,6 @@ ol.educationList {
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;
-  }
-  .posterActions {
-    gap: 0.5rem;
   }
 }
 @media print {

@@ -572,30 +572,22 @@
 }
 
 .poster {
-  --score-frame: #17201c;
-  --score-paper: #f7f3e9;
-  --score-green: #76efa3;
-  --score-yellow: #f5cf58;
-  --score-coral: #ff766a;
+  composes: theme from "../../../../components/tool-scorecard.module.css";
   position: relative;
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
-  border: 0;
+  border: 1px solid var(--score-line, var(--border));
   border-radius: var(--tl-radius-surface);
-  background: #07110f;
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
 }
 
-:global(.dark) .poster {
-  --score-frame: #f5f0e4;
-}
-
 .posterSheet {
   background-image:
-    linear-gradient(rgb(118 239 163 / 8%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(118 239 163 / 8%) 1px, transparent 1px);
+    linear-gradient(var(--score-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--score-grid) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -604,18 +596,18 @@
   align-items: center;
   justify-content: flex-end;
   min-height: 3rem;
-  border-bottom: 2px solid rgb(247 243 233 / 42%);
-  background: #07110f;
+  border-bottom: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-bg, var(--card));
   padding: 0.75rem 1.3rem;
 }
 
 .posterHeading {
   position: absolute;
-  top: -1rem;
+  top: 0;
   left: 1.3rem;
   border: 0;
   padding: 0.6rem 0.8rem;
-  background: #07110f;
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -647,7 +639,7 @@
 }
 
 .posterEyebrow {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 800;
@@ -687,7 +679,7 @@
 
 .posterProtocol {
   margin-top: 1.25rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.5;
@@ -695,7 +687,7 @@
 
 .pride {
   min-width: 0;
-  border-left: 1px solid rgb(247 243 233 / 30%);
+  border-left: 1px solid var(--score-line, var(--border));
   padding: 0.4rem 0 0.4rem 1.5rem;
 }
 
@@ -729,7 +721,7 @@
   display: inline-block;
   border: 2px solid var(--score-paper);
   padding: 0.4rem 0.75rem;
-  background: var(--score-coral);
+  background: var(--score-fill-coral);
   color: #17201c;
   box-shadow: 3px 3px 0 var(--score-paper);
   font-size: 1.1rem;
@@ -740,7 +732,7 @@
 
 .bandCaption {
   margin-top: 0.7rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.62rem;
   font-weight: 600;
   line-height: 1.4;
@@ -757,14 +749,14 @@
 
 .formulaEcho {
   padding: 0 1.8rem 1.5rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.9rem;
   line-height: 1.6;
 }
 
 .posterHint {
   margin-top: 0.85rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.78rem;
   line-height: 1.6;
 }
@@ -773,9 +765,9 @@
 }
 
 .posterZones {
-  border-top: 2px solid rgb(247 243 233 / 42%);
+  border-top: 2px solid var(--score-line-strong, var(--border));
   padding: 1.2rem 1.8rem 1rem;
-  background: #0d1813;
+  background: var(--score-panel, var(--secondary));
   color: var(--score-paper);
 }
 
@@ -792,7 +784,7 @@
   font-weight: 800;
 }
 .zoneHeading > span {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
 }
 
@@ -814,7 +806,7 @@
   flex-direction: column;
   gap: 0.4rem;
   padding: 0 0.7rem;
-  border-left: 1px solid rgb(247 243 233 / 16%);
+  border-left: 1px solid var(--score-line, var(--border));
 }
 
 .zoneCell:first-child {
@@ -868,7 +860,7 @@
 
 .zoneName {
   min-height: 2.6em;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.7rem;
   line-height: 1.3;
   overflow-wrap: anywhere;
@@ -886,7 +878,7 @@
 }
 
 .zonePercent {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.66rem;
   line-height: 1.3;
   white-space: nowrap;
@@ -894,9 +886,9 @@
 
 .zoneCaption {
   margin-top: 1.1rem;
-  border-top: 1px solid rgb(247 243 233 / 20%);
+  border-top: 1px solid var(--score-line, var(--border));
   padding-top: 0.7rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.65rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   line-height: 1.5;
@@ -1555,7 +1547,7 @@
     align-items: center;
     gap: 0.4rem;
     border: 0;
-    border-bottom: 1px solid rgb(247 243 233 / 12%);
+    border-bottom: 1px solid var(--score-line, var(--border));
     padding: 0.65rem 0;
   }
   .zoneCell:last-child {
@@ -1592,7 +1584,7 @@
   }
   .poster {
     box-shadow: none;
-    border: 0;
+    border: 1px solid var(--score-line, var(--border));
     border-radius: var(--tl-radius-surface);
   }
   .posterBrand {
@@ -1600,14 +1592,14 @@
     padding: 0.7rem 0.9rem;
   }
   .posterHeading {
-    top: -0.85rem;
+    top: 0;
     left: 0.9rem;
     padding: 0.45rem 0.55rem;
     font-size: 0.64rem;
     box-shadow: none;
     border: 0;
     transform: none;
-    background: #07110f;
+    background: var(--score-bg, var(--card));
     color: var(--score-paper);
   }
   .posterMark {

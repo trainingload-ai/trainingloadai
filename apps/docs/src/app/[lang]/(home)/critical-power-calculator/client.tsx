@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import {
   useEffect,
   useLayoutEffect,
@@ -10,11 +12,11 @@ import {
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CpFileInput } from "./file-input";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 import { Input } from "@/components/ui/input";
@@ -801,31 +803,30 @@ export function CriticalPowerCalculatorClient({
             ) : null}
           </div>
         </section>
-        <div className={`${styles.posterActions} cp-share-actions`}>
-          <Select value={zoneModel} onValueChange={onZoneModelChange}>
-            <SelectTrigger
-              aria-label={t("result.switchZones")}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              <SlidersHorizontal className="size-3.5" aria-hidden />
-              {t("result.switchZones")}
-            </SelectTrigger>
-            <SelectContent position="popper" align="start">
-              {POWER_ZONE_MODELS.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {tZones(`inputs.model.options.${model.toLowerCase()}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {cpRounded != null ? (
-            <a
-              href={cpZonesHref(prefix, cpRounded, zoneModel)}
-              className={styles.primaryAction}
-            >
-              {t("result.handoff")}
-            </a>
-          ) : null}
+        <ToolResultActions
+          className="cp-share-actions"
+          leading={
+            <>
+              <Select value={zoneModel} onValueChange={onZoneModelChange}>
+                <SelectTrigger aria-label={t("result.switchZones")}>
+                  {t("result.switchZones")}
+                </SelectTrigger>
+                <SelectContent position="popper" align="start">
+                  {POWER_ZONE_MODELS.map((model) => (
+                    <SelectItem key={model} value={model}>
+                      {tZones(`inputs.model.options.${model.toLowerCase()}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {cpRounded != null ? (
+                <a href={cpZonesHref(prefix, cpRounded, zoneModel)}>
+                  {t("result.handoff")}
+                </a>
+              ) : null}
+            </>
+          }
+        >
           <Button type="button" variant="outline" size="lg" onClick={onPrint}>
             <Printer className="size-3.5" aria-hidden />
             {t("result.print")}
@@ -834,7 +835,7 @@ export function CriticalPowerCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("result.copied") : t("result.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
       </div>
       <section id="methods" className={styles.section}>
         <div className={styles.sectionHeading}>

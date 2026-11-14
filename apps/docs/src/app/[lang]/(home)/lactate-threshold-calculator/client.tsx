@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import {
@@ -11,10 +13,10 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -1323,33 +1325,35 @@ export function LactateThresholdCalculatorClient({
             ) : null}
           </div>
         </section>
-        <div className={`${styles.posterActions} lt-share-actions`}>
-          {metric === "POWER" ? (
-            <Select
-              value={zoneModel}
-              onValueChange={(value) => setZoneModel(value as PowerZoneModel)}
-            >
-              <SelectTrigger
-                aria-label={t("scorecard.switchZones")}
-                className={buttonVariants({ variant: "outline", size: "lg" })}
-              >
-                <SlidersHorizontal className="size-3.5" aria-hidden />
-                {t("scorecard.switchZones")}
-              </SelectTrigger>
-              <SelectContent position="popper" align="start">
-                {POWER_ZONE_MODELS.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {POWER_ZONE_MODEL_NAMES[model]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
-          {primaryLink ? (
-            <a href={primaryLink.href} className={styles.primaryAction}>
-              {primaryLink.label}
-            </a>
-          ) : null}
+        <ToolResultActions
+          className="lt-share-actions"
+          leading={
+            <>
+              {metric === "POWER" ? (
+                <Select
+                  value={zoneModel}
+                  onValueChange={(value) =>
+                    setZoneModel(value as PowerZoneModel)
+                  }
+                >
+                  <SelectTrigger aria-label={t("scorecard.switchZones")}>
+                    {t("scorecard.switchZones")}
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="start">
+                    {POWER_ZONE_MODELS.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {POWER_ZONE_MODEL_NAMES[model]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+              {primaryLink ? (
+                <a href={primaryLink.href}>{primaryLink.label}</a>
+              ) : null}
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -1370,7 +1374,7 @@ export function LactateThresholdCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("scorecard.copied") : t("scorecard.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
         {result ? (
           <details className={styles.resultDetails}>
             <summary>{t("scorecard.evidence")}</summary>

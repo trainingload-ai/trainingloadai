@@ -1,0 +1,107 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  inline-size: min(100%, 50rem);
+  margin-inline: auto;
+  border-block-start: 1px solid var(--border);
+  padding-block: 0.5rem;
+  color: var(--foreground);
+}
+
+.leading,
+.exports {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.exports {
+  margin-inline-start: auto;
+}
+
+.row :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  inline-size: auto;
+  block-size: auto;
+  min-block-size: 2.25rem;
+  min-inline-size: 2.25rem;
+  max-inline-size: 100%;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: var(--tl-radius-control);
+  padding: 0.4rem 0.65rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  transition: none;
+}
+
+.row :is(button, a) svg {
+  flex: none;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  color: currentColor;
+}
+
+.leading [data-slot="select-trigger"] {
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.leading a {
+  color: var(--success);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.row :is(button, a):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.row :is(button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (hover: hover) {
+  .row :is(button, a):hover:not(:disabled, [aria-disabled="true"]) {
+    background: var(--secondary);
+    color: var(--foreground);
+  }
+}
+
+@media (pointer: coarse) {
+  .row :is(button, a) {
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .row :is(button, a):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media print {
+  .row {
+    display: none !important;
+  }
+}

@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import { useCommittedFields } from "@/lib/use-committed-fields";
@@ -12,9 +14,9 @@ import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { TrackedLink } from "@/components/TrackedLink";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/cn";
 import { localePrefix } from "@/lib/locale-url";
 import {
   calculateMhrZones,
@@ -665,65 +666,58 @@ export function MaxHeartRateCalculatorClient({
             </div>
           </div>
         </section>
-        <div className={`${styles.posterActions} hrmax-share-actions`}>
-          <Select
-            value={formula}
-            onValueChange={(value) => {
-              setFormula(isMaxHrFormulaKey(value) ? value : "default");
-            }}
-          >
-            <SelectTrigger
-              id="max-hr-formula"
-              aria-label={t("formulaField.label")}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "h-10",
-                styles.actionControl,
+        <ToolResultActions
+          className="hrmax-share-actions"
+          leading={
+            <>
+              <Select
+                value={formula}
+                onValueChange={(value) => {
+                  setFormula(isMaxHrFormulaKey(value) ? value : "default");
+                }}
+              >
+                <SelectTrigger
+                  id="max-hr-formula"
+                  aria-label={t("formulaField.label")}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper" align="start">
+                  <SelectItem value="default">
+                    {t("formulaField.defaultOption")}
+                  </SelectItem>
+                  {(Object.keys(FORMULA_SHORT) as MaxHrFormulaKey[]).map(
+                    (key) => (
+                      <SelectItem key={key} value={key}>
+                        {FORMULA_SHORT[key]}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+              {zonesHref ? (
+                <TrackedLink
+                  href={zonesHref}
+                  eventName="related_tool_clicked"
+                  eventProperties={{
+                    href: zonesHref,
+                    location: "hrmax_scorecard",
+                  }}
+                >
+                  {t("scorecard.viewZones")}
+                </TrackedLink>
+              ) : (
+                <Button type="button" variant="outline" size="lg" disabled>
+                  {t("scorecard.viewZones")}
+                </Button>
               )}
-            >
-              <SlidersHorizontal className="size-3.5" aria-hidden />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" align="start">
-              <SelectItem value="default">
-                {t("formulaField.defaultOption")}
-              </SelectItem>
-              {(Object.keys(FORMULA_SHORT) as MaxHrFormulaKey[]).map((key) => (
-                <SelectItem key={key} value={key}>
-                  {FORMULA_SHORT[key]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {zonesHref ? (
-            <TrackedLink
-              href={zonesHref}
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "h-10",
-                styles.actionControl,
-              )}
-              eventName="related_tool_clicked"
-              eventProperties={{ href: zonesHref, location: "hrmax_scorecard" }}
-            >
-              {t("scorecard.viewZones")}
-            </TrackedLink>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className={cn("h-10", styles.actionControl)}
-              disabled
-            >
-              {t("scorecard.viewZones")}
-            </Button>
-          )}
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
             size="lg"
-            className={cn("h-10", styles.actionControl)}
             disabled={activeBpm == null}
             onClick={onPrint}
           >
@@ -734,14 +728,13 @@ export function MaxHeartRateCalculatorClient({
             type="button"
             variant="outline"
             size="lg"
-            className={cn("h-10", styles.actionControl)}
             disabled={activeBpm == null}
             onClick={() => void onShare()}
           >
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("scorecard.copied") : t("scorecard.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         {age != null && resolvedFormula ? (
           <p className={styles.hint}>
             {t("formulaField.defaultHint", {

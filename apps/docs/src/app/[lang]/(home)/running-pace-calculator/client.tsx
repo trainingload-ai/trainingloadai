@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import { useCommittedFields } from "@/lib/use-committed-fields";
@@ -783,7 +785,21 @@ export function RunningPaceCalculatorClient({
             </dl>
           ) : null}
         </section>
-        <div className={`${styles.actions} pace-share-actions`}>
+        <ToolResultActions
+          className="pace-share-actions"
+          leading={
+            <>
+              <Button
+                variant="outline"
+                size="lg"
+                nativeButton={false}
+                render={<a href={`${prefix}/race-time-predictor`} />}
+              >
+                {t("scorecard.predict")}
+              </Button>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -804,15 +820,7 @@ export function RunningPaceCalculatorClient({
             <Share2 data-icon="inline-start" aria-hidden />
             {shareCopied ? t("scorecard.shareCopied") : t("scorecard.share")}
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            nativeButton={false}
-            render={<a href={`${prefix}/race-time-predictor`} />}
-          >
-            {t("scorecard.predict")}
-          </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <FieldError id="pace-input-error" role={undefined}>
             {t("scorecard.shareError")}

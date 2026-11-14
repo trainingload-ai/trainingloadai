@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
@@ -14,7 +16,7 @@ import {
 } from "react";
 import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TrackedLink } from "@/components/TrackedLink";
-import { cn } from "@/lib/cn";
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -573,38 +574,41 @@ export function HeartRateZonesCalculatorClient({
           </div>
         </section>
 
-        <div className={styles.posterActions}>
-          <Select value={model} onValueChange={chooseModel}>
-            <SelectTrigger
-              id="hr-zone-model-card"
-              aria-label={t("scorecard.switch")}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              {t("scorecard.switch")}
-            </SelectTrigger>
-            <SelectContent position="popper" align="start">
-              <SelectItem value="KARVONEN">
-                {t("inputs.model.options.karvonen")}
-              </SelectItem>
-              <SelectItem value="FRIEL">
-                {t("inputs.model.options.friel")}
-              </SelectItem>
-              <SelectItem value="MHR">
-                {t("inputs.model.options.mhr")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <TrackedLink
-            href={zone2Href}
-            className={cn(buttonVariants({ size: "lg" }), styles.primaryAction)}
-            eventName="related_tool_clicked"
-            eventProperties={{
-              href: zone2Href,
-              location: "heart_rate_zones_scorecard",
-            }}
-          >
-            {t("scorecard.view")}
-          </TrackedLink>
+        <ToolResultActions
+          leading={
+            <>
+              <Select value={model} onValueChange={chooseModel}>
+                <SelectTrigger
+                  id="hr-zone-model-card"
+                  aria-label={t("scorecard.switch")}
+                >
+                  {t("scorecard.switch")}
+                </SelectTrigger>
+                <SelectContent position="popper" align="start">
+                  <SelectItem value="KARVONEN">
+                    {t("inputs.model.options.karvonen")}
+                  </SelectItem>
+                  <SelectItem value="FRIEL">
+                    {t("inputs.model.options.friel")}
+                  </SelectItem>
+                  <SelectItem value="MHR">
+                    {t("inputs.model.options.mhr")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <TrackedLink
+                href={zone2Href}
+                eventName="related_tool_clicked"
+                eventProperties={{
+                  href: zone2Href,
+                  location: "heart_rate_zones_scorecard",
+                }}
+              >
+                {t("scorecard.view")}
+              </TrackedLink>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -625,7 +629,7 @@ export function HeartRateZonesCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {shareCopied ? t("scorecard.shareCopied") : t("scorecard.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p role="alert" className={styles.alert}>
             {shareError}

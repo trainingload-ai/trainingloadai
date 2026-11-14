@@ -40,13 +40,14 @@
   scroll-margin-top: 9rem;
 }
 .report {
+  composes: theme from "../../../../components/tool-scorecard.module.css";
   width: 100%;
   max-width: 800px;
   margin: auto;
-  border: 0;
+  border: 1px solid var(--score-line);
   box-shadow: none;
-  color: #e9eee5;
-  background: #08130e;
+  color: var(--score-paper);
+  background: var(--score-bg);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
   border-radius: var(--tl-radius-surface);
@@ -56,7 +57,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid #78847b;
+  border-bottom: 1px solid var(--score-line-strong);
   font-size: 0.8rem;
   font-family: ui-monospace, monospace;
 }
@@ -75,8 +76,8 @@
   gap: 1.5rem;
   padding: 2rem;
   background-image:
-    linear-gradient(#21433360 1px, transparent 1px),
-    linear-gradient(90deg, #21433360 1px, transparent 1px);
+    linear-gradient(var(--score-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--score-grid) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 .score p {
@@ -86,7 +87,7 @@
 .score strong {
   display: block;
   font-size: clamp(4rem, 10vw, 8rem);
-  color: #79eda3;
+  color: var(--score-green);
   font-weight: 800;
   font-style: italic;
   letter-spacing: -0.065em;
@@ -101,7 +102,7 @@
   gap: 0.5rem;
 }
 .secondary b {
-  color: #f5d65d;
+  color: var(--score-yellow);
   font-size: 2.5rem;
   line-height: 1.2;
 }
@@ -109,21 +110,13 @@
   font-size: 0.8rem;
 }
 .reportFooter {
-  border-top: 1px solid #78847b;
+  border-top: 1px solid var(--score-line-strong);
   padding: 1.5rem 2rem;
   font-size: 0.85rem;
   line-height: 1.8;
 }
 .reportFooter p + p {
   margin-top: 0.4rem;
-}
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
 }
 .status {
   text-align: center;
@@ -171,7 +164,6 @@
   :global(body:has(#result)):has(.calculator) nav,
   :global(main):has(.report) > div > :not(:has(.report)),
   .calculator > :not(.result),
-  .actions,
   .status,
   .empty {
     display: none !important;

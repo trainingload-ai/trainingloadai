@@ -1,12 +1,14 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { TrackedLink } from "@/components/TrackedLink";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/cn";
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -41,7 +42,6 @@ import styles from "./zone-2-heart-rate-calculator.module.css";
 
 const METHODS: Zone2Method[] = ["maxHr", "hrr", "lthr", "age"];
 const AGE_FORMULAS: AgeFormulaKey[] = ["tanaka", "fox"];
-const accentButtonClass = "bg-brand text-brand-foreground hover:bg-brand/85";
 
 function isZone2Method(value: string): value is Zone2Method {
   return METHODS.some((method) => method === value);
@@ -622,29 +622,26 @@ function Scorecard({
           <p className={styles.talkTest}>{t("talkTest")}</p>
         </div>
       </section>
-      <div className={`${styles.posterActions} z2-share-actions`}>
-        <Select value={method} onValueChange={onMethod}>
-          <SelectTrigger
-            aria-label={t("switchModel")}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            <SlidersHorizontal className="size-3.5" aria-hidden />
-            {methodLabel}
-          </SelectTrigger>
-          <SelectContent position="popper" align="start">
-            {METHODS.map((key) => (
-              <SelectItem key={key} value={key}>
-                {tClient(`inputs.method.options.${key}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <a
-          href={zonesHref}
-          className={cn(buttonVariants({ size: "lg" }), accentButtonClass)}
-        >
-          {t("viewZones")}
-        </a>
+      <ToolResultActions
+        className="z2-share-actions"
+        leading={
+          <>
+            <Select value={method} onValueChange={onMethod}>
+              <SelectTrigger aria-label={t("switchModel")}>
+                {methodLabel}
+              </SelectTrigger>
+              <SelectContent position="popper" align="start">
+                {METHODS.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {tClient(`inputs.method.options.${key}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <a href={zonesHref}>{t("viewZones")}</a>
+          </>
+        }
+      >
         <Button
           type="button"
           variant="outline"
@@ -665,7 +662,7 @@ function Scorecard({
           <Share2 className="size-3.5" aria-hidden />
           {copied ? t("copiedLink") : t("share")}
         </Button>
-      </div>
+      </ToolResultActions>
       {shareError ? (
         <p role="alert" className={styles.shareError}>
           {t("shareError")}

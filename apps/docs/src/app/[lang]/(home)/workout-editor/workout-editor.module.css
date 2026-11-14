@@ -787,13 +787,6 @@
   background: var(--we-canvas);
 }
 
-.shareRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
-  margin-top: 0.45rem;
-}
-
 .exampleBadge {
   margin-bottom: 0.55rem;
   color: var(--success);
@@ -901,7 +894,6 @@
   }
 
   .exportActions,
-  .shareRow,
   .rawList,
   .sourceNote,
   .sample {
@@ -941,10 +933,8 @@
   align-items: center;
   line-height: 1.65;
 }
-.posterActions > :is(a, button),
 .actions > :is(a, button),
-.actionGroup > :is(a, button),
-.shareRow > :is(a, button) {
+.actionGroup > :is(a, button) {
   min-height: 2.5rem;
   height: 2.5rem;
   border-radius: var(--tl-radius-xs);
@@ -982,9 +972,6 @@
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;
-  }
-  .posterActions {
-    gap: 0.5rem;
   }
 }
 @media print {

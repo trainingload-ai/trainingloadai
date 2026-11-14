@@ -688,7 +688,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
-          "line": 1134
+          "line": 1130
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1280,7 +1280,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
-          "line": 1141
+          "line": 1137
         }
       ],
       "capability": "third-party-sync",
@@ -1856,7 +1856,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/client.tsx",
-          "line": 549
+          "line": 550
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
@@ -3760,7 +3760,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/client.tsx",
-          "line": 826
+          "line": 828
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",

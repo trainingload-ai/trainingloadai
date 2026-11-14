@@ -1,13 +1,15 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 
 import { InputSource } from "@/components/calculators/input-source";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatRaceDuration, type VdotZoneKey } from "@shared/vdot";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/cn";
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import {
@@ -572,28 +573,30 @@ export function VdotCalculatorClient({
             </div>
           </div>
         </section>
-        <div className={`${styles.posterActions} vdot-share-actions`}>
-          <Select value={unit} onValueChange={onUnitChange}>
-            <SelectTrigger
-              aria-label={t("scorecard.switchUnits")}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                styles.actionButton,
-              )}
-            >
-              <SlidersHorizontal className="size-3.5" aria-hidden />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="km">{t("scorecard.unitsMetric")}</SelectItem>
-              <SelectItem value="mi">{t("scorecard.unitsImperial")}</SelectItem>
-            </SelectContent>
-          </Select>
+        <ToolResultActions
+          className="vdot-share-actions"
+          leading={
+            <>
+              <Select value={unit} onValueChange={onUnitChange}>
+                <SelectTrigger aria-label={t("scorecard.switchUnits")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="km">
+                    {t("scorecard.unitsMetric")}
+                  </SelectItem>
+                  <SelectItem value="mi">
+                    {t("scorecard.unitsImperial")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
             size="lg"
-            className={styles.actionButton}
             onClick={onPrint}
             disabled={!result}
           >
@@ -604,14 +607,13 @@ export function VdotCalculatorClient({
             type="button"
             variant="outline"
             size="lg"
-            className={styles.actionButton}
             onClick={onShare}
             disabled={!result}
           >
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("scorecard.copied") : t("scorecard.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p className={styles.alert} role="alert">
             {shareError}

@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Printer, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -371,7 +373,7 @@ function Scorecard({
           <p className={styles.disclaimer}>{t("disclaimer")}</p>
         </div>
       </section>
-      <div className={`${styles.posterActions} tl-share-actions`}>
+      <ToolResultActions className="tl-share-actions">
         <Button
           type="button"
           variant="outline"
@@ -392,7 +394,7 @@ function Scorecard({
           <Share2 className="size-3.5" aria-hidden />
           {copied ? t("copied") : t("copyLink")}
         </Button>
-      </div>
+      </ToolResultActions>
     </div>
   );
 }

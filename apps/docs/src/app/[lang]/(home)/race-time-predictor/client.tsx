@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { InputSource } from "@/components/calculators/input-source";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -576,13 +578,15 @@ export function RaceTimePredictorClient({
             ) : null}
           </div>
         </section>
-        <div className={styles.posterActions}>
-          <a
-            href={`${prefix}/vdot-calculator`}
-            className={styles.primaryAction}
-          >
-            {t("result.handoffVdot")}
-          </a>
+        <ToolResultActions
+          leading={
+            <>
+              <a href={`${prefix}/vdot-calculator`}>
+                {t("result.handoffVdot")}
+              </a>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -603,7 +607,7 @@ export function RaceTimePredictorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("result.linkCopied") : t("result.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         {warning ? (
           <p role="status" className={styles.alert}>
             {warning}

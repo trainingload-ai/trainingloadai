@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import {
   useCallback,
   useEffect,
@@ -10,10 +12,10 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { Loader2, Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Loader2, Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 import { Input } from "@/components/ui/input";
@@ -445,31 +447,30 @@ function FtpShareCard({
         </div>
       </section>
 
-      <div className={`${styles.posterActions} ftp-share-actions`}>
-        <Select value={zoneModel} onValueChange={selectZoneModel}>
-          <SelectTrigger
-            aria-label={t("fieldResult.switchZones")}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            <SlidersHorizontal className="size-3.5" aria-hidden />
-            {t("fieldResult.switchZones")}
-          </SelectTrigger>
-          <SelectContent position="popper" align="start">
-            {POWER_ZONE_MODELS.map((model) => (
-              <SelectItem key={model} value={model}>
-                {tZones(`inputs.model.options.${model.toLowerCase()}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {ftp != null ? (
-          <a
-            href={powerZonesHref(prefix, ftp, zoneModel)}
-            className={cn(buttonVariants({ size: "lg" }), accentButtonClass)}
-          >
-            {t("fieldResult.handoff")}
-          </a>
-        ) : null}
+      <ToolResultActions
+        className="ftp-share-actions"
+        leading={
+          <>
+            <Select value={zoneModel} onValueChange={selectZoneModel}>
+              <SelectTrigger aria-label={t("fieldResult.switchZones")}>
+                {t("fieldResult.switchZones")}
+              </SelectTrigger>
+              <SelectContent position="popper" align="start">
+                {POWER_ZONE_MODELS.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {tZones(`inputs.model.options.${model.toLowerCase()}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {ftp != null ? (
+              <a href={powerZonesHref(prefix, ftp, zoneModel)}>
+                {t("fieldResult.handoff")}
+              </a>
+            ) : null}
+          </>
+        }
+      >
         <Button type="button" variant="outline" size="lg" onClick={onPrint}>
           <Printer className="size-3.5" aria-hidden />
           {t("fieldResult.print")}
@@ -478,7 +479,7 @@ function FtpShareCard({
           <Share2 className="size-3.5" aria-hidden />
           {copied ? t("fieldResult.copied") : t("fieldResult.copyLink")}
         </Button>
-      </div>
+      </ToolResultActions>
     </div>
   );
 }

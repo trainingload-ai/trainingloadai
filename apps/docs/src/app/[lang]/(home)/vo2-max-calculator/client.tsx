@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import {
   useEffect,
   useState,
@@ -860,26 +862,16 @@ export function Vo2MaxCalculatorClient({
             </div>
           )}
         </section>
-        <div className={styles.scoreActions}>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={onPrint}
-            disabled={!computed}
-          >
+        <ToolResultActions>
+          <button type="button" onClick={onPrint} disabled={!computed}>
             <Printer className="size-3.5" aria-hidden />
             {t("scorecard.print")}
           </button>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={onShare}
-            disabled={!computed}
-          >
+          <button type="button" onClick={onShare} disabled={!computed}>
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("scorecard.copied") : t("scorecard.share")}
           </button>
-        </div>
+        </ToolResultActions>
       </div>
     </div>
   );

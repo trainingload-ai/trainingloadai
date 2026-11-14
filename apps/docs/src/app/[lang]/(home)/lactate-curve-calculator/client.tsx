@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 
 import {
@@ -1306,7 +1308,7 @@ export function LactateCurveCalculatorClient({
                 {run.analysis.engineVersion} ·{" "}
                 {run.analysis.referenceCommit.slice(0, 7)}
               </p>
-              <div className={styles.actions}>
+              <ToolResultActions>
                 <Button
                   variant="outline"
                   disabled={stale}
@@ -1332,7 +1334,7 @@ export function LactateCurveCalculatorClient({
                 <Button variant="ghost" disabled={stale} onClick={copyResults}>
                   {copied ? c.copied : c.copy}
                 </Button>
-              </div>
+              </ToolResultActions>
               <LactateToolFooter
                 copy={c}
                 lang={lang}

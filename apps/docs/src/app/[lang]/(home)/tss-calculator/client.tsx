@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import { useState, type FormEvent, type ReactNode } from "react";
@@ -290,17 +292,24 @@ export function TssCalculatorClient({
             )}
           </div>
         </article>
-        <div className={styles.actions}>
-          <Button
-            variant="outline"
-            size="lg"
-            nativeButton={false}
-            render={
-              <a href={`${localePrefix(locale)}/training-load-calculator`} />
-            }
-          >
-            {common("trainingLoadCalculatorAction")}
-          </Button>
+        <ToolResultActions
+          leading={
+            <>
+              <Button
+                variant="outline"
+                size="lg"
+                nativeButton={false}
+                render={
+                  <a
+                    href={`${localePrefix(locale)}/training-load-calculator`}
+                  />
+                }
+              >
+                {common("trainingLoadCalculatorAction")}
+              </Button>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -321,7 +330,7 @@ export function TssCalculatorClient({
             <Share2 data-icon="inline-start" aria-hidden />
             {t("report.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         <p role="status" className={styles.status}>
           {shareStatus}
         </p>

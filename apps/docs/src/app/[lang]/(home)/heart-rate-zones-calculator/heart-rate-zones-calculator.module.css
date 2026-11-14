@@ -432,12 +432,6 @@
   line-height: 1.5;
 }
 
-.posterActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-}
-
 .primaryAction {
   border: 0;
   background: var(--hr-accent);
@@ -613,7 +607,6 @@
   .shell:not(:has(.poster)),
   .stack > :not(.tool),
   .tool > :not(.posterWrap),
-  .posterActions,
   .exampleBanner {
     display: none !important;
   }
@@ -644,6 +637,7 @@
   }
 
   .poster {
+    composes: theme from "../../../../components/tool-scorecard.module.css";
     position: relative;
     left: 0;
     top: 0;
@@ -756,23 +750,15 @@
 }
 
 .poster {
-  --score-frame: #17201c;
-  --score-paper: #f7f3e9;
-  --score-green: #76efa3;
-  --score-yellow: #f5cf58;
   position: relative;
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 6.5rem;
-  border: 0;
-  background: #07110f;
+  border: 1px solid var(--score-line, var(--border));
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
   border-radius: var(--tl-radius-surface);
-}
-
-:global(.dark) .poster {
-  --score-frame: #f5f0e4;
 }
 
 .posterBrand {
@@ -781,8 +767,8 @@
   align-items: flex-end;
   justify-content: flex-end;
   min-height: 3rem;
-  border-bottom: 2px solid rgb(247 243 233 / 42%);
-  background: #07110f;
+  border-bottom: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-bg, var(--card));
   padding: 0.75rem 1.3rem;
 }
 
@@ -819,7 +805,7 @@
 }
 
 .posterEyebrow {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 800;
@@ -859,7 +845,7 @@
 .posterProtocol,
 .formulaEcho {
   margin-top: 1.25rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.5;
@@ -871,7 +857,7 @@
 
 .pride {
   min-width: 0;
-  border-left: 1px solid rgb(247 243 233 / 30%);
+  border-left: 1px solid var(--score-line, var(--border));
   padding: 0.4rem 0 0.4rem 1.5rem;
 }
 
@@ -902,9 +888,9 @@
 }
 
 .posterZones {
-  border-top: 2px solid rgb(247 243 233 / 42%);
+  border-top: 2px solid var(--score-line-strong, var(--border));
   padding: 1.2rem 1.8rem 1.3rem;
-  background: #0d1813;
+  background: var(--score-panel, var(--secondary));
 }
 
 .zoneStrip {
@@ -925,7 +911,7 @@
   flex-direction: column;
   gap: 0.4rem;
   padding: 0 0.7rem;
-  border-left: 1px solid rgb(247 243 233 / 16%);
+  border-left: 1px solid var(--score-line, var(--border));
 }
 
 .zoneCell:first-child {
@@ -974,7 +960,7 @@
 
 .poster .zoneName {
   min-height: 2.4em;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.3;
@@ -989,21 +975,9 @@
 }
 
 .zonePercent {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.66rem;
   white-space: nowrap;
-}
-
-.posterActions {
-  width: min(100%, 800px);
-  align-items: center;
-  justify-content: center;
-}
-
-.posterActions > :is(button, a),
-.posterActions :global([data-slot="select-trigger"]) {
-  height: 2.5rem !important;
-  min-height: 2.5rem;
 }
 
 .primaryAction {
@@ -1073,7 +1047,7 @@
     align-items: center;
     gap: 0.4rem;
     border: 0;
-    border-bottom: 1px solid rgb(247 243 233 / 12%);
+    border-bottom: 1px solid var(--score-line, var(--border));
     padding: 0.65rem 0;
   }
 
@@ -1088,16 +1062,6 @@
 }
 
 @media (max-width: 560px) {
-  .posterActions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .posterActions > :is(button, a),
-  .posterActions :global([data-slot="select-trigger"]) {
-    width: 100%;
-  }
-
   .posterMain {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     gap: 0.65rem;
@@ -1133,7 +1097,7 @@
 
   .pride {
     border-left: 0;
-    border-top: 1px solid rgb(247 243 233 / 30%);
+    border-top: 1px solid var(--score-line, var(--border));
     padding: 0.85rem 0 0;
   }
 }
@@ -1167,13 +1131,6 @@
   line-height: 1.65;
   border: 0;
   background: var(--secondary);
-}
-.posterActions > :is(a, button),
-.actions > :is(a, button),
-.shareRow > :is(a, button) {
-  min-height: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
 }
 .board :global([data-slot="input"]),
 .board :global([data-slot="select-trigger"]) {
@@ -1210,9 +1167,6 @@
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;
-  }
-  .posterActions {
-    gap: 0.5rem;
   }
 }
 @media print {

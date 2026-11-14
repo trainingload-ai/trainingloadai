@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
@@ -663,13 +665,14 @@ export function CssCalculatorClient({
             </div>
           </div>
         </section>
-        <div className={`${styles.posterActions} css-share-actions`}>
-          <a
-            href={`${prefix}/swim-training-plan`}
-            className={styles.primaryAction}
-          >
-            {t("result.handoff")}
-          </a>
+        <ToolResultActions
+          className="css-share-actions"
+          leading={
+            <>
+              <a href={`${prefix}/swim-training-plan`}>{t("result.handoff")}</a>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -690,7 +693,7 @@ export function CssCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("result.copied") : t("result.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p role="alert" className={styles.fileHint}>
             {t("result.shareError")}

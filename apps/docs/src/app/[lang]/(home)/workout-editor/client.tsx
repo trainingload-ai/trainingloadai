@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
@@ -1081,26 +1083,20 @@ export function WorkoutEditorClient({
                 {copied === "dsl" ? t("builder.copied") : t("builder.copyDsl")}
               </button>
             </div>
-            <div className={styles.shareRow}>
-              <button
-                type="button"
-                className={styles.secondaryAction}
-                onClick={handlePrint}
-                disabled={!ready}
-              >
+            <ToolResultActions>
+              <button type="button" onClick={handlePrint} disabled={!ready}>
                 <Printer className="size-4" aria-hidden />
                 {t("builder.print")}
               </button>
               <button
                 type="button"
-                className={styles.secondaryAction}
                 onClick={() => void handleShare()}
                 disabled={!ready}
               >
                 <Share2 className="size-4" aria-hidden />
                 {shareCopied ? t("builder.shared") : t("builder.share")}
               </button>
-            </div>
+            </ToolResultActions>
             {dslSample ? (
               <pre className={styles.sample}>{dslSample}</pre>
             ) : null}
