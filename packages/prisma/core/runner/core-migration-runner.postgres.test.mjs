@@ -153,6 +153,7 @@ postgresTest(
         { id: "0024_activity_analysis_segments", source: "baseline" },
         { id: "0025_vdot_forecast_snapshot", source: "baseline" },
         { id: "0026_athlete_state_updates", source: "baseline" },
+        { id: "0027_scope_fitness_setting_evidence", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,
@@ -175,6 +176,172 @@ postgresTest(
         "SELECT to_regclass('public.t_oauth_resource')::text AS relation",
       );
       assert.equal(oauthResourceRelation.rows[0]?.relation, "t_oauth_resource");
+    });
+  },
+);
+
+async function seedFitnessFixture(databaseUrl) {
+  await query(
+    databaseUrl,
+    `
+    INSERT INTO t_user(id, name, email, email_verified, created_at, updated_at)
+    VALUES ('fixture', 'Fixture', 'fixture@example.invalid', true, now(), now());
+    INSERT INTO t_activity(id, hash_id, user_id, updated_at)
+    VALUES (1, 'fixture-activity', 'fixture', now());
+  `,
+  );
+}
+
+async function fitnessRevision(databaseUrl) {
+  const result = await query(
+    databaseUrl,
+    "SELECT revision::text FROM t_fitness_evidence_revision WHERE user_id = 'fixture'",
+  );
+  return BigInt(result.rows[0].revision);
+}
+
+postgresTest(
+  "PostgreSQL excludes preferences from fitness invalidation and the analysis lock",
+  async () => {
+    await withPostgresDatabase(async (databaseUrl) => {
+      await runCoreMigrations({ databaseUrl, dialect: "postgresql" });
+      await seedFitnessFixture(databaseUrl);
+      const before = await fitnessRevision(databaseUrl);
+      await query(
+        databaseUrl,
+        `
+      INSERT INTO t_user_setting(id, updated_at, user_id, category, value)
+      VALUES ('preference', now(), 'fixture', 'THEME', 'light');
+      INSERT INTO t_user_setting(id, updated_at, user_id, category, value)
+      VALUES ('preference-retry', now(), 'fixture', 'THEME', 'light')
+      ON CONFLICT(user_id, category) DO UPDATE SET value = EXCLUDED.value;
+      UPDATE t_user_setting SET value = 'dark' WHERE id = 'preference';
+      DELETE FROM t_user_setting WHERE id = 'preference';
+    `,
+      );
+      assert.equal(await fitnessRevision(databaseUrl), before);
+
+      // Extensions may add settings, but that does not make them training input.
+      await query(
+        databaseUrl,
+        "ALTER TYPE enum_setting_category ADD VALUE 'ACCESS_FIXTURE'",
+      );
+      const access = new Client({ connectionString: databaseUrl });
+      const analysis = new Client({ connectionString: databaseUrl });
+      await Promise.all([access.connect(), analysis.connect()]);
+      try {
+        await access.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
+        await access.query("SET LOCAL statement_timeout = '5s'");
+        await access.query(
+          "SELECT id FROM t_user WHERE id = 'fixture' FOR UPDATE",
+        );
+        await analysis.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
+        await analysis.query("SET LOCAL statement_timeout = '5s'");
+        await analysis.query(
+          "SELECT pg_advisory_xact_lock(hashtextextended('fitness:fixture', 0))",
+        );
+
+        const accessWrite = async () => {
+          try {
+            await access.query(`INSERT INTO t_user_setting(id, updated_at, user_id, category, value)
+            VALUES ('access', now(), 'fixture', 'ACCESS_FIXTURE', 'unchanged')
+            ON CONFLICT(user_id, category) DO UPDATE SET value = EXCLUDED.value`);
+            await access.query("COMMIT");
+          } catch (error) {
+            await access.query("ROLLBACK");
+            throw error;
+          }
+        };
+        const analysisWrite = async () => {
+          try {
+            await analysis.query(`INSERT INTO t_activity_fitness_metrics_snapshot
+            (id, updated_at, activity_id, user_id, sport, recorded_at)
+            VALUES ('snapshot', now(), 1, 'fixture', 'RUN', now())`);
+            await analysis.query("COMMIT");
+          } catch (error) {
+            await analysis.query("ROLLBACK");
+            throw error;
+          }
+        };
+        const results = await Promise.allSettled([
+          accessWrite(),
+          analysisWrite(),
+        ]);
+        for (const result of results)
+          assert.equal(result.status, "fulfilled", result.reason?.message);
+        assert.equal(await fitnessRevision(databaseUrl), before);
+        assert.equal(
+          (
+            await query(
+              databaseUrl,
+              "SELECT count(*)::int AS count FROM t_activity_fitness_metrics_snapshot",
+            )
+          ).rows[0].count,
+          1,
+        );
+      } finally {
+        await Promise.all([access.end(), analysis.end()]);
+      }
+    });
+  },
+);
+
+postgresTest(
+  "PostgreSQL preserves consent cleanup and genuine fitness invalidation",
+  async () => {
+    await withPostgresDatabase(async (databaseUrl) => {
+      await runCoreMigrations({ databaseUrl, dialect: "postgresql" });
+      await seedFitnessFixture(databaseUrl);
+      const before = await fitnessRevision(databaseUrl);
+      await query(
+        databaseUrl,
+        `INSERT INTO t_user_setting(id, updated_at, user_id, category, value)
+      VALUES ('consent', now(), 'fixture', 'AI_DATA_CONSENT', 'granted')`,
+      );
+      const granted = await fitnessRevision(databaseUrl);
+      assert.ok(granted > before);
+      await query(
+        databaseUrl,
+        `
+      INSERT INTO t_fitness_assessment_task(id, user_id, session_id, request, facts, tracking, updated_at)
+      VALUES ('assessment', 'fixture', 'fixture-session', '{}', '{"fixture": true}', true, now());
+      INSERT INTO t_fitness_calculation
+      (id, user_id, task_id, task_revision, method_id, method_version, policy_version,
+       input, input_hash, selection_hash, baseline_hash, post_process_state)
+      VALUES
+      ('completed', 'fixture', 'assessment', 1, 'fixture', '1', '1', '{"fixture": true}', 'input', 'selection', 'baseline', 'DONE'),
+      ('pending', 'fixture', 'assessment', 1, 'fixture', '1', '1', '{"fixture": true}', 'input', 'selection', 'baseline', 'PENDING');
+      UPDATE t_user_setting SET value = 'revoked' WHERE id = 'consent';
+    `,
+      );
+      const revoked = await fitnessRevision(databaseUrl);
+      assert.ok(revoked > granted);
+      const calculations = await query(
+        databaseUrl,
+        "SELECT id, input FROM t_fitness_calculation ORDER BY id",
+      );
+      assert.deepEqual(calculations.rows, [{ id: "pending", input: {} }]);
+      const task = await query(
+        databaseUrl,
+        "SELECT tracking, stage, facts FROM t_fitness_assessment_task WHERE id = 'assessment'",
+      );
+      assert.deepEqual(task.rows[0], {
+        tracking: false,
+        stage: "CLOSED",
+        facts: {},
+      });
+      await query(
+        databaseUrl,
+        "DELETE FROM t_user_setting WHERE id = 'consent'",
+      );
+      const deleted = await fitnessRevision(databaseUrl);
+      assert.ok(deleted > revoked);
+      await query(
+        databaseUrl,
+        `INSERT INTO t_user_fitness_metric(id, user_id, type, value)
+      VALUES ('metric', 'fixture', 'MAX_HR', 180)`,
+      );
+      assert.ok((await fitnessRevision(databaseUrl)) > deleted);
     });
   },
 );

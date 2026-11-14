@@ -130,6 +130,11 @@
       "id": "0026_athlete_state_updates",
       "file": "0026_athlete_state_updates/migration.sql",
       "sha256": "6e89f3b9d197afcbedb545f2db3abea76e443d74c4998a7cd128602441baef96"
+    },
+    {
+      "id": "0027_scope_fitness_setting_evidence",
+      "file": "0027_scope_fitness_setting_evidence/migration.sql",
+      "sha256": "234411469fc93fe23c2ac51707c30e6c17d17d7fc04c16cf577326c0c9b62423"
     }
   ],
   "schemaChecksum": "c51de3fa827d934b84f41f864884950eea6fb1d9f7e30f9e398736e2b5129f36"
