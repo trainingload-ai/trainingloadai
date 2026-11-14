@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
@@ -663,11 +665,9 @@ export function RunningPaceCalculatorClient({
             ) : null}
           </FieldGroup>
           <div className={styles.formUtilities}>
-            <Button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="link"
-              size="sm"
-              className={styles.exampleAction}
               onClick={() => {
                 setState({ ...PACE_CALCULATOR_EXAMPLE });
                 setShareError(false);
@@ -675,12 +675,10 @@ export function RunningPaceCalculatorClient({
               }}
             >
               {t("example.action")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="ghost"
-              size="sm"
-              className={styles.resetAction}
               onClick={() => {
                 setState({ ...EMPTY_PACE_CALCULATOR });
                 setShareError(false);
@@ -688,11 +686,11 @@ export function RunningPaceCalculatorClient({
               }}
             >
               {t("panel.reset")}
-            </Button>
+            </ToolActionButton>
           </div>
-          <Button type="submit" size="lg" className={styles.calculateButton}>
+          <ToolActionButton intent="primary" fullWidth type="submit">
             {t("panel.calculate")}
-          </Button>
+          </ToolActionButton>
           <p className={styles.panelNote}>{t("panel.note")}</p>
         </form>
       </div>

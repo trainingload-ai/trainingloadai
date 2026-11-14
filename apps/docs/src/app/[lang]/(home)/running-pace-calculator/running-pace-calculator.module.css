@@ -215,27 +215,6 @@
   font-size: 0.84rem;
   line-height: 1.55;
 }
-.exampleAction {
-  padding-inline: 0;
-  color: var(--pace-ink);
-}
-.resetAction {
-  color: var(--pace-muted);
-}
-.calculateButton {
-  width: 100%;
-  min-height: 2.75rem;
-  border: 0;
-  border-radius: var(--tl-radius-control);
-  padding: 0.55rem 1rem;
-  background: var(--pace-ink);
-  color: var(--pace-canvas);
-  font-size: 0.9rem;
-  font-weight: 650;
-}
-.calculateButton:hover {
-  background: color-mix(in srgb, var(--pace-ink) 86%, transparent);
-}
 .board :global([data-slot="field-label"]),
 .board :global([data-slot="field-legend"]) {
   color: var(--pace-ink);

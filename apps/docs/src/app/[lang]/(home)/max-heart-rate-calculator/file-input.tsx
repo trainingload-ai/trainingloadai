@@ -1,10 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { observeMaxHeartRate } from "@/lib/max-heart-rate";
 import styles from "./max-heart-rate-calculator.module.css";
 
@@ -113,14 +114,14 @@ export function UseObservedPeakButton({
 }) {
   const t = useTranslations("maxHeartRateCalculator.page.scorecard");
   return (
-    <Button
+    <ToolActionButton
+      intent="secondary"
       type="button"
-      variant="outline"
       className={styles.usePeak}
       disabled={disabled}
       onClick={onClick}
     >
       {t("useObserved")}
-    </Button>
+    </ToolActionButton>
   );
 }

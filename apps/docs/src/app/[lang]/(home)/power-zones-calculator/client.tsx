@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
@@ -304,14 +306,9 @@ export function PowerZonesCalculatorClient({
                 {t("warnings.invalid")}
               </p>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className={styles.exampleButton}
-              onClick={loadExample}
-            >
+            <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
               {t("scorecard.exampleAction")}
-            </Button>
+            </ToolActionButton>
             <div className={styles.referenceHelp}>
               <p>{t("panel.needReference")}</p>
               <a href={`${prefix}/ftp-calculator`}>

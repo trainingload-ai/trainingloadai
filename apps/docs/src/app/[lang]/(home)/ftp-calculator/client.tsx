@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 
 import {
@@ -84,9 +86,6 @@ function UnitInput({
     </div>
   );
 }
-
-const accentButtonClass =
-  "bg-brand text-brand-foreground hover:bg-brand/85";
 
 type EstimateCpTestType = "three_nine" | "thirty_min";
 
@@ -1007,13 +1006,13 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
             {error}
           </div>
         ) : null}
-        <Button
+        <ToolActionButton
+          intent="primary"
+          fullWidth
           type="button"
-          size="lg"
           disabled={isSubmitting}
           onClick={onSubmit}
           aria-label={t("buttons.analyzeAria")}
-          className={cn("h-10 w-full", accentButtonClass)}
         >
           {isSubmitting ? (
             <>
@@ -1023,7 +1022,7 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
           ) : (
             t("buttons.analyze")
           )}
-        </Button>
+        </ToolActionButton>
 
 
       {results?.length ? (

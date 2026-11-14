@@ -1,10 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -170,9 +171,9 @@ export function RaceFileInput({
               />
             </div>
           </div>
-          <Button type="button" className={styles.primaryAction} onClick={useManualWindow}>
+          <ToolActionButton intent="primary" type="button" onClick={useManualWindow}>
             {t("useWindow")}
-          </Button>
+          </ToolActionButton>
         </>
       ) : null}
       {error ? (

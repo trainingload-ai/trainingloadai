@@ -1,10 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { estimateVdotFromActivity, type VdotWindowMode } from "@/lib/vdot-activity";
 import type { ThresholdRecord } from "@/lib/threshold-records";
 import styles from "./vdot-calculator.module.css";
@@ -113,9 +114,9 @@ export function VdotFileInput({
             ))}
           </fieldset>
           <p className={styles.fileHint}>{t("windowHint")}</p>
-          <Button type="button" className={styles.submit} onClick={apply}>
+          <ToolActionButton intent="primary" fullWidth type="button" onClick={apply}>
             {t("apply")}
-          </Button>
+          </ToolActionButton>
         </>
       ) : null}
       {error ? (

@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 
@@ -728,9 +730,9 @@ export function LactateCurveCalculatorClient({
           </button>
         </div>
         {mode === "report" && run ? (
-          <Button variant="ghost" size="sm" onClick={editData}>
+          <ToolActionButton intent="quiet" onClick={editData}>
             ← {c.presentation.editData}
-          </Button>
+          </ToolActionButton>
         ) : null}
       </nav>
       {stale && mode === "input" ? (
@@ -771,23 +773,23 @@ export function LactateCurveCalculatorClient({
             <p className={styles.muted}>{c.inputHelp}</p>
           </details>
           <div className={styles.toolbar}>
-            <Button variant="secondary" onClick={loadExample} disabled={busy}>
+            <ToolActionButton intent="quiet" onClick={loadExample} disabled={busy}>
               {c.example}
-            </Button>
-            <Button variant="ghost" onClick={clear} disabled={busy}>
+            </ToolActionButton>
+            <ToolActionButton intent="quiet" onClick={clear} disabled={busy}>
               {c.clear}
-            </Button>
+            </ToolActionButton>
           </div>
           <div className={styles.toolbar}>
-            <Button
-              variant="outline"
+            <ToolActionButton
+              intent="secondary"
               disabled={busy}
               onClick={() => setPasteOpen(!pasteOpen)}
             >
               {c.paste}
-            </Button>
-            <Button
-              variant="outline"
+            </ToolActionButton>
+            <ToolActionButton
+              intent="secondary"
               disabled={busy}
               onClick={() => {
                 trackLactateEvent("tool_file_picker_opened", {
@@ -798,7 +800,7 @@ export function LactateCurveCalculatorClient({
               }}
             >
               {c.import}
-            </Button>
+            </ToolActionButton>
             <input
               ref={file}
               type="file"
@@ -808,12 +810,12 @@ export function LactateCurveCalculatorClient({
               aria-label={c.import}
               disabled={busy}
             />
-            <Button
-              variant="link"
+            <ToolActionButton
+              intent="quiet"
               onClick={() => download(LACTATE_TEMPLATE, "lactate-template.csv")}
             >
               {c.template}
-            </Button>
+            </ToolActionButton>
           </div>
           {pasteOpen ? (
             <FieldGroup>
@@ -828,12 +830,12 @@ export function LactateCurveCalculatorClient({
                 />
                 <FieldDescription>{c.pasteHelp}</FieldDescription>
               </Field>
-              <Button
-                variant="outline"
+              <ToolActionButton
+                intent="secondary"
                 onClick={() => prepareImport(pasteText, "paste")}
               >
                 {c.mapping}
-              </Button>
+              </ToolActionButton>
             </FieldGroup>
           ) : null}
           {pending ? (
@@ -883,10 +885,12 @@ export function LactateCurveCalculatorClient({
                 </table>
               </ScrollableRegion>
               <div className={styles.actions}>
-                <Button onClick={confirmImport}>{c.confirmImport}</Button>
-                <Button variant="ghost" onClick={() => setPending(null)}>
+                <ToolActionButton intent="primary" onClick={confirmImport}>
+                  {c.confirmImport}
+                </ToolActionButton>
+                <ToolActionButton intent="quiet" onClick={() => setPending(null)}>
                   {c.cancel}
-                </Button>
+                </ToolActionButton>
               </div>
             </div>
           ) : null}
@@ -958,19 +962,16 @@ export function LactateCurveCalculatorClient({
               </tbody>
             </table>
           </ScrollableRegion>
-          <Button
-            variant="outline"
+          <ToolActionButton
+            intent="secondary"
             disabled={busy || rows.length >= 31}
             onClick={() =>
-              changeRows([
-                ...rows,
-                { intensity: "", lactate: "", heartRate: "" },
-              ])
+              changeRows([...rows, { intensity: "", lactate: "", heartRate: "" }])
             }
           >
             <Plus data-icon="inline-start" />
             {c.add}
-          </Button>
+          </ToolActionButton>
           <details className={styles.protocol}>
             <summary>{c.protocol}</summary>
             <FieldGroup>
@@ -1039,8 +1040,8 @@ export function LactateCurveCalculatorClient({
             </Alert>
           ) : null}
           {error?.code === "unsorted_stages" ? (
-            <Button
-              variant="outline"
+            <ToolActionButton
+              intent="quiet"
               onClick={() =>
                 changeRows(
                   [...rows].sort(
@@ -1052,17 +1053,17 @@ export function LactateCurveCalculatorClient({
               }
             >
               {c.sort}
-            </Button>
+            </ToolActionButton>
           ) : null}
-          <Button
-            size="lg"
+          <ToolActionButton
+            intent="primary"
             onClick={(event) => void analyze(event.timeStamp)}
             disabled={busy}
             data-testid="lactate-analyze"
           >
             {busy ? c.calculating : c.analyze}
             <ArrowRight data-icon="inline-end" />
-          </Button>
+          </ToolActionButton>
         </section>
         <section
           className={styles.results}

@@ -1,4 +1,6 @@
 "use client";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 
 import Link from "next/link";
@@ -10,7 +12,6 @@ import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
 import { withLocalePath } from "@/lib/locale-url";
 import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
-import { Button } from "@/components/ui/button";
 import layout from "@/components/calculators/tool-page.module.css";
 import {
   ToolCard,
@@ -19,10 +20,7 @@ import {
   ToolPageMain,
   ToolSection,
 } from "@/components/ToolPageLayout";
-import {
-  ToolFileDropzone,
-  toolPrimaryActionButtonClass,
-} from "@/components/ToolClientControls";
+import { ToolFileDropzone } from "@/components/ToolClientControls";
 import { TrainingPlanAfterConvertDialog } from "@/components/TrainingPlanAfterConvertDialog";
 import { TrackFileInspectionStatus } from "@/components/TrackFileInspectionStatus";
 import { useTrackFileInspection } from "@/hooks/use-track-file-inspection";
@@ -409,7 +407,9 @@ export function ConverterDirectionClient({
                   </div>
                 ) : null}
                 <div className="flex justify-end">
-                  <Button
+                  <ToolActionButton
+                    intent="primary"
+                    fullWidth
                     type="button"
                     disabled={
                       isSubmitting ||
@@ -418,7 +418,6 @@ export function ConverterDirectionClient({
                       noGps ||
                       Boolean(pending)
                     }
-                    className={toolPrimaryActionButtonClass}
                     ref={convertButtonRef}
                     onClick={onSubmit}
                     aria-label={ui.convertAria}
@@ -434,7 +433,7 @@ export function ConverterDirectionClient({
                         {ui.convertTo}
                       </>
                     )}
-                  </Button>
+                  </ToolActionButton>
                 </div>
               </div>
 

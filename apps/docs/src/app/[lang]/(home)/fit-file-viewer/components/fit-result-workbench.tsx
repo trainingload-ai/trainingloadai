@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -627,12 +629,12 @@ function FitMessageBrowser({
                   </p>
                 </div>
               </div>
-              <button
+              <ToolActionButton
+                intent="secondary"
                 type="button"
                 disabled={isExporting}
                 aria-busy={isExporting}
                 onClick={() => exportCsv(activeGroup.key)}
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-compact border border-neutral-300 bg-white px-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 disabled:opacity-50 dark:border-border dark:bg-card dark:text-neutral-200 dark:hover:bg-accent sm:h-8 sm:text-xs"
               >
                 {isExporting ? (
                   <Loader2
@@ -643,7 +645,7 @@ function FitMessageBrowser({
                   <Download aria-hidden="true" className="size-3.5" />
                 )}
                 {copy.buttons.exportCsv}
-              </button>
+              </ToolActionButton>
             </div>
 
             <label className="mt-4 block max-w-xl">
@@ -1089,20 +1091,16 @@ export function FitResultWorkbench({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onReset}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact px-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 dark:text-neutral-400 dark:hover:bg-accent dark:hover:text-neutral-100 sm:h-8 sm:text-xs"
-            >
+            <ToolActionButton intent="quiet" type="button" onClick={onReset}>
               <RotateCcw aria-hidden="true" className="size-3.5" />
               {copy.buttons.reset}
-            </button>
-            <button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="primary"
               type="button"
               disabled={isExporting}
               aria-busy={isExporting}
               onClick={() => exportFile("json")}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact bg-neutral-950 px-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200 sm:h-8 sm:text-xs"
             >
               {isExporting ? (
                 <Loader2
@@ -1113,7 +1111,7 @@ export function FitResultWorkbench({
                 <Download aria-hidden="true" className="size-3.5" />
               )}
               {copy.buttons.exportJson}
-            </button>
+            </ToolActionButton>
           </div>
         </div>
       </header>

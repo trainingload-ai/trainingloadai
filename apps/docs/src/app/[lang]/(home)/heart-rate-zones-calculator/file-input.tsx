@@ -1,10 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -200,13 +201,13 @@ export function HeartRateFileInput({
           </div>
           <p className={styles.fileHint}>{t("windowHelp")}</p>
           {autoStart != null ? (
-            <Button
+            <ToolActionButton
+              intent="secondary"
               type="button"
-              variant="outline"
               onClick={() => applyStart(formatMinutes(autoStart), false)}
             >
               {t("auto")}
-            </Button>
+            </ToolActionButton>
           ) : null}
         </>
       ) : null}

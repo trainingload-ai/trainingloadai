@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { InputSource } from "@/components/calculators/input-source";
 
@@ -429,9 +431,9 @@ export function RaceTimePredictorClient({
                 </span>
               </div>
               <div className={styles.formFoot}>
-                <button type="button" onClick={loadExample}>
+                <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
                   {t("example.action")}
-                </button>
+                </ToolActionButton>
               </div>
             </div>
           )}

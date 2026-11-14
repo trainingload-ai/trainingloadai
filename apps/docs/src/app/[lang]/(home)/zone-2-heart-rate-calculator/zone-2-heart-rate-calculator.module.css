@@ -128,17 +128,6 @@
   line-height: 1.6;
 }
 
-.exampleButton {
-  min-height: 2.5rem;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--success);
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .notice {
   border-radius: var(--tl-radius-control-lg);
   background: var(--z2-accent-soft);
@@ -165,7 +154,6 @@
 .relatedMore:focus-visible,
 .footerCtaButton:focus-visible,
 .posterLink:focus-visible,
-.exampleButton:focus-visible,
 .board :global(input:focus-visible),
 .board :global([data-slot="select-trigger"]:focus-visible) {
   outline: 2px solid var(--z2-accent);

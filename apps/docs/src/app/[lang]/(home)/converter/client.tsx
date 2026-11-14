@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useCallback, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -20,7 +22,6 @@ import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
 import layout from "@/components/calculators/tool-page.module.css";
 import { normalizeFaqItems } from "@/lib/seo-schema";
-import { Button } from "@/components/ui/button";
 import {
   ToolHero,
   ToolFaqSection,
@@ -29,10 +30,7 @@ import {
   ToolPageMain,
 } from "@/components/ToolPageLayout";
 import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
-import {
-  ToolFileDropzone,
-  toolPrimaryActionButtonClass,
-} from "@/components/ToolClientControls";
+import { ToolFileDropzone } from "@/components/ToolClientControls";
 import {
   fileAnalyticsProperties,
   getErrorDebugInfo,
@@ -413,7 +411,9 @@ export function ConverterClient({ lang }: { lang: string }) {
                 </div>
               ) : null}
               <div className="flex justify-end">
-                <Button
+                <ToolActionButton
+                  intent="primary"
+                  fullWidth
                   type="button"
                   disabled={
                     isSubmitting ||
@@ -422,7 +422,6 @@ export function ConverterClient({ lang }: { lang: string }) {
                     noGps ||
                     Boolean(pending)
                   }
-                  className={toolPrimaryActionButtonClass}
                   ref={convertButtonRef}
                   onClick={onSubmit}
                   aria-label={t("buttons.convertAria")}
@@ -438,7 +437,7 @@ export function ConverterClient({ lang }: { lang: string }) {
                       {t("buttons.convert")}
                     </>
                   )}
-                </Button>
+                </ToolActionButton>
               </div>
             </div>
 

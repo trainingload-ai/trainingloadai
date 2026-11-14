@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 
@@ -438,13 +440,9 @@ export function VdotCalculatorClient({
                 {t("errors.distance")}
               </p>
             ) : null}
-            <Button
-              type="button"
-              className={styles.exampleButton}
-              onClick={useExample}
-            >
+            <ToolActionButton intent="quiet" type="button" onClick={useExample}>
               {t("example.button")}
-            </Button>
+            </ToolActionButton>
           </div>
         </section>
       </div>

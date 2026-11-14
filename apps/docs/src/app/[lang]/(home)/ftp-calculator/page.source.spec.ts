@@ -31,7 +31,6 @@ describe("FTP calculator page source", () => {
     expect(client.indexOf('role="radiogroup"')).toBeLessThan(client.indexOf("<TabsList"));
     expect(client).toContain('t("manual.unitsMetric")');
     expect(client).toContain('t("fields.weightLb")');
-    expect(client).toContain("bg-brand text-brand-foreground");
     expect(css).toContain("--ftp-accent: var(--brand)");
     expect(css).toContain("--ftp-canvas: var(--background)");
     expect(css).toContain("#94a3b8");

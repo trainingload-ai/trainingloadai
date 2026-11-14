@@ -1,3 +1,4 @@
+import { ToolActionButton } from "@/components/ToolActionButton";
 import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import type {
@@ -6,7 +7,6 @@ import type {
   LactatePair,
 } from "@trainingloadai/shared/lactate-analysis";
 import type { LactateCopy } from "@/lib/lactate-curve-copy";
-import { Button } from "@/components/ui/button";
 import styles from "./lactate-curve.module.css";
 
 const pace = (value: number) => {
@@ -310,9 +310,9 @@ export function LactateEmptyPreview({
       {children}
       <div className={styles.previewAction}>
         <p className={styles.muted}>{c.presentation.previewBody}</p>
-        <Button variant="outline" onClick={onExample} disabled={disabled}>
+        <ToolActionButton intent="quiet" onClick={onExample} disabled={disabled}>
           {c.example} →
-        </Button>
+        </ToolActionButton>
       </div>
     </div>
   );

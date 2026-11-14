@@ -141,7 +141,6 @@
 .jumpItem:focus-visible,
 .footerCtaButton:focus-visible,
 .heroProductLink:focus-visible,
-.primaryAction:focus-visible,
 .secondaryAction:focus-visible,
 .relatedLink:focus-visible,
 .promoButton:focus-visible,
@@ -770,7 +769,6 @@
   font-weight: 650;
 }
 
-.primaryAction,
 .secondaryAction,
 .promoButton,
 .relatedLink,
@@ -787,19 +785,16 @@
   text-decoration: none;
 }
 
-.primaryAction,
 .promoButton {
   border: 0;
   background: var(--css-accent);
   color: var(--css-accent-foreground);
 }
 
-:global(.dark) .primaryAction,
 :global(.dark) .promoButton {
   color: var(--css-accent-foreground);
 }
 
-.primaryAction:hover,
 .promoButton:hover {
   background: color-mix(in srgb, var(--css-accent) 84%, black);
 }

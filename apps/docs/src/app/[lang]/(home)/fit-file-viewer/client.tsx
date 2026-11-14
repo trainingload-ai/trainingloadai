@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CircleAlert,
@@ -115,22 +117,22 @@ function UploadWorkspace({
 
           <div className="mt-3 flex flex-wrap items-center justify-end gap-1.5">
             {file ? (
-              <button
+              <ToolActionButton
+                intent="quiet"
                 type="button"
                 onClick={onReset}
                 disabled={isParsing}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact px-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-accent dark:hover:text-neutral-100 sm:h-8 sm:text-xs"
               >
                 <RotateCcw aria-hidden="true" className="size-3.5" />
                 {copy.buttons.reset}
-              </button>
+              </ToolActionButton>
             ) : null}
-            <button
+            <ToolActionButton
+              intent="primary"
               type="button"
               disabled={!file || isParsing}
               aria-busy={isParsing}
               onClick={onInspect}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact bg-emerald-700 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-emerald-500 dark:text-neutral-950 dark:hover:bg-emerald-400 sm:h-8 sm:px-3 sm:text-xs"
             >
               {isParsing ? (
                 <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
@@ -138,7 +140,7 @@ function UploadWorkspace({
                 <FileSearch aria-hidden="true" className="size-3.5" />
               )}
               {isParsing ? copy.buttons.inspecting : copy.buttons.inspect}
-            </button>
+            </ToolActionButton>
           </div>
         </div>
 

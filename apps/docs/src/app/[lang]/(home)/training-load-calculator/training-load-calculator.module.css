@@ -181,7 +181,6 @@
 
 .jumpItem:focus-visible,
 .input:focus-visible,
-.textButton:focus-visible,
 .footerCtaButton:focus-visible,
 .relatedLink:focus-visible {
   outline: 2px solid var(--tl-accent);
@@ -218,22 +217,6 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.35rem 0.7rem;
-}
-
-.textButton {
-  border: 0;
-  background: transparent;
-  color: var(--success);
-  font-size: 0.78rem;
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.textButton:disabled {
-  color: var(--tl-muted);
-  cursor: not-allowed;
-  text-decoration: none;
 }
 
 .boardLead {
@@ -806,16 +789,6 @@
   gap: 1rem;
   color: var(--tl-muted);
   font-size: 0.75rem;
-}
-.textButton {
-  min-height: 2rem;
-  padding: 0.2rem 0.45rem;
-  border-radius: var(--tl-radius-xs);
-  text-decoration: none;
-  cursor: pointer;
-}
-.textButton:hover:not(:disabled) {
-  background: var(--tl-accent-soft);
 }
 .period {
   padding: 1.25rem 1.5rem 1rem;

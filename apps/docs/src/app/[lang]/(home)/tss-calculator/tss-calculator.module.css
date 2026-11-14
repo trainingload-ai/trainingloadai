@@ -33,9 +33,6 @@
 .powerToggle > * {
   width: 100%;
 }
-.calculateButton {
-  width: 100%;
-}
 .result {
   scroll-margin-top: 9rem;
 }

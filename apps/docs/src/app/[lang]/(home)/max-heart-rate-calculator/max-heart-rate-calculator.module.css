@@ -123,7 +123,6 @@
 .jumpItem:focus-visible,
 .inlineLink:focus-visible,
 .relatedLink:focus-visible,
-.submit:focus-visible,
 .select:focus-visible,
 .input:focus-visible,
 .choice:focus-visible {
@@ -246,33 +245,6 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.5rem;
-}
-
-.exampleButton {
-  height: 2.5rem;
-  border: 1px solid var(--hr-line-strong);
-  border-radius: var(--tl-radius-control-lg);
-  background: transparent;
-  color: var(--hr-ink);
-  padding: 0 0.9rem;
-  font-size: 0.92rem;
-  font-weight: 650;
-}
-
-.submit {
-  min-height: 2.5rem;
-  border: 0;
-  border-radius: var(--tl-radius-control-lg);
-  background: var(--hr-ink);
-  color: var(--hr-canvas);
-  padding: 0 1.1rem;
-  font-size: 0.92rem;
-  font-weight: 650;
-}
-
-.submit:hover {
-  background: var(--hr-accent);
-  color: var(--hr-accent-foreground);
 }
 
 .posterWrap {
@@ -792,11 +764,6 @@
   margin: 0 1.5rem 1rem;
 }
 
-.exampleButton,
-.submit {
-  height: 2.5rem;
-}
-
 .footerCta {
   display: flex;
   flex-wrap: wrap;
@@ -1151,11 +1118,6 @@
   gap: 0.5rem;
   align-items: center;
   cursor: pointer;
-}
-.form .submit {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
 }
 .table th:first-child {
   min-width: 12rem;

@@ -151,7 +151,6 @@
 
 .jumpItem:focus-visible,
 .footerCtaButton:focus-visible,
-.primaryAction:focus-visible,
 .relatedLink:focus-visible,
 .choice:focus-visible {
   outline: 2px solid var(--rtp-accent);
@@ -462,24 +461,6 @@
   color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   line-height: 1.5;
-}
-
-.primaryAction {
-  border: 0;
-  border-radius: var(--tl-radius-control);
-  background: var(--rtp-accent);
-  color: var(--rtp-accent-foreground);
-  font-size: 0.88rem;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-:global(.dark) .primaryAction {
-  color: var(--rtp-accent-foreground);
-}
-
-.primaryAction:hover {
-  background: color-mix(in srgb, var(--rtp-accent) 84%, black);
 }
 
 .section {

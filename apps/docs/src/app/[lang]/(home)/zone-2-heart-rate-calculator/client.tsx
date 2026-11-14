@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
@@ -420,13 +422,9 @@ export function Zone2HeartRateCalculatorClient({
               </TrackedLink>
             </p>
             <div className={styles.formFoot}>
-              <button
-                type="button"
-                className={styles.exampleButton}
-                onClick={loadExample}
-              >
+              <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
                 {t("example")}
-              </button>
+              </ToolActionButton>
             </div>
 
             {invalid ? (

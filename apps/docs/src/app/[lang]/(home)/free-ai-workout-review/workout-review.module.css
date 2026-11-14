@@ -448,33 +448,6 @@
   accent-color: var(--lab-green-strong);
 }
 
-.submit {
-  display: inline-flex;
-  min-height: 3.05rem;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--lab-ink);
-  background: var(--lab-green);
-  box-shadow: 5px 5px 0 var(--lab-ink);
-  color: #17201c;
-  font-size: 0.86rem;
-  font-weight: 950;
-  transition:
-    transform 150ms ease,
-    box-shadow 150ms ease;
-}
-
-.submit:hover:not(:disabled) {
-  box-shadow: 1px 1px 0 var(--lab-ink);
-  transform: translate(3px, 3px);
-}
-
-.submit:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
 .error {
   border: 2px solid #7f1d1d;
   background: #fee2e2;
@@ -674,7 +647,6 @@
   line-height: 1.65;
 }
 
-.resultButton,
 .appCta {
   display: inline-flex;
   min-height: 2.8rem;
@@ -686,11 +658,6 @@
   padding: 0.65rem;
   font-size: 0.78rem;
   font-weight: 900;
-}
-
-.resultButton {
-  background: var(--lab-panel);
-  color: var(--lab-ink);
 }
 
 .appCta {
@@ -857,8 +824,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .primaryAction,
-  .secondaryAction,
-  .submit {
+  .secondaryAction {
     transition: none;
   }
 }

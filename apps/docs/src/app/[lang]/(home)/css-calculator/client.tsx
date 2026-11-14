@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
@@ -559,9 +561,9 @@ export function CssCalculatorClient({
               />
               <div className={styles.formFoot}>
                 <p className={styles.fileHint}>{t("manual.unitHelp")}</p>
-                <button type="button" onClick={loadExample}>
+                <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
                   {t("manual.example")}
-                </button>
+                </ToolActionButton>
               </div>
             </div>
           )}

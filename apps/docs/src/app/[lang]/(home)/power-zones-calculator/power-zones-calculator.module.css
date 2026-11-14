@@ -749,12 +749,6 @@
   width: 100%;
 }
 
-.exampleButton {
-  justify-self: start;
-  height: 2.5rem;
-  min-height: 2.5rem;
-}
-
 .exampleLabel {
   margin-bottom: 0.7rem;
   color: var(--pz-muted);

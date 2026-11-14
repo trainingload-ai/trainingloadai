@@ -167,7 +167,6 @@
 .jumpItem:focus-visible,
 .textLink:focus-visible,
 .relatedLink:focus-visible,
-.submit:focus-visible,
 .unitOption:focus-visible,
 .input:focus-visible,
 .footerCtaButton:focus-visible {
@@ -312,7 +311,6 @@ select.input {
   color: var(--success);
 }
 
-.submit,
 .footerCtaButton {
   display: inline-flex;
   align-items: center;
@@ -325,24 +323,8 @@ select.input {
   text-decoration: none;
 }
 
-.submit {
-  min-height: 3rem;
-  border-radius: var(--tl-radius-control-lg);
-  font-size: 0.95rem;
-}
-
-.submit:hover,
 .footerCtaButton:hover {
   background: #00786e;
-}
-
-:global(.dark) .submit {
-  background: var(--vdot-accent);
-  color: var(--vdot-accent-foreground);
-}
-
-:global(.dark) .submit:hover {
-  background: #14d48e;
 }
 
 .compare {
@@ -1142,22 +1124,6 @@ select.input {
   padding: 0;
   border: 0;
   background: transparent;
-}
-.exampleButton {
-  height: auto;
-  min-height: 2rem;
-  padding: 0;
-  background: transparent;
-  color: var(--success);
-  text-align: left;
-  justify-content: flex-start;
-  border: 0;
-  border-radius: 0;
-  font-weight: 650;
-}
-.exampleButton:hover {
-  background: transparent;
-  text-decoration: underline;
 }
 .shortAnswer {
   margin-top: 1rem;

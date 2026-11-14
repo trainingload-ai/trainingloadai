@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
@@ -140,10 +142,9 @@ export function TssCalculatorClient({
         >
           <div className={styles.formHeader}>
             <h2>{t("panel.title")}</h2>
-            <Button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="outline"
-              size="sm"
               onClick={() => {
                 setInputs(EXAMPLE_TSS_INPUTS);
                 setResultInputs(EXAMPLE_TSS_INPUTS);
@@ -153,7 +154,7 @@ export function TssCalculatorClient({
               }}
             >
               {t("report.example")}
-            </Button>
+            </ToolActionButton>
           </div>
           <FieldDescription>{t("panel.subtitle")}</FieldDescription>
           <FieldGroup className={styles.formFields}>
@@ -233,9 +234,9 @@ export function TssCalculatorClient({
             </div>
             <FieldDescription>{t("inputs.ftp.hint")}</FieldDescription>
             {showError ? <FieldError>{t("inputs.invalid")}</FieldError> : null}
-            <Button type="submit" size="lg" className={styles.calculateButton}>
+            <ToolActionButton intent="primary" fullWidth type="submit">
               {t("panel.calculate")}
-            </Button>
+            </ToolActionButton>
             <FieldDescription>{t("panel.note")}</FieldDescription>
           </FieldGroup>
         </form>

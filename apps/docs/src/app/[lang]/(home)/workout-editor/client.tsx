@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 
 import dynamic from "next/dynamic";
@@ -20,7 +22,6 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -737,7 +738,8 @@ export function WorkoutEditorClient({
         </div>
         <div className={styles.actions}>
           <div className={styles.actionGroup}>
-            <Button
+            <ToolActionButton
+              intent="primary"
               type="button"
               onClick={() =>
                 editDraft((current) => ({
@@ -748,10 +750,10 @@ export function WorkoutEditorClient({
             >
               <Plus data-icon="inline-start" />
               {t("builder.addStep")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="secondary"
               type="button"
-              variant="secondary"
               onClick={() =>
                 editDraft((current) => ({
                   ...current,
@@ -761,31 +763,31 @@ export function WorkoutEditorClient({
             >
               <Repeat2 data-icon="inline-start" />
               {t("builder.addInterval")}
-            </Button>
+            </ToolActionButton>
           </div>
           <div className={styles.actionGroup}>
-            <Button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="ghost"
               onClick={() => loadExample("intervals")}
             >
               {t("builder.exampleIntervals")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="ghost"
               onClick={() => loadExample("pool")}
             >
               {t("builder.examplePool")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="secondary"
               type="button"
-              variant="ghost"
               onClick={() => fileRef.current?.click()}
             >
               <Upload data-icon="inline-start" />
               {t("builder.importFile")}
-            </Button>
+            </ToolActionButton>
             <input
               ref={fileRef}
               className={styles.fileInput}
@@ -865,9 +867,9 @@ export function WorkoutEditorClient({
                       }}
                     />
                   </Field>
-                  <button
+                  <ToolActionButton
+                    intent="quiet"
                     type="button"
-                    className={styles.textButton}
                     onClick={() =>
                       editDraft((current) =>
                         updateModules(current, (modules) =>
@@ -878,7 +880,7 @@ export function WorkoutEditorClient({
                   >
                     <Trash2 className="size-4" />
                     {t("builder.removeInterval")}
-                  </button>
+                  </ToolActionButton>
                 </div>
                 <div className={styles.stepStack}>
                   {block.steps.map((step) => (
@@ -923,10 +925,9 @@ export function WorkoutEditorClient({
                     />
                   ))}
                 </div>
-                <Button
+                <ToolActionButton
+                  intent="secondary"
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() =>
                     editDraft((current) =>
                       updateModules(current, (modules) =>
@@ -944,7 +945,7 @@ export function WorkoutEditorClient({
                 >
                   <Plus className="size-4" />
                   {t("builder.addRepeatStep")}
-                </Button>
+                </ToolActionButton>
               </div>
             );
           }
@@ -1049,9 +1050,10 @@ export function WorkoutEditorClient({
               </div>
             </dl>
             <div className={styles.exportActions}>
-              <button
+              <ToolActionButton
+                intent="primary"
+                fullWidth
                 type="button"
-                className={styles.primaryAction}
                 onClick={() => void handleDownloadFit()}
                 disabled={!ready || isEncoding}
               >
@@ -1060,28 +1062,26 @@ export function WorkoutEditorClient({
                 ) : (
                   <Download className="size-4" />
                 )}
-                {isEncoding
-                  ? t("builder.downloadingFit")
-                  : t("builder.downloadFit")}
-              </button>
-              <button
+                {isEncoding ? t("builder.downloadingFit") : t("builder.downloadFit")}
+              </ToolActionButton>
+              <ToolActionButton
+                intent="secondary"
+                fullWidth
                 type="button"
-                className={styles.primaryAction}
                 onClick={() => void handleCopy("intervals")}
                 disabled={!ready}
               >
-                {copied === "intervals"
-                  ? t("builder.copied")
-                  : t("builder.copyIntervals")}
-              </button>
-              <button
+                {copied === "intervals" ? t("builder.copied") : t("builder.copyIntervals")}
+              </ToolActionButton>
+              <ToolActionButton
+                intent="secondary"
+                fullWidth
                 type="button"
-                className={styles.primaryAction}
                 onClick={() => void handleCopy("dsl")}
                 disabled={!ready}
               >
                 {copied === "dsl" ? t("builder.copied") : t("builder.copyDsl")}
-              </button>
+              </ToolActionButton>
             </div>
             <ToolResultActions>
               <button type="button" onClick={handlePrint} disabled={!ready}>
@@ -1165,13 +1165,13 @@ export function WorkoutEditorClient({
                 placeholder={t("builder.importIntervalsPlaceholder")}
               />
             </Field>
-            <Button
+            <ToolActionButton
+              intent="primary"
               type="button"
-              variant="outline"
               onClick={handleImportIntervals}
             >
               {t("builder.importIntervalsAction")}
-            </Button>
+            </ToolActionButton>
           </details>
           <details>
             <summary>{t("builder.dslTitle")}</summary>

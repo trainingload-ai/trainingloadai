@@ -666,7 +666,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/client.tsx",
-          "line": 587
+          "line": 589
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
@@ -1133,7 +1133,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/client.tsx",
-          "line": 574
+          "line": 576
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
@@ -1856,7 +1856,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/client.tsx",
-          "line": 550
+          "line": 552
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
@@ -3760,7 +3760,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/client.tsx",
-          "line": 828
+          "line": 830
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",

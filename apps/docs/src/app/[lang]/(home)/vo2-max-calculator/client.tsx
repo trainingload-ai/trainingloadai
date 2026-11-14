@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 
 import {
@@ -736,9 +738,9 @@ export function Vo2MaxCalculatorClient({
             </p>
           ) : null}
           <div className={styles.actions}>
-            <Button type="submit" className={styles.primary}>
+            <ToolActionButton intent="primary" fullWidth type="submit">
               {t("common.buttons.calculate")}
-            </Button>
+            </ToolActionButton>
           </div>
           <p className={styles.note}>{t("panel.note")}</p>
         </form>

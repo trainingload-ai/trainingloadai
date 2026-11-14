@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
@@ -452,12 +454,12 @@ export function MaxHeartRateCalculatorClient({
             )}
 
             <div className={styles.actions}>
-              <button type="submit" className={styles.submit}>
+              <ToolActionButton intent="primary" type="submit">
                 {t("calculateButton")}
-              </button>
-              <button
+              </ToolActionButton>
+              <ToolActionButton
+                intent="quiet"
                 type="button"
-                className={styles.exampleButton}
                 onClick={() => {
                   setExample(true);
                   setAgeText("40");
@@ -469,7 +471,7 @@ export function MaxHeartRateCalculatorClient({
                 }}
               >
                 {t("exampleButton")}
-              </button>
+              </ToolActionButton>
             </div>
           </form>
         </section>

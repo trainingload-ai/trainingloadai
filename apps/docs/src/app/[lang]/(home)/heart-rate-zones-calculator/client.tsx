@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
@@ -311,13 +313,9 @@ export function HeartRateZonesCalculatorClient({
           />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{tPage("title")}</h2>
-            <button
-              type="button"
-              className={styles.textButton}
-              onClick={loadExample}
-            >
+            <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
               {t("example.button")}
-            </button>
+            </ToolActionButton>
           </div>
           <p className={styles.boardLead}>{t("panel.subtitle")}</p>
           <div className={styles.fields}>

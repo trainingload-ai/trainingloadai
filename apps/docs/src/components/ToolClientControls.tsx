@@ -6,13 +6,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { fileAnalyticsProperties } from "@/lib/analytics";
 import { trackToolEvent, type ToolId } from "@/lib/tool-analytics";
-import styles from "./calculators/tool-page.module.css";
-
-export const toolPrimaryActionButtonClass = cn(
-  styles.button,
-  styles.primary,
-  styles.submit,
-);
 
 export function ToolFileDropzone({
   label,
