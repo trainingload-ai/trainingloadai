@@ -73,6 +73,57 @@ During a large import:
 
 On the Garmin page, **OAuth** receives new activities and authorized health summaries. **File import** supplies older training records. These are separate actions; choose the one you need.
 
+## How do planned workouts sync with Intervals.icu?
+
+These are workouts scheduled on your calendar, not completed activity recordings. In the Intervals.icu connection settings, you can turn on **Import planned workouts** and **Export planned workouts** separately.
+
+- **Import planned workouts** brings additions, edits, and deletions from Intervals.icu into Trainingload.ai.
+- **Export planned workouts** sends additions, edits, and deletions from Trainingload.ai to Intervals.icu.
+
+**With both directions on, deletions sync too.** If the other copy has not changed since the last sync, deleting one copy also deletes the other.
+
+### What happens when I add, edit, or delete a workout?
+
+This table assumes both directions are on:
+
+| What you do | What happens on the other side |
+| --- | --- |
+| Add a workout in Trainingload.ai | A corresponding new workout appears in Intervals.icu. |
+| Add a workout in Intervals.icu | A corresponding new workout appears in Trainingload.ai. |
+| Change only the Trainingload.ai date, name, or prescription | The corresponding Intervals.icu workout is updated. |
+| Change only the Intervals.icu date, name, or prescription | The corresponding Trainingload.ai workout is updated. |
+| Delete a workout in Trainingload.ai | The Intervals.icu copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
+| Delete a workout in Intervals.icu | The Trainingload.ai copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
+
+### Which version wins if I edit both copies?
+
+It depends on the direction currently being synchronized:
+
+- Importing from Intervals.icu uses the Intervals.icu version.
+- Exporting to Intervals.icu uses the Trainingload.ai version.
+
+Daily automatic sync imports before exporting. If both copies have already been edited when that run starts, the Intervals.icu version takes priority.
+
+To avoid overwriting an edit, finish editing on one side, allow it to sync, and then continue on the other side.
+
+### Why is one copy still there after I delete the other?
+
+The remaining copy was edited after the last sync. Those edits are kept, the two workouts stop updating each other, and sync does not immediately recreate the workout you deleted.
+
+For example, you delete Sunday's run in Intervals.icu after moving its Trainingload.ai copy to Saturday. Trainingload.ai keeps the Saturday run; the deleted Intervals.icu workout does not reappear because of it.
+
+If the system cannot confirm whether the other copy has changed, it keeps that copy rather than risk deleting it. Completed or skipped workouts, and workouts linked to an actual activity, also retain the history that needs to be kept.
+
+### What if I delete a workout and create another with the same name?
+
+The recreated workout is a new workout and syncs separately. Even matching names, dates, and prescriptions do not reconnect it to a deleted workout. Repeated notifications about the same workout do not create extra copies.
+
+### Why hasn't the other side updated yet?
+
+Both pages do not update instantly together. The system receives provider notifications and checks upcoming workouts periodically. Daily automatic checks cover yesterday through the next seven days in your time zone.
+
+Moving a workout outside that date range does not by itself mean it was deleted: its current location is checked separately. A temporarily unavailable connection also does not cause the other copy to be deleted.
+
 ## Disconnecting
 
 Disconnecting stops future synchronization and removes the active credential. It does not normally delete activities that were already imported. Delete an activity separately only after verifying that it is not the sole copy you want to keep.

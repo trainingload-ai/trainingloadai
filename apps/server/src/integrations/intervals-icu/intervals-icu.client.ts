@@ -511,6 +511,25 @@ export class IntervalsIcuClient {
     );
   }
 
+  /** Read one event independently of its current calendar date. */
+  getEvent(credential: IntervalsIcuApiCredential, eventId: string | number) {
+    return this.getJson<IntervalsIcuEvent>(
+      credential,
+      `/athlete/0/events/${encodeURIComponent(String(eventId))}`,
+    );
+  }
+
+  /** Delete only this event, never other events added at the same time. */
+  deleteEvent(credential: IntervalsIcuApiCredential, eventId: string | number) {
+    return this.sendJson<unknown>(
+      credential,
+      'DELETE',
+      `/athlete/0/events/${encodeURIComponent(String(eventId))}`,
+      undefined,
+      { others: false },
+    );
+  }
+
   /** 批量删除日历事件（可按 id 或 external_id）。 */
   deleteEventsBulk(
     credential: IntervalsIcuApiCredential,

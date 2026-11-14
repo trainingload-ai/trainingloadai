@@ -688,8 +688,11 @@ export class PlanWriteSupport {
       });
     }
 
-    await this.assertWorkoutHasNoActivityLink(workoutId);
-    await this.workouts.delete({ where: { id: workoutId } });
+    await this.prisma.$transaction(async (tx) => {
+      await this.assertWorkoutHasNoActivityLink(workoutId, tx);
+      await this.markExternalMappings(tx, [workoutId], 'LOCAL_DELETED');
+      await this.workouts.delete({ where: { id: workoutId } }, tx);
+    });
     await this.emitWorkoutsChanged(userId, 'independent_delete', [workoutId]);
 
     return { success: true as const };
