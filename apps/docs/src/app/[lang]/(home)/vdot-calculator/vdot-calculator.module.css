@@ -373,7 +373,7 @@ select.input {
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 7rem;
-  border: 1px solid var(--score-line, var(--border));
+  border: 0;
   background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
@@ -390,32 +390,20 @@ select.input {
 .posterBrand {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   min-height: 3rem;
   border-bottom: 2px solid var(--score-line-strong, var(--border));
-  padding: 0.75rem 1.2rem;
+  padding: 0.5rem 1.2rem;
+  gap: 1rem;
 }
 
 .posterHeading {
-  position: absolute;
-  top: 0;
-  left: 1.15rem;
-  border: 0;
-  padding: 0.55rem 0.7rem;
-  background: var(--score-bg, var(--card));
-  color: var(--score-paper);
-  box-shadow: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  transform: none;
+  composes: title from "../../../../components/tool-scorecard.module.css";
 }
 
 .poster {
   position: relative;
-  border: 1px solid var(--score-line, var(--border));
+  border: 0;
   box-shadow: none;
   border-radius: var(--tl-radius-surface);
 }
@@ -1011,15 +999,6 @@ select.input {
 
   .posterNumber {
     font-size: clamp(3.6rem, 18vw, 5rem);
-  }
-
-  .posterHeading {
-    font-size: 0.68rem;
-    border: 0;
-    box-shadow: none;
-    transform: none;
-    background: var(--score-bg, var(--card));
-    color: var(--score-paper);
   }
 }
 

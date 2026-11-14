@@ -44,7 +44,7 @@
   width: 100%;
   max-width: 800px;
   margin: auto;
-  border: 1px solid var(--score-line);
+  border: 0;
   box-shadow: none;
   color: var(--score-paper);
   background: var(--score-bg);
@@ -152,6 +152,19 @@
   }
 }
 @media print {
+  :global(body):has(.report) :not(:has(.report), .report, .report *) {
+    display: none !important;
+  }
+
+  :global(body):has(.report) :has(.report) {
+    display: block;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
   @page {
     size: A4 landscape;
     margin: 12mm;

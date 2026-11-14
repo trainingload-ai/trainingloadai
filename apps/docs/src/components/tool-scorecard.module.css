@@ -30,3 +30,25 @@
   --score-highlight: rgb(118 239 163 / 14%);
   --score-input: rgb(255 255 255 / 4%);
 }
+
+.title {
+  display: inline-block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  position: static;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0.4rem 0.75rem;
+  background: #f5d65d;
+  color: #172219;
+  box-shadow: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  line-height: 1.4;
+  text-transform: none;
+  overflow-wrap: anywhere;
+  transform: none;
+}

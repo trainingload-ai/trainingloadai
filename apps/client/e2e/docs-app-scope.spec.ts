@@ -435,3 +435,21 @@ test("FIT results stay operable after local worker parsing", async ({
   await expect(page.getByRole("tabpanel")).toBeVisible();
   expect(await page.getByRole("main").count()).toBe(1);
 });
+
+test("calculator printing produces visible reports without blank pages", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "PDF output requires Chromium");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  for (const route of ["race-time-predictor", "tss-calculator"]) {
+    await page.goto(`/zh/${route}`);
+    await page.getByRole("button", { name: /试用.*示例/ }).click();
+    const report = page.locator(route === "tss-calculator" ? "#result article" : "#result");
+    await page.emulateMedia({ media: "print" });
+    await expect(report).toHaveCSS("visibility", "visible");
+    const pdf = await page.pdf({ printBackground: true, preferCSSPageSize: true });
+    expect(pdf.toString("latin1").match(/\/Type\s*\/Page\b/g)).toHaveLength(1);
+    await page.emulateMedia({ media: "screen" });
+  }
+});

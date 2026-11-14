@@ -318,7 +318,7 @@
   width: 100%;
   max-width: 900px;
   scroll-margin-top: 8rem;
-  border: 1px solid var(--score-line, var(--border));
+  border: 0;
   border-radius: var(--tl-radius-surface);
   background: var(--score-bg, var(--card));
   color: var(--score-paper);
@@ -335,28 +335,16 @@
 .posterBrand {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   min-height: 3rem;
   border-bottom: 2px solid var(--score-line-strong, var(--border));
   background: var(--score-bg, var(--card));
-  padding: 0.75rem 1.3rem;
+  padding: 0.5rem 1.2rem;
+  gap: 1rem;
 }
 
 .posterHeading {
-  position: absolute;
-  top: 0;
-  left: 1.3rem;
-  border: 0;
-  padding: 0.6rem 0.8rem;
-  background: transparent;
-  color: var(--score-paper);
-  box-shadow: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  transform: none;
+  composes: title from "../../../../components/tool-scorecard.module.css";
 }
 
 .posterMark {

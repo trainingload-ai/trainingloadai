@@ -45,7 +45,6 @@
 }
 
 .kicker,
-.scoreKicker,
 .promoKicker {
   color: var(--success);
   font-size: 0.72rem;
@@ -313,7 +312,7 @@
 .scorecard {
   composes: theme from "../../../../components/tool-scorecard.module.css";
   scroll-margin-top: 9rem;
-  border: 1px solid var(--score-line);
+  border: 0;
   box-shadow: none;
   border-radius: var(--tl-radius-surface);
 }
@@ -815,7 +814,7 @@
   --vo2-line: var(--score-line);
   --vo2-ink: var(--score-paper);
   position: relative;
-  border: 1px solid var(--score-line);
+  border: 0;
   border-radius: var(--tl-radius-surface);
   padding: 0 28px 24px;
   background: var(--score-bg);
@@ -826,20 +825,11 @@
 .scoreHead {
   border-bottom: 1px solid var(--score-line-strong);
   margin: 0 -28px;
-  padding: 20px 28px;
+  padding: 14px 28px;
   align-items: center;
 }
 .scoreKicker {
-  background: #f5cf58;
-  color: #131a13;
-  padding: 11px 14px;
-  border: 2px solid #fff5cd;
-  box-shadow: 3px 3px 0 var(--score-paper);
-  transform: translateY(-30px);
-  margin-bottom: -32px;
-  letter-spacing: 0.02em;
-  font-size: 0.82rem;
-  font-weight: 750;
+  composes: title from "../../../../components/tool-scorecard.module.css";
 }
 .scoreMark {
   color: var(--score-paper);
@@ -1125,7 +1115,7 @@
   .scorecard {
     padding: 0 16px 20px;
     box-shadow: none;
-    border: 1px solid var(--score-line);
+    border: 0;
     border-radius: var(--tl-radius-surface);
   }
   .scoreHead {
@@ -1161,10 +1151,6 @@
   }
   .bandList li span:last-child {
     font-size: 0.75rem;
-  }
-  .scoreKicker {
-    font-size: 0.65rem;
-    padding: 9px;
   }
   .scoreMark {
     font-size: 0.65rem;
