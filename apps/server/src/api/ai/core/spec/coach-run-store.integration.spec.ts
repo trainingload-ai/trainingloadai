@@ -16,6 +16,7 @@ import {
   CoachRunCancelledError,
   type CoachRunHandle,
 } from '../../coach-run-store.service';
+import { AthleteStateInquiryService } from '../../athlete-state/athlete-state-inquiry.service';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
 import type { AiToolContext } from '../tool.types';
 import {
@@ -121,6 +122,100 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     expect(await prisma.aiCoachMemoryExtractionJob.count()).toBe(0);
   });
 
+  it('reuses one state session and resumes its owned pending question through the normal Coach runtime', async () => {
+    const args = {
+      userId: 'athlete',
+      taskKind: 'ATHLETE_STATE_UPDATE',
+      lang: 'en',
+      instructions: 'Refresh state.',
+      dedupeKey: 'version:1',
+      inputHash: 'v1',
+      operationId: randomUUID(),
+    };
+    const { handle } = await store.beginBackground(args);
+    handle!.projector.consume({
+      type: 'assistant',
+      message: {
+        content: [
+          {
+            type: 'tool_use',
+            id: 'question-call',
+            name: 'AskUserQuestion',
+            input: { ...question, metadata: { skill: 'athlete-state' } },
+          },
+        ],
+      },
+    });
+    handle!.projector.finish('awaiting_input');
+    await store.checkpoint(handle!, 'awaiting_input');
+    const answer = { ...answerArgs(handle!), sid: handle!.sessionId };
+    expect(
+      await store.isAthleteStateContinuation(
+        'athlete',
+        handle!.sessionId,
+        answer.command,
+      ),
+    ).toBe(true);
+    expect(
+      await store.isAthleteStateContinuation(
+        'intruder',
+        handle!.sessionId,
+        answer.command,
+      ),
+    ).toBe(false);
+    expect(
+      await store.isAthleteStateContinuation(
+        'athlete',
+        'foreign-session',
+        answer.command,
+      ),
+    ).toBe(false);
+    expect(
+      await store.isAthleteStateContinuation('athlete', handle!.sessionId, {
+        kind: 'start',
+        requestId: 'new',
+      }),
+    ).toBe(false);
+    const inquiries = new AthleteStateInquiryService(prisma as never);
+    const inquiry = await inquiries.pending('athlete');
+    expect(inquiry).toMatchObject({
+      caseId: handle!.projector.run.runId,
+      expiresAt: null,
+    });
+    expect(await inquiries.pending('intruder')).toBeNull();
+    expect(await inquiries.open('athlete', inquiry!.caseId)).toMatchObject({
+      sessionId: handle!.sessionId,
+    });
+    await expect(
+      inquiries.assertBound(
+        'athlete',
+        inquiry!.caseId,
+        'foreign-session',
+        null,
+      ),
+    ).rejects.toThrow();
+    const resumed = await store.begin(answer);
+    expect(resumed.handle!.projector.run.runId).toBe(
+      handle!.projector.run.runId,
+    );
+    expect(resumed.handle!.projector.run.attemptId).not.toBe(
+      handle!.projector.run.attemptId,
+    );
+    resumed.handle!.projector.finish('completed');
+    await store.checkpoint(resumed.handle!, 'completed');
+    expect(await inquiries.pending('athlete')).toBeNull();
+    const next = await store.beginBackground({
+      ...args,
+      dedupeKey: 'version:2',
+      inputHash: 'v2',
+      operationId: randomUUID(),
+    });
+    expect(next.handle!.sessionId).toBe(handle!.sessionId);
+    expect(next.handle!.projector.run.runId).not.toBe(
+      handle!.projector.run.runId,
+    );
+    expect(await prisma.coachAssessmentCase.count()).toBe(0);
+  });
   it('persists a hidden background run and replays its structured result without a second attempt', async () => {
     const args = {
       userId: 'athlete',

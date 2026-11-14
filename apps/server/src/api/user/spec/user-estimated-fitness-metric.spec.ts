@@ -156,6 +156,13 @@ function createService(options?: {
     {} as never,
     { get: jest.fn() } as never,
     ...userServiceDependencies(prisma, options?.autoEnabled ?? true),
+    {
+      observe: async (
+        _userId: unknown,
+        _tx: unknown,
+        write: () => Promise<unknown>,
+      ) => write(),
+    } as never,
   );
   return { service, prisma, created };
 }

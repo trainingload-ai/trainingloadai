@@ -18,8 +18,40 @@ export interface JWTConfigType {
   expiryTime: string;
 }
 
+/** Preserve the existing default-on flags and lowercase environment aliases. */
+function enabledByDefault(value?: string) {
+  if (value == null || value.trim() === '') return true;
+  return value.trim().toLowerCase() === 'true';
+}
+
 const config = () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
+  athleteState: {
+    evidenceEnabled: enabledByDefault(
+      process.env.ATHLETE_STATE_EVIDENCE_ENABLED ??
+        process.env.athlete_state_evidence_enabled,
+    ),
+    assessmentShadowEnabled: enabledByDefault(
+      process.env.ATHLETE_STATE_ASSESSMENT_SHADOW_ENABLED ??
+        process.env.athlete_state_assessment_shadow_enabled,
+    ),
+    caseEnabled: enabledByDefault(
+      process.env.COACH_ASSESSMENT_CASE_ENABLED ??
+        process.env.coach_assessment_case_enabled,
+    ),
+    homeInquiryEnabled: enabledByDefault(
+      process.env.COACH_ASSESSMENT_HOME_INQUIRY_ENABLED ??
+        process.env.coach_assessment_home_inquiry_enabled,
+    ),
+    planDecisionEnabled: enabledByDefault(
+      process.env.COACH_ASSESSMENT_PLAN_DECISION_ENABLED ??
+        process.env.coach_assessment_plan_decision_enabled,
+    ),
+    followupEnabled: enabledByDefault(
+      process.env.COACH_ASSESSMENT_FOLLOWUP_ENABLED ??
+        process.env.coach_assessment_followup_enabled,
+    ),
+  },
   database: {
     type: process.env.DATABASE_TYPE,
     host: process.env.DATABASE_HOST,

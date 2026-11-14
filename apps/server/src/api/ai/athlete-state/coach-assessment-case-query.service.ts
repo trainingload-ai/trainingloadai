@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { AthleteStateInquiryService } from './athlete-state-inquiry.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
   OPTIONAL_RECOVERY_EVIDENCE_KINDS,
@@ -19,10 +20,13 @@ export class CoachAssessmentCaseQueryService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly flags: AthleteStateFeatureFlags,
+    @Optional() private readonly inquiries?: AthleteStateInquiryService,
   ) {}
 
   async pendingInquiry(userId: string): Promise<CoachAssessmentInquiry | null> {
     if (!this.flags.homeInquiryEnabled()) return null;
+    const inquiry = await this.inquiries?.pending(userId);
+    if (inquiry) return inquiry;
     const row = await this.prisma.coachAssessmentCase.findFirst({
       where: {
         userId,
@@ -92,5 +96,24 @@ export class CoachAssessmentCaseQueryService {
         context: { select: { id: true, planId: true } },
       },
     });
+  }
+  async answerEvidence(userId: string, questionId: string) {
+    const question = await this.prisma.coachAssessmentQuestion.findFirst({
+      where: {
+        id: questionId,
+        case: { userId },
+        answerMessageId: { not: null },
+      },
+    });
+    return question?.answer
+      ? [
+          {
+            evidenceKind: question.evidenceKind,
+            answer: question.answer,
+            eventStart: question.eventStart?.toISOString() ?? null,
+            eventEnd: question.eventEnd?.toISOString() ?? null,
+          },
+        ]
+      : undefined;
   }
 }

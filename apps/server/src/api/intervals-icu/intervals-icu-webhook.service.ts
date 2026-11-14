@@ -8,6 +8,7 @@ import { ExternalProviderConnectionService } from '@/integrations/external-provi
 import type { PrismaClientSlice } from '@/prisma/prisma-db';
 import { ConfigService } from '@nestjs/config';
 import {
+  $Enums,
   ThirdPartyProvider,
   type ExternalProviderConnection,
 } from '@prisma/client';
@@ -21,13 +22,11 @@ import {
   type IntervalsIcuWellness,
 } from '@/integrations/intervals-icu/intervals-icu.client';
 import { IntervalsIcuCredentialService } from '@/integrations/intervals-icu/intervals-icu-credential.service';
+import { intervalsIcuMetadataOf } from '@/integrations/intervals-icu/intervals-icu-metadata';
+import { normalizeIanaTimezone } from '@/timezone/user-timezone-initializer.service';
 import { UserService } from '@/api/user/user.service';
 import { mapIntervalsIcuFitnessRecordsToMetricWrites } from './intervals-icu-fitness.mapper';
-import {
-  dateKeyFromWellness,
-  intervalsIcuWellnessPatchMetricTypes,
-  mapIntervalsIcuWellnessToHealthCandidates,
-} from './intervals-icu-health.mapper';
+import { mapIntervalsIcuWellnessRecordsToDailyPatches } from './intervals-icu-health.mapper';
 import { mapIntervalsIcuAthleteToSportSettingsMetrics } from './intervals-icu-sport-settings.mapper';
 import { IntervalsIcuPlanSyncService } from './intervals-icu-plan-sync.service';
 import { ExternalProviderWebhookInboxService } from '@/integrations/external-provider/external-provider-webhook-inbox.service';
@@ -116,7 +115,6 @@ export class IntervalsIcuWebhookService {
     private readonly activitySourceLifecycle?: ActivitySourceLifecycleService,
   ) {}
 
-
   /** 用配置的 `INTERVALS_ICU_WEBHOOK_SECRET` 校验 payload.secret。 */
   verifyPayloadSecret(payload: IntervalsIcuWebhookPayload) {
     const expectedSecret = (
@@ -146,25 +144,7 @@ export class IntervalsIcuWebhookService {
     let acceptedCount = 0;
     let duplicateCount = 0;
     for (const event of events) {
-      const eventType = String(event.type ?? 'UNKNOWN').trim() || 'UNKNOWN';
-      const athleteId = String(event.athlete_id ?? '').trim() || null;
-      const checksum = this.inbox.checksum(JSON.stringify(event));
-      const remoteId =
-        extractActivityExternalId(event) ??
-        String(event.id ?? event.timestamp ?? '').trim();
-      const dedupeKey = [
-        eventType,
-        athleteId ?? 'unknown',
-        remoteId || checksum,
-      ].join(':');
-      const queued = await this.inbox.enqueue({
-        provider: ThirdPartyProvider.intervals_icu,
-        eventType,
-        externalUserId: athleteId,
-        dedupeKey,
-        rawChecksum: checksum,
-        payload: importJsonValue(event),
-      });
+      const queued = await this.inbox.enqueue(this.buildInboxEvent(event));
       if (queued?.enqueued !== false) acceptedCount += 1;
       else duplicateCount += 1;
     }
@@ -176,12 +156,35 @@ export class IntervalsIcuWebhookService {
     };
   }
 
+  /** Normalize provider fields and preserve the existing event identity rules. */
+  private buildInboxEvent(event: IntervalsIcuWebhookEvent) {
+    const eventType = String(event.type ?? 'UNKNOWN').trim() || 'UNKNOWN';
+    const athleteId = String(event.athlete_id ?? '').trim() || null;
+    const checksum = this.inbox.checksum(JSON.stringify(event));
+    const remoteId =
+      extractActivityExternalId(event) ??
+      String(event.id ?? event.timestamp ?? '').trim();
+    const dedupeKey = [
+      eventType,
+      athleteId ?? 'unknown',
+      remoteId || checksum,
+    ].join(':');
+    return {
+      provider: ThirdPartyProvider.intervals_icu,
+      eventType,
+      externalUserId: athleteId,
+      dedupeKey,
+      rawChecksum: checksum,
+      payload: importJsonValue(event),
+    };
+  }
+
   /** 处理单条 durable inbox 事件，并返回明确的终态语义。 */
   processEvent(event: IntervalsIcuWebhookEvent) {
     return this.handleEvent(event);
   }
 
-  /** 按 type 分发：wellness / activity / fitness / calendar / sport settings。 */
+  /** 按 event.type 分发：wellness / activity / fitness / calendar / sport settings。 */
   private async handleEvent(event: IntervalsIcuWebhookEvent) {
     // 1. 校验 event 类型和 athlete_id
     const eventType = String(event.type ?? '').trim();
@@ -200,7 +203,7 @@ export class IntervalsIcuWebhookService {
     const connection = await this.findConnectionByAthleteId(athleteId);
     if (!connection) {
       this.logger.warn(
-        `[handleEvent] 未找到 Intervals.icu 连接 athlete_id=${athleteId} type=${eventType}`,
+        `[handleEvent] 未找到 Intervals.icu 连接对应用户 athlete_id=${athleteId} type=${eventType}`,
       );
       return 'IGNORED' as const;
     }
@@ -243,6 +246,7 @@ export class IntervalsIcuWebhookService {
     connection: ExternalProviderConnection,
     event: IntervalsIcuWebhookEvent,
   ) {
+    // 判断用户是否开启 wellness 同步
     if (connection.syncWellness !== true) {
       this.logger.log(
         `[intervals_icu wellness] 用户未开启 wellness 同步,跳过 userId=${connection.userId}`,
@@ -257,40 +261,37 @@ export class IntervalsIcuWebhookService {
       );
       return 'IGNORED' as const;
     }
-    // 3. 将 records 转换为 health candidates
-    let sampleCount = 0;
-    let replacedDays = 0;
-    for (const record of records) {
-      const dateKey = dateKeyFromWellness(record);
-      if (!dateKey) continue;
-      const candidates = mapIntervalsIcuWellnessToHealthCandidates({
-        externalAthleteId: connection.externalAthleteId,
-        connectionId: connection.id,
-        record,
-      });
-      const managedMetricTypes = intervalsIcuWellnessPatchMetricTypes(record);
-      if (managedMetricTypes.length === 0) continue;
-      await this.healthDataIngest.replaceProviderDailyCandidates({
-        userId: connection.userId,
-        provider: 'INTERVALS_ICU',
-        connectionId: connection.id,
-        localDate: new Date(`${dateKey}T00:00:00.000Z`),
-        managedMetricTypes,
-        candidates: candidates.filter((candidate) =>
-          managedMetricTypes.includes(candidate.metricType),
-        ),
-      });
-      sampleCount += candidates.length;
-      replacedDays += 1;
-    }
-    if (replacedDays === 0) {
+    // 3. 将 records 转换为每日字段补丁
+    const timezone =
+      normalizeIanaTimezone(
+        intervalsIcuMetadataOf(connection).profile?.athlete?.timezone,
+      ) ?? (await this.userService.getPreferredTimezone(connection.userId));
+    const patches = mapIntervalsIcuWellnessRecordsToDailyPatches({
+      externalAthleteId: connection.externalAthleteId,
+      connectionId: connection.id,
+      timezone,
+      records,
+    });
+    if (!patches.length) {
       this.logger.log(
-        `[intervals_icu wellness] 无有效日期的 wellness 记录 userId=${connection.userId}`,
+        `[intervals_icu wellness] 无可写入的 wellness 记录 userId=${connection.userId}`,
       );
       return 'IGNORED' as const;
     }
+
+    // 4. 写入健康管道并统计实际处理的候选指标
+    let sampleCount = 0;
+    for (const patch of patches) {
+      await this.healthDataIngest.replaceProviderDailyCandidates({
+        userId: connection.userId,
+        provider: $Enums.HealthDataProvider.INTERVALS_ICU,
+        connectionId: connection.id,
+        ...patch,
+      });
+      sampleCount += patch.candidates.length;
+    }
     this.logger.log(
-      `[intervals_icu wellness] 已替换 wellness userId=${connection.userId} records=${records.length} days=${replacedDays} samples=${sampleCount}`,
+      `[intervals_icu wellness] 已替换 wellness userId=${connection.userId} records=${records.length} days=${patches.length} samples=${sampleCount}`,
     );
     return 'DONE' as const;
   }

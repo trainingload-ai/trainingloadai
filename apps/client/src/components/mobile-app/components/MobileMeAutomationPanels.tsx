@@ -1,5 +1,8 @@
 "use client";
 
+import { useAiDataConsent } from "@/api/ai-data-consent";
+import { athleteStateAutoEnabled } from "@/api/settings";
+
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -65,7 +68,15 @@ const AUTO_UPDATE_SECTIONS: Array<{
   metrics: Array<{
     metric: AutoUpdateConfig["metric"];
     label: string;
-    translationKey: "ftp" | "cp" | "wPrime" | "pMax" | "tp" | "cs" | "lthr" | "maxHr";
+    translationKey:
+      | "ftp"
+      | "cp"
+      | "wPrime"
+      | "pMax"
+      | "tp"
+      | "cs"
+      | "lthr"
+      | "maxHr";
   }>;
 }> = [
   {
@@ -109,12 +120,15 @@ function MobileToggle({
   return (
     <div className="flex min-h-[58px] items-center gap-3 border-b border-border/60 bg-card px-4 py-2.5 last:border-b-0">
       <div className="min-w-0 flex-1">
-        <div className="truncate text-mobile-headline leading-5 text-foreground">{label}</div>
+        <div className="truncate text-mobile-headline leading-5 text-foreground">
+          {label}
+        </div>
         <div className="mt-0.5 truncate text-mobile-caption leading-4 text-muted-foreground">
           {detail}
         </div>
       </div>
       <Switch
+        aria-label={typeof label === "string" ? label : undefined}
         checked={checked}
         disabled={disabled}
         onCheckedChange={onCheckedChange}
@@ -135,10 +149,14 @@ function MobileSettingsSection({
 }) {
   return (
     <section className="space-y-2">
-      <h2 className="px-1 text-mobile-caption font-medium text-muted-foreground">{title}</h2>
+      <h2 className="px-1 text-mobile-caption font-medium text-muted-foreground">
+        {title}
+      </h2>
       <MobileGroupedList>{children}</MobileGroupedList>
       {footer ? (
-        <p className="px-1 text-mobile-caption leading-5 text-muted-foreground">{footer}</p>
+        <p className="px-1 text-mobile-caption leading-5 text-muted-foreground">
+          {footer}
+        </p>
       ) : null}
     </section>
   );
@@ -156,14 +174,31 @@ export function MobileAutoUpdatePanel() {
     [data],
   );
   const updateMutation = useMutation({
-    mutationFn: ({ metric, enabled }: { metric: AutoUpdateConfig["metric"]; enabled: boolean }) =>
-      updateAutoUpdateConfig(metric, enabled),
+    mutationFn: ({
+      metric,
+      enabled,
+    }: {
+      metric: AutoUpdateConfig["metric"];
+      enabled: boolean;
+    }) => updateAutoUpdateConfig(metric, enabled),
     onSuccess: (_saved, variables) => {
-      toast.success(variables.enabled ? t("toast.enabledSuccess") : t("toast.disabledSuccess"));
-      void queryClient.invalidateQueries({ queryKey: queryKeys.user.autoUpdateConfig() });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.root.userProfile });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.root.fitnessStatusMetricPair });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.root.userFitnessMetricPairs });
+      toast.success(
+        variables.enabled
+          ? t("toast.enabledSuccess")
+          : t("toast.disabledSuccess"),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.user.autoUpdateConfig(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.root.userProfile,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.root.fitnessStatusMetricPair,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.root.userFitnessMetricPairs,
+      });
     },
     onError: () => toast.error(t("toast.updateFailed")),
   });
@@ -181,7 +216,11 @@ export function MobileAutoUpdatePanel() {
   if (isError) {
     return (
       <MobileGroupedList>
-        <button type="button" onClick={() => void refetch()} className="min-h-24 w-full px-5 text-mobile-control text-red-500">
+        <button
+          type="button"
+          onClick={() => void refetch()}
+          className="min-h-24 w-full px-5 text-mobile-control text-red-500"
+        >
           {t("toast.updateFailed")}
         </button>
       </MobileGroupedList>
@@ -190,23 +229,37 @@ export function MobileAutoUpdatePanel() {
 
   return (
     <div className="space-y-4">
-      <p className="px-1 text-mobile-caption leading-5 text-muted-foreground">{t("mobileHint")}</p>
+      <p className="px-1 text-mobile-caption leading-5 text-muted-foreground">
+        {t("mobileHint")}
+      </p>
       {AUTO_UPDATE_SECTIONS.map((section) => (
         <MobileSettingsSection
           key={section.key}
           title={t(`sections.${section.key}.title`)}
-          footer={section.key === "power" || section.key === "pace" ? t(`sections.${section.key}.footer`) : undefined}
+          footer={
+            section.key === "power" || section.key === "pace"
+              ? t(`sections.${section.key}.footer`)
+              : undefined
+          }
         >
           {section.metrics.map((item) => {
-            const pending = updateMutation.isPending && updateMutation.variables?.metric === item.metric;
+            const pending =
+              updateMutation.isPending &&
+              updateMutation.variables?.metric === item.metric;
             return (
               <MobileToggle
                 key={item.metric}
-                label={item.metric === "MAX_HR" ? t("sections.heartRate.maxHrLabel") : item.label}
+                label={
+                  item.metric === "MAX_HR"
+                    ? t("sections.heartRate.maxHrLabel")
+                    : item.label
+                }
                 detail={t(`mobileMetrics.${item.translationKey}`)}
                 checked={enabledMap.get(item.metric) ?? false}
                 disabled={pending}
-                onCheckedChange={(enabled) => updateMutation.mutate({ metric: item.metric, enabled })}
+                onCheckedChange={(enabled) =>
+                  updateMutation.mutate({ metric: item.metric, enabled })
+                }
               />
             );
           })}
@@ -220,6 +273,7 @@ export function MobileReviewAutomationPanel() {
   const t = useTranslations("AccountInner.reviewAutomation");
   const queryClient = useQueryClient();
   const access = useFeatureAccess();
+  const consent = useAiDataConsent();
   const settings = useQuery({
     queryKey: queryKeys.user.settings(),
     queryFn: getUserSettings,
@@ -234,7 +288,13 @@ export function MobileReviewAutomationPanel() {
   }, [settings.data?.AI_REVIEW_MODE]);
 
   const updateMutation = useMutation({
-    mutationFn: async ({ key, enabled }: { key: ReviewFeature; enabled: boolean }) => {
+    mutationFn: async ({
+      key,
+      enabled,
+    }: {
+      key: ReviewFeature;
+      enabled: boolean;
+    }) => {
       const previous = features;
       const next = { ...features, [key]: enabled };
       setFeatures(next);
@@ -247,7 +307,21 @@ export function MobileReviewAutomationPanel() {
       }
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.user.settings() });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.user.settings(),
+      });
+      toast.success(t("saved"));
+    },
+    onError: () => toast.error(t("saveFailed")),
+  });
+
+  const stateMutation = useMutation({
+    mutationFn: (enabled: boolean) =>
+      updateUserSetting("ATHLETE_STATE_AUTO_ENABLED", String(enabled)),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.user.settings(),
+      });
       toast.success(t("saved"));
     },
     onError: () => toast.error(t("saveFailed")),
@@ -256,7 +330,9 @@ export function MobileReviewAutomationPanel() {
   if (access.isLoading || settings.isLoading) {
     return (
       <MobileGroupedList>
-        <div className="flex min-h-40 items-center justify-center text-mobile-control text-muted-foreground">{t("loading")}</div>
+        <div className="flex min-h-40 items-center justify-center text-mobile-control text-muted-foreground">
+          {t("loading")}
+        </div>
       </MobileGroupedList>
     );
   }
@@ -264,7 +340,13 @@ export function MobileReviewAutomationPanel() {
   if (access.isError || settings.isError) {
     return (
       <MobileGroupedList>
-        <button type="button" onClick={() => void Promise.all([access.refetch(), settings.refetch()])} className="min-h-24 w-full px-5 text-mobile-control text-red-500">
+        <button
+          type="button"
+          onClick={() =>
+            void Promise.all([access.refetch(), settings.refetch()])
+          }
+          className="min-h-24 w-full px-5 text-mobile-control text-red-500"
+        >
           {t("saveFailed")}
         </button>
       </MobileGroupedList>
@@ -277,32 +359,71 @@ export function MobileReviewAutomationPanel() {
     footer?: string;
     rows: ReviewFeature[];
   }> = [
-    { key: "activity", title: t("sections.activity"), rows: ["activityReview"] },
-    { key: "cycle", title: t("sections.cycle"), footer: t("cycleFooter"), rows: ["dailyReview", "weeklyReview", "monthlyReview"] },
+    {
+      key: "activity",
+      title: t("sections.activity"),
+      rows: ["activityReview"],
+    },
+    {
+      key: "cycle",
+      title: t("sections.cycle"),
+      footer: t("cycleFooter"),
+      rows: ["dailyReview", "weeklyReview", "monthlyReview"],
+    },
     { key: "plan", title: t("sections.plan"), rows: ["planReview"] },
   ];
 
   return (
     <div className="space-y-4">
-      <p className="px-1 text-mobile-caption leading-5 text-muted-foreground">{t("hint")}</p>
+      <p className="px-1 text-mobile-caption leading-5 text-muted-foreground">
+        {t("hint")}
+      </p>
       {!hasReviewAccess ? (
         <MobileGroupedList>
           <div className="bg-card px-4 py-4">
-            <p className="text-mobile-headline font-semibold">{t("accessRequired")}</p>
-            <p className="mt-1 text-mobile-caption leading-5 text-muted-foreground">{t("description")}</p>
+            <p className="text-mobile-headline font-semibold">
+              {t("accessRequired")}
+            </p>
+            <p className="mt-1 text-mobile-caption leading-5 text-muted-foreground">
+              {t("description")}
+            </p>
           </div>
         </MobileGroupedList>
       ) : null}
+      <MobileGroupedList>
+        <MobileToggle
+          label={t("athleteState")}
+          detail={t("athleteStateDetail")}
+          checked={athleteStateAutoEnabled(
+            settings.data?.ATHLETE_STATE_AUTO_ENABLED,
+          )}
+          disabled={
+            stateMutation.isPending ||
+            !featureAllowed(access.data, "ai.coach") ||
+            consent.data?.granted !== true
+          }
+          onCheckedChange={(enabled) => stateMutation.mutate(enabled)}
+        />
+      </MobileGroupedList>
       {sections.map((section) => (
-        <MobileSettingsSection key={section.key} title={section.title} footer={section.footer}>
+        <MobileSettingsSection
+          key={section.key}
+          title={section.title}
+          footer={section.footer}
+        >
           {section.rows.map((key) => (
             <MobileToggle
               key={key}
               label={t(key)}
               detail={t(`details.${key}`)}
               checked={features[key]}
-              disabled={!featureAllowed(access.data, ACCESS_FEATURE_BY_REVIEW[key]) || updateMutation.isPending}
-              onCheckedChange={(enabled) => updateMutation.mutate({ key, enabled })}
+              disabled={
+                !featureAllowed(access.data, ACCESS_FEATURE_BY_REVIEW[key]) ||
+                updateMutation.isPending
+              }
+              onCheckedChange={(enabled) =>
+                updateMutation.mutate({ key, enabled })
+              }
             />
           ))}
         </MobileSettingsSection>

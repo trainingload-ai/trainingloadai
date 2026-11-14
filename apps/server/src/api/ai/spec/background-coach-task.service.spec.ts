@@ -46,6 +46,103 @@ function installBackgroundPersistence(service: AiService) {
 }
 
 describe('AiService background coach tasks', () => {
+  it('rejects an ineligible state turn before reading Memory, history or health evidence', async () => {
+    const service = Object.create(AiService.prototype) as AiService;
+    const memory = { buildAmbientContext: jest.fn() };
+    const history = jest.fn();
+    const health = { getOverview: jest.fn() };
+    Object.defineProperties(service, {
+      aiDataConsent: {
+        value: { assertGranted: jest.fn(async () => undefined) },
+      },
+      athleteStateAgent: {
+        value: {
+          assertEligible: jest.fn(async () => {
+            throw new Error('FEATURE_ACCESS_REQUIRED');
+          }),
+        },
+      },
+      athleteMemory: { value: memory },
+      healthData: { value: health },
+      loadCoachContextFromDb: { value: history },
+    });
+    await expect(
+      service.coachStream({
+        session: { user: { id: 'athlete' } } as never,
+        sid: 'state-session',
+        prompt: 'Refresh state.',
+        activeSkillName: 'athlete-state',
+        executionMode: 'background',
+        resumeHistory: true,
+        signal: new AbortController().signal,
+      }),
+    ).rejects.toThrow('FEATURE_ACCESS_REQUIRED');
+    expect(memory.buildAmbientContext).not.toHaveBeenCalled();
+    expect(history).not.toHaveBeenCalled();
+    expect(health.getOverview).not.toHaveBeenCalled();
+  });
+  it('persists a platform-funded Skill question and resumes its conversation without requiring a premature result', async () => {
+    const service = Object.create(AiService.prototype) as AiService;
+    Object.defineProperty(service, 'getCoachModel', {
+      value: () => 'test-model',
+    });
+    const persistence = installBackgroundPersistence(service);
+    Object.assign(persistence.projector, {
+      pendingInteraction: { interactionId: 'question' },
+    });
+    const coachStream = jest.fn(async () =>
+      (async function* () {
+        yield {
+          type: 'model_usage' as const,
+          usage: { inputTokens: 8, outputTokens: 4 },
+          provider: 'test',
+          model: 'test-model',
+          status: 'SUCCESS' as const,
+        };
+      })(),
+    );
+    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    const result = await service.runBackgroundCoachTask({
+      userId: 'user-1',
+      lang: 'en',
+      taskType: 'ATHLETE_STATE_UPDATE',
+      activeSkillName: 'athlete-state',
+      funding: 'PLATFORM',
+      model: 'test-model',
+      instructions: 'Refresh current state.',
+      resumeHistory: true,
+      allowUserInteraction: true,
+      resultToolName: 'athlete_state.answer',
+      validateResult: (value) => value,
+    });
+    expect(result).toMatchObject({
+      awaitingInput: true,
+      sessionId: 'background:task',
+    });
+    expect(coachStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resumeHistory: true,
+        platformFunded: true,
+        backgroundTask: expect.objectContaining({
+          resultToolName: 'athlete_state.answer',
+        }),
+      }),
+    );
+    expect(persistence.coachRuns.checkpoint).toHaveBeenLastCalledWith(
+      expect.anything(),
+      'awaiting_input',
+      undefined,
+      expect.anything(),
+    );
+    expect(persistence.operations.begin).not.toHaveBeenCalled();
+    expect(persistence.operations.fail).not.toHaveBeenCalled();
+    expect(persistence.aiUsage.recordUsageEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operationId: null,
+        usage: expect.objectContaining({ inputTokens: 8 }),
+      }),
+    );
+  });
   it('uses an isolated background Agent run and aggregates successful usage', async () => {
     const service = Object.create(AiService.prototype) as AiService;
     Object.defineProperty(service, 'getCoachModel', {

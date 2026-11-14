@@ -1,7 +1,10 @@
+import { AthleteStateUpdateWorker } from './athlete-state/athlete-state-update.worker';
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { FitnessCalculationModule } from '@/fitness-calculation/fitness-calculation.module';
 import { FitnessAssessmentApplyService } from './fitness-assessment-apply.service';
 import { FitnessAssessmentFollowupService } from './fitness-assessment-followup.service';
 import { NotificationDomainModule } from '@/notification/notification-domain.module';
+import { HealthDataModule } from '@/health-data/health-data.module';
 import { Module } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { AiController } from './ai.controller';
@@ -33,7 +36,8 @@ import { CoachMemoryExtractionEnqueuer } from './memory/coach-memory-extraction-
 import { MemoryJudgeService } from './memory/memory-judge.service';
 import { AiCoachMemoryExtractionWorker } from './memory/ai-coach-memory-extraction.worker';
 import { AthleteStateModule } from '@/athlete-state/athlete-state.module';
-import { AthleteStateModelService } from './athlete-state/athlete-state-model.service';
+import { AthleteStateInquiryService } from './athlete-state/athlete-state-inquiry.service';
+import { AthleteStateAgentService } from './athlete-state/athlete-state-agent.service';
 import { CoachAssessmentCaseQueryService } from './athlete-state/coach-assessment-case-query.service';
 import { CoachAssessmentCaseService } from './athlete-state/coach-assessment-case.service';
 import { CoachAssessmentOrchestratorService } from './athlete-state/coach-assessment-orchestrator.service';
@@ -57,6 +61,8 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
 
 @Module({
   imports: [
+    HealthDataModule,
+    AthleteStateUpdatesModule,
     PrismaModule,
     FitnessCalculationModule,
     NotificationDomainModule,
@@ -81,6 +87,7 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
   ],
   controllers: [AiController, CoachBranchingController, AiOperationsController],
   providers: [
+    AthleteStateUpdateWorker,
     DeepSeekWebEvidenceAdapter,
     ProviderWebEvidenceAdapter,
     {
@@ -109,7 +116,8 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
     CoachMemoryExtractionEnqueuer,
     MemoryJudgeService,
     AiCoachMemoryExtractionWorker,
-    AthleteStateModelService,
+    AthleteStateAgentService,
+    AthleteStateInquiryService,
     CoachAssessmentCaseQueryService,
     CoachAssessmentCaseService,
     CoachAssessmentOrchestratorService,

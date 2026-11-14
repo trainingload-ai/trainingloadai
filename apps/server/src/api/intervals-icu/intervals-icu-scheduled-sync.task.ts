@@ -89,7 +89,9 @@ export class IntervalsIcuScheduledSyncTask implements ThirdPartyScheduledTask {
           AND (
             c.last_sync_completed_at IS NULL
             OR (
+              -- Prisma stores UTC in a timestamp without time zone.
               c.last_sync_completed_at
+              AT TIME ZONE 'UTC'
               AT TIME ZONE COALESCE(valid_tz.name, 'UTC')
             )::date
               < (NOW() AT TIME ZONE COALESCE(valid_tz.name, 'UTC'))::date

@@ -125,7 +125,12 @@
       "id": "0025_vdot_forecast_snapshot",
       "file": "0025_vdot_forecast_snapshot/migration.sql",
       "sha256": "0413de7bf1976a214da7edc1c337fcae1efba1788ce1d2cc32b4fd94cd83d14f"
+    },
+    {
+      "id": "0026_athlete_state_updates",
+      "file": "0026_athlete_state_updates/migration.sql",
+      "sha256": "6e89f3b9d197afcbedb545f2db3abea76e443d74c4998a7cd128602441baef96"
     }
   ],
-  "schemaChecksum": "fc458b6896b91463b639fc31ddfb52570b4790187b75489072cf4bb78b21d124"
+  "schemaChecksum": "c51de3fa827d934b84f41f864884950eea6fb1d9f7e30f9e398736e2b5129f36"
 }

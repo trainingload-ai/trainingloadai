@@ -19,7 +19,6 @@ import { resolveEffectiveActivityVo2Max } from '@/analyze/vo2max/vo2max-source';
 import { readyActivityWhere } from '@/utils/activity-ready-where';
 import { ReviewDigestContextService } from './review-digest-context.service';
 import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
-import { AiUsageService } from '@/api/ai/ai-usage.service';
 import {
   ReviewModelCallGuard,
   isReviewModelDeferredError,
@@ -159,7 +158,6 @@ export class ReviewDigestService {
     private readonly modelGuard: ReviewModelCallGuard,
     @Optional() private readonly digestContext?: ReviewDigestContextService,
     @Optional() private readonly aiDataConsent?: AiDataConsentService,
-    @Optional() private readonly aiUsage?: AiUsageService,
     @Optional() private readonly ai?: AiService,
   ) {}
 
@@ -675,6 +673,7 @@ export class ReviewDigestService {
             userId: args.userId,
             lang: args.lang,
             taskType: `REVIEW_DIGEST_${args.type}`,
+            funding: 'PLATFORM',
             activeSkillName: 'period-review',
             triggerType: 'REVIEW_DIGEST',
             triggerRef: `${args.periodStart.toISOString()}:${args.periodEnd.toISOString()}`,
@@ -711,30 +710,7 @@ export class ReviewDigestService {
                 : 'empty_response',
         },
       );
-      if (this.aiUsage && !task.replayed) {
-        try {
-          await this.aiUsage.recordUsageEvent({
-            userId: args.userId,
-            operationId: task.operationId,
-            callKey: `${task.operationId}:background-aggregate`,
-            kind:
-              args.type === 'DAILY'
-                ? AiUsageKind.REVIEW_DAILY
-                : args.type === 'WEEKLY'
-                  ? AiUsageKind.REVIEW_WEEKLY
-                  : AiUsageKind.REVIEW_MONTHLY,
-            provider: task.provider,
-            model: task.model,
-            usage: task.usage,
-          });
-        } catch (usageError) {
-          // Digest delivery has a rule-based fallback and must not be coupled to
-          // internal accounting availability. Keep the missing record observable.
-          this.logger.error(
-            `[复盘][AI] 用量记录失败：provider=${task.provider ?? provider} model=${task.model} userId=${args.userId} error=${String(usageError)}`,
-          );
-        }
-      }
+
       const md = task.result.markdown.trim();
       if (!md) return null;
       return {

@@ -935,6 +935,15 @@ export class UsersController {
       });
     }
     const cat = candidate;
+    if (
+      cat === 'ATHLETE_STATE_AUTO_ENABLED' &&
+      !['true', 'false'].includes(body.value)
+    ) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.COMMON,
+        message: 'Expected true or false',
+      });
+    }
     if (cat === $Enums.SettingCategory.AI_DATA_CONSENT) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.ACCESS_FORBIDDEN,

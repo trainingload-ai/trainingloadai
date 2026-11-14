@@ -126,6 +126,10 @@
       "0025_vdot_forecast_snapshot": {
         "phase": "expand",
         "releaseVersion": "1.1.22"
+      },
+      "0026_athlete_state_updates": {
+        "phase": "expand",
+        "releaseVersion": "1.1.23"
       }
     }
   }

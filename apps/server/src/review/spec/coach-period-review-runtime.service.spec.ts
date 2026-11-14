@@ -113,7 +113,6 @@ function createService() {
     coachContext as never,
     branching as never,
     aiService as never,
-    { recordUsageEvent: jest.fn(async () => undefined) } as never,
     {
       getPreferredLocale: jest.fn(async () => 'zh'),
       getPreferredTimezone: jest.fn(async () => 'Asia/Shanghai'),

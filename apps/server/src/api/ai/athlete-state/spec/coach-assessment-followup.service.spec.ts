@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { CoachAssessmentFollowupService } from './coach-assessment-followup.service';
+import { CoachAssessmentFollowupService } from '../coach-assessment-followup.service';
 
 describe('CoachAssessmentFollowupService', () => {
   it('does not scan follow-ups when AI is disabled', async () => {
@@ -10,6 +10,7 @@ describe('CoachAssessmentFollowupService', () => {
       } as never,
       { followupEnabled: () => true } as never,
       { assess: jest.fn() } as never,
+      { requestUpdate: jest.fn() } as never,
       { isEnabled: jest.fn(() => false) } as never,
     );
 
@@ -32,14 +33,18 @@ describe('CoachAssessmentFollowupService', () => {
       .mockResolvedValueOnce([]);
     const updateMany = jest.fn(async () => ({ count: 1 }));
     const assess = jest.fn(async () => ({}));
+    const requestUpdate = jest.fn(async () => ({}));
     const service = new CoachAssessmentFollowupService(
       {
         coachAssessmentCase: { findMany, updateMany },
         coachAssessmentQuestion: { updateMany: jest.fn() },
-        $transaction: jest.fn(),
+        $transaction: jest.fn(async (run: any) =>
+          run({ coachAssessmentCase: { updateMany } }),
+        ),
       } as never,
       { followupEnabled: () => true } as never,
       { assess } as never,
+      { requestUpdate } as never,
     );
 
     await service.poll();
@@ -55,11 +60,15 @@ describe('CoachAssessmentFollowupService', () => {
         }),
       }),
     );
-    expect(assess).toHaveBeenCalledWith({
-      userId: 'athlete',
-      triggerType: 'FOLLOW_UP',
-      triggerRef: 'case-1',
-      preserveCaseId: undefined,
-    });
+    expect(assess).not.toHaveBeenCalled();
+    expect(requestUpdate).toHaveBeenCalledWith(
+      {
+        userId: 'athlete',
+        triggerType: 'FOLLOW_UP',
+        triggerRef: 'case-1',
+        mode: 'immediate',
+      },
+      expect.anything(),
+    );
   });
 });

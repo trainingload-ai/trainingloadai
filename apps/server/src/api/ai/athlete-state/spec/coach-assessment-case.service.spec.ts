@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import {
   buildAssessmentQuestionStoredMessage,
   CoachAssessmentCaseService,
-} from './coach-assessment-case.service';
+} from '../coach-assessment-case.service';
 
 const assessment = {
   id: 'assessment-1',
@@ -55,6 +55,7 @@ describe('CoachAssessmentCaseService', () => {
     branching as never,
     queries as never,
     events as never,
+    { requestUpdate: jest.fn(async () => ({})) } as never,
   );
 
   beforeEach(() => {

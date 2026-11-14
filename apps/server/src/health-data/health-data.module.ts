@@ -1,3 +1,4 @@
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { HealthObservationService } from './health-observation.service';
 import { ImportingJobModule } from '@/importing/importing-job.module';
 import { Module } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { TimezoneModule } from '@/timezone/timezone.module';
  */
 @Module({
   imports: [
+    AthleteStateUpdatesModule,
     ImportingJobModule,
     PrismaModule,
     StorageModule,

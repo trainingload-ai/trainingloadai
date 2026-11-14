@@ -1217,7 +1217,9 @@
       "monthlyReview": "マンスリーレビュー",
       "planReview": "プランレビュー",
       "saved": "レビュー設定を保存しました",
-      "saveFailed": "レビュー設定の保存に失敗しました"
+      "saveFailed": "レビュー設定の保存に失敗しました",
+      "athleteState": "アスリート状態の自動評価",
+      "athleteStateDetail": "関連するトレーニングや回復データが変わると状態を更新します。自動 AI 評価の費用はプラットフォームが負担します。"
     },
     "dataExport": {
       "title": "すべてのデータをエクスポート",

@@ -1307,7 +1307,9 @@
       "monthlyReview": "每月複盤",
       "planReview": "計劃複盤",
       "saved": "複盤設定已儲存",
-      "saveFailed": "儲存複盤設定失敗"
+      "saveFailed": "儲存複盤設定失敗",
+      "athleteState": "自動評估運動員狀態",
+      "athleteStateDetail": "相關訓練或恢復資料變更後更新教練狀態。自動 AI 評估由平台承擔費用。"
     },
     "dataExport": {
       "title": "匯出全部資料",

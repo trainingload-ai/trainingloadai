@@ -4,7 +4,6 @@ import { randomUUID } from 'crypto';
 import { I18nService } from 'nestjs-i18n';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AiService, type AiTrainingAdviceContext } from './ai.service';
-import { AiUsageService } from './ai-usage.service';
 import {
   PlanExecutionContextService,
   type PlanExecutionContext,
@@ -67,7 +66,6 @@ export class AiPlanExecutionAdviceService {
 
   constructor(
     private readonly aiService: AiService,
-    private readonly aiUsage: AiUsageService,
     private readonly prisma: PrismaService,
     private readonly planExecutionContext: PlanExecutionContextService,
     private readonly i18n: I18nService,
@@ -225,18 +223,7 @@ export class AiPlanExecutionAdviceService {
         signal: abort.signal,
         allowWithoutConsent: params.allowWithoutConsent,
       });
-      if (!result.replayed) {
-        await this.aiUsage.recordUsageEvent({
-          userId,
-          operationId: result.operationId,
-          callKey: `${result.operationId}:background-aggregate`,
-          kind: $Enums.AiUsageKind.OTHER,
-          provider: result.provider,
-          model: result.model,
-          usage: result.usage,
-          sid: `plan-execution-advice:${surface.toLowerCase()}`,
-        });
-      }
+
       const generatedGrounding = validatePlanExecutionAdviceGrounding({
         summary: result.summary,
         tags: result.tags,

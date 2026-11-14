@@ -13,10 +13,14 @@ function setup() {
     supersedeWorkoutDecisions: supersede,
   };
   const service = new CoachContextService(
-    {} as never,
+    {
+      $transaction: async (write: (tx: unknown) => Promise<unknown>) =>
+        write(tx),
+    } as never,
     {} as never,
     contexts as never,
     {} as never,
+    { requestUpdate: async () => ({}) } as never,
     undefined,
   );
   return { service, tx, contexts, supersede };

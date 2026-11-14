@@ -152,6 +152,7 @@ postgresTest(
         },
         { id: "0024_activity_analysis_segments", source: "baseline" },
         { id: "0025_vdot_forecast_snapshot", source: "baseline" },
+        { id: "0026_athlete_state_updates", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,

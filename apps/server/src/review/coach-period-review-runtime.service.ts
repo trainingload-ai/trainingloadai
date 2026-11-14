@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { $Enums } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AiService } from '@/api/ai/ai.service';
-import { AiUsageService } from '@/api/ai/ai-usage.service';
 import { CoachBranchingService } from '@/api/ai/coach-branching.service';
 import { CoachContextService } from '@/api/plan/coach-context.service';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
@@ -66,7 +65,6 @@ export class CoachPeriodReviewRuntimeService {
     private readonly coachContext: CoachContextService,
     private readonly branching: CoachBranchingService,
     private readonly aiService: AiService,
-    private readonly aiUsage: AiUsageService,
     private readonly userService: UserService,
     private readonly i18n: I18nService,
     private readonly planQuery: PlanQueryService,
@@ -277,11 +275,7 @@ export class CoachPeriodReviewRuntimeService {
         composition,
       },
     });
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: args.userId,
-      triggerType: `REVIEW_${scale.toUpperCase()}`,
-      triggerRef: args.digestId,
-    });
+
     return finalJudgment.decision === 'ADJUST'
       ? {
           skipped: false,
@@ -329,21 +323,7 @@ export class CoachPeriodReviewRuntimeService {
           }),
         { failureReason: reviewUsageFailureReason },
       );
-      if (!result.replayed) {
-        await this.aiUsage.recordUsageEvent({
-          userId: args.userId,
-          operationId: result.operationId,
-          callKey: `${result.operationId}:background-aggregate`,
-          kind:
-            args.scale === 'weekly'
-              ? $Enums.AiUsageKind.REVIEW_WEEKLY
-              : $Enums.AiUsageKind.REVIEW_MONTHLY,
-          provider: result.provider,
-          model: result.model,
-          usage: result.usage,
-          sid: `coach-${args.scale}-review-runtime-v4`,
-        });
-      }
+
       return {
         decision: result.decision,
         presentation: result.presentation,

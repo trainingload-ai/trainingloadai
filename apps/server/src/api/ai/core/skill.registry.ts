@@ -1,3 +1,4 @@
+import { athleteStateSkill } from './skills/athleteState.skill';
 import { fitnessAssessmentSkill } from './skills/fitnessAssessment.skill';
 import type { ActiveCoachSkill, CoachSkillDef } from './skill.types';
 import { metricExplainerSkill } from './skills/metricExplainer.skill';
@@ -19,6 +20,7 @@ import { planReviewAdjustmentSkill } from './skills/planReviewAdjustment.skill';
 
 export function getCoachSkills(): CoachSkillDef[] {
   return [
+    athleteStateSkill,
     integrationSupportSkill,
     activityReviewSkill,
     planReviewAdjustmentSkill,

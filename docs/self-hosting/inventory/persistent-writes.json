@@ -46,14 +46,14 @@
     },
     {
       "file": "apps/server/src/config/config.ts",
-      "line": 86,
+      "line": 118,
       "owner": "apps",
       "classification": "cache",
       "expression": "process.env.LOCAL_STORAGE_CACHE_PATH || '/data/cache/storage',"
     },
     {
       "file": "apps/server/src/config/config.ts",
-      "line": 90,
+      "line": 122,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "dataPath: process.env.ELEVATION_DATA_PATH || '/data/elevation',"

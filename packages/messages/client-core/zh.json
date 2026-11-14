@@ -1452,7 +1452,9 @@
       "monthlyReview": "每月复盘",
       "planReview": "计划复盘",
       "saved": "复盘设置已保存",
-      "saveFailed": "保存复盘设置失败"
+      "saveFailed": "保存复盘设置失败",
+      "athleteState": "自动评估运动员状态",
+      "athleteStateDetail": "相关训练或恢复数据变化后更新教练状态。自动 AI 评估由平台承担费用。"
     },
     "dataExport": {
       "title": "导出全部数据",

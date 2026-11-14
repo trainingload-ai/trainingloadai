@@ -386,7 +386,16 @@ export function createAiSdkCoachTools(args: {
               (toolDef.name === 'skill.activate' &&
                 'activated' in result &&
                 result.activated === false));
-          if (!failed && toolDef.name !== 'coach_task_submit_result') {
+          if (
+            !failed &&
+            toolDef.name !== 'coach_task_submit_result' &&
+            toolDef.name !== 'athlete_state.answer'
+          ) {
+            ctx.athleteState?.recordRead(
+              toolDef.name,
+              input as Record<string, unknown>,
+              result,
+            );
             ctx.backgroundTask?.completedToolNames?.add(toolDef.name);
           }
           await ctx.onActivity?.({

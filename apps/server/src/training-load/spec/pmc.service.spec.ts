@@ -18,7 +18,10 @@ function pmcDependencies(prisma: object) {
     new UserIdentityRepository(prisma as never),
   );
   return [
-    new PmcRepository(prisma as never),
+    new PmcRepository(
+      prisma as never,
+      { requestUpdate: async () => ({}) } as never,
+    ),
     activityRead,
     new LoadReadoutService(prisma as never, activityRead, users, {} as never),
     users,

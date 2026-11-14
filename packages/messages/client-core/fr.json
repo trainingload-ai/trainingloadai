@@ -1218,7 +1218,9 @@
       "monthlyReview": "Revue mensuelle",
       "planReview": "Révision des plans",
       "saved": "Vérifier les paramètres enregistrés",
-      "saveFailed": "Échec de l'enregistrement des paramètres d'évaluation"
+      "saveFailed": "Échec de l'enregistrement des paramètres d'évaluation",
+      "athleteState": "Évaluation automatique de votre état",
+      "athleteStateDetail": "Actualise votre état selon les données pertinentes d’entraînement ou de récupération. La plateforme prend en charge les coûts des évaluations IA automatiques."
     },
     "dataExport": {
       "title": "Exporter toutes les données",

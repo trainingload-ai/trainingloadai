@@ -85,6 +85,7 @@ describe('IntervalsIcuService', () => {
       }),
     };
     const userService = {
+      getPreferredTimezone: jest.fn(async () => 'Asia/Shanghai'),
       getPreferredLocale: jest.fn(async () => 'en'),
     };
     const configValues: Record<string, string> = {
@@ -433,9 +434,8 @@ describe('IntervalsIcuService', () => {
       syncScheduledActivities: false,
       exportActivities: true,
       metadata: {
-        ...((
-          existingConnection as { metadata?: Record<string, unknown> }
-        ).metadata ?? {}),
+        ...((existingConnection as { metadata?: Record<string, unknown> })
+          .metadata ?? {}),
         planSync: {
           syncPlannedWorkouts: false,
           exportPlannedWorkouts: true,
@@ -633,6 +633,7 @@ describe('IntervalsIcuService', () => {
     intervalsIcuClient.listWellness.mockResolvedValueOnce([
       {
         id: '2026-07-06',
+        updated: '2026-07-07T00:30:00+08:00',
         weight: 70,
         restingHR: 48,
         hrvSDNN: 52,
@@ -688,6 +689,7 @@ describe('IntervalsIcuService', () => {
         expect.objectContaining({
           oldest: '2026-05-07',
           newest: '2026-07-06',
+          fields: expect.arrayContaining(['id', 'updated', 'hrv', 'hrvSDNN']),
         }),
       );
       expect(
@@ -703,6 +705,10 @@ describe('IntervalsIcuService', () => {
               provider: 'INTERVALS_ICU',
               connectionId: 'connection-1',
               metricType: 'BODY_MASS_KG',
+              timezone: 'Asia/Shanghai',
+              startTime: new Date('2026-07-05T16:00:00.000Z'),
+              endTime: new Date('2026-07-06T16:00:00.000Z'),
+              sourceUpdatedAt: new Date('2026-07-06T16:30:00.000Z'),
             }),
             expect.objectContaining({
               metricType: 'SLEEP_SCORE',

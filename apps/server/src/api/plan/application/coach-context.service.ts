@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { Prisma } from '@prisma/client';
@@ -25,6 +26,7 @@ export class CoachContextService {
     private readonly planSummary: PlanSummaryService,
     private readonly contexts: CoachContextRepository,
     private readonly plans: PlanRepository,
+    private readonly stateUpdates: AthleteStateUpdates,
     @Optional() private readonly events?: EventEmitter2,
   ) {}
 
@@ -108,6 +110,11 @@ export class CoachContextService {
     commitId?: string | null;
     tx?: PlanDb;
   }) {
+    if (args.type.startsWith('REVIEW_') && !args.tx) {
+      return this.prisma.$transaction((tx) =>
+        this.appendEvent({ ...args, tx }),
+      );
+    }
     const context = await this.ensureContext({
       userId: args.userId,
       planId: args.planId,
@@ -142,6 +149,16 @@ export class CoachContextService {
           },
           args.tx,
         );
+        if (args.type.startsWith('REVIEW_')) {
+          await this.stateUpdates.requestUpdate(
+            {
+              userId: args.userId,
+              triggerType: args.type,
+              triggerRef: args.dedupeKey ?? event.id,
+            },
+            args.tx,
+          );
+        }
         const change = args.payload as
           | {
               workoutId?: unknown;

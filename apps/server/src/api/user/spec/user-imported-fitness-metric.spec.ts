@@ -1,3 +1,4 @@
+import { AthleteStateFitnessFacts } from '@/athlete-state/updates/athlete-state-fitness-facts.service';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -49,6 +50,16 @@ async function createServiceWithStoredCp(cp: number) {
   const moduleRef = await Test.createTestingModule({
     providers: [
       UserService,
+      {
+        provide: AthleteStateFitnessFacts,
+        useValue: {
+          observe: async (
+            _userId: unknown,
+            _tx: unknown,
+            write: () => Promise<unknown>,
+          ) => write(),
+        },
+      },
       {
         provide: PrismaService,
         useValue: {
