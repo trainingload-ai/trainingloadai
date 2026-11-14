@@ -44,8 +44,8 @@ importers:
         specifier: 9.1.7
         version: 9.1.7
       trackswap:
-        specifier: 0.2.6
-        version: 0.2.6
+        specifier: 0.2.7
+        version: 0.2.7
       yaml:
         specifier: 2.9.0
         version: 2.9.0
@@ -736,8 +736,8 @@ importers:
         specifier: 0.35.5
         version: 0.35.5(@types/node@22.19.19)
       trackswap:
-        specifier: 0.2.6
-        version: 0.2.6
+        specifier: 0.2.7
+        version: 0.2.7
       tz-lookup:
         specifier: ^6.1.25
         version: 6.1.25
@@ -10604,8 +10604,8 @@ packages:
     resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
     engines: {node: '>=20'}
 
-  trackswap@0.2.6:
-    resolution: {integrity: sha512-ve+GV7rJ3EjShnduaSrRUCi9VlVIKhqv3kgzTDe5ElMMTvHiGX1rrRZpHcPUqldWKIlY01r6yjw2+NQpZpNK4w==}
+  trackswap@0.2.7:
+    resolution: {integrity: sha512-QZz5jcHDFXRxO8GxH4WJxtzPfG4ueQ9yYEuqVAICQKdouDkgR3W0qAsApqaeuW1PUIlXeZatUacmNRCTQW0zRA==}
     engines: {node: '>=18.0.0'}
 
   trim-lines@3.0.1:
@@ -23195,7 +23195,7 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  trackswap@0.2.6:
+  trackswap@0.2.7:
     dependencies:
       '@garmin/fitsdk': 21.212.0
       dayjs: 1.11.21
