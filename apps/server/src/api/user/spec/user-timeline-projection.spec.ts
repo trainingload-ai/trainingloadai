@@ -519,6 +519,135 @@ describe('UserService.applyTimelineProjectionBatch', () => {
     expect(created.map((row) => row.value)).toEqual([240]);
   });
 
+  it.each([
+    {
+      type: UserFitnessMetricType.TP,
+      value: 3.3,
+      reference: UserFitnessMetricType.CS,
+      referenceValue: 3,
+    },
+    {
+      type: UserFitnessMetricType.CS,
+      value: 3,
+      reference: UserFitnessMetricType.TP,
+      referenceValue: 3.3,
+    },
+  ])(
+    'writes an AUTO $type without requiring an older $reference to change',
+    async ({ type, value, reference, referenceValue }) => {
+      const { service, tx, created } = projectionService({
+        context: [
+          {
+            type: reference,
+            sport: SportType.RUN,
+            source: MetricSource.MANUAL,
+            value: referenceValue,
+            recordedAt: new Date('2025-08-01T00:00:00.000Z'),
+          },
+        ],
+      });
+      await service.applyTimelineProjectionBatch(
+        {
+          userId: 'user-1',
+          projectionRunId: 'independent-pace',
+          replacementReason: 'CHRONOLOGICAL_REPLAY',
+          replaceFrom,
+          replaceTo,
+          scopes: [{ type, sport: SportType.RUN }],
+          projections: [point(type, SportType.RUN, value)],
+        },
+        tx as never,
+      );
+
+      expect(created.map((row) => [row.type, row.value])).toEqual([
+        [type, value],
+      ]);
+    },
+  );
+
+  it.each([false, true])(
+    'writes same-time CS and TP from independent evidence with reversed order=%s',
+    async (reverse) => {
+      const { service, tx, created } = projectionService({});
+      const projections = [
+        point(UserFitnessMetricType.CS, SportType.RUN, 3),
+        point(UserFitnessMetricType.TP, SportType.RUN, 3.4),
+      ];
+      if (reverse) projections.reverse();
+      await service.applyTimelineProjectionBatch(
+        {
+          userId: 'user-1',
+          projectionRunId: 'pace-pair',
+          replacementReason: 'CHRONOLOGICAL_REPLAY',
+          replaceFrom,
+          replaceTo,
+          scopes: projections.map(({ type, sport }) => ({ type, sport })),
+          projections,
+        },
+        tx as never,
+      );
+
+      expect(created.map((row) => [row.type, row.value])).toEqual(
+        projections.map((row) => [row.type, row.value]),
+      );
+    },
+  );
+
+  it('retains independent TP and CS estimates while automatic updates are disabled', async () => {
+    const { service, tx, created } = projectionService({});
+    const projections = [
+      point(UserFitnessMetricType.CS, SportType.RUN, 3),
+      point(UserFitnessMetricType.TP, SportType.RUN, 3.4),
+    ];
+    await service.saveTimelineEstimatesBatch(
+      {
+        userId: 'user-1',
+        projectionRunId: 'pace-estimates',
+        replacementReason: 'AUTO_UPDATE_DISABLED',
+        replaceFrom,
+        replaceTo,
+        scopes: projections.map(({ type, sport }) => ({ type, sport })),
+        projections,
+      },
+      tx as never,
+    );
+
+    expect(created.map((row) => [row.type, row.value, row.source])).toEqual([
+      [UserFitnessMetricType.CS, 3, MetricSource.ESTIMATED],
+      [UserFitnessMetricType.TP, 3.4, MetricSource.ESTIMATED],
+    ]);
+  });
+
+  it.each([
+    { cs: 3, tp: 13, retained: UserFitnessMetricType.CS, value: 3 },
+    { cs: 1.5, tp: 3.3, retained: UserFitnessMetricType.TP, value: 3.3 },
+  ])(
+    'rejects only the invalid pace candidate and retains $retained',
+    async ({ cs, tp, retained, value }) => {
+      const { service, tx, created } = projectionService({});
+      const projections = [
+        point(UserFitnessMetricType.CS, SportType.RUN, cs),
+        point(UserFitnessMetricType.TP, SportType.RUN, tp),
+      ];
+      await service.applyTimelineProjectionBatch(
+        {
+          userId: 'user-1',
+          projectionRunId: 'invalid-pace',
+          replacementReason: 'CHRONOLOGICAL_REPLAY',
+          replaceFrom,
+          replaceTo,
+          scopes: projections.map(({ type, sport }) => ({ type, sport })),
+          projections,
+        },
+        tx as never,
+      );
+
+      expect(created.map((row) => [row.type, row.value])).toEqual([
+        [retained, value],
+      ]);
+    },
+  );
+
   it('rejects slow automatic running CS and keeps the same estimate when it is not AUTO', async () => {
     const auto = projectionService({});
     await auto.service.applyTimelineProjectionBatch(

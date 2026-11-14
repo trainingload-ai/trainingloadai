@@ -58,7 +58,7 @@
   "devDependencies": {
     "ajv": "8.20.0",
     "husky": "9.1.7",
-    "trackswap": "0.2.6",
+    "trackswap": "0.2.7",
     "yaml": "2.9.0"
   },
   "scripts": {

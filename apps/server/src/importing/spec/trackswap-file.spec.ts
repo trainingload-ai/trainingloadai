@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { trackFileRecords } from '../track-file-conversion';
 import {
   assertFITActivityRecordParity,
   decodeTrackFile,
@@ -22,6 +23,36 @@ const gpx = Buffer.from(
 // Small synthetic activity files encoded with Garmin's official SDK. No user data.
 const fitFixture = (kind: string) =>
   readFileSync(join(__dirname, 'fixtures', `conversion-${kind}.fit`));
+
+const sampleTimes = [0, 10, 20].map((second) =>
+  new Date(Date.UTC(2026, 0, 1, 0, 0, second)).toISOString(),
+);
+const multiPointGpx = Buffer.from(
+  '<gpx version="1.1" creator="synthetic-test"><trk><type>running</type><trkseg>' +
+    sampleTimes
+      .map(
+        (time, index) =>
+          `<trkpt lat="${31.2 + index * 0.0001}" lon="121.4"><time>${time}</time></trkpt>`,
+      )
+      .join('') +
+    '</trkseg></trk></gpx>',
+);
+const metricTcx = (gps: boolean) =>
+  Buffer.from(
+    '<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"><Activities><Activity Sport="Running">' +
+      `<Id>${sampleTimes[0]}</Id><Lap StartTime="${sampleTimes[0]}"><TotalTimeSeconds>20</TotalTimeSeconds><DistanceMeters>200</DistanceMeters><Track>` +
+      sampleTimes
+        .map(
+          (time, index) =>
+            `<Trackpoint><Time>${time}</Time>` +
+            (gps
+              ? `<Position><LatitudeDegrees>${31.2 + index * 0.0001}</LatitudeDegrees><LongitudeDegrees>121.4</LongitudeDegrees></Position>`
+              : '') +
+            `<DistanceMeters>${index * 100}</DistanceMeters></Trackpoint>`,
+        )
+        .join('') +
+      '</Track></Lap></Activity></Activities></TrainingCenterDatabase>',
+  );
 
 describe('TrackSwap server file boundary', () => {
   it('rejects a FIT document when canonicalization drops decoded records', () => {
@@ -203,4 +234,50 @@ describe('TrackSwap server file boundary', () => {
       },
     });
   });
+
+  it.each([
+    { name: 'GPX', input: multiPointGpx, hasSpeed: true },
+    { name: 'outdoor TCX', input: metricTcx(true), hasSpeed: true },
+    { name: 'indoor TCX', input: metricTcx(false), hasSpeed: false },
+  ])(
+    'preserves distance and speed when converting $name to FIT',
+    async ({ input, hasSpeed }) => {
+      const source = await decodeTrackFile(input);
+      const before = trackFileRecords(source.activity);
+      expect(before).toHaveLength(3);
+      expect(before.some((record) => (record.distance ?? 0) > 0)).toBe(true);
+      if (hasSpeed)
+        expect(before.some((record) => (record.speed ?? 0) > 0)).toBe(true);
+
+      const { content, report } = await transcodeTrackFile(input, 'fit');
+      expect(report).toMatchObject({
+        inputRecords: 3,
+        outputRecords: 3,
+        warnings: [],
+      });
+      const output = await decodeTrackFile(content);
+      const after = trackFileRecords(output.activity);
+      expect(after).toHaveLength(before.length);
+      before.forEach((record, index) => {
+        for (const [key, tolerance] of [
+          ['distance', 0.0051],
+          ['speed', 0.00051],
+        ] as const) {
+          if (record[key] === undefined) continue;
+          expect(typeof after[index][key]).toBe('number');
+          expect(
+            Math.abs(after[index][key]! - record[key]!),
+          ).toBeLessThanOrEqual(tolerance);
+        }
+      });
+      expect(output.activity.activities![0].totalDistance).toBeCloseTo(
+        source.activity.activities![0].totalDistance!,
+        2,
+      );
+      expect(output.activity.activities![0].laps[0].totalDistance).toBeCloseTo(
+        source.activity.activities![0].laps[0].totalDistance!,
+        2,
+      );
+    },
+  );
 });
