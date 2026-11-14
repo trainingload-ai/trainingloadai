@@ -400,13 +400,18 @@ for (const route of ["/zh", "/zh/docs"]) {
     const toggle = page
       .getByRole("button", { name: "主题", exact: true })
       .first();
-    if (await toggle.isVisible()) {
-      await toggle.click();
-    } else {
+    // The theme control replaces an SSR placeholder after hydration.
+    await expect(
+      page.locator('button[aria-label="主题"]').first(),
+    ).toBeAttached();
+    if (route === "/zh" && (page.viewportSize()?.width ?? 1440) < 1024) {
       await page
         .getByRole("button", { name: "打开主菜单", exact: true })
         .click();
       await page.getByRole("button", { name: "浅色", exact: true }).click();
+    } else {
+      await expect(toggle).toBeVisible();
+      await toggle.click();
     }
     await expect(image).toHaveCSS(
       "background-image",
