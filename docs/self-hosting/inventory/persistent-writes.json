@@ -928,7 +928,14 @@
     },
     {
       "file": "scripts/selfhost/copy-optional-workspace-metadata.mjs",
-      "line": 17,
+      "line": 54,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(dirname(destination), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/copy-optional-workspace-metadata.mjs",
+      "line": 60,
       "owner": "scripts",
       "classification": "runtime-write",
       "expression": "mkdirSync(dirname(destination), { recursive: true });"
