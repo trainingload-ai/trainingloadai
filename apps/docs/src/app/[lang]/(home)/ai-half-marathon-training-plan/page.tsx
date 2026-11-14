@@ -153,7 +153,7 @@ export default async function AiHalfMarathonPlanPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd
         id="ai-half-marathon-training-plan-structured-data"
         data={jsonLd}
@@ -341,6 +341,6 @@ export default async function AiHalfMarathonPlanPage({
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <ContentFreshness lastUpdated="2026-09-06" />
       </div>
-    </main>
+    </div>
   );
 }

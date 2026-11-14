@@ -204,6 +204,8 @@ export default async function BlogPostPage(props: {
           <ZoomableImage
             src={page.data.image}
             alt={page.data.title}
+            loading="eager"
+            fetchPriority="high"
             className="mb-12 aspect-[40/21] h-auto w-full rounded-control border border-neutral-200 object-cover dark:border-neutral-800"
           />
         )}

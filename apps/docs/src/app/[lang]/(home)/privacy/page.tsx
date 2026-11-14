@@ -190,7 +190,7 @@ export default async function PrivacyPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="min-h-screen px-4 py-12 md:px-6 md:py-16">
+      <div className="min-h-screen px-4 py-12 md:px-6 md:py-16">
         <article className="mx-auto w-full max-w-3xl">
           <header className="mb-12">
             <h1
@@ -288,7 +288,7 @@ export default async function PrivacyPage({
             </section>
           </div>
         </article>
-      </main>
+      </div>
     </>
   );
 }

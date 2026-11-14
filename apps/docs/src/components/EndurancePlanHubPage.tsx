@@ -109,7 +109,7 @@ export function EndurancePlanHubPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <Script
         id={`${page.slug}-structured-data`}
         type="application/ld+json"
@@ -535,6 +535,6 @@ export function EndurancePlanHubPage({
           </TrackedLink>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

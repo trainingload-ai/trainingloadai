@@ -578,7 +578,7 @@ export default async function ToolsPage({
   ]);
 
   return (
-    <main className="client-demo-radius overflow-x-hidden bg-background text-foreground">
+    <div className="client-demo-radius overflow-x-hidden bg-background text-foreground">
       <JsonLd id="tools-structured-data" data={structuredData} />
 
       <section className="bg-card px-4 pb-12 pt-14 md:px-6 md:pb-16 md:pt-20">
@@ -765,6 +765,6 @@ export default async function ToolsPage({
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

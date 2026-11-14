@@ -87,7 +87,7 @@ export function ThemeSwitcher({
       className="inline-flex size-9 items-center justify-center rounded-control text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={groupLabel ?? "Toggle theme"}
     >
-      {isDark ? <Moon className="size-4" /> : <Sun className="size-4" />}
+      {isDark ? <Moon aria-hidden="true" className="size-4" /> : <Sun aria-hidden="true" className="size-4" />}
     </button>
   );
 }

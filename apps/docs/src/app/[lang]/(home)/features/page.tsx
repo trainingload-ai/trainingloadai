@@ -348,7 +348,7 @@ export default async function FeaturesPage({
   };
 
   return (
-    <main className="client-demo-radius overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="client-demo-radius overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id="features-structured-data" data={jsonLd} />
 
       <section className="relative overflow-hidden border-b border-neutral-200/80 px-4 pb-12 pt-12 text-neutral-950 dark:border-white/10 dark:text-white md:px-6 md:pb-16 md:pt-16">
@@ -631,6 +631,6 @@ export default async function FeaturesPage({
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

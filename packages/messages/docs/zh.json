@@ -79,6 +79,26 @@
     "switch": "切换语言",
     "dismiss": "关闭语言切换建议"
   },
+  "accessibility": {
+    "skipToContent": "跳转到正文",
+    "previewImage": "预览图片",
+    "previewImageNamed": "预览图片：{description}",
+    "imagePreview": "图片预览",
+    "closePreview": "关闭预览",
+    "preview": "预览"
+  },
+  "docsUi": {
+    "searchNoResult": "未找到结果",
+    "toc": "本页目录",
+    "tocNoHeadings": "暂无标题",
+    "lastUpdate": "最后更新于",
+    "nextPage": "下一页",
+    "previousPage": "上一页",
+    "editOnGithub": "在 GitHub 上编辑",
+    "search": "搜索文档",
+    "chooseLanguage": "语言",
+    "chooseTheme": "主题"
+  },
   "header": {
     "searchDocs": "搜索文档",
     "openDocsMenu": "打开文档导航",

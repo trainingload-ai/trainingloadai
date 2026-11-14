@@ -73,6 +73,26 @@
     "switch": "切り替える",
     "dismiss": "言語の提案を閉じる"
   },
+  "accessibility": {
+    "skipToContent": "本文へ移動",
+    "previewImage": "画像をプレビュー",
+    "previewImageNamed": "画像をプレビュー：{description}",
+    "imagePreview": "画像プレビュー",
+    "closePreview": "プレビューを閉じる",
+    "preview": "プレビュー"
+  },
+  "docsUi": {
+    "searchNoResult": "結果が見つかりません",
+    "toc": "このページの内容",
+    "tocNoHeadings": "見出しはありません",
+    "lastUpdate": "最終更新日",
+    "nextPage": "次のページ",
+    "previousPage": "前のページ",
+    "editOnGithub": "GitHub で編集",
+    "search": "ドキュメントを検索",
+    "chooseLanguage": "言語",
+    "chooseTheme": "テーマ"
+  },
   "header": {
     "searchDocs": "ドキュメントを検索",
     "openDocsMenu": "ドキュメントのナビゲーションを開く",

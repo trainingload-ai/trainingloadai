@@ -219,7 +219,7 @@ export default async function PricingPage({
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6 md:py-16">
+    <div className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6 md:py-16">
       <JsonLd id="pricing-structured-data" data={structuredData} />
 
       <section className="mx-auto max-w-3xl text-center">
@@ -247,6 +247,6 @@ export default async function PricingPage({
         creditLabels={creditLabels}
         newUserGift={newUserGift}
       />
-    </main>
+    </div>
   );
 }

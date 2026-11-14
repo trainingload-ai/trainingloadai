@@ -122,7 +122,7 @@ export default async function AiCoachCollectionPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-foreground">
+    <div className="overflow-x-hidden bg-background text-foreground">
       <JsonLd id="ai-coach-collection-structured-data" data={jsonLd} />
 
       <section className="relative overflow-hidden bg-secondary/60 px-4 py-14 md:px-6 md:py-20">
@@ -373,6 +373,6 @@ export default async function AiCoachCollectionPage({
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

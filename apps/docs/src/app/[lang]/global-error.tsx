@@ -50,7 +50,7 @@ export default function GlobalError({
             >
               <CustomHeader />
             </Suspense>
-            <main className="flex-1">
+            <main id="main-content" tabIndex={-1} className="flex-1">
               <SiteErrorState
                 kind="server-error"
                 digest={error.digest}

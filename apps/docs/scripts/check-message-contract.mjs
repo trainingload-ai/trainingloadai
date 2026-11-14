@@ -18,6 +18,23 @@ const messagesDirectory = path.resolve(
 // for content still awaiting review, but strings rendered by every locale must
 // exist explicitly when their absence would otherwise only log during SSG.
 const requiredLocalizedStrings = [
+  "accessibility.skipToContent",
+  "accessibility.previewImage",
+  "accessibility.previewImageNamed",
+  "accessibility.imagePreview",
+  "accessibility.closePreview",
+  "accessibility.preview",
+  "docsUi.searchNoResult",
+  "docsUi.toc",
+  "docsUi.tocNoHeadings",
+  "docsUi.lastUpdate",
+  "docsUi.nextPage",
+  "docsUi.previousPage",
+  "docsUi.editOnGithub",
+  "docsUi.search",
+  "docsUi.chooseLanguage",
+  "docsUi.chooseTheme",
+
   "languageSuggestion.label",
   "languageSuggestion.message",
   "languageSuggestion.switch",

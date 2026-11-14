@@ -73,6 +73,26 @@
     "switch": "切換語言",
     "dismiss": "關閉語言切換建議"
   },
+  "accessibility": {
+    "skipToContent": "跳至正文",
+    "previewImage": "預覽圖片",
+    "previewImageNamed": "預覽圖片：{description}",
+    "imagePreview": "圖片預覽",
+    "closePreview": "關閉預覽",
+    "preview": "預覽"
+  },
+  "docsUi": {
+    "searchNoResult": "找不到結果",
+    "toc": "本頁目錄",
+    "tocNoHeadings": "尚無標題",
+    "lastUpdate": "最後更新於",
+    "nextPage": "下一頁",
+    "previousPage": "上一頁",
+    "editOnGithub": "在 GitHub 上編輯",
+    "search": "搜尋文檔",
+    "chooseLanguage": "語言",
+    "chooseTheme": "主題"
+  },
   "header": {
     "searchDocs": "搜尋文檔",
     "openDocsMenu": "開啟文檔導覽",

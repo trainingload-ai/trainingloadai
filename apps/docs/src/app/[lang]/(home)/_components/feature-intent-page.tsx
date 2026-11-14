@@ -155,7 +155,7 @@ export function FeatureIntentPage({
   const isEditorial = variant === "editorial";
 
   return (
-    <main
+    <div
       className={cn(
         "overflow-x-hidden bg-background text-foreground",
         isEditorial && "selection:bg-brand selection:text-brand-foreground",
@@ -509,6 +509,6 @@ export function FeatureIntentPage({
           <ContentFreshness lastUpdated={copy.lastUpdatedDate} />
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

@@ -99,7 +99,7 @@ export default async function ContactPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white">
+      <div className="bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white">
         <section className="border-b border-neutral-200/80 px-4 py-12 md:px-6 md:py-16 dark:border-white/10">
           <div className="mx-auto max-w-4xl text-center">
             <p className="mb-5 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
@@ -205,7 +205,7 @@ export default async function ContactPage({
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }

@@ -88,6 +88,26 @@
     "switch": "Cambiar",
     "dismiss": "Cerrar sugerencia de idioma"
   },
+  "accessibility": {
+    "skipToContent": "Saltar al contenido",
+    "previewImage": "Vista previa de la imagen",
+    "previewImageNamed": "Vista previa de la imagen: {description}",
+    "imagePreview": "Vista previa de la imagen",
+    "closePreview": "Cerrar vista previa",
+    "preview": "Vista previa"
+  },
+  "docsUi": {
+    "searchNoResult": "No se encontraron resultados",
+    "toc": "En esta página",
+    "tocNoHeadings": "Sin encabezados",
+    "lastUpdate": "Última actualización",
+    "nextPage": "Página siguiente",
+    "previousPage": "Página anterior",
+    "editOnGithub": "Editar en GitHub",
+    "search": "Buscar en la documentación",
+    "chooseLanguage": "Idioma",
+    "chooseTheme": "Tema"
+  },
   "header": {
     "searchDocs": "Buscar en la documentación",
     "openDocsMenu": "Abrir la navegación de la documentación",

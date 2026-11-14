@@ -146,7 +146,7 @@ export default async function AiTrainingPlanPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id="ai-training-plan-structured-data" data={jsonLd} />
 
       <section className="relative overflow-hidden border-b border-neutral-200/70 px-4 py-12 md:px-6 md:py-16 dark:border-white/10">
@@ -353,6 +353,6 @@ export default async function AiTrainingPlanPage({
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <ContentFreshness lastUpdated="2026-08-18" />
       </div>
-    </main>
+    </div>
   );
 }

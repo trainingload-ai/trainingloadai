@@ -147,7 +147,7 @@ export default async function AiCoachSportPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id={`${page.slug}-structured-data`} data={jsonLd} />
 
       <section className="relative overflow-hidden border-b border-neutral-200/70 px-4 py-12 md:px-6 md:py-16 dark:border-white/10">
@@ -519,6 +519,6 @@ export default async function AiCoachSportPage({
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

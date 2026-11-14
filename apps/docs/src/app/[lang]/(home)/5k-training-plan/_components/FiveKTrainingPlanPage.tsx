@@ -284,7 +284,7 @@ export function FiveKTrainingPlanPage({
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <JsonLd id={`${plan.slug}-structured-data`} data={jsonLd} />
 
       <section className={styles.hero}>
@@ -655,6 +655,6 @@ export function FiveKTrainingPlanPage({
           </div>
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }

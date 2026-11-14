@@ -304,7 +304,7 @@ export default async function HomePage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-foreground">
+    <div className="overflow-x-hidden bg-background text-foreground">
       <JsonLd id="home-structured-data" data={structuredData} />
       <section className="relative overflow-hidden bg-card px-4 pb-12 pt-10 text-foreground md:px-6 md:pb-16 md:pt-14">
         <div className="relative mx-auto max-w-7xl">
@@ -465,6 +465,6 @@ export default async function HomePage({
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

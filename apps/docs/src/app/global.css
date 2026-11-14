@@ -112,6 +112,22 @@
     --tw-leading: 1.14;
     text-wrap: balance;
   }
+
+  #main-content,
+  .docs-prose :where(h1, h2, h3, h4, h5, h6)[id] {
+    scroll-margin-block-start: calc(
+      var(--fd-banner-height, 4rem) + var(--fd-tocnav-height, 0px) + 2rem
+    );
+  }
+
+  .docs-image-preview:modal {
+    overscroll-behavior: contain;
+  }
+
+  .docs-image-preview::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
 }
 
 @layer components {

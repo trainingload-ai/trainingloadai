@@ -3,8 +3,9 @@ import "@fontsource-variable/space-grotesk";
 import "@fontsource-variable/jost";
 import { Suspense, type ReactNode } from "react";
 import type { Metadata } from "next";
-import { defineI18nUI } from "fumadocs-ui/i18n";
-import { i18n, isSeoIndexedLanguage } from "@/lib/i18n";
+import type { Translations } from "fumadocs-ui/i18n";
+import { isSeoIndexedLanguage } from "@/lib/i18n";
+import { LOCALE_OPTIONS } from "@/lib/locale-options";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -22,61 +23,6 @@ import { homeOpenGraphImage, homeTwitterImage } from "@/lib/social-metadata";
 import { isDocsTelemetryEnabled } from "@/lib/telemetry-config.mjs";
 import { selectClientMessages } from "@/lib/client-messages";
 import { docsFontVariables } from "@/lib/docs-fonts";
-
-const { provider } = defineI18nUI(i18n, {
-  translations: {
-    en: {
-      displayName: "English",
-      search: "Search",
-      chooseLanguage: "Choose language",
-    },
-    zh: {
-      displayName: "简体中文",
-      search: "搜索文档",
-      chooseLanguage: "选择语言",
-    },
-    "zh-hant": {
-      displayName: "繁體中文",
-      search: "搜尋文檔",
-      chooseLanguage: "選擇語言",
-    },
-    ja: {
-      displayName: "日本語",
-      search: "ドキュメントを検索",
-      chooseLanguage: "言語を選択",
-    },
-    de: {
-      displayName: "Deutsch",
-      search: "Search",
-      chooseLanguage: "Sprache wählen",
-    },
-    fr: {
-      displayName: "Français",
-      search: "Search",
-      chooseLanguage: "Choisir la langue",
-    },
-    ko: {
-      displayName: "한국어",
-      search: "Search",
-      chooseLanguage: "언어 선택",
-    },
-    es: {
-      displayName: "Español",
-      search: "Search",
-      chooseLanguage: "Elegir idioma",
-    },
-    "pt-BR": {
-      displayName: "Português (Brasil)",
-      search: "Search",
-      chooseLanguage: "Escolher idioma",
-    },
-    it: {
-      displayName: "Italiano",
-      search: "Search",
-      chooseLanguage: "Scegli la lingua",
-    },
-  },
-});
 
 /**
  * SEO 核心策略：
@@ -170,6 +116,12 @@ export default async function Layout({
         suppressHydrationWarning
         className="flex min-h-screen flex-col font-sans"
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-2 focus:z-[100] focus:rounded-control focus:bg-background focus:px-4 focus:py-2 focus:font-medium focus:text-foreground focus:outline-2 focus:outline-ring"
+        >
+          {(messages.accessibility as { skipToContent: string }).skipToContent}
+        </a>
         <NextIntlClientProvider
           locale={lang}
           messages={selectClientMessages(messages)}
@@ -178,7 +130,16 @@ export default async function Layout({
             <AnalyticsProvider locale={lang} />
           </Suspense>
           <LocalePreferenceSync />
-          <DocsRootProvider i18n={provider(lang)}>
+          <DocsRootProvider
+            i18n={{
+              locale: lang,
+              translations: messages.docsUi as unknown as Translations,
+              locales: LOCALE_OPTIONS.map((option) => ({
+                locale: option.key,
+                name: option.label,
+              })),
+            }}
+          >
             {/* <BetaBanner /> */}
             {children}
             <LocaleSuggestion />
