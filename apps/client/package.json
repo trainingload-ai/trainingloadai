@@ -51,7 +51,7 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@tanstack/react-query": "^5.81.5",
     "@tanstack/react-query-devtools": "^5.81.5",
-    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-table": "^9.3.1",
     "@tanstack/react-virtual": "^3.13.0",
     "@tiptap/core": "^2.11.3",
     "@tiptap/extension-color": "^2.11.3",
