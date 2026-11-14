@@ -5110,7 +5110,8 @@
       "reauthorizeSource": "Reautorizar origem",
       "enableSourceImport": "Ativar importação da origem",
       "checkSourceConnection": "Verificar conexão de origem",
-      "dataUnavailable": "Apenas o resumo da atividade está disponível; não foi possível obter os registros detalhados."
+      "dataUnavailable": "Apenas o resumo da atividade está disponível; não foi possível obter os registros detalhados.",
+      "why": "Por quê?"
     }
   },
   "V2ActivitiesStatsPage": {

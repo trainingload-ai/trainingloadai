@@ -121,41 +121,51 @@ export function ExternalActivityMirrorCard({
       footer={
         <div className="flex flex-wrap items-center justify-between gap-2">
           {sourceFlow}
-          {mirror.action === "RETRY" ? (
-            <button
-              type="button"
-              disabled={retrying}
-              onClick={async () => {
-                setRetrying(true);
-                try {
-                  await apiFetch(
-                    `/activities/external-mirrors/${mirror.id}/retry`,
-                    { method: "POST" },
-                  );
-                  onRetried?.();
-                } finally {
-                  setRetrying(false);
-                }
-              }}
-              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-border bg-background/65 px-2.5 text-xs font-medium text-foreground hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={`https://www.trainingload.ai/${locale.startsWith("zh") ? "zh" : "en"}/docs/guide/shadow-activities`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-8 shrink-0 items-center rounded-md px-2.5 text-xs font-medium text-muted-foreground hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span aria-live="polite">
-                {retrying ? t("mirror.retrying") : t("mirror.retry")}
+              {t("mirror.why")}
+            </a>
+            {mirror.action === "RETRY" ? (
+              <button
+                type="button"
+                disabled={retrying}
+                onClick={async () => {
+                  setRetrying(true);
+                  try {
+                    await apiFetch(
+                      `/activities/external-mirrors/${mirror.id}/retry`,
+                      { method: "POST" },
+                    );
+                    onRetried?.();
+                  } finally {
+                    setRetrying(false);
+                  }
+                }}
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-border bg-background/65 px-2.5 text-xs font-medium text-foreground hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+              >
+                <span aria-live="polite">
+                  {retrying ? t("mirror.retrying") : t("mirror.retry")}
+                </span>
+              </button>
+            ) : mirror.action === "MANAGE_CONNECTION" ? (
+              <Link
+                href={`/account?repairExternalMirror=${encodeURIComponent(mirror.id)}#connections`}
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-border bg-background/65 px-2.5 text-xs font-medium text-foreground hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {t(connectionActionKey(mirror))}
+                <ArrowRight className="size-3.5" aria-hidden />
+              </Link>
+            ) : (
+              <span className="inline-flex h-8 shrink-0 items-center rounded-md bg-background/65 px-2.5 text-xs text-muted-foreground">
+                {t("mirror.pending")}
               </span>
-            </button>
-          ) : mirror.action === "MANAGE_CONNECTION" ? (
-            <Link
-              href={`/account?repairExternalMirror=${encodeURIComponent(mirror.id)}#connections`}
-              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-border bg-background/65 px-2.5 text-xs font-medium text-foreground hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {t(connectionActionKey(mirror))}
-              <ArrowRight className="size-3.5" aria-hidden />
-            </Link>
-          ) : (
-            <span className="inline-flex h-8 shrink-0 items-center rounded-md bg-background/65 px-2.5 text-xs text-muted-foreground">
-              {t("mirror.pending")}
-            </span>
-          )}
+            )}
+          </div>
         </div>
       }
     />

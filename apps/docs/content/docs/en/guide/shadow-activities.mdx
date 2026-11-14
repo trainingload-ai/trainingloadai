@@ -1,0 +1,56 @@
+---
+title: "Shadow activities: why is only a summary available?"
+description: Understand Intervals.icu and Strava shadow activities, and decide when to connect a source, retry synchronization, or upload an original file.
+keywords:
+  [
+    "shadow activities",
+    "Strava missing streams",
+    "Intervals.icu activity import",
+    "retry activity sync",
+  ]
+---
+
+# Shadow activities: why is only a summary available?
+
+**A shadow activity is an activity we have discovered but whose full records are not available yet.** Trainingload.ai keeps its title and start time so you can see it has not been overlooked, together with the next available action.
+
+A shadow activity is not a fully imported activity. We do not invent charts or training load from the summary. A successful import replaces the shadow with the full activity. An existing full recording is not cleared because a later synchronization cannot retrieve data.
+
+There are currently two main situations.
+
+## Case 1: Intervals.icu has activity information but cannot supply the original file
+
+Intervals.icu can display a summary of an activity received from Strava, while its API explicitly restricts the original activity file. Seeing the activity there does not mean Trainingload.ai can retrieve full records through that API.
+
+Trainingload.ai then tries Strava directly. Follow the card's prompt to connect Strava, renew authorization, or enable activity import, and wait for synchronization to finish.
+
+If Strava also cannot supply the required data, the shadow activity remains. Repeatedly synchronizing Intervals.icu cannot bypass its restriction on the original file.
+
+## Case 2: Strava has activity details but cannot supply streams
+
+The activity name, total distance, and duration are separate from GPS, heart rate, power, or distance samples at each point in time. **Having activity details does not guarantee that streams suitable for import are available.**
+
+- **Samples never existed:** for example, an activity entered manually in Strava with distance and duration but no device recording. It can have a details page, but retries cannot generate the missing samples.
+- **Records are temporarily unavailable:** the provider may still be processing, or the detailed-data endpoint may be unavailable. One “not found” response does not establish deletion or a permanent absence of streams.
+
+Trainingload.ai retries uncertain availability failures a limited number of times. If records remain unavailable, it keeps the shadow activity and offers a retry. Missing heart rate, power, or GPS alone does not necessarily create a shadow: an activity with a usable time series can still import while lacking some analyses.
+
+## What should I do?
+
+| What you know                                                       | Suggested action                                                                            |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| The card asks you to connect, renew authorization, or enable import | Finish the indicated setup, then wait for synchronization or retry.                         |
+| The activity was just uploaded or is still processing               | Wait for processing to finish, then retry once.                                             |
+| A temporary provider problem has been resolved                      | Retry once to request the full records again.                                               |
+| The activity was entered manually and never had samples             | Repeated retries will not help. Look for an original device recording.                      |
+| Multiple attempts still leave a shadow activity                     | Check whether the original platform can export an activity file; contact support if needed. |
+
+Retrying requests data again; it does not guarantee that the provider can now supply it. You do not need to delete the shadow or an existing full activity first. Repeatedly disconnecting and reconnecting will not generate missing samples.
+
+## I have the original file
+
+If your device or the platform that first recorded the workout can export a FIT, TCX, or GPX file containing activity records, use [Upload activity files](/docs/guide/upload-activity-files). Check duplicate warnings and compare the date and contents if a full activity already exists.
+
+## Getting help
+
+Include the activity date, source provider, displayed message, and whether the original platform can export a file. Do not send access tokens or passwords. See [Troubleshooting](/docs/guide/troubleshooting) for more steps.

@@ -5563,7 +5563,8 @@
       "reauthorizeSource": "Reauthorize source",
       "enableSourceImport": "Enable source import",
       "checkSourceConnection": "Check source connection",
-      "dataUnavailable": "Only the activity summary is available; detailed records could not be retrieved."
+      "dataUnavailable": "Only the activity summary is available; detailed records could not be retrieved.",
+      "why": "Why?"
     }
   },
   "V2ActivitiesStatsPage": {

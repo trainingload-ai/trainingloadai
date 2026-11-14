@@ -5110,7 +5110,8 @@
       "reauthorizeSource": "Quelle erneut autorisieren",
       "enableSourceImport": "Quellimport aktivieren",
       "checkSourceConnection": "Quellverbindung prüfen",
-      "dataUnavailable": "Nur die Aktivitätsübersicht ist verfügbar; detaillierte Aufzeichnungen konnten nicht abgerufen werden."
+      "dataUnavailable": "Nur die Aktivitätsübersicht ist verfügbar; detaillierte Aufzeichnungen konnten nicht abgerufen werden.",
+      "why": "Warum?"
     }
   },
   "V2ActivitiesStatsPage": {

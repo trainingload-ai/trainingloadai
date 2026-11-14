@@ -5110,7 +5110,8 @@
       "reauthorizeSource": "Autorizza di nuovo la fonte",
       "enableSourceImport": "Attiva importazione dalla fonte",
       "checkSourceConnection": "Controlla connessione alla fonte",
-      "dataUnavailable": "È disponibile solo il riepilogo dell’attività; non è stato possibile recuperare i dati dettagliati."
+      "dataUnavailable": "È disponibile solo il riepilogo dell’attività; non è stato possibile recuperare i dati dettagliati.",
+      "why": "Perché?"
     }
   },
   "V2ActivitiesStatsPage": {

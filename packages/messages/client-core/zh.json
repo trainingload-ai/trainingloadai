@@ -5493,7 +5493,8 @@
       "reauthorizeSource": "重新授权来源",
       "enableSourceImport": "开启来源导入",
       "checkSourceConnection": "检查来源连接",
-      "dataUnavailable": "目前只有活动摘要，暂未取得详细记录。"
+      "dataUnavailable": "目前只有活动摘要，暂未取得详细记录。",
+      "why": "为什么"
     },
     "common": {
       "unknownTime": "未知时间",

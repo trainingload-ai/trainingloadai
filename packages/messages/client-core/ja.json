@@ -5103,7 +5103,8 @@
       "reauthorizeSource": "接続元を再認証",
       "enableSourceImport": "接続元のインポートを有効化",
       "checkSourceConnection": "接続元を確認",
-      "dataUnavailable": "現在はアクティビティの概要のみ利用でき、詳細な記録は取得できていません。"
+      "dataUnavailable": "現在はアクティビティの概要のみ利用でき、詳細な記録は取得できていません。",
+      "why": "なぜ？"
     }
   },
   "V2PlansPage": {

@@ -5141,7 +5141,8 @@
       "reauthorizeSource": "重新授權來源",
       "enableSourceImport": "開啟來源匯入",
       "checkSourceConnection": "檢查來源連線",
-      "dataUnavailable": "目前只有活動摘要，暫未取得詳細記錄。"
+      "dataUnavailable": "目前只有活動摘要，暫未取得詳細記錄。",
+      "why": "為什麼"
     },
     "common": {
       "unknownTime": "未知時間",
