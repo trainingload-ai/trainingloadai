@@ -5126,7 +5126,7 @@
     },
     "mirror": {
       "untitled": "等待來源同步的活動",
-      "discoveredVia": "由 Intervals.icu 發現",
+      "discoveredVia": "由 {provider} 發現",
       "syncing": "正在取得來源活動的完整資料。",
       "connectionRequired": "目前連線無法提供完整活動，請檢查來源連線。",
       "importDisabled": "來源已連線，但活動自動匯入尚未開啟。",
@@ -5140,7 +5140,8 @@
       "connectSource": "連接來源",
       "reauthorizeSource": "重新授權來源",
       "enableSourceImport": "開啟來源匯入",
-      "checkSourceConnection": "檢查來源連線"
+      "checkSourceConnection": "檢查來源連線",
+      "dataUnavailable": "目前只有活動摘要，暫未取得詳細記錄。"
     },
     "common": {
       "unknownTime": "未知時間",

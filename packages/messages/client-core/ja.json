@@ -5088,7 +5088,7 @@
     },
     "mirror": {
       "untitled": "同期元の取得を待っているアクティビティ",
-      "discoveredVia": "Intervals.icu で検出",
+      "discoveredVia": "{provider} で検出",
       "syncing": "元のアクティビティの完全なデータを取得しています。",
       "connectionRequired": "現在の連携では完全なアクティビティを取得できません。接続を確認してください。",
       "importDisabled": "接続済みですが、アクティビティの自動インポートは無効です。",
@@ -5102,7 +5102,8 @@
       "connectSource": "接続元を連携",
       "reauthorizeSource": "接続元を再認証",
       "enableSourceImport": "接続元のインポートを有効化",
-      "checkSourceConnection": "接続元を確認"
+      "checkSourceConnection": "接続元を確認",
+      "dataUnavailable": "現在はアクティビティの概要のみ利用でき、詳細な記録は取得できていません。"
     }
   },
   "V2PlansPage": {

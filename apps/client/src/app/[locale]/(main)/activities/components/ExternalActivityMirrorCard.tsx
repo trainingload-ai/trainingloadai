@@ -19,6 +19,8 @@ type Translate = (
 ) => string;
 
 function reasonKey(mirror: V2ExternalActivityMirror) {
+  if (mirror.reason === "UPSTREAM_DATA_UNAVAILABLE")
+    return "mirror.dataUnavailable";
   if (mirror.status === "ROUTING") return "mirror.syncing";
   if (mirror.reason === "ORIGIN_IMPORT_DISABLED")
     return "mirror.importDisabled";
@@ -93,11 +95,15 @@ export function ExternalActivityMirrorCard({
       : t("common.unknownTime");
   const sourceFlow = (
     <div className="flex items-center gap-1.5">
-      <ProviderMark provider={mirror.discoveredVia} />
-      <ArrowRight
-        className="size-3 text-muted-foreground/70"
-        aria-hidden="true"
-      />
+      {mirror.discoveredVia !== mirror.originProvider && (
+        <>
+          <ProviderMark provider={mirror.discoveredVia} />
+          <ArrowRight
+            className="size-3 text-muted-foreground/70"
+            aria-hidden="true"
+          />
+        </>
+      )}
       <ProviderMark provider={mirror.originProvider} />
     </div>
   );
@@ -105,7 +111,11 @@ export function ExternalActivityMirrorCard({
     <ActivitySummaryCard
       title={mirror.title || t("mirror.untitled")}
       sportType="UNKNOWN"
-      sportLabel={t("mirror.discoveredVia")}
+      sportLabel={t("mirror.discoveredVia", {
+        provider: isThirdPartyProviderBrand(mirror.discoveredVia)
+          ? thirdPartyProviderName(mirror.discoveredVia)
+          : mirror.discoveredVia,
+      })}
       startLabel={timeLabel}
       note={t(reasonKey(mirror))}
       footer={

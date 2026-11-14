@@ -5478,7 +5478,7 @@
     },
     "mirror": {
       "untitled": "等待来源同步的活动",
-      "discoveredVia": "由 Intervals.icu 发现",
+      "discoveredVia": "由 {provider} 发现",
       "syncing": "正在获取来源活动的完整数据。",
       "connectionRequired": "当前连接无法提供完整活动，请检查来源连接。",
       "importDisabled": "来源已连接，但活动自动导入尚未开启。",
@@ -5492,7 +5492,8 @@
       "connectSource": "连接来源",
       "reauthorizeSource": "重新授权来源",
       "enableSourceImport": "开启来源导入",
-      "checkSourceConnection": "检查来源连接"
+      "checkSourceConnection": "检查来源连接",
+      "dataUnavailable": "目前只有活动摘要，暂未取得详细记录。"
     },
     "common": {
       "unknownTime": "未知时间",

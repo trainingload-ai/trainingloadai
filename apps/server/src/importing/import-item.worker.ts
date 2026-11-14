@@ -64,6 +64,7 @@ import type {
 import { ActivityWeatherService } from '@/weather/activity-weather.service';
 import {
   IMPORT_ITEM_EXTENSION,
+  ImportSourceDataUnavailableError,
   type ImportItemExtension,
 } from './import-item-provider.port';
 
@@ -966,12 +967,88 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
    * 处理失败：FAILED + 退避；次数用尽变 DEAD。
    * 已 READY 的旧 Activity 不改；租约丢失则放弃写库。
    */
+  private async completeUnavailableItem(
+    job: ClaimedImportItemJob,
+    args: {
+      error: ImportSourceDataUnavailableError | null;
+      routeToOrigin: boolean;
+      diagnostic: string;
+      code: string;
+    },
+  ) {
+    const lockToken = this.activeLeaseTokens.get(job.id);
+    const completed = await this.prisma.$transaction(async (tx) => {
+      // Fence both the item completion and source routing with the current lease.
+      const result = await this.importJobs.itemJobs(tx).updateMany({
+        where: {
+          id: job.id,
+          userId: job.userId,
+          ...(lockToken ? { lockToken } : {}),
+        },
+        data: {
+          status: 'SKIPPED',
+          attempts: { increment: 1 },
+          analysisRequired: false,
+          outcome: 'UPSTREAM_DATA_UNAVAILABLE',
+          lastErrorCode: args.code,
+          lastError: args.diagnostic,
+          completedAt: new Date(),
+          lockToken: null,
+          leaseExpiresAt: null,
+        },
+      });
+      if (result.count !== 1) return false;
+      if (args.routeToOrigin) {
+        await this.externalActivityRouter.routePersistedIntervalsDiscovery(
+          {
+            userId: job.userId,
+            sourceObjectId: job.sourceObjectId,
+            reason: 'fallback',
+            confirmedOriginUnavailable: true,
+          },
+          tx,
+        );
+      } else {
+        await this.externalActivityRouter.keepUnavailableSource(
+          {
+            userId: job.userId,
+            sourceObjectId: job.sourceObjectId,
+            error: args.error!,
+          },
+          tx,
+        );
+        await this.externalActivityMirrors.markOriginImportFailed(
+          {
+            userId: job.userId,
+            sourceObjectId: job.sourceObjectId,
+            reason: 'UPSTREAM_DATA_UNAVAILABLE',
+          },
+          tx,
+        );
+      }
+      return true;
+    });
+    if (!completed) return;
+    this.logImportPipelineEvent({
+      batchJobId: job.batchJobId,
+      itemJobId: job.id,
+      userId: job.userId,
+      stage: $Enums.ImportPipelineStage.COMPLETED,
+      message:
+        'Source data unavailable; retained source without materializing an activity',
+      data: { code: args.code },
+      level: 'WARN',
+    });
+  }
+
   private async failClaimedItem(
     job: ClaimedImportItemJob,
     error: unknown,
     thirdPartyActivityId?: number,
   ) {
-    if (
+    const unavailable =
+      error instanceof ImportSourceDataUnavailableError ? error : null;
+    const routeToOrigin =
       job.sourceKind === 'INTERVALS_ICU' &&
       error instanceof IntervalsIcuApiError &&
       getExternalActivityOriginRoutingExtension()?.matchesUnavailableOriginError?.(
@@ -981,52 +1058,35 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           message: error.message,
           body: error.body,
         },
-      ) === true
-    ) {
-      // 旧数据或未知响应可能绕过列表阶段识别。这里是 422 兜底：停止通用重试，
-      // 把现有来源对象转为影子/来源路由状态，仍然不创建 Activity。
-      const diagnostic =
-        `${error.message}${error.body ? `: ${error.body}` : ''}`
-          .replace(/\s+/g, ' ')
-          .slice(0, 2_000);
-      const routeDecision =
-        await this.externalActivityRouter.routePersistedIntervalsDiscovery({
-          userId: job.userId,
-          sourceObjectId: job.sourceObjectId,
-          reason: 'fallback',
-          confirmedOriginUnavailable: true,
-        });
+      ) === true;
+    if (unavailable || routeToOrigin) {
       const lockToken = this.activeLeaseTokens.get(job.id);
-      await this.importJobs.itemJobs().updateMany({
+      const current = await this.importJobs.itemJobs().findFirst({
         where: {
           id: job.id,
+          userId: job.userId,
           ...(lockToken ? { lockToken } : {}),
         },
-        data: {
-          status: 'SKIPPED',
-          attempts: { increment: 1 },
-          outcome: 'UPSTREAM_DATA_UNAVAILABLE',
-          lastErrorCode: 'INTERVALS_ICU_ORIGIN_DATA_UNAVAILABLE',
-          lastError: diagnostic,
-          completedAt: new Date(),
-          lockToken: null,
-          leaseExpiresAt: null,
-        },
+        select: { attempts: true },
       });
-      this.logImportPipelineEvent({
-        batchJobId: job.batchJobId,
-        itemJobId: job.id,
-        userId: job.userId,
-        stage: $Enums.ImportPipelineStage.COMPLETED,
-        message: '发现来源无法提供原始活动，已转换为影子活动',
-        data: {
-          status: error.status,
-          responseBody: error.body?.slice(0, 500),
-          routeDecision: routeDecision.kind,
-        },
-        level: 'WARN',
-      });
-      return;
+      if (!current) return;
+      const maxAttempts =
+        this.configService.get<number>('importItemWorker.maxAttempts') ?? 6;
+      if (!unavailable?.retryable || current.attempts + 1 >= maxAttempts) {
+        const diagnostic =
+          routeToOrigin && error instanceof IntervalsIcuApiError
+            ? `${error.message}${error.body ? `: ${error.body}` : ''}`
+                .replace(/\s+/g, ' ')
+                .slice(0, 2_000)
+            : unavailable!.message;
+        await this.completeUnavailableItem(job, {
+          error: unavailable,
+          routeToOrigin,
+          diagnostic,
+          code: unavailable?.code ?? 'INTERVALS_ICU_ORIGIN_DATA_UNAVAILABLE',
+        });
+        return;
+      }
     }
     const msg = error instanceof Error ? error.message : String(error);
     const lockToken = this.activeLeaseTokens.get(job.id);
@@ -1038,6 +1098,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           status: 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
+          ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
           completedAt: null,
           availableAt: new Date(Date.now() + 30 * 60_000),
           lockToken: null,
@@ -1058,6 +1119,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           status: 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
+          ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
           completedAt: null,
         },
         select: { attempts: true, activityId: true },
