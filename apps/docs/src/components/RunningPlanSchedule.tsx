@@ -154,12 +154,6 @@ function formatWeekTitle(label: string, week: number) {
   return `${label} ${week}`;
 }
 
-function formatWeekColumnLabel(label: string) {
-  if (label === "第") return "周次";
-  if (label === "週") return "週次";
-  return label;
-}
-
 function WeekHeader({
   week,
   weekTitle,

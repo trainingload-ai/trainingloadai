@@ -195,6 +195,7 @@ export function HomeHeroDemoPreview({
                 endpoint supplies a resized, compressed version of the PNG. */}
             <img
               {...previewImage(false)}
+              alt=""
               className="absolute inset-0 h-full w-full object-cover object-top"
             />
           </picture>

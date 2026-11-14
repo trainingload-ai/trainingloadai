@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -201,20 +202,23 @@ export function LactateCurveChart({
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [hover?.pinned]);
-  function onResize(width: number, height: number) {
-    if (width > 0 && height > 0)
-      setSize((previous) =>
-        previous.width === width && previous.height === height
-          ? previous
-          : { width, height },
-      );
-    if (rendered.current || width <= 0 || height <= 0) return;
-    frame.current = requestAnimationFrame(() => {
-      if (rendered.current || !figure.current?.querySelector("svg")) return;
-      rendered.current = true;
-      onRendered?.();
-    });
-  }
+  const onResize = useCallback(
+    (width: number, height: number) => {
+      if (width > 0 && height > 0)
+        setSize((previous) =>
+          previous.width === width && previous.height === height
+            ? previous
+            : { width, height },
+        );
+      if (rendered.current || width <= 0 || height <= 0) return;
+      frame.current = requestAnimationFrame(() => {
+        if (rendered.current || !figure.current?.querySelector("svg")) return;
+        rendered.current = true;
+        onRendered?.();
+      });
+    },
+    [onRendered],
+  );
   const method = analysis.methods.find(
     (candidate) => candidate.methodId === methodId,
   )!;
@@ -226,89 +230,32 @@ export function LactateCurveChart({
   const unit = analysis.sport === "cycling" ? "W" : "km/h";
   const low = exercise[0]!.intensity;
   const high = exercise.at(-1)!.intensity;
-  const raw = exercise;
-  const logLines = logView
-    ? method.logFit!.map((fit, i) => {
-        const from = i === 0 ? low : method.intensity!;
-        const to = i === 0 ? method.intensity! : high;
-        return Array.from({ length: 25 }, (_, step) => {
-          const intensity = Math.exp(
-            Math.log(from) + ((Math.log(to) - Math.log(from)) * step) / 24,
-          );
-          return {
-            intensity,
-            lactate: Math.exp(fit.intercept + fit.slope * Math.log(intensity)),
-          };
-        });
-      })
-    : [];
-  const thresholds = analysis.selectedPair
-    ? [analysis.selectedPair.lt1Method, analysis.selectedPair.lt2Method].map(
-        (id) => analysis.methods.find((item) => item.methodId === id)!,
-      )
-    : [];
-  const bands = () =>
-    !construction && !logView
-      ? analysis.zones.map((zone) => (
-          <ReferenceArea
-            key={zone.zone}
-            x1={zone.from ?? low}
-            x2={zone.to ?? high}
-            fill={"var(--lactate-zone-" + zone.zone + ")"}
-            fillOpacity={0.09}
-            strokeOpacity={0}
-          />
-        ))
-      : null;
+  const hasHeartRate = exercise.some((row) => row.heartRate != null);
   const anchors = construction ? method?.anchors : undefined;
-  let distance: { intensity: number; lactate: number }[] = [];
-  if (
-    anchors?.length === 2 &&
-    method.intensity != null &&
-    method.lactate != null
-  ) {
-    const a = anchors[0]!;
-    const b = anchors[1]!;
-    const slope = (b.lactate - a.lactate) / (b.intensity - a.intensity);
-    const intercept = a.lactate - slope * a.intensity;
-    const foot =
-      (method.intensity + slope * (method.lactate - intercept)) /
-      (1 + slope ** 2);
-    distance = [
-      { intensity: method.intensity, lactate: method.lactate },
-      { intensity: foot, lactate: slope * foot + intercept },
-    ];
-  }
-  const heartRate = exercise.map((row) => ({
-    ...row,
-    heartRate: row.heartRate ?? null,
-  }));
-  const hasHeartRate = heartRate.some((row) => row.heartRate != null);
-  const fixed = methodId.startsWith("obla") || methodId.startsWith("bsln");
-  function inspectPointer(
-    event: ReactPointerEvent<HTMLDivElement>,
-    source: "lactate" | "heart",
-  ) {
-    if (event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const cx = event.clientX - rect.left;
-    const cy = event.clientY - rect.top;
-    if (cx < 46 || cx > rect.width - 18 || cy < 20 || cy > rect.height - 28)
-      return;
-    const ratio = (cx - 46) / (rect.width - 64);
-    const value = logView
-      ? Math.exp(Math.log(low) + ratio * (Math.log(high) - Math.log(low)))
-      : low + ratio * (high - low);
-    const stage = exercise.reduce((a, b) =>
-      Math.abs(b.intensity - value) < Math.abs(a.intensity - value) ? b : a,
-    );
-    setHover((previous) =>
-      previous?.pinned ||
-      (previous?.stage === stage && previous.source === source)
-        ? previous
-        : { stage, cx, cy, source, pinned: false },
-    );
-  }
+  const inspectPointer = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>, source: "lactate" | "heart") => {
+      if (event.pointerType !== "mouse") return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const cx = event.clientX - rect.left;
+      const cy = event.clientY - rect.top;
+      if (cx < 46 || cx > rect.width - 18 || cy < 20 || cy > rect.height - 28)
+        return;
+      const ratio = (cx - 46) / (rect.width - 64);
+      const value = logView
+        ? Math.exp(Math.log(low) + ratio * (Math.log(high) - Math.log(low)))
+        : low + ratio * (high - low);
+      const stage = exercise.reduce((a, b) =>
+        Math.abs(b.intensity - value) < Math.abs(a.intensity - value) ? b : a,
+      );
+      setHover((previous) =>
+        previous?.pinned ||
+        (previous?.stage === stage && previous.source === source)
+          ? previous
+          : { stage, cx, cy, source, pinned: false },
+      );
+    },
+    [exercise, high, logView, low],
+  );
   const fitRow = hover
     ? analysis.fitQuality?.residuals.find(
         (row) => row.intensity === hover.stage.intensity,
@@ -345,9 +292,7 @@ export function LactateCurveChart({
   const tooltipY = hover
     ? Math.max(
         8,
-        (hover.source === "heart" ? size.height + 12 : 0) +
-          hover.cy -
-          110,
+        (hover.source === "heart" ? size.height + 12 : 0) + hover.cy - 110,
       )
     : 0;
   const crosshairX = hover
@@ -358,8 +303,67 @@ export function LactateCurveChart({
         (size.width - 64)
     : 0;
   // Preserve chart nodes while the inspection overlay changes keyboard focus.
-  const plot = useMemo(
-    () => (
+  const plot = useMemo(() => {
+    const raw = exercise;
+    const logLines = logView
+      ? method.logFit!.map((fit, i) => {
+          const from = i === 0 ? low : method.intensity!;
+          const to = i === 0 ? method.intensity! : high;
+          return Array.from({ length: 25 }, (_, step) => {
+            const intensity = Math.exp(
+              Math.log(from) + ((Math.log(to) - Math.log(from)) * step) / 24,
+            );
+            return {
+              intensity,
+              lactate: Math.exp(
+                fit.intercept + fit.slope * Math.log(intensity),
+              ),
+            };
+          });
+        })
+      : [];
+    const thresholds = analysis.selectedPair
+      ? [analysis.selectedPair.lt1Method, analysis.selectedPair.lt2Method].map(
+          (id) => analysis.methods.find((item) => item.methodId === id)!,
+        )
+      : [];
+    const bands = () =>
+      !construction && !logView
+        ? analysis.zones.map((zone) => (
+            <ReferenceArea
+              key={zone.zone}
+              x1={zone.from ?? low}
+              x2={zone.to ?? high}
+              fill={"var(--lactate-zone-" + zone.zone + ")"}
+              fillOpacity={0.09}
+              strokeOpacity={0}
+            />
+          ))
+        : null;
+    let distance: { intensity: number; lactate: number }[] = [];
+    if (
+      anchors?.length === 2 &&
+      method.intensity != null &&
+      method.lactate != null
+    ) {
+      const a = anchors[0]!;
+      const b = anchors[1]!;
+      const slope = (b.lactate - a.lactate) / (b.intensity - a.intensity);
+      const intercept = a.lactate - slope * a.intensity;
+      const foot =
+        (method.intensity + slope * (method.lactate - intercept)) /
+        (1 + slope ** 2);
+      distance = [
+        { intensity: method.intensity, lactate: method.lactate },
+        { intensity: foot, lactate: slope * foot + intercept },
+      ];
+    }
+    const heartRate = exercise.map((row) => ({
+      ...row,
+      heartRate: row.heartRate ?? null,
+    }));
+    const fixed = methodId.startsWith("obla") || methodId.startsWith("bsln");
+    return (
       <>
         <div
           className={styles.chart}
@@ -580,9 +584,24 @@ export function LactateCurveChart({
           </div>
         ) : null}
       </>
-    ),
-    [analysis, methodId, c, construction, onRendered, tooltipId],
-  );
+    );
+  }, [
+    analysis,
+    anchors,
+    methodId,
+    c,
+    construction,
+    tooltipId,
+    exercise,
+    logView,
+    low,
+    high,
+    method,
+    unit,
+    hasHeartRate,
+    inspectPointer,
+    onResize,
+  ]);
   return (
     <figure
       ref={figure}

@@ -1,5 +1,6 @@
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
@@ -315,11 +316,14 @@ export default async function LactateThresholdCalculatorPage({
                 <div className={styles.heroProduct}>
                   <div className={styles.heroDevices}>
                     <div className={styles.heroPhone}>
-                      <img
+                      <Image
                         src={`/ftp-calculator/recording-${phoneLocale}.png`}
                         alt={tPage("heroProduct.phoneAlt")}
                         width={786}
                         height={1704}
+                        sizes="172px"
+                        loading="eager"
+                        fetchPriority="high"
                         decoding="async"
                       />
                     </div>

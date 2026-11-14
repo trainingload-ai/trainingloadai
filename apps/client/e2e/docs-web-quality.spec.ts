@@ -16,10 +16,9 @@ test("each documentation TOC link has a rendered heading target", async ({
   page,
 }) => {
   await page.goto("/zh/docs");
-  await expect(
-    page.getByRole("heading", { name: "本页目录", exact: true }),
-  ).toBeVisible();
-  const missing = await page.locator("#nd-toc a[href]").evaluateAll((links) =>
+  const tocLinks = page.locator("#nd-toc a[href], #nd-tocnav a[href]");
+  await expect(tocLinks.first()).toBeAttached();
+  const missing = await tocLinks.evaluateAll((links) =>
     links
       .filter((link) => {
         const hash = (link as HTMLAnchorElement).hash.slice(1);

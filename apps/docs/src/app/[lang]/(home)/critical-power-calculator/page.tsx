@@ -1,5 +1,6 @@
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Fragment, type ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
@@ -372,11 +373,14 @@ export default async function CriticalPowerCalculatorPage({
                 <div className={styles.heroProduct}>
                   <div className={styles.heroDevices}>
                     <div className={styles.heroPhone}>
-                      <img
+                      <Image
                         src={`/ftp-calculator/recording-${["zh", "zh-hant", "ja"].includes(lang) ? lang : "en"}.png`}
                         alt={tPage("heroProduct.phoneAlt")}
                         width={786}
                         height={1704}
+                        sizes="172px"
+                        loading="eager"
+                        fetchPriority="high"
                         decoding="async"
                       />
                     </div>

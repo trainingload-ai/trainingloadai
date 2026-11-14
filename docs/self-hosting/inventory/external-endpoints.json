@@ -1404,7 +1404,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 520
+          "line": 524
         },
         {
           "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
@@ -1962,7 +1962,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 527
+          "line": 531
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1976,7 +1976,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 353
+          "line": 354
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3128,11 +3128,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 129
+          "line": 130
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 180
+          "line": 181
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
@@ -3188,11 +3188,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 152
+          "line": 153
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 200
+          "line": 201
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
@@ -3216,11 +3216,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 120
+          "line": 121
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 171
+          "line": 172
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
@@ -3746,7 +3746,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 604
+          "line": 608
         }
       ],
       "capability": "web-asset-or-tooling",
