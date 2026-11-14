@@ -40,7 +40,7 @@
     "country-flag-icons": "^1.5.21",
     "dayjs": "^1.11.13",
     "fumadocs-core": "16.0.3",
-    "fumadocs-mdx": "13.0.2",
+    "fumadocs-mdx": "15.5.3",
     "fumadocs-ui": "16.0.3",
     "import-in-the-middle": "^3.0.1",
     "katex": "^0.16.33",
