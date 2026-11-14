@@ -441,7 +441,7 @@ export function validateBuildOverride(model, contract) {
     ["client", "apps/client/Dockerfile"],
   ]) {
     const definition = service(model, name);
-    const expectedImage = `\${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-${name}:\${SELF_HOST_VERSION:-1.1.23}`;
+    const expectedImage = `\${SELF_HOST_PROJECT_NAME:-trainingload-selfhost}-${name}:\${SELF_HOST_VERSION:-1.1.24}`;
     if (definition?.image !== expectedImage) {
       errors.push(
         issue(
