@@ -598,7 +598,7 @@ export function PublicReviewClient({
       : undefined;
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.shell}>
         <div className={styles.stack}>
           <div>
@@ -1020,6 +1020,6 @@ export function PublicReviewClient({
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

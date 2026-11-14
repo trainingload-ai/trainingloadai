@@ -370,7 +370,7 @@ export function OfficialPlanTemplateDetailPage({
   ]);
 
   return (
-    <main className="overflow-x-clip bg-[#f5f7f8] text-neutral-950 dark:bg-[#0d1113] dark:text-neutral-50">
+    <div className="overflow-x-clip bg-[#f5f7f8] text-neutral-950 dark:bg-[#0d1113] dark:text-neutral-50">
       <Script
         id={`${slug}-structured-data`}
         type="application/ld+json"
@@ -590,6 +590,6 @@ export function OfficialPlanTemplateDetailPage({
           </span>
         </div>
       </nav>
-    </main>
+    </div>
   );
 }

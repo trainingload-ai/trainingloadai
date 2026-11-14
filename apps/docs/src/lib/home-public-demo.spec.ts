@@ -30,7 +30,8 @@ describe("homepage public Demo handoff", () => {
     expect(preview).toContain("<iframe");
     expect(page).toContain("key={demoUrl}");
     expect(preview).toContain("title={copy.title}");
-    expect(preview).toContain("(max-width: 639px)");
+    expect(preview).toContain("mobileLight=");
+    expect(preview).toContain("mobileDark=");
     expect(preview).toContain("READY_TIMEOUT_MS");
     expect(preview).toContain("PUBLIC_DEMO_FRAME_READY_MESSAGE");
     expect(preview).toContain("PUBLIC_DEMO_EMBED_CONTEXT_MESSAGE");

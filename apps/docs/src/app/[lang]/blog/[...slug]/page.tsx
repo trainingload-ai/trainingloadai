@@ -7,7 +7,7 @@ import {
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
-import { Pre } from "fumadocs-ui/components/codeblock";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { JsonLd } from "@/components/JsonLd";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
@@ -204,6 +204,8 @@ export default async function BlogPostPage(props: {
           <ZoomableImage
             src={page.data.image}
             alt={page.data.title}
+            loading="eager"
+            fetchPriority="high"
             className="mb-12 aspect-[40/21] h-auto w-full rounded-control border border-neutral-200 object-cover dark:border-neutral-800"
           />
         )}
@@ -219,9 +221,13 @@ export default async function BlogPostPage(props: {
           <MDXContent
             components={getMDXComponents({
               pre: ({ children }: { children?: ReactNode }) => (
-                <Pre className="!w-full max-w-full overflow-x-auto rounded-compact border border-neutral-200 bg-white dark:border-border dark:bg-card">
+                <ScrollableRegion
+                  as="pre"
+                  label={page.data.title}
+                  className="min-w-full !w-full max-w-full overflow-x-auto rounded-compact border border-neutral-200 bg-white *:flex *:flex-col dark:border-border dark:bg-card"
+                >
                   {children}
-                </Pre>
+                </ScrollableRegion>
               ),
               code: ({
                 className,

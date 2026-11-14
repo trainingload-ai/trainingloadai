@@ -409,7 +409,7 @@ select.input {
   left: 1.15rem;
   border: 0;
   padding: 0.55rem 0.7rem;
-  background: transparent;
+  background: #07110f;
   color: var(--score-paper);
   box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -932,7 +932,7 @@ select.input {
   border-radius: var(--tl-radius-surface);
   background: var(--vdot-accent);
   padding: clamp(1.4rem, 3vw, 2rem);
-  color: #f7fffc;
+  color: var(--vdot-accent-foreground);
 }
 
 .footerCta h2 {
@@ -1053,7 +1053,7 @@ select.input {
     border: 0;
     box-shadow: none;
     transform: none;
-    background: transparent;
+    background: #07110f;
     color: var(--score-paper);
   }
 }

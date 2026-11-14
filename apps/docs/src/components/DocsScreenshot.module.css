@@ -54,7 +54,7 @@
   width: 22%;
 }
 
-.phone img {
+.phone :is(img, [data-themed-image]) {
   border-radius: clamp(11px, 2.4cqw, 31px);
 }
 

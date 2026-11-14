@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -13,6 +15,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { localePrefix } from "@/lib/locale-url";
 
 type SiteErrorKind = "not-found" | "server-error";
@@ -61,17 +64,27 @@ export function SiteErrorState({ kind, digest, onRetry }: SiteErrorStateProps) {
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           {isNotFound ? (
             <>
-              <Link href={`${prefix}/`} className="inline-flex sm:w-auto">
-                <Button className={primaryButtonClass}>
-                  <Home className="size-4" />
-                  {t("notFound.primary")}
-                </Button>
+              <Link
+                href={`${prefix}/`}
+                className={cn(
+                  buttonVariants({}),
+                  "inline-flex sm:w-auto",
+                  primaryButtonClass,
+                )}
+              >
+                <Home className="size-4" />
+                {t("notFound.primary")}
               </Link>
-              <Link href={`${prefix}/docs`} className="inline-flex sm:w-auto">
-                <Button variant="outline" className={outlineButtonClass}>
-                  <BookOpen className="size-4" />
-                  {t("notFound.secondary")}
-                </Button>
+              <Link
+                href={`${prefix}/docs`}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "inline-flex sm:w-auto",
+                  outlineButtonClass,
+                )}
+              >
+                <BookOpen className="size-4" />
+                {t("notFound.secondary")}
               </Link>
             </>
           ) : (
@@ -80,11 +93,16 @@ export function SiteErrorState({ kind, digest, onRetry }: SiteErrorStateProps) {
                 <RefreshCw className="size-4" />
                 {t("serverError.primary")}
               </Button>
-              <Link href={`${prefix}/`} className="inline-flex sm:w-auto">
-                <Button variant="outline" className={outlineButtonClass}>
-                  <ArrowLeft className="size-4" />
-                  {t("serverError.secondary")}
-                </Button>
+              <Link
+                href={`${prefix}/`}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "inline-flex sm:w-auto",
+                  outlineButtonClass,
+                )}
+              >
+                <ArrowLeft className="size-4" />
+                {t("serverError.secondary")}
               </Link>
             </>
           )}

@@ -1,8 +1,9 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { JsonLd } from "@/components/JsonLd";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
 import {
   Activity,
@@ -348,7 +349,7 @@ export default async function FeaturesPage({
   };
 
   return (
-    <main className="client-demo-radius overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="client-demo-radius overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id="features-structured-data" data={jsonLd} />
 
       <section className="relative overflow-hidden border-b border-neutral-200/80 px-4 pb-12 pt-12 text-neutral-950 dark:border-white/10 dark:text-white md:px-6 md:pb-16 md:pt-16">
@@ -372,16 +373,21 @@ export default async function FeaturesPage({
               {ui.intro}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href={appUrl}>
-                <Button className={featurePrimaryButtonClass}>
-                  {ui.primary}
-                  <ArrowRight className="ml-2 size-4" />
-                </Button>
+              <Link
+                href={appUrl}
+                className={cn(buttonVariants({}), featurePrimaryButtonClass)}
+              >
+                {ui.primary}
+                <ArrowRight className="ml-2 size-4" />
               </Link>
-              <Link href={`${prefix}/docs`}>
-                <Button variant="outline" className={featureOutlineButtonClass}>
-                  {ui.docs}
-                </Button>
+              <Link
+                href={`${prefix}/docs`}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  featureOutlineButtonClass,
+                )}
+              >
+                {ui.docs}
               </Link>
             </div>
           </div>
@@ -623,14 +629,15 @@ export default async function FeaturesPage({
               {t("cta.subtitle")}
             </p>
           </div>
-          <Link href={appUrl}>
-            <Button className={featurePrimaryButtonClass}>
-              {t("cta.button")}
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
+          <Link
+            href={appUrl}
+            className={cn(buttonVariants({}), featurePrimaryButtonClass)}
+          >
+            {t("cta.button")}
+            <ArrowRight className="ml-2 size-4" />
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

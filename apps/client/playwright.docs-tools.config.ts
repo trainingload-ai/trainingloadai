@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 const baseURL = process.env.LACTATE_TOOL_BASE_URL ?? "http://localhost:3024";
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: "public-lactate-curve.spec.ts",
+  testMatch: ["public-lactate-curve.spec.ts", "docs-web-quality.spec.ts"],
   fullyParallel: false,
   timeout: 60_000,
   expect: { timeout: 20_000 },

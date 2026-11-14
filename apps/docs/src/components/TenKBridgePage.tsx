@@ -141,7 +141,7 @@ export function TenKBridgePage({
   ]);
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <Script
         id={`${slug}-structured-data`}
         type="application/ld+json"
@@ -390,6 +390,6 @@ export function TenKBridgePage({
           </nav>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

@@ -145,7 +145,7 @@ function UploadWorkspace({
           </div>
         </div>
 
-        <aside className="border-t border-neutral-200 bg-neutral-50/70 p-5 dark:border-border dark:bg-white/[0.025] sm:p-6 lg:border-t-0 lg:border-l">
+        <div className="border-t border-neutral-200 bg-neutral-50/70 p-5 dark:border-border dark:bg-white/[0.025] sm:p-6 lg:border-t-0 lg:border-l">
           <div className="flex gap-3">
             <ShieldCheck
               aria-hidden="true"
@@ -177,7 +177,7 @@ function UploadWorkspace({
               </div>
             </div>
           </div>
-        </aside>
+        </div>
       </div>
 
       {isParsing ? (

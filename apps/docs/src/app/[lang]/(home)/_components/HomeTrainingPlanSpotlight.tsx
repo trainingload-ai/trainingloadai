@@ -185,7 +185,7 @@ export function HomeTrainingPlanSpotlight({
                       className={[
                         "mt-2 max-w-sm text-xs font-medium leading-5 sm:mt-3 sm:text-sm sm:leading-6",
                         index === 0
-                          ? "text-brand-foreground/70"
+                          ? "text-brand-foreground/85"
                           : "text-muted-foreground",
                       ].join(" ")}
                     >

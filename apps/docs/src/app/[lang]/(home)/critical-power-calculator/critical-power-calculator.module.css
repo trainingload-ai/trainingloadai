@@ -165,9 +165,6 @@
   border-radius: 1.15rem;
 }
 
-
-
-
 .heroProductCopy h2 {
   margin-top: 0.75rem;
   font-size: clamp(1.15rem, 1.6vw, 1.45rem);
@@ -460,7 +457,7 @@
   left: 1.3rem;
   border: 0;
   padding: 0.6rem 0.8rem;
-  background: transparent;
+  background: #07110f;
   color: var(--score-paper);
   box-shadow: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -1124,7 +1121,7 @@
 }
 
 .promoIndex {
-  color: var(--success);
+  color: #76efa3;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1359,7 +1356,7 @@
     box-shadow: none;
     border: 0;
     transform: none;
-    background: transparent;
+    background: #07110f;
     color: var(--score-paper);
   }
   .posterMark {

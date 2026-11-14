@@ -578,7 +578,7 @@ export default async function ToolsPage({
   ]);
 
   return (
-    <main className="client-demo-radius overflow-x-hidden bg-background text-foreground">
+    <div className="client-demo-radius overflow-x-hidden bg-background text-foreground">
       <JsonLd id="tools-structured-data" data={structuredData} />
 
       <section className="bg-card px-4 pb-12 pt-14 md:px-6 md:pb-16 md:pt-20">
@@ -717,7 +717,7 @@ export default async function ToolsPage({
                   className="inline-flex h-9 items-center gap-2 rounded-control bg-card px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   {group.label}
-                  <span className="tabular-nums text-xs text-muted-foreground/70">
+                  <span className="tabular-nums text-xs text-muted-foreground">
                     {group.tools.length}
                   </span>
                 </a>
@@ -765,6 +765,6 @@ export default async function ToolsPage({
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

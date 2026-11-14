@@ -141,7 +141,7 @@ export function RunningPlanPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <Script
         id={`${plan.slug}-structured-data`}
         type="application/ld+json"
@@ -625,6 +625,6 @@ export function RunningPlanPage({
           </TrackedLink>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

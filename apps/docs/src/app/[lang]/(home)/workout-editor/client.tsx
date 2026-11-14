@@ -111,7 +111,7 @@ function Field({
   children,
 }: {
   label: string;
-  htmlFor?: string;
+  htmlFor: string;
   children: ReactNode;
 }) {
   return (
@@ -232,14 +232,14 @@ function StepFields({
         </button>
       </div>
       <div className={styles.stepGrid}>
-        <Field label={t("builder.stepType")}>
+        <Field label={t("builder.stepType")} htmlFor={`${step.id}-type`}>
           <Select
             value={step.stepType}
             onValueChange={(value) =>
               onChange({ ...step, stepType: value as WorkoutStepType })
             }
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${step.id}-type`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -266,7 +266,7 @@ function StepFields({
             }}
           />
         </Field>
-        <Field label={t("builder.unit")}>
+        <Field label={t("builder.unit")} htmlFor={`${step.id}-unit`}>
           <Select
             value={step.durationUnit}
             onValueChange={(value) => {
@@ -283,7 +283,7 @@ function StepFields({
               });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${step.id}-unit`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -297,14 +297,17 @@ function StepFields({
         </Field>
       </div>
       <div className={styles.intensityGrid}>
-        <Field label={t("builder.targetType")}>
+        <Field
+          label={t("builder.targetType")}
+          htmlFor={`${step.id}-target-type`}
+        >
           <Select
             value={step.intensityKind}
             onValueChange={(value) =>
               onChange({ ...step, intensityKind: value as IntensityKind })
             }
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${step.id}-target-type`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -338,7 +341,7 @@ function StepFields({
           />
         </Field>
         {step.intensityKind === "pace" ? (
-          <Field label={t("builder.paceUnit")}>
+          <Field label={t("builder.paceUnit")} htmlFor={`${step.id}-pace-unit`}>
             <Select
               value={paceMeasure}
               onValueChange={(value) => {
@@ -350,7 +353,7 @@ function StepFields({
                 onChange({ ...step, intensityValue: next });
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${step.id}-pace-unit`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -364,7 +367,10 @@ function StepFields({
           </Field>
         ) : null}
         {step.intensityKind === "power" ? (
-          <Field label={t("builder.powerUnit")}>
+          <Field
+            label={t("builder.powerUnit")}
+            htmlFor={`${step.id}-power-unit`}
+          >
             <Select
               value={powerUnit}
               onValueChange={(value) => {
@@ -380,7 +386,7 @@ function StepFields({
                 onChange({ ...step, intensityValue: next });
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${step.id}-power-unit`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -691,7 +697,7 @@ export function WorkoutEditorClient({
               }
             />
           </Field>
-          <Field label={t("builder.sport")}>
+          <Field label={t("builder.sport")} htmlFor="workout-sport">
             <Select
               value={draft.sport}
               onValueChange={(value) =>
@@ -804,6 +810,9 @@ export function WorkoutEditorClient({
         ) : null}
         <details className={styles.notes}>
           <summary>{t("builder.notes")}</summary>
+          <Label htmlFor="workout-notes" className="sr-only">
+            {t("builder.notes")}
+          </Label>
           <Textarea
             id="workout-notes"
             value={draft.notes}

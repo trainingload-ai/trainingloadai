@@ -15,6 +15,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CpFileInput } from "./file-input";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -145,6 +147,7 @@ export function CriticalPowerCalculatorClient({
     }
   }, [efforts, ready, units, weightKgText]);
 
+  const fields = useCommittedFields();
   const weightLimits = bodyMassLimits(units);
   const weightRaw = parsePositiveNumber(weightText);
   const weightInvalid =
@@ -153,6 +156,13 @@ export function CriticalPowerCalculatorClient({
       weightRaw < weightLimits.min ||
       weightRaw > weightLimits.max);
   const bodyWeightKg = weightInvalid ? null : parsePositiveNumber(weightKgText);
+  const showWeightError =
+    weightInvalid && fields.isCommitted("weight", weightText);
+  const weightError = showWeightError
+    ? units === "imperial"
+      ? t("manual.invalidWeightLb")
+      : t("manual.invalidWeight")
+    : "";
 
   function updateEffort(index: number, patch: Partial<CpEffortDraft>) {
     setSourceFile(null);
@@ -267,13 +277,11 @@ export function CriticalPowerCalculatorClient({
 
   const warnings = (() => {
     const items: string[] = [];
+    if (!fields.hasCommitted) return items;
     const started = parsedEfforts.some(
       (effort) =>
         effort.draft.watts.trim() !== "" || effort.draft.minutes.trim() !== "",
     );
-    if (parsedEfforts.some((effort) => effort.powerInvalid)) {
-      items.push(t("manual.invalidPower"));
-    }
     if (
       parsedEfforts.some(
         (effort) =>
@@ -283,9 +291,6 @@ export function CriticalPowerCalculatorClient({
       )
     ) {
       items.push(t("manual.warnings.powerRange"));
-    }
-    if (parsedEfforts.some((effort) => effort.durationInvalid)) {
-      items.push(t("manual.invalidDuration"));
     }
     const outside = completeEfforts.some(
       (effort) =>
@@ -495,11 +500,41 @@ export function CriticalPowerCalculatorClient({
                           inputMode="decimal"
                           value={effort.draft.watts}
                           placeholder={t("manual.powerPlaceholder")}
-                          aria-invalid={effort.powerInvalid}
+                          aria-invalid={
+                            effort.powerInvalid &&
+                            fields.isCommitted(
+                              `power-${index}`,
+                              effort.draft.watts,
+                            )
+                          }
+                          aria-describedby={
+                            effort.powerInvalid &&
+                            fields.isCommitted(
+                              `power-${index}`,
+                              effort.draft.watts,
+                            )
+                              ? `cp-power-error-${index}`
+                              : undefined
+                          }
+                          onBlur={() =>
+                            fields.commit(`power-${index}`, effort.draft.watts)
+                          }
                           onChange={(event) =>
                             updateEffort(index, { watts: event.target.value })
                           }
                         />
+                        {effort.powerInvalid &&
+                        fields.isCommitted(
+                          `power-${index}`,
+                          effort.draft.watts,
+                        ) ? (
+                          <p
+                            id={`cp-power-error-${index}`}
+                            className={styles.alert}
+                          >
+                            {t("manual.invalidPower")}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                     {effort.draft.preset === "custom" ? (
@@ -513,11 +548,44 @@ export function CriticalPowerCalculatorClient({
                           inputMode="decimal"
                           value={effort.draft.minutes}
                           placeholder={t("manual.customPlaceholder")}
-                          aria-invalid={effort.durationInvalid}
+                          aria-invalid={
+                            effort.durationInvalid &&
+                            fields.isCommitted(
+                              `duration-${index}`,
+                              effort.draft.minutes,
+                            )
+                          }
+                          aria-describedby={
+                            effort.durationInvalid &&
+                            fields.isCommitted(
+                              `duration-${index}`,
+                              effort.draft.minutes,
+                            )
+                              ? `cp-duration-error-${index}`
+                              : undefined
+                          }
+                          onBlur={() =>
+                            fields.commit(
+                              `duration-${index}`,
+                              effort.draft.minutes,
+                            )
+                          }
                           onChange={(event) =>
                             updateEffort(index, { minutes: event.target.value })
                           }
                         />
+                        {effort.durationInvalid &&
+                        fields.isCommitted(
+                          `duration-${index}`,
+                          effort.draft.minutes,
+                        ) ? (
+                          <p
+                            id={`cp-duration-error-${index}`}
+                            className={styles.alert}
+                          >
+                            {t("manual.invalidDuration")}
+                          </p>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -564,18 +632,39 @@ export function CriticalPowerCalculatorClient({
                     ? t("manual.weightPlaceholderLb")
                     : t("manual.weightPlaceholder")
                 }
-                aria-invalid={weightInvalid}
+                aria-invalid={showWeightError}
+                aria-describedby={
+                  showWeightError ? "cp-weight-error" : undefined
+                }
+                onBlur={() => fields.commit("weight", weightText)}
                 onChange={(event) => onWeightInput(event.target.value)}
               />
             </div>
-            {weightInvalid ? (
-              <p role="alert" className={styles.alert}>
+            {showWeightError ? (
+              <p id="cp-weight-error" className={styles.alert}>
                 {units === "imperial"
                   ? t("manual.invalidWeightLb")
                   : t("manual.invalidWeight")}
               </p>
             ) : null}
           </div>
+          <FieldErrorAnnouncement
+            message={[
+              weightError,
+              ...parsedEfforts.flatMap((effort, index) => [
+                effort.powerInvalid &&
+                fields.isCommitted(`power-${index}`, effort.draft.watts)
+                  ? t("manual.invalidPower")
+                  : "",
+                effort.durationInvalid &&
+                fields.isCommitted(`duration-${index}`, effort.draft.minutes)
+                  ? t("manual.invalidDuration")
+                  : "",
+              ]),
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
           {sourceFile ? (
             <p className={styles.fileHint}>
               {t("file.source", { filename: sourceFile })}

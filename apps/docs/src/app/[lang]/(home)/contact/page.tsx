@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 
 const contactEmail = "support@trainingload.ai";
@@ -99,7 +99,7 @@ export default async function ContactPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white">
+      <div className="bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white">
         <section className="border-b border-neutral-200/80 px-4 py-12 md:px-6 md:py-16 dark:border-white/10">
           <div className="mx-auto max-w-4xl text-center">
             <p className="mb-5 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
@@ -112,20 +112,25 @@ export default async function ContactPage({
               {t("subtitle")}
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <a href={`mailto:${contactEmail}`}>
-                <Button className="h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-white hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto">
-                  <Mail className="mr-2 size-4" />
-                  {t("primaryCta")}
-                </Button>
+              <a
+                href={`mailto:${contactEmail}`}
+                className={cn(
+                  buttonVariants({}),
+                  "h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-white hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto",
+                )}
+              >
+                <Mail className="mr-2 size-4" />
+                {t("primaryCta")}
               </a>
-              <a href={appUrl}>
-                <Button
-                  variant="outline"
-                  className="h-12 w-full rounded-compact px-6 text-sm font-semibold sm:w-auto"
-                >
-                  {t("secondaryCta")}
-                  <ArrowRight className="ml-2 size-4" />
-                </Button>
+              <a
+                href={appUrl}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "h-12 w-full rounded-compact px-6 text-sm font-semibold sm:w-auto",
+                )}
+              >
+                {t("secondaryCta")}
+                <ArrowRight className="ml-2 size-4" />
               </a>
             </div>
             <p className="mt-5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
@@ -188,24 +193,29 @@ export default async function ContactPage({
               </p>
             </div>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <a href={`mailto:${contactEmail}`}>
-                <Button className="h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-white hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto">
-                  {t("bottom.emailCta")}
-                  <ArrowRight className="ml-2 size-4" />
-                </Button>
+              <a
+                href={`mailto:${contactEmail}`}
+                className={cn(
+                  buttonVariants({}),
+                  "h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-white hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto",
+                )}
+              >
+                {t("bottom.emailCta")}
+                <ArrowRight className="ml-2 size-4" />
               </a>
-              <Link href={`${prefix}/docs`}>
-                <Button
-                  variant="outline"
-                  className="h-12 w-full rounded-compact px-6 text-sm font-semibold sm:w-auto"
-                >
-                  {t("bottom.docsCta")}
-                </Button>
+              <Link
+                href={`${prefix}/docs`}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "h-12 w-full rounded-compact px-6 text-sm font-semibold sm:w-auto",
+                )}
+              >
+                {t("bottom.docsCta")}
               </Link>
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }

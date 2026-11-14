@@ -128,14 +128,14 @@ export function HomeDayDemoApp({
         <div className="order-3 md:hidden">
           <HomeDayDemoUploadMobile copy={copy} disabled />
         </div>
-        <main className="order-4 flex min-w-0 flex-col gap-2 md:col-start-1 md:row-span-3 md:row-start-1 md:gap-3 md:order-none">
+        <div className="order-4 flex min-w-0 flex-col gap-2 md:col-start-1 md:row-span-3 md:row-start-1 md:gap-3 md:order-none">
           <HomeDayDemoOverview
             copy={copy}
             dayPlanData={dayPlanData}
             completedPercent={completedPercent}
           />
           <HomeDayDemoWorkoutTimeline copy={copy} dayPlanData={dayPlanData} />
-        </main>
+        </div>
         <div className="order-5 min-w-0 md:col-start-2 md:row-start-3 md:order-none">
           <HomeDayDemoUploadDesktop copy={copy} disabled />
         </div>

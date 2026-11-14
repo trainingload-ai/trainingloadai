@@ -43,3 +43,4 @@ jobs:
       - run: pnpm --dir apps/client exec playwright install --with-deps chromium
       - run: pnpm --dir apps/client exec playwright test --config playwright.docs-tools.config.ts --project chromium-desktop-light
       - run: pnpm docs:build
+      - run: pnpm --dir apps/docs exec tsc --noEmit

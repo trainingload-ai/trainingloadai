@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -10,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ArrowRight } from "lucide-react";
 import {
   absoluteAlternatesForPath,
@@ -304,7 +305,7 @@ export default async function HomePage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-foreground">
+    <div className="overflow-x-hidden bg-background text-foreground">
       <JsonLd id="home-structured-data" data={structuredData} />
       <section className="relative overflow-hidden bg-card px-4 pb-12 pt-10 text-foreground md:px-6 md:pb-16 md:pt-14">
         <div className="relative mx-auto max-w-7xl">
@@ -326,7 +327,7 @@ export default async function HomePage({
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-7 text-muted-foreground md:text-base">
               {heroVisible.subtitleBefore}
-              <span className="font-semibold text-brand">
+              <span className="font-semibold text-emerald-700 dark:text-emerald-300">
                 {heroVisible.subtitleHighlight}
               </span>
               {heroVisible.subtitleAfter}
@@ -341,14 +342,16 @@ export default async function HomePage({
                 {heroVisible.planCta}
                 <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
               </TrackedLink>
-              <Link href={appUrl} className="w-full sm:w-auto">
-                <Button
-                  variant="brand"
-                  className="group min-h-11 w-full shrink-0 gap-2 px-5 text-sm font-semibold active:translate-y-px sm:w-auto"
-                >
-                  {heroVisible.startCta}
-                  <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
-                </Button>
+              <Link
+                href={appUrl}
+                className={cn(
+                  buttonVariants({ variant: "brand" }),
+                  "w-full sm:w-auto",
+                  "group min-h-11 w-full shrink-0 gap-2 px-5 text-sm font-semibold active:translate-y-px sm:w-auto",
+                )}
+              >
+                {heroVisible.startCta}
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
               </Link>
             </div>
 
@@ -442,29 +445,39 @@ export default async function HomePage({
               <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-brand-foreground md:text-3xl lg:text-[2.5rem]">
                 {t("bottomCta.title")}
               </h2>
-              <p className="mx-auto mt-4 max-w-[560px] text-sm leading-6 text-brand-foreground/70 md:text-base md:leading-7">
+              <p className="mx-auto mt-4 max-w-[560px] text-sm leading-6 text-brand-foreground/85 md:text-base md:leading-7">
                 {t("bottomCta.subtitle")}
               </p>
               <div className="mt-7 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row md:mt-8 md:gap-5">
-                <Link href={`${prefix}/plan`} className="w-full sm:w-auto">
-                  <Button className={homePrimaryButtonClass}>
-                    {t("bottomCta.button")}
-                    <ArrowRight className="ml-2 size-4" />
-                  </Button>
+                <Link
+                  href={`${prefix}/plan`}
+                  className={cn(
+                    buttonVariants({}),
+                    "w-full sm:w-auto",
+                    homePrimaryButtonClass,
+                  )}
+                >
+                  {t("bottomCta.button")}
+                  <ArrowRight className="ml-2 size-4" />
                 </Link>
-                <Link href={appUrl} className="w-full sm:w-auto">
-                  <Button variant="outline" className={homeOutlineButtonClass}>
-                    {t("bottomCta.secondaryButton")}
-                  </Button>
+                <Link
+                  href={appUrl}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "w-full sm:w-auto",
+                    homeOutlineButtonClass,
+                  )}
+                >
+                  {t("bottomCta.secondaryButton")}
                 </Link>
               </div>
-              <p className="mt-5 text-sm text-brand-foreground/70">
+              <p className="mt-5 text-sm text-brand-foreground/85">
                 {bottomTrialNote}
               </p>
             </div>
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

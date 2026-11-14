@@ -61,6 +61,8 @@ export function LLMCopyButton({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
+        type="button"
+        aria-busy={status === "loading"}
         disabled={status === "loading"}
         className={cn(
           buttonVariants({
@@ -72,7 +74,11 @@ export function LLMCopyButton({
         )}
         onClick={copyMarkdown}
       >
-        {status === "copied" ? <Check /> : <Copy />}
+        {status === "copied" ? (
+          <Check aria-hidden="true" />
+        ) : (
+          <Copy aria-hidden="true" />
+        )}
         {t(
           status === "copied"
             ? "copied"
@@ -81,6 +87,9 @@ export function LLMCopyButton({
               : "copy",
         )}
       </button>
+      <span role="status" className="sr-only">
+        {status === "copied" ? t("copied") : ""}
+      </span>
       {status === "error" ? (
         <span role="alert" className="text-sm text-destructive">
           {t("copyError")}

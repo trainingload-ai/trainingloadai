@@ -87,6 +87,26 @@
     "switch": "변경",
     "dismiss": "언어 제안 닫기"
   },
+  "accessibility": {
+    "skipToContent": "본문으로 건너뛰기",
+    "previewImage": "이미지 미리보기",
+    "previewImageNamed": "이미지 미리보기: {description}",
+    "imagePreview": "이미지 미리보기",
+    "closePreview": "미리보기 닫기",
+    "preview": "미리보기"
+  },
+  "docsUi": {
+    "searchNoResult": "검색 결과가 없습니다",
+    "toc": "이 페이지의 내용",
+    "tocNoHeadings": "제목이 없습니다",
+    "lastUpdate": "마지막 업데이트",
+    "nextPage": "다음 페이지",
+    "previousPage": "이전 페이지",
+    "editOnGithub": "GitHub에서 수정",
+    "search": "문서 검색",
+    "chooseLanguage": "언어",
+    "chooseTheme": "테마"
+  },
   "header": {
     "searchDocs": "문서 검색",
     "openDocsMenu": "문서 탐색 열기",

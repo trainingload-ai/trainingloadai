@@ -169,7 +169,7 @@ export default async function McpFeaturePage({
   const t = lang === "zh" ? copy.zh : copy.en;
 
   return (
-    <main className="bg-neutral-950 text-white">
+    <div className="bg-neutral-950 text-white">
       <section className="border-b border-white/10">
         <div className="mx-auto grid min-h-[680px] max-w-[1440px] lg:grid-cols-[0.42fr_0.58fr]">
           <div className="flex flex-col justify-center border-white/10 px-5 py-12 md:py-16 sm:px-10 lg:border-r lg:px-14 xl:px-20">
@@ -366,6 +366,6 @@ export default async function McpFeaturePage({
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

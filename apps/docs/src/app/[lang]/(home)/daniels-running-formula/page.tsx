@@ -116,7 +116,7 @@ export default async function DanielsRunningFormulaPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -409,6 +409,6 @@ export default async function DanielsRunningFormulaPage({
           </p>
         </article>
       </div>
-    </main>
+    </div>
   );
 }
