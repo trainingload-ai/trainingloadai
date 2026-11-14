@@ -2,7 +2,11 @@ import { restoreReferencedQuestion } from '../coach-question-reference';
 import { buildHistoryMessages } from '../coach-history-messages';
 import { athleteStateAnswerTool } from '../tools/athleteStateAnswer.tool';
 import { healthSummaryTool } from '../tools/healthSummary.tool';
-import { getCoachTools } from '../tool.registry';
+import {
+  getCoachTools,
+  scopeToolsByActiveSkill,
+  COACH_TOOL_DEFINITIONS,
+} from '../tool.registry';
 import {
   ATHLETE_STATE_TOOLS,
   athleteStateSkill,
@@ -52,6 +56,15 @@ describe('Athlete State in the shared Coach runtime', () => {
     });
     expect(tools.map((tool) => tool.name)).toContain('athlete_state.answer');
     expect(tools.map((tool) => tool.name)).toContain('health.summary');
+    const scoped = scopeToolsByActiveSkill(
+      COACH_TOOL_DEFINITIONS.filter((tool) =>
+        ATHLETE_STATE_TOOLS.includes(tool.name as never),
+      ),
+      athleteStateSkill as never,
+    ).map((tool) => tool.name);
+    expect(scoped).toContain('training.data_coverage');
+    expect(scoped).toContain('integration.status');
+    expect(scoped).toContain('plan.execution_context');
     expect(tools.map((tool) => tool.name)).not.toContain('skill.activate');
     expect(
       tools.every((tool) => tool.kind !== 'mutation' && tool.kind !== 'draft'),
@@ -96,12 +109,14 @@ describe('Athlete State in the shared Coach runtime', () => {
     }));
     const ctx = { athleteState: { submit } };
     expect(
-      await athleteStateAnswerTool.execute(ctx as never, { result: {} }),
+      await athleteStateAnswerTool.execute(ctx as never, {
+        result: {} as never,
+      }),
     ).toMatchObject({ kind: 'athlete_state_saved' });
     expect(
       await athleteStateAnswerTool.execute(
         { ...ctx, backgroundTask: {} } as never,
-        { result: {} },
+        { result: {} as never },
       ),
     ).toMatchObject({ kind: 'coach_task_result_accepted' });
   });

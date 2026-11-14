@@ -24,6 +24,14 @@ do not require one. Question text is restored from owned conversation history
 when a late reply falls outside the recent-message window. Historical dialogue
 provides continuity; current tool reads establish the facts for each assessment.
 
+The result tool and server writer share a strict schema for state, confidence,
+decision readiness, attributed evidence dimensions, hypotheses, safety flags and
+limitations. Known states require an actual fact read beyond data coverage or
+configuration. A necessary question uses the existing `awaiting_input` interaction;
+`NEEDS_USER_INPUT` and `evidenceRequests` belong to legacy Case handling and are not
+accepted in the new terminal result. Missing optional recovery measures normally
+produce an explicit limitation, rather than a question or an abnormal state.
+
 `AthleteStateUpdates.requestUpdate({ userId, triggerType, triggerRef, mode })`
 defaults to `queued`. Ordinary requests share a 20-minute window measured from the
 first pending request; subsequent requests do not postpone it.
@@ -71,3 +79,8 @@ Validation:
 - `pnpm test:athlete-state:database` (PGlite; add `ATHLETE_STATE_TEST_POSTGRES_URL`
   for disposable PostgreSQL schema tests)
 - `pnpm --dir apps/client exec playwright test --config=playwright.athlete-state.config.ts`
+- `pnpm eval:athlete-state` previews synthetic scenarios without network calls.
+  Explicit `--live` runs the production Agent loop against the configured model
+  with synthetic reads and in-memory persistence. See
+  [the scenario runner](../../../test/athlete-state-scenarios/README.md) for
+  complete input/output reports and repeatability probes.

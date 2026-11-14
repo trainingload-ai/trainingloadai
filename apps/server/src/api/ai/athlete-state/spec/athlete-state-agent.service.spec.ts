@@ -4,9 +4,15 @@ const result = {
   state: 'STABLE',
   confidence: 0.8,
   decisionReadiness: 'SUFFICIENT',
-  dimensions: [],
+  dimensions: [
+    {
+      name: 'training',
+      status: 'SUPPORTS',
+      summary: 'Recent sessions are consistent.',
+      evidence: ['training.readiness: recent sessions completed normally.'],
+    },
+  ],
   hypotheses: [],
-  evidenceRequests: [],
   safetyFlags: [],
   limitations: [],
 };
@@ -49,6 +55,11 @@ describe('Athlete State Skill result persistence', () => {
     const f = fixture();
     f.turn.recordRead('training.data_coverage', {}, { complete: true });
     f.turn.recordRead(
+      'training.readiness',
+      {},
+      { recentActivities: ['normal'] },
+    );
+    f.turn.recordRead(
       'memory.search',
       { query: 'recovery' },
       { claim: 'private athlete feedback' },
@@ -71,6 +82,7 @@ describe('Athlete State Skill result persistence', () => {
     });
     expect(evidence.snapshot.reads.map((read: any) => read.tool)).toEqual([
       'training.data_coverage',
+      'training.readiness',
       'memory.search',
       'plan.execution_context',
     ]);
@@ -87,13 +99,36 @@ describe('Athlete State Skill result persistence', () => {
     const a = f.service.openTurn(f.input);
     const b = f.service.openTurn(f.input);
     a.recordRead('training.data_coverage', {}, { complete: true });
+    a.recordRead('training.readiness', {}, { recentActivities: ['normal'] });
     b.recordRead('training.data_coverage', {}, { complete: true });
+    b.recordRead('training.readiness', {}, { recentActivities: ['normal'] });
     b.recordRead('plan.execution_context', {}, { changed: true });
     await a.submit(result);
     await b.submit(result);
     expect(f.saveAssessment.mock.calls[0][0].evidence.evidenceHash).not.toBe(
       f.saveAssessment.mock.calls[1][0].evidence.evidenceHash,
     );
+  });
+  it('does not mistake coverage or configuration reads for evidence of a known state', async () => {
+    const f = fixture();
+    f.turn.recordRead('training.data_coverage', {}, { complete: true });
+    f.turn.recordRead('profile.current', {}, { sport: 'RUN' });
+    await expect(f.turn.submit(result)).rejects.toThrow(
+      'ATHLETE_STATE_FACTS_REQUIRED',
+    );
+    expect(f.saveAssessment).not.toHaveBeenCalled();
+  });
+  it('rejects legacy question payloads instead of silently rewriting a waiting state', async () => {
+    const f = fixture();
+    f.turn.recordRead('training.data_coverage', {}, {});
+    await expect(
+      f.turn.submit({
+        ...result,
+        decisionReadiness: 'NEEDS_USER_INPUT',
+        evidenceRequests: [],
+      }),
+    ).rejects.toThrow();
+    expect(f.saveAssessment).not.toHaveBeenCalled();
   });
   it('rechecks authorization before writing a result', async () => {
     const f = fixture();

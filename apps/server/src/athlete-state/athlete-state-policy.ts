@@ -1,7 +1,7 @@
 export const ATHLETE_STATE_POLICY_VERSION =
-  'athlete-state-policy-v4-agent-skill';
+  'athlete-state-policy-v5-state-contract';
 export const ATHLETE_STATE_PROMPT_VERSION =
-  'athlete-state-assessment-v4-agent-skill';
+  'athlete-state-assessment-v5-passive-state-contract';
 
 export const ATHLETE_STATE_POLICY = Object.freeze({
   physiologyDays: 42,

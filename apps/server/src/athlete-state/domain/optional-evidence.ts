@@ -16,6 +16,7 @@ export function isOptionalRecoveryEvidence(kind: string) {
   );
 }
 
+/** Legacy Case normalization only; Skill questions live in CoachRun interactions. */
 export function normalizeAssessmentEvidenceRequests(
   result: AthleteStateAssessmentResult,
 ): AthleteStateAssessmentResult {

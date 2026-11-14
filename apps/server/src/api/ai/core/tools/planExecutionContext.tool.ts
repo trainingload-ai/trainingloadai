@@ -61,7 +61,7 @@ export const planExecutionContextTool: AiToolDef<Input, Output> = buildAiTool({
   searchHint:
     'plan execution facts today tomorrow next workout tsb ctl atl completion',
   cost: 'low',
-  applicableSkills: [...PLAN_REVIEW_SKILLS, 'readiness-check'],
+  applicableSkills: [...PLAN_REVIEW_SKILLS, 'readiness-check', 'athlete-state'],
   isEnabled: async (ctx) => hasSignedInUser(ctx),
   maxResultChars: 12_000,
   parameters: {
@@ -70,7 +70,8 @@ export const planExecutionContextTool: AiToolDef<Input, Output> = buildAiTool({
     properties: {
       date: {
         type: 'string',
-        description: 'Anchor date YYYY-MM-DD. Defaults to the user-local today.',
+        description:
+          'Anchor date YYYY-MM-DD. Defaults to the user-local today.',
       },
       planId: {
         type: 'string',

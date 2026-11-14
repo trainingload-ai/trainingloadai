@@ -96,6 +96,7 @@
     "desktop:build": "pnpm --dir apps/desktop core:build && pnpm --dir apps/desktop build",
     "desktop:start": "pnpm --dir apps/desktop start",
     "desktop:package": "pnpm --dir apps/desktop dist:local",
-    "test:athlete-state:database": "node scripts/test-athlete-state-database.mjs"
+    "test:athlete-state:database": "node scripts/test-athlete-state-database.mjs",
+    "eval:athlete-state": "pnpm --dir apps/server exec tsx --tsconfig tsconfig.selfhost.json test/athlete-state-scenarios/run-athlete-state-scenarios.ts"
   }
 }
