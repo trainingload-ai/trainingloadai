@@ -4077,7 +4077,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 98
+          "line": 44
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
@@ -4183,7 +4183,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 164
+          "line": 110
         }
       ]
     },
@@ -4449,7 +4449,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 161
+          "line": 107
         },
         {
           "file": "apps/docs/src/lib/posthog-client.ts",

@@ -416,19 +416,19 @@
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 340
+          "line": 282
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 465
+          "line": 413
         },
         {
           "file": "apps/docs/src/components/DocsHeader.tsx",
-          "line": 171
+          "line": 159
         },
         {
           "file": "apps/docs/src/components/DocsHeader.tsx",
-          "line": 253
+          "line": 250
         },
         {
           "file": "apps/docs/src/components/EndurancePlanHubPage.tsx",
@@ -560,7 +560,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 201
+          "line": 210
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -574,7 +574,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 219
+          "line": 228
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -702,7 +702,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 21
+          "line": 20
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1191,7 +1191,7 @@
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 23
+          "line": 22
         },
         {
           "file": "scripts/selfhost/release-artifact.mjs",
@@ -2260,7 +2260,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 137
+          "line": 146
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2423,7 +2423,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 236
+          "line": 245
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3400,7 +3400,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 98
+          "line": 44
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
@@ -3692,15 +3692,15 @@
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 146
+          "line": 155
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 210
+          "line": 219
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 227
+          "line": 236
         },
         {
           "file": "apps/server/src/maps/local-route-thumbnail.renderer.ts",
@@ -3778,7 +3778,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 24
+          "line": 23
         }
       ],
       "capability": "web-asset-or-tooling",
