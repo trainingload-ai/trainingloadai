@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
@@ -193,7 +194,7 @@ export default async function AlternativesPage({
               href={appUrl}
               className={cn(
                 buttonVariants({}),
-                "h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400",
+                "h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-neutral-950 hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400",
               )}
             >
               {t("primary")}
@@ -265,7 +266,10 @@ export default async function AlternativesPage({
           <p className="mt-3 max-w-3xl text-base text-neutral-700 dark:text-neutral-300">
             {t("comparisonSubtitle")}
           </p>
-          <div className="mt-8 overflow-x-auto rounded-compact border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+          <ScrollableRegion
+            label={t("comparisonTitle")}
+            className="mt-8 overflow-x-auto rounded-compact border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
+          >
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-neutral-50 text-xs uppercase text-neutral-600 dark:bg-white/[0.03] dark:text-neutral-300">
                 <tr>
@@ -294,7 +298,7 @@ export default async function AlternativesPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollableRegion>
         </div>
       </section>
 
@@ -399,12 +403,12 @@ export default async function AlternativesPage({
       </section>
 
       <section className="px-4 py-12 md:px-6 md:py-16">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-white shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-neutral-950 shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
           <div>
             <h2 className="text-3xl font-black tracking-tight md:text-5xl">
               {t("ctaTitle")}
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 dark:text-neutral-950/75">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-950/85 dark:text-neutral-950/85">
               {t("ctaText")}
             </p>
           </div>

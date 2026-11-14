@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { buildToolAppUrl } from "@shared/product-analytics";
@@ -71,6 +71,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
   const tConverter = useTranslations("converter.page");
   const tCommon = useTranslations("commonLinks");
 
+  const convertButtonRef = useRef<HTMLButtonElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -291,7 +292,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
                 <div
                   role="alert"
                   aria-live="assertive"
-                  className="text-sm text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-left-2"
+                  className="text-sm text-red-600 dark:text-red-400 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-left-2"
                 >
                   {error}
                 </div>
@@ -303,6 +304,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
                     isSubmitting || isInspecting || Boolean(inspectionError)
                   }
                   className={toolPrimaryActionButtonClass}
+                  ref={convertButtonRef}
                   onClick={onSubmit}
                 >
                   {isSubmitting ? (
@@ -389,6 +391,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
       </div>
 
       <TrainingPlanAfterConvertDialog
+        invokerRef={convertButtonRef}
         appHref={trainingPlanPromptHref}
         copy={trainingPlanPromptCopy}
         lang={lang}

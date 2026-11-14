@@ -170,7 +170,7 @@ export default async function RpeScalePage({
         primary={{ href: "#rpe-scale", label: copy.primaryCta }}
         secondary={{ href: `${prefix}/plan`, label: copy.secondaryCta }}
         visual={
-          <aside
+          <div
             aria-label={copy.scaleTitle}
             className="overflow-hidden rounded-surface border border-border bg-card"
           >
@@ -203,7 +203,7 @@ export default async function RpeScalePage({
             <p className="border-t border-border bg-muted/40 px-5 py-4 text-sm text-muted-foreground">
               {copy.effortFirstLabel}
             </p>
-          </aside>
+          </div>
         }
       >
         <p className="mt-6 max-w-2xl border-l-2 border-brand pl-4 text-sm leading-7 text-muted-foreground">
@@ -212,7 +212,7 @@ export default async function RpeScalePage({
       </ToolHero>
 
       <div className="grid min-w-0 gap-10 lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-12">
-        <aside className="min-w-0 lg:sticky lg:top-40 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-40 lg:self-start">
           <nav
             aria-label={copy.toc}
             className="border-y border-border py-5 lg:border-y-0 lg:border-l lg:py-0 lg:pl-4"
@@ -233,7 +233,7 @@ export default async function RpeScalePage({
               ))}
             </ol>
           </nav>
-        </aside>
+        </div>
 
         <article className="flex min-w-0 flex-col gap-12 md:gap-16">
           <ToolSection id="what-is-rpe" title={copy.definitionTitle}>

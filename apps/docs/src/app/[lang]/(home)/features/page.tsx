@@ -620,12 +620,12 @@ export default async function FeaturesPage({
       </section>
 
       <section className="px-4 py-12 md:px-6 md:py-16">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-white shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-neutral-950 shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
           <div>
             <h2 className="text-3xl font-black tracking-tight md:text-5xl">
               {t("cta.title")}
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 dark:text-neutral-950/75">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-950/85 dark:text-neutral-950/85">
               {t("cta.subtitle")}
             </p>
           </div>

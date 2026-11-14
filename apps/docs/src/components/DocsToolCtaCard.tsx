@@ -12,7 +12,7 @@ export function DocsToolCtaCard(props: {
   secondary: DocsToolCtaLink;
 }) {
   return (
-    <aside className="not-prose mt-6 rounded-surface bg-secondary p-5 ring-1 ring-border/80">
+    <div className="not-prose mt-6 rounded-surface bg-secondary p-5 ring-1 ring-border/80">
       <div className="text-base font-bold leading-6 text-foreground">
         {props.title}
       </div>
@@ -33,7 +33,6 @@ export function DocsToolCtaCard(props: {
           {props.secondary.label}
         </a>
       </div>
-    </aside>
+    </div>
   );
 }
-

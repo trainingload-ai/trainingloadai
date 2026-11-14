@@ -1418,7 +1418,7 @@
   border-radius: var(--tl-radius-surface);
 }
 .promoSteps span {
-  color: var(--success);
+  color: #76efa3;
   font-size: 0.85rem;
   font-weight: 700;
 }

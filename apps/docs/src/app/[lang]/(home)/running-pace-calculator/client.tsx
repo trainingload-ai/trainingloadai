@@ -1,4 +1,8 @@
 "use client";
+import { scrollBehavior } from "@/lib/scroll-behavior";
+
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
@@ -255,21 +259,28 @@ export function RunningPaceCalculatorClient({
         ? ""
         : distanceLabel;
 
-  const timeInvalid =
+  const committed = useCommittedFields();
+  const timeKey = `${state.hours}:${state.minutes}:${state.seconds}`;
+  const paceKey = `${state.paceMinutes}:${state.paceSeconds}`;
+  const rawTimeInvalid =
     state.solveFor !== "time" &&
     clockInvalid(state.hours, state.minutes, state.seconds);
-  const paceInvalid =
+  const rawPaceInvalid =
     state.solveFor !== "pace" &&
     (state.paceMinutes.trim() !== "" || state.paceSeconds.trim() !== "") &&
     pacePartsToSeconds({
       minutes: Number(state.paceMinutes || 0),
       seconds: Number(state.paceSeconds || 0),
     }) == null;
-  const distanceInvalid =
+  const rawDistanceInvalid =
     state.solveFor !== "distance" &&
     state.preset === "custom" &&
     state.distanceText.trim() !== "" &&
     parsePositiveNumber(state.distanceText) == null;
+  const timeInvalid = rawTimeInvalid && committed.isCommitted("time", timeKey);
+  const paceInvalid = rawPaceInvalid && committed.isCommitted("pace", paceKey);
+  const distanceInvalid =
+    rawDistanceInvalid && committed.isCommitted("distance", state.distanceText);
   const fieldInvalid = timeInvalid || paceInvalid || distanceInvalid;
   const inputsStarted =
     state.hours.trim() !== "" ||
@@ -280,7 +291,9 @@ export function RunningPaceCalculatorClient({
     (state.preset === "custom" && state.distanceText.trim() !== "");
   const unusable =
     inputsStarted &&
-    !fieldInvalid &&
+    !rawTimeInvalid &&
+    !rawPaceInvalid &&
+    !rawDistanceInvalid &&
     result == null &&
     ((state.solveFor === "pace" && timeSec != null && distanceKm != null) ||
       (state.solveFor === "time" &&
@@ -431,15 +444,33 @@ export function RunningPaceCalculatorClient({
           id="calculator"
           className={styles.board}
           aria-labelledby="pace-input-title"
+          onBlurCapture={() => {
+            committed.commit("time", timeKey);
+            committed.commit("pace", paceKey);
+            committed.commit("distance", state.distanceText);
+          }}
           onSubmit={(event) => {
             event.preventDefault();
+            committed.commit("time", timeKey);
+            committed.commit("pace", paceKey);
+            committed.commit("distance", state.distanceText);
+            if (rawDistanceInvalid || rawTimeInvalid || rawPaceInvalid) {
+              const id = rawDistanceInvalid
+                ? "running-pace-distance"
+                : rawTimeInvalid
+                  ? "pace-time-hours"
+                  : "pace-paceMinutes";
+              document.getElementById(id)?.focus();
+              return;
+            }
             if (!result) return;
             document.getElementById("result")?.scrollIntoView({
-              behavior: "smooth",
+              behavior: scrollBehavior(),
               block: "start",
             });
           }}
         >
+          <FieldErrorAnnouncement message={fieldInvalid ? t("invalid") : ""} />
           <div className={styles.formHead}>
             <div className={styles.formTitleRow}>
               <h2 id="pace-input-title" className={styles.boardLabel}>
@@ -507,6 +538,9 @@ export function RunningPaceCalculatorClient({
                   id="running-pace-distance"
                   inputMode="decimal"
                   aria-invalid={distanceInvalid || undefined}
+                  aria-describedby={
+                    distanceInvalid ? "pace-input-error" : undefined
+                  }
                   value={distanceValue}
                   onChange={(event) =>
                     edit({
@@ -568,6 +602,9 @@ export function RunningPaceCalculatorClient({
                         id={`pace-time-${key}`}
                         inputMode={mode}
                         aria-invalid={timeInvalid || undefined}
+                        aria-describedby={
+                          timeInvalid ? "pace-input-error" : undefined
+                        }
                         placeholder="00"
                         value={value}
                         onChange={(event) =>
@@ -603,6 +640,9 @@ export function RunningPaceCalculatorClient({
                         id={`pace-${key}`}
                         inputMode={mode}
                         aria-invalid={paceInvalid || undefined}
+                        aria-describedby={
+                          paceInvalid ? "pace-input-error" : undefined
+                        }
                         placeholder="00"
                         value={value}
                         onChange={(event) =>
@@ -615,7 +655,7 @@ export function RunningPaceCalculatorClient({
               </FieldSet>
             ) : null}
             {fieldInvalid || unusable ? (
-              <FieldError>
+              <FieldError id="pace-input-error" role={undefined}>
                 {t(fieldInvalid ? "invalid" : "unusable")}
               </FieldError>
             ) : null}
@@ -774,7 +814,9 @@ export function RunningPaceCalculatorClient({
           </Button>
         </div>
         {shareError ? (
-          <FieldError>{t("scorecard.shareError")}</FieldError>
+          <FieldError id="pace-input-error" role={undefined}>
+            {t("scorecard.shareError")}
+          </FieldError>
         ) : null}
       </div>
       {result ? (

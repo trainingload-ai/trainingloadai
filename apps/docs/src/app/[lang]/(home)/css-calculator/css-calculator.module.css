@@ -181,9 +181,6 @@
   border-radius: 1.15rem;
 }
 
-
-
-
 .heroProductCopy h2 {
   margin-top: 0.75rem;
   font-size: clamp(1.15rem, 1.6vw, 1.45rem);
@@ -473,7 +470,7 @@
 
 .posterHeading {
   position: absolute;
-  top: -1rem;
+  top: 0;
   left: 1.3rem;
   border: 0;
   padding: 0.6rem 0.8rem;
@@ -1141,7 +1138,7 @@
 }
 
 .promoIndex {
-  color: var(--success);
+  color: #76efa3;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1369,7 +1366,7 @@
     padding: 0.7rem 0.9rem;
   }
   .posterHeading {
-    top: -0.85rem;
+    top: 0;
     left: 0.9rem;
     padding: 0.45rem 0.55rem;
     font-size: 0.64rem;

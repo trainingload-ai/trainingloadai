@@ -92,7 +92,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--tl-font-ui);
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.6;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -120,11 +120,15 @@
     );
   }
 
-  :is(.docs-image-preview, .docs-demo-dialog):modal {
+  :is(.docs-image-preview, .docs-demo-dialog, .docs-conversion-dialog):modal {
     overscroll-behavior: contain;
   }
 
-  :is(.docs-image-preview, .docs-demo-dialog)::backdrop {
+  :is(
+    .docs-image-preview,
+    .docs-demo-dialog,
+    .docs-conversion-dialog
+  )::backdrop {
     overflow: hidden;
     overscroll-behavior: contain;
   }

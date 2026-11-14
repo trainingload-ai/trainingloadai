@@ -441,7 +441,7 @@ export function FiveKTrainingPlanPage({
         collapsible
         showOverview
         overviewAfter={
-          <aside className={styles.planBridge}>
+          <div className={styles.planBridge}>
             <div className={styles.bridgeCopy}>
               <span>{planValue.freeLabel}</span>
               <h3>{planValue.freeTitle}</h3>
@@ -467,7 +467,7 @@ export function FiveKTrainingPlanPage({
               {labels.addToCalendar}
               <ArrowRight aria-hidden="true" />
             </TrackedLink>
-          </aside>
+          </div>
         }
       />
 

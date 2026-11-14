@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import type {
   LactateAnalysis,
@@ -122,7 +123,10 @@ export function LactateMethodComparison({
         </span>
       </div>
       <p className={styles.muted}>{c.presentation.compareBody}</p>
-      <div className={styles.tableWrap}>
+      <ScrollableRegion
+        label={c.presentation.compareTitle}
+        className={styles.tableWrap}
+      >
         <table className={`${styles.table} ${styles.comparisonTable}`}>
           <thead>
             <tr>
@@ -225,7 +229,7 @@ export function LactateMethodComparison({
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollableRegion>
       <p className={styles.caption}>{c.presentation.notInterval}</p>
     </section>
   );

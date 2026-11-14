@@ -79,7 +79,11 @@
     "previewImageNamed": "画像をプレビュー：{description}",
     "imagePreview": "画像プレビュー",
     "closePreview": "プレビューを閉じる",
-    "preview": "プレビュー"
+    "preview": "プレビュー",
+    "pauseAnimation": "自動再生を一時停止",
+    "resumeAnimation": "自動再生を再開",
+    "codeBlock": "コード例",
+    "dataTable": "データ表"
   },
   "docsUi": {
     "searchNoResult": "結果が見つかりません",

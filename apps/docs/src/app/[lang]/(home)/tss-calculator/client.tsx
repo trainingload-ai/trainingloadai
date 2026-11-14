@@ -1,4 +1,5 @@
 "use client";
+import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -105,7 +106,7 @@ export function TssCalculatorClient({
     );
     requestAnimationFrame(() => {
       document.getElementById("result")?.scrollIntoView({
-        behavior: "smooth",
+        behavior: scrollBehavior(),
         block: "start",
       });
     });

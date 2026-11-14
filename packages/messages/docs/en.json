@@ -86,7 +86,11 @@
     "previewImageNamed": "Preview image: {description}",
     "imagePreview": "Image preview",
     "closePreview": "Close preview",
-    "preview": "Preview"
+    "preview": "Preview",
+    "pauseAnimation": "Pause animation",
+    "resumeAnimation": "Resume animation",
+    "codeBlock": "Code example",
+    "dataTable": "Data table"
   },
   "docsUi": {
     "searchNoResult": "No results found",

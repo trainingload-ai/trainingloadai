@@ -16,11 +16,9 @@ export function TrackFileInspectionStatus({
   const t = useTranslations("fileInspection");
   if (isInspecting) {
     return (
-      <div
-        role="status"
-        className="inline-flex items-center gap-2 text-xs text-neutral-500"
-      >
-        <Loader2 className="size-3.5 animate-spin" />
+      <div className="inline-flex items-center gap-2 text-xs text-neutral-500">
+        <progress className="sr-only" aria-label={t("checking")} />
+        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
         {t("checking")}
       </div>
     );

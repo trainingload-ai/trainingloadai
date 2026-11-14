@@ -91,7 +91,11 @@ export function DemoDurationTable({
       </div>
 
       <div className="relative hidden overflow-hidden rounded-compact border md:block">
-        <Table>
+        <Table
+          scrollLabel={segmentLabels
+            .map((segment) => segment.label)
+            .join(" · ")}
+        >
           <TableHeader>
             <TableRow>
               <TableHead className="w-[120px]" />

@@ -1,4 +1,7 @@
 "use client";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
+
 import { InputSource } from "@/components/calculators/input-source";
 
 import {
@@ -209,12 +212,28 @@ export function HeartRateZonesCalculatorClient({
   if (model === "FRIEL" && lthr != null && (lthr < 100 || lthr > 220)) {
     softWarnings.push(t("warnings.lthr"));
   }
+  const committed = useCommittedFields();
+  const maxInvalid =
+    maxHrText.trim() !== "" &&
+    maxHr == null &&
+    committed.isCommitted("max", maxHrText);
+  const restInvalid =
+    restHrText.trim() !== "" &&
+    restHr == null &&
+    committed.isCommitted("rest", restHrText);
+  const lthrInvalid =
+    lthrText.trim() !== "" &&
+    lthr == null &&
+    committed.isCommitted("lthr", lthrText);
   const reserveBlocked =
     model === "KARVONEN" && maxHr != null && restHr != null && restHr >= maxHr;
+  const showReserveBlocked =
+    reserveBlocked &&
+    committed.isCommitted("reserve", `${maxHrText}:${restHrText}`);
   const invalidField =
-    (model !== "FRIEL" && maxHrText.trim() !== "" && maxHr == null) ||
-    (model === "KARVONEN" && restHrText.trim() !== "" && restHr == null) ||
-    (model === "FRIEL" && lthrText.trim() !== "" && lthr == null);
+    (model !== "FRIEL" && maxInvalid) ||
+    (model === "KARVONEN" && restInvalid) ||
+    (model === "FRIEL" && lthrInvalid);
 
   const onShare = async () => {
     if (!zones) return;
@@ -274,7 +293,21 @@ export function HeartRateZonesCalculatorClient({
     <div className={styles.tool}>
       <div className={styles.hero}>
         {hero}
-        <section id="calculator" className={styles.board}>
+        <section
+          id="calculator"
+          className={styles.board}
+          onBlurCapture={() =>
+            committed.commit("reserve", `${maxHrText}:${restHrText}`)
+          }
+        >
+          <FieldErrorAnnouncement
+            message={[
+              invalidField ? t("warnings.invalid") : "",
+              showReserveBlocked ? t("warnings.reserve") : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{tPage("title")}</h2>
             <button
@@ -341,10 +374,12 @@ export function HeartRateZonesCalculatorClient({
                   </label>
                   <Input
                     id="hr-max"
+                    onBlur={() => committed.commit("max", maxHrText)}
+                    aria-describedby={maxInvalid ? "hr-input-error" : undefined}
                     inputMode="decimal"
                     value={maxHrText}
                     onChange={(event) => editMax(event.target.value)}
-                    aria-invalid={maxHrText.trim() !== "" && maxHr == null}
+                    aria-invalid={maxInvalid}
                   />
                 </div>
                 {model === "KARVONEN" ? (
@@ -354,13 +389,18 @@ export function HeartRateZonesCalculatorClient({
                     </label>
                     <Input
                       id="hr-rest"
+                      onBlur={() => committed.commit("rest", restHrText)}
+                      aria-describedby={
+                        showReserveBlocked
+                          ? "hr-reserve-error"
+                          : restInvalid
+                            ? "hr-input-error"
+                            : undefined
+                      }
                       inputMode="decimal"
                       value={restHrText}
                       onChange={(event) => editRest(event.target.value)}
-                      aria-invalid={
-                        (restHrText.trim() !== "" && restHr == null) ||
-                        reserveBlocked
-                      }
+                      aria-invalid={restInvalid || showReserveBlocked}
                     />
                   </div>
                 ) : null}
@@ -372,10 +412,12 @@ export function HeartRateZonesCalculatorClient({
                 </label>
                 <Input
                   id="hr-lthr"
+                  onBlur={() => committed.commit("lthr", lthrText)}
+                  aria-describedby={lthrInvalid ? "hr-input-error" : undefined}
                   inputMode="decimal"
                   value={lthrText}
                   onChange={(event) => editLthr(event.target.value)}
-                  aria-invalid={lthrText.trim() !== "" && lthr == null}
+                  aria-invalid={lthrInvalid}
                 />
               </div>
             )}
@@ -427,12 +469,12 @@ export function HeartRateZonesCalculatorClient({
             ) : null}
 
             {invalidField ? (
-              <p role="alert" className={styles.alert}>
+              <p id="hr-input-error" className={styles.alert}>
                 {t("warnings.invalid")}
               </p>
             ) : null}
-            {reserveBlocked ? (
-              <p role="alert" className={styles.alert}>
+            {showReserveBlocked ? (
+              <p id="hr-reserve-error" className={styles.alert}>
                 {t("warnings.reserve")}
               </p>
             ) : null}

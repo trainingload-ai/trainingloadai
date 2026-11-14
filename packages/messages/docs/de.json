@@ -93,7 +93,11 @@
     "previewImageNamed": "Bildvorschau: {description}",
     "imagePreview": "Bildvorschau",
     "closePreview": "Vorschau schließen",
-    "preview": "Vorschau"
+    "preview": "Vorschau",
+    "pauseAnimation": "Animation pausieren",
+    "resumeAnimation": "Animation fortsetzen",
+    "codeBlock": "Codebeispiel",
+    "dataTable": "Datentabelle"
   },
   "docsUi": {
     "searchNoResult": "Keine Ergebnisse gefunden",

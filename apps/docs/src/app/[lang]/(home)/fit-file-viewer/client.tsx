@@ -130,13 +130,10 @@ function UploadWorkspace({
               disabled={!file || isParsing}
               aria-busy={isParsing}
               onClick={onInspect}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact bg-emerald-600 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-emerald-500 dark:text-neutral-950 dark:hover:bg-emerald-400 sm:h-8 sm:px-3 sm:text-xs"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact bg-emerald-700 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-emerald-500 dark:text-neutral-950 dark:hover:bg-emerald-400 sm:h-8 sm:px-3 sm:text-xs"
             >
               {isParsing ? (
-                <Loader2
-                  aria-hidden="true"
-                  className="size-3.5 animate-spin motion-reduce:animate-none"
-                />
+                <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
               ) : (
                 <FileSearch aria-hidden="true" className="size-3.5" />
               )}

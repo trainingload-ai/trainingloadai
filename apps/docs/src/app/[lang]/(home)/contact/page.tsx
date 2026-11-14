@@ -116,7 +116,7 @@ export default async function ContactPage({
                 href={`mailto:${contactEmail}`}
                 className={cn(
                   buttonVariants({}),
-                  "h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-white hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto",
+                  "h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-neutral-950 hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto",
                 )}
               >
                 <Mail className="mr-2 size-4" />
@@ -197,7 +197,7 @@ export default async function ContactPage({
                 href={`mailto:${contactEmail}`}
                 className={cn(
                   buttonVariants({}),
-                  "h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-white hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto",
+                  "h-12 w-full rounded-compact bg-emerald-500 px-6 text-sm font-bold text-neutral-950 hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:hover:bg-emerald-300 sm:w-auto",
                 )}
               >
                 {t("bottom.emailCta")}

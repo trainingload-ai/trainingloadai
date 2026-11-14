@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -239,7 +240,10 @@ export function PmcFitnessChartGuide({
           </p>
         </div>
 
-        <div className="mt-8 hidden overflow-x-auto rounded-overlay border border-neutral-200 dark:border-white/10 md:block">
+        <ScrollableRegion
+          label={ui.patternsTitle}
+          className="mt-8 hidden overflow-x-auto rounded-overlay border border-neutral-200 dark:border-white/10 md:block"
+        >
           <table className="w-full min-w-[880px] border-collapse text-left">
             <thead className="bg-neutral-950 text-white dark:bg-black/40">
               <tr>
@@ -280,7 +284,7 @@ export function PmcFitnessChartGuide({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollableRegion>
         <div className="mt-8 space-y-3 md:hidden">
           {data.patterns.map(([scenario, signals, meaning, action], index) => (
             <article

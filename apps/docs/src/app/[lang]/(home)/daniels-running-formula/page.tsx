@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -164,7 +165,7 @@ export default async function DanielsRunningFormulaPage({
             </div>
           </div>
 
-          <aside className="rounded-compact border border-neutral-900 bg-neutral-950 p-5 text-white shadow-2xl">
+          <div className="rounded-compact border border-neutral-900 bg-neutral-950 p-5 text-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">
                 VDOT
@@ -189,12 +190,12 @@ export default async function DanielsRunningFormulaPage({
                 </div>
               ))}
             </div>
-          </aside>
+          </div>
         </div>
       </section>
 
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-12 md:px-6 md:py-16 lg:grid-cols-[230px_minmax(0,1fr)]">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-compact border border-neutral-200 bg-white p-4 dark:border-white/10 dark:bg-white/[0.04]">
             <div className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400">
               {copy.toc}
@@ -211,7 +212,7 @@ export default async function DanielsRunningFormulaPage({
               ))}
             </nav>
           </div>
-        </aside>
+        </div>
 
         <article className="min-w-0 space-y-12 md:space-y-16">
           <section id="what" className="scroll-mt-24">
@@ -283,7 +284,10 @@ export default async function DanielsRunningFormulaPage({
             <p className="mt-4 leading-8 text-neutral-700 dark:text-neutral-300">
               {copy.periodizationText}
             </p>
-            <div className="mt-8 overflow-x-auto rounded-compact border border-neutral-200 dark:border-white/10">
+            <ScrollableRegion
+              label={copy.periodizationTitle}
+              className="mt-8 overflow-x-auto rounded-compact border border-neutral-200 dark:border-white/10"
+            >
               <table className="w-full min-w-[640px] border-collapse text-left">
                 <tbody>
                   {copy.goalRows.map(([goal, focus]) => (
@@ -301,7 +305,7 @@ export default async function DanielsRunningFormulaPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
           </section>
 
           <section id="mistakes" className="scroll-mt-24">

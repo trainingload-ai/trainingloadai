@@ -23,6 +23,6 @@ export const VO2_METHODS_COMPARE_SHELL = [
 ].join(" ");
 
 export const VO2_MT_STRONG_EM =
-  "font-semibold text-emerald-600 dark:text-emerald-400";
+  "font-semibold text-emerald-800 dark:text-emerald-300";
 
 export const VO2_MT_STRONG_BL = "font-semibold text-blue-600 dark:text-sky-400";

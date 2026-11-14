@@ -1,4 +1,6 @@
 "use client";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Printer, Share2, SlidersHorizontal } from "lucide-react";
@@ -39,8 +41,7 @@ import styles from "./zone-2-heart-rate-calculator.module.css";
 
 const METHODS: Zone2Method[] = ["maxHr", "hrr", "lthr", "age"];
 const AGE_FORMULAS: AgeFormulaKey[] = ["tanaka", "fox"];
-const accentButtonClass =
-  "bg-brand text-brand-foreground hover:bg-brand/85";
+const accentButtonClass = "bg-brand text-brand-foreground hover:bg-brand/85";
 
 function isZone2Method(value: string): value is Zone2Method {
   return METHODS.some((method) => method === value);
@@ -123,21 +124,24 @@ export function Zone2HeartRateCalculatorClient({
     Boolean(result),
   );
 
+  const committed = useCommittedFields();
+  const showInvalid = (key: string, text: string, value: number | null) =>
+    text.trim() !== "" && value == null && committed.isCommitted(key, text);
   const activeFields =
     method === "hrr"
       ? [
-          { text: maxHrText, value: maxHr },
-          { text: restHrText, value: restHr },
+          { key: "maxHr", text: maxHrText, value: maxHr },
+          { key: "restHr", text: restHrText, value: restHr },
         ]
       : [
           method === "maxHr"
-            ? { text: maxHrText, value: maxHr }
+            ? { key: "maxHr", text: maxHrText, value: maxHr }
             : method === "lthr"
-              ? { text: lthrText, value: lthr }
-              : { text: ageText, value: age },
+              ? { key: "lthr", text: lthrText, value: lthr }
+              : { key: "age", text: ageText, value: age },
         ];
-  const invalid = activeFields.some(
-    ({ text: valueText, value }) => valueText.trim() !== "" && value == null,
+  const invalid = activeFields.some(({ key, text, value }) =>
+    showInvalid(key, text, value),
   );
 
   const warnings = useMemo(() => {
@@ -209,6 +213,9 @@ export function Zone2HeartRateCalculatorClient({
       <div className={styles.hero}>
         {hero}
         <section id="calculator" className={styles.board}>
+          <FieldErrorAnnouncement
+            message={invalid ? t("inputs.invalid") : ""}
+          />
           <h2 className={styles.boardLabel}>{t("panel.title")}</h2>
           <p className={styles.boardLead}>{t("panel.subtitle")}</p>
           <div className={styles.formStack}>
@@ -235,8 +242,15 @@ export function Zone2HeartRateCalculatorClient({
                 </span>
                 <Input
                   inputMode="decimal"
-                  aria-invalid={invalid}
+                  aria-invalid={showInvalid("maxHr", maxHrText, maxHr)}
                   placeholder={t("inputs.maxHr.placeholder")}
+                  id="zone2-maxHr"
+                  onBlur={() => committed.commit("maxHr", maxHrText)}
+                  aria-describedby={
+                    showInvalid("maxHr", maxHrText, maxHr)
+                      ? "zone2-input-error"
+                      : undefined
+                  }
                   value={maxHrText}
                   onChange={(event) => {
                     setMaxHrText(event.target.value);
@@ -255,8 +269,15 @@ export function Zone2HeartRateCalculatorClient({
                   </span>
                   <Input
                     inputMode="decimal"
-                    aria-invalid={maxHrText.trim() !== "" && maxHr == null}
+                    aria-invalid={showInvalid("maxHr", maxHrText, maxHr)}
                     placeholder={t("inputs.maxHr.placeholder")}
+                    id="zone2-maxHr"
+                    onBlur={() => committed.commit("maxHr", maxHrText)}
+                    aria-describedby={
+                      showInvalid("maxHr", maxHrText, maxHr)
+                        ? "zone2-input-error"
+                        : undefined
+                    }
                     value={maxHrText}
                     onChange={(event) => {
                       setMaxHrText(event.target.value);
@@ -271,8 +292,15 @@ export function Zone2HeartRateCalculatorClient({
                   </span>
                   <Input
                     inputMode="decimal"
-                    aria-invalid={restHrText.trim() !== "" && restHr == null}
+                    aria-invalid={showInvalid("restHr", restHrText, restHr)}
                     placeholder={t("inputs.restHr.placeholder")}
+                    id="zone2-restHr"
+                    onBlur={() => committed.commit("restHr", restHrText)}
+                    aria-describedby={
+                      showInvalid("restHr", restHrText, restHr)
+                        ? "zone2-input-error"
+                        : undefined
+                    }
                     value={restHrText}
                     onChange={(event) => {
                       setRestHrText(event.target.value);
@@ -291,8 +319,15 @@ export function Zone2HeartRateCalculatorClient({
                 </span>
                 <Input
                   inputMode="decimal"
-                  aria-invalid={invalid}
+                  aria-invalid={showInvalid("lthr", lthrText, lthr)}
                   placeholder={t("inputs.lthr.placeholder")}
+                  id="zone2-lthr"
+                  onBlur={() => committed.commit("lthr", lthrText)}
+                  aria-describedby={
+                    showInvalid("lthr", lthrText, lthr)
+                      ? "zone2-input-error"
+                      : undefined
+                  }
                   value={lthrText}
                   onChange={(event) => {
                     setLthrText(event.target.value);
@@ -311,8 +346,15 @@ export function Zone2HeartRateCalculatorClient({
                   </span>
                   <Input
                     inputMode="decimal"
-                    aria-invalid={invalid}
+                    aria-invalid={showInvalid("age", ageText, age)}
                     placeholder={t("inputs.age.placeholder")}
+                    id="zone2-age"
+                    onBlur={() => committed.commit("age", ageText)}
+                    aria-describedby={
+                      showInvalid("age", ageText, age)
+                        ? "zone2-input-error"
+                        : undefined
+                    }
                     value={ageText}
                     onChange={(event) => {
                       setAgeText(event.target.value);
@@ -388,7 +430,7 @@ export function Zone2HeartRateCalculatorClient({
             </div>
 
             {invalid ? (
-              <p role="alert" className={styles.alert}>
+              <p id="zone2-input-error" className={styles.alert}>
                 {t("inputs.invalid")}
               </p>
             ) : null}

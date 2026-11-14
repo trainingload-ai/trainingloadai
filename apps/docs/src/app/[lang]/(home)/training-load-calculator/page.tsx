@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
@@ -286,7 +287,10 @@ export default async function TrainingLoadCalculatorPage({
           >
             <p className={styles.formulaBlock}>{tPage("formula")}</p>
             <p className={styles.note}>{tPage("sections.formula.caption")}</p>
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("sections.formula.caption")}
+              className={styles.tableWrap}
+            >
               <table className={styles.table}>
                 <caption className="sr-only">
                   {tPage("sections.formula.caption")}
@@ -310,7 +314,7 @@ export default async function TrainingLoadCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.note}>{tPage("sections.formula.note")}</p>
             <p className={styles.note}>{tPage("sections.formula.rest")}</p>
             <p className={styles.note}>

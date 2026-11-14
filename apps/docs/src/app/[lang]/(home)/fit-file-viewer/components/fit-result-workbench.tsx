@@ -321,7 +321,7 @@ function MessageGroupButton({
             {messageLabel(group, copy)}
           </span>
           {group.messageNumber != null ? (
-            <span className="shrink-0 font-mono text-[10px] font-normal text-neutral-400 dark:text-neutral-500">
+            <span className="shrink-0 font-mono text-[10px] font-normal text-neutral-500 dark:text-neutral-400">
               {idLabel(group.messageNumber)}
             </span>
           ) : null}
@@ -330,7 +330,7 @@ function MessageGroupButton({
           {new Intl.NumberFormat(lang).format(group.count)}
         </span>
       </span>
-      <span className="mt-1 block truncate font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
+      <span className="mt-1 block truncate font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
         {previewFields
           .slice(0, 5)
           .map((field) =>
@@ -534,7 +534,7 @@ function FitMessageBrowser({
         </button>
       </div>
       <div className="grid min-h-[36rem] lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <aside className="hidden border-r border-neutral-200 bg-neutral-50/70 dark:border-border dark:bg-white/[0.02] lg:flex lg:min-h-0 lg:flex-col">
+        <div className="hidden border-r border-neutral-200 bg-neutral-50/70 dark:border-border dark:bg-white/[0.02] lg:flex lg:min-h-0 lg:flex-col">
           <div className="border-b border-neutral-200 p-3 dark:border-border">
             <label className="relative block">
               <span className="sr-only">{r.messageType}</span>
@@ -581,7 +581,7 @@ function FitMessageBrowser({
               </p>
             )}
           </div>
-        </aside>
+        </div>
 
         <section className="min-w-0">
           <div className="border-b border-neutral-200 p-4 dark:border-border sm:p-5">
@@ -871,7 +871,7 @@ function Overview({
                 <span className="truncate font-mono font-semibold text-neutral-700 dark:text-neutral-200">
                   {messageLabel(group, r)}
                   {group.messageNumber != null ? (
-                    <span className="ml-1.5 font-normal text-neutral-400 dark:text-neutral-500">
+                    <span className="ml-1.5 font-normal text-neutral-500 dark:text-neutral-400">
                       {idLabel(group.messageNumber)}
                     </span>
                   ) : null}
@@ -1133,35 +1133,35 @@ export function FitResultWorkbench({
           <TabsList className="flex h-auto w-max min-w-full justify-start rounded-none bg-transparent p-0 text-neutral-500 dark:text-neutral-400">
             <TabsTrigger
               value="overview"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
+              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
             >
               <Activity aria-hidden="true" className="size-4" />
               {r.overview}
             </TabsTrigger>
             <TabsTrigger
               value="map"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
+              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
             >
               <MapIcon aria-hidden="true" className="size-4" />
               {r.map}
             </TabsTrigger>
             <TabsTrigger
               value="chart"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
+              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
             >
               <ChartNoAxesCombined aria-hidden="true" className="size-4" />
               {r.chart}
             </TabsTrigger>
             <TabsTrigger
               value="messages"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
+              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
             >
               <Database aria-hidden="true" className="size-4" />
               {r.messages}
             </TabsTrigger>
             <TabsTrigger
               value="diagnostics"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
+              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
             >
               <ShieldCheck aria-hidden="true" className="size-4" />
               {r.diagnostics}

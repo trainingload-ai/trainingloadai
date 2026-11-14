@@ -94,7 +94,11 @@
     "previewImageNamed": "Aperçu de l’image : {description}",
     "imagePreview": "Aperçu de l’image",
     "closePreview": "Fermer l’aperçu",
-    "preview": "Aperçu"
+    "preview": "Aperçu",
+    "pauseAnimation": "Mettre en pause",
+    "resumeAnimation": "Reprendre l’animation",
+    "codeBlock": "Exemple de code",
+    "dataTable": "Tableau de données"
   },
   "docsUi": {
     "searchNoResult": "Aucun résultat trouvé",

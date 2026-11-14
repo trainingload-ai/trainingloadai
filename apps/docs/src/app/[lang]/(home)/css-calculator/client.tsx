@@ -1,4 +1,6 @@
 "use client";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
 import {
   useEffect,
@@ -249,6 +251,38 @@ export function CssCalculatorClient({
     (timeB == null &&
       (swimB.minutes.trim() !== "" || swimB.seconds.trim() !== ""));
 
+  const committed = useCommittedFields();
+  const swimKey = JSON.stringify([swimA, swimB]);
+  const fieldValues: Record<string, string> = {
+    "css-a-distance": swimA.distance,
+    "css-a-minutes": swimA.minutes,
+    "css-a-seconds": swimA.seconds,
+    "css-b-distance": swimB.distance,
+    "css-b-minutes": swimB.minutes,
+    "css-b-seconds": swimB.seconds,
+  };
+  const clockAInvalid =
+    timeA == null &&
+    (swimA.minutes.trim() !== "" || swimA.seconds.trim() !== "");
+  const clockBInvalid =
+    timeB == null &&
+    (swimB.minutes.trim() !== "" || swimB.seconds.trim() !== "");
+  const fieldErrors = {
+    "css-a-distance": swimA.distance.trim() !== "" && distanceA == null,
+    "css-a-minutes": minutesA == null || clockAInvalid,
+    "css-a-seconds": secondsA == null || clockAInvalid,
+    "css-b-distance": swimB.distance.trim() !== "" && distanceB == null,
+    "css-b-minutes": minutesB == null || clockBInvalid,
+    "css-b-seconds": secondsB == null || clockBInvalid,
+  };
+  const visibleErrors = Object.fromEntries(
+    Object.entries(fieldErrors).map(([id, invalid]) => [
+      id,
+      invalid && committed.isCommitted(id, fieldValues[id]),
+    ]),
+  );
+  const showInputInvalid = Object.values(visibleErrors).some(Boolean);
+
   const unusable =
     !inputInvalid &&
     distanceA != null &&
@@ -257,7 +291,11 @@ export function CssCalculatorClient({
     timeB != null &&
     result == null;
 
-  const unusual = result != null && isUnusualCssPace(result.pacePer100mSec);
+  const showUnusable = unusable && committed.isCommitted("swims", swimKey);
+  const unusual =
+    result != null &&
+    isUnusualCssPace(result.pacePer100mSec) &&
+    committed.isCommitted("swims", swimKey);
 
   function selectUnit(next: PoolUnit) {
     if (next === unit) return;
@@ -392,7 +430,25 @@ export function CssCalculatorClient({
     <>
       <div className={styles.hero}>
         {hero}
-        <section id="calculator" className={styles.board}>
+        <section
+          id="calculator"
+          className={styles.board}
+          onBlurCapture={(event) => {
+            if (event.target instanceof HTMLInputElement) {
+              committed.commit(event.target.id, event.target.value);
+              committed.commit("swims", swimKey);
+            }
+          }}
+        >
+          <FieldErrorAnnouncement
+            message={
+              showInputInvalid
+                ? t("manual.invalid")
+                : showUnusable
+                  ? t("manual.unusable")
+                  : ""
+            }
+          />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("manual.title")}</h2>
             <div
@@ -467,6 +523,7 @@ export function CssCalculatorClient({
             <div className={styles.formStack}>
               <SwimFields
                 idPrefix="css-a"
+                invalidFields={visibleErrors}
                 legend={t("manual.swimA")}
                 draft={swimA}
                 distanceSuffix={distanceSuffix}
@@ -483,6 +540,7 @@ export function CssCalculatorClient({
               />
               <SwimFields
                 idPrefix="css-b"
+                invalidFields={visibleErrors}
                 legend={t("manual.swimB")}
                 draft={swimB}
                 distanceSuffix={distanceSuffix}
@@ -505,13 +563,13 @@ export function CssCalculatorClient({
               </div>
             </div>
           )}
-          {inputInvalid ? (
-            <p role="alert" className={styles.alert}>
+          {showInputInvalid ? (
+            <p id="css-input-error" className={styles.alert}>
               {t("manual.invalid")}
             </p>
           ) : null}
-          {unusable ? (
-            <p role="alert" className={styles.alert}>
+          {showUnusable ? (
+            <p id="css-unusable-error" className={styles.alert}>
               {t("manual.unusable")}
             </p>
           ) : null}
@@ -655,6 +713,7 @@ export function CssCalculatorClient({
 
 function SwimFields({
   idPrefix,
+  invalidFields,
   legend,
   draft,
   distanceSuffix,
@@ -666,6 +725,7 @@ function SwimFields({
   onChange,
 }: {
   idPrefix: string;
+  invalidFields: Record<string, boolean>;
   legend: string;
   draft: SwimDraft;
   distanceSuffix: string;
@@ -684,6 +744,12 @@ function SwimFields({
           <Label htmlFor={`${idPrefix}-distance`}>{distanceLabel}</Label>
           <UnitInput
             id={`${idPrefix}-distance`}
+            aria-invalid={invalidFields[`${idPrefix}-distance`] || undefined}
+            aria-describedby={
+              invalidFields[`${idPrefix}-distance`]
+                ? "css-input-error"
+                : undefined
+            }
             suffix={distanceSuffix}
             inputMode="decimal"
             value={draft.distance}
@@ -697,6 +763,12 @@ function SwimFields({
           <Label htmlFor={`${idPrefix}-minutes`}>{minutesLabel}</Label>
           <UnitInput
             id={`${idPrefix}-minutes`}
+            aria-invalid={invalidFields[`${idPrefix}-minutes`] || undefined}
+            aria-describedby={
+              invalidFields[`${idPrefix}-minutes`]
+                ? "css-input-error"
+                : undefined
+            }
             suffix={minutesSuffix}
             inputMode="numeric"
             value={draft.minutes}
@@ -710,6 +782,12 @@ function SwimFields({
           <Label htmlFor={`${idPrefix}-seconds`}>{secondsLabel}</Label>
           <UnitInput
             id={`${idPrefix}-seconds`}
+            aria-invalid={invalidFields[`${idPrefix}-seconds`] || undefined}
+            aria-describedby={
+              invalidFields[`${idPrefix}-seconds`]
+                ? "css-input-error"
+                : undefined
+            }
             suffix={secondsSuffix}
             inputMode="decimal"
             value={draft.seconds}

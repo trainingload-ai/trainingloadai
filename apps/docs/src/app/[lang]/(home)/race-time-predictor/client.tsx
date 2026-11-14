@@ -554,7 +554,7 @@ export function RaceTimePredictorClient({
             </div>
             <p className={styles.formulaEcho}>{t("result.formula")}</p>
             {result?.vdotSupported ? (
-              <aside className={styles.resultGuidance}>
+              <div className={styles.resultGuidance}>
                 <p>{t("result.guidance.equivalent")}</p>
                 {rows.some((row) => row.key === "marathon" && !row.isSource) ? (
                   <p>{t("result.guidance.marathon")}</p>
@@ -572,7 +572,7 @@ export function RaceTimePredictorClient({
                 <a href="#prediction-accuracy">
                   {t("result.guidance.learn")} →
                 </a>
-              </aside>
+              </div>
             ) : null}
           </div>
         </section>

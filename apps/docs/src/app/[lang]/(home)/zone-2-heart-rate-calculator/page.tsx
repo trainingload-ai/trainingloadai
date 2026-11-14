@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
@@ -286,7 +287,10 @@ export default async function Zone2HeartRateCalculatorPage({
                 title={tPage("sections.methods.title")}
                 description={tPage("sections.methods.description")}
               >
-                <div className={styles.tableWrap}>
+                <ScrollableRegion
+                  label={tPage("sections.methods.caption")}
+                  className={styles.tableWrap}
+                >
                   <table className={styles.table}>
                     <caption className="sr-only">
                       {tPage("sections.methods.caption")}
@@ -313,7 +317,7 @@ export default async function Zone2HeartRateCalculatorPage({
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </ScrollableRegion>
                 <p className={styles.note}>{tPage("sections.methods.note")}</p>
                 <p className={styles.sourceNote}>
                   {sourceLinks.map((source, index) => (

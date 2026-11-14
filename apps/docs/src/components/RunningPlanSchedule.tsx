@@ -414,27 +414,35 @@ export function RunningPlanSchedule({
                     />
                   ) : null}
 
-                  <label
-                    htmlFor={toggleId}
-                    className={`grid gap-5 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center md:px-5 ${
+                  <div
+                    className={`relative grid gap-5 peer-focus-visible:outline-2 peer-focus-visible:outline-ring px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center md:px-5 ${
                       toggleId ? "cursor-pointer" : ""
                     }`}
                   >
-                    <span className="flex min-w-0 items-center gap-4">
+                    <div className="flex min-w-0 items-center gap-4">
                       <span className="font-mono text-3xl font-black tracking-[-0.08em] text-neutral-300 tabular-nums dark:text-neutral-700">
                         {String(week.week).padStart(2, "0")}
                       </span>
-                      <span className="min-w-0">
-                        <strong className="block text-base font-black text-neutral-950 dark:text-white">
-                          {weekTitle}
-                        </strong>
+                      <div className="min-w-0">
+                        <h3 className="text-base font-black text-neutral-950 dark:text-white">
+                          {toggleId ? (
+                            <label
+                              htmlFor={toggleId}
+                              className="cursor-pointer after:absolute after:inset-0"
+                            >
+                              {weekTitle}
+                            </label>
+                          ) : (
+                            weekTitle
+                          )}
+                        </h3>
                         <span
                           className={`mt-1 block text-xs font-bold ${phaseTextTone(week.phase)}`}
                         >
                           {week.phase}
                         </span>
-                      </span>
-                    </span>
+                      </div>
+                    </div>
 
                     <span className="flex items-center gap-4">
                       <span className="w-28 sm:w-40">
@@ -457,7 +465,7 @@ export function RunningPlanSchedule({
                         />
                       ) : null}
                     </span>
-                  </label>
+                  </div>
 
                   <div
                     className={
@@ -823,7 +831,7 @@ export function RunningPlanSchedule({
               </article>
             </div>
 
-            <aside
+            <div
               className={
                 showOverview
                   ? "border-b border-l-2 border-amber-400 bg-amber-50/55 p-6 text-amber-950 dark:border-amber-300/40 dark:bg-amber-300/[0.07] dark:text-amber-100"
@@ -869,7 +877,7 @@ export function RunningPlanSchedule({
                   ))}
                 </ul>
               </div>
-            </aside>
+            </div>
           </>
         )}
       </div>

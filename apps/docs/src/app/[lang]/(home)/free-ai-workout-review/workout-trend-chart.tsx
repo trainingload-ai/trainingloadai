@@ -95,15 +95,14 @@ export function WorkoutTrendChart({
         </div>
         <div
           className="flex flex-wrap gap-1.5"
-          role="tablist"
+          role="group"
           aria-label={labels.title}
         >
           {chart.availableMetrics.map((metric) => (
             <button
               key={metric}
               type="button"
-              role="tab"
-              aria-selected={metric === activeMetric}
+              aria-pressed={metric === activeMetric}
               onClick={() => setSelectedMetric(metric)}
               className={
                 metric === activeMetric

@@ -258,7 +258,7 @@
 
 .posterHeading {
   position: absolute;
-  top: -1rem;
+  top: 0;
   left: 1.3rem;
   border: 0;
   padding: 0.6rem 0.8rem;
@@ -1040,7 +1040,7 @@
   }
 
   .posterHeading {
-    top: -0.8rem;
+    top: 0;
     left: 0.85rem;
     padding: 0.45rem 0.55rem;
     font-size: 0.62rem;

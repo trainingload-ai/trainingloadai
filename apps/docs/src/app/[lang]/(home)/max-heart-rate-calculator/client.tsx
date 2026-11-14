@@ -1,4 +1,9 @@
 "use client";
+import { scrollBehavior } from "@/lib/scroll-behavior";
+
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InputSource } from "@/components/calculators/input-source";
 
@@ -105,13 +110,20 @@ export function MaxHeartRateCalculatorClient({
   const [shareError, setShareError] = useState(false);
 
   const age = useMemo(() => parseMaxHrAge(ageText), [ageText]);
-  const ageInvalid = ageText.trim() !== "" && age == null;
+  const committed = useCommittedFields();
+  const ageInvalid =
+    ageText.trim() !== "" &&
+    age == null &&
+    committed.isCommitted("age", ageText);
   const measuredParsed = useMemo(
     () =>
       measuredText.trim() === "" ? null : parseMeasuredMaxHr(measuredText),
     [measuredText],
   );
-  const measuredInvalid = measuredText.trim() !== "" && measuredParsed == null;
+  const measuredInvalid =
+    measuredText.trim() !== "" &&
+    measuredParsed == null &&
+    committed.isCommitted("measured", measuredText);
 
   useEffect(() => {
     const next = new URLSearchParams();
@@ -275,6 +287,14 @@ export function MaxHeartRateCalculatorClient({
       <div className={styles.hero}>
         {hero}
         <section id="calculator" className={styles.board}>
+          <FieldErrorAnnouncement
+            message={[
+              ageInvalid ? t("ageError") : "",
+              measuredInvalid ? t("measuredField.error") : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("title")}</h2>
             <p className={styles.boardLead}>{t("cardSubtitle")}</p>
@@ -283,8 +303,18 @@ export function MaxHeartRateCalculatorClient({
             className={styles.form}
             onSubmit={(event) => {
               event.preventDefault();
+              committed.commit("age", ageText);
+              committed.commit("measured", measuredText);
+              if (ageText.trim() !== "" && age == null) {
+                document.getElementById("max-heart-rate-age")?.focus();
+                return;
+              }
+              if (measuredText.trim() !== "" && measuredParsed == null) {
+                document.getElementById("max-hr-measured")?.focus();
+                return;
+              }
               document.getElementById("result")?.scrollIntoView({
-                behavior: "smooth",
+                behavior: scrollBehavior(),
                 block: "start",
               });
             }}
@@ -306,11 +336,16 @@ export function MaxHeartRateCalculatorClient({
                   <Label htmlFor="max-heart-rate-age">{t("ageLabel")}</Label>
                   <Input
                     id="max-heart-rate-age"
+                    onBlur={() => committed.commit("age", ageText)}
                     name="age"
                     className={styles.input}
                     inputMode="decimal"
                     autoComplete="off"
-                    aria-describedby="max-heart-rate-age-hint"
+                    aria-describedby={
+                      ageInvalid
+                        ? "max-heart-rate-age-hint max-heart-rate-age-error"
+                        : "max-heart-rate-age-hint"
+                    }
                     aria-invalid={ageInvalid}
                     value={ageText}
                     placeholder={t("agePlaceholder")}
@@ -325,7 +360,7 @@ export function MaxHeartRateCalculatorClient({
                     {t("ageHint")}
                   </p>
                   {ageInvalid ? (
-                    <p className={styles.error} role="alert">
+                    <p id="max-heart-rate-age-error" className={styles.error}>
                       {t("ageError")}
                     </p>
                   ) : null}
@@ -344,11 +379,16 @@ export function MaxHeartRateCalculatorClient({
                   </Label>
                   <Input
                     id="max-hr-measured"
+                    onBlur={() => committed.commit("measured", measuredText)}
                     name="measured"
                     className={styles.input}
                     inputMode="decimal"
                     autoComplete="off"
-                    aria-describedby="max-hr-measured-hint"
+                    aria-describedby={
+                      measuredInvalid
+                        ? "max-hr-measured-hint max-hr-measured-error"
+                        : "max-hr-measured-hint"
+                    }
                     aria-invalid={measuredInvalid}
                     value={measuredText}
                     placeholder={t("measuredField.placeholder")}
@@ -368,7 +408,7 @@ export function MaxHeartRateCalculatorClient({
                     )}
                   </p>
                   {measuredInvalid ? (
-                    <p className={styles.error} role="alert">
+                    <p id="max-hr-measured-error" className={styles.error}>
                       {t("measuredField.error")}
                     </p>
                   ) : null}

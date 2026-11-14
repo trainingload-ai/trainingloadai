@@ -79,7 +79,11 @@
     "previewImageNamed": "預覽圖片：{description}",
     "imagePreview": "圖片預覽",
     "closePreview": "關閉預覽",
-    "preview": "預覽"
+    "preview": "預覽",
+    "pauseAnimation": "暫停自動播放",
+    "resumeAnimation": "繼續自動播放",
+    "codeBlock": "程式碼範例",
+    "dataTable": "資料表格"
   },
   "docsUi": {
     "searchNoResult": "找不到結果",

@@ -1,13 +1,12 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
+import { DocsCodeBlock } from "@/components/DocsCodeBlock";
+import { DocsTable } from "@/components/DocsTable";
 import { Mermaid } from "@/components/Mermaid";
 import * as TabsComponents from "fumadocs-ui/components/tabs";
 import { ZoomableImage } from "@/components/ZoomableImage";
 import { DocsScreenshot } from "@/components/DocsScreenshot";
-import {
-  DocsTaskCard,
-  DocsTaskGrid,
-} from "@/components/DocsTaskGrid";
+import { DocsTaskCard, DocsTaskGrid } from "@/components/DocsTaskGrid";
 
 import { PDCChart } from "@/components/charts/PDCChart";
 import {
@@ -24,6 +23,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     ...TabsComponents,
     Mermaid,
+    pre: DocsCodeBlock,
+    table: DocsTable,
     DocsScreenshot,
     DocsTaskCard,
     DocsTaskGrid,

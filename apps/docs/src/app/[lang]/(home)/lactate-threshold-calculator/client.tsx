@@ -1,4 +1,5 @@
 "use client";
+import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import {
   useEffect,
@@ -800,7 +801,10 @@ export function LactateThresholdCalculatorClient({
       !hadResultRef.current &&
       window.matchMedia("(max-width: 1023px)").matches
     ) {
-      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      resultRef.current?.scrollIntoView({
+        behavior: scrollBehavior(),
+        block: "start",
+      });
     }
     hadResultRef.current = hasResult;
   }, [result]);

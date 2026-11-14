@@ -85,7 +85,11 @@
     "previewImageNamed": "预览图片：{description}",
     "imagePreview": "图片预览",
     "closePreview": "关闭预览",
-    "preview": "预览"
+    "preview": "预览",
+    "pauseAnimation": "暂停自动播放",
+    "resumeAnimation": "继续自动播放",
+    "codeBlock": "代码示例",
+    "dataTable": "数据表格"
   },
   "docsUi": {
     "searchNoResult": "未找到结果",

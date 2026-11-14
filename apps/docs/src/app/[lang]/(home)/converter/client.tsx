@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { buildToolAppUrl } from "@shared/product-analytics";
@@ -87,6 +87,7 @@ function parseFilenameFromContentDisposition(
 
 export function ConverterClient({ lang }: { lang: string }) {
   const t = useTranslations("converter.page");
+  const convertButtonRef = useRef<HTMLButtonElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState<TargetFormat>("gpx");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -406,7 +407,7 @@ export function ConverterClient({ lang }: { lang: string }) {
                 <div
                   role="alert"
                   aria-live="assertive"
-                  className="text-sm text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-left-2"
+                  className="text-sm text-red-600 dark:text-red-400 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-left-2"
                 >
                   {error}
                 </div>
@@ -422,6 +423,7 @@ export function ConverterClient({ lang }: { lang: string }) {
                     Boolean(pending)
                   }
                   className={toolPrimaryActionButtonClass}
+                  ref={convertButtonRef}
                   onClick={onSubmit}
                   aria-label={t("buttons.convertAria")}
                 >
@@ -503,6 +505,7 @@ export function ConverterClient({ lang }: { lang: string }) {
       </div>
 
       <TrainingPlanAfterConvertDialog
+        invokerRef={convertButtonRef}
         appHref={trainingPlanPromptHref}
         copy={trainingPlanPromptCopy}
         lang={lang}

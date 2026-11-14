@@ -223,6 +223,7 @@ export default async function BlogPostPage(props: {
               pre: ({ children }: { children?: ReactNode }) => (
                 <ScrollableRegion
                   as="pre"
+                  role="group"
                   label={page.data.title}
                   className="min-w-full !w-full max-w-full overflow-x-auto rounded-compact border border-neutral-200 bg-white *:flex *:flex-col dark:border-border dark:bg-card"
                 >

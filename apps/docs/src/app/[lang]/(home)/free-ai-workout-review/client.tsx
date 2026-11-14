@@ -226,7 +226,7 @@ function HeroBudgetCard({
   exhausted?: string;
 }) {
   return (
-    <aside className={styles.heroBudget}>
+    <div className={styles.heroBudget}>
       <div className={styles.heroBudgetHeader}>
         <span>{title}</span>
         <span className={styles.statusDot} />
@@ -245,7 +245,7 @@ function HeroBudgetCard({
           </p>
         ) : null}
       </div>
-    </aside>
+    </div>
   );
 }
 

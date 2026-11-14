@@ -93,7 +93,11 @@
     "previewImageNamed": "이미지 미리보기: {description}",
     "imagePreview": "이미지 미리보기",
     "closePreview": "미리보기 닫기",
-    "preview": "미리보기"
+    "preview": "미리보기",
+    "pauseAnimation": "자동 재생 일시 정지",
+    "resumeAnimation": "자동 재생 계속",
+    "codeBlock": "코드 예제",
+    "dataTable": "데이터 표"
   },
   "docsUi": {
     "searchNoResult": "검색 결과가 없습니다",

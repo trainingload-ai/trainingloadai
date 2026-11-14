@@ -76,7 +76,20 @@ export function ToolFileDropzone({
           {label}
         </div>
       ) : null}
-      <div
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(event) => {
+          if (event.target.files) {
+            pickFirstFile(event.target.files, "picker");
+          }
+          event.target.value = "";
+        }}
+      />
+      <button
+        type="button"
         onClick={onPickFiles}
         onDrop={(event) => {
           event.preventDefault();
@@ -89,51 +102,31 @@ export function ToolFileDropzone({
           setIsDragging(true);
         }}
         onDragLeave={() => setIsDragging(false)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onPickFiles();
-          }
-        }}
-        role="button"
         data-slot="file-dropzone"
-        tabIndex={0}
         data-has-file={file ? "true" : "false"}
-        aria-label={dropzoneAria ?? label}
+        aria-label={dropzoneAria ?? label ?? pickStrong}
         aria-describedby={supportedId}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-4 rounded-compact border border-dashed p-7 text-center transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
+          "flex w-full cursor-pointer flex-col items-center justify-center gap-4 rounded-compact border border-dashed p-7 text-center transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
           isDragging
             ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10"
             : "border-neutral-200 hover:border-emerald-500/40 hover:bg-neutral-50 dark:border-border dark:hover:border-emerald-500/40 dark:hover:bg-card/70",
         )}
         data-dragging={isDragging}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(event) => {
-            if (event.target.files) {
-              pickFirstFile(event.target.files, "picker");
-            }
-            event.target.value = "";
-          }}
-        />
         {file && selectedLayout === "inside" ? (
-          <div
+          <span
             data-slot="dropzone-selected"
             id={supportedId}
             className="flex min-w-0 flex-col items-center gap-2"
           >
-            <div
+            <span
               data-slot="dropzone-icon"
               className="grid size-12 place-items-center rounded-compact bg-emerald-500/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
             >
               <FileText className="size-5" />
-            </div>
-            <span className="max-w-full truncate text-sm font-bold text-neutral-900 dark:text-white">
+            </span>
+            <span className="max-w-full break-all text-sm font-bold text-neutral-900 dark:text-white">
               {file.name}
             </span>
             <span className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -145,16 +138,16 @@ export function ToolFileDropzone({
             >
               {replaceFileLabel ?? pickStrong}
             </span>
-          </div>
+          </span>
         ) : (
           <>
-            <div
+            <span
               data-slot="dropzone-icon"
               className="grid size-12 place-items-center rounded-compact bg-emerald-500/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
             >
               <Upload className="size-5" />
-            </div>
-            <div className="flex flex-col items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300 sm:flex-row sm:flex-wrap sm:justify-center">
+            </span>
+            <span className="flex flex-col items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300 sm:flex-row sm:flex-wrap sm:justify-center">
               <span
                 data-slot="dropzone-action"
                 className="inline-flex h-9 items-center justify-center rounded-compact border border-emerald-600/25 bg-emerald-50 px-3 text-sm font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-100"
@@ -162,7 +155,7 @@ export function ToolFileDropzone({
                 {pickStrong}
               </span>
               <span>{pickRest}</span>
-            </div>
+            </span>
             <span
               id={supportedId}
               className="block text-xs text-neutral-500 dark:text-neutral-400"
@@ -171,17 +164,17 @@ export function ToolFileDropzone({
             </span>
           </>
         )}
-      </div>
+      </button>
 
       {file && selectedLayout === "below" ? (
-        <div className="animate-in fade-in slide-in-from-top-2">
+        <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2">
           <div className="flex items-center justify-between rounded-compact border border-neutral-200 bg-neutral-50/70 px-4 py-3 dark:border-border dark:bg-card/70">
             <div className="flex min-w-0 items-center gap-3">
               <div className="rounded border border-neutral-100 bg-white p-2 dark:border-border dark:bg-secondary">
                 <FileText className="size-4 text-neutral-500" />
               </div>
               <div className="min-w-0">
-                <div className="max-w-[220px] truncate text-sm font-medium text-neutral-900 dark:text-white md:max-w-md">
+                <div className="break-all text-sm font-medium text-neutral-900 dark:text-white">
                   {file.name}
                 </div>
                 <div className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -196,7 +189,7 @@ export function ToolFileDropzone({
                   variant: "ghost",
                   size: "sm",
                   className:
-                    "h-8 w-8 p-0 text-neutral-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20",
+                    "h-8 w-8 shrink-0 p-0 text-neutral-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20",
                 }),
               )}
               onClick={(event) => {

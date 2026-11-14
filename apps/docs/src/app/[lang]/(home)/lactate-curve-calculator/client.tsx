@@ -1,4 +1,5 @@
 "use client";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 
 import {
   Component,
@@ -856,7 +857,10 @@ export function LactateCurveCalculatorClient({
                   ]}
                 />
               ))}
-              <div className={styles.tableWrap}>
+              <ScrollableRegion
+                label={c.confirmImport}
+                className={styles.tableWrap}
+              >
                 <table className={styles.table}>
                   <thead>
                     <tr>
@@ -875,7 +879,7 @@ export function LactateCurveCalculatorClient({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollableRegion>
               <div className={styles.actions}>
                 <Button onClick={confirmImport}>{c.confirmImport}</Button>
                 <Button variant="ghost" onClick={() => setPending(null)}>
@@ -887,7 +891,7 @@ export function LactateCurveCalculatorClient({
           {origin !== "user" ? (
             <p className={styles.notice}>{c.sample}</p>
           ) : null}
-          <div className={styles.tableWrap}>
+          <ScrollableRegion label={c.intensity} className={styles.tableWrap}>
             <table className={`${styles.table} ${styles.inputTable}`}>
               <thead>
                 <tr>
@@ -951,7 +955,7 @@ export function LactateCurveCalculatorClient({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollableRegion>
           <Button
             variant="outline"
             disabled={busy || rows.length >= 31}

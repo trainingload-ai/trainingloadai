@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
@@ -362,7 +363,7 @@ export default async function PlanCollectionPage({
             ) : null}
           </div>
 
-          <aside className="rounded-feature bg-card p-5 shadow-xs sm:p-6">
+          <div className="rounded-feature bg-card p-5 shadow-xs sm:p-6">
             <div className="flex items-start justify-between gap-6">
               <div>
                 <div className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
@@ -394,7 +395,7 @@ export default async function PlanCollectionPage({
                 </li>
               ))}
             </ol>
-          </aside>
+          </div>
         </div>
       </section>
 
@@ -416,7 +417,10 @@ export default async function PlanCollectionPage({
           </p>
         </div>
 
-        <div className="mt-9 hidden max-w-full overflow-x-auto rounded-overlay bg-secondary/65 p-2 lg:block">
+        <ScrollableRegion
+          label={copy.groupSubtitle}
+          className="mt-9 hidden max-w-full overflow-x-auto rounded-overlay bg-secondary/65 p-2 lg:block"
+        >
           <table className="min-w-[760px] w-full border-separate border-spacing-y-1 text-left text-sm">
             <caption className="sr-only">{copy.groupSubtitle}</caption>
             <thead>
@@ -539,7 +543,7 @@ export default async function PlanCollectionPage({
               ])}
             </tbody>
           </table>
-        </div>
+        </ScrollableRegion>
 
         <div className="mt-14 space-y-14">
           {displayGroups.map((group, groupIndex) => (
@@ -650,7 +654,7 @@ export default async function PlanCollectionPage({
           ))}
         </div>
 
-        <aside className="mt-12 grid gap-5 rounded-overlay bg-brand-soft p-6 md:grid-cols-[auto_1fr_auto] md:items-center">
+        <div className="mt-12 grid gap-5 rounded-overlay bg-brand-soft p-6 md:grid-cols-[auto_1fr_auto] md:items-center">
           <div className="flex size-12 items-center justify-center rounded-surface bg-brand text-brand-foreground">
             <BookOpenCheck aria-hidden="true" className="size-5" />
           </div>
@@ -669,7 +673,7 @@ export default async function PlanCollectionPage({
             {rpeCopy.primaryCta}
             <ArrowRight aria-hidden="true" className="ml-2 size-4" />
           </TrackedLink>
-        </aside>
+        </div>
       </section>
 
       <section
