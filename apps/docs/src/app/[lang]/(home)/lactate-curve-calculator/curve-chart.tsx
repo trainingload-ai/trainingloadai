@@ -177,8 +177,8 @@ export function LactateCurveChart({
   construction?: boolean;
 }) {
   const tooltipId = useId();
-  const size = useRef({ width: 600, height: 330 });
-  const heartHeight = useRef(135);
+  const [size, setSize] = useState({ width: 600, height: 330 });
+  const [heartHeight, setHeartHeight] = useState(135);
   const [hover, setHover] = useState<StageInspection | null>(null);
   const rendered = useRef(false);
   const figure = useRef<HTMLElement>(null);
@@ -202,7 +202,12 @@ export function LactateCurveChart({
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [hover?.pinned]);
   function onResize(width: number, height: number) {
-    if (width > 0 && height > 0) size.current = { width, height };
+    if (width > 0 && height > 0)
+      setSize((previous) =>
+        previous.width === width && previous.height === height
+          ? previous
+          : { width, height },
+      );
     if (rendered.current || width <= 0 || height <= 0) return;
     frame.current = requestAnimationFrame(() => {
       if (rendered.current || !figure.current?.querySelector("svg")) return;
@@ -332,15 +337,15 @@ export function LactateCurveChart({
     ? Math.max(
         8,
         Math.min(
-          size.current.width - 226,
-          hover.cx > size.current.width / 2 ? hover.cx - 220 : hover.cx + 16,
+          size.width - 226,
+          hover.cx > size.width / 2 ? hover.cx - 220 : hover.cx + 16,
         ),
       )
     : 0;
   const tooltipY = hover
     ? Math.max(
         8,
-        (hover.source === "heart" ? size.current.height + 12 : 0) +
+        (hover.source === "heart" ? size.height + 12 : 0) +
           hover.cy -
           110,
       )
@@ -350,7 +355,7 @@ export function LactateCurveChart({
       (logView
         ? Math.log(hover.stage.intensity / low) / Math.log(high / low)
         : (hover.stage.intensity - low) / (high - low)) *
-        (size.current.width - 64)
+        (size.width - 64)
     : 0;
   // Preserve chart nodes while the inspection overlay changes keyboard focus.
   const plot = useMemo(
@@ -520,7 +525,7 @@ export function LactateCurveChart({
               minWidth={0}
               initialDimension={{ width: 600, height: 135 }}
               onResize={(_width, height) => {
-                if (height > 0) heartHeight.current = height;
+                if (height > 0) setHeartHeight(height);
               }}
             >
               <ComposedChart
@@ -598,20 +603,22 @@ export function LactateCurveChart({
         <>
           <div
             className={styles.chartCrosshair}
+            data-testid="lactate-crosshair"
             style={{
               left: crosshairX,
               top: 26,
-              height: size.current.height - 76,
+              height: size.height - 76,
             }}
             aria-hidden="true"
           />
           {hasHeartRate && !construction && !logView ? (
             <div
               className={styles.chartCrosshair}
+              data-testid="lactate-heart-crosshair"
               style={{
                 left: crosshairX,
-                top: size.current.height + 32,
-                height: heartHeight.current - 66,
+                top: size.height + 32,
+                height: heartHeight - 66,
               }}
               aria-hidden="true"
             />

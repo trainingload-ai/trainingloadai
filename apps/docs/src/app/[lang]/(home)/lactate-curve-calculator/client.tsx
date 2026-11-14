@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { buildToolAppUrl } from "@shared/product-analytics";
+import { elapsedMilliseconds } from "@/lib/tool-analytics";
 import {
   DEFAULT_LACTATE_PAIR,
   analyzeLactate,
@@ -530,7 +531,7 @@ export function LactateCurveCalculatorClient({
       showInputError(cause, "parsing", pending.source);
     }
   }
-  async function analyze() {
+  async function analyze(started: number) {
     if (attempt.current.running) return;
     if (lastAnalyzedRevision.current === revisionRef.current && run) {
       revealReport();
@@ -565,7 +566,6 @@ export function LactateCurveCalculatorClient({
     setError(null);
     const snapshot = revisionRef.current;
     lastAnalyzedRevision.current = snapshot;
-    const started = performance.now();
     const properties = {
       ...context,
       point_count_bucket: lactatePointBucket(
@@ -599,7 +599,7 @@ export function LactateCurveCalculatorClient({
           ...properties,
           status: analysis.status,
           output_format: "lactate_analysis",
-          duration_ms: performance.now() - started,
+          duration_ms: elapsedMilliseconds(started),
           ...(analysis.status === "unavailable"
             ? { reason_code: "no_applicable_method" }
             : {}),
@@ -1050,7 +1050,7 @@ export function LactateCurveCalculatorClient({
           ) : null}
           <Button
             size="lg"
-            onClick={analyze}
+            onClick={(event) => void analyze(event.timeStamp)}
             disabled={busy}
             data-testid="lactate-analyze"
           >

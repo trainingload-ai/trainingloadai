@@ -324,6 +324,32 @@ test("inspects the full example chart with pointer, touch and keyboard without s
   await expect(tooltip).toHaveCount(0);
   await points.nth(4).click();
   await expect(tooltip).toContainText("2.40");
+  const viewport = page.viewportSize()!;
+  const plot = figure.locator(".recharts-responsive-container").first();
+  const crosshair = figure.getByTestId("lactate-crosshair");
+  const plotWidth = (await plot.boundingBox())!.width;
+  const crosshairRatio =
+    ((await crosshair.evaluate((node) => parseFloat(node.style.left))) - 46) /
+    (plotWidth - 64);
+  await page.setViewportSize({
+    ...viewport,
+    width: viewport.width > 600 ? 1100 : 360,
+  });
+  await expect
+    .poll(async () => (await plot.boundingBox())!.width)
+    .toBeLessThan(plotWidth - 10);
+  await expect
+    .poll(async () => {
+      const width = (await plot.boundingBox())!.width;
+      const left = await crosshair.evaluate((node) => parseFloat(node.style.left));
+      return Math.abs(left - (46 + crosshairRatio * (width - 64)));
+    })
+    .toBeLessThan(1);
+  await expect(tooltip).toContainText("2.40");
+  await points.nth(4).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(tooltip).toContainText("3.50");
+  await page.setViewportSize(viewport);
   const names = await page.evaluate(() =>
     (
       window as unknown as { lactateAnalyticsCalls: unknown[][] }
