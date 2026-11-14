@@ -23,13 +23,13 @@
     "dist:mac:signed": "node scripts/release-macos.mjs"
   },
   "dependencies": {
-    "@electric-sql/pglite": "0.5.8",
-    "@electric-sql/pglite-socket": "0.2.11",
+    "@electric-sql/pglite": "0.5.16",
+    "@electric-sql/pglite-socket": "0.2.19",
     "electron-updater": "6.8.11"
   },
   "devDependencies": {
     "@types/node": "^22.15.2",
-    "electron": "45.0.0",
+    "electron": "45.3.0",
     "electron-builder": "26.18.0",
     "sharp": "0.35.5",
     "typescript": "5.9.3"
