@@ -79,7 +79,7 @@
     "dayjs": "^1.11.13",
     "framer-motion": "^12.23.12",
     "input-otp": "^1.4.2",
-    "isomorphic-dompurify": "^2.31.0",
+    "isomorphic-dompurify": "^4.7.0",
     "ldrs": "^1.1.7",
     "lodash": "^4.17.21",
     "lowlight": "^3.3.0",
