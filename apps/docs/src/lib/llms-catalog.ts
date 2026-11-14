@@ -345,6 +345,12 @@ export const llmGuidePages: LlmToolPage[] = [
 
 export const llmFreeToolPages: LlmToolPage[] = [
   {
+    title: "Lactate Curve Calculator",
+    path: "/lactate-curve-calculator",
+    description:
+      "Analyze measured cycling or running step-test lactate data locally. Compare baseline, OBLA, Log-log and Dmax methods, inspect LT1/LT2 zones, and export CSV or a printable report.",
+  },
+  {
     title: "Free AI Workout Review",
     path: "/free-ai-workout-review",
     description:

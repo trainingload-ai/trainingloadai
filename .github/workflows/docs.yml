@@ -39,4 +39,6 @@ jobs:
       - run: ELECTRON_SKIP_BINARY_DOWNLOAD=1 pnpm install --frozen-lockfile
       - run: node --test scripts/docs/*.test.mjs
       - run: pnpm --dir apps/docs test
+      - run: pnpm --dir apps/client exec playwright install --with-deps chromium
+      - run: pnpm --dir apps/client exec playwright test --config playwright.docs-tools.config.ts --project chromium-desktop-light
       - run: pnpm docs:build

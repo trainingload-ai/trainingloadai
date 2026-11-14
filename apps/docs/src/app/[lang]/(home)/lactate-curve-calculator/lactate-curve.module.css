@@ -1,0 +1,1360 @@
+.pageFrame {
+  padding-block: 2.5rem;
+}
+.pageFrame > div {
+  gap: 2.25rem;
+}
+.pageFrame h1 {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+}
+.exampleRecording summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+.exampleRecording > div {
+  margin-top: 1rem;
+}
+.toolRoot {
+  --lactate-curve: var(--chart-fitness);
+  --lactate-zone-1: var(--chart-recovery);
+  --lactate-zone-2: var(--chart-warning);
+  --lactate-zone-3: var(--chart-danger);
+  min-width: 0;
+  color: var(--foreground);
+}
+.workflowBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-block: 1px solid var(--border);
+  padding: 0.65rem 0;
+  margin-bottom: 1.5rem;
+}
+.reportHeadingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.5rem;
+  justify-content: space-between;
+}
+.reportContext {
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+}
+.toolRoot[data-view="report"] .reportHeadingRow > h2 {
+  font-size: 1.8rem;
+  scroll-margin-top: 7.5rem;
+}
+.workflowSteps {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.workflowSteps button {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  cursor: pointer;
+}
+.workflowSteps button[aria-current="step"] {
+  color: var(--foreground);
+  font-weight: 650;
+}
+.workflowSteps button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.workflowSteps button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 5px;
+}
+.toolRoot[data-view="input"] .workspace {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 3rem;
+}
+.toolRoot[data-view="input"] .results {
+  background: transparent;
+  border: 0;
+  padding: 1rem 0;
+}
+.toolRoot[data-view="report"] .workspace {
+  display: block;
+}
+.toolRoot[data-view="report"] .inputPanel {
+  display: none;
+}
+.toolRoot[data-view="report"] .results {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  gap: 1.75rem;
+}
+.toolRoot[data-view="report"] .results > .title {
+  font-size: 1.8rem;
+  scroll-margin-top: 7.5rem;
+}
+.toolRoot[data-view="report"] .summaryGrid {
+  background: var(--card);
+}
+.toolRoot[data-view="report"] .summaryGrid {
+  grid-template-columns: 1fr 1fr 0.7fr;
+}
+.toolRoot[data-view="report"] .summaryMetric {
+  padding: 1rem 1.25rem;
+}
+.toolRoot[data-view="report"] .summaryMetric .metric {
+  font-size: 2.6rem;
+}
+.toolRoot[data-view="report"] .summaryMetric:last-child .metric {
+  font-size: 1.85rem;
+  font-weight: 500;
+  padding-block: 0.3rem;
+}
+.overviewSection {
+  display: grid;
+  gap: 1.4rem;
+}
+.overviewIntro {
+  max-width: 52rem;
+}
+.overviewIntro h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.overviewGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(230px, 1fr);
+  gap: 2rem;
+  padding-block: 1.2rem;
+  border-block: 1px solid var(--border);
+}
+.overviewPlot {
+  min-width: 0;
+}
+.interpretation {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--border);
+}
+.interpretation h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.thresholdBasis {
+  display: grid;
+  gap: 0.45rem;
+}
+.thresholdBasis .label {
+  font-size: 0.75rem;
+}
+.thresholdBasis .label::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--lactate-zone-1);
+}
+.thresholdBasis[data-threshold="2"] .label::before {
+  background: var(--lactate-zone-2);
+}
+.thresholdBasis button {
+  font-size: 0.7rem;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.thresholdBasis button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.methodDialog {
+  width: min(900px, calc(100vw - 2rem));
+  max-width: min(900px, calc(100vw - 2rem));
+  max-height: calc(100svh - 2rem);
+  overflow-y: auto;
+  background: var(--card) !important;
+  border-radius: var(--tl-radius-surface);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.methodDialog .chart {
+  height: 360px;
+}
+.inputGuide {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.inputGuide summary {
+  cursor: pointer;
+}
+.inputGuide p {
+  margin-top: 0.5rem;
+}
+.chart,
+.heartChart,
+.residualChart {
+  position: relative;
+}
+.chartUnit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+.pageFrame:has([data-view="report"]) > div > .noPrint ~ .noPrint {
+  display: none;
+}
+.pageFrame:has([data-view="report"]) h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+.pageFrame:has([data-view="report"]) > div > .noPrint header p {
+  display: none;
+}
+.pageFrame:has([data-view="report"]) {
+  padding-top: 1.25rem;
+}
+.pageFrame:has([data-view="report"]) > div {
+  gap: 1.25rem;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.8fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.inputPanel,
+.results {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--tl-radius-surface);
+  padding: 1.5rem;
+  background: var(--card);
+}
+.inputPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.title {
+  font-family: var(--tl-font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.subTitle {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.toolbar,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+.settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.muted {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.tableWrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  padding: 0.7rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.table td {
+  padding: 0.55rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.inputTable {
+  min-width: 280px;
+}
+.inputTable th {
+  white-space: nowrap;
+}
+.inputTable input {
+  min-width: 0;
+  width: 100%;
+}
+.inputTable th:first-child {
+  width: 2rem;
+}
+.inputTable th:last-child {
+  width: 2rem;
+}
+.table caption {
+  text-align: left;
+  margin-bottom: 0.6rem;
+  color: var(--muted-foreground);
+}
+.methodCell {
+  min-width: 8rem;
+}
+.methodCell a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.table small {
+  display: block;
+  max-width: 14rem;
+  margin-top: 0.2rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+.placeholder {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.metric {
+  font-size: 1.65rem;
+  line-height: 1.4;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.chart {
+  width: 100%;
+  height: 340px;
+  min-width: 0;
+}
+.chartLoading {
+  height: 290px;
+  background: var(--muted);
+  border-radius: var(--tl-radius-control);
+}
+.legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.legend span {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--lactate-curve);
+  border-radius: 50%;
+}
+.line {
+  width: 16px;
+  border-top: 2px solid var(--lactate-curve);
+}
+.notice {
+  border-left: 2px solid var(--foreground);
+  padding-left: 0.8rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-left: 1.2rem;
+  list-style: disc;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.zone {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  border-top: 1px solid var(--border);
+  padding: 0.7rem 0;
+  font-size: 0.85rem;
+}
+.zone span:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.mapping {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--tl-radius-control);
+  background: var(--muted);
+}
+.methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem 2rem;
+}
+.methods article {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  scroll-margin-top: 7rem;
+}
+.methods p {
+  margin-top: 0.5rem;
+}
+.methodContext {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+.methodContext dt {
+  font-size: 0.7rem;
+  font-weight: 550;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+.methodContext dd {
+  color: var(--muted-foreground);
+}
+.methodContext p {
+  margin: 0;
+}
+.methodContext a,
+.bibliography a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.methodContext a:focus-visible,
+.bibliography :is(a, summary):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.bibliography {
+  border-top: 1px solid var(--border);
+  padding-top: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+.bibliography summary {
+  width: fit-content;
+  font-weight: 550;
+  cursor: pointer;
+}
+.bibliography ol {
+  display: grid;
+  gap: 1rem;
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin-block: 1.25rem;
+}
+.bibliography li {
+  padding-left: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.bibliography li .caption {
+  display: block;
+}
+.bibliography > p + p {
+  margin-top: 0.5rem;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.5rem;
+}
+.links a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+}
+.error {
+  color: var(--destructive);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-block: 1px solid var(--border);
+}
+.summaryMetric {
+  min-width: 0;
+  padding: 1.1rem 0.8rem;
+  border-top: 3px solid transparent;
+}
+.summaryMetric + .summaryMetric {
+  border-left: 1px solid var(--border);
+}
+.summaryMetric[data-threshold="1"] {
+  border-top-color: var(--lactate-zone-1);
+}
+.summaryMetric[data-threshold="2"] {
+  border-top-color: var(--lactate-zone-2);
+}
+.summaryMetric .label {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+.summaryMetric .metric {
+  font-family: var(--tl-font-display);
+  font-size: 2.3rem;
+  letter-spacing: -0.04em;
+  margin-block: 0.2rem;
+}
+.summaryMetric .metric span {
+  font-family: var(--tl-font-ui);
+  font-size: 0.8rem;
+  font-weight: 450;
+  letter-spacing: 0;
+}
+.methodLabel {
+  font-size: 0.72rem;
+  font-weight: 550;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+.metricDetail {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+.methodExplanation {
+  border-left: 2px solid var(--lactate-curve);
+  padding-left: 0.9rem;
+  display: grid;
+  gap: 0.3rem;
+}
+.methodExplanation .muted {
+  font-size: 0.8rem;
+}
+.methodExplanation a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.curveFigure {
+  position: relative;
+  min-width: 0;
+}
+.screenPlot {
+  width: 100%;
+}
+.residualChart > .screenPlot {
+  height: 100%;
+}
+.printCurve {
+  display: none;
+}
+.stageControl {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: crosshair;
+  border-radius: 50%;
+}
+.stageControl:focus-visible {
+  outline: 2px solid var(--lactate-curve);
+  outline-offset: -2px;
+}
+.chartTooltip {
+  position: absolute;
+  z-index: 10;
+  width: 210px;
+  max-width: calc(100% - 16px);
+  pointer-events: none;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--tl-radius-control);
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
+  font-size: 0.7rem;
+}
+.chartCrosshair {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  border-left: 1px dashed var(--muted-foreground);
+  opacity: 0.75;
+}
+.tooltipHeading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.tooltipHeading span {
+  color: var(--muted-foreground);
+}
+.tooltipHeading strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.chartTooltip dl {
+  display: grid;
+  gap: 0.4rem;
+}
+.chartTooltip dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.chartTooltip dt {
+  color: var(--muted-foreground);
+}
+.chartTooltip dd {
+  font-variant-numeric: tabular-nums;
+}
+.chartTooltip dd span {
+  font-size: 0.6rem;
+  color: var(--muted-foreground);
+}
+.tooltipZone {
+  padding-top: 0.6rem;
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+.chartHint {
+  color: var(--muted-foreground);
+  font-size: 0.65rem;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+.productBridge {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+  grid-template-areas: "intro visual" "details visual";
+  gap: 1.25rem 3rem;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding-block: 2.5rem 1rem;
+}
+.bridgeContent {
+  grid-area: intro;
+  align-self: end;
+  display: grid;
+  gap: 1rem;
+}
+.bridgeDetails {
+  grid-area: details;
+  align-self: start;
+  display: grid;
+  gap: 1rem;
+}
+.bridgeVisual {
+  grid-area: visual;
+}
+.bridgeBrand {
+  font-family: var(--tl-font-display);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.bridgeContent h3 {
+  font-family: var(--tl-font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  max-width: 18ch;
+}
+.bridgeBody {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  line-height: 1.85;
+  max-width: 38rem;
+}
+.bridgeFeatures {
+  display: grid;
+  gap: 0.65rem;
+  font-size: 0.75rem;
+  margin-block: 0.3rem 0.5rem;
+}
+.bridgeFeatures li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+}
+.bridgeFeatures li::before {
+  content: "✓";
+  color: var(--brand);
+  font-weight: 600;
+}
+.bridgeActions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem 1.2rem;
+  flex-wrap: wrap;
+}
+.bridgePrimary {
+  display: inline-flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0.65rem 1rem;
+  border-radius: var(--tl-radius-control);
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.8rem;
+  font-weight: 550;
+}
+.bridgePrimary:hover {
+  opacity: 0.85;
+}
+.bridgeSecondary {
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.bridgeActions a:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.bridgeImage {
+  border: 1px solid var(--border);
+  border-radius: var(--tl-radius-surface);
+  overflow: hidden;
+  background: var(--card);
+}
+.bridgeImage img {
+  width: 100%;
+  height: auto;
+}
+.bridgeVisual figcaption {
+  margin-top: 0.65rem;
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+}
+.previewHeading {
+  display: grid;
+  gap: 0.35rem;
+}
+.previewHeading .previewTitle {
+  font-size: 1.1rem;
+  margin: 0;
+}
+.preview .chart {
+  height: 300px;
+}
+.preview .heartChart {
+  height: 130px;
+}
+.heartChart {
+  height: 145px;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+.residualChart {
+  height: 185px;
+  width: 100%;
+}
+.anchorLine {
+  width: 16px;
+  border-top: 1px dashed var(--muted-foreground);
+}
+.legend {
+  margin-top: 1rem;
+}
+.reportSection {
+  display: grid;
+  gap: 0.8rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  min-width: 0;
+}
+.sectionHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+}
+.sectionHeading .muted {
+  font-size: 0.7rem;
+}
+.caption {
+  font-size: 0.7rem;
+  line-height: 1.7;
+  color: var(--muted-foreground);
+}
+.comparisonTable {
+  min-width: 570px;
+}
+.comparisonTable th:first-child {
+  width: 150px;
+}
+.comparisonTable th:nth-child(2) {
+  width: 32%;
+}
+.comparisonTable td {
+  vertical-align: middle;
+  padding-block: 0.55rem;
+}
+.comparisonTable .methodGroup th {
+  border: 0;
+  padding-top: 1.2rem;
+  padding-bottom: 0.45rem;
+  color: var(--foreground);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.comparisonTable tr[data-selected="true"] {
+  background: color-mix(in srgb, var(--lactate-curve) 7%, transparent);
+}
+.axisLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  font-weight: 400;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+.methodTrack {
+  height: 23px;
+  position: relative;
+  background-image: linear-gradient(
+    to right,
+    var(--border) 1px,
+    transparent 1px
+  );
+  background-size: 25% 100%;
+  border-right: 1px solid var(--border);
+}
+.methodTrack::before {
+  content: "";
+  position: absolute;
+  height: 1px;
+  background: var(--border);
+  left: 0;
+  right: 0;
+  top: 50%;
+}
+.trackBoundary {
+  position: absolute;
+  height: 100%;
+  width: 1px;
+  border-left: 1px dashed var(--lactate-zone-1);
+  opacity: 0.8;
+}
+.trackBoundary[data-threshold="2"] {
+  border-color: var(--lactate-zone-2);
+}
+.methodMarker {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--lactate-curve);
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  box-sizing: content-box;
+}
+.methodMarker[data-threshold="1"] {
+  background: var(--lactate-zone-1);
+}
+.methodMarker[data-threshold="2"] {
+  background: var(--lactate-zone-2);
+}
+.methodButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: inherit;
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+}
+.methodButton:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.methodButton:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.methodButton[aria-pressed="true"] {
+  font-weight: 650;
+}
+.methodButton span {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--lactate-zone-1);
+  white-space: nowrap;
+}
+.methodButton span[data-threshold="2"] {
+  color: var(--lactate-zone-2);
+}
+.comparisonTable .numeric {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+.zoneGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  border-radius: var(--tl-radius-control);
+  overflow: hidden;
+}
+.zoneCard {
+  padding: 0.9rem 0.75rem;
+  border-top: 3px solid var(--zone-color);
+  background: color-mix(in srgb, var(--zone-color) 7%, transparent);
+}
+.zoneCard + .zoneCard {
+  border-left: 1px solid var(--border);
+}
+.zoneNumber {
+  font-size: 0.7rem;
+  font-weight: 650;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.zoneNumber span {
+  font-size: 0.65rem;
+  font-weight: 450;
+}
+.zoneRange {
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin-block: 0.6rem 0.25rem;
+}
+.zoneRange span {
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+.diagnostics {
+  border-top: 1px solid var(--border);
+  padding-top: 1.2rem;
+}
+.diagnostics summary {
+  font-size: 0.85rem;
+  font-weight: 550;
+  cursor: pointer;
+}
+.fitMetrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.7fr;
+  gap: 1rem;
+  margin-block: 1.3rem;
+}
+.fitMetrics div {
+  display: grid;
+  gap: 0.5rem;
+}
+.fitMetrics span {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+.fitMetrics strong {
+  font-size: 1.2rem;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+.fitMetrics small {
+  font-size: 0.65rem;
+  font-weight: 400;
+}
+.preview {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: 1.5rem 0.5rem;
+}
+.previewTitle {
+  font-family: var(--tl-font-display);
+  font-size: 1.65rem;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  font-weight: 550;
+  margin-bottom: 0.6rem;
+}
+.previewChart {
+  width: 100%;
+  height: auto;
+  font-size: 12px;
+  fill: var(--muted-foreground);
+}
+.previewAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+.previewAction .muted {
+  max-width: 24rem;
+}
+.previewAction button {
+  flex-shrink: 0;
+}
+.reportOnly {
+  display: none;
+}
+.protocol {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.protocol summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.protocol > div {
+  margin-top: 1rem;
+}
+@media (max-width: 900px) {
+  .productBridge {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "intro" "visual" "details";
+    gap: 1.5rem;
+  }
+  .bridgeContent h3 {
+    max-width: 26ch;
+  }
+  .toolRoot[data-view="input"] .workspace {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .overviewGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .interpretation {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .interpretation > h4,
+  .interpretation > p,
+  .interpretation > div:last-of-type {
+    grid-column: 1 / -1;
+  }
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .toolRoot[data-view="report"] .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .toolRoot[data-view="report"] .reportHeadingRow > h2 {
+    font-size: 1.5rem;
+  }
+  .workflowBar {
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .workflowBar > button {
+    margin-left: auto;
+  }
+  .workflowSteps {
+    gap: 0.6rem;
+    font-size: 0.7rem;
+  }
+  .toolRoot[data-view="report"] .summaryMetric {
+    padding: 0.85rem 0.75rem;
+  }
+  .toolRoot[data-view="report"] .summaryMetric .metric {
+    font-size: 2rem;
+  }
+  .toolRoot[data-view="report"] .results > .title {
+    font-size: 1.4rem;
+  }
+  .interpretation {
+    display: flex;
+  }
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .summaryMetric {
+    padding: 0.85rem 0.5rem;
+  }
+  .summaryMetric .metric {
+    font-size: 1.9rem;
+  }
+  .summaryMetric:last-child {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    column-gap: 1rem;
+  }
+  .summaryMetric:last-child .metric {
+    grid-row: span 2;
+    text-align: right;
+  }
+  .zoneGrid {
+    grid-template-columns: 1fr;
+  }
+  .zoneCard + .zoneCard {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .zoneCard {
+    border-top: 0;
+    border-left: 3px solid var(--zone-color) !important;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.3rem 0.75rem;
+    padding: 0.75rem;
+  }
+  .zoneCard .caption {
+    grid-column: 2;
+    text-align: right;
+  }
+  .zoneRange {
+    margin: 0;
+  }
+  .previewAction {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .fitMetrics {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .inputPanel,
+  .results {
+    padding: 1rem;
+  }
+  .pair,
+  .settings,
+  .methods {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chart {
+    height: 290px;
+  }
+  .actions > button {
+    min-height: 36px;
+  }
+}
+@media print {
+  .chartUnit {
+    display: none;
+  }
+  .screenPlot {
+    display: none !important;
+  }
+  .printCurve {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .curveFigure,
+  .residualChart {
+    height: auto !important;
+  }
+  .overviewIntro > .muted {
+    display: none;
+  }
+  .diagnostics[open] {
+    break-before: page;
+    break-inside: avoid;
+  }
+  .fitMetrics {
+    break-inside: avoid;
+  }
+  .productBridge,
+  .chartTooltip,
+  .chartHint,
+  .chartCrosshair,
+  .stageControl {
+    display: none !important;
+  }
+  .toolRoot[data-view="report"] .summaryGrid {
+    grid-template-columns: 1fr 1fr 0.7fr;
+  }
+  .toolRoot[data-view="report"] .summaryMetric {
+    padding: 12px;
+  }
+  .toolRoot[data-view="report"] .summaryMetric .metric {
+    font-size: 24pt;
+  }
+  .toolRoot[data-view="report"] .summaryMetric:last-child .metric {
+    text-align: left;
+  }
+  .zoneCard {
+    border-left: 0 !important;
+    border-top: 3px solid var(--zone-color);
+  }
+  .curveFigure,
+  .reportSection {
+    break-inside: avoid;
+  }
+  .methodDialog,
+  :global(body):has(.toolRoot) :global([data-slot="dialog-overlay"]) {
+    display: none !important;
+  }
+  .reportHeadingRow h2 {
+    font-size: 20pt;
+  }
+  .workflowBar,
+  .interpretation {
+    display: none !important;
+  }
+  .overviewGrid {
+    display: block;
+    border: 0;
+    padding-block: 0;
+  }
+  :global(body):has(.toolRoot) {
+    background: #fff !important;
+  }
+  .pageFrame {
+    padding: 0;
+    background: #fff !important;
+  }
+  .pageFrame > div {
+    max-width: 100%;
+    gap: 0;
+  }
+  .results > h2 {
+    display: none;
+  }
+  h3.reportOnly {
+    font-size: 20pt;
+    font-weight: 600;
+  }
+  .toolRoot {
+    --foreground: #191b18;
+    --muted-foreground: #5c6258;
+    --card: #fff;
+    --border: #cbd1c7;
+    --lactate-curve: #377da0;
+  }
+  .summaryGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .summaryMetric:last-child {
+    display: block;
+    grid-column: auto;
+    border-left: 1px solid var(--border);
+  }
+  .summaryMetric .metric {
+    font-size: 1.8rem;
+  }
+  .zoneGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .zoneCard {
+    display: block;
+  }
+  .diagnostics:not([open]) {
+    display: none;
+  }
+  .methodExplanation,
+  .results > [data-slot="field"] {
+    display: none;
+  }
+  :global(body):has(.toolRoot) :global(header),
+  :global(body):has(.toolRoot) :global(footer),
+  :global(body):has(.toolRoot) :global(nextjs-portal) {
+    display: none !important;
+  }
+  .inputPanel,
+  .actions,
+  .cta,
+  .noPrint {
+    display: none !important;
+  }
+  .workspace {
+    display: block;
+  }
+  .results {
+    border: 0;
+    padding: 0;
+    color: #000;
+    background: #fff;
+  }
+  .chart {
+    height: 250px;
+  }
+  .tableWrap {
+    overflow: visible;
+  }
+  .reportOnly {
+    display: block;
+  }
+  .table {
+    font-size: 9pt;
+  }
+  .pair,
+  .zone,
+  .chart,
+  .table tr {
+    break-inside: avoid;
+  }
+}

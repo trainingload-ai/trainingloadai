@@ -169,6 +169,7 @@ function getChangeFreqAndPriority(pathname: string) {
     pathname === "/ftp-calculator" ||
     pathname === "/critical-power-calculator" ||
     pathname === "/lactate-threshold-calculator" ||
+    pathname === "/lactate-curve-calculator" ||
     pathname === "/converter" ||
     pathname === "/fit-to-gpx" ||
     pathname === "/gpx-to-fit" ||
@@ -336,6 +337,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/ftp-calculator",
     "/critical-power-calculator",
     "/lactate-threshold-calculator",
+    "/lactate-curve-calculator",
     "/converter",
     "/fit-to-gpx",
     "/gpx-to-fit",

@@ -27,15 +27,17 @@ export function ToolPageMain({
   children,
   maxWidth = "max-w-6xl",
   className,
+  as: Container = "main",
 }: {
   children: ReactNode;
   maxWidth?: string;
   className?: string;
+  as?: "main" | "div";
 }) {
   return (
-    <main className={cn(styles.page, className)}>
+    <Container className={cn(styles.page, className)}>
       <div className={cn(styles.shell, maxWidth)}>{children}</div>
-    </main>
+    </Container>
   );
 }
 
