@@ -3095,7 +3095,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 364
+          "line": 370
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3116,7 +3116,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 333
+          "line": 339
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3137,7 +3137,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 342
+          "line": 348
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3158,7 +3158,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 351
+          "line": 357
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3577,7 +3577,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 352
+          "line": 358
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -3642,7 +3642,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 372
+          "line": 378
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -4129,11 +4129,11 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 373
+          "line": 379
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 424
+          "line": 430
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -4527,7 +4527,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 383
+          "line": 389
         },
         {
           "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
@@ -4552,7 +4552,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 384
+          "line": 390
         },
         {
           "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",

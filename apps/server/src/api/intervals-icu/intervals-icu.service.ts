@@ -3,6 +3,12 @@ import {
   intervalsOAuthDiagnostic,
   isIntervalsAthleteUniqueConflict,
 } from './intervals-icu-oauth-diagnostics';
+import {
+  intervalsOAuthStateRef,
+  intervalsOAuthFailure,
+  intervalsOAuthErrorCode,
+  type IntervalsOAuthStage,
+} from '@/integrations/intervals-icu/intervals-icu-oauth-diagnostics';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { ExternalProviderConnection } from '@prisma/client';
@@ -501,9 +507,32 @@ export class IntervalsIcuService {
     state?: string;
     error?: string;
   }) {
-    const callbackId = randomUUID();
     let diagnosticId: string | undefined;
-    let stage = 'consume_state';
+    const startedAt = Date.now();
+    const context = {
+      event: 'intervals_icu_oauth_callback',
+      provider: 'intervals_icu',
+      callbackId: randomUUID(),
+      stateRef: intervalsOAuthStateRef(query.state),
+      hasCode: Boolean(query.code),
+      hasProviderError: Boolean(query.error),
+    };
+    let stage: IntervalsOAuthStage = 'consume_state';
+    const report = (
+      outcome: 'connected' | 'failed',
+      details: Record<string, unknown> = {},
+    ) => {
+      const entry = {
+        ...context,
+        diagnosticId,
+        stage,
+        outcome,
+        elapsedMs: Date.now() - startedAt,
+        ...details,
+      };
+      if (outcome === 'connected') this.logger.log(JSON.stringify(entry));
+      else this.logger.warn(JSON.stringify(entry));
+    };
     let statePayload: {
       userId: string;
       returnUrl: string;
@@ -534,8 +563,13 @@ export class IntervalsIcuService {
             ? (payload.settings as StartIntervalsIcuOAuthDto)
             : {},
       };
+      stage = 'provider_response';
       // 如果错误，返回错误 URL
       if (query.error) {
+        report('failed', {
+          category: 'provider_error',
+          oauthError: intervalsOAuthErrorCode(query.error),
+        });
         return addQuery(statePayload.returnUrl, {
           intervals_icu_oauth: 'error',
           reason: query.error,
@@ -543,12 +577,14 @@ export class IntervalsIcuService {
       }
       // 如果缺少 code，返回错误 URL
       if (!query.code) {
+        report('failed', { category: 'missing_code' });
         return addQuery(statePayload.returnUrl, {
           intervals_icu_oauth: 'error',
           reason: 'missing_code',
         });
       }
 
+      stage = 'configuration';
       // 使用 code 换取 token
       const clientId = this.oauthClientId();
       const clientSecret = this.oauthClientSecret();
@@ -572,22 +608,18 @@ export class IntervalsIcuService {
         token,
         statePayload.settings,
       );
+      report('connected');
       // 返回成功 URL
       return addQuery(statePayload.returnUrl, {
         intervals_icu_oauth: 'connected',
       });
     } catch (error) {
       const returnUrl = statePayload?.returnUrl ?? this.sanitizeReturnUrl(null);
-      this.logger.warn(
-        JSON.stringify({
-          provider: 'intervals_icu',
-          callbackId,
-          diagnosticId,
-          stage,
-          ...intervalsOAuthDiagnostic(error),
-          reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',
-        }),
-      );
+      report('failed', {
+        ...intervalsOAuthDiagnostic(error),
+        ...intervalsOAuthFailure(error, stage),
+        reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',
+      });
       return addQuery(returnUrl, {
         intervals_icu_oauth: 'error',
         reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',

@@ -1,16 +1,6 @@
 import { IntervalsIcuApiError } from '@/integrations/intervals-icu/intervals-icu.client';
 
-const OAUTH_ERRORS = new Set([
-  'invalid_request',
-  'invalid_client',
-  'invalid_grant',
-  'unauthorized_client',
-  'unsupported_grant_type',
-  'invalid_scope',
-  'access_denied',
-  'server_error',
-  'temporarily_unavailable',
-]);
+import { intervalsOAuthErrorCode } from '@/integrations/intervals-icu/intervals-icu-oauth-diagnostics';
 
 /** Never log arbitrary upstream error text, response bodies, or credentials. */
 export function intervalsOAuthDiagnostic(error: unknown) {
@@ -20,7 +10,8 @@ export function intervalsOAuthDiagnostic(error: unknown) {
   try {
     const body: unknown = JSON.parse(error.body ?? '');
     const value = (body as { error?: unknown } | null)?.error;
-    if (typeof value === 'string' && OAUTH_ERRORS.has(value)) code = value;
+    const classified = intervalsOAuthErrorCode(value);
+    if (classified !== 'other') code = classified;
   } catch {
     /* Non-JSON responses receive only a generic classification. */
   }
