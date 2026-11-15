@@ -2102,11 +2102,11 @@
       "references": [
         {
           "file": "apps/server/src/review/coach-daily-review-runtime.service.ts",
-          "line": 511
+          "line": 539
         },
         {
           "file": "apps/server/src/review/coach-period-review-runtime.service.ts",
-          "line": 539
+          "line": 567
         }
       ]
     },
@@ -5162,7 +5162,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-digest.service.ts",
-          "line": 624
+          "line": 625
         }
       ]
     },
@@ -5179,7 +5179,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-digest.service.ts",
-          "line": 629
+          "line": 630
         }
       ]
     },
@@ -5298,7 +5298,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-model-call-guard.ts",
-          "line": 19
+          "line": 31
         }
       ]
     },

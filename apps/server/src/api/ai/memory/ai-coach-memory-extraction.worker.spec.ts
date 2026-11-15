@@ -86,17 +86,15 @@ function fixture(attempts = 1) {
     .mockResolvedValue({ count: 1 });
   const prisma = {
     aiCoachMessage: {
-      findFirst: jest
-        .fn()
-        .mockImplementation(async () => ({
-          id: job.sourceMessageId,
-          userId: job.userId,
-          sessionId: job.sessionId,
-          role: 'USER',
-          content: 'I prefer evening training.',
-          sequence: 1,
-          createdAt,
-        })),
+      findFirst: jest.fn().mockImplementation(async () => ({
+        id: job.sourceMessageId,
+        userId: job.userId,
+        sessionId: job.sessionId,
+        role: 'USER',
+        content: 'I prefer evening training.',
+        sequence: 1,
+        createdAt,
+      })),
       findMany: jest.fn().mockImplementation(async () => []),
     },
     aiCoachMemoryExtractionJob: { updateMany: update },
