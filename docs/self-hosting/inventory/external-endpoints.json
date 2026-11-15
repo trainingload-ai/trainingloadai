@@ -688,7 +688,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
-          "line": 1130
+          "line": 1134
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1280,7 +1280,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
-          "line": 1137
+          "line": 1141
         }
       ],
       "capability": "third-party-sync",

@@ -217,7 +217,10 @@ function StepFields({
   const powerUnit = /%|ftp/i.test(step.intensityValue) ? "%" : "W";
 
   return (
-    <div className={styles.stepCard}>
+    <fieldset className={styles.stepCard}>
+      <legend className="sr-only">
+        {t(`builder.stepTypes.${step.stepType}`)}
+      </legend>
       <div className={styles.stepTop}>
         <div className={styles.stepName}>
           <span className={styles.stepIcon}>
@@ -225,14 +228,14 @@ function StepFields({
           </span>
           <span>{t(`builder.stepTypes.${step.stepType}`)}</span>
         </div>
-        <button
+        <ToolActionButton
+          intent="quiet"
           type="button"
-          className={styles.iconButton}
           onClick={onRemove}
           aria-label={t("builder.removeStep")}
         >
-          <Trash2 className="size-4" />
-        </button>
+          <Trash2 aria-hidden="true" />
+        </ToolActionButton>
       </div>
       <div className={styles.stepGrid}>
         <Field label={t("builder.stepType")} htmlFor={`${step.id}-type`}>
@@ -402,7 +405,7 @@ function StepFields({
           </Field>
         ) : null}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -926,7 +929,8 @@ export function WorkoutEditorClient({
                   ))}
                 </div>
                 <ToolActionButton
-                  intent="secondary"
+                  intent="quiet"
+                  className={styles.addRepeatStep}
                   type="button"
                   onClick={() =>
                     editDraft((current) =>
