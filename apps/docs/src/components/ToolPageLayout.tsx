@@ -27,7 +27,7 @@ export function ToolPageMain({
   children,
   maxWidth = "max-w-6xl",
   className,
-  as: Container = "main",
+  as: Container = "div",
 }: {
   children: ReactNode;
   maxWidth?: string;

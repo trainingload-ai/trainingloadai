@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
@@ -277,7 +278,10 @@ export default async function MaxHeartRateCalculatorPage({
                   title={tPage("methodsTitle")}
                   description={tPage("methodsBody")}
                 >
-                  <div className={styles.tableWrap}>
+                  <ScrollableRegion
+                    label={tPage("formulasTable.title")}
+                    className={styles.tableWrap}
+                  >
                     <table className={styles.table}>
                       <caption className="sr-only">
                         {tPage("formulasTable.title")}
@@ -303,7 +307,7 @@ export default async function MaxHeartRateCalculatorPage({
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollableRegion>
                   <ul className={styles.researchList}>
                     <li>
                       <a href="https://pubmed.ncbi.nlm.nih.gov/11153730/">
@@ -394,7 +398,10 @@ export default async function MaxHeartRateCalculatorPage({
             title={tPage("byAge.title")}
             description={tPage("byAge.body")}
           >
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("byAge.caption")}
+              className={styles.tableWrap}
+            >
               <table className={styles.table}>
                 <caption className="sr-only">{tPage("byAge.caption")}</caption>
                 <thead>
@@ -416,7 +423,7 @@ export default async function MaxHeartRateCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.note}>{tPage("byAge.note")}</p>
           </Section>
         </div>

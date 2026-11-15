@@ -1,3 +1,5 @@
+import { ToolActionButton } from "@/components/ToolActionButton";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import type {
   LactateAnalysis,
@@ -5,7 +7,6 @@ import type {
   LactatePair,
 } from "@trainingloadai/shared/lactate-analysis";
 import type { LactateCopy } from "@/lib/lactate-curve-copy";
-import { Button } from "@/components/ui/button";
 import styles from "./lactate-curve.module.css";
 
 const pace = (value: number) => {
@@ -122,7 +123,10 @@ export function LactateMethodComparison({
         </span>
       </div>
       <p className={styles.muted}>{c.presentation.compareBody}</p>
-      <div className={styles.tableWrap}>
+      <ScrollableRegion
+        label={c.presentation.compareTitle}
+        className={styles.tableWrap}
+      >
         <table className={`${styles.table} ${styles.comparisonTable}`}>
           <thead>
             <tr>
@@ -225,7 +229,7 @@ export function LactateMethodComparison({
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollableRegion>
       <p className={styles.caption}>{c.presentation.notInterval}</p>
     </section>
   );
@@ -306,9 +310,9 @@ export function LactateEmptyPreview({
       {children}
       <div className={styles.previewAction}>
         <p className={styles.muted}>{c.presentation.previewBody}</p>
-        <Button variant="outline" onClick={onExample} disabled={disabled}>
+        <ToolActionButton intent="quiet" onClick={onExample} disabled={disabled}>
           {c.example} →
-        </Button>
+        </ToolActionButton>
       </div>
     </div>
   );

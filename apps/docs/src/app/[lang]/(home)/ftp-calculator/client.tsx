@@ -1,5 +1,13 @@
 "use client";
 
+import { ToolTabsList } from "@/components/ToolTabsList";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import {
   useCallback,
   useEffect,
@@ -7,13 +15,14 @@ import {
   useMemo,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { Loader2, Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Loader2, Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import styles from "./ftp-calculator.module.css";
 import { fileAnalyticsProperties, getErrorDebugInfo } from "@/lib/analytics";
 import { cn } from "@/lib/cn";
@@ -80,9 +89,6 @@ function UnitInput({
     </div>
   );
 }
-
-const accentButtonClass =
-  "bg-brand text-brand-foreground hover:bg-brand/85";
 
 type EstimateCpTestType = "three_nine" | "thirty_min";
 
@@ -443,31 +449,30 @@ function FtpShareCard({
         </div>
       </section>
 
-      <div className={`${styles.posterActions} ftp-share-actions`}>
-        <Select value={zoneModel} onValueChange={selectZoneModel}>
-          <SelectTrigger
-            aria-label={t("fieldResult.switchZones")}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            <SlidersHorizontal className="size-3.5" aria-hidden />
-            {t("fieldResult.switchZones")}
-          </SelectTrigger>
-          <SelectContent position="popper" align="start">
-            {POWER_ZONE_MODELS.map((model) => (
-              <SelectItem key={model} value={model}>
-                {tZones(`inputs.model.options.${model.toLowerCase()}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {ftp != null ? (
-          <a
-            href={powerZonesHref(prefix, ftp, zoneModel)}
-            className={cn(buttonVariants({ size: "lg" }), accentButtonClass)}
-          >
-            {t("fieldResult.handoff")}
-          </a>
-        ) : null}
+      <ToolResultActions
+        className="ftp-share-actions"
+        leading={
+          <>
+            <Select value={zoneModel} onValueChange={selectZoneModel}>
+              <SelectTrigger aria-label={t("fieldResult.switchZones")}>
+                {t("fieldResult.switchZones")}
+              </SelectTrigger>
+              <SelectContent position="popper" align="start">
+                {POWER_ZONE_MODELS.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {tZones(`inputs.model.options.${model.toLowerCase()}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {ftp != null ? (
+              <a href={powerZonesHref(prefix, ftp, zoneModel)}>
+                {t("fieldResult.handoff")}
+              </a>
+            ) : null}
+          </>
+        }
+      >
         <Button type="button" variant="outline" size="lg" onClick={onPrint}>
           <Printer className="size-3.5" aria-hidden />
           {t("fieldResult.print")}
@@ -476,7 +481,7 @@ function FtpShareCard({
           <Share2 className="size-3.5" aria-hidden />
           {copied ? t("fieldResult.copied") : t("fieldResult.copyLink")}
         </Button>
-      </div>
+      </ToolResultActions>
     </div>
   );
 }
@@ -549,6 +554,7 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
     () => parsePositiveNumber(weightText),
     [weightText],
   );
+  const fields = useCommittedFields();
   const weightLimits = bodyMassLimits(units);
   const canonicalKg = useMemo(
     () => parsePositiveNumber(weightKgText),
@@ -560,6 +566,12 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
       weightRaw < weightLimits.min ||
       weightRaw > weightLimits.max);
   const bodyWeightKg = weightInvalid ? null : canonicalKg;
+  const showPowerError = powerInvalid && fields.isCommitted("power", powerText);
+  const powerError = showPowerError ? t("manual.invalidPower") : "";
+  const showWeightError = weightInvalid && fields.isCommitted("weight", weightText);
+  const weightError = showWeightError
+    ? (units === "imperial" ? t("manual.invalidWeightLb") : t("manual.invalidWeight"))
+    : "";
 
   function onWeightInput(value: string) {
     setWeightText(value);
@@ -594,14 +606,6 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
     const fileDisplay = displayMassFromKg(fileWeightKgText, next);
     if (fileDisplay != null) setFileWeightText(fileDisplay);
     setUnits(next);
-  }
-
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next = event.key === "ArrowRight" ? "imperial" : "metric";
-    selectUnits(next);
-    document.getElementById(next === "metric" ? "ftp-units-metric" : "ftp-units-imperial")?.focus();
   }
 
   const ftp = useMemo(() => {
@@ -792,38 +796,19 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
         <section id="calculator" className={styles.board}>
         <div className={styles.boardHead}>
           <h2 className={styles.boardLabel}>{t("title")}</h2>
-          <div
-            role="radiogroup"
-            aria-label={t("manual.unitsLabel")}
-            className={styles.unitSwitch}
-          >
-            <Button
-              id="ftp-units-metric"
-              type="button"
-              role="radio"
-              variant="ghost"
-              aria-checked={units === "metric"}
-              tabIndex={units === "metric" ? 0 : -1}
-              onClick={() => selectUnits("metric")}
-              onKeyDown={onUnitKeyDown}
-              className={styles.unitOption}
-            >
-              {t("manual.unitsMetric")}
-            </Button>
-            <Button
-              id="ftp-units-imperial"
-              type="button"
-              role="radio"
-              variant="ghost"
-              aria-checked={units === "imperial"}
-              tabIndex={units === "imperial" ? 0 : -1}
-              onClick={() => selectUnits("imperial")}
-              onKeyDown={onUnitKeyDown}
-              className={styles.unitOption}
-            >
-              {t("manual.unitsImperial")}
-            </Button>
-          </div>
+          <ToolChoiceGroup
+            value={units}
+            onValueChange={selectUnits}
+            label={t("manual.unitsLabel")}
+            options={[
+              { value: "metric", id: "ftp-units-metric", label: t("manual.unitsMetric") },
+              {
+                value: "imperial",
+                id: "ftp-units-imperial",
+                label: t("manual.unitsImperial"),
+              },
+            ]}
+          />
         </div>
         <Tabs
           value={inputTab}
@@ -831,29 +816,14 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
             if (value === "field" || value === "file") setInputTab(value);
           }}
         >
-        <TabsList
-          aria-label={t("manual.tablist")}
-          className={cn(styles.tabs, "grid h-auto w-full grid-cols-2 rounded-none bg-transparent p-0")}
-        >
-          <TabsTrigger
-            value="field"
-            className={cn(
-              styles.tab,
-              "h-auto flex-1 rounded-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-            )}
-          >
-            {t("manual.title")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="file"
-            className={cn(
-              styles.tab,
-              "h-auto flex-1 rounded-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-            )}
-          >
-            {t("fileOption.tab")}
-          </TabsTrigger>
-        </TabsList>
+        <ToolTabsList
+          value={inputTab}
+          label={t("manual.tablist")}
+          options={[
+            { value: "field", label: t("manual.title") },
+            { value: "file", label: t("fileOption.tab") },
+          ]}
+        />
         <p className={styles.boardLead}>
           {inputTab === "field" ? t("manual.lead") : t("fileOption.lead")}
         </p>
@@ -896,7 +866,9 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
                 value={powerText}
                 placeholder={t("manual.powerPlaceholder")}
                 onChange={(event) => setPowerText(event.target.value)}
-                aria-invalid={powerInvalid}
+                aria-invalid={showPowerError}
+                aria-describedby={showPowerError ? "ftp-power-error" : undefined}
+                onBlur={() => fields.commit("power", powerText)}
               />
             </div>
             <div className={styles.field}>
@@ -915,20 +887,23 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
                     : t("manual.weightPlaceholder")
                 }
                 onChange={(event) => onWeightInput(event.target.value)}
-                aria-invalid={weightInvalid}
+                aria-invalid={showWeightError}
+                aria-describedby={showWeightError ? "ftp-weight-error" : undefined}
+                onBlur={() => fields.commit("weight", weightText)}
               />
             </div>
           </div>
-          {powerInvalid ? (
-            <p role="alert" className={styles.alert}>
-              {t("manual.invalidPower")}
+          {showPowerError ? (
+            <p id="ftp-power-error" className={styles.alert}>
+              {powerError}
             </p>
           ) : null}
-          {weightInvalid ? (
-            <p role="alert" className={styles.alert}>
-              {units === "imperial" ? t("manual.invalidWeightLb") : t("manual.invalidWeight")}
+          {showWeightError ? (
+            <p id="ftp-weight-error" className={styles.alert}>
+              {weightError}
             </p>
           ) : null}
+          <FieldErrorAnnouncement message={[powerError, weightError].filter(Boolean).join(" ")} />
         </TabsContent>
 
         <TabsContent value="file" className={styles.filePanel}>
@@ -992,13 +967,13 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
             {error}
           </div>
         ) : null}
-        <Button
+        <ToolActionButton
+          intent="primary"
+          fullWidth
           type="button"
-          size="lg"
           disabled={isSubmitting}
           onClick={onSubmit}
           aria-label={t("buttons.analyzeAria")}
-          className={cn("h-10 w-full", accentButtonClass)}
         >
           {isSubmitting ? (
             <>
@@ -1008,8 +983,7 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
           ) : (
             t("buttons.analyze")
           )}
-        </Button>
-
+        </ToolActionButton>
 
       {results?.length ? (
         <section className={styles.fileResults} aria-live="polite">

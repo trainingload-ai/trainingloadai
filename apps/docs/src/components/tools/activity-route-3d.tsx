@@ -233,10 +233,7 @@ export function ActivityRoute3D({
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
-      controls.autoRotate = !window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-      controls.autoRotateSpeed = 0.45;
+      controls.autoRotate = false;
       controls.maxPolarAngle = Math.PI * 0.48;
       controls.minDistance = extent * 0.25;
       controls.maxDistance = extent * 6;

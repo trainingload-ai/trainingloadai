@@ -18,7 +18,6 @@ describe("CSS calculator page source", () => {
     expect(client).toContain("window.print()");
     expect(client).toContain("navigator.clipboard.writeText");
     expect(client).toContain("<Input");
-    expect(client).toContain('role="radiogroup"');
     expect(client).toContain('t("manual.meters")');
     expect(client).toContain('t("manual.yards")');
     expect(client).toContain('t("result.print")');

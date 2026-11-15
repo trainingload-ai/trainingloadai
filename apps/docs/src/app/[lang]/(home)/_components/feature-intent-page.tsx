@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ContentFreshness } from "@/components/ContentFreshness";
 import { ArrowRight, Target } from "lucide-react";
 import {
@@ -155,7 +155,7 @@ export function FeatureIntentPage({
   const isEditorial = variant === "editorial";
 
   return (
-    <main
+    <div
       className={cn(
         "overflow-x-hidden bg-background text-foreground",
         isEditorial && "selection:bg-brand selection:text-brand-foreground",
@@ -215,22 +215,24 @@ export function FeatureIntentPage({
               {copy.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={primaryHref}>
-                <Button
-                  variant="brand"
-                  className="h-11 rounded-control-lg px-5 text-sm font-bold"
-                >
-                  {copy.primary}
-                  <ArrowRight aria-hidden="true" className="ml-2 size-4" />
-                </Button>
+              <Link
+                href={primaryHref}
+                className={cn(
+                  buttonVariants({ variant: "brand" }),
+                  "h-11 rounded-control-lg px-5 text-sm font-bold",
+                )}
+              >
+                {copy.primary}
+                <ArrowRight aria-hidden="true" className="ml-2 size-4" />
               </Link>
-              <Link href={secondaryHref}>
-                <Button
-                  variant="outline"
-                  className="h-11 rounded-control-lg border-border bg-card px-5 text-sm font-semibold hover:bg-muted"
-                >
-                  {copy.secondary}
-                </Button>
+              <Link
+                href={secondaryHref}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "h-11 rounded-control-lg border-border bg-card px-5 text-sm font-semibold hover:bg-muted",
+                )}
+              >
+                {copy.secondary}
               </Link>
             </div>
           </div>
@@ -279,7 +281,7 @@ export function FeatureIntentPage({
               </article>
             ) : null}
             {sources?.length ? (
-              <aside
+              <div
                 className={cn(
                   "rounded-surface border border-border bg-card p-5",
                   isEditorial && "rounded-overlay border-dashed p-6",
@@ -305,7 +307,7 @@ export function FeatureIntentPage({
                     <li key={source}>{source}</li>
                   ))}
                 </ul>
-              </aside>
+              </div>
             ) : null}
           </div>
         </section>
@@ -454,26 +456,32 @@ export function FeatureIntentPage({
             ))}
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={docsHref}>
-              <Button
-                variant="outline"
-                className="h-10 rounded-control border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted"
-              >
-                {copy.docsAction}
-              </Button>
+            <Link
+              href={docsHref}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-10 rounded-control border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted",
+              )}
+            >
+              {copy.docsAction}
             </Link>
-            <Link href={toolsHref}>
-              <Button
-                variant="outline"
-                className="h-10 rounded-control border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted"
-              >
-                {copy.toolsAction}
-              </Button>
+            <Link
+              href={toolsHref}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-10 rounded-control border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted",
+              )}
+            >
+              {copy.toolsAction}
             </Link>
-            <Link href={primaryHref}>
-              <Button className="h-10 rounded-control px-4 text-xs font-semibold">
-                {copy.productAction}
-              </Button>
+            <Link
+              href={primaryHref}
+              className={cn(
+                buttonVariants({}),
+                "h-10 rounded-control px-4 text-xs font-semibold",
+              )}
+            >
+              {copy.productAction}
             </Link>
           </div>
         </div>
@@ -495,11 +503,15 @@ export function FeatureIntentPage({
               {copy.ctaText}
             </p>
           </div>
-          <Link href={primaryHref}>
-            <Button className="h-12 rounded-control-lg bg-primary px-6 text-sm font-bold text-primary-foreground hover:opacity-90">
-              {copy.primary}
-              <ArrowRight aria-hidden="true" className="ml-2 size-4" />
-            </Button>
+          <Link
+            href={primaryHref}
+            className={cn(
+              buttonVariants({}),
+              "h-12 rounded-control-lg bg-primary px-6 text-sm font-bold text-primary-foreground hover:opacity-90",
+            )}
+          >
+            {copy.primary}
+            <ArrowRight aria-hidden="true" className="ml-2 size-4" />
           </Link>
         </div>
       </section>
@@ -509,6 +521,6 @@ export function FeatureIntentPage({
           <ContentFreshness lastUpdated={copy.lastUpdatedDate} />
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

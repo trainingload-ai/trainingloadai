@@ -88,6 +88,30 @@
     "switch": "Mudar",
     "dismiss": "Fechar sugestão de idioma"
   },
+  "accessibility": {
+    "skipToContent": "Pular para o conteúdo",
+    "previewImage": "Visualizar imagem",
+    "previewImageNamed": "Visualizar imagem: {description}",
+    "imagePreview": "Prévia da imagem",
+    "closePreview": "Fechar prévia",
+    "preview": "Prévia",
+    "pauseAnimation": "Pausar animação",
+    "resumeAnimation": "Retomar animação",
+    "codeBlock": "Exemplo de código",
+    "dataTable": "Tabela de dados"
+  },
+  "docsUi": {
+    "searchNoResult": "Nenhum resultado encontrado",
+    "toc": "Nesta página",
+    "tocNoHeadings": "Sem títulos",
+    "lastUpdate": "Última atualização",
+    "nextPage": "Próxima página",
+    "previousPage": "Página anterior",
+    "editOnGithub": "Editar no GitHub",
+    "search": "Pesquisar na documentação",
+    "chooseLanguage": "Idioma",
+    "chooseTheme": "Tema"
+  },
   "header": {
     "searchDocs": "Pesquisar na documentação",
     "openDocsMenu": "Abrir navegação da documentação",

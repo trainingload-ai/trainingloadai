@@ -1,5 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
+
 import {
   useCallback,
   useEffect,
@@ -57,6 +63,7 @@ export function PowerZonesCalculatorClient({
   const prefix = localePrefix(locale);
   const [model, setModel] = useState<PowerZoneModel>(initial.model ?? "COGGAN");
   const [baseKey, setBaseKey] = useState<BaseKey>(initial.baseType ?? "FTP");
+  const committed = useCommittedFields();
   const [baseValue, setBaseValue] = useState(initial.base ?? "");
   const [example, setExample] = useState(initial.example);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -185,11 +192,19 @@ export function PowerZonesCalculatorClient({
     roundedBase == null ? "" : `?model=${model.toLowerCase()}`
   }`;
 
+  const baseInvalid =
+    baseValue.trim() !== "" &&
+    !base &&
+    committed.isCommitted("power", baseValue);
+
   return (
     <>
       <div className={styles.hero}>
         {hero}
         <section id="calculator" className={styles.board}>
+          <FieldErrorAnnouncement
+            message={baseInvalid ? t("warnings.invalid") : ""}
+          />
           <h2 className={styles.boardLabel}>{t("panel.title")}</h2>
           <p className={styles.boardLead}>{t("panel.subtitle")}</p>
           <ol className={styles.panelSteps}>
@@ -269,10 +284,9 @@ export function PowerZonesCalculatorClient({
                 <div className={styles.inputWithUnit}>
                   <Input
                     id="pz-watts"
+                    onBlur={() => committed.commit("power", baseValue)}
                     aria-describedby={
-                      baseValue.trim() !== "" && !base
-                        ? "pz-input-error"
-                        : undefined
+                      baseInvalid ? "pz-input-error" : undefined
                     }
                     inputMode="numeric"
                     placeholder={t("inputs.baseValue.placeholder")}
@@ -281,25 +295,20 @@ export function PowerZonesCalculatorClient({
                       setBaseValue(event.target.value);
                       setExample(false);
                     }}
-                    aria-invalid={baseValue.trim() !== "" && !base}
+                    aria-invalid={baseInvalid}
                   />
                   <span aria-hidden>W</span>
                 </div>
               </div>
             </div>
-            {baseValue.trim() !== "" && !base ? (
-              <p id="pz-input-error" role="alert" className={styles.inputError}>
+            {baseInvalid ? (
+              <p id="pz-input-error" className={styles.inputError}>
                 {t("warnings.invalid")}
               </p>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className={styles.exampleButton}
-              onClick={loadExample}
-            >
+            <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
               {t("scorecard.exampleAction")}
-            </Button>
+            </ToolActionButton>
             <div className={styles.referenceHelp}>
               <p>{t("panel.needReference")}</p>
               <a href={`${prefix}/ftp-calculator`}>
@@ -396,9 +405,7 @@ export function PowerZonesCalculatorClient({
                     zones.map((zone) => (
                       <tr key={zone.order} data-zone={`z${zone.order}`}>
                         <th scope="row">
-                          <span className={styles.zoneCode}>
-                            Z{zone.order}
-                          </span>
+                          <span className={styles.zoneCode}>Z{zone.order}</span>
                         </th>
                         <td>{zoneName(zone.order)}</td>
                         <td className={styles.zoneFigure}>{zone.wattLabel}</td>
@@ -422,31 +429,32 @@ export function PowerZonesCalculatorClient({
             </div>
           </div>
         </section>
-        <div className={`${styles.posterActions} pz-share-actions`}>
-          <Select
-            value={model}
-            onValueChange={(value) => {
-              setModel(value as PowerZoneModel);
-              setExample(false);
-            }}
-          >
-            <SelectTrigger
-              aria-label={t("scorecard.switchModel")}
-              className={styles.modelAction}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POWER_ZONE_MODELS.map((key) => (
-                <SelectItem key={key} value={key}>
-                  {t(`inputs.model.options.${key.toLowerCase()}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <a href={guideHref} className={styles.secondaryAction}>
-            {t("scorecard.guide")}
-          </a>
+        <ToolResultActions
+          className="pz-share-actions"
+          leading={
+            <>
+              <Select
+                value={model}
+                onValueChange={(value) => {
+                  setModel(value as PowerZoneModel);
+                  setExample(false);
+                }}
+              >
+                <SelectTrigger aria-label={t("scorecard.switchModel")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {POWER_ZONE_MODELS.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {t(`inputs.model.options.${key.toLowerCase()}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <a href={guideHref}>{t("scorecard.guide")}</a>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -467,7 +475,7 @@ export function PowerZonesCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copiedLink ? t("scorecard.copied") : t("scorecard.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p role="alert" className={styles.inputError}>
             {t("scorecard.shareError")}

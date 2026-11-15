@@ -1,10 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -155,13 +156,9 @@ export function ThresholdFileInput({
             </div>
           </div>
           <p className={styles.fileHint}>{t(`method.${metric}`)}</p>
-          <Button
-            type="button"
-            className={styles.primaryAction}
-            onClick={calculate}
-          >
+          <ToolActionButton intent="primary" type="button" onClick={calculate}>
             {t("calculate")}
-          </Button>
+          </ToolActionButton>
         </>
       ) : null}
       {error ? (

@@ -2655,7 +2655,7 @@ function HomeTwoColumnSection({
         "md:[grid-template-areas:'main_state'_'main_recent'_'main_upload']"
       }
     >
-      <main className="contents md:flex md:min-h-0 md:min-w-0 md:flex-col md:gap-3 md:[grid-area:main] md:order-none">
+      <div className="contents md:flex md:min-h-0 md:min-w-0 md:flex-col md:gap-3 md:[grid-area:main] md:order-none">
         <div className="order-2 min-w-0 md:order-none">
           <LoadComparisonChart copy={copy} interactive={interactive} />
         </div>
@@ -2673,7 +2673,7 @@ function HomeTwoColumnSection({
             onOpenMetric={onOpenMetric}
           />
         </div>
-      </main>
+      </div>
       <div className="order-3 min-w-0 md:[grid-area:state] md:order-none">
         <CurrentStatePanel
           copy={copy}

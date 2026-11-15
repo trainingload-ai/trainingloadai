@@ -1,0 +1,54 @@
+.theme {
+  --score-bg: var(--card);
+  --score-panel: var(--secondary);
+  --score-paper: var(--foreground);
+  --score-muted: var(--muted-foreground);
+  --score-green: var(--success);
+  --score-yellow: color-mix(in srgb, var(--warning) 90%, var(--foreground));
+  --score-coral: color-mix(in srgb, var(--destructive) 90%, var(--foreground));
+  --score-line: var(--border);
+  --score-line-strong: var(--input);
+  --score-grid: color-mix(in srgb, var(--success) 8%, transparent);
+  --score-highlight: var(--accent);
+  --score-input: var(--card);
+  --score-fill-green: #76efa3;
+  --score-fill-yellow: #f5cf58;
+  --score-fill-coral: #ff766a;
+}
+
+:global(.dark) .theme {
+  --score-bg: #07110f;
+  --score-panel: #0d1813;
+  --score-paper: #f7f3e9;
+  --score-muted: #b8c0b9;
+  --score-green: #76efa3;
+  --score-yellow: #f5cf58;
+  --score-coral: #ff766a;
+  --score-line: rgb(247 243 233 / 16%);
+  --score-line-strong: rgb(247 243 233 / 42%);
+  --score-grid: rgb(118 239 163 / 8%);
+  --score-highlight: rgb(118 239 163 / 14%);
+  --score-input: rgb(255 255 255 / 4%);
+}
+
+.title {
+  display: inline-block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  position: static;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0.4rem 0.75rem;
+  background: #f5d65d;
+  color: #172219;
+  box-shadow: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  line-height: 1.4;
+  text-transform: none;
+  overflow-wrap: anywhere;
+  transform: none;
+}

@@ -1,5 +1,14 @@
 "use client";
 
+import { InputSource } from "@/components/calculators/input-source";
+
+import { ToolTabsList } from "@/components/ToolTabsList";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { scrollBehavior } from "@/lib/scroll-behavior";
+
 import {
   useEffect,
   useLayoutEffect,
@@ -7,13 +16,12 @@ import {
   useRef,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -239,7 +247,7 @@ export function LactateThresholdCalculatorClient({
   const [distanceText, setDistanceText] = useState("");
   const [timeText, setTimeText] = useState("");
   const [copied, setCopied] = useState(false);
-  const [inputTab, setInputTab] = useState("manual");
+  const [inputTab, setInputTab] = useState<"manual" | "file">("manual");
   const [zoneModel, setZoneModel] = useState<PowerZoneModel>("COGGAN");
 
   useLayoutEffect(() => {
@@ -800,7 +808,10 @@ export function LactateThresholdCalculatorClient({
       !hadResultRef.current &&
       window.matchMedia("(max-width: 1023px)").matches
     ) {
-      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      resultRef.current?.scrollIntoView({
+        behavior: scrollBehavior(),
+        block: "start",
+      });
     }
     hadResultRef.current = hasResult;
   }, [result]);
@@ -810,18 +821,6 @@ export function LactateThresholdCalculatorClient({
     setRaceDistanceText((text) => convertDistanceText(text, units, next));
     setDistanceText((text) => convertDistanceText(text, units, next));
     setUnits(next);
-  }
-
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next = event.key === "ArrowRight" ? "imperial" : "metric";
-    selectUnits(next);
-    document
-      .getElementById(
-        next === "metric" ? "lt-units-metric" : "lt-units-imperial",
-      )
-      ?.focus();
   }
 
   async function onShare() {
@@ -909,38 +908,23 @@ export function LactateThresholdCalculatorClient({
         <section id="calculator" className={styles.board}>
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("manual.title")}</h2>
-            <div
-              role="radiogroup"
-              aria-label={t("manual.unitsLabel")}
-              className={styles.unitSwitch}
-            >
-              <Button
-                id="lt-units-metric"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={units === "metric"}
-                tabIndex={units === "metric" ? 0 : -1}
-                onClick={() => selectUnits("metric")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.unitsMetric")}
-              </Button>
-              <Button
-                id="lt-units-imperial"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={units === "imperial"}
-                tabIndex={units === "imperial" ? 0 : -1}
-                onClick={() => selectUnits("imperial")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.unitsImperial")}
-              </Button>
-            </div>
+            <ToolChoiceGroup
+              value={units}
+              onValueChange={selectUnits}
+              label={t("manual.unitsLabel")}
+              options={[
+                {
+                  value: "metric",
+                  id: "lt-units-metric",
+                  label: t("manual.unitsMetric"),
+                },
+                {
+                  value: "imperial",
+                  id: "lt-units-imperial",
+                  label: t("manual.unitsImperial"),
+                },
+              ]}
+            />
           </div>
           <p className={styles.boardLead}>{t("panel.subtitle")}</p>
           <ol className={styles.stepList}>
@@ -957,238 +941,255 @@ export function LactateThresholdCalculatorClient({
             value={metric}
             onValueChange={(value) => setMetric(value as MetricKey)}
           >
-            <TabsList
-              className={styles.inputTabs}
-              aria-label={t("inputs.metric.label")}
-            >
-              {METRICS.map((key) => (
-                <TabsTrigger key={key} value={key}>
-                  {t(`inputs.metric.options.${METRIC_OPTION[key]}`)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <fieldset className={styles.inputSources}>
-            <legend className="sr-only">{t("source.label")}</legend>
-            <span className={styles.inputSourceLabel} aria-hidden="true">
-              {t("source.label")}
-            </span>
-            <div className={styles.inputSourceOptions}>
-              {(["manual", "file"] as const).map((source) => (
-                <label key={source}>
-                  <input
-                    type="radio"
-                    name="lt-input-source"
-                    value={source}
-                    checked={inputTab === source}
-                    onChange={() => setInputTab(source)}
-                  />
-                  <span>{t(`source.${source}`)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          {inputTab === "file" ? (
-            <ThresholdFileInput
-              key={metric}
-              metric={metric}
-              onResult={useFileResult}
-              onReset={resetFileResult}
+            <ToolTabsList
+              value={metric}
+              label={t("inputs.metric.label")}
+              options={METRICS.map((key) => ({
+                value: key,
+                label: t(`inputs.metric.options.${METRIC_OPTION[key]}`),
+              }))}
             />
-          ) : (
-            <>
-              <p className={styles.fileHint}>
-                {t(`inputs.metric.hint.${metric}`)}
-              </p>
-              <div className={styles.formStack}>
-                {metric === "RACE" ? (
+            {METRICS.map((key) => (
+              <TabsContent key={key} value={key} className="mt-0">
+                {key === metric ? (
                   <>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-race-preset">
-                        {t("race.preset.label")}
-                      </Label>
-                      <Select
-                        value={racePreset}
-                        onValueChange={(value) =>
-                          setRacePreset(value as RacePresetKey)
-                        }
-                      >
-                        <SelectTrigger id="lt-race-preset" className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {RACE_PRESETS.map((preset) => (
-                            <SelectItem key={preset} value={preset}>
-                              {t(`race.presets.${preset}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {racePreset === "custom" ? (
-                      <div className={styles.field}>
-                        <Label htmlFor="lt-race-distance">
-                          {units === "imperial"
-                            ? t("race.distanceMi.label")
-                            : t("race.distanceKm.label")}
-                        </Label>
-                        <UnitInput
-                          id="lt-race-distance"
-                          suffix={distanceUnit}
-                          inputMode="decimal"
-                          placeholder={
-                            units === "imperial"
-                              ? t("race.distanceMi.placeholder")
-                              : t("race.distanceKm.placeholder")
-                          }
-                          value={raceDistanceText}
-                          onChange={(event) =>
-                            setRaceDistanceText(event.target.value)
-                          }
-                          aria-invalid={
-                            raceDistanceText.trim() !== "" &&
-                            !parsePositiveNumber(raceDistanceText)
-                          }
+                    <InputSource
+                      value={inputTab}
+                      onValueChange={setInputTab}
+                      label={t("source.label")}
+                      manual={t("source.manual")}
+                      file={t("source.file")}
+                    >
+                      {inputTab === "file" ? (
+                        <ThresholdFileInput
+                          key={metric}
+                          metric={metric}
+                          onResult={useFileResult}
+                          onReset={resetFileResult}
                         />
-                      </div>
-                    ) : null}
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-race-time">
-                        {t("race.time.label")}
-                      </Label>
-                      <Input
-                        id="lt-race-time"
-                        inputMode="text"
-                        placeholder={t("race.time.placeholder")}
-                        value={raceTimeText}
-                        onChange={(event) =>
-                          setRaceTimeText(event.target.value)
-                        }
-                        aria-invalid={
-                          raceTimeText.trim() !== "" && !raceTimeSeconds
-                        }
-                      />
-                    </div>
+                      ) : (
+                        <>
+                          <p className={styles.fileHint}>
+                            {t(`inputs.metric.hint.${metric}`)}
+                          </p>
+                          <div className={styles.formStack}>
+                            {metric === "RACE" ? (
+                              <>
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-race-preset">
+                                    {t("race.preset.label")}
+                                  </Label>
+                                  <Select
+                                    value={racePreset}
+                                    onValueChange={(value) =>
+                                      setRacePreset(value as RacePresetKey)
+                                    }
+                                  >
+                                    <SelectTrigger
+                                      id="lt-race-preset"
+                                      className="w-full"
+                                    >
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {RACE_PRESETS.map((preset) => (
+                                        <SelectItem key={preset} value={preset}>
+                                          {t(`race.presets.${preset}`)}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                {racePreset === "custom" ? (
+                                  <div className={styles.field}>
+                                    <Label htmlFor="lt-race-distance">
+                                      {units === "imperial"
+                                        ? t("race.distanceMi.label")
+                                        : t("race.distanceKm.label")}
+                                    </Label>
+                                    <UnitInput
+                                      id="lt-race-distance"
+                                      suffix={distanceUnit}
+                                      inputMode="decimal"
+                                      placeholder={
+                                        units === "imperial"
+                                          ? t("race.distanceMi.placeholder")
+                                          : t("race.distanceKm.placeholder")
+                                      }
+                                      value={raceDistanceText}
+                                      onChange={(event) =>
+                                        setRaceDistanceText(event.target.value)
+                                      }
+                                      aria-invalid={
+                                        raceDistanceText.trim() !== "" &&
+                                        !parsePositiveNumber(raceDistanceText)
+                                      }
+                                    />
+                                  </div>
+                                ) : null}
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-race-time">
+                                    {t("race.time.label")}
+                                  </Label>
+                                  <Input
+                                    id="lt-race-time"
+                                    inputMode="text"
+                                    placeholder={t("race.time.placeholder")}
+                                    value={raceTimeText}
+                                    onChange={(event) =>
+                                      setRaceTimeText(event.target.value)
+                                    }
+                                    aria-invalid={
+                                      raceTimeText.trim() !== "" &&
+                                      !raceTimeSeconds
+                                    }
+                                  />
+                                </div>
+                              </>
+                            ) : null}
+
+                            {metric === "HEART_RATE" ? (
+                              <div className={styles.field}>
+                                <Label htmlFor="lt-hr">
+                                  {t("heartRate.avgHr20.label")}
+                                </Label>
+                                <UnitInput
+                                  id="lt-hr"
+                                  suffix="bpm"
+                                  inputMode="numeric"
+                                  placeholder={t(
+                                    "heartRate.avgHr20.placeholder",
+                                  )}
+                                  value={avgHr20Text}
+                                  onChange={(event) =>
+                                    setAvgHr20Text(event.target.value)
+                                  }
+                                  aria-invalid={
+                                    avgHr20Text.trim() !== "" && !avgHr20
+                                  }
+                                />
+                              </div>
+                            ) : null}
+
+                            {metric === "POWER" ? (
+                              <>
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-protocol">
+                                    {t("power.protocol.label")}
+                                  </Label>
+                                  <Select
+                                    value={powerProtocol}
+                                    onValueChange={(value) =>
+                                      setPowerProtocol(value as PowerProtocol)
+                                    }
+                                  >
+                                    <SelectTrigger
+                                      id="lt-protocol"
+                                      className="w-full"
+                                    >
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="20MIN">
+                                        {t("power.protocols.20min")}
+                                      </SelectItem>
+                                      <SelectItem value="8MIN">
+                                        {t("power.protocols.8min")}
+                                      </SelectItem>
+                                      <SelectItem value="60MIN">
+                                        {t("power.protocols.60min")}
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-power">
+                                    {t("power.avgPower.label")}
+                                  </Label>
+                                  <UnitInput
+                                    id="lt-power"
+                                    suffix="W"
+                                    inputMode="numeric"
+                                    placeholder={t(
+                                      "power.avgPower.placeholder",
+                                    )}
+                                    value={avgPowerText}
+                                    onChange={(event) =>
+                                      setAvgPowerText(event.target.value)
+                                    }
+                                    aria-invalid={
+                                      avgPowerText.trim() !== "" && !avgPower
+                                    }
+                                  />
+                                </div>
+                              </>
+                            ) : null}
+
+                            {metric === "PACE" ? (
+                              <div className={styles.effortGrid}>
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-distance">
+                                    {units === "imperial"
+                                      ? t("pace.distanceMi.label")
+                                      : t("pace.distanceKm.label")}
+                                  </Label>
+                                  <UnitInput
+                                    id="lt-distance"
+                                    suffix={distanceUnit}
+                                    inputMode="decimal"
+                                    placeholder={
+                                      units === "imperial"
+                                        ? t("pace.distanceMi.placeholder")
+                                        : t("pace.distanceKm.placeholder")
+                                    }
+                                    value={distanceText}
+                                    onChange={(event) =>
+                                      setDistanceText(event.target.value)
+                                    }
+                                    aria-invalid={
+                                      distanceText.trim() !== "" &&
+                                      !parsePositiveNumber(distanceText)
+                                    }
+                                  />
+                                </div>
+                                <div className={styles.field}>
+                                  <Label htmlFor="lt-time">
+                                    {t("pace.time.label")}
+                                  </Label>
+                                  <Input
+                                    id="lt-time"
+                                    inputMode="text"
+                                    placeholder={t("pace.time.placeholder")}
+                                    value={timeText}
+                                    onChange={(event) =>
+                                      setTimeText(event.target.value)
+                                    }
+                                    aria-invalid={
+                                      timeText.trim() !== "" && !timeSeconds
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {warnings.length > 0 ? (
+                              <div role="status" className={styles.alert}>
+                                <ul>
+                                  {warnings.map((warning) => (
+                                    <li key={warning}>{warning}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : null}
+                          </div>
+                        </>
+                      )}
+                    </InputSource>
                   </>
                 ) : null}
-
-                {metric === "HEART_RATE" ? (
-                  <div className={styles.field}>
-                    <Label htmlFor="lt-hr">
-                      {t("heartRate.avgHr20.label")}
-                    </Label>
-                    <UnitInput
-                      id="lt-hr"
-                      suffix="bpm"
-                      inputMode="numeric"
-                      placeholder={t("heartRate.avgHr20.placeholder")}
-                      value={avgHr20Text}
-                      onChange={(event) => setAvgHr20Text(event.target.value)}
-                      aria-invalid={avgHr20Text.trim() !== "" && !avgHr20}
-                    />
-                  </div>
-                ) : null}
-
-                {metric === "POWER" ? (
-                  <>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-protocol">
-                        {t("power.protocol.label")}
-                      </Label>
-                      <Select
-                        value={powerProtocol}
-                        onValueChange={(value) =>
-                          setPowerProtocol(value as PowerProtocol)
-                        }
-                      >
-                        <SelectTrigger id="lt-protocol" className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="20MIN">
-                            {t("power.protocols.20min")}
-                          </SelectItem>
-                          <SelectItem value="8MIN">
-                            {t("power.protocols.8min")}
-                          </SelectItem>
-                          <SelectItem value="60MIN">
-                            {t("power.protocols.60min")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-power">
-                        {t("power.avgPower.label")}
-                      </Label>
-                      <UnitInput
-                        id="lt-power"
-                        suffix="W"
-                        inputMode="numeric"
-                        placeholder={t("power.avgPower.placeholder")}
-                        value={avgPowerText}
-                        onChange={(event) =>
-                          setAvgPowerText(event.target.value)
-                        }
-                        aria-invalid={avgPowerText.trim() !== "" && !avgPower}
-                      />
-                    </div>
-                  </>
-                ) : null}
-
-                {metric === "PACE" ? (
-                  <div className={styles.effortGrid}>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-distance">
-                        {units === "imperial"
-                          ? t("pace.distanceMi.label")
-                          : t("pace.distanceKm.label")}
-                      </Label>
-                      <UnitInput
-                        id="lt-distance"
-                        suffix={distanceUnit}
-                        inputMode="decimal"
-                        placeholder={
-                          units === "imperial"
-                            ? t("pace.distanceMi.placeholder")
-                            : t("pace.distanceKm.placeholder")
-                        }
-                        value={distanceText}
-                        onChange={(event) =>
-                          setDistanceText(event.target.value)
-                        }
-                        aria-invalid={
-                          distanceText.trim() !== "" &&
-                          !parsePositiveNumber(distanceText)
-                        }
-                      />
-                    </div>
-                    <div className={styles.field}>
-                      <Label htmlFor="lt-time">{t("pace.time.label")}</Label>
-                      <Input
-                        id="lt-time"
-                        inputMode="text"
-                        placeholder={t("pace.time.placeholder")}
-                        value={timeText}
-                        onChange={(event) => setTimeText(event.target.value)}
-                        aria-invalid={timeText.trim() !== "" && !timeSeconds}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-
-                {warnings.length > 0 ? (
-                  <div role="status" className={styles.alert}>
-                    <ul>
-                      {warnings.map((warning) => (
-                        <li key={warning}>{warning}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
-            </>
-          )}
+              </TabsContent>
+            ))}
+          </Tabs>
         </section>
       </div>
 
@@ -1289,33 +1290,35 @@ export function LactateThresholdCalculatorClient({
             ) : null}
           </div>
         </section>
-        <div className={`${styles.posterActions} lt-share-actions`}>
-          {metric === "POWER" ? (
-            <Select
-              value={zoneModel}
-              onValueChange={(value) => setZoneModel(value as PowerZoneModel)}
-            >
-              <SelectTrigger
-                aria-label={t("scorecard.switchZones")}
-                className={buttonVariants({ variant: "outline", size: "lg" })}
-              >
-                <SlidersHorizontal className="size-3.5" aria-hidden />
-                {t("scorecard.switchZones")}
-              </SelectTrigger>
-              <SelectContent position="popper" align="start">
-                {POWER_ZONE_MODELS.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {POWER_ZONE_MODEL_NAMES[model]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
-          {primaryLink ? (
-            <a href={primaryLink.href} className={styles.primaryAction}>
-              {primaryLink.label}
-            </a>
-          ) : null}
+        <ToolResultActions
+          className="lt-share-actions"
+          leading={
+            <>
+              {metric === "POWER" ? (
+                <Select
+                  value={zoneModel}
+                  onValueChange={(value) =>
+                    setZoneModel(value as PowerZoneModel)
+                  }
+                >
+                  <SelectTrigger aria-label={t("scorecard.switchZones")}>
+                    {t("scorecard.switchZones")}
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="start">
+                    {POWER_ZONE_MODELS.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {POWER_ZONE_MODEL_NAMES[model]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+              {primaryLink ? (
+                <a href={primaryLink.href}>{primaryLink.label}</a>
+              ) : null}
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -1336,7 +1339,7 @@ export function LactateThresholdCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("scorecard.copied") : t("scorecard.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
         {result ? (
           <details className={styles.resultDetails}>
             <summary>{t("scorecard.evidence")}</summary>

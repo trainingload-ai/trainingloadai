@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --z2-canvas: var(--background);
   --z2-surface: var(--card);
   --z2-ink: var(--foreground);
@@ -128,17 +129,6 @@
   line-height: 1.6;
 }
 
-.exampleButton {
-  min-height: 2.5rem;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--success);
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .notice {
   border-radius: var(--tl-radius-control-lg);
   background: var(--z2-accent-soft);
@@ -158,14 +148,12 @@
 }
 
 .jumpItem:focus-visible,
-.choice:focus-visible,
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible,
 .relatedLink:focus-visible,
 .relatedMore:focus-visible,
 .footerCtaButton:focus-visible,
 .posterLink:focus-visible,
-.exampleButton:focus-visible,
 .board :global(input:focus-visible),
 .board :global([data-slot="select-trigger"]:focus-visible) {
   outline: 2px solid var(--z2-accent);
@@ -270,33 +258,6 @@
   font-weight: 650;
 }
 
-.choiceRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.choice {
-  min-height: 2.25rem;
-  border: 1px solid var(--z2-line-strong);
-  border-radius: var(--tl-radius-control);
-  background: var(--z2-surface);
-  padding: 0.35rem 0.75rem;
-  color: var(--z2-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.choice[aria-checked="true"] {
-  border-color: transparent;
-  background: var(--z2-accent);
-  color: var(--z2-accent-foreground);
-}
-
-:global(.dark) .choice[aria-checked="true"] {
-  color: var(--z2-accent-foreground);
-}
-
 .alert {
   border-radius: var(--tl-radius-control-lg);
   background: var(--z2-danger-bg);
@@ -320,23 +281,16 @@
 }
 
 .poster {
-  --score-frame: #17201c;
-  --score-paper: #f7f3e9;
-  --score-green: #76efa3;
-  --score-yellow: #f5cf58;
+  composes: theme from "../../../../components/tool-scorecard.module.css";
   position: relative;
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
   border: 0;
   border-radius: var(--tl-radius-surface);
-  background: #07110f;
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
-}
-
-:global(.dark) .poster {
-  --score-frame: #f5f0e4;
 }
 
 .posterSheet {
@@ -349,29 +303,17 @@
 .posterBrand {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   min-height: 3rem;
-  border-bottom: 2px solid rgb(247 243 233 / 42%);
-  background: #07110f;
-  padding: 0.75rem 1.3rem;
+  border-bottom: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-bg, var(--card));
+  padding: 0.5rem 1.2rem;
+  gap: 1rem;
 }
 
 .posterHeading {
-  position: absolute;
-  top: -1rem;
-  left: 1.3rem;
-  border: 0;
-  padding: 0.6rem 0.8rem;
-  background: transparent;
-  color: var(--score-paper);
-  box-shadow: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1.2;
+  composes: title from "../../../../components/tool-scorecard.module.css";
   text-wrap: balance;
-  transform: none;
 }
 
 .posterMark {
@@ -391,7 +333,7 @@
 }
 
 .posterEyebrow {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 800;
@@ -431,7 +373,7 @@
 
 .posterProtocol {
   margin-top: 1rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.92rem;
   font-weight: 600;
   line-height: 1.5;
@@ -439,7 +381,7 @@
 
 .pride {
   min-width: 0;
-  border-left: 1px solid rgb(247 243 233 / 30%);
+  border-left: 1px solid var(--score-line, var(--border));
   padding: 0.4rem 0 0.4rem 1.5rem;
 }
 
@@ -467,7 +409,7 @@
 
 .bandCaption {
   margin-top: 0.7rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.45;
@@ -488,7 +430,7 @@
 }
 
 .posterHandoff {
-  border-top: 1px solid rgb(247 243 233 / 18%);
+  border-top: 1px solid var(--score-line, var(--border));
   padding-top: 0.95rem;
   padding-bottom: 1.25rem;
 }
@@ -499,29 +441,10 @@
   text-underline-offset: 3px;
 }
 
-.posterActions {
-  display: flex;
-  width: min(100%, 800px);
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.posterActions > :is(button, a, [data-slot="select-trigger"]) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  height: 2.5rem;
-  min-height: 2.5rem;
-  box-shadow: none;
-}
-
 .posterZones {
-  border-top: 2px solid rgb(247 243 233 / 42%);
+  border-top: 2px solid var(--score-line-strong, var(--border));
   padding: 1.1rem 1.8rem 0.4rem;
-  background: #0d1813;
+  background: var(--score-panel, var(--secondary));
   color: var(--score-paper);
 }
 
@@ -538,7 +461,7 @@
 }
 
 .zoneHeading > span {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
 }
 
@@ -579,7 +502,7 @@
 
 .zoneName,
 .zonePercent {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.78rem;
 }
 
@@ -597,7 +520,7 @@
 .posterHint,
 .shareError {
   margin-top: 0.75rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -845,15 +768,6 @@
     grid-template-columns: 1fr;
   }
 
-  .posterWrap .posterActions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .posterActions > :is(button, a, [data-slot="select-trigger"]) {
-    width: 100%;
-  }
-
   .posterWatts[data-wide="true"] {
     font-size: clamp(2.4rem, 11vw, 3.2rem);
   }
@@ -890,7 +804,7 @@
   }
 
   .pride {
-    border-top: 1px solid rgb(247 243 233 / 30%);
+    border-top: 1px solid var(--score-line, var(--border));
     border-left: 0;
     padding: 1rem 0 0;
   }
@@ -903,13 +817,7 @@
 
   .posterHeading {
     max-width: 14rem;
-    font-size: 0.68rem;
     text-wrap: balance;
-    border: 0;
-    box-shadow: none;
-    transform: none;
-    background: transparent;
-    color: var(--score-paper);
   }
 }
 
@@ -932,8 +840,7 @@
   :global(body:has(#result)):has(.page) footer,
   .page > :not(.shell),
   .shell:not(:has(.poster)),
-  .stack > :not(.posterWrap),
-  .posterActions {
+  .stack > :not(.posterWrap) {
     display: none !important;
   }
 
@@ -974,7 +881,6 @@
     font-size: 4.2rem;
   }
 
-  .posterActions,
   .shareError,
   .hero,
   .board {
@@ -1012,21 +918,7 @@
   border: 0;
   background: var(--secondary);
 }
-.posterActions > :is(a, button),
-.actions > :is(a, button),
-.shareRow > :is(a, button) {
-  min-height: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--z2-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {
@@ -1054,9 +946,6 @@
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;
-  }
-  .posterActions {
-    gap: 0.5rem;
   }
 }
 @media print {

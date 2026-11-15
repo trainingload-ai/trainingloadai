@@ -28,10 +28,6 @@ describe("lactate threshold calculator page source", () => {
     expect(client).toContain("<SelectTrigger");
     expect(client).toContain("<Input");
     expect(client).toContain('suffix="W"');
-    expect(client).toContain('role="radiogroup"');
-    expect(client.indexOf('role="radiogroup"')).toBeLessThan(
-      client.indexOf("<TabsList"),
-    );
     expect(client).toContain('t("manual.unitsMetric")');
     expect(client).toContain('t("scorecard.print")');
     expect(client).toContain('t("scorecard.copyLink")');

@@ -21,7 +21,7 @@ export function toolToneStyle(tone: string): CSSProperties {
   return {
     "--tool-tone": tone,
     "--tool-tone-soft": `color-mix(in srgb, ${tone} 12%, var(--card))`,
-    "--tool-tone-strong": `color-mix(in srgb, ${tone} 68%, var(--foreground))`,
+    "--tool-tone-strong": `color-mix(in srgb, ${tone} 50%, var(--foreground))`,
   } as CSSProperties;
 }
 

@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --vdot-canvas: var(--background);
   --vdot-surface: var(--card);
   --vdot-ink: var(--foreground);
@@ -167,8 +168,6 @@
 .jumpItem:focus-visible,
 .textLink:focus-visible,
 .relatedLink:focus-visible,
-.submit:focus-visible,
-.unitOption:focus-visible,
 .input:focus-visible,
 .footerCtaButton:focus-visible {
   outline: 2px solid var(--vdot-accent);
@@ -286,33 +285,6 @@ select.input {
   font-weight: 650;
 }
 
-.unitSwitch {
-  display: inline-grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--vdot-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--vdot-canvas);
-}
-
-.unitOption {
-  min-width: 3.1rem;
-  height: 1.75rem;
-  border: 0;
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--vdot-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.unitOption[aria-checked="true"] {
-  background: var(--vdot-accent-soft);
-  color: var(--success);
-}
-
-.submit,
 .footerCtaButton {
   display: inline-flex;
   align-items: center;
@@ -325,24 +297,8 @@ select.input {
   text-decoration: none;
 }
 
-.submit {
-  min-height: 3rem;
-  border-radius: var(--tl-radius-control-lg);
-  font-size: 0.95rem;
-}
-
-.submit:hover,
 .footerCtaButton:hover {
   background: #00786e;
-}
-
-:global(.dark) .submit {
-  background: var(--vdot-accent);
-  color: var(--vdot-accent-foreground);
-}
-
-:global(.dark) .submit:hover {
-  background: #14d48e;
 }
 
 .compare {
@@ -369,55 +325,36 @@ select.input {
 }
 
 .poster {
-  --score-frame: #17201c;
-  --score-paper: #f7f3e9;
-  --score-green: #76efa3;
-  --score-yellow: #f5cf58;
+  composes: theme from "../../../../components/tool-scorecard.module.css";
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 7rem;
   border: 0;
-  background: #07110f;
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
   border-radius: var(--tl-radius-surface);
 }
 
-:global(.dark) .poster {
-  --score-frame: #f5f0e4;
-}
-
 .posterSheet {
   background-image:
-    linear-gradient(rgb(118 239 163 / 8%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(118 239 163 / 8%) 1px, transparent 1px);
+    linear-gradient(var(--score-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--score-grid) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
 .posterBrand {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   min-height: 3rem;
-  border-bottom: 2px solid rgb(247 243 233 / 42%);
-  padding: 0.75rem 1.2rem;
+  border-bottom: 2px solid var(--score-line-strong, var(--border));
+  padding: 0.5rem 1.2rem;
+  gap: 1rem;
 }
 
 .posterHeading {
-  position: absolute;
-  top: -1rem;
-  left: 1.15rem;
-  border: 0;
-  padding: 0.55rem 0.7rem;
-  background: transparent;
-  color: var(--score-paper);
-  box-shadow: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  transform: none;
+  composes: title from "../../../../components/tool-scorecard.module.css";
 }
 
 .poster {
@@ -442,7 +379,7 @@ select.input {
 }
 
 .eyebrow {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
   font-weight: 800;
@@ -464,7 +401,7 @@ select.input {
 .posterHint,
 .notVo2 {
   margin-top: 0.85rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -486,7 +423,7 @@ select.input {
 
 .pacePair span,
 .speedLine {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -506,7 +443,7 @@ select.input {
 }
 
 .pride {
-  border-left: 1px solid rgb(247 243 233 / 30%);
+  border-left: 1px solid var(--score-line, var(--border));
   padding-left: 1.15rem;
 }
 
@@ -522,7 +459,7 @@ select.input {
 .fitnessNote,
 .fitnessMeta {
   margin-top: 0.45rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.78rem;
   line-height: 1.5;
 }
@@ -537,8 +474,8 @@ select.input {
 .fitnessControls .input,
 .pride .input {
   min-height: 2.3rem;
-  border-color: rgb(247 243 233 / 28%);
-  background: rgb(255 255 255 / 4%);
+  border-color: var(--score-line, var(--border));
+  background: var(--score-input, var(--card));
   color: var(--score-paper);
   font-size: 0.85rem;
 }
@@ -546,8 +483,8 @@ select.input {
 .posterTables {
   display: grid;
   gap: 0.35rem;
-  border-top: 2px solid rgb(247 243 233 / 42%);
-  background: #0d1813;
+  border-top: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-panel, var(--secondary));
   padding: 0.35rem 0 0.6rem;
 }
 
@@ -564,56 +501,21 @@ select.input {
 
 .posterTables th,
 .posterTables td {
-  border-bottom-color: rgb(247 243 233 / 14%);
+  border-bottom-color: var(--score-line, var(--border));
 }
 
 .posterTables thead th {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
 }
 
 .posterTables .purpose,
 .posterTables .note,
 .posterTables .textLink {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
 }
 
 .posterTables .note {
   padding-inline: 0.9rem;
-}
-
-.posterActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: min(100%, 800px);
-}
-
-.posterActions > :is(button, a) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-}
-
-.actionButton {
-  height: 2.5rem;
-  min-height: 2.5rem;
-}
-
-.modeRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.85rem 1.25rem;
-  margin: 0;
-  border: 0;
-  padding: 0;
-}
-
-.modeOption {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.92rem;
 }
 
 .filePanel {
@@ -658,7 +560,7 @@ select.input {
 }
 
 .prideUnit {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.85rem;
   font-style: normal;
   font-weight: 700;
@@ -674,7 +576,7 @@ select.input {
 }
 
 .posterZones {
-  border-top: 2px solid rgb(247 243 233 / 42%);
+  border-top: 2px solid var(--score-line-strong, var(--border));
   padding: 0.85rem 1rem 0.4rem;
 }
 
@@ -698,7 +600,7 @@ select.input {
 .zoneSwatch,
 .zoneName,
 .zonePercent {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -932,7 +834,7 @@ select.input {
   border-radius: var(--tl-radius-surface);
   background: var(--vdot-accent);
   padding: clamp(1.4rem, 3vw, 2rem);
-  color: #f7fffc;
+  color: var(--vdot-accent-foreground);
 }
 
 .footerCta h2 {
@@ -990,7 +892,7 @@ select.input {
     align-items: center;
     gap: 0.4rem;
     border-top: 0;
-    border-bottom: 1px solid rgb(247 243 233 / 16%);
+    border-bottom: 1px solid var(--score-line, var(--border));
     padding: 0.65rem 0;
   }
 }
@@ -1002,18 +904,9 @@ select.input {
   }
 
   .pride {
-    border-top: 1px solid rgb(247 243 233 / 30%);
+    border-top: 1px solid var(--score-line, var(--border));
     border-left: 0;
     padding: 1rem 0 0;
-  }
-
-  .posterActions {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .posterActions > :is(button, a) {
-    width: 100%;
   }
 }
 
@@ -1039,22 +932,13 @@ select.input {
   }
 
   .pride {
-    border-top: 1px solid rgb(247 243 233 / 30%);
+    border-top: 1px solid var(--score-line, var(--border));
     border-left: 0;
     padding: 1rem 0 0;
   }
 
   .posterNumber {
     font-size: clamp(3.6rem, 18vw, 5rem);
-  }
-
-  .posterHeading {
-    font-size: 0.68rem;
-    border: 0;
-    box-shadow: none;
-    transform: none;
-    background: transparent;
-    color: var(--score-paper);
   }
 }
 
@@ -1077,8 +961,7 @@ select.input {
   :global(body:has(#result)):has(.page) footer,
   .page > :not(.shell),
   .shell:not(:has(.poster)),
-  .stack > :not(.posterWrap),
-  .posterActions {
+  .stack > :not(.posterWrap) {
     display: none !important;
   }
 
@@ -1148,21 +1031,7 @@ select.input {
   border: 0;
   background: var(--secondary);
 }
-.posterActions > :is(a, button),
-.actions > :is(a, button),
-.shareRow > :is(a, button) {
-  min-height: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--vdot-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {
@@ -1191,9 +1060,6 @@ select.input {
   .board :global([data-slot="input"]) {
     font-size: 1rem;
   }
-  .posterActions {
-    gap: 0.5rem;
-  }
 }
 @media print {
   .hero {
@@ -1209,22 +1075,6 @@ select.input {
   padding: 0;
   border: 0;
   background: transparent;
-}
-.exampleButton {
-  height: auto;
-  min-height: 2rem;
-  padding: 0;
-  background: transparent;
-  color: var(--success);
-  text-align: left;
-  justify-content: flex-start;
-  border: 0;
-  border-radius: 0;
-  font-weight: 650;
-}
-.exampleButton:hover {
-  background: transparent;
-  text-decoration: underline;
 }
 .shortAnswer {
   margin-top: 1rem;

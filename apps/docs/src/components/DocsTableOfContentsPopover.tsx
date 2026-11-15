@@ -1,3 +1,5 @@
+"use client";
+
 import { ChevronDown, List } from "lucide-react";
 import { PageTOCPopoverItems } from "fumadocs-ui/layouts/docs/page";
 
@@ -5,6 +7,21 @@ export function DocsTableOfContentsPopover({ title }: { title: string }) {
   return (
     <details
       id="nd-tocnav"
+      onClick={(event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest('a[href*="#"]')
+        ) {
+          event.currentTarget.open = false;
+        }
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && event.currentTarget.open) {
+          event.preventDefault();
+          event.currentTarget.open = false;
+          event.currentTarget.querySelector("summary")?.focus();
+        }
+      }}
       className="group fixed inset-x-0 z-10 border-b border-border bg-background/90 backdrop-blur-sm xl:hidden md:start-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))]"
       style={{ top: "calc(var(--fd-banner-height) + var(--fd-nav-height))" }}
     >
@@ -13,7 +30,7 @@ export function DocsTableOfContentsPopover({ title }: { title: string }) {
         <span className="min-w-0 flex-1 truncate">{title}</span>
         <ChevronDown
           aria-hidden="true"
-          className="size-4 shrink-0 transition-transform group-open:rotate-180"
+          className="size-4 shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none"
         />
       </summary>
       <div className="max-h-[50vh] overflow-y-auto border-t border-border px-4 pb-4 md:px-6">

@@ -1,5 +1,9 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
 
+import { getImageProps } from "next/image";
+import { ThemedImage, imageSetFromSrcSet } from "@/components/ThemedImage";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
 import type { DocsScreenshotMedia } from "@/lib/docs-screenshot";
 import { cn } from "@/lib/utils";
@@ -9,34 +13,43 @@ function ScreenshotImage({
   media,
   alt,
   preload = false,
+  renderWidth,
 }: {
   media: DocsScreenshotMedia;
   alt: string;
   preload?: boolean;
+  renderWidth: number;
 }) {
-  return (
-    <div style={{ aspectRatio: `${media.width} / ${media.height}` }}>
-      <img
-        src={media.imageSrc}
-        alt={alt}
-        width={media.width}
-        height={media.height}
-        loading={preload ? "eager" : "lazy"}
-        decoding="async"
-        className={cn("block h-auto w-full", media.darkImageSrc && "dark:hidden")}
-      />
-      {media.darkImageSrc ? (
-        <img
-          src={media.darkImageSrc}
-          alt={alt}
-          width={media.width}
-          height={media.height}
-          loading={preload ? "eager" : "lazy"}
-          decoding="async"
-          className="hidden h-auto w-full dark:block"
-        />
-      ) : null}
-    </div>
+  const imageProps = (src: string) =>
+    getImageProps({
+      src,
+      alt,
+      width: renderWidth,
+      height: Math.round((renderWidth * media.height) / media.width),
+    }).props;
+  const light = imageProps(media.imageSrc);
+  const dark = media.darkImageSrc ? imageProps(media.darkImageSrc) : undefined;
+  return dark ? (
+    <ThemedImage
+      light={imageSetFromSrcSet(light.srcSet!)}
+      dark={imageSetFromSrcSet(dark.srcSet!)}
+      alt={alt}
+      width={media.width}
+      height={media.height}
+      eager={preload}
+      preload={{ light: light.srcSet!, dark: dark.srcSet! }}
+      className="w-full"
+    />
+  ) : (
+    <img
+      src={media.imageSrc}
+      alt={alt}
+      width={media.width}
+      height={media.height}
+      loading={preload ? "eager" : "lazy"}
+      decoding="async"
+      className="block h-auto w-full"
+    />
   );
 }
 
@@ -49,6 +62,7 @@ export function DocsScreenshotVisual({
   webLabel,
   mobileLabel,
   preload = false,
+  imageWidth = 768,
 }: {
   desktop?: DocsScreenshotMedia;
   mobile?: DocsScreenshotMedia;
@@ -57,6 +71,7 @@ export function DocsScreenshotVisual({
   webLabel: string;
   mobileLabel: string;
   preload?: boolean;
+  imageWidth?: number;
 }) {
   const paired = Boolean(desktop && mobile);
   return (
@@ -75,12 +90,17 @@ export function DocsScreenshotVisual({
             media={desktop}
             alt={`${imageAlt} — ${webLabel}`}
             preload={preload}
+            renderWidth={imageWidth}
           />
         </ProductBrowserWindow>
       ) : null}
       {mobile ? (
         <div className={styles.phone}>
-          <ScreenshotImage media={mobile} alt={`${imageAlt} — ${mobileLabel}`} />
+          <ScreenshotImage
+            media={mobile}
+            alt={`${imageAlt} — ${mobileLabel}`}
+            renderWidth={384}
+          />
         </div>
       ) : null}
     </div>

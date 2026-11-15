@@ -17,7 +17,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToolTabsList } from "@/components/ToolTabsList";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { fitCriticalPower, type CpModelFit } from "@/lib/critical-power";
 import styles from "./critical-power-calculator.module.css";
 
@@ -76,10 +77,14 @@ export function CpFitChart({ fit }: { fit: CpModelFit | null }) {
             <h3>{t("title")}</h3>
             <p>{t(fit ? "yourData" : "example")}</p>
           </div>
-          <TabsList aria-label={t("views")}>
-            <TabsTrigger value="power">{t("power")}</TabsTrigger>
-            <TabsTrigger value="work">{t("work")}</TabsTrigger>
-          </TabsList>
+          <ToolTabsList
+            value={view}
+            label={t("views")}
+            options={[
+              { value: "power", label: t("power") },
+              { value: "work", label: t("work") },
+            ]}
+          />
         </div>
         <TabsContent key={view} value={view}>
           <div className={styles.fitChartLegend}>

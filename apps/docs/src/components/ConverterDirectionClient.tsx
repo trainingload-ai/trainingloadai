@@ -1,15 +1,17 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
+
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AlertCircle, ArrowRight, Download, Loader2 } from "lucide-react";
 import type { ConverterDirection } from "@/lib/converter-directions";
 import { ConverterRelatedTools } from "@/components/ConverterRelatedTools";
 import { withLocalePath } from "@/lib/locale-url";
 import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
-import { Button } from "@/components/ui/button";
 import layout from "@/components/calculators/tool-page.module.css";
 import {
   ToolCard,
@@ -18,10 +20,7 @@ import {
   ToolPageMain,
   ToolSection,
 } from "@/components/ToolPageLayout";
-import {
-  ToolFileDropzone,
-  toolPrimaryActionButtonClass,
-} from "@/components/ToolClientControls";
+import { ToolFileDropzone } from "@/components/ToolClientControls";
 import { TrainingPlanAfterConvertDialog } from "@/components/TrainingPlanAfterConvertDialog";
 import { TrackFileInspectionStatus } from "@/components/TrackFileInspectionStatus";
 import { useTrackFileInspection } from "@/hooks/use-track-file-inspection";
@@ -77,6 +76,7 @@ export function ConverterDirectionClient({
   relatedDirections: ConverterDirection[];
   lang: string;
 }) {
+  const convertButtonRef = useRef<HTMLButtonElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -407,7 +407,9 @@ export function ConverterDirectionClient({
                   </div>
                 ) : null}
                 <div className="flex justify-end">
-                  <Button
+                  <ToolActionButton
+                    intent="primary"
+                    fullWidth
                     type="button"
                     disabled={
                       isSubmitting ||
@@ -416,7 +418,7 @@ export function ConverterDirectionClient({
                       noGps ||
                       Boolean(pending)
                     }
-                    className={toolPrimaryActionButtonClass}
+                    ref={convertButtonRef}
                     onClick={onSubmit}
                     aria-label={ui.convertAria}
                   >
@@ -431,7 +433,7 @@ export function ConverterDirectionClient({
                         {ui.convertTo}
                       </>
                     )}
-                  </Button>
+                  </ToolActionButton>
                 </div>
               </div>
 
@@ -480,7 +482,10 @@ export function ConverterDirectionClient({
           title={direction.preserved.title}
           description={direction.preserved.intro || undefined}
         >
-          <div className="overflow-x-auto rounded-compact border border-neutral-200 dark:border-border">
+          <ScrollableRegion
+            label={direction.preserved.title}
+            className="overflow-x-auto rounded-compact border border-neutral-200 dark:border-border"
+          >
             <table className="w-full min-w-[520px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-neutral-200 bg-neutral-100 dark:border-border dark:bg-muted">
@@ -508,7 +513,7 @@ export function ConverterDirectionClient({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollableRegion>
           {direction.preserved.footnote ? (
             <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
               {direction.preserved.footnote}
@@ -596,6 +601,7 @@ export function ConverterDirectionClient({
       </div>
 
       <TrainingPlanAfterConvertDialog
+        invokerRef={convertButtonRef}
         appHref={trainingPlanPromptHref}
         copy={ui.trainingPlanPrompt}
         lang={lang}

@@ -73,7 +73,7 @@ export function PlanDemoApp({
     <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-3 bg-background pb-3 md:gap-4">
       <PlanDemoHeader copy={displayCopy} />
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px] gap-4">
-        <main className="flex min-h-0 flex-col gap-4">
+        <div className="flex min-h-0 flex-col gap-4">
           <PlanDemoWeekStrip
             copy={displayCopy}
             interactive={interactive}
@@ -85,7 +85,7 @@ export function PlanDemoApp({
             interactive={interactive}
             onOpenWorkout={(workout) => openWorkoutDay(workout.isoDate)}
           />
-        </main>
+        </div>
         <aside className="flex min-h-0 flex-col gap-3">
           <PlanDemoTodayWorkout
             copy={displayCopy}

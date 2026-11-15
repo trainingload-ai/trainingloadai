@@ -243,6 +243,8 @@
   background: var(--card);
 }
 .inputPanel {
+  border: 0;
+  background: var(--secondary);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;

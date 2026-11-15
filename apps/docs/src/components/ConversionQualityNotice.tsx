@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { AlertTriangle, Download } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type {
@@ -8,7 +10,6 @@ import type {
   TrackFileInspection,
 } from "@shared/track-file-contract";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { conversionHasNoGps } from "@/lib/conversion-download";
 
 export function ConversionInputNotice({
@@ -112,17 +113,13 @@ export function ConversionReviewNotice({
         </ul>
         {awaitingConfirmation ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              type="button"
-              onClick={onDownload}
-              className="h-auto min-h-8 max-w-full whitespace-normal text-left"
-            >
+            <ToolActionButton intent="primary" type="button" onClick={onDownload}>
               <Download data-icon="inline-start" />
               {t("downloadAnyway")}
-            </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            </ToolActionButton>
+            <ToolActionButton intent="quiet" type="button" onClick={onCancel}>
               {t("cancel")}
-            </Button>
+            </ToolActionButton>
           </div>
         ) : null}
       </AlertDescription>

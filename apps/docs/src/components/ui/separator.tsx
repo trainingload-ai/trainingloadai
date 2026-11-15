@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function Separator({
   className,
@@ -8,21 +8,21 @@ function Separator({
   decorative = true,
   ...props
 }: React.ComponentProps<"div"> & {
-  orientation?: "horizontal" | "vertical"
-  decorative?: boolean
+  orientation?: "horizontal" | "vertical";
+  decorative?: boolean;
 }) {
   return (
     <div
       role={decorative ? "none" : "separator"}
-      aria-orientation={orientation}
+      aria-orientation={decorative ? undefined : orientation}
       className={cn(
         "bg-border shrink-0",
         orientation === "horizontal" ? "h-px w-full" : "w-px h-full",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Separator }
+export { Separator };

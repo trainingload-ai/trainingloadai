@@ -109,7 +109,7 @@ export function EndurancePlanHubPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <Script
         id={`${page.slug}-structured-data`}
         type="application/ld+json"
@@ -148,7 +148,7 @@ export function EndurancePlanHubPage({
                   placement: "hero_primary",
                   locale: lang,
                 }}
-                className="inline-flex h-11 items-center justify-center rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white transition hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400"
+                className="inline-flex h-11 items-center justify-center rounded-compact bg-emerald-500 px-5 text-sm font-bold text-neutral-950 transition hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400"
               >
                 {labels.viewFramework}
                 <ArrowRight className="ml-2 size-4" />
@@ -169,9 +169,9 @@ export function EndurancePlanHubPage({
             </div>
           </div>
 
-          <aside className="rounded-compact border border-neutral-200 bg-white/85 p-6 shadow-2xl shadow-neutral-950/5 backdrop-blur dark:border-white/10 dark:bg-white/[0.05]">
+          <div className="rounded-compact border border-neutral-200 bg-white/85 p-6 shadow-2xl shadow-neutral-950/5 backdrop-blur dark:border-white/10 dark:bg-white/[0.05]">
             <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-compact bg-emerald-500 text-white dark:text-neutral-950">
+              <div className="flex size-11 items-center justify-center rounded-compact bg-emerald-500 text-neutral-950 dark:text-neutral-950">
                 {page.appIntent === "cycling" ? (
                   <Bike className="size-5" />
                 ) : page.appIntent === "swimming" ? (
@@ -207,7 +207,7 @@ export function EndurancePlanHubPage({
             <p className="mt-5 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
               {page.promise}
             </p>
-          </aside>
+          </div>
         </div>
         {page.trustItems.length ? (
           <ul className="relative mx-auto mt-10 grid max-w-7xl gap-2 border-t border-neutral-200/70 pt-6 sm:grid-cols-2 lg:grid-cols-4 dark:border-white/10">
@@ -509,13 +509,13 @@ export function EndurancePlanHubPage({
       </section>
 
       <section className="px-4 py-12 md:px-6 md:py-16">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-white shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-neutral-950 shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
           <div>
             <Bot className="size-6" />
             <h2 className="mt-4 text-3xl font-black tracking-tight md:text-5xl">
               {page.finalTitle}
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 dark:text-neutral-950/75">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-950/85 dark:text-neutral-950/85">
               {page.finalText}
             </p>
           </div>
@@ -535,6 +535,6 @@ export function EndurancePlanHubPage({
           </TrackedLink>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

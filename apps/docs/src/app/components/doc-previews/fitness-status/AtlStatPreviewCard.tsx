@@ -100,6 +100,7 @@ export function AtlStatPreviewCard({
             <button
               type="button"
               className="text-2xl font-bold inline-flex items-baseline text-left cursor-pointer"
+              aria-label={valuePopoverTitle}
               onMouseEnter={openValue}
               onMouseLeave={scheduleCloseValue}
               onFocus={openValue}
@@ -132,6 +133,7 @@ export function AtlStatPreviewCard({
                 <button
                   type="button"
                   className="relative h-4 bg-muted dark:bg-white/[0.08] ring-1 ring-inset ring-border/40 dark:ring-white/12 rounded-[2px] w-full overflow-hidden cursor-pointer"
+                  aria-label={percentPopoverTitle}
                   onMouseEnter={openPercent}
                   onMouseLeave={scheduleClosePercent}
                   onFocus={openPercent}
@@ -141,7 +143,7 @@ export function AtlStatPreviewCard({
                     className="absolute left-0 top-0 h-4 bg-violet-500/95 rounded-[2px]"
                     style={{ width: `${clampedPercent}%` }}
                   />
-                  <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-background dark:text-foreground">
+                  <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-foreground">
                     {clampedPercent}%
                   </span>
                 </button>
@@ -166,6 +168,7 @@ export function AtlStatPreviewCard({
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full hover:bg-muted cursor-pointer"
+                  aria-label={helpTitle}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </button>
@@ -269,6 +272,7 @@ export function CtlStatPreviewCard({
             <button
               type="button"
               className="text-2xl font-bold inline-flex items-baseline text-left cursor-pointer"
+              aria-label={valuePopoverTitle}
               onMouseEnter={openValue}
               onMouseLeave={scheduleCloseValue}
               onFocus={openValue}
@@ -301,6 +305,7 @@ export function CtlStatPreviewCard({
                 <button
                   type="button"
                   className="relative h-4 bg-muted dark:bg-white/[0.08] ring-1 ring-inset ring-border/40 dark:ring-white/12 rounded-[2px] w-full overflow-hidden cursor-pointer"
+                  aria-label={percentPopoverTitle}
                   onMouseEnter={openPercent}
                   onMouseLeave={scheduleClosePercent}
                   onFocus={openPercent}
@@ -310,7 +315,7 @@ export function CtlStatPreviewCard({
                     className="absolute left-0 top-0 h-4 bg-sky-500/95 rounded-[2px]"
                     style={{ width: `${clampedPercent}%` }}
                   />
-                  <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-background dark:text-foreground">
+                  <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-foreground">
                     {clampedPercent}%
                   </span>
                 </button>
@@ -335,6 +340,7 @@ export function CtlStatPreviewCard({
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full hover:bg-muted cursor-pointer"
+                  aria-label={helpTitle}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </button>
@@ -487,6 +493,7 @@ export function TsbStatPreviewCard({
             <button
               type="button"
               className="text-2xl font-bold inline-flex items-baseline text-left cursor-pointer"
+              aria-label={valuePopoverTitle}
               onMouseEnter={openValue}
               onMouseLeave={scheduleCloseValue}
               onFocus={openValue}
@@ -519,6 +526,7 @@ export function TsbStatPreviewCard({
                 <button
                   type="button"
                   className="relative h-4 bg-muted dark:bg-white/[0.08] ring-1 ring-inset ring-border/40 dark:ring-white/12 rounded-[2px] w-full overflow-hidden cursor-pointer"
+                  aria-label={rangePopoverTitle}
                   onMouseEnter={openRange}
                   onMouseLeave={scheduleCloseRange}
                   onFocus={openRange}
@@ -602,6 +610,7 @@ export function TsbStatPreviewCard({
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full hover:bg-muted cursor-pointer"
+                  aria-label={helpTitle}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </button>
@@ -740,6 +749,7 @@ export function AcRatioStatPreviewCard({
             <button
               type="button"
               className="text-2xl font-bold inline-flex items-baseline text-left cursor-pointer"
+              aria-label={valuePopoverTitle}
               onMouseEnter={openValue}
               onMouseLeave={scheduleCloseValue}
               onFocus={openValue}
@@ -772,6 +782,7 @@ export function AcRatioStatPreviewCard({
                 <button
                   type="button"
                   className="relative h-4 bg-muted dark:bg-white/[0.08] ring-1 ring-inset ring-border/40 dark:ring-white/12 rounded-[2px] w-full overflow-hidden cursor-pointer"
+                  aria-label={rangePopoverTitle}
                   onMouseEnter={openRange}
                   onMouseLeave={scheduleCloseRange}
                   onFocus={openRange}
@@ -833,6 +844,7 @@ export function AcRatioStatPreviewCard({
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full hover:bg-muted cursor-pointer"
+                  aria-label={helpTitle}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </button>
@@ -958,6 +970,7 @@ export function MonotonyStatPreviewCard({
             <button
               type="button"
               className="text-2xl font-bold inline-flex items-baseline text-left cursor-pointer"
+              aria-label={valuePopoverTitle}
               onMouseEnter={openValue}
               onMouseLeave={scheduleCloseValue}
               onFocus={openValue}
@@ -990,6 +1003,7 @@ export function MonotonyStatPreviewCard({
                 <button
                   type="button"
                   className="relative h-4 bg-muted dark:bg-white/[0.08] ring-1 ring-inset ring-border/40 dark:ring-white/12 rounded-[2px] w-full overflow-hidden cursor-pointer"
+                  aria-label={rangePopoverTitle}
                   onMouseEnter={openRange}
                   onMouseLeave={scheduleCloseRange}
                   onFocus={openRange}
@@ -1040,6 +1054,7 @@ export function MonotonyStatPreviewCard({
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full hover:bg-muted cursor-pointer"
+                  aria-label={helpTitle}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </button>

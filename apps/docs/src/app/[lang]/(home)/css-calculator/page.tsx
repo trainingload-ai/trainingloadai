@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -292,7 +293,10 @@ export default async function CssCalculatorPage({
           <CssCalculatorClient
             method={
               <div key="css-method-details">
-                <div className={styles.tableWrap}>
+                <ScrollableRegion
+                  label={tPage("sections.method.caption")}
+                  className={styles.tableWrap}
+                >
                   <table className={styles.table}>
                     <caption className="sr-only">
                       {tPage("sections.method.caption")}
@@ -319,7 +323,7 @@ export default async function CssCalculatorPage({
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </ScrollableRegion>
                 <p className={styles.note}>
                   {tPage("sections.method.example")}
                 </p>
@@ -442,7 +446,10 @@ export default async function CssCalculatorPage({
             title={tPage("sections.zones.title")}
             description={tPage("sections.zones.description")}
           >
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("sections.zones.caption")}
+              className={styles.tableWrap}
+            >
               <table className={styles.table}>
                 <caption className="sr-only">
                   {tPage("sections.zones.caption")}
@@ -471,7 +478,7 @@ export default async function CssCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.note}>{tPage("sections.zones.example")}</p>
             <p className={styles.sourceNote}>
               {tPage("sections.zones.source")}

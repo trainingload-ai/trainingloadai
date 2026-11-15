@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, X } from "lucide-react";
@@ -188,19 +190,14 @@ export function CssFileInput({
             </div>
           ))}
           <p className={styles.fileHint}>{t("timing")}</p>
-          <Button
+          <ToolActionButton
+            intent="primary"
             type="button"
-            className={styles.primaryAction}
-            disabled={
-              !selected[0] ||
-              !selected[1] ||
-              selected[0] === selected[1] ||
-              busy
-            }
+            disabled={!selected[0] || !selected[1] || selected[0] === selected[1] || busy}
             onClick={calculate}
           >
             {t("calculate")}
-          </Button>
+          </ToolActionButton>
         </>
       ) : null}
       {error ? (

@@ -1,0 +1,82 @@
+.list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: start;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  block-size: auto;
+  border: 0;
+  border-block-end: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0;
+  overflow-x: auto;
+  background: transparent;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-block-size: 2.5rem;
+  border: 0;
+  border-radius: 0;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 550;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  &[aria-selected="true"] {
+    background: transparent;
+    color: var(--accent-foreground);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      inset-block-end: 0;
+      border-block-end: 2px solid currentColor;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -3px;
+    box-shadow: none;
+  }
+}
+
+.source,
+.panel {
+  display: grid;
+  min-inline-size: 0;
+  gap: 1rem;
+}
+
+.panel {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+@media (pointer: coarse) {
+  .tab {
+    min-block-size: 3rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .tab:focus-visible {
+    outline-color: Highlight;
+  }
+}

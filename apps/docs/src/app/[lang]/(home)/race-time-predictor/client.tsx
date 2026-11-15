@@ -1,4 +1,10 @@
 "use client";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
 import { InputSource } from "@/components/calculators/input-source";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -252,23 +258,15 @@ export function RaceTimePredictorClient({
         <section id="calculator" className={styles.board}>
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("panel.title")}</h2>
-            <div
-              className={styles.unitSwitch}
-              role="group"
-              aria-label={t("units.label")}
-            >
-              {(["km", "mi"] as const).map((unit) => (
-                <button
-                  key={unit}
-                  type="button"
-                  className={styles.unitOption}
-                  aria-pressed={share.unit === unit}
-                  onClick={() => switchDistanceUnit(unit)}
-                >
-                  {t(`units.${unit}`)}
-                </button>
-              ))}
-            </div>
+            <ToolChoiceGroup
+              value={share.unit}
+              onValueChange={switchDistanceUnit}
+              label={t("units.label")}
+              options={(["km", "mi"] as const).map((value) => ({
+                value,
+                label: t(`units.${value}`),
+              }))}
+            />
           </div>
           <p className={styles.boardLead}>{t("panel.subtitle")}</p>
           <InputSource
@@ -280,169 +278,166 @@ export function RaceTimePredictorClient({
               setSource(next);
               if (next === "manual") setFileName("");
             }}
-          />
-          {source === "file" ? (
-            <RaceFileInput
-              onResult={({ filename, window }) => applyFile(filename, window)}
-              onReset={() => setFileName("")}
-            />
-          ) : (
-            <div className={styles.formStack}>
-              <fieldset className={styles.field}>
-                <legend className={styles.fieldLabel}>
-                  {t("inputs.mode.label")}
-                </legend>
-                <div className={styles.choiceRow}>
-                  {(["race", "pace"] as const).map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className={styles.choice}
-                      aria-pressed={share.mode === key}
-                      onClick={() => patch({ mode: key })}
-                    >
-                      {t(`inputs.mode.options.${key}`)}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              <fieldset className={styles.field}>
-                <legend className={styles.fieldLabel}>
-                  {t("inputs.preset.label")}
-                </legend>
-                <div className={styles.choiceRow}>
-                  {PRESETS.map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className={styles.choice}
-                      aria-pressed={share.preset === key}
-                      onClick={() => applyPreset(key)}
-                    >
-                      {t(`presets.${key}`)}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              {share.preset === "custom" ? (
+          >
+            {source === "file" ? (
+              <RaceFileInput
+                onResult={({ filename, window }) => applyFile(filename, window)}
+                onReset={() => setFileName("")}
+              />
+            ) : (
+              <div className={styles.formStack}>
+                <fieldset className={styles.field}>
+                  <legend className={styles.fieldLabel}>
+                    {t("inputs.mode.label")}
+                  </legend>
+                  <ToolChoiceGroup
+                    value={share.mode}
+                    onValueChange={(next) => patch({ mode: next })}
+                    label={t("inputs.mode.label")}
+                    options={(["race", "pace"] as const).map((value) => ({
+                      value,
+                      label: t(`inputs.mode.options.${value}`),
+                    }))}
+                  />
+                </fieldset>
+                <fieldset className={styles.field}>
+                  <legend className={styles.fieldLabel}>
+                    {t("inputs.preset.label")}
+                  </legend>
+                  <ToolChoiceGroup
+                    value={share.preset}
+                    onValueChange={applyPreset}
+                    label={t("inputs.preset.label")}
+                    options={PRESETS.map((value) => ({
+                      value,
+                      label: t(`presets.${value}`),
+                    }))}
+                    presentation="chips"
+                  />
+                </fieldset>
+                {share.preset === "custom" ? (
+                  <div className={styles.field}>
+                    <Label htmlFor="race-distance">
+                      {t("inputs.distance.label")}
+                    </Label>
+                    <Input
+                      id="race-distance"
+                      inputMode="decimal"
+                      value={share.distance}
+                      aria-invalid={distanceInvalid}
+                      onChange={(event) =>
+                        patch({ distance: event.target.value })
+                      }
+                    />
+                  </div>
+                ) : null}
+                {share.mode === "race" ? (
+                  <fieldset className={styles.field}>
+                    <legend className={styles.fieldLabel}>
+                      {t("inputs.time.label")}
+                    </legend>
+                    <div className={styles.timeGrid}>
+                      {(["hours", "minutes", "seconds"] as const).map(
+                        (part) => (
+                          <div key={part} className={styles.field}>
+                            <Label htmlFor={`race-${part}`}>
+                              {t(`inputs.time.${part}`)}
+                            </Label>
+                            <Input
+                              id={`race-${part}`}
+                              inputMode={
+                                part === "seconds" ? "decimal" : "numeric"
+                              }
+                              value={share[part]}
+                              aria-invalid={timeInvalid}
+                              onChange={(event) =>
+                                patch({ [part]: event.target.value })
+                              }
+                            />
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </fieldset>
+                ) : (
+                  <fieldset className={styles.field}>
+                    <legend className={styles.fieldLabel}>
+                      {t("inputs.pace.label")}
+                    </legend>
+                    <div className={styles.paceGrid}>
+                      {(["paceMinutes", "paceSeconds"] as const).map((part) => (
+                        <div key={part} className={styles.field}>
+                          <Label htmlFor={`race-${part}`}>
+                            {t(
+                              part === "paceMinutes"
+                                ? "inputs.pace.minutes"
+                                : "inputs.pace.seconds",
+                            )}
+                          </Label>
+                          <Input
+                            id={`race-${part}`}
+                            inputMode="decimal"
+                            value={share[part]}
+                            onChange={(event) =>
+                              patch({ [part]: event.target.value })
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <ToolChoiceGroup
+                      value={share.paceUnit}
+                      onValueChange={switchPaceUnit}
+                      label={t("inputs.pace.label")}
+                      options={(["min_per_km", "min_per_mi"] as const).map(
+                        (value) => ({
+                          value,
+                          label:
+                            value === "min_per_mi"
+                              ? t("units.minPerMile")
+                              : t("units.minPerKm"),
+                        }),
+                      )}
+                    />
+                  </fieldset>
+                )}
                 <div className={styles.field}>
-                  <Label htmlFor="race-distance">
-                    {t("inputs.distance.label")}
+                  <Label htmlFor="race-target">
+                    {t("inputs.customTarget.label")}
                   </Label>
                   <Input
-                    id="race-distance"
+                    id="race-target"
                     inputMode="decimal"
-                    value={share.distance}
-                    aria-invalid={distanceInvalid}
-                    onChange={(event) =>
-                      patch({ distance: event.target.value })
-                    }
+                    value={share.target}
+                    placeholder={t("inputs.customTarget.placeholder")}
+                    onChange={(event) => patch({ target: event.target.value })}
                   />
+                  <span className={styles.hint}>
+                    {t("inputs.customTarget.hint")}
+                  </span>
                 </div>
-              ) : null}
-              {share.mode === "race" ? (
-                <fieldset className={styles.field}>
-                  <legend className={styles.fieldLabel}>
-                    {t("inputs.time.label")}
-                  </legend>
-                  <div className={styles.timeGrid}>
-                    {(["hours", "minutes", "seconds"] as const).map((part) => (
-                      <div key={part} className={styles.field}>
-                        <Label htmlFor={`race-${part}`}>
-                          {t(`inputs.time.${part}`)}
-                        </Label>
-                        <Input
-                          id={`race-${part}`}
-                          inputMode={part === "seconds" ? "decimal" : "numeric"}
-                          value={share[part]}
-                          aria-invalid={timeInvalid}
-                          onChange={(event) =>
-                            patch({ [part]: event.target.value })
-                          }
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </fieldset>
-              ) : (
-                <fieldset className={styles.field}>
-                  <legend className={styles.fieldLabel}>
-                    {t("inputs.pace.label")}
-                  </legend>
-                  <div className={styles.paceGrid}>
-                    {(["paceMinutes", "paceSeconds"] as const).map((part) => (
-                      <div key={part} className={styles.field}>
-                        <Label htmlFor={`race-${part}`}>
-                          {t(
-                            part === "paceMinutes"
-                              ? "inputs.pace.minutes"
-                              : "inputs.pace.seconds",
-                          )}
-                        </Label>
-                        <Input
-                          id={`race-${part}`}
-                          inputMode="decimal"
-                          value={share[part]}
-                          onChange={(event) =>
-                            patch({ [part]: event.target.value })
-                          }
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div
-                    className={styles.unitSwitch}
-                    role="group"
-                    aria-label={t("inputs.pace.label")}
+                <div className={styles.formFoot}>
+                  <ToolActionButton
+                    intent="quiet"
+                    type="button"
+                    onClick={loadExample}
                   >
-                    {(["min_per_km", "min_per_mi"] as const).map((unit) => (
-                      <button
-                        key={unit}
-                        type="button"
-                        className={styles.unitOption}
-                        aria-pressed={share.paceUnit === unit}
-                        onClick={() => switchPaceUnit(unit)}
-                      >
-                        {unit === "min_per_mi"
-                          ? t("units.minPerMile")
-                          : t("units.minPerKm")}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
-              )}
-              <div className={styles.field}>
-                <Label htmlFor="race-target">
-                  {t("inputs.customTarget.label")}
-                </Label>
-                <Input
-                  id="race-target"
-                  inputMode="decimal"
-                  value={share.target}
-                  placeholder={t("inputs.customTarget.placeholder")}
-                  onChange={(event) => patch({ target: event.target.value })}
-                />
-                <span className={styles.hint}>
-                  {t("inputs.customTarget.hint")}
-                </span>
+                    {t("example.action")}
+                  </ToolActionButton>
+                </div>
               </div>
-              <div className={styles.formFoot}>
-                <button type="button" onClick={loadExample}>
-                  {t("example.action")}
-                </button>
-              </div>
-            </div>
-          )}
-          {fileName ? (
-            <p role="status" className={styles.fileHint}>
-              {t("file.fromFile", { name: fileName })}
-            </p>
-          ) : null}
-          {timeInvalid || distanceInvalid ? (
-            <p role="alert" className={styles.alert}>
-              {t("warnings.invalid")}
-            </p>
-          ) : null}
+            )}
+            {fileName ? (
+              <p role="status" className={styles.fileHint}>
+                {t("file.fromFile", { name: fileName })}
+              </p>
+            ) : null}
+            {timeInvalid || distanceInvalid ? (
+              <p role="alert" className={styles.alert}>
+                {t("warnings.invalid")}
+              </p>
+            ) : null}
+          </InputSource>
         </section>
       </div>
 
@@ -554,7 +549,7 @@ export function RaceTimePredictorClient({
             </div>
             <p className={styles.formulaEcho}>{t("result.formula")}</p>
             {result?.vdotSupported ? (
-              <aside className={styles.resultGuidance}>
+              <div className={styles.resultGuidance}>
                 <p>{t("result.guidance.equivalent")}</p>
                 {rows.some((row) => row.key === "marathon" && !row.isSource) ? (
                   <p>{t("result.guidance.marathon")}</p>
@@ -572,17 +567,19 @@ export function RaceTimePredictorClient({
                 <a href="#prediction-accuracy">
                   {t("result.guidance.learn")} →
                 </a>
-              </aside>
+              </div>
             ) : null}
           </div>
         </section>
-        <div className={styles.posterActions}>
-          <a
-            href={`${prefix}/vdot-calculator`}
-            className={styles.primaryAction}
-          >
-            {t("result.handoffVdot")}
-          </a>
+        <ToolResultActions
+          leading={
+            <>
+              <a href={`${prefix}/vdot-calculator`}>
+                {t("result.handoffVdot")}
+              </a>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -603,7 +600,7 @@ export function RaceTimePredictorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("result.linkCopied") : t("result.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         {warning ? (
           <p role="status" className={styles.alert}>
             {warning}

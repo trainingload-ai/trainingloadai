@@ -3,10 +3,16 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({
+  className,
+  scrollLabel,
+  ...props
+}: React.ComponentProps<"table"> & { scrollLabel: string }) {
   return (
-    <div
+    <ScrollableRegion
+      label={scrollLabel}
       data-slot="table-container"
       className="relative w-full overflow-x-auto"
     >
@@ -15,7 +21,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
       />
-    </div>
+    </ScrollableRegion>
   );
 }
 
@@ -69,20 +75,10 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap",
-        className,
-      )}
+      className={cn("p-2 align-middle whitespace-nowrap", className)}
       {...props}
     />
   );
 }
 
-export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-};
+export { Table, TableHeader, TableBody, TableHead, TableRow, TableCell };

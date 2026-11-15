@@ -165,7 +165,7 @@ export default async function TrainingLoadPage({
   ];
 
   return (
-    <main className="overflow-x-hidden bg-background text-foreground">
+    <div className="overflow-x-hidden bg-background text-foreground">
       <JsonLd id="training-load-structured-data" data={jsonLd} />
 
       <section className="relative overflow-hidden bg-secondary/60 px-4 py-14 md:px-6 md:py-20">
@@ -324,7 +324,7 @@ export default async function TrainingLoadPage({
                   className="grid size-10 place-items-center rounded-surface text-sm font-black"
                   style={{
                     backgroundColor: `color-mix(in srgb, ${metricColors[index]} 16%, transparent)`,
-                    color: metricColors[index],
+                    color: "var(--foreground)",
                   }}
                 >
                   {index < 3 ? (
@@ -363,7 +363,7 @@ export default async function TrainingLoadPage({
               {ui.pmcSubtitle}
             </p>
 
-            <aside className="mt-8 rounded-overlay bg-card p-5 sm:p-6">
+            <div className="mt-8 rounded-overlay bg-card p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <span className="grid size-10 place-items-center rounded-surface bg-brand-soft text-brand-strong">
                   <ShieldCheck aria-hidden="true" className="size-5" />
@@ -394,7 +394,7 @@ export default async function TrainingLoadPage({
                   </li>
                 ))}
               </ul>
-            </aside>
+            </div>
           </div>
 
           <div className="grid gap-3">
@@ -508,6 +508,6 @@ export default async function TrainingLoadPage({
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <ContentFreshness lastUpdated={ui.lastUpdatedDate} />
       </div>
-    </main>
+    </div>
   );
 }

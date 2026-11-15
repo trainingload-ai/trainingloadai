@@ -61,6 +61,7 @@ export function DocsTaskCard({
             webLabel={t("webPlatform")}
             mobileLabel={t("mobilePlatform")}
             preload={preload}
+            imageWidth={320}
           />
         </div>
       ) : null}
@@ -69,9 +70,9 @@ export function DocsTaskCard({
         <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-fd-muted-foreground">
           {eyebrow}
         </span>
-        <h2 className="mt-2 text-lg font-semibold leading-snug text-fd-foreground">
+        <h3 className="mt-2 text-lg font-semibold leading-snug text-fd-foreground">
           {title}
-        </h2>
+        </h3>
         <p className="mt-2 flex-1 text-sm leading-6 text-fd-muted-foreground">
           {description}
         </p>

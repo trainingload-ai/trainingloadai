@@ -370,7 +370,7 @@ export function OfficialPlanTemplateDetailPage({
   ]);
 
   return (
-    <main className="overflow-x-clip bg-[#f5f7f8] text-neutral-950 dark:bg-[#0d1113] dark:text-neutral-50">
+    <div className="overflow-x-clip bg-[#f5f7f8] text-neutral-950 dark:bg-[#0d1113] dark:text-neutral-50">
       <Script
         id={`${slug}-structured-data`}
         type="application/ld+json"
@@ -460,13 +460,13 @@ export function OfficialPlanTemplateDetailPage({
                 {labels.scheduleText}
               </p>
             </div>
-            <aside className="border-l-2 border-amber-400 bg-amber-50 px-5 py-4 text-amber-950 dark:bg-amber-300/[0.08] dark:text-amber-100">
+            <div className="border-l-2 border-amber-400 bg-amber-50 px-5 py-4 text-amber-950 dark:bg-amber-300/[0.08] dark:text-amber-100">
               <strong className="flex items-center gap-2 text-sm">
                 <Gauge className="size-4" />
                 {labels.example}
               </strong>
               <p className="mt-2 text-sm leading-6">{labels.exampleText}</p>
-            </aside>
+            </div>
           </div>
 
           <div className="mt-10 divide-y divide-neutral-200 border-y border-neutral-300 dark:divide-white/10 dark:border-white/15">
@@ -590,6 +590,6 @@ export function OfficialPlanTemplateDetailPage({
           </span>
         </div>
       </nav>
-    </main>
+    </div>
   );
 }

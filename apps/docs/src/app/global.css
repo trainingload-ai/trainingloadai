@@ -92,7 +92,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--tl-font-ui);
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.6;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -111,6 +111,32 @@
   :where(h2:not(.uppercase)) {
     --tw-leading: 1.14;
     text-wrap: balance;
+  }
+
+  #main-content,
+  .docs-prose :where(h1, h2, h3, h4, h5, h6)[id] {
+    scroll-margin-block-start: calc(
+      var(--fd-banner-height, 4rem) + var(--fd-tocnav-height, 0px) + 2rem
+    );
+  }
+
+  :is(.docs-image-preview, .docs-demo-dialog, .docs-conversion-dialog):modal {
+    overscroll-behavior: contain;
+  }
+
+  :is(
+    .docs-image-preview,
+    .docs-demo-dialog,
+    .docs-conversion-dialog
+  )::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin {
+    animation-duration: 6s;
   }
 }
 
@@ -225,4 +251,33 @@
       padding-inline: var(--tl-space-eight);
     }
   }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+  }
+}
+
+/* Keep inactive image URLs out of the computed background to avoid dual downloads. */
+.themed-image {
+  --selected-image: var(--image-light);
+  background-position: top center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.dark .themed-image {
+  --selected-image: var(--image-dark);
+}
+@media (max-width: 639px) {
+  .themed-image {
+    --selected-image: var(--image-mobile-light);
+  }
+  .dark .themed-image {
+    --selected-image: var(--image-mobile-dark);
+  }
+}
+.themed-image[data-image-ready="true"] {
+  background-image: var(--selected-image);
 }

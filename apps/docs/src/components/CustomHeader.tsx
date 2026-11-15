@@ -1,20 +1,19 @@
 "use client";
 
-import { Menu, X, Globe, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { SiDiscord, SiGithub, SiX } from "@icons-pack/react-simple-icons";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { HeaderLocaleSwitcher } from "./HeaderLocaleSwitcher";
+import { useHeaderDisclosure } from "@/hooks/use-header-disclosure";
 import { ReleaseBanner } from "./ReleaseBanner";
 // import { BlackFridayBanner } from "./BlackFridayBanner";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { localePrefix } from "@/lib/locale-url";
-import {
-  persistLocalePreference,
-  type DocsLocale,
-} from "@/lib/locale-preference";
+import { persistLocalePreference } from "@/lib/locale-preference";
 import { buildLocalePathname, LOCALE_OPTIONS } from "@/lib/locale-options";
 import type { NewUserGiftValues } from "@/lib/offer-content";
 
@@ -60,75 +59,6 @@ function SocialLinks() {
   );
 }
 
-function HeaderLocaleDropdownItem({
-  href,
-  active,
-  locale,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  locale: DocsLocale;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      prefetch={false}
-      onClick={() => persistLocalePreference(locale)}
-      className={[
-        "rounded-compact px-3 py-2 text-sm transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "dark:focus-visible:ring-ring/70 dark:focus-visible:ring-offset-background",
-        active
-          ? "bg-brand-soft font-semibold text-foreground"
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-      ].join(" ")}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function HeaderLocaleDropdown({
-  lang,
-  buildLangHref,
-}: {
-  lang: string;
-  buildLangHref: (targetLang: string) => string;
-}) {
-  const current =
-    LOCALE_OPTIONS.find((opt) => opt.key === lang)?.shortLabel ?? "EN";
-
-  return (
-    <div className="relative group">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        className="flex min-h-9 items-center gap-1.5 rounded-control px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-      >
-        <Globe className="h-3.5 w-3.5" />
-        {current}
-        <ChevronDown className="h-3 w-3 opacity-50 group-hover:rotate-180 group-focus-within:rotate-180 transition-transform" />
-      </button>
-      <div className="invisible absolute right-0 top-full z-30 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-        <div className="flex w-40 flex-col gap-1 overflow-hidden rounded-surface border border-border bg-popover p-1.5 shadow-md">
-          {LOCALE_OPTIONS.map((opt) => (
-            <HeaderLocaleDropdownItem
-              key={opt.key}
-              href={buildLangHref(opt.key)}
-              active={lang === opt.key}
-              locale={opt.key}
-            >
-              {opt.label}
-            </HeaderLocaleDropdownItem>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function CustomHeader({
   heightCssVariable,
   newUserGift,
@@ -139,6 +69,7 @@ export function CustomHeader({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileLanguagesOpen, setMobileLanguagesOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const tNav = useTranslations("nav");
   const tHeader = useTranslations("header");
   const tPlan = useTranslations("runningPlanPages.labels");
@@ -205,10 +136,16 @@ export function CustomHeader({
     };
   }, [heightCssVariable]);
 
-  const closeMobileMenu = () => {
+  const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
     setMobileLanguagesOpen(false);
-  };
+  }, []);
+  useHeaderDisclosure({
+    open: mobileMenuOpen,
+    close: closeMobileMenu,
+    headerRef,
+    triggerRef: menuTriggerRef,
+  });
   const currentLocale =
     LOCALE_OPTIONS.find((option) => option.key === lang) ?? LOCALE_OPTIONS[0];
 
@@ -328,12 +265,17 @@ export function CustomHeader({
 
         {/* Right side - Icons and Login */}
         <div className="hidden lg:flex lg:items-center lg:gap-x-1.5">
-          <HeaderLocaleDropdown lang={lang} buildLangHref={buildLangHref} />
+          <HeaderLocaleSwitcher
+            lang={lang}
+            pathname={pathname}
+            query={searchParams.toString()}
+            showIcon
+          />
 
           <SocialLinks />
 
           {/* Theme Switcher */}
-          <ThemeSwitcher />
+          <ThemeSwitcher groupLabel={tHeader("theme")} />
 
           {/* Login Button */}
           <a
@@ -351,7 +293,10 @@ export function CustomHeader({
           <SocialLinks />
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-control p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            ref={menuTriggerRef}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="site-mobile-menu"
+            className="inline-flex items-center justify-center rounded-control p-2 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() => {
               setMobileMenuOpen((open) => {
                 if (open) setMobileLanguagesOpen(false);
@@ -361,9 +306,9 @@ export function CustomHeader({
           >
             <span className="sr-only">{tHeader("openMainMenu")}</span>
             {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
+              <X aria-hidden="true" className="h-5 w-5" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu aria-hidden="true" className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -379,7 +324,10 @@ export function CustomHeader({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="max-h-[calc(100dvh-var(--docs-global-header-height,7.5rem))] overflow-y-auto overscroll-contain bg-background lg:hidden">
+        <div
+          id="site-mobile-menu"
+          className="max-h-[calc(100dvh-var(--docs-global-header-height,7.5rem))] overflow-y-auto overscroll-contain bg-background lg:hidden"
+        >
           <div className="space-y-1 px-4 pb-4 pt-2">
             <Link
               href={`${prefix}/plan`}
@@ -515,7 +463,10 @@ export function CustomHeader({
                           href={buildLangHref(opt.key)}
                           prefetch={false}
                           aria-current={active ? "true" : undefined}
-                          onClick={() => persistLocalePreference(opt.key)}
+                          onClick={() => {
+                            persistLocalePreference(opt.key);
+                            closeMobileMenu();
+                          }}
                           className={[
                             "flex min-h-10 items-center rounded-compact px-3 text-sm transition-colors",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",

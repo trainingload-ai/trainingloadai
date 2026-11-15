@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -15,7 +16,7 @@ import {
   Scale,
   ShieldCheck,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { absoluteAlternatesForPath, localePrefix } from "@/lib/locale-url";
 import { i18n } from "@/lib/i18n";
 import {
@@ -147,7 +148,7 @@ export default async function AiCoachSportPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id={`${page.slug}-structured-data`} data={jsonLd} />
 
       <section className="relative overflow-hidden border-b border-neutral-200/70 px-4 py-12 md:px-6 md:py-16 dark:border-white/10">
@@ -173,24 +174,29 @@ export default async function AiCoachSportPage({
               {page.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={appUrl}>
-                <Button className="h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400">
-                  {page.primary}
-                  <ArrowRight className="ml-2 size-4" />
-                </Button>
+              <Link
+                href={appUrl}
+                className={cn(
+                  buttonVariants({}),
+                  "h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-neutral-950 hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400",
+                )}
+              >
+                {page.primary}
+                <ArrowRight className="ml-2 size-4" />
               </Link>
-              <Link href={`${prefix}/ai-training-plan`}>
-                <Button
-                  variant="outline"
-                  className="h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
-                >
-                  {page.secondary}
-                </Button>
+              <Link
+                href={`${prefix}/ai-training-plan`}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10",
+                )}
+              >
+                {page.secondary}
               </Link>
             </div>
           </div>
 
-          <aside className="rounded-compact border border-neutral-200 bg-white p-5 shadow-xl shadow-neutral-900/10 dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="rounded-compact border border-neutral-200 bg-white p-5 shadow-xl shadow-neutral-900/10 dark:border-white/10 dark:bg-white/[0.04]">
             <ShieldCheck className="size-6 text-emerald-600 dark:text-emerald-300" />
             <p className="mt-4 text-lg font-black leading-snug">
               {page.promise}
@@ -208,7 +214,7 @@ export default async function AiCoachSportPage({
                 </div>
               ))}
             </div>
-          </aside>
+          </div>
         </div>
       </section>
 
@@ -501,24 +507,28 @@ export default async function AiCoachSportPage({
       </section>
 
       <section className="px-4 py-12 md:px-6 md:py-16">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-white shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-neutral-950 shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
           <div>
             <Bot className="size-6" />
             <h2 className="mt-4 text-3xl font-black tracking-tight md:text-5xl">
               {page.ctaTitle}
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 dark:text-neutral-950/75">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-950/85 dark:text-neutral-950/85">
               {page.ctaText}
             </p>
           </div>
-          <Link href={appUrl}>
-            <Button className="h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent">
-              {page.primary}
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
+          <Link
+            href={appUrl}
+            className={cn(
+              buttonVariants({}),
+              "h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent",
+            )}
+          >
+            {page.primary}
+            <ArrowRight className="ml-2 size-4" />
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

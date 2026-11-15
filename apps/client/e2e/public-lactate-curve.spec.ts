@@ -317,11 +317,14 @@ test("inspects the full example chart with pointer, touch and keyboard without s
   await expect(tooltip).toContainText("145");
   await expect(tooltip).toContainText("拟合乳酸");
   await points.nth(4).focus();
+  await expect(points.nth(4)).toBeFocused();
   await page.keyboard.press("ArrowRight");
+  await expect(points.nth(5)).toBeFocused();
   await expect(tooltip).toContainText("3.50");
   await expect(tooltip).toContainText("156");
   await page.keyboard.press("Escape");
   await expect(tooltip).toHaveCount(0);
+  await expect(points.nth(5)).toBeFocused();
   await points.nth(4).click();
   await expect(tooltip).toContainText("2.40");
   const viewport = page.viewportSize()!;
@@ -348,6 +351,7 @@ test("inspects the full example chart with pointer, touch and keyboard without s
   await expect(tooltip).toContainText("2.40");
   await points.nth(4).focus();
   await page.keyboard.press("ArrowRight");
+  await expect(points.nth(5)).toBeFocused();
   await expect(tooltip).toContainText("3.50");
   await page.setViewportSize(viewport);
   const names = await page.evaluate(() =>

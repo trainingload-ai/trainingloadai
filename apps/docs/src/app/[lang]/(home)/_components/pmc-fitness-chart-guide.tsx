@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -239,7 +240,10 @@ export function PmcFitnessChartGuide({
           </p>
         </div>
 
-        <div className="mt-8 hidden overflow-x-auto rounded-overlay border border-neutral-200 dark:border-white/10 md:block">
+        <ScrollableRegion
+          label={ui.patternsTitle}
+          className="mt-8 hidden overflow-x-auto rounded-overlay border border-neutral-200 dark:border-white/10 md:block"
+        >
           <table className="w-full min-w-[880px] border-collapse text-left">
             <thead className="bg-neutral-950 text-white dark:bg-black/40">
               <tr>
@@ -280,7 +284,7 @@ export function PmcFitnessChartGuide({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollableRegion>
         <div className="mt-8 space-y-3 md:hidden">
           {data.patterns.map(([scenario, signals, meaning, action], index) => (
             <article
@@ -288,7 +292,7 @@ export function PmcFitnessChartGuide({
               className="rounded-overlay border border-neutral-200 bg-card p-5 dark:border-white/10"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-300">
+                <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   0{index + 1}
                 </span>
                 <h3 className="font-black">{scenario}</h3>
@@ -342,7 +346,7 @@ export function PmcFitnessChartGuide({
                 <div className="flex items-start gap-3">
                   <CheckCircle2
                     aria-hidden="true"
-                    className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-300"
+                    className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-300"
                   />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">

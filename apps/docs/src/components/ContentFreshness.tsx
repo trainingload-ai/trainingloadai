@@ -17,7 +17,7 @@ export function ContentFreshness({
   className,
 }: ContentFreshnessProps) {
   const wrapperClass = [
-    "text-muted-foreground/80 mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs",
+    "text-muted-foreground mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs",
     className,
   ]
     .filter(Boolean)

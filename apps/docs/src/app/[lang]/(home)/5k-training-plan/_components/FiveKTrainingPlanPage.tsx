@@ -284,7 +284,7 @@ export function FiveKTrainingPlanPage({
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <JsonLd id={`${plan.slug}-structured-data`} data={jsonLd} />
 
       <section className={styles.hero}>
@@ -441,7 +441,7 @@ export function FiveKTrainingPlanPage({
         collapsible
         showOverview
         overviewAfter={
-          <aside className={styles.planBridge}>
+          <div className={styles.planBridge}>
             <div className={styles.bridgeCopy}>
               <span>{planValue.freeLabel}</span>
               <h3>{planValue.freeTitle}</h3>
@@ -467,7 +467,7 @@ export function FiveKTrainingPlanPage({
               {labels.addToCalendar}
               <ArrowRight aria-hidden="true" />
             </TrackedLink>
-          </aside>
+          </div>
         }
       />
 
@@ -655,6 +655,6 @@ export function FiveKTrainingPlanPage({
           </div>
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }

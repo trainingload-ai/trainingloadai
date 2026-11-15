@@ -1,5 +1,9 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Printer, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -101,13 +105,9 @@ export function TrainingLoadCalculatorClient({
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("board.title")}</h2>
             <div className={styles.boardActions}>
-              <button
-                type="button"
-                className={styles.textButton}
-                onClick={resetExample}
-              >
+              <ToolActionButton intent="quiet" type="button" onClick={resetExample}>
                 {t("board.reset")}
-              </button>
+              </ToolActionButton>
             </div>
           </div>
           <p className={styles.boardLead}>{t("board.lead")}</p>
@@ -193,22 +193,22 @@ export function TrainingLoadCalculatorClient({
           <div className={styles.dayActions}>
             <span>{t("board.period", { days: dailyTssText.length })}</span>
             <div className={styles.boardActions}>
-              <button
+              <ToolActionButton
+                intent="secondary"
                 type="button"
-                className={styles.textButton}
                 onClick={addDay}
                 disabled={dailyTssText.length >= MAX_PMC_DAYS}
               >
                 {t("board.addDay")}
-              </button>
-              <button
+              </ToolActionButton>
+              <ToolActionButton
+                intent="quiet"
                 type="button"
-                className={styles.textButton}
                 onClick={removeDay}
                 disabled={dailyTssText.length <= MIN_PMC_DAYS}
               >
                 {t("board.removeDay")}
-              </button>
+              </ToolActionButton>
             </div>
           </div>
           {!projection && (
@@ -371,7 +371,7 @@ function Scorecard({
           <p className={styles.disclaimer}>{t("disclaimer")}</p>
         </div>
       </section>
-      <div className={`${styles.posterActions} tl-share-actions`}>
+      <ToolResultActions className="tl-share-actions">
         <Button
           type="button"
           variant="outline"
@@ -392,7 +392,7 @@ function Scorecard({
           <Share2 className="size-3.5" aria-hidden />
           {copied ? t("copied") : t("copyLink")}
         </Button>
-      </div>
+      </ToolResultActions>
     </div>
   );
 }

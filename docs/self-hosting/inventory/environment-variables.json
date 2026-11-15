@@ -3745,7 +3745,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
-          "line": 37
+          "line": 38
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
@@ -3753,19 +3753,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
-          "line": 24
+          "line": 25
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-marathon-training-plan/page.tsx",
-          "line": 24
+          "line": 25
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-training-plan/page.tsx",
-          "line": 29
+          "line": 30
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/alternatives/page.tsx",
-          "line": 25
+          "line": 27
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/best-efforts/page.tsx",
@@ -3805,19 +3805,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 129
+          "line": 131
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 180
+          "line": 182
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
-          "line": 140
+          "line": 141
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
-          "line": 188
+          "line": 189
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/custom-zones/page.tsx",
@@ -3829,7 +3829,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 30
+          "line": 31
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/effective-vo2max-trend/page.tsx",
@@ -3841,7 +3841,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 53
+          "line": 54
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
@@ -3865,11 +3865,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 152
+          "line": 154
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 200
+          "line": 202
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
@@ -3893,11 +3893,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 120
+          "line": 122
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 171
+          "line": 173
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
@@ -3905,11 +3905,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 77
+          "line": 78
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 135
+          "line": 136
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/olympic-triathlon-training-plan/page.tsx",
@@ -3917,15 +3917,15 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 111
+          "line": 112
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 160
+          "line": 161
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
-          "line": 126
+          "line": 127
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
@@ -3941,11 +3941,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 120
+          "line": 121
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 171
+          "line": 172
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
@@ -4009,15 +4009,15 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
-          "line": 16
+          "line": 17
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 84
+          "line": 85
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 138
+          "line": 139
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
@@ -4033,19 +4033,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
-          "line": 94
+          "line": 95
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
-          "line": 147
+          "line": 148
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 188
+          "line": 189
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 262
+          "line": 263
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/page.tsx",
@@ -4057,11 +4057,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
-          "line": 121
+          "line": 122
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
-          "line": 169
+          "line": 170
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
@@ -4077,7 +4077,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 98
+          "line": 44
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
@@ -4183,7 +4183,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 164
+          "line": 110
         }
       ]
     },
@@ -4449,7 +4449,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 161
+          "line": 107
         },
         {
           "file": "apps/docs/src/lib/posthog-client.ts",

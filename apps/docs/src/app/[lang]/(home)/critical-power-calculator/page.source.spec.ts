@@ -21,7 +21,6 @@ describe("critical power calculator page source", () => {
     expect(client).toContain("<SelectTrigger");
     expect(client).toContain("<Input");
     expect(client).toContain('suffix="W"');
-    expect(client).toContain('role="radiogroup"');
     expect(client).toContain('t("manual.unitsMetric")');
     expect(client).toContain('t("manual.weightLabelLb")');
     expect(client).toContain("CpFileInput");

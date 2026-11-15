@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/cn";
 
 type Billing = "monthly" | "yearly";
@@ -22,6 +22,7 @@ type PricingPlansSectionProps = {
   creditLabels: PricingCreditLabels;
   newUserGift: { days: number; credits: string };
   className?: string;
+  heading?: string;
 };
 
 type CreditPackItem = {
@@ -31,10 +32,7 @@ type CreditPackItem = {
   note: string;
 };
 
-function planCreditLabel(
-  plan: PlanKey,
-  creditLabels: PricingCreditLabels,
-) {
+function planCreditLabel(plan: PlanKey, creditLabels: PricingCreditLabels) {
   if (plan === "plus") return creditLabels.plus;
   if (plan === "pro") return creditLabels.pro;
   return "";
@@ -53,6 +51,7 @@ export function PricingPlansSection({
   creditLabels,
   newUserGift,
   className,
+  heading,
 }: PricingPlansSectionProps) {
   const t = useTranslations("pricingPage");
   const [billing, setBilling] = useState<Billing>(DEFAULT_BILLING);
@@ -60,6 +59,7 @@ export function PricingPlansSection({
 
   return (
     <section className={cn("mt-9", className)}>
+      {heading ? <h2 className="sr-only">{heading}</h2> : null}
       <div className="mx-auto flex max-w-lg flex-col items-stretch gap-2 sm:max-w-xl">
         <span className="text-center text-xs font-semibold text-muted-foreground">
           {t("billingToggle.label")}
@@ -131,9 +131,7 @@ export function PricingPlansSection({
               key={plan}
               className={cn(
                 "relative flex flex-col rounded-surface bg-card p-5 shadow-xs ring-1 ring-border/80",
-                isPlus
-                  ? "ring-2 ring-foreground"
-                  : "",
+                isPlus ? "ring-2 ring-foreground" : "",
               )}
             >
               {isPlus ? (
@@ -199,18 +197,21 @@ export function PricingPlansSection({
                 ))}
               </ul>
 
-              <Link href={appUrl} className="mt-6 inline-flex">
-                <Button
-                  className={cn(
+              <Link
+                href={appUrl}
+                className={cn(
+                  buttonVariants({ variant: isPaid ? "default" : "outline" }),
+                  "mt-6 inline-flex",
+                  cn(
                     "h-10 w-full text-sm font-semibold",
-                    isPlus && "bg-brand text-brand-foreground hover:bg-brand/88",
-                  )}
-                  variant={isPaid ? "default" : "outline"}
-                >
-                  {isPaid
-                    ? t(`cta${plan === "plus" ? "Plus" : "Pro"}`)
-                    : t("ctaFree")}
-                </Button>
+                    isPlus &&
+                      "bg-brand text-brand-foreground hover:bg-brand/88",
+                  ),
+                )}
+              >
+                {isPaid
+                  ? t(`cta${plan === "plus" ? "Plus" : "Pro"}`)
+                  : t("ctaFree")}
               </Link>
             </article>
           );

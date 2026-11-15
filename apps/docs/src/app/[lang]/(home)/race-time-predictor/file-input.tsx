@@ -1,10 +1,13 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -133,19 +136,19 @@ export function RaceFileInput({
       {windows.length > 0 ? (
         <fieldset className={styles.field}>
           <legend className={styles.fieldLabel}>{t("window")}</legend>
-          <div className={styles.choiceRow}>
-            {windows.map((window) => (
-              <button
-                key={`${window.key}-${window.startSeconds}`}
-                type="button"
-                className={styles.choice}
-                aria-pressed={selected === window.key}
-                onClick={() => choose(window)}
-              >
-                {t(`windows.${window.key}`)}
-              </button>
-            ))}
-          </div>
+          <ToolChoiceGroup
+            value={selected}
+            onValueChange={(next) => {
+              const window = windows.find((window) => window.key === next);
+              if (window) choose(window);
+            }}
+            label={t("window")}
+            presentation="chips"
+            options={windows.map((window) => ({
+              value: window.key,
+              label: t(`windows.${window.key}`),
+            }))}
+          />
         </fieldset>
       ) : null}
       {records.length > 0 ? (
@@ -170,9 +173,13 @@ export function RaceFileInput({
               />
             </div>
           </div>
-          <Button type="button" className={styles.primaryAction} onClick={useManualWindow}>
+          <ToolActionButton
+            intent="primary"
+            type="button"
+            onClick={useManualWindow}
+          >
             {t("useWindow")}
-          </Button>
+          </ToolActionButton>
         </>
       ) : null}
       {error ? (

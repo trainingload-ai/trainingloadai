@@ -1,5 +1,12 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
+
 import {
   Component,
   useEffect,
@@ -32,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import { buildToolAppUrl } from "@shared/product-analytics";
 import { elapsedMilliseconds } from "@/lib/tool-analytics";
 import {
@@ -725,9 +732,9 @@ export function LactateCurveCalculatorClient({
           </button>
         </div>
         {mode === "report" && run ? (
-          <Button variant="ghost" size="sm" onClick={editData}>
+          <ToolActionButton intent="quiet" onClick={editData}>
             ← {c.presentation.editData}
-          </Button>
+          </ToolActionButton>
         ) : null}
       </nav>
       {stale && mode === "input" ? (
@@ -744,17 +751,16 @@ export function LactateCurveCalculatorClient({
           <h2 id={`${id}-input`} className={styles.title}>
             {c.inputTitle}
           </h2>
-          <ToggleGroup
-            type="single"
+          <ToolChoiceGroup
             value={sport}
             onValueChange={changeSport}
+            label={`${c.cycling} / ${c.running}`}
+            options={[
+              { value: "cycling", label: c.cycling },
+              { value: "running", label: c.running },
+            ]}
             disabled={busy}
-            variant="outline"
-            aria-label={`${c.cycling} / ${c.running}`}
-          >
-            <ToggleGroupItem value="cycling">{c.cycling}</ToggleGroupItem>
-            <ToggleGroupItem value="running">{c.running}</ToggleGroupItem>
-          </ToggleGroup>
+          />
           <Choice
             id={`${id}-unit`}
             label={c.intensity}
@@ -768,23 +774,27 @@ export function LactateCurveCalculatorClient({
             <p className={styles.muted}>{c.inputHelp}</p>
           </details>
           <div className={styles.toolbar}>
-            <Button variant="secondary" onClick={loadExample} disabled={busy}>
+            <ToolActionButton
+              intent="quiet"
+              onClick={loadExample}
+              disabled={busy}
+            >
               {c.example}
-            </Button>
-            <Button variant="ghost" onClick={clear} disabled={busy}>
+            </ToolActionButton>
+            <ToolActionButton intent="quiet" onClick={clear} disabled={busy}>
               {c.clear}
-            </Button>
+            </ToolActionButton>
           </div>
           <div className={styles.toolbar}>
-            <Button
-              variant="outline"
+            <ToolActionButton
+              intent="secondary"
               disabled={busy}
               onClick={() => setPasteOpen(!pasteOpen)}
             >
               {c.paste}
-            </Button>
-            <Button
-              variant="outline"
+            </ToolActionButton>
+            <ToolActionButton
+              intent="secondary"
               disabled={busy}
               onClick={() => {
                 trackLactateEvent("tool_file_picker_opened", {
@@ -795,7 +805,7 @@ export function LactateCurveCalculatorClient({
               }}
             >
               {c.import}
-            </Button>
+            </ToolActionButton>
             <input
               ref={file}
               type="file"
@@ -805,12 +815,12 @@ export function LactateCurveCalculatorClient({
               aria-label={c.import}
               disabled={busy}
             />
-            <Button
-              variant="link"
+            <ToolActionButton
+              intent="quiet"
               onClick={() => download(LACTATE_TEMPLATE, "lactate-template.csv")}
             >
               {c.template}
-            </Button>
+            </ToolActionButton>
           </div>
           {pasteOpen ? (
             <FieldGroup>
@@ -825,12 +835,12 @@ export function LactateCurveCalculatorClient({
                 />
                 <FieldDescription>{c.pasteHelp}</FieldDescription>
               </Field>
-              <Button
-                variant="outline"
+              <ToolActionButton
+                intent="secondary"
                 onClick={() => prepareImport(pasteText, "paste")}
               >
                 {c.mapping}
-              </Button>
+              </ToolActionButton>
             </FieldGroup>
           ) : null}
           {pending ? (
@@ -856,7 +866,10 @@ export function LactateCurveCalculatorClient({
                   ]}
                 />
               ))}
-              <div className={styles.tableWrap}>
+              <ScrollableRegion
+                label={c.confirmImport}
+                className={styles.tableWrap}
+              >
                 <table className={styles.table}>
                   <thead>
                     <tr>
@@ -875,19 +888,24 @@ export function LactateCurveCalculatorClient({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollableRegion>
               <div className={styles.actions}>
-                <Button onClick={confirmImport}>{c.confirmImport}</Button>
-                <Button variant="ghost" onClick={() => setPending(null)}>
+                <ToolActionButton intent="primary" onClick={confirmImport}>
+                  {c.confirmImport}
+                </ToolActionButton>
+                <ToolActionButton
+                  intent="quiet"
+                  onClick={() => setPending(null)}
+                >
                   {c.cancel}
-                </Button>
+                </ToolActionButton>
               </div>
             </div>
           ) : null}
           {origin !== "user" ? (
             <p className={styles.notice}>{c.sample}</p>
           ) : null}
-          <div className={styles.tableWrap}>
+          <ScrollableRegion label={c.intensity} className={styles.tableWrap}>
             <table className={`${styles.table} ${styles.inputTable}`}>
               <thead>
                 <tr>
@@ -951,9 +969,9 @@ export function LactateCurveCalculatorClient({
                 ))}
               </tbody>
             </table>
-          </div>
-          <Button
-            variant="outline"
+          </ScrollableRegion>
+          <ToolActionButton
+            intent="secondary"
             disabled={busy || rows.length >= 31}
             onClick={() =>
               changeRows([
@@ -964,7 +982,7 @@ export function LactateCurveCalculatorClient({
           >
             <Plus data-icon="inline-start" />
             {c.add}
-          </Button>
+          </ToolActionButton>
           <details className={styles.protocol}>
             <summary>{c.protocol}</summary>
             <FieldGroup>
@@ -1033,8 +1051,8 @@ export function LactateCurveCalculatorClient({
             </Alert>
           ) : null}
           {error?.code === "unsorted_stages" ? (
-            <Button
-              variant="outline"
+            <ToolActionButton
+              intent="quiet"
               onClick={() =>
                 changeRows(
                   [...rows].sort(
@@ -1046,17 +1064,17 @@ export function LactateCurveCalculatorClient({
               }
             >
               {c.sort}
-            </Button>
+            </ToolActionButton>
           ) : null}
-          <Button
-            size="lg"
+          <ToolActionButton
+            intent="primary"
             onClick={(event) => void analyze(event.timeStamp)}
             disabled={busy}
             data-testid="lactate-analyze"
           >
             {busy ? c.calculating : c.analyze}
             <ArrowRight data-icon="inline-end" />
-          </Button>
+          </ToolActionButton>
         </section>
         <section
           className={styles.results}
@@ -1302,7 +1320,7 @@ export function LactateCurveCalculatorClient({
                 {run.analysis.engineVersion} ·{" "}
                 {run.analysis.referenceCommit.slice(0, 7)}
               </p>
-              <div className={styles.actions}>
+              <ToolResultActions>
                 <Button
                   variant="outline"
                   disabled={stale}
@@ -1328,7 +1346,7 @@ export function LactateCurveCalculatorClient({
                 <Button variant="ghost" disabled={stale} onClick={copyResults}>
                   {copied ? c.copied : c.copy}
                 </Button>
-              </div>
+              </ToolResultActions>
               <LactateToolFooter
                 copy={c}
                 lang={lang}

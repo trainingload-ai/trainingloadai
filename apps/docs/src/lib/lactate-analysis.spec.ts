@@ -124,9 +124,11 @@ describe("lactate numerical invariants", () => {
     }
   });
   it("does not interpolate a missing heart-rate segment or invent zones", () => {
-    const stages = lactateExample("cycling").map(
-      ({ heartRate: _, ...row }) => row,
-    );
+    const stages = lactateExample("cycling").map((stage) => {
+      const row = { ...stage };
+      delete row.heartRate;
+      return row;
+    });
     const result = analyzeLactate({ sport: "cycling", stages });
     expect(result.methods.every((method) => method.heartRate === null)).toBe(
       true,

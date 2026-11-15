@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { useCallback, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { buildToolAppUrl } from "@shared/product-analytics";
@@ -8,7 +10,6 @@ import { CalculatorPromo } from "@/components/calculators/app-promo";
 import { ToolProductPreview } from "@/components/calculators/tool-product-preview";
 import layout from "@/components/calculators/tool-page.module.css";
 import { normalizeFaqItems } from "@/lib/seo-schema";
-import { Button } from "@/components/ui/button";
 import {
   TrainingPlanAfterConvertDialog,
   type TrainingPlanAfterConvertDialogCopy,
@@ -21,10 +22,7 @@ import {
   ToolPageMain,
   ToolRelatedLinks,
 } from "@/components/ToolPageLayout";
-import {
-  ToolFileDropzone,
-  toolPrimaryActionButtonClass,
-} from "@/components/ToolClientControls";
+import { ToolFileDropzone } from "@/components/ToolClientControls";
 import { TrackFileInspectionStatus } from "@/components/TrackFileInspectionStatus";
 import { useTrackFileInspection } from "@/hooks/use-track-file-inspection";
 import {
@@ -71,6 +69,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
   const tConverter = useTranslations("converter.page");
   const tCommon = useTranslations("commonLinks");
 
+  const convertButtonRef = useRef<HTMLButtonElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -291,18 +290,18 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
                 <div
                   role="alert"
                   aria-live="assertive"
-                  className="text-sm text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-left-2"
+                  className="text-sm text-red-600 dark:text-red-400 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-left-2"
                 >
                   {error}
                 </div>
               ) : null}
               <div className="flex justify-end">
-                <Button
+                <ToolActionButton
+                  intent="primary"
+                  fullWidth
                   type="button"
-                  disabled={
-                    isSubmitting || isInspecting || Boolean(inspectionError)
-                  }
-                  className={toolPrimaryActionButtonClass}
+                  disabled={isSubmitting || isInspecting || Boolean(inspectionError)}
+                  ref={convertButtonRef}
                   onClick={onSubmit}
                 >
                   {isSubmitting ? (
@@ -316,7 +315,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
                       {t("buttons.convert")}
                     </>
                   )}
-                </Button>
+                </ToolActionButton>
               </div>
             </div>
 
@@ -389,6 +388,7 @@ export function FitCourseConverterClient({ lang }: { lang: string }) {
       </div>
 
       <TrainingPlanAfterConvertDialog
+        invokerRef={convertButtonRef}
         appHref={trainingPlanPromptHref}
         copy={trainingPlanPromptCopy}
         lang={lang}

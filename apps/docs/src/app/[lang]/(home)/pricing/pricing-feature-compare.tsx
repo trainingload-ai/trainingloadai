@@ -1,4 +1,5 @@
 "use client";
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 
 import { Check, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -62,7 +63,8 @@ function CompareCell({
   const v = value.trim().toLowerCase();
   if (v === "y" || v === "yes") {
     return (
-      <div className="flex justify-center py-0.5" aria-label={yesLabel}>
+      <div className="relative flex justify-center py-0.5">
+        <span className="sr-only">{yesLabel}</span>
         <span
           className="inline-flex items-center justify-center rounded-full bg-emerald-600/12 p-1 dark:bg-emerald-500/15"
           aria-hidden
@@ -74,10 +76,8 @@ function CompareCell({
   }
   if (v === "n" || v === "no") {
     return (
-      <div
-        className="flex justify-center py-0.5 text-muted-foreground"
-        aria-label={noLabel}
-      >
+      <div className="relative flex justify-center py-0.5 text-muted-foreground">
+        <span className="sr-only">{noLabel}</span>
         <span
           className="inline-flex items-center justify-center rounded-full bg-neutral-100 p-1 dark:bg-white/5"
           aria-hidden
@@ -125,8 +125,11 @@ export function PricingFeatureCompare({
         </p>
       ) : null}
 
-      <div className="mt-6 overflow-x-auto rounded-control border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-card">
-        <table className="w-full min-w-[36rem] border-collapse text-sm">
+      <ScrollableRegion
+        label={`${fc.title}: ${fc.subtitle}`}
+        className="mt-6 overflow-x-auto rounded-control border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-card"
+      >
+        <table className="w-full min-w-[36rem] table-fixed border-collapse text-sm">
           <caption className="sr-only">
             {fc.title}: {fc.subtitle}
           </caption>
@@ -134,7 +137,7 @@ export function PricingFeatureCompare({
             <tr className="border-b border-neutral-200 bg-neutral-50/90 text-left dark:border-white/10 dark:bg-secondary/70">
               <th
                 scope="col"
-                className="sticky left-0 z-10 min-w-[10rem] bg-neutral-50/95 px-3 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground backdrop-blur-sm dark:bg-card/70 md:min-w-[12rem] md:px-4"
+                className="sticky left-0 z-10 w-2/5 bg-neutral-50/95 px-3 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground backdrop-blur-sm dark:bg-card/70 md:px-4"
               >
                 {fc.headers.feature}
               </th>
@@ -232,7 +235,7 @@ export function PricingFeatureCompare({
             })}
           </tbody>
         </table>
-      </div>
+      </ScrollableRegion>
     </section>
   );
 }

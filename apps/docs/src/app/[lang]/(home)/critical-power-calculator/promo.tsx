@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import { ArrowRight, Target } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { buildToolAppUrl } from "@shared/product-analytics";
@@ -106,20 +107,22 @@ export function CpAppPromo({ lang }: { lang: string }) {
               <span />
               <span />
             </div>
-            <img
+            <Image
               src={WEB_SRC}
               alt={t("collage.webAlt")}
               width={1150}
               height={751}
+              sizes="(min-width: 1180px) 464px, (min-width: 1024px) 40vw, 78vw"
               decoding="async"
             />
           </div>
           <div className={styles.promoPhone}>
-            <img
+            <Image
               src={phoneSrc}
               alt={t("collage.phoneAlt")}
               width={640}
               height={1391}
+              sizes="(min-width: 1180px) 226px, (min-width: 1024px) 20vw, 40vw"
               decoding="async"
             />
           </div>

@@ -348,7 +348,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
-          "line": 103
+          "line": 104
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
@@ -356,19 +356,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
-          "line": 90
+          "line": 91
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-marathon-training-plan/page.tsx",
-          "line": 90
+          "line": 91
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-training-plan/page.tsx",
-          "line": 92
+          "line": 93
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/alternatives/page.tsx",
-          "line": 92
+          "line": 94
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/brick-workout/page.tsx",
@@ -384,15 +384,15 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 271
+          "line": 272
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 164
+          "line": 165
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
-          "line": 180
+          "line": 181
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
@@ -404,7 +404,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
-          "line": 73
+          "line": 74
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
@@ -416,19 +416,19 @@
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 340
+          "line": 282
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 465
+          "line": 413
         },
         {
           "file": "apps/docs/src/components/DocsHeader.tsx",
-          "line": 171
+          "line": 159
         },
         {
           "file": "apps/docs/src/components/DocsHeader.tsx",
-          "line": 253
+          "line": 250
         },
         {
           "file": "apps/docs/src/components/EndurancePlanHubPage.tsx",
@@ -436,11 +436,11 @@
         },
         {
           "file": "apps/docs/src/components/ReleaseBanner.tsx",
-          "line": 54
+          "line": 53
         },
         {
           "file": "apps/docs/src/components/ReleaseBanner.tsx",
-          "line": 59
+          "line": 58
         },
         {
           "file": "apps/docs/src/components/RunningPlanPage.tsx",
@@ -560,7 +560,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 201
+          "line": 210
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -574,7 +574,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 219
+          "line": 228
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -666,7 +666,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/client.tsx",
-          "line": 590
+          "line": 589
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
@@ -688,7 +688,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
-          "line": 1125
+          "line": 1134
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -702,7 +702,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 21
+          "line": 20
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1133,7 +1133,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/client.tsx",
-          "line": 577
+          "line": 576
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-file-viewer/page.tsx",
@@ -1187,11 +1187,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 246
+          "line": 247
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 23
+          "line": 22
         },
         {
           "file": "scripts/selfhost/release-artifact.mjs",
@@ -1238,7 +1238,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 335
+          "line": 339
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1252,7 +1252,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 319
+          "line": 323
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1266,7 +1266,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 327
+          "line": 331
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1280,7 +1280,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/client.tsx",
-          "line": 1132
+          "line": 1141
         }
       ],
       "capability": "third-party-sync",
@@ -1390,7 +1390,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 439
+          "line": 446
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1404,7 +1404,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 520
+          "line": 531
         },
         {
           "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
@@ -1856,11 +1856,11 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/client.tsx",
-          "line": 509
+          "line": 546
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 309
+          "line": 313
         },
         {
           "file": "apps/docs/src/lib/heart-rate-llm.ts",
@@ -1906,7 +1906,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 67
+          "line": 68
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1920,7 +1920,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
-          "line": 356
+          "line": 360
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1934,7 +1934,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 73
+          "line": 74
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1962,7 +1962,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 527
+          "line": 538
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1976,7 +1976,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 353
+          "line": 358
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1990,7 +1990,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 314
+          "line": 318
         },
         {
           "file": "apps/docs/src/lib/heart-rate-llm.ts",
@@ -2022,7 +2022,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 319
+          "line": 323
         },
         {
           "file": "apps/docs/src/lib/heart-rate-llm.ts",
@@ -2054,7 +2054,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 49
+          "line": 50
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2082,7 +2082,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 84
+          "line": 85
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2124,7 +2124,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 61
+          "line": 62
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2152,7 +2152,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 55
+          "line": 56
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2184,7 +2184,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 325
+          "line": 326
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
@@ -2260,7 +2260,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 137
+          "line": 146
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2321,7 +2321,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 165
+          "line": 166
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2335,7 +2335,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 157
+          "line": 158
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2349,7 +2349,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 151
+          "line": 152
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2377,7 +2377,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 94
+          "line": 95
         }
       ],
       "capability": "auth",
@@ -2391,7 +2391,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 89
+          "line": 90
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2405,7 +2405,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 376
+          "line": 380
         },
         {
           "file": "apps/server/src/fitness-calculation/fitness-methods.ts",
@@ -2423,7 +2423,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 236
+          "line": 245
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2507,7 +2507,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 366
+          "line": 370
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2521,7 +2521,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 356
+          "line": 360
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2535,7 +2535,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
-          "line": 282
+          "line": 286
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2563,11 +2563,11 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
-          "line": 274
+          "line": 278
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 78
+          "line": 79
         },
         {
           "file": "apps/docs/src/lib/race-time-education.ts",
@@ -2599,7 +2599,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 99
+          "line": 100
         },
         {
           "file": "apps/docs/src/lib/running-plan-schedules.ts",
@@ -2803,7 +2803,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 348
+          "line": 345
         },
         {
           "file": "apps/docs/src/lib/running-plan-schedules.ts",
@@ -2881,7 +2881,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
-          "line": 354
+          "line": 351
         }
       ],
       "capability": "third-party-sync",
@@ -2973,7 +2973,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 455
+          "line": 462
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3001,7 +3001,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
-          "line": 364
+          "line": 368
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3068,7 +3068,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/[coach]/page.tsx",
-          "line": 37
+          "line": 38
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
@@ -3076,19 +3076,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
-          "line": 24
+          "line": 25
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-marathon-training-plan/page.tsx",
-          "line": 24
+          "line": 25
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-training-plan/page.tsx",
-          "line": 29
+          "line": 30
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/alternatives/page.tsx",
-          "line": 25
+          "line": 27
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/best-efforts/page.tsx",
@@ -3128,19 +3128,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 129
+          "line": 131
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/critical-power-calculator/page.tsx",
-          "line": 180
+          "line": 182
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
-          "line": 140
+          "line": 141
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/css-calculator/page.tsx",
-          "line": 188
+          "line": 189
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/custom-zones/page.tsx",
@@ -3152,7 +3152,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/daniels-running-formula/page.tsx",
-          "line": 30
+          "line": 31
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/effective-vo2max-trend/page.tsx",
@@ -3164,7 +3164,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/features/page.tsx",
-          "line": 53
+          "line": 54
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/fit-course-converter/page.tsx",
@@ -3188,11 +3188,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 152
+          "line": 154
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 200
+          "line": 202
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/half-marathon-training-plan/page.tsx",
@@ -3216,11 +3216,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 120
+          "line": 122
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/lactate-threshold-calculator/page.tsx",
-          "line": 171
+          "line": 173
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/marathon-training-plan/page.tsx",
@@ -3228,11 +3228,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 77
+          "line": 78
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/max-heart-rate-calculator/page.tsx",
-          "line": 135
+          "line": 136
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/olympic-triathlon-training-plan/page.tsx",
@@ -3240,15 +3240,15 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 111
+          "line": 112
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 160
+          "line": 161
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
-          "line": 126
+          "line": 127
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pmc-fitness-chart/page.tsx",
@@ -3264,11 +3264,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 120
+          "line": 121
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 171
+          "line": 172
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
@@ -3332,15 +3332,15 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
-          "line": 16
+          "line": 17
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 84
+          "line": 85
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load-calculator/page.tsx",
-          "line": 138
+          "line": 139
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
@@ -3356,19 +3356,19 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
-          "line": 94
+          "line": 95
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vdot-calculator/page.tsx",
-          "line": 147
+          "line": 148
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 188
+          "line": 189
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 262
+          "line": 263
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/workout-editor/page.tsx",
@@ -3380,11 +3380,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
-          "line": 121
+          "line": 122
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/zone-2-heart-rate-calculator/page.tsx",
-          "line": 169
+          "line": 170
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
@@ -3400,7 +3400,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
-          "line": 98
+          "line": 44
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",
@@ -3542,11 +3542,11 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 340
+          "line": 344
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 431
+          "line": 438
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3642,7 +3642,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/power-zones-calculator/page.tsx",
-          "line": 447
+          "line": 454
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3676,31 +3676,31 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
-          "line": 207
+          "line": 211
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
-          "line": 230
+          "line": 238
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
-          "line": 293
+          "line": 305
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/HomeIntegrationLogos.tsx",
-          "line": 315
+          "line": 331
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 146
+          "line": 155
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 210
+          "line": 219
         },
         {
           "file": "apps/docs/src/components/page-actions.tsx",
-          "line": 227
+          "line": 236
         },
         {
           "file": "apps/server/src/maps/local-route-thumbnail.renderer.ts",
@@ -3746,7 +3746,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/ftp-calculator/page.tsx",
-          "line": 604
+          "line": 618
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3760,11 +3760,11 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/client.tsx",
-          "line": 826
+          "line": 798
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/vo2-max-calculator/page.tsx",
-          "line": 454
+          "line": 455
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3778,7 +3778,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
-          "line": 24
+          "line": 23
         }
       ],
       "capability": "web-asset-or-tooling",

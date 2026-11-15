@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
@@ -301,7 +302,10 @@ export default async function PowerZonesCalculatorPage({
                   <p className={styles.exampleLabel}>
                     {tPage("sections.coggan.exampleLabel")}
                   </p>
-                  <div className={styles.tableWrap}>
+                  <ScrollableRegion
+                    label={tPage("sections.coggan.caption")}
+                    className={styles.tableWrap}
+                  >
                     <table className={styles.table}>
                       <caption className="sr-only">
                         {tPage("sections.coggan.caption")}
@@ -332,7 +336,7 @@ export default async function PowerZonesCalculatorPage({
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollableRegion>
                   <p className={styles.note}>{tPage("sections.coggan.note")}</p>
                   <p className={styles.sourceNote}>
                     {tPage("sections.coggan.source")}{" "}
@@ -351,7 +355,10 @@ export default async function PowerZonesCalculatorPage({
                   title={tPage("sections.targets.title")}
                   description={tPage("sections.targets.description")}
                 >
-                  <div className={styles.tableWrap}>
+                  <ScrollableRegion
+                    label={tPage("sections.targets.caption")}
+                    className={styles.tableWrap}
+                  >
                     <table className={styles.table}>
                       <caption className="sr-only">
                         {tPage("sections.targets.caption")}
@@ -377,7 +384,7 @@ export default async function PowerZonesCalculatorPage({
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollableRegion>
                   <p className={styles.note}>
                     {tPage("sections.targets.note")}
                   </p>
