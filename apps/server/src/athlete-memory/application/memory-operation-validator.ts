@@ -4,6 +4,7 @@ import {
   MEMORY_EPISTEMIC_STATUSES,
   MEMORY_IGNORE_REASONS,
   MEMORY_KINDS,
+  MEMORY_MODEL_AUDIT_CODES,
   MEMORY_OPERATIONS,
   MEMORY_TIME_PRECISIONS,
   type MemoryCategory,
@@ -13,6 +14,7 @@ import {
 import {
   assertIanaTimezone,
   assertMemoryTimeRange,
+  atMemoryValidationPath,
   MemoryValidationError,
   parseMemoryInstant,
 } from '../domain/memory-time';
@@ -32,12 +34,14 @@ const SECRET_MATERIAL = [
   /\b[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}\b/,
 ];
 
-// 这里是 LLM 之后的信任边界：Judge 只负责语义判断，只有经过本文件
-// 归一化并验证通过的字段才允许进入持久层。
+// Only normalized, validated fields may cross the model-to-persistence boundary.
 
 function record(value: unknown, field = 'operation'): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new MemoryValidationError(`${field} must be an object`);
+    throw new MemoryValidationError(`${field} must be an object`, {
+      field,
+      reason: value === undefined ? 'missing' : 'wrong_type',
+    });
   }
   return value as Record<string, unknown>;
 }
@@ -48,7 +52,15 @@ function enumValue<T extends readonly string[]>(
   field: string,
 ): T[number] {
   if (typeof value !== 'string' || !allowed.includes(value)) {
-    throw new MemoryValidationError(`${field} is not supported`);
+    throw new MemoryValidationError(`${field} is not supported`, {
+      field,
+      reason:
+        value === undefined
+          ? 'missing'
+          : typeof value !== 'string'
+            ? 'wrong_type'
+            : 'invalid_value',
+    });
   }
   return value as T[number];
 }
@@ -56,7 +68,19 @@ function enumValue<T extends readonly string[]>(
 function boundedString(value: unknown, field: string, max: number): string {
   const text = typeof value === 'string' ? value.trim() : '';
   if (!text || text.length > max) {
-    throw new MemoryValidationError(`${field} must be 1-${max} characters`);
+    throw new MemoryValidationError(`${field} must be 1-${max} characters`, {
+      field,
+      reason:
+        value === undefined
+          ? 'missing'
+          : typeof value !== 'string'
+            ? 'wrong_type'
+            : !text
+              ? 'empty'
+              : 'too_long',
+      ...(typeof value === 'string' ? { actualLength: text.length } : {}),
+      maxLength: max,
+    });
   }
   return text;
 }
@@ -97,17 +121,27 @@ function safeJsonValue(value: unknown): unknown {
 export function assertSafeMemoryClaim(value: unknown): string {
   const claim = boundedString(value, 'claim', 320);
   if (claim.includes('\u0000') || INSTRUCTION_LIKE.some((r) => r.test(claim))) {
-    throw new MemoryValidationError('claim contains instruction-like content');
+    throw new MemoryValidationError('claim contains instruction-like content', {
+      field: 'claim',
+      reason: 'invalid_value',
+    });
   }
   if (SECRET_MATERIAL.some((pattern) => pattern.test(claim))) {
-    throw new MemoryValidationError('claim contains credential material');
+    throw new MemoryValidationError('claim contains credential material', {
+      field: 'claim',
+      reason: 'invalid_value',
+    });
   }
   return claim.replace(/\s+/g, ' ');
 }
 
-function optionalString(value: unknown, max: number): string | undefined {
+function optionalString(
+  value: unknown,
+  field: string,
+  max: number,
+): string | undefined {
   if (value == null || value === '') return undefined;
-  return boundedString(value, 'text', max);
+  return boundedString(value, field, max);
 }
 
 function parseCandidate(args: {
@@ -139,13 +173,24 @@ function parseCandidate(args: {
     assertedAt: args.assertedAt,
   });
   if (decayProfile === 'UNTIL_DATE' && !validUntil) {
-    throw new MemoryValidationError('UNTIL_DATE requires validUntil');
+    throw new MemoryValidationError('UNTIL_DATE requires validUntil', {
+      field: 'validUntil',
+      reason: 'missing',
+    });
   }
-  const confidence = Number(value.confidence);
-  if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) {
-    throw new MemoryValidationError('confidence must be between 0 and 1');
+  const confidence = value.confidence;
+  if (
+    typeof confidence !== 'number' ||
+    !Number.isFinite(confidence) ||
+    confidence < 0 ||
+    confidence > 1
+  ) {
+    throw new MemoryValidationError('confidence must be between 0 and 1', {
+      field: 'confidence',
+      reason: value.confidence === undefined ? 'missing' : 'invalid_value',
+    });
   }
-  const timeText = optionalString(value.timeText, 120);
+  const timeText = optionalString(value.timeText, 'timeText', 120);
   return {
     kind: enumValue(value.kind, MEMORY_KINDS, 'kind'),
     category,
@@ -181,84 +226,112 @@ export function validateMemoryOperations(args: {
   const root = record(args.raw, 'decision');
   const rawOperations = root.operations;
   if (!Array.isArray(rawOperations) || rawOperations.length === 0) {
-    throw new MemoryValidationError('decision.operations must not be empty');
+    throw new MemoryValidationError('decision.operations must not be empty', {
+      field: 'operations',
+      reason: !Array.isArray(rawOperations) ? 'wrong_type' : 'empty',
+    });
   }
   if (rawOperations.length > 6) {
-    throw new MemoryValidationError('decision contains too many operations');
+    throw new MemoryValidationError('decision contains too many operations', {
+      field: 'operations',
+      reason: 'too_long',
+      actualLength: rawOperations.length,
+      maxLength: 6,
+    });
   }
-  const operations = rawOperations.map((raw): MemoryOperation => {
-    const item = record(raw);
-    const operation = enumValue(item.operation, MEMORY_OPERATIONS, 'operation');
-    if (operation === 'IGNORE') {
-      return {
-        operation,
-        reasonCode: enumValue(
-          item.reasonCode,
-          MEMORY_IGNORE_REASONS,
-          'reasonCode',
-        ),
-      };
-    }
-    if (operation === 'NEEDS_LOOKUP') {
-      const lookup = record(item.lookup, 'lookup');
-      const categories = Array.isArray(lookup.categories)
-        ? lookup.categories.map((category) =>
-            enumValue(category, MEMORY_CATEGORIES, 'lookup.categories'),
-          )
-        : undefined;
-      if (categories && categories.length > 8) {
-        throw new MemoryValidationError(
-          'lookup.categories contains too many values',
+  const operations = rawOperations.map(
+    (raw, index): MemoryOperation =>
+      atMemoryValidationPath(`operations[${index}]`, () => {
+        const item = record(raw);
+        const operation = enumValue(
+          item.operation,
+          MEMORY_OPERATIONS,
+          'operation',
         );
-      }
-      const eventFrom = parseMemoryInstant(
-        lookup.eventFrom,
-        'lookup.eventFrom',
-      );
-      const eventTo = parseMemoryInstant(lookup.eventTo, 'lookup.eventTo');
-      if (eventFrom && eventTo && eventTo < eventFrom) {
-        throw new MemoryValidationError('lookup event range is invalid');
-      }
-      return {
-        operation,
-        lookup: {
-          query: boundedString(lookup.query, 'lookup.query', 200),
-          ...(categories?.length ? { categories } : {}),
-          ...(eventFrom ? { eventFrom: eventFrom.toISOString() } : {}),
-          ...(eventTo ? { eventTo: eventTo.toISOString() } : {}),
-        },
-      };
-    }
-    const reasonCode = boundedString(item.reasonCode, 'reasonCode', 80);
-    if (operation === 'CREATE') {
-      return {
-        operation,
-        reasonCode,
-        ...parseCandidate({
-          value: item,
-          assertedAt: args.assertedAt,
-          timezone: args.timezone,
-        }),
-      };
-    }
-    const targetFactId = boundedString(item.targetFactId, 'targetFactId', 128);
-    const replacement = item.replacement
-      ? parseCandidate({
-          value: item.replacement,
-          assertedAt: args.assertedAt,
-          timezone: args.timezone,
-        })
-      : undefined;
-    if ((operation === 'REFINE' || operation === 'SUPERSEDE') && !replacement) {
-      throw new MemoryValidationError(`${operation} requires replacement`);
-    }
-    return {
-      operation,
-      targetFactId,
-      ...(replacement ? { replacement } : {}),
-      reasonCode,
-    };
-  });
+        if (operation === 'IGNORE') {
+          return {
+            operation,
+            reasonCode: enumValue(
+              item.reasonCode,
+              MEMORY_IGNORE_REASONS,
+              'reasonCode',
+            ),
+          };
+        }
+        if (operation === 'NEEDS_LOOKUP') {
+          const lookup = record(item.lookup, 'lookup');
+          const categories = Array.isArray(lookup.categories)
+            ? lookup.categories.map((category) =>
+                enumValue(category, MEMORY_CATEGORIES, 'lookup.categories'),
+              )
+            : undefined;
+          if (categories && categories.length > 8) {
+            throw new MemoryValidationError(
+              'lookup.categories contains too many values',
+            );
+          }
+          const eventFrom = parseMemoryInstant(
+            lookup.eventFrom,
+            'lookup.eventFrom',
+          );
+          const eventTo = parseMemoryInstant(lookup.eventTo, 'lookup.eventTo');
+          if (eventFrom && eventTo && eventTo < eventFrom) {
+            throw new MemoryValidationError('lookup event range is invalid');
+          }
+          return {
+            operation,
+            lookup: {
+              query: boundedString(lookup.query, 'lookup.query', 200),
+              ...(categories?.length ? { categories } : {}),
+              ...(eventFrom ? { eventFrom: eventFrom.toISOString() } : {}),
+              ...(eventTo ? { eventTo: eventTo.toISOString() } : {}),
+            },
+          };
+        }
+        // Model output cannot invent or invalidate an audit-only provenance code.
+        const reasonCode = MEMORY_MODEL_AUDIT_CODES[operation];
+        if (operation === 'CREATE') {
+          return {
+            operation,
+            reasonCode,
+            ...parseCandidate({
+              value: item,
+              assertedAt: args.assertedAt,
+              timezone: args.timezone,
+            }),
+          };
+        }
+        const targetFactId = boundedString(
+          item.targetFactId,
+          'targetFactId',
+          128,
+        );
+        const replacement = item.replacement
+          ? atMemoryValidationPath('replacement', () =>
+              parseCandidate({
+                value: item.replacement,
+                assertedAt: args.assertedAt,
+                timezone: args.timezone,
+              }),
+            )
+          : undefined;
+        if (
+          (operation === 'REFINE' || operation === 'SUPERSEDE') &&
+          !replacement
+        ) {
+          throw new MemoryValidationError(`${operation} requires replacement`, {
+            field: 'replacement',
+            reason: 'missing',
+          });
+        }
+        return {
+          operation,
+          targetFactId,
+          ...(replacement ? { replacement } : {}),
+          reasonCode,
+        };
+      }),
+  );
   if (
     operations.some((operation) => operation.operation === 'IGNORE') &&
     operations.length !== 1

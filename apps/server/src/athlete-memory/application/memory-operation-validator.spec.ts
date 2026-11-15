@@ -1,5 +1,7 @@
 import { validateMemoryOperations } from './memory-operation-validator';
 import { describe, expect, it } from '@jest/globals';
+import { MemoryValidationError } from '../domain/memory-time';
+import { MEMORY_MODEL_AUDIT_CODES } from '../domain/memory-operation';
 
 const assertedAt = new Date('2026-10-11T01:15:00.000Z');
 
@@ -26,6 +28,122 @@ function create(overrides: Record<string, unknown> = {}) {
 }
 
 describe('Memory operation validation', () => {
+  it.each([undefined, null, 7, '', ' ', 'x'.repeat(81)])(
+    'owns write audit metadata regardless of model reasonCode %p',
+    (reasonCode) => {
+      const [operation] = validateMemoryOperations({
+        raw: create({ reasonCode }),
+        assertedAt,
+        timezone: 'UTC',
+      });
+      expect(operation).toMatchObject({ reasonCode: 'MODEL_CREATE' });
+    },
+  );
+
+  it.each(Object.entries(MEMORY_MODEL_AUDIT_CODES))(
+    'generates the audit code for %s',
+    (operation, reasonCode) => {
+      const raw =
+        operation === 'CREATE'
+          ? create({ reasonCode: undefined })
+          : {
+              operations: [
+                {
+                  operation,
+                  targetFactId: 'fixture-fact',
+                  ...(['REFINE', 'SUPERSEDE'].includes(operation)
+                    ? { replacement: create().operations[0] }
+                    : {}),
+                },
+              ],
+            };
+      expect(
+        validateMemoryOperations({ raw, assertedAt, timezone: 'UTC' })[0],
+      ).toMatchObject({ operation, reasonCode });
+    },
+  );
+
+  it.each([
+    [undefined, 'missing'],
+    [null, 'wrong_type'],
+    [7, 'wrong_type'],
+    ['', 'empty'],
+    [' ', 'empty'],
+    ['x'.repeat(321), 'too_long'],
+  ])(
+    'classifies invalid claims without including their value: %p',
+    (claim, reason) => {
+      try {
+        validateMemoryOperations({
+          raw: create({ claim }),
+          assertedAt,
+          timezone: 'UTC',
+        });
+        throw new Error('Expected rejection');
+      } catch (error) {
+        expect(error).toBeInstanceOf(MemoryValidationError);
+        expect((error as MemoryValidationError).issue).toMatchObject({
+          field: 'operations[0].claim',
+          reason,
+          maxLength: 320,
+        });
+        expect((error as MemoryValidationError).issue).not.toHaveProperty(
+          'value',
+        );
+      }
+    },
+  );
+
+  it('identifies the replacement field and keeps IGNORE reasons constrained', () => {
+    expect.assertions(2);
+    expect(() =>
+      validateMemoryOperations({
+        raw: {
+          operations: [
+            { operation: 'IGNORE', reasonCode: 'arbitrary explanation' },
+          ],
+        },
+        assertedAt,
+        timezone: 'UTC',
+      }),
+    ).toThrow('reasonCode is not supported');
+    try {
+      validateMemoryOperations({
+        raw: {
+          operations: [
+            {
+              operation: 'REFINE',
+              targetFactId: 'fixture-fact',
+              replacement: create({ claim: '' }).operations[0],
+            },
+          ],
+        },
+        assertedAt,
+        timezone: 'UTC',
+      });
+    } catch (error) {
+      expect((error as MemoryValidationError).issue.field).toBe(
+        'operations[0].replacement.claim',
+      );
+    }
+  });
+
+  it('requires numeric confidence and keeps the claim boundary at 320 characters', () => {
+    expect(() =>
+      validateMemoryOperations({
+        raw: create({ confidence: '0.9' }),
+        assertedAt,
+        timezone: 'UTC',
+      }),
+    ).toThrow('confidence');
+    expect(() =>
+      validateMemoryOperations({
+        raw: create({ claim: 'x'.repeat(320) }),
+        assertedAt,
+        timezone: 'UTC',
+      }),
+    ).not.toThrow();
+  });
   it('keeps event time separate from asserted time and preserves raw time text', () => {
     const [operation] = validateMemoryOperations({
       raw: create(),
