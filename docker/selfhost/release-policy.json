@@ -136,6 +136,10 @@
       "0027_scope_fitness_setting_evidence": {
         "phase": "expand",
         "releaseVersion": "1.1.24"
+      },
+      "0028_user_scoped_activity_identity": {
+        "phase": "expand",
+        "releaseVersion": "1.1.25"
       }
     }
   }

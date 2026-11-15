@@ -36,6 +36,12 @@ for (const migration of manifest.migrations) {
   if (admin) await db.query(sql);
   else await db.exec(sql);
 }
+// This fixture emulates Managed after its separately reviewed multi-user contract.
+// Production Core remains additive and retains these indexes for old clients.
+const contract = `DROP INDEX "t_third_party_activity_provider_external_id_key";
+DROP INDEX "t_activity_third_party_provider_third_party_activity_id_key";`;
+if (admin) await db.query(contract);
+else await db.exec(contract);
 if (!admin) {
   socket = new PGLiteSocketServer({ db, host: '127.0.0.1', port: 0 });
   await socket.start();

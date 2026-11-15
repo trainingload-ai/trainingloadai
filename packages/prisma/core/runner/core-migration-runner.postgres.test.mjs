@@ -402,3 +402,59 @@ postgresTest(
     });
   },
 );
+
+postgresTest(
+  "Self-host retains legacy and owner-scoped native activity upserts",
+  async () => {
+    await withPostgresDatabase(async (databaseUrl) => {
+      await runCoreMigrations({ databaseUrl });
+      await query(
+        databaseUrl,
+        `INSERT INTO t_user(id,name,email,email_verified,created_at,updated_at)
+      VALUES('owner','Owner','owner@rollback.invalid',true,now(),now())`,
+      );
+      for (const conflict of [
+        "provider,external_id",
+        "user_id,provider,external_id",
+      ]) {
+        await query(
+          databaseUrl,
+          `INSERT INTO t_third_party_activity
+        (user_id,provider,external_id,raw_data,updated_at)
+        VALUES('owner','intervals_icu','remote-activity','{}',now())
+        ON CONFLICT(${conflict}) DO UPDATE SET activity_name='updated'`,
+        );
+      }
+      for (const conflict of [
+        "third_party_provider,third_party_activity_id",
+        "user_id,third_party_provider,third_party_activity_id",
+      ]) {
+        await query(
+          databaseUrl,
+          `INSERT INTO t_activity
+        (user_id,hash_id,third_party_provider,third_party_activity_id,updated_at)
+        VALUES('owner','rollback-activity','intervals_icu','remote-activity',now())
+        ON CONFLICT(${conflict}) DO UPDATE SET activity_name='updated'`,
+        );
+      }
+      assert.deepEqual(
+        (
+          await query(
+            databaseUrl,
+            "SELECT user_id, activity_name FROM t_activity",
+          )
+        ).rows,
+        [{ user_id: "owner", activity_name: "updated" }],
+      );
+      assert.deepEqual(
+        (
+          await query(
+            databaseUrl,
+            "SELECT user_id, activity_name FROM t_third_party_activity",
+          )
+        ).rows,
+        [{ user_id: "owner", activity_name: "updated" }],
+      );
+    });
+  },
+);
