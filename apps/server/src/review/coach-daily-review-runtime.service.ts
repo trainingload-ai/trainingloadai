@@ -23,6 +23,7 @@ import { CoachReviewAdjustmentService } from './coach-review-adjustment.service'
 import {
   ReviewModelCallGuard,
   isReviewModelDeferredError,
+  isReviewConsentRequiredError,
   reviewUsageFailureReason,
 } from './review-model-call-guard';
 import {
@@ -38,6 +39,7 @@ import { adjustmentDraftToWorkoutUpdatePayload } from '@shared/coach-adjustment-
 import type { PlanWorkoutAdjustmentDraftData } from '@shared/ai-coach-schema';
 import { PLAN_REVIEW_JUDGMENT_PROMPT_VERSION } from '@/api/ai/core/prompt-contracts/plan-review-judgment.contract';
 import { emitAthleteStateReassessRequested } from '@/athlete-state/athlete-state.events';
+import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
 
 const OPEN_REASON = 'runtime_day_review';
 
@@ -46,6 +48,7 @@ export type DailyReviewRuntimeResult = {
   reason:
     | 'not_daily'
     | 'no_active_plan'
+    | 'ai_data_consent_required'
     | 'duplicate'
     | 'keep'
     | 'guidance'
@@ -70,6 +73,7 @@ export class CoachDailyReviewRuntimeService {
     private readonly reviewContext: CoachReviewContextService,
     private readonly adjustments: CoachReviewAdjustmentService,
     private readonly modelGuard: ReviewModelCallGuard,
+    private readonly aiDataConsent: AiDataConsentService,
     @Optional() private readonly events?: EventEmitter2,
   ) {}
 
@@ -79,6 +83,27 @@ export class CoachDailyReviewRuntimeService {
     periodStart: Date;
     periodEnd: Date;
   }): Promise<DailyReviewRuntimeResult> {
+    if (!(await this.aiDataConsent.isGranted(args.userId))) {
+      return this.skipForConsent();
+    }
+    try {
+      return await this.runConsentedDailyJob(args);
+    } catch (error) {
+      if (isReviewConsentRequiredError(error)) return this.skipForConsent();
+      throw error;
+    }
+  }
+
+  private skipForConsent(): DailyReviewRuntimeResult {
+    this.logger.debug(
+      '[daily-runtime-v4] skipped code=AI_DATA_CONSENT_REQUIRED',
+    );
+    return { skipped: true, reason: 'ai_data_consent_required' };
+  }
+
+  private async runConsentedDailyJob(
+    args: Parameters<CoachDailyReviewRuntimeService['runForDailyJob']>[0],
+  ): Promise<DailyReviewRuntimeResult> {
     const timezone = await this.userService.getPreferredTimezone(args.userId);
     // Daily jobs review the completed local day [periodStart, periodEnd).
     // Keep HOME_TODAY on periodStart so unfinished athlete-today sessions are
@@ -118,11 +143,6 @@ export class CoachDailyReviewRuntimeService {
     ) {
       return { skipped: true, reason: 'duplicate' };
     }
-    await this.supersedeStaleProposals({
-      userId: args.userId,
-      contextId: execution.contextId,
-      factHash: context.reviewFactHash,
-    });
     if (
       await this.findPendingProposal({
         userId: args.userId,
@@ -143,6 +163,7 @@ export class CoachDailyReviewRuntimeService {
         fallbackCopy,
       }),
     });
+    await this.aiDataConsent.assertGranted(args.userId);
     let finalJudgment = judgment;
     let draft: PlanWorkoutAdjustmentDraftData | null = null;
     let composition: {
@@ -173,6 +194,13 @@ export class CoachDailyReviewRuntimeService {
       }
     }
 
+    // Recheck before any proposal/event side effect, including stale proposals.
+    await this.aiDataConsent.assertGranted(args.userId);
+    await this.supersedeStaleProposals({
+      userId: args.userId,
+      contextId: execution.contextId,
+      factHash: context.reviewFactHash,
+    });
     let decisionId: string | null = null;
     let branchId: string | null = null;
     const decisionType = decisionTypeForAction(finalJudgment.action);

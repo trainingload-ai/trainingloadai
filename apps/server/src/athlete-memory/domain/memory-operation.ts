@@ -41,6 +41,16 @@ export const MEMORY_OPERATIONS = [
   'IGNORE',
 ] as const;
 
+// These audit codes describe the actor and operation, not model-authored reasoning.
+export const MEMORY_MODEL_AUDIT_CODES = {
+  CREATE: 'MODEL_CREATE',
+  REFINE: 'MODEL_REFINE',
+  CORROBORATE: 'MODEL_CORROBORATE',
+  SUPERSEDE: 'MODEL_SUPERSEDE',
+  RESOLVE: 'MODEL_RESOLVE',
+  RETRACT: 'MODEL_RETRACT',
+} as const;
+
 export const MEMORY_CATEGORIES = [
   'sleep_quality',
   'sleep_duration',

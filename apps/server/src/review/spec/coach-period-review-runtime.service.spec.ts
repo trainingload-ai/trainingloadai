@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { isCoachUpstreamConfigured } from '@/api/ai/core/coach-upstream.adapter';
 import { CoachPeriodReviewRuntimeService } from '../coach-period-review-runtime.service';
 import { ReviewModelCallGuard } from '../review-model-call-guard';
+import { BusinessException } from '@/filters/business-exception/business.exception';
+import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 
 jest.mock('@/api/ai/core/coach-upstream.adapter', () => ({
   isCoachUpstreamConfigured: jest.fn(() => false),
@@ -102,6 +104,10 @@ function createService() {
     },
   };
   const coachContext = { appendEvent: jest.fn(async () => undefined) };
+  const consent = {
+    isGranted: jest.fn(async () => true),
+    assertGranted: jest.fn(async () => undefined),
+  };
   const service = new CoachPeriodReviewRuntimeService(
     { coachDecision: { findMany: jest.fn(async () => []) } } as never,
     {
@@ -127,8 +133,9 @@ function createService() {
     } as never,
     { compose: jest.fn(async () => ({ draft: null })) } as never,
     new ReviewModelCallGuard(),
+    consent as never,
   );
-  return { service, branching, coachContext, aiService };
+  return { service, branching, coachContext, aiService, consent };
 }
 
 const weekly = {
@@ -141,6 +148,38 @@ const weekly = {
 
 describe('CoachPeriodReviewRuntimeService v4', () => {
   afterEach(() => upstream.mockReturnValue(false));
+
+  it.each(['WEEKLY', 'MONTHLY'] as const)(
+    'skips %s before calling models or writing events without consent',
+    async (type) => {
+      const { service, consent, aiService, coachContext, branching } =
+        createService();
+      consent.isGranted.mockResolvedValueOnce(false);
+      await expect(service.runForJob({ ...weekly, type })).resolves.toEqual({
+        skipped: true,
+        reason: 'ai_data_consent_required',
+      });
+      expect(aiService.generatePlanReviewJudgment).not.toHaveBeenCalled();
+      expect(branching.rejectDecision).not.toHaveBeenCalled();
+      expect(coachContext.appendEvent).not.toHaveBeenCalled();
+    },
+  );
+
+  it('does not persist a fallback if consent is revoked during the model call', async () => {
+    upstream.mockReturnValue(true);
+    const { service, aiService, coachContext } = createService();
+    aiService.generatePlanReviewJudgment.mockRejectedValueOnce(
+      new BusinessException({
+        code: BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED,
+        message: 'AI_DATA_CONSENT_REQUIRED',
+      }),
+    );
+    await expect(service.runForJob(weekly)).resolves.toEqual({
+      skipped: true,
+      reason: 'ai_data_consent_required',
+    });
+    expect(coachContext.appendEvent).not.toHaveBeenCalled();
+  });
 
   it('does not let one incomplete workout alone force a fallback adjustment', async () => {
     const { service, branching } = createService();

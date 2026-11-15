@@ -1,3 +1,4 @@
+import { HttpException } from '@nestjs/common';
 import {
   containsZeroPercentage,
   type CoachReviewAction,
@@ -312,6 +313,8 @@ export function buildReviewAdjustmentMetadata(args: {
 }
 
 export function classifyUpstreamFailure(error: unknown) {
+  // Local policy and validation rejections must never become provider failures.
+  if (error instanceof HttpException) throw error;
   const status = Number(
     (error as { status?: unknown })?.status ??
       (error as { response?: { status?: unknown } })?.response?.status,

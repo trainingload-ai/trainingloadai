@@ -22,6 +22,7 @@ import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service'
 import {
   ReviewModelCallGuard,
   isReviewModelDeferredError,
+  isReviewConsentRequiredError,
 } from './review-model-call-guard';
 import { AiService } from '@/api/ai/ai.service';
 
@@ -720,6 +721,12 @@ export class ReviewDigestService {
       };
     } catch (e) {
       if (isReviewModelDeferredError(e)) throw e;
+      if (isReviewConsentRequiredError(e)) {
+        this.logger.debug(
+          '[review-digest] skipped code=AI_DATA_CONSENT_REQUIRED',
+        );
+        return null;
+      }
       const msg = e instanceof Error ? e.message : String(e);
       this.logger.warn(
         `[复盘][AI] 生成摘要失败，将降级为规则版：provider=${provider} baseURL=${getCoachBaseUrlForLog(provider)} error=${msg}`,

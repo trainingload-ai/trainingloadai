@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 293 |
+| Environment variables | 295 |
 | External URL literals | 202 |
 | Filesystem write sites | 221 |
-| Runtime variables missing from configuration docs | 230 |
+| Runtime variables missing from configuration docs | 232 |
 
 ## Undocumented runtime variables
 
@@ -238,6 +238,8 @@
 - `USER_DATA_EXPORT_WORKER_LEASE_MS` — apps
 - `USER_DATA_EXPORT_WORKER_POLL_MS` — apps
 - `USER_POST_PROCESS_AI_REVIEW_IMPORT_MAX_ACTIVITIES` — apps
+- `USER_POST_PROCESS_COALESCE_MAX_WAIT_MS` — apps
+- `USER_POST_PROCESS_COALESCE_QUIET_MS` — apps
 - `USER_POST_PROCESS_WORKER_BATCH_SIZE` — apps
 - `USER_POST_PROCESS_WORKER_CONCURRENCY` — apps
 - `USER_POST_PROCESS_WORKER_ENABLED` — apps

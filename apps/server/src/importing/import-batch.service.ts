@@ -1358,9 +1358,12 @@ export class ImportBatchService {
    * @returns - 批次级后处理任务
    * @returns
    */
-  async createPostProcessJob(batchJobId: string) {
+  async createPostProcessJob(
+    batchJobId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
     // 获取导入批次
-    const batch = await this.importJobs.batchJobs().findUnique({
+    const batch = await this.importJobs.batchJobs(tx).findUnique({
       where: { id: batchJobId },
       include: {
         items: {
@@ -1428,28 +1431,31 @@ export class ImportBatchService {
       ),
     );
 
-    const job = await this.importJobs.ensurePostProcessJob({
-      batchJobId: batch.id,
-      create: {
-        userId: batch.userId,
+    const job = await this.importJobs.ensurePostProcessJob(
+      {
         batchJobId: batch.id,
-        status: 'PENDING',
-        recomputeFrom: correctnessCandidates[0]?.startTime,
-        recomputeTo: correctnessCandidates.at(-1)?.startTime,
-        affectedSportTypes: sportTypes as Prisma.InputJsonValue,
-        summary: {
-          batchStatus: batch.status,
-          totalCount: batch.totalCount,
-          successCount: batch.successCount,
-          failedCount: batch.failedCount,
-          skippedCount: batch.skippedCount,
-          correctnessReplayActivityCount: correctnessCandidates.length,
-        } as Prisma.InputJsonValue,
-      } satisfies Prisma.UserPostProcessJobUncheckedCreateInput,
-    });
+        create: {
+          userId: batch.userId,
+          batchJobId: batch.id,
+          status: 'PENDING',
+          recomputeFrom: correctnessCandidates[0]?.startTime,
+          recomputeTo: correctnessCandidates.at(-1)?.startTime,
+          affectedSportTypes: sportTypes as Prisma.InputJsonValue,
+          summary: {
+            batchStatus: batch.status,
+            totalCount: batch.totalCount,
+            successCount: batch.successCount,
+            failedCount: batch.failedCount,
+            skippedCount: batch.skippedCount,
+            correctnessReplayActivityCount: correctnessCandidates.length,
+          } as Prisma.InputJsonValue,
+        } satisfies Prisma.UserPostProcessJobUncheckedCreateInput,
+      },
+      tx,
+    );
 
     if (job.status !== 'COMPLETED' && job.status !== 'DEAD') {
-      await this.importJobs.batchJobs().update({
+      await this.importJobs.batchJobs(tx).update({
         where: { id: batch.id },
         data: { status: 'POST_PROCESSING' },
       });
@@ -1472,14 +1478,26 @@ export class ImportBatchService {
    *
    * @returns
    */
-  async refreshBatchProgress(batchJobId: string) {
-    const batch = await this.importJobs.batchJobs().findUnique({
+  async refreshBatchProgress(
+    batchJobId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    if (!tx) {
+      return this.prisma.$transaction(
+        (transaction) => this.refreshBatchProgress(batchJobId, transaction),
+        { timeout: 15_000 },
+      );
+    }
+    // Serialize count publication with terminal item writes and job creation.
+    await tx.$queryRaw`SELECT id FROM t_import_batch_job
+      WHERE id = ${batchJobId} FOR UPDATE`;
+    const batch = await this.importJobs.batchJobs(tx).findUnique({
       where: { id: batchJobId },
       select: { id: true, userId: true, totalCount: true, startedAt: true },
     });
     if (!batch) throw new Error(`Import batch not found: ${batchJobId}`);
 
-    const statuses = await this.importJobs.itemJobs().groupBy({
+    const statuses = await this.importJobs.itemJobs(tx).groupBy({
       by: ['status'],
       where: { batchJobId },
       _count: { _all: true },
@@ -1507,7 +1525,7 @@ export class ImportBatchService {
       skippedCount,
     });
 
-    const updated = await this.importJobs.batchJobs().update({
+    const updated = await this.importJobs.batchJobs(tx).update({
       where: { id: batchJobId },
       data: {
         totalCount,
@@ -1533,7 +1551,7 @@ export class ImportBatchService {
       nextStatus === 'PARTIAL_FAILED' ||
       nextStatus === 'FAILED'
     ) {
-      await this.createPostProcessJob(batchJobId);
+      await this.createPostProcessJob(batchJobId, tx);
     }
 
     return updated;

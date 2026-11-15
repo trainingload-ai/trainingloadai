@@ -54,7 +54,7 @@ const REPLAY_TRANSACTION_OPTIONS = {
   isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
 } as const;
 
-class FitnessEvidenceRevisionDriftError extends Error {
+export class FitnessEvidenceRevisionDriftError extends Error {
   constructor() {
     super('FITNESS_EVIDENCE_REVISION_DRIFT');
   }
@@ -365,7 +365,7 @@ export class ChronologicalActivityReplayService {
               if (!(error instanceof FitnessEvidenceRevisionDriftError))
                 throw error;
               this.logger.warn(
-                `[activity-replay] evidence revision drift; restarting user=${request.userId} attempt=${attempt}`,
+                `[activity-replay] evidence-changed reason=EVIDENCE_REVISION_CHANGED outcome=${attempt < 3 ? 'retrying' : 'budget-exhausted'} job=${request.sourceJobId} attempt=${attempt}`,
               );
             }
           }
