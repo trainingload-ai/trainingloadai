@@ -14,6 +14,10 @@ describe('ImportBatchService', () => {
 
   function createService() {
     const prisma = {
+      $queryRaw: jest.fn(async () => []),
+      $transaction: jest.fn(async (work: (tx: unknown) => Promise<unknown>) =>
+        work(prisma),
+      ),
       t_user: {
         findUnique: jest.fn(async () => ({
           accountDeletionRequestedAt: null,

@@ -199,8 +199,8 @@ describe('UserPostProcessWorkerService', () => {
       $queryRawUnsafe.mock.calls[0];
     expect(sql).toContain("status='RUNNING'");
     expect(sql).toContain('lease_expires_at IS NULL');
-    expect(sql).toContain('started_at=COALESCE(j.started_at, $1)');
-    expect(sql).toContain('updated_at=$1');
+    expect(sql).toContain('started_at=COALESCE(j.started_at, ($1::timestamptz');
+    expect(sql).toContain('updated_at=($1::timestamptz');
     expect(sql).not.toContain('NOW()');
     expect(sql).toContain('>= b.total_count');
     expect(sql).toContain("i.status NOT IN ('DONE','SKIPPED','DEAD')");
@@ -236,9 +236,9 @@ describe('UserPostProcessWorkerService', () => {
     expect(sql).toContain('running.id <> j.id');
     expect(sql).toContain("running.status = 'RUNNING'");
     expect(sql).toContain('running.lease_expires_at IS NOT NULL');
-    expect(sql).toContain('running.lease_expires_at > $1');
+    expect(sql).toContain('running.lease_expires_at > ($1::timestamptz');
     expect(sql).toContain('lease_expires_at IS NULL');
-    expect(sql).toContain('lease_expires_at <= $1');
+    expect(sql).toContain('lease_expires_at <= ($1::timestamptz');
     expect(sql).not.toContain('NOW()');
   });
 

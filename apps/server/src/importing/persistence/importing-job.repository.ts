@@ -50,11 +50,14 @@ export class ImportingJobRepository {
    * Prisma upsert 在两个 worker 同时创建同一 batch job 时仍可能竞争。
    * 唯一约束决定胜者；败者只在确认冲突字段后回读同一行并视为成功。
    */
-  async ensurePostProcessJob(options: {
-    batchJobId: string;
-    create: Prisma.UserPostProcessJobUncheckedCreateInput;
-  }) {
-    const jobs = this.postProcessJobs();
+  async ensurePostProcessJob(
+    options: {
+      batchJobId: string;
+      create: Prisma.UserPostProcessJobUncheckedCreateInput;
+    },
+    tx?: Prisma.TransactionClient,
+  ) {
+    const jobs = this.postProcessJobs(tx);
     try {
       return await jobs.upsert({
         where: { batchJobId: options.batchJobId },
@@ -62,7 +65,8 @@ export class ImportingJobRepository {
         create: options.create,
       });
     } catch (error) {
-      if (!isBatchJobIdUniqueConflict(error)) throw error;
+      // A statement failure aborts a PostgreSQL transaction; let its owner retry.
+      if (tx || !isBatchJobIdUniqueConflict(error)) throw error;
 
       const concurrentJob = await jobs.findUnique({
         where: { batchJobId: options.batchJobId },
