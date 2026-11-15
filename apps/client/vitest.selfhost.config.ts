@@ -95,6 +95,7 @@ export default defineConfig({
       "src/app/[locale]/(main)/account/component/ThirdPartyConnections.test.tsx",
       "src/app/[locale]/onboarding/OnboardingImportStep.test.tsx",
       "src/components/third-party/personal-connection-dialog.test.tsx",
+      "src/components/third-party/intervals-icu-connection-dialog.test.tsx",
       "src/components/ui/date-range-picker.test.tsx",
       "src/lib/ai-operation-errors.test.ts",
       "src/lib/api.test.ts",
