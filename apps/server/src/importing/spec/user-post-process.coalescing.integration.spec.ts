@@ -85,6 +85,14 @@ describe('durable user post-process coalescing', () => {
     await db.$connect();
     // This isolated domain fixture also covers Managed's multiple athletes.
     await db.$executeRawUnsafe('DROP INDEX IF EXISTS t_user_single_owner_key');
+    // The shared PGLite helper adds convenience defaults. Restore the migrated
+    // identity requirements so both database modes exercise the same fixture.
+    await db.$executeRaw`ALTER TABLE t_user
+      ALTER COLUMN name DROP DEFAULT,
+      ALTER COLUMN email DROP DEFAULT,
+      ALTER COLUMN email_verified DROP DEFAULT,
+      ALTER COLUMN created_at DROP DEFAULT,
+      ALTER COLUMN updated_at DROP DEFAULT`;
     jobs = new ImportingJobService(new ImportingJobRepository(db as never));
     batches = new ImportBatchService(
       db as never,
@@ -108,7 +116,17 @@ describe('durable user post-process coalescing', () => {
 
   beforeEach(async () => {
     await db.$executeRaw`DELETE FROM t_user`;
-    await db.$executeRaw`INSERT INTO t_user(id) VALUES ('athlete-a'), ('athlete-b')`;
+    const now = new Date();
+    await db.t_user.createMany({
+      data: ['athlete-a', 'athlete-b'].map((id) => ({
+        id,
+        name: 'Synthetic athlete',
+        email: `${id}@example.invalid`,
+        emailVerified: true,
+        createdAt: now,
+        updatedAt: now,
+      })),
+    });
   });
 
   async function seed(args: {
