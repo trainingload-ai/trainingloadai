@@ -146,9 +146,20 @@ test("Markdown copy announces successful completion", async ({
   );
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/zh/docs");
+  const markdownResponse = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/api/docs-markdown/zh",
+    { timeout: 60_000 },
+  );
   await page
     .getByRole("button", { name: "复制 Markdown", exact: true })
     .click();
+  const response = await markdownResponse;
+  expect(response.ok()).toBe(true);
+  const markdown = await response.text();
+  expect(markdown).toContain("# Trainingload.ai");
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toBe(markdown);
   await expect(
     page.getByRole("status").filter({ hasText: "已复制" }),
   ).toHaveText("已复制");
@@ -555,6 +566,12 @@ test("profile radio choices retain values without submitting the calculator", as
 }) => {
   await page.goto("/zh/vo2-max-calculator");
   const form = page.locator("form").first();
+  const age = form.getByRole("spinbutton").first();
+  const choices = form.getByRole("radiogroup").last().getByRole("radio");
+  await choices.last().click();
+  await expect(choices.last()).toHaveAttribute("aria-checked", "true");
+  await choices.first().click();
+  await expect(choices.first()).toHaveAttribute("aria-checked", "true");
   await form.evaluate((node) => {
     node.setAttribute("data-test-submissions", "0");
     node.addEventListener("submit", () =>
@@ -564,12 +581,6 @@ test("profile radio choices retain values without submitting the calculator", as
       ),
     );
   });
-  const age = form.getByRole("spinbutton").first();
-  const choices = form.getByRole("radiogroup").last().getByRole("radio");
-  await choices.last().click();
-  await expect(choices.last()).toHaveAttribute("aria-checked", "true");
-  await choices.first().click();
-  await expect(choices.first()).toHaveAttribute("aria-checked", "true");
   await age.fill("35");
   await choices.first().focus();
   await choices.first().press("ArrowRight", { delay: 50 });
