@@ -136,7 +136,9 @@
     "polar_webhook_signature_invalid": "Invalid Polar webhook signature",
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
     "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
-    "ai_coach_model_unavailable": "モデルが一時的に応答できません。モデルを切り替えて再試行してください。"
+    "ai_coach_model_unavailable": "モデルが一時的に応答できません。モデルを切り替えて再試行してください。",
+    "import_identity_conflict": "アクティビティの所有権が競合しています。インポートの解決についてサポートにお問い合わせください。",
+    "intervals_icu_athlete_identity_missing": "Intervals.icu アカウントの本人確認ができませんでした。再度認証してください。"
   },
   "notification": {
     "reviewDigest": {

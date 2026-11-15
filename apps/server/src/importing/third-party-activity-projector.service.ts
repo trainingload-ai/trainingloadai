@@ -1,3 +1,4 @@
+import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import { Injectable } from '@nestjs/common';
 import type { ThirdPartyActivity, ThirdPartyProvider } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -21,8 +22,7 @@ export class ThirdPartyActivityProjectorService {
   resolveProvider(payload: CanonicalActivityPayload) {
     if (payload.source.kind === 'FILE') return null;
     return (
-      payload.source.provider ??
-      providerFromSourceKind(payload.source.kind)
+      payload.source.provider ?? providerFromSourceKind(payload.source.kind)
     );
   }
 
@@ -70,7 +70,7 @@ export class ThirdPartyActivityProjectorService {
       preferred &&
       (preferred.userId !== args.userId || preferred.provider !== provider)
     ) {
-      throw new Error(
+      throw new ImportIdentityConflictError(
         `Third-party activity projection identity mismatch: id=${preferred.id}`,
       );
     }
@@ -122,17 +122,22 @@ export class ThirdPartyActivityProjectorService {
     };
 
     return this.prisma.$transaction(async (tx) => {
-      // provider + externalId 是全局唯一键。锁住该业务身份后再校验用户，
-      // 避免两个用户并发首次投影时，后到者更新先到者的标准字段。
+      // Serialize repeat deliveries within the owner scope without locking another user.
       await acquireHashtextAdvisoryXactLock(
         tx,
-        `${provider}:${externalId}`,
+        JSON.stringify([args.userId, provider, externalId]),
       );
       const existing = await tx.thirdPartyActivity.findUnique({
-        where: { provider_externalId: { provider, externalId } },
+        where: {
+          userId_provider_externalId: {
+            userId: args.userId,
+            provider,
+            externalId,
+          },
+        },
       });
       if (existing && existing.userId !== args.userId) {
-        throw new Error(
+        throw new ImportIdentityConflictError(
           `Third-party external identity belongs to another user: provider=${provider}, externalId=${externalId}`,
         );
       }
@@ -159,7 +164,13 @@ export class ThirdPartyActivityProjectorService {
       }
 
       const projected = await tx.thirdPartyActivity.upsert({
-        where: { provider_externalId: { provider, externalId } },
+        where: {
+          userId_provider_externalId: {
+            userId: args.userId,
+            provider,
+            externalId,
+          },
+        },
         create: {
           userId: args.userId,
           provider,
@@ -170,7 +181,7 @@ export class ThirdPartyActivityProjectorService {
         update: { ...common, rawData },
       });
       if (projected.userId !== args.userId) {
-        throw new Error(
+        throw new ImportIdentityConflictError(
           `Third-party projection race detected: provider=${provider}, externalId=${externalId}`,
         );
       }

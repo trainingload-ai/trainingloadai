@@ -1,3 +1,4 @@
+import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import { ImportingJobService } from './importing-job.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -646,7 +647,7 @@ export class CanonicalActivityMaterializer {
           where: { thirdPartyActivityId: args.thirdPartyActivityId },
         });
       if (existing && existing.activityId !== args.activityId) {
-        throw new Error(
+        throw new ImportIdentityConflictError(
           `Third-party activity ${args.thirdPartyActivityId} is already mapped to activity ${existing.activityId}`,
         );
       }

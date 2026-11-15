@@ -100,6 +100,23 @@ describe('ImportBatchService', () => {
     expect(prisma.importBatchJob.create).not.toHaveBeenCalled();
   });
 
+  it('exposes only the safe ownership-conflict classification and localized message', async () => {
+    const { prisma, service } = createService();
+    (prisma.importItemJob.findMany as jest.Mock).mockResolvedValueOnce([
+      {
+        id: 'item',
+        status: 'DEAD',
+        lastErrorCode: 'IMPORT_IDENTITY_CONFLICT',
+        lastError: 'private upstream identity',
+      },
+    ] as never);
+    const result = await service.getBatchItems('batch-1', 'user-1');
+    expect(result.items[0]).toMatchObject({
+      lastErrorCode: 'IMPORT_IDENTITY_CONFLICT',
+      lastError: 'common.error.import_identity_conflict',
+    });
+  });
+
   it('does not expose persisted worker diagnostics or internal error codes', async () => {
     const { prisma, service } = createService();
     (prisma.importItemJob.findMany as jest.Mock).mockResolvedValueOnce([

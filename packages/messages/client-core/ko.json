@@ -1377,7 +1377,19 @@
       "replaceKeyConfirmTitle": "API 키를 바꾸시겠습니까?",
       "replaceKeyConfirmDescription": "이 API 키는 저장된 키와 다르며 다른 계정에 속할 수 있습니다. 저장하면 가져온 기록이 유지되며 향후 동기화에 새 키가 사용됩니다.",
       "replaceKeyCancel": "취소",
-      "replaceKeyConfirmAction": "키 교체"
+      "replaceKeyConfirmAction": "키 교체",
+      "lastDiscovery": "최근 활동 검색",
+      "activityImport": "최근 활동 가져오기",
+      "importCounts": "{success}/{total}개 완료, {failed}개 실패, {skipped}개 건너뜀",
+      "importState": {
+        "QUEUED": "대기 중",
+        "RUNNING": "가져오는 중",
+        "POST_PROCESSING": "후처리 중",
+        "COMPLETED": "완료",
+        "PARTIAL_FAILED": "일부 실패",
+        "FAILED": "실패",
+        "CANCELLED": "취소됨"
+      }
     }
   },
   "UserProfile": {

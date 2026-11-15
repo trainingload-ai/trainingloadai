@@ -1158,6 +1158,47 @@ export class ImportBatchService {
    * @param userId 用户ID
    * @returns
    */
+  async getLatestProviderBatchProgress(args: {
+    userId: string;
+    sourceKind: ImportSourceKind;
+    connectionId: string;
+  }) {
+    const batch = await this.importJobs.batchJobs().findFirst({
+      where: {
+        userId: args.userId,
+        sourceKind: args.sourceKind,
+        requestContext: { path: ['connectionId'], equals: args.connectionId },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        totalCount: true,
+        successCount: true,
+        failedCount: true,
+        skippedCount: true,
+        completedAt: true,
+        postProcessJobs: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { status: true },
+        },
+      },
+    });
+    return batch
+      ? {
+          batchId: batch.id,
+          status: batch.status,
+          totalCount: batch.totalCount,
+          successCount: batch.successCount,
+          failedCount: batch.failedCount,
+          skippedCount: batch.skippedCount,
+          completedAt: batch.completedAt,
+          postProcessingStatus: batch.postProcessJobs[0]?.status ?? null,
+        }
+      : null;
+  }
+
   async getBatchSummary(batchJobId: string, userId: string) {
     // 先判断所有权，当前用户和批次是否相关
     await this.assertBatchOwnership(batchJobId, userId);
@@ -1336,11 +1377,17 @@ export class ImportBatchService {
         // filesystem paths and upstream response bodies. Never cross the API boundary.
         lastErrorCode:
           item.status === 'FAILED' || item.status === 'DEAD'
-            ? 'IMPORT_PROCESSING_FAILED'
+            ? item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT'
+              ? 'IMPORT_IDENTITY_CONFLICT'
+              : 'IMPORT_PROCESSING_FAILED'
             : null,
         lastError:
           item.status === 'FAILED' || item.status === 'DEAD'
-            ? this.i18n.t('common.error.internal')
+            ? this.i18n.t(
+                item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT'
+                  ? 'common.error.import_identity_conflict'
+                  : 'common.error.internal',
+              )
             : null,
         startedAt: item.startedAt,
         completedAt: item.completedAt,

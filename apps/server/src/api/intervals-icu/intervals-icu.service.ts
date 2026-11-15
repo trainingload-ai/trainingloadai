@@ -1,3 +1,8 @@
+import { randomUUID } from 'node:crypto';
+import {
+  intervalsOAuthDiagnostic,
+  isIntervalsAthleteUniqueConflict,
+} from './intervals-icu-oauth-diagnostics';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { ExternalProviderConnection } from '@prisma/client';
@@ -151,7 +156,7 @@ function optionalApiKey(value?: string) {
 function extractExternalAthleteId(profile: IntervalsIcuAthleteProfile | null) {
   if (!profile) return '0';
   const nested = profile.athlete?.id;
-  if (nested != null && String(nested).trim()) return String(nested);
+  if (nested != null && String(nested).trim()) return String(nested).trim();
   return '0';
 }
 
@@ -182,7 +187,7 @@ function parseScopeList(value: unknown) {
 /** OAuth token 响应中的运动员 id。 */
 function oauthAthleteId(token: IntervalsIcuOAuthTokenResponse) {
   const id = token.athlete?.id;
-  return id == null || id === '' ? '0' : String(id);
+  return id == null || id === '' ? '0' : String(id).trim();
 }
 
 /** 给 URL 追加/覆盖 query 参数。 */
@@ -261,6 +266,31 @@ export class IntervalsIcuService {
         THIRD_PARTY_ERRORS.INTERVALS_ICU.ACCOUNT_ALREADY_CONNECTED,
       );
     }
+  }
+
+  private async saveConnection(
+    args: Prisma.ExternalProviderConnectionUpsertArgs,
+  ) {
+    try {
+      return await this.providerConnections.model().upsert(args);
+    } catch (error) {
+      if (isIntervalsAthleteUniqueConflict(error)) {
+        throw thirdPartyError(
+          THIRD_PARTY_ERRORS.INTERVALS_ICU.ACCOUNT_ALREADY_CONNECTED,
+        );
+      }
+      throw error;
+    }
+  }
+
+  private requireAthleteIdentity(value: string) {
+    const id = value.trim();
+    if (!id || id === '0') {
+      throw thirdPartyError(
+        THIRD_PARTY_ERRORS.INTERVALS_ICU.ATHLETE_IDENTITY_MISSING,
+      );
+    }
+    return id;
   }
 
   /** 调 profile 验证 API Key；401 等转为业务错误。 */
@@ -445,6 +475,7 @@ export class IntervalsIcuService {
       userId,
       provider: 'intervals_icu',
       payload: {
+        diagnosticId: randomUUID(),
         returnUrl: this.sanitizeReturnUrl(dto.returnUrl),
         settings: dto,
       } as unknown as Prisma.InputJsonValue,
@@ -470,6 +501,9 @@ export class IntervalsIcuService {
     state?: string;
     error?: string;
   }) {
+    const callbackId = randomUUID();
+    let diagnosticId: string | undefined;
+    let stage = 'consume_state';
     let statePayload: {
       userId: string;
       returnUrl: string;
@@ -483,6 +517,11 @@ export class IntervalsIcuService {
         !Array.isArray(row.payload)
           ? (row.payload as Record<string, unknown>)
           : {};
+      diagnosticId =
+        typeof payload.diagnosticId === 'string' &&
+        /^[0-9a-f-]{36}$/.test(payload.diagnosticId)
+          ? payload.diagnosticId
+          : undefined;
       statePayload = {
         userId: row.userId,
         returnUrl: this.sanitizeReturnUrl(
@@ -520,12 +559,14 @@ export class IntervalsIcuService {
       }
 
       // 获取 token
+      stage = 'exchange_token';
       const token = await this.intervalsIcuClient.exchangeOAuthCode({
         clientId,
         clientSecret,
         code: query.code,
       });
       // 拿到 token 后，创建/更新连接
+      stage = 'save_connection';
       await this.applyOAuthConnection(
         statePayload.userId,
         token,
@@ -537,8 +578,16 @@ export class IntervalsIcuService {
       });
     } catch (error) {
       const returnUrl = statePayload?.returnUrl ?? this.sanitizeReturnUrl(null);
-      const reason = error instanceof Error ? error.message : 'oauth_failed';
-      this.logger.warn(`[Intervals.icu][授权] 回调失败: ${reason}`);
+      this.logger.warn(
+        JSON.stringify({
+          provider: 'intervals_icu',
+          callbackId,
+          diagnosticId,
+          stage,
+          ...intervalsOAuthDiagnostic(error),
+          reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',
+        }),
+      );
       return addQuery(returnUrl, {
         intervals_icu_oauth: 'error',
         reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',
@@ -557,7 +606,15 @@ export class IntervalsIcuService {
         THIRD_PARTY_ERRORS.INTERVALS_ICU.OAUTH_TOKEN_MISSING,
       );
     }
-    const externalAthleteId = oauthAthleteId(token);
+    let externalAthleteId = oauthAthleteId(token);
+    if (!externalAthleteId || externalAthleteId === '0') {
+      const athlete = await this.intervalsIcuClient.getAthlete({
+        authType: 'oauth',
+        token: token.access_token,
+      });
+      externalAthleteId = String(athlete.id ?? '');
+    }
+    externalAthleteId = this.requireAthleteIdentity(externalAthleteId);
     // 验证运动员 ID 是否可用
     await this.assertExternalAthleteAvailable(userId, externalAthleteId);
     // 查找已存在的连接
@@ -638,7 +695,7 @@ export class IntervalsIcuService {
       },
     });
     // 更新/创建连接
-    const connection = await this.providerConnections.model().upsert({
+    const connection = await this.saveConnection({
       where: {
         userId_provider_region: {
           userId,
@@ -770,6 +827,7 @@ export class IntervalsIcuService {
 
     if (apiKey) {
       profile = await this.validateApiKey(apiKey);
+      this.requireAthleteIdentity(extractExternalAthleteId(profile));
       await this.assertExternalAthleteAvailable(
         userId,
         extractExternalAthleteId(profile),
@@ -833,7 +891,7 @@ export class IntervalsIcuService {
       },
     });
 
-    const connection = await this.providerConnections.model().upsert({
+    const connection = await this.saveConnection({
       where: {
         userId_provider_region: {
           userId,
@@ -975,9 +1033,19 @@ export class IntervalsIcuService {
         },
       },
     });
-    return connection
-      ? this.toConnectionStatus(connection)
-      : { connected: false };
+    if (!connection) return { connected: false };
+    const activitySync =
+      await this.importBatchService.getLatestProviderBatchProgress({
+        userId,
+        sourceKind: 'INTERVALS_ICU',
+        connectionId: connection.id,
+      });
+    return {
+      ...this.toConnectionStatus(connection),
+      // Connection completion timestamps describe discovery, not activity readiness.
+      discoveryCompletedAt: connection.lastSyncCompletedAt,
+      activitySync,
+    };
   }
 
   /** 断开连接并清空凭证字段（历史导入数据保留）。 */

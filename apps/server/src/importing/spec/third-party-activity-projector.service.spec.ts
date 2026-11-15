@@ -55,7 +55,8 @@ describe('ThirdPartyActivityProjectorService', () => {
     expect(tx.thirdPartyActivity.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          provider_externalId: {
+          userId_provider_externalId: {
+            userId: 'user-1',
             provider: 'intervals_icu',
             externalId: '123#0',
           },
@@ -64,7 +65,7 @@ describe('ThirdPartyActivityProjectorService', () => {
     );
     expect(tx.$executeRawUnsafe).toHaveBeenCalledWith(
       'SELECT pg_advisory_xact_lock(hashtext($1))::text AS lock',
-      'intervals_icu:123#0',
+      JSON.stringify(['user-1', 'intervals_icu', '123#0']),
     );
   });
 

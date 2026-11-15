@@ -228,7 +228,9 @@
     "polar_webhook_signature_missing": "Missing Polar-Signature header",
     "polar_webhook_signature_invalid": "Invalid Polar webhook signature",
     "polar_webhook_secret_missing": "Polar webhook secret is not configured",
-    "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification"
+    "polar_webhook_raw_body_missing": "Unable to read raw request body for webhook signature verification",
+    "import_identity_conflict": "Conflitto di proprietà dell’attività. Contatta l’assistenza per risolvere l’importazione.",
+    "intervals_icu_athlete_identity_missing": "Impossibile verificare l’identità dell’account Intervals.icu. Autorizza di nuovo."
   },
   "mail": {
     "brand": {

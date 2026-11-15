@@ -1470,7 +1470,19 @@
       "replaceKeyConfirmTitle": "要替換 API Key 嗎？",
       "replaceKeyConfirmDescription": "這個 API Key 與已儲存的 key 不同，可能屬於另一個帳戶。儲存後會保留已匯入的歷史，之後用新的 key 同步。",
       "replaceKeyCancel": "取消",
-      "replaceKeyConfirmAction": "替換 key"
+      "replaceKeyConfirmAction": "替換 key",
+      "lastDiscovery": "最近發現活動",
+      "activityImport": "最近活動匯入",
+      "importCounts": "成功 {success}/{total}，失敗 {failed}，略過 {skipped}",
+      "importState": {
+        "QUEUED": "排隊中",
+        "RUNNING": "匯入中",
+        "POST_PROCESSING": "後處理中",
+        "COMPLETED": "已完成",
+        "PARTIAL_FAILED": "部分失敗",
+        "FAILED": "失敗",
+        "CANCELLED": "已取消"
+      }
     }
   },
   "UserProfile": {

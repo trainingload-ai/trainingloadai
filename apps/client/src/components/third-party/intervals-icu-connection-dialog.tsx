@@ -86,7 +86,10 @@ export function IntervalsIcuConnectionDialog({
   const { locale } = useParams();
   const currentLocale = (Array.isArray(locale) ? locale[0] : locale) ?? "en";
   const { timeFormat } = useStore();
-  const { data: status = { connected: false } } = useIntervalsIcuStatus();
+  const { data: status = { connected: false } } = useIntervalsIcuStatus(
+    true,
+    open,
+  );
   const connectIntervalsIcu = useConnectIntervalsIcu();
   const startIntervalsIcuOAuth = useStartIntervalsIcuOAuth();
   const updateIntervalsIcuSettings = useUpdateIntervalsIcuSettings();
@@ -118,7 +121,7 @@ export function IntervalsIcuConnectionDialog({
   const showAuthAction = !viewingCurrentAuthMode || replacingCurrentApiKey;
   const busy = Boolean(busyAction);
   const lastSync = formatDateTime(
-    status.lastSyncCompletedAt,
+    status.discoveryCompletedAt ?? status.lastSyncCompletedAt,
     currentLocale,
     timeFormat,
   );
@@ -431,7 +434,7 @@ export function IntervalsIcuConnectionDialog({
                         })}
                   </div>
                   <div className="min-w-0 break-words">
-                    {t("intervalsIcu.lastSync")}:{" "}
+                    {t("intervalsIcu.lastDiscovery")}:{" "}
                     {lastSync ?? t("intervalsIcu.neverSynced")}
                   </div>
                   <div className="flex min-w-0 items-center">
@@ -440,6 +443,21 @@ export function IntervalsIcuConnectionDialog({
                     </Badge>
                   </div>
                 </div>
+                {status.activitySync ? (
+                  <div className="mt-2 min-w-0 break-words">
+                    {t("intervalsIcu.activityImport")}:{" "}
+                    {t(
+                      `intervalsIcu.importState.${status.activitySync.status}`,
+                    )}
+                    {" · "}
+                    {t("intervalsIcu.importCounts", {
+                      success: status.activitySync.successCount,
+                      total: status.activitySync.totalCount,
+                      failed: status.activitySync.failedCount,
+                      skipped: status.activitySync.skippedCount,
+                    })}
+                  </div>
+                ) : null}
                 {status.lastError ? (
                   <div className="mt-2 break-words text-destructive">
                     {t("syncError")}
