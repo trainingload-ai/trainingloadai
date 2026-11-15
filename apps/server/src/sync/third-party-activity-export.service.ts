@@ -292,7 +292,8 @@ export class ThirdPartyActivityExportService {
 
       const thirdPartyActivity = await tx.thirdPartyActivity.upsert({
         where: {
-          provider_externalId: {
+          userId_provider_externalId: {
+            userId: args.activity.userId,
             provider: args.provider as ThirdPartyProvider,
             externalId: args.externalId,
           },

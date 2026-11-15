@@ -32,6 +32,7 @@ jobs:
       ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
       NEXT_BUILD_CPUS: "2"
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/trainingload
+      ACTIVITY_REBIND_TEST_POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/trainingload
       CORE_MIGRATION_TEST_POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/trainingload
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

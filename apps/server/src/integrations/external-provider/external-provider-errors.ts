@@ -56,6 +56,10 @@ export const THIRD_PARTY_ERRORS = {
     OAUTH_NOT_CONFIGURED: {
       key: 'common.error.intervals_icu_oauth_not_configured',
     },
+    ATHLETE_IDENTITY_MISSING: {
+      key: 'common.error.intervals_icu_athlete_identity_missing',
+      oauthReason: 'athlete_identity_missing',
+    },
     OAUTH_TOKEN_MISSING: {
       key: 'common.error.intervals_icu_oauth_token_missing',
     },

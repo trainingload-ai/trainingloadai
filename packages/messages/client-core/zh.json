@@ -1615,7 +1615,19 @@
       "replaceKeyConfirmTitle": "确认替换 API Key？",
       "replaceKeyConfirmDescription": "这个 API Key 与当前保存的 Key 不一致，可能对应另一个账号。保存后会保留已导入的历史数据，并使用新的 Key 继续同步。",
       "replaceKeyCancel": "取消",
-      "replaceKeyConfirmAction": "确认替换"
+      "replaceKeyConfirmAction": "确认替换",
+      "lastDiscovery": "最近发现活动",
+      "activityImport": "最近活动导入",
+      "importCounts": "成功 {success}/{total}，失败 {failed}，跳过 {skipped}",
+      "importState": {
+        "QUEUED": "排队中",
+        "RUNNING": "导入中",
+        "POST_PROCESSING": "后处理中",
+        "COMPLETED": "已完成",
+        "PARTIAL_FAILED": "部分失败",
+        "FAILED": "失败",
+        "CANCELLED": "已取消"
+      }
     }
   },
   "UserProfile": {

@@ -312,20 +312,10 @@ describe('IntervalsIcuWebhookService', () => {
       ],
     });
 
-    expect(prisma.thirdPartyActivity.findFirst).toHaveBeenCalledWith({
-      where: {
-        userId: 'user-1',
-        provider: 'intervals_icu',
-        externalId: 'activity-1',
-        state: 1,
-      },
-      select: { id: true },
-    });
     expect(activitySourceLifecycle.deactivateProviderData).toHaveBeenCalledWith(
       {
         userId: 'user-1',
         provider: 'intervals_icu',
-        thirdPartyActivityIds: [42],
         externalIds: ['activity-1'],
       },
     );

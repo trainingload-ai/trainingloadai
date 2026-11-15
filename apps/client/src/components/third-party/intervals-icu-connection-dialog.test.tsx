@@ -141,9 +141,7 @@ describe("Intervals.icu confirmation lifecycle", () => {
     mount();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Disconnect OAuth" }));
-    await user.dblClick(
-      screen.getByRole("button", { name: "Disconnect", exact: true }),
-    );
+    await user.dblClick(screen.getByRole("button", { name: /^Disconnect$/ }));
     expect(
       screen.getByRole("button", { name: "Disconnecting..." }),
     ).toBeDisabled();
@@ -170,19 +168,13 @@ describe("Intervals.icu confirmation lifecycle", () => {
     mount();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Disconnect OAuth" }));
-    await user.click(
-      screen.getByRole("button", { name: "Disconnect", exact: true }),
-    );
+    await user.click(screen.getByRole("button", { name: /^Disconnect$/ }));
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Fixture network failure"),
     );
     expect(fixtures.openChange).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("button", { name: "Disconnect", exact: true }),
-    ).toBeEnabled();
-    await user.click(
-      screen.getByRole("button", { name: "Disconnect", exact: true }),
-    );
+    expect(screen.getByRole("button", { name: /^Disconnect$/ })).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: /^Disconnect$/ }));
     await waitFor(() =>
       expect(fixtures.openChange).toHaveBeenCalledWith(false),
     );
@@ -233,4 +225,25 @@ describe("Intervals.icu confirmation lifecycle", () => {
       }),
     );
   });
+});
+
+it("separates a connected account from a failed activity import", () => {
+  fixtures.status = {
+    connected: true,
+    authType: "oauth",
+    discoveryCompletedAt: "2026-11-15T14:21:09Z",
+    activitySync: {
+      status: "FAILED",
+      totalCount: 1,
+      successCount: 0,
+      failedCount: 1,
+      skippedCount: 0,
+    },
+  };
+  mount();
+  expect(screen.getByText(/Last activity discovery/)).toBeVisible();
+  expect(screen.getByText(/Latest activity import: Failed/)).toHaveTextContent(
+    "0/1 imported, 1 failed",
+  );
+  expect(screen.getByText("Connected", { exact: true })).toBeVisible();
 });

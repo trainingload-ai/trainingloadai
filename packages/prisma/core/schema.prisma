@@ -3632,7 +3632,7 @@ model Activity {
   mergedIntoActivity   Activity?  @relation("ActivityHistoricalMerge", fields: [mergedIntoActivityId], references: [id], onDelete: SetNull)
   mergedActivities     Activity[] @relation("ActivityHistoricalMerge")
 
-  @@unique([thirdPartyProvider, thirdPartyActivityId], name: "provider_activity_unique")
+  @@unique([userId, thirdPartyProvider, thirdPartyActivityId], name: "user_provider_activity_unique", map: "t_activity_user_provider_activity_key")
   @@index([startTime])
   @@index([hashId])
   @@index([userId, startTime])
@@ -5176,7 +5176,7 @@ model ThirdPartyActivity {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Indexes
-  @@unique([provider, externalId]) // Ensure unique activity ID per provider
+  @@unique([userId, provider, externalId]) // Each user owns an independent provider projection
   @@index([userId, provider])
   @@index([startTime])
   @@index([processingStatus])

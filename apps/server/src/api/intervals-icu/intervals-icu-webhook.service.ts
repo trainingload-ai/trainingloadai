@@ -402,26 +402,12 @@ export class IntervalsIcuWebhookService {
     userId: string,
     externalId: string,
   ) {
-    const thirdPartyActivity = await this.prisma.thirdPartyActivity.findFirst({
-      where: {
-        userId,
-        provider: ThirdPartyProvider.intervals_icu,
-        externalId,
-        state: 1,
-      },
-      select: { id: true },
-    });
-    if (!thirdPartyActivity) {
-      return { thirdPartyActivities: 0, activities: 0 };
-    }
-
     if (!this.activitySourceLifecycle) {
       throw new Error('ActivitySourceLifecycleService is unavailable');
     }
     return this.activitySourceLifecycle.deactivateProviderData({
       userId,
       provider: ThirdPartyProvider.intervals_icu,
-      thirdPartyActivityIds: [thirdPartyActivity.id],
       externalIds: [externalId],
     });
   }

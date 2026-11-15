@@ -1,3 +1,4 @@
+import { ImportIdentityConflictError } from '../import-identity-conflict.error';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ImportItemWorkerService } from '../import-item.worker';
 import { ImportSourceDataUnavailableError } from '../import-item-provider.port';
@@ -38,6 +39,7 @@ function setup(attempts = 0, claimed = true) {
   };
   const mirrors = { markOriginImportFailed: jest.fn(async () => undefined) };
   const args: unknown[] = Array.from({ length: 19 }, () => ({}));
+  args[5] = undefined;
   args[0] = prisma;
   args[1] = { get: () => 3 };
   args[16] = { itemJobs: () => items };
@@ -115,7 +117,7 @@ describe('unavailable import source completion', () => {
     expect(h.router.keepUnavailableSource).not.toHaveBeenCalled();
     expect(h.activityUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 42, processingStatus: { not: 'READY' } },
+        where: { id: 42, userId: 'owner', processingStatus: { not: 'READY' } },
       }),
     );
   });
@@ -166,4 +168,28 @@ describe('unavailable import source completion', () => {
       unregister();
     }
   });
+});
+
+it('terminates an ownership conflict immediately without retrying or changing a foreign projection', async () => {
+  const h = setup();
+  await h.worker.failClaimedItem(
+    job,
+    new ImportIdentityConflictError('Ownership conflict'),
+  );
+  expect(h.items.updateMany).toHaveBeenCalledWith(
+    expect.objectContaining({
+      where: { id: 'item', lockToken: 'lease' },
+      data: expect.objectContaining({
+        status: 'DEAD',
+        attempts: { increment: 1 },
+        lastErrorCode: 'IMPORT_IDENTITY_CONFLICT',
+        completedAt: expect.any(Date),
+      }),
+    }),
+  );
+  expect(h.items.update).not.toHaveBeenCalledWith(
+    expect.objectContaining({
+      data: expect.objectContaining({ availableAt: expect.any(Date) }),
+    }),
+  );
 });

@@ -135,7 +135,12 @@
       "id": "0027_scope_fitness_setting_evidence",
       "file": "0027_scope_fitness_setting_evidence/migration.sql",
       "sha256": "234411469fc93fe23c2ac51707c30e6c17d17d7fc04c16cf577326c0c9b62423"
+    },
+    {
+      "id": "0028_user_scoped_activity_identity",
+      "file": "0028_user_scoped_activity_identity/migration.sql",
+      "sha256": "be1545e6cbdbd2b9338c5e15e5cfc32b096dba60ed75d8b01f2e048f287b82d2"
     }
   ],
-  "schemaChecksum": "c51de3fa827d934b84f41f864884950eea6fb1d9f7e30f9e398736e2b5129f36"
+  "schemaChecksum": "9bd1c0be9049e3db5c0658c364a1050751bfab7b315fa5951749706666b7fd20"
 }

@@ -1,3 +1,4 @@
+import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import { Injectable } from '@nestjs/common';
 import type { Activity, MappingType, ThirdPartyProvider } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -160,7 +161,9 @@ export class ActivityAssociationService {
       });
       if (mapping?.activity) {
         if (mapping.activity.userId !== args.userId)
-          throw new Error('Third-party mapping belongs to another user');
+          throw new ImportIdentityConflictError(
+            'Third-party mapping belongs to another user',
+          );
         return {
           activity: mapping.activity,
           reason: 'mapping',
@@ -249,7 +252,8 @@ export class ActivityAssociationService {
     if (provider && externalId) {
       const legacy = await db.activity.findUnique({
         where: {
-          provider_activity_unique: {
+          user_provider_activity_unique: {
+            userId: args.userId,
             thirdPartyProvider: provider,
             thirdPartyActivityId: externalId,
           },
@@ -257,7 +261,9 @@ export class ActivityAssociationService {
       });
       if (legacy) {
         if (legacy.userId !== args.userId)
-          throw new Error('Legacy provider identity belongs to another user');
+          throw new ImportIdentityConflictError(
+            'Legacy provider identity belongs to another user',
+          );
         return {
           activity: legacy,
           reason: 'provider',

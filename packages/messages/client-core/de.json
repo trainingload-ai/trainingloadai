@@ -1378,7 +1378,19 @@
       "replaceKeyConfirmTitle": "API-Schlüssel ersetzen?",
       "replaceKeyConfirmDescription": "Dieser API-Schlüssel unterscheidet sich vom gespeicherten Schlüssel und gehört möglicherweise zu einem anderen Konto. Beim Speichern bleibt der importierte Verlauf erhalten und der neue Schlüssel wird für zukünftige Synchronisierungen verwendet.",
       "replaceKeyCancel": "Abbrechen",
-      "replaceKeyConfirmAction": "Schlüssel ersetzen"
+      "replaceKeyConfirmAction": "Schlüssel ersetzen",
+      "lastDiscovery": "Letzte Aktivitätssuche",
+      "activityImport": "Letzter Aktivitätsimport",
+      "importCounts": "{success}/{total} importiert, {failed} fehlgeschlagen, {skipped} übersprungen",
+      "importState": {
+        "QUEUED": "In Warteschlange",
+        "RUNNING": "Import läuft",
+        "POST_PROCESSING": "Nachverarbeitung",
+        "COMPLETED": "Abgeschlossen",
+        "PARTIAL_FAILED": "Teilweise fehlgeschlagen",
+        "FAILED": "Fehlgeschlagen",
+        "CANCELLED": "Abgebrochen"
+      }
     }
   },
   "UserProfile": {

@@ -7,6 +7,9 @@ import { IntervalsIcuService } from '../intervals-icu.service';
 describe('IntervalsIcuService', () => {
   function createService() {
     const prisma = {
+      importBatchJob: {
+        findFirst: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+      },
       externalProviderConnection: {
         findFirst: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         findUnique: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
@@ -15,6 +18,7 @@ describe('IntervalsIcuService', () => {
       },
     };
     const intervalsIcuClient = {
+      getAthlete: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       listActivities: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       listWellness: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       getProfile: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
@@ -32,6 +36,8 @@ describe('IntervalsIcuService', () => {
       }),
     };
     const importBatchService = {
+      getLatestProviderBatchProgress:
+        jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       createIntervalsIcuImportBatch:
         jest.fn<(...args: unknown[]) => Promise<unknown>>(),
     };
@@ -872,5 +878,87 @@ describe('IntervalsIcuService', () => {
     ).resolves.toMatchObject({ plannedWorkouts: null });
 
     expect(intervalsIcuPlanSync.syncConnectionWeek).not.toHaveBeenCalled();
+  });
+  it('maps a concurrent database ownership conflict to the existing binding error', async () => {
+    const h = createService();
+    h.intervalsIcuClient.getProfile.mockResolvedValueOnce({
+      athlete: { id: 'remote' },
+    });
+    h.prisma.externalProviderConnection.upsert.mockRejectedValueOnce({
+      code: 'P2002',
+      meta: { target: ['external_athlete_id'] },
+    });
+    await expect(
+      h.service.connect('user-1', {
+        apiKey: 'test-key',
+        syncActivities: false,
+      }),
+    ).rejects.toThrow('intervals_icu_account_already_connected');
+  });
+
+  it('reports discovery and failed activity import independently of connection status', async () => {
+    const h = createService();
+    h.prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(
+      connection(),
+    );
+    h.importBatchService.getLatestProviderBatchProgress.mockResolvedValueOnce({
+      id: 'batch',
+      status: 'FAILED',
+      totalCount: 1,
+      successCount: 0,
+      failedCount: 1,
+      skippedCount: 0,
+      postProcessJobs: [],
+    });
+    expect(await h.service.getStatus('user-1')).toMatchObject({
+      connected: true,
+      activitySync: { status: 'FAILED', failedCount: 1 },
+    });
+    expect(
+      h.importBatchService.getLatestProviderBatchProgress,
+    ).toHaveBeenCalledWith({
+      userId: 'user-1',
+      sourceKind: 'INTERVALS_ICU',
+      connectionId: 'connection-1',
+    });
+  });
+
+  it('consumes a failed OAuth attempt once and never exchanges the same code twice', async () => {
+    const h = createService();
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    try {
+      const start = await h.service.startOAuth('user-1', {
+        syncActivities: false,
+      });
+      const state = new URL(start.authorizationUrl).searchParams.get('state')!;
+      h.intervalsIcuClient.exchangeOAuthCode.mockRejectedValueOnce(
+        new IntervalsIcuApiError(
+          400,
+          'must-not-log-code',
+          '{"error":"invalid_grant","error_description":"must-not-log-token"}',
+        ),
+      );
+      const first = await h.service.completeOAuthCallback({
+        code: 'must-not-log-code',
+        state,
+      });
+      await h.service.completeOAuthCallback({
+        code: 'must-not-log-code',
+        state,
+      });
+      expect(new URL(first).searchParams.get('intervals_icu_oauth')).toBe(
+        'error',
+      );
+      expect(h.intervalsIcuClient.exchangeOAuthCode).toHaveBeenCalledTimes(1);
+      const logs = JSON.stringify(warn.mock.calls);
+      expect(logs).toContain('invalid_grant');
+      expect(logs).toContain('exchange_token');
+      expect(logs).not.toContain('must-not-log');
+      expect(logs).not.toContain(state);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

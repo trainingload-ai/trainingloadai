@@ -1378,7 +1378,19 @@
       "replaceKeyConfirmTitle": "¿Reemplazar la clave API?",
       "replaceKeyConfirmDescription": "Esta clave API difiere de la clave guardada y puede pertenecer a otra cuenta. Al guardar se mantendrá el historial importado y se utilizará la nueva clave para futuras sincronizaciones.",
       "replaceKeyCancel": "Cancelar",
-      "replaceKeyConfirmAction": "Reemplazar clave"
+      "replaceKeyConfirmAction": "Reemplazar clave",
+      "lastDiscovery": "Última búsqueda de actividades",
+      "activityImport": "Última importación de actividades",
+      "importCounts": "{success}/{total} importadas, {failed} fallidas, {skipped} omitidas",
+      "importState": {
+        "QUEUED": "En cola",
+        "RUNNING": "Importando",
+        "POST_PROCESSING": "Procesamiento posterior",
+        "COMPLETED": "Completada",
+        "PARTIAL_FAILED": "Parcialmente fallida",
+        "FAILED": "Fallida",
+        "CANCELLED": "Cancelada"
+      }
     }
   },
   "UserProfile": {

@@ -1,3 +1,4 @@
+import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import {
   Injectable,
   Inject,
@@ -1129,6 +1130,8 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         return;
       }
     }
+    const identityConflict =
+      error instanceof ImportIdentityConflictError ? error : null;
     const msg = error instanceof Error ? error.message : String(error);
     const lockToken = this.activeLeaseTokens.get(job.id);
     let row: { attempts: number; activityId: number | null } | null;
@@ -1136,11 +1139,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       const result = await this.importJobs.itemJobs().updateMany({
         where: { id: job.id, lockToken },
         data: {
-          status: 'FAILED',
+          status: identityConflict ? 'DEAD' : 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
+          ...(identityConflict ? { lastErrorCode: identityConflict.code } : {}),
           ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
-          completedAt: null,
+          completedAt: identityConflict ? new Date() : null,
           availableAt: new Date(Date.now() + 30 * 60_000),
           lockToken: null,
           leaseExpiresAt: null,
@@ -1157,11 +1161,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       row = await this.importJobs.itemJobs().update({
         where: { id: job.id },
         data: {
-          status: 'FAILED',
+          status: identityConflict ? 'DEAD' : 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
+          ...(identityConflict ? { lastErrorCode: identityConflict.code } : {}),
           ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
-          completedAt: null,
+          completedAt: identityConflict ? new Date() : null,
         },
         select: { attempts: true, activityId: true },
       });
@@ -1174,26 +1179,28 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     const maxAttempts =
       this.configService.get<number>('importItemWorker.maxAttempts') ?? 6;
 
+    const terminal = Boolean(identityConflict) || attempts >= maxAttempts;
+
     if (row.activityId) {
       // staging 失败时旧 Activity 仍是 READY，不能把它隐藏；只有已经进入
       // 新建/提交处理态的 Activity 才随 item 标记为未完成或最终失败。
       await this.prisma.activity.updateMany({
         where: {
           id: row.activityId,
+          userId: job.userId,
           processingStatus: { not: $Enums.ActivityProcessingStatus.READY },
         },
         data: {
-          processingStatus:
-            attempts >= maxAttempts
-              ? $Enums.ActivityProcessingStatus.FAILED
-              : $Enums.ActivityProcessingStatus.PARTIAL_FAILED,
+          processingStatus: terminal
+            ? $Enums.ActivityProcessingStatus.FAILED
+            : $Enums.ActivityProcessingStatus.PARTIAL_FAILED,
           processingUpdatedAt: new Date(),
           readyAt: null,
         },
       });
     }
 
-    if (thirdPartyActivityId) {
+    if (thirdPartyActivityId && !identityConflict) {
       await this.thirdPartyActivityService.markImportFailed(
         thirdPartyActivityId,
         msg,
@@ -1209,7 +1216,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       level: 'ERROR',
     });
 
-    if (attempts >= maxAttempts) {
+    if (terminal) {
       if (this.extension) {
         await this.extension.afterTerminalFailure({
           userId: job.userId,

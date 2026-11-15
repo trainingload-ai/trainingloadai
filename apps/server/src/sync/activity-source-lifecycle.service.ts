@@ -197,7 +197,18 @@ export class ActivitySourceLifecycleService {
         ? { id: { in: args.thirdPartyActivityIds } }
         : {}),
       ...(args.externalIds?.length
-        ? { externalId: { in: args.externalIds } }
+        ? {
+            AND: [
+              {
+                OR: [
+                  { externalId: { in: args.externalIds } },
+                  ...args.externalIds.map((externalId) => ({
+                    externalId: { startsWith: `${externalId}#` },
+                  })),
+                ],
+              },
+            ],
+          }
         : {}),
     };
     const thirdPartyActivities = await this.prisma.thirdPartyActivity.findMany({

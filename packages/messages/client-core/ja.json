@@ -1377,7 +1377,19 @@
       "replaceKeyConfirmTitle": "API Key を置き換えますか？",
       "replaceKeyConfirmDescription": "この API Key は保存済み key と異なり、別アカウントのものかもしれません。保存すると、取り込み済み履歴を維持したまま今後の同期に新しい key を使います。",
       "replaceKeyCancel": "キャンセル",
-      "replaceKeyConfirmAction": "key を置き換え"
+      "replaceKeyConfirmAction": "key を置き換え",
+      "lastDiscovery": "最終アクティビティ検出",
+      "activityImport": "最新のアクティビティインポート",
+      "importCounts": "成功 {success}/{total}、失敗 {failed}、スキップ {skipped}",
+      "importState": {
+        "QUEUED": "待機中",
+        "RUNNING": "インポート中",
+        "POST_PROCESSING": "後処理中",
+        "COMPLETED": "完了",
+        "PARTIAL_FAILED": "一部失敗",
+        "FAILED": "失敗",
+        "CANCELLED": "キャンセル済み"
+      }
     }
   },
   "UserProfile": {

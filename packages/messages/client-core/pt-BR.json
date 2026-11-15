@@ -1378,7 +1378,19 @@
       "replaceKeyConfirmTitle": "Substituir chave de API?",
       "replaceKeyConfirmDescription": "Esta chave de API é diferente da chave salva e pode pertencer a outra conta. Salvar manterá o histórico importado e usará a nova chave para sincronização futura.",
       "replaceKeyCancel": "Cancelar",
-      "replaceKeyConfirmAction": "Substituir chave"
+      "replaceKeyConfirmAction": "Substituir chave",
+      "lastDiscovery": "Última busca de atividades",
+      "activityImport": "Última importação de atividades",
+      "importCounts": "{success}/{total} importadas, {failed} falharam, {skipped} ignoradas",
+      "importState": {
+        "QUEUED": "Na fila",
+        "RUNNING": "Importando",
+        "POST_PROCESSING": "Pós-processamento",
+        "COMPLETED": "Concluída",
+        "PARTIAL_FAILED": "Falha parcial",
+        "FAILED": "Falhou",
+        "CANCELLED": "Cancelada"
+      }
     }
   },
   "UserProfile": {

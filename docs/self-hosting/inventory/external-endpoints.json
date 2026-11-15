@@ -1358,7 +1358,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 335
+          "line": 365
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -1540,7 +1540,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 322
+          "line": 352
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",
@@ -1558,7 +1558,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 344
+          "line": 374
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",
