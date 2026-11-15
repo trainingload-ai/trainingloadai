@@ -229,6 +229,13 @@ const config = () => ({
   },
 
   userPostProcessWorker: {
+    coalesceQuietMs: process.env.USER_POST_PROCESS_COALESCE_QUIET_MS?.trim()
+      ? Number(process.env.USER_POST_PROCESS_COALESCE_QUIET_MS)
+      : 3_000,
+    coalesceMaxWaitMs:
+      process.env.USER_POST_PROCESS_COALESCE_MAX_WAIT_MS?.trim()
+        ? Number(process.env.USER_POST_PROCESS_COALESCE_MAX_WAIT_MS)
+        : 15_000,
     enabled:
       (process.env.USER_POST_PROCESS_WORKER_ENABLED ?? 'true') === 'true',
     pollMs:

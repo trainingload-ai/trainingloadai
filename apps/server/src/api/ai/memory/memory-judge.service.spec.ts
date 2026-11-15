@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { MemoryJudgeService } from './memory-judge.service';
+import { validateMemoryOperations } from '@/athlete-memory/application/memory-operation-validator';
 import {
   buildThinkingRequestExtras,
   createCoachClient,
@@ -110,14 +111,18 @@ describe('MemoryJudgeService contract', () => {
           items: { required: string[] };
         }
       ).items.required,
-    ).toEqual(expect.arrayContaining(['operation', 'reasonCode']));
+    ).toEqual(['operation']);
     expect(
       (
         request.tools[0].function.parameters.properties.operations as {
           items: { properties: { reasonCode: unknown } };
         }
       ).items.properties.reasonCode,
-    ).toEqual(expect.objectContaining({ minLength: 1, maxLength: 80 }));
+    ).toEqual(
+      expect.objectContaining({
+        enum: expect.arrayContaining(['NO_FUTURE_VALUE', 'HYPOTHETICAL']),
+      }),
+    );
     expect(
       (
         request.tools[0].function.parameters.properties.operations as {
@@ -194,6 +199,28 @@ describe('MemoryJudgeService contract', () => {
     expect(request.messages[1].content).toContain(
       input.conversationClock.timezone,
     );
+    expect(request.messages[0].content).toContain(
+      'Structured questionnaire selections are intentional user assertions',
+    );
+    expect(request.messages[0].content).toContain(
+      'Do not turn a selected ability level into a verified fitness metric',
+    );
+    expect(request.messages[0].content).toContain(
+      'the server generates the audit provenance code',
+    );
+    const examples = [
+      ...request.messages[0].content.matchAll(/^Decision: (.+)$/gm),
+    ];
+    expect(examples).toHaveLength(3);
+    for (const [, json] of examples) {
+      expect(() =>
+        validateMemoryOperations({
+          raw: JSON.parse(json),
+          assertedAt: new Date(input.sourceMessage.createdAt),
+          timezone: 'Asia/Shanghai',
+        }),
+      ).not.toThrow();
+    }
   });
 
   it('rejects malformed tool arguments instead of guessing', async () => {

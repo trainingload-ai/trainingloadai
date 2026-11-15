@@ -10,7 +10,10 @@ import { createHash, randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobService } from './importing-job.service';
-import { ACTIVITY_MATERIALIZATION_VERSION, type ActivityDatasetRepair } from './activity-dataset-repair';
+import {
+  ACTIVITY_MATERIALIZATION_VERSION,
+  type ActivityDatasetRepair,
+} from './activity-dataset-repair';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import {
   ActivityAnalyzeMode,
@@ -279,16 +282,17 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
   private async updateClaimedItem(
     id: string,
     data: Prisma.ImportItemJobUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient,
   ) {
     const lockToken = this.activeLeaseTokens.get(id);
     if (!lockToken) {
-      await this.importJobs.itemJobs().update({
+      await this.importJobs.itemJobs(tx).update({
         where: { id },
         data,
       });
       return;
     }
-    const result = await this.importJobs.itemJobs().updateMany({
+    const result = await this.importJobs.itemJobs(tx).updateMany({
       where: { id, lockToken },
       data,
     });
@@ -301,13 +305,41 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     id: string,
     status: ImportItemJobStatus,
     extra?: ImportItemJobStatusExtra,
+    tx?: Prisma.TransactionClient,
   ) {
     const terminal = ['DONE', 'SKIPPED', 'DEAD'].includes(status);
-    await this.updateClaimedItem(id, {
-      status,
-      ...extra,
-      ...(terminal ? { lockToken: null, leaseExpiresAt: null } : {}),
-    });
+    await this.updateClaimedItem(
+      id,
+      {
+        status,
+        ...extra,
+        ...(terminal ? { lockToken: null, leaseExpiresAt: null } : {}),
+      },
+      tx,
+    );
+  }
+
+  private async completeActivityItem(jobId: string, batchJobId: string) {
+    // When this DONE makes the batch terminal, its durable analysis request
+    // commits in the same transaction instead of relying on the final refresh.
+    await this.prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM t_import_batch_job
+        WHERE id = ${batchJobId} FOR UPDATE`;
+        await this.markStatus(
+          jobId,
+          $Enums.ImportItemJobStatus.DONE,
+          {
+            completedAt: new Date(),
+            lastError: null,
+            lastErrorCode: null,
+          },
+          tx,
+        );
+        await this.importBatchService.refreshBatchProgress(batchJobId, tx);
+      },
+      { timeout: 15_000 },
+    );
   }
 
   private extractThirdPartyActivityId(job: ImportJobJsonFields) {
@@ -764,15 +796,28 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       // Parquet 一旦成为 canonical 数据集即可异步排队。天气失败不能阻塞
       // 活动进入 ANALYZING/READY，也不能延长主导入链路。
       const committedSource = await this.prisma.activitySource.findFirst({
-        where: { activityId: materialized.activity.id, userId: args.userId,
-          isPrimary: true, isActive: true, sourceUid: payload.source.sourceUid },
+        where: {
+          activityId: materialized.activity.id,
+          userId: args.userId,
+          isPrimary: true,
+          isActive: true,
+          sourceUid: payload.source.sourceUid,
+        },
       });
       if (committedSource) {
         await this.prisma.activitySource.updateMany({
-          where: { id: committedSource.id, canonicalSnapshotId: committedSource.canonicalSnapshotId,
-            sourceChecksum: committedSource.sourceChecksum, isPrimary: true },
-          data: { metadata: { ...(committedSource.metadata as Prisma.InputJsonObject),
-            materializationVersion: ACTIVITY_MATERIALIZATION_VERSION } },
+          where: {
+            id: committedSource.id,
+            canonicalSnapshotId: committedSource.canonicalSnapshotId,
+            sourceChecksum: committedSource.sourceChecksum,
+            isPrimary: true,
+          },
+          data: {
+            metadata: {
+              ...(committedSource.metadata as Prisma.InputJsonObject),
+              materializationVersion: ACTIVITY_MATERIALIZATION_VERSION,
+            },
+          },
         });
       }
       await this.activityWeather
@@ -803,11 +848,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         );
       }
 
-      await this.markStatus(args.jobId, $Enums.ImportItemJobStatus.DONE, {
-        completedAt: new Date(),
-        lastError: null,
-        lastErrorCode: null,
-      });
+      await this.completeActivityItem(args.jobId, args.batchJobId);
     } catch (error) {
       if (thirdPartyActivityId && !args.thirdPartyActivityId) {
         await this.thirdPartyActivityService

@@ -1,4 +1,16 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
+
+export function isReviewConsentRequiredError(error: unknown): boolean {
+  if (!(error instanceof HttpException)) return false;
+  const response = error.getResponse();
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    (response as { code?: unknown }).code ===
+      BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED
+  );
+}
 
 /** Consecutive model failures that stop the current hourly review run. */
 export const REVIEW_MODEL_MAX_CONSECUTIVE_FAILURES = 3;

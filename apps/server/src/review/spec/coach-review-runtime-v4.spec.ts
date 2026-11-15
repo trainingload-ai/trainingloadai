@@ -1,4 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
+import { BadRequestException } from '@nestjs/common';
+import { BusinessException } from '@/filters/business-exception/business.exception';
+import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import type { CoachReviewContext } from '../coach-review-context.service';
 import {
   buildCoachReviewFallback,
@@ -11,6 +14,15 @@ import {
 const copy = { keep: 'Keep the plan.', propose: 'Give recovery more room.' };
 
 describe('coach review runtime v4 safety', () => {
+  it('preserves application rejections instead of classifying them as upstream errors', () => {
+    const consent = new BusinessException({
+      code: BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED,
+      message: 'AI_DATA_CONSENT_REQUIRED',
+    });
+    expect(() => classifyUpstreamFailure(consent)).toThrow(consent);
+    const validation = new BadRequestException('Application validation');
+    expect(() => classifyUpstreamFailure(validation)).toThrow(validation);
+  });
   it('postpones the real late unplanned run case using two evidence domains', () => {
     const result = buildCoachReviewFallback(
       context({

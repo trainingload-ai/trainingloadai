@@ -15,7 +15,9 @@ import { AthleteMemoryPreferenceService } from '@/athlete-memory/application/ath
 import {
   formatLocalDateTime,
   MemoryIsolationError,
+  MemoryValidationError,
 } from '@/athlete-memory/domain/memory-time';
+import type { MemoryOperation } from '@/athlete-memory/domain/memory-operation';
 import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
 import { MemoryJudgeService } from './memory-judge.service';
 import { getStoredCoachLegacyMessage } from '../core/coach-history-messages';
@@ -186,19 +188,7 @@ export class AiCoachMemoryExtractionWorker
     job: NonNullable<Awaited<ReturnType<typeof this.claim>>>,
   ) {
     try {
-      if (!(await this.consent.isGranted(job.userId))) {
-        await this.completeWithoutApply(job.id, job.userId, {
-          operations: [{ operation: 'IGNORE', reasonCode: 'CONSENT_REVOKED' }],
-        });
-        return;
-      }
-      const preference = await this.preferences.get(job.userId);
-      if (!preference.enabled) {
-        await this.completeWithoutApply(job.id, job.userId, {
-          operations: [{ operation: 'IGNORE', reasonCode: 'MEMORY_DISABLED' }],
-        });
-        return;
-      }
+      if (await this.completeIfIneligible(job.id, job.userId)) return;
       const message = await this.prisma.aiCoachMessage.findFirst({
         where: {
           id: job.sourceMessageId,
@@ -252,16 +242,53 @@ export class AiCoachMemoryExtractionWorker
         })),
         activeMemoryIndex: memoryIndex.items,
       };
-      // One initial adjudication plus at most one targeted lookup retry. This is
-      // deliberately not an agent loop, so latency and model spend stay bounded.
-      let judged = await this.judge.judge(baseInput);
-      let operations = this.commands.validateDecision({
-        raw: judged.decision,
-        assertedAt: message.createdAt,
-        timezone,
-      });
-      if (operations[0]?.operation === 'NEEDS_LOOKUP') {
-        await this.extendLease(job.id, job.userId);
+      // Lookup and validation repair share one additional call per attempt.
+      // SDK transport retries remain bounded separately by the Judge client.
+      let input: Parameters<MemoryJudgeService['judge']>[0] = baseInput;
+      let judged: Awaited<ReturnType<MemoryJudgeService['judge']>>;
+      let operations: MemoryOperation[];
+      for (let call = 1; call <= 2; call++) {
+        if (call > 1) {
+          // A user may revoke consent or edit/delete the source during a call.
+          await this.extendLease(job.id, job.userId);
+          if (await this.completeIfIneligible(job.id, job.userId)) return;
+        }
+        try {
+          judged = await this.judge.judge(input);
+          operations = this.commands.validateDecision({
+            raw: judged.decision,
+            assertedAt: message.createdAt,
+            timezone,
+          });
+        } catch (error) {
+          if (
+            !(error instanceof MemoryValidationError) ||
+            error instanceof MemoryIsolationError
+          )
+            throw error;
+          const stage = input.validationFeedback
+            ? 'repair'
+            : input.lookupCandidates
+              ? 'lookup'
+              : 'initial';
+          const issue = error.issue ?? {
+            field: 'decision',
+            reason: 'invalid_value' as const,
+          };
+          this.logger.warn(
+            `Memory Judge rejected job=${job.id} model=${judged?.model ?? 'unreported'} stage=${stage} call=${call} issue=${JSON.stringify(issue)}`,
+          );
+          if (call === 2) throw error;
+          input = { ...input, validationFeedback: issue };
+          continue;
+        }
+        if (operations[0]?.operation !== 'NEEDS_LOOKUP') break;
+        if (call === 2) {
+          throw new MemoryValidationError('Memory Judge exceeded call budget', {
+            field: 'operations',
+            reason: 'budget_exhausted',
+          });
+        }
         const lookup = operations[0].lookup;
         const candidates = await this.queries.findJudgeCandidates({
           userId: job.userId,
@@ -273,19 +300,12 @@ export class AiCoachMemoryExtractionWorker
           limit: 20,
           asOf: message.createdAt,
         });
-        judged = await this.judge.judge({
-          ...baseInput,
-          lookupCandidates: candidates.items,
-        });
-        operations = this.commands.validateDecision({
-          raw: judged.decision,
-          assertedAt: message.createdAt,
-          timezone,
-        });
-        if (operations[0]?.operation === 'NEEDS_LOOKUP') {
-          throw new Error('Memory Judge exceeded lookup limit');
-        }
+        input = { ...baseInput, lookupCandidates: candidates.items };
       }
+
+      // Persist only the normalized contract, including server-owned audit codes.
+      const decision = { operations };
+      if (await this.completeIfIneligible(job.id, job.userId)) return;
 
       const names = operations
         .map((operation) => operation.operation)
@@ -297,7 +317,7 @@ export class AiCoachMemoryExtractionWorker
         await this.completeWithoutApply(
           job.id,
           job.userId,
-          judged.decision,
+          decision,
           judged.model,
         );
         return;
@@ -313,7 +333,7 @@ export class AiCoachMemoryExtractionWorker
         timezone,
         model: judged.model,
         policyVersion: job.policyVersion,
-        decision: judged.decision,
+        decision,
         operations,
       });
       this.logger.log(
@@ -322,6 +342,19 @@ export class AiCoachMemoryExtractionWorker
     } catch (error) {
       await this.fail(job, error);
     }
+  }
+
+  private async completeIfIneligible(jobId: string, userId: string) {
+    const reasonCode = !(await this.consent.isGranted(userId))
+      ? 'CONSENT_REVOKED'
+      : !(await this.preferences.get(userId)).enabled
+        ? 'MEMORY_DISABLED'
+        : null;
+    if (!reasonCode) return false;
+    await this.completeWithoutApply(jobId, userId, {
+      operations: [{ operation: 'IGNORE', reasonCode }],
+    });
+    return true;
   }
 
   private async completeWithoutApply(
@@ -379,7 +412,11 @@ export class AiCoachMemoryExtractionWorker
     const dead = permanent || job.attempts >= maxAttempts;
     const backoffMs = Math.min(5 * 60_000, 2_000 * 2 ** job.attempts);
     const message =
-      error instanceof Error ? error.message.slice(0, 2_000) : 'Unknown error';
+      error instanceof MemoryValidationError && error.issue
+        ? `Memory validation failed issue=${JSON.stringify(error.issue)}`
+        : error instanceof Error
+          ? error.message.slice(0, 2_000)
+          : 'Unknown error';
     await this.prisma.aiCoachMemoryExtractionJob.updateMany({
       where: { id: job.id, status: 'RUNNING', leaseOwner: this.ownerId },
       data: {
