@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --hr-canvas: var(--background);
   --hr-surface: var(--card);
   --hr-ink: var(--foreground);
@@ -124,8 +125,7 @@
 .inlineLink:focus-visible,
 .relatedLink:focus-visible,
 .select:focus-visible,
-.input:focus-visible,
-.choice:focus-visible {
+.input:focus-visible {
   outline: 2px solid var(--hr-accent);
   outline-offset: 3px;
 }
@@ -163,11 +163,13 @@
 
 .inputs {
   display: grid;
+  align-items: start;
   gap: 0.9rem;
 }
 
 .field {
   display: grid;
+  align-content: start;
   gap: 0.4rem;
   min-width: 0;
 }
@@ -216,28 +218,6 @@
 
 .error {
   color: var(--hr-danger);
-}
-
-.choices {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.4rem;
-}
-
-.choice {
-  min-height: 2.75rem;
-  border: 1px solid var(--hr-line-strong);
-  border-radius: var(--tl-radius-control-lg);
-  background: transparent;
-  color: var(--hr-ink);
-  font-size: 0.84rem;
-  font-weight: 600;
-}
-
-.choice[aria-checked="true"] {
-  border-color: var(--success);
-  background: var(--hr-accent-soft);
-  color: var(--hr-ink);
 }
 
 .actions {
@@ -706,22 +686,6 @@
   text-underline-offset: 3px;
 }
 
-.modeRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.modeOption {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.92rem;
-}
-
 .filePanel {
   display: grid;
   gap: 0.65rem;
@@ -1067,14 +1031,7 @@
   height: 2.5rem;
   border-radius: var(--tl-radius-xs);
 }
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--hr-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {
@@ -1109,16 +1066,6 @@
     display: none !important;
   }
 }
-
-.choices :global([data-slot="radio-group-item"]) {
-  color: var(--success);
-}
-.choices label {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  cursor: pointer;
-}
 .table th:first-child {
   min-width: 12rem;
   width: 28%;
@@ -1133,18 +1080,6 @@
   .posterMain {
     padding: 1rem 1.5rem;
   }
-}
-
-.choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  min-height: 2.5rem;
-  align-items: center;
-}
-.choices label {
-  white-space: nowrap;
-  font-size: 0.875rem;
 }
 
 @media (min-width: 560px) {

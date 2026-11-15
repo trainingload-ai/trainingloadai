@@ -276,173 +276,186 @@ export function VdotCalculatorClient({
               manual={t("file.manual")}
               file={t("file.upload")}
               onValueChange={setEntry}
-            />
-
-            {entry === "file" ? (
-              <VdotFileInput
-                active={entry === "file"}
-                onApply={({ distanceM: meters, timeSec: effort, filename }) => {
-                  const matched = PRESET_KEYS.find(
-                    (key) => Math.abs(VDOT_PRESET_METERS[key] - meters) < 1,
-                  );
-                  if (matched) {
-                    setPreset(matched);
-                    setCustomKm("");
-                  } else {
-                    setPreset("custom");
-                    setCustomKm(
-                      String(Math.round((meters / 1000) * 1000) / 1000),
+            >
+              {entry === "file" ? (
+                <VdotFileInput
+                  active={entry === "file"}
+                  onApply={({
+                    distanceM: meters,
+                    timeSec: effort,
+                    filename,
+                  }) => {
+                    const matched = PRESET_KEYS.find(
+                      (key) => Math.abs(VDOT_PRESET_METERS[key] - meters) < 1,
                     );
-                  }
-                  setFileName(filename);
-                  applyTime(effort, false);
-                  trackToolEvent("tool_started", "vdot_calculator", {
-                    action: "activity_file",
-                  });
-                }}
-              />
-            ) : (
-              <>
-                <div className={styles.field}>
-                  <Label htmlFor="vdot-distance">
-                    {t("inputs.distancePreset.label")}
-                  </Label>
-                  <Select
-                    value={preset}
-                    onValueChange={(value) => {
-                      setPreset(value as VdotPreset);
-                      setExample(false);
-                    }}
-                  >
-                    <SelectTrigger id="vdot-distance" className="h-10 w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRESET_KEYS.map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {t(`presets.${key}`)}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="custom">
-                        {t("presets.custom")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {preset === "custom" ? (
+                    if (matched) {
+                      setPreset(matched);
+                      setCustomKm("");
+                    } else {
+                      setPreset("custom");
+                      setCustomKm(
+                        String(Math.round((meters / 1000) * 1000) / 1000),
+                      );
+                    }
+                    setFileName(filename);
+                    applyTime(effort, false);
+                    trackToolEvent("tool_started", "vdot_calculator", {
+                      action: "activity_file",
+                    });
+                  }}
+                />
+              ) : (
+                <>
                   <div className={styles.field}>
-                    <Label htmlFor="vdot-custom-distance">
-                      {t("inputs.distanceCustom.label")}
+                    <Label htmlFor="vdot-distance">
+                      {t("inputs.distancePreset.label")}
                     </Label>
-                    <Input
-                      id="vdot-custom-distance"
-                      className="h-10"
-                      inputMode="decimal"
-                      value={customKm}
-                      aria-invalid={distanceInvalid}
-                      onChange={(event) => {
-                        setCustomKm(event.target.value);
+                    <Select
+                      value={preset}
+                      onValueChange={(value) => {
+                        setPreset(value as VdotPreset);
                         setExample(false);
                       }}
+                    >
+                      <SelectTrigger id="vdot-distance" className="h-10 w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRESET_KEYS.map((key) => (
+                          <SelectItem key={key} value={key}>
+                            {t(`presets.${key}`)}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">
+                          {t("presets.custom")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {preset === "custom" ? (
+                    <div className={styles.field}>
+                      <Label htmlFor="vdot-custom-distance">
+                        {t("inputs.distanceCustom.label")}
+                      </Label>
+                      <Input
+                        id="vdot-custom-distance"
+                        className="h-10"
+                        inputMode="decimal"
+                        value={customKm}
+                        aria-invalid={distanceInvalid}
+                        onChange={(event) => {
+                          setCustomKm(event.target.value);
+                          setExample(false);
+                        }}
+                      />
+                      <p className={styles.hint}>
+                        {t("inputs.distanceCustom.unit")}
+                      </p>
+                    </div>
+                  ) : null}
+                  <fieldset className={styles.field}>
+                    <legend className={styles.fieldLabel}>
+                      {t("inputs.time.label")}
+                    </legend>
+                    <div className={styles.timeGrid}>
+                      {(
+                        [
+                          [
+                            "hours",
+                            hours,
+                            setHours,
+                            t("inputs.time.units.hour"),
+                          ],
+                          [
+                            "minutes",
+                            minutes,
+                            setMinutes,
+                            t("inputs.time.units.minute"),
+                          ],
+                          [
+                            "seconds",
+                            seconds,
+                            setSeconds,
+                            t("inputs.time.units.second"),
+                          ],
+                        ] as const
+                      ).map(([key, value, setter, label]) => (
+                        <label key={key} className={styles.part}>
+                          <span>{label}</span>
+                          <Input
+                            className="h-10"
+                            inputMode="decimal"
+                            autoComplete="off"
+                            value={value}
+                            aria-label={label}
+                            onChange={(event) => {
+                              setter(
+                                event.target.value
+                                  .replace(/[^\d.]/g, "")
+                                  .slice(0, 6),
+                              );
+                              setTimeSource("parts");
+                              setExactTime(null);
+                              setExample(false);
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <div className={styles.field}>
+                    <Label htmlFor="vdot-clock">
+                      {t("inputs.time.clockLabel")}
+                    </Label>
+                    <Input
+                      id="vdot-clock"
+                      className="h-10"
+                      inputMode="decimal"
+                      autoComplete="off"
+                      placeholder={t("inputs.time.clockPlaceholder")}
+                      value={clockText}
+                      aria-invalid={clockInvalid}
+                      onChange={(event) => {
+                        setClockText(event.target.value);
+                        setTimeSource("clock");
+                        setExactTime(null);
+                        setExample(false);
+                        const parsed = parseFlexibleTime(event.target.value);
+                        if (parsed == null) return;
+                        const parts = clockParts(parsed);
+                        setHours(parts.hours);
+                        setMinutes(parts.minutes);
+                        setSeconds(parts.seconds);
+                      }}
                     />
-                    <p className={styles.hint}>
-                      {t("inputs.distanceCustom.unit")}
-                    </p>
+                    <p className={styles.hint}>{t("inputs.time.help")}</p>
                   </div>
-                ) : null}
-                <fieldset className={styles.field}>
-                  <legend className={styles.fieldLabel}>
-                    {t("inputs.time.label")}
-                  </legend>
-                  <div className={styles.timeGrid}>
-                    {(
-                      [
-                        ["hours", hours, setHours, t("inputs.time.units.hour")],
-                        [
-                          "minutes",
-                          minutes,
-                          setMinutes,
-                          t("inputs.time.units.minute"),
-                        ],
-                        [
-                          "seconds",
-                          seconds,
-                          setSeconds,
-                          t("inputs.time.units.second"),
-                        ],
-                      ] as const
-                    ).map(([key, value, setter, label]) => (
-                      <label key={key} className={styles.part}>
-                        <span>{label}</span>
-                        <Input
-                          className="h-10"
-                          inputMode="decimal"
-                          autoComplete="off"
-                          value={value}
-                          aria-label={label}
-                          onChange={(event) => {
-                            setter(
-                              event.target.value
-                                .replace(/[^\d.]/g, "")
-                                .slice(0, 6),
-                            );
-                            setTimeSource("parts");
-                            setExactTime(null);
-                            setExample(false);
-                          }}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-                <div className={styles.field}>
-                  <Label htmlFor="vdot-clock">
-                    {t("inputs.time.clockLabel")}
-                  </Label>
-                  <Input
-                    id="vdot-clock"
-                    className="h-10"
-                    inputMode="decimal"
-                    autoComplete="off"
-                    placeholder={t("inputs.time.clockPlaceholder")}
-                    value={clockText}
-                    aria-invalid={clockInvalid}
-                    onChange={(event) => {
-                      setClockText(event.target.value);
-                      setTimeSource("clock");
-                      setExactTime(null);
-                      setExample(false);
-                      const parsed = parseFlexibleTime(event.target.value);
-                      if (parsed == null) return;
-                      const parts = clockParts(parsed);
-                      setHours(parts.hours);
-                      setMinutes(parts.minutes);
-                      setSeconds(parts.seconds);
-                    }}
-                  />
-                  <p className={styles.hint}>{t("inputs.time.help")}</p>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {fileName ? (
-              <p className={styles.hint} role="status">
-                {t("file.source", { filename: fileName })}
-              </p>
-            ) : null}
-            {clockInvalid ? (
-              <p className={styles.alert} role="alert">
-                {t("errors.timeFormat")}
-              </p>
-            ) : null}
-            {distanceInvalid ? (
-              <p className={styles.alert} role="alert">
-                {t("errors.distance")}
-              </p>
-            ) : null}
-            <ToolActionButton intent="quiet" type="button" onClick={useExample}>
-              {t("example.button")}
-            </ToolActionButton>
+              {fileName ? (
+                <p className={styles.hint} role="status">
+                  {t("file.source", { filename: fileName })}
+                </p>
+              ) : null}
+              {clockInvalid ? (
+                <p className={styles.alert} role="alert">
+                  {t("errors.timeFormat")}
+                </p>
+              ) : null}
+              {distanceInvalid ? (
+                <p className={styles.alert} role="alert">
+                  {t("errors.distance")}
+                </p>
+              ) : null}
+              <ToolActionButton
+                intent="quiet"
+                type="button"
+                onClick={useExample}
+              >
+                {t("example.button")}
+              </ToolActionButton>
+            </InputSource>
           </div>
         </section>
       </div>

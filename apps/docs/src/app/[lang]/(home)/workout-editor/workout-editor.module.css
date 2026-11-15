@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --we-canvas: var(--background);
   --we-surface: var(--card);
   --we-ink: var(--foreground);
@@ -906,16 +907,6 @@
   align-items: center;
   line-height: 1.65;
 }
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
-.board :global([data-slot="input"]) {
-  background: var(--we-surface);
-  font-size: 0.95rem;
-}
 @media (min-width: 1024px) {
   .hero {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
@@ -936,9 +927,6 @@
   }
   .board {
     padding: 1.15rem;
-  }
-  .board :global([data-slot="input"]) {
-    font-size: 1rem;
   }
 }
 @media print {
@@ -970,14 +958,6 @@
 }
 .lead > header > div {
   max-width: 540px;
-}
-.workbench :global([data-slot="input"]),
-.workbench :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
-.workbench :global([data-slot="input"]) {
-  font-size: 0.95rem;
 }
 @media (min-width: 1024px) {
   .lead > header {

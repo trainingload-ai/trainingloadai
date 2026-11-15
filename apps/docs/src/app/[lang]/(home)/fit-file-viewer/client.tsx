@@ -72,7 +72,7 @@ function UploadWorkspace({
   onReset: () => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-compact border border-neutral-200 bg-white shadow-sm dark:border-border dark:bg-card">
+    <div className="overflow-hidden rounded-surface bg-secondary">
       <div className="grid lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="p-5 sm:p-6">
           <div className="mb-4">
@@ -144,7 +144,7 @@ function UploadWorkspace({
           </div>
         </div>
 
-        <div className="border-t border-neutral-200 bg-neutral-50/70 p-5 dark:border-border dark:bg-white/[0.025] sm:p-6 lg:border-t-0 lg:border-l">
+        <div className="border-t border-border p-5 sm:p-6 lg:border-t-0 lg:border-l">
           <div className="flex gap-3">
             <ShieldCheck
               aria-hidden="true"

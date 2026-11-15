@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --tl-canvas: var(--background);
   --tl-surface: var(--card);
   --tl-ink: var(--foreground);

@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --lt-canvas: var(--background);
   --lt-surface: var(--card);
   --lt-ink: var(--foreground);
@@ -128,7 +129,6 @@
 .secondaryAction:focus-visible,
 .relatedLink:focus-visible,
 .promoButton:focus-visible,
-.unitOption:focus-visible,
 .detail summary:focus-visible {
   outline: 2px solid var(--lt-accent);
   outline-offset: 3px;
@@ -338,39 +338,6 @@
   letter-spacing: 0.04em;
   pointer-events: none;
   transform: translateY(-50%);
-}
-
-.unitSwitch {
-  display: inline-grid;
-  flex: none;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--lt-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--lt-canvas);
-}
-
-.unitSwitch .unitOption {
-  min-width: 3.25rem;
-  height: 1.75rem;
-  padding: 0 0.65rem;
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--lt-muted);
-  font-size: 0.75rem;
-  font-weight: 650;
-  box-shadow: none;
-}
-
-.unitSwitch .unitOption:hover {
-  color: var(--lt-ink);
-  background: var(--lt-surface);
-}
-
-.unitSwitch .unitOption[aria-checked="true"] {
-  color: var(--success);
-  background: var(--lt-accent-soft);
 }
 
 .fieldOptional {
@@ -1538,31 +1505,6 @@
     align-items: start;
   }
 }
-
-.inputTabs {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  height: auto;
-  padding: 0;
-  margin: 1rem 0;
-  border-radius: 0;
-  border-bottom: 1px solid var(--lt-line);
-  background: transparent;
-}
-.inputTabs button {
-  border-radius: 0;
-  padding: 0.8rem 0.4rem;
-  border-bottom: 2px solid transparent;
-  box-shadow: none;
-  color: var(--lt-muted);
-}
-.inputTabs button[data-state="active"] {
-  background: transparent;
-  border-bottom-color: var(--success);
-  color: var(--success);
-  box-shadow: none;
-}
 .filePanel {
   display: grid;
   gap: 1.25rem;
@@ -1667,59 +1609,6 @@
   line-height: 1.6;
 }
 
-.inputSources {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  min-width: 0;
-  margin: 0.85rem 0 0.65rem;
-  padding: 0;
-  border: 0;
-}
-
-.inputSourceLabel {
-  color: var(--lt-muted);
-  font-size: 0.78rem;
-}
-
-.inputSourceOptions {
-  display: flex;
-  align-items: center;
-  gap: 1.1rem;
-  margin-left: auto;
-}
-
-.inputSourceOptions label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 2rem;
-  color: var(--lt-muted);
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.inputSourceOptions label:has(input:checked),
-.inputSourceOptions label:hover {
-  color: var(--lt-ink);
-}
-
-.inputSourceOptions input {
-  width: 0.875rem;
-  height: 0.875rem;
-  margin: 0;
-  accent-color: var(--success);
-  cursor: pointer;
-}
-
-.inputSourceOptions input:focus-visible {
-  outline: 2px solid var(--lt-accent);
-  outline-offset: 3px;
-}
-
 .resultDetails {
   width: min(100%, 800px);
   margin: 0.5rem auto 0;
@@ -1800,9 +1689,6 @@
   }
   .prideValue[data-wide="true"] {
     font-size: clamp(1.2rem, 5.5vw, 1.4rem);
-  }
-  .inputTabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .boardHead {
     align-items: flex-start;

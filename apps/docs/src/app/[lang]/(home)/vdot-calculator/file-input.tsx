@@ -1,12 +1,17 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { estimateVdotFromActivity, type VdotWindowMode } from "@/lib/vdot-activity";
+import {
+  estimateVdotFromActivity,
+  type VdotWindowMode,
+} from "@/lib/vdot-activity";
 import type { ThresholdRecord } from "@/lib/threshold-records";
 import styles from "./vdot-calculator.module.css";
 
@@ -55,7 +60,8 @@ export function VdotFileInput({
     } catch (err) {
       if (id !== request.current) return;
       const code =
-        err instanceof Error && ["size", "format", "timestamps"].includes(err.message)
+        err instanceof Error &&
+        ["size", "format", "timestamps"].includes(err.message)
           ? err.message
           : "format";
       setError(t(`errors.${code}`));
@@ -99,22 +105,24 @@ export function VdotFileInput({
       ) : null}
       {records.length > 0 ? (
         <>
-          <fieldset className={styles.modeRow}>
-            <legend className="sr-only">{t("windowLegend")}</legend>
-            {(["best", "whole"] as const).map((option) => (
-              <label key={option} className={styles.modeOption}>
-                <input
-                  type="radio"
-                  name="vdot-window"
-                  checked={mode === option}
-                  onChange={() => setMode(option)}
-                />
-                {t(option)}
-              </label>
-            ))}
-          </fieldset>
+          <ToolChoiceGroup
+            value={mode}
+            onValueChange={setMode}
+            label={t("windowLegend")}
+            options={(["best", "whole"] as const).map((value) => ({
+              value,
+              label: t(value),
+            }))}
+            presentation="radio"
+            name="vdot-window"
+          />
           <p className={styles.fileHint}>{t("windowHint")}</p>
-          <ToolActionButton intent="primary" fullWidth type="button" onClick={apply}>
+          <ToolActionButton
+            intent="primary"
+            fullWidth
+            type="button"
+            onClick={apply}
+          >
             {t("apply")}
           </ToolActionButton>
         </>

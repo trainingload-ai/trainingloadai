@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { ToolResultActions } from "@/components/ToolResultActions";
@@ -29,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { localePrefix } from "@/lib/locale-url";
@@ -480,29 +482,15 @@ export function RunningPaceCalculatorClient({
               <h2 id="pace-input-title" className={styles.boardLabel}>
                 {t("panel.title")}
               </h2>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                size="sm"
+              <ToolChoiceGroup
                 value={state.distanceUnit === "mi" ? "imperial" : "metric"}
-                aria-label={t("units.systemLabel")}
-                className={styles.unitSwitch}
-                onValueChange={(value) => {
-                  if (value) {
-                    switchUnitSystem(value as "metric" | "imperial");
-                  }
-                }}
-              >
-                {(["metric", "imperial"] as const).map((unitSystem) => (
-                  <ToggleGroupItem
-                    key={unitSystem}
-                    value={unitSystem}
-                    className={styles.unitOption}
-                  >
-                    {t(`units.${unitSystem}`)}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                onValueChange={switchUnitSystem}
+                label={t("units.systemLabel")}
+                options={(["metric", "imperial"] as const).map((value) => ({
+                  value,
+                  label: t(`units.${value}`),
+                }))}
+              />
             </div>
             <p>{t("panel.subtitle")}</p>
           </div>
@@ -555,30 +543,22 @@ export function RunningPaceCalculatorClient({
                   }
                   placeholder={t("inputs.distance.placeholder")}
                 />
-                <ToggleGroup
-                  type="single"
-                  variant="outline"
-                  size="sm"
-                  spacing={1}
+                <ToolChoiceGroup
                   value={state.preset}
-                  aria-label={t("inputs.preset.label")}
-                  className={styles.presetGroup}
-                  onValueChange={(value) => {
-                    if (value) applyPreset(value as RacePreset);
+                  onValueChange={(next) => {
+                    if (next !== "custom") applyPreset(next);
                   }}
-                >
-                  {RACE_PRESETS.map((key) => (
-                    <ToggleGroupItem
-                      key={key}
-                      value={key}
-                      className={styles.presetOption}
-                    >
-                      {key === "half"
+                  label={t("inputs.preset.label")}
+                  options={RACE_PRESETS.map((value) => ({
+                    value,
+                    label:
+                      value === "half"
                         ? t("inputs.preset.halfShort")
-                        : t(`presets.${key}`)}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                        : t(`presets.${value}`),
+                  }))}
+                  presentation="chips"
+                  fullWidth
+                />
               </Field>
             ) : null}
             {state.solveFor !== "time" ? (

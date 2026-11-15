@@ -1,5 +1,9 @@
 "use client";
 
+import { ToolTabsList } from "@/components/ToolTabsList";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolResultActions } from "@/components/ToolResultActions";
 
 import {
@@ -8,13 +12,12 @@ import {
   useMemo,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
 import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { CpFileInput } from "./file-input";
 import { Button } from "@/components/ui/button";
 import { useCommittedFields } from "@/lib/use-committed-fields";
@@ -194,18 +197,6 @@ export function CriticalPowerCalculatorClient({
       setWeightText(displayMassFromKg(weightKgText, next));
     }
     setUnits(next);
-  }
-
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next = event.key === "ArrowRight" ? "imperial" : "metric";
-    selectUnits(next);
-    document
-      .getElementById(
-        next === "metric" ? "cp-units-metric" : "cp-units-imperial",
-      )
-      ?.focus();
   }
 
   const parsedEfforts = useMemo(() => {
@@ -394,47 +385,33 @@ export function CriticalPowerCalculatorClient({
         <section id="calculator" className={styles.board}>
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("manual.title")}</h2>
-            <div
-              role="radiogroup"
-              aria-label={t("manual.unitsLabel")}
-              className={styles.unitSwitch}
-            >
-              <Button
-                id="cp-units-metric"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={units === "metric"}
-                tabIndex={units === "metric" ? 0 : -1}
-                onClick={() => selectUnits("metric")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.unitsMetric")}
-              </Button>
-              <Button
-                id="cp-units-imperial"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={units === "imperial"}
-                tabIndex={units === "imperial" ? 0 : -1}
-                onClick={() => selectUnits("imperial")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.unitsImperial")}
-              </Button>
-            </div>
+            <ToolChoiceGroup
+              value={units}
+              onValueChange={selectUnits}
+              label={t("manual.unitsLabel")}
+              options={[
+                {
+                  value: "metric",
+                  id: "cp-units-metric",
+                  label: t("manual.unitsMetric"),
+                },
+                {
+                  value: "imperial",
+                  id: "cp-units-imperial",
+                  label: t("manual.unitsImperial"),
+                },
+              ]}
+            />
           </div>
           <Tabs value={inputTab} onValueChange={setInputTab}>
-            <TabsList
-              className={styles.inputTabs}
-              aria-label={t("file.inputMode")}
-            >
-              <TabsTrigger value="manual">{t("file.manualTab")}</TabsTrigger>
-              <TabsTrigger value="file">{t("file.fileTab")}</TabsTrigger>
-            </TabsList>
+            <ToolTabsList
+              value={inputTab}
+              label={t("file.inputMode")}
+              options={[
+                { value: "manual", label: t("file.manualTab") },
+                { value: "file", label: t("file.fileTab") },
+              ]}
+            />
             <TabsContent value="manual">
               <p className={styles.boardLead}>{t("manual.lead")}</p>
               <ol className={styles.stepList}>

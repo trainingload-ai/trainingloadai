@@ -1,0 +1,57 @@
+.fields
+  :is(
+    input:not(
+      :where(
+        [type="checkbox"],
+        [type="radio"],
+        [type="file"],
+        [type="hidden"],
+        [type="range"],
+        [type="color"]
+      )
+    ),
+    select,
+    textarea,
+    [data-slot="select-trigger"]
+  ):where(:not([aria-hidden="true"], [data-slot="tool-result-actions"] *)) {
+  border: 1px solid transparent;
+  border-radius: var(--tl-radius-control);
+  background: var(--card);
+  box-shadow: none;
+
+  &:not(textarea) {
+    block-size: auto;
+    min-block-size: 2.5rem;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+
+  &[aria-invalid="true"] {
+    border-color: var(--destructive);
+  }
+
+  @media (pointer: coarse) {
+    font-size: max(1rem, 1em);
+
+    &:not(textarea) {
+      min-block-size: 3rem;
+      min-inline-size: 3rem;
+    }
+  }
+
+  @media (forced-colors: active) {
+    border-color: ButtonText;
+
+    &:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+}
+
+.fields :is(label[for], [data-slot="field-label"]) {
+  font-size: 0.875rem;
+}

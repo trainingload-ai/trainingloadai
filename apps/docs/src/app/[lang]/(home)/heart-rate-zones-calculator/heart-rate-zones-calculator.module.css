@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --hr-canvas: var(--background);
   --hr-surface: var(--card);
   --hr-ink: var(--foreground);
@@ -1110,14 +1111,7 @@
   border: 0;
   background: var(--secondary);
 }
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--hr-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {

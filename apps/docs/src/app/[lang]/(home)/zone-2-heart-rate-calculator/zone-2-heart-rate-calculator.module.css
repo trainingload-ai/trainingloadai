@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --z2-canvas: var(--background);
   --z2-surface: var(--card);
   --z2-ink: var(--foreground);
@@ -147,7 +148,6 @@
 }
 
 .jumpItem:focus-visible,
-.choice:focus-visible,
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible,
 .relatedLink:focus-visible,
@@ -256,33 +256,6 @@
   color: var(--z2-ink);
   font-size: 0.92rem;
   font-weight: 650;
-}
-
-.choiceRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.choice {
-  min-height: 2.25rem;
-  border: 1px solid var(--z2-line-strong);
-  border-radius: var(--tl-radius-control);
-  background: var(--z2-surface);
-  padding: 0.35rem 0.75rem;
-  color: var(--z2-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.choice[aria-checked="true"] {
-  border-color: transparent;
-  background: var(--z2-accent);
-  color: var(--z2-accent-foreground);
-}
-
-:global(.dark) .choice[aria-checked="true"] {
-  color: var(--z2-accent-foreground);
 }
 
 .alert {
@@ -945,14 +918,7 @@
   border: 0;
   background: var(--secondary);
 }
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--z2-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {

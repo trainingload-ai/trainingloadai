@@ -100,10 +100,8 @@ export function ToolFileDropzone({
         aria-label={dropzoneAria ?? label ?? pickStrong}
         aria-describedby={supportedId}
         className={cn(
-          "flex w-full cursor-pointer flex-col items-center justify-center gap-4 rounded-compact border border-dashed p-7 text-center transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
-          isDragging
-            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10"
-            : "border-neutral-200 hover:border-emerald-500/40 hover:bg-neutral-50 dark:border-border dark:hover:border-emerald-500/40 dark:hover:bg-card/70",
+          "flex w-full cursor-pointer flex-col items-center justify-center gap-4 rounded-surface border border-transparent p-6 text-center transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
+          isDragging ? "border-brand bg-brand-soft" : "bg-card hover:bg-muted",
         )}
         data-dragging={isDragging}
       >
@@ -115,7 +113,7 @@ export function ToolFileDropzone({
           >
             <span
               data-slot="dropzone-icon"
-              className="grid size-12 place-items-center rounded-compact bg-emerald-500/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
+              className="grid size-12 place-items-center rounded-full bg-brand-soft text-ring"
             >
               <FileText className="size-5" />
             </span>
@@ -127,7 +125,7 @@ export function ToolFileDropzone({
             </span>
             <span
               data-slot="dropzone-action"
-              className="inline-flex h-9 items-center justify-center rounded-compact border border-emerald-600/25 bg-emerald-50 px-3 text-sm font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-100"
+              className="inline-flex min-h-10 items-center justify-center rounded-control bg-secondary px-3 text-sm font-semibold text-foreground"
             >
               {replaceFileLabel ?? pickStrong}
             </span>
@@ -136,14 +134,14 @@ export function ToolFileDropzone({
           <>
             <span
               data-slot="dropzone-icon"
-              className="grid size-12 place-items-center rounded-compact bg-emerald-500/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
+              className="grid size-12 place-items-center rounded-full bg-brand-soft text-ring"
             >
               <Upload className="size-5" />
             </span>
             <span className="flex flex-col items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300 sm:flex-row sm:flex-wrap sm:justify-center">
               <span
                 data-slot="dropzone-action"
-                className="inline-flex h-9 items-center justify-center rounded-compact border border-emerald-600/25 bg-emerald-50 px-3 text-sm font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-100"
+                className="inline-flex min-h-10 items-center justify-center rounded-control bg-secondary px-3 text-sm font-semibold text-foreground"
               >
                 {pickStrong}
               </span>
@@ -161,11 +159,9 @@ export function ToolFileDropzone({
 
       {file && selectedLayout === "below" ? (
         <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2">
-          <div className="flex items-center justify-between rounded-compact border border-neutral-200 bg-neutral-50/70 px-4 py-3 dark:border-border dark:bg-card/70">
+          <div className="flex items-center justify-between gap-3 rounded-control bg-card px-4 py-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="rounded border border-neutral-100 bg-white p-2 dark:border-border dark:bg-secondary">
-                <FileText className="size-4 text-neutral-500" />
-              </div>
+              <FileText className="size-4 shrink-0 text-muted-foreground" />
               <div className="min-w-0">
                 <div className="break-all text-sm font-medium text-neutral-900 dark:text-white">
                   {file.name}
@@ -182,7 +178,7 @@ export function ToolFileDropzone({
                   variant: "ghost",
                   size: "sm",
                   className:
-                    "h-8 w-8 shrink-0 p-0 text-neutral-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20",
+                    "h-8 w-8 shrink-0 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive pointer-coarse:min-h-12 pointer-coarse:min-w-12",
                 }),
               )}
               onClick={(event) => {

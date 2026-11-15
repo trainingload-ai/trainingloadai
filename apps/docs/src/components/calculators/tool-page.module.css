@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../tool-form-controls.module.css";
   --tool-accent: var(--brand);
   --tool-accent-foreground: var(--brand-foreground);
   --tool-surface: var(--card);
@@ -167,40 +168,9 @@
   display: grid;
   gap: 0.5rem;
 }
-.form :global([data-slot="select-trigger"]) {
-  height: 40px;
-  border-radius: var(--tl-radius-control);
-  border-color: transparent;
-  background: var(--card);
-  box-shadow: none;
-}
 .form :global([data-slot="file-dropzone"]) {
   min-height: 200px;
   padding: 1.5rem 1rem;
-  border: 0;
-  border-radius: var(--tl-radius-surface);
-  background: var(--card);
-  color: inherit;
-}
-.form :global([data-slot="file-dropzone"]:hover),
-.form :global([data-slot="file-dropzone"][data-dragging="true"]) {
-  background: color-mix(in srgb, var(--tool-accent) 8%, var(--tool-surface));
-}
-.form :global([data-slot="file-dropzone"]:focus-visible) {
-  outline: 2px solid var(--tool-accent);
-  outline-offset: 3px;
-}
-.form :global([data-slot="dropzone-icon"]) {
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--tool-accent) 10%, var(--tool-surface));
-  color: var(--tool-accent);
-}
-.form :global([data-slot="dropzone-action"]) {
-  height: 40px;
-  border-radius: var(--tl-radius-control);
-  border-color: transparent;
-  background: var(--secondary);
-  color: inherit;
 }
 .conversionDirection {
   display: flex;

@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { ToolResultActions } from "@/components/ToolResultActions";
@@ -19,7 +21,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -30,7 +32,6 @@ import {
   formatTssScore,
   parseNonNegativeNumber,
   parsePositiveNumber,
-  type PowerKind,
   type TssResult,
 } from "@/lib/tss";
 import {
@@ -184,22 +185,16 @@ export function TssCalculatorClient({
               <FieldLegend variant="label">
                 {t("inputs.powerKind.label")}
               </FieldLegend>
-              <ToggleGroup
-                type="single"
-                variant="outline"
+              <ToolChoiceGroup
                 value={inputs.kind}
-                onValueChange={(value) => {
-                  if (value) change("kind", value as PowerKind);
-                }}
-                aria-label={t("inputs.powerKind.label")}
-                className={styles.powerToggle}
-              >
-                {(["normalized", "average"] as const).map((key) => (
-                  <ToggleGroupItem key={key} value={key}>
-                    {t(`inputs.powerKind.options.${key}`)}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                onValueChange={(next) => change("kind", next)}
+                label={t("inputs.powerKind.label")}
+                options={(["normalized", "average"] as const).map((value) => ({
+                  value,
+                  label: t(`inputs.powerKind.options.${value}`),
+                }))}
+                fullWidth
+              />
               <FieldDescription>
                 {t(`inputs.powerKind.hints.${inputs.kind}`)}
               </FieldDescription>

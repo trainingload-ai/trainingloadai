@@ -1,5 +1,9 @@
 "use client";
 
+import { ToolTabsList } from "@/components/ToolTabsList";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { ToolResultActions } from "@/components/ToolResultActions";
@@ -11,7 +15,6 @@ import {
   useMemo,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import { Loader2, Printer, Share2 } from "lucide-react";
@@ -29,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import styles from "./ftp-calculator.module.css";
 import { fileAnalyticsProperties, getErrorDebugInfo } from "@/lib/analytics";
 import { cn } from "@/lib/cn";
@@ -605,14 +608,6 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
     setUnits(next);
   }
 
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next = event.key === "ArrowRight" ? "imperial" : "metric";
-    selectUnits(next);
-    document.getElementById(next === "metric" ? "ftp-units-metric" : "ftp-units-imperial")?.focus();
-  }
-
   const ftp = useMemo(() => {
     if (testPower == null || testPower > FTP_TEST_POWER_MAX_W) return null;
     return estimateFieldFtp(testPower, protocol);
@@ -801,38 +796,19 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
         <section id="calculator" className={styles.board}>
         <div className={styles.boardHead}>
           <h2 className={styles.boardLabel}>{t("title")}</h2>
-          <div
-            role="radiogroup"
-            aria-label={t("manual.unitsLabel")}
-            className={styles.unitSwitch}
-          >
-            <Button
-              id="ftp-units-metric"
-              type="button"
-              role="radio"
-              variant="ghost"
-              aria-checked={units === "metric"}
-              tabIndex={units === "metric" ? 0 : -1}
-              onClick={() => selectUnits("metric")}
-              onKeyDown={onUnitKeyDown}
-              className={styles.unitOption}
-            >
-              {t("manual.unitsMetric")}
-            </Button>
-            <Button
-              id="ftp-units-imperial"
-              type="button"
-              role="radio"
-              variant="ghost"
-              aria-checked={units === "imperial"}
-              tabIndex={units === "imperial" ? 0 : -1}
-              onClick={() => selectUnits("imperial")}
-              onKeyDown={onUnitKeyDown}
-              className={styles.unitOption}
-            >
-              {t("manual.unitsImperial")}
-            </Button>
-          </div>
+          <ToolChoiceGroup
+            value={units}
+            onValueChange={selectUnits}
+            label={t("manual.unitsLabel")}
+            options={[
+              { value: "metric", id: "ftp-units-metric", label: t("manual.unitsMetric") },
+              {
+                value: "imperial",
+                id: "ftp-units-imperial",
+                label: t("manual.unitsImperial"),
+              },
+            ]}
+          />
         </div>
         <Tabs
           value={inputTab}
@@ -840,29 +816,14 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
             if (value === "field" || value === "file") setInputTab(value);
           }}
         >
-        <TabsList
-          aria-label={t("manual.tablist")}
-          className={cn(styles.tabs, "grid h-auto w-full grid-cols-2 rounded-none bg-transparent p-0")}
-        >
-          <TabsTrigger
-            value="field"
-            className={cn(
-              styles.tab,
-              "h-auto flex-1 rounded-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-            )}
-          >
-            {t("manual.title")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="file"
-            className={cn(
-              styles.tab,
-              "h-auto flex-1 rounded-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-            )}
-          >
-            {t("fileOption.tab")}
-          </TabsTrigger>
-        </TabsList>
+        <ToolTabsList
+          value={inputTab}
+          label={t("manual.tablist")}
+          options={[
+            { value: "field", label: t("manual.title") },
+            { value: "file", label: t("fileOption.tab") },
+          ]}
+        />
         <p className={styles.boardLead}>
           {inputTab === "field" ? t("manual.lead") : t("fileOption.lead")}
         </p>
@@ -1023,7 +984,6 @@ export function FtpCalculatorClient({ hero }: { hero: ReactNode }) {
             t("buttons.analyze")
           )}
         </ToolActionButton>
-
 
       {results?.length ? (
         <section className={styles.fileResults} aria-live="polite">

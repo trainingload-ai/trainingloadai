@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { ToolResultActions } from "@/components/ToolResultActions";
@@ -8,7 +10,6 @@ import { scrollBehavior } from "@/lib/scroll-behavior";
 import { useCommittedFields } from "@/lib/use-committed-fields";
 import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InputSource } from "@/components/calculators/input-source";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -331,148 +332,141 @@ export function MaxHeartRateCalculatorClient({
                 setFileGeneration((current) => current + 1);
                 setMode(next);
               }}
-            />
-
-            {mode === "manual" ? (
-              <div className={styles.inputs}>
-                <div className={styles.field}>
-                  <Label htmlFor="max-heart-rate-age">{t("ageLabel")}</Label>
-                  <Input
-                    id="max-heart-rate-age"
-                    onBlur={() => committed.commit("age", ageText)}
-                    name="age"
-                    className={styles.input}
-                    inputMode="decimal"
-                    autoComplete="off"
-                    aria-describedby={
-                      ageInvalid
-                        ? "max-heart-rate-age-hint max-heart-rate-age-error"
-                        : "max-heart-rate-age-hint"
-                    }
-                    aria-invalid={ageInvalid}
-                    value={ageText}
-                    placeholder={t("agePlaceholder")}
-                    onChange={(event) => {
-                      setExample(false);
-                      setAgeText(
-                        event.target.value.replace(/[^\d.]/g, "").slice(0, 6),
-                      );
-                    }}
-                  />
-                  <p id="max-heart-rate-age-hint" className={styles.hint}>
-                    {t("ageHint")}
-                  </p>
-                  {ageInvalid ? (
-                    <p id="max-heart-rate-age-error" className={styles.error}>
-                      {t("ageError")}
+            >
+              {mode === "manual" ? (
+                <div className={styles.inputs}>
+                  <div className={styles.field}>
+                    <Label htmlFor="max-heart-rate-age">{t("ageLabel")}</Label>
+                    <Input
+                      id="max-heart-rate-age"
+                      onBlur={() => committed.commit("age", ageText)}
+                      name="age"
+                      className={styles.input}
+                      inputMode="decimal"
+                      autoComplete="off"
+                      aria-describedby={
+                        ageInvalid
+                          ? "max-heart-rate-age-hint max-heart-rate-age-error"
+                          : "max-heart-rate-age-hint"
+                      }
+                      aria-invalid={ageInvalid}
+                      value={ageText}
+                      placeholder={t("agePlaceholder")}
+                      onChange={(event) => {
+                        setExample(false);
+                        setAgeText(
+                          event.target.value.replace(/[^\d.]/g, "").slice(0, 6),
+                        );
+                      }}
+                    />
+                    <p id="max-heart-rate-age-hint" className={styles.hint}>
+                      {t("ageHint")}
                     </p>
-                  ) : null}
-                </div>
+                    {ageInvalid ? (
+                      <p id="max-heart-rate-age-error" className={styles.error}>
+                        {t("ageError")}
+                      </p>
+                    ) : null}
+                  </div>
 
-                <div className={styles.field}>
-                  <Label htmlFor="max-hr-measured">
-                    {t(
-                      referenceSource === "observed"
-                        ? "scorecard.observedLabel"
-                        : "measuredField.label",
-                    )}
-                    <span className={styles.optional}>
-                      {t("measuredField.optional")}
-                    </span>
-                  </Label>
-                  <Input
-                    id="max-hr-measured"
-                    onBlur={() => committed.commit("measured", measuredText)}
-                    name="measured"
-                    className={styles.input}
-                    inputMode="decimal"
-                    autoComplete="off"
-                    aria-describedby={
-                      measuredInvalid
-                        ? "max-hr-measured-hint max-hr-measured-error"
-                        : "max-hr-measured-hint"
-                    }
-                    aria-invalid={measuredInvalid}
-                    value={measuredText}
-                    placeholder={t("measuredField.placeholder")}
-                    onChange={(event) => {
-                      setExample(false);
-                      setReferenceSource("measured");
-                      setMeasuredText(
-                        event.target.value.replace(/[^\d.]/g, "").slice(0, 6),
-                      );
-                    }}
-                  />
-                  <p id="max-hr-measured-hint" className={styles.hint}>
-                    {t(
-                      referenceSource === "observed"
-                        ? "scorecard.observedNote"
-                        : "measuredField.hint",
-                    )}
-                  </p>
-                  {measuredInvalid ? (
-                    <p id="max-hr-measured-error" className={styles.error}>
-                      {t("measuredField.error")}
+                  <div className={styles.field}>
+                    <Label htmlFor="max-hr-measured">
+                      {t(
+                        referenceSource === "observed"
+                          ? "scorecard.observedLabel"
+                          : "measuredField.label",
+                      )}
+                      <span className={styles.optional}>
+                        {t("measuredField.optional")}
+                      </span>
+                    </Label>
+                    <Input
+                      id="max-hr-measured"
+                      onBlur={() => committed.commit("measured", measuredText)}
+                      name="measured"
+                      className={styles.input}
+                      inputMode="decimal"
+                      autoComplete="off"
+                      aria-describedby={
+                        measuredInvalid
+                          ? "max-hr-measured-hint max-hr-measured-error"
+                          : "max-hr-measured-hint"
+                      }
+                      aria-invalid={measuredInvalid}
+                      value={measuredText}
+                      placeholder={t("measuredField.placeholder")}
+                      onChange={(event) => {
+                        setExample(false);
+                        setReferenceSource("measured");
+                        setMeasuredText(
+                          event.target.value.replace(/[^\d.]/g, "").slice(0, 6),
+                        );
+                      }}
+                    />
+                    <p id="max-hr-measured-hint" className={styles.hint}>
+                      {t(
+                        referenceSource === "observed"
+                          ? "scorecard.observedNote"
+                          : "measuredField.hint",
+                      )}
                     </p>
-                  ) : null}
+                    {measuredInvalid ? (
+                      <p id="max-hr-measured-error" className={styles.error}>
+                        {t("measuredField.error")}
+                      </p>
+                    ) : null}
+                  </div>
+                  <fieldset className={styles.field}>
+                    <legend className={styles.fieldLabel} id="max-hr-sex-label">
+                      {t("sexLabel")}
+                    </legend>
+                    <ToolChoiceGroup
+                      value={sex}
+                      onValueChange={setSex}
+                      label={t("sexLabel")}
+                      options={(["unspecified", "male", "female"] as const).map(
+                        (value) => ({ value, label: t(`sexOptions.${value}`) }),
+                      )}
+                      presentation="radio"
+                    />
+                    <p className={styles.hint}>{t("sexHint")}</p>
+                  </fieldset>
                 </div>
-                <fieldset className={styles.field}>
-                  <legend className={styles.fieldLabel} id="max-hr-sex-label">
-                    {t("sexLabel")}
-                  </legend>
-                  <RadioGroup
-                    value={sex}
-                    onValueChange={(next) => setSex(next as typeof sex)}
-                    orientation="horizontal"
-                    className={styles.choices}
-                    aria-labelledby="max-hr-sex-label"
-                  >
-                    {(["unspecified", "male", "female"] as const).map(
-                      (option) => (
-                        <label key={option}>
-                          <RadioGroupItem value={option} />
-                          {t(`sexOptions.${option}`)}
-                        </label>
-                      ),
-                    )}
-                  </RadioGroup>
-                  <p className={styles.hint}>{t("sexHint")}</p>
-                </fieldset>
+              ) : (
+                <MaxHrFileInput
+                  generation={fileGeneration}
+                  onPeak={(peak, name) => {
+                    setObserved(peak);
+                    setFilename(name);
+                  }}
+                  onClear={() => {
+                    setObserved(null);
+                    setFilename("");
+                  }}
+                />
+              )}
+
+              <div className={styles.actions}>
+                <ToolActionButton intent="primary" type="submit">
+                  {t("calculateButton")}
+                </ToolActionButton>
+                <ToolActionButton
+                  intent="quiet"
+                  type="button"
+                  onClick={() => {
+                    setExample(true);
+                    setAgeText("40");
+                    setSex("unspecified");
+                    setFormula("default");
+                    setMeasuredText("");
+                    setReferenceSource("measured");
+                    setMode("manual");
+                  }}
+                >
+                  {t("exampleButton")}
+                </ToolActionButton>
               </div>
-            ) : (
-              <MaxHrFileInput
-                generation={fileGeneration}
-                onPeak={(peak, name) => {
-                  setObserved(peak);
-                  setFilename(name);
-                }}
-                onClear={() => {
-                  setObserved(null);
-                  setFilename("");
-                }}
-              />
-            )}
-
-            <div className={styles.actions}>
-              <ToolActionButton intent="primary" type="submit">
-                {t("calculateButton")}
-              </ToolActionButton>
-              <ToolActionButton
-                intent="quiet"
-                type="button"
-                onClick={() => {
-                  setExample(true);
-                  setAgeText("40");
-                  setSex("unspecified");
-                  setFormula("default");
-                  setMeasuredText("");
-                  setReferenceSource("measured");
-                  setMode("manual");
-                }}
-              >
-                {t("exampleButton")}
-              </ToolActionButton>
-            </div>
+            </InputSource>
           </form>
         </section>
       </div>

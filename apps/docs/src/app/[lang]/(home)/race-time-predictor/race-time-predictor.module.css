@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --rtp-canvas: var(--background);
   --rtp-surface: var(--card);
   --rtp-ink: var(--foreground);
@@ -151,8 +152,7 @@
 
 .jumpItem:focus-visible,
 .footerCtaButton:focus-visible,
-.relatedLink:focus-visible,
-.choice:focus-visible {
+.relatedLink:focus-visible {
   outline: 2px solid var(--rtp-accent);
   outline-offset: 3px;
 }
@@ -201,29 +201,6 @@
   color: var(--rtp-ink);
   font-size: 0.84rem;
   font-weight: 650;
-}
-
-.choiceRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.choice {
-  min-height: 2rem;
-  border: 1px solid var(--rtp-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--rtp-canvas);
-  padding: 0 0.7rem;
-  color: var(--rtp-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.choice[aria-pressed="true"] {
-  border-color: transparent;
-  background: var(--rtp-accent-soft);
-  color: var(--success);
 }
 
 .timeGrid {
@@ -773,68 +750,6 @@ ol.educationList {
   height: auto;
 }
 
-.unitSwitch {
-  display: inline-grid;
-  flex: none;
-  grid-auto-flow: column;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--rtp-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--rtp-canvas);
-}
-
-.unitOption {
-  min-width: 3.25rem;
-  height: 1.75rem;
-  border: 0;
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--rtp-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.unitOption[aria-pressed="true"] {
-  background: var(--rtp-surface);
-  color: var(--rtp-ink);
-}
-
-.inputSources {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  margin: 1.15rem 0 0;
-  padding: 0;
-  border: 0;
-  font-size: 0.82rem;
-}
-
-.inputSourceLabel {
-  color: var(--rtp-muted);
-}
-
-.inputSourceOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.15rem;
-}
-
-.inputSourceOptions label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-}
-
-.inputSourceOptions input {
-  width: 0.9rem;
-  height: 0.9rem;
-  accent-color: var(--success);
-}
-
 .formFoot button {
   justify-self: start;
   color: var(--success);
@@ -992,10 +907,6 @@ ol.educationList {
 }
 
 @media (max-width: 420px) {
-  .choice,
-  .unitOption {
-    min-height: 2.25rem;
-  }
 
   .timeGrid,
   .paceGrid {
@@ -1092,14 +1003,7 @@ ol.educationList {
   border: 0;
   background: var(--secondary);
 }
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--rtp-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {

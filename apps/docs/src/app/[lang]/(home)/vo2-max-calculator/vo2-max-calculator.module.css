@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --vo2-canvas: var(--background);
   --vo2-surface: var(--card);
   --vo2-ink: var(--foreground);
@@ -117,6 +118,10 @@
 
 .form {
   display: grid;
+  border: 0;
+  border-radius: var(--tl-radius-surface);
+  background: var(--secondary);
+  box-shadow: none;
 }
 
 .profile {
@@ -131,31 +136,8 @@
   line-height: 1.45;
 }
 
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.tab,
 .secondary {
   font: inherit;
-}
-
-.tab {
-  border: 1px solid var(--vo2-line-strong);
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--vo2-ink);
-  padding: 0.38rem 0.72rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.tab[aria-selected="true"] {
-  border-color: var(--vo2-ink);
-  background: var(--vo2-ink);
-  color: var(--vo2-canvas);
 }
 
 .methodIntro,
@@ -195,27 +177,6 @@
 .scoreLabel {
   font-size: 0.78rem;
   font-weight: 650;
-}
-
-.choiceRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  min-height: 2.25rem;
-  align-items: center;
-}
-
-.choice {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.choice input {
-  accent-color: var(--success);
 }
 
 .input,
@@ -624,7 +585,6 @@
   text-underline-offset: 0.18em;
 }
 
-.tab:focus-visible,
 .secondary:focus-visible,
 .input:focus-visible,
 .select:focus-visible,
@@ -673,7 +633,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .secondary,
-  .tab,
   .promoButton {
     transition: none;
   }
@@ -746,7 +705,6 @@
 .form {
   padding: clamp(1.25rem, 3vw, 2rem);
   gap: 1.2rem;
-  border-radius: var(--tl-radius-overlay);
 }
 .formHead h2 {
   font-weight: 700;
@@ -774,10 +732,6 @@
 .select {
   border-radius: var(--tl-radius-xs);
   min-height: 2.25rem;
-}
-.choice {
-  border-radius: var(--tl-radius-xs);
-  background: transparent;
 }
 .workspace {
   gap: clamp(3rem, 7vw, 6rem);
@@ -1403,34 +1357,6 @@
 .formTitleRow h2 {
   min-width: 0;
 }
-.unitSwitch {
-  display: inline-grid;
-  flex: none;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--vo2-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--vo2-canvas);
-}
-.unitSwitch .unitOption {
-  min-width: 3.25rem;
-  height: 1.75rem;
-  padding: 0 0.65rem;
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--vo2-muted);
-  font-size: 0.75rem;
-  font-weight: 650;
-  box-shadow: none;
-}
-.unitSwitch .unitOption[aria-checked="true"] {
-  color: var(--success);
-  background: var(--vo2-soft);
-}
-.unitSwitch .unitOption:hover {
-  color: var(--vo2-ink);
-}
 .inputShell {
   position: relative;
 }
@@ -1461,12 +1387,6 @@
   border-color: var(--success);
   color: var(--vo2-surface);
 }
-.radioControl {
-  color: var(--success);
-}
-.radioControl[data-state="checked"] {
-  border-color: var(--success);
-}
 .select {
   height: 36px;
 }
@@ -1476,9 +1396,6 @@
 @media (max-width: 420px) {
   .formTitleRow {
     flex-wrap: wrap;
-  }
-  .unitSwitch {
-    margin-left: auto;
   }
 }
 

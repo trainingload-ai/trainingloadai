@@ -1,6 +1,9 @@
 "use client";
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import type { ReactNode } from "react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { ToolTabsList } from "@/components/ToolTabsList";
+import styles from "../tool-tabs.module.css";
 
 export function InputSource({
   value,
@@ -8,35 +11,32 @@ export function InputSource({
   label,
   manual,
   file,
+  children,
 }: {
   value: "manual" | "file";
   onValueChange: (value: "manual" | "file") => void;
   label: string;
   manual: string;
   file: string;
+  children: ReactNode;
 }) {
   return (
-    <RadioGroup
+    <Tabs
       value={value}
       onValueChange={(next) => onValueChange(next as "manual" | "file")}
-      orientation="horizontal"
-      aria-label={label}
-      className="flex flex-wrap gap-x-6 gap-y-3 border-b border-border pb-4"
+      className={styles.source}
     >
-      {(
-        [
-          ["manual", manual],
-          ["file", file],
-        ] as const
-      ).map(([key, text]) => (
-        <label
-          key={key}
-          className="flex cursor-pointer items-center gap-2 text-sm font-medium"
-        >
-          <RadioGroupItem value={key} />
-          {text}
-        </label>
-      ))}
-    </RadioGroup>
+      <ToolTabsList
+        value={value}
+        label={label}
+        options={[
+          { value: "manual", label: manual },
+          { value: "file", label: file },
+        ]}
+      />
+      <TabsContent value={value} tabIndex={-1} className={styles.panel}>
+        {children}
+      </TabsContent>
+    </Tabs>
   );
 }

@@ -1,4 +1,5 @@
 .calculator {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   display: grid;
   gap: 4.5rem;
 }
@@ -24,14 +25,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-}
-.powerToggle {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: 100%;
-}
-.powerToggle > * {
-  width: 100%;
 }
 .result {
   scroll-margin-top: 9rem;
@@ -128,9 +121,6 @@
 }
 @media (max-width: 480px) {
   .fields {
-    grid-template-columns: 1fr;
-  }
-  .powerToggle {
     grid-template-columns: 1fr;
   }
   .score {

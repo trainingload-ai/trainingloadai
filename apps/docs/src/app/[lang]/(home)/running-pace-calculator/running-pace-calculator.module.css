@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --pace-canvas: var(--background);
   --pace-surface: var(--card);
   --pace-ink: var(--foreground);
@@ -115,6 +116,7 @@
   color: var(--success);
 }
 .board {
+  container: pace-form / inline-size;
   display: grid;
   gap: 1.2rem;
   min-width: 0;
@@ -123,6 +125,17 @@
   padding: clamp(1.25rem, 3vw, 2rem);
   background: var(--secondary);
   scroll-margin-top: 8rem;
+}
+
+.board [data-slot="tool-choice-group"][data-presentation="chips"] {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@container pace-form (inline-size < 24rem) {
+  .board [data-slot="tool-choice-group"][data-presentation="chips"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .formTitleRow {
   display: flex;
@@ -139,36 +152,6 @@
   color: var(--pace-muted);
   font-size: 0.9rem;
   line-height: 1.7;
-}
-.unitSwitch {
-  display: inline-grid;
-  flex: none;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2px;
-  border: 1px solid var(--pace-line);
-  border-radius: var(--tl-radius-control);
-  padding: 3px;
-  background: var(--pace-canvas);
-  box-shadow: none;
-}
-.unitSwitch .unitOption {
-  min-width: 3.25rem;
-  height: 1.75rem;
-  border: 0;
-  border-radius: var(--tl-radius-xs);
-  padding-inline: 0.65rem;
-  background: transparent;
-  color: var(--pace-muted);
-  font-size: 0.75rem;
-  font-weight: 650;
-  box-shadow: none;
-}
-.unitSwitch .unitOption[data-state="on"] {
-  background: var(--pace-surface);
-  color: var(--pace-ink);
-}
-.unitSwitch .unitOption:hover {
-  color: var(--pace-ink);
 }
 .formFields {
   gap: 1.2rem;
@@ -189,19 +172,6 @@
 .clockFields > *,
 .paceFields > * {
   min-width: 0;
-}
-.presetGroup {
-  width: 100%;
-}
-.presetGroup .presetOption {
-  min-width: 0;
-  flex: 1;
-  padding-inline: 0.25rem;
-}
-.presetGroup .presetOption[data-state="on"] {
-  border-color: var(--pace-ink);
-  background: var(--pace-surface);
-  color: var(--pace-ink);
 }
 .formUtilities {
   display: flex;
@@ -228,14 +198,8 @@
 }
 .board :global([data-slot="input"]),
 .board :global([data-slot="select-trigger"]) {
-  min-height: 2.25rem;
-  height: 2.25rem;
-  border-color: var(--pace-line-strong);
-  border-radius: var(--tl-radius-control);
   padding: 0.4rem 0.7rem;
-  background: var(--pace-canvas);
   color: var(--pace-ink);
-  box-shadow: none;
   font-size: 0.875rem;
 }
 .hint,
@@ -817,9 +781,6 @@
 @media (max-width: 420px) {
   .formTitleRow {
     flex-wrap: wrap;
-  }
-  .unitSwitch {
-    margin-left: auto;
   }
   .clockFields,
   .paceFields {

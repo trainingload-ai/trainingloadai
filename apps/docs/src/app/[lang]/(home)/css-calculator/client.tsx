@@ -1,5 +1,9 @@
 "use client";
 
+import { InputSource } from "@/components/calculators/input-source";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { ToolResultActions } from "@/components/ToolResultActions";
@@ -13,7 +17,6 @@ import {
   useRef,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
@@ -133,7 +136,7 @@ export function CssCalculatorClient({
   const urlInitialized = useRef(false);
   const [copied, setCopied] = useState(false);
   const [shareError, setShareError] = useState(false);
-  const [inputSource, setInputSource] = useState("manual");
+  const [inputSource, setInputSource] = useState<"manual" | "file">("manual");
   const [example, setExample] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -354,18 +357,6 @@ export function CssCalculatorClient({
     setExample(false);
   }
 
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next: PoolUnit = event.key === "ArrowRight" ? "yards" : "meters";
-    selectUnit(next);
-    document
-      .getElementById(
-        next === "meters" ? "css-units-meters" : "css-units-yards",
-      )
-      ?.focus();
-  }
-
   function onPrint() {
     trackToolEvent("tool_result_copied", "css_calculator", {
       action: "print_result_card",
@@ -455,38 +446,23 @@ export function CssCalculatorClient({
           />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("manual.title")}</h2>
-            <div
-              role="radiogroup"
-              aria-label={t("manual.unitsLabel")}
-              className={styles.unitSwitch}
-            >
-              <Button
-                id="css-units-meters"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={unit === "meters"}
-                tabIndex={unit === "meters" ? 0 : -1}
-                onClick={() => selectUnit("meters")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.meters")}
-              </Button>
-              <Button
-                id="css-units-yards"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={unit === "yards"}
-                tabIndex={unit === "yards" ? 0 : -1}
-                onClick={() => selectUnit("yards")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.yards")}
-              </Button>
-            </div>
+            <ToolChoiceGroup
+              value={unit}
+              onValueChange={selectUnit}
+              label={t("manual.unitsLabel")}
+              options={[
+                {
+                  value: "meters",
+                  id: "css-units-meters",
+                  label: t("manual.meters"),
+                },
+                {
+                  value: "yards",
+                  id: "css-units-yards",
+                  label: t("manual.yards"),
+                },
+              ]}
+            />
           </div>
           <p className={styles.boardLead}>{t("manual.lead")}</p>
           <ol className={styles.stepList}>
@@ -499,89 +475,85 @@ export function CssCalculatorClient({
               </li>
             ))}
           </ol>
-          <fieldset className={styles.inputSources}>
-            <legend className="sr-only">{t("source.label")}</legend>
-            <span className={styles.inputSourceLabel} aria-hidden="true">
-              {t("source.label")}
-            </span>
-            <div className={styles.inputSourceOptions}>
-              {(["manual", "file"] as const).map((source) => (
-                <label key={source}>
-                  <input
-                    type="radio"
-                    name="css-source"
-                    checked={inputSource === source}
-                    onChange={() => {
-                      setInputSource(source);
-                      if (source === "file") resetFileResult();
-                    }}
-                  />
-                  <span>{t(`source.${source}`)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          {inputSource === "file" ? (
-            <CssFileInput onResult={useFileResult} onReset={resetFileResult} />
-          ) : (
-            <div className={styles.formStack}>
-              <SwimFields
-                idPrefix="css-a"
-                invalidFields={visibleErrors}
-                legend={t("manual.swimA")}
-                draft={swimA}
-                distanceSuffix={distanceSuffix}
-                distanceLabel={t("manual.distance")}
-                minutesLabel={t("manual.minutes")}
-                secondsLabel={t("manual.seconds")}
-                minutesSuffix={t("manual.suffix.minutes")}
-                secondsSuffix={t("manual.suffix.seconds")}
-                onChange={(draft) => {
-                  setSwimA(draft);
-                  setExample(false);
-                  setCopied(false);
-                }}
+          <InputSource
+            value={inputSource}
+            onValueChange={(next) => {
+              setInputSource(next);
+              if (next === "file") resetFileResult();
+            }}
+            label={t("source.label")}
+            manual={t("source.manual")}
+            file={t("source.file")}
+          >
+            {inputSource === "file" ? (
+              <CssFileInput
+                onResult={useFileResult}
+                onReset={resetFileResult}
               />
-              <SwimFields
-                idPrefix="css-b"
-                invalidFields={visibleErrors}
-                legend={t("manual.swimB")}
-                draft={swimB}
-                distanceSuffix={distanceSuffix}
-                distanceLabel={t("manual.distance")}
-                minutesLabel={t("manual.minutes")}
-                secondsLabel={t("manual.seconds")}
-                minutesSuffix={t("manual.suffix.minutes")}
-                secondsSuffix={t("manual.suffix.seconds")}
-                onChange={(draft) => {
-                  setSwimB(draft);
-                  setExample(false);
-                  setCopied(false);
-                }}
-              />
-              <div className={styles.formFoot}>
-                <p className={styles.fileHint}>{t("manual.unitHelp")}</p>
-                <ToolActionButton intent="quiet" type="button" onClick={loadExample}>
-                  {t("manual.example")}
-                </ToolActionButton>
+            ) : (
+              <div className={styles.formStack}>
+                <SwimFields
+                  idPrefix="css-a"
+                  invalidFields={visibleErrors}
+                  legend={t("manual.swimA")}
+                  draft={swimA}
+                  distanceSuffix={distanceSuffix}
+                  distanceLabel={t("manual.distance")}
+                  minutesLabel={t("manual.minutes")}
+                  secondsLabel={t("manual.seconds")}
+                  minutesSuffix={t("manual.suffix.minutes")}
+                  secondsSuffix={t("manual.suffix.seconds")}
+                  onChange={(draft) => {
+                    setSwimA(draft);
+                    setExample(false);
+                    setCopied(false);
+                  }}
+                />
+                <SwimFields
+                  idPrefix="css-b"
+                  invalidFields={visibleErrors}
+                  legend={t("manual.swimB")}
+                  draft={swimB}
+                  distanceSuffix={distanceSuffix}
+                  distanceLabel={t("manual.distance")}
+                  minutesLabel={t("manual.minutes")}
+                  secondsLabel={t("manual.seconds")}
+                  minutesSuffix={t("manual.suffix.minutes")}
+                  secondsSuffix={t("manual.suffix.seconds")}
+                  onChange={(draft) => {
+                    setSwimB(draft);
+                    setExample(false);
+                    setCopied(false);
+                  }}
+                />
+                <div className={styles.formFoot}>
+                  <p className={styles.fileHint}>{t("manual.unitHelp")}</p>
+                  <ToolActionButton
+                    intent="quiet"
+                    type="button"
+                    onClick={loadExample}
+                  >
+                    {t("manual.example")}
+                  </ToolActionButton>
+                </div>
               </div>
-            </div>
-          )}
-          {showInputInvalid ? (
-            <p id="css-input-error" className={styles.alert}>
-              {t("manual.invalid")}
-            </p>
-          ) : null}
-          {showUnusable ? (
-            <p id="css-unusable-error" className={styles.alert}>
-              {t("manual.unusable")}
-            </p>
-          ) : null}
-          {unusual ? (
-            <p role="status" className={styles.inputNotice}>
-              {t("manual.unusual")}
-            </p>
-          ) : null}
+            )}
+            {showInputInvalid ? (
+              <p id="css-input-error" className={styles.alert}>
+                {t("manual.invalid")}
+              </p>
+            ) : null}
+            {showUnusable ? (
+              <p id="css-unusable-error" className={styles.alert}>
+                {t("manual.unusable")}
+              </p>
+            ) : null}
+            {unusual ? (
+              <p role="status" className={styles.inputNotice}>
+                {t("manual.unusual")}
+              </p>
+            ) : null}
+          </InputSource>
         </section>
       </div>
 

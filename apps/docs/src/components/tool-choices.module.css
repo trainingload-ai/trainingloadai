@@ -1,0 +1,161 @@
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  min-inline-size: 0;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  border-radius: var(--tl-radius-control);
+  padding: 0.1875rem;
+  background: var(--card);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-inline-size: 2.25rem;
+  min-block-size: 2.25rem;
+  max-inline-size: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--tl-radius-control);
+  padding: 0.4rem 0.65rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+
+  &[data-state="checked"] {
+    background: var(--brand-soft);
+    color: var(--accent-foreground);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.check {
+  display: inline-flex;
+  flex: none;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+
+  &[data-state="unchecked"] {
+    visibility: hidden;
+  }
+
+  svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+}
+
+.group[data-full-width] {
+  inline-size: 100%;
+
+  .item {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+}
+
+.group[data-presentation="chips"],
+.group[data-presentation="radio"] {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  background: transparent;
+}
+
+.group[data-presentation="chips"] .item:not([data-state="checked"]) {
+  background: var(--card);
+}
+
+.group[data-presentation="chips"] .item {
+  flex-basis: auto;
+  white-space: nowrap;
+}
+
+.group[data-presentation="radio"] {
+  gap: 1rem;
+
+  .item {
+    border: 0;
+    padding-inline: 0;
+    background: transparent;
+    color: var(--foreground);
+  }
+}
+
+.radioMark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border: 1px solid var(--muted-foreground);
+  border-radius: 50%;
+
+  .item[data-state="checked"] & {
+    border-color: var(--ring);
+    color: var(--ring);
+  }
+}
+
+.dot {
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (hover: hover) {
+  .item:hover:not(:disabled, [data-state="checked"]) {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+}
+
+@media (pointer: coarse) {
+  .item {
+    min-block-size: 3rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .item {
+    border-color: ButtonText;
+  }
+
+  .item:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .item[data-state="checked"] {
+    color: Highlight;
+  }
+
+  .radioMark {
+    border-color: ButtonText;
+  }
+
+  .dot {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}

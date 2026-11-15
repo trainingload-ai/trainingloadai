@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --cp-canvas: var(--background);
   --cp-surface: var(--card);
   --cp-ink: var(--foreground);
@@ -128,7 +129,6 @@
 .secondaryAction:focus-visible,
 .relatedLink:focus-visible,
 .promoButton:focus-visible,
-.unitOption:focus-visible,
 .detail summary:focus-visible {
   outline: 2px solid var(--cp-accent);
   outline-offset: 3px;
@@ -338,39 +338,6 @@
   letter-spacing: 0.04em;
   pointer-events: none;
   transform: translateY(-50%);
-}
-
-.unitSwitch {
-  display: inline-grid;
-  flex: none;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--cp-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--cp-canvas);
-}
-
-.unitSwitch .unitOption {
-  min-width: 3.25rem;
-  height: 1.75rem;
-  padding: 0 0.65rem;
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--cp-muted);
-  font-size: 0.75rem;
-  font-weight: 650;
-  box-shadow: none;
-}
-
-.unitSwitch .unitOption:hover {
-  color: var(--cp-ink);
-  background: var(--cp-surface);
-}
-
-.unitSwitch .unitOption[aria-checked="true"] {
-  color: var(--success);
-  background: var(--cp-accent-soft);
 }
 
 .fieldOptional {
@@ -1462,6 +1429,9 @@
   font-size: 1.05rem;
   font-weight: 650;
 }
+.fitChartHeader [data-slot="tool-tabs"] {
+  inline-size: auto;
+}
 .fitChartHeader p,
 .fitChartNote {
   color: var(--cp-muted);
@@ -1540,31 +1510,6 @@
   .fitChartHeader {
     align-items: start;
   }
-}
-
-.inputTabs {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: auto;
-  padding: 0;
-  margin: 1rem 0;
-  border-radius: 0;
-  border-bottom: 1px solid var(--cp-line);
-  background: transparent;
-}
-.inputTabs button {
-  border-radius: 0;
-  padding: 0.8rem 0.4rem;
-  border-bottom: 2px solid transparent;
-  box-shadow: none;
-  color: var(--cp-muted);
-}
-.inputTabs button[data-state="active"] {
-  background: transparent;
-  border-bottom-color: var(--success);
-  color: var(--success);
-  box-shadow: none;
 }
 .filePanel {
   display: grid;

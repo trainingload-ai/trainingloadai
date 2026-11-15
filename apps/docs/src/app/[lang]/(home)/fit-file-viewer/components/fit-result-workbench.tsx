@@ -21,7 +21,8 @@ import {
   ShieldCheck,
   Timer,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToolTabsList } from "@/components/ToolTabsList";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/cn";
 import { FitRoutePanel } from "./fit-route-panel";
 import type { FitFileViewerPageMessages } from "../fit-view-copy";
@@ -1054,7 +1055,7 @@ export function FitResultWorkbench({
       ref={workbenchRef}
       tabIndex={-1}
       aria-label={`${copy.title}: ${model.fileName}`}
-      className="overflow-hidden rounded-compact border border-neutral-200 bg-white shadow-sm outline-none dark:border-border dark:bg-card"
+      className="overflow-hidden rounded-surface bg-card outline-none"
     >
       <header className="border-b border-neutral-200 bg-neutral-50/70 px-4 py-4 dark:border-border dark:bg-white/[0.025] sm:px-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1127,44 +1128,61 @@ export function FitResultWorkbench({
       ) : null}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="overflow-x-auto border-b border-neutral-200 px-4 [scrollbar-width:none] dark:border-border sm:px-5 [&::-webkit-scrollbar]:hidden">
-          <TabsList className="flex h-auto w-max min-w-full justify-start rounded-none bg-transparent p-0 text-neutral-500 dark:text-neutral-400">
-            <TabsTrigger
-              value="overview"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <Activity aria-hidden="true" className="size-4" />
-              {r.overview}
-            </TabsTrigger>
-            <TabsTrigger
-              value="map"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <MapIcon aria-hidden="true" className="size-4" />
-              {r.map}
-            </TabsTrigger>
-            <TabsTrigger
-              value="chart"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <ChartNoAxesCombined aria-hidden="true" className="size-4" />
-              {r.chart}
-            </TabsTrigger>
-            <TabsTrigger
-              value="messages"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <Database aria-hidden="true" className="size-4" />
-              {r.messages}
-            </TabsTrigger>
-            <TabsTrigger
-              value="diagnostics"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <ShieldCheck aria-hidden="true" className="size-4" />
-              {r.diagnostics}
-            </TabsTrigger>
-          </TabsList>
+        <div className="min-w-0 px-4 sm:px-5">
+          <ToolTabsList
+            value={activeTab}
+            label={copy.title}
+            options={[
+              {
+                value: "overview",
+                label: (
+                  <>
+                    <Activity aria-hidden="true" className="size-4" />
+                    {r.overview}
+                  </>
+                ),
+              },
+              {
+                value: "map",
+                label: (
+                  <>
+                    <MapIcon aria-hidden="true" className="size-4" />
+                    {r.map}
+                  </>
+                ),
+              },
+              {
+                value: "chart",
+                label: (
+                  <>
+                    <ChartNoAxesCombined
+                      aria-hidden="true"
+                      className="size-4"
+                    />
+                    {r.chart}
+                  </>
+                ),
+              },
+              {
+                value: "messages",
+                label: (
+                  <>
+                    <Database aria-hidden="true" className="size-4" />
+                    {r.messages}
+                  </>
+                ),
+              },
+              {
+                value: "diagnostics",
+                label: (
+                  <>
+                    <ShieldCheck aria-hidden="true" className="size-4" />
+                    {r.diagnostics}
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
 
         <TabsContent

@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --pz-canvas: var(--background);
   --pz-surface: var(--card);
   --pz-ink: var(--foreground);
@@ -745,7 +746,6 @@
 }
 
 .formStack :global(button[data-slot="select-trigger"]) {
-  height: 2.5rem;
   width: 100%;
 }
 
@@ -1155,14 +1155,7 @@
   border: 0;
   background: var(--secondary);
 }
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--pz-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {

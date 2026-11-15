@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
 import { ToolActionButton } from "@/components/ToolActionButton";
 
 import { ToolResultActions } from "@/components/ToolResultActions";
@@ -37,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import { buildToolAppUrl } from "@shared/product-analytics";
 import { elapsedMilliseconds } from "@/lib/tool-analytics";
 import {
@@ -749,17 +751,16 @@ export function LactateCurveCalculatorClient({
           <h2 id={`${id}-input`} className={styles.title}>
             {c.inputTitle}
           </h2>
-          <ToggleGroup
-            type="single"
+          <ToolChoiceGroup
             value={sport}
             onValueChange={changeSport}
+            label={`${c.cycling} / ${c.running}`}
+            options={[
+              { value: "cycling", label: c.cycling },
+              { value: "running", label: c.running },
+            ]}
             disabled={busy}
-            variant="outline"
-            aria-label={`${c.cycling} / ${c.running}`}
-          >
-            <ToggleGroupItem value="cycling">{c.cycling}</ToggleGroupItem>
-            <ToggleGroupItem value="running">{c.running}</ToggleGroupItem>
-          </ToggleGroup>
+          />
           <Choice
             id={`${id}-unit`}
             label={c.intensity}
@@ -773,7 +774,11 @@ export function LactateCurveCalculatorClient({
             <p className={styles.muted}>{c.inputHelp}</p>
           </details>
           <div className={styles.toolbar}>
-            <ToolActionButton intent="quiet" onClick={loadExample} disabled={busy}>
+            <ToolActionButton
+              intent="quiet"
+              onClick={loadExample}
+              disabled={busy}
+            >
               {c.example}
             </ToolActionButton>
             <ToolActionButton intent="quiet" onClick={clear} disabled={busy}>
@@ -888,7 +893,10 @@ export function LactateCurveCalculatorClient({
                 <ToolActionButton intent="primary" onClick={confirmImport}>
                   {c.confirmImport}
                 </ToolActionButton>
-                <ToolActionButton intent="quiet" onClick={() => setPending(null)}>
+                <ToolActionButton
+                  intent="quiet"
+                  onClick={() => setPending(null)}
+                >
                   {c.cancel}
                 </ToolActionButton>
               </div>
@@ -966,7 +974,10 @@ export function LactateCurveCalculatorClient({
             intent="secondary"
             disabled={busy || rows.length >= 31}
             onClick={() =>
-              changeRows([...rows, { intensity: "", lactate: "", heartRate: "" }])
+              changeRows([
+                ...rows,
+                { intensity: "", lactate: "", heartRate: "" },
+              ])
             }
           >
             <Plus data-icon="inline-start" />

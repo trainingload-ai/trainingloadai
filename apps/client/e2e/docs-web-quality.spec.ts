@@ -442,3 +442,172 @@ test("forced colors keeps a visible theme focus outline", async ({
     }),
   ).toBe(true);
 });
+
+for (const { route, field, value } of [
+  { route: "css-calculator", field: "css-a-distance", value: "450" },
+  {
+    route: "lactate-threshold-calculator",
+    field: "lt-race-time",
+    value: "0:45:00",
+  },
+  {
+    route: "max-heart-rate-calculator",
+    field: "max-heart-rate-age",
+    value: "40",
+  },
+  { route: "heart-rate-zones-calculator", field: "hr-max", value: "185" },
+  { route: "race-time-predictor", field: "race-minutes", value: "50" },
+  { route: "vdot-calculator", field: "vdot-clock", value: "25:00" },
+]) {
+  test(`input source tabs preserve manual values on ${route}`, async ({
+    page,
+  }) => {
+    await page.goto(`/zh/${route}`);
+    const list = page.locator("#calculator").getByRole("tablist").last();
+    const manual = list.getByRole("tab").first();
+    const file = list.getByRole("tab").last();
+    // Observe a completed interaction before editing an SSR-rendered input.
+    await file.click();
+    await expect(file).toHaveAttribute("aria-selected", "true");
+    await manual.click();
+    await expect(manual).toHaveAttribute("aria-selected", "true");
+    await page.locator(`#${field}`).fill(value);
+    await manual.focus();
+    await manual.press("ArrowRight");
+    await expect(file).toHaveAttribute("aria-selected", "true");
+    const panelId = await file.getAttribute("aria-controls");
+    const panel = page.locator(`[id="${panelId}"]`);
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveAttribute(
+      "aria-labelledby",
+      (await file.getAttribute("id"))!,
+    );
+    await expect(panel.locator('input[type="file"]')).toBeAttached();
+    await file.press("ArrowLeft");
+    await expect(page.locator(`#${field}`)).toHaveValue(value);
+  });
+}
+
+for (const { route, field, metric, imperial, original, converted } of [
+  {
+    route: "ftp-calculator",
+    field: "ftp-weight",
+    metric: "ftp-units-metric",
+    imperial: "ftp-units-imperial",
+    original: "70",
+    converted: 154.3,
+  },
+  {
+    route: "css-calculator",
+    field: "css-a-distance",
+    metric: "css-units-meters",
+    imperial: "css-units-yards",
+    original: "400",
+    converted: 437.4,
+  },
+]) {
+  test(`unit choices retain their conversion and keyboard behavior on ${route}`, async ({
+    page,
+  }) => {
+    await page.goto(`/zh/${route}`);
+    const selected = page.locator(`#${metric}`);
+    const next = page.locator(`#${imperial}`);
+    await next.click();
+    await expect(next).toHaveAttribute("aria-checked", "true");
+    await selected.click();
+    await expect(selected).toHaveAttribute("aria-checked", "true");
+    await page.locator(`#${field}`).fill(original);
+    await selected.focus();
+    await selected.press("ArrowRight", { delay: 50 });
+    await expect(next).toBeFocused();
+    await expect(next).toHaveAttribute("aria-checked", "true");
+    await expect(selected).toHaveAttribute("tabindex", "-1");
+    await expect
+      .poll(async () => Number(await page.locator(`#${field}`).inputValue()))
+      .toBeCloseTo(converted, 0);
+    await next.press("ArrowLeft", { delay: 50 });
+    await expect(selected).toHaveAttribute("aria-checked", "true");
+    await expect
+      .poll(async () => Number(await page.locator(`#${field}`).inputValue()))
+      .toBeCloseTo(Number(original), 0);
+  });
+}
+
+test("distance presets follow manual distances and remain mutually exclusive", async ({
+  page,
+}) => {
+  await page.goto("/zh/running-pace-calculator");
+  const distance = page.locator("#running-pace-distance");
+  const presets = page.locator(
+    '[data-slot="tool-choice-group"][data-presentation="chips"]',
+  );
+  await presets.getByRole("radio").nth(1).click();
+  await expect(distance).toHaveValue("10");
+  await distance.fill("7");
+  await expect(presets.locator('[aria-checked="true"]')).toHaveCount(0);
+  await presets.getByRole("radio").first().click();
+  await expect(distance).toHaveValue("5");
+  await expect(presets.locator('[aria-checked="true"]')).toHaveCount(1);
+});
+
+test("profile radio choices retain values without submitting the calculator", async ({
+  page,
+}) => {
+  await page.goto("/zh/vo2-max-calculator");
+  const form = page.locator("form").first();
+  await form.evaluate((node) => {
+    node.setAttribute("data-test-submissions", "0");
+    node.addEventListener("submit", () =>
+      node.setAttribute(
+        "data-test-submissions",
+        String(Number(node.getAttribute("data-test-submissions")) + 1),
+      ),
+    );
+  });
+  const age = form.getByRole("spinbutton").first();
+  const choices = form.getByRole("radiogroup").last().getByRole("radio");
+  await choices.last().click();
+  await expect(choices.last()).toHaveAttribute("aria-checked", "true");
+  await choices.first().click();
+  await expect(choices.first()).toHaveAttribute("aria-checked", "true");
+  await age.fill("35");
+  await choices.first().focus();
+  await choices.first().press("ArrowRight", { delay: 50 });
+  await expect(choices.last()).toBeFocused();
+  await expect(choices.last()).toHaveAttribute("aria-checked", "true");
+  await expect(age).toHaveValue("35");
+  await expect(form).toHaveAttribute("data-test-submissions", "0");
+});
+
+for (const route of [
+  "lactate-curve-calculator",
+  "race-time-predictor",
+  "running-pace-calculator",
+]) {
+  test(`compact selection groups fit their options on ${route}`, async ({
+    page,
+  }) => {
+    await page.goto(`/zh/${route}`);
+    const groups = page.locator(
+      '[data-slot="tool-choice-group"][data-presentation="segmented"]:not([data-full-width])',
+    );
+    await expect(groups.first()).toBeVisible();
+    const unusedSpace = await groups.evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const style = getComputedStyle(node);
+        const items = [...node.querySelectorAll('[role="radio"]')];
+        const bounds = items.map((item) => item.getBoundingClientRect());
+        const occupied =
+          Math.max(...bounds.map((box) => box.right)) -
+          Math.min(...bounds.map((box) => box.left));
+        return (
+          node.getBoundingClientRect().width -
+          occupied -
+          parseFloat(style.paddingLeft) -
+          parseFloat(style.paddingRight)
+        );
+      }),
+    );
+    expect(unusedSpace.every((space) => space < 2)).toBe(true);
+  });
+}
