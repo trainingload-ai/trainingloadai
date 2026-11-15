@@ -217,6 +217,62 @@ describe('IntervalsIcuService', () => {
     ]);
   });
 
+  it('correlates token failure and repeated state rejection without leaking credentials', async () => {
+    const { intervalsIcuClient, service } = createService();
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    try {
+      const start = await service.startOAuth('user-1', {
+        syncActivities: false,
+      });
+      const state = new URL(start.authorizationUrl).searchParams.get('state')!;
+      intervalsIcuClient.exchangeOAuthCode.mockRejectedValueOnce(
+        new IntervalsIcuApiError(
+          400,
+          'secret-error-message',
+          JSON.stringify({
+            error: 'invalid_grant',
+            error_description: 'secret-description',
+            access_token: 'secret-token',
+          }),
+        ),
+      );
+      const first = new URL(
+        await service.completeOAuthCallback({ code: 'secret-code', state }),
+      );
+      await service.completeOAuthCallback({ code: 'secret-code', state });
+      expect(first.searchParams.get('reason')).toBe('oauth_failed');
+      expect(intervalsIcuClient.exchangeOAuthCode).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(warn.mock.calls[0][0] as string)).toMatchObject({
+        stage: 'exchange_token',
+        category: 'http',
+        httpStatus: 400,
+        oauthError: 'invalid_grant',
+        outcome: 'failed',
+      });
+      expect(JSON.parse(warn.mock.calls[1][0] as string)).toMatchObject({
+        stage: 'consume_state',
+        category: 'state_rejected',
+      });
+      const a = JSON.parse(warn.mock.calls[0][0] as string);
+      const b = JSON.parse(warn.mock.calls[1][0] as string);
+      expect(a.stateRef).toBe(b.stateRef);
+      expect(a.callbackId).not.toBe(b.callbackId);
+      const logged = JSON.stringify(warn.mock.calls);
+      for (const secret of [
+        state,
+        'secret-code',
+        'secret-token',
+        'secret-description',
+        'secret-error-message',
+      ])
+        expect(logged).not.toContain(secret);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it('exchanges OAuth callback code and stores an OAuth connection', async () => {
     const {
       intervalsIcuClient,
