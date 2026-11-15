@@ -124,7 +124,11 @@ export function IntervalsIcuConnectionDialog({
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setPendingSave(null);
+      setConfirmDisconnectOpen(false);
+      return;
+    }
 
     setApiKey("");
     setAuthMode(
@@ -230,7 +234,6 @@ export function IntervalsIcuConnectionDialog({
       const result = await connectIntervalsIcu.mutateAsync(payload);
       if (result.keyChangeConfirmationRequired) {
         setPendingSave(payload);
-        closeDialog();
         return;
       }
       setApiKey("");
@@ -317,7 +320,6 @@ export function IntervalsIcuConnectionDialog({
   };
 
   const requestDisconnect = () => {
-    closeDialog();
     setConfirmDisconnectOpen(true);
   };
 
@@ -326,6 +328,7 @@ export function IntervalsIcuConnectionDialog({
       setBusyAction("disconnect");
       await disconnectIntervalsIcu.mutateAsync();
       setConfirmDisconnectOpen(false);
+      closeDialog();
       toast.success(`Intervals.icu ${t("disconnectSuccess")}`);
     } catch (error) {
       console.error("断开 Intervals.icu 连接失败：", error);
@@ -376,7 +379,7 @@ export function IntervalsIcuConnectionDialog({
   return (
     <>
       <AdaptiveDialog
-        open={open}
+        open={open && !confirmDisconnectOpen && !pendingSave}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && busy) return;
           onOpenChange(nextOpen);
@@ -628,7 +631,7 @@ export function IntervalsIcuConnectionDialog({
       </AdaptiveDialog>
 
       <AdaptiveDialog
-        open={Boolean(pendingSave)}
+        open={open && Boolean(pendingSave)}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && !busy) setPendingSave(null);
         }}
@@ -652,6 +655,7 @@ export function IntervalsIcuConnectionDialog({
               className={adaptiveDialogFooterActionButtonClassName}
               onClick={() => setPendingSave(null)}
               disabled={busy}
+              autoFocus
             >
               {t("intervalsIcu.replaceKeyCancel")}
             </Button>
@@ -671,7 +675,7 @@ export function IntervalsIcuConnectionDialog({
       </AdaptiveDialog>
 
       <AdaptiveDialog
-        open={confirmDisconnectOpen}
+        open={open && confirmDisconnectOpen}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && !busy) setConfirmDisconnectOpen(false);
         }}
@@ -697,6 +701,7 @@ export function IntervalsIcuConnectionDialog({
               className={adaptiveDialogFooterActionButtonClassName}
               onClick={() => setConfirmDisconnectOpen(false)}
               disabled={busy}
+              autoFocus
             >
               {t("disconnectConfirmCancel")}
             </Button>
