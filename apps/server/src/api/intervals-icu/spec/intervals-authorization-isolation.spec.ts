@@ -133,4 +133,16 @@ describe('Intervals webhook authorization isolation', () => {
       intervalsAuthorization(f.connection),
     );
   });
+  it('supports a legacy connection without a stored fingerprint while fencing its original encrypted credential', async () => {
+    const f = fixture();
+    f.connection.metadata = {};
+    f.connection.credentialFingerprint = null;
+    f.connection.credentialCiphertext = 'sealed-key-A';
+    await f.enqueue();
+    expect(await f.service.processEvent(f.queued.payload)).toBe('DONE');
+    f.lifecycle.deactivateProviderData.mockClear();
+    f.connection.credentialCiphertext = 'sealed-key-B';
+    expect(await f.service.processEvent(f.queued.payload)).toBe('IGNORED');
+    expect(f.lifecycle.deactivateProviderData).not.toHaveBeenCalled();
+  });
 });

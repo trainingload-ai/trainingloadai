@@ -1,10 +1,15 @@
+import { createHash } from 'node:crypto';
 import type { ExternalProviderConnection } from '@prisma/client';
 import { intervalsIcuMetadataOf } from './intervals-icu-metadata';
 
 type Connection = Pick<
   ExternalProviderConnection,
   'id' | 'userId' | 'credentialFingerprint'
-> & { externalAthleteId?: string | null; metadata?: unknown };
+> & {
+  externalAthleteId?: string | null;
+  metadata?: unknown;
+  credentialCiphertext?: string;
+};
 export type IntervalsAuthorization = {
   connectionId: string;
   userId: string;
@@ -22,7 +27,12 @@ export function intervalsAuthorization(
     revision:
       typeof revision === 'string'
         ? revision
-        : (connection.credentialFingerprint ?? ''),
+        : (connection.credentialFingerprint ??
+          (connection.credentialCiphertext
+            ? createHash('sha256')
+                .update(connection.credentialCiphertext)
+                .digest('hex')
+            : '')),
   };
 }
 export function matchesIntervalsAuthorization(
