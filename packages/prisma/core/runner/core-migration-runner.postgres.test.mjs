@@ -155,6 +155,7 @@ postgresTest(
         { id: "0026_athlete_state_updates", source: "baseline" },
         { id: "0027_scope_fitness_setting_evidence", source: "baseline" },
         { id: "0028_user_scoped_activity_identity", source: "baseline" },
+        { id: "0029_provider_authorization_revision", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,
