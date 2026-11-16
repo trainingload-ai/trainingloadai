@@ -140,7 +140,12 @@
       "id": "0028_user_scoped_activity_identity",
       "file": "0028_user_scoped_activity_identity/migration.sql",
       "sha256": "be1545e6cbdbd2b9338c5e15e5cfc32b096dba60ed75d8b01f2e048f287b82d2"
+    },
+    {
+      "id": "0029_provider_authorization_revision",
+      "file": "0029_provider_authorization_revision/migration.sql",
+      "sha256": "5af78c083f9de1dafe56c1d8e3c519a08c3c22bf15d25321264810a990f156dd"
     }
   ],
-  "schemaChecksum": "9bd1c0be9049e3db5c0658c364a1050751bfab7b315fa5951749706666b7fd20"
+  "schemaChecksum": "bc0506bc71d701056969b73e205124a722cb49e5d911f6742cee3877461b82cf"
 }

@@ -40,6 +40,7 @@ export class IntervalsIcuScheduledSyncTask implements ThirdPartyScheduledTask {
         provider: string;
         external_athlete_id: string | null;
         credential_ciphertext: string;
+        credential_fingerprint: string | null;
         credential_last4: string | null;
         status: string;
         last_sync_started_at: Date | null;
@@ -116,6 +117,7 @@ export class IntervalsIcuScheduledSyncTask implements ThirdPartyScheduledTask {
         c.provider::text AS provider,
         c.external_athlete_id,
         c.credential_ciphertext,
+        c.credential_fingerprint,
         c.credential_last4,
         c.status,
         c.last_sync_started_at,
@@ -145,6 +147,7 @@ export class IntervalsIcuScheduledSyncTask implements ThirdPartyScheduledTask {
       provider: row.provider,
       externalAthleteId: row.external_athlete_id,
       credentialCiphertext: row.credential_ciphertext,
+      credentialFingerprint: row.credential_fingerprint,
       credentialLast4: row.credential_last4,
       status: row.status,
       lastSyncStartedAt: row.last_sync_started_at,

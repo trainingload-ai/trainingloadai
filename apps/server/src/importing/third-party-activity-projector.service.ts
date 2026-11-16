@@ -142,6 +142,15 @@ export class ThirdPartyActivityProjectorService {
         );
       }
 
+      const account = args.payload.source.accountRef;
+      for (const candidate of [existing, preferred]) {
+        const owner = candidate?.externalUserId;
+        const legacyIntervals = provider === 'intervals_icu' && owner === '0';
+        const normalized = (value:string) => provider === 'intervals_icu' ? value.replace(/^i(?=\d+$)/, '') : value;
+        if (account && owner && !legacyIntervals && normalized(account) !== normalized(owner)) throw new ImportIdentityConflictError('Third-party activity belongs to a different remote account');
+      }
+      if (!common.externalUserId && existing?.externalUserId) common.externalUserId=existing.externalUserId;
+
       if (preferred) {
         if (existing && existing.id !== preferred.id) {
           await tx.activityThirdPartyMapping.updateMany({

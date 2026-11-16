@@ -142,3 +142,12 @@ describe('ThirdPartyActivityProjectorService', () => {
     });
   });
 });
+
+
+it('does not overwrite another remote account when one owner has conflicting activity IDs',async()=>{
+ const tx={ $executeRawUnsafe:jest.fn(async()=>1),thirdPartyActivity:{findUnique:jest.fn(async()=>({id:1,userId:'user',externalUserId:'account-A'})),upsert:jest.fn(),update:jest.fn()}};
+ const service=new ThirdPartyActivityProjectorService({$transaction:async(fn:any)=>fn(tx)}as never);
+ const input=payload('STRAVA');input.source.accountRef='account-B';
+ await expect(service.project({userId:'user',sourceObjectId:'source',batchJobId:'batch',payload:input})).rejects.toThrow('different remote account');
+ expect(tx.thirdPartyActivity.upsert).not.toHaveBeenCalled();expect(tx.thirdPartyActivity.update).not.toHaveBeenCalled();
+});

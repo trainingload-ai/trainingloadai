@@ -1,4 +1,8 @@
 import {
+  intervalsAuthorization,
+  matchesIntervalsAuthorization,
+} from '@/integrations/intervals-icu/intervals-icu-authorization';
+import {
   Injectable,
   Logger,
   Optional,
@@ -144,7 +148,9 @@ export class IntervalsIcuWebhookService {
     let acceptedCount = 0;
     let duplicateCount = 0;
     for (const event of events) {
-      const queued = await this.inbox.enqueue(this.buildInboxEvent(event));
+      const queued = await this.inbox.enqueue(
+        await this.buildInboxEvent(event),
+      );
       if (queued?.enqueued !== false) acceptedCount += 1;
       else duplicateCount += 1;
     }
@@ -157,9 +163,15 @@ export class IntervalsIcuWebhookService {
   }
 
   /** Normalize provider fields and preserve the existing event identity rules. */
-  private buildInboxEvent(event: IntervalsIcuWebhookEvent) {
+  private async buildInboxEvent(event: IntervalsIcuWebhookEvent) {
     const eventType = String(event.type ?? 'UNKNOWN').trim() || 'UNKNOWN';
     const athleteId = String(event.athlete_id ?? '').trim() || null;
+    const connection = athleteId
+      ? await this.findConnectionByAthleteId(athleteId)
+      : null;
+    const authorization = connection
+      ? intervalsAuthorization(connection)
+      : null;
     const checksum = this.inbox.checksum(JSON.stringify(event));
     const remoteId =
       extractActivityExternalId(event) ??
@@ -168,6 +180,7 @@ export class IntervalsIcuWebhookService {
       eventType,
       athleteId ?? 'unknown',
       remoteId || checksum,
+      this.inbox.checksum(JSON.stringify(authorization)),
     ].join(':');
     return {
       provider: ThirdPartyProvider.intervals_icu,
@@ -175,7 +188,7 @@ export class IntervalsIcuWebhookService {
       externalUserId: athleteId,
       dedupeKey,
       rawChecksum: checksum,
-      payload: importJsonValue(event),
+      payload: importJsonValue({ ...event, authorization }),
     };
   }
 
@@ -200,8 +213,27 @@ export class IntervalsIcuWebhookService {
       return 'IGNORED' as const;
     }
 
-    const connection = await this.findConnectionByAthleteId(athleteId);
-    if (!connection) {
+    const authorization = event.authorization as
+      | { connectionId?: unknown; userId?: unknown }
+      | undefined;
+    if (
+      typeof authorization?.connectionId !== 'string' ||
+      typeof authorization.userId !== 'string'
+    )
+      return 'IGNORED' as const;
+    const connection = await this.providerConnections.model().findFirst({
+      where: {
+        id: authorization.connectionId,
+        userId: authorization.userId,
+        provider: 'intervals_icu',
+        status: 'ACTIVE',
+        externalAthleteId: { in: athleteIdVariants(athleteId) },
+      },
+    });
+    if (
+      !connection ||
+      !matchesIntervalsAuthorization(event.authorization, connection)
+    ) {
       this.logger.warn(
         `[handleEvent] 未找到 Intervals.icu 连接对应用户 athlete_id=${athleteId} type=${eventType}`,
       );
@@ -322,6 +354,7 @@ export class IntervalsIcuWebhookService {
     const result = await this.importBatchService.createIntervalsIcuImportBatch({
       userId: connection.userId,
       connectionId: connection.id,
+      authorization: intervalsAuthorization(connection),
       activities: [activity],
       reason: 'webhook',
     });

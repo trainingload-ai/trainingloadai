@@ -34,6 +34,7 @@ export type IntervalsIcuOAuthMetadata = {
  * Prisma Json 无结构，读写统一经 {@link asIntervalsIcuMetadata} 收窄。
  */
 export type IntervalsIcuConnectionMetadata = {
+  authorizationRevision?: string;
   authType?: IntervalsIcuAuthType;
   athleteIdMode?: string;
   profile?: IntervalsIcuAthleteProfile;

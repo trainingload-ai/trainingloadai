@@ -25,7 +25,8 @@
     "preactivity-data:migrate": "pnpm build:selfhost",
     "activity-data:migrate": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/activity-data-migration.command.js",
     "vdot:fit": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-fit.command.ts",
-    "vdot:export": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-export.command.ts"
+    "vdot:export": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-export.command.ts",
+    "test:oauth-authorization": "node --experimental-strip-types --test src/auth/spec/oauth-authorization-revision.runtime.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.70",

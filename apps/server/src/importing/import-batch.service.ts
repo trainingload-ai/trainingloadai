@@ -1,3 +1,5 @@
+import { importJsonValue } from './import-item-job.types';
+import type { IntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { createHash } from 'crypto';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -55,8 +57,14 @@ function fileSourceUid(file: Express.Multer.File, userId: string) {
 }
 
 /** 使用用户 ID + Intervals.icu 活动 ID 生成稳定的导入源标识。 */
-function intervalsIcuSourceUid(userId: string, externalId: string) {
-  return `intervals_icu:${userId}:${externalId}`;
+function intervalsIcuSourceUid(
+  userId: string,
+  externalId: string,
+  authorization?: IntervalsAuthorization,
+) {
+  return authorization
+    ? `intervals_icu:${userId}:account:${encodeURIComponent(authorization.athleteId)}:grant:${stableChecksum(authorization.revision)}:${externalId}`
+    : `intervals_icu:${userId}:${externalId}`;
 }
 
 type IntervalsIcuDiscoveredImport = {
@@ -94,6 +102,7 @@ function intervalsIcuTimelineStartTime(
 function discoverIntervalsIcuActivities(
   userId: string,
   activities: IntervalsIcuActivityListItem[],
+  authorization?: IntervalsAuthorization,
 ): IntervalsIcuDiscoveredImport[] {
   const discovered: IntervalsIcuDiscoveredImport[] = [];
   for (const activity of activities) {
@@ -103,7 +112,7 @@ function discoverIntervalsIcuActivities(
       externalId,
       activity,
       checksum: stableChecksum(activity),
-      sourceUid: intervalsIcuSourceUid(userId, externalId),
+      sourceUid: intervalsIcuSourceUid(userId, externalId, authorization),
     });
   }
   return discovered;
@@ -896,6 +905,7 @@ export class ImportBatchService {
   async createIntervalsIcuImportBatch(args: {
     userId: string;
     connectionId: string;
+    authorization?: IntervalsAuthorization;
     activities: IntervalsIcuActivityListItem[];
     reason?: ThirdPartyImportReason;
     discoveryWindow?: { start: Date; end: Date };
@@ -906,6 +916,7 @@ export class ImportBatchService {
     const discovered = discoverIntervalsIcuActivities(
       args.userId,
       args.activities,
+      args.authorization,
     );
 
     // 加载导入发现状态
@@ -942,7 +953,7 @@ export class ImportBatchService {
             sourceKind: ImportSourceKind.INTERVALS_ICU,
             provider: ThirdPartyProvider.intervals_icu,
             sourceUid: item.sourceUid,
-            accountRef: '0',
+            accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
             objectType: 'third_party_activity_file',
             // The discovery-list checksum is not a hash of the downloaded file.
@@ -951,11 +962,17 @@ export class ImportBatchService {
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
             } as Prisma.InputJsonValue,
             timelineTitle: item.activity.name?.trim() || null,
             timelineStartTime: intervalsIcuTimelineStartTime(item.activity),
             metadata: {
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
               listChecksum: item.checksum,
               listActivityName: item.activity.name ?? null,
               listActivityStartDate:
@@ -969,17 +986,23 @@ export class ImportBatchService {
           },
           update: {
             provider: ThirdPartyProvider.intervals_icu,
-            accountRef: '0',
+            accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
             objectType: 'third_party_activity_file',
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
             } as Prisma.InputJsonValue,
             timelineTitle: item.activity.name?.trim() || null,
             timelineStartTime: intervalsIcuTimelineStartTime(item.activity),
             metadata: {
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
               listChecksum: item.checksum,
               listActivityName: item.activity.name ?? null,
               listActivityStartDate:
@@ -1109,6 +1132,9 @@ export class ImportBatchService {
             sourceRef: {
               externalId: item.externalId,
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
             } as Prisma.InputJsonValue,
           },
         });

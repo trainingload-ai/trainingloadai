@@ -1903,7 +1903,7 @@
       "references": [
         {
           "file": "apps/server/src/auth.ts",
-          "line": 42
+          "line": 43
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -2697,7 +2697,7 @@
       "references": [
         {
           "file": "apps/server/src/auth.ts",
-          "line": 307
+          "line": 308
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
@@ -3095,7 +3095,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 370
+          "line": 371
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3116,7 +3116,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 339
+          "line": 340
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3137,7 +3137,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 348
+          "line": 349
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3158,7 +3158,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 357
+          "line": 358
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3577,11 +3577,11 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 358
+          "line": 359
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 41
+          "line": 42
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -3642,15 +3642,15 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 378
-        },
-        {
-          "file": "apps/server/src/auth.ts",
-          "line": 48
+          "line": 379
         },
         {
           "file": "apps/server/src/auth.ts",
           "line": 49
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 50
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -4129,19 +4129,19 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 379
+          "line": 380
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 430
-        },
-        {
-          "file": "apps/server/src/auth.ts",
-          "line": 51
+          "line": 431
         },
         {
           "file": "apps/server/src/auth.ts",
           "line": 52
+        },
+        {
+          "file": "apps/server/src/auth.ts",
+          "line": 53
         },
         {
           "file": "apps/server/src/integrations/personal/personal-connection.service.ts",
@@ -4473,7 +4473,7 @@
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 306
+          "line": 307
         },
         {
           "file": "apps/server/src/auth/auth-security-config.ts",
@@ -4527,7 +4527,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 389
+          "line": 390
         },
         {
           "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
@@ -4552,7 +4552,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 390
+          "line": 391
         },
         {
           "file": "apps/server/src/integrations/external-provider/external-provider-return-url.ts",
@@ -4916,7 +4916,7 @@
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 43
+          "line": 44
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
@@ -6379,7 +6379,7 @@
       "references": [
         {
           "file": "apps/server/src/auth.ts",
-          "line": 545
+          "line": 563
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",

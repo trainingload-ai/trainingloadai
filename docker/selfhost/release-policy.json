@@ -140,6 +140,10 @@
       "0028_user_scoped_activity_identity": {
         "phase": "expand",
         "releaseVersion": "1.1.25"
+      },
+      "0029_provider_authorization_revision": {
+        "phase": "expand",
+        "releaseVersion": "1.1.25"
       }
     }
   }

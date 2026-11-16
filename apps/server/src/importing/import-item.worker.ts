@@ -1,3 +1,4 @@
+import { matchesIntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import {
   Injectable,
@@ -402,8 +403,11 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           job.userId,
           'intervals_icu',
         );
-        if (!connection) {
-          throw new Error(`未找到 Intervals.icu 连接：${connectionId}`);
+        if (
+          !connection ||
+          !matchesIntervalsAuthorization(sourceRef.authorization, connection)
+        ) {
+          throw new Error('INTERVALS_IMPORT_AUTHORIZATION_CHANGED');
         }
         try {
           const apiKey =
@@ -420,10 +424,19 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
             error instanceof IntervalsIcuApiError &&
             (error.status === 401 || error.status === 403)
           ) {
-            await this.externalConnections.markInvalid(
-              connectionId,
-              'Intervals.icu API 密钥无效或未授权',
-            );
+            await this.externalConnections.model().updateMany({
+              where: {
+                id: connectionId,
+                userId: job.userId,
+                status: 'ACTIVE',
+                credentialCiphertext: connection.credentialCiphertext,
+                metadata: { equals: connection.metadata ?? Prisma.DbNull },
+              },
+              data: {
+                status: 'INVALID',
+                lastError: 'Intervals.icu API 密钥无效或未授权',
+              },
+            });
           }
           throw error;
         }
