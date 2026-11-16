@@ -1,3 +1,4 @@
+import { intervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { randomUUID } from 'node:crypto';
 import {
   intervalsOAuthDiagnostic,
@@ -59,7 +60,7 @@ import {
 /** 活动与健康同步实际依赖的最小 connection 形状。 */
 export type IntervalsIcuSyncConnection = Pick<
   ExternalProviderConnection,
-  'id' | 'userId' | 'status' | 'credentialCiphertext'
+  'id' | 'userId' | 'status' | 'credentialCiphertext' | 'credentialFingerprint'
 > & {
   externalAthleteId?: string | null;
   syncScheduledActivities?: boolean;
@@ -696,6 +697,7 @@ export class IntervalsIcuService {
     // 构建 metadata
     const metadata: IntervalsIcuConnectionMetadata = {
       ...existingMetadata,
+      authorizationRevision: randomUUID(),
       authType: 'oauth',
       athleteIdMode: '0',
       oauth: {
@@ -881,11 +883,10 @@ export class IntervalsIcuService {
         };
       }
 
-      if (!currentFingerprint || currentFingerprint !== nextFingerprint) {
-        credentialData.credentialCiphertext =
-          this.intervalsIcuCredentials.encrypt(apiKey);
+      credentialData.credentialCiphertext =
+        this.intervalsIcuCredentials.encrypt(apiKey);
+      if (!currentFingerprint || currentFingerprint !== nextFingerprint)
         credentialChanged = true;
-      }
       credentialData.credentialLast4 =
         this.intervalsIcuCredentials.last4(apiKey);
       credentialData.credentialFingerprint = nextFingerprint;
@@ -897,6 +898,7 @@ export class IntervalsIcuService {
     const metadata: IntervalsIcuConnectionMetadata = {
       ...existingMetadata,
       authType: apiKey ? 'api_key' : existingAuthType,
+      ...(apiKey ? { authorizationRevision: randomUUID() } : {}),
       ...(apiKey ? { oauth: null } : {}),
       ...(profile ? { profile } : {}),
       athleteIdMode: '0',
@@ -1093,8 +1095,12 @@ export class IntervalsIcuService {
     });
     if (!connection) return { connected: false };
 
-    await this.providerConnections.model().update({
-      where: { id: connection.id },
+    await this.providerConnections.model().updateMany({
+      where: {
+        id: connection.id,
+        userId,
+        credentialCiphertext: connection.credentialCiphertext,
+      },
       data: {
         status: 'DISCONNECTED',
         credentialCiphertext: '',
@@ -1135,8 +1141,12 @@ export class IntervalsIcuService {
         ? yesterdayWindow(args.timezone)
         : latest60DayWindow(args.newest);
     const startedAt = new Date();
-    await this.providerConnections.model().update({
-      where: { id: connection.id },
+    await this.providerConnections.model().updateMany({
+      where: {
+        id: connection.id,
+        status: 'ACTIVE',
+        credentialCiphertext: connection.credentialCiphertext,
+      },
       data: {
         lastSyncStartedAt: startedAt,
         lastError: null,
@@ -1198,12 +1208,20 @@ export class IntervalsIcuService {
       const latestConnection = await this.providerConnections
         .model()
         .findUnique({
-          where: { id: connection.id },
+          where: {
+            id: connection.id,
+            status: 'ACTIVE',
+            credentialCiphertext: connection.credentialCiphertext,
+          },
           select: { metadata: true },
         });
       const existingMetadata = intervalsIcuMetadataOf(latestConnection);
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           lastSyncCompletedAt: completedAt,
           lastError: null,
@@ -1237,8 +1255,12 @@ export class IntervalsIcuService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`[Intervals.icu] wellness 同步失败：${message}`);
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           status:
             error instanceof IntervalsIcuApiError &&
@@ -1392,8 +1414,12 @@ export class IntervalsIcuService {
       args.reason === 'scheduled'
         ? yesterdayWindow(args.timezone)
         : latest60DayWindow(args.newest);
-    await this.providerConnections.model().update({
-      where: { id: connection.id },
+    await this.providerConnections.model().updateMany({
+      where: {
+        id: connection.id,
+        status: 'ACTIVE',
+        credentialCiphertext: connection.credentialCiphertext,
+      },
       data: {
         lastSyncStartedAt: new Date(),
         lastError: null,
@@ -1416,6 +1442,7 @@ export class IntervalsIcuService {
         await this.importBatchService.createIntervalsIcuImportBatch({
           userId: args.userId,
           connectionId: connection.id,
+          authorization: intervalsAuthorization(connection),
           activities,
           reason: args.reason,
           discoveryWindow: originSyncWindow(window),
@@ -1463,8 +1490,12 @@ export class IntervalsIcuService {
         });
       }
 
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           lastSyncCompletedAt: new Date(),
           lastSyncedActivityAt: new Date(`${window.newest}T00:00:00.000Z`),
@@ -1480,8 +1511,12 @@ export class IntervalsIcuService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`[Intervals.icu] 同步失败：${message}`);
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           status:
             error instanceof IntervalsIcuApiError &&

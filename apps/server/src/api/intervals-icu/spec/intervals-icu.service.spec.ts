@@ -14,6 +14,7 @@ describe('IntervalsIcuService', () => {
         findFirst: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         findUnique: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         update: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+        updateMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         upsert: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       },
     };
@@ -144,6 +145,8 @@ describe('IntervalsIcuService', () => {
       provider: 'intervals_icu',
       status: 'ACTIVE',
       credentialCiphertext: 'cipher-key',
+      externalAthleteId: 'athlete-1',
+      credentialFingerprint: 'generation-1',
       syncScheduledActivities: true,
       ...overrides,
     };
@@ -567,7 +570,7 @@ describe('IntervalsIcuService', () => {
       { id: 'activity-2', name: 'Ride' },
     ];
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(row);
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce(activities);
     importBatchService.createIntervalsIcuImportBatch.mockResolvedValueOnce({
       batch: { id: 'batch-1' },
@@ -613,16 +616,15 @@ describe('IntervalsIcuService', () => {
           },
         },
       );
-      expect(prisma.externalProviderConnection.update).toHaveBeenNthCalledWith(
-        1,
-        {
-          where: { id: 'connection-1' },
-          data: {
-            lastSyncStartedAt: new Date('2026-07-06T10:30:00.000Z'),
-            lastError: null,
-          },
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenNthCalledWith(1, {
+        where: expect.objectContaining({ id: 'connection-1' }),
+        data: {
+          lastSyncStartedAt: new Date('2026-07-06T10:30:00.000Z'),
+          lastError: null,
         },
-      );
+      });
       expect(intervalsIcuCredentials.decrypt).toHaveBeenCalledWith(
         'cipher-key',
       );
@@ -638,6 +640,12 @@ describe('IntervalsIcuService', () => {
       ).toHaveBeenCalledWith({
         userId: 'user-1',
         connectionId: 'connection-1',
+        authorization: {
+          connectionId: 'connection-1',
+          userId: 'user-1',
+          athleteId: 'athlete-1',
+          revision: 'generation-1',
+        },
         activities,
         reason: 'manual',
         discoveryWindow: {
@@ -645,17 +653,16 @@ describe('IntervalsIcuService', () => {
           end: new Date('2026-07-08T00:00:00.000Z'),
         },
       });
-      expect(prisma.externalProviderConnection.update).toHaveBeenNthCalledWith(
-        2,
-        {
-          where: { id: 'connection-1' },
-          data: {
-            lastSyncCompletedAt: new Date('2026-07-06T10:30:00.000Z'),
-            lastSyncedActivityAt: new Date('2026-07-06T00:00:00.000Z'),
-            lastError: null,
-          },
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenNthCalledWith(2, {
+        where: expect.objectContaining({ id: 'connection-1' }),
+        data: {
+          lastSyncCompletedAt: new Date('2026-07-06T10:30:00.000Z'),
+          lastSyncedActivityAt: new Date('2026-07-06T00:00:00.000Z'),
+          lastError: null,
         },
-      );
+      });
     } finally {
       jest.useRealTimers();
     }
@@ -679,7 +686,7 @@ describe('IntervalsIcuService', () => {
     prisma.externalProviderConnection.findUnique
       .mockResolvedValueOnce(row)
       .mockResolvedValueOnce({ metadata: {} });
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce([]);
     importBatchService.createIntervalsIcuImportBatch.mockResolvedValueOnce({
       batch: null,
@@ -778,9 +785,11 @@ describe('IntervalsIcuService', () => {
           ]),
         }),
       );
-      expect(prisma.externalProviderConnection.update).toHaveBeenLastCalledWith(
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          where: { id: 'connection-1' },
+          where: expect.objectContaining({ id: 'connection-1' }),
           data: expect.objectContaining({
             lastSyncCompletedAt: new Date('2026-07-06T10:30:00.000Z'),
             lastError: null,
@@ -802,7 +811,7 @@ describe('IntervalsIcuService', () => {
     } = createService();
     const row = connection();
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(row);
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce([
       { id: 'activity-1' },
     ]);
@@ -861,7 +870,7 @@ describe('IntervalsIcuService', () => {
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(
       connection(),
     );
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce([
       { id: 'activity-1', source: 'STRAVA' },
     ]);
@@ -889,7 +898,7 @@ describe('IntervalsIcuService', () => {
     const { intervalsIcuClient, prisma, service } = createService();
     const row = connection();
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(row);
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockRejectedValueOnce(
       new IntervalsIcuApiError(401, 'unauthorized'),
     );
@@ -899,15 +908,15 @@ describe('IntervalsIcuService', () => {
         'unauthorized',
       );
 
-      expect(prisma.externalProviderConnection.update).toHaveBeenLastCalledWith(
-        {
-          where: { id: 'connection-1' },
-          data: {
-            status: 'INVALID',
-            lastError: 'unauthorized',
-          },
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenLastCalledWith({
+        where: expect.objectContaining({ id: 'connection-1' }),
+        data: {
+          status: 'INVALID',
+          lastError: 'unauthorized',
         },
-      );
+      });
       expect(errorSpy).toHaveBeenCalledWith(
         '[Intervals.icu] 同步失败：unauthorized',
       );
@@ -923,7 +932,7 @@ describe('IntervalsIcuService', () => {
       syncPlannedWorkouts: true,
       exportPlannedWorkouts: false,
     });
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
 
     await expect(
       service.syncConnectionLatest({

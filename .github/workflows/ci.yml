@@ -55,6 +55,7 @@ jobs:
       - run: pnpm --dir apps/desktop runtime:prepare
       - run: pnpm --dir apps/desktop runtime:smoke
       - run: pnpm --dir apps/server test:core
+      - run: pnpm --dir apps/server test:oauth-authorization
       - run: pnpm test:athlete-state:database
       - run: pnpm test:selfhost
       - run: pnpm --dir packages/prisma core:migrate:test

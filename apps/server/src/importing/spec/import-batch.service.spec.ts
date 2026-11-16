@@ -686,4 +686,29 @@ describe('ImportBatchService', () => {
       logSpy.mockRestore();
     }
   });
+  it('separates identical Intervals activity IDs from different linked accounts', async () => {
+    const { service, prisma } = createService();
+    prisma.importItemJob.create.mockResolvedValue({ id: 'item' });
+    prisma.userPostProcessJob.upsert.mockResolvedValue({ id: 'post' });
+    prisma.importBatchJob.create.mockResolvedValue({
+      id: 'batch',
+      userId: 'user-1',
+    });
+    for (const athleteId of ['athlete-A', 'athlete-B'])
+      await service.createIntervalsIcuImportBatch({
+        userId: 'user-1',
+        connectionId: 'connection',
+        authorization: {
+          connectionId: 'connection',
+          userId: 'user-1',
+          athleteId,
+          revision: 'grant',
+        },
+        activities: [{ id: 'same-remote-id' }],
+      });
+    const calls = prisma.importSourceObject.upsert.mock.calls as any[];
+    expect(calls[0][0].create.sourceUid).not.toBe(calls[1][0].create.sourceUid);
+    expect(calls[0][0].create.accountRef).toBe('athlete-A');
+    expect(calls[1][0].create.accountRef).toBe('athlete-B');
+  });
 });

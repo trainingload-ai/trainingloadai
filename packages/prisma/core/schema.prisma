@@ -3232,6 +3232,7 @@ model T_user_accounts {
   idToken               String?   @map("id_token")
   accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
   refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  authorizationRevision String?   @map("authorization_revision")
   scope                 String?
   password              String?
   createdAt             DateTime  @map("created_at")

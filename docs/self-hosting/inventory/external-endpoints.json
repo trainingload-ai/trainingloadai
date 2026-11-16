@@ -100,7 +100,7 @@
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 54
+          "line": 55
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
@@ -993,7 +993,7 @@
         },
         {
           "file": "apps/server/src/auth.ts",
-          "line": 43
+          "line": 44
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1358,7 +1358,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 371
+          "line": 372
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -1540,7 +1540,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 358
+          "line": 359
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",
@@ -1558,7 +1558,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 380
+          "line": 381
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",

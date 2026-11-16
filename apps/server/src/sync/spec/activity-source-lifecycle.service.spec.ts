@@ -7,6 +7,21 @@ import { ImportingJobService } from '../../importing/importing-job.service';
 import { ImportingJobRepository } from '../../importing/persistence/importing-job.repository';
 
 function createService(prisma: unknown) {
+  const source = prisma as any;
+  const transaction = source.$transaction;
+  if (transaction)
+    source.$transaction = (callback: any, options: any) =>
+      transaction(
+        async (tx: any) =>
+          callback({
+            ...tx,
+            thirdPartyActivity: {
+              ...source.thirdPartyActivity,
+              ...tx.thirdPartyActivity,
+            },
+          }),
+        options,
+      );
   return new ActivitySourceLifecycleService(
     prisma as never,
     new ImportingJobService(new ImportingJobRepository(prisma as never)),
@@ -641,5 +656,47 @@ describe('ActivitySourceLifecycleService', () => {
     expect(tx.activitySource.update).not.toHaveBeenCalled();
     expect(tx.activity.update).not.toHaveBeenCalled();
     expect(tx.importBatchJob.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('delayed provider cleanup scope', () => {
+  it('limits reads to the disconnected remote account and records predating disconnect', async () => {
+    const before = new Date('2026-11-16T01:00:00Z');
+    const readThirdParty = jest.fn<any>().mockResolvedValue([]),
+      readSources = jest.fn<any>().mockResolvedValue([]);
+    const service = createService({
+      thirdPartyActivity: { findMany: readThirdParty },
+      $transaction: async (fn: any) =>
+        fn({ activitySource: { findMany: readSources } }),
+    });
+    await service.deactivateProviderData({
+      userId: 'user',
+      provider: 'strava',
+      accountRef: 'athlete-A',
+      before,
+    });
+    expect(readThirdParty).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          externalUserId: 'athlete-A',
+          updatedAt: { lte: before },
+        }),
+      }),
+    );
+    expect(readSources).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          accountRef: 'athlete-A',
+          AND: [
+            {
+              OR: [
+                { lastImportedAt: { lte: before } },
+                { lastImportedAt: null, createdAt: { lte: before } },
+              ],
+            },
+          ],
+        }),
+      }),
+    );
   });
 });
