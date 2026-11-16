@@ -33,6 +33,10 @@ proxy. The publishing job downloads the **same run's tested image**, checks its
 archive checksum, source/configuration labels and image ID, then pushes it
 without rebuilding.
 
+The HTTP smoke client runs inside the site container on an internal Docker
+network with a synthetic API fixture. It does not depend on host port mappings
+or contact the production API.
+
 The initial platform is **linux/amd64**, built on Linux x64 with Node.js
 22.23.3 and pnpm 9.0.0. The pinned Debian Node runtime runs as UID/GID
 `10001:10001`, listens on port `3000`, and retains the monorepo standalone
