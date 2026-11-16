@@ -125,6 +125,20 @@
       ]
     },
     {
+      "host": "127.0.0.1:3000",
+      "url": "http://127.0.0.1:3000/",
+      "references": [
+        {
+          "file": "apps/docs/Dockerfile",
+          "line": 34
+        }
+      ],
+      "capability": "product-internal",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "127.0.0.1:3001",
       "url": "http://127.0.0.1:3001/api/health/ready",
       "references": [
@@ -1181,6 +1195,10 @@
       "host": "github.com",
       "url": "https://github.com/trainingload-ai/trainingloadai",
       "references": [
+        {
+          "file": "apps/docs/Dockerfile",
+          "line": 10
+        },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/HomeOpenSourceSection.tsx",
           "line": 6

@@ -1,0 +1,15 @@
+.git
+.github
+**/.env
+**/.env.*
+**/.aws
+**/.ssh
+**/secrets
+**/credentials
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+uploads
+data
+backups

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/docs.yml"
+      - ".github/workflows/docs-image.yml"
       - "apps/docs/**"
       - "packages/design-tokens/**"
       - "packages/messages/docs/**"
@@ -17,6 +18,11 @@ on:
       - "pnpm-workspace.yaml"
   pull_request:
     branches: [main]
+  workflow_call:
+    inputs:
+      image-artifact:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -24,10 +30,12 @@ permissions:
 jobs:
   docs:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       NEXT_TELEMETRY_DISABLED: '1'
       NEXT_BUILD_CPUS: '2'
+      NODE_OPTIONS: --max-old-space-size=4096
+      DOCS_IMAGE_LEAK_CANARY: docs-image-excluded-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,5 +50,70 @@ jobs:
       - run: pnpm --dir apps/docs test
       - run: pnpm --dir apps/client exec playwright install --with-deps chromium
       - run: pnpm --dir apps/client exec playwright test --config playwright.docs-tools.config.ts --project chromium-desktop-light
+      - name: Resolve public image configuration
+        id: image
+        run: node scripts/docs/image-artifact.mjs configure
+        env:
+          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+          NEXT_PUBLIC_ASSET_BASE_URL: ${{ vars.NEXT_PUBLIC_ASSET_BASE_URL }}
+          NEXT_PUBLIC_DEMO_HOST: ${{ vars.NEXT_PUBLIC_DEMO_HOST }}
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ vars.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+          NEW_USER_GIFT_ACCESS_DAYS: ${{ vars.NEW_USER_GIFT_ACCESS_DAYS }}
+          NEW_USER_GIFT_BONUS_CREDITS: ${{ vars.NEW_USER_GIFT_BONUS_CREDITS }}
+          AI_PLAN_PLUS_MONTHLY_CREDITS: ${{ vars.AI_PLAN_PLUS_MONTHLY_CREDITS }}
+          AI_PLAN_PRO_MONTHLY_CREDITS: ${{ vars.AI_PLAN_PRO_MONTHLY_CREDITS }}
       - run: pnpm docs:build
       - run: pnpm --dir apps/docs exec tsc --noEmit
+      - name: Assemble only standalone runtime files
+        run: |
+          mkdir -p .aws uploads data backups
+          printf '%s\n' "$DOCS_IMAGE_LEAK_CANARY" > .env
+          printf '%s\n' "$DOCS_IMAGE_LEAK_CANARY" > .aws/credentials
+          printf '%s\n' "$DOCS_IMAGE_LEAK_CANARY" > uploads/private.fit
+          printf '%s\n' "$DOCS_IMAGE_LEAK_CANARY" > data/private.db
+          printf '%s\n' "$DOCS_IMAGE_LEAK_CANARY" > backups/private.dump
+          node scripts/docs/image-artifact.mjs stage
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      - name: Package the already-built Docs runtime
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        with:
+          context: dist/docs-image/context
+          file: apps/docs/Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          provenance: false
+          sbom: false
+          tags: trainingload-docs:verified
+          build-args: |
+            SOURCE_REVISION=${{ steps.image.outputs.revision }}
+            RELEASE_VERSION=${{ steps.image.outputs.version }}
+            CONFIG_FINGERPRINT=${{ steps.image.outputs.config_fingerprint }}
+          cache-from: type=gha,scope=docs-runtime
+          cache-to: type=gha,mode=max,scope=docs-runtime
+      - name: Verify the packaged site and runtime API proxy
+        run: node scripts/docs/smoke-image.mjs trainingload-docs:verified
+      - name: Verify the publisher's tested-image archive protocol
+        run: |
+          docker image inspect trainingload-docs:verified > dist/docs-image/inspect.json
+          docker save -o dist/docs-image/image.tar trainingload-docs:verified
+          node scripts/docs/image-artifact.mjs record
+          node scripts/docs/image-artifact.mjs verify
+          docker load -i dist/docs-image/image.tar
+          docker image inspect trainingload-docs:verified > dist/docs-image/inspect.json
+          node scripts/docs/image-artifact.mjs check-image
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: inputs.image-artifact
+        with:
+          name: docs-image-${{ github.sha }}
+          path: |
+            dist/docs-image/image.tar
+            dist/docs-image/artifact.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
