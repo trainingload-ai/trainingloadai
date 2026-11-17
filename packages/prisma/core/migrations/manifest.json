@@ -145,7 +145,12 @@
       "id": "0029_provider_authorization_revision",
       "file": "0029_provider_authorization_revision/migration.sql",
       "sha256": "5af78c083f9de1dafe56c1d8e3c519a08c3c22bf15d25321264810a990f156dd"
+    },
+    {
+      "id": "0030_independent_workout_activity_links",
+      "file": "0030_independent_workout_activity_links/migration.sql",
+      "sha256": "7858c8b48930f0c1fb5282279f55e3402f757d044eecc67a3571dfd3de1e87dd"
     }
   ],
-  "schemaChecksum": "bc0506bc71d701056969b73e205124a722cb49e5d911f6742cee3877461b82cf"
+  "schemaChecksum": "912c5ca14ac89b1fda6843ad6817a020f43e4e8b43a41521aa205a5f2f2f5e32"
 }

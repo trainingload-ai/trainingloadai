@@ -6,6 +6,7 @@ import * as React from "react";
 import { Check, Link2, Link2Off, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import type { V2ActivityListItem } from "@/api/v2-activities";
 import {
   getActivityPlanCandidates,
@@ -26,6 +27,7 @@ import { ConfirmDialog } from "@/components/ui/confirmDialog";
 import { cn } from "@/lib/utils";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
+import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 
 export function ActivityPlanLinkControl({
   activity,
@@ -40,6 +42,7 @@ export function ActivityPlanLinkControl({
   const tActivityTitle = useTranslations("ActivityTitle");
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
+  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [candidates, setCandidates] = React.useState<
     ActivityPlanCandidate[] | null
@@ -88,6 +91,7 @@ export function ActivityPlanLinkControl({
       setPending(true);
       const res = await replaceActivityPlanLink(activity.hashId, c.workoutId);
       const next = res?.linkedPlanWorkout;
+      await invalidateAfterPlanMutation(queryClient);
       if (next) {
         onLinkedPlanWorkoutChange?.(next);
         toast.success(t("toast.linkSuccess"));
@@ -111,6 +115,7 @@ export function ActivityPlanLinkControl({
     try {
       setPending(true);
       await removeActivityPlanLink(activity.hashId);
+      await invalidateAfterPlanMutation(queryClient);
       onLinkedPlanWorkoutChange?.(null);
       toast.success(t("toast.unlinkSuccess"));
       setMenuOpen(false);

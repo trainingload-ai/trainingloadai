@@ -4,12 +4,16 @@ import {
   buildBffInternalHeaders,
   buildBffServiceHeaders,
 } from "@/lib/bff-upstream-headers";
-import type { ActivePlanResponse } from "@/api/plans";
+import type {
+  ActivePlanResponse,
+  ScheduledWorkoutsResponse,
+} from "@/api/plans";
 import type { FitnessStatusData, PMCExtremes } from "@/api/usePMC";
 import type { UserProfile } from "@/api/settings";
 import {
   emptyHomeWeatherContext,
   mapTrainingPlanToHomePlan,
+  mapWorkoutToHomeWorkout,
   type V2HomeResponse,
 } from "@/api/v2-home";
 import {
@@ -184,13 +188,36 @@ export async function GET(request: NextRequest) {
     { sport: "SWIM", value: swimProfile?.cs },
   ]);
 
+  const date = todayKey(profileForDate?.timezone);
+  const homePlan = activePlan?.plan
+    ? mapTrainingPlanToHomePlan(activePlan.plan, date)
+    : null;
+  let scheduled: ScheduledWorkoutsResponse | null;
+  try {
+    scheduled = await fetchServerData<ScheduledWorkoutsResponse>(
+      request,
+      `/plans/scheduled-workouts?start=${date}&end=${date}`,
+    );
+  } catch (error) {
+    if (error instanceof UpstreamUnauthorizedError) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    throw error;
+  }
+  const todayWorkouts = [
+    ...new Map(
+      [
+        ...(homePlan?.todayWorkouts ?? []),
+        ...(scheduled?.independent ?? []).map((workout) =>
+          mapWorkoutToHomeWorkout(workout),
+        ),
+      ].map((workout) => [workout.id, workout]),
+    ).values(),
+  ].sort((a, b) => a.sessionIndex - b.sessionIndex || a.id.localeCompare(b.id));
   const response: V2HomeResponse = {
-    activePlan: activePlan?.plan
-      ? mapTrainingPlanToHomePlan(
-          activePlan.plan,
-          todayKey(profileForDate?.timezone),
-        )
-      : null,
+    activePlan: homePlan,
+    todayDate: date,
+    todayWorkouts,
     recentActivity: toRecentActivity(activitiesFeed?.items?.[0]),
     fitnessStatus,
     pmcExtremes,

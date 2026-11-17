@@ -186,7 +186,7 @@ export type PlanSportType =
 
 export type PlanWorkoutLink = {
   id: string;
-  planId: string;
+  planId: string | null;
   planWorkoutId: string;
   activityId: number;
   source: PlanWorkoutActivityLinkSource;

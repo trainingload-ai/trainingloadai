@@ -184,7 +184,7 @@ function buildHomeData(t: TranslateFn) {
       weekday: t("today.weekday"),
       plannedWorkouts: [] as Array<{
         id: string;
-        planId: string;
+        planId: string | null;
         title: string;
         sport: string;
         duration: string;
@@ -709,7 +709,12 @@ function TodayExecutionPanel({
   const postponeWorkout = async (
     workout: (typeof homeData.today.plannedWorkouts)[number],
   ) => {
-    if (workout.rawStatus === "DONE" || workout.rawStatus === "SKIPPED") return;
+    if (
+      !workout.planId ||
+      workout.rawStatus === "DONE" ||
+      workout.rawStatus === "SKIPPED"
+    )
+      return;
     try {
       await runPostponeWorkout({
         planId: workout.planId,
@@ -734,7 +739,12 @@ function TodayExecutionPanel({
   const skipWorkout = async (
     workout: (typeof homeData.today.plannedWorkouts)[number],
   ) => {
-    if (workout.rawStatus === "DONE" || workout.rawStatus === "SKIPPED") return;
+    if (
+      !workout.planId ||
+      workout.rawStatus === "DONE" ||
+      workout.rawStatus === "SKIPPED"
+    )
+      return;
     try {
       await runSkipWorkout({
         planId: workout.planId,
@@ -804,6 +814,7 @@ function TodayExecutionPanel({
               scheduledDate: homeData.today.isoDate,
             });
             const canMutate =
+              Boolean(workout.planId) &&
               workout.rawStatus !== "DONE" &&
               workout.rawStatus !== "SKIPPED" &&
               workout.rawStatus !== "MOVED";
@@ -929,10 +940,18 @@ function TodayExecutionPanel({
           onOpenChange={(open) => {
             if (!open) setSelectedWorkout(null);
           }}
-          planId={selectedWorkout.planId}
+          planId={selectedWorkout.planId ?? undefined}
           workoutId={selectedWorkout.id}
-          weekIndex={Math.floor(Math.max(0, selectedWorkout.dayOffset) / 7)}
-          dayIndex={Math.max(0, selectedWorkout.dayOffset) % 7}
+          weekIndex={
+            selectedWorkout.planId
+              ? Math.floor(Math.max(0, selectedWorkout.dayOffset) / 7)
+              : undefined
+          }
+          dayIndex={
+            selectedWorkout.planId
+              ? Math.max(0, selectedWorkout.dayOffset) % 7
+              : undefined
+          }
           notes={selectedWorkout.rawNotes}
           text={selectedWorkout.rawText}
           sportType={selectedWorkout.rawSportType as SportType}
@@ -1501,29 +1520,14 @@ export default function V2HomePageClient({
   });
   const resolvedTodayAdvice = todayAdvice ?? sourceData.aiTodaySuggestion;
   const homeData = useMemo(() => {
-    if (!activePlan) {
-      return {
-        ...baseHomeData,
-        aiTodaySuggestion: buildAiTodaySuggestionFromServer({
-          baseHomeData,
-          advice: resolvedTodayAdvice,
-          fallbackTitle: t("aiTodaySuggestion.fallbackTitle"),
-        }),
-        summaryMetrics: buildSummaryMetrics(baseHomeData, sourceData, t),
-        recentActivity: buildRecentActivity(
-          baseHomeData,
-          sourceData,
-          t,
-          timeFormat,
-        ),
-      };
-    }
-
-    const currentWeekIndex = activePlan.currentWeekIndex ?? 1;
-    const currentDayWorkouts = activePlan.todayWorkouts;
+    const currentWeekIndex = activePlan?.currentWeekIndex ?? 1;
+    const currentDayWorkouts =
+      sourceData.todayWorkouts ?? activePlan?.todayWorkouts ?? [];
     const dateKey =
-      currentDayWorkouts[0]?.scheduledDate ?? dayjs().format("YYYY-MM-DD");
-    const currentWeekWorkouts = activePlan.currentWeekWorkouts;
+      sourceData.todayDate ??
+      currentDayWorkouts[0]?.scheduledDate ??
+      dayjs().format("YYYY-MM-DD");
+    const currentWeekWorkouts = activePlan?.currentWeekWorkouts ?? [];
     const plannedWorkouts =
       currentDayWorkouts.length > 0
         ? currentDayWorkouts.map((item) => ({
@@ -1539,7 +1543,9 @@ export default function V2HomePageClient({
                     ? t("dynamic.sport.swim")
                     : t("dynamic.sport.other"),
             duration: formatWorkoutDuration(
-              estimateWorkoutDurationSeconds(item.text),
+              item.durationSeconds === undefined
+                ? estimateWorkoutDurationSeconds(item.text)
+                : item.durationSeconds,
             ),
             sessionCount: 1,
             description: item.description?.trim() || "",
@@ -1579,21 +1585,23 @@ export default function V2HomePageClient({
 
     return {
       ...baseHomeData,
-      currentPlan: {
-        ...baseHomeData.currentPlan,
-        cycle: activePlan.title,
-        weekLabel: t("dynamic.weekLabel", {
-          current: currentWeekIndex,
-          total: activePlan.periodWeeks,
-        }),
-        todayFocus:
-          currentDayWorkouts[0]?.title?.trim() ||
-          currentDayWorkouts[0]?.notes?.trim() ||
-          baseHomeData.currentPlan.todayFocus,
-        weekTargetLoad: currentWeekWorkouts.filter(
-          (workout) => workout.status !== "MOVED",
-        ).length,
-      },
+      currentPlan: activePlan
+        ? {
+            ...baseHomeData.currentPlan,
+            cycle: activePlan.title,
+            weekLabel: t("dynamic.weekLabel", {
+              current: currentWeekIndex,
+              total: activePlan.periodWeeks,
+            }),
+            todayFocus:
+              currentDayWorkouts[0]?.title?.trim() ||
+              currentDayWorkouts[0]?.notes?.trim() ||
+              baseHomeData.currentPlan.todayFocus,
+            weekTargetLoad: currentWeekWorkouts.filter(
+              (workout) => workout.status !== "MOVED",
+            ).length,
+          }
+        : baseHomeData.currentPlan,
       aiTodaySuggestion: buildAiTodaySuggestionFromServer({
         baseHomeData,
         advice: resolvedTodayAdvice,

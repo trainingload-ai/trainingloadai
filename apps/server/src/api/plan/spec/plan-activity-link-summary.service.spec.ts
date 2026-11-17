@@ -33,6 +33,100 @@ function createService(
 }
 
 describe('PlanActivityLinkService activity link summary', () => {
+  it('manually links an independent workout without creating a training plan', async () => {
+    const workout = {
+      id: 'independent',
+      userId: 'user-1',
+      planId: null,
+      plan: null,
+      name: 'Ordinary run',
+      sportType: 'RUN',
+      status: 'PLANNED',
+    };
+    const tx = {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      activity: {
+        findFirst: jest.fn(async () => ({
+          id: 42,
+          startTime: new Date('2026-07-06T08:00:00Z'),
+        })),
+      },
+      planWorkout: {
+        findUnique: jest.fn(async () => workout),
+        update: jest.fn(async () => ({ ...workout, status: 'DONE' })),
+      },
+      planWorkoutActivityLink: {
+        findMany: jest.fn(async () => []),
+        create: jest.fn(async ({ data }: { data: object }) => ({
+          ...data,
+          planWorkout: workout,
+        })),
+      },
+    };
+    const service = createService({
+      $transaction: (run: (tx: object) => unknown) => run(tx),
+    });
+    await expect(
+      service.replaceActivityPlanLinkByHash('user-1', 'activity', {
+        workoutId: 'independent',
+      }),
+    ).resolves.toMatchObject({
+      linkedPlanWorkout: {
+        planId: null,
+        workoutId: 'independent',
+        status: 'DONE',
+        source: 'MANUAL',
+      },
+    });
+    expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          planId: null,
+          planWorkoutId: 'independent',
+          autoMarkedWorkoutDone: true,
+        }),
+      }),
+    );
+  });
+
+  it('offers same-day independent candidates even without an active plan', async () => {
+    const service = createService({
+      activity: {
+        findFirst: jest.fn(async () => ({
+          id: 42,
+          startTime: new Date('2026-07-06T08:00:00Z'),
+          sportType: 'RUN',
+          timezone: 'UTC',
+        })),
+      },
+      plan: { findFirst: jest.fn(async () => null) },
+      planWorkout: {
+        findMany: jest.fn(async () => [
+          {
+            id: 'independent',
+            planId: null,
+            name: 'Ordinary run',
+            sportType: 'RUN',
+            structureKind: 'FREEFORM',
+            plannedDurationSeconds: 1800,
+            sessionIndex: 1,
+          },
+        ]),
+      },
+      planWorkoutActivityLink: { findFirst: jest.fn(async () => null) },
+    });
+    Object.assign(service, {
+      userService: { getPreferredTimezone: async () => 'UTC' },
+    });
+    await expect(
+      service.listActivityPlanCandidatesByHash('user-1', 'activity'),
+    ).resolves.toMatchObject({
+      candidates: [
+        { workoutId: 'independent', planId: null, expectedDurationSec: 1800 },
+      ],
+    });
+  });
+
   it('returns planned targets, completion state, and actual load', async () => {
     const service = createService(
       {
@@ -90,12 +184,14 @@ describe('PlanActivityLinkService activity link summary', () => {
   it('does not allow a manually edited link to replace an AUTO binding', async () => {
     const updateMany = jest.fn();
     const tx = {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
       activity: {
         findFirst: jest.fn(async () => ({ id: 42, startTime: new Date() })),
       },
       planWorkout: {
         findUnique: jest.fn(async () => ({
           id: 'workout-2',
+          userId: 'user-1',
           planId: 'plan-1',
           name: 'Intervals',
           sportType: 'RUN',
@@ -129,12 +225,14 @@ describe('PlanActivityLinkService activity link summary', () => {
   it('keeps repeated recorded-workout binding idempotent', async () => {
     const create = jest.fn();
     const tx = {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
       activity: {
         findFirst: jest.fn(async () => ({ id: 42, startTime: new Date() })),
       },
       planWorkout: {
         findUnique: jest.fn(async () => ({
           id: 'workout-1',
+          userId: 'user-1',
           planId: 'plan-1',
           name: 'Tempo',
           sportType: 'RUN',
@@ -174,7 +272,10 @@ describe('PlanActivityLinkService activity link summary', () => {
 
   it('allows recorded-workout binding to resolve an activity still being analyzed', async () => {
     const findFirst = jest.fn(async () => null);
-    const tx = { activity: { findFirst } };
+    const tx = {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      activity: { findFirst },
+    };
     const service = createService({
       $transaction: (callback: (value: typeof tx) => unknown) => callback(tx),
     });
@@ -201,6 +302,7 @@ describe('PlanActivityLinkService activity link summary', () => {
   it('does not allow an AUTO binding to be removed', async () => {
     const updateMany = jest.fn();
     const tx = {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
       activity: { findFirst: jest.fn(async () => ({ id: 42 })) },
       planWorkoutActivityLink: {
         findMany: jest.fn(async () => [

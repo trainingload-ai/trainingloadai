@@ -113,7 +113,7 @@ function mapLinkedPlanWorkout(
   const source =
     rawSource === "AUTO" ? "AUTO" : rawSource === "AI" ? "AI" : "MANUAL";
   return {
-    planId: String(linked.planId ?? ""),
+    planId: linked.planId == null ? null : String(linked.planId),
     workoutId: String(linked.workoutId ?? ""),
     name: typeof linked.name === "string" ? linked.name : null,
     sportType: normalizeSportType(linked.sportType),

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { planDb, type PlanDb } from './plan-db';
+import { markWorkoutDoneIfApplicable } from './plan-workout-done';
 
 @Injectable()
 export class PlanWorkoutRepository {
@@ -9,6 +10,10 @@ export class PlanWorkoutRepository {
 
   private db(tx?: PlanDb) {
     return planDb(this.prisma, tx);
+  }
+
+  async lockForUpdate(workoutId: string, tx: PlanDb) {
+    await tx.$queryRaw`SELECT id FROM t_plan_workout WHERE id = ${workoutId} FOR UPDATE`;
   }
 
   findUnique<T extends Prisma.PlanWorkoutFindUniqueArgs>(
@@ -126,32 +131,6 @@ export class PlanWorkoutRepository {
     eventTime: Date | null,
     tx: PlanDb,
   ): Promise<boolean> {
-    const workout = await this.findUnique(
-      {
-        where: { id: workoutId },
-        select: {
-          status: true,
-          plan: { select: { status: true } },
-        },
-      },
-      tx,
-    );
-    if (!workout) return false;
-    const planStatus = workout.plan?.status;
-    if (planStatus !== 'ACTIVE' && planStatus !== 'PAUSED') return false;
-    if (workout.status !== 'PLANNED' && workout.status !== 'IN_PROGRESS') {
-      return false;
-    }
-    await this.update(
-      {
-        where: { id: workoutId },
-        data: {
-          status: 'DONE',
-          completedAt: eventTime ?? new Date(),
-        },
-      },
-      tx,
-    );
-    return true;
+    return markWorkoutDoneIfApplicable(tx, workoutId, eventTime);
   }
 }

@@ -578,6 +578,38 @@ export class ActivityQueryService {
     userTzFallback: string | null;
     readOnly?: boolean;
   }) {
+    const activityDays = new Map(
+      args.activities.map((activity) => [
+        activity.id,
+        activity.startTime
+          ? resolveActivityCalendarDayStr(
+              activity.startTime,
+              activity.timezone,
+              args.filters.calendarTimeZone,
+              args.userTzFallback,
+            )
+          : null,
+      ]),
+    );
+    const dates = [
+      ...new Set(
+        [...activityDays.values()].filter((date): date is string =>
+          Boolean(date),
+        ),
+      ),
+    ];
+    const independent = dates.length
+      ? await this.planQuery.findIndependentLinkCandidates(args.userId, dates)
+      : [];
+    const independentKeys = new Set(
+      independent.map(
+        (workout) =>
+          `${this.toPlanDateYmd(workout.scheduledDate)}:${workout.sportType}`,
+      ),
+    );
+    const independentDays = new Set(
+      independent.map((workout) => this.toPlanDateYmd(workout.scheduledDate)),
+    );
     const filteredActivities = args.activities.map((activity) => ({
       id: activity.id,
       activityName: activity.activityName,
@@ -657,13 +689,20 @@ export class ActivityQueryService {
             }
           : null;
       })(),
-      planLinkUiVisible: this.planLinkUiVisibleForActivity(
-        activity.startTime,
-        activity.timezone,
-        args.filters.calendarTimeZone ?? null,
-        args.userTzFallback,
-        args.activePlanRow,
-      ),
+      planLinkUiVisible:
+        Boolean(activity.planWorkoutLinks?.length) ||
+        (!activity.sportType || activity.sportType === 'UNKNOWN'
+          ? independentDays.has(activityDays.get(activity.id) ?? '')
+          : independentKeys.has(
+              `${activityDays.get(activity.id)}:${activity.sportType}`,
+            )) ||
+        this.planLinkUiVisibleForActivity(
+          activity.startTime,
+          activity.timezone,
+          args.filters.calendarTimeZone ?? null,
+          args.userTzFallback,
+          args.activePlanRow,
+        ),
       planLinkActiveStartDate: args.activePlanRow
         ? this.toPlanDateYmd(args.activePlanRow.startDate)
         : null,

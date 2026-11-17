@@ -19,7 +19,7 @@ export type ActivityPlanLinkWorkout = V2ActivityLinkedPlanWorkout & {
 
 export type ActivityPlanCandidate = {
   workoutId: string;
-  planId: string;
+  planId: string | null;
   name: string | null;
   sportType: V2ActivitySportType;
   sessionIndex: number;

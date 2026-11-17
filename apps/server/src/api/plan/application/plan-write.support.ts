@@ -676,19 +676,27 @@ export class PlanWriteSupport {
   }
 
   async deleteIndependentWorkout(userId: string, workoutId: string) {
-    const workout = await this.workouts.findUnique({
-      where: { id: workoutId },
-      select: { id: true, userId: true, planId: true },
-    });
-
-    if (!workout || workout.userId !== userId || workout.planId != null) {
-      throw new BusinessException({
-        code: BUSINESS_ERROR_CODE.COMMON,
-        message: 'Workout not found',
-      });
-    }
-
     await this.prisma.$transaction(async (tx) => {
+      await this.workouts.lockForUpdate(workoutId, tx);
+      const workout = await this.workouts.findUnique(
+        {
+          where: { id: workoutId },
+          select: { id: true, userId: true, planId: true, status: true },
+        },
+        tx,
+      );
+      if (!workout || workout.userId !== userId || workout.planId != null) {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Workout not found',
+        });
+      }
+      if (workout.status !== 'PLANNED') {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Only planned independent workouts can be deleted',
+        });
+      }
       await this.assertWorkoutHasNoActivityLink(workoutId, tx);
       await this.markExternalMappings(tx, [workoutId], 'LOCAL_DELETED');
       await this.workouts.delete({ where: { id: workoutId } }, tx);
@@ -3477,12 +3485,7 @@ export class PlanWriteSupport {
         userId,
         await this.assertPlanOwnership(userId, planId),
       );
-      await this.emitWorkoutsChanged(
-        userId,
-        'workouts_committed',
-        [],
-        planId,
-      );
+      await this.emitWorkoutsChanged(userId, 'workouts_committed', [], planId);
     } catch (error) {
       // The transaction has already committed; notification failure must not report a failed apply.
       this.logger.warn(
@@ -3829,21 +3832,11 @@ export class PlanWriteSupport {
       return { candidates: [] as unknown[] };
     }
     const sport = activity.sportType;
-    if (
-      !sport ||
-      sport === SportType.UNKNOWN ||
-      sport === SportType.STRETCHING
-    ) {
-      return { candidates: [] as unknown[] };
-    }
 
     const activePlan = await this.plans.findFirst({
       where: { userId, status: 'ACTIVE' },
       select: { id: true },
     });
-    if (!activePlan) {
-      return { candidates: [] as unknown[] };
-    }
 
     const userTz = await this.userService.getPreferredTimezone(userId);
 
@@ -3861,9 +3854,13 @@ export class PlanWriteSupport {
 
     const workouts = await this.workouts.findMany({
       where: {
-        planId: activePlan.id,
+        userId,
+        OR: [
+          { planId: null },
+          ...(activePlan ? [{ planId: activePlan.id }] : []),
+        ],
         scheduledDate: scheduledEq,
-        sportType: sport,
+        ...(sport && sport !== SportType.UNKNOWN ? { sportType: sport } : {}),
         status: { in: ['PLANNED', 'IN_PROGRESS'] },
       },
       select: {
@@ -3872,15 +3869,19 @@ export class PlanWriteSupport {
         name: true,
         sportType: true,
         sessionIndex: true,
+        structureKind: true,
+        plannedDurationSeconds: true,
       },
       orderBy: [{ sessionIndex: 'asc' }],
     });
 
     const candidates: unknown[] = [];
     for (const w of workouts) {
-      const expectedSec = await this.planLinkMatcher.sumExpectedDurationSeconds(
-        w.id,
-      );
+      const expectedSec =
+        w.plannedDurationSeconds ??
+        (w.structureKind === 'FREEFORM'
+          ? null
+          : await this.planLinkMatcher.sumExpectedDurationSeconds(w.id));
       // 检查是否有其他活动占用该 workout
       const existingLink = await this.links.findFirst({
         where: {
@@ -3966,6 +3967,11 @@ export class PlanWriteSupport {
         });
       }
 
+      if (!(await this.links.lockLinkTargets(activity.id, dto.workoutId, tx)))
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Workout or activity not found',
+        });
       const targetWorkout = await this.workouts.findUnique(
         {
           where: { id: dto.workoutId },
@@ -3975,9 +3981,9 @@ export class PlanWriteSupport {
       );
       if (
         !targetWorkout ||
-        targetWorkout.plan?.userId !== userId ||
-        targetWorkout.plan.status === 'COMPLETED' ||
-        targetWorkout.plan.status === 'CANCELLED'
+        targetWorkout.userId !== userId ||
+        targetWorkout.plan?.status === 'COMPLETED' ||
+        targetWorkout.plan?.status === 'CANCELLED'
       ) {
         throw new BusinessException({
           code: BUSINESS_ERROR_CODE.COMMON,
@@ -3985,7 +3991,7 @@ export class PlanWriteSupport {
         });
       }
 
-      const planId = targetWorkout.planId as string;
+      const planId = targetWorkout.planId ?? null;
 
       // 同 activity 之前的所有 active link 都得解绑：可能涉及别的 workout，因此每条单独处理 auto DONE 回退。
       const detachedActivityLinks = await this.links.findMany(
@@ -4003,6 +4009,22 @@ export class PlanWriteSupport {
       const hardBoundActivityLink = detachedActivityLinks.find(
         (link) => link.source === PlanWorkoutActivityLinkSource.AUTO,
       );
+      if (
+        detachedActivityLinks.length === 1 &&
+        detachedActivityLinks[0].source === linkSource &&
+        detachedActivityLinks[0].planWorkoutId === dto.workoutId
+      ) {
+        return {
+          linkedPlanWorkout: {
+            planId,
+            workoutId: targetWorkout.id,
+            name: targetWorkout.name,
+            sportType: targetWorkout.sportType,
+            status: targetWorkout.status,
+            source: linkSource,
+          },
+        };
+      }
       if (hardBoundActivityLink) {
         if (
           linkSource === PlanWorkoutActivityLinkSource.AUTO &&
@@ -4112,30 +4134,31 @@ export class PlanWriteSupport {
 
       const pw = created.planWorkout;
 
-      await this.coachContext.appendEvent({
-        tx: tx,
-        userId,
-        planId,
-        type: 'WORKOUT_LINKED',
-        source: meta?.source ?? 'system',
-        decisionId: meta?.decisionId ?? null,
-        branchId: meta?.branchId ?? null,
-        commitId: meta?.commitId ?? null,
-        payload: {
-          action: 'replace_activity_plan_link',
-          reason: meta?.reason ?? null,
-          toolCallId: meta?.toolCallId ?? null,
+      if (planId)
+        await this.coachContext.appendEvent({
+          tx: tx,
+          userId,
+          planId,
+          type: 'WORKOUT_LINKED',
+          source: meta?.source ?? 'system',
           decisionId: meta?.decisionId ?? null,
           branchId: meta?.branchId ?? null,
           commitId: meta?.commitId ?? null,
-          hashId,
-          activityId: activity.id,
-          workoutId: dto.workoutId,
-          autoMarkedWorkoutDone: autoMarked,
-        },
-      });
+          payload: {
+            action: 'replace_activity_plan_link',
+            reason: meta?.reason ?? null,
+            toolCallId: meta?.toolCallId ?? null,
+            decisionId: meta?.decisionId ?? null,
+            branchId: meta?.branchId ?? null,
+            commitId: meta?.commitId ?? null,
+            hashId,
+            activityId: activity.id,
+            workoutId: dto.workoutId,
+            autoMarkedWorkoutDone: autoMarked,
+          },
+        });
 
-      if (autoMarked) {
+      if (autoMarked && planId) {
         await this.coachContext.appendEvent({
           tx: tx,
           userId,
@@ -4165,9 +4188,17 @@ export class PlanWriteSupport {
         },
       };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    const result = options?.tx
+      ? await run(options.tx)
+      : await this.prisma.$transaction(run, { timeout: 60_000 });
+    if (!options?.tx)
+      await this.emitWorkoutsChanged(
+        userId,
+        'activity_link',
+        [dto.workoutId],
+        result.linkedPlanWorkout.planId,
+      );
+    return result;
   }
 
   async bindRecordedActivityToWorkout(
@@ -4207,6 +4238,11 @@ export class PlanWriteSupport {
         });
       }
 
+      if (!(await this.links.lockLinkTargets(activity.id, null, tx)))
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Activity not found',
+        });
       const detached = await this.links.findMany(
         {
           where: { activityId: activity.id, unlinkedAt: null },
@@ -4229,6 +4265,10 @@ export class PlanWriteSupport {
         });
       }
       if (detached.length > 0) {
+        for (const workoutId of [
+          ...new Set(detached.map((link) => link.planWorkoutId)),
+        ].sort())
+          await this.links.lockLinkTargets(activity.id, workoutId, tx);
         await this.links.updateMany(
           {
             where: { activityId: activity.id, unlinkedAt: null },
@@ -4245,8 +4285,10 @@ export class PlanWriteSupport {
 
       return { success: true as const };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    const result = options?.tx
+      ? await run(options.tx)
+      : await this.prisma.$transaction(run, { timeout: 60_000 });
+    if (!options?.tx) await this.emitWorkoutsChanged(userId, 'activity_unlink');
+    return result;
   }
 }

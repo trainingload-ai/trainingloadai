@@ -5951,8 +5951,8 @@ model PlanWorkoutStep {
 model PlanWorkoutActivityLink {
   id String @id @default(cuid())
 
-  planId String @map("plan_id")
-  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String? @map("plan_id")
+  plan   Plan?   @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   planWorkoutId String      @map("plan_workout_id")
   planWorkout   PlanWorkout @relation(fields: [planWorkoutId], references: [id], onDelete: Cascade)

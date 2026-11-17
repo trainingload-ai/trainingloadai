@@ -254,11 +254,7 @@ export class PlanLinkMatcherService {
       // link + 自动 DONE 同事务，避免出现「已链接但 status 仍 PLANNED」的不一致中间态
       const matched = await this.prisma.$transaction(async (tx) => {
         if (
-          !(await this.links.lockAutoLinkTargets(
-            activity.id,
-            best.workoutId,
-            tx,
-          ))
+          !(await this.links.lockLinkTargets(activity.id, best.workoutId, tx))
         )
           return false;
         const occupied = await this.links.findFirst(

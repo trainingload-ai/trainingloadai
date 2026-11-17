@@ -124,7 +124,6 @@ export type WorkoutMiniChartWorkout = {
 };
 
 export function buildMobileWorkoutSegments(workout: WorkoutMiniChartWorkout) {
-
   if (workout.structure.kind !== "ENDURANCE") return [];
   const segments: MobileWorkoutSegment[] = [];
   const steps: WorkRestStep[] = [];
@@ -211,11 +210,13 @@ export const WorkoutMiniChart = memo(function WorkoutMiniChart({
   workout: WorkoutMiniChartWorkout | null;
 }) {
   const segments = useMemo(() => {
+    if (workout?.structure.kind === "FREEFORM") return [];
     const structured = workout ? buildMobileWorkoutSegments(workout) : [];
     return structured.length > 0
       ? structured
       : buildFallbackWorkoutSegments(fallbackText ?? workout?.text);
   }, [fallbackText, workout]);
+  if (workout?.structure.kind === "FREEFORM") return null;
   const total = segments.reduce(
     (sum, segment) => sum + Math.max(1, segment.duration),
     0,

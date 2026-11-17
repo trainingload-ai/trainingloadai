@@ -11,11 +11,16 @@ export class PlanActivityLinkRepository {
     return planDb(this.prisma, tx);
   }
 
-  /** Serialize automatic decisions for either the same activity or workout. */
-  async lockAutoLinkTargets(activityId: number, workoutId: string, tx: PlanDb) {
+  /** Serialize associations for either the same activity or workout. */
+  async lockLinkTargets(
+    activityId: number,
+    workoutId: string | null,
+    tx: PlanDb,
+  ) {
     const activities = await tx.$queryRaw<Array<{ id: number }>>`
       SELECT id FROM t_activity WHERE id = ${activityId} FOR UPDATE
     `;
+    if (!workoutId) return activities.length === 1;
     const workouts = await tx.$queryRaw<Array<{ id: string }>>`
       SELECT id FROM t_plan_workout WHERE id = ${workoutId} FOR UPDATE
     `;
