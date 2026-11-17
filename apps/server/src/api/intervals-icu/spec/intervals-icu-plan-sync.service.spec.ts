@@ -184,6 +184,258 @@ describe('IntervalsIcuPlanSyncService', () => {
     return { codec, fit };
   }
 
+  function createImportFixture(
+    initialMapping: Record<string, unknown> | null = null,
+  ) {
+    const f = createService();
+    let local: Record<string, unknown> | null = null;
+    let mapping = initialMapping;
+    const timestamp = new Date('2026-07-01T00:00:00Z');
+    f.planWorkout.findMany.mockResolvedValue([]);
+    f.planWorkout.findFirst.mockImplementation(
+      async () => local && { ...local },
+    );
+    f.planWorkout.findUnique.mockImplementation(
+      async () => local && { ...local, links: [] },
+    );
+    f.planWorkout.create.mockImplementation(async (input) => {
+      local = {
+        id: 'imported-workout',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        revision: 1,
+        steps: [],
+        plan: null,
+        ...(input as { data: object }).data,
+      };
+      return { ...local };
+    });
+    f.planWorkout.update.mockImplementation(async (input) => {
+      local = {
+        ...local,
+        ...(input as { data: object }).data,
+        revision: Number(local?.revision ?? 0) + 1,
+      };
+      return { ...local };
+    });
+    f.planWorkoutExternalMapping.findFirst.mockImplementation(
+      async () => mapping,
+    );
+    f.planWorkoutExternalMapping.findUnique.mockImplementation(
+      async () => mapping,
+    );
+    f.planWorkoutExternalMapping.create.mockImplementation(async (input) => {
+      mapping = { id: 'imported-mapping', ...(input as { data: object }).data };
+      return mapping;
+    });
+    f.planWorkoutExternalMapping.update.mockImplementation(async (input) => {
+      mapping = { ...mapping, ...(input as { data: object }).data };
+      return mapping;
+    });
+    f.planWorkoutExternalMapping.updateMany.mockImplementation(
+      async (input) => {
+        mapping = { ...mapping, ...(input as { data: object }).data };
+        return { count: 1 };
+      },
+    );
+    f.workoutService.buildWorkoutPlanSteps.mockReturnValue([]);
+    f.workoutService.buildPlanBlocksFromWorkoutSteps.mockReturnValue([]);
+    f.workoutService.stringifyPlan.mockReturnValue('work 30m');
+    return {
+      ...f,
+      local: () => local,
+      mapping: () => mapping,
+      importEvent: (event: unknown) =>
+        (
+          f.service as unknown as {
+            importRemoteEvent(args: unknown): Promise<{
+              created: number;
+              updated: number;
+              unchanged: number;
+              skipped: number;
+            }>;
+          }
+        ).importRemoteEvent({
+          userId: 'user-1',
+          connection: { id: 'connection-1' },
+          event,
+          window: { oldest: '2026-07-06', newest: '2026-07-12' },
+          trigger: 'manual',
+        }),
+    };
+  }
+
+  const ordinaryEvent = {
+    id: 'ordinary-event',
+    category: 'WORKOUT',
+    start_date_local: '2026-07-06',
+    type: 'Run',
+    name: 'Ordinary run',
+    description: null,
+    moving_time: 1800,
+    workout_doc: { steps: [] },
+  };
+
+  it('imports an ordinary workout once, detects duration edits and upgrades the same identity to structured', async () => {
+    const f = createImportFixture();
+    await expect(f.importEvent(ordinaryEvent)).resolves.toMatchObject({
+      created: 1,
+    });
+    expect(f.local()).toMatchObject({
+      planId: null,
+      structureKind: 'FREEFORM',
+      plannedDurationSeconds: 1800,
+    });
+    const baseline = f.mapping()?.lastRemoteChecksum;
+    await expect(f.importEvent(ordinaryEvent)).resolves.toMatchObject({
+      unchanged: 1,
+    });
+    expect(f.planWorkout.create).toHaveBeenCalledTimes(1);
+    await expect(
+      f.importEvent({ ...ordinaryEvent, moving_time: 2400 }),
+    ).resolves.toMatchObject({ updated: 1 });
+    expect(f.local()).toMatchObject({
+      id: 'imported-workout',
+      plannedDurationSeconds: 2400,
+    });
+    expect(f.mapping()?.lastRemoteChecksum).not.toBe(baseline);
+    await expect(
+      f.importEvent({
+        ...ordinaryEvent,
+        workout_doc: { steps: [{ duration: 1800 }] },
+      }),
+    ).resolves.toMatchObject({ updated: 1 });
+    expect(f.local()).toMatchObject({
+      id: 'imported-workout',
+      structureKind: 'ENDURANCE',
+      plannedDurationSeconds: null,
+    });
+    expect(f.planWorkout.create).toHaveBeenCalledTimes(1);
+    await expect(f.importEvent(ordinaryEvent)).resolves.toMatchObject({
+      updated: 1,
+    });
+    expect(f.local()).toMatchObject({
+      structureKind: 'FREEFORM',
+      plannedDurationSeconds: 1800,
+    });
+  });
+
+  it('recovers a never-imported FAILED mapping in the course transaction', async () => {
+    const f = createImportFixture({
+      id: 'failed-mapping',
+      userId: 'user-1',
+      provider: 'intervals_icu',
+      syncState: 'FAILED',
+      planWorkoutId: null,
+      externalEventId: ordinaryEvent.id,
+      lastError: 'UNSUPPORTED_WORKOUT_DOCUMENT',
+    });
+    await expect(f.importEvent(ordinaryEvent)).resolves.toMatchObject({
+      created: 1,
+    });
+    expect(f.mapping()).toMatchObject({
+      id: 'failed-mapping',
+      planWorkoutId: 'imported-workout',
+      syncState: 'SYNCED',
+      lastError: null,
+    });
+    expect(f.planWorkoutExternalMapping.create).not.toHaveBeenCalled();
+    expect(f.planWorkoutExternalMapping.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: 'failed-mapping',
+          userId: 'user-1',
+          planWorkoutId: null,
+          syncState: 'FAILED',
+          lastLocalChecksum: null,
+          lastRemoteChecksum: null,
+          localDeletedAt: null,
+        }),
+      }),
+    );
+  });
+
+  it('does not export an empty FIT for an ordinary imported workout', async () => {
+    const f = createImportFixture();
+    await f.importEvent(ordinaryEvent);
+    (f.intervalsIcuClient as Record<string, unknown>).getEvent = jest.fn(
+      async () => ordinaryEvent,
+    );
+    await (
+      f.service as unknown as {
+        exportLocalWorkout(args: unknown): Promise<unknown>;
+      }
+    ).exportLocalWorkout({
+      userId: 'user-1',
+      connection: { id: 'connection-1' },
+      apiKey: 'key',
+      workout: f.local(),
+      remoteIndex: { byExternalKey: new Map(), byUid: new Map() },
+    });
+    expect(f.workoutService.buildFITFromPlan).not.toHaveBeenCalled();
+    expect(f.intervalsIcuClient.updateEvent).not.toHaveBeenCalled();
+    expect(f.intervalsIcuClient.createEventsBulk).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Run', 1800, 1800],
+    ['Swim', null, null],
+    ['Run', 0, null],
+  ])(
+    'retains an ordinary %s calendar workout with duration %s',
+    async (type, duration, expected) => {
+      const f = createService();
+      const { codec, fit } = exportedFitFixture(false);
+      f.workoutService.parseFile.mockImplementation(async () =>
+        codec.parseFile(),
+      );
+      const parser = f.service as unknown as {
+        parseRemoteWorkout(event: unknown): Promise<unknown>;
+      };
+      const parsed = await parser.parseRemoteWorkout({
+        id: 'ordinary-event',
+        category: 'WORKOUT',
+        start_date_local: '2026-07-06',
+        type,
+        name: 'Ordinary training',
+        description: null,
+        moving_time: duration,
+        workout_doc: { steps: [], duration: 0 },
+        workout_file_base64: fit.toString('base64'),
+      });
+      expect(parsed).toMatchObject({
+        structureKind: 'FREEFORM',
+        plannedDurationSeconds: expected,
+        name: 'Ordinary training',
+        text: 'Ordinary training',
+        blocks: [],
+      });
+    },
+  );
+
+  it.each(['workout_doc', 'nested'])(
+    'never downgrades a nonempty unsupported %s document into an ordinary workout',
+    async (shape) => {
+      const f = createService();
+      const parsed = await (
+        f.service as unknown as {
+          parseRemoteWorkout(event: unknown): Promise<unknown>;
+        }
+      ).parseRemoteWorkout({
+        id: 'unsupported-event',
+        category: 'WORKOUT',
+        name: 'Run',
+        type: 'Run',
+        start_date_local: '2026-07-06',
+        moving_time: 1800,
+        ...(shape === 'workout_doc'
+          ? { workout_doc: { steps: [{ distance: 1000 }] } }
+          : { workout: { workout_doc: { steps: [{ distance: 1000 }] } } }),
+      });
+      expect(parsed).toBeNull();
+    },
+  );
+
   it('reads structured workouts from the official event export file field', async () => {
     const f = createService();
     const { codec, fit } = exportedFitFixture(true);
@@ -201,7 +453,9 @@ describe('IntervalsIcuPlanSyncService', () => {
       workout_doc: { steps: [] },
       workout_file_base64: fit.toString('base64'),
     });
-    expect(f.workoutService.parseFile).toHaveBeenCalledWith(fit);
+    expect(f.workoutService.parseFile).toHaveBeenCalledWith(fit, {
+      rejectDecodeErrors: true,
+    });
     expect(parsed).toMatchObject({
       blocks: [
         { type: 'work', steps: [expect.objectContaining({ duration: 60 })] },
@@ -283,7 +537,7 @@ describe('IntervalsIcuPlanSyncService', () => {
     });
   });
 
-  it.each([true, false])(
+  it.each([false])(
     'classifies empty=%s source events without changing existing mappings',
     async (empty) => {
       const f = createService();

@@ -372,6 +372,8 @@ export class PlanExternalSyncService {
       text?: string | null;
       notes?: string | null;
       blocks: PlanBlock[];
+      structureKind?: 'ENDURANCE' | 'FREEFORM';
+      plannedDurationSeconds?: number | null;
     },
     initializeMapping?: (
       workout: SyncedWorkout,
@@ -396,6 +398,8 @@ export class PlanExternalSyncService {
             name: args.name,
             text: args.text,
             notes: args.notes,
+            structureKind: args.structureKind ?? 'ENDURANCE',
+            plannedDurationSeconds: args.plannedDurationSeconds ?? null,
             status: 'PLANNED',
           },
         },
@@ -414,7 +418,31 @@ export class PlanExternalSyncService {
       );
       if (!stored) throw new Error('Imported workout readback failed');
       if (initializeMapping) {
-        await this.links.createMapping({ data: initializeMapping(stored) }, tx);
+        const { id: mappingId, ...data } = initializeMapping(stored);
+        if (mappingId) {
+          const updated = await this.links.updateManyMappings(
+            {
+              where: {
+                id: mappingId,
+                userId: args.userId,
+                provider: data.provider,
+                planWorkoutId: null,
+                syncState: 'FAILED',
+                localDeletedAt: null,
+                remoteDeletedAt: null,
+                lastLocalChecksum: null,
+                lastRemoteChecksum: null,
+                lastSyncedChecksum: null,
+              },
+              data,
+            },
+            tx,
+          );
+          if (updated.count !== 1)
+            throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
+        } else {
+          await this.links.createMapping({ data }, tx);
+        }
       }
       return stored;
     });
@@ -434,6 +462,8 @@ export class PlanExternalSyncService {
     notes?: string | null;
     status: PlanWorkoutStatus | string;
     blocks: PlanBlock[];
+    structureKind?: 'ENDURANCE' | 'FREEFORM';
+    plannedDurationSeconds?: number | null;
     dayOffset: number;
     expectedUpdatedAt?: Date;
   }) {
@@ -543,6 +573,9 @@ export class PlanExternalSyncService {
             name: args.name,
             text: args.text,
             notes: args.notes,
+            structureKind: args.structureKind ?? 'ENDURANCE',
+            plannedDurationSeconds: args.plannedDurationSeconds ?? null,
+            plannedSessionRpe: null,
             status: args.status as PlanWorkoutStatus,
             revision: { increment: 1 },
           },
@@ -550,6 +583,12 @@ export class PlanExternalSyncService {
         tx,
       );
       await this.replaceWorkoutSteps(tx, updated.id, args.blocks);
+      if (current.structureKind === 'STRENGTH') {
+        await this.workouts.deleteExercises(
+          { where: { workoutId: updated.id } },
+          tx,
+        );
+      }
       await this.estimateWorkoutLoad(updated.id, tx);
       const stored = await this.workouts.findFirst(
         {

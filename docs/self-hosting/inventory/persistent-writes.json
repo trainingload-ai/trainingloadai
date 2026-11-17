@@ -39,7 +39,7 @@
     },
     {
       "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-      "line": 115,
+      "line": 123,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "resolve(process.env.LOCAL_STORAGE_PATH || '/data/uploads'),"

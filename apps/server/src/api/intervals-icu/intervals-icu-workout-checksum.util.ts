@@ -52,6 +52,9 @@ export function syncChecksum(args: {
   name: string | null;
   notes: string | null;
   blocks: PlanBlock[];
+  structureKind?: 'ENDURANCE' | 'FREEFORM';
+  plannedDurationSeconds?: number | null;
+  text?: string | null;
 }) {
   return workoutChecksum({
     scheduledDate: args.scheduledDate,
@@ -60,5 +63,13 @@ export function syncChecksum(args: {
     name: args.name,
     notes: args.notes,
     blocks: normalizeWorkoutBlocks(args.blocks),
+    // Preserve existing structured baselines byte for byte.
+    ...(args.structureKind === 'FREEFORM'
+      ? {
+          structureKind: 'FREEFORM',
+          plannedDurationSeconds: args.plannedDurationSeconds ?? null,
+          text: args.text ?? '',
+        }
+      : {}),
   });
 }

@@ -40,6 +40,21 @@ export class FreeformWorkoutCodec implements WorkoutCodec<FreeformWorkoutIrV1> {
         },
       ];
     }
+    if (
+      structure.durationSeconds != null &&
+      (!Number.isSafeInteger(structure.durationSeconds) ||
+        structure.durationSeconds <= 0 ||
+        structure.durationSeconds > 2147483647)
+    ) {
+      return [
+        {
+          code: 'INVALID_DURATION',
+          severity: 'ERROR',
+          path: 'durationSeconds',
+          message: 'Freeform workout duration must be positive when provided',
+        },
+      ];
+    }
     return [];
   }
 
@@ -48,8 +63,18 @@ export class FreeformWorkoutCodec implements WorkoutCodec<FreeformWorkoutIrV1> {
     return structure.text.trim();
   }
 
-  summarize(): FreeformWorkoutSummary {
-    return { kind: 'FREEFORM', durationSeconds: null, hardSession: null };
+  summarize(structure: FreeformWorkoutIrV1): FreeformWorkoutSummary {
+    const duration = structure.durationSeconds;
+    return {
+      kind: 'FREEFORM',
+      durationSeconds:
+        typeof duration === 'number' &&
+        Number.isFinite(duration) &&
+        duration > 0
+          ? duration
+          : null,
+      hardSession: null,
+    };
   }
 
   private assertVersion(version: number) {

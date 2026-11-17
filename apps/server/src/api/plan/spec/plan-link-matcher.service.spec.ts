@@ -23,7 +23,9 @@ type LinkWhere = {
 
 function createPrisma() {
   const tx = {
+    $queryRaw: jest.fn(async () => [{ id: 'locked-target' }]),
     planWorkout: {
+      findFirst: jest.fn(async () => ({ id: 'current-workout' })),
       findUnique: jest.fn(async () => ({
         status: PlanWorkoutStatus.PLANNED,
         plan: { status: 'ACTIVE' },
@@ -31,6 +33,7 @@ function createPrisma() {
       update: jest.fn(async () => ({})),
     },
     planWorkoutActivityLink: {
+      findFirst: jest.fn(async () => null),
       create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => ({
         id: 'link-1',
         ...data,
@@ -153,6 +156,111 @@ describe('PlanLinkMatcherService.sumExpectedDurationSeconds', () => {
 });
 
 describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
+  it('never infers completion of a FREEFORM workout from duration or leftover steps', async () => {
+    const { prisma } = createPrisma();
+    prisma.activity.findUnique.mockResolvedValue({
+      id: 101,
+      userId: 'user-1',
+      sportType: SportType.RUN,
+      startTime: new Date('2026-06-29T10:00:00Z'),
+      timerTime: 1800,
+      state: 1,
+      timezone: 'UTC',
+    });
+    prisma.planWorkoutActivityLink.findFirst.mockResolvedValue(null);
+    prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1' });
+    prisma.userBodyMetric.findFirst.mockResolvedValue(null);
+    prisma.planWorkout.findMany.mockResolvedValue([
+      {
+        id: 'ordinary',
+        planId: 'plan-1',
+        structureKind: 'FREEFORM',
+        plannedDurationSeconds: 1800,
+      },
+    ]);
+    prisma.planWorkoutStep.findMany.mockResolvedValue([
+      {
+        durationType: WorkoutPlanStepDurationType.TIME,
+        durationValue: 1800,
+        durationUnit: WorkoutPlanValueUnit.SECONDS,
+      },
+    ]);
+    await createService(prisma).tryAutoLinkForActivity(101);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.planWorkoutStep.findMany).not.toHaveBeenCalled();
+  });
+
+  it('leaves equal-scoring workouts unlinked instead of choosing database order', async () => {
+    const { prisma } = createPrisma();
+    prisma.activity.findUnique.mockResolvedValue({
+      id: 101,
+      userId: 'user-1',
+      sportType: SportType.RUN,
+      startTime: new Date('2026-06-29T10:00:00Z'),
+      timerTime: 1800,
+      state: 1,
+      timezone: 'UTC',
+    });
+    prisma.planWorkoutActivityLink.findFirst.mockResolvedValue(null);
+    prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1' });
+    prisma.userBodyMetric.findFirst.mockResolvedValue(null);
+    prisma.planWorkout.findMany.mockResolvedValue([
+      { id: 'first', planId: 'plan-1' },
+      { id: 'second', planId: 'plan-1' },
+    ]);
+    prisma.planWorkoutStep.findMany.mockResolvedValue([
+      {
+        durationType: WorkoutPlanStepDurationType.TIME,
+        durationValue: 1800,
+        durationUnit: WorkoutPlanValueUnit.SECONDS,
+      },
+    ]);
+    await createService(prisma).tryAutoLinkForActivity(101);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it.each(['activity-linked', 'workout-changed', 'already-done'])(
+    'revalidates the selected course after locking: %s',
+    async (change) => {
+      const { prisma, tx } = createPrisma();
+      prisma.activity.findUnique.mockResolvedValue({
+        id: 101,
+        userId: 'user-1',
+        sportType: SportType.RUN,
+        startTime: new Date('2026-06-29T10:00:00Z'),
+        timerTime: 1800,
+        state: 1,
+        timezone: 'UTC',
+      });
+      prisma.planWorkoutActivityLink.findFirst.mockResolvedValue(null);
+      prisma.plan.findFirst.mockResolvedValue({ id: 'plan-1' });
+      prisma.userBodyMetric.findFirst.mockResolvedValue(null);
+      prisma.planWorkout.findMany.mockResolvedValue([
+        { id: 'candidate', planId: 'plan-1' },
+      ]);
+      prisma.planWorkoutStep.findMany.mockResolvedValue([
+        {
+          durationType: WorkoutPlanStepDurationType.TIME,
+          durationValue: 1800,
+          durationUnit: WorkoutPlanValueUnit.SECONDS,
+        },
+      ]);
+      if (change === 'activity-linked')
+        tx.planWorkoutActivityLink.findFirst.mockResolvedValue({
+          id: 'new-link',
+        } as never);
+      if (change === 'workout-changed')
+        tx.planWorkout.findFirst.mockResolvedValue(null as never);
+      if (change === 'already-done')
+        tx.planWorkout.findUnique.mockResolvedValue({
+          status: PlanWorkoutStatus.DONE,
+          plan: { status: 'ACTIVE' },
+        });
+      await createService(prisma).tryAutoLinkForActivity(101);
+      expect(tx.planWorkoutActivityLink.create).not.toHaveBeenCalled();
+    },
+  );
+
   it('links the closest eligible workout by activity day and auto-marks it done', async () => {
     const { prisma, tx } = createPrisma();
     const activityStart = new Date('2026-06-29T23:30:00.000Z');
@@ -218,6 +326,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
         structureKind: true,
         sportDefinitionCode: true,
         plannedDurationSeconds: true,
+        updatedAt: true,
       },
     });
     expect(tx.planWorkout.update).toHaveBeenCalledWith({
@@ -309,6 +418,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
         structureKind: true,
         sportDefinitionCode: true,
         plannedDurationSeconds: true,
+        updatedAt: true,
       },
     });
     expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith({

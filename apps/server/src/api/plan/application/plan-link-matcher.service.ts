@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import {
   BodyMetricType,
   PlanWorkoutActivityLinkRole,
@@ -169,6 +170,7 @@ export class PlanLinkMatcherService {
           structureKind: true,
           sportDefinitionCode: true,
           plannedDurationSeconds: true,
+          updatedAt: true,
         },
       });
 
@@ -179,10 +181,13 @@ export class PlanLinkMatcherService {
         planId: string;
         expectedSec: number | null;
         diff: number;
+        updatedAt?: Date;
       };
       const scored: Scored[] = [];
 
       for (const w of workouts) {
+        // Calendar-only prescriptions do not provide enough evidence for auto completion.
+        if (w.structureKind === 'FREEFORM') continue;
         const expectedSec =
           isStrengthActivity &&
           typeof w.plannedDurationSeconds === 'number' &&
@@ -220,21 +225,84 @@ export class PlanLinkMatcherService {
             actDur != null && expectedSec != null
               ? Math.abs(actDur - expectedSec)
               : 0,
+          updatedAt: w.updatedAt,
         });
       }
 
-      if (scored.length === 0) return;
+      if (scored.length === 0) {
+        this.logDecision(
+          activity.userId,
+          activity.id,
+          'NO_ELIGIBLE_WORKOUT',
+          0,
+        );
+        return;
+      }
 
       scored.sort((a, b) => a.diff - b.diff);
       const best = scored[0]!;
+      if (scored[1]?.diff === best.diff) {
+        this.logDecision(
+          activity.userId,
+          activity.id,
+          'AMBIGUOUS_CANDIDATES',
+          scored.length,
+        );
+        return;
+      }
 
       // link + 自动 DONE 同事务，避免出现「已链接但 status 仍 PLANNED」的不一致中间态
-      await this.prisma.$transaction(async (tx) => {
+      const matched = await this.prisma.$transaction(async (tx) => {
+        if (
+          !(await this.links.lockAutoLinkTargets(
+            activity.id,
+            best.workoutId,
+            tx,
+          ))
+        )
+          return false;
+        const occupied = await this.links.findFirst(
+          {
+            where: {
+              unlinkedAt: null,
+              OR: [
+                { activityId: activity.id },
+                {
+                  planWorkoutId: best.workoutId,
+                  role: PlanWorkoutActivityLinkRole.PRIMARY,
+                },
+              ],
+            },
+            select: { id: true },
+          },
+          tx,
+        );
+        if (occupied) return false;
+        const current = await this.workouts.findFirst(
+          {
+            where: {
+              id: best.workoutId,
+              userId: activity.userId,
+              planId: best.planId,
+              scheduledDate: scheduledEq,
+              structureKind: { not: 'FREEFORM' },
+              plan: { status: 'ACTIVE' },
+              status: {
+                in: [PlanWorkoutStatus.PLANNED, PlanWorkoutStatus.IN_PROGRESS],
+              },
+              ...(best.updatedAt ? { updatedAt: best.updatedAt } : {}),
+            },
+            select: { id: true },
+          },
+          tx,
+        );
+        if (!current) return false;
         const autoMarked = await this.workouts.markDoneIfApplicable(
           best.workoutId,
           activity.startTime ?? null,
           tx,
         );
+        if (!autoMarked) return false;
         await this.links.create(
           {
             data: {
@@ -248,7 +316,15 @@ export class PlanLinkMatcherService {
           },
           tx,
         );
+        return true;
       });
+      this.logDecision(
+        activity.userId,
+        activity.id,
+        matched ? 'MATCHED' : 'STATE_CHANGED_BEFORE_COMMIT',
+        scored.length,
+        best.workoutId,
+      );
     } catch (e) {
       this.logger.warn(
         `[PlanLinkMatcher] tryAutoLinkForActivity(${activityId}) failed: ${
@@ -256,6 +332,23 @@ export class PlanLinkMatcherService {
         }`,
       );
     }
+  }
+
+  private logDecision(
+    userId: string,
+    activityId: number,
+    reason: string,
+    candidateCount: number,
+    workoutId?: string,
+  ) {
+    const ref = (value: string) =>
+      createHash('sha256')
+        .update(`${userId}:${value}`)
+        .digest('hex')
+        .slice(0, 24);
+    this.logger.log(
+      `Plan auto-link decision: reason=${reason} activityRef=${ref(String(activityId))} candidateCount=${candidateCount}${workoutId ? ` workoutRef=${ref(workoutId)}` : ''}`,
+    );
   }
 }
 

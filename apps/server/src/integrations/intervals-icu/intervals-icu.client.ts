@@ -94,6 +94,8 @@ export interface IntervalsIcuEvent {
   description?: string | null;
   type?: string | null;
   updated?: string | null;
+  /** Planned calendar duration in seconds; independent of workout_doc.steps. */
+  moving_time?: number | null;
   /** Event：解析后的结构化课表。 */
   workout_doc?: IntervalsIcuWorkoutDocJson | null;
   /** Calendar GET exports, distinct from the EventEx upload fields below. */

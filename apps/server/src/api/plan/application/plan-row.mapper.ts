@@ -161,6 +161,7 @@ export function normalizePlanWorkoutRow(
             kind: 'FREEFORM',
             version: 1,
             text: typeof row.text === 'string' ? row.text : '',
+            durationSeconds: row.plannedDurationSeconds ?? null,
           }
         : {
             kind: 'ENDURANCE',

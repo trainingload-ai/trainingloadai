@@ -292,6 +292,7 @@ export class WorkoutService {
 
   async parseFile(
     buffer: Buffer,
+    options: { rejectDecodeErrors?: boolean } = {},
   ): Promise<{ block: PlanBlock[]; plan: string }> {
     // FIT 上传只接受 workout 文件；解析后统一转成内部 PlanBlock，再生成可编辑 DSL 文本。
     if (!buffer?.length) {
@@ -316,6 +317,12 @@ export class WorkoutService {
     const decoded = decoder.read();
     const messages = decoded?.messages;
     const errors = Array.isArray(decoded?.errors) ? decoded.errors : [];
+    if (errors.length > 0 && options.rejectDecodeErrors) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.COMMON,
+        message: this.i18n.t('common.error.not_valid_fit_file'),
+      });
+    }
     if (errors && errors.length > 0) {
       this.logger.warn(`FIT 解析告警：${JSON.stringify(errors)}`);
     }

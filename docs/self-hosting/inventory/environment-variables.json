@@ -2701,7 +2701,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 55
+          "line": 63
         }
       ]
     },
@@ -2918,7 +2918,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 119
+          "line": 127
         }
       ]
     },
@@ -3264,7 +3264,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 115
+          "line": 123
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -4485,7 +4485,11 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 108
+          "line": 25
+        },
+        {
+          "file": "apps/server/src/bootstrap/bootstrap-application.ts",
+          "line": 116
         },
         {
           "file": "apps/server/src/bootstrap/self-host-network-security.ts",
@@ -4920,7 +4924,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 119
+          "line": 127
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -6383,7 +6387,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 56
+          "line": 64
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",
