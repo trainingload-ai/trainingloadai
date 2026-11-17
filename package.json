@@ -62,6 +62,8 @@
     "yaml": "2.9.0"
   },
   "scripts": {
+    "brand:generate": "node scripts/generate-brand-assets.mjs",
+    "brand:check": "node scripts/check-brand-assets.mjs",
     "prepare": "node .husky/install.mjs",
     "design-tokens:generate": "pnpm --filter @trainingloadai/design-tokens generate",
     "design-tokens:check": "pnpm --filter @trainingloadai/design-tokens check && pnpm --filter @trainingloadai/design-tokens test",

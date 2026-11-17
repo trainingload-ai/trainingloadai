@@ -1,6 +1,6 @@
 # Desktop 图标
 
-正式品牌源文件为 `apps/desktop/assets/app-icon-source.svg`，桌面端只做平台导出，不另画 Logo。
+正式品牌源文件为 `assets/brand/app-icon-source.png`，桌面端只做平台导出，不另画 Logo。此目录原有的 `app-icon-source.svg` 保留为旧版归档，不再用于生成。
 
 ```sh
 pnpm --filter @trainingloadai/desktop icons:generate
