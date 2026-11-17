@@ -3937,7 +3937,9 @@ export class PlanWriteSupport {
           { planId: { in: activePlans.map((plan) => plan.id) } },
         ],
         scheduledDate: scheduledEq,
-        ...(sport && sport !== SportType.UNKNOWN ? { sportType: sport } : {}),
+        ...(sport && sport !== SportType.UNKNOWN
+          ? { sportType: { in: [sport, SportType.UNKNOWN] } }
+          : {}),
         status: { in: ['PLANNED', 'IN_PROGRESS'] },
       },
       select: {

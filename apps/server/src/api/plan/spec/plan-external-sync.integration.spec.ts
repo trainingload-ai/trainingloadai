@@ -243,6 +243,44 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     expect(await matcher().listMatchingReviews('user')).toEqual([]);
   });
 
+  it('lets an athlete resolve a Coach review for a course with unknown sport through the manual candidate list', async () => {
+    const f = await independentScenario();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { sportType: 'UNKNOWN', plannedDurationSeconds: null },
+    });
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(await matching.listMatchingReviews('user')).toEqual([
+      expect.objectContaining({
+        reason: 'INSUFFICIENT_EVIDENCE',
+        candidates: [expect.objectContaining({ workoutId: f.independent.id })],
+      }),
+    ]);
+    const write = manualLinks();
+    expect(
+      (await write.listActivityPlanCandidatesByHash('user', f.activity.hashId))
+        .candidates,
+    ).toEqual([
+      expect.objectContaining({
+        workoutId: f.independent.id,
+        sportType: 'UNKNOWN',
+      }),
+    ]);
+    await write.replaceActivityPlanLinkByHash('user', f.activity.hashId, {
+      workoutId: f.independent.id,
+    });
+    expect(
+      (await write.getActivityPlanLinkByHash('user', f.activity.hashId))
+        .linkedPlanWorkout,
+    ).toMatchObject({
+      workoutId: f.independent.id,
+      source: 'MANUAL',
+      status: 'DONE',
+    });
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
+  });
+
   it('supports manual completion and undo with no training plan, preserving idempotency', async () => {
     const f = await independentScenario();
     const write = manualLinks();

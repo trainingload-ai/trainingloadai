@@ -585,7 +585,7 @@ export class ActivityQueryService {
           ? resolveActivityCalendarDayStr(
               activity.startTime,
               activity.timezone,
-              args.filters.calendarTimeZone,
+              null,
               args.userTzFallback,
             )
           : null,
@@ -695,11 +695,12 @@ export class ActivityQueryService {
           ? independentDays.has(activityDays.get(activity.id) ?? '')
           : independentKeys.has(
               `${activityDays.get(activity.id)}:${activity.sportType}`,
-            )) ||
+            ) ||
+            independentKeys.has(`${activityDays.get(activity.id)}:UNKNOWN`)) ||
         this.planLinkUiVisibleForActivity(
           activity.startTime,
           activity.timezone,
-          args.filters.calendarTimeZone ?? null,
+          null,
           args.userTzFallback,
           args.activePlanRow,
         ),
