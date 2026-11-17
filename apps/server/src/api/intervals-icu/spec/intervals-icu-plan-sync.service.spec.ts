@@ -31,6 +31,7 @@ describe('IntervalsIcuPlanSyncService', () => {
       create: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
     };
     const prisma = {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
       externalProviderConnection,
       planWorkoutExternalMapping,
       planWorkout,

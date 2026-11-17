@@ -2240,6 +2240,9 @@ export class ActivityService {
       userId,
       mode: ActivityAnalyzeMode.LIGHT,
     });
+    await this.planLinkMatcher
+      .tryAutoLinkForActivity(activityId)
+      .catch(() => {});
   }
 
   /**

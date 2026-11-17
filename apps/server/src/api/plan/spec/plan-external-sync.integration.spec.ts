@@ -638,6 +638,144 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     ).toBe(2);
   });
 
+  it('rechecks a previous inference when another provider replaces the primary activity dataset', async () => {
+    const f = await independentScenario();
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    const activityService = Object.assign(
+      Object.create(ActivityService.prototype) as ActivityService,
+      {
+        prisma,
+        planLinkMatcher: matching,
+        metricsPipeline: {
+          runByMode: async () => {
+            await prisma.activity.update({
+              where: { id: f.activity.id },
+              data: { timerTime: 3600 },
+            });
+          },
+        },
+      },
+    );
+    await activityService.runLightMetricsPipeline(f.activity.id, 'user');
+    expect(
+      (await manualLinks().getActivityPlanLinkByHash('user', f.activity.hashId))
+        .linkedPlanWorkout,
+    ).toBeNull();
+    expect(
+      await prisma.planWorkout.findUnique({ where: { id: f.independent.id } }),
+    ).toMatchObject({ status: 'PLANNED', completedAt: null });
+  });
+
+  it('matches a Garmin activity to an Intervals course without counting its merged duplicate twice', async () => {
+    const f = await independentScenario();
+    await prisma.activity.update({
+      where: { id: f.activity.id },
+      data: { thirdPartyProvider: 'garmin' },
+    });
+    await prisma.planWorkoutExternalMapping.create({
+      data: {
+        userId: 'user',
+        provider: 'intervals_icu',
+        planWorkoutId: f.independent.id,
+        externalEventId: 'intervals-course',
+      },
+    });
+    await prisma.activity.create({
+      data: {
+        userId: 'user',
+        hashId: 'merged-intervals-copy',
+        thirdPartyProvider: 'intervals_icu',
+        state: 0,
+        mergedIntoActivityId: f.activity.id,
+        processingStatus: 'READY',
+        sportType: 'RUN',
+        timerTime: 1800,
+        startTime: f.activity.startTime,
+        timezone: f.activity.timezone,
+      },
+    });
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(
+      (await manualLinks().getActivityPlanLinkByHash('user', f.activity.hashId))
+        .linkedPlanWorkout,
+    ).toMatchObject({
+      workoutId: f.independent.id,
+      source: 'AUTO_MATCH',
+      status: 'DONE',
+    });
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { unlinkedAt: null },
+      }),
+    ).toBe(1);
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
+  });
+
+  it('routes a late Garmin course with unknown prescription to Coach instead of stealing a known Intervals match', async () => {
+    const f = await independentScenario();
+    const matching = matcher();
+    await prisma.planWorkoutExternalMapping.create({
+      data: {
+        userId: 'user',
+        provider: 'intervals_icu',
+        planWorkoutId: f.independent.id,
+        externalEventId: 'intervals-course',
+      },
+    });
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    const garmin = await service.createIndependentWorkout(
+      {
+        userId: 'user',
+        scheduledDate: new Date('2026-07-06'),
+        sportType: 'RUN',
+        structureKind: 'FREEFORM',
+        name: 'Garmin run',
+        text: 'Run',
+        blocks: [],
+      },
+      (stored) => ({
+        userId: 'user',
+        provider: 'garmin',
+        planWorkoutId: stored.id,
+        externalEventId: 'garmin-course',
+        externalSourceKey: 'garmin-schedule:course',
+      }),
+    );
+    const events = new EventEmitter2();
+    events.on(PLAN_WORKOUTS_CHANGED_EVENT, (event) =>
+      matching.onWorkoutsChanged(event),
+    );
+    Object.assign(service, { events });
+    try {
+      await service.notifyWorkoutsCommitted(
+        'user',
+        [garmin.id],
+        'garmin_schedule_import',
+      );
+    } finally {
+      Object.assign(service, { events: undefined });
+    }
+    expect(
+      (await manualLinks().getActivityPlanLinkByHash('user', f.activity.hashId))
+        .linkedPlanWorkout,
+    ).toBeNull();
+    expect(await matching.listMatchingReviews('user')).toEqual([
+      expect.objectContaining({
+        reason: 'INSUFFICIENT_EVIDENCE',
+        candidates: expect.arrayContaining([
+          expect.objectContaining({ workoutId: garmin.id }),
+          expect.objectContaining({ workoutId: f.independent.id }),
+        ]),
+      }),
+    ]);
+    expect(await prisma.planWorkout.count({ where: { status: 'DONE' } })).toBe(
+      0,
+    );
+  });
+
   it('reconciles an activity uploaded before its course was imported', async () => {
     const f = await independentScenario();
     await prisma.planWorkout.update({
@@ -1373,6 +1511,99 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       ).toMatchObject({ status: 'PLANNED', completedAt: null });
     },
   );
+
+  it.each(['DONE', 'SKIPPED', 'MOVED', 'IN_PROGRESS', 'LINKED'])(
+    'protects an independent imported course from remote overwrite when %s',
+    async (state) => {
+      const f = await independentScenario();
+      if (state === 'LINKED')
+        await prisma.planWorkoutActivityLink.create({
+          data: {
+            planWorkoutId: f.independent.id,
+            planId: null,
+            activityId: f.activity.id,
+            source: 'MANUAL',
+            role: 'SECONDARY',
+          },
+        });
+      else
+        await prisma.planWorkout.update({
+          where: { id: f.independent.id },
+          data: {
+            status: state as 'DONE',
+            completedAt: state === 'DONE' ? f.activity.startTime : null,
+          },
+        });
+      const before = await prisma.planWorkout.findUniqueOrThrow({
+        where: { id: f.independent.id },
+      });
+      await expect(
+        service.updateImportedWorkout({
+          userId: 'user',
+          workoutId: before.id,
+          preferredSessionIndex: before.sessionIndex,
+          scheduledDate: new Date('2026-07-06'),
+          targetPlanId: null,
+          targetPlanStartDate: null,
+          sportType: 'RUN',
+          text: 'remote changed',
+          status: 'PLANNED',
+          blocks: [],
+          structureKind: 'FREEFORM',
+          dayOffset: 0,
+          expectedUpdatedAt: before.updatedAt,
+        }),
+      ).rejects.toThrow('PLAN_IMPORT_HISTORY_PROTECTED');
+      expect(
+        await prisma.planWorkout.findUnique({ where: { id: before.id } }),
+      ).toEqual(before);
+    },
+  );
+
+  it('rolls back a third-party course update when its mapping cannot be persisted', async () => {
+    const f = await independentScenario();
+    const before = await prisma.planWorkout.findUniqueOrThrow({
+      where: { id: f.independent.id },
+    });
+    await prisma.planWorkoutExternalMapping.create({
+      data: {
+        userId: 'user',
+        provider: 'garmin',
+        externalEventId: 'duplicate',
+        externalSourceKey: 'existing',
+      },
+    });
+    await expect(
+      service.updateImportedWorkout(
+        {
+          userId: 'user',
+          workoutId: before.id,
+          preferredSessionIndex: before.sessionIndex,
+          scheduledDate: new Date('2026-07-06'),
+          targetPlanId: null,
+          targetPlanStartDate: null,
+          sportType: 'RUN',
+          text: 'remote changed',
+          status: 'PLANNED',
+          blocks: [],
+          structureKind: 'FREEFORM',
+          dayOffset: 0,
+          expectedUpdatedAt: before.updatedAt,
+        },
+        (stored) => ({
+          userId: 'user',
+          provider: 'garmin',
+          planWorkoutId: stored.id,
+          externalEventId: 'duplicate',
+          externalSourceKey: 'garmin-schedule:new',
+        }),
+      ),
+    ).rejects.toThrow();
+    expect(
+      await prisma.planWorkout.findUnique({ where: { id: before.id } }),
+    ).toEqual(before);
+    expect(await prisma.planWorkoutExternalMapping.count()).toBe(1);
+  });
 
   it.each(['create', 'update'])(
     'returns the transaction snapshot after %s and load estimation',

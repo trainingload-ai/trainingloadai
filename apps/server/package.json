@@ -922,6 +922,10 @@
     "./health-data/health-observation.contract": {
       "types": "./src/health-data/health-observation.contract.ts",
       "default": "./src/health-data/health-observation.contract.ts"
+    },
+    "./api/plan/application/plan-external-sync.service": {
+      "types": "./src/api/plan/application/plan-external-sync.service.ts",
+      "default": "./src/api/plan/application/plan-external-sync.service.ts"
     }
   }
 }

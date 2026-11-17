@@ -60,10 +60,14 @@ export class PlanExternalSyncService {
     @Optional() private readonly events?: EventEmitter2,
   ) {}
 
-  async notifyWorkoutsCommitted(userId: string, workoutIds: string[]) {
+  async notifyWorkoutsCommitted(
+    userId: string,
+    workoutIds: string[],
+    reason = 'external_import',
+  ) {
     await this.events?.emitAsync(
       PLAN_WORKOUTS_CHANGED_EVENT,
-      new PlanWorkoutsChangedEvent(userId, 'external_import', workoutIds),
+      new PlanWorkoutsChangedEvent(userId, reason, workoutIds),
     );
   }
 
@@ -461,26 +465,32 @@ export class PlanExternalSyncService {
     });
   }
 
-  async updateImportedWorkout(args: {
-    userId: string;
-    workoutId: string;
-    preferredSessionIndex: number;
-    scheduledDate: Date;
-    targetPlanId: string | null;
-    targetPlanStartDate: Date | null;
-    sportType: SportType;
-    sportDefinitionCode?: string | null;
-    name?: string | null;
-    text?: string | null;
-    notes?: string | null;
-    status: PlanWorkoutStatus | string;
-    blocks: PlanBlock[];
-    structureKind?: 'ENDURANCE' | 'FREEFORM';
-    plannedDurationSeconds?: number | null;
-    dayOffset: number;
-    expectedUpdatedAt?: Date;
-  }) {
+  async updateImportedWorkout(
+    args: {
+      userId: string;
+      workoutId: string;
+      preferredSessionIndex: number;
+      scheduledDate: Date;
+      targetPlanId: string | null;
+      targetPlanStartDate: Date | null;
+      sportType: SportType;
+      sportDefinitionCode?: string | null;
+      name?: string | null;
+      text?: string | null;
+      notes?: string | null;
+      status: PlanWorkoutStatus | string;
+      blocks: PlanBlock[];
+      structureKind?: 'ENDURANCE' | 'FREEFORM';
+      plannedDurationSeconds?: number | null;
+      dayOffset: number;
+      expectedUpdatedAt?: Date;
+    },
+    persistMapping?: (
+      workout: SyncedWorkout,
+    ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
+  ) {
     return this.runTransaction(async (tx) => {
+      await this.workouts.lockForUpdate(args.workoutId, tx);
       const current = await this.workouts.findUnique(
         {
           where: { id: args.workoutId },
@@ -499,6 +509,12 @@ export class PlanExternalSyncService {
         current.updatedAt.getTime() !== args.expectedUpdatedAt.getTime()
       ) {
         throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
+      }
+      if (
+        !current.plan &&
+        (current.status !== 'PLANNED' || current.links.length > 0)
+      ) {
+        throw new Error('PLAN_IMPORT_HISTORY_PROTECTED');
       }
       if (current.plan) {
         const timezone = await this.users.getPreferredTimezone(args.userId, tx);
@@ -611,6 +627,30 @@ export class PlanExternalSyncService {
         tx,
       );
       if (!stored) throw new Error('Imported workout readback failed');
+      if (persistMapping) {
+        const data = persistMapping(stored);
+        if (
+          data.userId !== args.userId ||
+          data.planWorkoutId !== stored.id ||
+          !data.externalSourceKey ||
+          data.id
+        )
+          throw new Error('PLAN_IMPORT_MAPPING_INVALID');
+        await this.links.upsertMapping(
+          {
+            where: {
+              userId_provider_externalSourceKey: {
+                userId: args.userId,
+                provider: data.provider,
+                externalSourceKey: data.externalSourceKey,
+              },
+            },
+            create: data,
+            update: data,
+          },
+          tx,
+        );
+      }
       return stored;
     });
   }

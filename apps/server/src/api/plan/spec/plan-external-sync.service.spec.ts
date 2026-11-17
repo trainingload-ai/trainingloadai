@@ -16,6 +16,7 @@ function fixture() {
   const tx = { transaction: true };
   const prisma = { $transaction: jest.fn(async (work) => work(tx)) };
   const workouts = {
+    lockForUpdate: jest.fn(async () => undefined),
     findFirst: jest.fn(async () => row),
     findUnique: jest.fn(async () => row),
     findMany: jest.fn(async () => []),
