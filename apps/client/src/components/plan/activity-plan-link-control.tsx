@@ -6,10 +6,11 @@ import * as React from "react";
 import { Check, Link2, Link2Off, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { V2ActivityListItem } from "@/api/v2-activities";
 import {
   getActivityPlanCandidates,
+  getActivityPlanLink,
   replaceActivityPlanLink,
   removeActivityPlanLink,
   type ActivityPlanCandidate,
@@ -28,12 +29,13 @@ import { cn } from "@/lib/utils";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+import { queryKeys } from "@/lib/query-keys";
 
 export function ActivityPlanLinkControl({
   activity,
   onLinkedPlanWorkoutChange,
 }: {
-  activity: V2ActivityListItem;
+  activity: Pick<V2ActivityListItem, "hashId" | "linkedPlanWorkout">;
   onLinkedPlanWorkoutChange?: (
     linked: V2ActivityListItem["linkedPlanWorkout"],
   ) => void;
@@ -273,5 +275,29 @@ export function ActivityPlanLinkControl({
         onConfirm={handleConfirmReplace}
       />
     </>
+  );
+}
+
+/** Share the existing editor and link cache across desktop and mobile detail views. */
+export function ActivityDetailPlanLinkControl({ hashId }: { hashId: string }) {
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.activity.planLink(hashId);
+  const link = useQuery({
+    queryKey,
+    queryFn: () => getActivityPlanLink(hashId),
+  });
+  if (!link.data) return null;
+
+  return (
+    <ActivityPlanLinkControl
+      activity={{
+        hashId,
+        linkedPlanWorkout: link.data.linkedPlanWorkout,
+      }}
+      onLinkedPlanWorkoutChange={(linkedPlanWorkout) => {
+        queryClient.setQueryData(queryKey, { linkedPlanWorkout });
+        void queryClient.invalidateQueries({ queryKey });
+      }}
+    />
   );
 }

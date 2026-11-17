@@ -8,9 +8,12 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import type { V2ActivityListItem } from "@/api/v2-activities";
 import { queryKeys } from "@/lib/query-keys";
-import { ActivityPlanLinkControl } from "./activity-plan-link-control";
+import {
+  ActivityDetailPlanLinkControl,
+  ActivityPlanLinkControl,
+} from "./activity-plan-link-control";
 
-const state = vi.hoisted(() => ({ linked: false }));
+const state = vi.hoisted(() => ({ linked: false, readFails: false }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("@deployment/managed-ui", () => ({
   useGuestAccessText: () => (key: string) => key,
@@ -19,6 +22,10 @@ vi.mock("@/public-demo/public-demo-provider", () => ({
   usePublicDemo: () => ({ active: false }),
 }));
 vi.mock("@/api/activity-plan-link", () => ({
+  getActivityPlanLink: async () => {
+    if (state.readFails) throw new Error("Read failed");
+    return { linkedPlanWorkout: null };
+  },
   getActivityPlanCandidates: async () => ({
     candidates: [
       {
@@ -69,6 +76,28 @@ function Activity() {
 }
 
 describe("activity-side manual completion", () => {
+  it("does not interpret a failed detail-link read as an unlinked activity", async () => {
+    state.readFails = true;
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <ActivityDetailPlanLinkControl hashId="run" />
+      </QueryClientProvider>,
+    );
+    await waitFor(() =>
+      expect(
+        client.getQueryState(queryKeys.activity.planLink("run"))?.status,
+      ).toBe("error"),
+    );
+    expect(
+      screen.queryByRole("button", { name: "label.unlinked" }),
+    ).not.toBeInTheDocument();
+    state.readFails = false;
+    client.clear();
+  });
+
   it("refreshes a fresh home cache on link and undo without an active plan", async () => {
     state.linked = false;
     const client = new QueryClient({

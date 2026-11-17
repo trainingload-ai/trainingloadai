@@ -15,6 +15,10 @@ async function openIndependentCourses(
     id: "42",
     hashId: "completed-run",
     title: "Completed easy run",
+    activityName: "Completed easy run",
+    processingStatus: "READY",
+    timezone: "UTC",
+    laps: [],
     sportType: "RUN",
     startTime: `${date}T08:00:00Z`,
     duration: 1800,
@@ -64,6 +68,8 @@ async function openIndependentCourses(
     const request = route.request();
     const url = new URL(request.url());
     const path = url.pathname.replace(/^\/api\/proxy/, "");
+    if (path.endsWith("/access/features"))
+      return route.fulfill({ json: { schemaVersion: 1, features: {} } });
     if (path === "/api/v2/home")
       return route.fulfill({
         json: {
@@ -105,7 +111,69 @@ async function openIndependentCourses(
           pagination: { page: 1, perPage: 100, total: 1, totalPages: 1 },
         },
       });
+    if (path.endsWith("/activities/completed-run"))
+      return route.fulfill({
+        json: {
+          data: {
+            ...activity,
+            linkedPlanWorkout: linked
+              ? {
+                  workoutId: "ordinary-run",
+                  planId: null,
+                  name: "Ordinary run",
+                  sportType: "RUN",
+                  source: "MANUAL",
+                }
+              : null,
+          },
+        },
+      });
+    if (path.endsWith("/charts/execute/activity"))
+      return route.fulfill({ json: { data: { rows: [], metadata: {} } } });
+    if (path.endsWith("/activities/completed-run/plan-workout/candidates"))
+      return route.fulfill({
+        json: {
+          data: {
+            candidates: [
+              {
+                workoutId: "ordinary-run",
+                planId: null,
+                name: "Ordinary run",
+                sportType: "RUN",
+                sessionIndex: 1,
+                expectedDurationSec: 1800,
+              },
+              {
+                workoutId: "plan-run",
+                planId: "plan-2",
+                planTitle: "Second plan",
+                name: "Easy run",
+                sportType: "UNKNOWN",
+                sessionIndex: 1,
+                expectedDurationSec: null,
+              },
+            ],
+          },
+        },
+      });
     if (path.endsWith("/activities/completed-run/plan-workout/link")) {
+      if (request.method() === "GET")
+        return route.fulfill({
+          json: {
+            data: {
+              linkedPlanWorkout: linked
+                ? {
+                    workoutId: "ordinary-run",
+                    planId: null,
+                    name: "Ordinary run",
+                    sportType: "RUN",
+                    source: "MANUAL",
+                    status: "DONE",
+                  }
+                : null,
+            },
+          },
+        });
       mutations.push({
         method: request.method(),
         body: request.postDataJSON(),
@@ -119,6 +187,8 @@ async function openIndependentCourses(
                 linkedPlanWorkout: {
                   workoutId: "ordinary-run",
                   planId: null,
+                  name: "Ordinary run",
+                  sportType: "RUN",
                   source: "MANUAL",
                 },
               }
@@ -279,17 +349,59 @@ for (const width of [1440, 390])
         path: `/private/tmp/unified-matching-qa/coach-${width}-${theme}.png`,
         animations: "disabled",
       });
-      await page
-        .getByRole("button", { name: "Ordinary run", exact: true })
-        .click();
-      const dialog = page.getByRole("dialog");
-      await dialog
-        .getByRole("button", { name: "Link activity", exact: true })
-        .click();
-      await page.getByRole("menuitem", { name: /Completed easy run/ }).click();
+      await reminder.getByRole("link").click();
+      await expect(page).toHaveURL(/\/en\/activities\/completed-run$/);
+      const associate = page.getByRole("button", {
+        name: "Link workout",
+        exact: true,
+      });
+      await expect(associate).toBeVisible();
+      await associate.press("ArrowDown");
+      await expect(
+        page.getByRole("menuitem", { name: /Easy run.*Second plan/ }),
+      ).toBeVisible();
+      await page.getByRole("menuitem", { name: /Ordinary run/ }).click();
+      const linked = page.getByRole("button", {
+        name: "Ordinary run",
+        exact: true,
+      });
+      await expect(linked).toBeVisible();
+      await linked.press("ArrowDown");
+      await page.keyboard.press("Escape");
+      await expect(linked).toBeFocused();
+      await page.screenshot({
+        path: `/private/tmp/unified-matching-qa/detail-${width}-${theme}.png`,
+        animations: "disabled",
+      });
+      await page.goto("/en");
+      await expect(
+        page.getByRole("heading", { name: "Ordinary run", exact: true }),
+      ).toBeVisible();
       await expect(reminder).toHaveCount(0);
       expect(mutations).toEqual([
         { method: "POST", body: { workoutId: "ordinary-run" } },
+      ]);
+      await page.goto("/en/activities/completed-run");
+      await page
+        .getByRole("button", { name: "Ordinary run", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Remove link", exact: true })
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Link workout", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Ordinary run", exact: true }),
+      ).toHaveCount(0);
+      await page.goto("/en");
+      await expect(
+        page.getByRole("heading", { name: "Ordinary run", exact: true }),
+      ).toBeVisible();
+      await expect(reminder).toHaveCount(0);
+      expect(mutations.map((value) => value.method)).toEqual([
+        "POST",
+        "DELETE",
       ]);
     });
   }
