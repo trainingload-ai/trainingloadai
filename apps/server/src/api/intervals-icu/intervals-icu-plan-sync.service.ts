@@ -1226,6 +1226,7 @@ export class IntervalsIcuPlanSyncService {
       };
     }
     await this.upsertMapping(this.importMappingData(args, local, mapping));
+    await this.planSync.notifyWorkoutsCommitted(args.userId, [local.id]);
     return created ? { ...zero, created: 1 } : { ...zero, updated: 1 };
   }
 

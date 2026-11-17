@@ -4771,6 +4771,14 @@
       "coachPrompt": "Lass uns die heutige Coach-Empfehlung prüfen und gemeinsam den nächsten Schritt festlegen.",
       "trainingWindowClosed": "Für heute sollte kein neues Training mehr geplant werden",
       "workoutAlreadyExists": "Für heute ist bereits eine Trainingseinheit geplant"
+    },
+    "workoutMatching": {
+      "title": "Training zuordnen",
+      "ambiguous": "Mehrere Einheiten passen zu dieser Aktivität. Ich habe nichts geändert. Bitte wähle die passende Einheit.",
+      "insufficient": "Die Informationen reichen für eine Zuordnung nicht aus. Ich habe nichts geändert. Bitte ordne die Aktivität manuell zu.",
+      "manual": "Manuell zuordnen",
+      "manualLabel": "{activity} manuell zuordnen",
+      "workout": "Training"
     }
   },
   "PlanActivationDialog": {

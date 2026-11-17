@@ -4864,6 +4864,14 @@
       "coachPrompt": "請根據今天的教練建議，和我一起判斷接下來怎麼做。",
       "trainingWindowClosed": "今天已不再適合安排新的訓練",
       "workoutAlreadyExists": "今天已有計畫課次，無需重複加入"
+    },
+    "workoutMatching": {
+      "title": "確認訓練關聯",
+      "ambiguous": "這次活動可能對應多節課程，我保留了原狀態。請確認後手動關聯。",
+      "insufficient": "現有資訊不足以確定對應課程，我保留了原狀態。請手動關聯。",
+      "manual": "手動關聯",
+      "manualLabel": "手動關聯：{activity}",
+      "workout": "訓練課程"
     }
   },
   "V2PlanPage": {

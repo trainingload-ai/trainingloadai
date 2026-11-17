@@ -302,11 +302,11 @@ export class PlanQueryService {
     });
   }
 
-  findIndependentLinkCandidates(userId: string, dates: string[]) {
+  findLinkCandidatesForDates(userId: string, dates: string[]) {
     return this.workouts.findMany({
       where: {
         userId,
-        planId: null,
+        OR: [{ planId: null }, { plan: { status: 'ACTIVE' } }],
         scheduledDate: {
           in: dates.map((date) => new Date(`${date}T00:00:00Z`)),
         },

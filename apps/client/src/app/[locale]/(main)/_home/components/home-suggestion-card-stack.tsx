@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkoutMatchingReviews } from "./workout-matching-reviews";
 import { Bell, CalendarDays, Loader2, MessageCircle } from "lucide-react";
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -616,6 +617,7 @@ export function HomeSuggestionCardStack({
           />
         </div>
       </div>
+      <WorkoutMatchingReviews reviews={reviewState?.workoutMatching ?? []} />
       <ResponsiveModal
         open={open}
         onOpenChange={(next) => {

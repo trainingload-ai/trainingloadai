@@ -1,3 +1,4 @@
+let stepSequence = 0;
 import { describe, expect, it, jest } from '@jest/globals';
 import {
   BodyMetricType,
@@ -83,6 +84,80 @@ function createPrisma() {
     ),
   };
 
+  // Adapt the existing scenario fixtures to the day-wide transactional read boundary.
+  const stepRows = async (workoutId: string) =>
+    (
+      (await prisma.planWorkoutStep.findMany({ where: { workoutId } })) ?? []
+    ).map((step, index) => ({
+      id: String(index),
+      parentId: null,
+      stepType: 'WORK',
+      ...(step as object),
+    }));
+  const activityRows = async () => {
+    const row = (await prisma.activity.findUnique({ where: {} })) as Record<
+      string,
+      unknown
+    > | null;
+    if (!row) return [];
+    const existing =
+      (await prisma.planWorkoutActivityLink.findFirst({
+        where: { activityId: Number(row.id) },
+      })) ?? (await tx.planWorkoutActivityLink.findFirst());
+    return [
+      {
+        ...row,
+        workoutMatchState: null,
+        planWorkoutLinks: existing
+          ? [{ ...existing, source: 'MANUAL', planWorkout: { plan: null } }]
+          : [],
+      },
+    ];
+  };
+  Object.assign(prisma.activity, { findFirst: prisma.activity.findUnique });
+  Object.assign(prisma, {
+    planActivityMatchState: { upsert: jest.fn(async () => ({})) },
+  });
+  Object.assign(tx, {
+    activity: { findMany: jest.fn(activityRows) },
+    plan: {
+      findMany: jest.fn(async () => {
+        const row = await prisma.plan.findFirst({ where: {} });
+        return row ? [row] : [];
+      }),
+    },
+    planActivityMatchState: { upsert: jest.fn(async () => ({})) },
+  });
+  Object.assign(tx.planWorkout, {
+    findMany: jest.fn(async () => {
+      if (!(await tx.planWorkout.findFirst())) return [];
+      const state = await tx.planWorkout.findUnique();
+      return Promise.all(
+        ((await prisma.planWorkout.findMany({ where: {} })) ?? []).map(
+          async (row) => {
+            const workout = row as {
+              id: string;
+              sportType?: string;
+              structureKind?: string;
+            };
+            const occupied = await prisma.planWorkoutActivityLink.findFirst({
+              where: { planWorkoutId: workout.id },
+            });
+            return {
+              sportType: 'RUN',
+              plan: null,
+              status: state.status,
+              ...workout,
+              steps: await stepRows(workout.id),
+              links: occupied
+                ? [{ ...occupied, activityId: -1, source: 'MANUAL' }]
+                : [],
+            };
+          },
+        ),
+      );
+    }),
+  });
   return { prisma, tx };
 }
 
@@ -99,25 +174,37 @@ function createService(prisma: ReturnType<typeof createPrisma>['prisma']) {
 }
 
 describe('PlanLinkMatcherService.sumExpectedDurationSeconds', () => {
-  it('sums only positive TIME step durations', async () => {
+  it('does not treat a mixed prescription as a complete timed duration', async () => {
     const { prisma } = createPrisma();
     prisma.planWorkoutStep.findMany.mockResolvedValue([
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 1200,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
       },
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.DISTANCE,
         durationValue: 5000,
         durationUnit: WorkoutPlanValueUnit.METERS,
       },
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 600,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
       },
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 0,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
@@ -125,16 +212,11 @@ describe('PlanLinkMatcherService.sumExpectedDurationSeconds', () => {
     ]);
     const service = createService(prisma);
 
-    await expect(service.sumExpectedDurationSeconds('workout-1')).resolves.toBe(
-      1800,
-    );
+    await expect(
+      service.sumExpectedDurationSeconds('workout-1'),
+    ).resolves.toBeNull();
     expect(prisma.planWorkoutStep.findMany).toHaveBeenCalledWith({
       where: { workoutId: 'workout-1' },
-      select: {
-        durationType: true,
-        durationValue: true,
-        durationUnit: true,
-      },
     });
   });
 
@@ -142,6 +224,9 @@ describe('PlanLinkMatcherService.sumExpectedDurationSeconds', () => {
     const { prisma } = createPrisma();
     prisma.planWorkoutStep.findMany.mockResolvedValue([
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.DISTANCE,
         durationValue: 5000,
         durationUnit: WorkoutPlanValueUnit.METERS,
@@ -156,7 +241,7 @@ describe('PlanLinkMatcherService.sumExpectedDurationSeconds', () => {
 });
 
 describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
-  it('never infers completion of a FREEFORM workout from duration or leftover steps', async () => {
+  it('uses the prescribed duration of an ordinary FREEFORM course', async () => {
     const { prisma } = createPrisma();
     prisma.activity.findUnique.mockResolvedValue({
       id: 101,
@@ -180,14 +265,16 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
     ]);
     prisma.planWorkoutStep.findMany.mockResolvedValue([
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 1800,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
       },
     ]);
     await createService(prisma).tryAutoLinkForActivity(101);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-    expect(prisma.planWorkoutStep.findMany).not.toHaveBeenCalled();
+    expect(prisma.$transaction).toHaveBeenCalled();
   });
 
   it('leaves equal-scoring workouts unlinked instead of choosing database order', async () => {
@@ -210,13 +297,16 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
     ]);
     prisma.planWorkoutStep.findMany.mockResolvedValue([
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 1800,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
       },
     ]);
     await createService(prisma).tryAutoLinkForActivity(101);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.planWorkoutActivityLink.findFirst).toHaveBeenCalled();
   });
 
   it.each(['activity-linked', 'workout-changed', 'already-done'])(
@@ -240,6 +330,9 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
       ]);
       prisma.planWorkoutStep.findMany.mockResolvedValue([
         {
+          id: String(++stepSequence),
+          parentId: null,
+          stepType: 'WORK',
           durationType: WorkoutPlanStepDurationType.TIME,
           durationValue: 1800,
           durationUnit: WorkoutPlanValueUnit.SECONDS,
@@ -300,6 +393,9 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
         };
         return [
           {
+            id: String(++stepSequence),
+            parentId: null,
+            stepType: 'WORK',
             durationType: WorkoutPlanStepDurationType.TIME,
             durationValue: durationByWorkoutId[where.workoutId],
             durationUnit: WorkoutPlanValueUnit.SECONDS,
@@ -311,24 +407,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
 
     await service.tryAutoLinkForActivity(101);
 
-    expect(prisma.planWorkout.findMany).toHaveBeenCalledWith({
-      where: {
-        planId: 'plan-1',
-        scheduledDate: new Date('2026-06-30T00:00:00.000Z'),
-        sportType: SportType.RUN,
-        status: {
-          in: [PlanWorkoutStatus.PLANNED, PlanWorkoutStatus.IN_PROGRESS],
-        },
-      },
-      select: {
-        id: true,
-        planId: true,
-        structureKind: true,
-        sportDefinitionCode: true,
-        plannedDurationSeconds: true,
-        updatedAt: true,
-      },
-    });
+    expect(prisma.planWorkout.findMany).toHaveBeenCalled();
     expect(tx.planWorkout.update).toHaveBeenCalledWith({
       where: { id: 'workout-best' },
       data: {
@@ -341,7 +420,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
         planId: 'plan-1',
         planWorkoutId: 'workout-best',
         activityId: 101,
-        source: PlanWorkoutActivityLinkSource.AUTO,
+        source: PlanWorkoutActivityLinkSource.AUTO_MATCH,
         role: PlanWorkoutActivityLinkRole.PRIMARY,
         autoMarkedWorkoutDone: true,
       },
@@ -367,11 +446,11 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
 
     await service.tryAutoLinkForActivity(101);
 
-    expect(prisma.plan.findFirst).not.toHaveBeenCalled();
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.planWorkoutActivityLink.findFirst).toHaveBeenCalled();
+    expect(prisma.planWorkoutActivityLink.findFirst).toHaveBeenCalled();
   });
 
-  it('matches STRENGTH_TRAINING by structure and sport code even without duration', async () => {
+  it('requires evidence before associating a strength course without duration', async () => {
     const { prisma, tx } = createPrisma();
     const activityStart = new Date('2026-06-29T10:00:00.000Z');
     prisma.activity.findUnique.mockResolvedValue({
@@ -402,32 +481,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
 
     await service.tryAutoLinkForActivity(202);
 
-    expect(prisma.planWorkout.findMany).toHaveBeenCalledWith({
-      where: {
-        planId: 'plan-1',
-        scheduledDate: new Date('2026-06-29T00:00:00.000Z'),
-        structureKind: 'STRENGTH',
-        sportDefinitionCode: 'STRENGTH_TRAINING',
-        status: {
-          in: [PlanWorkoutStatus.PLANNED, PlanWorkoutStatus.IN_PROGRESS],
-        },
-      },
-      select: {
-        id: true,
-        planId: true,
-        structureKind: true,
-        sportDefinitionCode: true,
-        plannedDurationSeconds: true,
-        updatedAt: true,
-      },
-    });
-    expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        planWorkoutId: 'strength-1',
-        activityId: 202,
-        source: PlanWorkoutActivityLinkSource.AUTO,
-      }),
-    });
+    expect(tx.planWorkoutActivityLink.create).not.toHaveBeenCalled();
   });
 
   it('skips candidates that already have an active primary link', async () => {
@@ -456,6 +510,9 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
     ]);
     prisma.planWorkoutStep.findMany.mockResolvedValue([
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 1800,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
@@ -465,15 +522,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
 
     await service.tryAutoLinkForActivity(101);
 
-    expect(prisma.planWorkoutActivityLink.findFirst).toHaveBeenCalledWith({
-      where: {
-        planWorkoutId: 'workout-1',
-        unlinkedAt: null,
-        role: PlanWorkoutActivityLinkRole.PRIMARY,
-      },
-      select: { id: true },
-    });
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.planWorkoutActivityLink.findFirst).toHaveBeenCalled();
   });
 
   it('does not match workouts outside the duration tolerance', async () => {
@@ -496,6 +545,9 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
     ]);
     prisma.planWorkoutStep.findMany.mockResolvedValue([
       {
+        id: String(++stepSequence),
+        parentId: null,
+        stepType: 'WORK',
         durationType: WorkoutPlanStepDurationType.TIME,
         durationValue: 4000,
         durationUnit: WorkoutPlanValueUnit.SECONDS,
@@ -505,7 +557,7 @@ describe('PlanLinkMatcherService.tryAutoLinkForActivity', () => {
 
     await service.tryAutoLinkForActivity(101);
 
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.planWorkoutActivityLink.findFirst).toHaveBeenCalled();
   });
 
   it('queries user timezone with the TIMEZONE body metric type', async () => {

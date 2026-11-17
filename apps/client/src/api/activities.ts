@@ -283,7 +283,7 @@ export interface Activity {
     workoutId: string;
     name: string | null;
     sportType: string;
-    source: "MANUAL" | "AUTO" | "AI";
+    source: "MANUAL" | "AUTO" | "AI" | "AUTO_MATCH";
   } | null;
 }
 

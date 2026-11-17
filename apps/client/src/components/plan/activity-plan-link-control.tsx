@@ -210,6 +210,7 @@ export function ActivityPlanLinkControl({
                         ) : null}
                       </div>
                       <span className="text-mobile-caption pc:text-[11px] text-muted-foreground">
+                        {c.planTitle ? `${c.planTitle} · ` : ""}
                         {c.expectedDurationSec != null
                           ? t("dropdown.expectedDuration", {
                               minutes: Math.max(

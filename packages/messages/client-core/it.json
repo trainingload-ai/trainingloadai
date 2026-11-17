@@ -4771,6 +4771,14 @@
       "coachPrompt": "Rivediamo il consiglio del coach di oggi e decidiamo insieme cosa fare dopo.",
       "trainingWindowClosed": "È troppo tardi per aggiungere un nuovo allenamento oggi",
       "workoutAlreadyExists": "Oggi è già previsto un allenamento"
+    },
+    "workoutMatching": {
+      "title": "Verifica associazione",
+      "ambiguous": "Più sessioni potrebbero corrispondere a questa attività. Non ho cambiato il loro stato. Scegli la sessione corretta.",
+      "insufficient": "Le informazioni non bastano per identificare la sessione. Non ho cambiato il suo stato. Associala manualmente.",
+      "manual": "Associa manualmente",
+      "manualLabel": "Associa {activity} manualmente",
+      "workout": "Allenamento"
     }
   },
   "PlanActivationDialog": {

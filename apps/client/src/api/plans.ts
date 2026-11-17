@@ -130,7 +130,11 @@ export function rollupPlanWorkoutStatuses(
   return r;
 }
 
-export type PlanWorkoutActivityLinkSource = "MANUAL" | "AUTO" | "AI";
+export type PlanWorkoutActivityLinkSource =
+  | "MANUAL"
+  | "AUTO"
+  | "AI"
+  | "AUTO_MATCH";
 export type PlanWorkoutActivityLinkRole = "PRIMARY" | "SECONDARY";
 
 /** 计划训练「期望负荷」的主导轨道 */

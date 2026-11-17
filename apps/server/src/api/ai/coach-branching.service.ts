@@ -1,3 +1,4 @@
+import { PlanLinkMatcherService } from '../plan/application/plan-link-matcher.service';
 import { Injectable, Optional } from '@nestjs/common';
 import {
   CoachApplyResult,
@@ -136,6 +137,7 @@ export class CoachBranchingService {
     private readonly planProposalPreviews: PlanProposalService,
     @Optional()
     private readonly assessmentCases?: CoachAssessmentCaseQueryService,
+    @Optional() private readonly workoutMatcher?: PlanLinkMatcherService,
   ) {}
 
   private fail(message: string): never {
@@ -1701,53 +1703,55 @@ export class CoachBranchingService {
 
   /** GET /ai/coach/pending-decisions：ACTIVE 全要，FINALIZED 只留 open_next。APPROVED 留给 apply 失败后重试。 */
   async listPendingDecisions(args: { userId: string }) {
-    const [decisions, latestReview, inquiry] = await Promise.all([
-      this.prisma.coachDecision.findMany({
-        where: {
-          state: {
-            in: [CoachDecisionState.PROPOSED, CoachDecisionState.APPROVED],
-          },
-          context: {
-            userId: args.userId,
-          },
-        },
-        include: {
-          options: { orderBy: { createdAt: 'asc' } },
-          branch: { select: { id: true, openReason: true } },
-          context: {
-            select: {
-              id: true,
-              planId: true,
-              status: true,
-              plan: { select: { id: true, title: true } },
+    const [decisions, latestReview, inquiry, workoutMatching] =
+      await Promise.all([
+        this.prisma.coachDecision.findMany({
+          where: {
+            state: {
+              in: [CoachDecisionState.PROPOSED, CoachDecisionState.APPROVED],
+            },
+            context: {
+              userId: args.userId,
             },
           },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-      }),
-      this.prisma.coachEvent.findFirst({
-        where: {
-          type: { in: ['REVIEW_DAILY', 'REVIEW_WEEKLY', 'REVIEW_MONTHLY'] },
-          occurredAt: { gte: new Date(Date.now() - 48 * 60 * 60 * 1000) },
-          context: { userId: args.userId, status: 'ACTIVE' },
-        },
-        orderBy: { occurredAt: 'desc' },
-        select: {
-          id: true,
-          occurredAt: true,
-          payload: true,
-          context: {
-            select: {
-              id: true,
-              planId: true,
-              plan: { select: { id: true, title: true } },
+          include: {
+            options: { orderBy: { createdAt: 'asc' } },
+            branch: { select: { id: true, openReason: true } },
+            context: {
+              select: {
+                id: true,
+                planId: true,
+                status: true,
+                plan: { select: { id: true, title: true } },
+              },
             },
           },
-        },
-      }),
-      this.assessmentCases?.pendingInquiry(args.userId) ?? null,
-    ]);
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+        }),
+        this.prisma.coachEvent.findFirst({
+          where: {
+            type: { in: ['REVIEW_DAILY', 'REVIEW_WEEKLY', 'REVIEW_MONTHLY'] },
+            occurredAt: { gte: new Date(Date.now() - 48 * 60 * 60 * 1000) },
+            context: { userId: args.userId, status: 'ACTIVE' },
+          },
+          orderBy: { occurredAt: 'desc' },
+          select: {
+            id: true,
+            occurredAt: true,
+            payload: true,
+            context: {
+              select: {
+                id: true,
+                planId: true,
+                plan: { select: { id: true, title: true } },
+              },
+            },
+          },
+        }),
+        this.assessmentCases?.pendingInquiry(args.userId) ?? null,
+        this.workoutMatcher?.listMatchingReviews(args.userId) ?? [],
+      ]);
 
     const nextCycleIds = decisions
       .filter((decision) =>
@@ -1776,6 +1780,7 @@ export class CoachBranchingService {
       decisions: ranked.map(presentPendingCoachDecision),
       guidance: presentReviewGuidance(latestReview),
       inquiry,
+      workoutMatching,
     };
   }
 

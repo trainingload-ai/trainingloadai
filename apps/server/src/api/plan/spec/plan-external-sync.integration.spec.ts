@@ -1,3 +1,15 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
+import { WorkoutService } from '../../workout/workout.service';
+import { EnduranceWorkoutCodec } from '../../workout/codecs/endurance-workout.codec';
+import { FreeformWorkoutCodec } from '../../workout/codecs/freeform-workout.codec';
+import { StrengthWorkoutCodec } from '../../workout/codecs/strength-workout.codec';
+import { WorkoutCodecRegistry } from '../../workout/workout-codec.registry';
+import { WorkoutDefinitionService } from '../../workout/workout-definition.service';
+import { WorkoutPersistenceService } from '../workout-persistence.service';
+import { PlanWorkoutMutabilityPolicy } from '../application/plan-workout-mutability.policy';
+import { CoachBranchingService } from '../../ai/coach-branching.service';
+import { PlanWorkoutsChangedEvent } from '../events/plan.events';
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient, type Prisma } from '@prisma/client';
@@ -177,12 +189,12 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     },
   );
 
-  function matcher() {
+  function matcher(workouts = new PlanWorkoutRepository(prisma as never)) {
     return new PlanLinkMatcherService(
       prisma as never,
       { getPreferredTimezone: async () => 'UTC' } as never,
       new PlanRepository(prisma as never),
-      new PlanWorkoutRepository(prisma as never),
+      workouts,
       new PlanActivityLinkRepository(prisma as never),
       new ActivityReadService(prisma as never),
       undefined as never,
@@ -214,6 +226,22 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     });
     return f;
   }
+
+  it('automatically completes an independent ordinary course without a training plan', async () => {
+    const f = await independentScenario();
+    await matcher().tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await manualLinks().getActivityPlanLinkByHash('user', f.activity.hashId),
+    ).toMatchObject({
+      linkedPlanWorkout: {
+        planId: null,
+        workoutId: f.independent.id,
+        source: 'AUTO_MATCH',
+        status: 'DONE',
+      },
+    });
+    expect(await matcher().listMatchingReviews('user')).toEqual([]);
+  });
 
   it('supports manual completion and undo with no training plan, preserving idempotency', async () => {
     const f = await independentScenario();
@@ -434,6 +462,8 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     });
     const activity = await prisma.activity.create({
       data: {
+        processingStatus: 'READY',
+        status: 'FINISHED',
         hashId: 'synthetic-run',
         userId: 'user',
         sportType: 'RUN',
@@ -466,54 +496,664 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     return { independent, activity, plan, workout };
   }
 
-  it('keeps ordinary independent courses out of active-plan matching and repeated analysis is idempotent', async () => {
+  it('keeps equal plan and independent candidates unresolved and repeated analysis is idempotent', async () => {
     const f = await matchingScenario();
     await matcher().tryAutoLinkForActivity(f.activity.id);
     await matcher().tryAutoLinkForActivity(f.activity.id);
-    expect(await prisma.planWorkoutActivityLink.count()).toBe(1);
-    expect(await prisma.planWorkoutActivityLink.findFirst()).toMatchObject({
-      planWorkoutId: f.workout.id,
-      activityId: f.activity.id,
-      source: 'AUTO',
-    });
-    expect(
-      await prisma.planWorkout.findUnique({ where: { id: f.independent.id } }),
-    ).toMatchObject({ status: 'PLANNED', completedAt: null });
+    expect(await prisma.planWorkoutActivityLink.count()).toBe(0);
+    expect(await matcher().listMatchingReviews('user')).toEqual([
+      expect.objectContaining({
+        reason: 'AMBIGUOUS',
+        candidates: expect.arrayContaining([
+          expect.objectContaining({ workoutId: f.workout.id }),
+          expect.objectContaining({ workoutId: f.independent.id }),
+        ]),
+      }),
+    ]);
+    expect(await prisma.planWorkout.count({ where: { status: 'DONE' } })).toBe(
+      0,
+    );
   });
 
-  it('creates only one association when activity analysis completes concurrently', async () => {
-    const f = await matchingScenario();
+  it('creates only one inferred association across concurrent analysis workers', async () => {
+    const f = await independentScenario();
     await Promise.all([
       matcher().tryAutoLinkForActivity(f.activity.id),
       matcher().tryAutoLinkForActivity(f.activity.id),
     ]);
-    expect(await prisma.planWorkoutActivityLink.count()).toBe(1);
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { unlinkedAt: null },
+      }),
+    ).toBe(1);
+    expect(await prisma.planWorkoutActivityLink.findFirst()).toMatchObject({
+      source: 'AUTO_MATCH',
+    });
   });
 
-  it('allows only one of two concurrent activities to complete the same workout', async () => {
-    const f = await matchingScenario();
+  it('leaves two indistinguishable activities competing for one course unresolved across workers', async () => {
+    const f = await independentScenario();
     const other = await prisma.activity.create({
       data: {
         hashId: 'second-run',
         userId: 'user',
         sportType: 'RUN',
-        activityName: 'Second run',
-        startTime: new Date('2026-07-06T02:00:00Z'),
+        startTime: f.activity.startTime,
         timerTime: 1800,
         state: 1,
         timezone: 'Asia/Shanghai',
+        processingStatus: 'READY',
       },
     });
     await Promise.all([
       matcher().tryAutoLinkForActivity(f.activity.id),
       matcher().tryAutoLinkForActivity(other.id),
     ]);
-    expect(await prisma.planWorkoutActivityLink.count()).toBe(1);
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { unlinkedAt: null },
+      }),
+    ).toBe(0);
+    expect(await matcher().listMatchingReviews('user')).toHaveLength(2);
+  });
+
+  it('compares courses in all active plans without privileging the first plan', async () => {
+    const f = await matchingScenario();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: 7200 },
+    });
+    const second = await prisma.plan.create({
+      data: {
+        userId: 'user',
+        periodWeeks: 1,
+        title: 'Second',
+        status: 'ACTIVE',
+        startDate: new Date('2026-07-06'),
+      },
+    });
+    await prisma.planWorkout.update({
+      where: { id: f.workout.id },
+      data: { planId: second.id },
+    });
+    await matcher().tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { unlinkedAt: null },
+      }),
+    ).toMatchObject({ planId: second.id, planWorkoutId: f.workout.id });
+    expect(
+      (
+        await manualLinks().listActivityPlanCandidatesByHash(
+          'user',
+          f.activity.hashId,
+        )
+      ).candidates,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ workoutId: f.independent.id }),
+      ]),
+    );
+  });
+
+  it('pairs two activities with two distinct courses as one day-wide assignment', async () => {
+    const f = await matchingScenario();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: 3600 },
+    });
+    const second = await prisma.activity.create({
+      data: {
+        hashId: 'long-run',
+        userId: 'user',
+        sportType: 'RUN',
+        timerTime: 3600,
+        startTime: f.activity.startTime,
+        timezone: f.activity.timezone,
+        state: 1,
+        processingStatus: 'READY',
+      },
+    });
+    await matcher().tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await prisma.planWorkoutActivityLink.findMany({
+        where: { unlinkedAt: null },
+      }),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          activityId: f.activity.id,
+          planWorkoutId: f.workout.id,
+        }),
+        expect.objectContaining({
+          activityId: second.id,
+          planWorkoutId: f.independent.id,
+        }),
+      ]),
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { unlinkedAt: null },
+      }),
+    ).toBe(2);
+  });
+
+  it('reconciles an activity uploaded before its course was imported', async () => {
+    const f = await independentScenario();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { scheduledDate: new Date('2026-07-07') },
+    });
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await prisma.planActivityMatchState.findUnique({
+        where: { activityId: f.activity.id },
+      }),
+    ).toMatchObject({ outcome: 'NO_MATCH' });
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { scheduledDate: new Date('2026-07-06') },
+    });
+    await matching.onWorkoutsChanged(
+      new PlanWorkoutsChangedEvent('user', 'external_import', [
+        f.independent.id,
+      ]),
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { unlinkedAt: null },
+      }),
+    ).toMatchObject({ planWorkoutId: f.independent.id });
+  });
+
+  it('withdraws an inference and its completion when a late competing course creates ambiguity', async () => {
+    const f = await independentScenario();
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    const competitor = await prisma.planWorkout.create({
+      data: {
+        userId: 'user',
+        dayOffset: 0,
+        sportType: 'RUN',
+        structureKind: 'FREEFORM',
+        plannedDurationSeconds: 1800,
+        scheduledDate: new Date('2026-07-06'),
+        text: 'Second run',
+      },
+    });
+    await matching.onWorkoutsChanged(
+      new PlanWorkoutsChangedEvent('user', 'external_import', [competitor.id]),
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { unlinkedAt: null },
+      }),
+    ).toBe(0);
+    expect(await prisma.planWorkout.count({ where: { status: 'DONE' } })).toBe(
+      0,
+    );
+    expect(await matching.listMatchingReviews('user')).toHaveLength(1);
+  });
+
+  it('preserves manual correction and remembers explicit unlink across event and scheduled reconciliation', async () => {
+    const f = await independentScenario();
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    await manualLinks().removeActivityPlanLinkByHash('user', f.activity.hashId);
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    await matching.rescanPendingMatches();
+    await matching.onWorkoutsChanged(
+      new PlanWorkoutsChangedEvent('user', 'workout_update', [
+        f.independent.id,
+      ]),
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { unlinkedAt: null },
+      }),
+    ).toBe(0);
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
+    await manualLinks().replaceActivityPlanLinkByHash(
+      'user',
+      f.activity.hashId,
+      { workoutId: f.independent.id },
+    );
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { unlinkedAt: null },
+      }),
+    ).toMatchObject({ source: 'MANUAL' });
+  });
+
+  it('allows manual correction of an inferred link while retaining legacy recorded binding protection', async () => {
+    const f = await independentScenario();
+    await matcher().tryAutoLinkForActivity(f.activity.id);
+    const replacement = await prisma.planWorkout.create({
+      data: {
+        userId: 'user',
+        dayOffset: 0,
+        sportType: 'RUN',
+        scheduledDate: new Date('2026-07-06'),
+        text: 'Replacement',
+      },
+    });
+    await manualLinks().replaceActivityPlanLinkByHash(
+      'user',
+      f.activity.hashId,
+      { workoutId: replacement.id },
+    );
+    expect(
+      await prisma.planWorkout.findUnique({ where: { id: f.independent.id } }),
+    ).toMatchObject({ status: 'PLANNED' });
+    await prisma.planWorkoutActivityLink.updateMany({
+      where: { unlinkedAt: null },
+      data: { source: 'AUTO' },
+    });
+    await expect(
+      manualLinks().removeActivityPlanLinkByHash('user', f.activity.hashId),
+    ).rejects.toThrow('locked');
+    await matcher().tryAutoLinkForActivity(f.activity.id);
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { unlinkedAt: null },
+      }),
+    ).toMatchObject({ planWorkoutId: replacement.id, source: 'AUTO' });
+  });
+
+  it('serializes an explicit manual choice against automatic analysis', async () => {
+    const f = await independentScenario();
+    await Promise.all([
+      matcher().tryAutoLinkForActivity(f.activity.id),
+      manualLinks().replaceActivityPlanLinkByHash('user', f.activity.hashId, {
+        workoutId: f.independent.id,
+      }),
+    ]);
+    expect(
+      await prisma.planWorkoutActivityLink.findMany({
+        where: { unlinkedAt: null },
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        source: 'MANUAL',
+        planWorkoutId: f.independent.id,
+      }),
+    ]);
+  });
+
+  it('exposes ambiguity through Coach and clears the reminder immediately after a manual choice', async () => {
+    const f = await matchingScenario();
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    const coach = new CoachBranchingService(
+      prisma as never,
+      undefined as never,
+      undefined as never,
+      { findNextCycleEligiblePlanIds: async () => [] } as never,
+      undefined as never,
+      undefined,
+      undefined,
+      matching,
+    );
+    expect(
+      (await coach.listPendingDecisions({ userId: 'user' })).workoutMatching,
+    ).toEqual([expect.objectContaining({ reason: 'AMBIGUOUS' })]);
+    expect(
+      (await coach.listPendingDecisions({ userId: 'other' })).workoutMatching,
+    ).toEqual([]);
+    await manualLinks().replaceActivityPlanLinkByHash(
+      'user',
+      f.activity.hashId,
+      { workoutId: f.independent.id },
+    );
+    expect(
+      (await coach.listPendingDecisions({ userId: 'user' })).workoutMatching,
+    ).toEqual([]);
+  });
+
+  it('rechecks feature-owned unmatched activities during scheduled recovery', async () => {
+    const f = await independentScenario();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: null },
+    });
+    const matching = matcher();
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(await matching.listMatchingReviews('user')).toEqual([
+      expect.objectContaining({ reason: 'INSUFFICIENT_EVIDENCE' }),
+    ]);
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: 1800 },
+    });
+    await matching.rescanPendingMatches();
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { unlinkedAt: null },
+      }),
+    ).toMatchObject({ source: 'AUTO_MATCH' });
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
+  });
+
+  it('recomputes the other activity after a manual choice resolves a competing day', async () => {
+    const f = await matchingScenario();
+    const matching = matcher();
+    const second = await prisma.activity.create({
+      data: {
+        hashId: 'other-same-day',
+        userId: 'user',
+        sportType: 'RUN',
+        timerTime: 1800,
+        startTime: f.activity.startTime,
+        timezone: f.activity.timezone,
+        state: 1,
+        processingStatus: 'READY',
+      },
+    });
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(await matching.listMatchingReviews('user')).toHaveLength(2);
+    await manualLinks().replaceActivityPlanLinkByHash(
+      'user',
+      f.activity.hashId,
+      { workoutId: f.workout.id },
+    );
+    await matching.onWorkoutsChanged(
+      new PlanWorkoutsChangedEvent(
+        'user',
+        'activity_link',
+        [f.workout.id],
+        f.plan.id,
+      ),
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { activityId: second.id, unlinkedAt: null },
+      }),
+    ).toMatchObject({ planWorkoutId: f.independent.id, source: 'AUTO_MATCH' });
+    expect(await matching.listMatchingReviews('user')).toEqual([]);
+  });
+
+  it('uses the athlete date consistently in Coach and manual candidates when browser timezone differs', async () => {
+    const f = await matchingScenario();
+    await prisma.activity.update({
+      where: { id: f.activity.id },
+      data: { timezone: null, startTime: new Date('2026-07-05T16:30:00Z') },
+    });
+    const matching = matcher();
+    Object.assign(matching, {
+      userService: { getPreferredTimezone: async () => 'Asia/Shanghai' },
+    });
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    expect(await matching.listMatchingReviews('user')).toEqual([
+      expect.objectContaining({ date: '2026-07-06' }),
+    ]);
+    const write = manualLinks();
+    Object.assign(write, {
+      userService: { getPreferredTimezone: async () => 'Asia/Shanghai' },
+    });
+    const candidates = await write.listActivityPlanCandidatesByHash(
+      'user',
+      f.activity.hashId,
+      'America/New_York',
+    );
+    expect(candidates.candidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ workoutId: f.workout.id }),
+        expect.objectContaining({ workoutId: f.independent.id }),
+      ]),
+    );
+  });
+
+  it('does not let invalid activity states starve scheduled matching recovery', async () => {
+    const f = await independentScenario();
+    const matching = matcher();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: null },
+    });
+    await matching.tryAutoLinkForActivity(f.activity.id);
+    for (let i = 0; i < 100; i++) {
+      const stale = await prisma.activity.create({
+        data: {
+          userId: 'user',
+          hashId: 'stale-' + i,
+          state: 0,
+          mergedIntoActivityId: f.activity.id,
+        },
+      });
+      await prisma.planActivityMatchState.create({
+        data: {
+          activityId: stale.id,
+          userId: 'user',
+          outcome: 'NO_MATCH',
+          reason: 'PENDING',
+          updatedAt: new Date('2020-01-01'),
+        },
+      });
+    }
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: 1800 },
+    });
+    await matching.rescanPendingMatches();
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { activityId: f.activity.id, unlinkedAt: null },
+      }),
+    ).toMatchObject({ source: 'AUTO_MATCH' });
+  });
+
+  it('publishes legacy course-side unlink after commit and immediately rematches the remaining activity', async () => {
+    const f = await matchingScenario();
+    const matching = matcher();
+    const write = manualLinks();
+    await prisma.planWorkout.update({
+      where: { id: f.independent.id },
+      data: { plannedDurationSeconds: 7200 },
+    });
+    const linked = await write.linkWorkoutActivity(
+      'user',
+      f.plan.id,
+      f.workout.id,
+      { activityId: f.activity.id },
+    );
+    const other = await prisma.activity.create({
+      data: {
+        userId: 'user',
+        hashId: 'waiting-run',
+        sportType: 'RUN',
+        startTime: f.activity.startTime,
+        timezone: f.activity.timezone,
+        timerTime: 1800,
+        state: 1,
+        processingStatus: 'READY',
+      },
+    });
+    await matching.tryAutoLinkForActivity(other.id);
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { activityId: other.id, unlinkedAt: null },
+      }),
+    ).toBe(0);
+    const events = new EventEmitter2();
+    events.on(PLAN_WORKOUTS_CHANGED_EVENT, (event) =>
+      matching.onWorkoutsChanged(event),
+    );
+    Object.assign(write, { events });
+    await write.unlinkWorkoutActivity(
+      'user',
+      f.plan.id,
+      f.workout.id,
+      linked.link!.id,
+    );
+    expect(
+      await prisma.planWorkoutActivityLink.findFirst({
+        where: { activityId: other.id, unlinkedAt: null },
+      }),
+    ).toMatchObject({ planWorkoutId: f.workout.id, source: 'AUTO_MATCH' });
+    expect(
+      await prisma.planWorkoutActivityLink.count({
+        where: { activityId: f.activity.id, unlinkedAt: null },
+      }),
+    ).toBe(0);
   });
 
   const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN
     ? it
     : it.skip;
+  nativeIt(
+    'preserves a user completion committed between activity evidence and workout locking',
+    async () => {
+      const f = await matchingScenario();
+      await prisma.planWorkout.update({
+        where: { id: f.independent.id },
+        data: { plannedDurationSeconds: 7200 },
+      });
+      const write = manualLinks();
+      const userWorkouts = new PlanWorkoutRepository(prisma as never);
+      const codec = new WorkoutService({} as never);
+      Object.assign(write, {
+        workouts: userWorkouts,
+        workoutMutability: new PlanWorkoutMutabilityPolicy(),
+        workoutService: codec,
+        workoutDefinitionService: new WorkoutDefinitionService(
+          new WorkoutCodecRegistry(
+            new EnduranceWorkoutCodec(codec),
+            new StrengthWorkoutCodec(),
+            new FreeformWorkoutCodec(),
+          ),
+        ),
+        workoutPersistence: new WorkoutPersistenceService(userWorkouts),
+      });
+      let selected!: () => void;
+      let resumeUser!: () => void;
+      const selectedGate = new Promise<void>((done) => (selected = done));
+      const userGate = new Promise<void>((done) => (resumeUser = done));
+      const update = userWorkouts.update.bind(userWorkouts);
+      jest
+        .spyOn(userWorkouts, 'update')
+        .mockImplementationOnce(async (args, tx) => {
+          selected();
+          await userGate;
+          return update(args, tx);
+        });
+      const confirming = write.updateWorkoutStatus(
+        'user',
+        f.plan.id,
+        f.workout.id,
+        'DONE',
+      );
+      await selectedGate;
+      await matcher().tryAutoLinkForActivity(f.activity.id);
+      expect(await prisma.planWorkoutActivityLink.findFirst()).toMatchObject({
+        autoMarkedWorkoutDone: true,
+      });
+      await prisma.planWorkout.update({
+        where: { id: f.independent.id },
+        data: { plannedDurationSeconds: 1800 },
+      });
+      const lockingWorkouts = new PlanWorkoutRepository(prisma as never);
+      let beforeLock!: () => void;
+      let resumeMatch!: () => void;
+      const lockGate = new Promise<void>((done) => (beforeLock = done));
+      const matchGate = new Promise<void>((done) => (resumeMatch = done));
+      const lock = lockingWorkouts.lockForUpdate.bind(lockingWorkouts);
+      jest
+        .spyOn(lockingWorkouts, 'lockForUpdate')
+        .mockImplementationOnce(async (id, tx) => {
+          beforeLock();
+          await matchGate;
+          return lock(id, tx);
+        });
+      const matching = matcher(lockingWorkouts).tryAutoLinkForActivity(
+        f.activity.id,
+      );
+      try {
+        await lockGate;
+        resumeUser();
+        await confirming;
+      } finally {
+        resumeUser();
+        resumeMatch();
+      }
+      await matching;
+      expect(
+        await prisma.planWorkout.findUnique({ where: { id: f.workout.id } }),
+      ).toMatchObject({ status: 'DONE' });
+      expect(
+        await prisma.planWorkoutActivityLink.findFirst({
+          where: { unlinkedAt: null },
+        }),
+      ).toMatchObject({
+        planWorkoutId: f.workout.id,
+        autoMarkedWorkoutDone: false,
+      });
+      await write.removeActivityPlanLinkByHash('user', f.activity.hashId);
+      expect(
+        await prisma.planWorkout.findUnique({ where: { id: f.workout.id } }),
+      ).toMatchObject({ status: 'DONE' });
+    },
+  );
+
+  nativeIt(
+    'never adopts an unlocked course inserted after the candidate snapshot or claims its user completion',
+    async () => {
+      const f = await independentScenario();
+      await prisma.planWorkout.update({
+        where: { id: f.independent.id },
+        data: { scheduledDate: new Date('2026-07-07') },
+      });
+      const workouts = new PlanWorkoutRepository(prisma as never);
+      const find = workouts.findMany.bind(workouts);
+      let inspected!: () => void;
+      let resume!: () => void;
+      const snapshot = new Promise<void>((done) => (inspected = done));
+      const released = new Promise<void>((done) => (resume = done));
+      jest
+        .spyOn(workouts, 'findMany')
+        .mockImplementationOnce(async (args, tx) => {
+          const rows = await find(args, tx);
+          inspected();
+          await released;
+          return rows;
+        });
+      const matching = matcher(workouts).tryAutoLinkForActivity(f.activity.id);
+      await snapshot;
+      let importedId = '';
+      try {
+        const imported = await service.createIndependentWorkout({
+          userId: 'user',
+          scheduledDate: new Date('2026-07-06'),
+          sportType: 'RUN',
+          structureKind: 'FREEFORM',
+          plannedDurationSeconds: 1800,
+          text: 'Late course',
+          blocks: [],
+        });
+        importedId = imported.id;
+        await prisma.planWorkout.update({
+          where: { id: importedId },
+          data: { status: 'DONE', completedAt: f.activity.startTime },
+        });
+      } finally {
+        resume();
+      }
+      await matching;
+      await matcher().onWorkoutsChanged(
+        new PlanWorkoutsChangedEvent('user', 'external_import', [importedId]),
+      );
+      expect(
+        await prisma.planWorkoutActivityLink.count({
+          where: { unlinkedAt: null },
+        }),
+      ).toBe(0);
+      expect(
+        await prisma.planWorkout.findUnique({ where: { id: importedId } }),
+      ).toMatchObject({ status: 'DONE', completedAt: f.activity.startTime });
+    },
+  );
+
   nativeIt.each(['workout', 'activity'])(
     'preserves completion history when deleting a %s concurrently with manual linking',
     async (target) => {
@@ -660,6 +1300,10 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     'does not let an ordinary import weaken matching guards: %s',
     async (scenario) => {
       const f = await matchingScenario();
+      await prisma.planWorkout.update({
+        where: { id: f.independent.id },
+        data: { scheduledDate: new Date('2026-07-07') },
+      });
       if (scenario === 'wrong-day')
         await prisma.planWorkout.update({
           where: { id: f.workout.id },
@@ -719,7 +1363,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       await matcher().tryAutoLinkForActivity(f.activity.id);
       expect(
         await prisma.planWorkoutActivityLink.count({
-          where: { source: 'AUTO' },
+          where: { source: 'AUTO_MATCH' },
         }),
       ).toBe(0);
       expect(

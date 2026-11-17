@@ -33,7 +33,7 @@ export type V2ActivityLinkedPlanWorkout = {
   workoutId: string;
   name: string | null;
   sportType: V2ActivitySportType;
-  source: "MANUAL" | "AUTO" | "AI";
+  source: "MANUAL" | "AUTO" | "AI" | "AUTO_MATCH";
 };
 
 export type V2ActivityListItem = {

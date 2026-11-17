@@ -2,10 +2,14 @@ import { mkdirSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { openCoachFixture } from "./fixtures/coach-page";
 
-async function openIndependentCourses(page: Page) {
+async function openIndependentCourses(
+  page: Page,
+  matchingReason?: "AMBIGUOUS" | "INSUFFICIENT_EVIDENCE",
+) {
   await openCoachFixture(page, [], { navigate: false });
   const date = new Date().toISOString().slice(0, 10);
   let linked = false;
+  let suppressed = false;
   const mutations: Array<{ method: string; body: unknown }> = [];
   const activity = {
     id: "42",
@@ -107,6 +111,7 @@ async function openIndependentCourses(page: Page) {
         body: request.postDataJSON(),
       });
       linked = request.method() === "POST";
+      if (request.method() === "DELETE") suppressed = true;
       return route.fulfill({
         json: {
           data: linked
@@ -128,7 +133,42 @@ async function openIndependentCourses(page: Page) {
       path.endsWith("/coach/home-review-state")
     )
       return route.fulfill({
-        json: { data: { decisions: [], inquiry: null, guidance: null } },
+        json: {
+          data: {
+            decisions: [],
+            inquiry: null,
+            guidance: null,
+            workoutMatching:
+              matchingReason && !linked && !suppressed
+                ? [
+                    {
+                      id: "review-42",
+                      activityHashId: activity.hashId,
+                      activityTitle: activity.title,
+                      date,
+                      reason: matchingReason,
+                      candidates: [
+                        {
+                          workoutId: "ordinary-run",
+                          planId: null,
+                          name: "Ordinary run",
+                          durationSeconds: 1800,
+                          distanceMeters: null,
+                        },
+                        {
+                          workoutId: "plan-run",
+                          planId: "plan-2",
+                          planTitle: "Second plan",
+                          name: "Easy run",
+                          durationSeconds: 1860,
+                          distanceMeters: null,
+                        },
+                      ],
+                    },
+                  ]
+                : [],
+          },
+        },
       });
     return route.fallback();
   });
@@ -208,3 +248,48 @@ for (const width of [1440, 390]) {
     });
   }
 }
+
+for (const width of [1440, 390])
+  for (const theme of ["light", "dark"] as const) {
+    test(`Coach keeps unresolved matching visible until manual association ${width} ${theme}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 960 });
+      await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+      await page.addInitScript(
+        (value) => localStorage.setItem("theme", value),
+        theme,
+      );
+      const mutations = await openIndependentCourses(page, "AMBIGUOUS");
+      const reminder = page.getByRole("article").filter({
+        has: page.getByRole("heading", { name: "Check workout association" }),
+      });
+      await expect(reminder).toBeVisible();
+      await expect(reminder).toContainText("Second plan");
+      await expect(
+        reminder.getByRole("link", {
+          name: "Associate Completed easy run manually",
+        }),
+      ).toHaveAttribute("href", "/en/activities/completed-run");
+      await reminder.getByRole("link").focus();
+      await expect(reminder.getByRole("link")).toBeFocused();
+      expect(mutations).toEqual([]);
+      mkdirSync("/private/tmp/unified-matching-qa", { recursive: true });
+      await page.screenshot({
+        path: `/private/tmp/unified-matching-qa/coach-${width}-${theme}.png`,
+        animations: "disabled",
+      });
+      await page
+        .getByRole("button", { name: "Ordinary run", exact: true })
+        .click();
+      const dialog = page.getByRole("dialog");
+      await dialog
+        .getByRole("button", { name: "Link activity", exact: true })
+        .click();
+      await page.getByRole("menuitem", { name: /Completed easy run/ }).click();
+      await expect(reminder).toHaveCount(0);
+      expect(mutations).toEqual([
+        { method: "POST", body: { workoutId: "ordinary-run" } },
+      ]);
+    });
+  }

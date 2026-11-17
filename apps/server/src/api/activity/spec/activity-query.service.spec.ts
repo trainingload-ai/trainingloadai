@@ -31,7 +31,7 @@ function createService(overrides?: {
   };
   const planQuery = {
     findActiveDateRange: jest.fn(async () => null),
-    findIndependentLinkCandidates: jest.fn(
+    findLinkCandidatesForDates: jest.fn(
       async () => overrides?.independent ?? [],
     ),
   };

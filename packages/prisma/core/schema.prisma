@@ -706,6 +706,7 @@ enum PlanWorkoutActivityLinkSource {
   MANUAL
   AUTO
   AI
+  AUTO_MATCH
 
   @@map("enum_plan_workout_activity_link_source")
 }
@@ -1266,6 +1267,7 @@ model T_user {
   externalProviderConnections       ExternalProviderConnection[]
   externalOAuthStates               ExternalOAuthState[]
   planWorkouts                      PlanWorkout[]
+  workoutMatchStates                PlanActivityMatchState[]
   planWorkoutExternalMappings       PlanWorkoutExternalMapping[]
   accountDeletionJob                AccountDeletionJob?
   userDataExportJobs                UserDataExportJob[]
@@ -3470,6 +3472,7 @@ model Activity {
   userId              String                     @map("user_id")
   user                T_user                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   planWorkoutLinks    PlanWorkoutActivityLink[]
+  workoutMatchState   PlanActivityMatchState?
   strengthExercises   ActivityStrengthExercise[]
   createdByBatchJobId String?                    @map("created_by_batch_job_id")
   createdByBatchJob   ImportBatchJob?            @relation("ActivityCreatedByBatch", fields: [createdByBatchJobId], references: [id], onDelete: SetNull)
@@ -5946,6 +5949,21 @@ model PlanWorkoutStep {
   @@index([workoutId, parentId, orderIndex])
   @@index([parentId])
   @@map("t_plan_workout_step")
+}
+
+model PlanActivityMatchState {
+  activityId Int @id @map("activity_id")
+  userId String @map("user_id")
+  outcome String
+  reason String
+  candidateWorkoutIds String[] @default([]) @map("candidate_workout_ids")
+  suppressedAt DateTime? @map("suppressed_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, outcome, updatedAt])
+  @@map("t_plan_activity_match_state")
 }
 
 model PlanWorkoutActivityLink {

@@ -45,6 +45,7 @@ describe('PlanActivityLinkService activity link summary', () => {
     };
     const tx = {
       $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      planActivityMatchState: { upsert: jest.fn(async () => ({})) },
       activity: {
         findFirst: jest.fn(async () => ({
           id: 42,
@@ -99,7 +100,7 @@ describe('PlanActivityLinkService activity link summary', () => {
           timezone: 'UTC',
         })),
       },
-      plan: { findFirst: jest.fn(async () => null) },
+      plan: { findMany: jest.fn(async () => []) },
       planWorkout: {
         findMany: jest.fn(async () => [
           {
@@ -185,6 +186,7 @@ describe('PlanActivityLinkService activity link summary', () => {
     const updateMany = jest.fn();
     const tx = {
       $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      planActivityMatchState: { upsert: jest.fn(async () => ({})) },
       activity: {
         findFirst: jest.fn(async () => ({ id: 42, startTime: new Date() })),
       },
@@ -226,6 +228,7 @@ describe('PlanActivityLinkService activity link summary', () => {
     const create = jest.fn();
     const tx = {
       $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      planActivityMatchState: { upsert: jest.fn(async () => ({})) },
       activity: {
         findFirst: jest.fn(async () => ({ id: 42, startTime: new Date() })),
       },
@@ -274,6 +277,7 @@ describe('PlanActivityLinkService activity link summary', () => {
     const findFirst = jest.fn(async () => null);
     const tx = {
       $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      planActivityMatchState: { upsert: jest.fn(async () => ({})) },
       activity: { findFirst },
     };
     const service = createService({
@@ -303,6 +307,7 @@ describe('PlanActivityLinkService activity link summary', () => {
     const updateMany = jest.fn();
     const tx = {
       $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      planActivityMatchState: { upsert: jest.fn(async () => ({})) },
       activity: { findFirst: jest.fn(async () => ({ id: 42 })) },
       planWorkoutActivityLink: {
         findMany: jest.fn(async () => [

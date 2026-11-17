@@ -5224,6 +5224,14 @@
       "coachPrompt": "Let's review today's coach advice and decide what I should do next.",
       "trainingWindowClosed": "It's too late to add a new workout for today",
       "workoutAlreadyExists": "Today's workout already exists"
+    },
+    "workoutMatching": {
+      "title": "Check workout association",
+      "ambiguous": "More than one course could match this activity. I have left them unchanged. Please choose the right course.",
+      "insufficient": "There is not enough information to identify the course. I have left it unchanged. Please associate it manually.",
+      "manual": "Associate manually",
+      "manualLabel": "Associate {activity} manually",
+      "workout": "Workout"
     }
   },
   "PlanActivationDialog": {

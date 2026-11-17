@@ -1319,6 +1319,7 @@ describe('PlanService workout activity links', () => {
     workout: Record<string, unknown> = createWorkoutRow(),
     activity: Record<string, unknown> | null = {
       id: 101,
+      hashId: 'activity-101',
       userId: 'user-1',
       startTime: activityStart,
     },
@@ -1380,6 +1381,42 @@ describe('PlanService workout activity links', () => {
         callback(tx),
       ),
     };
+    Object.assign(tx, {
+      $queryRaw: jest.fn(async () => [{ id: 'locked' }]),
+      activity: prisma.activity,
+      planActivityMatchState: { upsert: jest.fn(async () => ({})) },
+    });
+    tx.planWorkout.findUnique.mockImplementation(async () => ({
+      ...workout,
+      status: workoutStatus,
+    }));
+    let lastLink: Record<string, unknown> | null = null;
+    tx.planWorkoutActivityLink.create.mockImplementation(
+      async ({ data }: { data: Record<string, unknown> }) => {
+        lastLink = {
+          id: 'link-1',
+          ...data,
+          linkedAt: now,
+          unlinkedAt: null,
+          planWorkout: workout,
+        };
+        return lastLink as never;
+      },
+    );
+    prisma.planWorkoutActivityLink.findFirst.mockImplementation(
+      async () => lastLink as never,
+    );
+    Object.assign(tx.planWorkoutActivityLink, {
+      findUnique: prisma.planWorkoutActivityLink.findUnique,
+      findMany: jest.fn(async () => {
+        const existing = await prisma.planWorkoutActivityLink.findFirst();
+        if (existing) lastLink = existing as never;
+        return existing
+          ? [{ source: 'MANUAL', autoMarkedWorkoutDone: true, ...existing }]
+          : [];
+      }),
+      updateMany: jest.fn(async () => ({ count: 0 })),
+    });
     const coachContext = {
       appendEvent: jest.fn(async () => undefined),
     };
@@ -1431,16 +1468,18 @@ describe('PlanService workout activity links', () => {
         completedAt: activityStart,
       },
     });
-    expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith({
-      data: {
-        planId: 'plan-1',
-        planWorkoutId: 'workout-1',
-        activityId: 101,
-        source: 'MANUAL',
-        role: 'PRIMARY',
-        autoMarkedWorkoutDone: true,
-      },
-    });
+    expect(tx.planWorkoutActivityLink.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          planId: 'plan-1',
+          planWorkoutId: 'workout-1',
+          activityId: 101,
+          source: 'MANUAL',
+          role: 'PRIMARY',
+          autoMarkedWorkoutDone: true,
+        },
+      }),
+    );
     expect(coachContext.appendEvent).toHaveBeenNthCalledWith(1, {
       tx,
       userId: 'user-1',
@@ -1451,7 +1490,7 @@ describe('PlanService workout activity links', () => {
       branchId: null,
       commitId: null,
       payload: {
-        action: 'link_workout_activity',
+        action: 'replace_activity_plan_link',
         reason: null,
         toolCallId: null,
         decisionId: 'decision-1',
@@ -1459,8 +1498,7 @@ describe('PlanService workout activity links', () => {
         commitId: null,
         workoutId: 'workout-1',
         activityId: 101,
-        sourceType: 'MANUAL',
-        role: 'PRIMARY',
+        hashId: 'activity-101',
         autoMarkedWorkoutDone: true,
       },
     });
@@ -1475,6 +1513,7 @@ describe('PlanService workout activity links', () => {
       commitId: null,
       payload: {
         action: 'auto_mark_done_on_link',
+        hashId: 'activity-101',
         workoutId: 'workout-1',
         activityId: 101,
       },
@@ -1503,7 +1542,7 @@ describe('PlanService workout activity links', () => {
     );
 
     expect(result.link).toMatchObject({ id: 'existing-link' });
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.$transaction).toHaveBeenCalled();
     expect(tx.planWorkoutActivityLink.create).not.toHaveBeenCalled();
     expect(coachContext.appendEvent).not.toHaveBeenCalled();
   });
@@ -1576,7 +1615,7 @@ describe('PlanService workout activity links', () => {
     const { service, prisma, tx } = createService(
       createWorkoutRow({ status: 'DONE' }),
     );
-    prisma.planWorkoutActivityLink.findUnique.mockResolvedValueOnce({
+    prisma.planWorkoutActivityLink.findUnique.mockResolvedValue({
       id: 'link-1',
       planId: 'plan-1',
       planWorkoutId: 'workout-1',

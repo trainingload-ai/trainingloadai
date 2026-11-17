@@ -2312,7 +2312,7 @@ export class ActivityService {
       );
       await this.setActivityStatus(activity.id, $Enums.ActivityStatus.FINISHED);
       if (userId) {
-        void this.planLinkMatcher
+        await this.planLinkMatcher
           .tryAutoLinkForActivity(activity.id)
           .catch(() => {});
       }

@@ -1,3 +1,8 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  PLAN_WORKOUTS_CHANGED_EVENT,
+  PlanWorkoutsChangedEvent,
+} from '../events/plan.events';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
@@ -52,7 +57,15 @@ export class PlanExternalSyncService {
     private readonly users: UserService,
     @Optional()
     private readonly workoutTargetResolver?: PlanWorkoutTargetResolver,
+    @Optional() private readonly events?: EventEmitter2,
   ) {}
+
+  async notifyWorkoutsCommitted(userId: string, workoutIds: string[]) {
+    await this.events?.emitAsync(
+      PLAN_WORKOUTS_CHANGED_EVENT,
+      new PlanWorkoutsChangedEvent(userId, 'external_import', workoutIds),
+    );
+  }
 
   runTransaction<T>(fn: (tx: PlanDb) => Promise<T>): Promise<T> {
     return this.prisma.$transaction((tx) => fn(tx));

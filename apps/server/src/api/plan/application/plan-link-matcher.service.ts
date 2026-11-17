@@ -1,45 +1,94 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { Interval } from '@nestjs/schedule';
 import { createHash } from 'node:crypto';
-import {
-  BodyMetricType,
-  PlanWorkoutActivityLinkRole,
-  PlanWorkoutActivityLinkSource,
-  PlanWorkoutStatus,
-  SportType,
-  WorkoutPlanStepDurationType,
-  WorkoutPlanValueUnit,
-} from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UserService } from '@/api/user/user.service';
 import { UserQueryService } from '@/api/user/user-query.service';
+import { ActivityReadService } from '../../activity/activity-read.service';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
-import { ActivityReadService } from '../../activity/activity-read.service';
 import {
   resolveActivityCalendarDayStr,
   scheduledDateFromCalendar,
 } from '../plan-link-calendar.util';
+import { plannedStepTotal } from './plan-execution-chart';
+import { matchWorkoutDay } from './workout-day-matching';
+import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
+import {
+  PLAN_WORKOUTS_CHANGED_EVENT,
+  PlanWorkoutsChangedEvent,
+} from '../events/plan.events';
+import type {
+  WorkoutMatchingReview,
+  WorkoutMatchingReason,
+} from '@shared/workout-matching';
 
-/** 期望时长与活动时长偏差阈值：|act-plan|/plan ≤ RATIO */
-const DURATION_RATIO = 0.5;
+const ACTIVITY_SELECT = {
+  id: true,
+  userId: true,
+  activityName: true,
+  hashId: true,
+  sportType: true,
+  sportDefinitionCode: true,
+  startTime: true,
+  timezone: true,
+  timerTime: true,
+  elapsedTime: true,
+  distance: true,
+  planWorkoutLinks: {
+    where: { unlinkedAt: null },
+    select: {
+      id: true,
+      planWorkoutId: true,
+      source: true,
+      autoMarkedWorkoutDone: true,
+      planWorkout: {
+        select: { status: true, plan: { select: { status: true } } },
+      },
+    },
+  },
+  workoutMatchState: true,
+} satisfies Prisma.ActivitySelect;
+const WORKOUT_INCLUDE = {
+  plan: { select: { status: true, title: true } },
+  steps: true,
+  links: {
+    where: { unlinkedAt: null },
+    select: { id: true, source: true, activityId: true },
+  },
+} satisfies Prisma.PlanWorkoutInclude;
+type Workout = Prisma.PlanWorkoutGetPayload<{
+  include: typeof WORKOUT_INCLUDE;
+}>;
 
-function durationValueToSeconds(
-  value: number,
-  unit: WorkoutPlanValueUnit | null | undefined,
-): number {
-  const u = unit ?? WorkoutPlanValueUnit.SECONDS;
-  switch (u) {
-    case WorkoutPlanValueUnit.SECONDS:
-      return Math.max(0, value);
-    default:
-      return Math.max(0, value);
-  }
+function expected(workout: Pick<Workout, 'plannedDurationSeconds' | 'steps'>) {
+  const steps = workout.steps.map((step) => ({
+    ...step,
+    durationUnit:
+      step.durationUnit ?? (step.durationType === 'TIME' ? 'SECONDS' : null),
+  }));
+  const duration = plannedStepTotal(steps, 'DURATION_MIN');
+  const distance = plannedStepTotal(steps, 'DISTANCE_KM');
+  return {
+    durationSeconds:
+      workout.plannedDurationSeconds ??
+      (duration == null ? null : duration * 60),
+    distanceMeters: distance == null ? null : distance * 1000,
+  };
 }
 
+/** Owns day-wide inference, reversible completion and the Coach's unresolved matching facts. */
 @Injectable()
 export class PlanLinkMatcherService {
   private readonly logger = new Logger(PlanLinkMatcherService.name);
+  private readonly pending = new Map<
+    string,
+    { dirty: boolean; work: Promise<void> }
+  >();
+  private sweeping = false;
   constructor(
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
@@ -48,303 +97,539 @@ export class PlanLinkMatcherService {
     private readonly links: PlanActivityLinkRepository,
     private readonly activityRead: ActivityReadService,
     private readonly users: UserQueryService,
+    @Optional() private readonly events?: EventEmitter2,
   ) {}
 
-  /** 累加该 workout 下所有 TIME 步骤时长（秒）；无有效时长返回 null */
-  async sumExpectedDurationSeconds(workoutId: string): Promise<number | null> {
-    const steps = await this.links.findSteps({
-      where: { workoutId },
-      select: {
-        durationType: true,
-        durationValue: true,
-        durationUnit: true,
-      },
-    });
-    let sec = 0;
-    for (const s of steps) {
-      if (s.durationType !== WorkoutPlanStepDurationType.TIME) continue;
-      if (typeof s.durationValue !== 'number' || s.durationValue <= 0) continue;
-      sec += durationValueToSeconds(s.durationValue, s.durationUnit);
-    }
-    return sec > 0 ? sec : null;
+  private async timezone(userId: string) {
+    return this.userService
+      ? this.userService.getPreferredTimezone(userId)
+      : ((
+          await this.users.bodyMetrics().findFirst({
+            where: { userId, type: 'TIMEZONE' },
+            orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
+            select: { value: true },
+          })
+        )?.value ?? null);
   }
 
-  /**
-   * 活动分析完成后尝试自动关联 ACTIVE 计划中的课表。
-   *
-   * **按活动发生日匹配（与上传/分析完成时刻无关）**：用 `activity.startTime` 的 UTC 瞬间，
-   * 在 `activity.timezone` → 用户资料时区 的链上格式化为当地日历日 `YYYY-MM-DD`，
-   * 只查询 `PlanWorkout.scheduledDate` 等于该日的 PLANNED/IN_PROGRESS 课表；不会用「今天」替代。
-   *
-   * 不变量：activity 已有任意 active link 则跳过；一节 workout 同时最多一条 PRIMARY。
-   */
+  async sumExpectedDurationSeconds(workoutId: string): Promise<number | null> {
+    const steps = await this.links.findSteps({ where: { workoutId } });
+    const duration = plannedStepTotal(
+      steps.map((step) => ({
+        ...step,
+        durationUnit:
+          step.durationUnit ??
+          (step.durationType === 'TIME' ? 'SECONDS' : null),
+      })),
+      'DURATION_MIN',
+    );
+    return duration == null || duration <= 0 ? null : duration * 60;
+  }
+
   async tryAutoLinkForActivity(activityId: number): Promise<void> {
-    try {
-      const activity = await this.activityRead.findUnique({
-        where: { id: activityId },
-        select: {
-          id: true,
-          userId: true,
-          sportType: true,
-          sportDefinitionCode: true,
-          startTime: true,
-          timerTime: true,
-          elapsedTime: true,
-          state: true,
-          timezone: true,
-        },
-      });
-
-      if (!activity || activity.state !== 1) return;
-      if (!activity.startTime) return;
-
-      const sport = activity.sportType;
-      const isStrengthActivity =
-        activity.sportDefinitionCode === 'STRENGTH_TRAINING';
-      if (
-        !sport ||
-        (sport === SportType.UNKNOWN && !isStrengthActivity) ||
-        sport === SportType.STRETCHING
-      ) {
-        return;
-      }
-
-      const actDur =
-        typeof activity.timerTime === 'number' && activity.timerTime > 0
-          ? activity.timerTime
-          : typeof activity.elapsedTime === 'number' && activity.elapsedTime > 0
-            ? activity.elapsedTime
-            : null;
-      if ((actDur === null || actDur <= 0) && !isStrengthActivity) return;
-
-      // check 是否已经关联了课表
-      const existing = await this.links.findFirst({
-        where: { activityId: activity.id, unlinkedAt: null },
-      });
-      if (existing) return;
-
-      const activePlan = await this.plans.findFirst({
-        where: { userId: activity.userId, status: 'ACTIVE' },
-        select: { id: true },
-      });
-      if (!activePlan) return;
-
-      const userTz = this.userService
-        ? await this.userService.getPreferredTimezone(activity.userId)
-        : ((
-            await this.users.bodyMetrics().findFirst({
-              where: { userId: activity.userId, type: BodyMetricType.TIMEZONE },
-              orderBy: [{ effectiveDate: 'desc' }, { createdAt: 'desc' }],
-              select: { value: true },
-            })
-          )?.value ?? null);
-
-      // 日历日完全由 startTime + 时区决定；与本次请求/入库时间无关（前天骑的车只匹配前天排期）
-      const dayStr = resolveActivityCalendarDayStr(
-        new Date(activity.startTime),
-        activity.timezone,
-        null,
-        userTz,
-      );
-      if (!dayStr) return;
-
-      const scheduledEq = scheduledDateFromCalendar(dayStr);
-
-      const workouts = await this.workouts.findMany({
-        where: {
-          planId: activePlan.id,
-          scheduledDate: scheduledEq,
-          ...(isStrengthActivity
-            ? {
-                structureKind: 'STRENGTH',
-                sportDefinitionCode: 'STRENGTH_TRAINING',
-              }
-            : { sportType: sport }),
-          status: {
-            in: [PlanWorkoutStatus.PLANNED, PlanWorkoutStatus.IN_PROGRESS],
-          },
-        },
-        select: {
-          id: true,
-          planId: true,
-          structureKind: true,
-          sportDefinitionCode: true,
-          plannedDurationSeconds: true,
-          updatedAt: true,
-        },
-      });
-
-      if (workouts.length === 0) return;
-
-      type Scored = {
-        workoutId: string;
-        planId: string;
-        expectedSec: number | null;
-        diff: number;
-        updatedAt?: Date;
-      };
-      const scored: Scored[] = [];
-
-      for (const w of workouts) {
-        // Calendar-only prescriptions do not provide enough evidence for auto completion.
-        if (w.structureKind === 'FREEFORM') continue;
-        const expectedSec =
-          isStrengthActivity &&
-          typeof w.plannedDurationSeconds === 'number' &&
-          w.plannedDurationSeconds > 0
-            ? w.plannedDurationSeconds
-            : await this.sumExpectedDurationSeconds(w.id);
-        if (!isStrengthActivity && (expectedSec === null || expectedSec <= 0)) {
-          continue;
-        }
-
-        if (
-          !isStrengthActivity &&
-          actDur != null &&
-          expectedSec != null &&
-          Math.abs(actDur - expectedSec) / expectedSec > DURATION_RATIO
-        ) {
-          continue;
-        }
-
-        const taken = await this.links.findFirst({
-          where: {
-            planWorkoutId: w.id,
-            unlinkedAt: null,
-            role: PlanWorkoutActivityLinkRole.PRIMARY,
-          },
-          select: { id: true },
-        });
-        if (taken) continue;
-
-        scored.push({
-          workoutId: w.id,
-          planId: w.planId,
-          expectedSec,
-          diff:
-            actDur != null && expectedSec != null
-              ? Math.abs(actDur - expectedSec)
-              : 0,
-          updatedAt: w.updatedAt,
-        });
-      }
-
-      if (scored.length === 0) {
-        this.logDecision(
-          activity.userId,
-          activity.id,
-          'NO_ELIGIBLE_WORKOUT',
-          0,
-        );
-        return;
-      }
-
-      scored.sort((a, b) => a.diff - b.diff);
-      const best = scored[0]!;
-      if (scored[1]?.diff === best.diff) {
-        this.logDecision(
-          activity.userId,
-          activity.id,
-          'AMBIGUOUS_CANDIDATES',
-          scored.length,
-        );
-        return;
-      }
-
-      // link + 自动 DONE 同事务，避免出现「已链接但 status 仍 PLANNED」的不一致中间态
-      const matched = await this.prisma.$transaction(async (tx) => {
-        if (
-          !(await this.links.lockLinkTargets(activity.id, best.workoutId, tx))
-        )
+    const activity = await this.activityRead.findFirst({
+      where: { id: activityId, state: 1, mergedIntoActivityId: null },
+      select: { userId: true, startTime: true, timezone: true },
+    });
+    if (!activity?.startTime) return;
+    // Match the association lock order before the state's foreign-key write.
+    const persisted = await withSerializableRetry(() =>
+      this.prisma.$transaction(async (tx) => {
+        if (!(await this.links.lockLinkTargets(activityId, null, tx)))
           return false;
-        const occupied = await this.links.findFirst(
+        await this.links.putMatchState(
           {
-            where: {
-              unlinkedAt: null,
-              OR: [
-                { activityId: activity.id },
-                {
-                  planWorkoutId: best.workoutId,
-                  role: PlanWorkoutActivityLinkRole.PRIMARY,
-                },
-              ],
-            },
-            select: { id: true },
-          },
-          tx,
-        );
-        if (occupied) return false;
-        const current = await this.workouts.findFirst(
-          {
-            where: {
-              id: best.workoutId,
+            where: { activityId },
+            create: {
+              activityId,
               userId: activity.userId,
-              planId: best.planId,
-              scheduledDate: scheduledEq,
-              structureKind: { not: 'FREEFORM' },
-              plan: { status: 'ACTIVE' },
-              status: {
-                in: [PlanWorkoutStatus.PLANNED, PlanWorkoutStatus.IN_PROGRESS],
-              },
-              ...(best.updatedAt ? { updatedAt: best.updatedAt } : {}),
+              outcome: 'NO_MATCH',
+              reason: 'PENDING',
+              candidateWorkoutIds: [],
             },
-            select: { id: true },
-          },
-          tx,
-        );
-        if (!current) return false;
-        const autoMarked = await this.workouts.markDoneIfApplicable(
-          best.workoutId,
-          activity.startTime ?? null,
-          tx,
-        );
-        if (!autoMarked) return false;
-        await this.links.create(
-          {
-            data: {
-              planId: best.planId,
-              planWorkoutId: best.workoutId,
-              activityId: activity.id,
-              source: PlanWorkoutActivityLinkSource.AUTO,
-              role: PlanWorkoutActivityLinkRole.PRIMARY,
-              autoMarkedWorkoutDone: autoMarked,
-            },
+            update: {},
           },
           tx,
         );
         return true;
-      });
-      this.logDecision(
-        activity.userId,
-        activity.id,
-        matched ? 'MATCHED' : 'STATE_CHANGED_BEFORE_COMMIT',
-        scored.length,
-        best.workoutId,
+      }),
+    );
+    if (!persisted) return;
+    const timezone = await this.timezone(activity.userId);
+    const day = resolveActivityCalendarDayStr(
+      activity.startTime,
+      activity.timezone,
+      null,
+      timezone,
+    );
+    if (day) await this.requestDay(activity.userId, day);
+  }
+
+  private requestDay(userId: string, day: string): Promise<void> {
+    const key = userId + ':' + day;
+    const existing = this.pending.get(key);
+    if (existing) {
+      existing.dirty = true;
+      return existing.work;
+    }
+    const entry = { dirty: true, work: Promise.resolve() };
+    this.pending.set(key, entry);
+    entry.work = (async () => {
+      while (entry.dirty) {
+        entry.dirty = false;
+        try {
+          await this.reconcileDay(userId, day);
+        } catch (error) {
+          const code = (error as { code?: unknown })?.code;
+          this.logger.warn(
+            'Workout matching failed code=' +
+              (typeof code === 'string' && /^[A-Z0-9]+$/.test(code)
+                ? code
+                : 'UNKNOWN'),
+          );
+        }
+      }
+    })().finally(() => {
+      if (this.pending.get(key) === entry) this.pending.delete(key);
+    });
+    return entry.work;
+  }
+
+  private async reconcileDay(userId: string, day: string) {
+    const timezone = await this.timezone(userId);
+    const date = scheduledDateFromCalendar(day);
+    const from = new Date(date.getTime() - 86_400_000);
+    const to = new Date(date.getTime() + 2 * 86_400_000);
+    const result = await withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
+          await this.links.lockMatchDay(userId, day, tx);
+          const activityWhere: Prisma.ActivityWhereInput = {
+            userId,
+            state: 1,
+            mergedIntoActivityId: null,
+            startTime: { gte: from, lt: to },
+            OR: [{ status: 'FINISHED' }, { processingStatus: 'READY' }],
+          };
+          let rows = await this.activityRead.activity(tx).findMany({
+            where: activityWhere,
+            select: ACTIVITY_SELECT,
+            orderBy: { id: 'asc' },
+          });
+          rows = rows.filter(
+            (row) =>
+              row.startTime &&
+              resolveActivityCalendarDayStr(
+                row.startTime,
+                row.timezone,
+                null,
+                timezone,
+              ) === day,
+          );
+          for (const row of rows)
+            await this.links.lockLinkTargets(row.id, null, tx);
+          rows = await this.activityRead.activity(tx).findMany({
+            where: { ...activityWhere, id: { in: rows.map((row) => row.id) } },
+            select: ACTIVITY_SELECT,
+            orderBy: { id: 'asc' },
+          });
+          const activePlans = await this.plans.findMany(
+            { where: { userId, status: 'ACTIVE' }, select: { id: true } },
+            tx,
+          );
+          const workoutWhere: Prisma.PlanWorkoutWhereInput = {
+            userId,
+            scheduledDate: date,
+            OR: [
+              { planId: null },
+              { planId: { in: activePlans.map((plan) => plan.id) } },
+            ],
+          };
+          let workouts = await this.workouts.findMany(
+            {
+              where: workoutWhere,
+              include: WORKOUT_INCLUDE,
+              orderBy: { id: 'asc' },
+            },
+            tx,
+          );
+          const lockIds = [
+            ...new Set([
+              ...workouts.map((workout) => workout.id),
+              ...rows.flatMap((row) =>
+                row.planWorkoutLinks.map((link) => link.planWorkoutId),
+              ),
+            ]),
+          ].sort();
+          for (const workoutId of lockIds)
+            await this.workouts.lockForUpdate(workoutId, tx);
+          workouts = await this.workouts.findMany(
+            {
+              where: { ...workoutWhere, id: { in: lockIds } },
+              include: WORKOUT_INCLUDE,
+              orderBy: { id: 'asc' },
+            },
+            tx,
+          );
+          // Status changes own the workout lock, so their completion flags must be read after it.
+          rows = await this.activityRead.activity(tx).findMany({
+            where: {
+              ...activityWhere,
+              id: { in: rows.map((row) => row.id) },
+            },
+            select: ACTIVITY_SELECT,
+            orderBy: { id: 'asc' },
+          });
+          const activities = rows.filter(
+            (row) =>
+              !row.workoutMatchState?.suppressedAt &&
+              !row.planWorkoutLinks.some(
+                (link) =>
+                  link.source !== 'AUTO_MATCH' ||
+                  !link.autoMarkedWorkoutDone ||
+                  (link.planWorkout.plan &&
+                    link.planWorkout.plan.status !== 'ACTIVE'),
+              ),
+          );
+          const inferredLinks = activities.flatMap(
+            (activity) => activity.planWorkoutLinks,
+          );
+          const inferredIds = new Set(inferredLinks.map((link) => link.id));
+          const inferredWorkouts = new Set(
+            inferredLinks.map((link) => link.planWorkoutId),
+          );
+          workouts = workouts.filter(
+            (workout) =>
+              (!workout.plan || workout.plan.status === 'ACTIVE') &&
+              !workout.links.some((link) => !inferredIds.has(link.id)) &&
+              (workout.status === 'PLANNED' ||
+                workout.status === 'IN_PROGRESS' ||
+                (workout.status === 'DONE' &&
+                  inferredWorkouts.has(workout.id))),
+          );
+          const decision = matchWorkoutDay(
+            activities.map((activity) => ({
+              id: activity.id,
+              sportType: activity.sportType,
+              sportDefinitionCode: activity.sportDefinitionCode,
+              durationSeconds:
+                activity.timerTime && activity.timerTime > 0
+                  ? activity.timerTime
+                  : activity.elapsedTime && activity.elapsedTime > 0
+                    ? activity.elapsedTime
+                    : null,
+              distanceMeters: activity.distance,
+            })),
+            workouts.map((workout) => ({
+              id: workout.id,
+              sportType: workout.sportType,
+              sportDefinitionCode: workout.sportDefinitionCode,
+              ...expected(workout),
+            })),
+          );
+          const matched = new Map(
+            decision.matches.map((match) => [
+              match.activityId,
+              match.workoutId,
+            ]),
+          );
+          let changed = false;
+          for (const activity of activities) {
+            for (const link of activity.planWorkoutLinks) {
+              if (matched.get(activity.id) === link.planWorkoutId) continue;
+              await this.links.updateMany(
+                {
+                  where: { id: link.id, unlinkedAt: null },
+                  data: { unlinkedAt: new Date() },
+                },
+                tx,
+              );
+              if (link.autoMarkedWorkoutDone) {
+                const remaining = await this.links.findFirst(
+                  {
+                    where: {
+                      planWorkoutId: link.planWorkoutId,
+                      unlinkedAt: null,
+                      role: 'PRIMARY',
+                    },
+                  },
+                  tx,
+                );
+                if (!remaining)
+                  await this.workouts.updateMany(
+                    {
+                      where: { id: link.planWorkoutId, status: 'DONE' },
+                      data: { status: 'PLANNED', completedAt: null },
+                    },
+                    tx,
+                  );
+              }
+              changed = true;
+            }
+          }
+          for (const activity of activities) {
+            const workoutId = matched.get(activity.id);
+            const existing = activity.planWorkoutLinks.find(
+              (link) => link.planWorkoutId === workoutId,
+            );
+            if (workoutId && !existing) {
+              const workout = workouts.find(
+                (workout) => workout.id === workoutId,
+              )!;
+              const done = await this.workouts.markDoneIfApplicable(
+                workoutId,
+                activity.startTime,
+                tx,
+              );
+              if (!done) throw new Error('WORKOUT_MATCH_STATE_CHANGED');
+              await this.links.create(
+                {
+                  data: {
+                    planId: workout.planId,
+                    planWorkoutId: workoutId,
+                    activityId: activity.id,
+                    source: 'AUTO_MATCH',
+                    role: 'PRIMARY',
+                    autoMarkedWorkoutDone: true,
+                  },
+                },
+                tx,
+              );
+              changed = true;
+            }
+            const review = decision.reviews.find(
+              (review) => review.activityId === activity.id,
+            );
+            const candidateIds = workoutId
+              ? [workoutId]
+              : (review?.candidateWorkoutIds ?? []);
+            const outcome = workoutId
+              ? 'AUTO_LINKED'
+              : review
+                ? 'NEEDS_REVIEW'
+                : 'NO_MATCH';
+            const reason = workoutId
+              ? 'MATCHED'
+              : (review?.reason ?? 'NO_ELIGIBLE_WORKOUT');
+            await this.links.putMatchState(
+              {
+                where: { activityId: activity.id },
+                create: {
+                  activityId: activity.id,
+                  userId,
+                  outcome,
+                  reason,
+                  candidateWorkoutIds: candidateIds,
+                },
+                update: { outcome, reason, candidateWorkoutIds: candidateIds },
+              },
+              tx,
+            );
+          }
+          return {
+            changed,
+            matched: decision.matches.length,
+            reviews: decision.reviews.length,
+          };
+        },
+        {
+          timeout: 30_000,
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        },
+      ),
+    );
+    if (result.changed) {
+      this.logger.log(
+        'Workout matching committed dayRef=' +
+          createHash('sha256')
+            .update(userId + ':' + day)
+            .digest('hex')
+            .slice(0, 24) +
+          ' matched=' +
+          result.matched +
+          ' reviews=' +
+          result.reviews,
       );
-    } catch (e) {
-      this.logger.warn(
-        `[PlanLinkMatcher] tryAutoLinkForActivity(${activityId}) failed: ${
-          e instanceof Error ? e.message : String(e)
-        }`,
+      await this.events?.emitAsync(
+        PLAN_WORKOUTS_CHANGED_EVENT,
+        new PlanWorkoutsChangedEvent(userId, 'automatic_matching'),
       );
     }
   }
 
-  private logDecision(
-    userId: string,
-    activityId: number,
-    reason: string,
-    candidateCount: number,
-    workoutId?: string,
-  ) {
-    const ref = (value: string) =>
-      createHash('sha256')
-        .update(`${userId}:${value}`)
-        .digest('hex')
-        .slice(0, 24);
-    this.logger.log(
-      `Plan auto-link decision: reason=${reason} activityRef=${ref(String(activityId))} candidateCount=${candidateCount}${workoutId ? ` workoutRef=${ref(workoutId)}` : ''}`,
+  @OnEvent(PLAN_WORKOUTS_CHANGED_EVENT)
+  async onWorkoutsChanged(event: PlanWorkoutsChangedEvent) {
+    if (event.reason === 'automatic_matching') return;
+    const [workouts, states] = await Promise.all([
+      this.workouts.findMany({
+        where: {
+          userId: event.userId,
+          ...(event.workoutIds.length
+            ? { id: { in: event.workoutIds } }
+            : event.planId
+              ? { planId: event.planId }
+              : {}),
+        },
+        select: { scheduledDate: true },
+        take: 1000,
+      }),
+      this.links.findMatchStates({
+        where: {
+          userId: event.userId,
+          suppressedAt: null,
+          ...(event.workoutIds.length
+            ? { candidateWorkoutIds: { hasSome: event.workoutIds } }
+            : {}),
+        },
+        include: { activity: { select: { startTime: true, timezone: true } } },
+        take: 1000,
+      }),
+    ]);
+    const timezone = await this.timezone(event.userId);
+    const days = new Set(
+      workouts.flatMap((workout) =>
+        workout.scheduledDate
+          ? [workout.scheduledDate.toISOString().slice(0, 10)]
+          : [],
+      ),
     );
+    for (const state of states) {
+      if (!state.activity.startTime) continue;
+      const day = resolveActivityCalendarDayStr(
+        state.activity.startTime,
+        state.activity.timezone,
+        null,
+        timezone,
+      );
+      if (day) days.add(day);
+    }
+    for (const day of days) await this.requestDay(event.userId, day);
+  }
+
+  /** Repairs missed post-commit wakeups; only feature-owned states are revisited, never a historical backfill. */
+  @Interval(60_000)
+  async rescanPendingMatches() {
+    if (this.sweeping) return;
+    this.sweeping = true;
+    try {
+      const states = await this.links.findMatchStates({
+        where: {
+          suppressedAt: null,
+          outcome: { in: ['NO_MATCH', 'NEEDS_REVIEW', 'AUTO_LINKED'] },
+          activity: {
+            state: 1,
+            mergedIntoActivityId: null,
+            startTime: { not: null },
+            OR: [{ status: 'FINISHED' }, { processingStatus: 'READY' }],
+            planWorkoutLinks: {
+              none: {
+                unlinkedAt: null,
+                OR: [
+                  { source: { not: 'AUTO_MATCH' } },
+                  { autoMarkedWorkoutDone: false },
+                  { planWorkout: { plan: { status: { not: 'ACTIVE' } } } },
+                ],
+              },
+            },
+          },
+        },
+        orderBy: { updatedAt: 'asc' },
+        take: 100,
+        select: { activityId: true },
+      });
+      for (const state of states)
+        await this.tryAutoLinkForActivity(state.activityId);
+    } catch {
+      this.logger.warn('Workout matching rescan deferred');
+    } finally {
+      this.sweeping = false;
+    }
+  }
+
+  async listMatchingReviews(userId: string): Promise<WorkoutMatchingReview[]> {
+    const states = await this.links.findMatchStates({
+      where: {
+        userId,
+        outcome: 'NEEDS_REVIEW',
+        suppressedAt: null,
+        activity: {
+          userId,
+          state: 1,
+          mergedIntoActivityId: null,
+          planWorkoutLinks: { none: { unlinkedAt: null } },
+          processingStatus: 'READY',
+        },
+      },
+      include: {
+        activity: {
+          select: {
+            hashId: true,
+            activityName: true,
+            startTime: true,
+            timezone: true,
+          },
+        },
+      },
+      orderBy: { activity: { startTime: 'desc' } },
+      take: 50,
+    });
+    const workouts = await this.workouts.findMany({
+      where: {
+        id: {
+          in: [
+            ...new Set(states.flatMap((state) => state.candidateWorkoutIds)),
+          ],
+        },
+        userId,
+        status: { in: ['PLANNED', 'IN_PROGRESS'] },
+        OR: [{ planId: null }, { plan: { status: 'ACTIVE' } }],
+      },
+      include: WORKOUT_INCLUDE,
+    });
+    const timezone = await this.timezone(userId);
+    const reasons = new Set([
+      'AMBIGUOUS',
+      'INSUFFICIENT_EVIDENCE',
+      'COMPLEX_CANDIDATES',
+    ]);
+    return states
+      .flatMap((state) => {
+        if (!state.activity.startTime) return [];
+        const date = resolveActivityCalendarDayStr(
+          state.activity.startTime,
+          state.activity.timezone,
+          null,
+          timezone,
+        );
+        const candidates = workouts
+          .filter(
+            (workout) =>
+              state.candidateWorkoutIds.includes(workout.id) &&
+              workout.scheduledDate?.toISOString().slice(0, 10) === date &&
+              !workout.links.length,
+          )
+          .map((workout) => ({
+            workoutId: workout.id,
+            planId: workout.planId,
+            name: workout.name,
+            planTitle: workout.plan?.title ?? null,
+            ...expected(workout),
+          }));
+        if (!date || !candidates.length) return [];
+        return [
+          {
+            id: 'workout-match-' + state.activityId,
+            activityHashId: state.activity.hashId,
+            activityTitle: state.activity.activityName,
+            date,
+            reason: (reasons.has(state.reason)
+              ? state.reason
+              : 'INSUFFICIENT_EVIDENCE') as WorkoutMatchingReason,
+            candidates,
+          },
+        ];
+      })
+      .slice(0, 8);
   }
 }
 

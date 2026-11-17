@@ -599,7 +599,7 @@ export class ActivityQueryService {
       ),
     ];
     const independent = dates.length
-      ? await this.planQuery.findIndependentLinkCandidates(args.userId, dates)
+      ? await this.planQuery.findLinkCandidatesForDates(args.userId, dates)
       : [];
     const independentKeys = new Set(
       independent.map(

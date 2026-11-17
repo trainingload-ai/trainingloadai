@@ -1,3 +1,4 @@
+import type { WorkoutMatchingReview } from '@shared/workout-matching';
 /**
  * AI Coach 只读工具：把 PlanExecutionContext 压成日/周复盘技能能读的事实切片。
  * 不改计划。对话里问「今天练没练、明天是什么、TSB 多少」应走这个，不要靠聊天记录拼。
@@ -27,6 +28,7 @@ type WorkoutSlice = {
 
 type Output = {
   kind: 'plan_execution_context';
+  workoutMatching: WorkoutMatchingReview[];
   factHash: string;
   contextId: string | null;
   contextHeadEventSeq: number | null;
@@ -57,7 +59,7 @@ export const planExecutionContextTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'plan.execution_context',
   aliases: ['plan_execution_context', 'plan.execution_facts'],
   description:
-    'Read the current plan-execution fact snapshot for today and the next sessions: completion state, planned workouts, next workouts, and recent CTL/ATL/TSB. Use this instead of reconstructing execution facts from chat. This does not change the plan.',
+    'Read the current plan-execution fact snapshot for today and the next sessions: completion state, planned workouts, next workouts, and recent CTL/ATL/TSB. Use this instead of reconstructing execution facts from chat. Unresolved workoutMatching entries are not evidence of missed training: explain the uncertainty and ask the athlete to manually associate the activity; never choose a candidate or mark it completed without confirmation. This does not change the plan.',
   searchHint:
     'plan execution facts today tomorrow next workout tsb ctl atl completion',
   cost: 'low',
@@ -90,6 +92,7 @@ export const planExecutionContextTool: AiToolDef<Input, Output> = buildAiTool({
     });
     return {
       kind: 'plan_execution_context',
+      workoutMatching: context.workoutMatching ?? [],
       factHash: context.factHash,
       contextId: context.contextId,
       contextHeadEventSeq: context.contextHeadEventSeq,

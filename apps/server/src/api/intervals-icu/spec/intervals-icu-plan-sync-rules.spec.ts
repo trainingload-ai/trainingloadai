@@ -93,6 +93,7 @@ function fixture() {
       async (_user: string, id: string) => locals.get(id) ?? null,
     ),
     findExportWindowWorkouts: jest.fn(async () => [...locals.values()]),
+    notifyWorkoutsCommitted: jest.fn(async () => undefined),
     createIndependentWorkout: jest.fn(async (args: Row) => {
       const row = makeLocal(`local-${++localSequence}`, {
         ...args,

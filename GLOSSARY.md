@@ -18,3 +18,12 @@ A record of training that actually took place. An activity can exist without a p
 
 **Workout–activity link**:
 An explicit relationship indicating that an activity represents a planned workout. The planned workout can be independent or belong to a training plan.
+
+**Inferred workout link**:
+A relationship inferred from recorded activity and workout evidence. The athlete can correct or remove it when it does not represent their intent.
+
+**Recorded workout binding**:
+A relationship explicitly established by starting a recording for a chosen workout. It preserves that chosen workout's identity through activity processing.
+
+**Workout matching review**:
+An unresolved activity-to-workout relationship whose evidence is insufficient or ambiguous. The coach can explain the uncertainty and direct the athlete to associate it manually.

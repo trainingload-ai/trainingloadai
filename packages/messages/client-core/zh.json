@@ -5205,6 +5205,14 @@
       "coachPrompt": "请基于今天的教练建议，和我一起判断接下来怎么做。",
       "trainingWindowClosed": "今天已不再适合安排新的训练",
       "workoutAlreadyExists": "今天已有计划课次，无需重复添加"
+    },
+    "workoutMatching": {
+      "title": "确认训练关联",
+      "ambiguous": "这次活动可能对应多节课程，我保留了原状态。请确认后手动关联。",
+      "insufficient": "现有信息不足以确定对应课程，我保留了原状态。请手动关联。",
+      "manual": "手动关联",
+      "manualLabel": "手动关联：{activity}",
+      "workout": "训练课程"
     }
   },
   "PlanActivationDialog": {

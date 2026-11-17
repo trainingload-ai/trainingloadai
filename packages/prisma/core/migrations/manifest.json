@@ -150,7 +150,12 @@
       "id": "0030_independent_workout_activity_links",
       "file": "0030_independent_workout_activity_links/migration.sql",
       "sha256": "7858c8b48930f0c1fb5282279f55e3402f757d044eecc67a3571dfd3de1e87dd"
+    },
+    {
+      "id": "0031_workout_matching_review",
+      "file": "0031_workout_matching_review/migration.sql",
+      "sha256": "74937b9ccffc4209cb63381f4ea2cf7272f8c3e6aea43393153eddafdbbefb45"
     }
   ],
-  "schemaChecksum": "912c5ca14ac89b1fda6843ad6817a020f43e4e8b43a41521aa205a5f2f2f5e32"
+  "schemaChecksum": "7413c3df232225fda8e2f02151c4b1d3931e1cfbee475d6059aca6bd17e6734b"
 }

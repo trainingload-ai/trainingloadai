@@ -427,7 +427,7 @@ function WorkoutLoadEstimateSection({ detail }: { detail: DetailLike }) {
               planWorkoutId: string;
               activityId: number;
               role: "PRIMARY" | "SECONDARY";
-              source: "MANUAL" | "AUTO" | "AI";
+              source: "MANUAL" | "AUTO" | "AI" | "AUTO_MATCH";
               linkedAt: string;
               unlinkedAt: string | null;
               actualLoad?: number | null;
