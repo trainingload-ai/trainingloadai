@@ -32,16 +32,6 @@ export async function watchIcon() {
   </svg>`)).removeAlpha().png({ compressionLevel: 9 }).toBuffer();
 }
 
-export async function wordmark(appearance) {
-  const original = await readFile(path.join(repositoryDirectory, "assets/brand/legacy", `LOGO_${appearance}.svg`), "utf8");
-  const paths = original.replace(/^[\s\S]*?<svg\b[^>]*>/, "").replace(/<\/svg>\s*$/, "");
-  const icon = (await roundedIcon(128)).toString("base64");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="816" height="104" viewBox="0 0 816 104" fill="none">
-    <image width="104" height="104" href="data:image/png;base64,${icon}"/>
-    <g transform="translate(128 6)">${paths}</g>
-  </svg>\n`;
-}
-
 export async function createFavicon() {
   const images = await Promise.all(faviconSizes.map(roundedIcon));
   const header = Buffer.alloc(6 + images.length * 16);
@@ -63,15 +53,13 @@ export async function createFavicon() {
 }
 
 export async function generateWebAssets() {
-  const [icon, favicon, dark, light, apple] = await Promise.all([
-    roundedIcon(256), createFavicon(), wordmark("DARK"), wordmark("LIGHT"), opaqueIcon(180),
+  const [icon, favicon, apple] = await Promise.all([
+    roundedIcon(256), createFavicon(), opaqueIcon(180),
   ]);
   await Promise.all(["client", "docs"].map(async (app) => {
     const appDirectory = path.join(repositoryDirectory, "apps", app);
     await Promise.all([
       writeFile(path.join(appDirectory, "public/LOGO.png"), icon),
-      writeFile(path.join(appDirectory, "public/LOGO_DARK.svg"), dark),
-      writeFile(path.join(appDirectory, "public/LOGO_LIGHT.svg"), light),
       writeFile(path.join(appDirectory, "src/app/favicon.ico"), favicon),
       writeFile(path.join(appDirectory, "src/app/apple-icon.png"), apple),
     ]);

@@ -24,11 +24,9 @@ for (const app of ["client", "docs"]) {
   assert.equal(apple.width, 180);
   assert.equal(apple.hasAlpha, false);
   for (const appearance of ["DARK", "LIGHT"]) {
-    const lockup = await readFile(path.join(directory, `public/LOGO_${appearance}.svg`));
-    const metadata = await sharp(lockup).metadata();
-    assert.equal(metadata.width, 816);
-    assert.equal(metadata.height, 104);
-    assert.match(lockup.toString(), /data:image\/png;base64,/, "wordmark must include the new symbol");
+    const wordmark = await readFile(path.join(directory, `public/LOGO_${appearance}.svg`));
+    const original = await readFile(path.join(root, `assets/brand/legacy/LOGO_${appearance}.svg`));
+    assert.deepEqual(wordmark, original, "text wordmarks must remain unchanged");
   }
   const favicon = await readFile(path.join(directory, "src/app/favicon.ico"));
   assert.equal(favicon.readUInt16LE(2), 1);
