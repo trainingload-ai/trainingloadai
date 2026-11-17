@@ -1,6 +1,6 @@
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
 import { PlanExternalSyncService } from '../application/plan-external-sync.service';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
@@ -11,6 +11,8 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
   let database: ChildProcess;
   let prisma: PrismaClient;
   let service: PlanExternalSyncService;
+  let estimateWrites = false;
+  const estimatedAt = new Date('2026-07-07T00:00:00Z');
 
   beforeAll(async () => {
     database = fork(
@@ -37,7 +39,22 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     service = new PlanExternalSyncService(
       prisma as never,
       { buildWorkoutPlanSteps: () => [] } as never,
-      { applyForWorkout: async () => undefined } as never,
+      {
+        applyForWorkout: async (
+          workoutId: string,
+          { tx }: { tx: Prisma.TransactionClient },
+        ) => {
+          if (estimateWrites)
+            await tx.planWorkout.update({
+              where: { id: workoutId },
+              data: {
+                estimatedLoad: 50,
+                estimatedLoadComputedAt: estimatedAt,
+                updatedAt: estimatedAt,
+              },
+            });
+        },
+      } as never,
       new PlanRepository(prisma as never),
       new PlanWorkoutRepository(prisma as never),
       new PlanActivityLinkRepository(prisma as never),
@@ -56,6 +73,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
   });
 
   beforeEach(async () => {
+    estimateWrites = false;
     await prisma.$disconnect();
     await prisma.$connect();
     await prisma.$executeRawUnsafe('DELETE FROM t_user');
@@ -89,6 +107,35 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       externalEventId: '100',
     });
   });
+
+  it.each(['create', 'update'])(
+    'returns the transaction snapshot after %s and load estimation',
+    async (operation) => {
+      estimateWrites = true;
+      let row = await create();
+      if (operation === 'update')
+        row = await service.updateImportedWorkout({
+          userId: 'user',
+          workoutId: row.id,
+          preferredSessionIndex: 1,
+          scheduledDate: new Date('2026-07-06'),
+          targetPlanId: null,
+          targetPlanStartDate: null,
+          sportType: 'RUN',
+          status: 'PLANNED',
+          blocks: [],
+          dayOffset: 0,
+          expectedUpdatedAt: row.updatedAt,
+        });
+      const stored = await prisma.planWorkout.findUniqueOrThrow({
+        where: { id: row.id },
+      });
+      expect(row.updatedAt).toEqual(stored.updatedAt);
+      expect(row.updatedAt).toEqual(estimatedAt);
+      expect(row.estimatedLoad).toBe(50);
+      expect(row.revision).toBe(operation === 'update' ? 2 : 1);
+    },
+  );
 
   it('rolls back the course when mapping persistence fails', async () => {
     await expect(

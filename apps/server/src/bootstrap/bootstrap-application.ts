@@ -1,4 +1,4 @@
-import { Logger, type Type } from '@nestjs/common';
+import { Logger, type LogLevel, type Type } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ModuleRef, NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -21,6 +21,14 @@ import { createGlobalValidationPipe } from './runtime-safety';
 import { resolveTrustProxySetting } from './self-host-network-security';
 import { MANAGED_STARTUP, type ManagedStartup } from './managed-startup.port';
 
+export function applicationLogLevels(
+  environment = process.env.NODE_ENV,
+): LogLevel[] {
+  return environment === 'production'
+    ? ['error', 'warn', 'log']
+    : ['error', 'warn', 'log', 'debug', 'verbose'];
+}
+
 let applicationDuringBootstrap: NestExpressApplication | undefined;
 
 /**
@@ -32,7 +40,7 @@ export async function bootstrapApplication(
 ): Promise<NestExpressApplication> {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(rootModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: applicationLogLevels(),
     bodyParser: false,
   });
   applicationDuringBootstrap = app;

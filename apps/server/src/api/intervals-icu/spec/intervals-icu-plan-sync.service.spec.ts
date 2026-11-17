@@ -158,139 +158,173 @@ describe('IntervalsIcuPlanSyncService', () => {
     };
   }
 
-  it('uses the remote source when recovering a mapping without a sync baseline', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-07-02T08:00:00.000Z'));
-    const {
-      externalProviderConnection,
-      intervalsIcuClient,
-      planWorkout,
-      planWorkoutExternalMapping,
-      service,
-      workoutService,
-    } = createService();
-    const localBlocks = [
-      {
-        type: 'work',
-        steps: [
-          {
-            duration: 1800,
-            durationMeta: { kind: 'TIME', value: 1800, unit: 'SECONDS' },
-          },
-        ],
-      },
-    ];
-    const remoteBlocks = [
-      {
-        type: 'work',
-        steps: [
-          {
-            duration: 3600,
-            durationMeta: { kind: 'TIME', value: 3600, unit: 'SECONDS' },
-          },
-        ],
-      },
-    ];
-    const remoteEvent = {
-      id: 101,
-      external_id: 'trainingload.ai:plan_workout:workout-1',
-      uid: 'trainingload.ai:plan_workout:workout-1@trainingload.ai',
-      category: 'WORKOUT',
-      start_date_local: '2026-07-06',
-      name: 'Intervals version',
-      type: 'Run',
-      file_contents_base64: Buffer.from('fit').toString('base64'),
-    };
-    const localWorkout = {
-      id: 'workout-1',
-      planId: 'plan-1',
-      scheduledDate: new Date('2026-07-06T00:00:00.000Z'),
-      sportType: 'RUN',
-      name: 'Local version',
-      notes: null,
-      status: 'PLANNED',
-      steps: [],
-      plan: { id: 'plan-1', userId: 'user-1', status: 'ACTIVE' },
-    };
-
-    externalProviderConnection.findUnique.mockResolvedValue({
-      metadata: {
-        planSync: {
-          syncPlannedWorkouts: true,
-          exportPlannedWorkouts: false,
+  it.each(['unchanged', 'load-estimate', 'concurrent-edit'])(
+    'handles a local timestamp change from %s',
+    async (timestampChange) => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-07-02T08:00:00.000Z'));
+      const {
+        externalProviderConnection,
+        intervalsIcuClient,
+        planLoadEstimator,
+        planWorkout,
+        planWorkoutExternalMapping,
+        service,
+        workoutService,
+      } = createService();
+      const localBlocks = [
+        {
+          type: 'work',
+          steps: [
+            {
+              duration: 1800,
+              durationMeta: { kind: 'TIME', value: 1800, unit: 'SECONDS' },
+            },
+          ],
         },
-      },
-    });
-    externalProviderConnection.update.mockResolvedValue({});
-    intervalsIcuClient.listEvents.mockResolvedValueOnce([remoteEvent]);
-    planWorkout.findFirst.mockResolvedValue(localWorkout);
-    planWorkout.findUnique.mockResolvedValue({
-      ...localWorkout,
-      userId: 'user-1',
-      links: [],
-    });
-    planWorkout.update.mockResolvedValue({ id: 'workout-1', planId: 'plan-1' });
-    planWorkout.findMany.mockResolvedValue([]);
-    workoutService.buildWorkoutPlanSteps.mockReturnValue([]);
-    workoutService.parseFile.mockResolvedValue({
-      block: remoteBlocks,
-      plan: 'work 1:00:00',
-    });
-    workoutService.buildPlanBlocksFromWorkoutSteps.mockReturnValue(localBlocks);
-    planWorkoutExternalMapping.findFirst.mockResolvedValueOnce({
-      id: 'mapping-1',
-      userId: 'user-1',
-      provider: 'intervals_icu',
-      planWorkoutId: 'workout-1',
-      externalEventId: '101',
-      externalSourceKey: 'trainingload.ai:plan_workout:workout-1',
-      lastLocalChecksum: null,
-      lastRemoteChecksum: null,
-      syncState: 'SYNCED',
-    });
-    planWorkoutExternalMapping.create.mockResolvedValue({
-      id: 'mapping-1',
-      planWorkoutId: 'workout-1',
-    });
-    planWorkoutExternalMapping.update.mockResolvedValue({});
-    planWorkoutExternalMapping.findMany.mockResolvedValue([]);
+      ];
+      const remoteBlocks = [
+        {
+          type: 'work',
+          steps: [
+            {
+              duration: 3600,
+              durationMeta: { kind: 'TIME', value: 3600, unit: 'SECONDS' },
+            },
+          ],
+        },
+      ];
+      const remoteEvent = {
+        id: 101,
+        external_id: 'trainingload.ai:plan_workout:workout-1',
+        uid: 'trainingload.ai:plan_workout:workout-1@trainingload.ai',
+        category: 'WORKOUT',
+        start_date_local: '2026-07-06',
+        name: 'Intervals version',
+        type: 'Run',
+        file_contents_base64: Buffer.from('fit').toString('base64'),
+      };
+      const localWorkout = {
+        id: 'workout-1',
+        updatedAt: new Date('2026-07-02T08:00:00.000Z'),
+        revision: 1,
+        planId: 'plan-1',
+        scheduledDate: new Date('2026-07-06T00:00:00.000Z'),
+        sportType: 'RUN',
+        name: 'Local version',
+        notes: null,
+        status: 'PLANNED',
+        steps: [],
+        plan: { id: 'plan-1', userId: 'user-1', status: 'ACTIVE' },
+      };
 
-    try {
-      await expect(
-        service.syncConnectionWeek({
-          userId: 'user-1',
-          connection: {
-            id: 'connection-1',
+      externalProviderConnection.findUnique.mockResolvedValue({
+        metadata: {
+          planSync: {
+            syncPlannedWorkouts: true,
+            exportPlannedWorkouts: false,
+          },
+        },
+      });
+      externalProviderConnection.update.mockResolvedValue({});
+      intervalsIcuClient.listEvents.mockResolvedValueOnce([remoteEvent]);
+      let localReads = 0;
+      planWorkout.findFirst.mockImplementation(async () => {
+        localReads += 1;
+        if (timestampChange === 'concurrent-edit' && localReads === 3) {
+          localWorkout.updatedAt = new Date('2026-07-02T08:00:00.200Z');
+          localWorkout.revision += 1;
+        }
+        return { ...localWorkout };
+      });
+      planWorkout.findUnique.mockResolvedValue({
+        ...localWorkout,
+        userId: 'user-1',
+        links: [],
+      });
+      planWorkout.update.mockImplementation(async () => ({ ...localWorkout }));
+      if (timestampChange === 'load-estimate') {
+        planLoadEstimator.applyForWorkout.mockImplementation(async () => {
+          localWorkout.updatedAt = new Date('2026-07-02T08:00:00.100Z');
+        });
+      }
+      planWorkout.findMany.mockResolvedValue([]);
+      workoutService.buildWorkoutPlanSteps.mockReturnValue([]);
+      workoutService.parseFile.mockResolvedValue({
+        block: remoteBlocks,
+        plan: 'work 1:00:00',
+      });
+      workoutService.buildPlanBlocksFromWorkoutSteps.mockReturnValue(
+        localBlocks,
+      );
+      planWorkoutExternalMapping.findFirst.mockResolvedValueOnce({
+        id: 'mapping-1',
+        userId: 'user-1',
+        provider: 'intervals_icu',
+        planWorkoutId: 'workout-1',
+        externalEventId: '101',
+        externalSourceKey: 'trainingload.ai:plan_workout:workout-1',
+        lastLocalChecksum: null,
+        lastRemoteChecksum: null,
+        syncState: 'SYNCED',
+      });
+      planWorkoutExternalMapping.create.mockResolvedValue({
+        id: 'mapping-1',
+        planWorkoutId: 'workout-1',
+      });
+      planWorkoutExternalMapping.update.mockResolvedValue({});
+      planWorkoutExternalMapping.findMany.mockResolvedValue([]);
+
+      try {
+        await expect(
+          service.syncConnectionWeek({
             userId: 'user-1',
-            status: 'ACTIVE',
-            credentialCiphertext: 'cipher-key',
-            metadata: {
-              planSync: {
-                syncPlannedWorkouts: true,
-                exportPlannedWorkouts: false,
+            connection: {
+              id: 'connection-1',
+              userId: 'user-1',
+              status: 'ACTIVE',
+              credentialCiphertext: 'cipher-key',
+              metadata: {
+                planSync: {
+                  syncPlannedWorkouts: true,
+                  exportPlannedWorkouts: false,
+                },
               },
             },
-          },
-          trigger: 'manual',
-          weekStart: '2026-07-06',
-        }),
-      ).resolves.toMatchObject({
-        enabled: true,
-        window: { oldest: '2026-07-06', newest: '2026-07-12' },
-        import: { fetched: 1, conflicted: 0, updated: 1, created: 0 },
-      });
-
-      expect(planWorkout.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'workout-1', updatedAt: undefined },
-          data: expect.objectContaining({
-            name: 'Intervals version',
+            trigger: 'manual',
+            weekStart: '2026-07-06',
           }),
-        }),
-      );
-    } finally {
-      jest.useRealTimers();
-    }
-  });
+        ).resolves.toMatchObject({
+          enabled: true,
+          window: { oldest: '2026-07-06', newest: '2026-07-12' },
+          import: {
+            fetched: 1,
+            conflicted: 0,
+            updated: timestampChange === 'concurrent-edit' ? 0 : 1,
+            created: 0,
+            failed: timestampChange === 'concurrent-edit' ? 1 : 0,
+          },
+          outcome:
+            timestampChange === 'concurrent-edit'
+              ? 'PARTIAL_FAILURE'
+              : 'SUCCESS',
+        });
+
+        expect(planWorkout.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: {
+              id: 'workout-1',
+              updatedAt: new Date('2026-07-02T08:00:00.000Z'),
+            },
+            data: expect.objectContaining({
+              name: 'Intervals version',
+            }),
+          }),
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    },
+  );
 
   it('uses yesterday through the next seven days for scheduled planned workout sync', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-07-02T08:00:00.000Z'));
@@ -420,6 +454,10 @@ describe('IntervalsIcuPlanSyncService', () => {
       id: 'workout-1',
       planId: 'plan-local',
     });
+    planWorkout.findFirst.mockResolvedValue({
+      id: 'workout-1',
+      planId: 'plan-local',
+    });
     planWorkoutStep.deleteMany.mockResolvedValue({ count: 0 });
     workoutService.buildWorkoutPlanSteps.mockReturnValue([]);
     planLoadEstimator.applyForWorkout.mockResolvedValue(null);
@@ -476,6 +514,11 @@ describe('IntervalsIcuPlanSyncService', () => {
       workoutService,
     } = createService();
     planWorkout.findMany.mockResolvedValue([]);
+    planWorkout.findFirst.mockResolvedValue({
+      id: 'workout-remote',
+      userId: 'user-1',
+      planId: null,
+    });
     planWorkout.create.mockResolvedValue({
       id: 'workout-remote',
       userId: 'user-1',

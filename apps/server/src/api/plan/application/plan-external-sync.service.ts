@@ -403,18 +403,20 @@ export class PlanExternalSyncService {
       );
       await this.replaceWorkoutSteps(tx, created.id, args.blocks);
       await this.estimateWorkoutLoad(created.id, tx);
+      // Load estimation also writes the workout. Return the final transaction
+      // snapshot so its own updatedAt change is not mistaken for a later edit.
+      const stored = await this.workouts.findFirst(
+        {
+          where: { id: created.id, userId: args.userId },
+          include: WORKOUT_TREE_INCLUDE,
+        },
+        tx,
+      );
+      if (!stored) throw new Error('Imported workout readback failed');
       if (initializeMapping) {
-        const stored = await this.workouts.findFirst(
-          {
-            where: { id: created.id, userId: args.userId },
-            include: WORKOUT_TREE_INCLUDE,
-          },
-          tx,
-        );
-        if (!stored) throw new Error('Imported workout readback failed');
         await this.links.createMapping({ data: initializeMapping(stored) }, tx);
       }
-      return { ...created, planId: null };
+      return stored;
     });
   }
 
@@ -549,7 +551,15 @@ export class PlanExternalSyncService {
       );
       await this.replaceWorkoutSteps(tx, updated.id, args.blocks);
       await this.estimateWorkoutLoad(updated.id, tx);
-      return { ...updated, planId: args.targetPlanId };
+      const stored = await this.workouts.findFirst(
+        {
+          where: { id: updated.id, userId: args.userId },
+          include: WORKOUT_TREE_INCLUDE,
+        },
+        tx,
+      );
+      if (!stored) throw new Error('Imported workout readback failed');
+      return stored;
     });
   }
 

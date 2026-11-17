@@ -28,17 +28,18 @@ function fixture() {
     deleteSteps: jest.fn(async () => undefined),
     createMapping: jest.fn(async () => ({ id: 'mapping' })),
   };
+  const estimator = { applyForWorkout: jest.fn(async () => undefined) };
   const service = new PlanExternalSyncService(
     prisma as never,
     { buildWorkoutPlanSteps: () => [] } as never,
-    { applyForWorkout: async () => undefined } as never,
+    estimator as never,
     {} as never,
     workouts as never,
     links as never,
     {} as never,
     {} as never,
   );
-  return { row, tx, prisma, workouts, links, service };
+  return { row, tx, prisma, workouts, links, estimator, service };
 }
 
 describe('PlanExternalSyncService synchronization persistence', () => {
@@ -66,6 +67,39 @@ describe('PlanExternalSyncService synchronization persistence', () => {
     );
     expect(f.prisma.$transaction).toHaveBeenCalledTimes(1);
   });
+
+  it.each([false, true])(
+    'returns the final timestamp after load estimation, mapping=%s',
+    async (withMapping) => {
+      const f = fixture();
+      const original = { ...f.row };
+      f.workouts.create.mockResolvedValue(original);
+      f.estimator.applyForWorkout.mockImplementation(async () => {
+        f.row.updatedAt = new Date('2026-07-02T00:00:00.100Z');
+      });
+      const result = await f.service.createIndependentWorkout(
+        {
+          userId: 'user',
+          scheduledDate: new Date('2026-07-06'),
+          sportType: 'RUN',
+          blocks: [],
+        },
+        withMapping
+          ? ((() => ({
+              userId: 'user',
+              provider: 'intervals_icu',
+              externalEventId: '100',
+            })) as never)
+          : undefined,
+      );
+      expect(result.updatedAt).toEqual(f.row.updatedAt);
+      expect(result.revision).toBe(original.revision);
+      expect(f.workouts.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'workout', userId: 'user' } }),
+        f.tx,
+      );
+    },
+  );
 
   it('fails the transaction when mapping persistence fails', async () => {
     const f = fixture();
