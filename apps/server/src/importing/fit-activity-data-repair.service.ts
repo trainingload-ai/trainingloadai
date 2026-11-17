@@ -72,6 +72,7 @@ export type FitActivityRepairCandidate = {
   userId: string;
   sourceKind: ImportSourceKind;
   sourceUid: string;
+  sourceRevision?: string | null;
   fileName: string | null;
   payloads: CanonicalActivityPayload[];
   reasons: FitActivityRepairReason[];
@@ -218,6 +219,7 @@ export class FitActivityDataRepairService {
           fileKey: true,
           rawStorageKey: true,
           rawChecksum: true,
+          importRevision: true,
           metadata: true,
           activitySources: {
             where: { isActive: true, isPrimary: true, activity: { state: 1 } },
@@ -413,6 +415,7 @@ export class FitActivityDataRepairService {
           }
           const candidate: FitActivityRepairCandidate = {
             sourceObjectId: sourceObject.id,
+            sourceRevision: sourceObject.importRevision,
             userId: sourceObject.userId,
             sourceKind: sourceObject.sourceKind,
             sourceUid: sourceObject.sourceUid,
@@ -610,6 +613,7 @@ export class FitActivityDataRepairService {
                 sourceObjectId: candidate.sourceObjectId,
                 sourceKind: candidate.sourceKind,
                 sourceUid: payload.source.sourceUid,
+                sourceRevision: candidate.sourceRevision ?? null,
                 position,
                 status: 'QUEUED',
                 sourceRef: importJsonValue({

@@ -254,8 +254,8 @@ export class ThirdPartyActivityService {
     });
   }
 
-  async markImportCompleted(id: number) {
-    return this.prisma.thirdPartyActivity.update({
+  async markImportCompleted(id: number, tx?: Prisma.TransactionClient) {
+    return (tx ?? this.prisma).thirdPartyActivity.update({
       where: { id },
       data: {
         processingStatus: ThirdPartyActivityProcessingStatus.COMPLETED,
@@ -266,8 +266,12 @@ export class ThirdPartyActivityService {
     });
   }
 
-  async markImportFailed(id: number, errorMessage: string) {
-    return this.prisma.thirdPartyActivity.update({
+  async markImportFailed(
+    id: number,
+    errorMessage: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    return (tx ?? this.prisma).thirdPartyActivity.update({
       where: { id },
       data: {
         processingStatus: ThirdPartyActivityProcessingStatus.FAILED,

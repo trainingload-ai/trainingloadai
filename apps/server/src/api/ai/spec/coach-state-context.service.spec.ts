@@ -28,6 +28,37 @@ function decision(
 }
 
 describe('CoachStateContextService', () => {
+  it('distinguishes a failed assessment read from no assessment', async () => {
+    const service = new CoachStateContextService({
+      athleteStateAssessment: {
+        findFirst: async () => {
+          throw new Error('read failed');
+        },
+      },
+    } as never);
+    const result = await service.build({
+      userId: 'athlete',
+      anchorDate: '2026-11-18',
+      recentEvents: [],
+    });
+    expect(result.assessmentReadStatus).toBe('UNAVAILABLE');
+  });
+  it('does not carry an older derived assessment across a changed raw-fact revision', () => {
+    const service = new CoachStateContextService({} as never);
+    const context: any = {
+      decisionReadStatus: 'AVAILABLE',
+      assessmentReadStatus: 'AVAILABLE',
+      decisions: [],
+      recentReviews: [],
+      athleteState: { state: 'HIGH_CONCERN', factRevision: 'r1' },
+    };
+    expect(service.forFactRevision(context, 'r1').assessmentCoverage).toBe(
+      'CURRENT',
+    );
+    const changed = service.forFactRevision(context, 'r2');
+    expect(changed.athleteState).toBeNull();
+    expect(changed.assessmentCoverage).toBe('UNVERIFIED');
+  });
   it('exposes a Skill assessment to today advice without requiring a Case', async () => {
     const expiresAt = new Date(Date.now() + 3_600_000);
     const service = new CoachStateContextService({
@@ -54,6 +85,7 @@ describe('CoachStateContextService', () => {
       state: 'STABLE',
       decisionReadiness: 'SUFFICIENT',
       evidenceHash: 'new-facts',
+      factRevision: null,
       decisionId: null,
       expiresAt: expiresAt.toISOString(),
     });

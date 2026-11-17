@@ -95,6 +95,23 @@ export class AthleteMemoryQueryService {
     return this.ambient.build(input);
   }
 
+  async coachingContext(input: {
+    userId: string;
+    asOf: Date;
+    timezone: string;
+  }) {
+    const snapshot = await this.ambient.build({
+      ...input,
+      maxItems: 12,
+      maxTokens: 2000,
+    });
+    if (snapshot.disabled || snapshot.unavailable)
+      return { snapshot, extraction: [] };
+    const extraction =
+      (await this.store.contextInputStatus?.(input.userId)) ?? [];
+    return { snapshot, extraction };
+  }
+
   async search(input: MemorySearchInput) {
     if (!(await this.preferences.isEnabled(input.userId))) {
       return {

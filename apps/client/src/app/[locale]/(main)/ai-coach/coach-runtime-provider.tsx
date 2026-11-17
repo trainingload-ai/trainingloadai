@@ -325,8 +325,7 @@ export function CoachRuntimeProvider({
               .then(async (raw) => {
                 let operation = readAiOperationFromSse(raw);
                 if (!operation) return;
-                const currentOperationId =
-                  operation.operationId || operationId;
+                const currentOperationId = operation.operationId || operationId;
                 if (
                   operation.status === "STARTED" ||
                   operation.status === "RUNNING"
@@ -534,6 +533,7 @@ export function CoachRuntimeProvider({
     >
       {enableUrlSeed ? (
         <CoachSeedAutoStarter
+          sessionId={sid}
           intentOverrideRef={intentOverrideRef}
           branchContextRef={branchContextRef}
         />

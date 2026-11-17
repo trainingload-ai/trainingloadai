@@ -1,3 +1,4 @@
+import { uncontendedGeneration } from './testing/generation.fixture';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
 import { TodaySuggestionOrchestratorService } from './today-suggestion-orchestrator.service';
 import { TodaySuggestionDeliveryPolicy } from './today-suggestion-delivery-policy';
@@ -135,6 +136,7 @@ function harness() {
     {} as never,
     new TodaySuggestionDeliveryPolicy(),
     engagement,
+    uncontendedGeneration(prisma),
   );
   return {
     service,
@@ -328,6 +330,48 @@ describe('activity-first today suggestion regressions', () => {
     expect(Date.parse(result.validUntil) - Date.now()).toBe(30_000);
   });
 
+  it('treats an assessment read failure as unavailable and skips model generation', async () => {
+    const { service, coachState, agent } = harness();
+    (coachState as any).assessmentReadStatus = 'UNAVAILABLE';
+    const result = await service.get(args);
+    expect(agent.run).not.toHaveBeenCalled();
+    expect(result.recommendation.kind).toBe('RECOVER');
+  });
+  it('keeps equal assessment semantics stable when a repeat assessment only extends its expiry', async () => {
+    const { projector, coachState } = harness();
+    (coachState as any).athleteState = {
+      state: 'STABLE',
+      decisionReadiness: 'SUFFICIENT',
+      assessmentId: 'a1',
+      evidenceHash: 'audit1',
+      expiresAt: '2026-11-11T12:00:00Z',
+    };
+    const before = await projector.project(args);
+    Object.assign((coachState as any).athleteState, {
+      assessmentId: 'a2',
+      evidenceHash: 'audit2',
+      expiresAt: '2026-11-11T12:05:00Z',
+    });
+    const after = await projector.project(args);
+    expect(after.factHash).toBe(before.factHash);
+    expect(after.constraintHash).toBe(before.constraintHash);
+  });
+  it('invalidates on a goal-only edit while ignoring unchanged audit timestamps', async () => {
+    const { projector, execution } = harness();
+    (execution as any).plan = {
+      id: 'plan',
+      title: 'Current plan',
+      goal: 'Finish',
+      status: 'ACTIVE',
+      currentWeekIndex: 1,
+      updatedAt: 'audit1',
+    };
+    const before = await projector.project(args);
+    (execution as any).plan.updatedAt = 'audit2';
+    expect((await projector.project(args)).factHash).toBe(before.factHash);
+    (execution as any).plan.goal = 'Improve the 10K';
+    expect((await projector.project(args)).factHash).not.toBe(before.factHash);
+  });
   it('revalidates facts after generation and discards an outdated first draft', async () => {
     const { service, coverage, agent, prisma, projector } = harness();
     const normalRun = agent.run.getMockImplementation()!;
@@ -359,6 +403,7 @@ describe('activity-first today suggestion regressions', () => {
     const validUntil = new Date(Date.now() + 3_600_000);
     const winner = {
       id: 'winner',
+      generatedAt: new Date(),
       generationToken: 'winner-generation',
       signatureHash: facts.factHash,
       constraintHash: facts.constraintHash,

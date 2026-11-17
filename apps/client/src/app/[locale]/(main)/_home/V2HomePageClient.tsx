@@ -32,7 +32,7 @@ import {
   type AiTodaySuggestionResponse,
 } from "@/api/ai-today-suggestion";
 import { useQuery } from "@tanstack/react-query";
-import { createTodaySuggestionRefetchInterval } from "@shared/today-suggestion-refresh";
+import { createTodaySuggestionRefetchInterval } from "@/lib/today-suggestion-refresh";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getV2ActivitiesFeed,
@@ -1513,12 +1513,17 @@ export default function V2HomePageClient({
       ),
     enabled: deviceTimezone !== null && canUseAiSuggestion,
     meta: { errorSurface: "silent" },
-    staleTime: 15 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
     refetchInterval: adviceRefetchInterval,
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
     retry: false,
   });
-  const resolvedTodayAdvice = todayAdvice ?? sourceData.aiTodaySuggestion;
+  const resolvedTodayAdvice = isTodayAdviceError
+    ? undefined
+    : (todayAdvice ?? sourceData.aiTodaySuggestion);
   const homeData = useMemo(() => {
     const currentWeekIndex = activePlan?.currentWeekIndex ?? 1;
     const currentDayWorkouts =
@@ -1636,7 +1641,7 @@ export default function V2HomePageClient({
     (!aiConsent.isFetchedAfterMount ||
       (hasAiDataConsent && isTodayAdvicePending));
   const displayedHomeData = useMemo(() => {
-    if (isTodayAdviceError && !todayAdvice) {
+    if (isTodayAdviceError) {
       return {
         ...homeData,
         aiTodaySuggestion: {

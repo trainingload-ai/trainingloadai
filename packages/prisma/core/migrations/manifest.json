@@ -155,7 +155,22 @@
       "id": "0031_workout_matching_review",
       "file": "0031_workout_matching_review/migration.sql",
       "sha256": "74937b9ccffc4209cb63381f4ea2cf7272f8c3e6aea43393153eddafdbbefb45"
+    },
+    {
+      "id": "0032_import_source_revision_handoff",
+      "file": "0032_import_source_revision_handoff/migration.sql",
+      "sha256": "3e751260108f05be766aca2d4b3e5fd2c4994093f8c017a0982e5ff6c4d3b19e"
+    },
+    {
+      "id": "0033_today_suggestion_generation",
+      "file": "0033_today_suggestion_generation/migration.sql",
+      "sha256": "f6cabbce907441d1358179e092b2e18cfb28ed87b008386eb659cdb12c94e50b"
+    },
+    {
+      "id": "0034_coach_fact_scope",
+      "file": "0034_coach_fact_scope/migration.sql",
+      "sha256": "2cba5726f2c183963ac217f8b582ed49074ffd6b029d70051c78ef233e6d2648"
     }
   ],
-  "schemaChecksum": "7413c3df232225fda8e2f02151c4b1d3931e1cfbee475d6059aca6bd17e6734b"
+  "schemaChecksum": "e9e62b4e542246c3f2c4eae19a1ad41c55ac9b22343e36bede9396bba061268d"
 }

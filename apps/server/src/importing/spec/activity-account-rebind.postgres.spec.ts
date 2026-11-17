@@ -45,7 +45,10 @@ describe('account rebinding / database ownership and concurrency', () => {
     });
     prisma = new PrismaClient({ datasourceUrl: url });
     await prisma.$connect();
-    projector = new ThirdPartyActivityProjectorService(prisma as never);
+    projector = new ThirdPartyActivityProjectorService(
+      prisma as never,
+      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+    );
     materializer = new CanonicalActivityMaterializer(
       prisma as never,
       {} as never,

@@ -9,7 +9,9 @@ function createService() {
         jest.fn<(args: { where: { date: Date } }) => Promise<unknown>>(),
     },
     externalHealthSample: {
-      findMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+      findMany: jest
+        .fn<(...args: unknown[]) => Promise<unknown>>()
+        .mockResolvedValue([]),
     },
     canonicalHealthSession: {
       findMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
@@ -31,6 +33,118 @@ function createService() {
 }
 
 describe('HealthDataQueryService provider selection', () => {
+  it('does not resurrect a stale selected daily value after its source is withdrawn', async () => {
+    const { prisma, service } = createService();
+    prisma.userDailyHealthMetric.findMany.mockResolvedValue([
+      {
+        id: 'old-projection',
+        date: new Date('2026-07-18'),
+        metricType: 'SLEEP_ASLEEP_SECONDS',
+        value: 10800,
+        unit: 's',
+        selectedProvider: 'GARMIN',
+        sources: [],
+      },
+    ]);
+    prisma.canonicalHealthSession.findMany.mockResolvedValue([]);
+    expect(
+      (await service.getCoachingFacts('user-1', '2026-07-18')).observations,
+    ).toEqual([]);
+  });
+  it('withholds an old canonical sleep value while its correction snapshot is pending', async () => {
+    const { prisma, service } = createService();
+    prisma.userDailyHealthMetric.findMany.mockResolvedValue([]);
+    prisma.canonicalHealthSession.findMany.mockResolvedValue([
+      {
+        id: 'sleep',
+        calendarDate: new Date('2026-07-18'),
+        startTime: new Date('2026-07-17T23:00Z'),
+        endTime: new Date('2026-07-18T06:00Z'),
+        durationSeconds: 25200,
+        selectedProvider: 'GARMIN',
+        selectedSource: {
+          snapshotId: 'snapshot',
+          snapshot: { manifest: { status: 'PENDING' } },
+          summary: { validation: 'revised' },
+        },
+      },
+    ]);
+    const result = await service.getCoachingFacts('user-1', '2026-07-18');
+    expect(result.sleepSessions).toEqual([]);
+    expect(result.pending).toEqual([
+      expect.objectContaining({
+        key: 'sleep',
+        reason: 'NORMALIZATION_OR_SESSION_PROJECTION_PENDING',
+      }),
+    ]);
+  });
+  it('keeps a revised sleep status distinct even when the duration is unchanged', async () => {
+    const { prisma, service } = createService();
+    prisma.userDailyHealthMetric.findMany.mockResolvedValue([]);
+    const session = {
+      id: 'sleep',
+      calendarDate: new Date('2026-07-18'),
+      startTime: new Date('2026-07-17T23:00Z'),
+      endTime: new Date('2026-07-18T06:00Z'),
+      durationSeconds: 25200,
+      selectedProvider: 'GARMIN',
+      selectedSource: { summary: { validation: 'first-observation' } },
+    };
+    Object.assign(session, { summary: session.selectedSource.summary });
+    Object.assign(session.selectedSource, {
+      startTime: session.startTime,
+      endTime: session.endTime,
+      durationSeconds: session.durationSeconds,
+    });
+    prisma.canonicalHealthSession.findMany.mockResolvedValue([session]);
+    const before = await service.getCoachingFacts(
+      'user-1',
+      '2026-07-18',
+      new Date('2026-07-18T07:00Z'),
+    );
+    session.selectedSource.summary.validation = 'revised-observation';
+    const after = await service.getCoachingFacts(
+      'user-1',
+      '2026-07-18',
+      new Date('2026-07-18T08:00Z'),
+    );
+    expect(before.sleepSessions[0].value).toBe(after.sleepSessions[0].value);
+    expect(before.sleepSessions[0].sourceStatus).not.toBe(
+      after.sleepSessions[0].sourceStatus,
+    );
+    expect(after.sleepSessions[0].readiness.completePeriod).toBe('UNVERIFIED');
+  });
+
+  it('accepts a completed daily projection after relation-only writes advance audit time', async () => {
+    const { prisma, service } = createService();
+    prisma.userDailyHealthMetric.findMany.mockResolvedValue([
+      {
+        id: 'daily',
+        date: new Date('2026-07-18'),
+        metricType: 'SLEEP_ASLEEP_SECONDS',
+        value: 10800,
+        unit: 's',
+        selectedProvider: 'GARMIN',
+        computedAt: new Date('2026-07-18T07:00Z'),
+        sources: [
+          {
+            id: 'sample',
+            provider: 'GARMIN',
+            externalId: 'sleep',
+            startTime: new Date('2026-07-18T00:00Z'),
+            endTime: new Date('2026-07-18T03:00Z'),
+            value: 10800,
+            unit: 's',
+            updatedAt: new Date('2026-07-18T07:00:01Z'),
+          },
+        ],
+      },
+    ]);
+    prisma.canonicalHealthSession.findMany.mockResolvedValue([]);
+    const result = await service.getCoachingFacts('user-1', '2026-07-18');
+    expect(result.observations[0].value).toBe(10800);
+    expect(result.pending).toEqual([]);
+  });
   it('uses the athlete-local date when endDate is omitted', async () => {
     const { prisma, service } = createService();
     prisma.userDailyHealthMetric.findMany.mockResolvedValue([]);

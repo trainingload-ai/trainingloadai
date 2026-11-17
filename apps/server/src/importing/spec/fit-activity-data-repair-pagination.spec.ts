@@ -18,6 +18,7 @@ function scanner() {
     userId: 'user',
     sourceUid: id,
     fileName: id + '.fit',
+    importRevision: `consumed-${id}`,
     sourceKind: 'FILE',
     rawStorageKey: id + '.fit',
     rawChecksum:
@@ -53,6 +54,11 @@ function scanner() {
 describe('bounded raw-source repair pagination', () => {
   beforeEach(() => jest.resetAllMocks());
 
+  it('captures the scanned source revision before any later source input is registered', async () => {
+    const { service } = scanner();
+    const scanned = await service.scan({ all: false, limit: 1 });
+    expect(scanned.candidates[0].sourceRevision).toBe('consumed-a');
+  });
   it('does not declare completion when a full candidate page reaches the limit', async () => {
     const { service } = scanner();
     const first = await service.scan({ all: false, limit: 1 });

@@ -1,3 +1,11 @@
+import { Inject } from '@nestjs/common';
+import {
+  COACH_FACT_SCOPE_VALIDATOR,
+  type CoachFactScope,
+  type CoachFactScopeValidator,
+} from './core/coach-fact-scope.port';
+import type { FactGuidanceScope } from './today-suggestion/today-suggestion-guidance.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import {
   BadRequestException,
   ConflictException,
@@ -5,6 +13,7 @@ import {
   Logger,
   NotFoundException,
   Optional,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'crypto';
 import { AiCoachSessionType, Prisma } from '@prisma/client';
@@ -68,6 +77,9 @@ export class CoachRunStore {
     @Optional()
     private readonly memoryExtraction?: CoachMemoryExtractionEnqueuer,
     @Optional() private readonly events?: EventEmitter2,
+    @Optional()
+    @Inject(COACH_FACT_SCOPE_VALIDATOR)
+    private readonly factScopes?: CoachFactScopeValidator,
   ) {}
 
   async existingRequestBranch(
@@ -212,6 +224,7 @@ export class CoachRunStore {
     message: CoachUserMessageBody;
     operationId: string;
     command: CoachRunCommand;
+    guidance?: FactGuidanceScope;
   }): Promise<{
     handle?: CoachRunHandle;
     replay?: { id: string; message: unknown; operationId: string };
@@ -261,10 +274,66 @@ export class CoachRunStore {
     };
     const replay = await findReplay();
     if (replay) return replay;
+    if (command.kind === 'answer' && this.factScopes)
+      await this.reconcileFactGuidance(
+        userId,
+        await this.factScopes.current(userId),
+      );
     let acceptedAssessmentAnswer: CoachAssessmentAnsweredEvent | null = null;
 
     try {
       const result = await this.prisma.$transaction(async (tx) => {
+        let guidanceDedupeKey: string | undefined;
+        if (command.kind === 'start' && args.guidance) {
+          if (sid !== args.guidance.sessionId || args.branchId)
+            throw new ConflictException('FACT_GUIDANCE_SESSION_CHANGED');
+          const dedupeKey = hash([args.guidance.topic, args.guidance.revision]);
+          await acquireHashtextAdvisoryXactLock(
+            tx,
+            `fact-guidance:${userId}:${dedupeKey}`,
+          );
+          const existing = await tx.coachRun.findFirst({
+            where: {
+              userId,
+              taskKind: 'CONVERSATION',
+              triggerType: 'FACT_GUIDANCE',
+              triggerRef: args.guidance.topic,
+              inputHash: args.guidance.revision,
+              status: { not: 'cancelled' },
+            },
+            include: {
+              attempts: {
+                orderBy: { startedAt: 'desc' },
+                take: 1,
+                include: { message: true },
+              },
+            },
+          });
+          const attempt = existing?.attempts[0];
+          if (attempt)
+            return {
+              replay: {
+                id: attempt.messageId,
+                message: attempt.message.message,
+                operationId: attempt.operationId,
+              },
+            };
+          const prior = await tx.coachRun.findFirst({
+            where: {
+              userId,
+              taskKind: 'CONVERSATION',
+              triggerType: 'FACT_GUIDANCE',
+              triggerRef: args.guidance.topic,
+              inputHash: args.guidance.revision,
+              status: 'cancelled',
+            },
+            orderBy: [{ startedAt: 'desc' }, { id: 'desc' }],
+            select: { id: true, revision: true },
+          });
+          guidanceDedupeKey = prior
+            ? hash([dedupeKey, prior.id, prior.revision])
+            : dedupeKey;
+        }
         const now = new Date();
         const attemptId = randomUUID();
         const messageId = randomUUID();
@@ -521,6 +590,18 @@ export class CoachRunStore {
               sessionId: sid,
               branchId: args.branchId,
               originMessageId: inputMessageId,
+              ...(args.guidance
+                ? {
+                    triggerType: 'FACT_GUIDANCE',
+                    triggerRef: args.guidance.topic,
+                    inputHash: args.guidance.revision,
+                    factScope: json({
+                      topic: args.guidance.topic,
+                      revision: args.guidance.revision,
+                    }),
+                    dedupeKey: guidanceDedupeKey,
+                  }
+                : {}),
               activeAttemptId: attemptId,
               startedAt: now,
             },
@@ -864,6 +945,19 @@ export class CoachRunStore {
     runResult?: { resultType: string; resultRef: unknown },
   ) {
     const p = handle.projector;
+    if (terminal === 'awaiting_input' && this.factScopes) {
+      await this.reconcileFactGuidance(
+        handle.userId,
+        await this.factScopes.current(handle.userId),
+        p.run.runId,
+      );
+      const current = await this.prisma.coachRun.findFirst({
+        where: { id: p.run.runId, userId: handle.userId },
+        select: { status: true },
+      });
+      if (current?.status === 'cancelled')
+        throw new CoachRunCancelledError('facts_changed');
+    }
     const envelope = p.envelope(legacyMessage);
     await this.prisma.$transaction(async (tx) => {
       const updated = await tx.coachRunAttempt.updateMany({
@@ -934,6 +1028,166 @@ export class CoachRunStore {
       this.logger.log(
         `run_terminal run=${p.run.runId} attempt=${p.run.attemptId} status=${terminal} executionMs=${p.run.executionMs} retryBlocked=${p.run.retryBlocked}`,
       );
+  }
+
+  async bindFactScope(userId: string, runId: string, scope: CoachFactScope) {
+    await this.prisma.$transaction(async (tx) => {
+      const run = await tx.coachRun.findFirst({
+        where: { id: runId, userId, status: 'running' },
+      });
+      if (
+        !run?.activeAttemptId ||
+        !(await tx.coachRunAttempt.findFirst({
+          where: {
+            id: run.activeAttemptId,
+            userId,
+            ownerId: this.ownerId,
+            status: 'running',
+          },
+          select: { id: true },
+        }))
+      )
+        throw new ConflictException('Coach execution ownership changed');
+      if (run.triggerType === 'FACT_GUIDANCE' && run.factScope) return;
+      await tx.coachRun.updateMany({
+        where: {
+          id: runId,
+          userId,
+          activeAttemptId: run.activeAttemptId,
+          status: 'running',
+        },
+        data: { factScope: json(scope) },
+      });
+    });
+  }
+
+  async reconcileCurrentFacts(userId: string) {
+    try {
+      if (this.factScopes)
+        await this.reconcileFactGuidance(
+          userId,
+          await this.factScopes.current(userId),
+        );
+    } catch (error) {
+      if (!(error instanceof ServiceUnavailableException)) throw error;
+    }
+  }
+
+  /** Persist invalidation before restore or answer; this is not a user refusal. */
+  async reconcileFactGuidance(
+    userId: string,
+    topics: Array<{ topic: string; revision: string }>,
+    finishingRunId?: string,
+  ) {
+    const current = new Map(
+      topics.map((topic) => [topic.topic, topic.revision]),
+    );
+    return this.prisma.$transaction(async (tx) => {
+      let cancelled = 0;
+      const runs = await tx.coachRun.findMany({
+        where: {
+          userId,
+          AND: [
+            {
+              OR: [
+                { factScope: { not: Prisma.DbNull } },
+                { taskKind: { in: ['ATHLETE_STATE_UPDATE', 'CONVERSATION'] } },
+                { triggerType: 'FACT_GUIDANCE' },
+              ],
+            },
+            {
+              OR: [
+                { status: 'awaiting_input' },
+                ...(finishingRunId
+                  ? [{ id: finishingRunId, status: 'running' }]
+                  : []),
+              ],
+            },
+          ],
+        },
+      });
+      for (const run of runs) {
+        const scope =
+          run.factScope &&
+          typeof run.factScope === 'object' &&
+          !Array.isArray(run.factScope)
+            ? (run.factScope as { topic?: string; revision?: string })
+            : { topic: run.triggerRef, revision: run.inputHash };
+        if (
+          scope.topic &&
+          scope.revision &&
+          current.get(scope.topic) === scope.revision
+        )
+          continue;
+        const changed = await tx.coachRun.updateMany({
+          where: {
+            id: run.id,
+            userId,
+            revision: run.revision,
+            status: run.status,
+          },
+          data: {
+            status: 'cancelled',
+            activeAttemptId: null,
+            pendingInteraction: Prisma.DbNull,
+            endedAt: new Date(),
+            revision: { increment: 1 },
+          },
+        });
+        if (!changed.count) continue;
+        cancelled++;
+        if (run.activeAttemptId)
+          await tx.coachRunAttempt.updateMany({
+            where: { id: run.activeAttemptId, userId, status: 'running' },
+            data: { cancelRequestedAt: new Date() },
+          });
+        const pending = isCoachInteraction(run.pendingInteraction)
+          ? run.pendingInteraction
+          : null;
+        if (!pending) continue;
+        const row = await tx.aiCoachMessage.findFirst({
+          where: {
+            id: pending.questionMessageId,
+            userId,
+            sessionId: run.sessionId,
+          },
+        });
+        const envelope =
+          row?.message &&
+          typeof row.message === 'object' &&
+          !Array.isArray(row.message)
+            ? (row.message as Record<string, unknown>)
+            : null;
+        if (!row || !envelope || !Array.isArray(envelope.parts)) continue;
+        const parts = envelope.parts.map((part: Record<string, unknown>) => {
+          if (part.type === 'data-coach-interaction')
+            return {
+              ...part,
+              data: {
+                ...(part.data as object),
+                status: 'cancelled',
+                revision: pending.revision + 1,
+              },
+            };
+          if (part.type === 'data-coach-run')
+            return {
+              ...part,
+              data: {
+                ...(part.data as object),
+                status: 'cancelled',
+                endedAt: new Date().toISOString(),
+                retryBlocked: true,
+              },
+            };
+          return part;
+        });
+        await tx.aiCoachMessage.update({
+          where: { id: row.id },
+          data: { message: json({ ...envelope, parts }) },
+        });
+      }
+      return cancelled;
+    });
   }
 
   async cancel(userId: string, runId: string, attemptId: string) {

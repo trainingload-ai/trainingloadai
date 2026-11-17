@@ -7,6 +7,28 @@ describe('IntervalsIcuClient event verification', () => {
   const client = new IntervalsIcuClient({ get: () => undefined } as never);
   afterEach(() => jest.restoreAllMocks());
 
+  it('downloads the edited FIT and never silently falls back to the original file', async () => {
+    const fetcher = jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response('edited-fit'));
+    expect(
+      (
+        await client.downloadActivityFile('test-key', '123', {
+          preferEdited: true,
+        })
+      ).endpoint,
+    ).toBe('fit-file');
+    expect(fetcher.mock.calls[0][0]).toBe(
+      'https://intervals.icu/api/v1/activity/123/fit-file',
+    );
+    fetcher.mockClear();
+    fetcher.mockResolvedValue(new Response('not ready', { status: 503 }));
+    await expect(
+      client.downloadActivityFile('test-key', '123', { preferEdited: true }),
+    ).rejects.toMatchObject({ status: 503 });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
   it('reads an event by identity without restricting its calendar date', async () => {
     const fetcher = jest
       .spyOn(globalThis, 'fetch')

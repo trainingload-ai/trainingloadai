@@ -11,7 +11,7 @@ import type {
   WeatherAttribution,
 } from '@/weather/weather.types';
 
-export const TODAY_SUGGESTION_POLICY_VERSION = 'today-activity-first-v5';
+export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v6';
 
 export type TodaySuggestionConstraintCode =
   | 'NEVER_RECORDED_ACTIVITY'
@@ -66,6 +66,7 @@ export type TodaySuggestionConstraintProjection = {
   todayWorkouts: TodaySuggestionWorkoutFact[];
   tomorrowWorkouts: TodaySuggestionWorkoutFact[];
   latestActivityId: string | null;
+  matchingActivityId?: string | null;
   latestActivityAt: string | null;
   todayActivityCount?: number;
   coverageDiagnosis?: Record<string, unknown> | null;

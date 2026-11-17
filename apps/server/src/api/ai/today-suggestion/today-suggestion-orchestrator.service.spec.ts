@@ -1,3 +1,4 @@
+import { uncontendedGeneration } from './testing/generation.fixture';
 import { TodaySuggestionDeliveryPolicy } from './today-suggestion-delivery-policy';
 import { TodaySuggestionOrchestratorService } from './today-suggestion-orchestrator.service';
 import type { TodaySuggestionConstraintProjection } from './today-suggestion.types';
@@ -130,6 +131,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       workoutGenerator as never,
       new TodaySuggestionDeliveryPolicy(),
       engagement as never,
+      uncontendedGeneration(prisma),
     );
 
     const [first, second] = await Promise.all([
@@ -252,6 +254,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       workoutGenerator as never,
       new TodaySuggestionDeliveryPolicy(),
       engagement as never,
+      uncontendedGeneration(prisma),
     );
 
     const result = await service.get({
@@ -331,6 +334,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       {} as never,
       new TodaySuggestionDeliveryPolicy(),
       engagement as never,
+      uncontendedGeneration(prisma),
     );
 
     await service.get({ userId: 'user-1', locale: 'en', allowAi: true });

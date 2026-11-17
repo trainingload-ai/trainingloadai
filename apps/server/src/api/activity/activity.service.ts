@@ -2230,16 +2230,31 @@ export class ActivityService {
   async runLightMetricsPipeline(
     activityId: number,
     userId: string,
+    options?: {
+      publish: (
+        work: (tx: Prisma.TransactionClient) => Promise<void>,
+      ) => Promise<void>;
+    },
   ): Promise<void> {
     const activity = await this.prisma.activity.findUnique({
       where: { id: activityId },
     });
     if (!activity || !userId) return;
-    await this.metricsPipeline.runByMode({
-      activity,
-      userId,
-      mode: ActivityAnalyzeMode.LIGHT,
-    });
+    if (options?.publish) {
+      const computed = await this.metricsPipeline.computeLight(
+        activity,
+        userId,
+      );
+      await options.publish(async (tx) => {
+        await this.metricsPipeline.commitComputedLight(computed, tx);
+      });
+    } else {
+      await this.metricsPipeline.runByMode({
+        activity,
+        userId,
+        mode: ActivityAnalyzeMode.LIGHT,
+      });
+    }
     await this.planLinkMatcher
       .tryAutoLinkForActivity(activityId)
       .catch(() => {});

@@ -1,22 +1,23 @@
 "use client";
 
-import { WorkoutMatchingReviews } from "./workout-matching-reviews";
 import { Bell, CalendarDays, Loader2, MessageCircle } from "lucide-react";
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   confirmAndApplyCoachDecision,
-  dismissCoachAssessmentCase,
   fetchCoachHomeReviewState,
   openCoachAssessmentCase,
   rejectCoachDecision,
-  type CoachReviewGuidance,
   type PendingCoachDecision,
 } from "@/api/ai-coach";
-import type { CoachAssessmentInquiry } from "@shared/coach-assessment";
-import { buildCoachHomeStackItems } from "@shared/coach-home-card-stack";
 import {
   coachCycleStartHref,
   isCoachApplyNotAppliedError,
@@ -37,10 +38,10 @@ import { queryKeys } from "@/lib/query-keys";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 import { HomeAccessExtension } from "@deployment/managed-ui";
-import { HomeSuggestionDeck } from "./home-suggestion-deck";
 import {
   createTodaySuggestionWorkout,
   recordTodaySuggestionInteraction,
+  resolveTodaySuggestionContext,
   scheduleTodaySuggestionReminder,
   type AiTodaySuggestionResponse,
 } from "@/api/ai-today-suggestion";
@@ -52,7 +53,6 @@ import { Input } from "@/components/ui/input";
 import { ApiFetchError } from "@/lib/api";
 import { PlanWorkoutListRow } from "@/components/plan/plan-workout-list-row";
 import { WorkoutRenderer } from "@/components/workout/WorkoutRenderer";
-import { storeTodaySuggestionCoachContext } from "@/lib/today-suggestion-coach-context";
 
 type SuggestionCard = {
   title: string;
@@ -75,8 +75,6 @@ function defaultReminderLocalValue() {
 
 type OpenCard =
   | { kind: "suggestion" }
-  | { kind: "inquiry"; inquiry: CoachAssessmentInquiry }
-  | { kind: "guidance"; guidance: CoachReviewGuidance }
   | { kind: "decision"; decision: PendingCoachDecision };
 
 function isUsableTodaySuggestionIntent(
@@ -104,18 +102,6 @@ export function HomeSuggestionCardStack({
   const publicDemo = usePublicDemo();
   const region = useRef<HTMLDivElement>(null);
   const presented = useRef(new Set<string>());
-  const { data: reviewState } = useQuery({
-    queryKey: queryKeys.ai.pendingDecisions(),
-    queryFn: fetchCoachHomeReviewState,
-    enabled: !publicDemo.active,
-  });
-  const pending = reviewState?.decisions ?? [];
-  const guidance = reviewState?.guidance ?? null;
-  const inquiry = reviewState?.inquiry ?? null;
-  const items = useMemo(
-    () => buildCoachHomeStackItems(pending, undefined, guidance, inquiry),
-    [guidance, inquiry, pending],
-  );
   const [opened, setOpened] = useState<OpenCard>({ kind: "suggestion" });
   const [open, setOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
@@ -234,18 +220,6 @@ export function HomeSuggestionCardStack({
       router.push(`/ai-coach?${params.toString()}`);
     },
   });
-  const dismissInquiryMutation = useMutation({
-    mutationFn: dismissCoachAssessmentCase,
-    onSuccess: async () => {
-      setOpen(false);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.ai.pendingDecisions(),
-        }),
-        queryClient.invalidateQueries({ queryKey: ["v2-home-today-advice"] }),
-      ]);
-    },
-  });
   const workoutMutation = useMutation({
     mutationFn: (generationToken: string) =>
       createTodaySuggestionWorkout(generationToken),
@@ -336,14 +310,12 @@ export function HomeSuggestionCardStack({
     applyMutation.isPending ||
     rejectMutation.isPending ||
     openInquiryMutation.isPending ||
-    dismissInquiryMutation.isPending ||
     workoutMutation.isPending ||
     reminderMutation.isPending;
   const error =
     applyMutation.error ??
     rejectMutation.error ??
     openInquiryMutation.error ??
-    dismissInquiryMutation.error ??
     workoutMutation.error ??
     reminderMutation.error;
 
@@ -366,36 +338,33 @@ export function HomeSuggestionCardStack({
     },
     [details, publicDemo.active],
   );
-  const navigateToTodaySuggestionCoach = () => {
+  useEffect(() => {
+    recordPresented("suggestion");
+  }, [recordPresented]);
+  const navigateToTodaySuggestionCoach = async () => {
     if (!details || publicDemo.active) return;
-    storeTodaySuggestionCoachContext({
-      suggestionId: details.suggestionId,
-      date: suggestion.date,
-      weekday: suggestion.weekday,
-      headline: details.headline,
-      summary: details.summary,
-      recommendation: details.recommendation,
-      confidence: details.confidence,
-      uncertainty: details.uncertainty,
-      evidence: details.evidence,
-      primaryIntent,
-      secondaryIntents,
-      validUntil: details.validUntil,
-    });
-    const params = new URLSearchParams({
-      intent: "today-suggestion",
-      source: "home-today-suggestion",
-      openReason: "today_suggestion",
-      todaySuggestionId: details.suggestionId,
-      prompt: t("todaySuggestionActions.coachPrompt"),
-    });
-    const coachIntent = availableIntents.find(
-      (intent) => intent.type === "ASK_COACH",
-    );
-    if (coachIntent?.type === "ASK_COACH") {
-      params.set("starterCode", coachIntent.starterCode);
+    try {
+      const resolved = await resolveTodaySuggestionContext(
+        details.suggestionId,
+      );
+      if (!resolved?.sessionId || !resolved.context) {
+        toast.info(t("todaySuggestionActions.suggestionChanged"));
+        return;
+      }
+      const params = new URLSearchParams({
+        sid: resolved.sessionId,
+        intent: "today-suggestion",
+        source: "home-today-suggestion",
+        openReason: "today_suggestion",
+      });
+      if (!resolved.resumeExisting) {
+        params.set("todaySuggestionId", details.suggestionId);
+        params.set("prompt", t("todaySuggestionActions.coachPrompt"));
+      }
+      router.push(`/ai-coach?${params.toString()}`);
+    } catch {
+      toast.info(t("todaySuggestionActions.suggestionChanged"));
     }
-    router.push(`/ai-coach?${params.toString()}`);
   };
   const handleIntent = async (intent: TodaySuggestionIntent) => {
     if (!details || publicDemo.active) return;
@@ -440,17 +409,27 @@ export function HomeSuggestionCardStack({
         router.push(`/activities/${encodeURIComponent(intent.activityId)}`);
         return;
       case "OPEN_DECISION": {
-        const matched = pending.find((item) => item.id === intent.decisionId);
-        if (matched) {
+        try {
+          const current = await fetchCoachHomeReviewState();
+          const matched = current.decisions.find(
+            (item) => item.id === intent.decisionId,
+          );
+          if (!matched) {
+            toast.info(t("todaySuggestionActions.suggestionChanged"));
+            await queryClient.invalidateQueries({
+              queryKey: ["v2-home-today-advice"],
+            });
+            return;
+          }
           setOpened({ kind: "decision", decision: matched });
           setOpen(true);
-        } else {
-          router.push("/ai-coach?openReason=today_suggestion_decision");
+        } catch {
+          toast.info(t("todaySuggestionActions.suggestionChanged"));
         }
         return;
       }
       case "ASK_COACH": {
-        navigateToTodaySuggestionCoach();
+        await navigateToTodaySuggestionCoach();
         return;
       }
       case "VIEW_TOMORROW":
@@ -467,8 +446,6 @@ export function HomeSuggestionCardStack({
     setOpen(true);
   };
   const decision = opened.kind === "decision" ? opened.decision : null;
-  const openedInquiry = opened.kind === "inquiry" ? opened.inquiry : null;
-  const openedGuidance = opened.kind === "guidance" ? opened.guidance : null;
   const openNext = decision ? isOpenNextCoachDecision(decision) : false;
   const decisionTitle = (item: PendingCoachDecision) =>
     t(
@@ -482,9 +459,7 @@ export function HomeSuggestionCardStack({
     ? openNext
       ? coachCycleStartHref(decision)
       : `/ai-coach?branchId=${encodeURIComponent(decision.branchId)}&contextId=${encodeURIComponent(decision.contextId)}&planId=${encodeURIComponent(decision.planId)}&openReason=${encodeURIComponent(decision.openReason || "runtime_day_review")}`
-    : openedGuidance
-      ? `/ai-coach?contextId=${encodeURIComponent(openedGuidance.contextId)}&planId=${encodeURIComponent(openedGuidance.planId)}&openReason=review_guidance`
-      : "/ai-coach";
+    : "/ai-coach";
 
   return (
     <div ref={region} className="min-w-0 space-y-3">
@@ -495,7 +470,11 @@ export function HomeSuggestionCardStack({
         </div>
         <div className="flex shrink-0 items-center justify-end gap-1.5">
           <AccessGuardedLink
-            href="/ai-coach"
+            href={
+              details && !publicDemo.active
+                ? `/ai-coach?todaySuggestionId=${encodeURIComponent(details.suggestionId)}&intent=today-suggestion&prompt=${encodeURIComponent(t("todaySuggestionActions.coachPrompt"))}`
+                : "/ai-coach"
+            }
             aria-label={t("header.askCoach")}
             className="pointer-events-auto inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 pc:h-8 pc:w-auto pc:gap-1.5 pc:px-3"
           >
@@ -508,116 +487,46 @@ export function HomeSuggestionCardStack({
           <HomeAccessExtension />
         </div>
       </div>
-      <div className="flex min-w-0 items-stretch gap-2">
+      <div className="flex min-w-0 flex-wrap items-stretch gap-2">
         {suggestionPreviewLeading}
-        <div className="min-w-0 flex-1">
-          <HomeSuggestionDeck
-            disabled={busy || open}
-            switchLabel={t("decisionStack.bringForward")}
-            onFrontChange={recordPresented}
-            cards={items.map((item) => ({
-              id: item.id,
-              label:
-                item.kind === "decision"
-                  ? `${decisionTitle(item.decision)} · ${decisionSummary(item.decision)}`
-                  : item.kind === "inquiry"
-                    ? `${item.inquiry.title} · ${item.inquiry.question.question} · ${item.inquiry.reason}`
-                    : item.kind === "guidance"
-                      ? `${t("aiTodaySuggestion.reviewTitle")} · ${item.guidance.rationale}`
-                      : details
-                        ? `${details.headline} · ${suggestion.summary}`
-                        : suggestion.title,
-              className:
-                item.kind === "decision"
-                  ? "bg-palette-amber-100 dark:bg-visual-artwork-caution-dark"
-                  : item.kind === "inquiry"
-                    ? "bg-neutral-100 dark:bg-surface-strong"
-                    : item.kind === "guidance"
-                      ? "bg-neutral-100 dark:bg-surface-strong"
-                      : "bg-neutral-100 dark:bg-surface-strong",
-              onOpen: () => {
-                applyMutation.reset();
-                rejectMutation.reset();
-                setOpened(
-                  item.kind === "decision"
-                    ? { kind: "decision", decision: item.decision }
-                    : item.kind === "inquiry"
-                      ? { kind: "inquiry", inquiry: item.inquiry }
-                      : item.kind === "guidance"
-                        ? { kind: "guidance", guidance: item.guidance }
-                        : { kind: "suggestion" },
-                );
-                setOpen(true);
-              },
-              content: (
-                <>
-                  {item.kind === "suggestion" ? (
-                    <span className="flex min-w-0 flex-col gap-1 overflow-hidden">
-                      <span className="block truncate text-sm font-semibold leading-5">
-                        {details?.headline || suggestion.title}
-                      </span>
-                      <span className="line-clamp-2 min-h-0 min-w-0 overflow-hidden break-words text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
-                        {details?.summary || suggestion.summary}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="line-clamp-2 min-w-0 overflow-hidden break-words text-sm font-medium leading-5">
-                      {item.kind === "decision"
-                        ? decisionSummary(item.decision)
-                        : item.kind === "inquiry"
-                          ? item.inquiry.question.question
-                          : item.guidance.rationale}
-                    </span>
-                  )}
-                  {item.kind === "inquiry" ? (
-                    <span className="line-clamp-1 overflow-hidden text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
-                      {item.inquiry.reason}
-                    </span>
-                  ) : null}
-                  <CardTags
-                    tags={
-                      item.kind === "decision"
-                        ? [decisionTitle(item.decision)]
-                        : item.kind === "inquiry"
-                          ? [
-                              t("stateInquiry.tag"),
-                              item.inquiry.question.header,
-                            ]
-                          : item.kind === "guidance"
-                            ? [t("aiTodaySuggestion.reviewTitle")]
-                            : (details?.evidence
-                                .slice(0, 2)
-                                .map((evidence) => evidence.label) ??
-                              suggestion.tags.slice(0, 2))
-                    }
-                  />
-                </>
-              ),
-              actions:
-                item.kind === "suggestion" && details ? (
-                  <>
-                    {quickIntent ? (
-                      <Button
-                        key={quickIntent.type}
-                        type="button"
-                        size="xs"
-                        variant="ghost"
-                        disabled={busy || publicDemo.active}
-                        onClick={() => void handleIntent(quickIntent)}
-                      >
-                        {quickIntent.type === "SCHEDULE_REMINDER" ? (
-                          <Bell className="h-3.5 w-3.5" aria-hidden />
-                        ) : null}
-                        {quickIntent.label}
-                      </Button>
-                    ) : null}
-                  </>
-                ) : null,
-            }))}
-          />
+        <div className="min-w-0 grow basis-64">
+          <div
+            className="min-w-0 rounded-xl bg-neutral-100 p-4 dark:bg-surface-strong pc:rounded-md"
+            data-testid="today-advice"
+          >
+            <h2 className="text-sm font-semibold leading-5">
+              {details?.headline || suggestion.title}
+            </h2>
+            <p className="mt-2 whitespace-pre-wrap break-words text-pretty text-sm leading-6 text-muted-foreground">
+              {details?.summary || suggestion.summary}
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {quickIntent ? (
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  className="h-auto min-h-8 max-w-full whitespace-normal break-words text-left"
+                  disabled={busy || publicDemo.active}
+                  onClick={() => void handleIntent(quickIntent)}
+                >
+                  {quickIntent.label}
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                size="xs"
+                variant="ghost"
+                className="h-auto min-h-8 max-w-full whitespace-normal break-words text-left"
+                data-front="true"
+                onClick={openSuggestionDetails}
+              >
+                {t("todaySuggestionActions.viewSuggestion")}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-      <WorkoutMatchingReviews reviews={reviewState?.workoutMatching ?? []} />
       <ResponsiveModal
         open={open}
         onOpenChange={(next) => {
@@ -643,16 +552,10 @@ export function HomeSuggestionCardStack({
             <ResponsiveModalTitle>
               {decision
                 ? decisionTitle(decision)
-                : openedInquiry
-                  ? openedInquiry.title
-                  : openedGuidance
-                    ? t("aiTodaySuggestion.reviewTitle")
-                    : details?.headline || suggestion.title}
+                : details?.headline || suggestion.title}
             </ResponsiveModalTitle>
             <ResponsiveModalDescription>
               {decision?.planTitle ||
-                (openedInquiry ? t("stateInquiry.subtitle") : null) ||
-                openedGuidance?.planTitle ||
                 [suggestion.date, suggestion.weekday]
                   .map((value) => value.trim())
                   .filter(Boolean)
@@ -663,9 +566,7 @@ export function HomeSuggestionCardStack({
             <p className="whitespace-pre-wrap text-base leading-6">
               {decision
                 ? decisionSummary(decision)
-                : openedInquiry
-                  ? openedInquiry.question.question
-                  : openedGuidance?.rationale || suggestion.summary}
+                : details?.summary || suggestion.summary}
             </p>
             {decision ? (
               <>
@@ -678,19 +579,7 @@ export function HomeSuggestionCardStack({
                   </p>
                 ) : null}
               </>
-            ) : openedInquiry ? (
-              <div className="space-y-2">
-                <p className="text-sm leading-5 text-muted-foreground">
-                  {openedInquiry.reason}
-                </p>
-                <p className="text-sm leading-5 text-muted-foreground">
-                  {openedInquiry.decisionImpact}
-                </p>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {openedInquiry.observation}
-                </p>
-              </div>
-            ) : openedGuidance ? null : (
+            ) : (
               <>
                 {suggestion.weatherAttribution ? (
                   <p className="text-xs text-muted-foreground">
@@ -786,18 +675,6 @@ export function HomeSuggestionCardStack({
                     : "decisionStack.confirm",
                 )}
               </Button>
-            ) : openedInquiry ? (
-              <Button
-                type="button"
-                size="dialog-action"
-                className="w-full"
-                disabled={busy}
-                aria-busy={openInquiryMutation.isPending}
-                onClick={() => openInquiryMutation.mutate(openedInquiry.caseId)}
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden />
-                {t("stateInquiry.answer")}
-              </Button>
             ) : opened.kind === "suggestion" && primaryIntent ? (
               <Button
                 type="button"
@@ -882,21 +759,7 @@ export function HomeSuggestionCardStack({
                   )}
                 </Button>
               ) : null}
-              {openedInquiry ? (
-                <Button
-                  type="button"
-                  size="dialog-action"
-                  variant="ghost"
-                  className="flex-1"
-                  disabled={busy}
-                  aria-busy={dismissInquiryMutation.isPending}
-                  onClick={() =>
-                    dismissInquiryMutation.mutate(openedInquiry.caseId)
-                  }
-                >
-                  {t("stateInquiry.skip")}
-                </Button>
-              ) : opened.kind !== "suggestion" || !details ? (
+              {opened.kind !== "suggestion" || !details ? (
                 <AccessGuardedLink
                   href={coachHref}
                   aria-disabled={busy || undefined}

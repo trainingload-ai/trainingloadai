@@ -33,7 +33,10 @@ import { mapIntervalsIcuFitnessRecordsToMetricWrites } from './intervals-icu-fit
 import { mapIntervalsIcuWellnessRecordsToDailyPatches } from './intervals-icu-health.mapper';
 import { mapIntervalsIcuAthleteToSportSettingsMetrics } from './intervals-icu-sport-settings.mapper';
 import { IntervalsIcuPlanSyncService } from './intervals-icu-plan-sync.service';
-import { ExternalProviderWebhookInboxService } from '@/integrations/external-provider/external-provider-webhook-inbox.service';
+import {
+  ExternalProviderWebhookInboxService,
+  webhookContentChecksum,
+} from '@/integrations/external-provider/external-provider-webhook-inbox.service';
 import { importJsonValue } from '@/importing/import-item-job.types';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 
@@ -162,7 +165,7 @@ export class IntervalsIcuWebhookService {
     };
   }
 
-  /** Normalize provider fields and preserve the existing event identity rules. */
+  /** Entity identity cannot suppress a later notification with new content. */
   private async buildInboxEvent(event: IntervalsIcuWebhookEvent) {
     const eventType = String(event.type ?? 'UNKNOWN').trim() || 'UNKNOWN';
     const athleteId = String(event.athlete_id ?? '').trim() || null;
@@ -172,7 +175,7 @@ export class IntervalsIcuWebhookService {
     const authorization = connection
       ? intervalsAuthorization(connection)
       : null;
-    const checksum = this.inbox.checksum(JSON.stringify(event));
+    const checksum = webhookContentChecksum(event);
     const remoteId =
       extractActivityExternalId(event) ??
       String(event.id ?? event.timestamp ?? '').trim();
@@ -180,6 +183,8 @@ export class IntervalsIcuWebhookService {
       eventType,
       athleteId ?? 'unknown',
       remoteId || checksum,
+      'content-v2',
+      checksum,
       this.inbox.checksum(JSON.stringify(authorization)),
     ].join(':');
     return {
@@ -244,6 +249,7 @@ export class IntervalsIcuWebhookService {
       case 'WELLNESS_UPDATED':
         return this.handleWellnessUpdated(connection, event);
       case 'ACTIVITY_UPLOADED':
+      case 'ACTIVITY_ANALYZED':
         return this.handleActivityEvent(connection, event, eventType);
       case 'ACTIVITY_DELETED':
         return this.handleActivityDeleted(connection, event);
@@ -357,6 +363,9 @@ export class IntervalsIcuWebhookService {
       authorization: intervalsAuthorization(connection),
       activities: [activity],
       reason: 'webhook',
+      ...(eventType === 'ACTIVITY_ANALYZED'
+        ? { revisionHint: webhookContentChecksum(event) }
+        : {}),
     });
     this.logger.log(
       `[intervals_icu activity] ${eventType} userId=${connection.userId} activityId=${String(activity.id ?? 'unknown')} queued=${result.queuedCount} skipped=${result.skippedCount}`,

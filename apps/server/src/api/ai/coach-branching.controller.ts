@@ -1,3 +1,4 @@
+import { TodaySuggestionGuidanceService } from './today-suggestion/today-suggestion-guidance.service';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CurrentUserId } from '@/utils/decorators/current-user-id.decorator';
 import { CoachBranchingService } from './coach-branching.service';
@@ -74,13 +75,15 @@ export class CoachBranchingController {
   constructor(
     private readonly branching: CoachBranchingService,
     private readonly assessmentCases: CoachAssessmentCaseService,
+    private readonly guidance: TodaySuggestionGuidanceService,
   ) {}
 
   @Post('assessment-cases/:caseId/open')
-  openAssessmentCase(
+  async openAssessmentCase(
     @Param('caseId') caseId: string,
     @CurrentUserId() userId: string,
   ) {
+    await this.guidance.reconcile(userId, 'en');
     return this.assessmentCases.open(userId, caseId);
   }
 

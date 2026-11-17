@@ -15,6 +15,10 @@ function createService(prisma: unknown) {
         async (tx: any) =>
           callback({
             ...tx,
+            importSourceObject: {
+              findMany: async () => [],
+              ...tx.importSourceObject,
+            },
             thirdPartyActivity: {
               ...source.thirdPartyActivity,
               ...tx.thirdPartyActivity,

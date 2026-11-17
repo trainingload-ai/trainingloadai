@@ -17,6 +17,7 @@ export type TodayAdviceCoachDecision = {
   riskTier: string;
   rationale: string | null;
   confidence: number | null;
+  basisCoverage?: 'CURRENT' | 'UNVERIFIED';
   relevance: 'TODAY' | 'TOMORROW' | 'PAST' | 'FUTURE' | 'UNKNOWN';
   target: {
     planId: string | null;
@@ -69,6 +70,8 @@ export type TodayAdviceCoachReview = {
 
 export type TodayAdviceCoachState = {
   decisionReadStatus: 'AVAILABLE' | 'UNAVAILABLE' | 'NOT_APPLICABLE';
+  assessmentReadStatus?: 'AVAILABLE' | 'UNAVAILABLE';
+  assessmentCoverage?: 'CURRENT' | 'UNVERIFIED';
   decisions: TodayAdviceCoachDecision[];
   recentReviews: TodayAdviceCoachReview[];
   athleteState: {
@@ -80,6 +83,7 @@ export type TodayAdviceCoachState = {
     evidenceHash: string;
     decisionId: string | null;
     expiresAt: string;
+    factRevision?: string | null;
   } | null;
 };
 
@@ -169,6 +173,7 @@ export class CoachStateContextService {
     }
 
     let athleteState: TodayAdviceCoachState['athleteState'] = null;
+    let assessmentReadStatus: 'AVAILABLE' | 'UNAVAILABLE' = 'AVAILABLE';
     try {
       const latest = await this.prisma.athleteStateAssessment?.findFirst({
         where: {
@@ -186,6 +191,9 @@ export class CoachStateContextService {
           state: latest.state,
           decisionReadiness: latest.decisionReadiness,
           evidenceHash: latest.evidenceHash,
+          factRevision: text(
+            asRecord(latest.evidenceSnapshot)?.coachFactRevision,
+          ),
           decisionId: null,
           expiresAt: latest.expiresAt.toISOString(),
         };
@@ -216,6 +224,7 @@ export class CoachStateContextService {
               state: true,
               decisionReadiness: true,
               policyVersion: true,
+              evidenceSnapshot: true,
               evidenceRequests: true,
               safetyFlags: true,
             },
@@ -247,11 +256,15 @@ export class CoachStateContextService {
           state: row.assessment.state,
           decisionReadiness: row.assessment.decisionReadiness,
           evidenceHash: row.evidenceHash,
+          factRevision: text(
+            asRecord(row.assessment.evidenceSnapshot)?.coachFactRevision,
+          ),
           decisionId: row.decisionId,
           expiresAt: row.expiresAt.toISOString(),
         };
       }
     } catch (error) {
+      assessmentReadStatus = 'UNAVAILABLE';
       this.logger.warn(
         `[coach-state-context] athlete state read failed userId=${args.userId} reason=${error instanceof Error ? error.message : String(error)}`,
       );
@@ -259,6 +272,7 @@ export class CoachStateContextService {
 
     return {
       decisionReadStatus,
+      assessmentReadStatus,
       decisions: decisions.map((decision) =>
         presentDecision(decision, args.anchorDate),
       ),
@@ -267,6 +281,28 @@ export class CoachStateContextService {
         .slice(-3)
         .map(presentReview),
       athleteState,
+    };
+  }
+  /** Older assessments are historical until their dependency proof matches current facts. */
+  forFactRevision(
+    context: TodayAdviceCoachState,
+    revision: string,
+  ): TodayAdviceCoachState {
+    const covered = context.athleteState?.factRevision === revision;
+    return {
+      ...context,
+      assessmentCoverage: covered ? 'CURRENT' : 'UNVERIFIED',
+      athleteState: covered ? context.athleteState : null,
+      decisions: context.decisions.map((decision) => ({
+        ...decision,
+        basisCoverage: 'UNVERIFIED',
+        rationale: null,
+      })),
+      recentReviews: context.recentReviews.map((review) => ({
+        ...review,
+        rationale: null,
+        presentation: null,
+      })),
     };
   }
 }

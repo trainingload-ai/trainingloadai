@@ -1,5 +1,10 @@
 "use client";
 
+import { stripCoachSeedEntryParams } from "@/lib/coach-seed-entry";
+
+import { useQuery } from "@tanstack/react-query";
+import { resolveTodaySuggestionContext } from "@/api/ai-today-suggestion";
+
 import { useEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import { useCoachActions } from "./coach-chat-provider";
@@ -23,40 +28,23 @@ import {
   buildAiPlanSeedToolResult,
   buildAiPlanSeedUserText,
   parseAiPlanSeedFromSearchParams,
-  stripAiPlanSeedParams,
   type AiPlanSeedRaceDistance,
 } from "@/lib/ai-plan-seed-prompt";
 import { getStrengthEquipmentKey } from "@/lib/strength-catalog";
 import { getBranchContextFromSearchParams } from "./coach-branch-context";
-import {
-  buildTodaySuggestionCoachMessage,
-  claimTodaySuggestionCoachContext,
-} from "@/lib/today-suggestion-coach-context";
-
-function stripAiCoachSeedEntryParams(next: URLSearchParams): void {
-  stripAiPlanSeedParams(next);
-  next.delete("branch");
-  next.delete("branchId");
-  next.delete("contextId");
-  next.delete("source");
-  next.delete("date");
-  next.delete("workoutId");
-  next.delete("openReason");
-  next.delete("planId");
-  next.delete("pending");
-  next.delete("caseId");
-  next.delete("todaySuggestionId");
-  next.delete("starterCode");
-}
+import { buildTodaySuggestionCoachMessage } from "@/lib/today-suggestion-coach-context";
 
 export function CoachSeedAutoStarter({
+  sessionId,
   intentOverrideRef,
   branchContextRef,
 }: {
+  sessionId: string;
   intentOverrideRef: MutableRefObject<string | null>;
   branchContextRef: MutableRefObject<CoachBranchRequestContext | null>;
 }) {
   const locale = useLocale();
+  const tHome = useTranslations("V2HomePage");
   const tPlanCreate = useTranslations("V2PlanCreatePage");
   const tEquipment = useTranslations("StrengthCatalog.equipment");
   const pathname = usePathname();
@@ -65,10 +53,19 @@ export function CoachSeedAutoStarter({
   const { data: session, isPending: sessionPending } = useViewerSession();
   const thread = useCoachActions();
   const lastConsumedSeedRef = useRef<string | null>(null);
-  const claimedTodaySuggestionRef = useRef<{
-    id: string;
-    context: NonNullable<ReturnType<typeof claimTodaySuggestionCoachContext>>;
-  } | null>(null);
+  const todaySuggestionId = searchParams.get("todaySuggestionId")?.trim() ?? "";
+  const resolvedGuidance = useQuery({
+    queryKey: [
+      "today-suggestion-context",
+      session?.user?.id,
+      todaySuggestionId,
+    ],
+    queryFn: () => resolveTodaySuggestionContext(todaySuggestionId),
+    enabled: Boolean(session?.user?.id && todaySuggestionId),
+    staleTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (sessionPending) return;
@@ -98,18 +95,31 @@ export function CoachSeedAutoStarter({
 
     const planPayload = parseAiPlanSeedFromSearchParams(searchParams);
     const planFollowup = parsePlanFollowupFromSearchParams(searchParams);
-    const todaySuggestionId =
-      searchParams.get("todaySuggestionId")?.trim() ?? "";
-    const todaySuggestionContext = todaySuggestionId
-      ? claimedTodaySuggestionRef.current?.id === todaySuggestionId
-        ? claimedTodaySuggestionRef.current.context
-        : claimTodaySuggestionCoachContext(todaySuggestionId)
-      : null;
-    if (todaySuggestionId && todaySuggestionContext) {
-      claimedTodaySuggestionRef.current = {
-        id: todaySuggestionId,
-        context: todaySuggestionContext,
-      };
+    const todaySuggestionContext = resolvedGuidance.data?.context ?? null;
+    if (todaySuggestionId) {
+      if (
+        resolvedGuidance.isPending ||
+        resolvedGuidance.isFetching ||
+        !resolvedGuidance.isFetchedAfterMount ||
+        resolvedGuidance.isError
+      )
+        return;
+      if (!resolvedGuidance.data?.sessionId || !todaySuggestionContext) return;
+      if (searchParams.get("sid") !== resolvedGuidance.data.sessionId) {
+        const next = new URLSearchParams(searchParams.toString());
+        next.set("sid", resolvedGuidance.data.sessionId);
+        router.replace(`/ai-coach?${next.toString()}`);
+        return;
+      }
+      if (sessionId !== resolvedGuidance.data.sessionId) return;
+      if (resolvedGuidance.data.resumeExisting) {
+        const next = new URLSearchParams(searchParams.toString());
+        stripCoachSeedEntryParams(next);
+        next.delete("prompt");
+        next.delete("intent");
+        router.replace(`/ai-coach?${next.toString()}`);
+        return;
+      }
     }
     let seedPrompt = "";
     let seedKey = "";
@@ -230,7 +240,7 @@ export function CoachSeedAutoStarter({
     });
 
     const next = new URLSearchParams(searchParams.toString());
-    stripAiCoachSeedEntryParams(next);
+    stripCoachSeedEntryParams(next);
     const qs = next.toString();
     window.history.replaceState(
       window.history.state,
@@ -259,6 +269,13 @@ export function CoachSeedAutoStarter({
     });
   }, [
     branchContextRef,
+    resolvedGuidance.data,
+    resolvedGuidance.isPending,
+    resolvedGuidance.isFetching,
+    resolvedGuidance.isFetchedAfterMount,
+    resolvedGuidance.isError,
+    todaySuggestionId,
+    sessionId,
     intentOverrideRef,
     locale,
     pathname,
@@ -271,5 +288,15 @@ export function CoachSeedAutoStarter({
     thread,
   ]);
 
+  if (
+    todaySuggestionId &&
+    (resolvedGuidance.isError ||
+      resolvedGuidance.data?.status === "UNAVAILABLE")
+  )
+    return (
+      <p role="status" className="px-4 py-3 text-sm text-muted-foreground">
+        {tHome("todaySuggestionActions.suggestionChanged")}
+      </p>
+    );
   return null;
 }

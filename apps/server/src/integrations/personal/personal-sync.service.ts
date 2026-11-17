@@ -37,6 +37,7 @@ import {
 import { corosHealthCandidates } from '../coros-mcp/coros-health.mapper';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 import { personalAccountRef } from './personal-identity';
+import { webhookContentChecksum } from '@/integrations/external-provider/external-provider-webhook-inbox.service';
 import {
   garminSummaryMode,
   mapGarminHeartRateZones,
@@ -119,7 +120,9 @@ export class PersonalSyncService {
           activityDone: !settings.activities,
           healthDone: !settings.wellness,
           heartRateZonesDone:
-            trigger !== 'first_connect' || !settings.wellness || provider !== 'garmin',
+            trigger !== 'first_connect' ||
+            !settings.wellness ||
+            provider !== 'garmin',
           childIds: [],
           discovered: 0,
         }),
@@ -185,8 +188,7 @@ export class PersonalSyncService {
           cursor: startDate,
           activityDone: !settings.activities,
           healthDone: !settings.wellness,
-          heartRateZonesDone:
-            !settings.wellness || provider !== 'garmin',
+          heartRateZonesDone: !settings.wellness || provider !== 'garmin',
           childIds: [],
           discovered: 0,
         }),
@@ -208,12 +210,20 @@ export class PersonalSyncService {
   async enqueueFocus(userId: string, provider: PersonalProvider) {
     const connection = await this.connections.require(userId, provider);
     if (!connection.syncActivities && !connection.syncWellness)
-      return { status: 'SKIPPED', jobId: null as string | null, reason: 'disabled' };
+      return {
+        status: 'SKIPPED',
+        jobId: null as string | null,
+        reason: 'disabled',
+      };
     if (
       connection.lastSyncCompletedAt &&
       Date.now() - connection.lastSyncCompletedAt.getTime() < 60 * 60_000
     )
-      return { status: 'SKIPPED', jobId: null as string | null, reason: 'throttled' };
+      return {
+        status: 'SKIPPED',
+        jobId: null as string | null,
+        reason: 'throttled',
+      };
     const active = await this.prisma.personalProviderJob.findFirst({
       where: {
         connectionId: connection.id,
@@ -223,7 +233,11 @@ export class PersonalSyncService {
       select: { id: true },
     });
     if (active)
-      return { status: 'SKIPPED', jobId: null as string | null, reason: 'in_flight' };
+      return {
+        status: 'SKIPPED',
+        jobId: null as string | null,
+        reason: 'in_flight',
+      };
     const timezone = await this.connections.resolveAccountTimezone(userId);
     const endDate = localToday(timezone);
     const startDate = addDays(endDate, -1);
@@ -234,7 +248,9 @@ export class PersonalSyncService {
       wellness: connection.syncWellness === true,
     };
     const requestId = createHash('sha256')
-      .update(`focus:${connection.id}:${endDate}:${Math.floor(Date.now() / 3600_000)}`)
+      .update(
+        `focus:${connection.id}:${endDate}:${Math.floor(Date.now() / 3600_000)}`,
+      )
       .digest('hex');
     const job = await this.prisma.personalProviderJob.upsert({
       where: {
@@ -283,7 +299,9 @@ export class PersonalSyncService {
     for (const row of rows) {
       if (!isPersonalConnection(row)) continue;
       if (!row.syncActivities && !row.syncWellness) continue;
-      const timezone = await this.connections.resolveAccountTimezone(row.userId);
+      const timezone = await this.connections.resolveAccountTimezone(
+        row.userId,
+      );
       const now = new Date();
       const localHour = Number(
         new Intl.DateTimeFormat('en-US', {
@@ -670,11 +688,7 @@ export class PersonalSyncService {
       settings.wellness !== false
     ) {
       await this.importGarminHeartRateZones(job, connection);
-      await this.checkpoint(
-        job,
-        { ...result, heartRateZonesDone: true },
-        1000,
-      );
+      await this.checkpoint(job, { ...result, heartRateZonesDone: true }, 1000);
       return;
     }
     if (!result.healthDone && connection.syncWellness !== false) {
@@ -816,7 +830,8 @@ export class PersonalSyncService {
     if (active.length === 1) return false;
     const next = children.find(
       (child) =>
-        child.status === 'WAITING' && isPersonalActivitySerialHeld(child.result),
+        child.status === 'WAITING' &&
+        isPersonalActivitySerialHeld(child.result),
     );
     if (!next) return false;
     const released = await this.prisma.personalProviderJob.updateMany({
@@ -934,10 +949,7 @@ export class PersonalSyncService {
   ) {
     const input = record(job.payload),
       result = record(job.result);
-    if (
-      connection.provider === 'garmin' &&
-      result.validateRemote
-    ) {
+    if (connection.provider === 'garmin' && result.validateRemote) {
       // List → FIT only. An explicit re-sync clears the cached file so FIT is
       // fetched again; the importer still skips unchanged bytes by checksum.
       await this.checkpoint(
@@ -1069,8 +1081,22 @@ export class PersonalSyncService {
           accountRef: personalAccountRef(connection),
           objectType: 'ACTIVITY',
           rawChecksum: checksum,
+          inputRevision: webhookContentChecksum({
+            checksum,
+            detail: result.remoteDetail ?? null,
+            connectionId: connection.id,
+            fingerprint: connection.credentialFingerprint,
+          }),
           timelineTitle: input.title,
-          sourceRef: { fileKey, fileName },
+          sourceRef: {
+            fileKey,
+            fileName,
+            personalAuthorization: {
+              connectionId: connection.id,
+              fingerprint: connection.credentialFingerprint,
+              accountRef: personalAccountRef(connection),
+            },
+          },
           metadata: {
             connectionMode: personalMetadata(connection).connectionMode,
             remoteDetail: result.remoteDetail ?? null,
@@ -1323,12 +1349,14 @@ export class PersonalSyncService {
     connection: ExternalProviderConnection,
   ) {
     await this.current(job, connection, 'HEALTH');
-    const payload = await this.connections.authorized(connection.id, (c, token) =>
-      this.garmin.get(
-        personalRegion(c),
-        token,
-        '/biometric-service/heartRateZones/v2',
-      ),
+    const payload = await this.connections.authorized(
+      connection.id,
+      (c, token) =>
+        this.garmin.get(
+          personalRegion(c),
+          token,
+          '/biometric-service/heartRateZones/v2',
+        ),
     );
     const mapped = mapGarminHeartRateZones(payload);
     for (const entry of mapped) {

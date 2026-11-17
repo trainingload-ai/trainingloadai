@@ -29,6 +29,7 @@ export type ExternalActivityDiscoveryArgs = {
   reason: ExternalActivityDiscoveryReason;
   discoveryWindow?: { start: Date; end: Date };
   forceRetry?: boolean;
+  refreshResolved?: boolean;
   confirmedOriginUnavailable?: boolean;
   discoveryProvider?: ThirdPartyProvider;
 };

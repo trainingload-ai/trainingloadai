@@ -44,6 +44,36 @@ describe('RemoteActivityFileService', () => {
     });
   });
 
+  it('rejects a late legacy download when its null revision has been superseded', async () => {
+    const updateMany = jest.fn(async () => ({ count: 0 }));
+    const prisma = { importSourceObject: { updateMany } };
+    const service = new RemoteActivityFileService(
+      prisma as never,
+      {
+        uploadFile: async () => ({ fileKey: 'late.fit' }),
+        getFileWithKey: async () => undefined,
+      } as never,
+      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+    );
+    await expect(
+      service.resolve({
+        sourceObject: { id: 'source' },
+        sourceRevision: null,
+        fallbackFileName: 'file.fit',
+        download: async () => ({
+          buffer: Buffer.from('old'),
+          fileName: 'old.fit',
+          endpoint: '/file',
+        }),
+      }),
+    ).rejects.toThrow('IMPORT_SOURCE_REVISION_CHANGED');
+    expect(updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'source', importRevision: null },
+      }),
+    );
+  });
+
   it('stores a downloaded file and records its evidence', async () => {
     const update = jest
       .fn<(...args: unknown[]) => Promise<unknown>>()

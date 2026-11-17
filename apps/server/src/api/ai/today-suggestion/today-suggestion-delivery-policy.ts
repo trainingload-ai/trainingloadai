@@ -282,15 +282,18 @@ export class TodaySuggestionDeliveryPolicy {
           label: label(projection.locale, '导入活动', 'Import activity'),
         };
       case 'OPEN_ACTIVITY_REVIEW':
-        return projection.latestActivityId
+        return projection.matchingActivityId || projection.latestActivityId
           ? {
               type,
               label: label(
                 projection.locale,
-                '查看活动复盘',
-                'Review activity',
+                projection.matchingActivityId ? '核对活动关联' : '查看活动复盘',
+                projection.matchingActivityId
+                  ? 'Check activity association'
+                  : 'Review activity',
               ),
-              activityId: projection.latestActivityId,
+              activityId:
+                projection.matchingActivityId ?? projection.latestActivityId,
             }
           : null;
       case 'OPEN_DECISION':

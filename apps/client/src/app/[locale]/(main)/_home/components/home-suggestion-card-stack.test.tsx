@@ -9,11 +9,13 @@ import {
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { TodaySuggestionIntent } from "@shared/ai-today-suggestion-contract";
 import type { PendingCoachDecision } from "@/api/ai-coach";
 import { HomeSuggestionCardStack } from "./home-suggestion-card-stack";
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
+  resolveContext: vi.fn(),
   apply: vi.fn(),
   reject: vi.fn(),
   openAssessment: vi.fn(),
@@ -33,6 +35,7 @@ vi.mock("@/api/ai-coach", () => ({
   dismissCoachAssessmentCase: mocks.dismissAssessment,
 }));
 vi.mock("@/api/ai-today-suggestion", () => ({
+  resolveTodaySuggestionContext: mocks.resolveContext,
   recordTodaySuggestionInteraction: mocks.recordSuggestionInteraction,
   createTodaySuggestionWorkout: mocks.createSuggestionWorkout,
   scheduleTodaySuggestionReminder: mocks.scheduleSuggestionReminder,
@@ -106,26 +109,61 @@ function mount(
     </QueryClientProvider>,
   );
 }
-async function focusCard(label: string) {
-  if (!screen.queryByRole("button", { name: label })) {
-    const selector = await screen.findByRole("button", {
-      name: (name) =>
-        name.startsWith("decisionStack.bringForward") && name.endsWith(label),
-    });
-    fireEvent.click(selector);
-  }
-  return screen.findByRole("button", { name: label });
-}
-async function openCard(label: string) {
-  fireEvent.click(await focusCard(label));
-  return screen.findByRole("dialog");
+const adviceDetails = (
+  intent: TodaySuggestionIntent = {
+    type: "OPEN_DECISION",
+    label: "Review change",
+    decisionId: decision.id,
+  },
+) =>
+  ({
+    version: 2,
+    suggestionId: "suggestion-1",
+    headline: "Today's advice",
+    summary: suggestion.summary,
+    recommendation: { kind: "CHECK_IN" },
+    confidence: "LOW",
+    evidence: [],
+    primaryIntent: intent,
+    secondaryIntents: [],
+    tags: [],
+    source: "fallback",
+    shouldRefresh: false,
+    generatedAt: null,
+    validUntil: "2026-11-18T23:59:59Z",
+    delivery: {
+      state: "FACT_FALLBACK",
+      reasonCode: "AI_NOT_CONFIGURED",
+      generatedAt: null,
+    },
+  }) as NonNullable<
+    React.ComponentProps<
+      typeof HomeSuggestionCardStack
+    >["suggestion"]["details"]
+  >;
+function mountDecision() {
+  return mount({ ...suggestion, details: adviceDetails() });
 }
 async function openDecision() {
-  return openCard(`decisionStack.title · ${decision.rationale}`);
+  fireEvent.click(await screen.findByRole("button", { name: "Review change" }));
+  return screen.findByRole("dialog");
+}
+async function openCard(_label?: string) {
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "todaySuggestionActions.viewSuggestion",
+    }),
+  );
+  return screen.findByRole("dialog");
 }
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.publicDemo.active = false;
+  mocks.resolveContext.mockResolvedValue({
+    sessionId: "server-owned-session",
+    context: { version: 2 },
+    resumeExisting: false,
+  });
   mocks.fetch.mockResolvedValue({ decisions: [decision], guidance: null });
   mocks.apply.mockResolvedValue(undefined);
   mocks.reject.mockResolvedValue(undefined);
@@ -153,8 +191,8 @@ describe("home suggestion cards and decision details", () => {
   });
 
   it("shows summary-only cards and applies a decision only from its detail sheet", async () => {
-    mount();
-    await focusCard(`decisionStack.title · ${decision.rationale}`);
+    mountDecision();
+    expect(mocks.fetch).not.toHaveBeenCalled();
     expect(
       screen.queryByRole("button", { name: "decisionStack.confirm" }),
     ).not.toBeInTheDocument();
@@ -181,7 +219,7 @@ describe("home suggestion cards and decision details", () => {
   });
 
   it("closing details does not reject; ignoring does, and removes the card", async () => {
-    mount();
+    mountDecision();
     let sheet = await openDecision();
     fireEvent.click(within(sheet).getByRole("button", { name: "close" }));
     expect(mocks.reject).not.toHaveBeenCalled();
@@ -217,7 +255,7 @@ describe("home suggestion cards and decision details", () => {
     expect(coachShortcut.parentElement).toContainElement(
       screen.getByRole("button", { name: "Create plan" }),
     );
-    fireEvent.click(screen.getByRole("button", { name: suggestion.title }));
+    await openCard();
     const sheet = await screen.findByRole("dialog");
     expect(within(sheet).getByText("Fourth tag")).toBeVisible();
     expect(
@@ -291,13 +329,15 @@ describe("home suggestion cards and decision details", () => {
         "Import an activity or tell the coach about your available time and how you feel today.",
       ),
     ).toBeVisible();
-    expect(screen.getByText("No recorded activity yet")).toBeVisible();
-    expect(screen.getByText("No active plan")).toBeVisible();
+    expect(
+      screen.queryByText("No recorded activity yet"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("No active plan")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", {
         name: "todaySuggestionActions.viewSuggestion",
       }),
-    ).not.toBeInTheDocument();
+    ).toBeVisible();
     await openCard(
       "Complete the facts needed for today · Import an activity or tell the coach about your available time and how you feel today.",
     );
@@ -380,11 +420,7 @@ describe("home suggestion cards and decision details", () => {
       },
     });
 
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: "Easy run today · Stay easy today and keep your effort comfortable.",
-      }),
-    );
+    await openCard();
     expect(mocks.createSuggestionWorkout).not.toHaveBeenCalled();
     const sheet = await screen.findByRole("dialog");
     expect(
@@ -482,11 +518,7 @@ describe("home suggestion cards and decision details", () => {
       screen.queryByRole("button", { name: "Add as today's workout" }),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Easy run today · Stay easy today and keep your effort comfortable.",
-      }),
-    );
+    await openCard();
     const sheet = await screen.findByRole("dialog");
     expect(within(sheet).queryByText("Easy run")).not.toBeInTheDocument();
     fireEvent.click(within(sheet).getByRole("button", { name: "Ask coach" }));
@@ -499,23 +531,13 @@ describe("home suggestion cards and decision details", () => {
       openReason: "today_suggestion",
       todaySuggestionId: "legacy-suggestion",
       prompt: "todaySuggestionActions.coachPrompt",
-      starterCode: "today-context",
+      sid: "server-owned-session",
     });
     expect(mocks.recordSuggestionInteraction).toHaveBeenCalledWith(
       "legacy-suggestion",
       { kind: "INTENT_SELECTED", intentType: "ASK_COACH" },
     );
-    expect(
-      JSON.parse(
-        window.sessionStorage.getItem(
-          "trainingload:today-suggestion-coach:legacy-suggestion",
-        ) ?? "null",
-      ),
-    ).toMatchObject({
-      suggestionId: "legacy-suggestion",
-      headline: "Easy run today",
-      summary: "Keep the session relaxed.",
-    });
+    expect(window.sessionStorage.length).toBe(0);
   });
 
   it("locks pending actions, keeps failed details open, and permits a retry", async () => {
@@ -525,7 +547,7 @@ describe("home suggestion cards and decision details", () => {
         fail = reject;
       }),
     );
-    mount();
+    mountDecision();
     const sheet = await openDecision();
     const confirm = within(sheet).getByRole("button", {
       name: "decisionStack.confirm",
@@ -553,7 +575,7 @@ describe("home suggestion cards and decision details", () => {
   });
 
   it("preserves decision context on the coach link", async () => {
-    mount();
+    mountDecision();
     const sheet = await openDecision();
     const href = within(sheet)
       .getByRole("link", { name: "header.askCoach" })
@@ -563,83 +585,58 @@ describe("home suggestion cards and decision details", () => {
     expect(href).toContain("planId=plan-1");
   });
 
-  it("opens review guidance without apply or dismiss actions", async () => {
+  it("shows only the advice description and does not independently load or render pending facts", () => {
     mocks.fetch.mockResolvedValue({
-      decisions: [],
-      guidance: {
-        id: "guidance-1",
-        contextId: "context-1",
-        planId: "plan-1",
-        planTitle: "5K base plan",
-        rationale: "Two sessions were missed; resume with an easy run.",
-        scale: "weekly",
-        evidenceCodes: ["MISSED_WORKOUT"],
-        createdAt: "2026-09-11T00:00:00.000Z",
-      },
+      decisions: [decision],
+      guidance: { rationale: "old guidance" },
+      inquiry: { title: "old inquiry" },
     });
     mount();
-    await openCard(
-      "aiTodaySuggestion.reviewTitle · Two sessions were missed; resume with an easy run.",
-    );
-    const sheet = await screen.findByRole("dialog");
-    expect(
-      within(sheet).getByText(
-        "Two sessions were missed; resume with an easy run.",
-      ),
-    ).toBeVisible();
-    expect(
-      within(sheet).queryByRole("button", { name: "decisionStack.confirm" }),
-    ).not.toBeInTheDocument();
-    expect(
-      within(sheet).queryByRole("button", { name: "decisionStack.dismiss" }),
-    ).not.toBeInTheDocument();
-    expect(
-      within(sheet).getByRole("link", { name: "header.askCoach" }),
-    ).toHaveAttribute("href", expect.stringContaining("contextId=context-1"));
+    expect(screen.getAllByTestId("today-advice")).toHaveLength(1);
+    expect(screen.getByText(suggestion.summary)).toBeVisible();
+    expect(screen.queryByText("old guidance")).not.toBeInTheDocument();
+    expect(screen.queryByText("old inquiry")).not.toBeInTheDocument();
+    expect(mocks.fetch).not.toHaveBeenCalled();
   });
-
-  it("shows what state is missing and why before opening an inquiry", async () => {
-    const inquiry = {
-      caseId: "case-1",
-      questionId: "question-1",
-      title: "补充一项状态信息",
-      observation: "现有数据还不足以可靠判断今天的恢复状态。",
-      reason: "需要区分近期零负荷是真实休息、未记录还是未同步。",
-      decisionImpact: "答案会决定是渐进恢复，还是先补齐训练数据。",
-      question: {
-        id: "recent_training",
-        header: "近期训练",
-        question: "过去7天你的训练情况最接近哪一种？",
-        options: [
-          {
-            value: "none",
-            label: "基本没有训练",
-            description: "以休息为主。",
-          },
-        ],
-      },
-      state: "UNKNOWN",
-      confidence: 0.2,
-      expiresAt: "2026-09-12T00:00:00.000Z",
-    };
+  it("does not open an expired or unrelated proposal from an old suggestion", async () => {
     mocks.fetch.mockResolvedValue({
-      decisions: [],
+      decisions: [{ ...decision, id: "other" }],
       guidance: null,
-      inquiry,
     });
-
-    mount();
-    const card = await focusCard(
-      `${inquiry.title} · ${inquiry.question.question} · ${inquiry.reason}`,
+    mountDecision();
+    fireEvent.click(screen.getByRole("button", { name: "Review change" }));
+    await waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mocks.apply).not.toHaveBeenCalled();
+  });
+  it("resumes an existing server-owned discussion without sending another seed or answer", async () => {
+    mocks.resolveContext.mockResolvedValue({
+      sessionId: "same-discussion",
+      context: { version: 2 },
+      resumeExisting: true,
+    });
+    mount({
+      ...suggestion,
+      details: adviceDetails({
+        type: "ASK_COACH",
+        label: "Ask coach",
+        starterCode: "today-context",
+      }),
+    });
+    await openCard();
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Ask coach",
+      }),
     );
-    expect(within(card).getByText(inquiry.question.question)).toBeVisible();
-    expect(within(card).getByText(inquiry.reason)).toBeVisible();
-
-    fireEvent.click(card);
-    const sheet = await screen.findByRole("dialog");
-    expect(within(sheet).getByText(inquiry.question.question)).toBeVisible();
-    expect(within(sheet).getByText(inquiry.reason)).toBeVisible();
-    expect(within(sheet).getByText(inquiry.decisionImpact)).toBeVisible();
-    expect(within(sheet).getByText(inquiry.observation)).toBeVisible();
+    await waitFor(() => expect(mocks.push).toHaveBeenCalledTimes(1));
+    const target = new URL(
+      mocks.push.mock.calls[0][0],
+      "https://fixture.invalid",
+    );
+    expect(target.searchParams.get("sid")).toBe("same-discussion");
+    expect(target.searchParams.has("prompt")).toBe(false);
+    expect(target.searchParams.has("todaySuggestionId")).toBe(false);
+    expect(mocks.apply).not.toHaveBeenCalled();
   });
 });

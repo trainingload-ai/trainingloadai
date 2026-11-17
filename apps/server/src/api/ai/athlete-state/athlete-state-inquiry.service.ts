@@ -25,6 +25,40 @@ export class AthleteStateInquiryService {
     });
   }
 
+  /** Retire legacy pending questions whose assessment has no current dependency proof. */
+  async reconcileFactRevision(userId: string, revision: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const cases = await tx.coachAssessmentCase.findMany({
+        where: { userId, status: 'WAITING_FOR_USER' },
+        select: {
+          id: true,
+          assessment: { select: { evidenceSnapshot: true } },
+        },
+      });
+      const stale = cases
+        .filter((row) => {
+          const value = row.assessment.evidenceSnapshot;
+          return (
+            !value ||
+            typeof value !== 'object' ||
+            Array.isArray(value) ||
+            value.coachFactRevision !== revision
+          );
+        })
+        .map((row) => row.id);
+      if (!stale.length) return 0;
+      await tx.coachAssessmentQuestion.updateMany({
+        where: { caseId: { in: stale }, status: 'PENDING' },
+        data: { status: 'SUPERSEDED' },
+      });
+      const result = await tx.coachAssessmentCase.updateMany({
+        where: { id: { in: stale }, userId, status: 'WAITING_FOR_USER' },
+        data: { status: 'SUPERSEDED', resolvedAt: new Date() },
+      });
+      return result.count;
+    });
+  }
+
   async pending(userId: string): Promise<CoachAssessmentInquiry | null> {
     const run = await this.prisma.coachRun.findFirst({
       where: { userId, taskKind: ATHLETE_STATE_TASK, status: 'awaiting_input' },

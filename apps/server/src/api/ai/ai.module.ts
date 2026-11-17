@@ -1,3 +1,12 @@
+import { CoachTrainingFactContextService } from './core/coach-training-fact-context.service';
+import { COACH_FACT_SCOPE_VALIDATOR } from './core/coach-fact-scope.port';
+import { CurrentCoachFactScopeValidator } from './today-suggestion/coach-fact-scope-validator.service';
+import {
+  TodaySuggestionGuidanceService,
+  TodaySuggestionGuidanceLifecycle,
+} from './today-suggestion/today-suggestion-guidance.service';
+import { TodaySuggestionGenerationService } from './today-suggestion/today-suggestion-generation.service';
+import { CoachFactContextService } from './core/coach-fact-context.service';
 import { AthleteStateUpdateWorker } from './athlete-state/athlete-state-update.worker';
 import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { FitnessCalculationModule } from '@/fitness-calculation/fitness-calculation.module';
@@ -104,10 +113,20 @@ import { TodaySuggestionWorkoutGeneratorService } from './today-suggestion/today
     AiCoachMutationBootstrap,
     CoachBranchingService,
     CoachStateContextService,
+    CoachFactContextService,
+    CoachTrainingFactContextService,
     TodaySuggestionConstraintProjector,
     TodaySuggestionAgentService,
     TodaySuggestionDeliveryPolicy,
     TodaySuggestionEngagementService,
+    CurrentCoachFactScopeValidator,
+    {
+      provide: COACH_FACT_SCOPE_VALIDATOR,
+      useExisting: CurrentCoachFactScopeValidator,
+    },
+    TodaySuggestionGuidanceService,
+    TodaySuggestionGuidanceLifecycle,
+    TodaySuggestionGenerationService,
     TodaySuggestionOrchestratorService,
     TodaySuggestionWorkoutService,
     TodaySuggestionWorkoutGeneratorService,

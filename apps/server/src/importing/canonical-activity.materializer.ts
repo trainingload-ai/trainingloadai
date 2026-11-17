@@ -257,6 +257,22 @@ export class CanonicalActivityMaterializer {
     private readonly jobs: ImportingJobService,
   ) {}
 
+  private publishImport<T>(
+    args: { itemJobId?: string; userId: string; itemLockToken?: string },
+    work: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return args.itemJobId && args.itemLockToken
+      ? this.jobs.withCurrentImport(
+          {
+            itemJobId: args.itemJobId,
+            userId: args.userId,
+            lockToken: args.itemLockToken,
+          },
+          work,
+        )
+      : this.prisma.$transaction(work);
+  }
+
   /**
    * 解析最终活动名称。显式名称优先；只有需要生成兜底名称时，才补齐用户时区信号。
    * 时区初始化可能写入用户时区，因此该方法保持异步并使用 resolve 命名。
@@ -728,7 +744,7 @@ export class CanonicalActivityMaterializer {
     itemLockToken?: string;
   }): Promise<Activity> {
     const resolvedMaxSpeeds = resolveCanonicalMaxSpeeds(args.payload);
-    return this.prisma.$transaction(async (tx) => {
+    return this.publishImport(args, async (tx) => {
       if (typeof tx.$executeRawUnsafe === 'function') {
         await acquireActivityWriteLock(tx, args.token.activityId);
       }
@@ -759,7 +775,22 @@ export class CanonicalActivityMaterializer {
             isActive: true,
           },
           orderBy: { createdAt: 'asc' },
-          include: { canonicalSnapshot: { select: { payload: true } } },
+          include: {
+            canonicalSnapshot: {
+              select: {
+                payload: true,
+                itemJob: {
+                  select: {
+                    status: true,
+                    sourceRevision: true,
+                    sourceObject: {
+                      select: { importRevision: true, importRevokedAt: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
         }),
       ]);
       if (!activity) {
@@ -1118,6 +1149,7 @@ export class CanonicalActivityMaterializer {
     thirdPartyActivityId?: number;
     conflictRecoveryAttempt?: boolean;
     repair?: ActivityDatasetRepair;
+    itemLockToken?: string;
   }): Promise<MaterializeResult> {
     // 实体化顺序：按来源复用 -> 按 dedupeKey 复用 -> 创建新 activity，并绑定 activitySource。
     const provider =
@@ -1241,7 +1273,20 @@ export class CanonicalActivityMaterializer {
           where: { activityId: activity.id, isPrimary: true, isActive: true },
           orderBy: { createdAt: 'asc' },
           include: {
-            canonicalSnapshot: { select: { payload: true } },
+            canonicalSnapshot: {
+              select: {
+                payload: true,
+                itemJob: {
+                  select: {
+                    status: true,
+                    sourceRevision: true,
+                    sourceObject: {
+                      select: { importRevision: true, importRevokedAt: true },
+                    },
+                  },
+                },
+              },
+            },
           },
         }),
         this.sensorFiles.parquetFiles().findMany({
@@ -1386,9 +1431,19 @@ export class CanonicalActivityMaterializer {
         Boolean(args.repair && !repairCommitted);
       const isPrimary = Boolean(existingSource?.isPrimary || promote);
 
+      const previousOwner = currentPrimary?.canonicalSnapshot?.itemJob;
+      const previousInputSuperseded = Boolean(
+        previousOwner &&
+        (['SKIPPED', 'DEAD'].includes(previousOwner.status) ||
+          previousOwner.sourceObject.importRevokedAt ||
+          (previousOwner.sourceObject.importRevision &&
+            previousOwner.sourceObject.importRevision !==
+              previousOwner.sourceRevision)),
+      );
       if (
         shouldRebuild &&
         !recoveringCommittedItem &&
+        !previousInputSuperseded &&
         (activity.processingStatus === ActivityProcessingStatus.PARQUET_READY ||
           activity.processingStatus === ActivityProcessingStatus.ANALYZING)
       ) {
@@ -1464,22 +1519,26 @@ export class CanonicalActivityMaterializer {
       // 同来源重复 item 可以在当前数据集分析期间成功去重，但不能把 primary
       // source 的 snapshot 指针改到另一个 item，否则原提交 item 崩溃恢复时会
       // 失去“这是我提交的数据集”这一 fencing token。
-      const boundSource = preserveInFlightPrimarySnapshot
-        ? currentPrimary!
-        : await this.bindSource(bindArgs);
-
-      await this.upsertThirdPartyMapping({
-        activityId: activity.id,
-        thirdPartyActivityId: args.thirdPartyActivityId,
-        mappingType: association.mappingType,
-        confidence: association.confidence,
-        matchingFields: {
-          associationReason: association.reason,
-          ...(association.matchingFields ?? {}),
-          activitySourceId: boundSource.id,
-        },
-        isPrimary,
-      });
+      const bind = async (client?: PrismaTx) => {
+        const boundSource = preserveInFlightPrimarySnapshot
+          ? currentPrimary!
+          : await this.bindSource({ ...bindArgs, client });
+        await this.upsertThirdPartyMapping({
+          client,
+          activityId: activity.id,
+          thirdPartyActivityId: args.thirdPartyActivityId,
+          mappingType: association.mappingType,
+          confidence: association.confidence,
+          matchingFields: {
+            associationReason: association.reason,
+            ...(association.matchingFields ?? {}),
+            activitySourceId: boundSource.id,
+          },
+          isPrimary,
+        });
+      };
+      if (args.itemLockToken) await this.publishImport(args, bind);
+      else await bind();
       return {
         activity,
         created: false,
@@ -1525,8 +1584,9 @@ export class CanonicalActivityMaterializer {
     }
 
     let activity: Activity;
+    let createdPrimarySourceId: string | null = null;
     try {
-      const lockedResult = await this.prisma.$transaction(async (tx) => {
+      const lockedResult = await this.publishImport(args, async (tx) => {
         // 两个 worker 可能在不同进程同时处理手动上传和 webhook。只在候选
         // 复查与 Activity/Source 创建期间持有用户级事务锁；解析和分析均在锁外。
         await acquireHashtextAdvisoryXactLock(tx, args.userId);
@@ -1621,7 +1681,7 @@ export class CanonicalActivityMaterializer {
           );
         }
 
-        await this.ingest.activitySource(tx).create({
+        const createdSource = await this.ingest.activitySource(tx).create({
           data: {
             activityId: created.id,
             userId: args.userId,
@@ -1651,7 +1711,20 @@ export class CanonicalActivityMaterializer {
           } satisfies Prisma.ActivitySourceUncheckedCreateInput,
         });
 
-        return { activity: created, created: true };
+        await this.upsertThirdPartyMapping({
+          activityId: created.id,
+          thirdPartyActivityId: args.thirdPartyActivityId,
+          mappingType: 'EXACT',
+          confidence: 1,
+          matchingFields: { associationReason: 'new' },
+          isPrimary: true,
+          client: tx,
+        });
+        return {
+          activity: created,
+          created: true,
+          primarySourceId: createdSource.id,
+        };
       });
       if (!lockedResult.created) {
         // 锁内复查发现另一个 worker 已先创建；事务结束后重新走统一关联分支，
@@ -1659,6 +1732,7 @@ export class CanonicalActivityMaterializer {
         return this.materialize(args);
       }
       activity = lockedResult.activity;
+      createdPrimarySourceId = lockedResult.primarySourceId ?? null;
     } catch (error) {
       // 多个 worker 可能同时通过前置检查。唯一键冲突时，回查胜出的活动并
       // 补齐来源映射，把并发冲突收敛成一次成功复用，而不是进入失败重试。
@@ -1695,10 +1769,12 @@ export class CanonicalActivityMaterializer {
         Number(activity.startLng),
       );
       if (inferred) {
-        resolvedActivity = await this.prisma.activity.update({
-          where: { id: activity.id },
-          data: { timezone: inferred },
-        });
+        resolvedActivity = await this.publishImport(args, (tx) =>
+          tx.activity.update({
+            where: { id: activity.id },
+            data: { timezone: inferred },
+          }),
+        );
       }
     }
 
@@ -1706,15 +1782,6 @@ export class CanonicalActivityMaterializer {
       args.userId,
       resolvedActivity,
     );
-
-    await this.upsertThirdPartyMapping({
-      activityId: resolvedActivity.id,
-      thirdPartyActivityId: args.thirdPartyActivityId,
-      mappingType: 'EXACT',
-      confidence: 1,
-      matchingFields: { associationReason: 'new' },
-      isPrimary: true,
-    });
 
     return {
       activity: resolvedActivity,
@@ -1724,7 +1791,20 @@ export class CanonicalActivityMaterializer {
       primaryChanged: true,
       primaryDatasetChanged: true,
       outcome: 'CREATED',
-      pendingCommit: null,
+      pendingCommit: args.itemLockToken
+        ? {
+            activityId: resolvedActivity.id,
+            expectedPrimarySourceId: createdPrimarySourceId,
+            canonicalSnapshotId: snapshot.id,
+            sportDefinitionCode,
+            provider,
+            quality,
+            thirdPartyActivityId: args.thirdPartyActivityId,
+            mappingType: 'EXACT',
+            confidence: 1,
+            matchingFields: { associationReason: 'new' },
+          }
+        : null,
       selection: {
         reason: 'first_source',
         previousPrimarySourceId: null,

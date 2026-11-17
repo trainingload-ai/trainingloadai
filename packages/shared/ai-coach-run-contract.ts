@@ -95,7 +95,7 @@ export type CoachInteractionSnapshot = {
   runId: string;
   questionMessageId: string;
   questionToolCallId: string;
-  status: "pending" | "resolved" | "skipped";
+  status: "pending" | "resolved" | "skipped" | "cancelled";
   revision: number;
   submissionId?: string;
   answers?: Record<string, string | string[]>;
@@ -277,7 +277,9 @@ export function isCoachInteraction(
     validId(value.runId) &&
     validId(value.questionMessageId) &&
     validId(value.questionToolCallId) &&
-    ["pending", "resolved", "skipped"].includes(String(value.status)) &&
+    ["pending", "resolved", "skipped", "cancelled"].includes(
+      String(value.status),
+    ) &&
     natural(value.revision) &&
     optional(value.submissionId, validId) &&
     optional(

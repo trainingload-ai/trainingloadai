@@ -282,7 +282,8 @@ const RunTimeline = memo(function RunTimeline({
             key={`${message.id}:${part.data.toolCallId}`}
             id={message.id}
           >
-            {interaction?.status === "pending" && !awaiting ? (
+            {interaction?.status === "cancelled" ||
+            (interaction?.status === "pending" && !awaiting) ? (
               <p className="mb-2 text-xs text-muted-foreground">
                 {t("questionInactive")}
               </p>

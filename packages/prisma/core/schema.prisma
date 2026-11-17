@@ -1237,6 +1237,7 @@ model T_user {
   aiUsageEvents                     AiUsageEvent[]
   aiOperations                      AiOperation[]
   aiTodaySuggestions                AiTodaySuggestion[]
+  todaySuggestionGeneration         TodaySuggestionGeneration?
   todaySuggestionEngagementState    TodaySuggestionEngagementState?
   aiPlanExecutionAdvices            AiPlanExecutionAdvice[]
   coachActions                      CoachAction[]
@@ -2361,6 +2362,7 @@ model CoachRun {
   activeAttemptId    String?           @map("active_attempt_id")
   revision           Int               @default(0)
   pendingInteraction Json?             @map("pending_interaction")
+  factScope          Json?             @map("fact_scope")
   executionMs        Int               @default(0) @map("execution_ms")
   startedAt          DateTime          @default(now()) @map("started_at")
   endedAt            DateTime?         @map("ended_at")
@@ -2369,6 +2371,7 @@ model CoachRun {
   @@unique([userId, taskKind, dedupeKey])
   @@index([userId, sessionId])
   @@index([userId, taskKind, startedAt(sort: Desc)])
+  @@index([userId, status])
   @@map("t_coach_run")
 }
 
@@ -2470,6 +2473,12 @@ model ImportSourceObject {
   rawStorageKey String? @map("raw_storage_key")
   rawChecksum   String? @map("raw_checksum")
   rawPayload    Json?   @map("raw_payload")
+
+  /// Latest accepted discovery revision, separate from the downloaded file hash.
+  importRevision String? @map("import_revision")
+  completedImportRevision String? @map("completed_import_revision")
+  importRevokedAt DateTime? @map("import_revoked_at")
+  importRequest  Json?   @map("import_request")
   metadata      Json?   @map("metadata")
 
   /// 查询层使用的活动时间线标题；从远端摘要标准化而来，不代表正式 Activity。
@@ -2607,6 +2616,8 @@ model ImportItemJob {
   sourceKind ImportSourceKind    @map("source_kind")
   position   Int                 @default(0) @map("position")
   status     ImportItemJobStatus @default(QUEUED) @map("status")
+
+  sourceRevision String? @map("source_revision")
 
   sourceRef        Json?   @map("source_ref")
   sourceUid        String  @map("source_uid")
@@ -4484,6 +4495,25 @@ model AiTodaySuggestion {
   @@index([userId, updatedAt])
   @@index([runId])
   @@map("t_ai_today_suggestion")
+}
+
+/// User-level generation coordination; content remains in its locale/date cache slot.
+model TodaySuggestionGeneration {
+  userId String @id @map("user_id")
+  user T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contextToken String @unique @default(uuid()) @map("context_token")
+  token String?
+  fence Int @default(0)
+  locale String?
+  date String?
+  inputHash String? @map("input_hash")
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz(3)
+  retryAfter DateTime? @map("retry_after") @db.Timestamptz(3)
+  failures Int @default(0)
+  lastErrorCode String? @map("last_error_code")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("t_today_suggestion_generation")
 }
 
 /// Minimal functional state for suggestion continuity. This is not an analytics event log.

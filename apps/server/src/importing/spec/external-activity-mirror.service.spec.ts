@@ -2,6 +2,23 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { evaluateExternalActivityMirrorMatch } from '../external-activity-mirror-match';
 import { ExternalActivityMirrorService } from '../external-activity-mirror.service';
 
+async function checkedResolution(
+  tx: any,
+  prisma: any,
+  work: (tx: any) => unknown,
+) {
+  tx.$queryRaw ??= jest.fn(async () => []);
+  tx.activity ??= { findFirst: prisma.activity.findFirst };
+  tx.importSourceObject.findFirst ??= jest.fn(async ({ where }: any) => {
+    const rows = await prisma.importSourceObject.findMany();
+    return (
+      rows.find((row: any) => row.id === where.id && !row.importRevokedAt) ??
+      null
+    );
+  });
+  return work(tx);
+}
+
 describe('external activity mirror match', () => {
   const activity = {
     startTime: new Date('2026-10-09T23:30:00.000Z'),
@@ -174,7 +191,8 @@ describe('ExternalActivityMirrorService', () => {
           ]),
         },
         $transaction: jest.fn(
-          async (callback: (client: typeof tx) => unknown) => callback(tx),
+          async (callback: (client: typeof tx) => unknown) =>
+            checkedResolution(tx, prisma, callback),
         ),
       };
       const service = new ExternalActivityMirrorService(
@@ -202,14 +220,14 @@ describe('ExternalActivityMirrorService', () => {
       if (sameSource) expect(tx.activitySource.upsert).not.toHaveBeenCalled();
       else
         expect(tx.activitySource.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        create: expect.objectContaining({
-          activityId: 42,
-          sourceObjectId: 'mirror-1',
-          isPrimary: false,
-        }),
-      }),
-    );
+          expect.objectContaining({
+            create: expect.objectContaining({
+              activityId: 42,
+              sourceObjectId: 'mirror-1',
+              isPrimary: false,
+            }),
+          }),
+        );
       expect(tx.importSourceObject.update).toHaveBeenCalledWith({
         where: { id: sameSource ? 'unknown-source-1' : 'mirror-1' },
         data: expect.objectContaining({
@@ -280,7 +298,7 @@ describe('ExternalActivityMirrorService', () => {
         ]),
       },
       $transaction: jest.fn(async (callback: (client: typeof tx) => unknown) =>
-        callback(tx),
+        checkedResolution(tx, prisma, callback),
       ),
     };
     const service = new ExternalActivityMirrorService(
@@ -377,7 +395,7 @@ describe('ExternalActivityMirrorService', () => {
         ]),
       },
       $transaction: jest.fn(async (callback: (client: typeof tx) => unknown) =>
-        callback(tx),
+        checkedResolution(tx, prisma, callback),
       ),
     };
     const service = new ExternalActivityMirrorService(

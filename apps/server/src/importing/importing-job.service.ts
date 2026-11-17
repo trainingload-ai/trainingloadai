@@ -8,6 +8,43 @@ import { ImportingJobRepository } from './persistence/importing-job.repository';
 export class ImportingJobService {
   constructor(private readonly jobs: ImportingJobRepository) {}
 
+  withSourceLocks<T>(
+    identity: Parameters<ImportingJobRepository['withSourceLocks']>[0],
+    work: (tx: import('@prisma/client').Prisma.TransactionClient) => Promise<T>,
+    transaction?: import('@prisma/client').Prisma.TransactionClient,
+  ): Promise<T> {
+    return this.jobs.withSourceLocks(identity, work, transaction);
+  }
+
+  finishRevisionedItem(
+    args: Parameters<ImportingJobRepository['finishRevisionedItem']>[0],
+    transaction?: import('@prisma/client').Prisma.TransactionClient,
+  ) {
+    return this.jobs.finishRevisionedItem(args, transaction);
+  }
+
+  withCurrentImport<T>(
+    args: Parameters<ImportingJobRepository['withCurrentImport']>[0],
+    work: (tx: import('@prisma/client').Prisma.TransactionClient) => Promise<T>,
+    transaction?: import('@prisma/client').Prisma.TransactionClient,
+  ): Promise<T> {
+    return this.jobs.withCurrentImport(args, work, transaction);
+  }
+
+  createPostProcessJob(
+    batchJobId: string,
+    tx?: import('@prisma/client').Prisma.TransactionClient,
+  ) {
+    return this.jobs.createPostProcessJob(batchJobId, tx);
+  }
+
+  refreshBatchProgress(
+    batchJobId: string,
+    tx?: import('@prisma/client').Prisma.TransactionClient,
+  ) {
+    return this.jobs.refreshBatchProgress(batchJobId, tx);
+  }
+
   batchJobs(tx?: Parameters<ImportingJobRepository['batchJobs']>[0]) {
     return this.jobs.batchJobs(tx);
   }

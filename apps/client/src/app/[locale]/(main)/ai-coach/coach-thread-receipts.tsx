@@ -65,7 +65,7 @@ function serializeCoachThreadReceipts(
         continue;
       const data = item.data;
       durableQuestions.add(data.questionMessageId);
-      if (data.status === "pending") continue;
+      if (data.status === "pending" || data.status === "cancelled") continue;
       receipts.push({
         durable: true,
         kind:

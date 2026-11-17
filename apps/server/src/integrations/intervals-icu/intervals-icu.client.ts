@@ -555,12 +555,10 @@ export class IntervalsIcuClient {
   async downloadActivityFile(
     credential: IntervalsIcuApiCredential,
     activityId: string,
+    options?: { preferEdited?: boolean },
   ): Promise<IntervalsIcuDownloadedFile> {
-    const endpoints: Array<IntervalsIcuDownloadedFile['endpoint']> = [
-      'file',
-      'fit-file',
-      'gpx-file',
-    ];
+    const endpoints: Array<IntervalsIcuDownloadedFile['endpoint']> =
+      options?.preferEdited ? ['fit-file'] : ['file', 'fit-file', 'gpx-file'];
     let lastError: unknown;
 
     for (const endpoint of endpoints) {

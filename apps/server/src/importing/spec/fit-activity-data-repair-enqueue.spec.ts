@@ -106,6 +106,13 @@ function harness() {
 }
 
 describe('bounded repair task registration', () => {
+  it('registers the exact scanned revision rather than adopting a later desired input', async () => {
+    const h = harness();
+    const scanned = { ...candidate(1), sourceRevision: 'scan-r1' };
+    await h.service.enqueue([scanned]);
+    expect(h.state().items).toHaveLength(1);
+    expect(h.state().items[0].sourceRevision).toBe('scan-r1');
+  });
   it('registers a full scan page in sequential, bounded transactions', async () => {
     const h = harness();
     const result = await h.service.enqueue(

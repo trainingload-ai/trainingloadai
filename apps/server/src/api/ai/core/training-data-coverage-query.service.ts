@@ -117,14 +117,14 @@ export class TrainingDataCoverageQueryService {
   ) {}
 
   /** Bounded training facts, independent of plans or wearable recovery data. */
-  async recentActivityFacts(userId: string, since: Date) {
+  async recentActivityFacts(userId: string, since: Date, limit = 12) {
     const rows = await this.activities.findMany({
       where: readyActivityWhere({
         userId,
         startTime: { gte: since, lte: new Date() },
       }),
       orderBy: [{ startTime: 'desc' }, { id: 'desc' }],
-      take: 12,
+      take: Math.max(1, Math.min(1_001, Math.trunc(limit))),
       select: {
         hashId: true,
         activityName: true,

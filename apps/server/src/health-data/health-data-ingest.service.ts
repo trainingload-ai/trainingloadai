@@ -1,3 +1,4 @@
+import { healthProjectionFingerprint } from './health-projection-fingerprint';
 import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import {
   STATE_UPDATE_HEALTH_METRICS,
@@ -113,6 +114,7 @@ function candidatePriority(candidate: ExternalHealthMetricCandidate) {
 /** Provider 确定性合并所需的最小已存储事实结构。 */
 type StoredHealthCandidate = {
   id?: string;
+  snapshotId?: string | null;
   provider: HealthDataProviderCode;
   externalId: string;
   startTime: Date;
@@ -503,6 +505,7 @@ export class HealthDataIngestService {
       },
       select: {
         id: true,
+        snapshotId: true,
         provider: true,
         externalId: true,
         startTime: true,
@@ -560,6 +563,9 @@ export class HealthDataIngestService {
       consolidated.map((entry) => [
         entry.provider,
         {
+          inputFingerprint: healthProjectionFingerprint(
+            byProvider.get(entry.provider) ?? [],
+          ),
           value: entry.value,
           unit: entry.unit,
           sourceName: entry.sourceName,

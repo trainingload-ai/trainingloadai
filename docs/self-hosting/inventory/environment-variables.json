@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2189
+          "line": 2228
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2112
+          "line": 2182
         }
       ]
     },
@@ -800,7 +800,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 449
+          "line": 451
         }
       ]
     },
@@ -905,7 +905,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 603
+          "line": 605
         }
       ]
     },
@@ -939,7 +939,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1157
+          "line": 1159
         }
       ]
     },
@@ -998,7 +998,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 749
+          "line": 753
         }
       ]
     },
@@ -1040,7 +1040,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1046
+          "line": 1052
         }
       ]
     },
@@ -1057,7 +1057,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 948
+          "line": 950
         }
       ]
     },
@@ -1074,11 +1074,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1027
+          "line": 1049
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2925
+          "line": 2964
         }
       ]
     },
@@ -1095,27 +1095,27 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1029
+          "line": 1051
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2621
+          "line": 2660
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2682
+          "line": 2721
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2769
+          "line": 2808
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2821
+          "line": 2860
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2909
+          "line": 2948
         }
       ]
     },
@@ -1153,7 +1153,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 279
+          "line": 284
         }
       ]
     },
@@ -1170,7 +1170,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 278
+          "line": 283
         }
       ]
     },
@@ -1225,11 +1225,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 526
+          "line": 528
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 947
+          "line": 949
         }
       ]
     },
@@ -1267,7 +1267,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 311
+          "line": 315
         }
       ]
     },
@@ -1284,7 +1284,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 337
+          "line": 341
         }
       ]
     },
@@ -1301,7 +1301,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1065
+          "line": 1087
         }
       ]
     },
@@ -1340,7 +1340,7 @@
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 302
+          "line": 340
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1394,7 +1394,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 144
+          "line": 149
         }
       ]
     },
@@ -1534,7 +1534,7 @@
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 303
+          "line": 341
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1588,7 +1588,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 288
+          "line": 293
         }
       ]
     },
@@ -1605,7 +1605,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 287
+          "line": 292
         }
       ]
     },
@@ -1685,7 +1685,7 @@
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 304
+          "line": 342
         },
         {
           "file": "apps/server/src/self-host/self-host-ai-configuration.service.ts",
@@ -1714,7 +1714,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 324
+          "line": 328
         }
       ]
     },
@@ -1731,7 +1731,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 349
+          "line": 353
         }
       ]
     },
@@ -2162,7 +2162,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 470
+          "line": 472
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2196,7 +2196,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 475
+          "line": 477
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2542,7 +2542,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 317
+          "line": 321
         }
       ]
     },
@@ -2559,7 +2559,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 342
+          "line": 346
         }
       ]
     },
@@ -2610,11 +2610,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 298
+          "line": 336
         },
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-constraint.projector.ts",
-          "line": 338
+          "line": 376
         },
         {
           "file": "apps/server/src/app.module.ts",
@@ -2838,7 +2838,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1267
+          "line": 1304
         },
         {
           "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",
@@ -3548,7 +3548,7 @@
       "references": [
         {
           "file": "apps/client/src/api/ai-today-suggestion.ts",
-          "line": 88
+          "line": 89
         }
       ]
     },
@@ -4586,7 +4586,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 470
+          "line": 472
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -4857,7 +4857,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 329
+          "line": 333
         }
       ]
     },
@@ -4874,7 +4874,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 355
+          "line": 359
         }
       ]
     },
@@ -5759,7 +5759,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 461
+          "line": 463
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",

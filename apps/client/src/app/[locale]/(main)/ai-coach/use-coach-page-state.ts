@@ -69,8 +69,15 @@ export function useCoachPageState(enabled: boolean) {
   }, [clearCoachSidFromUrl, router, session?.user?.id, sessionPending]);
 
   const releasedEmptySidRef = useRef<string>("");
+  const guidanceEntrySidRef = useRef<string>("");
+  useEffect(() => {
+    if (sid && searchParams.has("todaySuggestionId"))
+      guidanceEntrySidRef.current = sid;
+  }, [sid, searchParams]);
   useEffect(() => {
     if (
+      searchParams.has("todaySuggestionId") ||
+      guidanceEntrySidRef.current === sid ||
       !shouldReleaseEmptyCoachSid({
         sid,
         messagesStatus: messagesQuery.status,
@@ -95,6 +102,7 @@ export function useCoachPageState(enabled: boolean) {
       });
     startNewConversation();
   }, [
+    searchParams,
     messagesQuery.data?.length,
     messagesQuery.status,
     queryClient,
