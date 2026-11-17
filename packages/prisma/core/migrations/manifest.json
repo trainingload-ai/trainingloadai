@@ -164,7 +164,7 @@
     {
       "id": "0033_today_suggestion_generation",
       "file": "0033_today_suggestion_generation/migration.sql",
-      "sha256": "f6cabbce907441d1358179e092b2e18cfb28ed87b008386eb659cdb12c94e50b"
+      "sha256": "f67a743cba96b9d5634b16ed9200699413278f1b3ea0641a6cbab15e1c97f034"
     },
     {
       "id": "0034_coach_fact_scope",

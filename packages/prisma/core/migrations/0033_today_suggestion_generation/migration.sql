@@ -1,6 +1,6 @@
 CREATE TABLE "t_today_suggestion_generation" (
   "user_id" TEXT PRIMARY KEY REFERENCES "t_user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  "context_token" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+  "context_token" TEXT NOT NULL,
   "token" TEXT,
   "fence" INTEGER NOT NULL DEFAULT 0,
   "locale" TEXT,
