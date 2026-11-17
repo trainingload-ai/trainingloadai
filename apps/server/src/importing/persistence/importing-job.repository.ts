@@ -1,5 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
+import { UserQueryService } from '@/api/user/user-query.service';
+import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { prismaModel, type PrismaClientSlice } from '@/prisma/prisma-db';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
@@ -66,6 +68,8 @@ function summarizeBatchStatus(args: {
 export class ImportingJobRepository {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly users: UserQueryService,
+    private readonly connections: ExternalProviderConnectionService,
     @Optional()
     @Inject(IMPORT_PUBLICATION_AUTHORIZATION)
     private readonly publicationAuthorization?: ImportPublicationAuthorizationExtension,
@@ -260,6 +264,8 @@ export class ImportingJobRepository {
         await assertImportPublicationAuthorized(
           tx,
           item,
+          this.users,
+          this.connections,
           this.publicationAuthorization,
         );
         // A Serializable withdrawal that started before this publication must retry.

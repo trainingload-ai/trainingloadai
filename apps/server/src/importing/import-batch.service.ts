@@ -918,7 +918,7 @@ export class ImportBatchService {
             sourceKind: args.sourceKind,
             sourceUid: candidate.sourceUid,
           };
-          const previous = await tx.importSourceObject.findUnique({
+          const previous = await this.importJobs.sourceObjects(tx).findUnique({
             where: { import_source_object_identity_unique: identity },
           });
           const revision =
@@ -968,12 +968,12 @@ export class ImportBatchService {
             discoveredAt: new Date(),
             sourceUpdatedAt: new Date(),
           };
-          const source = await tx.importSourceObject.upsert({
+          const source = await this.importJobs.sourceObjects(tx).upsert({
             where: { import_source_object_identity_unique: identity },
             create: { ...identity, ...values },
             update: values,
           });
-          const running = await tx.importItemJob.findFirst({
+          const running = await this.importJobs.itemJobs(tx).findFirst({
             where: {
               userId: args.userId,
               sourceObjectId: source.id,
@@ -992,7 +992,7 @@ export class ImportBatchService {
             running.sourceUid === source.sourceUid &&
             ['QUEUED', 'FAILED'].includes(running.status)
           ) {
-            const result = await tx.importItemJob.updateMany({
+            const result = await this.importJobs.itemJobs(tx).updateMany({
               where: {
                 id: running.id,
                 status: { in: ['QUEUED', 'FAILED'] },
@@ -1018,7 +1018,7 @@ export class ImportBatchService {
               running.sourceUid === source.sourceUid &&
               ['QUEUED', 'FAILED'].includes(running.status)
             ) {
-              await tx.importItemJob.updateMany({
+              await this.importJobs.itemJobs(tx).updateMany({
                 where: {
                   id: running.id,
                   status: { in: ['QUEUED', 'FAILED'] },
@@ -1044,7 +1044,7 @@ export class ImportBatchService {
             previous?.completedImportRevision === revision
           )
             continue;
-          batch ??= await tx.importBatchJob.create({
+          batch ??= await this.importJobs.batchJobs(tx).create({
             data: {
               userId: args.userId,
               sourceKind: args.sourceKind,
@@ -1055,7 +1055,7 @@ export class ImportBatchService {
               ) as Prisma.InputJsonValue,
             },
           });
-          await tx.importItemJob.create({
+          await this.importJobs.itemJobs(tx).create({
             data: {
               ...identity,
               batchJobId: batch.id,
@@ -1068,7 +1068,7 @@ export class ImportBatchService {
           });
         }
         if (batch && queuedCount !== args.candidates.length) {
-          batch = await tx.importBatchJob.update({
+          batch = await this.importJobs.batchJobs(tx).update({
             where: { id: batch.id },
             data: { totalCount: queuedCount },
           });

@@ -1,3 +1,4 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { datasetRepairFingerprint } from '../activity-dataset-repair';
 import { CanonicalActivityMaterializer } from '../canonical-activity.materializer';
 import { ActivityAssociationService } from '../activity-association.service';
@@ -10,7 +11,6 @@ import { randomUUID } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { ImportBatchService } from '../import-batch.service';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { ImportItemWorkerService } from '../import-item.worker';
 import { ExternalActivitySourceRouter } from '../external-activity-source-router.service';
 import { RemoteActivityFileService } from '../remote-activity-file.service';
@@ -25,7 +25,7 @@ databaseTests('Source revision handoff on PostgreSQL', () => {
   });
   const userId = `fact-test-${randomUUID()}`;
   const sportCode = `FACT_TEST_RUN_${randomUUID()}`;
-  const jobs = new ImportingJobService(new ImportingJobRepository(db as never));
+  const jobs = new ImportingJobService(importingJobRepository(db as never));
   const batches = new ImportBatchService(
     db as never,
     {} as never,
@@ -1151,7 +1151,7 @@ databaseTests('Source revision handoff on PostgreSQL', () => {
       },
     });
     const withdrawalJobs = new ImportingJobService(
-      new ImportingJobRepository(withdrawalDb as never),
+      importingJobRepository(withdrawalDb as never),
     );
     const withdrawing = new ActivitySourceLifecycleService(
       withdrawalDb as never,

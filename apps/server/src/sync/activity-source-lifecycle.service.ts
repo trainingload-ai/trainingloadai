@@ -248,7 +248,7 @@ export class ActivitySourceLifecycleService {
             ]),
           );
           if (['intervals_icu', 'strava', 'garmin'].includes(args.provider)) {
-            const importSources = await tx.importSourceObject.findMany({
+            const importSources = await this.importJobs.sourceObjects(tx).findMany({
               where: {
                 userId: args.userId,
                 provider: args.provider,
@@ -284,14 +284,14 @@ export class ActivitySourceLifecycleService {
             }
             if (importSources.length) {
               const ids = importSources.map((source) => source.id);
-              await tx.importSourceObject.updateMany({
+              await this.importJobs.sourceObjects(tx).updateMany({
                 where: { id: { in: ids } },
                 data: {
                   importRevokedAt: new Date(),
                   importRequest: Prisma.DbNull,
                 },
               });
-              const cancelled = await tx.importItemJob.findMany({
+              const cancelled = await this.importJobs.itemJobs(tx).findMany({
                 where: {
                   sourceObjectId: { in: ids },
                   status: {
@@ -308,7 +308,7 @@ export class ActivitySourceLifecycleService {
                 },
                 select: { batchJobId: true },
               });
-              await tx.importItemJob.updateMany({
+              await this.importJobs.itemJobs(tx).updateMany({
                 where: {
                   sourceObjectId: { in: ids },
                   status: {

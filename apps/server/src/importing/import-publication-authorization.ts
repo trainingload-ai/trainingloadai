@@ -1,4 +1,6 @@
 import type { ImportItemJob, ImportSourceObject, Prisma } from '@prisma/client';
+import type { UserQueryService } from '@/api/user/user-query.service';
+import type { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { matchesIntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { personalAccountRef } from '@/integrations/personal/personal-identity';
 import { asImportJsonRecord } from './import-item-job.types';
@@ -21,19 +23,22 @@ export const IMPORT_PUBLICATION_AUTHORIZATION = Symbol(
 export async function lockImportConnection(
   tx: Prisma.TransactionClient,
   id: string,
+  connections: ExternalProviderConnectionService,
 ) {
   await tx.$queryRaw`SELECT id FROM t_external_provider_connection WHERE id=${id} FOR SHARE`;
-  return tx.externalProviderConnection.findUnique({ where: { id } });
+  return connections.model(tx).findUnique({ where: { id } });
 }
 
 /** Authorization is checked at the local publication boundary, including cache hits. */
 export async function assertImportPublicationAuthorized(
   tx: Prisma.TransactionClient,
   item: ImportPublication,
+  users: UserQueryService,
+  connections: ExternalProviderConnectionService,
   extension?: ImportPublicationAuthorizationExtension,
 ) {
   await tx.$queryRaw`SELECT id FROM t_user WHERE id=${item.userId} FOR SHARE`;
-  const user = await tx.t_user.findUnique({
+  const user = await users.users(tx).findUnique({
     where: { id: item.userId },
     select: { accountDeletionRequestedAt: true },
   });
@@ -84,7 +89,11 @@ export async function assertImportPublicationAuthorized(
     const expected = asImportJsonRecord(ref.authorization);
     if (typeof expected.connectionId !== 'string')
       throw new Error('IMPORT_AUTHORIZATION_CHANGED');
-    const connection = await lockImportConnection(tx, expected.connectionId);
+    const connection = await lockImportConnection(
+      tx,
+      expected.connectionId,
+      connections,
+    );
     if (
       !connection ||
       connection.userId !== item.userId ||
@@ -101,7 +110,11 @@ export async function assertImportPublicationAuthorized(
       typeof expected.fingerprint !== 'string'
     )
       throw new Error('IMPORT_AUTHORIZATION_CHANGED');
-    const connection = await lockImportConnection(tx, expected.connectionId);
+    const connection = await lockImportConnection(
+      tx,
+      expected.connectionId,
+      connections,
+    );
     const metadata = asImportJsonRecord(connection?.metadata);
     if (
       !connection ||

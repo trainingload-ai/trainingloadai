@@ -1,9 +1,9 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { createHash } from 'crypto';
 import { Logger } from '@nestjs/common';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ImportBatchService } from '../import-batch.service';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 
 describe('ImportBatchService', () => {
   function stableChecksum(value: unknown) {
@@ -74,7 +74,7 @@ describe('ImportBatchService', () => {
         prisma as never,
         storage as never,
         i18n as never,
-        new ImportingJobService(new ImportingJobRepository(prisma as never)),
+        new ImportingJobService(importingJobRepository(prisma as never)),
         { users: () => prisma.t_user } as never,
         externalActivityRouter as never,
       ),

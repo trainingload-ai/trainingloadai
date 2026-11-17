@@ -1,10 +1,10 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { describe, expect, it, jest } from '@jest/globals';
 import {
   ActivitySourceLifecycleService,
   selectFallbackActivitySource,
 } from '../activity-source-lifecycle.service';
 import { ImportingJobService } from '../../importing/importing-job.service';
-import { ImportingJobRepository } from '../../importing/persistence/importing-job.repository';
 
 function createService(prisma: unknown) {
   const source = prisma as any;
@@ -28,7 +28,7 @@ function createService(prisma: unknown) {
       );
   return new ActivitySourceLifecycleService(
     prisma as never,
-    new ImportingJobService(new ImportingJobRepository(prisma as never)),
+    new ImportingJobService(importingJobRepository(prisma as never)),
   );
 }
 

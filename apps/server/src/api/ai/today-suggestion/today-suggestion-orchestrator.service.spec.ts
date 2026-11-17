@@ -24,6 +24,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       {} as never,
       new TodaySuggestionDeliveryPolicy(),
       {} as never,
+      {} as never,
     );
     const draft = (
       service as unknown as {

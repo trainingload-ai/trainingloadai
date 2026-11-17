@@ -140,9 +140,7 @@ export class TodaySuggestionOrchestratorService {
     private readonly workoutGenerator: TodaySuggestionWorkoutGeneratorService,
     private readonly delivery: TodaySuggestionDeliveryPolicy,
     private readonly engagement: TodaySuggestionEngagementService,
-    private readonly generations: TodaySuggestionGenerationService = new TodaySuggestionGenerationService(
-      prisma,
-    ),
+    private readonly generations: TodaySuggestionGenerationService,
     @Optional() private readonly guidance?: TodaySuggestionGuidanceLifecycle,
   ) {}
 

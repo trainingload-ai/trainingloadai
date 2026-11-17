@@ -1,3 +1,4 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { describe, expect, it } from '@jest/globals';
 import { DuckDBInstance } from '@duckdb/node-api';
 import Ajv2020 from 'ajv/dist/2020';
@@ -17,7 +18,6 @@ import { UserQueryService } from '../../api/user/user-query.service';
 import { UserIdentityRepository } from '../../api/user/persistence/user-identity.repository';
 import { CompetitionRepository } from '../../api/competition/persistence/competition.repository';
 import { HealthDataRepository } from '../../health-data/persistence/health-data.repository';
-import { ImportingJobRepository } from '../../importing/persistence/importing-job.repository';
 import { SensorFileRepository } from '../../sensor/persistence/sensor-file.repository';
 
 type ArchiveInternals = {
@@ -43,7 +43,7 @@ function archiveDependencies(prisma: object) {
   return [
     new CompetitionQueryService(new CompetitionRepository(prisma as never)),
     new HealthFileQueryService(new HealthDataRepository({externalHealthObservation:emptyModel(),externalHealthSample:emptyModel(),...prisma} as never)),
-    new ImportingJobService(new ImportingJobRepository(prisma as never)),
+    new ImportingJobService(importingJobRepository(prisma as never)),
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new UserQueryService(new UserIdentityRepository(prisma as never)),
     { batchGetActualLoad: async () => new Map() },

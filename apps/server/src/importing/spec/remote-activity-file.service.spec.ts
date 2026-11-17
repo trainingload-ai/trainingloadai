@@ -1,10 +1,10 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { describe, expect, it, jest } from '@jest/globals';
 import {
   RemoteActivityFileService,
   type DownloadedActivityFile,
 } from '../remote-activity-file.service';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 
 describe('RemoteActivityFileService', () => {
   it('reuses a persisted source file without downloading it again', async () => {
@@ -20,7 +20,7 @@ describe('RemoteActivityFileService', () => {
           .fn<() => Promise<Buffer>>()
           .mockResolvedValue(Buffer.from('fit')),
       } as never,
-      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+      new ImportingJobService(importingJobRepository(prisma as never)),
     );
     const result = await service.resolve({
       sourceObject: {
@@ -53,7 +53,7 @@ describe('RemoteActivityFileService', () => {
         uploadFile: async () => ({ fileKey: 'late.fit' }),
         getFileWithKey: async () => undefined,
       } as never,
-      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+      new ImportingJobService(importingJobRepository(prisma as never)),
     );
     await expect(
       service.resolve({
@@ -85,7 +85,7 @@ describe('RemoteActivityFileService', () => {
     const service = new RemoteActivityFileService(
       prisma as never,
       { getFileWithKey: jest.fn(), uploadFile } as never,
-      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+      new ImportingJobService(importingJobRepository(prisma as never)),
     );
     const result = await service.resolve({
       sourceObject: { id: 'source-1' },
@@ -109,7 +109,7 @@ describe('RemoteActivityFileService', () => {
     const service = new RemoteActivityFileService(
       {} as never,
       { getFileWithKey: jest.fn(async () => undefined) } as never,
-      new ImportingJobService(new ImportingJobRepository({} as never)),
+      new ImportingJobService(importingJobRepository({} as never)),
       {
         require: jest.fn(() => {
           throw new Error('CAPABILITY_DISABLED');
@@ -134,7 +134,7 @@ describe('RemoteActivityFileService', () => {
     const service = new RemoteActivityFileService(
       {} as never,
       { getFileWithKey: jest.fn(async () => undefined) } as never,
-      new ImportingJobService(new ImportingJobRepository({} as never)),
+      new ImportingJobService(importingJobRepository({} as never)),
       { require: requireCapability } as never,
     );
 

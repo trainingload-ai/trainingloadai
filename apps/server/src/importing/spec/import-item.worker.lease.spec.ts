@@ -1,7 +1,7 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ImportItemWorkerService } from '../import-item.worker';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 
 function createService(prisma: unknown, config: unknown = {}) {
   return new ImportItemWorkerService(
@@ -22,7 +22,7 @@ function createService(prisma: unknown, config: unknown = {}) {
     {} as never,
     {} as never,
     new ImportingJobService(
-      new ImportingJobRepository(prisma as never),
+      importingJobRepository(prisma as never),
     ) as never,
     {} as never,
     {} as never,

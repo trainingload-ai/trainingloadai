@@ -683,7 +683,7 @@ export class ExternalActivityMirrorService {
     const publish = async (tx: Prisma.TransactionClient) => {
       await tx.$queryRaw`SELECT id FROM t_import_source_object WHERE id=${mirror.id} FOR UPDATE`;
       const [currentMirror, target] = await Promise.all([
-        tx.importSourceObject.findFirst({
+        this.importJobs.sourceObjects(tx).findFirst({
           where: { id: mirror.id, userId: args.userId, importRevokedAt: null },
         }),
         tx.activity.findFirst({

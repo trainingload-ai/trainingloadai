@@ -1,5 +1,5 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { ThirdPartyActivityProjectorService } from '../third-party-activity-projector.service';
 import { describe, expect, it, jest } from '@jest/globals';
 import type { CanonicalActivityPayload } from '../canonical-activity.types';
@@ -7,7 +7,7 @@ import type { CanonicalActivityPayload } from '../canonical-activity.types';
 function createService(prisma: unknown) {
   return new ThirdPartyActivityProjectorService(
     prisma as never,
-    new ImportingJobService(new ImportingJobRepository(prisma as never)),
+    new ImportingJobService(importingJobRepository(prisma as never)),
   );
 }
 
