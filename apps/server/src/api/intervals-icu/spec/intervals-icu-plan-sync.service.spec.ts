@@ -63,6 +63,7 @@ describe('IntervalsIcuPlanSyncService', () => {
     };
     const workoutService = {
       parseFile: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+      stringifyPlan: jest.fn<(...args: unknown[]) => string>(),
       buildPlanBlocksFromWorkoutSteps:
         jest.fn<(...args: unknown[]) => unknown>(),
       buildWorkoutPlanSteps: jest.fn<(...args: unknown[]) => unknown[]>(),
@@ -157,6 +158,203 @@ describe('IntervalsIcuPlanSyncService', () => {
       workoutService,
     };
   }
+
+  function exportedFitFixture(withSteps: boolean) {
+    const fit = Buffer.from(
+      withSteps ? 'synthetic-structured-fit' : 'synthetic-empty-fit',
+    );
+    const codec = {
+      parseFile: async () => ({
+        block: withSteps
+          ? [
+              {
+                type: 'work',
+                steps: [
+                  {
+                    duration: 60,
+                    durationMeta: { kind: 'TIME', value: 60, unit: 'SECONDS' },
+                  },
+                ],
+              },
+            ]
+          : [],
+        plan: withSteps ? 'work 1m' : '',
+      }),
+    };
+    return { codec, fit };
+  }
+
+  it('reads structured workouts from the official event export file field', async () => {
+    const f = createService();
+    const { codec, fit } = exportedFitFixture(true);
+    f.workoutService.parseFile.mockImplementation(async () =>
+      codec.parseFile(),
+    );
+    const parsed = await (
+      f.service as unknown as {
+        parseRemoteWorkout(event: unknown): Promise<unknown>;
+      }
+    ).parseRemoteWorkout({
+      id: 'synthetic-fit-event',
+      start_date_local: '2026-07-06',
+      type: 'Run',
+      workout_doc: { steps: [] },
+      workout_file_base64: fit.toString('base64'),
+    });
+    expect(f.workoutService.parseFile).toHaveBeenCalledWith(fit);
+    expect(parsed).toMatchObject({
+      blocks: [
+        { type: 'work', steps: [expect.objectContaining({ duration: 60 })] },
+      ],
+    });
+  });
+
+  it('keeps the native-document checksum when calendar GET also supplies a FIT export', async () => {
+    const f = createService();
+    const { fit } = exportedFitFixture(true);
+    f.workoutService.stringifyPlan.mockReturnValue('work 1m');
+    const event = {
+      id: 'synthetic-doc-event',
+      start_date_local: '2026-07-06',
+      type: 'Run',
+      workout_doc: {
+        steps: [{ duration: 60, power: { value: 70, units: '%ftp' } }],
+      },
+    };
+    const parser = f.service as unknown as {
+      parseRemoteWorkout(event: unknown): Promise<unknown>;
+    };
+    const original = await parser.parseRemoteWorkout(event);
+    expect(original).not.toBeNull();
+    expect(
+      await parser.parseRemoteWorkout({
+        ...event,
+        workout_file_base64: fit.toString('base64'),
+      }),
+    ).toEqual(original);
+    expect(f.workoutService.parseFile).not.toHaveBeenCalled();
+  });
+
+  it.each(['file_contents_base64', 'workout_file_base64'])(
+    'does not turn an empty %s export into a local workout',
+    async (field) => {
+      const f = createService();
+      const { codec, fit } = exportedFitFixture(false);
+      f.workoutService.parseFile.mockImplementation(async () =>
+        codec.parseFile(),
+      );
+      const parsed = await (
+        f.service as unknown as {
+          parseRemoteWorkout(event: unknown): Promise<unknown>;
+        }
+      ).parseRemoteWorkout({
+        id: 'synthetic-empty-event',
+        start_date_local: '2026-07-06',
+        type: 'Run',
+        workout_doc: { steps: [] },
+        [field]: fit.toString('base64'),
+      });
+      expect(parsed).toBeNull();
+    },
+  );
+
+  it('falls back to the structured document when the exported FIT has no steps', async () => {
+    const f = createService();
+    const { codec, fit } = exportedFitFixture(false);
+    f.workoutService.parseFile.mockImplementation(async () =>
+      codec.parseFile(),
+    );
+    f.workoutService.stringifyPlan.mockReturnValue('work 1m');
+    const parsed = await (
+      f.service as unknown as {
+        parseRemoteWorkout(event: unknown): Promise<unknown>;
+      }
+    ).parseRemoteWorkout({
+      id: 'synthetic-fallback-event',
+      start_date_local: '2026-07-06',
+      type: 'Run',
+      workout_doc: { steps: [{ duration: 60 }] },
+      file_contents_base64: fit.toString('base64'),
+    });
+    expect(parsed).toMatchObject({
+      blocks: [
+        { type: 'work', steps: [expect.objectContaining({ duration: 60 })] },
+      ],
+    });
+  });
+
+  it.each([true, false])(
+    'classifies empty=%s source events without changing existing mappings',
+    async (empty) => {
+      const f = createService();
+      const logger = { log: jest.fn(), warn: jest.fn(), debug: jest.fn() };
+      (f.service as unknown as { logger: typeof logger }).logger = logger;
+      const { codec, fit } = exportedFitFixture(false);
+      f.workoutService.parseFile.mockImplementation(async () =>
+        codec.parseFile(),
+      );
+      f.externalProviderConnection.findUnique.mockResolvedValue({
+        metadata: {},
+      });
+      f.planWorkoutExternalMapping.findMany.mockResolvedValue([]);
+      f.intervalsIcuClient.listEvents.mockResolvedValue(
+        ['Swim', 'Run'].map((type, i) => ({
+          id: `synthetic-empty-${i}`,
+          type,
+          category: 'WORKOUT',
+          start_date_local: '2026-07-06',
+          name: 'Private synthetic title',
+          description: null,
+          workout_doc: { steps: empty ? [] : [{ distance: 1000 }] },
+          workout_file_base64: empty ? fit.toString('base64') : undefined,
+        })),
+      );
+      const result = await f.service.syncConnectionWeek({
+        userId: 'user-1',
+        credential: 'key',
+        weekStart: '2026-07-06',
+        trigger: 'scheduled',
+        connection: {
+          id: 'private-connection',
+          status: 'ACTIVE',
+          metadata: {
+            planSync: {
+              syncPlannedWorkouts: true,
+              exportPlannedWorkouts: false,
+            },
+          },
+        },
+      });
+      expect(result.import).toMatchObject({
+        fetched: 2,
+        skipped: 2,
+        failed: 0,
+        created: 0,
+        updated: 0,
+      });
+      expect(f.planWorkout.create).not.toHaveBeenCalled();
+      expect(f.planWorkoutExternalMapping.update).not.toHaveBeenCalled();
+      expect(f.planWorkoutExternalMapping.create).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledTimes(empty ? 0 : 2);
+      expect(logger.log).toHaveBeenCalledTimes(empty ? 2 : 0);
+      const logs = (empty ? logger.log : logger.warn).mock.calls.map(
+        ([message]) => String(message),
+      );
+      expect(
+        logs.every((message) =>
+          message.includes(
+            empty
+              ? 'reason=NO_STRUCTURED_WORKOUT_STEPS'
+              : 'reason=UNSUPPORTED_WORKOUT_DOCUMENT',
+          ),
+        ),
+      ).toBe(true);
+      expect(new Set(logs).size).toBe(2);
+      expect(logs.join(' ')).not.toMatch(
+        /private-connection|synthetic-empty|Private synthetic title/,
+      );
+    },
+  );
 
   it.each(['unchanged', 'load-estimate', 'concurrent-edit'])(
     'handles a local timestamp change from %s',

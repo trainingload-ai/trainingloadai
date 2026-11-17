@@ -96,6 +96,9 @@ export interface IntervalsIcuEvent {
   updated?: string | null;
   /** Event：解析后的结构化课表。 */
   workout_doc?: IntervalsIcuWorkoutDocJson | null;
+  /** Calendar GET exports, distinct from the EventEx upload fields below. */
+  workout_file_base64?: string | null;
+  workout_filename?: string | null;
   /** EventEx：嵌套库内 workout（可带文件内容）。 */
   workout?: IntervalsIcuEventWorkout | null;
   file_contents?: string | null;

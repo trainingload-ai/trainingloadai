@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { SportCatalogService } from '@/sports/sport-catalog.service';
 import type {
@@ -305,13 +306,17 @@ function eventDate(event: IntervalsIcuEvent) {
 }
 
 /** 从事件各字段里抽出 FIT base64（OpenAPI EventEx）。 */
-function extractFitBase64(event: IntervalsIcuEvent) {
+function extractFitBase64(
+  event: IntervalsIcuEvent,
+  includeCalendarExport = true,
+) {
   const workout = event.workout ?? {};
   const candidates = [
     event.file_contents_base64,
     event.file_contents,
     workout.file_contents_base64,
     workout.file_contents,
+    ...(includeCalendarExport ? [event.workout_file_base64] : []),
   ];
   for (const candidate of candidates) {
     const text = cleanString(candidate);
@@ -1104,13 +1109,9 @@ export class IntervalsIcuPlanSyncService {
 
     const parsed = await this.parseRemoteWorkout(args.event);
     if (!parsed) {
-      await this.markRemoteEventFailed({
-        userId: args.userId,
+      this.logRemoteEventSkipped({
         connectionId: args.connection.id,
         event: args.event,
-        error: 'Intervals.icu 计划课没有包含 FIT 训练文件',
-        window: args.window,
-        trigger: args.trigger,
       });
       return { ...zero, skipped: 1 };
     }
@@ -1297,11 +1298,19 @@ export class IntervalsIcuPlanSyncService {
     const scheduledDate = eventDate(event);
     const fitBase64 = extractFitBase64(event);
     if (!scheduledDate) return null;
-    if (!fitBase64) return this.parseRemoteWorkoutFromDoc(event);
+    if (!extractFitBase64(event, false)) {
+      // Keep existing native-document baselines stable when calendar GET also
+      // supplies an export. Only use that export when the document is unusable.
+      const native = await this.parseRemoteWorkoutFromDoc(event);
+      if (native || !fitBase64) return native;
+    }
 
     const parsed = await this.workoutService.parseFile(
       Buffer.from(fitBase64, 'base64'),
     );
+    // A valid FIT envelope can contain no workout steps. Do not create an
+    // empty course; the native document may still carry usable structure.
+    if (parsed.block.length === 0) return this.parseRemoteWorkoutFromDoc(event);
     const name = cleanString(event.name);
     const notes = cleanString(event.description);
     const sportType = mapIntervalsSportType(event.type);
@@ -1912,18 +1921,26 @@ export class IntervalsIcuPlanSyncService {
     });
   }
 
-  /** Parsing failures do not mutate an existing synchronization baseline or tombstone. */
-  private async markRemoteEventFailed(_args: {
-    userId: string;
+  /** Skips never mutate an existing synchronization baseline or tombstone. */
+  private logRemoteEventSkipped(args: {
     connectionId: string;
     event: IntervalsIcuEvent;
-    error: string;
-    window: WeekWindow;
-    trigger: SyncTrigger;
   }) {
-    this.logger.warn(
-      `Intervals.icu plan event skipped: reason=UNSUPPORTED_WORKOUT_DOCUMENT`,
-    );
+    const steps = args.event.workout_doc?.steps;
+    const empty =
+      Boolean(eventDate(args.event)) &&
+      Array.isArray(steps) &&
+      steps.length === 0;
+    const reason = empty
+      ? 'NO_STRUCTURED_WORKOUT_STEPS'
+      : 'UNSUPPORTED_WORKOUT_DOCUMENT';
+    const eventRef = createHash('sha256')
+      .update(`${args.connectionId}:${eventId(args.event) ?? 'missing'}`)
+      .digest('hex')
+      .slice(0, 24);
+    const message = `Intervals.icu plan event skipped: reason=${reason} eventRef=${eventRef}`;
+    if (empty) this.logger.log(message);
+    else this.logger.warn(message);
   }
 
   /** 创建或更新 PlanWorkoutExternalMapping。 */
