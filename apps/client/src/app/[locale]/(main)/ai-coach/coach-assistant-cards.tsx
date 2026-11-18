@@ -11,7 +11,8 @@ import {
   useCoachActions,
 } from "./coach-chat-provider";
 import { CoachQuestionAnsweredView } from "./coach-question-answered-view";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { payloadTooLargeMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -130,7 +131,7 @@ function CoachV2AssistantCardsInner({
   const [createdPlanId, setCreatedPlanId] = useState<string | null>(null);
   const tq = useTranslations("AiCoachPage.questions");
   const tpd = useTranslations("AiCoachPage.planDraft");
-  const tApiErrors = useTranslations("ApiErrors");
+  const locale = useLocale();
   const twa = useTranslations("AiCoachPage.workoutAdjustment");
   const td = useTranslations("AiCoachPage.decision");
 
@@ -462,7 +463,7 @@ function CoachV2AssistantCardsInner({
                 className="text-sm text-destructive"
               >
                 {planSaveError === "tooLarge"
-                  ? tApiErrors("payloadTooLarge")
+                  ? payloadTooLargeMessage(locale)
                   : tpd(`saveErrors.${planSaveError}`)}
               </p>
             ) : null}

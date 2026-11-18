@@ -1,0 +1,32 @@
+{
+  "zh": {
+    "payloadTooLarge": "提交的内容超出大小限制。请减少内容或分批提交后重试。"
+  },
+  "en": {
+    "payloadTooLarge": "The submitted content exceeds the size limit. Reduce it or submit it in smaller parts and try again."
+  },
+  "de": {
+    "payloadTooLarge": "Die übermittelten Inhalte überschreiten die Größenbeschränkung. Reduzieren Sie den Inhalt oder teilen Sie ihn auf und versuchen Sie es erneut."
+  },
+  "fr": {
+    "payloadTooLarge": "Le contenu envoyé dépasse la taille autorisée. Réduisez-le ou envoyez-le en plusieurs parties, puis réessayez."
+  },
+  "it": {
+    "payloadTooLarge": "Il contenuto inviato supera il limite di dimensione. Riducilo o invialo in parti più piccole e riprova."
+  },
+  "es": {
+    "payloadTooLarge": "El contenido enviado supera el límite de tamaño. Redúcelo o envíalo en partes más pequeñas e inténtalo de nuevo."
+  },
+  "pt-BR": {
+    "payloadTooLarge": "O conteúdo enviado excede o limite de tamanho. Reduza-o ou envie em partes menores e tente novamente."
+  },
+  "ja": {
+    "payloadTooLarge": "送信内容がサイズ上限を超えています。内容を減らすか、分割して再度送信してください。"
+  },
+  "ko": {
+    "payloadTooLarge": "제출한 내용이 크기 한도를 초과합니다. 내용을 줄이거나 나누어 다시 제출해 주세요."
+  },
+  "zh-hant": {
+    "payloadTooLarge": "提交的內容超出大小限制。請減少內容或分批提交後重試。"
+  }
+}

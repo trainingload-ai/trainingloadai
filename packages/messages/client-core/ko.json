@@ -6476,6 +6476,5 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  },
-  "ApiErrors": {"payloadTooLarge": "제출한 내용이 크기 한도를 초과합니다. 내용을 줄이거나 나누어 다시 제출해 주세요."}
+  }
 }

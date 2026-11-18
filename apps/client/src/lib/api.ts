@@ -5,7 +5,7 @@ import {
   parseApiEnvelopeText,
   type ApiEnvelope,
 } from "@shared/runtime-reliability";
-import { ApiFetchError } from "./api-error";
+import { ApiFetchError, payloadTooLargeMessage } from "./api-error";
 import { getPendingAuthFailure, handleUnauthorized } from "./auth-failure";
 import { notifyAiDataConsentRequired } from "./ai-data-consent-events";
 import { isPublicDemoBrowser } from "@/public-demo/public-demo-runtime";
@@ -52,21 +52,8 @@ const getClientLang = (): string => {
   return isSupportedLocale(firstSeg) ? firstSeg : "en";
 };
 
-async function httpErrorMessage(
-  status: number,
-  fallback: string,
-): Promise<string> {
-  if (status !== 413) return fallback;
-  try {
-    const messages = (
-      await import(
-        `../../../../packages/messages/client-core/${getClientLang()}.json`
-      )
-    ).default;
-    return messages.ApiErrors.payloadTooLarge;
-  } catch {
-    return "The submitted content exceeds the size limit.";
-  }
+function httpErrorMessage(status: number, fallback: string): string {
+  return status === 413 ? payloadTooLargeMessage(getClientLang()) : fallback;
 }
 
 function getApiFetchBaseUrl(): string {
@@ -128,7 +115,7 @@ export async function apiFetchErrorFromResponse(
   const errorCode = envelopeErrorCode(envelope);
   const consentRequired = notifyAiDataConsentRequired(errorCode);
   return new ApiFetchError(
-    await httpErrorMessage(
+    httpErrorMessage(
       response.status,
       envelope.message || `Request failed (${response.status})`,
     ),
@@ -226,7 +213,7 @@ export const apiFetch = async <T = unknown>(
     const errorCode = envelopeErrorCode(res);
     const consentRequired = notifyAiDataConsentRequired(errorCode);
     throw new ApiFetchError(
-      await httpErrorMessage(response.status, msg),
+      httpErrorMessage(response.status, msg),
       response.status,
       errorCode,
       res.data,
@@ -272,7 +259,7 @@ export const apiDownloadFetch = async (url: string, options?: RequestInit) => {
   if (!response.ok) {
     const res = await readApiEnvelope<unknown>(response);
     throw new ApiFetchError(
-      await httpErrorMessage(
+      httpErrorMessage(
         response.status,
         res.message || `API request failed (${response.status})`,
       ),

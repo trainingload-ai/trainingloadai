@@ -6574,6 +6574,5 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  },
-  "ApiErrors": {"payloadTooLarge": "提交的內容超出大小限制。請減少內容或分批提交後重試。"}
+  }
 }

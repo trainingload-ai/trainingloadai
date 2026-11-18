@@ -1,3 +1,4 @@
+import httpErrorMessages from "../../../../../../../packages/messages/client-http-errors.json";
 import {
   cleanup,
   fireEvent,
@@ -104,7 +105,7 @@ describe("coach plan save failure through the actual mutation and API", () => {
       );
       expect(await screen.findByRole("status")).toHaveTextContent(
         key === "tooLarge"
-          ? messages.ApiErrors.payloadTooLarge
+          ? httpErrorMessages.zh.payloadTooLarge
           : messages.AiCoachPage.planDraft.saveErrors[key],
       );
       expect(screen.getByText(draft.title)).toBeVisible();

@@ -7134,6 +7134,5 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  },
-  "ApiErrors": {"payloadTooLarge": "The submitted content exceeds the size limit. Reduce it or submit it in smaller parts and try again."}
+  }
 }

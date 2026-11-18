@@ -6477,6 +6477,5 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  },
-  "ApiErrors": {"payloadTooLarge": "Il contenuto inviato supera il limite di dimensione. Riducilo o invialo in parti più piccole e riprova."}
+  }
 }

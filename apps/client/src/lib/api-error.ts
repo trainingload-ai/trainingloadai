@@ -1,3 +1,4 @@
+import httpErrorMessages from "../../../../packages/messages/client-http-errors.json";
 import { errorHttpStatus, isAbortError } from "@shared/runtime-reliability";
 
 export class ApiFetchError<T = unknown> extends Error {
@@ -47,4 +48,11 @@ export function classifyApiError(error: unknown): ApiErrorKind {
   }
 
   return "unknown";
+}
+
+export function payloadTooLargeMessage(locale: string): string {
+  const messages = Object.hasOwn(httpErrorMessages, locale)
+    ? httpErrorMessages[locale as keyof typeof httpErrorMessages]
+    : httpErrorMessages.en;
+  return messages.payloadTooLarge;
 }

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { apiFetch, parseDownloadFilename } from "./api";
-import messages from "../../../../packages/messages/client-core/zh.json";
+import httpErrorMessages from "../../../../packages/messages/client-http-errors.json";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -24,26 +24,48 @@ describe("parseDownloadFilename", () => {
 });
 
 describe("apiFetch error presentation metadata", () => {
+  it.each(Object.entries(httpErrorMessages))(
+    "localizes common HTTP 413 in %s without loading a page catalog",
+    async (locale, messages) => {
+      window.history.replaceState({}, "", `/${locale}/routes`);
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockResolvedValue(
+            new Response(
+              JSON.stringify({ message: "The uploaded file is too large." }),
+              { status: 413 },
+            ),
+          ),
+      );
+      await expect(
+        apiFetch("/routes", { method: "POST", body: "{}" }),
+      ).rejects.toMatchObject({
+        status: 413,
+        message: messages.payloadTooLarge,
+      });
+      window.history.replaceState({}, "", "/");
+    },
+  );
   it.each(["/plans", "/routes", "/account/profile"])(
     "normalizes an HTML 413 on %s with the common localized message",
     async (url) => {
       window.history.replaceState({}, "", "/zh/account");
       vi.stubGlobal(
         "fetch",
-        vi
-          .fn()
-          .mockResolvedValue(
-            new Response("<html>Payload Too Large</html>", {
-              status: 413,
-              headers: { "content-type": "text/html" },
-            }),
-          ),
+        vi.fn().mockResolvedValue(
+          new Response("<html>Payload Too Large</html>", {
+            status: 413,
+            headers: { "content-type": "text/html" },
+          }),
+        ),
       );
       await expect(
         apiFetch(url, { method: "POST", body: "{}" }),
       ).rejects.toMatchObject({
         status: 413,
-        message: messages.ApiErrors.payloadTooLarge,
+        message: httpErrorMessages.zh.payloadTooLarge,
       });
       window.history.replaceState({}, "", "/");
     },

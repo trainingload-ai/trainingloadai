@@ -6477,6 +6477,5 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  },
-  "ApiErrors": {"payloadTooLarge": "Die übermittelten Inhalte überschreiten die Größenbeschränkung. Reduzieren Sie den Inhalt oder teilen Sie ihn auf und versuchen Sie es erneut."}
+  }
 }

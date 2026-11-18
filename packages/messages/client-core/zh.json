@@ -7133,6 +7133,5 @@
       "tsb": "状态"
     },
     "metricSwitch": "切换指标"
-  },
-  "ApiErrors": {"payloadTooLarge": "提交的内容超出大小限制。请减少内容或分批提交后重试。"}
+  }
 }
