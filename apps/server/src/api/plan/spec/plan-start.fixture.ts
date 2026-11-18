@@ -33,6 +33,7 @@ import { PlanLifecycleService } from '../application/plan-lifecycle.service';
 import { PlanProposalService } from '../application/plan-proposal.service';
 import { PlanProposalApplyService } from '../application/plan-proposal-apply.service';
 import { PlanProposalRepository } from '../persistence/plan-proposal.repository';
+import { PlanQueryService } from '../application/plan-query.service';
 
 export function planStartFixture(prisma: PrismaClient) {
   const workouts = new PlanWorkoutRepository(prisma as never);
@@ -132,5 +133,13 @@ export function planStartFixture(prisma: PrismaClient) {
     loads as never,
     starts,
   );
-  return { starts, service, write, context, proposals, apply, users };
+  const query = new PlanQueryService(
+    prisma as never,
+    plans,
+    workouts,
+    new PlanActivityLinkRepository(prisma as never),
+    new CoachContextRepository(prisma as never),
+    {} as never,
+  );
+  return { starts, service, write, context, proposals, apply, users, query };
 }

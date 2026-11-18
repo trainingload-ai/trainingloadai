@@ -819,6 +819,8 @@
       "scheduleSyncImpact": "The committed schedule updates the calendar. Device sync has its own status; view or retry it in connection settings.",
       "scheduleRange": "Adjustment range",
       "scheduleTimezone": "Calendar time zone",
+      "scheduleMaxDailyMinutes": "Daily training time limit",
+      "scheduleMaxTrainingDaysPerWeek": "Weekly training day limit",
       "scheduleRevision": "Rule revision",
       "fixedRestWeekdays": "Recurring rest days",
       "unavailableDates": "Unavailable dates",

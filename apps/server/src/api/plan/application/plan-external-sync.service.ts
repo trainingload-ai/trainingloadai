@@ -664,6 +664,7 @@ export class PlanExternalSyncService {
               changedWorkoutIds: [updated.id],
               constraints,
               qualityContract,
+              scheduleRuleMetadata: metadata,
             });
             if (!report.valid)
               throw new UnprocessableEntityException({

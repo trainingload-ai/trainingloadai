@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "El calendario se actualiza al guardar el plan. La sincronización del dispositivo tiene un estado independiente; consulta o reintenta en los ajustes de conexión.",
       "scheduleRange": "Intervalo de ajuste",
       "scheduleTimezone": "Zona horaria del calendario",
+      "scheduleMaxDailyMinutes": "Tiempo máximo de entrenamiento diario",
+      "scheduleMaxTrainingDaysPerWeek": "Máximo de días de entrenamiento por semana",
       "scheduleRevision": "Versión de reglas",
       "fixedRestWeekdays": "Días de descanso fijos",
       "unavailableDates": "Fechas no disponibles",

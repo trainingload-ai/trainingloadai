@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "Il calendario si aggiorna dopo il salvataggio. La sincronizzazione del dispositivo ha uno stato separato; controllala o riprova nelle impostazioni di connessione.",
       "scheduleRange": "Intervallo delle modifiche",
       "scheduleTimezone": "Fuso orario del calendario",
+      "scheduleMaxDailyMinutes": "Tempo massimo di allenamento giornaliero",
+      "scheduleMaxTrainingDaysPerWeek": "Numero massimo di giorni di allenamento a settimana",
       "scheduleRevision": "Versione delle regole",
       "fixedRestWeekdays": "Giorni di riposo fissi",
       "unavailableDates": "Date non disponibili",

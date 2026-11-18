@@ -37,9 +37,11 @@ import {
 } from '@shared/ai-coach-schema';
 import {
   assessPlanSchedule,
+  addCalendarDays,
   isCalendarDate,
   parseScheduleConstraints,
-  resolveScheduleQualityContract,
+  transitionScheduleMetadata,
+  scheduleRulePeriods,
 } from '@shared/plan-calendar';
 import {
   assessPlanQuality,
@@ -937,20 +939,21 @@ export class PlanStartService {
             );
           if (constraints && constraints.calendarTimeZone !== calendarTimeZone)
             fail('Calendar timezone changed; reassess constraints');
-          if (
-            request.qualityContractTransition?.mode ===
-              'REPLACE_ALLOWED_DAYS' &&
-            !request.scheduleConstraints
-          )
+          if (request.qualityContractTransition && !request.scheduleConstraints)
             fail(
-              'Replacing relative allowed days requires an explicit new schedule constraint revision',
+              'A contract transition requires an explicit new schedule constraint revision',
             );
-          const contract = request.qualityContractTransition
-            ? resolveScheduleQualityContract(
-                parsePlanQualityContract(metadata.qualityContract),
-                request.qualityContractTransition,
-              )
-            : parsePlanQualityContract(metadata.qualityContract);
+          const candidateMetadata =
+            request.scheduleConstraints && request.qualityContractTransition
+              ? transitionScheduleMetadata(
+                  metadata,
+                  request.scheduleConstraints,
+                  request.qualityContractTransition,
+                )
+              : metadata;
+          const contract = parsePlanQualityContract(
+            candidateMetadata.qualityContract,
+          );
           const quality = assessPlanQuality(
             source.periodWeeks,
             display.map((w) => ({
@@ -1008,6 +1011,7 @@ export class PlanStartService {
             constraints: constraints ?? undefined,
             qualityContract: contract,
             projectDates: true,
+            scheduleRuleMetadata: candidateMetadata,
           };
           const report = assessPlanSchedule(scheduleInput);
           const calendarAssessment =
@@ -1028,6 +1032,13 @@ export class PlanStartService {
               issues: report.issues,
             });
           const presentation: PlanProposalPresentation = {
+            scheduleRulePeriods: scheduleRulePeriods(
+              candidateMetadata,
+              range?.from ?? startDate,
+              range?.to ??
+                addCalendarDays(startDate, source.periodWeeks * 7 - 1),
+            ),
+            ...(contract ? { qualityContract: contract } : {}),
             relatedCalendarConflicts: calendarAssessment.relatedConflicts,
             title: source.title,
             summary: request.rationale,
@@ -1319,18 +1330,20 @@ export class PlanStartService {
       hash(expectedConstraints ?? null)
     )
       fail('Start constraints readback failed');
-    const expectedContract = proposal.request.qualityContractTransition
-      ? resolveScheduleQualityContract(
-          parsePlanQualityContract(
+    const expectedContract =
+      proposal.request.qualityContractTransition &&
+      proposal.request.scheduleConstraints
+        ? parsePlanQualityContract(
+            transitionScheduleMetadata(
+              source.generationMetadata,
+              proposal.request.scheduleConstraints,
+              proposal.request.qualityContractTransition,
+            ).qualityContract,
+          )
+        : parsePlanQualityContract(
             (source.generationMetadata as Record<string, unknown> | null)
               ?.qualityContract,
-          ),
-          proposal.request.qualityContractTransition,
-        )
-      : parsePlanQualityContract(
-          (source.generationMetadata as Record<string, unknown> | null)
-            ?.qualityContract,
-        );
+          );
     if (
       hash(parsePlanQualityContract(actualMetadata.qualityContract) ?? {}) !==
       hash(expectedContract ?? {})
@@ -1416,6 +1429,7 @@ export class PlanStartService {
       identityMap,
       readbackVerified: true,
       executionSource: 'USER_CONFIRMATION',
+      qualityContract: expectedContract ?? null,
       scheduleConstraints: expectedConstraints ?? null,
       ...(schedule
         ? {

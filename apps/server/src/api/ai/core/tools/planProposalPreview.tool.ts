@@ -138,8 +138,23 @@ export const planProposalPreviewTool: AiToolDef<
       },
       qualityContractTransition: {
         type: 'object',
+        additionalProperties: false,
+        required: ['mode'],
+        properties: {
+          mode: { type: 'string', enum: ['INHERIT', 'REPLACE_ALLOWED_DAYS'] },
+          allowedDays: {
+            type: ['array', 'null'],
+            items: { type: 'integer', minimum: 1, maximum: 7 },
+          },
+          maxDailyMinutes: {
+            type: 'number',
+            exclusiveMinimum: 0,
+            maximum: 1440,
+          },
+          maxTrainingDaysPerWeek: { type: 'integer', minimum: 1, maximum: 7 },
+        },
         description:
-          'INHERIT existing relative allowedDays by default; REPLACE_ALLOWED_DAYS only when athlete explicitly settles the weekday rule. {mode:INHERIT} or {mode:REPLACE_ALLOWED_DAYS,allowedDays:number[]|null}.',
+          'Inherit existing limits by default. Use REPLACE_ALLOWED_DAYS only for an explicitly settled relative-day rule. Optional maxDailyMinutes/maxTrainingDaysPerWeek replace only availability budgets explicitly requested by the athlete, alongside a new scheduleConstraints revision and the actual card confirmation. Other sport/phase requirements cannot be replaced.',
       },
       scope: {
         type: 'string',
@@ -391,6 +406,19 @@ export const planProposalPreviewTool: AiToolDef<
       ? {
           completeCandidateRenderedByServer: true,
           counts: output.presentation.counts,
+          scheduleRulePeriods: output.presentation.scheduleRulePeriods?.slice(
+            0,
+            40,
+          ),
+          scheduleRuleCoverage: {
+            total: output.presentation.scheduleRulePeriods?.length ?? 0,
+            returned: Math.min(
+              40,
+              output.presentation.scheduleRulePeriods?.length ?? 0,
+            ),
+            hasMore:
+              (output.presentation.scheduleRulePeriods?.length ?? 0) > 40,
+          },
           relatedCalendarConflicts:
             output.presentation.relatedCalendarConflicts,
           warnings: output.presentation.warnings,

@@ -777,6 +777,8 @@
       "scheduleSyncImpact": "课表提交后更新日历；设备同步状态独立显示，可在连接设置中查看或重试。",
       "scheduleRange": "调整范围",
       "scheduleTimezone": "日历时区",
+      "scheduleMaxDailyMinutes": "每日训练时长上限",
+      "scheduleMaxTrainingDaysPerWeek": "每周训练天数上限",
       "scheduleRevision": "规则版本",
       "fixedRestWeekdays": "固定休息日",
       "unavailableDates": "不可训练日期",

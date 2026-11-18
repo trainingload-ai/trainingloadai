@@ -3,6 +3,7 @@ import {
   projectPlanCalendar,
   parseScheduleConstraints,
   resolveScheduleQualityContract,
+  resolveScheduleRulesAtDate,
 } from '@shared/plan-calendar';
 
 describe('plan calendar projection', () => {
@@ -85,6 +86,46 @@ describe('plan calendar projection', () => {
       }),
     ).toThrow();
     expect(() => parseScheduleConstraints({ version: 2 })).toThrow();
+  });
+  it('reads legacy constraint history without transition provenance and keeps inherited budgets', () => {
+    const previous = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: ['2099-11-23'],
+      availableDateOverrides: [],
+      effectiveFrom: '2099-11-22',
+      confirmation: { source: 'USER', reference: 'old-rule' },
+    };
+    const metadata = {
+      qualityContract: { maxDailyMinutes: 60, requiredSports: ['RUN'] },
+      scheduleConstraints: {
+        ...previous,
+        revision: 2,
+        unavailableDates: [],
+        effectiveFrom: '2099-11-25',
+      },
+      qualityContractTransition: { mode: 'INHERIT' },
+      scheduleConstraintHistory: [
+        {
+          scheduleConstraints: null,
+          qualityContract: { maxDailyMinutes: 60, requiredSports: ['RUN'] },
+        },
+        {
+          scheduleConstraints: previous,
+          qualityContract: { maxDailyMinutes: 60, requiredSports: ['RUN'] },
+        },
+      ],
+    };
+    expect(resolveScheduleRulesAtDate(metadata, '2099-11-23')).toMatchObject({
+      constraints: { unavailableDates: ['2099-11-23'] },
+      qualityContract: { maxDailyMinutes: 60, requiredSports: ['RUN'] },
+    });
+    expect(resolveScheduleRulesAtDate(metadata, '2099-11-25')).toMatchObject({
+      constraints: { unavailableDates: [] },
+      qualityContract: { maxDailyMinutes: 60 },
+    });
   });
   it('keeps Wednesday and Friday rest rules when a Monday draft starts on Sunday', () => {
     const result = projectPlanCalendar({

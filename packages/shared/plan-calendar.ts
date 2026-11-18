@@ -1,4 +1,7 @@
-import type { PlanQualityContract } from "./plan-quality";
+import {
+  parsePlanQualityContract,
+  type PlanQualityContract,
+} from "./plan-quality";
 
 export type ScheduleConstraints = {
   version: 1;
@@ -252,19 +255,36 @@ export function projectPlanCalendar<
   };
 }
 
-export type ScheduleQualityContractTransition =
+export type ScheduleQualityContractTransition = (
   | { mode: "INHERIT" }
-  | { mode: "REPLACE_ALLOWED_DAYS"; allowedDays: number[] | null };
+  | { mode: "REPLACE_ALLOWED_DAYS"; allowedDays: number[] | null }
+) & {
+  /** Only explicitly confirmed availability changes replace inherited budgets. */
+  maxDailyMinutes?: number;
+  maxTrainingDaysPerWeek?: number;
+};
 
 /** Replacement is explicit: the legacy contract never implies weekday provenance. */
 export function resolveScheduleQualityContract(
   contract: PlanQualityContract | undefined,
   transition: ScheduleQualityContractTransition,
 ): PlanQualityContract | undefined {
-  if (transition.mode === "INHERIT") return contract;
   if (
-    transition.mode !== "REPLACE_ALLOWED_DAYS" ||
-    (transition.allowedDays !== null &&
+    !transition ||
+    !["INHERIT", "REPLACE_ALLOWED_DAYS"].includes(transition.mode) ||
+    Object.keys(transition).some(
+      (key) =>
+        ![
+          "mode",
+          "maxDailyMinutes",
+          "maxTrainingDaysPerWeek",
+          ...(transition.mode === "REPLACE_ALLOWED_DAYS"
+            ? ["allowedDays"]
+            : []),
+        ].includes(key),
+    ) ||
+    (transition.mode === "REPLACE_ALLOWED_DAYS" &&
+      transition.allowedDays !== null &&
       (!Array.isArray(transition.allowedDays) ||
         !transition.allowedDays.length ||
         transition.allowedDays.some(
@@ -272,13 +292,205 @@ export function resolveScheduleQualityContract(
         )))
   )
     throw new Error("Invalid quality contract transition");
-  const { allowedDays: _prior, ...inherited } = contract ?? {};
-  return {
-    ...inherited,
-    ...(transition.allowedDays === null
-      ? {}
-      : { allowedDays: transition.allowedDays }),
+  const next = { ...contract };
+  if (transition.mode === "REPLACE_ALLOWED_DAYS") {
+    delete next.allowedDays;
+    if (transition.allowedDays !== null)
+      next.allowedDays = transition.allowedDays;
+  }
+  if (transition.maxDailyMinutes !== undefined)
+    next.maxDailyMinutes = transition.maxDailyMinutes;
+  if (transition.maxTrainingDaysPerWeek !== undefined)
+    next.maxTrainingDaysPerWeek = transition.maxTrainingDaysPerWeek;
+  return Object.keys(next).length ? parsePlanQualityContract(next) : undefined;
+}
+
+function scheduleMetadataRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+/** Replay explicit availability changes; a later rest-only revision never activates a future budget. */
+export function createScheduleRuleResolver(metadata: unknown) {
+  const current = scheduleMetadataRecord(metadata);
+  const history = Array.isArray(current.scheduleConstraintHistory)
+    ? current.scheduleConstraintHistory.map(scheduleMetadataRecord)
+    : [];
+  const versions = [...history, current];
+  const baseline = parsePlanQualityContract(
+    versions[0].qualityContract ?? undefined,
+  );
+  const inherited = {
+    ...parsePlanQualityContract(current.qualityContract ?? undefined),
   };
+  delete inherited.maxDailyMinutes;
+  delete inherited.maxTrainingDaysPerWeek;
+  delete inherited.allowedDays;
+  if (baseline?.maxDailyMinutes !== undefined)
+    inherited.maxDailyMinutes = baseline.maxDailyMinutes;
+  if (baseline?.maxTrainingDaysPerWeek !== undefined)
+    inherited.maxTrainingDaysPerWeek = baseline.maxTrainingDaysPerWeek;
+  if (baseline?.allowedDays !== undefined)
+    inherited.allowedDays = baseline.allowedDays;
+  const parsed = versions.map((version) => {
+    const rules = parseScheduleConstraints(
+      version.scheduleConstraints ?? undefined,
+    );
+    const transition = scheduleMetadataRecord(
+      version.qualityContractTransition,
+    );
+    const patch: Partial<PlanQualityContract> = {};
+    for (const key of ["maxDailyMinutes", "maxTrainingDaysPerWeek"] as const) {
+      if (transition[key] === undefined) continue;
+      patch[key] = parsePlanQualityContract({ [key]: transition[key] })![key];
+    }
+    let clearAllowedDays = false;
+    if (transition.mode === "REPLACE_ALLOWED_DAYS") {
+      const replaced = resolveScheduleQualityContract(
+        undefined,
+        transition as ScheduleQualityContractTransition,
+      );
+      clearAllowedDays = transition.allowedDays === null;
+      if (replaced?.allowedDays) patch.allowedDays = replaced.allowedDays;
+    } else if (
+      !Object.prototype.hasOwnProperty.call(
+        version,
+        "qualityContractTransition",
+      )
+    ) {
+      // Legacy snapshots predate transition provenance; their saved relative rule remains authoritative.
+      const saved = parsePlanQualityContract(
+        version.qualityContract ?? undefined,
+      );
+      clearAllowedDays = saved?.allowedDays === undefined;
+      if (saved?.allowedDays) patch.allowedDays = saved.allowedDays;
+    }
+    return { rules, patch, clearAllowedDays };
+  });
+  return (date: string) => {
+    const qualityContract = { ...inherited };
+    let constraints: ScheduleConstraints | undefined;
+    for (const { rules, patch, clearAllowedDays } of parsed) {
+      if (
+        !rules ||
+        date < rules.effectiveFrom ||
+        (rules.effectiveUntil && date > rules.effectiveUntil)
+      )
+        continue;
+      constraints = rules;
+      if (clearAllowedDays) delete qualityContract.allowedDays;
+      Object.assign(qualityContract, patch);
+    }
+    return {
+      constraints,
+      qualityContract: Object.keys(qualityContract).length
+        ? qualityContract
+        : undefined,
+    };
+  };
+}
+
+export function resolveScheduleRulesAtDate(metadata: unknown, date: string) {
+  return createScheduleRuleResolver(metadata)(date);
+}
+
+/** Store one version of the existing rules and retain the explicit origin of each budget change. */
+export function transitionScheduleMetadata(
+  raw: unknown,
+  constraints: ScheduleConstraints,
+  transition: ScheduleQualityContractTransition,
+): Record<string, unknown> {
+  const metadata = scheduleMetadataRecord(raw);
+  const contract = resolveScheduleQualityContract(
+    parsePlanQualityContract(metadata.qualityContract ?? undefined),
+    transition,
+  );
+  const next = {
+    ...metadata,
+    scheduleConstraints: constraints,
+    qualityContract: contract ?? {},
+    qualityContractTransition: transition,
+    scheduleConstraintHistory: [
+      ...(Array.isArray(metadata.scheduleConstraintHistory)
+        ? metadata.scheduleConstraintHistory
+        : []),
+      {
+        scheduleConstraints: metadata.scheduleConstraints ?? null,
+        qualityContract: metadata.qualityContract ?? null,
+        qualityContractTransition: metadata.qualityContractTransition ?? null,
+      },
+    ],
+  };
+  next.qualityContract =
+    resolveScheduleRulesAtDate(next, constraints.effectiveFrom)
+      .qualityContract ?? {};
+  return next;
+}
+
+export type ScheduleRulePeriod = {
+  from: string;
+  to: string;
+  scheduleConstraints: ScheduleConstraints | null;
+  /** Relative 1-based plan-week offsets; null means no relative-day restriction. */
+  allowedDays: number[] | null;
+  availability: Pick<
+    PlanQualityContract,
+    "maxDailyMinutes" | "maxTrainingDaysPerWeek"
+  >;
+};
+
+/** Exact civil-date segments derived from the same rule history used by calendar writers. */
+export function scheduleRulePeriods(
+  metadata: unknown,
+  from: string,
+  to: string,
+): ScheduleRulePeriod[] {
+  if (!isCalendarDate(from) || !isCalendarDate(to) || to < from)
+    throw new Error("Invalid schedule rule range");
+  const current = scheduleMetadataRecord(metadata);
+  const versions = [
+    ...(Array.isArray(current.scheduleConstraintHistory)
+      ? current.scheduleConstraintHistory
+      : []),
+    current,
+  ];
+  const boundaries = new Set([from, addCalendarDays(to, 1)]);
+  for (const version of versions) {
+    const rules = parseScheduleConstraints(
+      scheduleMetadataRecord(version).scheduleConstraints ?? undefined,
+    );
+    for (const boundary of [
+      rules?.effectiveFrom,
+      rules?.effectiveUntil
+        ? addCalendarDays(rules.effectiveUntil, 1)
+        : undefined,
+    ])
+      if (boundary && boundary > from && boundary <= to)
+        boundaries.add(boundary);
+  }
+  const sorted = [...boundaries].sort();
+  const rulesAt = createScheduleRuleResolver(metadata);
+  return sorted.slice(0, -1).map((date, index) => {
+    const rules = rulesAt(date);
+    return {
+      from: date,
+      to: addCalendarDays(sorted[index + 1], -1),
+      scheduleConstraints: rules.constraints ?? null,
+      allowedDays: rules.qualityContract?.allowedDays ?? null,
+      availability: {
+        ...(rules.qualityContract?.maxDailyMinutes !== undefined
+          ? { maxDailyMinutes: rules.qualityContract.maxDailyMinutes }
+          : {}),
+        ...(rules.qualityContract?.maxTrainingDaysPerWeek !== undefined
+          ? {
+              maxTrainingDaysPerWeek:
+                rules.qualityContract.maxTrainingDaysPerWeek,
+            }
+          : {}),
+      },
+    };
+  });
 }
 
 export type ScheduledPlanWorkout = {
@@ -298,6 +510,7 @@ export function assessPlanSchedule(input: {
   constraints?: ScheduleConstraints;
   qualityContract?: PlanQualityContract;
   projectDates?: boolean;
+  scheduleRuleMetadata?: unknown;
 }) {
   const issues: Array<{ code: string; date?: string; workoutId?: string }> = [];
   const touched = new Set(input.changedWorkoutIds);
@@ -305,13 +518,21 @@ export function assessPlanSchedule(input: {
     input.projectDates || !w.scheduledDate
       ? addCalendarDays(input.startDate, w.dayOffset)
       : w.scheduledDate;
+  const rulesAt = input.scheduleRuleMetadata
+    ? createScheduleRuleResolver(input.scheduleRuleMetadata)
+    : (_date: string) => ({
+        constraints: input.constraints,
+        qualityContract: input.qualityContract,
+      });
   const dates = new Set<string>();
-  const planWeeks = new Set<number>();
+  const planWeeks = new Map<number, Set<string>>();
   for (const w of input.workouts) {
     if (!touched.has(w.id)) continue;
     const date = dateOf(w);
     dates.add(date);
-    planWeeks.add(Math.floor(w.dayOffset / 7));
+    const week = Math.floor(w.dayOffset / 7);
+    if (!planWeeks.has(week)) planWeeks.set(week, new Set());
+    planWeeks.get(week)!.add(date);
     if (
       w.dayOffset < 0 ||
       w.dayOffset >= input.periodWeeks * 7 ||
@@ -320,26 +541,28 @@ export function assessPlanSchedule(input: {
       issues.push({ code: "OUTSIDE_PLAN", date, workoutId: w.id });
     if (date !== addCalendarDays(input.startDate, w.dayOffset))
       issues.push({ code: "DATE_POSITION_MISMATCH", date, workoutId: w.id });
-    const code = scheduleDateConflict(date, input.constraints);
+    const rules = rulesAt(date);
+    const code = scheduleDateConflict(date, rules.constraints);
     if (code) issues.push({ code, date, workoutId: w.id });
     if (
-      input.qualityContract?.allowedDays &&
-      !input.qualityContract.allowedDays.includes((w.dayOffset % 7) + 1)
+      rules.qualityContract?.allowedDays &&
+      !rules.qualityContract.allowedDays.includes((w.dayOffset % 7) + 1)
     )
       issues.push({ code: "UNAVAILABLE_DAY", date, workoutId: w.id });
   }
   for (const date of dates) {
+    const contract = rulesAt(date).qualityContract;
     const daily = input.workouts.filter(
       (w) => !["MOVED", "SKIPPED"].includes(w.status) && dateOf(w) === date,
     );
     if (
-      input.qualityContract?.maxDailyMinutes &&
+      contract?.maxDailyMinutes &&
       daily.reduce((sum, w) => sum + (w.durationSeconds ?? 0), 0) >
-        input.qualityContract.maxDailyMinutes * 60
+        contract.maxDailyMinutes * 60
     )
       issues.push({ code: "DAILY_TIME_BUDGET", date });
   }
-  for (const week of planWeeks) {
+  for (const [week, changedDates] of planWeeks) {
     const days = new Set(
       input.workouts
         .filter(
@@ -350,8 +573,10 @@ export function assessPlanSchedule(input: {
         .map((w) => w.dayOffset),
     );
     if (
-      input.qualityContract?.maxTrainingDaysPerWeek &&
-      days.size > input.qualityContract.maxTrainingDaysPerWeek
+      [...changedDates].some((date) => {
+        const maxDays = rulesAt(date).qualityContract?.maxTrainingDaysPerWeek;
+        return maxDays !== undefined && days.size > maxDays;
+      })
     )
       issues.push({ code: "WEEKLY_DAY_BUDGET" });
   }

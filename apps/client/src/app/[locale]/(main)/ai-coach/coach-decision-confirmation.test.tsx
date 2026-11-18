@@ -163,6 +163,8 @@ it("renders a dated START candidate and confirms through the existing conversati
   fireEvent.click(screen.getByRole("button", { name: "确认并开始" }));
   expect(onConfirm).toHaveBeenCalledExactlyOnceWith("decision");
   expect(screen.queryByText("决策已应用")).not.toBeInTheDocument();
+  expect(screen.queryByText("每日训练时长上限")).not.toBeInTheDocument();
+  expect(screen.queryByText("每周训练天数上限")).not.toBeInTheDocument();
 });
 
 it("shows localized deletion details and pending device sync for START", () => {
@@ -227,6 +229,7 @@ it("restores the committed START receipt from an APPLIED draft without an applie
                 planId: "plan",
                 startDate: "2026-11-22",
                 calendarTimeZone: "Asia/Shanghai",
+                qualityContract: null,
                 readbackVerified: true,
                 changedWorkoutCount: 1,
                 addedWorkoutCount: 0,
@@ -245,6 +248,11 @@ it("restores the committed START receipt from an APPLIED draft without an applie
     screen.getByText(messages.AiCoachPage.decision.applyResult.APPLIED),
   ).toBeInTheDocument();
   expect(screen.getByText("2026-11-22 · Asia/Shanghai")).toBeInTheDocument();
+  expect(
+    screen.queryByText(messages.AiCoachPage.decision.scheduleRange),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("每日训练时长上限")).not.toBeInTheDocument();
+  expect(screen.queryByText("每周训练天数上限")).not.toBeInTheDocument();
   expect(
     screen.getByText(messages.AiCoachPage.decision.readbackVerified),
   ).toBeInTheDocument();
@@ -270,6 +278,10 @@ const scheduleProposal: CoachDecisionDraftToolResult = {
       startDate: "2026-11-22",
       calendarTimeZone: "Asia/Shanghai",
       range: { from: "2026-11-23", to: "2026-12-20" },
+      qualityContract: {
+        maxDailyMinutes: 30,
+        maxTrainingDaysPerWeek: 2,
+      },
       scheduleConstraints: {
         version: 1,
         revision: 3,
@@ -319,6 +331,12 @@ it("shows the actual schedule rules and range before explicit confirmation", () 
     </QueryClientProvider>,
   );
   expect(screen.getByText("2026-11-23 — 2026-12-20")).toBeInTheDocument();
+  expect(screen.getByText("每日训练时长上限").parentElement).toHaveTextContent(
+    "30分钟",
+  );
+  expect(screen.getByText("每周训练天数上限").parentElement).toHaveTextContent(
+    "2天",
+  );
   expect(screen.getByText("星期二、星期四")).toBeInTheDocument();
   expect(screen.getByText("不可训练日期").parentElement).toHaveTextContent(
     "2026-11-27",
@@ -326,6 +344,12 @@ it("shows the actual schedule rules and range before explicit confirmation", () 
   expect(
     screen.getByText("已确认的可训练例外").parentElement,
   ).toHaveTextContent("2026-12-01");
+  expect(screen.getByText("规则生效日期").parentElement).toHaveTextContent(
+    "2026-11-23",
+  );
+  expect(screen.getByText("规则结束日期").parentElement).toHaveTextContent(
+    "2026-12-20",
+  );
   expect(
     screen.getByRole("button", { name: "协调后的轻松跑 · S1 · 2026-11-23" }),
   ).toBeInTheDocument();
@@ -347,8 +371,16 @@ it("restores the committed SCHEDULE receipt from an APPLIED draft without an app
               appliedReceipt: {
                 mode: "SCHEDULE",
                 planId: "plan",
+                range: { from: "2026-11-23", to: "2026-12-20" },
                 startDate: "2026-11-22",
                 calendarTimeZone: "Asia/Shanghai",
+                qualityContract: {
+                  maxDailyMinutes: 30,
+                  maxTrainingDaysPerWeek: 2,
+                },
+                scheduleConstraints: (
+                  scheduleProposal.payload!.presentation as Record<string, unknown>
+                ).scheduleConstraints,
                 readbackVerified: true,
                 changedWorkoutCount: 1,
                 addedWorkoutCount: 0,
@@ -379,6 +411,26 @@ it("restores the committed SCHEDULE receipt from an APPLIED draft without an app
     screen.queryByRole("button", { name: "确认并开始" }),
   ).not.toBeInTheDocument();
   expect(onConfirm).not.toHaveBeenCalled();
+  expect(screen.getByText("2026-11-23 — 2026-12-20")).toBeInTheDocument();
+  expect(screen.getByText("每日训练时长上限").parentElement).toHaveTextContent(
+    "30分钟",
+  );
+  expect(screen.getByText("每周训练天数上限").parentElement).toHaveTextContent(
+    "2天",
+  );
+  expect(screen.getByText("星期二、星期四")).toBeInTheDocument();
+  expect(screen.getByText("不可训练日期").parentElement).toHaveTextContent(
+    "2026-11-27",
+  );
+  expect(
+    screen.getByText("已确认的可训练例外").parentElement,
+  ).toHaveTextContent("2026-12-01");
+  expect(screen.getByText("规则生效日期").parentElement).toHaveTextContent(
+    "2026-11-23",
+  );
+  expect(screen.getByText("规则结束日期").parentElement).toHaveTextContent(
+    "2026-12-20",
+  );
 });
 
 it("keeps related independent and other-plan workouts visible as unmodified coordination facts", () => {

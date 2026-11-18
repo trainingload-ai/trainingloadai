@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "Der gespeicherte Zeitplan aktualisiert den Kalender. Der Gerätesync hat einen eigenen Status; er lässt sich in den Verbindungseinstellungen prüfen oder wiederholen.",
       "scheduleRange": "Änderungszeitraum",
       "scheduleTimezone": "Kalenderzeitzone",
+      "scheduleMaxDailyMinutes": "Maximale tägliche Trainingszeit",
+      "scheduleMaxTrainingDaysPerWeek": "Maximale Trainingstage pro Woche",
       "scheduleRevision": "Regelversion",
       "fixedRestWeekdays": "Feste Ruhetage",
       "unavailableDates": "Nicht verfügbare Tage",

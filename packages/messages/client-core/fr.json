@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "Le calendrier est mis à jour après enregistrement. La synchronisation des appareils a un statut distinct ; consultez-le ou réessayez dans les réglages de connexion.",
       "scheduleRange": "Période des ajustements",
       "scheduleTimezone": "Fuseau du calendrier",
+      "scheduleMaxDailyMinutes": "Durée maximale d’entraînement par jour",
+      "scheduleMaxTrainingDaysPerWeek": "Nombre maximal de jours d’entraînement par semaine",
       "scheduleRevision": "Version des règles",
       "fixedRestWeekdays": "Jours de repos fixes",
       "unavailableDates": "Dates indisponibles",

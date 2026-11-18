@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "A agenda salva atualiza o calendário. A sincronização do dispositivo tem status independente; consulte ou tente novamente nas configurações de conexão.",
       "scheduleRange": "Período de ajuste",
       "scheduleTimezone": "Fuso horário do calendário",
+      "scheduleMaxDailyMinutes": "Tempo máximo de treino diário",
+      "scheduleMaxTrainingDaysPerWeek": "Máximo de dias de treino por semana",
       "scheduleRevision": "Versão das regras",
       "fixedRestWeekdays": "Dias fixos de descanso",
       "unavailableDates": "Datas indisponíveis",

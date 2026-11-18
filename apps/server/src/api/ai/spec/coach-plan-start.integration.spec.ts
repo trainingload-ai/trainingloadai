@@ -77,17 +77,32 @@ describe('START decision confirmation / PostgreSQL', () => {
     const created = await f.service.createPlan('user', {
       title: 'Saved draft',
       periodWeeks: 1,
+      ...(schedule
+        ? { generationMetadata: { qualityContract: { maxDailyMinutes: 60 } } }
+        : {}),
       workouts: [
         {
           weekIndex: 1,
           dayIndex: 1,
           sportType: 'RUN',
-          definition: {
-            kind: 'FREEFORM',
-            version: 1,
-            source: 'TEXT',
-            text: 'Easy run 30m',
-          },
+          definition: schedule
+            ? {
+                kind: 'FREEFORM',
+                version: 1,
+                source: 'STRUCTURE',
+                structure: {
+                  kind: 'FREEFORM',
+                  version: 1,
+                  text: 'Easy run 30m',
+                  durationSeconds: 1800,
+                },
+              }
+            : {
+                kind: 'FREEFORM',
+                version: 1,
+                source: 'TEXT',
+                text: 'Easy run 30m',
+              },
         },
       ],
     });
@@ -199,6 +214,24 @@ describe('START decision confirmation / PostgreSQL', () => {
           ...request,
           mode: 'SCHEDULE' as const,
           range: { from: '2099-11-22', to: '2099-11-28' },
+          scheduleConstraints: {
+            version: 1 as const,
+            revision: 1,
+            calendarTimeZone: 'UTC',
+            fixedRestWeekdays: [],
+            unavailableDates: [],
+            availableDateOverrides: [],
+            effectiveFrom: '2099-11-22',
+            confirmation: {
+              source: 'USER' as const,
+              reference: 'availability-request',
+            },
+          },
+          qualityContractTransition: {
+            mode: 'INHERIT' as const,
+            maxDailyMinutes: 30,
+            maxTrainingDaysPerWeek: 2,
+          },
         }
       : request;
     if (mainChat) {
@@ -412,46 +445,54 @@ describe('START decision confirmation / PostgreSQL', () => {
       (await f.service.getPlanDetail('user', p.planId)).plan!.workouts,
     ).toHaveLength(2);
   });
-  it('atomically rolls back activation when Commit persistence fails', async () => {
-    const p = await proposal();
-    await coach.approveDecision(p.confirmation);
-    await prisma.$executeRawUnsafe(
-      "CREATE FUNCTION reject_start_commit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test commit rejected'; END $$",
-    );
-    await prisma.$executeRawUnsafe(
-      'CREATE TRIGGER test_reject_start_commit BEFORE INSERT ON t_coach_commit FOR EACH ROW EXECUTE FUNCTION reject_start_commit()',
-    );
-    try {
-      await expect(
-        coach.applyDecision({
-          userId: 'user',
-          decisionId: p.draft.decision.id,
-        }),
-      ).rejects.toThrow(/test commit rejected/);
-    } finally {
+  it.each([false, true])(
+    'atomically rolls back the plan write and availability when Commit persistence fails (schedule=%s)',
+    async (schedule) => {
+      const p = await proposal(false, schedule);
+      await coach.approveDecision(p.confirmation);
       await prisma.$executeRawUnsafe(
-        'DROP TRIGGER test_reject_start_commit ON t_coach_commit',
+        "CREATE FUNCTION reject_start_commit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test commit rejected'; END $$",
       );
-      await prisma.$executeRawUnsafe('DROP FUNCTION reject_start_commit()');
-    }
-    expect((await f.service.getPlanDetail('user', p.planId)).plan!.status).toBe(
-      'DRAFT',
-    );
-    expect(
-      (
-        await prisma.coachDecision.findUniqueOrThrow({
-          where: { id: p.draft.decision.id },
-        })
-      ).state,
-    ).toBe('APPROVED');
-    expect(
-      (
-        await prisma.planProposalPreview.findUniqueOrThrow({
-          where: { id: p.preview.previewId },
-        })
-      ).appliedAt,
-    ).toBeNull();
-  });
+      await prisma.$executeRawUnsafe(
+        'CREATE TRIGGER test_reject_start_commit BEFORE INSERT ON t_coach_commit FOR EACH ROW EXECUTE FUNCTION reject_start_commit()',
+      );
+      try {
+        await expect(
+          coach.applyDecision({
+            userId: 'user',
+            decisionId: p.draft.decision.id,
+          }),
+        ).rejects.toThrow(/test commit rejected/);
+      } finally {
+        await prisma.$executeRawUnsafe(
+          'DROP TRIGGER test_reject_start_commit ON t_coach_commit',
+        );
+        await prisma.$executeRawUnsafe('DROP FUNCTION reject_start_commit()');
+      }
+      expect(
+        (await f.service.getPlanDetail('user', p.planId)).plan!.status,
+      ).toBe(schedule ? 'ACTIVE' : 'DRAFT');
+      if (schedule)
+        expect(
+          (await f.service.getPlanDetail('user', p.planId)).plan!
+            .generationMetadata,
+        ).toMatchObject({ qualityContract: { maxDailyMinutes: 60 } });
+      expect(
+        (
+          await prisma.coachDecision.findUniqueOrThrow({
+            where: { id: p.draft.decision.id },
+          })
+        ).state,
+      ).toBe('APPROVED');
+      expect(
+        (
+          await prisma.planProposalPreview.findUniqueOrThrow({
+            where: { id: p.preview.previewId },
+          })
+        ).appliedAt,
+      ).toBeNull();
+    },
+  );
   it('revokes an approved card before persisting a new discussion turn with additional constraints', async () => {
     const p = await proposal();
     await coach.approveDecision(p.confirmation);
@@ -658,6 +699,14 @@ describe('START decision confirmation / PostgreSQL', () => {
   it('requires an actual card in an ordinary conversation and commits a SCHEDULE receipt exactly once', async () => {
     const p = await proposal(false, true);
     expect(p.preview.mode).toBe('SCHEDULE');
+    expect(p.preview.presentation.qualityContract).toMatchObject({
+      maxDailyMinutes: 30,
+      maxTrainingDaysPerWeek: 2,
+    });
+    expect(
+      (await f.service.getPlanDetail('user', p.planId)).plan!
+        .generationMetadata,
+    ).toMatchObject({ qualityContract: { maxDailyMinutes: 60 } });
     await expect(
       coach.approveDecision({
         userId: 'user',
@@ -675,6 +724,7 @@ describe('START decision confirmation / PostgreSQL', () => {
         mode: 'SCHEDULE',
         readbackVerified: true,
         changedWorkoutCount: 0,
+        qualityContract: { maxDailyMinutes: 30, maxTrainingDaysPerWeek: 2 },
       },
       commit: { id: expect.any(String) },
     });
@@ -683,6 +733,12 @@ describe('START decision confirmation / PostgreSQL', () => {
       decisionId: p.draft.decision.id,
     });
     expect(replay.receipt).toEqual(applied.receipt);
+    expect(
+      (await f.service.getPlanDetail('user', p.planId)).plan!
+        .generationMetadata,
+    ).toMatchObject({
+      qualityContract: { maxDailyMinutes: 30, maxTrainingDaysPerWeek: 2 },
+    });
   });
   it('creates a server-owned branch from a branchless ordinary chat and restores it for real-card confirmation', async () => {
     const p = await proposal(false, true, true);

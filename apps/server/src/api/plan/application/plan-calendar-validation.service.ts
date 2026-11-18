@@ -3,15 +3,12 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import {
   addCalendarDays,
   assessPlanSchedule,
-  parseScheduleConstraints,
   scheduleDateConflict,
+  createScheduleRuleResolver,
   type ScheduleConstraints,
   type ScheduledPlanWorkout,
 } from '@shared/plan-calendar';
-import {
-  parsePlanQualityContract,
-  type PlanQualityContract,
-} from '@shared/plan-quality';
+import type { PlanQualityContract } from '@shared/plan-quality';
 import type { PlanDb } from '../persistence/plan-db';
 
 type Candidate = {
@@ -25,6 +22,7 @@ type Candidate = {
   qualityContract?: PlanQualityContract;
   projectDates?: boolean;
   validationRange?: { from: string; until: string };
+  scheduleRuleMetadata?: unknown;
 };
 export type RelatedCalendarConflict = {
   code: string;
@@ -58,6 +56,12 @@ export class PlanCalendarValidationService {
   }
 
   async assertCandidate(input: Candidate, tx: PlanDb) {
+    const rulesAt = input.scheduleRuleMetadata
+      ? createScheduleRuleResolver(input.scheduleRuleMetadata)
+      : (_date: string) => ({
+          constraints: input.constraints,
+          qualityContract: input.qualityContract,
+        });
     const report = assessPlanSchedule(input);
     this.reject(report.issues);
     const touched = new Set(input.changedWorkoutIds);
@@ -105,7 +109,7 @@ export class PlanCalendarValidationService {
       .filter((w) => this.inCalendar(w) && visible(w.status))
       .flatMap((w) => {
         const date = ymd(w.scheduledDate)!;
-        const code = scheduleDateConflict(date, input.constraints);
+        const code = scheduleDateConflict(date, rulesAt(date).constraints);
         return code
           ? [
               {
@@ -120,7 +124,13 @@ export class PlanCalendarValidationService {
           : [];
       });
     this.reject(
-      this.dailyIssues(dates, rows, input.qualityContract?.maxDailyMinutes),
+      dates.flatMap((date) =>
+        this.dailyIssues(
+          [date],
+          rows,
+          rulesAt(date).qualityContract?.maxDailyMinutes,
+        ),
+      ),
     );
     // Other effective plans can impose a stricter athlete time budget too.
     await this.assertDates(input.userId, dates, rows, tx, input.planId);
@@ -226,10 +236,7 @@ export class PlanCalendarValidationService {
         string,
         unknown
       > | null;
-      const contract = parsePlanQualityContract(metadata?.qualityContract);
-      const constraints = parseScheduleConstraints(
-        metadata?.scheduleConstraints,
-      );
+      const rulesAt = createScheduleRuleResolver(metadata);
       const start = ymd(plan.startDate);
       const end =
         ymd(plan.endDate) ??
@@ -250,12 +257,21 @@ export class PlanCalendarValidationService {
           !activeDates.includes(row.scheduledDate)
         )
           continue;
-        const code = scheduleDateConflict(row.scheduledDate, constraints);
+        const code = scheduleDateConflict(
+          row.scheduledDate,
+          rulesAt(row.scheduledDate).constraints,
+        );
         if (code)
           issues.push({ code, date: row.scheduledDate, workoutId: row.id });
       }
       issues.push(
-        ...this.dailyIssues(activeDates, rows, contract?.maxDailyMinutes),
+        ...activeDates.flatMap((date) =>
+          this.dailyIssues(
+            [date],
+            rows,
+            rulesAt(date).qualityContract?.maxDailyMinutes,
+          ),
+        ),
       );
     }
     this.reject([

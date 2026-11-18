@@ -1,10 +1,12 @@
 import type {
   ScheduleConstraints,
   ScheduleQualityContractTransition,
+  ScheduleRulePeriod,
 } from "./plan-calendar";
 import type { CoachPlanDraftData } from "./ai-coach-schema";
 import type { WorkoutDefinitionInput } from "./workout-structure";
 import type { WorkoutIntensityIntent } from "./endurance-workout-ir";
+import type { PlanQualityContract } from "./plan-quality";
 
 export type PlanProposalMode = "ADAPT" | "SUPERSEDE" | "START" | "SCHEDULE";
 export type PlanAdaptationScope = "WORKOUT" | "PLAN_REMAINING";
@@ -104,7 +106,10 @@ export type PlanStartPreviewRequest = {
   preserved?: Array<{ sourceWorkoutId: string; expectedRevision: number }>;
 };
 
-export type PlanSchedulePreviewRequest = Omit<PlanStartPreviewRequest, "mode" | "startDate"> & {
+export type PlanSchedulePreviewRequest = Omit<
+  PlanStartPreviewRequest,
+  "mode" | "startDate"
+> & {
   mode: "SCHEDULE";
   range: { from: string; to: string };
 };
@@ -138,6 +143,8 @@ export type RelatedCalendarConflict = {
 };
 
 export type PlanProposalPresentation = {
+  scheduleRulePeriods?: ScheduleRulePeriod[];
+  qualityContract?: PlanQualityContract;
   relatedCalendarConflicts?: RelatedCalendarConflict[];
   title: string;
   summary: string;
@@ -169,7 +176,11 @@ export type PlanProposalPreviewResult = {
   previewId: string;
   mode: PlanProposalMode;
   expiresAt: string;
-  decisionType: "PLAN_ADAPTATION" | "PLAN_SUPERSESSION" | "PLAN_START" | "PLAN_SCHEDULE";
+  decisionType:
+    | "PLAN_ADAPTATION"
+    | "PLAN_SUPERSESSION"
+    | "PLAN_START"
+    | "PLAN_SCHEDULE";
   decisionPayload: {
     planId: string;
     previewId: string;
