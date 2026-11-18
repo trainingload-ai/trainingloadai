@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, withAlpha as tokenAlpha } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -185,7 +187,7 @@ const PowerPointChart: React.FC<PowerPointChartProps> = ({
       cursor: {
         points: {
           size: 9,
-          fill: "var(--color-power, #9333ea)",
+          fill: `var(--color-power, ${tokenPalette["purple-600"]})`,
         },
       },
       legend: { show: false },
@@ -202,7 +204,7 @@ const PowerPointChart: React.FC<PowerPointChartProps> = ({
 
             // Draw dashed line
             ctx.beginPath();
-            ctx.strokeStyle = "#9333ea";
+            ctx.strokeStyle = tokenPalette["purple-600"];
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.moveTo(u.bbox.left, y);
@@ -223,7 +225,7 @@ const PowerPointChart: React.FC<PowerPointChartProps> = ({
             const yPos = y - textHeight - paddingY * 2 - 2; // Position above the line
 
             // Background rect
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.fillStyle = tokenAlpha(tokenPalette["white"], 0.8);
             ctx.beginPath();
             // Round rect manually or just rect
             ctx.roundRect(
@@ -236,7 +238,7 @@ const PowerPointChart: React.FC<PowerPointChartProps> = ({
             ctx.fill();
 
             // Text
-            ctx.fillStyle = "#9333ea";
+            ctx.fillStyle = tokenPalette["purple-600"];
             ctx.textAlign = "left";
             ctx.textBaseline = "top";
             ctx.fillText(text, xPos + paddingX, yPos + paddingY + 1); // +1 for visual centering
@@ -250,7 +252,7 @@ const PowerPointChart: React.FC<PowerPointChartProps> = ({
         {
           stroke: (u: uPlot) => {
             if (!powerZones || powerZones.length === 0)
-              return cssVar("var(--color-power)") || "#9333ea";
+              return cssVar("var(--color-power)") || tokenPalette["purple-600"];
 
             if (
               !u.bbox ||
@@ -258,14 +260,14 @@ const PowerPointChart: React.FC<PowerPointChartProps> = ({
               !Number.isFinite(u.bbox.height) ||
               u.bbox.height <= 0
             ) {
-              return "#9333ea";
+              return tokenPalette["purple-600"];
             }
 
             const min = u.scales.y?.min ?? 0;
             const max = u.scales.y?.max ?? 1000;
             const range = max - min;
 
-            if (range <= 0) return "#9333ea";
+            if (range <= 0) return tokenPalette["purple-600"];
 
             const gradient = u.ctx.createLinearGradient(
               0,

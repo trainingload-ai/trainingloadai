@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, withAlpha as tokenAlpha } from '@trainingloadai/design-tokens/colors';
+
 import { memo, useCallback, useMemo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useLocale, useTranslations } from "next-intl";
@@ -171,7 +173,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
                   <span className="text-muted-foreground">CP</span>
                   <span
                     className="font-mono font-medium"
-                    style={{ color: "#9333ea" }}
+                    style={{ color: tokenPalette["purple-600"] }}
                   >
                     {Math.round(cp)}W
                   </span>
@@ -182,7 +184,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
                   <span className="text-muted-foreground">W&apos;</span>
                   <span
                     className="font-mono font-medium"
-                    style={{ color: "#9333ea" }}
+                    style={{ color: tokenPalette["purple-600"] }}
                   >
                     {(wPrime / 1000).toFixed(1)}kJ
                   </span>
@@ -193,7 +195,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
                   <span className="text-muted-foreground">FTP</span>
                   <span
                     className="font-mono font-medium"
-                    style={{ color: "#3b82f6" }}
+                    style={{ color: tokenPalette["blue-500"] }}
                   >
                     {Math.round(ftp)}W
                   </span>
@@ -228,7 +230,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
               const yPos = u.valToPos(cp, "y");
               if (yPos >= u.bbox.top && yPos <= u.bbox.top + u.bbox.height) {
                 ctx.save();
-                ctx.strokeStyle = "rgba(147, 51, 234, 0.4)";
+                ctx.strokeStyle = tokenAlpha(tokenPalette["purple-600"], 0.4);
                 ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.moveTo(left, yPos);
@@ -240,7 +242,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
                     ? `CP ${Math.round(cp)}W • W' ${Math.round(wPrime / 1000)}kJ`
                     : `CP ${Math.round(cp)}W`;
 
-                ctx.fillStyle = "#9333ea";
+                ctx.fillStyle = tokenPalette["purple-600"];
                 ctx.font =
                   "600 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
                 ctx.textAlign = "right";
@@ -255,7 +257,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
               const yPos = u.valToPos(ftp, "y");
               if (yPos >= u.bbox.top && yPos <= u.bbox.top + u.bbox.height) {
                 ctx.save();
-                ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
+                ctx.strokeStyle = tokenAlpha(tokenPalette["blue-500"], 0.4);
                 ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.moveTo(left, yPos);
@@ -264,7 +266,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
 
                 const text = `FTP ${Math.round(ftp)}W`;
 
-                ctx.fillStyle = "#3b82f6";
+                ctx.fillStyle = tokenPalette["blue-500"];
                 ctx.font =
                   "600 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
                 ctx.textAlign = "right";
@@ -315,7 +317,7 @@ export function PowerChart({ times, sportType }: PowerChartProps) {
             show: true,
             size: 5,
             width: 0,
-            fill: "rgba(147, 51, 234, 0.55)",
+            fill: tokenAlpha(tokenPalette["purple-600"], 0.55),
           },
         }),
       ),

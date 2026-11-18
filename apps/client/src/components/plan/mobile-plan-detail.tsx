@@ -67,8 +67,8 @@ function getMobilePlanStatusClass(status: PlanStatus, dark: boolean) {
   switch (status) {
     case "ACTIVE":
       return dark
-        ? "bg-[#00bc7d]/10 text-[#00bc7d]"
-        : "bg-[#009689]/10 text-[#009689]";
+        ? "bg-visual-assessment-accent-dark/10 text-visual-assessment-accent-dark"
+        : "bg-visual-assessment-accent/10 text-visual-assessment-accent";
     case "SCHEDULED":
       return dark
         ? "bg-violet-950/40 text-violet-300"
@@ -85,11 +85,11 @@ function getMobilePlanStatusClass(status: PlanStatus, dark: boolean) {
         : "bg-rose-100 text-rose-700";
     case "SUPERSEDED":
       return dark
-        ? "bg-[#161a19]/70 text-zinc-300"
+        ? "bg-visual-recording-background/70 text-zinc-300"
         : "bg-neutral-200 text-zinc-700";
     default:
       return dark
-        ? "bg-[#161a19]/70 text-zinc-300"
+        ? "bg-visual-recording-background/70 text-zinc-300"
         : "bg-neutral-200 text-zinc-700";
   }
 }
@@ -195,7 +195,7 @@ export function MobilePlanLibraryItem({
         <span
           className={cn(
             "absolute inset-y-2 left-0 w-0.5 rounded-r-full",
-            dark ? "bg-[#00bc7d]" : "bg-[#009689]",
+            dark ? "bg-visual-assessment-accent-dark" : "bg-visual-assessment-accent",
           )}
           aria-hidden="true"
         />

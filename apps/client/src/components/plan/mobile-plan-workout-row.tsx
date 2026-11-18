@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import type { WorkRestStep } from "@/api/workout";
 import {
@@ -36,22 +38,22 @@ export type MobileWorkoutSegment = {
 };
 
 const STEP_COLORS: Record<string, string> = {
-  WARMUP: "#60a5fa",
-  WORK: "#6366f1",
-  RECOVERY: "#6ee7b7",
-  REST: "#94a3b8",
-  COOLDOWN: "#06b6d4",
-  OTHER: "#8b5cf6",
+  WARMUP: tokenPalette["blue-400"],
+  WORK: tokenPalette["indigo-500"],
+  RECOVERY: tokenPalette["emerald-300"],
+  REST: tokenPalette["slate-400"],
+  COOLDOWN: tokenPalette["cyan-500"],
+  OTHER: tokenPalette["violet-500"],
 };
 
 const ZONE_COLORS = [
-  "#94a3b8",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#9333ea",
-  "#ec4899",
+  tokenPalette["slate-400"],
+  tokenPalette["blue-500"],
+  tokenPalette["emerald-500"],
+  tokenPalette["amber-500"],
+  tokenPalette["red-500"],
+  tokenPalette["purple-600"],
+  tokenPalette["pink-500"],
 ] as const;
 
 function finiteNumber(record: Record<string, unknown>, keys: string[]) {

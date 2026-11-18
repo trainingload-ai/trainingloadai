@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import uPlot from "uplot";
 import { DEFAULT_AXIS_FONT, createAxes } from "./uPlotConfig";
 
@@ -225,7 +226,7 @@ export const createMinMaxPointsPlugin = ({
         ctx.arc(cx, cy, pointRadius, 0, 2 * Math.PI);
         ctx.fillStyle = pointColor;
         ctx.fill();
-        ctx.strokeStyle = "#fff"; // Ensure visibility on dark background or overlapping lines
+        ctx.strokeStyle = tokenPalette["white"]; // Ensure visibility on dark background or overlapping lines
         ctx.lineWidth = 1;
         ctx.stroke();
         ctx.closePath();

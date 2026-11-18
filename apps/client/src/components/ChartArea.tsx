@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import * as React from "react";
 import { Line, LineChart, CartesianGrid, XAxis } from "recharts";
@@ -22,12 +24,12 @@ const chartConfig = {
   desktop: {
     label: "Desktop",
     // Soft orange (amber-500)
-    color: "#F59E0B",
+    color: tokenPalette["amber-500"],
   },
   mobile: {
     label: "Mobile",
     // Fresh green (emerald-500)
-    color: "#10B981",
+    color: tokenPalette["emerald-500"],
   },
 } satisfies ChartConfig;
 

@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import type { MobileMeMetric, MobileMeRange } from "./mobile-me-model";
 
 export type MobileMeSport =
@@ -27,14 +28,14 @@ export const MOBILE_ME_FITNESS_DEFINITIONS = new Set([
 ]);
 
 export const MOBILE_ME_METRIC_COLORS: Record<MobileMeMetric, string> = {
-  count: "#10b981",
-  distance: "#0ea5e9",
-  duration: "#8b5cf6",
-  load: "#f59e0b",
-  ascent: "#22c55e",
-  calories: "#f97316",
-  avgSpeed: "#06b6d4",
-  avgHeartRate: "#ef4444",
-  avgPower: "#6366f1",
-  avgCadence: "#a855f7",
+  count: tokenPalette["emerald-500"],
+  distance: tokenPalette["sky-500"],
+  duration: tokenPalette["violet-500"],
+  load: tokenPalette["amber-500"],
+  ascent: tokenPalette["green-500"],
+  calories: tokenPalette["orange-500"],
+  avgSpeed: tokenPalette["cyan-500"],
+  avgHeartRate: tokenPalette["red-500"],
+  avgPower: tokenPalette["indigo-500"],
+  avgCadence: tokenPalette["purple-500"],
 };

@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,16 +41,16 @@ export function ColorPicker({
 
   // Standard training zone colors + common colors
   const colors = [
-    "#808080", // Gray
-    "#3b82f6", // Blue
-    "#22c55e", // Green
-    "#eab308", // Yellow
-    "#f97316", // Orange
-    "#ef4444", // Red
-    "#a855f7", // Purple
-    "#ec4899", // Pink
-    "#14b8a6", // Teal
-    "#000000", // Black
+    tokenVisual.editor.gray, // Gray
+    tokenPalette["blue-500"], // Blue
+    tokenPalette["green-500"], // Green
+    tokenPalette["yellow-500"], // Yellow
+    tokenPalette["orange-500"], // Orange
+    tokenPalette["red-500"], // Red
+    tokenPalette["purple-500"], // Purple
+    tokenPalette["pink-500"], // Pink
+    tokenPalette["teal-500"], // Teal
+    tokenPalette["black"], // Black
   ];
 
   const isMobile = useIsMobile();
@@ -119,7 +121,7 @@ export function ColorPicker({
           }}
           onBlur={() => setHex(value ?? "")}
           className="h-8 text-mobile-caption pc:text-xs"
-          placeholder="#000000"
+          placeholder={tokenPalette["black"]}
         />
       </div>
     </div>

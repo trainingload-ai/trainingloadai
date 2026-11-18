@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, toRgb as tokenRgb, withAlpha as tokenAlpha } from '@trainingloadai/design-tokens/colors';
+
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as mapengine from "@deployment/map-engine";
@@ -36,9 +38,9 @@ function lerp(a: number, b: number, t: number) {
 function colorGreenToRed(t: number) {
   // 绿 -> 黄 -> 红，便于感知速度变化
   const x = clamp01(t);
-  const c1 = { r: 16, g: 185, b: 129 }; // emerald-500 #10b981
-  const c2 = { r: 250, g: 204, b: 21 }; // yellow-400
-  const c3 = { r: 239, g: 68, b: 68 }; // red-500
+  const c1 = tokenRgb(tokenPalette["emerald-500"]);
+  const c2 = tokenRgb(tokenPalette["yellow-400"]);
+  const c3 = tokenRgb(tokenPalette["red-500"]);
 
   if (x <= 0.5) {
     const tt = x / 0.5;
@@ -263,9 +265,9 @@ export function ActivitySharePosterModal({
 
       // 指标区域渐变（透明->黑），模拟当前覆盖层
       const grad = ctx.createLinearGradient(0, H * 0.62, 0, H);
-      grad.addColorStop(0, "rgba(0,0,0,0)");
-      grad.addColorStop(0.55, "rgba(0,0,0,0.35)");
-      grad.addColorStop(1, "rgba(0,0,0,0.80)");
+      grad.addColorStop(0, tokenAlpha(tokenPalette["black"], 0));
+      grad.addColorStop(0.55, tokenAlpha(tokenPalette["black"], 0.35));
+      grad.addColorStop(1, tokenAlpha(tokenPalette["black"], 0.8));
       ctx.fillStyle = grad;
       ctx.fillRect(0, H * 0.55, W, H * 0.45);
 
@@ -314,7 +316,7 @@ export function ActivitySharePosterModal({
       // 标题（顶部）
       const header = title || t("activityFallback");
       ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.fillStyle = tokenAlpha(tokenPalette["white"], 0.92);
       ctx.font =
         "700 34px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
       ctx.fillText(header, W / 2, 64);
@@ -325,14 +327,14 @@ export function ActivitySharePosterModal({
         const x = paddingX + c * (cellW + gapX) + cellW / 2;
         const y = startY + r * rowH;
 
-        ctx.fillStyle = "rgba(255,255,255,0.75)";
+        ctx.fillStyle = tokenAlpha(tokenPalette["white"], 0.75);
         ctx.font =
           "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
         ctx.fillText(metrics[i]!.k, x, y);
 
         const unit = metrics[i]!.u;
         const value = metrics[i]!.v + (unit ? ` ${unit}` : "");
-        ctx.fillStyle = "rgba(255,255,255,0.98)";
+        ctx.fillStyle = tokenAlpha(tokenPalette["white"], 0.98);
         ctx.font =
           "800 34px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
         ctx.fillText(value, x, y + 44);
@@ -438,7 +440,7 @@ export function ActivitySharePosterModal({
           "line-width": 6,
           "line-opacity": 0.95,
           // 始终给一个基础色，避免 line-gradient 未生效时落到默认灰色
-          "line-color": "rgb(34, 197, 94)",
+          "line-color": tokenPalette["green-500"],
           ...(stops.length >= 4
             ? {
                 "line-gradient": [

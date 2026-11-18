@@ -122,7 +122,7 @@ function YearHeatmapCard({
   return (
     <section className="overflow-hidden rounded-md p-2">
       {isLoading ? (
-        <Skeleton className="h-[128px] w-full animate-none rounded-md bg-neutral-100 dark:bg-[#343832]" />
+        <Skeleton className="h-[128px] w-full animate-none rounded-md bg-neutral-100 dark:bg-visual-heatmap-skeleton-dark" />
       ) : (
         <ActivityContributionHeatmap
           days={days}

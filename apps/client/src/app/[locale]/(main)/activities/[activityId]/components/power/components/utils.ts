@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import { PowerZoneValue } from "@/api/use-power";
 import { getPowerZoneColorByZone } from "@/utils/util";
 import type { ChartValue } from "@/api/useActivityMetric";
@@ -59,7 +60,7 @@ export const processPowerChartData = (
           "second",
         ),
         power: power,
-        zoneColor: zoneColor ?? "#94a3b8",
+        zoneColor: zoneColor ?? tokenPalette["slate-400"],
         zoneName: zoneLabel ?? t("chart.unknownZone"),
         zoneDescription: zoneLabel ? t(`zones.${zoneLabel}`) : "",
       };

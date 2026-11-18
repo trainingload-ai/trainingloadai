@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -157,7 +159,7 @@ const HeartRateDurationCurve: React.FC = () => {
               <div className="flex w-full flex-wrap gap-2 items-center">
                 <div
                   className="shrink-0 rounded-micro border-border bg-(--color-bg) h-2.5 w-2.5"
-                  style={{ "--color-bg": "#be123c" } as React.CSSProperties}
+                  style={{ "--color-bg": tokenPalette["rose-700"] } as React.CSSProperties}
                 />
                 <div className="flex flex-col">
                   <div className="flex flex-1 justify-between leading-none items-center gap-4">
@@ -188,8 +190,8 @@ const HeartRateDurationCurve: React.FC = () => {
   const options = useMemo(() => {
     const axisStroke = cssVar("var(--muted-foreground)");
     const gridStroke = cssVar("var(--border)");
-    const hrColor = cssVar("var(--chart-1)") || "#e11d48"; // Rose-600 for HR
-    const comparisonColor = "#be123c"; // Darker Rose for comparison
+    const hrColor = cssVar("var(--chart-1)") || tokenPalette["rose-600"]; // Rose-600 for HR
+    const comparisonColor = tokenPalette["rose-700"]; // Darker Rose for comparison
 
     return createUplotOptions({
       width: chartAreaSize.width,

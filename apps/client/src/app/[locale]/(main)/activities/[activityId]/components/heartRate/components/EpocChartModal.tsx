@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -35,14 +37,14 @@ import { resolveActivityChartXAxis } from "@/lib/activity-chart-axis";
 const chartConfig = {
   hr: {
     theme: {
-      light: "#ef4444", // red-500
-      dark: "#f87171", // red-400
+      light: tokenPalette["red-500"], // red-500
+      dark: tokenPalette["red-400"], // red-400
     },
   },
   epoc: {
     theme: {
-      light: "#3b82f6", // blue-500
-      dark: "#60a5fa", // blue-400
+      light: tokenPalette["blue-500"], // blue-500
+      dark: tokenPalette["blue-400"], // blue-400
     },
   },
 };

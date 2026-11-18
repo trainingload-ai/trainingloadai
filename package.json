@@ -64,7 +64,7 @@
   "scripts": {
     "prepare": "node .husky/install.mjs",
     "design-tokens:generate": "pnpm --filter @trainingloadai/design-tokens generate",
-    "design-tokens:check": "pnpm --filter @trainingloadai/design-tokens check && pnpm --filter @trainingloadai/design-tokens test",
+    "design-tokens:check": "pnpm --filter @trainingloadai/design-tokens check && pnpm --filter @trainingloadai/design-tokens test && pnpm --filter @trainingloadai/client lint:colors",
     "precommit:check": "git diff --cached --check && pnpm design-tokens:check && pnpm boundary:check && pnpm messages:check && pnpm selfhost:inventory:check && pnpm selfhost:docs-contract",
     "selfhost:inventory": "node scripts/generate-selfhost-inventory.mjs",
     "selfhost:inventory:check": "node scripts/generate-selfhost-inventory.mjs --check",

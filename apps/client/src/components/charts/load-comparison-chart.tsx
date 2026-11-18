@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useId } from "react";
 import {
@@ -52,11 +54,11 @@ export function LoadComparisonChart({
   const config = {
     actual: {
       label: actualLabel,
-      theme: { light: "#7c3aed", dark: "#a78bfa" },
+      theme: { light: tokenPalette["violet-600"], dark: tokenPalette["violet-400"] },
     },
     planned: {
       label: plannedLabel,
-      theme: { light: "#7c3aed", dark: "#a78bfa" },
+      theme: { light: tokenPalette["violet-600"], dark: tokenPalette["violet-400"] },
     },
   } satisfies ChartConfig;
   const selectedPoint = data.find(

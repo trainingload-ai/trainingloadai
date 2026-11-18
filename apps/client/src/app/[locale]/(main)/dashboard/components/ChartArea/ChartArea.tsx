@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
@@ -24,15 +26,15 @@ const chartConfig = {
   current: {
     label: "当前",
     theme: {
-      light: "#ea580c", // orange-600
-      dark: "#fb923c", // orange-400
+      light: tokenPalette["orange-600"], // orange-600
+      dark: tokenPalette["orange-400"], // orange-400
     },
   },
   previous: {
     label: "历史",
     theme: {
-      light: "#fdba74", // orange-300
-      dark: "#c2410c", // orange-700
+      light: tokenPalette["orange-300"], // orange-300
+      dark: tokenPalette["orange-700"], // orange-700
     },
   },
 } satisfies ChartConfig;
@@ -141,7 +143,7 @@ export function ChartArea(props: ChartAreaProps) {
   const translate = useTranslations("dashboard");
   const { selectedStat, systemUnit, dashboardFilters } = useStore();
   const { theme: currentTheme } = useTheme();
-  const averageLineColor = currentTheme === "dark" ? "#94a3b8" : "#64748b";
+  const averageLineColor = currentTheme === "dark" ? tokenPalette["slate-400"] : tokenPalette["slate-500"];
   const containerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useContainerDimensions(containerRef);
   const [cursorIdx, setCursorIdx] = React.useState<number | null>(null);
@@ -211,8 +213,8 @@ export function ChartArea(props: ChartAreaProps) {
   // Configure options
   const options = React.useMemo(() => {
     const isDark = currentTheme === "dark";
-    const gridColor = isDark ? "#404040" : "#e5e5e5";
-    const tickColor = isDark ? "#a3a3a3" : "#737373"; // muted-foreground
+    const gridColor = isDark ? tokenPalette["neutral-700"] : tokenPalette["neutral-200"];
+    const tickColor = isDark ? tokenPalette["neutral-400"] : tokenPalette["neutral-500"]; // muted-foreground
 
     const { axes, plugins } = createInnerYAxisTickDesign({
       axisStroke: tickColor,

@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo } from "react";
 import {
@@ -208,15 +210,15 @@ const SlopeChart = React.memo(({ slopeData, avg }: SlopeChartProps) => {
           config={{
             slope: {
               label: "坡度",
-              color: "#8b5cf6", // 紫色线条
+              color: tokenPalette["violet-500"], // 紫色线条
             },
             enhancedElevation: {
               label: "修正海拔",
-              color: "#06b6d4", // 青色线条
+              color: tokenPalette["cyan-500"], // 青色线条
             },
             originalElevation: {
               label: "原始海拔",
-              color: "#10b981", // 绿色线条
+              color: tokenPalette["emerald-500"], // 绿色线条
             },
           }}
           className="aspect-auto h-full w-full"
@@ -236,35 +238,35 @@ const SlopeChart = React.memo(({ slopeData, avg }: SlopeChartProps) => {
               yAxisId="slope"
               y1={-15}
               y2={-6}
-              fill="#0ea5e9"
+              fill={tokenPalette["sky-500"]}
               fillOpacity={0.12}
             />
             <ReferenceArea
               yAxisId="slope"
               y1={-6}
               y2={-2}
-              fill="#06b6d4"
+              fill={tokenPalette["cyan-500"]}
               fillOpacity={0.12}
             />
             <ReferenceArea
               yAxisId="slope"
               y1={-2}
               y2={2}
-              fill="#10b981"
+              fill={tokenPalette["emerald-500"]}
               fillOpacity={0.12}
             />
             <ReferenceArea
               yAxisId="slope"
               y1={2}
               y2={6}
-              fill="#f59e0b"
+              fill={tokenPalette["amber-500"]}
               fillOpacity={0.12}
             />
             <ReferenceArea
               yAxisId="slope"
               y1={6}
               y2={15}
-              fill="#f97316"
+              fill={tokenPalette["orange-500"]}
               fillOpacity={0.12}
             />
 
@@ -272,35 +274,35 @@ const SlopeChart = React.memo(({ slopeData, avg }: SlopeChartProps) => {
             <ReferenceLine
               yAxisId="slope"
               y={0}
-              stroke="#6b7280"
+              stroke={tokenPalette["gray-500"]}
               strokeDasharray="2 2"
               strokeOpacity={0.6}
             />
             <ReferenceLine
               yAxisId="slope"
               y={-6}
-              stroke="#0ea5e9"
+              stroke={tokenPalette["sky-500"]}
               strokeDasharray="1 1"
               strokeOpacity={0.4}
             />
             <ReferenceLine
               yAxisId="slope"
               y={-2}
-              stroke="#06b6d4"
+              stroke={tokenPalette["cyan-500"]}
               strokeDasharray="1 1"
               strokeOpacity={0.4}
             />
             <ReferenceLine
               yAxisId="slope"
               y={2}
-              stroke="#f59e0b"
+              stroke={tokenPalette["amber-500"]}
               strokeDasharray="1 1"
               strokeOpacity={0.4}
             />
             <ReferenceLine
               yAxisId="slope"
               y={6}
-              stroke="#f97316"
+              stroke={tokenPalette["orange-500"]}
               strokeDasharray="1 1"
               strokeOpacity={0.4}
             />
@@ -309,7 +311,7 @@ const SlopeChart = React.memo(({ slopeData, avg }: SlopeChartProps) => {
             <ReferenceLine
               yAxisId="slope"
               y={averageSlope}
-              stroke="#ec4899"
+              stroke={tokenPalette["pink-500"]}
               strokeWidth={2.5}
               strokeDasharray="8 4"
               strokeOpacity={0.85}
@@ -317,7 +319,7 @@ const SlopeChart = React.memo(({ slopeData, avg }: SlopeChartProps) => {
                 value: `平均坡度: ${formatSlope(averageSlope)}`,
                 position: "insideBottomLeft",
                 style: {
-                  fill: "#ec4899",
+                  fill: tokenPalette["pink-500"],
                   fontSize: "12px",
                   fontWeight: "600",
                 },
@@ -359,29 +361,29 @@ const SlopeChart = React.memo(({ slopeData, avg }: SlopeChartProps) => {
               yAxisId="slope"
               type="monotone"
               dataKey="slope"
-              stroke="#8b5cf6"
+              stroke={tokenPalette["violet-500"]}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: "#8b5cf6" }}
+              activeDot={{ r: 4, fill: tokenPalette["violet-500"] }}
             />
             <Line
               yAxisId="elevation"
               type="monotone"
               dataKey="enhancedElevation"
-              stroke="#06b6d4"
+              stroke={tokenPalette["cyan-500"]}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: "#06b6d4" }}
+              activeDot={{ r: 4, fill: tokenPalette["cyan-500"] }}
               strokeDasharray="5 5"
             />
             <Line
               yAxisId="elevation"
               type="monotone"
               dataKey="originalElevation"
-              stroke="#10b981"
+              stroke={tokenPalette["emerald-500"]}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: "#10b981" }}
+              activeDot={{ r: 4, fill: tokenPalette["emerald-500"] }}
               strokeDasharray="3 3"
             />
 

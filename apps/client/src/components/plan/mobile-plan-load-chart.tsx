@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -12,9 +14,9 @@ import {
 } from "./mobile-plan-load-model";
 
 const CHART_HEIGHT = 168;
-const CTL_COLOR = "#0ea5e9";
-const ATL_COLOR = "#8b5cf6";
-const LOAD_COLOR = "#16a34a";
+const CTL_COLOR = tokenPalette["sky-500"];
+const ATL_COLOR = tokenPalette["violet-500"];
+const LOAD_COLOR = tokenPalette["green-600"];
 
 function formatPointDate(key: string, locale: string) {
   const [year, month, day] = key.split("-").map(Number);

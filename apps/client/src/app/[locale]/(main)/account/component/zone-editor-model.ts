@@ -1,15 +1,16 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import { SportType } from "@/api/activities";
 import type { ZoneSetting, UserProfile } from "@/api/settings";
 import { BenchmarkType } from "./zoneSettings";
 
 export const DEFAULT_ZONE_COLORS = [
-  "#94a3b8",
-  "#10b981",
-  "#eab308",
-  "#f97316",
-  "#ef4444",
-  "#a855f7",
-  "#000000",
+  tokenPalette["slate-400"],
+  tokenPalette["emerald-500"],
+  tokenPalette["yellow-500"],
+  tokenPalette["orange-500"],
+  tokenPalette["red-500"],
+  tokenPalette["purple-500"],
+  tokenPalette["black"],
 ];
 
 export function createDefaultZones() {

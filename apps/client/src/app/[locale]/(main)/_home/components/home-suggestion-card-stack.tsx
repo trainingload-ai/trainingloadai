@@ -528,12 +528,12 @@ export function HomeSuggestionCardStack({
                         : suggestion.title,
               className:
                 item.kind === "decision"
-                  ? "bg-[#fef3c7] dark:bg-[#382c20]"
+                  ? "bg-palette-amber-100 dark:bg-visual-artwork-caution-dark"
                   : item.kind === "inquiry"
-                    ? "bg-neutral-100 dark:bg-[#292b2a]"
+                    ? "bg-neutral-100 dark:bg-surface-strong"
                     : item.kind === "guidance"
-                      ? "bg-neutral-100 dark:bg-[#292b2a]"
-                      : "bg-neutral-100 dark:bg-[#292b2a]",
+                      ? "bg-neutral-100 dark:bg-surface-strong"
+                      : "bg-neutral-100 dark:bg-surface-strong",
               onOpen: () => {
                 applyMutation.reset();
                 rejectMutation.reset();

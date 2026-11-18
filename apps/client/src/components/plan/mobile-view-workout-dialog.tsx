@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { CalendarClock, Link2, SkipForward, X } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
@@ -34,10 +36,10 @@ import { getLocalizedActivityTitle } from "@/lib/activity-title";
 type PendingConfirmation = "postpone" | "skip" | null;
 
 function workoutAccentColor(sportType: PlanWorkout["sportType"]) {
-  if (sportType === "CYCLING") return "#f97316";
-  if (sportType === "SWIM") return "#06b6d4";
-  if (sportType === "RUN") return "#10b981";
-  return "#8b5cf6";
+  if (sportType === "CYCLING") return tokenPalette["orange-500"];
+  if (sportType === "SWIM") return tokenPalette["cyan-500"];
+  if (sportType === "RUN") return tokenPalette["emerald-500"];
+  return tokenPalette["violet-500"];
 }
 
 function formatChartTime(seconds: number) {
@@ -296,7 +298,7 @@ export function MobileViewWorkoutContent({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col bg-neutral-50 dark:bg-[#202221]">
+      <div className="flex min-h-0 flex-1 flex-col bg-neutral-50 dark:bg-visual-artwork-sheet-dark">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-safe-or-3 py-4">
           {loading && !workout ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
@@ -355,7 +357,7 @@ export function MobileViewWorkoutContent({
         </div>
 
         {workout ? (
-          <div className="shrink-0 space-y-2 border-t border-border/60 bg-background px-safe-or-3 pb-safe-or-3 pt-3 dark:bg-[#202221]">
+          <div className="shrink-0 space-y-2 border-t border-border/60 bg-background px-safe-or-3 pb-safe-or-3 pt-3 dark:bg-visual-artwork-sheet-dark">
             {displayKind === "moved" ? (
               movedByLabel ? (
                 <div className="text-center text-mobile-caption text-muted-foreground pc:text-xs">
@@ -463,12 +465,12 @@ export function MobileViewWorkoutDialog({
       onOpenChange={onOpenChange}
       shouldScaleBackground={false}
     >
-      <DrawerContent className="flex h-[96dvh] max-h-[96dvh] flex-col gap-0 overflow-hidden rounded-t-2xl bg-neutral-50 p-0 pb-0 dark:bg-[#202221]">
+      <DrawerContent className="flex h-[96dvh] max-h-[96dvh] flex-col gap-0 overflow-hidden rounded-t-2xl bg-neutral-50 p-0 pb-0 dark:bg-visual-artwork-sheet-dark">
         <div
           aria-hidden="true"
           className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-black/15 dark:bg-white/20"
         />
-        <DrawerHeader className="relative shrink-0 border-b border-border/60 px-4 pb-3 pt-2 text-left dark:bg-[#202221]">
+        <DrawerHeader className="relative shrink-0 border-b border-border/60 px-4 pb-3 pt-2 text-left dark:bg-visual-artwork-sheet-dark">
           <div className="min-w-0 pr-14">
             <DrawerTitle className="truncate text-[17px] leading-6">
               {title}

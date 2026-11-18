@@ -72,7 +72,7 @@ export function MobilePlanNavigation() {
       onOpenChange={setOpen}
       title={t("allPlans")}
       contentClassName={
-        resolvedTheme === "dark" ? "bg-[#202221] py-3" : "bg-background py-3"
+        resolvedTheme === "dark" ? "bg-visual-artwork-sheet-dark py-3" : "bg-background py-3"
       }
       trailing={
         <MobileTopBarAction asChild>

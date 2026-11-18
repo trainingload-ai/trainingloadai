@@ -499,7 +499,7 @@ function LoadComparisonChart({
         <div className="mb-2 flex items-center justify-between gap-3 px-4 text-xs text-muted-foreground">
           <div className="flex min-w-0 items-center gap-3">
             <span className="inline-flex items-center gap-1.5">
-              <span className="block h-[3px] w-3 shrink-0 rounded-full bg-[#7c3aed] dark:bg-[#a78bfa]" />
+              <span className="block h-[3px] w-3 shrink-0 rounded-full bg-palette-violet-600 dark:bg-palette-violet-400" />
               {t("load.actual")}
             </span>
             <span className="inline-flex items-center gap-1.5">
@@ -508,7 +508,7 @@ function LoadComparisonChart({
                 width="12"
                 height="12"
                 viewBox="0 0 12 12"
-                className="shrink-0 text-[#7c3aed] dark:text-[#a78bfa]"
+                className="shrink-0 text-palette-violet-600 dark:text-palette-violet-400"
               >
                 <rect
                   x="0.5"

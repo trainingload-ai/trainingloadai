@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import type { StyleSpecification } from "@deployment/map-engine";
 import type {
   RuntimeMapConfiguration,
@@ -14,8 +15,8 @@ export interface MapProvider {
 }
 
 const background = {
-  light: "#f5f5f4",
-  dark: "#171717",
+  light: tokenPalette["stone-100"],
+  dark: tokenPalette["neutral-900"],
 } as const;
 
 export function routeOnlyStyle(theme: MapTheme): StyleSpecification {

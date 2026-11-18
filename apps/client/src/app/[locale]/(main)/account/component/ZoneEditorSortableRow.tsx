@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useTranslations } from "next-intl";
 import { CSS } from "@dnd-kit/utilities";
@@ -58,7 +60,7 @@ export function ZoneEditorSortableRow({
     position: "relative" as const,
   };
 
-  const currentColor = zone.color || DEFAULT_ZONE_COLORS[index] || "#64748b";
+  const currentColor = zone.color || DEFAULT_ZONE_COLORS[index] || tokenPalette["slate-500"];
 
   return (
     <div

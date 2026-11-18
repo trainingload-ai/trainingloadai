@@ -8,14 +8,15 @@
     "build": "NEXT_PUBLIC_SELF_HOST_MODE=core-local next build && node scripts/finalize-selfhost-build.mjs",
     "build:selfhost": "NEXT_PUBLIC_SELF_HOST_MODE=${NEXT_PUBLIC_SELF_HOST_MODE:-core-local} next build && node scripts/finalize-selfhost-build.mjs",
     "start": "env -u NODE_OPTIONS next start -p ${CLIENT_DEV_PORT:-3002}",
-    "lint": "env -u NODE_OPTIONS eslint .",
+    "lint": "env -u NODE_OPTIONS eslint . && pnpm lint:colors",
     "typecheck": "tsc -p tsconfig.typecheck.json",
     "test": "vitest run",
     "test:selfhost": "vitest run --config vitest.selfhost.config.ts",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:auth": "playwright test --project=client-auth-chromium",
-    "dev:selfhost": "NEXT_PUBLIC_SELF_HOST_MODE=core-local next dev -p 3002"
+    "dev:selfhost": "NEXT_PUBLIC_SELF_HOST_MODE=core-local next dev -p 3002",
+    "lint:colors": "node ../../packages/design-tokens/scripts/check-color-usage.mjs src tailwind.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/space-grotesk": "5.3.0",

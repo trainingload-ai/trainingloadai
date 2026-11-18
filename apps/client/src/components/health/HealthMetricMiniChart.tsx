@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useState } from "react";
 import {
@@ -146,10 +148,10 @@ function HealthTooltip({
       });
     }
     const stages = [
-      ["core", point.core, "#60a5fa"],
-      ["deep", point.deep, "#6366f1"],
-      ["rem", point.rem, "#a78bfa"],
-      ["awake", point.awake, "#fbbf24"],
+      ["core", point.core, tokenPalette["blue-400"]],
+      ["deep", point.deep, tokenPalette["indigo-500"]],
+      ["rem", point.rem, tokenPalette["violet-400"]],
+      ["awake", point.awake, tokenPalette["amber-400"]],
     ] as const;
     for (const [key, value, color] of stages) {
       if (value == null) continue;
@@ -259,12 +261,12 @@ function alignIntradayPoints(intraday: HealthIntradayResponse) {
 }
 
 const SLEEP_STAGE_COLORS: Record<string, string> = {
-  awake: "#fbbf24",
-  rem: "#a78bfa",
-  deep: "#6366f1",
-  core: "#60a5fa",
-  light: "#60a5fa",
-  sleep: "#60a5fa",
+  awake: tokenPalette["amber-400"],
+  rem: tokenPalette["violet-400"],
+  deep: tokenPalette["indigo-500"],
+  core: tokenPalette["blue-400"],
+  light: tokenPalette["blue-400"],
+  sleep: tokenPalette["blue-400"],
 };
 
 function SleepIntradayTimeline({
@@ -418,7 +420,7 @@ function SleepIntradayTimeline({
                   backgroundColor:
                     SLEEP_STAGE_COLORS[
                       (point.stage ?? "sleep").toLowerCase()
-                    ] ?? "#94a3b8",
+                    ] ?? tokenPalette["slate-400"],
                 }}
               />
             );
@@ -670,13 +672,13 @@ export function HealthMetricMiniChart({
             fill={comparisonColor}
             radius={[3, 3, 0, 0]}
           />
-          <Bar dataKey="core" stackId="sleep" fill="#60a5fa" />
-          <Bar dataKey="deep" stackId="sleep" fill="#6366f1" />
-          <Bar dataKey="rem" stackId="sleep" fill="#a78bfa" />
+          <Bar dataKey="core" stackId="sleep" fill={tokenPalette["blue-400"]} />
+          <Bar dataKey="deep" stackId="sleep" fill={tokenPalette["indigo-500"]} />
+          <Bar dataKey="rem" stackId="sleep" fill={tokenPalette["violet-400"]} />
           <Bar
             dataKey="awake"
             stackId="sleep"
-            fill="#fbbf24"
+            fill={tokenPalette["amber-400"]}
             radius={[3, 3, 0, 0]}
           />
         </ComposedChart>

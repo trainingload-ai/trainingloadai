@@ -6,7 +6,15 @@
   "license": "AGPL-3.0-only",
   "exports": {
     "./web.css": "./dist/web.css",
+    "./desktop.css": "./dist/desktop.css",
+    "./integrations.css": "./dist/integrations.css",
+    "./apple.swift": "./dist/apple.swift",
+    "./palette.css": "./dist/palette.css",
     "./native": {
+      "types": "./dist/native.d.ts",
+      "default": "./dist/native.js"
+    },
+    "./colors": {
       "types": "./dist/native.d.ts",
       "default": "./dist/native.js"
     },

@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -165,7 +167,7 @@ const PowerDurationCurve: React.FC = () => {
               <div className="flex w-full flex-wrap gap-2 items-center">
                 <div
                   className="shrink-0 rounded-micro border-border bg-(--color-bg) h-2.5 w-2.5"
-                  style={{ "--color-bg": "#a855f7" } as React.CSSProperties}
+                  style={{ "--color-bg": tokenPalette["purple-500"] } as React.CSSProperties}
                 />
                 <div className="flex flex-col">
                   <div className="flex flex-1 justify-between leading-none items-center gap-4">
@@ -194,8 +196,8 @@ const PowerDurationCurve: React.FC = () => {
   const options = useMemo(() => {
     const axisStroke = cssVar("var(--muted-foreground)");
     const gridStroke = cssVar("var(--border)");
-    const powerColor = cssVar("var(--chart-1)") || "#9333ea";
-    const mmpColor = "#a855f7"; // Purple for 90-day MMP
+    const powerColor = cssVar("var(--chart-1)") || tokenPalette["purple-600"];
+    const mmpColor = tokenPalette["purple-500"]; // Purple for 90-day MMP
 
     const innerYAxisLabelsPlugin = createInnerYAxisLabelsPlugin({
       axisStroke,

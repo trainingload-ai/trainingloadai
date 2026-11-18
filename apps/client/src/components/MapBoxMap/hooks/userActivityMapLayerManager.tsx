@@ -1,3 +1,4 @@
+import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as mapengine from "@deployment/map-engine";
 import { useStore } from "@/lib/store";
@@ -45,7 +46,7 @@ const FOCUS_CASING_LAYER_ID = "activity-focus-casing";
 const FOCUS_LINE_LAYER_ID = "activity-focus-line";
 const FOCUS_ENDPOINT_LAYER_ID = "activity-focus-endpoints";
 const FOCUS_ENDPOINT_LABEL_LAYER_ID = "activity-focus-endpoint-labels";
-const FOCUS_COLOR = "#2f7d61";
+const FOCUS_COLOR = tokenVisual.map.focus;
 
 function useStablePadding(padding: ActivityMapPadding) {
   const top = typeof padding === "number" ? padding : (padding.top ?? 0);
@@ -338,7 +339,7 @@ export const useActivityLayerManager = ({
           filter: ["==", ["get", "kind"], "range"],
           layout: { "line-cap": "round", "line-join": "round" },
           paint: {
-            "line-color": "#ffffff",
+            "line-color": tokenPalette["white"],
             "line-width": 11,
             "line-opacity": 0.95,
           },
@@ -366,7 +367,7 @@ export const useActivityLayerManager = ({
               "match",
               ["get", "endpoint"],
               "start",
-              "#ffffff",
+              tokenPalette["white"],
               FOCUS_COLOR,
             ],
             "circle-stroke-width": 3,
@@ -375,7 +376,7 @@ export const useActivityLayerManager = ({
               ["get", "endpoint"],
               "start",
               FOCUS_COLOR,
-              "#ffffff",
+              tokenPalette["white"],
             ],
           },
         });
@@ -396,7 +397,7 @@ export const useActivityLayerManager = ({
               ["get", "endpoint"],
               "start",
               FOCUS_COLOR,
-              "#ffffff",
+              tokenPalette["white"],
             ],
           },
         });
@@ -409,7 +410,7 @@ export const useActivityLayerManager = ({
         "match",
         ["get", "endpoint"],
         "start",
-        "#ffffff",
+        tokenPalette["white"],
         FOCUS_COLOR,
       ]);
       map.setPaintProperty(FOCUS_ENDPOINT_LAYER_ID, "circle-stroke-color", [
@@ -417,14 +418,14 @@ export const useActivityLayerManager = ({
         ["get", "endpoint"],
         "start",
         FOCUS_COLOR,
-        "#ffffff",
+        tokenPalette["white"],
       ]);
       map.setPaintProperty(FOCUS_ENDPOINT_LABEL_LAYER_ID, "text-color", [
         "match",
         ["get", "endpoint"],
         "start",
         FOCUS_COLOR,
-        "#ffffff",
+        tokenPalette["white"],
       ]);
 
       if (map.getLayer("activities-layer")) {
@@ -483,7 +484,7 @@ export const useActivityLayerManager = ({
       if (!focusMarkerRef.current) {
         focusMarkerRef.current = attachFocusMarker(
           new mapengine.Marker({
-            color: "#111827",
+            color: tokenPalette["gray-900"],
             scale: 0.72,
           }),
           map,

@@ -1,0 +1,43 @@
+/* Generated Desktop Self-host theme variant. */
+:root[data-desktop-self-host="true"] {
+  --background: #FFFFFF;
+  --foreground: #242424;
+  --card: #F7F7F7;
+  --card-foreground: #242424;
+  --popover: #FFFFFF;
+  --popover-foreground: #242424;
+  --muted: #EDEDED;
+  --muted-foreground: #707070;
+  --accent: #E8E8E8;
+  --accent-foreground: #242424;
+  --border: #E4E4E4;
+  --input: #D8D8D8;
+  --sidebar: #F7F7F7;
+  --sidebar-foreground: #303030;
+  --sidebar-accent: #E5E5E5;
+  --sidebar-accent-foreground: #242424;
+  --sidebar-border: #E4E4E4;
+  --desktop-chrome: #F0F0F0;
+  --desktop-rail-selected: #DEDEDE;
+}
+:root.dark[data-desktop-self-host="true"] {
+  --background: #191919;
+  --foreground: #E8E8E8;
+  --card: #222222;
+  --card-foreground: #E8E8E8;
+  --popover: #282828;
+  --popover-foreground: #E8E8E8;
+  --muted: #303030;
+  --muted-foreground: #A0A0A0;
+  --accent: #343434;
+  --accent-foreground: #F0F0F0;
+  --border: #303030;
+  --input: #424242;
+  --sidebar: #222222;
+  --sidebar-foreground: #DFDFDF;
+  --sidebar-accent: #343434;
+  --sidebar-accent-foreground: #F2F2F2;
+  --sidebar-border: #303030;
+  --desktop-chrome: #292929;
+  --desktop-rail-selected: #3B3B3B;
+}

@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -134,9 +136,9 @@ function MobileActivityWorkoutSummary({
   const notes = detailedWorkout?.notes ?? null;
 
   return (
-    <section className="space-y-4 rounded-surface bg-background p-4 shadow-[0_1px_0_rgba(0,0,0,0.03)]">
+    <section className="space-y-4 rounded-surface bg-background p-4 shadow-[0_1px_0_hsl(var(--black)/0.03)]">
       <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-control bg-[rgba(0,150,137,0.1)] text-[#009689] dark:bg-[rgba(0,188,125,0.1)] dark:text-[#00bc7d]">
+        <span className="grid size-10 shrink-0 place-items-center rounded-control bg-visual-assessment-accent/10 text-visual-assessment-accent dark:bg-visual-assessment-accent-dark/10 dark:text-visual-assessment-accent-dark">
           <CalendarCheck2 className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
@@ -144,7 +146,7 @@ function MobileActivityWorkoutSummary({
             <h3 className="line-clamp-2 min-w-0 flex-1 text-base font-semibold">
               {workout.name || tCalendar("plannedTraining")}
             </h3>
-            <span className="shrink-0 rounded-full bg-[rgba(220,252,231,0.9)] px-2.5 py-1 text-mobile-caption pc:text-[11px] font-semibold text-[#15803d] dark:bg-[rgba(5,46,22,0.4)] dark:text-[#86efac]">
+            <span className="shrink-0 rounded-full bg-palette-green-100/90 px-2.5 py-1 text-mobile-caption pc:text-[11px] font-semibold text-palette-green-700 dark:bg-palette-green-950/40 dark:text-palette-green-300">
               {completed ? tTimeline("completed") : tTimeline("planned")}
             </span>
           </div>
@@ -166,7 +168,7 @@ function MobileActivityWorkoutSummary({
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-[#009689] dark:bg-[#00bc7d]"
+              className="h-full rounded-full bg-visual-assessment-accent dark:bg-visual-assessment-accent-dark"
               style={{ width: `${Math.min(completionPercent, 100)}%` }}
             />
           </div>
@@ -272,8 +274,8 @@ function MobileActivityRpeSection({ activity }: { activity: Activity }) {
               >
                 <Star
                   className="size-7"
-                  fill={selected ? "#f59e0b" : "transparent"}
-                  color={selected ? "#f59e0b" : "#d4d4d8"}
+                  fill={selected ? tokenPalette["amber-500"] : "transparent"}
+                  color={selected ? tokenPalette["amber-500"] : tokenPalette["zinc-300"]}
                   aria-hidden="true"
                 />
               </button>
@@ -358,7 +360,7 @@ function ActivitySplits({ activity }: { activity: Activity }) {
         <button
           type="button"
           onClick={() => setVisibleCount(meaningfulLaps.length)}
-          className="min-h-10 w-full text-sm font-medium text-[#009689] dark:text-[#00bc7d]"
+          className="min-h-10 w-full text-sm font-medium text-visual-assessment-accent dark:text-visual-assessment-accent-dark"
         >
           {t("Activities.filters.all")} ({meaningfulLaps.length})
         </button>

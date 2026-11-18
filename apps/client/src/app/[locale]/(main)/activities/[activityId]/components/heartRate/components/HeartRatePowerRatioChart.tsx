@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useCallback, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -200,7 +202,7 @@ const HeartRatePowerRatioChart: React.FC<HeartRatePowerRatioChartProps> = ({
   const options = useMemo(() => {
     const axisStroke = cssVar("var(--muted-foreground)");
     const gridStroke = cssVar("var(--border)");
-    const trendColor = "#9333ea"; // Purple for trend line
+    const trendColor = tokenPalette["purple-600"]; // Purple for trend line
 
     const innerYAxisLabelsPlugin = createInnerYAxisLabelsPlugin({
       axisStroke,

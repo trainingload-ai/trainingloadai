@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useCallback, useMemo, useRef } from "react";
 import { useActivityId } from "@/hooks/useActivityId";
@@ -96,7 +98,7 @@ const AerobicEfficiencyChartWrapper: React.FC = () => {
   const options = useMemo<uPlot.Options>(() => {
     const axisStroke = cssVar("var(--muted-foreground)");
     const gridStroke = cssVar("var(--border)");
-    const lineColor = cssVar("var(--chart-2)") || "#22c55e";
+    const lineColor = cssVar("var(--chart-2)") || tokenPalette["green-500"];
 
     const innerYAxisLabelsPlugin = createInnerYAxisLabelsPlugin({
       axisStroke,

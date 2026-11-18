@@ -32,7 +32,7 @@ export function getThirdPartyProviderLogoFrameClassName(
 ) {
   if (providerId === "garmin") {
     // Solid Garmin-blue badge tile; white wordmark fills the icon slot.
-    return `${layout === "row" ? badgeRowFrame : badgeGridFrame} border-transparent bg-[#007DC3]`;
+    return `${layout === "row" ? badgeRowFrame : badgeGridFrame} border-transparent bg-visual-providers-garmin`;
   }
   if (providerId === "coros") {
     return `${layout === "row" ? badgeRowFrame : badgeGridFrame} border-border bg-white dark:border-neutral-700 dark:bg-neutral-900`;

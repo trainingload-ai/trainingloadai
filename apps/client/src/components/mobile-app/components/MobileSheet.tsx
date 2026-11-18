@@ -62,7 +62,7 @@ export function MobileSheet({
           "max-h-[96dvh] rounded-t-2xl",
           fullScreen ? "h-[96dvh]" : "h-[55dvh]",
           backgroundVariant === "grouped" &&
-            "bg-neutral-100 dark:bg-[#202221]",
+            "bg-neutral-100 dark:bg-visual-artwork-sheet-dark",
           className,
         )}
       >

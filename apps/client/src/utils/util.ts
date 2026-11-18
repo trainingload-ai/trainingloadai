@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import { HeartRateZoneValue } from "@/api/use-heart-rate";
 import { ChartValue } from "@/api/useActivityMetric";
 import dayjs from "dayjs";
@@ -95,7 +96,7 @@ export const getHeartRateZoneColor = (
   heartRate: number,
   zones: HeartRateZoneValue[],
   palette = POWER_ZONE_PALETTE,
-  fallback = "#ef4444",
+  fallback = tokenPalette["red-500"],
 ) => {
   const idx = zones.findIndex(
     (z) =>
@@ -110,7 +111,7 @@ export const getHeartRateZoneColor = (
 export const getHeartRateZoneColorByZone = (
   zone?: number,
   palette = POWER_ZONE_PALETTE,
-  fallback = "#ef4444",
+  fallback = tokenPalette["red-500"],
 ) => {
   if (!zone) return fallback;
   return palette[zone] ?? fallback;
@@ -118,13 +119,13 @@ export const getHeartRateZoneColorByZone = (
 
 // Power zone color helper - default supports Z1~Z7
 export const POWER_ZONE_PALETTE = [
-  "#94a3b8", // Z1
-  "#3b82f6", // Z2
-  "#10b981", // Z3
-  "#f59e0b", // Z4
-  "#ef4444", // Z5
-  "#9333ea", // Z6
-  "#ec4899", // Z7
+  tokenPalette["slate-400"], // Z1
+  tokenPalette["blue-500"], // Z2
+  tokenPalette["emerald-500"], // Z3
+  tokenPalette["amber-500"], // Z4
+  tokenPalette["red-500"], // Z5
+  tokenPalette["purple-600"], // Z6
+  tokenPalette["pink-500"], // Z7
 ];
 
 // Return color based on power value and zone
@@ -132,7 +133,7 @@ export const getPowerZoneColor = (
   power: number,
   zones: Array<{ min?: number; max?: number }>,
   palette: string[] = POWER_ZONE_PALETTE,
-  fallback = "#ef4444",
+  fallback = tokenPalette["red-500"],
 ) => {
   const idx = zones.findIndex(
     (z) =>
@@ -149,7 +150,7 @@ export const getPowerZoneColorByZone = (
   color?: string,
   order?: number,
   palette: string[] = POWER_ZONE_PALETTE,
-  fallback = "#ef4444",
+  fallback = tokenPalette["red-500"],
 ) => {
   if (color) {
     return color;
@@ -160,15 +161,15 @@ export const getPowerZoneColorByZone = (
 export const getPaceZoneColorByZone = (
   zone?: string,
   palette = [
-    "#94a3b8",
-    "#3b82f6",
-    "#10b981",
-    "#f59e0b",
-    "#ef4444",
-    "#9333ea",
-    "#ec4899",
+    tokenPalette["slate-400"],
+    tokenPalette["blue-500"],
+    tokenPalette["emerald-500"],
+    tokenPalette["amber-500"],
+    tokenPalette["red-500"],
+    tokenPalette["purple-600"],
+    tokenPalette["pink-500"],
   ],
-  fallback = "#ef4444",
+  fallback = tokenPalette["red-500"],
 ) => {
   if (!zone) return fallback;
   const index = Number(zone.toLowerCase().replace("z", "")) - 1;
