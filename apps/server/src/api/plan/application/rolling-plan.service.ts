@@ -1,3 +1,9 @@
+import { readWorkoutSportDefinitions } from '@/sports/persistence/sport-catalog.repository';
+import {
+  defaultSportDefinitionCode,
+  normalizeSportDefinitionCode,
+} from '@/sports/sport-catalog.types';
+import { PLAN_SPORT_TYPES } from '../plan.constants';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
@@ -19,23 +25,6 @@ type RollingWorkoutSport = {
   definition?: { kind?: string };
 };
 
-/** Resolve the catalog/definition semantics without treating every UNKNOWN as strength. */
-export function isRollingWorkoutSportAuthorized(
-  sports: string[],
-  workout: RollingWorkoutSport,
-) {
-  if (
-    workout.structureKind === 'STRENGTH' ||
-    workout.definition?.kind === 'STRENGTH' ||
-    workout.sportDefinitionCode === 'STRENGTH_TRAINING'
-  )
-    return sports.includes('STRENGTH');
-  const family = workout.sportType ?? 'UNKNOWN';
-  if (family === 'UNKNOWN')
-    return sports.includes('UNKNOWN') || sports.includes('OTHER');
-  return sports.includes(family);
-}
-
 /** Owns versioned policy/month/week publication. Model output never authorizes execution. */
 @Injectable()
 export class RollingPlanService {
@@ -43,7 +32,61 @@ export class RollingPlanService {
     private readonly plans: PlanRepository,
     private readonly workouts: PlanWorkoutRepository,
   ) {}
-  validateStart(
+  async areSportsAuthorized(
+    sports: string[],
+    workouts: RollingWorkoutSport[],
+    tx: PlanDb,
+  ) {
+    if (!workouts.length) return true;
+    const identities = workouts.map((workout) => {
+      const family = PLAN_SPORT_TYPES.find(
+        (value) => value === workout.sportType,
+      );
+      const kind = workout.definition?.kind ?? workout.structureKind;
+      if (
+        !family ||
+        !kind ||
+        (workout.definition?.kind &&
+          workout.structureKind &&
+          workout.definition.kind !== workout.structureKind)
+      )
+        return null;
+      return {
+        family,
+        kind,
+        code: normalizeSportDefinitionCode(family, workout.sportDefinitionCode),
+      };
+    });
+    if (identities.some((identity) => !identity)) return false;
+    const definitions = new Map(
+      (
+        await readWorkoutSportDefinitions(tx, [
+          ...new Set(identities.map((identity) => identity!.code)),
+        ])
+      ).map((sport) => [sport.code, sport]),
+    );
+    return identities.every((identity) => {
+      const { family, kind, code } = identity!;
+      const catalog = definitions.get(code);
+      if (!catalog || catalog.family !== family) return false;
+      const catalogStrength =
+        catalog.defaultWorkoutStructureKind === 'STRENGTH';
+      if (kind === 'STRENGTH') {
+        // OTHER is the existing neutral fallback for older strength prescriptions.
+        return (
+          family === 'UNKNOWN' &&
+          (catalogStrength || code === defaultSportDefinitionCode('UNKNOWN')) &&
+          sports.includes('STRENGTH')
+        );
+      }
+      if (catalogStrength) return false;
+      return family === 'UNKNOWN'
+        ? sports.includes('UNKNOWN') || sports.includes('OTHER')
+        : sports.includes(family);
+    });
+  }
+
+  async validateStart(
     value: unknown,
     startDate: string,
     workouts: Array<
@@ -53,6 +96,7 @@ export class RollingPlanService {
         sportType?: string;
       } & RollingWorkoutSport
     >,
+    tx: PlanDb,
   ) {
     let settings: RollingStartSettings;
     try {
@@ -63,17 +107,18 @@ export class RollingPlanService {
         message: (error as Error).message,
       });
     }
+    const authorized = await this.areSportsAuthorized(
+      settings.policy.sportTypes,
+      workouts,
+      tx,
+    );
     const through = addCalendarDays(isoWeekStart(startDate), 6);
     for (const workout of workouts) {
       const scheduled = addCalendarDays(
         startDate,
         (workout.weekIndex - 1) * 7 + workout.dayIndex - 1,
       );
-      if (
-        scheduled < startDate ||
-        scheduled > through ||
-        !isRollingWorkoutSportAuthorized(settings.policy.sportTypes, workout)
-      )
+      if (scheduled < startDate || scheduled > through || !authorized)
         throw new UnprocessableEntityException(
           'First rolling week must contain only the remaining ISO week and authorized sports',
         );
@@ -94,7 +139,12 @@ export class RollingPlanService {
     tx: PlanDb,
   ) {
     const { userId, planId, startDate } = input;
-    const settings = this.validateStart(input.settings, startDate, []);
+    const settings = await this.validateStart(
+      input.settings,
+      startDate,
+      [],
+      tx,
+    );
     const policy = await tx.planAutomationPolicy.create({
       data: {
         userId,

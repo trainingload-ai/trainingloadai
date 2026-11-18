@@ -1,9 +1,6 @@
 import type { WorkoutStructure } from '@shared/workout-structure';
 import { RollingPlanAuthorizationService } from './rolling-plan-authorization.service';
-import {
-  RollingPlanService,
-  isRollingWorkoutSportAuthorized,
-} from './rolling-plan.service';
+import { RollingPlanService } from './rolling-plan.service';
 import { isoWeekStart, parseRollingStartSettings } from '@shared/rolling-plan';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { HealthDataRepository } from '@/health-data/persistence/health-data.repository';
@@ -827,10 +824,6 @@ export class PlanStartService {
           if (automationJob) {
             await this.assertAutomationFacts(automationJob, tx);
             this.assertAutomationSettings(request);
-            this.assertAutomationSports(automationJob.policy.settings, [
-              ...request.changes.map((c) => c.workout),
-              ...request.additions.map((a) => a.workout),
-            ]);
           }
           const session = automationJob
             ? null
@@ -1121,6 +1114,20 @@ export class PlanStartService {
               sportDefinitionCode: w.sportDefinitionCode ?? undefined,
             };
           });
+          if (automationJob) {
+            const changed = new Set(
+              request.changes.map((change) => change.sourceWorkoutId),
+            );
+            await this.assertAutomationSports(
+              automationJob.policy.settings,
+              display.filter(
+                (_, index) =>
+                  candidate[index].candidateKey ||
+                  changed.has(candidate[index].sourceWorkoutId!),
+              ),
+              tx,
+            );
+          }
           const metadata = (source.generationMetadata ?? {}) as Record<
             string,
             unknown
@@ -1163,7 +1170,12 @@ export class PlanStartService {
           }));
           const rollingStart =
             source.planningMode === 'ROLLING' && !schedule
-              ? this.rolling.validateStart(request.rolling, startDate, display)
+              ? await this.rolling.validateStart(
+                  request.rolling,
+                  startDate,
+                  display,
+                  tx,
+                )
               : undefined;
           if (source.planningMode !== 'ROLLING' && request.rolling)
             fail('Automatic policy requires a rolling plan');
@@ -1497,7 +1509,7 @@ export class PlanStartService {
       fail('Automatic candidates cannot change user settings');
   }
 
-  private assertAutomationSports(
+  private async assertAutomationSports(
     settings: unknown,
     workouts: Array<{
       sportType?: string;
@@ -1505,12 +1517,13 @@ export class PlanStartService {
       structureKind?: string;
       definition?: { kind?: string };
     }>,
+    tx: PlanDb,
   ) {
     const sports = (settings as { sportTypes?: unknown })?.sportTypes;
     if (
       !Array.isArray(sports) ||
       !sports.length ||
-      workouts.some((w) => !isRollingWorkoutSportAuthorized(sports, w))
+      !(await this.rolling.areSportsAuthorized(sports, workouts, tx))
     )
       fail('Automatic workout is outside the authorized sports');
   }
@@ -1595,11 +1608,12 @@ export class PlanStartService {
           const changed = new Set(
             proposal.request.changes.map((c) => c.sourceWorkoutId),
           );
-          this.assertAutomationSports(
+          await this.assertAutomationSports(
             job.policy.settings,
             proposal.candidate
               .filter((c) => c.candidateKey || changed.has(c.sourceWorkoutId!))
               .map((c) => c.workout),
+            tx,
           );
           const range = (proposal.request as PlanSchedulePreviewRequest).range;
           const weekStart = job.windowStart.toISOString().slice(0, 10);
