@@ -177,9 +177,15 @@ describe('continuous training / PostgreSQL', () => {
       );
     return { planId, request, preview, apply };
   }
-  it.each(['STRENGTH', 'OTHER', 'UNKNOWN'])(
+  it.each([
+    ['STRENGTH', 'STRENGTH_TRAINING'],
+    ['STRENGTH', undefined],
+    ['STRETCHING', 'STRETCHING'],
+    ['OTHER', 'OTHER'],
+    ['UNKNOWN', 'OTHER'],
+  ] as const)(
     'starts and automatically generates only the authorized %s sport using its persisted family',
-    async (sport) => {
+    async (sport, code) => {
       const definition =
         sport === 'STRENGTH'
           ? {
@@ -197,9 +203,8 @@ describe('continuous training / PostgreSQL', () => {
       const { planId, apply } = await ready('2099-11-18', (request) => {
         request.rolling!.policy.sportTypes = [sport];
         Object.assign(request.additions[0].workout, {
-          sportType: 'UNKNOWN',
-          sportDefinitionCode:
-            sport === 'STRENGTH' ? 'STRENGTH_TRAINING' : 'OTHER',
+          sportType: sport === 'STRETCHING' ? 'STRETCHING' : 'UNKNOWN',
+          sportDefinitionCode: code,
           definition,
         });
       });
@@ -231,9 +236,8 @@ describe('continuous training / PostgreSQL', () => {
             workout: {
               weekIndex: 1,
               dayIndex: 6,
-              sportType: 'UNKNOWN',
-              sportDefinitionCode:
-                sport === 'STRENGTH' ? 'STRENGTH_TRAINING' : 'OTHER',
+              sportType: sport === 'STRETCHING' ? 'STRETCHING' : 'UNKNOWN',
+              sportDefinitionCode: code,
               definition,
             },
           },
@@ -838,6 +842,116 @@ describe('continuous training / PostgreSQL', () => {
       expect(
         (await f.service.getPlanDetail('user', planId)).plan!.workouts,
       ).toHaveLength(1);
+    });
+  });
+
+  it('rejects a running prescription disguised by a strength catalog code before automatic publication', async () => {
+    await withAuthorizedWeek(async ({ job, request, planId, policyId }) => {
+      await prisma.planAutomationPolicy.update({
+        where: { id: policyId },
+        data: {
+          settings: {
+            goal: 'Strength only',
+            sportTypes: ['STRENGTH'],
+            autoPlanMonths: true,
+            autoGenerateWeeks: true,
+            autoAdjustFuture: true,
+          },
+        },
+      });
+      request.additions[0].workout.sportDefinitionCode = 'STRENGTH_TRAINING';
+      await expect(
+        f.starts.createAutomationPreview(job.id, job.claimToken!, request),
+      ).rejects.toThrow('outside the authorized sports');
+      expect(
+        (await f.service.getPlanDetail('user', planId)).plan!.workouts,
+      ).toHaveLength(1);
+    });
+  });
+
+  it.each([
+    ['STRENGTH', 'UNKNOWN', 'STRENGTH_TRAINING', 'FREEFORM'],
+    ['STRENGTH', 'RUN', 'ROAD_RUNNING', 'STRENGTH'],
+    ['OTHER', 'UNKNOWN', 'ROAD_RUNNING', 'FREEFORM'],
+    ['UNKNOWN', 'UNKNOWN', 'ROAD_RUNNING', 'FREEFORM'],
+    ['OTHER', 'STRETCHING', 'STRETCHING', 'FREEFORM'],
+    ['UNKNOWN', 'STRETCHING', 'STRETCHING', 'FREEFORM'],
+    ['STRETCHING', 'UNKNOWN', 'STRETCHING', 'FREEFORM'],
+  ] as const)(
+    'rejects inconsistent %s authorization for %s/%s/%s',
+    async (policy, family, code, kind) => {
+      await withAuthorizedWeek(async ({ job, request, planId, policyId }) => {
+        await prisma.planAutomationPolicy.update({
+          where: { id: policyId },
+          data: {
+            settings: {
+              goal: 'Confirmed sport scope',
+              sportTypes: [policy],
+              autoPlanMonths: true,
+              autoGenerateWeeks: true,
+              autoAdjustFuture: true,
+            },
+          },
+        });
+        Object.assign(request.additions[0].workout, {
+          sportType: family,
+          sportDefinitionCode: code,
+          definition:
+            kind === 'STRENGTH'
+              ? {
+                  kind: 'STRENGTH',
+                  version: 1,
+                  source: 'TEXT',
+                  text: 'duration 45m\nsession rpe 6\nexercise "Squat" {\nwork 3x5 open rpe 7 rest 3m\n}',
+                }
+              : request.additions[0].workout.definition,
+        });
+        await expect(
+          f.starts.createAutomationPreview(job.id, job.claimToken!, request),
+        ).rejects.toThrow('outside the authorized sports');
+        expect(
+          (await f.service.getPlanDetail('user', planId)).plan!.workouts,
+        ).toHaveLength(1);
+      });
+    },
+  );
+
+  it.each(['STRENGTH', 'OTHER', 'UNKNOWN'])(
+    'rejects inconsistent saved-draft sports before confirming a %s policy',
+    async (sport) => {
+      await expect(
+        ready('2099-11-18', (request) => {
+          request.rolling!.policy.sportTypes = [sport];
+          Object.assign(request.additions[0].workout, {
+            sportType: sport === 'STRENGTH' ? 'RUN' : 'UNKNOWN',
+            sportDefinitionCode:
+              sport === 'STRENGTH' ? 'STRENGTH_TRAINING' : 'ROAD_RUNNING',
+          });
+        }),
+      ).rejects.toThrow('authorized sports');
+    },
+  );
+
+  it('rechecks the authoritative sport catalog when publishing an already previewed automatic workout', async () => {
+    await withAuthorizedWeek(async ({ job, request, planId }) => {
+      await f.starts.createAutomationPreview(job.id, job.claimToken!, request);
+      await prisma.sportDefinition.update({
+        where: { code: 'ROAD_RUNNING' },
+        data: { family: 'UNKNOWN' },
+      });
+      try {
+        await expect(
+          f.starts.applyAutomation(job.id, job.claimToken!),
+        ).rejects.toThrow('outside the authorized sports');
+        expect(
+          (await f.service.getPlanDetail('user', planId)).plan!.workouts,
+        ).toHaveLength(1);
+      } finally {
+        await prisma.sportDefinition.update({
+          where: { code: 'ROAD_RUNNING' },
+          data: { family: 'RUN' },
+        });
+      }
     });
   });
 
