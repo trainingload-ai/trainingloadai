@@ -1,3 +1,9 @@
+import { UnprocessableEntityException } from '@nestjs/common';
+import {
+  assessPlanSchedule,
+  parseScheduleConstraints,
+} from '@shared/plan-calendar';
+import { parsePlanQualityContract } from '@shared/plan-quality';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   PLAN_WORKOUTS_CHANGED_EVENT,
@@ -619,6 +625,52 @@ export class PlanExternalSyncService {
         );
       }
       await this.estimateWorkoutLoad(updated.id, tx);
+      if (args.targetPlanId) {
+        const plan = await this.plans.findUnique(
+          { where: { id: args.targetPlanId } },
+          tx,
+        );
+        const metadata = plan?.generationMetadata as Record<
+          string,
+          unknown
+        > | null;
+        try {
+          const constraints = parseScheduleConstraints(
+            metadata?.scheduleConstraints,
+          );
+          const qualityContract = parsePlanQualityContract(
+            metadata?.qualityContract,
+          );
+          if (plan?.startDate && (constraints || qualityContract)) {
+            const rows = await this.workouts.findMany(
+              { where: { planId: args.targetPlanId } },
+              tx,
+            );
+            const report = assessPlanSchedule({
+              startDate: plan.startDate.toISOString().slice(0, 10),
+              periodWeeks: plan.periodWeeks,
+              workouts: rows.map((row) => ({
+                ...row,
+                scheduledDate: row.scheduledDate?.toISOString().slice(0, 10),
+                durationSeconds: row.plannedDurationSeconds,
+              })),
+              changedWorkoutIds: [updated.id],
+              constraints,
+              qualityContract,
+            });
+            if (!report.valid)
+              throw new UnprocessableEntityException({
+                code: 'PLAN_SCHEDULE_INVALID',
+                issues: report.issues,
+              });
+          }
+        } catch (error) {
+          if (error instanceof UnprocessableEntityException) throw error;
+          throw new UnprocessableEntityException(
+            'Invalid plan schedule constraints',
+          );
+        }
+      }
       const stored = await this.workouts.findFirst(
         {
           where: { id: updated.id, userId: args.userId },

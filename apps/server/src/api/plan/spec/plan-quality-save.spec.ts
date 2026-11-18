@@ -75,6 +75,26 @@ describe('plan save server quality boundary', () => {
     expect(report.valid).toBe(true);
     expect(report.weeks[0].totalDurationSeconds).toBe(4500);
   });
+  it('rejects a confirmed rest-day conflict when saving a dated draft', async () => {
+    const s = setup();
+    s.dto.generationMetadata = {
+      qualityContract: { startDate: '2026-11-22' },
+      scheduleConstraints: {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'Asia/Shanghai',
+        fixedRestWeekdays: [7],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: '2026-11-16',
+        confirmation: { source: 'USER', reference: 'message-1' },
+      },
+    };
+    await expect(s.service.createPlan('u', s.dto)).rejects.toMatchObject({
+      status: 422,
+    });
+    expect(s.transaction).not.toHaveBeenCalled();
+  });
   it('blocks fake recovery before opening a write transaction', async () => {
     const s = setup();
     s.dto.generationMetadata = {

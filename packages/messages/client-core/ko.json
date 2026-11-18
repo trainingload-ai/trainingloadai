@@ -491,7 +491,8 @@
       "workoutDialogSessionCount": "{count, plural, one {#개 세션} other {#개 세션}}",
       "workoutDialogSessionMeta": "{ordinal}번째 세션 · {sport}",
       "workoutDialogSessionFallback": "{ordinal}번째 세션",
-      "workoutDialogClose": "닫다"
+      "workoutDialogClose": "닫다",
+      "scheduleConflict": "훈련 가능 일정과 충돌합니다"
     },
     "readCards": {
       "competitionEvents": {

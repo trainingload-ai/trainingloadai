@@ -491,7 +491,8 @@
       "workoutDialogSessionCount": "{count, plural, one {# 個訓練} other {# 個訓練}}",
       "workoutDialogSessionMeta": "第 {ordinal} 節 · {sport}",
       "workoutDialogSessionFallback": "第 {ordinal} 節",
-      "workoutDialogClose": "關閉"
+      "workoutDialogClose": "關閉",
+      "scheduleConflict": "與可訓練時間衝突"
     },
     "readCards": {
       "competitionEvents": {

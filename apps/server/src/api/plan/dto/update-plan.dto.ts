@@ -1,8 +1,13 @@
+import type {
+  ScheduleConstraints,
+  ScheduleQualityContractTransition,
+} from '@shared/plan-calendar';
 import {
   IsArray,
   IsIn,
   IsInt,
   IsOptional,
+  IsObject,
   IsString,
   Min,
   ValidateNested,
@@ -58,6 +63,14 @@ class UpdatePlanWorkoutInputDto {
 }
 
 export class UpdatePlanDto {
+  @IsOptional()
+  @IsObject()
+  scheduleConstraints?: ScheduleConstraints;
+
+  @IsOptional()
+  @IsObject()
+  qualityContractTransition?: ScheduleQualityContractTransition;
+
   @IsOptional()
   @IsString()
   title?: string;

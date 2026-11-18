@@ -57,8 +57,7 @@ const draft: CoachPlanDraft = {
       sportType: "UNKNOWN",
       structureKind: "STRENGTH",
       text: "duration 40m\nexercise squat { work 3x10 open }",
-      notes:
-        "完整力量训练说明很长，不应显示在空间有限的日历预览格子里。",
+      notes: "完整力量训练说明很长，不应显示在空间有限的日历预览格子里。",
       summary: {
         kind: "STRENGTH",
         durationSeconds: 2400,
@@ -82,6 +81,31 @@ const draft: CoachPlanDraft = {
 };
 
 describe("CoachPlanDraftCalendarPreview workout selection", () => {
+  it("projects a Sunday start into two natural weeks and keeps the selected workout identity", () => {
+    render(
+      <CoachPlanDraftCalendarPreview
+        draft={draft}
+        startDate="2026-11-22"
+        calendarTimeZone="Asia/Shanghai"
+      />,
+    );
+    const mobile = screen.getByTestId("coach-plan-draft-mobile-calendar");
+    expect(within(mobile).getByText("2026-11-22")).toBeInTheDocument();
+    expect(within(mobile).queryByText("2026-11-21")).not.toBeInTheDocument();
+    expect(
+      within(mobile).queryByRole("button", { name: /Easy run/ }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(within(mobile).getByRole("button", { name: "2026-11-23" }));
+    const workout = within(mobile).getByRole("button", {
+      name: /Easy run · S1/,
+    });
+    expect(workout).toHaveAccessibleName(/2026-11-26/);
+    fireEvent.click(workout);
+    expect(screen.getByTestId("workout-dialog-selection")).toHaveTextContent(
+      "Easy run",
+    );
+  });
+
   it("opens the exact workout pressed instead of the whole day", () => {
     render(<CoachPlanDraftCalendarPreview draft={draft} />);
 
@@ -102,9 +126,7 @@ describe("CoachPlanDraftCalendarPreview workout selection", () => {
       "active:scale-[0.985]",
       "active:bg-neutral-200",
     );
-    expect(strength).toHaveTextContent(
-      "exerciseCount 5 · workingSetCount 15",
-    );
+    expect(strength).toHaveTextContent("exerciseCount 5 · workingSetCount 15");
     expect(strength).not.toHaveTextContent("title ·");
     expect(strength).not.toHaveTextContent("完整力量训练说明很长");
 
@@ -112,16 +134,16 @@ describe("CoachPlanDraftCalendarPreview workout selection", () => {
     expect(screen.getByTestId("workout-dialog-selection")).toHaveTextContent(
       "Easy run",
     );
-    expect(screen.getByTestId("workout-dialog-selection")).not.toHaveTextContent(
-      "Strength B",
-    );
+    expect(
+      screen.getByTestId("workout-dialog-selection"),
+    ).not.toHaveTextContent("Strength B");
 
     fireEvent.click(strength);
     expect(screen.getByTestId("workout-dialog-selection")).toHaveTextContent(
       "Strength B",
     );
-    expect(screen.getByTestId("workout-dialog-selection")).not.toHaveTextContent(
-      "Easy run",
-    );
+    expect(
+      screen.getByTestId("workout-dialog-selection"),
+    ).not.toHaveTextContent("Easy run");
   });
 });

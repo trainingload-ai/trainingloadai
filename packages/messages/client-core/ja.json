@@ -491,7 +491,8 @@
       "workoutDialogSessionCount": "{count, plural, one {# 件のセッション} other {# 件のセッション}}",
       "workoutDialogSessionMeta": "セッション {ordinal} · {sport}",
       "workoutDialogSessionFallback": "セッション {ordinal}",
-      "workoutDialogClose": "閉じる"
+      "workoutDialogClose": "閉じる",
+      "scheduleConflict": "トレーニング可能日と競合しています"
     },
     "readCards": {
       "competitionEvents": {

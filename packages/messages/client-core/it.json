@@ -491,7 +491,8 @@
       "workoutDialogSessionCount": "{count, plural, one {# sessione} other {# sessioni}}",
       "workoutDialogSessionMeta": "Sessione {ordinal} · {sport}",
       "workoutDialogSessionFallback": "Sessione {ordinal}",
-      "workoutDialogClose": "Vicino"
+      "workoutDialogClose": "Vicino",
+      "scheduleConflict": "Conflitto con la tua disponibilità"
     },
     "readCards": {
       "competitionEvents": {

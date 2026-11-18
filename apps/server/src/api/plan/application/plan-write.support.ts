@@ -17,6 +17,13 @@ import {
   assessPlanQuality,
   parsePlanQualityContract,
 } from '@shared/plan-quality';
+import {
+  parseScheduleConstraints,
+  projectPlanCalendar,
+  resolveScheduleQualityContract,
+  isCalendarDate,
+  assessPlanSchedule,
+} from '@shared/plan-calendar';
 import { UserService } from '@/api/user/user.service';
 import type { UserProfileResponse } from '@/api/user/user.interface';
 import {
@@ -786,6 +793,13 @@ export class PlanWriteSupport {
         },
       });
 
+      await this.assertStoredScheduleConstraints(
+        tx,
+        planId,
+        [row.id],
+        undefined,
+        plan,
+      );
       const full = await this.workouts.findUnique(
         {
           where: { id: row.id },
@@ -895,6 +909,13 @@ export class PlanWriteSupport {
         },
       });
 
+      await this.assertStoredScheduleConstraints(
+        tx,
+        planId,
+        [row.id],
+        undefined,
+        plan,
+      );
       return row;
     });
 
@@ -2197,6 +2218,70 @@ export class PlanWriteSupport {
     };
   }
 
+  private parseStoredScheduleConstraints(metadata: unknown) {
+    try {
+      return parseScheduleConstraints(
+        (metadata as Record<string, unknown> | null)?.scheduleConstraints,
+      );
+    } catch {
+      throw new UnprocessableEntityException(
+        'Invalid plan schedule constraints',
+      );
+    }
+  }
+
+  /** Validate final dates only for changed sessions; existing historical violations remain untouched. */
+  private async assertStoredScheduleConstraints(
+    tx: Tx,
+    planId: string,
+    changedIds: string[],
+    startDate?: string,
+    knownPlan?: { generationMetadata?: unknown },
+  ) {
+    const knownMetadata = knownPlan?.generationMetadata as Record<
+      string,
+      unknown
+    > | null;
+    if (
+      knownPlan &&
+      knownMetadata?.scheduleConstraints === undefined &&
+      knownMetadata?.qualityContract === undefined
+    )
+      return;
+    const plan = await this.plans.findUnique({ where: { id: planId } }, tx);
+    const constraints = this.parseStoredScheduleConstraints(
+      plan?.generationMetadata,
+    );
+    if (!plan) return;
+    const contract = parsePlanQualityContract(
+      (plan.generationMetadata as Record<string, unknown> | null)
+        ?.qualityContract,
+    );
+    if (!constraints && !contract) return;
+    const start =
+      startDate ?? normalizePlanDate(plan.startDate) ?? contract?.startDate;
+    if (!start) return;
+    const rows = await this.workouts.findMany({ where: { planId } }, tx);
+    const report = assessPlanSchedule({
+      startDate: start,
+      periodWeeks: plan.periodWeeks,
+      workouts: rows.map((row) => ({
+        ...row,
+        scheduledDate: normalizePlanDate(row.scheduledDate),
+        durationSeconds: row.plannedDurationSeconds,
+      })),
+      changedWorkoutIds: changedIds,
+      constraints,
+      qualityContract: contract,
+      projectDates: Boolean(startDate),
+    });
+    if (!report.valid)
+      throw new UnprocessableEntityException({
+        code: 'PLAN_SCHEDULE_INVALID',
+        issues: report.issues,
+      });
+  }
+
   async createPlan(
     userId: string,
     dto: CreatePlanDto,
@@ -2224,6 +2309,23 @@ export class PlanWriteSupport {
         );
       } catch {
         throw new UnprocessableEntityException('Invalid plan quality contract');
+      }
+      const scheduleConstraints = this.parseStoredScheduleConstraints(
+        dto.generationMetadata,
+      );
+      if (scheduleConstraints && qualityContract?.startDate) {
+        const projection = projectPlanCalendar({
+          periodWeeks: dto.periodWeeks,
+          workouts: dto.workouts,
+          startDate: qualityContract.startDate,
+          calendarTimeZone: scheduleConstraints.calendarTimeZone,
+          constraints: scheduleConstraints,
+        });
+        if (projection.conflicts.length)
+          throw new UnprocessableEntityException({
+            code: 'PLAN_SCHEDULE_INVALID',
+            issues: projection.conflicts,
+          });
       }
       const qualityReport = assessPlanQuality(
         dto.periodWeeks,
@@ -2323,6 +2425,54 @@ export class PlanWriteSupport {
         this.validatePlanWorkouts(dto.workouts);
       }
 
+      let nextMetadata: Record<string, unknown> | undefined;
+      if (dto.scheduleConstraints !== undefined) {
+        const prior = this.parseStoredScheduleConstraints(
+          existing.generationMetadata,
+        );
+        const next = this.parseStoredScheduleConstraints({
+          scheduleConstraints: dto.scheduleConstraints,
+        });
+        if (!next || next.revision !== (prior?.revision ?? 0) + 1)
+          throw new UnprocessableEntityException(
+            'Schedule constraint revision must advance by one',
+          );
+        if (!dto.qualityContractTransition)
+          throw new UnprocessableEntityException(
+            'An explicit quality contract transition is required',
+          );
+        const metadata =
+          (existing.generationMetadata as Record<string, unknown> | null) ?? {};
+        try {
+          const qualityContract = resolveScheduleQualityContract(
+            parsePlanQualityContract(metadata.qualityContract),
+            dto.qualityContractTransition,
+          );
+          nextMetadata = {
+            ...metadata,
+            scheduleConstraints: next,
+            scheduleConstraintHistory: [
+              ...(Array.isArray(metadata.scheduleConstraintHistory)
+                ? metadata.scheduleConstraintHistory
+                : []),
+              {
+                scheduleConstraints: prior ?? null,
+                qualityContract: metadata.qualityContract ?? null,
+              },
+            ],
+            qualityContract: qualityContract ?? {},
+            qualityContractTransition: dto.qualityContractTransition,
+          };
+        } catch {
+          throw new UnprocessableEntityException(
+            'Invalid quality contract transition',
+          );
+        }
+      } else if (dto.qualityContractTransition !== undefined) {
+        throw new UnprocessableEntityException(
+          'A contract transition requires confirmed schedule constraints',
+        );
+      }
       const nextPeriodWeeks = dto.periodWeeks ?? existing.periodWeeks;
       const nextStartDate = existing.startDate ?? null;
 
@@ -2337,6 +2487,9 @@ export class PlanWriteSupport {
                 : undefined,
             goal: dto.goal !== undefined ? dto.goal?.trim() || null : undefined,
             periodWeeks: nextPeriodWeeks,
+            ...(nextMetadata
+              ? { generationMetadata: nextMetadata as Prisma.InputJsonValue }
+              : {}),
           },
         },
         tx,
@@ -2449,6 +2602,41 @@ export class PlanWriteSupport {
         }
       }
 
+      if (dto.scheduleConstraints !== undefined) {
+        const candidates = await this.workouts.findMany(
+          {
+            where: { planId, status: 'PLANNED' },
+            include: { links: this.buildWorkoutLinksInclude() },
+          },
+          tx,
+        );
+        for (const row of candidates) {
+          if (
+            row.scheduledDate &&
+            row.scheduledDate.toISOString().slice(0, 10) <
+              dto.scheduleConstraints!.effectiveFrom
+          )
+            continue;
+          if (
+            this.workoutMutability.reason(
+              await this.workoutMutabilityInput(
+                userId,
+                { ...row, plan: existing },
+                tx,
+              ),
+              'SCHEDULE',
+            ) === null
+          )
+            touchedWorkoutIds.push(row.id);
+        }
+      }
+      if (touchedWorkoutIds.length)
+        await this.assertStoredScheduleConstraints(
+          tx,
+          planId,
+          touchedWorkoutIds,
+        );
+
       // PAUSED 计划下编辑：对受影响的 workout 增量重算估值；DRAFT 不算
       if (existing.status === 'PAUSED' && touchedWorkoutIds.length > 0) {
         for (const wid of touchedWorkoutIds) {
@@ -2542,7 +2730,58 @@ export class PlanWriteSupport {
         });
       }
 
-      const start = this.parseDate(startDate) ?? new Date();
+      if (startDate !== undefined && !isCalendarDate(startDate))
+        throw new UnprocessableEntityException('Invalid calendar start date');
+      if (
+        plan.status === 'PAUSED' &&
+        startDate &&
+        startDate !== normalizePlanDate(plan.startDate)
+      )
+        throw new UnprocessableEntityException(
+          'Resuming a plan cannot change its start date',
+        );
+      const constraints = this.parseStoredScheduleConstraints(
+        plan.generationMetadata,
+      );
+      const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone:
+          constraints?.calendarTimeZone ??
+          (await this.userService.getPreferredTimezone(userId)),
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+      const start =
+        plan.status === 'PAUSED'
+          ? plan.startDate
+          : this.parseDate(startDate ?? today);
+      if (!start)
+        throw new UnprocessableEntityException('Plan start date is required');
+      const candidates = await this.workouts.findMany(
+        {
+          where: { planId },
+          include: { links: this.buildWorkoutLinksInclude() },
+        },
+        tx,
+      );
+      const mutableIds: string[] = [];
+      for (const row of candidates) {
+        const input = await this.workoutMutabilityInput(
+          userId,
+          { ...row, plan },
+          tx,
+        );
+        if (plan.status === 'DRAFT')
+          this.workoutMutability.assertMutable(input, 'SCHEDULE');
+        if (this.workoutMutability.reason(input, 'SCHEDULE') === null)
+          mutableIds.push(row.id);
+      }
+      await this.assertStoredScheduleConstraints(
+        tx,
+        planId,
+        mutableIds,
+        normalizePlanDate(start)!,
+      );
       const end = this.addDays(start, plan.periodWeeks * 7 - 1);
       const current = clampCurrentIndexes({
         startDate: start,
@@ -2585,7 +2824,7 @@ export class PlanWriteSupport {
         tx,
       );
 
-      for (const workout of workouts) {
+      for (const workout of plan.status === 'PAUSED' ? [] : workouts) {
         await this.workouts.update(
           {
             where: { id: workout.id },
@@ -3049,6 +3288,13 @@ export class PlanWriteSupport {
           );
         }
       }
+      await this.assertStoredScheduleConstraints(
+        tx,
+        planId,
+        [created.id],
+        undefined,
+        plan,
+      );
       const result = await this.workouts.findUnique(
         {
           where: { id: created.id },
@@ -3212,7 +3458,7 @@ export class PlanWriteSupport {
     workoutId: string,
     dto: UpdatePlanWorkoutDto,
     meta?: CoachEventMeta,
-    options?: { tx?: Tx },
+    options?: { tx?: Tx; deferScheduleValidation?: boolean },
   ) {
     // 单节课编辑仍会重建 step 树，保证 text/steps 永远保持一致。
     const run = async (tx: Tx) => {
@@ -3325,6 +3571,14 @@ export class PlanWriteSupport {
         }
       }
 
+      if (!options?.deferScheduleValidation)
+        await this.assertStoredScheduleConstraints(
+          tx,
+          planId,
+          [clonedWorkoutId ?? workoutId],
+          undefined,
+          workout.plan,
+        );
       const updated = await this.workouts.findUnique(
         {
           where: { id: workoutId },
@@ -3448,6 +3702,7 @@ export class PlanWriteSupport {
         );
       }
       const after = [];
+      const scheduleChangedIds: string[] = [];
       for (const change of changes) {
         const result = await this.updateWorkout(
           userId,
@@ -3455,10 +3710,18 @@ export class PlanWriteSupport {
           change.workoutId,
           change.dto,
           meta,
-          { tx },
+          { tx, deferScheduleValidation: true },
         );
         after.push(result.workout);
+        scheduleChangedIds.push(result.clonedWorkoutId ?? change.workoutId);
       }
+      await this.assertStoredScheduleConstraints(
+        tx,
+        planId,
+        scheduleChangedIds,
+        undefined,
+        plan,
+      );
       const full = await this.plans.findUnique(
         { where: { id: planId }, include: this.buildPlanInclude() },
         tx,

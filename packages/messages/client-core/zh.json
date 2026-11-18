@@ -557,7 +557,8 @@
       "workoutDialogSessionCount": "{count, plural, one {# 个训练} other {# 个训练}}",
       "workoutDialogSessionMeta": "第 {ordinal} 节 · {sport}",
       "workoutDialogSessionFallback": "第 {ordinal} 节",
-      "workoutDialogClose": "关闭"
+      "workoutDialogClose": "关闭",
+      "scheduleConflict": "与可训练时间冲突"
     },
     "readCards": {
       "competitionEvents": {
