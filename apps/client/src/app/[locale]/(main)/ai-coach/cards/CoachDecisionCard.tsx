@@ -31,6 +31,7 @@ import { parseScheduleConstraints } from "@shared/plan-calendar";
 import type { PlanProposalPresentation } from "@shared/plan-proposal";
 import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
 import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
+import { getRestoredStartDecisionApply } from "../coach-plan-decision-state";
 import { rejectCoachDecision } from "@/api/ai-coach";
 
 export type CoachDecisionDraftToolResult = {
@@ -445,6 +446,9 @@ export function CoachDecisionDraftCard({
   const [isCancelled, setIsCancelled] = React.useState(false);
   const [cancelFailed, setCancelFailed] = React.useState(false);
   const applied = Boolean(isApplied || result.state === "APPLIED");
+  const restoredApply = !isApplied
+    ? getRestoredStartDecisionApply(result)
+    : null;
   const superseded = !applied && result.state === "SUPERSEDED";
   const rejected = !applied && (isCancelled || result.state === "REJECTED");
   const approved = !rejected && (applied || result.state === "APPROVED");
@@ -461,7 +465,7 @@ export function CoachDecisionDraftCard({
       ? proposal.rows
       : proposal.rows.slice(0, 10)
     : [];
-  return (
+  const draftCard = (
     <CoachCard
       tone={workoutDrafts.length ? "neutral" : isHighRisk ? "warning" : "info"}
       icon={
@@ -781,6 +785,14 @@ export function CoachDecisionDraftCard({
       </div>
     </CoachCard>
   );
+  return (
+    <>
+      {draftCard}
+      {restoredApply ? (
+        <CoachDecisionAppliedCard result={restoredApply} dense={dense} />
+      ) : null}
+    </>
+  );
 }
 
 export function CoachDecisionAppliedCard({
@@ -796,6 +808,9 @@ export function CoachDecisionAppliedCard({
 }) {
   const t = useTranslations("AiCoachPage.decision");
   const applied = result.result === "APPLIED";
+  const receipt = asRecord(result.receipt);
+  const startReceipt =
+    applied && receipt.mode === "START" && receipt.readbackVerified === true;
   const rebaseRequired = result.result === "REBASE_REQUIRED";
   return (
     <CoachCard
@@ -836,6 +851,30 @@ export function CoachDecisionAppliedCard({
       }
     >
       <div className="space-y-1.5">
+        {startReceipt ? (
+          <>
+            <p role="status" className="text-xs text-muted-foreground">
+              {t("readbackVerified")}
+            </p>
+            <CoachCard.MetaRow label={t("startDate")}>
+              {[asText(receipt.startDate), asText(receipt.calendarTimeZone)]
+                .filter(Boolean)
+                .join(" · ")}
+            </CoachCard.MetaRow>
+            {(
+              [
+                ["changed", "changedWorkoutCount"],
+                ["added", "addedWorkoutCount"],
+                ["deleted", "deletedWorkoutCount"],
+                ["preserved", "preservedWorkoutCount"],
+              ] as const
+            ).map(([label, key]) => (
+              <CoachCard.MetaRow key={key} label={t(label)}>
+                {asNumber(receipt[key]) ?? "—"}
+              </CoachCard.MetaRow>
+            ))}
+          </>
+        ) : null}
         {applied
           ? coachDecisionPreviewRows(result.receipt).map((row) => (
               <CoachCard.MetaRow

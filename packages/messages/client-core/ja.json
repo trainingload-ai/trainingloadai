@@ -696,7 +696,8 @@
       "supersededTitle": "新しい提案に置き換えられました",
       "added": "追加",
       "deleted": "削除",
-      "startSyncImpact": "開始後にカレンダーが更新され、デバイスの同期は保留中になります。"
+      "startSyncImpact": "開始後にカレンダーが更新され、デバイスの同期は保留中になります。",
+      "readbackVerified": "保存後のプランを検証しました。"
     },
     "history": {
       "title": "履歴",

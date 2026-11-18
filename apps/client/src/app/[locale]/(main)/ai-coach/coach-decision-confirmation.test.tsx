@@ -210,3 +210,51 @@ it("shows localized deletion details and pending device sync for START", () => {
   ).toBeInTheDocument();
   expect(screen.queryByText("English server text")).not.toBeInTheDocument();
 });
+
+it("restores the committed START receipt from an APPLIED draft without an applied message", () => {
+  const onConfirm = vi.fn();
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NextIntlClientProvider locale="zh" messages={messages}>
+        <CoachDecisionDraftCard
+          result={{
+            ...proposal,
+            state: "APPLIED",
+            decisionType: "PLAN_START",
+            payload: {
+              appliedReceipt: {
+                mode: "START",
+                planId: "plan",
+                startDate: "2026-11-22",
+                calendarTimeZone: "Asia/Shanghai",
+                readbackVerified: true,
+                changedWorkoutCount: 1,
+                addedWorkoutCount: 0,
+                deletedWorkoutCount: 0,
+                preservedWorkoutCount: 2,
+                identityMap: [],
+              },
+            },
+          }}
+          onConfirm={onConfirm}
+        />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
+  );
+  expect(
+    screen.getByText(messages.AiCoachPage.decision.applyResult.APPLIED),
+  ).toBeInTheDocument();
+  expect(screen.getByText("2026-11-22 · Asia/Shanghai")).toBeInTheDocument();
+  expect(
+    screen.getByText(messages.AiCoachPage.decision.readbackVerified),
+  ).toBeInTheDocument();
+  expect(
+    within(
+      screen.getByText(messages.AiCoachPage.decision.preserved).parentElement!,
+    ).getByText("2"),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "确认并开始" }),
+  ).not.toBeInTheDocument();
+  expect(onConfirm).not.toHaveBeenCalled();
+});

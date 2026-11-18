@@ -676,4 +676,44 @@ describe('saved draft START / PostgreSQL', () => {
       ).rejects.toThrow(/facts/);
     },
   );
+  it("reopens an unconfirmed draft on the new server day and supersedes yesterday's card", async () => {
+    jest.useFakeTimers({
+      doNotFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'nextTick',
+        'queueMicrotask',
+        'hrtime',
+        'performance',
+      ],
+      now: new Date('2099-11-22T12:00:00Z'),
+    });
+    try {
+      const d = await draft();
+      const c = await confirmed(d);
+      jest.setSystemTime(new Date('2099-11-23T12:00:00Z'));
+      const reopened = await f.starts.conversation('user', d.planId);
+      expect(reopened).toMatchObject({
+        sid: d.session.sid,
+        startDate: '2099-11-23',
+        earliestStartDate: '2099-11-23',
+        evaluationStarted: false,
+        plan: { status: 'DRAFT' },
+      });
+      expect(reopened.entryKey).not.toBe(d.session.entryKey);
+      expect(
+        (
+          await prisma.coachDecision.findUniqueOrThrow({
+            where: { id: c.decision.id },
+          })
+        ).state,
+      ).toBe('SUPERSEDED');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

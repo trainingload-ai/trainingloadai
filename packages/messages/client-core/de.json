@@ -696,7 +696,8 @@
       "supersededTitle": "Durch einen neueren Vorschlag ersetzt",
       "added": "Hinzugefügt",
       "deleted": "Gelöscht",
-      "startSyncImpact": "Nach dem Start wird der Kalender aktualisiert; die Gerätesynchronisierung steht noch aus."
+      "startSyncImpact": "Nach dem Start wird der Kalender aktualisiert; die Gerätesynchronisierung steht noch aus.",
+      "readbackVerified": "Trainingsplan nach dem Speichern geprüft."
     },
     "history": {
       "title": "Geschichte",

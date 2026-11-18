@@ -1,8 +1,21 @@
+import { StrictMode } from "react";
+import {
+  CoachDecisionDraftCard,
+  type CoachDecisionDraftToolResult,
+} from "@/app/[locale]/(main)/ai-coach/cards/CoachDecisionCard";
+import type { CoachUiMessage } from "@/lib/ai-coach-ui-parts";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
-const api = vi.hoisted(() => ({ open: vi.fn(), messages: vi.fn() }));
+const api = vi.hoisted(() => ({
+  open: vi.fn(),
+  messages: vi.fn(),
+  invalidate: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("@/lib/query-invalidation", () => ({
+  invalidateAfterPlanMutation: api.invalidate,
+}));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("@/api/plans", () => ({ openPlanStartConversation: api.open }));
 vi.mock("@/api/ai-coach", () => ({
@@ -39,12 +52,29 @@ vi.mock("@/app/[locale]/(main)/ai-coach/coach-runtime-provider", () => ({
   CoachRuntimeProvider: ({
     sid,
     entry,
+    initialMessages,
+    onPlanApplied,
   }: {
     sid: string;
     entry: { key: string };
+    initialMessages: CoachUiMessage[];
+    onPlanApplied?: (decisionId: string) => void;
   }) => (
     <div data-testid="runtime">
       {sid}:{entry.key}
+      <button onClick={() => onPlanApplied?.("committed-start")}>
+        Committed delivery
+      </button>
+      {initialMessages.flatMap((m) =>
+        m.parts
+          .filter((p) => p.type === "data-coach-tool")
+          .map((p) => (
+            <CoachDecisionDraftCard
+              key={p.data.toolCallId}
+              result={p.data.input as CoachDecisionDraftToolResult}
+            />
+          )),
+      )}
     </div>
   ),
 }));
@@ -196,4 +226,82 @@ it("uses the athlete server day as the earliest date and refuses earlier selecti
   fireEvent.change(input, { target: { value: "2026-11-21" } });
   expect(api.open).toHaveBeenCalledTimes(requests);
   expect(input).toHaveValue("2026-11-22");
+});
+
+it("restores only the projected APPLIED draft receipt and refreshes caches once without an Applied message", async () => {
+  api.invalidate.mockClear();
+  api.open.mockResolvedValue({
+    ...prepared,
+    evaluationStarted: true,
+    plan: { ...prepared.plan, status: "ACTIVE" },
+  });
+  api.messages.mockResolvedValue([
+    {
+      id: "persisted-draft",
+      role: "assistant",
+      content: "",
+      createdAt: "2026-11-22",
+      message: {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "tool",
+            name: "CoachDecisionDraft",
+            input: {
+              kind: "coach_decision_draft",
+              decisionId: "committed-start",
+              branchId: "branch",
+              state: "APPLIED",
+              riskTier: "HIGH",
+              decisionType: "PLAN_START",
+              payload: {
+                appliedReceipt: {
+                  mode: "START",
+                  planId: "recovered-plan",
+                  readbackVerified: true,
+                  startDate: "2026-11-22",
+                  calendarTimeZone: "Asia/Shanghai",
+                  changedWorkoutCount: 1,
+                  addedWorkoutCount: 0,
+                  deletedWorkoutCount: 0,
+                  preservedWorkoutCount: 2,
+                  identityMap: [],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const mounted = render(
+    <StrictMode>
+      <QueryClientProvider client={client}>
+        <PlanStartConversationDialog
+          open
+          planId="recovered-plan"
+          onOpenChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+  expect(await screen.findByText("applyResult.APPLIED")).toBeInTheDocument();
+  expect(screen.getAllByText("2026-11-22 · Asia/Shanghai").length).toBe(2);
+  await waitFor(() =>
+    expect(api.invalidate).toHaveBeenCalledExactlyOnceWith(client, {
+      planId: "recovered-plan",
+    }),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Committed delivery" }));
+  await client.invalidateQueries({ queryKey: ["messages", prepared.sid] });
+  expect(api.invalidate).toHaveBeenCalledTimes(1);
+  expect(
+    screen.queryByRole("button", { name: "applyStartButton" }),
+  ).not.toBeInTheDocument();
+  mounted.unmount();
+  client.clear();
 });

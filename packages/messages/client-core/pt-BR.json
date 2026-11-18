@@ -696,7 +696,8 @@
       "supersededTitle": "Substituída por uma proposta mais recente",
       "added": "Adicionadas",
       "deleted": "Excluídas",
-      "startSyncImpact": "Após o início, o calendário é atualizado e a sincronização do dispositivo fica pendente."
+      "startSyncImpact": "Após o início, o calendário é atualizado e a sincronização do dispositivo fica pendente.",
+      "readbackVerified": "Plano verificado após salvar."
     },
     "history": {
       "title": "História",

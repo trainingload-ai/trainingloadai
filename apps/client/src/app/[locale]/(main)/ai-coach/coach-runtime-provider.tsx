@@ -66,7 +66,7 @@ export type CoachConversationRuntimeProps = {
   persistSid?: (sid: string) => void;
   enableUrlSeed?: boolean;
   entry?: CoachRuntimeEntry;
-  onPlanApplied?: () => void;
+  onPlanApplied?: (decisionId: string) => void;
   onTurnFinished?: () => void;
   prepareOutgoingUserMessage?: (
     message: CoachUiMessage,
@@ -524,21 +524,23 @@ export function CoachRuntimeProvider({
           ),
         );
       }
-      if (
-        !isAbort &&
-        !isDisconnect &&
-        !isError &&
-        message.parts.some((part) => {
-          if (part.type !== "data-coach-tool") return false;
+      if (!isAbort && !isDisconnect && !isError) {
+        const appliedDecisions = new Set<string>();
+        for (const part of message.parts) {
+          if (part.type !== "data-coach-tool") continue;
           const input = part.data.input as
-            | { kind?: string; result?: string }
+            | { kind?: string; result?: string; decisionId?: string }
             | undefined;
-          return (
-            input?.kind === "coach_decision_apply" && input.result === "APPLIED"
-          );
-        })
-      )
-        onPlanAppliedRef.current?.();
+          if (
+            input?.kind === "coach_decision_apply" &&
+            input.result === "APPLIED" &&
+            typeof input.decisionId === "string"
+          )
+            appliedDecisions.add(input.decisionId);
+        }
+        for (const decisionId of appliedDecisions)
+          onPlanAppliedRef.current?.(decisionId);
+      }
       if (!isAbort && !isDisconnect && !isError) onTurnFinishedRef.current?.();
       invalidateCoachSessionLists(queryClient);
       void queryClient.invalidateQueries({

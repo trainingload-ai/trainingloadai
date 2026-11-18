@@ -696,7 +696,8 @@
       "supersededTitle": "Sostituito da una proposta più recente",
       "added": "Aggiunte",
       "deleted": "Eliminate",
-      "startSyncImpact": "All’avvio il calendario viene aggiornato e la sincronizzazione del dispositivo resta in attesa."
+      "startSyncImpact": "All’avvio il calendario viene aggiornato e la sincronizzazione del dispositivo resta in attesa.",
+      "readbackVerified": "Piano verificato dopo il salvataggio."
     },
     "history": {
       "title": "Storia",

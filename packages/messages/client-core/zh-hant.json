@@ -696,7 +696,8 @@
       "supersededTitle": "已被新方案取代",
       "added": "新增",
       "deleted": "刪除",
-      "startSyncImpact": "開始後更新日曆，並等待裝置同步。"
+      "startSyncImpact": "開始後更新日曆，並等待裝置同步。",
+      "readbackVerified": "計劃讀回驗證通過。"
     },
     "history": {
       "title": "歷史",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
@@ -27,6 +27,7 @@ import { coachRowsToUiMessages } from "@/app/[locale]/(main)/ai-coach/coach-rows
 import { CoachPlanDraftCalendarPreview } from "@/app/[locale]/(main)/ai-coach/coach-plan-draft-calendar-preview";
 import { savedPlanToCoachDraft } from "@/lib/coach-plan-start";
 import { parseScheduleConstraints } from "@shared/plan-calendar";
+import { getRestoredStartDecisionApply } from "@/app/[locale]/(main)/ai-coach/coach-plan-decision-state";
 import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
 
 function PlanCoachDialogBody({ planId }: { planId: string }) {
@@ -62,22 +63,57 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
           "PLAN_START",
     ),
   );
-  const appliedReceipt = initialMessages.some((message) =>
-    message.parts.some((part) => {
-      if (part.type !== "data-coach-tool") return false;
-      const result = part.data.input as {
-        kind?: string;
-        result?: string;
-      } | null;
-      return (
-        result?.kind === "coach_decision_apply" && result.result === "APPLIED"
-      );
-    }),
+  const appliedDecisionIds = JSON.stringify(
+    [
+      ...new Set(
+        initialMessages.flatMap((message) =>
+          message.parts.flatMap((part) => {
+            if (part.type !== "data-coach-tool") return [];
+            const result = part.data.input as {
+              kind?: string;
+              result?: string;
+              decisionId?: string;
+            } | null;
+            const restored = getRestoredStartDecisionApply(result);
+            if (restored) return [restored.decisionId];
+            return result?.kind === "coach_decision_apply" &&
+              result.result === "APPLIED" &&
+              typeof result.decisionId === "string"
+              ? [result.decisionId]
+              : [];
+          }),
+        ),
+      ),
+    ].sort(),
+  );
+  const appliedReceipt = appliedDecisionIds !== "[]";
+  const invalidatedDecisions = useRef(new Set<string>());
+  const invalidateAppliedDecision = useCallback(
+    (decisionId: string) => {
+      if (invalidatedDecisions.current.has(decisionId)) return;
+      invalidatedDecisions.current.add(decisionId);
+      void invalidateAfterPlanMutation(queryClient, { planId });
+    },
+    [planId, queryClient],
   );
   useEffect(() => {
-    if (appliedReceipt)
-      void invalidateAfterPlanMutation(queryClient, { planId });
-  }, [appliedReceipt, planId, queryClient]);
+    if (
+      !prepared.isFetchedAfterMount ||
+      !messages.isFetchedAfterMount ||
+      prepared.isError ||
+      messages.isError
+    )
+      return;
+    for (const decisionId of JSON.parse(appliedDecisionIds) as string[])
+      invalidateAppliedDecision(decisionId);
+  }, [
+    appliedDecisionIds,
+    invalidateAppliedDecision,
+    prepared.isFetchedAfterMount,
+    messages.isFetchedAfterMount,
+    prepared.isError,
+    messages.isError,
+  ]);
   const dateMutation = useMutation({
     mutationFn: (startDate: string) =>
       openPlanStartConversation(planId, startDate),
@@ -187,9 +223,7 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
               onTurnFinished={() => {
                 void messages.refetch();
               }}
-              onPlanApplied={() => {
-                void invalidateAfterPlanMutation(queryClient, { planId });
-              }}
+              onPlanApplied={invalidateAppliedDecision}
             />
           </div>
         </>

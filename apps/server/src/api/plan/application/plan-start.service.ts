@@ -469,10 +469,15 @@ export class PlanStartService {
             (await this.users.getPreferredTimezone(userId, tx)) ??
             'UTC';
 
+          const earliestStartDate = this.earliestStartDate(calendarTimeZone);
+          const savedDate =
+            selectedDate ?? prior?.planStartDate ?? earliestStartDate;
           const startDate =
-            selectedDate ??
-            prior?.planStartDate ??
-            activityCalendarYmdInZone(new Date(), calendarTimeZone)!;
+            source.status === 'DRAFT' &&
+            selectedDate === undefined &&
+            savedDate < earliestStartDate
+              ? earliestStartDate
+              : savedDate;
           if (!startDate) fail('Invalid calendar timezone');
           if (source.status === 'DRAFT')
             this.assertFutureStart(startDate, calendarTimeZone);
@@ -521,7 +526,7 @@ export class PlanStartService {
             entryKey: `plan-start:${session.id}:${session.planStartRevision}`,
             startDate,
             calendarTimeZone,
-            earliestStartDate: this.earliestStartDate(calendarTimeZone),
+            earliestStartDate,
             plan,
           };
         },

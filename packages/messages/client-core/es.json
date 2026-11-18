@@ -696,7 +696,8 @@
       "supersededTitle": "Sustituido por una propuesta más reciente",
       "added": "Añadidas",
       "deleted": "Eliminadas",
-      "startSyncImpact": "Al iniciar se actualiza el calendario y la sincronización del dispositivo queda pendiente."
+      "startSyncImpact": "Al iniciar se actualiza el calendario y la sincronización del dispositivo queda pendiente.",
+      "readbackVerified": "Plan verificado tras guardar."
     },
     "history": {
       "title": "Historia",

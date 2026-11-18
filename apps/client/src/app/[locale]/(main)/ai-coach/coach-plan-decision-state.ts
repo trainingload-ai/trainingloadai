@@ -1,6 +1,37 @@
 import type { CoachUiMessage } from "@/lib/ai-coach-ui-parts";
 
-type DecisionState = { decisionId: string; state: string };
+type DecisionState = {
+  decisionId: string;
+  state: string;
+  appliedReceipt?: unknown;
+};
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+/** A committed START remains recoverable if the later assistant apply message was lost. */
+export function getRestoredStartDecisionApply(input: unknown) {
+  const card = record(input);
+  const receipt = record(record(card?.payload)?.appliedReceipt);
+  if (
+    card?.kind !== "coach_decision_draft" ||
+    card.decisionType !== "PLAN_START" ||
+    card.state !== "APPLIED" ||
+    typeof card.decisionId !== "string" ||
+    receipt?.mode !== "START" ||
+    receipt.readbackVerified !== true
+  )
+    return null;
+  return {
+    kind: "coach_decision_apply" as const,
+    decisionId: card.decisionId,
+    branchId: typeof card.branchId === "string" ? card.branchId : null,
+    result: "APPLIED",
+    receipt,
+  };
+}
 function startDecision(
   part: CoachUiMessage["parts"][number],
 ): DecisionState | null {
@@ -13,7 +44,13 @@ function startDecision(
   return input?.decisionType === "PLAN_START" &&
     typeof input.decisionId === "string" &&
     typeof input.state === "string"
-    ? { decisionId: input.decisionId, state: input.state }
+    ? {
+        decisionId: input.decisionId,
+        state: input.state,
+        ...(input.state === "APPLIED" && record(input.payload)?.appliedReceipt
+          ? { appliedReceipt: record(input.payload)!.appliedReceipt }
+          : {}),
+      }
     : null;
 }
 
@@ -38,7 +75,7 @@ export function reconcilePlanDecisionStates(
   const states = new Map(
     (JSON.parse(serialized) as DecisionState[]).map((item) => [
       item.decisionId,
-      item.state,
+      item,
     ]),
   );
   let changed = false;
@@ -46,22 +83,41 @@ export function reconcilePlanDecisionStates(
     let messageChanged = false;
     const parts = message.parts.map((part) => {
       const current = startDecision(part);
-      const state = current && states.get(current.decisionId);
+      const incoming = current && states.get(current.decisionId);
       if (
         !current ||
-        !state ||
-        state === current.state ||
-        ["APPLIED", "SUPERSEDED", "REJECTED"].includes(current.state) ||
-        part.type !== "data-coach-tool"
+        !incoming ||
+        part.type !== "data-coach-tool" ||
+        ["SUPERSEDED", "REJECTED"].includes(current.state) ||
+        (current.state === "APPLIED" && incoming.state !== "APPLIED")
       )
         return part;
+      const payload = record(
+        (part.data.input as Record<string, unknown>).payload,
+      );
+      const receiptChanged =
+        incoming.appliedReceipt !== undefined &&
+        JSON.stringify(incoming.appliedReceipt) !==
+          JSON.stringify(payload?.appliedReceipt);
+      if (current.state === incoming.state && !receiptChanged) return part;
       messageChanged = true;
       changed = true;
       return {
         ...part,
         data: {
           ...part.data,
-          input: { ...(part.data.input as Record<string, unknown>), state },
+          input: {
+            ...(part.data.input as Record<string, unknown>),
+            state: incoming.state,
+            ...(incoming.appliedReceipt !== undefined
+              ? {
+                  payload: {
+                    ...payload,
+                    appliedReceipt: incoming.appliedReceipt,
+                  },
+                }
+              : {}),
+          },
         },
       };
     });

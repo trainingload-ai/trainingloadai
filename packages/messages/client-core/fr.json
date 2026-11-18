@@ -696,7 +696,8 @@
       "supersededTitle": "Remplacé par une proposition plus récente",
       "added": "Ajoutées",
       "deleted": "Supprimées",
-      "startSyncImpact": "Au démarrage, le calendrier est mis à jour et la synchronisation de l’appareil est en attente."
+      "startSyncImpact": "Au démarrage, le calendrier est mis à jour et la synchronisation de l’appareil est en attente.",
+      "readbackVerified": "Plan vérifié après enregistrement."
     },
     "history": {
       "title": "Histoire",

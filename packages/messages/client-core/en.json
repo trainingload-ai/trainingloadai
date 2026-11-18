@@ -812,7 +812,8 @@
       "supersededTitle": "Replaced by a newer proposal",
       "added": "Added",
       "deleted": "Deleted",
-      "startSyncImpact": "After starting, the calendar is updated and device sync is pending."
+      "startSyncImpact": "After starting, the calendar is updated and device sync is pending.",
+      "readbackVerified": "Plan readback verified."
     },
     "history": {
       "title": "History",

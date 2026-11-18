@@ -770,7 +770,8 @@
       "supersededTitle": "已被新方案替代",
       "added": "新增",
       "deleted": "删除",
-      "startSyncImpact": "开始后更新日历，并等待设备同步。"
+      "startSyncImpact": "开始后更新日历，并等待设备同步。",
+      "readbackVerified": "计划读回校验通过。"
     },
     "history": {
       "title": "历史对话",
