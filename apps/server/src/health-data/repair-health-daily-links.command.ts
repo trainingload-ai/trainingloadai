@@ -1,3 +1,4 @@
+import { healthDailyFactSource } from './health-fact-eligibility';
 /**
  * 在每日投影资格规则变更后，修复历史每日指标关联。
  *
@@ -121,7 +122,11 @@ async function run() {
       const page = await health.samples().findMany({
         where: {
           dailyMetricId: { not: null },
-          OR: [{ projectToDaily: false }, { deletedAt: { not: null } }],
+          OR: [
+            { projectToDaily: false },
+            { deletedAt: { not: null } },
+            { NOT: healthDailyFactSource },
+          ],
           ...(cursorId ? { id: { gt: cursorId } } : {}),
         },
         orderBy: { id: 'asc' },
@@ -162,16 +167,9 @@ async function run() {
       }
 
       if (options.apply) {
-        for (const [dailyMetricId, metric] of affected) {
+        for (const metric of affected.values()) {
           await health.runTransaction(
             async (tx) => {
-              await health.samples(tx).updateMany({
-                where: {
-                  dailyMetricId,
-                  OR: [{ projectToDaily: false }, { deletedAt: { not: null } }],
-                },
-                data: { dailyMetricId: null },
-              });
               await healthIngest.rebuildDailyMetric(
                 {
                   userId: metric.userId,

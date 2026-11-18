@@ -1,3 +1,4 @@
+import { HealthDataProvider } from '@prisma/client';
 import type { ExternalHealthMetricCandidate } from '@/health-data/health-data-ingest.service';
 import { assertHealthMetricCandidate } from '@/health-data/health-metric-contract';
 import { healthDay } from './personal-dates';
@@ -110,7 +111,7 @@ export function garminHealthProjection(args: Args) {
       if (typeof value !== 'number' || !Number.isFinite(value))
         throw new PersonalProviderError('PROVIDER_HEALTH_SCHEMA_UNSUPPORTED');
       const candidate: ExternalHealthMetricCandidate = {
-        provider: 'GARMIN',
+        provider: HealthDataProvider.GARMIN,
         metricType,
         externalId: `${args.accountId}:${args.day}:${metricType}`,
         ...healthDay(args.day, args.timezone),

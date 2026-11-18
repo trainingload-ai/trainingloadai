@@ -1,3 +1,5 @@
+import { ImportSourceKind, ThirdPartyProvider } from '@prisma/client';
+import { ImportSourceObjectType } from './import-item-job.types';
 import { createHash } from 'node:crypto';
 
 export type LegacyDiscoveryIntegrityAudit = {
@@ -23,9 +25,9 @@ export function resolveRawFileIntegrity(
 ): { sha256: string; audit?: LegacyDiscoveryIntegrityAudit } {
   const metadata = source.metadata as { listChecksum?: unknown } | null;
   const discoveryOnly =
-    source.sourceKind === 'INTERVALS_ICU' &&
-    source.provider === 'intervals_icu' &&
-    source.objectType === 'third_party_activity_file' &&
+    source.sourceKind === ImportSourceKind.INTERVALS_ICU &&
+    source.provider === ThirdPartyProvider.intervals_icu &&
+    source.objectType === ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE &&
     typeof source.rawChecksum === 'string' &&
     /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(source.rawChecksum) &&
     metadata?.listChecksum === source.rawChecksum &&

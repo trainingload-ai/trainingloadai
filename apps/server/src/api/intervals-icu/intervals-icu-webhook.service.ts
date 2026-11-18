@@ -40,6 +40,17 @@ import {
 import { importJsonValue } from '@/importing/import-item-job.types';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 
+const IntervalsIcuEventType = {
+  WELLNESS_UPDATED: 'WELLNESS_UPDATED',
+  ACTIVITY_UPLOADED: 'ACTIVITY_UPLOADED',
+  ACTIVITY_ANALYZED: 'ACTIVITY_ANALYZED',
+  ACTIVITY_DELETED: 'ACTIVITY_DELETED',
+  FITNESS_UPDATED: 'FITNESS_UPDATED',
+  CALENDAR_UPDATED: 'CALENDAR_UPDATED',
+  SPORT_SETTINGS_UPDATED: 'SPORT_SETTINGS_UPDATED',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
 /** Intervals.icu 推送的顶层 payload（含 shared secret）。 */
 export type IntervalsIcuWebhookPayload = {
   secret?: string;
@@ -60,7 +71,7 @@ export type IntervalsIcuWebhookEvent = {
 
 /** 写入 fitness/健康 rawPayload 的来源标记。 */
 const INTERVALS_ICU_WEBHOOK_ORIGIN = {
-  source: 'intervals_icu',
+  source: ThirdPartyProvider.intervals_icu,
   trigger: 'webhook',
 } as const;
 
@@ -167,7 +178,7 @@ export class IntervalsIcuWebhookService {
 
   /** Entity identity cannot suppress a later notification with new content. */
   private async buildInboxEvent(event: IntervalsIcuWebhookEvent) {
-    const eventType = String(event.type ?? 'UNKNOWN').trim() || 'UNKNOWN';
+    const eventType = String(event.type ?? IntervalsIcuEventType.UNKNOWN).trim() || IntervalsIcuEventType.UNKNOWN;
     const athleteId = String(event.athlete_id ?? '').trim() || null;
     const connection = athleteId
       ? await this.findConnectionByAthleteId(athleteId)
@@ -230,7 +241,7 @@ export class IntervalsIcuWebhookService {
       where: {
         id: authorization.connectionId,
         userId: authorization.userId,
-        provider: 'intervals_icu',
+        provider: ThirdPartyProvider.intervals_icu,
         status: 'ACTIVE',
         externalAthleteId: { in: athleteIdVariants(athleteId) },
       },
@@ -246,18 +257,18 @@ export class IntervalsIcuWebhookService {
     }
     // 2. 根据 event 类型执行不同的处理逻辑
     switch (eventType) {
-      case 'WELLNESS_UPDATED':
+      case IntervalsIcuEventType.WELLNESS_UPDATED:
         return this.handleWellnessUpdated(connection, event);
-      case 'ACTIVITY_UPLOADED':
-      case 'ACTIVITY_ANALYZED':
+      case IntervalsIcuEventType.ACTIVITY_UPLOADED:
+      case IntervalsIcuEventType.ACTIVITY_ANALYZED:
         return this.handleActivityEvent(connection, event, eventType);
-      case 'ACTIVITY_DELETED':
+      case IntervalsIcuEventType.ACTIVITY_DELETED:
         return this.handleActivityDeleted(connection, event);
-      case 'FITNESS_UPDATED':
+      case IntervalsIcuEventType.FITNESS_UPDATED:
         return this.handleFitnessUpdated(connection, event);
-      case 'CALENDAR_UPDATED':
+      case IntervalsIcuEventType.CALENDAR_UPDATED:
         return this.handleCalendarUpdated(connection, event);
-      case 'SPORT_SETTINGS_UPDATED':
+      case IntervalsIcuEventType.SPORT_SETTINGS_UPDATED:
         return this.handleSportSettingsUpdated(connection, event);
       default:
         this.logger.debug(
@@ -273,7 +284,7 @@ export class IntervalsIcuWebhookService {
     if (!variants.length) return null;
     return await this.providerConnections.model().findFirst({
       where: {
-        provider: 'intervals_icu',
+        provider: ThirdPartyProvider.intervals_icu,
         status: 'ACTIVE',
         externalAthleteId: { in: variants },
       },
@@ -363,7 +374,7 @@ export class IntervalsIcuWebhookService {
       authorization: intervalsAuthorization(connection),
       activities: [activity],
       reason: 'webhook',
-      ...(eventType === 'ACTIVITY_ANALYZED'
+      ...(eventType === IntervalsIcuEventType.ACTIVITY_ANALYZED
         ? { revisionHint: webhookContentChecksum(event) }
         : {}),
     });
@@ -500,7 +511,7 @@ export class IntervalsIcuWebhookService {
         externalId: write.externalId,
         rawPayload: {
           ...INTERVALS_ICU_WEBHOOK_ORIGIN,
-          eventType: 'FITNESS_UPDATED',
+          eventType: IntervalsIcuEventType.FITNESS_UPDATED,
           record: write,
         },
       });
@@ -561,7 +572,7 @@ export class IntervalsIcuWebhookService {
           externalId: `sport-settings:${write.type}:${write.sport}`,
           rawPayload: {
             ...INTERVALS_ICU_WEBHOOK_ORIGIN,
-            eventType: 'SPORT_SETTINGS_UPDATED',
+            eventType: IntervalsIcuEventType.SPORT_SETTINGS_UPDATED,
             athlete,
           },
         });

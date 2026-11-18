@@ -243,6 +243,347 @@ scenarios('Today advice generation across instances on PostgreSQL', () => {
       ),
     ).toBe(true);
   });
+  it('preserves the daily fact identity across replay, correction, withdrawal and restoration', async () => {
+    const { userId, date } = await scope();
+    const repo = new HealthDataRepository(db as never);
+    const ingest = new HealthDataIngestService(db as never, repo, {
+      requestUpdate: async () => {},
+    } as never);
+    const query = new HealthDataQueryService({} as never, repo, {} as never);
+    const localDate = new Date(date);
+    const metricType = 'SLEEP_ASLEEP_SECONDS';
+    const externalId = 'intervals:fact-versions:sleep';
+    const write = (hour: number, value?: number) => {
+      const sourceRevision = new Date(Date.UTC(2026, 10, 18, hour));
+      return ingest.replaceProviderDailyCandidates({
+        userId,
+        provider: 'INTERVALS_ICU',
+        localDate,
+        managedMetricTypes: [metricType],
+        sourceRevision,
+        withdrawals: value === undefined ? [{ metricType, externalId }] : [],
+        candidates:
+          value === undefined
+            ? []
+            : [
+                {
+                  provider: 'INTERVALS_ICU',
+                  metricType,
+                  externalId,
+                  localDate,
+                  startTime: localDate,
+                  endTime: new Date(localDate.getTime() + 86_400_000),
+                  sourceUpdatedAt: sourceRevision,
+                  value,
+                  unit: 's',
+                },
+              ],
+      });
+    };
+    const read = () => query.getCoachingFacts(userId, date);
+
+    await write(8, 10_800);
+    const first = (await read()).observations[0];
+    const firstProjection = await repo.dailyMetrics().findUnique({
+      where: { id: first.key },
+      select: { computedAt: true },
+    });
+    expect(first).toMatchObject({ value: 10_800, factVersion: 1 });
+    await write(9, 10_800);
+    expect((await read()).observations[0]).toEqual(first);
+    expect(
+      await repo.dailyMetrics().findUnique({
+        where: { id: first.key },
+        select: { computedAt: true },
+      }),
+    ).toEqual(firstProjection);
+    await write(10, 25_200);
+    expect((await read()).observations[0]).toMatchObject({
+      key: first.key,
+      value: 25_200,
+      factVersion: 2,
+    });
+
+    await write(11);
+    await write(12);
+    const withdrawn = await read();
+    expect(withdrawn.observations).toEqual([]);
+    expect(withdrawn.withdrawn).toEqual([
+      { key: first.key, date, metric: metricType, factVersion: 3 },
+    ]);
+    await write(13, 25_200);
+    const restored = await read();
+    expect(restored.withdrawn).toEqual([]);
+    expect(restored.observations[0]).toMatchObject({
+      key: first.key,
+      value: 25_200,
+      factVersion: 4,
+    });
+    expect(await query.listDailyFactPublications(userId, first.key, 1)).toEqual(
+      [
+        {
+          key: first.key,
+          date,
+          metric: metricType,
+          previousVersion: 1,
+          version: 2,
+          status: 'AVAILABLE',
+        },
+        {
+          key: first.key,
+          date,
+          metric: metricType,
+          previousVersion: 2,
+          version: 3,
+          status: 'WITHDRAWN',
+        },
+        {
+          key: first.key,
+          date,
+          metric: metricType,
+          previousVersion: 3,
+          version: 4,
+          status: 'AVAILABLE',
+        },
+      ],
+    );
+    expect(
+      await query.listDailyFactPublications('another-athlete', first.key),
+    ).toEqual([]);
+    expect(
+      await db.healthDailyFactRevision.findMany({
+        where: { dailyMetricId: first.key },
+        orderBy: { version: 'asc' },
+        select: { version: true, status: true, value: true },
+      }),
+    ).toEqual([
+      { version: 1, status: 'AVAILABLE', value: 10_800 },
+      { version: 2, status: 'AVAILABLE', value: 25_200 },
+      { version: 3, status: 'WITHDRAWN', value: null },
+      { version: 4, status: 'AVAILABLE', value: 25_200 },
+    ]);
+  });
+
+  it('keeps the most recent decision while a health snapshot is being rewritten', async () => {
+    const { userId, date } = await scope();
+    const repo = new HealthDataRepository(db as never);
+    const ingest = new HealthDataIngestService(db as never, repo, {
+      requestUpdate: async () => {},
+    } as never);
+    const query = new HealthDataQueryService({} as never, repo, {} as never);
+    const localDate = new Date(date);
+    const evidence = {
+      userId,
+      sourceKind: 'FILE' as const,
+      sourceUid: 'snapshot-fixture',
+    };
+    const source = await db.importSourceObject.create({ data: evidence });
+    const batch = await db.importBatchJob.create({
+      data: { userId, sourceKind: evidence.sourceKind },
+    });
+    const item = await db.importItemJob.create({
+      data: { ...evidence, batchJobId: batch.id, sourceObjectId: source.id },
+    });
+    const snapshot = await repo.snapshots().create({
+      data: {
+        userId,
+        sourceObjectId: source.id,
+        itemJobId: item.id,
+        parserVersion: 'fixture',
+        primaryKind: 'health',
+        detectedKinds: ['health'],
+        manifest: { status: 'READY' },
+        canonicalChecksum: 'fixture',
+      },
+    });
+    const candidate = {
+      provider: 'GARMIN' as const,
+      metricType: 'HRV_RMSSD_MS',
+      externalId: 'health-fit:hrv',
+      snapshotId: snapshot.id,
+      localDate,
+      startTime: localDate,
+      endTime: localDate,
+      unit: 'ms',
+    };
+    await ingest.ingestCandidate({
+      userId,
+      candidate: { ...candidate, value: 42 },
+    });
+    const initial = (await query.getCoachingFacts(userId, date))
+      .observations[0];
+    expect(initial).toMatchObject({ value: 42, factVersion: 1 });
+    await repo.runDailyPublicationTransaction(userId, (tx) =>
+      repo.snapshots(tx).update({
+        where: { id: snapshot.id },
+        data: { manifest: { status: 'WRITING' } },
+      }),
+    );
+    await ingest.ingestCandidate({
+      userId,
+      candidate: { ...candidate, value: 55 },
+    });
+    const during = await query.getCoachingFacts(userId, date);
+    expect(during.observations).toEqual([]);
+    expect(during.pending).toEqual([
+      expect.objectContaining({ key: initial.key }),
+    ]);
+    expect(
+      await query.listDailyFactPublications(userId, initial.key, 1),
+    ).toEqual([]);
+
+    await repo.runDailyPublicationTransaction(userId, async (tx) => {
+      await repo.snapshots(tx).update({
+        where: { id: snapshot.id },
+        data: { manifest: { status: 'READY' } },
+      });
+      await ingest.rebuildDailyMetric(
+        { userId, localDate, metricType: candidate.metricType },
+        tx,
+      );
+    });
+    const ready = await query.getCoachingFacts(userId, date);
+    expect(ready.pending).toEqual([]);
+    expect(ready.observations[0]).toMatchObject({
+      key: initial.key,
+      value: 55,
+      factVersion: 2,
+    });
+  });
+
+  it('keeps source-only reports and old short measurements out of the daily fact', async () => {
+    const { userId, date } = await scope();
+    const repo = new HealthDataRepository(db as never);
+    const state = { requestUpdate: jest.fn() };
+    const ingest = new HealthDataIngestService(
+      db as never,
+      repo,
+      state as never,
+    );
+    const query = new HealthDataQueryService({} as never, repo, {} as never);
+    const start = new Date(date);
+    const daily = {
+      provider: 'GARMIN' as const,
+      metricType: 'HRV_RMSSD_MS',
+      externalId: 'garmin:connect_developer:account:hrv:night:HRV_RMSSD_MS',
+      localDate: start,
+      startTime: start,
+      endTime: new Date(start.getTime() + 8 * 3_600_000),
+      value: 52,
+      unit: 'ms',
+      sourcePriority: 10,
+    };
+    await ingest.ingestCandidate({ userId, candidate: daily });
+    const before = await query.getCoachingFacts(userId, date);
+    state.requestUpdate.mockClear();
+    await ingest.upsertExternalSample({
+      userId,
+      candidate: {
+        ...daily,
+        externalId:
+          'garmin:connect_developer:account:healthSnapshot:short:HRV_RMSSD_MS',
+        value: 95,
+        sourcePriority: 100,
+      },
+    });
+    await ingest.ingestCandidate({
+      userId,
+      candidate: {
+        ...daily,
+        provider: 'COROS',
+        externalId: 'coros:mirror',
+        value: 90,
+        sourcePriority: 100,
+      },
+    });
+    const after = await query.getCoachingFacts(userId, date);
+    expect(after).toEqual(before);
+    expect(after.observations[0]).toMatchObject({
+      provider: 'GARMIN',
+      value: 52,
+    });
+    expect(state.requestUpdate).not.toHaveBeenCalled();
+    expect(
+      await repo.samples().count({ where: { userId, dailyMetricId: null } }),
+    ).toBe(2);
+    await repo.dailyMetrics().updateMany({
+      where: { userId },
+      data: { selectedProvider: 'COROS', value: 90 },
+    });
+    const stale = await query.getCoachingFacts(userId, date);
+    expect(stale.observations).toEqual([]);
+    expect(stale.pending).toEqual([
+      expect.objectContaining({
+        key: before.observations[0].key,
+        metric: 'HRV_RMSSD_MS',
+      }),
+    ]);
+  });
+
+  it('does not let an older Intervals field update or an unversioned replay undo a withdrawal', async () => {
+    const { userId, date } = await scope();
+    const repo = new HealthDataRepository(db as never);
+    const ingest = new HealthDataIngestService(db as never, repo, {
+      requestUpdate: async () => {},
+    } as never);
+    const query = new HealthDataQueryService({} as never, repo, {} as never);
+    const localDate = new Date(date);
+    const replace = (revision: Date | null, value?: number) =>
+      ingest.replaceProviderDailyCandidates({
+        userId,
+        provider: 'INTERVALS_ICU',
+        localDate,
+        managedMetricTypes: ['BODY_MASS_KG'],
+        sourceRevision: revision,
+        withdrawals:
+          value === undefined
+            ? [{ metricType: 'BODY_MASS_KG', externalId: 'intervals:weight' }]
+            : undefined,
+        candidates:
+          value === undefined
+            ? []
+            : [
+                {
+                  provider: 'INTERVALS_ICU',
+                  metricType: 'BODY_MASS_KG',
+                  externalId: 'intervals:weight',
+                  localDate,
+                  startTime: localDate,
+                  endTime: localDate,
+                  sourceUpdatedAt: revision,
+                  value,
+                  unit: 'kg',
+                },
+              ],
+      });
+    const original = new Date('2026-11-18T09:00:00Z');
+    const corrected = new Date('2026-11-18T10:00:00Z');
+    const withdrawn = new Date('2026-11-18T11:00:00Z');
+    await replace(original);
+    await replace(new Date('2026-11-18T08:00:00Z'), 74);
+    expect((await query.getCoachingFacts(userId, date)).observations).toEqual(
+      [],
+    );
+    await replace(new Date('2026-11-18T09:30:00Z'), 72);
+    await replace(corrected, 71);
+    await replace(original, 72);
+    expect(
+      (await query.getCoachingFacts(userId, date)).observations[0].value,
+    ).toBe(71);
+    await replace(withdrawn);
+    await replace(corrected, 71);
+    await replace(null, 70);
+    expect((await query.getCoachingFacts(userId, date)).observations).toEqual(
+      [],
+    );
+    expect(await repo.samples().findFirst({ where: { userId } })).toMatchObject(
+      {
+        sourceUpdatedAt: withdrawn,
+        deletedAt: expect.any(Date),
+      },
+    );
+  });
+
   it('does not lose an old unresolved injury behind newer episodic memories', async () => {
     const input = await scope();
     const now = new Date();

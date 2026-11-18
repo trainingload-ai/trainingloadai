@@ -51,11 +51,11 @@ describe.each([
 });
 
 it('keeps health reads on the same day while preserving an explicit historical date', async () => {
-  const getOverview = jest.fn(async (_id, _days, endDate) => ({ endDate }));
+  const getCoachingFacts = jest.fn(async (_id, endDate) => ({ endDate }));
   const ctx = {
     session: { user: { id: 'u1' } },
     currentTurnCalendar: calendar,
-    healthData: { getOverview },
+    healthData: { getCoachingFacts },
   } as never;
   expect(await healthSummaryTool.execute(ctx, {})).toEqual({
     endDate: '2026-11-18',

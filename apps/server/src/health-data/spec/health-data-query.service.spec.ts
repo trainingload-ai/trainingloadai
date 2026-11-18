@@ -4,6 +4,7 @@ import { HealthDataRepository } from '../persistence/health-data.repository';
 
 function createService() {
   const prisma = {
+    $transaction: async (read: (client: unknown) => unknown) => read(prisma),
     userDailyHealthMetric: {
       findMany:
         jest.fn<(args: { where: { date: Date } }) => Promise<unknown>>(),
@@ -14,7 +15,9 @@ function createService() {
         .mockResolvedValue([]),
     },
     canonicalHealthSession: {
-      findMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+      findMany: jest
+        .fn<(...args: unknown[]) => Promise<unknown>>()
+        .mockResolvedValue([]),
     },
   };
   const seriesStorage = {
@@ -145,6 +148,40 @@ describe('HealthDataQueryService provider selection', () => {
     expect(result.observations[0].value).toBe(10800);
     expect(result.pending).toEqual([]);
   });
+  it('withholds a legacy row when its accepted source is ineligible', async () => {
+    const { prisma, service } = createService();
+    const date = new Date('2026-07-18');
+    prisma.userDailyHealthMetric.findMany.mockResolvedValue([
+      {
+        id: 'old-projection',
+        date,
+        metricType: 'STEP_COUNT',
+        value: 9999,
+        unit: 'count',
+        selectedProvider: 'COROS',
+        sourceBreakdown: { GARMIN: { value: 3600, unit: 'count' } },
+        sources: [
+          {
+            id: 'garmin',
+            provider: 'GARMIN',
+            externalId: 'dailies',
+            startTime: date,
+            endTime: date,
+            value: 3600,
+            unit: 'count',
+            aggregation: 'LATEST',
+          },
+        ],
+      },
+    ]);
+    prisma.canonicalHealthSession.findMany.mockResolvedValue([]);
+
+    const result = await service.getCoachingFacts('user-1', '2026-07-18');
+
+    expect(result.observations).toEqual([]);
+    expect(result.pending).toEqual([]);
+  });
+
   it('uses the athlete-local date when endDate is omitted', async () => {
     const { prisma, service } = createService();
     prisma.userDailyHealthMetric.findMany.mockResolvedValue([]);

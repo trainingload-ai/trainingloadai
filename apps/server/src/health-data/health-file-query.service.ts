@@ -21,6 +21,7 @@ export class HealthFileQueryService {
       where: {
         userId,
         metricType: 'RESTING_HEART_RATE_BPM',
+        value: { not: null },
         date: { gte: from, lte: to },
       },
       orderBy: [{ date: 'asc' }, { id: 'asc' }],
@@ -48,7 +49,7 @@ export class HealthFileQueryService {
 
   listExportDailyMetrics(userId: string, cutoff: Date) {
     return this.health.dailyMetrics().findMany({
-      where: { userId, createdAt: { lte: cutoff } },
+      where: { userId, createdAt: { lte: cutoff }, value: { not: null } },
       orderBy: [{ date: 'asc' }, { metricType: 'asc' }],
     });
   }

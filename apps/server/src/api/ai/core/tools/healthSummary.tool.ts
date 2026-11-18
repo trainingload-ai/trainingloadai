@@ -29,9 +29,10 @@ export const healthSummaryTool = buildAiTool<
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
   execute: (ctx, input) =>
-    ctx.healthData!.getOverview(
+    ctx.healthData!.getCoachingFacts(
       ctx.session!.user.id,
-      input.days ?? 42,
       input.endDate ?? ctx.currentTurnCalendar?.date,
+      undefined,
+      input.days ?? 42,
     ),
 });

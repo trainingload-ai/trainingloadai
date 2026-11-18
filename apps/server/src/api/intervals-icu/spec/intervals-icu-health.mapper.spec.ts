@@ -138,7 +138,14 @@ describe('intervals-icu-health.mapper', () => {
     expect(patches).toEqual([
       {
         localDate: new Date('2026-11-12T00:00:00Z'),
+        sourceRevision: null,
         managedMetricTypes: ['HRV_RMSSD_MS', 'STEP_COUNT'],
+        withdrawals: [
+          {
+            metricType: 'HRV_RMSSD_MS',
+            externalId: 'intervals-icu:wellness:0:2026-11-12:HRV_RMSSD_MS',
+          },
+        ],
         candidates: [
           expect.objectContaining({ metricType: 'STEP_COUNT', value: 0 }),
         ],
@@ -154,7 +161,14 @@ describe('intervals-icu-health.mapper', () => {
     ).toEqual([
       {
         localDate: new Date('2026-11-12T00:00:00Z'),
+        sourceRevision: null,
         managedMetricTypes: ['BODY_MASS_KG'],
+        withdrawals: [
+          {
+            metricType: 'BODY_MASS_KG',
+            externalId: 'intervals-icu:wellness:0:2026-11-12:BODY_MASS_KG',
+          },
+        ],
         candidates: [],
       },
     ]);

@@ -1,3 +1,4 @@
+import { HealthDataProvider } from '@prisma/client';
 import type { ExternalHealthMetricCandidate } from '@/health-data/health-data-ingest.service';
 import { healthLocalDayBounds } from '@/health-data/health-local-day';
 import type { IntervalsIcuWellness } from '@/integrations/intervals-icu/intervals-icu.client';
@@ -29,9 +30,6 @@ const WELLNESS_FIELD_METRICS: Array<{
   { field: 'vo2max', metricType: 'VO2_MAX', unit: 'ml/kg/min' },
 ];
 
-export const INTERVALS_ICU_AUTHORITATIVE_DAILY_METRIC_TYPES =
-  WELLNESS_FIELD_METRICS.map(({ metricType }) => metricType);
-
 export const INTERVALS_ICU_WELLNESS_SYNC_FIELDS = [
   'id',
   'updated',
@@ -44,8 +42,10 @@ export const INTERVALS_ICU_WELLNESS_SYNC_FIELDS = [
 export function intervalsIcuWellnessPatchMetricTypes(
   record: IntervalsIcuWellness,
 ) {
-  return WELLNESS_FIELD_METRICS.filter(({ field }) =>
-    Object.prototype.hasOwnProperty.call(record, field),
+  return WELLNESS_FIELD_METRICS.filter(
+    ({ field }) =>
+      Object.prototype.hasOwnProperty.call(record, field) &&
+      record[field] !== undefined,
   ).map(({ metricType }) => metricType);
 }
 
@@ -59,8 +59,10 @@ type IntervalsIcuHealthInput = {
 
 export type IntervalsIcuWellnessDailyPatch = {
   localDate: Date;
+  sourceRevision?: Date | null;
   managedMetricTypes: string[];
   candidates: ExternalHealthMetricCandidate[];
+  withdrawals?: Array<{ metricType: string; externalId: string }>;
 };
 
 function numberValue(value: unknown) {
@@ -83,7 +85,7 @@ export function dateKeyFromWellness(record: IntervalsIcuWellness) {
 }
 
 /** An update timestamp must identify an absolute instant, not host-local time. */
-function sourceUpdateTime(value?: string | null) {
+function intervalsIcuWellnessRevision(value?: string | null) {
   if (typeof value !== 'string') return null;
   const text = value.trim();
   if (!/T.*(?:Z|[+-]\d{2}:\d{2})$/i.test(text)) return null;
@@ -93,6 +95,14 @@ function sourceUpdateTime(value?: string | null) {
 
 function accountPart(externalAthleteId?: string | null) {
   return String(externalAthleteId || '0');
+}
+
+function wellnessExternalId(
+  account: string | null | undefined,
+  date: string,
+  metricType: string,
+) {
+  return `intervals-icu:wellness:${accountPart(account)}:${date}:${metricType}`;
 }
 
 /** 构造单条 ExternalHealthMetricCandidate（日粒度 wellness）。 */
@@ -107,12 +117,14 @@ function baseCandidate(args: {
   field: keyof IntervalsIcuWellness;
 }): ExternalHealthMetricCandidate {
   return {
-    provider: 'INTERVALS_ICU',
+    provider: HealthDataProvider.INTERVALS_ICU,
     connectionId: args.input.connectionId,
     metricType: args.metricType,
-    externalId: `intervals-icu:wellness:${accountPart(
+    externalId: wellnessExternalId(
       args.input.externalAthleteId,
-    )}:${args.dateKey}:${args.metricType}`,
+      args.dateKey,
+      args.metricType,
+    ),
     localDate: args.day.date,
     startTime: args.day.start,
     endTime: args.day.end,
@@ -160,7 +172,7 @@ export function mapIntervalsIcuWellnessToHealthCandidates(
   const dateKey = dateKeyFromWellness(record);
   if (!dateKey) return [];
   const day = healthLocalDayBounds(dateKey, input.timezone);
-  const sourceUpdatedAt = sourceUpdateTime(record.updated);
+  const sourceUpdatedAt = intervalsIcuWellnessRevision(record.updated);
 
   const candidates: ExternalHealthMetricCandidate[] = [];
   for (const { metricType, field, unit } of WELLNESS_FIELD_METRICS) {
@@ -209,10 +221,24 @@ export function mapIntervalsIcuWellnessRecordsToDailyPatches(args: {
       timezone: args.timezone,
       record,
     });
+    const withdrawals = WELLNESS_FIELD_METRICS.filter(
+      ({ field }) =>
+        Object.prototype.hasOwnProperty.call(record, field) &&
+        record[field] === null,
+    ).map(({ metricType }) => ({
+      metricType,
+      externalId: wellnessExternalId(
+        args.externalAthleteId,
+        dateKey,
+        metricType,
+      ),
+    }));
     patches.push({
       localDate: new Date(`${dateKey}T00:00:00.000Z`),
+      sourceRevision: intervalsIcuWellnessRevision(record.updated),
       managedMetricTypes,
       candidates,
+      ...(withdrawals.length ? { withdrawals } : {}),
     });
   }
 

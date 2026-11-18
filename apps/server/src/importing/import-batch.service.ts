@@ -1,4 +1,4 @@
-import { importJsonValue } from './import-item-job.types';
+import { ImportSourceObjectType, importJsonValue } from './import-item-job.types';
 import type { IntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { createHash } from 'crypto';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -129,9 +129,9 @@ export type ExternalArchiveImportFile = {
   size: number;
   archivePath: string;
   objectType:
-    | 'third_party_activity_file'
-    | 'third_party_health_file'
-    | 'third_party_mixed_fit';
+    | typeof ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE
+    | typeof ImportSourceObjectType.THIRD_PARTY_HEALTH_FILE
+    | typeof ImportSourceObjectType.THIRD_PARTY_MIXED_FIT;
   metadata?: Record<string, unknown>;
 };
 
@@ -461,7 +461,7 @@ export class ImportBatchService {
             userId: args.userId,
             sourceKind: $Enums.ImportSourceKind.FILE,
             sourceUid,
-            objectType: 'activity_file',
+            objectType: ImportSourceObjectType.ACTIVITY_FILE,
             fileName: file.originalname,
             fileKey: uploaded.fileKey,
             rawStorageKey: uploaded.fileKey,
@@ -1143,7 +1143,7 @@ export class ImportBatchService {
             sourceUid: item.sourceUid,
             accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
-            objectType: 'third_party_activity_file',
+            objectType: ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE,
             // The discovery-list checksum is not a hash of the downloaded file.
             // Keep it in metadata and fill rawChecksum only after file resolution.
             rawChecksum: null,
@@ -1176,7 +1176,7 @@ export class ImportBatchService {
             provider: ThirdPartyProvider.intervals_icu,
             accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
-            objectType: 'third_party_activity_file',
+            objectType: ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE,
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
@@ -1271,7 +1271,7 @@ export class ImportBatchService {
           sourceUid: item.sourceUid,
           externalId: item.externalId,
           accountRef: args.authorization?.athleteId ?? '0',
-          objectType: 'third_party_activity_file',
+          objectType: ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE,
           rawPayload: {
             listActivity: item.activity,
             connectionId: args.connectionId,

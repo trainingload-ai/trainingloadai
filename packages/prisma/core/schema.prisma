@@ -4768,11 +4768,41 @@ model UserDailyHealthMetric {
   sourceBreakdown  Json?               @map("source_breakdown")
   computedAt       DateTime            @default(now()) @map("computed_at")
 
-  sources ExternalHealthSample[]
+  semanticVersion Int     @default(0) @map("semantic_version")
+  semanticHash    String? @map("semantic_hash") @db.VarChar(64)
+
+  sources   ExternalHealthSample[]
+  revisions HealthDailyFactRevision[]
 
   @@unique([userId, date, metricType])
   @@index([userId, metricType, date])
   @@map("t_user_daily_health_metric")
+}
+
+/// A published revision of a daily fact. Its owner and date come from the stable daily metric row.
+model HealthDailyFactRevision {
+  dailyMetricId String                @map("daily_metric_id")
+  dailyMetric   UserDailyHealthMetric @relation(fields: [dailyMetricId], references: [id], onDelete: Cascade)
+  version       Int
+  status        HealthDailyFactStatus
+  semanticHash  String                @map("semantic_hash") @db.VarChar(64)
+  publishedAt   DateTime              @default(now()) @map("published_at")
+
+  value            Float?
+  unit             String?
+  timezone         String?
+  selectedProvider HealthDataProvider? @map("selected_provider")
+  evidence         Json?
+
+  @@id([dailyMetricId, version])
+  @@map("t_health_daily_fact_revision")
+}
+
+enum HealthDailyFactStatus {
+  AVAILABLE
+  WITHDRAWN
+
+  @@map("enum_health_daily_fact_status")
 }
 
 /// Versioned, provider-neutral manifest produced from one raw health source object.

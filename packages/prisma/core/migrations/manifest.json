@@ -175,7 +175,12 @@
       "id": "0035_coach_context_timezone",
       "file": "0035_coach_context_timezone/migration.sql",
       "sha256": "b753a8e9a9f374dd780ad65cb07784b887b745ba28ce6c6f8b167a106c57a93a"
+    },
+    {
+      "id": "0036_health_daily_fact_revisions",
+      "file": "0036_health_daily_fact_revisions/migration.sql",
+      "sha256": "d94ff126be360e20e3ab7227bf7820b10854d0645fc0f9acf0c136458d39b802"
     }
   ],
-  "schemaChecksum": "8947c54d33af04ca3dab612658fe0c896c5de20e3a1013280b5908b6688aa449"
+  "schemaChecksum": "46efffb30bc6137c3b53428a7253778ea46b02660d065896203fa93c0e27eec1"
 }

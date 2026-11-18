@@ -141,8 +141,10 @@ describe('healthSessionMatchScore', () => {
           .mockResolvedValue([
             {
               id: 'canonical-1',
-              startTime: session.startTime,
-              endTime: session.endTime,
+              selectedSource: {
+                startTime: session.startTime,
+                endTime: session.endTime,
+              },
             },
           ]),
         update: jest
@@ -301,13 +303,17 @@ describe('healthSessionMatchScore', () => {
           .mockResolvedValue([
             {
               id: 'canonical-best',
-              startTime: new Date('2026-07-18T10:00:00.000Z'),
-              endTime: new Date('2026-07-18T10:02:00.000Z'),
+              selectedSource: {
+                startTime: new Date('2026-07-18T10:00:00.000Z'),
+                endTime: new Date('2026-07-18T10:02:00.000Z'),
+              },
             },
             {
               id: 'canonical-duplicate',
-              startTime: new Date('2026-07-18T10:01:00.000Z'),
-              endTime: new Date('2026-07-18T10:03:00.000Z'),
+              selectedSource: {
+                startTime: new Date('2026-07-18T10:01:00.000Z'),
+                endTime: new Date('2026-07-18T10:03:00.000Z'),
+              },
             },
           ]),
         create: jest.fn<(...args: unknown[]) => Promise<unknown>>(),

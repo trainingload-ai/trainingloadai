@@ -1,5 +1,13 @@
-import { healthProjectionFingerprint } from './health-projection-fingerprint';
 import { consolidateHealthCandidates } from './health-data-ingest.service';
+import { HEALTH_FACT_PROVIDERS } from './health-data-provider-policy.port';
+import {
+  healthDailyFactSource,
+  healthSessionFactSource,
+} from './health-fact-eligibility';
+import {
+  healthProjectionFingerprint,
+  isHealthSnapshotReady,
+} from './health-projection-fingerprint';
 import { coachingHealthReadiness } from './health-coaching-readiness';
 /**
  * 健康数据面板的读取模型。
@@ -84,7 +92,8 @@ function requestedDate(value: string) {
   const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value)
     ? new Date(`${value}T00:00:00.000Z`)
     : null;
-  if (parsed && !Number.isNaN(parsed.getTime())) return parsed;
+  if (parsed && !Number.isNaN(parsed.getTime()) && dateKey(parsed) === value)
+    return parsed;
   throw new BadRequestException('endDate must be YYYY-MM-DD');
 }
 
@@ -98,105 +107,152 @@ export class HealthDataQueryService {
   ) {}
 
   /** A bounded coaching view of current selected observations and their use limits. */
-  async getCoachingFacts(userId: string, endDate: string, asOf = new Date()) {
-    const end = requestedDate(endDate);
+  async getCoachingFacts(
+    userId: string,
+    endDate?: string,
+    asOf = new Date(),
+    days = 7,
+  ) {
+    const to = endDate ?? (await this.athleteClock.todayYmd(userId));
+    const end = requestedDate(to);
+    const windowDays = Math.min(90, Math.max(7, Math.trunc(days) || 7));
     const start = new Date(end);
-    start.setUTCDate(start.getUTCDate() - 6);
-    const [rows, sessions, unprojected] = await Promise.all([
-      this.health.dailyMetrics().findMany({
-        where: {
-          userId,
-          date: { gte: start, lte: end },
-          value: { not: null },
-          selectedProvider: { in: ['GARMIN', 'INTERVALS_ICU'] },
-          metricType: { in: [...OVERVIEW_METRIC_TYPES] },
-        },
-        orderBy: [{ date: 'desc' }, { metricType: 'asc' }],
-        select: {
-          id: true,
-          date: true,
-          metricType: true,
-          value: true,
-          unit: true,
-          selectedProvider: true,
-          sourceBreakdown: true,
-          sources: {
-            where: { deletedAt: null, projectToDaily: true },
+    start.setUTCDate(start.getUTCDate() - windowDays + 1);
+    const [rows, sessions, unprojected] = await this.health.runTransaction(
+      (tx) =>
+        Promise.all([
+          this.health.dailyMetrics(tx).findMany({
+            where: {
+              userId,
+              date: { gte: start, lte: end },
+              OR: [
+                { semanticVersion: { gt: 0 } },
+                {
+                  value: { not: null },
+                  sources: {
+                    some: {
+                      ...healthDailyFactSource,
+                      deletedAt: null,
+                      projectToDaily: true,
+                    },
+                  },
+                },
+              ],
+            },
+            orderBy: [{ date: 'desc' }, { metricType: 'asc' }],
             select: {
               id: true,
-              provider: true,
-              externalId: true,
+              date: true,
+              metricType: true,
               value: true,
               unit: true,
               timezone: true,
-              sourceName: true,
-              sourcePriority: true,
-              sourceUpdatedAt: true,
-              sourceNamespace: true,
-              aggregation: true,
-              metadata: true,
-              startTime: true,
-              endTime: true,
-              snapshotId: true,
-              snapshot: { select: { manifest: true } },
+              selectedProvider: true,
+              sourceBreakdown: true,
+              semanticVersion: true,
+              semanticHash: true,
+              revisions: {
+                orderBy: { version: 'desc' },
+                take: 2,
+                select: {
+                  version: true,
+                  semanticHash: true,
+                  status: true,
+                  selectedProvider: true,
+                  value: true,
+                  unit: true,
+                  timezone: true,
+                  evidence: true,
+                },
+              },
+              sources: {
+                where: {
+                  ...healthDailyFactSource,
+                  deletedAt: null,
+                  projectToDaily: true,
+                },
+                select: {
+                  id: true,
+                  provider: true,
+                  externalId: true,
+                  value: true,
+                  unit: true,
+                  timezone: true,
+                  sourceName: true,
+                  sourcePriority: true,
+                  sourceUpdatedAt: true,
+                  sourceNamespace: true,
+                  aggregation: true,
+                  metadata: true,
+                  startTime: true,
+                  endTime: true,
+                  snapshotId: true,
+                  snapshot: { select: { manifest: true } },
+                },
+              },
             },
-          },
-        },
-      }),
-      this.health.sessions().findMany({
-        where: {
-          userId,
-          deletedAt: null,
-          sessionType: { in: ['SLEEP', 'NAP'] },
-          calendarDate: { gte: start, lte: end },
-          selectedProvider: { in: ['GARMIN', 'INTERVALS_ICU'] },
-          selectedSource: { deletedAt: null },
-        },
-        orderBy: [{ startTime: 'desc' }, { id: 'asc' }],
-        take: 40,
-        select: {
-          id: true,
-          calendarDate: true,
-          startTime: true,
-          endTime: true,
-          durationSeconds: true,
-          summary: true,
-          selectedProvider: true,
-          selectedSource: {
+          }),
+          this.health.sessions(tx).findMany({
+            where: {
+              userId,
+              deletedAt: null,
+              sessionType: { in: ['SLEEP', 'NAP'] },
+              calendarDate: { gte: start, lte: end },
+              selectedSource: { ...healthSessionFactSource, deletedAt: null },
+            },
+            orderBy: [{ startTime: 'desc' }, { id: 'asc' }],
+            take: 40,
             select: {
-              summary: true,
-              metadata: true,
+              id: true,
+              sessionType: true,
+              calendarDate: true,
               startTime: true,
               endTime: true,
               durationSeconds: true,
-              snapshotId: true,
-              snapshot: { select: { manifest: true } },
+              summary: true,
+              selectedProvider: true,
+              selectedSource: {
+                select: {
+                  id: true,
+                  summary: true,
+                  metadata: true,
+                  startTime: true,
+                  endTime: true,
+                  durationSeconds: true,
+                  snapshotId: true,
+                  snapshot: { select: { manifest: true } },
+                },
+              },
             },
-          },
-        },
-      }),
-      this.health.samples().findMany({
-        where: {
-          userId,
-          localDate: { gte: start, lte: end },
-          dailyMetricId: null,
-          deletedAt: null,
-          projectToDaily: true,
-          provider: { in: ['GARMIN', 'INTERVALS_ICU'] },
-          metricType: { in: [...OVERVIEW_METRIC_TYPES] },
-          value: { not: null },
-        },
-        select: { id: true, localDate: true, metricType: true },
-        take: 501,
-      }),
-    ]);
+          }),
+          this.health.samples(tx).findMany({
+            where: {
+              userId,
+              localDate: { gte: start, lte: end },
+              dailyMetricId: null,
+              deletedAt: null,
+              projectToDaily: true,
+              ...healthDailyFactSource,
+              value: { not: null },
+            },
+            distinct: ['localDate', 'metricType'],
+            orderBy: [
+              { localDate: 'desc' },
+              { metricType: 'asc' },
+              { id: 'asc' },
+            ],
+            select: { localDate: true, metricType: true },
+          }),
+        ]),
+      { isolationLevel: 'RepeatableRead' },
+    );
     const pending: Array<{
       key: string;
       date: string;
       metric: string;
       reason: string;
     }> = unprojected.map((sample) => ({
-      key: sample.id,
+      key: `daily:${dateKey(sample.localDate)}:${sample.metricType}`,
       date: dateKey(sample.localDate),
       metric: sample.metricType,
       reason: 'DAILY_PROJECTION_PENDING',
@@ -206,60 +262,120 @@ export class HealthDataQueryService {
         (sample) => `${dateKey(sample.localDate)}:${sample.metricType}`,
       ),
     );
-    const normalized = (source: {
-      snapshotId?: string | null;
-      snapshot?: { manifest: unknown } | null;
-    }) => {
-      const manifest = source.snapshot?.manifest;
-      const ready =
-        !source.snapshotId ||
-        (manifest &&
-          typeof manifest === 'object' &&
-          !Array.isArray(manifest) &&
-          'status' in manifest &&
-          manifest.status === 'READY');
-      return ready;
-    };
+    const withdrawn: Array<{
+      key: string;
+      date: string;
+      metric: string;
+      factVersion: number;
+    }> = [];
+    const publishedChanges: Array<{
+      key: string;
+      date: string;
+      metric: string;
+      previousVersion: number | null;
+      version: number;
+      status: 'AVAILABLE' | 'WITHDRAWN';
+    }> = [];
     const observations = rows.flatMap((row) => {
+      const scope = {
+        key: row.id,
+        date: dateKey(row.date),
+        metric: row.metricType,
+      };
+      if (unprojectedKeys.has(`${scope.date}:${scope.metric}`)) return [];
+      const markPending = () => {
+        pending.push({
+          ...scope,
+          reason: 'NORMALIZATION_OR_DAILY_PROJECTION_PENDING',
+        });
+        return [];
+      };
+      const published = row.semanticVersion > 0;
+      const decision = row.revisions?.[0];
       if (
-        row.value == null ||
-        !Number.isFinite(row.value) ||
-        unprojected.length > 500 ||
-        unprojectedKeys.has(`${dateKey(row.date)}:${row.metricType}`)
+        published &&
+        (!decision ||
+          decision.version !== row.semanticVersion ||
+          decision.semanticHash !== row.semanticHash ||
+          decision.value !== row.value ||
+          decision.selectedProvider !== row.selectedProvider)
+      )
+        return markPending();
+      if (decision?.status === 'WITHDRAWN') {
+        withdrawn.push({ ...scope, factVersion: decision.version });
+        publishedChanges.push({
+          ...scope,
+          previousVersion: row.revisions[1]?.version ?? null,
+          version: decision.version,
+          status: decision.status,
+        });
+        return [];
+      }
+      const stored = decision ?? row;
+      if (
+        stored.value == null ||
+        !Number.isFinite(stored.value) ||
+        !stored.selectedProvider
       )
         return [];
-      // A stale selected projection must not resurrect withdrawn source samples.
-      const sources = row.sources.filter(
-        (source) => source.provider === row.selectedProvider,
-      );
-      if (!sources.length) return [];
       const breakdown = row.sourceBreakdown as Record<
         string,
         { inputFingerprint?: string }
       > | null;
-      const proof = breakdown?.[String(row.selectedProvider)]?.inputFingerprint;
-      const legacy = proof ? null : consolidateHealthCandidates(sources);
-      const matches = proof
-        ? proof === healthProjectionFingerprint(sources)
-        : legacy?.value === row.value && legacy?.unit === row.unit;
-      if (!matches || sources.some((source) => !normalized(source))) {
-        pending.push({
-          key: row.id,
-          date: dateKey(row.date),
-          metric: row.metricType,
-          reason: 'NORMALIZATION_OR_DAILY_PROJECTION_PENDING',
-        });
-        return [];
+      const byProvider = new Map<string, typeof row.sources>();
+      for (const source of row.sources) {
+        const sources = byProvider.get(source.provider) ?? [];
+        sources.push(source);
+        byProvider.set(source.provider, sources);
       }
+      const sources = byProvider.get(stored.selectedProvider);
+      if (!sources) return published ? markPending() : [];
+      if (published) {
+        const currentProof =
+          byProvider.size === Object.keys(breakdown ?? {}).length &&
+          [...byProvider].every(
+            ([provider, records]) =>
+              breakdown?.[provider]?.inputFingerprint ===
+                healthProjectionFingerprint(records, false) &&
+              records.every(isHealthSnapshotReady),
+          );
+        if (!currentProof) return markPending();
+      } else {
+        const proof = breakdown?.[stored.selectedProvider]?.inputFingerprint;
+        const legacy = proof ? null : consolidateHealthCandidates(sources);
+        const matches = proof
+          ? proof === healthProjectionFingerprint(sources)
+          : legacy?.value === stored.value && legacy?.unit === stored.unit;
+        if (!matches || !sources.every(isHealthSnapshotReady))
+          return markPending();
+      }
+      const evidence = decision?.evidence;
+      const comparabilityUnverified =
+        evidence && typeof evidence === 'object' && !Array.isArray(evidence)
+          ? evidence.comparabilityUnverified === true
+          : byProvider.size > 1;
+      if (decision)
+        publishedChanges.push({
+          ...scope,
+          previousVersion: row.revisions[1]?.version ?? null,
+          version: decision.version,
+          status: decision.status,
+        });
       return [
         coachingHealthReadiness(
           {
-            key: row.id,
-            date: dateKey(row.date),
-            metric: row.metricType,
-            value: row.value,
-            unit: row.unit,
-            provider: String(row.selectedProvider),
+            ...scope,
+            value: stored.value,
+            unit: stored.unit,
+            timezone: stored.timezone,
+            provider: stored.selectedProvider,
+            evidenceRevision:
+              decision?.semanticHash ??
+              healthProjectionFingerprint(sources, false),
+            ...(decision ? { factVersion: decision.version } : {}),
+            alternativeSources: comparabilityUnverified
+              ? 'COMPARABILITY_UNVERIFIED'
+              : undefined,
           },
           asOf,
         ),
@@ -268,7 +384,7 @@ export class HealthDataQueryService {
     const sleepSessions = sessions.flatMap((row) => {
       if (
         !row.selectedSource ||
-        !normalized(row.selectedSource) ||
+        !isHealthSnapshotReady(row.selectedSource) ||
         row.durationSeconds !== row.selectedSource.durationSeconds ||
         row.startTime.getTime() !== row.selectedSource.startTime.getTime() ||
         row.endTime.getTime() !== row.selectedSource.endTime.getTime() ||
@@ -295,6 +411,8 @@ export class HealthDataQueryService {
             date: dateKey(row.calendarDate ?? row.endTime),
             provider: String(row.selectedProvider),
             metric: 'SLEEP_SESSION_SECONDS',
+            sessionType: row.sessionType,
+            evidenceRevision: row.selectedSource.id,
             value: row.durationSeconds,
             unit: 's',
             range: {
@@ -308,17 +426,50 @@ export class HealthDataQueryService {
       ];
     });
     return {
-      policy: 'health-coaching-observation-v1',
-      window: { from: dateKey(start), to: endDate },
+      policy: 'health-coaching-observation-v3',
+      window: { from: dateKey(start), to },
       observations,
       sleepSessions,
+      withdrawn,
+      publishedChanges,
       pending,
-      truncated: sessions.length === 40 || unprojected.length > 500,
+      truncated: sessions.length === 40,
       limitations: [
         'Sleep totals, stages and scores are independent reported observations; source completion is unverified.',
+        'Sources with unverified comparability do not count as independent confirmation.',
         'Missing data is unknown. Daily cumulative values are partial observations, not full-day totals.',
       ],
     };
+  }
+
+  /** Replay durable publication references for a fact owned by the requesting athlete. */
+  async listDailyFactPublications(
+    userId: string,
+    factId: string,
+    afterVersion = 0,
+  ) {
+    const row = await this.health.dailyMetrics().findFirst({
+      where: { userId, id: factId },
+      select: {
+        date: true,
+        metricType: true,
+        revisions: {
+          where: { version: { gt: afterVersion } },
+          orderBy: { version: 'asc' },
+          take: 50,
+          select: { version: true, status: true },
+        },
+      },
+    });
+    return (
+      row?.revisions.map((revision) => ({
+        key: factId,
+        date: dateKey(row.date),
+        metric: row.metricType,
+        previousVersion: revision.version > 1 ? revision.version - 1 : null,
+        ...revision,
+      })) ?? []
+    );
   }
 
   /** 解析首个已配置每日指标及其已选 provider。 */
@@ -341,7 +492,17 @@ export class HealthDataQueryService {
         date,
         metricType: { in: [...metricTypes] },
         value: { not: null },
-        selectedProvider: { not: null },
+        OR: HEALTH_FACT_PROVIDERS.map((provider) => ({
+          selectedProvider: provider,
+          sources: {
+            some: {
+              ...healthDailyFactSource,
+              provider,
+              deletedAt: null,
+              projectToDaily: true,
+            },
+          },
+        })),
       },
       select: {
         metricType: true,
@@ -373,6 +534,7 @@ export class HealthDataQueryService {
         userId: args.userId,
         localDate: args.date,
         metricType: args.metricType,
+        ...healthDailyFactSource,
         provider: args.provider,
         deletedAt: null,
         projectToDaily: true,
@@ -423,24 +585,13 @@ export class HealthDataQueryService {
     const start = new Date(end);
     start.setUTCDate(start.getUTCDate() - days + 1);
 
-    const rows = await this.health.dailyMetrics().findMany({
-      where: {
-        userId,
-        date: { gte: start, lte: end },
-        metricType: { in: [...OVERVIEW_METRIC_TYPES] },
-        value: { not: null },
-      },
-      orderBy: [{ date: 'asc' }, { metricType: 'asc' }],
-      select: {
-        date: true,
-        timezone: true,
-        metricType: true,
-        value: true,
-        unit: true,
-        selectedProvider: true,
-      },
-    });
-
+    const { observations } = await this.getCoachingFacts(
+      userId,
+      dateKey(end),
+      new Date(),
+      days,
+    );
+    const overviewMetrics = new Set<string>(OVERVIEW_METRIC_TYPES);
     const grouped = new Map<
       string,
       {
@@ -455,21 +606,20 @@ export class HealthDataQueryService {
       }
     >();
 
-    for (const row of rows) {
-      if (row.value == null || !Number.isFinite(row.value)) continue;
-      const key = dateKey(row.date);
-      const day = grouped.get(key) ?? {
-        date: key,
-        timezone: row.timezone,
+    for (const row of observations) {
+      if (!overviewMetrics.has(row.metric)) continue;
+      const day = grouped.get(row.date) ?? {
+        date: row.date,
+        timezone: row.timezone ?? null,
         metrics: [],
       };
       day.metrics.push({
-        type: row.metricType,
+        type: row.metric,
         value: row.value,
         unit: row.unit,
-        provider: row.selectedProvider,
+        provider: row.provider,
       });
-      grouped.set(key, day);
+      grouped.set(row.date, day);
     }
 
     const overviewDays: Array<{
@@ -557,6 +707,7 @@ export class HealthDataQueryService {
           selectedSourceId: true,
           sources: {
             where: {
+              ...healthSessionFactSource,
               deletedAt: null,
               OR: [
                 { snapshotId: null },

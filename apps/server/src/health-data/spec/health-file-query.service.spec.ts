@@ -39,7 +39,11 @@ describe('HealthFileQueryService', () => {
 
     expect(prisma.userDailyHealthMetric.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: 'user-1', createdAt: { lte: cutoff } },
+        where: {
+          userId: 'user-1',
+          createdAt: { lte: cutoff },
+          value: { not: null },
+        },
       }),
     );
     expect(prisma.canonicalHealthSession.findMany).toHaveBeenCalledWith(

@@ -160,6 +160,10 @@
       "0035_coach_context_timezone": {
         "phase": "expand",
         "releaseVersion": "1.1.26"
+      },
+      "0036_health_daily_fact_revisions": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
       }
     }
   }

@@ -15,6 +15,7 @@ function canonical(value: unknown): unknown {
 /** Hash consumed source content, never relation writes or ingestion heartbeats. */
 export function healthProjectionFingerprint(
   sources: ReadonlyArray<Record<string, unknown>>,
+  includeSourceUpdatedAt = true,
 ) {
   const fields = [
     'id',
@@ -28,7 +29,7 @@ export function healthProjectionFingerprint(
     'timezone',
     'sourceName',
     'sourcePriority',
-    'sourceUpdatedAt',
+    ...(includeSourceUpdatedAt ? ['sourceUpdatedAt'] : []),
     'sourceNamespace',
     'aggregation',
     'metadata',
@@ -41,4 +42,28 @@ export function healthProjectionFingerprint(
     )
     .sort();
   return createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+}
+
+/** Semantic versions exclude source polling and projection timestamps. */
+export function healthDailySemanticHash(fact: object) {
+  return createHash('sha256')
+    .update(JSON.stringify(canonical({ policy: 'health-daily-v1', ...fact })))
+    .digest('hex');
+}
+
+export function isHealthSnapshotReady(source: {
+  snapshotId?: string | null;
+  snapshot?: { manifest: unknown } | null;
+}) {
+  const manifest = source.snapshot?.manifest;
+  return (
+    !source.snapshotId ||
+    Boolean(
+      manifest &&
+      typeof manifest === 'object' &&
+      !Array.isArray(manifest) &&
+      'status' in manifest &&
+      manifest.status === 'READY',
+    )
+  );
 }
