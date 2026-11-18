@@ -10,6 +10,12 @@ export type LegacyDiscoveryIntegrityAudit = {
   fileChecksumStatus: 'OBSERVED_LEGACY_FILE' | 'VERIFIED_PRIMARY_DIGEST';
 };
 
+export function fitSegmentChecksum(containerSha256: string, index: number) {
+  return createHash('sha256')
+    .update(`${containerSha256}#${index}`)
+    .digest('hex');
+}
+
 /** Old Intervals discovery rows stored the list digest in the file-digest column. */
 export function resolveRawFileIntegrity(
   buffer: Buffer,
@@ -18,9 +24,14 @@ export function resolveRawFileIntegrity(
     sourceKind: string;
     provider: string | null;
     objectType: string;
+    sourceUid?: string;
     rawChecksum: string | null;
     metadata: unknown;
-    activitySources: Array<{ sourceChecksum: string | null }>;
+    activitySources: Array<{
+      sourceChecksum: string | null;
+      sourceUid?: string;
+      metadata?: unknown;
+    }>;
   },
 ): { sha256: string; audit?: LegacyDiscoveryIntegrityAudit } {
   const metadata = source.metadata as { listChecksum?: unknown } | null;
@@ -32,32 +43,45 @@ export function resolveRawFileIntegrity(
     /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(source.rawChecksum) &&
     metadata?.listChecksum === source.rawChecksum &&
     source.activitySources.length > 0;
-  const primaryDigests = source.activitySources
-    .map((s) => s.sourceChecksum)
-    .filter((s): s is string => s != null);
-  // A prior repair may already have registered the file identity on PRIMARY.
-  // Validate every such identity before accepting the old discovery column.
-  const digests =
-    discoveryOnly && primaryDigests.length
-      ? primaryDigests
-      : [discoveryOnly ? null : source.rawChecksum];
-  let sha256 = '';
-  for (const digest of digests) sha256 = verifiedRawFileSha256(buffer, digest);
+  if (!discoveryOnly) {
+    return { sha256: verifiedRawFileSha256(buffer, source.rawChecksum) };
+  }
+
+  const sha256 = verifiedRawFileSha256(buffer, null);
+  const primaryDigests = source.activitySources.filter(
+    (primary) => primary.sourceChecksum != null,
+  );
+  for (const primary of primaryDigests) {
+    const prefix = source.sourceUid ? `${source.sourceUid}#` : undefined;
+    const index =
+      prefix && primary.sourceUid?.startsWith(prefix)
+        ? primary.sourceUid.slice(prefix.length)
+        : '';
+    const primaryMetadata = primary.metadata as {
+      containerChecksum?: unknown;
+    } | null;
+    // Multi-session imports hash the container plus the session index.
+    if (
+      /^(0|[1-9]\d*)$/.test(index) &&
+      Number.isSafeInteger(Number(index)) &&
+      primaryMetadata?.containerChecksum === sha256 &&
+      primary.sourceChecksum === fitSegmentChecksum(sha256, Number(index))
+    ) {
+      continue;
+    }
+    verifiedRawFileSha256(buffer, primary.sourceChecksum);
+  }
   return {
     sha256,
-    ...(discoveryOnly
-      ? {
-          audit: {
-            sourceObjectId: source.id,
-            basis: 'LEGACY_DISCOVERY_CHECKSUM' as const,
-            registeredDiscoveryChecksum: source.rawChecksum!,
-            observedFileSha256: sha256,
-            fileChecksumStatus: primaryDigests.length
-              ? ('VERIFIED_PRIMARY_DIGEST' as const)
-              : ('OBSERVED_LEGACY_FILE' as const),
-          },
-        }
-      : {}),
+    audit: {
+      sourceObjectId: source.id,
+      basis: 'LEGACY_DISCOVERY_CHECKSUM',
+      registeredDiscoveryChecksum: source.rawChecksum,
+      observedFileSha256: sha256,
+      fileChecksumStatus: primaryDigests.length
+        ? 'VERIFIED_PRIMARY_DIGEST'
+        : 'OBSERVED_LEGACY_FILE',
+    },
   };
 }
 
