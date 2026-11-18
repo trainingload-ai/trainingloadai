@@ -9,6 +9,7 @@ import {
   Prisma,
   SportType,
 } from '@prisma/client';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { PrismaService } from '@/prisma/prisma.service';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
@@ -87,132 +88,145 @@ export class StrengthActivityService {
     userId: string,
     input: StartStrengthActivityDto & { planId: string; workoutId: string },
   ) {
-    const workout = await this.planQuery.findWorkout({
-      where: {
-        id: input.workoutId,
-        planId: input.planId,
-        userId,
-      },
-      include: {
-        plan: { select: { id: true, status: true } },
-        strengthExercises: {
-          orderBy: { orderIndex: 'asc' },
-          include: { setGroups: { orderBy: { orderIndex: 'asc' } } },
-        },
-      },
-    });
-    if (!workout || workout.structureKind !== 'STRENGTH') {
-      this.throwWorkoutNotFound();
-    }
-    if (workout.plan?.status !== 'ACTIVE') {
-      throw new UnprocessableEntityException(
-        'Only a workout in an active plan can be started',
-      );
-    }
-    if (workout.status !== 'PLANNED' && workout.status !== 'IN_PROGRESS') {
-      throw new UnprocessableEntityException(
-        'This strength workout cannot be started',
-      );
-    }
-
-    const existingLink = await this.planQuery.findLink({
-      where: {
-        planWorkoutId: workout.id,
-        role: 'PRIMARY',
-        unlinkedAt: null,
-      },
-      include: { activity: { select: { id: true, hashId: true } } },
-    });
-    if (existingLink?.activity) {
-      return {
-        activityId: existingLink.activity.id,
-        activityHashId: existingLink.activity.hashId,
-        workoutId: workout.id,
-        created: false,
-      };
-    }
-
-    const startedAt = this.parseSessionDate(input.startedAt) ?? new Date();
-    const activity = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.activity.create({
-        data: {
-          hashId: generateRandomDights(),
-          userId,
-          activityName: workout.name?.trim() || 'Strength Training',
-          description: workout.notes?.trim() || null,
-          sportType: SportType.UNKNOWN,
-          sportDefinitionCode: 'STRENGTH_TRAINING',
-          timestamp: startedAt,
-          startTime: startedAt,
-          timezone: input.timezone?.trim() || null,
-          status: ActivityStatus.PADDING,
-          processingStatus: ActivityProcessingStatus.MATERIALIZED,
-          processingUpdatedAt: startedAt,
-        },
-      });
-
-      await this.planQuery.createLink(
+    return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
+      const workout = await this.planQuery.findWorkout(
         {
-          data: {
+          where: {
+            id: input.workoutId,
             planId: input.planId,
-            planWorkoutId: workout.id,
-            activityId: created.id,
-            source: 'AUTO',
-            role: 'PRIMARY',
+            userId,
+          },
+          include: {
+            plan: { select: { id: true, status: true } },
+            strengthExercises: {
+              orderBy: { orderIndex: 'asc' },
+              include: { setGroups: { orderBy: { orderIndex: 'asc' } } },
+            },
           },
         },
         tx,
       );
-      await this.planQuery.updateWorkout(
+      if (!workout || workout.structureKind !== 'STRENGTH') {
+        this.throwWorkoutNotFound();
+      }
+      if (workout.plan?.status !== 'ACTIVE') {
+        throw new UnprocessableEntityException(
+          'Only a workout in an active plan can be started',
+        );
+      }
+      if (workout.status !== 'PLANNED' && workout.status !== 'IN_PROGRESS') {
+        throw new UnprocessableEntityException(
+          'This strength workout cannot be started',
+        );
+      }
+
+      const existingLink = await this.planQuery.findLink(
         {
-          where: { id: workout.id },
-          data: { status: 'IN_PROGRESS', completedAt: null, skippedAt: null },
+          where: {
+            planWorkoutId: workout.id,
+            role: 'PRIMARY',
+            unlinkedAt: null,
+          },
+          include: { activity: { select: { id: true, hashId: true } } },
         },
         tx,
       );
+      if (existingLink?.activity) {
+        return {
+          activityId: existingLink.activity.id,
+          activityHashId: existingLink.activity.hashId,
+          workoutId: workout.id,
+          created: false,
+        };
+      }
 
-      for (const [
-        exerciseIndex,
-        exercise,
-      ] of workout.strengthExercises.entries()) {
-        const actualExercise = await tx.activityStrengthExercise.create({
+      const startedAt = this.parseSessionDate(input.startedAt) ?? new Date();
+      const activity = await (async () => {
+        const created = await tx.activity.create({
           data: {
-            activityId: created.id,
-            orderIndex: exerciseIndex,
-            exerciseCode: exercise.exerciseCode ?? null,
-            name: exercise.name,
-            equipmentCode: exercise.equipmentCode ?? null,
-            notes: exercise.notes ?? null,
+            hashId: generateRandomDights(),
+            userId,
+            activityName: workout.name?.trim() || 'Strength Training',
+            description: workout.notes?.trim() || null,
+            sportType: SportType.UNKNOWN,
+            sportDefinitionCode: 'STRENGTH_TRAINING',
+            timestamp: startedAt,
+            startTime: startedAt,
+            timezone: input.timezone?.trim() || null,
+            status: ActivityStatus.PADDING,
+            processingStatus: ActivityProcessingStatus.MATERIALIZED,
+            processingUpdatedAt: startedAt,
           },
         });
-        let setIndex = 0;
-        for (const group of exercise.setGroups) {
-          for (let index = 0; index < Number(group.setCount); index += 1) {
-            await tx.activityStrengthSet.create({
-              data: {
-                exerciseId: actualExercise.id,
-                plannedSetGroupId: group.id,
-                setIndex,
-                setType: group.setType,
-                ...strengthLoadToColumns(
-                  strengthLoadFromColumns(group, 'ABSOLUTE'),
-                ),
-                source: 'APP',
-              } satisfies Prisma.ActivityStrengthSetUncheckedCreateInput,
-            });
-            setIndex += 1;
+
+        await this.planQuery.createLink(
+          {
+            data: {
+              planId: input.planId,
+              planWorkoutId: workout.id,
+              activityId: created.id,
+              source: 'AUTO',
+              role: 'PRIMARY',
+            },
+          },
+          tx,
+        );
+        await this.planQuery.updateWorkout(
+          {
+            where: {
+              id: workout.id,
+              revision: workout.revision,
+              status: workout.status,
+            },
+            data: { status: 'IN_PROGRESS', completedAt: null, skippedAt: null },
+          },
+          tx,
+        );
+
+        for (const [
+          exerciseIndex,
+          exercise,
+        ] of workout.strengthExercises.entries()) {
+          const actualExercise = await tx.activityStrengthExercise.create({
+            data: {
+              activityId: created.id,
+              orderIndex: exerciseIndex,
+              exerciseCode: exercise.exerciseCode ?? null,
+              name: exercise.name,
+              equipmentCode: exercise.equipmentCode ?? null,
+              notes: exercise.notes ?? null,
+            },
+          });
+          let setIndex = 0;
+          for (const group of exercise.setGroups) {
+            for (let index = 0; index < Number(group.setCount); index += 1) {
+              await tx.activityStrengthSet.create({
+                data: {
+                  exerciseId: actualExercise.id,
+                  plannedSetGroupId: group.id,
+                  setIndex,
+                  setType: group.setType,
+                  ...strengthLoadToColumns(
+                    strengthLoadFromColumns(group, 'ABSOLUTE'),
+                  ),
+                  source: 'APP',
+                } satisfies Prisma.ActivityStrengthSetUncheckedCreateInput,
+              });
+              setIndex += 1;
+            }
           }
         }
-      }
-      return created;
-    });
+        return created;
+      })();
 
-    return {
-      activityId: activity.id,
-      activityHashId: activity.hashId,
-      workoutId: workout.id,
-      created: true,
-    };
+      return {
+        activityId: activity.id,
+        activityHashId: activity.hashId,
+        workoutId: workout.id,
+        created: true,
+      };
+    });
   }
 
   /**

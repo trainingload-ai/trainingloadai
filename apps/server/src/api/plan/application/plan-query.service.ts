@@ -1,3 +1,4 @@
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { activityCalendarYmdInZone } from '../plan-link-calendar.util';
 import { addCalendarDays, isCalendarDate } from '@shared/plan-calendar';
@@ -1249,6 +1250,19 @@ export class PlanQueryService {
     activityStartTime: Date | null;
   }) {
     return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
+      const current = await this.workouts.findFirst(
+        {
+          where: {
+            id: args.planWorkoutId,
+            userId: args.userId,
+            planId: args.planId,
+          },
+        },
+        tx,
+      );
+      if (!current)
+        throw new UnprocessableEntityException('Workout no longer exists');
       const autoMarked = await this.workouts.markDoneIfApplicable(
         args.planWorkoutId,
         args.activityStartTime,

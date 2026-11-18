@@ -18,6 +18,7 @@ import { trainingAnalyticsSkill } from './skills/trainingAnalytics.skill';
 import { periodReviewSkill } from './skills/periodReview.skill';
 import { activityReviewSkill } from './skills/activityReview.skill';
 import { planReviewAdjustmentSkill } from './skills/planReviewAdjustment.skill';
+import { rollingPlanSkill } from './skills/rollingPlan.skill';
 
 export function getCoachSkills(): CoachSkillDef[] {
   return [
@@ -25,6 +26,7 @@ export function getCoachSkills(): CoachSkillDef[] {
     integrationSupportSkill,
     activityReviewSkill,
     planReviewAdjustmentSkill,
+    rollingPlanSkill,
     periodReviewSkill,
     fitnessAssessmentSkill,
     trainingAnalyticsSkill,

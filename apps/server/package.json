@@ -926,6 +926,10 @@
     "./api/plan/application/plan-external-sync.service": {
       "types": "./src/api/plan/application/plan-external-sync.service.ts",
       "default": "./src/api/plan/application/plan-external-sync.service.ts"
+    },
+    "./rolling-plan/rolling-plan-runtime.module": {
+      "types": "./src/rolling-plan/rolling-plan-runtime.module.ts",
+      "default": "./src/rolling-plan/rolling-plan-runtime.module.ts"
     }
   }
 }

@@ -220,7 +220,7 @@ export class PlanStartService {
     });
   }
 
-  private async facts(
+  async automationEvidence(
     userId: string,
     planId: string,
     startDate: string,
@@ -287,6 +287,8 @@ export class PlanStartService {
           id: true,
           date: true,
           metricType: true,
+          value: true,
+          unit: true,
           semanticVersion: true,
           semanticHash: true,
         },
@@ -294,7 +296,20 @@ export class PlanStartService {
       tx.athleteMemoryFact.findMany({
         where: { userId },
         orderBy: { id: 'asc' },
-        select: { id: true, version: true, status: true },
+        select: {
+          id: true,
+          version: true,
+          status: true,
+          kind: true,
+          category: true,
+          claim: true,
+          value: true,
+          validFrom: true,
+          validUntil: true,
+          eventStart: true,
+          eventEnd: true,
+          confidence: true,
+        },
       }),
       this.userQuery.profiles(tx).findUnique({ where: { userId } }),
       this.storage.calendar(userId, planId, since, until, tx),
@@ -343,7 +358,7 @@ export class PlanStartService {
       createdAt: _created,
       ...settings
     } = profile ?? {};
-    return hash({
+    return {
       activities,
       health,
       memory,
@@ -355,7 +370,107 @@ export class PlanStartService {
       zones,
       competitions,
       loadConfigurations,
+    };
+  }
+
+  async automationSnapshot(
+    userId: string,
+    planId: string,
+    from: string,
+    through: string,
+    tx: PlanDb,
+  ) {
+    const plan = await this.storage.source(planId, tx, {
+      from: addCalendarDays(from, -90),
+      to: through,
     });
+    if (!plan || plan.userId !== userId) fail('ROLLING_PLAN_NOT_FOUND');
+    const external = await this.automationEvidence(
+      userId,
+      planId,
+      from,
+      Math.ceil(
+        (new Date(through).getTime() - new Date(from).getTime()) / 604800000,
+      ) + 1,
+      tx,
+    );
+    const externalWorkouts = plan.workouts
+      .filter(
+        (w) =>
+          w.automationProtected ||
+          !w.generationId ||
+          w.status !== 'PLANNED' ||
+          w.links.length,
+      )
+      .map((w) => ({
+        id: w.id,
+        revision: w.revision,
+        status: w.status,
+        date: w.scheduledDate,
+        links: w.links,
+        protected: w.automationProtected,
+      }));
+    return {
+      plan,
+      external,
+      revision: hash({
+        external: {
+          ...external,
+          activities: external.activities.map(
+            ({ updatedAt: _auditClock, ...activity }) => ({
+              ...activity,
+              fitnessMetricsSnapshot: activity.fitnessMetricsSnapshot
+                ? {
+                    actualLoad: activity.fitnessMetricsSnapshot.actualLoad,
+                    actualLoadSource:
+                      activity.fitnessMetricsSnapshot.actualLoadSource,
+                  }
+                : null,
+            }),
+          ),
+        },
+        externalWorkouts,
+        goal: plan.goal,
+        metadata: plan.generationMetadata,
+        startDate: plan.startDate,
+      }),
+    };
+  }
+
+  private async assertAutomationFacts(
+    job: { receipt: unknown; planId: string; plan: { userId: string } },
+    tx: PlanDb,
+  ) {
+    const receipt = job.receipt as {
+      preparedRevision?: string;
+      input?: { from: string; through: string };
+    } | null;
+    if (
+      receipt?.preparedRevision &&
+      receipt.input &&
+      (
+        await this.automationSnapshot(
+          job.plan.userId,
+          job.planId,
+          receipt.input.from,
+          receipt.input.through,
+          tx,
+        )
+      ).revision !== receipt.preparedRevision
+    )
+      fail('ROLLING_FACTS_CHANGED');
+  }
+
+  private async facts(
+    userId: string,
+    planId: string,
+    startDate: string,
+    weeks: number,
+    tx: PlanDb,
+  ) {
+    return hash(
+      await this.automationEvidence(userId, planId, startDate, weeks, tx),
+    );
   }
 
   async invalidate(userId: string, planId: string, tx: PlanDb) {
@@ -688,6 +803,7 @@ export class PlanStartService {
               )
             : null;
           if (automationJob) {
+            await this.assertAutomationFacts(automationJob, tx);
             this.assertAutomationSettings(request);
             this.assertAutomationSports(automationJob.policy.settings, [
               ...request.changes.map((c) => c.workout),
@@ -1270,6 +1386,7 @@ export class PlanStartService {
                         (request as PlanSchedulePreviewRequest).range.from,
                       ),
                       tx,
+                      (request as PlanSchedulePreviewRequest).range.from,
                     ),
                 }),
             startDate,
@@ -1425,6 +1542,7 @@ export class PlanStartService {
           )
             return previous.receipt;
           const job = await this.assertAutomationJob(jobId, claimToken, tx);
+          await this.assertAutomationFacts(job, tx);
           if (!job.previewId) fail('Automation job has no validated candidate');
           const preview = await tx.planProposalPreview.findUnique({
             where: { id: job.previewId },
@@ -1468,6 +1586,7 @@ export class PlanStartService {
             job.policyId,
             weekStart,
             tx,
+            range.from,
           );
           if (hash(dependencies) !== hash(proposal.automationMonthStrategyIds))
             fail('Month strategy changed after assessment');
@@ -1476,21 +1595,20 @@ export class PlanStartService {
             proposal,
             true,
           );
-          const generation =
-            job.kind === 'WEEK'
-              ? await this.rolling.publishWeek(
-                  {
-                    planId: job.planId,
-                    policyId: job.policyId,
-                    weekStart,
-                    from: range.from,
-                    evidenceRevision: proposal.factFingerprint,
-                    strategyIds: dependencies,
-                    receipt,
-                  },
-                  tx,
-                )
-              : undefined;
+          const generation = ['WEEK', 'ADJUST'].includes(job.kind)
+            ? await this.rolling.publishWeek(
+                {
+                  planId: job.planId,
+                  policyId: job.policyId,
+                  weekStart,
+                  from: range.from,
+                  evidenceRevision: proposal.factFingerprint,
+                  strategyIds: dependencies,
+                  receipt,
+                },
+                tx,
+              )
+            : undefined;
           const context = await tx.coachContext.findUniqueOrThrow({
             where: { planId: job.planId },
           });
@@ -1502,6 +1620,12 @@ export class PlanStartService {
           });
           const fullReceipt = {
             ...receipt,
+            reason: (job.receipt as { candidate?: { reason?: string } })
+              ?.candidate?.reason,
+            runId: (job.receipt as { runId?: string })?.runId,
+            semanticRevision: (
+              job.receipt as { input?: { semanticRevision?: string } }
+            )?.input?.semanticRevision,
             ...(generation ? { rolling: generation } : {}),
             commitId: commit.id,
             policyRevision: job.policy.revision,
@@ -1646,6 +1770,47 @@ export class PlanStartService {
     const changed = new Set(
       proposal.request.changes.map((c) => c.sourceWorkoutId),
     );
+    if (automation) {
+      const normalizedSource = normalizePlanRow(source, {
+        workoutService: this.workout,
+        workoutDefinitionService: this.definitions,
+        workoutPersistence: this.persistence,
+      })!;
+      const structureKey = (value: {
+        kind: string;
+        durationSeconds?: number | null;
+      }) =>
+        hash({
+          ...value,
+          ...(value.kind === 'FREEFORM'
+            ? { durationSeconds: value.durationSeconds ?? null }
+            : {}),
+        });
+      for (const candidate of proposal.candidate) {
+        if (
+          !candidate.sourceWorkoutId ||
+          !changed.has(candidate.sourceWorkoutId)
+        )
+          continue;
+        const prior = normalizedSource.workouts!.find(
+          (w) => w.id === candidate.sourceWorkoutId,
+        )!;
+        const draft = candidate.workout;
+        const resolved = this.definitions.resolve(draft.definition!);
+        if (
+          prior.weekIndex === draft.weekIndex &&
+          prior.dayIndex === draft.dayIndex &&
+          prior.sessionIndex === (draft.sessionIndex ?? 1) &&
+          prior.sportType === draft.sportType &&
+          prior.name === (draft.name ?? null) &&
+          prior.notes === (draft.notes ?? null) &&
+          prior.plannedSessionRpe === (draft.plannedSessionRpe ?? null) &&
+          structureKey(prior.structure) ===
+            structureKey(resolved.structure as { kind: string })
+        )
+          changed.delete(candidate.sourceWorkoutId);
+      }
+    }
     const input: UpdatePlanDto = {
       workouts: proposal.candidate
         .filter((c) => c.candidateKey || changed.has(c.sourceWorkoutId!))
@@ -1660,7 +1825,12 @@ export class PlanStartService {
       qualityContractTransition: proposal.request.qualityContractTransition,
     };
     if (!input.workouts?.length) delete input.workouts;
-    await this.plans.updatePlan(args.userId, source.id, input, meta, { tx });
+    if (
+      !automation ||
+      input.workouts?.length ||
+      input.deletedWorkoutIds?.length
+    )
+      await this.plans.updatePlan(args.userId, source.id, input, meta, { tx });
     if (!schedule)
       await this.plans.activatePlan(
         args.userId,
@@ -1832,6 +2002,9 @@ export class PlanStartService {
       calendarTimeZone: proposal.calendarTimeZone,
       identityMap,
       readbackVerified: true,
+      changed: Boolean(
+        input.workouts?.length || input.deletedWorkoutIds?.length,
+      ),
       executionSource: automation ? 'AUTOMATION_POLICY' : 'USER_CONFIRMATION',
       qualityContract: expectedContract ?? null,
       scheduleConstraints: expectedConstraints ?? null,

@@ -2618,7 +2618,7 @@
         },
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 86
+          "line": 87
         },
         {
           "file": "apps/server/src/bootstrap/deployment-edition.ts",
@@ -6143,15 +6143,15 @@
       "references": [
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 82
-        },
-        {
-          "file": "apps/server/src/app.module.ts",
-          "line": 92
+          "line": 83
         },
         {
           "file": "apps/server/src/app.module.ts",
           "line": 93
+        },
+        {
+          "file": "apps/server/src/app.module.ts",
+          "line": 94
         }
       ]
     },

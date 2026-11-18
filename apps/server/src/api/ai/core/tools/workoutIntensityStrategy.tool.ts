@@ -122,6 +122,7 @@ export const workoutIntensityStrategyTool: AiToolDef<Input, Output> =
       'fitness-assessment',
       'workout-management',
       'workout-generator',
+      'rolling-plan',
     ],
     isEnabled: async (ctx) => hasSignedInUser(ctx),
     maxResultChars: 7_000,

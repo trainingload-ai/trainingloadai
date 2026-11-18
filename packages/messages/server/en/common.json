@@ -328,6 +328,11 @@
     }
   },
   "notification": {
+    "rollingPlan": {
+      "titleMonthApplied": "Continuous training: month direction updated",
+      "titleWeekApplied": "Continuous training: schedule updated",
+      "titleBlocked": "Continuous training needs attention"
+    },
     "reviewDigest": {
       "titleDailyReady": "Daily review is ready",
       "titleWeeklyReady": "Weekly review is ready",

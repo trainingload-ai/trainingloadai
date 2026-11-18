@@ -147,3 +147,30 @@ export function parseRollingStartSettings(
   }
   return JSON.parse(JSON.stringify(data));
 }
+
+export type RollingPlanAutomationJobState =
+  | "PENDING"
+  | "RUNNING"
+  | "RETRY"
+  | "APPLIED"
+  | "BLOCKED"
+  | "FAILED"
+  | "CANCELLED";
+
+export type RollingPlanAutomationJob = {
+  id: string;
+  kind: "MONTH" | "WEEK" | "ADJUST";
+  windowStart: string;
+  state: RollingPlanAutomationJobState;
+  attempts: number;
+  lastError: string | null;
+  availableAt: string;
+};
+
+export type RollingPlanAutomationStatus = {
+  enabled: boolean;
+  revision: number | null;
+  hasAuthorization: boolean;
+  blockedReason?: string | null;
+  jobs: RollingPlanAutomationJob[];
+};

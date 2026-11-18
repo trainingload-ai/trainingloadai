@@ -51,6 +51,7 @@ describe('coach skill capability composition', () => {
       'activity-review',
       'period-review',
       'plan-review-adjustment',
+      'rolling-plan',
     ]) {
       expect(getCoachSkillByName(name)).not.toBeNull();
       expect(catalog.some((entry) => entry.name === name)).toBe(false);
