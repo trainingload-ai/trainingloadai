@@ -17,6 +17,7 @@ describe('draft start preview boundary', () => {
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
     );
     await expect(
       service.createPreview('u', {

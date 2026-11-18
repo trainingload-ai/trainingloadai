@@ -6607,5 +6607,29 @@
     "loadFailed": "無法載入對話，請重試。",
     "activePlanConversation": "計畫已開始，可繼續討論後續安排。",
     "activePlanCalendar": "目前計畫日曆"
+  },
+  "RollingPlan": {
+    "title": "持續訓練計畫",
+    "description": "根據你的目標、時間和訓練情況，自動規劃並持續調整",
+    "generatedThrough": "已產生至 {date}",
+    "notGenerated": "尚未產生",
+    "titleLabel": "計畫名稱",
+    "goalLabel": "訓練目標",
+    "create": "建立草稿",
+    "creating": "正在建立…",
+    "failed": "建立計畫失敗",
+    "coverageLabel": "日期視窗課表",
+    "currentWeek": "第 {week} 週",
+    "shareHint": "持續訓練計畫只能分享明確選擇的已產生日期視窗快照，目前不支援整份計畫分享。",
+    "created": "草稿已儲存，請在教練對話中開始。",
+    "automaticScope": "確認後將自動規劃月度目標、逐週產生課程，並在你確認的設定範圍內調整未來課程；暫停計畫可停止自動調整。",
+    "monthDirection": "{month} 月度方向",
+    "exportWindow": "匯出已產生日期視窗",
+    "snapshotHint": "JSON 檔案僅是所選日期視窗的快照，不是完整自動計畫，不能作為完整計畫匯入；產生缺口將保留標記。最多 93 天。",
+    "windowFrom": "開始日期",
+    "windowThrough": "結束日期",
+    "exporting": "正在匯出…",
+    "exportFailed": "匯出快照失敗",
+    "plannedThrough": "確認後產生至 {date}"
   }
 }

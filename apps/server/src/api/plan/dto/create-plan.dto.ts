@@ -9,6 +9,7 @@ import {
   Max,
   Min,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PLAN_SOURCE_TYPES, PLAN_SPORT_TYPES } from '../plan.constants';
@@ -83,10 +84,15 @@ export class CreatePlanDto {
   @IsObject()
   generationMetadata?: Record<string, unknown>;
 
+  @IsOptional()
+  @IsIn(['FIXED', 'ROLLING'])
+  planningMode?: 'FIXED' | 'ROLLING';
+
+  @ValidateIf((o) => o.planningMode !== 'ROLLING')
   @IsInt()
   @Min(1)
   @Max(520)
-  periodWeeks!: number;
+  periodWeeks!: number | null;
 
   @IsArray()
   @ValidateNested({ each: true })

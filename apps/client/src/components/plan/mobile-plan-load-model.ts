@@ -1,3 +1,5 @@
+import { isRollingPlan, isPlanDateNotGenerated, generatedPlanThrough } from "@/lib/rolling-plan";
+
 import type { PlanWorkout, TrainingPlanDetail } from "@/api/plans";
 
 export type PlanLoadPoint = {
@@ -105,12 +107,12 @@ export function planTimelineBounds(
     : null;
   const lastWorkoutDate = datedWorkouts.at(-1);
   const end = normalizeDay(
-    parsePlanDate(plan.endDate) ?? lastWorkoutDate ?? inferredEnd ?? start,
+    (isRollingPlan(plan) ? parsePlanDate(generatedPlanThrough(plan)) : parsePlanDate(plan.endDate)) ?? lastWorkoutDate ?? inferredEnd ?? start,
   );
   const currentDay = normalizeDay(today);
   const firstVisibleEnd = addDays(currentDay, 6);
   const timelineStart = start > currentDay ? currentDay : start;
-  const timelineEnd = end < firstVisibleEnd ? firstVisibleEnd : end;
+  const timelineEnd = isRollingPlan(plan) ? end : end < firstVisibleEnd ? firstVisibleEnd : end;
 
   return timelineEnd < timelineStart
     ? { start: timelineEnd, end: timelineStart }
@@ -122,6 +124,7 @@ export function buildPlanLoadPoints(
   today = new Date(),
   maxDays = 180,
 ) {
+  if (isRollingPlan(plan) && !generatedPlanThrough(plan)) return [];
   const { start, end } = planTimelineBounds(plan, today);
   const loadsByDate = new Map<string, number>();
 
@@ -145,6 +148,7 @@ export function buildPlanLoadPoints(
     date = addDays(date, 1), index += 1
   ) {
     const key = localDateKey(date);
+    if (isPlanDateNotGenerated(plan, key)) continue;
     const load = loadsByDate.get(key) ?? 0;
     ctl += (load - ctl) / 42;
     atl += (load - atl) / 7;

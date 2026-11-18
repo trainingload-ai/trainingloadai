@@ -655,6 +655,7 @@ export class PlanExternalSyncService {
             );
             const report = assessPlanSchedule({
               startDate: plan.startDate.toISOString().slice(0, 10),
+              planningMode: plan.planningMode,
               periodWeeks: plan.periodWeeks,
               workouts: rows.map((row) => ({
                 ...row,

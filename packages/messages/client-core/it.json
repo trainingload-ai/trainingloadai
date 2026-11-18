@@ -6510,5 +6510,29 @@
     "loadFailed": "Impossibile caricare la conversazione. Riprova.",
     "activePlanConversation": "Il piano è iniziato. Continua qui a discutere gli allenamenti futuri.",
     "activePlanCalendar": "Calendario attuale del piano"
+  },
+  "RollingPlan": {
+    "title": "Piano di allenamento continuo",
+    "description": "Pianifica e adatta automaticamente in base a obiettivi, tempo e allenamento.",
+    "generatedThrough": "Generato fino al {date}",
+    "notGenerated": "Non ancora generato",
+    "titleLabel": "Nome del piano",
+    "goalLabel": "Obiettivo di allenamento",
+    "create": "Crea bozza",
+    "creating": "Creazione…",
+    "failed": "Impossibile creare il piano",
+    "coverageLabel": "Sessioni del periodo",
+    "currentWeek": "Settimana {week}",
+    "shareHint": "Per condividere serve un intervallo di date generate scelto esplicitamente. Non è possibile condividere l’intero piano continuo.",
+    "created": "Bozza salvata. Avviala nella conversazione con il coach.",
+    "automaticScope": "Pianifica obiettivi mensili, genera sessioni settimanali e adatta quelle future entro le impostazioni confermate. Metti in pausa il piano per interrompere le modifiche automatiche.",
+    "monthDirection": "Obiettivo di {month}",
+    "exportWindow": "Esporta intervallo generato",
+    "snapshotHint": "Questo JSON è un’istantanea dell’intervallo, non il piano automatico completo né un piano importabile. Gli intervalli mancanti restano indicati. Massimo 93 giorni.",
+    "windowFrom": "Dal",
+    "windowThrough": "Al",
+    "exporting": "Esportazione…",
+    "exportFailed": "Esportazione non riuscita",
+    "plannedThrough": "Verrà generato fino al {date}"
   }
 }

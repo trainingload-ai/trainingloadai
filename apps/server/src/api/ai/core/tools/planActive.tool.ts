@@ -51,6 +51,18 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> =
       tomorrow: output.tomorrow,
       currentWeek: output.currentWeek,
       allWorkouts: output.allWorkouts?.slice(0, 80),
+      ...(output.allWorkouts
+        ? {
+            workoutInventory: {
+              total: output.allWorkouts.length,
+              returned: Math.min(80, output.allWorkouts.length),
+              offset: 0,
+              hasMore: output.allWorkouts.length > 80,
+              nextOffset: output.allWorkouts.length > 80 ? 80 : null,
+              readMoreWith: 'plan.by_id',
+            },
+          }
+        : {}),
     }),
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
@@ -62,6 +74,7 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> =
       const tomorrow = anchor.add(1, 'day');
 
       const plan = await ctx.planQuery.findCoachPlanSnapshot({
+        asOf: anchor.format('YYYY-MM-DD'),
         userId: userId!,
         status: 'ACTIVE',
         orderBy: { activatedAt: 'desc' },

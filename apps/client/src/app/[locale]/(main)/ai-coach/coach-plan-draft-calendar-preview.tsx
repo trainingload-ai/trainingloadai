@@ -125,6 +125,8 @@ type Props = {
   scheduleConstraints?: ScheduleConstraints;
   /** default：固定最大高度日历区；dialog / embedded：占满父级剩余高度（embedded 用于手动创建第三步等） */
   variant?: "default" | "dialog" | "embedded";
+  windowOnly?: boolean;
+  generationWindow?: { from: string; through: string };
 };
 
 export function CoachPlanDraftCalendarPreview({
@@ -134,8 +136,11 @@ export function CoachPlanDraftCalendarPreview({
   calendarTimeZone = "UTC",
   scheduleConstraints,
   variant = "default",
+  windowOnly = false,
+  generationWindow,
 }: Props) {
   const t = useTranslations("AiCoachPage.planDraft");
+  const rollingT = useTranslations("RollingPlan");
   const tStrength = useTranslations("WorkoutEditor.strength.preview");
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const [picked, setPicked] = useState<{
@@ -182,20 +187,36 @@ export function CoachPlanDraftCalendarPreview({
         : null,
     [draft, startDate, calendarTimeZone, scheduleConstraints],
   );
+  const generationThrough = generationWindow?.through;
   const grid = useMemo(
     () =>
       calendar
-        ? calendar.weeks.map((week) =>
-            week.days.map((day) => day.workouts.map((w) => w.workout)),
-          )
+        ? calendar.weeks
+            .filter(
+              (week) =>
+                !generationThrough || week.startDate <= generationThrough,
+            )
+            .map((week) =>
+              week.days.map((day) => day.workouts.map((w) => w.workout)),
+            )
         : buildGrid(draft),
-    [calendar, draft],
+    [calendar, draft, generationThrough],
   );
   const displayedWeek = Math.min(activeWeek, Math.max(0, grid.length - 1));
   const weekLabel = (week: number) =>
     calendar?.weeks[week]?.startDate ?? t("weekLabel", { week: week + 1 });
-  const dateAt = (week: number, day: number) =>
-    calendar?.weeks[week]?.days[day];
+  const dateAt = (week: number, day: number) => {
+    const date = calendar?.weeks[week]?.days[day];
+    return date && generationWindow
+      ? {
+          ...date,
+          inPlan:
+            date.inPlan &&
+            date.date >= generationWindow.from &&
+            date.date <= generationWindow.through,
+        }
+      : date;
+  };
 
   const draftGlobalSessionOrdinal = useMemo(
     () => buildCoachDraftGlobalSessionOrdinalMap(draft),
@@ -224,10 +245,12 @@ export function CoachPlanDraftCalendarPreview({
             {draft.title}
           </div>
           <p className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-muted-foreground dark:bg-muted/55">
-            {t("summary", {
-              weeks: draft.periodWeeks,
-              sessions: draft.workouts.filter((w) => w.text?.trim()).length,
-            })}
+            {windowOnly
+              ? rollingT("coverageLabel")
+              : t("summary", {
+                  weeks: draft.periodWeeks,
+                  sessions: draft.workouts.filter((w) => w.text?.trim()).length,
+                })}
           </p>
         </div>
         <div className="mt-1.5 min-h-[2lh] text-sm leading-snug">

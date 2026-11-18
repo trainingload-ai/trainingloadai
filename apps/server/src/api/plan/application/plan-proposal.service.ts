@@ -339,8 +339,8 @@ export class PlanProposalService {
         proposal.mode === 'SCHEDULE',
       );
       if (
-        proposal.binding.sid !== args.binding?.sid ||
-        proposal.binding.branchId !== args.binding?.branchId ||
+        proposal.binding?.sid !== args.binding?.sid ||
+        proposal.binding?.branchId !== args.binding?.branchId ||
         proposal.conversationRevision !== session.planStartRevision
       )
         conflict('Start proposal belongs to a different conversation version');

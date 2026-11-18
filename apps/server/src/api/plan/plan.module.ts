@@ -1,3 +1,6 @@
+import { RollingPlanAuthorizationService } from './application/rolling-plan-authorization.service';
+import { AiDataConsentModule } from '@/ai-data-consent/ai-data-consent.module';
+import { RollingPlanService } from './application/rolling-plan.service';
 import { PlanCalendarRepository } from './persistence/plan-calendar.repository';
 import { HealthDataModule } from '@/health-data/health-data.module';
 import { UserAnalysisConfigModule } from '@/api/user/user-analysis-config.module';
@@ -52,6 +55,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
  */
 @Module({
   imports: [
+    AiDataConsentModule,
     AthleteStateUpdatesModule,
     HealthDataModule,
     UserAnalysisConfigModule,
@@ -96,7 +100,9 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     CoachContextService,
     PlanExecutionContextService,
     PlanWorkoutMutabilityPolicy,
+    RollingPlanAuthorizationService,
     PlanStartService,
+    RollingPlanService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanScheduledActivationWorker,
@@ -118,6 +124,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PlanExecutionContextService,
     WorkoutPersistenceService,
     PlanStartService,
+    RollingPlanService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanDeliveryReadService,

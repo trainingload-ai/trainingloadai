@@ -76,6 +76,28 @@ export class PlanRepository {
     });
   }
 
+  async fenceAutomationJobs(
+    planId: string,
+    reason: string,
+    revokePolicy: boolean,
+    tx: PlanDb,
+  ) {
+    await this.db(tx).rollingPlanJob.updateMany({
+      where: { planId, state: { in: ['PENDING', 'RUNNING', 'RETRY'] } },
+      data: {
+        state: 'CANCELLED',
+        claimToken: null,
+        leaseUntil: null,
+        lastError: reason,
+      },
+    });
+    if (revokePolicy)
+      await this.db(tx).planAutomationPolicy.updateMany({
+        where: { planId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+  }
+
   countActive() {
     return this.prisma.plan.count({ where: { status: 'ACTIVE' } });
   }

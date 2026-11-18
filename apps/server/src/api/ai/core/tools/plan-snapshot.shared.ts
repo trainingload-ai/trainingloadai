@@ -38,7 +38,11 @@ export type PlanSnapshotToolOutput = {
     goal?: string | null;
     sourceType: string;
     status: string;
-    periodWeeks: number;
+    periodWeeks: number | null;
+    planningMode?: 'FIXED' | 'ROLLING';
+    generatedThrough?: string | null;
+    generationCoverage?: unknown;
+    workoutWindow?: { from: string; through: string; bounded: boolean };
     generationMetadata?: unknown;
     scheduleRules?: {
       asOf: string;
@@ -159,6 +163,10 @@ export type PlanSnapshotPlanRow = {
   goal?: string | null;
   sourceType: string;
   status: string;
+  planningMode?: 'FIXED' | 'ROLLING';
+  generatedThrough?: Date | string | null;
+  generationCoverage?: unknown;
+  workoutWindow?: { from: string; through: string; bounded: boolean };
   periodWeeks?: number | null;
   startDate?: Date | string | null;
   endDate?: Date | string | null;
@@ -211,17 +219,20 @@ export function summarizePlanWorkoutRow(
 }
 
 export function getPlanAnchorDayIndex(
-  plan: Pick<PlanSnapshotPlanRow, 'startDate' | 'periodWeeks'>,
+  plan: Pick<PlanSnapshotPlanRow, 'startDate' | 'periodWeeks' | 'planningMode'>,
   date: dayjs.Dayjs,
 ) {
-  if (!plan?.startDate || !plan?.periodWeeks) {
+  if (
+    !plan?.startDate ||
+    (plan.planningMode !== 'ROLLING' && !plan?.periodWeeks)
+  ) {
     return { weekIndex: null, dayIndex: null, dayOffset: null };
   }
 
   const start = dayjs(plan.startDate).startOf('day');
   const diff = date.startOf('day').diff(start, 'day');
   const maxOffset = plan.periodWeeks * 7 - 1;
-  if (diff < 0 || diff > maxOffset) {
+  if (diff < 0 || (plan.planningMode !== 'ROLLING' && diff > maxOffset)) {
     return { weekIndex: null, dayIndex: null, dayOffset: null };
   }
 
@@ -281,6 +292,10 @@ export function buildPlanSnapshotFromRow(
       goal: plan.goal ?? null,
       sourceType: plan.sourceType,
       status: plan.status,
+      planningMode: plan.planningMode ?? 'FIXED',
+      generatedThrough: normalizePlanDate(plan.generatedThrough),
+      generationCoverage: plan.generationCoverage ?? null,
+      ...(plan.workoutWindow ? { workoutWindow: plan.workoutWindow } : {}),
       periodWeeks: plan.periodWeeks,
       startDate: normalizePlanDate(plan.startDate),
       endDate: normalizePlanDate(plan.endDate),

@@ -582,7 +582,8 @@ export class CoachBranchingService {
           !Number.isInteger(to) ||
           from < 1 ||
           to < from ||
-          to > (detail.plan?.periodWeeks ?? 0)
+          (detail.plan?.planningMode !== 'ROLLING' &&
+            to > (detail.plan?.periodWeeks ?? 0))
         )
           this.fail('Batch scope must specify a valid inclusive week range');
         const expected = workouts.filter(
@@ -639,7 +640,10 @@ export class CoachBranchingService {
           this.fail('Workout schedule contains duplicate target positions');
         const changedIds = new Set(verified.map((change) => change.workoutId));
         for (const dto of targetDtos) {
-          if (dto.weekIndex > (detail.plan?.periodWeeks ?? 0))
+          if (
+            detail.plan?.planningMode !== 'ROLLING' &&
+            dto.weekIndex > (detail.plan?.periodWeeks ?? 0)
+          )
             this.fail('Workout target is outside the plan period');
           const occupied = workouts.find(
             (workout) =>
@@ -679,7 +683,10 @@ export class CoachBranchingService {
         branch.context.planId,
       );
       const dto = additions[0];
-      if (dto.weekIndex > (detail.plan?.periodWeeks ?? 0))
+      if (
+        detail.plan?.planningMode !== 'ROLLING' &&
+        dto.weekIndex > (detail.plan?.periodWeeks ?? 0)
+      )
         this.fail('Workout target is outside the plan period');
       const occupied = (detail.plan?.workouts ?? []).find(
         (workout) =>

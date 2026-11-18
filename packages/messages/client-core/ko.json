@@ -6509,5 +6509,29 @@
     "loadFailed": "대화를 불러올 수 없습니다. 다시 시도하세요.",
     "activePlanConversation": "계획이 시작되었습니다. 여기서 향후 훈련을 계속 상담할 수 있습니다.",
     "activePlanCalendar": "현재 계획 캘린더"
+  },
+  "RollingPlan": {
+    "title": "지속 훈련 계획",
+    "description": "목표, 시간, 훈련 상황에 맞춰 자동으로 계획하고 지속적으로 조정합니다.",
+    "generatedThrough": "{date}까지 생성됨",
+    "notGenerated": "아직 생성되지 않음",
+    "titleLabel": "계획 이름",
+    "goalLabel": "훈련 목표",
+    "create": "초안 만들기",
+    "creating": "생성 중…",
+    "failed": "계획을 만들 수 없습니다",
+    "coverageLabel": "날짜 범위 훈련 일정",
+    "currentWeek": "{week}주차",
+    "shareHint": "공유하려면 생성된 날짜 범위를 명시적으로 선택해야 합니다. 지속 계획 전체 공유는 지원하지 않습니다.",
+    "created": "초안이 저장되었습니다. 코치 대화에서 시작하세요.",
+    "automaticScope": "확인한 설정 범위에서 월간 목표 계획, 주간 훈련 생성 및 향후 훈련 조정을 자동으로 진행합니다. 계획을 일시 정지하면 자동 변경이 중단됩니다.",
+    "monthDirection": "{month} 방향",
+    "exportWindow": "생성된 날짜 범위 내보내기",
+    "snapshotHint": "이 JSON은 선택한 기간의 스냅샷이며 전체 자동 계획이나 가져오기용 계획이 아닙니다. 생성되지 않은 기간은 표시됩니다. 최대 93일입니다.",
+    "windowFrom": "시작일",
+    "windowThrough": "종료일",
+    "exporting": "내보내는 중…",
+    "exportFailed": "내보내기 실패",
+    "plannedThrough": "확인 후 {date}까지 생성"
   }
 }

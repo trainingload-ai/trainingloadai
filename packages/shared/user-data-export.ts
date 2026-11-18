@@ -1,4 +1,4 @@
-export const USER_DATA_EXPORT_FORMAT = "trainingload-export/v1" as const;
+export const USER_DATA_EXPORT_FORMAT = "trainingload-export/v2" as const;
 export const USER_DATA_EXPORT_SCHEMA_DRAFT =
   "https://json-schema.org/draft/2020-12/schema" as const;
 
@@ -124,7 +124,7 @@ function recordSchema(args: {
 }): JsonSchema {
   return {
     $schema: USER_DATA_EXPORT_SCHEMA_DRAFT,
-    $id: `https://trainingload.ai/schemas/export/v1/${args.id}.schema.json`,
+    $id: `https://trainingload.ai/schemas/export/v2/${args.id}.schema.json`,
     title: args.title,
     description: args.description,
     type: "object",
@@ -757,7 +757,26 @@ const trainingPlan = recordSchema({
       "Whether the saved plan originated from a manual, AI-assisted, or deterministic generation workflow.",
     ),
     sportType: string("The primary sport type."),
-    periodWeeks: requiredInteger("The planned duration in calendar weeks."),
+    automationPolicies: array(
+      "User-confirmed automatic management settings and effective revisions; no model prompts or reasoning.",
+      object("A versioned policy."),
+    ),
+    monthStrategies: array(
+      "Natural month directions and safe target ranges; no model prompts or reasoning.",
+      object("A calendar month strategy."),
+    ),
+    weekGenerations: array(
+      "Actual generation intervals, revisions and publication state; gaps remain explicit.",
+      object("A calendar week generation."),
+    ),
+    planningMode: requiredString(
+      "FIXED or ROLLING; continuous plans have no fixed endpoint.",
+    ),
+    generatedThrough: string(
+      "Latest published calendar day; does not imply gap-free coverage or a plan endpoint.",
+      "date",
+    ),
+    periodWeeks: integer("The fixed planned duration; null for ROLLING."),
     startDate: string("The plan start date in YYYY-MM-DD format.", "date"),
     endDate: string("The plan end date in YYYY-MM-DD format.", "date"),
     status: string("The current plan lifecycle status."),

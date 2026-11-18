@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/adaptive-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Sparkles, Pencil, Library } from "lucide-react";
+import { ChevronRight, Sparkles, Pencil, Library, CalendarClock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-export type CreatePlanMode = "template" | "ai" | "manual";
+export type CreatePlanMode = "template" | "ai" | "manual" | "rolling";
 
 export type CreatePlanModeDialogProps = {
   open: boolean;
@@ -74,6 +74,7 @@ const OptionCard = ({
 export function CreatePlanModeDialog(props: CreatePlanModeDialogProps) {
   const { open, onOpenChange, onSelect, aiDisabled, className } = props;
   const t = useTranslations("CreatePlanDialog");
+  const rollingT = useTranslations("RollingPlan");
 
   return (
     <AdaptiveDialog
@@ -98,6 +99,13 @@ export function CreatePlanModeDialog(props: CreatePlanModeDialogProps) {
 
         <div className="min-h-0 flex-1 overflow-y-auto ">
           <div className="grid grid-cols-1 gap-2.5">
+            <OptionCard
+              icon={<CalendarClock className="h-5 w-5" />}
+              title={rollingT("title")}
+              desc={rollingT("description")}
+              onClick={() => onSelect("rolling")}
+              disabled={aiDisabled}
+            />
             <OptionCard
               icon={<Library className="h-5 w-5" />}
               title={t("options.template.title")}

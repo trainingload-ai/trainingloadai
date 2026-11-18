@@ -504,7 +504,8 @@ export type ScheduledPlanWorkout = {
 /** Evaluate final persisted dates, including combined sessions on changed days. */
 export function assessPlanSchedule(input: {
   startDate: string;
-  periodWeeks: number;
+  periodWeeks: number | null;
+  planningMode?: "FIXED" | "ROLLING";
   workouts: ScheduledPlanWorkout[];
   changedWorkoutIds: string[];
   constraints?: ScheduleConstraints;
@@ -525,17 +526,22 @@ export function assessPlanSchedule(input: {
         qualityContract: input.qualityContract,
       });
   const dates = new Set<string>();
-  const planWeeks = new Map<number, Set<string>>();
+  const planWeeks = new Map<string, Set<string>>();
+  const weekOf = (w: ScheduledPlanWorkout) =>
+    input.planningMode === "ROLLING"
+      ? addCalendarDays(dateOf(w), 1 - calendarIsoWeekday(dateOf(w)))
+      : String(Math.floor(w.dayOffset / 7));
   for (const w of input.workouts) {
     if (!touched.has(w.id)) continue;
     const date = dateOf(w);
     dates.add(date);
-    const week = Math.floor(w.dayOffset / 7);
+    const week = weekOf(w);
     if (!planWeeks.has(week)) planWeeks.set(week, new Set());
     planWeeks.get(week)!.add(date);
     if (
       w.dayOffset < 0 ||
-      w.dayOffset >= input.periodWeeks * 7 ||
+      (input.planningMode !== "ROLLING" &&
+        (input.periodWeeks == null || w.dayOffset >= input.periodWeeks * 7)) ||
       !Number.isInteger(w.dayOffset)
     )
       issues.push({ code: "OUTSIDE_PLAN", date, workoutId: w.id });
@@ -566,9 +572,7 @@ export function assessPlanSchedule(input: {
     const days = new Set(
       input.workouts
         .filter(
-          (w) =>
-            !["MOVED", "SKIPPED"].includes(w.status) &&
-            Math.floor(w.dayOffset / 7) === week,
+          (w) => !["MOVED", "SKIPPED"].includes(w.status) && weekOf(w) === week,
         )
         .map((w) => w.dayOffset),
     );

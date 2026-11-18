@@ -6,6 +6,8 @@ import type {
 } from "@shared/workout-structure";
 import type { WorkoutSummary } from "@shared/workout-summary";
 import type { VdotPlanDraftV1 } from "@shared/vdot-plan";
+import type { PlanGenerationCoverage } from "@/lib/rolling-plan";
+import type { RollingMonthDraft, RollingPolicySettings } from "@shared/rolling-plan";
 
 // 计划状态 定义
 // DRAFT 草稿，
@@ -253,7 +255,8 @@ export type CreatePlanDto = {
   goal?: string;
   sourceType?: PlanSourceType;
   generationMetadata?: Record<string, unknown>;
-  periodWeeks: number;
+  planningMode?: "FIXED" | "ROLLING";
+  periodWeeks: number | null;
   workouts: Array<{
     weekIndex: number;
     dayIndex: number;
@@ -307,6 +310,20 @@ export type UpdatePlanWorkoutStatusDto = {
   status: PlanWorkoutStatus;
 };
 
+export type PlanAutomationPolicy = {
+  revision: number;
+  enabled: boolean;
+  settings: RollingPolicySettings;
+};
+
+export type PlanMonthDirection = {
+  monthStart: string;
+  monthEnd: string;
+  effectiveFrom: string;
+  revision: number;
+  strategy: Omit<RollingMonthDraft, "monthStart">;
+};
+
 export type TrainingPlanSummary = {
   id: string;
   userId: string;
@@ -317,7 +334,12 @@ export type TrainingPlanSummary = {
   generationMetadata?: Record<string, unknown> | null;
   status: PlanStatus;
   capabilities?: { delete: boolean };
-  periodWeeks: number;
+  planningMode?: "FIXED" | "ROLLING";
+  periodWeeks: number | null;
+  generatedThrough?: string | null;
+  generationCoverage?: PlanGenerationCoverage;
+  automationPolicy?: PlanAutomationPolicy | null;
+  monthDirections?: PlanMonthDirection[];
   startDate: string | null;
   endDate: string | null;
   currentWeekIndex: number | null;
@@ -354,7 +376,12 @@ export type TrainingPlanDetail = {
   generationMetadata?: Record<string, unknown> | null;
   status: PlanStatus;
   capabilities?: { delete: boolean };
-  periodWeeks: number;
+  planningMode?: "FIXED" | "ROLLING";
+  periodWeeks: number | null;
+  generatedThrough?: string | null;
+  generationCoverage?: PlanGenerationCoverage;
+  automationPolicy?: PlanAutomationPolicy | null;
+  monthDirections?: PlanMonthDirection[];
   startDate: string | null;
   endDate: string | null;
   activatedAt?: string | null;
@@ -423,6 +450,24 @@ export async function createPlan(dto: CreatePlanDto) {
   })) as PlanResult | undefined;
 
   return data?.plan;
+}
+
+export type PlanWindowSnapshot = {
+  schemaVersion: 2;
+  payloadVersion: "plan-window-v2";
+  sourceMode: "ROLLING";
+  snapshotOnly: true;
+  title: string;
+  goal: string | null;
+  window: { from: string; through: string };
+  generationCoverage: PlanGenerationCoverage;
+  monthDirections: unknown[];
+  workouts: unknown[];
+};
+
+export async function getPlanWindowSnapshot(planId: string, from: string, through: string) {
+  const query = new URLSearchParams({ from, through });
+  return apiFetch(`/plans/${encodeURIComponent(planId)}/window-snapshot?${query}`) as Promise<PlanWindowSnapshot | undefined>;
 }
 
 export type PlanSharePreview = {

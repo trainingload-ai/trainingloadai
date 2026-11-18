@@ -65,6 +65,7 @@
     "./pmc-projection": "./pmc-projection.ts",
     "./workout-matching": "./workout-matching.ts",
     "./plan-calendar": "./plan-calendar.ts",
-    "./plan-proposal-receipt": "./plan-proposal-receipt.ts"
+    "./plan-proposal-receipt": "./plan-proposal-receipt.ts",
+    "./rolling-plan": "./rolling-plan.ts"
   }
 }

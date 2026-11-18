@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+
 import { useState } from "react";
 import { Copy, Link2, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -14,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { ApiFetchError } from "@/lib/api";
 import { toast } from "sonner";
 import { getPlanSharePublicUrl } from "@/lib/config";
+import { RollingPlanWindowExport } from "./rolling-plan-window-export";
 
 function shareUrl(publicId: string) {
   return getPlanSharePublicUrl(publicId);
@@ -25,11 +28,12 @@ async function copyText(value: string) {
 
 export function PlanShareCard({ plan }: { plan: TrainingPlanDetail }) {
   const t = useTranslations("V2PlanDetailPage.share");
+  const rollingT = useTranslations("RollingPlan");
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<PlanShareResult | null>(null);
 
   const runShare = async () => {
-    if (pending) return;
+    if (pending || isRollingPlan(plan)) return;
     setPending(true);
     try {
       const created = await createPlanShare(plan.id);
@@ -92,7 +96,7 @@ export function PlanShareCard({ plan }: { plan: TrainingPlanDetail }) {
         <Share2 className="h-4 w-4" />
         {t("title")}
       </div>
-      {plan.derivedFromShareId ? (
+      {isRollingPlan(plan) ? <p className="text-mobile-caption pc:text-xs text-muted-foreground">{rollingT("shareHint")}</p> : plan.derivedFromShareId ? (
         <p className="text-mobile-caption pc:text-xs text-muted-foreground">
           {t("derivedHint")}
         </p>
@@ -105,7 +109,7 @@ export function PlanShareCard({ plan }: { plan: TrainingPlanDetail }) {
         size="sm"
         variant="outline"
         className="w-full"
-        disabled={pending}
+        disabled={pending || isRollingPlan(plan)}
         onClick={() => void runShare()}
       >
         <Link2 className="h-4 w-4" />
@@ -156,6 +160,7 @@ export function PlanShareCard({ plan }: { plan: TrainingPlanDetail }) {
           </div>
         </div>
       ) : null}
+      {isRollingPlan(plan) ? <RollingPlanWindowExport key={plan.id} plan={plan} /> : null}
     </section>
   );
 }

@@ -6510,5 +6510,29 @@
     "loadFailed": "Não foi possível carregar a conversa. Tente novamente.",
     "activePlanConversation": "O plano já começou. Continue conversando sobre os próximos treinos aqui.",
     "activePlanCalendar": "Calendário atual do plano"
+  },
+  "RollingPlan": {
+    "title": "Plano de treino contínuo",
+    "description": "Planeja e adapta automaticamente aos seus objetivos, tempo e treinos.",
+    "generatedThrough": "Gerado até {date}",
+    "notGenerated": "Ainda não gerado",
+    "titleLabel": "Nome do plano",
+    "goalLabel": "Objetivo do treino",
+    "create": "Criar rascunho",
+    "creating": "Criando…",
+    "failed": "Não foi possível criar o plano",
+    "coverageLabel": "Treinos do intervalo",
+    "currentWeek": "Semana {week}",
+    "shareHint": "O compartilhamento exige um intervalo de datas geradas escolhido explicitamente. O plano contínuo inteiro não pode ser compartilhado.",
+    "created": "Rascunho salvo. Inicie-o na conversa com o treinador.",
+    "automaticScope": "Planeja metas mensais, gera treinos semanais e ajusta treinos futuros dentro das configurações confirmadas. Pause o plano para interromper mudanças automáticas.",
+    "monthDirection": "Foco de {month}",
+    "exportWindow": "Exportar intervalo gerado",
+    "snapshotHint": "Este JSON é um retrato do intervalo, não o plano automático completo nem um plano importável. Intervalos não gerados continuam marcados. Máximo de 93 dias.",
+    "windowFrom": "De",
+    "windowThrough": "Até",
+    "exporting": "Exportando…",
+    "exportFailed": "Falha ao exportar",
+    "plannedThrough": "Será gerado até {date}"
   }
 }

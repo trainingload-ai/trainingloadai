@@ -81,6 +81,15 @@ const draft: CoachPlanDraft = {
 };
 
 describe("CoachPlanDraftCalendarPreview workout selection", () => {
+  it("bounds a continuous partial-week START preview without inventing rest days after Sunday", () => {
+    render(<CoachPlanDraftCalendarPreview draft={draft} startDate="2026-11-18" calendarTimeZone="Asia/Shanghai" windowOnly generationWindow={{ from: "2026-11-18", through: "2026-11-22" }} />);
+    expect(screen.getByText("coverageLabel")).toBeInTheDocument();
+    expect(screen.queryByText("2026-11-23")).not.toBeInTheDocument();
+    expect(screen.queryByText("2026-11-24")).not.toBeInTheDocument();
+    const mobile = screen.getByTestId("coach-plan-draft-mobile-calendar");
+    expect(within(mobile).getByText("2026-11-18")).toBeInTheDocument();
+    expect(within(mobile).getByText("2026-11-22")).toBeInTheDocument();
+  });
   it("projects a Sunday start into two natural weeks and keeps the selected workout identity", () => {
     render(
       <CoachPlanDraftCalendarPreview

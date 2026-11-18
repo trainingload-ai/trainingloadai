@@ -136,6 +136,94 @@ export const planProposalPreviewTool: AiToolDef<
         description:
           'Versioned schedule constraints: version=1, revision, calendarTimeZone, fixedRestWeekdays (ISO 1..7), unavailableDates, availableDateOverrides, effectiveFrom/effectiveUntil, confirmation:{source:USER,reference}. Reference is audit only; actual authorization comes from card confirmation.',
       },
+      rolling: {
+        type: 'object',
+        additionalProperties: false,
+        description:
+          'ROLLING START only: confirmed automatic management policy and first one/two calendar month directions. First week covers startDate through ISO Sunday. Null targets mean unknown, not zero.',
+        properties: {
+          policy: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              goal: { type: 'string' },
+              sportTypes: { type: 'array', items: { type: 'string' } },
+              autoPlanMonths: { type: 'boolean', const: true },
+              autoGenerateWeeks: { type: 'boolean', const: true },
+              autoAdjustFuture: { type: 'boolean', const: true },
+            },
+            required: [
+              'goal',
+              'sportTypes',
+              'autoPlanMonths',
+              'autoGenerateWeeks',
+              'autoAdjustFuture',
+            ],
+          },
+          monthStrategies: {
+            type: 'array',
+            minItems: 1,
+            maxItems: 2,
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                monthStart: { type: 'string' },
+                objective: { type: 'string' },
+                loadRange: {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      type: 'object',
+                      properties: {
+                        unit: { type: 'string', const: 'NORMALIZED_LOAD' },
+                        min: { type: 'number', minimum: 0 },
+                        max: { type: 'number', minimum: 0 },
+                      },
+                      required: ['unit', 'min', 'max'],
+                      additionalProperties: false,
+                    },
+                  ],
+                },
+                durationMinutesRange: {
+                  anyOf: [
+                    { type: 'null' },
+                    {
+                      type: 'object',
+                      properties: {
+                        min: { type: 'number', minimum: 0 },
+                        max: { type: 'number', minimum: 0 },
+                      },
+                      required: ['min', 'max'],
+                      additionalProperties: false,
+                    },
+                  ],
+                },
+                weekFocus: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      weekStart: { type: 'string' },
+                      focus: { type: 'string' },
+                    },
+                    required: ['weekStart', 'focus'],
+                    additionalProperties: false,
+                  },
+                },
+              },
+              required: [
+                'monthStart',
+                'objective',
+                'loadRange',
+                'durationMinutesRange',
+                'weekFocus',
+              ],
+            },
+          },
+        },
+        required: ['policy', 'monthStrategies'],
+      },
       qualityContractTransition: {
         type: 'object',
         additionalProperties: false,

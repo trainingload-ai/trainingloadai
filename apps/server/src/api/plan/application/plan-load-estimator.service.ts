@@ -195,7 +195,7 @@ export class PlanLoadEstimatorService {
     };
   }
 
-  /** 游泳阈值配速（sec/100m）：TP 优先，否则 CS（m/s）换算。 */
+  /** Both effective SWIM TP and CS are speeds in m/s; estimator targets use sec/100m. */
   private async loadSwimThresholdPaceSecPer100m(
     userId: string,
     tx?: PlanDb,
@@ -220,7 +220,7 @@ export class PlanLoadEstimatorService {
       readMetric(UserFitnessMetricType.CS),
     ]);
     if (typeof tp?.value === 'number' && tp.value > 0) {
-      return tp.value;
+      return 100 / tp.value;
     }
     if (typeof cs?.value === 'number' && cs.value > 0) {
       return 100 / cs.value;
@@ -735,10 +735,12 @@ export class PlanLoadEstimatorService {
       durationSeconds?: number | null;
       plannedSessionRpe?: number | null;
     }>,
+    options?: { includeInputs?: boolean },
   ): Promise<
     Array<{
       estimatedLoad: number | null;
       estimatedLoadSource: PlanLoadSource;
+      estimatedLoadInputs?: EstimateResult['estimatedLoadInputs'];
     }>
   > {
     const sports = [
@@ -764,6 +766,9 @@ export class PlanLoadEstimatorService {
         return {
           estimatedLoad: result.estimatedLoad,
           estimatedLoadSource: result.estimatedLoadSource,
+          ...(options?.includeInputs
+            ? { estimatedLoadInputs: result.estimatedLoadInputs }
+            : {}),
         };
       }
       const sport = asViewerSport(workout.sportType);
@@ -776,6 +781,9 @@ export class PlanLoadEstimatorService {
       return {
         estimatedLoad: result.estimatedLoad,
         estimatedLoadSource: result.estimatedLoadSource,
+        ...(options?.includeInputs
+          ? { estimatedLoadInputs: result.estimatedLoadInputs }
+          : {}),
       };
     });
   }

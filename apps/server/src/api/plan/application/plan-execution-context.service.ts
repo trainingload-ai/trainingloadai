@@ -53,6 +53,7 @@ export type PlanExecutionSurface =
 export type PlanExecutionCompletionState =
   | 'NO_PLAN'
   | 'REST_DAY'
+  | 'NOT_GENERATED'
   | 'PLANNED'
   | 'PARTIAL'
   | 'COMPLETED'
@@ -134,6 +135,8 @@ export type PlanExecutionContext = {
     status: string;
     startDate: string | null;
     endDate: string | null;
+    planningMode?: 'FIXED' | 'ROLLING';
+    generatedThrough?: string | null;
     periodWeeks: number | null;
     currentWeekIndex: number | null;
     currentDayIndex: number | null;
@@ -295,7 +298,10 @@ type SnapshotPlanRow = {
   status: unknown;
   startDate: Date | null;
   endDate: Date | null;
-  periodWeeks: number;
+  periodWeeks: number | null;
+  planningMode?: 'FIXED' | 'ROLLING';
+  generatedThrough?: Date | null;
+  weekGenerations?: Array<{ generatedFrom: Date; generatedThrough: Date }>;
   updatedAt: Date | null;
 };
 
@@ -552,6 +558,12 @@ export class PlanExecutionContextService {
         startDate: true,
         endDate: true,
         periodWeeks: true,
+        planningMode: true,
+        generatedThrough: true,
+        weekGenerations: {
+          where: { appliedAt: { not: null }, supersededAt: null },
+          select: { generatedFrom: true, generatedThrough: true },
+        },
         updatedAt: true,
       },
     });
@@ -642,10 +654,11 @@ export class PlanExecutionContextService {
     );
     const isWithinPlan =
       rows.plan != null &&
-      Number.isInteger(rows.plan.periodWeeks) &&
-      rows.plan.periodWeeks > 0 &&
       planDayOffset >= 0 &&
-      planDayOffset < rows.plan.periodWeeks * 7;
+      (rows.plan.planningMode === 'ROLLING' ||
+        (Number.isInteger(rows.plan.periodWeeks) &&
+          rows.plan.periodWeeks > 0 &&
+          planDayOffset < rows.plan.periodWeeks * 7));
     const mappedWorkouts = rows.workouts.map((workout) =>
       this.mapWorkout(workout, timezone),
     );
@@ -691,6 +704,8 @@ export class PlanExecutionContextService {
             status: String(rows.plan.status),
             startDate: ymdFromDate(rows.plan.startDate),
             endDate: ymdFromDate(rows.plan.endDate),
+            planningMode: rows.plan.planningMode ?? 'FIXED',
+            generatedThrough: ymdFromDate(rows.plan.generatedThrough ?? null),
             periodWeeks: rows.plan.periodWeeks ?? null,
             currentWeekIndex: isWithinPlan
               ? Math.floor(planDayOffset / 7) + 1
@@ -706,6 +721,13 @@ export class PlanExecutionContextService {
         unlinkedActivities,
         completionState: this.resolveCompletionState({
           hasPlan: Boolean(rows.plan),
+          notGenerated:
+            rows.plan?.planningMode === 'ROLLING' &&
+            !(rows.plan.weekGenerations ?? []).some(
+              (g) =>
+                anchorDate >= ymdFromDate(g.generatedFrom)! &&
+                anchorDate <= ymdFromDate(g.generatedThrough)!,
+            ),
           workouts: today,
           linkedActivities,
           unlinkedActivities,
@@ -1247,12 +1269,14 @@ export class PlanExecutionContextService {
   /** 当天有没有课、课有没有完成、有没有计划外活动。 */
   private resolveCompletionState(args: {
     hasPlan: boolean;
+    notGenerated?: boolean;
     workouts: PlanExecutionWorkout[];
     linkedActivities: PlanExecutionActivity[];
     unlinkedActivities: PlanExecutionActivity[];
   }): PlanExecutionCompletionState {
     if (!args.hasPlan) return 'NO_PLAN';
     if (args.workouts.length === 0) {
+      if (args.notGenerated) return 'NOT_GENERATED';
       return args.unlinkedActivities.length > 0 ? 'EXTRA_ACTIVITY' : 'REST_DAY';
     }
     const doneCount = args.workouts.filter(

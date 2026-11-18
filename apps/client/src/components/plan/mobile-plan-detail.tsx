@@ -1,4 +1,8 @@
 "use client";
+import { isRollingPlan, isPlanDateNotGenerated } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
+
 import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 
 import { useGuestAccessText } from "@deployment/managed-ui";
@@ -42,7 +46,7 @@ import {
 import { MobilePlanLoadChart } from "@/components/plan/mobile-plan-load-chart";
 import { PlanShareCard } from "@/components/plan/plan-share-card";
 import { PlanDetailWorkoutEditor } from "@/components/plan/plan-detail-workout-editor";
-import { getPlanFocusWorkouts } from "@/components/plan/mobile-plan-load-model";
+import { getPlanFocusWorkouts, localDateKey, normalizeDay } from "@/components/plan/mobile-plan-load-model";
 import { MobilePlanWorkoutRow } from "@/components/plan/mobile-plan-workout-row";
 import { ViewWorkoutDialog } from "@/components/plan/view-workout-dialog";
 import { buildWorkoutListTitle } from "@/components/plan/detail/plan-detail-utils";
@@ -209,8 +213,8 @@ export function MobilePlanLibraryItem({
             {plan.title}
           </span>
           <span className="mt-1 block truncate text-mobile-caption pc:text-xs text-muted-foreground">
-            {plansT("recent.itemMeta", {
-              weeks: plan.periodWeeks,
+            {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : plansT("recent.itemMeta", {
+              weeks: plan.periodWeeks ?? 1,
               sessions: plan.workoutCount,
             })}
           </span>
@@ -279,6 +283,8 @@ export function MobilePlanDetailContent({
   ).length;
   const openCount = workouts.filter(isOpenWorkout).length;
   const execution = useMemo(() => rollupPlanDetailExecution(plan), [plan]);
+  const rollingT = useTranslations("RollingPlan");
+  const todayNotGenerated = isPlanDateNotGenerated(plan, localDateKey(normalizeDay(new Date())));
   const { currentWorkout, nextWorkout } = useMemo(
     () => getPlanFocusWorkouts(plan),
     [plan],
@@ -305,12 +311,14 @@ export function MobilePlanDetailContent({
         ) : null}
       </section>
 
+      <RollingPlanMonthDirection plan={plan} />
+
       <section className="grid grid-cols-2 gap-3">
         <PlanMetric
           label={mobileT("currentWeek")}
-          value={plansT("planProgress.active", {
+          value={isRollingPlan(plan) ? rollingT("currentWeek", { week: plan.currentWeekIndex ?? 1 }) : plansT("planProgress.active", {
             current: plan.currentWeekIndex ?? 1,
-            total: plan.periodWeeks,
+            total: plan.periodWeeks ?? 1,
           })}
         />
         <PlanMetric
@@ -324,7 +332,7 @@ export function MobilePlanDetailContent({
         <PlanMetric label={mobileT("openSessions")} value={String(openCount)} />
       </section>
 
-      <MobilePlanLoadChart plan={plan} />
+      {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : <MobilePlanLoadChart plan={plan} />}
 
       <section className="space-y-2">
         <h2 className="px-1 text-sm font-semibold text-foreground">
@@ -339,8 +347,8 @@ export function MobilePlanDetailContent({
             <MobilePlanWorkoutRow
               plan={plan}
               workout={currentWorkout}
-              emptyTitle={mobileT("restDay")}
-              emptyDetail={mobileT("noPlannedWorkout")}
+              emptyTitle={todayNotGenerated ? rollingT("notGenerated") : mobileT("restDay")}
+              emptyDetail={todayNotGenerated ? rollingT("notGenerated") : mobileT("noPlannedWorkout")}
               onClick={onWorkoutClick}
             />
             <MobilePlanWorkoutRow
@@ -358,7 +366,7 @@ export function MobilePlanDetailContent({
                     workout={workout}
                     onClick={onWorkoutClick}
                     emptyTitle={mobileT("plannedWorkout")}
-                    emptyDetail={mobileT("noPlannedWorkout")}
+                    emptyDetail={todayNotGenerated ? rollingT("notGenerated") : mobileT("noPlannedWorkout")}
                   />
                 ))
               : null}
@@ -549,8 +557,8 @@ export function MobilePlanDetailSheet({
           viewingWorkout
             ? undefined
             : plan
-              ? plansT("recent.itemMeta", {
-                  weeks: plan.periodWeeks,
+              ? isRollingPlan(plan) ? undefined : plansT("recent.itemMeta", {
+                  weeks: plan.periodWeeks ?? 1,
                   sessions: plan.workoutCount,
                 })
               : undefined
