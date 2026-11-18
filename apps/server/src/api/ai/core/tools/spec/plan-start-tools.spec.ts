@@ -4,6 +4,7 @@ import { planProposalPreviewTool } from '../planProposalPreview.tool';
 import { coachDecisionDraftTool } from '../coachDecisionDraft.tool';
 import { resolveCoachActiveSkill } from '../../coach-skill-resolution';
 import { toolSchemaValidator } from '../../tool-input-validation';
+import { addCalendarDays } from '@shared/plan-calendar';
 
 const request = {
   mode: 'START',
@@ -119,6 +120,77 @@ describe('saved draft start tools', () => {
       plannedSessionRpe: 6,
     });
   });
+});
+
+it('pages effective rule periods separately from workout inventory without truncating the promised date range', async () => {
+  const rule = (index: number) => ({
+    version: 1,
+    revision: index + 1,
+    calendarTimeZone: 'UTC',
+    fixedRestWeekdays: [],
+    unavailableDates: [],
+    availableDateOverrides: [],
+    effectiveFrom: addCalendarDays('2099-11-01', index),
+    confirmation: { source: 'USER', reference: `rule-${index}` },
+  });
+  const plan = {
+    id: 'p',
+    title: 'Rules',
+    status: 'ACTIVE',
+    sourceType: 'USER',
+    periodWeeks: 20,
+    workouts: [],
+    generationMetadata: {
+      qualityContract: { maxDailyMinutes: 60 },
+      scheduleConstraints: rule(60),
+      qualityContractTransition: { mode: 'INHERIT' },
+      scheduleConstraintHistory: Array.from({ length: 60 }, (_, index) => ({
+        scheduleConstraints: rule(index),
+        qualityContract: { maxDailyMinutes: 60 },
+        qualityContractTransition: { mode: 'INHERIT' },
+      })),
+    },
+  };
+  const ctx = {
+    session: { user: { id: 'u' } },
+    currentTurnCalendar: { date: '2099-11-01' },
+    planQuery: {
+      findCoachPlanSnapshot: async () => plan,
+      findRelatedCalendarPage: async () => ({
+        workouts: [],
+        total: 0,
+        offset: 0,
+        returned: 0,
+        hasMore: false,
+        nextOffset: null,
+      }),
+    },
+  } as never;
+  const input = {
+    planId: 'p',
+    calendarFrom: '2099-11-01',
+    calendarTo: addCalendarDays('2099-11-01', 61),
+  };
+  const first = await planByIdTool.execute(ctx, input);
+  expect(first.scheduleRuleInventory).toEqual({
+    total: 61,
+    offset: 0,
+    returned: 40,
+    hasMore: true,
+    nextOffset: 40,
+  });
+  const last = await planByIdTool.execute(ctx, {
+    ...input,
+    scheduleRuleOffset: 40,
+  });
+  expect(last.scheduleRuleInventory).toEqual({
+    total: 61,
+    offset: 40,
+    returned: 21,
+    hasMore: false,
+    nextOffset: null,
+  });
+  expect(last.scheduleRulePeriods!.at(-1)!.to).toBe(input.calendarTo);
 });
 
 describe('START planned session RPE', () => {

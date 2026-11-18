@@ -1,4 +1,8 @@
 import dayjs = require('dayjs');
+import {
+  resolveScheduleRulesAtDate,
+  type ScheduleRulePeriod,
+} from '@shared/plan-calendar';
 
 export type PlanWorkoutSummary = {
   id: string;
@@ -36,6 +40,14 @@ export type PlanSnapshotToolOutput = {
     status: string;
     periodWeeks: number;
     generationMetadata?: unknown;
+    scheduleRules?: {
+      asOf: string;
+      effective: ReturnType<typeof resolveScheduleRulesAtDate>;
+      latestConfirmed: {
+        scheduleConstraints: unknown;
+        qualityContract: unknown;
+      };
+    };
     startDate: string | null;
     endDate: string | null;
     currentWeekIndex: number | null;
@@ -85,6 +97,14 @@ export type PlanSnapshotToolOutput = {
     workouts: unknown[];
   };
   allWorkouts?: PlanWorkoutSummary[];
+  scheduleRulePeriods?: ScheduleRulePeriod[];
+  scheduleRuleInventory?: {
+    total: number;
+    offset: number;
+    returned: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+  };
   workoutInventory?: {
     total: number;
     offset: number;
@@ -241,6 +261,7 @@ export function buildPlanSnapshotFromRow(
     plannedCount: currentWeekWorkouts.filter((w) => w.status === 'PLANNED')
       .length,
   };
+  const metadata = (plan.generationMetadata ?? {}) as Record<string, unknown>;
 
   return {
     asOf: asOfDate,
@@ -248,6 +269,14 @@ export function buildPlanSnapshotFromRow(
       id: plan.id,
       title: plan.title,
       generationMetadata: plan.generationMetadata,
+      scheduleRules: {
+        asOf: asOfDate,
+        effective: resolveScheduleRulesAtDate(metadata, asOfDate),
+        latestConfirmed: {
+          scheduleConstraints: metadata.scheduleConstraints ?? null,
+          qualityContract: metadata.qualityContract ?? null,
+        },
+      },
       description: plan.description ?? null,
       goal: plan.goal ?? null,
       sourceType: plan.sourceType,
@@ -296,6 +325,25 @@ export function buildPlanSnapshotFromRow(
       summary,
     },
     ...(input.includeAllWorkouts ? { allWorkouts: workouts } : {}),
+  };
+}
+
+/** Keep model evidence current; the latest confirmed version can intentionally start later. */
+export function planSnapshotModelPlan(plan: PlanSnapshotToolOutput['plan']) {
+  if (!plan) return null;
+  const metadata = (plan.generationMetadata ?? {}) as Record<string, unknown>;
+  const {
+    scheduleConstraintHistory: _history,
+    qualityContractTransition: _transition,
+    ...rest
+  } = metadata;
+  return {
+    ...plan,
+    generationMetadata: {
+      ...rest,
+      scheduleConstraints: plan.scheduleRules?.effective.constraints ?? null,
+      qualityContract: plan.scheduleRules?.effective.qualityContract ?? null,
+    },
   };
 }
 

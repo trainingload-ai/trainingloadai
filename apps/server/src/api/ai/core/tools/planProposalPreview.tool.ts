@@ -404,6 +404,19 @@ export const planProposalPreviewTool: AiToolDef<
       ? {
           completeCandidateRenderedByServer: true,
           counts: output.presentation.counts,
+          scheduleRulePeriods: output.presentation.scheduleRulePeriods?.slice(
+            0,
+            40,
+          ),
+          scheduleRuleCoverage: {
+            total: output.presentation.scheduleRulePeriods?.length ?? 0,
+            returned: Math.min(
+              40,
+              output.presentation.scheduleRulePeriods?.length ?? 0,
+            ),
+            hasMore:
+              (output.presentation.scheduleRulePeriods?.length ?? 0) > 40,
+          },
           relatedCalendarConflicts:
             output.presentation.relatedCalendarConflicts,
           warnings: output.presentation.warnings,

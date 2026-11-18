@@ -1,6 +1,7 @@
 import type {
   ScheduleConstraints,
   ScheduleQualityContractTransition,
+  ScheduleRulePeriod,
 } from "./plan-calendar";
 import type { CoachPlanDraftData } from "./ai-coach-schema";
 import type { WorkoutDefinitionInput } from "./workout-structure";
@@ -142,6 +143,7 @@ export type RelatedCalendarConflict = {
 };
 
 export type PlanProposalPresentation = {
+  scheduleRulePeriods?: ScheduleRulePeriod[];
   qualityContract?: PlanQualityContract;
   relatedCalendarConflicts?: RelatedCalendarConflict[];
   title: string;

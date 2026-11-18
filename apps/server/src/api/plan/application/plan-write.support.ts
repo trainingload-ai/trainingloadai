@@ -22,7 +22,7 @@ import {
 import {
   parseScheduleConstraints,
   projectPlanCalendar,
-  resolveScheduleQualityContract,
+  transitionScheduleMetadata,
   isCalendarDate,
   assessPlanSchedule,
 } from '@shared/plan-calendar';
@@ -2279,6 +2279,7 @@ export class PlanWriteSupport {
         changedWorkoutIds: changedIds,
         constraints,
         qualityContract: contract,
+        scheduleRuleMetadata: plan.generationMetadata,
         projectDates: Boolean(startDate),
         validationRange,
       };
@@ -2457,25 +2458,11 @@ export class PlanWriteSupport {
         const metadata =
           (existing.generationMetadata as Record<string, unknown> | null) ?? {};
         try {
-          const qualityContract = resolveScheduleQualityContract(
-            parsePlanQualityContract(metadata.qualityContract),
+          nextMetadata = transitionScheduleMetadata(
+            metadata,
+            next,
             dto.qualityContractTransition,
           );
-          nextMetadata = {
-            ...metadata,
-            scheduleConstraints: next,
-            scheduleConstraintHistory: [
-              ...(Array.isArray(metadata.scheduleConstraintHistory)
-                ? metadata.scheduleConstraintHistory
-                : []),
-              {
-                scheduleConstraints: prior ?? null,
-                qualityContract: metadata.qualityContract ?? null,
-              },
-            ],
-            qualityContract: qualityContract ?? {},
-            qualityContractTransition: dto.qualityContractTransition,
-          };
         } catch {
           throw new UnprocessableEntityException(
             'Invalid quality contract transition',

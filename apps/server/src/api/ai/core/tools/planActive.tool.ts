@@ -9,6 +9,7 @@ import {
   buildPlanSnapshotFromRow,
   emptyPlanSnapshotOutput,
   type PlanSnapshotToolOutput,
+  planSnapshotModelPlan,
 } from './plan-snapshot.shared';
 
 type Input = {
@@ -16,8 +17,8 @@ type Input = {
   includeAllWorkouts?: boolean;
 };
 
-export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiTool(
-  {
+export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> =
+  buildAiTool({
     name: 'plan.active',
     aliases: ['active_plan', 'current_plan'],
     description:
@@ -45,7 +46,7 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiT
     checkPermissions: async (ctx) => requireSignedInUser(ctx),
     summarizeForModel: ({ output }) => ({
       asOf: output.asOf,
-      plan: output.plan,
+      plan: planSnapshotModelPlan(output.plan),
       today: output.today,
       tomorrow: output.tomorrow,
       currentWeek: output.currentWeek,
@@ -72,5 +73,4 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiT
 
       return buildPlanSnapshotFromRow(plan, input, anchor, tomorrow);
     },
-  },
-);
+  });

@@ -4,6 +4,8 @@ import { PrismaClient } from '@prisma/client';
 import { planStartFixture } from './plan-start.fixture';
 import { addCalendarDays } from '@shared/plan-calendar';
 import type { PlanQualityContract } from '@shared/plan-quality';
+import { planByIdTool } from '../../ai/core/tools/planById.tool';
+import { planActiveTool } from '../../ai/core/tools/planActive.tool';
 
 describe('remaining schedule / PostgreSQL', () => {
   let database: ChildProcess;
@@ -529,6 +531,311 @@ describe('remaining schedule / PostgreSQL', () => {
       (await f.service.getPlanDetail('user', d.planId)).plan!.workouts,
     ).toHaveLength(5);
   });
+
+  it.each([
+    { previous: 60, next: 30, beforeAllowed: true, duringAllowed: false },
+    { previous: 30, next: 60, beforeAllowed: false, duringAllowed: true },
+  ])(
+    'applies daily availability only inside its confirmed date window (%j)',
+    async ({ previous, next, beforeAllowed, duringAllowed }) => {
+      const d = await running(1, {
+        durationMinutes: 30,
+        qualityContract: { maxDailyMinutes: previous },
+      });
+      d.request.scheduleConstraints = {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'UTC',
+        fixedRestWeekdays: [],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: '2099-11-25',
+        effectiveUntil: '2099-11-26',
+        confirmation: { source: 'USER', reference: 'future-time-availability' },
+      };
+      d.request.qualityContractTransition = {
+        mode: 'INHERIT',
+        maxDailyMinutes: next,
+      };
+      const workout = (minutes: number) => ({
+        kind: 'FREEFORM' as const,
+        version: 1 as const,
+        source: 'STRUCTURE' as const,
+        structure: {
+          kind: 'FREEFORM' as const,
+          version: 1 as const,
+          text: `Run ${minutes}m`,
+          durationSeconds: minutes * 60,
+        },
+      });
+      const source = (await f.service.getPlanDetail('user', d.planId)).plan!
+        .workouts[0];
+      d.request.changes = [
+        {
+          sourceWorkoutId: source.id,
+          expectedRevision: source.revision ?? 1,
+          workout: {
+            weekIndex: 1,
+            dayIndex: 1,
+            sportType: 'RUN',
+            definition: workout(45),
+          },
+        },
+      ];
+      if (beforeAllowed)
+        await f.proposals.createPreview('user', d.request, d.binding);
+      else {
+        await expect(
+          f.proposals.createPreview('user', d.request, d.binding),
+        ).rejects.toThrow();
+        d.request.changes = [];
+      }
+      await apply(d);
+      const toolContext = {
+        session: { user: { id: 'user' } },
+        currentTurnCalendar: { date: '2099-11-23' },
+        planQuery: f.query,
+      } as never;
+      const read = await planByIdTool.execute(toolContext, {
+        planId: d.planId,
+        asOf: '2099-11-23',
+        calendarFrom: '2099-11-22',
+        calendarTo: '2099-11-28',
+      });
+      const model = (planByIdTool.summarizeForModel as any)({ output: read });
+      expect(
+        model.plan.scheduleRules.effective.qualityContract.maxDailyMinutes,
+      ).toBe(previous);
+      expect(
+        model.plan.generationMetadata.qualityContract.maxDailyMinutes,
+      ).toBe(previous);
+      expect(
+        model.plan.scheduleRules.latestConfirmed.scheduleConstraints
+          .effectiveFrom,
+      ).toBe('2099-11-25');
+      expect(
+        model.scheduleRulePeriods.map((period) => [
+          period.from,
+          period.to,
+          period.availability.maxDailyMinutes,
+        ]),
+      ).toEqual([
+        ['2099-11-22', '2099-11-24', previous],
+        ['2099-11-25', '2099-11-26', next],
+        ['2099-11-27', '2099-11-28', previous],
+      ]);
+      const active = await planActiveTool.execute(toolContext, {
+        asOf: '2099-11-23',
+      });
+      expect(
+        (planActiveTool.summarizeForModel as any)({ output: active }).plan
+          .scheduleRules.effective.qualityContract.maxDailyMinutes,
+      ).toBe(previous);
+      for (const [date, allowed] of [
+        ['2099-11-23', beforeAllowed],
+        ['2099-11-25', duringAllowed],
+        ['2099-11-27', beforeAllowed],
+      ] as const) {
+        const operation = f.write.createIndependentWorkout('user', {
+          scheduledDate: date,
+          sportType: 'RUN',
+          definition: workout(45),
+        });
+        if (allowed) await operation;
+        else await expect(operation).rejects.toThrow();
+      }
+      if (beforeAllowed) {
+        await f.write.createIndependentWorkout('user', {
+          scheduledDate: '2099-11-22',
+          sportType: 'RUN',
+          definition: workout(15),
+        });
+        await expect(
+          f.service.updatePlan('user', d.planId, {
+            scheduleConstraints: {
+              ...d.request.scheduleConstraints,
+              revision: 2,
+            },
+            qualityContractTransition: { mode: 'INHERIT' },
+            workouts: [
+              {
+                id: source.id,
+                weekIndex: 1,
+                dayIndex: 1,
+                sportType: 'RUN',
+                definition: workout(50),
+              },
+            ],
+          }),
+        ).rejects.toThrow();
+      }
+    },
+  );
+
+  it.each([false, true])(
+    'keeps a future budget pending across a rest-only revision and honors an explicit earlier repeat (explicit=%s)',
+    async (explicit) => {
+      const d = await running(1, {
+        durationMinutes: 30,
+        qualityContract: { maxDailyMinutes: 60 },
+      });
+      d.request.scheduleConstraints = {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'UTC',
+        fixedRestWeekdays: [],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: '2099-11-25',
+        effectiveUntil: '2099-11-26',
+        confirmation: { source: 'USER', reference: 'future-budget' },
+      };
+      d.request.qualityContractTransition = {
+        mode: 'INHERIT',
+        maxDailyMinutes: 30,
+      };
+      await apply(d);
+      d.request.scheduleConstraints = {
+        ...d.request.scheduleConstraints,
+        revision: 2,
+        effectiveFrom: '2099-11-22',
+        effectiveUntil: '2099-11-24',
+      };
+      d.request.qualityContractTransition = explicit
+        ? { mode: 'INHERIT', maxDailyMinutes: 30 }
+        : { mode: 'INHERIT' };
+      await apply(d);
+      const after = (await f.service.getPlanDetail('user', d.planId)).plan!;
+      expect(after.generationMetadata).toMatchObject({
+        scheduleConstraintHistory: expect.arrayContaining([
+          expect.objectContaining({
+            qualityContractTransition: { mode: 'INHERIT', maxDailyMinutes: 30 },
+          }),
+        ]),
+      });
+      for (const [date, allowed] of [
+        ['2099-11-23', !explicit],
+        ['2099-11-25', false],
+        ['2099-11-27', true],
+      ] as const) {
+        const operation = f.write.createIndependentWorkout('user', {
+          scheduledDate: date,
+          sportType: 'RUN',
+          definition: {
+            kind: 'FREEFORM',
+            version: 1,
+            source: 'STRUCTURE',
+            structure: {
+              kind: 'FREEFORM',
+              version: 1,
+              text: 'Run 45m',
+              durationSeconds: 2700,
+            },
+          },
+        });
+        if (allowed) await operation;
+        else await expect(operation).rejects.toThrow();
+      }
+    },
+  );
+
+  it('keeps prior rest rules before a future revision and restores them after an explicit empty-rule window', async () => {
+    const d = await running(1);
+    d.request.scheduleConstraints = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: ['2099-11-23', '2099-11-25', '2099-11-27'],
+      availableDateOverrides: [],
+      effectiveFrom: '2099-11-22',
+      confirmation: { source: 'USER', reference: 'initial-rest-dates' },
+    };
+    d.request.qualityContractTransition = { mode: 'INHERIT' };
+    await apply(d);
+    d.request.scheduleConstraints = {
+      ...d.request.scheduleConstraints,
+      revision: 2,
+      unavailableDates: [],
+      effectiveFrom: '2099-11-25',
+      effectiveUntil: '2099-11-26',
+    };
+    await apply(d);
+    for (const [dayIndex, allowed] of [
+      [2, false],
+      [4, true],
+      [6, false],
+    ] as const) {
+      const operation = f.service.addWorkout('user', d.planId, {
+        weekIndex: 1,
+        dayIndex,
+        sportType: 'RUN',
+        definition: {
+          kind: 'FREEFORM',
+          version: 1,
+          source: 'TEXT',
+          text: 'Run 30m',
+        },
+      });
+      if (allowed) await operation;
+      else await expect(operation).rejects.toThrow();
+    }
+  });
+
+  it.each([{ allowedDays: [1] }, { allowedDays: null }])(
+    'restores prior relative allowed days outside an explicit replacement window (%j)',
+    async ({ allowedDays }) => {
+      const d = await running(1, {
+        periodWeeks: 2,
+        qualityContract: { allowedDays: [1, 2] },
+      });
+      d.request.scheduleConstraints = {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'UTC',
+        fixedRestWeekdays: [],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: '2099-11-25',
+        effectiveUntil: '2099-11-26',
+        confirmation: { source: 'USER', reference: 'relative-day-window' },
+      };
+      d.request.qualityContractTransition = {
+        mode: 'REPLACE_ALLOWED_DAYS',
+        allowedDays,
+      };
+      const preview = await f.proposals.createPreview(
+        'user',
+        d.request,
+        d.binding,
+      );
+      expect(
+        preview.presentation.scheduleRulePeriods.map(
+          (period) => period.allowedDays,
+        ),
+      ).toEqual([[1, 2], allowedDays, [1, 2]]);
+      await apply(d);
+      const workout = (weekIndex: number, dayIndex: number) => ({
+        weekIndex,
+        dayIndex,
+        sportType: 'RUN' as const,
+        definition: {
+          kind: 'FREEFORM' as const,
+          version: 1 as const,
+          source: 'TEXT' as const,
+          text: 'Run 30m',
+        },
+      });
+      await f.service.addWorkout('user', d.planId, workout(1, 2));
+      const during = f.service.addWorkout('user', d.planId, workout(1, 4));
+      if (allowedDays === null) await during;
+      else await expect(during).rejects.toThrow();
+      await f.service.addWorkout('user', d.planId, workout(2, 2));
+      await expect(
+        f.service.addWorkout('user', d.planId, workout(2, 3)),
+      ).rejects.toThrow();
+    },
+  );
 
   it.each([
     { maxDailyMinutes: 0 },

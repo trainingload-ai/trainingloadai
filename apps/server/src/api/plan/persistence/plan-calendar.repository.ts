@@ -20,12 +20,27 @@ export class PlanCalendarRepository {
       where: {
         userId,
         OR: [{ planId: null }, { planId: { not: planId } }],
-        scheduledDate: range
-          ? {
-              gte: new Date(`${range.from}T00:00:00Z`),
-              lte: new Date(`${range.until}T00:00:00Z`),
-            }
-          : { in: dates.map((d) => new Date(`${d}T00:00:00Z`)) },
+        AND: [
+          {
+            OR: [
+              {
+                scheduledDate: {
+                  in: dates.map((d) => new Date(`${d}T00:00:00Z`)),
+                },
+              },
+              ...(range
+                ? [
+                    {
+                      scheduledDate: {
+                        gte: new Date(`${range.from}T00:00:00Z`),
+                        lte: new Date(`${range.until}T00:00:00Z`),
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ],
       },
       include: calendarInclude,
     });
