@@ -164,6 +164,18 @@
       "0036_health_daily_fact_revisions": {
         "phase": "expand",
         "releaseVersion": "1.1.26"
+      },
+      "0037_plan_start_conversation": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0038_plan_schedule": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0039_rolling_plan": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
       }
     }
   }

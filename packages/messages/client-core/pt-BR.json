@@ -6534,6 +6534,56 @@
     "windowThrough": "Até",
     "exporting": "Exportando…",
     "exportFailed": "Falha ao exportar",
-    "plannedThrough": "Será gerado até {date}"
+    "plannedThrough": "Será gerado até {date}",
+    "loadTitle": "Carga mensal",
+    "actual": "Real concluída",
+    "remainingPlanned": "Planejada restante",
+    "ungeneratedForecast": "Previsão não gerada",
+    "unknown": "Desconhecida",
+    "unit": "carga normalizada",
+    "sources": "Fontes: {sources}",
+    "observedCount": "{known}/{total} conhecidos",
+    "coverage": {
+      "COMPLETE": "Cobertura completa",
+      "PARTIAL": "Cobertura parcial",
+      "NO_DATA": "Sem observações",
+      "UNKNOWN": "Cobertura desconhecida"
+    },
+    "loadHint": "A carga real inclui atividades registradas neste período. A planejada inclui estimativas conhecidas de sessões incompletas. Dados ausentes não são zero; as diretrizes mensais não determinam a carga de sessões ainda não geradas.",
+    "loadError": "Não foi possível ler a carga.",
+    "retryLoad": "Tentar novamente"
+  },
+  "PlanAutomation": {
+    "title": "Gestão automática",
+    "enable": "Retomar gestão automática",
+    "disable": "Desativar gestão automática",
+    "enabled": "A gestão automática está ativada",
+    "disabled": "A gestão automática está desativada",
+    "loading": "Lendo o status da gestão automática…",
+    "loadError": "O status da gestão automática está indisponível.",
+    "updateError": "Não foi possível confirmar o resultado. Confira o status atual do servidor.",
+    "retryLoad": "Recarregar status",
+    "blockedHint": "O calendário ainda não foi atualizado. Confira as configurações ou converse com seu treinador.",
+    "pausedHint": "O treino está pausado. O planejamento automático continua quando você retomar os treinos.",
+    "noTasks": "Os próximos treinos serão organizados conforme suas configurações, sem uma nova confirmação.",
+    "needsAuthorization": "Primeiro confirme com seu treinador a gestão automática do plano contínuo.",
+    "lastKnown": "Última leitura: {state}",
+    "accessRequired": "Confira o acesso ao treinador de IA e o consentimento de dados. O planejamento automático ainda não pode continuar.",
+    "coachSettings": "Configurações da conta",
+    "aiConsent": "Consentimento de dados de IA",
+    "kind": {
+      "MONTH": "Direção do mês",
+      "WEEK": "Calendário semanal",
+      "ADJUST": "Próximos ajustes"
+    },
+    "state": {
+      "PENDING": "Aguardando geração",
+      "RUNNING": "Planejando",
+      "RETRY": "Aguardando nova tentativa automática",
+      "APPLIED": "Atualizado",
+      "BLOCKED": "Bloqueado",
+      "FAILED": "Não foi possível atualizar",
+      "CANCELLED": "Tarefa cancelada"
+    }
   }
 }

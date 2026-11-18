@@ -809,6 +809,9 @@ export class PlanWriteSupport {
           data: {
             userId,
             planId,
+            automationProtected:
+              plan.planningMode === 'ROLLING' &&
+              meta?.action !== 'automation_apply_plan_schedule',
             dayOffset,
             sessionIndex,
             scheduledDate,
@@ -935,6 +938,10 @@ export class PlanWriteSupport {
           where: { id: workoutId },
           data: {
             planId,
+            ...(plan.planningMode === 'ROLLING' &&
+            meta?.action !== 'automation_apply_plan_schedule'
+              ? { automationProtected: true }
+              : {}),
             dayOffset,
             sessionIndex,
             revision: { increment: 1 },

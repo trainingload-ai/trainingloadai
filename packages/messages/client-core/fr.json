@@ -6534,6 +6534,56 @@
     "windowThrough": "Au",
     "exporting": "Exportation…",
     "exportFailed": "Échec de l’exportation",
-    "plannedThrough": "Sera généré jusqu’au {date}"
+    "plannedThrough": "Sera généré jusqu’au {date}",
+    "loadTitle": "Charge mensuelle",
+    "actual": "Charge réalisée",
+    "remainingPlanned": "Prévision des séances restantes",
+    "ungeneratedForecast": "Prévision non générée",
+    "unknown": "Inconnue",
+    "unit": "charge normalisée",
+    "sources": "Sources : {sources}",
+    "observedCount": "{known}/{total} connus",
+    "coverage": {
+      "COMPLETE": "Couverture complète",
+      "PARTIAL": "Couverture partielle",
+      "NO_DATA": "Aucune observation",
+      "UNKNOWN": "Couverture inconnue"
+    },
+    "loadHint": "La charge réelle couvre les activités enregistrées sur cette période. La charge prévue inclut les estimations connues des séances inachevées. Une donnée absente ne vaut pas zéro ; les orientations mensuelles ne déterminent pas la charge des séances non générées.",
+    "loadError": "Impossible de lire les données de charge.",
+    "retryLoad": "Réessayer"
+  },
+  "PlanAutomation": {
+    "title": "Gestion automatique",
+    "enable": "Reprendre la gestion automatique",
+    "disable": "Désactiver la gestion automatique",
+    "enabled": "La gestion automatique est activée",
+    "disabled": "La gestion automatique est désactivée",
+    "loading": "Lecture du statut de gestion automatique…",
+    "loadError": "Le statut de gestion automatique est indisponible.",
+    "updateError": "Le résultat n’a pas pu être confirmé. Vérifiez le statut actuel du serveur.",
+    "retryLoad": "Actualiser le statut",
+    "blockedHint": "Le programme n’a pas été mis à jour. Vérifiez les réglages ou parlez à votre coach.",
+    "pausedHint": "L’entraînement est en pause. La planification automatique continuera à sa reprise.",
+    "noTasks": "Les prochaines séances seront organisées selon vos réglages sans nouvelle confirmation.",
+    "needsAuthorization": "Confirmez d’abord avec votre coach la gestion automatique du plan continu.",
+    "lastKnown": "Dernière lecture : {state}",
+    "accessRequired": "Vérifiez l’accès au coach IA et le consentement aux données. La planification automatique ne peut pas encore continuer.",
+    "coachSettings": "Réglages du compte",
+    "aiConsent": "Consentement aux données IA",
+    "kind": {
+      "MONTH": "Orientation du mois",
+      "WEEK": "Programme de la semaine",
+      "ADJUST": "Prochains ajustements"
+    },
+    "state": {
+      "PENDING": "En attente de génération",
+      "RUNNING": "Planification en cours",
+      "RETRY": "En attente d’un nouvel essai automatique",
+      "APPLIED": "Mis à jour",
+      "BLOCKED": "Bloqué",
+      "FAILED": "Échec de la mise à jour",
+      "CANCELLED": "Tâche annulée"
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { RollingPlanAutomationService } from '../application/rolling-plan-automation.service';
+import { PlanRepository } from '../persistence/plan.repository';
 import dayjs = require('dayjs');
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
@@ -175,6 +177,169 @@ describe('continuous training / PostgreSQL', () => {
       );
     return { planId, request, preview, apply };
   }
+  it.each(['STRENGTH', 'OTHER', 'UNKNOWN'])(
+    'starts and automatically generates only the authorized %s sport using its persisted family',
+    async (sport) => {
+      const definition =
+        sport === 'STRENGTH'
+          ? {
+              kind: 'STRENGTH' as const,
+              version: 1 as const,
+              source: 'TEXT' as const,
+              text: 'duration 45m\nsession rpe 6\nexercise "Squat" {\nwork 3x5 open rpe 7 rest 3m\n}',
+            }
+          : {
+              kind: 'FREEFORM' as const,
+              version: 1 as const,
+              source: 'TEXT' as const,
+              text: 'General movement 20m',
+            };
+      const { planId, apply } = await ready('2099-11-18', (request) => {
+        request.rolling!.policy.sportTypes = [sport];
+        Object.assign(request.additions[0].workout, {
+          sportType: 'UNKNOWN',
+          sportDefinitionCode:
+            sport === 'STRENGTH' ? 'STRENGTH_TRAINING' : 'OTHER',
+          definition,
+        });
+      });
+      await apply();
+      Object.defineProperty(f.starts, 'automationAccess', {
+        value: { assertAllowed: async () => undefined },
+      });
+      const queue = new RollingPlanAutomationService(
+        prisma as never,
+        f.starts,
+        { assertAllowed: async () => undefined } as never,
+        new PlanRepository(prisma as never),
+      );
+      await queue.discover(new Date('2099-11-20T09:00:00Z'));
+      const job = (await queue.claim())!;
+      await queue.prepare(job.id, job.claimToken!);
+      const request: PlanSchedulePreviewRequest = {
+        mode: 'SCHEDULE',
+        planId,
+        range: { from: '2099-11-23', to: '2099-11-29' },
+        rationale: 'Generate the authorized sport',
+        evidenceRefs: [],
+        changes: [],
+        deletions: [],
+        preserveUnmentioned: true,
+        additions: [
+          {
+            candidateKey: 'next-week',
+            workout: {
+              weekIndex: 1,
+              dayIndex: 6,
+              sportType: 'UNKNOWN',
+              sportDefinitionCode:
+                sport === 'STRENGTH' ? 'STRENGTH_TRAINING' : 'OTHER',
+              definition,
+            },
+          },
+        ],
+      };
+      if (sport === 'STRENGTH') {
+        await expect(
+          f.starts.createAutomationPreview(job.id, job.claimToken!, {
+            ...request,
+            additions: [
+              {
+                ...request.additions[0],
+                workout: {
+                  ...request.additions[0].workout,
+                  sportDefinitionCode: 'OTHER',
+                  definition: {
+                    kind: 'FREEFORM',
+                    version: 1,
+                    source: 'TEXT',
+                    text: 'Unspecified 20m',
+                  },
+                },
+              },
+            ],
+          }),
+        ).rejects.toThrow('outside the authorized sports');
+      }
+      if (sport !== 'STRENGTH') {
+        await expect(
+          f.starts.createAutomationPreview(job.id, job.claimToken!, {
+            ...request,
+            additions: [
+              {
+                ...request.additions[0],
+                workout: {
+                  ...request.additions[0].workout,
+                  sportDefinitionCode: 'STRENGTH_TRAINING',
+                  definition: {
+                    kind: 'STRENGTH',
+                    version: 1,
+                    source: 'TEXT',
+                    text: 'duration 45m\nsession rpe 6\nexercise "Squat" {\nwork 3x5 open rpe 7 rest 3m\n}',
+                  },
+                },
+              },
+            ],
+          }),
+        ).rejects.toThrow('outside the authorized sports');
+      }
+      await f.starts.createAutomationPreview(job.id, job.claimToken!, request);
+      await f.starts.applyAutomation(job.id, job.claimToken!);
+      const workouts = (await f.service.getPlanDetail('user', planId)).plan!
+        .workouts;
+      expect(workouts).toHaveLength(2);
+      expect(workouts.every((w) => w.structureKind === definition.kind)).toBe(
+        true,
+      );
+    },
+  );
+  it.each(['set-prescription', 'session-rpe'])(
+    'rejects and rolls back a strength START when persistence changes the %s rather than its generated IDs',
+    async (fault) => {
+      const { planId, apply } = await ready('2099-11-18', (request) => {
+        request.rolling!.policy.sportTypes = ['STRENGTH'];
+        Object.assign(request.additions[0].workout, {
+          sportType: 'UNKNOWN',
+          sportDefinitionCode: 'STRENGTH_TRAINING',
+          definition: {
+            kind: 'STRENGTH',
+            version: 1,
+            source: 'TEXT',
+            text: 'duration 45m\nsession rpe 6\nexercise "Squat" {\nwork 3x5 open rpe 7 rest 3m\n}',
+          },
+        });
+      });
+      // A synthetic database fault exercises readback through the real apply transaction.
+      const table =
+        fault === 'set-prescription'
+          ? 't_plan_workout_set_group'
+          : 't_plan_workout';
+      const field =
+        fault === 'set-prescription' ? 'reps_max' : 'planned_session_rpe';
+      const wrongValue = fault === 'set-prescription' ? 6 : 2;
+      await prisma.$executeRawUnsafe(
+        `CREATE FUNCTION synthetic_strength_write_fault() RETURNS trigger AS $$ BEGIN NEW.${field} = ${wrongValue}; RETURN NEW; END; $$ LANGUAGE plpgsql`,
+      );
+      await prisma.$executeRawUnsafe(
+        `CREATE TRIGGER synthetic_strength_write_fault BEFORE INSERT OR UPDATE ON ${table} FOR EACH ROW EXECUTE FUNCTION synthetic_strength_write_fault()`,
+      );
+      try {
+        await expect(apply()).rejects.toThrow(
+          'Start workout definition readback failed',
+        );
+        expect(
+          (await f.service.getPlanDetail('user', planId)).plan,
+        ).toMatchObject({ status: 'DRAFT', workouts: [] });
+      } finally {
+        await prisma.$executeRawUnsafe(
+          `DROP TRIGGER synthetic_strength_write_fault ON ${table}`,
+        );
+        await prisma.$executeRawUnsafe(
+          'DROP FUNCTION synthetic_strength_write_fault()',
+        );
+      }
+    },
+  );
   it('confirms the same rolling plan, month direction and partial first ISO week in one atomic start', async () => {
     const { planId, apply } = await ready();
     const receipt = await apply();

@@ -11,7 +11,7 @@ export function RollingStartSummary({
   pending?: boolean;
 }) {
   const t = useTranslations("RollingPlan");
-  const sportT = useTranslations("V2PlanDetailPage.sportType");
+  const sportT = useTranslations("SportCatalog");
   return (
     <section className="space-y-2 rounded-md bg-muted p-3 text-sm">
       <h3 className="font-semibold">{t("title")}</h3>
@@ -19,13 +19,13 @@ export function RollingStartSummary({
       <p className="text-muted-foreground">
         {rolling.policy.sportTypes
           .map((sport) =>
-            sport === "RUN"
-              ? sportT("run")
-              : sport === "CYCLING"
-                ? sportT("cycling")
-                : sport === "SWIM"
-                  ? sportT("swim")
-                  : sport,
+            ["RUN", "CYCLING", "SWIM", "UNKNOWN"].includes(sport)
+              ? sportT(
+                  `families.${sport as "RUN" | "CYCLING" | "SWIM" | "UNKNOWN"}`,
+                )
+              : sportT(
+                  `sports.${sport === "STRENGTH" ? "STRENGTH_TRAINING" : sport}`,
+                ),
           )
           .join(" · ")}
       </p>

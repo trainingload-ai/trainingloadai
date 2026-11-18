@@ -205,9 +205,10 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
               {isRollingPlan(current.plan) ? (
                 <>
                   <RollingPlanCoverage plan={current.plan} />
-                  {current.plan.startDate ? (
-                    <RollingPlanCalendar plan={current.plan} />
-                  ) : null}
+                  <RollingPlanCalendar
+                    plan={current.plan}
+                    pendingStartDate={current.plan.status === "DRAFT" ? current.startDate : undefined}
+                  />
                 </>
               ) : (
                 <CoachPlanDraftCalendarPreview

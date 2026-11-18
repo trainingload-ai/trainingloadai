@@ -6631,6 +6631,56 @@
     "windowThrough": "結束日期",
     "exporting": "正在匯出…",
     "exportFailed": "匯出快照失敗",
-    "plannedThrough": "確認後產生至 {date}"
+    "plannedThrough": "確認後產生至 {date}",
+    "loadTitle": "月度負荷",
+    "actual": "實際完成",
+    "remainingPlanned": "剩餘課程預計",
+    "ungeneratedForecast": "未生成部分預測",
+    "unknown": "未知",
+    "unit": "標準化負荷",
+    "sources": "來源：{sources}",
+    "observedCount": "已知 {known}/{total}",
+    "coverage": {
+      "COMPLETE": "完整涵蓋",
+      "PARTIAL": "部分涵蓋",
+      "NO_DATA": "暫無觀測",
+      "UNKNOWN": "涵蓋未知"
+    },
+    "loadHint": "實際負荷來自此視窗內已記錄的活動；剩餘預計僅包含未完成課程的已知估算。缺失資料不按零計算，月度方向不代表尚未生成課程的負荷。",
+    "loadError": "無法讀取負荷資料。",
+    "retryLoad": "重試"
+  },
+  "PlanAutomation": {
+    "title": "自動管理",
+    "enable": "恢復自動管理",
+    "disable": "關閉自動管理",
+    "enabled": "自動管理已開啟",
+    "disabled": "自動管理已關閉",
+    "loading": "正在讀取自動管理狀態…",
+    "loadError": "暫時無法讀取自動管理狀態。",
+    "updateError": "未能確認操作結果，請以目前讀取的狀態為準。",
+    "retryLoad": "重新讀取狀態",
+    "blockedHint": "課表尚未更新，請檢查教練設定或與教練溝通。",
+    "pausedHint": "訓練計畫已暫停；恢復訓練後才會自動安排新課表。",
+    "noTasks": "後續課表會依設定自動安排，無需逐次確認。",
+    "needsAuthorization": "請先與教練確認持續訓練計畫的自動管理設定。",
+    "lastKnown": "上次讀取：{state}",
+    "accessRequired": "請檢查 AI 教練功能與資料授權，自動安排暫時無法繼續。",
+    "coachSettings": "帳戶設定",
+    "aiConsent": "AI 資料授權",
+    "kind": {
+      "MONTH": "月度方向",
+      "WEEK": "週課表",
+      "ADJUST": "近期調整"
+    },
+    "state": {
+      "PENDING": "等待產生",
+      "RUNNING": "正在規劃",
+      "RETRY": "正在等待自動重試",
+      "APPLIED": "已更新",
+      "BLOCKED": "暫時受阻",
+      "FAILED": "本次未能更新",
+      "CANCELLED": "本次任務已取消"
+    }
   }
 }
