@@ -1,3 +1,4 @@
+import { isCalendarPlanDecisionType } from "@shared/plan-proposal-receipt";
 import type { CoachUiMessage } from "@/lib/ai-coach-ui-parts";
 
 type DecisionState = {
@@ -11,27 +12,7 @@ function record(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-/** A committed START remains recoverable if the later assistant apply message was lost. */
-export function getRestoredStartDecisionApply(input: unknown) {
-  const card = record(input);
-  const receipt = record(record(card?.payload)?.appliedReceipt);
-  if (
-    card?.kind !== "coach_decision_draft" ||
-    card.decisionType !== "PLAN_START" ||
-    card.state !== "APPLIED" ||
-    typeof card.decisionId !== "string" ||
-    receipt?.mode !== "START" ||
-    receipt.readbackVerified !== true
-  )
-    return null;
-  return {
-    kind: "coach_decision_apply" as const,
-    decisionId: card.decisionId,
-    branchId: typeof card.branchId === "string" ? card.branchId : null,
-    result: "APPLIED",
-    receipt,
-  };
-}
+export { getRestoredPlanDecisionApply as getRestoredStartDecisionApply } from "@shared/plan-proposal-receipt";
 function startDecision(
   part: CoachUiMessage["parts"][number],
 ): DecisionState | null {
@@ -41,7 +22,8 @@ function startDecision(
   )
     return null;
   const input = part.data.input as Record<string, unknown> | null;
-  return input?.decisionType === "PLAN_START" &&
+  return input &&
+    isCalendarPlanDecisionType(input.decisionType) &&
     typeof input.decisionId === "string" &&
     typeof input.state === "string"
     ? {

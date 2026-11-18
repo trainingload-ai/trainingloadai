@@ -772,7 +772,28 @@
       "added": "新增",
       "deleted": "删除",
       "startSyncImpact": "开始后更新日历，并等待设备同步。",
-      "readbackVerified": "计划读回校验通过。"
+      "readbackVerified": "计划读回校验通过。",
+      "applyScheduleButton": "确认并调整课表",
+      "scheduleSyncImpact": "课表提交后更新日历；设备同步状态独立显示，可在连接设置中查看或重试。",
+      "scheduleRange": "调整范围",
+      "scheduleTimezone": "日历时区",
+      "scheduleRevision": "规则版本",
+      "fixedRestWeekdays": "固定休息日",
+      "unavailableDates": "不可训练日期",
+      "availableDateOverrides": "已确认的可训练例外",
+      "rulesEffectiveFrom": "规则生效日期",
+      "rulesEffectiveTo": "规则结束日期",
+      "noScheduleDates": "无",
+      "noEndDate": "不设结束日期",
+      "protected": "受保护",
+      "protectedOutsideRange": "范围外保留",
+      "protectedPlanStatus": "计划状态受保护",
+      "protectedWorkoutStatus": "已开始或已结束",
+      "protectedActivityLinked": "已关联活动",
+      "protectedHistory": "历史课程",
+      "protectedSuccessor": "由后继计划覆盖",
+      "relatedCalendarConflicts": "相关课程仍需协调",
+      "relatedCalendarUnmanaged": "以下独立课程或其他计划课程未由本提案修改，请继续与教练协调。"
     },
     "history": {
       "title": "历史对话",
@@ -7140,6 +7161,8 @@
     "changeDate": "修改日期",
     "pendingCalendar": "待评估的日历",
     "evaluatePrompt": "我想从 {date} 开始这个已保存的计划（日历时区：{timeZone}）。请结合近期训练和当前情况评估完整课表，必要时先问我，再提供可确认的开始方案。",
-    "loadFailed": "无法加载对话，请重试。"
+    "loadFailed": "无法加载对话，请重试。",
+    "activePlanConversation": "计划已开始，可继续讨论后续安排。",
+    "activePlanCalendar": "当前计划日历"
   }
 }

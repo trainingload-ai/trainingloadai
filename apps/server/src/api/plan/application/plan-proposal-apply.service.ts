@@ -97,11 +97,14 @@ export class PlanProposalApplyService {
     const presentation =
       preview.presentation as unknown as PlanProposalPresentation;
     const receipt =
-      proposal.mode === 'START'
+      proposal.mode === 'START' || proposal.mode === 'SCHEDULE'
         ? await this.starts.apply(args, proposal)
         : proposal.mode === 'ADAPT'
           ? await this.applyAdaptation(args, proposal)
-          : await this.applySupersession(args, proposal);
+          : await this.applySupersession(
+              args,
+              proposal as Extract<CanonicalPlanProposal, { mode: 'SUPERSEDE' }>,
+            );
 
     const consumed = await this.proposals.updateMany(
       {

@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import type { PlanDb } from './plan-db';
 
 export const sourceInclude = {
+  supersededBy: { select: { id: true, status: true, startDate: true } },
   workouts: {
     orderBy: [{ dayOffset: 'asc' }, { sessionIndex: 'asc' }, { id: 'asc' }],
     include: {
@@ -61,7 +62,23 @@ export class PlanStartRepository {
         scheduledDate: { gte: since, lte: until },
       },
       orderBy: { id: 'asc' },
-      select: { id: true, revision: true, status: true, scheduledDate: true },
+      select: {
+        id: true,
+        revision: true,
+        status: true,
+        scheduledDate: true,
+        plannedDurationSeconds: true,
+        plannedSessionRpe: true,
+        plan: {
+          select: {
+            status: true,
+            startDate: true,
+            endDate: true,
+            generationMetadata: true,
+            supersededBy: { select: { status: true, startDate: true } },
+          },
+        },
+      },
     });
   }
 }

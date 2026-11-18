@@ -698,7 +698,28 @@
       "added": "Hinzugefügt",
       "deleted": "Gelöscht",
       "startSyncImpact": "Nach dem Start wird der Kalender aktualisiert; die Gerätesynchronisierung steht noch aus.",
-      "readbackVerified": "Trainingsplan nach dem Speichern geprüft."
+      "readbackVerified": "Trainingsplan nach dem Speichern geprüft.",
+      "applyScheduleButton": "Zeitplan bestätigen",
+      "scheduleSyncImpact": "Der gespeicherte Zeitplan aktualisiert den Kalender. Der Gerätesync hat einen eigenen Status; er lässt sich in den Verbindungseinstellungen prüfen oder wiederholen.",
+      "scheduleRange": "Änderungszeitraum",
+      "scheduleTimezone": "Kalenderzeitzone",
+      "scheduleRevision": "Regelversion",
+      "fixedRestWeekdays": "Feste Ruhetage",
+      "unavailableDates": "Nicht verfügbare Tage",
+      "availableDateOverrides": "Bestätigte verfügbare Ausnahmen",
+      "rulesEffectiveFrom": "Regeln gültig ab",
+      "rulesEffectiveTo": "Regeln gültig bis",
+      "noScheduleDates": "Keine",
+      "noEndDate": "Kein Enddatum",
+      "protected": "Geschützt",
+      "protectedOutsideRange": "Außerhalb des Zeitraums beibehalten",
+      "protectedPlanStatus": "Geschützter Planstatus",
+      "protectedWorkoutStatus": "Begonnen oder beendet",
+      "protectedActivityLinked": "Mit einer Aktivität verknüpft",
+      "protectedHistory": "Vergangenes Training",
+      "protectedSuccessor": "Durch Nachfolgeplan abgedeckt",
+      "relatedCalendarConflicts": "Weitere Trainings müssen abgestimmt werden",
+      "relatedCalendarUnmanaged": "Dieser Vorschlag ändert die folgenden eigenständigen Trainings oder Trainings anderer Pläne nicht. Stimme sie weiter mit deinem Coach ab."
     },
     "history": {
       "title": "Geschichte",
@@ -6484,6 +6505,8 @@
     "changeDate": "Datum ändern",
     "pendingCalendar": "Kalender zur Bewertung",
     "evaluatePrompt": "Ich möchte diesen gespeicherten Plan am {date} ({timeZone}) starten. Bitte prüfe den vollständigen Plan anhand meines jüngsten Trainings und meines aktuellen Zustands, stelle wichtige Rückfragen und bereite einen Vorschlag zur Bestätigung vor.",
-    "loadFailed": "Unterhaltung konnte nicht geladen werden. Bitte erneut versuchen."
+    "loadFailed": "Unterhaltung konnte nicht geladen werden. Bitte erneut versuchen.",
+    "activePlanConversation": "Der Plan hat begonnen. Besprich hier das weitere Training.",
+    "activePlanCalendar": "Aktueller Plankalender"
   }
 }

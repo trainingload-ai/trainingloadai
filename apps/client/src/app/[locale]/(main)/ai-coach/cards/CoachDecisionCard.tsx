@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   CircleX,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Confirmation,
@@ -27,7 +27,10 @@ import { CoachCard } from "./CoachCard";
 import { coachDecisionPreviewRows } from "@shared/coach-decision-preview";
 import type { PlanSportType } from "@/api/plans";
 import { CoachWorkoutPreview } from "../coach-workout-preview";
-import { parseScheduleConstraints } from "@shared/plan-calendar";
+import {
+  isCalendarDate,
+  parseScheduleConstraints,
+} from "@shared/plan-calendar";
 import type { PlanProposalPresentation } from "@shared/plan-proposal";
 import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
 import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
@@ -87,7 +90,8 @@ function getPlanProposalPresentation(
   if (
     result.decisionType !== "PLAN_ADAPTATION" &&
     result.decisionType !== "PLAN_SUPERSESSION" &&
-    result.decisionType !== "PLAN_START"
+    result.decisionType !== "PLAN_START" &&
+    result.decisionType !== "PLAN_SCHEDULE"
   )
     return null;
   const value = asRecord(asRecord(result.payload).presentation);
@@ -96,7 +100,10 @@ function getPlanProposalPresentation(
   if (
     !asText(value.title) ||
     !asText(value.summary) ||
-    (mode !== "ADAPT" && mode !== "SUPERSEDE" && mode !== "START") ||
+    (mode !== "ADAPT" &&
+      mode !== "SUPERSEDE" &&
+      mode !== "START" &&
+      mode !== "SCHEDULE") ||
     !Array.isArray(value.rows)
   )
     return null;
@@ -111,7 +118,15 @@ function getPlanProposalPresentation(
     summary: asText(value.summary),
     mode,
     effectiveFrom: asText(value.effectiveFrom) || undefined,
-    ...(mode === "START"
+    ...(mode === "SCHEDULE"
+      ? {
+          range: {
+            from: asText(asRecord(value.range).from),
+            to: asText(asRecord(value.range).to),
+          },
+        }
+      : {}),
+    ...(mode === "START" || mode === "SCHEDULE"
       ? {
           startDate: asText(value.startDate),
           calendarTimeZone: asText(value.calendarTimeZone),
@@ -120,6 +135,23 @@ function getPlanProposalPresentation(
           scheduleConstraints,
         }
       : {}),
+    relatedCalendarConflicts: Array.isArray(value.relatedCalendarConflicts)
+      ? value.relatedCalendarConflicts.flatMap((item) => {
+          const conflict = asRecord(item);
+          if (conflict.managed !== false || !isCalendarDate(conflict.date))
+            return [];
+          return [
+            {
+              code: asText(conflict.code),
+              date: conflict.date,
+              workoutId: asText(conflict.workoutId),
+              planId: asText(conflict.planId) || null,
+              name: asText(conflict.name) || undefined,
+              managed: false as const,
+            },
+          ];
+        })
+      : [],
     facts: Array.isArray(value.facts)
       ? value.facts.flatMap((item) => {
           const fact = asRecord(item);
@@ -144,8 +176,9 @@ function getPlanProposalPresentation(
       changed: asNumber(counts.changed) ?? 0,
       preserved: asNumber(counts.preserved) ?? 0,
       skipped: asNumber(counts.skipped) ?? 0,
-      ...(mode === "START"
+      ...(mode === "START" || mode === "SCHEDULE"
         ? {
+            protected: asNumber(counts.protected) ?? 0,
             added: asNumber(counts.added) ?? 0,
             deleted: asNumber(counts.deleted) ?? 0,
           }
@@ -171,6 +204,7 @@ function getPlanProposalPresentation(
                 >,
               }
             : {}),
+          protectedReason: asText(row.protectedReason) || undefined,
           scheduledDate: asText(row.scheduledDate) || null,
           sportType: asText(row.sportType),
           disposition,
@@ -184,6 +218,70 @@ function getPlanProposalPresentation(
       ? value.warnings.map(asText).filter(Boolean)
       : [],
   };
+}
+
+function CoachScheduleRules({
+  proposal,
+}: {
+  proposal: Pick<
+    PlanProposalPresentation,
+    "range" | "calendarTimeZone" | "scheduleConstraints"
+  >;
+}) {
+  const t = useTranslations("AiCoachPage.decision");
+  const locale = useLocale();
+  const rules = proposal.scheduleConstraints;
+  const days = rules?.fixedRestWeekdays
+    .map((day) =>
+      new Intl.DateTimeFormat(locale, {
+        weekday: "long",
+        timeZone: "UTC",
+      }).format(new Date(Date.UTC(2024, 0, day))),
+    )
+    .join(locale.startsWith("zh") || locale.startsWith("ja") ? "、" : ", ");
+  const rows: Array<[string, string]> = [
+    ...(proposal.range
+      ? [
+          [
+            t("scheduleRange"),
+            `${proposal.range.from} — ${proposal.range.to}`,
+          ] as [string, string],
+        ]
+      : []),
+    ...(proposal.calendarTimeZone
+      ? [[t("scheduleTimezone"), proposal.calendarTimeZone] as [string, string]]
+      : []),
+    ...(rules
+      ? ([
+          [t("scheduleRevision"), String(rules.revision)],
+          [t("fixedRestWeekdays"), days || t("noScheduleDates")],
+          [
+            t("unavailableDates"),
+            rules.unavailableDates.join(", ") || t("noScheduleDates"),
+          ],
+          [
+            t("availableDateOverrides"),
+            rules.availableDateOverrides.join(", ") || t("noScheduleDates"),
+          ],
+          [t("rulesEffectiveFrom"), rules.effectiveFrom],
+          [t("rulesEffectiveTo"), rules.effectiveUntil || t("noEndDate")],
+        ] as Array<[string, string]>)
+      : []),
+  ];
+  if (!rows.length) return null;
+  return (
+    <dl className="flex min-w-0 flex-col gap-2 rounded-md bg-muted px-3 py-3 text-xs">
+      {rows.map(([label, value]) => (
+        <div
+          key={label}
+          className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3"
+        >
+          <dt className="text-muted-foreground">{label}</dt>
+          <dd className="min-w-0 break-words text-foreground">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
 }
 
 function formatStatusValue(
@@ -585,13 +683,15 @@ export function CoachDecisionDraftCard({
                 disabled={confirmDisabled || isCancelling}
                 onClick={() => onConfirm?.(result.decisionId)}
               >
-                {proposal?.mode === "START"
-                  ? t("applyStartButton")
-                  : proposal?.mode === "SUPERSEDE"
-                    ? t("applySupersessionButton")
-                    : proposal
-                      ? t("applyAdaptationButton")
-                      : t("confirmButton")}
+                {proposal?.mode === "SCHEDULE"
+                  ? t("applyScheduleButton")
+                  : proposal?.mode === "START"
+                    ? t("applyStartButton")
+                    : proposal?.mode === "SUPERSEDE"
+                      ? t("applySupersessionButton")
+                      : proposal
+                        ? t("applyAdaptationButton")
+                        : t("confirmButton")}
               </ConfirmationAction>
             </ConfirmationActions>
           </Confirmation>
@@ -601,7 +701,7 @@ export function CoachDecisionDraftCard({
       <div className="space-y-2.5">
         {proposal ? (
           <>
-            {proposal.mode === "START" &&
+            {(proposal.mode === "START" || proposal.mode === "SCHEDULE") &&
             proposal.calendarDraft &&
             proposal.startDate &&
             proposal.calendarTimeZone ? (
@@ -612,14 +712,38 @@ export function CoachDecisionDraftCard({
                 scheduleConstraints={proposal.scheduleConstraints}
               />
             ) : null}
+            <CoachScheduleRules proposal={proposal} />
+            {proposal.relatedCalendarConflicts?.length ? (
+              <div className="flex min-w-0 flex-col gap-2 rounded-md bg-muted px-3 py-3">
+                <CoachCard.SectionTitle>
+                  {t("relatedCalendarConflicts")}
+                </CoachCard.SectionTitle>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t("relatedCalendarUnmanaged")}
+                </p>
+                <ul className="flex min-w-0 list-disc flex-col gap-1 pl-4 text-xs leading-5">
+                  {proposal.relatedCalendarConflicts.map((conflict, index) => (
+                    <li
+                      key={`${conflict.workoutId}:${conflict.code}:${index}`}
+                      className="min-w-0 break-words"
+                    >
+                      <time dateTime={conflict.date}>{conflict.date}</time>
+                      {" · "}
+                      <span>{conflict.name || t("workoutName")}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(proposal.mode === "START"
+              {(proposal.mode === "START" || proposal.mode === "SCHEDULE"
                 ? ([
                     "total",
                     "changed",
                     "added",
                     "deleted",
                     "preserved",
+                    "protected",
                   ] as const)
                 : (["total", "changed", "preserved", "skipped"] as const)
               ).map((key) => (
@@ -657,8 +781,12 @@ export function CoachDecisionDraftCard({
                 </CoachCard.MetaRow>
               ) : null}
               <CoachCard.MetaRow label={t("syncImpact")}>
-                {proposal.mode === "START"
-                  ? t("startSyncImpact")
+                {proposal.mode === "START" || proposal.mode === "SCHEDULE"
+                  ? t(
+                      proposal.mode === "SCHEDULE"
+                        ? "scheduleSyncImpact"
+                        : "startSyncImpact",
+                    )
                   : proposal.syncImpact || "—"}
               </CoachCard.MetaRow>
               {proposal.effectiveFrom ? (
@@ -679,6 +807,22 @@ export function CoachDecisionDraftCard({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 text-xs font-medium text-foreground">
                       {row.name}
+                      {row.protectedReason ? (
+                        <span className="ml-2 text-muted-foreground">
+                          {t(
+                            (
+                              {
+                                OUTSIDE_RANGE: "protectedOutsideRange",
+                                PLAN_STATUS: "protectedPlanStatus",
+                                WORKOUT_STATUS: "protectedWorkoutStatus",
+                                ACTIVITY_LINKED: "protectedActivityLinked",
+                                HISTORY: "protectedHistory",
+                                PENDING_SUPERSESSION: "protectedSuccessor",
+                              } as Record<string, string>
+                            )[row.protectedReason] ?? "protected",
+                          )}
+                        </span>
+                      ) : null}
                       {row.changeKind ? (
                         <span className="ml-2 text-muted-foreground">
                           {t(
@@ -810,7 +954,9 @@ export function CoachDecisionAppliedCard({
   const applied = result.result === "APPLIED";
   const receipt = asRecord(result.receipt);
   const startReceipt =
-    applied && receipt.mode === "START" && receipt.readbackVerified === true;
+    applied &&
+    (receipt.mode === "START" || receipt.mode === "SCHEDULE") &&
+    receipt.readbackVerified === true;
   const rebaseRequired = result.result === "REBASE_REQUIRED";
   return (
     <CoachCard
@@ -853,8 +999,28 @@ export function CoachDecisionAppliedCard({
       <div className="space-y-1.5">
         {startReceipt ? (
           <>
+            <CoachScheduleRules
+              proposal={{
+                calendarTimeZone: asText(receipt.calendarTimeZone),
+                range: asRecord(
+                  receipt.range,
+                ) as PlanProposalPresentation["range"],
+                scheduleConstraints: (() => {
+                  try {
+                    return parseScheduleConstraints(
+                      receipt.scheduleConstraints,
+                    );
+                  } catch {
+                    return undefined;
+                  }
+                })(),
+              }}
+            />
             <p role="status" className="text-xs text-muted-foreground">
               {t("readbackVerified")}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t("scheduleSyncImpact")}
             </p>
             <CoachCard.MetaRow label={t("startDate")}>
               {[asText(receipt.startDate), asText(receipt.calendarTimeZone)]
@@ -867,6 +1033,9 @@ export function CoachDecisionAppliedCard({
                 ["added", "addedWorkoutCount"],
                 ["deleted", "deletedWorkoutCount"],
                 ["preserved", "preservedWorkoutCount"],
+                ...(receipt.mode === "SCHEDULE"
+                  ? [["protected", "protectedWorkoutCount"] as const]
+                  : []),
               ] as const
             ).map(([label, key]) => (
               <CoachCard.MetaRow key={key} label={t(label)}>

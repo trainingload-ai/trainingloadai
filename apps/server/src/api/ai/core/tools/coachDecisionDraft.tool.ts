@@ -53,6 +53,7 @@ const SUPPORTED_DECISION_TYPES = new Set([
   'PLAN_ADAPTATION',
   'PLAN_SUPERSESSION',
   'PLAN_START',
+  'PLAN_SCHEDULE',
 ]);
 
 function containsMultiItemArray(value: unknown): boolean {
@@ -144,6 +145,7 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
       decisionType !== 'PLAN_ADAPTATION' &&
       decisionType !== 'PLAN_SUPERSESSION' &&
       decisionType !== 'PLAN_START' &&
+      decisionType !== 'PLAN_SCHEDULE' &&
       containsMultiItemArray(input.payload)
     ) {
       return aiToolError(
@@ -162,7 +164,8 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
     return { ok: true };
   },
   summarizeForModel: ({ output }) =>
-    output.decisionType === 'PLAN_START'
+    output.decisionType === 'PLAN_START' ||
+    output.decisionType === 'PLAN_SCHEDULE'
       ? {
           kind: output.kind,
           decisionId: output.decisionId,
@@ -180,6 +183,18 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
     if (!userId || !ctx.coachBranching) {
       throw new Error('coach_decision_draft requires branch context');
     }
+    if (
+      !branchId &&
+      input.decisionType === 'PLAN_SCHEDULE' &&
+      ctx.sid &&
+      ctx.currentUserMessageId
+    )
+      branchId =
+        (await ctx.coachBranching.currentConversationBranch({
+          userId,
+          sid: ctx.sid,
+          userMessageId: ctx.currentUserMessageId,
+        })) ?? '';
     if (!branchId) {
       const planId = String(input.payload.planId ?? '').trim();
       if (!planId)

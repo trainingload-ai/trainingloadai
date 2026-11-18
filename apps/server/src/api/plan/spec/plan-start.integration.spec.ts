@@ -604,6 +604,11 @@ describe('saved draft START / PostgreSQL', () => {
       },
     ];
     const c = await confirmed(d);
+    expect(
+      c.preview.presentation.calendarDraft!.workouts.find(
+        (row) => row.dayIndex === 4,
+      )?.plannedSessionRpe,
+    ).toBe(6);
     await prisma.$transaction((tx) => f.apply.apply({ ...c.args, tx }), {
       isolationLevel: 'Serializable',
     });
@@ -716,4 +721,20 @@ describe('saved draft START / PostgreSQL', () => {
       jest.useRealTimers();
     }
   });
+  it.each(['DONE', 'IN_PROGRESS', 'SKIPPED', 'MOVED'])(
+    'refuses to re-date a protected %s draft course during START',
+    async (status) => {
+      const d = await draft();
+      const w = await prisma.planWorkout.findFirstOrThrow({
+        where: { planId: d.planId },
+      });
+      await prisma.planWorkout.update({
+        where: { id: w.id },
+        data: { status: status as never },
+      });
+      await expect(
+        f.proposals.createPreview('user', d.request, d.binding),
+      ).rejects.toThrow(/protected/);
+    },
+  );
 });

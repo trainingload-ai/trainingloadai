@@ -127,7 +127,7 @@ export class CoachContextRepository {
       where: {
         userId: args.userId,
         sourcePlanId: args.planId,
-        mode: 'START',
+        mode: { in: ['START', 'SCHEDULE'] },
         appliedAt: null,
         ...(args.appliedDecisionId
           ? {

@@ -698,7 +698,28 @@
       "added": "Ajoutées",
       "deleted": "Supprimées",
       "startSyncImpact": "Au démarrage, le calendrier est mis à jour et la synchronisation de l’appareil est en attente.",
-      "readbackVerified": "Plan vérifié après enregistrement."
+      "readbackVerified": "Plan vérifié après enregistrement.",
+      "applyScheduleButton": "Confirmer le calendrier",
+      "scheduleSyncImpact": "Le calendrier est mis à jour après enregistrement. La synchronisation des appareils a un statut distinct ; consultez-le ou réessayez dans les réglages de connexion.",
+      "scheduleRange": "Période des ajustements",
+      "scheduleTimezone": "Fuseau du calendrier",
+      "scheduleRevision": "Version des règles",
+      "fixedRestWeekdays": "Jours de repos fixes",
+      "unavailableDates": "Dates indisponibles",
+      "availableDateOverrides": "Exceptions disponibles confirmées",
+      "rulesEffectiveFrom": "Début des règles",
+      "rulesEffectiveTo": "Fin des règles",
+      "noScheduleDates": "Aucun",
+      "noEndDate": "Sans date de fin",
+      "protected": "Protégés",
+      "protectedOutsideRange": "Conservé hors de la période",
+      "protectedPlanStatus": "Statut du plan protégé",
+      "protectedWorkoutStatus": "Commencé ou terminé",
+      "protectedActivityLinked": "Lié à une activité",
+      "protectedHistory": "Entraînement passé",
+      "protectedSuccessor": "Couvert par un plan successeur",
+      "relatedCalendarConflicts": "Des entraînements restent à coordonner",
+      "relatedCalendarUnmanaged": "Cette proposition ne modifie pas les entraînements indépendants ou des autres plans ci-dessous. Continuez à les coordonner avec votre coach."
     },
     "history": {
       "title": "Histoire",
@@ -6484,6 +6505,8 @@
     "changeDate": "Modifier la date",
     "pendingCalendar": "Calendrier en attente d’évaluation",
     "evaluatePrompt": "Je souhaite commencer ce plan enregistré le {date} ({timeZone}). Examine tout le calendrier avec mon entraînement récent et mon état actuel, pose les questions essentielles et prépare une proposition que je pourrai confirmer.",
-    "loadFailed": "Impossible de charger la conversation. Réessayez."
+    "loadFailed": "Impossible de charger la conversation. Réessayez.",
+    "activePlanConversation": "Le plan a commencé. Discutez ici des entraînements à venir.",
+    "activePlanCalendar": "Calendrier actuel du plan"
   }
 }

@@ -45,6 +45,7 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
   const [selected, setSelected] = useState<PlanStartConversation | null>(null);
   const [editingDate, setEditingDate] = useState(false);
   const [entered, setEntered] = useState(false);
+  const [committed, setCommitted] = useState(false);
   const current = selected ?? prepared.data;
   const messages = useQuery({
     queryKey: aiCoachMessagesQueryKey(current?.sid ?? ""),
@@ -90,6 +91,8 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
   const invalidatedDecisions = useRef(new Set<string>());
   const invalidateAppliedDecision = useCallback(
     (decisionId: string) => {
+      setCommitted(true);
+      setEditingDate(false);
       if (invalidatedDecisions.current.has(decisionId)) return;
       invalidatedDecisions.current.add(decisionId);
       void invalidateAfterPlanMutation(queryClient, { planId });
@@ -147,7 +150,11 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
   }
   const earliestStart = new Date(`${current.earliestStartDate}T00:00:00`);
   const showChat =
-    !editingDate && (entered || current.evaluationStarted || appliedReceipt);
+    !editingDate &&
+    (entered ||
+      current.evaluationStarted ||
+      appliedReceipt ||
+      current.plan.status === "ACTIVE");
   const changeDate = (next?: Date) => {
     if (next && next < earliestStart) return;
     setDate(next);
@@ -166,18 +173,29 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
             <span>
               {current.startDate} · {current.calendarTimeZone}
             </span>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={current.plan.status === "ACTIVE"}
-              onClick={() => setEditingDate(true)}
-            >
-              {t("changeDate")}
-            </Button>
+            {current.plan.status === "DRAFT" &&
+            !committed &&
+            !appliedReceipt ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setEditingDate(true)}
+              >
+                {t("changeDate")}
+              </Button>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                {t("activePlanConversation")}
+              </span>
+            )}
           </div>
           <details open={!hasStartProposal} className="shrink-0 px-4">
             <summary className="cursor-pointer text-sm text-muted-foreground">
-              {t("pendingCalendar")}
+              {t(
+                current.plan.status === "ACTIVE" || committed || appliedReceipt
+                  ? "activePlanCalendar"
+                  : "pendingCalendar",
+              )}
             </summary>
             <div className="max-h-64 overflow-y-auto py-3">
               <CoachPlanDraftCalendarPreview

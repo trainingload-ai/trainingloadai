@@ -71,6 +71,7 @@ describe('saved draft start tools', () => {
     const workouts = Array.from({ length: 95 }, (_, i) => ({
       id: `w${i + 1}`,
       revision: i === 80 ? 4 : 1,
+      plannedSessionRpe: i === 80 ? 6 : null,
       dayOffset: i,
       sportType: 'RUN',
       status: 'PLANNED',
@@ -112,7 +113,11 @@ describe('saved draft start tools', () => {
       hasMore: false,
       nextOffset: null,
     });
-    expect(last.allWorkouts?.[0]).toMatchObject({ id: 'w81', revision: 4 });
+    expect(last.allWorkouts?.[0]).toMatchObject({
+      id: 'w81',
+      revision: 4,
+      plannedSessionRpe: 6,
+    });
   });
 });
 
@@ -198,4 +203,37 @@ describe('START planned session RPE', () => {
       },
     });
   });
+});
+
+it('accepts one complete SCHEDULE proposal and preserves the trusted ordinary-chat binding', async () => {
+  const schedule = {
+    ...request,
+    mode: 'SCHEDULE',
+    range: { from: '2099-11-22', to: '2100-06-30' },
+  };
+  delete (schedule as { startDate?: string }).startDate;
+  expect(
+    toolSchemaValidator(planProposalPreviewTool.parameters!)(schedule).success,
+  ).toBe(true);
+  expect(
+    await planProposalPreviewTool.validateInput!(
+      {
+        coachBranching: {},
+        sid: 'ordinary',
+        branchId: 'b',
+        currentUserMessageId: 'user',
+      } as never,
+      schedule as never,
+    ),
+  ).toEqual({ ok: true });
+  expect(
+    await coachDecisionDraftTool.validateInput!({} as never, {
+      decisionType: 'PLAN_SCHEDULE',
+      payload: {
+        planId: 'p',
+        previewId: 'preview',
+        presentation: { rows: [{ name: 'Run' }, { name: 'Strength' }] },
+      },
+    }),
+  ).toEqual({ ok: true });
 });

@@ -1,3 +1,8 @@
+import { ActivityReadService } from '@/api/activity/activity-read.service';
+import { HealthDataRepository } from '@/health-data/persistence/health-data.repository';
+import { UserQueryService } from '@/api/user/user-query.service';
+import { CompetitionQueryService } from '@/api/competition/application/competition-query.service';
+import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
@@ -21,6 +26,7 @@ import { PlanService } from '../plan.service';
 import type { PlanDb } from '../persistence/plan-db';
 import type {
   PlanStartPreviewRequest,
+  PlanSchedulePreviewRequest,
   PlanProposalPreviewResult,
   PlanProposalPresentation,
   PlanStartWorkoutDraft,
@@ -43,6 +49,8 @@ import { normalizePlanRow } from './plan-row.mapper';
 import { activityCalendarYmdInZone } from '../plan-link-calendar.util';
 import { BusinessException } from '@/filters/business-exception/business.exception';
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
+import { PlanCalendarValidationService } from './plan-calendar-validation.service';
+import { workoutImmutabilityReason } from './plan-workout-mutability.policy';
 import type { UpdatePlanDto } from '../dto/update-plan.dto';
 
 export type PlanStartBinding = {
@@ -77,7 +85,7 @@ function hash(value: unknown) {
 }
 
 export type CanonicalStartProposal = {
-  mode: 'START';
+  mode: 'START' | 'SCHEDULE';
   planId: string;
   binding: PlanStartBinding;
   conversationRevision: number;
@@ -86,7 +94,7 @@ export type CanonicalStartProposal = {
   sourceFingerprint: string;
   factFingerprint: string;
   sourceWorkouts: Array<{ id: string; revision: number }>;
-  request: PlanStartPreviewRequest;
+  request: PlanStartPreviewRequest | PlanSchedulePreviewRequest;
   candidate: Array<{
     sourceWorkoutId?: string;
     candidateKey?: string;
@@ -96,7 +104,7 @@ export type CanonicalStartProposal = {
   presentation: PlanProposalPresentation;
 };
 
-/** Owns the saved-draft start candidate and transaction-scoped source/fact binding. */
+/** Owns immutable START/SCHEDULE candidates and transaction-scoped source/fact binding. */
 @Injectable()
 export class PlanStartService {
   constructor(
@@ -108,6 +116,12 @@ export class PlanStartService {
     private readonly persistence: WorkoutPersistenceService,
     private readonly storage: PlanStartRepository,
     private readonly loads: PlanLoadEstimatorService,
+    private readonly calendarValidation: PlanCalendarValidationService,
+    private readonly activityRead: ActivityReadService,
+    private readonly healthData: HealthDataRepository,
+    private readonly userQuery: UserQueryService,
+    private readonly competitions: CompetitionQueryService,
+    private readonly analysisConfig: UserAnalysisConfigService,
   ) {}
 
   private constraints(value: unknown) {
@@ -141,12 +155,16 @@ export class PlanStartService {
     planId: string,
     tx: PlanDb,
     allowStarted = false,
+    schedule = false,
   ): Promise<Source> {
     const plan = await this.storage.source(planId, tx);
     if (
       !plan ||
       plan.userId !== userId ||
-      (plan.status !== 'DRAFT' && !(allowStarted && plan.status === 'ACTIVE'))
+      (schedule
+        ? !['ACTIVE', 'PAUSED'].includes(plan.status)
+        : plan.status !== 'DRAFT' &&
+          !(allowStarted && plan.status === 'ACTIVE'))
     )
       fail('A saved DRAFT plan is required; reassess the start');
     if (plan.workouts.length > 10000)
@@ -158,6 +176,10 @@ export class PlanStartService {
     return hash({
       id: plan.id,
       status: plan.status,
+      startDate: plan.startDate,
+      endDate: plan.endDate,
+      activationTimezone: plan.activationTimezone,
+      supersededBy: plan.supersededBy,
       title: plan.title,
       description: plan.description,
       goal: plan.goal,
@@ -212,7 +234,7 @@ export class PlanStartService {
       competitions,
       loadConfigurations,
     ] = await Promise.all([
-      tx.activity.findMany({
+      this.activityRead.activity(tx).findMany({
         where: {
           userId,
           OR: [{ startTime: { gte: since } }, { startTime: null }],
@@ -246,7 +268,7 @@ export class PlanStartService {
           },
         },
       }),
-      tx.userDailyHealthMetric.findMany({
+      this.healthData.dailyMetrics(tx).findMany({
         where: { userId, date: { gte: since } },
         orderBy: { id: 'asc' },
         select: {
@@ -262,7 +284,7 @@ export class PlanStartService {
         orderBy: { id: 'asc' },
         select: { id: true, version: true, status: true },
       }),
-      tx.userProfile.findUnique({ where: { userId } }),
+      this.userQuery.profiles(tx).findUnique({ where: { userId } }),
       this.storage.calendar(userId, planId, since, until, tx),
       this.users.getPreferredTimezone(userId, tx),
       Promise.all(
@@ -282,7 +304,7 @@ export class PlanStartService {
           thresholds: await this.loads.loadThresholdsForUser(userId, sport, tx),
         })),
       ),
-      tx.userZoneSetting.findMany({
+      this.userQuery.zoneSettings(tx).findMany({
         where: { userId },
         orderBy: [{ sportType: 'asc' }, { zoneType: 'asc' }],
         select: {
@@ -295,30 +317,13 @@ export class PlanStartService {
           },
         },
       }),
-      tx.competitionEvent.findMany({
-        where: { userId, startDate: { gte: since, lte: until } },
-        orderBy: { id: 'asc' },
-        select: {
-          id: true,
-          version: true,
-          startDate: true,
-          endDate: true,
-          startTimeMinute: true,
-          timezone: true,
-          status: true,
-          deletedAt: true,
-          importance: true,
-          sportType: true,
-          goalType: true,
-          targetTimeSeconds: true,
-          distanceMeters: true,
-        },
-      }),
-      tx.userAnalysisConfigVersion.findMany({
-        where: { userId },
-        orderBy: { effectiveAt: 'asc' },
-        select: { effectiveAt: true, loadSources: true },
-      }),
+      this.competitions.findPlanProposalFacts(userId, since, until, tx),
+      this.analysisConfig.listVersions(userId, until, tx).then((rows) =>
+        rows.map((row) => ({
+          effectiveAt: row.effectiveAt,
+          loadSources: row.loadSources,
+        })),
+      ),
     ]);
     // Execution/audit clocks are excluded; new activity/health/memory/calendar evidence remains observable.
     const {
@@ -343,7 +348,12 @@ export class PlanStartService {
 
   async invalidate(userId: string, planId: string, tx: PlanDb) {
     const old = await tx.planProposalPreview.findMany({
-      where: { userId, sourcePlanId: planId, mode: 'START', appliedAt: null },
+      where: {
+        userId,
+        sourcePlanId: planId,
+        mode: { in: ['START', 'SCHEDULE'] },
+        appliedAt: null,
+      },
       select: { id: true, decisionId: true },
     });
     await tx.planProposalPreview.updateMany({
@@ -370,12 +380,37 @@ export class PlanStartService {
     let session = await tx.aiCoachSession.findUnique({
       where: { userId_id: { userId, id: sid } },
     });
-    if (!session?.planStartPlanId) return;
+    if (!session) return;
+    const branch = branchId
+      ? await tx.coachBranch.findFirst({
+          where: { id: branchId, context: { userId } },
+          include: { context: true },
+        })
+      : null;
+    const planId = session.planStartPlanId ?? branch?.context.planId;
+    if (!planId) {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
+      const pending = await tx.planProposalPreview.findMany({
+        where: {
+          userId,
+          mode: 'SCHEDULE',
+          appliedAt: null,
+          proposal: { path: ['binding', 'sid'], equals: sid },
+        },
+        select: { sourcePlanId: true },
+      });
+      for (const id of new Set(pending.map((p) => p.sourcePlanId)))
+        await this.invalidate(userId, id, tx);
+      return;
+    }
     await acquireHashtextAdvisoryXactLock(tx, userId);
     session = await tx.aiCoachSession.findUnique({
       where: { userId_id: { userId, id: sid } },
     });
-    if (!session?.planStartPlanId || session.planStartBranchId !== branchId)
+    if (
+      !session ||
+      (session.planStartPlanId && session.planStartBranchId !== branchId)
+    )
       fail('Start conversation branch changed');
     const record = (value: unknown): Record<string, unknown> | null =>
       value && typeof value === 'object' && !Array.isArray(value)
@@ -397,9 +432,9 @@ export class PlanStartService {
           where: {
             id: confirmation.decisionId,
             branchId: branchId!,
-            decisionType: 'PLAN_START',
+            decisionType: { in: ['PLAN_START', 'PLAN_SCHEDULE'] },
             state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
-            context: { userId, planId: session.planStartPlanId },
+            context: { userId, planId },
           },
         }),
         tx.aiCoachMessage.findFirst({
@@ -431,7 +466,7 @@ export class PlanStartService {
         }),
       );
     }
-    if (!exactCard) await this.invalidate(userId, session.planStartPlanId, tx);
+    if (!exactCard) await this.invalidate(userId, planId, tx);
   }
 
   async conversation(userId: string, planId: string, selectedDate?: string) {
@@ -541,6 +576,7 @@ export class PlanStartService {
     binding: PlanStartBinding | undefined,
     tx: PlanDb,
     date?: string,
+    schedule = false,
   ) {
     if (!binding?.sid || !binding.branchId)
       fail('A server-owned start conversation is required');
@@ -553,8 +589,9 @@ export class PlanStartService {
     });
     if (
       !session ||
-      session.planStartPlanId !== planId ||
-      session.planStartBranchId !== binding.branchId ||
+      (!schedule &&
+        (session.planStartPlanId !== planId ||
+          session.planStartBranchId !== binding.branchId)) ||
       !branch ||
       branch.context.planId !== planId ||
       branch.context.userId !== userId ||
@@ -572,12 +609,31 @@ export class PlanStartService {
           'The evaluation turn was replaced; reassess the latest user request',
         );
     }
+    if (schedule && binding.userMessageId) {
+      const attempt = await tx.coachRunAttempt.findFirst({
+        where: {
+          userId,
+          inputMessageId: binding.userMessageId,
+          cancelRequestedAt: null,
+          status: 'running',
+          run: {
+            userId,
+            sessionId: binding.sid,
+            branchId: binding.branchId,
+            status: 'running',
+          },
+        },
+        include: { run: true },
+      });
+      if (!attempt || attempt.run.activeAttemptId !== attempt.id)
+        fail('The schedule evaluation run is no longer current');
+    }
     return session;
   }
 
   async createPreview(
     userId: string,
-    request: PlanStartPreviewRequest,
+    request: PlanStartPreviewRequest | PlanSchedulePreviewRequest,
     binding?: PlanStartBinding,
   ): Promise<PlanProposalPreviewResult> {
     if (!binding) fail('A server-owned start conversation is required');
@@ -585,16 +641,29 @@ export class PlanStartService {
       this.prisma.$transaction(
         async (tx) => {
           await acquireHashtextAdvisoryXactLock(tx, userId);
+          const schedule = request.mode === 'SCHEDULE';
           const session = await this.assertBinding(
             userId,
             request.planId,
             binding,
             tx,
-            request.startDate,
+            schedule
+              ? undefined
+              : (request as PlanStartPreviewRequest).startDate,
+            schedule,
           );
-          if (!isCalendarDate(request.startDate))
+          const source = await this.source(
+            userId,
+            request.planId,
+            tx,
+            false,
+            schedule,
+          );
+          const startDate = schedule
+            ? source.startDate?.toISOString().slice(0, 10)
+            : (request as PlanStartPreviewRequest).startDate;
+          if (!startDate || !isCalendarDate(startDate))
             fail('Invalid calendar start date');
-          const source = await this.source(userId, request.planId, tx);
           const calendarTimeZone =
             this.constraints(request.scheduleConstraints)?.calendarTimeZone ??
             this.constraints(
@@ -603,7 +672,46 @@ export class PlanStartService {
             )?.calendarTimeZone ??
             (await this.users.getPreferredTimezone(userId, tx)) ??
             'UTC';
-          this.assertFutureStart(request.startDate, calendarTimeZone);
+          if (!schedule) this.assertFutureStart(startDate, calendarTimeZone);
+          const today = this.earliestStartDate(calendarTimeZone);
+          const range = schedule
+            ? (request as PlanSchedulePreviewRequest).range
+            : undefined;
+          if (
+            schedule &&
+            (!binding?.userMessageId ||
+              !range ||
+              !isCalendarDate(range.from) ||
+              !isCalendarDate(range.to) ||
+              range.from < today ||
+              range.to < range.from)
+          )
+            fail(
+              'SCHEDULE requires a current user turn and a future explicit date range',
+            );
+          const successor =
+            schedule && source.supersededBy?.status === 'SCHEDULED'
+              ? source.supersededBy
+              : null;
+          const protectedReason = (row: Source['workouts'][number]) =>
+            schedule
+              ? workoutImmutabilityReason({
+                  planStatus: source.status,
+                  workoutStatus: row.status,
+                  scheduledDateYmd: row.scheduledDate
+                    ?.toISOString()
+                    .slice(0, 10),
+                  athleteTodayYmd: today,
+                  activeActivityLinkCount: row.links.length,
+                  pendingSupersessionYmd: successor?.startDate
+                    ?.toISOString()
+                    .slice(0, 10),
+                })
+              : row.status !== 'PLANNED' || row.links.length
+                ? 'WORKOUT_STATUS'
+                : null;
+          const inRange = (date: string | null | undefined) =>
+            !range || (!!date && date >= range.from && date <= range.to);
           const normalized = normalizePlanRow(source, {
             workoutService: this.workout,
             workoutDefinitionService: this.definitions,
@@ -614,10 +722,13 @@ export class PlanStartService {
             normalized.workouts!.map((w) => [w.id, w]),
           );
           const covered = new Set<string>();
-          const cover = (item: {
-            sourceWorkoutId: string;
-            expectedRevision: number;
-          }) => {
+          const cover = (
+            item: {
+              sourceWorkoutId: string;
+              expectedRevision: number;
+            },
+            mutating = true,
+          ) => {
             const row = byId.get(item.sourceWorkoutId);
             if (
               !row ||
@@ -627,8 +738,12 @@ export class PlanStartService {
               fail(
                 'Each source workout must be covered exactly once at its current revision',
               );
-            if (row.status !== 'PLANNED' || row.links.length)
-              fail('A protected or linked workout cannot be started');
+            if (
+              mutating &&
+              (protectedReason(row) ||
+                !inRange(row.scheduledDate?.toISOString().slice(0, 10)))
+            )
+              fail('A protected or out-of-range workout cannot be changed');
             covered.add(row.id);
             return row;
           };
@@ -659,7 +774,7 @@ export class PlanStartService {
                   expectedRevision: w.revision,
                 });
           for (const item of preserved) {
-            cover(item);
+            cover(item, !schedule);
             const w = normalizedById.get(item.sourceWorkoutId)!;
             candidate.push({
               sourceWorkoutId: item.sourceWorkoutId,
@@ -697,8 +812,10 @@ export class PlanStartService {
               workout: json(addition.workout),
             });
           }
-          if (!candidate.length)
-            fail('A start candidate must contain at least one workout');
+          if (!candidate.length || candidate.length > 10000)
+            fail(
+              'A calendar candidate must contain 1–10000 workouts; choose an explicit smaller scope if this capacity is exceeded',
+            );
           const slots = new Set<string>();
           const display: CoachPlanDraftWorkout[] = candidate.map((item) => {
             const w = item.workout;
@@ -760,6 +877,23 @@ export class PlanStartService {
                 source: 'STRUCTURE',
                 structure: { ...resolved.structure, plannedSessionRpe },
               });
+            if (
+              (item.candidateKey ||
+                request.changes.some(
+                  (c) => c.sourceWorkoutId === item.sourceWorkoutId,
+                )) &&
+              schedule
+            ) {
+              const date = new Date(`${startDate}T00:00:00Z`);
+              date.setUTCDate(
+                date.getUTCDate() + (w.weekIndex - 1) * 7 + w.dayIndex - 1,
+              );
+              if (
+                !inRange(date.toISOString().slice(0, 10)) ||
+                (successor?.startDate && date >= successor.startDate)
+              )
+                fail('Candidate target is outside the mutable schedule range');
+            }
             item.workout = {
               ...w,
               plannedSessionRpe,
@@ -773,6 +907,7 @@ export class PlanStartService {
             };
             return {
               ...w,
+              plannedSessionRpe,
               text: resolved.text,
               structureKind: resolved.kind,
               dslVersion: 1,
@@ -802,6 +937,14 @@ export class PlanStartService {
             );
           if (constraints && constraints.calendarTimeZone !== calendarTimeZone)
             fail('Calendar timezone changed; reassess constraints');
+          if (
+            request.qualityContractTransition?.mode ===
+              'REPLACE_ALLOWED_DAYS' &&
+            !request.scheduleConstraints
+          )
+            fail(
+              'Replacing relative allowed days requires an explicit new schedule constraint revision',
+            );
           const contract = request.qualityContractTransition
             ? resolveScheduleQualityContract(
                 parsePlanQualityContract(metadata.qualityContract),
@@ -814,7 +957,14 @@ export class PlanStartService {
               ...w,
               durationSeconds: w.summary?.durationSeconds,
             })),
-            contract,
+            schedule && contract
+              ? {
+                  ...contract,
+                  allowedDays: undefined,
+                  maxDailyMinutes: undefined,
+                  maxTrainingDaysPerWeek: undefined,
+                }
+              : contract,
           );
           if (!quality.valid)
             throw new UnprocessableEntityException({
@@ -825,30 +975,66 @@ export class PlanStartService {
             id: String(i),
             dayOffset: (w.weekIndex - 1) * 7 + w.dayIndex - 1,
             sessionIndex: w.sessionIndex ?? 1,
-            status: 'PLANNED',
+            status: candidate[i].sourceWorkoutId
+              ? byId.get(candidate[i].sourceWorkoutId!)!.status
+              : 'PLANNED',
             sportType: w.sportType ?? 'UNKNOWN',
             durationSeconds: w.summary?.durationSeconds ?? null,
           }));
-          const report = assessPlanSchedule({
+          const changedWorkoutIds = scheduled
+            .filter(
+              (w, i) =>
+                !schedule ||
+                candidate[i].candidateKey ||
+                request.changes.some(
+                  (c) => c.sourceWorkoutId === candidate[i].sourceWorkoutId,
+                ) ||
+                (request.scheduleConstraints &&
+                  candidate[i].sourceWorkoutId &&
+                  !protectedReason(byId.get(candidate[i].sourceWorkoutId!)!) &&
+                  inRange(
+                    byId
+                      .get(candidate[i].sourceWorkoutId!)!
+                      .scheduledDate?.toISOString()
+                      .slice(0, 10),
+                  )),
+            )
+            .map((w) => w.id);
+          const scheduleInput = {
             periodWeeks: source.periodWeeks,
             workouts: scheduled,
-            changedWorkoutIds: scheduled.map((w) => w.id),
-            startDate: request.startDate,
+            changedWorkoutIds,
+            startDate,
             constraints: constraints ?? undefined,
             qualityContract: contract,
             projectDates: true,
-          });
+          };
+          const report = assessPlanSchedule(scheduleInput);
+          const calendarAssessment =
+            await this.calendarValidation.assertCandidate(
+              {
+                ...scheduleInput,
+                userId,
+                planId: source.id,
+                ...(range
+                  ? { validationRange: { from: range.from, until: range.to } }
+                  : {}),
+              },
+              tx,
+            );
           if (!report.valid)
             throw new UnprocessableEntityException({
               code: 'PLAN_SCHEDULE_INVALID',
               issues: report.issues,
             });
           const presentation: PlanProposalPresentation = {
+            relatedCalendarConflicts: calendarAssessment.relatedConflicts,
             title: source.title,
             summary: request.rationale,
-            mode: 'START',
-            startDate: request.startDate,
+            mode: request.mode,
+            startDate,
             calendarTimeZone,
+            ...(range ? { range } : {}),
             ...(constraints ? { scheduleConstraints: constraints } : {}),
             calendarDraft: {
               title: source.title,
@@ -861,6 +1047,9 @@ export class PlanStartService {
               changed: request.changes.length,
               preserved: preserved.length,
               skipped: 0,
+              protected: preserved.filter(
+                (p) => !!protectedReason(byId.get(p.sourceWorkoutId)!),
+              ).length,
               added: request.additions.length,
               deleted: request.deletions.length,
             },
@@ -868,11 +1057,28 @@ export class PlanStartService {
             rows: [
               ...candidate.map((item) => {
                 const w = item.workout;
-                const date = new Date(`${request.startDate}T00:00:00Z`);
+                const date = new Date(`${startDate}T00:00:00Z`);
                 date.setUTCDate(
                   date.getUTCDate() + (w.weekIndex - 1) * 7 + w.dayIndex - 1,
                 );
                 return {
+                  ...(item.sourceWorkoutId &&
+                  !inRange(
+                    byId
+                      .get(item.sourceWorkoutId)!
+                      .scheduledDate?.toISOString()
+                      .slice(0, 10),
+                  )
+                    ? { protectedReason: 'OUTSIDE_RANGE' }
+                    : {}),
+                  ...(item.sourceWorkoutId &&
+                  protectedReason(byId.get(item.sourceWorkoutId)!)
+                    ? {
+                        protectedReason: protectedReason(
+                          byId.get(item.sourceWorkoutId)!,
+                        )!,
+                      }
+                    : {}),
                   workoutId: item.sourceWorkoutId,
                   name: w.name ?? w.sportType,
                   sportType: w.sportType,
@@ -900,7 +1106,7 @@ export class PlanStartService {
               }),
               ...request.deletions.map((item) => {
                 const w = normalizedById.get(item.sourceWorkoutId)!;
-                const date = new Date(`${request.startDate}T00:00:00Z`);
+                const date = new Date(`${startDate}T00:00:00Z`);
                 date.setUTCDate(
                   date.getUTCDate() + (w.weekIndex - 1) * 7 + w.dayIndex - 1,
                 );
@@ -920,17 +1126,17 @@ export class PlanStartService {
             warnings: [],
           };
           const proposal: CanonicalStartProposal = {
-            mode: 'START',
+            mode: request.mode,
             planId: source.id,
             binding: binding!,
             conversationRevision: session.planStartRevision,
-            startDate: request.startDate,
+            startDate,
             calendarTimeZone,
             sourceFingerprint: this.fingerprint(source),
             factFingerprint: await this.facts(
               userId,
               source.id,
-              request.startDate,
+              startDate,
               source.periodWeeks,
               tx,
             ),
@@ -949,7 +1155,7 @@ export class PlanStartService {
             data: {
               userId,
               sourcePlanId: source.id,
-              mode: 'START',
+              mode: request.mode,
               request: json(request) as Prisma.InputJsonValue,
               proposal: json(proposal) as unknown as Prisma.InputJsonValue,
               sourceSnapshot: {
@@ -964,9 +1170,9 @@ export class PlanStartService {
           return {
             kind: 'plan_proposal_preview',
             previewId: preview.id,
-            mode: 'START',
+            mode: request.mode,
             expiresAt: expiresAt.toISOString(),
-            decisionType: 'PLAN_START',
+            decisionType: schedule ? 'PLAN_SCHEDULE' : 'PLAN_START',
             decisionPayload: {
               planId: source.id,
               previewId: preview.id,
@@ -996,7 +1202,8 @@ export class PlanStartService {
       proposal.planId,
       { sid: proposal.binding.sid, branchId: proposal.binding.branchId },
       tx,
-      proposal.startDate,
+      proposal.mode === 'START' ? proposal.startDate : undefined,
+      proposal.mode === 'SCHEDULE',
     );
     if (
       session.planStartRevision !== proposal.conversationRevision ||
@@ -1004,7 +1211,20 @@ export class PlanStartService {
       args.contextPlanId !== proposal.planId
     )
       fail('Start conversation changed; reassess the start');
-    const source = await this.source(args.userId, proposal.planId, tx);
+    const schedule = proposal.mode === 'SCHEDULE';
+    const source = await this.source(
+      args.userId,
+      proposal.planId,
+      tx,
+      false,
+      schedule,
+    );
+    if (
+      schedule &&
+      (proposal.request as PlanSchedulePreviewRequest).range.from <
+        this.earliestStartDate(proposal.calendarTimeZone)
+    )
+      fail('The schedule range is now historical; reassess');
     if (this.fingerprint(source) !== proposal.sourceFingerprint)
       fail('Source plan or a preserved workout changed after preview');
     const timezone =
@@ -1016,7 +1236,7 @@ export class PlanStartService {
       )?.calendarTimeZone ??
       (await this.users.getPreferredTimezone(args.userId, tx)) ??
       'UTC';
-    this.assertFutureStart(proposal.startDate, timezone);
+    if (!schedule) this.assertFutureStart(proposal.startDate, timezone);
     if (
       timezone !== proposal.calendarTimeZone ||
       (await this.facts(
@@ -1030,7 +1250,9 @@ export class PlanStartService {
       fail('Training facts or calendar timezone changed; reassess the start');
     const meta = {
       source: 'ai' as const,
-      action: 'decision_apply_plan_start',
+      action: schedule
+        ? 'decision_apply_plan_schedule'
+        : 'decision_apply_plan_start',
       decisionId: args.decisionId,
       branchId: args.branchId,
     };
@@ -1052,25 +1274,33 @@ export class PlanStartService {
     };
     if (!input.workouts?.length) delete input.workouts;
     await this.plans.updatePlan(args.userId, source.id, input, meta, { tx });
-    await this.plans.activatePlan(
-      args.userId,
-      source.id,
-      proposal.startDate,
-      meta,
-      {
-        tx,
-        validatedStartPreview: true,
-        calendarTimeZone: proposal.calendarTimeZone,
-      },
-    );
+    if (!schedule)
+      await this.plans.activatePlan(
+        args.userId,
+        source.id,
+        proposal.startDate,
+        meta,
+        {
+          tx,
+          validatedStartPreview: true,
+          calendarTimeZone: proposal.calendarTimeZone,
+        },
+      );
     const readback = await this.storage.readback(source.id, tx);
     if (
-      readback.status !== 'ACTIVE' ||
-      readback.activationTimezone !== proposal.calendarTimeZone ||
+      readback.status !== (schedule ? source.status : 'ACTIVE') ||
+      (!schedule &&
+        readback.activationTimezone !== proposal.calendarTimeZone) ||
       readback.startDate?.toISOString().slice(0, 10) !== proposal.startDate ||
       readback.workouts.length !== proposal.candidate.length
     )
       fail('Start readback failed');
+    if (
+      proposal.request.deletions.some((d) =>
+        readback.workouts.some((w) => w.id === d.sourceWorkoutId),
+      )
+    )
+      fail('Deleted workout readback failed');
     const normalizedReadback = normalizePlanRow(readback, {
       workoutService: this.workout,
       workoutDefinitionService: this.definitions,
@@ -1119,6 +1349,7 @@ export class PlanStartService {
       expected.setUTCDate(expected.getUTCDate() + offset);
       if (
         !row ||
+        (!c.sourceWorkoutId && source.workouts.some((w) => w.id === row.id)) ||
         row.dayOffset !== offset ||
         row.sessionIndex !== (c.workout.sessionIndex ?? 1) ||
         row.scheduledDate?.getTime() !== expected.getTime()
@@ -1184,6 +1415,14 @@ export class PlanStartService {
       calendarTimeZone: proposal.calendarTimeZone,
       identityMap,
       readbackVerified: true,
+      executionSource: 'USER_CONFIRMATION',
+      scheduleConstraints: expectedConstraints ?? null,
+      ...(schedule
+        ? {
+            range: (proposal.request as PlanSchedulePreviewRequest).range,
+            protectedWorkoutCount: proposal.presentation.counts.protected ?? 0,
+          }
+        : {}),
     };
   }
 }

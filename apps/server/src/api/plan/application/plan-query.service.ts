@@ -812,6 +812,69 @@ export class PlanQueryService {
     return this.workouts.update(args, tx);
   }
 
+  async findRelatedCalendarPage(args: {
+    userId: string;
+    planId: string;
+    from: string;
+    to: string;
+    offset: number;
+    limit: number;
+  }) {
+    const where = {
+      userId: args.userId,
+      OR: [{ planId: null }, { planId: { not: args.planId } }],
+      scheduledDate: {
+        gte: new Date(`${args.from}T00:00:00Z`),
+        lte: new Date(`${args.to}T00:00:00Z`),
+      },
+    };
+    const [total, workouts] = await Promise.all([
+      this.workouts.count({ where }),
+      this.workouts.findMany({
+        where,
+        orderBy: [
+          { scheduledDate: 'asc' },
+          { sessionIndex: 'asc' },
+          { id: 'asc' },
+        ],
+        skip: args.offset,
+        take: args.limit,
+        select: {
+          id: true,
+          planId: true,
+          revision: true,
+          scheduledDate: true,
+          sessionIndex: true,
+          sportType: true,
+          name: true,
+          text: true,
+          notes: true,
+          status: true,
+          plannedDurationSeconds: true,
+          plannedSessionRpe: true,
+          structureKind: true,
+          links: { where: { unlinkedAt: null }, select: { id: true } },
+        },
+      }),
+    ]);
+    const nextOffset = args.offset + workouts.length;
+    return {
+      from: args.from,
+      to: args.to,
+      total,
+      offset: args.offset,
+      returned: workouts.length,
+      hasMore: nextOffset < total,
+      nextOffset: nextOffset < total ? nextOffset : null,
+      workouts: workouts.map((w) => ({
+        ...w,
+        scheduledDate: w.scheduledDate?.toISOString().slice(0, 10) ?? null,
+        activeActivityLinkCount: w.links.length,
+        links: undefined,
+      })),
+    };
+  }
+
   findCoachPlanSnapshot(args: {
     userId: string;
     planId?: string;

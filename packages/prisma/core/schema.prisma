@@ -573,6 +573,7 @@ enum PlanProposalMode {
   SUPERSEDE
 
   @@map("enum_plan_proposal_mode")
+  SCHEDULE
 }
 
 enum CompetitionImportance {

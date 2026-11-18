@@ -814,7 +814,28 @@
       "added": "Added",
       "deleted": "Deleted",
       "startSyncImpact": "After starting, the calendar is updated and device sync is pending.",
-      "readbackVerified": "Plan readback verified."
+      "readbackVerified": "Plan readback verified.",
+      "applyScheduleButton": "Confirm schedule changes",
+      "scheduleSyncImpact": "The committed schedule updates the calendar. Device sync has its own status; view or retry it in connection settings.",
+      "scheduleRange": "Adjustment range",
+      "scheduleTimezone": "Calendar time zone",
+      "scheduleRevision": "Rule revision",
+      "fixedRestWeekdays": "Recurring rest days",
+      "unavailableDates": "Unavailable dates",
+      "availableDateOverrides": "Confirmed available exceptions",
+      "rulesEffectiveFrom": "Rules start",
+      "rulesEffectiveTo": "Rules end",
+      "noScheduleDates": "None",
+      "noEndDate": "No end date",
+      "protected": "Protected",
+      "protectedOutsideRange": "Preserved outside the range",
+      "protectedPlanStatus": "Protected plan status",
+      "protectedWorkoutStatus": "Started or finished",
+      "protectedActivityLinked": "Linked to an activity",
+      "protectedHistory": "Historical workout",
+      "protectedSuccessor": "Covered by a successor",
+      "relatedCalendarConflicts": "Related workouts still need coordination",
+      "relatedCalendarUnmanaged": "This proposal does not change the following independent workouts or workouts in other plans. Continue coordinating them with your coach."
     },
     "history": {
       "title": "History",
@@ -7141,6 +7162,8 @@
     "changeDate": "Change date",
     "pendingCalendar": "Calendar awaiting assessment",
     "evaluatePrompt": "I’d like to start this saved plan on {date} ({timeZone}). Please review the full schedule with my recent training and current condition, ask any essential questions, and prepare a proposal for me to confirm.",
-    "loadFailed": "Unable to load the conversation. Please retry."
+    "loadFailed": "Unable to load the conversation. Please retry.",
+    "activePlanConversation": "The plan has started. Continue discussing future training here.",
+    "activePlanCalendar": "Current plan calendar"
   }
 }

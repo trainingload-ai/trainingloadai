@@ -1,3 +1,4 @@
+import { PlanCalendarValidationService } from './plan-calendar-validation.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import {
@@ -188,6 +189,7 @@ export class PlanWriteSupport {
     private readonly activityRead: ActivityReadService,
     private readonly workoutMutability: PlanWorkoutMutabilityPolicy,
     private readonly workoutPrescriptions: WorkoutPrescriptionService,
+    private readonly calendarValidation: PlanCalendarValidationService,
     @Optional() private readonly events?: EventEmitter2,
     @Optional()
     private readonly workoutTargetResolver?: PlanWorkoutTargetResolver,
@@ -608,6 +610,7 @@ export class PlanWriteSupport {
     dto: CreateScheduledWorkoutDto,
     tx: Prisma.TransactionClient,
   ) {
+    await acquireHashtextAdvisoryXactLock(tx, userId);
     this.assertWorkoutDefinitionPresent(dto);
     const definition = this.resolveWorkoutDefinitionInput(dto);
     const scheduledDate = scheduledDateFromCalendar(dto.scheduledDate);
@@ -648,6 +651,7 @@ export class PlanWriteSupport {
       },
       tx,
     );
+    await this.calendarValidation.assertStored(userId, [row.id], tx);
     return { workout: this.normalizePlanWorkoutRow(full) };
   }
 
@@ -686,6 +690,7 @@ export class PlanWriteSupport {
 
   async deleteIndependentWorkout(userId: string, workoutId: string) {
     await this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       await this.workouts.lockForUpdate(workoutId, tx);
       const workout = await this.workouts.findUnique(
         {
@@ -2239,50 +2244,53 @@ export class PlanWriteSupport {
     planId: string,
     changedIds: string[],
     startDate?: string,
-    knownPlan?: { generationMetadata?: unknown },
+    knownPlan?: {
+      userId: string;
+      generationMetadata: unknown;
+      startDate: Date | null;
+      periodWeeks: number;
+    },
+    validationRange?: { from: string; until: string },
   ) {
-    const knownMetadata = knownPlan?.generationMetadata as Record<
-      string,
-      unknown
-    > | null;
-    if (
-      knownPlan &&
-      knownMetadata?.scheduleConstraints === undefined &&
-      knownMetadata?.qualityContract === undefined
-    )
-      return;
-    const plan = await this.plans.findUnique({ where: { id: planId } }, tx);
-    const constraints = this.parseStoredScheduleConstraints(
-      plan?.generationMetadata,
-    );
+    const plan =
+      knownPlan ?? (await this.plans.findUnique({ where: { id: planId } }, tx));
     if (!plan) return;
+    const constraints = this.parseStoredScheduleConstraints(
+      plan.generationMetadata,
+    );
     const contract = parsePlanQualityContract(
       (plan.generationMetadata as Record<string, unknown> | null)
         ?.qualityContract,
     );
-    if (!constraints && !contract) return;
     const start =
       startDate ?? normalizePlanDate(plan.startDate) ?? contract?.startDate;
-    if (!start) return;
-    const rows = await this.workouts.findMany({ where: { planId } }, tx);
-    const report = assessPlanSchedule({
-      startDate: start,
-      periodWeeks: plan.periodWeeks,
-      workouts: rows.map((row) => ({
-        ...row,
-        scheduledDate: normalizePlanDate(row.scheduledDate),
-        durationSeconds: row.plannedDurationSeconds,
-      })),
-      changedWorkoutIds: changedIds,
-      constraints,
-      qualityContract: contract,
-      projectDates: Boolean(startDate),
-    });
-    if (!report.valid)
-      throw new UnprocessableEntityException({
-        code: 'PLAN_SCHEDULE_INVALID',
-        issues: report.issues,
-      });
+    if (start) {
+      const rows = await this.workouts.findMany({ where: { planId } }, tx);
+      const input = {
+        userId: plan.userId,
+        planId,
+        startDate: start,
+        periodWeeks: plan.periodWeeks,
+        workouts: rows.map((row) => ({
+          ...row,
+          scheduledDate: normalizePlanDate(row.scheduledDate),
+          durationSeconds: row.plannedDurationSeconds,
+        })),
+        changedWorkoutIds: changedIds,
+        constraints,
+        qualityContract: contract,
+        projectDates: Boolean(startDate),
+        validationRange,
+      };
+      const report = assessPlanSchedule(input);
+      if (!report.valid)
+        throw new UnprocessableEntityException({
+          code: 'PLAN_SCHEDULE_INVALID',
+          issues: report.issues,
+        });
+      await this.calendarValidation.assertCandidate(input, tx);
+    } else
+      await this.calendarValidation.assertStored(plan.userId, changedIds, tx);
   }
 
   async createPlan(
@@ -2663,11 +2671,26 @@ export class PlanWriteSupport {
             touchedWorkoutIds.push(row.id);
         }
       }
-      if (touchedWorkoutIds.length)
+      if (touchedWorkoutIds.length || dto.scheduleConstraints !== undefined)
         await this.assertStoredScheduleConstraints(
           tx,
           planId,
           touchedWorkoutIds,
+          undefined,
+          undefined,
+          dto.scheduleConstraints
+            ? {
+                from: dto.scheduleConstraints.effectiveFrom,
+                until:
+                  dto.scheduleConstraints.effectiveUntil ??
+                  normalizePlanDate(existing.endDate) ??
+                  (nextStartDate
+                    ? this.addDays(nextStartDate, existing.periodWeeks * 7 - 1)
+                        .toISOString()
+                        .slice(0, 10)
+                    : dto.scheduleConstraints.effectiveFrom),
+              }
+            : undefined,
         );
 
       // PAUSED 计划下编辑：对受影响的 workout 增量重算估值；DRAFT 不算

@@ -35,10 +35,28 @@ export const planProposalPreviewTool: AiToolDef<
     additionalProperties: false,
     required: ['mode'],
     properties: {
-      mode: { type: 'string', enum: ['ADAPT', 'SUPERSEDE', 'START'] },
+      mode: {
+        type: 'string',
+        enum: ['ADAPT', 'SUPERSEDE', 'START', 'SCHEDULE'],
+      },
       planId: {
         type: 'string',
-        description: 'Source plan id for ADAPT or START.',
+        description: 'Source plan id for ADAPT, START or SCHEDULE.',
+      },
+      range: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          from: {
+            type: 'string',
+            description: 'SCHEDULE inclusive effective date YYYY-MM-DD',
+          },
+          to: {
+            type: 'string',
+            description: 'SCHEDULE inclusive last date YYYY-MM-DD',
+          },
+        },
+        required: ['from', 'to'],
       },
       startDate: {
         type: 'string',
@@ -48,7 +66,7 @@ export const planProposalPreviewTool: AiToolDef<
       preserveUnmentioned: {
         type: 'boolean',
         description:
-          'START: true explicitly preserves every source workout not listed in changes/deletions. Server expands all identities/revisions and shows full scope; never infer deletion from omission.',
+          'START/SCHEDULE: true explicitly preserves every source workout not listed in changes/deletions. Server expands all identities/revisions and shows full scope; never infer deletion from omission.',
       },
       changes: {
         type: 'array',
@@ -282,10 +300,11 @@ export const planProposalPreviewTool: AiToolDef<
     if (
       input?.mode !== 'ADAPT' &&
       input?.mode !== 'SUPERSEDE' &&
-      input?.mode !== 'START'
+      input?.mode !== 'START' &&
+      input?.mode !== 'SCHEDULE'
     ) {
       return aiToolError(
-        'mode must be ADAPT, SUPERSEDE or START',
+        'mode must be ADAPT, SUPERSEDE, START or SCHEDULE',
         'INVALID_INPUT',
       );
     }
@@ -316,21 +335,23 @@ export const planProposalPreviewTool: AiToolDef<
       );
     }
     if (
-      input.mode === 'START' &&
+      (input.mode === 'START' || input.mode === 'SCHEDULE') &&
       (!ctx.sid ||
-        !ctx.branchId ||
+        (input.mode === 'START' && !ctx.branchId) ||
         !ctx.currentUserMessageId ||
         !input.planId ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(input.startDate) ||
+        (input.mode === 'START'
+          ? !/^\d{4}-\d{2}-\d{2}$/.test(input.startDate)
+          : !input.range?.from || !input.range?.to) ||
         !input.rationale?.trim() ||
         !Array.isArray(input.evidenceRefs) ||
         input.evidenceRefs.length === 0)
     )
       return aiToolError(
-        'START requires the bound start conversation, planId, selected startDate, rationale and evidenceRefs',
+        'START/SCHEDULE requires a current durable conversation, planId, selected startDate or explicit range, rationale and evidenceRefs',
         'INVALID_INPUT',
       );
-    if (input.mode === 'START') {
+    if (input.mode === 'START' || input.mode === 'SCHEDULE') {
       const affected = [
         ...(Array.isArray(input.changes) ? input.changes : []),
         ...(Array.isArray(input.additions) ? input.additions : []),
@@ -348,7 +369,7 @@ export const planProposalPreviewTool: AiToolDef<
         })
       )
         return aiToolError(
-          'START plannedSessionRpe must be a number from 1 to 10 when supplied',
+          'Candidate plannedSessionRpe must be a number from 1 to 10 when supplied',
           'INVALID_INPUT',
         );
     }
@@ -361,21 +382,28 @@ export const planProposalPreviewTool: AiToolDef<
     expiresAt: output.expiresAt,
     decisionType: output.decisionType,
     decisionPayload:
-      output.mode === 'START'
+      output.mode === 'START' || output.mode === 'SCHEDULE'
         ? { planId: output.decisionPayload.planId, previewId: output.previewId }
         : output.decisionPayload,
-    ...(output.mode === 'START'
+    ...(output.mode === 'START' || output.mode === 'SCHEDULE'
       ? {
           completeCandidateRenderedByServer: true,
           counts: output.presentation.counts,
+          relatedCalendarConflicts:
+            output.presentation.relatedCalendarConflicts,
           warnings: output.presentation.warnings,
         }
       : {}),
   }),
   execute: async (ctx, input) => {
     const userId = ctx.session?.user?.id;
-    if (input.mode === 'START' && !ctx.currentUserMessageId)
-      throw new Error('START requires the current durable user turn');
+    if (
+      (input.mode === 'START' || input.mode === 'SCHEDULE') &&
+      !ctx.currentUserMessageId
+    )
+      throw new Error(
+        'Calendar proposals require the current durable user turn',
+      );
     if (!userId || !ctx.coachBranching) {
       throw new Error('plan.proposal_preview requires a signed-in user');
     }
@@ -383,10 +411,10 @@ export const planProposalPreviewTool: AiToolDef<
       userId,
       request: input,
       binding:
-        ctx.sid && ctx.branchId
+        ctx.sid && (ctx.branchId || input.mode === 'SCHEDULE')
           ? {
               sid: ctx.sid,
-              branchId: ctx.branchId,
+              branchId: ctx.branchId ?? '',
               userMessageId: ctx.currentUserMessageId,
             }
           : undefined,

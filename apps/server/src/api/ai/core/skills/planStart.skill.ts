@@ -20,6 +20,7 @@ export const planStartSkill: CoachSkillDef = {
     'ask_user_question',
   ],
   prompt: [
+    `After the same plan has a committed START receipt it is already running: use plan-followup/SCHEDULE for new availability or remaining-course changes, preserve its original start and history, and never repeat activation.`,
     `This is preparation to start the exact saved DRAFT bound to this conversation. Selecting a date asks for assessment; it is not permission to activate. Do not create a new plan, call a direct lifecycle activation, or present a generic save-new-plan card.`,
     `Read the opened plan with plan.by_id including its workouts, source identities/revisions, generationMetadata and existing constraints. Read relevant actual training, readiness/recovery, personal constraints and calendar facts; explicitly distinguish missing evidence from no fatigue. Ask only for personal information that changes the judgment and cannot be read from tools.`,
     `Evaluate the complete candidate at the selected date and calendar timezone. An initial rest day is allowed; do not mechanically move a fixed competition date. Discuss and revise the same draft in this conversation when needed.`,

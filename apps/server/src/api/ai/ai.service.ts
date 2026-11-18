@@ -1641,7 +1641,7 @@ export class AiService {
           `This conversation has a plan branch: it is a proposal workspace, not proof that the main plan changed. Only a committed apply receipt establishes a plan change.`,
           `Use the Workout operation decision guide to choose evidence and form one coherent proposal for the athlete's agreed scope.`,
           `Decision payloads: PLAN_WORKOUT_UPDATE changes one existing workout; PLAN_WORKOUT_ADD adds without related edits; PLAN_WORKOUT_SCHEDULE atomically combines local changes [{ workoutId, dto }] and additions [{ dto }]; PLAN_WORKOUT_BATCH_UPDATE is reserved for an agreed inclusive multi-week rewrite and covers every pending workout in its scope.`,
-          `PLAN_START, PLAN_ADAPTATION and PLAN_SUPERSESSION are server-owned proposal decisions. First call plan.proposal_preview, then pass its returned decisionPayload unchanged to coach_decision_draft. Never put editable workout content into those decision payloads.`,
+          `PLAN_START, PLAN_SCHEDULE, PLAN_ADAPTATION and PLAN_SUPERSESSION are server-owned proposal decisions. First call plan.proposal_preview, then pass its returned decisionPayload unchanged to coach_decision_draft. Never put editable workout content into those decision payloads.`,
           `Create the structured decision with coach_decision_draft. Apply an existing proposal with coach_decision_apply only when the current user input confirms that exact proposal.`,
           `If apply reports a conflict or skipped proposal, no change was committed. Reassess against current state before presenting a replacement.`,
           `Keep decision, branch, context, commit, and event identifiers inside tool arguments.`,
@@ -2912,7 +2912,7 @@ export class AiService {
       ? await this.prisma.coachDecision.findMany({
           where: {
             id: { in: startIds },
-            decisionType: 'PLAN_START',
+            decisionType: { in: ['PLAN_START', 'PLAN_SCHEDULE'] },
             context: { userId },
           },
           select: { id: true, state: true, payload: true },

@@ -1,3 +1,7 @@
+import { PlanCalendarRepository } from './persistence/plan-calendar.repository';
+import { HealthDataModule } from '@/health-data/health-data.module';
+import { UserAnalysisConfigModule } from '@/api/user/user-analysis-config.module';
+import { PlanCalendarValidationService } from './application/plan-calendar-validation.service';
 import { PlanStartRepository } from './persistence/plan-start.repository';
 import { PlanStartService } from './application/plan-start.service';
 import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
@@ -49,6 +53,8 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
 @Module({
   imports: [
     AthleteStateUpdatesModule,
+    HealthDataModule,
+    UserAnalysisConfigModule,
     PrismaModule,
     PlanProjectionReadModule,
     LoadReadoutModule,
@@ -68,6 +74,8 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PublicPlanShareController,
   ],
   providers: [
+    PlanCalendarRepository,
+    PlanCalendarValidationService,
     PlanStartRepository,
     PlanActivityLinkRepository,
     CoachContextRepository,

@@ -1,3 +1,5 @@
+import { PlanCalendarValidationService } from '../application/plan-calendar-validation.service';
+import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { PlanWriteSupport } from '../application/plan-write.support';
 import { ActivityReadService } from '../../activity/activity-read.service';
@@ -29,6 +31,7 @@ function createService(
     new ActivityReadService(prisma as never),
     new PlanWorkoutMutabilityPolicy(),
     new WorkoutPrescriptionService(),
+    new PlanCalendarValidationService(new PlanCalendarRepository()),
   );
 }
 

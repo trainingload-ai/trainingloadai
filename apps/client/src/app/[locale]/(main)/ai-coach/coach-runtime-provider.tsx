@@ -1,5 +1,8 @@
 "use client";
 
+import { getRestoredPlanDecisionApply } from "@shared/plan-proposal-receipt";
+import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat, type UseChatHelpers } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -524,23 +527,6 @@ export function CoachRuntimeProvider({
           ),
         );
       }
-      if (!isAbort && !isDisconnect && !isError) {
-        const appliedDecisions = new Set<string>();
-        for (const part of message.parts) {
-          if (part.type !== "data-coach-tool") continue;
-          const input = part.data.input as
-            | { kind?: string; result?: string; decisionId?: string }
-            | undefined;
-          if (
-            input?.kind === "coach_decision_apply" &&
-            input.result === "APPLIED" &&
-            typeof input.decisionId === "string"
-          )
-            appliedDecisions.add(input.decisionId);
-        }
-        for (const decisionId of appliedDecisions)
-          onPlanAppliedRef.current?.(decisionId);
-      }
       if (!isAbort && !isDisconnect && !isError) onTurnFinishedRef.current?.();
       invalidateCoachSessionLists(queryClient);
       void queryClient.invalidateQueries({
@@ -565,12 +551,41 @@ export function CoachRuntimeProvider({
   });
 
   chatRef.current = runtime;
+  const appliedDecisionsSeen = useRef(new Set<string>());
+  const appliedDecisionIds = JSON.stringify(
+    [
+      ...new Set(
+        [...initialMessages, ...runtime.messages].flatMap((message) =>
+          message.parts.flatMap((part) => {
+            if (part.type !== "data-coach-tool") return [];
+            const restored = getRestoredPlanDecisionApply(part.data.input);
+            if (restored) return [restored.decisionId];
+            const input = part.data.input as
+              | { kind?: string; result?: string; decisionId?: string }
+              | undefined;
+            return input?.kind === "coach_decision_apply" &&
+              input.result === "APPLIED" &&
+              typeof input.decisionId === "string"
+              ? [input.decisionId]
+              : [];
+          }),
+        ),
+      ),
+    ].sort(),
+  );
+  useEffect(() => {
+    for (const decisionId of JSON.parse(appliedDecisionIds) as string[]) {
+      if (appliedDecisionsSeen.current.has(decisionId)) continue;
+      appliedDecisionsSeen.current.add(decisionId);
+      if (onPlanAppliedRef.current) onPlanAppliedRef.current(decisionId);
+      else void invalidateAfterPlanMutation(queryClient);
+    }
+  }, [appliedDecisionIds, queryClient]);
   const persistedDecisionStates = serializePlanDecisionStates(initialMessages);
   useEffect(() => {
-    if (entry)
-      runtime.setMessages((current) =>
-        reconcilePlanDecisionStates(current, persistedDecisionStates),
-      );
+    runtime.setMessages((current) =>
+      reconcilePlanDecisionStates(current, persistedDecisionStates),
+    );
   }, [entry, persistedDecisionStates, runtime.setMessages]);
   useEffect(() => {
     mountedRef.current = true;

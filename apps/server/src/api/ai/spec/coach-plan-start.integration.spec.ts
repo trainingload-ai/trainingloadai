@@ -69,7 +69,11 @@ describe('START decision confirmation / PostgreSQL', () => {
     await prisma.$executeRawUnsafe('DELETE FROM t_user');
     await prisma.$executeRawUnsafe("INSERT INTO t_user(id) VALUES ('user')");
   });
-  async function proposal(addition = false) {
+  async function proposal(
+    addition = false,
+    schedule = false,
+    mainChat = false,
+  ) {
     const created = await f.service.createPlan('user', {
       title: 'Saved draft',
       periodWeeks: 1,
@@ -89,13 +93,77 @@ describe('START decision confirmation / PostgreSQL', () => {
     });
     const planId = created.plan!.id;
     const session = await f.starts.conversation('user', planId, '2099-11-22');
-    const branch = await coach.bindStartConversationBranch({
+    if (schedule)
+      await prisma.$transaction((tx) =>
+        f.service.activatePlan('user', planId, '2099-11-22', undefined, {
+          tx,
+          validatedStartPreview: true,
+        }),
+      );
+    let branch = await coach.bindStartConversationBranch({
       userId: 'user',
       sid: session.sid,
       branchId: null,
       revision: 1,
     });
-    const binding = { sid: session.sid, branchId: branch.id };
+    const binding: { sid: string; branchId: string; userMessageId?: string } = {
+      sid: session.sid,
+      branchId: branch.id,
+    };
+    if (schedule) {
+      await prisma.aiCoachSession.update({
+        where: { userId_id: { userId: 'user', id: session.sid } },
+        data: {
+          planStartPlanId: null,
+          planStartBranchId: null,
+          planStartRevision: 0,
+        },
+      });
+      const user = await prisma.aiCoachMessage.create({
+        data: {
+          userId: 'user',
+          sessionId: session.sid,
+          role: 'USER',
+          sequence: -2,
+          content: 'Change remaining availability',
+          createdAt: new Date(Date.now() - 20000),
+        },
+      });
+      const assistant = await prisma.aiCoachMessage.create({
+        data: {
+          userId: 'user',
+          sessionId: session.sid,
+          role: 'ASSISTANT',
+          sequence: -1,
+          content: '',
+          createdAt: new Date(Date.now() - 19000),
+        },
+      });
+      binding.userMessageId = user.id;
+      await prisma.coachRun.create({
+        data: {
+          id: 'schedule-run',
+          userId: 'user',
+          sessionId: session.sid,
+          branchId: branch.id,
+          originMessageId: user.id,
+          activeAttemptId: 'schedule-attempt',
+          attempts: {
+            create: {
+              id: 'schedule-attempt',
+              userId: 'user',
+              requestId: 'req',
+              requestHash: 'hash',
+              inputMessageId: user.id,
+              messageId: assistant.id,
+              trigger: 'start',
+              operationId: 'op',
+              ownerId: 'test',
+            },
+          },
+        },
+      });
+    }
     const request: PlanStartPreviewRequest = {
       mode: 'START',
       planId,
@@ -126,7 +194,37 @@ describe('START decision confirmation / PostgreSQL', () => {
       deletions: [],
       preserveUnmentioned: true,
     };
-    const preview = await f.proposals.createPreview('user', request, binding);
+    const effectiveRequest = schedule
+      ? {
+          ...request,
+          mode: 'SCHEDULE' as const,
+          range: { from: '2099-11-22', to: '2099-11-28' },
+        }
+      : request;
+    if (mainChat) {
+      await prisma.coachRun.update({
+        where: { id: 'schedule-run' },
+        data: { branchId: null },
+      });
+      binding.branchId = '';
+    }
+    const preview = mainChat
+      ? await coach.createPlanProposalPreview({
+          userId: 'user',
+          request: effectiveRequest,
+          binding,
+        })
+      : await f.proposals.createPreview('user', effectiveRequest, binding);
+    if (mainChat) {
+      binding.branchId = (await coach.currentConversationBranch({
+        userId: 'user',
+        sid: session.sid,
+        userMessageId: binding.userMessageId!,
+      }))!;
+      branch = await prisma.coachBranch.findUniqueOrThrow({
+        where: { id: binding.branchId },
+      });
+    }
     const draft = await coach.squashBranch({
       userId: 'user',
       branchId: branch.id,
@@ -159,7 +257,7 @@ describe('START decision confirmation / PostgreSQL', () => {
                 input: {
                   decisionId: draft.decision.id,
                   branchId: branch.id,
-                  decisionType: 'PLAN_START',
+                  decisionType: preview.decisionType,
                   payload: preview.decisionPayload,
                 },
               },
@@ -536,5 +634,149 @@ describe('START decision confirmation / PostgreSQL', () => {
     expect(
       (await f.starts.conversation('user', created.plan!.id)).evaluationStarted,
     ).toBe(true);
+  });
+  it('continues the same start conversation on a writable followup branch after the start commit', async () => {
+    const p = await proposal();
+    await coach.approveDecision(p.confirmation);
+    await coach.applyDecision({
+      userId: 'user',
+      decisionId: p.draft.decision.id,
+    });
+    const next = await coach.bindStartConversationBranch({
+      userId: 'user',
+      sid: p.session.sid,
+      branchId: p.binding.branchId,
+      revision: 1,
+    });
+    expect(next.status).toBe('OPEN');
+    expect(next.id).not.toBe(p.binding.branchId);
+    expect((await f.starts.conversation('user', p.planId)).sid).toBe(
+      p.session.sid,
+    );
+  });
+
+  it('requires an actual card in an ordinary conversation and commits a SCHEDULE receipt exactly once', async () => {
+    const p = await proposal(false, true);
+    expect(p.preview.mode).toBe('SCHEDULE');
+    await expect(
+      coach.approveDecision({
+        userId: 'user',
+        decisionId: p.draft.decision.id,
+      }),
+    ).rejects.toThrow('START_CONFIRMATION_REQUIRED');
+    await coach.approveDecision(p.confirmation);
+    const applied = await coach.applyDecision({
+      userId: 'user',
+      decisionId: p.draft.decision.id,
+    });
+    expect(applied).toMatchObject({
+      result: 'APPLIED',
+      receipt: {
+        mode: 'SCHEDULE',
+        readbackVerified: true,
+        changedWorkoutCount: 0,
+      },
+      commit: { id: expect.any(String) },
+    });
+    const replay = await coach.applyDecision({
+      userId: 'user',
+      decisionId: p.draft.decision.id,
+    });
+    expect(replay.receipt).toEqual(applied.receipt);
+  });
+  it('creates a server-owned branch from a branchless ordinary chat and restores it for real-card confirmation', async () => {
+    const p = await proposal(false, true, true);
+    expect(
+      await coach.decisionConversationBranch(
+        'user',
+        p.session.sid,
+        p.draft.decision.id,
+      ),
+    ).toBe(p.binding.branchId);
+    expect(
+      await coach.decisionConversationBranch(
+        'user',
+        'different-session',
+        p.draft.decision.id,
+      ),
+    ).toBeNull();
+    await coach.approveDecision(p.confirmation);
+    expect(
+      await coach.applyDecision({
+        userId: 'user',
+        decisionId: p.draft.decision.id,
+      }),
+    ).toMatchObject({
+      result: 'APPLIED',
+      receipt: { mode: 'SCHEDULE', readbackVerified: true },
+    });
+  });
+  it('keeps the committed schedule receipt authoritative when the post-commit notification fails', async () => {
+    const p = await proposal(false, true);
+    await coach.approveDecision(p.confirmation);
+    Object.assign(f.write, {
+      events: {
+        emitAsync: async () => {
+          throw new Error('provider unavailable');
+        },
+      },
+    });
+    try {
+      const result = await coach.applyDecision({
+        userId: 'user',
+        decisionId: p.draft.decision.id,
+      });
+      expect(result).toMatchObject({
+        result: 'APPLIED',
+        receipt: { mode: 'SCHEDULE', readbackVerified: true },
+        commit: { id: expect.any(String) },
+      });
+      expect(
+        (await f.service.getPlanDetail('user', p.planId)).plan!.status,
+      ).toBe('ACTIVE');
+      expect(
+        (
+          await coach.applyDecision({
+            userId: 'user',
+            decisionId: p.draft.decision.id,
+          })
+        ).receipt,
+      ).toEqual(result.receipt);
+    } finally {
+      Object.assign(f.write, { events: undefined });
+    }
+  });
+  it('converges eight simultaneous confirmations to one committed schedule receipt', async () => {
+    const p = await proposal(false, true);
+    let notifications = 0;
+    Object.assign(f.write, {
+      events: {
+        emitAsync: async (type: string) => {
+          if (type === 'plan.workoutsChanged') notifications++;
+        },
+      },
+    });
+    const results = await Promise.all(
+      Array.from({ length: 8 }, async () => {
+        await coach.approveDecision(p.confirmation);
+        return coach.applyDecision({
+          userId: 'user',
+          decisionId: p.draft.decision.id,
+        });
+      }),
+    );
+    expect(results.map((result) => result.result)).toEqual(
+      Array(8).fill('APPLIED'),
+    );
+    expect(new Set(results.map((result) => result.commit!.id)).size).toBe(1);
+    for (const result of results)
+      expect(result.receipt).toEqual(results[0].receipt);
+    expect(
+      await prisma.coachCommit.count({
+        where: { decisionId: p.draft.decision.id },
+      }),
+    ).toBe(1);
+    expect(notifications).toBe(1);
+    Object.assign(f.write, { events: undefined });
   });
 });

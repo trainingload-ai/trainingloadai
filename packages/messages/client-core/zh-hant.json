@@ -698,7 +698,28 @@
       "added": "新增",
       "deleted": "刪除",
       "startSyncImpact": "開始後更新日曆，並等待裝置同步。",
-      "readbackVerified": "計劃讀回驗證通過。"
+      "readbackVerified": "計劃讀回驗證通過。",
+      "applyScheduleButton": "確認並調整課表",
+      "scheduleSyncImpact": "課表提交後更新日曆；裝置同步狀態獨立顯示，可在連線設定中查看或重試。",
+      "scheduleRange": "調整範圍",
+      "scheduleTimezone": "日曆時區",
+      "scheduleRevision": "規則版本",
+      "fixedRestWeekdays": "固定休息日",
+      "unavailableDates": "不可訓練日期",
+      "availableDateOverrides": "已確認的可訓練例外",
+      "rulesEffectiveFrom": "規則生效日期",
+      "rulesEffectiveTo": "規則結束日期",
+      "noScheduleDates": "無",
+      "noEndDate": "不設結束日期",
+      "protected": "受保護",
+      "protectedOutsideRange": "範圍外保留",
+      "protectedPlanStatus": "計畫狀態受保護",
+      "protectedWorkoutStatus": "已開始或已結束",
+      "protectedActivityLinked": "已關聯活動",
+      "protectedHistory": "歷史課程",
+      "protectedSuccessor": "由後繼計畫涵蓋",
+      "relatedCalendarConflicts": "相關課程仍需協調",
+      "relatedCalendarUnmanaged": "以下獨立課程或其他計畫課程未由本提案修改，請繼續與教練協調。"
     },
     "history": {
       "title": "歷史",
@@ -6581,6 +6602,8 @@
     "changeDate": "修改日期",
     "pendingCalendar": "待評估的日曆",
     "evaluatePrompt": "我想從 {date} 開始這個已儲存的計畫（日曆時區：{timeZone}）。請結合近期訓練和目前狀況評估完整課表，必要時先問我，再提供可確認的開始方案。",
-    "loadFailed": "無法載入對話，請重試。"
+    "loadFailed": "無法載入對話，請重試。",
+    "activePlanConversation": "計畫已開始，可繼續討論後續安排。",
+    "activePlanCalendar": "目前計畫日曆"
   }
 }

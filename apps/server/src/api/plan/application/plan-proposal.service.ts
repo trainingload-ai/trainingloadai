@@ -303,7 +303,7 @@ export class PlanProposalService {
     request: PlanProposalPreviewRequest,
     binding?: PlanStartBinding,
   ): Promise<PlanProposalPreviewResult> {
-    if (request.mode === 'START')
+    if (request.mode === 'START' || request.mode === 'SCHEDULE')
       return this.starts.createPreview(userId, request, binding);
     return request.mode === 'ADAPT'
       ? this.createAdaptPreview(userId, request)
@@ -314,7 +314,7 @@ export class PlanProposalService {
     userId: string;
     sourcePlanId: string;
     previewId: string;
-    mode: 'ADAPT' | 'SUPERSEDE' | 'START';
+    mode: 'ADAPT' | 'SUPERSEDE' | 'START' | 'SCHEDULE';
     binding?: PlanStartBinding;
   }) {
     const preview = await this.proposals.findUnique({
@@ -328,14 +328,15 @@ export class PlanProposalService {
     ) {
       invalid('Plan proposal preview is unavailable');
     }
-    if (args.mode === 'START') {
+    if (args.mode === 'START' || args.mode === 'SCHEDULE') {
       const proposal = preview.proposal as unknown as CanonicalStartProposal;
       const session = await this.starts.assertBinding(
         args.userId,
         args.sourcePlanId,
         args.binding,
         this.proposals.database(),
-        proposal.startDate,
+        proposal.mode === 'START' ? proposal.startDate : undefined,
+        proposal.mode === 'SCHEDULE',
       );
       if (
         proposal.binding.sid !== args.binding?.sid ||

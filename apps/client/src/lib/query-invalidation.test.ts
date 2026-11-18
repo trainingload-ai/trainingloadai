@@ -68,3 +68,26 @@ describe("maximum oxygen uptake after activity processing", () => {
     }
   });
 });
+
+it("refreshes every execution-advice variant after a committed plan mutation", async () => {
+  const client = new QueryClient();
+  const keys = [
+    ["ai-plan-execution-advice", { planId: "a", surface: "HOME_TODAY" }],
+    ["ai-plan-execution-advice", { planId: "a", surface: "PLAN_SIDEBAR" }],
+    ["ai-plan-execution-advice", { planId: "b" }],
+    ["account-intervals-icu"],
+    ["personal-connection", "garmin"],
+    ["account-external-provider", "garmin", "training"],
+    ["account-external-provider", "intervals_icu", "status"],
+  ];
+  try {
+    for (const key of keys) client.setQueryData(key, { summary: "old" });
+    client.setQueryData(["unrelated"], { value: 1 });
+    await invalidateAfterPlanMutation(client, { planId: "a" });
+    for (const key of keys)
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(["unrelated"])?.isInvalidated).toBe(false);
+  } finally {
+    client.clear();
+  }
+});

@@ -16,7 +16,10 @@ const api = vi.hoisted(() => ({
 vi.mock("@/lib/query-invalidation", () => ({
   invalidateAfterPlanMutation: api.invalidate,
 }));
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => "zh",
+}));
 vi.mock("@/api/plans", () => ({ openPlanStartConversation: api.open }));
 vi.mock("@/api/ai-coach", () => ({
   aiCoachMessagesQueryKey: (sid: string) => ["messages", sid],
@@ -97,7 +100,13 @@ const prepared = {
   startDate: "2026-11-22",
   earliestStartDate: "2026-11-22",
   calendarTimeZone: "Asia/Shanghai",
-  plan: { id: "plan", title: "Saved plan", periodWeeks: 1, workouts: [] },
+  plan: {
+    id: "plan",
+    title: "Saved plan",
+    status: "DRAFT",
+    periodWeeks: 1,
+    workouts: [],
+  },
 };
 describe("saved draft start conversation", () => {
   it("selects a date and enters embedded chat without activating the plan", async () => {
@@ -290,6 +299,10 @@ it("restores only the projected APPLIED draft receipt and refreshes caches once 
     </StrictMode>,
   );
   expect(await screen.findByText("applyResult.APPLIED")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "changeDate" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("activePlanConversation")).toBeInTheDocument();
   expect(screen.getAllByText("2026-11-22 · Asia/Shanghai").length).toBe(2);
   await waitFor(() =>
     expect(api.invalidate).toHaveBeenCalledExactlyOnceWith(client, {
@@ -302,6 +315,34 @@ it("restores only the projected APPLIED draft receipt and refreshes caches once 
   expect(
     screen.queryByRole("button", { name: "applyStartButton" }),
   ).not.toBeInTheDocument();
+  mounted.unmount();
+  client.clear();
+});
+
+it("removes the start-date action immediately after a live commit while the prepared query is still DRAFT", async () => {
+  api.open.mockResolvedValue({ ...prepared, evaluationStarted: true });
+  api.messages.mockResolvedValue([]);
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const mounted = render(
+    <QueryClientProvider client={client}>
+      <PlanStartConversationDialog
+        open
+        planId="just-started"
+        onOpenChange={vi.fn()}
+      />
+    </QueryClientProvider>,
+  );
+  await screen.findByTestId("runtime");
+  expect(
+    screen.getByRole("button", { name: "changeDate" }),
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Committed delivery" }));
+  expect(
+    screen.queryByRole("button", { name: "changeDate" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("activePlanConversation")).toBeInTheDocument();
   mounted.unmount();
   client.clear();
 });

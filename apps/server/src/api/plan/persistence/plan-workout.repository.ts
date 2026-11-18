@@ -37,6 +37,10 @@ export class PlanWorkoutRepository {
     return this.db(tx).planWorkout.findMany(args);
   }
 
+  count(args: Prisma.PlanWorkoutCountArgs, tx?: PlanDb) {
+    return this.db(tx).planWorkout.count(args);
+  }
+
   create<T extends Prisma.PlanWorkoutCreateArgs>(
     args: Prisma.SelectSubset<T, Prisma.PlanWorkoutCreateArgs>,
     tx?: PlanDb,

@@ -1,3 +1,8 @@
+import {
+  isPrismaSerializableConflict,
+  MAX_SERIALIZABLE_ATTEMPTS,
+  serializableRetryDelayMs,
+} from '@/prisma/prisma-transaction-errors';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { PlanLinkMatcherService } from '../plan/application/plan-link-matcher.service';
 import { Injectable, Optional } from '@nestjs/common';
@@ -304,6 +309,7 @@ export class CoachBranchingService {
     sid: string;
     branchId: string | null;
     revision: number;
+    preserveClosedBranch?: boolean;
   }) {
     return this.prisma.$transaction(async (tx) => {
       await acquireHashtextAdvisoryXactLock(tx, args.userId);
@@ -326,9 +332,11 @@ export class CoachBranchingService {
           },
         });
         if (!branch) this.fail('START_SESSION_MISMATCH');
-        return branch;
+        if (branch.status !== 'CLOSED' || args.preserveClosedBranch)
+          return branch;
       }
-      if (args.branchId) this.fail('START_SESSION_MISMATCH');
+      if (args.branchId && !session.planStartBranchId)
+        this.fail('START_SESSION_MISMATCH');
       const context = await this.coachContext.ensureContext({
         userId: args.userId,
         planId: session.planStartPlanId,
@@ -533,6 +541,7 @@ export class CoachBranchingService {
     if (
       decisionType === 'PLAN_ADAPTATION' ||
       decisionType === 'PLAN_START' ||
+      decisionType === 'PLAN_SCHEDULE' ||
       decisionType === 'PLAN_SUPERSESSION'
     ) {
       const previewId = toSafeString(rec.previewId);
@@ -540,9 +549,11 @@ export class CoachBranchingService {
       const expectedMode =
         decisionType === 'PLAN_ADAPTATION'
           ? 'ADAPT'
-          : decisionType === 'PLAN_START'
-            ? 'START'
-            : 'SUPERSEDE';
+          : decisionType === 'PLAN_SCHEDULE'
+            ? 'SCHEDULE'
+            : decisionType === 'PLAN_START'
+              ? 'START'
+              : 'SUPERSEDE';
       payload = await this.planProposalPreviews.resolveDecisionPayload({
         userId: args.userId,
         sourcePlanId: branch.context.planId,
@@ -702,6 +713,7 @@ export class CoachBranchingService {
           confidence:
             decisionType !== 'PLAN_ADAPTATION' &&
             decisionType !== 'PLAN_START' &&
+            decisionType !== 'PLAN_SCHEDULE' &&
             decisionType !== 'PLAN_SUPERSESSION' &&
             typeof args.confidence === 'number'
               ? Number(args.confidence)
@@ -714,6 +726,7 @@ export class CoachBranchingService {
       if (
         decisionType === 'PLAN_ADAPTATION' ||
         decisionType === 'PLAN_START' ||
+        decisionType === 'PLAN_SCHEDULE' ||
         decisionType === 'PLAN_SUPERSESSION'
       ) {
         await this.planProposalPreviews.claimDecision({
@@ -808,11 +821,108 @@ export class CoachBranchingService {
     );
   }
 
+  async currentConversationBranch(args: {
+    userId: string;
+    sid: string;
+    userMessageId: string;
+    planId?: string;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
+      const latest = await tx.aiCoachMessage.findFirst({
+        where: { userId: args.userId, sessionId: args.sid, role: 'USER' },
+        orderBy: { sequence: 'desc' },
+        select: { id: true },
+      });
+      const attempt = await tx.coachRunAttempt.findFirst({
+        where: {
+          userId: args.userId,
+          inputMessageId: args.userMessageId,
+          cancelRequestedAt: null,
+          status: 'running',
+          run: { userId: args.userId, sessionId: args.sid, status: 'running' },
+        },
+        include: { run: true },
+      });
+      if (
+        latest?.id !== args.userMessageId ||
+        !attempt ||
+        attempt.run.activeAttemptId !== attempt.id
+      )
+        this.fail('SCHEDULE_RUN_CHANGED');
+      if (attempt.run.branchId || !args.planId) return attempt.run.branchId;
+      const plan = await this.planQuery.findPlan(
+        {
+          where: {
+            id: args.planId,
+            userId: args.userId,
+            status: { in: ['ACTIVE', 'PAUSED'] },
+          },
+          select: { id: true },
+        },
+        tx,
+      );
+      if (!plan) this.fail('SCHEDULE_PLAN_NOT_FOUND');
+      const context = await this.coachContext.ensureContext({
+        userId: args.userId,
+        planId: args.planId,
+        tx,
+      });
+      const thread = await this.getOrCreateMainThread(tx, context.id);
+      const branch = await tx.coachBranch.create({
+        data: {
+          threadId: thread.id,
+          contextId: context.id,
+          baseEventSeq: context.headEventSeq,
+          openedBy: args.userId,
+          openReason: 'conversation_schedule',
+        },
+      });
+      await tx.coachRun.update({
+        where: { id: attempt.runId },
+        data: { branchId: branch.id },
+      });
+      return branch.id;
+    });
+  }
+
+  async decisionConversationBranch(
+    userId: string,
+    sid: string,
+    decisionId: string,
+  ) {
+    const decision = await this.requireDecisionOwner(userId, decisionId);
+    if (!['PLAN_START', 'PLAN_SCHEDULE'].includes(decision.decisionType))
+      return null;
+    const previewId = toSafeString(asRecord(decision.payload)?.previewId);
+    const preview = await this.prisma.planProposalPreview.findUnique({
+      where: { id: previewId },
+    });
+    const binding = asRecord(asRecord(preview?.proposal)?.binding);
+    return preview?.userId === userId &&
+      binding?.sid === sid &&
+      binding?.branchId === decision.branchId
+      ? decision.branchId
+      : null;
+  }
+
   async createPlanProposalPreview(args: {
     userId: string;
     request: PlanProposalPreviewRequest;
     binding?: { sid: string; branchId: string; userMessageId?: string };
   }): Promise<PlanProposalPreviewResult> {
+    if (args.request.mode === 'SCHEDULE' && !args.binding?.branchId) {
+      if (!args.binding?.sid || !args.binding.userMessageId)
+        this.fail('SCHEDULE_RUN_REQUIRED');
+      const branchId = await this.currentConversationBranch({
+        userId: args.userId,
+        sid: args.binding.sid,
+        userMessageId: args.binding.userMessageId,
+        planId: args.request.planId,
+      });
+      if (!branchId) this.fail('SCHEDULE_BRANCH_REQUIRED');
+      args = { ...args, binding: { ...args.binding, branchId } };
+    }
     return this.planProposalPreviews.createPreview(
       args.userId,
       args.request,
@@ -843,7 +953,11 @@ export class CoachBranchingService {
       this.fail(
         'Keeping the plan requires rejecting, not applying, the decision',
       );
-    if (decision.decisionType === 'PLAN_START' && !args.confirmation)
+    if (
+      (decision.decisionType === 'PLAN_START' ||
+        decision.decisionType === 'PLAN_SCHEDULE') &&
+      !args.confirmation
+    )
       this.fail('START_CONFIRMATION_REQUIRED');
     if (decision.state !== CoachDecisionState.APPLIED) {
       await this.assertNextCycleEligible(args.userId, decision);
@@ -863,8 +977,14 @@ export class CoachBranchingService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      if (
+        decision.decisionType === 'PLAN_START' ||
+        decision.decisionType === 'PLAN_SCHEDULE'
+      )
+        await acquireHashtextAdvisoryXactLock(tx, args.userId);
       const startConfirmation =
-        decision.decisionType === 'PLAN_START'
+        decision.decisionType === 'PLAN_START' ||
+        decision.decisionType === 'PLAN_SCHEDULE'
           ? await this.verifyStartConfirmation(args, decision, tx)
           : null;
       if (toSafeString(args.selectedOptionKey)) {
@@ -900,7 +1020,10 @@ export class CoachBranchingService {
       };
 
       let updated;
-      if (decision.decisionType === 'PLAN_START') {
+      if (
+        decision.decisionType === 'PLAN_START' ||
+        decision.decisionType === 'PLAN_SCHEDULE'
+      ) {
         const claim = await tx.coachDecision.updateMany({
           where: {
             id: decision.id,
@@ -937,6 +1060,7 @@ export class CoachBranchingService {
       branchId: string;
       payload: unknown;
       context: { planId: string };
+      decisionType?: string;
     },
     tx: PrismaTx,
   ) {
@@ -951,10 +1075,21 @@ export class CoachBranchingService {
     const session = await tx.aiCoachSession.findUnique({
       where: { userId_id: { userId: args.userId, id: confirmation.sid } },
     });
+    const schedule = decision.decisionType === 'PLAN_SCHEDULE';
+    const previewId = toSafeString(asRecord(decision.payload)?.previewId);
+    const preview = schedule
+      ? await tx.planProposalPreview.findUnique({ where: { id: previewId } })
+      : null;
+    const previewBinding = asRecord(asRecord(preview?.proposal)?.binding);
     if (
       !session ||
-      session.planStartPlanId !== decision.context.planId ||
-      session.planStartBranchId !== decision.branchId ||
+      (schedule
+        ? preview?.mode !== 'SCHEDULE' ||
+          preview.userId !== args.userId ||
+          previewBinding?.sid !== confirmation.sid ||
+          previewBinding?.branchId !== decision.branchId
+        : session.planStartPlanId !== decision.context.planId ||
+          session.planStartBranchId !== decision.branchId) ||
       (args.sessionRevision !== undefined &&
         args.sessionRevision !== session.planStartRevision)
     )
@@ -1339,6 +1474,17 @@ export class CoachBranchingService {
     decisionId: string;
     expectedBaseEventSeq?: number;
   }) {
+    return this.applyDecisionAttempt(args);
+  }
+
+  private async applyDecisionAttempt(
+    args: {
+      userId: string;
+      decisionId: string;
+      expectedBaseEventSeq?: number;
+    },
+    retryAttempt = 0,
+  ) {
     const decision = await this.requireDecisionOwner(
       args.userId,
       args.decisionId,
@@ -1447,7 +1593,8 @@ export class CoachBranchingService {
 
     const payload = (decision.payload ?? {}) as Record<string, unknown>;
     if (
-      decision.decisionType === 'PLAN_START' &&
+      (decision.decisionType === 'PLAN_START' ||
+        decision.decisionType === 'PLAN_SCHEDULE') &&
       !asRecord(payload.startConfirmation)
     )
       this.fail('START_CONFIRMATION_REQUIRED');
@@ -1460,6 +1607,7 @@ export class CoachBranchingService {
     const isPlanProposal =
       decision.decisionType === 'PLAN_ADAPTATION' ||
       decision.decisionType === 'PLAN_START' ||
+      decision.decisionType === 'PLAN_SCHEDULE' ||
       decision.decisionType === 'PLAN_SUPERSESSION';
     const isAtomicPlanWrite = isWorkoutChange || isPlanProposal;
 
@@ -1476,7 +1624,7 @@ export class CoachBranchingService {
       const result = await this.prisma.$transaction(
         async (tx) => {
           let receipt: Record<string, unknown> | null = null;
-          if (decision.decisionType === 'PLAN_START')
+          if (isAtomicPlanWrite)
             await acquireHashtextAdvisoryXactLock(tx, args.userId);
           if (isAtomicPlanWrite) {
             // Claim the decision before writing. A concurrent apply/reject/supersede cannot apply it twice.
@@ -1495,7 +1643,10 @@ export class CoachBranchingService {
             if (payload.planId !== decision.context.planId)
               this.fail('Decision must target the branch plan');
           }
-          if (decision.decisionType === 'PLAN_START') {
+          if (
+            decision.decisionType === 'PLAN_START' ||
+            decision.decisionType === 'PLAN_SCHEDULE'
+          ) {
             const authorization = asRecord(payload.startConfirmation);
             if (
               !authorization ||
@@ -1713,6 +1864,15 @@ export class CoachBranchingService {
           committed.state === CoachDecisionState.SUPERSEDED
         )
           return this.applyDecision(args);
+        if (
+          isPrismaSerializableConflict(error) &&
+          retryAttempt + 1 < MAX_SERIALIZABLE_ATTEMPTS
+        ) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, serializableRetryDelayMs(retryAttempt + 1)),
+          );
+          return this.applyDecisionAttempt(args, retryAttempt + 1);
+        }
       }
       await this.recordApplyAttempt({
         decisionId: decision.id,

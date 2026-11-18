@@ -19,6 +19,7 @@ export type PlanWorkoutSummary = {
   summary?: unknown;
   blocks?: unknown;
   plannedDurationSeconds?: number | null;
+  plannedSessionRpe?: number | null;
   estimatedLoad?: number | null;
   status: string;
   linkedActivityCount: number;
@@ -73,6 +74,16 @@ export type PlanSnapshotToolOutput = {
       plannedCount: number;
     };
   };
+  relatedCalendar?: {
+    from: string;
+    to: string;
+    total: number;
+    offset: number;
+    returned: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+    workouts: unknown[];
+  };
   allWorkouts?: PlanWorkoutSummary[];
   workoutInventory?: {
     total: number;
@@ -114,6 +125,7 @@ export type PlanSnapshotWorkoutRow = {
   summary?: unknown;
   blocks?: unknown;
   plannedDurationSeconds?: number | null;
+  plannedSessionRpe?: number | null;
   estimatedLoad?: number | null;
   status?: string | null;
   links?: unknown[] | null;
@@ -169,6 +181,8 @@ export function summarizePlanWorkoutRow(
       typeof row.plannedDurationSeconds === 'number'
         ? row.plannedDurationSeconds
         : null,
+    plannedSessionRpe:
+      typeof row.plannedSessionRpe === 'number' ? row.plannedSessionRpe : null,
     estimatedLoad:
       typeof row.estimatedLoad === 'number' ? row.estimatedLoad : null,
     status: String(row.status ?? ''),

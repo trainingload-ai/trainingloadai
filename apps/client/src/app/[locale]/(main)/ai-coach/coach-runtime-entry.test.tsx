@@ -171,3 +171,63 @@ it("reconciles a committed receipt even when a live draft already has APPLIED st
     ),
   ).toBe(updated);
 });
+
+it("reconciles a committed SCHEDULE receipt even when a live draft already has APPLIED state", () => {
+  const receipt = {
+    mode: "SCHEDULE",
+    planId: "plan",
+    readbackVerified: true,
+    startDate: "2026-11-22",
+  };
+  const live: CoachUiMessage[] = [
+    {
+      id: "assistant",
+      role: "assistant",
+      parts: [
+        { type: "text", text: "Live response" },
+        {
+          type: "data-coach-tool",
+          data: {
+            name: "CoachDecisionDraft",
+            toolCallId: "tool",
+            input: {
+              kind: "coach_decision_draft",
+              decisionType: "PLAN_SCHEDULE",
+              decisionId: "decision",
+              state: "APPLIED",
+              payload: { presentation: { title: "Original candidate" } },
+            },
+          },
+        },
+      ],
+    },
+  ];
+  const persisted: CoachUiMessage[] = structuredClone(live);
+  const part = persisted[0].parts[1];
+  if (part.type === "data-coach-tool")
+    (part.data.input as Record<string, unknown>).payload = {
+      appliedReceipt: receipt,
+    };
+  const updated = reconcilePlanDecisionStates(
+    live,
+    serializePlanDecisionStates(persisted),
+  );
+  expect(updated[0].parts[1]).toMatchObject({
+    data: {
+      input: {
+        state: "APPLIED",
+        payload: {
+          presentation: { title: "Original candidate" },
+          appliedReceipt: receipt,
+        },
+      },
+    },
+  });
+  expect(updated[0].parts[0]).toEqual({ type: "text", text: "Live response" });
+  expect(
+    reconcilePlanDecisionStates(
+      updated,
+      serializePlanDecisionStates(persisted),
+    ),
+  ).toBe(updated);
+});

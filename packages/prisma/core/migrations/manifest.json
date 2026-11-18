@@ -185,7 +185,12 @@
       "id": "0037_plan_start_conversation",
       "file": "0037_plan_start_conversation/migration.sql",
       "sha256": "73a7b6a5a92f1d0d53e3e0e882aff58728bb64fa69c584cf1c98c17d696d09d8"
+    },
+    {
+      "id": "0038_plan_schedule",
+      "file": "0038_plan_schedule/migration.sql",
+      "sha256": "1af9d4adddb7a63b3fe0a08cacee90162625cbe15e48262bc9e8f279e0b8d6ac"
     }
   ],
-  "schemaChecksum": "a336126eff84c3ccd2a65d5dfa69c1a53ccf5da10fa5d59c691ddb432f0adccc"
+  "schemaChecksum": "b5ea2f5f2a05d17ef64bb44dd98541273bfa9dbb79820598408b882117024745"
 }

@@ -1,3 +1,5 @@
+import { PlanCalendarValidationService } from '../application/plan-calendar-validation.service';
+import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
 import { WorkoutService } from '../../workout/workout.service';
@@ -84,6 +86,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       new PlanActivityLinkRepository(prisma as never),
       { assertMutable: () => undefined } as never,
       { getPreferredTimezone: async () => 'UTC' } as never,
+      new PlanCalendarValidationService(new PlanCalendarRepository()),
     );
   }, 30_000);
 

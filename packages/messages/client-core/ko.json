@@ -698,7 +698,28 @@
       "added": "추가",
       "deleted": "삭제",
       "startSyncImpact": "시작 후 달력이 업데이트되며 기기 동기화는 대기 중입니다.",
-      "readbackVerified": "저장된 계획을 확인했습니다."
+      "readbackVerified": "저장된 계획을 확인했습니다.",
+      "applyScheduleButton": "일정 변경 확인",
+      "scheduleSyncImpact": "저장된 일정은 캘린더에 반영됩니다. 기기 동기화 상태는 별도로 관리되며 연결 설정에서 확인하거나 재시도할 수 있습니다.",
+      "scheduleRange": "조정 범위",
+      "scheduleTimezone": "캘린더 시간대",
+      "scheduleRevision": "규칙 버전",
+      "fixedRestWeekdays": "고정 휴식일",
+      "unavailableDates": "훈련 불가 날짜",
+      "availableDateOverrides": "확인된 훈련 가능 예외",
+      "rulesEffectiveFrom": "규칙 시작일",
+      "rulesEffectiveTo": "규칙 종료일",
+      "noScheduleDates": "없음",
+      "noEndDate": "종료일 없음",
+      "protected": "보호됨",
+      "protectedOutsideRange": "범위 밖 일정 유지",
+      "protectedPlanStatus": "보호된 계획 상태",
+      "protectedWorkoutStatus": "시작 또는 종료됨",
+      "protectedActivityLinked": "활동 연결됨",
+      "protectedHistory": "지난 훈련",
+      "protectedSuccessor": "후속 계획에 포함됨",
+      "relatedCalendarConflicts": "관련 훈련을 추가로 조율해야 합니다",
+      "relatedCalendarUnmanaged": "이 제안은 아래의 독립 훈련이나 다른 계획의 훈련을 변경하지 않습니다. 코치와 계속 조율하세요."
     },
     "history": {
       "title": "역사",
@@ -6483,6 +6504,8 @@
     "changeDate": "날짜 변경",
     "pendingCalendar": "평가 대기 중인 달력",
     "evaluatePrompt": "저장된 이 계획을 {date} ({timeZone})부터 시작하고 싶어요. 최근 훈련과 현재 상태를 바탕으로 전체 일정을 검토하고, 필요한 질문을 한 뒤 제가 확인할 수 있는 시작 제안을 준비해 주세요.",
-    "loadFailed": "대화를 불러올 수 없습니다. 다시 시도하세요."
+    "loadFailed": "대화를 불러올 수 없습니다. 다시 시도하세요.",
+    "activePlanConversation": "계획이 시작되었습니다. 여기서 향후 훈련을 계속 상담할 수 있습니다.",
+    "activePlanCalendar": "현재 계획 캘린더"
   }
 }

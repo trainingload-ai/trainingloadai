@@ -1,3 +1,12 @@
+import { PlanWorkoutCommandService } from '../application/plan-workout-command.service';
+import { PlanActivityLinkService } from '../application/plan-activity-link.service';
+import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
+import { ActivityReadService } from '@/api/activity/activity-read.service';
+import { HealthDataRepository } from '@/health-data/persistence/health-data.repository';
+import { CompetitionQueryService } from '@/api/competition/application/competition-query.service';
+import { CompetitionRepository } from '@/api/competition/persistence/competition.repository';
+import { UserAnalysisConfigService } from '@/api/user/user-analysis-config.service';
+import { PlanCalendarValidationService } from '../application/plan-calendar-validation.service';
 import { UserService } from '@/api/user/user.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { UserIdentityRepository } from '@/api/user/persistence/user-identity.repository';
@@ -59,6 +68,9 @@ export function planStartFixture(prisma: PrismaClient) {
   );
   Object.assign(write, {
     prisma,
+    calendarValidation: new PlanCalendarValidationService(
+      new PlanCalendarRepository(),
+    ),
     workoutService: codec,
     userService: users,
     logger: { error: () => undefined, warn: () => undefined },
@@ -77,8 +89,8 @@ export function planStartFixture(prisma: PrismaClient) {
   });
   const service = new PlanService(
     new PlanLifecycleService(write),
-    {} as never,
-    {} as never,
+    new PlanWorkoutCommandService(write),
+    new PlanActivityLinkService(write),
   );
   const starts = new PlanStartService(
     prisma as never,
@@ -89,6 +101,15 @@ export function planStartFixture(prisma: PrismaClient) {
     persistence,
     new PlanStartRepository(),
     loads,
+    new PlanCalendarValidationService(new PlanCalendarRepository()),
+    new ActivityReadService(prisma as never),
+    new HealthDataRepository(prisma as never),
+    new UserQueryService(new UserIdentityRepository(prisma as never)),
+    new CompetitionQueryService(new CompetitionRepository(prisma as never)),
+    new UserAnalysisConfigService(
+      prisma as never,
+      new UserQueryService(new UserIdentityRepository(prisma as never)),
+    ),
   );
   const proposalRepo = new PlanProposalRepository(prisma as never);
   const proposals = new PlanProposalService(

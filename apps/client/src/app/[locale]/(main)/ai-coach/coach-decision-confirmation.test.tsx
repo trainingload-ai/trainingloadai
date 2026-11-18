@@ -258,3 +258,170 @@ it("restores the committed START receipt from an APPLIED draft without an applie
   ).not.toBeInTheDocument();
   expect(onConfirm).not.toHaveBeenCalled();
 });
+
+const scheduleProposal: CoachDecisionDraftToolResult = {
+  ...proposal,
+  decisionType: "PLAN_SCHEDULE",
+  payload: {
+    presentation: {
+      title: "调整剩余课表",
+      summary: "保留恢复时间",
+      mode: "SCHEDULE",
+      startDate: "2026-11-22",
+      calendarTimeZone: "Asia/Shanghai",
+      range: { from: "2026-11-23", to: "2026-12-20" },
+      scheduleConstraints: {
+        version: 1,
+        revision: 3,
+        calendarTimeZone: "Asia/Shanghai",
+        fixedRestWeekdays: [2, 4],
+        unavailableDates: ["2026-11-27"],
+        availableDateOverrides: ["2026-12-01"],
+        effectiveFrom: "2026-11-23",
+        effectiveUntil: "2026-12-20",
+        confirmation: { source: "USER", reference: "user-turn" },
+      },
+      calendarDraft: {
+        title: "完整课表",
+        periodWeeks: 1,
+        workouts: [
+          {
+            weekIndex: 1,
+            dayIndex: 2,
+            name: "协调后的轻松跑",
+            sportType: "RUN",
+            text: "20m @easy",
+          },
+        ],
+      },
+      counts: {
+        total: 1,
+        changed: 1,
+        preserved: 0,
+        protected: 2,
+        added: 0,
+        deleted: 0,
+      },
+      facts: [],
+      rows: [],
+      warnings: [],
+      syncImpact: "",
+    },
+  },
+};
+it("shows the actual schedule rules and range before explicit confirmation", () => {
+  const confirm = vi.fn();
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NextIntlClientProvider locale="zh" messages={messages}>
+        <CoachDecisionDraftCard result={scheduleProposal} onConfirm={confirm} />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
+  );
+  expect(screen.getByText("2026-11-23 — 2026-12-20")).toBeInTheDocument();
+  expect(screen.getByText("星期二、星期四")).toBeInTheDocument();
+  expect(screen.getByText("不可训练日期").parentElement).toHaveTextContent(
+    "2026-11-27",
+  );
+  expect(
+    screen.getByText("已确认的可训练例外").parentElement,
+  ).toHaveTextContent("2026-12-01");
+  expect(
+    screen.getByRole("button", { name: "协调后的轻松跑 · S1 · 2026-11-23" }),
+  ).toBeInTheDocument();
+  expect(confirm).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "确认并调整课表" }));
+  expect(confirm).toHaveBeenCalledExactlyOnceWith("decision");
+});
+it("restores the committed SCHEDULE receipt from an APPLIED draft without an applied message", () => {
+  const onConfirm = vi.fn();
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NextIntlClientProvider locale="zh" messages={messages}>
+        <CoachDecisionDraftCard
+          result={{
+            ...proposal,
+            state: "APPLIED",
+            decisionType: "PLAN_SCHEDULE",
+            payload: {
+              appliedReceipt: {
+                mode: "SCHEDULE",
+                planId: "plan",
+                startDate: "2026-11-22",
+                calendarTimeZone: "Asia/Shanghai",
+                readbackVerified: true,
+                changedWorkoutCount: 1,
+                addedWorkoutCount: 0,
+                deletedWorkoutCount: 0,
+                preservedWorkoutCount: 2,
+                identityMap: [],
+              },
+            },
+          }}
+          onConfirm={onConfirm}
+        />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
+  );
+  expect(
+    screen.getByText(messages.AiCoachPage.decision.applyResult.APPLIED),
+  ).toBeInTheDocument();
+  expect(screen.getByText("2026-11-22 · Asia/Shanghai")).toBeInTheDocument();
+  expect(
+    screen.getByText(messages.AiCoachPage.decision.readbackVerified),
+  ).toBeInTheDocument();
+  expect(
+    within(
+      screen.getByText(messages.AiCoachPage.decision.preserved).parentElement!,
+    ).getByText("2"),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "确认并开始" }),
+  ).not.toBeInTheDocument();
+  expect(onConfirm).not.toHaveBeenCalled();
+});
+
+it("keeps related independent and other-plan workouts visible as unmodified coordination facts", () => {
+  const value = structuredClone(scheduleProposal);
+  (
+    value.payload!.presentation as Record<string, unknown>
+  ).relatedCalendarConflicts = [
+    {
+      code: "REST_DAY_OCCUPIED",
+      date: "2026-11-24",
+      workoutId: "hidden-independent-id",
+      planId: null,
+      name: "独立力量训练",
+      managed: false,
+    },
+    {
+      code: "DAY_BUDGET",
+      date: "2026-11-26",
+      workoutId: "hidden-foreign-id",
+      planId: "hidden-plan-id",
+      name: "其他计划骑行",
+      managed: false,
+    },
+  ];
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NextIntlClientProvider locale="zh" messages={messages}>
+        <CoachDecisionDraftCard result={value} />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
+  );
+  expect(screen.getByText("相关课程仍需协调")).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "以下独立课程或其他计划课程未由本提案修改，请继续与教练协调。",
+    ),
+  ).toBeInTheDocument();
+  expect(screen.getByText("独立力量训练").closest("li")).toHaveTextContent(
+    "2026-11-24",
+  );
+  expect(screen.getByText("其他计划骑行").closest("li")).toHaveTextContent(
+    "2026-11-26",
+  );
+  expect(screen.queryByText("hidden-independent-id")).not.toBeInTheDocument();
+  expect(screen.queryByText("hidden-plan-id")).not.toBeInTheDocument();
+});

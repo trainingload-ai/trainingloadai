@@ -1,3 +1,4 @@
+import { PlanCalendarValidationService } from './plan-calendar-validation.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { UnprocessableEntityException } from '@nestjs/common';
 import {
@@ -62,6 +63,7 @@ export class PlanExternalSyncService {
     private readonly links: PlanActivityLinkRepository,
     private readonly mutability: PlanWorkoutMutabilityPolicy,
     private readonly users: UserService,
+    private readonly calendarValidation: PlanCalendarValidationService,
     @Optional()
     private readonly workoutTargetResolver?: PlanWorkoutTargetResolver,
     @Optional() private readonly events?: EventEmitter2,
@@ -433,6 +435,7 @@ export class PlanExternalSyncService {
       );
       await this.replaceWorkoutSteps(tx, created.id, args.blocks);
       await this.estimateWorkoutLoad(created.id, tx);
+      await this.calendarValidation.assertStored(args.userId, [created.id], tx);
       // Load estimation also writes the workout. Return the final transaction
       // snapshot so its own updatedAt change is not mistaken for a later edit.
       const stored = await this.workouts.findFirst(
@@ -675,6 +678,7 @@ export class PlanExternalSyncService {
           );
         }
       }
+      await this.calendarValidation.assertStored(args.userId, [updated.id], tx);
       const stored = await this.workouts.findFirst(
         {
           where: { id: updated.id, userId: args.userId },

@@ -698,7 +698,28 @@
       "added": "Aggiunte",
       "deleted": "Eliminate",
       "startSyncImpact": "All’avvio il calendario viene aggiornato e la sincronizzazione del dispositivo resta in attesa.",
-      "readbackVerified": "Piano verificato dopo il salvataggio."
+      "readbackVerified": "Piano verificato dopo il salvataggio.",
+      "applyScheduleButton": "Conferma il calendario",
+      "scheduleSyncImpact": "Il calendario si aggiorna dopo il salvataggio. La sincronizzazione del dispositivo ha uno stato separato; controllala o riprova nelle impostazioni di connessione.",
+      "scheduleRange": "Intervallo delle modifiche",
+      "scheduleTimezone": "Fuso orario del calendario",
+      "scheduleRevision": "Versione delle regole",
+      "fixedRestWeekdays": "Giorni di riposo fissi",
+      "unavailableDates": "Date non disponibili",
+      "availableDateOverrides": "Eccezioni disponibili confermate",
+      "rulesEffectiveFrom": "Inizio delle regole",
+      "rulesEffectiveTo": "Fine delle regole",
+      "noScheduleDates": "Nessuna",
+      "noEndDate": "Senza data finale",
+      "protected": "Protetti",
+      "protectedOutsideRange": "Conservato fuori intervallo",
+      "protectedPlanStatus": "Stato del piano protetto",
+      "protectedWorkoutStatus": "Iniziato o terminato",
+      "protectedActivityLinked": "Collegato a un’attività",
+      "protectedHistory": "Allenamento passato",
+      "protectedSuccessor": "Coperto dal piano successivo",
+      "relatedCalendarConflicts": "Altri allenamenti richiedono coordinamento",
+      "relatedCalendarUnmanaged": "Questa proposta non modifica i seguenti allenamenti indipendenti o di altri piani. Continua a coordinarli con il coach."
     },
     "history": {
       "title": "Storia",
@@ -6484,6 +6505,8 @@
     "changeDate": "Cambia data",
     "pendingCalendar": "Calendario in attesa di valutazione",
     "evaluatePrompt": "Vorrei iniziare questo piano salvato il {date} ({timeZone}). Valuta tutto il calendario insieme ai miei allenamenti recenti e alla mia condizione attuale, fai le domande necessarie e prepara una proposta da confermare.",
-    "loadFailed": "Impossibile caricare la conversazione. Riprova."
+    "loadFailed": "Impossibile caricare la conversazione. Riprova.",
+    "activePlanConversation": "Il piano è iniziato. Continua qui a discutere gli allenamenti futuri.",
+    "activePlanCalendar": "Calendario attuale del piano"
   }
 }

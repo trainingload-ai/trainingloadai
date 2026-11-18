@@ -1,4 +1,5 @@
 import dayjs = require('dayjs');
+import { isCalendarDate } from '@shared/plan-calendar';
 import {
   buildAiTool,
   hasSignedInUser,
@@ -17,6 +18,10 @@ type Input = {
   includeAllWorkouts?: boolean;
   workoutOffset?: number;
   workoutLimit?: number;
+  calendarFrom?: string;
+  calendarTo?: string;
+  calendarOffset?: number;
+  calendarLimit?: number;
 };
 
 export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
@@ -38,6 +43,22 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
           type: 'string',
           description: 'The plan id (cuid) for this user.',
         },
+        calendarFrom: {
+          type: 'string',
+          description:
+            'Read related standalone and other-plan courses from this inclusive calendar date YYYY-MM-DD; use with calendarTo for SCHEDULE coordination.',
+        },
+        calendarTo: {
+          type: 'string',
+          description: 'Inclusive calendar range end YYYY-MM-DD.',
+        },
+        calendarOffset: {
+          type: 'integer',
+          minimum: 0,
+          description:
+            'Related calendar offset; follow relatedCalendar.nextOffset until hasMore=false.',
+        },
+        calendarLimit: { type: 'integer', minimum: 1, maximum: 40 },
         asOf: {
           type: 'string',
           description:
@@ -72,6 +93,8 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
       currentWeek: output.currentWeek,
       allWorkouts: output.allWorkouts,
       workoutInventory: output.workoutInventory,
+      relatedCalendar: output.relatedCalendar,
+      candidateCapacity: 10000,
     }),
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
@@ -114,6 +137,27 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
           hasMore: nextOffset < total,
           nextOffset: nextOffset < total ? nextOffset : null,
         };
+      }
+      if (input.calendarFrom || input.calendarTo) {
+        if (
+          !isCalendarDate(input.calendarFrom) ||
+          !isCalendarDate(input.calendarTo) ||
+          input.calendarTo! < input.calendarFrom!
+        )
+          throw new Error(
+            'A valid complete related calendar range is required',
+          );
+        output.relatedCalendar = await ctx.planQuery.findRelatedCalendarPage({
+          userId: userId!,
+          planId,
+          from: input.calendarFrom!,
+          to: input.calendarTo!,
+          offset: Math.max(0, Math.floor(input.calendarOffset ?? 0)),
+          limit: Math.max(
+            1,
+            Math.min(40, Math.floor(input.calendarLimit ?? 40)),
+          ),
+        });
       }
       return output;
     },

@@ -13,7 +13,7 @@ export function projectStartDecisionCards(
     const card = asRecord(input);
     if (
       name !== 'CoachDecisionDraft' ||
-      card?.decisionType !== 'PLAN_START' ||
+      !['PLAN_START', 'PLAN_SCHEDULE'].includes(String(card?.decisionType)) ||
       typeof card.decisionId !== 'string'
     )
       return input;
@@ -66,7 +66,7 @@ export function startDecisionCardIds(message: unknown): string[] {
   const inputId = (name: unknown, input: unknown): string[] => {
     const card = asRecord(input);
     return name === 'CoachDecisionDraft' &&
-      card?.decisionType === 'PLAN_START' &&
+      ['PLAN_START', 'PLAN_SCHEDULE'].includes(String(card?.decisionType)) &&
       typeof card.decisionId === 'string'
       ? [card.decisionId]
       : [];

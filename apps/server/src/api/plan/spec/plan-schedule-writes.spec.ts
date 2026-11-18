@@ -100,6 +100,10 @@ function setup(
   const workoutService = new WorkoutService({} as never);
   const service = Object.create(PlanWriteSupport.prototype) as PlanWriteSupport;
   Object.assign(service, {
+    calendarValidation: {
+      assertCandidate: async () => undefined,
+      assertStored: async () => undefined,
+    },
     prisma: {
       $transaction: async (run: any) => {
         const saved = structuredClone({ plan, rows });

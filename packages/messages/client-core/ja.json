@@ -698,7 +698,28 @@
       "added": "追加",
       "deleted": "削除",
       "startSyncImpact": "開始後にカレンダーが更新され、デバイスの同期は保留中になります。",
-      "readbackVerified": "保存後のプランを検証しました。"
+      "readbackVerified": "保存後のプランを検証しました。",
+      "applyScheduleButton": "日程の変更を確定",
+      "scheduleSyncImpact": "確定した日程はカレンダーに反映されます。デバイス同期の状態は別に管理されます。接続設定で確認または再試行できます。",
+      "scheduleRange": "調整範囲",
+      "scheduleTimezone": "カレンダーのタイムゾーン",
+      "scheduleRevision": "ルールの改訂",
+      "fixedRestWeekdays": "固定休養日",
+      "unavailableDates": "トレーニング不可日",
+      "availableDateOverrides": "確認済みのトレーニング可能な例外",
+      "rulesEffectiveFrom": "ルール開始日",
+      "rulesEffectiveTo": "ルール終了日",
+      "noScheduleDates": "なし",
+      "noEndDate": "終了日なし",
+      "protected": "保護対象",
+      "protectedOutsideRange": "範囲外のため保持",
+      "protectedPlanStatus": "プランの状態を保護",
+      "protectedWorkoutStatus": "開始済みまたは終了済み",
+      "protectedActivityLinked": "アクティビティに紐付け済み",
+      "protectedHistory": "過去のワークアウト",
+      "protectedSuccessor": "後続プランの対象",
+      "relatedCalendarConflicts": "関連するワークアウトの調整が必要です",
+      "relatedCalendarUnmanaged": "この提案では、以下の単独ワークアウトや他のプランのワークアウトは変更されません。引き続きコーチと調整してください。"
     },
     "history": {
       "title": "履歴",
@@ -6483,6 +6504,8 @@
     "changeDate": "日付を変更",
     "pendingCalendar": "評価待ちのカレンダー",
     "evaluatePrompt": "この保存済み計画を {date}（{timeZone}）から始めたいです。最近のトレーニングと現在の状態に照らして全日程を評価し、必要なことを質問してから、確認できる開始案を提案してください。",
-    "loadFailed": "会話を読み込めませんでした。再試行してください。"
+    "loadFailed": "会話を読み込めませんでした。再試行してください。",
+    "activePlanConversation": "プランは開始済みです。今後のトレーニングについて引き続き相談できます。",
+    "activePlanCalendar": "現在のプランのカレンダー"
   }
 }

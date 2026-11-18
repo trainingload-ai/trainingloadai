@@ -64,6 +64,7 @@
     "./vdot-forecast": "./vdot-forecast.ts",
     "./pmc-projection": "./pmc-projection.ts",
     "./workout-matching": "./workout-matching.ts",
-    "./plan-calendar": "./plan-calendar.ts"
+    "./plan-calendar": "./plan-calendar.ts",
+    "./plan-proposal-receipt": "./plan-proposal-receipt.ts"
   }
 }

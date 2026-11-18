@@ -73,6 +73,10 @@ function createPlanPorts(prisma: unknown) {
     new ActivityReadService(prisma as never),
     new PlanWorkoutMutabilityPolicy(),
     new WorkoutPrescriptionService(),
+    {
+      assertCandidate: async () => undefined,
+      assertStored: async () => undefined,
+    } as never,
   ] as const;
 }
 

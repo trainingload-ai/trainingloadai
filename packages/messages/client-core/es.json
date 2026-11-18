@@ -698,7 +698,28 @@
       "added": "Añadidas",
       "deleted": "Eliminadas",
       "startSyncImpact": "Al iniciar se actualiza el calendario y la sincronización del dispositivo queda pendiente.",
-      "readbackVerified": "Plan verificado tras guardar."
+      "readbackVerified": "Plan verificado tras guardar.",
+      "applyScheduleButton": "Confirmar cambios de calendario",
+      "scheduleSyncImpact": "El calendario se actualiza al guardar el plan. La sincronización del dispositivo tiene un estado independiente; consulta o reintenta en los ajustes de conexión.",
+      "scheduleRange": "Intervalo de ajuste",
+      "scheduleTimezone": "Zona horaria del calendario",
+      "scheduleRevision": "Versión de reglas",
+      "fixedRestWeekdays": "Días de descanso fijos",
+      "unavailableDates": "Fechas no disponibles",
+      "availableDateOverrides": "Excepciones disponibles confirmadas",
+      "rulesEffectiveFrom": "Inicio de reglas",
+      "rulesEffectiveTo": "Fin de reglas",
+      "noScheduleDates": "Ninguno",
+      "noEndDate": "Sin fecha final",
+      "protected": "Protegidos",
+      "protectedOutsideRange": "Conservado fuera del intervalo",
+      "protectedPlanStatus": "Estado del plan protegido",
+      "protectedWorkoutStatus": "Iniciado o finalizado",
+      "protectedActivityLinked": "Vinculado a una actividad",
+      "protectedHistory": "Entrenamiento histórico",
+      "protectedSuccessor": "Cubierto por un plan sucesor",
+      "relatedCalendarConflicts": "Los entrenamientos relacionados requieren coordinación",
+      "relatedCalendarUnmanaged": "Esta propuesta no modifica los siguientes entrenamientos independientes o de otros planes. Sigue coordinándolos con tu entrenador."
     },
     "history": {
       "title": "Historia",
@@ -6484,6 +6505,8 @@
     "changeDate": "Cambiar fecha",
     "pendingCalendar": "Calendario pendiente de evaluación",
     "evaluatePrompt": "Quiero empezar este plan guardado el {date} ({timeZone}). Revisa todo el calendario junto con mi entrenamiento reciente y mi estado actual, haz las preguntas necesarias y prepara una propuesta para que la confirme.",
-    "loadFailed": "No se pudo cargar la conversación. Inténtalo de nuevo."
+    "loadFailed": "No se pudo cargar la conversación. Inténtalo de nuevo.",
+    "activePlanConversation": "El plan ha comenzado. Puedes seguir hablando del entrenamiento futuro.",
+    "activePlanCalendar": "Calendario actual del plan"
   }
 }

@@ -1,3 +1,4 @@
+import { currentDecisionConfirmation } from './core/coach-workout-change';
 import { ConflictException } from '@nestjs/common';
 import {
   TodaySuggestionGuidanceService,
@@ -1033,7 +1034,7 @@ export class AiController {
       prompt,
       String(body?.lang ?? 'en').trim() || 'en',
     );
-    const intent = String(body?.intent ?? '').trim();
+    let intent = String(body?.intent ?? '').trim();
     const purpose = parseRequestedModelPurpose(body?.purpose);
     const thinking = purpose === 'REASONING';
     const operationId =
@@ -1345,12 +1346,34 @@ export class AiController {
           sid: coachSessionKey,
           branchId: coachBranchId,
           revision: startConversation.planStartRevision,
+          preserveClosedBranch:
+            !!currentDecisionConfirmation(coachUserMessage) ||
+            command?.kind === 'retry',
         });
         coachBranchId = branch.id;
         body = { ...body, planId: startConversation.planStartPlanId };
-        if (!startConversation.planStartBranchId)
+        const appliedStart = await this.prisma.planProposalPreview.findFirst({
+          where: {
+            userId,
+            sourcePlanId: startConversation.planStartPlanId,
+            mode: 'START',
+            appliedAt: { not: null },
+            proposal: { path: ['binding', 'sid'], equals: coachSessionKey },
+          },
+          select: { id: true },
+        });
+        if (appliedStart) intent = 'plan-followup';
+        if (branch.id !== startConversation.planStartBranchId)
           await sink.emit({ type: 'branch', subtype: 'opened', branch });
       }
+
+      const cardConfirmation = currentDecisionConfirmation(coachUserMessage);
+      if (!coachBranchId && cardConfirmation)
+        coachBranchId = await this.coachBranching.decisionConversationBranch(
+          userId,
+          coachSessionKey,
+          cardConfirmation.decisionId,
+        );
 
       if (
         !coachBranchId &&

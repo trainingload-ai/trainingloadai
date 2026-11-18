@@ -6,7 +6,7 @@ import type { CoachPlanDraftData } from "./ai-coach-schema";
 import type { WorkoutDefinitionInput } from "./workout-structure";
 import type { WorkoutIntensityIntent } from "./endurance-workout-ir";
 
-export type PlanProposalMode = "ADAPT" | "SUPERSEDE" | "START";
+export type PlanProposalMode = "ADAPT" | "SUPERSEDE" | "START" | "SCHEDULE";
 export type PlanAdaptationScope = "WORKOUT" | "PLAN_REMAINING";
 export type PlanAssessmentDisposition = "APPLY" | "PRESERVE";
 export type PlanTargetDimension = "PACE" | "HEART_RATE" | "POWER";
@@ -104,12 +104,19 @@ export type PlanStartPreviewRequest = {
   preserved?: Array<{ sourceWorkoutId: string; expectedRevision: number }>;
 };
 
+export type PlanSchedulePreviewRequest = Omit<PlanStartPreviewRequest, "mode" | "startDate"> & {
+  mode: "SCHEDULE";
+  range: { from: string; to: string };
+};
+
 export type PlanProposalPreviewRequest =
   | PlanAdaptationPreviewRequest
   | PlanSupersessionPreviewRequest
-  | PlanStartPreviewRequest;
+  | PlanStartPreviewRequest
+  | PlanSchedulePreviewRequest;
 
 export type PlanProposalPresentationRow = {
+  protectedReason?: string;
   changeKind?: "CHANGED" | "ADDED" | "DELETED" | "PRESERVED";
   workoutId?: string;
   name: string;
@@ -121,10 +128,21 @@ export type PlanProposalPresentationRow = {
   rationale: string;
 };
 
+export type RelatedCalendarConflict = {
+  code: string;
+  date: string;
+  workoutId: string;
+  planId: string | null;
+  name?: string | null;
+  managed: false;
+};
+
 export type PlanProposalPresentation = {
+  relatedCalendarConflicts?: RelatedCalendarConflict[];
   title: string;
   summary: string;
   mode: PlanProposalMode;
+  range?: { from: string; to: string };
   effectiveFrom?: string;
   startDate?: string;
   calendarTimeZone?: string;
@@ -136,6 +154,7 @@ export type PlanProposalPresentation = {
     changed: number;
     preserved: number;
     skipped: number;
+    protected?: number;
     added?: number;
     deleted?: number;
   };
@@ -150,7 +169,7 @@ export type PlanProposalPreviewResult = {
   previewId: string;
   mode: PlanProposalMode;
   expiresAt: string;
-  decisionType: "PLAN_ADAPTATION" | "PLAN_SUPERSESSION" | "PLAN_START";
+  decisionType: "PLAN_ADAPTATION" | "PLAN_SUPERSESSION" | "PLAN_START" | "PLAN_SCHEDULE";
   decisionPayload: {
     planId: string;
     previewId: string;
