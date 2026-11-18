@@ -18,6 +18,7 @@ import type {
   CanonicalRecord,
   CanonicalStrengthSet,
 } from '../canonical-activity.types';
+import { fitSegmentChecksum } from '../raw-file-checksum';
 
 function isoString(value?: string | number | Date | null) {
   if (!value) return undefined;
@@ -429,9 +430,7 @@ export function mapTrackSwapActivityToCanonicalPayload(args: {
     typeof args.activityIndex === 'number' &&
     typeof args.activityCount === 'number' &&
     args.activityCount > 1
-      ? createHash('sha256')
-          .update(`${args.sourceChecksum}#${args.activityIndex}`)
-          .digest('hex')
+      ? fitSegmentChecksum(args.sourceChecksum, args.activityIndex)
       : (args.sourceChecksum ?? datasetChecksum);
 
   return {
