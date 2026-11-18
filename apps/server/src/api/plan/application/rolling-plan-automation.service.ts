@@ -16,6 +16,8 @@ import {
   isoWeekStart,
   parseRollingStartSettings,
   type RollingMonthDraft,
+  type RollingPlanAutomationStatus,
+  type RollingPlanAutomationJob,
 } from '@shared/rolling-plan';
 import { activityCalendarYmdInZone } from '../plan-link-calendar.util';
 import type { PlanDb } from '../persistence/plan-db';
@@ -96,7 +98,8 @@ export class RollingPlanAutomationService {
               { where: { id: plan.id } },
               tx,
             );
-            if (current?.id !== policy.id || live?.status !== 'ACTIVE') return 0;
+            if (current?.id !== policy.id || live?.status !== 'ACTIVE')
+              return 0;
             const evidence = await this.evidence(plan.id, from, through, tx);
             const months = new Set([from.slice(0, 7), through.slice(0, 7)]);
             if (today >= addCalendarDays(calendarMonthEnd(today), -7))
@@ -821,7 +824,10 @@ export class RollingPlanAutomationService {
         : 'en',
     };
   }
-  async status(userId: string, planId: string) {
+  async status(
+    userId: string,
+    planId: string,
+  ): Promise<RollingPlanAutomationStatus> {
     const plan = await this.plans.findFirst({
       where: { id: planId, userId },
     });
@@ -843,9 +849,9 @@ export class RollingPlanAutomationService {
         .filter((j) => !(j.receipt as { baseline?: boolean })?.baseline)
         .map((j) => ({
           id: j.id,
-          kind: j.kind,
+          kind: j.kind as RollingPlanAutomationJob['kind'],
           windowStart: ymd(j.windowStart),
-          state: j.state,
+          state: j.state as RollingPlanAutomationJob['state'],
           attempts: j.attempts,
           lastError: j.lastError,
           availableAt: j.availableAt.toISOString(),
