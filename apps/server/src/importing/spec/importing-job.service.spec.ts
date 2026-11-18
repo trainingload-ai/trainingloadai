@@ -1,6 +1,6 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 
 describe('ImportingJobService', () => {
   it('uses the transaction client when one is passed', async () => {
@@ -13,7 +13,7 @@ describe('ImportingJobService', () => {
       userPostProcessJob: { findMany: prismaFindMany },
     };
     const jobs = new ImportingJobService(
-      new ImportingJobRepository(prisma as never),
+      importingJobRepository(prisma as never),
     );
 
     await jobs

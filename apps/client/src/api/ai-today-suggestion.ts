@@ -67,6 +67,7 @@ export type AiTodaySuggestionResponse = TodaySuggestionV2 & {
   tags: string[];
   source: "fallback" | "cache" | "generated";
   shouldRefresh: boolean;
+  retryAt?: string;
   generatedAt: string | null;
   reason?: string;
   tone?: "neutral" | "warning" | "success";
@@ -172,5 +173,29 @@ export function cancelTodaySuggestionReminder(generationToken: string) {
   return apiFetch<{ cancelled: boolean }>(
     `/ai/today-suggestion/${encodeURIComponent(generationToken)}/reminder`,
     { method: "DELETE" },
+  );
+}
+
+export type TodaySuggestionServerContext = {
+  kind: "today_suggestion_context";
+  version: 2;
+  suggestionId: string;
+  date: string;
+  headline: string;
+  summary: string;
+  currentFacts: Record<string, unknown>;
+  guidanceStatus: string;
+  instruction: string;
+};
+export type TodaySuggestionContextResolution = {
+  status: "CURRENT" | "UPDATED" | "UNAVAILABLE";
+  sessionId: string | null;
+  resumeExisting?: boolean;
+  context: TodaySuggestionServerContext | null;
+};
+export function resolveTodaySuggestionContext(suggestionId: string) {
+  return apiFetch<TodaySuggestionContextResolution>(
+    `/ai/today-suggestion/${encodeURIComponent(suggestionId)}/context`,
+    { method: "POST" },
   );
 }

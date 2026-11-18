@@ -5,6 +5,19 @@ import type { PrismaTx } from '@/prisma/prisma-db';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ExternalProviderWebhookSignalService } from './external-provider-webhook-signal.service';
 
+/** Content identity for JSON notifications, independent of object key order. */
+export function webhookContentChecksum(value: unknown): string {
+  const json = JSON.stringify(value, (_key, item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return item;
+    return Object.fromEntries(
+      Object.keys(item)
+        .sort()
+        .map((key) => [key, item[key]]),
+    );
+  });
+  return createHash('sha256').update(json).digest('hex');
+}
+
 export type ExternalProviderWebhookInboxEvent<
   Payload = Record<string, unknown>,
 > = {

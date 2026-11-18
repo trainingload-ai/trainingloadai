@@ -1,5 +1,5 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { ImportingJobService } from '../../importing/importing-job.service';
-import { ImportingJobRepository } from '../../importing/persistence/importing-job.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { StorageObjectGarbageCollectorService } from '../parquet-garbage-collector.service';
 import { SensorFileQueryService } from '../sensor-file-query.service';
@@ -24,7 +24,7 @@ function createService(
     storage as never,
     new SensorFileQueryService(new SensorFileRepository(prisma as never)),
     new HealthFileQueryService(new HealthDataRepository(prisma as never)),
-    new ImportingJobService(new ImportingJobRepository(database)),
+    new ImportingJobService(importingJobRepository(database)),
     routes as never,
   );
 }

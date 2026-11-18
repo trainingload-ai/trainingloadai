@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import {
   prismaModel,
   type PrismaClientSlice,
@@ -45,9 +46,17 @@ export class HealthDataRepository {
 
   runTransaction<T>(
     fn: (tx: PrismaTx) => Promise<T>,
-    options?: { maxWait?: number; timeout?: number },
+    options?: { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel },
   ): Promise<T> {
     return this.prisma.$transaction(fn, options);
+  }
+
+  /** Serialize source registration with publication for the same athlete. */
+  runDailyPublicationTransaction<T>(userId: string, fn: (tx: PrismaTx) => Promise<T>) {
+    return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, `health-daily-user|${userId}`);
+      return fn(tx);
+    });
   }
 
   transaction(operations: Prisma.PrismaPromise<unknown>[]) {

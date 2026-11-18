@@ -1,3 +1,4 @@
+import { ThirdPartyProvider } from '@prisma/client';
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import {
   ExternalProviderWebhookDispatcherService,
@@ -23,7 +24,7 @@ export class IntervalsIcuWebhookWorker
 
   onModuleInit() {
     this.unregister = this.dispatcher.register<IntervalsIcuWebhookEvent>({
-      provider: 'intervals_icu',
+      provider: ThirdPartyProvider.intervals_icu,
       label: 'Intervals.icu',
       process: (event) => this.process(event),
     });

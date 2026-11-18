@@ -8,10 +8,14 @@ export async function markWorkoutDoneIfApplicable(
 ) {
   const workout = await tx.planWorkout.findUnique({
     where: { id: workoutId },
-    select: { status: true, plan: { select: { status: true } } },
+    select: { status: true, planId: true, plan: { select: { status: true } } },
   });
   if (!workout) return false;
-  if (workout.plan?.status !== 'ACTIVE' && workout.plan?.status !== 'PAUSED') {
+  if (
+    (workout.planId || workout.plan) &&
+    workout.plan?.status !== 'ACTIVE' &&
+    workout.plan?.status !== 'PAUSED'
+  ) {
     return false;
   }
   if (workout.status !== 'PLANNED' && workout.status !== 'IN_PROGRESS') {

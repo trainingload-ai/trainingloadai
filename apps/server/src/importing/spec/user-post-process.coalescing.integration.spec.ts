@@ -1,3 +1,4 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import {
   afterAll,
   beforeAll,
@@ -10,7 +11,6 @@ import {
 import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { ImportingJobService } from '../importing-job.service';
 import { ImportBatchService } from '../import-batch.service';
 import { ImportItemWorkerService } from '../import-item.worker';
@@ -46,6 +46,7 @@ describe('durable user post-process coalescing', () => {
   let database: ChildProcess;
   let db: PrismaClient;
   let jobs: ImportingJobService;
+  let repository: ReturnType<typeof importingJobRepository>;
   let batches: ImportBatchService;
   let sequence = 0;
   const translate = { t: (key: string) => key };
@@ -93,7 +94,8 @@ describe('durable user post-process coalescing', () => {
       ALTER COLUMN email_verified DROP DEFAULT,
       ALTER COLUMN created_at DROP DEFAULT,
       ALTER COLUMN updated_at DROP DEFAULT`;
-    jobs = new ImportingJobService(new ImportingJobRepository(db as never));
+    repository = importingJobRepository(db as never);
+    jobs = new ImportingJobService(repository);
     batches = new ImportBatchService(
       db as never,
       {} as never,
@@ -410,7 +412,7 @@ describe('durable user post-process coalescing', () => {
     const done = completion();
     done.activeLeaseTokens.set(row.item.id, 'item-owner');
     const broken = jest
-      .spyOn(batches, 'createPostProcessJob')
+      .spyOn(repository, 'createPostProcessJob')
       .mockRejectedValueOnce(new Error('queue unavailable'));
     await expect(
       done.completeActivityItem(row.item.id, row.batch.id),

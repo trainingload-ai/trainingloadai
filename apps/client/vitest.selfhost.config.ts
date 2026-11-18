@@ -67,6 +67,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: [
+      "src/app/api/v2/home/route.test.ts",
       "src/app/**/_home/**/*.test.{ts,tsx}",
       "src/lib/query-invalidation.test.ts",
       "src/api/activity-review-stream.test.ts",
@@ -128,6 +129,7 @@ export default defineConfig({
       "src/components/ai-consent/AiDataConsentReminder.test.tsx",
       "src/components/layout/MainScrollPageShell.test.tsx",
       "src/components/plan/create-plan-mode-dialog.test.tsx",
+      "src/components/plan/activity-plan-link-control.test.tsx",
       "src/deployment/analytics.test.ts",
       "src/lib/product-analytics.test.ts",
       "src/lib/map/map-provider.test.ts",

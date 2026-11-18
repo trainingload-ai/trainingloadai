@@ -1,3 +1,4 @@
+import { inheritedImportAuthorization } from '@/importing/import-publication-authorization';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -30,7 +31,11 @@ type SourceCandidate = {
   isPrimary: boolean;
   createdAt: Date;
   metadata: unknown;
-  canonicalSnapshot: { payload: unknown } | null;
+  canonicalSnapshot: {
+    id?: string;
+    payload: unknown;
+    itemJob?: { sourceRef: unknown; sourceRevision: string | null };
+  } | null;
 };
 
 function qualityScore(source: SourceCandidate) {
@@ -168,6 +173,7 @@ export class ActivitySourceLifecycleService {
     thirdPartyActivityIds?: number[];
     externalIds?: string[];
     sourceUids?: string[];
+    assertAuthorization?: (tx: Prisma.TransactionClient) => Promise<void>;
   }) {
     const providerWide =
       !args.thirdPartyActivityIds?.length &&
@@ -219,6 +225,7 @@ export class ActivitySourceLifecycleService {
     return withSerializableRetry(() =>
       this.prisma.$transaction(
         async (tx) => {
+          await args.assertAuthorization?.(tx);
           const thirdPartyActivities = await tx.thirdPartyActivity.findMany({
             where: thirdPartyWhere,
             select: { id: true, externalId: true, rawData: true },
@@ -240,6 +247,97 @@ export class ActivitySourceLifecycleService {
                 .filter((value): value is string => Boolean(value)),
             ]),
           );
+          if (['intervals_icu', 'strava', 'garmin'].includes(args.provider)) {
+            const importSources = await this.importJobs.sourceObjects(tx).findMany({
+              where: {
+                userId: args.userId,
+                provider: args.provider,
+                ...(args.accountRef ? { accountRef: args.accountRef } : {}),
+                ...(args.before ? { createdAt: { lte: args.before } } : {}),
+                ...(providerWide
+                  ? {}
+                  : {
+                      OR: [
+                        ...(externalIds.length
+                          ? [{ externalId: { in: externalIds } }]
+                          : []),
+                        ...sourceUids.flatMap((sourceUid) => [
+                          { sourceUid },
+                          { sourceUid: { startsWith: `${sourceUid}#` } },
+                        ]),
+                      ],
+                    }),
+              },
+              select: { id: true, sourceKind: true, sourceUid: true },
+              orderBy: [{ sourceKind: 'asc' }, { sourceUid: 'asc' }],
+            });
+            for (const source of importSources) {
+              await this.importJobs.withSourceLocks(
+                {
+                  userId: args.userId,
+                  sourceKind: source.sourceKind,
+                  sourceUids: [source.sourceUid],
+                },
+                async () => undefined,
+                tx,
+              );
+            }
+            if (importSources.length) {
+              const ids = importSources.map((source) => source.id);
+              await this.importJobs.sourceObjects(tx).updateMany({
+                where: { id: { in: ids } },
+                data: {
+                  importRevokedAt: new Date(),
+                  importRequest: Prisma.DbNull,
+                },
+              });
+              const cancelled = await this.importJobs.itemJobs(tx).findMany({
+                where: {
+                  sourceObjectId: { in: ids },
+                  status: {
+                    in: [
+                      'QUEUED',
+                      'NORMALIZING',
+                      'DEDUPING',
+                      'MATERIALIZING',
+                      'PARQUET_BUILDING',
+                      'ANALYZING',
+                      'FAILED',
+                    ],
+                  },
+                },
+                select: { batchJobId: true },
+              });
+              await this.importJobs.itemJobs(tx).updateMany({
+                where: {
+                  sourceObjectId: { in: ids },
+                  status: {
+                    in: [
+                      'QUEUED',
+                      'NORMALIZING',
+                      'DEDUPING',
+                      'MATERIALIZING',
+                      'PARQUET_BUILDING',
+                      'ANALYZING',
+                      'FAILED',
+                    ],
+                  },
+                },
+                data: {
+                  status: 'SKIPPED',
+                  outcome: 'SOURCE_REVOKED',
+                  completedAt: new Date(),
+                  lockToken: null,
+                  leaseExpiresAt: null,
+                },
+              });
+              for (const batchId of [
+                ...new Set(cancelled.map((item) => item.batchJobId)),
+              ].sort()) {
+                await this.importJobs.refreshBatchProgress(batchId, tx);
+              }
+            }
+          }
           const sourceFilters = args.sourceUids?.length
             ? args.sourceUids.flatMap<Prisma.ActivitySourceWhereInput>(
                 (sourceUid) => [
@@ -345,7 +443,15 @@ export class ActivitySourceLifecycleService {
             ? ((await tx.activitySource.findMany({
                 where: { activityId: { in: activityIds }, isActive: true },
                 include: {
-                  canonicalSnapshot: { select: { payload: true } },
+                  canonicalSnapshot: {
+                    select: {
+                      id: true,
+                      payload: true,
+                      itemJob: {
+                        select: { sourceRef: true, sourceRevision: true },
+                      },
+                    },
+                  },
                 },
                 orderBy: { createdAt: 'asc' },
               })) as unknown as SourceCandidate[])
@@ -578,8 +684,22 @@ export class ActivitySourceLifecycleService {
                 sourceObjectId: item.sourceObjectId,
                 sourceKind: item.source.sourceKind,
                 sourceUid: item.source.sourceUid,
+                sourceRevision:
+                  item.source.canonicalSnapshot?.itemJob?.sourceRevision ??
+                  null,
                 position,
                 sourceRef: {
+                  ...inheritedImportAuthorization(
+                    item.source.canonicalSnapshot?.itemJob?.sourceRef,
+                  ),
+                  ...(item.source.canonicalSnapshot?.id
+                    ? {
+                        localReplay: {
+                          activityId: item.activityId,
+                          canonicalSnapshotId: item.source.canonicalSnapshot.id,
+                        },
+                      }
+                    : {}),
                   kind: 'canonical_payload',
                   payload: item.payload,
                 } as unknown as Prisma.InputJsonValue,

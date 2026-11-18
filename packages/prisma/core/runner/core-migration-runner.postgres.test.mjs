@@ -156,6 +156,13 @@ postgresTest(
         { id: "0027_scope_fitness_setting_evidence", source: "baseline" },
         { id: "0028_user_scoped_activity_identity", source: "baseline" },
         { id: "0029_provider_authorization_revision", source: "baseline" },
+        { id: "0030_independent_workout_activity_links", source: "baseline" },
+        { id: "0031_workout_matching_review", source: "baseline" },
+        { id: "0032_import_source_revision_handoff", source: "baseline" },
+        { id: "0033_today_suggestion_generation", source: "baseline" },
+        { id: "0034_coach_fact_scope", source: "baseline" },
+        { id: "0035_coach_context_timezone", source: "baseline" },
+        { id: "0036_health_daily_fact_revisions", source: "baseline" },
       ]);
       const jwksColumns = await query(
         databaseUrl,

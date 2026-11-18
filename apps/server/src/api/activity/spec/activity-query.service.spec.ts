@@ -14,6 +14,9 @@ function createService(overrides?: {
     { actualLoad: number | null; actualLoadSource?: string | null }
   >;
   thumbUrls?: Map<number, { lightUrl: string | null; darkUrl: string | null }>;
+  independent?: Array<{ scheduledDate: Date; sportType: string }>;
+  userTimezone?: string;
+  activePlan?: { startDate: Date; endDate: Date };
 }) {
   const activities = overrides?.activities ?? [];
   const prisma = {
@@ -26,9 +29,18 @@ function createService(overrides?: {
     },
   };
   const users = {
-    bodyMetrics: () => ({ findFirst: jest.fn(async () => null) }),
+    bodyMetrics: () => ({
+      findFirst: jest.fn(async () =>
+        overrides?.userTimezone ? { value: overrides.userTimezone } : null,
+      ),
+    }),
   };
-  const planQuery = { findActiveDateRange: jest.fn(async () => null) };
+  const planQuery = {
+    findActiveDateRange: jest.fn(async () => overrides?.activePlan ?? null),
+    findLinkCandidatesForDates: jest.fn(
+      async () => overrides?.independent ?? [],
+    ),
+  };
   const loadReadout = {
     batchGetActualLoad: jest.fn(
       async () => overrides?.loads ?? new Map([[7, { actualLoad: 51 }]]),
@@ -69,10 +81,115 @@ function createService(overrides?: {
       })),
     } as never,
   );
-  return { service, prisma, mapDerivation, externalActivityMirrors };
+  return { service, prisma, mapDerivation, externalActivityMirrors, planQuery };
 }
 
 describe('ActivityQueryService', () => {
+  it.each([
+    { sport: 'RUN', courseSport: 'RUN', date: '2026-08-21', visible: true },
+    { sport: 'RUN', courseSport: 'UNKNOWN', date: '2026-08-21', visible: true },
+    { sport: null, courseSport: 'SWIM', date: '2026-08-21', visible: true },
+    {
+      sport: 'UNKNOWN',
+      courseSport: 'SWIM',
+      date: '2026-08-21',
+      visible: true,
+    },
+    { sport: 'RUN', courseSport: 'SWIM', date: '2026-08-21', visible: false },
+    { sport: 'RUN', courseSport: 'RUN', date: '2026-08-20', visible: false },
+  ])(
+    'shows a first manual-link action without an active plan only for an eligible independent day/sport: %j',
+    async ({ sport, courseSport, date, visible }) => {
+      const { service } = createService({
+        activities: [
+          {
+            id: 7,
+            hashId: 'run',
+            sportType: sport,
+            startTime: new Date('2026-08-20T23:30:00Z'),
+            timezone: 'Asia/Shanghai',
+            activitySources: [],
+            thirdPartyMappings: [],
+            planWorkoutLinks: [],
+          },
+        ],
+        independent: [
+          {
+            scheduledDate: new Date(`${date}T00:00:00Z`),
+            sportType: courseSport,
+          },
+        ],
+      });
+      const result = await service.getActivityTimeline({
+        userId: 'user-1',
+        limit: 20,
+      });
+      expect(result.items[0].kind).toBe('activity');
+      expect(
+        result.items[0].kind === 'activity' &&
+          result.items[0].activity.planLinkUiVisible,
+      ).toBe(visible);
+    },
+  );
+
+  it.each([
+    { view: 'timeline', activePlanOnly: false },
+    { view: 'list', activePlanOnly: false },
+    { view: 'timeline', activePlanOnly: true },
+    { view: 'list', activePlanOnly: true },
+  ])(
+    'uses the athlete day for the manual-link action when the browser day differs: %j',
+    async ({ view, activePlanOnly }) => {
+      const { service, planQuery } = createService({
+        userTimezone: 'Asia/Shanghai',
+        activities: [
+          {
+            id: 7,
+            hashId: 'run',
+            sportType: 'RUN',
+            startTime: new Date('2026-08-20T23:30:00Z'),
+            timezone: null,
+            activitySources: [],
+            thirdPartyMappings: [],
+            planWorkoutLinks: [],
+          },
+        ],
+        activePlan: activePlanOnly
+          ? {
+              startDate: new Date('2026-08-21T00:00:00Z'),
+              endDate: new Date('2026-08-21T00:00:00Z'),
+            }
+          : undefined,
+        independent: activePlanOnly
+          ? []
+          : [
+              {
+                scheduledDate: new Date('2026-08-21T00:00:00Z'),
+                sportType: 'RUN',
+              },
+            ],
+      });
+      const filters = { calendarTimeZone: 'America/New_York' };
+      const activity =
+        view === 'list'
+          ? (await service.getActivities('user-1', filters)).activities[0]
+          : (
+              await service.getActivityTimeline({
+                userId: 'user-1',
+                filters,
+                limit: 20,
+              })
+            ).items.flatMap((item) =>
+              item.kind === 'activity' ? [item.activity] : [],
+            )[0];
+      expect(activity.planLinkUiVisible).toBe(true);
+      expect(planQuery.findLinkCandidatesForDates).toHaveBeenCalledWith(
+        'user-1',
+        ['2026-08-21'],
+      );
+    },
+  );
+
   it('returns one server-ordered timeline across formal activities and mirrors', async () => {
     const { service } = createService({
       activities: [

@@ -11,7 +11,7 @@ import type { WorkoutPersistenceService } from '../persistence/workout-persisten
 
 export type PlanWorkoutLinkRow = {
   id: string;
-  planId: string;
+  planId: string | null;
   planWorkoutId: string;
   activityId: number;
   source: string;
@@ -28,7 +28,7 @@ export type PlanWorkoutLinkRow = {
 
 export type PlanWorkoutRowLike = {
   id: string;
-  planId: string;
+  planId: string | null;
   dayOffset?: number | null;
   sessionIndex?: number | null;
   scheduledDate?: Date | string | null;
@@ -161,6 +161,7 @@ export function normalizePlanWorkoutRow(
             kind: 'FREEFORM',
             version: 1,
             text: typeof row.text === 'string' ? row.text : '',
+            durationSeconds: row.plannedDurationSeconds ?? null,
           }
         : {
             kind: 'ENDURANCE',

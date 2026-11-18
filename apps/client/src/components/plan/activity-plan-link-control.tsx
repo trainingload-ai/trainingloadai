@@ -6,9 +6,11 @@ import * as React from "react";
 import { Check, Link2, Link2Off, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { V2ActivityListItem } from "@/api/v2-activities";
 import {
   getActivityPlanCandidates,
+  getActivityPlanLink,
   replaceActivityPlanLink,
   removeActivityPlanLink,
   type ActivityPlanCandidate,
@@ -26,12 +28,14 @@ import { ConfirmDialog } from "@/components/ui/confirmDialog";
 import { cn } from "@/lib/utils";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
+import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+import { queryKeys } from "@/lib/query-keys";
 
 export function ActivityPlanLinkControl({
   activity,
   onLinkedPlanWorkoutChange,
 }: {
-  activity: V2ActivityListItem;
+  activity: Pick<V2ActivityListItem, "hashId" | "linkedPlanWorkout">;
   onLinkedPlanWorkoutChange?: (
     linked: V2ActivityListItem["linkedPlanWorkout"],
   ) => void;
@@ -40,6 +44,7 @@ export function ActivityPlanLinkControl({
   const tActivityTitle = useTranslations("ActivityTitle");
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
+  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [candidates, setCandidates] = React.useState<
     ActivityPlanCandidate[] | null
@@ -88,6 +93,7 @@ export function ActivityPlanLinkControl({
       setPending(true);
       const res = await replaceActivityPlanLink(activity.hashId, c.workoutId);
       const next = res?.linkedPlanWorkout;
+      await invalidateAfterPlanMutation(queryClient);
       if (next) {
         onLinkedPlanWorkoutChange?.(next);
         toast.success(t("toast.linkSuccess"));
@@ -111,6 +117,7 @@ export function ActivityPlanLinkControl({
     try {
       setPending(true);
       await removeActivityPlanLink(activity.hashId);
+      await invalidateAfterPlanMutation(queryClient);
       onLinkedPlanWorkoutChange?.(null);
       toast.success(t("toast.unlinkSuccess"));
       setMenuOpen(false);
@@ -205,6 +212,7 @@ export function ActivityPlanLinkControl({
                         ) : null}
                       </div>
                       <span className="text-mobile-caption pc:text-[11px] text-muted-foreground">
+                        {c.planTitle ? `${c.planTitle} · ` : ""}
                         {c.expectedDurationSec != null
                           ? t("dropdown.expectedDuration", {
                               minutes: Math.max(
@@ -267,5 +275,29 @@ export function ActivityPlanLinkControl({
         onConfirm={handleConfirmReplace}
       />
     </>
+  );
+}
+
+/** Share the existing editor and link cache across desktop and mobile detail views. */
+export function ActivityDetailPlanLinkControl({ hashId }: { hashId: string }) {
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.activity.planLink(hashId);
+  const link = useQuery({
+    queryKey,
+    queryFn: () => getActivityPlanLink(hashId),
+  });
+  if (!link.data) return null;
+
+  return (
+    <ActivityPlanLinkControl
+      activity={{
+        hashId,
+        linkedPlanWorkout: link.data.linkedPlanWorkout,
+      }}
+      onLinkedPlanWorkoutChange={(linkedPlanWorkout) => {
+        queryClient.setQueryData(queryKey, { linkedPlanWorkout });
+        void queryClient.invalidateQueries({ queryKey });
+      }}
+    />
   );
 }

@@ -260,53 +260,81 @@ describe('IntervalsIcuWebhookService', () => {
     );
   });
 
-  it('queues ACTIVITY_UPLOADED when automatic activity import is enabled', async () => {
-    const { importBatchService, prisma, service } = createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValue({
-      id: 'connection-1',
-      status: 'ACTIVE',
-      credentialFingerprint: 'generation-1',
-      userId: 'user-1',
-      externalAthleteId: '49291',
-      syncScheduledActivities: true,
-    } as never);
-    importBatchService.createIntervalsIcuImportBatch.mockResolvedValueOnce({
-      batch: { id: 'batch-1' } as never,
-      totalDiscovered: 1,
-      queuedCount: 1,
-      skippedCount: 0,
-      directlyQueued: 1,
-      routedToOrigin: 0,
-      mirrorsCreated: 0,
-      alreadyResolved: 0,
-      duplicateOrRunning: 0,
-    });
-
-    await processEvents(service, {
-      secret: 'test-secret',
-      events: [
-        {
-          athlete_id: '49291',
-          type: 'ACTIVITY_UPLOADED',
-          activity: { id: 'activity-1', name: 'Ride' },
-        },
-      ],
-    });
-
-    expect(
-      importBatchService.createIntervalsIcuImportBatch,
-    ).toHaveBeenCalledWith({
-      userId: 'user-1',
-      connectionId: 'connection-1',
-      authorization: {
-        connectionId: 'connection-1',
+  it.each(['ACTIVITY_UPLOADED', 'ACTIVITY_ANALYZED'])(
+    'queues %s when automatic activity import is enabled',
+    async (eventType) => {
+      const { importBatchService, prisma, service } = createService();
+      prisma.externalProviderConnection.findFirst.mockResolvedValue({
+        id: 'connection-1',
+        status: 'ACTIVE',
+        credentialFingerprint: 'generation-1',
         userId: 'user-1',
-        athleteId: '49291',
-        revision: 'generation-1',
-      },
-      activities: [{ id: 'activity-1', name: 'Ride' }],
-      reason: 'webhook',
+        externalAthleteId: '49291',
+        syncScheduledActivities: true,
+      } as never);
+      importBatchService.createIntervalsIcuImportBatch.mockResolvedValueOnce({
+        batch: { id: 'batch-1' } as never,
+        totalDiscovered: 1,
+        queuedCount: 1,
+        skippedCount: 0,
+        directlyQueued: 1,
+        routedToOrigin: 0,
+        mirrorsCreated: 0,
+        alreadyResolved: 0,
+        duplicateOrRunning: 0,
+      });
+
+      await processEvents(service, {
+        secret: 'test-secret',
+        events: [
+          {
+            athlete_id: '49291',
+            type: eventType,
+            activity: { id: 'activity-1', name: 'Ride' },
+          },
+        ],
+      });
+
+      expect(
+        importBatchService.createIntervalsIcuImportBatch,
+      ).toHaveBeenCalledWith({
+        userId: 'user-1',
+        connectionId: 'connection-1',
+        authorization: {
+          connectionId: 'connection-1',
+          userId: 'user-1',
+          athleteId: '49291',
+          revision: 'generation-1',
+        },
+        activities: [{ id: 'activity-1', name: 'Ride' }],
+        reason: 'webhook',
+        ...(eventType === 'ACTIVITY_ANALYZED'
+          ? { revisionHint: expect.any(String) }
+          : {}),
+      });
+    },
+  );
+
+  it('retains each activity revision while coalescing exact retries', async () => {
+    const { service, inbox } = createService();
+    const first = {
+      type: 'ACTIVITY_ANALYZED',
+      athlete_id: 'i42',
+      timestamp: '2026-11-17T00:00:00Z',
+      activity: { id: 'a1', name: 'First' },
+    };
+    const input = await (service as any).buildInboxEvent(first);
+    const retry = await (service as any).buildInboxEvent({
+      ...first,
+      activity: { name: 'First', id: 'a1' },
     });
+    const changed = await (service as any).buildInboxEvent({
+      ...first,
+      activity: { id: 'a1', name: 'Changed' },
+    });
+    expect(input.dedupeKey).toBe(retry.dedupeKey);
+    expect(input.dedupeKey).not.toBe(changed.dedupeKey);
+    expect(inbox.enqueue).not.toHaveBeenCalled();
   });
 
   it('soft deletes ACTIVITY_DELETED when automatic activity import is enabled', async () => {

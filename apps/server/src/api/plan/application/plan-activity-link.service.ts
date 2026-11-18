@@ -18,6 +18,8 @@ export class PlanActivityLinkService {
     activityId: number,
     tx: PlanDb,
   ): Promise<string[]> {
+    // Deletion must read its completion snapshot after concurrent linking commits.
+    await this.links.lockLinkTargets(activityId, null, tx);
     const links = await this.links.findMany(
       {
         where: {
@@ -76,13 +78,7 @@ export class PlanActivityLinkService {
     dto: LinkPlanWorkoutActivityDto,
     meta?: Parameters<PlanWriteSupport['linkWorkoutActivity']>[4],
   ) {
-    return this.write.linkWorkoutActivity(
-      userId,
-      planId,
-      workoutId,
-      dto,
-      meta,
-    );
+    return this.write.linkWorkoutActivity(userId, planId, workoutId, dto, meta);
   }
 
   unlinkWorkoutActivity(

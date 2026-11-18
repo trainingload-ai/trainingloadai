@@ -11,6 +11,59 @@ export class PlanActivityLinkRepository {
     return planDb(this.prisma, tx);
   }
 
+  findMatchStates<T extends Prisma.PlanActivityMatchStateFindManyArgs>(
+    args: Prisma.SelectSubset<T, Prisma.PlanActivityMatchStateFindManyArgs>,
+    tx?: PlanDb,
+  ) {
+    return this.db(tx).planActivityMatchState.findMany(args);
+  }
+
+  putMatchState(args: Prisma.PlanActivityMatchStateUpsertArgs, tx?: PlanDb) {
+    return this.db(tx).planActivityMatchState.upsert(args);
+  }
+
+  suppressMatching(
+    userId: string,
+    activityId: number,
+    reason: 'USER_UNLINKED' | 'USER_REPLACED',
+    tx: PlanDb,
+  ) {
+    const data = {
+      outcome: 'SUPPRESSED',
+      reason,
+      candidateWorkoutIds: [],
+      suppressedAt: new Date(),
+    };
+    return this.putMatchState(
+      {
+        where: { activityId },
+        create: { activityId, userId, ...data },
+        update: data,
+      },
+      tx,
+    );
+  }
+
+  async lockMatchDay(userId: string, date: string, tx: PlanDb) {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${'workout-matching:' + userId}), hashtext(${date}))::text`;
+  }
+
+  /** Serialize associations for either the same activity or workout. */
+  async lockLinkTargets(
+    activityId: number,
+    workoutId: string | null,
+    tx: PlanDb,
+  ) {
+    const activities = await tx.$queryRaw<Array<{ id: number }>>`
+      SELECT id FROM t_activity WHERE id = ${activityId} FOR UPDATE
+    `;
+    if (!workoutId) return activities.length === 1;
+    const workouts = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT id FROM t_plan_workout WHERE id = ${workoutId} FOR UPDATE
+    `;
+    return activities.length === 1 && workouts.length === 1;
+  }
+
   findUnique<T extends Prisma.PlanWorkoutActivityLinkFindUniqueArgs>(
     args: Prisma.SelectSubset<T, Prisma.PlanWorkoutActivityLinkFindUniqueArgs>,
     tx?: PlanDb,

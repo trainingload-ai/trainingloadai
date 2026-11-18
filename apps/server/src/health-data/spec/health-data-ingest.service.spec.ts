@@ -20,7 +20,7 @@ function createService() {
     },
     userDailyHealthMetric: {
       upsert: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
-      deleteMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+      update: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       findMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       findUnique: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
     },
@@ -384,13 +384,13 @@ describe('HealthDataIngestService', () => {
       }),
     );
     expect(prisma.externalHealthSample.updateMany).toHaveBeenCalledWith({
-      where: {
+      where: expect.objectContaining({
         userId: 'user-1',
         localDate: new Date('2026-07-03T00:00:00.000Z'),
         metricType: 'STEP_COUNT',
         deletedAt: null,
         projectToDaily: true,
-      },
+      }),
       data: { dailyMetricId: 'daily-metric-1' },
     });
   });
@@ -401,29 +401,29 @@ describe('HealthDataIngestService', () => {
     prisma.externalHealthSample.findMany.mockResolvedValueOnce([
       {
         provider: 'MANUAL',
-        externalId: 'apple:20260703:STEP_COUNT',
+        externalId: 'manual:20260703:STEP_COUNT',
         startTime: new Date('2026-07-03T00:00:00.000Z'),
         endTime: new Date('2026-07-04T00:00:00.000Z'),
         value: 10000,
         unit: 'count',
         timezone: null,
-        sourceName: 'Apple Health',
+        sourceName: 'Manual',
         sourcePriority: 80,
-        sourceNamespace: 'apple-health',
+        sourceNamespace: 'manual',
         aggregation: 'SUM',
         metadata: null,
       },
       {
-        provider: 'HEALTH_CONNECT',
-        externalId: 'coros:daily:user:20260703:STEP_COUNT',
+        provider: 'GARMIN',
+        externalId: 'garmin:daily:user:20260703:STEP_COUNT',
         startTime: new Date('2026-07-03T00:00:00.000Z'),
         endTime: new Date('2026-07-04T00:00:00.000Z'),
         value: 9000,
         unit: 'count',
         timezone: null,
-        sourceName: 'HEALTH_CONNECT',
+        sourceName: 'GARMIN',
         sourcePriority: 40,
-        sourceNamespace: 'coros',
+        sourceNamespace: 'garmin:personal',
         aggregation: 'SUM',
         metadata: null,
       },
@@ -434,15 +434,15 @@ describe('HealthDataIngestService', () => {
       service.ingestCandidate({
         userId: 'user-1',
         candidate: {
-          provider: 'HEALTH_CONNECT',
+          provider: 'GARMIN',
           metricType: 'STEP_COUNT',
-          externalId: 'coros:daily:user:20260703:STEP_COUNT',
+          externalId: 'garmin:daily:user:20260703:STEP_COUNT',
           localDate: new Date('2026-07-03T00:00:00.000Z'),
           startTime: new Date('2026-07-03T00:00:00.000Z'),
           endTime: new Date('2026-07-04T00:00:00.000Z'),
           value: 9000,
           unit: 'count',
-          sourceName: 'HEALTH_CONNECT',
+          sourceName: 'GARMIN',
         },
       }),
     ).resolves.toEqual({ projected: true, selected: false });
@@ -454,7 +454,7 @@ describe('HealthDataIngestService', () => {
           value: 10000,
           sourceBreakdown: expect.objectContaining({
             MANUAL: expect.objectContaining({ value: 10000 }),
-            HEALTH_CONNECT: expect.objectContaining({
+            GARMIN: expect.objectContaining({
               value: 9000,
               priority: 40,
             }),
@@ -636,7 +636,10 @@ describe('HealthDataIngestService', () => {
         userId: 'user-1',
         localDate: new Date('2026-07-03T00:00:00.000Z'),
         metricType: 'STEP_COUNT',
-        OR: [{ projectToDaily: false }, { deletedAt: { not: null } }],
+        OR: expect.arrayContaining([
+          { projectToDaily: false },
+          { deletedAt: { not: null } },
+        ]),
       },
       data: { dailyMetricId: null },
     });
@@ -791,9 +794,9 @@ describe('HealthDataIngestService', () => {
         metricType: 'SLEEP_SCORE',
       },
     ]);
-    prisma.userDailyHealthMetric.deleteMany
-      .mockResolvedValueOnce({ count: 1 })
-      .mockResolvedValueOnce({ count: 1 });
+    prisma.userDailyHealthMetric.findUnique
+      .mockResolvedValueOnce({ id: 'old-day', value: 80, semanticVersion: 1 })
+      .mockResolvedValueOnce(null);
 
     await service.replaceProviderDailyCandidates({
       userId: 'user-1',
@@ -823,12 +826,21 @@ describe('HealthDataIngestService', () => {
         }),
       }),
     );
-    expect(prisma.userDailyHealthMetric.deleteMany).toHaveBeenCalledWith({
+    expect(prisma.userDailyHealthMetric.update).toHaveBeenCalledWith({
       where: {
-        userId: 'user-1',
-        date: new Date('2026-06-20T00:00:00.000Z'),
-        metricType: 'SLEEP_SCORE',
+        userId_date_metricType: {
+          userId: 'user-1',
+          date: new Date('2026-06-20T00:00:00.000Z'),
+          metricType: 'SLEEP_SCORE',
+        },
       },
+      data: expect.objectContaining({
+        value: null,
+        semanticVersion: 2,
+        revisions: {
+          create: expect.objectContaining({ status: 'WITHDRAWN', version: 2 }),
+        },
+      }),
     });
   });
 });

@@ -4770,6 +4770,14 @@
       "coachPrompt": "今日のコーチ提案を確認し、次に何をするか一緒に判断してください。",
       "trainingWindowClosed": "今日は新しいトレーニングを追加する時間ではありません",
       "workoutAlreadyExists": "今日のトレーニングはすでに登録されています"
+    },
+    "workoutMatching": {
+      "title": "トレーニングの関連を確認",
+      "ambiguous": "このアクティビティに該当する候補が複数あります。状態は変更していません。正しいメニューを選んでください。",
+      "insufficient": "メニューを特定する情報が不足しています。状態は変更していません。手動で関連付けてください。",
+      "manual": "手動で関連付け",
+      "manualLabel": "{activity}を手動で関連付け",
+      "workout": "トレーニング"
     }
   },
   "V2PlanPage": {

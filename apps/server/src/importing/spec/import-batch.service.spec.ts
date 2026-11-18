@@ -1,9 +1,9 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { createHash } from 'crypto';
 import { Logger } from '@nestjs/common';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ImportBatchService } from '../import-batch.service';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 
 describe('ImportBatchService', () => {
   function stableChecksum(value: unknown) {
@@ -15,6 +15,7 @@ describe('ImportBatchService', () => {
   function createService() {
     const prisma = {
       $queryRaw: jest.fn(async () => []),
+      $executeRaw: jest.fn(async () => 1),
       $transaction: jest.fn(async (work: (tx: unknown) => Promise<unknown>) =>
         work(prisma),
       ),
@@ -73,7 +74,7 @@ describe('ImportBatchService', () => {
         prisma as never,
         storage as never,
         i18n as never,
-        new ImportingJobService(new ImportingJobRepository(prisma as never)),
+        new ImportingJobService(importingJobRepository(prisma as never)),
         { users: () => prisma.t_user } as never,
         externalActivityRouter as never,
       ),
@@ -485,9 +486,12 @@ describe('ImportBatchService', () => {
     prisma.importBatchJob.create.mockResolvedValueOnce({
       id: 'batch-1',
     });
-    prisma.importSourceObject.upsert
-      .mockResolvedValueOnce({ id: 'source-object-1' })
-      .mockResolvedValueOnce({ id: 'source-object-2' });
+    prisma.importSourceObject.upsert.mockImplementation(async (args: any) => ({
+      id:
+        args.create.externalId === 'activity-1'
+          ? 'source-object-1'
+          : 'source-object-2',
+    }));
     prisma.importItemJob.create
       .mockResolvedValueOnce({ id: 'item-1' })
       .mockResolvedValueOnce({ id: 'item-2' });
@@ -586,6 +590,7 @@ describe('ImportBatchService', () => {
           sourceUid: 'intervals_icu:user-1:activity-1',
           position: 0,
           status: 'QUEUED',
+          sourceRevision: expect.any(String),
           sourceRef: {
             externalId: 'activity-1',
             connectionId: 'connection-1',
@@ -633,18 +638,27 @@ describe('ImportBatchService', () => {
       },
       {
         sourceUid: 'intervals_icu:user-1:running-activity',
-        status: 'FETCHING',
+        status: 'NORMALIZING',
       },
     ]);
     prisma.activitySource.findMany.mockResolvedValueOnce([
       { sourceUid: 'intervals_icu:user-1:done-activity' },
     ]);
+    prisma.importItemJob.findFirst.mockImplementation(async (args: any) =>
+      args.where.sourceObjectId ===
+      'source-intervals_icu:user-1:running-activity'
+        ? {
+            id: 'running-item',
+            status: 'NORMALIZING',
+            batchJob: { id: 'running-batch' },
+          }
+        : null,
+    );
+    prisma.importBatchJob.update.mockResolvedValue({ id: 'batch-1' });
     prisma.importBatchJob.create.mockResolvedValueOnce({
       id: 'batch-1',
     });
-    prisma.importSourceObject.upsert.mockResolvedValueOnce({
-      id: 'source-object-new',
-    });
+
     prisma.importItemJob.create.mockResolvedValueOnce({ id: 'item-new' });
 
     try {
@@ -669,13 +683,13 @@ describe('ImportBatchService', () => {
       expect(prisma.importBatchJob.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           sourceKind: 'INTERVALS_ICU',
-          totalCount: 1,
+          totalCount: 2,
           requestContext: expect.objectContaining({
             totalDiscovered: 3,
           }),
         }),
       });
-      expect(prisma.importSourceObject.upsert).toHaveBeenCalledTimes(3);
+      expect(prisma.importSourceObject.upsert).toHaveBeenCalledTimes(5);
       expect(prisma.importItemJob.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           sourceUid: 'intervals_icu:user-1:new-activity',
@@ -707,8 +721,10 @@ describe('ImportBatchService', () => {
         activities: [{ id: 'same-remote-id' }],
       });
     const calls = prisma.importSourceObject.upsert.mock.calls as any[];
-    expect(calls[0][0].create.sourceUid).not.toBe(calls[1][0].create.sourceUid);
-    expect(calls[0][0].create.accountRef).toBe('athlete-A');
-    expect(calls[1][0].create.accountRef).toBe('athlete-B');
+    const identities = new Map(
+      calls.map(([args]) => [args.create.accountRef, args.create.sourceUid]),
+    );
+    expect(identities.size).toBe(2);
+    expect(identities.get('athlete-A')).not.toBe(identities.get('athlete-B'));
   });
 });

@@ -82,7 +82,12 @@ export class PlanDeliveryReadService {
             plannedSessionRpe: row.plannedSessionRpe,
           })
         : row.structureKind === 'FREEFORM'
-          ? { kind: 'FREEFORM', version: 1, text: row.text }
+          ? {
+              kind: 'FREEFORM',
+              version: 1,
+              text: row.text,
+              durationSeconds: row.plannedDurationSeconds,
+            }
           : {
               kind: 'ENDURANCE',
               version: 1,

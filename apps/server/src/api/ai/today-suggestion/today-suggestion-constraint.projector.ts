@@ -1,4 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { coachingSemanticValue } from '../core/coach-fact-semantic';
+import { CoachFactContextService } from '../core/coach-fact-context.service';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import {
   FEATURE_ACCESS_POLICY,
   type FeatureAccessPolicy,
@@ -66,6 +68,7 @@ export class TodaySuggestionConstraintProjector {
     private readonly featureAccess: FeatureAccessPolicy,
     private readonly engagement: TodaySuggestionEngagementService,
     private readonly workouts: PlanWorkoutRepository,
+    @Optional() private readonly facts?: CoachFactContextService,
   ) {}
 
   async project(args: {
@@ -74,6 +77,7 @@ export class TodaySuggestionConstraintProjector {
     timezone?: string | null;
     location?: TodayWeatherLocation | null;
     allowAi: boolean;
+    allowWithoutConsent?: boolean;
   }): Promise<TodaySuggestionConstraintProjection> {
     const execution = await this.planExecution.buildContext({
       userId: args.userId,
@@ -82,7 +86,7 @@ export class TodaySuggestionConstraintProjector {
     });
     const date = execution.anchor.anchorDate;
     const [
-      coachState,
+      rawCoachState,
       pendingInquiry,
       coverage,
       access,
@@ -146,6 +150,19 @@ export class TodaySuggestionConstraintProjector {
           location: args.location,
         })
       : { impact: { status: 'unavailable' as const }, attribution: null };
+    const sharedFacts = this.facts
+      ? await this.facts.build({
+          userId: args.userId,
+          date,
+          timezone: timezone || 'UTC',
+          allowAi: args.allowAi && featureAllowedForUser,
+          allowWithoutConsent: args.allowWithoutConsent,
+        })
+      : null;
+    const coachState = sharedFacts
+      ? this.coachState.forFactRevision(rawCoachState, sharedFacts.revision)
+      : rawCoachState;
+    const allowAi = args.allowAi && sharedFacts?.status !== 'DISABLED';
     const todayWorkouts = execution.day.plannedWorkouts.map(workoutFact);
     const tomorrowWorkouts =
       execution.tomorrow.plannedWorkouts.map(workoutFact);
@@ -225,11 +242,12 @@ export class TodaySuggestionConstraintProjector {
       coachState.decisions.some(
         (decision) =>
           decision.riskTier === 'HIGH' &&
+          decision.basisCoverage !== 'UNVERIFIED' &&
           decision.stateRole === 'ACTIVE_PROPOSAL' &&
           ['TODAY', 'TOMORROW'].includes(decision.relevance),
       );
     if (highConcern) constraints.push('HIGH_CONCERN');
-    if (!args.allowAi) constraints.push('AI_DISABLED');
+    if (!allowAi) constraints.push('AI_DISABLED');
     if (!featureAllowedForUser) constraints.push('ACCESS_DENIED');
 
     const dayActivities = [
@@ -246,13 +264,23 @@ export class TodaySuggestionConstraintProjector {
     );
     const factProjection = {
       policyVersion: TODAY_SUGGESTION_POLICY_VERSION,
+      sharedFactRevision: sharedFacts?.revision ?? null,
       date,
       timezone,
-      executionFactHash: execution.factHash,
+      execution: coachingSemanticValue({
+        day: execution.day,
+        tomorrow: execution.tomorrow,
+        load: execution.recentLoad,
+        competition: execution.competitionContext,
+      }),
+      workoutMatching: execution.workoutMatching ?? [],
       plan: execution.plan
         ? {
             id: execution.plan.id,
             status: execution.plan.status,
+            title: execution.plan.title,
+            goal: execution.plan.goal,
+            currentWeekIndex: execution.plan.currentWeekIndex,
             updatedAt: execution.plan.updatedAt,
           }
         : null,
@@ -271,7 +299,7 @@ export class TodaySuggestionConstraintProjector {
         revision: workout.revision,
         updatedAt: workout.updatedAt,
       })),
-      coachState: coachState.athleteState,
+      coachState: coachingSemanticValue(coachState.athleteState),
       decisions: coachState.decisions.map((decision) => ({
         id: decision.id,
         state: decision.state,
@@ -288,12 +316,22 @@ export class TodaySuggestionConstraintProjector {
         ? {
             signals: coverageDiagnosis.signals,
             integrations: coverageDiagnosis.integrations,
-            imports: coverageDiagnosis.imports,
           }
         : null,
       coachReadStatus: coachState.decisionReadStatus,
-      coachReviews: coachState.recentReviews,
-      allowAi: args.allowAi,
+      assessmentReadStatus: coachState.assessmentReadStatus,
+      assessmentCoverage: coachState.assessmentCoverage,
+      coachReviews: coachState.recentReviews.map((review) => ({
+        type: review.type,
+        outcome: review.outcome,
+        decision: review.decision,
+        action: review.action,
+        targetWorkoutId: review.targetWorkoutId,
+        sourceWorkoutId: review.sourceWorkoutId,
+        targetDate: review.targetDate,
+        evidenceCodes: review.evidenceCodes,
+      })),
+      allowAi,
       featureAllowed: featureAllowedForUser,
       edition: process.env.DEPLOYMENT_MODE === 'cloud' ? 'cloud' : 'self-host',
       aiConfiguration: {
@@ -307,7 +345,7 @@ export class TodaySuggestionConstraintProjector {
     };
     const constraintProjection = {
       constraints: [...constraints].sort(),
-      athleteStateEvidenceHash: coachState.athleteState?.evidenceHash ?? null,
+      athleteState: coachingSemanticValue(coachState.athleteState),
       pendingQuestionId: pendingInquiry?.questionId ?? null,
     };
     const continuityProjection = {
@@ -320,7 +358,7 @@ export class TodaySuggestionConstraintProjector {
         linkedActivityCount: workout.linkedActivityCount,
       })),
       latestReadyAt,
-      coachStateEvidenceHash: coachState.athleteState?.evidenceHash ?? null,
+      coachState: coachingSemanticValue(coachState.athleteState),
       activeDecisionId: activeDecision?.id ?? null,
     };
     const requiredToolNames =
@@ -342,9 +380,9 @@ export class TodaySuggestionConstraintProjector {
       date,
       timezone,
       edition,
-      allowAi: args.allowAi,
+      allowAi,
       featureAllowed: featureAllowedForUser,
-      factHash: sha256Hex(stableJson(factProjection)),
+      factHash: sha256Hex(stableJson(coachingSemanticValue(factProjection))),
       aiState: aiCapability.state,
       constraintHash: sha256Hex(stableJson(constraintProjection)),
       continuityHash: sha256Hex(stableJson(continuityProjection)),
@@ -371,6 +409,8 @@ export class TodaySuggestionConstraintProjector {
         : null,
       todayWorkouts,
       tomorrowWorkouts,
+      matchingActivityId:
+        execution.workoutMatching?.[0]?.activityHashId ?? null,
       latestActivityId:
         latestActivity?.hashId ?? recentActivities[0]?.hashId ?? null,
       latestActivityAt:
@@ -394,6 +434,10 @@ export class TodaySuggestionConstraintProjector {
       weatherAttribution: weather.attribution,
       lightContext: {
         policyVersion: TODAY_SUGGESTION_POLICY_VERSION,
+        sharedFacts,
+        workoutMatching: execution.workoutMatching ?? [],
+        assessmentCoverage: coachState.assessmentCoverage ?? 'UNVERIFIED',
+        assessmentReadStatus: coachState.assessmentReadStatus ?? 'AVAILABLE',
         locale: args.locale,
         date,
         timezone,

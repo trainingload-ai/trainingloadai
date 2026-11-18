@@ -1,10 +1,10 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { describe, expect, it, jest } from '@jest/globals';
 import {
   importPostProcessPolicy,
   UserPostProcessWorkerService,
 } from '../user-post-process.worker';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { featureAccessSnapshot } from '@/access/feature-access.types';
 
 function featureAccess(allowed: boolean) {
@@ -19,7 +19,7 @@ function featureAccess(allowed: boolean) {
 }
 
 function createImportingJobs(prisma: unknown) {
-  return new ImportingJobService(new ImportingJobRepository(prisma as never));
+  return new ImportingJobService(importingJobRepository(prisma as never));
 }
 
 function userQueries(prisma: Record<string, unknown>) {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { stripAiPlanSeedParams } from "@/lib/ai-plan-seed-prompt";
+import { stripCoachSeedEntryParams } from "@/lib/coach-seed-entry";
 import {
   decideCoachSidSync,
   normalizeCoachSid,
@@ -18,26 +18,13 @@ import {
 
 const COACH_CHAT_PATH = "/ai-coach";
 
-function stripAiCoachEntryParams(next: URLSearchParams): void {
-  stripAiPlanSeedParams(next);
-  next.delete("branch");
-  next.delete("branchId");
-  next.delete("contextId");
-  next.delete("source");
-  next.delete("date");
-  next.delete("workoutId");
-  next.delete("openReason");
-  next.delete("caseId");
-  next.delete("view");
-}
-
 function replaceCoachChatUrl(
   router: { replace: (href: string, opts?: { scroll?: boolean }) => void },
   searchParams: URLSearchParams,
   nextSid: string,
 ) {
   const sp = new URLSearchParams(searchParams.toString());
-  stripAiCoachEntryParams(sp);
+  stripCoachSeedEntryParams(sp);
   if (nextSid) {
     sp.set("sid", nextSid);
   } else {

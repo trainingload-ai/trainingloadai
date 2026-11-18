@@ -496,11 +496,70 @@ export class PrismaAthleteMemoryStore implements AthleteMemoryStore {
     });
   }
 
+  /** Hash every eligible semantic version without loading private claims into the caller. */
+  async ambientFingerprint(userId: string, asOf: Date) {
+    const rows = await this.prisma.$queryRaw<Array<{ fingerprint: string }>>`
+      SELECT md5(COALESCE(string_agg(json_build_array(id, version, status, claim, value,
+        epistemic_status, confidence, event_start, event_end, valid_from, valid_until,
+        decay_profile, relevance_anchor_at, review_after)::text, '|' ORDER BY id), '')) AS fingerprint
+      FROM t_athlete_memory_fact WHERE user_id=${userId} AND status='ACTIVE'
+        AND decay_profile <> 'EPISODIC'
+        AND (valid_from IS NULL OR valid_from <= ${asOf})
+        AND (valid_until IS NULL OR valid_until >= ${asOf})
+        AND (decay_profile <> 'ACUTE_RECOVERY' OR relevance_anchor_at >= ${new Date(asOf.getTime() - 72 * 3_600_000)})`;
+    return rows[0]?.fingerprint ?? '';
+  }
+
+  /** Extraction state is a limitation, never a substitute for a persisted fact. */
+  contextInputStatus(userId: string) {
+    return this.prisma.aiCoachMemoryExtractionJob.findMany({
+      where: {
+        userId,
+        status: { in: ['PENDING', 'RUNNING', 'FAILED', 'DEAD'] },
+        createdAt: { gte: new Date(Date.now() - 7 * 86_400_000) },
+      },
+      select: { id: true, status: true },
+      orderBy: { id: 'asc' },
+      take: 201,
+    });
+  }
+
   async findFacts(input: StoreSearchInput): Promise<MemoryFactRecord[]> {
     return this.prisma.athleteMemoryFact.findMany({
       where: {
         userId: input.userId,
         status: { in: input.statuses as AthleteMemoryStatus[] },
+        ...(input.ambientAsOf
+          ? {
+              decayProfile: { not: 'EPISODIC' as const },
+              AND: [
+                {
+                  OR: [
+                    { validFrom: null },
+                    { validFrom: { lte: input.ambientAsOf } },
+                  ],
+                },
+                {
+                  OR: [
+                    { validUntil: null },
+                    { validUntil: { gte: input.ambientAsOf } },
+                  ],
+                },
+                {
+                  OR: [
+                    { decayProfile: { not: 'ACUTE_RECOVERY' as const } },
+                    {
+                      relevanceAnchorAt: {
+                        gte: new Date(
+                          input.ambientAsOf.getTime() - 72 * 3_600_000,
+                        ),
+                      },
+                    },
+                  ],
+                },
+              ],
+            }
+          : {}),
         ...(input.categories?.length
           ? { category: { in: input.categories } }
           : {}),

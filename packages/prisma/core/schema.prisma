@@ -706,6 +706,7 @@ enum PlanWorkoutActivityLinkSource {
   MANUAL
   AUTO
   AI
+  AUTO_MATCH
 
   @@map("enum_plan_workout_activity_link_source")
 }
@@ -1236,6 +1237,7 @@ model T_user {
   aiUsageEvents                     AiUsageEvent[]
   aiOperations                      AiOperation[]
   aiTodaySuggestions                AiTodaySuggestion[]
+  todaySuggestionGeneration         TodaySuggestionGeneration?
   todaySuggestionEngagementState    TodaySuggestionEngagementState?
   aiPlanExecutionAdvices            AiPlanExecutionAdvice[]
   coachActions                      CoachAction[]
@@ -1266,6 +1268,7 @@ model T_user {
   externalProviderConnections       ExternalProviderConnection[]
   externalOAuthStates               ExternalOAuthState[]
   planWorkouts                      PlanWorkout[]
+  workoutMatchStates                PlanActivityMatchState[]
   planWorkoutExternalMappings       PlanWorkoutExternalMapping[]
   accountDeletionJob                AccountDeletionJob?
   userDataExportJobs                UserDataExportJob[]
@@ -1280,6 +1283,8 @@ model T_user {
   @@index([registrationMethod, createdAt])
   @@index([acquisitionSource, createdAt])
   @@map("t_user")
+  todaySuggestionContextReferences TodaySuggestionContextReference[]
+
 }
 
 /// Durable singleton for self-host ownership and repeatable local reinitialization.
@@ -2359,6 +2364,7 @@ model CoachRun {
   activeAttemptId    String?           @map("active_attempt_id")
   revision           Int               @default(0)
   pendingInteraction Json?             @map("pending_interaction")
+  factScope          Json?             @map("fact_scope")
   executionMs        Int               @default(0) @map("execution_ms")
   startedAt          DateTime          @default(now()) @map("started_at")
   endedAt            DateTime?         @map("ended_at")
@@ -2367,6 +2373,7 @@ model CoachRun {
   @@unique([userId, taskKind, dedupeKey])
   @@index([userId, sessionId])
   @@index([userId, taskKind, startedAt(sort: Desc)])
+  @@index([userId, status])
   @@map("t_coach_run")
 }
 
@@ -2468,6 +2475,12 @@ model ImportSourceObject {
   rawStorageKey String? @map("raw_storage_key")
   rawChecksum   String? @map("raw_checksum")
   rawPayload    Json?   @map("raw_payload")
+
+  /// Latest accepted discovery revision, separate from the downloaded file hash.
+  importRevision String? @map("import_revision")
+  completedImportRevision String? @map("completed_import_revision")
+  importRevokedAt DateTime? @map("import_revoked_at")
+  importRequest  Json?   @map("import_request")
   metadata      Json?   @map("metadata")
 
   /// 查询层使用的活动时间线标题；从远端摘要标准化而来，不代表正式 Activity。
@@ -2605,6 +2618,8 @@ model ImportItemJob {
   sourceKind ImportSourceKind    @map("source_kind")
   position   Int                 @default(0) @map("position")
   status     ImportItemJobStatus @default(QUEUED) @map("status")
+
+  sourceRevision String? @map("source_revision")
 
   sourceRef        Json?   @map("source_ref")
   sourceUid        String  @map("source_uid")
@@ -3470,6 +3485,7 @@ model Activity {
   userId              String                     @map("user_id")
   user                T_user                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   planWorkoutLinks    PlanWorkoutActivityLink[]
+  workoutMatchState   PlanActivityMatchState?
   strengthExercises   ActivityStrengthExercise[]
   createdByBatchJobId String?                    @map("created_by_batch_job_id")
   createdByBatchJob   ImportBatchJob?            @relation("ActivityCreatedByBatch", fields: [createdByBatchJobId], references: [id], onDelete: SetNull)
@@ -4483,6 +4499,36 @@ model AiTodaySuggestion {
   @@map("t_ai_today_suggestion")
 }
 
+/// Opaque, user-owned references retain the calendar timezone across devices.
+model TodaySuggestionContextReference {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  user T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timezone String
+
+  @@unique([userId, timezone])
+  @@map("t_today_suggestion_context_reference")
+}
+
+/// User-level generation coordination; content remains in its locale/date cache slot.
+model TodaySuggestionGeneration {
+  userId String @id @map("user_id")
+  user T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contextToken String @unique @default(uuid()) @map("context_token")
+  token String?
+  fence Int @default(0)
+  locale String?
+  date String?
+  inputHash String? @map("input_hash")
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz(3)
+  retryAfter DateTime? @map("retry_after") @db.Timestamptz(3)
+  failures Int @default(0)
+  lastErrorCode String? @map("last_error_code")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("t_today_suggestion_generation")
+}
+
 /// Minimal functional state for suggestion continuity. This is not an analytics event log.
 model TodaySuggestionEngagementState {
   userId String @id @map("user_id")
@@ -4722,11 +4768,41 @@ model UserDailyHealthMetric {
   sourceBreakdown  Json?               @map("source_breakdown")
   computedAt       DateTime            @default(now()) @map("computed_at")
 
-  sources ExternalHealthSample[]
+  semanticVersion Int     @default(0) @map("semantic_version")
+  semanticHash    String? @map("semantic_hash") @db.VarChar(64)
+
+  sources   ExternalHealthSample[]
+  revisions HealthDailyFactRevision[]
 
   @@unique([userId, date, metricType])
   @@index([userId, metricType, date])
   @@map("t_user_daily_health_metric")
+}
+
+/// A published revision of a daily fact. Its owner and date come from the stable daily metric row.
+model HealthDailyFactRevision {
+  dailyMetricId String                @map("daily_metric_id")
+  dailyMetric   UserDailyHealthMetric @relation(fields: [dailyMetricId], references: [id], onDelete: Cascade)
+  version       Int
+  status        HealthDailyFactStatus
+  semanticHash  String                @map("semantic_hash") @db.VarChar(64)
+  publishedAt   DateTime              @default(now()) @map("published_at")
+
+  value            Float?
+  unit             String?
+  timezone         String?
+  selectedProvider HealthDataProvider? @map("selected_provider")
+  evidence         Json?
+
+  @@id([dailyMetricId, version])
+  @@map("t_health_daily_fact_revision")
+}
+
+enum HealthDailyFactStatus {
+  AVAILABLE
+  WITHDRAWN
+
+  @@map("enum_health_daily_fact_status")
 }
 
 /// Versioned, provider-neutral manifest produced from one raw health source object.
@@ -5948,11 +6024,26 @@ model PlanWorkoutStep {
   @@map("t_plan_workout_step")
 }
 
+model PlanActivityMatchState {
+  activityId Int @id @map("activity_id")
+  userId String @map("user_id")
+  outcome String
+  reason String
+  candidateWorkoutIds String[] @default([]) @map("candidate_workout_ids")
+  suppressedAt DateTime? @map("suppressed_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, outcome, updatedAt])
+  @@map("t_plan_activity_match_state")
+}
+
 model PlanWorkoutActivityLink {
   id String @id @default(cuid())
 
-  planId String @map("plan_id")
-  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String? @map("plan_id")
+  plan   Plan?   @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   planWorkoutId String      @map("plan_workout_id")
   planWorkout   PlanWorkout @relation(fields: [planWorkoutId], references: [id], onDelete: Cascade)

@@ -60,6 +60,8 @@ import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { getActivitySportVisual } from "@shared/activity-visual";
 import { cn } from "@/lib/utils";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
+import { ActivityDetailPlanLinkControl } from "@/components/plan/activity-plan-link-control";
+import { getActivityDetailState } from "@shared/activity-detail";
 
 interface ActivityHeaderProps {
   activity: Activity;
@@ -347,7 +349,13 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
             <span className="truncate">{startDate}</span>
           </span>
         </div>
-        <ActivitySessionRpeControl activity={activity} />
+        <div className="flex flex-wrap items-center gap-2">
+          {activity.hashId &&
+          getActivityDetailState(activity).canShowEnhancedDetail ? (
+            <ActivityDetailPlanLinkControl hashId={activity.hashId} />
+          ) : null}
+          <ActivitySessionRpeControl activity={activity} />
+        </div>
       </div>
 
       <AlertDialog

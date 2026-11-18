@@ -10,7 +10,10 @@ import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock
 import { ImportingJobService } from '@/importing/importing-job.service';
 import { AthleteClockService } from '@/timezone/athlete-clock.service';
 import { HealthDataRepository } from './persistence/health-data.repository';
-import { healthDataProviderPriority } from './health-data-provider-policy.port';
+import {
+  HEALTH_FACT_PROVIDERS,
+  healthDataProviderPriority,
+} from './health-data-provider-policy.port';
 import {
   healthObservationCandidate,
   type HealthObservationCandidate,
@@ -81,28 +84,24 @@ export class HealthObservationService {
       );
       if (
         args.sourceObjectId &&
-        !(await this.imports
-          .sourceObjects(tx)
-          .findFirst({
-            where: { id: args.sourceObjectId, userId: args.userId },
-            select: { id: true },
-          }))
+        !(await this.imports.sourceObjects(tx).findFirst({
+          where: { id: args.sourceObjectId, userId: args.userId },
+          select: { id: true },
+        }))
       )
         throw new ConflictException('HEALTH_OBSERVATION_SOURCE_OWNER_MISMATCH');
       if (
         args.snapshotId &&
-        !(await this.health
-          .snapshots(tx)
-          .findFirst({
-            where: {
-              id: args.snapshotId,
-              userId: args.userId,
-              ...(args.sourceObjectId
-                ? { sourceObjectId: args.sourceObjectId }
-                : {}),
-            },
-            select: { id: true },
-          }))
+        !(await this.health.snapshots(tx).findFirst({
+          where: {
+            id: args.snapshotId,
+            userId: args.userId,
+            ...(args.sourceObjectId
+              ? { sourceObjectId: args.sourceObjectId }
+              : {}),
+          },
+          select: { id: true },
+        }))
       )
         throw new ConflictException(
           'HEALTH_OBSERVATION_SNAPSHOT_OWNER_MISMATCH',
@@ -114,13 +113,11 @@ export class HealthObservationService {
         kind: args.kind,
         sourceGroupKey,
       };
-      const latest = await this.health
-        .observations(tx)
-        .findFirst({
-          where: scope,
-          orderBy: { sourceUpdatedAt: 'desc' },
-          select: { sourceUpdatedAt: true },
-        });
+      const latest = await this.health.observations(tx).findFirst({
+        where: scope,
+        orderBy: { sourceUpdatedAt: 'desc' },
+        select: { sourceUpdatedAt: true },
+      });
       if (latest && latest.sourceUpdatedAt > args.sourceUpdatedAt)
         return { upsertedCount: 0, deletedCount: 0, ignored: true };
       const ids: string[] = [];
@@ -167,43 +164,39 @@ export class HealthObservationService {
           sourceUpdatedAt: args.sourceUpdatedAt,
           deletedAt: null,
         };
-        const row = await this.health
-          .observations(tx)
-          .upsert({
-            where: {
-              userId_provider_sourceNamespace_kind_externalId: {
-                userId: args.userId,
-                provider: args.provider,
-                sourceNamespace: args.sourceNamespace,
-                kind: args.kind,
-                externalId: candidate.externalId,
-              },
-            },
-            create: {
+        const row = await this.health.observations(tx).upsert({
+          where: {
+            userId_provider_sourceNamespace_kind_externalId: {
               userId: args.userId,
               provider: args.provider,
               sourceNamespace: args.sourceNamespace,
+              kind: args.kind,
               externalId: candidate.externalId,
-              ...data,
             },
-            update: data,
-            select: { id: true },
-          });
+          },
+          create: {
+            userId: args.userId,
+            provider: args.provider,
+            sourceNamespace: args.sourceNamespace,
+            externalId: candidate.externalId,
+            ...data,
+          },
+          update: data,
+          select: { id: true },
+        });
         ids.push(row.id);
       }
-      const retired = await this.health
-        .observations(tx)
-        .updateMany({
-          where: {
-            ...scope,
-            deletedAt: null,
-            ...(ids.length ? { id: { notIn: ids } } : {}),
-          },
-          data: {
-            deletedAt: new Date(),
-            sourceUpdatedAt: args.sourceUpdatedAt,
-          },
-        });
+      const retired = await this.health.observations(tx).updateMany({
+        where: {
+          ...scope,
+          deletedAt: null,
+          ...(ids.length ? { id: { notIn: ids } } : {}),
+        },
+        data: {
+          deletedAt: new Date(),
+          sourceUpdatedAt: args.sourceUpdatedAt,
+        },
+      });
       return {
         upsertedCount: ids.length,
         deletedCount: retired.count,
@@ -212,12 +205,10 @@ export class HealthObservationService {
     });
   }
   async tombstoneSource(userId: string, sourceObjectId: string) {
-    return this.health
-      .observations()
-      .updateMany({
-        where: { userId, sourceObjectId, deletedAt: null },
-        data: { deletedAt: new Date(), sourceUpdatedAt: new Date() },
-      });
+    return this.health.observations().updateMany({
+      where: { userId, sourceObjectId, deletedAt: null },
+      data: { deletedAt: new Date(), sourceUpdatedAt: new Date() },
+    });
   }
   async tombstoneExternalIds(args: {
     userId: string;
@@ -227,18 +218,16 @@ export class HealthObservationService {
   }) {
     if (args.externalIds.length > 1000)
       throw new BadRequestException('HEALTH_OBSERVATION_LIMIT');
-    return this.health
-      .observations()
-      .updateMany({
-        where: {
-          userId: args.userId,
-          provider: args.provider,
-          sourceNamespace: args.sourceNamespace,
-          externalId: { in: args.externalIds },
-          deletedAt: null,
-        },
-        data: { deletedAt: new Date(), sourceUpdatedAt: new Date() },
-      });
+    return this.health.observations().updateMany({
+      where: {
+        userId: args.userId,
+        provider: args.provider,
+        sourceNamespace: args.sourceNamespace,
+        externalId: { in: args.externalIds },
+        deletedAt: null,
+      },
+      data: { deletedAt: new Date(), sourceUpdatedAt: new Date() },
+    });
   }
   async overview(
     userId: string,
@@ -258,114 +247,55 @@ export class HealthObservationService {
       throw new BadRequestException('HEALTH_DATE_INVALID');
     const start = new Date(end);
     start.setUTCDate(start.getUTCDate() - days + 1);
-    const rows = await this.health
-      .observations()
-      .findMany({
-        where: { userId, localDate: { gte: start, lte: end }, deletedAt: null },
-        orderBy: [
-          { localDate: 'desc' },
-          { sourcePriority: 'desc' },
-          { sourceUpdatedAt: 'desc' },
-          { id: 'asc' },
+    const rows = await this.health.observations().findMany({
+      where: {
+        userId,
+        localDate: { gte: start, lte: end },
+        provider: { in: [...HEALTH_FACT_PROVIDERS] },
+        kind: 'BLOOD_PRESSURE',
+        scope: 'MEASUREMENT',
+        deletedAt: null,
+        OR: [
+          { snapshotId: null },
+          { snapshot: { manifest: { path: ['status'], equals: 'READY' } } },
         ],
-        take: 1001,
-      });
-    const rawReports = await this.health
-      .samples()
-      .findMany({
-        where: {
-          userId,
-          localDate: { gte: start, lte: end },
-          deletedAt: null,
-          projectToDaily: false,
-          metricType: 'HYDRATION_ML',
-          metadata: { path: ['basis'], equals: 'UNSPECIFIED_REPORT' },
-        },
-        orderBy: [
-          { localDate: 'desc' },
-          { sourceUpdatedAt: 'desc' },
-          { id: 'asc' },
-        ],
-        take: 501,
-      });
-    const reports = rawReports
-      .slice(0, 500)
-      .filter(
-        (row) =>
-          row.value != null &&
-          Number.isFinite(row.value) &&
-          row.unit?.toLowerCase() === 'ml',
-      )
-      .map((row) => ({
-        id: row.id,
-        type: row.metricType,
-        localDate: dayKey(row.localDate),
-        value: row.value!,
-        unit: 'mL',
-        provider: row.provider,
-        sourceName: row.sourceName,
-        basis: 'UNSPECIFIED_REPORT' as const,
-      }));
-    const winners = new Map<
-      string,
-      { source: string; priority: number; time: number }
-    >();
-    const key = (row: (typeof rows)[number]) =>
-      `${dayKey(row.localDate)}:${row.kind}:${row.categorySystem ?? ''}`;
-    for (const row of rows.slice(0, 1000)) {
-      const k = key(row),
-        priority =
-          row.sourcePriority ?? healthDataProviderPriority(row.provider),
-        time = row.sourceUpdatedAt.getTime(),
-        old = winners.get(k);
-      if (
-        !old ||
-        priority > old.priority ||
-        (priority === old.priority &&
-          (time > old.time ||
-            (time === old.time &&
-              (row.provider + ':' + row.sourceNamespace).localeCompare(
-                old.source,
-              ) < 0)))
-      )
-        winners.set(k, {
-          source: row.provider + ':' + row.sourceNamespace,
-          priority,
-          time,
-        });
-    }
-    const items = rows
-      .slice(0, 1000)
-      .map((row) => ({
-        id: row.id,
-        groupId: row.sourceGroupKey,
-        kind: row.kind,
-        scope: row.scope,
-        localDate: dayKey(row.localDate),
-        timezone: row.timezone,
-        offsetSeconds: row.offsetSeconds,
-        measuredAt: row.measuredAt?.toISOString() ?? null,
-        intervalStart: row.intervalStart?.toISOString() ?? null,
-        intervalEnd: row.intervalEnd?.toISOString() ?? null,
-        systolicMmHg: row.systolicMmHg,
-        diastolicMmHg: row.diastolicMmHg,
-        pulseBpm: row.pulseBpm,
-        measurementOrigin: row.measurementOrigin,
-        categorySystem: row.categorySystem,
-        categoryCode: row.categoryCode,
-        provider: row.provider,
-        sourceName: row.sourceName,
-        selected:
-          winners.get(key(row))?.source ===
-          row.provider + ':' + row.sourceNamespace,
-        sourceUpdatedAt: row.sourceUpdatedAt.toISOString(),
-      }));
+      },
+      orderBy: [
+        { localDate: 'desc' },
+        { sourcePriority: 'desc' },
+        { sourceUpdatedAt: 'desc' },
+        { id: 'asc' },
+      ],
+      take: 1001,
+    });
+    const items = rows.slice(0, 1000).map((row) => ({
+      id: row.id,
+      groupId: row.sourceGroupKey,
+      kind: row.kind,
+      scope: row.scope,
+      localDate: dayKey(row.localDate),
+      timezone: row.timezone,
+      offsetSeconds: row.offsetSeconds,
+      measuredAt: row.measuredAt?.toISOString() ?? null,
+      intervalStart: row.intervalStart?.toISOString() ?? null,
+      intervalEnd: row.intervalEnd?.toISOString() ?? null,
+      systolicMmHg: row.systolicMmHg,
+      diastolicMmHg: row.diastolicMmHg,
+      pulseBpm: row.pulseBpm,
+      measurementOrigin: row.measurementOrigin,
+      categorySystem: row.categorySystem,
+      categoryCode: row.categoryCode,
+      provider: row.provider,
+      sourceName: row.sourceName,
+      selected: true,
+      sourceUpdatedAt: row.sourceUpdatedAt.toISOString(),
+    }));
     return {
       startDate: dayKey(start),
       endDate: dayKey(end),
       items,
-      reports,
-      truncated: rows.length > 1000 || rawReports.length > 500,
+      reports: [],
+      truncated: rows.length > 1000,
     };
   }
 }

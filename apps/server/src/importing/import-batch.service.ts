@@ -1,4 +1,4 @@
-import { importJsonValue } from './import-item-job.types';
+import { ImportSourceObjectType, importJsonValue } from './import-item-job.types';
 import type { IntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { createHash } from 'crypto';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -15,10 +15,12 @@ import {
   ImportSourceKind,
   Prisma,
   ThirdPartyProvider,
+  type ImportBatchJob,
 } from '@prisma/client';
 import type { IntervalsIcuActivityListItem } from '@/integrations/intervals-icu/intervals-icu.client';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
 import { ExternalActivitySourceRouter } from './external-activity-source-router.service';
+import { webhookContentChecksum } from '@/integrations/external-provider/external-provider-webhook-inbox.service';
 
 const ACTIVE_IMPORT_ITEM_STATUSES = [
   ImportItemJobStatus.QUEUED,
@@ -127,9 +129,9 @@ export type ExternalArchiveImportFile = {
   size: number;
   archivePath: string;
   objectType:
-    | 'third_party_activity_file'
-    | 'third_party_health_file'
-    | 'third_party_mixed_fit';
+    | typeof ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE
+    | typeof ImportSourceObjectType.THIRD_PARTY_HEALTH_FILE
+    | typeof ImportSourceObjectType.THIRD_PARTY_MIXED_FIT;
   metadata?: Record<string, unknown>;
 };
 
@@ -139,11 +141,24 @@ export type ExternalProviderImportCandidate = {
   accountRef?: string | null;
   objectType: string;
   rawChecksum?: string | null;
+  /** Producer-owned stable input version; excludes leases and scheduling metadata. */
+  inputRevision?: string;
   rawPayload?: unknown;
   metadata?: unknown;
   sourceRef?: unknown;
   timelineTitle?: string | null;
   timelineStartTime?: Date | null;
+};
+
+type ExternalProviderImportBatchArgs = {
+  userId: string;
+  sourceKind: ImportSourceKind;
+  provider: ThirdPartyProvider;
+  candidates: ExternalProviderImportCandidate[];
+  totalDiscovered?: number;
+  requestContext: Record<string, unknown>;
+  skipCompletedUnchanged?: boolean;
+  reuseRunningBatch?: boolean;
 };
 
 function toSafeJson<T>(value: T) {
@@ -165,21 +180,6 @@ function redactImportRequestContext(value: unknown): unknown {
       .filter(([key]) => !/(?:ciphertext|secret|token)$/i.test(key))
       .map(([key, entry]) => [key, redactImportRequestContext(entry)]),
   );
-}
-
-function summarizeBatchStatus(args: {
-  totalCount: number;
-  successCount: number;
-  failedCount: number;
-  skippedCount: number;
-}): ImportBatchJobStatus {
-  // item job 是异步完成的，批次状态由三类终态计数汇总得到。
-  const completedCount =
-    args.successCount + args.failedCount + args.skippedCount;
-  if (completedCount < args.totalCount) return 'RUNNING';
-  if (args.failedCount > 0 && args.successCount > 0) return 'PARTIAL_FAILED';
-  if (args.failedCount > 0 && args.successCount === 0) return 'FAILED';
-  return 'COMPLETED';
 }
 
 @Injectable()
@@ -461,7 +461,7 @@ export class ImportBatchService {
             userId: args.userId,
             sourceKind: $Enums.ImportSourceKind.FILE,
             sourceUid,
-            objectType: 'activity_file',
+            objectType: ImportSourceObjectType.ACTIVITY_FILE,
             fileName: file.originalname,
             fileKey: uploaded.fileKey,
             rawStorageKey: uploaded.fileKey,
@@ -719,17 +719,13 @@ export class ImportBatchService {
    * 登记部署适配器已经标准化的外部活动候选。
    * Core 只处理幂等、批次和 source object 生命周期，不包含 provider 字段解析。
    */
-  async createExternalProviderImportBatch(args: {
-    userId: string;
-    sourceKind: ImportSourceKind;
-    provider: ThirdPartyProvider;
-    candidates: ExternalProviderImportCandidate[];
-    totalDiscovered?: number;
-    requestContext: Record<string, unknown>;
-    skipCompletedUnchanged?: boolean;
-    reuseRunningBatch?: boolean;
-  }) {
+  async createExternalProviderImportBatch(
+    args: ExternalProviderImportBatchArgs,
+  ) {
     await this.assertUserCanImport(args.userId);
+    if (['STRAVA', 'GARMIN', 'GARMIN_PERSONAL_API'].includes(args.sourceKind)) {
+      return this.createRevisionedProviderImportBatch(args);
+    }
     const totalDiscovered = args.totalDiscovered ?? args.candidates.length;
     const discoveryState = await this.loadImportDiscoveryState({
       userId: args.userId,
@@ -902,11 +898,203 @@ export class ImportBatchService {
   /**
    * 将 Intervals.icu 活动列表项登记为 source object，并创建导入任务。
    */
+  /** Keep one active item per source; its terminal transition hands off newer input. */
+  private createRevisionedProviderImportBatch(
+    args: ExternalProviderImportBatchArgs,
+  ) {
+    return this.importJobs.withSourceLocks(
+      {
+        ...args,
+        sourceUids: args.candidates.map((candidate) => candidate.sourceUid),
+      },
+      async (tx) => {
+        let batch: ImportBatchJob | null = null;
+        let runningBatch: typeof batch = null;
+        let queuedCount = 0;
+        const totalDiscovered = args.totalDiscovered ?? args.candidates.length;
+        for (const candidate of args.candidates) {
+          const identity = {
+            userId: args.userId,
+            sourceKind: args.sourceKind,
+            sourceUid: candidate.sourceUid,
+          };
+          const previous = await this.importJobs.sourceObjects(tx).findUnique({
+            where: { import_source_object_identity_unique: identity },
+          });
+          const revision =
+            candidate.inputRevision ||
+            webhookContentChecksum({
+              rawChecksum: candidate.rawChecksum ?? null,
+              rawPayload: toSafeJson(candidate.rawPayload ?? null),
+              sourceRef: toSafeJson(candidate.sourceRef ?? null),
+            });
+          const sourceRef = toSafeJson(
+            candidate.sourceRef ?? { externalId: candidate.externalId },
+          ) as Prisma.InputJsonValue;
+          const values = {
+            provider: args.provider,
+            accountRef: candidate.accountRef ?? undefined,
+            externalId: candidate.externalId,
+            objectType: candidate.objectType,
+            rawChecksum: candidate.rawChecksum ?? undefined,
+            ...(candidate.sourceRef &&
+            typeof candidate.sourceRef === 'object' &&
+            'fileKey' in candidate.sourceRef &&
+            typeof candidate.sourceRef.fileKey === 'string'
+              ? {
+                  fileKey: candidate.sourceRef.fileKey,
+                  rawStorageKey: candidate.sourceRef.fileKey,
+                  ...('fileName' in candidate.sourceRef &&
+                  typeof candidate.sourceRef.fileName === 'string'
+                    ? { fileName: candidate.sourceRef.fileName }
+                    : {}),
+                }
+              : {}),
+            rawPayload: toSafeJson(
+              candidate.rawPayload ?? null,
+            ) as Prisma.InputJsonValue,
+            metadata: toSafeJson(
+              candidate.metadata ?? {},
+            ) as Prisma.InputJsonValue,
+            timelineTitle: candidate.timelineTitle ?? undefined,
+            timelineStartTime: candidate.timelineStartTime ?? undefined,
+            importRevision: revision,
+            // An acknowledgement covers only the uninterrupted desired revision.
+            ...(previous?.importRevision !== revision
+              ? { completedImportRevision: null }
+              : {}),
+            importRevokedAt: null,
+            importRequest: sourceRef,
+            ...(args.provider === 'intervals_icu' &&
+            previous?.importRevision !== revision
+              ? { fileKey: null, rawStorageKey: null, fileName: null }
+              : {}),
+            discoveredAt: new Date(),
+            sourceUpdatedAt: new Date(),
+          };
+          const source = await this.importJobs.sourceObjects(tx).upsert({
+            where: { import_source_object_identity_unique: identity },
+            create: { ...identity, ...values },
+            update: values,
+          });
+          const running = await this.importJobs.itemJobs(tx).findFirst({
+            where: {
+              userId: args.userId,
+              sourceObjectId: source.id,
+              status: {
+                in: [...ACTIVE_IMPORT_ITEM_STATUSES, 'DEDUPING', 'FAILED'],
+              },
+            },
+            include: { batchJob: true },
+            orderBy: { createdAt: 'desc' },
+          });
+          let retired = false;
+          if (
+            running?.sourceRevision &&
+            (running.startedAt || running.status === 'FAILED') &&
+            previous?.importRevision !== revision &&
+            running.sourceUid === source.sourceUid &&
+            ['QUEUED', 'FAILED'].includes(running.status)
+          ) {
+            const result = await this.importJobs.itemJobs(tx).updateMany({
+              where: {
+                id: running.id,
+                status: { in: ['QUEUED', 'FAILED'] },
+                lockToken: null,
+              },
+              data: {
+                status: 'SKIPPED',
+                outcome: 'SUPERSEDED',
+                completedAt: new Date(),
+              },
+            });
+            retired = result.count === 1;
+            if (retired)
+              await this.importJobs.refreshBatchProgress(
+                running.batchJobId,
+                tx,
+              );
+          }
+          if (running && !retired) {
+            runningBatch ??= running.batchJob;
+            if (
+              previous?.importRevision !== revision &&
+              running.sourceUid === source.sourceUid &&
+              ['QUEUED', 'FAILED'].includes(running.status)
+            ) {
+              await this.importJobs.itemJobs(tx).updateMany({
+                where: {
+                  id: running.id,
+                  status: { in: ['QUEUED', 'FAILED'] },
+                  lockToken: null,
+                },
+                data: {
+                  ...(running.sourceUid === source.sourceUid
+                    ? { sourceRevision: revision, sourceRef }
+                    : {}),
+                  status: 'QUEUED',
+                  availableAt: new Date(),
+                  attempts: 0,
+                  lastError: null,
+                  lastErrorCode: null,
+                },
+              });
+            }
+            continue;
+          }
+          if (
+            args.skipCompletedUnchanged !== false &&
+            !previous?.importRevokedAt &&
+            previous?.importRevision === revision &&
+            previous?.completedImportRevision === revision
+          )
+            continue;
+          batch ??= await this.importJobs.batchJobs(tx).create({
+            data: {
+              userId: args.userId,
+              sourceKind: args.sourceKind,
+              status: 'QUEUED',
+              totalCount: args.candidates.length,
+              requestContext: toSafeJson(
+                args.requestContext,
+              ) as Prisma.InputJsonValue,
+            },
+          });
+          await this.importJobs.itemJobs(tx).create({
+            data: {
+              ...identity,
+              batchJobId: batch.id,
+              sourceObjectId: source.id,
+              sourceRevision: revision,
+              position: queuedCount++,
+              status: 'QUEUED',
+              sourceRef,
+            },
+          });
+        }
+        if (batch && queuedCount !== args.candidates.length) {
+          batch = await this.importJobs.batchJobs(tx).update({
+            where: { id: batch.id },
+            data: { totalCount: queuedCount },
+          });
+        }
+        return {
+          batch: batch ?? runningBatch,
+          totalDiscovered,
+          queuedCount,
+          skippedCount: totalDiscovered - queuedCount,
+          reused: !batch && Boolean(runningBatch),
+        };
+      },
+    );
+  }
+
   async createIntervalsIcuImportBatch(args: {
     userId: string;
     connectionId: string;
     authorization?: IntervalsAuthorization;
     activities: IntervalsIcuActivityListItem[];
+    revisionHint?: string;
     reason?: ThirdPartyImportReason;
     discoveryWindow?: { start: Date; end: Date };
   }) {
@@ -955,7 +1143,7 @@ export class ImportBatchService {
             sourceUid: item.sourceUid,
             accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
-            objectType: 'third_party_activity_file',
+            objectType: ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE,
             // The discovery-list checksum is not a hash of the downloaded file.
             // Keep it in metadata and fill rawChecksum only after file resolution.
             rawChecksum: null,
@@ -988,7 +1176,7 @@ export class ImportBatchService {
             provider: ThirdPartyProvider.intervals_icu,
             accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
-            objectType: 'third_party_activity_file',
+            objectType: ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE,
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
@@ -1024,6 +1212,12 @@ export class ImportBatchService {
             activity: item.activity,
             reason: args.reason ?? 'manual',
             discoveryWindow: args.discoveryWindow,
+            refreshResolved:
+              Boolean(args.revisionHint) ||
+              (
+                discoveryState.sourceObjectsByUid.get(item.sourceUid)
+                  ?.metadata as Record<string, unknown> | null
+              )?.listChecksum !== item.checksum,
           }),
         );
       },
@@ -1049,141 +1243,82 @@ export class ImportBatchService {
     const alreadyResolvedCount = discovered.filter(
       (item) => routeResults.get(item.sourceUid)?.kind === 'ALREADY_RESOLVED',
     ).length;
-    const queuedInputs: typeof discovered = [];
-
-    // 只有 IMPORT_VIA_DISCOVERY_PROVIDER 才能进入正式导入队列。ROUTING/BLOCKED
-    // 的来源对象不会创建 item job，因此不会物化 Activity 或进入后处理计算。
-    for (const item of directlyImportable) {
-      const existingObject = discoveryState.sourceObjectsByUid.get(
-        item.sourceUid,
-      );
-      const existingMetadata = (existingObject?.metadata ?? null) as Record<
-        string,
-        unknown
-      > | null;
-      const existingListChecksum =
-        typeof existingMetadata?.listChecksum === 'string'
-          ? existingMetadata.listChecksum
-          : existingObject?.rawChecksum;
-      if (existingListChecksum === item.checksum) {
-        if (
-          discoveryState.completedSourceUids.has(item.sourceUid) &&
-          discoveryState.activeSourceUids.has(item.sourceUid)
-        )
-          continue;
-      }
-      if (!discoveryState.runningSourceUids.has(item.sourceUid)) {
-        queuedInputs.push(item);
-      }
-    }
-
-    if (queuedInputs.length === 0) {
-      return {
-        batch: null,
-        totalDiscovered: discovered.length,
-        queuedCount: 0,
-        skippedCount: discovered.length,
-        directlyQueued: 0,
-        routedToOrigin: routedToOriginCount,
-        // 保留既有返回字段名以兼容调用方；它实际统计 BLOCKED 来源，没有创建 Mirror 记录。
-        mirrorsCreated: blockedSourceCount,
-        alreadyResolved: alreadyResolvedCount,
-        duplicateOrRunning: directlyImportable.length,
-      };
-    }
-
-    // 创建导入批次
-    const batch = await this.importJobs.batchJobs().create({
-      data: {
-        userId: args.userId,
-        sourceKind: ImportSourceKind.INTERVALS_ICU,
-        status: ImportBatchJobStatus.QUEUED,
-        totalCount: queuedInputs.length,
-        requestContext: {
-          source: 'intervals_icu',
-          reason: args.reason ?? 'manual',
-          connectionId: args.connectionId,
-          totalDiscovered: discovered.length,
-        } as Prisma.InputJsonValue,
-      },
-    });
-
-    // 登记 source object 并创建导入任务
-    await forEachWithConcurrency(
-      queuedInputs,
-      IMPORT_SOURCE_REGISTRATION_CONCURRENCY,
-      async (item, position) => {
-        const sourceObjectId = sourceObjectIds.get(item.sourceUid);
-        if (!sourceObjectId) {
-          throw new Error(
-            `Intervals.icu source object missing: ${item.sourceUid}`,
-          );
-        }
-
-        const importItem = await this.importJobs.itemJobs().create({
-          data: {
-            batchJobId: batch.id,
-            userId: args.userId,
-            sourceObjectId,
-            sourceKind: ImportSourceKind.INTERVALS_ICU,
-            sourceUid: item.sourceUid,
-            position,
-            status: ImportItemJobStatus.QUEUED,
-            sourceRef: {
-              externalId: item.externalId,
-              connectionId: args.connectionId,
-              ...(args.authorization
-                ? { authorization: importJsonValue(args.authorization) }
-                : {}),
-            } as Prisma.InputJsonValue,
-          },
-        });
-        this.logImportPipelineEvent({
-          batchJobId: batch.id,
-          itemJobId: importItem.id,
-          userId: args.userId,
-          stage: ImportPipelineStage.SOURCE_REGISTERED,
-          message: `已登记 Intervals.icu 活动源对象：${item.externalId}`,
-          data: {
-            externalId: item.externalId,
-            sourceUid: item.sourceUid,
-          },
-        });
-      },
-    );
-    // 记录导入批次创建事件
-    this.logImportPipelineEvent({
-      batchJobId: batch.id,
+    const result = await this.createRevisionedProviderImportBatch({
       userId: args.userId,
-      stage: ImportPipelineStage.BATCH_CREATED,
-      message: `已创建 Intervals.icu 导入批次，待处理 ${queuedInputs.length} 个活动`,
-      data: {
+      sourceKind: ImportSourceKind.INTERVALS_ICU,
+      provider: ThirdPartyProvider.intervals_icu,
+      candidates: directlyImportable
+        .filter((item) => {
+          const previous = discoveryState.sourceObjectsByUid.get(
+            item.sourceUid,
+          );
+          const previousChecksum =
+            (previous?.metadata as Record<string, unknown> | null)
+              ?.listChecksum ?? previous?.rawChecksum;
+          return (
+            Boolean(args.revisionHint) ||
+            previousChecksum !== item.checksum ||
+            !discoveryState.completedSourceUids.has(item.sourceUid) ||
+            !discoveryState.activeSourceUids.has(item.sourceUid)
+          );
+        })
+        .map((item) => ({
+          inputRevision: webhookContentChecksum({
+            listChecksum: item.checksum,
+            authorization: args.authorization ?? null,
+            revisionHint: args.revisionHint ?? null,
+          }),
+          sourceUid: item.sourceUid,
+          externalId: item.externalId,
+          accountRef: args.authorization?.athleteId ?? '0',
+          objectType: ImportSourceObjectType.THIRD_PARTY_ACTIVITY_FILE,
+          rawPayload: {
+            listActivity: item.activity,
+            connectionId: args.connectionId,
+            ...(args.authorization
+              ? { authorization: args.authorization }
+              : {}),
+          },
+          metadata: {
+            connectionId: args.connectionId,
+            ...(args.authorization
+              ? { authorization: args.authorization }
+              : {}),
+            listChecksum: item.checksum,
+            listActivityName: item.activity.name ?? null,
+          },
+          sourceRef: {
+            externalId: item.externalId,
+            connectionId: args.connectionId,
+            ...(args.authorization
+              ? { authorization: args.authorization }
+              : {}),
+            ...(args.revisionHint ? { revisionHint: args.revisionHint } : {}),
+          },
+          timelineTitle: item.activity.name?.trim() || null,
+          timelineStartTime: intervalsIcuTimelineStartTime(item.activity),
+        })),
+      requestContext: {
+        source: 'intervals_icu',
+        reason: args.reason ?? 'manual',
+        connectionId: args.connectionId,
         totalDiscovered: discovered.length,
-        queuedCount: queuedInputs.length,
-        skippedCount: discovered.length - queuedInputs.length,
       },
+      reuseRunningBatch: true,
     });
-
     return {
-      batch,
+      batch: result.batch,
+      queuedCount: result.queuedCount,
       totalDiscovered: discovered.length,
-      queuedCount: queuedInputs.length,
-      skippedCount: discovered.length - queuedInputs.length,
-      directlyQueued: queuedInputs.length,
+      skippedCount: discovered.length - result.queuedCount,
+      directlyQueued: result.queuedCount,
       routedToOrigin: routedToOriginCount,
-      // 保留既有返回字段名以兼容调用方；它实际统计 BLOCKED 来源，没有创建 Mirror 记录。
       mirrorsCreated: blockedSourceCount,
       alreadyResolved: alreadyResolvedCount,
-      duplicateOrRunning: directlyImportable.length - queuedInputs.length,
+      duplicateOrRunning: directlyImportable.length - result.queuedCount,
     };
   }
 
-  /**
-   * 获取导入批次的摘要信息
-   * @param batchJobId 导入批次ID
-   * @param userId 用户ID
-   * @returns
-   */
   async getLatestProviderBatchProgress(args: {
     userId: string;
     sourceKind: ImportSourceKind;
@@ -1425,208 +1560,17 @@ export class ImportBatchService {
       })),
     };
   }
-  /**
-   * 创建批次级后处理任务
-   * @param batchJobId - 导入批次ID
-   * @returns - 批次级后处理任务
-   * @returns
-   */
   async createPostProcessJob(
     batchJobId: string,
     tx?: Prisma.TransactionClient,
   ) {
-    // 获取导入批次
-    const batch = await this.importJobs.batchJobs(tx).findUnique({
-      where: { id: batchJobId },
-      include: {
-        items: {
-          where: {
-            activityId: { not: null },
-            analysisRequired: true,
-            status: ImportItemJobStatus.DONE,
-          },
-          select: {
-            activity: { select: { sportType: true, startTime: true } },
-          },
-        },
-      },
-    });
-    if (!batch) throw new Error(`Import batch not found: ${batchJobId}`);
-
-    // 获取请求上下文
-    const requestContext = (batch.requestContext ?? {}) as Record<
-      string,
-      unknown
-    >;
-
-    const forcedCandidates = Array.isArray(
-      requestContext.globalRefreshCandidates,
-    )
-      ? (requestContext.globalRefreshCandidates as Array<{
-          sportType?: string | null;
-          startTime?: Date | string | null;
-        }>)
-      : [];
-    const correctnessCandidates = [
-      ...batch.items.map((item) => ({
-        sportType: item.activity?.sportType,
-        startTime: item.activity?.startTime,
-      })),
-      ...forcedCandidates,
-    ]
-      .map((candidate) => ({
-        sportType: candidate.sportType,
-        startTime:
-          candidate.startTime instanceof Date
-            ? candidate.startTime
-            : candidate.startTime
-              ? new Date(candidate.startTime)
-              : null,
-      }))
-      .filter(
-        (
-          candidate,
-        ): candidate is {
-          sportType: string | null | undefined;
-          startTime: Date;
-        } =>
-          candidate.startTime instanceof Date &&
-          Number.isFinite(candidate.startTime.getTime()),
-      )
-      .sort(
-        (left, right) => left.startTime.getTime() - right.startTime.getTime(),
-      );
-    const sportTypes = Array.from(
-      new Set(
-        correctnessCandidates
-          .map((candidate) => candidate.sportType)
-          .filter((value): value is string => Boolean(value)),
-      ),
-    );
-
-    const job = await this.importJobs.ensurePostProcessJob(
-      {
-        batchJobId: batch.id,
-        create: {
-          userId: batch.userId,
-          batchJobId: batch.id,
-          status: 'PENDING',
-          recomputeFrom: correctnessCandidates[0]?.startTime,
-          recomputeTo: correctnessCandidates.at(-1)?.startTime,
-          affectedSportTypes: sportTypes as Prisma.InputJsonValue,
-          summary: {
-            batchStatus: batch.status,
-            totalCount: batch.totalCount,
-            successCount: batch.successCount,
-            failedCount: batch.failedCount,
-            skippedCount: batch.skippedCount,
-            correctnessReplayActivityCount: correctnessCandidates.length,
-          } as Prisma.InputJsonValue,
-        } satisfies Prisma.UserPostProcessJobUncheckedCreateInput,
-      },
-      tx,
-    );
-
-    if (job.status !== 'COMPLETED' && job.status !== 'DEAD') {
-      await this.importJobs.batchJobs(tx).update({
-        where: { id: batch.id },
-        data: { status: 'POST_PROCESSING' },
-      });
-    }
-
-    this.logImportPipelineEvent({
-      batchJobId: batch.id,
-      postProcessJobId: job.id,
-      userId: batch.userId,
-      stage: 'POST_PROCESSING',
-      message: '已确保批次级后处理任务存在',
-    });
-
-    return job;
+    return this.importJobs.createPostProcessJob(batchJobId, tx);
   }
-  /**
-   * 刷新批次进度
-   * 导入
-   * @param batchJobId 导入批次ID
-   *
-   * @returns
-   */
+
   async refreshBatchProgress(
     batchJobId: string,
     tx?: Prisma.TransactionClient,
   ) {
-    if (!tx) {
-      return this.prisma.$transaction(
-        (transaction) => this.refreshBatchProgress(batchJobId, transaction),
-        { timeout: 15_000 },
-      );
-    }
-    // Serialize count publication with terminal item writes and job creation.
-    await tx.$queryRaw`SELECT id FROM t_import_batch_job
-      WHERE id = ${batchJobId} FOR UPDATE`;
-    const batch = await this.importJobs.batchJobs(tx).findUnique({
-      where: { id: batchJobId },
-      select: { id: true, userId: true, totalCount: true, startedAt: true },
-    });
-    if (!batch) throw new Error(`Import batch not found: ${batchJobId}`);
-
-    const statuses = await this.importJobs.itemJobs(tx).groupBy({
-      by: ['status'],
-      where: { batchJobId },
-      _count: { _all: true },
-    });
-    const actualTotalCount = statuses.reduce(
-      (total, row) => total + row._count._all,
-      0,
-    );
-
-    const countOf = (status: ImportItemJobStatus) =>
-      statuses.find((row) => row.status === status)?._count._all ?? 0;
-
-    const successCount = countOf('DONE');
-    // FAILED 仍在指数退避重试，不是终态；只有 DEAD 才计入批次失败数。
-    const failedCount = countOf('DEAD');
-    const skippedCount = countOf('SKIPPED');
-    // Items are registered while workers are already consuming the batch.
-    // Never shrink the declared count to the few items registered so far:
-    // doing so can start post-processing before the remaining files exist.
-    const totalCount = Math.max(batch.totalCount, actualTotalCount);
-    const nextStatus = summarizeBatchStatus({
-      totalCount,
-      successCount,
-      failedCount,
-      skippedCount,
-    });
-
-    const updated = await this.importJobs.batchJobs(tx).update({
-      where: { id: batchJobId },
-      data: {
-        totalCount,
-        successCount,
-        failedCount,
-        skippedCount,
-        status: nextStatus,
-        startedAt:
-          nextStatus === 'RUNNING'
-            ? (batch.startedAt ?? new Date())
-            : batch.startedAt,
-        completedAt:
-          nextStatus === 'COMPLETED' ||
-          nextStatus === 'PARTIAL_FAILED' ||
-          nextStatus === 'FAILED'
-            ? new Date()
-            : null,
-      },
-    });
-
-    if (
-      nextStatus === 'COMPLETED' ||
-      nextStatus === 'PARTIAL_FAILED' ||
-      nextStatus === 'FAILED'
-    ) {
-      await this.createPostProcessJob(batchJobId, tx);
-    }
-
-    return updated;
+    return this.importJobs.refreshBatchProgress(batchJobId, tx);
   }
 }

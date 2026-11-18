@@ -1,3 +1,7 @@
+import {
+  healthSessionFactSource,
+  isHealthSessionFactSource,
+} from './health-fact-eligibility';
 /**
  * 跨 provider 健康 session 的关联边界。
  * Provider 事实是不可变且幂等的来源记录；规范 session 是根据时间重叠、provider
@@ -276,11 +280,9 @@ export class HealthSessionAssociationService {
             candidate.endOffsetSeconds === undefined
               ? undefined
               : candidate.endOffsetSeconds,
-          score: candidate.score === undefined ? null : candidate.score,
+          score: candidate.score,
           summary:
-            candidate.summary == null
-              ? Prisma.DbNull
-              : (candidate.summary as Prisma.InputJsonValue),
+            candidate.summary === undefined ? undefined : createData.summary,
           sourceUpdatedAt:
             candidate.sourceUpdatedAt === undefined
               ? undefined
@@ -301,9 +303,21 @@ export class HealthSessionAssociationService {
             })
           : await this.health.providerSessions(tx).create({ data: createData });
 
-        await this.health.providerSegments(tx).deleteMany({
-          where: { sessionId: session.id },
-        });
+        if (candidate.segments !== undefined || candidate.deletedAt) {
+          await this.health.providerSegments(tx).deleteMany({
+            where: { sessionId: session.id },
+          });
+        } else if (existing) {
+          await this.health.providerSegments(tx).deleteMany({
+            where: {
+              sessionId: session.id,
+              OR: [
+                { startTime: { lt: session.startTime } },
+                { endTime: { gt: session.endTime } },
+              ],
+            },
+          });
+        }
         if (!candidate.deletedAt && segments.length > 0) {
           await this.health.providerSegments(tx).createMany({
             data: segments.map((segment, position) => ({
@@ -508,6 +522,15 @@ export class HealthSessionAssociationService {
     userId: string,
     source: ExternalHealthSession,
   ) {
+    if (!isHealthSessionFactSource(source)) {
+      if (source.canonicalSessionId) {
+        await this.health.providerSessions(tx).update({
+          where: { id: source.id },
+          data: { canonicalSessionId: null },
+        });
+      }
+      return null;
+    }
     if (source.deletedAt && source.canonicalSessionId) {
       return source.canonicalSessionId;
     }
@@ -517,28 +540,37 @@ export class HealthSessionAssociationService {
       source.sessionType === ExternalHealthSessionType.NAP
         ? 6 * 60 * 60 * 1000
         : 30 * 60 * 1000;
+    const associatedSource = {
+      ...healthSessionFactSource,
+      deletedAt: null,
+      startTime: { lte: new Date(source.endTime.valueOf() + marginMs) },
+      endTime: { gte: new Date(source.startTime.valueOf() - marginMs) },
+    };
     const canonicals = await this.health.sessions(tx).findMany({
       where: {
         userId,
         sessionType: source.sessionType,
         deletedAt: null,
-        startTime: { lte: new Date(source.endTime.valueOf() + marginMs) },
-        endTime: { gte: new Date(source.startTime.valueOf() - marginMs) },
+        selectedSource: associatedSource,
       },
-      select: { id: true, startTime: true, endTime: true },
+      select: {
+        id: true,
+        selectedSource: { select: { startTime: true, endTime: true } },
+      },
     });
     const matches = canonicals
       .map((canonical) => ({
-        ...canonical,
-        score: healthSessionMatchScore(source, canonical),
+        id: canonical.id,
+        score: canonical.selectedSource
+          ? healthSessionMatchScore(source, canonical.selectedSource)
+          : null,
       }))
       .filter(
         (canonical): canonical is typeof canonical & { score: number } =>
           canonical.score != null,
       )
       .sort(
-        (a, b) =>
-          b.score - a.score || String(a.id).localeCompare(String(b.id)),
+        (a, b) => b.score - a.score || String(a.id).localeCompare(String(b.id)),
       );
     const match = matches[0];
     const canonical = match
@@ -588,14 +620,12 @@ export class HealthSessionAssociationService {
   }
 
   /** 重新计算规范边界、代表字段和合并后的 segment。 */
-  private async rebuildCanonicalWith(
-    tx: PrismaTx,
-    canonicalSessionId: string,
-  ) {
+  private async rebuildCanonicalWith(tx: PrismaTx, canonicalSessionId: string) {
     const sources = await this.health.providerSessions(tx).findMany({
       where: {
         canonicalSessionId,
         deletedAt: null,
+        ...healthSessionFactSource,
         OR: [
           { snapshotId: null },
           {
@@ -609,7 +639,11 @@ export class HealthSessionAssociationService {
     });
     if (sources.length === 0) {
       const pendingSource = await this.health.providerSessions(tx).findFirst({
-        where: { canonicalSessionId, deletedAt: null },
+        where: {
+          canonicalSessionId,
+          deletedAt: null,
+          ...healthSessionFactSource,
+        },
         select: { id: true },
       });
       if (pendingSource) return;

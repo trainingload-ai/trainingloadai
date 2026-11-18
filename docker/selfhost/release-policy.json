@@ -14,17 +14,7 @@
       "1.1.24",
       "1.1.25"
     ],
-    "applicationRollbackTo": [
-      "1.1.15",
-      "1.1.17",
-      "1.1.18",
-      "1.1.19",
-      "1.1.20",
-      "1.1.21",
-      "1.1.22",
-      "1.1.24",
-      "1.1.25"
-    ],
+    "applicationRollbackTo": [],
     "backupRequired": true
   },
   "database": {
@@ -144,6 +134,34 @@
         "releaseVersion": "1.1.26"
       },
       "0029_provider_authorization_revision": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0030_independent_workout_activity_links": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0031_workout_matching_review": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0032_import_source_revision_handoff": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0033_today_suggestion_generation": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0034_coach_fact_scope": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0035_coach_context_timezone": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0036_health_daily_fact_revisions": {
         "phase": "expand",
         "releaseVersion": "1.1.26"
       }

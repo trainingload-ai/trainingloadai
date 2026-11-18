@@ -46,9 +46,14 @@ export type StoreSearchInput = {
   eventTo?: Date;
   query?: string;
   take: number;
+  ambientAsOf?: Date;
 };
 
 export interface AthleteMemoryStore {
+  ambientFingerprint?(userId: string, asOf: Date): Promise<string>;
+  contextInputStatus?(
+    userId: string,
+  ): Promise<Array<{ id: string; status: string }>>;
   applyOperations(input: {
     jobId: string;
     leaseOwner: string;

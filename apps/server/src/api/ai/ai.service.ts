@@ -1,3 +1,4 @@
+import { CoachFactContextService } from './core/coach-fact-context.service';
 import { HealthDataQueryService } from '@/health-data/health-data-query.service';
 import {
   loadReferencedCoachQuestion,
@@ -416,6 +417,7 @@ export class AiService {
     private readonly memoryCommands?: ApplyMemoryOperationsService,
     @Optional() private readonly athleteStateAgent?: AthleteStateAgentService,
     @Optional() private readonly healthData?: HealthDataQueryService,
+    @Optional() private readonly factContext?: CoachFactContextService,
   ) {}
 
   async assertAthleteStateAccess(userId: string) {
@@ -1222,7 +1224,36 @@ export class AiService {
     if (params.activeSkillName === ATHLETE_STATE_SKILL)
       await this.assertAthleteStateAccess(userId);
     let ambientMemory: AmbientMemoryContext | undefined;
+    let coachFacts:
+      | Awaited<ReturnType<CoachFactContextService['build']>>
+      | undefined;
     if (
+      userId &&
+      this.factContext &&
+      (!background || params.activeSkillName === ATHLETE_STATE_SKILL)
+    ) {
+      const timezone =
+        (await this.userService.getPreferredTimezone(userId)) ??
+        (params.runtimeRunId
+          ? await this.coachRuns.contextTimezone(userId, params.runtimeRunId)
+          : undefined) ??
+        'UTC';
+      const date = new Intl.DateTimeFormat('en-CA', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(currentTurnStartedAt);
+      coachFacts = await this.factContext.build({
+        userId,
+        date,
+        timezone,
+        allowAi: true,
+        allowWithoutConsent: params.allowWithoutConsent,
+      });
+    }
+    if (
+      !coachFacts &&
       userId &&
       this.athleteMemory &&
       params.activeSkillName !== ATHLETE_STATE_SKILL
@@ -1233,6 +1264,17 @@ export class AiService {
         userId,
         asOf: currentTurnStartedAt,
         timezone: athleteTimezone,
+      });
+    }
+    if (coachFacts && params.runtimeRunId) {
+      const topic =
+        params.activeSkillName === ATHLETE_STATE_SKILL
+          ? `athlete-state:${coachFacts.date}`
+          : `coach-context:${coachFacts.date}`;
+      await this.coachRuns.bindFactScope(userId, params.runtimeRunId, {
+        topic,
+        revision: coachFacts.revision,
+        timezone: coachFacts.timezone,
       });
     }
     const safetyConcern = background ? null : coachSafetyConcern(prompt);
@@ -1499,6 +1541,9 @@ export class AiService {
       questionResponse,
       confirmedDecisionId: currentDecisionConfirmationId(params.message),
       currentTurnStartedAt,
+      currentTurnCalendar: coachFacts
+        ? { date: coachFacts.date, timezone: coachFacts.timezone }
+        : undefined,
       webEvidence: this.webEvidence,
       webEvidenceBudget: { searchCalls: 0, fetchCalls: 0 },
       athleteStateSafetyMode,
@@ -1510,8 +1555,11 @@ export class AiService {
               sessionId: safeSid,
               runId: params.runtimeRunId ?? crypto.randomUUID(),
               timezone:
-                (await this.userService.getPreferredTimezone(userId)) ?? 'UTC',
+                coachFacts?.timezone ??
+                (await this.userService.getPreferredTimezone(userId)) ??
+                'UTC',
               asOf: currentTurnStartedAt,
+              factContext: coachFacts,
               onSubmitted: params.backgroundTask?.submitResult,
             })
           : undefined,
@@ -1608,6 +1656,7 @@ export class AiService {
       activeSkill,
       thinking: params.thinking === true,
       ambientMemory,
+      coachFacts,
       model: params.model,
     });
     const withAssessment = async function* (): AsyncGenerator<

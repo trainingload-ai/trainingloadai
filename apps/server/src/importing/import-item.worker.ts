@@ -1,3 +1,5 @@
+import { acquireActivityWriteLock } from '@/prisma/activity-write-lock';
+import { inheritedImportAuthorization } from './import-publication-authorization';
 import { matchesIntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import {
@@ -36,7 +38,10 @@ import {
   type ImportSourceKind,
 } from '@prisma/client';
 import type { CanonicalActivityPayload } from './canonical-activity.types';
-import { CanonicalActivityMaterializer } from './canonical-activity.materializer';
+import {
+  CanonicalActivityMaterializer,
+  type CanonicalDatasetCommitToken,
+} from './canonical-activity.materializer';
 import { ThirdPartyActivityProjectorService } from './third-party-activity-projector.service';
 import { ImportBatchService } from './import-batch.service';
 import { RemoteActivityFileService } from './remote-activity-file.service';
@@ -92,6 +97,7 @@ type ClaimedImportItemJob = {
   sourceObjectId: string;
   sourceKind: ImportSourceKind;
   lockToken?: string;
+  sourceRevision?: string;
 };
 
 function backoffMs(attempts: number) {
@@ -108,6 +114,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
   private stopping = false;
   private draining = false;
   private readonly activeLeaseTokens = new Map<string, string>();
+  private readonly revisionedItems = new Set<string>();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -218,6 +225,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         source_object_id: string;
         source_kind: string;
         lock_token: string;
+        source_revision: string | null;
       }>
     >(
       // source_kind 是 PG 枚举，queryRaw 只能给出 string，下面再收成 ImportSourceKind。
@@ -241,10 +249,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           started_at=COALESCE(j.started_at, $1),
           lock_token=$3,
           lease_expires_at=$4,
+          source_revision=COALESCE(source_revision, CASE WHEN source_ref->>'kind'='canonical_payload'
+            THEN 'legacy-unversioned-canonical' ELSE (SELECT import_revision FROM t_import_source_object s WHERE s.id=j.source_object_id) END),
           updated_at=$1
       FROM picked
       WHERE j.id = picked.id
-      RETURNING j.id, j.batch_job_id, j.user_id, j.source_object_id, j.source_kind, j.lock_token;
+      RETURNING j.id, j.batch_job_id, j.user_id, j.source_object_id, j.source_kind, j.lock_token, j.source_revision;
       `,
       now,
       batchSize,
@@ -260,6 +270,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         sourceObjectId: row.source_object_id,
         sourceKind: asImportSourceKind(row.source_kind),
         lockToken: row.lock_token,
+        ...(row.source_revision ? { sourceRevision: row.source_revision } : {}),
       }),
     );
   }
@@ -310,6 +321,23 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     tx?: Prisma.TransactionClient,
   ) {
     const terminal = ['DONE', 'SKIPPED', 'DEAD'].includes(status);
+    const lockToken = this.activeLeaseTokens.get(id);
+    if (terminal && lockToken && this.revisionedItems.has(id)) {
+      await this.importJobs.finishRevisionedItem(
+        {
+          id,
+          lockToken,
+          data: {
+            status,
+            ...extra,
+            lockToken: null,
+            leaseExpiresAt: null,
+          },
+        },
+        tx,
+      );
+      return;
+    }
     await this.updateClaimedItem(
       id,
       {
@@ -321,27 +349,55 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  private async completeActivityItem(jobId: string, batchJobId: string) {
-    // When this DONE makes the batch terminal, its durable analysis request
-    // commits in the same transaction instead of relying on the final refresh.
-    await this.prisma.$transaction(
-      async (tx) => {
-        await tx.$queryRaw`SELECT id FROM t_import_batch_job
-        WHERE id = ${batchJobId} FOR UPDATE`;
-        await this.markStatus(
-          jobId,
-          $Enums.ImportItemJobStatus.DONE,
-          {
-            completedAt: new Date(),
-            lastError: null,
-            lastErrorCode: null,
-          },
-          tx,
-        );
-        await this.importBatchService.refreshBatchProgress(batchJobId, tx);
-      },
-      { timeout: 15_000 },
-    );
+  private async completeActivityItem(
+    jobId: string,
+    batchJobId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const finish = async (transaction: Prisma.TransactionClient) => {
+      await this.markStatus(
+        jobId,
+        'DONE',
+        { completedAt: new Date(), lastError: null, lastErrorCode: null },
+        transaction,
+      );
+      await this.importBatchService.refreshBatchProgress(
+        batchJobId,
+        transaction,
+      );
+    };
+    return tx
+      ? finish(tx)
+      : this.prisma.$transaction(finish, { timeout: 15_000 });
+  }
+
+  private async withCurrentDataset<T>(
+    args: { jobId: string; userId: string },
+    token: CanonicalDatasetCommitToken,
+    work: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    const publish = async (tx: Prisma.TransactionClient) => {
+      await acquireActivityWriteLock(tx, token.activityId);
+      const primary = await tx.activitySource.findFirst({
+        where: {
+          activityId: token.activityId,
+          userId: args.userId,
+          isPrimary: true,
+          isActive: true,
+        },
+        select: { canonicalSnapshotId: true },
+      });
+      if (primary?.canonicalSnapshotId !== token.canonicalSnapshotId)
+        throw new Error('IMPORT_DATASET_CHANGED');
+      return work(tx);
+    };
+    const lockToken = this.activeLeaseTokens.get(args.jobId);
+    return lockToken
+      ? this.importJobs.withCurrentImport(
+          { itemJobId: args.jobId, userId: args.userId, lockToken },
+          publish,
+        )
+      : this.prisma.$transaction(publish, { timeout: 15_000 });
   }
 
   private extractThirdPartyActivityId(job: ImportJobJsonFields) {
@@ -387,6 +443,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     }
     const resolved = await this.remoteActivityFiles.resolve({
       capability: 'intervals-icu-api-key',
+      sourceRevision: job.sourceRevision ?? null,
       sourceObject: {
         ...job.sourceObject,
         fileKey:
@@ -417,6 +474,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           const downloaded = await this.intervalsIcuClient.downloadActivityFile(
             apiKey,
             String(externalId),
+            ...(job.sourceRevision ? [{ preferEdited: true }] : []),
           );
           return { ...downloaded, metadata: { connectionId } };
         } catch (error) {
@@ -595,35 +653,55 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     sourceObjectId: string;
     payloads: CanonicalActivityPayload[];
   }) {
-    const maxPositionRow = await this.importJobs.itemJobs().aggregate({
-      where: { batchJobId: args.batchJobId },
-      _max: { position: true },
-    });
-    const firstPosition = (maxPositionRow._max.position ?? 0) + 1;
-
-    if (args.payloads.length > 0) {
-      await this.importJobs.itemJobs().createMany({
-        data: args.payloads.map((payload, index) => ({
-          batchJobId: args.batchJobId,
-          userId: args.userId,
-          sourceObjectId: args.sourceObjectId,
-          sourceKind: payload.source.kind,
-          sourceUid: payload.source.sourceUid,
-          position: firstPosition + index,
-          status: 'QUEUED',
-          sourceRef: importJsonValue({
-            kind: 'canonical_payload',
-            payload,
-          } as ImportItemSourceRef),
-        })),
+    const lockToken = this.activeLeaseTokens.get(args.jobId);
+    const work = async (tx?: Prisma.TransactionClient) => {
+      const parent = lockToken
+        ? await this.importJobs
+            .itemJobs(tx)
+            .findUnique({ where: { id: args.jobId } })
+        : null;
+      const maxPositionRow = await this.importJobs.itemJobs(tx).aggregate({
+        where: { batchJobId: args.batchJobId },
+        _max: { position: true },
       });
-    }
-
-    await this.markStatus(args.jobId, 'SKIPPED', {
-      completedAt: new Date(),
-      lastErrorCode: 'spawned_child_items',
-      lastError: `Spawned ${args.payloads.length} canonical item jobs`,
-    });
+      const firstPosition = (maxPositionRow._max.position ?? 0) + 1;
+      if (args.payloads.length)
+        await this.importJobs.itemJobs(tx).createMany({
+          data: args.payloads.map((payload, index) => ({
+            batchJobId: args.batchJobId,
+            userId: args.userId,
+            sourceObjectId: args.sourceObjectId,
+            sourceKind: payload.source.kind,
+            sourceUid: payload.source.sourceUid,
+            ...(parent?.sourceRevision
+              ? { sourceRevision: parent.sourceRevision }
+              : {}),
+            position: firstPosition + index,
+            status: 'QUEUED',
+            sourceRef: importJsonValue({
+              ...inheritedImportAuthorization(parent?.sourceRef),
+              kind: 'canonical_payload',
+              payload,
+            } as ImportItemSourceRef),
+          })),
+        });
+      await this.markStatus(
+        args.jobId,
+        'SKIPPED',
+        {
+          completedAt: new Date(),
+          lastErrorCode: 'spawned_child_items',
+          lastError: `Spawned ${args.payloads.length} canonical item jobs`,
+        },
+        tx,
+      );
+    };
+    if (lockToken)
+      await this.importJobs.withCurrentImport(
+        { itemJobId: args.jobId, userId: args.userId, lockToken },
+        work,
+      );
+    else await work();
   }
 
   /**
@@ -645,6 +723,8 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
   }) {
     const payload = args.payload;
     const thirdPartyActivity = await this.thirdPartyProjector.project({
+      itemJobId: args.jobId,
+      itemLockToken: this.activeLeaseTokens.get(args.jobId),
       userId: args.userId,
       sourceObjectId: args.sourceObjectId,
       batchJobId: args.batchJobId,
@@ -672,6 +752,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       );
       // 将 canonical payload 物化成 Activity
       const materialized = await this.materializer.materialize({
+        itemLockToken: this.activeLeaseTokens.get(args.jobId),
         itemJobId: args.jobId,
         userId: args.userId,
         batchJobId: args.batchJobId,
@@ -684,6 +765,8 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       // Activity 已经由任意 Provider 正式物化后，再尝试解析影子。影子本身从不
       // 进入 materializer；匹配成功只是添加次级来源并将来源对象标记 RESOLVED。
       await this.externalActivityMirrors.resolveForImportedActivity({
+        itemJobId: args.jobId,
+        itemLockToken: this.activeLeaseTokens.get(args.jobId),
         userId: args.userId,
         activityId: materialized.activity.id,
         provider: payload.source.provider,
@@ -737,16 +820,26 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       });
 
       if (!materialized.shouldRebuild) {
-        if (thirdPartyActivityId) {
-          await this.thirdPartyActivityService.markImportCompleted(
-            thirdPartyActivityId,
+        const finish = async (tx: Prisma.TransactionClient) => {
+          if (thirdPartyActivityId)
+            await this.thirdPartyActivityService.markImportCompleted(
+              thirdPartyActivityId,
+              tx,
+            );
+          await this.markStatus(
+            args.jobId,
+            'DONE',
+            { completedAt: new Date(), lastError: null, lastErrorCode: null },
+            tx,
           );
-        }
-        await this.markStatus(args.jobId, $Enums.ImportItemJobStatus.DONE, {
-          completedAt: new Date(),
-          lastError: null,
-          lastErrorCode: null,
-        });
+        };
+        const lockToken = this.activeLeaseTokens.get(args.jobId);
+        if (lockToken)
+          await this.importJobs.withCurrentImport(
+            { itemJobId: args.jobId, userId: args.userId, lockToken },
+            finish,
+          );
+        else await this.prisma.$transaction(finish, { timeout: 15_000 });
         return;
       }
 
@@ -793,6 +886,10 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         await this.activityService.runLightMetricsPipeline(
           materialized.activity.id,
           args.userId,
+          {
+            publish: (work) =>
+              this.withCurrentDataset(args, materialized.pendingCommit!, work),
+          },
         );
         await this.activityMapDerivation.scheduleAfterCanonicalCommit(
           materialized.activity.id,
@@ -809,31 +906,6 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       }
       // Parquet 一旦成为 canonical 数据集即可异步排队。天气失败不能阻塞
       // 活动进入 ANALYZING/READY，也不能延长主导入链路。
-      const committedSource = await this.prisma.activitySource.findFirst({
-        where: {
-          activityId: materialized.activity.id,
-          userId: args.userId,
-          isPrimary: true,
-          isActive: true,
-          sourceUid: payload.source.sourceUid,
-        },
-      });
-      if (committedSource) {
-        await this.prisma.activitySource.updateMany({
-          where: {
-            id: committedSource.id,
-            canonicalSnapshotId: committedSource.canonicalSnapshotId,
-            sourceChecksum: committedSource.sourceChecksum,
-            isPrimary: true,
-          },
-          data: {
-            metadata: {
-              ...(committedSource.metadata as Prisma.InputJsonObject),
-              materializationVersion: ACTIVITY_MATERIALIZATION_VERSION,
-            },
-          },
-        });
-      }
       await this.activityWeather
         ?.schedule({
           activityId: materialized.activity.id,
@@ -845,32 +917,41 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
             `[活动天气排队] 失败 activityId=${materialized.activity.id} code=SCHEDULE_FAILED`,
           );
         });
-      // 更新活动状态
-      await this.prisma.activity.update({
-        where: { id: materialized.activity.id },
-        data: {
-          status: $Enums.ActivityStatus.FINISHED,
-          processingStatus: 'ANALYZING',
-          processingUpdatedAt: new Date(),
-          readyAt: null,
-        },
-      });
-
-      if (thirdPartyActivityId) {
-        await this.thirdPartyActivityService.markImportCompleted(
-          thirdPartyActivityId,
-        );
-      }
-
-      await this.completeActivityItem(args.jobId, args.batchJobId);
+      const finish = async (tx: Prisma.TransactionClient) => {
+        await tx.activity.update({
+          where: { id: materialized.activity.id },
+          data: {
+            status: $Enums.ActivityStatus.FINISHED,
+            processingStatus: 'ANALYZING',
+            processingUpdatedAt: new Date(),
+            readyAt: null,
+          },
+        });
+        if (thirdPartyActivityId)
+          await this.thirdPartyActivityService.markImportCompleted(
+            thirdPartyActivityId,
+            tx,
+          );
+        await this.completeActivityItem(args.jobId, args.batchJobId, tx);
+      };
+      if (materialized.pendingCommit)
+        await this.withCurrentDataset(args, materialized.pendingCommit, finish);
+      else await this.prisma.$transaction(finish, { timeout: 15_000 });
     } catch (error) {
       if (thirdPartyActivityId && !args.thirdPartyActivityId) {
-        await this.thirdPartyActivityService
-          .markImportFailed(
-            thirdPartyActivityId,
-            error instanceof Error ? error.message : String(error),
-          )
-          .catch(() => undefined);
+        const lockToken = this.activeLeaseTokens.get(args.jobId);
+        if (lockToken)
+          await this.importJobs
+            .withCurrentImport(
+              { itemJobId: args.jobId, userId: args.userId, lockToken },
+              (tx) =>
+                this.thirdPartyActivityService.markImportFailed(
+                  thirdPartyActivityId,
+                  error instanceof Error ? error.message : String(error),
+                  tx,
+                ),
+            )
+            .catch(() => undefined);
       }
       throw error;
     }
@@ -885,6 +966,13 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     const startedAt = Date.now();
     let thirdPartyActivityId: number | undefined;
     if (job.lockToken) this.activeLeaseTokens.set(job.id, job.lockToken);
+    if (
+      job.sourceRevision ||
+      ['STRAVA', 'GARMIN', 'GARMIN_PERSONAL_API', 'INTERVALS_ICU'].includes(
+        job.sourceKind,
+      )
+    )
+      this.revisionedItems.add(job.id);
     const heartbeat = setInterval(
       () => void this.renewItemLease(job).catch(() => undefined),
       Math.max(30_000, Math.floor(this.itemLeaseMs() / 3)),
@@ -925,6 +1013,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       // 清理心跳定时器
       clearInterval(heartbeat);
       this.activeLeaseTokens.delete(job.id);
+      this.revisionedItems.delete(job.id);
       // 刷新批次进度
       await this.importBatchService.refreshBatchProgress(job.batchJobId);
     }
@@ -1032,7 +1121,29 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     },
   ) {
     const lockToken = this.activeLeaseTokens.get(job.id);
-    const completed = await this.prisma.$transaction(async (tx) => {
+    const work = async (tx: Prisma.TransactionClient) => {
+      if (lockToken && this.revisionedItems.has(job.id)) {
+        const current = await this.importJobs.itemJobs(tx).findFirst({
+          where: { id: job.id, lockToken },
+          include: { sourceObject: true },
+        });
+        if (!current) return false;
+        if (current.sourceObject.importRevision !== current.sourceRevision) {
+          await this.importJobs.finishRevisionedItem(
+            {
+              id: job.id,
+              lockToken,
+              data: {
+                status: 'SKIPPED',
+                lockToken: null,
+                leaseExpiresAt: null,
+              },
+            },
+            tx,
+          );
+          return false;
+        }
+      }
       // Fence both the item completion and source routing with the current lease.
       const result = await this.importJobs.itemJobs(tx).updateMany({
         where: {
@@ -1082,7 +1193,20 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         );
       }
       return true;
-    });
+    };
+    const identity =
+      lockToken && this.revisionedItems.has(job.id)
+        ? await this.importJobs.itemJobs().findUnique({
+            where: { id: job.id },
+            select: { userId: true, sourceKind: true, sourceUid: true },
+          })
+        : null;
+    const completed = identity
+      ? await this.importJobs.withSourceLocks(
+          { ...identity, sourceUids: [identity.sourceUid] },
+          work,
+        )
+      : await this.prisma.$transaction(work);
     if (!completed) return;
     this.logImportPipelineEvent({
       batchJobId: job.batchJobId,
@@ -1142,6 +1266,113 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         });
         return;
       }
+    }
+    const revisionToken = this.activeLeaseTokens.get(job.id);
+    if (revisionToken && this.revisionedItems.has(job.id)) {
+      const identity = await this.importJobs.itemJobs().findUnique({
+        where: { id: job.id },
+        select: {
+          userId: true,
+          sourceKind: true,
+          sourceObject: { select: { sourceUid: true } },
+        },
+      });
+      if (!identity) return;
+      await this.importJobs.withSourceLocks(
+        { ...identity, sourceUids: [identity.sourceObject.sourceUid] },
+        async (tx) => {
+          const current = await this.importJobs
+            .itemJobs(tx)
+            .findFirst({ where: { id: job.id, lockToken: revisionToken } });
+          if (!current) return;
+          const attempts = current.attempts + 1;
+          const invalidAuthorization =
+            error instanceof Error &&
+            [
+              'IMPORT_AUTHORIZATION_CHANGED',
+              'IMPORT_ACCOUNT_NO_LONGER_WRITABLE',
+            ].includes(error.message);
+          const terminal =
+            invalidAuthorization ||
+            error instanceof ImportIdentityConflictError ||
+            attempts >=
+              (this.configService.get<number>('importItemWorker.maxAttempts') ??
+                6);
+          const result = await this.importJobs.finishRevisionedItem(
+            {
+              id: job.id,
+              lockToken: revisionToken,
+              data: {
+                status: invalidAuthorization
+                  ? 'SKIPPED'
+                  : terminal
+                    ? 'DEAD'
+                    : 'FAILED',
+                ...(invalidAuthorization
+                  ? { outcome: 'AUTHORIZATION_CHANGED' }
+                  : {}),
+                attempts,
+                lastError:
+                  error instanceof Error ? error.message : String(error),
+                lastErrorCode:
+                  error instanceof ImportIdentityConflictError
+                    ? error.code
+                    : null,
+                completedAt: terminal ? new Date() : null,
+                availableAt: new Date(Date.now() + backoffMs(attempts)),
+                lockToken: null,
+                leaseExpiresAt: null,
+              },
+            },
+            tx,
+          );
+          if (!result.requeued && !invalidAuthorization) {
+            if (
+              thirdPartyActivityId &&
+              !(error instanceof ImportIdentityConflictError)
+            ) {
+              await this.thirdPartyActivityService.markImportFailed(
+                thirdPartyActivityId,
+                error instanceof Error ? error.message : String(error),
+                tx,
+              );
+            }
+            if (terminal && this.extension)
+              await this.extension.afterTerminalFailure(
+                {
+                  userId: job.userId,
+                  sourceObjectId: job.sourceObjectId,
+                  sourceKind: job.sourceKind,
+                },
+                tx,
+              );
+            this.logImportPipelineEvent({
+              batchJobId: job.batchJobId,
+              itemJobId: job.id,
+              userId: job.userId,
+              stage: 'FAILED',
+              level: 'ERROR',
+              message: error instanceof Error ? error.message : String(error),
+            });
+          }
+          if (!result.requeued && !invalidAuthorization && current.activityId) {
+            await tx.activity.updateMany({
+              where: {
+                id: current.activityId,
+                userId: job.userId,
+                processingStatus: { not: 'READY' },
+              },
+              data: {
+                processingStatus: terminal ? 'FAILED' : 'PARTIAL_FAILED',
+                processingUpdatedAt: new Date(),
+                readyAt: null,
+              },
+            });
+          }
+        },
+      );
+      this.logger.warn(`Import revision failed or superseded: item=${job.id}`);
+      return;
     }
     const identityConflict =
       error instanceof ImportIdentityConflictError ? error : null;

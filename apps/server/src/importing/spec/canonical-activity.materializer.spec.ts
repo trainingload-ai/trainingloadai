@@ -1,5 +1,5 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { CanonicalActivityMaterializer } from '../canonical-activity.materializer';
 import { ActivityAssociationService } from '../activity-association.service';
@@ -182,12 +182,84 @@ function createMaterializerPrisma(overrides?: Record<string, unknown>) {
       new ActivityDatasetSelectorService(),
       new SensorFileQueryService(new SensorFileRepository(prisma as never)),
       new ActivityIngestService(prisma as never),
-      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+      new ImportingJobService(importingJobRepository(prisma as never)),
     ),
   };
 }
 
 describe('CanonicalActivityMaterializer sport resolution', () => {
+  it('stages the first dataset and fences its delayed publication after lease takeover', async () => {
+    const owner = {
+      id: 'new-item',
+      userId: 'user-1',
+      sourceKind: 'INTERVALS_ICU',
+      sourceObjectId: 'source-object-1',
+      sourceRevision: 'r1',
+      sourceRef: {
+        authorization: {
+          connectionId: 'connection-1',
+          userId: 'user-1',
+          athleteId: 'athlete-1',
+          revision: 'grant',
+        },
+      },
+      sourceObject: {
+        sourceUid: 'source-root',
+        importRevision: 'r1',
+        importRevokedAt: null,
+      },
+    };
+    const { prisma, materializer } = createMaterializerPrisma({
+      $executeRaw: jest.fn(async () => 1),
+      $queryRaw: jest.fn(async () => []),
+      t_user: {
+        findUnique: jest.fn(async () => ({ accountDeletionRequestedAt: null })),
+      },
+      externalProviderConnection: {
+        findUnique: jest.fn(async () => ({
+          id: 'connection-1',
+          userId: 'user-1',
+          provider: 'intervals_icu',
+          status: 'ACTIVE',
+          externalAthleteId: 'athlete-1',
+          credentialFingerprint: 'grant',
+        })),
+      },
+      importSourceObject: { update: jest.fn(async () => ({})) },
+      importItemJob: {
+        findUnique: jest.fn(async () => owner),
+        findFirst: jest.fn(async () => owner),
+      },
+    });
+    prisma.activity.findFirst.mockResolvedValue(null);
+    const payload = intervalsPayload();
+    const result = await materializer.materialize({
+      itemJobId: 'new-item',
+      itemLockToken: 'r1-worker',
+      userId: 'user-1',
+      sourceObjectId: 'source-object-1',
+      payload,
+    });
+    expect(result.created).toBe(true);
+    expect(result.pendingCommit).toMatchObject({
+      expectedPrimarySourceId: 'source-1',
+      canonicalSnapshotId: 'snapshot-1',
+    });
+    (prisma as any).importItemJob.findFirst.mockResolvedValue(null);
+    await expect(
+      materializer.commitStagedDataset({
+        token: result.pendingCommit!,
+        userId: 'user-1',
+        sourceObjectId: 'source-object-1',
+        payload,
+        stagedParquetFiles: [],
+        itemJobId: 'new-item',
+        itemLockToken: 'r1-worker',
+      }),
+    ).rejects.toThrow('IMPORT_ITEM_LEASE_LOST');
+    expect(prisma.activityParquetFile.upsert).not.toHaveBeenCalled();
+  });
+
   it('normalizes an unknown family before storing the canonical snapshot and activity', async () => {
     const { prisma, materializer } = createMaterializerPrisma();
     jest
@@ -252,7 +324,7 @@ describe('CanonicalActivityMaterializer sport resolution', () => {
       {} as never,
       new SensorFileQueryService(new SensorFileRepository({} as never)),
       new ActivityIngestService({} as never),
-      new ImportingJobService(new ImportingJobRepository({} as never)),
+      new ImportingJobService(importingJobRepository({} as never)),
     );
 
     const code = await materializer.resolveSportDefinitionCode(
@@ -1085,8 +1157,51 @@ describe('CanonicalActivityMaterializer provider identity reuse', () => {
   it.each(['SOURCE_SPORT_CONFLICT', 'SOURCE_ONLY_GENERIC_SPORT'])(
     'rebuilds sensor data without reclassifying a deferred %s activity',
     async (reason) => {
+      const owner = {
+        id: 'item-1',
+        userId: 'user-1',
+        sourceKind: 'INTERVALS_ICU',
+        sourceUid: 'intervals-source',
+        sourceObjectId: 'source-object-1',
+        sourceRevision: null,
+        sourceRef: {
+          authorization: {
+            connectionId: 'connection-1',
+            userId: 'user-1',
+            athleteId: 'athlete-1',
+            revision: 'grant-1',
+          },
+        },
+        sourceObject: {
+          sourceUid: 'intervals-source',
+          importRevision: null,
+          importRevokedAt: null,
+        },
+      };
       const { prisma, materializer } = createMaterializerPrisma({
-        importItemJob: { findFirst: jest.fn(async () => ({ id: 'item-1' })) },
+        $executeRaw: jest.fn(async () => 1),
+        $queryRaw: jest.fn(async () => []),
+        t_user: {
+          findUnique: jest.fn(async () => ({
+            accountDeletionRequestedAt: null,
+          })),
+        },
+        externalProviderConnection: {
+          findUnique: jest.fn(async () => ({
+            id: 'connection-1',
+            userId: 'user-1',
+            provider: 'intervals_icu',
+            status: 'ACTIVE',
+            externalAthleteId: 'athlete-1',
+            credentialFingerprint: 'grant-1',
+            syncActivities: true,
+          })),
+        },
+        importSourceObject: { update: jest.fn(async () => ({})) },
+        importItemJob: {
+          findUnique: jest.fn(async () => owner),
+          findFirst: jest.fn(async () => owner),
+        },
         activityDataMigration: {
           findFirst: jest.fn(async () => ({
             id: 'migration-1',

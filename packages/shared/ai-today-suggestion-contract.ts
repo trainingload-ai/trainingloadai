@@ -63,6 +63,8 @@ export type TodaySuggestionDeliveryReason =
   | "CACHE_HIT"
   | "COACH_STATE_UNAVAILABLE"
   | "FACTS_CHANGED"
+  | "GENERATION_IN_PROGRESS"
+  | "RETRY_COOLDOWN"
   | "AI_DISABLED"
   | "AI_NOT_CONFIGURED"
   | "ACCESS_DENIED"

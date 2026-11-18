@@ -50,9 +50,18 @@ export class ExternalActivitySourceRouter {
   ): Promise<ExternalActivityRouteDecision> {
     const current = await this.importJobs.sourceObjects(tx).findUnique({
       where: { id: args.sourceObjectId },
-      select: { resolvedActivityId: true },
+      select: {
+        resolvedActivityId: true,
+        activitySources: {
+          where: { isActive: true, provider: 'intervals_icu' },
+          select: { id: true },
+        },
+      },
     });
     if (current?.resolvedActivityId) {
+      if (args.refreshResolved && current.activitySources?.length) {
+        return { kind: 'IMPORT_VIA_DISCOVERY_PROVIDER' };
+      }
       await this.importJobs.sourceObjects(tx).update({
         where: { id: args.sourceObjectId },
         data: { lastSeenAt: new Date() },

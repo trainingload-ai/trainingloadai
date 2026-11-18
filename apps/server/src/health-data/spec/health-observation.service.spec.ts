@@ -10,7 +10,11 @@ function fixture() {
         'kind',
         'sourceGroupKey',
         'sourceObjectId',
-      ].every((k) => where[k] === undefined || row[k] === where[k]) &&
+      ].every(
+        (k) =>
+          where[k] === undefined ||
+          (where[k]?.in ? where[k].in.includes(row[k]) : row[k] === where[k]),
+      ) &&
       (!where.deletedAt || row.deletedAt === where.deletedAt) &&
       (!where.id?.notIn || !where.id.notIn.includes(row.id));
   const model: any = {
@@ -164,7 +168,7 @@ describe('complete typed health observations', () => {
     });
     expect(f.rows[1].intervalEnd - f.rows[1].intervalStart).toBe(210000);
   });
-  it('selects entire source groups and never combines systolic and diastolic values across providers', async () => {
+  it('returns eligible blood-pressure pairs and retains the source-only measurements', async () => {
     const f = fixture();
     await f.service.replaceSourceObservations({
       ...f.args,
@@ -180,13 +184,15 @@ describe('complete typed health observations', () => {
       ],
     });
     const result = await f.service.overview('user', 7, '2026-11-01');
-    expect(result.items.filter((row) => row.selected)).toEqual([
+    expect(result.items).toEqual([
       expect.objectContaining({
-        provider: 'HEALTH_CONNECT',
-        systolicMmHg: 118,
-        diastolicMmHg: 78,
+        selected: true,
+        provider: 'MANUAL',
+        systolicMmHg: 120,
+        diastolicMmHg: 80,
       }),
     ]);
+    expect(f.rows.some((row) => row.provider === 'HEALTH_CONNECT')).toBe(true);
     expect((await f.service.overview('other', 7, '2026-11-01')).items).toEqual(
       [],
     );

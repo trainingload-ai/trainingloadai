@@ -1,3 +1,4 @@
+import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import {
   Injectable,
   Logger,
@@ -676,19 +677,27 @@ export class PlanWriteSupport {
   }
 
   async deleteIndependentWorkout(userId: string, workoutId: string) {
-    const workout = await this.workouts.findUnique({
-      where: { id: workoutId },
-      select: { id: true, userId: true, planId: true },
-    });
-
-    if (!workout || workout.userId !== userId || workout.planId != null) {
-      throw new BusinessException({
-        code: BUSINESS_ERROR_CODE.COMMON,
-        message: 'Workout not found',
-      });
-    }
-
     await this.prisma.$transaction(async (tx) => {
+      await this.workouts.lockForUpdate(workoutId, tx);
+      const workout = await this.workouts.findUnique(
+        {
+          where: { id: workoutId },
+          select: { id: true, userId: true, planId: true, status: true },
+        },
+        tx,
+      );
+      if (!workout || workout.userId !== userId || workout.planId != null) {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Workout not found',
+        });
+      }
+      if (workout.status !== 'PLANNED') {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Only planned independent workouts can be deleted',
+        });
+      }
       await this.assertWorkoutHasNoActivityLink(workoutId, tx);
       await this.markExternalMappings(tx, [workoutId], 'LOCAL_DELETED');
       await this.workouts.delete({ where: { id: workoutId } }, tx);
@@ -2488,7 +2497,9 @@ export class PlanWriteSupport {
     };
     const result = options?.tx
       ? await run(options.tx)
-      : await this.prisma.$transaction(run, { timeout: 60_000 });
+      : await withSerializableRetry(() =>
+          this.prisma.$transaction(run, { timeout: 60_000 }),
+        );
     const afterCommit = () => this.emitDraftChanged(userId, result.plan);
     if (!options?.tx) {
       await afterCommit();
@@ -2743,7 +2754,9 @@ export class PlanWriteSupport {
     };
     const result = options?.tx
       ? await run(options.tx)
-      : await this.prisma.$transaction(run, { timeout: 60_000 });
+      : await withSerializableRetry(() =>
+          this.prisma.$transaction(run, { timeout: 60_000 }),
+        );
     if (!options?.tx) await result.afterCommit?.();
     return result;
   }
@@ -2832,7 +2845,9 @@ export class PlanWriteSupport {
     };
     const result = options?.tx
       ? await run(options.tx)
-      : await this.prisma.$transaction(run, { timeout: 60_000 });
+      : await withSerializableRetry(() =>
+          this.prisma.$transaction(run, { timeout: 60_000 }),
+        );
     if (!options?.tx) await result.afterCommit?.();
     return result;
   }
@@ -2907,6 +2922,13 @@ export class PlanWriteSupport {
             strengthExercises: this.buildStrengthExercisesInclude(),
             links: this.buildWorkoutLinksInclude(),
           },
+        },
+        tx,
+      );
+      await this.links.updateMany(
+        {
+          where: { planWorkoutId: workoutId, unlinkedAt: null },
+          data: { autoMarkedWorkoutDone: false },
         },
         tx,
       );
@@ -3458,7 +3480,9 @@ export class PlanWriteSupport {
     };
     const result = options?.tx
       ? await run(options.tx)
-      : await this.prisma.$transaction(run, { timeout: 60_000 });
+      : await withSerializableRetry(() =>
+          this.prisma.$transaction(run, { timeout: 60_000 }),
+        );
     if (!options?.tx) {
       await this.emitDraftChanged(userId, result.plan);
       await this.emitWorkoutsChanged(
@@ -3477,12 +3501,7 @@ export class PlanWriteSupport {
         userId,
         await this.assertPlanOwnership(userId, planId),
       );
-      await this.emitWorkoutsChanged(
-        userId,
-        'workouts_committed',
-        [],
-        planId,
-      );
+      await this.emitWorkoutsChanged(userId, 'workouts_committed', [], planId);
     } catch (error) {
       // The transaction has already committed; notification failure must not report a failed apply.
       this.logger.warn(
@@ -3564,13 +3583,32 @@ export class PlanWriteSupport {
 
     const activity = await this.activityRead.findFirst({
       where: readyActivityWhere({ id: dto.activityId }),
-      select: { id: true, userId: true, startTime: true },
+      select: { id: true, hashId: true, userId: true, startTime: true },
     });
     if (!activity || activity.userId !== userId) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
         message: 'Activity not found',
       });
+    }
+
+    if ((dto.role ?? 'PRIMARY') === 'PRIMARY') {
+      await this.replaceActivityPlanLinkByHash(
+        userId,
+        activity.hashId,
+        { workoutId },
+        meta,
+        dto.source ?? 'MANUAL',
+      );
+      return {
+        link: await this.links.findFirst({
+          where: {
+            activityId: activity.id,
+            planWorkoutId: workoutId,
+            unlinkedAt: null,
+          },
+        }),
+      };
     }
 
     const existing = await this.links.findFirst({
@@ -3584,73 +3622,88 @@ export class PlanWriteSupport {
       return { link: existing };
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const isPrimary = (dto.role ?? 'PRIMARY') === 'PRIMARY';
-      const autoMarked = isPrimary
-        ? await markWorkoutDoneIfApplicable(
-            tx,
-            workoutId,
-            activity.startTime ?? null,
-          )
-        : false;
-      const link = await this.links.create(
-        {
-          data: {
-            planId,
-            planWorkoutId: workoutId,
-            activityId: dto.activityId,
-            source: dto.source ?? 'MANUAL',
-            role: dto.role ?? 'PRIMARY',
-            autoMarkedWorkoutDone: autoMarked,
+    return withSerializableRetry(() =>
+      this.prisma.$transaction(async (tx) => {
+        if (!(await this.links.lockLinkTargets(activity.id, workoutId, tx)))
+          throw new Error('Link target no longer exists');
+        const existing = await this.links.findFirst(
+          {
+            where: {
+              activityId: activity.id,
+              planWorkoutId: workoutId,
+              unlinkedAt: null,
+            },
           },
-        },
-        tx,
-      );
+          tx,
+        );
+        if (existing) return { link: existing };
+        const isPrimary = (dto.role ?? 'PRIMARY') === 'PRIMARY';
+        const autoMarked = isPrimary
+          ? await markWorkoutDoneIfApplicable(
+              tx,
+              workoutId,
+              activity.startTime ?? null,
+            )
+          : false;
+        const link = await this.links.create(
+          {
+            data: {
+              planId,
+              planWorkoutId: workoutId,
+              activityId: dto.activityId,
+              source: dto.source ?? 'MANUAL',
+              role: dto.role ?? 'PRIMARY',
+              autoMarkedWorkoutDone: autoMarked,
+            },
+          },
+          tx,
+        );
 
-      await this.coachContext.appendEvent({
-        tx: tx,
-        userId,
-        planId,
-        type: 'WORKOUT_LINKED',
-        source: meta?.source ?? 'system',
-        decisionId: meta?.decisionId ?? null,
-        branchId: meta?.branchId ?? null,
-        commitId: meta?.commitId ?? null,
-        payload: {
-          action: 'link_workout_activity',
-          reason: meta?.reason ?? null,
-          toolCallId: meta?.toolCallId ?? null,
-          decisionId: meta?.decisionId ?? null,
-          branchId: meta?.branchId ?? null,
-          commitId: meta?.commitId ?? null,
-          workoutId,
-          activityId: dto.activityId,
-          sourceType: dto.source ?? 'MANUAL',
-          role: dto.role ?? 'PRIMARY',
-          autoMarkedWorkoutDone: autoMarked,
-        },
-      });
-
-      if (autoMarked) {
         await this.coachContext.appendEvent({
           tx: tx,
           userId,
           planId,
-          type: 'WORKOUT_COMPLETED',
+          type: 'WORKOUT_LINKED',
           source: meta?.source ?? 'system',
           decisionId: meta?.decisionId ?? null,
           branchId: meta?.branchId ?? null,
           commitId: meta?.commitId ?? null,
           payload: {
-            action: 'auto_mark_done_on_link',
+            action: 'link_workout_activity',
+            reason: meta?.reason ?? null,
+            toolCallId: meta?.toolCallId ?? null,
+            decisionId: meta?.decisionId ?? null,
+            branchId: meta?.branchId ?? null,
+            commitId: meta?.commitId ?? null,
             workoutId,
             activityId: dto.activityId,
+            sourceType: dto.source ?? 'MANUAL',
+            role: dto.role ?? 'PRIMARY',
+            autoMarkedWorkoutDone: autoMarked,
           },
         });
-      }
 
-      return { link };
-    });
+        if (autoMarked) {
+          await this.coachContext.appendEvent({
+            tx: tx,
+            userId,
+            planId,
+            type: 'WORKOUT_COMPLETED',
+            source: meta?.source ?? 'system',
+            decisionId: meta?.decisionId ?? null,
+            branchId: meta?.branchId ?? null,
+            commitId: meta?.commitId ?? null,
+            payload: {
+              action: 'auto_mark_done_on_link',
+              workoutId,
+              activityId: dto.activityId,
+            },
+          });
+        }
+
+        return { link };
+      }),
+    );
   }
 
   async unlinkWorkoutActivity(
@@ -3671,18 +3724,45 @@ export class PlanWriteSupport {
       });
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      await this.links.update(
-        {
-          where: { id: linkId },
-          data: { unlinkedAt: new Date() },
-        },
-        tx,
-      );
-      // 仅自动 link 自己置 DONE 的回退；用户手动改 DONE 不动。
-      await this.revertAutoDoneIfOrphan(tx, workoutId, link);
-      return { success: true };
-    });
+    const result = await withSerializableRetry(() =>
+      this.prisma.$transaction(async (tx) => {
+        if (!(await this.links.lockLinkTargets(link.activityId, workoutId, tx)))
+          throw new Error('Link target no longer exists');
+        const current = await this.links.findUnique(
+          { where: { id: linkId } },
+          tx,
+        );
+        if (!current || current.unlinkedAt) return { success: true };
+        if (current.source === 'AUTO')
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Activity is locked to its recorded workout',
+          });
+        await this.links.update(
+          {
+            where: { id: linkId },
+            data: { unlinkedAt: new Date() },
+          },
+          tx,
+        );
+        // 仅自动 link 自己置 DONE 的回退；用户手动改 DONE 不动。
+        await this.revertAutoDoneIfOrphan(tx, workoutId, current);
+        await this.links.suppressMatching(
+          userId,
+          link.activityId,
+          'USER_UNLINKED',
+          tx,
+        );
+        return { success: true };
+      }),
+    );
+    await this.emitWorkoutsChanged(
+      userId,
+      'activity_unlink',
+      [workoutId],
+      planId,
+    );
+    return result;
   }
 
   /**
@@ -3806,7 +3886,7 @@ export class PlanWriteSupport {
   async listActivityPlanCandidatesByHash(
     userId: string,
     hashId: string,
-    calendarTimeZone?: string,
+    _calendarTimeZone?: string,
   ) {
     const activity = await this.activityRead.findFirst({
       where: readyActivityWhere({ hashId, userId }),
@@ -3829,28 +3909,18 @@ export class PlanWriteSupport {
       return { candidates: [] as unknown[] };
     }
     const sport = activity.sportType;
-    if (
-      !sport ||
-      sport === SportType.UNKNOWN ||
-      sport === SportType.STRETCHING
-    ) {
-      return { candidates: [] as unknown[] };
-    }
 
-    const activePlan = await this.plans.findFirst({
+    const activePlans = await this.plans.findMany({
       where: { userId, status: 'ACTIVE' },
       select: { id: true },
     });
-    if (!activePlan) {
-      return { candidates: [] as unknown[] };
-    }
 
     const userTz = await this.userService.getPreferredTimezone(userId);
 
     const dayStr = resolveActivityCalendarDayStr(
       new Date(activity.startTime),
       activity.timezone,
-      calendarTimeZone ?? null,
+      null,
       userTz,
     );
     if (!dayStr) {
@@ -3861,26 +3931,37 @@ export class PlanWriteSupport {
 
     const workouts = await this.workouts.findMany({
       where: {
-        planId: activePlan.id,
+        userId,
+        OR: [
+          { planId: null },
+          { planId: { in: activePlans.map((plan) => plan.id) } },
+        ],
         scheduledDate: scheduledEq,
-        sportType: sport,
+        ...(sport && sport !== SportType.UNKNOWN
+          ? { sportType: { in: [sport, SportType.UNKNOWN] } }
+          : {}),
         status: { in: ['PLANNED', 'IN_PROGRESS'] },
       },
       select: {
         id: true,
         planId: true,
+        plan: { select: { title: true } },
         name: true,
         sportType: true,
         sessionIndex: true,
+        structureKind: true,
+        plannedDurationSeconds: true,
       },
       orderBy: [{ sessionIndex: 'asc' }],
     });
 
     const candidates: unknown[] = [];
     for (const w of workouts) {
-      const expectedSec = await this.planLinkMatcher.sumExpectedDurationSeconds(
-        w.id,
-      );
+      const expectedSec =
+        w.plannedDurationSeconds ??
+        (w.structureKind === 'FREEFORM'
+          ? null
+          : await this.planLinkMatcher.sumExpectedDurationSeconds(w.id));
       // 检查是否有其他活动占用该 workout
       const existingLink = await this.links.findFirst({
         where: {
@@ -3921,6 +4002,7 @@ export class PlanWriteSupport {
       candidates.push({
         workoutId: w.id,
         planId: w.planId,
+        planTitle: w.plan?.title ?? null,
         name: w.name,
         sportType: w.sportType,
         sessionIndex: w.sessionIndex ?? 1,
@@ -3966,6 +4048,31 @@ export class PlanWriteSupport {
         });
       }
 
+      if (!(await this.links.lockLinkTargets(activity.id, null, tx)))
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Workout or activity not found',
+        });
+      // Lock all affected workouts in one order before reading completion ownership.
+      const linkedWorkouts = await this.links.findMany(
+        {
+          where: { activityId: activity.id, unlinkedAt: null },
+          select: { planWorkoutId: true },
+        },
+        tx,
+      );
+      for (const workoutId of [
+        ...new Set([
+          dto.workoutId,
+          ...linkedWorkouts.map((link) => link.planWorkoutId),
+        ]),
+      ].sort()) {
+        if (!(await this.links.lockLinkTargets(activity.id, workoutId, tx)))
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Workout or activity not found',
+          });
+      }
       const targetWorkout = await this.workouts.findUnique(
         {
           where: { id: dto.workoutId },
@@ -3975,9 +4082,9 @@ export class PlanWriteSupport {
       );
       if (
         !targetWorkout ||
-        targetWorkout.plan?.userId !== userId ||
-        targetWorkout.plan.status === 'COMPLETED' ||
-        targetWorkout.plan.status === 'CANCELLED'
+        targetWorkout.userId !== userId ||
+        targetWorkout.plan?.status === 'COMPLETED' ||
+        targetWorkout.plan?.status === 'CANCELLED'
       ) {
         throw new BusinessException({
           code: BUSINESS_ERROR_CODE.COMMON,
@@ -3985,7 +4092,7 @@ export class PlanWriteSupport {
         });
       }
 
-      const planId = targetWorkout.planId as string;
+      const planId = targetWorkout.planId ?? null;
 
       // 同 activity 之前的所有 active link 都得解绑：可能涉及别的 workout，因此每条单独处理 auto DONE 回退。
       const detachedActivityLinks = await this.links.findMany(
@@ -4003,6 +4110,22 @@ export class PlanWriteSupport {
       const hardBoundActivityLink = detachedActivityLinks.find(
         (link) => link.source === PlanWorkoutActivityLinkSource.AUTO,
       );
+      if (
+        detachedActivityLinks.length === 1 &&
+        detachedActivityLinks[0].source === linkSource &&
+        detachedActivityLinks[0].planWorkoutId === dto.workoutId
+      ) {
+        return {
+          linkedPlanWorkout: {
+            planId,
+            workoutId: targetWorkout.id,
+            name: targetWorkout.name,
+            sportType: targetWorkout.sportType,
+            status: targetWorkout.status,
+            source: linkSource,
+          },
+        };
+      }
       if (hardBoundActivityLink) {
         if (
           linkSource === PlanWorkoutActivityLinkSource.AUTO &&
@@ -4074,6 +4197,13 @@ export class PlanWriteSupport {
           tx,
         );
         for (const l of detachedWorkoutLinks) {
+          if (l.activityId !== activity.id)
+            await this.links.suppressMatching(
+              userId,
+              l.activityId,
+              'USER_REPLACED',
+              tx,
+            );
           await this.revertAutoDoneIfOrphan(tx, l.planWorkoutId, {
             autoMarkedWorkoutDone: l.autoMarkedWorkoutDone,
           });
@@ -4110,32 +4240,52 @@ export class PlanWriteSupport {
         tx,
       );
 
+      await this.links.putMatchState(
+        {
+          where: { activityId: activity.id },
+          create: {
+            activityId: activity.id,
+            userId,
+            outcome: 'MANUAL',
+            reason: 'USER_LINKED',
+            candidateWorkoutIds: [dto.workoutId],
+          },
+          update: {
+            outcome: 'MANUAL',
+            reason: 'USER_LINKED',
+            candidateWorkoutIds: [dto.workoutId],
+            suppressedAt: null,
+          },
+        },
+        tx,
+      );
       const pw = created.planWorkout;
 
-      await this.coachContext.appendEvent({
-        tx: tx,
-        userId,
-        planId,
-        type: 'WORKOUT_LINKED',
-        source: meta?.source ?? 'system',
-        decisionId: meta?.decisionId ?? null,
-        branchId: meta?.branchId ?? null,
-        commitId: meta?.commitId ?? null,
-        payload: {
-          action: 'replace_activity_plan_link',
-          reason: meta?.reason ?? null,
-          toolCallId: meta?.toolCallId ?? null,
+      if (planId)
+        await this.coachContext.appendEvent({
+          tx: tx,
+          userId,
+          planId,
+          type: 'WORKOUT_LINKED',
+          source: meta?.source ?? 'system',
           decisionId: meta?.decisionId ?? null,
           branchId: meta?.branchId ?? null,
           commitId: meta?.commitId ?? null,
-          hashId,
-          activityId: activity.id,
-          workoutId: dto.workoutId,
-          autoMarkedWorkoutDone: autoMarked,
-        },
-      });
+          payload: {
+            action: 'replace_activity_plan_link',
+            reason: meta?.reason ?? null,
+            toolCallId: meta?.toolCallId ?? null,
+            decisionId: meta?.decisionId ?? null,
+            branchId: meta?.branchId ?? null,
+            commitId: meta?.commitId ?? null,
+            hashId,
+            activityId: activity.id,
+            workoutId: dto.workoutId,
+            autoMarkedWorkoutDone: autoMarked,
+          },
+        });
 
-      if (autoMarked) {
+      if (autoMarked && planId) {
         await this.coachContext.appendEvent({
           tx: tx,
           userId,
@@ -4165,9 +4315,19 @@ export class PlanWriteSupport {
         },
       };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    const result = options?.tx
+      ? await run(options.tx)
+      : await withSerializableRetry(() =>
+          this.prisma.$transaction(run, { timeout: 60_000 }),
+        );
+    if (!options?.tx)
+      await this.emitWorkoutsChanged(
+        userId,
+        'activity_link',
+        [dto.workoutId],
+        result.linkedPlanWorkout.planId,
+      );
+    return result;
   }
 
   async bindRecordedActivityToWorkout(
@@ -4207,7 +4367,12 @@ export class PlanWriteSupport {
         });
       }
 
-      const detached = await this.links.findMany(
+      if (!(await this.links.lockLinkTargets(activity.id, null, tx)))
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.COMMON,
+          message: 'Activity not found',
+        });
+      let detached = await this.links.findMany(
         {
           where: { activityId: activity.id, unlinkedAt: null },
           select: {
@@ -4229,6 +4394,22 @@ export class PlanWriteSupport {
         });
       }
       if (detached.length > 0) {
+        for (const workoutId of [
+          ...new Set(detached.map((link) => link.planWorkoutId)),
+        ].sort())
+          await this.links.lockLinkTargets(activity.id, workoutId, tx);
+        // A concurrent explicit completion may have cleared the flag while we waited.
+        detached = await this.links.findMany(
+          {
+            where: { activityId: activity.id, unlinkedAt: null },
+            select: {
+              planWorkoutId: true,
+              autoMarkedWorkoutDone: true,
+              source: true,
+            },
+          },
+          tx,
+        );
         await this.links.updateMany(
           {
             where: { activityId: activity.id, unlinkedAt: null },
@@ -4243,10 +4424,20 @@ export class PlanWriteSupport {
         }
       }
 
+      await this.links.suppressMatching(
+        userId,
+        activity.id,
+        'USER_UNLINKED',
+        tx,
+      );
       return { success: true as const };
     };
-    return options?.tx
-      ? run(options.tx)
-      : this.prisma.$transaction(run, { timeout: 60_000 });
+    const result = options?.tx
+      ? await run(options.tx)
+      : await withSerializableRetry(() =>
+          this.prisma.$transaction(run, { timeout: 60_000 }),
+        );
+    if (!options?.tx) await this.emitWorkoutsChanged(userId, 'activity_unlink');
+    return result;
   }
 }

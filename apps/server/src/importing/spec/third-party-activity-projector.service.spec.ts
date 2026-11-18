@@ -1,6 +1,15 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
+import { ImportingJobService } from '../importing-job.service';
 import { ThirdPartyActivityProjectorService } from '../third-party-activity-projector.service';
 import { describe, expect, it, jest } from '@jest/globals';
 import type { CanonicalActivityPayload } from '../canonical-activity.types';
+
+function createService(prisma: unknown) {
+  return new ThirdPartyActivityProjectorService(
+    prisma as never,
+    new ImportingJobService(importingJobRepository(prisma as never)),
+  );
+}
 
 function payload(kind: string): CanonicalActivityPayload {
   return {
@@ -16,7 +25,7 @@ function payload(kind: string): CanonicalActivityPayload {
 
 describe('ThirdPartyActivityProjectorService', () => {
   it('does not create a pseudo third-party activity for manual upload', async () => {
-    const service = new ThirdPartyActivityProjectorService({} as never);
+    const service = createService({} as never);
     await expect(
       service.project({
         userId: 'user-1',
@@ -44,7 +53,7 @@ describe('ThirdPartyActivityProjectorService', () => {
         callback(tx as never),
       ),
     };
-    const service = new ThirdPartyActivityProjectorService(prisma as never);
+    const service = createService(prisma as never);
     await service.project({
       userId: 'user-1',
       sourceObjectId: 'source-1',
@@ -77,7 +86,7 @@ describe('ThirdPartyActivityProjectorService', () => {
         upsert: jest.fn(),
       },
     };
-    const service = new ThirdPartyActivityProjectorService({
+    const service = createService({
       thirdPartyActivity: tx.thirdPartyActivity,
       $transaction: jest.fn(async (callback: (client: never) => unknown) =>
         callback(tx as never),
@@ -115,7 +124,7 @@ describe('ThirdPartyActivityProjectorService', () => {
       },
       activityThirdPartyMapping: { updateMany: jest.fn() },
     };
-    const service = new ThirdPartyActivityProjectorService({
+    const service = createService({
       thirdPartyActivity: { findUnique: jest.fn(async () => preferred) },
       $transaction: jest.fn(async (callback: (client: never) => unknown) =>
         callback(tx as never),
@@ -143,11 +152,32 @@ describe('ThirdPartyActivityProjectorService', () => {
   });
 });
 
-
-it('does not overwrite another remote account when one owner has conflicting activity IDs',async()=>{
- const tx={ $executeRawUnsafe:jest.fn(async()=>1),thirdPartyActivity:{findUnique:jest.fn(async()=>({id:1,userId:'user',externalUserId:'account-A'})),upsert:jest.fn(),update:jest.fn()}};
- const service=new ThirdPartyActivityProjectorService({$transaction:async(fn:any)=>fn(tx)}as never);
- const input=payload('STRAVA');input.source.accountRef='account-B';
- await expect(service.project({userId:'user',sourceObjectId:'source',batchJobId:'batch',payload:input})).rejects.toThrow('different remote account');
- expect(tx.thirdPartyActivity.upsert).not.toHaveBeenCalled();expect(tx.thirdPartyActivity.update).not.toHaveBeenCalled();
+it('does not overwrite another remote account when one owner has conflicting activity IDs', async () => {
+  const tx = {
+    $executeRawUnsafe: jest.fn(async () => 1),
+    thirdPartyActivity: {
+      findUnique: jest.fn(async () => ({
+        id: 1,
+        userId: 'user',
+        externalUserId: 'account-A',
+      })),
+      upsert: jest.fn(),
+      update: jest.fn(),
+    },
+  };
+  const service = createService({
+    $transaction: async (fn: any) => fn(tx),
+  } as never);
+  const input = payload('STRAVA');
+  input.source.accountRef = 'account-B';
+  await expect(
+    service.project({
+      userId: 'user',
+      sourceObjectId: 'source',
+      batchJobId: 'batch',
+      payload: input,
+    }),
+  ).rejects.toThrow('different remote account');
+  expect(tx.thirdPartyActivity.upsert).not.toHaveBeenCalled();
+  expect(tx.thirdPartyActivity.update).not.toHaveBeenCalled();
 });

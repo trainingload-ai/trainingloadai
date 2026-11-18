@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { TodaySuggestionGuidanceLifecycle } from './today-suggestion-guidance.service';
+import {
+  TodaySuggestionGenerationService,
+  TodayGenerationLeaseLost,
+  type TodayGenerationLease,
+} from './today-suggestion-generation.service';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
 import type {
@@ -26,6 +32,7 @@ export type TodaySuggestionResponseV2 = TodaySuggestionV2 & {
   tags: string[];
   source: 'fallback' | 'cache' | 'generated';
   shouldRefresh: boolean;
+  retryAt?: string;
   generatedAt: string | null;
   reason: string;
   tone: 'neutral' | 'warning' | 'success';
@@ -133,6 +140,8 @@ export class TodaySuggestionOrchestratorService {
     private readonly workoutGenerator: TodaySuggestionWorkoutGeneratorService,
     private readonly delivery: TodaySuggestionDeliveryPolicy,
     private readonly engagement: TodaySuggestionEngagementService,
+    private readonly generations: TodaySuggestionGenerationService,
+    @Optional() private readonly guidance?: TodaySuggestionGuidanceLifecycle,
   ) {}
 
   get(args: {
@@ -158,8 +167,12 @@ export class TodaySuggestionOrchestratorService {
       signal?: AbortSignal;
     },
     revisionRetry = 0,
+    lease?: TodayGenerationLease,
+    waitAttempt = 0,
   ): Promise<TodaySuggestionResponseV2> {
     let projection = await this.projector.project(args);
+    const reconciled = await this.guidance?.reconcile(projection);
+    if (reconciled?.changed) projection = await this.projector.project(args);
     const cached = await this.prisma.aiTodaySuggestion.findUnique({
       where: {
         ai_today_suggestion_user_locale_date_unique: {
@@ -189,7 +202,10 @@ export class TodaySuggestionOrchestratorService {
       cached.signatureHash === projection.factHash &&
       cachedWeatherMatches(cached.keyContext, projection) &&
       cached.validUntil &&
-      cached.validUntil.getTime() > Date.now()
+      cached.validUntil.getTime() > Date.now() &&
+      (cachedResult.recommendation.kind !== 'TRAIN' ||
+        (cachedResult.recommendation.durationMinutes ?? 0) <=
+          (projection.minutesUntilDayEnd ?? 1_440))
     ) {
       if (keyContextTimezone(cached.keyContext) !== projection.timezone) {
         await this.prisma.aiTodaySuggestion.update({
@@ -219,6 +235,54 @@ export class TodaySuggestionOrchestratorService {
       );
     }
 
+    const scope = {
+      userId: args.userId,
+      locale: args.locale,
+      date: projection.date,
+      inputHash: createHash('sha256')
+        .update(
+          stableJson({
+            facts: projection.factHash,
+            constraints: projection.constraintHash,
+            weather: projection.weatherImpact,
+          }),
+        )
+        .digest('hex'),
+    };
+    if (!lease) {
+      const claim = await this.generations.claim(scope);
+      if (claim.kind !== 'ACQUIRED') {
+        if (claim.kind === 'BUSY' && waitAttempt < 3) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, [150, 350, 750][waitAttempt]),
+          );
+          return this.generate(args, revisionRetry, undefined, waitAttempt + 1);
+        }
+        return this.currentFallback(
+          projection,
+          claim.kind === 'BUSY' ? 'GENERATION_IN_PROGRESS' : 'RETRY_COOLDOWN',
+          new Date(
+            claim.kind === 'BUSY'
+              ? Math.min(claim.retryAt.getTime(), Date.now() + 15_000)
+              : claim.retryAt.getTime(),
+          ),
+        );
+      }
+      try {
+        return await this.generate(args, revisionRetry, claim.lease);
+      } catch (error) {
+        if (!(error instanceof TodayGenerationLeaseLost)) throw error;
+        return this.currentFallback(
+          await this.projector.project(args),
+          'GENERATION_IN_PROGRESS',
+          new Date(Date.now() + 15_000),
+        );
+      } finally {
+        await this.generations.release(claim.lease);
+      }
+    }
+    await this.generations.bind(lease, scope);
+
     // Viewing a card is optional and must never alter the training prescription.
     let draft: TodaySuggestionDraft;
     let state: TodaySuggestionDeliveryState;
@@ -241,16 +305,18 @@ export class TodaySuggestionOrchestratorService {
       draft = this.factFallback(projection);
       state = 'AI_UNAVAILABLE';
       reasonCode = 'AI_NOT_CONFIGURED';
-    } else if (projection.coachState?.decisionReadStatus === 'UNAVAILABLE') {
+    } else if (
+      projection.coachState?.decisionReadStatus === 'UNAVAILABLE' ||
+      projection.coachState?.assessmentReadStatus === 'UNAVAILABLE' ||
+      (projection.lightContext.sharedFacts as { status?: string } | undefined)
+        ?.status === 'LIMITED'
+    ) {
       draft = this.factFallback(projection);
       state = 'FACT_FALLBACK';
       reasonCode = 'COACH_STATE_UNAVAILABLE';
     } else {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort('timeout'), 60_000);
-      const forwardAbort = () => controller.abort(args.signal?.reason);
-      if (args.signal?.aborted) forwardAbort();
-      else args.signal?.addEventListener('abort', forwardAbort, { once: true });
       try {
         const run = await this.agent.run({
           projection,
@@ -258,6 +324,7 @@ export class TodaySuggestionOrchestratorService {
           allowWithoutConsent: args.allowWithoutConsent,
         });
         draft = run.draft;
+        lease.failure = undefined;
         if (draft.preferredIntent === 'CREATE_TODAY_WORKOUT') {
           try {
             const generated = await this.workoutGenerator.generate({
@@ -290,6 +357,12 @@ export class TodaySuggestionOrchestratorService {
       } catch (error) {
         draft = this.factFallback(projection);
         reasonCode = this.reasonFromError(error, controller.signal.aborted);
+        if (
+          !['AI_NOT_CONFIGURED', 'AI_DISABLED', 'ACCESS_DENIED'].includes(
+            reasonCode,
+          )
+        )
+          lease.failure = reasonCode;
         state =
           reasonCode === 'AI_NOT_CONFIGURED'
             ? 'AI_UNAVAILABLE'
@@ -299,7 +372,6 @@ export class TodaySuggestionOrchestratorService {
         );
       } finally {
         clearTimeout(timeout);
-        args.signal?.removeEventListener('abort', forwardAbort);
       }
     }
 
@@ -309,11 +381,13 @@ export class TodaySuggestionOrchestratorService {
       latest.constraintHash !== projection.constraintHash ||
       !cachedWeatherMatches(keyContext(projection), latest)
     ) {
-      if (revisionRetry < 1) return this.generate(args, revisionRetry + 1);
+      if (revisionRetry < 1 && !lease.failure)
+        return this.generate(args, revisionRetry + 1, lease);
       projection = latest;
       draft = this.factFallback(latest);
       state = 'FACT_FALLBACK';
-      reasonCode = 'FACTS_CHANGED';
+      reasonCode = lease.failure ? reasonCode : 'FACTS_CHANGED';
+      lease.failure ??= 'FACTS_CHANGED';
       generatedAt = null;
       runId = null;
       workoutRunId = null;
@@ -321,6 +395,19 @@ export class TodaySuggestionOrchestratorService {
       model = null;
     }
 
+    await this.generations.bind(lease, {
+      ...scope,
+      date: projection.date,
+      inputHash: createHash('sha256')
+        .update(
+          stableJson({
+            facts: projection.factHash,
+            constraints: projection.constraintHash,
+            weather: projection.weatherImpact,
+          }),
+        )
+        .digest('hex'),
+    });
     const generationToken = deterministicGenerationToken([
       args.userId,
       args.locale,
@@ -391,7 +478,7 @@ export class TodaySuggestionOrchestratorService {
         generatedAt: generatedAt ?? new Date(),
       },
     };
-    const persisted = await this.prisma.$transaction(async (tx) => {
+    const persisted = await this.generations.publish(lease, async (tx) => {
       await acquireHashtextAdvisoryXactLock(
         tx,
         `today-advice:${args.userId}:${args.locale}:${projection.date}`,
@@ -441,10 +528,53 @@ export class TodaySuggestionOrchestratorService {
     );
   }
 
+  private async currentFallback(
+    projection: TodaySuggestionConstraintProjection,
+    reasonCode: TodaySuggestionDeliveryReason,
+    retryAt: Date,
+  ): Promise<TodaySuggestionResponseV2> {
+    const draft = this.factFallback(projection);
+    const generationToken = await this.generations.contextToken(
+      projection.userId,
+      projection.timezone,
+    );
+    return {
+      ...this.present(
+        this.delivery.build({
+          projection,
+          draft,
+          generationToken,
+          state: 'FACT_FALLBACK',
+          reasonCode,
+          generatedAt: null,
+        }),
+        draft.tags,
+      ),
+      retryAt: retryAt.toISOString(),
+    };
+  }
+
   private factFallback(
     projection: TodaySuggestionConstraintProjection,
   ): TodaySuggestionDraft {
     const zh = projection.locale.toLowerCase().startsWith('zh');
+    if (
+      projection.coachState?.assessmentReadStatus === 'UNAVAILABLE' ||
+      (projection.lightContext?.sharedFacts as { status?: string } | undefined)
+        ?.status === 'LIMITED'
+    )
+      return {
+        headline: zh ? '今天先保持低负担安排' : 'Keep today low demand',
+        summary: zh
+          ? '部分当前依据暂时无法核对，今天先保持低负担活动，不临时增加强度或补练。数据恢复后，今日建议会重新结合当前情况判断。'
+          : 'Some current evidence is temporarily unavailable. Keep activity low demand without increasing intensity or making up training; the advice will update when current evidence is available.',
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'LOW',
+        evidenceCodes: [],
+        preferredIntent: 'ASK_COACH',
+        secondaryIntents: [],
+        tags: [],
+      };
     if (projection.highConcern) {
       return {
         headline: zh ? '今天先保持保守安排' : 'Keep today conservative',
@@ -514,6 +644,63 @@ export class TodaySuggestionOrchestratorService {
         evidenceCodes: [],
         preferredIntent: projection.activePlan ? 'OPEN_PLAN' : null,
         secondaryIntents: [],
+        tags: [],
+      };
+    }
+    const sharedMemory = (
+      projection.lightContext?.sharedFacts as
+        | { memory?: { items?: Array<{ category?: string; kind?: string }> } }
+        | undefined
+    )?.memory;
+    if (
+      sharedMemory?.items?.some(
+        (item) =>
+          item.kind === 'CONSTRAINT' ||
+          ['pain', 'illness', 'recovery', 'fatigue'].includes(
+            item.category ?? '',
+          ),
+      )
+    )
+      return {
+        headline: zh ? '今天先保持低负担安排' : 'Keep today low demand',
+        summary: zh
+          ? '近期的身体状态记录需要和当前课表一起判断，暂不据此增加强度或补练。今天先保持低负担安排，待完整判断恢复后再决定下一步。'
+          : 'Recent reports need to be considered with the current schedule. Avoid increasing intensity or making up training; keep today low demand until a complete judgment is available.',
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'LOW',
+        evidenceCodes: [],
+        preferredIntent: null,
+        secondaryIntents: [],
+        tags: [],
+      };
+    const matching = (
+      projection.lightContext?.workoutMatching as
+        | Array<{
+            activityTitle?: string;
+            candidates: Array<{ name?: string; planTitle?: string | null }>;
+          }>
+        | undefined
+    )?.[0];
+    if (matching?.candidates.length) {
+      const names = matching.candidates
+        .slice(0, 2)
+        .map((candidate) =>
+          candidate.planTitle
+            ? `${candidate.planTitle} · ${candidate.name || (zh ? '课程' : 'Workout')}`
+            : candidate.name || (zh ? '独立课程' : 'Independent workout'),
+        );
+      return {
+        headline: zh
+          ? '训练已记录，课程关联需要核对'
+          : 'Training is recorded; check its workout association',
+        summary: zh
+          ? `这次活动与${names.map((name) => `「${name}」`).join('、')}都可能对应，目前尚未自动关联或据此标记课程完成。请在活动详情中核对并手动选择实际完成的课程，不必因为尚未打勾而重复训练。`
+          : `This activity may correspond to ${names.join(' or ')}. It has not been automatically associated or used to mark a workout complete. Check the activity details and manually select the workout you completed; do not repeat training just because a workout is not checked off.`,
+        recommendation: { kind: 'RECOVER' },
+        confidence: 'LOW',
+        evidenceCodes: ['RECENT_ACTIVITY'],
+        preferredIntent: 'OPEN_ACTIVITY_REVIEW',
+        secondaryIntents: ['ASK_COACH'],
         tags: [],
       };
     }

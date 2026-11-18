@@ -318,6 +318,18 @@ export class ActivityMetricsPipelineService {
     return this.orchestrator.runStrict(context, this.tasksFor(args.mode));
   }
 
+  async computeLight(activity: Activity, userId: string) {
+    const context = await this.buildContext(activity, userId);
+    return this.orchestrator.computeStrict(
+      context,
+      this.tasksFor(ActivityAnalyzeMode.LIGHT),
+    );
+  }
+
+  commitComputedLight(run: ComputedMetricsRun, tx: Prisma.TransactionClient) {
+    return this.orchestrator.commitComputed(run, tx);
+  }
+
   async runHeartRate(activityId: number, userId: string): Promise<void> {
     const context = await this.contextForActivity(activityId, userId);
     if (!context) return;

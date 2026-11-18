@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
+import { ImportingJobModule } from '../importing-job.module';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobRepository } from '../persistence/importing-job.repository';
 
@@ -17,14 +18,11 @@ async function createRepository(postProcessJobs: {
   upsert: jest.Mock<AsyncFn>;
 }) {
   const moduleRef = await Test.createTestingModule({
-    providers: [
-      ImportingJobRepository,
-      {
-        provide: PrismaService,
-        useValue: { userPostProcessJob: postProcessJobs },
-      },
-    ],
-  }).compile();
+    imports: [ImportingJobModule],
+  })
+    .overrideProvider(PrismaService)
+    .useValue({ userPostProcessJob: postProcessJobs })
+    .compile();
   return moduleRef.get(ImportingJobRepository);
 }
 

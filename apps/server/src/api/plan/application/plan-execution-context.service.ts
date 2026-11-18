@@ -1,3 +1,6 @@
+import { Optional } from '@nestjs/common';
+import { PlanLinkMatcherService } from './plan-link-matcher.service';
+import type { WorkoutMatchingReview } from '@shared/workout-matching';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   $Enums,
@@ -75,7 +78,7 @@ export type PlanExecutionActivity = {
   sessionRpe: number | null;
   updatedAt: string | null;
   linkedPlanWorkout: {
-    planId: string;
+    planId: string | null;
     workoutId: string;
     source: string;
     role: string;
@@ -217,6 +220,7 @@ export type PlanExecutionContext = {
     combinedConflicts: unknown[];
   };
   /** 事实指纹。计划/活动/负荷没变则不变，Runtime 用来去重。 */
+  workoutMatching: WorkoutMatchingReview[];
   factHash: string;
 };
 
@@ -438,6 +442,7 @@ export class PlanExecutionContextService {
     private readonly contexts: CoachContextRepository,
     private readonly activityRead: ActivityReadService,
     private readonly users: UserQueryService,
+    @Optional() private readonly workoutMatcher?: PlanLinkMatcherService,
   ) {}
 
   /**
@@ -466,14 +471,16 @@ export class PlanExecutionContextService {
       anchorDate,
       timezone,
     });
-    const [recentEvents, competitionContext] = await Promise.all([
-      this.loadRecentCoachEvents(rows.coachContext?.id ?? null),
-      this.buildCompetitionContext({
-        userId: args.userId,
-        anchorDate,
-        plan: rows.plan,
-      }),
-    ]);
+    const [recentEvents, competitionContext, workoutMatching] =
+      await Promise.all([
+        this.loadRecentCoachEvents(rows.coachContext?.id ?? null),
+        this.buildCompetitionContext({
+          userId: args.userId,
+          anchorDate,
+          plan: rows.plan,
+        }),
+        this.workoutMatcher?.listMatchingReviews(args.userId) ?? [],
+      ]);
 
     return this.assembleContext({
       args,
@@ -483,6 +490,9 @@ export class PlanExecutionContextService {
       rows,
       recentEvents,
       competitionContext,
+      workoutMatching: workoutMatching.filter(
+        (review) => review.date === anchorDate,
+      ),
     });
   }
 
@@ -621,6 +631,7 @@ export class PlanExecutionContextService {
     rows: SnapshotRows;
     recentEvents: PlanExecutionContext['recentEvents'];
     competitionContext: PlanExecutionContext['competitionContext'];
+    workoutMatching: WorkoutMatchingReview[];
   }): PlanExecutionContext {
     const { resolved, timezone, anchorDate, rows } = args;
     // 持久化的 current*Index 只在计划写入时更新，不能作为日期推进后的事实。
@@ -714,6 +725,7 @@ export class PlanExecutionContextService {
       ),
       recentEvents: args.recentEvents,
       competitionContext: args.competitionContext,
+      workoutMatching: args.workoutMatching,
     };
 
     return {
@@ -1266,6 +1278,7 @@ export class PlanExecutionContextService {
         activityId: context.anchor.activityId,
       },
       plan: context.plan,
+      workoutMatching: context.workoutMatching,
       day: context.day,
       tomorrow: context.tomorrow,
       currentWorkout: context.currentWorkout,

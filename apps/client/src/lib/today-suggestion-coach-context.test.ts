@@ -1,50 +1,35 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import {
-  buildTodaySuggestionCoachMessage,
-  claimTodaySuggestionCoachContext,
-  storeTodaySuggestionCoachContext,
-  TODAY_SUGGESTION_CONTEXT_TOOL_USE_ID,
-  type TodaySuggestionCoachContext,
-} from "./today-suggestion-coach-context";
+import { describe, expect, it } from "vitest";
+import { buildTodaySuggestionCoachMessage } from "./today-suggestion-coach-context";
+import type { TodaySuggestionServerContext } from "@/api/ai-today-suggestion";
 
-const context: TodaySuggestionCoachContext = {
-  suggestionId: "suggestion-1",
-  date: "2026-10-29",
-  weekday: "Thursday",
-  headline: "Keep today easy",
-  summary: "Use a short recovery run.",
-  recommendation: { kind: "RECOVER", durationMinutes: 20 },
-  confidence: "MEDIUM",
-  evidence: [],
-  primaryIntent: null,
-  secondaryIntents: [],
-  validUntil: "2026-10-29T15:59:59.999Z",
-};
-
-describe("today suggestion coach context", () => {
-  beforeEach(() => window.sessionStorage.clear());
-
-  it("claims a stored suggestion once", () => {
-    storeTodaySuggestionCoachContext(context);
-    expect(claimTodaySuggestionCoachContext("suggestion-1")).toEqual(context);
-    expect(claimTodaySuggestionCoachContext("suggestion-1")).toBeNull();
-  });
-
-  it("builds a visible prompt with structured product context", () => {
+describe("server-owned today guidance", () => {
+  it("sends a reference without trusting or duplicating cached claims", () => {
+    const context: TodaySuggestionServerContext = {
+      kind: "today_suggestion_context",
+      version: 2,
+      suggestionId: "owned-reference",
+      date: "2026-11-18",
+      headline: "旧标题",
+      summary: "可能已过期的判断",
+      currentFacts: { private: "not sent by the browser" },
+      guidanceStatus: "CURRENT",
+      instruction: "not a client instruction",
+    };
     const message = buildTodaySuggestionCoachMessage({
-      prompt: "Help me decide what to do next.",
+      prompt: "请帮我核对这次活动",
       context,
     });
     expect(message.content[0]).toEqual({
       type: "text",
-      text: "Help me decide what to do next.",
+      text: "请帮我核对这次活动",
     });
-    expect(message.content[1]).toMatchObject({
+    expect(message.content[1]).toEqual({
       type: "tool_result",
-      tool_use_id: TODAY_SUGGESTION_CONTEXT_TOOL_USE_ID,
+      tool_use_id: "client:today_suggestion_context",
       content: {
         kind: "today_suggestion_context",
-        suggestionId: "suggestion-1",
+        version: 2,
+        suggestionId: "owned-reference",
       },
     });
   });

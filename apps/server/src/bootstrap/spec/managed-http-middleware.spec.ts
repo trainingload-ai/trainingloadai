@@ -1,5 +1,6 @@
 import {
   Controller,
+  Logger,
   Global,
   HttpCode,
   MiddlewareConsumer,
@@ -11,7 +12,10 @@ import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { json, raw, type Request } from 'express';
 import request = require('supertest');
-import { bootstrapApplication } from '../bootstrap-application';
+import {
+  applicationLogLevels,
+  bootstrapApplication,
+} from '../bootstrap-application';
 import { MANAGED_STARTUP, type ManagedStartup } from '../managed-startup.port';
 import { ResponseInterceptor } from '../../response.interceptor';
 import { RuntimeCapabilityService } from '../../runtime-capabilities/runtime-capability.service';
@@ -121,5 +125,23 @@ describe('deployment middleware in the real shared bootstrap', () => {
       ),
     ).rejects.toThrow('configuration failed');
     expect(app?.getHttpServer().listening).toBe(false);
+  });
+});
+
+describe('application log levels', () => {
+  afterEach(() => Logger.overrideLogger(applicationLogLevels('test')));
+
+  it('suppresses diagnostic payloads in production and retains operational logs', () => {
+    Logger.overrideLogger(applicationLogLevels('production'));
+    for (const level of ['debug', 'verbose'] as const)
+      expect(Logger.isLevelEnabled(level)).toBe(false);
+    for (const level of ['error', 'warn', 'log'] as const)
+      expect(Logger.isLevelEnabled(level)).toBe(true);
+  });
+
+  it('keeps diagnostics available during development', () => {
+    Logger.overrideLogger(applicationLogLevels('development'));
+    expect(Logger.isLevelEnabled('debug')).toBe(true);
+    expect(Logger.isLevelEnabled('verbose')).toBe(true);
   });
 });

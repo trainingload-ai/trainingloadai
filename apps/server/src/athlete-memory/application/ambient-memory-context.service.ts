@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   ATHLETE_MEMORY_STORE,
@@ -32,6 +33,9 @@ export type AmbientMemoryContext = {
   estimatedTokens: number;
   truncated: boolean;
   unavailable?: boolean;
+  disabled?: boolean;
+  semanticRevision?: string;
+  omittedSafetyConstraints?: boolean;
 };
 
 const HEALTH_CATEGORIES = new Set([
@@ -46,6 +50,10 @@ const HEALTH_CATEGORIES = new Set([
   'nutrition',
   'hydration',
 ]);
+
+function isCurrentConstraint(fact: MemoryFactRecord) {
+  return fact.kind === 'CONSTRAINT' || HEALTH_CATEGORIES.has(fact.category);
+}
 
 function authorityWeight(status: string) {
   if (status === 'USER_CONFIRMED') return 1;
@@ -107,13 +115,18 @@ export class AmbientMemoryContextService {
       estimatedTokens: 0,
       truncated: false,
     };
-    if (!(await this.preferences.isEnabled(input.userId))) return empty;
+    if (!(await this.preferences.isEnabled(input.userId)))
+      return { ...empty, disabled: true, semanticRevision: 'disabled' };
     try {
-      const facts = await this.store.findFacts({
-        userId: input.userId,
-        statuses: ['ACTIVE'],
-        take: 200,
-      });
+      const [facts, fingerprint] = await Promise.all([
+        this.store.findFacts({
+          userId: input.userId,
+          statuses: ['ACTIVE'],
+          take: 201,
+          ambientAsOf: input.asOf,
+        }),
+        this.store.ambientFingerprint?.(input.userId, input.asOf),
+      ]);
       const maxItems = Math.min(Math.max(input.maxItems ?? 8, 1), 12);
       const maxTokens = Math.min(
         Math.max(input.maxTokens ?? 1_000, 200),
@@ -139,9 +152,12 @@ export class AmbientMemoryContextService {
         .filter((candidate) => candidate.ambient)
         .sort(
           (a, b) =>
+            Number(isCurrentConstraint(b.fact)) -
+              Number(isCurrentConstraint(a.fact)) ||
             b.impact - a.impact ||
             b.fact.relevanceAnchorAt.getTime() -
-              a.fact.relevanceAnchorAt.getTime(),
+              a.fact.relevanceAnchorAt.getTime() ||
+            a.fact.id.localeCompare(b.fact.id),
         );
       const items: AmbientMemoryItem[] = [];
       let estimatedTokens = 0;
@@ -169,7 +185,28 @@ export class AmbientMemoryContextService {
         ...empty,
         items,
         estimatedTokens,
-        truncated: items.length < ranked.length,
+        truncated: items.length < ranked.length || facts.length >= 201,
+        semanticRevision: createHash('sha256')
+          .update(
+            JSON.stringify({
+              fingerprint,
+              lifecycle: ranked
+                .map(({ fact, lifecycle }) => ({
+                  id: fact.id,
+                  version: fact.version,
+                  lifecycle,
+                }))
+                .sort((a, b) => a.id.localeCompare(b.id)),
+            }),
+          )
+          .digest('hex'),
+        omittedSafetyConstraints:
+          facts.length >= 201 ||
+          ranked.some(
+            ({ fact }) =>
+              isCurrentConstraint(fact) &&
+              !items.some((item) => item.id === fact.id),
+          ),
       };
     } catch (error) {
       this.logger.warn(

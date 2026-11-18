@@ -27,6 +27,8 @@ import { queryKeys } from "@/lib/query-keys";
 import { useStore } from "@/lib/store";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { MobileActivityMapHero } from "./MobileActivityMapHero";
+import { ActivityDetailPlanLinkControl } from "@/components/plan/activity-plan-link-control";
+import { getActivityDetailState } from "@shared/activity-detail";
 
 const SPLIT_PAGE_SIZE = 20;
 const RPE_STARS = [2, 4, 6, 8, 10] as const;
@@ -105,7 +107,7 @@ function MobileActivityWorkoutSummary({
     enabled: Boolean(activityId),
   });
   const detailedWorkout = link.data?.linkedPlanWorkout ?? null;
-  const workout = detailedWorkout ?? activity.linkedPlanWorkout;
+  const workout = link.data ? detailedWorkout : activity.linkedPlanWorkout;
 
   if (link.isLoading && !workout) {
     return (
@@ -621,6 +623,11 @@ export function MobileActivityDetailSheetContent({
 
       <div className="space-y-4 px-3 pt-3">
         <GenericActivityDataNotice activity={activity} />
+
+        {activity.hashId &&
+        getActivityDetailState(activity).canShowEnhancedDetail ? (
+          <ActivityDetailPlanLinkControl hashId={activity.hashId} />
+        ) : null}
 
         <MobileActivityWorkoutSummary
           activity={activity}

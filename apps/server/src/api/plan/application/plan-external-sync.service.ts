@@ -1,3 +1,8 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  PLAN_WORKOUTS_CHANGED_EVENT,
+  PlanWorkoutsChangedEvent,
+} from '../events/plan.events';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
@@ -52,7 +57,19 @@ export class PlanExternalSyncService {
     private readonly users: UserService,
     @Optional()
     private readonly workoutTargetResolver?: PlanWorkoutTargetResolver,
+    @Optional() private readonly events?: EventEmitter2,
   ) {}
+
+  async notifyWorkoutsCommitted(
+    userId: string,
+    workoutIds: string[],
+    reason = 'external_import',
+  ) {
+    await this.events?.emitAsync(
+      PLAN_WORKOUTS_CHANGED_EVENT,
+      new PlanWorkoutsChangedEvent(userId, reason, workoutIds),
+    );
+  }
 
   runTransaction<T>(fn: (tx: PlanDb) => Promise<T>): Promise<T> {
     return this.prisma.$transaction((tx) => fn(tx));
@@ -372,6 +389,8 @@ export class PlanExternalSyncService {
       text?: string | null;
       notes?: string | null;
       blocks: PlanBlock[];
+      structureKind?: 'ENDURANCE' | 'FREEFORM';
+      plannedDurationSeconds?: number | null;
     },
     initializeMapping?: (
       workout: SyncedWorkout,
@@ -396,6 +415,8 @@ export class PlanExternalSyncService {
             name: args.name,
             text: args.text,
             notes: args.notes,
+            structureKind: args.structureKind ?? 'ENDURANCE',
+            plannedDurationSeconds: args.plannedDurationSeconds ?? null,
             status: 'PLANNED',
           },
         },
@@ -403,39 +424,73 @@ export class PlanExternalSyncService {
       );
       await this.replaceWorkoutSteps(tx, created.id, args.blocks);
       await this.estimateWorkoutLoad(created.id, tx);
+      // Load estimation also writes the workout. Return the final transaction
+      // snapshot so its own updatedAt change is not mistaken for a later edit.
+      const stored = await this.workouts.findFirst(
+        {
+          where: { id: created.id, userId: args.userId },
+          include: WORKOUT_TREE_INCLUDE,
+        },
+        tx,
+      );
+      if (!stored) throw new Error('Imported workout readback failed');
       if (initializeMapping) {
-        const stored = await this.workouts.findFirst(
-          {
-            where: { id: created.id, userId: args.userId },
-            include: WORKOUT_TREE_INCLUDE,
-          },
-          tx,
-        );
-        if (!stored) throw new Error('Imported workout readback failed');
-        await this.links.createMapping({ data: initializeMapping(stored) }, tx);
+        const { id: mappingId, ...data } = initializeMapping(stored);
+        if (mappingId) {
+          const updated = await this.links.updateManyMappings(
+            {
+              where: {
+                id: mappingId,
+                userId: args.userId,
+                provider: data.provider,
+                planWorkoutId: null,
+                syncState: 'FAILED',
+                localDeletedAt: null,
+                remoteDeletedAt: null,
+                lastLocalChecksum: null,
+                lastRemoteChecksum: null,
+                lastSyncedChecksum: null,
+              },
+              data,
+            },
+            tx,
+          );
+          if (updated.count !== 1)
+            throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
+        } else {
+          await this.links.createMapping({ data }, tx);
+        }
       }
-      return { ...created, planId: null };
+      return stored;
     });
   }
 
-  async updateImportedWorkout(args: {
-    userId: string;
-    workoutId: string;
-    preferredSessionIndex: number;
-    scheduledDate: Date;
-    targetPlanId: string | null;
-    targetPlanStartDate: Date | null;
-    sportType: SportType;
-    sportDefinitionCode?: string | null;
-    name?: string | null;
-    text?: string | null;
-    notes?: string | null;
-    status: PlanWorkoutStatus | string;
-    blocks: PlanBlock[];
-    dayOffset: number;
-    expectedUpdatedAt?: Date;
-  }) {
+  async updateImportedWorkout(
+    args: {
+      userId: string;
+      workoutId: string;
+      preferredSessionIndex: number;
+      scheduledDate: Date;
+      targetPlanId: string | null;
+      targetPlanStartDate: Date | null;
+      sportType: SportType;
+      sportDefinitionCode?: string | null;
+      name?: string | null;
+      text?: string | null;
+      notes?: string | null;
+      status: PlanWorkoutStatus | string;
+      blocks: PlanBlock[];
+      structureKind?: 'ENDURANCE' | 'FREEFORM';
+      plannedDurationSeconds?: number | null;
+      dayOffset: number;
+      expectedUpdatedAt?: Date;
+    },
+    persistMapping?: (
+      workout: SyncedWorkout,
+    ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
+  ) {
     return this.runTransaction(async (tx) => {
+      await this.workouts.lockForUpdate(args.workoutId, tx);
       const current = await this.workouts.findUnique(
         {
           where: { id: args.workoutId },
@@ -454,6 +509,12 @@ export class PlanExternalSyncService {
         current.updatedAt.getTime() !== args.expectedUpdatedAt.getTime()
       ) {
         throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
+      }
+      if (
+        !current.plan &&
+        (current.status !== 'PLANNED' || current.links.length > 0)
+      ) {
+        throw new Error('PLAN_IMPORT_HISTORY_PROTECTED');
       }
       if (current.plan) {
         const timezone = await this.users.getPreferredTimezone(args.userId, tx);
@@ -541,6 +602,9 @@ export class PlanExternalSyncService {
             name: args.name,
             text: args.text,
             notes: args.notes,
+            structureKind: args.structureKind ?? 'ENDURANCE',
+            plannedDurationSeconds: args.plannedDurationSeconds ?? null,
+            plannedSessionRpe: null,
             status: args.status as PlanWorkoutStatus,
             revision: { increment: 1 },
           },
@@ -548,8 +612,46 @@ export class PlanExternalSyncService {
         tx,
       );
       await this.replaceWorkoutSteps(tx, updated.id, args.blocks);
+      if (current.structureKind === 'STRENGTH') {
+        await this.workouts.deleteExercises(
+          { where: { workoutId: updated.id } },
+          tx,
+        );
+      }
       await this.estimateWorkoutLoad(updated.id, tx);
-      return { ...updated, planId: args.targetPlanId };
+      const stored = await this.workouts.findFirst(
+        {
+          where: { id: updated.id, userId: args.userId },
+          include: WORKOUT_TREE_INCLUDE,
+        },
+        tx,
+      );
+      if (!stored) throw new Error('Imported workout readback failed');
+      if (persistMapping) {
+        const data = persistMapping(stored);
+        if (
+          data.userId !== args.userId ||
+          data.planWorkoutId !== stored.id ||
+          !data.externalSourceKey ||
+          data.id
+        )
+          throw new Error('PLAN_IMPORT_MAPPING_INVALID');
+        await this.links.upsertMapping(
+          {
+            where: {
+              userId_provider_externalSourceKey: {
+                userId: args.userId,
+                provider: data.provider,
+                externalSourceKey: data.externalSourceKey,
+              },
+            },
+            create: data,
+            update: data,
+          },
+          tx,
+        );
+      }
+      return stored;
     });
   }
 

@@ -8,7 +8,7 @@ import {
 
 import { decodeTrackFile } from '@/importing/trackswap-file';
 import type { CanonicalActivityPayload } from '@/importing/canonical-activity.types';
-import { importJsonValue } from '@/importing/import-item-job.types';
+import { ImportSourceObjectType, importJsonValue } from '@/importing/import-item-job.types';
 import {
   resolveRawFileIntegrity,
   type LegacyDiscoveryIntegrityAudit,
@@ -33,8 +33,8 @@ const ACTIVE_ITEM_STATUSES: ImportItemJobStatus[] = [
 ];
 
 const HEALTH_OBJECT_TYPES = [
-  'third_party_health_file',
-  'third_party_mixed_fit',
+  ImportSourceObjectType.THIRD_PARTY_HEALTH_FILE,
+  ImportSourceObjectType.THIRD_PARTY_MIXED_FIT,
 ];
 
 // Keep registration transactions short even when canonical payloads contain
@@ -72,6 +72,7 @@ export type FitActivityRepairCandidate = {
   userId: string;
   sourceKind: ImportSourceKind;
   sourceUid: string;
+  sourceRevision?: string | null;
   fileName: string | null;
   payloads: CanonicalActivityPayload[];
   reasons: FitActivityRepairReason[];
@@ -218,6 +219,7 @@ export class FitActivityDataRepairService {
           fileKey: true,
           rawStorageKey: true,
           rawChecksum: true,
+          importRevision: true,
           metadata: true,
           activitySources: {
             where: { isActive: true, isPrimary: true, activity: { state: 1 } },
@@ -413,6 +415,7 @@ export class FitActivityDataRepairService {
           }
           const candidate: FitActivityRepairCandidate = {
             sourceObjectId: sourceObject.id,
+            sourceRevision: sourceObject.importRevision,
             userId: sourceObject.userId,
             sourceKind: sourceObject.sourceKind,
             sourceUid: sourceObject.sourceUid,
@@ -610,6 +613,7 @@ export class FitActivityDataRepairService {
                 sourceObjectId: candidate.sourceObjectId,
                 sourceKind: candidate.sourceKind,
                 sourceUid: payload.source.sourceUid,
+                sourceRevision: candidate.sourceRevision ?? null,
                 position,
                 status: 'QUEUED',
                 sourceRef: importJsonValue({

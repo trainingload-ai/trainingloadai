@@ -58,7 +58,10 @@ export async function queryTrainingExploration(
     );
   assertExplorationQuery(query);
   const userId = ctx.session.user.id;
-  const tz = (await ctx.userService.getPreferredTimezone(userId)) || 'UTC';
+  const tz =
+    (await ctx.userService.getPreferredTimezone(userId)) ||
+    ctx.currentTurnCalendar?.timezone ||
+    'UTC';
   const notes: ExplorationNote[] = [];
   let panels: ExplorationPanel[] = [],
     truncated = false,

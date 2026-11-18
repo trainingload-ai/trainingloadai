@@ -10,6 +10,16 @@ describe('planExecutionContextTool', () => {
 
   it('returns a compact execution snapshot for the review skills', async () => {
     const buildContext = jest.fn(async () => ({
+      workoutMatching: [
+        {
+          id: 'review',
+          activityHashId: 'activity',
+          reason: 'AMBIGUOUS',
+          date: '2026-08-18',
+          activityTitle: 'Run',
+          candidates: [],
+        },
+      ],
       factHash: 'fact-1',
       contextId: 'ctx-1',
       contextHeadEventSeq: 4,
@@ -52,6 +62,12 @@ describe('planExecutionContextTool', () => {
     );
     expect(output).toMatchObject({
       kind: 'plan_execution_context',
+      workoutMatching: [
+        expect.objectContaining({
+          reason: 'AMBIGUOUS',
+          activityHashId: 'activity',
+        }),
+      ],
       factHash: 'fact-1',
       plan: { id: 'plan-1', status: 'ACTIVE' },
       day: { completionState: 'COMPLETED' },

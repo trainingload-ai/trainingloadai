@@ -88,17 +88,22 @@ describe('Athlete State in the shared Coach runtime', () => {
         },
       ],
     };
-    const getOverview = jest.fn(async () => facts);
+    const getCoachingFacts = jest.fn(async () => facts);
     expect(
       await healthSummaryTool.execute(
         {
           session: { user: { id: 'athlete' } },
-          healthData: { getOverview },
+          healthData: { getCoachingFacts },
         } as never,
         { days: 42, endDate: '2026-11-13' },
       ),
     ).toEqual(facts);
-    expect(getOverview).toHaveBeenCalledWith('athlete', 42, '2026-11-13');
+    expect(getCoachingFacts).toHaveBeenCalledWith(
+      'athlete',
+      '2026-11-13',
+      undefined,
+      42,
+    );
   });
 
   it('terminates a passive task after saving but lets a resumed turn explain its saved result', async () => {

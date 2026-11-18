@@ -6,6 +6,8 @@ import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock
 import type { CanonicalActivityPayload } from './canonical-activity.types';
 import { providerFromSourceKind } from './external-provider-identity';
 import { resolveExternalActivityId } from './external-activity-identity-extension.port';
+import { ImportingJobService } from './importing-job.service';
+import type { Prisma } from '@prisma/client';
 
 function childSuffix(sourceUid: string) {
   return sourceUid.match(/(#\d+)$/)?.[1] ?? '';
@@ -17,7 +19,10 @@ function childSuffix(sourceUid: string) {
  */
 @Injectable()
 export class ThirdPartyActivityProjectorService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jobs: ImportingJobService,
+  ) {}
 
   resolveProvider(payload: CanonicalActivityPayload) {
     if (payload.source.kind === 'FILE') return null;
@@ -52,6 +57,8 @@ export class ThirdPartyActivityProjectorService {
     batchJobId: string;
     payload: CanonicalActivityPayload;
     preferredThirdPartyActivityId?: number;
+    itemJobId?: string;
+    itemLockToken?: string;
   }): Promise<ThirdPartyActivity | null> {
     const provider = this.resolveProvider(args.payload);
     if (!provider) return null;
@@ -121,7 +128,7 @@ export class ThirdPartyActivityProjectorService {
       },
     };
 
-    return this.prisma.$transaction(async (tx) => {
+    const persist = async (tx: Prisma.TransactionClient) => {
       // Serialize repeat deliveries within the owner scope without locking another user.
       await acquireHashtextAdvisoryXactLock(
         tx,
@@ -146,10 +153,22 @@ export class ThirdPartyActivityProjectorService {
       for (const candidate of [existing, preferred]) {
         const owner = candidate?.externalUserId;
         const legacyIntervals = provider === 'intervals_icu' && owner === '0';
-        const normalized = (value:string) => provider === 'intervals_icu' ? value.replace(/^i(?=\d+$)/, '') : value;
-        if (account && owner && !legacyIntervals && normalized(account) !== normalized(owner)) throw new ImportIdentityConflictError('Third-party activity belongs to a different remote account');
+        const normalized = (value: string) =>
+          provider === 'intervals_icu'
+            ? value.replace(/^i(?=\d+$)/, '')
+            : value;
+        if (
+          account &&
+          owner &&
+          !legacyIntervals &&
+          normalized(account) !== normalized(owner)
+        )
+          throw new ImportIdentityConflictError(
+            'Third-party activity belongs to a different remote account',
+          );
       }
-      if (!common.externalUserId && existing?.externalUserId) common.externalUserId=existing.externalUserId;
+      if (!common.externalUserId && existing?.externalUserId)
+        common.externalUserId = existing.externalUserId;
 
       if (preferred) {
         if (existing && existing.id !== preferred.id) {
@@ -195,6 +214,16 @@ export class ThirdPartyActivityProjectorService {
         );
       }
       return projected;
-    });
+    };
+    return args.itemJobId && args.itemLockToken
+      ? this.jobs.withCurrentImport(
+          {
+            itemJobId: args.itemJobId,
+            userId: args.userId,
+            lockToken: args.itemLockToken,
+          },
+          persist,
+        )
+      : this.prisma.$transaction(persist);
   }
 }

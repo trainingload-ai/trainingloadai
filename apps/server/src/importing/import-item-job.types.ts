@@ -2,6 +2,17 @@ import type { ImportItemJob, ImportSourceObject, Prisma } from '@prisma/client';
 import type { CanonicalActivityPayload } from './canonical-activity.types';
 import type { ActivityDatasetRepair } from './activity-dataset-repair';
 
+/** Persisted discriminators for source objects shared by import producers and readers. */
+export const ImportSourceObjectType = {
+  ACTIVITY_FILE: 'activity_file',
+  THIRD_PARTY_ACTIVITY: 'third_party_activity',
+  THIRD_PARTY_ACTIVITY_FILE: 'third_party_activity_file',
+  THIRD_PARTY_HEALTH_FILE: 'third_party_health_file',
+  THIRD_PARTY_MIXED_FIT: 'third_party_mixed_fit',
+  HEALTH: 'HEALTH',
+  PERSONAL_ACTIVITY: 'ACTIVITY',
+} as const;
+
 /** Prisma Json 字段的对象形态。 */
 export type ImportJsonRecord = Record<string, unknown>;
 

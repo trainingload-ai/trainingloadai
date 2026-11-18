@@ -962,7 +962,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 136
+          "line": 140
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -1035,7 +1035,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu-health.mapper.ts",
-          "line": 11
+          "line": 12
         }
       ],
       "capability": "third-party-sync",
@@ -1049,7 +1049,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu-health.mapper.ts",
-          "line": 10
+          "line": 11
         }
       ],
       "capability": "third-party-sync",
@@ -1298,7 +1298,7 @@
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
-          "line": 305
+          "line": 310
         }
       ],
       "capability": "third-party-sync",
@@ -1316,7 +1316,7 @@
         },
         {
           "file": "apps/server/src/integrations/intervals-icu/intervals-icu.client.ts",
-          "line": 300
+          "line": 305
         }
       ],
       "capability": "third-party-sync",
@@ -1358,7 +1358,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 372
+          "line": 370
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -1540,7 +1540,7 @@
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 359
+          "line": 357
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",
@@ -1558,7 +1558,7 @@
       "references": [
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
-          "line": 381
+          "line": 379
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",

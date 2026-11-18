@@ -1,3 +1,8 @@
+import { ConflictException } from '@nestjs/common';
+import {
+  TodaySuggestionGuidanceService,
+  type FactGuidanceScope,
+} from './today-suggestion/today-suggestion-guidance.service';
 import {
   BadRequestException,
   Body,
@@ -308,6 +313,7 @@ export class AiController {
     private readonly aiDataConsent: AiDataConsentService,
     private readonly coachRuns: CoachRunStore,
     private readonly assessmentCases: CoachAssessmentCaseService,
+    private readonly todayGuidance: TodaySuggestionGuidanceService,
   ) {}
 
   @Post('data-consent')
@@ -418,6 +424,18 @@ export class AiController {
       generationToken,
       input,
     });
+  }
+
+  @Post('today-suggestion/:generationToken/context')
+  resolveTodaySuggestionContext(
+    @CurrentUserId() userId: string,
+    @Param('generationToken') generationToken: string,
+  ) {
+    return this.todayGuidance.resolve(
+      userId,
+      generationToken,
+      I18nContext.current()?.lang ?? 'en',
+    );
   }
 
   @Post('today-suggestion/:generationToken/workout')
@@ -572,7 +590,10 @@ export class AiController {
   ) {
     // Demo conversations are curated snapshots. Reading them must not repair
     // or otherwise mutate their stored run state.
-    if (!publicDemo) await this.coachRuns.recoverStale(userId, sid);
+    if (!publicDemo) {
+      await this.coachRuns.reconcileCurrentFacts(userId);
+      await this.coachRuns.recoverStale(userId, sid);
+    }
     const rows = await this.aiService.listCoachSessionMessages({
       userId,
       sid,
@@ -988,7 +1009,8 @@ export class AiController {
     };
     const reqId = randomUUID();
     const startedAt = Date.now();
-    const coachUserMessage = normalizeCoachUserMessage(body?.message);
+    let coachUserMessage = normalizeCoachUserMessage(body?.message);
+    let factGuidance: FactGuidanceScope | undefined;
     if (!v2) await this.coachRuns.assertLegacyInput(coachUserMessage);
     const isMetaOnlyToolResult = hasCoachMetaOnlyToolResult(coachUserMessage);
     const prompt = (
@@ -1055,7 +1077,7 @@ export class AiController {
     const provider = getCoachUpstreamProvider();
     const model = getCoachModel({ thinking });
     this.logger.log(
-      `[AI][教练][${reqId}] 开始处理 用户ID=${userId} 会话ID=${sessionId || 'default'} 语言=${lang} 服务商=${provider ?? 'none'} 模型=${model || 'none'} skipUserAppend=${skipUserAppend ? '是' : 'no'} 提示字符数=${prompt.length} promptPreview="${previewText(prompt)}"`,
+      `[AI][教练][${reqId}] 开始处理 用户ID=${userId} 会话ID=${sessionId || 'default'} 语言=${lang} 服务商=${provider ?? 'none'} 模型=${model || 'none'} skipUserAppend=${skipUserAppend ? '是' : 'no'} 提示字符数=${prompt.length}`,
     );
 
     sink.start();
@@ -1248,6 +1270,53 @@ export class AiController {
     };
 
     try {
+      const reference = coachUserMessage?.content.find(
+        (block) =>
+          block.type === 'tool_result' &&
+          block.content &&
+          typeof block.content === 'object' &&
+          (block.content as { kind?: string }).kind ===
+            'today_suggestion_context',
+      );
+      if (reference?.type === 'tool_result') {
+        const supplied = reference.content as {
+          suggestionId?: string;
+          version?: number;
+        };
+        if (typeof supplied.suggestionId !== 'string')
+          throw new BadRequestException('TODAY_GUIDANCE_NOT_FOUND');
+        const resolved = await this.todayGuidance.resolve(
+          userId,
+          supplied.suggestionId,
+        );
+        if (!resolved.context || !resolved.sessionId)
+          throw new BadRequestException('TODAY_GUIDANCE_UNAVAILABLE');
+        coachUserMessage = {
+          ...coachUserMessage,
+          content: coachUserMessage.content.map((block) =>
+            block === reference
+              ? {
+                  ...block,
+                  content: {
+                    kind: 'today_suggestion_context',
+                    version: 2,
+                    suggestionId: supplied.suggestionId,
+                    guidanceStatus: resolved.status,
+                    topic: resolved.scope?.topic,
+                    refs: resolved.context.currentFacts,
+                    meaning:
+                      'Server-verified discussion target only. Read current facts from their owners. Opening this context is not an answer or permission to alter training.',
+                  },
+                }
+              : block,
+          ),
+        };
+        if (supplied.version === 2) {
+          if (coachSessionKey !== resolved.sessionId)
+            throw new ConflictException('FACT_GUIDANCE_SESSION_CHANGED');
+          factGuidance = resolved.scope;
+        }
+      }
       if (!platformFunded && !isMetaOnlyToolResult && !v2) {
         const peeked = await this.operations.peekReplay(operationAdmissionArgs);
         if (peeked.replay) {
@@ -1293,6 +1362,7 @@ export class AiController {
           },
           operationId,
           command,
+          guidance: factGuidance,
         });
         if (begun.replay) {
           const replayChunks = coachSnapshotChunks(

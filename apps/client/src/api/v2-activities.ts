@@ -29,11 +29,11 @@ export type V2ActivityStatus =
   | "UNKNOWN";
 
 export type V2ActivityLinkedPlanWorkout = {
-  planId: string;
+  planId: string | null;
   workoutId: string;
   name: string | null;
   sportType: V2ActivitySportType;
-  source: "MANUAL" | "AUTO" | "AI";
+  source: "MANUAL" | "AUTO" | "AI" | "AUTO_MATCH";
 };
 
 export type V2ActivityListItem = {

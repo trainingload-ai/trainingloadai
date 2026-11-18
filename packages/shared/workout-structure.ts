@@ -14,6 +14,7 @@ export type FreeformWorkoutIrV1 = {
   kind: "FREEFORM";
   version: 1;
   text: string;
+  durationSeconds?: number | null;
 };
 
 export type WorkoutStructure =

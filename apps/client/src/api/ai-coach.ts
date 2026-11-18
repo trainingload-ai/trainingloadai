@@ -1,3 +1,4 @@
+import type { WorkoutMatchingReview } from "@shared/workout-matching";
 import type { QueryClient } from "@tanstack/react-query";
 import { getApiBaseUrl, getRegion } from "@/lib/config";
 import {
@@ -458,6 +459,7 @@ export type CoachReviewGuidance = {
 };
 
 export type CoachHomeReviewState = {
+  workoutMatching?: WorkoutMatchingReview[];
   decisions: PendingCoachDecision[];
   guidance: CoachReviewGuidance | null;
   inquiry: CoachAssessmentInquiry | null;
@@ -533,6 +535,7 @@ export async function fetchCoachHomeReviewState(): Promise<CoachHomeReviewState>
       decisions?: PendingCoachDecision[];
       guidance?: CoachReviewGuidance | null;
       inquiry?: CoachAssessmentInquiry | null;
+      workoutMatching?: WorkoutMatchingReview[];
     };
   };
   return {
@@ -541,6 +544,9 @@ export async function fetchCoachHomeReviewState(): Promise<CoachHomeReviewState>
       json.data?.guidance && typeof json.data.guidance === "object"
         ? json.data.guidance
         : null,
+    workoutMatching: Array.isArray(json.data?.workoutMatching)
+      ? json.data.workoutMatching
+      : [],
     inquiry:
       json.data?.inquiry && typeof json.data.inquiry === "object"
         ? json.data.inquiry

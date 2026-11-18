@@ -145,7 +145,42 @@
       "id": "0029_provider_authorization_revision",
       "file": "0029_provider_authorization_revision/migration.sql",
       "sha256": "5af78c083f9de1dafe56c1d8e3c519a08c3c22bf15d25321264810a990f156dd"
+    },
+    {
+      "id": "0030_independent_workout_activity_links",
+      "file": "0030_independent_workout_activity_links/migration.sql",
+      "sha256": "7858c8b48930f0c1fb5282279f55e3402f757d044eecc67a3571dfd3de1e87dd"
+    },
+    {
+      "id": "0031_workout_matching_review",
+      "file": "0031_workout_matching_review/migration.sql",
+      "sha256": "74937b9ccffc4209cb63381f4ea2cf7272f8c3e6aea43393153eddafdbbefb45"
+    },
+    {
+      "id": "0032_import_source_revision_handoff",
+      "file": "0032_import_source_revision_handoff/migration.sql",
+      "sha256": "3e751260108f05be766aca2d4b3e5fd2c4994093f8c017a0982e5ff6c4d3b19e"
+    },
+    {
+      "id": "0033_today_suggestion_generation",
+      "file": "0033_today_suggestion_generation/migration.sql",
+      "sha256": "f67a743cba96b9d5634b16ed9200699413278f1b3ea0641a6cbab15e1c97f034"
+    },
+    {
+      "id": "0034_coach_fact_scope",
+      "file": "0034_coach_fact_scope/migration.sql",
+      "sha256": "2cba5726f2c183963ac217f8b582ed49074ffd6b029d70051c78ef233e6d2648"
+    },
+    {
+      "id": "0035_coach_context_timezone",
+      "file": "0035_coach_context_timezone/migration.sql",
+      "sha256": "b753a8e9a9f374dd780ad65cb07784b887b745ba28ce6c6f8b167a106c57a93a"
+    },
+    {
+      "id": "0036_health_daily_fact_revisions",
+      "file": "0036_health_daily_fact_revisions/migration.sql",
+      "sha256": "d94ff126be360e20e3ab7227bf7820b10854d0645fc0f9acf0c136458d39b802"
     }
   ],
-  "schemaChecksum": "bc0506bc71d701056969b73e205124a722cb49e5d911f6742cee3877461b82cf"
+  "schemaChecksum": "46efffb30bc6137c3b53428a7253778ea46b02660d065896203fa93c0e27eec1"
 }

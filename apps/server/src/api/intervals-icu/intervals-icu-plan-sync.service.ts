@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { SportCatalogService } from '@/sports/sport-catalog.service';
 import type {
@@ -123,6 +124,8 @@ type ParsedRemoteWorkout = {
   notes: string | null;
   text: string;
   blocks: PlanBlock[];
+  structureKind: 'ENDURANCE' | 'FREEFORM';
+  plannedDurationSeconds: number | null;
   /** 双向 sync 冲突检测 */
   checksum: string;
 };
@@ -255,11 +258,17 @@ function buildParsedRemoteWorkout(args: {
   notes: string | null;
   text: string;
   blocks: PlanBlock[];
+  structureKind?: 'ENDURANCE' | 'FREEFORM';
+  plannedDurationSeconds?: number | null;
 }): ParsedRemoteWorkout {
   const blocks = normalizeBlocks(args.blocks);
+  const structureKind = args.structureKind ?? 'ENDURANCE';
+  const plannedDurationSeconds = args.plannedDurationSeconds ?? null;
   return {
     ...args,
     blocks,
+    structureKind,
+    plannedDurationSeconds,
     checksum: computeSyncChecksum({
       scheduledDate: args.scheduledDate,
       sportType: args.sportType,
@@ -267,6 +276,9 @@ function buildParsedRemoteWorkout(args: {
       name: args.name,
       notes: args.notes,
       blocks,
+      structureKind,
+      plannedDurationSeconds,
+      text: args.text,
     }),
   };
 }
@@ -305,26 +317,23 @@ function eventDate(event: IntervalsIcuEvent) {
 }
 
 /** 从事件各字段里抽出 FIT base64（OpenAPI EventEx）。 */
-function extractFitBase64(event: IntervalsIcuEvent) {
+function extractFitBase64(
+  event: IntervalsIcuEvent,
+  includeCalendarExport = true,
+) {
   const workout = event.workout ?? {};
   const candidates = [
     event.file_contents_base64,
     event.file_contents,
     workout.file_contents_base64,
     workout.file_contents,
+    ...(includeCalendarExport ? [event.workout_file_base64] : []),
   ];
   for (const candidate of candidates) {
     const text = cleanString(candidate);
     if (text) return text;
   }
   return null;
-}
-
-/** 事件是否带可解析的 workout_doc.steps。 */
-function hasWorkoutDoc(event: IntervalsIcuEvent) {
-  const doc = event.workout_doc;
-  if (!doc || typeof doc !== 'object') return false;
-  return Array.isArray(doc.steps) && doc.steps.length > 0;
 }
 
 /** 我方 SportType → Intervals.icu 事件 type 字符串。 */
@@ -383,6 +392,8 @@ type SyncWorkout = {
   sessionIndex?: number | null;
   status?: string | null;
   steps?: unknown;
+  structureKind?: string;
+  plannedDurationSeconds?: number | null;
   planId?: string | null;
   plan?: {
     id?: string;
@@ -571,7 +582,7 @@ export class IntervalsIcuPlanSyncService {
   }
   /**
    * Webhook CALENDAR_UPDATED：增量导入/删除计划课（需开启 syncPlannedWorkouts）。
-   * 带 FIT 走完整导入；仅 workout_doc 的路径可能标记 pending。
+   * Re-read canonical events before importing structured or ordinary courses.
    */
   async handleCalendarWebhookEvent(args: CalendarWebhookRequest) {
     return this.syncLock.run(args.connection.id, () =>
@@ -617,79 +628,47 @@ export class IntervalsIcuPlanSyncService {
     let failed = 0;
     let workoutDocPending = 0;
 
-    // 5. 遍历事件（webhook 与 API 同步的 payload 形态不同，需分支处理）
+    // Use the same parser after the authoritative GET for every notification shape.
     for (const rawEvent of events) {
       const remoteEventId = eventId(rawEvent) ?? 'unknown';
 
-      if (extractFitBase64(rawEvent)) {
-        try {
-          const result = await this.importRemoteEvent({
-            userId: args.userId,
-            connection: args.connection,
+      try {
+        const parsed = await this.parseRemoteWorkout(rawEvent);
+        if (!parsed) {
+          this.logRemoteEventSkipped({
+            connectionId: args.connection.id,
             event: rawEvent,
-            window,
-            trigger: 'webhook',
           });
-          imported +=
-            result.created +
-            result.updated +
-            result.unchanged +
-            result.conflicted;
-          failed += result.failed;
-          if (result.skipped > 0) {
-            this.logger.debug(
-              `[handleCalendarWebhookEvent] 跳过远端计划课 eventId=${remoteEventId} userId=${args.userId}`,
-            );
-          }
-        } catch (error) {
-          failed += 1;
-          this.logger.warn(
-            `[handleCalendarWebhookEvent] 导入远端计划课失败 userId=${args.userId} eventId=${remoteEventId}：${
-              error instanceof Error ? error.message : String(error)
-            }`,
+          workoutDocPending += 1;
+          continue;
+        }
+        const result = await this.importParsedRemoteWorkout({
+          userId: args.userId,
+          connection: args.connection,
+          event: rawEvent,
+          parsed,
+          window,
+          trigger: 'webhook',
+        });
+        imported +=
+          result.created +
+          result.updated +
+          result.unchanged +
+          result.conflicted;
+        failed += result.failed;
+        if (result.skipped > 0) {
+          this.logger.debug(
+            `[handleCalendarWebhookEvent] 跳过远端计划课 eventId=${remoteEventId} userId=${args.userId}`,
           );
         }
-        continue;
+      } catch (error) {
+        failed += 1;
+        this.logger.warn(
+          `[handleCalendarWebhookEvent] 导入远端计划课失败 userId=${args.userId} eventId=${remoteEventId}：${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
       }
-
-      if (hasWorkoutDoc(rawEvent)) {
-        try {
-          const parsedFromDoc = await this.parseRemoteWorkoutFromDoc(rawEvent);
-          if (!parsedFromDoc) {
-            workoutDocPending += 1;
-            this.logger.warn(
-              `[handleCalendarWebhookEvent] workout_doc 解析失败 eventId=${remoteEventId} userId=${args.userId}`,
-            );
-            continue;
-          }
-          const result = await this.importParsedRemoteWorkout({
-            userId: args.userId,
-            connection: args.connection,
-            event: rawEvent,
-            parsed: parsedFromDoc,
-            window,
-            trigger: 'webhook',
-          });
-          imported +=
-            result.created +
-            result.updated +
-            result.unchanged +
-            result.conflicted;
-          failed += result.failed;
-        } catch (error) {
-          failed += 1;
-          this.logger.warn(
-            `[handleCalendarWebhookEvent] workout_doc 导入失败 userId=${args.userId} eventId=${remoteEventId}：${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-        }
-        continue;
-      }
-
-      this.logger.warn(
-        `[handleCalendarWebhookEvent] 跳过无 FIT 且无 workout_doc 的 webhook 事件 eventId=${remoteEventId} userId=${args.userId}`,
-      );
     }
 
     let deleted = 0;
@@ -1104,13 +1083,9 @@ export class IntervalsIcuPlanSyncService {
 
     const parsed = await this.parseRemoteWorkout(args.event);
     if (!parsed) {
-      await this.markRemoteEventFailed({
-        userId: args.userId,
+      this.logRemoteEventSkipped({
         connectionId: args.connection.id,
         event: args.event,
-        error: 'Intervals.icu 计划课没有包含 FIT 训练文件',
-        window: args.window,
-        trigger: args.trigger,
       });
       return { ...zero, skipped: 1 };
     }
@@ -1151,6 +1126,18 @@ export class IntervalsIcuPlanSyncService {
     if (mapping && this.mappingIsClosed(mapping)) {
       return { ...zero, skipped: 1 };
     }
+    // A failed first import is not evidence that an athlete deleted a course.
+    // Never reopen a mapping that already had a successful synchronization baseline.
+    const retryUnmaterialized = Boolean(
+      mapping &&
+      mapping.syncState === 'FAILED' &&
+      !mapping.planWorkoutId &&
+      !mapping.localDeletedAt &&
+      !mapping.remoteDeletedAt &&
+      !mapping.lastLocalChecksum &&
+      !mapping.lastRemoteChecksum &&
+      !mapping.lastSyncedChecksum,
+    );
     if (mapping?.remoteDeletedAt) {
       // Legacy window-based tombstones are reversible only after a live read confirms existence.
       await this.updateMapping(mapping.id, { remoteDeletedAt: null });
@@ -1159,7 +1146,7 @@ export class IntervalsIcuPlanSyncService {
     let local = mapping?.planWorkoutId
       ? await this.findLocalWorkout(args.userId, mapping.planWorkoutId)
       : null;
-    if (mapping && (!local || mapping.localDeletedAt)) {
+    if (mapping && (!local || mapping.localDeletedAt) && !retryUnmaterialized) {
       // Importing a changed survivor must not recreate the deleted endpoint.
       await this.reconcileLocalDeletion({ ...args, mapping });
       return { ...zero, skipped: 1 };
@@ -1193,7 +1180,11 @@ export class IntervalsIcuPlanSyncService {
         (stored) =>
           ({
             provider: PROVIDER,
-            ...this.importMappingData(args, stored),
+            ...this.importMappingData(
+              args,
+              stored,
+              retryUnmaterialized ? mapping : undefined,
+            ),
           }) as Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
       );
       mapping = await this.findMappingForRemote(args.userId, args.event);
@@ -1235,6 +1226,7 @@ export class IntervalsIcuPlanSyncService {
       };
     }
     await this.upsertMapping(this.importMappingData(args, local, mapping));
+    await this.planSync.notifyWorkoutsCommitted(args.userId, [local.id]);
     return created ? { ...zero, created: 1 } : { ...zero, updated: 1 };
   }
 
@@ -1297,11 +1289,25 @@ export class IntervalsIcuPlanSyncService {
     const scheduledDate = eventDate(event);
     const fitBase64 = extractFitBase64(event);
     if (!scheduledDate) return null;
-    if (!fitBase64) return this.parseRemoteWorkoutFromDoc(event);
+    if (!extractFitBase64(event, false)) {
+      // Keep existing native-document baselines stable when calendar GET also
+      // supplies an export. Only use that export when the document is unusable.
+      const native = await this.parseRemoteWorkoutFromDoc(event);
+      if (native) return native;
+      if (!fitBase64) return this.parseOrdinaryRemoteWorkout(event);
+    }
 
     const parsed = await this.workoutService.parseFile(
       Buffer.from(fitBase64, 'base64'),
+      { rejectDecodeErrors: true },
     );
+    // A valid FIT envelope can contain no workout steps. Do not create an
+    // empty course; the native document may still carry usable structure.
+    if (parsed.block.length === 0)
+      return (
+        (await this.parseRemoteWorkoutFromDoc(event)) ??
+        this.parseOrdinaryRemoteWorkout(event)
+      );
     const name = cleanString(event.name);
     const notes = cleanString(event.description);
     const sportType = mapIntervalsSportType(event.type);
@@ -1317,6 +1323,45 @@ export class IntervalsIcuPlanSyncService {
       notes,
       text: parsed.plan,
       blocks: parsed.block,
+    });
+  }
+
+  /** Calendar-only prescriptions carry no invented intervals or intensity. */
+  private async parseOrdinaryRemoteWorkout(
+    event: IntervalsIcuEvent,
+  ): Promise<ParsedRemoteWorkout | null> {
+    const scheduledDate = eventDate(event);
+    const name = cleanString(event.name);
+    const notes = cleanString(event.description);
+    if (!scheduledDate || event.category !== 'WORKOUT' || !name) return null;
+    // Nonempty or unknown document shapes must keep their unsupported warning.
+    if (
+      [event.workout_doc, event.workout?.workout_doc].some(
+        (doc) =>
+          doc != null && (!Array.isArray(doc.steps) || doc.steps.length !== 0),
+      )
+    )
+      return null;
+    const sportType = mapIntervalsSportType(event.type);
+    return buildParsedRemoteWorkout({
+      scheduledDate,
+      sportType,
+      sportDefinitionCode: await this.resolveIntervalsSportCode(
+        event.type,
+        sportType,
+      ),
+      name,
+      notes,
+      text: notes ?? name,
+      blocks: [],
+      structureKind: 'FREEFORM',
+      plannedDurationSeconds:
+        typeof event.moving_time === 'number' &&
+        Number.isSafeInteger(event.moving_time) &&
+        event.moving_time > 0 &&
+        event.moving_time <= 2147483647
+          ? event.moving_time
+          : null,
     });
   }
 
@@ -1511,6 +1556,13 @@ export class IntervalsIcuPlanSyncService {
       !mapping ||
       this.localComparisonChecksum(args.workout, mapping) !==
         mapping.lastLocalChecksum;
+    // Ordinary calendar courses are imported without a structured device file.
+    // Do not export an empty FIT or overwrite the source with a fabricated prescription.
+    if (args.workout.structureKind === 'FREEFORM') {
+      if (mapping && localChanged)
+        await this.updateMapping(mapping.id, { syncState: 'LOCAL_CHANGED' });
+      return { ...zero, ...(localChanged ? { skipped: 1 } : { unchanged: 1 }) };
+    }
     if (!localChanged && mapping) {
       const parsed = remote ? await this.parseRemoteWorkout(remote) : null;
       const remoteUnchanged =
@@ -1839,6 +1891,10 @@ export class IntervalsIcuPlanSyncService {
       name: cleanString(workout.name),
       notes: cleanString(workout.notes),
       blocks,
+      structureKind:
+        workout.structureKind === 'FREEFORM' ? 'FREEFORM' : 'ENDURANCE',
+      plannedDurationSeconds: workout.plannedDurationSeconds,
+      text: cleanString(workout.text),
     });
   }
 
@@ -1862,6 +1918,8 @@ export class IntervalsIcuPlanSyncService {
         text: args.parsed.text,
         notes: args.parsed.notes,
         blocks: args.parsed.blocks,
+        structureKind: args.parsed.structureKind,
+        plannedDurationSeconds: args.parsed.plannedDurationSeconds,
       },
       initializeMapping,
     );
@@ -1907,23 +1965,33 @@ export class IntervalsIcuPlanSyncService {
           ? args.workout.status
           : 'PLANNED',
       blocks: args.parsed.blocks,
+      structureKind: args.parsed.structureKind,
+      plannedDurationSeconds: args.parsed.plannedDurationSeconds,
       dayOffset,
       expectedUpdatedAt: args.workout.updatedAt,
     });
   }
 
-  /** Parsing failures do not mutate an existing synchronization baseline or tombstone. */
-  private async markRemoteEventFailed(_args: {
-    userId: string;
+  /** Skips never mutate an existing synchronization baseline or tombstone. */
+  private logRemoteEventSkipped(args: {
     connectionId: string;
     event: IntervalsIcuEvent;
-    error: string;
-    window: WeekWindow;
-    trigger: SyncTrigger;
   }) {
-    this.logger.warn(
-      `Intervals.icu plan event skipped: reason=UNSUPPORTED_WORKOUT_DOCUMENT`,
-    );
+    const steps = args.event.workout_doc?.steps;
+    const empty =
+      Boolean(eventDate(args.event)) &&
+      Array.isArray(steps) &&
+      steps.length === 0;
+    const reason = empty
+      ? 'NO_STRUCTURED_WORKOUT_STEPS'
+      : 'UNSUPPORTED_WORKOUT_DOCUMENT';
+    const eventRef = createHash('sha256')
+      .update(`${args.connectionId}:${eventId(args.event) ?? 'missing'}`)
+      .digest('hex')
+      .slice(0, 24);
+    const message = `Intervals.icu plan event skipped: reason=${reason} eventRef=${eventRef}`;
+    if (empty) this.logger.log(message);
+    else this.logger.warn(message);
   }
 
   /** 创建或更新 PlanWorkoutExternalMapping。 */

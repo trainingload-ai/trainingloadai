@@ -13,11 +13,7 @@ import {
   type PlanExecutionRow,
 } from './plan-execution-chart';
 import type { ExplorationQuery } from '@shared/training-exploration';
-import type {
-  PlanStatus,
-  SportType,
-  ThirdPartyProvider,
-} from '@prisma/client';
+import type { PlanStatus, SportType, ThirdPartyProvider } from '@prisma/client';
 import { PlanWorkoutTargetResolver } from './plan-workout-target-resolver.service';
 
 /**
@@ -303,6 +299,20 @@ export class PlanQueryService {
     return this.plans.findActiveForUser(userId, {
       startDate: true,
       endDate: true,
+    });
+  }
+
+  findLinkCandidatesForDates(userId: string, dates: string[]) {
+    return this.workouts.findMany({
+      where: {
+        userId,
+        OR: [{ planId: null }, { plan: { status: 'ACTIVE' } }],
+        scheduledDate: {
+          in: dates.map((date) => new Date(`${date}T00:00:00Z`)),
+        },
+        status: { in: ['PLANNED', 'IN_PROGRESS'] },
+      },
+      select: { scheduledDate: true, sportType: true },
     });
   }
 
@@ -608,10 +618,7 @@ export class PlanQueryService {
     });
   }
 
-  findTargetExternalEventId(
-    activityId: number,
-    provider: ThirdPartyProvider,
-  ) {
+  findTargetExternalEventId(activityId: number, provider: ThirdPartyProvider) {
     return this.links.findFirst({
       where: { activityId, unlinkedAt: null },
       orderBy: { linkedAt: 'desc' },

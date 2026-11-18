@@ -1,5 +1,5 @@
 import type { FileType } from 'trackswap';
-import type { ImportSourceKind } from '@prisma/client';
+import type { ImportSourceKind, Prisma } from '@prisma/client';
 import type { CanonicalActivityPayload } from './canonical-activity.types';
 import type { ImportItemJobWithSourceObject } from './import-item-job.types';
 import type { SourceNormalizeInput } from './source-adapters/source-adapter.interface';
@@ -60,9 +60,18 @@ export interface ImportItemExtension {
     payload: CanonicalActivityPayload;
   }): Promise<ImportItemExtensionNotice[]>;
 
-  afterTerminalFailure(args: {
-    userId: string;
-    sourceObjectId: string;
-    sourceKind: ImportSourceKind;
-  }): Promise<void>;
+  afterTerminalFailure(
+    args: {
+      userId: string;
+      sourceObjectId: string;
+      sourceKind: ImportSourceKind;
+    },
+    tx?: Prisma.TransactionClient,
+  ): Promise<void>;
 }
+export {
+  IMPORT_PUBLICATION_AUTHORIZATION,
+  lockImportConnection,
+  type ImportPublication,
+  type ImportPublicationAuthorizationExtension,
+} from './import-publication-authorization';

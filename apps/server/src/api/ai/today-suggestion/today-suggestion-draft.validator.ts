@@ -230,6 +230,11 @@ export function validateTodaySuggestionDraftForProjection(
     const handling = draft.coachDecisionHandling?.find(
       (item) => item.decisionId === decision.id,
     );
+    if (
+      decision.basisCoverage === 'UNVERIFIED' &&
+      handling?.handling === 'FOLLOW'
+    )
+      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_UNVERIFIED_BASIS');
     const allowed =
       decision.stateRole === 'ACTIVE_PROPOSAL'
         ? ['FOLLOW', 'CONDITIONAL', 'DEPART']

@@ -1,3 +1,4 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { ActivitySourceLifecycleService } from '../../sync/activity-source-lifecycle.service';
 import {
   afterAll,
@@ -17,7 +18,6 @@ import { CanonicalActivityMaterializer } from '../canonical-activity.materialize
 import { ActivityDatasetSelectorService } from '../activity-dataset-selector.service';
 import { ActivityIngestService } from '../../api/activity/activity-ingest.service';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { SensorFileQueryService } from '../../sensor/sensor-file-query.service';
 import { SensorFileRepository } from '../../sensor/persistence/sensor-file.repository';
 import { ThirdPartyActivityExportService } from '../../sync/third-party-activity-export.service';
@@ -45,7 +45,10 @@ describe('account rebinding / database ownership and concurrency', () => {
     });
     prisma = new PrismaClient({ datasourceUrl: url });
     await prisma.$connect();
-    projector = new ThirdPartyActivityProjectorService(prisma as never);
+    projector = new ThirdPartyActivityProjectorService(
+      prisma as never,
+      new ImportingJobService(importingJobRepository(prisma as never)),
+    );
     materializer = new CanonicalActivityMaterializer(
       prisma as never,
       {} as never,
@@ -59,7 +62,7 @@ describe('account rebinding / database ownership and concurrency', () => {
       new ActivityDatasetSelectorService(),
       new SensorFileQueryService(new SensorFileRepository(prisma as never)),
       new ActivityIngestService(prisma as never),
-      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+      new ImportingJobService(importingJobRepository(prisma as never)),
     );
     service = new IntervalsIcuService(
       prisma as never,
@@ -252,7 +255,7 @@ describe('account rebinding / database ownership and concurrency', () => {
     });
     const lifecycle = new ActivitySourceLifecycleService(
       prisma as never,
-      new ImportingJobService(new ImportingJobRepository(prisma as never)),
+      new ImportingJobService(importingJobRepository(prisma as never)),
     );
     await lifecycle.deactivateProviderData({
       userId: 'new',

@@ -3,6 +3,7 @@ import type { UserProfile } from "@/api/settings";
 import type {
   PlanWorkoutEstimatedLoadInputs,
   TrainingPlanDetail,
+  PlanWorkout,
 } from "@/api/plans";
 import type { V2ActivityListItem } from "@/api/v2-activities";
 import type { WorkoutStructure } from "@shared/workout-structure";
@@ -11,7 +12,7 @@ import { getPendingAuthFailure, handleUnauthorized } from "@/lib/auth-failure";
 
 export type V2HomePlanWorkout = {
   id: string;
-  planId: string;
+  planId: string | null;
   /** API 课次名称（若有），不含结构化 text */
   name: string | null;
   /** 展示用短标题：name 或 notes，不含 text/DSL */
@@ -19,6 +20,7 @@ export type V2HomePlanWorkout = {
   /** 展示用可读说明；不包含结构化 text/DSL */
   description: string | null;
   text: string;
+  durationSeconds?: number | null;
   notes: string | null;
   sportType: string;
   status: string;
@@ -93,6 +95,8 @@ export type V2HomeTodayAdvice = {
 export type HomeMetricSport = "RUN" | "CYCLING" | "SWIM";
 
 export type V2HomeResponse = {
+  todayDate?: string;
+  todayWorkouts?: V2HomePlanWorkout[];
   activePlan: V2HomeActivePlan | null;
   recentActivity: V2HomeRecentActivity | null;
   fitnessStatus: FitnessStatusData | null;
@@ -262,48 +266,55 @@ export function emptyHomeWeatherContext(): V2HomeWeatherContext {
   };
 }
 
+export function mapWorkoutToHomeWorkout(
+  workout: PlanWorkout,
+  plan?: Pick<TrainingPlanDetail, "id" | "startDate">,
+): V2HomePlanWorkout {
+  const planStart = plan?.startDate ? new Date(plan.startDate) : null;
+  let scheduledDate = workout.scheduledDate
+    ? String(workout.scheduledDate).slice(0, 10)
+    : null;
+  if (!scheduledDate && planStart) {
+    const date = new Date(planStart);
+    date.setDate(date.getDate() + workout.dayOffset);
+    scheduledDate = date.toISOString().slice(0, 10);
+  }
+  const firstLink = workout.links?.find((link) => !link.unlinkedAt);
+  const nameTrim = typeof workout.name === "string" ? workout.name.trim() : "";
+  const notesTrim =
+    typeof workout.notes === "string" ? workout.notes.trim() : "";
+  /** 展示用短标题：只用人读字段，不把结构化 text/DSL 塞进 title */
+  const displayTitle = nameTrim || notesTrim || "";
+  return {
+    id: workout.id,
+    planId: workout.planId ?? plan?.id ?? null,
+    name: nameTrim || null,
+    title: displayTitle,
+    description: nameTrim && notesTrim ? notesTrim : null,
+    text: workout.text,
+    durationSeconds: workout.summary?.durationSeconds ?? null,
+    notes: workout.notes ?? null,
+    sportType: workout.sportType,
+    status: workout.status,
+    scheduledDate,
+    dayOffset: workout.dayOffset,
+    weekIndex: workout.weekIndex,
+    dayIndex: workout.dayIndex,
+    sessionIndex: workout.sessionIndex,
+    linkedActivityTitle: firstLink ? `#${firstLink.activityId}` : null,
+    estimatedLoad: workout.estimatedLoad ?? null,
+    structure: workout.structure,
+    estimatedLoadInputs: workout.estimatedLoadInputs ?? null,
+  } satisfies V2HomePlanWorkout;
+}
+
 export function mapTrainingPlanToHomePlan(
   plan: TrainingPlanDetail,
   todayKey: string,
 ): V2HomeActivePlan {
-  const planStart = plan.startDate ? new Date(plan.startDate) : null;
-  const workouts = plan.workouts.map((workout) => {
-    let scheduledDate = workout.scheduledDate
-      ? String(workout.scheduledDate).slice(0, 10)
-      : null;
-    if (!scheduledDate && planStart) {
-      const date = new Date(planStart);
-      date.setDate(date.getDate() + workout.dayOffset);
-      scheduledDate = date.toISOString().slice(0, 10);
-    }
-    const firstLink = workout.links?.find((link) => !link.unlinkedAt);
-    const nameTrim =
-      typeof workout.name === "string" ? workout.name.trim() : "";
-    const notesTrim =
-      typeof workout.notes === "string" ? workout.notes.trim() : "";
-    /** 展示用短标题：只用人读字段，不把结构化 text/DSL 塞进 title */
-    const displayTitle = nameTrim || notesTrim || "";
-    return {
-      id: workout.id,
-      planId: workout.planId ?? plan.id,
-      name: nameTrim || null,
-      title: displayTitle,
-      description: nameTrim && notesTrim ? notesTrim : null,
-      text: workout.text,
-      notes: workout.notes ?? null,
-      sportType: workout.sportType,
-      status: workout.status,
-      scheduledDate,
-      dayOffset: workout.dayOffset,
-      weekIndex: workout.weekIndex,
-      dayIndex: workout.dayIndex,
-      sessionIndex: workout.sessionIndex,
-      linkedActivityTitle: firstLink ? `#${firstLink.activityId}` : null,
-      estimatedLoad: workout.estimatedLoad ?? null,
-      structure: workout.structure,
-      estimatedLoadInputs: workout.estimatedLoadInputs ?? null,
-    } satisfies V2HomePlanWorkout;
-  });
+  const workouts = plan.workouts.map((workout) =>
+    mapWorkoutToHomeWorkout(workout, plan),
+  );
 
   const currentWeek = plan.currentWeekIndex ?? 1;
 

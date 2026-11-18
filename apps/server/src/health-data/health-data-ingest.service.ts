@@ -1,3 +1,12 @@
+import {
+  healthDailyFactSource,
+  isHealthDailyFactSource,
+} from './health-fact-eligibility';
+import {
+  healthDailySemanticHash,
+  healthProjectionFingerprint,
+  isHealthSnapshotReady,
+} from './health-projection-fingerprint';
 import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import {
   STATE_UPDATE_HEALTH_METRICS,
@@ -96,6 +105,9 @@ type DailyCandidateReplacement = {
   managedMetricTypes: string[];
   candidates: ExternalHealthMetricCandidate[];
   externalIdPrefix?: string;
+  /** Absolute vendor revision for versioned daily reports; null means unknown. */
+  sourceRevision?: Date | null;
+  withdrawals?: Array<{ metricType: string; externalId: string }>;
 };
 
 function jsonObject(value: unknown): Record<string, unknown> {
@@ -113,6 +125,7 @@ function candidatePriority(candidate: ExternalHealthMetricCandidate) {
 /** Provider 确定性合并所需的最小已存储事实结构。 */
 type StoredHealthCandidate = {
   id?: string;
+  snapshotId?: string | null;
   provider: HealthDataProviderCode;
   externalId: string;
   startTime: Date;
@@ -322,6 +335,8 @@ export function consolidateHealthCandidates(
       break;
   }
   return {
+    contributingSources:
+      aggregation === 'LATEST' || aggregation === 'SCORE' ? [latest] : retained,
     provider: latest.provider,
     value,
     unit: latest.unit,
@@ -451,7 +466,14 @@ export class HealthDataIngestService {
     userId: string;
     candidate: ExternalHealthMetricCandidate;
   }) {
-    return this.upsertExternalSampleWith(this.prisma, args);
+    if (
+      !isHealthDailyFactSource(args.candidate) ||
+      args.candidate.projectToDaily === false
+    )
+      return this.upsertExternalSampleWith(this.prisma, args);
+    return this.health.runDailyPublicationTransaction(args.userId, (tx) =>
+      this.upsertExternalSampleWith(tx, args),
+    );
   }
 
   /**
@@ -480,29 +502,39 @@ export class HealthDataIngestService {
       db,
       `health-daily|${args.userId}|${args.localDate.toISOString().slice(0, 10)}|${args.metricType}`,
     );
-    const relevant = STATE_UPDATE_HEALTH_METRICS.has(args.metricType);
-    const previous = relevant
-      ? await this.health.dailyMetrics(db).findUnique({
-          where: {
-            userId_date_metricType: {
-              userId: args.userId,
-              date: args.localDate,
-              metricType: asHealthMetricType(args.metricType),
-            },
-          },
-        })
-      : null;
-    const candidates = (await this.health.samples(db).findMany({
+    const identity = {
+      userId: args.userId,
+      date: args.localDate,
+      metricType: asHealthMetricType(args.metricType),
+    };
+    const where = { userId_date_metricType: identity };
+    const previous = await this.health.dailyMetrics(db).findUnique({ where });
+    const candidates = await this.health.samples(db).findMany({
       where: {
-        userId: args.userId,
-        localDate: args.localDate,
-        metricType: asHealthMetricType(args.metricType),
-        deletedAt: null,
+        ...healthDailyFactSource,
+        userId: identity.userId,
+        localDate: identity.date,
+        metricType: identity.metricType,
         projectToDaily: true,
         value: { not: null },
+        OR: [
+          { deletedAt: null },
+          ...(previous
+            ? [
+                {
+                  dailyMetricId: previous.id,
+                  snapshotId: { not: null },
+                  deletedAt: { not: null },
+                },
+              ]
+            : []),
+        ],
       },
       select: {
         id: true,
+        deletedAt: true,
+        snapshotId: true,
+        snapshot: { select: { manifest: true } },
         provider: true,
         externalId: true,
         startTime: true,
@@ -517,12 +549,16 @@ export class HealthDataIngestService {
         aggregation: true,
         metadata: true,
       },
-    })) as StoredHealthCandidate[];
+    });
+    if (candidates.some((candidate) => !isHealthSnapshotReady(candidate))) {
+      return { selectedProvider: null };
+    }
     const byProvider = new Map<
       HealthDataProviderCode,
       StoredHealthCandidate[]
     >();
     candidates.forEach((candidate) => {
+      if (candidate.deletedAt) return;
       const values = byProvider.get(candidate.provider) ?? [];
       values.push(candidate);
       byProvider.set(candidate.provider, values);
@@ -530,24 +566,41 @@ export class HealthDataIngestService {
     const consolidated = [...byProvider.values()]
       .map(consolidateHealthCandidates)
       .filter((value): value is NonNullable<typeof value> => Boolean(value));
+    const relevant = STATE_UPDATE_HEALTH_METRICS.has(args.metricType);
     if (consolidated.length === 0) {
-      await this.health.dailyMetrics(db).deleteMany({
-        where: {
-          userId: args.userId,
-          date: args.localDate,
-          metricType: asHealthMetricType(args.metricType),
-        },
-      });
-      if (relevant && previous) {
-        await this.stateUpdates.requestUpdate(
-          {
-            userId: args.userId,
-            triggerType: 'HEALTH_FACT_CHANGED',
-            healthDate: args.localDate,
-            triggerRef: `${args.localDate.toISOString().slice(0, 10)}:${args.metricType}`,
+      if (previous && previous.value != null) {
+        const status = 'WITHDRAWN' as const;
+        const semanticHash = healthDailySemanticHash({ status });
+        const version = (previous.semanticVersion ?? 0) + 1;
+        await this.health.dailyMetrics(db).update({
+          where,
+          data: {
+            value: null,
+            unit: null,
+            timezone: null,
+            selectedProvider: null,
+            sourceBreakdown: Prisma.DbNull,
+            computedAt: new Date(),
+            semanticHash,
+            semanticVersion: version,
+            revisions: { create: { status, semanticHash, version } },
           },
-          db,
-        );
+        });
+        await this.health.samples(db).updateMany({
+          where: { dailyMetricId: previous.id },
+          data: { dailyMetricId: null },
+        });
+        if (relevant) {
+          await this.stateUpdates.requestUpdate(
+            {
+              userId: args.userId,
+              triggerType: 'HEALTH_FACT_CHANGED',
+              healthDate: args.localDate,
+              triggerRef: `${args.localDate.toISOString().slice(0, 10)}:${args.metricType}`,
+            },
+            db,
+          );
+        }
       }
       return { selectedProvider: null };
     }
@@ -560,6 +613,10 @@ export class HealthDataIngestService {
       consolidated.map((entry) => [
         entry.provider,
         {
+          inputFingerprint: healthProjectionFingerprint(
+            byProvider.get(entry.provider) ?? [],
+            false,
+          ),
           value: entry.value,
           unit: entry.unit,
           sourceName: entry.sourceName,
@@ -580,41 +637,97 @@ export class HealthDataIngestService {
         },
       ]),
     );
-    const dailyMetric = await this.health.dailyMetrics(db).upsert({
-      where: {
-        userId_date_metricType: {
-          userId: args.userId,
-          date: args.localDate,
-          metricType: asHealthMetricType(args.metricType),
-        },
-      },
-      create: {
-        userId: args.userId,
-        date: args.localDate,
-        timezone: selected.timezone,
-        metricType: asHealthMetricType(args.metricType),
-        value: selected.value,
-        unit: selected.unit,
-        selectedProvider: selected.provider,
-        sourceBreakdown: sourceBreakdown as Prisma.InputJsonValue,
-        computedAt,
-      },
-      update: {
-        timezone: selected.timezone,
-        value: selected.value,
-        unit: selected.unit,
-        selectedProvider: selected.provider,
-        sourceBreakdown: sourceBreakdown as Prisma.InputJsonValue,
-        computedAt,
-      },
+    const published = {
+      value: selected.value,
+      unit: selected.unit,
+      timezone: selected.timezone,
+      selectedProvider: selected.provider,
+    };
+    const status = 'AVAILABLE' as const;
+    const evidence = {
+      sourceIds: selected.contributingSources
+        .flatMap((source) => (source.id ? [source.id] : []))
+        .sort(),
+      sourceFingerprint: healthProjectionFingerprint(
+        selected.contributingSources,
+        false,
+      ),
+      aggregation: selected.aggregation,
+      startTime: new Date(
+        Math.min(
+          ...selected.contributingSources.map((source) =>
+            source.startTime.valueOf(),
+          ),
+        ),
+      ).toISOString(),
+      endTime: new Date(
+        Math.max(
+          ...selected.contributingSources.map((source) =>
+            source.endTime.valueOf(),
+          ),
+        ),
+      ).toISOString(),
+      comparabilityUnverified: consolidated.length > 1,
+    };
+    const semanticHash = healthDailySemanticHash({
+      status,
+      ...published,
+      evidence,
     });
+    const data = {
+      ...published,
+      sourceBreakdown: sourceBreakdown as Prisma.InputJsonValue,
+      computedAt,
+    };
+    const version = {
+      ...published,
+      status,
+      evidence,
+      semanticHash,
+      version: (previous?.semanticVersion ?? 0) + 1,
+    };
+    const publication = {
+      semanticVersion: version.version,
+      semanticHash,
+      revisions: { create: version },
+    };
+    const previousBreakdown = jsonObject(previous?.sourceBreakdown);
+    const sameInputs =
+      Object.keys(previousBreakdown).length === consolidated.length &&
+      Object.entries(sourceBreakdown).every(
+        ([provider, entry]) =>
+          jsonObject(previousBreakdown[provider]).inputFingerprint ===
+          entry.inputFingerprint,
+      );
+    const sameDecision = previous?.semanticHash === semanticHash;
+    const dailyMetric =
+      previous &&
+      sameDecision &&
+      sameInputs &&
+      previous.value === published.value &&
+      previous.unit === published.unit &&
+      previous.timezone === published.timezone &&
+      previous.selectedProvider === published.selectedProvider
+        ? previous
+        : await this.health.dailyMetrics(db).upsert({
+            where,
+            create: { ...identity, ...data, ...publication },
+            update: {
+              ...data,
+              ...(sameDecision ? {} : publication),
+            },
+          });
     if (dailyMetric?.id) {
       await this.health.samples(db).updateMany({
         where: {
           userId: args.userId,
           localDate: args.localDate,
           metricType: asHealthMetricType(args.metricType),
-          OR: [{ projectToDaily: false }, { deletedAt: { not: null } }],
+          OR: [
+            { projectToDaily: false },
+            { deletedAt: { not: null } },
+            { NOT: healthDailyFactSource },
+          ],
         },
         data: { dailyMetricId: null },
       });
@@ -623,6 +736,7 @@ export class HealthDataIngestService {
           userId: args.userId,
           localDate: args.localDate,
           metricType: asHealthMetricType(args.metricType),
+          ...healthDailyFactSource,
           deletedAt: null,
           projectToDaily: true,
         },
@@ -692,12 +806,21 @@ export class HealthDataIngestService {
           args,
           metricTypes,
         );
-        const rebuilt = await this.rebuildReplacementDailyMetrics(
-          tx,
-          args,
-          metricTypes,
-          replacement.previousDailyMetricIds,
+        const formalMetrics = metricTypes.filter((metricType) =>
+          isHealthDailyFactSource({
+            provider: args.provider,
+            metricType,
+            externalId: args.externalIdPrefix ?? '',
+          }),
         );
+        const rebuilt = formalMetrics.length
+          ? await this.rebuildReplacementDailyMetrics(
+              tx,
+              args,
+              formalMetrics,
+              replacement.previousDailyMetricIds,
+            )
+          : { rebuiltCount: 0 };
         return {
           sampleCount: args.candidates.length,
           previousCount: replacement.previousCount,
@@ -730,6 +853,14 @@ export class HealthDataIngestService {
           'replaceProviderDailyCandidates received a candidate outside its authoritative daily scope',
         );
       }
+    }
+    for (const withdrawal of args.withdrawals ?? []) {
+      if (
+        !metricTypes.includes(withdrawal.metricType) ||
+        (args.externalIdPrefix &&
+          !withdrawal.externalId.startsWith(args.externalIdPrefix))
+      )
+        throw new Error('Health withdrawal is outside its daily scope');
     }
   }
 
@@ -773,16 +904,54 @@ export class HealthDataIngestService {
       ...(args.externalIdPrefix ? { externalId: externalIdScope } : {}),
       deletedAt: null,
     };
+    const versioned = args.sourceRevision !== undefined;
+    const assertedIds = [
+      ...args.candidates.map((candidate) => candidate.externalId),
+      ...(args.withdrawals ?? []).map((withdrawal) => withdrawal.externalId),
+    ];
     const previous = await this.health.samples(tx).findMany({
-      where: scope,
-      select: { externalId: true, dailyMetricId: true },
+      where: versioned
+        ? {
+            OR: [
+              { ...scope, deletedAt: undefined },
+              {
+                userId: args.userId,
+                provider: args.provider,
+                metricType: scope.metricType,
+                externalId: { in: assertedIds },
+              },
+            ],
+          }
+        : scope,
+      select: {
+        id: true,
+        externalId: true,
+        metricType: true,
+        dailyMetricId: true,
+        sourceUpdatedAt: true,
+      },
     });
+    const protectedRows = versioned
+      ? previous.filter(
+          (sample) =>
+            sample.sourceUpdatedAt &&
+            (!args.sourceRevision ||
+              sample.sourceUpdatedAt >= args.sourceRevision),
+        )
+      : [];
+    const protectedKeys = new Set(
+      protectedRows.map(
+        (sample) => `${sample.metricType}:${sample.externalId}`,
+      ),
+    );
     const previousDailyMetricIds = new Set<string>(
       previous
         .map((sample) => sample.dailyMetricId)
         .filter((id): id is string => Boolean(id)),
     );
     for (const candidate of args.candidates) {
+      if (protectedKeys.has(`${candidate.metricType}:${candidate.externalId}`))
+        continue;
       const stored = await this.upsertExternalSampleWith(tx, {
         userId: args.userId,
         candidate,
@@ -790,21 +959,67 @@ export class HealthDataIngestService {
       if (stored?.dailyMetricId)
         previousDailyMetricIds.add(stored.dailyMetricId);
     }
+    let withdrawnCount = 0;
+    for (const withdrawal of args.sourceRevision
+      ? (args.withdrawals ?? [])
+      : []) {
+      if (
+        protectedKeys.has(`${withdrawal.metricType}:${withdrawal.externalId}`)
+      )
+        continue;
+      const identity = {
+        userId: args.userId,
+        provider: args.provider,
+        metricType: asHealthMetricType(withdrawal.metricType),
+        externalId: withdrawal.externalId,
+      };
+      const retirement = {
+        deletedAt: new Date(),
+        sourceUpdatedAt: args.sourceRevision ?? undefined,
+      };
+      await this.health.samples(tx).upsert({
+        where: { userId_provider_metricType_externalId: identity },
+        create: {
+          ...identity,
+          ...retirement,
+          connectionId: args.connectionId,
+          localDate: args.localDate,
+          startTime: args.localDate,
+          endTime: args.localDate,
+        },
+        update: retirement,
+      });
+      withdrawnCount++;
+    }
     const currentExternalIds = args.candidates.map(
       (candidate) => candidate.externalId,
     );
-    const deleted = await this.health.samples(tx).updateMany({
-      where: {
-        ...scope,
-        ...(currentExternalIds.length > 0
-          ? { externalId: { ...externalIdScope, notIn: currentExternalIds } }
-          : {}),
-      },
-      data: { deletedAt: new Date() },
-    });
+    const deleted =
+      versioned && !args.sourceRevision
+        ? { count: 0 }
+        : await this.health.samples(tx).updateMany({
+            where: {
+              ...scope,
+              ...(protectedRows.length
+                ? { id: { notIn: protectedRows.map((row) => row.id) } }
+                : {}),
+              ...(currentExternalIds.length > 0
+                ? {
+                    externalId: {
+                      ...externalIdScope,
+                      notIn: currentExternalIds,
+                    },
+                  }
+                : {}),
+            },
+            data: {
+              deletedAt: new Date(),
+              sourceUpdatedAt: args.sourceRevision ?? undefined,
+            },
+          });
     return {
       previousCount: previous.length,
-      deletedCount: deleted.count,
+      deletedCount: deleted.count + withdrawnCount,
       previousDailyMetricIds,
     };
   }
@@ -975,6 +1190,7 @@ export class HealthDataIngestService {
     userId: string;
     candidate: ExternalHealthMetricCandidate;
   }) {
+    if (!isHealthDailyFactSource(args.candidate)) return { selected: false };
     const rebuilt = await this.rebuildDailyMetric({
       userId: args.userId,
       localDate: args.candidate.localDate,
@@ -992,6 +1208,9 @@ export class HealthDataIngestService {
     candidate: ExternalHealthMetricCandidate;
   }) {
     const stored = await this.upsertExternalSample(args);
+    if (!isHealthDailyFactSource(args.candidate)) {
+      return { projected: false, selected: false };
+    }
     if (args.candidate.projectToDaily === false) {
       if (stored?.dailyMetricId) {
         const previousMetric = await this.health.dailyMetrics().findUnique({
@@ -1065,10 +1284,13 @@ export class HealthDataIngestService {
             userId: args.userId,
             candidate,
           });
+          sampleCount += 1;
+          metricTypes.add(candidate.metricType);
+          dates.add(candidate.localDate.toISOString().slice(0, 10));
+          if (!isHealthDailyFactSource(candidate)) continue;
           if (stored?.dailyMetricId) {
             previousDailyMetricIds.add(stored.dailyMetricId);
           }
-          sampleCount += 1;
           if (candidate.projectToDaily !== false) {
             projectedCount += 1;
             dailyKeys.set(
@@ -1079,8 +1301,6 @@ export class HealthDataIngestService {
               },
             );
           }
-          metricTypes.add(candidate.metricType);
-          dates.add(candidate.localDate.toISOString().slice(0, 10));
         }
       },
     );

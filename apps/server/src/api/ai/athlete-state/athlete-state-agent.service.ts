@@ -1,3 +1,5 @@
+import { Optional } from '@nestjs/common';
+import { CoachFactContextService } from '../core/coach-fact-context.service';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
@@ -27,6 +29,7 @@ export class AthleteStateAgentService {
   constructor(
     private readonly commands: AthleteStateCommands,
     private readonly updates: AthleteStateUpdates,
+    @Optional() private readonly facts?: CoachFactContextService,
   ) {}
 
   async assertEligible(userId: string) {
@@ -40,8 +43,10 @@ export class AthleteStateAgentService {
     runId: string;
     timezone: string;
     asOf: Date;
+    factContext?: Awaited<ReturnType<CoachFactContextService['build']>>;
     onSubmitted?: (result: unknown) => void | Promise<void>;
   }) {
+    const timezone = input.factContext?.timezone ?? input.timezone;
     const reads: AthleteStateReadReceipt[] = [];
     let accepted:
       | { assessmentId: string; state: string; confidence: number }
@@ -58,6 +63,19 @@ export class AthleteStateAgentService {
       submit: async (raw: unknown) => {
         if (accepted) throw new Error('ATHLETE_STATE_RESULT_ALREADY_SUBMITTED');
         await this.assertEligible(input.userId);
+        if (input.factContext && this.facts) {
+          const latest = await this.facts.build({
+            userId: input.userId,
+            date: input.factContext.date,
+            timezone,
+            allowAi: true,
+          });
+          if (
+            latest.revision !== input.factContext.revision ||
+            latest.status !== 'AVAILABLE'
+          )
+            throw new Error('ATHLETE_STATE_FACTS_CHANGED');
+        }
         if (!reads.some((read) => read.tool === 'training.data_coverage'))
           throw new Error('ATHLETE_STATE_COVERAGE_REQUIRED');
         const parsed = parseAthleteStateSkillResult(raw);
@@ -69,9 +87,10 @@ export class AthleteStateAgentService {
           throw new Error('ATHLETE_STATE_FACTS_REQUIRED');
         const snapshot = {
           schemaVersion: 2 as const,
+          coachFactRevision: input.factContext?.revision ?? null,
           policyVersion: ATHLETE_STATE_POLICY_VERSION,
           asOf: input.asOf.toISOString(),
-          timezone: input.timezone,
+          timezone,
           sessionId: input.sessionId,
           runId: input.runId,
           // Hashes reference actual tool reads without duplicating private Memory claims.

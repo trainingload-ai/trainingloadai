@@ -39,7 +39,7 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
         asOf: {
           type: 'string',
           description:
-            'Optional anchor date in YYYY-MM-DD. Defaults to server today.',
+            'Optional anchor date in YYYY-MM-DD. Defaults to athlete-local today.',
         },
         includeAllWorkouts: {
           type: 'boolean',
@@ -60,10 +60,11 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
       const planId = String(input.planId ?? '').trim();
-      const asOf = input.asOf ? dayjs(input.asOf) : dayjs();
+      const today = dayjs(ctx.currentTurnCalendar?.date);
+      const asOf = input.asOf ? dayjs(input.asOf) : today;
       const anchor = asOf.isValid()
         ? asOf.startOf('day')
-        : dayjs().startOf('day');
+        : today.startOf('day');
       const tomorrow = anchor.add(1, 'day');
 
       if (!planId) {

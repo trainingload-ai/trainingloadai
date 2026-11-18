@@ -62,6 +62,7 @@
     "./routes": "./routes.ts",
     "./health-observations": "./health-observations.ts",
     "./vdot-forecast": "./vdot-forecast.ts",
-    "./pmc-projection": "./pmc-projection.ts"
+    "./pmc-projection": "./pmc-projection.ts",
+    "./workout-matching": "./workout-matching.ts"
   }
 }

@@ -1,8 +1,8 @@
+import { importingJobRepository } from '@/importing/spec/importing-job.fixture';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
 import { ImportItemWorkerService } from '../import-item.worker';
 import { ImportingJobService } from '../importing-job.service';
-import { ImportingJobRepository } from '../persistence/importing-job.repository';
 import { ExternalActivitySourceRouter } from '../external-activity-source-router.service';
 import { ExternalActivityMirrorService } from '../external-activity-mirror.service';
 import { ImportSourceDataUnavailableError } from '../import-item-provider.port';
@@ -28,7 +28,7 @@ postgres('unavailable source transactions / PostgreSQL', () => {
     }
     prisma = new PrismaClient({ datasourceUrl: databaseUrl });
     await prisma.$connect();
-    const jobs = new ImportingJobService(new ImportingJobRepository(prisma as never));
+    const jobs = new ImportingJobService(importingJobRepository(prisma as never));
     router = new ExternalActivitySourceRouter(prisma as never, jobs);
     const args: unknown[] = Array.from({ length: 19 }, () => ({}));
     args[0] = prisma;

@@ -12,7 +12,7 @@ import {
 } from '@/integrations/intervals-icu/intervals-icu-oauth-diagnostics';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { ExternalProviderConnection } from '@prisma/client';
+import { ImportSourceKind, ThirdPartyProvider, HealthDataProvider, type ExternalProviderConnection } from '@prisma/client';
 import { NotificationKind, Prisma } from '@prisma/client';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -75,10 +75,8 @@ type IntervalsIcuFingerprintConnection = Pick<
 > &
   Partial<Pick<ExternalProviderConnection, 'credentialFingerprint'>>;
 import {
-  dateKeyFromWellness,
-  INTERVALS_ICU_AUTHORITATIVE_DAILY_METRIC_TYPES,
   INTERVALS_ICU_WELLNESS_SYNC_FIELDS,
-  mapIntervalsIcuWellnessToHealthCandidates,
+  mapIntervalsIcuWellnessRecordsToDailyPatches,
 } from './intervals-icu-health.mapper';
 import {
   canonicalConnectionStatus,
@@ -261,7 +259,7 @@ export class IntervalsIcuService {
       .model()
       .findFirst({
         where: {
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           externalAthleteId: normalizedAthleteId,
           status: 'ACTIVE',
           userId: { not: userId },
@@ -480,7 +478,7 @@ export class IntervalsIcuService {
     // Shared store provides expiry, one-time consumption, and replay defense.
     const state = await this.oauthStates.issue({
       userId,
-      provider: 'intervals_icu',
+      provider: ThirdPartyProvider.intervals_icu,
       payload: {
         diagnosticId: randomUUID(),
         returnUrl: this.sanitizeReturnUrl(dto.returnUrl),
@@ -512,7 +510,7 @@ export class IntervalsIcuService {
     const startedAt = Date.now();
     const context = {
       event: 'intervals_icu_oauth_callback',
-      provider: 'intervals_icu',
+      provider: ThirdPartyProvider.intervals_icu,
       callbackId: randomUUID(),
       stateRef: intervalsOAuthStateRef(query.state),
       hasCode: Boolean(query.code),
@@ -657,7 +655,7 @@ export class IntervalsIcuService {
         where: {
           userId_provider_region: {
             userId,
-            provider: 'intervals_icu',
+            provider: ThirdPartyProvider.intervals_icu,
             region: '',
           },
         },
@@ -713,7 +711,7 @@ export class IntervalsIcuService {
       },
     };
     const canonical = canonicalSettingsUpdateData({
-      provider: 'intervals_icu',
+      provider: ThirdPartyProvider.intervals_icu,
       connection: existingConnection
         ? { ...existingConnection, metadata }
         : { status: 'ACTIVE', metadata },
@@ -733,13 +731,13 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },
       create: {
         userId,
-        provider: 'intervals_icu',
+        provider: ThirdPartyProvider.intervals_icu,
         externalAthleteId,
         credentialCiphertext: this.intervalsIcuCredentials.encrypt(
           token.access_token,
@@ -815,7 +813,7 @@ export class IntervalsIcuService {
         where: {
           userId_provider_region: {
             userId,
-            provider: 'intervals_icu',
+            provider: ThirdPartyProvider.intervals_icu,
             region: '',
           },
         },
@@ -909,7 +907,7 @@ export class IntervalsIcuService {
       },
     };
     const canonical = canonicalSettingsUpdateData({
-      provider: 'intervals_icu',
+      provider: ThirdPartyProvider.intervals_icu,
       connection: existingConnection
         ? { ...existingConnection, metadata }
         : { status: 'ACTIVE', metadata },
@@ -929,13 +927,13 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },
       create: {
         userId,
-        provider: 'intervals_icu',
+        provider: ThirdPartyProvider.intervals_icu,
         externalAthleteId: profile ? extractExternalAthleteId(profile) : '0',
         credentialCiphertext: credentialData.credentialCiphertext,
         credentialLast4: credentialData.credentialLast4,
@@ -1012,7 +1010,7 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },
@@ -1031,7 +1029,7 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },
@@ -1043,7 +1041,7 @@ export class IntervalsIcuService {
     // 已授权后的设置保存不要求重新 OAuth 或再次提交 API Key。
     // Canonical settings 写入 metadata.integration，并镜像旧列供滚动升级兼容。
     const canonical = canonicalSettingsUpdateData({
-      provider: 'intervals_icu',
+      provider: ThirdPartyProvider.intervals_icu,
       connection,
       patch: legacySettingsPatch(dto as Record<string, unknown>),
     });
@@ -1062,7 +1060,7 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },
@@ -1071,7 +1069,7 @@ export class IntervalsIcuService {
     const activitySync =
       await this.importBatchService.getLatestProviderBatchProgress({
         userId,
-        sourceKind: 'INTERVALS_ICU',
+        sourceKind: ImportSourceKind.INTERVALS_ICU,
         connectionId: connection.id,
       });
     return {
@@ -1088,7 +1086,7 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },
@@ -1174,28 +1172,24 @@ export class IntervalsIcuService {
         ) ??
         normalizeIanaTimezone(args.timezone) ??
         (await this.userService?.getPreferredTimezone(args.userId));
-      for (const record of wellnessRecords) {
-        const dateKey = dateKeyFromWellness(record);
-        if (!dateKey) continue;
-        const candidates = mapIntervalsIcuWellnessToHealthCandidates({
-          externalAthleteId: connection.externalAthleteId,
-          connectionId: connection.id,
-          timezone: wellnessTimezone,
-          record,
-        });
+      const patches = mapIntervalsIcuWellnessRecordsToDailyPatches({
+        externalAthleteId: connection.externalAthleteId,
+        connectionId: connection.id,
+        timezone: wellnessTimezone,
+        records: wellnessRecords,
+      });
+      for (const patch of patches) {
         await this.healthDataIngest.replaceProviderDailyCandidates({
           userId: args.userId,
-          provider: 'INTERVALS_ICU',
+          provider: HealthDataProvider.INTERVALS_ICU,
           connectionId: connection.id,
-          localDate: new Date(`${dateKey}T00:00:00.000Z`),
-          managedMetricTypes: INTERVALS_ICU_AUTHORITATIVE_DAILY_METRIC_TYPES,
-          candidates,
+          ...patch,
         });
-        sampleCount += candidates.length;
-        candidates.forEach((candidate) =>
+        sampleCount += patch.candidates.length;
+        patch.candidates.forEach((candidate) =>
           metricTypes.add(candidate.metricType),
         );
-        dates.add(dateKey);
+        dates.add(patch.localDate.toISOString().slice(0, 10));
       }
       const ingestResult = {
         sampleCount,
@@ -1283,7 +1277,7 @@ export class IntervalsIcuService {
       where: {
         userId_provider_region: {
           userId,
-          provider: 'intervals_icu',
+          provider: ThirdPartyProvider.intervals_icu,
           region: '',
         },
       },

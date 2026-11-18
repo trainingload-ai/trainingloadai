@@ -1,3 +1,4 @@
+import { webhookContentChecksum } from '@/integrations/external-provider/external-provider-webhook-inbox.service';
 import { Injectable } from '@nestjs/common';
 import {
   ImportSourceKind,
@@ -372,6 +373,7 @@ export class ExternalActivityMirrorService {
       originProvider: { not: null },
       ...providerFilter,
       resolvedActivityId: null,
+      importRevokedAt: null,
       resolutionStatus: {
         in: [
           ImportSourceResolutionStatus.ROUTING,
@@ -458,6 +460,8 @@ export class ExternalActivityMirrorService {
     activityId: number;
     provider: ThirdPartyProvider | null | undefined;
     sourceObjectId: string;
+    itemJobId?: string;
+    itemLockToken?: string;
   }): Promise<ExternalActivityMirrorResolutionResult> {
     // 1. 找出可能被本次正式 Activity 认领的未解析影子。
     const mirrors = await this.findUnresolvedMirrors(args.userId);
@@ -541,7 +545,12 @@ export class ExternalActivityMirrorService {
         select: { sourceKind: true, provider: true, rawPayload: true },
       }),
       this.prisma.activity.findFirst({
-        where: { id: args.activityId, userId: args.userId },
+        where: {
+          id: args.activityId,
+          userId: args.userId,
+          state: 1,
+          mergedIntoActivityId: null,
+        },
         select: {
           id: true,
           startTime: true,
@@ -568,6 +577,7 @@ export class ExternalActivityMirrorService {
           ),
         },
         mergedIntoActivityId: null,
+        state: 1,
       },
       select: {
         id: true,
@@ -596,7 +606,13 @@ export class ExternalActivityMirrorService {
 
   /** 将纯决策转换为状态更新；只有 RESOLVE 分支会进入关联事务。 */
   private async applyResolutionDecision(
-    args: { userId: string; activityId: number; sourceObjectId: string },
+    args: {
+      userId: string;
+      activityId: number;
+      sourceObjectId: string;
+      itemJobId?: string;
+      itemLockToken?: string;
+    },
     context: ResolutionContext,
     decision: MirrorResolutionDecision,
   ): Promise<ExternalActivityMirrorResolutionResult> {
@@ -643,7 +659,13 @@ export class ExternalActivityMirrorService {
 
   /** 原子写入次级来源关联并关闭影子，不创建新的 Activity。 */
   private async persistResolution(
-    args: { userId: string; activityId: number; sourceObjectId: string },
+    args: {
+      userId: string;
+      activityId: number;
+      sourceObjectId: string;
+      itemJobId?: string;
+      itemLockToken?: string;
+    },
     context: ResolutionContext,
     resolution: Extract<MirrorAssessment, { kind: 'MATCH' }>,
   ) {
@@ -658,42 +680,64 @@ export class ExternalActivityMirrorService {
     } satisfies Prisma.InputJsonObject;
     // 解析必须原子完成：为正式 Activity 增加次级发现来源，同时关闭影子投影。
     // 不创建第二条 Activity，因此训练统计和计划课绑定仍只看到一个正式活动。
-    await this.prisma.$transaction(async (tx) => {
+    const publish = async (tx: Prisma.TransactionClient) => {
+      await tx.$queryRaw`SELECT id FROM t_import_source_object WHERE id=${mirror.id} FOR UPDATE`;
+      const [currentMirror, target] = await Promise.all([
+        this.importJobs.sourceObjects(tx).findFirst({
+          where: { id: mirror.id, userId: args.userId, importRevokedAt: null },
+        }),
+        tx.activity.findFirst({
+          where: {
+            id: args.activityId,
+            userId: args.userId,
+            state: 1,
+            mergedIntoActivityId: null,
+          },
+          select: { id: true },
+        }),
+      ]);
+      if (
+        !currentMirror ||
+        !target ||
+        webhookContentChecksum(currentMirror.rawPayload) !==
+          webhookContentChecksum(mirror.rawPayload)
+      )
+        throw new Error('MIRROR_RESOLUTION_CONTEXT_CHANGED');
       if (mirror.id !== args.sourceObjectId)
         await tx.activitySource.upsert({
-        where: {
-          activity_source_identity_unique: {
-            userId: args.userId,
-            sourceKind: mirror.sourceKind,
-            sourceUid: mirror.sourceUid,
+          where: {
+            activity_source_identity_unique: {
+              userId: args.userId,
+              sourceKind: mirror.sourceKind,
+              sourceUid: mirror.sourceUid,
+            },
           },
-        },
-        update: {
-          activityId: args.activityId,
-          sourceObjectId: mirror.id,
-          provider: mirror.provider,
-          accountRef: mirror.accountRef,
-          externalId: mirror.externalId,
-          isPrimary: false,
-          isActive: true,
-          metadata: resolutionMetadata,
-          lastImportedAt: new Date(),
-        },
-        create: {
-          activityId: args.activityId,
-          userId: args.userId,
-          sourceObjectId: mirror.id,
-          sourceKind: mirror.sourceKind,
-          provider: mirror.provider,
-          sourceUid: mirror.sourceUid,
-          accountRef: mirror.accountRef,
-          externalId: mirror.externalId,
-          metadata: resolutionMetadata,
-          isPrimary: false,
-          isActive: true,
-          lastImportedAt: new Date(),
-        },
-      });
+          update: {
+            activityId: args.activityId,
+            sourceObjectId: mirror.id,
+            provider: mirror.provider,
+            accountRef: mirror.accountRef,
+            externalId: mirror.externalId,
+            isPrimary: false,
+            isActive: true,
+            metadata: resolutionMetadata,
+            lastImportedAt: new Date(),
+          },
+          create: {
+            activityId: args.activityId,
+            userId: args.userId,
+            sourceObjectId: mirror.id,
+            sourceKind: mirror.sourceKind,
+            provider: mirror.provider,
+            sourceUid: mirror.sourceUid,
+            accountRef: mirror.accountRef,
+            externalId: mirror.externalId,
+            metadata: resolutionMetadata,
+            isPrimary: false,
+            isActive: true,
+            lastImportedAt: new Date(),
+          },
+        });
       await this.importJobs.sourceObjects(tx).update({
         where: { id: mirror.id },
         data: {
@@ -703,7 +747,17 @@ export class ExternalActivityMirrorService {
           resolutionReason: null,
         },
       });
-    });
+    };
+    if (args.itemJobId && args.itemLockToken)
+      await this.importJobs.withCurrentImport(
+        {
+          itemJobId: args.itemJobId,
+          userId: args.userId,
+          lockToken: args.itemLockToken,
+        },
+        publish,
+      );
+    else await this.prisma.$transaction(publish);
   }
 
   /**

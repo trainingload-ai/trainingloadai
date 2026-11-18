@@ -5,6 +5,7 @@ import { ImportingJobService } from './importing-job.service';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import { importJsonValue } from './import-item-job.types';
 import { RuntimeCapabilityService } from '@/runtime-capabilities/runtime-capability.service';
+import type { Prisma } from '@prisma/client';
 import type { RuntimeCapabilityName } from '@/runtime-capabilities/runtime-capability.types';
 
 export type DownloadedActivityFile = {
@@ -33,10 +34,30 @@ export class RemoteActivityFileService {
       rawChecksum?: string | null;
     };
     fallbackFileName: string;
+    sourceRevision?: string | null;
     metadata?: Record<string, unknown>;
     capability?: RuntimeCapabilityName;
     download: () => Promise<DownloadedActivityFile>;
   }) {
+    const persist = async (
+      data: Prisma.ImportSourceObjectUncheckedUpdateInput,
+    ) => {
+      if (args.sourceRevision !== undefined) {
+        const result = await this.importJobs.sourceObjects().updateMany({
+          where: {
+            id: args.sourceObject.id,
+            importRevision: args.sourceRevision,
+          },
+          data,
+        });
+        if (result.count !== 1)
+          throw new Error('IMPORT_SOURCE_REVISION_CHANGED');
+      } else {
+        await this.importJobs
+          .sourceObjects()
+          .update({ where: { id: args.sourceObject.id }, data });
+      }
+    };
     const existingKey = args.sourceObject.fileKey ?? undefined;
     const existingBuffer = existingKey
       ? await this.storage.getFileWithKey(existingKey)
@@ -52,13 +73,10 @@ export class RemoteActivityFileService {
         args.sourceObject.fileName !== fileName ||
         args.sourceObject.rawStorageKey !== rawStorageKey
       ) {
-        await this.importJobs.sourceObjects().update({
-          where: { id: args.sourceObject.id },
-          data: {
-            fileName,
-            rawStorageKey,
-            rawChecksum: sourceChecksum,
-          },
+        await persist({
+          fileName,
+          rawStorageKey,
+          rawChecksum: sourceChecksum,
         });
       }
       return {
@@ -80,23 +98,18 @@ export class RemoteActivityFileService {
       mimetype: downloaded.contentType ?? 'application/octet-stream',
       size: downloaded.buffer.length,
     } as Express.Multer.File);
-    await this.importJobs.sourceObjects().update({
-      where: { id: args.sourceObject.id },
-      data: {
-        fileName: downloaded.fileName,
-        fileKey: uploaded.fileKey,
-        rawStorageKey: uploaded.fileKey,
-        rawChecksum: createHash('sha256')
-          .update(downloaded.buffer)
-          .digest('hex'),
-        metadata: importJsonValue({
-          ...(args.metadata ?? {}),
-          ...(downloaded.metadata ?? {}),
-          downloadedFileEndpoint: downloaded.endpoint ?? null,
-          downloadedFileContentType: downloaded.contentType ?? null,
-          downloadedFileName: downloaded.fileName,
-        }),
-      },
+    await persist({
+      fileName: downloaded.fileName,
+      fileKey: uploaded.fileKey,
+      rawStorageKey: uploaded.fileKey,
+      rawChecksum: createHash('sha256').update(downloaded.buffer).digest('hex'),
+      metadata: importJsonValue({
+        ...(args.metadata ?? {}),
+        ...(downloaded.metadata ?? {}),
+        downloadedFileEndpoint: downloaded.endpoint ?? null,
+        downloadedFileContentType: downloaded.contentType ?? null,
+        downloadedFileName: downloaded.fileName,
+      }),
     });
     return {
       buffer: downloaded.buffer,

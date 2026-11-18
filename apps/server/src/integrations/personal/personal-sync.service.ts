@@ -1,6 +1,10 @@
+import { ImportSourceObjectType } from '@/importing/import-item-job.types';
 import { Inject, Injectable } from '@nestjs/common';
 import { createHash, randomUUID } from 'crypto';
 import {
+  ThirdPartyProvider,
+  ImportSourceKind,
+  HealthDataProvider,
   Prisma,
   ZoneBase,
   ZoneType,
@@ -37,6 +41,7 @@ import {
 import { corosHealthCandidates } from '../coros-mcp/coros-health.mapper';
 import { ActivitySourceLifecycleService } from '@/sync/activity-source-lifecycle.service';
 import { personalAccountRef } from './personal-identity';
+import { webhookContentChecksum } from '@/integrations/external-provider/external-provider-webhook-inbox.service';
 import {
   garminSummaryMode,
   mapGarminHeartRateZones,
@@ -119,7 +124,9 @@ export class PersonalSyncService {
           activityDone: !settings.activities,
           healthDone: !settings.wellness,
           heartRateZonesDone:
-            trigger !== 'first_connect' || !settings.wellness || provider !== 'garmin',
+            trigger !== 'first_connect' ||
+            !settings.wellness ||
+            provider !== 'garmin',
           childIds: [],
           discovered: 0,
         }),
@@ -185,8 +192,7 @@ export class PersonalSyncService {
           cursor: startDate,
           activityDone: !settings.activities,
           healthDone: !settings.wellness,
-          heartRateZonesDone:
-            !settings.wellness || provider !== 'garmin',
+          heartRateZonesDone: !settings.wellness || provider !== 'garmin',
           childIds: [],
           discovered: 0,
         }),
@@ -208,12 +214,20 @@ export class PersonalSyncService {
   async enqueueFocus(userId: string, provider: PersonalProvider) {
     const connection = await this.connections.require(userId, provider);
     if (!connection.syncActivities && !connection.syncWellness)
-      return { status: 'SKIPPED', jobId: null as string | null, reason: 'disabled' };
+      return {
+        status: 'SKIPPED',
+        jobId: null as string | null,
+        reason: 'disabled',
+      };
     if (
       connection.lastSyncCompletedAt &&
       Date.now() - connection.lastSyncCompletedAt.getTime() < 60 * 60_000
     )
-      return { status: 'SKIPPED', jobId: null as string | null, reason: 'throttled' };
+      return {
+        status: 'SKIPPED',
+        jobId: null as string | null,
+        reason: 'throttled',
+      };
     const active = await this.prisma.personalProviderJob.findFirst({
       where: {
         connectionId: connection.id,
@@ -223,7 +237,11 @@ export class PersonalSyncService {
       select: { id: true },
     });
     if (active)
-      return { status: 'SKIPPED', jobId: null as string | null, reason: 'in_flight' };
+      return {
+        status: 'SKIPPED',
+        jobId: null as string | null,
+        reason: 'in_flight',
+      };
     const timezone = await this.connections.resolveAccountTimezone(userId);
     const endDate = localToday(timezone);
     const startDate = addDays(endDate, -1);
@@ -234,7 +252,9 @@ export class PersonalSyncService {
       wellness: connection.syncWellness === true,
     };
     const requestId = createHash('sha256')
-      .update(`focus:${connection.id}:${endDate}:${Math.floor(Date.now() / 3600_000)}`)
+      .update(
+        `focus:${connection.id}:${endDate}:${Math.floor(Date.now() / 3600_000)}`,
+      )
       .digest('hex');
     const job = await this.prisma.personalProviderJob.upsert({
       where: {
@@ -283,7 +303,9 @@ export class PersonalSyncService {
     for (const row of rows) {
       if (!isPersonalConnection(row)) continue;
       if (!row.syncActivities && !row.syncWellness) continue;
-      const timezone = await this.connections.resolveAccountTimezone(row.userId);
+      const timezone = await this.connections.resolveAccountTimezone(
+        row.userId,
+      );
       const now = new Date();
       const localHour = Number(
         new Intl.DateTimeFormat('en-US', {
@@ -414,7 +436,7 @@ export class PersonalSyncService {
         sportType?: number;
         day?: string;
       }>;
-      if (connection.provider === 'garmin') {
+      if (connection.provider === ThirdPartyProvider.garmin) {
         // Full selected startDate–endDate with offset pages (not one calendar day
         // per request). Absence runs once after the last page of this window.
         const offset = Number(result.offset ?? 0);
@@ -495,18 +517,18 @@ export class PersonalSyncService {
       }
       await this.current(job, connection, 'ACTIVITY');
       const previousIds: string[] =
-        connection.provider === 'garmin' && Array.isArray(result.dayIds)
+        connection.provider === ThirdPartyProvider.garmin && Array.isArray(result.dayIds)
           ? result.dayIds
           : [];
       const ids = activities.map((item) => item.id);
       const dayIds = [...previousIds, ...ids];
       if (
         new Set(dayIds).size !== dayIds.length ||
-        (activities.length > 99 && connection.provider === 'garmin')
+        (activities.length > 99 && connection.provider === ThirdPartyProvider.garmin)
       )
         throw new PersonalProviderError('PROVIDER_WINDOW_INCOMPLETE');
       const anotherPage =
-        connection.provider === 'garmin' && activities.length === 99;
+        connection.provider === ThirdPartyProvider.garmin && activities.length === 99;
       if (!anotherPage) {
         // Absence needs a complete observation window and two separated misses.
         // Garmin: whole startDate–endDate after the last offset page.
@@ -518,7 +540,7 @@ export class PersonalSyncService {
             requestId: {
               startsWith: `activity:${personalAccountRef(connection)}:`,
             },
-            ...(connection.provider === 'garmin'
+            ...(connection.provider === ThirdPartyProvider.garmin
               ? {}
               : { payload: { path: ['day'], equals: day } }),
           },
@@ -527,7 +549,7 @@ export class PersonalSyncService {
         for (const prior of previous) {
           const priorDay = String(record(prior.payload).day ?? '');
           if (
-            connection.provider === 'garmin' &&
+            connection.provider === ThirdPartyProvider.garmin &&
             (priorDay < String(payload.startDate) ||
               priorDay > String(payload.endDate))
           )
@@ -540,7 +562,7 @@ export class PersonalSyncService {
                 ? Date.parse(old.missingSince)
                 : NaN;
             if (Number.isFinite(first) && Date.now() - first >= 30 * 60_000) {
-              if (connection.provider === 'garmin') {
+              if (connection.provider === ThirdPartyProvider.garmin) {
                 // Sync path no longer calls activity detail. Without an
                 // authoritative 404, keep the reversible missing marker only.
                 continue;
@@ -638,7 +660,7 @@ export class PersonalSyncService {
       await this.releaseNextSerialActivity(connection.id, childIds);
       // Garmin finishes the whole window via offset pages; COROS still advances one day.
       const cursor =
-        connection.provider === 'garmin'
+        connection.provider === ThirdPartyProvider.garmin
           ? anotherPage
             ? day
             : addDays(String(payload.endDate), 1)
@@ -655,7 +677,7 @@ export class PersonalSyncService {
           dayIds: anotherPage ? dayIds : [],
           discovered: childIds.length,
           activityDone:
-            connection.provider === 'garmin'
+            connection.provider === ThirdPartyProvider.garmin
               ? !anotherPage
               : cursor > payload.endDate,
         },
@@ -665,16 +687,12 @@ export class PersonalSyncService {
     }
     if (
       !result.heartRateZonesDone &&
-      connection.provider === 'garmin' &&
+      connection.provider === ThirdPartyProvider.garmin &&
       connection.syncWellness !== false &&
       settings.wellness !== false
     ) {
       await this.importGarminHeartRateZones(job, connection);
-      await this.checkpoint(
-        job,
-        { ...result, heartRateZonesDone: true },
-        1000,
-      );
+      await this.checkpoint(job, { ...result, heartRateZonesDone: true }, 1000);
       return;
     }
     if (!result.healthDone && connection.syncWellness !== false) {
@@ -816,7 +834,8 @@ export class PersonalSyncService {
     if (active.length === 1) return false;
     const next = children.find(
       (child) =>
-        child.status === 'WAITING' && isPersonalActivitySerialHeld(child.result),
+        child.status === 'WAITING' &&
+        isPersonalActivitySerialHeld(child.result),
     );
     if (!next) return false;
     const released = await this.prisma.personalProviderJob.updateMany({
@@ -934,10 +953,7 @@ export class PersonalSyncService {
   ) {
     const input = record(job.payload),
       result = record(job.result);
-    if (
-      connection.provider === 'garmin' &&
-      result.validateRemote
-    ) {
+    if (connection.provider === ThirdPartyProvider.garmin && result.validateRemote) {
       // List → FIT only. An explicit re-sync clears the cached file so FIT is
       // fetched again; the importer still skips unchanged bytes by checksum.
       await this.checkpoint(
@@ -957,7 +973,7 @@ export class PersonalSyncService {
       return;
     }
     if (
-      connection.provider === 'coros' &&
+      connection.provider === ThirdPartyProvider.coros &&
       (result.validateRemote || !result.remoteHash)
     ) {
       const detail = await this.connections.readCoros(
@@ -1012,7 +1028,7 @@ export class PersonalSyncService {
       checksum: string = result.checksum;
     if (!fileKey) {
       let file: { buffer: Buffer; fileName: string };
-      if (connection.provider === 'garmin') {
+      if (connection.provider === ThirdPartyProvider.garmin) {
         const bytes = await this.connections.authorized(
           connection.id,
           (c, token) =>
@@ -1061,16 +1077,30 @@ export class PersonalSyncService {
       userId: connection.userId,
       provider: connection.provider,
       sourceKind:
-        connection.provider === 'garmin' ? 'GARMIN_PERSONAL_API' : 'COROS_MCP',
+        connection.provider === ThirdPartyProvider.garmin ? ImportSourceKind.GARMIN_PERSONAL_API : ImportSourceKind.COROS_MCP,
       candidates: [
         {
           sourceUid: `${connection.provider}:${personalAccountRef(connection)}:${input.id}`,
           externalId: input.id,
           accountRef: personalAccountRef(connection),
-          objectType: 'ACTIVITY',
+          objectType: ImportSourceObjectType.PERSONAL_ACTIVITY,
           rawChecksum: checksum,
+          inputRevision: webhookContentChecksum({
+            checksum,
+            detail: result.remoteDetail ?? null,
+            connectionId: connection.id,
+            fingerprint: connection.credentialFingerprint,
+          }),
           timelineTitle: input.title,
-          sourceRef: { fileKey, fileName },
+          sourceRef: {
+            fileKey,
+            fileName,
+            personalAuthorization: {
+              connectionId: connection.id,
+              fingerprint: connection.credentialFingerprint,
+              accountRef: personalAccountRef(connection),
+            },
+          },
           metadata: {
             connectionMode: personalMetadata(connection).connectionMode,
             remoteDetail: result.remoteDetail ?? null,
@@ -1107,7 +1137,7 @@ export class PersonalSyncService {
   ) {
     const input = record(job.payload),
       day = input.day as string;
-    if (connection.provider === 'garmin') {
+    if (connection.provider === ThirdPartyProvider.garmin) {
       const get = (path: string, query: Record<string, string> = {}) =>
         this.connections.authorized(connection.id, (c, token) =>
           this.garmin.get(personalRegion(c), token, path, query),
@@ -1124,7 +1154,7 @@ export class PersonalSyncService {
           where: {
             id: previous.sourceObjectId,
             userId: connection.userId,
-            sourceKind: 'GARMIN_PERSONAL_API',
+            sourceKind: ImportSourceKind.GARMIN_PERSONAL_API,
             accountRef: personalAccountRef(connection),
             externalId: day,
           },
@@ -1226,7 +1256,7 @@ export class PersonalSyncService {
       await this.current(job, connection, 'HEALTH', input.timezone);
       const projected = await this.health.replaceProviderDailyCandidates({
         userId: connection.userId,
-        provider: 'GARMIN',
+        provider: HealthDataProvider.GARMIN,
         connectionId: connection.id,
         localDate: new Date(`${day}T00:00:00Z`),
         externalIdPrefix: `${personalAccountRef(connection)}:${day}:`,
@@ -1298,7 +1328,7 @@ export class PersonalSyncService {
       await this.current(job, connection, 'HEALTH', input.timezone);
       const projected = await this.health.replaceProviderDailyCandidates({
         userId: connection.userId,
-        provider: 'COROS',
+        provider: HealthDataProvider.COROS,
         connectionId: connection.id,
         localDate: new Date(`${day}T00:00:00Z`),
         externalIdPrefix: `${personalAccountRef(connection)}:${day}:`,
@@ -1323,18 +1353,20 @@ export class PersonalSyncService {
     connection: ExternalProviderConnection,
   ) {
     await this.current(job, connection, 'HEALTH');
-    const payload = await this.connections.authorized(connection.id, (c, token) =>
-      this.garmin.get(
-        personalRegion(c),
-        token,
-        '/biometric-service/heartRateZones/v2',
-      ),
+    const payload = await this.connections.authorized(
+      connection.id,
+      (c, token) =>
+        this.garmin.get(
+          personalRegion(c),
+          token,
+          '/biometric-service/heartRateZones/v2',
+        ),
     );
     const mapped = mapGarminHeartRateZones(payload);
     for (const entry of mapped) {
       await this.users.upsertImportedZoneSetting({
         userId: connection.userId,
-        provider: 'garmin',
+        provider: ThirdPartyProvider.garmin,
         sportType: entry.sportType,
         zoneType: ZoneType.HEART_RATE,
         zones: entry.zones,
@@ -1352,12 +1384,12 @@ export class PersonalSyncService {
     // Raw evidence survives transient jobs and disconnects. Stable identity is
     // scoped to the vendor account, not the replaceable connection row.
     const version =
-      connection.provider === 'garmin'
+      connection.provider === ThirdPartyProvider.garmin
         ? `:${createHash('sha256').update(JSON.stringify(raw)).digest('hex')}`
         : '';
     const sourceUid = `${connection.provider}:${personalAccountRef(connection)}:health:${day}${version}`;
     const sourceKind =
-      connection.provider === 'garmin' ? 'GARMIN_PERSONAL_API' : 'COROS_MCP';
+      connection.provider === ThirdPartyProvider.garmin ? ImportSourceKind.GARMIN_PERSONAL_API : ImportSourceKind.COROS_MCP;
     return this.importJobs.sourceObjects().upsert({
       where: {
         import_source_object_identity_unique: {
@@ -1373,7 +1405,7 @@ export class PersonalSyncService {
         sourceUid,
         accountRef: personalAccountRef(connection),
         externalId: day,
-        objectType: 'HEALTH',
+        objectType: ImportSourceObjectType.HEALTH,
         rawPayload: json(raw),
       },
       update: { rawPayload: json(raw), lastSeenAt: new Date() },
