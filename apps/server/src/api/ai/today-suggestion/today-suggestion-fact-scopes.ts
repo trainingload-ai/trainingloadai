@@ -59,5 +59,5 @@ export function todayCoachingFactScopes(
       topic: `athlete-state:${projection.date}`,
       revision: shared?.revision ?? 'unverified',
     },
-  ];
+  ].map((scope) => ({ ...scope, timezone: projection.timezone ?? 'UTC' }));
 }

@@ -19,7 +19,11 @@ const url = process.env.COACH_FACT_TEST_DATABASE_URL;
     let topics: CoachFactScope[];
     let userId: string;
     const users: string[] = [];
-    const validator = { current: async () => topics };
+    let zones: Map<string, CoachFactScope[]>;
+    const validator = {
+      current: async (_userId: string, timezone?: string) =>
+        timezone ? (zones.get(timezone) ?? topics) : topics,
+    };
     const store = new CoachRunStore(
       db as never,
       undefined,
@@ -53,6 +57,7 @@ const url = process.env.COACH_FACT_TEST_DATABASE_URL;
           updatedAt: new Date(),
         },
       });
+      zones = new Map();
       topics = [
         { topic: 'workout-match:activity-1', revision: 'candidates-v1' },
         { topic: 'today:2026-11-18', revision: 'health-v1' },
@@ -141,6 +146,58 @@ const url = process.env.COACH_FACT_TEST_DATABASE_URL;
         },
       };
     }
+    it('restores and answers in the server-verified timezone instead of the default UTC day', async () => {
+      topics = [
+        { topic: 'today:2026-11-17', revision: 'utc', timezone: 'UTC' },
+      ];
+      const local = {
+        topic: 'today:2026-11-18',
+        revision: 'local-v1',
+        timezone: 'Asia/Shanghai',
+      };
+      zones.set('Asia/Shanghai', [local]);
+      const { handle } = await store.begin(start(local));
+      await question(handle!);
+      await peer.reconcileCurrentFacts(userId);
+      expect(
+        (
+          await db.coachRun.findUniqueOrThrow({
+            where: { id: handle!.projector.run.runId },
+          })
+        ).status,
+      ).toBe('awaiting_input');
+      expect(
+        await peer.contextTimezone(userId, handle!.projector.run.runId),
+      ).toBe('Asia/Shanghai');
+      expect(
+        await peer.contextTimezone('another-user', handle!.projector.run.runId),
+      ).toBeUndefined();
+      const result = await peer.begin(answer(handle!));
+      expect(result.handle).toBeTruthy();
+    });
+    it('still cancels a timezone-bound question when its own current facts change', async () => {
+      topics = [
+        { topic: 'today:2026-11-17', revision: 'utc', timezone: 'UTC' },
+      ];
+      const local = {
+        topic: 'today:2026-11-18',
+        revision: 'local-v1',
+        timezone: 'Asia/Shanghai',
+      };
+      zones.set('Asia/Shanghai', [local]);
+      const { handle } = await store.begin(start(local));
+      await question(handle!);
+      zones.set('Asia/Shanghai', [{ ...local, revision: 'local-v2' }]);
+      await peer.reconcileCurrentFacts(userId);
+      expect(
+        (
+          await db.coachRun.findUniqueOrThrow({
+            where: { id: handle!.projector.run.runId },
+          })
+        ).status,
+      ).toBe('cancelled');
+      await expect(peer.begin(answer(handle!))).rejects.toThrow();
+    });
     it('deduplicates simultaneous entries from two instances but keeps distinct topics independent', async () => {
       const results = await Promise.all([
         store.begin(start()),

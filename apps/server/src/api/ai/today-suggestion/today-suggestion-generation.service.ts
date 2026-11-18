@@ -1,3 +1,4 @@
+import { validCoachTimezone } from '../core/coach-fact-scope.port';
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Prisma } from '@prisma/client';
@@ -40,14 +41,17 @@ export class TodaySuggestionGenerationService {
     );
   }
 
-  async contextToken(userId: string) {
-    const row = await this.prisma.todaySuggestionGeneration.upsert({
-      where: { userId },
-      create: { userId },
-      update: {},
-      select: { contextToken: true },
+  async contextToken(userId: string, timezone?: string | null) {
+    const zone = validCoachTimezone(timezone) ?? 'UTC';
+    return this.locked(userId, async (tx) => {
+      const row = await tx.todaySuggestionContextReference.upsert({
+        where: { userId_timezone: { userId, timezone: zone } },
+        create: { userId, timezone: zone },
+        update: {},
+        select: { id: true },
+      });
+      return row.id;
     });
-    return row.contextToken;
   }
 
   claim(scope: TodayGenerationScope) {

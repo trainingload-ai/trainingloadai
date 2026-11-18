@@ -730,6 +730,118 @@ databaseTests('Source revision handoff on PostgreSQL', () => {
     worker.onModuleDestroy();
   });
 
+  it('consumes a reverted R1 after an acknowledged R1 and partially published R2', async () => {
+    const name = 'reverted-content';
+    const first = await submit(name, 'r1');
+    const worker = createWorker({});
+    const control = worker as any;
+    const materializer = createMaterializer();
+    const payload = (version: number): any => ({
+      source: {
+        kind: 'GARMIN_PERSONAL_API',
+        provider: 'garmin',
+        sourceUid: sourceUid(name),
+        accountRef,
+        externalId: name,
+        sourceChecksum: String(version).repeat(64),
+      },
+      identity: { dedupeKey: `aba-${userId}` },
+      summary: {
+        name: `version-${version}`,
+        sportType: 'RUN',
+        startTime: '2026-11-18T03:00:00Z',
+        endTime: '2026-11-18T04:00:00Z',
+        distance: version * 4000,
+      },
+      laps: [],
+    });
+    const claim = async (sourceObjectId?: string) => {
+      const item = (await control.claimBatch(100)).find((row: any) =>
+        sourceObjectId
+          ? row.sourceObjectId === sourceObjectId
+          : row.batchJobId === first.batch!.id,
+      );
+      expect(item).toBeDefined();
+      control.activeLeaseTokens.set(item.id, item.lockToken);
+      control.revisionedItems.add(item.id);
+      return item;
+    };
+    const commit = async (item: any, version: number) => {
+      const row = await materializer.materialize({
+        itemJobId: item.id,
+        itemLockToken: item.lockToken,
+        userId,
+        sourceObjectId: item.sourceObjectId,
+        payload: payload(version),
+      });
+      expect(row.pendingCommit).toBeTruthy();
+      await control.markStatus(item.id, 'PARQUET_BUILDING');
+      await materializer.commitStagedDataset({
+        token: row.pendingCommit!,
+        userId,
+        sourceObjectId: item.sourceObjectId,
+        payload: payload(version),
+        stagedParquetFiles: [],
+        itemJobId: item.id,
+        itemLockToken: item.lockToken,
+      });
+      return row;
+    };
+    const finish = (item: any, row: any) =>
+      control.withCurrentDataset(
+        { jobId: item.id, userId },
+        row.pendingCommit,
+        async (tx: any) => {
+          await tx.activity.update({
+            where: { id: row.activity.id },
+            data: { processingStatus: 'READY' },
+          });
+          await control.completeActivityItem(item.id, item.batchJobId, tx);
+        },
+      );
+    try {
+      const r1 = await claim();
+      const one = await commit(r1, 1);
+      await finish(r1, one);
+      expect(
+        (
+          await db.importSourceObject.findUniqueOrThrow({
+            where: { id: r1.sourceObjectId },
+          })
+        ).completedImportRevision,
+      ).toBe(r1.sourceRevision);
+      await submit(name, 'r2');
+      const r2 = await claim(r1.sourceObjectId);
+      const two = await commit(r2, 2);
+      await submit(name, 'r1');
+      await expect(finish(r2, two)).rejects.toThrow(
+        'IMPORT_SOURCE_REVISION_CHANGED',
+      );
+      await jobs.finishRevisionedItem({
+        id: r2.id,
+        lockToken: r2.lockToken,
+        data: { status: 'FAILED', lockToken: null, leaseExpiresAt: null },
+      });
+      const reverted = await claim(r1.sourceObjectId);
+      expect(reverted.sourceRevision).toBe(r1.sourceRevision);
+      const restored = await commit(reverted, 1);
+      await finish(reverted, restored);
+      expect(
+        await db.activity.findUniqueOrThrow({ where: { id: one.activity.id } }),
+      ).toMatchObject({ distance: 4000, processingStatus: 'READY' });
+      expect(
+        (
+          await db.importSourceObject.findUniqueOrThrow({
+            where: { id: r1.sourceObjectId },
+          })
+        ).completedImportRevision,
+      ).toBe(r1.sourceRevision);
+      expect((await submit(name, 'r1', true)).queuedCount).toBe(0);
+    } finally {
+      worker.onModuleDestroy();
+    }
+  });
+
   it.each(['fallback', 'repair'])(
     'finishes a local %s of an accepted dataset after the remote connection is disabled',
     async (mode) => {

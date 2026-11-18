@@ -1,3 +1,7 @@
+import {
+  validCoachTimezone,
+  type CoachFactScope,
+} from '../core/coach-fact-scope.port';
 import { AthleteStateInquiryService } from '../athlete-state/athlete-state-inquiry.service';
 import { todayCoachingFactScopes } from './today-suggestion-fact-scopes';
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
@@ -8,7 +12,7 @@ import { TodaySuggestionConstraintProjector } from './today-suggestion-constrain
 import { stableJson } from '../core/ai-common.util';
 import type { TodaySuggestionConstraintProjection } from './today-suggestion.types';
 
-export type FactGuidanceScope = {
+export type FactGuidanceScope = CoachFactScope & {
   topic: string;
   revision: string;
   sessionId: string;
@@ -75,18 +79,34 @@ export class TodaySuggestionGuidanceService {
     });
     if (stored && stored.userId !== userId)
       throw new NotFoundException('TODAY_GUIDANCE_NOT_FOUND');
-    const temporary =
+    const reference =
       !stored &&
+      (await this.prisma.todaySuggestionContextReference.findFirst({
+        where: { id: generationToken, userId },
+        select: { timezone: true },
+      }));
+    // Existing references created before timezone-scoped contexts remain UTC hints.
+    const legacy =
+      !stored &&
+      !reference &&
       (await this.prisma.todaySuggestionGeneration.findFirst({
         where: { userId, contextToken: generationToken },
         select: { userId: true },
       }));
-    if (!stored && !temporary)
+    if (!stored && !reference && !legacy)
       throw new NotFoundException('TODAY_GUIDANCE_NOT_FOUND');
     const lang = stored?.locale ?? locale;
+    const timezone = validCoachTimezone(
+      stored
+        ? (stored.keyContext as { timezone?: unknown } | null)?.timezone
+        : reference
+          ? reference.timezone
+          : 'UTC',
+    );
     let projection = await this.projector.project({
       userId,
       locale: lang,
+      timezone,
       allowAi: true,
     });
     const reconciled = await this.lifecycle.reconcile(projection);
@@ -94,6 +114,7 @@ export class TodaySuggestionGuidanceService {
       projection = await this.projector.project({
         userId,
         locale: lang,
+        timezone,
         allowAi: true,
       });
     const topics = this.lifecycle.topics(projection);

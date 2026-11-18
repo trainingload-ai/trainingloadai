@@ -8,6 +8,7 @@ const AUDIT_KEYS = new Set([
   'assessmentId',
   'evidenceHash',
   'recordedAt',
+  'readyAt',
   'expiresAt',
 ]);
 

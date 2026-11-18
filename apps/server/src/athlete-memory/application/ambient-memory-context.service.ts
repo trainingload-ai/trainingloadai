@@ -51,6 +51,10 @@ const HEALTH_CATEGORIES = new Set([
   'hydration',
 ]);
 
+function isCurrentConstraint(fact: MemoryFactRecord) {
+  return fact.kind === 'CONSTRAINT' || HEALTH_CATEGORIES.has(fact.category);
+}
+
 function authorityWeight(status: string) {
   if (status === 'USER_CONFIRMED') return 1;
   if (status === 'USER_ASSERTED') return 0.95;
@@ -148,6 +152,8 @@ export class AmbientMemoryContextService {
         .filter((candidate) => candidate.ambient)
         .sort(
           (a, b) =>
+            Number(isCurrentConstraint(b.fact)) -
+              Number(isCurrentConstraint(a.fact)) ||
             b.impact - a.impact ||
             b.fact.relevanceAnchorAt.getTime() -
               a.fact.relevanceAnchorAt.getTime() ||
@@ -198,9 +204,8 @@ export class AmbientMemoryContextService {
           facts.length >= 201 ||
           ranked.some(
             ({ fact }) =>
-              ['pain', 'illness', 'recovery', 'fatigue'].includes(
-                fact.category,
-              ) && !items.some((item) => item.id === fact.id),
+              isCurrentConstraint(fact) &&
+              !items.some((item) => item.id === fact.id),
           ),
       };
     } catch (error) {

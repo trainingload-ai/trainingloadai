@@ -170,7 +170,12 @@
       "id": "0034_coach_fact_scope",
       "file": "0034_coach_fact_scope/migration.sql",
       "sha256": "2cba5726f2c183963ac217f8b582ed49074ffd6b029d70051c78ef233e6d2648"
+    },
+    {
+      "id": "0035_coach_context_timezone",
+      "file": "0035_coach_context_timezone/migration.sql",
+      "sha256": "b753a8e9a9f374dd780ad65cb07784b887b745ba28ce6c6f8b167a106c57a93a"
     }
   ],
-  "schemaChecksum": "e9e62b4e542246c3f2c4eae19a1ad41c55ac9b22343e36bede9396bba061268d"
+  "schemaChecksum": "8947c54d33af04ca3dab612658fe0c896c5de20e3a1013280b5908b6688aa449"
 }

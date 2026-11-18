@@ -6,10 +6,11 @@ import { todayCoachingFactScopes } from './today-suggestion-fact-scopes';
 @Injectable()
 export class CurrentCoachFactScopeValidator implements CoachFactScopeValidator {
   constructor(private readonly projector: TodaySuggestionConstraintProjector) {}
-  async current(userId: string) {
+  async current(userId: string, timezone?: string) {
     const projection = await this.projector.project({
       userId,
       locale: 'en',
+      timezone,
       allowAi: true,
     });
     if (

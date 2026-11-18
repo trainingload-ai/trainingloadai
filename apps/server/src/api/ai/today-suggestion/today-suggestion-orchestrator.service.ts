@@ -536,6 +536,7 @@ export class TodaySuggestionOrchestratorService {
     const draft = this.factFallback(projection);
     const generationToken = await this.generations.contextToken(
       projection.userId,
+      projection.timezone,
     );
     return {
       ...this.present(

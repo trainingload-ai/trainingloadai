@@ -156,6 +156,10 @@
       "0034_coach_fact_scope": {
         "phase": "expand",
         "releaseVersion": "1.1.26"
+      },
+      "0035_coach_context_timezone": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
       }
     }
   }

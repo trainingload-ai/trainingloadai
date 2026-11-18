@@ -152,4 +152,85 @@ describe('Shared current coaching facts', () => {
     f.setExtraction([]);
     expect((await f.read()).revision).not.toBe(pending.revision);
   });
+  it.each([1, 13])(
+    'preserves current constraints or declares limited coverage with %s constraints',
+    async (count) => {
+      const f = fixture();
+      const at = new Date();
+      const base = {
+        status: 'ACTIVE',
+        version: 1,
+        epistemicStatus: 'USER_CONFIRMED',
+        decayProfile: 'STABLE',
+        relevanceAnchorAt: at,
+        validFrom: null,
+        validUntil: null,
+        reviewAfter: null,
+        confidence: 1,
+      };
+      const facts = Array.from({ length: 12 }, (_, i) => ({
+        ...base,
+        id: `pref-${i}`,
+        kind: 'PREFERENCE',
+        category: 'training_preference',
+        claim: 'Morning workouts',
+      }));
+      facts.push(
+        ...Array.from({ length: count }, (_, i) => ({
+          ...base,
+          id: `constraint-${i}`,
+          kind: 'CONSTRAINT',
+          category: 'equipment_constraint',
+          claim: 'Bike unavailable',
+          confidence: 0.9,
+        })),
+      );
+      f.setFacts(facts);
+      const result = await f.read();
+      if (count === 1) {
+        expect(
+          result.memory?.items.some((item) => item.id === 'constraint-0'),
+        ).toBe(true);
+        expect(result.status).toBe('AVAILABLE');
+      } else {
+        expect(result.status).toBe('LIMITED');
+        expect(result.memory?.omittedSafetyConstraints).toBe(true);
+      }
+    },
+  );
+});
+
+it('does not let preferences hide a current user-reported sleep constraint', async () => {
+  const f = fixture();
+  const at = new Date();
+  const common = {
+    status: 'ACTIVE',
+    version: 1,
+    epistemicStatus: 'USER_CONFIRMED',
+    decayProfile: 'STABLE',
+    relevanceAnchorAt: at,
+    validFrom: null,
+    validUntil: null,
+    reviewAfter: null,
+    confidence: 1,
+  };
+  f.setFacts([
+    ...Array.from({ length: 12 }, (_, i) => ({
+      ...common,
+      id: `pref-${i}`,
+      kind: 'PREFERENCE',
+      category: 'training_preference',
+      claim: 'Morning workouts',
+    })),
+    {
+      ...common,
+      id: 'sleep',
+      kind: 'CURRENT_STATE',
+      category: 'sleep_duration',
+      claim: '昨晚只睡了三小时',
+      confidence: 0.9,
+    },
+  ]);
+  const result = await f.read();
+  expect(result.memory?.items.some((item) => item.id === 'sleep')).toBe(true);
 });

@@ -1233,7 +1233,11 @@ export class AiService {
       (!background || params.activeSkillName === ATHLETE_STATE_SKILL)
     ) {
       const timezone =
-        (await this.userService.getPreferredTimezone(userId)) ?? 'UTC';
+        (await this.userService.getPreferredTimezone(userId)) ??
+        (params.runtimeRunId
+          ? await this.coachRuns.contextTimezone(userId, params.runtimeRunId)
+          : undefined) ??
+        'UTC';
       const date = new Intl.DateTimeFormat('en-CA', {
         timeZone: timezone,
         year: 'numeric',
@@ -1270,6 +1274,7 @@ export class AiService {
       await this.coachRuns.bindFactScope(userId, params.runtimeRunId, {
         topic,
         revision: coachFacts.revision,
+        timezone: coachFacts.timezone,
       });
     }
     const safetyConcern = background ? null : coachSafetyConcern(prompt);

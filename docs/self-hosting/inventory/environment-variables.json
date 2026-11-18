@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2228
+          "line": 2233
         }
       ]
     },
@@ -1078,7 +1078,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2964
+          "line": 2969
         }
       ]
     },
@@ -1099,23 +1099,23 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2660
+          "line": 2665
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2721
+          "line": 2726
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2808
+          "line": 2813
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2860
+          "line": 2865
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2948
+          "line": 2953
         }
       ]
     },
@@ -2838,7 +2838,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1304
+          "line": 1309
         },
         {
           "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",

@@ -959,6 +959,10 @@ export class ImportBatchService {
             timelineTitle: candidate.timelineTitle ?? undefined,
             timelineStartTime: candidate.timelineStartTime ?? undefined,
             importRevision: revision,
+            // An acknowledgement covers only the uninterrupted desired revision.
+            ...(previous?.importRevision !== revision
+              ? { completedImportRevision: null }
+              : {}),
             importRevokedAt: null,
             importRequest: sourceRef,
             ...(args.provider === 'intervals_icu' &&
@@ -1041,6 +1045,7 @@ export class ImportBatchService {
           if (
             args.skipCompletedUnchanged !== false &&
             !previous?.importRevokedAt &&
+            previous?.importRevision === revision &&
             previous?.completedImportRevision === revision
           )
             continue;

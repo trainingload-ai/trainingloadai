@@ -1178,6 +1178,85 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
   const nativeIt = process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN
     ? it
     : it.skip;
+  nativeIt.each(['replace', 'unlink'])(
+    'preserves explicit completion during activity %s',
+    async (mode) => {
+      const f = await matchingScenario();
+      await prisma.planWorkout.update({
+        where: { id: f.independent.id },
+        data: { plannedDurationSeconds: 7200 },
+      });
+      const replacing = manualLinks();
+      const confirming = manualLinks();
+      const userWorkouts = new PlanWorkoutRepository(prisma as never);
+      const codec = new WorkoutService({} as never);
+      Object.assign(confirming, {
+        workouts: userWorkouts,
+        workoutMutability: new PlanWorkoutMutabilityPolicy(),
+        workoutService: codec,
+        workoutDefinitionService: new WorkoutDefinitionService(
+          new WorkoutCodecRegistry(
+            new EnduranceWorkoutCodec(codec),
+            new StrengthWorkoutCodec(),
+            new FreeformWorkoutCodec(),
+          ),
+        ),
+        workoutPersistence: new WorkoutPersistenceService(userWorkouts),
+      });
+      let selectedUser!: () => void;
+      let resumeUser!: () => void;
+      const userSelected = new Promise<void>((done) => (selectedUser = done));
+      const userGate = new Promise<void>((done) => (resumeUser = done));
+      const update = userWorkouts.update.bind(userWorkouts);
+      jest
+        .spyOn(userWorkouts, 'update')
+        .mockImplementationOnce(async (args, tx) => {
+          selectedUser();
+          await userGate;
+          return update(args, tx);
+        });
+      const confirmingPromise = confirming.updateWorkoutStatus(
+        'user',
+        f.plan.id,
+        f.workout.id,
+        'DONE',
+      );
+      await userSelected;
+      await matcher().tryAutoLinkForActivity(f.activity.id);
+      let selected!: () => void;
+      let resume!: () => void;
+      const selectedGate = new Promise<void>((done) => (selected = done));
+      const resumeGate = new Promise<void>((done) => (resume = done));
+      const links = (replacing as any).links as PlanActivityLinkRepository;
+      const findMany = links.findMany.bind(links);
+      jest
+        .spyOn(links, 'findMany')
+        .mockImplementationOnce(async (args: any, tx: any) => {
+          const snapshot = await findMany(args, tx);
+          selected();
+          await resumeGate;
+          return snapshot as never;
+        });
+      const replacingPromise =
+        mode === 'replace'
+          ? replacing.replaceActivityPlanLinkByHash('user', f.activity.hashId, {
+              workoutId: f.independent.id,
+            })
+          : replacing.removeActivityPlanLinkByHash('user', f.activity.hashId);
+      try {
+        await selectedGate;
+        resumeUser();
+        await confirmingPromise;
+      } finally {
+        resume();
+        resumeUser();
+      }
+      await replacingPromise;
+      expect(
+        await prisma.planWorkout.findUnique({ where: { id: f.workout.id } }),
+      ).toMatchObject({ status: 'DONE' });
+    },
+  );
   nativeIt(
     'preserves a user completion committed between activity evidence and workout locking',
     async () => {

@@ -4048,11 +4048,31 @@ export class PlanWriteSupport {
         });
       }
 
-      if (!(await this.links.lockLinkTargets(activity.id, dto.workoutId, tx)))
+      if (!(await this.links.lockLinkTargets(activity.id, null, tx)))
         throw new BusinessException({
           code: BUSINESS_ERROR_CODE.COMMON,
           message: 'Workout or activity not found',
         });
+      // Lock all affected workouts in one order before reading completion ownership.
+      const linkedWorkouts = await this.links.findMany(
+        {
+          where: { activityId: activity.id, unlinkedAt: null },
+          select: { planWorkoutId: true },
+        },
+        tx,
+      );
+      for (const workoutId of [
+        ...new Set([
+          dto.workoutId,
+          ...linkedWorkouts.map((link) => link.planWorkoutId),
+        ]),
+      ].sort()) {
+        if (!(await this.links.lockLinkTargets(activity.id, workoutId, tx)))
+          throw new BusinessException({
+            code: BUSINESS_ERROR_CODE.COMMON,
+            message: 'Workout or activity not found',
+          });
+      }
       const targetWorkout = await this.workouts.findUnique(
         {
           where: { id: dto.workoutId },
@@ -4352,7 +4372,7 @@ export class PlanWriteSupport {
           code: BUSINESS_ERROR_CODE.COMMON,
           message: 'Activity not found',
         });
-      const detached = await this.links.findMany(
+      let detached = await this.links.findMany(
         {
           where: { activityId: activity.id, unlinkedAt: null },
           select: {
@@ -4378,6 +4398,18 @@ export class PlanWriteSupport {
           ...new Set(detached.map((link) => link.planWorkoutId)),
         ].sort())
           await this.links.lockLinkTargets(activity.id, workoutId, tx);
+        // A concurrent explicit completion may have cleared the flag while we waited.
+        detached = await this.links.findMany(
+          {
+            where: { activityId: activity.id, unlinkedAt: null },
+            select: {
+              planWorkoutId: true,
+              autoMarkedWorkoutDone: true,
+              source: true,
+            },
+          },
+          tx,
+        );
         await this.links.updateMany(
           {
             where: { activityId: activity.id, unlinkedAt: null },

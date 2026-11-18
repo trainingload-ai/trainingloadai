@@ -60,6 +60,78 @@ scenarios('Today advice generation across instances on PostgreSQL', () => {
     await Promise.all([db.$disconnect(), other.$disconnect()]);
   });
 
+  it('keeps temporary references independent across device timezones and resolves each against the current local day', async () => {
+    const input = await scope();
+    const eastReferences = await Promise.all(
+      Array.from({ length: 8 }, (_, i) =>
+        (i % 2 ? owner : peer).contextToken(input.userId, 'Asia/Shanghai'),
+      ),
+    );
+    expect(new Set(eastReferences).size).toBe(1);
+    const east = eastReferences[0];
+    const west = await peer.contextToken(input.userId, 'America/Los_Angeles');
+    expect(east).not.toBe(west);
+    expect(await peer.contextToken(input.userId, 'Asia/Shanghai')).toBe(east);
+    let at = new Date('2026-11-17T20:00:00Z');
+    const projector = {
+      project: async (args: any) => {
+        const timezone = args.timezone ?? 'UTC';
+        const date = new Intl.DateTimeFormat('en-CA', {
+          timeZone: timezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).format(at);
+        return {
+          ...input,
+          date,
+          timezone,
+          factHash: `${timezone}:${date}`,
+          constraintHash: 'constraints',
+          allowAi: true,
+          featureAllowed: true,
+          lightContext: {
+            sharedFacts: {
+              revision: `${timezone}:${date}`,
+              status: 'AVAILABLE',
+            },
+          },
+          todayWorkouts: [],
+          tomorrowWorkouts: [],
+        };
+      },
+    };
+    const resolver = new TodaySuggestionGuidanceService(
+      other as never,
+      projector as never,
+      new TodaySuggestionGuidanceLifecycle(new CoachRunStore(other as never)),
+    );
+    expect(
+      (await resolver.resolve(input.userId, east)).context?.currentFacts.date,
+    ).toBe('2026-11-18');
+    expect(
+      (await resolver.resolve(input.userId, west)).context?.currentFacts.date,
+    ).toBe('2026-11-17');
+    expect((await resolver.resolve(input.userId, east)).scope?.timezone).toBe(
+      'Asia/Shanghai',
+    );
+    await expect(resolver.resolve('another-user', east)).rejects.toThrow(
+      'TODAY_GUIDANCE_NOT_FOUND',
+    );
+    at = new Date('2026-11-18T20:00:00Z');
+    expect(
+      (await resolver.resolve(input.userId, east)).context?.currentFacts.date,
+    ).toBe('2026-11-19');
+    const lease = await owner.claim(input);
+    const legacy = await db.todaySuggestionGeneration.findUniqueOrThrow({
+      where: { userId: input.userId },
+    });
+    expect(
+      (await resolver.resolve(input.userId, legacy.contextToken)).scope
+        ?.timezone,
+    ).toBe('UTC');
+    if (lease.kind === 'ACQUIRED') await owner.release(lease.lease);
+  });
   it('retains distinct same-time webhook revisions while deduplicating exact retries across instances', async () => {
     const input = await scope();
     const inbox = new ExternalProviderWebhookInboxService(db as never);

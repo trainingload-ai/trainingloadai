@@ -153,6 +153,7 @@ test("PGlite applies the Core baseline exactly once and serializes concurrent st
       { id: "0032_import_source_revision_handoff", source: "baseline" },
       { id: "0033_today_suggestion_generation", source: "baseline" },
       { id: "0034_coach_fact_scope", source: "baseline" },
+      { id: "0035_coach_context_timezone", source: "baseline" },
     ]);
     const relation = await query(
       databaseUrl,

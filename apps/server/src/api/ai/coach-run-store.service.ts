@@ -1,3 +1,4 @@
+import { validCoachTimezone } from './core/coach-fact-scope.port';
 import { Inject } from '@nestjs/common';
 import {
   COACH_FACT_SCOPE_VALIDATOR,
@@ -598,6 +599,7 @@ export class CoachRunStore {
                     factScope: json({
                       topic: args.guidance.topic,
                       revision: args.guidance.revision,
+                      timezone: args.guidance.timezone,
                     }),
                     dedupeKey: guidanceDedupeKey,
                   }
@@ -1030,6 +1032,30 @@ export class CoachRunStore {
       );
   }
 
+  async contextTimezone(userId: string, runId: string) {
+    const run = await this.prisma.coachRun.findFirst({
+      where: { id: runId, userId },
+      select: { sessionId: true, factScope: true },
+    });
+    if (!run) return undefined;
+    const own = validCoachTimezone(
+      (run.factScope as { timezone?: unknown } | null)?.timezone,
+    );
+    if (own) return own;
+    const previous = await this.prisma.coachRun.findFirst({
+      where: {
+        userId,
+        sessionId: run.sessionId,
+        factScope: { not: Prisma.DbNull },
+      },
+      orderBy: [{ startedAt: 'desc' }, { id: 'desc' }],
+      select: { factScope: true },
+    });
+    return validCoachTimezone(
+      (previous?.factScope as { timezone?: unknown } | null)?.timezone,
+    );
+  }
+
   async bindFactScope(userId: string, runId: string, scope: CoachFactScope) {
     await this.prisma.$transaction(async (tx) => {
       const run = await tx.coachRun.findFirst({
@@ -1076,47 +1102,74 @@ export class CoachRunStore {
   /** Persist invalidation before restore or answer; this is not a user refusal. */
   async reconcileFactGuidance(
     userId: string,
-    topics: Array<{ topic: string; revision: string }>,
+    topics: CoachFactScope[],
     finishingRunId?: string,
   ) {
     const current = new Map(
       topics.map((topic) => [topic.topic, topic.revision]),
     );
+    const runs = await this.prisma.coachRun.findMany({
+      where: {
+        userId,
+        AND: [
+          {
+            OR: [
+              { factScope: { not: Prisma.DbNull } },
+              { taskKind: { in: ['ATHLETE_STATE_UPDATE', 'CONVERSATION'] } },
+              { triggerType: 'FACT_GUIDANCE' },
+            ],
+          },
+          {
+            OR: [
+              { status: 'awaiting_input' },
+              ...(finishingRunId
+                ? [{ id: finishingRunId, status: 'running' }]
+                : []),
+            ],
+          },
+        ],
+      },
+    });
+    const alternate = new Map<string, Map<string, string>>();
+    const projectedTimezone = topics[0]?.timezone ?? 'UTC';
+    if (this.factScopes) {
+      for (const run of runs) {
+        const zone = validCoachTimezone(
+          (run.factScope as { timezone?: unknown } | null)?.timezone,
+        );
+        if (zone && zone !== projectedTimezone && !alternate.has(zone)) {
+          const scoped = await this.factScopes.current(userId, zone);
+          alternate.set(
+            zone,
+            new Map(scoped.map((value) => [value.topic, value.revision])),
+          );
+        }
+      }
+    }
     return this.prisma.$transaction(async (tx) => {
       let cancelled = 0;
-      const runs = await tx.coachRun.findMany({
-        where: {
-          userId,
-          AND: [
-            {
-              OR: [
-                { factScope: { not: Prisma.DbNull } },
-                { taskKind: { in: ['ATHLETE_STATE_UPDATE', 'CONVERSATION'] } },
-                { triggerType: 'FACT_GUIDANCE' },
-              ],
-            },
-            {
-              OR: [
-                { status: 'awaiting_input' },
-                ...(finishingRunId
-                  ? [{ id: finishingRunId, status: 'running' }]
-                  : []),
-              ],
-            },
-          ],
-        },
-      });
       for (const run of runs) {
         const scope =
           run.factScope &&
           typeof run.factScope === 'object' &&
           !Array.isArray(run.factScope)
-            ? (run.factScope as { topic?: string; revision?: string })
+            ? (run.factScope as {
+                topic?: string;
+                revision?: string;
+                timezone?: string;
+              })
             : { topic: run.triggerRef, revision: run.inputHash };
+        const timezone = validCoachTimezone(
+          'timezone' in scope ? scope.timezone : undefined,
+        );
+        const expected =
+          timezone && alternate.has(timezone)
+            ? alternate.get(timezone)!
+            : current;
         if (
           scope.topic &&
           scope.revision &&
-          current.get(scope.topic) === scope.revision
+          expected.get(scope.topic) === scope.revision
         )
           continue;
         const changed = await tx.coachRun.updateMany({
