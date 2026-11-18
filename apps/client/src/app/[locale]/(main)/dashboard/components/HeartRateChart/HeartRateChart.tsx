@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -24,15 +26,15 @@ const chartConfig = {
   current: {
     label: "当前",
     theme: {
-      light: "#dc2626", // red-600
-      dark: "#f87171", // red-400
+      light: tokenPalette["red-600"], // red-600
+      dark: tokenPalette["red-400"], // red-400
     },
   },
   previous: {
     label: "历史",
     theme: {
-      light: "#fca5a5", // red-300
-      dark: "#b91c1c", // red-700
+      light: tokenPalette["red-300"], // red-300
+      dark: tokenPalette["red-700"], // red-700
     },
   },
 };

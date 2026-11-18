@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, withAlpha as tokenAlpha } from '@trainingloadai/design-tokens/colors';
+
 
 import { Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -35,41 +37,41 @@ function getRingVisualState(args: {
 }) {
   if (!args.hasContext) {
     return {
-      tone: "#d4d4d4",
+      tone: tokenPalette["neutral-300"],
       glow: "none",
     };
   }
 
   if (args.compressed) {
     return {
-      tone: "#f97316",
-      glow: "drop-shadow(0 0 3px rgba(249,115,22,0.32))",
+      tone: tokenPalette["orange-500"],
+      glow: `drop-shadow(0 0 3px ${tokenAlpha(tokenPalette["orange-500"], 0.32)})`,
     };
   }
 
   if (args.usageRatio >= 0.92) {
     return {
-      tone: "#ef4444",
-      glow: "drop-shadow(0 0 4px rgba(239,68,68,0.4))",
+      tone: tokenPalette["red-500"],
+      glow: `drop-shadow(0 0 4px ${tokenAlpha(tokenPalette["red-500"], 0.4)})`,
     };
   }
 
   if (args.usageRatio >= 0.82) {
     return {
-      tone: "#f97316",
-      glow: "drop-shadow(0 0 3px rgba(249,115,22,0.32))",
+      tone: tokenPalette["orange-500"],
+      glow: `drop-shadow(0 0 3px ${tokenAlpha(tokenPalette["orange-500"], 0.32)})`,
     };
   }
 
   if (args.usageRatio >= 0.72) {
     return {
-      tone: "#f59e0b",
-      glow: "drop-shadow(0 0 2px rgba(245,158,11,0.2))",
+      tone: tokenPalette["amber-500"],
+      glow: `drop-shadow(0 0 2px ${tokenAlpha(tokenPalette["amber-500"], 0.2)})`,
     };
   }
 
   return {
-    tone: "#10b981",
+    tone: tokenPalette["emerald-500"],
     glow: "none",
   };
 }

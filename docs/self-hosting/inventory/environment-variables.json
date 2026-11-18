@@ -4433,7 +4433,7 @@
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/ai-coach/training-visualization-card.tsx",
-          "line": 145
+          "line": 147
         },
         {
           "file": "apps/client/src/app/[locale]/layout.tsx",

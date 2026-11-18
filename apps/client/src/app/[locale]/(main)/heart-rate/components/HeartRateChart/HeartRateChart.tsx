@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, withAlpha as tokenAlpha } from '@trainingloadai/design-tokens/colors';
+
 import { memo, useCallback, useMemo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useTranslations } from "next-intl";
@@ -166,7 +168,7 @@ export function HeartRateChart({ times, sportType }: HeartRateChartProps) {
                   <span className="text-muted-foreground">{t("maxHr")}</span>
                   <span
                     className="font-mono font-medium"
-                    style={{ color: "#dc2626" }}
+                    style={{ color: tokenPalette["red-600"] }}
                   >
                     {Math.round(maxHeartRate)} bpm
                   </span>
@@ -177,7 +179,7 @@ export function HeartRateChart({ times, sportType }: HeartRateChartProps) {
                   <span className="text-muted-foreground">{t("lthr")}</span>
                   <span
                     className="font-mono font-medium"
-                    style={{ color: "#ea580c" }}
+                    style={{ color: tokenPalette["orange-600"] }}
                   >
                     {Math.round(lthr)} bpm
                   </span>
@@ -234,12 +236,12 @@ export function HeartRateChart({ times, sportType }: HeartRateChartProps) {
             };
 
             if (lthr)
-              drawLine(lthr, "rgba(234, 88, 12, 0.4)", "#ea580c", t("lthr"));
+              drawLine(lthr, tokenAlpha(tokenPalette["orange-600"], 0.4), tokenPalette["orange-600"], t("lthr"));
             if (maxHeartRate)
               drawLine(
                 maxHeartRate,
-                "rgba(220, 38, 38, 0.4)",
-                "#dc2626",
+                tokenAlpha(tokenPalette["red-600"], 0.4),
+                tokenPalette["red-600"],
                 t("maxHr"),
               );
           },

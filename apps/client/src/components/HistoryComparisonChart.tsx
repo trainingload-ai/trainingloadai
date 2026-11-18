@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
@@ -35,11 +37,11 @@ export function HistoryComparisonChart({
       ({
         current: {
           label: t("current"),
-          color: "#84cc16",
+          color: tokenPalette["lime-500"],
         },
         history: {
           label: t("history"),
-          color: "#9ca3af",
+          color: tokenPalette["gray-400"],
         },
       }) satisfies ChartConfig,
     [t],
@@ -145,8 +147,8 @@ export function HistoryComparisonChart({
             <YAxis domain={[minVal, maxVal]} />
             <defs>
               <linearGradient id="fillCurrent" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#84cc16" stopOpacity={0.9} />
-                <stop offset="95%" stopColor="#84cc16" stopOpacity={0.3} />
+                <stop offset="5%" stopColor={tokenPalette["lime-500"]} stopOpacity={0.9} />
+                <stop offset="95%" stopColor={tokenPalette["lime-500"]} stopOpacity={0.3} />
               </linearGradient>
             </defs>
             <Area
@@ -156,7 +158,7 @@ export function HistoryComparisonChart({
               stackId={undefined}
               name={t("series.historyData")}
               fill="url(#fillCurrent)"
-              stroke="#84cc16"
+              stroke={tokenPalette["lime-500"]}
               fillOpacity={1}
             />
             <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />

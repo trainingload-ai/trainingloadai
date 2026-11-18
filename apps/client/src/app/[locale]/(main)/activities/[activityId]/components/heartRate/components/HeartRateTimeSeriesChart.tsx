@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useCallback, useRef } from "react";
 import { useActivityMetricSeries } from "@/api/useActivityMetric";
@@ -170,7 +172,7 @@ const HeartRateTimeSeriesChart: React.FC<HeartRateTimeSeriesChartProps> = ({
             const ctx = u.ctx;
             ctx.save();
             ctx.beginPath();
-            ctx.strokeStyle = "#9333ea";
+            ctx.strokeStyle = tokenPalette["purple-600"];
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.moveTo(u.bbox.left, y);
@@ -210,7 +212,7 @@ const HeartRateTimeSeriesChart: React.FC<HeartRateTimeSeriesChartProps> = ({
                 ? labelStroke
                 : `hsl(${labelStroke})`;
             ctx.strokeText(text, textX, finalY);
-            ctx.fillStyle = "#9333ea";
+            ctx.fillStyle = tokenPalette["purple-600"];
             ctx.fillText(text, textX, finalY);
 
             ctx.restore();
@@ -237,7 +239,7 @@ const HeartRateTimeSeriesChart: React.FC<HeartRateTimeSeriesChartProps> = ({
         {
           stroke: (u: uPlot) => {
             if (!heartRateZones || heartRateZones.zones.length === 0)
-              return "#ef4444";
+              return tokenPalette["red-500"];
 
             if (
               !u.bbox ||
@@ -245,14 +247,14 @@ const HeartRateTimeSeriesChart: React.FC<HeartRateTimeSeriesChartProps> = ({
               !Number.isFinite(u.bbox.height) ||
               u.bbox.height <= 0
             ) {
-              return "#ef4444";
+              return tokenPalette["red-500"];
             }
 
             const min = u.scales.y?.min ?? 0;
             const max = u.scales.y?.max ?? 220;
             const range = max - min;
 
-            if (range <= 0) return "#ef4444";
+            if (range <= 0) return tokenPalette["red-500"];
 
             const gradient = u.ctx.createLinearGradient(
               0,

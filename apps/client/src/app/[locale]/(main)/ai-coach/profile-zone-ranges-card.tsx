@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useLocale, useTranslations } from "next-intl";
 import { Activity, Heart, Layers, Zap } from "lucide-react";
@@ -24,13 +26,13 @@ type MetricBundle = {
 };
 
 const ZONE_FALLBACK_COLORS = [
-  "#22c55e",
-  "#84cc16",
-  "#eab308",
-  "#f97316",
-  "#ef4444",
-  "#a855f7",
-  "#6366f1",
+  tokenPalette["green-500"],
+  tokenPalette["lime-500"],
+  tokenPalette["yellow-500"],
+  tokenPalette["orange-500"],
+  tokenPalette["red-500"],
+  tokenPalette["purple-500"],
+  tokenPalette["indigo-500"],
 ] as const;
 
 function asRecord(v: unknown): Record<string, unknown> | null {

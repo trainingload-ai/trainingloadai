@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import uPlot from "uplot";
 
 /**
@@ -215,33 +216,33 @@ type MetricColorRule = {
 };
 
 const METRIC_COLOR_RULES: Record<MetricColorGroup, MetricColorRule> = {
-  volume: { color: "#2563eb", comparisonColor: "#93c5fd" },
-  duration: { color: "#0f766e", comparisonColor: "#99f6e4" },
-  locomotion: { color: "#d97706", comparisonColor: "#fcd34d" },
-  power: { color: "#dc2626", comparisonColor: "#fca5a5" },
-  cardio: { color: "#e11d48", comparisonColor: "#fda4af" },
-  terrain: { color: "#57534e", comparisonColor: "#d6d3d1" },
-  energy: { color: "#ea580c", comparisonColor: "#fdba74" },
-  load: { color: "#7c3aed", comparisonColor: "#c4b5fd" },
-  fitness: { color: "#0284c7", comparisonColor: "#7dd3fc" },
-  recovery: { color: "#64748b", comparisonColor: "#cbd5e1" },
-  efficiency: { color: "#059669", comparisonColor: "#6ee7b7" },
-  consistency: { color: "#c2410c", comparisonColor: "#fed7aa" },
-  mechanics: { color: "#0891b2", comparisonColor: "#67e8f9" },
-  environment: { color: "#ca8a04", comparisonColor: "#fde68a" },
-  neutral: { color: "#64748b", comparisonColor: "#cbd5e1" },
+  volume: { color: tokenPalette["blue-600"], comparisonColor: tokenPalette["blue-300"] },
+  duration: { color: tokenPalette["teal-700"], comparisonColor: tokenPalette["teal-200"] },
+  locomotion: { color: tokenPalette["amber-600"], comparisonColor: tokenPalette["amber-300"] },
+  power: { color: tokenPalette["red-600"], comparisonColor: tokenPalette["red-300"] },
+  cardio: { color: tokenPalette["rose-600"], comparisonColor: tokenPalette["rose-300"] },
+  terrain: { color: tokenPalette["stone-600"], comparisonColor: tokenPalette["stone-300"] },
+  energy: { color: tokenPalette["orange-600"], comparisonColor: tokenPalette["orange-300"] },
+  load: { color: tokenPalette["violet-600"], comparisonColor: tokenPalette["violet-300"] },
+  fitness: { color: tokenPalette["sky-600"], comparisonColor: tokenPalette["sky-300"] },
+  recovery: { color: tokenPalette["slate-500"], comparisonColor: tokenPalette["slate-300"] },
+  efficiency: { color: tokenPalette["emerald-600"], comparisonColor: tokenPalette["emerald-300"] },
+  consistency: { color: tokenPalette["orange-700"], comparisonColor: tokenPalette["orange-200"] },
+  mechanics: { color: tokenPalette["cyan-600"], comparisonColor: tokenPalette["cyan-300"] },
+  environment: { color: tokenPalette["yellow-600"], comparisonColor: tokenPalette["amber-200"] },
+  neutral: { color: tokenPalette["slate-500"], comparisonColor: tokenPalette["slate-300"] },
 };
 
 // 跑步动态各曲线需要一眼可区分，同时保持整套图表的低饱和度。
 const METRIC_COLOR_OVERRIDES: Record<string, MetricColorRule> = {
-  cadence: { color: "#0891b2", comparisonColor: "#67e8f9" },
-  stepLength: { color: "#2563eb", comparisonColor: "#93c5fd" },
-  strideLength: { color: "#2563eb", comparisonColor: "#93c5fd" },
-  verticalOscillation: { color: "#7c3aed", comparisonColor: "#c4b5fd" },
-  verticalRatio: { color: "#db2777", comparisonColor: "#f9a8d4" },
-  stanceTime: { color: "#ea580c", comparisonColor: "#fdba74" },
-  flightTime: { color: "#059669", comparisonColor: "#6ee7b7" },
-  flightRatio: { color: "#65a30d", comparisonColor: "#bef264" },
+  cadence: { color: tokenPalette["cyan-600"], comparisonColor: tokenPalette["cyan-300"] },
+  stepLength: { color: tokenPalette["blue-600"], comparisonColor: tokenPalette["blue-300"] },
+  strideLength: { color: tokenPalette["blue-600"], comparisonColor: tokenPalette["blue-300"] },
+  verticalOscillation: { color: tokenPalette["violet-600"], comparisonColor: tokenPalette["violet-300"] },
+  verticalRatio: { color: tokenPalette["pink-600"], comparisonColor: tokenPalette["pink-300"] },
+  stanceTime: { color: tokenPalette["orange-600"], comparisonColor: tokenPalette["orange-300"] },
+  flightTime: { color: tokenPalette["emerald-600"], comparisonColor: tokenPalette["emerald-300"] },
+  flightRatio: { color: tokenPalette["lime-600"], comparisonColor: tokenPalette["lime-300"] },
 };
 
 const METRIC_COLOR_GROUPS: Record<string, MetricColorGroup> = {

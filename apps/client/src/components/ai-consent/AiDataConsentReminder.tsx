@@ -38,13 +38,13 @@ export function AiDataConsentReminder() {
     <>
       <button
         type="button"
-        className="flex min-h-9 w-full items-center gap-2 rounded-xl bg-[rgba(0,150,137,0.1)] px-3 py-2 text-left transition-colors hover:bg-[rgba(0,150,137,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 dark:bg-[rgba(0,188,125,0.12)] dark:hover:bg-[rgba(0,188,125,0.18)]"
+        className="flex min-h-9 w-full items-center gap-2 rounded-xl bg-visual-assessment-accent/10 px-3 py-2 text-left transition-colors hover:bg-visual-assessment-accent/16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 dark:bg-visual-assessment-accent-dark/12 dark:hover:bg-visual-assessment-accent-dark/18"
         onClick={() => {
           track("ai_consent_reminder_opened", { state });
           setDialogOpen(true);
         }}
       >
-        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[rgba(0,150,137,0.12)] text-teal-700 dark:bg-[rgba(0,188,125,0.14)] dark:text-teal-300">
+        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-visual-assessment-accent/12 text-teal-700 dark:bg-visual-assessment-accent-dark/14 dark:text-teal-300">
           <ShieldCheck className="size-3.5" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1 truncate text-[13px] font-semibold leading-[18px] text-foreground">

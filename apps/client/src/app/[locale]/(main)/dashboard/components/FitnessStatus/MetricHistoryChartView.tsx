@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import type { VdotForecastResult } from "@shared/vdot-forecast";
 import {
   metricForecastDays,
@@ -92,7 +93,7 @@ export function MetricHistoryChartView({
   height = "h-[200px]",
   title,
   accentColor,
-  comparisonColor = "#94a3b8",
+  comparisonColor = tokenPalette["slate-400"],
   titleIcon,
   appearance = "default",
 }: MetricHistoryChartViewProps) {
@@ -442,7 +443,7 @@ export function MetricHistoryChartView({
               <div className="flex w-full flex-wrap gap-2 items-center">
                 <div
                   className="shrink-0 rounded-micro border-border bg-(--color-bg) h-2.5 w-2.5"
-                  style={{ "--color-bg": "#3b82f6" } as React.CSSProperties}
+                  style={{ "--color-bg": tokenPalette["blue-500"] } as React.CSSProperties}
                 />
                 <div className="flex flex-col">
                   <div className="flex flex-1 justify-between leading-none items-center gap-4">
@@ -674,8 +675,8 @@ export function MetricHistoryChartView({
                   show: true,
                   size: 6,
                   width: 1,
-                  fill: "#3b82f6",
-                  stroke: "#3b82f6",
+                  fill: tokenPalette["blue-500"],
+                  stroke: tokenPalette["blue-500"],
                 },
               },
               {

@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import uPlot from "uplot";
 import { formatBySettings, formatter } from "@/lib/utils";
 
@@ -24,12 +25,12 @@ export const resolveAxisColors = (
   const axisStroke =
     axisStrokeRaw && !axisStrokeRaw.startsWith("var(")
       ? axisStrokeRaw
-      : "#6b7280";
+      : tokenPalette["gray-500"];
 
   const gridStroke =
     gridStrokeRaw && !gridStrokeRaw.startsWith("var(")
       ? gridStrokeRaw
-      : "#e5e7eb";
+      : tokenPalette["gray-200"];
 
   return { axisStroke, gridStroke };
 };

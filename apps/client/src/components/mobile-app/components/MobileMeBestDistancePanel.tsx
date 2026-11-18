@@ -157,7 +157,7 @@ export function MobileBestDistancePanel() {
       <section className="space-y-2">
         <div className="flex items-center px-1 py-1">
           <label className="relative min-h-[74px] w-[116px]">
-            <span className="flex h-[74px] items-center text-[42px] font-semibold leading-[46px] text-[#007aff]">
+            <span className="flex h-[74px] items-center text-[42px] font-semibold leading-[46px] text-visual-system-blue">
               {sport === "RUN" ? activityT("run") : sport === "CYCLING" ? activityT("cycling") : activityT("swim")}
               <span className="ml-1 text-mobile-control">⌃⌄</span>
             </span>

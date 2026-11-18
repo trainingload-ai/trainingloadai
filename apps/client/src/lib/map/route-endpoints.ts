@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import type { GeoJSONSource, Map } from "@deployment/map-engine";
 
 export type RouteLine = {
@@ -69,16 +70,16 @@ export function upsertRouteEndpointLayer(
         "match",
         ["get", "endpoint"],
         "start",
-        "#ffffff",
-        "#f97316",
+        tokenPalette["white"],
+        tokenPalette["orange-500"],
       ],
       "circle-stroke-width": 2,
       "circle-stroke-color": [
         "match",
         ["get", "endpoint"],
         "start",
-        "#f97316",
-        "#ffffff",
+        tokenPalette["orange-500"],
+        tokenPalette["white"],
       ],
     },
   });

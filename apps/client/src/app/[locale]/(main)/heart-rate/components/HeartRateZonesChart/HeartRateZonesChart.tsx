@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -239,7 +241,7 @@ export function HeartRateZonesChart({
                 return (
                   <Cell
                     key={`${s.key}-${idx}`}
-                    fill={zoneColors[idx] ?? "#94a3b8"}
+                    fill={zoneColors[idx] ?? tokenPalette["slate-400"]}
                     opacity={opacity}
                   />
                 );

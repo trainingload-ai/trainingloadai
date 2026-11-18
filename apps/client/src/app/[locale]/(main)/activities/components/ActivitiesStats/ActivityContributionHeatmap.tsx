@@ -111,7 +111,7 @@ export function activityContributionLevelClass(
       return "bg-[hsl(var(--emerald-600)/0.85)] dark:bg-[hsl(var(--emerald-500)/0.85)]";
     if (level === 4)
       return "bg-[hsl(var(--emerald-800)/0.9)] dark:bg-[hsl(var(--emerald-300))]";
-    return "bg-[hsl(var(--neutral-300)/0.75)] dark:bg-[#333631]";
+    return "bg-[hsl(var(--neutral-300)/0.75)] dark:bg-visual-heatmap-empty-dark";
   }
   if (level === 1)
     return "bg-[hsl(var(--sky-300)/0.75)] dark:bg-[hsl(var(--sky-900))]";
@@ -197,7 +197,7 @@ function ShowcaseHeatmap({
       </div>
       {!compact ? (
         <div
-          className="mt-2 grid w-full text-mobile-caption pc:text-xs font-medium text-[#a5a69f]"
+          className="mt-2 grid w-full text-mobile-caption pc:text-xs font-medium text-visual-heatmap-label"
           style={{
             gridTemplateColumns: `repeat(${Math.max(weeks.length, 1)}, minmax(0, 1fr))`,
           }}

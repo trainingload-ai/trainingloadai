@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { BarChart3, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -68,13 +70,13 @@ const TRAINING_MEASURE_METRIC_KEYS: Record<
 function trainingMeasureTheme(key: TrainingAnalysisMeasure) {
   switch (key) {
     case "RUNNING_LOAD":
-      return { light: "#10b981", dark: "#34d399" };
+      return { light: tokenPalette["emerald-500"], dark: tokenPalette["emerald-400"] };
     case "CYCLING_LOAD":
-      return { light: "#f97316", dark: "#fb923c" };
+      return { light: tokenPalette["orange-500"], dark: tokenPalette["orange-400"] };
     case "SWIMMING_LOAD":
-      return { light: "#06b6d4", dark: "#22d3ee" };
+      return { light: tokenPalette["cyan-500"], dark: tokenPalette["cyan-400"] };
     case "OTHER_LOAD":
-      return { light: "#f43f5e", dark: "#fb7185" };
+      return { light: tokenPalette["rose-500"], dark: tokenPalette["rose-400"] };
     default: {
       const rule = getMetricColorRule(TRAINING_MEASURE_METRIC_KEYS[key]);
       return { light: rule.color, dark: rule.comparisonColor };

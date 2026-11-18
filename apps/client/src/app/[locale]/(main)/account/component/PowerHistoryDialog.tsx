@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo, useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -226,7 +228,7 @@ export const PowerHistoryDialog = React.memo(function PowerHistoryDialog({
           const cy = u.valToPos(yVal, "y", true);
 
           ctx.save();
-          ctx.fillStyle = "#22c55e";
+          ctx.fillStyle = tokenPalette["green-500"];
           ctx.font = "bold 12px sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
@@ -267,11 +269,11 @@ export const PowerHistoryDialog = React.memo(function PowerHistoryDialog({
             },
             fill: (self: uPlot, seriesIdx: number, idx: number) => {
               const isCurrent = idx === latestActiveIndex;
-              return isCurrent ? "#22c55e" : cssVar("var(--primary)");
+              return isCurrent ? tokenPalette["green-500"] : cssVar("var(--primary)");
             },
             stroke: (self: uPlot, seriesIdx: number, idx: number) => {
               const isCurrent = idx === latestActiveIndex;
-              return isCurrent ? "#22c55e" : cssVar("var(--primary)");
+              return isCurrent ? tokenPalette["green-500"] : cssVar("var(--primary)");
             },
           },
         },

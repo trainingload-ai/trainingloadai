@@ -1,3 +1,4 @@
+import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
 import { decode } from "@mapbox/polyline";
 import * as mapengine from "@deployment/map-engine";
 import { upsertRouteEndpointLayer } from "@/lib/map/route-endpoints";
@@ -41,16 +42,16 @@ export const addRasterTileLayer = (
 
 export const getColor = (idx: number) => {
   const color = [
-    "rgb(222, 129, 59)",
-    "rgb(67, 161, 138)",
-    "rgb(34, 59, 74)",
-    "rgb(186, 142, 65)",
-    "rgb(217, 123, 45)",
-    "rgb(155, 98, 164)",
-    "rgb(37, 144, 188)",
-    "rgb(69, 151, 77)",
-    "rgb(232, 208, 96)",
-    "rgb(80, 42, 90)",
+    tokenVisual.map.activity[0],
+    tokenVisual.map.activity[1],
+    tokenVisual.map.activity[2],
+    tokenVisual.map.activity[3],
+    tokenVisual.map.activity[4],
+    tokenVisual.map.activity[5],
+    tokenVisual.map.activity[6],
+    tokenVisual.map.activity[7],
+    tokenVisual.map.activity[8],
+    tokenVisual.map.activity[9],
   ];
 
   return color[idx % 10];
@@ -133,9 +134,9 @@ export const addDistanceMarkers = (
       source: "distance-markers-source",
       paint: {
         "circle-radius": 8,
-        "circle-color": "#ffffff",
+        "circle-color": tokenPalette["white"],
         "circle-stroke-width": 2,
-        "circle-stroke-color": "rgb(222, 129, 59)", // 与轨迹颜色一致
+        "circle-stroke-color": tokenVisual.map.activity[0], // 与轨迹颜色一致
       },
     });
 
@@ -153,7 +154,7 @@ export const addDistanceMarkers = (
         "text-ignore-placement": true,
       },
       paint: {
-        "text-color": "rgb(222, 129, 59)",
+        "text-color": tokenVisual.map.activity[0],
       },
     });
 };
@@ -314,7 +315,7 @@ export const addLayersToMap = (
         visibility: "visible", // 明确设置为可见
       },
       paint: {
-        "line-color": "rgb(222, 129, 59)", // 橙色轨迹线
+        "line-color": tokenVisual.map.activity[0], // 橙色轨迹线
         "line-width": [
           "interpolate",
           ["linear"],

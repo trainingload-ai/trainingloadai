@@ -1,3 +1,4 @@
+import { visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
 import type { UserZoneSetting } from "@/api/settings";
 import type { WorkRestStep, WorkoutStepTarget } from "@/api/workout";
 
@@ -6,27 +7,12 @@ export type WorkoutZoneColorMap = Partial<
   Record<WorkoutZoneMetric, readonly (string | undefined)[]>
 >;
 
-export const DEFAULT_WORKOUT_ZONE_COLORS = [
-  "#94a3b8",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#9333ea",
-  "#ec4899",
-] as const;
+export const DEFAULT_WORKOUT_ZONE_COLORS = tokenVisual.zones;
 
 export const DEFAULT_WORKOUT_STEP_COLORS: Record<
   NonNullable<WorkRestStep["stepKind"]>,
   string
-> = {
-  WARMUP: "#60a5fa",
-  WORK: "#6366f1",
-  RECOVERY: "#6ee7b7",
-  REST: "#94a3b8",
-  COOLDOWN: "#06b6d4",
-  OTHER: "#8b5cf6",
-};
+> = tokenVisual.workoutStep;
 
 export function workoutZoneMetric(
   kind: WorkoutStepTarget["kind"] | undefined,

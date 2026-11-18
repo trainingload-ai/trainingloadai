@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import * as mapengine from "@deployment/map-engine";
 import type { LineLayerSpecification } from "@deployment/map-engine";
 import { decode as decodePolyline } from "@mapbox/polyline";
@@ -142,7 +143,7 @@ export function applyActivitiesLineLayer(
       "line-join": "round",
     },
     paint: options.paint ?? {
-      "line-color": "#22c55e",
+      "line-color": tokenPalette["green-500"],
       "line-opacity": 0.55,
       "line-width": 1.5,
     },

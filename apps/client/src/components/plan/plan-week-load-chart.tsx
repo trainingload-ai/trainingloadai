@@ -40,7 +40,7 @@ export function PlanWeekLoadChart({
             <span className="inline-flex items-center gap-1.5">
               <span
                 aria-hidden="true"
-                className="h-0.5 w-2.5 rounded-full bg-[#7c3aed] dark:bg-[#a78bfa]"
+                className="h-0.5 w-2.5 rounded-full bg-palette-violet-600 dark:bg-palette-violet-400"
               />
               {tLoad("actual")}
             </span>
@@ -50,7 +50,7 @@ export function PlanWeekLoadChart({
                 width="10"
                 height="10"
                 viewBox="0 0 12 12"
-                className="shrink-0 text-[#7c3aed] dark:text-[#a78bfa]"
+                className="shrink-0 text-palette-violet-600 dark:text-palette-violet-400"
               >
                 <rect
                   x="0.5"

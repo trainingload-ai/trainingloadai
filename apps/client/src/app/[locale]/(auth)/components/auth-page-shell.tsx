@@ -1,5 +1,7 @@
 "use client";
 
+
+
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { TopBar } from "@/components/TopBar";
@@ -25,7 +27,7 @@ export default function AuthPageShell({
     <div className="flex min-h-dvh flex-col bg-background">
       <TopBar />
       <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:py-12">
-        <div className="grid w-full max-w-[920px] overflow-hidden rounded-overlay border border-foreground/80 bg-card shadow-[6px_6px_0_rgba(25,27,24,0.12)] lg:grid-cols-[0.9fr_1.1fr] dark:shadow-[6px_6px_0_rgba(0,0,0,0.32)]">
+        <div className="grid w-full max-w-[920px] overflow-hidden rounded-overlay border border-foreground/80 bg-card shadow-[6px_6px_0_color-mix(in_srgb,var(--foreground)_12%,transparent)] lg:grid-cols-[0.9fr_1.1fr] dark:shadow-[6px_6px_0_hsl(var(--black)/0.32)]">
           <aside className="hidden min-h-[560px] flex-col border-r border-border bg-secondary p-10 lg:flex">
             <ThemeLogo width={156} height={29} alt="Trainingload.ai" />
             <div className="flex flex-1 items-center">

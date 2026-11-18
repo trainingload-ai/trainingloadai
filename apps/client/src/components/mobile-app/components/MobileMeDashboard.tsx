@@ -108,7 +108,7 @@ export function MobileMeDashboard() {
       <MobilePage className="space-y-3 px-0 pb-6 tablet:max-w-3xl tablet:px-4 tablet:pt-3">
         <div className="flex items-center gap-3 py-3">
           <label className="relative min-w-0">
-            <span className="flex items-center gap-1 text-[38px] font-semibold leading-[42px] text-[#007aff] dark:text-[#64d2ff]">
+            <span className="flex items-center gap-1 text-[38px] font-semibold leading-[42px] text-visual-system-blue dark:text-visual-system-cyan">
               {t(`sports.${sport}`)}
               <ChevronsUpDown className="size-4 shrink-0" aria-hidden="true" />
             </span>

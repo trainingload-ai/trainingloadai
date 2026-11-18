@@ -1,4 +1,6 @@
 "use client";
+import { visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { memo, useCallback, useMemo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -306,7 +308,7 @@ const PMCCombinedChart: React.FC<PMCCombinedChartProps> = ({
               if (yPos === null || yPos < top || yPos > top + height) return;
 
               ctx.beginPath();
-              ctx.strokeStyle = val === 0 ? "#666" : "#999";
+              ctx.strokeStyle = val === 0 ? tokenVisual.canvas.axis : tokenVisual.canvas.grid;
               ctx.lineWidth = 1;
               ctx.setLineDash([5, 5]);
               ctx.moveTo(left, yPos);

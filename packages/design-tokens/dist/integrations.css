@@ -1,0 +1,14 @@
+/* Generated selectors for upstream chart defaults; colors are owned by design-tokens. */
+@layer utilities {
+.tl-chart-bridge .recharts-cartesian-grid line[stroke='#ccc'] {
+  stroke: color-mix(in srgb, var(--border) 50%, transparent);
+}
+.tl-chart-bridge .recharts-polar-grid [stroke='#ccc'],
+.tl-chart-bridge .recharts-reference-line [stroke='#ccc'] {
+  stroke: var(--border);
+}
+.tl-chart-bridge .recharts-dot[stroke='#fff'],
+.tl-chart-bridge .recharts-sector[stroke='#fff'] {
+  stroke: transparent;
+}
+}

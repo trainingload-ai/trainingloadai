@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useTranslations } from "next-intl";
 
@@ -23,12 +25,12 @@ const RING_SEGMENTS: Array<{
   zone: TsbZone;
   color: string;
 }> = [
-  { start: 0, end: 12.5, zone: "danger", color: "#f87171" },
-  { start: 12.5, end: 37.5, zone: "optimal", color: "#10b981" },
-  { start: 37.5, end: 56.25, zone: "neutral", color: "#94a3b8" },
-  { start: 56.25, end: 68.75, zone: "fresh", color: "#0ea5e9" },
-  { start: 68.75, end: 81.25, zone: "peak", color: "#8b5cf6" },
-  { start: 81.25, end: 100, zone: "transition", color: "#f59e0b" },
+  { start: 0, end: 12.5, zone: "danger", color: tokenPalette["red-400"] },
+  { start: 12.5, end: 37.5, zone: "optimal", color: tokenPalette["emerald-500"] },
+  { start: 37.5, end: 56.25, zone: "neutral", color: tokenPalette["slate-400"] },
+  { start: 56.25, end: 68.75, zone: "fresh", color: tokenPalette["sky-500"] },
+  { start: 68.75, end: 81.25, zone: "peak", color: tokenPalette["violet-500"] },
+  { start: 81.25, end: 100, zone: "transition", color: tokenPalette["amber-500"] },
 ];
 
 function StatusProgressRing({
@@ -40,7 +42,7 @@ function StatusProgressRing({
 }) {
   const safePercent = Math.max(0, Math.min(100, percent ?? 0));
   const activeColor =
-    RING_SEGMENTS.find((segment) => segment.zone === zone)?.color ?? "#64748b";
+    RING_SEGMENTS.find((segment) => segment.zone === zone)?.color ?? tokenPalette["slate-500"];
   const markerAngle = (safePercent / 100) * Math.PI * 2 - Math.PI / 2;
   const markerX = RING_SIZE / 2 + Math.cos(markerAngle) * RING_RADIUS;
   const markerY = RING_SIZE / 2 + Math.sin(markerAngle) * RING_RADIUS;
@@ -155,7 +157,7 @@ export function MobilePmcStatusPreview() {
     <Link
       href="/metrics/pmc"
       aria-label={t("currentState.title")}
-      className="flex h-[150px] w-[86px] shrink-0 flex-col items-center justify-between rounded-surface bg-neutral-100 px-2 py-2.5 text-foreground transition-colors active:bg-neutral-200 pc:hidden dark:bg-[#292b2a] dark:active:bg-muted"
+      className="flex h-[150px] w-[86px] shrink-0 flex-col items-center justify-between rounded-surface bg-neutral-100 px-2 py-2.5 text-foreground transition-colors active:bg-neutral-200 pc:hidden dark:bg-surface-strong dark:active:bg-muted"
     >
       <div className="flex flex-col items-center gap-1">
         <span className="text-[11px] font-medium text-muted-foreground">
@@ -165,13 +167,13 @@ export function MobilePmcStatusPreview() {
       </div>
       <div className="w-full space-y-2">
         <StatusMetricBar
-          color="#0ea5e9"
+          color={tokenPalette["sky-500"]}
           label={t("currentState.cards.fitness")}
           percent={ready ? ctlPercent : 0}
           value={ctlValue}
         />
         <StatusMetricBar
-          color="#f97316"
+          color={tokenPalette["orange-500"]}
           label={t("currentState.cards.fatigue")}
           percent={ready ? atlPercent : 0}
           value={atlValue}

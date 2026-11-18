@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import {
   useEffect,
@@ -51,7 +53,7 @@ export function MobileMeTrendChart({
   ariaLabel,
   locale,
   maximumFractionDigits,
-  color = "#10b981",
+  color = tokenPalette["emerald-500"],
 }: {
   data: MobileMeTrendChartPoint[];
   valueLabel: string;

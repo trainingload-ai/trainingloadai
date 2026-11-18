@@ -1,3 +1,5 @@
+import { palette } from "./palette.mjs";
+
 export const schemaVersion = 1;
 
 export const colors = {
@@ -5,6 +7,12 @@ export const colors = {
     background: "#FAFAF7",
     foreground: "#191B18",
     card: "#FFFFFF",
+    // Client content cards use Neutral 100, distinct from white form controls.
+    surface: palette["neutral-100"],
+    surfaceStrong: palette["neutral-100"],
+    surfacePressed: palette["neutral-200"],
+    track: palette["neutral-200"],
+    stateNeutral: palette["slate-300"],
     cardForeground: "#191B18",
     popover: "#FFFFFF",
     popoverForeground: "#191B18",
@@ -38,6 +46,12 @@ export const colors = {
     background: "#0B0C0B",
     foreground: "#F4F6F2",
     card: "#121412",
+    // Precomposed Client muted/45 surface; no nested alpha layers on native.
+    surface: "#141614",
+    surfaceStrong: "#292B2A",
+    surfacePressed: "#202320",
+    track: palette["neutral-800"],
+    stateNeutral: palette["slate-300"],
     cardForeground: "#F4F6F2",
     popover: "#151715",
     popoverForeground: "#F4F6F2",

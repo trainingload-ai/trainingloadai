@@ -1,4 +1,5 @@
 "use client";
+import { palette as tokenPalette, withAlpha as tokenAlpha } from "@trainingloadai/design-tokens/colors";
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -119,9 +120,9 @@ export function MonthlyActivityCalendar() {
                       style={{
                         backgroundColor:
                           count > 0
-                            ? `rgba(22, 101, 52, ${bgOpacity})`
+                            ? tokenAlpha(tokenPalette["green-800"], bgOpacity)
                             : undefined,
-                        color: count > 0 ? "white" : undefined,
+                        color: count > 0 ? tokenPalette.white : undefined,
                       }}
                     >
                       <span

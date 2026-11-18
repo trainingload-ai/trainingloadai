@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 import { useCallback, useMemo, memo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useTranslations, useLocale } from "next-intl";
@@ -121,7 +123,7 @@ export function PaceChart({ times, sportType }: PaceChartProps) {
     [times, tDate, locale],
   );
   const csMeta = useMemo(
-    () => ({ key: "cs" as const, label: tPaceChart("cs"), color: "#a78bfa" }),
+    () => ({ key: "cs" as const, label: tPaceChart("cs"), color: tokenPalette["violet-400"] }),
     [tPaceChart],
   );
 

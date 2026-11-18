@@ -1,4 +1,6 @@
 "use client";
+
+
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -174,12 +176,12 @@ const CommonActivityDetail = () => {
             ) : null}
           </section>
 
-          <section className="relative overflow-hidden rounded-md bg-neutral-50 px-4 py-3.5 dark:bg-[#151817] md:px-5">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(117,185,155,0.20),transparent_46%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(112,189,152,0.20),transparent_46%)]" />
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#4b8b70]/45 via-[#4b8b70]/15 to-transparent" />
-            <div className="pointer-events-none absolute bottom-3.5 left-0 top-3.5 w-px bg-gradient-to-b from-[#4b8b70]/30 to-transparent" />
+          <section className="relative overflow-hidden rounded-md bg-neutral-50 px-4 py-3.5 dark:bg-visual-artwork-inset-dark md:px-5">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_srgb,var(--visual-review-gradient-start)_20%,transparent),transparent_46%)] dark:bg-[radial-gradient(ellipse_at_top_left,color-mix(in_srgb,var(--visual-review-gradient-start-dark)_20%,transparent),transparent_46%)]" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-visual-review-accent/45 via-visual-review-accent/15 to-transparent" />
+            <div className="pointer-events-none absolute bottom-3.5 left-0 top-3.5 w-px bg-gradient-to-b from-visual-review-accent/30 to-transparent" />
             <div className="relative flex items-center justify-between gap-3">
-              <h2 className="text-mobile-caption font-semibold tracking-[0.2px] text-[#326c56] pc:text-xs dark:text-[#a4d5bf]">
+              <h2 className="text-mobile-caption font-semibold tracking-[0.2px] text-visual-review-title pc:text-xs dark:text-visual-review-title-dark">
                 {t("coachReview")}
               </h2>
               <span className="text-[10px] tracking-[0.2px] text-muted-foreground/65">

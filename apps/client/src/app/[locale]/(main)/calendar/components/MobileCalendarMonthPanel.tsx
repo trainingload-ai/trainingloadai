@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
+
 
 import React from "react";
 import dayjs, { type Dayjs } from "dayjs";
@@ -14,9 +16,9 @@ import {
 import { MobileCalendarDayContent } from "./MobileCalendarSessionCards";
 
 const MONTH_MARKER_COLORS = {
-  activity: "#0ea5e9",
-  competition: "#93c5fd",
-  workout: "#009689",
+  activity: tokenPalette["sky-500"],
+  competition: tokenPalette["blue-300"],
+  workout: tokenVisual.assessment.accent,
 } as const;
 
 export function MobileCalendarMonthPanel({

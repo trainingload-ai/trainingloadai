@@ -1,3 +1,4 @@
+import { visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
 /**
  * 向地图中添加一个栅格瓦片图层
  * @param map
@@ -25,16 +26,16 @@ export const addRasterTileLayer = (
 
 export const getColor = (idx: number) => {
   const color = [
-    "rgb(222, 129, 59)",
-    "rgb(67, 161, 138)",
-    "rgb(34, 59, 74)",
-    "rgb(186, 142, 65)",
-    "rgb(217, 123, 45)",
-    "rgb(155, 98, 164)",
-    "rgb(37, 144, 188)",
-    "rgb(69, 151, 77)",
-    "rgb(232, 208, 96)",
-    "rgb(80, 42, 90)",
+    tokenVisual.map.activity[0],
+    tokenVisual.map.activity[1],
+    tokenVisual.map.activity[2],
+    tokenVisual.map.activity[3],
+    tokenVisual.map.activity[4],
+    tokenVisual.map.activity[5],
+    tokenVisual.map.activity[6],
+    tokenVisual.map.activity[7],
+    tokenVisual.map.activity[8],
+    tokenVisual.map.activity[9],
   ];
 
   return color[idx % 10];

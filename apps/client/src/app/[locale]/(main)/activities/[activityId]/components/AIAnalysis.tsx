@@ -259,9 +259,9 @@ const AIAnalysis = () => {
                     {markdownBody}
                   </ReactMarkdown>
                 </div>
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-neutral-50 via-neutral-50/90 to-transparent dark:from-[#151817] dark:via-[#151817]/90" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-neutral-50 via-neutral-50/90 to-transparent dark:from-visual-artwork-inset-dark dark:via-visual-artwork-inset-dark/90" />
               </div>
-              <div className="mt-1.5 flex items-center justify-between pt-1.5 text-mobile-caption font-medium text-[#3f8067] pc:text-xs dark:text-[#91c9af]">
+              <div className="mt-1.5 flex items-center justify-between pt-1.5 text-mobile-caption font-medium text-visual-review-icon pc:text-xs dark:text-visual-review-accent-dark">
                 <span>{t("expand")} ›</span>
               </div>
             </button>

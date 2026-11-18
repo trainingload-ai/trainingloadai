@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
+
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
@@ -39,34 +41,34 @@ type Status = (typeof STATUSES)[number];
 
 const STATUS_STYLE = {
   completed: {
-    light: "#10b981",
-    dark: "#34d399",
+    light: tokenPalette["emerald-500"],
+    dark: tokenPalette["emerald-400"],
     opacity: 0.75,
-    swatch: "text-[#10b981] dark:text-[#34d399]",
+    swatch: "text-palette-emerald-500 dark:text-palette-emerald-400",
   },
   missed: {
-    light: "#f5b619",
-    dark: "#fbbf24",
+    light: tokenVisual.cycle.base,
+    dark: tokenPalette["amber-400"],
     opacity: 1,
-    swatch: "text-[#f5b619] dark:text-[#fbbf24]",
+    swatch: "text-visual-cycle-base dark:text-palette-amber-400",
   },
   skipped: {
-    light: "#94a3b8",
-    dark: "#94a3b8",
+    light: tokenPalette["slate-400"],
+    dark: tokenPalette["slate-400"],
     opacity: 0.5,
-    swatch: "text-[#94a3b8]",
+    swatch: "text-palette-slate-400",
   },
   moved: {
-    light: "#38bdf8",
-    dark: "#7dd3fc",
+    light: tokenPalette["sky-400"],
+    dark: tokenPalette["sky-300"],
     opacity: 0.65,
-    swatch: "text-[#38bdf8] dark:text-[#7dd3fc]",
+    swatch: "text-palette-sky-400 dark:text-palette-sky-300",
   },
   pending: {
-    light: "#b8c2ce",
-    dark: "#94a3b8",
+    light: tokenVisual.cycle.inactive,
+    dark: tokenPalette["slate-400"],
     opacity: 0.18,
-    swatch: "text-[#b8c2ce] dark:text-[#94a3b8]",
+    swatch: "text-visual-cycle-inactive dark:text-palette-slate-400",
   },
 } satisfies Record<
   Status,
@@ -214,7 +216,7 @@ export function PlanCycleProgressChart({
             >
               <span
                 aria-hidden="true"
-                className="size-1.5 rounded-full bg-[#7c3aed] dark:bg-[#a78bfa]"
+                className="size-1.5 rounded-full bg-palette-violet-600 dark:bg-palette-violet-400"
               />
               {t("currentPosition", {
                 current: currentPoint.selectionKey,
@@ -404,7 +406,7 @@ export function PlanCycleProgressChart({
                         isSelected
                           ? "bg-background font-medium text-foreground"
                           : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
-                        isCurrent && "text-[#7c3aed] dark:text-[#a78bfa]",
+                        isCurrent && "text-palette-violet-600 dark:text-palette-violet-400",
                       )}
                     >
                       {point.label}
@@ -413,7 +415,7 @@ export function PlanCycleProgressChart({
                       className={cn(
                         "h-3 text-[10px] leading-3",
                         isCurrent
-                          ? "text-[#7c3aed] dark:text-[#a78bfa]"
+                          ? "text-palette-violet-600 dark:text-palette-violet-400"
                           : "invisible",
                       )}
                     >

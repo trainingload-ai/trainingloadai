@@ -58,7 +58,7 @@ export function MobileConnectionsPanel() {
                 onClick={() => setDialogOpen(true)}
                 className="flex min-h-14 w-full items-center gap-3 px-4 py-2.5 text-left active:bg-muted/65"
               >
-                <span className="grid size-8 shrink-0 place-items-center rounded-compact bg-[#5856d6] text-white">
+                <span className="grid size-8 shrink-0 place-items-center rounded-compact bg-visual-providers-intervals text-white">
                   <RefreshCw className="size-[18px]" />
                 </span>
                 <span className="min-w-0 flex-1">

@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -15,7 +17,7 @@ type Sport = "RUN" | "CYCLING" | "SWIM";
 type ZoneRow = ZoneSetting & { id: string };
 type Selector = "sport" | "benchmark" | null;
 
-const COLORS = ["#94a3b8", "#10b981", "#eab308", "#f97316", "#ef4444", "#a855f7", "#0f172a"];
+const COLORS = [tokenPalette["slate-400"], tokenPalette["emerald-500"], tokenPalette["yellow-500"], tokenPalette["orange-500"], tokenPalette["red-500"], tokenPalette["purple-500"], tokenPalette["slate-900"]];
 const DEFAULT_ROWS: ZoneSetting[] = [
   { color: COLORS[0], name: "Z1", min: 0, max: 55 },
   { color: COLORS[1], name: "Z2", min: 55, max: 75 },

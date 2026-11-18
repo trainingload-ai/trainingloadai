@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { useMemo } from "react";
 import { calcClampedPercent, clamp, cn } from "@/lib/utils";
@@ -146,10 +148,10 @@ const PMCStat: React.FC<PMCStatProps> = ({
   };
 
   const getAcmpSwatchColor = (v: number | null) => {
-    if (v == null) return "#9ca3af";
-    if (v >= 1.5) return "#ef4444";
-    if (v >= 0.8 && v <= 1.3) return "#22c55e";
-    return "#9ca3af";
+    if (v == null) return tokenPalette["gray-400"];
+    if (v >= 1.5) return tokenPalette["red-500"];
+    if (v >= 0.8 && v <= 1.3) return tokenPalette["green-500"];
+    return tokenPalette["gray-400"];
   };
 
   const isSelected = pmcSelectedStat?.id === type;

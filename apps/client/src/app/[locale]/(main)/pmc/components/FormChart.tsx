@@ -1,4 +1,6 @@
 "use client";
+import { visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
+
 
 import { memo, useCallback, useMemo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -113,7 +115,7 @@ const FormChart: React.FC<FormChartProps> = ({
 
             ctx.save();
             ctx.beginPath();
-            ctx.strokeStyle = "#666";
+            ctx.strokeStyle = tokenVisual.canvas.axis;
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.moveTo(u.bbox.left, yPos);

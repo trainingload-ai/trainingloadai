@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 // Slope Zone Definition
 export const SLOPE_ZONES = [
   {
@@ -5,35 +6,35 @@ export const SLOPE_ZONES = [
     description: "Steep Downhill",
     minSlope: -15,
     maxSlope: -6,
-    color: "#0ea5e9",
+    color: tokenPalette["sky-500"],
   },
   {
     name: "Downhill",
     description: "Gentle Downhill",
     minSlope: -6,
     maxSlope: -2,
-    color: "#06b6d4",
+    color: tokenPalette["cyan-500"],
   },
   {
     name: "Flat",
     description: "Flat or Gentle Slope",
     minSlope: -2,
     maxSlope: 2,
-    color: "#10b981",
+    color: tokenPalette["emerald-500"],
   },
   {
     name: "Uphill",
     description: "Gentle Uphill",
     minSlope: 2,
     maxSlope: 6,
-    color: "#f59e0b",
+    color: tokenPalette["amber-500"],
   },
   {
     name: "Steep Uphill",
     description: "Steep Uphill",
     minSlope: 6,
     maxSlope: 15,
-    color: "#f97316",
+    color: tokenPalette["orange-500"],
   },
 ];
 

@@ -1,3 +1,4 @@
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as mapengine from "@deployment/map-engine";
 import dynamic from "next/dynamic";
@@ -142,18 +143,18 @@ export const useMapInitialization = ({
                 "match",
                 ["get", "ageBucket"],
                 0,
-                "#fb923c",
+                tokenPalette["orange-400"],
                 1,
-                "#f97316",
+                tokenPalette["orange-500"],
                 2,
-                "#ea580c",
+                tokenPalette["orange-600"],
                 3,
-                "#a3a3a3",
+                tokenPalette["neutral-400"],
                 4,
-                "#737373",
+                tokenPalette["neutral-500"],
                 5,
-                "#525252",
-                "#fb923c",
+                tokenPalette["neutral-600"],
+                tokenPalette["orange-400"],
               ],
               "line-width": [
                 "interpolate",
@@ -180,7 +181,7 @@ export const useMapInitialization = ({
               "line-gap-width": 0,
             }
           : {
-              "line-color": "#f97316",
+              "line-color": tokenPalette["orange-500"],
               "line-opacity": 0.82,
               "line-width": 2.8,
             },

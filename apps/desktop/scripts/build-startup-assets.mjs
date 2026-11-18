@@ -1,45 +1,17 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { createRequire } from "node:module";
 import { core, desktop, validateCoreSource } from "./core-path.mjs";
+import { desktopStartupPalettes } from "./startup-palette.mjs";
 validateCoreSource();
 
 // Keep the pre-server window aligned with the exact Core release being bundled.
-const css = readFileSync(join(core, "apps/client/src/app/globals.css"), "utf8");
-const properties = [
-  "background",
-  "foreground",
-  "muted-foreground",
-  "border",
-  "desktop-chrome",
-  "desktop-workspace-radius",
-  "tl-font-ui",
-];
-function palette(selector) {
-  const start = css.indexOf(`${selector} {`);
-  if (start < 0) throw new Error(`Missing Core desktop palette: ${selector}`);
-  const body = css.slice(start + selector.length + 2, css.indexOf("}", start));
-  return Object.fromEntries(
-    properties
-      .map((name) => {
-        const value = body
-          .match(new RegExp(`--${name}:\\s*([^;]+);`))?.[1]
-          ?.trim();
-        // Dark mode inherits the UI font and radius from the base palette.
-        if (
-          !value &&
-          !["tl-font-ui", "desktop-workspace-radius"].includes(name)
-        )
-          throw new Error(`Missing Core desktop token: ${selector} --${name}`);
-        return [name, value];
-      })
-      .filter(([, value]) => value),
-  );
-}
-const light = palette(':root[data-desktop-self-host="true"]');
-const dark = {
-  ...light,
-  ...palette(':root.dark[data-desktop-self-host="true"]'),
-};
+const coreRequire = createRequire(join(core, "apps/client/package.json"));
+const css = [
+  readFileSync(coreRequire.resolve("@trainingloadai/design-tokens/desktop.css"), "utf8"),
+  readFileSync(join(core, "apps/client/src/app/globals.css"), "utf8"),
+].join("\n");
+const { light, dark } = desktopStartupPalettes(css);
 const spinner = readFileSync(
   join(core, "apps/client/src/components/icons/spinner.tsx"),
   "utf8",

@@ -2,6 +2,12 @@ node_modules/
 .next/
 .next-*/
 dist/
+!packages/design-tokens/dist/
+!packages/design-tokens/dist/palette.css
+!packages/design-tokens/dist/color-utils.js
+!packages/design-tokens/dist/desktop.css
+!packages/design-tokens/dist/integrations.css
+!packages/design-tokens/dist/apple.swift
 dist-selfhost/
 .generated/
 generated/

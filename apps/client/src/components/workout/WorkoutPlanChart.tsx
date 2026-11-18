@@ -1,4 +1,6 @@
 "use client";
+import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
+
 
 import React, { memo, useCallback, useMemo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -58,13 +60,13 @@ type Segment = {
 };
 
 const POWER_ZONES = [
-  { key: "power_Z1", name: "Power Z1", min: 0, max: 55, color: "#94a3b8" },
-  { key: "power_Z2", name: "Power Z2", min: 55, max: 75, color: "#3b82f6" },
-  { key: "power_Z3", name: "Power Z3", min: 75, max: 90, color: "#10b981" },
-  { key: "power_Z4", name: "Power Z4", min: 90, max: 105, color: "#f59e0b" },
-  { key: "power_Z5", name: "Power Z5", min: 105, max: 120, color: "#ef4444" },
-  { key: "power_Z6", name: "Power Z6", min: 120, max: 150, color: "#dc2626" },
-  { key: "power_Z7", name: "Power Z7", min: 150, max: 1000, color: "#7c2d12" },
+  { key: "power_Z1", name: "Power Z1", min: 0, max: 55, color: tokenPalette["slate-400"] },
+  { key: "power_Z2", name: "Power Z2", min: 55, max: 75, color: tokenPalette["blue-500"] },
+  { key: "power_Z3", name: "Power Z3", min: 75, max: 90, color: tokenPalette["emerald-500"] },
+  { key: "power_Z4", name: "Power Z4", min: 90, max: 105, color: tokenPalette["amber-500"] },
+  { key: "power_Z5", name: "Power Z5", min: 105, max: 120, color: tokenPalette["red-500"] },
+  { key: "power_Z6", name: "Power Z6", min: 120, max: 150, color: tokenPalette["red-600"] },
+  { key: "power_Z7", name: "Power Z7", min: 150, max: 1000, color: tokenPalette["orange-900"] },
 ] as const;
 
 function zoneForPower(p: number) {

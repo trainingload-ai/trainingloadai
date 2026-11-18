@@ -210,16 +210,16 @@ const config = {
         },
         // 自定义运动类型浅色，用于日历条目背景
         run: {
-          DEFAULT: "#FED7AA", // 浅橙色（近似 orange-200）
+          DEFAULT: "hsl(var(--orange-200))", // 浅橙色（近似 orange-200）
         },
         cycling: {
-          DEFAULT: "#a7f3d0", // emerald-200，与营销绿同一色系
+          DEFAULT: "hsl(var(--emerald-200))", // emerald-200，与营销绿同一色系
         },
         swim: {
-          DEFAULT: "#BAE6FD", // 浅蓝色（近似 sky-200）
+          DEFAULT: "hsl(var(--sky-200))", // 浅蓝色（近似 sky-200）
         },
         unknown: {
-          DEFAULT: "#E5E7EB", // 浅灰色（近似 gray-200）
+          DEFAULT: "hsl(var(--gray-200))", // 浅灰色（近似 gray-200）
         },
         border: "var(--border)",
         input: "var(--input)",
