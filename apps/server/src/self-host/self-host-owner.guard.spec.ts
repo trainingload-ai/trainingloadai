@@ -34,6 +34,7 @@ describe('SelfHostOwnerGuard', () => {
   }
 
   it('hides the settings endpoint outside self-host deployments', async () => {
+    process.env.DEPLOYMENT_MODE = 'cloud';
     delete process.env.SELF_HOST_MODE;
     await expect(
       guard(null).canActivate(context({ session: { user: { id: 'owner' } } })),
@@ -50,6 +51,7 @@ describe('SelfHostOwnerGuard', () => {
   });
 
   it('requires an authenticated owner of a ready instance', async () => {
+    process.env.DEPLOYMENT_MODE = 'self-host';
     process.env.SELF_HOST_MODE = 'core-local';
     await expect(guard(null).canActivate(context({}))).rejects.toBeInstanceOf(
       UnauthorizedException,
