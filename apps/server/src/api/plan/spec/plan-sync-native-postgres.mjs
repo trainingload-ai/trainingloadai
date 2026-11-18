@@ -104,6 +104,16 @@ try {
     if (migration.id === '0007_single_owner') continue;
     execute(readFileSync(new URL(migration.file, migrations), 'utf8'));
   }
+  const operationColumn =
+    process.env.COACH_RUN_TEST_OPERATION_COLUMN?.trim() || 'operation_id';
+  if (!/^[a-z][a-z0-9_]*$/.test(operationColumn)) {
+    throw new Error('Invalid coach run test operation column');
+  }
+  if (operationColumn !== 'operation_id') {
+    execute(
+      `ALTER TABLE t_coach_run_attempt RENAME COLUMN operation_id TO ${operationColumn}`,
+    );
+  }
   execute(`ALTER TABLE t_user ALTER COLUMN name SET DEFAULT 'Test athlete';
     ALTER TABLE t_user ALTER COLUMN email_verified SET DEFAULT true;
     ALTER TABLE t_user ALTER COLUMN created_at SET DEFAULT now();
