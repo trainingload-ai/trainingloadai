@@ -1,3 +1,4 @@
+import { createAiFallbackI18n } from '../spec/ai-fallback-i18n.test-util';
 import { uncontendedGeneration } from './testing/generation.fixture';
 import { TodaySuggestionDeliveryPolicy } from './today-suggestion-delivery-policy';
 import { TodaySuggestionOrchestratorService } from './today-suggestion-orchestrator.service';
@@ -22,7 +23,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       {} as never,
       {} as never,
       {} as never,
-      new TodaySuggestionDeliveryPolicy(),
+      new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
       {} as never,
       {} as never,
     );
@@ -130,7 +131,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       projector as never,
       agent as never,
       workoutGenerator as never,
-      new TodaySuggestionDeliveryPolicy(),
+      new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
       engagement as never,
       uncontendedGeneration(prisma),
     );
@@ -253,7 +254,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       { project: jest.fn(async () => projection) } as never,
       agent as never,
       workoutGenerator as never,
-      new TodaySuggestionDeliveryPolicy(),
+      new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
       engagement as never,
       uncontendedGeneration(prisma),
     );
@@ -278,7 +279,7 @@ describe('TodaySuggestionOrchestratorService', () => {
     });
   });
 
-  it('backfills the generation timezone on a fresh legacy cache row', async () => {
+  it('localizes legacy cached labels while backfilling its timezone', async () => {
     const generatedAt = new Date();
     const validUntil = new Date(Date.now() + 60 * 60_000);
     const cachedResult = {
@@ -288,9 +289,21 @@ describe('TodaySuggestionOrchestratorService', () => {
       summary: 'Use a short recovery session.',
       recommendation: { kind: 'RECOVERY' },
       confidence: 'MEDIUM',
-      evidence: [],
-      primaryIntent: null,
-      secondaryIntents: [],
+      evidence: [
+        {
+          code: 'NEVER_RECORDED_ACTIVITY',
+          label: 'No recorded activities yet',
+          evidenceRefs: ['fact:unchanged'],
+        },
+      ],
+      primaryIntent: {
+        type: 'OPEN_PROVIDER_SETTINGS',
+        label: 'Check data connection',
+      },
+      secondaryIntents: [
+        { type: 'OPEN_IMPORT', label: 'Import activity' },
+        { type: 'ASK_COACH', label: 'Ask coach', starterCode: 'unchanged' },
+      ],
       validUntil: validUntil.toISOString(),
       delivery: {
         state: 'GENERATED',
@@ -319,7 +332,7 @@ describe('TodaySuggestionOrchestratorService', () => {
       },
     };
     const projection = {
-      locale: 'en',
+      locale: 'de-DE',
       date: '2026-10-29',
       timezone: 'Asia/Shanghai',
       edition: 'self-host',
@@ -333,13 +346,35 @@ describe('TodaySuggestionOrchestratorService', () => {
       { project: jest.fn(async () => projection) } as never,
       {} as never,
       {} as never,
-      new TodaySuggestionDeliveryPolicy(),
+      new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
       engagement as never,
       uncontendedGeneration(prisma),
     );
 
-    await service.get({ userId: 'user-1', locale: 'en', allowAi: true });
+    const result = await service.get({
+      userId: 'user-1',
+      locale: 'de-DE',
+      allowAi: true,
+    });
 
+    expect(result).toMatchObject({
+      headline: cachedResult.headline,
+      suggestionId: cachedResult.suggestionId,
+      validUntil: cachedResult.validUntil,
+      delivery: { state: 'CACHED' },
+      primaryIntent: { label: 'Datenverbindung prüfen' },
+      secondaryIntents: [
+        { label: 'Aktivität importieren' },
+        { label: 'Coach fragen', starterCode: 'unchanged' },
+      ],
+      evidence: [
+        {
+          label: 'Noch keine Aktivitäten erfasst',
+          evidenceRefs: ['fact:unchanged'],
+        },
+      ],
+    });
+    expect(cachedResult.primaryIntent.label).toBe('Check data connection');
     expect(prisma.aiTodaySuggestion.update).toHaveBeenCalledWith({
       where: { id: 'row-1' },
       data: {

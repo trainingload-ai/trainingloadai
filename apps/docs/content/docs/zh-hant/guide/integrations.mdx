@@ -2,7 +2,13 @@
 title: 訓練平台串接怎麼選：Strava、Garmin、COROS 對照
 description: 對比 Trainingload.ai 的 Strava、Garmin、COROS、Polar、Suunto、Wahoo 與 Intervals.icu 串接方式。先選持續同步、一次性歷史匯入或檔案上傳，再進入對應授權流程。
 keywords:
-  ["訓練平台串接", "Strava 串接", "Garmin 串接", "COROS 同步", "Intervals.icu 串接"]
+  [
+    "訓練平台串接",
+    "Strava 串接",
+    "Garmin 串接",
+    "COROS 同步",
+    "Intervals.icu 串接",
+  ]
 ---
 
 # 訓練平台串接怎麼選：Strava、Garmin、COROS 對照
@@ -28,26 +34,28 @@ keywords:
 
 ## 選擇匯入路徑
 
-| 來源            | 最適合                               | 連接模型                     |
-| --------------- | ------------------------------------ | ---------------------------- |
-| Strava          | 持續活動同步                         | 帶同步設定的已連接帳號       |
-| Polar           | 持續 Polar 活動匯入                  | OAuth 與同步設定             |
-| COROS           | 活動與每日資料同步                   | 帶手動同步的已連接帳號       |
-| Intervals.icu   | 活動同步與相容的計畫課流程           | OAuth 或 API Key             |
-| Suunto          | 持續課表匯入                         | OAuth 與同步設定             |
-| Wahoo           | 持續 Wahoo 課表匯入                  | OAuth 與同步設定             |
-| Garmin          | 一次性歷史活動匯入                   | 匯入動作，不是常駐連接卡片   |
-| FIT / TCX / GPX | 個別檔案或不支援來源                 | 手動上傳                     |
+| 來源            | 最適合                     | 連接模型               |
+| --------------- | -------------------------- | ---------------------- |
+| Strava          | 持續活動同步               | 帶同步設定的已連接帳號 |
+| Polar           | 持續 Polar 活動匯入        | OAuth 與同步設定       |
+| COROS           | 活動與每日資料同步         | 帶手動同步的已連接帳號 |
+| Intervals.icu   | 活動同步與相容的計畫課流程 | OAuth 或 API Key       |
+| Suunto          | 持續課表匯入               | OAuth 與同步設定       |
+| Wahoo           | 持續 Wahoo 課表匯入        | OAuth 與同步設定       |
+| Garmin          | 新活動同步與歷史活動匯入   | OAuth 連接或檔案匯入   |
+| FIT / TCX / GPX | 個別檔案或不支援來源       | 手動上傳               |
+
+**目前，Trainingload.ai 的 Garmin 官方 OAuth 連接無法取得授權之前已有的活動；解除後重新連接也不會回填歷史。** 請匯入 Garmin 完整匯出 ZIP（或其暫時下載連結），或上傳個別 FIT、TCX、GPX 檔案來補充記錄。自架版的 Garmin Personal API 是另一項功能，請依其專屬文件操作。
 
 ## 常見問題
 
 ### Trainingload.ai 支援哪些訓練平台串接？
 
-Strava、Polar、COROS、Intervals.icu、Suunto、Wahoo 可以保持連接。Garmin 是一次性歷史匯入。FIT、TCX、GPX 用於單檔或不支援的手錶。
+Strava、Polar、COROS、Intervals.icu、Suunto、Wahoo 可以保持連接。Garmin 支援新資料的 OAuth 連接與歷史檔案匯入。FIT、TCX、GPX 用於單檔或不支援的手錶。
 
 ### 選 Strava 串接還是 Garmin 匯入？
 
-要讓新訓練持續進來，選 Strava 或其他線上平台。只要一份歷史存檔，選 Garmin 歷史匯入。之後的新 Garmin 檔仍需線上路徑或手動上傳。
+使用 Garmin OAuth 接收新活動；授權前的記錄請使用歷史檔案匯入。如果同一條活動也會經過 Strava，請選擇一條主要匯入路徑，避免重複。
 
 ### 同一塊錶能開兩個串接嗎？
 

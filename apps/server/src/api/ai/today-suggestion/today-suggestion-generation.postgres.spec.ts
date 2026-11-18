@@ -1,3 +1,4 @@
+import { createAiFallbackI18n } from '../spec/ai-fallback-i18n.test-util';
 import {
   ExternalProviderWebhookInboxService,
   webhookContentChecksum,
@@ -821,7 +822,7 @@ scenarios('Today advice generation across instances on PostgreSQL', () => {
         { project } as never,
         agent as never,
         {} as never,
-        new TodaySuggestionDeliveryPolicy(),
+        new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
         { rollover: async () => undefined } as never,
         generation,
       );

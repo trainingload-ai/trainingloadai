@@ -232,6 +232,7 @@ export class TodaySuggestionOrchestratorService {
             : { ...cachedResult.delivery, cached: true },
         },
         cached.tags,
+        projection,
       );
     }
 
@@ -525,6 +526,7 @@ export class TodaySuggestionOrchestratorService {
             },
           },
       persisted.tags,
+      projection,
     );
   }
 
@@ -549,6 +551,7 @@ export class TodaySuggestionOrchestratorService {
           generatedAt: null,
         }),
         draft.tags,
+        projection,
       ),
       retryAt: retryAt.toISOString(),
     };
@@ -906,7 +909,9 @@ export class TodaySuggestionOrchestratorService {
   private present(
     result: TodaySuggestionV2,
     rawTags: unknown,
+    projection: TodaySuggestionConstraintProjection,
   ): TodaySuggestionResponseV2 {
+    result = this.delivery.localize(result, projection);
     const tags = Array.isArray(rawTags)
       ? rawTags
           .map((tag) => String(tag ?? ''))

@@ -115,5 +115,37 @@
       "strength": "fuerza",
       "unknown": "actividad"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "Aún no hay actividades registradas",
+      "LAST_ACTIVITY_OVER_30_DAYS": "No hay actividades registradas en más de 30 días",
+      "ACTIVITY_PROCESSING_PENDING": "Los datos de la actividad se están procesando",
+      "TODAY_WORKOUT_COMPLETED": "El entrenamiento de hoy está completado",
+      "TODAY_WORKOUT_AVAILABLE": "Hay un entrenamiento programado para hoy",
+      "NO_ACTIVE_PLAN": "No hay ningún plan activo",
+      "WAITING_FOR_USER": "Falta información sobre tu estado",
+      "WAITING_FOR_DATA": "Esperando datos de entrenamiento",
+      "HIGH_CONCERN": "Tu estado actual necesita atención",
+      "RECENT_LOAD": "Carga de entrenamiento reciente",
+      "RECENT_ACTIVITY": "Última actividad",
+      "PLAN_CONTEXT": "Plan de entrenamiento actual",
+      "COMPETITION_CONTEXT": "Próxima competición",
+      "LOAD_ZERO_28D": "La carga calculada de los últimos 28 días es cero"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "Abrir el entrenamiento de hoy",
+      "OPEN_PLAN": "Ver el plan",
+      "OPEN_ASSESSMENT": "Actualizar mi estado",
+      "OPEN_PROVIDER_SETTINGS": "Comprobar la conexión de datos",
+      "OPEN_IMPORT": "Importar actividad",
+      "OPEN_ACTIVITY_REVIEW": "Revisar actividad",
+      "CHECK_ACTIVITY_ASSOCIATION": "Comprobar la asociación de la actividad",
+      "OPEN_DECISION": "Ver la decisión del entrenador",
+      "ASK_COACH": "Preguntar al entrenador",
+      "VIEW_TOMORROW": "Ver el entrenamiento de mañana",
+      "CREATE_TODAY_WORKOUT": "Añadir como entrenamiento de hoy",
+      "SCHEDULE_REMINDER": "Recordármelo más tarde"
+    }
   }
 }

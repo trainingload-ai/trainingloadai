@@ -577,7 +577,19 @@
       "planAlreadySavedShort": "Saved",
       "waitStreamEnd": "Wait for the reply to finish before saving.",
       "creating": "Saving…",
-      "createFailed": "Could not save the plan. Check workout text (DSL) and try again.",
+      "createFailed": "The plan could not be saved. Your draft is retained; please try again.",
+      "saveErrors": {
+        "tooLarge": "This plan exceeds the current save limit. Your draft is retained; please contact support.",
+        "validation": "The plan did not pass validation. Check the sessions and try again; your draft is retained.",
+        "network": "We could not confirm whether the plan was saved. Check your plan library before saving again to avoid duplicates.",
+        "service": "Saving is temporarily unavailable. Try again later; your draft is retained.",
+        "rateLimit": "Too many save requests. Wait a moment and try again.",
+        "authentication": "Your session expired. Sign in again to save.",
+        "noWorkouts": "The draft has no sessions to save. Ask the coach to add sessions.",
+        "unknown": "The plan could not be saved. Your draft is retained; please try again.",
+        "receipt": "The plan was saved, but the conversation could not be updated. Find it in your plan library; no need to save again.",
+        "checkLibrary": "Open plan library"
+      },
       "createSuccess": "Plan saved",
       "noWorkouts": "This draft has no sessions with workout text.",
       "weekdayShort": {

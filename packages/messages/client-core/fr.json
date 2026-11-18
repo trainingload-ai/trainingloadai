@@ -469,7 +469,19 @@
       "planAlreadySavedShort": "Enregistré",
       "waitStreamEnd": "Attendez la fin de la réponse avant de sauvegarder.",
       "creating": "Économie…",
-      "createFailed": "Impossible d'enregistrer le plan. Vérifiez le texte de l'entraînement (DSL) et réessayez.",
+      "createFailed": "Le plan n'a pas pu être enregistré. Le brouillon est conservé ; veuillez réessayer.",
+      "saveErrors": {
+        "tooLarge": "Ce plan dépasse la limite actuelle d'enregistrement. Le brouillon est conservé ; contactez l'assistance.",
+        "validation": "Le plan n'a pas passé la validation. Vérifiez les séances et réessayez ; le brouillon est conservé.",
+        "network": "Impossible de confirmer si le plan a été enregistré. Consultez la bibliothèque de plans avant de réessayer pour éviter les doublons.",
+        "service": "L'enregistrement est temporairement indisponible. Réessayez plus tard ; le brouillon est conservé.",
+        "rateLimit": "Trop de demandes d'enregistrement. Patientez un instant et réessayez.",
+        "authentication": "Votre session a expiré. Reconnectez-vous pour enregistrer.",
+        "noWorkouts": "Le brouillon ne contient aucune séance à enregistrer. Demandez au coach d'en ajouter.",
+        "unknown": "Le plan n'a pas pu être enregistré. Le brouillon est conservé ; veuillez réessayer.",
+        "receipt": "Le plan a été enregistré, mais la conversation n'a pas pu être mise à jour. Retrouvez-le dans votre bibliothèque ; inutile de l'enregistrer à nouveau.",
+        "checkLibrary": "Voir la bibliothèque de plans"
+      },
       "createSuccess": "Forfait enregistré",
       "noWorkouts": "Ce brouillon ne contient aucune session avec un texte d'entraînement.",
       "weekdayShort": {

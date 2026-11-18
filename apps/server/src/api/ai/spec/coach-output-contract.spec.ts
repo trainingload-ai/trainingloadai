@@ -147,6 +147,7 @@ function setup(events: CoachUiStreamYield[]) {
   };
   Object.assign(controller, {
     coachRuns,
+    prisma: { aiCoachSession: { findUnique: jest.fn(async () => null) } },
     aiService,
     aiUsage,
     operations,
@@ -204,6 +205,31 @@ function setup(events: CoachUiStreamYield[]) {
 }
 
 describe('durable Coach output contract', () => {
+  it('keeps a disconnected empty stream interrupted without a model failure receipt', async () => {
+    const fixture = setup([]);
+    fixture.aiService.coachStream.mockImplementation(async () => ({
+      async *[Symbol.asyncIterator]() {
+        fixture.response.emit('close');
+        yield success;
+      },
+    }));
+    await fixture.run({
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'request-disconnected' },
+    });
+    const message = fixture.runSnapshots.at(-1);
+    expect(JSON.stringify(message)).not.toContain('model_unavailable');
+    expect(message).toMatchObject({
+      parts: expect.arrayContaining([
+        expect.objectContaining({
+          type: 'data-coach-run',
+          data: expect.objectContaining({ status: 'interrupted' }),
+        }),
+      ]),
+    });
+    expect(fixture.operations.complete).not.toHaveBeenCalled();
+  });
+
   it('continues an owned Athlete State answer without user admission or a paid operation', async () => {
     const fixture = setup([
       {

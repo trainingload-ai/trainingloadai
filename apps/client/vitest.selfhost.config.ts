@@ -89,6 +89,7 @@ export default defineConfig({
       "src/app/[locale]/(main)/ai-coach/desktop-coach-capability-state.test.tsx",
       "src/app/[locale]/(main)/ai-coach/coach-markdown.test.tsx",
       "src/app/[locale]/(main)/ai-coach/coach-assistant-composer.test.tsx",
+      "src/app/[locale]/(main)/ai-coach/coach-plan-save.test.tsx",
       "src/app/[locale]/(main)/ai-coach/coach-question-flow.test.tsx",
       "src/components/TopBar.test.tsx",
       "src/components/Sidebar/Sidebar.test.tsx",
