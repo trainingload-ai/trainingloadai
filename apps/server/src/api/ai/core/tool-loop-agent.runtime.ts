@@ -1032,11 +1032,12 @@ export async function* streamCoachAnswer(args: {
     userService: ctx.userService,
     userId: ctx.session?.user?.id,
   });
+  const serverOwnedTask = Boolean(ctx.backgroundTask || ctx.athleteState);
   const systemPromptFor = (publicReasoningSummary: boolean) =>
     appendAmbientMemory(
       buildCoachSystemPrompt(ctx.lang, args.activeSkill ?? null, clock, {
         publicReasoningSummary,
-        serverOwnedTask: Boolean(ctx.backgroundTask),
+        serverOwnedTask,
       }),
       args.ambientMemory,
       args.coachFacts,
@@ -1207,7 +1208,7 @@ export async function* streamCoachAnswer(args: {
                     clock,
                     {
                       publicReasoningSummary: thinking,
-                      serverOwnedTask: Boolean(ctx.backgroundTask),
+                      serverOwnedTask,
                     },
                   ),
                   args.ambientMemory,
@@ -1233,7 +1234,7 @@ export async function* streamCoachAnswer(args: {
               clock,
               {
                 publicReasoningSummary: thinking && !deliveryOnly,
-                serverOwnedTask: Boolean(ctx.backgroundTask),
+                serverOwnedTask,
               },
             ),
             args.ambientMemory,

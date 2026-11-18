@@ -70,10 +70,12 @@ const tool = (overrides: Partial<AiToolDef> = {}): AiToolDef => ({
 });
 
 describe('real execution lifecycle / fallback fences', () => {
-  it.each([false, true])(
-    'keeps structured submission required only for background tasks (background=%s)',
-    async (background) => {
+  it.each(['chat', 'background', 'state-continuation'])(
+    'keeps the caller submission and discovery boundary for %s',
+    async (mode) => {
+      const background = mode === 'background';
       const context = ctx(async () => undefined);
+      if (mode === 'state-continuation') context.athleteState = {} as never;
       if (background)
         context.backgroundTask = {
           taskType: 'TODAY_SUGGESTION',
@@ -100,7 +102,7 @@ describe('real execution lifecycle / fallback fences', () => {
       const step = latestAgentConfig.prepareStep({ stepNumber: 0, steps: [] });
       expect(step.toolChoice).toBe(expected);
       expect(step.activeTools).toContain('coach_task_submit_result');
-      expect(step.system.includes('# Available skills')).toBe(!background);
+      expect(step.system.includes('# Available skills')).toBe(mode === 'chat');
     },
   );
 
