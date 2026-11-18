@@ -362,6 +362,9 @@ describe('continuous plan runtime / PostgreSQL', () => {
     await expect(denied.prepare(job.id, job.claimToken!)).rejects.toThrow(
       'ACCESS_REVOKED',
     );
+    expect((await denied.status('user', planId)).blockedReason).toBe(
+      'ROLLING_AI_ACCESS_REQUIRED',
+    );
     await prisma.rollingPlanJob.update({
       where: { id: job.id },
       data: { attempts: 5, leaseUntil: new Date(0) },

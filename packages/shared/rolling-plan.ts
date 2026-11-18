@@ -171,5 +171,6 @@ export type RollingPlanAutomationStatus = {
   enabled: boolean;
   revision: number | null;
   hasAuthorization: boolean;
+  blockedReason?: string | null;
   jobs: RollingPlanAutomationJob[];
 };

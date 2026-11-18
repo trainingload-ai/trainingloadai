@@ -841,10 +841,21 @@ export class RollingPlanAutomationService {
       where: { planId },
       orderBy: { revision: 'desc' },
     });
+    let blockedReason: string | null = null;
+    if (latest && !latest.revokedAt) {
+      try {
+        await this.prisma.$transaction((tx) =>
+          this.access.assertAllowed(userId, tx),
+        );
+      } catch {
+        blockedReason = 'ROLLING_AI_ACCESS_REQUIRED';
+      }
+    }
     return {
       enabled: Boolean(latest && !latest.revokedAt),
       revision: latest?.revision ?? null,
       hasAuthorization: Boolean(latest),
+      blockedReason,
       jobs: jobs
         .filter((j) => !(j.receipt as { baseline?: boolean })?.baseline)
         .map((j) => ({
