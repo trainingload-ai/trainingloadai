@@ -7191,5 +7191,38 @@
     "exporting": "正在导出…",
     "exportFailed": "导出快照失败",
     "plannedThrough": "确认后生成至 {date}"
+  },
+  "PlanAutomation": {
+    "title": "自动管理",
+    "enable": "恢复自动管理",
+    "disable": "关闭自动管理",
+    "enabled": "自动管理已开启",
+    "disabled": "自动管理已关闭",
+    "loading": "正在读取自动管理状态…",
+    "loadError": "暂时无法读取自动管理状态。",
+    "kind": {
+      "MONTH": "月度方向",
+      "WEEK": "周课表",
+      "ADJUST": "近期调整"
+    },
+    "state": {
+      "PENDING": "等待生成",
+      "RUNNING": "正在规划",
+      "RETRY": "正在等待自动重试",
+      "APPLIED": "已更新",
+      "BLOCKED": "暂时受阻",
+      "FAILED": "本次未能更新",
+      "CANCELLED": "本次任务已取消"
+    },
+    "updateError": "未能确认操作结果，请以当前读取的状态为准。",
+    "retryLoad": "重新读取状态",
+    "blockedHint": "课表尚未更新，请检查教练设置或与教练沟通。",
+    "pausedHint": "训练计划已暂停；恢复训练后才会自动安排新课表。",
+    "noTasks": "后续课表会按设置自动安排，无需逐次确认。",
+    "needsAuthorization": "请先与教练确认持续计划的自动管理设置。",
+    "lastKnown": "上次读取：{state}",
+    "accessRequired": "请检查 AI 教练功能和数据授权，自动安排暂时无法继续。",
+    "coachSettings": "账户设置",
+    "aiConsent": "AI 数据授权"
   }
 }

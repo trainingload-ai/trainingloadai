@@ -1,6 +1,7 @@
 import { isRollingPlan } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
+import { RollingPlanAutomation } from "@/components/plan/rolling-plan-automation";
 
 import dayjs from "dayjs";
 import {
@@ -95,6 +96,7 @@ export function PlanDetailHeader({
         </div>
         {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanCoverage plan={plan} /></div> : null}
         {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanMonthDirection plan={plan} /></div> : null}
+        {isRollingPlan(plan) ? <div className="mt-3"><RollingPlanAutomation plan={plan} /></div> : null}
         {hasGoalOrDescription ? (
           <div className="mt-2 space-y-3">
             {goalTrim ? (

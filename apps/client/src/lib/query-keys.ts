@@ -15,6 +15,7 @@ export const queryKeys = {
     activityStats: ["activity-stats"] as const,
     plans: ["plans-list"] as const,
     planDetail: ["plan-detail"] as const,
+    planAutomation: ["plan-automation"] as const,
     planWorkoutDetail: ["plan-workout-detail"] as const,
     userProfile: ["userProfile"] as const,
     userZones: ["userZones"] as const,
@@ -101,6 +102,7 @@ export const queryKeys = {
   },
 
   plans: {
+    automation: (planId?: string) => ["plan-automation", planId] as const,
     list: () => ["plans-list"] as const,
     /** plan-workout-activity-link-control 等使用的历史 key */
     legacyPlans: () => ["plans"] as const,

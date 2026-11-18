@@ -6534,5 +6534,38 @@
     "exporting": "エクスポート中…",
     "exportFailed": "エクスポートに失敗しました",
     "plannedThrough": "確認後に {date} まで生成"
+  },
+  "PlanAutomation": {
+    "title": "自動管理",
+    "enable": "自動管理を再開",
+    "disable": "自動管理をオフ",
+    "enabled": "自動管理はオンです",
+    "disabled": "自動管理はオフです",
+    "loading": "自動管理の状態を読み込み中…",
+    "loadError": "自動管理の状態を取得できません。",
+    "updateError": "操作結果を確認できませんでした。現在のサーバーの状態を確認してください。",
+    "retryLoad": "状態を再読み込み",
+    "blockedHint": "メニューはまだ更新されていません。コーチ設定を確認するか、コーチに相談してください。",
+    "pausedHint": "トレーニングは一時停止中です。再開後に自動で新しいメニューを作成します。",
+    "noTasks": "今後のメニューは設定に従って自動で作成され、毎回の確認は不要です。",
+    "needsAuthorization": "まずコーチと継続トレーニングプランの自動管理設定を確認してください。",
+    "lastKnown": "前回の取得：{state}",
+    "accessRequired": "AIコーチの利用権限とデータへの同意を確認してください。自動作成はまだ続行できません。",
+    "coachSettings": "アカウント設定",
+    "aiConsent": "AIデータへの同意",
+    "kind": {
+      "MONTH": "月の方針",
+      "WEEK": "週間メニュー",
+      "ADJUST": "直近の調整"
+    },
+    "state": {
+      "PENDING": "作成待ち",
+      "RUNNING": "計画中",
+      "RETRY": "自動再試行を待機中",
+      "APPLIED": "更新済み",
+      "BLOCKED": "保留中",
+      "FAILED": "更新できませんでした",
+      "CANCELLED": "タスクはキャンセルされました"
+    }
   }
 }

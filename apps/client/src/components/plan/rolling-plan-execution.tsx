@@ -9,6 +9,7 @@ import { PlanCreateLauncher } from "./plan-create-launcher";
 import { RollingPlanCoverage } from "./rolling-plan-coverage";
 import { RollingPlanCalendar } from "./rolling-plan-calendar";
 import { RollingPlanMonthDirection } from "./rolling-plan-month-direction";
+import { RollingPlanAutomation } from "./rolling-plan-automation";
 import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 
 export function RollingPlanExecution({ plan }: { plan: TrainingPlanDetail }) {
@@ -21,6 +22,7 @@ export function RollingPlanExecution({ plan }: { plan: TrainingPlanDetail }) {
         <RollingPlanCoverage plan={plan} />
         {plan.goal ? <p className="text-sm">{plan.goal}</p> : null}
         <RollingPlanMonthDirection plan={plan} />
+        <RollingPlanAutomation plan={plan} />
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"

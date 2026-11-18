@@ -67,6 +67,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: [
+      "src/components/plan/rolling-plan-automation.test.tsx",
       "src/components/plan/rolling-plan-month-direction.test.tsx",
       "src/app/[locale]/(main)/calendar/components/MobileCalendarSessionCards.test.tsx",
       "src/app/[locale]/(main)/calendar/components/MobileCalendarDaySheet.test.tsx",

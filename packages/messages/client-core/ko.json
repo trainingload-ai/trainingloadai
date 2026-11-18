@@ -6534,5 +6534,38 @@
     "exporting": "내보내는 중…",
     "exportFailed": "내보내기 실패",
     "plannedThrough": "확인 후 {date}까지 생성"
+  },
+  "PlanAutomation": {
+    "title": "자동 관리",
+    "enable": "자동 관리 다시 켜기",
+    "disable": "자동 관리 끄기",
+    "enabled": "자동 관리가 켜져 있습니다",
+    "disabled": "자동 관리가 꺼져 있습니다",
+    "loading": "자동 관리 상태를 불러오는 중…",
+    "loadError": "자동 관리 상태를 불러올 수 없습니다.",
+    "updateError": "작업 결과를 확인하지 못했습니다. 현재 서버 상태를 확인하세요.",
+    "retryLoad": "상태 다시 불러오기",
+    "blockedHint": "훈련 일정이 아직 업데이트되지 않았습니다. 코치 설정을 확인하거나 코치와 상담하세요.",
+    "pausedHint": "훈련이 일시 중지되었습니다. 훈련을 재개하면 자동 일정 생성도 계속됩니다.",
+    "noTasks": "앞으로의 훈련은 설정에 따라 자동으로 배정되며 매번 확인할 필요가 없습니다.",
+    "needsAuthorization": "먼저 코치와 지속 훈련 계획의 자동 관리 설정을 확인하세요.",
+    "lastKnown": "마지막 조회: {state}",
+    "accessRequired": "AI 코치 이용 권한과 데이터 동의를 확인하세요. 아직 자동 일정을 계속할 수 없습니다.",
+    "coachSettings": "계정 설정",
+    "aiConsent": "AI 데이터 동의",
+    "kind": {
+      "MONTH": "월간 방향",
+      "WEEK": "주간 훈련 일정",
+      "ADJUST": "예정된 조정"
+    },
+    "state": {
+      "PENDING": "생성 대기 중",
+      "RUNNING": "계획 중",
+      "RETRY": "자동 재시도 대기 중",
+      "APPLIED": "업데이트됨",
+      "BLOCKED": "진행 보류",
+      "FAILED": "업데이트하지 못함",
+      "CANCELLED": "작업 취소됨"
+    }
   }
 }

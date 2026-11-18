@@ -6535,5 +6535,38 @@
     "exporting": "Exportando…",
     "exportFailed": "No se pudo exportar",
     "plannedThrough": "Se generará hasta {date}"
+  },
+  "PlanAutomation": {
+    "title": "Gestión automática",
+    "enable": "Reanudar gestión automática",
+    "disable": "Desactivar gestión automática",
+    "enabled": "La gestión automática está activada",
+    "disabled": "La gestión automática está desactivada",
+    "loading": "Leyendo el estado de la gestión automática…",
+    "loadError": "El estado de la gestión automática no está disponible.",
+    "updateError": "No se pudo confirmar el resultado. Comprueba el estado actual del servidor.",
+    "retryLoad": "Recargar estado",
+    "blockedHint": "El calendario no se ha actualizado. Revisa los ajustes o habla con tu entrenador.",
+    "pausedHint": "El entrenamiento está pausado. La planificación automática continuará cuando lo reanudes.",
+    "noTasks": "Los próximos entrenamientos se organizarán según tus ajustes sin otra confirmación.",
+    "needsAuthorization": "Confirma primero con tu entrenador la gestión automática del plan continuo.",
+    "lastKnown": "Última lectura: {state}",
+    "accessRequired": "Revisa el acceso al entrenador de IA y el consentimiento de datos. La planificación automática aún no puede continuar.",
+    "coachSettings": "Ajustes de cuenta",
+    "aiConsent": "Consentimiento de datos de IA",
+    "kind": {
+      "MONTH": "Objetivo mensual",
+      "WEEK": "Calendario semanal",
+      "ADJUST": "Próximos ajustes"
+    },
+    "state": {
+      "PENDING": "Pendiente de generar",
+      "RUNNING": "Planificando",
+      "RETRY": "Esperando reintento automático",
+      "APPLIED": "Actualizado",
+      "BLOCKED": "Bloqueado",
+      "FAILED": "No se pudo actualizar",
+      "CANCELLED": "Tarea cancelada"
+    }
   }
 }

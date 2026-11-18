@@ -2,6 +2,7 @@
 import { isRollingPlan, isPlanDateNotGenerated } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
+import { RollingPlanAutomation } from "@/components/plan/rolling-plan-automation";
 
 import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 
@@ -312,6 +313,7 @@ export function MobilePlanDetailContent({
       </section>
 
       <RollingPlanMonthDirection plan={plan} />
+      <RollingPlanAutomation plan={plan} />
 
       <section className="grid grid-cols-2 gap-3">
         <PlanMetric

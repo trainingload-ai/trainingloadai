@@ -6535,5 +6535,38 @@
     "exporting": "Export…",
     "exportFailed": "Export fehlgeschlagen",
     "plannedThrough": "Wird bis {date} erstellt"
+  },
+  "PlanAutomation": {
+    "title": "Automatische Planung",
+    "enable": "Automatische Planung fortsetzen",
+    "disable": "Automatische Planung ausschalten",
+    "enabled": "Automatische Planung ist aktiviert",
+    "disabled": "Automatische Planung ist ausgeschaltet",
+    "loading": "Status der automatischen Planung wird geladen…",
+    "loadError": "Der Status der automatischen Planung ist nicht verfügbar.",
+    "updateError": "Das Ergebnis konnte nicht bestätigt werden. Prüfe den aktuellen Serverstatus.",
+    "retryLoad": "Status neu laden",
+    "blockedHint": "Der Trainingsplan wurde nicht aktualisiert. Prüfe die Coach-Einstellungen oder sprich mit deinem Coach.",
+    "pausedHint": "Das Training ist pausiert. Die automatische Planung geht weiter, sobald du das Training fortsetzt.",
+    "noTasks": "Weitere Einheiten werden gemäß deinen Einstellungen ohne erneute Bestätigung geplant.",
+    "needsAuthorization": "Bestätige zuerst mit deinem Coach die automatische Verwaltung des fortlaufenden Plans.",
+    "lastKnown": "Zuletzt gelesen: {state}",
+    "accessRequired": "Prüfe den KI-Coach-Zugang und die Datenfreigabe. Die automatische Planung kann noch nicht fortgesetzt werden.",
+    "coachSettings": "Kontoeinstellungen",
+    "aiConsent": "KI-Datenfreigabe",
+    "kind": {
+      "MONTH": "Monatliche Ausrichtung",
+      "WEEK": "Wochenplan",
+      "ADJUST": "Anstehende Anpassungen"
+    },
+    "state": {
+      "PENDING": "Wartet auf Erstellung",
+      "RUNNING": "Wird geplant",
+      "RETRY": "Wartet auf automatischen Neuversuch",
+      "APPLIED": "Aktualisiert",
+      "BLOCKED": "Blockiert",
+      "FAILED": "Aktualisierung fehlgeschlagen",
+      "CANCELLED": "Aufgabe abgebrochen"
+    }
   }
 }

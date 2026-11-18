@@ -7192,5 +7192,38 @@
     "exporting": "Exporting…",
     "exportFailed": "Could not export the snapshot",
     "plannedThrough": "Will generate through {date}"
+  },
+  "PlanAutomation": {
+    "title": "Automatic management",
+    "enable": "Resume automatic management",
+    "disable": "Turn off automatic management",
+    "enabled": "Automatic management is on",
+    "disabled": "Automatic management is off",
+    "loading": "Reading automatic management status…",
+    "loadError": "Automatic management status is unavailable.",
+    "updateError": "The result could not be confirmed. Check the current server state.",
+    "retryLoad": "Reload status",
+    "blockedHint": "The schedule has not been updated. Check coach settings or talk with your coach.",
+    "pausedHint": "Training is paused. Automatic scheduling continues after you resume training.",
+    "noTasks": "Future workouts will be arranged according to your settings without another confirmation.",
+    "needsAuthorization": "Confirm the continuous plan’s automatic management settings with your coach first.",
+    "lastKnown": "Last read: {state}",
+    "accessRequired": "Check AI coach access and data consent. Automatic scheduling cannot continue yet.",
+    "coachSettings": "Account settings",
+    "aiConsent": "AI data consent",
+    "kind": {
+      "MONTH": "Monthly direction",
+      "WEEK": "Weekly schedule",
+      "ADJUST": "Upcoming adjustments"
+    },
+    "state": {
+      "PENDING": "Waiting to generate",
+      "RUNNING": "Planning",
+      "RETRY": "Waiting for automatic retry",
+      "APPLIED": "Updated",
+      "BLOCKED": "Blocked",
+      "FAILED": "Update unsuccessful",
+      "CANCELLED": "Task cancelled"
+    }
   }
 }
