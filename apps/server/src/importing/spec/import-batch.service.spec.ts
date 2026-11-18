@@ -14,6 +14,10 @@ describe('ImportBatchService', () => {
 
   function createService() {
     const prisma = {
+      $queryRaw: jest.fn(async () => []),
+      $transaction: jest.fn(async (work: (tx: unknown) => Promise<unknown>) =>
+        work(prisma),
+      ),
       t_user: {
         findUnique: jest.fn(async () => ({
           accountDeletionRequestedAt: null,
@@ -94,6 +98,23 @@ describe('ImportBatchService', () => {
       }),
     ).rejects.toThrow('ACCOUNT_DELETION_IN_PROGRESS');
     expect(prisma.importBatchJob.create).not.toHaveBeenCalled();
+  });
+
+  it('exposes only the safe ownership-conflict classification and localized message', async () => {
+    const { prisma, service } = createService();
+    (prisma.importItemJob.findMany as jest.Mock).mockResolvedValueOnce([
+      {
+        id: 'item',
+        status: 'DEAD',
+        lastErrorCode: 'IMPORT_IDENTITY_CONFLICT',
+        lastError: 'private upstream identity',
+      },
+    ] as never);
+    const result = await service.getBatchItems('batch-1', 'user-1');
+    expect(result.items[0]).toMatchObject({
+      lastErrorCode: 'IMPORT_IDENTITY_CONFLICT',
+      lastError: 'common.error.import_identity_conflict',
+    });
   });
 
   it('does not expose persisted worker diagnostics or internal error codes', async () => {
@@ -664,5 +685,30 @@ describe('ImportBatchService', () => {
     } finally {
       logSpy.mockRestore();
     }
+  });
+  it('separates identical Intervals activity IDs from different linked accounts', async () => {
+    const { service, prisma } = createService();
+    prisma.importItemJob.create.mockResolvedValue({ id: 'item' });
+    prisma.userPostProcessJob.upsert.mockResolvedValue({ id: 'post' });
+    prisma.importBatchJob.create.mockResolvedValue({
+      id: 'batch',
+      userId: 'user-1',
+    });
+    for (const athleteId of ['athlete-A', 'athlete-B'])
+      await service.createIntervalsIcuImportBatch({
+        userId: 'user-1',
+        connectionId: 'connection',
+        authorization: {
+          connectionId: 'connection',
+          userId: 'user-1',
+          athleteId,
+          revision: 'grant',
+        },
+        activities: [{ id: 'same-remote-id' }],
+      });
+    const calls = prisma.importSourceObject.upsert.mock.calls as any[];
+    expect(calls[0][0].create.sourceUid).not.toBe(calls[1][0].create.sourceUid);
+    expect(calls[0][0].create.accountRef).toBe('athlete-A');
+    expect(calls[1][0].create.accountRef).toBe('athlete-B');
   });
 });

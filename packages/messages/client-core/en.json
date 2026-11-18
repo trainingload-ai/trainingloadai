@@ -1495,7 +1495,9 @@
       "monthlyReview": "Monthly review",
       "planReview": "Plan review",
       "saved": "Review settings saved",
-      "saveFailed": "Failed to save review settings"
+      "saveFailed": "Failed to save review settings",
+      "athleteState": "Automatic athlete state assessment",
+      "athleteStateDetail": "Update coaching state when relevant training or recovery facts change. Automatic AI costs are covered by the platform."
     },
     "dataExport": {
       "title": "Export all data",
@@ -1656,7 +1658,19 @@
       "replaceKeyConfirmTitle": "Replace API key?",
       "replaceKeyConfirmDescription": "This API key differs from the saved key and may belong to another account. Saving will keep imported history and use the new key for future sync.",
       "replaceKeyCancel": "Cancel",
-      "replaceKeyConfirmAction": "Replace key"
+      "replaceKeyConfirmAction": "Replace key",
+      "lastDiscovery": "Last activity discovery",
+      "activityImport": "Latest activity import",
+      "importCounts": "{success}/{total} imported, {failed} failed, {skipped} skipped",
+      "importState": {
+        "QUEUED": "Queued",
+        "RUNNING": "Importing",
+        "POST_PROCESSING": "Post-processing",
+        "COMPLETED": "Completed",
+        "PARTIAL_FAILED": "Partially failed",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      }
     }
   },
   "UserProfile": {
@@ -5546,7 +5560,7 @@
     },
     "mirror": {
       "untitled": "Activity awaiting source sync",
-      "discoveredVia": "Discovered via Intervals.icu",
+      "discoveredVia": "Discovered via {provider}",
       "syncing": "The source activity is being fetched.",
       "connectionRequired": "The current integration cannot provide the complete activity. Check the source connection.",
       "importDisabled": "The source is connected, but automatic activity import is disabled.",
@@ -5560,7 +5574,9 @@
       "connectSource": "Connect source",
       "reauthorizeSource": "Reauthorize source",
       "enableSourceImport": "Enable source import",
-      "checkSourceConnection": "Check source connection"
+      "checkSourceConnection": "Check source connection",
+      "dataUnavailable": "Only the activity summary is available; detailed records could not be retrieved.",
+      "why": "Why?"
     }
   },
   "V2ActivitiesStatsPage": {

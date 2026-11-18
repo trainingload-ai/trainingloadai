@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { $Enums } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AiService } from '@/api/ai/ai.service';
-import { AiUsageService } from '@/api/ai/ai-usage.service';
 import { CoachBranchingService } from '@/api/ai/coach-branching.service';
 import { CoachContextService } from '@/api/plan/coach-context.service';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
@@ -27,6 +26,7 @@ import { CoachReviewAdjustmentService } from './coach-review-adjustment.service'
 import {
   ReviewModelCallGuard,
   isReviewModelDeferredError,
+  isReviewConsentRequiredError,
   reviewUsageFailureReason,
 } from './review-model-call-guard';
 import {
@@ -42,12 +42,14 @@ import { adjustmentDraftToWorkoutUpdatePayload } from '@shared/coach-adjustment-
 import type { PlanWorkoutAdjustmentDraftData } from '@shared/ai-coach-schema';
 import { PLAN_REVIEW_JUDGMENT_PROMPT_VERSION } from '@/api/ai/core/prompt-contracts/plan-review-judgment.contract';
 import { emitAthleteStateReassessRequested } from '@/athlete-state/athlete-state.events';
+import { AiDataConsentService } from '@/ai-data-consent/ai-data-consent.service';
 
 export type PeriodReviewRuntimeResult = {
   skipped: boolean;
   reason:
     | 'not_period'
     | 'no_active_plan'
+    | 'ai_data_consent_required'
     | 'duplicate'
     | 'keep'
     | 'guidance'
@@ -66,13 +68,13 @@ export class CoachPeriodReviewRuntimeService {
     private readonly coachContext: CoachContextService,
     private readonly branching: CoachBranchingService,
     private readonly aiService: AiService,
-    private readonly aiUsage: AiUsageService,
     private readonly userService: UserService,
     private readonly i18n: I18nService,
     private readonly planQuery: PlanQueryService,
     private readonly reviewContext: CoachReviewContextService,
     private readonly adjustments: CoachReviewAdjustmentService,
     private readonly modelGuard: ReviewModelCallGuard,
+    private readonly aiDataConsent: AiDataConsentService,
     @Optional() private readonly events?: EventEmitter2,
   ) {}
 
@@ -83,6 +85,28 @@ export class CoachPeriodReviewRuntimeService {
     periodStart: Date;
     periodEnd: Date;
   }): Promise<PeriodReviewRuntimeResult> {
+    if (args.type === 'DAILY') return { skipped: true, reason: 'not_period' };
+    if (!(await this.aiDataConsent.isGranted(args.userId))) {
+      return this.skipForConsent();
+    }
+    try {
+      return await this.runConsentedJob(args);
+    } catch (error) {
+      if (isReviewConsentRequiredError(error)) return this.skipForConsent();
+      throw error;
+    }
+  }
+
+  private skipForConsent(): PeriodReviewRuntimeResult {
+    this.logger.debug(
+      '[period-runtime-v4] skipped code=AI_DATA_CONSENT_REQUIRED',
+    );
+    return { skipped: true, reason: 'ai_data_consent_required' };
+  }
+
+  private async runConsentedJob(
+    args: Parameters<CoachPeriodReviewRuntimeService['runForJob']>[0],
+  ): Promise<PeriodReviewRuntimeResult> {
     const scale = scaleOf(args.type);
     if (!scale) return { skipped: true, reason: 'not_period' };
     const timezone = await this.userService.getPreferredTimezone(args.userId);
@@ -126,12 +150,6 @@ export class CoachPeriodReviewRuntimeService {
     ) {
       return { skipped: true, reason: 'duplicate' };
     }
-    await this.supersedeStaleProposals({
-      userId: args.userId,
-      contextId: execution.contextId,
-      factHash: context.reviewFactHash,
-      openReason,
-    });
     if (
       await this.findPendingProposal({
         userId: args.userId,
@@ -154,6 +172,7 @@ export class CoachPeriodReviewRuntimeService {
         fallbackCopy,
       }),
     });
+    await this.aiDataConsent.assertGranted(args.userId);
     let finalJudgment = judgment;
     let draft: PlanWorkoutAdjustmentDraftData | null = null;
     let composition: {
@@ -184,6 +203,13 @@ export class CoachPeriodReviewRuntimeService {
       }
     }
 
+    await this.aiDataConsent.assertGranted(args.userId);
+    await this.supersedeStaleProposals({
+      userId: args.userId,
+      contextId: execution.contextId,
+      factHash: context.reviewFactHash,
+      openReason,
+    });
     let decisionId: string | null = null;
     let branchId: string | null = null;
     const decisionType = decisionTypeForAction(finalJudgment.action);
@@ -277,11 +303,7 @@ export class CoachPeriodReviewRuntimeService {
         composition,
       },
     });
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: args.userId,
-      triggerType: `REVIEW_${scale.toUpperCase()}`,
-      triggerRef: args.digestId,
-    });
+
     return finalJudgment.decision === 'ADJUST'
       ? {
           skipped: false,
@@ -329,21 +351,7 @@ export class CoachPeriodReviewRuntimeService {
           }),
         { failureReason: reviewUsageFailureReason },
       );
-      if (!result.replayed) {
-        await this.aiUsage.recordUsageEvent({
-          userId: args.userId,
-          operationId: result.operationId,
-          callKey: `${result.operationId}:background-aggregate`,
-          kind:
-            args.scale === 'weekly'
-              ? $Enums.AiUsageKind.REVIEW_WEEKLY
-              : $Enums.AiUsageKind.REVIEW_MONTHLY,
-          provider: result.provider,
-          model: result.model,
-          usage: result.usage,
-          sid: `coach-${args.scale}-review-runtime-v4`,
-        });
-      }
+
       return {
         decision: result.decision,
         presentation: result.presentation,

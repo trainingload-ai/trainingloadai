@@ -60,7 +60,8 @@ export function createSiteSecurityHeaders({
     connectSources.join(" "),
     "worker-src 'self' blob:",
     "manifest-src 'self'",
-    "upgrade-insecure-requests",
+    // Safari upgrades localhost assets too, which breaks the HTTP dev server.
+    ...(allowDevelopmentEval ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
 
   return [

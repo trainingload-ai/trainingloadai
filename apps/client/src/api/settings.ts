@@ -12,6 +12,7 @@ export interface UserSettings {
   TIME_FORMAT?: string;
   FITNESS_STATUS_LAYOUT?: string;
   AI_REVIEW_MODE?: string;
+  ATHLETE_STATE_AUTO_ENABLED?: string;
 }
 
 export const PUBLIC_DEMO_USER_SETTINGS: Readonly<UserSettings> = {
@@ -688,3 +689,10 @@ export async function getUserCriticalPowerHistory(
     `/users/cp?${params.toString()}`,
   );
 }
+
+export const athleteStateAutoEnabled = (value?: string) =>
+  !["false", "0", "no"].includes(
+    String(value ?? "")
+      .trim()
+      .toLowerCase(),
+  );

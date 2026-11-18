@@ -247,7 +247,8 @@ export default async function Page(props: {
 
   return (
     <DocsPage
-      toc={page.data.toc}
+      toc={page.data.toc.filter((item) => item.depth > 1)}
+      container={{ id: "main-content", tabIndex: -1 }}
       full={page.data.full}
       tableOfContentPopover={{
         component: <DocsTableOfContentsPopover title={page.data.title} />,
@@ -263,7 +264,7 @@ export default async function Page(props: {
         {page.data.description}
       </DocsDescription>
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-6 pt-2">
-        <LLMCopyButton markdownUrl={markdownUrl} />
+        <LLMCopyButton key={markdownUrl} markdownUrl={markdownUrl} />
         <ViewOptions markdownUrl={`${getSiteUrl()}${markdownUrl}`} />
       </div>
       <DocsBody className="docs-prose">

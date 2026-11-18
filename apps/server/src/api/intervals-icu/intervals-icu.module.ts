@@ -15,6 +15,7 @@ import { IntervalsIcuWebhookController } from './intervals-icu-webhook.controlle
 import { IntervalsIcuScheduledSyncTask } from './intervals-icu-scheduled-sync.task';
 import { IntervalsIcuExportService } from './intervals-icu-export.service';
 import { IntervalsIcuPlanSyncService } from './intervals-icu-plan-sync.service';
+import { IntervalsIcuPlanSyncLock } from './intervals-icu-plan-sync-lock.service';
 import { IntervalsIcuService } from './intervals-icu.service';
 import { IntervalsIcuWebhookService } from './intervals-icu-webhook.service';
 import { SportCatalogModule } from '@/sports/sport-catalog.module';
@@ -48,6 +49,7 @@ import { SyncModule } from '@/sync/sync.module';
     IntervalsIcuScheduledSyncTask,
     IntervalsIcuExportService,
     IntervalsIcuPlanSyncService,
+    IntervalsIcuPlanSyncLock,
   ],
   exports: [
     IntervalsIcuService,

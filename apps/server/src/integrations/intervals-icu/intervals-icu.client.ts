@@ -130,7 +130,9 @@ export interface IntervalsIcuWellness {
   updated?: string | null;
   weight?: number | null;
   restingHR?: number | null;
+  /** rMSSD in milliseconds; distinct from SDNN. */
   hrv?: number | null;
+  /** SDNN in milliseconds. */
   hrvSDNN?: number | null;
   sleepSecs?: number | null;
   sleepScore?: number | null;
@@ -142,6 +144,8 @@ export interface IntervalsIcuWellness {
   mood?: number | null;
   readiness?: number | null;
   sportInfo?: IntervalsIcuSportInfo[] | null;
+  tempWeight?: boolean;
+  tempRestingHR?: boolean;
 }
 
 /** OpenAPI `SportInfo`（嵌在 Wellness.sportInfo）。 */
@@ -504,6 +508,25 @@ export class IntervalsIcuClient {
       'PUT',
       `/athlete/0/events/${encodeURIComponent(String(eventId))}`,
       event,
+    );
+  }
+
+  /** Read one event independently of its current calendar date. */
+  getEvent(credential: IntervalsIcuApiCredential, eventId: string | number) {
+    return this.getJson<IntervalsIcuEvent>(
+      credential,
+      `/athlete/0/events/${encodeURIComponent(String(eventId))}`,
+    );
+  }
+
+  /** Delete only this event, never other events added at the same time. */
+  deleteEvent(credential: IntervalsIcuApiCredential, eventId: string | number) {
+    return this.sendJson<unknown>(
+      credential,
+      'DELETE',
+      `/athlete/0/events/${encodeURIComponent(String(eventId))}`,
+      undefined,
+      { others: false },
     );
   }
 

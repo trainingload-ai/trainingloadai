@@ -1,4 +1,11 @@
 "use client";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
+
 import { InputSource } from "@/components/calculators/input-source";
 
 import {
@@ -11,7 +18,7 @@ import {
 } from "react";
 import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,7 +28,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TrackedLink } from "@/components/TrackedLink";
-import { cn } from "@/lib/cn";
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -209,12 +215,28 @@ export function HeartRateZonesCalculatorClient({
   if (model === "FRIEL" && lthr != null && (lthr < 100 || lthr > 220)) {
     softWarnings.push(t("warnings.lthr"));
   }
+  const committed = useCommittedFields();
+  const maxInvalid =
+    maxHrText.trim() !== "" &&
+    maxHr == null &&
+    committed.isCommitted("max", maxHrText);
+  const restInvalid =
+    restHrText.trim() !== "" &&
+    restHr == null &&
+    committed.isCommitted("rest", restHrText);
+  const lthrInvalid =
+    lthrText.trim() !== "" &&
+    lthr == null &&
+    committed.isCommitted("lthr", lthrText);
   const reserveBlocked =
     model === "KARVONEN" && maxHr != null && restHr != null && restHr >= maxHr;
+  const showReserveBlocked =
+    reserveBlocked &&
+    committed.isCommitted("reserve", `${maxHrText}:${restHrText}`);
   const invalidField =
-    (model !== "FRIEL" && maxHrText.trim() !== "" && maxHr == null) ||
-    (model === "KARVONEN" && restHrText.trim() !== "" && restHr == null) ||
-    (model === "FRIEL" && lthrText.trim() !== "" && lthr == null);
+    (model !== "FRIEL" && maxInvalid) ||
+    (model === "KARVONEN" && restInvalid) ||
+    (model === "FRIEL" && lthrInvalid);
 
   const onShare = async () => {
     if (!zones) return;
@@ -274,16 +296,30 @@ export function HeartRateZonesCalculatorClient({
     <div className={styles.tool}>
       <div className={styles.hero}>
         {hero}
-        <section id="calculator" className={styles.board}>
+        <section
+          id="calculator"
+          className={styles.board}
+          onBlurCapture={() =>
+            committed.commit("reserve", `${maxHrText}:${restHrText}`)
+          }
+        >
+          <FieldErrorAnnouncement
+            message={[
+              invalidField ? t("warnings.invalid") : "",
+              showReserveBlocked ? t("warnings.reserve") : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{tPage("title")}</h2>
-            <button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              className={styles.textButton}
               onClick={loadExample}
             >
               {t("example.button")}
-            </button>
+            </ToolActionButton>
           </div>
           <p className={styles.boardLead}>{t("panel.subtitle")}</p>
           <div className={styles.fields}>
@@ -299,150 +335,167 @@ export function HeartRateZonesCalculatorClient({
                   setBaseline(null);
                 }
               }}
-            />
+            >
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="hr-zone-model">
+                  {t("inputs.model.label")}
+                </label>
+                <Select value={model} onValueChange={chooseModel}>
+                  <SelectTrigger id="hr-zone-model" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="KARVONEN">
+                      {t("inputs.model.options.karvonen")}
+                    </SelectItem>
+                    <SelectItem value="FRIEL">
+                      {t("inputs.model.options.friel")}
+                    </SelectItem>
+                    <SelectItem value="MHR">
+                      {t("inputs.model.options.mhr")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className={styles.useWhen}>
+                  {tPage(`sections.models.useWhen.${slug}`)}
+                </p>
+              </div>
 
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="hr-zone-model">
-                {t("inputs.model.label")}
-              </label>
-              <Select value={model} onValueChange={chooseModel}>
-                <SelectTrigger id="hr-zone-model" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="KARVONEN">
-                    {t("inputs.model.options.karvonen")}
-                  </SelectItem>
-                  <SelectItem value="FRIEL">
-                    {t("inputs.model.options.friel")}
-                  </SelectItem>
-                  <SelectItem value="MHR">
-                    {t("inputs.model.options.mhr")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className={styles.useWhen}>
-                {tPage(`sections.models.useWhen.${slug}`)}
-              </p>
-            </div>
+              {source === "file" ? (
+                <HeartRateFileInput
+                  onResult={onFileResult}
+                  onReset={onFileReset}
+                />
+              ) : null}
 
-            {source === "file" ? (
-              <HeartRateFileInput
-                onResult={onFileResult}
-                onReset={onFileReset}
-              />
-            ) : null}
-
-            {model !== "FRIEL" ? (
-              <div className={styles.fieldGrid}>
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="hr-max">
-                    {t("inputs.maxHr.label")}
-                  </label>
-                  <Input
-                    id="hr-max"
-                    inputMode="decimal"
-                    value={maxHrText}
-                    onChange={(event) => editMax(event.target.value)}
-                    aria-invalid={maxHrText.trim() !== "" && maxHr == null}
-                  />
-                </div>
-                {model === "KARVONEN" ? (
+              {model !== "FRIEL" ? (
+                <div className={styles.fieldGrid}>
                   <div className={styles.field}>
-                    <label className={styles.label} htmlFor="hr-rest">
-                      {t("inputs.restHr.label")}
+                    <label className={styles.label} htmlFor="hr-max">
+                      {t("inputs.maxHr.label")}
                     </label>
                     <Input
-                      id="hr-rest"
-                      inputMode="decimal"
-                      value={restHrText}
-                      onChange={(event) => editRest(event.target.value)}
-                      aria-invalid={
-                        (restHrText.trim() !== "" && restHr == null) ||
-                        reserveBlocked
+                      id="hr-max"
+                      onBlur={() => committed.commit("max", maxHrText)}
+                      aria-describedby={
+                        maxInvalid ? "hr-input-error" : undefined
                       }
+                      inputMode="decimal"
+                      value={maxHrText}
+                      onChange={(event) => editMax(event.target.value)}
+                      aria-invalid={maxInvalid}
                     />
                   </div>
-                ) : null}
-              </div>
-            ) : (
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="hr-lthr">
-                  {t("inputs.lthr.label")}
-                </label>
-                <Input
-                  id="hr-lthr"
-                  inputMode="decimal"
-                  value={lthrText}
-                  onChange={(event) => editLthr(event.target.value)}
-                  aria-invalid={lthrText.trim() !== "" && lthr == null}
-                />
-              </div>
-            )}
+                  {model === "KARVONEN" ? (
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="hr-rest">
+                        {t("inputs.restHr.label")}
+                      </label>
+                      <Input
+                        id="hr-rest"
+                        onBlur={() => committed.commit("rest", restHrText)}
+                        aria-describedby={
+                          showReserveBlocked
+                            ? "hr-reserve-error"
+                            : restInvalid
+                              ? "hr-input-error"
+                              : undefined
+                        }
+                        inputMode="decimal"
+                        value={restHrText}
+                        onChange={(event) => editRest(event.target.value)}
+                        aria-invalid={restInvalid || showReserveBlocked}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="hr-lthr">
+                    {t("inputs.lthr.label")}
+                  </label>
+                  <Input
+                    id="hr-lthr"
+                    onBlur={() => committed.commit("lthr", lthrText)}
+                    aria-describedby={
+                      lthrInvalid ? "hr-input-error" : undefined
+                    }
+                    inputMode="decimal"
+                    value={lthrText}
+                    onChange={(event) => editLthr(event.target.value)}
+                    aria-invalid={lthrInvalid}
+                  />
+                </div>
+              )}
 
-            {fileEstimate ? (
-              <div className={styles.compare} role="status">
-                <p>{t("compare.from", { filename: fileEstimate.filename })}</p>
-                {fileEstimate.lthr != null ? (
-                  <>
-                    <p>{t("compare.lthr", { value: fileEstimate.lthr })}</p>
-                    <p>
-                      {previousLthr == null
-                        ? t("compare.noPrior")
-                        : fileEstimate.lthr === previousLthr
-                          ? t("compare.deltaSame", { previous: previousLthr })
-                          : fileEstimate.lthr > previousLthr
-                            ? t("compare.deltaUp", {
-                                delta: formatDelta(
-                                  fileEstimate.lthr - previousLthr,
-                                ),
-                                previous: previousLthr,
-                              })
-                            : t("compare.deltaDown", {
-                                delta: formatDelta(
-                                  previousLthr - fileEstimate.lthr,
-                                ),
-                                previous: previousLthr,
-                              })}
-                    </p>
-                  </>
-                ) : null}
-                {fileEstimate.maxHr != null ? (
-                  <>
-                    <p>{t("compare.peak", { value: fileEstimate.maxHr })}</p>
-                    {fileEstimate.maxHrInstantaneous ? null : (
-                      <p>{t("compare.peakCoarse")}</p>
-                    )}
-                    {maxNote === "may_be_low" && previousMax != null ? (
-                      <p>{t("compare.peakLow", { previous: previousMax })}</p>
-                    ) : null}
-                    {maxNote === "not_a_decline" && previousMax != null ? (
+              {fileEstimate ? (
+                <div className={styles.compare} role="status">
+                  <p>
+                    {t("compare.from", { filename: fileEstimate.filename })}
+                  </p>
+                  {fileEstimate.lthr != null ? (
+                    <>
+                      <p>{t("compare.lthr", { value: fileEstimate.lthr })}</p>
                       <p>
-                        {t("compare.peakNotDecline", { previous: previousMax })}
+                        {previousLthr == null
+                          ? t("compare.noPrior")
+                          : fileEstimate.lthr === previousLthr
+                            ? t("compare.deltaSame", { previous: previousLthr })
+                            : fileEstimate.lthr > previousLthr
+                              ? t("compare.deltaUp", {
+                                  delta: formatDelta(
+                                    fileEstimate.lthr - previousLthr,
+                                  ),
+                                  previous: previousLthr,
+                                })
+                              : t("compare.deltaDown", {
+                                  delta: formatDelta(
+                                    previousLthr - fileEstimate.lthr,
+                                  ),
+                                  previous: previousLthr,
+                                })}
                       </p>
-                    ) : null}
-                  </>
-                ) : null}
-              </div>
-            ) : null}
+                    </>
+                  ) : null}
+                  {fileEstimate.maxHr != null ? (
+                    <>
+                      <p>{t("compare.peak", { value: fileEstimate.maxHr })}</p>
+                      {fileEstimate.maxHrInstantaneous ? null : (
+                        <p>{t("compare.peakCoarse")}</p>
+                      )}
+                      {maxNote === "may_be_low" && previousMax != null ? (
+                        <p>{t("compare.peakLow", { previous: previousMax })}</p>
+                      ) : null}
+                      {maxNote === "not_a_decline" && previousMax != null ? (
+                        <p>
+                          {t("compare.peakNotDecline", {
+                            previous: previousMax,
+                          })}
+                        </p>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
 
-            {invalidField ? (
-              <p role="alert" className={styles.alert}>
-                {t("warnings.invalid")}
-              </p>
-            ) : null}
-            {reserveBlocked ? (
-              <p role="alert" className={styles.alert}>
-                {t("warnings.reserve")}
-              </p>
-            ) : null}
-            {softWarnings.length > 0 ? (
-              <div role="status" className={styles.note}>
-                {softWarnings.map((warning) => (
-                  <p key={warning}>{warning}</p>
-                ))}
-              </div>
-            ) : null}
+              {invalidField ? (
+                <p id="hr-input-error" className={styles.alert}>
+                  {t("warnings.invalid")}
+                </p>
+              ) : null}
+              {showReserveBlocked ? (
+                <p id="hr-reserve-error" className={styles.alert}>
+                  {t("warnings.reserve")}
+                </p>
+              ) : null}
+              {softWarnings.length > 0 ? (
+                <div role="status" className={styles.note}>
+                  {softWarnings.map((warning) => (
+                    <p key={warning}>{warning}</p>
+                  ))}
+                </div>
+              ) : null}
+            </InputSource>
           </div>
         </section>
       </div>
@@ -531,38 +584,41 @@ export function HeartRateZonesCalculatorClient({
           </div>
         </section>
 
-        <div className={styles.posterActions}>
-          <Select value={model} onValueChange={chooseModel}>
-            <SelectTrigger
-              id="hr-zone-model-card"
-              aria-label={t("scorecard.switch")}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              {t("scorecard.switch")}
-            </SelectTrigger>
-            <SelectContent position="popper" align="start">
-              <SelectItem value="KARVONEN">
-                {t("inputs.model.options.karvonen")}
-              </SelectItem>
-              <SelectItem value="FRIEL">
-                {t("inputs.model.options.friel")}
-              </SelectItem>
-              <SelectItem value="MHR">
-                {t("inputs.model.options.mhr")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <TrackedLink
-            href={zone2Href}
-            className={cn(buttonVariants({ size: "lg" }), styles.primaryAction)}
-            eventName="related_tool_clicked"
-            eventProperties={{
-              href: zone2Href,
-              location: "heart_rate_zones_scorecard",
-            }}
-          >
-            {t("scorecard.view")}
-          </TrackedLink>
+        <ToolResultActions
+          leading={
+            <>
+              <Select value={model} onValueChange={chooseModel}>
+                <SelectTrigger
+                  id="hr-zone-model-card"
+                  aria-label={t("scorecard.switch")}
+                >
+                  {t("scorecard.switch")}
+                </SelectTrigger>
+                <SelectContent position="popper" align="start">
+                  <SelectItem value="KARVONEN">
+                    {t("inputs.model.options.karvonen")}
+                  </SelectItem>
+                  <SelectItem value="FRIEL">
+                    {t("inputs.model.options.friel")}
+                  </SelectItem>
+                  <SelectItem value="MHR">
+                    {t("inputs.model.options.mhr")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <TrackedLink
+                href={zone2Href}
+                eventName="related_tool_clicked"
+                eventProperties={{
+                  href: zone2Href,
+                  location: "heart_rate_zones_scorecard",
+                }}
+              >
+                {t("scorecard.view")}
+              </TrackedLink>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -583,7 +639,7 @@ export function HeartRateZonesCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {shareCopied ? t("scorecard.shareCopied") : t("scorecard.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p role="alert" className={styles.alert}>
             {shareError}

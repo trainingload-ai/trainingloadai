@@ -127,11 +127,26 @@ test("CI password stays in stdin and cleanup removes only its own temporary cred
       commands.push({ command, args, input: options?.input });
       if (args[0] === "list-keychains" && !args.includes("-s"))
         return '"/original/login.keychain-db"\n';
+      if (args[0] === "default-keychain" && !args.includes("-s"))
+        return '"/original/default.keychain-db"\n';
       if (args[0] === "create-keychain")
         writeFileSync(args.at(-1), "temporary fixture");
       return "";
     };
     importMacCloudCredentials(env, run);
+    assert.deepEqual(
+      commands.find(
+        (item) =>
+          item.args[0] === "default-keychain" && item.args.includes("-s"),
+      ).args,
+      [
+        "default-keychain",
+        "-d",
+        "user",
+        "-s",
+        join(temporary, "trainingload-desktop-signing/signing.keychain-db"),
+      ],
+    );
     const notary = commands.find((item) => item.command === "xcrun");
     assert.equal(notary.input, env.DESKTOP_MAC_APP_PASSWORD + "\n");
     assert.ok(
@@ -148,6 +163,13 @@ test("CI password stays in stdin and cleanup removes only its own temporary cred
     ])
       assert.ok(!exported.includes(secret));
     cleanupMacCloudCredentials(env, run);
+    assert.deepEqual(commands.at(-3).args, [
+      "default-keychain",
+      "-d",
+      "user",
+      "-s",
+      "/original/default.keychain-db",
+    ]);
     assert.deepEqual(commands.at(-2).args, [
       "list-keychains",
       "-d",

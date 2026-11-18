@@ -1,3 +1,4 @@
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { Module } from '@nestjs/common';
 import { UsersController } from './user.controller';
 import { PrismaModule } from '../../prisma/prisma.module';
@@ -21,6 +22,7 @@ import { RoutesDataModule } from '../../routes/routes-data.module';
 
 @Module({
   imports: [
+    AthleteStateUpdatesModule,
     StorageModule,
     TimezoneModule,
     SyncModule,

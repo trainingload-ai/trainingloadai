@@ -93,7 +93,7 @@ describe("lactate threshold calculator messages", () => {
     expect(en.lactateThresholdCalculator.page.heroProduct.body).toMatch(
       /iPhone/,
     );
-    expect(en.lactateThresholdCalculator.page.heroProduct.body).toMatch(
+    expect(en.lactateThresholdCalculator.page.heroProduct.body).not.toMatch(
       /Apple Watch/,
     );
   });

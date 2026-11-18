@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -226,7 +228,7 @@ function HeroBudgetCard({
   exhausted?: string;
 }) {
   return (
-    <aside className={styles.heroBudget}>
+    <div className={styles.heroBudget}>
       <div className={styles.heroBudgetHeader}>
         <span>{title}</span>
         <span className={styles.statusDot} />
@@ -245,7 +247,7 @@ function HeroBudgetCard({
           </p>
         ) : null}
       </div>
-    </aside>
+    </div>
   );
 }
 
@@ -598,7 +600,7 @@ export function PublicReviewClient({
       : undefined;
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.shell}>
         <div className={styles.stack}>
           <div>
@@ -728,11 +730,12 @@ export function PublicReviewClient({
                       {error}
                     </div>
                   ) : null}
-                  <button
+                  <ToolActionButton
+                    intent="primary"
+                    fullWidth
                     type="button"
                     disabled={isWorking}
                     onClick={submit}
-                    className={styles.submit}
                   >
                     {isWorking ? (
                       <Loader2 className="mr-2 size-4 animate-spin" />
@@ -740,7 +743,7 @@ export function PublicReviewClient({
                       <Sparkles className="mr-2 size-4" />
                     )}
                     {isWorking ? copy.form.working : copy.form.submit}
-                  </button>
+                  </ToolActionButton>
                   {stageLabel ? (
                     <div aria-live="polite" className={styles.stage}>
                       <Loader2 className="size-4 animate-spin" />
@@ -903,29 +906,21 @@ export function PublicReviewClient({
                       ))}
                     </ul>
                   </article>
-                  <button
+                  <ToolActionButton
+                    intent="quiet"
                     type="button"
                     onClick={async () => {
-                      await navigator.clipboard.writeText(
-                        reviewMarkdown(review, copy.result),
-                      );
+                      await navigator.clipboard.writeText(reviewMarkdown(review, copy.result));
                       setCopied(true);
-                      trackToolEvent(
-                        "tool_result_copied",
-                        "free_ai_workout_review",
-                        { action: "markdown" },
-                      );
+                      trackToolEvent("tool_result_copied", "free_ai_workout_review", {
+                        action: "markdown",
+                      });
                       window.setTimeout(() => setCopied(false), 1800);
                     }}
-                    className={styles.resultButton}
                   >
-                    {copied ? (
-                      <Check className="size-4" />
-                    ) : (
-                      <Clipboard className="size-4" />
-                    )}
+                    {copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}
                     {copied ? copy.result.copied : copy.result.copy}
-                  </button>
+                  </ToolActionButton>
                   <Link
                     href={buildToolAppUrl({
                       locale: lang,
@@ -1020,6 +1015,6 @@ export function PublicReviewClient({
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

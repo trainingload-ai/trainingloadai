@@ -70,7 +70,7 @@ describe("FTP calculator messages", () => {
       expect(copy.page.subtitle.trim()).not.toBe("");
       expect(copy.page.heroProduct.title.trim()).not.toBe("");
       expect(copy.page.heroProduct.body).toMatch(/iPhone/);
-      expect(copy.page.heroProduct.body).toMatch(/Apple Watch/);
+      expect(copy.page.heroProduct.body).not.toMatch(/Apple Watch/);
       expect(copy.page.proof).toHaveLength(3);
       expect(copy.page.proof.join(" ")).not.toMatch(
         /★|reviews|4\.8|unlock my results/i,

@@ -1,3 +1,5 @@
+import { importJsonValue } from './import-item-job.types';
+import type { IntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
 import { createHash } from 'crypto';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -55,8 +57,14 @@ function fileSourceUid(file: Express.Multer.File, userId: string) {
 }
 
 /** 使用用户 ID + Intervals.icu 活动 ID 生成稳定的导入源标识。 */
-function intervalsIcuSourceUid(userId: string, externalId: string) {
-  return `intervals_icu:${userId}:${externalId}`;
+function intervalsIcuSourceUid(
+  userId: string,
+  externalId: string,
+  authorization?: IntervalsAuthorization,
+) {
+  return authorization
+    ? `intervals_icu:${userId}:account:${encodeURIComponent(authorization.athleteId)}:grant:${stableChecksum(authorization.revision)}:${externalId}`
+    : `intervals_icu:${userId}:${externalId}`;
 }
 
 type IntervalsIcuDiscoveredImport = {
@@ -94,6 +102,7 @@ function intervalsIcuTimelineStartTime(
 function discoverIntervalsIcuActivities(
   userId: string,
   activities: IntervalsIcuActivityListItem[],
+  authorization?: IntervalsAuthorization,
 ): IntervalsIcuDiscoveredImport[] {
   const discovered: IntervalsIcuDiscoveredImport[] = [];
   for (const activity of activities) {
@@ -103,7 +112,7 @@ function discoverIntervalsIcuActivities(
       externalId,
       activity,
       checksum: stableChecksum(activity),
-      sourceUid: intervalsIcuSourceUid(userId, externalId),
+      sourceUid: intervalsIcuSourceUid(userId, externalId, authorization),
     });
   }
   return discovered;
@@ -896,6 +905,7 @@ export class ImportBatchService {
   async createIntervalsIcuImportBatch(args: {
     userId: string;
     connectionId: string;
+    authorization?: IntervalsAuthorization;
     activities: IntervalsIcuActivityListItem[];
     reason?: ThirdPartyImportReason;
     discoveryWindow?: { start: Date; end: Date };
@@ -906,6 +916,7 @@ export class ImportBatchService {
     const discovered = discoverIntervalsIcuActivities(
       args.userId,
       args.activities,
+      args.authorization,
     );
 
     // 加载导入发现状态
@@ -942,7 +953,7 @@ export class ImportBatchService {
             sourceKind: ImportSourceKind.INTERVALS_ICU,
             provider: ThirdPartyProvider.intervals_icu,
             sourceUid: item.sourceUid,
-            accountRef: '0',
+            accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
             objectType: 'third_party_activity_file',
             // The discovery-list checksum is not a hash of the downloaded file.
@@ -951,11 +962,17 @@ export class ImportBatchService {
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
             } as Prisma.InputJsonValue,
             timelineTitle: item.activity.name?.trim() || null,
             timelineStartTime: intervalsIcuTimelineStartTime(item.activity),
             metadata: {
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
               listChecksum: item.checksum,
               listActivityName: item.activity.name ?? null,
               listActivityStartDate:
@@ -969,17 +986,23 @@ export class ImportBatchService {
           },
           update: {
             provider: ThirdPartyProvider.intervals_icu,
-            accountRef: '0',
+            accountRef: args.authorization?.athleteId ?? '0',
             externalId: item.externalId,
             objectType: 'third_party_activity_file',
             rawPayload: {
               listActivity: item.activity,
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
             } as Prisma.InputJsonValue,
             timelineTitle: item.activity.name?.trim() || null,
             timelineStartTime: intervalsIcuTimelineStartTime(item.activity),
             metadata: {
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
               listChecksum: item.checksum,
               listActivityName: item.activity.name ?? null,
               listActivityStartDate:
@@ -1109,6 +1132,9 @@ export class ImportBatchService {
             sourceRef: {
               externalId: item.externalId,
               connectionId: args.connectionId,
+              ...(args.authorization
+                ? { authorization: importJsonValue(args.authorization) }
+                : {}),
             } as Prisma.InputJsonValue,
           },
         });
@@ -1158,6 +1184,47 @@ export class ImportBatchService {
    * @param userId 用户ID
    * @returns
    */
+  async getLatestProviderBatchProgress(args: {
+    userId: string;
+    sourceKind: ImportSourceKind;
+    connectionId: string;
+  }) {
+    const batch = await this.importJobs.batchJobs().findFirst({
+      where: {
+        userId: args.userId,
+        sourceKind: args.sourceKind,
+        requestContext: { path: ['connectionId'], equals: args.connectionId },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        totalCount: true,
+        successCount: true,
+        failedCount: true,
+        skippedCount: true,
+        completedAt: true,
+        postProcessJobs: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { status: true },
+        },
+      },
+    });
+    return batch
+      ? {
+          batchId: batch.id,
+          status: batch.status,
+          totalCount: batch.totalCount,
+          successCount: batch.successCount,
+          failedCount: batch.failedCount,
+          skippedCount: batch.skippedCount,
+          completedAt: batch.completedAt,
+          postProcessingStatus: batch.postProcessJobs[0]?.status ?? null,
+        }
+      : null;
+  }
+
   async getBatchSummary(batchJobId: string, userId: string) {
     // 先判断所有权，当前用户和批次是否相关
     await this.assertBatchOwnership(batchJobId, userId);
@@ -1336,11 +1403,17 @@ export class ImportBatchService {
         // filesystem paths and upstream response bodies. Never cross the API boundary.
         lastErrorCode:
           item.status === 'FAILED' || item.status === 'DEAD'
-            ? 'IMPORT_PROCESSING_FAILED'
+            ? item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT'
+              ? 'IMPORT_IDENTITY_CONFLICT'
+              : 'IMPORT_PROCESSING_FAILED'
             : null,
         lastError:
           item.status === 'FAILED' || item.status === 'DEAD'
-            ? this.i18n.t('common.error.internal')
+            ? this.i18n.t(
+                item.lastErrorCode === 'IMPORT_IDENTITY_CONFLICT'
+                  ? 'common.error.import_identity_conflict'
+                  : 'common.error.internal',
+              )
             : null,
         startedAt: item.startedAt,
         completedAt: item.completedAt,
@@ -1358,9 +1431,12 @@ export class ImportBatchService {
    * @returns - 批次级后处理任务
    * @returns
    */
-  async createPostProcessJob(batchJobId: string) {
+  async createPostProcessJob(
+    batchJobId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
     // 获取导入批次
-    const batch = await this.importJobs.batchJobs().findUnique({
+    const batch = await this.importJobs.batchJobs(tx).findUnique({
       where: { id: batchJobId },
       include: {
         items: {
@@ -1428,28 +1504,31 @@ export class ImportBatchService {
       ),
     );
 
-    const job = await this.importJobs.ensurePostProcessJob({
-      batchJobId: batch.id,
-      create: {
-        userId: batch.userId,
+    const job = await this.importJobs.ensurePostProcessJob(
+      {
         batchJobId: batch.id,
-        status: 'PENDING',
-        recomputeFrom: correctnessCandidates[0]?.startTime,
-        recomputeTo: correctnessCandidates.at(-1)?.startTime,
-        affectedSportTypes: sportTypes as Prisma.InputJsonValue,
-        summary: {
-          batchStatus: batch.status,
-          totalCount: batch.totalCount,
-          successCount: batch.successCount,
-          failedCount: batch.failedCount,
-          skippedCount: batch.skippedCount,
-          correctnessReplayActivityCount: correctnessCandidates.length,
-        } as Prisma.InputJsonValue,
-      } satisfies Prisma.UserPostProcessJobUncheckedCreateInput,
-    });
+        create: {
+          userId: batch.userId,
+          batchJobId: batch.id,
+          status: 'PENDING',
+          recomputeFrom: correctnessCandidates[0]?.startTime,
+          recomputeTo: correctnessCandidates.at(-1)?.startTime,
+          affectedSportTypes: sportTypes as Prisma.InputJsonValue,
+          summary: {
+            batchStatus: batch.status,
+            totalCount: batch.totalCount,
+            successCount: batch.successCount,
+            failedCount: batch.failedCount,
+            skippedCount: batch.skippedCount,
+            correctnessReplayActivityCount: correctnessCandidates.length,
+          } as Prisma.InputJsonValue,
+        } satisfies Prisma.UserPostProcessJobUncheckedCreateInput,
+      },
+      tx,
+    );
 
     if (job.status !== 'COMPLETED' && job.status !== 'DEAD') {
-      await this.importJobs.batchJobs().update({
+      await this.importJobs.batchJobs(tx).update({
         where: { id: batch.id },
         data: { status: 'POST_PROCESSING' },
       });
@@ -1472,14 +1551,26 @@ export class ImportBatchService {
    *
    * @returns
    */
-  async refreshBatchProgress(batchJobId: string) {
-    const batch = await this.importJobs.batchJobs().findUnique({
+  async refreshBatchProgress(
+    batchJobId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    if (!tx) {
+      return this.prisma.$transaction(
+        (transaction) => this.refreshBatchProgress(batchJobId, transaction),
+        { timeout: 15_000 },
+      );
+    }
+    // Serialize count publication with terminal item writes and job creation.
+    await tx.$queryRaw`SELECT id FROM t_import_batch_job
+      WHERE id = ${batchJobId} FOR UPDATE`;
+    const batch = await this.importJobs.batchJobs(tx).findUnique({
       where: { id: batchJobId },
       select: { id: true, userId: true, totalCount: true, startedAt: true },
     });
     if (!batch) throw new Error(`Import batch not found: ${batchJobId}`);
 
-    const statuses = await this.importJobs.itemJobs().groupBy({
+    const statuses = await this.importJobs.itemJobs(tx).groupBy({
       by: ['status'],
       where: { batchJobId },
       _count: { _all: true },
@@ -1507,7 +1598,7 @@ export class ImportBatchService {
       skippedCount,
     });
 
-    const updated = await this.importJobs.batchJobs().update({
+    const updated = await this.importJobs.batchJobs(tx).update({
       where: { id: batchJobId },
       data: {
         totalCount,
@@ -1533,7 +1624,7 @@ export class ImportBatchService {
       nextStatus === 'PARTIAL_FAILED' ||
       nextStatus === 'FAILED'
     ) {
-      await this.createPostProcessJob(batchJobId);
+      await this.createPostProcessJob(batchJobId, tx);
     }
 
     return updated;

@@ -69,5 +69,9 @@
   "downloadDetail": "Aktuelle Version: {version}. Nach dem Herunterladen können Sie den Zeitpunkt für Neustart und Installation wählen.",
   "download": "Update laden",
   "updateFailed": "Update nicht abgeschlossen",
-  "updateFailedDetail": "Prüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut. Ihre aktuelle Version und lokalen Daten bleiben erhalten."
+  "updateFailedDetail": "Prüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut. Ihre aktuelle Version und lokalen Daten bleiben erhalten.",
+  "secureStorageUnavailable": "Der sichere Systemspeicher ist nicht verfügbar. Entsperren Sie Ihren Anmeldeschlüsselbund und versuchen Sie es erneut. Vorhandene Schlüssel werden weder ersetzt noch zurückgesetzt.",
+  "credentialsUnreadable": "Die gespeicherten Zugangsdaten konnten nicht entschlüsselt werden. Wenn Sie zuvor einen Entwicklungsbuild oder einen unsignierten Build verwendet haben, migrieren Sie die Schlüssel mit der ursprünglichen vertrauenswürdigen Laufzeit. Vorhandene Daten und Schlüssel bleiben erhalten.",
+  "credentialsMismatch": "Keine Zugangsdaten passen zur vorhandenen lokalen Datenbank. Migrieren Sie die ursprünglichen Instanzschlüssel; eine Neuinstallation oder ein Neustart behebt das Problem nicht. Ihre vorhandenen Daten bleiben erhalten.",
+  "macSignatureRequired": "Diese macOS-App hat keine gültige Developer ID Application-Signatur. Installieren Sie eine offiziell signierte Version. Verwenden Sie für lokale Vorschauen den isolierten Quellcode-Entwicklungsbefehl. Es wurden weder die lokale Datenbank noch Zugangsdaten geöffnet."
 }

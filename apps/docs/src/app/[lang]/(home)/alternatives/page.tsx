@@ -1,9 +1,11 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, CheckCircle2, CircleDashed, Scale } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ContentFreshness } from "@/components/ContentFreshness";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import {
@@ -172,7 +174,7 @@ export default async function AlternativesPage({
   ]);
 
   return (
-    <main className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
+    <div className="overflow-x-hidden bg-background text-neutral-950 dark:bg-background dark:text-white">
       <JsonLd id="alternatives-structured-data" data={jsonLd} />
 
       <section className="relative overflow-hidden border-b border-neutral-200/70 px-4 py-12 md:px-6 md:py-16 dark:border-white/10">
@@ -188,27 +190,33 @@ export default async function AlternativesPage({
             {t("definition")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={appUrl}>
-              <Button className="h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-white hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400">
-                {t("primary")}
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
+            <Link
+              href={appUrl}
+              className={cn(
+                buttonVariants({}),
+                "h-11 rounded-compact bg-emerald-500 px-5 text-sm font-bold text-neutral-950 hover:bg-emerald-600 dark:text-neutral-950 dark:hover:bg-emerald-400",
+              )}
+            >
+              {t("primary")}
+              <ArrowRight className="ml-2 size-4" />
             </Link>
-            <Link href={`${prefix}/training-load`}>
-              <Button
-                variant="outline"
-                className="h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
-              >
-                {t("secondary")}
-              </Button>
+            <Link
+              href={`${prefix}/training-load`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10",
+              )}
+            >
+              {t("secondary")}
             </Link>
-            <Link href={`${prefix}/ai-training-plan`}>
-              <Button
-                variant="outline"
-                className="h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
-              >
-                {t("tertiary")}
-              </Button>
+            <Link
+              href={`${prefix}/ai-training-plan`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-11 rounded-compact border-neutral-300 bg-white/80 px-5 text-sm font-semibold backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10",
+              )}
+            >
+              {t("tertiary")}
             </Link>
           </div>
         </div>
@@ -258,7 +266,10 @@ export default async function AlternativesPage({
           <p className="mt-3 max-w-3xl text-base text-neutral-700 dark:text-neutral-300">
             {t("comparisonSubtitle")}
           </p>
-          <div className="mt-8 overflow-x-auto rounded-compact border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+          <ScrollableRegion
+            label={t("comparisonTitle")}
+            className="mt-8 overflow-x-auto rounded-compact border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
+          >
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-neutral-50 text-xs uppercase text-neutral-600 dark:bg-white/[0.03] dark:text-neutral-300">
                 <tr>
@@ -287,7 +298,7 @@ export default async function AlternativesPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollableRegion>
         </div>
       </section>
 
@@ -392,20 +403,24 @@ export default async function AlternativesPage({
       </section>
 
       <section className="px-4 py-12 md:px-6 md:py-16">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-white shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-compact bg-emerald-500 p-8 text-neutral-950 shadow-2xl shadow-emerald-500/20 md:p-12 lg:grid-cols-[1fr_auto] lg:items-center dark:text-neutral-950">
           <div>
             <h2 className="text-3xl font-black tracking-tight md:text-5xl">
               {t("ctaTitle")}
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 dark:text-neutral-950/75">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-950/85 dark:text-neutral-950/85">
               {t("ctaText")}
             </p>
           </div>
-          <Link href={appUrl}>
-            <Button className="h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent">
-              {t("primary")}
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
+          <Link
+            href={appUrl}
+            className={cn(
+              buttonVariants({}),
+              "h-12 rounded-compact bg-white px-6 text-sm font-bold text-emerald-700 hover:bg-emerald-50 dark:bg-card dark:text-white dark:hover:bg-accent",
+            )}
+          >
+            {t("primary")}
+            <ArrowRight className="ml-2 size-4" />
           </Link>
         </div>
       </section>
@@ -413,6 +428,6 @@ export default async function AlternativesPage({
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <ContentFreshness lastUpdated={t("lastUpdatedDate")} />
       </div>
-    </main>
+    </div>
   );
 }

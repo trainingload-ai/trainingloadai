@@ -11,6 +11,15 @@ import {
 import type { AiDataConsentSource } from './ai-data-consent.dto';
 import { emitAiDataConsentChanged } from './ai-data-consent.events';
 import { isSelfHostEnvironment } from '@/runtime-capabilities/runtime-capability.resolver';
+import {
+  AiDataConsentState,
+  type AiDataConsentStatus,
+} from './ai-data-consent.types';
+
+export {
+  AiDataConsentState,
+  type AiDataConsentStatus,
+} from './ai-data-consent.types';
 
 // v3 adds explicit cross-conversation Athlete Memory processing. Enabling
 // Memory therefore cannot reuse a grant made for the older transient AI flow.
@@ -24,23 +33,6 @@ type StoredAiDataConsent = {
   decidedAt: string;
   locale?: string;
   source: AiDataConsentSource;
-};
-
-export type AiDataConsentStatus = {
-  state:
-    | 'UNAVAILABLE'
-    | 'UNDECIDED'
-    | 'GRANTED'
-    | 'DECLINED'
-    | 'RECONSENT_REQUIRED';
-  granted: boolean;
-  promptRequired: boolean;
-  /** @deprecated Use promptRequired. Kept temporarily for older clients. */
-  required: boolean;
-  version: string;
-  provider: CoachUpstreamProvider | null;
-  recipient: string;
-  decidedAt: string | null;
 };
 
 function providerRecipient(provider: CoachUpstreamProvider | null) {
@@ -94,7 +86,9 @@ export class AiDataConsentService {
     if (isSelfHostEnvironment(process.env)) {
       const granted = provider !== null;
       return {
-        state: granted ? 'GRANTED' : 'UNAVAILABLE',
+        state: granted
+          ? AiDataConsentState.GRANTED
+          : AiDataConsentState.UNAVAILABLE,
         granted,
         promptRequired: false,
         required: false,
@@ -114,19 +108,20 @@ export class AiDataConsentService {
       select: { value: true },
     });
     const stored = parseStoredConsent(row?.value);
-    const state: AiDataConsentStatus['state'] = !provider
-      ? 'UNAVAILABLE'
+    const state = !provider
+      ? AiDataConsentState.UNAVAILABLE
       : !stored
-        ? 'UNDECIDED'
+        ? AiDataConsentState.UNDECIDED
         : stored.granted === false
-          ? 'DECLINED'
+          ? AiDataConsentState.DECLINED
           : stored.version === AI_DATA_CONSENT_VERSION &&
               stored.provider === provider
-            ? 'GRANTED'
-            : 'RECONSENT_REQUIRED';
-    const granted = state === 'GRANTED';
+            ? AiDataConsentState.GRANTED
+            : AiDataConsentState.RECONSENT_REQUIRED;
+    const granted = state === AiDataConsentState.GRANTED;
     const promptRequired =
-      state === 'UNDECIDED' || state === 'RECONSENT_REQUIRED';
+      state === AiDataConsentState.UNDECIDED ||
+      state === AiDataConsentState.RECONSENT_REQUIRED;
 
     return {
       state,

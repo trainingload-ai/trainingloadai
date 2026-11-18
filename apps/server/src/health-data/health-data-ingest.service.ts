@@ -1,3 +1,8 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
+import {
+  STATE_UPDATE_HEALTH_METRICS,
+  stateHealthFactChanged,
+} from '@/athlete-state/updates/athlete-state-update-policy';
 /**
  * 与 provider 无关的每日健康数据摄取和投影策略。
  *
@@ -5,8 +10,7 @@
  * provider 内合并，再根据 provider 优先级选择每日投影；`sourceBreakdown` 会保留
  * 每个有效 provider 的结果。任何软删除都会触发确定性重建。
  */
-import { Injectable, Optional } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable } from '@nestjs/common';
 import {
   HealthMetricType,
   Prisma,
@@ -18,7 +22,6 @@ import type { PrismaClientSlice, PrismaTx } from '@/prisma/prisma-db';
 import { HealthDataRepository } from './persistence/health-data.repository';
 import { forEachWithConcurrency } from '@/utils/async-concurrency.util';
 import { assertHealthMetricCandidate } from './health-metric-contract';
-import { emitAthleteStateReassessRequested } from '@/athlete-state/athlete-state.events';
 import { healthDataProviderPriority } from './health-data-provider-policy.port';
 
 const HEALTH_CANDIDATE_INGEST_CONCURRENCY = 4;
@@ -83,6 +86,16 @@ export type ExternalHealthMetricCandidate = {
   metadata?: Record<string, unknown> | null;
   /** 对绝不能参与每日聚合的原始 point 设置为 `false`。 */
   projectToDaily?: boolean;
+};
+
+type DailyCandidateReplacement = {
+  userId: string;
+  provider: HealthDataProviderCode;
+  connectionId?: string | null;
+  localDate: Date;
+  managedMetricTypes: string[];
+  candidates: ExternalHealthMetricCandidate[];
+  externalIdPrefix?: string;
 };
 
 function jsonObject(value: unknown): Record<string, unknown> {
@@ -349,7 +362,7 @@ export class HealthDataIngestService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly health: HealthDataRepository,
-    @Optional() private readonly events?: EventEmitter2,
+    private readonly stateUpdates: AthleteStateUpdates,
   ) {}
 
   /** 可由 PrismaService 或事务共同使用的 upsert 实现。 */
@@ -467,6 +480,18 @@ export class HealthDataIngestService {
       db,
       `health-daily|${args.userId}|${args.localDate.toISOString().slice(0, 10)}|${args.metricType}`,
     );
+    const relevant = STATE_UPDATE_HEALTH_METRICS.has(args.metricType);
+    const previous = relevant
+      ? await this.health.dailyMetrics(db).findUnique({
+          where: {
+            userId_date_metricType: {
+              userId: args.userId,
+              date: args.localDate,
+              metricType: asHealthMetricType(args.metricType),
+            },
+          },
+        })
+      : null;
     const candidates = (await this.health.samples(db).findMany({
       where: {
         userId: args.userId,
@@ -513,6 +538,17 @@ export class HealthDataIngestService {
           metricType: asHealthMetricType(args.metricType),
         },
       });
+      if (relevant && previous) {
+        await this.stateUpdates.requestUpdate(
+          {
+            userId: args.userId,
+            triggerType: 'HEALTH_FACT_CHANGED',
+            healthDate: args.localDate,
+            triggerRef: `${args.localDate.toISOString().slice(0, 10)}:${args.metricType}`,
+          },
+          db,
+        );
+      }
       return { selectedProvider: null };
     }
     consolidated.sort(
@@ -593,6 +629,17 @@ export class HealthDataIngestService {
         data: { dailyMetricId: dailyMetric.id },
       });
     }
+    if (relevant && stateHealthFactChanged(previous, dailyMetric)) {
+      await this.stateUpdates.requestUpdate(
+        {
+          userId: args.userId,
+          triggerType: 'HEALTH_FACT_CHANGED',
+          healthDate: args.localDate,
+          triggerRef: `${args.localDate.toISOString().slice(0, 10)}:${args.metricType}`,
+        },
+        db,
+      );
+    }
     return { selectedProvider: selected.provider };
   }
 
@@ -626,21 +673,49 @@ export class HealthDataIngestService {
    * 替换权威 provider payload 对应的完整每日候选范围。缺失事实会被软删除，
    * 受影响投影会被重建。不得用于增量事件流或 Provider 原始分片。
    */
-  async replaceProviderDailyCandidates(args: {
-    userId: string;
-    provider: HealthDataProviderCode;
-    connectionId?: string | null;
-    localDate: Date;
-    managedMetricTypes: string[];
-    candidates: ExternalHealthMetricCandidate[];
-    externalIdPrefix?: string;
-  }) {
+  async replaceProviderDailyCandidates(args: DailyCandidateReplacement) {
     const metricTypes = [...new Set(args.managedMetricTypes)];
     if (metricTypes.length === 0) {
       return { sampleCount: 0, deletedCount: 0, rebuiltCount: 0 };
     }
+    this.assertDailyReplacementScope(args, metricTypes);
+
+    // Measurements remain available as evidence for authorized coaching.
+    // Replacing a daily record (including backfills and unchanged polls) is
+    // not itself a request to run a paid AI assessment. Activity, Review and
+    // athlete feedback own the explicit coaching triggers.
+    return this.health.runTransaction(
+      async (tx) => {
+        await this.lockDailyReplacement(tx, args, metricTypes);
+        const replacement = await this.replaceDailySamples(
+          tx,
+          args,
+          metricTypes,
+        );
+        const rebuilt = await this.rebuildReplacementDailyMetrics(
+          tx,
+          args,
+          metricTypes,
+          replacement.previousDailyMetricIds,
+        );
+        return {
+          sampleCount: args.candidates.length,
+          previousCount: replacement.previousCount,
+          deletedCount: replacement.deletedCount,
+          rebuiltCount: rebuilt.rebuiltCount,
+        };
+      },
+      { timeout: 30_000 },
+    );
+  }
+
+  /** Reject candidates outside the provider, connection, date and metric scope. */
+  private assertDailyReplacementScope(
+    args: DailyCandidateReplacement,
+    metricTypes: string[],
+  ) {
     const dateKey = args.localDate.toISOString().slice(0, 10);
-    args.candidates.forEach((candidate) => {
+    for (const candidate of args.candidates) {
       if (
         candidate.provider !== args.provider ||
         candidate.localDate.toISOString().slice(0, 10) !== dateKey ||
@@ -655,126 +730,109 @@ export class HealthDataIngestService {
           'replaceProviderDailyCandidates received a candidate outside its authoritative daily scope',
         );
       }
-    });
+    }
+  }
 
-    const result = await this.health.runTransaction(
-      async (tx) => {
-        await acquireHashtextAdvisoryXactLock(
-          tx,
-          `health-daily-user|${args.userId}`,
-        );
-        for (const metricType of [...metricTypes].sort()) {
-          await acquireHashtextAdvisoryXactLock(
-            tx,
-            `health-daily|${args.userId}|${dateKey}|${metricType}`,
-          );
-        }
-        const previous = await this.health.samples(tx).findMany({
-          where: {
-            userId: args.userId,
-            provider: args.provider,
-            ...(args.connectionId !== undefined
-              ? { connectionId: args.connectionId }
-              : {}),
-            ...(args.externalIdPrefix ? {} : { localDate: args.localDate }),
-            metricType: { in: asHealthMetricTypes(metricTypes) },
-            ...(args.externalIdPrefix
-              ? { externalId: { startsWith: args.externalIdPrefix } }
-              : {}),
-            deletedAt: null,
-          },
-          select: { externalId: true, dailyMetricId: true },
-        });
-        const previousDailyMetricIds = new Set<string>(
-          previous
-            .map((sample) => sample.dailyMetricId)
-            .filter((id): id is string => Boolean(id)),
-        );
-        for (const candidate of args.candidates) {
-          const stored = await this.upsertExternalSampleWith(tx, {
-            userId: args.userId,
-            candidate,
-          });
-          if (stored?.dailyMetricId) {
-            previousDailyMetricIds.add(stored.dailyMetricId);
-          }
-        }
-        const currentExternalIds = args.candidates.map(
-          (candidate) => candidate.externalId,
-        );
-        const deleted = await this.health.samples(tx).updateMany({
-          where: {
-            userId: args.userId,
-            provider: args.provider,
-            ...(args.connectionId !== undefined
-              ? { connectionId: args.connectionId }
-              : {}),
-            ...(args.externalIdPrefix ? {} : { localDate: args.localDate }),
-            metricType: { in: asHealthMetricTypes(metricTypes) },
-            ...(args.externalIdPrefix || currentExternalIds.length > 0
-              ? {
-                  externalId: {
-                    ...(args.externalIdPrefix
-                      ? { startsWith: args.externalIdPrefix }
-                      : {}),
-                    ...(currentExternalIds.length > 0
-                      ? { notIn: currentExternalIds }
-                      : {}),
-                  },
-                }
-              : {}),
-            deletedAt: null,
-          },
-          data: { deletedAt: new Date() },
-        });
-        const rebuildKeys = new Map<
-          string,
-          { localDate: Date; metricType: string }
-        >();
-        metricTypes.forEach((metricType) =>
-          rebuildKeys.set(`${dateKey}|${metricType}`, {
-            localDate: args.localDate,
-            metricType,
-          }),
-        );
-        if (previousDailyMetricIds.size > 0) {
-          const previousMetrics = await this.health.dailyMetrics(tx).findMany({
-            where: { id: { in: [...previousDailyMetricIds] } },
-            select: { date: true, metricType: true },
-          });
-          previousMetrics.forEach((metric) =>
-            rebuildKeys.set(
-              `${metric.date.toISOString().slice(0, 10)}|${metric.metricType}`,
-              {
-                localDate: metric.date,
-                metricType: String(metric.metricType),
-              },
-            ),
-          );
-        }
-        const orderedRebuildKeys = [...rebuildKeys.values()].sort(
-          (left, right) =>
-            left.localDate.valueOf() - right.localDate.valueOf() ||
-            left.metricType.localeCompare(right.metricType),
-        );
-        for (const key of orderedRebuildKeys) {
-          await this.rebuildDailyMetric({ userId: args.userId, ...key }, tx);
-        }
-        return {
-          sampleCount: args.candidates.length,
-          previousCount: previous.length,
-          deletedCount: deleted.count,
-          rebuiltCount: rebuildKeys.size,
-        };
-      },
-      { timeout: 30_000 },
+  /** Use the same lock order as other daily-health writes. */
+  private async lockDailyReplacement(
+    tx: PrismaTx,
+    args: DailyCandidateReplacement,
+    metricTypes: string[],
+  ) {
+    const dateKey = args.localDate.toISOString().slice(0, 10);
+    await acquireHashtextAdvisoryXactLock(
+      tx,
+      `health-daily-user|${args.userId}`,
     );
-    await emitAthleteStateReassessRequested(this.events, {
+    for (const metricType of [...metricTypes].sort()) {
+      await acquireHashtextAdvisoryXactLock(
+        tx,
+        `health-daily|${args.userId}|${dateKey}|${metricType}`,
+      );
+    }
+  }
+
+  /** Upsert the supplied facts and retire only missing facts in the same scope. */
+  private async replaceDailySamples(
+    tx: PrismaTx,
+    args: DailyCandidateReplacement,
+    metricTypes: string[],
+  ) {
+    const externalIdScope = args.externalIdPrefix
+      ? { startsWith: args.externalIdPrefix }
+      : {};
+    const scope: Prisma.ExternalHealthSampleWhereInput = {
       userId: args.userId,
-      triggerType: 'HEALTH_DATA_AGGREGATED',
-      triggerRef: `${dateKey}:${metricTypes.sort().join(',')}`,
+      provider: args.provider,
+      ...(args.connectionId !== undefined
+        ? { connectionId: args.connectionId }
+        : {}),
+      // A scoped source can move dates; retain its previous daily links too.
+      ...(args.externalIdPrefix ? {} : { localDate: args.localDate }),
+      metricType: { in: asHealthMetricTypes(metricTypes) },
+      ...(args.externalIdPrefix ? { externalId: externalIdScope } : {}),
+      deletedAt: null,
+    };
+    const previous = await this.health.samples(tx).findMany({
+      where: scope,
+      select: { externalId: true, dailyMetricId: true },
     });
-    return result;
+    const previousDailyMetricIds = new Set<string>(
+      previous
+        .map((sample) => sample.dailyMetricId)
+        .filter((id): id is string => Boolean(id)),
+    );
+    for (const candidate of args.candidates) {
+      const stored = await this.upsertExternalSampleWith(tx, {
+        userId: args.userId,
+        candidate,
+      });
+      if (stored?.dailyMetricId)
+        previousDailyMetricIds.add(stored.dailyMetricId);
+    }
+    const currentExternalIds = args.candidates.map(
+      (candidate) => candidate.externalId,
+    );
+    const deleted = await this.health.samples(tx).updateMany({
+      where: {
+        ...scope,
+        ...(currentExternalIds.length > 0
+          ? { externalId: { ...externalIdScope, notIn: currentExternalIds } }
+          : {}),
+      },
+      data: { deletedAt: new Date() },
+    });
+    return {
+      previousCount: previous.length,
+      deletedCount: deleted.count,
+      previousDailyMetricIds,
+    };
+  }
+
+  /** Rebuild the requested date and any previous dates of moved source facts. */
+  private async rebuildReplacementDailyMetrics(
+    tx: PrismaTx,
+    args: DailyCandidateReplacement,
+    metricTypes: string[],
+    previousDailyMetricIds: Set<string>,
+  ) {
+    const keys = metricTypes.map((metricType) => ({
+      localDate: args.localDate,
+      metricType,
+    }));
+    if (previousDailyMetricIds.size > 0) {
+      const previousMetrics = await this.health.dailyMetrics(tx).findMany({
+        where: { id: { in: [...previousDailyMetricIds] } },
+        select: { date: true, metricType: true },
+      });
+      keys.push(
+        ...previousMetrics.map((metric) => ({
+          localDate: metric.date,
+          metricType: String(metric.metricType),
+        })),
+      );
+    }
+    return this.rebuildDailyMetrics({ userId: args.userId, keys }, tx);
   }
 
   /**

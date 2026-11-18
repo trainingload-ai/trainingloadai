@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -374,15 +375,6 @@ export default async function Vo2MaxCalculatorPage({
                           loading="eager"
                         />
                       </div>
-                      <div className={styles.heroWatch}>
-                        <Image
-                          src={`/ftp-calculator/watch-${["en", "zh", "zh-hant", "ja"].includes(lang) ? lang : "en"}.png`}
-                          alt={tPage("heroProduct.watchAlt")}
-                          width={416}
-                          height={496}
-                          sizes="128px"
-                        />
-                      </div>
                     </div>
                     <div className={styles.heroProductCopy}>
                       <p className={styles.kicker}>Trainingload.ai</p>
@@ -489,7 +481,10 @@ export default async function Vo2MaxCalculatorPage({
             description={tPage("protocolGuide.lead")}
           >
             {protocolRows.length > 0 ? (
-              <div className={styles.tableWrap}>
+              <ScrollableRegion
+                label={tPage("protocolGuide.title")}
+                className={styles.tableWrap}
+              >
                 <table className={styles.table}>
                   <thead>
                     <tr>
@@ -522,7 +517,7 @@ export default async function Vo2MaxCalculatorPage({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollableRegion>
             ) : null}
             <p className={styles.note}>{tPage("safety.body")}</p>
           </Section>
@@ -610,7 +605,10 @@ export default async function Vo2MaxCalculatorPage({
               <h3 id="methods" className={styles.articleSubtitle}>
                 {tPage("methodsTable.title")}
               </h3>
-              <div className={styles.tableWrap}>
+              <ScrollableRegion
+                label={tPage("methodsTable.title")}
+                className={styles.tableWrap}
+              >
                 <table className={`${styles.table} ${styles.methodComparison}`}>
                   <thead>
                     <tr>
@@ -641,7 +639,7 @@ export default async function Vo2MaxCalculatorPage({
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </ScrollableRegion>
               <p className={styles.note}>{tPage("methodsTable.shortcut")}</p>
               <p className={styles.articleBody}>
                 {tPage("education.accuracy.vdot")}{" "}
@@ -726,7 +724,10 @@ export default async function Vo2MaxCalculatorPage({
             <p className={styles.articleBody}>
               {tPage("education.training.intro")}
             </p>
-            <div className={styles.tableWrap}>
+            <ScrollableRegion
+              label={tPage("education.training.title")}
+              className={styles.tableWrap}
+            >
               <table className={`${styles.table} ${styles.trainingTable}`}>
                 <caption className="sr-only">
                   {tPage("education.training.title")}
@@ -759,7 +760,7 @@ export default async function Vo2MaxCalculatorPage({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollableRegion>
             <p className={styles.articleBody}>
               {tPage("education.training.note")}{" "}
               <a href="#vo2-source-training" className={styles.inlineLink}>

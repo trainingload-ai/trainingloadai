@@ -141,7 +141,7 @@ export function TenKBridgePage({
   ]);
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <Script
         id={`${slug}-structured-data`}
         type="application/ld+json"
@@ -151,10 +151,7 @@ export function TenKBridgePage({
       />
       <section className={styles.hero}>
         <div className={styles.shell}>
-          <nav
-            aria-label={labels.relatedTitle}
-            className="mb-8 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400"
-          >
+          <div className="mb-8 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
             <Link
               href={withLocalePath(lang, "/5k-training-plan")}
               className="hover:underline"
@@ -167,7 +164,7 @@ export function TenKBridgePage({
             >
               {labels.hub10K}
             </Link>
-          </nav>
+          </div>
           <div className={styles.heroGrid}>
             <div
               className={`${styles.heroCopy} ${["zh", "zh-hant", "ja"].includes(lang) ? styles.heroCopyCjk : ""}`}
@@ -340,7 +337,7 @@ export function TenKBridgePage({
               </details>
             ))}
           </div>
-          <aside className="mt-8 max-w-4xl text-xs leading-6 text-neutral-500 dark:text-neutral-400">
+          <div className="mt-8 max-w-4xl text-xs leading-6 text-neutral-500 dark:text-neutral-400">
             <h3 className="font-bold">{labels.sources}</h3>
             <p>{labels.sourceNote}</p>
             <p className="mt-2 flex flex-wrap gap-x-5">
@@ -357,7 +354,7 @@ export function TenKBridgePage({
                 Polar · 10K
               </a>
             </p>
-          </aside>
+          </div>
           <nav
             aria-label={labels.relatedTitle}
             className="mt-10 border-t border-neutral-200 pt-6 dark:border-neutral-800"
@@ -390,6 +387,6 @@ export function TenKBridgePage({
           </nav>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

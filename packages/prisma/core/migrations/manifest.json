@@ -125,7 +125,27 @@
       "id": "0025_vdot_forecast_snapshot",
       "file": "0025_vdot_forecast_snapshot/migration.sql",
       "sha256": "0413de7bf1976a214da7edc1c337fcae1efba1788ce1d2cc32b4fd94cd83d14f"
+    },
+    {
+      "id": "0026_athlete_state_updates",
+      "file": "0026_athlete_state_updates/migration.sql",
+      "sha256": "6e89f3b9d197afcbedb545f2db3abea76e443d74c4998a7cd128602441baef96"
+    },
+    {
+      "id": "0027_scope_fitness_setting_evidence",
+      "file": "0027_scope_fitness_setting_evidence/migration.sql",
+      "sha256": "234411469fc93fe23c2ac51707c30e6c17d17d7fc04c16cf577326c0c9b62423"
+    },
+    {
+      "id": "0028_user_scoped_activity_identity",
+      "file": "0028_user_scoped_activity_identity/migration.sql",
+      "sha256": "be1545e6cbdbd2b9338c5e15e5cfc32b096dba60ed75d8b01f2e048f287b82d2"
+    },
+    {
+      "id": "0029_provider_authorization_revision",
+      "file": "0029_provider_authorization_revision/migration.sql",
+      "sha256": "5af78c083f9de1dafe56c1d8e3c519a08c3c22bf15d25321264810a990f156dd"
     }
   ],
-  "schemaChecksum": "fc458b6896b91463b639fc31ddfb52570b4790187b75489072cf4bb78b21d124"
+  "schemaChecksum": "bc0506bc71d701056969b73e205124a722cb49e5d911f6742cee3877461b82cf"
 }

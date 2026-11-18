@@ -25,6 +25,24 @@ export type IntervalsIcuConnectionStatus = ThirdPartyConnectionEnvelope & {
   exportSportSettings?: boolean;
   keyChangeConfirmationRequired?: boolean;
   pendingCredentialLast4?: string | null;
+  discoveryCompletedAt?: string | null;
+  activitySync?: {
+    batchId: string;
+    status:
+      | "QUEUED"
+      | "RUNNING"
+      | "POST_PROCESSING"
+      | "COMPLETED"
+      | "PARTIAL_FAILED"
+      | "FAILED"
+      | "CANCELLED";
+    totalCount: number;
+    successCount: number;
+    failedCount: number;
+    skippedCount: number;
+    completedAt?: string | null;
+    postProcessingStatus?: string | null;
+  } | null;
   lastSyncStartedAt?: string | null;
   lastSyncCompletedAt?: string | null;
   lastSyncedActivityAt?: string | null;
@@ -117,9 +135,19 @@ export type SyncIntervalsIcuResult = {
   plannedWorkouts?: PlannedWorkoutSyncResult | null;
 };
 
-export const useIntervalsIcuStatus = (enabled = true) => {
+export const useIntervalsIcuStatus = (
+  enabled = true,
+  pollWhileRunning = false,
+) => {
   const publicDemo = usePublicDemo();
   return useQuery<IntervalsIcuConnectionStatus>({
+    refetchInterval: (query) =>
+      pollWhileRunning &&
+      ["QUEUED", "RUNNING", "POST_PROCESSING"].includes(
+        query.state.data?.activitySync?.status ?? "",
+      )
+        ? 3000
+        : false,
     queryKey: queryKeys.account.intervalsIcu(),
     queryFn: async () => {
       const data = await apiFetch<IntervalsIcuConnectionStatus>(

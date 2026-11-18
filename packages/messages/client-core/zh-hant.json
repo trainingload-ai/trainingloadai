@@ -1307,7 +1307,9 @@
       "monthlyReview": "每月複盤",
       "planReview": "計劃複盤",
       "saved": "複盤設定已儲存",
-      "saveFailed": "儲存複盤設定失敗"
+      "saveFailed": "儲存複盤設定失敗",
+      "athleteState": "自動評估運動員狀態",
+      "athleteStateDetail": "相關訓練或恢復資料變更後更新教練狀態。自動 AI 評估由平台承擔費用。"
     },
     "dataExport": {
       "title": "匯出全部資料",
@@ -1468,7 +1470,19 @@
       "replaceKeyConfirmTitle": "要替換 API Key 嗎？",
       "replaceKeyConfirmDescription": "這個 API Key 與已儲存的 key 不同，可能屬於另一個帳戶。儲存後會保留已匯入的歷史，之後用新的 key 同步。",
       "replaceKeyCancel": "取消",
-      "replaceKeyConfirmAction": "替換 key"
+      "replaceKeyConfirmAction": "替換 key",
+      "lastDiscovery": "最近發現活動",
+      "activityImport": "最近活動匯入",
+      "importCounts": "成功 {success}/{total}，失敗 {failed}，略過 {skipped}",
+      "importState": {
+        "QUEUED": "排隊中",
+        "RUNNING": "匯入中",
+        "POST_PROCESSING": "後處理中",
+        "COMPLETED": "已完成",
+        "PARTIAL_FAILED": "部分失敗",
+        "FAILED": "失敗",
+        "CANCELLED": "已取消"
+      }
     }
   },
   "UserProfile": {
@@ -5124,7 +5138,7 @@
     },
     "mirror": {
       "untitled": "等待來源同步的活動",
-      "discoveredVia": "由 Intervals.icu 發現",
+      "discoveredVia": "由 {provider} 發現",
       "syncing": "正在取得來源活動的完整資料。",
       "connectionRequired": "目前連線無法提供完整活動，請檢查來源連線。",
       "importDisabled": "來源已連線，但活動自動匯入尚未開啟。",
@@ -5138,7 +5152,9 @@
       "connectSource": "連接來源",
       "reauthorizeSource": "重新授權來源",
       "enableSourceImport": "開啟來源匯入",
-      "checkSourceConnection": "檢查來源連線"
+      "checkSourceConnection": "檢查來源連線",
+      "dataUnavailable": "目前只有活動摘要，暫未取得詳細記錄。",
+      "why": "為什麼"
     },
     "common": {
       "unknownTime": "未知時間",

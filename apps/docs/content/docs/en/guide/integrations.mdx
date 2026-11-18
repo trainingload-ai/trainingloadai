@@ -13,7 +13,9 @@ keywords:
 
 # Training App Integrations: Strava Garmin COROS Sync
 
-**Training app integrations** are the connection cards that decide how workouts enter Trainingload.ai. Use this page to choose a path: live Strava or COROS sync, a one-time Garmin history import, Intervals.icu OAuth or API key, or a FIT / TCX / GPX upload. For the exact authorize-and-verify clicks, open [Connect Strava, Garmin, and COROS](/docs/guide/connect-third-party-platforms).
+Choose where to import your training records from, then decide whether you need ongoing sync or a one-time history import. This page covers Cloud connections; follow [Connect a platform](/docs/guide/connect-third-party-platforms) for the steps.
+
+For self-hosting, use the separate [Intervals.icu settings](/docs/self-host/configuration#connect-intervalsicu) and [Garmin Personal API guide](/docs/self-host/garmin-personal-api), or upload activity files directly.
 
 Provider availability and supported directions can change. Use the controls shown in the connection dialog as the final authority.
 
@@ -21,7 +23,7 @@ Provider availability and supported directions can change. Use the controls show
   id="integrations-connections"
   title="Third-party connections"
   description="Each provider card shows connection state and the actions currently supported for the account."
-  route="Account → Third Party Connections"
+  route="Top-right avatar → Third Party Connections"
 />
 
 ## Before you connect
@@ -42,7 +44,7 @@ Provider availability and supported directions can change. Use the controls show
 | Intervals.icu   | Activity synchronization and compatible planned-workout workflows | OAuth or API key, depending on account setup    |
 | Suunto          | Ongoing workout import and supported guide workflows              | OAuth connection with sync settings             |
 | Wahoo           | Ongoing Wahoo workout import                                      | OAuth connection with sync settings             |
-| Garmin          | One-time historical activity import                               | Import action, not a persistent connection card |
+| Garmin          | New training sync or older activity history                       | OAuth connection or file import                |
 | FIT / TCX / GPX | Individual files or exports from unsupported sources              | Manual upload                                   |
 
 ## Connect a provider
@@ -69,7 +71,58 @@ During a large import:
 
 ## Garmin historical import
 
-Garmin is presented as a one-time history import rather than a persistent connection. Start the import from the Garmin card, follow the dialog instructions, and return to the same dialog to check the latest job status.
+On the Garmin page, **OAuth** receives new activities and authorized health summaries. **File import** supplies older training records. These are separate actions; choose the one you need.
+
+## How do planned workouts sync with Intervals.icu?
+
+These are workouts scheduled on your calendar, not completed activity recordings. In the Intervals.icu connection settings, you can turn on **Import planned workouts** and **Export planned workouts** separately.
+
+- **Import planned workouts** brings additions, edits, and deletions from Intervals.icu into Trainingload.ai.
+- **Export planned workouts** sends additions, edits, and deletions from Trainingload.ai to Intervals.icu.
+
+**With both directions on, deletions sync too.** If the other copy has not changed since the last sync, deleting one copy also deletes the other.
+
+### What happens when I add, edit, or delete a workout?
+
+This table assumes both directions are on:
+
+| What you do | What happens on the other side |
+| --- | --- |
+| Add a workout in Trainingload.ai | A corresponding new workout appears in Intervals.icu. |
+| Add a workout in Intervals.icu | A corresponding new workout appears in Trainingload.ai. |
+| Change only the Trainingload.ai date, name, or prescription | The corresponding Intervals.icu workout is updated. |
+| Change only the Intervals.icu date, name, or prescription | The corresponding Trainingload.ai workout is updated. |
+| Delete a workout in Trainingload.ai | The Intervals.icu copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
+| Delete a workout in Intervals.icu | The Trainingload.ai copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
+
+### Which version wins if I edit both copies?
+
+It depends on the direction currently being synchronized:
+
+- Importing from Intervals.icu uses the Intervals.icu version.
+- Exporting to Intervals.icu uses the Trainingload.ai version.
+
+Daily automatic sync imports before exporting. If both copies have already been edited when that run starts, the Intervals.icu version takes priority.
+
+To avoid overwriting an edit, finish editing on one side, allow it to sync, and then continue on the other side.
+
+### Why is one copy still there after I delete the other?
+
+The remaining copy was edited after the last sync. Those edits are kept, the two workouts stop updating each other, and sync does not immediately recreate the workout you deleted.
+
+For example, you delete Sunday's run in Intervals.icu after moving its Trainingload.ai copy to Saturday. Trainingload.ai keeps the Saturday run; the deleted Intervals.icu workout does not reappear because of it.
+
+If the system cannot confirm whether the other copy has changed, it keeps that copy rather than risk deleting it. Completed or skipped workouts, and workouts linked to an actual activity, also retain the history that needs to be kept.
+
+### What if I delete a workout and create another with the same name?
+
+The recreated workout is a new workout and syncs separately. Even matching names, dates, and prescriptions do not reconnect it to a deleted workout. Repeated notifications about the same workout do not create extra copies.
+
+### Why hasn't the other side updated yet?
+
+Both pages do not update instantly together. The system receives provider notifications and checks upcoming workouts periodically. Daily automatic checks cover yesterday through the next seven days in your time zone.
+
+Moving a workout outside that date range does not by itself mean it was deleted: its current location is checked separately. A temporarily unavailable connection also does not cause the other copy to be deleted.
 
 ## Disconnecting
 
@@ -108,11 +161,11 @@ The connection dialog is authoritative for the current account, provider, and pl
 
 ### Which training app integrations does Trainingload.ai support?
 
-Strava, Polar, COROS, Intervals.icu, Suunto, and Wahoo can stay connected. Garmin is a one-time history import. FIT, TCX, and GPX cover one-off files or unsupported watches.
+Strava, Polar, COROS, Intervals.icu, Suunto, and Wahoo can stay connected. Garmin offers an OAuth connection for new data and file import for history. FIT, TCX, and GPX cover one-off files or unsupported watches.
 
 ### Strava integration or Garmin import?
 
-Choose Strava (or another live provider) if you want new workouts to keep arriving. Choose Garmin history import when you need an archive once. After that archive, new Garmin files still need a live path or a manual upload.
+Use Garmin OAuth for new Garmin workouts and history import for older records. If the same workouts also reach Strava, choose one primary import path to avoid duplicates.
 
 ### Can I enable two integrations for the same watch?
 
@@ -120,7 +173,7 @@ You can, but you should not import the same recording twice. Pick one primary ro
 
 ### Where do I complete the connection?
 
-Open **Account → Third Party Connections** on web, or **Me → Account → Connections** on mobile. Then follow [Connect Strava, Garmin, and COROS](/docs/guide/connect-third-party-platforms) for provider-specific steps.
+On the web, click your avatar in the top-right corner, then scroll down to **Third Party Connections**. On mobile, open **Me → Menu → Data authorization**. Then follow [Connect Strava, Garmin, and COROS](/docs/guide/connect-third-party-platforms) for provider-specific steps.
 
 ## Next steps
 

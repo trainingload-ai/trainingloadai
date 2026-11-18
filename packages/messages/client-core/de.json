@@ -1218,7 +1218,9 @@
       "monthlyReview": "Monatlicher Rückblick",
       "planReview": "Planüberprüfung",
       "saved": "Überprüfungseinstellungen gespeichert",
-      "saveFailed": "Überprüfungseinstellungen konnten nicht gespeichert werden"
+      "saveFailed": "Überprüfungseinstellungen konnten nicht gespeichert werden",
+      "athleteState": "Automatische Zustandsbewertung",
+      "athleteStateDetail": "Aktualisiert den Trainingszustand bei relevanten Trainings- oder Erholungsdaten. Die Plattform trägt die Kosten automatischer KI-Bewertungen."
     },
     "dataExport": {
       "title": "Alle Daten exportieren",
@@ -1376,7 +1378,19 @@
       "replaceKeyConfirmTitle": "API-Schlüssel ersetzen?",
       "replaceKeyConfirmDescription": "Dieser API-Schlüssel unterscheidet sich vom gespeicherten Schlüssel und gehört möglicherweise zu einem anderen Konto. Beim Speichern bleibt der importierte Verlauf erhalten und der neue Schlüssel wird für zukünftige Synchronisierungen verwendet.",
       "replaceKeyCancel": "Abbrechen",
-      "replaceKeyConfirmAction": "Schlüssel ersetzen"
+      "replaceKeyConfirmAction": "Schlüssel ersetzen",
+      "lastDiscovery": "Letzte Aktivitätssuche",
+      "activityImport": "Letzter Aktivitätsimport",
+      "importCounts": "{success}/{total} importiert, {failed} fehlgeschlagen, {skipped} übersprungen",
+      "importState": {
+        "QUEUED": "In Warteschlange",
+        "RUNNING": "Import läuft",
+        "POST_PROCESSING": "Nachverarbeitung",
+        "COMPLETED": "Abgeschlossen",
+        "PARTIAL_FAILED": "Teilweise fehlgeschlagen",
+        "FAILED": "Fehlgeschlagen",
+        "CANCELLED": "Abgebrochen"
+      }
     }
   },
   "UserProfile": {
@@ -5093,7 +5107,7 @@
     },
     "mirror": {
       "untitled": "Aktivität wartet auf Quellsynchronisierung",
-      "discoveredVia": "Über Intervals.icu gefunden",
+      "discoveredVia": "Über {provider} gefunden",
       "syncing": "Die Aktivität wird von der Quelle abgerufen.",
       "connectionRequired": "Die aktuelle Integration kann die vollständige Aktivität nicht liefern. Prüfe die Quellverbindung.",
       "importDisabled": "Die Quelle ist verbunden, aber der automatische Aktivitätsimport ist deaktiviert.",
@@ -5107,7 +5121,9 @@
       "connectSource": "Quelle verbinden",
       "reauthorizeSource": "Quelle erneut autorisieren",
       "enableSourceImport": "Quellimport aktivieren",
-      "checkSourceConnection": "Quellverbindung prüfen"
+      "checkSourceConnection": "Quellverbindung prüfen",
+      "dataUnavailable": "Nur die Aktivitätsübersicht ist verfügbar; detaillierte Aufzeichnungen konnten nicht abgerufen werden.",
+      "why": "Warum?"
     }
   },
   "V2ActivitiesStatsPage": {

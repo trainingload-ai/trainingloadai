@@ -1218,7 +1218,9 @@
       "monthlyReview": "Revisione mensile",
       "planReview": "Revisione del piano",
       "saved": "Rivedi le impostazioni salvate",
-      "saveFailed": "Impossibile salvare le impostazioni di revisione"
+      "saveFailed": "Impossibile salvare le impostazioni di revisione",
+      "athleteState": "Valutazione automatica dello stato",
+      "athleteStateDetail": "Aggiorna lo stato quando cambiano i dati rilevanti di allenamento o recupero. La piattaforma copre i costi delle valutazioni IA automatiche."
     },
     "dataExport": {
       "title": "Esporta tutti i dati",
@@ -1376,7 +1378,19 @@
       "replaceKeyConfirmTitle": "Sostituire la chiave API?",
       "replaceKeyConfirmDescription": "Questa chiave API è diversa dalla chiave salvata e potrebbe appartenere a un altro account. Il salvataggio manterrà la cronologia importata e utilizzerà la nuova chiave per la sincronizzazione futura.",
       "replaceKeyCancel": "Cancellare",
-      "replaceKeyConfirmAction": "Sostituire la chiave"
+      "replaceKeyConfirmAction": "Sostituire la chiave",
+      "lastDiscovery": "Ultima ricerca di attività",
+      "activityImport": "Ultima importazione di attività",
+      "importCounts": "{success}/{total} importate, {failed} non riuscite, {skipped} saltate",
+      "importState": {
+        "QUEUED": "In coda",
+        "RUNNING": "Importazione",
+        "POST_PROCESSING": "Post-elaborazione",
+        "COMPLETED": "Completata",
+        "PARTIAL_FAILED": "Parzialmente fallita",
+        "FAILED": "Fallita",
+        "CANCELLED": "Annullata"
+      }
     }
   },
   "UserProfile": {
@@ -5093,7 +5107,7 @@
     },
     "mirror": {
       "untitled": "Attività in attesa della sincronizzazione",
-      "discoveredVia": "Rilevata tramite Intervals.icu",
+      "discoveredVia": "Rilevata tramite {provider}",
       "syncing": "Recupero dell’attività dalla fonte in corso.",
       "connectionRequired": "L’integrazione corrente non può fornire l’attività completa. Controlla la connessione alla fonte.",
       "importDisabled": "La fonte è connessa, ma l’importazione automatica delle attività è disattivata.",
@@ -5107,7 +5121,9 @@
       "connectSource": "Collega fonte",
       "reauthorizeSource": "Autorizza di nuovo la fonte",
       "enableSourceImport": "Attiva importazione dalla fonte",
-      "checkSourceConnection": "Controlla connessione alla fonte"
+      "checkSourceConnection": "Controlla connessione alla fonte",
+      "dataUnavailable": "È disponibile solo il riepilogo dell’attività; non è stato possibile recuperare i dati dettagliati.",
+      "why": "Perché?"
     }
   },
   "V2ActivitiesStatsPage": {

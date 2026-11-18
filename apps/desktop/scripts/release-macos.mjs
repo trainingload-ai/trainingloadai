@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import { checkMacSigning, notaryArguments } from "./macos-signing.mjs";
 import { runtimeSourceCommit } from "../src/runtime/core-source.mjs";
 import { runMacStapler } from "./macos-ticket.mjs";
+import { checkMacCredentialAccess } from "./macos-credential-check.mjs";
 
 const desktop = join(dirname(fileURLToPath(import.meta.url)), "..");
 const signing = checkMacSigning();
@@ -104,9 +105,11 @@ try {
   run("pnpm", ["run", "runtime:prepare"]);
   // Reject missing or stale provenance before signing or Apple submissions.
   const sourceCommit = runtimeSourceCommit(
-    JSON.parse(readFileSync(join(desktop, "build/app/runtime-size.json"), "utf8")),
+    JSON.parse(
+      readFileSync(join(desktop, "build/app/runtime-size.json"), "utf8"),
+    ),
     environment.GITHUB_ACTIONS === "true"
-      ? environment.GITHUB_SHA ?? ""
+      ? (environment.GITHUB_SHA ?? "")
       : undefined,
   );
   run("pnpm", ["run", "runtime:smoke"]);
@@ -127,6 +130,8 @@ try {
     "Trainingload.ai.app",
   );
   run("codesign", ["--verify", "--deep", "--strict", "--verbose=2", app]);
+  step("verify signed Keychain access without user interaction");
+  const credentials = await checkMacCredentialAccess(app, signing);
   const submissionZip = join(staging, "application-for-notarization.zip");
   run("ditto", [
     "-c",
@@ -255,6 +260,7 @@ try {
     teamId: signing.teamId,
     signed: true,
     notarized: true,
+    credentials,
     submissions,
     artifacts,
     directory: output,

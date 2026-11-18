@@ -11,7 +11,11 @@ import {
   useFeatureAccess,
   type ProductFeature,
 } from "@/api/feature-access";
-import { getUserSettings, updateUserSetting } from "@/api/settings";
+import {
+  getUserSettings,
+  updateUserSetting,
+  athleteStateAutoEnabled,
+} from "@/api/settings";
 import { queryKeys } from "@/lib/query-keys";
 
 type ReviewFeatureKey =
@@ -66,13 +70,30 @@ export function ReviewAutomationSettings() {
     queryFn: getUserSettings,
   });
   const [savingReviewFeatures, setSavingReviewFeatures] = useState(false);
-  const [reviewFeatures, setReviewFeatures] = useState(
-    DEFAULT_REVIEW_FEATURES,
-  );
+  const [reviewFeatures, setReviewFeatures] = useState(DEFAULT_REVIEW_FEATURES);
 
   useEffect(() => {
     setReviewFeatures(parseReviewFeatures(userSettings?.AI_REVIEW_MODE));
   }, [userSettings?.AI_REVIEW_MODE]);
+
+  const [savingState, setSavingState] = useState(false);
+  const stateEnabled = athleteStateAutoEnabled(
+    userSettings?.ATHLETE_STATE_AUTO_ENABLED,
+  );
+  const toggleState = async (enabled: boolean) => {
+    setSavingState(true);
+    try {
+      await updateUserSetting("ATHLETE_STATE_AUTO_ENABLED", String(enabled));
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.user.settings(),
+      });
+      toast.success(t("reviewAutomation.saved"));
+    } catch {
+      toast.error(t("reviewAutomation.saveFailed"));
+    } finally {
+      setSavingState(false);
+    }
+  };
 
   const hasAnyReviewAccess = Object.values(ACCESS_FEATURE_BY_REVIEW).some(
     (feature) => featureAllowed(access, feature),
@@ -118,6 +139,30 @@ export function ReviewAutomationSettings() {
               {t("reviewAutomation.accessRequired")}
             </p>
           ) : null}
+          <div className="flex items-center justify-between gap-3 rounded-control bg-background px-3 py-2.5">
+            <div className="space-y-1">
+              <label
+                htmlFor="athlete-state-auto"
+                className="text-sm text-foreground/85"
+              >
+                {t("reviewAutomation.athleteState")}
+              </label>
+              <p className="text-xs text-muted-foreground">
+                {t("reviewAutomation.athleteStateDetail")}
+              </p>
+            </div>
+            <Switch
+              id="athlete-state-auto"
+              checked={stateEnabled}
+              disabled={
+                savingState ||
+                !userSettings ||
+                !featureAllowed(access, "ai.coach") ||
+                !hasAiDataConsent
+              }
+              onCheckedChange={toggleState}
+            />
+          </div>
           <div className="grid gap-2 sm:grid-cols-2">
             {(
               [

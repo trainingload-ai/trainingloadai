@@ -29,25 +29,18 @@ export class PmcInvalidateListener {
         userId: event.userId,
         startDate: event.startDate,
         endDate,
+        requestAthleteStateUpdate: !event.suppressAthleteStateReassessment,
       });
-      if (!event.suppressAthleteStateReassessment) {
-        await emitAthleteStateReassessRequested(this.events, {
-          userId: event.userId,
-          triggerType: 'PMC_UPDATED',
-        });
-      }
+
       return;
     }
 
     this.logger.log(
       `[pmc.invalidate] full window recalculate userId=${event.userId}`,
     );
-    await this.pmc.recalculatePMC(event.userId);
-    if (!event.suppressAthleteStateReassessment) {
-      await emitAthleteStateReassessRequested(this.events, {
-        userId: event.userId,
-        triggerType: 'PMC_UPDATED',
-      });
-    }
+    await this.pmc.recalculatePMC(
+      event.userId,
+      !event.suppressAthleteStateReassessment,
+    );
   }
 }

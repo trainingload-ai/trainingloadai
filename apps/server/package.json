@@ -1,6 +1,6 @@
 {
   "name": "@trainingloadai/server",
-  "version": "1.1.22",
+  "version": "1.1.26",
   "description": "",
   "author": "",
   "private": true,
@@ -25,7 +25,8 @@
     "preactivity-data:migrate": "pnpm build:selfhost",
     "activity-data:migrate": "TS_NODE_PROJECT=tsconfig.selfhost.json node -r tsconfig-paths/register dist-selfhost/apps/server/src/importing/activity-data-migration.command.js",
     "vdot:fit": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-fit.command.ts",
-    "vdot:export": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-export.command.ts"
+    "vdot:export": "TS_NODE_PROJECT=tsconfig.selfhost.json ts-node -r tsconfig-paths/register src/training-load/vdot-forecast-export.command.ts",
+    "test:oauth-authorization": "node --experimental-strip-types --test src/auth/spec/oauth-authorization-revision.runtime.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.70",
@@ -73,7 +74,7 @@
     "rxjs": "^7.8.2",
     "saxes": "6.0.0",
     "sharp": "0.35.5",
-    "trackswap": "0.2.6",
+    "trackswap": "0.2.7",
     "tz-lookup": "^6.1.25",
     "uuid": "^11.1.0",
     "yauzl": "^3.3.2",

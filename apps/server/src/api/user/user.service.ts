@@ -1,3 +1,4 @@
+import { AthleteStateFitnessFacts } from '@/athlete-state/updates/athlete-state-fitness-facts.service';
 import { lockFitnessUser } from '@/prisma/fitness-write-lock';
 import dayjs = require('dayjs');
 import { createHash } from 'crypto';
@@ -177,6 +178,7 @@ export class UserService {
     private readonly events: EventEmitter2,
     private readonly users: UserQueryService,
     private readonly analysisConfigs: UserAnalysisConfigService,
+    private readonly stateFitness: AthleteStateFitnessFacts,
   ) {}
 
   private analysisConfigVersions() {
@@ -218,7 +220,7 @@ export class UserService {
   ): Promise<T> {
     return this.prisma.$transaction(async (tx) => {
       await lockFitnessUser(tx, userId);
-      return operation(tx);
+      return this.stateFitness.observe(userId, tx, () => operation(tx));
     }, FITNESS_WRITE_TRANSACTION_OPTIONS);
   }
 
@@ -1433,6 +1435,17 @@ export class UserService {
     return context;
   }
 
+  private normalizeFitnessMetricValue(
+    type: UserFitnessMetricType,
+    value: number,
+  ): number {
+    // Pace metrics use m/s, so rounding to integers changes the threshold itself.
+    return type === UserFitnessMetricType.TP ||
+      type === UserFitnessMetricType.CS
+      ? value
+      : round(value);
+  }
+
   private async persistFitnessMetricBySource(
     userId: string,
     type: UserFitnessMetricType,
@@ -1490,18 +1503,26 @@ export class UserService {
       orderBy: { recordedAt: 'desc' },
     });
 
-    const isValueDiff = !current || Math.abs(current.value - value) > 0.001;
+    const valueTolerance =
+      type === UserFitnessMetricType.TP || type === UserFitnessMetricType.CS
+        ? 0
+        : 0.001;
+    const isValueDiff =
+      !current || Math.abs(current.value - value) > valueTolerance;
     const isOriginDiff = current
       ? this.hasOriginDiff(current, originData)
       : true;
+    const persistedValue = this.normalizeFitnessMetricValue(type, value);
+    const persistedValue2 =
+      value2 == null ? value2 : this.normalizeFitnessMetricValue(type, value2);
 
     if (current && dayjs(current.recordedAt).isSame(dayjs(recordedAt), 'day')) {
       if (forceRecord || isValueDiff || isOriginDiff) {
         const updated = await this.users.fitnessMetrics(tx).update({
           where: { id: current.id },
           data: {
-            value: round(value),
-            value2: round(value2),
+            value: persistedValue,
+            value2: persistedValue2,
             source,
             recordedAt: new Date(
               `${dayjs(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`,
@@ -1529,8 +1550,8 @@ export class UserService {
           userId,
           type,
           sport,
-          value: round(value),
-          value2: round(value2),
+          value: persistedValue,
+          value2: persistedValue2,
           source,
           recordedAt: new Date(
             `${dayjs(recordedAt).format('YYYY-MM-DD')}T00:00:00.000Z`,
@@ -1661,7 +1682,7 @@ export class UserService {
     return this.upsertFitnessMetric(
       options.userId,
       options.type,
-      round(options.value),
+      this.normalizeFitnessMetricValue(options.type, options.value),
       sportType,
       undefined,
       MetricSource.MANUAL,

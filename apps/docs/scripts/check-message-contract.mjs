@@ -18,12 +18,33 @@ const messagesDirectory = path.resolve(
 // for content still awaiting review, but strings rendered by every locale must
 // exist explicitly when their absence would otherwise only log during SSG.
 const requiredLocalizedStrings = [
+  "accessibility.skipToContent",
+  "accessibility.previewImage",
+  "accessibility.previewImageNamed",
+  "accessibility.imagePreview",
+  "accessibility.closePreview",
+  "accessibility.preview",
+  "docsUi.searchNoResult",
+  "docsUi.toc",
+  "docsUi.tocNoHeadings",
+  "docsUi.lastUpdate",
+  "docsUi.nextPage",
+  "docsUi.previousPage",
+  "docsUi.editOnGithub",
+  "docsUi.search",
+  "docsUi.chooseLanguage",
+  "docsUi.chooseTheme",
+
   "languageSuggestion.label",
   "languageSuggestion.message",
   "languageSuggestion.switch",
   "languageSuggestion.dismiss",
   "header.searchDocs",
   "header.openDocsMenu",
+  "docsScreenshot.openDemo",
+  "docsScreenshot.openWebDemo",
+  "docsScreenshot.webPlatform",
+  "docsScreenshot.mobilePlatform",
   "alternatives.ctaTitle",
   "alternatives.ctaText",
   "home.bottomCta.secondaryButton",
@@ -103,7 +124,6 @@ collectStrings(
 );
 for (const key of [
   "recordingAlt",
-  "watchAlt",
   "planAlt",
   "webPlanAlt",
   "webLoadAlt",

@@ -28,6 +28,36 @@ function decision(
 }
 
 describe('CoachStateContextService', () => {
+  it('exposes a Skill assessment to today advice without requiring a Case', async () => {
+    const expiresAt = new Date(Date.now() + 3_600_000);
+    const service = new CoachStateContextService({
+      athleteStateAssessment: {
+        findFirst: jest.fn(async () => ({
+          id: 'state',
+          state: 'STABLE',
+          decisionReadiness: 'SUFFICIENT',
+          evidenceHash: 'new-facts',
+          expiresAt,
+        })),
+      },
+      coachAssessmentCase: { findFirst: jest.fn(async () => null) },
+    } as never);
+    const state = await service.build({
+      userId: 'athlete',
+      anchorDate: '2026-11-13',
+      recentEvents: [],
+    });
+    expect(state.athleteState).toEqual({
+      caseId: null,
+      caseStatus: null,
+      assessmentId: 'state',
+      state: 'STABLE',
+      decisionReadiness: 'SUFFICIENT',
+      evidenceHash: 'new-facts',
+      decisionId: null,
+      expiresAt: expiresAt.toISOString(),
+    });
+  });
   it('projects every decision state and recent review into a compact today context', async () => {
     const prisma = {
       coachDecision: {

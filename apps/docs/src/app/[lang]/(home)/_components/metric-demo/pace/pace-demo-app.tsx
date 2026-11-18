@@ -85,7 +85,7 @@ export function PaceDemoApp({ lang }: { lang: string }) {
           <TabsContent value="curve">
             <div className="grid grid-cols-1 gap-6">
               <div className="relative hidden overflow-hidden rounded-compact border md:block">
-                <Table>
+                <Table scrollLabel={copy.pace.table.segment}>
                   <TableHeader>
                     <TableRow>
                       <TableHead>{copy.pace.table.segment}</TableHead>

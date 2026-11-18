@@ -7,6 +7,7 @@ import {
   ThirdPartyProvider,
 } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
+import type { PrismaTx } from '@/prisma/prisma-db';
 import { ImportingJobService } from './importing-job.service';
 import {
   evaluateExternalActivityMirrorMatch,
@@ -37,10 +38,11 @@ function localStartKey(value: unknown): string | null {
 
 function listActivity(rawPayload: unknown): JsonRecord {
   const raw = record(rawPayload);
-  const direct = record(raw.listActivity ?? raw.activity);
-  if (Object.keys(direct).length > 0) return direct;
   const original = record(raw.original);
-  return record(original.listActivity ?? original.activity ?? original);
+  const native = record(
+    raw.listActivity ?? original.listActivity ?? original.activity ?? original,
+  );
+  return Object.keys(native).length > 0 ? native : record(raw.activity);
 }
 
 export type ExternalActivityMirrorDto = {
@@ -89,7 +91,9 @@ function toMirrorDto(row: MirrorProjectionRow): ExternalActivityMirrorDto {
           row.resolutionReason ===
             ImportSourceResolutionReason.ORIGIN_ACTIVITY_AMBIGUOUS ||
           row.resolutionReason ===
-            ImportSourceResolutionReason.ORIGIN_SYNC_FAILED
+            ImportSourceResolutionReason.ORIGIN_SYNC_FAILED ||
+          row.resolutionReason ===
+            ImportSourceResolutionReason.UPSTREAM_DATA_UNAVAILABLE
         ? 'RETRY'
         : 'MANAGE_CONNECTION';
   return {
@@ -280,15 +284,20 @@ export class ExternalActivityMirrorService {
     endDate?: Date;
   }): Promise<ExternalActivityMirrorDto[]> {
     if ((args.page ?? 1) !== 1) return [];
-    const requestedOrigin =
-      args.provider && !['all', 'intervals_icu'].includes(args.provider)
-        ? (args.provider as ThirdPartyProvider)
-        : null;
+    const providerFilter =
+      args.provider && args.provider !== 'all'
+        ? {
+            OR: [
+              { provider: args.provider as ThirdPartyProvider },
+              { originProvider: args.provider as ThirdPartyProvider },
+            ],
+          }
+        : {};
     const rows = await this.importJobs.sourceObjects().findMany({
       where: {
         userId: args.userId,
-        sourceKind: ImportSourceKind.INTERVALS_ICU,
-        originProvider: requestedOrigin ?? { not: null },
+        originProvider: { not: null },
+        ...providerFilter,
         resolvedActivityId: null,
         resolutionStatus: {
           in: [
@@ -348,15 +357,20 @@ export class ExternalActivityMirrorService {
     startDate?: Date;
     endDate?: Date;
   }): Promise<ExternalActivityMirrorTimelineCandidate[]> {
-    const requestedOrigin =
-      args.provider && !['all', 'intervals_icu'].includes(args.provider)
-        ? (args.provider as ThirdPartyProvider)
-        : null;
+    const providerFilter =
+      args.provider && args.provider !== 'all'
+        ? {
+            OR: [
+              { provider: args.provider as ThirdPartyProvider },
+              { originProvider: args.provider as ThirdPartyProvider },
+            ],
+          }
+        : {};
 
     const where: Prisma.ImportSourceObjectWhereInput = {
       userId: args.userId,
-      sourceKind: ImportSourceKind.INTERVALS_ICU,
-      originProvider: requestedOrigin ?? { not: null },
+      originProvider: { not: null },
+      ...providerFilter,
       resolvedActivityId: null,
       resolutionStatus: {
         in: [
@@ -463,18 +477,34 @@ export class ExternalActivityMirrorService {
       }),
     );
 
-    // 4. 汇总所有评估，避免多个影子同时认领同一条正式 Activity。
-    const decision = decideMirrorResolution(assessments);
-    return this.applyResolutionDecision(args, context, decision);
+    // Exact source identity is authoritative and must not compete with fuzzy discoveries.
+    const own = assessments.find(
+      (
+        assessment,
+      ): assessment is Extract<MirrorAssessment, { kind: 'MATCH' }> =>
+        assessment.kind === 'MATCH' &&
+        assessment.mirror.id === args.sourceObjectId,
+    );
+    if (own) await this.persistResolution(args, context, own);
+    const decision = decideMirrorResolution(
+      assessments.filter((assessment) => assessment !== own),
+    );
+    const result = await this.applyResolutionDecision(args, context, decision);
+    return own
+      ? {
+          kind: 'RESOLVED',
+          mirrorId: own.mirror.id,
+          activityId: args.activityId,
+        }
+      : result;
   }
 
-  /** 查询该用户全部未解析的 Intervals 来源对象；真实来源类型不构成匹配限制。 */
+  /** Find unresolved discoveries from any source; origin only guides data retrieval. */
   private findUnresolvedMirrors(userId: string): Promise<UnresolvedMirror[]> {
     // originProvider 只用于补数路由和审计，不限制哪个 Provider 可以完成解析。
     return this.importJobs.sourceObjects().findMany({
       where: {
         userId,
-        sourceKind: ImportSourceKind.INTERVALS_ICU,
         originProvider: { not: null },
         resolvedActivityId: null,
         resolutionStatus: {
@@ -566,7 +596,7 @@ export class ExternalActivityMirrorService {
 
   /** 将纯决策转换为状态更新；只有 RESOLVE 分支会进入关联事务。 */
   private async applyResolutionDecision(
-    args: { userId: string; activityId: number },
+    args: { userId: string; activityId: number; sourceObjectId: string },
     context: ResolutionContext,
     decision: MirrorResolutionDecision,
   ): Promise<ExternalActivityMirrorResolutionResult> {
@@ -613,7 +643,7 @@ export class ExternalActivityMirrorService {
 
   /** 原子写入次级来源关联并关闭影子，不创建新的 Activity。 */
   private async persistResolution(
-    args: { userId: string; activityId: number },
+    args: { userId: string; activityId: number; sourceObjectId: string },
     context: ResolutionContext,
     resolution: Extract<MirrorAssessment, { kind: 'MATCH' }>,
   ) {
@@ -629,7 +659,8 @@ export class ExternalActivityMirrorService {
     // 解析必须原子完成：为正式 Activity 增加次级发现来源，同时关闭影子投影。
     // 不创建第二条 Activity，因此训练统计和计划课绑定仍只看到一个正式活动。
     await this.prisma.$transaction(async (tx) => {
-      await tx.activitySource.upsert({
+      if (mirror.id !== args.sourceObjectId)
+        await tx.activitySource.upsert({
         where: {
           activity_source_identity_unique: {
             userId: args.userId,
@@ -731,11 +762,15 @@ export class ExternalActivityMirrorService {
     ]);
   }
 
-  async markOriginImportFailed(args: {
-    userId: string;
-    sourceObjectId: string;
-  }) {
-    const source = await this.importJobs.sourceObjects().findUnique({
+  async markOriginImportFailed(
+    args: {
+      userId: string;
+      sourceObjectId: string;
+      reason?: ImportSourceResolutionReason;
+    },
+    tx?: PrismaTx,
+  ) {
+    const source = await this.importJobs.sourceObjects(tx).findUnique({
       where: { id: args.sourceObjectId },
       select: { provider: true, rawPayload: true },
     });
@@ -745,7 +780,7 @@ export class ExternalActivityMirrorService {
       sourceActivity.start_date_local ?? sourceActivity.start_date,
     );
     if (!start) return;
-    const candidates = await this.importJobs.sourceObjects().findMany({
+    const candidates = await this.importJobs.sourceObjects(tx).findMany({
       where: {
         userId: args.userId,
         sourceKind: ImportSourceKind.INTERVALS_ICU,
@@ -765,11 +800,12 @@ export class ExternalActivityMirrorService {
       })
       .map((candidate) => candidate.id);
     if (!ids.length) return;
-    await this.importJobs.sourceObjects().updateMany({
+    await this.importJobs.sourceObjects(tx).updateMany({
       where: { id: { in: ids } },
       data: {
         resolutionStatus: ImportSourceResolutionStatus.BLOCKED,
-        resolutionReason: ImportSourceResolutionReason.ORIGIN_SYNC_FAILED,
+        resolutionReason:
+          args.reason ?? ImportSourceResolutionReason.ORIGIN_SYNC_FAILED,
       },
     });
   }

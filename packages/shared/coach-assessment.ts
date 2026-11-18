@@ -10,7 +10,8 @@ export type CoachAssessmentInquiry = {
   question: AskUserQuestionItem;
   state: string;
   confidence: number;
-  expiresAt: string;
+  /** Legacy Case deadlines; persisted Coach interactions may have no deadline. */
+  expiresAt: string | null;
 };
 
 export type OpenCoachAssessmentCaseResult = {

@@ -1,3 +1,4 @@
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { PmcProjectionService } from './pmc-projection.service';
 import { PlanProjectionReadModule } from '@/api/plan/application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { VdotForecastService } from './vdot-forecast.service';
 
 @Module({
   imports: [
+    AthleteStateUpdatesModule,
     PrismaModule,
     PlanProjectionReadModule,
     UsersModule,

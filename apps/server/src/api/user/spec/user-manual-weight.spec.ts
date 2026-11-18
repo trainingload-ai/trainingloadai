@@ -1,3 +1,4 @@
+import { AthleteStateFitnessFacts } from '@/athlete-state/updates/athlete-state-fitness-facts.service';
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
@@ -31,6 +32,16 @@ async function createFixture(
   const moduleRef = await Test.createTestingModule({
     providers: [
       UserService,
+      {
+        provide: AthleteStateFitnessFacts,
+        useValue: {
+          observe: async (
+            _userId: unknown,
+            _tx: unknown,
+            write: () => Promise<unknown>,
+          ) => write(),
+        },
+      },
       { provide: PrismaService, useValue: {} },
       { provide: I18nService, useValue: {} },
       { provide: ConfigService, useValue: { get: jest.fn() } },
@@ -202,6 +213,13 @@ describe('UserService Coach fitness metric history', () => {
       { emitAsync: jest.fn(async () => []) } as never,
       users,
       {} as never,
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
     const tx = {
       userFitnessMetric: delegate,

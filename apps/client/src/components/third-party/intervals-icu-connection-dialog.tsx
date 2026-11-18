@@ -86,7 +86,10 @@ export function IntervalsIcuConnectionDialog({
   const { locale } = useParams();
   const currentLocale = (Array.isArray(locale) ? locale[0] : locale) ?? "en";
   const { timeFormat } = useStore();
-  const { data: status = { connected: false } } = useIntervalsIcuStatus();
+  const { data: status = { connected: false } } = useIntervalsIcuStatus(
+    true,
+    open,
+  );
   const connectIntervalsIcu = useConnectIntervalsIcu();
   const startIntervalsIcuOAuth = useStartIntervalsIcuOAuth();
   const updateIntervalsIcuSettings = useUpdateIntervalsIcuSettings();
@@ -118,13 +121,17 @@ export function IntervalsIcuConnectionDialog({
   const showAuthAction = !viewingCurrentAuthMode || replacingCurrentApiKey;
   const busy = Boolean(busyAction);
   const lastSync = formatDateTime(
-    status.lastSyncCompletedAt,
+    status.discoveryCompletedAt ?? status.lastSyncCompletedAt,
     currentLocale,
     timeFormat,
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setPendingSave(null);
+      setConfirmDisconnectOpen(false);
+      return;
+    }
 
     setApiKey("");
     setAuthMode(
@@ -230,7 +237,6 @@ export function IntervalsIcuConnectionDialog({
       const result = await connectIntervalsIcu.mutateAsync(payload);
       if (result.keyChangeConfirmationRequired) {
         setPendingSave(payload);
-        closeDialog();
         return;
       }
       setApiKey("");
@@ -317,7 +323,6 @@ export function IntervalsIcuConnectionDialog({
   };
 
   const requestDisconnect = () => {
-    closeDialog();
     setConfirmDisconnectOpen(true);
   };
 
@@ -326,6 +331,7 @@ export function IntervalsIcuConnectionDialog({
       setBusyAction("disconnect");
       await disconnectIntervalsIcu.mutateAsync();
       setConfirmDisconnectOpen(false);
+      closeDialog();
       toast.success(`Intervals.icu ${t("disconnectSuccess")}`);
     } catch (error) {
       console.error("断开 Intervals.icu 连接失败：", error);
@@ -376,7 +382,7 @@ export function IntervalsIcuConnectionDialog({
   return (
     <>
       <AdaptiveDialog
-        open={open}
+        open={open && !confirmDisconnectOpen && !pendingSave}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && busy) return;
           onOpenChange(nextOpen);
@@ -428,7 +434,7 @@ export function IntervalsIcuConnectionDialog({
                         })}
                   </div>
                   <div className="min-w-0 break-words">
-                    {t("intervalsIcu.lastSync")}:{" "}
+                    {t("intervalsIcu.lastDiscovery")}:{" "}
                     {lastSync ?? t("intervalsIcu.neverSynced")}
                   </div>
                   <div className="flex min-w-0 items-center">
@@ -437,6 +443,21 @@ export function IntervalsIcuConnectionDialog({
                     </Badge>
                   </div>
                 </div>
+                {status.activitySync ? (
+                  <div className="mt-2 min-w-0 break-words">
+                    {t("intervalsIcu.activityImport")}:{" "}
+                    {t(
+                      `intervalsIcu.importState.${status.activitySync.status}`,
+                    )}
+                    {" · "}
+                    {t("intervalsIcu.importCounts", {
+                      success: status.activitySync.successCount,
+                      total: status.activitySync.totalCount,
+                      failed: status.activitySync.failedCount,
+                      skipped: status.activitySync.skippedCount,
+                    })}
+                  </div>
+                ) : null}
                 {status.lastError ? (
                   <div className="mt-2 break-words text-destructive">
                     {t("syncError")}
@@ -628,7 +649,7 @@ export function IntervalsIcuConnectionDialog({
       </AdaptiveDialog>
 
       <AdaptiveDialog
-        open={Boolean(pendingSave)}
+        open={open && Boolean(pendingSave)}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && !busy) setPendingSave(null);
         }}
@@ -652,6 +673,7 @@ export function IntervalsIcuConnectionDialog({
               className={adaptiveDialogFooterActionButtonClassName}
               onClick={() => setPendingSave(null)}
               disabled={busy}
+              autoFocus
             >
               {t("intervalsIcu.replaceKeyCancel")}
             </Button>
@@ -671,7 +693,7 @@ export function IntervalsIcuConnectionDialog({
       </AdaptiveDialog>
 
       <AdaptiveDialog
-        open={confirmDisconnectOpen}
+        open={open && confirmDisconnectOpen}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && !busy) setConfirmDisconnectOpen(false);
         }}
@@ -697,6 +719,7 @@ export function IntervalsIcuConnectionDialog({
               className={adaptiveDialogFooterActionButtonClassName}
               onClick={() => setConfirmDisconnectOpen(false)}
               disabled={busy}
+              autoFocus
             >
               {t("disconnectConfirmCancel")}
             </Button>

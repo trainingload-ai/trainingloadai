@@ -23,6 +23,35 @@ function source(
 }
 
 describe("app entry analytics", () => {
+  it("retains the measured lactate tool through signup attribution", () => {
+    const entryUrl = new URL(
+      buildToolAppUrl({
+        locale: "zh",
+        toolId: "lactate_curve_calculator",
+        ctaPlacement: "result",
+        destination: "signup",
+      }),
+    );
+    const entry = buildAppSessionStartedProperties({
+      pathname: entryUrl.pathname,
+      authenticated: false,
+      searchParams: entryUrl.searchParams,
+      referrer: "https://www.trainingload.ai/zh/lactate-curve-calculator",
+      origin: entryUrl.origin,
+    });
+    expect(entry.source_tool_id).toBe("lactate_curve_calculator");
+    expect(entry.cta_placement).toBe("result");
+    expect(buildSignUpAttribution(entry)).toMatchObject({
+      signup_source: "docs_tool",
+      tool_name: "lactate_curve_calculator",
+    });
+    expect([...entryUrl.searchParams.keys()].sort()).toEqual([
+      "cta",
+      "from",
+      "tool",
+    ]);
+  });
+
   it("builds a stable cross-site tool attribution URL", () => {
     const url = new URL(
       buildToolAppUrl({

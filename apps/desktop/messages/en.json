@@ -69,5 +69,9 @@
   "downloadDetail": "Current version: {version}. After downloading, you can choose when to restart and install.",
   "download": "Download Update",
   "updateFailed": "Update Not Completed",
-  "updateFailedDetail": "Check your network connection and try again. Your current version and local data are retained."
+  "updateFailedDetail": "Check your network connection and try again. Your current version and local data are retained.",
+  "secureStorageUnavailable": "OS secure storage is unavailable. Unlock your login keychain and try again. Existing keys will not be replaced or reset.",
+  "credentialsUnreadable": "The saved credentials could not be decrypted. If you previously used a development or unsigned build, migrate with the original trusted runtime. Existing data and keys are retained.",
+  "credentialsMismatch": "No credentials match the existing local database. Migrate the original instance keys; reinstalling or restarting will not repair this. Your existing data is retained.",
+  "macSignatureRequired": "This macOS app is not signed with a valid Developer ID Application certificate. Install an official signed release. Use the isolated source development command for local previews. No local database or credentials have been opened."
 }

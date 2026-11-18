@@ -1,11 +1,16 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import {
   useEffect,
   useState,
   type ReactNode,
   type ComponentProps,
-  type KeyboardEvent,
 } from "react";
 import Link from "next/link";
 import { Printer, Share2 } from "lucide-react";
@@ -23,10 +28,10 @@ import {
   type Vo2Method,
   type Vo2Result,
 } from "@/lib/vo2-field";
-import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import {
   Select,
   SelectContent,
@@ -153,15 +158,6 @@ export function Vo2MaxCalculatorClient({
         "",
         `${window.location.pathname}${vo2SearchFromDraft(next)}${window.location.hash}`,
       );
-  }
-
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
-    event.preventDefault();
-    const units =
-      event.key === "ArrowRight" || event.key === "End" ? "imperial" : "metric";
-    selectUnits(units);
-    document.getElementById(`vo2-units-${units}`)?.focus();
   }
 
   function messageFor(code: Vo2FieldError) {
@@ -336,28 +332,16 @@ export function Vo2MaxCalculatorClient({
           <div className={styles.formHead}>
             <div className={styles.formTitleRow}>
               <h2>{t("panel.title")}</h2>
-              <div
-                role="radiogroup"
-                aria-label={t("units.label")}
-                className={styles.unitSwitch}
-              >
-                {(["metric", "imperial"] as const).map((units) => (
-                  <Button
-                    key={units}
-                    id={`vo2-units-${units}`}
-                    type="button"
-                    role="radio"
-                    variant="ghost"
-                    aria-checked={draft.units === units}
-                    tabIndex={draft.units === units ? 0 : -1}
-                    onClick={() => selectUnits(units)}
-                    onKeyDown={onUnitKeyDown}
-                    className={styles.unitOption}
-                  >
-                    {t(`units.${units}`)}
-                  </Button>
-                ))}
-              </div>
+              <ToolChoiceGroup
+                value={draft.units}
+                onValueChange={selectUnits}
+                label={t("units.label")}
+                options={(["metric", "imperial"] as const).map((value) => ({
+                  value,
+                  id: `vo2-units-${value}`,
+                  label: t(`units.${value}`),
+                }))}
+              />
             </div>
             <p>{t("panel.lead")}</p>
           </div>
@@ -407,31 +391,19 @@ export function Vo2MaxCalculatorClient({
               <legend className={styles.fieldLabel}>
                 {t("profile.sex.label")}
               </legend>
-              <RadioGroup
-                className={styles.choiceRow}
+              <ToolChoiceGroup
                 value={draft.sex}
-                onValueChange={(value) =>
-                  patch({ sex: value as "male" | "female" })
-                }
+                onValueChange={(next) => patch({ sex: next })}
+                label={t("profile.sex.label")}
+                options={(["male", "female"] as const).map((value) => ({
+                  value,
+                  id: `vo2-sex-${value}`,
+                  label: t(`common.gender.${value}`),
+                }))}
+                presentation="radio"
                 required
                 name="vo2-sex"
-                aria-label={t("profile.sex.label")}
-              >
-                {(["male", "female"] as const).map((sex) => (
-                  <label
-                    key={sex}
-                    className={styles.choice}
-                    htmlFor={`vo2-sex-${sex}`}
-                  >
-                    <RadioGroupItem
-                      className={styles.radioControl}
-                      id={`vo2-sex-${sex}`}
-                      value={sex}
-                    />
-                    {t(`common.gender.${sex}`)}
-                  </label>
-                ))}
-              </RadioGroup>
+              />
             </fieldset>
             <p className={styles.profileHelp}>{t("profile.help")}</p>
           </div>
@@ -734,9 +706,9 @@ export function Vo2MaxCalculatorClient({
             </p>
           ) : null}
           <div className={styles.actions}>
-            <Button type="submit" className={styles.primary}>
+            <ToolActionButton intent="primary" fullWidth type="submit">
               {t("common.buttons.calculate")}
-            </Button>
+            </ToolActionButton>
           </div>
           <p className={styles.note}>{t("panel.note")}</p>
         </form>
@@ -860,26 +832,16 @@ export function Vo2MaxCalculatorClient({
             </div>
           )}
         </section>
-        <div className={styles.scoreActions}>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={onPrint}
-            disabled={!computed}
-          >
+        <ToolResultActions>
+          <button type="button" onClick={onPrint} disabled={!computed}>
             <Printer className="size-3.5" aria-hidden />
             {t("scorecard.print")}
           </button>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={onShare}
-            disabled={!computed}
-          >
+          <button type="button" onClick={onShare} disabled={!computed}>
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("scorecard.copied") : t("scorecard.share")}
           </button>
-        </div>
+        </ToolResultActions>
       </div>
     </div>
   );

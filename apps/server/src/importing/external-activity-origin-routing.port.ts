@@ -2,7 +2,7 @@ import type {
   ImportSourceResolutionReason,
   ThirdPartyProvider,
 } from '@prisma/client';
-import type { PrismaService } from '@/prisma/prisma.service';
+import type { PrismaClientSlice } from '@/prisma/prisma-db';
 import type { IntervalsIcuActivityListItem as IntervalsActivity } from '@/integrations/intervals-icu/intervals-icu.client';
 
 export type ExternalActivityDiscoveryReason =
@@ -30,11 +30,18 @@ export type ExternalActivityDiscoveryArgs = {
   discoveryWindow?: { start: Date; end: Date };
   forceRetry?: boolean;
   confirmedOriginUnavailable?: boolean;
+  discoveryProvider?: ThirdPartyProvider;
 };
+
+export type ExternalActivityRoutingDb = PrismaClientSlice<
+  | 'importSourceObject'
+  | 'externalProviderConnection'
+  | 'originActivitySyncRequest'
+>;
 
 export interface ExternalActivityOriginRoutingExtension {
   route(
-    prisma: PrismaService,
+    prisma: ExternalActivityRoutingDb,
     args: ExternalActivityDiscoveryArgs,
   ): Promise<ExternalActivityRouteDecision | null>;
   matchesUnavailableOriginError?(error: {

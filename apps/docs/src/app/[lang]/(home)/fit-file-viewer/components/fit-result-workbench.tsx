@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -19,7 +21,8 @@ import {
   ShieldCheck,
   Timer,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToolTabsList } from "@/components/ToolTabsList";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/cn";
 import { FitRoutePanel } from "./fit-route-panel";
 import type { FitFileViewerPageMessages } from "../fit-view-copy";
@@ -321,7 +324,7 @@ function MessageGroupButton({
             {messageLabel(group, copy)}
           </span>
           {group.messageNumber != null ? (
-            <span className="shrink-0 font-mono text-[10px] font-normal text-neutral-400 dark:text-neutral-500">
+            <span className="shrink-0 font-mono text-[10px] font-normal text-neutral-500 dark:text-neutral-400">
               {idLabel(group.messageNumber)}
             </span>
           ) : null}
@@ -330,7 +333,7 @@ function MessageGroupButton({
           {new Intl.NumberFormat(lang).format(group.count)}
         </span>
       </span>
-      <span className="mt-1 block truncate font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
+      <span className="mt-1 block truncate font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
         {previewFields
           .slice(0, 5)
           .map((field) =>
@@ -534,7 +537,7 @@ function FitMessageBrowser({
         </button>
       </div>
       <div className="grid min-h-[36rem] lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <aside className="hidden border-r border-neutral-200 bg-neutral-50/70 dark:border-border dark:bg-white/[0.02] lg:flex lg:min-h-0 lg:flex-col">
+        <div className="hidden border-r border-neutral-200 bg-neutral-50/70 dark:border-border dark:bg-white/[0.02] lg:flex lg:min-h-0 lg:flex-col">
           <div className="border-b border-neutral-200 p-3 dark:border-border">
             <label className="relative block">
               <span className="sr-only">{r.messageType}</span>
@@ -581,7 +584,7 @@ function FitMessageBrowser({
               </p>
             )}
           </div>
-        </aside>
+        </div>
 
         <section className="min-w-0">
           <div className="border-b border-neutral-200 p-4 dark:border-border sm:p-5">
@@ -627,12 +630,12 @@ function FitMessageBrowser({
                   </p>
                 </div>
               </div>
-              <button
+              <ToolActionButton
+                intent="secondary"
                 type="button"
                 disabled={isExporting}
                 aria-busy={isExporting}
                 onClick={() => exportCsv(activeGroup.key)}
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-compact border border-neutral-300 bg-white px-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 disabled:opacity-50 dark:border-border dark:bg-card dark:text-neutral-200 dark:hover:bg-accent sm:h-8 sm:text-xs"
               >
                 {isExporting ? (
                   <Loader2
@@ -643,7 +646,7 @@ function FitMessageBrowser({
                   <Download aria-hidden="true" className="size-3.5" />
                 )}
                 {copy.buttons.exportCsv}
-              </button>
+              </ToolActionButton>
             </div>
 
             <label className="mt-4 block max-w-xl">
@@ -871,7 +874,7 @@ function Overview({
                 <span className="truncate font-mono font-semibold text-neutral-700 dark:text-neutral-200">
                   {messageLabel(group, r)}
                   {group.messageNumber != null ? (
-                    <span className="ml-1.5 font-normal text-neutral-400 dark:text-neutral-500">
+                    <span className="ml-1.5 font-normal text-neutral-500 dark:text-neutral-400">
                       {idLabel(group.messageNumber)}
                     </span>
                   ) : null}
@@ -1052,7 +1055,7 @@ export function FitResultWorkbench({
       ref={workbenchRef}
       tabIndex={-1}
       aria-label={`${copy.title}: ${model.fileName}`}
-      className="overflow-hidden rounded-compact border border-neutral-200 bg-white shadow-sm outline-none dark:border-border dark:bg-card"
+      className="overflow-hidden rounded-surface bg-card outline-none"
     >
       <header className="border-b border-neutral-200 bg-neutral-50/70 px-4 py-4 dark:border-border dark:bg-white/[0.025] sm:px-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1089,20 +1092,16 @@ export function FitResultWorkbench({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onReset}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact px-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 dark:text-neutral-400 dark:hover:bg-accent dark:hover:text-neutral-100 sm:h-8 sm:text-xs"
-            >
+            <ToolActionButton intent="quiet" type="button" onClick={onReset}>
               <RotateCcw aria-hidden="true" className="size-3.5" />
               {copy.buttons.reset}
-            </button>
-            <button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="primary"
               type="button"
               disabled={isExporting}
               aria-busy={isExporting}
               onClick={() => exportFile("json")}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-compact bg-neutral-950 px-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200 sm:h-8 sm:text-xs"
             >
               {isExporting ? (
                 <Loader2
@@ -1113,7 +1112,7 @@ export function FitResultWorkbench({
                 <Download aria-hidden="true" className="size-3.5" />
               )}
               {copy.buttons.exportJson}
-            </button>
+            </ToolActionButton>
           </div>
         </div>
       </header>
@@ -1129,44 +1128,61 @@ export function FitResultWorkbench({
       ) : null}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="overflow-x-auto border-b border-neutral-200 px-4 [scrollbar-width:none] dark:border-border sm:px-5 [&::-webkit-scrollbar]:hidden">
-          <TabsList className="flex h-auto w-max min-w-full justify-start rounded-none bg-transparent p-0 text-neutral-500 dark:text-neutral-400">
-            <TabsTrigger
-              value="overview"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <Activity aria-hidden="true" className="size-4" />
-              {r.overview}
-            </TabsTrigger>
-            <TabsTrigger
-              value="map"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <MapIcon aria-hidden="true" className="size-4" />
-              {r.map}
-            </TabsTrigger>
-            <TabsTrigger
-              value="chart"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <ChartNoAxesCombined aria-hidden="true" className="size-4" />
-              {r.chart}
-            </TabsTrigger>
-            <TabsTrigger
-              value="messages"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <Database aria-hidden="true" className="size-4" />
-              {r.messages}
-            </TabsTrigger>
-            <TabsTrigger
-              value="diagnostics"
-              className="min-h-11 shrink-0 gap-1.5 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 py-2.5 text-xs leading-tight shadow-none data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <ShieldCheck aria-hidden="true" className="size-4" />
-              {r.diagnostics}
-            </TabsTrigger>
-          </TabsList>
+        <div className="min-w-0 px-4 sm:px-5">
+          <ToolTabsList
+            value={activeTab}
+            label={copy.title}
+            options={[
+              {
+                value: "overview",
+                label: (
+                  <>
+                    <Activity aria-hidden="true" className="size-4" />
+                    {r.overview}
+                  </>
+                ),
+              },
+              {
+                value: "map",
+                label: (
+                  <>
+                    <MapIcon aria-hidden="true" className="size-4" />
+                    {r.map}
+                  </>
+                ),
+              },
+              {
+                value: "chart",
+                label: (
+                  <>
+                    <ChartNoAxesCombined
+                      aria-hidden="true"
+                      className="size-4"
+                    />
+                    {r.chart}
+                  </>
+                ),
+              },
+              {
+                value: "messages",
+                label: (
+                  <>
+                    <Database aria-hidden="true" className="size-4" />
+                    {r.messages}
+                  </>
+                ),
+              },
+              {
+                value: "diagnostics",
+                label: (
+                  <>
+                    <ShieldCheck aria-hidden="true" className="size-4" />
+                    {r.diagnostics}
+                  </>
+                ),
+              },
+            ]}
+          />
         </div>
 
         <TabsContent

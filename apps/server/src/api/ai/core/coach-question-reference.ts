@@ -1,6 +1,38 @@
 import type { PrismaService } from '@/prisma/prisma.service';
 import { parseCoachQuestionReplyLikeToolResultPayload } from '@shared/ai-coach-schema';
 import { getStoredCoachLegacyMessage } from './coach-history-messages';
+import type { StoredCoachMessageRow } from './coach-history-messages';
+
+/** Restore an owned question when its turn is outside the bounded history window. */
+export function restoreReferencedQuestion(
+  rows: StoredCoachMessageRow[],
+  question: unknown,
+  toolUseId: string,
+) {
+  if (!question) return;
+  const alreadyPresent = rows.some((row) => {
+    const body = getStoredCoachLegacyMessage(row.message) as {
+      content?: Array<{ id?: string }>;
+    } | null;
+    return body?.content?.some((block) => block.id === toolUseId);
+  });
+  if (!alreadyPresent)
+    rows.unshift({
+      role: 'ASSISTANT',
+      content: '',
+      message: {
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool_use',
+            id: toolUseId,
+            name: 'AskUserQuestion',
+            input: question,
+          },
+        ],
+      },
+    });
+}
 
 /** Resolve the stable tool id as well as legacy database message references. */
 export async function loadReferencedCoachQuestion(
@@ -76,7 +108,13 @@ export async function loadReferencedCoachQuestion(
           content?: Array<{
             id?: string;
             name?: string;
-            input?: { metadata?: { branchId?: string | null; skill?: string } };
+            input?: {
+              metadata?: {
+                branchId?: string | null;
+                skill?: string;
+                source?: string;
+              };
+            };
           }>;
         }
       | undefined

@@ -15,6 +15,7 @@ module.exports = {
     '<rootDir>/auth/self-host-mail-auth.spec.ts',
     '<rootDir>/auth/spec/signup-policy.spec.ts',
     '<rootDir>/bootstrap/spec/deployment-edition.spec.ts',
+    '<rootDir>/bootstrap/spec/managed-http-middleware.spec.ts',
     '<rootDir>/bootstrap/spec/self-host-network-security.spec.ts',
     '<rootDir>/api/intervals-icu/spec/intervals-icu-capability.spec.ts',
     '<rootDir>/api/ai/ai-operations.controller.spec.ts',

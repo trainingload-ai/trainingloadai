@@ -31,6 +31,10 @@ const WORKOUT_TREE_INCLUDE = {
   },
 } satisfies Prisma.PlanWorkoutInclude;
 
+type SyncedWorkout = Prisma.PlanWorkoutGetPayload<{
+  include: typeof WORKOUT_TREE_INCLUDE;
+}>;
+
 /**
  * 第三方计划同步用的 Plan 表门面。Intervals.icu 等不要直查 plan*。
  */
@@ -142,6 +146,50 @@ export class PlanExternalSyncService {
     });
     if (!workout || !this.workoutTargetResolver) return workout;
     return this.workoutTargetResolver.resolveWorkout(userId, workout);
+  }
+
+  /** Delete the exact inspected revision; completed/activity-linked history is retained. */
+  async deleteSyncedWorkout(args: {
+    userId: string;
+    workoutId: string;
+    updatedAt?: Date;
+    revision?: number;
+  }): Promise<'deleted' | 'missing' | 'changed' | 'protected'> {
+    return this.runTransaction(async (tx) => {
+      const current = await this.workouts.findFirst(
+        { where: { id: args.workoutId, userId: args.userId } },
+        tx,
+      );
+      if (!current) return 'missing';
+      if (
+        (args.updatedAt &&
+          current.updatedAt.getTime() !== args.updatedAt.getTime()) ||
+        (args.revision !== undefined && current.revision !== args.revision)
+      )
+        return 'changed';
+      const linked = await this.links.findFirst(
+        {
+          where: { planWorkoutId: current.id, unlinkedAt: null },
+          select: { id: true },
+        },
+        tx,
+      );
+      if (linked || current.status === 'DONE' || current.status === 'SKIPPED') {
+        return 'protected';
+      }
+      const result = await this.workouts.deleteMany(
+        {
+          where: {
+            id: current.id,
+            userId: args.userId,
+            updatedAt: current.updatedAt,
+            revision: current.revision,
+          },
+        },
+        tx,
+      );
+      return result.count === 1 ? 'deleted' : 'changed';
+    });
   }
 
   findMapping<T extends Prisma.PlanWorkoutExternalMappingFindFirstArgs>(
@@ -314,16 +362,21 @@ export class PlanExternalSyncService {
     return this.pickNextSessionIndex(rows, preferred);
   }
 
-  async createIndependentWorkout(args: {
-    userId: string;
-    scheduledDate: Date;
-    sportType: SportType;
-    sportDefinitionCode?: string | null;
-    name?: string | null;
-    text?: string | null;
-    notes?: string | null;
-    blocks: PlanBlock[];
-  }) {
+  async createIndependentWorkout(
+    args: {
+      userId: string;
+      scheduledDate: Date;
+      sportType: SportType;
+      sportDefinitionCode?: string | null;
+      name?: string | null;
+      text?: string | null;
+      notes?: string | null;
+      blocks: PlanBlock[];
+    },
+    initializeMapping?: (
+      workout: SyncedWorkout,
+    ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
+  ) {
     return this.runTransaction(async (tx) => {
       const sessionIndex = await this.nextIndependentSessionIndex(
         tx,
@@ -350,6 +403,17 @@ export class PlanExternalSyncService {
       );
       await this.replaceWorkoutSteps(tx, created.id, args.blocks);
       await this.estimateWorkoutLoad(created.id, tx);
+      if (initializeMapping) {
+        const stored = await this.workouts.findFirst(
+          {
+            where: { id: created.id, userId: args.userId },
+            include: WORKOUT_TREE_INCLUDE,
+          },
+          tx,
+        );
+        if (!stored) throw new Error('Imported workout readback failed');
+        await this.links.createMapping({ data: initializeMapping(stored) }, tx);
+      }
       return { ...created, planId: null };
     });
   }
@@ -369,6 +433,7 @@ export class PlanExternalSyncService {
     status: PlanWorkoutStatus | string;
     blocks: PlanBlock[];
     dayOffset: number;
+    expectedUpdatedAt?: Date;
   }) {
     return this.runTransaction(async (tx) => {
       const current = await this.workouts.findUnique(
@@ -383,6 +448,12 @@ export class PlanExternalSyncService {
       );
       if (!current || current.userId !== args.userId) {
         throw new Error('Imported workout not found');
+      }
+      if (
+        args.expectedUpdatedAt &&
+        current.updatedAt.getTime() !== args.expectedUpdatedAt.getTime()
+      ) {
+        throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
       }
       if (current.plan) {
         const timezone = await this.users.getPreferredTimezone(args.userId, tx);
@@ -458,7 +529,7 @@ export class PlanExternalSyncService {
           );
       const updated = await this.workouts.update(
         {
-          where: { id: args.workoutId },
+          where: { id: args.workoutId, updatedAt: current.updatedAt },
           data: {
             userId: args.userId,
             planId: args.targetPlanId,

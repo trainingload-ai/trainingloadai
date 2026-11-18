@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
   type FocusEvent,
@@ -9,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Pause, Play } from "lucide-react";
 import { ProductBrowserWindow } from "@/components/ProductBrowserChrome";
 import { TrackedLink } from "@/components/TrackedLink";
 import { publicDemoDestination } from "@/lib/public-demo-url";
@@ -265,6 +266,8 @@ export function HomeProductShowcase({
   lang: string;
   modules: HomeProductShowcaseModule[];
 }) {
+  const tAccessibility = useTranslations("accessibility");
+  const [userPaused, setUserPaused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
   const [inView, setInView] = useState(false);
@@ -357,7 +360,8 @@ export function HomeProductShowcase({
     !pointerPaused &&
     !focusPaused &&
     !documentHidden &&
-    !reduceMotion;
+    !reduceMotion &&
+    !userPaused;
 
   useEffect(() => {
     // A resumed carousel always gets a full viewing interval. Carrying over a
@@ -451,6 +455,21 @@ export function HomeProductShowcase({
           </p>
         </div>
 
+        {modules.length > 1 && !reduceMotion ? (
+          <button
+            type="button"
+            onClick={() => setUserPaused((current) => !current)}
+            className="mt-5 inline-flex min-h-9 items-center gap-2 rounded-control px-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            {userPaused ? (
+              <Play aria-hidden="true" className="size-4" />
+            ) : (
+              <Pause aria-hidden="true" className="size-4" />
+            )}
+            {tAccessibility(userPaused ? "resumeAnimation" : "pauseAnimation")}
+          </button>
+        ) : null}
+
         <div className="mt-9 grid overflow-hidden rounded-overlay bg-card shadow-xs ring-1 ring-border/70 md:mt-10 lg:grid-cols-[minmax(17rem,0.36fr)_minmax(0,0.64fr)]">
           <div
             role="tablist"
@@ -539,6 +558,7 @@ export function HomeProductShowcase({
                   key={`outgoing-${outgoingPreview.id}`}
                   className={`${styles.previewLayer} ${styles.previewExit}`}
                   aria-hidden="true"
+                  inert
                 >
                   <div className="mx-auto w-full max-w-[850px] py-5 sm:py-7">
                     <ProductScreens

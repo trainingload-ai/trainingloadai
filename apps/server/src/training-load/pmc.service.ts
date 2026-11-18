@@ -153,6 +153,7 @@ export interface PMCCalculationParams {
   endDate: Date;
   ctlTimeConstant?: number; // CTL time constant, default 42 days
   atlTimeConstant?: number; // ATL time constant, default 7 days
+  requestAthleteStateUpdate?: boolean;
   recalculateAll?: boolean; // Whether to recalculate all data
 }
 @Injectable()
@@ -393,7 +394,11 @@ export class PMCService {
     );
     // this.logger.log(`[PMCService] 计算结果为 ${JSON.stringify(pmcResults)}`);
     // 4. Save calculation results
-    await this.savePMCData(userId, pmcResults);
+    await this.savePMCData(
+      userId,
+      pmcResults,
+      params.requestAthleteStateUpdate,
+    );
 
     await this.updatePMCExtremes(pmcResults);
 
@@ -407,7 +412,10 @@ export class PMCService {
    * 手动触发重新计算
    * Directly calculate last 60 days
    */
-  async recalculatePMC(userId: string): Promise<boolean> {
+  async recalculatePMC(
+    userId: string,
+    requestAthleteStateUpdate = false,
+  ): Promise<boolean> {
     this.logger.log(`开始手动计算用户${userId}过去60天的数据`);
     // tomorrow
     const endDate = pmcDayEnd(dayjs.utc().add(1, 'day').toDate()).toDate();
@@ -420,6 +428,7 @@ export class PMCService {
       startDate,
       endDate,
       recalculateAll: true,
+      requestAthleteStateUpdate,
     });
 
     return true;
@@ -1103,13 +1112,19 @@ export class PMCService {
   private async savePMCData(
     userId: string,
     results: PMCCalculationResult[],
+    requestStateUpdate = false,
   ): Promise<void> {
     try {
       // We can't use a simple transaction with userId_date unique key anymore because we have multiple entries per day (TSS and TRIMP)
       // The schema has @@unique([userId, date, type])
       // So we need to specify type in the where clause.
 
-      await this.pmc.saveDailySeries(userId, results, PMC_ALGORITHM_VERSION);
+      await this.pmc.saveDailySeries(
+        userId,
+        results,
+        PMC_ALGORITHM_VERSION,
+        requestStateUpdate,
+      );
     } catch (error) {
       this.logger.error(
         `[savePMCData] 保存 PMC 数据失败：${

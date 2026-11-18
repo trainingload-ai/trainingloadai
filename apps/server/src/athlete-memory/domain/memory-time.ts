@@ -1,9 +1,46 @@
 const OFFSET_ISO = /(?:Z|[+-]\d{2}:\d{2})$/i;
 
+export type MemoryValidationIssue = {
+  field: string;
+  reason:
+    | 'missing'
+    | 'wrong_type'
+    | 'empty'
+    | 'too_long'
+    | 'invalid_value'
+    | 'budget_exhausted';
+  actualLength?: number;
+  maxLength?: number;
+};
+
 export class MemoryValidationError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly issue?: MemoryValidationIssue,
+  ) {
     super(message);
     this.name = 'MemoryValidationError';
+  }
+}
+
+export function atMemoryValidationPath<T>(path: string, validate: () => T): T {
+  try {
+    return validate();
+  } catch (error) {
+    if (
+      error instanceof MemoryValidationError &&
+      !(error instanceof MemoryIsolationError)
+    ) {
+      const issue = error.issue ?? {
+        field: 'decision',
+        reason: 'invalid_value' as const,
+      };
+      throw new MemoryValidationError(error.message, {
+        ...issue,
+        field: issue.field === 'decision' ? path : `${path}.${issue.field}`,
+      });
+    }
+    throw error;
   }
 }
 
@@ -24,7 +61,10 @@ export function assertIanaTimezone(value: string): string {
   try {
     new Intl.DateTimeFormat('en-US', { timeZone: timezone }).format();
   } catch {
-    throw new MemoryValidationError('Invalid IANA timezone');
+    throw new MemoryValidationError('Invalid IANA timezone', {
+      field: 'timezone',
+      reason: 'invalid_value',
+    });
   }
   return timezone;
 }
@@ -38,11 +78,20 @@ export function parseMemoryInstant(
   // timestamp. The Judge receives the IANA zone and must return an absolute
   // instant with an explicit offset; we then normalize it to UTC for storage.
   if (typeof value !== 'string' || !OFFSET_ISO.test(value)) {
-    throw new MemoryValidationError(`${field} must include an explicit offset`);
+    throw new MemoryValidationError(
+      `${field} must include an explicit offset`,
+      {
+        field,
+        reason: 'invalid_value',
+      },
+    );
   }
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) {
-    throw new MemoryValidationError(`${field} is invalid`);
+    throw new MemoryValidationError(`${field} is invalid`, {
+      field,
+      reason: 'invalid_value',
+    });
   }
   return date;
 }
@@ -59,14 +108,20 @@ export function assertMemoryTimeRange(args: {
     args.eventEnd &&
     args.eventEnd.getTime() < args.eventStart.getTime()
   ) {
-    throw new MemoryValidationError('eventEnd must not precede eventStart');
+    throw new MemoryValidationError('eventEnd must not precede eventStart', {
+      field: 'eventEnd',
+      reason: 'invalid_value',
+    });
   }
   if (
     args.validFrom &&
     args.validUntil &&
     args.validUntil.getTime() < args.validFrom.getTime()
   ) {
-    throw new MemoryValidationError('validUntil must not precede validFrom');
+    throw new MemoryValidationError('validUntil must not precede validFrom', {
+      field: 'validUntil',
+      reason: 'invalid_value',
+    });
   }
   const latestEvent = Math.max(
     args.eventStart?.getTime() ?? 0,
@@ -76,6 +131,7 @@ export function assertMemoryTimeRange(args: {
   if (latestEvent > args.assertedAt.getTime() + fiveYears) {
     throw new MemoryValidationError(
       'Event time is unreasonably far in the future',
+      { field: 'eventStart', reason: 'invalid_value' },
     );
   }
 }

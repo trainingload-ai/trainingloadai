@@ -1,6 +1,6 @@
 import { Logger, type Type } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { ModuleRef, NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { resolve } from 'path';
 
@@ -73,6 +73,24 @@ export async function bootstrapApplication(
 
   registerIntervalsIcuWebhookBodyParser(app);
   registerPersonalProviderBodyParser(app);
+  let managedStartup: ManagedStartup | undefined;
+  try {
+    // ModuleRef permits an optional lookup without the application proxy's
+    // fatal exception handler intercepting an absent deployment provider.
+    managedStartup = app
+      .get(ModuleRef)
+      .get<ManagedStartup>(MANAGED_STARTUP, { strict: false });
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      error.constructor.name !== 'UnknownElementException'
+    )
+      throw error;
+    // Self-host does not install a Managed startup provider.
+  }
+  // Keep this outside the optional-provider lookup: configuration failures must
+  // abort startup rather than silently leaving route parsers unregistered.
+  managedStartup?.configureHttpMiddleware?.(app);
   app.enableShutdownHooks();
   app.useGlobalPipes(createGlobalValidationPipe());
   app.useGlobalInterceptors(app.get(ResponseInterceptor));
@@ -114,12 +132,7 @@ export async function bootstrapApplication(
       '[bootstrap] 已跳过第三方 webhook 远端自动注册（当前部署未启用或未设置 THIRD_PARTY_WEBHOOK_BOOTSTRAP=true）',
     );
   } else {
-    let managedStartup: ManagedStartup | undefined;
-    try {
-      managedStartup = app.get<ManagedStartup>(MANAGED_STARTUP, {
-        strict: false,
-      });
-    } catch {
+    if (!managedStartup) {
       logger.warn('[bootstrap] 当前部署未装配远端 Webhook 初始化器');
     }
     await managedStartup?.initializeRemoteWebhooks();

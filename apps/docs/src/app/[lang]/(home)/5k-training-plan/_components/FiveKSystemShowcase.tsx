@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { TrackedLink } from "@/components/TrackedLink";
 import type { RunningPlanSlug } from "@/lib/running-plan-pages";
@@ -32,19 +32,20 @@ export function FiveKSystemShowcase({
   calendarHref: string;
   calendarLabel: string;
 }) {
+  const id = useId();
+  const panelRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const activeModule = modules[activeIndex];
-  const kind = KINDS[activeIndex] ?? "calendar";
+  useEffect(() => {
+    const listeners = panelRefs.current.map((panel, index) => {
+      const reveal = () => setActiveIndex(index);
+      panel?.addEventListener("beforematch", reveal);
+      return () => panel?.removeEventListener("beforematch", reveal);
+    });
+    return () => listeners.forEach((remove) => remove());
+  }, []);
 
-  if (!activeModule) return null;
-
-  const moduleHref =
-    kind === "analysis"
-      ? `${prefix}/training-load`
-      : kind === "coach"
-        ? `${prefix}/ai-coach`
-        : calendarHref;
+  if (!modules.length) return null;
 
   const selectTab = (nextIndex: number) => {
     setActiveIndex(nextIndex);
@@ -69,15 +70,11 @@ export function FiveKSystemShowcase({
             ref={(node) => {
               tabRefs.current[index] = node;
             }}
-            id={`system-tab-${index}`}
+            id={`${id}-tab-${index}`}
             type="button"
             role="tab"
             aria-selected={activeIndex === index}
-            aria-controls="system-panel"
             tabIndex={activeIndex === index ? 0 : -1}
-            className={
-              activeIndex === index ? styles.systemTabActive : undefined
-            }
             onClick={() => setActiveIndex(index)}
             onKeyDown={(event) => {
               if (event.key === "ArrowUp") {
@@ -111,35 +108,61 @@ export function FiveKSystemShowcase({
         ))}
       </div>
 
-      <article
-        id="system-panel"
-        role="tabpanel"
-        aria-labelledby={`system-tab-${activeIndex}`}
-        className={styles.systemPanel}
-      >
-        <FiveKSystemPreview
-          kind={kind}
-          lang={lang}
-          label={activeModule.title}
-          planSlug={slug}
-        />
-        <div className={styles.systemPanelFooter}>
-          <span>{activeModule.points.join(" · ")}</span>
-          <TrackedLink
-            href={moduleHref}
-            eventName="plan_product_module_click"
-            eventProperties={{
-              slug,
-              module: activeModule.name,
-              placement: "system_flow",
-            }}
-            className={styles.textLink}
-          >
-            {activeModule.cta ?? calendarLabel}
-            <ArrowRight aria-hidden="true" />
-          </TrackedLink>
-        </div>
-      </article>
+      <div className={styles.systemPanels}>
+        {modules.map((module, index) => {
+          const kind = KINDS[index] ?? "calendar";
+          const href =
+            kind === "analysis"
+              ? `${prefix}/training-load`
+              : kind === "coach"
+                ? `${prefix}/ai-coach`
+                : calendarHref;
+          return (
+            <div
+              key={module.name}
+              ref={(node) => {
+                panelRefs.current[index] = node;
+                // React normalizes hidden to a boolean; enhance the hydrated panel.
+                if (node && activeIndex !== index)
+                  node.setAttribute("hidden", "until-found");
+              }}
+              id={`${id}-panel-${index}`}
+              role="tabpanel"
+              aria-labelledby={`${id}-tab-${index}`}
+              hidden={activeIndex !== index}
+              aria-hidden={activeIndex !== index}
+              className={styles.systemTabPanel}
+            >
+              <div className={styles.systemPanel}>
+                {activeIndex === index ? (
+                  <FiveKSystemPreview
+                    kind={kind}
+                    lang={lang}
+                    label={module.title}
+                    planSlug={slug}
+                  />
+                ) : null}
+                <div className={styles.systemPanelFooter}>
+                  <span>{module.points.join(" · ")}</span>
+                  <TrackedLink
+                    href={href}
+                    eventName="plan_product_module_click"
+                    eventProperties={{
+                      slug,
+                      module: module.name,
+                      placement: "system_flow",
+                    }}
+                    className={styles.textLink}
+                  >
+                    {module.cta ?? calendarLabel}
+                    <ArrowRight aria-hidden="true" />
+                  </TrackedLink>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

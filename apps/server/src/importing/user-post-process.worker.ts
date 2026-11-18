@@ -10,7 +10,17 @@ import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobService } from './importing-job.service';
-import { ChronologicalActivityReplayService } from '@/analyze/chronological-activity-replay.service';
+import {
+  ChronologicalActivityReplayService,
+  FitnessEvidenceRevisionDriftError,
+} from '@/analyze/chronological-activity-replay.service';
+import {
+  DEFAULT_POST_PROCESS_MAX_WAIT_MS,
+  DEFAULT_POST_PROCESS_QUIET_MS,
+  MAX_EVIDENCE_DRIFT_DEFERRALS,
+  postProcessCoalescingSql,
+  postProcessWindowMs,
+} from './post-process-coalescing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { ActivityService } from '@/api/activity/activity.service';
@@ -119,12 +129,15 @@ function replayWindowCovered(args: {
   );
 }
 
+// Prisma binds Dates as timestamptz; queue columns store UTC without a timezone.
+const POST_PROCESS_NOW_SQL = "($1::timestamptz AT TIME ZONE 'UTC')";
+
 function postProcessClaimableSql(alias: string) {
   return `(
-    (${alias}.status IN ('PENDING','FAILED') AND ${alias}.available_at <= $1)
+    (${alias}.status IN ('PENDING','FAILED') AND ${alias}.available_at <= ${POST_PROCESS_NOW_SQL})
     OR (
       ${alias}.status = 'RUNNING'
-      AND (${alias}.lease_expires_at IS NULL OR ${alias}.lease_expires_at <= $1)
+      AND (${alias}.lease_expires_at IS NULL OR ${alias}.lease_expires_at <= ${POST_PROCESS_NOW_SQL})
     )
   )`;
 }
@@ -365,13 +378,22 @@ export class UserPostProcessWorkerService
     }
   }
 
-  private async claimBatch(batchSize: number) {
+  private async claimBatch(batchSize: number, now = new Date()) {
     // 同一用户同时只领一条。已有未过期 RUNNING 时整户跳过；多条可领时只锁最早的一条。
     // 两个副本会抢这同一行，SKIP LOCKED 不会把该用户的另一条也标成 RUNNING。
     // 其它用户的最早一条仍可在同一批里并行领取。过期 RUNNING 仍可被原任务重新认领。
-    const now = new Date();
     const lockToken = randomUUID();
     const leaseExpiresAt = new Date(now.getTime() + this.leaseMs());
+    const quietCutoff = new Date(now.getTime() - this.quietMs());
+    const maxWaitCutoff = new Date(
+      now.getTime() -
+        postProcessWindowMs(
+          this.configService.get<number>(
+            'userPostProcessWorker.coalesceMaxWaitMs',
+          ),
+          DEFAULT_POST_PROCESS_MAX_WAIT_MS,
+        ),
+    );
     const rows = await this.prisma.$queryRawUnsafe<
       Array<{
         id: string;
@@ -386,6 +408,7 @@ export class UserPostProcessWorkerService
         FROM t_user_post_process_job j
         WHERE ${postProcessClaimableSql('j')}
           AND ${postProcessBatchReadySql('j.batch_job_id')}
+          AND ${postProcessCoalescingSql('j')}
           AND NOT EXISTS (
             SELECT 1
             FROM t_user_post_process_job running
@@ -393,7 +416,7 @@ export class UserPostProcessWorkerService
               AND running.id <> j.id
               AND running.status = 'RUNNING'
               AND running.lease_expires_at IS NOT NULL
-              AND running.lease_expires_at > $1
+              AND running.lease_expires_at > ${POST_PROCESS_NOW_SQL}
           )
           AND NOT EXISTS (
             SELECT 1
@@ -402,6 +425,7 @@ export class UserPostProcessWorkerService
               AND earlier.id <> j.id
               AND ${postProcessClaimableSql('earlier')}
               AND ${postProcessBatchReadySql('earlier.batch_job_id')}
+              AND ${postProcessCoalescingSql('earlier')}
               AND (
                 earlier.created_at < j.created_at
                 OR (earlier.created_at = j.created_at AND earlier.id < j.id)
@@ -413,10 +437,10 @@ export class UserPostProcessWorkerService
       )
       UPDATE t_user_post_process_job j
       SET status='RUNNING',
-          started_at=COALESCE(j.started_at, $1),
+          started_at=COALESCE(j.started_at, ${POST_PROCESS_NOW_SQL}),
           lock_token=$3,
-          lease_expires_at=$4,
-          updated_at=$1
+          lease_expires_at=($4::timestamptz AT TIME ZONE 'UTC'),
+          updated_at=${POST_PROCESS_NOW_SQL}
       FROM picked
       WHERE j.id = picked.id
       RETURNING j.id, j.user_id, j.batch_job_id, j.lock_token;
@@ -425,6 +449,8 @@ export class UserPostProcessWorkerService
       batchSize,
       lockToken,
       leaseExpiresAt,
+      quietCutoff,
+      maxWaitCutoff,
     );
 
     return rows.map((row) => ({
@@ -433,6 +459,13 @@ export class UserPostProcessWorkerService
       batchJobId: row.batch_job_id,
       lockToken: row.lock_token,
     }));
+  }
+
+  private quietMs() {
+    return postProcessWindowMs(
+      this.configService.get<number>('userPostProcessWorker.coalesceQuietMs'),
+      DEFAULT_POST_PROCESS_QUIET_MS,
+    );
   }
 
   private leaseMs() {
@@ -488,6 +521,51 @@ export class UserPostProcessWorkerService
         data: { status: batchStatus },
       });
     });
+  }
+
+  private async deferEvidenceDrift(job: {
+    id: string;
+    userId: string;
+    lockToken?: string;
+  }): Promise<boolean> {
+    const jobs = this.importJobs.postProcessJobs();
+    const current = await jobs.findFirst({
+      where: {
+        id: job.id,
+        userId: job.userId,
+        status: 'RUNNING',
+        ...(job.lockToken ? { lockToken: job.lockToken } : {}),
+      },
+      select: { replayCheckpoint: true },
+    });
+    if (!current) return false;
+    const checkpoint = jsonRecord(current.replayCheckpoint);
+    const deferrals = countField(checkpoint.evidenceDriftDeferrals);
+    if (deferrals >= MAX_EVIDENCE_DRIFT_DEFERRALS) return false;
+    const result = await jobs.updateMany({
+      where: {
+        id: job.id,
+        userId: job.userId,
+        status: 'RUNNING',
+        ...(job.lockToken ? { lockToken: job.lockToken } : {}),
+      },
+      data: {
+        status: 'PENDING',
+        availableAt: new Date(Date.now() + Math.max(1_000, this.quietMs())),
+        lockToken: null,
+        leaseExpiresAt: null,
+        lastError: null,
+        replayCheckpoint: {
+          ...checkpoint,
+          evidenceDriftDeferrals: deferrals + 1,
+        } as Prisma.InputJsonValue,
+      },
+    });
+    if (result.count !== 1) return false;
+    this.logger.log(
+      `[activity-replay] retry-scheduled reason=EVIDENCE_REVISION_CHANGED job=${job.id} deferrals=${deferrals + 1}`,
+    );
+    return true;
   }
 
   private async failClaimedJob(
@@ -1177,13 +1255,9 @@ export class UserPostProcessWorkerService
           });
           return;
         }
-        await this.markSiblingReplaysSatisfied({
-          userId: job.userId,
-          sourceJobId: job.id,
-          effectiveFrom,
-          satisfiedThrough: replayTo,
-          siblings: coalescedSiblings,
-        });
+        // Persist the assessment request before declaring sibling replays
+        // satisfied. A queue failure must leave the durable source retryable.
+
         if (
           heavyActivityIds.length > 0 &&
           !postProcessPolicy.suppressAthleteStateReassessment
@@ -1194,6 +1268,13 @@ export class UserPostProcessWorkerService
             triggerRef: job.id,
           });
         }
+        await this.markSiblingReplaysSatisfied({
+          userId: job.userId,
+          sourceJobId: job.id,
+          effectiveFrom,
+          satisfiedThrough: replayTo,
+          siblings: coalescedSiblings,
+        });
       }
       // 由实例功能策略与维护批次策略共同决定是否自动触发活动 AI 复盘。
       if (postProcessPolicy.suppressAutomaticAiReview) {
@@ -1251,6 +1332,11 @@ export class UserPostProcessWorkerService
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      if (
+        e instanceof FitnessEvidenceRevisionDriftError &&
+        (await this.deferEvidenceDrift(job))
+      )
+        return;
       if (msg === 'ACTIVITY_ANALYSIS_CAPACITY_UNAVAILABLE') {
         await this.importJobs.postProcessJobs().updateMany({
           where: {

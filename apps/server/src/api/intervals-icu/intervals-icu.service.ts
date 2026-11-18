@@ -1,3 +1,15 @@
+import { intervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
+import { randomUUID } from 'node:crypto';
+import {
+  intervalsOAuthDiagnostic,
+  isIntervalsAthleteUniqueConflict,
+} from './intervals-icu-oauth-diagnostics';
+import {
+  intervalsOAuthStateRef,
+  intervalsOAuthFailure,
+  intervalsOAuthErrorCode,
+  type IntervalsOAuthStage,
+} from '@/integrations/intervals-icu/intervals-icu-oauth-diagnostics';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { ExternalProviderConnection } from '@prisma/client';
@@ -9,6 +21,7 @@ import { ImportBatchService } from '@/importing/import-batch.service';
 import { HealthDataIngestService } from '@/health-data/health-data-ingest.service';
 import { NotificationDomainService } from '@/notification/notification-domain.service';
 import { UserService } from '@/api/user/user.service';
+import { normalizeIanaTimezone } from '@/timezone/user-timezone-initializer.service';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
@@ -47,7 +60,7 @@ import {
 /** 活动与健康同步实际依赖的最小 connection 形状。 */
 export type IntervalsIcuSyncConnection = Pick<
   ExternalProviderConnection,
-  'id' | 'userId' | 'status' | 'credentialCiphertext'
+  'id' | 'userId' | 'status' | 'credentialCiphertext' | 'credentialFingerprint'
 > & {
   externalAthleteId?: string | null;
   syncScheduledActivities?: boolean;
@@ -64,6 +77,7 @@ type IntervalsIcuFingerprintConnection = Pick<
 import {
   dateKeyFromWellness,
   INTERVALS_ICU_AUTHORITATIVE_DAILY_METRIC_TYPES,
+  INTERVALS_ICU_WELLNESS_SYNC_FIELDS,
   mapIntervalsIcuWellnessToHealthCandidates,
 } from './intervals-icu-health.mapper';
 import {
@@ -149,7 +163,7 @@ function optionalApiKey(value?: string) {
 function extractExternalAthleteId(profile: IntervalsIcuAthleteProfile | null) {
   if (!profile) return '0';
   const nested = profile.athlete?.id;
-  if (nested != null && String(nested).trim()) return String(nested);
+  if (nested != null && String(nested).trim()) return String(nested).trim();
   return '0';
 }
 
@@ -180,7 +194,7 @@ function parseScopeList(value: unknown) {
 /** OAuth token 响应中的运动员 id。 */
 function oauthAthleteId(token: IntervalsIcuOAuthTokenResponse) {
   const id = token.athlete?.id;
-  return id == null || id === '' ? '0' : String(id);
+  return id == null || id === '' ? '0' : String(id).trim();
 }
 
 /** 给 URL 追加/覆盖 query 参数。 */
@@ -243,20 +257,47 @@ export class IntervalsIcuService {
     const normalizedAthleteId = cleanString(externalAthleteId);
     if (!normalizedAthleteId || normalizedAthleteId === '0') return;
 
-    const conflictingConnection = await this.providerConnections.model().findFirst({
-      where: {
-        provider: 'intervals_icu',
-        externalAthleteId: normalizedAthleteId,
-        status: 'ACTIVE',
-        userId: { not: userId },
-      },
-      select: { userId: true },
-    });
+    const conflictingConnection = await this.providerConnections
+      .model()
+      .findFirst({
+        where: {
+          provider: 'intervals_icu',
+          externalAthleteId: normalizedAthleteId,
+          status: 'ACTIVE',
+          userId: { not: userId },
+        },
+        select: { userId: true },
+      });
     if (conflictingConnection) {
       throw thirdPartyError(
         THIRD_PARTY_ERRORS.INTERVALS_ICU.ACCOUNT_ALREADY_CONNECTED,
       );
     }
+  }
+
+  private async saveConnection(
+    args: Prisma.ExternalProviderConnectionUpsertArgs,
+  ) {
+    try {
+      return await this.providerConnections.model().upsert(args);
+    } catch (error) {
+      if (isIntervalsAthleteUniqueConflict(error)) {
+        throw thirdPartyError(
+          THIRD_PARTY_ERRORS.INTERVALS_ICU.ACCOUNT_ALREADY_CONNECTED,
+        );
+      }
+      throw error;
+    }
+  }
+
+  private requireAthleteIdentity(value: string) {
+    const id = value.trim();
+    if (!id || id === '0') {
+      throw thirdPartyError(
+        THIRD_PARTY_ERRORS.INTERVALS_ICU.ATHLETE_IDENTITY_MISSING,
+      );
+    }
+    return id;
   }
 
   /** 调 profile 验证 API Key；401 等转为业务错误。 */
@@ -441,6 +482,7 @@ export class IntervalsIcuService {
       userId,
       provider: 'intervals_icu',
       payload: {
+        diagnosticId: randomUUID(),
         returnUrl: this.sanitizeReturnUrl(dto.returnUrl),
         settings: dto,
       } as unknown as Prisma.InputJsonValue,
@@ -466,6 +508,32 @@ export class IntervalsIcuService {
     state?: string;
     error?: string;
   }) {
+    let diagnosticId: string | undefined;
+    const startedAt = Date.now();
+    const context = {
+      event: 'intervals_icu_oauth_callback',
+      provider: 'intervals_icu',
+      callbackId: randomUUID(),
+      stateRef: intervalsOAuthStateRef(query.state),
+      hasCode: Boolean(query.code),
+      hasProviderError: Boolean(query.error),
+    };
+    let stage: IntervalsOAuthStage = 'consume_state';
+    const report = (
+      outcome: 'connected' | 'failed',
+      details: Record<string, unknown> = {},
+    ) => {
+      const entry = {
+        ...context,
+        diagnosticId,
+        stage,
+        outcome,
+        elapsedMs: Date.now() - startedAt,
+        ...details,
+      };
+      if (outcome === 'connected') this.logger.log(JSON.stringify(entry));
+      else this.logger.warn(JSON.stringify(entry));
+    };
     let statePayload: {
       userId: string;
       returnUrl: string;
@@ -479,6 +547,11 @@ export class IntervalsIcuService {
         !Array.isArray(row.payload)
           ? (row.payload as Record<string, unknown>)
           : {};
+      diagnosticId =
+        typeof payload.diagnosticId === 'string' &&
+        /^[0-9a-f-]{36}$/.test(payload.diagnosticId)
+          ? payload.diagnosticId
+          : undefined;
       statePayload = {
         userId: row.userId,
         returnUrl: this.sanitizeReturnUrl(
@@ -491,8 +564,13 @@ export class IntervalsIcuService {
             ? (payload.settings as StartIntervalsIcuOAuthDto)
             : {},
       };
+      stage = 'provider_response';
       // 如果错误，返回错误 URL
       if (query.error) {
+        report('failed', {
+          category: 'provider_error',
+          oauthError: intervalsOAuthErrorCode(query.error),
+        });
         return addQuery(statePayload.returnUrl, {
           intervals_icu_oauth: 'error',
           reason: query.error,
@@ -500,12 +578,14 @@ export class IntervalsIcuService {
       }
       // 如果缺少 code，返回错误 URL
       if (!query.code) {
+        report('failed', { category: 'missing_code' });
         return addQuery(statePayload.returnUrl, {
           intervals_icu_oauth: 'error',
           reason: 'missing_code',
         });
       }
 
+      stage = 'configuration';
       // 使用 code 换取 token
       const clientId = this.oauthClientId();
       const clientSecret = this.oauthClientSecret();
@@ -516,25 +596,31 @@ export class IntervalsIcuService {
       }
 
       // 获取 token
+      stage = 'exchange_token';
       const token = await this.intervalsIcuClient.exchangeOAuthCode({
         clientId,
         clientSecret,
         code: query.code,
       });
       // 拿到 token 后，创建/更新连接
+      stage = 'save_connection';
       await this.applyOAuthConnection(
         statePayload.userId,
         token,
         statePayload.settings,
       );
+      report('connected');
       // 返回成功 URL
       return addQuery(statePayload.returnUrl, {
         intervals_icu_oauth: 'connected',
       });
     } catch (error) {
       const returnUrl = statePayload?.returnUrl ?? this.sanitizeReturnUrl(null);
-      const reason = error instanceof Error ? error.message : 'oauth_failed';
-      this.logger.warn(`[Intervals.icu][授权] 回调失败: ${reason}`);
+      report('failed', {
+        ...intervalsOAuthDiagnostic(error),
+        ...intervalsOAuthFailure(error, stage),
+        reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',
+      });
       return addQuery(returnUrl, {
         intervals_icu_oauth: 'error',
         reason: thirdPartyOAuthReason(error) ?? 'oauth_failed',
@@ -553,19 +639,29 @@ export class IntervalsIcuService {
         THIRD_PARTY_ERRORS.INTERVALS_ICU.OAUTH_TOKEN_MISSING,
       );
     }
-    const externalAthleteId = oauthAthleteId(token);
+    let externalAthleteId = oauthAthleteId(token);
+    if (!externalAthleteId || externalAthleteId === '0') {
+      const athlete = await this.intervalsIcuClient.getAthlete({
+        authType: 'oauth',
+        token: token.access_token,
+      });
+      externalAthleteId = String(athlete.id ?? '');
+    }
+    externalAthleteId = this.requireAthleteIdentity(externalAthleteId);
     // 验证运动员 ID 是否可用
     await this.assertExternalAthleteAvailable(userId, externalAthleteId);
     // 查找已存在的连接
-    const existingConnection = await this.providerConnections.model().findUnique({
-      where: {
-        userId_provider_region: {
-          userId,
-          provider: 'intervals_icu',
-          region: '',
+    const existingConnection = await this.providerConnections
+      .model()
+      .findUnique({
+        where: {
+          userId_provider_region: {
+            userId,
+            provider: 'intervals_icu',
+            region: '',
+          },
         },
-      },
-    });
+      });
     // 获取历史同步设置
     const existingMetadata = intervalsIcuMetadataOf(existingConnection);
     // 获取历史计划课同步设置
@@ -601,6 +697,7 @@ export class IntervalsIcuService {
     // 构建 metadata
     const metadata: IntervalsIcuConnectionMetadata = {
       ...existingMetadata,
+      authorizationRevision: randomUUID(),
       authType: 'oauth',
       athleteIdMode: '0',
       oauth: {
@@ -632,7 +729,7 @@ export class IntervalsIcuService {
       },
     });
     // 更新/创建连接
-    const connection = await this.providerConnections.model().upsert({
+    const connection = await this.saveConnection({
       where: {
         userId_provider_region: {
           userId,
@@ -712,15 +809,17 @@ export class IntervalsIcuService {
    * 并在需要时排队首同步与计划课同步。
    */
   async connect(userId: string, dto: ConnectIntervalsIcuDto) {
-    const existingConnection = await this.providerConnections.model().findUnique({
-      where: {
-        userId_provider_region: {
-          userId,
-          provider: 'intervals_icu',
-          region: '',
+    const existingConnection = await this.providerConnections
+      .model()
+      .findUnique({
+        where: {
+          userId_provider_region: {
+            userId,
+            provider: 'intervals_icu',
+            region: '',
+          },
         },
-      },
-    });
+      });
     const apiKey = optionalApiKey(dto.apiKey);
     const existingMetadata = intervalsIcuMetadataOf(existingConnection);
     const existingPlanSync = intervalsIcuPlanSyncOf(existingMetadata);
@@ -762,6 +861,7 @@ export class IntervalsIcuService {
 
     if (apiKey) {
       profile = await this.validateApiKey(apiKey);
+      this.requireAthleteIdentity(extractExternalAthleteId(profile));
       await this.assertExternalAthleteAvailable(
         userId,
         extractExternalAthleteId(profile),
@@ -783,11 +883,10 @@ export class IntervalsIcuService {
         };
       }
 
-      if (!currentFingerprint || currentFingerprint !== nextFingerprint) {
-        credentialData.credentialCiphertext =
-          this.intervalsIcuCredentials.encrypt(apiKey);
+      credentialData.credentialCiphertext =
+        this.intervalsIcuCredentials.encrypt(apiKey);
+      if (!currentFingerprint || currentFingerprint !== nextFingerprint)
         credentialChanged = true;
-      }
       credentialData.credentialLast4 =
         this.intervalsIcuCredentials.last4(apiKey);
       credentialData.credentialFingerprint = nextFingerprint;
@@ -799,6 +898,7 @@ export class IntervalsIcuService {
     const metadata: IntervalsIcuConnectionMetadata = {
       ...existingMetadata,
       authType: apiKey ? 'api_key' : existingAuthType,
+      ...(apiKey ? { authorizationRevision: randomUUID() } : {}),
       ...(apiKey ? { oauth: null } : {}),
       ...(profile ? { profile } : {}),
       athleteIdMode: '0',
@@ -825,7 +925,7 @@ export class IntervalsIcuService {
       },
     });
 
-    const connection = await this.providerConnections.model().upsert({
+    const connection = await this.saveConnection({
       where: {
         userId_provider_region: {
           userId,
@@ -967,9 +1067,19 @@ export class IntervalsIcuService {
         },
       },
     });
-    return connection
-      ? this.toConnectionStatus(connection)
-      : { connected: false };
+    if (!connection) return { connected: false };
+    const activitySync =
+      await this.importBatchService.getLatestProviderBatchProgress({
+        userId,
+        sourceKind: 'INTERVALS_ICU',
+        connectionId: connection.id,
+      });
+    return {
+      ...this.toConnectionStatus(connection),
+      // Connection completion timestamps describe discovery, not activity readiness.
+      discoveryCompletedAt: connection.lastSyncCompletedAt,
+      activitySync,
+    };
   }
 
   /** 断开连接并清空凭证字段（历史导入数据保留）。 */
@@ -985,8 +1095,12 @@ export class IntervalsIcuService {
     });
     if (!connection) return { connected: false };
 
-    await this.providerConnections.model().update({
-      where: { id: connection.id },
+    await this.providerConnections.model().updateMany({
+      where: {
+        id: connection.id,
+        userId,
+        credentialCiphertext: connection.credentialCiphertext,
+      },
       data: {
         status: 'DISCONNECTED',
         credentialCiphertext: '',
@@ -1027,8 +1141,12 @@ export class IntervalsIcuService {
         ? yesterdayWindow(args.timezone)
         : latest60DayWindow(args.newest);
     const startedAt = new Date();
-    await this.providerConnections.model().update({
-      where: { id: connection.id },
+    await this.providerConnections.model().updateMany({
+      where: {
+        id: connection.id,
+        status: 'ACTIVE',
+        credentialCiphertext: connection.credentialCiphertext,
+      },
       data: {
         lastSyncStartedAt: startedAt,
         lastError: null,
@@ -1044,28 +1162,25 @@ export class IntervalsIcuService {
         credential,
         {
           ...window,
-          fields: [
-            'id',
-            'weight',
-            'restingHR',
-            'hrvSDNN',
-            'sleepSecs',
-            'sleepScore',
-            'avgSleepingHR',
-            'steps',
-            'vo2max',
-          ],
+          fields: INTERVALS_ICU_WELLNESS_SYNC_FIELDS,
         },
       );
       const metricTypes = new Set<string>();
       const dates = new Set<string>();
       let sampleCount = 0;
+      const wellnessTimezone =
+        normalizeIanaTimezone(
+          intervalsIcuMetadataOf(connection).profile?.athlete?.timezone,
+        ) ??
+        normalizeIanaTimezone(args.timezone) ??
+        (await this.userService?.getPreferredTimezone(args.userId));
       for (const record of wellnessRecords) {
         const dateKey = dateKeyFromWellness(record);
         if (!dateKey) continue;
         const candidates = mapIntervalsIcuWellnessToHealthCandidates({
           externalAthleteId: connection.externalAthleteId,
           connectionId: connection.id,
+          timezone: wellnessTimezone,
           record,
         });
         await this.healthDataIngest.replaceProviderDailyCandidates({
@@ -1090,13 +1205,23 @@ export class IntervalsIcuService {
       };
 
       const completedAt = new Date();
-      const latestConnection = await this.providerConnections.model().findUnique({
-        where: { id: connection.id },
-        select: { metadata: true },
-      });
+      const latestConnection = await this.providerConnections
+        .model()
+        .findUnique({
+          where: {
+            id: connection.id,
+            status: 'ACTIVE',
+            credentialCiphertext: connection.credentialCiphertext,
+          },
+          select: { metadata: true },
+        });
       const existingMetadata = intervalsIcuMetadataOf(latestConnection);
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           lastSyncCompletedAt: completedAt,
           lastError: null,
@@ -1130,8 +1255,12 @@ export class IntervalsIcuService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`[Intervals.icu] wellness 同步失败：${message}`);
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           status:
             error instanceof IntervalsIcuApiError &&
@@ -1285,8 +1414,12 @@ export class IntervalsIcuService {
       args.reason === 'scheduled'
         ? yesterdayWindow(args.timezone)
         : latest60DayWindow(args.newest);
-    await this.providerConnections.model().update({
-      where: { id: connection.id },
+    await this.providerConnections.model().updateMany({
+      where: {
+        id: connection.id,
+        status: 'ACTIVE',
+        credentialCiphertext: connection.credentialCiphertext,
+      },
       data: {
         lastSyncStartedAt: new Date(),
         lastError: null,
@@ -1309,6 +1442,7 @@ export class IntervalsIcuService {
         await this.importBatchService.createIntervalsIcuImportBatch({
           userId: args.userId,
           connectionId: connection.id,
+          authorization: intervalsAuthorization(connection),
           activities,
           reason: args.reason,
           discoveryWindow: originSyncWindow(window),
@@ -1356,8 +1490,12 @@ export class IntervalsIcuService {
         });
       }
 
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           lastSyncCompletedAt: new Date(),
           lastSyncedActivityAt: new Date(`${window.newest}T00:00:00.000Z`),
@@ -1373,8 +1511,12 @@ export class IntervalsIcuService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`[Intervals.icu] 同步失败：${message}`);
-      await this.providerConnections.model().update({
-        where: { id: connection.id },
+      await this.providerConnections.model().updateMany({
+        where: {
+          id: connection.id,
+          status: 'ACTIVE',
+          credentialCiphertext: connection.credentialCiphertext,
+        },
         data: {
           status:
             error instanceof IntervalsIcuApiError &&

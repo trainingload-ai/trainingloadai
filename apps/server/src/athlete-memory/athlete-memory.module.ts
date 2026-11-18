@@ -1,3 +1,4 @@
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { UserQueryModule } from '@/api/user/user-query.module';
@@ -12,7 +13,12 @@ import { AthleteMemoryController } from './presentation/athlete-memory.controlle
 import { AiDataConsentModule } from '@/ai-data-consent/ai-data-consent.module';
 
 @Module({
-  imports: [PrismaModule, UserQueryModule, AiDataConsentModule],
+  imports: [
+    AthleteStateUpdatesModule,
+    PrismaModule,
+    UserQueryModule,
+    AiDataConsentModule,
+  ],
   controllers: [AthleteMemoryController],
   providers: [
     PrismaAthleteMemoryStore,

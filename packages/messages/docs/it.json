@@ -88,6 +88,30 @@
     "switch": "Cambia",
     "dismiss": "Chiudi il suggerimento della lingua"
   },
+  "accessibility": {
+    "skipToContent": "Vai al contenuto",
+    "previewImage": "Anteprima immagine",
+    "previewImageNamed": "Anteprima immagine: {description}",
+    "imagePreview": "Anteprima immagine",
+    "closePreview": "Chiudi anteprima",
+    "preview": "Anteprima",
+    "pauseAnimation": "Metti in pausa",
+    "resumeAnimation": "Riprendi animazione",
+    "codeBlock": "Esempio di codice",
+    "dataTable": "Tabella dati"
+  },
+  "docsUi": {
+    "searchNoResult": "Nessun risultato trovato",
+    "toc": "In questa pagina",
+    "tocNoHeadings": "Nessun titolo",
+    "lastUpdate": "Ultimo aggiornamento",
+    "nextPage": "Pagina successiva",
+    "previousPage": "Pagina precedente",
+    "editOnGithub": "Modifica su GitHub",
+    "search": "Cerca nella documentazione",
+    "chooseLanguage": "Lingua",
+    "chooseTheme": "Tema"
+  },
   "header": {
     "searchDocs": "Cerca nella documentazione",
     "openDocsMenu": "Apri la navigazione della documentazione",
@@ -109,9 +133,11 @@
     "ask": "Leggi {url}. Vorrei fare domande su questa documentazione."
   },
   "docsScreenshot": {
-    "openImage": "Apri immagine a dimensione intera",
     "demoLabel": "Demo dal vivo",
-    "openDemo": "Apri questa pagina nella demo"
+    "openDemo": "Apri questa pagina nella demo",
+    "openWebDemo": "Esplora questa funzione nella demo web",
+    "webPlatform": "Web",
+    "mobilePlatform": "Mobile"
   },
   "SiteError": {
     "notFound": {
@@ -186,7 +212,7 @@
       "fitCourseConverter": "Convertitore FIT Course"
     },
     "brandDescription": "Piani, allenamenti svolti, carico e recupero riuniti in un unico posto.",
-    "appStoreMeta": "iPhone + Apple Watch",
+    "appStoreMeta": "iPhone",
     "appStoreCta": "Scarica su App Store"
   },
   "tools": {
@@ -1874,7 +1900,7 @@
       "sections": {
         "scope": {
           "title": "1. Who we are and what this policy covers",
-          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, Apple Watch experience, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
+          "body": "Trainingload.ai is operated by the developer identified on the app store or distribution channel through which you obtained the Service (\"Trainingload.ai\", \"we\", \"our\", or \"us\"). This Policy applies to our mobile apps, website, web app, APIs, support, and related services. \"Personal data\" means information that identifies you or can reasonably be linked to you. This Policy does not replace the privacy notices of services you choose to connect."
         },
         "dataWeCollect": {
           "title": "2. Data we collect",
@@ -2985,7 +3011,7 @@
         "more": "e altro…"
       },
       "sportWords": ["Corsa", "Ciclismo", "Nuoto", "Triathlon"],
-      "iphoneSupport": "Disponibile per iPhone e Apple Watch",
+      "iphoneSupport": "Disponibile per iPhone",
       "appStoreCta": "Scarica su App Store"
     },
     "planSpotlight": {
@@ -3597,10 +3623,9 @@
       },
       "heroProduct": {
         "title": "Registra le sedute.\nGuarda come migliori.",
-        "body": "Registra con iPhone o Apple Watch e riunisci prestazioni, frequenza cardiaca e carico in Trainingload.ai.",
+        "body": "Registra con iPhone e riunisci prestazioni, frequenza cardiaca e carico in Trainingload.ai.",
         "link": "Scopri il coach IA",
-        "phoneAlt": "Registrazione dell’allenamento in diretta su iPhone",
-        "watchAlt": "Dati di allenamento in diretta su Apple Watch"
+        "phoneAlt": "Registrazione dell’allenamento in diretta su iPhone"
       },
       "footerCta": {
         "title": "Scopri da dove parti. Pianifica il prossimo passo.",

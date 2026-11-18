@@ -1,5 +1,15 @@
 "use client";
 
+import { InputSource } from "@/components/calculators/input-source";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
+
 import {
   useEffect,
   useLayoutEffect,
@@ -7,7 +17,6 @@ import {
   useRef,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
@@ -127,7 +136,7 @@ export function CssCalculatorClient({
   const urlInitialized = useRef(false);
   const [copied, setCopied] = useState(false);
   const [shareError, setShareError] = useState(false);
-  const [inputSource, setInputSource] = useState("manual");
+  const [inputSource, setInputSource] = useState<"manual" | "file">("manual");
   const [example, setExample] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -249,6 +258,38 @@ export function CssCalculatorClient({
     (timeB == null &&
       (swimB.minutes.trim() !== "" || swimB.seconds.trim() !== ""));
 
+  const committed = useCommittedFields();
+  const swimKey = JSON.stringify([swimA, swimB]);
+  const fieldValues: Record<string, string> = {
+    "css-a-distance": swimA.distance,
+    "css-a-minutes": swimA.minutes,
+    "css-a-seconds": swimA.seconds,
+    "css-b-distance": swimB.distance,
+    "css-b-minutes": swimB.minutes,
+    "css-b-seconds": swimB.seconds,
+  };
+  const clockAInvalid =
+    timeA == null &&
+    (swimA.minutes.trim() !== "" || swimA.seconds.trim() !== "");
+  const clockBInvalid =
+    timeB == null &&
+    (swimB.minutes.trim() !== "" || swimB.seconds.trim() !== "");
+  const fieldErrors = {
+    "css-a-distance": swimA.distance.trim() !== "" && distanceA == null,
+    "css-a-minutes": minutesA == null || clockAInvalid,
+    "css-a-seconds": secondsA == null || clockAInvalid,
+    "css-b-distance": swimB.distance.trim() !== "" && distanceB == null,
+    "css-b-minutes": minutesB == null || clockBInvalid,
+    "css-b-seconds": secondsB == null || clockBInvalid,
+  };
+  const visibleErrors = Object.fromEntries(
+    Object.entries(fieldErrors).map(([id, invalid]) => [
+      id,
+      invalid && committed.isCommitted(id, fieldValues[id]),
+    ]),
+  );
+  const showInputInvalid = Object.values(visibleErrors).some(Boolean);
+
   const unusable =
     !inputInvalid &&
     distanceA != null &&
@@ -257,7 +298,11 @@ export function CssCalculatorClient({
     timeB != null &&
     result == null;
 
-  const unusual = result != null && isUnusualCssPace(result.pacePer100mSec);
+  const showUnusable = unusable && committed.isCommitted("swims", swimKey);
+  const unusual =
+    result != null &&
+    isUnusualCssPace(result.pacePer100mSec) &&
+    committed.isCommitted("swims", swimKey);
 
   function selectUnit(next: PoolUnit) {
     if (next === unit) return;
@@ -310,18 +355,6 @@ export function CssCalculatorClient({
     setSwimA(draft(swims[0]));
     setSwimB(draft(swims[1]));
     setExample(false);
-  }
-
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next: PoolUnit = event.key === "ArrowRight" ? "yards" : "meters";
-    selectUnit(next);
-    document
-      .getElementById(
-        next === "meters" ? "css-units-meters" : "css-units-yards",
-      )
-      ?.focus();
   }
 
   function onPrint() {
@@ -392,41 +425,44 @@ export function CssCalculatorClient({
     <>
       <div className={styles.hero}>
         {hero}
-        <section id="calculator" className={styles.board}>
+        <section
+          id="calculator"
+          className={styles.board}
+          onBlurCapture={(event) => {
+            if (event.target instanceof HTMLInputElement) {
+              committed.commit(event.target.id, event.target.value);
+              committed.commit("swims", swimKey);
+            }
+          }}
+        >
+          <FieldErrorAnnouncement
+            message={
+              showInputInvalid
+                ? t("manual.invalid")
+                : showUnusable
+                  ? t("manual.unusable")
+                  : ""
+            }
+          />
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("manual.title")}</h2>
-            <div
-              role="radiogroup"
-              aria-label={t("manual.unitsLabel")}
-              className={styles.unitSwitch}
-            >
-              <Button
-                id="css-units-meters"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={unit === "meters"}
-                tabIndex={unit === "meters" ? 0 : -1}
-                onClick={() => selectUnit("meters")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.meters")}
-              </Button>
-              <Button
-                id="css-units-yards"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={unit === "yards"}
-                tabIndex={unit === "yards" ? 0 : -1}
-                onClick={() => selectUnit("yards")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.yards")}
-              </Button>
-            </div>
+            <ToolChoiceGroup
+              value={unit}
+              onValueChange={selectUnit}
+              label={t("manual.unitsLabel")}
+              options={[
+                {
+                  value: "meters",
+                  id: "css-units-meters",
+                  label: t("manual.meters"),
+                },
+                {
+                  value: "yards",
+                  id: "css-units-yards",
+                  label: t("manual.yards"),
+                },
+              ]}
+            />
           </div>
           <p className={styles.boardLead}>{t("manual.lead")}</p>
           <ol className={styles.stepList}>
@@ -439,87 +475,85 @@ export function CssCalculatorClient({
               </li>
             ))}
           </ol>
-          <fieldset className={styles.inputSources}>
-            <legend className="sr-only">{t("source.label")}</legend>
-            <span className={styles.inputSourceLabel} aria-hidden="true">
-              {t("source.label")}
-            </span>
-            <div className={styles.inputSourceOptions}>
-              {(["manual", "file"] as const).map((source) => (
-                <label key={source}>
-                  <input
-                    type="radio"
-                    name="css-source"
-                    checked={inputSource === source}
-                    onChange={() => {
-                      setInputSource(source);
-                      if (source === "file") resetFileResult();
-                    }}
-                  />
-                  <span>{t(`source.${source}`)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          {inputSource === "file" ? (
-            <CssFileInput onResult={useFileResult} onReset={resetFileResult} />
-          ) : (
-            <div className={styles.formStack}>
-              <SwimFields
-                idPrefix="css-a"
-                legend={t("manual.swimA")}
-                draft={swimA}
-                distanceSuffix={distanceSuffix}
-                distanceLabel={t("manual.distance")}
-                minutesLabel={t("manual.minutes")}
-                secondsLabel={t("manual.seconds")}
-                minutesSuffix={t("manual.suffix.minutes")}
-                secondsSuffix={t("manual.suffix.seconds")}
-                onChange={(draft) => {
-                  setSwimA(draft);
-                  setExample(false);
-                  setCopied(false);
-                }}
+          <InputSource
+            value={inputSource}
+            onValueChange={(next) => {
+              setInputSource(next);
+              if (next === "file") resetFileResult();
+            }}
+            label={t("source.label")}
+            manual={t("source.manual")}
+            file={t("source.file")}
+          >
+            {inputSource === "file" ? (
+              <CssFileInput
+                onResult={useFileResult}
+                onReset={resetFileResult}
               />
-              <SwimFields
-                idPrefix="css-b"
-                legend={t("manual.swimB")}
-                draft={swimB}
-                distanceSuffix={distanceSuffix}
-                distanceLabel={t("manual.distance")}
-                minutesLabel={t("manual.minutes")}
-                secondsLabel={t("manual.seconds")}
-                minutesSuffix={t("manual.suffix.minutes")}
-                secondsSuffix={t("manual.suffix.seconds")}
-                onChange={(draft) => {
-                  setSwimB(draft);
-                  setExample(false);
-                  setCopied(false);
-                }}
-              />
-              <div className={styles.formFoot}>
-                <p className={styles.fileHint}>{t("manual.unitHelp")}</p>
-                <button type="button" onClick={loadExample}>
-                  {t("manual.example")}
-                </button>
+            ) : (
+              <div className={styles.formStack}>
+                <SwimFields
+                  idPrefix="css-a"
+                  invalidFields={visibleErrors}
+                  legend={t("manual.swimA")}
+                  draft={swimA}
+                  distanceSuffix={distanceSuffix}
+                  distanceLabel={t("manual.distance")}
+                  minutesLabel={t("manual.minutes")}
+                  secondsLabel={t("manual.seconds")}
+                  minutesSuffix={t("manual.suffix.minutes")}
+                  secondsSuffix={t("manual.suffix.seconds")}
+                  onChange={(draft) => {
+                    setSwimA(draft);
+                    setExample(false);
+                    setCopied(false);
+                  }}
+                />
+                <SwimFields
+                  idPrefix="css-b"
+                  invalidFields={visibleErrors}
+                  legend={t("manual.swimB")}
+                  draft={swimB}
+                  distanceSuffix={distanceSuffix}
+                  distanceLabel={t("manual.distance")}
+                  minutesLabel={t("manual.minutes")}
+                  secondsLabel={t("manual.seconds")}
+                  minutesSuffix={t("manual.suffix.minutes")}
+                  secondsSuffix={t("manual.suffix.seconds")}
+                  onChange={(draft) => {
+                    setSwimB(draft);
+                    setExample(false);
+                    setCopied(false);
+                  }}
+                />
+                <div className={styles.formFoot}>
+                  <p className={styles.fileHint}>{t("manual.unitHelp")}</p>
+                  <ToolActionButton
+                    intent="quiet"
+                    type="button"
+                    onClick={loadExample}
+                  >
+                    {t("manual.example")}
+                  </ToolActionButton>
+                </div>
               </div>
-            </div>
-          )}
-          {inputInvalid ? (
-            <p role="alert" className={styles.alert}>
-              {t("manual.invalid")}
-            </p>
-          ) : null}
-          {unusable ? (
-            <p role="alert" className={styles.alert}>
-              {t("manual.unusable")}
-            </p>
-          ) : null}
-          {unusual ? (
-            <p role="status" className={styles.inputNotice}>
-              {t("manual.unusual")}
-            </p>
-          ) : null}
+            )}
+            {showInputInvalid ? (
+              <p id="css-input-error" className={styles.alert}>
+                {t("manual.invalid")}
+              </p>
+            ) : null}
+            {showUnusable ? (
+              <p id="css-unusable-error" className={styles.alert}>
+                {t("manual.unusable")}
+              </p>
+            ) : null}
+            {unusual ? (
+              <p role="status" className={styles.inputNotice}>
+                {t("manual.unusual")}
+              </p>
+            ) : null}
+          </InputSource>
         </section>
       </div>
 
@@ -605,13 +639,14 @@ export function CssCalculatorClient({
             </div>
           </div>
         </section>
-        <div className={`${styles.posterActions} css-share-actions`}>
-          <a
-            href={`${prefix}/swim-training-plan`}
-            className={styles.primaryAction}
-          >
-            {t("result.handoff")}
-          </a>
+        <ToolResultActions
+          className="css-share-actions"
+          leading={
+            <>
+              <a href={`${prefix}/swim-training-plan`}>{t("result.handoff")}</a>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -632,7 +667,7 @@ export function CssCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("result.copied") : t("result.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
           <p role="alert" className={styles.fileHint}>
             {t("result.shareError")}
@@ -655,6 +690,7 @@ export function CssCalculatorClient({
 
 function SwimFields({
   idPrefix,
+  invalidFields,
   legend,
   draft,
   distanceSuffix,
@@ -666,6 +702,7 @@ function SwimFields({
   onChange,
 }: {
   idPrefix: string;
+  invalidFields: Record<string, boolean>;
   legend: string;
   draft: SwimDraft;
   distanceSuffix: string;
@@ -684,6 +721,12 @@ function SwimFields({
           <Label htmlFor={`${idPrefix}-distance`}>{distanceLabel}</Label>
           <UnitInput
             id={`${idPrefix}-distance`}
+            aria-invalid={invalidFields[`${idPrefix}-distance`] || undefined}
+            aria-describedby={
+              invalidFields[`${idPrefix}-distance`]
+                ? "css-input-error"
+                : undefined
+            }
             suffix={distanceSuffix}
             inputMode="decimal"
             value={draft.distance}
@@ -697,6 +740,12 @@ function SwimFields({
           <Label htmlFor={`${idPrefix}-minutes`}>{minutesLabel}</Label>
           <UnitInput
             id={`${idPrefix}-minutes`}
+            aria-invalid={invalidFields[`${idPrefix}-minutes`] || undefined}
+            aria-describedby={
+              invalidFields[`${idPrefix}-minutes`]
+                ? "css-input-error"
+                : undefined
+            }
             suffix={minutesSuffix}
             inputMode="numeric"
             value={draft.minutes}
@@ -710,6 +759,12 @@ function SwimFields({
           <Label htmlFor={`${idPrefix}-seconds`}>{secondsLabel}</Label>
           <UnitInput
             id={`${idPrefix}-seconds`}
+            aria-invalid={invalidFields[`${idPrefix}-seconds`] || undefined}
+            aria-describedby={
+              invalidFields[`${idPrefix}-seconds`]
+                ? "css-input-error"
+                : undefined
+            }
             suffix={secondsSuffix}
             inputMode="decimal"
             value={draft.seconds}

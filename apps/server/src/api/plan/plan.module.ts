@@ -1,3 +1,4 @@
+import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { PlanProjectionReadModule } from './application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@/prisma/prisma.module';
@@ -45,6 +46,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
  */
 @Module({
   imports: [
+    AthleteStateUpdatesModule,
     PrismaModule,
     PlanProjectionReadModule,
     LoadReadoutModule,

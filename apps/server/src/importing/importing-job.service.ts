@@ -28,7 +28,8 @@ export class ImportingJobService {
 
   ensurePostProcessJob(
     options: Parameters<ImportingJobRepository['ensurePostProcessJob']>[0],
+    tx?: Parameters<ImportingJobRepository['ensurePostProcessJob']>[1],
   ) {
-    return this.jobs.ensurePostProcessJob(options);
+    return this.jobs.ensurePostProcessJob(options, tx);
   }
 }

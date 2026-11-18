@@ -174,6 +174,35 @@ describe('Athlete State PostgreSQL invariants', () => {
     ).resolves.toBe(1);
   });
 
+  it('does not let a late turn supersede a newer state assessment', async () => {
+    const latest = await createAssessment('newest');
+    const repository = new AthleteStateRepository(prisma as never);
+    const saved = await repository.saveAssessment({
+      userId: 'athlete',
+      evidence: {
+        evidenceHash: 'older',
+        snapshot: { asOf: '2026-10-11T01:00:00Z', timezone: 'UTC' },
+        latestSourceAt: null,
+        expiresAt: new Date('2026-10-12T01:00:00Z'),
+      },
+      result: {
+        state: 'STABLE',
+        confidence: 0.8,
+        decisionReadiness: 'SUFFICIENT',
+        dimensions: [],
+        hypotheses: [],
+        evidenceRequests: [],
+        safetyFlags: [],
+        limitations: [],
+      },
+    });
+    expect(saved.assessment.id).toBe(latest.id);
+    expect(saved.reused).toBe(true);
+    expect(await prisma.athleteStateAssessment.count()).toBe(1);
+    expect(
+      (await repository.latestForUser('athlete'))!.supersededAt,
+    ).toBeNull();
+  });
   it('deletes a bound Case when its dedicated Coach session is deleted', async () => {
     const assessment = await createAssessment();
     await prisma.aiCoachSession.create({

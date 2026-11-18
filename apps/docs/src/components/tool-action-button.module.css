@@ -1,0 +1,100 @@
+.button[data-slot="tool-action"] {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  inline-size: auto;
+  block-size: auto;
+  min-inline-size: 2.25rem;
+  min-block-size: 2.25rem;
+  max-inline-size: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--tl-radius-control);
+  padding: 0.45rem 0.75rem;
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  cursor: pointer;
+  transition: none;
+}
+
+.button[data-intent="primary"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.button[data-intent="secondary"] {
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.button[data-intent="quiet"] {
+  background: transparent;
+  color: var(--muted-foreground);
+}
+
+.button[data-full-width] {
+  inline-size: 100%;
+}
+
+.button[data-slot="tool-action"] svg {
+  flex: none;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  margin: 0;
+  color: currentColor;
+}
+
+.button[data-slot="tool-action"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.button[data-slot="tool-action"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (hover: hover) {
+  .button[data-intent="primary"]:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    opacity: 0.85;
+  }
+
+  .button[data-intent="secondary"]:hover:not(:disabled),
+  .button[data-intent="quiet"]:hover:not(:disabled) {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+}
+
+@media (pointer: coarse) {
+  .button[data-slot="tool-action"] {
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .button[data-slot="tool-action"] {
+    border-color: ButtonText;
+  }
+
+  .button[data-slot="tool-action"]:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .button[data-slot="tool-action"]:disabled {
+    color: GrayText;
+    border-color: GrayText;
+    opacity: 1;
+  }
+}

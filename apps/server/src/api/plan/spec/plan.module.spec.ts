@@ -1,3 +1,4 @@
+import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { describe, expect, it } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -46,6 +47,10 @@ describe('PlanModule command wiring', () => {
         PlanExternalSyncService,
         PlanSummaryService,
         CoachContextService,
+        {
+          provide: AthleteStateUpdates,
+          useValue: { requestUpdate: async () => ({}) },
+        },
         PlanLinkMatcherService,
         PlanLoadEstimatorService,
         WorkoutPersistenceService,

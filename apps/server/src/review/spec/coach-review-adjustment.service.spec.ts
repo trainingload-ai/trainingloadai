@@ -97,7 +97,6 @@ function createService(
   };
   const service = new CoachReviewAdjustmentService(
     ai as never,
-    { recordUsageEvent: jest.fn(async () => undefined) } as never,
     {
       get: jest.fn(() => ({
         parseText: jest.fn((text: string) => text),

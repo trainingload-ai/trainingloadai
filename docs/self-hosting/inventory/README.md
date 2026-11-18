@@ -7,10 +7,10 @@
 
 | Inventory | Entries |
 | --- | ---: |
-| Environment variables | 286 |
-| External URL literals | 189 |
-| Filesystem write sites | 220 |
-| Runtime variables missing from configuration docs | 223 |
+| Environment variables | 295 |
+| External URL literals | 202 |
+| Filesystem write sites | 221 |
+| Runtime variables missing from configuration docs | 232 |
 
 ## Undocumented runtime variables
 
@@ -92,6 +92,9 @@
 - `ALIYUN_STREAM_IDLE_TIMEOUT_MS` — apps
 - `ANALYZE_RECOMPUTE_WINDOW_DAYS` — apps
 - `APP_VERSION` — apps
+- `ATHLETE_STATE_ASSESSMENT_SHADOW_ENABLED` — apps
+- `ATHLETE_STATE_EVIDENCE_ENABLED` — apps
+- `ATHLETE_STATE_UPDATE_DELAY_MS` — apps
 - `AUTH_SECRET` — apps
 - `BETTER_AUTH_URL` — apps
 - `CALENDAR_FEED_PUBLIC_URL` — apps
@@ -99,6 +102,10 @@
 - `CLIENT_INTERNAL_API_URL` — apps
 - `CLIENT_INTERNAL_ORIGIN` — apps
 - `CLIENT_PUBLIC_URL` — apps
+- `COACH_ASSESSMENT_CASE_ENABLED` — apps
+- `COACH_ASSESSMENT_FOLLOWUP_ENABLED` — apps
+- `COACH_ASSESSMENT_HOME_INQUIRY_ENABLED` — apps
+- `COACH_ASSESSMENT_PLAN_DECISION_ENABLED` — apps
 - `COACH_E2E` — apps
 - `COACH_REVIEW_RUNTIME_V4_ENABLED` — apps
 - `COACH_REVIEW_UPSTREAM_TIMEOUT_MS` — apps
@@ -231,6 +238,8 @@
 - `USER_DATA_EXPORT_WORKER_LEASE_MS` — apps
 - `USER_DATA_EXPORT_WORKER_POLL_MS` — apps
 - `USER_POST_PROCESS_AI_REVIEW_IMPORT_MAX_ACTIVITIES` — apps
+- `USER_POST_PROCESS_COALESCE_MAX_WAIT_MS` — apps
+- `USER_POST_PROCESS_COALESCE_QUIET_MS` — apps
 - `USER_POST_PROCESS_WORKER_BATCH_SIZE` — apps
 - `USER_POST_PROCESS_WORKER_CONCURRENCY` — apps
 - `USER_POST_PROCESS_WORKER_ENABLED` — apps

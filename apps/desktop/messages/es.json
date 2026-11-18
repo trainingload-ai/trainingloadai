@@ -69,5 +69,9 @@
   "downloadDetail": "Versión actual: {version}. Después de descargar, podrá elegir cuándo reiniciar e instalar.",
   "download": "Descargar actualización",
   "updateFailed": "Actualización incompleta",
-  "updateFailedDetail": "Compruebe su conexión de red e inténtelo de nuevo. Su versión actual y sus datos locales se conservan."
+  "updateFailedDetail": "Compruebe su conexión de red e inténtelo de nuevo. Su versión actual y sus datos locales se conservan.",
+  "secureStorageUnavailable": "El almacenamiento seguro del sistema no está disponible. Desbloquea el llavero de inicio de sesión y vuelve a intentarlo. Las claves existentes no se sustituirán ni restablecerán.",
+  "credentialsUnreadable": "No se pudieron descifrar las credenciales guardadas. Si usaste una versión de desarrollo o sin firmar, migra las claves con el entorno de ejecución original de confianza. Los datos y las claves existentes se conservan.",
+  "credentialsMismatch": "Ninguna credencial coincide con la base de datos local existente. Migra las claves de la instancia original; reinstalar o reiniciar no resolverá el problema. Tus datos existentes se conservan.",
+  "macSignatureRequired": "Esta aplicación de macOS no tiene una firma válida de Developer ID Application. Instala una versión oficial firmada. Para vistas previas locales, usa el comando de desarrollo aislado desde el código fuente. No se han abierto la base de datos local ni las credenciales."
 }

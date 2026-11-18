@@ -4,16 +4,30 @@ import { ActivityRecomputeJobService } from '../activity-recompute-job.service';
 
 describe('ActivityRecomputeJobService', () => {
   it('scans a direct MANUAL change through the complete causal suffix', async () => {
-    const create = jest.fn(async ({ data }: { data: object }) => ({
+    const update = jest.fn(async ({ data }: { data: object }) => ({
       id: 'job-1',
       ...data,
     }));
     const findNextManualFitnessMetric = jest.fn();
-    const prisma = {
+    const transaction = {
+      $executeRaw: jest.fn(async () => 1),
+      $queryRaw: jest.fn(async () => [
+        {
+          id: 'job-1',
+          status: 'SCHEDULED',
+          recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
+          recomputeTo: new Date('2026-01-02T00:00:00.000Z'),
+        },
+      ]),
       activityRecomputeJob: {
-        findUnique: jest.fn(async () => null),
-        create,
+        update,
       },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (work: (tx: typeof transaction) => Promise<unknown>) =>
+          work(transaction),
+      ),
     };
     const service = new ActivityRecomputeJobService(
       prisma as never,
@@ -37,7 +51,8 @@ describe('ActivityRecomputeJobService', () => {
     });
 
     expect(findNextManualFitnessMetric).not.toHaveBeenCalled();
-    expect(create).toHaveBeenCalledWith({
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'job-1' },
       data: expect.objectContaining({
         recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
         recomputeTo: expect.any(Date),
@@ -48,23 +63,40 @@ describe('ActivityRecomputeJobService', () => {
   });
 
   it('does not drop a context change that arrives while the deduplicated job is running', async () => {
-    const create = jest.fn(
+    const update = jest.fn(
       async ({ data }: { data: { dedupeKey: string } }) => ({
         id: 'job-followup',
         ...data,
       }),
     );
-    const findUnique = jest
+    const queryRaw = jest
       .fn()
-      .mockResolvedValueOnce({
-        id: 'job-running',
-        status: 'RUNNING',
-        recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
-        recomputeTo: new Date('2026-01-02T00:00:00.000Z'),
-      })
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce([
+        {
+          id: 'job-running',
+          status: 'RUNNING',
+          recomputeFrom: new Date('2026-01-01T00:00:00.000Z'),
+          recomputeTo: new Date('2026-01-02T00:00:00.000Z'),
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'job-followup',
+          status: 'SCHEDULED',
+          recomputeFrom: new Date('2026-01-03T00:00:00.000Z'),
+          recomputeTo: new Date('2026-01-04T00:00:00.000Z'),
+        },
+      ]);
+    const transaction = {
+      $executeRaw: jest.fn(async () => 1),
+      $queryRaw: queryRaw,
+      activityRecomputeJob: { update },
+    };
     const prisma = {
-      activityRecomputeJob: { findUnique, create },
+      $transaction: jest.fn(
+        async (work: (tx: typeof transaction) => Promise<unknown>) =>
+          work(transaction),
+      ),
     };
     const service = new ActivityRecomputeJobService(
       prisma as never,
@@ -85,7 +117,9 @@ describe('ActivityRecomputeJobService', () => {
     });
 
     expect(result.scheduled).toBe(true);
-    expect(create).toHaveBeenCalledWith({
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'job-followup' },
       data: expect.objectContaining({
         dedupeKey: expect.stringContaining(':followup'),
         recomputeFrom: new Date('2026-01-03T00:00:00.000Z'),

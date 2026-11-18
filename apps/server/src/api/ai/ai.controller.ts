@@ -849,6 +849,15 @@ export class AiController {
     if (v2 && !command)
       throw new HttpException('Invalid Coach run command', 400);
     await this.aiDataConsent.assertGranted(userId);
+    const platformFunded =
+      command && this.coachRuns.isAthleteStateContinuation
+        ? await this.coachRuns.isAthleteStateContinuation(
+            userId,
+            String(body.sid ?? ''),
+            command,
+          )
+        : false;
+    if (platformFunded) await this.aiService.assertAthleteStateAccess(userId);
     if (command && !body.branchId) {
       const branchId = await this.coachRuns.existingRequestBranch(
         userId,
@@ -1005,7 +1014,9 @@ export class AiController {
     const intent = String(body?.intent ?? '').trim();
     const purpose = parseRequestedModelPurpose(body?.purpose);
     const thinking = purpose === 'REASONING';
-    const operationId = String(body?.operationId ?? '').trim();
+    const operationId =
+      String(body?.operationId ?? '').trim() ||
+      (platformFunded ? randomUUID() : '');
     if (!isMetaOnlyToolResult && !operationId) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
@@ -1125,14 +1136,17 @@ export class AiController {
               },
             ];
       for (const [index, event] of events.entries()) {
-        const callKey = `${operationId}:coach-model:${index}`;
+        const usageIdentity = platformFunded
+          ? (runHandle?.projector.run.attemptId ?? operationId)
+          : operationId;
+        const callKey = `${usageIdentity}:coach-model:${index}`;
         if (persistedUsageCallKeys.has(callKey)) continue;
         const eventModel = event.model.trim() || actualModel;
         const eventProvider = event.provider?.trim() || provider;
         try {
           await this.aiUsage.recordUsageEvent({
             userId,
-            operationId,
+            operationId: platformFunded ? null : operationId,
             callKey,
             kind: actionUsageKind,
             provider: eventProvider,
@@ -1234,7 +1248,7 @@ export class AiController {
     };
 
     try {
-      if (!isMetaOnlyToolResult && !v2) {
+      if (!platformFunded && !isMetaOnlyToolResult && !v2) {
         const peeked = await this.operations.peekReplay(operationAdmissionArgs);
         if (peeked.replay) {
           await emitOperationReplay(peeked.operation);
@@ -1287,10 +1301,9 @@ export class AiController {
           );
           for (const chunk of replayChunks.slice(0, -2))
             await rawSink.emit({ type: 'ui_chunk', chunk });
-          const operation = await this.operations.get(
-            userId,
-            begun.replay.operationId,
-          );
+          const operation = platformFunded
+            ? null
+            : await this.operations.get(userId, begun.replay.operationId);
           if (operation)
             await rawSink.emit({
               type: 'ui_chunk',
@@ -1387,7 +1400,7 @@ export class AiController {
 
       // USER 必须在模型操作登记前落库。否则模型不可用会留下
       // 空壳 sid，用户发的「你好」无法从同一会话恢复。
-      if (!isMetaOnlyToolResult) {
+      if (!platformFunded && !isMetaOnlyToolResult) {
         const admission = await this.operations.begin(operationAdmissionArgs);
         if (admission.replay) {
           await emitOperationReplay(admission.operation);
@@ -1415,6 +1428,9 @@ export class AiController {
         | { type: 'user'; message: CoachUserMessageBody }
       > = [];
       const stream = await this.aiService.coachStream({
+        platformFunded,
+        runtimeRunId: runHandle?.projector.run.runId,
+        activeSkillName: platformFunded ? 'athlete-state' : undefined,
         session,
         sid: coachSessionKey,
         lang,
@@ -1684,7 +1700,9 @@ export class AiController {
         return;
       }
 
-      actionUsageKind = resolveCoachUsageKind(structuredEventsToPersist);
+      actionUsageKind = platformFunded
+        ? $Enums.AiUsageKind.OTHER
+        : resolveCoachUsageKind(structuredEventsToPersist);
       if (
         operationStarted &&
         actionUsageKind !== $Enums.AiUsageKind.COACH_CHAT
@@ -1821,6 +1839,18 @@ export class AiController {
       );
       if (!assistantResultPersisted) {
         throw new Error('AI_RESULT_NOT_PERSISTED');
+      }
+      if (platformFunded) {
+        await sink.emit(
+          terminalSuccessEvent ?? {
+            type: 'result',
+            subtype: 'success',
+            is_error: false,
+            result: assistantText,
+          },
+        );
+        sink.end();
+        return;
       }
       await this.operations.markDelivered({
         userId,
@@ -1995,6 +2025,9 @@ export class AiController {
           'Internal error. Please try again later.',
       });
     } finally {
+      // Failed or interrupted platform attempts still retain their actual cost.
+      if (platformFunded && (modelUsageEvents.length || lastUsage))
+        await persistCoachUsage().catch(() => undefined);
       if (runTimer) clearInterval(runTimer);
       if (v2) {
         try {

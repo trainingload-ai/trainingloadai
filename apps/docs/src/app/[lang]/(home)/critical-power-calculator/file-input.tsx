@@ -1,10 +1,11 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ToolFileDropzone } from "@/components/ToolClientControls";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -161,16 +162,15 @@ export function CpFileInput({
           {error}
         </p>
       ) : null}
-      <Button
-        className={`${styles.primaryAction} w-full`}
+      <ToolActionButton
+        intent="primary"
+        fullWidth
         disabled={!file || busy}
         onClick={analyze}
       >
-        {busy ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-        ) : null}
+        {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
         {t(busy ? "analyzing" : "analyze")}
-      </Button>
+      </ToolActionButton>
       {done ? (
         <p role="status" className={styles.fileSuccess}>
           {t("done")} <a href="#result">{t("viewResult")} →</a>

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.22",
+  "releaseVersion": "1.1.26",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [
@@ -9,7 +9,10 @@
       "1.1.18",
       "1.1.19",
       "1.1.20",
-      "1.1.21"
+      "1.1.21",
+      "1.1.22",
+      "1.1.24",
+      "1.1.25"
     ],
     "applicationRollbackTo": [
       "1.1.15",
@@ -17,7 +20,10 @@
       "1.1.18",
       "1.1.19",
       "1.1.20",
-      "1.1.21"
+      "1.1.21",
+      "1.1.22",
+      "1.1.24",
+      "1.1.25"
     ],
     "backupRequired": true
   },
@@ -124,6 +130,22 @@
       "0025_vdot_forecast_snapshot": {
         "phase": "expand",
         "releaseVersion": "1.1.22"
+      },
+      "0026_athlete_state_updates": {
+        "phase": "expand",
+        "releaseVersion": "1.1.24"
+      },
+      "0027_scope_fitness_setting_evidence": {
+        "phase": "expand",
+        "releaseVersion": "1.1.24"
+      },
+      "0028_user_scoped_activity_identity": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
+      },
+      "0029_provider_authorization_revision": {
+        "phase": "expand",
+        "releaseVersion": "1.1.26"
       }
     }
   }

@@ -1,14 +1,16 @@
 "use client";
 
 import { ChevronDown, Menu, PanelLeft, Search, X } from "lucide-react";
-import { useSidebar } from "fumadocs-ui/provider";
+import { useSidebar } from "fumadocs-ui/contexts/sidebar";
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { HeaderLocaleSwitcher } from "@/components/HeaderLocaleSwitcher";
+import { useHeaderDisclosure } from "@/hooks/use-header-disclosure";
 import { Button } from "@/components/ui/button";
 import { localePrefix } from "@/lib/locale-url";
 import {
@@ -20,6 +22,8 @@ import { publicDemoDestination } from "@/lib/public-demo-url";
 
 export function DocsHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const [languagesOpen, setLanguagesOpen] = useState(false);
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebar();
   const { setOpenSearch } = useSearchContext();
@@ -71,13 +75,22 @@ export function DocsHeader() {
     return query ? `${nextPath}?${query}` : nextPath;
   };
 
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     setMenuOpen(false);
     setLanguagesOpen(false);
-  };
+  }, []);
+  useHeaderDisclosure({
+    open: menuOpen,
+    close: closeMenu,
+    headerRef,
+    triggerRef: menuTriggerRef,
+  });
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85"
+    >
       <nav
         aria-label={tNav("docs")}
         className="mx-auto flex min-h-14 max-w-[1440px] items-center gap-3 px-4 lg:gap-4 lg:px-6"
@@ -128,37 +141,12 @@ export function DocsHeader() {
         </div>
 
         <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
-          <div className="group relative">
-            <button
-              type="button"
-              aria-haspopup="menu"
-              className="flex min-h-9 items-center gap-1 rounded-compact px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            >
-              {currentLocale.shortLabel}
-              <ChevronDown aria-hidden="true" className="size-3.5 opacity-60" />
-            </button>
-            <div className="invisible absolute right-0 top-full pt-2 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-              <div className="grid w-40 gap-1 rounded-compact border border-border bg-popover p-1 shadow-lg">
-                {LOCALE_OPTIONS.map((option) => (
-                  <Link
-                    key={option.key}
-                    href={buildLangHref(option.key)}
-                    prefetch={false}
-                    onClick={() => persistLocalePreference(option.key)}
-                    className={[
-                      "rounded-xs px-3 py-2 text-sm transition-colors",
-                      option.key === lang
-                        ? "bg-secondary font-semibold text-foreground"
-                        : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
-                    ].join(" ")}
-                  >
-                    {option.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-          <ThemeSwitcher />
+          <HeaderLocaleSwitcher
+            lang={lang}
+            pathname={pathname}
+            query={searchParams.toString()}
+          />
+          <ThemeSwitcher groupLabel={tHeader("theme")} />
           <a
             href={demo.href}
             target="_blank"
@@ -190,7 +178,7 @@ export function DocsHeader() {
           >
             <Search aria-hidden="true" />
           </Button>
-          <ThemeSwitcher />
+          <ThemeSwitcher groupLabel={tHeader("theme")} />
           <Button
             variant="ghost"
             size="icon-lg"
@@ -207,7 +195,9 @@ export function DocsHeader() {
           </Button>
           <button
             type="button"
+            ref={menuTriggerRef}
             aria-expanded={menuOpen}
+            aria-controls="docs-mobile-menu"
             aria-label={tHeader("openMainMenu")}
             onClick={() => {
               setSidebarOpen(false);
@@ -215,13 +205,20 @@ export function DocsHeader() {
             }}
             className="inline-flex size-9 items-center justify-center rounded-compact text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            {menuOpen ? (
+              <X aria-hidden="true" className="size-5" />
+            ) : (
+              <Menu aria-hidden="true" className="size-5" />
+            )}
           </button>
         </div>
       </nav>
 
       {menuOpen ? (
-        <div className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-border bg-background px-4 py-3 lg:hidden">
+        <div
+          id="docs-mobile-menu"
+          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-border bg-background px-4 py-3 lg:hidden"
+        >
           <div className="grid gap-1">
             {navItems.map((item) => (
               <Link
@@ -262,23 +259,30 @@ export function DocsHeader() {
           <button
             type="button"
             aria-expanded={languagesOpen}
+            aria-controls="docs-mobile-languages"
             onClick={() => setLanguagesOpen((open) => !open)}
             className="mt-3 flex min-h-10 w-full items-center justify-between rounded-compact border border-border px-3 text-sm font-medium"
           >
             {currentLocale.label}
             <ChevronDown
               aria-hidden="true"
-              className={`size-4 transition-transform ${languagesOpen ? "rotate-180" : ""}`}
+              className={`size-4 transition-transform motion-reduce:transition-none ${languagesOpen ? "rotate-180" : ""}`}
             />
           </button>
           {languagesOpen ? (
-            <div className="mt-2 grid grid-cols-2 gap-1">
+            <div
+              id="docs-mobile-languages"
+              className="mt-2 grid grid-cols-2 gap-1"
+            >
               {LOCALE_OPTIONS.map((option) => (
                 <Link
                   key={option.key}
                   href={buildLangHref(option.key)}
                   prefetch={false}
-                  onClick={() => persistLocalePreference(option.key)}
+                  onClick={() => {
+                    persistLocalePreference(option.key);
+                    closeMenu();
+                  }}
                   className={[
                     "rounded-compact px-3 py-2 text-sm",
                     option.key === lang

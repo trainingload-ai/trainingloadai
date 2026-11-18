@@ -7,6 +7,17 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 const outputDir = resolve(currentDir, "../public/og");
 
 const assets = {
+  "lactate-curve-calculator": {
+    kicker: "MEASURED TEST DATA",
+    title: ["Lactate Curve", "Calculator"],
+    description: "Analyze blood lactate step tests in your browser",
+    screenTitle: "Lactate curve · illustrative example",
+    metric: "LT1 / LT2",
+    unit: "METHODS",
+    detail: "OBLA · Baseline · Log-log · Dmax",
+    preview: "power",
+    tabs: ["CURVE", "METHODS", "ZONES"],
+  },
   converter: {
     kicker: "FILE TOOL",
     title: ["GPX / FIT / TCX", "Converter"],
@@ -276,11 +287,15 @@ function barsPreview(type) {
       .join("");
   }
 
-  const labels = type === "zones" ? ["Z1", "Z2", "Z3", "Z4", "Z5"] : ["EASY", "STEADY", "HARD"];
+  const labels =
+    type === "zones"
+      ? ["Z1", "Z2", "Z3", "Z4", "Z5"]
+      : ["EASY", "STEADY", "HARD"];
   return labels
     .map((label, index) => {
       const y = 116 + index * (type === "zones" ? 35 : 52);
-      const widths = type === "zones" ? [235, 292, 342, 385, 420] : [260, 335, 405];
+      const widths =
+        type === "zones" ? [235, 292, 342, 385, 420] : [260, 335, 405];
       const colors = ["#D8F99D", "#A7F3D0", "#67E8F9", "#5EEAD4", "#2DD4BF"];
       return `<rect x="28" y="${y}" width="${widths[index]}" height="24" rx="8" fill="${colors[index]}"/>
         ${text(label, 39, y + 17, { size: 11, weight: 900, fill: "#0B241E" })}`;
@@ -289,7 +304,8 @@ function barsPreview(type) {
 }
 
 function mainVisualization(asset) {
-  if (["zones", "pace"].includes(asset.preview)) return barsPreview(asset.preview);
+  if (["zones", "pace"].includes(asset.preview))
+    return barsPreview(asset.preview);
 
   if (asset.preview === "route") {
     return `<rect x="28" y="110" width="430" height="152" rx="18" fill="#E7F1EE"/>
@@ -361,7 +377,14 @@ function createSvg(asset) {
   const titleSize = asset.title.some((line) => line.length > 19) ? 51 : 58;
   const titleStart = asset.title.length === 1 ? 286 : 258;
   const titleMarkup = asset.title
-    .map((line, index) => text(line, 68, titleStart + index * 66, { size: titleSize, weight: 900, fill: "#F8FAFC", spacing: -1.8 }))
+    .map((line, index) =>
+      text(line, 68, titleStart + index * 66, {
+        size: titleSize,
+        weight: 900,
+        fill: "#F8FAFC",
+        spacing: -1.8,
+      }),
+    )
     .join("");
   const descriptionY = titleStart + asset.title.length * 66 + 28;
 
@@ -433,13 +456,17 @@ function createSvg(asset) {
 }
 
 await mkdir(outputDir, { recursive: true });
+const selectedAssets = new Set(process.argv.slice(2));
 
 for (const [name, asset] of Object.entries(assets)) {
+  if (selectedAssets.size && !selectedAssets.has(name)) continue;
   const svg = createSvg(asset).replace(/[ \t]+$/gm, "");
   const svgPath = resolve(outputDir, `${name}.svg`);
   const pngPath = resolve(outputDir, `${name}.png`);
   await writeFile(svgPath, `${svg}\n`, "utf8");
-  await sharp(Buffer.from(svg)).png({ compressionLevel: 9, palette: true }).toFile(pngPath);
+  await sharp(Buffer.from(svg))
+    .png({ compressionLevel: 9, palette: true })
+    .toFile(pngPath);
   console.log(`${name}: ${svgPath} -> ${pngPath}`);
 }
 
@@ -459,8 +486,9 @@ const squareBrandCardSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" 
   ${text("Trainingload.ai", 175, 319, { size: 54, weight: 850, fill: "#080B0B", spacing: -1.8 })}
 </svg>`;
 
-await sharp(Buffer.from(squareBrandCardSvg))
-  .png({ compressionLevel: 9 })
-  .toFile(squareBrandCardPath);
-
-console.log(`brand card: ${squareBrandCardPath}`);
+if (!selectedAssets.size) {
+  await sharp(Buffer.from(squareBrandCardSvg))
+    .png({ compressionLevel: 9 })
+    .toFile(squareBrandCardPath);
+  console.log(`brand card: ${squareBrandCardPath}`);
+}

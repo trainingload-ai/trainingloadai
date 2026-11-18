@@ -44,6 +44,37 @@ describe('external activity mirror match', () => {
 });
 
 describe('ExternalActivityMirrorService', () => {
+  it('lists unavailable discoveries from any provider with a retry action', async () => {
+    const findMany = jest.fn(async (_args: { where: object }) => [
+      {
+        id: 'direct-source',
+        sourceKind: 'FILE',
+        originProvider: 'upload',
+        resolutionStatus: 'BLOCKED',
+        resolutionReason: 'UPSTREAM_DATA_UNAVAILABLE',
+        timelineTitle: 'Summary only',
+        timelineStartTime: new Date('2026-08-01T00:00:00Z'),
+        rawPayload: {
+          original: {
+            name: 'Summary only',
+            start_date: '2026-08-01T00:00:00Z',
+          },
+        },
+      },
+    ]);
+    const service = new ExternalActivityMirrorService(
+      {} as never,
+      { sourceObjects: () => ({ findMany }) } as never,
+    );
+    await expect(service.listForUser({ userId: 'owner' })).resolves.toEqual([
+      expect.objectContaining({
+        discoveredVia: 'file',
+        title: 'Summary only',
+        action: 'RETRY',
+      }),
+    ]);
+    expect(findMany.mock.calls[0][0].where).not.toHaveProperty('sourceKind');
+  });
   it('stops before loading activity context when the user has no unresolved mirrors', async () => {
     const prisma = {
       importSourceObject: {
@@ -55,10 +86,14 @@ describe('ExternalActivityMirrorService', () => {
         findMany: jest.fn(),
       },
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await expect(
       service.resolveForImportedActivity({
@@ -74,91 +109,99 @@ describe('ExternalActivityMirrorService', () => {
     expect(prisma.activity.findMany).not.toHaveBeenCalled();
   });
 
-  it('unwraps nested provider payloads and resolves the matching mirror', async () => {
-    const tx = {
-      activitySource: { upsert: jest.fn(async () => ({})) },
-      importSourceObject: { update: jest.fn(async () => ({})) },
-    };
-    const prisma = {
-      importSourceObject: {
-        findUnique: jest.fn(async () => ({
-          sourceKind: 'UNKNOWN',
-          provider: 'unknown',
-          rawPayload: {
-            original: {
-              listActivity: {
-                start_date_local: '2026-10-10T07:30:00',
-              },
-            },
-          },
-        })),
-        findMany: jest.fn(async () => [
-          {
-            id: 'mirror-1',
-            sourceKind: 'INTERVALS_ICU',
-            provider: 'intervals_icu',
-            sourceUid: 'intervals:user-1:i123',
-            accountRef: '0',
-            externalId: 'i123',
-            originProvider: 'unknown',
+  it.each([false, true])(
+    'resolves nested provider payloads without demoting its own primary (same source: %s)',
+    async (sameSource) => {
+      const tx = {
+        activitySource: { upsert: jest.fn(async () => ({})) },
+        importSourceObject: { update: jest.fn(async () => ({})) },
+      };
+      const prisma = {
+        importSourceObject: {
+          findUnique: jest.fn(async () => ({
+            sourceKind: 'UNKNOWN',
+            provider: 'unknown',
             rawPayload: {
-              listActivity: {
-                start_date_local: '2026-10-10T07:30:00',
+              original: {
+                listActivity: {
+                  start_date_local: '2026-10-10T07:30:00',
+                },
               },
             },
-          },
-        ]),
-      },
-      activity: {
-        findFirst: jest.fn(async () => ({
-          id: 42,
-          startTime: new Date('2026-10-09T23:30:00.000Z'),
-          timezone: 'Asia/Shanghai',
-          sportType: 'RUNNING',
-          elapsedTime: 3600,
-          distance: 10_000,
-        })),
-        findMany: jest.fn(async () => [
-          {
+          })),
+          findMany: jest.fn(async () => [
+            {
+              id: sameSource ? 'unknown-source-1' : 'mirror-1',
+              sourceKind: 'INTERVALS_ICU',
+              provider: 'intervals_icu',
+              sourceUid: 'intervals:user-1:i123',
+              accountRef: '0',
+              externalId: 'i123',
+              originProvider: 'unknown',
+              rawPayload: {
+                listActivity: {
+                  start_date_local: '2026-10-10T07:30:00',
+                },
+              },
+            },
+          ]),
+        },
+        activity: {
+          findFirst: jest.fn(async () => ({
             id: 42,
             startTime: new Date('2026-10-09T23:30:00.000Z'),
             timezone: 'Asia/Shanghai',
             sportType: 'RUNNING',
             elapsedTime: 3600,
             distance: 10_000,
-            activitySources: [
-              {
-                sourceObjectId: 'unknown-source-1',
-                sourceKind: 'UNKNOWN',
-                provider: 'unknown',
-              },
-            ],
-          },
-        ]),
-      },
-      $transaction: jest.fn(async (callback: (client: typeof tx) => unknown) =>
-        callback(tx),
-      ),
-    };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+          })),
+          findMany: jest.fn(async () => [
+            {
+              id: 42,
+              startTime: new Date('2026-10-09T23:30:00.000Z'),
+              timezone: 'Asia/Shanghai',
+              sportType: 'RUNNING',
+              elapsedTime: 3600,
+              distance: 10_000,
+              activitySources: [
+                {
+                  sourceObjectId: 'unknown-source-1',
+                  sourceKind: 'UNKNOWN',
+                  provider: 'unknown',
+                },
+              ],
+            },
+          ]),
+        },
+        $transaction: jest.fn(
+          async (callback: (client: typeof tx) => unknown) => callback(tx),
+        ),
+      };
+      const service = new ExternalActivityMirrorService(
+        prisma as never,
+        {
+          sourceObjects: (client?: {
+            importSourceObject: typeof prisma.importSourceObject;
+          }) => client?.importSourceObject ?? prisma.importSourceObject,
+        } as never,
+      );
 
-    await expect(
-      service.resolveForImportedActivity({
-        userId: 'user-1',
+      await expect(
+        service.resolveForImportedActivity({
+          userId: 'user-1',
+          activityId: 42,
+          provider: 'unknown',
+          sourceObjectId: 'unknown-source-1',
+        }),
+      ).resolves.toEqual({
+        kind: 'RESOLVED',
+        mirrorId: sameSource ? 'unknown-source-1' : 'mirror-1',
         activityId: 42,
-        provider: 'unknown',
-        sourceObjectId: 'unknown-source-1',
-      }),
-    ).resolves.toEqual({
-      kind: 'RESOLVED',
-      mirrorId: 'mirror-1',
-      activityId: 42,
-    });
+      });
 
-    expect(tx.activitySource.upsert).toHaveBeenCalledWith(
+      if (sameSource) expect(tx.activitySource.upsert).not.toHaveBeenCalled();
+      else
+        expect(tx.activitySource.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         create: expect.objectContaining({
           activityId: 42,
@@ -167,14 +210,15 @@ describe('ExternalActivityMirrorService', () => {
         }),
       }),
     );
-    expect(tx.importSourceObject.update).toHaveBeenCalledWith({
-      where: { id: 'mirror-1' },
-      data: expect.objectContaining({
-        resolvedActivityId: 42,
-        resolutionStatus: 'RESOLVED',
-      }),
-    });
-  });
+      expect(tx.importSourceObject.update).toHaveBeenCalledWith({
+        where: { id: sameSource ? 'unknown-source-1' : 'mirror-1' },
+        data: expect.objectContaining({
+          resolvedActivityId: 42,
+          resolutionStatus: 'RESOLVED',
+        }),
+      });
+    },
+  );
 
   it('falls back to shared fuzzy evidence outside the exact-start tolerance', async () => {
     const tx = {
@@ -239,10 +283,14 @@ describe('ExternalActivityMirrorService', () => {
         callback(tx),
       ),
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await expect(
       service.resolveForImportedActivity({
@@ -332,10 +380,14 @@ describe('ExternalActivityMirrorService', () => {
         callback(tx),
       ),
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await expect(
       service.resolveForImportedActivity({
@@ -427,10 +479,14 @@ describe('ExternalActivityMirrorService', () => {
       },
       $transaction: jest.fn(),
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await expect(
       service.resolveForImportedActivity({
@@ -508,10 +564,14 @@ describe('ExternalActivityMirrorService', () => {
       },
       $transaction: jest.fn(),
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await expect(
       service.resolveForImportedActivity({
@@ -561,10 +621,14 @@ describe('ExternalActivityMirrorService', () => {
         updateMany: jest.fn(async () => ({ count: 1 })),
       },
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await service.classifySyncRequestCandidates('request-1', [
       '2026-10-10T08:00:00',
@@ -615,10 +679,14 @@ describe('ExternalActivityMirrorService', () => {
         updateMany: jest.fn(async () => ({ count: 1 })),
       },
     };
-    const service = new ExternalActivityMirrorService(prisma as never, {
-      sourceObjects: (client?: { importSourceObject: typeof prisma.importSourceObject }) =>
-        client?.importSourceObject ?? prisma.importSourceObject,
-    } as never);
+    const service = new ExternalActivityMirrorService(
+      prisma as never,
+      {
+        sourceObjects: (client?: {
+          importSourceObject: typeof prisma.importSourceObject;
+        }) => client?.importSourceObject ?? prisma.importSourceObject,
+      } as never,
+    );
 
     await service.markOriginImportFailed({
       userId: 'user-1',

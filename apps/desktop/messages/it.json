@@ -69,5 +69,9 @@
   "downloadDetail": "Versione attuale: {version}. Dopo il download potrai scegliere quando riavviare e installare.",
   "download": "Scarica aggiornamento",
   "updateFailed": "Aggiornamento non completato",
-  "updateFailedDetail": "Controlla la connessione di rete e riprova. La versione attuale e i dati locali sono conservati."
+  "updateFailedDetail": "Controlla la connessione di rete e riprova. La versione attuale e i dati locali sono conservati.",
+  "secureStorageUnavailable": "L’archivio sicuro del sistema non è disponibile. Sblocca il portachiavi di accesso e riprova. Le chiavi esistenti non verranno sostituite né reimpostate.",
+  "credentialsUnreadable": "Impossibile decifrare le credenziali salvate. Se usavi una versione di sviluppo o non firmata, migra le chiavi con l’ambiente di esecuzione originale attendibile. I dati e le chiavi esistenti vengono conservati.",
+  "credentialsMismatch": "Nessuna credenziale corrisponde al database locale esistente. Migra le chiavi dell’istanza originale; reinstallare o riavviare non risolverà il problema. I dati esistenti vengono conservati.",
+  "macSignatureRequired": "Questa app macOS non ha una firma Developer ID Application valida. Installa una versione ufficiale firmata. Per le anteprime locali, usa il comando di sviluppo isolato dal codice sorgente. Il database locale e le credenziali non sono stati aperti."
 }

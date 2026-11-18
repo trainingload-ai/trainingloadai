@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "toolId": "lactate_curve_calculator",
+  "enabledInProduction": false,
+  "eventProperty": "tool_id",
+  "breakdowns": ["input_origin", "input_method", "sport", "lang", "engine_version"],
+  "userProvidedFilter": { "input_origin": "user" },
+  "completionStatuses": ["complete", "partial"],
+  "runtimeFailureStages": ["load", "analysis"],
+  "dashboards": [
+    {
+      "name": "Lactate Tool Usage",
+      "source": "PostHog",
+      "funnels": [{ "events": ["tool_viewed", "tool_started", "tool_completed"], "windowMinutes": 30, "count": "unique persons", "breakdown": "input_origin on start and completion" }],
+      "trends": ["tool_input_rejected by reason_code and stage", "tool_completed by status", "tool_no_result / tool_started by engine_version and input_origin", "tool_exported, tool_result_copied, print_opened: separate unique-person counts over 24 hours"]
+    },
+    {
+      "name": "Lactate Tool Health",
+      "source": "PostHog and Sentry",
+      "trends": ["tool_failed(stage in load,analysis) / tool_started: event counts", "tool_failed by stage, reason_code and engine_version", "tool_completed and tool_no_result duration_ms: P50/P95", "tool_completed to tool_visualization_rendered within 30 seconds", "Sentry tool=lactate_curve_calculator by release and browser"],
+      "limitations": ["duration_ms includes module loading and calculation, not chart paint", "rendered event follows a positive chart size and an SVG animation frame; the event gap approximates render delay", "missing terminal events are tracked separately; never classify every departure as a runtime failure"]
+    },
+    {
+      "name": "Lactate Tool Acquisition",
+      "source": "PostHog and GA4",
+      "funnels": [
+        { "events": ["tool_completed", "tool_app_cta_clicked"], "windowHours": 24, "filter": "input_origin=user on both steps; cta_placement=result", "count": "unique persons" },
+        { "events": ["tool_app_cta_clicked", "app_session_started"], "windowMinutes": 30, "filter": "source_tool_id=lactate_curve_calculator on App entry", "count": "unique persons" },
+        { "events": ["app_session_started", "signup_completed", "onboarding_completed"], "windowDays": 7, "filter": "new anonymous App entry with source_tool_id=lactate_curve_calculator; follow the same person", "count": "unique persons" }
+      ],
+      "limitations": ["signup attribution uses tool_name, not tool_id", "App entry is once per session; existing sessions and blocked identity cookies reduce observable arrivals", "exclude example and example_edited completions from the user-provided-data cohort", "do not sum PostHog and GA4 users"]
+    },
+    { "name": "Lactate Search Performance", "source": "GSC", "paths": ["/lactate-curve-calculator", "/lactate-threshold-calculator"], "locales": ["en", "zh", "zh-hant", "ja"], "metrics": ["impressions", "clicks", "CTR", "position", "queries", "country", "device"], "windowDays": 28 }
+  ],
+  "proposedAlerts": [
+    { "id": "smoke", "intervalMinutes": 15, "consecutiveFailures": 2, "ownerRole": "engineering", "action": "inspect availability, JS resources, CSP and last release" },
+    { "id": "algorithm-regression", "trigger": "any fixture availability change or numeric tolerance failure", "action": "block merge and release" },
+    { "id": "runtime-errors", "windowHours": 24, "minimumStarts": 100, "errorRateAbove": 0.02, "stages": ["load", "analysis"], "ownerRole": "engineering" },
+    { "id": "end-to-end-latency", "windowHours": 24, "minimumCompletions": 100, "p95MsAbove": 2000, "requiresComparableBaseline": true, "ownerRole": "engineering" },
+    { "id": "completion-drop", "windowDays": 7, "minimumUserProvidedPersonsPerWindow": 100, "relativeDropAbove": 0.3, "ownerRole": "growth", "action": "investigate traffic mix and telemetry before drawing conclusions" },
+    { "id": "privacy-or-duplicates", "trigger": "unknown enum, duplicate terminal event or sensitive input property", "action": "disable affected telemetry, preserve local calculation, audit and fix" }
+  ],
+  "activationRequires": ["assigned owners", "notification channel", "live event verification", "alert drill", "cross-site identity test", "synthetic monitor telemetry exclusion"]
+}

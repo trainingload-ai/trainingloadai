@@ -39,6 +39,7 @@ vi.mock("@/api/ai-data-consent", () => ({
 }));
 
 vi.mock("@/api/settings", () => ({
+  athleteStateAutoEnabled: (value?: string) => value !== "false",
   getUserSettings: vi.fn(),
   updateUserSetting: vi.fn(),
 }));

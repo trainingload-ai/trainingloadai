@@ -419,6 +419,8 @@ export default function VdotPlanGeneratorClient({
         destination: "plan_import",
         lang,
       });
+      // Import continues on the separate app origin with a full navigation.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign(
         `${appImportBase(lang)}/plans/import/${encodeURIComponent(payload.token)}`,
       );

@@ -107,7 +107,7 @@ export default async function BlogPage({
   const moreLabel = isChinese ? "更多文章" : "More stories";
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-7xl px-4 py-12 md:px-6 md:py-16 sm:px-6 lg:px-8">
+    <div className="mx-auto min-h-[70vh] max-w-7xl px-4 py-12 md:px-6 md:py-16 sm:px-6 lg:px-8">
       <header className="grid gap-8 border-b border-neutral-300 pb-10 dark:border-neutral-700 md:grid-cols-12 md:items-end md:pb-14">
         <div className="md:col-span-8">
           <p className="mb-5 font-mono text-xs font-semibold tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
@@ -275,6 +275,6 @@ export default async function BlogPage({
           <p className="text-neutral-600 dark:text-neutral-400">{t("empty")}</p>
         </div>
       )}
-    </main>
+    </div>
   );
 }

@@ -69,5 +69,9 @@
   "downloadDetail": "Version actuelle : {version}. Après le téléchargement, vous pourrez choisir quand redémarrer et installer.",
   "download": "Télécharger la mise à jour",
   "updateFailed": "Mise à jour incomplète",
-  "updateFailedDetail": "Vérifiez votre connexion réseau et réessayez. Votre version actuelle et vos données locales sont conservées."
+  "updateFailedDetail": "Vérifiez votre connexion réseau et réessayez. Votre version actuelle et vos données locales sont conservées.",
+  "secureStorageUnavailable": "Le stockage sécurisé du système est indisponible. Déverrouillez votre trousseau de session et réessayez. Les clés existantes ne seront ni remplacées ni réinitialisées.",
+  "credentialsUnreadable": "Impossible de déchiffrer les identifiants enregistrés. Si vous utilisiez une version de développement ou non signée, migrez les clés avec l’environnement d’exécution d’origine de confiance. Les données et clés existantes sont conservées.",
+  "credentialsMismatch": "Aucun identifiant ne correspond à la base de données locale existante. Migrez les clés de l’instance d’origine ; une réinstallation ou un redémarrage ne résoudra pas le problème. Vos données existantes sont conservées.",
+  "macSignatureRequired": "Cette application macOS ne possède pas de signature Developer ID Application valide. Installez une version officielle signée. Pour les aperçus locaux, utilisez la commande de développement isolée depuis les sources. Aucune base de données locale ni aucun identifiant n’a été ouvert."
 }

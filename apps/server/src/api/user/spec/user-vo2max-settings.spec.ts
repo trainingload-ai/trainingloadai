@@ -39,6 +39,13 @@ function createService(args?: {
       }),
     } as never,
     { recordCurrentVersion: jest.fn(async () => ({})) } as never,
+    {
+      observe: async (
+        _userId: unknown,
+        _tx: unknown,
+        write: () => Promise<unknown>,
+      ) => write(),
+    } as never,
   );
   jest.spyOn(service, 'getComposedUserProfile').mockResolvedValue({} as never);
   return { service, profileUpsert, profileUpdate, emitAsync };

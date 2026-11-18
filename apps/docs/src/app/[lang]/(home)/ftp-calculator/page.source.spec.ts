@@ -22,16 +22,12 @@ describe("FTP calculator page source", () => {
     expect(client).toContain('const FTP_FILE_SPORT = "CYCLING" as const');
     expect(client).not.toContain('{ value: "ten_km"');
     expect(client).toContain('useState<EstimateCpTestType>("thirty_min")');
-    expect(client).toContain("<TabsList");
     expect(client).toContain("<SelectTrigger");
     expect(client).toContain("<Input");
     expect(client).toContain('suffix="W"');
     expect(page).toContain("readProof");
-    expect(client).toContain('role="radiogroup"');
-    expect(client.indexOf('role="radiogroup"')).toBeLessThan(client.indexOf("<TabsList"));
     expect(client).toContain('t("manual.unitsMetric")');
     expect(client).toContain('t("fields.weightLb")');
-    expect(client).toContain("bg-brand text-brand-foreground");
     expect(css).toContain("--ftp-accent: var(--brand)");
     expect(css).toContain("--ftp-canvas: var(--background)");
     expect(css).toContain("#94a3b8");

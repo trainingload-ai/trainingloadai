@@ -1,5 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { ReviewDigestService } from '../review-digest.service';
+import { BusinessException } from '@/filters/business-exception/business.exception';
+import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import {
   ReviewModelCallGuard,
   ReviewModelDeferredError,
@@ -99,7 +101,6 @@ function createAiService(args?: {
     args?.guard ?? new ReviewModelCallGuard(),
     undefined,
     { isGranted: jest.fn(async () => true) } as never,
-    { recordUsageEvent } as never,
     { runBackgroundCoachTask: create } as never,
   );
   return { service, recordUsageEvent, create };
@@ -191,24 +192,29 @@ describe('ReviewDigestService AI usage accounting', () => {
   };
 
   it('records automatic digest generation as platform-paid usage', async () => {
-    const { service, recordUsageEvent } = createAiService();
+    const { service, recordUsageEvent, create } = createAiService();
 
     await expect(service.generateAiSummaryMarkdown(request)).resolves.toEqual(
       expect.objectContaining({ markdown: '## AI review', model: 'model' }),
     );
-    expect(recordUsageEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userId: 'user-1',
-        kind: 'REVIEW_WEEKLY',
-        provider: 'openrouter',
-        model: 'model',
-        usage: expect.objectContaining({
-          inputTokens: 900,
-          cachedInputTokens: 300,
-          outputTokens: 100,
-        }),
-      }),
+    expect(recordUsageEvent).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ funding: 'PLATFORM' }),
     );
+  });
+
+  it('keeps rule-based digest generation available after a late consent rejection', async () => {
+    const { service } = createAiService({
+      create: jest.fn(async () => {
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED,
+          message: 'AI_DATA_CONSENT_REQUIRED',
+        });
+      }),
+    });
+    await expect(
+      service.generateAiSummaryMarkdown(request),
+    ).resolves.toBeNull();
   });
 
   it('keeps a valid digest when internal usage persistence is unavailable', async () => {

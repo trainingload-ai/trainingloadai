@@ -1,8 +1,9 @@
 .page {
-  --lab-paper: #f3eddf;
-  --lab-panel: #fffaf0;
-  --lab-ink: #17201c;
-  --lab-muted: #5f665f;
+  composes: fields from "../../../../components/tool-form-controls.module.css";
+  --lab-paper: var(--background);
+  --lab-panel: var(--secondary);
+  --lab-ink: var(--foreground);
+  --lab-muted: var(--muted-foreground);
   --lab-grid: rgba(23, 32, 28, 0.08);
   --lab-green: #76efa3;
   --lab-green-strong: #20b86b;
@@ -29,10 +30,10 @@
 }
 
 :global(.dark) .page {
-  --lab-paper: #171d1a;
-  --lab-panel: #202824;
-  --lab-ink: #f5f0e4;
-  --lab-muted: #b8c0b9;
+  --lab-paper: var(--background);
+  --lab-panel: var(--secondary);
+  --lab-ink: var(--foreground);
+  --lab-muted: var(--muted-foreground);
   --lab-grid: rgba(245, 240, 228, 0.06);
   --lab-green: #58d78b;
   --lab-green-strong: #4bdb88;
@@ -297,9 +298,10 @@
 
 .panel {
   position: relative;
-  border: 2px solid var(--lab-ink);
+  border: 0;
+  border-radius: var(--tl-radius-surface);
   background: var(--lab-panel);
-  box-shadow: 6px 6px 0 var(--lab-ink);
+  box-shadow: none;
   color: var(--lab-ink);
 }
 
@@ -321,6 +323,15 @@
   font-size: clamp(1.65rem, 3vw, 2.2rem);
   font-weight: 950;
   letter-spacing: -0.035em !important;
+}
+
+.panelLabel {
+  position: static;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--lab-muted);
+  box-shadow: none;
 }
 
 .panelDescription {
@@ -434,9 +445,9 @@
   cursor: pointer;
   align-items: flex-start;
   gap: 0.75rem;
-  border: 1.5px solid var(--lab-ink);
-  background: color-mix(in srgb, var(--lab-blue) 16%, var(--lab-panel));
-  padding: 0.8rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
   font-size: 0.78rem;
   line-height: 1.6;
 }
@@ -446,33 +457,6 @@
   height: 1rem;
   margin-top: 0.15rem;
   accent-color: var(--lab-green-strong);
-}
-
-.submit {
-  display: inline-flex;
-  min-height: 3.05rem;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--lab-ink);
-  background: var(--lab-green);
-  box-shadow: 5px 5px 0 var(--lab-ink);
-  color: #17201c;
-  font-size: 0.86rem;
-  font-weight: 950;
-  transition:
-    transform 150ms ease,
-    box-shadow 150ms ease;
-}
-
-.submit:hover:not(:disabled) {
-  box-shadow: 1px 1px 0 var(--lab-ink);
-  transform: translate(3px, 3px);
-}
-
-.submit:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
 }
 
 .error {
@@ -674,7 +658,6 @@
   line-height: 1.65;
 }
 
-.resultButton,
 .appCta {
   display: inline-flex;
   min-height: 2.8rem;
@@ -686,11 +669,6 @@
   padding: 0.65rem;
   font-size: 0.78rem;
   font-weight: 900;
-}
-
-.resultButton {
-  background: var(--lab-panel);
-  color: var(--lab-ink);
 }
 
 .appCta {
@@ -857,8 +835,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .primaryAction,
-  .secondaryAction,
-  .submit {
+  .secondaryAction {
     transition: none;
   }
 }

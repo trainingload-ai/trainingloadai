@@ -18,7 +18,8 @@ async function processEvents(
   payload: IntervalsIcuWebhookPayload,
 ) {
   for (const event of payload.events ?? []) {
-    await service.processEvent(event);
+    const input = await (service as any).buildInboxEvent(event);
+    await service.processEvent(input.payload);
   }
 }
 
@@ -57,6 +58,7 @@ describe('IntervalsIcuWebhookService', () => {
       resolveConnectionCredential: jest.fn(),
     } as unknown as jest.Mocked<IntervalsIcuCredentialService>;
     const userService = {
+      getPreferredTimezone: jest.fn(async () => 'Asia/Shanghai'),
       upsertImportedFitnessMetric: jest.fn(),
     } as unknown as jest.Mocked<UserService>;
     const inbox = {
@@ -153,8 +155,10 @@ describe('IntervalsIcuWebhookService', () => {
 
   it('ingests WELLNESS_UPDATED records when syncWellness is enabled', async () => {
     const { healthDataIngest, prisma, service } = createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce({
+    prisma.externalProviderConnection.findFirst.mockResolvedValue({
       id: 'connection-1',
+      status: 'ACTIVE',
+      credentialFingerprint: 'generation-1',
       userId: 'user-1',
       externalAthleteId: 'i49291',
       syncWellness: true,
@@ -202,22 +206,66 @@ describe('IntervalsIcuWebhookService', () => {
         managedMetricTypes: [
           'BODY_MASS_KG',
           'RESTING_HEART_RATE_BPM',
-          'HRV_SDNN_MS',
+          'HRV_RMSSD_MS',
         ],
         candidates: expect.arrayContaining([
           expect.objectContaining({
-            metricType: 'HRV_SDNN_MS',
+            metricType: 'HRV_RMSSD_MS',
             value: 35,
+            timezone: 'Asia/Shanghai',
+            startTime: new Date('2026-07-04T16:00:00.000Z'),
+            endTime: new Date('2026-07-05T16:00:00.000Z'),
           }),
         ]),
       }),
     );
   });
 
+  it('uses the source account timezone for wellness before the local account fallback', async () => {
+    const { healthDataIngest, prisma, service, userService } = createService();
+    prisma.externalProviderConnection.findFirst.mockResolvedValue({
+      id: 'connection-1',
+      status: 'ACTIVE',
+      credentialFingerprint: 'generation-1',
+      userId: 'user-1',
+      externalAthleteId: 'athlete-1',
+      syncWellness: true,
+      metadata: { profile: { athlete: { timezone: 'America/New_York' } } },
+    } as never);
+    await service.processEvent({
+      authorization: {
+        connectionId: 'connection-1',
+        userId: 'user-1',
+        athleteId: 'athlete-1',
+        revision: 'generation-1',
+      },
+      type: 'WELLNESS_UPDATED',
+      athlete_id: 'athlete-1',
+      records: [{ id: '2026-03-08', weight: 70 }],
+    });
+    expect(userService.getPreferredTimezone).not.toHaveBeenCalled();
+    expect(
+      healthDataIngest.replaceProviderDailyCandidates,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        localDate: new Date('2026-03-08T00:00:00Z'),
+        candidates: [
+          expect.objectContaining({
+            timezone: 'America/New_York',
+            startTime: new Date('2026-03-08T05:00:00Z'),
+            endTime: new Date('2026-03-09T04:00:00Z'),
+          }),
+        ],
+      }),
+    );
+  });
+
   it('queues ACTIVITY_UPLOADED when automatic activity import is enabled', async () => {
     const { importBatchService, prisma, service } = createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce({
+    prisma.externalProviderConnection.findFirst.mockResolvedValue({
       id: 'connection-1',
+      status: 'ACTIVE',
+      credentialFingerprint: 'generation-1',
       userId: 'user-1',
       externalAthleteId: '49291',
       syncScheduledActivities: true,
@@ -250,6 +298,12 @@ describe('IntervalsIcuWebhookService', () => {
     ).toHaveBeenCalledWith({
       userId: 'user-1',
       connectionId: 'connection-1',
+      authorization: {
+        connectionId: 'connection-1',
+        userId: 'user-1',
+        athleteId: '49291',
+        revision: 'generation-1',
+      },
       activities: [{ id: 'activity-1', name: 'Ride' }],
       reason: 'webhook',
     });
@@ -257,13 +311,15 @@ describe('IntervalsIcuWebhookService', () => {
 
   it('soft deletes ACTIVITY_DELETED when automatic activity import is enabled', async () => {
     const { activitySourceLifecycle, prisma, service } = createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce({
+    prisma.externalProviderConnection.findFirst.mockResolvedValue({
       id: 'connection-1',
+      status: 'ACTIVE',
+      credentialFingerprint: 'generation-1',
       userId: 'user-1',
       externalAthleteId: '49291',
       syncScheduledActivities: true,
     } as never);
-    prisma.thirdPartyActivity.findFirst.mockResolvedValueOnce({
+    prisma.thirdPartyActivity.findFirst.mockResolvedValue({
       id: 42,
     } as never);
     await processEvents(service, {
@@ -277,20 +333,10 @@ describe('IntervalsIcuWebhookService', () => {
       ],
     });
 
-    expect(prisma.thirdPartyActivity.findFirst).toHaveBeenCalledWith({
-      where: {
-        userId: 'user-1',
-        provider: 'intervals_icu',
-        externalId: 'activity-1',
-        state: 1,
-      },
-      select: { id: true },
-    });
     expect(activitySourceLifecycle.deactivateProviderData).toHaveBeenCalledWith(
       {
         userId: 'user-1',
         provider: 'intervals_icu',
-        thirdPartyActivityIds: [42],
         externalIds: ['activity-1'],
       },
     );
@@ -298,8 +344,10 @@ describe('IntervalsIcuWebhookService', () => {
 
   it('writes FITNESS_UPDATED metrics when syncSportSettings is enabled', async () => {
     const { prisma, service, userService } = createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce({
+    prisma.externalProviderConnection.findFirst.mockResolvedValue({
       id: 'connection-1',
+      status: 'ACTIVE',
+      credentialFingerprint: 'generation-1',
       userId: 'user-1',
       externalAthleteId: '49291',
       syncSportSettings: true,
@@ -345,8 +393,10 @@ describe('IntervalsIcuWebhookService', () => {
       service,
       userService,
     } = createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce({
+    prisma.externalProviderConnection.findFirst.mockResolvedValue({
       id: 'connection-1',
+      status: 'ACTIVE',
+      credentialFingerprint: 'generation-1',
       userId: 'user-1',
       externalAthleteId: '49291',
       syncSportSettings: true,
@@ -397,7 +447,7 @@ describe('IntervalsIcuWebhookService', () => {
   it('skips events when athlete connection is missing', async () => {
     const { healthDataIngest, importBatchService, prisma, service } =
       createService();
-    prisma.externalProviderConnection.findFirst.mockResolvedValueOnce(null);
+    prisma.externalProviderConnection.findFirst.mockResolvedValue(null);
 
     await processEvents(service, {
       secret: 'test-secret',

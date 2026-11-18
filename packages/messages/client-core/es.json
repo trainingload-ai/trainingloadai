@@ -1218,7 +1218,9 @@
       "monthlyReview": "Revisión mensual",
       "planReview": "Revisión del plan",
       "saved": "Revisar la configuración guardada",
-      "saveFailed": "No se pudo guardar la configuración de revisión"
+      "saveFailed": "No se pudo guardar la configuración de revisión",
+      "athleteState": "Evaluación automática del estado",
+      "athleteStateDetail": "Actualiza el estado con cambios relevantes de entrenamiento o recuperación. La plataforma cubre el coste de las evaluaciones automáticas con IA."
     },
     "dataExport": {
       "title": "Exportar todos los datos",
@@ -1376,7 +1378,19 @@
       "replaceKeyConfirmTitle": "¿Reemplazar la clave API?",
       "replaceKeyConfirmDescription": "Esta clave API difiere de la clave guardada y puede pertenecer a otra cuenta. Al guardar se mantendrá el historial importado y se utilizará la nueva clave para futuras sincronizaciones.",
       "replaceKeyCancel": "Cancelar",
-      "replaceKeyConfirmAction": "Reemplazar clave"
+      "replaceKeyConfirmAction": "Reemplazar clave",
+      "lastDiscovery": "Última búsqueda de actividades",
+      "activityImport": "Última importación de actividades",
+      "importCounts": "{success}/{total} importadas, {failed} fallidas, {skipped} omitidas",
+      "importState": {
+        "QUEUED": "En cola",
+        "RUNNING": "Importando",
+        "POST_PROCESSING": "Procesamiento posterior",
+        "COMPLETED": "Completada",
+        "PARTIAL_FAILED": "Parcialmente fallida",
+        "FAILED": "Fallida",
+        "CANCELLED": "Cancelada"
+      }
     }
   },
   "UserProfile": {
@@ -5093,7 +5107,7 @@
     },
     "mirror": {
       "untitled": "Actividad pendiente de sincronizar",
-      "discoveredVia": "Detectada mediante Intervals.icu",
+      "discoveredVia": "Detectada mediante {provider}",
       "syncing": "Obteniendo la actividad desde el origen.",
       "connectionRequired": "La integración actual no puede proporcionar la actividad completa. Revisa la conexión de origen.",
       "importDisabled": "El origen está conectado, pero la importación automática de actividades está desactivada.",
@@ -5107,7 +5121,9 @@
       "connectSource": "Conectar origen",
       "reauthorizeSource": "Volver a autorizar el origen",
       "enableSourceImport": "Activar importación del origen",
-      "checkSourceConnection": "Revisar conexión de origen"
+      "checkSourceConnection": "Revisar conexión de origen",
+      "dataUnavailable": "Solo está disponible el resumen de la actividad; no se pudieron obtener los registros detallados.",
+      "why": "¿Por qué?"
     }
   },
   "V2ActivitiesStatsPage": {

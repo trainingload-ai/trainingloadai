@@ -1,4 +1,5 @@
 "use client";
+import { scrollBehavior } from "@/lib/scroll-behavior";
 
 import { useMemo, useState } from "react";
 import { CalendarDays, ChevronRight } from "lucide-react";
@@ -73,7 +74,7 @@ export function PlanSharePublicPage({
     setSelectedWeek(weekIndex);
     document
       .getElementById(`share-week-${weekIndex}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   };
 
   return (
@@ -102,7 +103,7 @@ export function PlanSharePublicPage({
       </header>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
-        <aside className="order-1 space-y-4 lg:order-none lg:col-start-2">
+        <div className="order-1 space-y-4 lg:order-none lg:col-start-2">
           <section className="rounded-surface border border-border/70 p-4">
             <h2 className="text-sm font-semibold">{t("takeCta")}</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -130,7 +131,7 @@ export function PlanSharePublicPage({
               ))}
             </div>
           ) : null}
-        </aside>
+        </div>
 
         <div className="order-2 space-y-4 lg:order-none lg:col-start-1 lg:row-start-1">
           <section className="rounded-surface border border-border/70 p-4">
@@ -184,14 +185,18 @@ export function PlanSharePublicPage({
                         selected && "ring-1 ring-foreground/25",
                       )}
                     >
-                      <div
-                        className="absolute bottom-0 left-0 w-full bg-emerald-500/80"
-                        style={{ height }}
-                      />
                       <span className="relative z-10 text-xs font-medium">
                         W{week.weekIndex}
                       </span>
-                      <div className="relative z-10 mt-2 h-24" />
+                      <span
+                        aria-hidden="true"
+                        className="relative mt-2 block h-24 w-full"
+                      >
+                        <span
+                          className="absolute bottom-0 left-0 w-full bg-emerald-500/80"
+                          style={{ height }}
+                        />
+                      </span>
                       <span className="relative z-10 mt-2 text-[10px] text-muted-foreground">
                         {formatLoad(week.previewLoad)}
                       </span>

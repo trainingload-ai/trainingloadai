@@ -39,17 +39,6 @@ export function ProductPreview({
             sizes="(min-width: 1024px) 184px, (min-width: 600px) 180px, 36vw"
           />
         </div>
-        {variant === "recording" ? (
-          <div className={styles.watch}>
-            <Image
-              src={`/ftp-calculator/watch-${locale}.png`}
-              alt={t("watchAlt")}
-              width={416}
-              height={496}
-              sizes="(min-width: 600px) 120px, 22vw"
-            />
-          </div>
-        ) : null}
       </div>
       <div className={styles.copy}>
         <p className={styles.kicker}>Trainingload.ai</p>

@@ -1217,7 +1217,9 @@
       "monthlyReview": "월간 리뷰",
       "planReview": "계획 검토",
       "saved": "검토 설정이 저장되었습니다.",
-      "saveFailed": "검토 설정을 저장하지 못했습니다."
+      "saveFailed": "검토 설정을 저장하지 못했습니다.",
+      "athleteState": "선수 상태 자동 평가",
+      "athleteStateDetail": "관련 훈련 또는 회복 데이터가 변경되면 상태를 업데이트합니다. 자동 AI 평가 비용은 플랫폼이 부담합니다."
     },
     "dataExport": {
       "title": "모든 데이터 내보내기",
@@ -1375,7 +1377,19 @@
       "replaceKeyConfirmTitle": "API 키를 바꾸시겠습니까?",
       "replaceKeyConfirmDescription": "이 API 키는 저장된 키와 다르며 다른 계정에 속할 수 있습니다. 저장하면 가져온 기록이 유지되며 향후 동기화에 새 키가 사용됩니다.",
       "replaceKeyCancel": "취소",
-      "replaceKeyConfirmAction": "키 교체"
+      "replaceKeyConfirmAction": "키 교체",
+      "lastDiscovery": "최근 활동 검색",
+      "activityImport": "최근 활동 가져오기",
+      "importCounts": "{success}/{total}개 완료, {failed}개 실패, {skipped}개 건너뜀",
+      "importState": {
+        "QUEUED": "대기 중",
+        "RUNNING": "가져오는 중",
+        "POST_PROCESSING": "후처리 중",
+        "COMPLETED": "완료",
+        "PARTIAL_FAILED": "일부 실패",
+        "FAILED": "실패",
+        "CANCELLED": "취소됨"
+      }
     }
   },
   "UserProfile": {
@@ -5092,7 +5106,7 @@
     },
     "mirror": {
       "untitled": "원본 동기화를 기다리는 활동",
-      "discoveredVia": "Intervals.icu에서 발견",
+      "discoveredVia": "{provider}에서 발견",
       "syncing": "원본 활동의 전체 데이터를 가져오는 중입니다.",
       "connectionRequired": "현재 연결에서 전체 활동을 제공할 수 없습니다. 원본 연결을 확인하세요.",
       "importDisabled": "원본은 연결되어 있지만 활동 자동 가져오기가 꺼져 있습니다.",
@@ -5106,7 +5120,9 @@
       "connectSource": "원본 연결",
       "reauthorizeSource": "원본 다시 인증",
       "enableSourceImport": "원본 가져오기 켜기",
-      "checkSourceConnection": "원본 연결 확인"
+      "checkSourceConnection": "원본 연결 확인",
+      "dataUnavailable": "현재 활동 요약만 제공되며 상세 기록을 가져오지 못했습니다.",
+      "why": "왜 그런가요?"
     }
   },
   "V2ActivitiesStatsPage": {

@@ -1,5 +1,12 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { scrollBehavior } from "@/lib/scroll-behavior";
+
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Printer, Share2 } from "lucide-react";
@@ -14,7 +21,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import { localePrefix } from "@/lib/locale-url";
 import { trackToolEvent } from "@/lib/tool-analytics";
 import { useInstantToolAnalytics } from "@/lib/use-instant-tool-analytics";
@@ -25,7 +32,6 @@ import {
   formatTssScore,
   parseNonNegativeNumber,
   parsePositiveNumber,
-  type PowerKind,
   type TssResult,
 } from "@/lib/tss";
 import {
@@ -105,7 +111,7 @@ export function TssCalculatorClient({
     );
     requestAnimationFrame(() => {
       document.getElementById("result")?.scrollIntoView({
-        behavior: "smooth",
+        behavior: scrollBehavior(),
         block: "start",
       });
     });
@@ -137,10 +143,9 @@ export function TssCalculatorClient({
         >
           <div className={styles.formHeader}>
             <h2>{t("panel.title")}</h2>
-            <Button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="outline"
-              size="sm"
               onClick={() => {
                 setInputs(EXAMPLE_TSS_INPUTS);
                 setResultInputs(EXAMPLE_TSS_INPUTS);
@@ -150,7 +155,7 @@ export function TssCalculatorClient({
               }}
             >
               {t("report.example")}
-            </Button>
+            </ToolActionButton>
           </div>
           <FieldDescription>{t("panel.subtitle")}</FieldDescription>
           <FieldGroup className={styles.formFields}>
@@ -180,22 +185,16 @@ export function TssCalculatorClient({
               <FieldLegend variant="label">
                 {t("inputs.powerKind.label")}
               </FieldLegend>
-              <ToggleGroup
-                type="single"
-                variant="outline"
+              <ToolChoiceGroup
                 value={inputs.kind}
-                onValueChange={(value) => {
-                  if (value) change("kind", value as PowerKind);
-                }}
-                aria-label={t("inputs.powerKind.label")}
-                className={styles.powerToggle}
-              >
-                {(["normalized", "average"] as const).map((key) => (
-                  <ToggleGroupItem key={key} value={key}>
-                    {t(`inputs.powerKind.options.${key}`)}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                onValueChange={(next) => change("kind", next)}
+                label={t("inputs.powerKind.label")}
+                options={(["normalized", "average"] as const).map((value) => ({
+                  value,
+                  label: t(`inputs.powerKind.options.${value}`),
+                }))}
+                fullWidth
+              />
               <FieldDescription>
                 {t(`inputs.powerKind.hints.${inputs.kind}`)}
               </FieldDescription>
@@ -230,9 +229,9 @@ export function TssCalculatorClient({
             </div>
             <FieldDescription>{t("inputs.ftp.hint")}</FieldDescription>
             {showError ? <FieldError>{t("inputs.invalid")}</FieldError> : null}
-            <Button type="submit" size="lg" className={styles.calculateButton}>
+            <ToolActionButton intent="primary" fullWidth type="submit">
               {t("panel.calculate")}
-            </Button>
+            </ToolActionButton>
             <FieldDescription>{t("panel.note")}</FieldDescription>
           </FieldGroup>
         </form>
@@ -289,17 +288,24 @@ export function TssCalculatorClient({
             )}
           </div>
         </article>
-        <div className={styles.actions}>
-          <Button
-            variant="outline"
-            size="lg"
-            nativeButton={false}
-            render={
-              <a href={`${localePrefix(locale)}/training-load-calculator`} />
-            }
-          >
-            {common("trainingLoadCalculatorAction")}
-          </Button>
+        <ToolResultActions
+          leading={
+            <>
+              <Button
+                variant="outline"
+                size="lg"
+                nativeButton={false}
+                render={
+                  <a
+                    href={`${localePrefix(locale)}/training-load-calculator`}
+                  />
+                }
+              >
+                {common("trainingLoadCalculatorAction")}
+              </Button>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -320,7 +326,7 @@ export function TssCalculatorClient({
             <Share2 data-icon="inline-start" aria-hidden />
             {t("report.share")}
           </Button>
-        </div>
+        </ToolResultActions>
         <p role="status" className={styles.status}>
           {shareStatus}
         </p>

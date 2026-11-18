@@ -37,7 +37,10 @@ describe('Athlete Memory PostgreSQL invariants', () => {
       datasourceUrl: `postgresql://postgres:postgres@${address}/postgres?connection_limit=1&sslmode=disable`,
     });
     await prisma.$connect();
-    store = new PrismaAthleteMemoryStore(prisma as PrismaService);
+    store = new PrismaAthleteMemoryStore(
+      prisma as PrismaService,
+      { requestUpdate: async () => ({}) } as never,
+    );
   }, 30_000);
 
   afterAll(async () => {

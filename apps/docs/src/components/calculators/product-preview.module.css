@@ -13,9 +13,10 @@
 }
 .devices {
   position: relative;
-  padding: 0 1.75rem 0.5rem 0;
+  padding-bottom: 0.5rem;
 }
 .phone {
+  margin-inline: auto;
   max-width: 11.5rem;
   padding: 5px;
   overflow: hidden;
@@ -28,33 +29,6 @@
   width: 100%;
   height: auto;
   border-radius: 1.15rem;
-}
-.watch {
-  position: absolute;
-  right: 0;
-  bottom: 1rem;
-  width: 54%;
-  max-width: 7.5rem;
-  padding: 5px;
-  border: 1px solid #7d8580;
-  border-radius: 1.85rem;
-  background: #191e1b;
-}
-.watch::after {
-  position: absolute;
-  top: 25%;
-  right: -4px;
-  width: 3px;
-  height: 18%;
-  border-radius: var(--tl-radius-micro);
-  background: #8c958e;
-  content: "";
-}
-.watch img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 1.5rem;
 }
 .copy .kicker {
   color: var(--preview-accent);
@@ -103,12 +77,5 @@
   .phone {
     padding: 4px;
     border-radius: 1.3rem;
-  }
-  .watch {
-    padding: 3px;
-    border-radius: 1.25rem;
-  }
-  .watch img {
-    border-radius: 1rem;
   }
 }

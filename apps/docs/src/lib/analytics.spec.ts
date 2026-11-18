@@ -146,6 +146,47 @@ describe("marketing analytics routing", () => {
     });
   });
 
+  it("preserves lactate sample isolation across GA4 outcomes and CTA mapping", () => {
+    for (const name of [
+      "tool_started",
+      "tool_completed",
+      "tool_no_result",
+      "tool_input_rejected",
+      "tool_failed",
+      "tool_app_cta_clicked",
+    ]) {
+      trackMarketingEvent(name, {
+        tool_id: "lactate_curve_calculator",
+        input_origin: "example_edited",
+        input_method: "manual",
+        engine_version: "1.0.0",
+        status: "partial",
+        reason_code: "no_applicable_method",
+        stage: "analysis",
+        destination: "signup",
+        cta_placement: "result",
+      });
+    }
+    expect(gtag.mock.calls.map((row) => row[1])).toEqual([
+      "tool_start",
+      "tool_success",
+      "tool_no_result",
+      "tool_input_rejected",
+      "tool_error",
+      "signup_click",
+    ]);
+    for (const [, , properties] of gtag.mock.calls) {
+      expect(properties).toMatchObject({
+        tool_name: "lactate_curve_calculator",
+        input_origin: "example_edited",
+        input_method: "manual",
+        engine_version: "1.0.0",
+        status: "partial",
+      });
+    }
+    expect(mocks.capture).toHaveBeenCalledTimes(6);
+  });
+
   it("does not report a clipboard failure as a business-level tool error", () => {
     trackMarketingEvent("tool_failed", {
       error_code: "clipboard_failed",

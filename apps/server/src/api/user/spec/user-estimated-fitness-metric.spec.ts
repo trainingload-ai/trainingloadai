@@ -156,6 +156,13 @@ function createService(options?: {
     {} as never,
     { get: jest.fn() } as never,
     ...userServiceDependencies(prisma, options?.autoEnabled ?? true),
+    {
+      observe: async (
+        _userId: unknown,
+        _tx: unknown,
+        write: () => Promise<unknown>,
+      ) => write(),
+    } as never,
   );
   return { service, prisma, created };
 }
@@ -222,6 +229,37 @@ describe('UserService estimated fitness metric tracks', () => {
       { seconds: 1200, watts: 300, activityId: 9 },
     ]),
   };
+
+  describe.each([false, true])(
+    'pace precision with automatic updates enabled=%s',
+    (autoEnabled) => {
+      it.each([UserFitnessMetricType.TP, UserFitnessMetricType.CS])(
+        'keeps fractional %s in every written track',
+        async (type) => {
+          const { service, created } = createService({ autoEnabled });
+          const value = 3.123456;
+          const value2 =
+            type === UserFitnessMetricType.TP ? 1000 / value : 123.456789;
+          await service.upsertFitnessMetric(
+            'user-1',
+            type,
+            value,
+            SportType.RUN,
+            value2,
+            MetricSource.AUTO,
+            new Date('2026-08-04T12:00:00.000Z'),
+          );
+
+          expect(
+            created.map((row) => [row.source, row.value, row.value2]),
+          ).toEqual([
+            [MetricSource.ESTIMATED, value, value2],
+            ...(autoEnabled ? [[MetricSource.AUTO, value, value2]] : []),
+          ]);
+        },
+      );
+    },
+  );
 
   it('writes ESTIMATED and AUTO when auto update is enabled', async () => {
     const { service, created } = createService({ autoEnabled: true });

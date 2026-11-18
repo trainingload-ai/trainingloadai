@@ -1,4 +1,5 @@
 .page {
+  composes: fields from "../../../../components/tool-form-controls.module.css";
   --rtp-canvas: var(--background);
   --rtp-surface: var(--card);
   --rtp-ink: var(--foreground);
@@ -151,9 +152,7 @@
 
 .jumpItem:focus-visible,
 .footerCtaButton:focus-visible,
-.primaryAction:focus-visible,
-.relatedLink:focus-visible,
-.choice:focus-visible {
+.relatedLink:focus-visible {
   outline: 2px solid var(--rtp-accent);
   outline-offset: 3px;
 }
@@ -204,29 +203,6 @@
   font-weight: 650;
 }
 
-.choiceRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.choice {
-  min-height: 2rem;
-  border: 1px solid var(--rtp-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--rtp-canvas);
-  padding: 0 0.7rem;
-  color: var(--rtp-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.choice[aria-pressed="true"] {
-  border-color: transparent;
-  background: var(--rtp-accent-soft);
-  color: var(--success);
-}
-
 .timeGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -263,58 +239,38 @@
 }
 
 .poster {
-  --score-frame: #17201c;
-  --score-paper: #f7f3e9;
-  --score-green: #76efa3;
-  --score-yellow: #f5cf58;
-  --score-coral: #ff766a;
+  composes: theme from "../../../../components/tool-scorecard.module.css";
   position: relative;
   width: 100%;
   max-width: 800px;
   scroll-margin-top: 8rem;
   border: 0;
   border-radius: var(--tl-radius-surface);
-  background: #07110f;
+  background: var(--score-bg, var(--card));
   color: var(--score-paper);
   box-shadow: none;
 }
 
-:global(.dark) .poster {
-  --score-frame: #f5f0e4;
-}
-
 .posterSheet {
   background-image:
-    linear-gradient(rgb(118 239 163 / 8%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(118 239 163 / 8%) 1px, transparent 1px);
+    linear-gradient(var(--score-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--score-grid) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
 .posterBrand {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   min-height: 3rem;
-  border-bottom: 2px solid rgb(247 243 233 / 42%);
-  background: #07110f;
-  padding: 0.75rem 1.3rem;
+  border-bottom: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-bg, var(--card));
+  padding: 0.5rem 1.2rem;
+  gap: 1rem;
 }
 
 .posterHeading {
-  position: absolute;
-  top: -1rem;
-  left: 1.3rem;
-  border: 0;
-  padding: 0.6rem 0.8rem;
-  background: transparent;
-  color: var(--score-paper);
-  box-shadow: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  transform: none;
+  composes: title from "../../../../components/tool-scorecard.module.css";
 }
 
 .posterMark {
@@ -334,7 +290,7 @@
 }
 
 .posterEyebrow {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 800;
@@ -361,7 +317,7 @@
 
 .posterProtocol {
   margin-top: 0.9rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.5;
@@ -369,7 +325,7 @@
 
 .pride {
   min-width: 0;
-  border-left: 1px solid rgb(247 243 233 / 30%);
+  border-left: 1px solid var(--score-line, var(--border));
   padding: 0.2rem 0 0.2rem 1.3rem;
 }
 
@@ -392,7 +348,7 @@
 
 .bandCaption {
   margin-top: 0.55rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   line-height: 1.45;
 }
@@ -407,7 +363,7 @@
 }
 
 .assumptionList li {
-  border: 1px solid rgb(247 243 233 / 28%);
+  border: 1px solid var(--score-line, var(--border));
   padding: 0.2rem 0.45rem;
   color: var(--score-paper);
   font-size: 0.68rem;
@@ -421,8 +377,8 @@
 }
 
 .predictWrap {
-  border-top: 2px solid rgb(247 243 233 / 42%);
-  background: #0d1813;
+  border-top: 2px solid var(--score-line-strong, var(--border));
+  background: var(--score-panel, var(--secondary));
   padding: 0.85rem 1.1rem 1rem;
   overflow-x: auto;
 }
@@ -438,14 +394,14 @@
 .predictTable th,
 .predictTable td {
   padding: 0.42rem 0.45rem;
-  border-bottom: 1px solid rgb(247 243 233 / 14%);
+  border-bottom: 1px solid var(--score-line, var(--border));
   text-align: left;
   font-size: 0.82rem;
   font-weight: 650;
 }
 
 .predictTable thead th {
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.68rem;
   font-weight: 800;
@@ -454,7 +410,7 @@
 }
 
 .predictTable tr[data-highlight="true"] {
-  background: rgb(118 239 163 / 14%);
+  background: var(--score-highlight);
 }
 
 .predictTable tr[data-highlight="true"] td:nth-child(2) {
@@ -478,48 +434,10 @@
 
 .formulaEcho {
   padding: 0.7rem 1.2rem 0.95rem;
-  background: #07110f;
-  color: #b8c0b9;
+  background: var(--score-bg, var(--card));
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.72rem;
   line-height: 1.5;
-}
-
-.posterActions {
-  display: flex;
-  width: min(100%, 800px);
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.posterActions > :is(button, a) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.5rem;
-  min-height: 2.5rem;
-  gap: 0.45rem;
-  padding: 0 0.75rem;
-  box-shadow: none;
-}
-
-.primaryAction {
-  border: 0;
-  border-radius: var(--tl-radius-control);
-  background: var(--rtp-accent);
-  color: var(--rtp-accent-foreground);
-  font-size: 0.88rem;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-:global(.dark) .primaryAction {
-  color: var(--rtp-accent-foreground);
-}
-
-.primaryAction:hover {
-  background: color-mix(in srgb, var(--rtp-accent) 84%, black);
 }
 
 .section {
@@ -641,10 +559,10 @@ ol.educationList {
 .resultGuidance {
   display: grid;
   gap: 0.55rem;
-  border-top: 1px solid rgb(247 243 233 / 30%);
-  background: #07110f;
+  border-top: 1px solid var(--score-line, var(--border));
+  background: var(--score-bg, var(--card));
   padding: 1rem 1.2rem;
-  color: #b8c0b9;
+  color: var(--score-muted, var(--muted-foreground));
   font-size: 0.8rem;
   line-height: 1.65;
 }
@@ -832,68 +750,6 @@ ol.educationList {
   height: auto;
 }
 
-.unitSwitch {
-  display: inline-grid;
-  flex: none;
-  grid-auto-flow: column;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--rtp-line);
-  border-radius: var(--tl-radius-control);
-  background: var(--rtp-canvas);
-}
-
-.unitOption {
-  min-width: 3.25rem;
-  height: 1.75rem;
-  border: 0;
-  border-radius: var(--tl-radius-compact);
-  background: transparent;
-  color: var(--rtp-muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.unitOption[aria-pressed="true"] {
-  background: var(--rtp-surface);
-  color: var(--rtp-ink);
-}
-
-.inputSources {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  margin: 1.15rem 0 0;
-  padding: 0;
-  border: 0;
-  font-size: 0.82rem;
-}
-
-.inputSourceLabel {
-  color: var(--rtp-muted);
-}
-
-.inputSourceOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.15rem;
-}
-
-.inputSourceOptions label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-}
-
-.inputSourceOptions input {
-  width: 0.9rem;
-  height: 0.9rem;
-  accent-color: var(--success);
-}
-
 .formFoot button {
   justify-self: start;
   color: var(--success);
@@ -972,7 +828,7 @@ ol.educationList {
 
   .pride {
     border-left: 0;
-    border-top: 1px solid rgb(247 243 233 / 30%);
+    border-top: 1px solid var(--score-line, var(--border));
     padding: 0.9rem 0 0;
   }
 
@@ -1001,7 +857,7 @@ ol.educationList {
     grid-template-columns: 1fr 1fr;
     gap: 0.15rem 0.75rem;
     padding: 0.65rem 0;
-    border-bottom: 1px solid rgb(247 243 233 / 14%);
+    border-bottom: 1px solid var(--score-line, var(--border));
   }
 
   .predictTable td {
@@ -1016,7 +872,7 @@ ol.educationList {
   .predictTable td::before {
     display: block;
     margin-bottom: 0.12rem;
-    color: #b8c0b9;
+    color: var(--score-muted, var(--muted-foreground));
     content: attr(data-label);
     font-size: 0.62rem;
     font-weight: 800;
@@ -1041,10 +897,6 @@ ol.educationList {
 }
 
 @media (max-width: 560px) {
-  .posterActions > :is(button, a) {
-    flex: 1 1 8rem;
-  }
-
   .predictTable tr {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1055,14 +907,6 @@ ol.educationList {
 }
 
 @media (max-width: 420px) {
-  .choice,
-  .unitOption {
-    min-height: 2.25rem;
-  }
-
-  .posterActions > :is(button, a) {
-    flex-basis: 100%;
-  }
 
   .timeGrid,
   .paceGrid {
@@ -1087,9 +931,9 @@ ol.educationList {
   :global(body:has(#result)):has(.page) header,
   :global(body:has(#result)):has(.page) footer,
   .page > :not(.shell),
+  .shell:not(:has(.poster)),
   .stack > :not(.work),
-  .work > :not(.posterWrap),
-  .posterActions {
+  .work > :not(.posterWrap) {
     display: none !important;
   }
 
@@ -1101,21 +945,22 @@ ol.educationList {
     display: block;
     width: 100%;
     min-height: 0;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white;
   }
 
   .poster,
   .poster * {
-    visibility: visible;
+    visibility: visible !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   .poster {
     max-width: 800px;
-    margin: 0.5rem auto;
+    margin: 0 auto;
+    break-inside: avoid;
     box-shadow: none;
   }
 
@@ -1158,21 +1003,7 @@ ol.educationList {
   border: 0;
   background: var(--secondary);
 }
-.posterActions > :is(a, button),
-.actions > :is(a, button),
-.shareRow > :is(a, button) {
-  min-height: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
-.board :global([data-slot="input"]),
-.board :global([data-slot="select-trigger"]) {
-  height: 2.5rem;
-  min-height: 2.5rem;
-  border-radius: var(--tl-radius-xs);
-}
 .board :global([data-slot="input"]) {
-  background: var(--rtp-surface);
   font-size: 0.95rem;
 }
 @media (min-width: 1024px) {
@@ -1200,9 +1031,6 @@ ol.educationList {
   }
   .board :global([data-slot="input"]) {
     font-size: 1rem;
-  }
-  .posterActions {
-    gap: 0.5rem;
   }
 }
 @media print {

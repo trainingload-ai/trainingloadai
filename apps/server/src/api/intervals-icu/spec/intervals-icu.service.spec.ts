@@ -7,14 +7,19 @@ import { IntervalsIcuService } from '../intervals-icu.service';
 describe('IntervalsIcuService', () => {
   function createService() {
     const prisma = {
+      importBatchJob: {
+        findFirst: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+      },
       externalProviderConnection: {
         findFirst: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         findUnique: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         update: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
+        updateMany: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
         upsert: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       },
     };
     const intervalsIcuClient = {
+      getAthlete: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       listActivities: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       listWellness: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       getProfile: jest.fn<(...args: unknown[]) => Promise<unknown>>(),
@@ -32,6 +37,8 @@ describe('IntervalsIcuService', () => {
       }),
     };
     const importBatchService = {
+      getLatestProviderBatchProgress:
+        jest.fn<(...args: unknown[]) => Promise<unknown>>(),
       createIntervalsIcuImportBatch:
         jest.fn<(...args: unknown[]) => Promise<unknown>>(),
     };
@@ -85,6 +92,7 @@ describe('IntervalsIcuService', () => {
       }),
     };
     const userService = {
+      getPreferredTimezone: jest.fn(async () => 'Asia/Shanghai'),
       getPreferredLocale: jest.fn(async () => 'en'),
     };
     const configValues: Record<string, string> = {
@@ -137,6 +145,8 @@ describe('IntervalsIcuService', () => {
       provider: 'intervals_icu',
       status: 'ACTIVE',
       credentialCiphertext: 'cipher-key',
+      externalAthleteId: 'athlete-1',
+      credentialFingerprint: 'generation-1',
       syncScheduledActivities: true,
       ...overrides,
     };
@@ -208,6 +218,62 @@ describe('IntervalsIcuService', () => {
       'WELLNESS:WRITE',
       'SETTINGS:WRITE',
     ]);
+  });
+
+  it('correlates token failure and repeated state rejection without leaking credentials', async () => {
+    const { intervalsIcuClient, service } = createService();
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    try {
+      const start = await service.startOAuth('user-1', {
+        syncActivities: false,
+      });
+      const state = new URL(start.authorizationUrl).searchParams.get('state')!;
+      intervalsIcuClient.exchangeOAuthCode.mockRejectedValueOnce(
+        new IntervalsIcuApiError(
+          400,
+          'secret-error-message',
+          JSON.stringify({
+            error: 'invalid_grant',
+            error_description: 'secret-description',
+            access_token: 'secret-token',
+          }),
+        ),
+      );
+      const first = new URL(
+        await service.completeOAuthCallback({ code: 'secret-code', state }),
+      );
+      await service.completeOAuthCallback({ code: 'secret-code', state });
+      expect(first.searchParams.get('reason')).toBe('oauth_failed');
+      expect(intervalsIcuClient.exchangeOAuthCode).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(warn.mock.calls[0][0] as string)).toMatchObject({
+        stage: 'exchange_token',
+        category: 'http',
+        httpStatus: 400,
+        oauthError: 'invalid_grant',
+        outcome: 'failed',
+      });
+      expect(JSON.parse(warn.mock.calls[1][0] as string)).toMatchObject({
+        stage: 'consume_state',
+        category: 'state_rejected',
+      });
+      const a = JSON.parse(warn.mock.calls[0][0] as string);
+      const b = JSON.parse(warn.mock.calls[1][0] as string);
+      expect(a.stateRef).toBe(b.stateRef);
+      expect(a.callbackId).not.toBe(b.callbackId);
+      const logged = JSON.stringify(warn.mock.calls);
+      for (const secret of [
+        state,
+        'secret-code',
+        'secret-token',
+        'secret-description',
+        'secret-error-message',
+      ])
+        expect(logged).not.toContain(secret);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it('exchanges OAuth callback code and stores an OAuth connection', async () => {
@@ -433,9 +499,8 @@ describe('IntervalsIcuService', () => {
       syncScheduledActivities: false,
       exportActivities: true,
       metadata: {
-        ...((
-          existingConnection as { metadata?: Record<string, unknown> }
-        ).metadata ?? {}),
+        ...((existingConnection as { metadata?: Record<string, unknown> })
+          .metadata ?? {}),
         planSync: {
           syncPlannedWorkouts: false,
           exportPlannedWorkouts: true,
@@ -505,7 +570,7 @@ describe('IntervalsIcuService', () => {
       { id: 'activity-2', name: 'Ride' },
     ];
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(row);
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce(activities);
     importBatchService.createIntervalsIcuImportBatch.mockResolvedValueOnce({
       batch: { id: 'batch-1' },
@@ -551,16 +616,15 @@ describe('IntervalsIcuService', () => {
           },
         },
       );
-      expect(prisma.externalProviderConnection.update).toHaveBeenNthCalledWith(
-        1,
-        {
-          where: { id: 'connection-1' },
-          data: {
-            lastSyncStartedAt: new Date('2026-07-06T10:30:00.000Z'),
-            lastError: null,
-          },
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenNthCalledWith(1, {
+        where: expect.objectContaining({ id: 'connection-1' }),
+        data: {
+          lastSyncStartedAt: new Date('2026-07-06T10:30:00.000Z'),
+          lastError: null,
         },
-      );
+      });
       expect(intervalsIcuCredentials.decrypt).toHaveBeenCalledWith(
         'cipher-key',
       );
@@ -576,6 +640,12 @@ describe('IntervalsIcuService', () => {
       ).toHaveBeenCalledWith({
         userId: 'user-1',
         connectionId: 'connection-1',
+        authorization: {
+          connectionId: 'connection-1',
+          userId: 'user-1',
+          athleteId: 'athlete-1',
+          revision: 'generation-1',
+        },
         activities,
         reason: 'manual',
         discoveryWindow: {
@@ -583,17 +653,16 @@ describe('IntervalsIcuService', () => {
           end: new Date('2026-07-08T00:00:00.000Z'),
         },
       });
-      expect(prisma.externalProviderConnection.update).toHaveBeenNthCalledWith(
-        2,
-        {
-          where: { id: 'connection-1' },
-          data: {
-            lastSyncCompletedAt: new Date('2026-07-06T10:30:00.000Z'),
-            lastSyncedActivityAt: new Date('2026-07-06T00:00:00.000Z'),
-            lastError: null,
-          },
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenNthCalledWith(2, {
+        where: expect.objectContaining({ id: 'connection-1' }),
+        data: {
+          lastSyncCompletedAt: new Date('2026-07-06T10:30:00.000Z'),
+          lastSyncedActivityAt: new Date('2026-07-06T00:00:00.000Z'),
+          lastError: null,
         },
-      );
+      });
     } finally {
       jest.useRealTimers();
     }
@@ -617,7 +686,7 @@ describe('IntervalsIcuService', () => {
     prisma.externalProviderConnection.findUnique
       .mockResolvedValueOnce(row)
       .mockResolvedValueOnce({ metadata: {} });
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce([]);
     importBatchService.createIntervalsIcuImportBatch.mockResolvedValueOnce({
       batch: null,
@@ -633,6 +702,7 @@ describe('IntervalsIcuService', () => {
     intervalsIcuClient.listWellness.mockResolvedValueOnce([
       {
         id: '2026-07-06',
+        updated: '2026-07-07T00:30:00+08:00',
         weight: 70,
         restingHR: 48,
         hrvSDNN: 52,
@@ -688,6 +758,7 @@ describe('IntervalsIcuService', () => {
         expect.objectContaining({
           oldest: '2026-05-07',
           newest: '2026-07-06',
+          fields: expect.arrayContaining(['id', 'updated', 'hrv', 'hrvSDNN']),
         }),
       );
       expect(
@@ -703,6 +774,10 @@ describe('IntervalsIcuService', () => {
               provider: 'INTERVALS_ICU',
               connectionId: 'connection-1',
               metricType: 'BODY_MASS_KG',
+              timezone: 'Asia/Shanghai',
+              startTime: new Date('2026-07-05T16:00:00.000Z'),
+              endTime: new Date('2026-07-06T16:00:00.000Z'),
+              sourceUpdatedAt: new Date('2026-07-06T16:30:00.000Z'),
             }),
             expect.objectContaining({
               metricType: 'SLEEP_SCORE',
@@ -710,9 +785,11 @@ describe('IntervalsIcuService', () => {
           ]),
         }),
       );
-      expect(prisma.externalProviderConnection.update).toHaveBeenLastCalledWith(
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          where: { id: 'connection-1' },
+          where: expect.objectContaining({ id: 'connection-1' }),
           data: expect.objectContaining({
             lastSyncCompletedAt: new Date('2026-07-06T10:30:00.000Z'),
             lastError: null,
@@ -734,7 +811,7 @@ describe('IntervalsIcuService', () => {
     } = createService();
     const row = connection();
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(row);
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce([
       { id: 'activity-1' },
     ]);
@@ -793,7 +870,7 @@ describe('IntervalsIcuService', () => {
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(
       connection(),
     );
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockResolvedValueOnce([
       { id: 'activity-1', source: 'STRAVA' },
     ]);
@@ -821,7 +898,7 @@ describe('IntervalsIcuService', () => {
     const { intervalsIcuClient, prisma, service } = createService();
     const row = connection();
     prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(row);
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
     intervalsIcuClient.listActivities.mockRejectedValueOnce(
       new IntervalsIcuApiError(401, 'unauthorized'),
     );
@@ -831,15 +908,15 @@ describe('IntervalsIcuService', () => {
         'unauthorized',
       );
 
-      expect(prisma.externalProviderConnection.update).toHaveBeenLastCalledWith(
-        {
-          where: { id: 'connection-1' },
-          data: {
-            status: 'INVALID',
-            lastError: 'unauthorized',
-          },
+      expect(
+        prisma.externalProviderConnection.updateMany,
+      ).toHaveBeenLastCalledWith({
+        where: expect.objectContaining({ id: 'connection-1' }),
+        data: {
+          status: 'INVALID',
+          lastError: 'unauthorized',
         },
-      );
+      });
       expect(errorSpy).toHaveBeenCalledWith(
         '[Intervals.icu] 同步失败：unauthorized',
       );
@@ -855,7 +932,7 @@ describe('IntervalsIcuService', () => {
       syncPlannedWorkouts: true,
       exportPlannedWorkouts: false,
     });
-    prisma.externalProviderConnection.update.mockResolvedValue({});
+    prisma.externalProviderConnection.updateMany.mockResolvedValue({});
 
     await expect(
       service.syncConnectionLatest({
@@ -866,5 +943,87 @@ describe('IntervalsIcuService', () => {
     ).resolves.toMatchObject({ plannedWorkouts: null });
 
     expect(intervalsIcuPlanSync.syncConnectionWeek).not.toHaveBeenCalled();
+  });
+  it('maps a concurrent database ownership conflict to the existing binding error', async () => {
+    const h = createService();
+    h.intervalsIcuClient.getProfile.mockResolvedValueOnce({
+      athlete: { id: 'remote' },
+    });
+    h.prisma.externalProviderConnection.upsert.mockRejectedValueOnce({
+      code: 'P2002',
+      meta: { target: ['external_athlete_id'] },
+    });
+    await expect(
+      h.service.connect('user-1', {
+        apiKey: 'test-key',
+        syncActivities: false,
+      }),
+    ).rejects.toThrow('intervals_icu_account_already_connected');
+  });
+
+  it('reports discovery and failed activity import independently of connection status', async () => {
+    const h = createService();
+    h.prisma.externalProviderConnection.findUnique.mockResolvedValueOnce(
+      connection(),
+    );
+    h.importBatchService.getLatestProviderBatchProgress.mockResolvedValueOnce({
+      id: 'batch',
+      status: 'FAILED',
+      totalCount: 1,
+      successCount: 0,
+      failedCount: 1,
+      skippedCount: 0,
+      postProcessJobs: [],
+    });
+    expect(await h.service.getStatus('user-1')).toMatchObject({
+      connected: true,
+      activitySync: { status: 'FAILED', failedCount: 1 },
+    });
+    expect(
+      h.importBatchService.getLatestProviderBatchProgress,
+    ).toHaveBeenCalledWith({
+      userId: 'user-1',
+      sourceKind: 'INTERVALS_ICU',
+      connectionId: 'connection-1',
+    });
+  });
+
+  it('consumes a failed OAuth attempt once and never exchanges the same code twice', async () => {
+    const h = createService();
+    const warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    try {
+      const start = await h.service.startOAuth('user-1', {
+        syncActivities: false,
+      });
+      const state = new URL(start.authorizationUrl).searchParams.get('state')!;
+      h.intervalsIcuClient.exchangeOAuthCode.mockRejectedValueOnce(
+        new IntervalsIcuApiError(
+          400,
+          'must-not-log-code',
+          '{"error":"invalid_grant","error_description":"must-not-log-token"}',
+        ),
+      );
+      const first = await h.service.completeOAuthCallback({
+        code: 'must-not-log-code',
+        state,
+      });
+      await h.service.completeOAuthCallback({
+        code: 'must-not-log-code',
+        state,
+      });
+      expect(new URL(first).searchParams.get('intervals_icu_oauth')).toBe(
+        'error',
+      );
+      expect(h.intervalsIcuClient.exchangeOAuthCode).toHaveBeenCalledTimes(1);
+      const logs = JSON.stringify(warn.mock.calls);
+      expect(logs).toContain('invalid_grant');
+      expect(logs).toContain('exchange_token');
+      expect(logs).not.toContain('must-not-log');
+      expect(logs).not.toContain(state);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

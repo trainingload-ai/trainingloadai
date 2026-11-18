@@ -956,7 +956,7 @@
 }
 
 .choiceCurrent .choiceTopline {
-  color: rgb(0 29 22 / 70%);
+  color: var(--brand-foreground);
 }
 
 .choice h3 {
@@ -1048,7 +1048,7 @@
 }
 
 .systemSection .kicker {
-  color: var(--success);
+  color: #76efa3;
 }
 
 .systemHeading > p:last-child {
@@ -1115,7 +1115,7 @@
 
 .systemTabIndex {
   padding-top: 0.08rem;
-  color: #61706a;
+  color: #8e9d97;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 1.05rem;
   font-weight: 800;
@@ -1129,7 +1129,7 @@
 }
 
 .systemTabCopy small {
-  color: var(--success);
+  color: #76efa3;
   font-size: 0.65rem;
   font-weight: 750;
   letter-spacing: 0.08em;
@@ -1162,28 +1162,23 @@
     color 160ms ease;
 }
 
-.systemTabs .systemTabActive {
+.systemTabs button[aria-selected="true"] {
   background: #17231f;
   color: #f4f6f8;
 }
 
-.systemTabs .systemTabActive .systemTabIndex {
-  color: var(--success);
+.systemTabs button[aria-selected="true"] .systemTabIndex {
+  color: #76efa3;
 }
 
-.systemTabs .systemTabActive .systemTabCopy strong {
-  font-size: 1.08rem;
-}
-
-.systemTabs .systemTabActive::after {
+.systemTabs button[aria-selected="true"]::after {
   position: absolute;
   inset: 0 auto 0 0;
-  width: 2px;
-  background: var(--plan-accent);
+  border-inline-start: 2px solid var(--plan-accent);
   content: "";
 }
 
-.systemTabs .systemTabActive > svg {
+.systemTabs button[aria-selected="true"] > svg {
   color: var(--success);
   transform: translateX(0.2rem);
 }
@@ -1988,7 +1983,7 @@
   }
 
   .systemTabCopy strong,
-  .systemTabs .systemTabActive .systemTabCopy strong {
+  .systemTabs button[aria-selected="true"] .systemTabCopy strong {
     font-size: 0.9rem;
     line-height: 1.22;
   }
@@ -2069,4 +2064,13 @@
     max-width: none;
     font-size: 2rem;
   }
+}
+
+.systemPanels {
+  display: grid;
+  min-width: 0;
+}
+.systemTabPanel {
+  grid-area: 1 / 1;
+  min-width: 0;
 }

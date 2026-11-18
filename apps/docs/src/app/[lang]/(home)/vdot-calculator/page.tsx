@@ -1,3 +1,4 @@
+import { ScrollableRegion } from "@/components/ScrollableRegion";
 import { ToolFaqList, ToolFaqItem } from "@/components/ToolPageLayout";
 import { ProductPreview } from "@/components/calculators/product-preview";
 import type { Metadata } from "next";
@@ -239,7 +240,10 @@ export default async function VdotCalculatorPage({
     >
       <p className={styles.formula}>{tPage("method.formula")}</p>
       <h3 className={styles.examplesTitle}>{tPage("method.examplesTitle")}</h3>
-      <div className={styles.tableWrap}>
+      <ScrollableRegion
+        label={tPage("method.examplesTitle")}
+        className={styles.tableWrap}
+      >
         <table className={styles.table}>
           <caption className="sr-only">{tPage("method.examplesTitle")}</caption>
           <thead>
@@ -264,7 +268,7 @@ export default async function VdotCalculatorPage({
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollableRegion>
       <p className={styles.note}>{tPage("method.examplesNote")}</p>
       <p className={styles.note}>{tPage("method.assumptions")}</p>
       <p className={styles.note}>{tPage("method.limits")}</p>

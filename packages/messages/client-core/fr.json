@@ -1218,7 +1218,9 @@
       "monthlyReview": "Revue mensuelle",
       "planReview": "Révision des plans",
       "saved": "Vérifier les paramètres enregistrés",
-      "saveFailed": "Échec de l'enregistrement des paramètres d'évaluation"
+      "saveFailed": "Échec de l'enregistrement des paramètres d'évaluation",
+      "athleteState": "Évaluation automatique de votre état",
+      "athleteStateDetail": "Actualise votre état selon les données pertinentes d’entraînement ou de récupération. La plateforme prend en charge les coûts des évaluations IA automatiques."
     },
     "dataExport": {
       "title": "Exporter toutes les données",
@@ -1376,7 +1378,19 @@
       "replaceKeyConfirmTitle": "Remplacer la clé API ?",
       "replaceKeyConfirmDescription": "Cette clé API diffère de la clé enregistrée et peut appartenir à un autre compte. L'enregistrement conservera l'historique importé et utilisera la nouvelle clé pour la synchronisation future.",
       "replaceKeyCancel": "Annuler",
-      "replaceKeyConfirmAction": "Remplacer la clé"
+      "replaceKeyConfirmAction": "Remplacer la clé",
+      "lastDiscovery": "Dernière recherche d’activités",
+      "activityImport": "Dernier import d’activités",
+      "importCounts": "{success}/{total} importées, {failed} en échec, {skipped} ignorées",
+      "importState": {
+        "QUEUED": "En attente",
+        "RUNNING": "Import en cours",
+        "POST_PROCESSING": "Post-traitement",
+        "COMPLETED": "Terminé",
+        "PARTIAL_FAILED": "Partiellement échoué",
+        "FAILED": "Échoué",
+        "CANCELLED": "Annulé"
+      }
     }
   },
   "UserProfile": {
@@ -5093,7 +5107,7 @@
     },
     "mirror": {
       "untitled": "Activité en attente de synchronisation",
-      "discoveredVia": "Détectée via Intervals.icu",
+      "discoveredVia": "Détectée via {provider}",
       "syncing": "Récupération de l’activité source en cours.",
       "connectionRequired": "L’intégration actuelle ne peut pas fournir l’activité complète. Vérifiez la connexion à la source.",
       "importDisabled": "La source est connectée, mais l’import automatique des activités est désactivé.",
@@ -5107,7 +5121,9 @@
       "connectSource": "Connecter la source",
       "reauthorizeSource": "Réautoriser la source",
       "enableSourceImport": "Activer l’import de la source",
-      "checkSourceConnection": "Vérifier la connexion source"
+      "checkSourceConnection": "Vérifier la connexion source",
+      "dataUnavailable": "Seul le résumé de l’activité est disponible ; les données détaillées n’ont pas pu être récupérées.",
+      "why": "Pourquoi ?"
     }
   },
   "V2ActivitiesStatsPage": {

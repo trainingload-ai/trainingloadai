@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { $Enums } from '@prisma/client';
 import { AiService } from '@/api/ai/ai.service';
-import { AiUsageService } from '@/api/ai/ai-usage.service';
 import type {
   CoachReviewAction,
   CoachReviewJudgment,
@@ -44,7 +43,6 @@ export class CoachReviewAdjustmentService {
 
   constructor(
     private readonly ai: AiService,
-    private readonly usage: AiUsageService,
     private readonly codecs: WorkoutCodecRegistry,
     private readonly loadEstimator: PlanLoadEstimatorService,
     private readonly modelGuard: ReviewModelCallGuard,
@@ -130,17 +128,7 @@ export class CoachReviewAdjustmentService {
           }),
         { failureReason: reviewUsageFailureReason },
       );
-      await this.usage.recordUsageEvent({
-        userId: args.userId,
-        operationId: generated.operationId,
-        callKey: `${generated.operationId}:background-aggregate`,
-        kind: usageKind(args.context.meta.scale),
-        provider: generated.provider,
-        model: generated.model,
-        usage: generated.usage,
-        sid: `coach-${args.context.meta.scale}-review-composer`,
-        entityId: workout.id,
-      });
+
       if (!generated.draft) {
         validationError = 'Output did not match the adjustment draft schema.';
         continue;

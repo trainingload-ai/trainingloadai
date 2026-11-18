@@ -1,5 +1,8 @@
 import type { EventEmitter2 } from '@nestjs/event-emitter';
 
+/** Standalone maintenance jobs suppress automatic updates across shared writers. */
+export { withAutomaticStateUpdatesSuppressed } from './updates/athlete-state-update-scope';
+
 export const ATHLETE_STATE_REASSESS_REQUESTED_EVENT =
   'athlete-state.reassess-requested.v1';
 

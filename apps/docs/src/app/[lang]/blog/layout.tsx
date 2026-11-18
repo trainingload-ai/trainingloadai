@@ -21,7 +21,7 @@ export default async function BlogLayout({
       >
         <CustomHeader newUserGift={newUserGiftValues(process.env)} />
       </Suspense>
-      <main className="flex-1 min-h-screen">{children}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1 min-h-screen">{children}</main>
       <Footer lang={lang} />
     </>
   );

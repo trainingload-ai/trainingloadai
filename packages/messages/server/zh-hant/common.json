@@ -136,7 +136,9 @@
     "polar_webhook_signature_invalid": "Polar webhook 簽名無效",
     "polar_webhook_secret_missing": "Polar webhook secret 未設定",
     "polar_webhook_raw_body_missing": "無法取得原始請求體，無法校驗 webhook 簽名",
-    "ai_coach_model_unavailable": "模型暫時無法回應，請嘗試切換模型後重試。"
+    "ai_coach_model_unavailable": "模型暫時無法回應，請嘗試切換模型後重試。",
+    "import_identity_conflict": "活動歸屬存在衝突，請聯絡支援人員處理此次匯入。",
+    "intervals_icu_athlete_identity_missing": "無法確認 Intervals.icu 帳號身分，請重新授權。"
   },
   "notification": {
     "reviewDigest": {

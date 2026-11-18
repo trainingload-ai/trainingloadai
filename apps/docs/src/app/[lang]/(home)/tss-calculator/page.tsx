@@ -311,7 +311,10 @@ export default async function TssCalculatorPage({
         description={tPage("sections.examples.description")}
       >
         <ToolCard className="overflow-hidden p-0">
-          <Table className="min-w-[560px]">
+          <Table
+            scrollLabel={tPage("sections.examples.caption")}
+            className="min-w-[560px]"
+          >
             <caption className="sr-only">
               {tPage("sections.examples.caption")}
             </caption>
@@ -358,7 +361,10 @@ export default async function TssCalculatorPage({
         description={tPage("sections.methods.description")}
       >
         <ToolCard className="overflow-hidden p-0">
-          <Table className="min-w-[720px]">
+          <Table
+            scrollLabel={tPage("sections.methods.caption")}
+            className="min-w-[720px]"
+          >
             <caption className="sr-only">
               {tPage("sections.methods.caption")}
             </caption>

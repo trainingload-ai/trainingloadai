@@ -20,9 +20,7 @@ export function isLocalAnalyticsHostname(hostname: string) {
 
 export function resolveGa4MeasurementId(value: string | null | undefined) {
   const candidate = value?.trim().toUpperCase();
-  return candidate && /^G-[A-Z0-9]+$/.test(candidate)
-    ? candidate
-    : null;
+  return candidate && /^G-[A-Z0-9]+$/.test(candidate) ? candidate : null;
 }
 
 // Self-host analytics has a deliberately smaller contract than the managed
@@ -80,6 +78,7 @@ export function toSelfHostGa4OperationName(
 }
 
 const BASE_TOOL_IDS = [
+  "lactate_curve_calculator",
   "activity_file_converter",
   "critical_power_calculator",
   "css_calculator",

@@ -1,20 +1,27 @@
 "use client";
 
+import { ToolTabsList } from "@/components/ToolTabsList";
+
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import {
   useEffect,
   useLayoutEffect,
   useMemo,
   useState,
   type ComponentProps,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
-import { Printer, Share2, SlidersHorizontal } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { CpFileInput } from "./file-input";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -145,6 +152,7 @@ export function CriticalPowerCalculatorClient({
     }
   }, [efforts, ready, units, weightKgText]);
 
+  const fields = useCommittedFields();
   const weightLimits = bodyMassLimits(units);
   const weightRaw = parsePositiveNumber(weightText);
   const weightInvalid =
@@ -153,6 +161,13 @@ export function CriticalPowerCalculatorClient({
       weightRaw < weightLimits.min ||
       weightRaw > weightLimits.max);
   const bodyWeightKg = weightInvalid ? null : parsePositiveNumber(weightKgText);
+  const showWeightError =
+    weightInvalid && fields.isCommitted("weight", weightText);
+  const weightError = showWeightError
+    ? units === "imperial"
+      ? t("manual.invalidWeightLb")
+      : t("manual.invalidWeight")
+    : "";
 
   function updateEffort(index: number, patch: Partial<CpEffortDraft>) {
     setSourceFile(null);
@@ -182,18 +197,6 @@ export function CriticalPowerCalculatorClient({
       setWeightText(displayMassFromKg(weightKgText, next));
     }
     setUnits(next);
-  }
-
-  function onUnitKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const next = event.key === "ArrowRight" ? "imperial" : "metric";
-    selectUnits(next);
-    document
-      .getElementById(
-        next === "metric" ? "cp-units-metric" : "cp-units-imperial",
-      )
-      ?.focus();
   }
 
   const parsedEfforts = useMemo(() => {
@@ -267,13 +270,11 @@ export function CriticalPowerCalculatorClient({
 
   const warnings = (() => {
     const items: string[] = [];
+    if (!fields.hasCommitted) return items;
     const started = parsedEfforts.some(
       (effort) =>
         effort.draft.watts.trim() !== "" || effort.draft.minutes.trim() !== "",
     );
-    if (parsedEfforts.some((effort) => effort.powerInvalid)) {
-      items.push(t("manual.invalidPower"));
-    }
     if (
       parsedEfforts.some(
         (effort) =>
@@ -283,9 +284,6 @@ export function CriticalPowerCalculatorClient({
       )
     ) {
       items.push(t("manual.warnings.powerRange"));
-    }
-    if (parsedEfforts.some((effort) => effort.durationInvalid)) {
-      items.push(t("manual.invalidDuration"));
     }
     const outside = completeEfforts.some(
       (effort) =>
@@ -387,47 +385,33 @@ export function CriticalPowerCalculatorClient({
         <section id="calculator" className={styles.board}>
           <div className={styles.boardHead}>
             <h2 className={styles.boardLabel}>{t("manual.title")}</h2>
-            <div
-              role="radiogroup"
-              aria-label={t("manual.unitsLabel")}
-              className={styles.unitSwitch}
-            >
-              <Button
-                id="cp-units-metric"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={units === "metric"}
-                tabIndex={units === "metric" ? 0 : -1}
-                onClick={() => selectUnits("metric")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.unitsMetric")}
-              </Button>
-              <Button
-                id="cp-units-imperial"
-                type="button"
-                role="radio"
-                variant="ghost"
-                aria-checked={units === "imperial"}
-                tabIndex={units === "imperial" ? 0 : -1}
-                onClick={() => selectUnits("imperial")}
-                onKeyDown={onUnitKeyDown}
-                className={styles.unitOption}
-              >
-                {t("manual.unitsImperial")}
-              </Button>
-            </div>
+            <ToolChoiceGroup
+              value={units}
+              onValueChange={selectUnits}
+              label={t("manual.unitsLabel")}
+              options={[
+                {
+                  value: "metric",
+                  id: "cp-units-metric",
+                  label: t("manual.unitsMetric"),
+                },
+                {
+                  value: "imperial",
+                  id: "cp-units-imperial",
+                  label: t("manual.unitsImperial"),
+                },
+              ]}
+            />
           </div>
           <Tabs value={inputTab} onValueChange={setInputTab}>
-            <TabsList
-              className={styles.inputTabs}
-              aria-label={t("file.inputMode")}
-            >
-              <TabsTrigger value="manual">{t("file.manualTab")}</TabsTrigger>
-              <TabsTrigger value="file">{t("file.fileTab")}</TabsTrigger>
-            </TabsList>
+            <ToolTabsList
+              value={inputTab}
+              label={t("file.inputMode")}
+              options={[
+                { value: "manual", label: t("file.manualTab") },
+                { value: "file", label: t("file.fileTab") },
+              ]}
+            />
             <TabsContent value="manual">
               <p className={styles.boardLead}>{t("manual.lead")}</p>
               <ol className={styles.stepList}>
@@ -495,11 +479,41 @@ export function CriticalPowerCalculatorClient({
                           inputMode="decimal"
                           value={effort.draft.watts}
                           placeholder={t("manual.powerPlaceholder")}
-                          aria-invalid={effort.powerInvalid}
+                          aria-invalid={
+                            effort.powerInvalid &&
+                            fields.isCommitted(
+                              `power-${index}`,
+                              effort.draft.watts,
+                            )
+                          }
+                          aria-describedby={
+                            effort.powerInvalid &&
+                            fields.isCommitted(
+                              `power-${index}`,
+                              effort.draft.watts,
+                            )
+                              ? `cp-power-error-${index}`
+                              : undefined
+                          }
+                          onBlur={() =>
+                            fields.commit(`power-${index}`, effort.draft.watts)
+                          }
                           onChange={(event) =>
                             updateEffort(index, { watts: event.target.value })
                           }
                         />
+                        {effort.powerInvalid &&
+                        fields.isCommitted(
+                          `power-${index}`,
+                          effort.draft.watts,
+                        ) ? (
+                          <p
+                            id={`cp-power-error-${index}`}
+                            className={styles.alert}
+                          >
+                            {t("manual.invalidPower")}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                     {effort.draft.preset === "custom" ? (
@@ -513,11 +527,44 @@ export function CriticalPowerCalculatorClient({
                           inputMode="decimal"
                           value={effort.draft.minutes}
                           placeholder={t("manual.customPlaceholder")}
-                          aria-invalid={effort.durationInvalid}
+                          aria-invalid={
+                            effort.durationInvalid &&
+                            fields.isCommitted(
+                              `duration-${index}`,
+                              effort.draft.minutes,
+                            )
+                          }
+                          aria-describedby={
+                            effort.durationInvalid &&
+                            fields.isCommitted(
+                              `duration-${index}`,
+                              effort.draft.minutes,
+                            )
+                              ? `cp-duration-error-${index}`
+                              : undefined
+                          }
+                          onBlur={() =>
+                            fields.commit(
+                              `duration-${index}`,
+                              effort.draft.minutes,
+                            )
+                          }
                           onChange={(event) =>
                             updateEffort(index, { minutes: event.target.value })
                           }
                         />
+                        {effort.durationInvalid &&
+                        fields.isCommitted(
+                          `duration-${index}`,
+                          effort.draft.minutes,
+                        ) ? (
+                          <p
+                            id={`cp-duration-error-${index}`}
+                            className={styles.alert}
+                          >
+                            {t("manual.invalidDuration")}
+                          </p>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -564,18 +611,39 @@ export function CriticalPowerCalculatorClient({
                     ? t("manual.weightPlaceholderLb")
                     : t("manual.weightPlaceholder")
                 }
-                aria-invalid={weightInvalid}
+                aria-invalid={showWeightError}
+                aria-describedby={
+                  showWeightError ? "cp-weight-error" : undefined
+                }
+                onBlur={() => fields.commit("weight", weightText)}
                 onChange={(event) => onWeightInput(event.target.value)}
               />
             </div>
-            {weightInvalid ? (
-              <p role="alert" className={styles.alert}>
+            {showWeightError ? (
+              <p id="cp-weight-error" className={styles.alert}>
                 {units === "imperial"
                   ? t("manual.invalidWeightLb")
                   : t("manual.invalidWeight")}
               </p>
             ) : null}
           </div>
+          <FieldErrorAnnouncement
+            message={[
+              weightError,
+              ...parsedEfforts.flatMap((effort, index) => [
+                effort.powerInvalid &&
+                fields.isCommitted(`power-${index}`, effort.draft.watts)
+                  ? t("manual.invalidPower")
+                  : "",
+                effort.durationInvalid &&
+                fields.isCommitted(`duration-${index}`, effort.draft.minutes)
+                  ? t("manual.invalidDuration")
+                  : "",
+              ]),
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
           {sourceFile ? (
             <p className={styles.fileHint}>
               {t("file.source", { filename: sourceFile })}
@@ -712,31 +780,30 @@ export function CriticalPowerCalculatorClient({
             ) : null}
           </div>
         </section>
-        <div className={`${styles.posterActions} cp-share-actions`}>
-          <Select value={zoneModel} onValueChange={onZoneModelChange}>
-            <SelectTrigger
-              aria-label={t("result.switchZones")}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              <SlidersHorizontal className="size-3.5" aria-hidden />
-              {t("result.switchZones")}
-            </SelectTrigger>
-            <SelectContent position="popper" align="start">
-              {POWER_ZONE_MODELS.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {tZones(`inputs.model.options.${model.toLowerCase()}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {cpRounded != null ? (
-            <a
-              href={cpZonesHref(prefix, cpRounded, zoneModel)}
-              className={styles.primaryAction}
-            >
-              {t("result.handoff")}
-            </a>
-          ) : null}
+        <ToolResultActions
+          className="cp-share-actions"
+          leading={
+            <>
+              <Select value={zoneModel} onValueChange={onZoneModelChange}>
+                <SelectTrigger aria-label={t("result.switchZones")}>
+                  {t("result.switchZones")}
+                </SelectTrigger>
+                <SelectContent position="popper" align="start">
+                  {POWER_ZONE_MODELS.map((model) => (
+                    <SelectItem key={model} value={model}>
+                      {tZones(`inputs.model.options.${model.toLowerCase()}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {cpRounded != null ? (
+                <a href={cpZonesHref(prefix, cpRounded, zoneModel)}>
+                  {t("result.handoff")}
+                </a>
+              ) : null}
+            </>
+          }
+        >
           <Button type="button" variant="outline" size="lg" onClick={onPrint}>
             <Printer className="size-3.5" aria-hidden />
             {t("result.print")}
@@ -745,7 +812,7 @@ export function CriticalPowerCalculatorClient({
             <Share2 className="size-3.5" aria-hidden />
             {copied ? t("result.copied") : t("result.copyLink")}
           </Button>
-        </div>
+        </ToolResultActions>
       </div>
       <section id="methods" className={styles.section}>
         <div className={styles.sectionHeading}>

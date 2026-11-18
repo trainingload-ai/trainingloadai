@@ -1,3 +1,4 @@
+import { oauthAuthorizationWrite } from './auth/oauth-authorization-revision';
 import { betterAuth, type Auth } from 'better-auth';
 import { APIError, createAuthMiddleware, getOAuthState } from 'better-auth/api';
 import { bearer, emailOTP, jwt } from 'better-auth/plugins';
@@ -410,6 +411,13 @@ export const getAuthConfig = (): AuthInstance => {
     },
     account: {
       modelName: 't_user_accounts',
+      additionalFields: {
+        authorizationRevision: {
+          type: 'string',
+          required: false,
+          input: false,
+        },
+      },
       accountLinking: {
         allowDifferentEmails: true,
       },
@@ -418,6 +426,16 @@ export const getAuthConfig = (): AuthInstance => {
       modelName: 't_user_verifications',
     },
     databaseHooks: {
+      account: {
+        create: {
+          before: async (account, context) =>
+            oauthAuthorizationWrite(account, context),
+        },
+        update: {
+          before: async (account, context) =>
+            oauthAuthorizationWrite(account, context),
+        },
+      },
       session: {
         create: {
           before: async (session) => {

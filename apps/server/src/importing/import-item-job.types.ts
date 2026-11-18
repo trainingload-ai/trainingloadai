@@ -1,8 +1,4 @@
-import type {
-  ImportItemJob,
-  ImportSourceObject,
-  Prisma,
-} from '@prisma/client';
+import type { ImportItemJob, ImportSourceObject, Prisma } from '@prisma/client';
 import type { CanonicalActivityPayload } from './canonical-activity.types';
 import type { ActivityDatasetRepair } from './activity-dataset-repair';
 
@@ -22,6 +18,7 @@ export type ImportItemSourceRef = {
   fileKey?: string;
   fileName?: string;
   connectionId?: string;
+  authorization?: unknown;
   thirdPartyActivityId?: string | number;
   workoutId?: string | number;
 };
@@ -97,9 +94,7 @@ export function importJsonValue(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
-export function readImportString(
-  ...candidates: unknown[]
-): string | undefined {
+export function readImportString(...candidates: unknown[]): string | undefined {
   for (const candidate of candidates) {
     if (typeof candidate === 'string' && candidate.trim()) {
       return candidate.trim();
@@ -111,9 +106,7 @@ export function readImportString(
   return undefined;
 }
 
-export function readImportNumber(
-  ...candidates: unknown[]
-): number | undefined {
+export function readImportNumber(...candidates: unknown[]): number | undefined {
   for (const candidate of candidates) {
     if (typeof candidate === 'number' && Number.isFinite(candidate)) {
       return candidate;

@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { isCoachUpstreamConfigured } from '@/api/ai/core/coach-upstream.adapter';
 import { CoachDailyReviewRuntimeService } from '../coach-daily-review-runtime.service';
+import { ForbiddenException } from '@nestjs/common';
+import { BusinessException } from '@/filters/business-exception/business.exception';
+import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import {
   ReviewModelCallGuard,
   ReviewModelDeferredError,
@@ -140,9 +143,16 @@ function createService(
       failure: 'invalid',
     })),
   };
+  const consent = {
+    isGranted: jest.fn(async () => true),
+    assertGranted: jest.fn(async () => undefined),
+  };
+  const findDecisions = jest.fn(
+    async (): Promise<Array<{ id: string; payload: unknown }>> => [],
+  );
   const service = new CoachDailyReviewRuntimeService(
     {
-      coachDecision: { findMany: jest.fn(async () => []) },
+      coachDecision: { findMany: findDecisions },
     } as never,
     {
       buildContext: jest.fn(async () => args.execution ?? execution()),
@@ -150,7 +160,6 @@ function createService(
     coachContext as never,
     branching as never,
     aiService as never,
-    { recordUsageEvent: jest.fn(async () => undefined) } as never,
     {
       getPreferredLocale: jest.fn(async () => 'zh'),
       getPreferredTimezone: jest.fn(async () => 'Asia/Shanghai'),
@@ -162,8 +171,17 @@ function createService(
     { build: jest.fn(async () => args.review ?? review()) } as never,
     adjustments as never,
     args.guard ?? new ReviewModelCallGuard(),
+    consent as never,
   );
-  return { service, branching, coachContext, aiService, adjustments };
+  return {
+    service,
+    branching,
+    coachContext,
+    aiService,
+    adjustments,
+    consent,
+    findDecisions,
+  };
 }
 
 const job = {
@@ -174,8 +192,74 @@ const job = {
 };
 
 describe('CoachDailyReviewRuntimeService v4', () => {
+  const consentError = () =>
+    new BusinessException({
+      code: BUSINESS_ERROR_CODE.AI_DATA_CONSENT_REQUIRED,
+      message: 'AI_DATA_CONSENT_REQUIRED',
+    });
   afterEach(() => {
     upstream.mockReturnValue(false);
+  });
+
+  it('skips without model calls, proposal changes or review events when consent is absent', async () => {
+    const {
+      service,
+      consent,
+      branching,
+      coachContext,
+      aiService,
+      findDecisions,
+    } = createService();
+    consent.isGranted.mockResolvedValueOnce(false);
+    await expect(service.runForDailyJob(job)).resolves.toEqual({
+      skipped: true,
+      reason: 'ai_data_consent_required',
+    });
+    expect(aiService.generateDailyPlanReviewJudgment).not.toHaveBeenCalled();
+    expect(findDecisions).not.toHaveBeenCalled();
+    expect(branching.openBranch).not.toHaveBeenCalled();
+    expect(branching.rejectDecision).not.toHaveBeenCalled();
+    expect(coachContext.appendEvent).not.toHaveBeenCalled();
+  });
+
+  it('handles a late consent rejection as skipped rather than an upstream fallback', async () => {
+    upstream.mockReturnValue(true);
+    const { service, aiService, coachContext, branching } = createService();
+    aiService.generateDailyPlanReviewJudgment.mockRejectedValueOnce(
+      consentError(),
+    );
+    await expect(service.runForDailyJob(job)).resolves.toEqual({
+      skipped: true,
+      reason: 'ai_data_consent_required',
+    });
+    expect(coachContext.appendEvent).not.toHaveBeenCalled();
+    expect(branching.rejectDecision).not.toHaveBeenCalled();
+  });
+
+  it('rechecks consent before superseding proposals or persisting the result', async () => {
+    const { service, consent, findDecisions, branching, coachContext } =
+      createService();
+    findDecisions.mockResolvedValue([
+      { id: 'old-proposal', payload: { factHash: 'older-facts' } },
+    ]);
+    consent.assertGranted
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(consentError());
+    await expect(service.runForDailyJob(job)).resolves.toEqual({
+      skipped: true,
+      reason: 'ai_data_consent_required',
+    });
+    expect(branching.rejectDecision).not.toHaveBeenCalled();
+    expect(coachContext.appendEvent).not.toHaveBeenCalled();
+  });
+
+  it('does not convert other application policy errors into provider failures', async () => {
+    upstream.mockReturnValue(true);
+    const { service, aiService, coachContext } = createService();
+    const error = new ForbiddenException('Application policy denied');
+    aiService.generateDailyPlanReviewJudgment.mockRejectedValueOnce(error);
+    await expect(service.runForDailyJob(job)).rejects.toBe(error);
+    expect(coachContext.appendEvent).not.toHaveBeenCalled();
   });
 
   it('skips when no active plan exists', async () => {

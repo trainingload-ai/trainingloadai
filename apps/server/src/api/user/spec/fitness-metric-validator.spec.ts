@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { SportType, UserFitnessMetricType } from '@prisma/client';
+import { MetricSource, SportType, UserFitnessMetricType } from '@prisma/client';
 import { validateFitnessMetricCandidate } from '../fitness-metric-validator';
 
 describe('validateFitnessMetricCandidate', () => {
@@ -105,4 +105,80 @@ describe('validateFitnessMetricCandidate', () => {
       reason: 'auto_running_cs_below_minimum:1.8',
     });
   });
+
+  describe.each([
+    MetricSource.MANUAL,
+    MetricSource.AUTO,
+    MetricSource.ESTIMATED,
+  ])('%s pace metrics', (source) => {
+    it.each([
+      {
+        type: UserFitnessMetricType.TP,
+        value: 3.3,
+        reference: UserFitnessMetricType.CS,
+        referenceValue: 3,
+      },
+      {
+        type: UserFitnessMetricType.TP,
+        value: 2,
+        reference: UserFitnessMetricType.CS,
+        referenceValue: 3.5,
+      },
+      {
+        type: UserFitnessMetricType.CS,
+        value: 3,
+        reference: UserFitnessMetricType.TP,
+        referenceValue: 3.3,
+      },
+      {
+        type: UserFitnessMetricType.CS,
+        value: 4,
+        reference: UserFitnessMetricType.TP,
+        referenceValue: 2,
+      },
+    ])(
+      'accepts $type=$value independently of $reference=$referenceValue',
+      ({ type, value, reference, referenceValue }) => {
+        expect(
+          validateFitnessMetricCandidate(
+            { type, value, sport: SportType.RUN, source },
+            { [reference]: referenceValue },
+            { requireReferenceMetrics: true },
+          ),
+        ).toEqual({ valid: true });
+      },
+    );
+  });
+
+  it.each([UserFitnessMetricType.TP, UserFitnessMetricType.CS])(
+    'still rejects a non-finite %s',
+    (type) => {
+      expect(
+        validateFitnessMetricCandidate({
+          type,
+          value: Number.NaN,
+          sport: SportType.RUN,
+        }),
+      ).toEqual({
+        valid: false,
+        reason: 'value_not_finite',
+      });
+    },
+  );
+
+  it.each([UserFitnessMetricType.TP, UserFitnessMetricType.CS])(
+    'still rejects an out-of-range %s',
+    (type) => {
+      expect(
+        validateFitnessMetricCandidate({
+          type,
+          value: 13,
+          sport: SportType.RUN,
+        }),
+      ).toEqual({
+        valid: false,
+        reason: 'outside_intrinsic_range:0.3-12',
+      });
+    },
+  );
 });

@@ -204,6 +204,66 @@ function setup(events: CoachUiStreamYield[]) {
 }
 
 describe('durable Coach output contract', () => {
+  it('continues an owned Athlete State answer without user admission or a paid operation', async () => {
+    const fixture = setup([
+      {
+        type: 'model_usage',
+        usage: { inputTokens: 5, outputTokens: 2 },
+        model: 'test-model',
+        provider: 'test',
+        status: 'SUCCESS',
+      },
+      {
+        type: 'stream_event',
+        event: {
+          type: 'text_delta',
+          text: 'State updated.',
+          modelStepId: 'step-1',
+          placement: 'answer',
+        },
+      },
+      success,
+    ]);
+    const assertAccess = jest.fn(async () => undefined);
+    Object.assign(fixture.coachRuns, {
+      isAthleteStateContinuation: jest.fn(async () => true),
+      answerBranch: jest.fn(async () => null),
+    });
+    Object.assign(fixture.aiService, {
+      assertAthleteStateAccess: assertAccess,
+    });
+    // Any attempted paid admission would fail for this athlete.
+    fixture.operations.begin.mockImplementation(async () => {
+      throw new Error('INSUFFICIENT_CREDITS');
+    });
+    await fixture.run({
+      protocolVersion: 2,
+      runCommand: {
+        kind: 'answer',
+        requestId: 'request',
+        runId: 'run-1',
+        interactionId: 'question',
+        submissionId: 'reply',
+      },
+    });
+    expect(assertAccess).toHaveBeenCalledWith('user-1');
+    expect(fixture.operations.begin).not.toHaveBeenCalled();
+    expect(fixture.operations.complete).not.toHaveBeenCalled();
+    expect(fixture.operations.markDelivered).not.toHaveBeenCalled();
+    expect(fixture.aiService.coachStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        platformFunded: true,
+        activeSkillName: 'athlete-state',
+        runtimeRunId: 'run-1',
+      }),
+    );
+    expect(fixture.aiUsage.recordUsageEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operationId: null,
+        callKey: 'attempt-1:coach-model:0',
+      }),
+    );
+  });
   it('publishes the persisted final projection then operation state before closing', async () => {
     const fixture = setup([
       {
@@ -386,10 +446,13 @@ describe('AI coach client output contract through the controller', () => {
       success,
     ]);
 
-    expect(await run({ purpose: 'REASONING' })).toEqual([text, {
-      ...settledSuccess,
-      operation: { ...settledSuccess.operation, purpose: 'DEFAULT' },
-    }]);
+    expect(await run({ purpose: 'REASONING' })).toEqual([
+      text,
+      {
+        ...settledSuccess,
+        operation: { ...settledSuccess.operation, purpose: 'DEFAULT' },
+      },
+    ]);
     const flashPurpose = purposeForActualModel({
       provider: 'deepseek',
       modelId: 'deepseek-flash',

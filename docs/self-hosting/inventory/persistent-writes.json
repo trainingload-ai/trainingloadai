@@ -39,21 +39,21 @@
     },
     {
       "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-      "line": 97,
+      "line": 115,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "resolve(process.env.LOCAL_STORAGE_PATH || '/data/uploads'),"
     },
     {
       "file": "apps/server/src/config/config.ts",
-      "line": 86,
+      "line": 118,
       "owner": "apps",
       "classification": "cache",
       "expression": "process.env.LOCAL_STORAGE_CACHE_PATH || '/data/cache/storage',"
     },
     {
       "file": "apps/server/src/config/config.ts",
-      "line": 90,
+      "line": 122,
       "owner": "apps",
       "classification": "runtime-write",
       "expression": "dataPath: process.env.ELEVATION_DATA_PATH || '/data/elevation',"
@@ -928,7 +928,14 @@
     },
     {
       "file": "scripts/selfhost/copy-optional-workspace-metadata.mjs",
-      "line": 17,
+      "line": 54,
+      "owner": "scripts",
+      "classification": "runtime-write",
+      "expression": "mkdirSync(dirname(destination), { recursive: true });"
+    },
+    {
+      "file": "scripts/selfhost/copy-optional-workspace-metadata.mjs",
+      "line": 60,
       "owner": "scripts",
       "classification": "runtime-write",
       "expression": "mkdirSync(dirname(destination), { recursive: true });"

@@ -178,6 +178,31 @@ export class CoachRunStore {
     };
   }
 
+  /** Only server-owned persisted tasks can select platform-funded continuation. */
+  async isAthleteStateContinuation(
+    userId: string,
+    sid: string,
+    command: CoachRunCommand,
+  ) {
+    if (command.kind === 'start') return false;
+    const run = await this.prisma.coachRun.findFirst({
+      where: { id: command.runId, userId, sessionId: sid },
+      select: { taskKind: true, originMessageId: true },
+    });
+    if (run?.taskKind === 'ATHLETE_STATE_UPDATE') return true;
+    if (!run?.originMessageId.startsWith('assessment-case:')) return false;
+    return Boolean(
+      await this.prisma.coachAssessmentCase.findFirst({
+        where: {
+          id: run.originMessageId.slice('assessment-case:'.length),
+          userId,
+          sessionId: sid,
+        },
+        select: { id: true },
+      }),
+    );
+  }
+
   async begin(args: {
     userId: string;
     sid: string;

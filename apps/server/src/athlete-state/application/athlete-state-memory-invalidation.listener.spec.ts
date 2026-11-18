@@ -28,7 +28,7 @@ describe('AthleteStateMemoryInvalidationListener', () => {
     expect(events.emitAsync).not.toHaveBeenCalled();
   });
 
-  it('invalidates and requests reassessment for independent Memory changes', async () => {
+  it('invalidates cached state without duplicating the request persisted by the Memory store', async () => {
     const commands = {
       isAssessmentAnswerSource: jest.fn(async () => false),
       invalidate: jest.fn(async () => ({ assessments: 1, cases: 1 })),
@@ -46,13 +46,6 @@ describe('AthleteStateMemoryInvalidationListener', () => {
     });
 
     expect(commands.invalidate).toHaveBeenCalledWith('athlete-1');
-    expect(events.emitAsync).toHaveBeenCalledWith(
-      'athlete-state.reassess-requested.v1',
-      expect.objectContaining({
-        userId: 'athlete-1',
-        triggerType: 'MEMORY_CHANGED',
-        triggerRef: 'CORRECTED',
-      }),
-    );
+    expect(events.emitAsync).not.toHaveBeenCalled();
   });
 });

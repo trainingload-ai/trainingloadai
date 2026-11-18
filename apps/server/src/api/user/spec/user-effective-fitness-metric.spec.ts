@@ -56,6 +56,13 @@ function createService(rows: ReturnType<typeof metric>[]) {
     {} as never,
     { get: jest.fn() } as never,
     ...userServiceDependencies(prisma),
+    {
+      observe: async (
+        _userId: unknown,
+        _tx: unknown,
+        write: () => Promise<unknown>,
+      ) => write(),
+    } as never,
   );
   return { service, prisma };
 }
@@ -130,6 +137,13 @@ describe('UserService effective fitness metric reads', () => {
       {} as never,
       { get: jest.fn() } as never,
       ...userServiceDependencies(prisma),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
 
     const selected = await service.getEffectiveUserFitnessMetric(
@@ -178,6 +192,13 @@ describe('UserService effective fitness metric reads', () => {
       {} as never,
       { get: jest.fn() } as never,
       ...userServiceDependencies(prisma),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
 
     await expect(
@@ -238,6 +259,13 @@ describe('UserService effective fitness metric reads', () => {
       {} as never,
       { get: jest.fn() } as never,
       ...userServiceDependencies(prisma),
+      {
+        observe: async (
+          _userId: unknown,
+          _tx: unknown,
+          write: () => Promise<unknown>,
+        ) => write(),
+      } as never,
     );
 
     const profile = await service.getComposedUserProfile(

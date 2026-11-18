@@ -22,6 +22,7 @@ export const trainingDataCoverageTool: AiToolDef<
   searchHint:
     'training data coverage missing activities sync pending import freshness zero load',
   applicableSkills: [
+    'athlete-state',
     'readiness-check',
     'week-review',
     'plan-day-review',

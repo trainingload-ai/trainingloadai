@@ -1,5 +1,9 @@
 "use client";
 
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
@@ -18,7 +22,6 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -111,7 +114,7 @@ function Field({
   children,
 }: {
   label: string;
-  htmlFor?: string;
+  htmlFor: string;
   children: ReactNode;
 }) {
   return (
@@ -214,7 +217,10 @@ function StepFields({
   const powerUnit = /%|ftp/i.test(step.intensityValue) ? "%" : "W";
 
   return (
-    <div className={styles.stepCard}>
+    <fieldset className={styles.stepCard}>
+      <legend className="sr-only">
+        {t(`builder.stepTypes.${step.stepType}`)}
+      </legend>
       <div className={styles.stepTop}>
         <div className={styles.stepName}>
           <span className={styles.stepIcon}>
@@ -222,24 +228,24 @@ function StepFields({
           </span>
           <span>{t(`builder.stepTypes.${step.stepType}`)}</span>
         </div>
-        <button
+        <ToolActionButton
+          intent="quiet"
           type="button"
-          className={styles.iconButton}
           onClick={onRemove}
           aria-label={t("builder.removeStep")}
         >
-          <Trash2 className="size-4" />
-        </button>
+          <Trash2 aria-hidden="true" />
+        </ToolActionButton>
       </div>
       <div className={styles.stepGrid}>
-        <Field label={t("builder.stepType")}>
+        <Field label={t("builder.stepType")} htmlFor={`${step.id}-type`}>
           <Select
             value={step.stepType}
             onValueChange={(value) =>
               onChange({ ...step, stepType: value as WorkoutStepType })
             }
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${step.id}-type`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -266,7 +272,7 @@ function StepFields({
             }}
           />
         </Field>
-        <Field label={t("builder.unit")}>
+        <Field label={t("builder.unit")} htmlFor={`${step.id}-unit`}>
           <Select
             value={step.durationUnit}
             onValueChange={(value) => {
@@ -283,7 +289,7 @@ function StepFields({
               });
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${step.id}-unit`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -297,14 +303,17 @@ function StepFields({
         </Field>
       </div>
       <div className={styles.intensityGrid}>
-        <Field label={t("builder.targetType")}>
+        <Field
+          label={t("builder.targetType")}
+          htmlFor={`${step.id}-target-type`}
+        >
           <Select
             value={step.intensityKind}
             onValueChange={(value) =>
               onChange({ ...step, intensityKind: value as IntensityKind })
             }
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${step.id}-target-type`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -338,7 +347,7 @@ function StepFields({
           />
         </Field>
         {step.intensityKind === "pace" ? (
-          <Field label={t("builder.paceUnit")}>
+          <Field label={t("builder.paceUnit")} htmlFor={`${step.id}-pace-unit`}>
             <Select
               value={paceMeasure}
               onValueChange={(value) => {
@@ -350,7 +359,7 @@ function StepFields({
                 onChange({ ...step, intensityValue: next });
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${step.id}-pace-unit`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -364,7 +373,10 @@ function StepFields({
           </Field>
         ) : null}
         {step.intensityKind === "power" ? (
-          <Field label={t("builder.powerUnit")}>
+          <Field
+            label={t("builder.powerUnit")}
+            htmlFor={`${step.id}-power-unit`}
+          >
             <Select
               value={powerUnit}
               onValueChange={(value) => {
@@ -380,7 +392,7 @@ function StepFields({
                 onChange({ ...step, intensityValue: next });
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${step.id}-power-unit`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -393,7 +405,7 @@ function StepFields({
           </Field>
         ) : null}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -691,7 +703,7 @@ export function WorkoutEditorClient({
               }
             />
           </Field>
-          <Field label={t("builder.sport")}>
+          <Field label={t("builder.sport")} htmlFor="workout-sport">
             <Select
               value={draft.sport}
               onValueChange={(value) =>
@@ -729,7 +741,8 @@ export function WorkoutEditorClient({
         </div>
         <div className={styles.actions}>
           <div className={styles.actionGroup}>
-            <Button
+            <ToolActionButton
+              intent="primary"
               type="button"
               onClick={() =>
                 editDraft((current) => ({
@@ -740,10 +753,10 @@ export function WorkoutEditorClient({
             >
               <Plus data-icon="inline-start" />
               {t("builder.addStep")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="secondary"
               type="button"
-              variant="secondary"
               onClick={() =>
                 editDraft((current) => ({
                   ...current,
@@ -753,31 +766,31 @@ export function WorkoutEditorClient({
             >
               <Repeat2 data-icon="inline-start" />
               {t("builder.addInterval")}
-            </Button>
+            </ToolActionButton>
           </div>
           <div className={styles.actionGroup}>
-            <Button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="ghost"
               onClick={() => loadExample("intervals")}
             >
               {t("builder.exampleIntervals")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="ghost"
               onClick={() => loadExample("pool")}
             >
               {t("builder.examplePool")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="secondary"
               type="button"
-              variant="ghost"
               onClick={() => fileRef.current?.click()}
             >
               <Upload data-icon="inline-start" />
               {t("builder.importFile")}
-            </Button>
+            </ToolActionButton>
             <input
               ref={fileRef}
               className={styles.fileInput}
@@ -804,6 +817,9 @@ export function WorkoutEditorClient({
         ) : null}
         <details className={styles.notes}>
           <summary>{t("builder.notes")}</summary>
+          <Label htmlFor="workout-notes" className="sr-only">
+            {t("builder.notes")}
+          </Label>
           <Textarea
             id="workout-notes"
             value={draft.notes}
@@ -854,9 +870,9 @@ export function WorkoutEditorClient({
                       }}
                     />
                   </Field>
-                  <button
+                  <ToolActionButton
+                    intent="quiet"
                     type="button"
-                    className={styles.textButton}
                     onClick={() =>
                       editDraft((current) =>
                         updateModules(current, (modules) =>
@@ -867,7 +883,7 @@ export function WorkoutEditorClient({
                   >
                     <Trash2 className="size-4" />
                     {t("builder.removeInterval")}
-                  </button>
+                  </ToolActionButton>
                 </div>
                 <div className={styles.stepStack}>
                   {block.steps.map((step) => (
@@ -912,10 +928,10 @@ export function WorkoutEditorClient({
                     />
                   ))}
                 </div>
-                <Button
+                <ToolActionButton
+                  intent="quiet"
+                  className={styles.addRepeatStep}
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() =>
                     editDraft((current) =>
                       updateModules(current, (modules) =>
@@ -933,7 +949,7 @@ export function WorkoutEditorClient({
                 >
                   <Plus className="size-4" />
                   {t("builder.addRepeatStep")}
-                </Button>
+                </ToolActionButton>
               </div>
             );
           }
@@ -1038,9 +1054,10 @@ export function WorkoutEditorClient({
               </div>
             </dl>
             <div className={styles.exportActions}>
-              <button
+              <ToolActionButton
+                intent="primary"
+                fullWidth
                 type="button"
-                className={styles.primaryAction}
                 onClick={() => void handleDownloadFit()}
                 disabled={!ready || isEncoding}
               >
@@ -1049,49 +1066,41 @@ export function WorkoutEditorClient({
                 ) : (
                   <Download className="size-4" />
                 )}
-                {isEncoding
-                  ? t("builder.downloadingFit")
-                  : t("builder.downloadFit")}
-              </button>
-              <button
+                {isEncoding ? t("builder.downloadingFit") : t("builder.downloadFit")}
+              </ToolActionButton>
+              <ToolActionButton
+                intent="secondary"
+                fullWidth
                 type="button"
-                className={styles.primaryAction}
                 onClick={() => void handleCopy("intervals")}
                 disabled={!ready}
               >
-                {copied === "intervals"
-                  ? t("builder.copied")
-                  : t("builder.copyIntervals")}
-              </button>
-              <button
+                {copied === "intervals" ? t("builder.copied") : t("builder.copyIntervals")}
+              </ToolActionButton>
+              <ToolActionButton
+                intent="secondary"
+                fullWidth
                 type="button"
-                className={styles.primaryAction}
                 onClick={() => void handleCopy("dsl")}
                 disabled={!ready}
               >
                 {copied === "dsl" ? t("builder.copied") : t("builder.copyDsl")}
-              </button>
+              </ToolActionButton>
             </div>
-            <div className={styles.shareRow}>
-              <button
-                type="button"
-                className={styles.secondaryAction}
-                onClick={handlePrint}
-                disabled={!ready}
-              >
+            <ToolResultActions>
+              <button type="button" onClick={handlePrint} disabled={!ready}>
                 <Printer className="size-4" aria-hidden />
                 {t("builder.print")}
               </button>
               <button
                 type="button"
-                className={styles.secondaryAction}
                 onClick={() => void handleShare()}
                 disabled={!ready}
               >
                 <Share2 className="size-4" aria-hidden />
                 {shareCopied ? t("builder.shared") : t("builder.share")}
               </button>
-            </div>
+            </ToolResultActions>
             {dslSample ? (
               <pre className={styles.sample}>{dslSample}</pre>
             ) : null}
@@ -1160,13 +1169,13 @@ export function WorkoutEditorClient({
                 placeholder={t("builder.importIntervalsPlaceholder")}
               />
             </Field>
-            <Button
+            <ToolActionButton
+              intent="primary"
               type="button"
-              variant="outline"
               onClick={handleImportIntervals}
             >
               {t("builder.importIntervalsAction")}
-            </Button>
+            </ToolActionButton>
           </details>
           <details>
             <summary>{t("builder.dslTitle")}</summary>

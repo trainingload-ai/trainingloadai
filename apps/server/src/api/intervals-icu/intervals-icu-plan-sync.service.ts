@@ -1,4 +1,4 @@
-import { Injectable, Optional, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ExternalProviderConnectionService } from '@/integrations/external-provider/external-provider-connection.service';
 import { SportCatalogService } from '@/sports/sport-catalog.service';
 import type {
@@ -31,7 +31,6 @@ import {
   thirdPartyError,
 } from '@/integrations/external-provider/external-provider-errors';
 import {
-  contentChecksum as computeContentChecksum,
   jsonSafe,
   normalizeWorkoutBlocks,
   syncChecksum as computeSyncChecksum,
@@ -45,13 +44,23 @@ export type IntervalsIcuPlanConnection = Pick<
   Partial<
     Pick<
       ExternalProviderConnection,
-      'userId' | 'status' | 'credentialCiphertext' | 'metadata'
+      | 'userId'
+      | 'status'
+      | 'credentialCiphertext'
+      | 'metadata'
+      | 'externalAthleteId'
     >
   >;
 import {
   mapIntervalsSportType,
   parseIntervalsIcuCalendarEvent,
 } from './intervals-icu-workout-doc.mapper';
+import { IntervalsIcuPlanSyncLock } from './intervals-icu-plan-sync-lock.service';
+import {
+  decidePlanSyncDeletion,
+  planSyncChecksum,
+  planSyncMetadata,
+} from './intervals-icu-plan-sync-state';
 
 const PROVIDER = 'intervals_icu';
 // 我们上传到 Intervals.icu 的计划课都带这个 external_id。
@@ -116,8 +125,6 @@ type ParsedRemoteWorkout = {
   blocks: PlanBlock[];
   /** 双向 sync 冲突检测 */
   checksum: string;
-  /** 计划内自动合并匹配 */
-  contentChecksum: string;
 };
 
 /** 两位数补零。 */
@@ -253,11 +260,6 @@ function buildParsedRemoteWorkout(args: {
   return {
     ...args,
     blocks,
-    contentChecksum: computeContentChecksum({
-      sportType: args.sportType,
-      subSportType: args.sportDefinitionCode,
-      blocks,
-    }),
     checksum: computeSyncChecksum({
       scheduledDate: args.scheduledDate,
       sportType: args.sportType,
@@ -368,6 +370,9 @@ function isRemoteManagedPlan(plan: { goal?: unknown } | null | undefined) {
 
 type SyncWorkout = {
   id: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  revision?: number;
   name?: string | null;
   text?: string | null;
   notes?: string | null;
@@ -395,15 +400,34 @@ type SyncMapping = {
   externalSourceKey?: string | null;
   externalUid?: string | null;
   metadata?: unknown;
+  connectionId?: string | null;
+  externalAthleteId?: string | null;
+  planWorkoutId?: string | null;
+  syncState?: string;
+  lastLocalChecksum?: string | null;
+  lastRemoteChecksum?: string | null;
+  lastSyncedChecksum?: string | null;
+  remoteDeletedAt?: Date | null;
+  localDeletedAt?: Date | null;
+  rawRemote?: unknown;
 };
 
-function mappingScheduledDate(metadata: unknown): string {
-  const rec =
-    metadata && typeof metadata === 'object' && !Array.isArray(metadata)
-      ? (metadata as Record<string, unknown>)
-      : {};
-  return cleanString(rec.scheduledDate);
-}
+type SyncWeekRequest = {
+  userId: string;
+  connection: IntervalsIcuPlanConnection;
+  apiKey?: string;
+  credential?: IntervalsIcuApiCredential;
+  weekStart?: string | null;
+  timezone?: string | null;
+  trigger: SyncTrigger;
+};
+
+type CalendarWebhookRequest = {
+  userId: string;
+  connection: IntervalsIcuPlanConnection;
+  calendarEvents: Array<Record<string, unknown>>;
+  deletedEvents: Array<Record<string, unknown> | string | number>;
+};
 
 /** 计划课双向同步：远端日历 ↔ 本地 PlanWorkout（import 优先于 export）。 */
 @Injectable()
@@ -418,8 +442,8 @@ export class IntervalsIcuPlanSyncService {
     private readonly sportCatalog: SportCatalogService,
     private readonly planSync: PlanExternalSyncService,
     private readonly providerConnections: ExternalProviderConnectionService,
+    private readonly syncLock: IntervalsIcuPlanSyncLock,
   ) {}
-
 
   /** 从 connection.metadata.planSync 读取计划课双向开关。 */
   getPlanSyncFlags(connection: { metadata?: unknown } | null): PlanSyncFlags {
@@ -433,15 +457,13 @@ export class IntervalsIcuPlanSyncService {
   /**
    * 单连接一周（或指定窗口）计划课同步：先 import 再 export，便于正确判冲突。
    */
-  async syncConnectionWeek(args: {
-    userId: string;
-    connection: IntervalsIcuPlanConnection;
-    apiKey?: string;
-    credential?: IntervalsIcuApiCredential;
-    weekStart?: string | null;
-    timezone?: string | null;
-    trigger: SyncTrigger;
-  }) {
+  async syncConnectionWeek(args: SyncWeekRequest) {
+    return this.syncLock.run(args.connection.id, () =>
+      this.syncConnectionWeekUnlocked(args),
+    );
+  }
+
+  private async syncConnectionWeekUnlocked(args: SyncWeekRequest) {
     // 单次计划课同步的顺序固定：先 import 再 export。
     // 这样如果远端刚改过，本地会先看到最新版本，随后 export 阶段才能正确判断冲突。
     const connection = args.connection;
@@ -511,12 +533,19 @@ export class IntervalsIcuPlanSyncService {
         window,
         import: importResult,
         export: exportResult,
+        outcome:
+          (importResult?.failed ?? 0) + (exportResult?.failed ?? 0) > 0
+            ? 'PARTIAL_FAILURE'
+            : 'SUCCESS',
       };
       await this.updateConnectionPlanSyncMetadata(connection.id, {
         lastCompletedAt: completedAt.toISOString(),
         lastWindow: window,
         lastResult: result,
-        lastError: null,
+        lastError:
+          result.outcome === 'PARTIAL_FAILURE'
+            ? 'INTERVALS_PLAN_SYNC_PARTIAL_FAILURE'
+            : null,
       });
       return result;
     } catch (error) {
@@ -544,12 +573,15 @@ export class IntervalsIcuPlanSyncService {
    * Webhook CALENDAR_UPDATED：增量导入/删除计划课（需开启 syncPlannedWorkouts）。
    * 带 FIT 走完整导入；仅 workout_doc 的路径可能标记 pending。
    */
-  async handleCalendarWebhookEvent(args: {
-    userId: string;
-    connection: IntervalsIcuPlanConnection;
-    calendarEvents: Array<Record<string, unknown>>;
-    deletedEvents: Array<Record<string, unknown> | string | number>;
-  }) {
+  async handleCalendarWebhookEvent(args: CalendarWebhookRequest) {
+    return this.syncLock.run(args.connection.id, () =>
+      this.handleCalendarWebhookEventUnlocked(args),
+    );
+  }
+
+  private async handleCalendarWebhookEventUnlocked(
+    args: CalendarWebhookRequest,
+  ) {
     // 1. 获取计划同步标志
     const flags = this.getPlanSyncFlags(args.connection);
     if (!flags.syncPlannedWorkouts) {
@@ -563,7 +595,21 @@ export class IntervalsIcuPlanSyncService {
     }
 
     // 2. 解析事件
-    const events = args.calendarEvents as IntervalsIcuEvent[];
+    const apiKey = this.connectionCredential(args.connection);
+    const events: IntervalsIcuEvent[] = [];
+    // Notifications are hints. Re-read current state so delayed updates cannot revive deletions.
+    for (const hint of args.calendarEvents) {
+      const id = eventId(hint);
+      if (!id) continue;
+      const current = await this.readRemoteEvent(apiKey, id);
+      if (current) events.push(current);
+      else
+        await this.markRemoteEventDeletedById({
+          userId: args.userId,
+          remoteEventId: id,
+          connection: args.connection,
+        });
+    }
     // 3. 解析窗口
     const window = this.resolveCalendarWebhookWindow(events);
     // 4. 初始化计数器
@@ -650,60 +696,16 @@ export class IntervalsIcuPlanSyncService {
     for (const item of args.deletedEvents) {
       const remoteEventId = this.extractDeletedEventId(item);
       if (!remoteEventId) continue;
+      const current = await this.readRemoteEvent(apiKey, remoteEventId);
+      if (current) continue;
       deleted += await this.markRemoteEventDeletedById({
         userId: args.userId,
         remoteEventId,
+        connection: args.connection,
       });
     }
 
     return { skipped: false, imported, deleted, failed, workoutDocPending };
-  }
-
-  /**
-   * Webhook 事件缺 FIT 时，可通过 API 补拉（供后续扩展；当前 workout_doc 分支走 TODO）。
-   */
-  private async resolveWebhookCalendarEvent(args: {
-    apiKey: IntervalsIcuApiCredential;
-    event: IntervalsIcuEvent;
-    window: WeekWindow;
-  }) {
-    // 1. 如果事件已经包含 FIT 文件，则直接返回
-    if (extractFitBase64(args.event)) return args.event;
-    // 2. 获取事件 ID
-    const remoteEventId = eventId(args.event);
-    if (!remoteEventId) return args.event;
-
-    const eventDay = eventDate(args.event);
-    const queryWindow = eventDay
-      ? { oldest: eventDay, newest: eventDay }
-      : { oldest: args.window.oldest, newest: args.window.newest };
-
-    try {
-      const events = await this.intervalsIcuClient.listEvents(args.apiKey, {
-        ...queryWindow,
-        category: 'WORKOUT',
-        ext: 'fit',
-        resolve: true,
-      });
-      // 3. 判断是否匹配
-      const matched = events.find((item) => eventId(item) === remoteEventId);
-      // 4. 如果匹配，则返回
-      if (matched) {
-        this.logger.debug(
-          `[resolveWebhookCalendarEvent] 已从 API 补拉 FIT eventId=${remoteEventId}`,
-        );
-        return matched;
-      }
-      // 5. 如果未匹配，则返回原事件
-    } catch (error) {
-      this.logger.warn(
-        `[resolveWebhookCalendarEvent] 补拉 FIT 失败 eventId=${remoteEventId}：${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
-
-    return args.event;
   }
 
   /** 根据 webhook 事件日期推一个尽量紧的补拉窗口。 */
@@ -738,29 +740,247 @@ export class IntervalsIcuPlanSyncService {
     return null;
   }
 
-  /** 远端删除：按 externalEventId 标记本地 mapping / 处理本地课。 */
+  /** A confirmed remote deletion is applied only to an unchanged local revision. */
   private async markRemoteEventDeletedById(args: {
     userId: string;
     remoteEventId: string;
+    connection: IntervalsIcuPlanConnection;
   }) {
     const mapping = await this.planSync.findMapping({
       where: {
         userId: args.userId,
         provider: PROVIDER,
         externalEventId: args.remoteEventId,
-        remoteDeletedAt: null,
       },
     });
-    if (!mapping) return 0;
-    await this.planSync.updateMapping({
-      where: { id: mapping.id },
-      data: {
-        syncState: 'REMOTE_DELETED',
-        remoteDeletedAt: new Date(),
-        lastSeenAt: new Date(),
+    if (!mapping || this.mappingIsClosed(mapping)) return 0;
+    if (!this.mappingMatchesConnection(mapping, args.connection))
+      throw new Error('INTERVALS_PLAN_ACCOUNT_MISMATCH');
+    const local = mapping.planWorkoutId
+      ? await this.findLocalWorkout(args.userId, mapping.planWorkoutId)
+      : null;
+    const decision = decidePlanSyncDeletion({
+      exists: Boolean(local),
+      currentChecksum: local
+        ? this.localComparisonChecksum(local, mapping)
+        : null,
+      baselineChecksum: mapping.lastLocalChecksum,
+    });
+    const now = new Date();
+    let detachedReason: string | undefined;
+    if (decision === 'detach')
+      detachedReason = mapping.lastLocalChecksum
+        ? 'LOCAL_CHANGED'
+        : 'LOCAL_BASELINE_UNKNOWN';
+    if (local && !this.getPlanSyncFlags(args.connection).syncPlannedWorkouts)
+      detachedReason = 'IMPORT_DISABLED';
+    if (decision === 'delete' && local && !detachedReason) {
+      this.syncLock.assertHeld();
+      const result = await this.planSync.deleteSyncedWorkout({
+        userId: args.userId,
+        workoutId: local.id,
+        updatedAt: local.updatedAt,
+        revision: local.revision,
+      });
+      if (result === 'changed') detachedReason = 'LOCAL_CHANGED';
+      if (result === 'protected') detachedReason = 'LOCAL_HISTORY_PROTECTED';
+    }
+    await this.updateMapping(mapping.id, {
+      syncState: 'REMOTE_DELETED',
+      remoteDeletedAt: now,
+      ...(detachedReason ? {} : { localDeletedAt: now }),
+      lastSeenAt: now,
+      metadata: {
+        ...planSyncMetadata(mapping.metadata),
+        relationClosedAt: now.toISOString(),
+        ...(detachedReason
+          ? { detachedAt: now.toISOString(), detachedReason, survivor: 'local' }
+          : {}),
       },
     });
     return 1;
+  }
+
+  private mappingIsClosed(mapping: SyncMapping): boolean {
+    const metadata = planSyncMetadata(mapping.metadata);
+    return Boolean(metadata.relationClosedAt || metadata.detachedAt);
+  }
+
+  private connectionCredential(connection: IntervalsIcuPlanConnection) {
+    return this.intervalsIcuCredentials.resolveConnectionCredential({
+      credentialCiphertext: connection.credentialCiphertext ?? '',
+      metadata: connection.metadata,
+    });
+  }
+
+  private mappingMatchesConnection(
+    mapping: SyncMapping,
+    connection: IntervalsIcuPlanConnection,
+  ): boolean {
+    return (
+      (!mapping.connectionId || mapping.connectionId === connection.id) &&
+      (!mapping.externalAthleteId ||
+        !connection.externalAthleteId ||
+        mapping.externalAthleteId.replace(/^i/, '') ===
+          connection.externalAthleteId.replace(/^i/, ''))
+    );
+  }
+
+  private localWorkoutChecksum(workout: SyncWorkout): string {
+    return planSyncChecksum({
+      id: workout.id,
+      createdAt: workout.createdAt,
+      contentChecksum: this.localContentSyncChecksum(workout),
+    });
+  }
+
+  private localComparisonChecksum(
+    workout: SyncWorkout,
+    mapping: SyncMapping,
+  ): string {
+    return planSyncMetadata(mapping.metadata).syncVersion === 2
+      ? this.localWorkoutChecksum(workout)
+      : this.localContentSyncChecksum(workout);
+  }
+
+  private remoteWorkoutChecksum(
+    event: IntervalsIcuEvent,
+    parsed: ParsedRemoteWorkout,
+  ): string {
+    // The provider exposes no creation timestamp. Never substitute scheduling or update time.
+    return planSyncChecksum({
+      id: eventId(event)!,
+      createdAt: null,
+      contentChecksum: parsed.checksum,
+    });
+  }
+
+  private remoteComparisonChecksum(
+    event: IntervalsIcuEvent,
+    parsed: ParsedRemoteWorkout,
+    mapping: SyncMapping,
+  ): string {
+    return planSyncMetadata(mapping.metadata).syncVersion === 2
+      ? this.remoteWorkoutChecksum(event, parsed)
+      : parsed.checksum;
+  }
+
+  private async readRemoteEvent(
+    apiKey: IntervalsIcuApiCredential,
+    id: string,
+  ): Promise<IntervalsIcuEvent | null> {
+    this.syncLock.assertHeld();
+    try {
+      const event = await this.intervalsIcuClient.getEvent(apiKey, id);
+      this.syncLock.assertHeld();
+      return event;
+    } catch (error) {
+      if (error instanceof IntervalsIcuApiError && error.status === 404)
+        return null;
+      throw error;
+    }
+  }
+
+  private async reconcileLocalDeletion(args: {
+    userId: string;
+    connection: IntervalsIcuPlanConnection;
+    apiKey?: IntervalsIcuApiCredential;
+    mapping: SyncMapping;
+    event?: IntervalsIcuEvent | null;
+    parsed?: ParsedRemoteWorkout;
+  }): Promise<number> {
+    const { mapping } = args;
+    if (this.mappingIsClosed(mapping)) return 0;
+    if (!this.mappingMatchesConnection(mapping, args.connection))
+      throw new Error('INTERVALS_PLAN_ACCOUNT_MISMATCH');
+    const apiKey = args.apiKey ?? this.connectionCredential(args.connection);
+    const remote =
+      args.event === undefined
+        ? await this.readRemoteEvent(apiKey, mapping.externalEventId!)
+        : args.event;
+    const parsed = remote
+      ? (args.parsed ?? (await this.parseRemoteWorkout(remote)))
+      : null;
+    if (remote && !parsed)
+      return this.detachRemoteSurvivor(mapping, 'REMOTE_UNVERIFIABLE');
+    const decision = decidePlanSyncDeletion({
+      exists: Boolean(remote),
+      currentChecksum:
+        remote && parsed
+          ? this.remoteComparisonChecksum(remote, parsed, mapping)
+          : null,
+      baselineChecksum: mapping.lastRemoteChecksum,
+    });
+    if (decision === 'delete') {
+      if (!this.getPlanSyncFlags(args.connection).exportPlannedWorkouts)
+        return 0;
+      // Recheck immediately before destructive provider I/O.
+      const latest = await this.readRemoteEvent(
+        apiKey,
+        mapping.externalEventId!,
+      );
+      const latestParsed = latest
+        ? await this.parseRemoteWorkout(latest)
+        : null;
+      if (
+        latest &&
+        (!latestParsed ||
+          this.remoteComparisonChecksum(latest, latestParsed, mapping) !==
+            mapping.lastRemoteChecksum)
+      ) {
+        return this.detachRemoteSurvivor(mapping);
+      }
+      if (latest) {
+        this.syncLock.assertHeld();
+        try {
+          await this.intervalsIcuClient.deleteEvent(
+            apiKey,
+            mapping.externalEventId!,
+          );
+        } catch (error) {
+          if (!(error instanceof IntervalsIcuApiError && error.status === 404))
+            throw error;
+        }
+      }
+    } else if (decision === 'detach') {
+      return this.detachRemoteSurvivor(
+        mapping,
+        mapping.lastRemoteChecksum
+          ? 'REMOTE_CHANGED'
+          : 'REMOTE_BASELINE_UNKNOWN',
+      );
+    }
+    const now = new Date();
+    await this.updateMapping(mapping.id, {
+      syncState: 'LOCAL_DELETED',
+      localDeletedAt: now,
+      remoteDeletedAt: now,
+      lastPushedAt: now,
+      metadata: {
+        ...planSyncMetadata(mapping.metadata),
+        relationClosedAt: now.toISOString(),
+      },
+    });
+    return decision === 'delete' ? 1 : 0;
+  }
+
+  private async detachRemoteSurvivor(
+    mapping: SyncMapping,
+    reason = 'REMOTE_CHANGED',
+  ): Promise<number> {
+    const now = new Date();
+    await this.updateMapping(mapping.id, {
+      syncState: 'LOCAL_DELETED',
+      localDeletedAt: mapping.localDeletedAt ?? now,
+      metadata: {
+        ...planSyncMetadata(mapping.metadata),
+        relationClosedAt: now.toISOString(),
+        detachedAt: now.toISOString(),
+        detachedReason: reason,
+        survivor: 'remote',
+      },
+    });
+    return 0;
   }
 
   /** 回写 connection.metadata.planSync 的最近窗口/错误等。 */
@@ -854,6 +1074,9 @@ export class IntervalsIcuPlanSyncService {
       connectionId: args.connection.id,
       window: args.window,
       seenRemoteEventIds,
+      apiKey: args.apiKey,
+      connection: args.connection,
+      trigger: args.trigger,
     });
 
     return {
@@ -902,7 +1125,7 @@ export class IntervalsIcuPlanSyncService {
     });
   }
 
-  /** 已解析的远端课 → 创建/更新本地课 + mapping（含冲突检测）。 */
+  /** Reconcile B -> A. The source wins edits; deletion uses the survivor baseline. */
   private async importParsedRemoteWorkout(args: {
     userId: string;
     connection: IntervalsIcuPlanConnection;
@@ -920,274 +1143,150 @@ export class IntervalsIcuPlanSyncService {
       failed: 0,
     };
     const remoteEventId = eventId(args.event);
-    if (!remoteEventId) {
+    if (!remoteEventId) return { ...zero, skipped: 1 };
+    let mapping = await this.findMappingForRemote(args.userId, args.event);
+    if (mapping && !this.mappingMatchesConnection(mapping, args.connection)) {
+      throw new Error('INTERVALS_PLAN_ACCOUNT_MISMATCH');
+    }
+    if (mapping && this.mappingIsClosed(mapping)) {
       return { ...zero, skipped: 1 };
     }
-
-    const externalSourceKey = cleanString(args.event.external_id);
-    const externalUid = cleanString(args.event.uid);
-    const localWorkoutId = workoutIdFromExternalKey(externalSourceKey);
-    if (localWorkoutId) {
-      // 这是 Trainingload.ai 曾经上传过的课程。即使本地已经删除，也只标记映射，
-      // 不把它当作新的远端课程重新导入，避免“删了又回来”。
-      const local = await this.findLocalWorkout(args.userId, localWorkoutId);
-      await this.upsertMapping({
-        userId: args.userId,
-        connectionId: args.connection.id,
-        planWorkoutId: local?.id ?? null,
-        externalEventId: remoteEventId,
-        externalUid,
-        externalSourceKey,
-        externalAthleteId: cleanString(args.event.athlete_id),
-        origin: 'LOCAL',
-        syncState: local ? 'SYNCED' : 'LOCAL_DELETED',
-        remoteDeletedAt: null,
-        localDeletedAt: local ? null : new Date(),
-        rawRemote: args.event,
-        metadata: mappingMetadata({
-          planId: local?.planId ?? null,
-          scheduledDate: local?.scheduledDate
-            ? ymd(local.scheduledDate)
-            : eventDate(args.event),
-          window: args.window,
-          trigger: args.trigger,
-          remoteName: cleanString(args.event.name),
-        }),
-        lastSeenAt: new Date(),
-      });
-      if (!local) return { ...zero, skipped: 1 };
+    if (mapping?.remoteDeletedAt) {
+      // Legacy window-based tombstones are reversible only after a live read confirms existence.
+      await this.updateMapping(mapping.id, { remoteDeletedAt: null });
+      mapping = { ...mapping, remoteDeletedAt: null };
     }
-
-    const parsed = args.parsed;
-    const mapping = await this.findMappingForRemote(args.userId, args.event);
-    let targetWorkoutId = mapping?.planWorkoutId ?? localWorkoutId ?? null;
-    let local = targetWorkoutId
-      ? await this.findLocalWorkout(args.userId, targetWorkoutId)
+    let local = mapping?.planWorkoutId
+      ? await this.findLocalWorkout(args.userId, mapping.planWorkoutId)
       : null;
-
-    if (!local) {
-      local = await this.resolveImportTargetWorkout({
-        userId: args.userId,
-        parsed,
-      });
-      if (local) {
-        targetWorkoutId = local.id;
-      }
+    if (mapping && (!local || mapping.localDeletedAt)) {
+      // Importing a changed survivor must not recreate the deleted endpoint.
+      await this.reconcileLocalDeletion({ ...args, mapping });
+      return { ...zero, skipped: 1 };
     }
-
-    if (!local) {
-      // 无 mapping 且 contentChecksum 未命中计划内课次 → 计划外 independent workout。
-      const created = await this.createWorkoutFromRemote({
-        userId: args.userId,
-        parsed,
-      });
-      await this.upsertMapping({
-        userId: args.userId,
-        connectionId: args.connection.id,
-        planWorkoutId: created.id,
-        externalEventId: remoteEventId,
-        externalUid,
-        externalSourceKey,
-        externalAthleteId: cleanString(args.event.athlete_id),
-        origin: isTrainingloadExternalKey(externalSourceKey)
-          ? 'LOCAL'
-          : 'REMOTE',
-        syncState: 'SYNCED',
-        lastLocalChecksum: parsed.checksum,
-        lastRemoteChecksum: parsed.checksum,
-        lastSyncedChecksum: parsed.checksum,
-        lastSeenAt: new Date(),
-        lastPulledAt: new Date(),
-        remoteDeletedAt: null,
-        localDeletedAt: null,
-        rawRemote: args.event,
-        metadata: mappingMetadata({
-          planId: created.planId,
-          scheduledDate: parsed.scheduledDate,
-          window: args.window,
-          trigger: args.trigger,
-          remoteName: parsed.name,
-        }),
-      });
-      return { ...zero, created: 1 };
-    }
-
     if (!mapping) {
-      const updated = await this.updateWorkoutFromRemote({
-        userId: args.userId,
-        workout: local,
-        parsed,
-      });
-      await this.upsertMapping({
-        userId: args.userId,
-        connectionId: args.connection.id,
-        planWorkoutId: updated.id,
-        externalEventId: remoteEventId,
-        externalUid,
-        externalSourceKey,
-        externalAthleteId: cleanString(args.event.athlete_id),
-        origin: isTrainingloadExternalKey(externalSourceKey)
-          ? 'LOCAL'
-          : 'REMOTE',
-        syncState: 'SYNCED',
-        lastLocalChecksum: parsed.checksum,
-        lastRemoteChecksum: parsed.checksum,
-        lastSyncedChecksum: parsed.checksum,
-        lastSeenAt: new Date(),
-        lastPulledAt: new Date(),
-        remoteDeletedAt: null,
-        localDeletedAt: null,
-        rawRemote: args.event,
-        metadata: mappingMetadata({
-          planId: updated.planId,
-          scheduledDate: parsed.scheduledDate,
-          window: args.window,
-          trigger: args.trigger,
-          remoteName: parsed.name,
-        }),
-      });
-      return { ...zero, updated: 1 };
-    }
-
-    const localChecksum = this.localWorkoutChecksum(local);
-    const lastLocalChecksum = cleanString(mapping?.lastLocalChecksum);
-    const lastRemoteChecksum = cleanString(mapping?.lastRemoteChecksum);
-    const hasSyncBaseline = Boolean(lastLocalChecksum || lastRemoteChecksum);
-    if (!hasSyncBaseline) {
-      // 有映射但没有历史 checksum，说明是恢复/迁移场景。
-      // 内容不一致时不能猜谁是主源，必须交给冲突处理。
-      if (localChecksum !== parsed.checksum) {
-        await this.updateMapping(mapping?.id, {
-          syncState: 'CONFLICT',
-          lastLocalChecksum: localChecksum,
-          lastRemoteChecksum: parsed.checksum,
-          lastSeenAt: new Date(),
-          lastPulledAt: new Date(),
-          lastConflictAt: new Date(),
-          remoteDeletedAt: null,
-          localDeletedAt: null,
-          rawRemote: jsonSafe(args.event),
-          lastError:
-            '恢复的 Intervals.icu 映射没有同步基线，且内容与本地计划课不一致',
-          metadata: mappingMetadata({
-            planId: local.planId,
-            scheduledDate: parsed.scheduledDate,
-            window: args.window,
-            trigger: args.trigger,
-            remoteName: parsed.name,
-          }),
+      const localId = workoutIdFromExternalKey(
+        cleanString(args.event.external_id),
+      );
+      if (localId) {
+        const previous = await this.planSync.findMapping({
+          where: {
+            userId: args.userId,
+            provider: PROVIDER,
+            planWorkoutId: localId,
+          },
         });
-        return { ...zero, conflicted: 1 };
+        // An external key is only a recovery hint, not permission to reuse a closed identity.
+        if (!previous)
+          local = await this.findLocalWorkout(args.userId, localId);
       }
-      await this.updateMapping(mapping?.id, {
-        syncState: 'SYNCED',
-        lastLocalChecksum: localChecksum,
-        lastRemoteChecksum: parsed.checksum,
-        lastSyncedChecksum: localChecksum,
-        lastSeenAt: new Date(),
-        lastPulledAt: new Date(),
-        remoteDeletedAt: null,
-        localDeletedAt: null,
-        lastError: null,
-        rawRemote: jsonSafe(args.event),
-        metadata: mappingMetadata({
-          planId: local.planId,
-          scheduledDate: parsed.scheduledDate,
-          window: args.window,
-          trigger: args.trigger,
-          remoteName: parsed.name,
-        }),
-      });
-      return { ...zero, unchanged: 1 };
     }
-    const localChanged =
-      Boolean(lastLocalChecksum) && localChecksum !== lastLocalChecksum;
-    const remoteChanged = parsed.checksum !== lastRemoteChecksum;
-
-    if (localChanged && remoteChanged) {
-      // 两边都从上次同步后改过，自动覆盖会丢用户数据。
-      await this.updateMapping(mapping?.id, {
-        syncState: 'CONFLICT',
-        lastRemoteChecksum: parsed.checksum,
-        lastSeenAt: new Date(),
-        lastPulledAt: new Date(),
-        lastConflictAt: new Date(),
-        remoteDeletedAt: null,
-        localDeletedAt: null,
-        rawRemote: jsonSafe(args.event),
-        lastError:
-          '上次同步后，Trainingload.ai 和 Intervals.icu 都修改了这节计划课',
-        metadata: mappingMetadata({
-          planId: local.planId,
-          scheduledDate: parsed.scheduledDate,
-          window: args.window,
-          trigger: args.trigger,
-          remoteName: parsed.name,
-        }),
-      });
-      return { ...zero, conflicted: 1 };
-    }
-
-    if (remoteChanged) {
-      // 只有远端变更时，远端是这一轮的事实来源，更新本地 workout。
-      const updated = await this.updateWorkoutFromRemote({
+    const remoteChanged =
+      !mapping ||
+      this.remoteComparisonChecksum(args.event, args.parsed, mapping) !==
+        mapping.lastRemoteChecksum;
+    const created = !local;
+    if (!local) {
+      this.syncLock.assertHeld();
+      const row = await this.createWorkoutFromRemote(
+        { userId: args.userId, parsed: args.parsed },
+        (stored) =>
+          ({
+            provider: PROVIDER,
+            ...this.importMappingData(args, stored),
+          }) as Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
+      );
+      mapping = await this.findMappingForRemote(args.userId, args.event);
+      local = await this.findLocalWorkout(args.userId, row.id);
+      if (!local) throw new Error('INTERVALS_PLAN_LOCAL_READBACK_FAILED');
+      if (
+        row.updatedAt &&
+        local.updatedAt &&
+        row.updatedAt.getTime() !== local.updatedAt.getTime()
+      )
+        throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
+    } else if (remoteChanged) {
+      this.syncLock.assertHeld();
+      const row = await this.updateWorkoutFromRemote({
         userId: args.userId,
         workout: local,
-        parsed,
+        parsed: args.parsed,
       });
-      await this.updateMapping(mapping?.id, {
-        planWorkoutId: updated.id,
-        connectionId: args.connection.id,
-        externalEventId: remoteEventId,
-        externalUid,
-        externalSourceKey,
-        externalAthleteId: cleanString(args.event.athlete_id),
-        syncState: 'SYNCED',
-        lastLocalChecksum: parsed.checksum,
-        lastRemoteChecksum: parsed.checksum,
-        lastSyncedChecksum: parsed.checksum,
+      local = await this.findLocalWorkout(args.userId, row.id);
+      if (!local) throw new Error('INTERVALS_PLAN_LOCAL_READBACK_FAILED');
+      if (
+        row.updatedAt &&
+        local.updatedAt &&
+        row.updatedAt.getTime() !== local.updatedAt.getTime()
+      )
+        throw new Error('INTERVALS_PLAN_LOCAL_REVISION_CHANGED');
+    } else {
+      const localChanged =
+        this.localComparisonChecksum(local, mapping!) !==
+        mapping!.lastLocalChecksum;
+      await this.updateMapping(mapping!.id, {
         lastSeenAt: new Date(),
-        lastPulledAt: new Date(),
-        remoteDeletedAt: null,
-        localDeletedAt: null,
-        lastError: null,
-        rawRemote: jsonSafe(args.event),
-        metadata: mappingMetadata({
-          planId: updated.planId,
-          scheduledDate: parsed.scheduledDate,
-          window: args.window,
-          trigger: args.trigger,
-          remoteName: parsed.name,
-        }),
+        syncState: localChanged ? 'LOCAL_CHANGED' : 'SYNCED',
       });
-      return { ...zero, updated: 1 };
+      return {
+        ...zero,
+        unchanged: localChanged ? 0 : 1,
+        skipped: localChanged ? 1 : 0,
+      };
     }
+    await this.upsertMapping(this.importMappingData(args, local, mapping));
+    return created ? { ...zero, created: 1 } : { ...zero, updated: 1 };
+  }
 
-    await this.updateMapping(mapping?.id, {
+  private importMappingData(
+    args: {
+      userId: string;
+      connection: IntervalsIcuPlanConnection;
+      event: IntervalsIcuEvent;
+      parsed: ParsedRemoteWorkout;
+      window: WeekWindow;
+      trigger: SyncTrigger;
+    },
+    local: SyncWorkout,
+    mapping?: SyncMapping | null,
+  ): Record<string, unknown> {
+    const remoteEventId = eventId(args.event)!;
+    const externalKey = cleanString(args.event.external_id);
+    const ownsExternalIdentity =
+      workoutIdFromExternalKey(externalKey) === local.id;
+    return {
+      id: mapping?.id,
+      userId: args.userId,
       connectionId: args.connection.id,
+      planWorkoutId: local.id,
       externalEventId: remoteEventId,
-      externalUid,
-      externalSourceKey,
+      // Provider-owned UIDs can be reused by copies. Event ID is the remote identity.
+      externalUid: ownsExternalIdentity ? cleanString(args.event.uid) : null,
+      externalSourceKey: ownsExternalIdentity ? externalKey : null,
       externalAthleteId: cleanString(args.event.athlete_id),
-      syncState: localChanged ? 'LOCAL_CHANGED' : 'SYNCED',
+      origin: mapping?.origin ?? (ownsExternalIdentity ? 'LOCAL' : 'REMOTE'),
+      syncState: 'SYNCED',
+      lastLocalChecksum: this.localWorkoutChecksum(local),
+      lastRemoteChecksum: this.remoteWorkoutChecksum(args.event, args.parsed),
+      lastSyncedChecksum: args.parsed.checksum,
       lastSeenAt: new Date(),
       lastPulledAt: new Date(),
       remoteDeletedAt: null,
       localDeletedAt: null,
-      lastRemoteChecksum: parsed.checksum,
-      rawRemote: jsonSafe(args.event),
-      metadata: mappingMetadata({
-        planId: local.planId,
-        scheduledDate: parsed.scheduledDate,
-        window: args.window,
-        trigger: args.trigger,
-        remoteName: parsed.name,
-      }),
-    });
-    return {
-      ...zero,
-      unchanged: localChanged ? 0 : 1,
-      skipped: localChanged ? 1 : 0,
+      lastError: null,
+      rawRemote: args.event,
+      metadata: {
+        ...planSyncMetadata(mapping?.metadata),
+        ...mappingMetadata({
+          planId: local.planId,
+          scheduledDate: args.parsed.scheduledDate,
+          window: args.window,
+          trigger: args.trigger,
+          remoteName: args.parsed.name,
+        }),
+        syncVersion: 2,
+        remoteUpdatedAt: args.event.updated ?? null,
+      },
     };
   }
 
@@ -1197,7 +1296,8 @@ export class IntervalsIcuPlanSyncService {
   ): Promise<ParsedRemoteWorkout | null> {
     const scheduledDate = eventDate(event);
     const fitBase64 = extractFitBase64(event);
-    if (!scheduledDate || !fitBase64) return null;
+    if (!scheduledDate) return null;
+    if (!fitBase64) return this.parseRemoteWorkoutFromDoc(event);
 
     const parsed = await this.workoutService.parseFile(
       Buffer.from(fitBase64, 'base64'),
@@ -1269,38 +1369,6 @@ export class IntervalsIcuPlanSyncService {
       sportType as SportFamily,
     );
     return fallback?.code ?? 'OTHER';
-  }
-
-  /** 按 external_id/uid/mapping 找回或决定新建本地课。 */
-  private async resolveImportTargetWorkout(args: {
-    userId: string;
-    parsed: ParsedRemoteWorkout;
-  }) {
-    const scheduledDate = parseYmd(args.parsed.scheduledDate);
-    const plans = await this.planSync.findActivePausedPlans(args.userId);
-    const planIds = plans.map((plan: { id: string }) => plan.id);
-    if (!planIds.length) return null;
-
-    const candidates = await this.planSync.findImportCandidateWorkouts({
-      userId: args.userId,
-      planIds,
-      scheduledDate,
-      sportType: args.parsed.sportType,
-    });
-
-    const matched = candidates.filter(
-      (workout) =>
-        this.localContentChecksum(workout) === args.parsed.contentChecksum,
-    );
-    if (!matched.length) return null;
-
-    matched.sort((a, b) => {
-      const aHasPrimary = Array.isArray(a.links) && a.links.length > 0 ? 1 : 0;
-      const bHasPrimary = Array.isArray(b.links) && b.links.length > 0 ? 1 : 0;
-      if (aHasPrimary !== bHasPrimary) return aHasPrimary - bHasPrimary;
-      return (a.sessionIndex ?? 1) - (b.sessionIndex ?? 1);
-    });
-    return matched[0] ?? null;
   }
 
   /** 上行：窗口内本地课推到 Intervals.icu，并清理远端多余事件。 */
@@ -1394,7 +1462,7 @@ export class IntervalsIcuPlanSyncService {
     return { byExternalKey, byUid };
   }
 
-  /** 导出/更新单条本地计划课到远端日历。 */
+  /** Reconcile A -> B. Local edits win concurrent edits in this direction. */
   private async exportLocalWorkout(args: {
     userId: string;
     connection: IntervalsIcuPlanConnection;
@@ -1422,97 +1490,150 @@ export class IntervalsIcuPlanSyncService {
         planWorkoutId: args.workout.id,
       },
     });
-    if (mapping?.syncState === 'CONFLICT') {
-      // 冲突状态下不推送，防止把未确认的一边覆盖掉。
-      return { ...zero, conflicted: 1 };
-    }
-    if (mapping?.remoteDeletedAt && mapping.origin === 'LOCAL') {
-      // 用户在远端删过本地来源课程时，不自动“复活”远端事件。
+    if (mapping && !this.mappingMatchesConnection(mapping, args.connection))
+      throw new Error('INTERVALS_PLAN_ACCOUNT_MISMATCH');
+    if (mapping && (this.mappingIsClosed(mapping) || mapping.localDeletedAt))
+      return { ...zero, skipped: 1 };
+    let remote = mapping?.externalEventId
+      ? await this.readRemoteEvent(args.apiKey, mapping.externalEventId)
+      : (args.remoteIndex.byExternalKey.get(
+          externalKeyForWorkout(args.workout.id),
+        ) ?? null);
+    if (mapping?.externalEventId && !remote) {
+      await this.markRemoteEventDeletedById({
+        userId: args.userId,
+        remoteEventId: mapping.externalEventId,
+        connection: args.connection,
+      });
       return { ...zero, skipped: 1 };
     }
-
-    const localChecksum = this.localWorkoutChecksum(args.workout);
-    if (
-      mapping?.externalEventId &&
-      mapping.lastLocalChecksum === localChecksum &&
-      mapping.syncState === 'SYNCED'
-    ) {
+    const localChanged =
+      !mapping ||
+      this.localComparisonChecksum(args.workout, mapping) !==
+        mapping.lastLocalChecksum;
+    if (!localChanged && mapping) {
+      const parsed = remote ? await this.parseRemoteWorkout(remote) : null;
+      const remoteUnchanged =
+        remote &&
+        parsed &&
+        this.remoteComparisonChecksum(remote, parsed, mapping) ===
+          mapping.lastRemoteChecksum;
       await this.updateMapping(mapping.id, {
         lastSeenAt: new Date(),
-        metadata: mappingMetadata({
+        remoteDeletedAt: null,
+        ...(remoteUnchanged
+          ? {
+              syncState: 'SYNCED',
+              lastLocalChecksum: this.localWorkoutChecksum(args.workout),
+              lastRemoteChecksum: this.remoteWorkoutChecksum(remote!, parsed!),
+              metadata: {
+                ...planSyncMetadata(mapping.metadata),
+                syncVersion: 2,
+              },
+            }
+          : {}),
+      });
+      return { ...zero, unchanged: 1 };
+    }
+    const payload = await this.buildEventPayload(args.workout, mapping);
+    const remoteEventId = remote ? eventId(remote) : null;
+    let response: IntervalsIcuEvent | undefined;
+    try {
+      this.syncLock.assertHeld();
+      response = remoteEventId
+        ? await this.intervalsIcuClient.updateEvent(
+            args.apiKey,
+            remoteEventId,
+            payload,
+          )
+        : (
+            await this.intervalsIcuClient.createEventsBulk(
+              args.apiKey,
+              [payload],
+              {
+                upsert: true,
+                upsertOnUid: false,
+                updatePlanApplied: false,
+              },
+            )
+          )[0];
+    } catch (error) {
+      if (
+        mapping &&
+        error instanceof IntervalsIcuApiError &&
+        error.status === 404
+      ) {
+        // A deletion racing with the PUT still follows deletion rules, never create fallback.
+        const latest = await this.readRemoteEvent(
+          args.apiKey,
+          mapping.externalEventId!,
+        );
+        if (!latest) {
+          await this.markRemoteEventDeletedById({
+            userId: args.userId,
+            remoteEventId: mapping.externalEventId!,
+            connection: args.connection,
+          });
+          return { ...zero, skipped: 1 };
+        }
+      }
+      throw error;
+    }
+    const savedId = response
+      ? (eventId(response) ?? remoteEventId)
+      : remoteEventId;
+    if (!savedId) throw new Error('INTERVALS_PLAN_REMOTE_ID_MISSING');
+    remote = await this.readRemoteEvent(args.apiKey, savedId);
+    const parsed = remote ? await this.parseRemoteWorkout(remote) : null;
+    if (!remote || !parsed)
+      throw new Error('INTERVALS_PLAN_REMOTE_READBACK_FAILED');
+    const latestLocal = await this.findLocalWorkout(
+      args.userId,
+      args.workout.id,
+    );
+    const changedDuringPush =
+      !latestLocal ||
+      this.localWorkoutChecksum(latestLocal) !==
+        this.localWorkoutChecksum(args.workout);
+    await this.upsertMapping({
+      id: mapping?.id,
+      userId: args.userId,
+      connectionId: args.connection.id,
+      planWorkoutId: latestLocal?.id ?? null,
+      externalEventId: savedId,
+      externalUid:
+        mapping?.origin === 'REMOTE' ? null : cleanString(remote.uid),
+      externalSourceKey:
+        mapping?.origin === 'REMOTE' ? null : cleanString(remote.external_id),
+      externalAthleteId: cleanString(remote.athlete_id),
+      origin: mapping?.origin ?? 'LOCAL',
+      syncState: !latestLocal
+        ? 'LOCAL_DELETED'
+        : changedDuringPush
+          ? 'LOCAL_CHANGED'
+          : 'SYNCED',
+      lastLocalChecksum: this.localWorkoutChecksum(args.workout),
+      lastRemoteChecksum: this.remoteWorkoutChecksum(remote, parsed),
+      lastSyncedChecksum: parsed.checksum,
+      lastSeenAt: new Date(),
+      lastPushedAt: new Date(),
+      remoteDeletedAt: null,
+      localDeletedAt: latestLocal ? null : new Date(),
+      lastError: null,
+      rawRemote: remote,
+      metadata: {
+        ...planSyncMetadata(mapping?.metadata),
+        ...mappingMetadata({
           planId: args.workout.planId,
           scheduledDate: ymd(args.workout.scheduledDate),
           window: args.window,
           trigger: args.trigger,
           remoteName: args.workout.name,
         }),
-      });
-      return { ...zero, unchanged: 1 };
-    }
-
-    const payload = await this.buildEventPayload(args.workout, mapping);
-    const externalKey = cleanString(payload.external_id);
-    const uid = cleanString(payload.uid);
-    const remoteExisting =
-      (externalKey ? args.remoteIndex.byExternalKey.get(externalKey) : null) ??
-      (uid ? args.remoteIndex.byUid.get(uid) : null) ??
-      null;
-    const remoteEventId =
-      cleanString(mapping?.externalEventId) ?? eventId(remoteExisting);
-
-    // 有 Intervals event id 就 PUT；没有就走 bulk upsert。
-    // external_id 只能匹配本应用创建的事件，所以本地仍保存 event id 作为双保险。
-    const response = remoteEventId
-      ? await this.intervalsIcuClient.updateEvent(
-          args.apiKey,
-          remoteEventId,
-          payload,
-        )
-      : (
-          await this.intervalsIcuClient.createEventsBulk(
-            args.apiKey,
-            [payload],
-            {
-              upsert: true,
-              upsertOnUid: false,
-              updatePlanApplied: false,
-            },
-          )
-        )[0];
-
-    const savedRemoteEventId = response
-      ? (eventId(response) ?? remoteEventId)
-      : remoteEventId;
-    const remoteChecksum = localChecksum;
-    await this.upsertMapping({
-      id: mapping?.id,
-      userId: args.userId,
-      connectionId: args.connection.id,
-      planWorkoutId: args.workout.id,
-      externalEventId: savedRemoteEventId,
-      externalUid: cleanString(response?.uid) ?? uid,
-      externalSourceKey: cleanString(response?.external_id) ?? externalKey,
-      externalAthleteId: cleanString(response?.athlete_id),
-      origin: mapping?.origin ?? 'LOCAL',
-      syncState: 'SYNCED',
-      lastLocalChecksum: localChecksum,
-      lastRemoteChecksum: remoteChecksum,
-      lastSyncedChecksum: localChecksum,
-      lastSeenAt: new Date(),
-      lastPushedAt: new Date(),
-      remoteDeletedAt: null,
-      localDeletedAt: null,
-      lastError: null,
-      rawRemote: response ?? null,
-      metadata: mappingMetadata({
-        planId: args.workout.planId,
-        scheduledDate: ymd(args.workout.scheduledDate),
-        window: args.window,
-        trigger: args.trigger,
-        remoteName: args.workout.name,
-      }),
+        syncVersion: 2,
+        remoteUpdatedAt: remote.updated ?? null,
+      },
     });
-
     return remoteEventId ? { ...zero, updated: 1 } : { ...zero, created: 1 };
   }
 
@@ -1580,7 +1701,7 @@ export class IntervalsIcuPlanSyncService {
     };
   }
 
-  /** 本地已删但远端仍在的事件 → 远端 bulk-delete。 */
+  /** Local deletion is symmetric, regardless of where the course originated. */
   private async deleteLocalRemovedRemoteEvents(args: {
     userId: string;
     connection: IntervalsIcuPlanConnection;
@@ -1588,44 +1709,21 @@ export class IntervalsIcuPlanSyncService {
     window: WeekWindow;
     trigger: SyncTrigger;
   }) {
-    // planWorkoutId 被 FK 置空代表本地 workout 已删除；LOCAL 来源需要同步删除远端 event。
     const mappings = await this.planSync.findMappings({
       where: {
         userId: args.userId,
         provider: PROVIDER,
-        origin: 'LOCAL',
-        planWorkoutId: null,
         externalEventId: { not: null },
-        remoteDeletedAt: null,
+        OR: [{ planWorkoutId: null }, { localDeletedAt: { not: null } }],
       },
     });
-    const due = mappings.filter((mapping) => {
-      const scheduledDate = mappingScheduledDate(mapping.metadata);
-      return (
-        scheduledDate &&
-        scheduledDate >= args.window.oldest &&
-        scheduledDate <= args.window.newest
-      );
-    });
-    if (!due.length) return 0;
-
-    await this.intervalsIcuClient.deleteEventsBulk(
-      args.apiKey,
-      due.flatMap((mapping) =>
-        mapping.externalEventId ? [{ id: mapping.externalEventId }] : [],
-      ),
-    );
-    await this.planSync.updateManyMappings({
-      where: { id: { in: due.map((mapping) => mapping.id) } },
-      data: {
-        syncState: 'LOCAL_DELETED',
-        localDeletedAt: new Date(),
-        remoteDeletedAt: new Date(),
-        lastPushedAt: new Date(),
-        lastError: null,
-      },
-    });
-    return due.length;
+    let deleted = 0;
+    for (const mapping of mappings) {
+      if (this.mappingIsClosed(mapping)) continue;
+      // Stable event IDs can be verified without a calendar-window restriction.
+      deleted += await this.reconcileLocalDeletion({ ...args, mapping });
+    }
+    return deleted;
   }
 
   /** 本地终态课对应远端仍存在时删除远端。 */
@@ -1659,39 +1757,28 @@ export class IntervalsIcuPlanSyncService {
     });
     if (!mappings.length) return 0;
 
-    await this.intervalsIcuClient.deleteEventsBulk(
-      args.apiKey,
-      mappings.flatMap((mapping) =>
-        mapping.externalEventId ? [{ id: mapping.externalEventId }] : [],
-      ),
-    );
-    await this.planSync.updateManyMappings({
-      where: { id: { in: mappings.map((mapping) => mapping.id) } },
-      data: {
-        syncState: 'LOCAL_DELETED',
-        localDeletedAt: new Date(),
-        remoteDeletedAt: new Date(),
-        lastPushedAt: new Date(),
-        lastError: null,
-      },
-    });
-    return mappings.length;
+    let deleted = 0;
+    for (const mapping of mappings) {
+      deleted += await this.reconcileLocalDeletion({ ...args, mapping });
+    }
+    return deleted;
   }
 
-  /** 窗口内远端消失的事件 → 标记 mapping / 处理本地。 */
+  /** Absence from a date window is only a hint: the course may have moved. */
   private async markMissingRemoteEvents(args: {
     userId: string;
     connectionId: string;
     window: WeekWindow;
     seenRemoteEventIds: Set<string>;
+    apiKey: IntervalsIcuApiCredential;
+    connection: IntervalsIcuPlanConnection;
+    trigger: SyncTrigger;
   }) {
-    // import 阶段没看到原 event，说明远端窗口内已删除；先标记，不直接删除本地。
     const mappings = await this.planSync.findMappings({
       where: {
         userId: args.userId,
         provider: PROVIDER,
         externalEventId: { not: null },
-        remoteDeletedAt: null,
         planWorkout: {
           scheduledDate: {
             gte: parseYmd(args.window.oldest),
@@ -1699,42 +1786,38 @@ export class IntervalsIcuPlanSyncService {
           },
         },
       },
-      include: { planWorkout: true },
     });
-    const missing = mappings.filter(
-      (mapping) =>
-        mapping.externalEventId &&
-        !args.seenRemoteEventIds.has(String(mapping.externalEventId)),
-    );
-    if (!missing.length) return 0;
-    await this.planSync.updateManyMappings({
-      where: { id: { in: missing.map((mapping) => mapping.id) } },
-      data: {
-        syncState: 'REMOTE_DELETED',
-        remoteDeletedAt: new Date(),
-        lastSeenAt: new Date(),
-      },
-    });
-    return missing.length;
+    let deleted = 0;
+    for (const mapping of mappings) {
+      if (
+        !mapping.externalEventId ||
+        this.mappingIsClosed(mapping) ||
+        args.seenRemoteEventIds.has(mapping.externalEventId)
+      )
+        continue;
+      if (!this.mappingMatchesConnection(mapping, args.connection))
+        throw new Error('INTERVALS_PLAN_ACCOUNT_MISMATCH');
+      const current = await this.readRemoteEvent(
+        args.apiKey,
+        mapping.externalEventId,
+      );
+      if (!current)
+        deleted += await this.markRemoteEventDeletedById({
+          userId: args.userId,
+          remoteEventId: mapping.externalEventId,
+          connection: args.connection,
+        });
+      else await this.importRemoteEvent({ ...args, event: current });
+    }
+    return deleted;
   }
 
-  /** 按远端 event id / uid / external_id 查 mapping。 */
+  /** Event ID identifies a creation instance; names, dates and UIDs do not. */
   private async findMappingForRemote(userId: string, event: IntervalsIcuEvent) {
-    const remoteEventId = eventId(event);
-    const externalSourceKey = cleanString(event.external_id);
-    const externalUid = cleanString(event.uid);
-    const clauses = [
-      remoteEventId ? { externalEventId: remoteEventId } : null,
-      externalSourceKey ? { externalSourceKey } : null,
-      externalUid ? { externalUid } : null,
-    ].filter(Boolean);
-    if (!clauses.length) return null;
+    const id = eventId(event);
+    if (!id) return null;
     return this.planSync.findMapping({
-      where: {
-        userId,
-        provider: PROVIDER,
-        OR: clauses,
-      },
+      where: { userId, provider: PROVIDER, externalEventId: id },
     });
   }
 
@@ -1744,7 +1827,7 @@ export class IntervalsIcuPlanSyncService {
   }
 
   /** 本地课的 sync checksum（含日期/名称等）。 */
-  private localWorkoutChecksum(workout: SyncWorkout) {
+  private localContentSyncChecksum(workout: SyncWorkout) {
     const blocks = this.workoutService.buildPlanBlocksFromWorkoutSteps(
       Array.isArray(workout.steps) ? workout.steps : [],
       workout.sportType,
@@ -1759,34 +1842,29 @@ export class IntervalsIcuPlanSyncService {
     });
   }
 
-  /** 本地课的 content checksum（仅结构）。 */
-  private localContentChecksum(workout: SyncWorkout) {
-    const blocks = this.workoutService.buildPlanBlocksFromWorkoutSteps(
-      Array.isArray(workout.steps) ? workout.steps : [],
-      workout.sportType,
-    );
-    return computeContentChecksum({
-      sportType: workout.sportType,
-      subSportType: workout.sportDefinitionCode,
-      blocks,
-    });
-  }
-
   /** 由远端解析结果创建本地独立课。 */
-  private async createWorkoutFromRemote(args: {
-    userId: string;
-    parsed: ParsedRemoteWorkout;
-  }) {
-    return this.planSync.createIndependentWorkout({
-      userId: args.userId,
-      scheduledDate: parseYmd(args.parsed.scheduledDate),
-      sportType: args.parsed.sportType,
-      sportDefinitionCode: args.parsed.sportDefinitionCode,
-      name: args.parsed.name,
-      text: args.parsed.text,
-      notes: args.parsed.notes,
-      blocks: args.parsed.blocks,
-    });
+  private async createWorkoutFromRemote(
+    args: {
+      userId: string;
+      parsed: ParsedRemoteWorkout;
+    },
+    initializeMapping?: (
+      workout: SyncWorkout,
+    ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
+  ) {
+    return this.planSync.createIndependentWorkout(
+      {
+        userId: args.userId,
+        scheduledDate: parseYmd(args.parsed.scheduledDate),
+        sportType: args.parsed.sportType,
+        sportDefinitionCode: args.parsed.sportDefinitionCode,
+        name: args.parsed.name,
+        text: args.parsed.text,
+        notes: args.parsed.notes,
+        blocks: args.parsed.blocks,
+      },
+      initializeMapping,
+    );
   }
 
   /** 用远端内容更新本地课（冲突时标记 conflicted）。 */
@@ -1830,11 +1908,12 @@ export class IntervalsIcuPlanSyncService {
           : 'PLANNED',
       blocks: args.parsed.blocks,
       dayOffset,
+      expectedUpdatedAt: args.workout.updatedAt,
     });
   }
 
-  /** 导入失败时写 mapping 失败状态。 */
-  private async markRemoteEventFailed(args: {
+  /** Parsing failures do not mutate an existing synchronization baseline or tombstone. */
+  private async markRemoteEventFailed(_args: {
     userId: string;
     connectionId: string;
     event: IntervalsIcuEvent;
@@ -1842,40 +1921,21 @@ export class IntervalsIcuPlanSyncService {
     window: WeekWindow;
     trigger: SyncTrigger;
   }) {
-    const remoteEventId = eventId(args.event);
-    await this.upsertMapping({
-      userId: args.userId,
-      connectionId: args.connectionId,
-      externalEventId: remoteEventId,
-      externalUid: cleanString(args.event.uid),
-      externalSourceKey: cleanString(args.event.external_id),
-      externalAthleteId: cleanString(args.event.athlete_id),
-      origin: isTrainingloadExternalKey(args.event.external_id)
-        ? 'LOCAL'
-        : 'REMOTE',
-      syncState: 'FAILED',
-      lastSeenAt: new Date(),
-      lastError: args.error,
-      remoteDeletedAt: null,
-      localDeletedAt: null,
-      rawRemote: args.event,
-      metadata: mappingMetadata({
-        scheduledDate: eventDate(args.event),
-        window: args.window,
-        trigger: args.trigger,
-        remoteName: cleanString(args.event.name),
-      }),
-    });
+    this.logger.warn(
+      `Intervals.icu plan event skipped: reason=UNSUPPORTED_WORKOUT_DOCUMENT`,
+    );
   }
 
   /** 创建或更新 PlanWorkoutExternalMapping。 */
   private async upsertMapping(data: Record<string, unknown>) {
+    this.syncLock.assertHeld();
     // mapping 是幂等核心：任何一个稳定键命中，都更新同一条映射。
     const id = cleanString(data.id);
     const existing = id
       ? await this.planSync.findMappingUnique({ where: { id } })
       : await this.findExistingMapping(data);
     const write = this.mappingWriteData(data);
+    this.syncLock.assertHeld();
     if (existing) {
       return this.planSync.updateMapping({
         where: { id: existing.id },
@@ -1891,28 +1951,14 @@ export class IntervalsIcuPlanSyncService {
     });
   }
 
-  /** 按 planWorkoutId / external ids 查找已有 mapping。 */
   private async findExistingMapping(data: Record<string, unknown>) {
-    const clauses = [
-      cleanString(data.planWorkoutId)
-        ? { planWorkoutId: cleanString(data.planWorkoutId) }
-        : null,
-      cleanString(data.externalEventId)
-        ? { externalEventId: cleanString(data.externalEventId) }
-        : null,
-      cleanString(data.externalUid)
-        ? { externalUid: cleanString(data.externalUid) }
-        : null,
-      cleanString(data.externalSourceKey)
-        ? { externalSourceKey: cleanString(data.externalSourceKey) }
-        : null,
-    ].filter(Boolean);
-    if (!clauses.length) return null;
+    const remoteId = cleanString(data.externalEventId);
+    if (!remoteId) return null;
     return this.planSync.findMapping({
       where: {
         userId: data.userId,
         provider: PROVIDER,
-        OR: clauses,
+        externalEventId: remoteId,
       },
     });
   }
@@ -1984,6 +2030,7 @@ export class IntervalsIcuPlanSyncService {
     data: Record<string, unknown>,
   ) {
     if (!id) return null;
+    this.syncLock.assertHeld();
     return this.planSync.updateMapping({
       where: { id },
       data: this.mappingWriteData(

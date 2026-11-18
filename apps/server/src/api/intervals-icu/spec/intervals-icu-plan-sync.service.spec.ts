@@ -149,12 +149,16 @@ describe('IntervalsIcuPlanSyncService', () => {
           } as never,
         ),
         { model: () => externalProviderConnection } as never,
+        {
+          run: (_id: string, work: () => Promise<unknown>) => work(),
+          assertHeld: () => undefined,
+        } as never,
       ),
       workoutService,
     };
   }
 
-  it('marks recovered mappings as conflicts when local and remote differ without a sync baseline', async () => {
+  it('uses the remote source when recovering a mapping without a sync baseline', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-07-02T08:00:00.000Z'));
     const {
       externalProviderConnection,
@@ -219,24 +223,30 @@ describe('IntervalsIcuPlanSyncService', () => {
     externalProviderConnection.update.mockResolvedValue({});
     intervalsIcuClient.listEvents.mockResolvedValueOnce([remoteEvent]);
     planWorkout.findFirst.mockResolvedValue(localWorkout);
+    planWorkout.findUnique.mockResolvedValue({
+      ...localWorkout,
+      userId: 'user-1',
+      links: [],
+    });
+    planWorkout.update.mockResolvedValue({ id: 'workout-1', planId: 'plan-1' });
+    planWorkout.findMany.mockResolvedValue([]);
+    workoutService.buildWorkoutPlanSteps.mockReturnValue([]);
     workoutService.parseFile.mockResolvedValue({
       block: remoteBlocks,
       plan: 'work 1:00:00',
     });
     workoutService.buildPlanBlocksFromWorkoutSteps.mockReturnValue(localBlocks);
-    planWorkoutExternalMapping.findFirst
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({
-        id: 'mapping-1',
-        userId: 'user-1',
-        provider: 'intervals_icu',
-        planWorkoutId: 'workout-1',
-        externalEventId: '101',
-        externalSourceKey: 'trainingload.ai:plan_workout:workout-1',
-        lastLocalChecksum: null,
-        lastRemoteChecksum: null,
-        syncState: 'SYNCED',
-      });
+    planWorkoutExternalMapping.findFirst.mockResolvedValueOnce({
+      id: 'mapping-1',
+      userId: 'user-1',
+      provider: 'intervals_icu',
+      planWorkoutId: 'workout-1',
+      externalEventId: '101',
+      externalSourceKey: 'trainingload.ai:plan_workout:workout-1',
+      lastLocalChecksum: null,
+      lastRemoteChecksum: null,
+      syncState: 'SYNCED',
+    });
     planWorkoutExternalMapping.create.mockResolvedValue({
       id: 'mapping-1',
       planWorkoutId: 'workout-1',
@@ -266,17 +276,14 @@ describe('IntervalsIcuPlanSyncService', () => {
       ).resolves.toMatchObject({
         enabled: true,
         window: { oldest: '2026-07-06', newest: '2026-07-12' },
-        import: { fetched: 1, conflicted: 1, updated: 0, created: 0 },
+        import: { fetched: 1, conflicted: 0, updated: 1, created: 0 },
       });
 
-      expect(planWorkout.update).not.toHaveBeenCalled();
-      expect(planWorkoutExternalMapping.update).toHaveBeenCalledWith(
+      expect(planWorkout.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'mapping-1' },
+          where: { id: 'workout-1', updatedAt: undefined },
           data: expect.objectContaining({
-            syncState: 'CONFLICT',
-            lastError:
-              '恢复的 Intervals.icu 映射没有同步基线，且内容与本地计划课不一致',
+            name: 'Intervals version',
           }),
         }),
       );

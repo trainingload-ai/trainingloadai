@@ -32,6 +32,7 @@ describe("site security headers", () => {
     expect(csp).toContain("https://*.posthog.com");
     expect(csp).toContain("https://*.sentry.io");
     expect(csp).not.toContain("'unsafe-eval'");
+    expect(csp).toContain("upgrade-insecure-requests");
   });
 
   it("does not extend HSTS to unaudited subdomains or preload lists", () => {
@@ -50,6 +51,9 @@ describe("site security headers", () => {
 
     expect(developmentHeaders.get("content-security-policy")).toContain(
       "'unsafe-eval'",
+    );
+    expect(developmentHeaders.get("content-security-policy")).not.toContain(
+      "upgrade-insecure-requests",
     );
     expect(headers.get("content-security-policy")).not.toContain(
       "'unsafe-eval'",

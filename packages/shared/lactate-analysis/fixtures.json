@@ -1,0 +1,295 @@
+{
+  "referenceCommit": "2cd3709f6442447b3b9128e325f13fa38570eb17",
+  "rVersion": "4.5.1",
+  "cases": [
+    {
+      "id": "cycling-rest",
+      "input": {
+        "sport": "cycling",
+        "stages": [
+          {
+            "intensity": 0,
+            "lactate": 0.9,
+            "heartRate": 90
+          },
+          {
+            "intensity": 75,
+            "lactate": 1,
+            "heartRate": 101
+          },
+          {
+            "intensity": 100,
+            "lactate": 1.1,
+            "heartRate": 112
+          },
+          {
+            "intensity": 125,
+            "lactate": 1.3,
+            "heartRate": 123
+          },
+          {
+            "intensity": 150,
+            "lactate": 1.7,
+            "heartRate": 134
+          },
+          {
+            "intensity": 175,
+            "lactate": 2.4,
+            "heartRate": 145
+          },
+          {
+            "intensity": 200,
+            "lactate": 3.5,
+            "heartRate": 156
+          },
+          {
+            "intensity": 225,
+            "lactate": 5.2,
+            "heartRate": 167
+          },
+          {
+            "intensity": 250,
+            "lactate": 7.5,
+            "heartRate": 178
+          }
+        ]
+      },
+      "expectedIntensity": {
+        "obla_2": 162.61188634775024,
+        "obla_4": 208.16667097304023,
+        "bsln_05": 133.0807845697228,
+        "bsln_10": 158.8921574570355,
+        "log_log": 149.12361192586545,
+        "dmax": 176.97329891985413,
+        "moddmax": 193.45398881121142,
+        "log_poly_moddmax": 203.0682281249062
+      }
+    },
+    {
+      "id": "running-rest",
+      "input": {
+        "sport": "running",
+        "stages": [
+          {
+            "intensity": 0,
+            "lactate": 1,
+            "heartRate": 90
+          },
+          {
+            "intensity": 8,
+            "lactate": 1.1,
+            "heartRate": 101
+          },
+          {
+            "intensity": 10,
+            "lactate": 1.2,
+            "heartRate": 112
+          },
+          {
+            "intensity": 12,
+            "lactate": 1.6,
+            "heartRate": 123
+          },
+          {
+            "intensity": 14,
+            "lactate": 2.6,
+            "heartRate": 134
+          },
+          {
+            "intensity": 16,
+            "lactate": 4.6,
+            "heartRate": 145
+          },
+          {
+            "intensity": 18,
+            "lactate": 8,
+            "heartRate": 156
+          }
+        ]
+      },
+      "expectedIntensity": {
+        "obla_2": 13.018819995876925,
+        "obla_4": 15.507559843248016,
+        "bsln_05": 11.695238428210311,
+        "bsln_10": 13.018819995876925,
+        "log_log": 12.044078087280766,
+        "dmax": 13.863354967215452,
+        "moddmax": 14.48081239990023,
+        "log_poly_moddmax": 15.250121178786197
+      }
+    },
+    {
+      "id": "early-dip",
+      "input": {
+        "sport": "cycling",
+        "stages": [
+          {
+            "intensity": 0,
+            "lactate": 1.4
+          },
+          {
+            "intensity": 100,
+            "lactate": 1.6
+          },
+          {
+            "intensity": 125,
+            "lactate": 1.2
+          },
+          {
+            "intensity": 150,
+            "lactate": 1
+          },
+          {
+            "intensity": 175,
+            "lactate": 1.5
+          },
+          {
+            "intensity": 200,
+            "lactate": 2.4
+          },
+          {
+            "intensity": 225,
+            "lactate": 4
+          },
+          {
+            "intensity": 250,
+            "lactate": 7.5
+          }
+        ]
+      },
+      "expectedIntensity": {
+        "obla_2": 194.23488365357258,
+        "obla_4": 222.72207302839672,
+        "bsln_05": 192.02664696891802,
+        "bsln_10": 201.83518244671242,
+        "log_log": 153.2873416531485,
+        "dmax": 188.70474025016597,
+        "moddmax": 205.77422449452874,
+        "log_poly_moddmax": 206.4691372913355
+      }
+    },
+    {
+      "id": "exact-point-four",
+      "input": {
+        "sport": "cycling",
+        "stages": [
+          {
+            "intensity": 100,
+            "lactate": 1
+          },
+          {
+            "intensity": 125,
+            "lactate": 1.1
+          },
+          {
+            "intensity": 150,
+            "lactate": 1.5
+          },
+          {
+            "intensity": 175,
+            "lactate": 2
+          },
+          {
+            "intensity": 200,
+            "lactate": 3.2
+          },
+          {
+            "intensity": 225,
+            "lactate": 5
+          }
+        ]
+      },
+      "expectedIntensity": {
+        "obla_2": 173.4170061076159,
+        "obla_4": 212.58812947901384,
+        "bsln_05": 153.70191528720346,
+        "bsln_10": 173.4170061076159,
+        "log_log": 170.66923279673063,
+        "dmax": 172.9647388745898,
+        "moddmax": 181.18856890611247,
+        "log_poly_moddmax": 199.11756275345522
+      }
+    },
+    {
+      "id": "four-stages",
+      "input": {
+        "sport": "cycling",
+        "stages": [
+          {
+            "intensity": 100,
+            "lactate": 1
+          },
+          {
+            "intensity": 150,
+            "lactate": 1.4
+          },
+          {
+            "intensity": 200,
+            "lactate": 2.5
+          },
+          {
+            "intensity": 250,
+            "lactate": 6
+          }
+        ]
+      },
+      "expectedIntensity": {
+        "obla_2": 185.16892351447862,
+        "obla_4": 227.23072214414196,
+        "bsln_05": 159.24151883117486,
+        "bsln_10": 185.16892351447862,
+        "log_log": null,
+        "dmax": 192.2869360815103,
+        "moddmax": 192.28693894684608,
+        "log_poly_moddmax": null
+      }
+    },
+    {
+      "id": "submaximal",
+      "input": {
+        "sport": "cycling",
+        "stages": [
+          {
+            "intensity": 100,
+            "lactate": 1
+          },
+          {
+            "intensity": 125,
+            "lactate": 0.95
+          },
+          {
+            "intensity": 150,
+            "lactate": 1.05
+          },
+          {
+            "intensity": 175,
+            "lactate": 1.2
+          },
+          {
+            "intensity": 200,
+            "lactate": 1.4
+          },
+          {
+            "intensity": 225,
+            "lactate": 1.8
+          }
+        ]
+      },
+      "expectedIntensity": {
+        "obla_2": null,
+        "obla_4": null,
+        "bsln_05": 205.70755711422393,
+        "bsln_10": null,
+        "log_log": 150.73986945048873,
+        "dmax": 166.27969875084906,
+        "moddmax": 220.026121760342,
+        "log_poly_moddmax": 189.74137288781142
+      }
+    }
+  ],
+  "runtime": {
+    "name": "webr",
+    "version": "0.5.4",
+    "isolation": "WebAssembly worker with an in-memory filesystem"
+  }
+}

@@ -45,6 +45,7 @@ const siteSecurityHeaders = createSiteSecurityHeaders({
 
 /** @type {import('next').NextConfig} */
 const config = {
+  transpilePackages: ["@trainingloadai/shared"],
   // Allow release verification to use an isolated output directory while a
   // local `next dev` process is still using the default `.next` directory.
   ...(nextDistDir ? { distDir: nextDistDir } : {}),
@@ -55,7 +56,10 @@ const config = {
     // Keep monorepo runtime resources explicit. The Markdown API resolves files
     // from process.cwd() with dynamic locale/slug segments, which static tracing
     // cannot enumerate reliably without this narrow include.
-    "/*": ["../../packages/messages/docs/**/*.json", "../../packages/shared/**/*"],
+    "/*": [
+      "../../packages/messages/docs/**/*.json",
+      "../../packages/shared/**/*",
+    ],
     "/api/docs-markdown/\\[lang\\]/\\[\\[\\.\\.\\.slug\\]\\]": [
       "./content/docs/**/*",
     ],

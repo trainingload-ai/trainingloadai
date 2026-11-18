@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
+import { getLactateCopy } from "@/lib/lactate-curve-copy";
 import { JsonLd } from "@/components/JsonLd";
 import { ToolCatalogCard, toolToneStyle } from "@/components/ToolCatalogCard";
 import {
@@ -165,6 +166,25 @@ export default async function ToolsPage({
   });
 
   const tools = [
+    {
+      key: "lactateCurveCalculator",
+      title: getLactateCopy(lang).title,
+      description: getLactateCopy(lang).description,
+      href: withLocalePath(lang, "/lactate-curve-calculator"),
+      icon: FlaskConical,
+      tone: toolTones.physiology,
+      signal: "LT1 / LT2",
+      type: ui.training,
+      bestFor: getLactateCopy(lang).inputTitle,
+      output: getLactateCopy(lang).report,
+      question: getLactateCopy(lang).instructionsTitle,
+      docsHref: withLocalePath(
+        lang,
+        "/docs/metrics/physiology/lactate-threshold",
+      ),
+      docsLabel: getLactateCopy(lang).methodsTitle,
+      featured: false,
+    },
     {
       key: "freeAiWorkoutReview",
       title: tFreeReview("title"),
@@ -558,7 +578,7 @@ export default async function ToolsPage({
   ]);
 
   return (
-    <main className="client-demo-radius overflow-x-hidden bg-background text-foreground">
+    <div className="client-demo-radius overflow-x-hidden bg-background text-foreground">
       <JsonLd id="tools-structured-data" data={structuredData} />
 
       <section className="bg-card px-4 pb-12 pt-14 md:px-6 md:pb-16 md:pt-20">
@@ -697,7 +717,7 @@ export default async function ToolsPage({
                   className="inline-flex h-9 items-center gap-2 rounded-control bg-card px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   {group.label}
-                  <span className="tabular-nums text-xs text-muted-foreground/70">
+                  <span className="tabular-nums text-xs text-muted-foreground">
                     {group.tools.length}
                   </span>
                 </a>
@@ -745,6 +765,6 @@ export default async function ToolsPage({
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

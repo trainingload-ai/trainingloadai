@@ -1,3 +1,5 @@
+import { matchesIntervalsAuthorization } from '@/integrations/intervals-icu/intervals-icu-authorization';
+import { ImportIdentityConflictError } from './import-identity-conflict.error';
 import {
   Injectable,
   Inject,
@@ -10,7 +12,10 @@ import { createHash, randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ImportingJobService } from './importing-job.service';
-import { ACTIVITY_MATERIALIZATION_VERSION, type ActivityDatasetRepair } from './activity-dataset-repair';
+import {
+  ACTIVITY_MATERIALIZATION_VERSION,
+  type ActivityDatasetRepair,
+} from './activity-dataset-repair';
 import { STORAGE_PORT, type StoragePort } from '@/storage/storage.port';
 import {
   ActivityAnalyzeMode,
@@ -64,6 +69,7 @@ import type {
 import { ActivityWeatherService } from '@/weather/activity-weather.service';
 import {
   IMPORT_ITEM_EXTENSION,
+  ImportSourceDataUnavailableError,
   type ImportItemExtension,
 } from './import-item-provider.port';
 
@@ -278,16 +284,17 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
   private async updateClaimedItem(
     id: string,
     data: Prisma.ImportItemJobUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient,
   ) {
     const lockToken = this.activeLeaseTokens.get(id);
     if (!lockToken) {
-      await this.importJobs.itemJobs().update({
+      await this.importJobs.itemJobs(tx).update({
         where: { id },
         data,
       });
       return;
     }
-    const result = await this.importJobs.itemJobs().updateMany({
+    const result = await this.importJobs.itemJobs(tx).updateMany({
       where: { id, lockToken },
       data,
     });
@@ -300,13 +307,41 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     id: string,
     status: ImportItemJobStatus,
     extra?: ImportItemJobStatusExtra,
+    tx?: Prisma.TransactionClient,
   ) {
     const terminal = ['DONE', 'SKIPPED', 'DEAD'].includes(status);
-    await this.updateClaimedItem(id, {
-      status,
-      ...extra,
-      ...(terminal ? { lockToken: null, leaseExpiresAt: null } : {}),
-    });
+    await this.updateClaimedItem(
+      id,
+      {
+        status,
+        ...extra,
+        ...(terminal ? { lockToken: null, leaseExpiresAt: null } : {}),
+      },
+      tx,
+    );
+  }
+
+  private async completeActivityItem(jobId: string, batchJobId: string) {
+    // When this DONE makes the batch terminal, its durable analysis request
+    // commits in the same transaction instead of relying on the final refresh.
+    await this.prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM t_import_batch_job
+        WHERE id = ${batchJobId} FOR UPDATE`;
+        await this.markStatus(
+          jobId,
+          $Enums.ImportItemJobStatus.DONE,
+          {
+            completedAt: new Date(),
+            lastError: null,
+            lastErrorCode: null,
+          },
+          tx,
+        );
+        await this.importBatchService.refreshBatchProgress(batchJobId, tx);
+      },
+      { timeout: 15_000 },
+    );
   }
 
   private extractThirdPartyActivityId(job: ImportJobJsonFields) {
@@ -368,8 +403,11 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           job.userId,
           'intervals_icu',
         );
-        if (!connection) {
-          throw new Error(`未找到 Intervals.icu 连接：${connectionId}`);
+        if (
+          !connection ||
+          !matchesIntervalsAuthorization(sourceRef.authorization, connection)
+        ) {
+          throw new Error('INTERVALS_IMPORT_AUTHORIZATION_CHANGED');
         }
         try {
           const apiKey =
@@ -386,10 +424,19 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
             error instanceof IntervalsIcuApiError &&
             (error.status === 401 || error.status === 403)
           ) {
-            await this.externalConnections.markInvalid(
-              connectionId,
-              'Intervals.icu API 密钥无效或未授权',
-            );
+            await this.externalConnections.model().updateMany({
+              where: {
+                id: connectionId,
+                userId: job.userId,
+                status: 'ACTIVE',
+                credentialCiphertext: connection.credentialCiphertext,
+                metadata: { equals: connection.metadata ?? Prisma.DbNull },
+              },
+              data: {
+                status: 'INVALID',
+                lastError: 'Intervals.icu API 密钥无效或未授权',
+              },
+            });
           }
           throw error;
         }
@@ -763,15 +810,28 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       // Parquet 一旦成为 canonical 数据集即可异步排队。天气失败不能阻塞
       // 活动进入 ANALYZING/READY，也不能延长主导入链路。
       const committedSource = await this.prisma.activitySource.findFirst({
-        where: { activityId: materialized.activity.id, userId: args.userId,
-          isPrimary: true, isActive: true, sourceUid: payload.source.sourceUid },
+        where: {
+          activityId: materialized.activity.id,
+          userId: args.userId,
+          isPrimary: true,
+          isActive: true,
+          sourceUid: payload.source.sourceUid,
+        },
       });
       if (committedSource) {
         await this.prisma.activitySource.updateMany({
-          where: { id: committedSource.id, canonicalSnapshotId: committedSource.canonicalSnapshotId,
-            sourceChecksum: committedSource.sourceChecksum, isPrimary: true },
-          data: { metadata: { ...(committedSource.metadata as Prisma.InputJsonObject),
-            materializationVersion: ACTIVITY_MATERIALIZATION_VERSION } },
+          where: {
+            id: committedSource.id,
+            canonicalSnapshotId: committedSource.canonicalSnapshotId,
+            sourceChecksum: committedSource.sourceChecksum,
+            isPrimary: true,
+          },
+          data: {
+            metadata: {
+              ...(committedSource.metadata as Prisma.InputJsonObject),
+              materializationVersion: ACTIVITY_MATERIALIZATION_VERSION,
+            },
+          },
         });
       }
       await this.activityWeather
@@ -802,11 +862,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
         );
       }
 
-      await this.markStatus(args.jobId, $Enums.ImportItemJobStatus.DONE, {
-        completedAt: new Date(),
-        lastError: null,
-        lastErrorCode: null,
-      });
+      await this.completeActivityItem(args.jobId, args.batchJobId);
     } catch (error) {
       if (thirdPartyActivityId && !args.thirdPartyActivityId) {
         await this.thirdPartyActivityService
@@ -966,12 +1022,88 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
    * 处理失败：FAILED + 退避；次数用尽变 DEAD。
    * 已 READY 的旧 Activity 不改；租约丢失则放弃写库。
    */
+  private async completeUnavailableItem(
+    job: ClaimedImportItemJob,
+    args: {
+      error: ImportSourceDataUnavailableError | null;
+      routeToOrigin: boolean;
+      diagnostic: string;
+      code: string;
+    },
+  ) {
+    const lockToken = this.activeLeaseTokens.get(job.id);
+    const completed = await this.prisma.$transaction(async (tx) => {
+      // Fence both the item completion and source routing with the current lease.
+      const result = await this.importJobs.itemJobs(tx).updateMany({
+        where: {
+          id: job.id,
+          userId: job.userId,
+          ...(lockToken ? { lockToken } : {}),
+        },
+        data: {
+          status: 'SKIPPED',
+          attempts: { increment: 1 },
+          analysisRequired: false,
+          outcome: 'UPSTREAM_DATA_UNAVAILABLE',
+          lastErrorCode: args.code,
+          lastError: args.diagnostic,
+          completedAt: new Date(),
+          lockToken: null,
+          leaseExpiresAt: null,
+        },
+      });
+      if (result.count !== 1) return false;
+      if (args.routeToOrigin) {
+        await this.externalActivityRouter.routePersistedIntervalsDiscovery(
+          {
+            userId: job.userId,
+            sourceObjectId: job.sourceObjectId,
+            reason: 'fallback',
+            confirmedOriginUnavailable: true,
+          },
+          tx,
+        );
+      } else {
+        await this.externalActivityRouter.keepUnavailableSource(
+          {
+            userId: job.userId,
+            sourceObjectId: job.sourceObjectId,
+            error: args.error!,
+          },
+          tx,
+        );
+        await this.externalActivityMirrors.markOriginImportFailed(
+          {
+            userId: job.userId,
+            sourceObjectId: job.sourceObjectId,
+            reason: 'UPSTREAM_DATA_UNAVAILABLE',
+          },
+          tx,
+        );
+      }
+      return true;
+    });
+    if (!completed) return;
+    this.logImportPipelineEvent({
+      batchJobId: job.batchJobId,
+      itemJobId: job.id,
+      userId: job.userId,
+      stage: $Enums.ImportPipelineStage.COMPLETED,
+      message:
+        'Source data unavailable; retained source without materializing an activity',
+      data: { code: args.code },
+      level: 'WARN',
+    });
+  }
+
   private async failClaimedItem(
     job: ClaimedImportItemJob,
     error: unknown,
     thirdPartyActivityId?: number,
   ) {
-    if (
+    const unavailable =
+      error instanceof ImportSourceDataUnavailableError ? error : null;
+    const routeToOrigin =
       job.sourceKind === 'INTERVALS_ICU' &&
       error instanceof IntervalsIcuApiError &&
       getExternalActivityOriginRoutingExtension()?.matchesUnavailableOriginError?.(
@@ -981,53 +1113,38 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
           message: error.message,
           body: error.body,
         },
-      ) === true
-    ) {
-      // 旧数据或未知响应可能绕过列表阶段识别。这里是 422 兜底：停止通用重试，
-      // 把现有来源对象转为影子/来源路由状态，仍然不创建 Activity。
-      const diagnostic =
-        `${error.message}${error.body ? `: ${error.body}` : ''}`
-          .replace(/\s+/g, ' ')
-          .slice(0, 2_000);
-      const routeDecision =
-        await this.externalActivityRouter.routePersistedIntervalsDiscovery({
-          userId: job.userId,
-          sourceObjectId: job.sourceObjectId,
-          reason: 'fallback',
-          confirmedOriginUnavailable: true,
-        });
+      ) === true;
+    if (unavailable || routeToOrigin) {
       const lockToken = this.activeLeaseTokens.get(job.id);
-      await this.importJobs.itemJobs().updateMany({
+      const current = await this.importJobs.itemJobs().findFirst({
         where: {
           id: job.id,
+          userId: job.userId,
           ...(lockToken ? { lockToken } : {}),
         },
-        data: {
-          status: 'SKIPPED',
-          attempts: { increment: 1 },
-          outcome: 'UPSTREAM_DATA_UNAVAILABLE',
-          lastErrorCode: 'INTERVALS_ICU_ORIGIN_DATA_UNAVAILABLE',
-          lastError: diagnostic,
-          completedAt: new Date(),
-          lockToken: null,
-          leaseExpiresAt: null,
-        },
+        select: { attempts: true },
       });
-      this.logImportPipelineEvent({
-        batchJobId: job.batchJobId,
-        itemJobId: job.id,
-        userId: job.userId,
-        stage: $Enums.ImportPipelineStage.COMPLETED,
-        message: '发现来源无法提供原始活动，已转换为影子活动',
-        data: {
-          status: error.status,
-          responseBody: error.body?.slice(0, 500),
-          routeDecision: routeDecision.kind,
-        },
-        level: 'WARN',
-      });
-      return;
+      if (!current) return;
+      const maxAttempts =
+        this.configService.get<number>('importItemWorker.maxAttempts') ?? 6;
+      if (!unavailable?.retryable || current.attempts + 1 >= maxAttempts) {
+        const diagnostic =
+          routeToOrigin && error instanceof IntervalsIcuApiError
+            ? `${error.message}${error.body ? `: ${error.body}` : ''}`
+                .replace(/\s+/g, ' ')
+                .slice(0, 2_000)
+            : unavailable!.message;
+        await this.completeUnavailableItem(job, {
+          error: unavailable,
+          routeToOrigin,
+          diagnostic,
+          code: unavailable?.code ?? 'INTERVALS_ICU_ORIGIN_DATA_UNAVAILABLE',
+        });
+        return;
+      }
     }
+    const identityConflict =
+      error instanceof ImportIdentityConflictError ? error : null;
     const msg = error instanceof Error ? error.message : String(error);
     const lockToken = this.activeLeaseTokens.get(job.id);
     let row: { attempts: number; activityId: number | null } | null;
@@ -1035,10 +1152,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       const result = await this.importJobs.itemJobs().updateMany({
         where: { id: job.id, lockToken },
         data: {
-          status: 'FAILED',
+          status: identityConflict ? 'DEAD' : 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
-          completedAt: null,
+          ...(identityConflict ? { lastErrorCode: identityConflict.code } : {}),
+          ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
+          completedAt: identityConflict ? new Date() : null,
           availableAt: new Date(Date.now() + 30 * 60_000),
           lockToken: null,
           leaseExpiresAt: null,
@@ -1055,10 +1174,12 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       row = await this.importJobs.itemJobs().update({
         where: { id: job.id },
         data: {
-          status: 'FAILED',
+          status: identityConflict ? 'DEAD' : 'FAILED',
           attempts: { increment: 1 },
           lastError: msg,
-          completedAt: null,
+          ...(identityConflict ? { lastErrorCode: identityConflict.code } : {}),
+          ...(unavailable ? { lastErrorCode: unavailable.code } : {}),
+          completedAt: identityConflict ? new Date() : null,
         },
         select: { attempts: true, activityId: true },
       });
@@ -1071,26 +1192,28 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
     const maxAttempts =
       this.configService.get<number>('importItemWorker.maxAttempts') ?? 6;
 
+    const terminal = Boolean(identityConflict) || attempts >= maxAttempts;
+
     if (row.activityId) {
       // staging 失败时旧 Activity 仍是 READY，不能把它隐藏；只有已经进入
       // 新建/提交处理态的 Activity 才随 item 标记为未完成或最终失败。
       await this.prisma.activity.updateMany({
         where: {
           id: row.activityId,
+          userId: job.userId,
           processingStatus: { not: $Enums.ActivityProcessingStatus.READY },
         },
         data: {
-          processingStatus:
-            attempts >= maxAttempts
-              ? $Enums.ActivityProcessingStatus.FAILED
-              : $Enums.ActivityProcessingStatus.PARTIAL_FAILED,
+          processingStatus: terminal
+            ? $Enums.ActivityProcessingStatus.FAILED
+            : $Enums.ActivityProcessingStatus.PARTIAL_FAILED,
           processingUpdatedAt: new Date(),
           readyAt: null,
         },
       });
     }
 
-    if (thirdPartyActivityId) {
+    if (thirdPartyActivityId && !identityConflict) {
       await this.thirdPartyActivityService.markImportFailed(
         thirdPartyActivityId,
         msg,
@@ -1106,7 +1229,7 @@ export class ImportItemWorkerService implements OnModuleInit, OnModuleDestroy {
       level: 'ERROR',
     });
 
-    if (attempts >= maxAttempts) {
+    if (terminal) {
       if (this.extension) {
         await this.extension.afterTerminalFailure({
           userId: job.userId,

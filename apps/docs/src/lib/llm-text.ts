@@ -37,7 +37,7 @@ function stringAttributes(node: MarkdownNode) {
 
 function screenshotNodes(node: MarkdownNode, locale: string): MarkdownNode[] {
   const attributes = stringAttributes(node);
-  const { imageSrc, destination } = resolveDocsScreenshot({
+  const { images, destination } = resolveDocsScreenshot({
     id: attributes.id ?? "",
     locale,
     imageSrc: attributes.imageSrc,
@@ -58,11 +58,16 @@ function screenshotNodes(node: MarkdownNode, locale: string): MarkdownNode[] {
       children: [{ type: "text", value: attributes.description }],
     });
   }
-  if (imageSrc) {
+  for (const image of images) {
+    const platform = image.platform === "web" ? "Web" : "Mobile";
     nodes.push({
       type: "paragraph",
       children: [
-        { type: "image", url: imageSrc, alt: attributes.imageAlt ?? title },
+        {
+          type: "image",
+          url: image.imageSrc,
+          alt: `${attributes.imageAlt ?? title}${images.length > 1 ? ` — ${platform}` : ""}`,
+        },
       ],
     });
   }
@@ -79,7 +84,7 @@ function screenshotNodes(node: MarkdownNode, locale: string): MarkdownNode[] {
   return nodes;
 }
 
-function taskCardNodes(node: MarkdownNode): MarkdownNode[] {
+function taskCardNodes(node: MarkdownNode, locale: string): MarkdownNode[] {
   const attributes = stringAttributes(node);
   const title = attributes.title ?? attributes.action ?? "Guide";
   const nodes: MarkdownNode[] = [
@@ -91,14 +96,19 @@ function taskCardNodes(node: MarkdownNode): MarkdownNode[] {
       children: [{ type: "text", value: attributes.description }],
     });
   }
-  if (attributes.imageSrc) {
+  const images = attributes.screenshotId
+    ? resolveDocsScreenshot({ id: attributes.screenshotId, locale }).images
+    : attributes.imageSrc
+      ? [{ imageSrc: attributes.imageSrc, platform: "web" }]
+      : [];
+  for (const image of images) {
     nodes.push({
       type: "paragraph",
       children: [
         {
           type: "image",
-          url: attributes.imageSrc,
-          alt: attributes.imageAlt ?? title,
+          url: image.imageSrc,
+          alt: `${attributes.imageAlt ?? title}${images.length > 1 ? ` — ${image.platform === "mobile" ? "Mobile" : "Web"}` : ""}`,
         },
       ],
     });
@@ -132,7 +142,7 @@ function rewriteDocumentation(
         child.name === "DocsScreenshot"
           ? screenshotNodes(child, locale)
           : child.name === "DocsTaskCard"
-            ? taskCardNodes(child)
+            ? taskCardNodes(child, locale)
             : [child];
       if (replacement[0] !== child) {
         for (const item of replacement)

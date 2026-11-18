@@ -5,6 +5,7 @@ import type { AbstractIntlMessages } from "next-intl";
 export const SHARED_CLIENT_MESSAGE_PATHS = [
   "nav",
   "header",
+  "accessibility",
   "banner.release",
   "runningPlanPages.labels",
   "commonLinks",

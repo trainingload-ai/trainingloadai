@@ -13,7 +13,7 @@ describe('PmcInvalidateListener', () => {
 
     await listener.handle(new PmcInvalidateEvent('user-1'));
 
-    expect(recalculatePMC).toHaveBeenCalledWith('user-1');
+    expect(recalculatePMC).toHaveBeenCalledWith('user-1', true);
     expect(calculatePMC).not.toHaveBeenCalled();
   });
 
@@ -33,6 +33,7 @@ describe('PmcInvalidateListener', () => {
       userId: 'user-1',
       startDate,
       endDate,
+      requestAthleteStateUpdate: true,
     });
     expect(recalculatePMC).not.toHaveBeenCalled();
   });
@@ -56,6 +57,7 @@ describe('PmcInvalidateListener', () => {
       userId: 'user-1',
       startDate,
       endDate,
+      requestAthleteStateUpdate: false,
     });
     expect(emitAsync).not.toHaveBeenCalled();
   });

@@ -181,7 +181,7 @@ function PowerProfilePanel({ copy }: { copy: (typeof metricDemoCopy)["en"] }) {
         {copy.power.profile.riderType}: {DEMO_POWER_PROFILE.riderType}
       </div>
       <div className="overflow-hidden rounded-compact border">
-        <Table>
+        <Table scrollLabel={copy.power.profileTitle}>
           <TableHeader>
             <TableRow>
               <TableHead />

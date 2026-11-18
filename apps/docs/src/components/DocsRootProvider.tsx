@@ -30,7 +30,9 @@ export function DocsRootProvider({
       search={{ preload: false }}
       theme={{
         enabled: true,
-        defaultTheme: "light",
+        // Shared with the critical image preload bootstrap.
+        storageKey: "theme",
+        defaultTheme: "system",
         enableSystem: true,
       }}
       i18n={{ ...i18n, onLocaleChange: changeLocale }}

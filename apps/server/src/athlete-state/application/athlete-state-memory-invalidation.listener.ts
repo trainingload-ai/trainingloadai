@@ -31,10 +31,5 @@ export class AthleteStateMemoryInvalidationListener {
       return;
     }
     await this.commands.invalidate(event.userId);
-    await emitAthleteStateReassessRequested(this.events, {
-      userId: event.userId,
-      triggerType: 'MEMORY_CHANGED',
-      triggerRef: event.change,
-    });
   }
 }

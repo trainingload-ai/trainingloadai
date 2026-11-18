@@ -1,5 +1,15 @@
 "use client";
 
+import { ToolChoiceGroup } from "@/components/ToolChoiceGroup";
+
+import { ToolActionButton } from "@/components/ToolActionButton";
+
+import { ToolResultActions } from "@/components/ToolResultActions";
+import { scrollBehavior } from "@/lib/scroll-behavior";
+
+import { useCommittedFields } from "@/lib/use-committed-fields";
+import { FieldErrorAnnouncement } from "@/components/FieldErrorAnnouncement";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import { Printer, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { localePrefix } from "@/lib/locale-url";
@@ -255,21 +265,28 @@ export function RunningPaceCalculatorClient({
         ? ""
         : distanceLabel;
 
-  const timeInvalid =
+  const committed = useCommittedFields();
+  const timeKey = `${state.hours}:${state.minutes}:${state.seconds}`;
+  const paceKey = `${state.paceMinutes}:${state.paceSeconds}`;
+  const rawTimeInvalid =
     state.solveFor !== "time" &&
     clockInvalid(state.hours, state.minutes, state.seconds);
-  const paceInvalid =
+  const rawPaceInvalid =
     state.solveFor !== "pace" &&
     (state.paceMinutes.trim() !== "" || state.paceSeconds.trim() !== "") &&
     pacePartsToSeconds({
       minutes: Number(state.paceMinutes || 0),
       seconds: Number(state.paceSeconds || 0),
     }) == null;
-  const distanceInvalid =
+  const rawDistanceInvalid =
     state.solveFor !== "distance" &&
     state.preset === "custom" &&
     state.distanceText.trim() !== "" &&
     parsePositiveNumber(state.distanceText) == null;
+  const timeInvalid = rawTimeInvalid && committed.isCommitted("time", timeKey);
+  const paceInvalid = rawPaceInvalid && committed.isCommitted("pace", paceKey);
+  const distanceInvalid =
+    rawDistanceInvalid && committed.isCommitted("distance", state.distanceText);
   const fieldInvalid = timeInvalid || paceInvalid || distanceInvalid;
   const inputsStarted =
     state.hours.trim() !== "" ||
@@ -280,7 +297,9 @@ export function RunningPaceCalculatorClient({
     (state.preset === "custom" && state.distanceText.trim() !== "");
   const unusable =
     inputsStarted &&
-    !fieldInvalid &&
+    !rawTimeInvalid &&
+    !rawPaceInvalid &&
+    !rawDistanceInvalid &&
     result == null &&
     ((state.solveFor === "pace" && timeSec != null && distanceKm != null) ||
       (state.solveFor === "time" &&
@@ -431,43 +450,47 @@ export function RunningPaceCalculatorClient({
           id="calculator"
           className={styles.board}
           aria-labelledby="pace-input-title"
+          onBlurCapture={() => {
+            committed.commit("time", timeKey);
+            committed.commit("pace", paceKey);
+            committed.commit("distance", state.distanceText);
+          }}
           onSubmit={(event) => {
             event.preventDefault();
+            committed.commit("time", timeKey);
+            committed.commit("pace", paceKey);
+            committed.commit("distance", state.distanceText);
+            if (rawDistanceInvalid || rawTimeInvalid || rawPaceInvalid) {
+              const id = rawDistanceInvalid
+                ? "running-pace-distance"
+                : rawTimeInvalid
+                  ? "pace-time-hours"
+                  : "pace-paceMinutes";
+              document.getElementById(id)?.focus();
+              return;
+            }
             if (!result) return;
             document.getElementById("result")?.scrollIntoView({
-              behavior: "smooth",
+              behavior: scrollBehavior(),
               block: "start",
             });
           }}
         >
+          <FieldErrorAnnouncement message={fieldInvalid ? t("invalid") : ""} />
           <div className={styles.formHead}>
             <div className={styles.formTitleRow}>
               <h2 id="pace-input-title" className={styles.boardLabel}>
                 {t("panel.title")}
               </h2>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                size="sm"
+              <ToolChoiceGroup
                 value={state.distanceUnit === "mi" ? "imperial" : "metric"}
-                aria-label={t("units.systemLabel")}
-                className={styles.unitSwitch}
-                onValueChange={(value) => {
-                  if (value) {
-                    switchUnitSystem(value as "metric" | "imperial");
-                  }
-                }}
-              >
-                {(["metric", "imperial"] as const).map((unitSystem) => (
-                  <ToggleGroupItem
-                    key={unitSystem}
-                    value={unitSystem}
-                    className={styles.unitOption}
-                  >
-                    {t(`units.${unitSystem}`)}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                onValueChange={switchUnitSystem}
+                label={t("units.systemLabel")}
+                options={(["metric", "imperial"] as const).map((value) => ({
+                  value,
+                  label: t(`units.${value}`),
+                }))}
+              />
             </div>
             <p>{t("panel.subtitle")}</p>
           </div>
@@ -507,6 +530,9 @@ export function RunningPaceCalculatorClient({
                   id="running-pace-distance"
                   inputMode="decimal"
                   aria-invalid={distanceInvalid || undefined}
+                  aria-describedby={
+                    distanceInvalid ? "pace-input-error" : undefined
+                  }
                   value={distanceValue}
                   onChange={(event) =>
                     edit({
@@ -517,30 +543,22 @@ export function RunningPaceCalculatorClient({
                   }
                   placeholder={t("inputs.distance.placeholder")}
                 />
-                <ToggleGroup
-                  type="single"
-                  variant="outline"
-                  size="sm"
-                  spacing={1}
+                <ToolChoiceGroup
                   value={state.preset}
-                  aria-label={t("inputs.preset.label")}
-                  className={styles.presetGroup}
-                  onValueChange={(value) => {
-                    if (value) applyPreset(value as RacePreset);
+                  onValueChange={(next) => {
+                    if (next !== "custom") applyPreset(next);
                   }}
-                >
-                  {RACE_PRESETS.map((key) => (
-                    <ToggleGroupItem
-                      key={key}
-                      value={key}
-                      className={styles.presetOption}
-                    >
-                      {key === "half"
+                  label={t("inputs.preset.label")}
+                  options={RACE_PRESETS.map((value) => ({
+                    value,
+                    label:
+                      value === "half"
                         ? t("inputs.preset.halfShort")
-                        : t(`presets.${key}`)}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                        : t(`presets.${value}`),
+                  }))}
+                  presentation="chips"
+                  fullWidth
+                />
               </Field>
             ) : null}
             {state.solveFor !== "time" ? (
@@ -568,6 +586,9 @@ export function RunningPaceCalculatorClient({
                         id={`pace-time-${key}`}
                         inputMode={mode}
                         aria-invalid={timeInvalid || undefined}
+                        aria-describedby={
+                          timeInvalid ? "pace-input-error" : undefined
+                        }
                         placeholder="00"
                         value={value}
                         onChange={(event) =>
@@ -603,6 +624,9 @@ export function RunningPaceCalculatorClient({
                         id={`pace-${key}`}
                         inputMode={mode}
                         aria-invalid={paceInvalid || undefined}
+                        aria-describedby={
+                          paceInvalid ? "pace-input-error" : undefined
+                        }
                         placeholder="00"
                         value={value}
                         onChange={(event) =>
@@ -615,17 +639,15 @@ export function RunningPaceCalculatorClient({
               </FieldSet>
             ) : null}
             {fieldInvalid || unusable ? (
-              <FieldError>
+              <FieldError id="pace-input-error" role={undefined}>
                 {t(fieldInvalid ? "invalid" : "unusable")}
               </FieldError>
             ) : null}
           </FieldGroup>
           <div className={styles.formUtilities}>
-            <Button
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="link"
-              size="sm"
-              className={styles.exampleAction}
               onClick={() => {
                 setState({ ...PACE_CALCULATOR_EXAMPLE });
                 setShareError(false);
@@ -633,12 +655,10 @@ export function RunningPaceCalculatorClient({
               }}
             >
               {t("example.action")}
-            </Button>
-            <Button
+            </ToolActionButton>
+            <ToolActionButton
+              intent="quiet"
               type="button"
-              variant="ghost"
-              size="sm"
-              className={styles.resetAction}
               onClick={() => {
                 setState({ ...EMPTY_PACE_CALCULATOR });
                 setShareError(false);
@@ -646,11 +666,11 @@ export function RunningPaceCalculatorClient({
               }}
             >
               {t("panel.reset")}
-            </Button>
+            </ToolActionButton>
           </div>
-          <Button type="submit" size="lg" className={styles.calculateButton}>
+          <ToolActionButton intent="primary" fullWidth type="submit">
             {t("panel.calculate")}
-          </Button>
+          </ToolActionButton>
           <p className={styles.panelNote}>{t("panel.note")}</p>
         </form>
       </div>
@@ -743,7 +763,21 @@ export function RunningPaceCalculatorClient({
             </dl>
           ) : null}
         </section>
-        <div className={`${styles.actions} pace-share-actions`}>
+        <ToolResultActions
+          className="pace-share-actions"
+          leading={
+            <>
+              <Button
+                variant="outline"
+                size="lg"
+                nativeButton={false}
+                render={<a href={`${prefix}/race-time-predictor`} />}
+              >
+                {t("scorecard.predict")}
+              </Button>
+            </>
+          }
+        >
           <Button
             type="button"
             variant="outline"
@@ -764,17 +798,11 @@ export function RunningPaceCalculatorClient({
             <Share2 data-icon="inline-start" aria-hidden />
             {shareCopied ? t("scorecard.shareCopied") : t("scorecard.share")}
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            nativeButton={false}
-            render={<a href={`${prefix}/race-time-predictor`} />}
-          >
-            {t("scorecard.predict")}
-          </Button>
-        </div>
+        </ToolResultActions>
         {shareError ? (
-          <FieldError>{t("scorecard.shareError")}</FieldError>
+          <FieldError id="pace-input-error" role={undefined}>
+            {t("scorecard.shareError")}
+          </FieldError>
         ) : null}
       </div>
       {result ? (
