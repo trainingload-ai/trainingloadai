@@ -125,6 +125,10 @@ OpenAI API Key 与 ChatGPT Plus 或 Pro 订阅是两回事。ChatGPT 订阅不�
 
 自托管版不使用 Trainingload.ai 云端会员或 AI 积分。**AI 用量** 页面会说明自有 AI 服务的费用规则；实际 API 用量、余额和账单请到所选服务商的控制台查看。
 
+## 公开文件工具的可选故障留档
+
+默认关闭。在 `.env.selfhost` 中显式设置 `PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=true` 后，公开文件工具遇到服务端错误会保留原始上传。文件可能包含 GPS 轨迹或其他个人数据，保存在 `data/operations/public-upload-failures`，不进入备份。留档在达到 72 小时后清理，达到容量或数量上限时会更早清理。
+
 ## 用于自动化部署的环境变量兜底
 
 发行 schema 仍允许在 `.env.selfhost` 中提供完整的供应商配置组，用于无人值守部署。这只是兜底方式，不是推荐的交互路径。Client 不会显示环境中的 Key；从环境变量切换到 Client 管理时，Owner 必须重新输入 Key。
