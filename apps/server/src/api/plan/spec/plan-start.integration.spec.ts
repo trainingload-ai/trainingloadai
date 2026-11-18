@@ -665,6 +665,7 @@ describe('saved draft START / PostgreSQL', () => {
           type: metric.type,
           sport: metric.sport,
           source: 'MANUAL',
+          changeSource: 'USER_MANUAL',
           value: metric.initial,
           recordedAt: new Date('2026-01-01'),
         },

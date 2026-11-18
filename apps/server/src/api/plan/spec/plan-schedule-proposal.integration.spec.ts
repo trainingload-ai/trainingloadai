@@ -897,49 +897,56 @@ describe('remaining schedule / PostgreSQL', () => {
     ).rejects.toThrow(/out-of-range/);
   });
 
-  it('atomically applies a complete 210-course positional rotation without a 200-course batch truncation', async () => {
-    const d = await running(210);
-    d.request.range.to = '2100-06-30';
-    const rows = await prisma.planWorkout.findMany({
-      where: { planId: d.planId },
-      orderBy: { dayOffset: 'asc' },
-    });
-    d.request.changes = rows.map((w, i) => {
-      const offset = (i + 1) % 210;
-      return {
-        sourceWorkoutId: w.id,
-        expectedRevision: w.revision,
-        workout: {
-          weekIndex: Math.floor(offset / 7) + 1,
-          dayIndex: (offset % 7) + 1,
-          sportType: 'RUN',
-          plannedSessionRpe: 6,
-          definition: {
-            kind: 'FREEFORM',
-            version: 1,
-            source: 'TEXT',
-            text: 'Run 30m',
+  describe('large schedule', () => {
+    let prepared: Awaited<ReturnType<typeof running>>;
+    beforeEach(async () => {
+      prepared = await running(210);
+    }, 30_000);
+
+    it('atomically applies a complete 210-course positional rotation without a 200-course batch truncation', async () => {
+      const d = prepared;
+      d.request.range.to = '2100-06-30';
+      const rows = await prisma.planWorkout.findMany({
+        where: { planId: d.planId },
+        orderBy: { dayOffset: 'asc' },
+      });
+      d.request.changes = rows.map((w, i) => {
+        const offset = (i + 1) % 210;
+        return {
+          sourceWorkoutId: w.id,
+          expectedRevision: w.revision,
+          workout: {
+            weekIndex: Math.floor(offset / 7) + 1,
+            dayIndex: (offset % 7) + 1,
+            sportType: 'RUN',
+            plannedSessionRpe: 6,
+            definition: {
+              kind: 'FREEFORM',
+              version: 1,
+              source: 'TEXT',
+              text: 'Run 30m',
+            },
           },
-        },
-      };
+        };
+      });
+      const receipt = await apply(d);
+      expect(receipt).toMatchObject({
+        readbackVerified: true,
+        changedWorkoutCount: 210,
+        preservedWorkoutCount: 0,
+      });
+      expect(receipt.identityMap).toHaveLength(210);
+      const final = await prisma.planWorkout.findMany({
+        where: { planId: d.planId },
+        orderBy: { dayOffset: 'asc' },
+      });
+      expect(final[0]).toMatchObject({
+        id: rows[209].id,
+        revision: 2,
+        plannedSessionRpe: 6,
+      });
+      expect(final[209]).toMatchObject({ id: rows[208].id, revision: 2 });
     });
-    const receipt = await apply(d);
-    expect(receipt).toMatchObject({
-      readbackVerified: true,
-      changedWorkoutCount: 210,
-      preservedWorkoutCount: 0,
-    });
-    expect(receipt.identityMap).toHaveLength(210);
-    const final = await prisma.planWorkout.findMany({
-      where: { planId: d.planId },
-      orderBy: { dayOffset: 'asc' },
-    });
-    expect(final[0]).toMatchObject({
-      id: rows[209].id,
-      revision: 2,
-      plannedSessionRpe: 6,
-    });
-    expect(final[209]).toMatchObject({ id: rows[208].id, revision: 2 });
   });
 
   (process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN ? it : it.skip)(
