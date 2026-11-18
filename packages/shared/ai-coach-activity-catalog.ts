@@ -13,6 +13,7 @@ export const COACH_SKILL_LABELS = {
   "plan-day-review": "planDayReview",
   "plan-week-review": "planWeekReview",
   "plan-review-adjustment": "planReviewAdjustment",
+  "rolling-plan": "rollingPlan",
   "plan-cycle-review": "planCycleReview",
   "period-review": "periodReview",
   "plan-builder": "planBuilder",

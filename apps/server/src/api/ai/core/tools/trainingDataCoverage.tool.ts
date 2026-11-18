@@ -29,6 +29,7 @@ export const trainingDataCoverageTool: AiToolDef<
     'plan-week-review',
     'plan-cycle-review',
     'period-review',
+    'rolling-plan',
   ],
   isEnabled: async (ctx) =>
     hasSignedInUser(ctx) && Boolean(ctx.trainingDataCoverage),

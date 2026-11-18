@@ -1,3 +1,4 @@
+import { RollingPlanAutomationService } from './application/rolling-plan-automation.service';
 import { RollingPlanAuthorizationService } from './application/rolling-plan-authorization.service';
 import { AiDataConsentModule } from '@/ai-data-consent/ai-data-consent.module';
 import { RollingPlanService } from './application/rolling-plan.service';
@@ -103,6 +104,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     RollingPlanAuthorizationService,
     PlanStartService,
     RollingPlanService,
+    RollingPlanAutomationService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanScheduledActivationWorker,
@@ -125,6 +127,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     WorkoutPersistenceService,
     PlanStartService,
     RollingPlanService,
+    RollingPlanAutomationService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanDeliveryReadService,

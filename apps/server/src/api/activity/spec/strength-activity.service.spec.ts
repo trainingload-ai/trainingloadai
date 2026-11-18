@@ -72,6 +72,7 @@ describe('StrengthActivityService', () => {
       planWorkout: {
         findFirst: jest.fn(async () => ({
           id: 'workout-1',
+          revision: 1,
           planId: 'plan-1',
           structureKind: 'STRENGTH',
           status: 'PLANNED',
@@ -109,6 +110,10 @@ describe('StrengthActivityService', () => {
         callback(tx),
       ),
     };
+    Object.assign(tx.planWorkout, { findFirst: prisma.planWorkout.findFirst });
+    Object.assign(tx.planWorkoutActivityLink, {
+      findFirst: prisma.planWorkoutActivityLink.findFirst,
+    });
     const service = createService(prisma);
 
     const result = await service.startPlanned('user-1', {
@@ -125,7 +130,7 @@ describe('StrengthActivityService', () => {
       created: true,
     });
     expect(tx.planWorkout.update).toHaveBeenCalledWith({
-      where: { id: 'workout-1' },
+      where: { id: 'workout-1', revision: 1, status: 'PLANNED' },
       data: { status: 'IN_PROGRESS', completedAt: null, skippedAt: null },
     });
     expect(createSet).toHaveBeenCalledTimes(2);

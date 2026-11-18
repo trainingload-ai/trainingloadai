@@ -76,6 +76,7 @@ describe('coach skill resolution', () => {
     'workout-review',
     'period-review',
     'plan-review-adjustment',
+    'rolling-plan',
     'athlete-state',
     'workout-generator',
   ])(

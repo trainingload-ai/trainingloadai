@@ -2557,6 +2557,14 @@ export class PlanWriteSupport {
       const existing = await this.assertPlanOwnership(userId, planId, tx);
       this.assertMutablePlanStatus(existing.status);
 
+      if (
+        existing.planningMode === 'ROLLING' &&
+        dto.goal !== undefined &&
+        !dto.goal?.trim()
+      )
+        throw new UnprocessableEntityException(
+          'A continuous plan requires a confirmed nonempty goal',
+        );
       const nextTitle =
         dto.title !== undefined ? dto.title.trim() : existing.title;
       if (!nextTitle) {
@@ -2619,6 +2627,34 @@ export class PlanWriteSupport {
           false,
           tx,
         );
+      if (
+        existing.planningMode === 'ROLLING' &&
+        (dto.scheduleConstraints !== undefined || dto.goal !== undefined) &&
+        meta?.action !== 'automation_apply_plan_schedule'
+      ) {
+        const policy = await tx.planAutomationPolicy.findFirst({
+          where: { planId, revokedAt: null },
+        });
+        if (policy) {
+          await tx.planAutomationPolicy.update({
+            where: { id: policy.id },
+            data: { revokedAt: new Date() },
+          });
+          await tx.planAutomationPolicy.create({
+            data: {
+              planId,
+              userId,
+              revision: policy.revision + 1,
+              settings: {
+                ...(policy.settings as object),
+                ...(dto.goal !== undefined ? { goal: dto.goal?.trim() } : {}),
+              },
+              confirmedDecisionId: policy.confirmedDecisionId,
+              effectiveFrom: policy.effectiveFrom,
+            },
+          });
+        }
+      }
       const nextPeriodWeeks = dto.periodWeeks ?? existing.periodWeeks;
       const nextStartDate = existing.startDate ?? null;
 
@@ -4152,6 +4188,7 @@ export class PlanWriteSupport {
 
     return withSerializableRetry(() =>
       this.prisma.$transaction(async (tx) => {
+        await acquireHashtextAdvisoryXactLock(tx, userId);
         if (!(await this.links.lockLinkTargets(activity.id, workoutId, tx)))
           throw new Error('Link target no longer exists');
         const existing = await this.links.findFirst(
@@ -4254,6 +4291,7 @@ export class PlanWriteSupport {
 
     const result = await withSerializableRetry(() =>
       this.prisma.$transaction(async (tx) => {
+        await acquireHashtextAdvisoryXactLock(tx, userId);
         if (!(await this.links.lockLinkTargets(link.activityId, workoutId, tx)))
           throw new Error('Link target no longer exists');
         const current = await this.links.findUnique(
@@ -4560,6 +4598,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const activity = await this.activityRead.activity(tx).findFirst({
         // 计划关联是导入处理链的一部分，必须能看到当前刚提交、尚在 ANALYZING
         // 的活动；readyActivityWhere 明确不适用于 worker/association 场景。
@@ -4884,6 +4923,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const activity = await this.activityRead.activity(tx).findFirst({
         where: readyActivityWhere({ hashId, userId }),
         select: { id: true },

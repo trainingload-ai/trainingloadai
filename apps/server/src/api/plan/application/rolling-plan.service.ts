@@ -226,13 +226,17 @@ export class RollingPlanService {
       _max: { revision: true },
     });
     const through = addCalendarDays(input.weekStart, 6);
+    const coverageFrom =
+      previous && previous.generatedFrom < date(input.from)
+        ? previous.generatedFrom.toISOString().slice(0, 10)
+        : input.from;
     const generation = await tx.rollingWeekGeneration.create({
       data: {
         planId: input.planId,
         policyId: input.policyId,
         weekStart: date(input.weekStart),
         weekEnd: date(through),
-        generatedFrom: date(input.from),
+        generatedFrom: date(coverageFrom),
         generatedThrough: date(through),
         revision: (latest._max.revision ?? 0) + 1,
         evidenceRevision: input.evidenceRevision,
@@ -273,13 +277,13 @@ export class RollingPlanService {
       generation.id,
       input.policyId,
       currentIds,
-      input.from,
+      coverageFrom,
       through,
       tx,
     );
     return {
       generationId: generation.id,
-      generatedFrom: input.from,
+      generatedFrom: coverageFrom,
       generatedThrough: through,
       monthStrategyIds: currentIds,
     };

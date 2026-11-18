@@ -328,6 +328,11 @@
     }
   },
   "notification": {
+    "rollingPlan": {
+      "titleMonthApplied": "持续训练计划：月度方向已更新",
+      "titleWeekApplied": "持续训练计划：训练安排已更新",
+      "titleBlocked": "持续训练计划需要处理"
+    },
     "reviewDigest": {
       "titleDailyReady": "日复盘已生成",
       "titleWeeklyReady": "周复盘已生成",

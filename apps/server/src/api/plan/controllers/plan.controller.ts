@@ -1,3 +1,5 @@
+import { ConfigurePlanAutomationDto } from '../dto/configure-plan-automation.dto';
+import { RollingPlanAutomationService } from '../application/rolling-plan-automation.service';
 import { PlanQueryService } from '../application/plan-query.service';
 import { PlanStartService } from '../application/plan-start.service';
 import {
@@ -42,7 +44,29 @@ export class PlanController {
     private readonly planShares: PlanShareService,
     private readonly starts: PlanStartService,
     private readonly queries: PlanQueryService,
+    private readonly automation: RollingPlanAutomationService,
   ) {}
+
+  @Get(':planId/automation')
+  async automationStatus(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+  ) {
+    return this.automation.status(userId, planId);
+  }
+  @Put(':planId/automation')
+  async configureAutomation(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Body() input: ConfigurePlanAutomationDto,
+  ) {
+    return this.automation.configure(
+      userId,
+      planId,
+      input.enabled,
+      input.settings,
+    );
+  }
 
   @Get()
   @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.PLANS_READ)
