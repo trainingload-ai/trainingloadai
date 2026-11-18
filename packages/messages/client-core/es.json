@@ -6534,7 +6534,24 @@
     "windowThrough": "Hasta",
     "exporting": "Exportando…",
     "exportFailed": "No se pudo exportar",
-    "plannedThrough": "Se generará hasta {date}"
+    "plannedThrough": "Se generará hasta {date}",
+    "loadTitle": "Carga mensual",
+    "actual": "Real completada",
+    "remainingPlanned": "Planificada restante",
+    "ungeneratedForecast": "Previsión sin generar",
+    "unknown": "Desconocida",
+    "unit": "carga normalizada",
+    "sources": "Fuentes: {sources}",
+    "observedCount": "{known}/{total} conocidos",
+    "coverage": {
+      "COMPLETE": "Cobertura completa",
+      "PARTIAL": "Cobertura parcial",
+      "NO_DATA": "Sin observaciones",
+      "UNKNOWN": "Cobertura desconocida"
+    },
+    "loadHint": "La carga real incluye actividades registradas en este intervalo. La carga planificada incluye estimaciones conocidas de sesiones pendientes. Los datos ausentes no son cero; la orientación mensual no determina la carga de sesiones sin generar.",
+    "loadError": "No se pudo leer la carga.",
+    "retryLoad": "Reintentar"
   },
   "PlanAutomation": {
     "title": "Gestión automática",

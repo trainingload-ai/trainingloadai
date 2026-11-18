@@ -6631,7 +6631,24 @@
     "windowThrough": "結束日期",
     "exporting": "正在匯出…",
     "exportFailed": "匯出快照失敗",
-    "plannedThrough": "確認後產生至 {date}"
+    "plannedThrough": "確認後產生至 {date}",
+    "loadTitle": "月度負荷",
+    "actual": "實際完成",
+    "remainingPlanned": "剩餘課程預計",
+    "ungeneratedForecast": "未生成部分預測",
+    "unknown": "未知",
+    "unit": "標準化負荷",
+    "sources": "來源：{sources}",
+    "observedCount": "已知 {known}/{total}",
+    "coverage": {
+      "COMPLETE": "完整涵蓋",
+      "PARTIAL": "部分涵蓋",
+      "NO_DATA": "暫無觀測",
+      "UNKNOWN": "涵蓋未知"
+    },
+    "loadHint": "實際負荷來自此視窗內已記錄的活動；剩餘預計僅包含未完成課程的已知估算。缺失資料不按零計算，月度方向不代表尚未生成課程的負荷。",
+    "loadError": "無法讀取負荷資料。",
+    "retryLoad": "重試"
   },
   "PlanAutomation": {
     "title": "自動管理",

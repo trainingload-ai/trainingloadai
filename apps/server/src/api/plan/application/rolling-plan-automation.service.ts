@@ -294,6 +294,27 @@ export class RollingPlanAutomationService {
         lastError: 'ROLLING_INPUT_SUPERSEDED',
       },
     });
+    // Only a same-input pause can resume a frozen candidate. Discovery has already
+    // checked the active policy and current facts; prepare/apply revalidate them.
+    const resumed = await tx.rollingPlanJob.updateMany({
+      where: {
+        planId: data.planId,
+        kind: data.kind,
+        policyId: data.policyId,
+        windowStart: data.windowStart,
+        inputRevision: data.inputRevision,
+        state: 'CANCELLED',
+        lastError: 'PAUSED',
+      },
+      data: {
+        state: 'PENDING',
+        attempts: 0,
+        availableAt: new Date(),
+        claimToken: null,
+        leaseUntil: null,
+        lastError: null,
+      },
+    });
     // Exhaust a bounded burst, then re-admit on the next day; blocked personal settings need new input.
     await tx.rollingPlanJob.updateMany({
       where: {
@@ -311,7 +332,7 @@ export class RollingPlanAutomationService {
       data: { ...data, receipt: json({ input }) },
       skipDuplicates: true,
     });
-    return result.count;
+    return result.count + resumed.count;
   }
 
   /** Atomic competing-worker claim, including process-crash recovery and a fresh fencing token. */

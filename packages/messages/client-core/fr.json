@@ -6534,7 +6534,24 @@
     "windowThrough": "Au",
     "exporting": "Exportation…",
     "exportFailed": "Échec de l’exportation",
-    "plannedThrough": "Sera généré jusqu’au {date}"
+    "plannedThrough": "Sera généré jusqu’au {date}",
+    "loadTitle": "Charge mensuelle",
+    "actual": "Charge réalisée",
+    "remainingPlanned": "Prévision des séances restantes",
+    "ungeneratedForecast": "Prévision non générée",
+    "unknown": "Inconnue",
+    "unit": "charge normalisée",
+    "sources": "Sources : {sources}",
+    "observedCount": "{known}/{total} connus",
+    "coverage": {
+      "COMPLETE": "Couverture complète",
+      "PARTIAL": "Couverture partielle",
+      "NO_DATA": "Aucune observation",
+      "UNKNOWN": "Couverture inconnue"
+    },
+    "loadHint": "La charge réelle couvre les activités enregistrées sur cette période. La charge prévue inclut les estimations connues des séances inachevées. Une donnée absente ne vaut pas zéro ; les orientations mensuelles ne déterminent pas la charge des séances non générées.",
+    "loadError": "Impossible de lire les données de charge.",
+    "retryLoad": "Réessayer"
   },
   "PlanAutomation": {
     "title": "Gestion automatique",

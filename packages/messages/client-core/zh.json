@@ -7190,7 +7190,24 @@
     "windowThrough": "结束日期",
     "exporting": "正在导出…",
     "exportFailed": "导出快照失败",
-    "plannedThrough": "确认后生成至 {date}"
+    "plannedThrough": "确认后生成至 {date}",
+    "loadTitle": "月度负荷",
+    "actual": "实际完成",
+    "remainingPlanned": "剩余课程预计",
+    "ungeneratedForecast": "未生成部分预测",
+    "unknown": "未知",
+    "unit": "标准化负荷",
+    "sources": "来源：{sources}",
+    "observedCount": "已知 {known}/{total}",
+    "coverage": {
+      "COMPLETE": "完整覆盖",
+      "PARTIAL": "部分覆盖",
+      "NO_DATA": "暂无观测",
+      "UNKNOWN": "覆盖未知"
+    },
+    "loadHint": "实际负荷来自此窗口内已记录的活动；剩余预计仅包含未完成课程的已知估算。缺失数据不按零计算，月度方向不代表尚未生成课程的负荷。",
+    "loadError": "无法读取负荷数据。",
+    "retryLoad": "重试"
   },
   "PlanAutomation": {
     "title": "自动管理",

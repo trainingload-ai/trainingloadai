@@ -6534,7 +6534,24 @@
     "windowThrough": "Al",
     "exporting": "Esportazione…",
     "exportFailed": "Esportazione non riuscita",
-    "plannedThrough": "Verrà generato fino al {date}"
+    "plannedThrough": "Verrà generato fino al {date}",
+    "loadTitle": "Carico mensile",
+    "actual": "Carico effettivo completato",
+    "remainingPlanned": "Pianificato rimanente",
+    "ungeneratedForecast": "Previsione non generata",
+    "unknown": "Sconosciuto",
+    "unit": "carico normalizzato",
+    "sources": "Fonti: {sources}",
+    "observedCount": "{known}/{total} noti",
+    "coverage": {
+      "COMPLETE": "Copertura completa",
+      "PARTIAL": "Copertura parziale",
+      "NO_DATA": "Nessuna osservazione",
+      "UNKNOWN": "Copertura sconosciuta"
+    },
+    "loadHint": "Il carico effettivo comprende le attività registrate in questo intervallo. Il pianificato include le stime note delle sessioni incomplete. I dati mancanti non valgono zero; le indicazioni mensili non determinano il carico delle sessioni non generate.",
+    "loadError": "Impossibile leggere i dati di carico.",
+    "retryLoad": "Riprova"
   },
   "PlanAutomation": {
     "title": "Gestione automatica",

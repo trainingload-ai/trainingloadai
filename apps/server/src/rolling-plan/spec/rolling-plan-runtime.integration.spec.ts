@@ -147,6 +147,102 @@ describe('continuous plan runtime / PostgreSQL', () => {
     );
     await a.heartbeat(recovered!.id, recovered!.claimToken!);
   });
+  it('resumes unchanged same-day work with a new lease and revalidates current facts', async () => {
+    const { planId } = await active();
+    const queue = automation();
+    await queue.discover(now);
+    const old = (await queue.claim())!;
+    await queue.prepare(old.id, old.claimToken!);
+    await f.service.pausePlan('user', planId);
+    await expect(queue.heartbeat(old.id, old.claimToken!)).rejects.toThrow(
+      'ROLLING_LEASE_LOST',
+    );
+    await f.service.activatePlan('user', planId);
+    await queue.discover(now);
+    expect(
+      (await queue.status('user', planId)).jobs.filter((j) =>
+        ['PENDING', 'RETRY'].includes(j.state),
+      ),
+    ).toHaveLength(2);
+    const resumed = (await queue.claim())!;
+    expect(resumed.claimToken).not.toBe(old.claimToken);
+    await expect(queue.prepare(old.id, old.claimToken!)).rejects.toThrow(
+      'ROLLING_LEASE_LOST',
+    );
+    await queue.prepare(resumed.id, resumed.claimToken!);
+    await prisma.planWorkout.create({
+      data: {
+        userId: 'user',
+        planId,
+        dayOffset: 3,
+        sessionIndex: 1,
+        scheduledDate: new Date('2099-11-21'),
+        sportType: 'RUN',
+        text: 'Easy 20m',
+        name: 'New athlete fact',
+      },
+    });
+    await expect(
+      queue.prepare(resumed.id, resumed.claimToken!),
+    ).rejects.toThrow('ROLLING_FACTS_CHANGED');
+  });
+  it.each(['calendar-create', 'calendar-attach'])(
+    'preserves a manually scheduled %s workout against automatic deletion',
+    async (path) => {
+      const { planId } = await active();
+      Object.assign(f.write, { emitWorkoutsChanged: async () => undefined });
+      Object.defineProperty(f.starts, 'automationAccess', {
+        value: { assertAllowed: async () => undefined },
+      });
+      const dto = {
+        scheduledDate: '2099-11-21',
+        sportType: 'RUN' as const,
+        definition: {
+          kind: 'FREEFORM' as const,
+          version: 1 as const,
+          source: 'TEXT' as const,
+          text: 'Easy run 20m',
+        },
+        name: 'Athlete commitment',
+      };
+      const created =
+        path === 'calendar-create'
+          ? await f.service.createPlanWorkout('user', planId, dto)
+          : await f.service.createIndependentWorkout('user', dto);
+      const workoutId = created.workout!.id;
+      if (path === 'calendar-attach')
+        await f.service.attachWorkoutToPlan('user', planId, workoutId);
+      const queue = automation();
+      await queue.discover(now);
+      const job = (await queue.claim())!;
+      await queue.prepare(job.id, job.claimToken!);
+      await expect(
+        f.starts.createAutomationPreview(job.id, job.claimToken!, {
+          mode: 'SCHEDULE',
+          planId,
+          range: { from: '2099-11-20', to: '2099-11-22' },
+          rationale: 'Attempted automated deletion',
+          evidenceRefs: [],
+          changes: [],
+          additions: [],
+          deletions: [
+            {
+              sourceWorkoutId: workoutId,
+              expectedRevision: path === 'calendar-create' ? 1 : 2,
+            },
+          ],
+          preserveUnmentioned: true,
+        }),
+      ).rejects.toThrow(
+        'A protected or out-of-range workout cannot be changed',
+      );
+      expect(
+        (await f.service.getPlanDetail('user', planId)).plan!.workouts.map(
+          (w) => w.id,
+        ),
+      ).toContain(workoutId);
+    },
+  );
   it('serializes planned strength start behind calendar edits and starts only the committed prescription once', async () => {
     const { planId } = await active();
     const workout = await prisma.planWorkout.create({
@@ -445,7 +541,7 @@ describe('continuous plan runtime / PostgreSQL', () => {
     expect(await a.notificationsDue()).toEqual([]);
   });
 
-  it('reclaims a crashed model-result job and applies its frozen candidate without another paid call', async () => {
+  it('resumes a paused paid candidate and reclaims its lease without another paid call', async () => {
     const { planId } = await active();
     Object.defineProperty(f.starts, 'automationAccess', {
       value: { assertAllowed: async () => undefined },
@@ -495,6 +591,9 @@ describe('continuous plan runtime / PostgreSQL', () => {
       candidate,
       'paid-run-before-crash',
     );
+    await f.service.pausePlan('user', planId);
+    await f.service.activatePlan('user', planId);
+    await a.discover(now);
     // Keep this test focused on response-loss recovery of one business job.
     await prisma.rollingPlanJob.updateMany({
       where: { planId, id: { not: job.id }, state: 'PENDING' },

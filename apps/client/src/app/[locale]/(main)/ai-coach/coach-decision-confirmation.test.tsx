@@ -40,11 +40,12 @@ afterEach(() => {
 });
 it("shows the confirmed automatic scope and monthly direction on a continuous START proposal", () => {
   const rolling = {
-    policy: { goal: "提升耐力", sportTypes: ["RUN"], autoPlanMonths: true, autoGenerateWeeks: true, autoAdjustFuture: true },
+    policy: { goal: "提升耐力", sportTypes: ["RUN", "STRENGTH", "STRETCHING", "OTHER", "UNKNOWN"], autoPlanMonths: true, autoGenerateWeeks: true, autoAdjustFuture: true },
     monthStrategies: [{ monthStart: "2026-11-01", objective: "逐步建立有氧基础", loadRange: null, durationMinutesRange: null, weekFocus: [{ weekStart: "2026-11-16", focus: "恢复后谨慎开始" }] }],
     generatedFrom: "2026-11-18", generatedThrough: "2026-11-22",
   };
   render(<QueryClientProvider client={new QueryClient()}><NextIntlClientProvider locale="zh" messages={messages}><CoachDecisionDraftCard result={{ ...proposal, decisionType: "PLAN_START", payload: { presentation: { ...proposal.payload!.presentation as object, mode: "START", startDate: "2026-11-18", rolling } } }} onConfirm={vi.fn()} /></NextIntlClientProvider></QueryClientProvider>);
+  expect(screen.getByText("跑步 · 力量训练 · 拉伸 · 其他 · 其他")).toBeInTheDocument();
   expect(screen.getByText("持续训练计划")).toBeInTheDocument();
   expect(screen.getByText("逐步建立有氧基础")).toBeInTheDocument();
   expect(screen.getByText(/确认后将自动规划月度目标/)).toBeInTheDocument();

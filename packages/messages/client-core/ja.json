@@ -6533,7 +6533,24 @@
     "windowThrough": "終了日",
     "exporting": "エクスポート中…",
     "exportFailed": "エクスポートに失敗しました",
-    "plannedThrough": "確認後に {date} まで生成"
+    "plannedThrough": "確認後に {date} まで生成",
+    "loadTitle": "月間負荷",
+    "actual": "完了した実績",
+    "remainingPlanned": "残りの予定負荷",
+    "ungeneratedForecast": "未生成部分の予測",
+    "unknown": "不明",
+    "unit": "正規化負荷",
+    "sources": "出典：{sources}",
+    "observedCount": "既知 {known}/{total}",
+    "coverage": {
+      "COMPLETE": "完全なカバー範囲",
+      "PARTIAL": "部分的なカバー範囲",
+      "NO_DATA": "観測なし",
+      "UNKNOWN": "カバー範囲不明"
+    },
+    "loadHint": "実績はこの期間に記録されたアクティビティです。残りの予定負荷は未完了セッションの既知の推定値のみを含みます。欠損値はゼロではなく、月間方針は未生成セッションの負荷を表しません。",
+    "loadError": "負荷データを読み込めませんでした。",
+    "retryLoad": "再試行"
   },
   "PlanAutomation": {
     "title": "自動管理",

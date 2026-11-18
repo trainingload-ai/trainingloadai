@@ -1,5 +1,9 @@
+import type { WorkoutStructure } from '@shared/workout-structure';
 import { RollingPlanAuthorizationService } from './rolling-plan-authorization.service';
-import { RollingPlanService } from './rolling-plan.service';
+import {
+  RollingPlanService,
+  isRollingWorkoutSportAuthorized,
+} from './rolling-plan.service';
 import { isoWeekStart, parseRollingStartSettings } from '@shared/rolling-plan';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { HealthDataRepository } from '@/health-data/persistence/health-data.repository';
@@ -58,6 +62,24 @@ import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-excep
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
 import { workoutImmutabilityReason } from './plan-workout-mutability.policy';
 import type { UpdatePlanDto } from '../dto/update-plan.dto';
+
+// Persistence assigns exercise/set IDs; compare the prescription independently of those identities.
+function workoutStructureKey(value: WorkoutStructure) {
+  if (value.kind === 'STRENGTH')
+    return hash({
+      ...value,
+      exercises: value.exercises.map(({ id: _exerciseId, ...exercise }) => ({
+        ...exercise,
+        setGroups: exercise.setGroups.map(({ id: _setId, ...group }) => group),
+      })),
+    });
+  return hash({
+    ...value,
+    ...(value.kind === 'FREEFORM'
+      ? { durationSeconds: value.durationSeconds ?? null }
+      : {}),
+  });
+}
 
 export type PlanStartBinding = {
   sid: string;
@@ -1477,13 +1499,18 @@ export class PlanStartService {
 
   private assertAutomationSports(
     settings: unknown,
-    workouts: Array<{ sportType?: string }>,
+    workouts: Array<{
+      sportType?: string;
+      sportDefinitionCode?: string | null;
+      structureKind?: string;
+      definition?: { kind?: string };
+    }>,
   ) {
     const sports = (settings as { sportTypes?: unknown })?.sportTypes;
     if (
       !Array.isArray(sports) ||
       !sports.length ||
-      workouts.some((w) => !sports.includes(w.sportType ?? 'UNKNOWN'))
+      workouts.some((w) => !isRollingWorkoutSportAuthorized(sports, w))
     )
       fail('Automatic workout is outside the authorized sports');
   }
@@ -1776,16 +1803,6 @@ export class PlanStartService {
         workoutDefinitionService: this.definitions,
         workoutPersistence: this.persistence,
       })!;
-      const structureKey = (value: {
-        kind: string;
-        durationSeconds?: number | null;
-      }) =>
-        hash({
-          ...value,
-          ...(value.kind === 'FREEFORM'
-            ? { durationSeconds: value.durationSeconds ?? null }
-            : {}),
-        });
       for (const candidate of proposal.candidate) {
         if (
           !candidate.sourceWorkoutId ||
@@ -1805,8 +1822,8 @@ export class PlanStartService {
           prior.name === (draft.name ?? null) &&
           prior.notes === (draft.notes ?? null) &&
           prior.plannedSessionRpe === (draft.plannedSessionRpe ?? null) &&
-          structureKey(prior.structure) ===
-            structureKey(resolved.structure as { kind: string })
+          workoutStructureKey(prior.structure) ===
+            workoutStructureKey(resolved.structure)
         )
           changed.delete(candidate.sourceWorkoutId);
       }
@@ -1927,25 +1944,8 @@ export class PlanStartService {
         c.workout.definition!,
       );
       if (
-        hash({
-          ...actual.structure,
-          ...(actual.structure.kind === 'FREEFORM'
-            ? { durationSeconds: actual.structure.durationSeconds ?? null }
-            : {}),
-        }) !==
-          hash({
-            ...expectedDefinition.structure,
-            ...(expectedDefinition.kind === 'FREEFORM'
-              ? {
-                  durationSeconds:
-                    (
-                      expectedDefinition.structure as {
-                        durationSeconds?: number | null;
-                      }
-                    ).durationSeconds ?? null,
-                }
-              : {}),
-          }) ||
+        workoutStructureKey(actual.structure) !==
+          workoutStructureKey(expectedDefinition.structure) ||
         actual.sportType !== c.workout.sportType ||
         actual.name !== (c.workout.name ?? null) ||
         actual.notes !== (c.workout.notes ?? null) ||

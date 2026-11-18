@@ -346,3 +346,16 @@ it("removes the start-date action immediately after a live commit while the prep
   mounted.unmount();
   client.clear();
 });
+
+it("projects an empty rolling draft at the chosen date before assessment without calling it rest", async () => {
+  api.open.mockResolvedValue({ ...prepared, plan: { ...prepared.plan, planningMode: "ROLLING", startDate: null, periodWeeks: null } });
+  api.messages.mockResolvedValue([]);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><PlanStartConversationDialog open planId="empty-rolling" onOpenChange={vi.fn()} /></QueryClientProvider>);
+  await screen.findByDisplayValue("2026-11-22");
+  fireEvent.click(screen.getByRole("button", { name: "evaluate" }));
+  await screen.findByTestId("runtime");
+  expect(screen.getByText("2026-11-16 – 2026-11-22")).toBeInTheDocument();
+  expect(screen.getByText("2026-11-23 – 2026-11-29")).toBeInTheDocument();
+  expect(screen.queryByText("weekBreakdown.restDay")).not.toBeInTheDocument();
+});

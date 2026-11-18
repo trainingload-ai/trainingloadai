@@ -12,6 +12,30 @@ import {
 
 const date = (value: string) => new Date(`${value}T00:00:00Z`);
 
+type RollingWorkoutSport = {
+  sportType?: string;
+  sportDefinitionCode?: string | null;
+  structureKind?: string;
+  definition?: { kind?: string };
+};
+
+/** Resolve the catalog/definition semantics without treating every UNKNOWN as strength. */
+export function isRollingWorkoutSportAuthorized(
+  sports: string[],
+  workout: RollingWorkoutSport,
+) {
+  if (
+    workout.structureKind === 'STRENGTH' ||
+    workout.definition?.kind === 'STRENGTH' ||
+    workout.sportDefinitionCode === 'STRENGTH_TRAINING'
+  )
+    return sports.includes('STRENGTH');
+  const family = workout.sportType ?? 'UNKNOWN';
+  if (family === 'UNKNOWN')
+    return sports.includes('UNKNOWN') || sports.includes('OTHER');
+  return sports.includes(family);
+}
+
 /** Owns versioned policy/month/week publication. Model output never authorizes execution. */
 @Injectable()
 export class RollingPlanService {
@@ -22,11 +46,13 @@ export class RollingPlanService {
   validateStart(
     value: unknown,
     startDate: string,
-    workouts: Array<{
-      weekIndex: number;
-      dayIndex: number;
-      sportType?: string;
-    }>,
+    workouts: Array<
+      {
+        weekIndex: number;
+        dayIndex: number;
+        sportType?: string;
+      } & RollingWorkoutSport
+    >,
   ) {
     let settings: RollingStartSettings;
     try {
@@ -46,7 +72,7 @@ export class RollingPlanService {
       if (
         scheduled < startDate ||
         scheduled > through ||
-        !settings.policy.sportTypes.includes(workout.sportType ?? 'UNKNOWN')
+        !isRollingWorkoutSportAuthorized(settings.policy.sportTypes, workout)
       )
         throw new UnprocessableEntityException(
           'First rolling week must contain only the remaining ISO week and authorized sports',

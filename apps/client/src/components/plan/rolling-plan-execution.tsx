@@ -1,5 +1,6 @@
 "use client";
 
+import { RollingPlanLoadSummary } from "./rolling-plan-load-summary";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -23,6 +24,7 @@ export function RollingPlanExecution({ plan }: { plan: TrainingPlanDetail }) {
         {plan.goal ? <p className="text-sm">{plan.goal}</p> : null}
         <RollingPlanMonthDirection plan={plan} />
         <RollingPlanAutomation plan={plan} />
+        <RollingPlanLoadSummary plan={plan} />
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"

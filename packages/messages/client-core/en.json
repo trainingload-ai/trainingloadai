@@ -7191,7 +7191,24 @@
     "windowThrough": "Through",
     "exporting": "Exporting…",
     "exportFailed": "Could not export the snapshot",
-    "plannedThrough": "Will generate through {date}"
+    "plannedThrough": "Will generate through {date}",
+    "loadTitle": "Monthly load",
+    "actual": "Completed actual",
+    "remainingPlanned": "Remaining planned",
+    "ungeneratedForecast": "Ungenerated forecast",
+    "unknown": "Unknown",
+    "unit": "normalized load",
+    "sources": "Sources: {sources}",
+    "observedCount": "{known}/{total} known",
+    "coverage": {
+      "COMPLETE": "Complete coverage",
+      "PARTIAL": "Partial coverage",
+      "NO_DATA": "No observations",
+      "UNKNOWN": "Unknown coverage"
+    },
+    "loadHint": "Actual load covers recorded activities in this window. Remaining planned load includes known estimates for unfinished sessions. Missing data is not zero; monthly directions do not determine the load of ungenerated sessions.",
+    "loadError": "Could not read load data.",
+    "retryLoad": "Retry"
   },
   "PlanAutomation": {
     "title": "Automatic management",

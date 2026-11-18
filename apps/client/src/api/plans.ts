@@ -452,7 +452,18 @@ export async function createPlan(dto: CreatePlanDto) {
   return data?.plan;
 }
 
+export type PlanWindowLoadMetric = {
+  value: number | null;
+  unit: "NORMALIZED_LOAD";
+  coverage: "COMPLETE" | "PARTIAL" | "NO_DATA" | "UNKNOWN";
+  knownCount?: number;
+  totalCount?: number;
+  sources?: string[];
+  reason?: string;
+};
+
 export type PlanWindowSnapshot = {
+  load: Record<"actual" | "remainingPlanned" | "ungeneratedForecast", PlanWindowLoadMetric>;
   schemaVersion: 2;
   payloadVersion: "plan-window-v2";
   sourceMode: "ROLLING";

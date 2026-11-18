@@ -1,4 +1,6 @@
 "use client";
+
+import { RollingPlanLoadSummary } from "./rolling-plan-load-summary";
 import { isRollingPlan, isPlanDateNotGenerated } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
@@ -314,6 +316,7 @@ export function MobilePlanDetailContent({
 
       <RollingPlanMonthDirection plan={plan} />
       <RollingPlanAutomation plan={plan} />
+        <RollingPlanLoadSummary plan={plan} />
 
       <section className="grid grid-cols-2 gap-3">
         <PlanMetric

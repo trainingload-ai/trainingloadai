@@ -1,3 +1,4 @@
+import { RollingPlanLoadSummary } from "@/components/plan/rolling-plan-load-summary";
 import { isRollingPlan } from "@/lib/rolling-plan";
 import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
@@ -97,6 +98,7 @@ export function PlanDetailHeader({
         {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanCoverage plan={plan} /></div> : null}
         {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanMonthDirection plan={plan} /></div> : null}
         {isRollingPlan(plan) ? <div className="mt-3"><RollingPlanAutomation plan={plan} /></div> : null}
+        <RollingPlanLoadSummary plan={plan} />
         {hasGoalOrDescription ? (
           <div className="mt-2 space-y-3">
             {goalTrim ? (
