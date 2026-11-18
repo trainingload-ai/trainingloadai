@@ -647,4 +647,67 @@ describe('continuous plan runtime / PostgreSQL', () => {
       a.assertFresh(job.id, job.claimToken!),
     ).resolves.toBeUndefined();
   });
+  it('publishes a remaining Sunday after a month boundary without inventing a direction for elapsed days', async () => {
+    const { planId, policy } = await active();
+    Object.defineProperty(f.starts, 'automationAccess', {
+      value: { assertAllowed: async () => undefined },
+    });
+    await prisma.plan.update({
+      where: { id: planId },
+      data: { startDate: new Date('2099-11-01') },
+    });
+    await prisma.rollingMonthStrategy.updateMany({
+      where: { planId },
+      data: { effectiveFrom: new Date('2099-11-01') },
+    });
+    const a = automation();
+    await a.discover(new Date('2099-11-01T09:00:00Z'));
+    let job = (await a.claim())!;
+    if (job.windowStart.toISOString().slice(0, 10) !== '2099-10-26')
+      job = (await a.claim())!;
+    await a.prepare(job.id, job.claimToken!);
+    await f.starts.createAutomationPreview(job.id, job.claimToken!, {
+      mode: 'SCHEDULE',
+      planId,
+      range: { from: '2099-11-01', to: '2099-11-01' },
+      rationale: 'Only future November Sunday',
+      evidenceRefs: [],
+      changes: [],
+      deletions: [],
+      preserveUnmentioned: true,
+      additions: [
+        {
+          candidateKey: 'remaining-sunday',
+          workout: {
+            weekIndex: 1,
+            dayIndex: 1,
+            sportType: 'RUN',
+            definition: {
+              kind: 'FREEFORM',
+              version: 1,
+              source: 'TEXT',
+              text: 'Easy run 20m',
+            },
+          },
+        },
+      ],
+    });
+    await f.starts.applyAutomation(job.id, job.claimToken!);
+    const snapshot = await f.query.windowSnapshot(
+      'user',
+      planId,
+      '2099-11-01',
+      '2099-11-01',
+    );
+    expect(snapshot.generationCoverage.status).toBe('GENERATED');
+    expect(
+      await prisma.rollingMonthStrategy.count({
+        where: {
+          planId,
+          policyId: policy.id,
+          monthStart: new Date('2099-10-01'),
+        },
+      }),
+    ).toBe(0);
+  });
 });

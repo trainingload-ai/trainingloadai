@@ -162,13 +162,16 @@ export class RollingPlanService {
     policyId: string,
     weekStart: string,
     tx: PlanDb,
+    from = weekStart,
   ) {
     if (isoWeekStart(weekStart) !== weekStart)
       throw new UnprocessableEntityException(
         'A rolling week starts on ISO Monday',
       );
     const end = addCalendarDays(weekStart, 6);
-    const months = [...new Set([weekStart.slice(0, 7), end.slice(0, 7)])];
+    if (from < weekStart || from > end)
+      throw new UnprocessableEntityException('Invalid remaining week window');
+    const months = [...new Set([from.slice(0, 7), end.slice(0, 7)])];
     const strategies = await tx.rollingMonthStrategy.findMany({
       where: {
         planId,
@@ -203,6 +206,7 @@ export class RollingPlanService {
       input.policyId,
       input.weekStart,
       tx,
+      input.from,
     );
     if (JSON.stringify(currentIds) !== JSON.stringify(input.strategyIds))
       throw new UnprocessableEntityException(

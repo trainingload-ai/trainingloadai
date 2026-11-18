@@ -1386,6 +1386,7 @@ export class PlanStartService {
                         (request as PlanSchedulePreviewRequest).range.from,
                       ),
                       tx,
+                      (request as PlanSchedulePreviewRequest).range.from,
                     ),
                 }),
             startDate,
@@ -1585,6 +1586,7 @@ export class PlanStartService {
             job.policyId,
             weekStart,
             tx,
+            range.from,
           );
           if (hash(dependencies) !== hash(proposal.automationMonthStrategyIds))
             fail('Month strategy changed after assessment');
