@@ -27,6 +27,7 @@ import {
 } from './public-upload-limits';
 import { EncodeWorkoutDto } from './dto/encode-workout.dto';
 import { TRACK_FILE_CONVERSION_REPORT_HEADER } from '@shared/track-file-contract';
+import { PublicUploadFailureCaptureService } from './public-upload-failure-capture.service';
 
 function readNumberEnv(key: string, fallback: number): number {
   const raw = process.env[key];
@@ -65,6 +66,7 @@ export class PublicController {
   constructor(
     private readonly publicService: PublicService,
     private readonly activityService: ActivityService,
+    private readonly failedUploads: PublicUploadFailureCaptureService,
   ) {}
 
   /**
@@ -111,7 +113,13 @@ export class PublicController {
     @UploadedFiles(FileNameEncodePipe) files: Array<Express.Multer.File>,
     @Body(new ValidationPipe({ transform: true })) body: EstimateCpFromFilesDto,
   ) {
-    return await this.activityService.estimateCpFromFiles(files, body);
+    return await this.failedUploads.run(
+      {
+        route: 'POST /public/estimate-cp',
+        files,
+      },
+      () => this.activityService.estimateCpFromFiles(files, body),
+    );
   }
 
   /**
@@ -144,10 +152,17 @@ export class PublicController {
     @Body(new ValidationPipe({ transform: true })) body: ConvertFilesDto,
     @Res() res: Response,
   ) {
-    const content = await this.activityService.convertFiles(
-      files,
-      body.type,
-      body.sourceType,
+    const content = await this.failedUploads.run(
+      {
+        route: 'POST /public/convert',
+        files,
+        context: {
+          targetFormat: body.type,
+          ...(body.sourceType ? { expectedSourceFormat: body.sourceType } : {}),
+        },
+      },
+      () =>
+        this.activityService.convertFiles(files, body.type, body.sourceType),
     );
     res.setHeader(
       'Content-Type',
@@ -186,7 +201,13 @@ export class PublicController {
   async inspectActivityFile(
     @UploadedFile(FileNameEncodePipe) file: Express.Multer.File,
   ) {
-    return await this.publicService.inspectActivityFile(file);
+    return await this.failedUploads.run(
+      {
+        route: 'POST /public/inspect-activity-file',
+        files: [file],
+      },
+      () => this.publicService.inspectActivityFile(file),
+    );
   }
 
   /**
@@ -212,7 +233,14 @@ export class PublicController {
     @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
   ) {
-    const content = await this.publicService.encodeFITCourseFromFile(file);
+    const content = await this.failedUploads.run(
+      {
+        route: 'POST /public/encode-course',
+        files: [file],
+        context: { targetFormat: 'fit' },
+      },
+      () => this.publicService.encodeFITCourseFromFile(file),
+    );
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
     res.setHeader(

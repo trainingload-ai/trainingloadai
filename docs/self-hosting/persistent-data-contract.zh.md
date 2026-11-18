@@ -10,7 +10,7 @@
 | `data/elevation`                           | `/data/elevation`       | operator dataset            | elevation provider     |       单独管理 |                              可重新挂载来源 |
 | `data/backups`                             | helper `/state/backups` | versioned bundle            | management CLI         |     本身是备份 |                            需显式 retention |
 | `data/diagnostics`                         | `/data/diagnostics`     | redacted artifact           | management CLI         |             否 |                                          是 |
-| `data/operations`                          | `/data/operations`      | bootstrap/restore transient | apps/server/management CLI  |             否 |               生命周期完成后删除 token/快照 |
+| `data/operations`                          | `/data/operations`      | bootstrap/restore transient、可选故障取证 | apps/server/management CLI  |             否 | token/快照按生命周期删除；公开文件工具的 5xx 原始上传最多保留 72 小时 |
 | `data/gateway/data`                        | `/data` (Caddy)         | TLS state                   | gateway                |       单独管理 |                      否，证书与本地 CA 状态 |
 | `data/gateway/config`                      | `/config` (Caddy)       | derived config              | gateway                |             否 |                                          是 |
 | `.selfhost/operations`                     | 不挂载                  | operator audit              | management CLI         | 取决于保留策略 |                          仅按显式 retention |
@@ -38,34 +38,38 @@
 8. `data/operations/bootstrap-token` 是短期 secret，不得进入 backup、diagnostics 或 CLI audit；`owner-bootstrap` 只让
    容器内命令读取该文件，CLI 的 redacted operation record 只写入宿主 `.selfhost/operations`，不与 server-writable secret
    目录混用。
-9. `data/.trainingload-selfhost-data-root.json` 声明目录已由 operator 专用于本实例；没有 marker 的非空目录
+9. 只有显式设置 `PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=true` 时，公开文件工具的服务端失败才会在
+   `data/operations/public-upload-failures` 暂存原始上传。成功请求和预期 4xx 不写入；目录/文件权限分别为 `0700`/`0600`，
+   每组只记录随机 ID、稳定错误码、格式、大小与 SHA-256，不记录原文件名、IP、UA、请求正文或错误消息。数据按 72 小时、
+   100 组和 512 MiB 三重上限自动清理，不进入 backup；分享前仍需人工检查文件内容。
+10. `data/.trainingload-selfhost-data-root.json` 声明目录已由 operator 专用于本实例；没有 marker 的非空目录
    只有在顶层条目全部属于既有 self-host 契约时才能被 `init` 接管。
-10. 实例内 data-root 不能位于已签名 release 子树、`.selfhost` 或 `.env.selfhost` 下；边界校验同时使用词法路径和
+11. 实例内 data-root 不能位于已签名 release 子树、`.selfhost` 或 `.env.selfhost` 下；边界校验同时使用词法路径和
     prospective physical path，因此即使目标尚未创建，也不能通过父目录 symlink 绕入签名子树。默认 `./data` 与其他独立顶层
     目录可用，也可使用实例外绝对路径。这样运行时写入不会让 bundle 的精确签名子树失效。
-11. backup bundle 只包含 PostgreSQL logical dump、uploads、非 secret 配置、secret 名称引用、manifest、结果与
+12. backup bundle 只包含 PostgreSQL logical dump、uploads、非 secret 配置、secret 名称引用、manifest、结果与
     checksums；`.env.selfhost`、bootstrap token、cache、elevation、TLS private state 和 diagnostics 不进入 bundle。
-12. `.selfhost` lifecycle state 必须是 `0600` regular file 和 `0700` directory；marker、current release 和 report
+13. `.selfhost` lifecycle state 必须是 `0600` regular file 和 `0700` directory；marker、current release 和 report
     在被信任前执行 strict schema 校验，不能靠手工编辑解除 restore/upgrade block。成功 report 先于 marker 删除持久化；
     删除后的目录同步失败时必须原子重建原 marker 并 fail closed。
-13. 可移植 backup 树最多包含 100,000 个 upload 文件、100,006 个总文件、100,000 个子目录和 64 层目录；doctor
+14. 可移植 backup 树最多包含 100,000 个 upload 文件、100,006 个总文件、100,000 个子目录和 64 层目录；doctor
     对 backup/restore/operation history 分别只扫描 1024/4096/10,000 个顶层项并累计读取 64/16/2 MiB，
     upgrade/rollback 最多接受 1024 个 report-directory 项和 64 MiB report。所有上限由 `v1-contract.json` 交叉校验，
     越界时显式 warning 或 fail closed，不能静默截断。
-14. Release bundle 的每个签名文件最多 32 MiB、完整签名集合最多 512 MiB；builder 在复制前、verifier 在 hashing/Cosign
+15. Release bundle 的每个签名文件最多 32 MiB、完整签名集合最多 512 MiB；builder 在复制前、verifier 在 hashing/Cosign
     前执行累计记账，防止最终 archive 门禁生效前先耗尽磁盘或读取资源。
-15. 安装后的 release root 最多扫描 1024 个顶层条目；签名文件、`.env.selfhost` 与 `.selfhost` 以外只接受真实目录作为
+16. 安装后的 release root 最多扫描 1024 个顶层条目；签名文件、`.env.selfhost` 与 `.selfhost` 以外只接受真实目录作为
     潜在自定义 data-root。未声明普通文件、symlink 与 special file 不属于运行时状态，验证时 fail closed。
-16. `init/start/backup/restore/upgrade/rollback/stop/owner-bootstrap/owner-recovery/uninstall` 共用实例级 exclusive mutation
+17. `init/start/backup/restore/upgrade/rollback/stop/owner-bootstrap/owner-recovery/uninstall` 共用实例级 exclusive mutation
     lock；不同备份名也不能绕开。锁是 `0600`、有界、严格 schema 的原子发布文件，冲突在任何 Docker 或数据变更前返回稳定
     exit 6。进程消失后仍保留两小时安全窗口，超过后只有确认 PID 不存活且锁字节未漂移才允许回收；固定 strict reclaim record
     原子仲裁唯一回收者，并绑定其 PID/operation/time 与旧锁 operation ID/digest，再原子替换旧锁，锁路径不出现空窗。畸形锁、
     死亡回收者、超过 15 分钟的回收或残留/不匹配 record 一律 fail closed，不得手工删除绕过。
-17. 锁释放不用可覆盖目标的 rename：先以 exclusive hard link 发布 owner snapshot，重读主锁与 snapshot 的精确字节后才 unlink 主锁；
+18. 锁释放不用可覆盖目标的 rename：先以 exclusive hard link 发布 owner snapshot，重读主锁与 snapshot 的精确字节后才 unlink 主锁；
     snapshot 路径已存在或任一字节漂移时保留主锁并返回稳定 release failure，不能覆盖未知/取证文件。
-18. Release、acceptance 与 RC 的私有 staging/work/snapshot 目录属于 required cleanup；主装配或验证失败后仍逐项删除。删除失败
+19. Release、acceptance 与 RC 的私有 staging/work/snapshot 目录属于 required cleanup；主装配或验证失败后仍逐项删除。删除失败
     与主错误聚合保留并标记 filesystem failure，不能由 `catch` / `finally` 覆盖原始原因；成功路径存在清理失败时同样 fail closed。
-19. 私有文件的稳定读取、复制和 `fsync` 必须尝试关闭全部已打开的文件/目录句柄；读写或同步已失败时，任何 close 失败都追加到
+20. 私有文件的稳定读取、复制和 `fsync` 必须尝试关闭全部已打开的文件/目录句柄；读写或同步已失败时，任何 close 失败都追加到
     原始错误而不是覆盖它。双句柄复制保留两个 close 失败，清理错误统一携带可映射的 filesystem code。
 
 ## 当前实现状态

@@ -154,6 +154,7 @@ export const SELF_HOST_INSTANCE_CONFIG_KEYS = Object.freeze([
   "OPENROUTER_BASE_URL",
   "OPENROUTER_DEFAULT_MODEL",
   "OPENROUTER_REASONING_MODEL",
+  "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED",
   "SELF_HOST_ALLOW_INSECURE_HTTP",
   "SELF_HOST_AUTH_SECRET",
   "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS",
@@ -313,6 +314,7 @@ const BACKUP_SAFE_SETTINGS = new Set([
   "SELF_HOST_DATABASE_POOL_TIMEOUT_SECONDS",
   "SELF_HOST_DATABASE_USER",
   "SELF_HOST_ALLOW_INSECURE_HTTP",
+  "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED",
   "TELEMETRY_ENABLED",
 ]);
 const DATA_ROOT_MARKER = ".trainingload-selfhost-data-root.json";
@@ -1098,6 +1100,7 @@ export function validateSelfHostEnvironment(values) {
     );
   }
   for (const name of [
+    "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED",
     "SELF_HOST_ALLOW_INSECURE_HTTP",
   ]) {
     if (values.has(name) && !new Set(["true", "false"]).has(values.get(name))) {

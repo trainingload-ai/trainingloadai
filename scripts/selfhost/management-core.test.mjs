@@ -3248,6 +3248,7 @@ test("configuration preflight rejects invalid ports and bootstrap expiry", async
     { source: `${original}SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS=599\n`, message: "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS must be an integer between 600 and 604800" },
     { source: `${original}SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS=604801\n`, message: "SELF_HOST_BOOTSTRAP_TOKEN_TTL_SECONDS must be an integer between 600 and 604800" },
     { source: `${original}COMPOSE_PROFILES=docs\n`, message: "must not contain Docker Compose control setting COMPOSE_PROFILES" },
+    { source: `${original}PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=eventually\n`, message: "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED must be true or false" },
     ...["MAIL_PROVIDER", "SELF_HOST_DOCS_ENABLED", "SELF_HOST_HTTPS_PORT", "SELF_HOST_GATEWAY_ADDRESS", "DISABLE_SIGNUP", "BILLING_PROVIDER"].map(key => ({ source: `${original}${key}=true\n`, message: `unsupported setting ${key}` })),
     { source: original.replace("TELEMETRY_ENABLED=false", "TELEMETRY_ENABLED=true"), message: "TELEMETRY_ENABLED must remain false" },
     { source: `${original}ELEVATION_PROVIDER=mapbox\n`, message: "ELEVATION_PROVIDER must be none or local-dem" },
