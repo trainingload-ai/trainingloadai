@@ -1,3 +1,4 @@
+import { PlanStartService } from '../plan/application/plan-start.service';
 import { validCoachTimezone } from './core/coach-fact-scope.port';
 import { Inject } from '@nestjs/common';
 import {
@@ -58,6 +59,7 @@ export type CoachRunHandle = {
   userId: string;
   sessionId: string;
   operationId: string;
+  inputMessageId?: string;
   previousExecutionMs: number;
 };
 
@@ -81,6 +83,7 @@ export class CoachRunStore {
     @Optional()
     @Inject(COACH_FACT_SCOPE_VALIDATOR)
     private readonly factScopes?: CoachFactScopeValidator,
+    private readonly planStarts?: PlanStartService,
   ) {}
 
   async existingRequestBranch(
@@ -284,6 +287,14 @@ export class CoachRunStore {
 
     try {
       const result = await this.prisma.$transaction(async (tx) => {
+        if (command.kind !== 'retry')
+          await this.planStarts?.prepareTurn(
+            userId,
+            sid,
+            args.branchId,
+            args.message,
+            tx,
+          );
         let guidanceDedupeKey: string | undefined;
         if (command.kind === 'start' && args.guidance) {
           if (sid !== args.guidance.sessionId || args.branchId)
@@ -638,6 +649,7 @@ export class CoachRunStore {
             userId,
             sessionId: sid,
             operationId: args.operationId,
+            inputMessageId,
             previousExecutionMs,
           },
         };
@@ -925,6 +937,7 @@ export class CoachRunStore {
             userId,
             sessionId: sid,
             operationId: args.operationId,
+            inputMessageId,
             previousExecutionMs,
           },
         };

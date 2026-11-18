@@ -26,7 +26,7 @@ import {
   type TrainingPlanSummary,
 } from "@/api/plans";
 import { useActivatePlan, useDeletePlan } from "@/api/usePlanMutations";
-import { PlanActivateDialog } from "@/components/plan/PlanActivateDialog";
+import { PlanStartConversationDialog } from "@/components/plan/plan-start-conversation-dialog";
 import { useTranslations } from "next-intl";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import {
@@ -613,7 +613,11 @@ export default function PlansDesktopPage() {
                       deleting={deletingPlan}
                       activating={activatingPlan}
                       onRequestDelete={setPlanPendingDelete}
-                      onRequestStart={setPlanPendingStart}
+                      onRequestStart={(candidate) => {
+                        if (candidate.status === "PAUSED") {
+                          void activatePlanMut({ planId: candidate.id });
+                        } else setPlanPendingStart(candidate);
+                      }}
                     />
                   ))
                 )}
@@ -643,23 +647,11 @@ export default function PlansDesktopPage() {
         </div>
       </div>
 
-      <PlanActivateDialog
+      <PlanStartConversationDialog
         open={planPendingStart !== null}
-        pending={activatingPlan}
+        planId={planPendingStart?.id ?? null}
         onOpenChange={(open) => {
           if (!open) setPlanPendingStart(null);
-        }}
-        onConfirm={async (startDate) => {
-          if (!planPendingStart) return;
-          try {
-            await activatePlanMut({
-              planId: planPendingStart.id,
-              startDate,
-            });
-            setPlanPendingStart(null);
-          } catch {
-            /* toast via useActivatePlan */
-          }
         }}
       />
 

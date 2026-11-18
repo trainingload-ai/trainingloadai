@@ -1,4 +1,9 @@
 import {
+  parseScheduleConstraints,
+  scheduleConstraintsSchema,
+  type ScheduleConstraints,
+} from "./plan-calendar";
+import {
   parseFitnessUserAction,
   fitnessUserActionSchemas,
   type FitnessUserAction,
@@ -73,6 +78,7 @@ export type CoachPlanDraftWorkout = {
 };
 
 export type CoachPlanDraftData = {
+  scheduleConstraints?: ScheduleConstraints;
   qualityContract?: PlanQualityContract;
   title: string;
   description?: string;
@@ -142,7 +148,14 @@ export type CoachQuestionReplyLikeToolResultPayload =
   | CoachQuestionReplyToolResultPayload
   | CoachQuestionSkipToolResultPayload;
 
+export type CoachDecisionConfirmationPayload = {
+  kind: "coach_decision_confirmation";
+  repliesToAssistantMessageId: string;
+  decisionId: string;
+};
+
 export type CoachUserToolResultPayload =
+  | CoachDecisionConfirmationPayload
   | FitnessUserAction
   | CoachQuestionReplyToolResultPayload
   | CoachQuestionSkipToolResultPayload
@@ -416,6 +429,14 @@ export function parseCoachPlanDraftData(
 ): ParseResult<CoachPlanDraftData> {
   const obj = asRecord(raw);
   if (!obj) return err("input must be an object");
+  let scheduleConstraints: ScheduleConstraints | undefined;
+  try {
+    scheduleConstraints = parseScheduleConstraints(obj.scheduleConstraints);
+  } catch (error) {
+    return err(
+      error instanceof Error ? error.message : "Invalid scheduleConstraints",
+    );
+  }
   let qualityContract: PlanQualityContract | undefined;
   try {
     qualityContract = parsePlanQualityContract(obj.qualityContract);
@@ -532,6 +553,7 @@ export function parseCoachPlanDraftData(
   return ok({
     title: title.data,
     ...(qualityContract ? { qualityContract } : {}),
+    ...(scheduleConstraints ? { scheduleConstraints } : {}),
     ...(readOptionalTrimmedString(obj.description)
       ? { description: readOptionalTrimmedString(obj.description) }
       : {}),
@@ -837,10 +859,30 @@ export function safeParsePlanWorkoutAdjustmentAppliedToolResultPayload(
   return parsed.ok ? parsed.data : null;
 }
 
+export function safeParseCoachDecisionConfirmationPayload(
+  raw: unknown,
+): CoachDecisionConfirmationPayload | null {
+  const obj = asRecord(raw);
+  if (obj?.kind !== "coach_decision_confirmation") return null;
+  const decisionId = readNonEmptyString(obj.decisionId, "decisionId");
+  const reply = readNonEmptyString(
+    obj.repliesToAssistantMessageId,
+    "repliesToAssistantMessageId",
+  );
+  return decisionId.ok && reply.ok
+    ? {
+        kind: "coach_decision_confirmation",
+        decisionId: decisionId.data,
+        repliesToAssistantMessageId: reply.data,
+      }
+    : null;
+}
+
 export function safeParseCoachUserToolResultPayload(
   raw: unknown,
 ): CoachUserToolResultPayload | null {
   return (
+    safeParseCoachDecisionConfirmationPayload(raw) ??
     parseFitnessUserAction(raw) ??
     safeParseCoachQuestionReplyLikeToolResultPayload(raw) ??
     safeParseCoachPlanDraftSavedToolResultPayload(raw) ??
@@ -945,6 +987,7 @@ export const coachPlanDraftToolParametersSchema = {
   required: ["title", "periodWeeks", "workouts"],
   properties: {
     qualityContract: planQualityContractSchema,
+    scheduleConstraints: scheduleConstraintsSchema,
     title: { type: "string", minLength: 1 },
     description: {
       type: "string",
@@ -1117,6 +1160,16 @@ export function buildCoachUserToolResultPayloadJsonSchema(): Record<
       "User-side structured AI coach payload stored in tool_result.content for replies, skips, and draft-saved acknowledgements.",
     oneOf: [
       ...fitnessUserActionSchemas(),
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["kind", "repliesToAssistantMessageId", "decisionId"],
+        properties: {
+          kind: { const: "coach_decision_confirmation" },
+          repliesToAssistantMessageId: { type: "string", minLength: 1 },
+          decisionId: { type: "string", minLength: 1 },
+        },
+      },
       {
         type: "object",
         additionalProperties: false,

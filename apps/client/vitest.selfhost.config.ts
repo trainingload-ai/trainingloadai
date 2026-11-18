@@ -67,6 +67,10 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: [
+      "src/components/plan/plan-start-conversation-dialog.test.tsx",
+      "src/app/[locale]/(main)/ai-coach/coach-runtime-entry.test.tsx",
+      "src/app/[locale]/(main)/ai-coach/coach-decision-confirmation.test.tsx",
+      "src/lib/coach-plan-start.test.ts",
       "src/app/[locale]/(main)/ai-coach/coach-plan-draft-calendar-preview.test.tsx",
       "src/app/api/v2/home/route.test.ts",
       "src/app/**/_home/**/*.test.{ts,tsx}",

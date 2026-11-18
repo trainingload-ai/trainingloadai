@@ -7,6 +7,10 @@ import { planDb, type PlanDb } from './plan-db';
 export class PlanProposalRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  database(): PlanDb {
+    return this.prisma;
+  }
+
   private db(tx?: PlanDb) {
     return planDb(this.prisma, tx);
   }

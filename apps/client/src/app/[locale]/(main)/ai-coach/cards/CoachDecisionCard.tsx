@@ -27,6 +27,10 @@ import { CoachCard } from "./CoachCard";
 import { coachDecisionPreviewRows } from "@shared/coach-decision-preview";
 import type { PlanSportType } from "@/api/plans";
 import { CoachWorkoutPreview } from "../coach-workout-preview";
+import { parseScheduleConstraints } from "@shared/plan-calendar";
+import type { PlanProposalPresentation } from "@shared/plan-proposal";
+import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
+import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
 import { rejectCoachDecision } from "@/api/ai-coach";
 
 export type CoachDecisionDraftToolResult = {
@@ -76,38 +80,13 @@ function asNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-type PlanProposalPresentation = {
-  title: string;
-  summary: string;
-  mode: "ADAPT" | "SUPERSEDE";
-  effectiveFrom?: string;
-  facts: Array<{ type: string; label: string; value?: unknown }>;
-  counts: {
-    total: number;
-    changed: number;
-    preserved: number;
-    skipped: number;
-  };
-  estimatedLoadDelta?: number | null;
-  syncImpact: string;
-  rows: Array<{
-    name: string;
-    scheduledDate?: string | null;
-    sportType: string;
-    disposition: "APPLY" | "PRESERVE";
-    before: string;
-    after: string;
-    rationale: string;
-  }>;
-  warnings: string[];
-};
-
 function getPlanProposalPresentation(
   result: CoachDecisionDraftToolResult,
 ): PlanProposalPresentation | null {
   if (
     result.decisionType !== "PLAN_ADAPTATION" &&
-    result.decisionType !== "PLAN_SUPERSESSION"
+    result.decisionType !== "PLAN_SUPERSESSION" &&
+    result.decisionType !== "PLAN_START"
   )
     return null;
   const value = asRecord(asRecord(result.payload).presentation);
@@ -116,21 +95,46 @@ function getPlanProposalPresentation(
   if (
     !asText(value.title) ||
     !asText(value.summary) ||
-    (mode !== "ADAPT" && mode !== "SUPERSEDE") ||
+    (mode !== "ADAPT" && mode !== "SUPERSEDE" && mode !== "START") ||
     !Array.isArray(value.rows)
   )
     return null;
+  let scheduleConstraints: PlanProposalPresentation["scheduleConstraints"];
+  try {
+    scheduleConstraints = parseScheduleConstraints(value.scheduleConstraints);
+  } catch {
+    return null;
+  }
   return {
     title: asText(value.title),
     summary: asText(value.summary),
     mode,
     effectiveFrom: asText(value.effectiveFrom) || undefined,
+    ...(mode === "START"
+      ? {
+          startDate: asText(value.startDate),
+          calendarTimeZone: asText(value.calendarTimeZone),
+          calendarDraft:
+            safeParseCoachPlanDraftData(value.calendarDraft) ?? undefined,
+          scheduleConstraints,
+        }
+      : {}),
     facts: Array.isArray(value.facts)
       ? value.facts.flatMap((item) => {
           const fact = asRecord(item);
           const label = asText(fact.label);
           return label
-            ? [{ type: asText(fact.type), label, value: fact.value }]
+            ? [
+                {
+                  type: asText(fact.type),
+                  label,
+                  value:
+                    typeof fact.value === "number" ||
+                    typeof fact.value === "string"
+                      ? fact.value
+                      : null,
+                },
+              ]
             : [];
         })
       : [],
@@ -139,6 +143,12 @@ function getPlanProposalPresentation(
       changed: asNumber(counts.changed) ?? 0,
       preserved: asNumber(counts.preserved) ?? 0,
       skipped: asNumber(counts.skipped) ?? 0,
+      ...(mode === "START"
+        ? {
+            added: asNumber(counts.added) ?? 0,
+            deleted: asNumber(counts.deleted) ?? 0,
+          }
+        : {}),
     },
     estimatedLoadDelta: asNumber(value.estimatedLoadDelta),
     syncImpact: asText(value.syncImpact),
@@ -151,6 +161,15 @@ function getPlanProposalPresentation(
       return [
         {
           name,
+          ...(["CHANGED", "ADDED", "DELETED", "PRESERVED"].includes(
+            asText(row.changeKind),
+          )
+            ? {
+                changeKind: asText(row.changeKind) as NonNullable<
+                  PlanProposalPresentation["rows"][number]["changeKind"]
+                >,
+              }
+            : {}),
           scheduledDate: asText(row.scheduledDate) || null,
           sportType: asText(row.sportType),
           disposition,
@@ -426,6 +445,7 @@ export function CoachDecisionDraftCard({
   const [isCancelled, setIsCancelled] = React.useState(false);
   const [cancelFailed, setCancelFailed] = React.useState(false);
   const applied = Boolean(isApplied || result.state === "APPLIED");
+  const superseded = !applied && result.state === "SUPERSEDED";
   const rejected = !applied && (isCancelled || result.state === "REJECTED");
   const approved = !rejected && (applied || result.state === "APPROVED");
   const isHighRisk = result.riskTier === "HIGH";
@@ -455,7 +475,7 @@ export function CoachDecisionDraftCard({
       }
       title={summary}
       subtitle={
-        applied || rejected || approved
+        applied || rejected || approved || superseded
           ? undefined
           : (proposal?.summary ??
             (workoutDrafts.length
@@ -469,19 +489,25 @@ export function CoachDecisionDraftCard({
           </span>
         ) : (
           <span className="text-xs text-muted-foreground">
-            {rejected
-              ? t("rejectedTitle")
-              : approved
-                ? t("approvedTitle")
-                : isHighRisk
-                  ? t("reviewBadge")
-                  : t("draftBadge")}
+            {superseded
+              ? t("supersededTitle")
+              : rejected
+                ? t("rejectedTitle")
+                : approved
+                  ? t("approvedTitle")
+                  : isHighRisk
+                    ? t("reviewBadge")
+                    : t("draftBadge")}
           </span>
         )
       }
       dense={dense}
       footer={
-        showConfirmControls && (onConfirm || approved || rejected) ? (
+        superseded ? (
+          <p role="status" className="text-xs text-muted-foreground">
+            {t("supersededTitle")}
+          </p>
+        ) : showConfirmControls && (onConfirm || approved || rejected) ? (
           <Confirmation
             approval={{
               id: result.decisionId,
@@ -555,11 +581,13 @@ export function CoachDecisionDraftCard({
                 disabled={confirmDisabled || isCancelling}
                 onClick={() => onConfirm?.(result.decisionId)}
               >
-                {proposal?.mode === "SUPERSEDE"
-                  ? t("applySupersessionButton")
-                  : proposal
-                    ? t("applyAdaptationButton")
-                    : t("confirmButton")}
+                {proposal?.mode === "START"
+                  ? t("applyStartButton")
+                  : proposal?.mode === "SUPERSEDE"
+                    ? t("applySupersessionButton")
+                    : proposal
+                      ? t("applyAdaptationButton")
+                      : t("confirmButton")}
               </ConfirmationAction>
             </ConfirmationActions>
           </Confirmation>
@@ -569,22 +597,40 @@ export function CoachDecisionDraftCard({
       <div className="space-y-2.5">
         {proposal ? (
           <>
+            {proposal.mode === "START" &&
+            proposal.calendarDraft &&
+            proposal.startDate &&
+            proposal.calendarTimeZone ? (
+              <CoachPlanDraftCalendarPreview
+                draft={proposal.calendarDraft}
+                startDate={proposal.startDate}
+                calendarTimeZone={proposal.calendarTimeZone}
+                scheduleConstraints={proposal.scheduleConstraints}
+              />
+            ) : null}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(["total", "changed", "preserved", "skipped"] as const).map(
-                (key) => (
-                  <div
-                    key={key}
-                    className="rounded-md bg-background/80 px-3 py-2 dark:bg-background/45"
-                  >
-                    <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
-                      {t(key)}
-                    </div>
-                    <div className="mt-0.5 text-sm font-semibold text-foreground">
-                      {proposal.counts[key]}
-                    </div>
+              {(proposal.mode === "START"
+                ? ([
+                    "total",
+                    "changed",
+                    "added",
+                    "deleted",
+                    "preserved",
+                  ] as const)
+                : (["total", "changed", "preserved", "skipped"] as const)
+              ).map((key) => (
+                <div
+                  key={key}
+                  className="rounded-md bg-background/80 px-3 py-2 dark:bg-background/45"
+                >
+                  <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
+                    {t(key)}
                   </div>
-                ),
-              )}
+                  <div className="mt-0.5 text-sm font-semibold text-foreground">
+                    {proposal.counts[key]}
+                  </div>
+                </div>
+              ))}
             </div>
             {proposal.facts.length ? (
               <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
@@ -607,7 +653,9 @@ export function CoachDecisionDraftCard({
                 </CoachCard.MetaRow>
               ) : null}
               <CoachCard.MetaRow label={t("syncImpact")}>
-                {proposal.syncImpact || "—"}
+                {proposal.mode === "START"
+                  ? t("startSyncImpact")
+                  : proposal.syncImpact || "—"}
               </CoachCard.MetaRow>
               {proposal.effectiveFrom ? (
                 <CoachCard.MetaRow label={t("startDate")}>
@@ -627,6 +675,20 @@ export function CoachDecisionDraftCard({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 text-xs font-medium text-foreground">
                       {row.name}
+                      {row.changeKind ? (
+                        <span className="ml-2 text-muted-foreground">
+                          {t(
+                            (
+                              {
+                                CHANGED: "changed",
+                                ADDED: "added",
+                                DELETED: "deleted",
+                                PRESERVED: "preserved",
+                              } as const
+                            )[row.changeKind],
+                          )}
+                        </span>
+                      ) : null}
                     </div>
                     <span className="shrink-0 text-[11px] text-muted-foreground">
                       {[row.scheduledDate, row.sportType]
@@ -634,7 +696,7 @@ export function CoachDecisionDraftCard({
                         .join(" · ")}
                     </span>
                   </div>
-                  <div className="mt-1 text-xs leading-5 text-muted-foreground">
+                  <div className="mt-1 whitespace-pre-line text-xs leading-5 text-muted-foreground">
                     {row.before} → {row.after}
                   </div>
                   {row.rationale ? (

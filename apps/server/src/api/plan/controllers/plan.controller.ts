@@ -1,3 +1,4 @@
+import { PlanStartService } from '../application/plan-start.service';
 import {
   Body,
   Controller,
@@ -38,6 +39,7 @@ export class PlanController {
     private readonly planService: PlanService,
     private readonly planSummary: PlanSummaryService,
     private readonly planShares: PlanShareService,
+    private readonly starts: PlanStartService,
   ) {}
 
   @Get()
@@ -157,6 +159,15 @@ export class PlanController {
     @CurrentUserId() userId: string,
   ) {
     return this.planShares.createFromPlan(userId, planId);
+  }
+
+  @Post(':planId/start-conversation')
+  async startConversation(
+    @Param('planId') planId: string,
+    @CurrentUserId() userId: string,
+    @Body() dto?: ActivatePlanDto,
+  ) {
+    return this.starts.conversation(userId, planId, dto?.startDate);
   }
 
   @Post(':planId/activate')

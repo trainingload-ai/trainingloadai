@@ -15,10 +15,12 @@ type Input = {
   planId: string;
   asOf?: string;
   includeAllWorkouts?: boolean;
+  workoutOffset?: number;
+  workoutLimit?: number;
 };
 
-export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiTool(
-  {
+export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
+  buildAiTool({
     name: 'plan.by_id',
     aliases: ['plan_by_id', 'get_plan_by_id', 'saved_plan'],
     description:
@@ -41,6 +43,19 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
           description:
             'Optional anchor date in YYYY-MM-DD. Defaults to athlete-local today.',
         },
+        workoutOffset: {
+          type: 'integer',
+          minimum: 0,
+          description:
+            'Zero-based source inventory offset. Read successive pages when editing a long plan; do not claim unseen workouts were assessed.',
+        },
+        workoutLimit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 40,
+          description:
+            'Source inventory page size, default 40. Each source includes identity and revision.',
+        },
         includeAllWorkouts: {
           type: 'boolean',
           description:
@@ -55,7 +70,8 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
       today: output.today,
       tomorrow: output.tomorrow,
       currentWeek: output.currentWeek,
-      allWorkouts: output.allWorkouts?.slice(0, 80),
+      allWorkouts: output.allWorkouts,
+      workoutInventory: output.workoutInventory,
     }),
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
@@ -81,7 +97,24 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
         return emptyPlanSnapshotOutput(anchor, tomorrow);
       }
 
-      return buildPlanSnapshotFromRow(plan, input, anchor, tomorrow);
+      const output = buildPlanSnapshotFromRow(plan, input, anchor, tomorrow);
+      if (output.allWorkouts) {
+        const offset = Math.max(0, Math.floor(input.workoutOffset ?? 0));
+        const limit = Math.max(
+          1,
+          Math.min(40, Math.floor(input.workoutLimit ?? 40)),
+        );
+        const total = output.allWorkouts.length;
+        output.allWorkouts = output.allWorkouts.slice(offset, offset + limit);
+        const nextOffset = offset + output.allWorkouts.length;
+        output.workoutInventory = {
+          total,
+          offset,
+          returned: output.allWorkouts.length,
+          hasMore: nextOffset < total,
+          nextOffset: nextOffset < total ? nextOffset : null,
+        };
+      }
+      return output;
     },
-  },
-);
+  });

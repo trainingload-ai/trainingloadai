@@ -1,3 +1,4 @@
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { UnprocessableEntityException } from '@nestjs/common';
 import {
   assessPlanSchedule,
@@ -179,6 +180,7 @@ export class PlanExternalSyncService {
     revision?: number;
   }): Promise<'deleted' | 'missing' | 'changed' | 'protected'> {
     return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       const current = await this.workouts.findFirst(
         { where: { id: args.workoutId, userId: args.userId } },
         tx,
@@ -403,6 +405,7 @@ export class PlanExternalSyncService {
     ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
   ) {
     return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       const sessionIndex = await this.nextIndependentSessionIndex(
         tx,
         args.userId,
@@ -496,6 +499,7 @@ export class PlanExternalSyncService {
     ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
   ) {
     return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       await this.workouts.lockForUpdate(args.workoutId, tx);
       const current = await this.workouts.findUnique(
         {

@@ -1,3 +1,5 @@
+import { PlanStartRepository } from './persistence/plan-start.repository';
+import { PlanStartService } from './application/plan-start.service';
 import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { PlanProjectionReadModule } from './application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
@@ -66,6 +68,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PublicPlanShareController,
   ],
   providers: [
+    PlanStartRepository,
     PlanActivityLinkRepository,
     CoachContextRepository,
     PlanShareRepository,
@@ -85,6 +88,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     CoachContextService,
     PlanExecutionContextService,
     PlanWorkoutMutabilityPolicy,
+    PlanStartService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanScheduledActivationWorker,
@@ -105,6 +109,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     CoachContextService,
     PlanExecutionContextService,
     WorkoutPersistenceService,
+    PlanStartService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanDeliveryReadService,

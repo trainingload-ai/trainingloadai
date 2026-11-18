@@ -82,8 +82,17 @@ export function draftToCreatePlanDto(draft: CoachPlanDraft): CreatePlanDto {
   return {
     title: draft.title.trim(),
     sourceType: "AI",
-    ...(draft.qualityContract
-      ? { generationMetadata: { qualityContract: draft.qualityContract } }
+    ...(draft.qualityContract || draft.scheduleConstraints
+      ? {
+          generationMetadata: {
+            ...(draft.qualityContract
+              ? { qualityContract: draft.qualityContract }
+              : {}),
+            ...(draft.scheduleConstraints
+              ? { scheduleConstraints: draft.scheduleConstraints }
+              : {}),
+          },
+        }
       : {}),
     ...(draft.description?.trim()
       ? { description: draft.description.trim() }

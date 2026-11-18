@@ -1,3 +1,4 @@
+import { PlanStartService } from './plan-start.service';
 import { Injectable } from '@nestjs/common';
 import dayjs = require('dayjs');
 import utc = require('dayjs/plugin/utc');
@@ -67,6 +68,7 @@ export class PlanProposalApplyService {
     private readonly users: UserService,
     private readonly prescriptions: WorkoutPrescriptionService,
     private readonly loads: PlanLoadEstimatorService,
+    private readonly starts: PlanStartService,
   ) {}
 
   async apply(args: ApplyArgs) {
@@ -95,9 +97,11 @@ export class PlanProposalApplyService {
     const presentation =
       preview.presentation as unknown as PlanProposalPresentation;
     const receipt =
-      proposal.mode === 'ADAPT'
-        ? await this.applyAdaptation(args, proposal)
-        : await this.applySupersession(args, proposal);
+      proposal.mode === 'START'
+        ? await this.starts.apply(args, proposal)
+        : proposal.mode === 'ADAPT'
+          ? await this.applyAdaptation(args, proposal)
+          : await this.applySupersession(args, proposal);
 
     const consumed = await this.proposals.updateMany(
       {
@@ -414,7 +418,7 @@ export class PlanProposalApplyService {
           decisionId: args.decisionId,
           branchId: args.branchId,
         },
-        { tx: args.tx },
+        { tx: args.tx, validatedStartPreview: true },
       );
       await this.coachContext.supersedeContext({
         userId: args.userId,

@@ -807,7 +807,12 @@
         "REBASE_REQUIRED": "The plan context changed and needs to be realigned before applying.",
         "FAILED": "Apply failed. Continue with the coach to resolve it.",
         "SKIPPED": "The main plan was not changed."
-      }
+      },
+      "applyStartButton": "Confirm and start",
+      "supersededTitle": "Replaced by a newer proposal",
+      "added": "Added",
+      "deleted": "Deleted",
+      "startSyncImpact": "After starting, the calendar is updated and device sync is pending."
     },
     "history": {
       "title": "History",
@@ -7124,5 +7129,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "Prepare to start",
+    "description": "Choose a date, then review the complete schedule with your coach before confirming.",
+    "dateLabel": "Start date",
+    "dateHint": "The date starts an assessment. Your plan starts only after you confirm the coach’s proposal.",
+    "evaluate": "Review with coach",
+    "changeDate": "Change date",
+    "pendingCalendar": "Calendar awaiting assessment",
+    "evaluatePrompt": "I’d like to start this saved plan on {date} ({timeZone}). Please review the full schedule with my recent training and current condition, ask any essential questions, and prepare a proposal for me to confirm.",
+    "loadFailed": "Unable to load the conversation. Please retry."
   }
 }

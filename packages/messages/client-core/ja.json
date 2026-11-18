@@ -691,7 +691,12 @@
         "REBASE_REQUIRED": "プランコンテキストが変わったため、適用前に再調整が必要です。",
         "FAILED": "適用に失敗しました。コーチと続けて確認してください。",
         "SKIPPED": "メインプランは変更されていません。"
-      }
+      },
+      "applyStartButton": "確認して開始",
+      "supersededTitle": "新しい提案に置き換えられました",
+      "added": "追加",
+      "deleted": "削除",
+      "startSyncImpact": "開始後にカレンダーが更新され、デバイスの同期は保留中になります。"
     },
     "history": {
       "title": "履歴",
@@ -6466,5 +6471,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "開始の準備",
+    "description": "日付を選び、コーチと全日程を確認してから開始を確定します。",
+    "dateLabel": "開始日",
+    "dateHint": "日付の選択は評価のみを開始します。提案を確認するまで計画は開始されません。",
+    "evaluate": "コーチと評価",
+    "changeDate": "日付を変更",
+    "pendingCalendar": "評価待ちのカレンダー",
+    "evaluatePrompt": "この保存済み計画を {date}（{timeZone}）から始めたいです。最近のトレーニングと現在の状態に照らして全日程を評価し、必要なことを質問してから、確認できる開始案を提案してください。",
+    "loadFailed": "会話を読み込めませんでした。再試行してください。"
   }
 }

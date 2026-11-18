@@ -840,3 +840,29 @@ export async function attachWorkoutToPlan(planId: string, workoutId: string) {
   )) as WorkoutResult | undefined;
   return data?.workout;
 }
+
+export type PlanStartConversation = {
+  earliestStartDate: string;
+  evaluationStarted: boolean;
+  sid: string;
+  branchId: string | null;
+  entryKey: string;
+  startDate: string;
+  calendarTimeZone: string;
+  plan: TrainingPlanDetail;
+};
+
+export async function openPlanStartConversation(
+  planId: string,
+  startDate?: string,
+): Promise<PlanStartConversation> {
+  const result = (await apiFetch(
+    `/plans/${encodeURIComponent(planId)}/start-conversation`,
+    {
+      method: "POST",
+      body: JSON.stringify(startDate ? { startDate } : {}),
+    },
+  )) as PlanStartConversation | undefined;
+  if (!result) throw new Error("START_CONVERSATION_UNAVAILABLE");
+  return result;
+}

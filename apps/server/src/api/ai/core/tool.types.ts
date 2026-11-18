@@ -76,12 +76,14 @@ export type AiToolContext = {
   aiOperationId?: string | null;
   aiUsageKind?: AiUsageKind;
   currentUserPrompt?: string;
+  currentUserMessageId?: string;
   /** Structured-question response state for this resumed turn. */
   questionResponse?: {
     declinedAll: boolean;
     skippedQuestionIds: readonly string[];
   };
   confirmedDecisionId?: string;
+  confirmedAssistantMessageId?: string;
   currentTurnStartedAt?: Date;
   /** Calendar used by the facts bound to this turn, including advice entry hints. */
   currentTurnCalendar?: { date: string; timezone: string };

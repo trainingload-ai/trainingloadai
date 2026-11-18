@@ -28,6 +28,8 @@ export const planBuilderSkill: CoachSkillDef = {
   ],
   prompt: [
     `Create a coherent plan draft that fits the athlete's goal, availability, current capability, and recovery capacity. The plan draft payload contract below defines its machine format.`,
+    `- Starting a saved draft belongs to plan-start, which updates and activates that same plan after a START card confirmation. Do not generate another plan or use this save-new-plan flow for it.`,
+    `- Preserve explicit fixed ISO rest weekdays, unavailable dates, calendar timezone and confirmed exceptions in scheduleConstraints. Legacy qualityContract.allowedDays remains relative to the plan start, not ISO weekdays; never silently reinterpret it. A dated draft must respect its actual calendar before presentation.`,
     `- Extract and preserve facts already supplied in the brief. Treat weekly days and session duration as an availability budget rather than a quota, and preserve every selected sport and explicit strength preference.`,
     `- Identify only facts or evidence that could change the schedule. Prefer training.plan_context for personalized plans and narrower tools for unresolved details; generic templates need less evidence than race plans.`,
     `- Ask only decision-critical questions the product cannot answer. Prefer one structured question round with concrete options when choices are needed; otherwise state conservative assumptions and continue.`,

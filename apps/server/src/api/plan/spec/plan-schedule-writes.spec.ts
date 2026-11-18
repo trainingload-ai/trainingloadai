@@ -150,25 +150,54 @@ function setup(
 }
 
 describe('plan calendar write boundaries', () => {
+  it('requires a fresh coach preview for legacy direct DRAFT activation', async () => {
+    const s = setup('DRAFT', false, null);
+    await expect(
+      s.service.activatePlan('u', 'p', '2026-11-22'),
+    ).rejects.toMatchObject({
+      response: { code: 'PLAN_START_REASSESSMENT_REQUIRED' },
+    });
+  });
+
   it('uses UTC calendar dates for a new athlete without a preferred time zone', async () => {
     const s = setup('DRAFT', false, null);
-    const result = await s.service.activatePlan('u', 'p');
+    const result = await s.service.activatePlan(
+      'u',
+      'p',
+      undefined,
+      undefined,
+      { validatedStartPreview: true },
+    );
     expect(result.plan?.startDate).toBe(new Date().toISOString().slice(0, 10));
   });
   it('uses an explicit date without computing today for an athlete without a time zone', async () => {
     const s = setup('DRAFT', false, null);
-    const result = await s.service.activatePlan('u', 'p', '2026-11-22');
+    const result = await s.service.activatePlan(
+      'u',
+      'p',
+      '2026-11-22',
+      undefined,
+      { validatedStartPreview: true },
+    );
     expect(result.plan?.startDate).toBe('2026-11-22');
   });
   it('resumes the original start date when an athlete has no preferred time zone', async () => {
     const s = setup('PAUSED', false, null);
-    const result = await s.service.activatePlan('u', 'p');
+    const result = await s.service.activatePlan(
+      'u',
+      'p',
+      undefined,
+      undefined,
+      { validatedStartPreview: true },
+    );
     expect(result.plan?.startDate).toBe('2099-11-22');
   });
   it('rejects Sunday activation when a Monday draft would put sessions on Wednesday rest', async () => {
     const s = setup();
     await expect(
-      s.service.activatePlan('u', 'p', '2026-11-22'),
+      s.service.activatePlan('u', 'p', '2026-11-22', undefined, {
+        validatedStartPreview: true,
+      }),
     ).rejects.toMatchObject({
       response: {
         code: 'PLAN_SCHEDULE_INVALID',
@@ -178,9 +207,15 @@ describe('plan calendar write boundaries', () => {
     expect(s.plan().status).toBe('DRAFT');
     expect(s.rows()[0].scheduledDate).toBeNull();
   });
-  it('keeps unknown historical weekday constraints unknown and allows the legacy activation', async () => {
+  it('keeps unknown historical weekday constraints unknown during a validated activation', async () => {
     const s = setup('DRAFT', false);
-    const result = await s.service.activatePlan('u', 'p', '2026-11-22');
+    const result = await s.service.activatePlan(
+      'u',
+      'p',
+      '2026-11-22',
+      undefined,
+      { validatedStartPreview: true },
+    );
     expect(result.plan?.startDate).toBe('2026-11-22');
     expect(result.plan?.workouts[0].scheduledDate).toBe('2026-11-25');
   });
@@ -248,7 +283,13 @@ describe('plan calendar write boundaries', () => {
   it('resumes without moving completed or historical dates and rejects a new origin', async () => {
     const s = setup('PAUSED');
     s.rows()[0].status = 'DONE';
-    const result = await s.service.activatePlan('u', 'p');
+    const result = await s.service.activatePlan(
+      'u',
+      'p',
+      undefined,
+      undefined,
+      { validatedStartPreview: true },
+    );
     expect(result.plan?.startDate).toBe('2099-11-22');
     expect(result.plan?.workouts[0].scheduledDate).toBe('2099-11-25');
     const other = setup('PAUSED');

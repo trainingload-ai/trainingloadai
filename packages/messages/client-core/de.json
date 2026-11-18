@@ -691,7 +691,12 @@
         "REBASE_REQUIRED": "Der Plankontext hat sich geändert und muss vor der Anwendung neu ausgerichtet werden.",
         "FAILED": "Die Bewerbung ist fehlgeschlagen. Fahren Sie mit dem Coach fort, um das Problem zu lösen.",
         "SKIPPED": "Der Hauptplan wurde nicht geändert."
-      }
+      },
+      "applyStartButton": "Bestätigen und starten",
+      "supersededTitle": "Durch einen neueren Vorschlag ersetzt",
+      "added": "Hinzugefügt",
+      "deleted": "Gelöscht",
+      "startSyncImpact": "Nach dem Start wird der Kalender aktualisiert; die Gerätesynchronisierung steht noch aus."
     },
     "history": {
       "title": "Geschichte",
@@ -6467,5 +6472,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "Start vorbereiten",
+    "description": "Wähle ein Datum und besprich den vollständigen Plan vor der Bestätigung mit deinem Coach.",
+    "dateLabel": "Startdatum",
+    "dateHint": "Das Datum startet nur die Bewertung. Der Plan beginnt erst nach deiner Bestätigung.",
+    "evaluate": "Mit Coach prüfen",
+    "changeDate": "Datum ändern",
+    "pendingCalendar": "Kalender zur Bewertung",
+    "evaluatePrompt": "Ich möchte diesen gespeicherten Plan am {date} ({timeZone}) starten. Bitte prüfe den vollständigen Plan anhand meines jüngsten Trainings und meines aktuellen Zustands, stelle wichtige Rückfragen und bereite einen Vorschlag zur Bestätigung vor.",
+    "loadFailed": "Unterhaltung konnte nicht geladen werden. Bitte erneut versuchen."
   }
 }

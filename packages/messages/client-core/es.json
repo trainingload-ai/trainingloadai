@@ -691,7 +691,12 @@
         "REBASE_REQUIRED": "El contexto del plan cambió y es necesario realinearlo antes de presentar la solicitud.",
         "FAILED": "La solicitud falló. Continúa con el entrenador para resolverlo.",
         "SKIPPED": "El plan principal no fue cambiado."
-      }
+      },
+      "applyStartButton": "Confirmar e iniciar",
+      "supersededTitle": "Sustituido por una propuesta más reciente",
+      "added": "Añadidas",
+      "deleted": "Eliminadas",
+      "startSyncImpact": "Al iniciar se actualiza el calendario y la sincronización del dispositivo queda pendiente."
     },
     "history": {
       "title": "Historia",
@@ -6467,5 +6472,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "Preparar el inicio",
+    "description": "Elige una fecha y revisa el calendario completo con tu entrenador antes de confirmar.",
+    "dateLabel": "Fecha de inicio",
+    "dateHint": "La fecha solo inicia la evaluación. El plan comienza cuando confirmas la propuesta.",
+    "evaluate": "Revisar con el entrenador",
+    "changeDate": "Cambiar fecha",
+    "pendingCalendar": "Calendario pendiente de evaluación",
+    "evaluatePrompt": "Quiero empezar este plan guardado el {date} ({timeZone}). Revisa todo el calendario junto con mi entrenamiento reciente y mi estado actual, haz las preguntas necesarias y prepara una propuesta para que la confirme.",
+    "loadFailed": "No se pudo cargar la conversación. Inténtalo de nuevo."
   }
 }

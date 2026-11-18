@@ -1,6 +1,12 @@
+import type {
+  ScheduleConstraints,
+  ScheduleQualityContractTransition,
+} from "./plan-calendar";
+import type { CoachPlanDraftData } from "./ai-coach-schema";
+import type { WorkoutDefinitionInput } from "./workout-structure";
 import type { WorkoutIntensityIntent } from "./endurance-workout-ir";
 
-export type PlanProposalMode = "ADAPT" | "SUPERSEDE";
+export type PlanProposalMode = "ADAPT" | "SUPERSEDE" | "START";
 export type PlanAdaptationScope = "WORKOUT" | "PLAN_REMAINING";
 export type PlanAssessmentDisposition = "APPLY" | "PRESERVE";
 export type PlanTargetDimension = "PACE" | "HEART_RATE" | "POWER";
@@ -65,11 +71,46 @@ export type PlanSupersessionPreviewRequest = {
   plan: PlanReplacementDraft;
 };
 
+export type PlanStartWorkoutDraft = {
+  plannedSessionRpe?: number;
+  weekIndex: number;
+  dayIndex: number;
+  sessionIndex?: number;
+  sportType: string;
+  sportDefinitionCode?: string | null;
+  name?: string;
+  notes?: string;
+  text?: string;
+  definition?: WorkoutDefinitionInput;
+};
+
+export type PlanStartPreviewRequest = {
+  mode: "START";
+  planId: string;
+  startDate: string;
+  rationale: string;
+  evidenceRefs: PlanProposalEvidenceRef[];
+  scheduleConstraints?: ScheduleConstraints;
+  qualityContractTransition?: ScheduleQualityContractTransition;
+  changes: Array<{
+    sourceWorkoutId: string;
+    expectedRevision: number;
+    workout: PlanStartWorkoutDraft;
+  }>;
+  additions: Array<{ candidateKey: string; workout: PlanStartWorkoutDraft }>;
+  deletions: Array<{ sourceWorkoutId: string; expectedRevision: number }>;
+  /** The server expands every unmentioned source workout into an explicit preserved identity. */
+  preserveUnmentioned?: boolean;
+  preserved?: Array<{ sourceWorkoutId: string; expectedRevision: number }>;
+};
+
 export type PlanProposalPreviewRequest =
   | PlanAdaptationPreviewRequest
-  | PlanSupersessionPreviewRequest;
+  | PlanSupersessionPreviewRequest
+  | PlanStartPreviewRequest;
 
 export type PlanProposalPresentationRow = {
+  changeKind?: "CHANGED" | "ADDED" | "DELETED" | "PRESERVED";
   workoutId?: string;
   name: string;
   scheduledDate?: string | null;
@@ -85,12 +126,18 @@ export type PlanProposalPresentation = {
   summary: string;
   mode: PlanProposalMode;
   effectiveFrom?: string;
+  startDate?: string;
+  calendarTimeZone?: string;
+  scheduleConstraints?: ScheduleConstraints;
+  calendarDraft?: CoachPlanDraftData;
   facts: PlanProposalEvidenceRef[];
   counts: {
     total: number;
     changed: number;
     preserved: number;
     skipped: number;
+    added?: number;
+    deleted?: number;
   };
   estimatedLoadDelta?: number | null;
   syncImpact: string;
@@ -103,7 +150,7 @@ export type PlanProposalPreviewResult = {
   previewId: string;
   mode: PlanProposalMode;
   expiresAt: string;
-  decisionType: "PLAN_ADAPTATION" | "PLAN_SUPERSESSION";
+  decisionType: "PLAN_ADAPTATION" | "PLAN_SUPERSESSION" | "PLAN_START";
   decisionPayload: {
     planId: string;
     previewId: string;

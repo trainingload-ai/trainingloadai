@@ -691,7 +691,12 @@
         "REBASE_REQUIRED": "計畫上下文已變化，需要重新對齊後再套用。",
         "FAILED": "套用失敗，請繼續和教練確認。",
         "SKIPPED": "這次沒有修改主計畫。"
-      }
+      },
+      "applyStartButton": "確認並開始",
+      "supersededTitle": "已被新方案取代",
+      "added": "新增",
+      "deleted": "刪除",
+      "startSyncImpact": "開始後更新日曆，並等待裝置同步。"
     },
     "history": {
       "title": "歷史",
@@ -6564,5 +6569,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "準備開始計畫",
+    "description": "選擇日期後，與教練評估完整課表，再確認開始。",
+    "dateLabel": "開始日期",
+    "dateHint": "選日期只發起評估。只有確認教練方案後，計畫才會開始。",
+    "evaluate": "與教練評估",
+    "changeDate": "修改日期",
+    "pendingCalendar": "待評估的日曆",
+    "evaluatePrompt": "我想從 {date} 開始這個已儲存的計畫（日曆時區：{timeZone}）。請結合近期訓練和目前狀況評估完整課表，必要時先問我，再提供可確認的開始方案。",
+    "loadFailed": "無法載入對話，請重試。"
   }
 }

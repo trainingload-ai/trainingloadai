@@ -1,4 +1,5 @@
 "use client";
+import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 
 import { useGuestAccessText } from "@deployment/managed-ui";
 
@@ -195,7 +196,9 @@ export function MobilePlanLibraryItem({
         <span
           className={cn(
             "absolute inset-y-2 left-0 w-0.5 rounded-r-full",
-            dark ? "bg-visual-assessment-accent-dark" : "bg-visual-assessment-accent",
+            dark
+              ? "bg-visual-assessment-accent-dark"
+              : "bg-visual-assessment-accent",
           )}
           aria-hidden="true"
         />
@@ -446,6 +449,7 @@ export function MobilePlanDetailSheet({
   const complete = useCompletePlan();
   const cancel = useCancelActivation();
   const deletePlan = useDeletePlan();
+  const [startOpen, setStartOpen] = useState(false);
   const [pendingAction, setPendingAction] =
     useState<PlanLifecycleAction | null>(null);
   const [confirmAction, setConfirmAction] =
@@ -456,6 +460,7 @@ export function MobilePlanDetailSheet({
 
   useEffect(() => {
     if (!open) {
+      setStartOpen(false);
       setPendingAction(null);
       setConfirmAction(null);
       setSelectedWorkout(null);
@@ -477,12 +482,7 @@ export function MobilePlanDetailSheet({
     if (!current || pendingAction) return;
     setPendingAction(action);
     try {
-      if (action === "activate") {
-        await activate.mutateAsync({
-          planId: current.id,
-          startDate: dayjs().format("YYYY-MM-DD"),
-        });
-      } else if (action === "resume") {
+      if (action === "resume") {
         await activate.mutateAsync({ planId: current.id });
       } else if (action === "pause") {
         await pause.mutateAsync({
@@ -511,7 +511,11 @@ export function MobilePlanDetailSheet({
   };
 
   const requestAction = (action: PlanLifecycleAction) => {
-    if (action === "activate" || action === "resume") {
+    if (action === "activate") {
+      setStartOpen(true);
+      return;
+    }
+    if (action === "resume") {
       void runAction(action);
       return;
     }
@@ -528,8 +532,13 @@ export function MobilePlanDetailSheet({
 
   return (
     <>
+      <PlanStartConversationDialog
+        open={startOpen}
+        planId={plan?.id ?? null}
+        onOpenChange={setStartOpen}
+      />
       <MobileSheet
-        open={open && Boolean(plan)}
+        open={open && Boolean(plan) && !startOpen}
         onOpenChange={onOpenChange}
         title={
           viewingWorkout && selectedWorkout

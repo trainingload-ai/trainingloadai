@@ -40,7 +40,7 @@ import {
   buildPlanListItemMeta,
   toExistingPlanDraft,
 } from "./plan-dialog-model";
-import { PlanActivateDialog } from "./PlanActivateDialog";
+import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 
 interface PlanListDialogProps {
@@ -205,8 +205,12 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
                                   hasActivePlan
                                 }
                                 onClick={() => {
-                                  setActivatePlanId(p.id);
-                                  setActivateOpen(true);
+                                  if (p.status === "PAUSED") {
+                                    void activateAsync({ planId: p.id });
+                                  } else {
+                                    setActivatePlanId(p.id);
+                                    setActivateOpen(true);
+                                  }
                                 }}
                               >
                                 {t("buttons.activate")}
@@ -243,21 +247,12 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
           </ScrollArea>
         </DialogContent>
       </Dialog>
-      <PlanActivateDialog
+      <PlanStartConversationDialog
         open={activateOpen}
-        pending={activating}
+        planId={activatePlanId}
         onOpenChange={(nextOpen) => {
           setActivateOpen(nextOpen);
           if (!nextOpen) setActivatePlanId(null);
-        }}
-        onConfirm={async (startDate) => {
-          if (!activatePlanId) return;
-          await activateAsync({
-            planId: activatePlanId,
-            startDate,
-          });
-          setActivateOpen(false);
-          setActivatePlanId(null);
         }}
       />
       <EditPlanDialog

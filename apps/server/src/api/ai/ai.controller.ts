@@ -1325,6 +1325,33 @@ export class AiController {
         }
       }
 
+      const startConversation = await this.prisma.aiCoachSession.findUnique({
+        where: { userId_id: { userId, id: coachSessionKey } },
+        select: {
+          planStartPlanId: true,
+          planStartBranchId: true,
+          planStartRevision: true,
+        },
+      });
+      if (startConversation?.planStartPlanId && !v2)
+        throw new ConflictException('START_REQUIRES_DURABLE_RUNTIME');
+      if (intent === 'plan-start' && !startConversation?.planStartPlanId)
+        throw new ConflictException('START_SESSION_REQUIRED');
+      if (startConversation?.planStartPlanId) {
+        if (body?.planId && body.planId !== startConversation.planStartPlanId)
+          throw new ConflictException('START_SESSION_MISMATCH');
+        const branch = await this.coachBranching.bindStartConversationBranch({
+          userId,
+          sid: coachSessionKey,
+          branchId: coachBranchId,
+          revision: startConversation.planStartRevision,
+        });
+        coachBranchId = branch.id;
+        body = { ...body, planId: startConversation.planStartPlanId };
+        if (!startConversation.planStartBranchId)
+          await sink.emit({ type: 'branch', subtype: 'opened', branch });
+      }
+
       if (
         !coachBranchId &&
         (String(body?.contextId ?? '').trim() ||
@@ -1500,6 +1527,7 @@ export class AiController {
       const stream = await this.aiService.coachStream({
         platformFunded,
         runtimeRunId: runHandle?.projector.run.runId,
+        currentUserMessageId: runHandle?.inputMessageId,
         activeSkillName: platformFunded ? 'athlete-state' : undefined,
         session,
         sid: coachSessionKey,

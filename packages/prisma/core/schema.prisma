@@ -568,6 +568,7 @@ enum PlanStatus {
 }
 
 enum PlanProposalMode {
+  START
   ADAPT
   SUPERSEDE
 
@@ -2060,12 +2061,16 @@ model AiCoachSession {
   type        AiCoachSessionType  @default(CHAT) @map("type")
   reviewScope AiCoachReviewScope? @map("review_scope")
 
-  title        String?   @map("title")
-  lang         String?   @map("lang")
-  summary      String?   @map("summary") @db.Text
-  nextSequence Int       @default(1) @map("next_sequence")
+  title             String?   @map("title")
+  lang              String?   @map("lang")
+  summary           String?   @map("summary") @db.Text
+  nextSequence      Int       @default(1) @map("next_sequence")
+  planStartPlanId   String?   @map("plan_start_plan_id")
+  planStartDate     String?   @map("plan_start_date")
+  planStartRevision Int       @default(0) @map("plan_start_revision")
+  planStartBranchId String?   @map("plan_start_branch_id")
   /// 置顶时间；非空表示置顶，列表排在最前（按 pinnedAt 降序）
-  pinnedAt     DateTime? @map("pinned_at")
+  pinnedAt          DateTime? @map("pinned_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -2076,6 +2081,7 @@ model AiCoachSession {
   assessmentCases      CoachAssessmentCase[]
 
   @@id([userId, id])
+  @@unique([userId, planStartPlanId])
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, type, updatedAt(sort: Desc)])
   @@index([userId, pinnedAt(sort: Desc)])

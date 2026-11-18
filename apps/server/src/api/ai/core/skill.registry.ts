@@ -4,6 +4,7 @@ import type { ActiveCoachSkill, CoachSkillDef } from './skill.types';
 import { metricExplainerSkill } from './skills/metricExplainer.skill';
 import { planCycleReviewSkill } from './skills/planCycleReview.skill';
 import { planDayReviewSkill } from './skills/planDayReview.skill';
+import { planStartSkill } from './skills/planStart.skill';
 import { planFollowupSkill } from './skills/planFollowup.skill';
 import { planBuilderSkill } from './skills/planBuilder.skill';
 import { planWeekReviewSkill } from './skills/planWeekReview.skill';
@@ -30,6 +31,7 @@ export function getCoachSkills(): CoachSkillDef[] {
     workoutGeneratorSkill,
     workoutManagementSkill,
     planFollowupSkill,
+    planStartSkill,
     planDayReviewSkill,
     planWeekReviewSkill,
     planCycleReviewSkill,

@@ -19,6 +19,7 @@ type Output = {
   result: string;
   commitId?: string | null;
   branchId?: string | null;
+  receipt?: unknown;
   conflict?: {
     expectedBaseEventSeq: number;
     currentHeadEventSeq: number;
@@ -112,6 +113,13 @@ export const coachDecisionApplyTool: AiToolDef<Input, Output> = buildAiTool({
       comment: input.userConfirmation,
       branchId: ctx.branchId ?? undefined,
       proposedBefore: ctx.currentTurnStartedAt,
+      confirmation:
+        ctx.sid && ctx.confirmedAssistantMessageId
+          ? {
+              sid: ctx.sid,
+              assistantMessageId: ctx.confirmedAssistantMessageId,
+            }
+          : undefined,
     });
     const result = await ctx.coachBranching.applyDecision({
       userId,

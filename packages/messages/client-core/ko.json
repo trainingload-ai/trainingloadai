@@ -691,7 +691,12 @@
         "REBASE_REQUIRED": "계획 맥락이 바뀌었습니다. 적용하기 전에 다시 맞춰야 합니다.",
         "FAILED": "적용하지 못했습니다. 코치와 이어서 확인해 주세요.",
         "SKIPPED": "메인 계획은 변경되지 않았습니다."
-      }
+      },
+      "applyStartButton": "확인하고 시작",
+      "supersededTitle": "새 제안으로 대체됨",
+      "added": "추가",
+      "deleted": "삭제",
+      "startSyncImpact": "시작 후 달력이 업데이트되며 기기 동기화는 대기 중입니다."
     },
     "history": {
       "title": "역사",
@@ -6466,5 +6471,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "시작 준비",
+    "description": "날짜를 선택하고 코치와 전체 일정을 검토한 후 시작을 확인하세요.",
+    "dateLabel": "시작일",
+    "dateHint": "날짜를 선택하면 평가만 시작됩니다. 제안을 확인해야 계획이 시작됩니다.",
+    "evaluate": "코치와 평가",
+    "changeDate": "날짜 변경",
+    "pendingCalendar": "평가 대기 중인 달력",
+    "evaluatePrompt": "저장된 이 계획을 {date} ({timeZone})부터 시작하고 싶어요. 최근 훈련과 현재 상태를 바탕으로 전체 일정을 검토하고, 필요한 질문을 한 뒤 제가 확인할 수 있는 시작 제안을 준비해 주세요.",
+    "loadFailed": "대화를 불러올 수 없습니다. 다시 시도하세요."
   }
 }

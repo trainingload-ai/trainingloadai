@@ -11,6 +11,7 @@ function setup() {
     createEvent: jest.fn(async () => ({ id: 'event-22', seq: 22 })),
     updateMany: jest.fn(async () => ({ count: 1 })),
     supersedeWorkoutDecisions: supersede,
+    supersedeStartDecisions: async () => undefined,
   };
   const service = new CoachContextService(
     {

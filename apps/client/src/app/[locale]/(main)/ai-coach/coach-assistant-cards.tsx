@@ -438,6 +438,11 @@ function CoachV2AssistantCardsInner({
           <PlanContent className="p-0">
             <CoachPlanDraftCalendarPreview
               draft={planDraft}
+              startDate={planDraft.qualityContract?.startDate}
+              calendarTimeZone={
+                planDraft.scheduleConstraints?.calendarTimeZone ?? "UTC"
+              }
+              scheduleConstraints={planDraft.scheduleConstraints}
               className="rounded-none bg-transparent dark:bg-transparent"
             />
           </PlanContent>

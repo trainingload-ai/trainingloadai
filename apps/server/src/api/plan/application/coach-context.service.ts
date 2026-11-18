@@ -186,6 +186,16 @@ export class CoachContextService {
             args.tx,
           );
         }
+        if (args.tx && args.type === 'ADAPTATION_APPLIED') {
+          await this.contexts.supersedeStartDecisions(
+            {
+              userId: args.userId,
+              planId: args.planId,
+              appliedDecisionId: args.decisionId,
+            },
+            args.tx,
+          );
+        }
         return event;
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);

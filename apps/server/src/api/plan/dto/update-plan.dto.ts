@@ -6,6 +6,8 @@ import {
   IsArray,
   IsIn,
   IsInt,
+  IsNumber,
+  Max,
   IsOptional,
   IsObject,
   IsString,
@@ -17,6 +19,12 @@ import { PLAN_SPORT_TYPES } from '../plan.constants';
 import { ParseWorkoutDefinitionDto } from '../../workout/dto/parse-workout-definition.dto';
 
 class UpdatePlanWorkoutInputDto {
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(10)
+  plannedSessionRpe?: number;
+
   @IsOptional()
   @IsString()
   id?: string;

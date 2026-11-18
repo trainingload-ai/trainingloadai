@@ -23,7 +23,7 @@ import { useMobileViewport } from "@/hooks/use-mobile";
 import { getPlanLibraryHref } from "@/lib/plan-navigation";
 import { cn } from "@/lib/utils";
 import { useMobileNavigation } from "@/components/mobile-app/components/MobileNavigationProvider";
-import { PlanActivateDialog } from "@/components/plan/PlanActivateDialog";
+import { PlanStartConversationDialog } from "@/components/plan/plan-start-conversation-dialog";
 import { PlanShareCard } from "@/components/plan/plan-share-card";
 import { PlanDetailCycleProgress } from "@/components/plan/detail/plan-detail-cycle-progress";
 import {
@@ -278,11 +278,7 @@ export default function V2PlanDetailPage() {
             pendingAction={activeLifecycleAction}
             onAction={(action) => {
               if (action === "activate") {
-                setPendingLifecycleAction(action);
-                void activateAsync({
-                  planId: plan.id,
-                  startDate: dayjs().format("YYYY-MM-DD"),
-                }).finally(() => setPendingLifecycleAction(null));
+                setActivateOpen(true);
                 return;
               }
               if (action === "resume") {
@@ -407,14 +403,10 @@ export default function V2PlanDetailPage() {
         />
       ) : null}
 
-      <PlanActivateDialog
+      <PlanStartConversationDialog
         open={activateOpen}
-        pending={activating}
+        planId={plan.id}
         onOpenChange={setActivateOpen}
-        onConfirm={async (startDate) => {
-          await activateAsync({ planId: plan.id, startDate });
-          setActivateOpen(false);
-        }}
       />
       <AlertDialog
         open={pendingLifecycleAction !== null}

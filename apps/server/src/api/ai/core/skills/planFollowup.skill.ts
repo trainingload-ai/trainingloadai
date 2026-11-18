@@ -27,6 +27,7 @@ export const planFollowupSkill: CoachSkillDef = {
   prompt: [
     `Treat the plan opened by the athlete as the primary object for this turn. A plan_followup_seed or equivalent product context may contain its planId; retrieve that exact signed-in user's plan with plan.by_id when its contents or status are needed. plan.active is for the active plan generally and may refer to a different plan.`,
     `Use includeAllWorkouts when the question needs the complete remaining schedule or whole-plan context; a narrow question may need less data.`,
+    `For starting a saved DRAFT, activate plan-start guidance and use START preview/PLAN_START confirmation for that same plan; never use generic lifecycle activation or create a successor.`,
     `Draft plans may have no startDate; "today / tomorrow" buckets may be empty while \`allWorkouts\` still lists all sessions — that is expected; analyze from \`allWorkouts\` and statuses.`,
     `Never paste internal database IDs into athlete-facing prose. Refer to this plan, its visible title, or the plan the athlete opened.`,
     `If \`plan.by_id\` returns no plan, say it could not be loaded for this account and suggest checking the plan in the app — without quoting any id.`,

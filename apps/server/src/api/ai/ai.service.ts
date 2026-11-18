@@ -1,3 +1,7 @@
+import {
+  projectStartDecisionCards,
+  startDecisionCardIds,
+} from './core/coach-start-card-state';
 import { CoachFactContextService } from './core/coach-fact-context.service';
 import { HealthDataQueryService } from '@/health-data/health-data-query.service';
 import {
@@ -132,7 +136,10 @@ import {
   urgentCoachSafetyReply,
   withCoachSafetyReminder,
 } from './core/coach-safety-policy';
-import { currentDecisionConfirmationId } from './core/coach-workout-change';
+import {
+  currentDecisionConfirmation,
+  currentDecisionConfirmationId,
+} from './core/coach-workout-change';
 import { CoachMemoryExtractionEnqueuer } from './memory/coach-memory-extraction-enqueuer.service';
 import { AthleteMemoryQueryService } from '@/athlete-memory/application/athlete-memory-query.service';
 import { ApplyMemoryOperationsService } from '@/athlete-memory/application/apply-memory-operations.service';
@@ -1196,6 +1203,7 @@ export class AiService {
     executionMode?: 'interactive' | 'background';
     resumeHistory?: boolean;
     runtimeRunId?: string;
+    currentUserMessageId?: string;
     platformFunded?: boolean;
     activeSkillName?: string;
     backgroundTask?: {
@@ -1540,7 +1548,10 @@ export class AiService {
       currentUserPrompt: prompt,
       questionResponse,
       confirmedDecisionId: currentDecisionConfirmationId(params.message),
+      confirmedAssistantMessageId: currentDecisionConfirmation(params.message)
+        ?.assistantMessageId,
       currentTurnStartedAt,
+      currentUserMessageId: params.currentUserMessageId,
       currentTurnCalendar: coachFacts
         ? { date: coachFacts.date, timezone: coachFacts.timezone }
         : undefined,
@@ -1630,7 +1641,7 @@ export class AiService {
           `This conversation has a plan branch: it is a proposal workspace, not proof that the main plan changed. Only a committed apply receipt establishes a plan change.`,
           `Use the Workout operation decision guide to choose evidence and form one coherent proposal for the athlete's agreed scope.`,
           `Decision payloads: PLAN_WORKOUT_UPDATE changes one existing workout; PLAN_WORKOUT_ADD adds without related edits; PLAN_WORKOUT_SCHEDULE atomically combines local changes [{ workoutId, dto }] and additions [{ dto }]; PLAN_WORKOUT_BATCH_UPDATE is reserved for an agreed inclusive multi-week rewrite and covers every pending workout in its scope.`,
-          `PLAN_ADAPTATION and PLAN_SUPERSESSION are server-owned proposal decisions. First call plan.proposal_preview, then pass its returned decisionPayload unchanged to coach_decision_draft. Never put editable workout content into those decision payloads.`,
+          `PLAN_START, PLAN_ADAPTATION and PLAN_SUPERSESSION are server-owned proposal decisions. First call plan.proposal_preview, then pass its returned decisionPayload unchanged to coach_decision_draft. Never put editable workout content into those decision payloads.`,
           `Create the structured decision with coach_decision_draft. Apply an existing proposal with coach_decision_apply only when the current user input confirms that exact proposal.`,
           `If apply reports a conflict or skipped proposal, no change was committed. Reassess against current state before presenting a replacement.`,
           `Keep decision, branch, context, commit, and event identifiers inside tool arguments.`,
@@ -2894,6 +2905,20 @@ export class AiService {
       },
     });
 
+    const startIds = [
+      ...new Set(rows.flatMap((row) => startDecisionCardIds(row.message))),
+    ];
+    const startStates = startIds.length
+      ? await this.prisma.coachDecision.findMany({
+          where: {
+            id: { in: startIds },
+            decisionType: 'PLAN_START',
+            context: { userId },
+          },
+          select: { id: true, state: true, payload: true },
+        })
+      : [];
+    const states = new Map(startStates.map((state) => [state.id, state]));
     return rows.map((r) => {
       const isAssistant = r.role === AiCoachMessageRole.ASSISTANT;
       const role =
@@ -2921,7 +2946,9 @@ export class AiService {
               message: null,
             })
           : sanitizeStoredCoachMessageForClient(
-              r.message ?? null,
+              isAssistant
+                ? projectStartDecisionCards(r.message ?? null, states)
+                : (r.message ?? null),
               isAssistant ? (sess.lang ?? 'en') : undefined,
             ),
         createdAt: r.createdAt.toISOString(),

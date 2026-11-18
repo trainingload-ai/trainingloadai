@@ -1,3 +1,4 @@
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
 import {
   Injectable,
@@ -724,6 +725,7 @@ export class PlanWriteSupport {
     const definition = this.resolveWorkoutDefinitionInput(dto);
 
     const result = await this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       if (
         plan.status !== 'ACTIVE' &&
@@ -827,6 +829,7 @@ export class PlanWriteSupport {
     meta?: CoachEventMeta,
   ) {
     const updated = await this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       if (!plan.startDate) {
         throw new BusinessException({
@@ -2348,6 +2351,7 @@ export class PlanWriteSupport {
       }
 
       const run = async (tx: Tx) => {
+        await acquireHashtextAdvisoryXactLock(tx, userId);
         const plan = await this.plans.create(
           {
             data: {
@@ -2409,6 +2413,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const existing = await this.assertPlanOwnership(userId, planId, tx);
       this.assertMutablePlanStatus(existing.status);
 
@@ -2536,6 +2541,24 @@ export class PlanWriteSupport {
         );
         const existingIds = new Set(existingWorkouts.map((item) => item.id));
 
+        // Free all changed slots in the same transaction so swaps cannot hit the unique position index.
+        const relocating = dto.workouts.filter((w) => w.id);
+        for (const [index, w] of relocating.entries()) {
+          const current = await this.assertWorkoutOwnership(
+            userId,
+            planId,
+            w.id!,
+            tx,
+          );
+          await this.assertWorkoutMutable(userId, current, 'PRESCRIPTION', tx);
+          await this.workouts.update(
+            {
+              where: { id: w.id },
+              data: { dayOffset: -1000000 - index, sessionIndex: 1 },
+            },
+            tx,
+          );
+        }
         for (const workout of dto.workouts) {
           const definition = this.resolveWorkoutDefinitionInput(workout);
           const data = this.buildWorkoutWriteData(
@@ -2569,7 +2592,12 @@ export class PlanWriteSupport {
               },
               tx,
             );
-            await this.replaceWorkoutDefinition(tx, workout.id, definition);
+            await this.replaceWorkoutDefinition(
+              tx,
+              workout.id,
+              definition,
+              workout.plannedSessionRpe ?? current.plannedSessionRpe,
+            );
             await this.markExternalMappings(tx, [workout.id], 'LOCAL_CHANGED');
             touchedWorkoutIds.push(workout.id);
             continue;
@@ -2597,7 +2625,12 @@ export class PlanWriteSupport {
             },
             tx,
           );
-          await this.replaceWorkoutDefinition(tx, created.id, definition);
+          await this.replaceWorkoutDefinition(
+            tx,
+            created.id,
+            definition,
+            workout.plannedSessionRpe,
+          );
           touchedWorkoutIds.push(created.id);
         }
       }
@@ -2700,10 +2733,15 @@ export class PlanWriteSupport {
     planId: string,
     startDate?: string,
     meta?: CoachEventMeta,
-    options?: { tx?: Tx },
+    options?: {
+      tx?: Tx;
+      validatedStartPreview?: boolean;
+      calendarTimeZone?: string;
+    },
   ) {
     // 同一用户同一时间只允许一个 ACTIVE 计划；激活时统一重算每节课 scheduledDate。
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const active = await this.plans.findFirst(
         {
           where: {
@@ -2729,6 +2767,13 @@ export class PlanWriteSupport {
           message: 'Plan cannot be activated',
         });
       }
+
+      if (plan.status === 'DRAFT' && !options?.validatedStartPreview)
+        throw new UnprocessableEntityException({
+          code: 'PLAN_START_REASSESSMENT_REQUIRED',
+          message:
+            'Open the plan start conversation and confirm a fresh preview',
+        });
 
       if (startDate !== undefined && !isCalendarDate(startDate))
         throw new UnprocessableEntityException('Invalid calendar start date');
@@ -2794,6 +2839,7 @@ export class PlanWriteSupport {
           where: { id: planId },
           data: {
             status: 'ACTIVE',
+            activationTimezone: options?.calendarTimeZone,
             startDate: start,
             endDate: end,
             activatedAt: new Date(),
@@ -2892,6 +2938,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       if (plan.status !== 'ACTIVE') {
         throw new BusinessException({
@@ -2950,6 +2997,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       if (plan.status !== 'ACTIVE' && plan.status !== 'PAUSED') {
         throw new BusinessException({
@@ -3008,6 +3056,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       if (
         plan.status === 'COMPLETED' ||
@@ -3234,6 +3283,7 @@ export class PlanWriteSupport {
     options?: { tx?: Tx },
   ) {
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       this.validatePlanWorkouts([dto]);
       if (dto.weekIndex > plan.periodWeeks) {
@@ -3462,6 +3512,7 @@ export class PlanWriteSupport {
   ) {
     // 单节课编辑仍会重建 step 树，保证 text/steps 永远保持一致。
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const workout = await this.assertWorkoutOwnership(
         userId,
         planId,
@@ -3672,6 +3723,7 @@ export class PlanWriteSupport {
       );
     }
     const run = async (tx: Tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
       const before = [];
       for (const change of changes) {

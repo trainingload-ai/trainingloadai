@@ -691,7 +691,12 @@
         "REBASE_REQUIRED": "Le contexte du régime a changé et doit être réaligné avant de présenter une demande.",
         "FAILED": "L'application a échoué. Continuez avec le coach pour le résoudre.",
         "SKIPPED": "Le plan principal n'a pas été modifié."
-      }
+      },
+      "applyStartButton": "Confirmer et démarrer",
+      "supersededTitle": "Remplacé par une proposition plus récente",
+      "added": "Ajoutées",
+      "deleted": "Supprimées",
+      "startSyncImpact": "Au démarrage, le calendrier est mis à jour et la synchronisation de l’appareil est en attente."
     },
     "history": {
       "title": "Histoire",
@@ -6467,5 +6472,16 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
+  },
+  "PlanStartConversation": {
+    "title": "Préparer le démarrage",
+    "description": "Choisissez une date, puis examinez le calendrier complet avec votre coach avant de confirmer.",
+    "dateLabel": "Date de début",
+    "dateHint": "La date lance uniquement une évaluation. Le plan démarre après votre confirmation.",
+    "evaluate": "Évaluer avec le coach",
+    "changeDate": "Modifier la date",
+    "pendingCalendar": "Calendrier en attente d’évaluation",
+    "evaluatePrompt": "Je souhaite commencer ce plan enregistré le {date} ({timeZone}). Examine tout le calendrier avec mon entraînement récent et mon état actuel, pose les questions essentielles et prépare une proposition que je pourrai confirmer.",
+    "loadFailed": "Impossible de charger la conversation. Réessayez."
   }
 }

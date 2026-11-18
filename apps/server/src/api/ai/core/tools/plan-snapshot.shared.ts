@@ -2,6 +2,7 @@ import dayjs = require('dayjs');
 
 export type PlanWorkoutSummary = {
   id: string;
+  revision: number;
   weekIndex: number;
   dayIndex: number;
   dayOffset: number;
@@ -33,6 +34,7 @@ export type PlanSnapshotToolOutput = {
     sourceType: string;
     status: string;
     periodWeeks: number;
+    generationMetadata?: unknown;
     startDate: string | null;
     endDate: string | null;
     currentWeekIndex: number | null;
@@ -72,6 +74,13 @@ export type PlanSnapshotToolOutput = {
     };
   };
   allWorkouts?: PlanWorkoutSummary[];
+  workoutInventory?: {
+    total: number;
+    offset: number;
+    returned: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+  };
 };
 
 export function normalizePlanDate(value?: Date | string | null) {
@@ -90,6 +99,7 @@ export function planDayOffsetToWeekDay(dayOffset: number) {
 
 export type PlanSnapshotWorkoutRow = {
   id: string;
+  revision?: number;
   dayOffset?: number | null;
   sessionIndex?: number | null;
   scheduledDate?: Date | string | null;
@@ -111,6 +121,7 @@ export type PlanSnapshotWorkoutRow = {
 
 export type PlanSnapshotPlanRow = {
   id: string;
+  generationMetadata?: unknown;
   title: string;
   description?: string | null;
   goal?: string | null;
@@ -138,6 +149,7 @@ export function summarizePlanWorkoutRow(
   const { weekIndex, dayIndex } = planDayOffsetToWeekDay(row.dayOffset ?? 0);
   return {
     id: row.id,
+    revision: row.revision ?? 1,
     weekIndex,
     dayIndex,
     dayOffset: row.dayOffset ?? 0,
@@ -149,8 +161,7 @@ export function summarizePlanWorkoutRow(
     text: typeof row.text === 'string' ? row.text : '',
     notes: row.notes ?? null,
     structureKind: row.structureKind ?? null,
-    dslVersion:
-      typeof row.dslVersion === 'number' ? row.dslVersion : null,
+    dslVersion: typeof row.dslVersion === 'number' ? row.dslVersion : null,
     structure: row.structure ?? null,
     summary: row.summary ?? null,
     blocks: row.blocks ?? null,
@@ -222,6 +233,7 @@ export function buildPlanSnapshotFromRow(
     plan: {
       id: plan.id,
       title: plan.title,
+      generationMetadata: plan.generationMetadata,
       description: plan.description ?? null,
       goal: plan.goal ?? null,
       sourceType: plan.sourceType,
@@ -232,8 +244,7 @@ export function buildPlanSnapshotFromRow(
       currentWeekIndex,
       currentDayIndex: todayIndex.dayIndex ?? plan.currentDayIndex ?? null,
       workoutCount: workouts.length,
-      completedWorkoutCount: workouts.filter((w) => w.status === 'DONE')
-        .length,
+      completedWorkoutCount: workouts.filter((w) => w.status === 'DONE').length,
       cycleReview: plan.coachSummary
         ? {
             adherenceScore: plan.coachSummary.adherenceScore ?? null,
