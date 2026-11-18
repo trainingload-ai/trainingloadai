@@ -253,7 +253,6 @@ function CoachScheduleRules({
       : []),
     ...(rules
       ? ([
-          [t("scheduleRevision"), String(rules.revision)],
           [t("fixedRestWeekdays"), days || t("noScheduleDates")],
           [
             t("unavailableDates"),
@@ -953,6 +952,11 @@ export function CoachDecisionAppliedCard({
   const t = useTranslations("AiCoachPage.decision");
   const applied = result.result === "APPLIED";
   const receipt = asRecord(result.receipt);
+  const range = asRecord(receipt.range);
+  const scheduleRange =
+    isCalendarDate(range.from) && isCalendarDate(range.to)
+      ? { from: range.from, to: range.to }
+      : undefined;
   const startReceipt =
     applied &&
     (receipt.mode === "START" || receipt.mode === "SCHEDULE") &&
@@ -1002,9 +1006,7 @@ export function CoachDecisionAppliedCard({
             <CoachScheduleRules
               proposal={{
                 calendarTimeZone: asText(receipt.calendarTimeZone),
-                range: asRecord(
-                  receipt.range,
-                ) as PlanProposalPresentation["range"],
+                range: scheduleRange,
                 scheduleConstraints: (() => {
                   try {
                     return parseScheduleConstraints(

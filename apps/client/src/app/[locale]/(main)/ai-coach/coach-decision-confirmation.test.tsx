@@ -246,6 +246,9 @@ it("restores the committed START receipt from an APPLIED draft without an applie
   ).toBeInTheDocument();
   expect(screen.getByText("2026-11-22 · Asia/Shanghai")).toBeInTheDocument();
   expect(
+    screen.queryByText(messages.AiCoachPage.decision.scheduleRange),
+  ).not.toBeInTheDocument();
+  expect(
     screen.getByText(messages.AiCoachPage.decision.readbackVerified),
   ).toBeInTheDocument();
   expect(
@@ -347,6 +350,7 @@ it("restores the committed SCHEDULE receipt from an APPLIED draft without an app
               appliedReceipt: {
                 mode: "SCHEDULE",
                 planId: "plan",
+                range: { from: "2026-11-23", to: "2026-12-20" },
                 startDate: "2026-11-22",
                 calendarTimeZone: "Asia/Shanghai",
                 readbackVerified: true,
@@ -379,6 +383,7 @@ it("restores the committed SCHEDULE receipt from an APPLIED draft without an app
     screen.queryByRole("button", { name: "确认并开始" }),
   ).not.toBeInTheDocument();
   expect(onConfirm).not.toHaveBeenCalled();
+  expect(screen.getByText("2026-11-23 — 2026-12-20")).toBeInTheDocument();
 });
 
 it("keeps related independent and other-plan workouts visible as unmodified coordination facts", () => {
