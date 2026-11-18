@@ -8,6 +8,7 @@ import { UserIdentityRepository } from '@/api/user/persistence/user-identity.rep
 import { TodaySuggestionGuidanceService } from './today-suggestion-guidance.service';
 import { CurrentCoachFactScopeValidator } from './coach-fact-scope-validator.service';
 import { todayCoachingFactScopes } from './today-suggestion-fact-scopes';
+import { planExecutionContextTool } from '../core/tools/planExecutionContext.tool';
 
 function fixture(profile: string | null, temporary = false) {
   const model = {
@@ -81,6 +82,7 @@ function fixture(profile: string | null, temporary = false) {
     } as never,
   );
   return {
+    execution,
     guidance,
     setProfile: (value: string | null) => {
       profile = value;
@@ -143,4 +145,19 @@ it('lets a changed profile timezone override a previously stored device hint', a
   expect(after.scope?.timezone).toBe('UTC');
   expect(after.context?.currentFacts.date).toBe('2026-11-17');
   expect(after.scope?.revision).not.toBe(before.scope?.revision);
+});
+
+it('keeps an on-demand plan tool read on the advice calendar day', async () => {
+  jest.useFakeTimers().setSystemTime(new Date('2026-11-17T20:00:00Z'));
+  const f = fixture(null);
+  const home = await f.home();
+  const output = await planExecutionContextTool.execute(
+    {
+      session: { user: { id: 'u1' } },
+      currentTurnCalendar: { date: home.date, timezone: home.timezone },
+      planExecutionContext: f.execution,
+    } as never,
+    {},
+  );
+  expect(output.day.date).toBe('2026-11-18');
 });

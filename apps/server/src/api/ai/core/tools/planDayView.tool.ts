@@ -76,10 +76,11 @@ export const planDayViewTool: AiToolDef<Input, PlanDayViewToolOutput> =
     }),
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
+      const today = dayjs(ctx.currentTurnCalendar?.date).startOf('day');
       const anchor = input.date
         ? dayjs(input.date).startOf('day')
-        : dayjs().startOf('day');
-      const safeAnchor = anchor.isValid() ? anchor : dayjs().startOf('day');
+        : today;
+      const safeAnchor = anchor.isValid() ? anchor : today;
       const dateStr = safeAnchor.format('YYYY-MM-DD');
       const planIdRaw = String(input.planId ?? '').trim();
 

@@ -32,6 +32,6 @@ export const healthSummaryTool = buildAiTool<
     ctx.healthData!.getOverview(
       ctx.session!.user.id,
       input.days ?? 42,
-      input.endDate,
+      input.endDate ?? ctx.currentTurnCalendar?.date,
     ),
 });

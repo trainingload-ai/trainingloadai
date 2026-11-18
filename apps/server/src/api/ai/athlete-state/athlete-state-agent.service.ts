@@ -46,6 +46,7 @@ export class AthleteStateAgentService {
     factContext?: Awaited<ReturnType<CoachFactContextService['build']>>;
     onSubmitted?: (result: unknown) => void | Promise<void>;
   }) {
+    const timezone = input.factContext?.timezone ?? input.timezone;
     const reads: AthleteStateReadReceipt[] = [];
     let accepted:
       | { assessmentId: string; state: string; confidence: number }
@@ -66,7 +67,7 @@ export class AthleteStateAgentService {
           const latest = await this.facts.build({
             userId: input.userId,
             date: input.factContext.date,
-            timezone: input.timezone,
+            timezone,
             allowAi: true,
           });
           if (
@@ -89,7 +90,7 @@ export class AthleteStateAgentService {
           coachFactRevision: input.factContext?.revision ?? null,
           policyVersion: ATHLETE_STATE_POLICY_VERSION,
           asOf: input.asOf.toISOString(),
-          timezone: input.timezone,
+          timezone,
           sessionId: input.sessionId,
           runId: input.runId,
           // Hashes reference actual tool reads without duplicating private Memory claims.

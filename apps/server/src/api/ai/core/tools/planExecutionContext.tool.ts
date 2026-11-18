@@ -88,7 +88,8 @@ export const planExecutionContextTool: AiToolDef<Input, Output> = buildAiTool({
       userId,
       surface: 'COACH_CHAT',
       planId: input.planId?.trim() || undefined,
-      anchorDate: input.date?.trim() || undefined,
+      anchorDate: input.date?.trim() || ctx.currentTurnCalendar?.date,
+      timezone: ctx.currentTurnCalendar?.timezone,
     });
     return {
       kind: 'plan_execution_context',

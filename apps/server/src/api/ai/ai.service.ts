@@ -1541,6 +1541,9 @@ export class AiService {
       questionResponse,
       confirmedDecisionId: currentDecisionConfirmationId(params.message),
       currentTurnStartedAt,
+      currentTurnCalendar: coachFacts
+        ? { date: coachFacts.date, timezone: coachFacts.timezone }
+        : undefined,
       webEvidence: this.webEvidence,
       webEvidenceBudget: { searchCalls: 0, fetchCalls: 0 },
       athleteStateSafetyMode,
@@ -1552,7 +1555,9 @@ export class AiService {
               sessionId: safeSid,
               runId: params.runtimeRunId ?? crypto.randomUUID(),
               timezone:
-                (await this.userService.getPreferredTimezone(userId)) ?? 'UTC',
+                coachFacts?.timezone ??
+                (await this.userService.getPreferredTimezone(userId)) ??
+                'UTC',
               asOf: currentTurnStartedAt,
               factContext: coachFacts,
               onSubmitted: params.backgroundTask?.submitResult,

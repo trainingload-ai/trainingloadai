@@ -453,10 +453,11 @@ export function buildPmcTrainingDataset(args: {
   } else {
     const buckets = new Map<string, PmcAccumulator>();
     for (const record of args.records) {
+      // PMC dates are calendar keys carried at UTC midnight, not activity instants.
       const bucket = bucketForDate(
         record.date,
         args.query.groupBy,
-        args.timezone,
+        'UTC',
       );
       const existing = buckets.get(bucket.key) ?? { ...bucket, rows: [] };
       existing.rows.push(record);

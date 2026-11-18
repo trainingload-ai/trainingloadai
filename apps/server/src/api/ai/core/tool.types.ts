@@ -83,6 +83,8 @@ export type AiToolContext = {
   };
   confirmedDecisionId?: string;
   currentTurnStartedAt?: Date;
+  /** Calendar used by the facts bound to this turn, including advice entry hints. */
+  currentTurnCalendar?: { date: string; timezone: string };
   /** Live public-web evidence gateway and per-turn cost guard. */
   webEvidence?: WebEvidenceGateway;
   webEvidenceBudget?: { searchCalls: number; fetchCalls: number };

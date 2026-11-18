@@ -139,4 +139,35 @@ describe('Athlete State Skill result persistence', () => {
     );
     expect(f.saveAssessment).not.toHaveBeenCalled();
   });
+  it('revalidates and saves an assessment in the timezone of its factual context', async () => {
+    const f = fixture();
+    const facts = {
+      build: jest.fn(async (input: any) => ({
+        revision: input.timezone === 'Asia/Shanghai' ? 'shanghai' : 'utc',
+        status: 'AVAILABLE',
+      })),
+    };
+    const service = new AthleteStateAgentService(
+      { saveAssessment: f.saveAssessment } as never,
+      f.updates as never,
+      facts as never,
+    );
+    const turn = service.openTurn({
+      ...f.input,
+      factContext: {
+        date: '2026-11-18',
+        timezone: 'Asia/Shanghai',
+        revision: 'shanghai',
+        status: 'AVAILABLE',
+      } as never,
+    });
+    turn.recordRead('training.data_coverage', {}, { complete: true });
+    turn.recordRead('training.readiness', {}, { recentActivities: ['normal'] });
+    await expect(turn.submit(result)).resolves.toMatchObject({
+      assessmentId: 'assessment',
+    });
+    expect(f.saveAssessment.mock.calls[0][0].evidence.snapshot.timezone).toBe(
+      'Asia/Shanghai',
+    );
+  });
 });

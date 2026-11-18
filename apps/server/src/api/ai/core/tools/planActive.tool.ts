@@ -33,7 +33,7 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiT
         asOf: {
           type: 'string',
           description:
-            'Optional anchor date in YYYY-MM-DD. Defaults to server today.',
+            'Optional anchor date in YYYY-MM-DD. Defaults to athlete-local today.',
         },
         includeAllWorkouts: {
           type: 'boolean',
@@ -53,10 +53,11 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiT
     }),
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
-      const asOf = input.asOf ? dayjs(input.asOf) : dayjs();
+      const today = dayjs(ctx.currentTurnCalendar?.date);
+      const asOf = input.asOf ? dayjs(input.asOf) : today;
       const anchor = asOf.isValid()
         ? asOf.startOf('day')
-        : dayjs().startOf('day');
+        : today.startOf('day');
       const tomorrow = anchor.add(1, 'day');
 
       const plan = await ctx.planQuery.findCoachPlanSnapshot({

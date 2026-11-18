@@ -1054,7 +1054,7 @@ export class CoachToolsService {
       Intl.DateTimeFormat().resolvedOptions().timeZone ||
       process.env.TZ ||
       'UTC';
-    const instant = new Date();
+    const instant = ctx.currentTurnStartedAt ?? new Date();
     const now = dayjs(instant);
     const userId = ctx.session?.user?.id;
     let userTimezone: string | undefined;
@@ -1066,12 +1066,13 @@ export class CoachToolsService {
         userTimezone = undefined;
       }
     }
-    const athleteTimezone = userTimezone || 'UTC';
+    const athleteTimezone =
+      userTimezone || ctx.currentTurnCalendar?.timezone || 'UTC';
     const athleteLocalToday =
       localDateYmd(instant, athleteTimezone) ??
       localDateYmd(instant, 'UTC') ??
       instant.toISOString().slice(0, 10);
-    const userNow = userTimezone ? now.tz(userTimezone) : undefined;
+    const userNow = now.tz(athleteTimezone);
 
     return {
       unixMs: instant.getTime(),
@@ -1086,21 +1087,13 @@ export class CoachToolsService {
         offset: '+00:00',
       },
       userTimezone: userTimezone ?? null,
-      user: userNow
-        ? {
-            iso: userNow.toISOString(),
-            date: athleteLocalToday,
-            time: userNow.format('HH:mm:ss'),
-            weekday: userNow.format('dddd'),
-            offset: userNow.format('Z'),
-          }
-        : {
-            iso: instant.toISOString(),
-            date: athleteLocalToday,
-            time: now.utc().format('HH:mm:ss'),
-            weekday: now.utc().format('dddd'),
-            offset: '+00:00',
-          },
+      user: {
+        iso: userNow.toISOString(),
+        date: athleteLocalToday,
+        time: userNow.format('HH:mm:ss'),
+        weekday: userNow.format('dddd'),
+        offset: userNow.format('Z'),
+      },
     };
   }
 
@@ -3352,7 +3345,9 @@ export class CoachToolsService {
     }
 
     const userTimezone =
-      (await ctx.userService.getPreferredTimezone(userId)) ?? 'UTC';
+      (await ctx.userService.getPreferredTimezone(userId)) ??
+      ctx.currentTurnCalendar?.timezone ??
+      'UTC';
     const from = dayjs
       .tz(String(input?.from ?? ''), userTimezone)
       .startOf('day');
@@ -3415,8 +3410,8 @@ export class CoachToolsService {
     if (query.source === 'PMC') {
       const records = await ctx.pmc.listRange(
         userId,
-        from.toDate(),
-        to.toDate(),
+        dayjs.utc(query.from).startOf('day').toDate(),
+        dayjs.utc(query.to).endOf('day').toDate(),
         { orderBy: 'asc' },
       );
       return buildPmcTrainingDataset({
