@@ -3,10 +3,9 @@ import type { CoachSkillDef } from '../skill.types';
 export const integrationSupportSkill: CoachSkillDef = {
   name: 'integration-support',
   aliases: ['integration', 'sync-support', 'device-sync'],
-  description:
-    'Explain third-party connections and synchronization using the product capability matrix plus the signed-in user’s effective connection and settings state.',
+  description: 'Explain supported connections and their current usable state.',
   whenToUse:
-    'Use when the user asks how to connect, import, export, or sync activities, planned workouts, wellness, athlete settings, calendars, GPS computers, or watches with an integration enabled by this deployment.',
+    'Connection, import, export, calendar or device-delivery questions; workout changes use workout-management.',
   suggestedTools: ['integration.status', 'docs.search', 'docs.get'],
   prompt: [
     `Resolve the athlete's actual integration question from current product capability and account state. integration.status is the authoritative source for provider support, connection, permission, settings, sync state, and device reachability; use it whenever the answer depends on those facts.`,

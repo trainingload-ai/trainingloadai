@@ -26,6 +26,8 @@ export const planProposalPreviewTool: AiToolDef<
     'plan-followup',
     'plan-start',
     'plan-cycle-review',
+    'plan-day-review',
+    'plan-week-review',
     'workout-management',
   ],
   isEnabled: async (ctx) => hasSignedInUser(ctx),

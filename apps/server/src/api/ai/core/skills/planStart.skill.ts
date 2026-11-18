@@ -3,16 +3,19 @@ import type { CoachSkillDef } from '../skill.types';
 export const planStartSkill: CoachSkillDef = {
   name: 'plan-start',
   aliases: ['plan_start'],
-  description: 'Review and start a saved draft.',
-  whenToUse: 'Saved-draft starts or date changes.',
+  description:
+    'Assess and prepare the same saved DRAFT for its selected start date.',
+  whenToUse:
+    'Starting a saved DRAFT or changing its date before activation; running-plan availability changes use plan-followup.',
   suggestedTools: [
     'plan.by_id',
     'time.current',
     'training.baseline',
-    'training.plan_context',
     'training.readiness',
     'profile.current',
     'profile.zones',
+    'workout.intensity_strategy',
+    'integration.status',
     'activity.search',
     'plan.proposal_preview',
     'coach_decision_draft',
@@ -29,5 +32,6 @@ export const planStartSkill: CoachSkillDef = {
     `Fixed ISO rest weekdays and legacy relative allowedDays are distinct. Inherit existing constraints unless the athlete explicitly settles a replacement. Any changed scheduleConstraints and qualityContractTransition must be shown with the final candidate; audit references do not grant execution authority.`,
     `Pass the returned decisionType PLAN_START and decisionPayload unchanged into coach_decision_draft. Wait for the athlete to use that actual card confirmation in a later turn; coach_decision_apply cannot use seed text or invented consent. After an expired or superseded preview, reassess rather than retrying its old card.`,
     `Only a committed apply receipt/readback establishes the same plan was started. Describe the real resulting dates and synchronization status without exposing database IDs or internal schema details.`,
+    'Complete this turn with a necessary question, a valid START confirmation card, or the committed start receipt. A presented card awaits the later product confirmation; it is not an activated plan.',
   ].join('\n'),
 };

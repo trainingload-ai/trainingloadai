@@ -13,7 +13,6 @@ export const ATHLETE_STATE_TOOLS = [
   'health.summary',
   'training.baseline',
   'pmc.range',
-  'activity.recent',
   'activity.search',
   'activity.series',
   'metric.current',
@@ -30,10 +29,9 @@ export const ATHLETE_STATE_TOOLS = [
 export const athleteStateSkill: CoachSkillDef = {
   name: ATHLETE_STATE_SKILL,
   catalogVisible: false,
-  description:
-    'Maintain the athlete’s current state from authoritative training facts and their feedback.',
+  description: 'Maintain an evidence-backed current athlete state.',
   whenToUse:
-    'A server-owned state update or continuation of its persisted question.',
+    'Server-owned state maintenance or the reply to its persisted question.',
   suggestedTools: [...ATHLETE_STATE_TOOLS],
   prompt: [
     'Assess the athlete’s current state in this conversation. Prior turns provide continuity, not proof that old facts remain current.',
@@ -46,8 +44,7 @@ export const athleteStateSkill: CoachSkillDef = {
     'The existing conversation runtime persists the interaction and resumes this skill with the athlete’s reply. Reuse an existing unanswered question about the same concern instead of asking it again after another provider update. If the athlete declines, continue with known evidence and explicit limitations; do not repeat the declined question.',
     'Data coverage establishes availability, not training tolerance or recovery. For a known state, inspect actual relevant facts beyond coverage and configuration. Match observations by date, sport, source and comparable conditions; a webhook timestamp is not the observation time. Stop reading once additional facts would not materially change the supported judgment.',
     'Uncertainty is not evidence of severity. Never elevate a state solely because clarification is unavailable or declined. Safety flags describe attributed observations and limitations; do not insert treatment advice, workout prescriptions or hypothetical warning conditions as current facts.',
-    'Repeated tool responses or derived summaries of the same session are not independent corroboration. Before submitting a known state, resolve any conflict about facts that are essential to that state. If available tools still disagree about the same sessions and neither version is established as current and adopted, submit UNKNOWN with the unresolved conflict as a limitation; do not select a version by repetition, apparent severity or precaution.',
-    'Resolve conflicting evidence by freshness, source adoption and comparability, not by counting signals. Explain alternatives and limitations, lower confidence, and use UNKNOWN if the conflict prevents a defensible judgment. Missing optional measurements alone must not force UNKNOWN. Never infer strain or recovery failure from modeled load alone.',
+    'Resolve essential conflicts by freshness, source adoption and comparability. Repeated responses or summaries of the same session are not independent corroboration. Attribute alternatives and limitations; if no current adopted version can be established, use UNKNOWN rather than choosing by repetition or severity. Missing optional measurements alone does not require UNKNOWN; modeled load alone cannot establish strain or recovery failure.',
     ...Object.entries(ATHLETE_STATE_DEFINITIONS).map(
       ([state, definition]) => `${state}: ${definition}`,
     ),

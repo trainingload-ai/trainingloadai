@@ -3,10 +3,9 @@ import type { CoachSkillDef } from '../skill.types';
 export const planFollowupSkill: CoachSkillDef = {
   name: 'plan-followup',
   aliases: ['plan_followup', 'followup-plan', 'training-plan-followup'],
-  description:
-    'Follow up on a saved training plan the user opened in the app: execution progress, remaining sessions, load context, and schedule adjustments — including drafts not yet activated.',
+  description: 'Continue work on the specific saved plan the athlete opened.',
   whenToUse:
-    'Use when the user opens AI Coach from a specific plan (intent plan-followup) or asks to discuss a plan they are viewing, remaining workouts, or next steps for that plan.',
+    'Opened-plan progress, remaining sessions or next steps, including DRAFT plans; keep that object when another plan is active.',
   suggestedTools: [
     'plan.by_id',
     'plan.active',
@@ -30,11 +29,9 @@ export const planFollowupSkill: CoachSkillDef = {
     `For changed availability, rest weekdays or time budgets on an ACTIVE/PAUSED plan, read every page of plan.by_id and relevant calendar, then use SCHEDULE preview + PLAN_SCHEDULE decision. Supply explicit future range and complete changes/additions/deletions with preserveUnmentioned:true. Preserve historical, linked, non-PLANNED and successor-covered workouts; do not infer ISO weekdays from allowedDays. The server enforces the whole candidate and real dates. Fixed plans require confirmation of the actual card in a later turn.`,
     `For starting a saved DRAFT, activate plan-start guidance and use START preview/PLAN_START confirmation for that same plan; never use generic lifecycle activation or create a successor.`,
     `Draft plans may have no startDate; "today / tomorrow" buckets may be empty while \`allWorkouts\` still lists all sessions — that is expected; analyze from \`allWorkouts\` and statuses.`,
-    `Never paste internal database IDs into athlete-facing prose. Refer to this plan, its visible title, or the plan the athlete opened.`,
     `If \`plan.by_id\` returns no plan, say it could not be loaded for this account and suggest checking the plan in the app — without quoting any id.`,
     `Choose additional baseline, profile, metric, readiness, plan-day, or activity evidence only when it can materially change the requested judgment or proposal. For schedule changes, use the Workout operation decision guide and present one coherent change set.`,
     `For prescription changes across one workout or the remaining plan, assess equivalent workout families together and use plan.proposal_preview. Do not turn the athlete's requested pace/HR/power/RPE wording directly into a write without coaching judgment.`,
-    `When connected-device delivery matters, inspect integration.status directly and explain any synchronization limitation without changing the internally correct prescription.`,
-    `In proposal rationale and evidence, explain what athlete data was used and what conclusion follows; never expose database IDs, internal DSL/schema details, algorithm or model brands, or confidence scores.`,
+    'A narrow plan question may end with a direct answer. Delegate day/week implications to the corresponding plan review, whole-plan feasibility to plan-cycle-review, and retain the opened plan, relevant evidence and settled constraints across the handoff. Finish with that answer, a complete preview, a committed receipt, one necessary question or the concrete loading limitation.',
   ].join('\n'),
 };

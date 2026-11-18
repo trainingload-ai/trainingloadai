@@ -38,6 +38,7 @@ export const integrationStatusTool: AiToolDef<Input, Output> = buildAiTool({
     'plan-week-review',
     'period-review',
     'plan-builder',
+    'plan-start',
     'plan-followup',
     'plan-cycle-review',
     'workout-management',

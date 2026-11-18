@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2249
+          "line": 2241
         }
       ]
     },
@@ -1040,7 +1040,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1052
+          "line": 1053
         }
       ]
     },
@@ -1078,7 +1078,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 3001
+          "line": 2993
         }
       ]
     },
@@ -1099,23 +1099,23 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2681
+          "line": 2673
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2742
+          "line": 2734
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2829
+          "line": 2821
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2881
+          "line": 2873
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2985
+          "line": 2977
         }
       ]
     },

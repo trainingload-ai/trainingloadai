@@ -1479,14 +1479,6 @@ export class AiService {
           factMessage?.id ?? 'unpersisted-user-turn',
         );
     }
-    if (
-      !restoredSkill &&
-      task &&
-      /^(?:今天|都|按|基于|根据|更新|重算|应用|确认|采用|只是|骑行|跑步)|(?:latest|recalculate|apply)/i.test(
-        prompt.trim(),
-      )
-    )
-      restoredSkill = 'fitness-assessment';
     const activeSkill =
       background ||
       (params.platformFunded && params.activeSkillName === ATHLETE_STATE_SKILL)

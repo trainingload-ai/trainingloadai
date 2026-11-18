@@ -1036,6 +1036,7 @@ export async function* streamCoachAnswer(args: {
     appendAmbientMemory(
       buildCoachSystemPrompt(ctx.lang, args.activeSkill ?? null, clock, {
         publicReasoningSummary,
+        serverOwnedTask: Boolean(ctx.backgroundTask),
       }),
       args.ambientMemory,
       args.coachFacts,
@@ -1204,7 +1205,10 @@ export async function* streamCoachAnswer(args: {
                     ctx.lang,
                     runtimeState.currentActiveSkill,
                     clock,
-                    { publicReasoningSummary: thinking },
+                    {
+                      publicReasoningSummary: thinking,
+                      serverOwnedTask: Boolean(ctx.backgroundTask),
+                    },
                   ),
                   args.ambientMemory,
                   args.coachFacts,
@@ -1227,7 +1231,10 @@ export async function* streamCoachAnswer(args: {
               ctx.lang,
               runtimeState.currentActiveSkill,
               clock,
-              { publicReasoningSummary: thinking && !deliveryOnly },
+              {
+                publicReasoningSummary: thinking && !deliveryOnly,
+                serverOwnedTask: Boolean(ctx.backgroundTask),
+              },
             ),
             args.ambientMemory,
             args.coachFacts,

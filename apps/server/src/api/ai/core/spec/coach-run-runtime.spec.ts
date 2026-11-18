@@ -4,6 +4,9 @@ import type { CoachActivityEvent } from '@shared/ai-coach-run-contract';
 import type { AiToolContext, AiToolDef } from '../tool.types';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
 import { streamCoachAnswer } from '../tool-loop-agent.runtime';
+import { COACH_TOOL_DEFINITIONS } from '../tool.registry';
+import { getCoachSkillByName } from '../skill.registry';
+import { skillActivateTool } from '../tools/skillActivate.tool';
 
 let modelAttempts = 0;
 let latestAgentConfig: any;
@@ -97,6 +100,7 @@ describe('real execution lifecycle / fallback fences', () => {
       const step = latestAgentConfig.prepareStep({ stepNumber: 0, steps: [] });
       expect(step.toolChoice).toBe(expected);
       expect(step.activeTools).toContain('coach_task_submit_result');
+      expect(step.system.includes('# Available skills')).toBe(!background);
     },
   );
 
@@ -107,6 +111,56 @@ describe('real execution lifecycle / fallback fences', () => {
     if (previousFallback === undefined)
       delete process.env.OPENROUTER_DEFAULT_FALLBACK_MODELS;
     else process.env.OPENROUTER_DEFAULT_FALLBACK_MODELS = previousFallback;
+  });
+
+  it('uses the newly activated real skill and capability set on the next step', async () => {
+    const context = ctx(async () => undefined);
+    const drain = async () => {
+      for await (const _event of streamCoachAnswer({
+        tools: [...COACH_TOOL_DEFINITIONS],
+        ctx: context,
+        model: 'test-explicit',
+        activeSkill: getCoachSkillByName('plan-day-review'),
+        messages: [
+          {
+            role: 'user',
+            content: 'For the opened plan, show my VO2max history.',
+          },
+        ],
+      })) {
+        /* drain */
+      }
+    };
+    await expect(drain()).rejects.toThrow('rate limited');
+    const initial = latestAgentConfig.prepareStep({ stepNumber: 0, steps: [] });
+    expect(initial.activeTools).toContain('plan_proposal_preview');
+    const output = await skillActivateTool.execute(context, {
+      name: 'training-analytics',
+    });
+    expect(output.skill).not.toHaveProperty('prompt');
+    latestAgentConfig.onStepFinish({
+      toolCalls: [],
+      stepNumber: 0,
+      toolResults: [
+        {
+          toolCallId: 'switch',
+          toolName: 'skill_activate',
+          input: { name: 'training-analytics' },
+          output,
+        },
+      ],
+    });
+    const next = latestAgentConfig.prepareStep({ stepNumber: 1, steps: [] });
+    expect(next.system).toContain('# Active skill: training-analytics');
+    expect(next.system).toContain(
+      getCoachSkillByName('training-analytics')!.prompt,
+    );
+    expect(next.system).toContain('# Available skills');
+    expect(next.activeTools).toContain('metric_history');
+    expect(next.activeTools).toContain('present_training_visualization');
+    expect(next.activeTools).not.toContain('plan_proposal_preview');
+    expect(context.fitnessConfirmation).toBeUndefined();
+    expect(context.fitnessTrackingReply).toBeUndefined();
   });
 
   it('keeps same-name parallel calls separate, and serial queued calls out of running', async () => {

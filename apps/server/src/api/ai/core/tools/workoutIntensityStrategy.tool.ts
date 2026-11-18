@@ -115,6 +115,10 @@ export const workoutIntensityStrategyTool: AiToolDef<Input, Output> =
     applicableSkills: [
       'plan-builder',
       'plan-followup',
+      'plan-start',
+      'plan-day-review',
+      'plan-week-review',
+      'plan-cycle-review',
       'fitness-assessment',
       'workout-management',
       'workout-generator',

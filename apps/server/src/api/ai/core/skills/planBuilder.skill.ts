@@ -3,10 +3,9 @@ import type { CoachSkillDef } from '../skill.types';
 export const planBuilderSkill: CoachSkillDef = {
   name: 'plan-builder',
   aliases: ['training-plan-builder', 'build-plan', 'plan-generator'],
-  description:
-    'Turn an athlete brief and relevant evidence into a structured, reviewable training plan draft.',
+  description: 'Turn a new training brief into a reviewable plan draft.',
   whenToUse:
-    'Use when the athlete wants a new training plan, race plan, training block, or weekly schedule. Use plan-cycle-review to evaluate an existing or just-generated plan.',
+    'A new plan or training block; a saved plan uses plan-followup, feasibility uses plan-cycle-review, DRAFT start uses plan-start.',
   suggestedTools: [
     'ask_user_question',
     'training.plan_context',
@@ -41,5 +40,6 @@ export const planBuilderSkill: CoachSkillDef = {
     `- Use prior plans as execution evidence. Judge completion against elapsed weeks, not future sessions.`,
     `- Choose workout mix, progression, recovery placement and frequency. Avoid filler, unsupported load jumps, clustered hard work and strength that undermines key endurance sessions.`,
     `- Deliver READY through present_coach_plan_draft; compact repeated sessions with templates. Repair rejected payloads silently. The athlete reviews and saves the preview in the app.`,
+    'Complete with a READY reviewable draft, one necessary question, or coordinated suitability alternatives awaiting the athlete choice. Saving a draft and starting that saved plan are later product actions.',
   ].join('\n'),
 };

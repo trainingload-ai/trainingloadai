@@ -73,6 +73,19 @@ export function getCoachSkillByName(name: string): ActiveCoachSkill | null {
   return toActiveSkill(skill, `explicit:${normalized}`);
 }
 
+/** Conversational discovery only; server task ownership and tool authorization are separate. */
+export function getCoachCatalogSkillByName(
+  name: string,
+): ActiveCoachSkill | null {
+  const skill = getCoachSkillByName(name);
+  return skill &&
+    getCoachSkills().some(
+      (entry) => entry.name === skill.name && entry.catalogVisible !== false,
+    )
+    ? skill
+    : null;
+}
+
 export function listCoachSkillsForPrompt(): Array<{
   name: string;
   description: string;
