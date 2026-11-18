@@ -98,10 +98,19 @@ describe('coach skill capability composition', () => {
   });
 
   it('keeps generic and active prompts within the existing size ceilings', () => {
-    expect(buildCoachSystemPrompt('zh').length).toBeLessThan(15_000);
+    const clock = {
+      timezone: 'Asia/Shanghai',
+      athleteLocalToday: '2026-11-18',
+      generatedAt: '2026-11-18T14:00:00Z',
+    };
+    expect(
+      buildCoachSystemPrompt('zh', null, clock, {
+        publicReasoningSummary: true,
+      }).length,
+    ).toBeLessThan(15_000);
     for (const definition of getCoachSkills()) {
       const skill = getCoachSkillByName(definition.name);
-      const prompt = buildCoachSystemPrompt('zh', skill, null, {
+      const prompt = buildCoachSystemPrompt('zh', skill, clock, {
         serverOwnedTask: definition.catalogVisible === false,
         publicReasoningSummary: true,
       });
