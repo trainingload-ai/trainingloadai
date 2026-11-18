@@ -375,6 +375,76 @@ describe('continuous plan runtime / PostgreSQL', () => {
     ).toBe('FAILED');
   });
 
+  it('keeps exhausted crash retries deferred until the next daily retry window', async () => {
+    const { planId } = await active();
+    const a = automation();
+    await a.discover(now);
+    const job = (await a.claim())!;
+    await prisma.rollingPlanJob.updateMany({
+      where: { planId, id: { not: job.id }, state: 'PENDING' },
+      data: { availableAt: new Date('2200-01-01') },
+    });
+    await prisma.rollingPlanJob.update({
+      where: { id: job.id },
+      data: { attempts: 5, leaseUntil: new Date(0) },
+    });
+    expect(await a.claim()).toBeNull();
+    await a.discover(now);
+    const deferred = (await a.status('user', planId)).jobs.find(
+      (j) => j.id === job.id,
+    )!;
+    expect(deferred.state).toBe('FAILED');
+    expect(new Date(deferred.availableAt).getTime()).toBeGreaterThan(
+      Date.now() + 23 * 60 * 60_000,
+    );
+    expect(await a.claim()).toBeNull();
+
+    await prisma.rollingPlanJob.update({
+      where: { id: job.id },
+      data: { availableAt: new Date(0) },
+    });
+    await a.discover(now);
+    expect(await a.claim()).toMatchObject({ id: job.id, attempts: 1 });
+  });
+
+  it('recovers a committed notification behind newer no-op or already delivered jobs', async () => {
+    const { planId, policy } = await active();
+    await prisma.rollingPlanJob.createMany({
+      data: [
+        {
+          id: 'awaiting-notification',
+          planId,
+          policyId: policy.id,
+          kind: 'MONTH',
+          windowStart: new Date('2099-11-01'),
+          inputRevision: 'undelivered',
+          state: 'APPLIED',
+          receipt: { changed: true },
+          updatedAt: new Date(0),
+        },
+        ...Array.from({ length: 101 }, (_, index) => ({
+          planId,
+          policyId: policy.id,
+          kind: 'MONTH',
+          windowStart: new Date('2099-11-01'),
+          inputRevision: `later-result-${index}`,
+          state: 'APPLIED',
+          receipt:
+            index % 2
+              ? { changed: false }
+              : { changed: true, notifiedAt: '2000-01-01T00:00:00Z' },
+          updatedAt: new Date('2000-01-01'),
+        })),
+      ],
+    });
+    const a = automation();
+    expect((await a.notificationsDue()).map((job) => job.id)).toEqual([
+      'awaiting-notification',
+    ]);
+    await a.markNotified('awaiting-notification');
+    expect(await a.notificationsDue()).toEqual([]);
+  });
+
   it('reclaims a crashed model-result job and applies its frozen candidate without another paid call', async () => {
     const { planId } = await active();
     Object.defineProperty(f.starts, 'automationAccess', {

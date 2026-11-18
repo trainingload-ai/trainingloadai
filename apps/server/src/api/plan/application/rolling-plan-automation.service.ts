@@ -326,7 +326,9 @@ export class RollingPlanAutomationService {
         data: {
           state: 'FAILED',
           claimToken: null,
+          leaseUntil: null,
           lastError: 'ROLLING_RETRY_EXHAUSTED',
+          availableAt: new Date(Date.now() + 86400000),
         },
       });
       const token = randomUUID();
@@ -773,29 +775,26 @@ export class RollingPlanAutomationService {
     });
   }
   async notificationsDue() {
+    const pending = await this.prisma.$queryRawUnsafe<Array<{ id: string }>>(
+      `SELECT id FROM t_rolling_plan_job
+       WHERE state = 'APPLIED' AND receipt IS NOT NULL
+         AND receipt->>'baseline' IS DISTINCT FROM 'true'
+         AND receipt->>'notifiedAt' IS NULL
+         AND receipt->>'changed' IS DISTINCT FROM 'false'
+       ORDER BY updated_at, id LIMIT 20`,
+    );
     const jobs = await this.prisma.rollingPlanJob.findMany({
-      where: { state: 'APPLIED' },
+      where: { id: { in: pending.map((job) => job.id) }, state: 'APPLIED' },
       include: { plan: true },
-      orderBy: { updatedAt: 'desc' },
-      take: 100,
+      orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }],
     });
-    return jobs
-      .filter((j) => {
-        const r = j.receipt as {
-          baseline?: boolean;
-          notifiedAt?: string;
-          changed?: boolean;
-        } | null;
-        return r && !r.baseline && !r.notifiedAt && r.changed !== false;
-      })
-      .slice(0, 20)
-      .map((j) => ({
-        id: j.id,
-        planId: j.planId,
-        userId: j.plan.userId,
-        kind: j.kind,
-        receipt: j.receipt,
-      }));
+    return jobs.map((j) => ({
+      id: j.id,
+      planId: j.planId,
+      userId: j.plan.userId,
+      kind: j.kind,
+      receipt: j.receipt,
+    }));
   }
   async markNotified(jobId: string) {
     const job = await this.prisma.rollingPlanJob.findUniqueOrThrow({
