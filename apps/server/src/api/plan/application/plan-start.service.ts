@@ -680,13 +680,22 @@ export class PlanStartService {
         async (tx) => {
           await acquireHashtextAdvisoryXactLock(tx, userId);
           const schedule = request.mode === 'SCHEDULE';
-          const session = automation
-            ? (await this.assertAutomationJob(
+          const automationJob = automation
+            ? await this.assertAutomationJob(
                 automation.jobId,
                 automation.claimToken,
                 tx,
-              ),
-              null)
+              )
+            : null;
+          if (automationJob) {
+            this.assertAutomationSettings(request);
+            this.assertAutomationSports(automationJob.policy.settings, [
+              ...request.changes.map((c) => c.workout),
+              ...request.additions.map((a) => a.workout),
+            ]);
+          }
+          const session = automationJob
+            ? null
             : await this.assertBinding(
                 userId,
                 request.planId,
@@ -1338,6 +1347,30 @@ export class PlanStartService {
     );
   }
 
+  private assertAutomationSettings(
+    request: PlanStartPreviewRequest | PlanSchedulePreviewRequest,
+  ) {
+    if (
+      request.scheduleConstraints !== undefined ||
+      request.qualityContractTransition !== undefined ||
+      request.rolling !== undefined
+    )
+      fail('Automatic candidates cannot change user settings');
+  }
+
+  private assertAutomationSports(
+    settings: unknown,
+    workouts: Array<{ sportType?: string }>,
+  ) {
+    const sports = (settings as { sportTypes?: unknown })?.sportTypes;
+    if (
+      !Array.isArray(sports) ||
+      !sports.length ||
+      workouts.some((w) => !sports.includes(w.sportType ?? 'UNKNOWN'))
+    )
+      fail('Automatic workout is outside the authorized sports');
+  }
+
   private async assertAutomationJob(
     jobId: string,
     claimToken: string,
@@ -1413,6 +1446,16 @@ export class PlanStartService {
             proposal.binding
           )
             fail('Automation cannot consume a user-confirmation proposal');
+          this.assertAutomationSettings(proposal.request);
+          const changed = new Set(
+            proposal.request.changes.map((c) => c.sourceWorkoutId),
+          );
+          this.assertAutomationSports(
+            job.policy.settings,
+            proposal.candidate
+              .filter((c) => c.candidateKey || changed.has(c.sourceWorkoutId!))
+              .map((c) => c.workout),
+          );
           const range = (proposal.request as PlanSchedulePreviewRequest).range;
           const weekStart = job.windowStart.toISOString().slice(0, 10);
           if (
@@ -1468,6 +1511,7 @@ export class PlanStartService {
             where: { id: preview.id },
             data: { appliedAt: new Date() },
           });
+          await this.assertAutomationJob(job.id, claimToken, tx);
           await tx.rollingPlanJob.update({
             where: { id: job.id },
             data: {

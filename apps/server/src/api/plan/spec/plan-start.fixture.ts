@@ -93,7 +93,11 @@ export function planStartFixture(prisma: PrismaClient) {
   const service = new PlanService(
     new PlanLifecycleService(write),
     new PlanWorkoutCommandService(write),
-    new PlanActivityLinkService(write),
+    new PlanActivityLinkService(
+      write,
+      new PlanActivityLinkRepository(prisma as never),
+      workouts,
+    ),
   );
   const starts = new PlanStartService(
     prisma as never,

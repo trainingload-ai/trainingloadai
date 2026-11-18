@@ -3,7 +3,10 @@ import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import { planStartFixture } from './plan-start.fixture';
-import type { PlanStartPreviewRequest } from '@shared/plan-proposal';
+import type {
+  PlanSchedulePreviewRequest,
+  PlanStartPreviewRequest,
+} from '@shared/plan-proposal';
 
 describe('continuous training / PostgreSQL', () => {
   let database: ChildProcess;
@@ -570,6 +573,294 @@ describe('continuous training / PostgreSQL', () => {
         else process.env[key] = value;
       }
     }
+  });
+
+  async function withAuthorizedWeek(
+    check: (input: {
+      job: { id: string; claimToken: string | null };
+      request: PlanSchedulePreviewRequest;
+      planId: string;
+      policyId: string;
+      revokeConsent: () => Promise<unknown>;
+    }) => Promise<void>,
+  ) {
+    const { RollingPlanAuthorizationService } =
+      await import('../application/rolling-plan-authorization.service');
+    const { SelfHostFeatureAccessPolicy } =
+      await import('@/deployment/self-host-feature-access-policy.service');
+    const { AiDataConsentService } =
+      await import('@/ai-data-consent/ai-data-consent.service');
+    const { UserQueryService } = await import('@/api/user/user-query.service');
+    const { UserIdentityRepository } =
+      await import('@/api/user/persistence/user-identity.repository');
+    const saved = {
+      AI_PROVIDER: process.env.AI_PROVIDER,
+      DEPLOYMENT_MODE: process.env.DEPLOYMENT_MODE,
+      SELF_HOST_MODE: process.env.SELF_HOST_MODE,
+    };
+    process.env.AI_PROVIDER = 'openai';
+    process.env.DEPLOYMENT_MODE = 'cloud';
+    delete process.env.SELF_HOST_MODE;
+    try {
+      const consent = new AiDataConsentService(
+        new UserQueryService(new UserIdentityRepository(prisma as never)),
+      );
+      await consent.recordDecision({
+        userId: 'user',
+        granted: true,
+        source: 'ACCOUNT_SETTINGS',
+      });
+      Object.assign(f.starts, {
+        automationAccess: new RollingPlanAuthorizationService(
+          new SelfHostFeatureAccessPolicy(),
+          consent,
+        ),
+      });
+      const d = await ready();
+      await d.apply();
+      const policy = await prisma.planAutomationPolicy.findFirstOrThrow({
+        where: { planId: d.planId },
+      });
+      const job = await prisma.rollingPlanJob.create({
+        data: {
+          planId: d.planId,
+          policyId: policy.id,
+          kind: 'WEEK',
+          windowStart: new Date('2099-11-23'),
+          inputRevision: 'authorization-scope',
+          state: 'RUNNING',
+          claimToken: 'scope-claim',
+          leaseUntil: new Date(Date.now() + 60000),
+        },
+      });
+      const { rolling: _, startDate: __, ...base } = d.request;
+      await check({
+        job,
+        planId: d.planId,
+        policyId: policy.id,
+        revokeConsent: () =>
+          consent.recordDecision({
+            userId: 'user',
+            granted: false,
+            source: 'ACCOUNT_SETTINGS',
+          }),
+        request: {
+          ...base,
+          mode: 'SCHEDULE',
+          range: { from: '2099-11-23', to: '2099-11-29' },
+          additions: [
+            {
+              candidateKey: 'next-monday',
+              workout: { ...d.request.additions[0].workout, dayIndex: 6 },
+            },
+          ],
+        },
+      });
+    } finally {
+      for (const [key, value] of Object.entries(saved)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
+  }
+
+  it('rejects automatic additions outside the confirmed sports without altering the saved calendar', async () => {
+    await withAuthorizedWeek(async ({ job, request, planId }) => {
+      request.additions[0].workout.sportType = 'SWIM';
+      await expect(
+        f.starts.createAutomationPreview(job.id, job.claimToken!, request),
+      ).rejects.toThrow('outside the authorized sports');
+      expect(
+        (await f.service.getPlanDetail('user', planId)).plan!.workouts,
+      ).toHaveLength(1);
+    });
+  });
+
+  it('rejects automatic changes to user availability settings before preparing a schedule', async () => {
+    await withAuthorizedWeek(async ({ job, request, planId }) => {
+      request.scheduleConstraints = {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'UTC',
+        fixedRestWeekdays: [],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: '2099-11-23',
+        confirmation: {
+          source: 'USER',
+          reference: 'model cannot confirm settings',
+        },
+      };
+      request.qualityContractTransition = {
+        mode: 'INHERIT',
+        maxTrainingDaysPerWeek: 7,
+      };
+      await expect(
+        f.starts.createAutomationPreview(job.id, job.claimToken!, request),
+      ).rejects.toThrow('cannot change user settings');
+      expect(
+        (await f.service.getPlanDetail('user', planId)).plan!.workouts,
+      ).toHaveLength(1);
+    });
+  });
+
+  it('rechecks the current policy sports at automatic submission', async () => {
+    await withAuthorizedWeek(async ({ job, request, policyId, planId }) => {
+      await f.starts.createAutomationPreview(job.id, job.claimToken!, request);
+      const policy = await prisma.planAutomationPolicy.findUniqueOrThrow({
+        where: { id: policyId },
+      });
+      await prisma.planAutomationPolicy.update({
+        where: { id: policyId },
+        data: {
+          settings: { ...(policy.settings as object), sportTypes: ['SWIM'] },
+        },
+      });
+      await expect(
+        f.starts.applyAutomation(job.id, job.claimToken!),
+      ).rejects.toThrow('outside the authorized sports');
+      expect(
+        (await f.service.getPlanDetail('user', planId)).plan!.workouts,
+      ).toHaveLength(1);
+    });
+  });
+
+  it('preserves a manually protected course outside the automatic sports while publishing authorized courses', async () => {
+    await withAuthorizedWeek(async ({ job, request, planId }) => {
+      await f.service.addWorkout('user', planId, {
+        weekIndex: 1,
+        dayIndex: 7,
+        sportType: 'SWIM',
+        definition: {
+          kind: 'FREEFORM',
+          version: 1,
+          source: 'TEXT',
+          text: 'Easy swim',
+        },
+      });
+      await f.starts.createAutomationPreview(job.id, job.claimToken!, request);
+      await f.starts.applyAutomation(job.id, job.claimToken!);
+      const snapshot = await f.query.windowSnapshot(
+        'user',
+        planId,
+        '2099-11-23',
+        '2099-11-29',
+      );
+      expect(
+        snapshot.workouts.map((w) => [w.scheduledDate, w.sportType]),
+      ).toEqual([
+        ['2099-11-23', 'RUN'],
+        ['2099-11-24', 'SWIM'],
+      ]);
+    });
+  });
+
+  it.each([
+    'source edit',
+    'fitness fact',
+    'expired lease',
+    'month strategy',
+    'consent',
+    'policy',
+  ] as const)(
+    'rejects automatic submission after a concurrent %s change',
+    async (change) => {
+      await withAuthorizedWeek(
+        async ({ job, request, planId, policyId, revokeConsent }) => {
+          await f.starts.createAutomationPreview(
+            job.id,
+            job.claimToken!,
+            request,
+          );
+          if (change === 'source edit')
+            await f.service.addWorkout('user', planId, {
+              weekIndex: 1,
+              dayIndex: 7,
+              sportType: 'RUN',
+              definition: {
+                kind: 'FREEFORM',
+                version: 1,
+                source: 'TEXT',
+                text: 'Manual run',
+              },
+            });
+          else if (change === 'fitness fact')
+            await prisma.userFitnessMetric.create({
+              data: {
+                userId: 'user',
+                type: 'TP',
+                sport: 'SWIM',
+                value: 1,
+                source: 'MANUAL',
+                changeSource: 'USER_MANUAL',
+                recordedAt: new Date(),
+              },
+            });
+          else if (change === 'expired lease')
+            await prisma.rollingPlanJob.update({
+              where: { id: job.id },
+              data: { leaseUntil: new Date(0) },
+            });
+          else if (change === 'consent') await revokeConsent();
+          else if (change === 'policy')
+            await prisma.planAutomationPolicy.update({
+              where: { id: policyId },
+              data: { revokedAt: new Date() },
+            });
+          else
+            await prisma.rollingMonthStrategy.updateMany({
+              where: { policyId },
+              data: { supersededAt: new Date() },
+            });
+          await expect(
+            f.starts.applyAutomation(job.id, job.claimToken!),
+          ).rejects.toThrow();
+          const snapshot = await f.query.windowSnapshot(
+            'user',
+            planId,
+            '2099-11-23',
+            '2099-11-29',
+          );
+          expect(
+            snapshot.workouts.some((w) => w.scheduledDate === '2099-11-23'),
+          ).toBe(false);
+        },
+      );
+    },
+  );
+
+  it('rolls back an automatic publication when its lease expires during the atomic write', async () => {
+    await withAuthorizedWeek(async ({ job, request, planId }) => {
+      await f.starts.createAutomationPreview(job.id, job.claimToken!, request);
+      await prisma.$executeRawUnsafe(
+        `CREATE FUNCTION delay_rolling_write() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN PERFORM pg_sleep(0.4); RETURN NEW; END $$`,
+      );
+      await prisma.$executeRawUnsafe(
+        `CREATE TRIGGER delay_rolling_write BEFORE INSERT ON t_plan_workout FOR EACH ROW EXECUTE FUNCTION delay_rolling_write()`,
+      );
+      try {
+        await prisma.rollingPlanJob.update({
+          where: { id: job.id },
+          data: { leaseUntil: new Date(Date.now() + 250) },
+        });
+        await expect(
+          f.starts.applyAutomation(job.id, job.claimToken!),
+        ).rejects.toThrow();
+        const snapshot = await f.query.windowSnapshot(
+          'user',
+          planId,
+          '2099-11-23',
+          '2099-11-29',
+        );
+        expect(snapshot.workouts).toHaveLength(0);
+        expect(snapshot.generationCoverage.status).toBe('NOT_GENERATED');
+      } finally {
+        await prisma.$executeRawUnsafe(
+          'DROP TRIGGER delay_rolling_write ON t_plan_workout',
+        );
+        await prisma.$executeRawUnsafe('DROP FUNCTION delay_rolling_write()');
+      }
+    });
   });
 
   it('separates actual, remaining planned and unknown forecast load without counting linked estimates twice', async () => {
