@@ -102,6 +102,14 @@ export function normalizeHttpStatus(value: unknown): number {
     : HttpStatus.INTERNAL_SERVER_ERROR;
 }
 
+export function httpStatusForException(exception: unknown): number {
+  if (exception instanceof HttpException) {
+    return normalizeHttpStatus(exception.getStatus());
+  }
+  const error = exception as { status?: unknown; statusCode?: unknown } | null;
+  return normalizeHttpStatus(error?.status ?? error?.statusCode);
+}
+
 function isClientAbortException(
   exception: unknown,
   request: RequestAbortState,
@@ -340,15 +348,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return;
     }
 
-    const errorStatus =
-      exception && typeof exception === 'object'
-        ? (exception as { status?: unknown; statusCode?: unknown })
-        : null;
-    const status = normalizeHttpStatus(
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : (errorStatus?.status ?? errorStatus?.statusCode),
-    );
+    const status = httpStatusForException(exception);
     const rawMessage =
       exception instanceof Error ? exception.message : String(exception ?? '');
     const message = getSafeHttpMessage(status, rawMessage, null);

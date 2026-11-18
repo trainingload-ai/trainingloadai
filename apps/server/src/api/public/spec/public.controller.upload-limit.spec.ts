@@ -15,6 +15,7 @@ import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import { resolve } from 'node:path';
 import { TrackFileConversionError } from '@/importing/track-file-conversion';
 import { mapTrackFileRequestError } from '@/importing/track-file-request-error';
+import { PublicUploadFailureCaptureService } from '../public-upload-failure-capture.service';
 
 jest.mock('@thallesp/nestjs-better-auth', () => ({
   AllowAnonymous: () => () => undefined,
@@ -69,6 +70,15 @@ describe('PublicController upload limits', () => {
         {
           provide: ActivityService,
           useValue: { convertFiles },
+        },
+        {
+          provide: PublicUploadFailureCaptureService,
+          useValue: {
+            run: async <T>(
+              _request: unknown,
+              operation: () => Promise<T>,
+            ): Promise<T> => operation(),
+          },
         },
       ],
     }).compile();
