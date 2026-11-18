@@ -32,6 +32,7 @@ import {
   parseScheduleConstraints,
 } from "@shared/plan-calendar";
 import type { PlanProposalPresentation } from "@shared/plan-proposal";
+import { parsePlanQualityContract } from "@shared/plan-quality";
 import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
 import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
 import { getRestoredStartDecisionApply } from "../coach-plan-decision-state";
@@ -108,8 +109,10 @@ function getPlanProposalPresentation(
   )
     return null;
   let scheduleConstraints: PlanProposalPresentation["scheduleConstraints"];
+  let qualityContract: PlanProposalPresentation["qualityContract"];
   try {
     scheduleConstraints = parseScheduleConstraints(value.scheduleConstraints);
+    qualityContract = parsePlanQualityContract(value.qualityContract ?? undefined);
   } catch {
     return null;
   }
@@ -133,6 +136,7 @@ function getPlanProposalPresentation(
           calendarDraft:
             safeParseCoachPlanDraftData(value.calendarDraft) ?? undefined,
           scheduleConstraints,
+          qualityContract,
         }
       : {}),
     relatedCalendarConflicts: Array.isArray(value.relatedCalendarConflicts)
@@ -225,12 +229,13 @@ function CoachScheduleRules({
 }: {
   proposal: Pick<
     PlanProposalPresentation,
-    "range" | "calendarTimeZone" | "scheduleConstraints"
+    "range" | "calendarTimeZone" | "scheduleConstraints" | "qualityContract"
   >;
 }) {
   const t = useTranslations("AiCoachPage.decision");
   const locale = useLocale();
   const rules = proposal.scheduleConstraints;
+  const budget = proposal.qualityContract;
   const days = rules?.fixedRestWeekdays
     .map((day) =>
       new Intl.DateTimeFormat(locale, {
@@ -250,6 +255,31 @@ function CoachScheduleRules({
       : []),
     ...(proposal.calendarTimeZone
       ? [[t("scheduleTimezone"), proposal.calendarTimeZone] as [string, string]]
+      : []),
+    ...(budget?.maxDailyMinutes !== undefined
+      ? [
+          [
+            t("scheduleMaxDailyMinutes"),
+            new Intl.NumberFormat(locale, {
+              style: "unit",
+              unit: "minute",
+              unitDisplay: "long",
+              maximumFractionDigits: 20,
+            }).format(budget.maxDailyMinutes),
+          ] as [string, string],
+        ]
+      : []),
+    ...(budget?.maxTrainingDaysPerWeek !== undefined
+      ? [
+          [
+            t("scheduleMaxTrainingDaysPerWeek"),
+            new Intl.NumberFormat(locale, {
+              style: "unit",
+              unit: "day",
+              unitDisplay: "long",
+            }).format(budget.maxTrainingDaysPerWeek),
+          ] as [string, string],
+        ]
       : []),
     ...(rules
       ? ([
@@ -1007,6 +1037,15 @@ export function CoachDecisionAppliedCard({
               proposal={{
                 calendarTimeZone: asText(receipt.calendarTimeZone),
                 range: scheduleRange,
+                qualityContract: (() => {
+                  try {
+                    return parsePlanQualityContract(
+                      receipt.qualityContract ?? undefined,
+                    );
+                  } catch {
+                    return undefined;
+                  }
+                })(),
                 scheduleConstraints: (() => {
                   try {
                     return parseScheduleConstraints(

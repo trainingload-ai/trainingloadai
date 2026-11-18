@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "課表提交後更新日曆；裝置同步狀態獨立顯示，可在連線設定中查看或重試。",
       "scheduleRange": "調整範圍",
       "scheduleTimezone": "日曆時區",
+      "scheduleMaxDailyMinutes": "每日訓練時長上限",
+      "scheduleMaxTrainingDaysPerWeek": "每週訓練天數上限",
       "scheduleRevision": "規則版本",
       "fixedRestWeekdays": "固定休息日",
       "unavailableDates": "不可訓練日期",

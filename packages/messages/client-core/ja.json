@@ -703,6 +703,8 @@
       "scheduleSyncImpact": "確定した日程はカレンダーに反映されます。デバイス同期の状態は別に管理されます。接続設定で確認または再試行できます。",
       "scheduleRange": "調整範囲",
       "scheduleTimezone": "カレンダーのタイムゾーン",
+      "scheduleMaxDailyMinutes": "1日のトレーニング時間の上限",
+      "scheduleMaxTrainingDaysPerWeek": "週のトレーニング日数の上限",
       "scheduleRevision": "ルールの改訂",
       "fixedRestWeekdays": "固定休養日",
       "unavailableDates": "トレーニング不可日",

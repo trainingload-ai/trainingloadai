@@ -2,6 +2,8 @@ import { fork, type ChildProcess } from 'node:child_process';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import { planStartFixture } from './plan-start.fixture';
+import { addCalendarDays } from '@shared/plan-calendar';
+import type { PlanQualityContract } from '@shared/plan-quality';
 
 describe('remaining schedule / PostgreSQL', () => {
   let database: ChildProcess;
@@ -48,28 +50,55 @@ describe('remaining schedule / PostgreSQL', () => {
       "INSERT INTO t_user(id) VALUES ('user'),('other')",
     );
   });
-  async function running(count = 3) {
+  async function running(
+    count = 3,
+    options: {
+      qualityContract?: PlanQualityContract;
+      startDate?: string;
+      durationMinutes?: number;
+      periodWeeks?: number;
+    } = {},
+  ) {
     const created = await f.service.createPlan('user', {
       title: 'Running',
-      periodWeeks: Math.ceil(count / 7),
+      periodWeeks: options.periodWeeks ?? Math.ceil(count / 7),
+      generationMetadata: { qualityContract: options.qualityContract },
       workouts: Array.from({ length: count }, (_, i) => ({
         weekIndex: Math.floor(i / 7) + 1,
         dayIndex: (i % 7) + 1,
         sportType: 'RUN',
-        definition: {
-          kind: 'FREEFORM' as const,
-          version: 1 as const,
-          source: 'TEXT' as const,
-          text: 'Run 30m',
-        },
+        definition: options.durationMinutes
+          ? {
+              kind: 'FREEFORM' as const,
+              version: 1 as const,
+              source: 'STRUCTURE' as const,
+              structure: {
+                kind: 'FREEFORM' as const,
+                version: 1 as const,
+                text: `Run ${options.durationMinutes}m`,
+                durationSeconds: options.durationMinutes * 60,
+              },
+            }
+          : {
+              kind: 'FREEFORM' as const,
+              version: 1 as const,
+              source: 'TEXT' as const,
+              text: `Run ${options.durationMinutes ?? 30}m`,
+            },
       })),
     });
     const planId = created.plan!.id;
     await prisma.$transaction((tx) =>
-      f.service.activatePlan('user', planId, '2099-11-22', undefined, {
-        tx,
-        validatedStartPreview: true,
-      }),
+      f.service.activatePlan(
+        'user',
+        planId,
+        options.startDate ?? '2099-11-22',
+        undefined,
+        {
+          tx,
+          validatedStartPreview: true,
+        },
+      ),
     );
     const context = await f.context.ensureContext({ userId: 'user', planId });
     const thread = await prisma.coachThread.create({
@@ -300,6 +329,240 @@ describe('remaining schedule / PostgreSQL', () => {
       scheduleConstraints: d.request.scheduleConstraints,
     });
   });
+  it('commits a newly confirmed daily budget with the remaining courses and preserves protected history', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const d = await running(3, {
+      startDate: addCalendarDays(today, -2),
+      durationMinutes: 60,
+      qualityContract: { maxDailyMinutes: 60, requiredSports: ['RUN'] },
+    });
+    const before = (await f.service.getPlanDetail('user', d.planId)).plan!;
+    const remaining = before.workouts[2];
+    d.request.range = { from: today, to: addCalendarDays(today, 4) };
+    d.request.scheduleConstraints = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      effectiveFrom: today,
+      confirmation: { source: 'USER', reference: 'daily-availability' },
+    };
+    d.request.qualityContractTransition = {
+      mode: 'INHERIT',
+      maxDailyMinutes: 30,
+    };
+    d.request.changes = [
+      {
+        sourceWorkoutId: remaining.id,
+        expectedRevision: remaining.revision ?? 1,
+        workout: {
+          weekIndex: 1,
+          dayIndex: 3,
+          sportType: 'RUN',
+          definition: {
+            kind: 'FREEFORM',
+            version: 1,
+            source: 'STRUCTURE',
+            structure: {
+              kind: 'FREEFORM',
+              version: 1,
+              text: 'Run 30m',
+              durationSeconds: 1800,
+            },
+          },
+        },
+      },
+    ];
+    const preview = await f.proposals.createPreview(
+      'user',
+      d.request,
+      d.binding,
+    );
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!
+        .generationMetadata,
+    ).toMatchObject({ qualityContract: { maxDailyMinutes: 60 } });
+    const receipt = await apply(d);
+    const after = (await f.service.getPlanDetail('user', d.planId)).plan!;
+    expect(after.generationMetadata).toMatchObject({
+      qualityContract: { maxDailyMinutes: 30, requiredSports: ['RUN'] },
+    });
+    expect(receipt).toMatchObject({
+      readbackVerified: true,
+      qualityContract: { maxDailyMinutes: 30 },
+    });
+    expect(preview.presentation.qualityContract).toMatchObject({
+      maxDailyMinutes: 30,
+      requiredSports: ['RUN'],
+    });
+    expect(after.workouts.slice(0, 2)).toEqual(before.workouts.slice(0, 2));
+    expect(after.workouts[2].summary.durationSeconds).toBe(1800);
+    await expect(
+      f.service.addWorkout('user', d.planId, {
+        weekIndex: 1,
+        dayIndex: 4,
+        sportType: 'RUN',
+        definition: {
+          kind: 'FREEFORM',
+          version: 1,
+          source: 'STRUCTURE',
+          structure: {
+            kind: 'FREEFORM',
+            version: 1,
+            text: 'Run 40m',
+            durationSeconds: 2400,
+          },
+        },
+      }),
+    ).rejects.toThrow();
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!.workouts,
+    ).toHaveLength(3);
+  });
+
+  it('persists an explicitly expanded weekly availability and enforces it on later ordinary additions', async () => {
+    const d = await running(3, {
+      qualityContract: { maxTrainingDaysPerWeek: 3, requiredSports: ['RUN'] },
+    });
+    d.request.scheduleConstraints = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      effectiveFrom: '2099-11-22',
+      confirmation: { source: 'USER', reference: 'weekly-availability' },
+    };
+    d.request.qualityContractTransition = {
+      mode: 'INHERIT',
+      maxTrainingDaysPerWeek: 5,
+    };
+    const workout = (dayIndex: number) => ({
+      weekIndex: 1,
+      dayIndex,
+      sportType: 'RUN' as const,
+      definition: {
+        kind: 'FREEFORM' as const,
+        version: 1 as const,
+        source: 'TEXT' as const,
+        text: 'Run 30m',
+      },
+    });
+    d.request.additions = [4, 5].map((day) => ({
+      candidateKey: `extra-${day}`,
+      workout: workout(day),
+    }));
+    const receipt = await apply(d);
+    expect(receipt).toMatchObject({
+      qualityContract: { maxTrainingDaysPerWeek: 5, requiredSports: ['RUN'] },
+    });
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!,
+    ).toMatchObject({
+      generationMetadata: { qualityContract: { maxTrainingDaysPerWeek: 5 } },
+      workouts: expect.any(Array),
+    });
+    await expect(
+      f.service.addWorkout('user', d.planId, workout(6)),
+    ).rejects.toThrow();
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!.workouts,
+    ).toHaveLength(5);
+  });
+
+  it('saves a lower weekly limit over protected history and only permits new days within the remaining weekly budget', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const d = await running(3, {
+      startDate: addCalendarDays(today, -3),
+      periodWeeks: 2,
+      qualityContract: { maxTrainingDaysPerWeek: 3 },
+    });
+    const before = (await f.service.getPlanDetail('user', d.planId)).plan!;
+    d.request.range = { from: today, to: addCalendarDays(today, 10) };
+    d.request.scheduleConstraints = {
+      version: 1,
+      revision: 1,
+      calendarTimeZone: 'UTC',
+      fixedRestWeekdays: [],
+      unavailableDates: [],
+      availableDateOverrides: [],
+      effectiveFrom: today,
+      confirmation: {
+        source: 'USER',
+        reference: 'reduced-weekly-availability',
+      },
+    };
+    d.request.qualityContractTransition = {
+      mode: 'INHERIT',
+      maxTrainingDaysPerWeek: 2,
+    };
+    const receipt = await apply(d);
+    expect(receipt).toMatchObject({
+      qualityContract: { maxTrainingDaysPerWeek: 2 },
+    });
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!.workouts,
+    ).toEqual(before.workouts);
+    const workout = (weekIndex: number, dayIndex: number) => ({
+      weekIndex,
+      dayIndex,
+      sportType: 'RUN' as const,
+      definition: {
+        kind: 'FREEFORM' as const,
+        version: 1 as const,
+        source: 'TEXT' as const,
+        text: 'Run 30m',
+      },
+    });
+    await expect(
+      f.service.addWorkout('user', d.planId, workout(1, 4)),
+    ).rejects.toThrow();
+    await f.service.addWorkout('user', d.planId, workout(2, 1));
+    await f.service.addWorkout('user', d.planId, workout(2, 2));
+    await expect(
+      f.service.addWorkout('user', d.planId, workout(2, 3)),
+    ).rejects.toThrow();
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!.workouts,
+    ).toHaveLength(5);
+  });
+
+  it.each([
+    { maxDailyMinutes: 0 },
+    { maxDailyMinutes: 1441 },
+    { maxTrainingDaysPerWeek: 0 },
+    { maxTrainingDaysPerWeek: 8 },
+    { requiredSports: ['SWIM'] },
+    { raceDiscipline: 'SWIM' },
+    { weekPhases: ['TAPER'] },
+  ])(
+    'rejects invalid or unrelated availability transition %j before writing',
+    async (patch) => {
+      const d = await running();
+      d.request.scheduleConstraints = {
+        version: 1,
+        revision: 1,
+        calendarTimeZone: 'UTC',
+        fixedRestWeekdays: [],
+        unavailableDates: [],
+        availableDateOverrides: [],
+        effectiveFrom: '2099-11-22',
+        confirmation: { source: 'USER', reference: 'invalid-availability' },
+      };
+      d.request.qualityContractTransition = { mode: 'INHERIT', ...patch };
+      await expect(
+        f.proposals.createPreview('user', d.request, d.binding),
+      ).rejects.toThrow();
+      expect(
+        (await f.service.getPlanDetail('user', d.planId)).plan!
+          .generationMetadata,
+      ).not.toHaveProperty('scheduleConstraints');
+    },
+  );
+
   it('rejects targets outside the explicit range and preserves out-of-range sources', async () => {
     const d = await running();
     d.request.range.to = '2099-11-23';

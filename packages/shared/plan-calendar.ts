@@ -1,4 +1,7 @@
-import type { PlanQualityContract } from "./plan-quality";
+import {
+  parsePlanQualityContract,
+  type PlanQualityContract,
+} from "./plan-quality";
 
 export type ScheduleConstraints = {
   version: 1;
@@ -252,19 +255,36 @@ export function projectPlanCalendar<
   };
 }
 
-export type ScheduleQualityContractTransition =
+export type ScheduleQualityContractTransition = (
   | { mode: "INHERIT" }
-  | { mode: "REPLACE_ALLOWED_DAYS"; allowedDays: number[] | null };
+  | { mode: "REPLACE_ALLOWED_DAYS"; allowedDays: number[] | null }
+) & {
+  /** Only explicitly confirmed availability changes replace inherited budgets. */
+  maxDailyMinutes?: number;
+  maxTrainingDaysPerWeek?: number;
+};
 
 /** Replacement is explicit: the legacy contract never implies weekday provenance. */
 export function resolveScheduleQualityContract(
   contract: PlanQualityContract | undefined,
   transition: ScheduleQualityContractTransition,
 ): PlanQualityContract | undefined {
-  if (transition.mode === "INHERIT") return contract;
   if (
-    transition.mode !== "REPLACE_ALLOWED_DAYS" ||
-    (transition.allowedDays !== null &&
+    !transition ||
+    !["INHERIT", "REPLACE_ALLOWED_DAYS"].includes(transition.mode) ||
+    Object.keys(transition).some(
+      (key) =>
+        ![
+          "mode",
+          "maxDailyMinutes",
+          "maxTrainingDaysPerWeek",
+          ...(transition.mode === "REPLACE_ALLOWED_DAYS"
+            ? ["allowedDays"]
+            : []),
+        ].includes(key),
+    ) ||
+    (transition.mode === "REPLACE_ALLOWED_DAYS" &&
+      transition.allowedDays !== null &&
       (!Array.isArray(transition.allowedDays) ||
         !transition.allowedDays.length ||
         transition.allowedDays.some(
@@ -272,13 +292,17 @@ export function resolveScheduleQualityContract(
         )))
   )
     throw new Error("Invalid quality contract transition");
-  const { allowedDays: _prior, ...inherited } = contract ?? {};
-  return {
-    ...inherited,
-    ...(transition.allowedDays === null
-      ? {}
-      : { allowedDays: transition.allowedDays }),
-  };
+  const next = { ...contract };
+  if (transition.mode === "REPLACE_ALLOWED_DAYS") {
+    delete next.allowedDays;
+    if (transition.allowedDays !== null)
+      next.allowedDays = transition.allowedDays;
+  }
+  if (transition.maxDailyMinutes !== undefined)
+    next.maxDailyMinutes = transition.maxDailyMinutes;
+  if (transition.maxTrainingDaysPerWeek !== undefined)
+    next.maxTrainingDaysPerWeek = transition.maxTrainingDaysPerWeek;
+  return Object.keys(next).length ? parsePlanQualityContract(next) : undefined;
 }
 
 export type ScheduledPlanWorkout = {

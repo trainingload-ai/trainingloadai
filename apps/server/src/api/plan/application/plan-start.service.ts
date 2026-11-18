@@ -937,13 +937,9 @@ export class PlanStartService {
             );
           if (constraints && constraints.calendarTimeZone !== calendarTimeZone)
             fail('Calendar timezone changed; reassess constraints');
-          if (
-            request.qualityContractTransition?.mode ===
-              'REPLACE_ALLOWED_DAYS' &&
-            !request.scheduleConstraints
-          )
+          if (request.qualityContractTransition && !request.scheduleConstraints)
             fail(
-              'Replacing relative allowed days requires an explicit new schedule constraint revision',
+              'A contract transition requires an explicit new schedule constraint revision',
             );
           const contract = request.qualityContractTransition
             ? resolveScheduleQualityContract(
@@ -1028,6 +1024,7 @@ export class PlanStartService {
               issues: report.issues,
             });
           const presentation: PlanProposalPresentation = {
+            ...(contract ? { qualityContract: contract } : {}),
             relatedCalendarConflicts: calendarAssessment.relatedConflicts,
             title: source.title,
             summary: request.rationale,
@@ -1416,6 +1413,7 @@ export class PlanStartService {
       identityMap,
       readbackVerified: true,
       executionSource: 'USER_CONFIRMATION',
+      qualityContract: expectedContract ?? null,
       scheduleConstraints: expectedConstraints ?? null,
       ...(schedule
         ? {
