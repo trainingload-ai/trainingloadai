@@ -256,7 +256,8 @@
         "weekReview": "Wochenrückblick",
         "performanceReview": "Leistungsanalyse",
         "metricExplainer": "Erklärung von Trainingskennzahlen",
-        "periodReview": "Periodischer Rückblick"
+        "periodReview": "Periodischer Rückblick",
+        "planStart": "Prüfung des Planstarts"
       },
       "resumed": "Frühere Aufgabe fortsetzen",
       "seconds": "{count} s",

@@ -251,7 +251,8 @@
         "weekReview": "Bilan de l’entraînement hebdomadaire",
         "performanceReview": "Analyse des performances",
         "metricExplainer": "Explication des indicateurs",
-        "periodReview": "Bilan périodique"
+        "periodReview": "Bilan périodique",
+        "planStart": "Évaluation du début du plan"
       },
       "resumed": "Reprendre la tâche précédente",
       "seconds": "{count} s",

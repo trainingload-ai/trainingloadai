@@ -251,7 +251,8 @@
         "weekReview": "Revisione dell’allenamento settimanale",
         "performanceReview": "Analisi delle prestazioni",
         "metricExplainer": "Interpretazione dei parametri",
-        "periodReview": "Revisione periodica"
+        "periodReview": "Revisione periodica",
+        "planStart": "Valutazione dell’avvio del piano"
       },
       "resumed": "Riprendi attività precedente",
       "seconds": "{count} s",

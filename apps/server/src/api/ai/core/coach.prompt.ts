@@ -20,7 +20,7 @@ function buildAvailableSkillsBlock(): string[] {
   return [
     ``,
     `# Available skills`,
-    `Skills provide domain knowledge and a focused capability set. After identifying the current objective, activate the closest skill when specialized guidance helps; a simple task may use a direct tool without one:`,
+    `Activate a relevant skill for specialized guidance; simple tasks may call a direct tool:`,
     ...skills.map(
       (skill) =>
         `- ${skill.name}: ${skill.description} Use when: ${skill.whenToUse}`,

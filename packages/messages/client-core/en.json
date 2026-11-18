@@ -364,7 +364,8 @@
         "weekReview": "Weekly training review",
         "performanceReview": "Performance analysis",
         "metricExplainer": "Training metric guidance",
-        "periodReview": "Periodic training review"
+        "periodReview": "Periodic training review",
+        "planStart": "Plan start review"
       },
       "resumed": "Continue earlier task",
       "seconds": "{count} s",

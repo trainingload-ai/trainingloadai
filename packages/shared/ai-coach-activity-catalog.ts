@@ -16,6 +16,7 @@ export const COACH_SKILL_LABELS = {
   "plan-cycle-review": "planCycleReview",
   "period-review": "periodReview",
   "plan-builder": "planBuilder",
+  "plan-start": "planStart",
   "readiness-check": "readinessCheck",
   "athlete-state": "readinessCheck",
   "week-review": "weekReview",

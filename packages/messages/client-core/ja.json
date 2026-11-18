@@ -256,7 +256,8 @@
         "weekReview": "週間トレーニングの振り返り",
         "performanceReview": "パフォーマンス分析",
         "metricExplainer": "トレーニング指標の解説",
-        "periodReview": "定期トレーニングレビュー"
+        "periodReview": "定期トレーニングレビュー",
+        "planStart": "プラン開始の確認"
       },
       "resumed": "以前のタスクを続ける",
       "seconds": "{count} 秒",

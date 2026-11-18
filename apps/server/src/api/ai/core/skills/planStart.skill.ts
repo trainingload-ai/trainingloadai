@@ -3,10 +3,8 @@ import type { CoachSkillDef } from '../skill.types';
 export const planStartSkill: CoachSkillDef = {
   name: 'plan-start',
   aliases: ['plan_start'],
-  description:
-    'Assess and prepare the same saved draft for its selected real start date in a bound conversation.',
-  whenToUse:
-    'The athlete opens the saved draft start dialog, evaluates its start date, or adjusts that start proposal.',
+  description: 'Review and start a saved draft.',
+  whenToUse: 'Saved-draft starts or date changes.',
   suggestedTools: [
     'plan.by_id',
     'time.current',

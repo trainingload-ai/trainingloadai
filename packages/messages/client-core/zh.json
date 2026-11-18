@@ -322,7 +322,8 @@
         "weekReview": "每周训练复盘",
         "performanceReview": "运动表现分析",
         "metricExplainer": "训练指标解读",
-        "periodReview": "周期训练复盘"
+        "periodReview": "周期训练复盘",
+        "planStart": "计划开始评估"
       },
       "resumed": "继续此前任务",
       "seconds": "{count} 秒",

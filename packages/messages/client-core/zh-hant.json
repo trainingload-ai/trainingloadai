@@ -256,7 +256,8 @@
         "weekReview": "每週訓練回顧",
         "performanceReview": "運動表現分析",
         "metricExplainer": "訓練指標解讀",
-        "periodReview": "週期訓練回顧"
+        "periodReview": "週期訓練回顧",
+        "planStart": "計畫開始評估"
       },
       "resumed": "繼續先前任務",
       "seconds": "{count} 秒",

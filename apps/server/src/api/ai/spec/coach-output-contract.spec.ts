@@ -146,6 +146,9 @@ function setup(events: CoachUiStreamYield[]) {
     heartbeat: jest.fn(async () => null),
   };
   Object.assign(controller, {
+    prisma: {
+      aiCoachSession: { findUnique: jest.fn(async () => null) },
+    },
     coachRuns,
     aiService,
     aiUsage,

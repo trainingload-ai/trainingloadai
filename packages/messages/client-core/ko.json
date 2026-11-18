@@ -256,7 +256,8 @@
         "weekReview": "주간 훈련 검토",
         "performanceReview": "운동 성과 분석",
         "metricExplainer": "훈련 지표 해설",
-        "periodReview": "주기별 훈련 검토"
+        "periodReview": "주기별 훈련 검토",
+        "planStart": "계획 시작 검토"
       },
       "resumed": "이전 작업 이어서 진행",
       "seconds": "{count}초",
