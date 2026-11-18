@@ -108,7 +108,7 @@ describe('PublicController upload limits', () => {
       .expect(({ body }) => {
         expect(body).toMatchObject({
           code: 413,
-          message: '上传的文件过大。',
+          message: '提交的内容超出大小限制。请减少内容或分批提交后重试。',
         });
       });
 
