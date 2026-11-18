@@ -49,7 +49,7 @@ const ENGLISH_STATUS_FALLBACKS: Partial<Record<number, string>> = {
   [HttpStatus.FORBIDDEN]: 'You do not have permission to perform this action',
   [HttpStatus.NOT_FOUND]: 'The requested resource was not found',
   [HttpStatus.CONFLICT]: 'The request conflicts with the current state',
-  [HttpStatus.PAYLOAD_TOO_LARGE]: 'The uploaded file is too large.',
+  [HttpStatus.PAYLOAD_TOO_LARGE]: 'The submitted content exceeds the size limit.',
   [HttpStatus.UNPROCESSABLE_ENTITY]: 'The request could not be processed',
   [HttpStatus.TOO_MANY_REQUESTS]: 'Too many requests, please try again later.',
 };

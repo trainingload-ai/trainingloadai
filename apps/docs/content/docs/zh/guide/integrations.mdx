@@ -2,7 +2,13 @@
 title: 训练平台对接怎么选：Strava、Garmin、COROS 对照
 description: 对比 Trainingload.ai 的 Strava、Garmin、COROS、Polar、Suunto、Wahoo 与 Intervals.icu 对接方式。先选持续同步、一次性历史导入或文件上传，再进入对应授权流程。
 keywords:
-  ["训练平台对接", "Strava 对接", "Garmin 对接", "COROS 同步", "Intervals.icu 对接"]
+  [
+    "训练平台对接",
+    "Strava 对接",
+    "Garmin 对接",
+    "COROS 同步",
+    "Intervals.icu 对接",
+  ]
 ---
 
 # 训练平台对接怎么选：Strava、Garmin、COROS 对照
@@ -31,16 +37,16 @@ keywords:
 
 ## 选择正确的方式
 
-| 来源            | 适用场景                      | 连接方式               |
-| --------------- | ----------------------------- | ---------------------- |
-| Strava          | 持续同步活动                  | 账号连接和同步设置     |
-| Polar           | 持续导入 Polar 活动           | OAuth 与同步设置       |
-| COROS           | 活动、日常数据和兼容计划导出  | 账号连接与手动同步     |
-| Intervals.icu   | 活动同步和兼容计划课程流程    | OAuth 或 API Key       |
-| Suunto          | 持续导入训练和兼容 Guide 流程 | OAuth 与同步设置       |
-| Wahoo           | 持续导入 Wahoo 训练           | OAuth 与同步设置       |
-| Garmin          | 新训练同步或补充历史活动      | OAuth 授权或文件导入   |
-| FIT / TCX / GPX | 单个文件或其他平台导出        | 手动上传               |
+| 来源            | 适用场景                      | 连接方式             |
+| --------------- | ----------------------------- | -------------------- |
+| Strava          | 持续同步活动                  | 账号连接和同步设置   |
+| Polar           | 持续导入 Polar 活动           | OAuth 与同步设置     |
+| COROS           | 活动、日常数据和兼容计划导出  | 账号连接与手动同步   |
+| Intervals.icu   | 活动同步和兼容计划课程流程    | OAuth 或 API Key     |
+| Suunto          | 持续导入训练和兼容 Guide 流程 | OAuth 与同步设置     |
+| Wahoo           | 持续导入 Wahoo 训练           | OAuth 与同步设置     |
+| Garmin          | 新训练同步或补充历史活动      | OAuth 授权或文件导入 |
+| FIT / TCX / GPX | 单个文件或其他平台导出        | 手动上传             |
 
 ## 连接平台
 
@@ -72,14 +78,14 @@ keywords:
 
 下表假设两个方向都已开启：
 
-| 你做了什么 | 另一边会怎样？ |
-| --- | --- |
-| 在 Trainingload.ai 新增一节课 | Intervals.icu 会出现对应的新课。 |
-| 在 Intervals.icu 新增一节课 | Trainingload.ai 会出现对应的新课。 |
-| 只在 Trainingload.ai 改了日期、名字或训练内容 | 对应的 Intervals.icu 课程会跟着更新。 |
-| 只在 Intervals.icu 改了日期、名字或训练内容 | 对应的 Trainingload.ai 课程会跟着更新。 |
-| 在 Trainingload.ai 删除一节课 | 如果 Intervals.icu 那节课没有改过，也会删除；如果改过，就保留修改后的课。 |
-| 在 Intervals.icu 删除一节课 | 如果 Trainingload.ai 那节课没有改过，也会删除；如果改过，就保留修改后的课。 |
+| 你做了什么                                    | 另一边会怎样？                                                              |
+| --------------------------------------------- | --------------------------------------------------------------------------- |
+| 在 Trainingload.ai 新增一节课                 | Intervals.icu 会出现对应的新课。                                            |
+| 在 Intervals.icu 新增一节课                   | Trainingload.ai 会出现对应的新课。                                          |
+| 只在 Trainingload.ai 改了日期、名字或训练内容 | 对应的 Intervals.icu 课程会跟着更新。                                       |
+| 只在 Intervals.icu 改了日期、名字或训练内容   | 对应的 Trainingload.ai 课程会跟着更新。                                     |
+| 在 Trainingload.ai 删除一节课                 | 如果 Intervals.icu 那节课没有改过，也会删除；如果改过，就保留修改后的课。   |
+| 在 Intervals.icu 删除一节课                   | 如果 Trainingload.ai 那节课没有改过，也会删除；如果改过，就保留修改后的课。 |
 
 ### 两边都改了，会用哪一版？
 
@@ -111,6 +117,8 @@ keywords:
 如果你只是把课程移到了这个日期范围之外，系统会先确认它去了哪里，不会因为暂时没在范围内找到，就把它当作删除。连接暂时不可用时，也不会据此删除另一边的课程。
 
 ## Garmin 历史导入
+
+**目前，Trainingload.ai 的 Garmin 官方 OAuth 连接无法获取授权之前已有的活动；断开后重新连接也不会触发历史回填。** 需要补充这些记录时，请导入 Garmin 完整导出 ZIP（或其临时下载链接），也可以上传单个 FIT、TCX 或 GPX 文件。此限制不适用于自托管版的 Garmin Personal API；请按对应文档操作。
 
 Garmin 页面中的 **OAuth 授权**用于接收新活动和已授权的健康摘要；**文件导入**用于补充更早的训练记录。两项操作彼此独立，请按需要选择。
 

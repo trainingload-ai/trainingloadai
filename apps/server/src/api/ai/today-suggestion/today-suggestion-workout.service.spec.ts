@@ -1,3 +1,4 @@
+import { createAiFallbackI18n } from '../spec/ai-fallback-i18n.test-util';
 import { CoachActionType } from '@prisma/client';
 import { TodaySuggestionWorkoutService } from './today-suggestion-workout.service';
 import { todaySuggestionProposalToken } from './today-suggestion-delivery-policy';
@@ -108,6 +109,7 @@ describe('TodaySuggestionWorkoutService', () => {
         planWorkouts as never,
         actions as never,
         projector as never,
+        createAiFallbackI18n()
       ),
       actions,
       workouts,

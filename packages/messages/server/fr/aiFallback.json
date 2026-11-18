@@ -115,5 +115,37 @@
       "strength": "renforcement",
       "unknown": "activité"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "Aucune activité enregistrée",
+      "LAST_ACTIVITY_OVER_30_DAYS": "Aucune activité enregistrée depuis plus de 30 jours",
+      "ACTIVITY_PROCESSING_PENDING": "Les données de l’activité sont en cours de traitement",
+      "TODAY_WORKOUT_COMPLETED": "L’entraînement du jour est terminé",
+      "TODAY_WORKOUT_AVAILABLE": "Un entraînement est prévu aujourd’hui",
+      "NO_ACTIVE_PLAN": "Aucun plan actif",
+      "WAITING_FOR_USER": "Des précisions sur votre état sont nécessaires",
+      "WAITING_FOR_DATA": "En attente de données d’entraînement",
+      "HIGH_CONCERN": "Votre état actuel nécessite une attention particulière",
+      "RECENT_LOAD": "Charge d’entraînement récente",
+      "RECENT_ACTIVITY": "Dernière activité",
+      "PLAN_CONTEXT": "Plan d’entraînement actuel",
+      "COMPETITION_CONTEXT": "Compétition à venir",
+      "LOAD_ZERO_28D": "La charge calculée sur les 28 derniers jours est nulle"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "Ouvrir l’entraînement du jour",
+      "OPEN_PLAN": "Voir le plan",
+      "OPEN_ASSESSMENT": "Préciser mon état",
+      "OPEN_PROVIDER_SETTINGS": "Vérifier la connexion des données",
+      "OPEN_IMPORT": "Importer une activité",
+      "OPEN_ACTIVITY_REVIEW": "Analyser l’activité",
+      "CHECK_ACTIVITY_ASSOCIATION": "Vérifier l’association de l’activité",
+      "OPEN_DECISION": "Voir la décision du coach",
+      "ASK_COACH": "Demander au coach",
+      "VIEW_TOMORROW": "Voir l’entraînement de demain",
+      "CREATE_TODAY_WORKOUT": "Ajouter comme entraînement du jour",
+      "SCHEDULE_REMINDER": "Me rappeler plus tard"
+    }
   }
 }

@@ -4,6 +4,17 @@ import { ApiFetchError } from "./api-error";
 import { createApiErrorNotifier } from "./api-error-notifier";
 
 describe("createApiErrorNotifier", () => {
+  it("shows 413 as a common transport error rather than hiding it as field validation", () => {
+    const notify = vi.fn();
+    const notifier = createApiErrorNotifier({ notify });
+    notifier.report(new ApiFetchError("Content exceeds the size limit", 413), {
+      surface: "page",
+      scope: "/routes",
+    });
+    expect(notify).toHaveBeenCalledWith("Content exceeds the size limit", {
+      id: "api-error:payload-too-large:/routes",
+    });
+  });
   it("groups concurrent server failures into one notice per scope", () => {
     let currentTime = 1_000;
     const notify = vi.fn();
@@ -75,7 +86,13 @@ describe("createApiErrorNotifier", () => {
     const notifier = createApiErrorNotifier({ notify });
 
     notifier.report(
-      new ApiFetchError("handled inline", 500, "INTERNAL_ERROR", undefined, true),
+      new ApiFetchError(
+        "handled inline",
+        500,
+        "INTERNAL_ERROR",
+        undefined,
+        true,
+      ),
       { scope: "/zh/health", surface: "page" },
     );
 

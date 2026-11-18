@@ -1,3 +1,4 @@
+import { createAiFallbackI18n } from '../spec/ai-fallback-i18n.test-util';
 import { TodaySuggestionDeliveryPolicy } from './today-suggestion-delivery-policy';
 import type {
   TodaySuggestionConstraintProjection,
@@ -85,8 +86,43 @@ describe('TodaySuggestionDeliveryPolicy', () => {
     process.env.SELF_HOST_AUTH_SECRET = originalSecret;
   });
 
+  it.each(['de', 'de-DE'])(
+    'localizes delivered actions and evidence for %s',
+    (locale) => {
+      const result = new TodaySuggestionDeliveryPolicy(
+        createAiFallbackI18n(),
+      ).build({
+        projection: projection({
+          locale,
+          constraints: ['NEVER_RECORDED_ACTIVITY'],
+        }),
+        draft: draft({
+          headline: 'Heute locker starten',
+          summary: 'Verbinde deine Trainingsdaten.',
+          evidenceCodes: ['NEVER_RECORDED_ACTIVITY'],
+          preferredIntent: 'OPEN_PROVIDER_SETTINGS',
+          secondaryIntents: ['OPEN_IMPORT', 'ASK_COACH'],
+          generatedWorkout: undefined,
+        }),
+        generationToken: 'german-suggestion',
+        state: 'GENERATED',
+        reasonCode: 'GENERATED',
+        generatedAt: new Date(),
+      });
+
+      expect(result.primaryIntent?.label).toBe('Datenverbindung prüfen');
+      expect(result.secondaryIntents.map((intent) => intent.label)).toEqual([
+        'Aktivität importieren',
+        'Coach fragen',
+      ]);
+      expect(result.evidence[0].label).toBe('Noch keine Aktivitäten erfasst');
+    },
+  );
+
   it('resolves only server-owned entities and a signed workout proposal', () => {
-    const result = new TodaySuggestionDeliveryPolicy().build({
+    const result = new TodaySuggestionDeliveryPolicy(
+      createAiFallbackI18n(),
+    ).build({
       projection: projection(),
       draft: draft(),
       generationToken: '11111111-1111-5111-8111-111111111111',
@@ -117,7 +153,9 @@ describe('TodaySuggestionDeliveryPolicy', () => {
   });
 
   it('forces the existing assessment case and removes write actions', () => {
-    const result = new TodaySuggestionDeliveryPolicy().build({
+    const result = new TodaySuggestionDeliveryPolicy(
+      createAiFallbackI18n(),
+    ).build({
       projection: projection({
         constraints: ['WAITING_FOR_USER'],
         highConcern: true,
@@ -144,7 +182,9 @@ describe('TodaySuggestionDeliveryPolicy', () => {
   });
 
   it('blocks workout creation for high concern state', () => {
-    const result = new TodaySuggestionDeliveryPolicy().build({
+    const result = new TodaySuggestionDeliveryPolicy(
+      createAiFallbackI18n(),
+    ).build({
       projection: projection({ highConcern: true }),
       draft: draft(),
       generationToken: '33333333-3333-5333-8333-333333333333',
@@ -163,7 +203,9 @@ describe('TodaySuggestionDeliveryPolicy', () => {
   });
 
   it('allows evening workouts and optional reminders when they still fit the day', () => {
-    const result = new TodaySuggestionDeliveryPolicy().build({
+    const result = new TodaySuggestionDeliveryPolicy(
+      createAiFallbackI18n(),
+    ).build({
       projection: projection({
         localTime: '22:50',
         minutesUntilDayEnd: 70,
@@ -189,7 +231,9 @@ describe('TodaySuggestionDeliveryPolicy', () => {
   });
 
   it('does not expose unknown internal evidence codes', () => {
-    const result = new TodaySuggestionDeliveryPolicy().build({
+    const result = new TodaySuggestionDeliveryPolicy(
+      createAiFallbackI18n(),
+    ).build({
       projection: projection(),
       draft: draft({ evidenceCodes: ['INTERNAL_MODEL_CODE', 'LOAD_ZERO_28D'] }),
       generationToken: '55555555-5555-5555-8555-555555555555',

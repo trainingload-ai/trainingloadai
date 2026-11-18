@@ -44,7 +44,7 @@
     "metric_required": "Metric is required",
     "internal": "Something went wrong on our end. Please try again later.",
     "request_failed": "Request failed",
-    "payload_too_large": "The uploaded file is too large.",
+    "payload_too_large": "The submitted content exceeds the size limit. Reduce it or submit it in smaller parts and try again.",
     "unauthorized": "Authentication is required",
     "forbidden": "You do not have permission to perform this action",
     "not_found": "The requested resource was not found",

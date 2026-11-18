@@ -115,5 +115,37 @@
       "strength": "力量訓練",
       "unknown": "活動"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "尚無活動紀錄",
+      "LAST_ACTIVITY_OVER_30_DAYS": "超過 30 天沒有活動紀錄",
+      "ACTIVITY_PROCESSING_PENDING": "活動仍在處理中",
+      "TODAY_WORKOUT_COMPLETED": "今日訓練已完成",
+      "TODAY_WORKOUT_AVAILABLE": "今日已有訓練安排",
+      "NO_ACTIVE_PLAN": "暫無進行中的計畫",
+      "WAITING_FOR_USER": "需要補充身體狀態",
+      "WAITING_FOR_DATA": "等待訓練資料",
+      "HIGH_CONCERN": "目前狀態需要優先處理",
+      "RECENT_LOAD": "近期訓練負荷",
+      "RECENT_ACTIVITY": "最近一次活動",
+      "PLAN_CONTEXT": "目前訓練計畫",
+      "COMPETITION_CONTEXT": "近期比賽安排",
+      "LOAD_ZERO_28D": "近 28 天計算訓練負荷為 0"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "開啟今日訓練",
+      "OPEN_PLAN": "查看計畫",
+      "OPEN_ASSESSMENT": "補充狀態",
+      "OPEN_PROVIDER_SETTINGS": "檢查資料連線",
+      "OPEN_IMPORT": "匯入活動",
+      "OPEN_ACTIVITY_REVIEW": "查看活動回顧",
+      "CHECK_ACTIVITY_ASSOCIATION": "核對活動關聯",
+      "OPEN_DECISION": "查看教練判斷",
+      "ASK_COACH": "問教練",
+      "VIEW_TOMORROW": "查看明日安排",
+      "CREATE_TODAY_WORKOUT": "加入為今日課次",
+      "SCHEDULE_REMINDER": "稍後提醒"
+    }
   }
 }

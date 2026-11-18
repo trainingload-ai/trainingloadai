@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { CoachActionRiskTier, CoachActionType, Prisma } from '@prisma/client';
 import { timingSafeEqual } from 'crypto';
+import { I18nService } from 'nestjs-i18n';
 import type {
   TodaySuggestionIntent,
   TodaySuggestionV2,
@@ -18,7 +19,10 @@ import { PlanWorkoutCommandService } from '@/api/plan/application/plan-workout-c
 import { PlanWorkoutRepository } from '@/api/plan/persistence/plan-workout.repository';
 import { CoachActionService } from '../core/coach-action.service';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
-import { todaySuggestionProposalToken } from './today-suggestion-delivery-policy';
+import {
+  todaySuggestionLabel,
+  todaySuggestionProposalToken,
+} from './today-suggestion-delivery-policy';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 
 function parseV2(value: unknown): TodaySuggestionV2 | null {
@@ -64,6 +68,7 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
     private readonly planWorkouts: PlanWorkoutRepository,
     private readonly actions: CoachActionService,
     private readonly projector: TodaySuggestionConstraintProjector,
+    private readonly i18n: I18nService,
   ) {}
 
   onModuleInit() {
@@ -173,9 +178,11 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
           undoUntil: action.undoUntil?.toISOString() ?? null,
           intent: {
             type: 'OPEN_TODAY_WORKOUT',
-            label: suggestion.locale.startsWith('zh')
-              ? '打开今日训练'
-              : "Open today's workout",
+            label: todaySuggestionLabel(
+              this.i18n,
+              suggestion.locale,
+              'intents.OPEN_TODAY_WORKOUT',
+            ),
             workoutId: workout.id,
             scheduledDate: suggestion.date,
             planId: null,
@@ -376,9 +383,11 @@ export class TodaySuggestionWorkoutService implements OnModuleInit {
       undoUntil: action.undoUntil?.toISOString() ?? null,
       intent: {
         type: 'OPEN_TODAY_WORKOUT',
-        label: suggestion.locale.startsWith('zh')
-          ? '打开今日训练'
-          : "Open today's workout",
+        label: todaySuggestionLabel(
+          this.i18n,
+          suggestion.locale,
+          'intents.OPEN_TODAY_WORKOUT',
+        ),
         workoutId: action.payloadForUi.workoutId,
         scheduledDate: suggestion.date,
         planId: null,

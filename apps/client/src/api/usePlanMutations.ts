@@ -34,7 +34,7 @@ export function useCreateCoachPlanFromDraft() {
       } catch {
         throw new Error("NO_WORKOUTS");
       }
-      const result = await createPlan(dto);
+      const result = await createPlan(dto, { suppressErrorToast: true });
       if (!result?.id) throw new Error("CREATE_FAILED");
       return result;
     },

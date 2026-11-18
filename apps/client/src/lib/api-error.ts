@@ -1,7 +1,5 @@
-import {
-  errorHttpStatus,
-  isAbortError,
-} from "@shared/runtime-reliability";
+import httpErrorMessages from "../../../../packages/messages/client-http-errors.json";
+import { errorHttpStatus, isAbortError } from "@shared/runtime-reliability";
 
 export class ApiFetchError<T = unknown> extends Error {
   constructor(
@@ -21,6 +19,7 @@ export type ApiErrorKind =
   | "permission"
   | "not-found"
   | "validation"
+  | "payload-too-large"
   | "rate-limit"
   | "network"
   | "server"
@@ -34,6 +33,7 @@ export function classifyApiError(error: unknown): ApiErrorKind {
   if (status === 401) return "authentication";
   if (status === 403) return "permission";
   if (status === 404) return "not-found";
+  if (status === 413) return "payload-too-large";
   if (status === 408 || status === 425 || status === 429) {
     return "rate-limit";
   }
@@ -48,4 +48,11 @@ export function classifyApiError(error: unknown): ApiErrorKind {
   }
 
   return "unknown";
+}
+
+export function payloadTooLargeMessage(locale: string): string {
+  const messages = Object.hasOwn(httpErrorMessages, locale)
+    ? httpErrorMessages[locale as keyof typeof httpErrorMessages]
+    : httpErrorMessages.en;
+  return messages.payloadTooLarge;
 }

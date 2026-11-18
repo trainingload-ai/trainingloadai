@@ -2,12 +2,21 @@
 title: 連接 Strava、Garmin 與 COROS：同步訓練分步指南
 description: 連接 Strava、Garmin、COROS、Polar、Suunto 或 Wahoo 匯入訓練。按 OAuth、API Key 和 Garmin 歷史匯入步驟操作，核對第一次同步結果，並避免同一條訓練重複匯入。
 keywords:
-  ["連接 Strava", "連接 Garmin", "連接 COROS", "Polar 同步", "匯入 Wahoo 訓練", "Garmin 歷史匯入"]
+  [
+    "連接 Strava",
+    "連接 Garmin",
+    "連接 COROS",
+    "Polar 同步",
+    "匯入 Wahoo 訓練",
+    "Garmin 歷史匯入",
+  ]
 ---
 
 # 連接 Strava、Garmin 與 COROS：同步訓練分步指南
 
-本頁是**連接 Strava**、匯入 Garmin 歷史，以及 COROS、Polar、Suunto、Wahoo、Intervals.icu 的操作說明：去哪裡授權、保留哪些同步選項、怎樣證明第一條訓練已經進來。多數平台用 OAuth；Intervals.icu 也支援 API Key；Garmin 是一次性歷史匯入，不是長期線上連接。
+本頁介紹 Strava、Garmin、COROS、Polar、Suunto、Wahoo 與 Intervals.icu 的操作：在哪裡授權、保留哪些同步選項，以及如何確認第一條活動已匯入。Garmin OAuth 用於接收新資料，歷史檔案匯入則用於補充舊活動。
+
+**目前，Trainingload.ai 的 Garmin 官方 OAuth 連接無法取得授權之前已有的活動；解除後重新連接也不會回填歷史。** 請匯入 Garmin 完整匯出 ZIP（或其暫時下載連結），或上傳個別 FIT、TCX、GPX 檔案來補充記錄。自架版的 Garmin Personal API 是另一項功能，請依其專屬文件操作。
 
 ## 開始前
 
@@ -19,17 +28,18 @@ keywords:
 
 ## 打開連接
 
-網頁打開 **帳號 → 第三方平台連接**，再選平台卡片。行動端打開 **我的 → 帳號 → 連接**。OAuth 會在系統瀏覽器授權後回到 App。Strava、Polar、COROS、Suunto、Wahoo、Intervals.icu 可在行動端管理。Garmin 歷史匯入僅限網頁。
+網頁打開 **帳號 → 第三方平台連接**，再選平台卡片。行動端打開 **我的 → 選單 → 資料授權**。OAuth 會在系統瀏覽器授權後回到 App。Garmin 的 OAuth 連接、歷史 ZIP 和暫時下載連結匯入均可在行動端 Garmin 設定中管理。
 
-| 平台          | 網頁 | 行動端 | 授權                 | 典型首次動作                 |
-| ------------- | ---- | ------ | -------------------- | ---------------------------- |
-| Strava        | 是   | 是     | OAuth                | 若選取則匯入最近 60 天       |
-| Polar         | 是   | 是     | OAuth                | 若選取則匯入最近 30 天       |
-| COROS         | 是   | 是     | OAuth                | 活動與健康同步分開執行       |
-| Intervals.icu | 是   | 是     | OAuth 或 API Key     | 匯入近期活動                 |
-| Suunto        | 是   | 是     | OAuth                | 首次匯入近期課表             |
-| Wahoo         | 是   | 是     | OAuth                | 連接、儲存方向、再同步       |
-| Garmin        | 是   | 否     | Garmin 匯出暫時連結  | 啟動一次歷史匯入工作         |
+| 平台          | 網頁 | 行動端 | 授權                | 典型首次動作               |
+| ------------- | ---- | ------ | ------------------- | -------------------------- |
+| Strava        | 是   | 是     | OAuth               | 若選取則匯入最近 60 天     |
+| Polar         | 是   | 是     | OAuth               | 若選取則匯入最近 30 天     |
+| COROS         | 是   | 是     | OAuth               | 活動與健康同步分開執行     |
+| Intervals.icu | 是   | 是     | OAuth 或 API Key    | 匯入近期活動               |
+| Suunto        | 是   | 是     | OAuth               | 首次匯入近期課表           |
+| Wahoo         | 是   | 是     | OAuth               | 連接、儲存方向、再同步     |
+| Garmin OAuth  | 是   | 是     | OAuth               | 接收新活動與授權的健康資料 |
+| Garmin 歷史   | 是   | 是     | 匯出 ZIP 或暫時連結 | 補充授權前的活動記錄       |
 
 ## 連接 Strava
 
@@ -58,7 +68,7 @@ Polar 可選最近 30 天與健康資料，並在 Polar Flow 批准。COROS 授�
 
 ## 匯入 Garmin 歷史
 
-Garmin 是一次性封存流程，不是常駐連接。
+歷史匯入用於補充舊活動，不會開啟後續同步。需要接收新資料時，請在 Garmin 設定中選擇 OAuth 授權並儲存同步設定。
 
 1. 在網頁打開 **Account → Third Party Connections → Garmin**。
 2. 從對話框開啟 [Garmin 官方資料匯出](https://www.garmin.com/account/datamanagement/exportdata/) 並申請。
@@ -83,7 +93,7 @@ Garmin 是一次性封存流程，不是常駐連接。
 
 ### 連接 Garmin 之後會持續同步嗎？
 
-不會。這裡的 Garmin 是按官方匯出做一次性歷史匯入，不是長期線上連接。匯入之後的新訓練，請走 Strava、COROS 等持續連接，或上傳 FIT / TCX / GPX。
+Garmin OAuth 連接會依儲存的設定接收新資料。授權前的活動無法透過此連接取得，請使用歷史檔案匯入補充；解除後重新連接也不會回填歷史。
 
 ### 為什麼同一條訓練出現兩次？
 

@@ -115,5 +115,37 @@
       "strength": "力量训练",
       "unknown": "活动"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "尚无活动记录",
+      "LAST_ACTIVITY_OVER_30_DAYS": "超过 30 天没有活动记录",
+      "ACTIVITY_PROCESSING_PENDING": "活动仍在处理中",
+      "TODAY_WORKOUT_COMPLETED": "今日训练已完成",
+      "TODAY_WORKOUT_AVAILABLE": "今日已有训练安排",
+      "NO_ACTIVE_PLAN": "暂无进行中的计划",
+      "WAITING_FOR_USER": "需要补充身体状态",
+      "WAITING_FOR_DATA": "等待训练数据",
+      "HIGH_CONCERN": "当前状态需要优先处理",
+      "RECENT_LOAD": "近期训练负荷",
+      "RECENT_ACTIVITY": "最近一次活动",
+      "PLAN_CONTEXT": "当前训练计划",
+      "COMPETITION_CONTEXT": "近期比赛安排",
+      "LOAD_ZERO_28D": "近 28 天计算训练负荷为 0"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "打开今日训练",
+      "OPEN_PLAN": "查看计划",
+      "OPEN_ASSESSMENT": "补充状态",
+      "OPEN_PROVIDER_SETTINGS": "检查数据连接",
+      "OPEN_IMPORT": "导入活动",
+      "OPEN_ACTIVITY_REVIEW": "查看活动复盘",
+      "CHECK_ACTIVITY_ASSOCIATION": "核对活动关联",
+      "OPEN_DECISION": "查看教练判断",
+      "ASK_COACH": "问教练",
+      "VIEW_TOMORROW": "查看明日安排",
+      "CREATE_TODAY_WORKOUT": "添加为今日课次",
+      "SCHEDULE_REMINDER": "稍后提醒"
+    }
   }
 }

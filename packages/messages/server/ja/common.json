@@ -26,7 +26,7 @@
     "track_file_gpx_coordinates_required": "このアクティビティには有効な GPS 座標がないため、GPX 軌跡に変換できません。屋内トレーニングでは元の FIT ファイルを保存するか、TCX への変換をお試しください。",
     "internal": "システムで問題が発生しました。しばらくしてからもう一度お試しください。",
     "request_failed": "リクエストに失敗しました",
-    "payload_too_large": "アップロードしたファイルが大きすぎます。",
+    "payload_too_large": "送信内容がサイズ上限を超えています。内容を減らすか、分割して再度送信してください。",
     "invalid_request": "リクエストの内容が正しくありません",
     "track_file_required": "続行するにはファイルを選択してください。",
     "track_file_single_required": "ファイルは1回につき1つだけアップロードしてください。",
