@@ -7166,5 +7166,29 @@
     "loadFailed": "无法加载对话，请重试。",
     "activePlanConversation": "计划已开始，可继续讨论后续安排。",
     "activePlanCalendar": "当前计划日历"
+  },
+  "RollingPlan": {
+    "title": "持续训练计划",
+    "description": "根据你的目标、时间和训练情况，自动规划并持续调整",
+    "generatedThrough": "已生成至 {date}",
+    "notGenerated": "尚未生成",
+    "titleLabel": "计划名称",
+    "goalLabel": "训练目标",
+    "create": "创建草稿",
+    "creating": "正在创建…",
+    "failed": "创建计划失败",
+    "coverageLabel": "日期窗口课表",
+    "currentWeek": "第 {week} 周",
+    "shareHint": "持续训练计划只能分享明确选择的已生成日期窗口快照，目前不支持整份计划分享。",
+    "created": "草稿已保存，请在教练对话中开始。",
+    "automaticScope": "确认后将自动规划月度目标、逐周生成课程，并在你确认的设置范围内调整未来课程；暂停计划可停止自动调整。",
+    "monthDirection": "{month} 月度方向",
+    "exportWindow": "导出已生成日期窗口",
+    "snapshotHint": "JSON 文件仅是所选日期窗口的快照，不是完整自动计划，不能作为完整计划导入；生成缺口将保留标记。最多 93 天。",
+    "windowFrom": "开始日期",
+    "windowThrough": "结束日期",
+    "exporting": "正在导出…",
+    "exportFailed": "导出快照失败",
+    "plannedThrough": "确认后生成至 {date}"
   }
 }

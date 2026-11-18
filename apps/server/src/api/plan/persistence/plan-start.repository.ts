@@ -24,17 +24,44 @@ export type Source = Prisma.PlanGetPayload<{ include: typeof sourceInclude }>;
 
 @Injectable()
 export class PlanStartRepository {
-  source(planId: string, tx: PlanDb) {
+  async source(
+    planId: string,
+    tx: PlanDb,
+    window?: { from: string; to: string },
+  ) {
+    const scalar = window
+      ? await tx.plan.findUnique({
+          where: { id: planId },
+          select: { planningMode: true },
+        })
+      : null;
     return tx.plan.findUnique({
       where: { id: planId },
-      include: sourceInclude,
+      include:
+        scalar?.planningMode === 'ROLLING' && window
+          ? {
+              ...sourceInclude,
+              workouts: {
+                ...sourceInclude.workouts,
+                where: {
+                  scheduledDate: {
+                    gte: new Date(window.from),
+                    lte: new Date(window.to),
+                  },
+                },
+              },
+            }
+          : sourceInclude,
     });
   }
-  readback(planId: string, tx: PlanDb) {
-    return tx.plan.findUniqueOrThrow({
-      where: { id: planId },
-      include: sourceInclude,
-    });
+  async readback(
+    planId: string,
+    tx: PlanDb,
+    window?: { from: string; to: string },
+  ) {
+    const plan = await this.source(planId, tx, window);
+    if (!plan) throw new Error('Plan readback failed');
+    return plan;
   }
   appliedStart(userId: string, planId: string, sid: string, tx: PlanDb) {
     return tx.planProposalPreview.findFirst({

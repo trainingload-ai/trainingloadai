@@ -1,3 +1,4 @@
+import { PlanQueryService } from '../application/plan-query.service';
 import { PlanStartService } from '../application/plan-start.service';
 import {
   Body,
@@ -40,6 +41,7 @@ export class PlanController {
     private readonly planSummary: PlanSummaryService,
     private readonly planShares: PlanShareService,
     private readonly starts: PlanStartService,
+    private readonly queries: PlanQueryService,
   ) {}
 
   @Get()
@@ -96,6 +98,16 @@ export class PlanController {
     @CurrentUserId() userId: string,
   ) {
     return this.planService.getPlanDetail(userId, planId);
+  }
+
+  @Get(':planId/window-snapshot')
+  async windowSnapshot(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Query('from') from: string,
+    @Query('through') through: string,
+  ) {
+    return this.queries.windowSnapshot(userId, planId, from, through);
   }
 
   @Get(':planId/summary')

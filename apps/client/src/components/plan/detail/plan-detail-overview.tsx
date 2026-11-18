@@ -1,9 +1,15 @@
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+
 import type { TrainingPlanDetail } from "@/api/plans";
 import {
   rollupPlanDetailExecution,
   type TranslateFn,
 } from "@/components/plan/detail/plan-detail-utils";
-import { Panel, SectionTitle } from "@/components/plan/detail/plan-detail-panel";
+import {
+  Panel,
+  SectionTitle,
+} from "@/components/plan/detail/plan-detail-panel";
 
 export function PlanDetailOverview({
   plan,
@@ -20,9 +26,20 @@ export function PlanDetailOverview({
   const items = [
     {
       label: t("overview.cycleLength"),
-      value: t("overview.weekCount", { count: plan.periodWeeks }),
+      value: isRollingPlan(plan) ? (
+        <RollingPlanCoverage plan={plan} />
+      ) : (
+        t("overview.weekCount", { count: plan.periodWeeks ?? 1 })
+      ),
     },
-    { label: t("overview.completionRate"), value: `${completionPercent}%` },
+    ...(isRollingPlan(plan)
+      ? []
+      : [
+          {
+            label: t("overview.completionRate"),
+            value: `${completionPercent}%`,
+          },
+        ]),
     {
       label: t("execution.incomplete"),
       value: String(ws.incomplete),
@@ -39,7 +56,9 @@ export function PlanDetailOverview({
             key={item.label}
             className="rounded-md bg-neutral-100 px-3 py-2.5 dark:bg-muted/45"
           >
-            <div className="text-mobile-caption pc:text-xs text-muted-foreground">{item.label}</div>
+            <div className="text-mobile-caption pc:text-xs text-muted-foreground">
+              {item.label}
+            </div>
             <div className="mt-1 text-xl font-semibold">{item.value}</div>
           </div>
         ))}

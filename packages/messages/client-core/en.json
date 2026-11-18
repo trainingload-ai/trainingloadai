@@ -7167,5 +7167,29 @@
     "loadFailed": "Unable to load the conversation. Please retry.",
     "activePlanConversation": "The plan has started. Continue discussing future training here.",
     "activePlanCalendar": "Current plan calendar"
+  },
+  "RollingPlan": {
+    "title": "Continuous training plan",
+    "description": "Automatically plan and adapt to your goals, availability, and training.",
+    "generatedThrough": "Generated through {date}",
+    "notGenerated": "Not generated yet",
+    "titleLabel": "Plan title",
+    "goalLabel": "Training goal",
+    "create": "Create draft",
+    "creating": "Creating…",
+    "failed": "Could not create the plan",
+    "coverageLabel": "Date-window schedule",
+    "currentWeek": "Week {week}",
+    "shareHint": "Sharing requires an explicitly selected generated date window. Whole-plan sharing is unavailable for continuous plans.",
+    "created": "Plan saved. Start it in the coach conversation.",
+    "automaticScope": "Automatically plan monthly targets, generate weekly sessions, and adjust future sessions within your confirmed settings. You can pause the plan to stop automatic changes.",
+    "monthDirection": "{month} direction",
+    "exportWindow": "Export generated date window",
+    "snapshotHint": "This JSON file is a date-window snapshot, not the complete automatic plan or an importable plan. Missing generation intervals remain marked. Maximum 93 days.",
+    "windowFrom": "From",
+    "windowThrough": "Through",
+    "exporting": "Exporting…",
+    "exportFailed": "Could not export the snapshot",
+    "plannedThrough": "Will generate through {date}"
   }
 }

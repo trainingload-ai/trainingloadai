@@ -1,3 +1,4 @@
+import { generationCoverage } from '@shared/rolling-plan';
 import { PlanCalendarValidationService } from './plan-calendar-validation.service';
 import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import { withSerializableRetry } from '@/prisma/prisma-transaction-errors';
@@ -17,6 +18,7 @@ import {
 import { PrismaService } from '@/prisma/prisma.service';
 import {
   assessPlanQuality,
+  assessRollingPlanQuality,
   parsePlanQualityContract,
 } from '@shared/plan-quality';
 import {
@@ -413,10 +415,51 @@ export class PlanWriteSupport {
     };
   }
 
-  private buildPlanInclude(): Prisma.PlanInclude {
+  private buildPlanInclude(window?: {
+    from: Date;
+    through: Date;
+  }): Prisma.PlanInclude {
     // 计划详情默认加载顶层步骤、子步骤和未解绑活动链接，顺序保持可直接渲染。
     return {
+      automationPolicies: {
+        where: { revokedAt: null },
+        orderBy: { revision: 'desc' },
+        take: 1,
+      },
+      monthStrategies: {
+        where: {
+          appliedAt: { not: null },
+          supersededAt: null,
+          ...(window
+            ? {
+                monthStart: { lte: window.through },
+                monthEnd: { gte: window.from },
+              }
+            : {}),
+        },
+        orderBy: { monthStart: 'asc' },
+      },
+      weekGenerations: {
+        where: {
+          appliedAt: { not: null },
+          supersededAt: null,
+          ...(window
+            ? {
+                generatedFrom: { lte: window.through },
+                generatedThrough: { gte: window.from },
+              }
+            : {}),
+        },
+        orderBy: { weekStart: 'asc' },
+      },
       workouts: {
+        ...(window
+          ? {
+              where: {
+                scheduledDate: { gte: window.from, lte: window.through },
+              },
+            }
+          : {}),
         orderBy: [
           { dayOffset: 'asc' as const },
           { sessionIndex: 'asc' as const },
@@ -1146,7 +1189,10 @@ export class PlanWriteSupport {
         plan.startDate,
         scheduledDate,
       );
-      if (dayOffset < 0 || dayOffset >= plan.periodWeeks * 7) {
+      if (
+        dayOffset < 0 ||
+        (plan.planningMode !== 'ROLLING' && dayOffset >= plan.periodWeeks * 7)
+      ) {
         throw new UnprocessableEntityException(
           'Workout lies outside the plan period',
         );
@@ -1173,7 +1219,10 @@ export class PlanWriteSupport {
     );
   }
 
-  private validatePlanWorkouts(workouts: PersistedWorkoutInput[]) {
+  private validatePlanWorkouts(
+    workouts: PersistedWorkoutInput[],
+    planningMode: 'FIXED' | 'ROLLING' = 'FIXED',
+  ) {
     // 同一天允许多节课，但 sessionIndex 必须唯一，避免覆盖同一日的第二练。
     if (!Array.isArray(workouts) || workouts.length === 0) {
       throw new BusinessException({
@@ -1187,7 +1236,7 @@ export class PlanWriteSupport {
       if (
         !Number.isInteger(workout.weekIndex) ||
         workout.weekIndex < 1 ||
-        workout.weekIndex > 520 ||
+        (planningMode !== 'ROLLING' && workout.weekIndex > 520) ||
         !Number.isInteger(workout.dayIndex) ||
         workout.dayIndex < 1 ||
         workout.dayIndex > 7 ||
@@ -2040,6 +2089,17 @@ export class PlanWriteSupport {
   async listPlans(userId: string) {
     const plans = await this.plans.findMany({
       where: { userId },
+      include: {
+        weekGenerations: {
+          where: {
+            appliedAt: { not: null },
+            supersededAt: null,
+            generatedFrom: { lte: this.addDays(new Date(), 84) },
+            generatedThrough: { gte: this.addDays(new Date(), -28) },
+          },
+          orderBy: { weekStart: 'asc' },
+        },
+      },
       orderBy: [{ status: 'asc' }, { updatedAt: 'desc' }],
     });
 
@@ -2048,7 +2108,19 @@ export class PlanWriteSupport {
       planIds.length === 0
         ? []
         : await this.workouts.findMany({
-            where: { planId: { in: planIds } },
+            where: {
+              planId: { in: planIds },
+              OR: [
+                { plan: { planningMode: 'FIXED' } },
+                {
+                  plan: { planningMode: 'ROLLING' },
+                  scheduledDate: {
+                    gte: this.addDays(new Date(), -28),
+                    lte: this.addDays(new Date(), 84),
+                  },
+                },
+              ],
+            },
             select: PLAN_LIST_WORKOUT_SELECT,
           });
 
@@ -2097,6 +2169,26 @@ export class PlanWriteSupport {
         generationMetadata: plan.generationMetadata ?? null,
         status: plan.status,
         capabilities: planCapabilities(plan.status),
+        planningMode: plan.planningMode,
+        generatedThrough: normalizePlanDate(plan.generatedThrough),
+        generationCoverage: generationCoverage(
+          normalizePlanDate(this.addDays(new Date(), -28)),
+          normalizePlanDate(this.addDays(new Date(), 84)),
+          plan.weekGenerations.map((g) => ({
+            from: normalizePlanDate(g.generatedFrom)!,
+            through: normalizePlanDate(g.generatedThrough)!,
+            weekStart: normalizePlanDate(g.weekStart)!,
+          })),
+        ),
+        ...(plan.planningMode === 'ROLLING'
+          ? {
+              workoutWindow: {
+                from: normalizePlanDate(this.addDays(new Date(), -28)),
+                through: normalizePlanDate(this.addDays(new Date(), 84)),
+                bounded: true,
+              },
+            }
+          : {}),
         periodWeeks: plan.periodWeeks,
         startDate: normalizePlanDate(plan.startDate),
         endDate: normalizePlanDate(plan.endDate),
@@ -2121,27 +2213,37 @@ export class PlanWriteSupport {
 
   async getActivePlan(userId: string) {
     const plan = await this.plans.findFirst({
-      where: {
-        userId,
-        status: 'ACTIVE',
-      },
+      where: { userId, status: 'ACTIVE' },
       orderBy: { activatedAt: 'desc' },
-      include: this.buildPlanInclude(),
     });
+    return plan ? this.getPlanDetail(userId, plan.id) : { plan: null };
+  }
 
-    await this.attachActualLoadToWorkouts(plan);
-    const resolved = await this.resolvePlanTargetsForRead(userId, plan);
-
+  private rollingReadWindow(plan: {
+    planningMode?: string;
+    startDate?: Date | null;
+  }) {
+    if (plan.planningMode !== 'ROLLING') return undefined;
+    const today = new Date(
+      new Date().toISOString().slice(0, 10) + 'T00:00:00Z',
+    );
+    const anchor =
+      plan.startDate && plan.startDate > today ? plan.startDate : today;
     return {
-      plan: this.normalizePlanRow(resolved),
+      from: this.addDays(anchor, -28),
+      through: this.addDays(anchor, 84),
     };
   }
 
   async getPlanDetail(userId: string, planId: string, db?: PlanDb) {
+    const scalar = await this.plans.findUnique({ where: { id: planId } }, db);
+    if (!scalar || scalar.userId !== userId)
+      throw new UnprocessableEntityException('Plan not found');
+    const window = this.rollingReadWindow(scalar);
     const plan = await this.plans.findUnique(
       {
         where: { id: planId },
-        include: this.buildPlanInclude(),
+        include: this.buildPlanInclude(window),
       },
       db,
     );
@@ -2156,7 +2258,18 @@ export class PlanWriteSupport {
     const resolved = await this.resolvePlanTargetsForRead(userId, plan, db);
 
     return {
-      plan: this.normalizePlanRow(resolved),
+      plan: {
+        ...this.normalizePlanRow({ ...resolved, coverageWindow: window }),
+        ...(window
+          ? {
+              workoutWindow: {
+                from: normalizePlanDate(window.from),
+                through: normalizePlanDate(window.through),
+                bounded: true,
+              },
+            }
+          : {}),
+      },
     };
   }
 
@@ -2248,7 +2361,8 @@ export class PlanWriteSupport {
       userId: string;
       generationMetadata: unknown;
       startDate: Date | null;
-      periodWeeks: number;
+      periodWeeks: number | null;
+      planningMode?: 'FIXED' | 'ROLLING';
     },
     validationRange?: { from: string; until: string },
   ) {
@@ -2270,6 +2384,7 @@ export class PlanWriteSupport {
         userId: plan.userId,
         planId,
         startDate: start,
+        planningMode: plan.planningMode,
         periodWeeks: plan.periodWeeks,
         workouts: rows.map((row) => ({
           ...row,
@@ -2313,7 +2428,16 @@ export class PlanWriteSupport {
           message: 'Plan title cannot be empty',
         });
       }
-      this.validatePlanWorkouts(dto.workouts);
+      if (dto.planningMode !== 'ROLLING' || dto.workouts.length)
+        this.validatePlanWorkouts(dto.workouts, dto.planningMode);
+      if (
+        dto.planningMode === 'ROLLING'
+          ? dto.periodWeeks != null
+          : !Number.isInteger(dto.periodWeeks) ||
+            dto.periodWeeks < 1 ||
+            dto.periodWeeks > 520
+      )
+        throw new UnprocessableEntityException('Invalid plan mode and period');
       let qualityContract;
       try {
         qualityContract = parsePlanQualityContract(
@@ -2339,19 +2463,24 @@ export class PlanWriteSupport {
             issues: projection.conflicts,
           });
       }
-      const qualityReport = assessPlanQuality(
-        dto.periodWeeks,
-        dto.workouts.map((workout) => {
-          const definition = this.resolveWorkoutDefinitionInput(workout);
-          return {
-            ...workout,
-            structureKind: definition.kind,
-            text: definition.text,
-            durationSeconds: definition.summary.durationSeconds,
-          };
-        }),
-        qualityContract,
-      );
+      const qualityReport =
+        dto.planningMode === 'ROLLING' && !dto.workouts.length
+          ? { valid: true, weeks: [], issues: [] }
+          : assessPlanQuality(
+              dto.planningMode === 'ROLLING'
+                ? Math.max(1, ...dto.workouts.map((w) => w.weekIndex))
+                : dto.periodWeeks,
+              dto.workouts.map((workout) => {
+                const definition = this.resolveWorkoutDefinitionInput(workout);
+                return {
+                  ...workout,
+                  structureKind: definition.kind,
+                  text: definition.text,
+                  durationSeconds: definition.summary.durationSeconds,
+                };
+              }),
+              qualityContract,
+            );
       if (!qualityReport.valid) {
         throw new UnprocessableEntityException({
           code: 'PLAN_QUALITY_INVALID',
@@ -2374,7 +2503,9 @@ export class PlanWriteSupport {
                 qualityReport,
               } as Prisma.InputJsonValue,
               status: 'DRAFT',
-              periodWeeks: dto.periodWeeks,
+              planningMode: dto.planningMode ?? 'FIXED',
+              periodWeeks:
+                dto.planningMode === 'ROLLING' ? null : dto.periodWeeks,
               derivedFromShareId: options?.lineage?.derivedFromShareId,
               derivedFromLineageId: options?.lineage?.derivedFromLineageId,
               rootLineageId: options?.lineage?.rootLineageId,
@@ -2436,7 +2567,7 @@ export class PlanWriteSupport {
       }
 
       if (dto.workouts) {
-        this.validatePlanWorkouts(dto.workouts);
+        this.validatePlanWorkouts(dto.workouts, existing.planningMode);
       }
 
       let nextMetadata: Record<string, unknown> | undefined;
@@ -2473,6 +2604,21 @@ export class PlanWriteSupport {
           'A contract transition requires confirmed schedule constraints',
         );
       }
+      if (existing.planningMode === 'ROLLING' && dto.periodWeeks != null)
+        throw new UnprocessableEntityException(
+          'Continuous plans have no fixed period',
+        );
+      if (
+        existing.planningMode === 'ROLLING' &&
+        (dto.scheduleConstraints !== undefined || dto.goal !== undefined) &&
+        meta?.action !== 'automation_apply_plan_schedule'
+      )
+        await this.plans.fenceAutomationJobs(
+          planId,
+          'SETTINGS_CHANGED',
+          false,
+          tx,
+        );
       const nextPeriodWeeks = dto.periodWeeks ?? existing.periodWeeks;
       const nextStartDate = existing.startDate ?? null;
 
@@ -2583,7 +2729,14 @@ export class PlanWriteSupport {
             await this.workouts.update(
               {
                 where: { id: workout.id },
-                data: { ...data, revision: { increment: 1 } },
+                data: {
+                  ...data,
+                  ...(existing.planningMode === 'ROLLING' &&
+                  meta?.action !== 'automation_apply_plan_schedule'
+                    ? { automationProtected: true }
+                    : {}),
+                  revision: { increment: 1 },
+                },
               },
               tx,
             );
@@ -2616,6 +2769,10 @@ export class PlanWriteSupport {
                 userId,
                 planId,
                 ...data,
+                automationProtected:
+                  existing.planningMode === 'ROLLING' &&
+                  existing.status !== 'DRAFT' &&
+                  meta?.action !== 'automation_apply_plan_schedule',
               },
             },
             tx,
@@ -2671,11 +2828,17 @@ export class PlanWriteSupport {
                 until:
                   dto.scheduleConstraints.effectiveUntil ??
                   normalizePlanDate(existing.endDate) ??
-                  (nextStartDate
-                    ? this.addDays(nextStartDate, existing.periodWeeks * 7 - 1)
-                        .toISOString()
-                        .slice(0, 10)
-                    : dto.scheduleConstraints.effectiveFrom),
+                  (existing.planningMode === 'ROLLING'
+                    ? (normalizePlanDate(existing.generatedThrough) ??
+                      dto.scheduleConstraints.effectiveFrom)
+                    : nextStartDate
+                      ? this.addDays(
+                          nextStartDate,
+                          existing.periodWeeks * 7 - 1,
+                        )
+                          .toISOString()
+                          .slice(0, 10)
+                      : dto.scheduleConstraints.effectiveFrom),
               }
             : undefined,
         );
@@ -2837,10 +3000,14 @@ export class PlanWriteSupport {
         mutableIds,
         normalizePlanDate(start)!,
       );
-      const end = this.addDays(start, plan.periodWeeks * 7 - 1);
+      const end =
+        plan.planningMode === 'ROLLING'
+          ? null
+          : this.addDays(start, plan.periodWeeks * 7 - 1);
       const current = clampCurrentIndexes({
         startDate: start,
         periodWeeks: plan.periodWeeks,
+        planningMode: plan.planningMode,
         status: 'ACTIVE',
       });
 
@@ -2957,6 +3124,8 @@ export class PlanWriteSupport {
         });
       }
 
+      if (plan.planningMode === 'ROLLING')
+        await this.plans.fenceAutomationJobs(planId, 'PAUSED', false, tx);
       const updated = await this.plans.update(
         {
           where: { id: planId },
@@ -3017,13 +3186,15 @@ export class PlanWriteSupport {
       }
 
       const completed = this.parseDate(completedAt) ?? new Date();
+      if (plan.planningMode === 'ROLLING')
+        await this.plans.fenceAutomationJobs(planId, 'COMPLETED', true, tx);
       const updated = await this.plans.update(
         {
           where: { id: planId },
           data: {
             status: 'COMPLETED',
             completedAt: completed,
-            endDate: completed,
+            endDate: plan.planningMode === 'ROLLING' ? null : completed,
             currentWeekIndex: null,
             currentDayIndex: null,
           },
@@ -3080,13 +3251,15 @@ export class PlanWriteSupport {
       }
 
       const cancelled = new Date();
+      if (plan.planningMode === 'ROLLING')
+        await this.plans.fenceAutomationJobs(planId, 'CANCELLED', true, tx);
       const updated = await this.plans.update(
         {
           where: { id: planId },
           data: {
             status: 'CANCELLED',
             cancelledAt: cancelled,
-            endDate: cancelled,
+            endDate: plan.planningMode === 'ROLLING' ? null : cancelled,
             currentWeekIndex: null,
             currentDayIndex: null,
             scheduledActivationAt: null,
@@ -3295,8 +3468,8 @@ export class PlanWriteSupport {
     const run = async (tx: Tx) => {
       await acquireHashtextAdvisoryXactLock(tx, userId);
       const plan = await this.assertPlanOwnership(userId, planId, tx);
-      this.validatePlanWorkouts([dto]);
-      if (dto.weekIndex > plan.periodWeeks) {
+      this.validatePlanWorkouts([dto], plan.planningMode);
+      if (plan.planningMode !== 'ROLLING' && dto.weekIndex > plan.periodWeeks) {
         throw new UnprocessableEntityException(
           'Workout lies outside the plan period',
         );
@@ -3329,6 +3502,9 @@ export class PlanWriteSupport {
             userId,
             planId,
             ...this.buildWorkoutWriteData(dto, definition, plan.startDate),
+            automationProtected:
+              plan.planningMode === 'ROLLING' &&
+              meta?.action !== 'automation_apply_plan_schedule',
           },
         },
         tx,
@@ -3441,7 +3617,11 @@ export class PlanWriteSupport {
       userId: string;
       structureKind?: string | null;
       plannedSessionRpe?: number | null;
-      plan: { startDate: Date | null; status: string };
+      plan: {
+        startDate: Date | null;
+        status: string;
+        planningMode?: 'FIXED' | 'ROLLING';
+      };
     };
     dto: UpdatePlanWorkoutDto;
     definition: ResolvedWorkoutDefinition;
@@ -3481,6 +3661,7 @@ export class PlanWriteSupport {
             args.source.plan.startDate ?? null,
           ),
           status: 'PLANNED',
+          automationProtected: args.source.plan.planningMode === 'ROLLING',
           movedFromWorkoutId: args.source.id,
           movedBy,
         },
@@ -3540,15 +3721,21 @@ export class PlanWriteSupport {
         });
       }
 
-      this.validatePlanWorkouts([
-        {
-          ...dto,
-          id: workoutId,
-        },
-      ]);
+      this.validatePlanWorkouts(
+        [
+          {
+            ...dto,
+            id: workoutId,
+          },
+        ],
+        workout.plan.planningMode,
+      );
 
       const nextDayOffset = this.toDayOffset(dto.weekIndex, dto.dayIndex);
-      if (dto.weekIndex > workout.plan.periodWeeks)
+      if (
+        workout.plan.planningMode !== 'ROLLING' &&
+        dto.weekIndex > workout.plan.periodWeeks
+      )
         throw new UnprocessableEntityException(
           'Workout lies outside the plan period',
         );
@@ -3609,7 +3796,14 @@ export class PlanWriteSupport {
         await this.workouts.update(
           {
             where: { id: workoutId },
-            data: { ...data, revision: { increment: 1 } },
+            data: {
+              ...data,
+              ...(workout.plan.planningMode === 'ROLLING' &&
+              meta?.action !== 'automation_apply_plan_schedule'
+                ? { automationProtected: true }
+                : {}),
+              revision: { increment: 1 },
+            },
           },
           tx,
         );
@@ -3847,18 +4041,27 @@ export class PlanWriteSupport {
     } catch {
       throw new UnprocessableEntityException('Invalid plan quality contract');
     }
-    const report = assessPlanQuality(
-      plan.periodWeeks ?? 0,
-      (normalized?.workouts ?? []).map((workout) => {
-        const definition = this.resolveWorkoutDefinitionInput(workout);
-        return {
-          ...workout,
-          structureKind: definition.kind,
-          durationSeconds: definition.summary.durationSeconds,
-        };
-      }),
-      contract,
-    );
+    const report =
+      plan.planningMode === 'ROLLING'
+        ? assessRollingPlanQuality(
+            (normalized?.workouts ?? []).map((w) => ({
+              ...w,
+              durationSeconds: w.summary?.durationSeconds,
+            })),
+            contract,
+          )
+        : assessPlanQuality(
+            plan.periodWeeks ?? 0,
+            (normalized?.workouts ?? []).map((workout) => {
+              const definition = this.resolveWorkoutDefinitionInput(workout);
+              return {
+                ...workout,
+                structureKind: definition.kind,
+                durationSeconds: definition.summary.durationSeconds,
+              };
+            }),
+            contract,
+          );
     if (!report.valid)
       throw new UnprocessableEntityException({
         code: 'PLAN_QUALITY_INVALID',

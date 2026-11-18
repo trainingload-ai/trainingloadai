@@ -15,7 +15,8 @@ type Candidate = {
   userId: string;
   planId: string;
   startDate: string;
-  periodWeeks: number;
+  periodWeeks: number | null;
+  planningMode?: 'FIXED' | 'ROLLING';
   workouts: ScheduledPlanWorkout[];
   changedWorkoutIds: string[];
   constraints?: ScheduleConstraints;
@@ -240,7 +241,9 @@ export class PlanCalendarValidationService {
       const start = ymd(plan.startDate);
       const end =
         ymd(plan.endDate) ??
-        (start ? addCalendarDays(start, plan.periodWeeks * 7 - 1) : null);
+        (start && plan.planningMode !== 'ROLLING'
+          ? addCalendarDays(start, plan.periodWeeks * 7 - 1)
+          : null);
       const cutoff =
         plan.supersededBy?.status === 'SCHEDULED'
           ? ymd(plan.supersededBy.startDate)

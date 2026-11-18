@@ -29,7 +29,9 @@ export type AiTodaySuggestionContext = {
   activePlan: {
     title: string;
     goal: string | null;
-    periodWeeks: number;
+    planningMode?: "FIXED" | "ROLLING";
+    periodWeeks: number | null;
+    generatedThrough?: string | null;
     currentWeekIndex: number | null;
   } | null;
   todayWorkouts: AiTodaySuggestionWorkoutContext[];

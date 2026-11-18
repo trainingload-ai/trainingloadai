@@ -1,3 +1,5 @@
+import { isRollingPlan } from "@/lib/rolling-plan";
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -81,7 +83,10 @@ export function useActivePlan(enabled = true) {
         typeof w.dayOffset === "number"
           ? w.dayOffset
           : (w.weekIndex - 1) * 7 + (w.dayIndex - 1);
-      const d = startDate.add(offsetDays, "day").format("YYYY-MM-DD");
+      const d =
+        isRollingPlan(query.data?.plan) && w.scheduledDate
+          ? w.scheduledDate.slice(0, 10)
+          : startDate.add(offsetDays, "day").format("YYYY-MM-DD");
       if (!map[d]) map[d] = [];
       map[d].push(w);
     });
@@ -89,18 +94,19 @@ export function useActivePlan(enabled = true) {
       items.sort((a, b) => (a.sessionIndex ?? 1) - (b.sessionIndex ?? 1));
     });
     return map;
-  }, [startDate, workouts]);
+  }, [startDate, workouts, query.data?.plan]);
 
   // Plan range should start from activation start date (not natural week start), lasting periodWeeks weeks
+  const rolling = isRollingPlan(query.data?.plan);
   const range = React.useMemo(
     () =>
-      startDate && periodWeeks
+      !rolling && startDate && periodWeeks
         ? {
             startOfWeek: startDate.startOf("day"),
             end: startDate.add(periodWeeks * 7 - 1, "day").endOf("day"),
           }
         : null,
-    [periodWeeks, startDate],
+    [periodWeeks, startDate, rolling],
   );
 
   return {

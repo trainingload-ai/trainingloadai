@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan, generatedPlanThrough } from "@/lib/rolling-plan";
+
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
@@ -337,20 +339,20 @@ export default function V2PlanDetailPage() {
                 "pc:[grid-area:main]",
               )}
             >
-              {planActivated ? (
+              {planActivated && !isRollingPlan(plan) ? (
                 <PlanSummaryCard summary={summary} loading={summaryLoading} />
               ) : null}
-              <PlanDetailCycleProgress
+              {!isRollingPlan(plan) ? <PlanDetailCycleProgress
                 key={plan.id}
                 weeks={weeks}
                 status={plan.status}
-              />
-              {plan.startDate ? (
+              /> : null}
+              {plan.startDate && (!isRollingPlan(plan) || generatedPlanThrough(plan)) ? (
                 <CompetitionPlanImpactCard
                   anchorDate={dayjs().format("YYYY-MM-DD")}
                   startDate={dayjs(plan.startDate).format("YYYY-MM-DD")}
                   endDate={
-                    plan.endDate
+                    generatedPlanThrough(plan) && isRollingPlan(plan) ? generatedPlanThrough(plan)! : plan.endDate
                       ? dayjs(plan.endDate).format("YYYY-MM-DD")
                       : dayjs(plan.startDate)
                           .add(

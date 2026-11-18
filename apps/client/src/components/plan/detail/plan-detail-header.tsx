@@ -1,3 +1,7 @@
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+import { RollingPlanMonthDirection } from "@/components/plan/rolling-plan-month-direction";
+
 import dayjs from "dayjs";
 import {
   ArrowLeft,
@@ -89,6 +93,8 @@ export function PlanDetailHeader({
             {plan.title}
           </h1>
         </div>
+        {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanCoverage plan={plan} /></div> : null}
+        {isRollingPlan(plan) ? <div className="mt-2"><RollingPlanMonthDirection plan={plan} /></div> : null}
         {hasGoalOrDescription ? (
           <div className="mt-2 space-y-3">
             {goalTrim ? (

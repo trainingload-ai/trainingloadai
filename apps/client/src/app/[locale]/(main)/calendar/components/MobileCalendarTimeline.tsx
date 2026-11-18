@@ -1,5 +1,6 @@
 "use client";
 
+import { isPlanDateNotGenerated, type PlanPlanning } from "@/lib/rolling-plan";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import dayjs, { type Dayjs } from "dayjs";
 import { useLocale, useTranslations } from "next-intl";
@@ -135,6 +136,7 @@ const tagClassNames: Record<TimelineTag["tone"], string> = {
 };
 
 export function MobileCalendarTimeline({
+  activePlan,
   days,
   selectedDate,
   onRequestEarlier,
@@ -145,6 +147,7 @@ export function MobileCalendarTimeline({
   competitionEventsByDate,
   tssByDate,
 }: {
+  activePlan?: PlanPlanning | null;
   days: Dayjs[];
   selectedDate: Dayjs;
   onRequestEarlier?: () => void;
@@ -157,6 +160,7 @@ export function MobileCalendarTimeline({
 }) {
   const locale = useLocale();
   const t = useTranslations("MobileCalendarTimeline");
+  const rollingT = useTranslations("RollingPlan");
   const translate = useTranslations();
   const selectedKey = selectedDate.format("YYYY-MM-DD");
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -415,7 +419,7 @@ export function MobileCalendarTimeline({
                     ))}
                     {itemCount === 0 && rangeCompetitions.length === 0 ? (
                       <span className="text-mobile-caption pc:text-xs text-muted-foreground">
-                        {t("rest")}
+                        {activePlan && isPlanDateNotGenerated(activePlan, key) ? rollingT("notGenerated") : t("rest")}
                       </span>
                     ) : null}
                   </span>

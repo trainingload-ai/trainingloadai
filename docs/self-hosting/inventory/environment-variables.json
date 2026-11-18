@@ -1208,7 +1208,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/coach-branching.service.ts",
-          "line": 1918
+          "line": 1925
         }
       ]
     },
@@ -1979,7 +1979,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 136
+          "line": 143
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
@@ -3548,7 +3548,7 @@
       "references": [
         {
           "file": "apps/client/src/api/ai-today-suggestion.ts",
-          "line": 89
+          "line": 91
         }
       ]
     },
@@ -4908,7 +4908,7 @@
       "references": [
         {
           "file": "apps/client/src/api/v2-home.ts",
-          "line": 139
+          "line": 146
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",

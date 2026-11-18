@@ -37,6 +37,8 @@ import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
 import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
 import { getRestoredStartDecisionApply } from "../coach-plan-decision-state";
 import { rejectCoachDecision } from "@/api/ai-coach";
+import { parseRollingStartSettings } from "@shared/rolling-plan";
+import { RollingStartSummary } from "@/components/plan/rolling-start-summary";
 
 export type CoachDecisionDraftToolResult = {
   kind: "coach_decision_draft";
@@ -85,6 +87,28 @@ function asNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function parseRollingPresentation(
+  value: unknown,
+  startDate: string,
+): PlanProposalPresentation["rolling"] {
+  if (value == null) return undefined;
+  const record = asRecord(value);
+  if (
+    !isCalendarDate(record.generatedFrom) ||
+    !isCalendarDate(record.generatedThrough)
+  )
+    return undefined;
+  try {
+    return {
+      ...parseRollingStartSettings(value, startDate || record.generatedFrom),
+      generatedFrom: record.generatedFrom,
+      generatedThrough: record.generatedThrough,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 function getPlanProposalPresentation(
   result: CoachDecisionDraftToolResult,
 ): PlanProposalPresentation | null {
@@ -110,15 +134,20 @@ function getPlanProposalPresentation(
     return null;
   let scheduleConstraints: PlanProposalPresentation["scheduleConstraints"];
   let qualityContract: PlanProposalPresentation["qualityContract"];
+  let rolling: PlanProposalPresentation["rolling"];
   try {
     scheduleConstraints = parseScheduleConstraints(value.scheduleConstraints);
-    qualityContract = parsePlanQualityContract(value.qualityContract ?? undefined);
+    qualityContract = parsePlanQualityContract(
+      value.qualityContract ?? undefined,
+    );
+    rolling = parseRollingPresentation(value.rolling, asText(value.startDate));
   } catch {
     return null;
   }
   return {
     title: asText(value.title),
     summary: asText(value.summary),
+    rolling,
     mode,
     effectiveFrom: asText(value.effectiveFrom) || undefined,
     ...(mode === "SCHEDULE"
@@ -132,6 +161,9 @@ function getPlanProposalPresentation(
     ...(mode === "START" || mode === "SCHEDULE"
       ? {
           startDate: asText(value.startDate),
+          calendarDraftStartDate: isCalendarDate(value.calendarDraftStartDate)
+            ? value.calendarDraftStartDate
+            : undefined,
           calendarTimeZone: asText(value.calendarTimeZone),
           calendarDraft:
             safeParseCoachPlanDraftData(value.calendarDraft) ?? undefined,
@@ -730,13 +762,30 @@ export function CoachDecisionDraftCard({
       <div className="space-y-2.5">
         {proposal ? (
           <>
+            {proposal.rolling ? (
+              <RollingStartSummary
+                rolling={proposal.rolling}
+                pending={!applied}
+              />
+            ) : null}
             {(proposal.mode === "START" || proposal.mode === "SCHEDULE") &&
             proposal.calendarDraft &&
             proposal.startDate &&
             proposal.calendarTimeZone ? (
               <CoachPlanDraftCalendarPreview
+                windowOnly={Boolean(proposal.rolling)}
+                generationWindow={
+                  proposal.rolling
+                    ? {
+                        from: proposal.rolling.generatedFrom,
+                        through: proposal.rolling.generatedThrough,
+                      }
+                    : undefined
+                }
                 draft={proposal.calendarDraft}
-                startDate={proposal.startDate}
+                startDate={
+                  proposal.calendarDraftStartDate ?? proposal.startDate
+                }
                 calendarTimeZone={proposal.calendarTimeZone}
                 scheduleConstraints={proposal.scheduleConstraints}
               />
@@ -982,6 +1031,10 @@ export function CoachDecisionAppliedCard({
   const t = useTranslations("AiCoachPage.decision");
   const applied = result.result === "APPLIED";
   const receipt = asRecord(result.receipt);
+  const rolling = parseRollingPresentation(
+    asRecord(receipt.presentation).rolling,
+    asText(receipt.startDate),
+  );
   const range = asRecord(receipt.range);
   const scheduleRange =
     isCalendarDate(range.from) && isCalendarDate(range.to)
@@ -1033,6 +1086,7 @@ export function CoachDecisionAppliedCard({
       <div className="space-y-1.5">
         {startReceipt ? (
           <>
+            {rolling ? <RollingStartSummary rolling={rolling} /> : null}
             <CoachScheduleRules
               proposal={{
                 calendarTimeZone: asText(receipt.calendarTimeZone),

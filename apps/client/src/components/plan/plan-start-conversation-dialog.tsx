@@ -1,5 +1,9 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+import { RollingPlanCalendar } from "@/components/plan/rolling-plan-calendar";
+
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -198,14 +202,23 @@ function PlanCoachDialogBody({ planId }: { planId: string }) {
               )}
             </summary>
             <div className="max-h-64 overflow-y-auto py-3">
-              <CoachPlanDraftCalendarPreview
-                draft={savedPlanToCoachDraft(current.plan)}
-                startDate={current.startDate}
-                calendarTimeZone={current.calendarTimeZone}
-                scheduleConstraints={parseScheduleConstraints(
-                  current.plan.generationMetadata?.scheduleConstraints,
-                )}
-              />
+              {isRollingPlan(current.plan) ? (
+                <>
+                  <RollingPlanCoverage plan={current.plan} />
+                  {current.plan.startDate ? (
+                    <RollingPlanCalendar plan={current.plan} />
+                  ) : null}
+                </>
+              ) : (
+                <CoachPlanDraftCalendarPreview
+                  draft={savedPlanToCoachDraft(current.plan)}
+                  startDate={current.startDate}
+                  calendarTimeZone={current.calendarTimeZone}
+                  scheduleConstraints={parseScheduleConstraints(
+                    current.plan.generationMetadata?.scheduleConstraints,
+                  )}
+                />
+              )}
             </div>
           </details>
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

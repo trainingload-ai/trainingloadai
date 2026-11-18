@@ -6510,5 +6510,29 @@
     "loadFailed": "Unterhaltung konnte nicht geladen werden. Bitte erneut versuchen.",
     "activePlanConversation": "Der Plan hat begonnen. Besprich hier das weitere Training.",
     "activePlanCalendar": "Aktueller Plankalender"
+  },
+  "RollingPlan": {
+    "title": "Fortlaufender Trainingsplan",
+    "description": "Passt die Planung automatisch an Ziele, Zeit und Training an.",
+    "generatedThrough": "Erstellt bis {date}",
+    "notGenerated": "Noch nicht erstellt",
+    "titleLabel": "Planname",
+    "goalLabel": "Trainingsziel",
+    "create": "Entwurf erstellen",
+    "creating": "Wird erstellt…",
+    "failed": "Plan konnte nicht erstellt werden",
+    "coverageLabel": "Trainingsplan im Zeitraum",
+    "currentWeek": "Woche {week}",
+    "shareHint": "Teilen erfordert einen ausdrücklich gewählten Zeitraum mit erstellten Einheiten. Der gesamte fortlaufende Plan kann nicht geteilt werden.",
+    "created": "Entwurf gespeichert. Starte ihn im Trainergespräch.",
+    "automaticScope": "Plant monatliche Ziele, erstellt wöchentliche Einheiten und passt zukünftige Einheiten innerhalb deiner bestätigten Einstellungen automatisch an. Pausiere den Plan, um automatische Änderungen zu stoppen.",
+    "monthDirection": "Schwerpunkt {month}",
+    "exportWindow": "Erstellten Zeitraum exportieren",
+    "snapshotHint": "Diese JSON-Datei ist eine Zeitraumaufnahme, kein vollständiger automatischer oder importierbarer Plan. Fehlende Zeiträume bleiben markiert. Maximal 93 Tage.",
+    "windowFrom": "Von",
+    "windowThrough": "Bis",
+    "exporting": "Export…",
+    "exportFailed": "Export fehlgeschlagen",
+    "plannedThrough": "Wird bis {date} erstellt"
   }
 }

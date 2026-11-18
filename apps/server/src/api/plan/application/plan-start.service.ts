@@ -1,3 +1,6 @@
+import { RollingPlanAuthorizationService } from './rolling-plan-authorization.service';
+import { RollingPlanService } from './rolling-plan.service';
+import { isoWeekStart, parseRollingStartSettings } from '@shared/rolling-plan';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { HealthDataRepository } from '@/health-data/persistence/health-data.repository';
 import { UserQueryService } from '@/api/user/user-query.service';
@@ -45,6 +48,7 @@ import {
 } from '@shared/plan-calendar';
 import {
   assessPlanQuality,
+  assessRollingPlanQuality,
   parsePlanQualityContract,
 } from '@shared/plan-quality';
 import { normalizePlanRow } from './plan-row.mapper';
@@ -89,8 +93,10 @@ function hash(value: unknown) {
 export type CanonicalStartProposal = {
   mode: 'START' | 'SCHEDULE';
   planId: string;
-  binding: PlanStartBinding;
-  conversationRevision: number;
+  binding?: PlanStartBinding;
+  conversationRevision?: number;
+  automationJobId?: string;
+  automationMonthStrategyIds?: string[];
   startDate: string;
   calendarTimeZone: string;
   sourceFingerprint: string;
@@ -124,6 +130,8 @@ export class PlanStartService {
     private readonly userQuery: UserQueryService,
     private readonly competitions: CompetitionQueryService,
     private readonly analysisConfig: UserAnalysisConfigService,
+    private readonly rolling: RollingPlanService,
+    private readonly automationAccess?: RollingPlanAuthorizationService,
   ) {}
 
   private constraints(value: unknown) {
@@ -158,8 +166,9 @@ export class PlanStartService {
     tx: PlanDb,
     allowStarted = false,
     schedule = false,
+    window?: { from: string; to: string },
   ): Promise<Source> {
-    const plan = await this.storage.source(planId, tx);
+    const plan = await this.storage.source(planId, tx, window);
     if (
       !plan ||
       plan.userId !== userId ||
@@ -185,6 +194,7 @@ export class PlanStartService {
       title: plan.title,
       description: plan.description,
       goal: plan.goal,
+      planningMode: plan.planningMode,
       periodWeeks: plan.periodWeeks,
       metadata: plan.generationMetadata,
       workouts: plan.workouts.map((w) => ({
@@ -639,27 +649,67 @@ export class PlanStartService {
     binding?: PlanStartBinding,
   ): Promise<PlanProposalPreviewResult> {
     if (!binding) fail('A server-owned start conversation is required');
+    return this.preparePreview(userId, request, binding);
+  }
+
+  async createAutomationPreview(
+    jobId: string,
+    claimToken: string,
+    request: PlanSchedulePreviewRequest,
+  ) {
+    const job = await this.prisma.rollingPlanJob.findUnique({
+      where: { id: jobId },
+      include: { plan: true },
+    });
+    if (!job || request.planId !== job.planId || request.mode !== 'SCHEDULE')
+      fail('Automation job targets a different schedule');
+    return this.preparePreview(job.plan.userId, request, undefined, {
+      jobId,
+      claimToken,
+    });
+  }
+
+  private async preparePreview(
+    userId: string,
+    request: PlanStartPreviewRequest | PlanSchedulePreviewRequest,
+    binding?: PlanStartBinding,
+    automation?: { jobId: string; claimToken: string },
+  ): Promise<PlanProposalPreviewResult> {
     return withSerializableRetry(() =>
       this.prisma.$transaction(
         async (tx) => {
           await acquireHashtextAdvisoryXactLock(tx, userId);
           const schedule = request.mode === 'SCHEDULE';
-          const session = await this.assertBinding(
-            userId,
-            request.planId,
-            binding,
-            tx,
-            schedule
-              ? undefined
-              : (request as PlanStartPreviewRequest).startDate,
-            schedule,
-          );
+          const session = automation
+            ? (await this.assertAutomationJob(
+                automation.jobId,
+                automation.claimToken,
+                tx,
+              ),
+              null)
+            : await this.assertBinding(
+                userId,
+                request.planId,
+                binding,
+                tx,
+                schedule
+                  ? undefined
+                  : (request as PlanStartPreviewRequest).startDate,
+                schedule,
+              );
           const source = await this.source(
             userId,
             request.planId,
             tx,
             false,
             schedule,
+            schedule &&
+              isCalendarDate(
+                (request as PlanSchedulePreviewRequest).range?.from,
+              ) &&
+              isCalendarDate((request as PlanSchedulePreviewRequest).range?.to)
+              ? (request as PlanSchedulePreviewRequest).range
+              : undefined,
           );
           const startDate = schedule
             ? source.startDate?.toISOString().slice(0, 10)
@@ -681,7 +731,7 @@ export class PlanStartService {
             : undefined;
           if (
             schedule &&
-            (!binding?.userMessageId ||
+            ((!automation && !binding?.userMessageId) ||
               !range ||
               !isCalendarDate(range.from) ||
               !isCalendarDate(range.to) ||
@@ -696,22 +746,24 @@ export class PlanStartService {
               ? source.supersededBy
               : null;
           const protectedReason = (row: Source['workouts'][number]) =>
-            schedule
-              ? workoutImmutabilityReason({
-                  planStatus: source.status,
-                  workoutStatus: row.status,
-                  scheduledDateYmd: row.scheduledDate
-                    ?.toISOString()
-                    .slice(0, 10),
-                  athleteTodayYmd: today,
-                  activeActivityLinkCount: row.links.length,
-                  pendingSupersessionYmd: successor?.startDate
-                    ?.toISOString()
-                    .slice(0, 10),
-                })
-              : row.status !== 'PLANNED' || row.links.length
-                ? 'WORKOUT_STATUS'
-                : null;
+            automation && row.automationProtected
+              ? 'USER_EXCEPTION'
+              : schedule
+                ? workoutImmutabilityReason({
+                    planStatus: source.status,
+                    workoutStatus: row.status,
+                    scheduledDateYmd: row.scheduledDate
+                      ?.toISOString()
+                      .slice(0, 10),
+                    athleteTodayYmd: today,
+                    activeActivityLinkCount: row.links.length,
+                    pendingSupersessionYmd: successor?.startDate
+                      ?.toISOString()
+                      .slice(0, 10),
+                  })
+                : row.status !== 'PLANNED' || row.links.length
+                  ? 'WORKOUT_STATUS'
+                  : null;
           const inRange = (date: string | null | undefined) =>
             !range || (!!date && date >= range.from && date <= range.to);
           const normalized = normalizePlanRow(source, {
@@ -814,7 +866,10 @@ export class PlanStartService {
               workout: json(addition.workout),
             });
           }
-          if (!candidate.length || candidate.length > 10000)
+          if (
+            (!candidate.length && source.planningMode !== 'ROLLING') ||
+            candidate.length > 10000
+          )
             fail(
               'A calendar candidate must contain 1–10000 workouts; choose an explicit smaller scope if this capacity is exceeded',
             );
@@ -830,7 +885,8 @@ export class PlanStartService {
             if (
               !Number.isInteger(w.weekIndex) ||
               w.weekIndex < 1 ||
-              w.weekIndex > source.periodWeeks ||
+              (source.planningMode !== 'ROLLING' &&
+                w.weekIndex > source.periodWeeks) ||
               !Number.isInteger(w.dayIndex) ||
               w.dayIndex < 1 ||
               w.dayIndex > 7 ||
@@ -954,21 +1010,37 @@ export class PlanStartService {
           const contract = parsePlanQualityContract(
             candidateMetadata.qualityContract,
           );
-          const quality = assessPlanQuality(
-            source.periodWeeks,
-            display.map((w) => ({
-              ...w,
-              durationSeconds: w.summary?.durationSeconds,
-            })),
-            schedule && contract
-              ? {
-                  ...contract,
-                  allowedDays: undefined,
-                  maxDailyMinutes: undefined,
-                  maxTrainingDaysPerWeek: undefined,
-                }
-              : contract,
-          );
+          const qualityInput = display.map((w) => ({
+            ...w,
+            durationSeconds: w.summary?.durationSeconds,
+          }));
+          const rollingStart =
+            source.planningMode === 'ROLLING' && !schedule
+              ? this.rolling.validateStart(request.rolling, startDate, display)
+              : undefined;
+          if (source.planningMode !== 'ROLLING' && request.rolling)
+            fail('Automatic policy requires a rolling plan');
+          const candidateWeeks =
+            source.periodWeeks ??
+            Math.max(1, ...display.map((w) => w.weekIndex));
+          const quality =
+            source.planningMode === 'ROLLING'
+              ? assessRollingPlanQuality(qualityInput, contract)
+              : assessPlanQuality(
+                  source.periodWeeks,
+                  display.map((w) => ({
+                    ...w,
+                    durationSeconds: w.summary?.durationSeconds,
+                  })),
+                  schedule && contract
+                    ? {
+                        ...contract,
+                        allowedDays: undefined,
+                        maxDailyMinutes: undefined,
+                        maxTrainingDaysPerWeek: undefined,
+                      }
+                    : contract,
+                );
           if (!quality.valid)
             throw new UnprocessableEntityException({
               code: 'PLAN_QUALITY_INVALID',
@@ -1004,6 +1076,7 @@ export class PlanStartService {
             )
             .map((w) => w.id);
           const scheduleInput = {
+            planningMode: source.planningMode,
             periodWeeks: source.periodWeeks,
             workouts: scheduled,
             changedWorkoutIds,
@@ -1031,12 +1104,40 @@ export class PlanStartService {
               code: 'PLAN_SCHEDULE_INVALID',
               issues: report.issues,
             });
+          const calendarDraftStartDate =
+            source.planningMode === 'ROLLING'
+              ? (range?.from ?? startDate)
+              : startDate;
+          const calendarDisplay =
+            source.planningMode === 'ROLLING'
+              ? display.flatMap((w) => {
+                  const date = addCalendarDays(
+                    startDate,
+                    (w.weekIndex - 1) * 7 + w.dayIndex - 1,
+                  );
+                  if (range && (date < range.from || date > range.to))
+                    return [];
+                  const offset = Math.round(
+                    (new Date(date).getTime() -
+                      new Date(calendarDraftStartDate).getTime()) /
+                      86400000,
+                  );
+                  return [
+                    {
+                      ...w,
+                      weekIndex: Math.floor(offset / 7) + 1,
+                      dayIndex: (offset % 7) + 1,
+                    },
+                  ];
+                })
+              : display;
           const presentation: PlanProposalPresentation = {
+            calendarDraftStartDate,
+            ...(rollingStart ? { rolling: rollingStart } : {}),
             scheduleRulePeriods: scheduleRulePeriods(
               candidateMetadata,
               range?.from ?? startDate,
-              range?.to ??
-                addCalendarDays(startDate, source.periodWeeks * 7 - 1),
+              range?.to ?? addCalendarDays(startDate, candidateWeeks * 7 - 1),
             ),
             ...(contract ? { qualityContract: contract } : {}),
             relatedCalendarConflicts: calendarAssessment.relatedConflicts,
@@ -1049,8 +1150,11 @@ export class PlanStartService {
             ...(constraints ? { scheduleConstraints: constraints } : {}),
             calendarDraft: {
               title: source.title,
-              periodWeeks: source.periodWeeks,
-              workouts: display,
+              periodWeeks:
+                source.planningMode === 'ROLLING'
+                  ? Math.max(1, ...calendarDisplay.map((w) => w.weekIndex))
+                  : candidateWeeks,
+              workouts: calendarDisplay,
             },
             facts: request.evidenceRefs ?? [],
             counts: {
@@ -1139,16 +1243,46 @@ export class PlanStartService {
           const proposal: CanonicalStartProposal = {
             mode: request.mode,
             planId: source.id,
-            binding: binding!,
-            conversationRevision: session.planStartRevision,
+            ...(binding
+              ? { binding, conversationRevision: session!.planStartRevision }
+              : {
+                  automationJobId: automation!.jobId,
+                  automationMonthStrategyIds:
+                    await this.rolling.weekDependencies(
+                      source.id,
+                      (
+                        await this.assertAutomationJob(
+                          automation!.jobId,
+                          automation!.claimToken,
+                          tx,
+                        )
+                      ).policyId,
+                      isoWeekStart(
+                        (request as PlanSchedulePreviewRequest).range.from,
+                      ),
+                      tx,
+                    ),
+                }),
             startDate,
             calendarTimeZone,
             sourceFingerprint: this.fingerprint(source),
             factFingerprint: await this.facts(
               userId,
               source.id,
-              startDate,
-              source.periodWeeks,
+              source.planningMode === 'ROLLING' && range
+                ? range.from
+                : startDate,
+              source.planningMode === 'ROLLING' && range
+                ? Math.max(
+                    1,
+                    Math.ceil(
+                      (new Date(range.to).getTime() -
+                        new Date(range.from).getTime() +
+                        86400000) /
+                        (7 * 86400000),
+                    ),
+                  )
+                : candidateWeeks,
               tx,
             ),
             sourceWorkouts: source.workouts.map((w) => ({
@@ -1172,12 +1306,19 @@ export class PlanStartService {
               sourceSnapshot: {
                 sourceFingerprint: proposal.sourceFingerprint,
                 factFingerprint: proposal.factFingerprint,
-                binding: binding!,
+                ...(binding
+                  ? { binding }
+                  : { automationJobId: automation!.jobId }),
               },
               presentation: json(presentation) as Prisma.InputJsonValue,
               expiresAt,
             },
           });
+          if (automation)
+            await tx.rollingPlanJob.update({
+              where: { id: automation.jobId },
+              data: { previewId: preview.id },
+            });
           return {
             kind: 'plan_proposal_preview',
             previewId: preview.id,
@@ -1197,6 +1338,156 @@ export class PlanStartService {
     );
   }
 
+  private async assertAutomationJob(
+    jobId: string,
+    claimToken: string,
+    tx: PlanDb,
+  ) {
+    const job = await tx.rollingPlanJob.findUnique({
+      where: { id: jobId },
+      include: { plan: true, policy: true },
+    });
+    if (!job) fail('Automation job not found');
+    await acquireHashtextAdvisoryXactLock(tx, job.plan.userId);
+    if (
+      job.state !== 'RUNNING' ||
+      job.claimToken !== claimToken ||
+      !job.leaseUntil ||
+      job.leaseUntil.getTime() <= Date.now() ||
+      job.plan.planningMode !== 'ROLLING' ||
+      job.plan.status !== 'ACTIVE' ||
+      job.policy.revokedAt ||
+      job.policy.planId !== job.planId ||
+      job.policy.userId !== job.plan.userId ||
+      !['WEEK', 'ADJUST'].includes(job.kind)
+    )
+      fail('Automation lease or current policy is no longer valid');
+    const current = await tx.planAutomationPolicy.findFirst({
+      where: { planId: job.planId, revokedAt: null },
+    });
+    if (current?.id !== job.policyId) fail('Automation policy was superseded');
+    const settings = job.policy.settings as Record<string, unknown>;
+    if (
+      settings.autoGenerateWeeks !== true ||
+      (job.kind === 'ADJUST' && settings.autoAdjustFuture !== true)
+    )
+      fail('Automatic operation is outside the authorized scope');
+    if (!this.automationAccess)
+      fail('Automation access provider is unavailable');
+    await this.automationAccess.assertAllowed(job.plan.userId, tx);
+    return job;
+  }
+
+  /** Server-only execution port. HTTP/model tools never receive this capability. */
+  async applyAutomation(jobId: string, claimToken: string) {
+    const result = await withSerializableRetry(() =>
+      this.prisma.$transaction(
+        async (tx) => {
+          const previous = await tx.rollingPlanJob.findUnique({
+            where: { id: jobId },
+          });
+          if (
+            previous?.state === 'APPLIED' &&
+            previous.claimToken === claimToken
+          )
+            return previous.receipt;
+          const job = await this.assertAutomationJob(jobId, claimToken, tx);
+          if (!job.previewId) fail('Automation job has no validated candidate');
+          const preview = await tx.planProposalPreview.findUnique({
+            where: { id: job.previewId },
+          });
+          if (
+            !preview ||
+            preview.userId !== job.plan.userId ||
+            preview.sourcePlanId !== job.planId ||
+            preview.decisionId ||
+            preview.appliedAt ||
+            preview.expiresAt.getTime() <= Date.now()
+          )
+            fail('Automation candidate is invalid or expired');
+          const proposal =
+            preview.proposal as unknown as CanonicalStartProposal;
+          if (
+            proposal.mode !== 'SCHEDULE' ||
+            proposal.automationJobId !== job.id ||
+            proposal.binding
+          )
+            fail('Automation cannot consume a user-confirmation proposal');
+          const range = (proposal.request as PlanSchedulePreviewRequest).range;
+          const weekStart = job.windowStart.toISOString().slice(0, 10);
+          if (
+            isoWeekStart(range.from) !== weekStart ||
+            range.to !== addCalendarDays(weekStart, 6)
+          )
+            fail('Automated schedule must cover the actual remaining ISO week');
+          const dependencies = await this.rolling.weekDependencies(
+            job.planId,
+            job.policyId,
+            weekStart,
+            tx,
+          );
+          if (hash(dependencies) !== hash(proposal.automationMonthStrategyIds))
+            fail('Month strategy changed after assessment');
+          const receipt = await this.applyCandidate(
+            { userId: job.plan.userId, contextPlanId: job.planId, tx },
+            proposal,
+            true,
+          );
+          const generation =
+            job.kind === 'WEEK'
+              ? await this.rolling.publishWeek(
+                  {
+                    planId: job.planId,
+                    policyId: job.policyId,
+                    weekStart,
+                    from: range.from,
+                    evidenceRevision: proposal.factFingerprint,
+                    strategyIds: dependencies,
+                    receipt,
+                  },
+                  tx,
+                )
+              : undefined;
+          const context = await tx.coachContext.findUniqueOrThrow({
+            where: { planId: job.planId },
+          });
+          const commit = await tx.coachCommit.create({
+            data: {
+              contextId: context.id,
+              commitMessage: 'Automatic rolling plan schedule applied',
+            },
+          });
+          const fullReceipt = {
+            ...receipt,
+            ...(generation ? { rolling: generation } : {}),
+            commitId: commit.id,
+            policyRevision: job.policy.revision,
+            jobId: job.id,
+          };
+          await tx.planProposalPreview.update({
+            where: { id: preview.id },
+            data: { appliedAt: new Date() },
+          });
+          await tx.rollingPlanJob.update({
+            where: { id: job.id },
+            data: {
+              state: 'APPLIED',
+              receipt: json(fullReceipt) as Prisma.InputJsonValue,
+            },
+          });
+          return fullReceipt;
+        },
+        { isolationLevel: 'Serializable', timeout: 60000 },
+      ),
+    );
+    const job = await this.prisma.rollingPlanJob.findUniqueOrThrow({
+      where: { id: jobId },
+      include: { plan: true },
+    });
+    await this.plans.notifyWorkoutChanges(job.plan.userId, job.planId);
+    return result;
+  }
+
   async apply(
     args: {
       userId: string;
@@ -1207,21 +1498,37 @@ export class PlanStartService {
     },
     proposal: CanonicalStartProposal,
   ) {
+    return this.applyCandidate(args, proposal);
+  }
+
+  private async applyCandidate(
+    args: {
+      userId: string;
+      decisionId?: string;
+      branchId?: string;
+      contextPlanId: string;
+      tx: PlanDb;
+    },
+    proposal: CanonicalStartProposal,
+    automation = false,
+  ) {
     const tx = args.tx;
-    const session = await this.assertBinding(
-      args.userId,
-      proposal.planId,
-      { sid: proposal.binding.sid, branchId: proposal.binding.branchId },
-      tx,
-      proposal.mode === 'START' ? proposal.startDate : undefined,
-      proposal.mode === 'SCHEDULE',
-    );
-    if (
-      session.planStartRevision !== proposal.conversationRevision ||
-      args.branchId !== proposal.binding.branchId ||
-      args.contextPlanId !== proposal.planId
-    )
-      fail('Start conversation changed; reassess the start');
+    if (!automation) {
+      const session = await this.assertBinding(
+        args.userId,
+        proposal.planId,
+        { sid: proposal.binding.sid, branchId: proposal.binding.branchId },
+        tx,
+        proposal.mode === 'START' ? proposal.startDate : undefined,
+        proposal.mode === 'SCHEDULE',
+      );
+      if (
+        session.planStartRevision !== proposal.conversationRevision ||
+        args.branchId !== proposal.binding.branchId ||
+        args.contextPlanId !== proposal.planId
+      )
+        fail('Start conversation changed; reassess the start');
+    }
     const schedule = proposal.mode === 'SCHEDULE';
     const source = await this.source(
       args.userId,
@@ -1229,6 +1536,9 @@ export class PlanStartService {
       tx,
       false,
       schedule,
+      schedule
+        ? (proposal.request as PlanSchedulePreviewRequest).range
+        : undefined,
     );
     if (
       schedule &&
@@ -1253,17 +1563,39 @@ export class PlanStartService {
       (await this.facts(
         args.userId,
         source.id,
-        proposal.startDate,
-        source.periodWeeks,
+        source.planningMode === 'ROLLING' && schedule
+          ? (proposal.request as PlanSchedulePreviewRequest).range.from
+          : proposal.startDate,
+        source.planningMode === 'ROLLING' && schedule
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(
+                  (proposal.request as PlanSchedulePreviewRequest).range.to,
+                ).getTime() -
+                  new Date(
+                    (proposal.request as PlanSchedulePreviewRequest).range.from,
+                  ).getTime() +
+                  86400000) /
+                  (7 * 86400000),
+              ),
+            )
+          : (source.periodWeeks ??
+              Math.max(
+                1,
+                ...proposal.candidate.map((c) => c.workout.weekIndex),
+              )),
         tx,
       )) !== proposal.factFingerprint
     )
       fail('Training facts or calendar timezone changed; reassess the start');
     const meta = {
       source: 'ai' as const,
-      action: schedule
-        ? 'decision_apply_plan_schedule'
-        : 'decision_apply_plan_start',
+      action: automation
+        ? 'automation_apply_plan_schedule'
+        : schedule
+          ? 'decision_apply_plan_schedule'
+          : 'decision_apply_plan_start',
       decisionId: args.decisionId,
       branchId: args.branchId,
     };
@@ -1297,7 +1629,13 @@ export class PlanStartService {
           calendarTimeZone: proposal.calendarTimeZone,
         },
       );
-    const readback = await this.storage.readback(source.id, tx);
+    const readback = await this.storage.readback(
+      source.id,
+      tx,
+      schedule
+        ? (proposal.request as PlanSchedulePreviewRequest).range
+        : undefined,
+    );
     if (
       readback.status !== (schedule ? source.status : 'ACTIVE') ||
       (!schedule &&
@@ -1416,7 +1754,29 @@ export class PlanStartService {
         revision: row.revision,
       };
     });
+    const rollingReceipt =
+      source.planningMode === 'ROLLING' && !schedule
+        ? await this.rolling.publishStart(
+            {
+              userId: args.userId,
+              planId: source.id,
+              decisionId: args.decisionId,
+              startDate: proposal.startDate,
+              settings: parseRollingStartSettings(
+                proposal.request.rolling,
+                proposal.startDate,
+              ),
+              evidenceRevision: proposal.factFingerprint,
+              receipt: {
+                executionSource: 'USER_CONFIRMATION',
+                readbackVerified: true,
+              },
+            },
+            tx,
+          )
+        : undefined;
     return {
+      ...(rollingReceipt ? { rolling: rollingReceipt } : {}),
       planId: source.id,
       createdPlanId: null as string | null,
       changedWorkoutCount: changed.size,
@@ -1428,7 +1788,7 @@ export class PlanStartService {
       calendarTimeZone: proposal.calendarTimeZone,
       identityMap,
       readbackVerified: true,
-      executionSource: 'USER_CONFIRMATION',
+      executionSource: automation ? 'AUTOMATION_POLICY' : 'USER_CONFIRMATION',
       qualityContract: expectedContract ?? null,
       scheduleConstraints: expectedConstraints ?? null,
       ...(schedule

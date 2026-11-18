@@ -121,6 +121,9 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
       }
 
       const plan = await ctx.planQuery.findCoachPlanSnapshot({
+        asOf: anchor.format('YYYY-MM-DD'),
+        calendarFrom: input.calendarFrom,
+        calendarTo: input.calendarTo,
         userId: userId!,
         planId,
         includeCoachSummary: true,

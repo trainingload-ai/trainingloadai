@@ -1,5 +1,6 @@
 "use client";
 
+import { isPlanDateNotGenerated, type PlanPlanning } from "@/lib/rolling-plan";
 import React from "react";
 import dayjs, { type Dayjs } from "dayjs";
 import { AnimatePresence, motion } from "framer-motion";
@@ -70,6 +71,7 @@ function buildCompetitionSegments(
 }
 
 type CalendarStageProps = {
+  activePlan?: PlanPlanning | null;
   currentMonth: Dayjs;
   weeks: Dayjs[][];
   selectedWeek: Dayjs[];
@@ -108,6 +110,7 @@ const stageVariants = {
 };
 
 export function CalendarStage({
+  activePlan,
   currentMonth,
   weeks,
   selectedWeek,
@@ -227,6 +230,7 @@ export function CalendarStage({
                       return (
                         <CalendarDayButton
                           key={key}
+                          notGenerated={Boolean(activePlan && isPlanDateNotGenerated(activePlan, key))}
                           date={date}
                           isCurrentMonth={date.month() === currentMonth.month()}
                           isToday={date.isSame(dayjs(), "day")}

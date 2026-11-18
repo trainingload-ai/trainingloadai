@@ -29,6 +29,7 @@ function workoutStatusClassName(kind: PlanWorkoutDisplayKind) {
 }
 
 type CalendarDayButtonProps = {
+  notGenerated?: boolean;
   date: Dayjs;
   isCurrentMonth: boolean;
   isToday: boolean;
@@ -43,6 +44,7 @@ type CalendarDayButtonProps = {
 };
 
 export function CalendarDayButton({
+  notGenerated,
   date,
   isCurrentMonth,
   isToday,
@@ -56,6 +58,7 @@ export function CalendarDayButton({
   onSelectWorkout,
 }: CalendarDayButtonProps) {
   const t = useTranslations("CalendarExperience");
+  const rollingT = useTranslations("RollingPlan");
   const hasPlan = planWorkouts.length > 0;
   const primaryPlanWorkout = planWorkouts[0];
   const planDetailTitle =
@@ -164,6 +167,7 @@ export function CalendarDayButton({
               : undefined
           }
         >
+          {notGenerated && !hasPlan ? <span className="text-mobile-caption pc:text-[11px] text-muted-foreground">{rollingT("notGenerated")}</span> : null}
           {hasPlan ? (
             <div
               role={onSelectWorkout ? "button" : undefined}

@@ -1,5 +1,6 @@
 "use client";
 
+import { isPlanDateNotGenerated } from "@/lib/rolling-plan";
 import React from "react";
 import dayjs from "dayjs";
 import { CalendarRange } from "lucide-react";
@@ -135,6 +136,7 @@ export default function PMCPage() {
     selectedPlanWorkouts,
     selectedCompetitionEvents,
     activePlanId,
+    activePlan,
     selectedTss,
     activitiesByDate,
     workoutsByDate,
@@ -350,6 +352,7 @@ export default function PMCPage() {
               workoutsByDate={workoutsByDate}
               competitionEventsByDate={competitionEventsByDate}
               tssByDate={tssByDate}
+              activePlan={activePlan}
               range={range}
             />
           </>
@@ -380,11 +383,13 @@ export default function PMCPage() {
                   workoutsByDate={workoutsByDate}
                   competitionEventsByDate={competitionEventsByDate}
                   tssByDate={tssByDate}
-                  range={range}
+                  activePlan={activePlan}
+              range={range}
                 />
               ) : null}
             </MobilePushSidePage>
             <MobileCalendarTimeline
+              activePlan={activePlan}
               days={mobileAgendaDays}
               selectedDate={selectedDate}
               onRequestEarlier={extendMobileAgendaEarlier}
@@ -419,6 +424,7 @@ export default function PMCPage() {
       ) : null}
       {isMobileLayout && daySheetOpen ? (
         <MobileCalendarDaySheet
+          notGenerated={Boolean(activePlan && isPlanDateNotGenerated(activePlan, selectedDate.format("YYYY-MM-DD")))}
           open
           onOpenChange={setDaySheetOpen}
           page={mobileSheetPage}

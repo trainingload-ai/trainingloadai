@@ -1,3 +1,4 @@
+import type { RollingStartSettings } from "./rolling-plan";
 import type {
   ScheduleConstraints,
   ScheduleQualityContractTransition,
@@ -87,6 +88,7 @@ export type PlanStartWorkoutDraft = {
 };
 
 export type PlanStartPreviewRequest = {
+  rolling?: RollingStartSettings;
   mode: "START";
   planId: string;
   startDate: string;
@@ -143,6 +145,11 @@ export type RelatedCalendarConflict = {
 };
 
 export type PlanProposalPresentation = {
+  calendarDraftStartDate?: string;
+  rolling?: RollingStartSettings & {
+    generatedFrom: string;
+    generatedThrough: string;
+  };
   scheduleRulePeriods?: ScheduleRulePeriod[];
   qualityContract?: PlanQualityContract;
   relatedCalendarConflicts?: RelatedCalendarConflict[];

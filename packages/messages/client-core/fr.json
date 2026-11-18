@@ -6510,5 +6510,29 @@
     "loadFailed": "Impossible de charger la conversation. Réessayez.",
     "activePlanConversation": "Le plan a commencé. Discutez ici des entraînements à venir.",
     "activePlanCalendar": "Calendrier actuel du plan"
+  },
+  "RollingPlan": {
+    "title": "Plan d’entraînement continu",
+    "description": "Planifie et adapte automatiquement selon tes objectifs, ton temps et ton entraînement.",
+    "generatedThrough": "Généré jusqu’au {date}",
+    "notGenerated": "Pas encore généré",
+    "titleLabel": "Nom du plan",
+    "goalLabel": "Objectif d’entraînement",
+    "create": "Créer un brouillon",
+    "creating": "Création…",
+    "failed": "Impossible de créer le plan",
+    "coverageLabel": "Séances de la période",
+    "currentWeek": "Semaine {week}",
+    "shareHint": "Le partage nécessite une plage de dates générées explicitement choisie. Le plan continu complet ne peut pas être partagé.",
+    "created": "Brouillon enregistré. Démarre-le dans la conversation avec le coach.",
+    "automaticScope": "Planifie les objectifs mensuels, génère les séances hebdomadaires et ajuste les futures séances selon tes réglages confirmés. Mets le plan en pause pour arrêter les changements automatiques.",
+    "monthDirection": "Orientation de {month}",
+    "exportWindow": "Exporter la plage générée",
+    "snapshotHint": "Ce JSON est un instantané de la plage, pas le plan automatique complet ni un plan importable. Les périodes manquantes restent signalées. Maximum 93 jours.",
+    "windowFrom": "Du",
+    "windowThrough": "Au",
+    "exporting": "Exportation…",
+    "exportFailed": "Échec de l’exportation",
+    "plannedThrough": "Sera généré jusqu’au {date}"
   }
 }

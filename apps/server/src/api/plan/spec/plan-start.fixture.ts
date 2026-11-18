@@ -1,3 +1,5 @@
+import { RollingPlanService } from '../application/rolling-plan.service';
+import { LoadReadoutService } from '@/api/activity/load-readout.service';
 import { PlanWorkoutCommandService } from '../application/plan-workout-command.service';
 import { PlanActivityLinkService } from '../application/plan-activity-link.service';
 import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
@@ -111,6 +113,7 @@ export function planStartFixture(prisma: PrismaClient) {
       prisma as never,
       new UserQueryService(new UserIdentityRepository(prisma as never)),
     ),
+    new RollingPlanService(plans, workouts),
   );
   const proposalRepo = new PlanProposalRepository(prisma as never);
   const proposals = new PlanProposalService(
@@ -139,7 +142,17 @@ export function planStartFixture(prisma: PrismaClient) {
     workouts,
     new PlanActivityLinkRepository(prisma as never),
     new CoachContextRepository(prisma as never),
-    {} as never,
+    new LoadReadoutService(
+      prisma as never,
+      new ActivityReadService(prisma as never),
+      new UserQueryService(new UserIdentityRepository(prisma as never)),
+      new UserAnalysisConfigService(
+        prisma as never,
+        new UserQueryService(new UserIdentityRepository(prisma as never)),
+      ),
+    ),
+    undefined,
+    new ActivityReadService(prisma as never),
   );
   return { starts, service, write, context, proposals, apply, users, query };
 }

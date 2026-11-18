@@ -62,7 +62,7 @@ export class CoachContextService {
 
     const patch: Record<string, unknown> = {};
     if (args.startDate && !existing.startDate) patch.startDate = args.startDate;
-    if (args.endDate) patch.endDate = args.endDate;
+    if (args.endDate !== undefined) patch.endDate = args.endDate;
     if (args.status && existing.status !== args.status) {
       patch.status = args.status;
     }

@@ -6509,5 +6509,29 @@
     "loadFailed": "会話を読み込めませんでした。再試行してください。",
     "activePlanConversation": "プランは開始済みです。今後のトレーニングについて引き続き相談できます。",
     "activePlanCalendar": "現在のプランのカレンダー"
+  },
+  "RollingPlan": {
+    "title": "継続トレーニングプラン",
+    "description": "目標、時間、トレーニング状況に合わせて自動で計画し、継続的に調整します。",
+    "generatedThrough": "{date} まで生成済み",
+    "notGenerated": "まだ生成されていません",
+    "titleLabel": "プラン名",
+    "goalLabel": "トレーニング目標",
+    "create": "下書きを作成",
+    "creating": "作成中…",
+    "failed": "プランを作成できませんでした",
+    "coverageLabel": "日付範囲の予定",
+    "currentWeek": "第 {week} 週",
+    "shareHint": "共有には、生成済みの日付範囲を明示的に選択する必要があります。継続プラン全体の共有には対応していません。",
+    "created": "下書きを保存しました。コーチとの会話で開始してください。",
+    "automaticScope": "確認済みの設定範囲内で月間目標の計画、週間メニューの生成、今後のメニュー調整を自動で行います。プランを一時停止すると自動変更が止まります。",
+    "monthDirection": "{month} の方針",
+    "exportWindow": "生成済み日付範囲をエクスポート",
+    "snapshotHint": "このJSONは選択した期間のスナップショットであり、自動プラン全体ではなく、プランとしてインポートできません。未生成の期間は明示されます。最大93日です。",
+    "windowFrom": "開始日",
+    "windowThrough": "終了日",
+    "exporting": "エクスポート中…",
+    "exportFailed": "エクスポートに失敗しました",
+    "plannedThrough": "確認後に {date} まで生成"
   }
 }
