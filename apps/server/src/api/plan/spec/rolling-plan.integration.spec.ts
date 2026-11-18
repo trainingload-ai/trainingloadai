@@ -1124,7 +1124,10 @@ describe('continuous training / PostgreSQL', () => {
           periodWeeks: null,
         },
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('t_plan_mode_period');
+    // PGlite can close the rejected-query socket; read back through a fresh connection.
+    await prisma.$disconnect();
+    await prisma.$connect();
     expect(await prisma.plan.count()).toBe(0);
   });
 });
