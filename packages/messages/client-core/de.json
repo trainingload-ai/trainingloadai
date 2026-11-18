@@ -471,7 +471,6 @@
       "creating": "Speichern…",
       "createFailed": "Der Plan konnte nicht gespeichert werden. Der Entwurf bleibt erhalten. Bitte versuchen Sie es erneut.",
       "saveErrors": {
-        "tooLarge": "Dieser Plan überschreitet die aktuelle Speichergrenze. Der Entwurf bleibt erhalten; bitte wenden Sie sich an den Support.",
         "validation": "Der Plan hat die Prüfung nicht bestanden. Prüfen Sie die Einheiten und versuchen Sie es erneut. Der Entwurf bleibt erhalten.",
         "network": "Es ist unklar, ob der Plan gespeichert wurde. Prüfen Sie zuerst die Planbibliothek, um Duplikate zu vermeiden.",
         "service": "Speichern ist vorübergehend nicht möglich. Versuchen Sie es später erneut. Der Entwurf bleibt erhalten.",
@@ -6478,5 +6477,6 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  }
+  },
+  "ApiErrors": {"payloadTooLarge": "Die übermittelten Inhalte überschreiten die Größenbeschränkung. Reduzieren Sie den Inhalt oder teilen Sie ihn auf und versuchen Sie es erneut."}
 }

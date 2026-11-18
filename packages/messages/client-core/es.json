@@ -471,7 +471,6 @@
       "creating": "Ahorro…",
       "createFailed": "No se pudo guardar el plan. El borrador se conserva; vuelve a intentarlo.",
       "saveErrors": {
-        "tooLarge": "El plan supera el límite actual de guardado. El borrador se conserva; contacta con soporte.",
         "validation": "El plan no superó la validación. Revisa las sesiones y vuelve a intentarlo; el borrador se conserva.",
         "network": "No se pudo confirmar si el plan se guardó. Revisa tu biblioteca de planes antes de guardarlo de nuevo para evitar duplicados.",
         "service": "No se puede guardar en este momento. Inténtalo más tarde; el borrador se conserva.",
@@ -6478,5 +6477,6 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  }
+  },
+  "ApiErrors": {"payloadTooLarge": "El contenido enviado supera el límite de tamaño. Redúcelo o envíalo en partes más pequeñas e inténtalo de nuevo."}
 }

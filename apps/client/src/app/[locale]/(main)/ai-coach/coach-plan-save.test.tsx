@@ -45,7 +45,7 @@ vi.mock("./cards/MutationAppliedCard", () => ({
   MutationAppliedCard: () => null,
 }));
 const draft = {
-  title: "Retained running plan",
+  title: "测试训练计划",
   periodWeeks: 1,
   workouts: [
     {
@@ -103,7 +103,9 @@ describe("coach plan save failure through the actual mutation and API", () => {
         }),
       );
       expect(await screen.findByRole("status")).toHaveTextContent(
-        messages.AiCoachPage.planDraft.saveErrors[key],
+        key === "tooLarge"
+          ? messages.ApiErrors.payloadTooLarge
+          : messages.AiCoachPage.planDraft.saveErrors[key],
       );
       expect(screen.getByText(draft.title)).toBeVisible();
       expect(runtime.append).not.toHaveBeenCalled();
@@ -134,13 +136,11 @@ describe("coach plan save failure through the actual mutation and API", () => {
     },
   );
   it("does not recreate a saved plan when the conversation receipt fails", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue(
-        new Response(JSON.stringify({ data: { plan: { id: "saved-plan" } } }), {
-          status: 201,
-        }),
-      );
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: { plan: { id: "saved-plan" } } }), {
+        status: 201,
+      }),
+    );
     vi.stubGlobal("fetch", fetchMock);
     runtime.append.mockRejectedValueOnce(new Error("receipt unavailable"));
     const queryClient = new QueryClient({

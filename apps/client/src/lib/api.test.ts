@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { apiFetch, parseDownloadFilename } from "./api";
+import messages from "../../../../packages/messages/client-core/zh.json";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -23,6 +24,30 @@ describe("parseDownloadFilename", () => {
 });
 
 describe("apiFetch error presentation metadata", () => {
+  it.each(["/plans", "/routes", "/account/profile"])(
+    "normalizes an HTML 413 on %s with the common localized message",
+    async (url) => {
+      window.history.replaceState({}, "", "/zh/account");
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockResolvedValue(
+            new Response("<html>Payload Too Large</html>", {
+              status: 413,
+              headers: { "content-type": "text/html" },
+            }),
+          ),
+      );
+      await expect(
+        apiFetch(url, { method: "POST", body: "{}" }),
+      ).rejects.toMatchObject({
+        status: 413,
+        message: messages.ApiErrors.payloadTooLarge,
+      });
+      window.history.replaceState({}, "", "/");
+    },
+  );
   it("returns successful raw JSON for operational endpoints", async () => {
     vi.stubGlobal(
       "fetch",
@@ -57,9 +82,7 @@ describe("apiFetch error presentation metadata", () => {
       ),
     );
 
-    await expect(
-      apiFetch("/ai/operations/action-1"),
-    ).rejects.toMatchObject({
+    await expect(apiFetch("/ai/operations/action-1")).rejects.toMatchObject({
       status: 409,
       errorCode: "AI_OPERATION_SETTLEMENT_PENDING",
       data: { actionId: "action-1" },

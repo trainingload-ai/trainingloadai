@@ -130,6 +130,7 @@ function CoachV2AssistantCardsInner({
   const [createdPlanId, setCreatedPlanId] = useState<string | null>(null);
   const tq = useTranslations("AiCoachPage.questions");
   const tpd = useTranslations("AiCoachPage.planDraft");
+  const tApiErrors = useTranslations("ApiErrors");
   const twa = useTranslations("AiCoachPage.workoutAdjustment");
   const td = useTranslations("AiCoachPage.decision");
 
@@ -460,7 +461,9 @@ function CoachV2AssistantCardsInner({
                 role="status"
                 className="text-sm text-destructive"
               >
-                {tpd(`saveErrors.${planSaveError}`)}
+                {planSaveError === "tooLarge"
+                  ? tApiErrors("payloadTooLarge")
+                  : tpd(`saveErrors.${planSaveError}`)}
               </p>
             ) : null}
             {planSaveError === "network" || planSaveError === "receipt" ? (

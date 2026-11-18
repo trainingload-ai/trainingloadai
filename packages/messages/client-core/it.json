@@ -471,7 +471,6 @@
       "creating": "Risparmio…",
       "createFailed": "Impossibile salvare il piano. La bozza è conservata; riprova.",
       "saveErrors": {
-        "tooLarge": "Il piano supera il limite attuale di salvataggio. La bozza è conservata; contatta l'assistenza.",
         "validation": "Il piano non ha superato la convalida. Controlla le sessioni e riprova; la bozza è conservata.",
         "network": "Non è possibile confermare se il piano sia stato salvato. Controlla la raccolta dei piani prima di salvare di nuovo per evitare duplicati.",
         "service": "Il salvataggio è temporaneamente non disponibile. Riprova più tardi; la bozza è conservata.",
@@ -6478,5 +6477,6 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  }
+  },
+  "ApiErrors": {"payloadTooLarge": "Il contenuto inviato supera il limite di dimensione. Riducilo o invialo in parti più piccole e riprova."}
 }

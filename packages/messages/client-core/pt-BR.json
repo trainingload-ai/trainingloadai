@@ -471,7 +471,6 @@
       "creating": "Salvando…",
       "createFailed": "Não foi possível salvar o plano. O rascunho foi mantido; tente novamente.",
       "saveErrors": {
-        "tooLarge": "O plano excede o limite atual de salvamento. O rascunho foi mantido; entre em contato com o suporte.",
         "validation": "O plano não passou na validação. Confira as sessões e tente novamente; o rascunho foi mantido.",
         "network": "Não foi possível confirmar se o plano foi salvo. Confira a biblioteca de planos antes de salvar novamente para evitar duplicatas.",
         "service": "Não é possível salvar no momento. Tente mais tarde; o rascunho foi mantido.",
@@ -6478,5 +6477,6 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  }
+  },
+  "ApiErrors": {"payloadTooLarge": "O conteúdo enviado excede o limite de tamanho. Reduza-o ou envie em partes menores e tente novamente."}
 }

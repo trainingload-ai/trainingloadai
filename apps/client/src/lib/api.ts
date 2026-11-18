@@ -52,6 +52,23 @@ const getClientLang = (): string => {
   return isSupportedLocale(firstSeg) ? firstSeg : "en";
 };
 
+async function httpErrorMessage(
+  status: number,
+  fallback: string,
+): Promise<string> {
+  if (status !== 413) return fallback;
+  try {
+    const messages = (
+      await import(
+        `../../../../packages/messages/client-core/${getClientLang()}.json`
+      )
+    ).default;
+    return messages.ApiErrors.payloadTooLarge;
+  } catch {
+    return "The submitted content exceeds the size limit.";
+  }
+}
+
 function getApiFetchBaseUrl(): string {
   // getApiBaseUrl() selects the private/public server origin during SSR and
   // the same-origin Next.js BFF in a browser.
@@ -111,7 +128,10 @@ export async function apiFetchErrorFromResponse(
   const errorCode = envelopeErrorCode(envelope);
   const consentRequired = notifyAiDataConsentRequired(errorCode);
   return new ApiFetchError(
-    envelope.message || `Request failed (${response.status})`,
+    await httpErrorMessage(
+      response.status,
+      envelope.message || `Request failed (${response.status})`,
+    ),
     response.status,
     errorCode,
     envelope.data,
@@ -206,7 +226,7 @@ export const apiFetch = async <T = unknown>(
     const errorCode = envelopeErrorCode(res);
     const consentRequired = notifyAiDataConsentRequired(errorCode);
     throw new ApiFetchError(
-      msg,
+      await httpErrorMessage(response.status, msg),
       response.status,
       errorCode,
       res.data,
@@ -252,7 +272,10 @@ export const apiDownloadFetch = async (url: string, options?: RequestInit) => {
   if (!response.ok) {
     const res = await readApiEnvelope<unknown>(response);
     throw new ApiFetchError(
-      res.message || `API request failed (${response.status})`,
+      await httpErrorMessage(
+        response.status,
+        res.message || `API request failed (${response.status})`,
+      ),
       response.status,
       envelopeErrorCode(res),
       res.data,

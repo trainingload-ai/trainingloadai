@@ -101,6 +101,7 @@ export default defineConfig({
       "src/components/ui/date-range-picker.test.tsx",
       "src/lib/ai-operation-errors.test.ts",
       "src/lib/api.test.ts",
+      "src/lib/api-error-notifier.test.ts",
       "src/lib/bff-upstream-headers.test.ts",
       "src/lib/proxy-upstream.test.ts",
       "src/lib/config.test.ts",

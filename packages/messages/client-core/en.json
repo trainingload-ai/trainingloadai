@@ -579,7 +579,6 @@
       "creating": "Saving…",
       "createFailed": "The plan could not be saved. Your draft is retained; please try again.",
       "saveErrors": {
-        "tooLarge": "This plan exceeds the current save limit. Your draft is retained; please contact support.",
         "validation": "The plan did not pass validation. Check the sessions and try again; your draft is retained.",
         "network": "We could not confirm whether the plan was saved. Check your plan library before saving again to avoid duplicates.",
         "service": "Saving is temporarily unavailable. Try again later; your draft is retained.",
@@ -7135,5 +7134,6 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  }
+  },
+  "ApiErrors": {"payloadTooLarge": "The submitted content exceeds the size limit. Reduce it or submit it in smaller parts and try again."}
 }

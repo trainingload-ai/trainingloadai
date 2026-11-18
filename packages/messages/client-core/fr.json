@@ -471,7 +471,6 @@
       "creating": "Économie…",
       "createFailed": "Le plan n'a pas pu être enregistré. Le brouillon est conservé ; veuillez réessayer.",
       "saveErrors": {
-        "tooLarge": "Ce plan dépasse la limite actuelle d'enregistrement. Le brouillon est conservé ; contactez l'assistance.",
         "validation": "Le plan n'a pas passé la validation. Vérifiez les séances et réessayez ; le brouillon est conservé.",
         "network": "Impossible de confirmer si le plan a été enregistré. Consultez la bibliothèque de plans avant de réessayer pour éviter les doublons.",
         "service": "L'enregistrement est temporairement indisponible. Réessayez plus tard ; le brouillon est conservé.",
@@ -6478,5 +6477,6 @@
       "tsb": "Form"
     },
     "metricSwitch": "Select metric"
-  }
+  },
+  "ApiErrors": {"payloadTooLarge": "Le contenu envoyé dépasse la taille autorisée. Réduisez-le ou envoyez-le en plusieurs parties, puis réessayez."}
 }

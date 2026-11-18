@@ -26,7 +26,7 @@
     "track_file_gpx_coordinates_required": "此活動沒有可用的 GPS 座標，無法產生 GPX 軌跡。室內訓練請保留原始 FIT 檔案，或嘗試轉換為 TCX。",
     "internal": "系統發生錯誤，請稍後再試。",
     "request_failed": "請求失敗",
-    "payload_too_large": "上傳的檔案過大。",
+    "payload_too_large": "提交的內容超出大小限制。請減少內容或分批提交後重試。",
     "invalid_request": "請求參數不合法",
     "track_file_required": "請先選擇一個檔案。",
     "track_file_single_required": "每次只能上傳一個檔案。",
