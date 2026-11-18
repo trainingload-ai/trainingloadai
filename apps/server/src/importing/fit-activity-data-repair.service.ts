@@ -428,7 +428,9 @@ export class FitActivityDataRepairService {
                     }
                   ).strengthSets.filter(
                     (set) =>
-                      String(set.setType ?? 'UNKNOWN').toUpperCase() !== 'REST',
+                      String(set.setType ?? '')
+                        .trim()
+                        .toUpperCase() === 'ACTIVE',
                   ).length
                 : 0,
             }),

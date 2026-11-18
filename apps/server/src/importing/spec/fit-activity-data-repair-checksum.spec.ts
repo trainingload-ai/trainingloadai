@@ -204,6 +204,8 @@ describe('repair scanner discovery checksum compatibility', () => {
         activity: {
           activities: times.map((time, index) => ({
             startTime: time,
+            strengthSets:
+              damagedTail && index === 1 ? [{}, { setType: 'REST' }] : [],
             laps: [
               {
                 records: [
