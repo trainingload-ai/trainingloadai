@@ -2743,18 +2743,18 @@ export class PlanWriteSupport {
       const constraints = this.parseStoredScheduleConstraints(
         plan.generationMetadata,
       );
-      const today = new Intl.DateTimeFormat('en-CA', {
-        timeZone:
+      let start =
+        plan.status === 'PAUSED' ? plan.startDate : this.parseDate(startDate);
+      if (plan.status === 'DRAFT' && !start) {
+        const calendarTimeZone =
           constraints?.calendarTimeZone ??
-          (await this.userService.getPreferredTimezone(userId)),
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).format(new Date());
-      const start =
-        plan.status === 'PAUSED'
-          ? plan.startDate
-          : this.parseDate(startDate ?? today);
+          (await this.userService.getPreferredTimezone(userId, tx)) ??
+          'UTC';
+        const today = activityCalendarYmdInZone(new Date(), calendarTimeZone);
+        if (!today)
+          throw new UnprocessableEntityException('Invalid calendar time zone');
+        start = scheduledDateFromCalendar(today);
+      }
       if (!start)
         throw new UnprocessableEntityException('Plan start date is required');
       const candidates = await this.workouts.findMany(

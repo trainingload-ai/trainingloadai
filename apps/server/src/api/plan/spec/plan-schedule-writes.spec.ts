@@ -37,7 +37,11 @@ const dto = (dayIndex: number) => ({
 });
 
 /** The in-memory database boundary rolls back transactions; all write and calendar logic is real. */
-function setup(status = 'DRAFT', useConstraints = true) {
+function setup(
+  status = 'DRAFT',
+  useConstraints = true,
+  timezone: string | null = 'Asia/Shanghai',
+) {
   let plan: any = {
     id: 'p',
     userId: 'u',
@@ -130,7 +134,7 @@ function setup(status = 'DRAFT', useConstraints = true) {
       deleteSteps: async () => undefined,
       updateManyMappings: async () => undefined,
     },
-    userService: { getPreferredTimezone: async () => 'Asia/Shanghai' },
+    userService: { getPreferredTimezone: async () => timezone },
     workoutMutability: new PlanWorkoutMutabilityPolicy(),
     planLoadEstimator: {
       applyForPlan: async () => undefined,
@@ -146,6 +150,21 @@ function setup(status = 'DRAFT', useConstraints = true) {
 }
 
 describe('plan calendar write boundaries', () => {
+  it('uses UTC calendar dates for a new athlete without a preferred time zone', async () => {
+    const s = setup('DRAFT', false, null);
+    const result = await s.service.activatePlan('u', 'p');
+    expect(result.plan?.startDate).toBe(new Date().toISOString().slice(0, 10));
+  });
+  it('uses an explicit date without computing today for an athlete without a time zone', async () => {
+    const s = setup('DRAFT', false, null);
+    const result = await s.service.activatePlan('u', 'p', '2026-11-22');
+    expect(result.plan?.startDate).toBe('2026-11-22');
+  });
+  it('resumes the original start date when an athlete has no preferred time zone', async () => {
+    const s = setup('PAUSED', false, null);
+    const result = await s.service.activatePlan('u', 'p');
+    expect(result.plan?.startDate).toBe('2099-11-22');
+  });
   it('rejects Sunday activation when a Monday draft would put sessions on Wednesday rest', async () => {
     const s = setup();
     await expect(
