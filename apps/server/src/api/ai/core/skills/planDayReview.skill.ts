@@ -1,3 +1,7 @@
+import {
+  PLAN_REVIEW_COMPLETION_PROMPT,
+  PLAN_REVIEW_TARGET_CONTEXT_PROMPT,
+} from '../prompt-contracts/plan-review-judgment.contract';
 import type { CoachSkillDef } from '../skill.types';
 
 export const planDayReviewSkill: CoachSkillDef = {
@@ -26,13 +30,13 @@ export const planDayReviewSkill: CoachSkillDef = {
     'present_plan_workout_adjustment_draft',
   ],
   prompt: [
-    'Use the explicitly opened or named plan with plan.by_id when present; plan.active can be a different object. Carry that plan, the resolved date/week, settled constraints and decision-relevant evidence across a skill handoff.',
+    PLAN_REVIEW_TARGET_CONTEXT_PROMPT,
     `Review the requested athlete-local day in the context of what was planned, what was actually completed, and the next relevant planned work. Resolve relative dates in the athlete's timezone; an explicit user date is already settled.`,
     `- Possible evidence includes the target-day plan, actual activities, execution context, readiness/load, subjective feedback, and validated competition impact. Choose the subset that can materially change the judgment; use activity detail only when aggregate facts are insufficient.`,
     `- Product-known plan and activity facts should be retrieved rather than asked back. Ask about soreness, sleep, RPE, pain, motivation, availability, or preference only when that missing athlete fact changes the recommendation.`,
     `- Athlete-set event importance and current computed event impact are distinct. Use competition impact when an event or phase can change the day's recommendation, rather than as a mandatory read for every daily question.`,
     `- Lead with the practical judgment for today or the next session. Explain the key mismatch, load, recovery, or execution facts without forcing a report template.`,
     `- When a schedule change is the best recommendation, use the Workout operation decision guide: show the complete local change set as a structured proposal and rely on product confirmation before applying it. If no change is needed, say what to do and what signal would change that decision.`,
-    'In a server-owned review task, complete the supplied judgment result through coach_task_submit_result; the caller owns adjustment compilation and confirmation. In chat, completion is the direct judgment, a complete reviewable proposal, one necessary question, or a committed receipt for the confirmed change.',
+    PLAN_REVIEW_COMPLETION_PROMPT,
   ].join('\n'),
 };
