@@ -767,6 +767,9 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     await expect(
       store.begin({ ...args, command: startArgs().command }),
     ).rejects.toThrow();
+    // Constraint failures can close PGlite Socket's protocol connection.
+    await prisma.$disconnect();
+    await prisma.$connect();
     const source = await prisma.coachRunAttempt.findUnique({
       where: { id: handle.projector.run.attemptId },
     });
