@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "releaseVersion": "1.1.26",
+  "releaseVersion": "1.1.27",
   "releaseKind": "self-host-v1-patch",
   "upgrade": {
     "supportedSourceVersions": [
@@ -12,7 +12,8 @@
       "1.1.21",
       "1.1.22",
       "1.1.24",
-      "1.1.25"
+      "1.1.25",
+      "1.1.26"
     ],
     "applicationRollbackTo": [],
     "backupRequired": true
@@ -139,43 +140,43 @@
       },
       "0030_independent_workout_activity_links": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0031_workout_matching_review": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0032_import_source_revision_handoff": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0033_today_suggestion_generation": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0034_coach_fact_scope": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0035_coach_context_timezone": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0036_health_daily_fact_revisions": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0037_plan_start_conversation": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0038_plan_schedule": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       },
       "0039_rolling_plan": {
         "phase": "expand",
-        "releaseVersion": "1.1.26"
+        "releaseVersion": "1.1.27"
       }
     }
   }
