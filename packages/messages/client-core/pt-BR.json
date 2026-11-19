@@ -6407,6 +6407,11 @@
       "REMOTE_DELETED": "Remoção remota confirmada"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "Tempo na cama",
+    "unclassifiedSleep": "Sono sem estágio identificado",
+    "unclassified": "Sem estágio"
+  },
   "HealthRecords": {
     "title": "Health records",
     "description": "Measurements retain their source, local date and units. Missing values remain blank.",

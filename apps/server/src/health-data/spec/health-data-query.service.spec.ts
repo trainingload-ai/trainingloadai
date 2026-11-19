@@ -278,6 +278,49 @@ describe('HealthDataQueryService provider selection', () => {
     );
   });
 
+  it('selects the requested HRV type for both days and reads matching storage', async () => {
+    const { prisma, seriesStorage, service } = createService();
+    prisma.userDailyHealthMetric.findMany.mockResolvedValue([
+      {
+        metricType: 'HRV_RMSSD_MS',
+        selectedProvider: 'GARMIN',
+        value: 52,
+        unit: 'ms',
+      },
+      {
+        metricType: 'HRV_SDNN_MS',
+        selectedProvider: 'APPLE_HEALTH',
+        value: 40,
+        unit: 'ms',
+      },
+    ]);
+    seriesStorage.readMetricRows.mockResolvedValue([
+      { timestampUtcMs: Date.parse('2026-07-18T04:00:00Z'), value: 41 },
+    ]);
+
+    const result = await service.getIntraday(
+      'user-1',
+      'hrv',
+      '2026-07-18',
+      'HRV_SDNN_MS',
+    );
+
+    expect(seriesStorage.readMetricRows).toHaveBeenCalledTimes(2);
+    for (const [query] of seriesStorage.readMetricRows.mock.calls) {
+      expect(query).toMatchObject({
+        metricCode: 'hrv_sdnn_ms',
+        provider: 'APPLE_HEALTH',
+      });
+    }
+    expect(result).toMatchObject({
+      hrvType: 'HRV_SDNN_MS',
+      current: [{ value: 41, provider: 'APPLE_HEALTH' }],
+    });
+    await expect(
+      service.getIntraday('user-1', 'hrv', '2026-07-18', 'bad'),
+    ).rejects.toThrow('Unsupported HRV metric type');
+  });
+
   it('filters sleep sessions by the provider selected for that date', async () => {
     const { prisma, service } = createService();
     prisma.userDailyHealthMetric.findMany.mockImplementation(async (args) =>
@@ -324,7 +367,11 @@ describe('HealthDataQueryService provider selection', () => {
     const result = await service.getIntraday('user-1', 'sleep', '2026-07-18');
 
     expect(result.current).toEqual([
-      expect.objectContaining({ provider: 'APPLE_HEALTH', stage: 'sleep' }),
+      expect.objectContaining({
+        provider: 'APPLE_HEALTH',
+        stage: 'sleep',
+        summaryOnly: true,
+      }),
     ]);
     expect(result.current).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ provider: 'GARMIN' })]),

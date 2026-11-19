@@ -76,4 +76,57 @@ describe('TodaySuggestionAgentService', () => {
       '"workoutProposal"',
     );
   });
+  it('holds the next session fixed when replaying optional recovery evidence', async () => {
+    const runBackgroundCoachTask = jest.fn(
+      async (_input: { instructions: string }) => ({
+        result: {},
+        provider: 'test',
+        model: 'test-model',
+      }),
+    );
+    const service = new TodaySuggestionAgentService({
+      runBackgroundCoachTask,
+    } as never);
+    const workout = { id: 'intervals-1', name: 'Evening intervals' };
+    const projection = {
+      userId: 'user-1',
+      locale: 'en',
+      date: '2026-11-19',
+      lightContext: { todayWorkouts: [workout] },
+      todayWorkouts: [workout],
+      requiredToolNames: [],
+    } as unknown as TodaySuggestionConstraintProjection;
+    const health = {
+      observations: [
+        {
+          key: 'sleep:last-night',
+          date: '2026-11-19',
+          metric: 'SLEEP_ASLEEP_SECONDS',
+          provider: 'GARMIN',
+          value: 14400,
+          readiness: {
+            completePeriod: 'UNVERIFIED',
+            permitsCompleteNightClaim: false,
+          },
+        },
+      ],
+    };
+    await service.run({ projection });
+    await service.run({
+      projection: {
+        ...projection,
+        lightContext: { ...projection.lightContext, sharedFacts: { health } },
+      },
+    });
+    const [withoutHealth, withHealth] = runBackgroundCoachTask.mock.calls.map(
+      ([request]) =>
+        JSON.parse(
+          request.instructions
+            .split('SERVER_PROJECTION_BEGIN\n')[1]
+            .split('\nSERVER_PROJECTION_END')[0],
+        ),
+    );
+    expect(withoutHealth).toEqual({ todayWorkouts: [workout] });
+    expect(withHealth).toEqual({ ...withoutHealth, sharedFacts: { health } });
+  });
 });

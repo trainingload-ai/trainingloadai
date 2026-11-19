@@ -6406,6 +6406,11 @@
       "REMOTE_DELETED": "원격 삭제 확인됨"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "침대에 머문 시간",
+    "unclassifiedSleep": "단계 미분류 수면",
+    "unclassified": "미분류"
+  },
   "HealthRecords": {
     "title": "Health records",
     "description": "Measurements retain their source, local date and units. Missing values remain blank.",
