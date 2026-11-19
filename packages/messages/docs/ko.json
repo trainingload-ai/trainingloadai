@@ -69,6 +69,29 @@
       "cta": "무료로 시작"
     }
   },
+  "productReleases": {
+    "homeTitle": "데스크톱 앱",
+    "download": {
+      "heading": "개인용 버전 다운로드",
+      "description": "Mac에서 Trainingload.ai를 사용하고 운동 데이터를 해당 기기에 저장하세요."
+    },
+    "history": {
+      "heading": "릴리스 노트",
+      "description": "macOS 개인용 버전의 최근 업데이트입니다. 발췌문은 원문 언어로 표시됩니다.",
+      "empty": "아직 공개 릴리스가 없습니다."
+    },
+    "macos": {
+      "title": "macOS 개인용",
+      "requirements": "Apple Silicon Mac(arm64)이 필요합니다.",
+      "download": "macOS DMG 다운로드",
+      "downloadLatest": "최신 버전 다운로드",
+      "noDownload": "macOS 설치 파일은 아직 공개되지 않았습니다."
+    },
+    "version": "버전 {version}",
+    "versionNotes": "GitHub에서 {edition} v{version} 보기",
+    "githubHistory": "GitHub 릴리스 기록",
+    "feedUnavailable": "릴리스 정보를 일시적으로 불러올 수 없습니다. GitHub에서 릴리스를 확인할 수 있습니다."
+  },
   "nav": {
     "blog": "블로그",
     "aiPlans": "AI Coach",

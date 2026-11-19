@@ -55,6 +55,29 @@
       "cta": "無料で始める"
     }
   },
+  "productReleases": {
+    "homeTitle": "デスクトップアプリ",
+    "download": {
+      "heading": "個人版をダウンロード",
+      "description": "Mac で Trainingload.ai を使い、トレーニングデータをその端末に保存できます。"
+    },
+    "history": {
+      "heading": "リリースノート",
+      "description": "macOS 個人版の最近の更新です。抜粋は原文の言語で表示されます。",
+      "empty": "公開リリースはまだありません。"
+    },
+    "macos": {
+      "title": "macOS 個人版",
+      "requirements": "Appleシリコン搭載の Mac（arm64）が必要です。",
+      "download": "macOS 用 DMG をダウンロード",
+      "downloadLatest": "最新版をダウンロード",
+      "noDownload": "macOS 用インストーラーはまだ公開されていません。"
+    },
+    "version": "バージョン {version}",
+    "versionNotes": "GitHub で {edition} v{version} を見る",
+    "githubHistory": "GitHub のリリース履歴",
+    "feedUnavailable": "リリース情報を一時的に取得できません。GitHub で公開状況を確認できます。"
+  },
   "nav": {
     "blog": "ブログ",
     "aiPlans": "AI コーチ",

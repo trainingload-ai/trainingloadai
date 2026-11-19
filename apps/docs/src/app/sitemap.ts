@@ -334,6 +334,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/tools",
     "/free-ai-workout-review",
     "/pricing",
+    "/download",
+    "/releases",
     "/ftp-calculator",
     "/critical-power-calculator",
     "/lactate-threshold-calculator",

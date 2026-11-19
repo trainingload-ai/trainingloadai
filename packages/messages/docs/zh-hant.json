@@ -55,6 +55,29 @@
       "cta": "免費開始"
     }
   },
+  "productReleases": {
+    "homeTitle": "桌面應用程式",
+    "download": {
+      "heading": "下載個人版",
+      "description": "在 Mac 上執行 Trainingload.ai，讓訓練資料保存在這部裝置上。"
+    },
+    "history": {
+      "heading": "版本更新",
+      "description": "查看 macOS 個人版近期的更新。摘要保留發行原文的語言。",
+      "empty": "目前沒有公開版本。"
+    },
+    "macos": {
+      "title": "macOS 個人版",
+      "requirements": "需要搭載 Apple 晶片的 Mac（arm64）。",
+      "download": "下載 macOS 安裝套件（DMG）",
+      "downloadLatest": "下載最新版",
+      "noDownload": "macOS 安裝套件尚未公開發行。"
+    },
+    "version": "版本 {version}",
+    "versionNotes": "在 GitHub 查看 {edition} v{version}",
+    "githubHistory": "查看 GitHub 發行記錄",
+    "feedUnavailable": "暫時無法讀取版本資訊。你仍可前往 GitHub 查看發行記錄。"
+  },
   "nav": {
     "features": "功能",
     "trainingLoad": "訓練負荷",

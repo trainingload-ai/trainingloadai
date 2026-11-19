@@ -69,6 +69,29 @@
       "cta": "Kostenlos starten"
     }
   },
+  "productReleases": {
+    "homeTitle": "Desktop-App",
+    "download": {
+      "heading": "Persönliche Edition herunterladen",
+      "description": "Nutze Trainingload.ai auf deinem Mac und speichere deine Trainingsdaten auf diesem Gerät."
+    },
+    "history": {
+      "heading": "Versionshinweise",
+      "description": "Aktuelle Änderungen für die macOS-App. Auszüge erscheinen in der Originalsprache.",
+      "empty": "Es gibt noch keine öffentlichen Versionen."
+    },
+    "macos": {
+      "title": "macOS-App",
+      "requirements": "Erfordert einen Mac mit Apple Silicon (arm64).",
+      "download": "DMG für macOS herunterladen",
+      "downloadLatest": "Neueste Version herunterladen",
+      "noDownload": "Das macOS-Installationspaket ist noch nicht öffentlich verfügbar."
+    },
+    "version": "Version {version}",
+    "versionNotes": "{edition} v{version} auf GitHub",
+    "githubHistory": "Versionsverlauf auf GitHub",
+    "feedUnavailable": "Versionsinformationen sind vorübergehend nicht verfügbar. Die Releases sind weiterhin auf GitHub einsehbar."
+  },
   "nav": {
     "blog": "Blog",
     "tools": "Werkzeuge",

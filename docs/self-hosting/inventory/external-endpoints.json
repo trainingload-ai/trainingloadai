@@ -222,6 +222,20 @@
       ]
     },
     {
+      "host": "api.github.com",
+      "url": "https://api.github.com/repos/trainingload-ai/trainingloadai/releases",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/product-releases.ts",
+          "line": 6
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "api.openai.com",
       "url": "https://api.openai.com/v1",
       "references": [
@@ -1183,7 +1197,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/HomeOpenSourceSection.tsx",
-          "line": 6
+          "line": 18
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
@@ -1216,6 +1230,20 @@
       "capability": "auth",
       "owners": [
         "scripts"
+      ]
+    },
+    {
+      "host": "github.com",
+      "url": "https://github.com/trainingload-ai/trainingloadai/releases",
+      "references": [
+        {
+          "file": "apps/docs/src/lib/product-releases.ts",
+          "line": 4
+        }
+      ],
+      "capability": "auth",
+      "owners": [
+        "apps"
       ]
     },
     {
@@ -3449,6 +3477,10 @@
         {
           "file": "apps/docs/src/lib/llm-text.ts",
           "line": 174
+        },
+        {
+          "file": "apps/docs/src/lib/product-release-metadata.ts",
+          "line": 19
         }
       ],
       "capability": "product-internal",

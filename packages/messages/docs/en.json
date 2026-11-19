@@ -62,6 +62,29 @@
       "cta": "Start free"
     }
   },
+  "productReleases": {
+    "homeTitle": "Desktop app",
+    "download": {
+      "heading": "Download the Personal edition",
+      "description": "Run Trainingload.ai on your Mac and keep your training data on that device."
+    },
+    "history": {
+      "heading": "Release notes",
+      "description": "See recent updates for the macOS Personal edition. Excerpts use the original release language.",
+      "empty": "No public releases yet."
+    },
+    "macos": {
+      "title": "macOS Personal",
+      "requirements": "Requires a Mac with Apple Silicon (arm64).",
+      "download": "Download macOS DMG",
+      "downloadLatest": "Download latest",
+      "noDownload": "A public macOS installer is not available yet."
+    },
+    "version": "Version {version}",
+    "versionNotes": "{edition} v{version} on GitHub",
+    "githubHistory": "GitHub release history",
+    "feedUnavailable": "Release information is temporarily unavailable. You can still check GitHub Releases."
+  },
   "nav": {
     "features": "Features",
     "trainingLoad": "Training Load",

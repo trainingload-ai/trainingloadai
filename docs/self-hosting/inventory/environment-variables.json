@@ -4124,6 +4124,10 @@
           "line": 23
         },
         {
+          "file": "apps/docs/src/lib/product-release-metadata.ts",
+          "line": 19
+        },
+        {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
           "line": 14
         },
@@ -4454,6 +4458,10 @@
         {
           "file": "apps/docs/src/lib/posthog-client.ts",
           "line": 13
+        },
+        {
+          "file": "apps/docs/src/lib/product-releases.ts",
+          "line": 33
         },
         {
           "file": "apps/server/src/api/public/workout-review/public-review-config.ts",
