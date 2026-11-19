@@ -7064,6 +7064,11 @@
       "REMOTE_DELETED": "Remote removal confirmed"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "Time in bed",
+    "unclassifiedSleep": "Unclassified sleep",
+    "unclassified": "Unclassified"
+  },
   "HealthRecords": {
     "title": "Health records",
     "description": "Measurements retain their source, local date and units. Missing values remain blank.",

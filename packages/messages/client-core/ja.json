@@ -6406,6 +6406,11 @@
       "REMOTE_DELETED": "リモート削除を確認済み"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "床上時間",
+    "unclassifiedSleep": "睡眠段階未分類",
+    "unclassified": "未分類"
+  },
   "HealthRecords": {
     "title": "Health records",
     "description": "Measurements retain their source, local date and units. Missing values remain blank.",

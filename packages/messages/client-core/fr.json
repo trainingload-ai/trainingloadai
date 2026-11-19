@@ -6407,6 +6407,11 @@
       "REMOTE_DELETED": "Suppression distante confirmée"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "Temps au lit",
+    "unclassifiedSleep": "Sommeil sans stade identifié",
+    "unclassified": "Non classé"
+  },
   "HealthRecords": {
     "title": "Health records",
     "description": "Measurements retain their source, local date and units. Missing values remain blank.",

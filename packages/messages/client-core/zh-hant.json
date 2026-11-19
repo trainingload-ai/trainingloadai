@@ -6504,6 +6504,11 @@
       "REMOTE_DELETED": "已確認遠端移除"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "臥床時間",
+    "unclassifiedSleep": "未分期睡眠",
+    "unclassified": "未分期"
+  },
   "HealthRecords": {
     "title": "健康記錄",
     "description": "保留每筆記錄的來源、本地日期和單位，缺少值不補零。",

@@ -1,3 +1,7 @@
+import {
+  HEALTH_HRV_TYPES,
+  type HealthIntradayMetricKey,
+} from '@shared/health-overview';
 import { consolidateHealthCandidates } from './health-data-ingest.service';
 import { HEALTH_FACT_PROVIDERS } from './health-data-provider-policy.port';
 import {
@@ -86,7 +90,7 @@ const INTRADAY_METRICS = {
 } as const;
 
 /** 支持的日内 API 指标键；`sleep` 会解析规范 session 和 segment。 */
-export type HealthIntradayMetricKey = 'sleep' | keyof typeof INTRADAY_METRICS;
+export type { HealthIntradayMetricKey };
 
 function requestedDate(value: string) {
   const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -660,11 +664,19 @@ export class HealthDataQueryService {
     userId: string,
     key: HealthIntradayMetricKey,
     requestedEndDate?: string,
+    requestedHrvType?: string,
   ) {
-    if (key !== 'sleep' && !(key in INTRADAY_METRICS)) {
+    if (
+      key !== 'sleep' &&
+      !Object.prototype.hasOwnProperty.call(INTRADAY_METRICS, key)
+    ) {
       throw new BadRequestException(`Unsupported health metric: ${key}`);
     }
 
+    const hrvType = HEALTH_HRV_TYPES.find((type) => type === requestedHrvType);
+    if (requestedHrvType !== undefined && (key !== 'hrv' || !hrvType)) {
+      throw new BadRequestException('Unsupported HRV metric type');
+    }
     const currentDate = requestedDate(
       requestedEndDate ?? (await this.athleteClock.todayYmd(userId)),
     );
@@ -763,6 +775,7 @@ export class HealthDataQueryService {
                   endTime: segment.endTime.toISOString(),
                   value: segment.durationSeconds,
                   stage: segment.segmentType,
+                  summaryOnly: false,
                   provider: source.provider,
                 }))
               : [
@@ -771,6 +784,7 @@ export class HealthDataQueryService {
                     endTime: source.endTime.toISOString(),
                     value: source.durationSeconds,
                     stage: 'sleep',
+                    summaryOnly: true,
                     provider: source.provider,
                   },
                 ];
@@ -782,7 +796,11 @@ export class HealthDataQueryService {
           metricType: selected.metricType,
           provider: selected.selectedProvider,
         });
-        return fallback.map((point) => ({ ...point, stage: 'sleep' }));
+        return fallback.map((point) => ({
+          ...point,
+          stage: 'sleep',
+          summaryOnly: true,
+        }));
       };
       const [current, previous] = await Promise.all([
         pointsFor(currentDate),
@@ -803,12 +821,15 @@ export class HealthDataQueryService {
       const selected = await this.selectedDailyMetric(
         userId,
         date,
-        config.dailyTypes,
+        hrvType ? [hrvType] : config.dailyTypes,
       );
       if (!selected?.selectedProvider) return [];
       const rows = await this.seriesStorage.readMetricRows({
         userId,
-        metricCode: config.metricCode,
+        metricCode:
+          selected.metricType === HealthMetricType.HRV_SDNN_MS
+            ? 'hrv_sdnn_ms'
+            : config.metricCode,
         localDates: [date],
         provider: selected.selectedProvider,
       });
@@ -841,6 +862,7 @@ export class HealthDataQueryService {
     ]);
     return {
       key,
+      ...(hrvType ? { hrvType } : {}),
       granularity: 'intraday' as const,
       currentDate: dateKey(currentDate),
       previousDate: dateKey(previousDate),

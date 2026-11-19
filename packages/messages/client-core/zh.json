@@ -7063,6 +7063,11 @@
       "REMOTE_DELETED": "已确认远端移除"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "卧床时间",
+    "unclassifiedSleep": "未分期睡眠",
+    "unclassified": "未分期"
+  },
   "HealthRecords": {
     "title": "健康记录",
     "description": "保留每条记录的来源、本地日期和单位，缺失值不补零。",
