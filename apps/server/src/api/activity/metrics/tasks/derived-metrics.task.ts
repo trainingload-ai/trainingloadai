@@ -31,14 +31,21 @@ export class DerivedMetricsTask implements MetricsTask {
         activity.id,
         activity.sportType || undefined,
       );
-    // 更新对应字段
-    await this.prisma.activity.update({
-      where: { id: activity.id },
-      data: { effectiveDistance, avgLeftRightBalance },
-    });
-    return ctx;
+    return {
+      ...ctx,
+      outputs: {
+        ...ctx.outputs,
+        derivedMetrics: { effectiveDistance, avgLeftRightBalance },
+      },
+    };
   }
   async post(ctx: MetricsContext) {
+    const derived = ctx.outputs.derivedMetrics;
+    if (!derived) return ctx;
+    await (ctx.persistenceTx ?? this.prisma).activity.update({
+      where: { id: ctx.inputs.activity.id },
+      data: derived,
+    });
     return ctx;
   }
 }

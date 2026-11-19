@@ -90,6 +90,7 @@ export class ActivityPeakMetricWriterService {
         });
       }
     } catch (e) {
+      if (tx) throw e;
       this.logger.error(
         `[replacePeakMetrics] 替换峰值指标失败：${
           e instanceof Error ? e.message : String(e)

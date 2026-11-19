@@ -294,6 +294,7 @@ export class PeakPaceTask implements MetricsTask {
         type: PeakType.pace,
         scaleType: ScaleType.DISTANCE,
         windows: out.distanceWindows,
+        tx: ctx.persistenceTx,
       });
     }
 
@@ -305,6 +306,7 @@ export class PeakPaceTask implements MetricsTask {
         type: PeakType.pace,
         scaleType: ScaleType.TIME,
         windows: out.timeWindows,
+        tx: ctx.persistenceTx,
       });
     }
 
@@ -315,6 +317,7 @@ export class PeakPaceTask implements MetricsTask {
         entries: bestDistances,
         targetScaleType: ScaleType.TIME,
         windows: out.timeWindows,
+        tx: ctx.persistenceTx,
       });
     }
 
@@ -325,6 +328,7 @@ export class PeakPaceTask implements MetricsTask {
         entries: bestTimes,
         targetScaleType: ScaleType.DISTANCE,
         windows: out.distanceWindows,
+        tx: ctx.persistenceTx,
       });
     }
 

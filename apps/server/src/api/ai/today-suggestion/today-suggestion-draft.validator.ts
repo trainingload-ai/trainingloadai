@@ -78,7 +78,11 @@ function trainingBasis(value: unknown): TodaySuggestionDraft['trainingBasis'] {
   if (basis?.kind === 'ADDITIONAL')
     return {
       kind: 'ADDITIONAL',
-      reason: requiredText(basis.reason, 240, 'TRAINING_BASIS_REASON'),
+      reason: requiredText(
+        typeof basis.reason === 'string' ? basis.reason : undefined,
+        240,
+        'TRAINING_BASIS_REASON',
+      ),
     };
   throw new Error('TODAY_SUGGESTION_INVALID_TRAINING_BASIS');
 }
@@ -180,25 +184,12 @@ export function validateTodaySuggestionDraftForProjection(
   const scheduledWorkout = todaySuggestionScheduledWorkout(projection, draft);
   if (draft.recommendation.kind === 'TRAIN') {
     const basis = draft.trainingBasis;
-    const moved = projection.todayWorkouts.some(
-      (workout) => workout.status === 'MOVED',
-    );
-    const remaining = projection.todayWorkouts.filter((workout) =>
-      ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
-    );
-    if ((moved || remaining.length > 1) && !basis)
-      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
-    if (basis?.kind === 'SCHEDULED') {
-      if (!scheduledWorkout)
-        throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
-    }
     if (
-      basis?.kind === 'ADDITIONAL' &&
-      (!draft.summary.includes(basis.reason) ||
-        draft.preferredIntent !== 'CREATE_TODAY_WORKOUT' ||
-        [draft.preferredIntent, ...draft.secondaryIntents].includes(
-          'OPEN_TODAY_WORKOUT',
-        ))
+      !basis ||
+      (basis.kind === 'SCHEDULED' && !scheduledWorkout) ||
+      (basis.kind === 'ADDITIONAL' &&
+        (draft.preferredIntent !== 'CREATE_TODAY_WORKOUT' ||
+          draft.secondaryIntents.includes('OPEN_TODAY_WORKOUT')))
     )
       throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
   }

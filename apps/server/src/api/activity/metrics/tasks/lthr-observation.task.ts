@@ -78,11 +78,10 @@ export class LthrObservationTask implements MetricsTask {
     const observation = ctx.outputs.lthrObservation;
     const { activity, userId } = ctx.inputs;
     if (!userId || !activity.id) return ctx;
-    await this.persistence.saveActivityLthrObservation({
-      activity,
-      userId,
-      observation,
-    });
+    await this.persistence.saveActivityLthrObservation(
+      { activity, userId, observation },
+      ctx.persistenceTx,
+    );
     return ctx;
   }
 }
