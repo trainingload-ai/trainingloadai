@@ -1,4 +1,11 @@
-import type { DailyHealthData } from "@/api/health-data";
+import type {
+  DailyHealthData,
+  HealthIntradayResponse,
+} from "@/api/health-data";
+import type { HealthRange } from "@/components/metrics/metric-chart-policy";
+
+const DAY_MS = 86_400_000;
+const MAX_LATEST_AGE_DAYS = 3;
 
 export type HealthChartKind = "sleep" | "line" | "range" | "bar";
 export type HealthCardKey =
@@ -43,6 +50,28 @@ export type HealthOverviewCard = {
   provider: string | null;
   points: HealthChartPoint[];
 };
+
+export function getRecentHealthDate(latestDate: string, referenceDate: string) {
+  const age = Date.parse(referenceDate) - Date.parse(latestDate);
+  return age >= 0 && age <= MAX_LATEST_AGE_DAYS * DAY_MS
+    ? latestDate
+    : undefined;
+}
+
+export function formatHealthDate(
+  value: string,
+  locale: string,
+  includeYear = false,
+) {
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: "UTC",
+    ...(includeYear ? { year: "numeric" as const } : {}),
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
 
 type MetricMap = Map<
   string,
@@ -276,6 +305,96 @@ export function buildHealthOverviewCards(days: DailyHealthData[]) {
     buildStepsCard(days),
   ];
   return cards.filter((card): card is HealthOverviewCard => card != null);
+}
+
+function average(values: Array<number | undefined>) {
+  const finite = values.filter(
+    (value): value is number => value != null && Number.isFinite(value),
+  );
+  return finite.length > 0
+    ? finite.reduce((total, value) => total + value, 0) / finite.length
+    : undefined;
+}
+
+export function buildHealthCardPeriod(
+  card: HealthOverviewCard,
+  rangeDays: HealthRange,
+  intraday?: HealthIntradayResponse,
+  referenceDate = card.latestDate,
+) {
+  const recentDate = getRecentHealthDate(card.latestDate, referenceDate);
+  if (rangeDays !== "7" && !recentDate) {
+    return {
+      currentPoints: [],
+      previousPoints: [],
+      baselinePoints: [],
+      currentAggregate: undefined,
+      previousAggregate: undefined,
+    };
+  }
+  if (rangeDays === "latest") {
+    const aggregate = (
+      points: HealthIntradayResponse["current"] | undefined,
+    ) => {
+      const values =
+        points
+          ?.filter(
+            (point) =>
+              card.key !== "sleep" ||
+              (point.stage ?? "sleep").toLowerCase() !== "awake",
+          )
+          .map((point) => point.value) ?? [];
+      if (card.key === "sleep") {
+        return values.length > 0
+          ? values.reduce((total, value) => total + value, 0)
+          : undefined;
+      }
+      return average(values);
+    };
+    const previousDate = new Date(card.latestDate);
+    previousDate.setUTCDate(previousDate.getUTCDate() - 1);
+    const previousDateKey = previousDate.toISOString().slice(0, 10);
+    const currentPoint = card.points.find(
+      (point) => point.date === card.latestDate,
+    );
+    const previousPoint = card.points.find(
+      (point) => point.date === previousDateKey,
+    );
+    return {
+      currentPoints: currentPoint ? [currentPoint] : [],
+      previousPoints: previousPoint ? [previousPoint] : [],
+      baselinePoints: [],
+      currentAggregate: aggregate(intraday?.current) ?? currentPoint?.value,
+      previousAggregate: aggregate(intraday?.previous) ?? previousPoint?.value,
+    };
+  }
+  const count = Number(rangeDays);
+  const endDate = rangeDays === "3" ? card.latestDate : referenceDate;
+  const referenceIndex = card.points.findIndex(
+    (point) => point.date === endDate,
+  );
+  const endIndex =
+    referenceIndex >= 0 ? referenceIndex + 1 : card.points.length;
+  const currentPoints = card.points.slice(
+    Math.max(0, endIndex - count),
+    endIndex,
+  );
+  const previousPoints = card.points.slice(
+    Math.max(0, endIndex - count * 2),
+    Math.max(0, endIndex - count),
+  );
+  const currentStartIndex = Math.max(0, endIndex - count);
+  const baselinePoints = card.points.slice(
+    Math.max(0, currentStartIndex - 21),
+    currentStartIndex,
+  );
+  return {
+    currentPoints,
+    previousPoints,
+    baselinePoints,
+    currentAggregate: average(currentPoints.map((point) => point.value)),
+    previousAggregate: average(previousPoints.map((point) => point.value)),
+  };
 }
 
 export function formatHealthCardValue(

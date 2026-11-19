@@ -16,21 +16,24 @@ import {
   useHealthIntraday,
   useHealthOverview,
   type HealthIntradayMetricKey,
-  type HealthIntradayResponse,
 } from "@/api/health-data";
 import ChartContainer from "@/components/ChartContainer";
 import {
-  HEALTH_RANGE_DAYS,
-  type HealthRangeDays,
+  getHealthMetricChartPolicy,
+  HEALTH_RANGES,
+  type HealthRange,
 } from "@/components/metrics/metric-chart-policy";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getMetricColor } from "@/lib/chart-data-utils";
 import {
+  buildHealthCardPeriod,
   buildHealthOverviewCards,
   calculateHealthBaseline,
   formatHealthCardValue,
+  formatHealthDate,
   getHealthBaselineStatus,
+  getRecentHealthDate,
   type HealthCardKey,
   type HealthOverviewCard,
 } from "./health-overview-model";
@@ -61,7 +64,7 @@ export const HEALTH_CARD_ICONS = {
 const COPY = {
   zh: {
     title: "全天健康",
-    description: "支持 1、3、7 天切换",
+    description: "查看最近一次记录或多日趋势",
     sleep: "睡眠",
     hrv: "HRV",
     restingHeartRate: "静息心率",
@@ -75,7 +78,9 @@ const COPY = {
     averageTimeAsleep: "平均睡眠时间",
     average: "平均值",
     sleepScoreShort: "评分",
-    noTodayData: "今日暂无数据",
+    latest: "最近一次",
+    range: "时间范围",
+    noRecentData: "近 3 天暂无数据",
     noPeriodData: "所选时段暂无数据",
     noComparison: "暂无环比数据",
     comparison: "环比",
@@ -87,7 +92,7 @@ const COPY = {
   },
   en: {
     title: "Daily health",
-    description: "Switch between 1, 3, and 7 days",
+    description: "View the latest reading or trends over several days",
     sleep: "Sleep",
     hrv: "HRV",
     restingHeartRate: "Resting HR",
@@ -101,7 +106,9 @@ const COPY = {
     averageTimeAsleep: "Average time asleep",
     average: "average",
     sleepScoreShort: "Score",
-    noTodayData: "No data today",
+    latest: "Latest",
+    range: "Time range",
+    noRecentData: "No data in the last 3 days",
     noPeriodData: "No data in this period",
     noComparison: "No comparison data",
     comparison: "vs prior",
@@ -121,30 +128,31 @@ export function getHealthOverviewCopy(locale: string): HealthOverviewCopy {
 
 function HealthRangeTabs({
   copy,
+  metricKey,
   disabled = false,
   rangeDays,
   setRangeDays,
 }: {
   copy: HealthOverviewCopy;
+  metricKey: HealthCardKey;
   disabled?: boolean;
-  rangeDays: HealthRangeDays;
-  setRangeDays: (rangeDays: HealthRangeDays) => void;
+  rangeDays: HealthRange;
+  setRangeDays: (rangeDays: HealthRange) => void;
 }) {
   return (
     <Tabs
       value={rangeDays}
-      onValueChange={(next) => setRangeDays(next as HealthRangeDays)}
+      onValueChange={(next) => setRangeDays(next as HealthRange)}
     >
-      <TabsList className="h-7">
-        {HEALTH_RANGE_DAYS.map((days) => (
+      <TabsList className="h-7" aria-label={`${copy[metricKey]} · ${copy.range}`}>
+        {HEALTH_RANGES.map((days) => (
           <TabsTrigger
             key={days}
             value={days}
             disabled={disabled}
             className="h-6 px-1.5 text-mobile-unit pc:text-[10px] md:px-2 md:text-mobile-caption"
           >
-            {days}
-            {copy.day}
+            {days === "latest" ? copy.latest : `${days}${copy.day}`}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -169,7 +177,11 @@ export function HealthMetricCard({
   height?: string;
   appearance?: "default" | "soft";
 }) {
-  const [rangeDays, setRangeDays] = useState<HealthRangeDays>("1");
+  const [rangeDays, setRangeDays] = useState(
+    getHealthMetricChartPolicy(card.key).defaultRangeDays,
+  );
+  const isLatest = rangeDays === "latest";
+  const recentDate = getRecentHealthDate(card.latestDate, referenceDate);
   const Icon = HEALTH_CARD_ICONS[card.key];
   const accentColor = getMetricColor(card.key);
   const intradayKey: HealthIntradayMetricKey = isHealthIntradayMetricKey(
@@ -177,16 +189,17 @@ export function HealthMetricCard({
   )
     ? card.key
     : "sleep";
-  const supportsIntraday = isHealthIntradayMetricKey(card.key);
-  const intradayQuery = useHealthIntraday(
-    intradayKey,
-    supportsIntraday && rangeDays === "1",
-    referenceDate,
-  );
+  const showIntraday =
+    isLatest && recentDate != null && isHealthIntradayMetricKey(card.key);
+  const intradayQuery = useHealthIntraday(intradayKey, showIntraday, recentDate);
+  const intraday =
+    showIntraday && intradayQuery.data?.currentDate === recentDate
+      ? intradayQuery.data
+      : undefined;
   const period = useMemo(
     () =>
-      buildHealthCardPeriod(card, rangeDays, intradayQuery.data, referenceDate),
-    [card, intradayQuery.data, rangeDays, referenceDate],
+      buildHealthCardPeriod(card, rangeDays, intraday, referenceDate),
+    [card, intraday, rangeDays, referenceDate],
   );
   const comparison = formatComparison(
     card,
@@ -199,8 +212,7 @@ export function HealthMetricCard({
       ? "—"
       : formatHealthCardValue(card, locale, period.currentAggregate);
   const usesPersonalBaseline =
-    rangeDays !== "1" &&
-    (card.key === "hrv" || card.key === "restingHeartRate");
+    !isLatest && (card.key === "hrv" || card.key === "restingHeartRate");
   const baseline = usesPersonalBaseline
     ? calculateHealthBaseline(period.baselinePoints)
     : null;
@@ -208,9 +220,8 @@ export function HealthMetricCard({
     baseline != null && period.currentAggregate != null
       ? getHealthBaselineStatus(period.currentAggregate, baseline)
       : null;
-  const showsOneDayValueSummary =
-    rangeDays === "1" &&
-    (card.key === "hrv" || card.key === "restingHeartRate");
+  const showsLatestValueSummary =
+    isLatest && (card.key === "hrv" || card.key === "restingHeartRate");
   const periodContext = usesPersonalBaseline
     ? baselineStatus
       ? copy[`${baselineStatus}Baseline`]
@@ -228,10 +239,11 @@ export function HealthMetricCard({
       className={className}
       height={height}
       appearance={appearance}
-      isLoading={rangeDays === "1" && intradayQuery.isLoading}
+      isLoading={showIntraday && intradayQuery.isLoading}
       tools={
         <HealthRangeTabs
           copy={copy}
+          metricKey={card.key}
           rangeDays={rangeDays}
           setRangeDays={setRangeDays}
         />
@@ -239,14 +251,14 @@ export function HealthMetricCard({
     >
       {period.currentAggregate == null ? (
         <div className="flex h-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
-          {rangeDays === "1" ? copy.noTodayData : copy.noPeriodData}
+          {rangeDays === "7" ? copy.noPeriodData : copy.noRecentData}
         </div>
       ) : (
         <div className="flex h-full min-h-0 flex-col">
-          {!showsOneDayValueSummary ? (
+          {!showsLatestValueSummary ? (
             <div className="flex min-h-9 shrink-0 items-center justify-between gap-3 border-b border-border/60 px-2.5 py-1.5">
               <div className="flex min-w-0 items-baseline gap-1.5">
-                {rangeDays !== "1" ? (
+                {!isLatest ? (
                   <span className="shrink-0 text-mobile-unit text-muted-foreground pc:text-[10px]">
                     {copy.average}
                   </span>
@@ -260,13 +272,21 @@ export function HealthMetricCard({
                   </span>
                 ) : null}
               </div>
-              <div className="max-w-[48%] shrink-0 truncate text-right text-mobile-unit text-muted-foreground pc:text-[10px]">
-                {card.key === "sleep" &&
-                rangeDays === "1" &&
-                card.latestDate === referenceDate &&
-                card.secondaryValue != null
-                  ? `${copy.sleepScoreShort} ${Math.round(card.secondaryValue)}`
-                  : periodContext}
+              <div className="flex max-w-[55%] shrink-0 items-center gap-1 text-right text-mobile-unit text-muted-foreground pc:text-[10px]">
+                {isLatest && recentDate ? (
+                  <>
+                    <span className="truncate">
+                      {card.key === "sleep" && card.secondaryValue != null
+                        ? `${copy.sleepScoreShort} ${Math.round(card.secondaryValue)}`
+                        : periodContext}
+                    </span>
+                    <time className="shrink-0" dateTime={recentDate}>
+                      {formatHealthDate(recentDate, locale)}
+                    </time>
+                  </>
+                ) : (
+                  <span className="truncate">{periodContext}</span>
+                )}
               </div>
             </div>
           ) : null}
@@ -278,7 +298,7 @@ export function HealthMetricCard({
               currentPoints={period.currentPoints}
               previousPoints={period.previousPoints}
               baseline={baseline}
-              intraday={rangeDays === "1" ? intradayQuery.data : undefined}
+              intraday={intraday}
             />
           </div>
         </div>
@@ -293,89 +313,6 @@ function isHealthIntradayMetricKey(
   return ["sleep", "hrv", "restingHeartRate", "stress", "bodyBattery"].includes(
     key,
   );
-}
-
-function average(values: Array<number | undefined>) {
-  const finite = values.filter(
-    (value): value is number => value != null && Number.isFinite(value),
-  );
-  return finite.length > 0
-    ? finite.reduce((total, value) => total + value, 0) / finite.length
-    : undefined;
-}
-
-export function buildHealthCardPeriod(
-  card: HealthOverviewCard,
-  rangeDays: HealthRangeDays,
-  intraday?: HealthIntradayResponse,
-  referenceDate = card.latestDate,
-) {
-  if (rangeDays === "1") {
-    const aggregate = (
-      points: HealthIntradayResponse["current"] | undefined,
-    ) => {
-      const values =
-        points
-          ?.filter(
-            (point) =>
-              card.key !== "sleep" ||
-              (point.stage ?? "sleep").toLowerCase() !== "awake",
-          )
-          .map((point) => point.value) ?? [];
-      if (card.key === "sleep") {
-        return values.length > 0
-          ? values.reduce((total, value) => total + value, 0)
-          : undefined;
-      }
-      return average(values);
-    };
-    const previousDate = new Date(`${referenceDate}T12:00:00`);
-    previousDate.setDate(previousDate.getDate() - 1);
-    const previousDateKey = [
-      previousDate.getFullYear(),
-      String(previousDate.getMonth() + 1).padStart(2, "0"),
-      String(previousDate.getDate()).padStart(2, "0"),
-    ].join("-");
-    const currentPoint = card.points.find(
-      (point) => point.date === referenceDate,
-    );
-    const previousPoint = card.points.find(
-      (point) => point.date === previousDateKey,
-    );
-    return {
-      currentPoints: currentPoint ? [currentPoint] : [],
-      previousPoints: previousPoint ? [previousPoint] : [],
-      baselinePoints: [],
-      currentAggregate: aggregate(intraday?.current) ?? currentPoint?.value,
-      previousAggregate: aggregate(intraday?.previous) ?? previousPoint?.value,
-    };
-  }
-  const count = Number(rangeDays);
-  const referenceIndex = card.points.findIndex(
-    (point) => point.date === referenceDate,
-  );
-  const endIndex =
-    referenceIndex >= 0 ? referenceIndex + 1 : card.points.length;
-  const currentPoints = card.points.slice(
-    Math.max(0, endIndex - count),
-    endIndex,
-  );
-  const previousPoints = card.points.slice(
-    Math.max(0, endIndex - count * 2),
-    Math.max(0, endIndex - count),
-  );
-  const currentStartIndex = Math.max(0, endIndex - count);
-  const baselinePoints = card.points.slice(
-    Math.max(0, currentStartIndex - 21),
-    currentStartIndex,
-  );
-  return {
-    currentPoints,
-    previousPoints,
-    baselinePoints,
-    currentAggregate: average(currentPoints.map((point) => point.value)),
-    previousAggregate: average(previousPoints.map((point) => point.value)),
-  };
 }
 
 function formatComparison(
@@ -420,8 +357,9 @@ export function HealthMetricCardLoading({
       tools={
         <HealthRangeTabs
           copy={copy}
+          metricKey={metricKey}
           disabled
-          rangeDays="1"
+          rangeDays={getHealthMetricChartPolicy(metricKey).defaultRangeDays}
           setRangeDays={() => undefined}
         />
       }
@@ -440,7 +378,9 @@ export function HealthMetricCardEmpty({
   height?: string;
   appearance?: "default" | "soft";
 }) {
-  const [rangeDays, setRangeDays] = useState<HealthRangeDays>("1");
+  const [rangeDays, setRangeDays] = useState(
+    getHealthMetricChartPolicy(metricKey).defaultRangeDays,
+  );
   const Icon = HEALTH_CARD_ICONS[metricKey];
   return (
     <ChartContainer
@@ -452,13 +392,14 @@ export function HealthMetricCardEmpty({
       tools={
         <HealthRangeTabs
           copy={copy}
+          metricKey={metricKey}
           rangeDays={rangeDays}
           setRangeDays={setRangeDays}
         />
       }
     >
       <div className="flex h-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
-        {rangeDays === "1" ? copy.noTodayData : copy.noPeriodData}
+        {rangeDays === "7" ? copy.noPeriodData : copy.noRecentData}
       </div>
     </ChartContainer>
   );

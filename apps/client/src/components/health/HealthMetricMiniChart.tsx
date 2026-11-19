@@ -18,12 +18,13 @@ import {
   YAxis,
 } from "recharts";
 import type { HealthIntradayResponse } from "@/api/health-data";
-import type { HealthRangeDays } from "@/components/metrics/metric-chart-policy";
+import type { HealthRange } from "@/components/metrics/metric-chart-policy";
 import {
   getMetricColor,
   getMetricComparisonColor,
 } from "@/lib/chart-data-utils";
 import {
+  formatHealthDate as formatDate,
   getHealthBaselineStatus,
   type HealthBaseline,
   type HealthChartPoint,
@@ -35,16 +36,6 @@ type ComparisonPoint = HealthChartPoint & {
   comparisonMin?: number;
   comparisonMax?: number;
 };
-
-function formatDate(value: string, locale: string, includeYear = false) {
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(locale, {
-    ...(includeYear ? { year: "numeric" as const } : {}),
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-}
 
 function formatTime(value: string, locale: string) {
   const date = new Date(value);
@@ -453,7 +444,7 @@ function averagePointValue(values: Array<number | undefined>) {
   return count > 0 ? total / count : undefined;
 }
 
-function OneDayValueSummary({
+function LatestValueSummary({
   card,
   locale,
   currentPoints,
@@ -506,9 +497,12 @@ function OneDayValueSummary({
         </span>
       </div>
       {date ? (
-        <span className="text-mobile-caption pc:text-[11px] text-muted-foreground/80">
+        <time
+          dateTime={date}
+          className="text-mobile-caption pc:text-[11px] text-muted-foreground/80"
+        >
           {formatDate(date.slice(0, 10), locale, true)}
-        </span>
+        </time>
       ) : null}
     </div>
   );
@@ -552,22 +546,22 @@ export function HealthMetricMiniChart({
 }: {
   card: HealthOverviewCard;
   locale: string;
-  rangeDays: HealthRangeDays;
+  rangeDays: HealthRange;
   currentPoints: HealthChartPoint[];
   previousPoints: HealthChartPoint[];
   baseline?: HealthBaseline | null;
   intraday?: HealthIntradayResponse;
 }) {
   const hasIntraday = intraday != null && intraday.current.length > 0;
-  if (rangeDays === "1" && card.key === "sleep" && hasIntraday) {
+  if (rangeDays === "latest" && card.key === "sleep" && hasIntraday) {
     return <SleepIntradayTimeline intraday={intraday!} locale={locale} />;
   }
   if (
-    rangeDays === "1" &&
+    rangeDays === "latest" &&
     (card.key === "hrv" || card.key === "restingHeartRate")
   ) {
     return (
-      <OneDayValueSummary
+      <LatestValueSummary
         card={card}
         locale={locale}
         currentPoints={currentPoints}
@@ -577,9 +571,9 @@ export function HealthMetricMiniChart({
     );
   }
 
-  const isIntraday = rangeDays === "1" && hasIntraday;
+  const isIntraday = rangeDays === "latest" && hasIntraday;
   const usesPersonalBaseline =
-    rangeDays !== "1" &&
+    rangeDays !== "latest" &&
     (card.key === "hrv" || card.key === "restingHeartRate");
   const data = usesPersonalBaseline
     ? currentPoints
@@ -647,6 +641,7 @@ export function HealthMetricMiniChart({
       )}
     />
   );
+  const showDailyDots = card.chartKind === "sleep" || data.length === 1;
   const comparisonLine = (
     <Line
       type="monotone"
@@ -654,14 +649,14 @@ export function HealthMetricMiniChart({
       stroke={comparisonColor}
       strokeWidth={1.5}
       strokeDasharray="5 4"
-      dot={data.length === 1 ? { r: 3, fill: comparisonColor } : false}
+      dot={showDailyDots ? { r: 3, fill: comparisonColor } : false}
       activeDot={{ r: 4, strokeWidth: 2 }}
       connectNulls={false}
       isAnimationActive={false}
     />
   );
 
-  if (card.chartKind === "sleep" && rangeDays === "1") {
+  if (card.chartKind === "sleep" && rangeDays === "latest") {
     return (
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart {...common} barCategoryGap="24%">
@@ -811,7 +806,7 @@ export function HealthMetricMiniChart({
           dataKey="value"
           stroke={accentColor}
           strokeWidth={2}
-          dot={data.length === 1 ? { r: 3, fill: accentColor } : false}
+          dot={showDailyDots ? { r: 3, fill: accentColor } : false}
           activeDot={{ r: 4, strokeWidth: 2 }}
           connectNulls={false}
           isAnimationActive={false}
