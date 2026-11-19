@@ -8,6 +8,12 @@ export const PLAN_REVIEW_JUDGMENT_PROMPT_VERSION = 'plan_review_judgment_v5_3';
 export const PLAN_REVIEW_ADJUSTMENT_PROMPT_VERSION =
   'plan_review_adjustment_v2_2';
 
+export const PLAN_REVIEW_TARGET_CONTEXT_PROMPT =
+  'Use the explicitly opened or named plan with plan.by_id when present; plan.active can be a different object. Carry that plan, the resolved date/week, settled constraints and decision-relevant evidence across a skill handoff.';
+
+export const PLAN_REVIEW_COMPLETION_PROMPT =
+  'In a server-owned review task, complete the supplied judgment result through coach_task_submit_result; the caller owns adjustment compilation and confirmation. In chat, completion is the direct judgment, a complete reviewable proposal, one necessary question, or a committed receipt for the confirmed change.';
+
 export type PlanReviewJudgmentScale = 'daily' | 'weekly' | 'monthly';
 
 export function serializePlanReviewJudgmentContext(context: unknown): string {

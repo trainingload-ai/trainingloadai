@@ -1,3 +1,4 @@
+import { generationCoverage } from '@shared/rolling-plan';
 import type { PlanStatus } from '../plan.constants';
 import { defaultSportDefinitionCode } from '@/sports/sport-catalog.types';
 import type { EndurancePlanBlock } from '../../../../../../packages/shared/endurance-workout-ir';
@@ -65,7 +66,28 @@ export type PlanRowLike = {
   goal?: string | null;
   sourceType: string;
   generationMetadata?: unknown;
+  coverageWindow?: { from: Date; through: Date };
   status: PlanStatus | string;
+  planningMode?: 'FIXED' | 'ROLLING';
+  activationTimezone?: string | null;
+  automationPolicies?: Array<{
+    revision: number;
+    revokedAt: Date | null;
+    settings: unknown;
+  }>;
+  monthStrategies?: Array<{
+    monthStart: Date;
+    monthEnd: Date;
+    effectiveFrom: Date;
+    revision: number;
+    strategy: unknown;
+  }>;
+  generatedThrough?: Date | string | null;
+  weekGenerations?: Array<{
+    weekStart: Date;
+    generatedFrom: Date;
+    generatedThrough: Date;
+  }>;
   periodWeeks?: number | null;
   startDate?: Date | string | null;
   endDate?: Date | string | null;
@@ -109,24 +131,43 @@ export function normalizePlanDate(value?: Date | string | null) {
 
 export function clampCurrentIndexes(plan: {
   startDate?: Date | string | null;
+  planningMode?: 'FIXED' | 'ROLLING';
+  activationTimezone?: string | null;
   periodWeeks?: number | null;
   status?: PlanStatus | string | null;
 }) {
-  if (!plan.startDate || plan.status !== 'ACTIVE' || !plan.periodWeeks) {
+  if (
+    !plan.startDate ||
+    plan.status !== 'ACTIVE' ||
+    (plan.planningMode !== 'ROLLING' && !plan.periodWeeks)
+  ) {
     return {
       currentWeekIndex: null,
       currentDayIndex: null,
     };
   }
 
-  const today = new Date();
+  const today =
+    plan.planningMode === 'ROLLING' && plan.activationTimezone
+      ? new Date(
+          new Intl.DateTimeFormat('en-CA', {
+            timeZone: plan.activationTimezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(new Date()) + 'T00:00:00Z',
+        )
+      : new Date();
   const start = new Date(plan.startDate);
   const diffDays = Math.max(
     0,
     Math.floor((today.getTime() - start.getTime()) / 86400000),
   );
   const maxDays = Math.max(1, plan.periodWeeks * 7);
-  const bounded = Math.min(diffDays, maxDays - 1);
+  const bounded =
+    plan.planningMode === 'ROLLING'
+      ? diffDays
+      : Math.min(diffDays, maxDays - 1);
   return {
     currentWeekIndex: Math.floor(bounded / 7) + 1,
     currentDayIndex: (bounded % 7) + 1,
@@ -265,6 +306,31 @@ export function normalizePlanRow(
     generationMetadata: plan.generationMetadata ?? null,
     status: plan.status,
     capabilities: planCapabilities(plan.status),
+    planningMode: plan.planningMode ?? 'FIXED',
+    automationPolicy: plan.automationPolicies?.[0]
+      ? {
+          revision: plan.automationPolicies[0].revision,
+          enabled: !plan.automationPolicies[0].revokedAt,
+          settings: plan.automationPolicies[0].settings,
+        }
+      : null,
+    monthDirections: (plan.monthStrategies ?? []).map((m) => ({
+      monthStart: normalizePlanDate(m.monthStart),
+      monthEnd: normalizePlanDate(m.monthEnd),
+      effectiveFrom: normalizePlanDate(m.effectiveFrom),
+      revision: m.revision,
+      strategy: m.strategy,
+    })),
+    generatedThrough: normalizePlanDate(plan.generatedThrough),
+    generationCoverage: generationCoverage(
+      normalizePlanDate(plan.coverageWindow?.from ?? plan.startDate),
+      normalizePlanDate(plan.coverageWindow?.through ?? plan.generatedThrough),
+      (plan.weekGenerations ?? []).map((g) => ({
+        from: normalizePlanDate(g.generatedFrom)!,
+        through: normalizePlanDate(g.generatedThrough)!,
+        weekStart: normalizePlanDate(g.weekStart)!,
+      })),
+    ),
     periodWeeks: plan.periodWeeks,
     startDate: normalizePlanDate(plan.startDate),
     endDate: normalizePlanDate(plan.endDate),

@@ -1,5 +1,8 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import dayjs from "dayjs";
@@ -26,7 +29,7 @@ import {
   type TrainingPlanSummary,
 } from "@/api/plans";
 import { useActivatePlan, useDeletePlan } from "@/api/usePlanMutations";
-import { PlanActivateDialog } from "@/components/plan/PlanActivateDialog";
+import { PlanStartConversationDialog } from "@/components/plan/plan-start-conversation-dialog";
 import { useTranslations } from "next-intl";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import {
@@ -138,7 +141,7 @@ function formatPlanProgress(t: TranslateFn, plan: TrainingPlanSummary) {
   if (plan.status === "ACTIVE") {
     return t("planProgress.active", {
       current: plan.currentWeekIndex ?? 1,
-      total: plan.periodWeeks,
+      total: plan.periodWeeks ?? 1,
     });
   }
   if (plan.status === "SCHEDULED") {
@@ -147,7 +150,7 @@ function formatPlanProgress(t: TranslateFn, plan: TrainingPlanSummary) {
   if (plan.status === "PAUSED") {
     return t("planProgress.paused", {
       current: plan.currentWeekIndex ?? "-",
-      total: plan.periodWeeks,
+      total: plan.periodWeeks ?? 1,
     });
   }
   if (plan.status === "COMPLETED") {
@@ -280,7 +283,7 @@ function PlanCard({
                 </span>
               </div>
               <div className="mt-1 text-mobile-caption text-muted-foreground pc:text-xs">
-                {formatPlanProgress(t, plan)} · {formatPlanRange(t, plan)}
+                {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : <>{formatPlanProgress(t, plan)} · {formatPlanRange(t, plan)}</>}
               </div>
             </div>
 
@@ -354,7 +357,7 @@ function PlanCard({
                 {t("stats.sessionCompletion")}
               </div>
               <div className="mt-0.5 text-sm font-semibold">
-                {sessionCompletion}%
+                {isRollingPlan(plan) ? "—" : `${sessionCompletion}%`}
               </div>
             </div>
             <div className="rounded-lg bg-background px-2.5 py-2 dark:bg-black/20">
@@ -383,12 +386,12 @@ function PlanCard({
             </div>
           </div>
 
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-background dark:bg-black/20">
+          {!isRollingPlan(plan) ? <div className="mt-3 h-2 overflow-hidden rounded-full bg-background dark:bg-black/20">
             <div
               className="h-full rounded-full bg-emerald-500"
               style={{ width: `${sessionCompletion}%` }}
             />
-          </div>
+          </div> : null}
 
           {plan.description?.trim() ? (
             <div className="mt-3 text-sm leading-snug">
@@ -542,8 +545,8 @@ export default function PlansDesktopPage() {
                             {plan.title}
                           </div>
                           <div className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
-                            {t("recent.itemMeta", {
-                              weeks: plan.periodWeeks,
+                            {isRollingPlan(plan) ? <RollingPlanCoverage plan={plan} /> : t("recent.itemMeta", {
+                              weeks: plan.periodWeeks ?? 1,
                               sessions: plan.workoutCount,
                             })}
                           </div>
@@ -613,7 +616,11 @@ export default function PlansDesktopPage() {
                       deleting={deletingPlan}
                       activating={activatingPlan}
                       onRequestDelete={setPlanPendingDelete}
-                      onRequestStart={setPlanPendingStart}
+                      onRequestStart={(candidate) => {
+                        if (candidate.status === "PAUSED") {
+                          void activatePlanMut({ planId: candidate.id });
+                        } else setPlanPendingStart(candidate);
+                      }}
                     />
                   ))
                 )}
@@ -643,23 +650,11 @@ export default function PlansDesktopPage() {
         </div>
       </div>
 
-      <PlanActivateDialog
+      <PlanStartConversationDialog
         open={planPendingStart !== null}
-        pending={activatingPlan}
+        planId={planPendingStart?.id ?? null}
         onOpenChange={(open) => {
           if (!open) setPlanPendingStart(null);
-        }}
-        onConfirm={async (startDate) => {
-          if (!planPendingStart) return;
-          try {
-            await activatePlanMut({
-              planId: planPendingStart.id,
-              startDate,
-            });
-            setPlanPendingStart(null);
-          } catch {
-            /* toast via useActivatePlan */
-          }
         }}
       />
 

@@ -1,4 +1,8 @@
 import {
+  scheduleConstraintsSchema,
+  assessPlanSchedule,
+} from '@shared/plan-calendar';
+import {
   WorkoutDefinitionService,
   type ResolvedWorkoutDefinition,
 } from '@/api/workout/workout-definition.service';
@@ -100,6 +104,7 @@ export const compactCoachPlanDraftToolParametersSchema = {
       description:
         'Explicit schedule/phase commitments to validate. Copy availability and disciplines from the agreed brief; never invent a budget. weekPhases lists one phase per week for multi-week drafts.',
     },
+    scheduleConstraints: scheduleConstraintsSchema,
     sessionTemplates: {
       type: 'array',
       description:
@@ -210,6 +215,7 @@ export function expandCoachPlanDraftInput(raw: unknown): ExpandResult {
 
   const parsed = parseCoachPlanDraftData({
     qualityContract: input.qualityContract,
+    scheduleConstraints: input.scheduleConstraints,
     title: input.title,
     description: input.description,
     periodWeeks: input.periodWeeks,
@@ -383,6 +389,32 @@ export const presentCoachPlanDraftTool: AiToolDef<Input, Output> = buildAiTool({
       }
     }
 
+    if (
+      parsed.data.scheduleConstraints &&
+      parsed.data.qualityContract?.startDate
+    ) {
+      const scheduled = workouts.map((w, index) => ({
+        id: String(index),
+        status: 'PLANNED',
+        dayOffset: (w.weekIndex - 1) * 7 + w.dayIndex - 1,
+        sportType: w.sportType,
+        durationSeconds: definitions.get(w)?.summary.durationSeconds ?? null,
+      }));
+      const assessment = assessPlanSchedule({
+        startDate: parsed.data.qualityContract.startDate,
+        periodWeeks: parsed.data.periodWeeks,
+        workouts: scheduled,
+        changedWorkoutIds: scheduled.map((w) => w.id),
+        constraints: parsed.data.scheduleConstraints,
+        qualityContract: parsed.data.qualityContract,
+        projectDates: true,
+      });
+      if (!assessment.valid)
+        return aiToolError(
+          'The dated draft violates its explicit schedule constraints; adjust the actual calendar before presenting it.',
+          'INVALID_INPUT',
+        );
+    }
     const quality = assessPlanQuality(
       parsed.data.periodWeeks,
       workouts.map((w) => ({
@@ -672,6 +704,9 @@ export const presentCoachPlanDraftTool: AiToolDef<Input, Output> = buildAiTool({
       periodWeeks: expanded.data.periodWeeks,
       ...(expanded.data.qualityContract
         ? { qualityContract: expanded.data.qualityContract }
+        : {}),
+      ...(expanded.data.scheduleConstraints
+        ? { scheduleConstraints: expanded.data.scheduleConstraints }
         : {}),
       qualityReport,
       workouts,

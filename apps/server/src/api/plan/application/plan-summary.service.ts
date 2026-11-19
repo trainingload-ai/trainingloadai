@@ -93,6 +93,8 @@ export type WorkoutRollupInput = {
 export interface PlanSummary {
   planId: string;
   status: string;
+  planningMode?: 'FIXED' | 'ROLLING';
+  workoutWindow?: { from: string; through: string };
   periodWeeks: number | null;
   totals: {
     workoutCount: number;
@@ -141,6 +143,8 @@ export class PlanSummaryService {
         id: true,
         userId: true,
         status: true,
+        planningMode: true,
+        startDate: true,
         periodWeeks: true,
       },
     });
@@ -148,8 +152,18 @@ export class PlanSummaryService {
       throw new PlanSummaryNotFoundError();
     }
 
+    const today = new Date(new Date().toISOString().slice(0, 10));
+    const anchor =
+      plan.startDate && plan.startDate > today ? plan.startDate : today;
+    const from = new Date(anchor.getTime() - 28 * 86400000),
+      through = new Date(anchor.getTime() + 84 * 86400000);
     const workouts = (await this.workouts.findMany({
-      where: { planId },
+      where: {
+        planId,
+        ...(plan.planningMode === 'ROLLING'
+          ? { scheduledDate: { gte: from, lte: through } }
+          : {}),
+      },
       orderBy: [{ dayOffset: 'asc' }, { sessionIndex: 'asc' }],
       select: {
         id: true,
@@ -230,9 +244,20 @@ export class PlanSummaryService {
     return {
       planId: plan.id,
       status: plan.status as string,
+      planningMode: plan.planningMode,
+      ...(plan.planningMode === 'ROLLING'
+        ? {
+            workoutWindow: {
+              from: from.toISOString().slice(0, 10),
+              through: through.toISOString().slice(0, 10),
+            },
+          }
+        : {}),
       periodWeeks: plan.periodWeeks ?? null,
       totals: finalizeTotals(totals),
-      weeks: finalizeWeeks(weekBuckets, plan.periodWeeks ?? 0),
+      weeks: finalizeWeeks(weekBuckets, plan.periodWeeks ?? 0).filter(
+        (w) => plan.planningMode !== 'ROLLING' || weekBuckets.has(w.weekIndex),
+      ),
       bySport: finalizeSports(sportBuckets),
     };
   }
@@ -400,7 +425,9 @@ function finalizeTotals(totals: ReturnType<typeof makeEmptyTotals>) {
 function finalizeWeeks(map: Map<number, WeekBucketAgg>, periodWeeks: number) {
   const total = Math.max(periodWeeks ?? 0, ...map.keys());
   const out: PlanSummaryByWeek[] = [];
-  for (let week = 1; week <= total; week += 1) {
+  for (const week of periodWeeks
+    ? Array.from({ length: total }, (_, i) => i + 1)
+    : [...map.keys()].sort((a, b) => a - b)) {
     const row = map.get(week);
     if (row) {
       const complianceRate =

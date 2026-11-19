@@ -36,7 +36,9 @@ describe('personal delivery worker recovery', () => {
     };
     const worker = new PersonalWorkerService(
       prisma as never,
-      { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as never,
+      {
+        model: (tx?: any) => (tx ?? prisma).externalProviderConnection,
+      } as never,
       {
         run: async () => {
           throw new PersonalProviderError('PROVIDER_RATE_LIMITED', 120000, 429);
@@ -64,6 +66,7 @@ describe('personal delivery worker recovery', () => {
   it('dispatches a recovered UNKNOWN operation only to the read-only reconciler', async () => {
     jest.replaceProperty(process, 'env', {
       ...process.env,
+      DEPLOYMENT_MODE: 'self-host',
       SELF_HOST_MODE: 'core-local',
     });
     const job = {
@@ -162,7 +165,9 @@ describe('personal ACTIVITY download retries', () => {
     };
     const worker = new PersonalWorkerService(
       prisma as never,
-      { model: (tx?: any) => (tx ?? prisma).externalProviderConnection } as never,
+      {
+        model: (tx?: any) => (tx ?? prisma).externalProviderConnection,
+      } as never,
       {
         run: async () => {
           throw new PersonalProviderError('PROVIDER_REQUEST_FAILED');

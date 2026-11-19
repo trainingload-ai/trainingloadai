@@ -17,6 +17,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileAiPlanCreateSheet } from "@/components/plan/mobile-ai-plan-create-sheet";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 import { useTranslations } from "next-intl";
+import { RollingPlanCreateDialog } from "./rolling-plan-create-dialog";
 
 type PlanCreateLauncherProps = {
   children: React.ReactNode;
@@ -44,6 +45,7 @@ export function PlanCreateLauncher({
   const access = useFeatureAccess({ enabled: !publicDemo.active });
   const [modeOpen, setModeOpen] = useState(false);
   const [mobileAiOpen, setMobileAiOpen] = useState(false);
+  const [rollingOpen, setRollingOpen] = useState(false);
   const [pricingDialogOpen, setPricingDialogOpen] = useState(false);
 
   const handleSelect = (mode: CreatePlanMode) => {
@@ -52,11 +54,15 @@ export function PlanCreateLauncher({
       router.push("/plans/templates");
       return;
     }
-    if (mode === "ai") {
+    if (mode === "ai" || mode === "rolling") {
       if (access.isLoading) return;
       setModeOpen(false);
       if (!featureAllowed(access.data, "ai.planAdvice")) {
         setPricingDialogOpen(true);
+        return;
+      }
+      if (mode === "rolling") {
+        requestAnimationFrame(() => setRollingOpen(true));
         return;
       }
       if (isMobile) {
@@ -104,6 +110,7 @@ export function PlanCreateLauncher({
           router.push(`/ai-coach?${params.toString()}`);
         }}
       />
+      <RollingPlanCreateDialog open={rollingOpen} onOpenChange={setRollingOpen} />
 
       <AccessOptionsDialog
         open={pricingDialogOpen}

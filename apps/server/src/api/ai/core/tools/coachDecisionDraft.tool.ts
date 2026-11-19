@@ -52,6 +52,8 @@ const SUPPORTED_DECISION_TYPES = new Set([
   'ACTIVITY_PLAN_LINK',
   'PLAN_ADAPTATION',
   'PLAN_SUPERSESSION',
+  'PLAN_START',
+  'PLAN_SCHEDULE',
 ]);
 
 function containsMultiItemArray(value: unknown): boolean {
@@ -142,6 +144,8 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
       decisionType !== 'PLAN_WORKOUT_SCHEDULE' &&
       decisionType !== 'PLAN_ADAPTATION' &&
       decisionType !== 'PLAN_SUPERSESSION' &&
+      decisionType !== 'PLAN_START' &&
+      decisionType !== 'PLAN_SCHEDULE' &&
       containsMultiItemArray(input.payload)
     ) {
       return aiToolError(
@@ -159,12 +163,38 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
     }
     return { ok: true };
   },
+  summarizeForModel: ({ output }) =>
+    output.decisionType === 'PLAN_START' ||
+    output.decisionType === 'PLAN_SCHEDULE'
+      ? {
+          kind: output.kind,
+          decisionId: output.decisionId,
+          branchId: output.branchId,
+          state: output.state,
+          decisionType: output.decisionType,
+          completeCandidateRenderedByServer: true,
+          nextAction:
+            'Wait for the athlete to confirm this actual persisted card in a later turn.',
+        }
+      : output,
   execute: async (ctx, input) => {
     const userId = ctx.session?.user?.id;
     let branchId = String(ctx.branchId ?? '').trim();
     if (!userId || !ctx.coachBranching) {
       throw new Error('coach_decision_draft requires branch context');
     }
+    if (
+      !branchId &&
+      input.decisionType === 'PLAN_SCHEDULE' &&
+      ctx.sid &&
+      ctx.currentUserMessageId
+    )
+      branchId =
+        (await ctx.coachBranching.currentConversationBranch({
+          userId,
+          sid: ctx.sid,
+          userMessageId: ctx.currentUserMessageId,
+        })) ?? '';
     if (!branchId) {
       const planId = String(input.payload.planId ?? '').trim();
       if (!planId)
@@ -180,6 +210,9 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
     const { decision, options } = await ctx.coachBranching.squashBranch({
       userId,
       branchId,
+      binding: ctx.sid
+        ? { sid: ctx.sid, branchId, userMessageId: ctx.currentUserMessageId }
+        : undefined,
       mode: 'AUTO',
       riskTier: input.riskTier === 'LOW' ? 'LOW' : 'HIGH',
       decisionType: input.decisionType,

@@ -43,20 +43,37 @@ export function hasCurrentDecisionConfirmation(
   );
 }
 
-export function currentDecisionConfirmationId(
-  message: unknown,
-): string | undefined {
+export function currentDecisionConfirmation(message: unknown):
+  | {
+      decisionId: string;
+      assistantMessageId?: string;
+    }
+  | undefined {
   if (!message || typeof message !== 'object') return undefined;
   const content = (message as { content?: unknown }).content;
   if (!Array.isArray(content)) return undefined;
-  const ids = content.flatMap((block) => {
+  const confirmations = content.flatMap((block) => {
     if (block?.type !== 'tool_result' || block.is_error) return [];
     const value = block.content;
     return value?.kind === 'coach_decision_confirmation' &&
       typeof value.decisionId === 'string' &&
       value.decisionId.trim()
-      ? [value.decisionId.trim()]
+      ? [
+          {
+            decisionId: value.decisionId.trim(),
+            assistantMessageId:
+              typeof value.repliesToAssistantMessageId === 'string'
+                ? value.repliesToAssistantMessageId.trim()
+                : undefined,
+          },
+        ]
       : [];
   });
-  return ids.length === 1 ? ids[0] : undefined;
+  return confirmations.length === 1 ? confirmations[0] : undefined;
+}
+
+export function currentDecisionConfirmationId(
+  message: unknown,
+): string | undefined {
+  return currentDecisionConfirmation(message)?.decisionId;
 }

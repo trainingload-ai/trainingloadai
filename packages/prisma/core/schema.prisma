@@ -568,10 +568,12 @@ enum PlanStatus {
 }
 
 enum PlanProposalMode {
+  START
   ADAPT
   SUPERSEDE
 
   @@map("enum_plan_proposal_mode")
+  SCHEDULE
 }
 
 enum CompetitionImportance {
@@ -2060,12 +2062,16 @@ model AiCoachSession {
   type        AiCoachSessionType  @default(CHAT) @map("type")
   reviewScope AiCoachReviewScope? @map("review_scope")
 
-  title        String?   @map("title")
-  lang         String?   @map("lang")
-  summary      String?   @map("summary") @db.Text
-  nextSequence Int       @default(1) @map("next_sequence")
+  title             String?   @map("title")
+  lang              String?   @map("lang")
+  summary           String?   @map("summary") @db.Text
+  nextSequence      Int       @default(1) @map("next_sequence")
+  planStartPlanId   String?   @map("plan_start_plan_id")
+  planStartDate     String?   @map("plan_start_date")
+  planStartRevision Int       @default(0) @map("plan_start_revision")
+  planStartBranchId String?   @map("plan_start_branch_id")
   /// 置顶时间；非空表示置顶，列表排在最前（按 pinnedAt 降序）
-  pinnedAt     DateTime? @map("pinned_at")
+  pinnedAt          DateTime? @map("pinned_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -2076,6 +2082,7 @@ model AiCoachSession {
   assessmentCases      CoachAssessmentCase[]
 
   @@id([userId, id])
+  @@unique([userId, planStartPlanId])
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, type, updatedAt(sort: Desc)])
   @@index([userId, pinnedAt(sort: Desc)])
@@ -5320,7 +5327,9 @@ model Plan {
   status             PlanStatus     @default(DRAFT)
   generationMetadata Json?          @map("generation_metadata")
 
-  periodWeeks Int @map("period_weeks")
+  planningMode     PlanPlanningMode @default(FIXED) @map("planning_mode")
+  periodWeeks      Int?             @map("period_weeks")
+  generatedThrough DateTime?        @map("generated_through") @db.Date
 
   startDate DateTime? @map("start_date") @db.Date
   endDate   DateTime? @map("end_date") @db.Date
@@ -5347,6 +5356,11 @@ model Plan {
   derivedFromShareId   String? @map("derived_from_share_id")
   derivedFromLineageId String? @map("derived_from_lineage_id")
   rootLineageId        String? @map("root_lineage_id")
+
+  automationPolicies PlanAutomationPolicy[]
+  monthStrategies    RollingMonthStrategy[]
+  weekGenerations    RollingWeekGeneration[]
+  automationJobs     RollingPlanJob[]
 
   workouts            PlanWorkout[]
   links               PlanWorkoutActivityLink[]
@@ -5815,9 +5829,12 @@ model CoachCommit {
 }
 
 model PlanWorkout {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  generationId        String?                @map("generation_id")
+  generation          RollingWeekGeneration? @relation(fields: [generationId], references: [id], onDelete: SetNull)
+  automationProtected Boolean                @default(false) @map("automation_protected")
+  id                  String                 @id @default(cuid())
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt @map("updated_at")
 
   userId String @map("user_id")
   user   T_user @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -6429,4 +6446,114 @@ model AthleteStateUpdate {
   @@index([status, availableAt], map: "t_athlete_state_update_due_idx")
   @@index([status, leaseExpiresAt], map: "t_athlete_state_update_lease_idx")
   @@map("t_athlete_state_update")
+}
+
+enum PlanPlanningMode {
+  FIXED
+  ROLLING
+
+  @@map("enum_plan_planning_mode")
+}
+
+/// Versioned user authorization; only one non-revoked policy per plan is effective.
+model PlanAutomationPolicy {
+  id                  String                  @id @default(cuid())
+  planId              String                  @map("plan_id")
+  plan                Plan                    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  userId              String                  @map("user_id")
+  revision            Int
+  settings            Json
+  confirmedDecisionId String                  @map("confirmed_decision_id")
+  effectiveFrom       DateTime                @map("effective_from") @db.Date
+  revokedAt           DateTime?               @map("revoked_at")
+  createdAt           DateTime                @default(now()) @map("created_at")
+  monthStrategies     RollingMonthStrategy[]
+  weekGenerations     RollingWeekGeneration[]
+  jobs                RollingPlanJob[]
+
+  @@unique([planId, revision])
+  @@index([userId, revokedAt])
+  @@map("t_plan_automation_policy")
+}
+
+/// A calendar month direction; targets are forecasts, never unpaid training debt.
+model RollingMonthStrategy {
+  id               String                     @id @default(cuid())
+  planId           String                     @map("plan_id")
+  plan             Plan                       @relation(fields: [planId], references: [id], onDelete: Cascade)
+  policyId         String                     @map("policy_id")
+  policy           PlanAutomationPolicy       @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  monthStart       DateTime                   @map("month_start") @db.Date
+  monthEnd         DateTime                   @map("month_end") @db.Date
+  effectiveFrom    DateTime                   @map("effective_from") @db.Date
+  revision         Int
+  strategy         Json
+  evidenceRevision String                     @map("evidence_revision")
+  appliedAt        DateTime?                  @map("applied_at")
+  supersededAt     DateTime?                  @map("superseded_at")
+  createdAt        DateTime                   @default(now()) @map("created_at")
+  weekDependencies RollingWeekMonthStrategy[]
+
+  @@unique([planId, monthStart, revision])
+  @@map("t_rolling_month_strategy")
+}
+
+/// One ISO calendar week, including explicit generated rest days and partial starts.
+model RollingWeekGeneration {
+  id               String                     @id @default(cuid())
+  planId           String                     @map("plan_id")
+  plan             Plan                       @relation(fields: [planId], references: [id], onDelete: Cascade)
+  policyId         String                     @map("policy_id")
+  policy           PlanAutomationPolicy       @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  weekStart        DateTime                   @map("week_start") @db.Date
+  weekEnd          DateTime                   @map("week_end") @db.Date
+  generatedFrom    DateTime                   @map("generated_from") @db.Date
+  generatedThrough DateTime                   @map("generated_through") @db.Date
+  revision         Int
+  evidenceRevision String                     @map("evidence_revision")
+  receipt          Json
+  appliedAt        DateTime?                  @map("applied_at")
+  supersededAt     DateTime?                  @map("superseded_at")
+  createdAt        DateTime                   @default(now()) @map("created_at")
+  workouts         PlanWorkout[]
+  monthStrategies  RollingWeekMonthStrategy[]
+
+  @@unique([planId, weekStart, revision])
+  @@map("t_rolling_week_generation")
+}
+
+model RollingWeekMonthStrategy {
+  generationId String                @map("generation_id")
+  generation   RollingWeekGeneration @relation(fields: [generationId], references: [id], onDelete: Cascade)
+  strategyId   String                @map("strategy_id")
+  strategy     RollingMonthStrategy  @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@id([generationId, strategyId])
+  @@map("t_rolling_week_month_strategy")
+}
+
+/// Durable execution identity and fenced lease. Only server workers may consume it.
+model RollingPlanJob {
+  id            String               @id @default(cuid())
+  planId        String               @map("plan_id")
+  plan          Plan                 @relation(fields: [planId], references: [id], onDelete: Cascade)
+  policyId      String               @map("policy_id")
+  policy        PlanAutomationPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  kind          String
+  windowStart   DateTime             @map("window_start") @db.Date
+  inputRevision String               @map("input_revision")
+  state         String               @default("PENDING")
+  previewId     String?              @map("preview_id")
+  availableAt   DateTime             @default(now()) @map("available_at")
+  attempts      Int                  @default(0)
+  claimToken    String?              @map("claim_token")
+  leaseUntil    DateTime?            @map("lease_until")
+  lastError     String?              @map("last_error")
+  receipt       Json?
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+
+  @@unique([planId, kind, windowStart, policyId, inputRevision])
+  @@index([state, availableAt, leaseUntil])
+  @@map("t_rolling_plan_job")
 }

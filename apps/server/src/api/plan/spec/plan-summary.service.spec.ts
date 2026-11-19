@@ -19,7 +19,8 @@ function createService(args?: {
   };
   const loadReadout = {
     batchGetActualLoad: jest.fn(
-      async () => args?.actualMap ?? new Map<number, { actualLoad: number | null }>(),
+      async () =>
+        args?.actualMap ?? new Map<number, { actualLoad: number | null }>(),
     ),
   };
   const service = new PlanSummaryService(
@@ -31,7 +32,10 @@ function createService(args?: {
   return { service, prisma, loadReadout };
 }
 
-const primaryLink = (activityId: number, overrides: Record<string, unknown> = {}) => ({
+const primaryLink = (
+  activityId: number,
+  overrides: Record<string, unknown> = {},
+) => ({
   role: PlanWorkoutActivityLinkRole.PRIMARY,
   unlinkedAt: null,
   activityId,
@@ -174,6 +178,8 @@ describe('PlanSummaryService.summarize', () => {
         id: true,
         userId: true,
         status: true,
+        planningMode: true,
+        startDate: true,
         periodWeeks: true,
       },
     });

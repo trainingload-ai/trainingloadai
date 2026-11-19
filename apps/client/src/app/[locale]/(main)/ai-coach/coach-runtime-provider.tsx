@@ -1,5 +1,8 @@
 "use client";
 
+import { getRestoredPlanDecisionApply } from "@shared/plan-proposal-receipt";
+import { invalidateAfterPlanMutation } from "@/lib/query-invalidation";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChat, type UseChatHelpers } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -39,6 +42,14 @@ import {
   operationIdForRequest,
   clearPendingAiOperation,
 } from "@/lib/ai-operation-recovery";
+import {
+  reconcilePlanDecisionStates,
+  serializePlanDecisionStates,
+} from "./coach-plan-decision-state";
+import {
+  CoachRuntimeEntryStarter,
+  type CoachRuntimeEntry,
+} from "./coach-runtime-entry";
 import { CoachSeedAutoStarter } from "./coach-seed-auto-starter";
 import { CoachThread } from "./coach-thread";
 import { readAiOperationFromSse } from "./coach-operation-event";
@@ -57,6 +68,9 @@ export type CoachConversationRuntimeProps = {
   variant?: "page" | "embedded";
   persistSid?: (sid: string) => void;
   enableUrlSeed?: boolean;
+  entry?: CoachRuntimeEntry;
+  onPlanApplied?: (decisionId: string) => void;
+  onTurnFinished?: () => void;
   prepareOutgoingUserMessage?: (
     message: CoachUiMessage,
     messages: CoachUiMessage[],
@@ -70,6 +84,9 @@ export function CoachRuntimeProvider({
   variant = "page",
   persistSid,
   enableUrlSeed = true,
+  entry,
+  onPlanApplied,
+  onTurnFinished,
   prepareOutgoingUserMessage,
 }: CoachConversationRuntimeProps) {
   const locale = useLocale();
@@ -97,6 +114,12 @@ export function CoachRuntimeProvider({
   const inlineTurnErrorRef = useRef(false);
   const chatRef = useRef<UseChatHelpers<CoachUiMessage> | null>(null);
   const mountedRef = useRef(false);
+  const entryRef = useRef(entry);
+  const onPlanAppliedRef = useRef(onPlanApplied);
+  const onTurnFinishedRef = useRef(onTurnFinished);
+  onTurnFinishedRef.current = onTurnFinished;
+  entryRef.current = entry;
+  onPlanAppliedRef.current = onPlanApplied;
 
   persistSidRef.current = persistSid;
   prepareOutgoingUserMessageRef.current = prepareOutgoingUserMessage;
@@ -233,9 +256,11 @@ export function CoachRuntimeProvider({
         const sessionSid = sidRef.current || activeSid;
         url.searchParams.set("sid", sessionSid);
         const intentOverride =
+          entryRef.current?.intent ||
           intentOverrideRef.current?.trim() ||
           readStoredSessionIntent(sessionSid);
-        const branchContext = branchContextRef.current;
+        const branchContext =
+          entryRef.current?.branchContext ?? branchContextRef.current;
         if (intentOverride) {
           url.searchParams.set("intent", intentOverride);
           intentOverrideRef.current = intentOverride;
@@ -287,11 +312,21 @@ export function CoachRuntimeProvider({
           planId: branchContext?.planId ?? null,
           caseId: branchContext?.caseId ?? null,
         });
-        const operationId = operationIdForRequest({
-          kind: "COACH_SESSION",
-          entityId: sessionSid,
-          requestFingerprint,
-        });
+        const outgoingMessage = requestBody?.message as
+          | { id?: string }
+          | undefined;
+        const entryOperationId =
+          entryRef.current &&
+          outgoingMessage?.id === entryRef.current.firstMessage.id
+            ? `coach-entry:${entryRef.current.key}`
+            : null;
+        const operationId =
+          entryOperationId ??
+          operationIdForRequest({
+            kind: "COACH_SESSION",
+            entityId: sessionSid,
+            requestFingerprint,
+          });
         headers.set("Idempotency-Key", operationId);
         if (requestBody) requestBody.operationId = operationId;
         init = {
@@ -443,7 +478,7 @@ export function CoachRuntimeProvider({
       setTurnError(visibleError);
       toast.error(visibleError);
     },
-    onFinish: ({ isAbort, isDisconnect, isError }) => {
+    onFinish: ({ message, isAbort, isDisconnect, isError }) => {
       if (isAbort || isDisconnect || isError) {
         // This is a local presentation of a lost connection, not a fabricated
         // completion. Reopening obtains the producer's authoritative snapshot.
@@ -492,6 +527,7 @@ export function CoachRuntimeProvider({
           ),
         );
       }
+      if (!isAbort && !isDisconnect && !isError) onTurnFinishedRef.current?.();
       invalidateCoachSessionLists(queryClient);
       void queryClient.invalidateQueries({
         queryKey: queryKeys.ai.usageSummary(),
@@ -515,6 +551,42 @@ export function CoachRuntimeProvider({
   });
 
   chatRef.current = runtime;
+  const appliedDecisionsSeen = useRef(new Set<string>());
+  const appliedDecisionIds = JSON.stringify(
+    [
+      ...new Set(
+        [...initialMessages, ...runtime.messages].flatMap((message) =>
+          message.parts.flatMap((part) => {
+            if (part.type !== "data-coach-tool") return [];
+            const restored = getRestoredPlanDecisionApply(part.data.input);
+            if (restored) return [restored.decisionId];
+            const input = part.data.input as
+              | { kind?: string; result?: string; decisionId?: string }
+              | undefined;
+            return input?.kind === "coach_decision_apply" &&
+              input.result === "APPLIED" &&
+              typeof input.decisionId === "string"
+              ? [input.decisionId]
+              : [];
+          }),
+        ),
+      ),
+    ].sort(),
+  );
+  useEffect(() => {
+    for (const decisionId of JSON.parse(appliedDecisionIds) as string[]) {
+      if (appliedDecisionsSeen.current.has(decisionId)) continue;
+      appliedDecisionsSeen.current.add(decisionId);
+      if (onPlanAppliedRef.current) onPlanAppliedRef.current(decisionId);
+      else void invalidateAfterPlanMutation(queryClient);
+    }
+  }, [appliedDecisionIds, queryClient]);
+  const persistedDecisionStates = serializePlanDecisionStates(initialMessages);
+  useEffect(() => {
+    runtime.setMessages((current) =>
+      reconcilePlanDecisionStates(current, persistedDecisionStates),
+    );
+  }, [entry, persistedDecisionStates, runtime.setMessages]);
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -531,6 +603,11 @@ export function CoachRuntimeProvider({
       chat={runtime}
       onStopError={(error) => toast.error(error.message)}
     >
+      <CoachRuntimeEntryStarter
+        entry={entry}
+        chat={runtime}
+        ready={Boolean(session?.user?.id)}
+      />
       {enableUrlSeed ? (
         <CoachSeedAutoStarter
           sessionId={sid}

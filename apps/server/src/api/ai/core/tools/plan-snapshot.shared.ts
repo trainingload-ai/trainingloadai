@@ -1,7 +1,12 @@
 import dayjs = require('dayjs');
+import {
+  resolveScheduleRulesAtDate,
+  type ScheduleRulePeriod,
+} from '@shared/plan-calendar';
 
 export type PlanWorkoutSummary = {
   id: string;
+  revision: number;
   weekIndex: number;
   dayIndex: number;
   dayOffset: number;
@@ -18,6 +23,7 @@ export type PlanWorkoutSummary = {
   summary?: unknown;
   blocks?: unknown;
   plannedDurationSeconds?: number | null;
+  plannedSessionRpe?: number | null;
   estimatedLoad?: number | null;
   status: string;
   linkedActivityCount: number;
@@ -32,7 +38,20 @@ export type PlanSnapshotToolOutput = {
     goal?: string | null;
     sourceType: string;
     status: string;
-    periodWeeks: number;
+    periodWeeks: number | null;
+    planningMode?: 'FIXED' | 'ROLLING';
+    generatedThrough?: string | null;
+    generationCoverage?: unknown;
+    workoutWindow?: { from: string; through: string; bounded: boolean };
+    generationMetadata?: unknown;
+    scheduleRules?: {
+      asOf: string;
+      effective: ReturnType<typeof resolveScheduleRulesAtDate>;
+      latestConfirmed: {
+        scheduleConstraints: unknown;
+        qualityContract: unknown;
+      };
+    };
     startDate: string | null;
     endDate: string | null;
     currentWeekIndex: number | null;
@@ -71,7 +90,32 @@ export type PlanSnapshotToolOutput = {
       plannedCount: number;
     };
   };
+  relatedCalendar?: {
+    from: string;
+    to: string;
+    total: number;
+    offset: number;
+    returned: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+    workouts: unknown[];
+  };
   allWorkouts?: PlanWorkoutSummary[];
+  scheduleRulePeriods?: ScheduleRulePeriod[];
+  scheduleRuleInventory?: {
+    total: number;
+    offset: number;
+    returned: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+  };
+  workoutInventory?: {
+    total: number;
+    offset: number;
+    returned: number;
+    hasMore: boolean;
+    nextOffset: number | null;
+  };
 };
 
 export function normalizePlanDate(value?: Date | string | null) {
@@ -90,6 +134,7 @@ export function planDayOffsetToWeekDay(dayOffset: number) {
 
 export type PlanSnapshotWorkoutRow = {
   id: string;
+  revision?: number;
   dayOffset?: number | null;
   sessionIndex?: number | null;
   scheduledDate?: Date | string | null;
@@ -104,6 +149,7 @@ export type PlanSnapshotWorkoutRow = {
   summary?: unknown;
   blocks?: unknown;
   plannedDurationSeconds?: number | null;
+  plannedSessionRpe?: number | null;
   estimatedLoad?: number | null;
   status?: string | null;
   links?: unknown[] | null;
@@ -111,11 +157,16 @@ export type PlanSnapshotWorkoutRow = {
 
 export type PlanSnapshotPlanRow = {
   id: string;
+  generationMetadata?: unknown;
   title: string;
   description?: string | null;
   goal?: string | null;
   sourceType: string;
   status: string;
+  planningMode?: 'FIXED' | 'ROLLING';
+  generatedThrough?: Date | string | null;
+  generationCoverage?: unknown;
+  workoutWindow?: { from: string; through: string; bounded: boolean };
   periodWeeks?: number | null;
   startDate?: Date | string | null;
   endDate?: Date | string | null;
@@ -138,6 +189,7 @@ export function summarizePlanWorkoutRow(
   const { weekIndex, dayIndex } = planDayOffsetToWeekDay(row.dayOffset ?? 0);
   return {
     id: row.id,
+    revision: row.revision ?? 1,
     weekIndex,
     dayIndex,
     dayOffset: row.dayOffset ?? 0,
@@ -149,8 +201,7 @@ export function summarizePlanWorkoutRow(
     text: typeof row.text === 'string' ? row.text : '',
     notes: row.notes ?? null,
     structureKind: row.structureKind ?? null,
-    dslVersion:
-      typeof row.dslVersion === 'number' ? row.dslVersion : null,
+    dslVersion: typeof row.dslVersion === 'number' ? row.dslVersion : null,
     structure: row.structure ?? null,
     summary: row.summary ?? null,
     blocks: row.blocks ?? null,
@@ -158,6 +209,8 @@ export function summarizePlanWorkoutRow(
       typeof row.plannedDurationSeconds === 'number'
         ? row.plannedDurationSeconds
         : null,
+    plannedSessionRpe:
+      typeof row.plannedSessionRpe === 'number' ? row.plannedSessionRpe : null,
     estimatedLoad:
       typeof row.estimatedLoad === 'number' ? row.estimatedLoad : null,
     status: String(row.status ?? ''),
@@ -166,17 +219,20 @@ export function summarizePlanWorkoutRow(
 }
 
 export function getPlanAnchorDayIndex(
-  plan: Pick<PlanSnapshotPlanRow, 'startDate' | 'periodWeeks'>,
+  plan: Pick<PlanSnapshotPlanRow, 'startDate' | 'periodWeeks' | 'planningMode'>,
   date: dayjs.Dayjs,
 ) {
-  if (!plan?.startDate || !plan?.periodWeeks) {
+  if (
+    !plan?.startDate ||
+    (plan.planningMode !== 'ROLLING' && !plan?.periodWeeks)
+  ) {
     return { weekIndex: null, dayIndex: null, dayOffset: null };
   }
 
   const start = dayjs(plan.startDate).startOf('day');
   const diff = date.startOf('day').diff(start, 'day');
   const maxOffset = plan.periodWeeks * 7 - 1;
-  if (diff < 0 || diff > maxOffset) {
+  if (diff < 0 || (plan.planningMode !== 'ROLLING' && diff > maxOffset)) {
     return { weekIndex: null, dayIndex: null, dayOffset: null };
   }
 
@@ -216,24 +272,37 @@ export function buildPlanSnapshotFromRow(
     plannedCount: currentWeekWorkouts.filter((w) => w.status === 'PLANNED')
       .length,
   };
+  const metadata = (plan.generationMetadata ?? {}) as Record<string, unknown>;
 
   return {
     asOf: asOfDate,
     plan: {
       id: plan.id,
       title: plan.title,
+      generationMetadata: plan.generationMetadata,
+      scheduleRules: {
+        asOf: asOfDate,
+        effective: resolveScheduleRulesAtDate(metadata, asOfDate),
+        latestConfirmed: {
+          scheduleConstraints: metadata.scheduleConstraints ?? null,
+          qualityContract: metadata.qualityContract ?? null,
+        },
+      },
       description: plan.description ?? null,
       goal: plan.goal ?? null,
       sourceType: plan.sourceType,
       status: plan.status,
+      planningMode: plan.planningMode ?? 'FIXED',
+      generatedThrough: normalizePlanDate(plan.generatedThrough),
+      generationCoverage: plan.generationCoverage ?? null,
+      ...(plan.workoutWindow ? { workoutWindow: plan.workoutWindow } : {}),
       periodWeeks: plan.periodWeeks,
       startDate: normalizePlanDate(plan.startDate),
       endDate: normalizePlanDate(plan.endDate),
       currentWeekIndex,
       currentDayIndex: todayIndex.dayIndex ?? plan.currentDayIndex ?? null,
       workoutCount: workouts.length,
-      completedWorkoutCount: workouts.filter((w) => w.status === 'DONE')
-        .length,
+      completedWorkoutCount: workouts.filter((w) => w.status === 'DONE').length,
       cycleReview: plan.coachSummary
         ? {
             adherenceScore: plan.coachSummary.adherenceScore ?? null,
@@ -271,6 +340,25 @@ export function buildPlanSnapshotFromRow(
       summary,
     },
     ...(input.includeAllWorkouts ? { allWorkouts: workouts } : {}),
+  };
+}
+
+/** Keep model evidence current; the latest confirmed version can intentionally start later. */
+export function planSnapshotModelPlan(plan: PlanSnapshotToolOutput['plan']) {
+  if (!plan) return null;
+  const metadata = (plan.generationMetadata ?? {}) as Record<string, unknown>;
+  const {
+    scheduleConstraintHistory: _history,
+    qualityContractTransition: _transition,
+    ...rest
+  } = metadata;
+  return {
+    ...plan,
+    generationMetadata: {
+      ...rest,
+      scheduleConstraints: plan.scheduleRules?.effective.constraints ?? null,
+      qualityContract: plan.scheduleRules?.effective.qualityContract ?? null,
+    },
   };
 }
 

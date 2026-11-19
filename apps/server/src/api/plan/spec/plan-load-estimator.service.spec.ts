@@ -301,7 +301,9 @@ describe('PlanLoadEstimatorService.loadThresholdsForUser', () => {
       getComposedUserProfile: jest.fn(async () => ({})),
       getEffectiveUserFitnessMetric: jest.fn(
         async (_userId: string, type: UserFitnessMetricType) =>
-          type === UserFitnessMetricType.TP ? { value: 96 } : { value: 1.25 },
+          type === UserFitnessMetricType.TP
+            ? { value: 100 / 96 }
+            : { value: 1.25 },
       ),
     };
     const service = buildEstimator(

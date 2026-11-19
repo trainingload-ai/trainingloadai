@@ -188,9 +188,9 @@ describe('coach visible output policy', () => {
 
     expect(prompt).toContain('<coach_app_context>');
     expect(prompt).toContain('<coach_user_context>');
-    expect(prompt).toContain('never reproduce or mention the wrapper');
-    expect(prompt).toContain('private reasoning, chain-of-thought');
-    expect(prompt).toContain('schema, parser, and retry narration');
+    expect(prompt).toContain('Keep wrappers, hidden labels');
+    expect(prompt).toContain('private reasoning, internal state');
+    expect(prompt).toContain('keep parser/schema narration private');
     expect(prompt).toContain('Simplified Chinese (简体中文)');
     expect(prompt).toContain(
       'never permits an English preface or progress narration',
@@ -201,11 +201,13 @@ describe('coach visible output policy', () => {
     const prompt = buildCoachSystemPrompt('zh');
 
     expect(prompt).toContain(
-      'Before answering current, changing, niche, precise, or disputed external facts',
+      'Verify current, niche, precise or disputed external facts',
     );
-    expect(prompt).toContain("never include the athlete's email");
-    expect(prompt).toContain('cite direct source URLs as Markdown links');
-    expect(prompt).toContain('say when verification fails instead of guessing');
+    expect(prompt).toContain(
+      'free of private athlete/account/health/training data',
+    );
+    expect(prompt).toContain('link direct sources');
+    expect(prompt).toContain('state verification gaps');
   });
 
   it('keeps the product in a first-person coach role for every visible reply', () => {

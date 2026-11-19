@@ -62,7 +62,7 @@ export class CoachContextService {
 
     const patch: Record<string, unknown> = {};
     if (args.startDate && !existing.startDate) patch.startDate = args.startDate;
-    if (args.endDate) patch.endDate = args.endDate;
+    if (args.endDate !== undefined) patch.endDate = args.endDate;
     if (args.status && existing.status !== args.status) {
       patch.status = args.status;
     }
@@ -182,6 +182,16 @@ export class CoachContextService {
                 (typeof change.decisionId === 'string'
                   ? change.decisionId
                   : null),
+            },
+            args.tx,
+          );
+        }
+        if (args.tx && args.type === 'ADAPTATION_APPLIED') {
+          await this.contexts.supersedeStartDecisions(
+            {
+              userId: args.userId,
+              planId: args.planId,
+              appliedDecisionId: args.decisionId,
             },
             args.tx,
           );

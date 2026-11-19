@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import {
   ArrowRight,
   Bell,
@@ -144,7 +146,7 @@ export function MeDesktopDashboard() {
 
   const goalName = activePlan?.plan?.title ?? t("goal.name");
   const goalDescription = activePlan?.plan
-    ? `${activePlan.plan.periodWeeks}w · W${(activePlan.plan.currentWeekIndex ?? 0) + 1} · ${activePlan.plan.status}`
+    ? isRollingPlan(activePlan.plan) ? <RollingPlanCoverage plan={activePlan.plan} /> : `${activePlan.plan.periodWeeks}w · W${(activePlan.plan.currentWeekIndex ?? 0) + 1} · ${activePlan.plan.status}`
     : t("goal.description");
   const userTitle = session.data?.user?.name ?? t("header.badge");
 

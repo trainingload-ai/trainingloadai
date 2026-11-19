@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan, generatedPlanThrough } from "@/lib/rolling-plan";
+
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
@@ -23,7 +25,7 @@ import { useMobileViewport } from "@/hooks/use-mobile";
 import { getPlanLibraryHref } from "@/lib/plan-navigation";
 import { cn } from "@/lib/utils";
 import { useMobileNavigation } from "@/components/mobile-app/components/MobileNavigationProvider";
-import { PlanActivateDialog } from "@/components/plan/PlanActivateDialog";
+import { PlanStartConversationDialog } from "@/components/plan/plan-start-conversation-dialog";
 import { PlanShareCard } from "@/components/plan/plan-share-card";
 import { PlanDetailCycleProgress } from "@/components/plan/detail/plan-detail-cycle-progress";
 import {
@@ -278,11 +280,7 @@ export default function V2PlanDetailPage() {
             pendingAction={activeLifecycleAction}
             onAction={(action) => {
               if (action === "activate") {
-                setPendingLifecycleAction(action);
-                void activateAsync({
-                  planId: plan.id,
-                  startDate: dayjs().format("YYYY-MM-DD"),
-                }).finally(() => setPendingLifecycleAction(null));
+                setActivateOpen(true);
                 return;
               }
               if (action === "resume") {
@@ -341,20 +339,20 @@ export default function V2PlanDetailPage() {
                 "pc:[grid-area:main]",
               )}
             >
-              {planActivated ? (
+              {planActivated && !isRollingPlan(plan) ? (
                 <PlanSummaryCard summary={summary} loading={summaryLoading} />
               ) : null}
-              <PlanDetailCycleProgress
+              {!isRollingPlan(plan) ? <PlanDetailCycleProgress
                 key={plan.id}
                 weeks={weeks}
                 status={plan.status}
-              />
-              {plan.startDate ? (
+              /> : null}
+              {plan.startDate && (!isRollingPlan(plan) || generatedPlanThrough(plan)) ? (
                 <CompetitionPlanImpactCard
                   anchorDate={dayjs().format("YYYY-MM-DD")}
                   startDate={dayjs(plan.startDate).format("YYYY-MM-DD")}
                   endDate={
-                    plan.endDate
+                    generatedPlanThrough(plan) && isRollingPlan(plan) ? generatedPlanThrough(plan)! : plan.endDate
                       ? dayjs(plan.endDate).format("YYYY-MM-DD")
                       : dayjs(plan.startDate)
                           .add(
@@ -407,14 +405,10 @@ export default function V2PlanDetailPage() {
         />
       ) : null}
 
-      <PlanActivateDialog
+      <PlanStartConversationDialog
         open={activateOpen}
-        pending={activating}
+        planId={plan.id}
         onOpenChange={setActivateOpen}
-        onConfirm={async (startDate) => {
-          await activateAsync({ planId: plan.id, startDate });
-          setActivateOpen(false);
-        }}
       />
       <AlertDialog
         open={pendingLifecycleAction !== null}

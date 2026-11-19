@@ -4,9 +4,9 @@ export const planCycleReviewSkill: CoachSkillDef = {
   name: 'plan-cycle-review',
   aliases: ['plan-review', 'cycle-review', 'block-review'],
   description:
-    'Review an active, opened, visible, or just-generated plan against its original goal, race-finish feasibility, execution consistency, load progression, missed sessions, and performance signals.',
+    'Judge whether an existing or visible draft plan serves its goal.',
   whenToUse:
-    'Use for prompts asking to review the whole plan, review a cycle/block, decide whether an existing or just-generated plan is feasible/enough/safe, whether it can finish a race, summarize plan progress, decide whether the plan is working, or plan the next cycle after a block.',
+    'Whole-plan feasibility, race-finish demand or progress across a block; a genuinely new cycle brief uses plan-builder.',
   suggestedTools: [
     'time.current',
     'plan.by_id',
@@ -34,7 +34,7 @@ export const planCycleReviewSkill: CoachSkillDef = {
     `- Keep athlete-set event importance separate from current computed planning impact. Do not infer event constraints from goal prose when the product can resolve them.`,
     `- Complete a review with the direct judgment, decisive evidence and uncertainty, and concrete changes to keep or consider. A new plan draft or applied schedule change is a separate artifact with its own review and confirmation surface.`,
     `- When the review concludes that remaining prescriptions should change, group equivalent sessions, explicitly preserve justified workouts, and use plan.proposal_preview. Use SUPERSEDE only when the coherent coaching solution is a complete successor plan with an explicit effective date.`,
-    `- When connected-device delivery matters to the recommendation, inspect integration.status directly and surface limitations as synchronization impact rather than weakening the internal plan.`,
-    `- In proposal rationale and evidence, explain what athlete data was used and what conclusion follows. Do not expose database IDs, internal DSL/schema details, algorithm or model brands, or confidence scores.`,
+    'For a genuinely new cycle, hand the settled goal, constraints and useful review findings to plan-builder. For saved-DRAFT activation use plan-start; a review alone does not start or replace a plan.',
+    'In a server-owned cycle review, submit only the caller-required judgment; its later composer owns any adjustment artifact.',
   ].join('\n'),
 };

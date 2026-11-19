@@ -1,3 +1,4 @@
+import { currentDecisionConfirmation } from './core/coach-workout-change';
 import { ConflictException } from '@nestjs/common';
 import {
   TodaySuggestionGuidanceService,
@@ -1033,7 +1034,7 @@ export class AiController {
       prompt,
       String(body?.lang ?? 'en').trim() || 'en',
     );
-    const intent = String(body?.intent ?? '').trim();
+    let intent = String(body?.intent ?? '').trim();
     const purpose = parseRequestedModelPurpose(body?.purpose);
     const thinking = purpose === 'REASONING';
     const operationId =
@@ -1325,6 +1326,55 @@ export class AiController {
         }
       }
 
+      const startConversation = await this.prisma.aiCoachSession.findUnique({
+        where: { userId_id: { userId, id: coachSessionKey } },
+        select: {
+          planStartPlanId: true,
+          planStartBranchId: true,
+          planStartRevision: true,
+        },
+      });
+      if (startConversation?.planStartPlanId && !v2)
+        throw new ConflictException('START_REQUIRES_DURABLE_RUNTIME');
+      if (intent === 'plan-start' && !startConversation?.planStartPlanId)
+        throw new ConflictException('START_SESSION_REQUIRED');
+      if (startConversation?.planStartPlanId) {
+        if (body?.planId && body.planId !== startConversation.planStartPlanId)
+          throw new ConflictException('START_SESSION_MISMATCH');
+        const branch = await this.coachBranching.bindStartConversationBranch({
+          userId,
+          sid: coachSessionKey,
+          branchId: coachBranchId,
+          revision: startConversation.planStartRevision,
+          preserveClosedBranch:
+            !!currentDecisionConfirmation(coachUserMessage) ||
+            command?.kind === 'retry',
+        });
+        coachBranchId = branch.id;
+        body = { ...body, planId: startConversation.planStartPlanId };
+        const appliedStart = await this.prisma.planProposalPreview.findFirst({
+          where: {
+            userId,
+            sourcePlanId: startConversation.planStartPlanId,
+            mode: 'START',
+            appliedAt: { not: null },
+            proposal: { path: ['binding', 'sid'], equals: coachSessionKey },
+          },
+          select: { id: true },
+        });
+        if (appliedStart) intent = 'plan-followup';
+        if (branch.id !== startConversation.planStartBranchId)
+          await sink.emit({ type: 'branch', subtype: 'opened', branch });
+      }
+
+      const cardConfirmation = currentDecisionConfirmation(coachUserMessage);
+      if (!coachBranchId && cardConfirmation)
+        coachBranchId = await this.coachBranching.decisionConversationBranch(
+          userId,
+          coachSessionKey,
+          cardConfirmation.decisionId,
+        );
+
       if (
         !coachBranchId &&
         (String(body?.contextId ?? '').trim() ||
@@ -1500,6 +1550,7 @@ export class AiController {
       const stream = await this.aiService.coachStream({
         platformFunded,
         runtimeRunId: runHandle?.projector.run.runId,
+        currentUserMessageId: runHandle?.inputMessageId,
         activeSkillName: platformFunded ? 'athlete-state' : undefined,
         session,
         sid: coachSessionKey,

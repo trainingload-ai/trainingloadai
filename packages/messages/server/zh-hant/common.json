@@ -141,6 +141,11 @@
     "intervals_icu_athlete_identity_missing": "無法確認 Intervals.icu 帳號身分，請重新授權。"
   },
   "notification": {
+    "rollingPlan": {
+      "titleMonthApplied": "持續訓練計劃：月度方向已更新",
+      "titleWeekApplied": "持續訓練計劃：訓練安排已更新",
+      "titleBlocked": "持續訓練計劃需要處理"
+    },
     "reviewDigest": {
       "titleDailyReady": "日複盤已生成",
       "titleWeeklyReady": "週複盤已生成",

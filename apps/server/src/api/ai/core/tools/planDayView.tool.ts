@@ -46,7 +46,7 @@ export const planDayViewTool: AiToolDef<Input, PlanDayViewToolOutput> =
     cost: 'low',
     searchHint:
       'plan day tomorrow schedule workouts calendar single day active plan',
-    applicableSkills: [...PLAN_REVIEW_SKILLS],
+    applicableSkills: [...PLAN_REVIEW_SKILLS, 'workout-management'],
     isEnabled: async (ctx) => hasSignedInUser(ctx),
     maxResultChars: 14_000,
     parameters: {
@@ -77,9 +77,7 @@ export const planDayViewTool: AiToolDef<Input, PlanDayViewToolOutput> =
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
       const today = dayjs(ctx.currentTurnCalendar?.date).startOf('day');
-      const anchor = input.date
-        ? dayjs(input.date).startOf('day')
-        : today;
+      const anchor = input.date ? dayjs(input.date).startOf('day') : today;
       const safeAnchor = anchor.isValid() ? anchor : today;
       const dateStr = safeAnchor.format('YYYY-MM-DD');
       const planIdRaw = String(input.planId ?? '').trim();

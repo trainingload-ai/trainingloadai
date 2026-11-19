@@ -1,6 +1,15 @@
+import type { RollingStartSettings } from "./rolling-plan";
+import type {
+  ScheduleConstraints,
+  ScheduleQualityContractTransition,
+  ScheduleRulePeriod,
+} from "./plan-calendar";
+import type { CoachPlanDraftData } from "./ai-coach-schema";
+import type { WorkoutDefinitionInput } from "./workout-structure";
 import type { WorkoutIntensityIntent } from "./endurance-workout-ir";
+import type { PlanQualityContract } from "./plan-quality";
 
-export type PlanProposalMode = "ADAPT" | "SUPERSEDE";
+export type PlanProposalMode = "ADAPT" | "SUPERSEDE" | "START" | "SCHEDULE";
 export type PlanAdaptationScope = "WORKOUT" | "PLAN_REMAINING";
 export type PlanAssessmentDisposition = "APPLY" | "PRESERVE";
 export type PlanTargetDimension = "PACE" | "HEART_RATE" | "POWER";
@@ -65,11 +74,57 @@ export type PlanSupersessionPreviewRequest = {
   plan: PlanReplacementDraft;
 };
 
+export type PlanStartWorkoutDraft = {
+  plannedSessionRpe?: number;
+  weekIndex: number;
+  dayIndex: number;
+  sessionIndex?: number;
+  sportType: string;
+  sportDefinitionCode?: string | null;
+  name?: string;
+  notes?: string;
+  text?: string;
+  definition?: WorkoutDefinitionInput;
+};
+
+export type PlanStartPreviewRequest = {
+  rolling?: RollingStartSettings;
+  mode: "START";
+  planId: string;
+  startDate: string;
+  rationale: string;
+  evidenceRefs: PlanProposalEvidenceRef[];
+  scheduleConstraints?: ScheduleConstraints;
+  qualityContractTransition?: ScheduleQualityContractTransition;
+  changes: Array<{
+    sourceWorkoutId: string;
+    expectedRevision: number;
+    workout: PlanStartWorkoutDraft;
+  }>;
+  additions: Array<{ candidateKey: string; workout: PlanStartWorkoutDraft }>;
+  deletions: Array<{ sourceWorkoutId: string; expectedRevision: number }>;
+  /** The server expands every unmentioned source workout into an explicit preserved identity. */
+  preserveUnmentioned?: boolean;
+  preserved?: Array<{ sourceWorkoutId: string; expectedRevision: number }>;
+};
+
+export type PlanSchedulePreviewRequest = Omit<
+  PlanStartPreviewRequest,
+  "mode" | "startDate"
+> & {
+  mode: "SCHEDULE";
+  range: { from: string; to: string };
+};
+
 export type PlanProposalPreviewRequest =
   | PlanAdaptationPreviewRequest
-  | PlanSupersessionPreviewRequest;
+  | PlanSupersessionPreviewRequest
+  | PlanStartPreviewRequest
+  | PlanSchedulePreviewRequest;
 
 export type PlanProposalPresentationRow = {
+  protectedReason?: string;
+  changeKind?: "CHANGED" | "ADDED" | "DELETED" | "PRESERVED";
   workoutId?: string;
   name: string;
   scheduledDate?: string | null;
@@ -80,17 +135,42 @@ export type PlanProposalPresentationRow = {
   rationale: string;
 };
 
+export type RelatedCalendarConflict = {
+  code: string;
+  date: string;
+  workoutId: string;
+  planId: string | null;
+  name?: string | null;
+  managed: false;
+};
+
 export type PlanProposalPresentation = {
+  calendarDraftStartDate?: string;
+  rolling?: RollingStartSettings & {
+    generatedFrom: string;
+    generatedThrough: string;
+  };
+  scheduleRulePeriods?: ScheduleRulePeriod[];
+  qualityContract?: PlanQualityContract;
+  relatedCalendarConflicts?: RelatedCalendarConflict[];
   title: string;
   summary: string;
   mode: PlanProposalMode;
+  range?: { from: string; to: string };
   effectiveFrom?: string;
+  startDate?: string;
+  calendarTimeZone?: string;
+  scheduleConstraints?: ScheduleConstraints;
+  calendarDraft?: CoachPlanDraftData;
   facts: PlanProposalEvidenceRef[];
   counts: {
     total: number;
     changed: number;
     preserved: number;
     skipped: number;
+    protected?: number;
+    added?: number;
+    deleted?: number;
   };
   estimatedLoadDelta?: number | null;
   syncImpact: string;
@@ -103,7 +183,11 @@ export type PlanProposalPreviewResult = {
   previewId: string;
   mode: PlanProposalMode;
   expiresAt: string;
-  decisionType: "PLAN_ADAPTATION" | "PLAN_SUPERSESSION";
+  decisionType:
+    | "PLAN_ADAPTATION"
+    | "PLAN_SUPERSESSION"
+    | "PLAN_START"
+    | "PLAN_SCHEDULE";
   decisionPayload: {
     planId: string;
     previewId: string;

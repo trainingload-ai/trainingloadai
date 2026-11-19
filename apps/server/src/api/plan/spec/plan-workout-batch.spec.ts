@@ -49,6 +49,10 @@ function setup() {
     },
   );
   Object.assign(service, {
+    calendarValidation: {
+      assertCandidate: async () => undefined,
+      assertStored: async () => undefined,
+    },
     prisma: {
       $transaction: jest.fn(async (run: (t: unknown) => Promise<unknown>) => {
         const snapshot = structuredClone(rows);

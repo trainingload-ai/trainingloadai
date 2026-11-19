@@ -1,4 +1,13 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { ActivityReadService } from '@/api/activity/activity-read.service';
+import { activityCalendarYmdInZone } from '../plan-link-calendar.util';
+import { addCalendarDays, isCalendarDate } from '@shared/plan-calendar';
+import { generationCoverage } from '@shared/rolling-plan';
+import {
+  Injectable,
+  Optional,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { PlanRepository } from '../persistence/plan.repository';
 import { PlanWorkoutRepository } from '../persistence/plan-workout.repository';
 import { PlanActivityLinkRepository } from '../persistence/plan-activity-link.repository';
@@ -30,7 +39,181 @@ export class PlanQueryService {
     private readonly loadReadout: LoadReadoutService,
     @Optional()
     private readonly workoutTargetResolver?: PlanWorkoutTargetResolver,
+    @Optional() private readonly activityRead?: ActivityReadService,
   ) {}
+
+  /** A dated share/export artifact, deliberately distinct from the finite v1 reusable template. */
+  async windowSnapshot(
+    userId: string,
+    planId: string,
+    from: string,
+    through: string,
+  ) {
+    if (
+      !isCalendarDate(from) ||
+      !isCalendarDate(through) ||
+      through < from ||
+      through > addCalendarDays(from, 92)
+    )
+      throw new UnprocessableEntityException(
+        'A dated snapshot requires a window of at most 93 days',
+      );
+    const plan = await this.plans.findFirst({ where: { id: planId, userId } });
+    if (!plan || plan.planningMode !== 'ROLLING')
+      throw new UnprocessableEntityException('A continuous plan is required');
+    const [generations, workouts, strategies] = await Promise.all([
+      this.prisma.rollingWeekGeneration.findMany({
+        where: {
+          planId,
+          appliedAt: { not: null },
+          supersededAt: null,
+          generatedFrom: { lte: new Date(through) },
+          generatedThrough: { gte: new Date(from) },
+        },
+        orderBy: { weekStart: 'asc' },
+      }),
+      this.workouts.findMany({
+        where: {
+          planId,
+          userId,
+          scheduledDate: { gte: new Date(from), lte: new Date(through) },
+        },
+        orderBy: [{ scheduledDate: 'asc' }, { sessionIndex: 'asc' }],
+        select: {
+          scheduledDate: true,
+          sessionIndex: true,
+          sportType: true,
+          name: true,
+          notes: true,
+          text: true,
+          structureKind: true,
+          status: true,
+          plannedDurationSeconds: true,
+          plannedSessionRpe: true,
+          estimatedLoad: true,
+          estimatedLoadSource: true,
+          links: { where: { unlinkedAt: null }, select: { activityId: true } },
+        },
+      }),
+      this.prisma.rollingMonthStrategy.findMany({
+        where: {
+          planId,
+          appliedAt: { not: null },
+          supersededAt: null,
+          monthStart: { lte: new Date(through) },
+          monthEnd: { gte: new Date(from) },
+        },
+        orderBy: { monthStart: 'asc' },
+      }),
+    ]);
+    const ymd = (d: Date) => d.toISOString().slice(0, 10);
+    const observed = this.activityRead
+      ? await this.activityRead.findMany({
+          where: readyActivityWhere({
+            userId,
+            startTime: {
+              gte: new Date(addCalendarDays(from, -1)),
+              lte: new Date(addCalendarDays(through, 2)),
+            },
+          }),
+          select: { id: true, startTime: true, timezone: true },
+        })
+      : [];
+    const activities = observed.filter((a) => {
+      const day = activityCalendarYmdInZone(
+        a.startTime,
+        plan.activationTimezone ?? a.timezone ?? 'UTC',
+      );
+      return day && day >= from && day <= through;
+    });
+    const actuals = activities.length
+      ? await this.loadReadout.batchGetActualLoad([
+          ...new Set(activities.map((a) => a.id)),
+        ])
+      : new Map<
+          number,
+          { actualLoad: number | null; actualLoadSource?: string | null }
+        >();
+    const actualIds = new Set(activities.map((a) => a.id));
+    const aggregate = (
+      rows: Array<{ value: number | null; source: string | null }>,
+    ) => {
+      const known = rows.filter(
+        (r) => r.value !== null && Number.isFinite(r.value),
+      );
+      return {
+        value: known.length
+          ? Math.round(known.reduce((n, r) => n + r.value!, 0) * 10) / 10
+          : null,
+        unit: 'NORMALIZED_LOAD',
+        knownCount: known.length,
+        totalCount: rows.length,
+        coverage: !rows.length
+          ? 'NO_DATA'
+          : known.length === rows.length
+            ? 'COMPLETE'
+            : 'PARTIAL',
+        sources: [...new Set(known.map((r) => r.source).filter(Boolean))],
+      };
+    };
+    const load = {
+      actual: aggregate(
+        activities.map((a) => ({
+          value: actuals.get(a.id)?.actualLoad ?? null,
+          source: actuals.get(a.id)?.actualLoadSource ?? null,
+        })),
+      ),
+      remainingPlanned: aggregate(
+        workouts
+          .filter(
+            (w) =>
+              ['PLANNED', 'IN_PROGRESS'].includes(w.status) &&
+              !w.links.some((l) => actualIds.has(l.activityId)),
+          )
+          .map((w) => ({
+            value: w.estimatedLoad,
+            source: w.estimatedLoadSource,
+          })),
+      ),
+      ungeneratedForecast: {
+        value: null,
+        unit: 'NORMALIZED_LOAD',
+        coverage: 'UNKNOWN',
+        reason:
+          'Month directions are forecasts, not completed or generated workout load',
+      },
+    };
+    return {
+      load,
+      schemaVersion: 2,
+      payloadVersion: 'plan-window-v2',
+      sourceMode: 'ROLLING',
+      snapshotOnly: true,
+      title: plan.title,
+      goal: plan.goal,
+      window: { from, through },
+      generationCoverage: generationCoverage(
+        from,
+        through,
+        generations.map((g) => ({
+          from: ymd(g.generatedFrom),
+          through: ymd(g.generatedThrough),
+          weekStart: ymd(g.weekStart),
+        })),
+      ),
+      monthDirections: strategies.map((m) => ({
+        monthStart: ymd(m.monthStart),
+        effectiveFrom: ymd(m.effectiveFrom),
+        revision: m.revision,
+        strategy: m.strategy,
+      })),
+      workouts: workouts.map(({ links: _links, ...w }) => ({
+        ...w,
+        scheduledDate: w.scheduledDate ? ymd(w.scheduledDate) : null,
+      })),
+      exportedAt: new Date().toISOString(),
+    };
+  }
 
   /** Bounded, user-scoped projection for read-only MCP clients. */
   listWorkoutsForMcp(args: {
@@ -166,6 +349,11 @@ export class PlanQueryService {
           { endDate: { gte: args.from, lte: args.to } },
           { startDate: { lte: args.from }, endDate: { gte: args.to } },
           {
+            planningMode: 'ROLLING',
+            startDate: { lte: args.to },
+            endDate: null,
+          },
+          {
             startDate: null,
             endDate: null,
             updatedAt: { gte: args.from, lte: args.to },
@@ -181,6 +369,8 @@ export class PlanQueryService {
         description: true,
         goal: true,
         status: true,
+        planningMode: true,
+        generatedThrough: true,
         periodWeeks: true,
         startDate: true,
         endDate: true,
@@ -409,6 +599,41 @@ export class PlanQueryService {
     return this.plans.findMany({
       where: { userId, createdAt: { lte: cutoff } },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      include: {
+        automationPolicies: {
+          where: { createdAt: { lte: cutoff } },
+          select: {
+            revision: true,
+            settings: true,
+            effectiveFrom: true,
+            revokedAt: true,
+          },
+        },
+        monthStrategies: {
+          where: { createdAt: { lte: cutoff } },
+          select: {
+            monthStart: true,
+            monthEnd: true,
+            effectiveFrom: true,
+            revision: true,
+            strategy: true,
+            appliedAt: true,
+            supersededAt: true,
+          },
+        },
+        weekGenerations: {
+          where: { createdAt: { lte: cutoff } },
+          select: {
+            weekStart: true,
+            weekEnd: true,
+            generatedFrom: true,
+            generatedThrough: true,
+            revision: true,
+            appliedAt: true,
+            supersededAt: true,
+          },
+        },
+      },
     });
   }
 
@@ -812,7 +1037,73 @@ export class PlanQueryService {
     return this.workouts.update(args, tx);
   }
 
-  findCoachPlanSnapshot(args: {
+  async findRelatedCalendarPage(args: {
+    userId: string;
+    planId: string;
+    from: string;
+    to: string;
+    offset: number;
+    limit: number;
+  }) {
+    const where = {
+      userId: args.userId,
+      OR: [{ planId: null }, { planId: { not: args.planId } }],
+      scheduledDate: {
+        gte: new Date(`${args.from}T00:00:00Z`),
+        lte: new Date(`${args.to}T00:00:00Z`),
+      },
+    };
+    const [total, workouts] = await Promise.all([
+      this.workouts.count({ where }),
+      this.workouts.findMany({
+        where,
+        orderBy: [
+          { scheduledDate: 'asc' },
+          { sessionIndex: 'asc' },
+          { id: 'asc' },
+        ],
+        skip: args.offset,
+        take: args.limit,
+        select: {
+          id: true,
+          planId: true,
+          revision: true,
+          scheduledDate: true,
+          sessionIndex: true,
+          sportType: true,
+          name: true,
+          text: true,
+          notes: true,
+          status: true,
+          plannedDurationSeconds: true,
+          plannedSessionRpe: true,
+          structureKind: true,
+          links: { where: { unlinkedAt: null }, select: { id: true } },
+        },
+      }),
+    ]);
+    const nextOffset = args.offset + workouts.length;
+    return {
+      from: args.from,
+      to: args.to,
+      total,
+      offset: args.offset,
+      returned: workouts.length,
+      hasMore: nextOffset < total,
+      nextOffset: nextOffset < total ? nextOffset : null,
+      workouts: workouts.map((w) => ({
+        ...w,
+        scheduledDate: w.scheduledDate?.toISOString().slice(0, 10) ?? null,
+        activeActivityLinkCount: w.links.length,
+        links: undefined,
+      })),
+    };
+  }
+
+  async findCoachPlanSnapshot(args: {
+    asOf?: string;
+    calendarFrom?: string;
+    calendarTo?: string;
     userId: string;
     planId?: string;
     status?: string | string[];
@@ -830,7 +1121,33 @@ export class PlanQueryService {
           }
         : {}),
     };
+    const scalar = await this.plans.findFirst({ where, orderBy: args.orderBy });
+    if (!scalar) return null;
+    const anchor =
+      args.asOf && isCalendarDate(args.asOf)
+        ? args.asOf
+        : new Date().toISOString().slice(0, 10);
+    const from = args.calendarFrom ?? addCalendarDays(anchor, -28),
+      through = args.calendarTo ?? addCalendarDays(anchor, 84);
+    if (
+      scalar.planningMode === 'ROLLING' &&
+      (!isCalendarDate(from) ||
+        !isCalendarDate(through) ||
+        through < from ||
+        through > addCalendarDays(from, 366))
+    )
+      throw new UnprocessableEntityException(
+        'Continuous coach reads require a bounded calendar window',
+      );
+    const bounded = scalar.planningMode === 'ROLLING';
     const workoutsInclude = {
+      ...(bounded
+        ? {
+            where: {
+              scheduledDate: { gte: new Date(from), lte: new Date(through) },
+            },
+          }
+        : {}),
       orderBy: [
         { dayOffset: 'asc' as const },
         { sessionIndex: 'asc' as const },
@@ -842,18 +1159,41 @@ export class PlanQueryService {
         },
       },
     };
-    if (args.includeCoachSummary) {
-      return this.plans.findFirst({
-        where,
-        orderBy: args.orderBy,
-        include: { workouts: workoutsInclude, coachSummary: true },
-      });
-    }
-    return this.plans.findFirst({
+    const plan = await this.plans.findFirst({
       where,
       orderBy: args.orderBy,
-      include: { workouts: workoutsInclude },
+      include: {
+        workouts: workoutsInclude,
+        coachSummary: args.includeCoachSummary ?? false,
+        weekGenerations: {
+          where: {
+            appliedAt: { not: null },
+            supersededAt: null,
+            generatedFrom: { lte: new Date(through) },
+            generatedThrough: { gte: new Date(from) },
+          },
+          orderBy: { weekStart: 'asc' },
+        },
+      },
     });
+    if (!plan) return null;
+    return {
+      ...plan,
+      ...(bounded
+        ? {
+            workoutWindow: { from, through, bounded: true },
+            generationCoverage: generationCoverage(
+              from,
+              through,
+              plan.weekGenerations.map((g) => ({
+                from: g.generatedFrom.toISOString().slice(0, 10),
+                through: g.generatedThrough.toISOString().slice(0, 10),
+                weekStart: g.weekStart.toISOString().slice(0, 10),
+              })),
+            ),
+          }
+        : {}),
+    };
   }
 
   findContextById<T extends Prisma.CoachContextSelect>(
@@ -910,6 +1250,19 @@ export class PlanQueryService {
     activityStartTime: Date | null;
   }) {
     return this.prisma.$transaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
+      const current = await this.workouts.findFirst(
+        {
+          where: {
+            id: args.planWorkoutId,
+            userId: args.userId,
+            planId: args.planId,
+          },
+        },
+        tx,
+      );
+      if (!current)
+        throw new UnprocessableEntityException('Workout no longer exists');
       const autoMarked = await this.workouts.markDoneIfApplicable(
         args.planWorkoutId,
         args.activityStartTime,

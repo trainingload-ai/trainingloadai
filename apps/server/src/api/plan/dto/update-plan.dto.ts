@@ -1,8 +1,15 @@
+import type {
+  ScheduleConstraints,
+  ScheduleQualityContractTransition,
+} from '@shared/plan-calendar';
 import {
   IsArray,
   IsIn,
   IsInt,
+  IsNumber,
+  Max,
   IsOptional,
+  IsObject,
   IsString,
   Min,
   ValidateNested,
@@ -12,6 +19,12 @@ import { PLAN_SPORT_TYPES } from '../plan.constants';
 import { ParseWorkoutDefinitionDto } from '../../workout/dto/parse-workout-definition.dto';
 
 class UpdatePlanWorkoutInputDto {
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(10)
+  plannedSessionRpe?: number;
+
   @IsOptional()
   @IsString()
   id?: string;
@@ -58,6 +71,14 @@ class UpdatePlanWorkoutInputDto {
 }
 
 export class UpdatePlanDto {
+  @IsOptional()
+  @IsObject()
+  scheduleConstraints?: ScheduleConstraints;
+
+  @IsOptional()
+  @IsObject()
+  qualityContractTransition?: ScheduleQualityContractTransition;
+
   @IsOptional()
   @IsString()
   title?: string;

@@ -63,7 +63,12 @@ export const planExecutionContextTool: AiToolDef<Input, Output> = buildAiTool({
   searchHint:
     'plan execution facts today tomorrow next workout tsb ctl atl completion',
   cost: 'low',
-  applicableSkills: [...PLAN_REVIEW_SKILLS, 'readiness-check', 'athlete-state'],
+  applicableSkills: [
+    ...PLAN_REVIEW_SKILLS,
+    'readiness-check',
+    'athlete-state',
+    'period-review',
+  ],
   isEnabled: async (ctx) => hasSignedInUser(ctx),
   maxResultChars: 12_000,
   parameters: {

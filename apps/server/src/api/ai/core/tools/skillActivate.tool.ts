@@ -1,6 +1,6 @@
 import { aiToolError, buildAiTool, type AiToolDef } from '../tool.types';
 import {
-  getCoachSkillByName,
+  getCoachCatalogSkillByName,
   getCoachSkills,
   listCoachSkillsForPrompt,
 } from '../skill.registry';
@@ -12,28 +12,16 @@ type Input = {
 
 type Output = {
   activated: boolean;
-  skill?: {
-    name: string;
-    description: string;
-    whenToUse: string;
-    suggestedTools: string[];
-    prompt: string;
-    activatedBy: string;
-  };
-  availableSkills: Array<{
-    name: string;
-    description: string;
-    whenToUse: string;
-  }>;
+  skill?: { name: string; description: string };
+  availableSkills: Array<{ name: string; description: string }>;
   reason?: string;
 };
 
 // Existing stored calls can use aliases; normalize the displayed identity, not
 // the caller's arguments. New model calls should use the canonical catalog.
-const SKILL_NAMES = getCoachSkills().flatMap((skill) => [
-  skill.name,
-  ...(skill.aliases ?? []),
-]);
+const SKILL_NAMES = getCoachSkills()
+  .filter((skill) => skill.catalogVisible !== false)
+  .flatMap((skill) => [skill.name, ...(skill.aliases ?? [])]);
 
 export const skillActivateTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'skill.activate',
@@ -63,11 +51,16 @@ export const skillActivateTool: AiToolDef<Input, Output> = buildAiTool({
       ? { ok: true }
       : aiToolError('Missing skill name', 'INVALID_INPUT'),
   execute: async (_ctx, input) => {
-    const skill = getCoachSkillByName(input.name);
+    const skill = getCoachCatalogSkillByName(input.name);
     return {
       activated: Boolean(skill),
-      skill: skill ?? undefined,
-      availableSkills: listCoachSkillsForPrompt(),
+      // Both runtimes reload the complete guidance by canonical name next step.
+      skill: skill
+        ? { name: skill.name, description: skill.description }
+        : undefined,
+      availableSkills: listCoachSkillsForPrompt().map(
+        ({ name, description }) => ({ name, description }),
+      ),
       reason: input.reason?.trim() || undefined,
     };
   },

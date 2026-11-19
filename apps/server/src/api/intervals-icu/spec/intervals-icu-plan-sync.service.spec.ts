@@ -1,3 +1,5 @@
+import { PlanCalendarValidationService } from '../../plan/application/plan-calendar-validation.service';
+import { PlanCalendarRepository } from '../../plan/persistence/plan-calendar.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { PlanExternalSyncService } from '@/api/plan/application/plan-external-sync.service';
 import { PlanRepository } from '@/api/plan/persistence/plan.repository';
@@ -149,6 +151,7 @@ describe('IntervalsIcuPlanSyncService', () => {
           {
             getPreferredTimezone: jest.fn(async () => 'UTC'),
           } as never,
+          new PlanCalendarValidationService(new PlanCalendarRepository()),
         ),
         { model: () => externalProviderConnection } as never,
         {

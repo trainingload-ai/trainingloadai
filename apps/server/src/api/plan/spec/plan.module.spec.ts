@@ -1,3 +1,5 @@
+import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
+import { PlanCalendarValidationService } from '../application/plan-calendar-validation.service';
 import { AthleteStateUpdates } from '@/athlete-state/updates/athlete-state-updates.service';
 import { describe, expect, it } from '@jest/globals';
 import { Test } from '@nestjs/testing';
@@ -33,6 +35,8 @@ describe('PlanModule command wiring', () => {
   it('compiles the facade and command services through Nest DI', async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        PlanCalendarRepository,
+        PlanCalendarValidationService,
         PlanRepository,
         PlanWorkoutRepository,
         PlanActivityLinkRepository,

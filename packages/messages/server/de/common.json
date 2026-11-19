@@ -328,6 +328,11 @@
     }
   },
   "notification": {
+    "rollingPlan": {
+      "titleMonthApplied": "Fortlaufender Trainingsplan: Monatsziel aktualisiert",
+      "titleWeekApplied": "Fortlaufender Trainingsplan: Einheiten aktualisiert",
+      "titleBlocked": "Fortlaufender Trainingsplan erfordert Aufmerksamkeit"
+    },
     "reviewDigest": {
       "titleDailyReady": "Daily review is ready",
       "titleWeeklyReady": "Weekly review is ready",

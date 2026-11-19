@@ -71,6 +71,37 @@ describe('coach skill resolution', () => {
       }),
     ).toBeNull();
   });
+  it.each([
+    'activity-review',
+    'workout-review',
+    'period-review',
+    'plan-review-adjustment',
+    'rolling-plan',
+    'athlete-state',
+    'workout-generator',
+  ])(
+    'does not preload a server-only skill from ordinary client intent: %s',
+    (intent) => {
+      expect(
+        resolveCoachActiveSkill({ prompt: 'Discuss this training.', intent }),
+      ).toBeNull();
+      expect(
+        resolveCoachActiveSkill({
+          prompt: 'My reply.',
+          intent: 'plan-builder',
+          restoredSkill: intent,
+        }),
+      ).not.toBeNull();
+    },
+  );
+  it('preserves a visible legacy entry alias', () => {
+    expect(
+      resolveCoachActiveSkill({
+        prompt: 'Move my workout.',
+        intent: 'workout-editor',
+      })?.name,
+    ).toBe('workout-management');
+  });
   it('detects coach question reply tool results', () => {
     expect(
       hasCoachQuestionReplyToolResult({

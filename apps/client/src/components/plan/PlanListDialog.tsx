@@ -1,8 +1,12 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
+
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import React, { useState } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -40,7 +44,7 @@ import {
   buildPlanListItemMeta,
   toExistingPlanDraft,
 } from "./plan-dialog-model";
-import { PlanActivateDialog } from "./PlanActivateDialog";
+import { PlanStartConversationDialog } from "./plan-start-conversation-dialog";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 
 interface PlanListDialogProps {
@@ -58,6 +62,7 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
   const qc = useQueryClient();
+  const router = useRouter();
   const { plans, isLoading, error } = usePlansList(open);
   const [editOpen, setEditOpen] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
@@ -126,7 +131,7 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
                         <ItemHeader>
                           <ItemTitle>
                             {p.title}
-                            {meta.weeks ? (
+                            {isRollingPlan(p) ? <RollingPlanCoverage plan={p} /> : meta.weeks ? (
                               <span className="ml-2 text-mobile-caption pc:text-xs text-muted-foreground">
                                 {meta.weeks} weeks
                               </span>
@@ -157,6 +162,7 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
                               variant="outline"
                               onClick={async () => {
                                 try {
+                                  if (isRollingPlan(p)) { onOpenChange(false); router.push(`/plans/${p.id}`); return; }
                                   const detail = await qc.fetchQuery({
                                     queryKey: queryKeys.plans.detail(p.id),
                                     queryFn: () => getPlanDetail(p.id),
@@ -205,8 +211,12 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
                                   hasActivePlan
                                 }
                                 onClick={() => {
-                                  setActivatePlanId(p.id);
-                                  setActivateOpen(true);
+                                  if (p.status === "PAUSED") {
+                                    void activateAsync({ planId: p.id });
+                                  } else {
+                                    setActivatePlanId(p.id);
+                                    setActivateOpen(true);
+                                  }
                                 }}
                               >
                                 {t("buttons.activate")}
@@ -243,21 +253,12 @@ export const PlanListDialog: React.FC<PlanListDialogProps> = ({
           </ScrollArea>
         </DialogContent>
       </Dialog>
-      <PlanActivateDialog
+      <PlanStartConversationDialog
         open={activateOpen}
-        pending={activating}
+        planId={activatePlanId}
         onOpenChange={(nextOpen) => {
           setActivateOpen(nextOpen);
           if (!nextOpen) setActivatePlanId(null);
-        }}
-        onConfirm={async (startDate) => {
-          if (!activatePlanId) return;
-          await activateAsync({
-            planId: activatePlanId,
-            startDate,
-          });
-          setActivateOpen(false);
-          setActivatePlanId(null);
         }}
       />
       <EditPlanDialog

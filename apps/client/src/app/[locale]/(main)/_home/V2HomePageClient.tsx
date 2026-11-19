@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan, isPlanDateNotGenerated, type PlanPlanning } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import {
   ArrowRight,
   CalendarRange,
@@ -161,6 +163,7 @@ function buildHomeData(t: TranslateFn) {
       mapThumbnailUrl: null as string | null,
     },
     currentPlan: {
+      planning: null as PlanPlanning | null,
       title: t("currentPlan.title"),
       cycle: t("currentPlan.cycle"),
       weekLabel: t("currentPlan.weekLabel"),
@@ -690,6 +693,7 @@ function TodayExecutionPanel({
   const tActivities = useTranslations("activities");
   const tLoad = useTranslations("V2PlanDetailPage.mobile.loadChart");
   const tWorkoutDialog = useTranslations("ViewWorkoutDialog.mobile");
+  const rollingT = useTranslations("RollingPlan");
   const dayHref = `/day/${homeData.today.isoDate}`;
   const {
     pendingWorkoutId,
@@ -805,7 +809,7 @@ function TodayExecutionPanel({
         <div className="space-y-1.5">
           {homeData.today.plannedWorkouts.length === 0 ? (
             <div className="rounded-surface border border-dashed border-border/70 bg-neutral-100 px-4 py-6 text-sm text-muted-foreground dark:bg-muted/45">
-              {t("todayExecution.empty")}
+              {homeData.currentPlan.planning && isPlanDateNotGenerated(homeData.currentPlan.planning, homeData.today.isoDate) ? rollingT("notGenerated") : t("todayExecution.empty")}
             </div>
           ) : null}
           {homeData.today.plannedWorkouts.map((workout) => {
@@ -1151,11 +1155,11 @@ function HomeTwoColumnSection({
               <div className="h-64 animate-pulse rounded-md bg-muted/45" />
             }
           >
-            <LoadComparisonChart
+            {isRollingPlan(homeData.currentPlan.planning) ? <RollingPlanCoverage plan={homeData.currentPlan.planning!} /> : <LoadComparisonChart
               homeData={homeData}
               plannedWorkouts={plannedWorkouts}
               t={t}
-            />
+            />}
           </DeferredMount>
         </div>
         <div className="order-1 min-w-0 md:order-none">
@@ -1460,6 +1464,7 @@ export default function V2HomePageClient({
 }) {
   const t = useTranslations("V2HomePage");
   const tAiConsent = useTranslations("AiDataConsent");
+  const rollingT = useTranslations("RollingPlan");
   const queryClient = useQueryClient();
   const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
@@ -1593,15 +1598,16 @@ export default function V2HomePageClient({
       currentPlan: activePlan
         ? {
             ...baseHomeData.currentPlan,
+            planning: activePlan,
             cycle: activePlan.title,
-            weekLabel: t("dynamic.weekLabel", {
+            weekLabel: isRollingPlan(activePlan) ? rollingT("currentWeek", { week: currentWeekIndex }) : t("dynamic.weekLabel", {
               current: currentWeekIndex,
-              total: activePlan.periodWeeks,
+              total: activePlan.periodWeeks ?? 1,
             }),
             todayFocus:
               currentDayWorkouts[0]?.title?.trim() ||
               currentDayWorkouts[0]?.notes?.trim() ||
-              baseHomeData.currentPlan.todayFocus,
+              (activePlan && isPlanDateNotGenerated(activePlan, dateKey) ? rollingT("notGenerated") : baseHomeData.currentPlan.todayFocus),
             weekTargetLoad: currentWeekWorkouts.filter(
               (workout) => workout.status !== "MOVED",
             ).length,
@@ -1632,6 +1638,7 @@ export default function V2HomePageClient({
     baseHomeData,
     locale,
     resolvedTodayAdvice,
+    rollingT,
     sourceData,
     t,
     timeFormat,
@@ -1763,14 +1770,14 @@ export default function V2HomePageClient({
                   <div className="inline-flex shrink-0 rounded-md bg-white/92 px-2 py-1 text-mobile-caption text-muted-foreground dark:bg-black/30 pc:text-[11px]">
                     {t("header.weekTarget")}
                     <span className="ml-1 font-semibold text-foreground">
-                      {displayedHomeData.currentPlan.weekTargetLoad}
+                      {isRollingPlan(activePlan) ? "—" : displayedHomeData.currentPlan.weekTargetLoad}
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-3 flex min-w-0 items-start gap-2.5">
                   <span className="shrink-0 whitespace-nowrap rounded-md bg-white/88 px-2 py-1 text-mobile-caption text-muted-foreground dark:bg-black/28 pc:text-[11px]">
-                    {displayedHomeData.currentPlan.weekLabel}
+                    {isRollingPlan(activePlan) ? <RollingPlanCoverage plan={activePlan!} /> : displayedHomeData.currentPlan.weekLabel}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="text-mobile-caption text-muted-foreground pc:text-[11px]">

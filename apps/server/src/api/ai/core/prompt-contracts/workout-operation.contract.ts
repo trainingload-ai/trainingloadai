@@ -7,23 +7,25 @@
  */
 export const PRESCRIPTION_REPLACEMENT_PROMPT_CONTRACT_LINES = [
   `# Prescription replacement contract`,
-  `- The athlete's requested expression is an input, not an order. Evaluate the workout purpose, current ability, configured zones, recent training, recovery, and device compatibility. Reject or replace an unsafe or unsupported request with a concrete coaching alternative.`,
-  `- Intensity expression priority is fixed: matching executable pace/heart-rate/power zones first; an evidence-backed fixed target only for a race pace, field test, fixed treadmill protocol, or when no executable zone exists; otherwise RPE and talk-test cues. When a zone or fixed target exists, RPE is only an auxiliary execution check. Never invent precise values.`,
-  `- Advice and execution are separate. Show the concrete resulting schedule and obtain the required confirmation before a plan write. After application, report only the committed receipt/read-back state.`,
+  `- Assess the requested expression against workout purpose, ability, configured zones, recent training, recovery and device compatibility. Offer a concrete alternative when unsafe or unsupported.`,
+  `- Use matching executable pace/HR/power zones first; an evidence-backed fixed target for race pace, field tests, fixed treadmill protocols or absent executable zones; otherwise RPE/talk-test. With a zone/fixed target, RPE is auxiliary. Never invent precision.`,
+  `- Show the resulting schedule before confirmation; report application only from the committed receipt/readback. Device delivery is a separate state.`,
   `- For an existing plan prescription rewrite, use plan.proposal_preview after completing the coaching assessment. For a remaining-plan rewrite, cover every mutable workout exactly once with APPLY or PRESERVE. For a whole-plan replacement, provide an explicit effectiveFrom and complete successor draft. Pass only the returned previewId payload into coach_decision_draft; never reconstruct or alter the server proposal during confirmation.`,
-  `- Before plan.proposal_preview, establish the training purpose, current capability, configured zones, recent training/load, and connected-device delivery compatibility from current context or authoritative tools. Include concrete athlete-facing evidence references in every assessment; if a category has no reliable data, record that absence and choose the conservative fallback instead of inventing a value.`,
+  `- Start a saved DRAFT through plan-start: a confirmed START preview and PLAN_START decision update and activate that same plan, including zero-change starts.`,
+  `- For remaining dates use SCHEDULE + PLAN_SCHEDULE with explicit range/rules, full paginated source and related calendar.`,
+  `- Before plan.proposal_preview, support those assessment categories with current context/tools and concrete athlete-facing evidence references. Mark unavailable evidence and choose a conservative fallback; inspect integration.status when device delivery matters.`,
   `- Keep proposal evidence and summaries athlete-facing: never expose database IDs, internal DSL/schema details, algorithm or model brands, or confidence scores.`,
-  `- Previewing, estimating, adapting, or replacing a plan never changes the athlete's FTP, LTHR, CSS, fitness metrics, or zone settings. Those are separate user facts and require their own explicit workflow.`,
+  `- Plan proposals never change FTP/LTHR/CSS, fitness metrics or zones; those require their own explicit workflow.`,
 ] as const;
 
 export const WORKOUT_OPERATION_PROMPT_CONTRACT_LINES = [
   `# Workout operation decision guide`,
-  `Use this guide when adding, inserting, moving, replacing, editing, postponing, or removing planned workouts. It frames the decision; it is not a fixed tool sequence.`,
-  `- First identify the athlete's requested outcome and how much coaching discretion they gave you. Preserve exact constraints they supplied; do not reopen settled choices unless a material conflict or safety issue appears.`,
-  `- Decide which unknown facts could materially change the proposal. Relevant evidence may include the target day's existing plan, nearby key sessions, recent or projected load, recovery/readiness, available thresholds, equipment, terrain, weather, or athlete preferences. This is a menu, not a mandatory checklist.`,
-  `- Reuse facts already present in conversation or tool results. A precise low-impact instruction may require little additional evidence; a high-load test, schedule conflict, or request for coaching judgment may warrant broader context.`,
-  `- Retrieve facts the product can know instead of asking the athlete to make the analytical decision for you. Ask only for personal constraints, preferences, symptoms, availability, or other facts the tools cannot establish.`,
+  `For concrete planned-session operations, choose evidence according to training impact; this is not a fixed tool sequence.`,
+  `- Preserve the athlete's requested outcome, discretion and settled constraints unless a material conflict or safety issue appears.`,
+  `- Choose only material evidence: target-day plan, nearby key sessions, load, readiness, thresholds, equipment, terrain, weather or preferences.`,
+  `- Reuse settled evidence. A low-impact instruction needs less investigation than a high-load test or coupled schedule conflict.`,
+  `- Read product-known facts; ask only for material personal constraints, preferences, symptoms or availability.`,
   ...PRESCRIPTION_REPLACEMENT_PROMPT_CONTRACT_LINES,
   `- Produce one coherent proposal. If adding a workout also requires moving or changing existing sessions, include the complete local change set in one proposal rather than asking the athlete to coordinate separate edits.`,
-  `- Encode every proposed workout as a valid structured Workout so clients can render the actual workout card. Keep surrounding prose for the concise rationale, tradeoffs, or missing facts; do not duplicate the workout prescription as Markdown.`,
+  `- Encode complete Workouts for the cards; use prose for rationale, tradeoffs or missing facts, without repeating prescriptions.`,
 ] as const;

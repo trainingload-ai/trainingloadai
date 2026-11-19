@@ -39,6 +39,7 @@ function fixture() {
     links as never,
     {} as never,
     {} as never,
+    { assertStored: async () => undefined } as never,
   );
   return { row, tx, prisma, workouts, links, estimator, service };
 }

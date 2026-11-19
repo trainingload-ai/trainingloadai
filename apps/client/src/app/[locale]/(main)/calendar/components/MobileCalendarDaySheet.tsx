@@ -34,6 +34,7 @@ const ViewWorkoutDialog = dynamic(
 );
 
 export function MobileCalendarDaySheet({
+  notGenerated,
   activities,
   date,
   events,
@@ -43,6 +44,7 @@ export function MobileCalendarDaySheet({
   page,
   workouts,
 }: {
+  notGenerated?: boolean;
   activities: Activity[];
   date: Dayjs;
   events: CompetitionEvent[];
@@ -139,6 +141,7 @@ export function MobileCalendarDaySheet({
       {page.kind === "day" ? (
         <div className="space-y-2">
           <MobileCalendarDayContent
+            notGenerated={notGenerated}
             activities={activities}
             events={events}
             workouts={workouts}
