@@ -131,11 +131,12 @@ function harness() {
       model: 'test',
     })),
   };
+  const workoutGenerator = { generate: jest.fn() };
   const service = new TodaySuggestionOrchestratorService(
     prisma as never,
     projector,
     agent as never,
-    {} as never,
+    workoutGenerator as never,
     new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
     engagement,
     uncontendedGeneration(prisma),
@@ -144,6 +145,7 @@ function harness() {
     service,
     projector,
     agent,
+    workoutGenerator,
     engagement,
     execution,
     coverage,
@@ -215,6 +217,43 @@ describe('activity-first today suggestion regressions', () => {
     expect(restored.delivery.reasonCode).toBe('GENERATED');
     expect(restored.suggestionId).not.toBe(denied.suggestionId);
     expect(agent.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back as a whole when an additional-training preview cannot be generated', async () => {
+    const { service, agent, workoutGenerator } = harness();
+    const reason =
+      'An optional additional ride fits the recent easy load and time available.';
+    agent.run.mockImplementationOnce(async ({ projection }) => ({
+      draft: validateTodaySuggestionDraftForProjection(
+        {
+          headline: 'An optional extra ride',
+          summary: reason,
+          recommendation: {
+            kind: 'TRAIN',
+            durationMinutes: 30,
+            intensity: 'EASY',
+          },
+          confidence: 'MEDIUM',
+          evidenceCodes: ['RECENT_ACTIVITY'],
+          preferredIntent: 'CREATE_TODAY_WORKOUT',
+          secondaryIntents: [],
+          tags: [],
+          trainingBasis: { kind: 'ADDITIONAL', reason },
+        },
+        projection,
+      ),
+      runId: 'extra-run',
+      provider: 'test',
+      model: 'test',
+    }));
+    workoutGenerator.generate.mockRejectedValueOnce(
+      new Error('generator unavailable'),
+    );
+    const result = await service.get(args);
+    expect(result.delivery.reasonCode).toBe('OUTPUT_REJECTED');
+    expect(result.recommendation.kind).toBe('RECOVER');
+    expect(result.primaryIntent?.type).not.toBe('CREATE_TODAY_WORKOUT');
+    expect(result.summary).not.toBe(reason);
   });
 
   it('keeps fallback grounded in the actual morning session without inventing a plan', async () => {

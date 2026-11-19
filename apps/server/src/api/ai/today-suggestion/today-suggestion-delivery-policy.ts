@@ -9,6 +9,7 @@ import type {
   TodaySuggestionV2,
   TodaySuggestionWorkout,
 } from '@shared/ai-today-suggestion-contract';
+import { isTodaySuggestionWorkout } from '@shared/ai-today-suggestion-contract';
 import { stableJson } from '../core/ai-common.util';
 import { aiFallbackText } from '../core/ai-fallback-copy';
 import type {
@@ -138,6 +139,12 @@ export class TodaySuggestionDeliveryPolicy {
     generatedAt: Date | null;
   }): TodaySuggestionV2 {
     const { projection, draft } = args;
+    if (
+      draft.trainingBasis?.kind === 'ADDITIONAL' &&
+      (draft.preferredIntent !== 'CREATE_TODAY_WORKOUT' ||
+        !isTodaySuggestionWorkout(draft.generatedWorkout))
+    )
+      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_ADDITIONAL_WORKOUT');
     const evidenceCodes = [
       ...draft.evidenceCodes,
       ...projection.constraints.filter((code) => EVIDENCE_CODES.has(code)),

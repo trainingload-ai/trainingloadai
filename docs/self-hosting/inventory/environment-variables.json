@@ -1837,7 +1837,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 27
+          "line": 28
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -1870,7 +1870,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 26
+          "line": 27
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -5477,7 +5477,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 25
+          "line": 26
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",

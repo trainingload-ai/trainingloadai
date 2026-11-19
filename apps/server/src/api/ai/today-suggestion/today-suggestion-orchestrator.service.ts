@@ -337,9 +337,21 @@ export class TodaySuggestionOrchestratorService {
               signal: controller.signal,
               allowWithoutConsent: args.allowWithoutConsent,
             });
+            if (
+              draft.trainingBasis?.kind === 'ADDITIONAL' &&
+              !isTodaySuggestionWorkout(generated.workout)
+            )
+              throw new Error(
+                'TODAY_SUGGESTION_OUTPUT_REJECTED_ADDITIONAL_WORKOUT',
+              );
             draft = { ...draft, generatedWorkout: generated.workout };
             workoutRunId = generated.runId;
           } catch (error) {
+            if (draft.trainingBasis?.kind === 'ADDITIONAL')
+              throw new Error(
+                'TODAY_SUGGESTION_OUTPUT_REJECTED_ADDITIONAL_WORKOUT',
+                { cause: error },
+              );
             this.logger.warn(
               `[AI][today-suggestion-workout] unavailable userId=${args.userId} date=${projection.date} reason=${this.errorMessage(error)}`,
             );

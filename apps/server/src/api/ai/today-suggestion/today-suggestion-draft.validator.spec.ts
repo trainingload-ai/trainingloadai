@@ -285,7 +285,7 @@ describe('validateTodaySuggestionDraft', () => {
         {
           ...valid,
           summary: reason,
-          preferredIntent: null,
+          preferredIntent: 'CREATE_TODAY_WORKOUT',
           trainingBasis: { kind: 'ADDITIONAL', reason },
         },
         movedProjection,
@@ -299,6 +299,38 @@ describe('validateTodaySuggestionDraft', () => {
           trainingBasis: { kind: 'ADDITIONAL', reason },
         },
         movedProjection,
+      ),
+    ).toThrow('TRAINING_BASIS');
+  });
+
+  it('requires an explicit new-workout preview for additional training, rather than reviving moved-course prose', () => {
+    const summary =
+      'Complete the moved endurance ride tonight as originally scheduled.';
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          summary,
+          preferredIntent: null,
+          trainingBasis: { kind: 'ADDITIONAL', reason: summary },
+        },
+        movedProjection,
+      ),
+    ).toThrow('TRAINING_BASIS');
+  });
+
+  it('requires the chosen course identity when more than one course remains today', () => {
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        { ...valid, preferredIntent: 'OPEN_TODAY_WORKOUT' },
+        {
+          ...movedProjection,
+          todayWorkouts: ['first', 'second'].map((id) => ({
+            ...movedProjection.tomorrowWorkouts[0],
+            id,
+            scheduledDate: movedProjection.date,
+          })),
+        },
       ),
     ).toThrow('TRAINING_BASIS');
   });

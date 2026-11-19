@@ -61,34 +61,34 @@ const OptionCard = ({
       aria-labelledby={`${id}-title`}
       aria-describedby={`${id}-description ${id}-features`}
       className={cn(
-        "group grid min-w-0 w-full grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3 rounded-md bg-muted/55 p-4 text-left text-foreground transition-colors sm:row-span-5 sm:grid-cols-1 sm:grid-rows-[auto_auto_auto_1fr_auto] sm:gap-y-4 sm:p-6 sm:supports-[grid-template-rows:subgrid]:grid-rows-subgrid",
+        "group grid min-w-0 w-full grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3 rounded-md bg-muted/55 p-4 text-left text-foreground transition-colors md:row-span-5 md:grid-cols-1 md:grid-rows-[auto_auto_auto_1fr_auto] md:gap-y-4 md:p-6 md:supports-[grid-template-rows:subgrid]:grid-rows-subgrid",
         "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         !disabled && "cursor-pointer",
         disabled && "cursor-not-allowed opacity-50 hover:bg-muted/55",
         className,
       )}
     >
-      <span className="row-span-3 flex min-h-6 items-start gap-2.5 text-muted-foreground sm:row-span-1 sm:items-center">
+      <span className="row-span-3 flex min-h-6 items-start gap-2.5 text-muted-foreground md:row-span-1 md:items-center">
         <span aria-hidden="true" className="shrink-0 [&_svg]:size-5">
           {icon}
         </span>
-        <span className="hidden text-xs leading-5 sm:inline">{eyebrow}</span>
+        <span className="hidden text-xs leading-5 md:inline">{eyebrow}</span>
       </span>
       <span
         id={`${id}-title`}
-        className="col-start-2 text-base font-semibold leading-6 text-foreground sm:col-auto"
+        className="col-start-2 text-base font-semibold leading-6 text-foreground md:col-auto"
       >
         {title}
       </span>
       <span
         id={`${id}-description`}
-        className="col-start-2 mt-1.5 text-sm leading-6 text-muted-foreground sm:col-auto sm:mt-0"
+        className="col-start-2 mt-1.5 text-sm leading-6 text-muted-foreground md:col-auto md:mt-0"
       >
         {desc}
       </span>
       <span
         id={`${id}-features`}
-        className="hidden flex-col gap-2.5 text-xs leading-5 text-muted-foreground sm:flex"
+        className="hidden flex-col gap-2.5 text-xs leading-5 text-muted-foreground md:flex"
       >
         {features.map((feature) => (
           <span key={feature} className="flex items-start gap-2">
@@ -97,7 +97,7 @@ const OptionCard = ({
           </span>
         ))}
       </span>
-      <span className="col-start-2 mt-3 flex items-end justify-between gap-3 text-sm font-medium leading-5 text-foreground sm:col-auto sm:mt-auto">
+      <span className="col-start-2 mt-3 flex items-end justify-between gap-3 text-sm font-medium leading-5 text-foreground md:col-auto md:mt-auto">
         <span>{action}</span>
         <ArrowRight
           aria-hidden="true"
@@ -138,7 +138,7 @@ export function CreatePlanModeDialog(props: CreatePlanModeDialogProps) {
         </AdaptiveDialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-1 pc:px-6">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-y-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-y-4 lg:grid-cols-4">
             <OptionCard
               icon={<CalendarClock />}
               title={rollingT("title")}

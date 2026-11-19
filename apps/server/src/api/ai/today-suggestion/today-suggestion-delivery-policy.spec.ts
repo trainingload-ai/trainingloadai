@@ -174,6 +174,35 @@ describe('TodaySuggestionDeliveryPolicy', () => {
     expect(result).not.toHaveProperty('trainingBasis');
   });
 
+  it('requires a real new-workout preview before delivering additional training', () => {
+    const policy = new TodaySuggestionDeliveryPolicy(createAiFallbackI18n());
+    const extra = draft({
+      trainingBasis: {
+        kind: 'ADDITIONAL',
+        reason: 'An optional extra session fits the recent load.',
+      },
+    });
+    expect(() =>
+      policy.build({
+        projection: projection(),
+        draft: { ...extra, generatedWorkout: undefined },
+        generationToken: 'extra',
+        state: 'GENERATED',
+        reasonCode: 'GENERATED',
+        generatedAt: new Date(),
+      }),
+    ).toThrow('ADDITIONAL_WORKOUT');
+    const result = policy.build({
+      projection: projection(),
+      draft: extra,
+      generationToken: 'extra',
+      state: 'GENERATED',
+      reasonCode: 'GENERATED',
+      generatedAt: new Date(),
+    });
+    expect(result.primaryIntent?.type).toBe('CREATE_TODAY_WORKOUT');
+  });
+
   it.each(['de', 'de-DE'])(
     'localizes delivered actions and evidence for %s',
     (locale) => {

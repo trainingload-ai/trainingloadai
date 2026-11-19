@@ -183,7 +183,10 @@ export function validateTodaySuggestionDraftForProjection(
     const moved = projection.todayWorkouts.some(
       (workout) => workout.status === 'MOVED',
     );
-    if (moved && !basis)
+    const remaining = projection.todayWorkouts.filter((workout) =>
+      ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
+    );
+    if ((moved || remaining.length > 1) && !basis)
       throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
     if (basis?.kind === 'SCHEDULED') {
       if (!scheduledWorkout)
@@ -192,6 +195,7 @@ export function validateTodaySuggestionDraftForProjection(
     if (
       basis?.kind === 'ADDITIONAL' &&
       (!draft.summary.includes(basis.reason) ||
+        draft.preferredIntent !== 'CREATE_TODAY_WORKOUT' ||
         [draft.preferredIntent, ...draft.secondaryIntents].includes(
           'OPEN_TODAY_WORKOUT',
         ))
