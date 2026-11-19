@@ -78,6 +78,7 @@ export class MaxMeanHeartRateTask implements MetricsTask {
       windows: ctx.outputs.maxMeanHeartRateWindows,
       type: PeakType.hr,
       scaleType: ScaleType.TIME,
+      tx: ctx.persistenceTx,
     });
     return ctx;
   }
