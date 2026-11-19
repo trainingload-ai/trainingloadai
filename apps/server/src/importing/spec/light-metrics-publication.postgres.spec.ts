@@ -1,8 +1,10 @@
+import { AlgorithmService } from '@/analyze/algorithm.service';
 import { AnalyzePersistenceService } from '@/analyze/analyze-persistence.service';
 import type { MetricsContext } from '@/api/activity/metrics/context';
 import { ActivityMetricsOrchestratorService } from '@/api/activity/metrics/orchestrator.service';
 import { ActivityPeakMetricWriterService } from '@/api/activity/metrics/shared/peak-metric-writer.service';
 import { ActivityPerformanceTTWriterService } from '@/api/activity/metrics/shared/performance-tt-writer.service';
+import { DerivedMetricsTask } from '@/api/activity/metrics/tasks/derived-metrics.task';
 import { EstimatedPowerMetricsTask } from '@/api/activity/metrics/tasks/estimated-power-metrics.task';
 import { LthrObservationTask } from '@/api/activity/metrics/tasks/lthr-observation.task';
 import { MaxMeanHeartRateTask } from '@/api/activity/metrics/tasks/max-mean-heart-rate.task';
@@ -59,16 +61,28 @@ describe('Imported activity LIGHT metrics publication', () => {
     'publishes %s and subsequent metrics within one transaction',
     async (kind) => {
       const activity = await prisma.activity.create({
-        data: { userId, hashId: kind, sportType: 'RUN', ecp: 250 },
+        data: {
+          userId,
+          hashId: kind,
+          sportType: 'RUN',
+          distance: 1000,
+          ecp: 250,
+        },
       });
       const peakWriter = new ActivityPeakMetricWriterService(prisma);
       const ttWriter = new ActivityPerformanceTTWriterService(prisma);
+      const derivedMetrics = new DerivedMetricsTask(
+        new AlgorithmService(),
+        { getAvgLeftRightBalance: async () => 51 } as never,
+        prisma,
+      );
       const tasks = [
         new RecordsBootstrapTask({} as never, prisma),
         new MaxMeanHeartRateTask(peakWriter),
         new LthrObservationTask(new AnalyzePersistenceService(prisma)),
         new PeakPaceTask({} as never, peakWriter, ttWriter),
         new EstimatedPowerMetricsTask({} as never, prisma),
+        derivedMetrics,
         new Vo2MaxTask({} as never, {} as never, {} as never, prisma),
       ];
       const context: MetricsContext = {
@@ -92,7 +106,18 @@ describe('Imported activity LIGHT metrics publication', () => {
       const orchestrator = new ActivityMetricsOrchestratorService();
       // The sample interval write takes the same fitness evidence lock as the
       // peak triggers. A separate connection would wait for this transaction.
-      const run = { context, tasks };
+      const computed = await orchestrator.computeStrict(context, [
+        derivedMetrics,
+      ]);
+      const readActivity = () =>
+        prisma.activity.findUniqueOrThrow({
+          where: { id: activity.id },
+        });
+      await expect(readActivity()).resolves.toMatchObject({
+        effectiveDistance: null,
+        avgLeftRightBalance: null,
+      });
+      const run = { context: computed.context, tasks };
       const transactionOptions = { timeout: 1_000 };
       const where = { activityId: activity.id };
       await expect(
@@ -101,6 +126,10 @@ describe('Imported activity LIGHT metrics publication', () => {
           throw new Error('fixture rollback');
         }, transactionOptions),
       ).rejects.toThrow('fixture rollback');
+      await expect(readActivity()).resolves.toMatchObject({
+        effectiveDistance: null,
+        avgLeftRightBalance: null,
+      });
       await expect(prisma.activityPeakMetric.count({ where })).resolves.toBe(0);
       await expect(prisma.activityPerformanceTT.count({ where })).resolves.toBe(
         0,
@@ -114,6 +143,8 @@ describe('Imported activity LIGHT metrics publication', () => {
         prisma.activity.findUnique({ where: { id: activity.id } }),
       ).resolves.toMatchObject({
         sampleSec: 1,
+        effectiveDistance: 1000,
+        avgLeftRightBalance: 51,
         ecp: kind === 'pace' ? 250 : null,
       });
       await expect(
