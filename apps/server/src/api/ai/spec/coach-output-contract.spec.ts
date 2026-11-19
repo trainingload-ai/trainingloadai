@@ -150,7 +150,6 @@ function setup(events: CoachUiStreamYield[]) {
       aiCoachSession: { findUnique: jest.fn(async () => null) },
     },
     coachRuns,
-    prisma: { aiCoachSession: { findUnique: jest.fn(async () => null) } },
     aiService,
     aiUsage,
     operations,
