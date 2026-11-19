@@ -70,6 +70,29 @@
       "cta": "Empezar gratis"
     }
   },
+  "productReleases": {
+    "homeTitle": "Aplicación de escritorio",
+    "download": {
+      "heading": "Descarga la edición personal",
+      "description": "Usa Trainingload.ai en tu Mac y guarda tus datos de entrenamiento en ese dispositivo."
+    },
+    "history": {
+      "heading": "Notas de versión",
+      "description": "Consulta las últimas actualizaciones de la edición personal para macOS. Los extractos se muestran en su idioma original.",
+      "empty": "Aún no hay versiones públicas."
+    },
+    "macos": {
+      "title": "Edición personal para macOS",
+      "requirements": "Requiere un Mac con chip de Apple (arm64).",
+      "download": "Descargar DMG para macOS",
+      "downloadLatest": "Descargar la última versión",
+      "noDownload": "El instalador de macOS aún no se ha publicado."
+    },
+    "version": "Versión {version}",
+    "versionNotes": "{edition} v{version} en GitHub",
+    "githubHistory": "Historial de versiones en GitHub",
+    "feedUnavailable": "La información de versiones no está disponible temporalmente. Puedes consultar las publicaciones en GitHub."
+  },
   "nav": {
     "blog": "Blog",
     "aiPlans": "AI Coach",

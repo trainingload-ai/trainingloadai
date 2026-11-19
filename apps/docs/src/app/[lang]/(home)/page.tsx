@@ -392,7 +392,7 @@ export default async function HomePage({
 
       <HomeMcpShowcase lang={lang} prefix={prefix} />
 
-      <HomeOpenSourceSection copy={openSource} prefix={prefix} />
+      <HomeOpenSourceSection copy={openSource} lang={lang} />
 
       <section className="marketing-section bg-secondary/70 text-foreground">
         <div className="mx-auto max-w-7xl">
