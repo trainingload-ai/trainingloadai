@@ -11,7 +11,7 @@ import type {
   WeatherAttribution,
 } from '@/weather/weather.types';
 
-export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v7';
+export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v8';
 
 export type TodaySuggestionConstraintCode =
   | 'NEVER_RECORDED_ACTIVITY'
