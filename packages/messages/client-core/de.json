@@ -6407,6 +6407,11 @@
       "REMOTE_DELETED": "Remote-Löschung bestätigt"
     }
   },
+  "HealthOverview": {
+    "timeInBed": "Zeit im Bett",
+    "unclassifiedSleep": "Schlaf ohne Phasenzuordnung",
+    "unclassified": "Ohne Phase"
+  },
   "HealthRecords": {
     "title": "Health records",
     "description": "Measurements retain their source, local date and units. Missing values remain blank.",

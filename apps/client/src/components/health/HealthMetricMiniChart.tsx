@@ -1,6 +1,7 @@
 "use client";
-import { palette as tokenPalette } from '@trainingloadai/design-tokens/colors';
 
+import { useTranslations } from "next-intl";
+import { palette as tokenPalette } from "@trainingloadai/design-tokens/colors";
 
 import { useState } from "react";
 import {
@@ -26,6 +27,7 @@ import {
 import {
   formatHealthDate as formatDate,
   getHealthBaselineStatus,
+  getSleepTimelineRow,
   type HealthBaseline,
   type HealthChartPoint,
   type HealthOverviewCard,
@@ -35,11 +37,12 @@ type ComparisonPoint = HealthChartPoint & {
   comparisonValue?: number;
   comparisonMin?: number;
   comparisonMax?: number;
+  timestamp?: number;
 };
 
-function formatTime(value: string, locale: string) {
+function formatTime(value: string | number, locale: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  if (Number.isNaN(date.getTime())) return String(value);
   return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
@@ -95,6 +98,7 @@ function HealthTooltip({
   intraday?: boolean;
   baseline?: HealthBaseline | null;
 }) {
+  const t = useTranslations("HealthOverview");
   if (!active || !point) return null;
   const labels = locale.startsWith("zh")
     ? {
@@ -103,6 +107,8 @@ function HealthTooltip({
         range: "范围",
         baseline: "个人基线",
         totalSleep: "睡眠时长",
+        timeInBed: t("timeInBed"),
+        unclassifiedSleep: t("unclassifiedSleep"),
         core: "核心睡眠",
         deep: "深睡",
         rem: "REM",
@@ -114,6 +120,8 @@ function HealthTooltip({
         range: "Range",
         baseline: "Personal baseline",
         totalSleep: "Sleep duration",
+        timeInBed: t("timeInBed"),
+        unclassifiedSleep: t("unclassifiedSleep"),
         core: "Core",
         deep: "Deep",
         rem: "REM",
@@ -127,7 +135,10 @@ function HealthTooltip({
     if (point.value != null) {
       rows.push({
         color: accentColor,
-        label: labels.totalSleep,
+        label:
+          point.sleepValueKind === "timeInBed"
+            ? labels.timeInBed
+            : labels.totalSleep,
         value: formatDuration(point.value, locale),
       });
     }
@@ -139,6 +150,11 @@ function HealthTooltip({
       });
     }
     const stages = [
+      [
+        "unclassifiedSleep",
+        point.unclassifiedSleep || undefined,
+        tokenPalette["slate-400"],
+      ],
       ["core", point.core, tokenPalette["blue-400"]],
       ["deep", point.deep, tokenPalette["indigo-500"]],
       ["rem", point.rem, tokenPalette["violet-400"]],
@@ -257,7 +273,7 @@ const SLEEP_STAGE_COLORS: Record<string, string> = {
   deep: tokenPalette["indigo-500"],
   core: tokenPalette["blue-400"],
   light: tokenPalette["blue-400"],
-  sleep: tokenPalette["blue-400"],
+  sleep: tokenPalette["slate-400"],
 };
 
 function SleepIntradayTimeline({
@@ -267,6 +283,7 @@ function SleepIntradayTimeline({
   intraday: HealthIntradayResponse;
   locale: string;
 }) {
+  const t = useTranslations("HealthOverview");
   const points = intraday.current;
   const [hoveredSegment, setHoveredSegment] = useState<{
     key: string;
@@ -304,19 +321,10 @@ function SleepIntradayTimeline({
       "睡眠"
     );
   };
-  const stageIndex = (stage?: string) => {
-    const normalized = (stage ?? "sleep").toLowerCase();
-    if (normalized === "awake") return 0;
-    if (normalized === "rem") return 1;
-    if (["core", "light", "sleep", "unmeasurable"].includes(normalized)) {
-      return 2;
-    }
-    if (normalized === "deep") return 3;
-    return 2;
-  };
   const stageRows = locale.startsWith("zh")
-    ? ["清醒", "REM", "浅睡", "深睡"]
-    : ["Awake", "REM", "Light", "Deep"];
+    ? ["清醒", "REM", "浅睡", "深睡", t("unclassified")]
+    : ["Awake", "REM", "Light", "Deep", t("unclassified")];
+  const rowPercent = 100 / stageRows.length;
   const axisTicks = [start, start + span / 2, end];
   return (
     <div className="relative flex h-full flex-col px-3 pb-3 pt-4">
@@ -350,13 +358,13 @@ function SleepIntradayTimeline({
           </div>
         </div>
       ) : null}
-      <div className="grid min-h-0 flex-1 grid-cols-[3.5rem_1fr] gap-2">
+      <div className="grid min-h-0 flex-1 grid-cols-[4.25rem_1fr] grid-rows-[minmax(0,1fr)_auto] gap-x-2">
         <div className="relative">
           {stageRows.map((label, index) => (
             <span
               key={label}
               className="absolute right-0 -translate-y-1/2 text-mobile-unit pc:text-[10px] text-muted-foreground md:text-mobile-caption"
-              style={{ top: `${(index + 0.5) * 25}%` }}
+              style={{ top: `${(index + 0.5) * rowPercent}%` }}
             >
               {label}
             </span>
@@ -367,7 +375,7 @@ function SleepIntradayTimeline({
             <span
               key={label}
               className="pointer-events-none absolute inset-x-0 border-t border-border/55"
-              style={{ top: `${index * 25}%` }}
+              style={{ top: `${index * rowPercent}%` }}
             />
           ))}
           {points.map((point, index) => {
@@ -405,9 +413,9 @@ function SleepIntradayTimeline({
                 onBlur={() => setHoveredSegment(null)}
                 style={{
                   left: `${left}%`,
-                  top: `${stageIndex(point.stage) * 25 + 3}%`,
+                  top: `${getSleepTimelineRow(point.stage) * rowPercent + 2}%`,
                   width: `${width}%`,
-                  height: "19%",
+                  height: `${rowPercent - 4}%`,
                   backgroundColor:
                     SLEEP_STAGE_COLORS[
                       (point.stage ?? "sleep").toLowerCase()
@@ -417,17 +425,17 @@ function SleepIntradayTimeline({
             );
           })}
         </div>
-      </div>
-      <div className="relative ml-[4rem] h-5 border-t border-border/80 text-mobile-unit pc:text-[10px] text-muted-foreground">
-        {axisTicks.map((tick, index) => (
-          <span
-            key={`${tick}-${index}`}
-            className="absolute top-1 -translate-x-1/2 tabular-nums before:absolute before:-top-1 before:left-1/2 before:h-1 before:border-l before:border-border/80"
-            style={{ left: `${index * 50}%` }}
-          >
-            {formatTime(new Date(tick).toISOString(), locale)}
-          </span>
-        ))}
+        <div className="relative col-start-2 h-5 border-t border-border/80 text-mobile-unit pc:text-[10px] text-muted-foreground">
+          {axisTicks.map((tick, index) => (
+            <span
+              key={`${tick}-${index}`}
+              className="absolute top-1 -translate-x-1/2 tabular-nums before:absolute before:-top-1 before:left-1/2 before:h-1 before:border-l before:border-border/80"
+              style={{ left: `${index * 50}%` }}
+            >
+              {formatTime(new Date(tick).toISOString(), locale)}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -558,7 +566,7 @@ export function HealthMetricMiniChart({
   }
   if (
     rangeDays === "latest" &&
-    (card.key === "hrv" || card.key === "restingHeartRate")
+    ((card.key === "hrv" && !hasIntraday) || card.key === "restingHeartRate")
   ) {
     return (
       <LatestValueSummary
@@ -566,20 +574,28 @@ export function HealthMetricMiniChart({
         locale={locale}
         currentPoints={currentPoints}
         previousPoints={previousPoints}
-        intraday={intraday}
+        intraday={card.key === "hrv" ? undefined : intraday}
       />
     );
   }
 
   const isIntraday = rangeDays === "latest" && hasIntraday;
+  const hrvIntraday = isIntraday && card.key === "hrv";
   const usesPersonalBaseline =
     rangeDays !== "latest" &&
     (card.key === "hrv" || card.key === "restingHeartRate");
   const data = usesPersonalBaseline
     ? currentPoints
-    : isIntraday
-      ? alignIntradayPoints(intraday!)
-      : alignDailyPoints(currentPoints, previousPoints);
+    : hrvIntraday
+      ? intraday!.current.map((point) => ({
+          date: intraday!.currentDate,
+          time: point.time,
+          timestamp: Date.parse(point.time),
+          value: point.value,
+        }))
+      : isIntraday
+        ? alignIntradayPoints(intraday!)
+        : alignDailyPoints(currentPoints, previousPoints);
   const accentColor = getMetricColor(card.key);
   const comparisonColor = getMetricComparisonColor(card.key);
   const yDomain: [number | "auto", number | "auto"] =
@@ -600,14 +616,18 @@ export function HealthMetricMiniChart({
     />,
     <XAxis
       key="x-axis"
-      dataKey={isIntraday ? "time" : "date"}
+      dataKey={hrvIntraday ? "timestamp" : isIntraday ? "time" : "date"}
+      type={hrvIntraday ? "number" : "category"}
+      domain={hrvIntraday ? ["dataMin", "dataMax"] : undefined}
       axisLine={{ stroke: "var(--border)", strokeOpacity: 0.9 }}
       tickLine={{ stroke: "var(--border)", strokeOpacity: 0.9 }}
       tickMargin={7}
       height={28}
       minTickGap={28}
-      tickFormatter={(value: string) =>
-        isIntraday ? formatTime(value, locale) : formatDate(value, locale)
+      tickFormatter={(value: string | number) =>
+        isIntraday
+          ? formatTime(value, locale)
+          : formatDate(String(value), locale)
       }
       tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
     />,
@@ -641,7 +661,8 @@ export function HealthMetricMiniChart({
       )}
     />
   );
-  const showDailyDots = card.chartKind === "sleep" || data.length === 1;
+  const showDailyDots =
+    card.chartKind === "sleep" || card.key === "hrv" || data.length === 1;
   const comparisonLine = (
     <Line
       type="monotone"
@@ -667,9 +688,26 @@ export function HealthMetricMiniChart({
             fill={comparisonColor}
             radius={[3, 3, 0, 0]}
           />
+          <Bar
+            dataKey={(point: HealthChartPoint) =>
+              point.sleepValueKind === "timeInBed"
+                ? point.value
+                : point.unclassifiedSleep
+            }
+            stackId="sleep"
+            fill={tokenPalette["slate-400"]}
+          />
           <Bar dataKey="core" stackId="sleep" fill={tokenPalette["blue-400"]} />
-          <Bar dataKey="deep" stackId="sleep" fill={tokenPalette["indigo-500"]} />
-          <Bar dataKey="rem" stackId="sleep" fill={tokenPalette["violet-400"]} />
+          <Bar
+            dataKey="deep"
+            stackId="sleep"
+            fill={tokenPalette["indigo-500"]}
+          />
+          <Bar
+            dataKey="rem"
+            stackId="sleep"
+            fill={tokenPalette["violet-400"]}
+          />
           <Bar
             dataKey="awake"
             stackId="sleep"
@@ -804,7 +842,7 @@ export function HealthMetricMiniChart({
         <Line
           type="monotone"
           dataKey="value"
-          stroke={accentColor}
+          stroke={hrvIntraday ? "transparent" : accentColor}
           strokeWidth={2}
           dot={showDailyDots ? { r: 3, fill: accentColor } : false}
           activeDot={{ r: 4, strokeWidth: 2 }}

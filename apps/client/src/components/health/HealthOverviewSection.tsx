@@ -32,6 +32,8 @@ import {
   calculateHealthBaseline,
   formatHealthCardValue,
   formatHealthDate,
+  formatHealthHrvLabel,
+  getComparableHealthIntraday,
   getHealthBaselineStatus,
   getRecentHealthDate,
   type HealthCardKey,
@@ -144,7 +146,10 @@ function HealthRangeTabs({
       value={rangeDays}
       onValueChange={(next) => setRangeDays(next as HealthRange)}
     >
-      <TabsList className="h-7" aria-label={`${copy[metricKey]} · ${copy.range}`}>
+      <TabsList
+        className="h-7"
+        aria-label={`${copy[metricKey]} · ${copy.range}`}
+      >
         {HEALTH_RANGES.map((days) => (
           <TabsTrigger
             key={days}
@@ -191,14 +196,19 @@ export function HealthMetricCard({
     : "sleep";
   const showIntraday =
     isLatest && recentDate != null && isHealthIntradayMetricKey(card.key);
-  const intradayQuery = useHealthIntraday(intradayKey, showIntraday, recentDate);
+  const intradayQuery = useHealthIntraday(
+    intradayKey,
+    showIntraday,
+    recentDate,
+    card.hrvType,
+  );
   const intraday =
-    showIntraday && intradayQuery.data?.currentDate === recentDate
-      ? intradayQuery.data
+    showIntraday && recentDate
+      ? getComparableHealthIntraday(card, intradayQuery.data, recentDate)
       : undefined;
+  const hrv = formatHealthHrvLabel(card);
   const period = useMemo(
-    () =>
-      buildHealthCardPeriod(card, rangeDays, intraday, referenceDate),
+    () => buildHealthCardPeriod(card, rangeDays, intraday, referenceDate),
     [card, intraday, rangeDays, referenceDate],
   );
   const comparison = formatComparison(
@@ -212,7 +222,9 @@ export function HealthMetricCard({
       ? "—"
       : formatHealthCardValue(card, locale, period.currentAggregate);
   const usesPersonalBaseline =
-    !isLatest && (card.key === "hrv" || card.key === "restingHeartRate");
+    !isLatest &&
+    ((card.key === "hrv" && !intraday?.current.length) ||
+      card.key === "restingHeartRate");
   const baseline = usesPersonalBaseline
     ? calculateHealthBaseline(period.baselinePoints)
     : null;
@@ -221,7 +233,9 @@ export function HealthMetricCard({
       ? getHealthBaselineStatus(period.currentAggregate, baseline)
       : null;
   const showsLatestValueSummary =
-    isLatest && (card.key === "hrv" || card.key === "restingHeartRate");
+    isLatest &&
+    ((card.key === "hrv" && !intraday?.current.length) ||
+      card.key === "restingHeartRate");
   const periodContext = usesPersonalBaseline
     ? baselineStatus
       ? copy[`${baselineStatus}Baseline`]
@@ -233,7 +247,7 @@ export function HealthMetricCard({
         : null;
   return (
     <ChartContainer
-      title={copy[card.key]}
+      title={hrv ? `${copy.hrv} · ${hrv}` : copy[card.key]}
       titleIcon={<Icon className="h-4 w-4" />}
       accentColor={accentColor}
       className={className}
@@ -258,9 +272,15 @@ export function HealthMetricCard({
           {!showsLatestValueSummary ? (
             <div className="flex min-h-9 shrink-0 items-center justify-between gap-3 border-b border-border/60 px-2.5 py-1.5">
               <div className="flex min-w-0 items-baseline gap-1.5">
-                {!isLatest ? (
+                {card.key === "sleep" || !isLatest ? (
                   <span className="shrink-0 text-mobile-unit text-muted-foreground pc:text-[10px]">
-                    {copy.average}
+                    {card.key !== "sleep"
+                      ? copy.average
+                      : period.sleepValueKind === "timeInBed"
+                        ? copy.timeInBed
+                        : isLatest
+                          ? copy.timeAsleep
+                          : copy.averageTimeAsleep}
                   </span>
                 ) : null}
                 <span className="truncate font-mono text-sm font-semibold tabular-nums text-foreground">

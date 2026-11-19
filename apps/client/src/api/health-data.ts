@@ -1,48 +1,21 @@
 import { apiFetch } from "@/lib/api";
 import { useSimpleApiQuery } from "@/hooks/useApiQuery";
 
-export type DailyHealthMetric = {
-  type: string;
-  value: number;
-  unit: string | null;
-  provider: string | null;
-};
+import type {
+  HealthHrvType,
+  HealthIntradayMetricKey,
+  HealthIntradayResponse,
+  HealthOverviewResponse,
+} from "@shared/health-overview";
 
-export type DailyHealthData = {
-  date: string;
-  timezone: string | null;
-  metrics: DailyHealthMetric[];
-};
-
-export type HealthOverviewResponse = {
-  startDate: string;
-  endDate: string;
-  days: DailyHealthData[];
-};
-
-export type HealthIntradayMetricKey =
-  | "sleep"
-  | "hrv"
-  | "restingHeartRate"
-  | "stress"
-  | "bodyBattery";
-
-export type HealthIntradayPoint = {
-  time: string;
-  endTime?: string;
-  value: number;
-  stage?: string;
-  provider?: string;
-};
-
-export type HealthIntradayResponse = {
-  key: HealthIntradayMetricKey;
-  granularity: "intraday";
-  currentDate: string;
-  previousDate: string;
-  current: HealthIntradayPoint[];
-  previous: HealthIntradayPoint[];
-};
+export type {
+  DailyHealthData,
+  DailyHealthMetric,
+  HealthIntradayMetricKey,
+  HealthIntradayPoint,
+  HealthIntradayResponse,
+  HealthOverviewResponse,
+} from "@shared/health-overview";
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -73,8 +46,10 @@ export function useHealthOverview(days = 30) {
 export async function getHealthIntraday(
   key: HealthIntradayMetricKey,
   endDate = localDateKey(),
+  hrvType?: HealthHrvType,
 ) {
   const params = new URLSearchParams({ key, endDate });
+  if (hrvType) params.set("hrvType", hrvType);
   return (
     (await apiFetch<HealthIntradayResponse>(
       `/health-data/intraday?${params.toString()}`,
@@ -94,10 +69,11 @@ export function useHealthIntraday(
   key: HealthIntradayMetricKey,
   enabled = true,
   endDate = localDateKey(),
+  hrvType?: HealthHrvType,
 ) {
   return useSimpleApiQuery(
-    ["health-data", "intraday", key, endDate],
-    () => getHealthIntraday(key, endDate),
+    ["health-data", "intraday", key, endDate, hrvType ?? ""],
+    () => getHealthIntraday(key, endDate, hrvType),
     { enabled, staleTime: 5 * 60 * 1000 },
   );
 }

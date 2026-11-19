@@ -39,8 +39,9 @@ export class HealthDataController {
     @CurrentUserId() userId: string,
     @Query('key') key: HealthIntradayMetricKey,
     @Query('endDate') endDate?: string,
+    @Query('hrvType') hrvType?: string,
   ) {
-    return this.healthDataQuery.getIntraday(userId, key, endDate);
+    return this.healthDataQuery.getIntraday(userId, key, endDate, hrvType);
   }
   @Get('observations')
   @SessionOnly()
