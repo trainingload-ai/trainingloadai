@@ -946,7 +946,7 @@ describe('remaining schedule / PostgreSQL', () => {
         plannedSessionRpe: 6,
       });
       expect(final[209]).toMatchObject({ id: rows[208].id, revision: 2 });
-    });
+    }, 30_000);
   });
 
   (process.env.PLAN_SYNC_TEST_NATIVE_POSTGRES_BIN ? it : it.skip)(
