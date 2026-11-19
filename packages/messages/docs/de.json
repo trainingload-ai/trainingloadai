@@ -77,7 +77,9 @@
     },
     "history": {
       "heading": "Versionshinweise",
-      "description": "Aktuelle Änderungen für die macOS-App. Auszüge erscheinen in der Originalsprache.",
+      "description": "Updates für den Cloud-Dienst und die persönliche Version für macOS.",
+      "cloudTitle": "Cloud-Dienst",
+      "cloudEmpty": "Für den Cloud-Dienst sind noch keine Updates verzeichnet.",
       "empty": "Es gibt noch keine öffentlichen Versionen."
     },
     "macos": {

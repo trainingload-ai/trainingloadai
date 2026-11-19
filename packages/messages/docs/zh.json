@@ -69,7 +69,9 @@
     },
     "history": {
       "heading": "版本更新",
-      "description": "查看 macOS 个人版的近期更新。摘要保留发布原文的语言。",
+      "description": "查看 Trainingload.ai 云服务和 macOS 个人版的最新变化。",
+      "cloudTitle": "云服务",
+      "cloudEmpty": "暂无云服务更新记录。",
       "empty": "暂无公开版本。"
     },
     "macos": {
