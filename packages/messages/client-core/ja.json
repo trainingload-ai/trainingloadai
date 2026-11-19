@@ -3932,16 +3932,33 @@
       "template": {
         "title": "公式トレーニング",
         "desc": "目標を選び、構造化された全プランを確認",
-        "badge": "AIチャット不要"
+        "badge": "AIチャット不要",
+        "feature1": "トレーニング目標から選択",
+        "feature2": "全期間のメニューを事前に確認",
+        "action": "公式プランを見る"
       },
       "ai": {
         "title": "AIコーチ",
         "desc": "Open AI Coach and generate a plan through guided multi-step questions",
-        "badge": "AIコーチ"
+        "badge": "AIコーチ",
+        "eyebrow": "期間を決めて計画",
+        "feature1": "これまでのトレーニングを考慮",
+        "feature2": "全期間のプランをまとめて作成",
+        "action": "コーチとプランを作成"
       },
       "manual": {
         "title": "手動",
-        "desc": "Create your plan manually"
+        "desc": "Create your plan manually",
+        "eyebrow": "週ごとに自由に編成",
+        "feature1": "持久系と筋力トレーニングを組み合わせ",
+        "feature2": "トレーニング日と休養日を設定",
+        "action": "自分でプランを作成"
+      },
+      "rolling": {
+        "eyebrow": "自動で調整",
+        "feature1": "月ごとにトレーニング方針を計画",
+        "feature2": "毎週のメニューを状況に合わせて更新",
+        "action": "継続トレーニングを設定"
       }
     },
     "buttons": {

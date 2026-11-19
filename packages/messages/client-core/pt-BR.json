@@ -3933,16 +3933,33 @@
       "template": {
         "title": "Treinos oficiais",
         "desc": "Escolha um objetivo e visualize o plano estruturado completo",
-        "badge": "Sem chat de IA"
+        "badge": "Sem chat de IA",
+        "feature1": "Escolha seu objetivo",
+        "feature2": "Confira o ciclo e todas as sessões",
+        "action": "Explorar planos oficiais"
       },
       "ai": {
         "title": "Coach de IA",
         "desc": "Abra o AI Coach e gere um plano por meio de perguntas guiadas em várias etapas",
-        "badge": "Coach de IA"
+        "badge": "Coach de IA",
+        "eyebrow": "Ciclo com duração definida",
+        "feature1": "Considera seu histórico de treinos",
+        "feature2": "Cria um ciclo completo",
+        "action": "Planejar com seu treinador"
       },
       "manual": {
         "title": "Manual",
-        "desc": "Crie seu plano manualmente"
+        "desc": "Crie seu plano manualmente",
+        "eyebrow": "Organize cada semana",
+        "feature1": "Combine resistência e força",
+        "feature2": "Escolha dias de treino e descanso",
+        "action": "Criar meu próprio plano"
+      },
+      "rolling": {
+        "eyebrow": "Adaptação automática",
+        "feature1": "Direção mensal do treinamento",
+        "feature2": "Sessões semanais que se adaptam",
+        "action": "Configurar treinamento contínuo"
       }
     },
     "buttons": {

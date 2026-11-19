@@ -11,6 +11,7 @@ import { CoachRunStore } from '../coach-run-store.service';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
 import { stableJson } from '../core/ai-common.util';
 import type { TodaySuggestionConstraintProjection } from './today-suggestion.types';
+import { todaySuggestionCoachAvailable } from './today-suggestion.types';
 
 export type FactGuidanceScope = CoachFactScope & {
   topic: string;
@@ -119,8 +120,7 @@ export class TodaySuggestionGuidanceService {
       });
     const topics = this.lifecycle.topics(projection);
     if (
-      !projection.allowAi ||
-      !projection.featureAllowed ||
+      !todaySuggestionCoachAvailable(projection) ||
       (projection.lightContext.sharedFacts as { status?: string } | undefined)
         ?.status === 'LIMITED'
     )

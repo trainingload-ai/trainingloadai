@@ -89,6 +89,7 @@ export default defineConfig({
       "src/hooks/useAiAnalysis.test.tsx",
       "src/app/**/activities/**/AIAnalysis.test.tsx",
       "src/app/**/activities/**/common-activity.test.tsx",
+      "src/app/**/activities/**/ActivityMap.test.tsx",
       "src/app/**/activities/**/ExternalActivityMirrorCard.test.tsx",
       "src/lib/today-suggestion-refresh.test.ts",
       "src/lib/spec/coach-home-card-stack.test.ts",

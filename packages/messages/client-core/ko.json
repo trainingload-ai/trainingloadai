@@ -3932,16 +3932,33 @@
       "template": {
         "title": "공식 트레이닝",
         "desc": "목표를 선택한 뒤 전체 구조화 계획을 미리 보세요",
-        "badge": "AI 채팅 불필요"
+        "badge": "AI 채팅 불필요",
+        "feature1": "훈련 목표에 따라 선택",
+        "feature2": "전체 기간과 훈련을 미리 확인",
+        "action": "공식 계획 둘러보기"
       },
       "ai": {
         "title": "AI 코치",
         "desc": "AI Coach를 열고 다단계 질문을 통해 계획을 수립하세요.",
-        "badge": "AI 코치"
+        "badge": "AI 코치",
+        "eyebrow": "정해진 훈련 주기",
+        "feature1": "기존 훈련 기록 반영",
+        "feature2": "전체 훈련 주기를 한 번에 작성",
+        "action": "코치와 계획 세우기"
       },
       "manual": {
         "title": "수동",
-        "desc": "수동으로 계획 만들기"
+        "desc": "수동으로 계획 만들기",
+        "eyebrow": "주별로 직접 구성",
+        "feature1": "지구력과 근력 훈련 조합",
+        "feature2": "훈련일과 휴식일 직접 지정",
+        "action": "직접 계획 만들기"
+      },
+      "rolling": {
+        "eyebrow": "자동 조정",
+        "feature1": "월별 훈련 방향 계획",
+        "feature2": "상태에 맞춰 매주 훈련 업데이트",
+        "action": "지속 훈련 설정"
       }
     },
     "buttons": {

@@ -1,4 +1,7 @@
-import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
+import {
+  palette as tokenPalette,
+  visualColors as tokenVisual,
+} from "@trainingloadai/design-tokens/colors";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as mapengine from "@deployment/map-engine";
 import { useStore } from "@/lib/store";
@@ -32,6 +35,7 @@ interface UseActivityLayerManagerProps {
   activityLayer: ActivityLayer | undefined;
   containerId?: string;
   fitBoundsPadding?: ActivityMapPadding;
+  fitBoundsMaxZoom?: number;
   interactive?: boolean;
   lockedFitBoundsPadding?: ActivityMapPadding;
   focusDistanceM?: number | null;
@@ -79,6 +83,7 @@ export const useActivityLayerManager = ({
   activityLayer,
   containerId = "map-container",
   fitBoundsPadding = 100,
+  fitBoundsMaxZoom = 15,
   interactive = true,
   lockedFitBoundsPadding = 50,
   focusDistanceM = null,
@@ -124,11 +129,13 @@ export const useActivityLayerManager = ({
   );
   const padding = useStablePadding(fitBoundsPadding);
   const lockedPadding = useStablePadding(lockedFitBoundsPadding);
+  const framingMaxZoom = Math.min(fitBoundsMaxZoom, mapConfig?.maxZoom ?? 18);
   const lastFramingRef = useRef<{
     map: mapengine.Map;
     bounds: typeof bounds;
     padding: mapengine.PaddingOptions;
     interactive: boolean;
+    maxZoom: number;
   } | null>(null);
 
   // Route/focus updates must not tear down the basemap or reset its camera.
@@ -218,22 +225,25 @@ export const useActivityLayerManager = ({
       bounds,
       padding: currentPadding,
       interactive,
+      maxZoom: framingMaxZoom,
     };
     const changedRoute = previous?.map !== map || previous.bounds !== bounds;
     const locking = previous?.interactive === true && !interactive;
+    const changedMaxZoom = previous?.maxZoom !== framingMaxZoom;
     if (
       changedRoute ||
       locking ||
+      changedMaxZoom ||
       (previous?.interactive === interactive &&
         previous.padding !== currentPadding)
     ) {
       map.fitBounds(bounds, {
         padding: currentPadding,
-        maxZoom: 15,
+        maxZoom: framingMaxZoom,
         duration: changedRoute ? 0 : 800,
       });
     }
-  }, [map, bounds, interactive, padding, lockedPadding]);
+  }, [map, bounds, interactive, padding, lockedPadding, framingMaxZoom]);
 
   useEffect(() => {
     if (!map || mapRef.current !== map || !activityLayer) return;
@@ -271,7 +281,7 @@ export const useActivityLayerManager = ({
           ],
           {
             padding: lockedPadding,
-            maxZoom: 15,
+            maxZoom: framingMaxZoom,
             duration: 650,
           },
         );
@@ -458,6 +468,7 @@ export const useActivityLayerManager = ({
     focusTracks,
     autoFitFocus,
     lockedPadding,
+    framingMaxZoom,
   ]);
 
   useEffect(() => {

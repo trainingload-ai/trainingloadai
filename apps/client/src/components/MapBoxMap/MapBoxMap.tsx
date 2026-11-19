@@ -13,6 +13,7 @@ interface MapBoxMapProps {
   className?: string;
   containerId?: string;
   fitBoundsPadding?: ActivityMapPadding;
+  fitBoundsMaxZoom?: number;
   isLoading?: boolean;
   interactive?: boolean;
   lockedFitBoundsPadding?: ActivityMapPadding;
@@ -29,6 +30,7 @@ const MapBoxMap = ({
   className,
   containerId = "map-container",
   fitBoundsPadding = 100,
+  fitBoundsMaxZoom = 15,
   isLoading = false,
   interactive = true,
   lockedFitBoundsPadding = 50,
@@ -44,6 +46,7 @@ const MapBoxMap = ({
     activityLayer,
     containerId,
     fitBoundsPadding,
+    fitBoundsMaxZoom,
     interactive,
     lockedFitBoundsPadding,
     focusDistanceM,

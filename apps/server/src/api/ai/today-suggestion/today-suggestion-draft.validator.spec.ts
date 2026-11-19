@@ -201,6 +201,198 @@ describe('validateTodaySuggestionDraft', () => {
     ).toThrow('TODAY_SUGGESTION_OUTPUT_REJECTED_INSUFFICIENT_TIME');
   });
 
+  const movedProjection = {
+    ...projection,
+    date: '2026-11-18',
+    constraints: [],
+    todayWorkouts: [
+      {
+        id: 'moved-course',
+        status: 'MOVED',
+        scheduledDate: '2026-11-18',
+        name: 'Endurance ride',
+        plannedDurationSeconds: 3900,
+      },
+    ],
+    tomorrowWorkouts: [
+      {
+        id: 'tomorrow-course',
+        status: 'PLANNED',
+        scheduledDate: '2026-11-19',
+        name: 'Endurance ride',
+        plannedDurationSeconds: 3900,
+      },
+    ],
+  } as unknown as TodaySuggestionConstraintProjection;
+
+  it('rejects reviving a moved course as training today without an explicit basis', () => {
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          summary: 'The moved endurance ride is still scheduled for tonight.',
+          preferredIntent: null,
+        },
+        movedProjection,
+      ),
+    ).toThrow('TRAINING_BASIS');
+  });
+
+  it.each(['moved-course', 'tomorrow-course', 'unknown-course'])(
+    'rejects %s as the scheduled training basis for today',
+    (workoutId) => {
+      expect(() =>
+        validateTodaySuggestionDraftForProjection(
+          {
+            ...valid,
+            preferredIntent: null,
+            trainingBasis: { kind: 'SCHEDULED', workoutId },
+          },
+          movedProjection,
+        ),
+      ).toThrow('TRAINING_BASIS');
+    },
+  );
+
+  it('accepts a different remaining course on the same day after another course moves', () => {
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'remaining-course' },
+        },
+        {
+          ...movedProjection,
+          todayWorkouts: [
+            ...movedProjection.todayWorkouts,
+            {
+              ...movedProjection.tomorrowWorkouts[0],
+              id: 'remaining-course',
+              scheduledDate: movedProjection.date,
+            },
+          ],
+        },
+      ).trainingBasis,
+    ).toEqual({ kind: 'SCHEDULED', workoutId: 'remaining-course' });
+  });
+
+  it('allows explicit additional training with its explanation visible to the athlete', () => {
+    const reason =
+      'An optional extra easy ride fits your available time and recent load.';
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          summary: reason,
+          preferredIntent: 'CREATE_TODAY_WORKOUT',
+          trainingBasis: { kind: 'ADDITIONAL', reason },
+        },
+        movedProjection,
+      ).trainingBasis,
+    ).toEqual({ kind: 'ADDITIONAL', reason });
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          preferredIntent: null,
+          trainingBasis: { kind: 'ADDITIONAL', reason },
+        },
+        movedProjection,
+      ),
+    ).toThrow('TRAINING_BASIS');
+  });
+
+  it('requires an explicit new-workout preview for additional training, rather than reviving moved-course prose', () => {
+    const summary =
+      'Complete the moved endurance ride tonight as originally scheduled.';
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          summary,
+          preferredIntent: null,
+          trainingBasis: { kind: 'ADDITIONAL', reason: summary },
+        },
+        movedProjection,
+      ),
+    ).toThrow('TRAINING_BASIS');
+  });
+
+  it('requires the chosen course identity when more than one course remains today', () => {
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        { ...valid, preferredIntent: 'OPEN_TODAY_WORKOUT' },
+        {
+          ...movedProjection,
+          todayWorkouts: ['first', 'second'].map((id) => ({
+            ...movedProjection.tomorrowWorkouts[0],
+            id,
+            scheduledDate: movedProjection.date,
+          })),
+        },
+      ),
+    ).toThrow('TRAINING_BASIS');
+  });
+
+  it('checks remaining time against the selected course rather than a different course', () => {
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          recommendation: { kind: 'TRAIN' },
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'short-course' },
+        },
+        {
+          ...movedProjection,
+          minutesUntilDayEnd: 20,
+          todayWorkouts: [
+            {
+              ...movedProjection.tomorrowWorkouts[0],
+              scheduledDate: movedProjection.date,
+            },
+            {
+              ...movedProjection.tomorrowWorkouts[0],
+              id: 'short-course',
+              scheduledDate: movedProjection.date,
+              plannedDurationSeconds: 900,
+            },
+          ],
+        },
+      ).recommendation.kind,
+    ).toBe('TRAIN');
+  });
+
+  it('does not exempt a future session from the time limit because another session is in progress', () => {
+    const sessions = ['IN_PROGRESS', 'PLANNED'].map((status, index) => ({
+      ...movedProjection.tomorrowWorkouts[0],
+      id: `course-${index}`,
+      scheduledDate: movedProjection.date,
+      status,
+    }));
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'course-1' },
+        },
+        { ...movedProjection, todayWorkouts: sessions, minutesUntilDayEnd: 10 },
+      ),
+    ).toThrow('INSUFFICIENT_TIME');
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'course-0' },
+        },
+        { ...movedProjection, todayWorkouts: sessions, minutesUntilDayEnd: 10 },
+      ).recommendation.kind,
+    ).toBe('TRAIN');
+  });
+
   it('delivers recovery guidance with an optional review link in the evening', () => {
     expect(
       validateTodaySuggestionDraftForProjection(

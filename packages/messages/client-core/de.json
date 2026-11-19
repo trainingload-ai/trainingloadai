@@ -3933,16 +3933,33 @@
       "template": {
         "title": "Offizielles Training",
         "desc": "Trainingsziel wählen und vollständigen strukturierten Plan ansehen",
-        "badge": "Kein AI-Chat"
+        "badge": "Kein KI-Chat",
+        "feature1": "Passendes Trainingsziel wählen",
+        "feature2": "Zyklus und Einheiten vorab ansehen",
+        "action": "Pläne ansehen"
       },
       "ai": {
         "title": "KI-Coach",
         "desc": "Öffnen Sie AI Coach und erstellen Sie einen Plan durch geführte mehrstufige Fragen",
-        "badge": "KI-Coach"
+        "badge": "KI-Coach",
+        "eyebrow": "Fester Trainingszyklus",
+        "feature1": "Berücksichtigt Ihr bisheriges Training",
+        "feature2": "Entwirft einen vollständigen Zyklus",
+        "action": "Mit dem Coach planen"
       },
       "manual": {
-        "title": "Handbuch",
-        "desc": "Erstellen Sie Ihren Plan manuell"
+        "title": "Manuelle Planung",
+        "desc": "Erstellen Sie Ihren Plan manuell",
+        "eyebrow": "Wochenplanung",
+        "feature1": "Ausdauer und Kraft kombinieren",
+        "feature2": "Trainings- und Ruhetage festlegen",
+        "action": "Eigenen Plan erstellen"
+      },
+      "rolling": {
+        "eyebrow": "Automatische Anpassung",
+        "feature1": "Monatliche Trainingsausrichtung",
+        "feature2": "Wöchentlich passende Einheiten",
+        "action": "Training einrichten"
       }
     },
     "buttons": {

@@ -9,11 +9,16 @@ import type {
   TodaySuggestionV2,
   TodaySuggestionWorkout,
 } from '@shared/ai-today-suggestion-contract';
+import { isTodaySuggestionWorkout } from '@shared/ai-today-suggestion-contract';
 import { stableJson } from '../core/ai-common.util';
 import { aiFallbackText } from '../core/ai-fallback-copy';
 import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
+} from './today-suggestion.types';
+import {
+  todaySuggestionCoachAvailable,
+  todaySuggestionScheduledWorkout,
 } from './today-suggestion.types';
 
 function authSecret() {
@@ -85,8 +90,21 @@ export class TodaySuggestionDeliveryPolicy {
     projection: Pick<
       TodaySuggestionConstraintProjection,
       'locale' | 'matchingActivityId'
-    >,
+    > &
+      Partial<
+        Pick<
+          TodaySuggestionConstraintProjection,
+          'allowAi' | 'featureAllowed' | 'aiState'
+        >
+      >,
   ): TodaySuggestionV2 {
+    const coachAvailable =
+      todaySuggestionCoachAvailable(projection) &&
+      !['ACCESS_DENIED', 'AI_DISABLED', 'AI_NOT_CONFIGURED'].includes(
+        result.delivery.reasonCode ?? '',
+      );
+    const available = (value: TodaySuggestionIntent) =>
+      value.type !== 'ASK_COACH' || coachAvailable;
     const intent = (value: TodaySuggestionIntent): TodaySuggestionIntent => ({
       ...value,
       label: this.text(
@@ -104,8 +122,11 @@ export class TodaySuggestionDeliveryPolicy {
             }
           : value,
       ),
-      primaryIntent: result.primaryIntent ? intent(result.primaryIntent) : null,
-      secondaryIntents: result.secondaryIntents.map(intent),
+      primaryIntent:
+        result.primaryIntent && available(result.primaryIntent)
+          ? intent(result.primaryIntent)
+          : null,
+      secondaryIntents: result.secondaryIntents.filter(available).map(intent),
     };
   }
 
@@ -118,6 +139,12 @@ export class TodaySuggestionDeliveryPolicy {
     generatedAt: Date | null;
   }): TodaySuggestionV2 {
     const { projection, draft } = args;
+    if (
+      draft.trainingBasis?.kind === 'ADDITIONAL' &&
+      (draft.preferredIntent !== 'CREATE_TODAY_WORKOUT' ||
+        !isTodaySuggestionWorkout(draft.generatedWorkout))
+    )
+      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_ADDITIONAL_WORKOUT');
     const evidenceCodes = [
       ...draft.evidenceCodes,
       ...projection.constraints.filter((code) => EVIDENCE_CODES.has(code)),
@@ -174,45 +201,47 @@ export class TodaySuggestionDeliveryPolicy {
         draft.generatedWorkout?.summary.durationSeconds ??
         (draft.recommendation.durationMinutes
           ? draft.recommendation.durationMinutes * 60
-          : (projection.todayWorkouts.find((workout) =>
-              ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
-            )?.plannedDurationSeconds ?? 1_800));
+          : (todaySuggestionScheduledWorkout(projection, draft)
+              ?.plannedDurationSeconds ?? 1_800));
       const latestStart = projection.validUntil.getTime() - duration * 1_000;
       if (latestStart > Date.now())
         validUntil = Math.min(validUntil, latestStart);
     }
-    return {
-      version: 2,
-      suggestionId: args.generationToken,
-      delivery: {
-        state: args.state,
-        reasonCode: args.reasonCode,
-        generatedAt: args.generatedAt?.toISOString() ?? null,
-        cached: false,
+    return this.localize(
+      {
+        version: 2,
+        suggestionId: args.generationToken,
+        delivery: {
+          state: args.state,
+          reasonCode: args.reasonCode,
+          generatedAt: args.generatedAt?.toISOString() ?? null,
+          cached: false,
+        },
+        headline: draft.headline,
+        summary: draft.summary,
+        recommendation: draft.recommendation,
+        confidence: draft.confidence,
+        ...(draft.uncertainty ? { uncertainty: draft.uncertainty } : {}),
+        evidence,
+        primaryIntent,
+        secondaryIntents: forced
+          ? secondaryIntents.filter(
+              (intent) =>
+                !['CREATE_TODAY_WORKOUT', 'SCHEDULE_REMINDER'].includes(
+                  intent.type,
+                ),
+            )
+          : secondaryIntents,
+        ...(projection.pendingInquiry
+          ? { assessmentCaseRef: projection.pendingInquiry }
+          : {}),
+        ...(projection.activeDecisionId
+          ? { decisionRef: { decisionId: projection.activeDecisionId } }
+          : {}),
+        validUntil: new Date(validUntil).toISOString(),
       },
-      headline: draft.headline,
-      summary: draft.summary,
-      recommendation: draft.recommendation,
-      confidence: draft.confidence,
-      ...(draft.uncertainty ? { uncertainty: draft.uncertainty } : {}),
-      evidence,
-      primaryIntent,
-      secondaryIntents: forced
-        ? secondaryIntents.filter(
-            (intent) =>
-              !['CREATE_TODAY_WORKOUT', 'SCHEDULE_REMINDER'].includes(
-                intent.type,
-              ),
-          )
-        : secondaryIntents,
-      ...(projection.pendingInquiry
-        ? { assessmentCaseRef: projection.pendingInquiry }
-        : {}),
-      ...(projection.activeDecisionId
-        ? { decisionRef: { decisionId: projection.activeDecisionId } }
-        : {}),
-      validUntil: new Date(validUntil).toISOString(),
-    };
+      projection,
+    );
   }
 
   private forcedSafetyIntent(
@@ -261,9 +290,7 @@ export class TodaySuggestionDeliveryPolicy {
     ) {
       return null;
     }
-    const todayWorkout = projection.todayWorkouts.find((workout) =>
-      ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
-    );
+    const todayWorkout = todaySuggestionScheduledWorkout(projection, draft);
     switch (type) {
       case 'OPEN_TODAY_WORKOUT':
         return todayWorkout

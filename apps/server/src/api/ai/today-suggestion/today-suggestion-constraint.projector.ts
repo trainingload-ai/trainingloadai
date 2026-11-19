@@ -457,6 +457,14 @@ export class TodaySuggestionConstraintProjector {
         tomorrowWorkouts,
         planCompletionState: execution.day.completionState,
         todayExecution: {
+          remainingWorkoutIds: scheduledToday
+            .filter((workout) =>
+              ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
+            )
+            .map((workout) => workout.id),
+          movedWorkoutIds: todayWorkouts
+            .filter((workout) => workout.status === 'MOVED')
+            .map((workout) => workout.id),
           scheduledCount: scheduledToday.length,
           completedCount: scheduledToday.filter(
             (workout) => workout.status === 'DONE',
