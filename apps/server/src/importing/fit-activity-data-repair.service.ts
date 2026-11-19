@@ -8,12 +8,19 @@ import {
 
 import { decodeTrackFile } from '@/importing/trackswap-file';
 import type { CanonicalActivityPayload } from '@/importing/canonical-activity.types';
-import { ImportSourceObjectType, importJsonValue } from '@/importing/import-item-job.types';
 import {
+  ImportSourceObjectType,
+  importJsonValue,
+} from '@/importing/import-item-job.types';
+import {
+  fitSegmentChecksum,
   resolveRawFileIntegrity,
   type LegacyDiscoveryIntegrityAudit,
 } from './raw-file-checksum';
-import { mapTrackSwapActivityToCanonicalPayload } from '@/importing/source-adapters/trackswap-canonical.mapper';
+import {
+  mapTrackSwapActivityToCanonicalPayload,
+  normalizeTrackSwapLapRecords,
+} from '@/importing/source-adapters/trackswap-canonical.mapper';
 import {
   ACTIVITY_MATERIALIZATION_VERSION,
   datasetRepairFingerprint,
@@ -57,6 +64,11 @@ type RawActivityDataset = {
   sourceUid: string;
   recordCount: number;
   strengthSetCount: number;
+};
+
+type RawFitSegment = RawActivityDataset & {
+  index: number;
+  startTimeMs: number;
 };
 
 export type FitActivityRepairReason = {
@@ -166,6 +178,101 @@ export class FitActivityDataRepairService {
     private readonly jobs: ImportingJobService,
   ) {}
 
+  private async findCoveredDuplicateSegments(args: {
+    userId: string;
+    sourceObjectId: string;
+    containerChecksum: string;
+    segments: RawFitSegment[];
+    stored: StoredActivityDataset[];
+  }): Promise<StoredActivityDataset[]> {
+    const storedUids = new Set(args.stored.map(({ sourceUid }) => sourceUid));
+    const missingByChecksum = new Map(
+      args.segments
+        .filter(
+          (segment) =>
+            !storedUids.has(segment.sourceUid) &&
+            (segment.recordCount > 0 || segment.strengthSetCount > 0) &&
+            Number.isFinite(segment.startTimeMs),
+        )
+        .map((segment) => [
+          fitSegmentChecksum(args.containerChecksum, segment.index),
+          segment,
+        ]),
+    );
+    if (!missingByChecksum.size) return [];
+
+    const equivalent = await this.prisma.activitySource.findMany({
+      where: {
+        userId: args.userId,
+        sourceChecksum: { in: [...missingByChecksum.keys()] },
+        sourceObject: {
+          is: { userId: args.userId, id: { not: args.sourceObjectId } },
+        },
+        isActive: true,
+        isPrimary: true,
+        activity: { state: 1, processingStatus: 'READY' },
+      },
+      select: {
+        sourceUid: true,
+        sourceChecksum: true,
+        metadata: true,
+        sourceObject: { select: { sourceUid: true } },
+        activityId: true,
+        activity: {
+          select: {
+            startTime: true,
+            parquetFiles: {
+              where: { type: 'record' },
+              select: { pointCount: true },
+            },
+            strengthExercises: {
+              select: {
+                _count: { select: { sets: { where: { source: 'FIT' } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+    const covered = new Map<string, StoredActivityDataset>();
+    for (const link of equivalent) {
+      const segment = missingByChecksum.get(link.sourceChecksum ?? '');
+      const metadata = link.metadata as {
+        containerChecksum?: string;
+        materializationVersion?: number;
+      } | null;
+      const version = metadata?.materializationVersion ?? 0;
+      if (
+        !segment ||
+        !link.sourceObject ||
+        link.sourceUid !== `${link.sourceObject.sourceUid}#${segment.index}` ||
+        metadata?.containerChecksum !== args.containerChecksum ||
+        version < ACTIVITY_MATERIALIZATION_VERSION ||
+        link.activity.startTime?.getTime() !== segment.startTimeMs
+      )
+        continue;
+
+      const records = link.activity.parquetFiles.reduce(
+        (total, file) => total + file.pointCount,
+        0,
+      );
+      const sets = link.activity.strengthExercises.reduce(
+        (total, exercise) => total + exercise._count.sets,
+        0,
+      );
+      if (records < segment.recordCount || sets < segment.strengthSetCount)
+        continue;
+      covered.set(segment.sourceUid, {
+        sourceUid: segment.sourceUid,
+        activityId: link.activityId,
+        recordPointCount: records,
+        strengthSetCount: sets,
+        materializationVersion: version,
+      });
+    }
+    return [...covered.values()];
+  }
+
   async scan(
     options: FitActivityRepairScanOptions,
   ): Promise<FitActivityRepairScanResult> {
@@ -241,7 +348,11 @@ export class FitActivityDataRepairService {
                     },
                   },
                   strengthExercises: {
-                    select: { _count: { select: { sets: true } } },
+                    select: {
+                      _count: {
+                        select: { sets: { where: { source: 'FIT' } } },
+                      },
+                    },
                   },
                 },
               },
@@ -295,8 +406,13 @@ export class FitActivityDataRepairService {
             continue;
           }
           phase = 'RAW_CANONICAL_MAPPING_FAILED';
-          const raw = (decoded.activity.activities ?? []).map(
-            (activity, index): RawActivityDataset => ({
+          const activities = decoded.activity.activities ?? [];
+          const raw = activities.map(
+            (activity, index): RawFitSegment => ({
+              index,
+              startTimeMs: activity.startTime
+                ? new Date(activity.startTime).getTime()
+                : Number.NaN,
               sourceUid: `${sourceObject.sourceUid}#${index}`,
               recordCount: (activity.laps ?? []).reduce(
                 (count, lap) => count + (lap.records?.length ?? 0),
@@ -312,7 +428,9 @@ export class FitActivityDataRepairService {
                     }
                   ).strengthSets.filter(
                     (set) =>
-                      String(set.setType ?? 'UNKNOWN').toUpperCase() !== 'REST',
+                      String(set.setType ?? '')
+                        .trim()
+                        .toUpperCase() === 'ACTIVE',
                   ).length
                 : 0,
             }),
@@ -337,7 +455,33 @@ export class FitActivityDataRepairService {
               ),
             }),
           );
-          const comparison = compareRecoverableFitData({ raw, stored });
+          let comparison = compareRecoverableFitData({ raw, stored });
+          if (raw.length > 1 && comparison.unmapped > 0) {
+            const primaryUids = new Set(
+              stored.map(({ sourceUid }) => sourceUid),
+            );
+            for (const segment of raw) {
+              if (primaryUids.has(segment.sourceUid)) continue;
+              segment.recordCount = (
+                activities[segment.index]?.laps ?? []
+              ).reduce(
+                (count, lap) =>
+                  count +
+                  normalizeTrackSwapLapRecords(lap.records ?? []).length,
+                0,
+              );
+            }
+            stored.push(
+              ...(await this.findCoveredDuplicateSegments({
+                userId: sourceObject.userId,
+                sourceObjectId: sourceObject.id,
+                containerChecksum: actualChecksum,
+                segments: raw,
+                stored,
+              })),
+            );
+            comparison = compareRecoverableFitData({ raw, stored });
+          }
           result.unmappedRawActivities += comparison.unmapped;
           if (comparison.unmapped) {
             result.failures.push({
@@ -413,6 +557,12 @@ export class FitActivityDataRepairService {
             if (options.failFast) break scan;
             continue;
           }
+          const payloadChecksums = new Map(
+            payloads.map(({ source }) => [
+              source.sourceUid,
+              source.sourceChecksum,
+            ]),
+          );
           const candidate: FitActivityRepairCandidate = {
             sourceObjectId: sourceObject.id,
             sourceRevision: sourceObject.importRevision,
@@ -429,7 +579,8 @@ export class FitActivityDataRepairService {
                   migrationId: options.migrationId ?? '',
                   activityId: source.activityId,
                   primarySourceId: source.id,
-                  sourceChecksum,
+                  sourceChecksum:
+                    payloadChecksums.get(source.sourceUid) ?? sourceChecksum,
                   expectedFingerprint: datasetRepairFingerprint(
                     source.activity,
                     source,

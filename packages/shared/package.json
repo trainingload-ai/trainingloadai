@@ -23,6 +23,7 @@
     "./coach-competition-events": "./coach-competition-events.ts",
     "./coach-decision-preview": "./coach-decision-preview.ts",
     "./coach-home-card-stack": "./coach-home-card-stack.ts",
+    "./coach-plan-save-error": "./coach-plan-save-error.ts",
     "./coach-reply-language": "./coach-reply-language.ts",
     "./coach-training-evidence": "./coach-training-evidence.ts",
     "./coach-turn-error": "./coach-turn-error.ts",

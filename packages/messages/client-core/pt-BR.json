@@ -471,7 +471,18 @@
       "planAlreadySavedShort": "Salvo",
       "waitStreamEnd": "Aguarde a resposta terminar antes de salvar.",
       "creating": "Salvando…",
-      "createFailed": "Não foi possível salvar o plano. Verifique o texto do treino (DSL) e tente novamente.",
+      "createFailed": "Não foi possível salvar o plano. O rascunho foi mantido; tente novamente.",
+      "saveErrors": {
+        "validation": "O plano não passou na validação. Confira as sessões e tente novamente; o rascunho foi mantido.",
+        "network": "Não foi possível confirmar se o plano foi salvo. Confira a biblioteca de planos antes de salvar novamente para evitar duplicatas.",
+        "service": "Não é possível salvar no momento. Tente mais tarde; o rascunho foi mantido.",
+        "rateLimit": "Muitas solicitações de salvamento. Aguarde um momento e tente novamente.",
+        "authentication": "Sua sessão expirou. Entre novamente para salvar.",
+        "noWorkouts": "O rascunho não tem sessões para salvar. Peça ao treinador para adicionar sessões.",
+        "unknown": "Não foi possível salvar o plano. O rascunho foi mantido; tente novamente.",
+        "receipt": "O plano foi salvo, mas a conversa não pôde ser atualizada. Encontre-o na biblioteca de planos; não é necessário salvar novamente.",
+        "checkLibrary": "Abrir biblioteca de planos"
+      },
       "createSuccess": "Plano salvo",
       "noWorkouts": "Este rascunho não contém sessões com texto de treino.",
       "weekdayShort": {

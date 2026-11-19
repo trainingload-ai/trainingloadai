@@ -17,6 +17,7 @@ import { CORS_ALLOWED_HEADERS } from './cors-options';
 import { desktopInternalCredentialMiddleware } from './desktop-internal-credential.middleware';
 import { registerIntervalsIcuWebhookBodyParser } from './intervals-icu-webhook-body-parser';
 import { registerPersonalProviderBodyParser } from './personal-provider-body-parser';
+import { registerPlanBodyParser } from './plan-body-parser';
 import { createGlobalValidationPipe } from './runtime-safety';
 import { resolveTrustProxySetting } from './self-host-network-security';
 import { MANAGED_STARTUP, type ManagedStartup } from './managed-startup.port';
@@ -81,6 +82,7 @@ export async function bootstrapApplication(
 
   registerIntervalsIcuWebhookBodyParser(app);
   registerPersonalProviderBodyParser(app);
+  registerPlanBodyParser(app);
   let managedStartup: ManagedStartup | undefined;
   try {
     // ModuleRef permits an optional lookup without the application proxy's

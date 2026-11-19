@@ -115,5 +115,37 @@
       "strength": "筋力トレーニング",
       "unknown": "アクティビティ"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "活動記録がまだありません",
+      "LAST_ACTIVITY_OVER_30_DAYS": "30日以上活動記録がありません",
+      "ACTIVITY_PROCESSING_PENDING": "活動データを処理中です",
+      "TODAY_WORKOUT_COMPLETED": "今日のトレーニングは完了しました",
+      "TODAY_WORKOUT_AVAILABLE": "今日はトレーニングの予定があります",
+      "NO_ACTIVE_PLAN": "実行中のプランがありません",
+      "WAITING_FOR_USER": "体調の追加情報が必要です",
+      "WAITING_FOR_DATA": "トレーニングデータを待っています",
+      "HIGH_CONCERN": "現在の状態への対応が必要です",
+      "RECENT_LOAD": "最近のトレーニング負荷",
+      "RECENT_ACTIVITY": "直近の活動",
+      "PLAN_CONTEXT": "現在のトレーニングプラン",
+      "COMPETITION_CONTEXT": "今後の大会予定",
+      "LOAD_ZERO_28D": "過去28日間の計算上のトレーニング負荷は0です"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "今日のトレーニングを開く",
+      "OPEN_PLAN": "プランを見る",
+      "OPEN_ASSESSMENT": "体調を入力する",
+      "OPEN_PROVIDER_SETTINGS": "データ接続を確認する",
+      "OPEN_IMPORT": "活動をインポートする",
+      "OPEN_ACTIVITY_REVIEW": "活動を振り返る",
+      "CHECK_ACTIVITY_ASSOCIATION": "活動の関連付けを確認する",
+      "OPEN_DECISION": "コーチの判断を見る",
+      "ASK_COACH": "コーチに聞く",
+      "VIEW_TOMORROW": "明日の予定を見る",
+      "CREATE_TODAY_WORKOUT": "今日のトレーニングに追加する",
+      "SCHEDULE_REMINDER": "後で通知する"
+    }
   }
 }

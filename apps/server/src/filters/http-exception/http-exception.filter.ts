@@ -49,7 +49,7 @@ const ENGLISH_STATUS_FALLBACKS: Partial<Record<number, string>> = {
   [HttpStatus.FORBIDDEN]: 'You do not have permission to perform this action',
   [HttpStatus.NOT_FOUND]: 'The requested resource was not found',
   [HttpStatus.CONFLICT]: 'The request conflicts with the current state',
-  [HttpStatus.PAYLOAD_TOO_LARGE]: 'The uploaded file is too large.',
+  [HttpStatus.PAYLOAD_TOO_LARGE]: 'The submitted content exceeds the size limit.',
   [HttpStatus.UNPROCESSABLE_ENTITY]: 'The request could not be processed',
   [HttpStatus.TOO_MANY_REQUESTS]: 'Too many requests, please try again later.',
 };
@@ -100,6 +100,14 @@ export function normalizeHttpStatus(value: unknown): number {
     value <= 599
     ? value
     : HttpStatus.INTERNAL_SERVER_ERROR;
+}
+
+export function httpStatusForException(exception: unknown): number {
+  if (exception instanceof HttpException) {
+    return normalizeHttpStatus(exception.getStatus());
+  }
+  const error = exception as { status?: unknown; statusCode?: unknown } | null;
+  return normalizeHttpStatus(error?.status ?? error?.statusCode);
 }
 
 function isClientAbortException(
@@ -340,15 +348,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return;
     }
 
-    const errorStatus =
-      exception && typeof exception === 'object'
-        ? (exception as { status?: unknown; statusCode?: unknown })
-        : null;
-    const status = normalizeHttpStatus(
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : (errorStatus?.status ?? errorStatus?.statusCode),
-    );
+    const status = httpStatusForException(exception);
     const rawMessage =
       exception instanceof Error ? exception.message : String(exception ?? '');
     const message = getSafeHttpMessage(status, rawMessage, null);

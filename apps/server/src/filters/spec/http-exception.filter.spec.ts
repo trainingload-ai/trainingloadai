@@ -17,7 +17,8 @@ import {
 const zhMessages: Record<string, string> = {
   'common.error.internal': '系统内部错误，请稍后重试。',
   'common.error.invalid_request': '请求参数不合法',
-  'common.error.payload_too_large': '上传的文件过大。',
+  'common.error.payload_too_large':
+    '提交的内容超出大小限制。请减少内容或分批提交后重试。',
   'common.error.unprocessable_entity': '无法处理该请求',
   'common.error.workout_definition_invalid': '训练定义不合法',
   'common.error.account_deletion_in_progress': '账户删除申请正在处理中',
@@ -69,12 +70,12 @@ describe('getSafeHttpMessage', () => {
     ).toBe('无法处理该请求');
   });
 
-  it('localizes oversized upload errors', () => {
+  it('localizes oversized request errors', () => {
     mockI18n('zh');
 
     expect(
       getSafeHttpMessage(HttpStatus.PAYLOAD_TOO_LARGE, 'File too large', null),
-    ).toBe('上传的文件过大。');
+    ).toBe('提交的内容超出大小限制。请减少内容或分批提交后重试。');
   });
 
   it('translates a stable structured error code', () => {

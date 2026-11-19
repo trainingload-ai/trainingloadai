@@ -471,7 +471,18 @@
       "planAlreadySavedShort": "已儲存",
       "waitStreamEnd": "請等回覆完成先再儲存。",
       "creating": "儲存中…",
-      "createFailed": "未能儲存計劃。請檢查 workout 文字（DSL）後再試。",
+      "createFailed": "計畫未能儲存，草案已保留。請重試。",
+      "saveErrors": {
+        "validation": "計畫內容未通過驗證。請檢查課次安排後重試，草案已保留。",
+        "network": "無法確認計畫是否已儲存。請先查看計畫庫，避免重複建立。",
+        "service": "儲存服務暫時無法使用，請稍後重試。草案已保留。",
+        "rateLimit": "儲存請求過於頻繁，請稍等片刻再試。",
+        "authentication": "登入已過期，請重新登入後儲存。",
+        "noWorkouts": "草案沒有可儲存的課次，請教練補充課次。",
+        "unknown": "計畫未能儲存，草案已保留。請重試。",
+        "receipt": "計畫已儲存，但對話未更新。請在計畫庫查看，無需再次儲存。",
+        "checkLibrary": "查看計畫庫"
+      },
       "createSuccess": "計劃已儲存",
       "noWorkouts": "呢個草稿冇任何包含 workout 文字嘅課。",
       "weekdayShort": {

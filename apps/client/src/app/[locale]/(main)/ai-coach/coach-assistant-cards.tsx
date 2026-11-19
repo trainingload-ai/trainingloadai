@@ -1,13 +1,18 @@
 "use client";
 
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
+import {
+  coachPlanSaveErrorKind,
+  type CoachPlanSaveErrorKind,
+} from "@shared/coach-plan-save-error";
 import {
   useCoachMessage,
   useCoachThread,
   useCoachActions,
 } from "./coach-chat-provider";
 import { CoachQuestionAnsweredView } from "./coach-question-answered-view";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { payloadTooLargeMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -85,7 +90,7 @@ function appendCoachToolResult(
   text: string,
   data: CoachUserToolResultData,
 ) {
-  thread.append({
+  return thread.append({
     role: "user",
     content: [
       ...(text.trim() ? [{ type: "text" as const, text }] : []),
@@ -120,8 +125,13 @@ function CoachV2AssistantCardsInner({
   const router = useRouter();
   const isMobile = useIsMobile();
   const createCoachPlan = useCreateCoachPlanFromDraft();
+  const [planSaveError, setPlanSaveError] = useState<
+    CoachPlanSaveErrorKind | "receipt" | null
+  >(null);
+  const [createdPlanId, setCreatedPlanId] = useState<string | null>(null);
   const tq = useTranslations("AiCoachPage.questions");
   const tpd = useTranslations("AiCoachPage.planDraft");
+  const locale = useLocale();
   const twa = useTranslations("AiCoachPage.workoutAdjustment");
   const td = useTranslations("AiCoachPage.decision");
 
@@ -149,7 +159,7 @@ function CoachV2AssistantCardsInner({
         receipts.questionReplies.get(assistantMessageId) ??
         null));
   const planDraftAlreadySaved =
-    receipts.savedPlanDrafts.has(assistantMessageId);
+    receipts.savedPlanDrafts.has(assistantMessageId) || createdPlanId !== null;
 
   const planDraftTool = useMemo(
     () => tools.find((item) => item.name === "PresentCoachPlanDraft") ?? null,
@@ -286,7 +296,7 @@ function CoachV2AssistantCardsInner({
         repliesToAssistantMessageId: assistantMessageId,
         planId,
       };
-      appendCoachToolResult(thread, tpd("savedMetaPrompt"), {
+      return appendCoachToolResult(thread, tpd("savedMetaPrompt"), {
         toolUseId: assistantMessageId,
         content: toolResult,
       });
@@ -297,17 +307,21 @@ function CoachV2AssistantCardsInner({
   const createPlanFromDraft = useCallback(
     (draft: CoachPlanDraft) => {
       if (isRunning) return;
+      setPlanSaveError(null);
       createCoachPlan.mutate(draft, {
-        onSuccess: (result) => {
-          notifyPlanDraftSaved(String(result.id));
+        onSuccess: async (result) => {
+          setCreatedPlanId(String(result.id));
+          try {
+            await notifyPlanDraftSaved(String(result.id));
+          } catch {
+            setPlanSaveError("receipt");
+            return;
+          }
           toast.success(tpd("createSuccess"));
           router.push(getPlanLibraryHref(isMobile));
         },
         onError: (err) => {
-          const code = err instanceof Error ? err.message : String(err);
-          toast.error(
-            code === "NO_WORKOUTS" ? tpd("noWorkouts") : tpd("createFailed"),
-          );
+          setPlanSaveError(coachPlanSaveErrorKind(err));
         },
       });
     },
@@ -446,7 +460,28 @@ function CoachV2AssistantCardsInner({
               className="rounded-none bg-transparent dark:bg-transparent"
             />
           </PlanContent>
-          <PlanFooter>
+          <PlanFooter className="flex-col items-stretch gap-2 sm:items-end">
+            {planSaveError ? (
+              <p
+                id={`plan-save-error-${assistantMessageId}`}
+                role="status"
+                className="text-sm text-destructive"
+              >
+                {planSaveError === "tooLarge"
+                  ? payloadTooLargeMessage(locale)
+                  : tpd(`saveErrors.${planSaveError}`)}
+              </p>
+            ) : null}
+            {planSaveError === "network" || planSaveError === "receipt" ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(getPlanLibraryHref(isMobile))}
+              >
+                {tpd("saveErrors.checkLibrary")}
+              </Button>
+            ) : null}
             <Button
               type="button"
               size="sm"
@@ -455,6 +490,11 @@ function CoachV2AssistantCardsInner({
                 createCoachPlan.isPending || isRunning || planDraftAlreadySaved
               }
               title={isRunning ? tpd("waitStreamEnd") : undefined}
+              aria-describedby={
+                planSaveError
+                  ? `plan-save-error-${assistantMessageId}`
+                  : undefined
+              }
               onClick={() => createPlanFromDraft(planDraft)}
             >
               {createCoachPlan.isPending

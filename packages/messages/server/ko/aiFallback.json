@@ -115,5 +115,37 @@
       "strength": "근력 훈련",
       "unknown": "활동"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "아직 기록된 활동이 없습니다",
+      "LAST_ACTIVITY_OVER_30_DAYS": "30일 넘게 기록된 활동이 없습니다",
+      "ACTIVITY_PROCESSING_PENDING": "활동 데이터를 처리 중입니다",
+      "TODAY_WORKOUT_COMPLETED": "오늘의 훈련을 완료했습니다",
+      "TODAY_WORKOUT_AVAILABLE": "오늘 예정된 훈련이 있습니다",
+      "NO_ACTIVE_PLAN": "진행 중인 계획이 없습니다",
+      "WAITING_FOR_USER": "몸 상태에 대한 추가 정보가 필요합니다",
+      "WAITING_FOR_DATA": "훈련 데이터를 기다리고 있습니다",
+      "HIGH_CONCERN": "현재 상태를 우선 확인해야 합니다",
+      "RECENT_LOAD": "최근 훈련 부하",
+      "RECENT_ACTIVITY": "최근 활동",
+      "PLAN_CONTEXT": "현재 훈련 계획",
+      "COMPETITION_CONTEXT": "다가오는 대회",
+      "LOAD_ZERO_28D": "최근 28일간 계산된 훈련 부하는 0입니다"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "오늘의 훈련 열기",
+      "OPEN_PLAN": "계획 보기",
+      "OPEN_ASSESSMENT": "상태 입력",
+      "OPEN_PROVIDER_SETTINGS": "데이터 연결 확인",
+      "OPEN_IMPORT": "활동 가져오기",
+      "OPEN_ACTIVITY_REVIEW": "활동 분석 보기",
+      "CHECK_ACTIVITY_ASSOCIATION": "활동 연결 확인",
+      "OPEN_DECISION": "코치 판단 보기",
+      "ASK_COACH": "코치에게 질문",
+      "VIEW_TOMORROW": "내일 일정 보기",
+      "CREATE_TODAY_WORKOUT": "오늘의 훈련으로 추가",
+      "SCHEDULE_REMINDER": "나중에 알림"
+    }
   }
 }

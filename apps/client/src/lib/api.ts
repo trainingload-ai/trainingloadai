@@ -5,7 +5,7 @@ import {
   parseApiEnvelopeText,
   type ApiEnvelope,
 } from "@shared/runtime-reliability";
-import { ApiFetchError } from "./api-error";
+import { ApiFetchError, payloadTooLargeMessage } from "./api-error";
 import { getPendingAuthFailure, handleUnauthorized } from "./auth-failure";
 import { notifyAiDataConsentRequired } from "./ai-data-consent-events";
 import { isPublicDemoBrowser } from "@/public-demo/public-demo-runtime";
@@ -51,6 +51,10 @@ const getClientLang = (): string => {
   const firstSeg = pathname.split("/").filter(Boolean)[0];
   return isSupportedLocale(firstSeg) ? firstSeg : "en";
 };
+
+function httpErrorMessage(status: number, fallback: string): string {
+  return status === 413 ? payloadTooLargeMessage(getClientLang()) : fallback;
+}
 
 function getApiFetchBaseUrl(): string {
   // getApiBaseUrl() selects the private/public server origin during SSR and
@@ -111,7 +115,10 @@ export async function apiFetchErrorFromResponse(
   const errorCode = envelopeErrorCode(envelope);
   const consentRequired = notifyAiDataConsentRequired(errorCode);
   return new ApiFetchError(
-    envelope.message || `Request failed (${response.status})`,
+    httpErrorMessage(
+      response.status,
+      envelope.message || `Request failed (${response.status})`,
+    ),
     response.status,
     errorCode,
     envelope.data,
@@ -206,7 +213,7 @@ export const apiFetch = async <T = unknown>(
     const errorCode = envelopeErrorCode(res);
     const consentRequired = notifyAiDataConsentRequired(errorCode);
     throw new ApiFetchError(
-      msg,
+      httpErrorMessage(response.status, msg),
       response.status,
       errorCode,
       res.data,
@@ -252,7 +259,10 @@ export const apiDownloadFetch = async (url: string, options?: RequestInit) => {
   if (!response.ok) {
     const res = await readApiEnvelope<unknown>(response);
     throw new ApiFetchError(
-      res.message || `API request failed (${response.status})`,
+      httpErrorMessage(
+        response.status,
+        res.message || `API request failed (${response.status})`,
+      ),
       response.status,
       envelopeErrorCode(res),
       res.data,

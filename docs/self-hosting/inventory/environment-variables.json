@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2233
+          "line": 2234
         }
       ]
     },
@@ -842,7 +842,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 40
+          "line": 41
         }
       ]
     },
@@ -888,7 +888,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 41
+          "line": 42
         }
       ]
     },
@@ -1352,7 +1352,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 42
+          "line": 43
         }
       ]
     },
@@ -1512,7 +1512,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 39
+          "line": 40
         }
       ]
     },
@@ -1546,7 +1546,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 43
+          "line": 44
         }
       ]
     },
@@ -1837,7 +1837,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 20
+          "line": 23
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -1870,7 +1870,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 19
+          "line": 22
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -2178,7 +2178,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 52
+          "line": 53
         }
       ]
     },
@@ -2212,7 +2212,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 53
+          "line": 54
         }
       ]
     },
@@ -2229,7 +2229,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 54
+          "line": 55
         }
       ]
     },
@@ -2246,7 +2246,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 55
+          "line": 56
         }
       ]
     },
@@ -2453,7 +2453,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 56
+          "line": 57
         }
       ]
     },
@@ -2487,7 +2487,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 57
+          "line": 58
         }
       ]
     },
@@ -2504,7 +2504,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 58
+          "line": 59
         }
       ]
     },
@@ -2521,7 +2521,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 59
+          "line": 60
         }
       ]
     },
@@ -2701,7 +2701,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 63
+          "line": 64
         }
       ]
     },
@@ -2757,7 +2757,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 36
+          "line": 37
         }
       ]
     },
@@ -2779,7 +2779,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 38
+          "line": 39
         }
       ]
     },
@@ -2918,7 +2918,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 127
+          "line": 129
         }
       ]
     },
@@ -3264,7 +3264,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 123
+          "line": 125
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -3289,7 +3289,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 33
+          "line": 34
         }
       ]
     },
@@ -3306,7 +3306,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 34
+          "line": 35
         }
       ]
     },
@@ -3323,7 +3323,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 30
+          "line": 31
         }
       ]
     },
@@ -3340,7 +3340,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 31
+          "line": 32
         }
       ]
     },
@@ -3357,7 +3357,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 32
+          "line": 33
         }
       ]
     },
@@ -4485,11 +4485,11 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 25
+          "line": 26
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 116
+          "line": 118
         },
         {
           "file": "apps/server/src/bootstrap/self-host-network-security.ts",
@@ -4602,7 +4602,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 44
+          "line": 45
         }
       ]
     },
@@ -4632,7 +4632,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 45
+          "line": 46
         }
       ]
     },
@@ -4649,7 +4649,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 46
+          "line": 47
         }
       ]
     },
@@ -4666,7 +4666,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 47
+          "line": 48
         }
       ]
     },
@@ -4700,7 +4700,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 48
+          "line": 49
         }
       ]
     },
@@ -4751,7 +4751,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 49
+          "line": 50
         }
       ]
     },
@@ -4768,7 +4768,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 50
+          "line": 51
         }
       ]
     },
@@ -4802,7 +4802,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 51
+          "line": 52
         }
       ]
     },
@@ -4924,7 +4924,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 127
+          "line": 129
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -4945,7 +4945,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 116
+          "line": 117
         }
       ]
     },
@@ -4962,7 +4962,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 116
+          "line": 117
         }
       ]
     },
@@ -5065,6 +5065,28 @@
         {
           "file": "apps/server/src/api/user/account-deletion.service.ts",
           "line": 435
+        }
+      ]
+    },
+    {
+      "name": "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": true,
+      "exampleDefault": "false",
+      "owners": [
+        "apps",
+        "compose.yml"
+      ],
+      "references": [
+        {
+          "file": "apps/server/src/api/public/public-upload-failure-capture.service.ts",
+          "line": 132
+        },
+        {
+          "file": "compose.yml",
+          "line": 27
         }
       ]
     },
@@ -5455,7 +5477,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 18
+          "line": 21
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -5506,7 +5528,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 191
+          "line": 192
         }
       ]
     },
@@ -5523,15 +5545,11 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 94
+          "line": 95
         },
         {
           "file": "compose.yml",
-          "line": 112
-        },
-        {
-          "file": "compose.yml",
-          "line": 163
+          "line": 113
         },
         {
           "file": "compose.yml",
@@ -5547,7 +5565,11 @@
         },
         {
           "file": "compose.yml",
-          "line": 211
+          "line": 167
+        },
+        {
+          "file": "compose.yml",
+          "line": 212
         }
       ]
     },
@@ -5585,11 +5607,11 @@
         },
         {
           "file": "compose.yml",
-          "line": 107
+          "line": 108
         },
         {
           "file": "compose.yml",
-          "line": 134
+          "line": 135
         }
       ]
     },
@@ -5610,11 +5632,11 @@
         },
         {
           "file": "compose.yml",
-          "line": 109
+          "line": 110
         },
         {
           "file": "compose.yml",
-          "line": 134
+          "line": 135
         }
       ]
     },
@@ -5635,7 +5657,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 134
+          "line": 135
         }
       ]
     },
@@ -5656,11 +5678,11 @@
         },
         {
           "file": "compose.yml",
-          "line": 108
+          "line": 109
         },
         {
           "file": "compose.yml",
-          "line": 134
+          "line": 135
         }
       ]
     },
@@ -5681,7 +5703,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 213
+          "line": 214
         }
       ]
     },
@@ -5698,7 +5720,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 213
+          "line": 214
         }
       ]
     },
@@ -5732,11 +5754,11 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 73
+          "line": 74
         },
         {
           "file": "compose.yml",
-          "line": 128
+          "line": 129
         }
       ]
     },
@@ -5835,7 +5857,7 @@
         },
         {
           "file": "compose.yml",
-          "line": 205
+          "line": 206
         }
       ]
     },
@@ -5916,7 +5938,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 152
+          "line": 153
         }
       ]
     },
@@ -5966,10 +5988,6 @@
         },
         {
           "file": "compose.yml",
-          "line": 201
-        },
-        {
-          "file": "compose.yml",
           "line": 202
         },
         {
@@ -5979,6 +5997,10 @@
         {
           "file": "compose.yml",
           "line": 204
+        },
+        {
+          "file": "compose.yml",
+          "line": 205
         }
       ]
     },
@@ -6387,7 +6409,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 64
+          "line": 65
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",

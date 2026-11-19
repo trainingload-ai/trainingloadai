@@ -39,7 +39,7 @@
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "Si è verificato un errore nel sistema. Riprova più tardi.",
     "request_failed": "Richiesta non riuscita",
-    "payload_too_large": "Il file caricato è troppo grande.",
+    "payload_too_large": "Il contenuto inviato supera il limite di dimensione. Riducilo o invialo in parti più piccole e riprova.",
     "unauthorized": "È necessario accedere",
     "forbidden": "Non hai l’autorizzazione per eseguire questa azione",
     "not_found": "La risorsa richiesta non è stata trovata",

@@ -537,7 +537,18 @@
       "planAlreadySavedShort": "已保存",
       "waitStreamEnd": "请等本条回复生成完成后再保存。",
       "creating": "保存中…",
-      "createFailed": "无法保存计划，请检查课表 DSL 是否正确后重试。",
+      "createFailed": "计划未能保存，草案已保留。请重试。",
+      "saveErrors": {
+        "validation": "计划内容未通过校验。请检查课次安排后重试，草案已保留。",
+        "network": "无法确认计划是否已保存。请先查看计划库，避免重复创建。",
+        "service": "保存服务暂时不可用，请稍后重试。草案已保留。",
+        "rateLimit": "保存请求过于频繁，请稍等片刻再试。",
+        "authentication": "登录已过期，请重新登录后保存。",
+        "noWorkouts": "草案没有可保存的课次，请让教练补充课次。",
+        "unknown": "计划未能保存，草案已保留。请重试。",
+        "receipt": "计划已保存，但对话未更新。请在计划库查看，无需再次保存。",
+        "checkLibrary": "查看计划库"
+      },
       "createSuccess": "计划已保存",
       "noWorkouts": "草案中没有可保存的训练内容。",
       "weekdayShort": {

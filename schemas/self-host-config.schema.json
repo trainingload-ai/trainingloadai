@@ -87,6 +87,10 @@
       "type": "string",
       "default": "/data/cache/storage"
     },
+    "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED": {
+      "type": "boolean",
+      "default": false
+    },
     "MAP_PROVIDER": {
       "type": "string",
       "enum": [

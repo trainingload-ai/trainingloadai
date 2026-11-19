@@ -39,7 +39,7 @@
     "invalid_session_rpe": "Session RPE must be empty (clear) or a number between 1 and 10",
     "internal": "시스템에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
     "request_failed": "요청에 실패했습니다",
-    "payload_too_large": "업로드한 파일이 너무 큽니다.",
+    "payload_too_large": "제출한 내용이 크기 한도를 초과합니다. 내용을 줄이거나 나누어 다시 제출해 주세요.",
     "unauthorized": "로그인이 필요합니다",
     "forbidden": "이 작업을 수행할 권한이 없습니다",
     "not_found": "요청한 항목을 찾을 수 없습니다",

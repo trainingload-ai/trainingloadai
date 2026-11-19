@@ -1,4 +1,5 @@
 import {
+  fitSegmentChecksum,
   verifiedRawFileSha256,
   resolveRawFileIntegrity,
 } from '../raw-file-checksum';
@@ -92,6 +93,37 @@ describe('legacy discovery checksum provenance', () => {
     expect(() => resolveRawFileIntegrity(Buffer.from('changed'), s)).toThrow(
       'RAW_CHECKSUM_MISMATCH',
     );
+  });
+  it('verifies the container and exact session index of a legacy multipart source', () => {
+    const primary = {
+      sourceUid: 'source-1#1',
+      sourceChecksum: fitSegmentChecksum(sha256, 1),
+      metadata: { containerChecksum: sha256 },
+    };
+    const s = {
+      ...source(),
+      sourceUid: 'source-1',
+      activitySources: [primary],
+    };
+    expect(resolveRawFileIntegrity(Buffer.from('abc'), s)).toMatchObject({
+      sha256,
+      audit: { fileChecksumStatus: 'VERIFIED_PRIMARY_DIGEST' },
+    });
+    expect(() => resolveRawFileIntegrity(Buffer.from('changed'), s)).toThrow(
+      'RAW_CHECKSUM_MISMATCH',
+    );
+    for (const change of [
+      { sourceUid: 'source-1#0' },
+      { sourceUid: 'source-11#1' },
+      { metadata: { containerChecksum: '0'.repeat(64) } },
+    ]) {
+      expect(() =>
+        resolveRawFileIntegrity(Buffer.from('abc'), {
+          ...s,
+          activitySources: [{ ...primary, ...change }],
+        }),
+      ).toThrow('RAW_CHECKSUM_MISMATCH');
+    }
   });
   it('keeps genuine file digests strict even when list metadata exists', () => {
     const s = {

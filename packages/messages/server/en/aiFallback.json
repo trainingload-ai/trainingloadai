@@ -115,5 +115,37 @@
       "strength": "strength session",
       "unknown": "activity"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "No recorded activity yet",
+      "LAST_ACTIVITY_OVER_30_DAYS": "No activity recorded for 30+ days",
+      "ACTIVITY_PROCESSING_PENDING": "Activity data is still processing",
+      "TODAY_WORKOUT_COMPLETED": "Today's workout is complete",
+      "TODAY_WORKOUT_AVAILABLE": "A workout is scheduled today",
+      "NO_ACTIVE_PLAN": "No active plan",
+      "WAITING_FOR_USER": "Athlete input is needed",
+      "WAITING_FOR_DATA": "Waiting for training data",
+      "HIGH_CONCERN": "Current state needs attention",
+      "RECENT_LOAD": "Recent training load",
+      "RECENT_ACTIVITY": "Latest activity",
+      "PLAN_CONTEXT": "Current training plan",
+      "COMPETITION_CONTEXT": "Upcoming competition",
+      "LOAD_ZERO_28D": "Calculated training load is zero over 28 days"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "Open today's workout",
+      "OPEN_PLAN": "View plan",
+      "OPEN_ASSESSMENT": "Update status",
+      "OPEN_PROVIDER_SETTINGS": "Check data connection",
+      "OPEN_IMPORT": "Import activity",
+      "OPEN_ACTIVITY_REVIEW": "Review activity",
+      "CHECK_ACTIVITY_ASSOCIATION": "Check activity association",
+      "OPEN_DECISION": "Review coach decision",
+      "ASK_COACH": "Ask coach",
+      "VIEW_TOMORROW": "View tomorrow's plan",
+      "CREATE_TODAY_WORKOUT": "Add as today's workout",
+      "SCHEDULE_REMINDER": "Remind me later"
+    }
   }
 }

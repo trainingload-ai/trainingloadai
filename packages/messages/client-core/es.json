@@ -471,7 +471,18 @@
       "planAlreadySavedShort": "Guardado",
       "waitStreamEnd": "Espere a que termine la respuesta antes de guardar.",
       "creating": "Ahorro…",
-      "createFailed": "No se pudo guardar el plan. Verifique el texto del entrenamiento (DSL) e inténtelo nuevamente.",
+      "createFailed": "No se pudo guardar el plan. El borrador se conserva; vuelve a intentarlo.",
+      "saveErrors": {
+        "validation": "El plan no superó la validación. Revisa las sesiones y vuelve a intentarlo; el borrador se conserva.",
+        "network": "No se pudo confirmar si el plan se guardó. Revisa tu biblioteca de planes antes de guardarlo de nuevo para evitar duplicados.",
+        "service": "No se puede guardar en este momento. Inténtalo más tarde; el borrador se conserva.",
+        "rateLimit": "Demasiadas solicitudes de guardado. Espera un momento y vuelve a intentarlo.",
+        "authentication": "Tu sesión ha caducado. Inicia sesión de nuevo para guardar.",
+        "noWorkouts": "El borrador no tiene sesiones para guardar. Pide al entrenador que añada sesiones.",
+        "unknown": "No se pudo guardar el plan. El borrador se conserva; vuelve a intentarlo.",
+        "receipt": "El plan se guardó, pero no se pudo actualizar la conversación. Encuéntralo en tu biblioteca; no necesitas guardarlo de nuevo.",
+        "checkLibrary": "Ver biblioteca de planes"
+      },
       "createSuccess": "Plan guardado",
       "noWorkouts": "Este borrador no tiene sesiones con texto de entrenamiento.",
       "weekdayShort": {

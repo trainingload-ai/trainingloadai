@@ -15,6 +15,7 @@ import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import { resolve } from 'node:path';
 import { TrackFileConversionError } from '@/importing/track-file-conversion';
 import { mapTrackFileRequestError } from '@/importing/track-file-request-error';
+import { PublicUploadFailureCaptureService } from '../public-upload-failure-capture.service';
 
 jest.mock('@thallesp/nestjs-better-auth', () => ({
   AllowAnonymous: () => () => undefined,
@@ -70,6 +71,15 @@ describe('PublicController upload limits', () => {
           provide: ActivityService,
           useValue: { convertFiles },
         },
+        {
+          provide: PublicUploadFailureCaptureService,
+          useValue: {
+            run: async <T>(
+              _request: unknown,
+              operation: () => Promise<T>,
+            ): Promise<T> => operation(),
+          },
+        },
       ],
     }).compile();
 
@@ -98,7 +108,7 @@ describe('PublicController upload limits', () => {
       .expect(({ body }) => {
         expect(body).toMatchObject({
           code: 413,
-          message: '上传的文件过大。',
+          message: '提交的内容超出大小限制。请减少内容或分批提交后重试。',
         });
       });
 

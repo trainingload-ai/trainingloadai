@@ -1624,6 +1624,13 @@ export class AiController {
           await persistCoachUsage();
           continue;
         }
+        if (event.type === 'result' && event.usage !== undefined) {
+          lastUsage = event.usage;
+        }
+        if (event.type === 'result' && event.model?.trim()) {
+          actualModel = event.model.trim();
+        }
+        if (abort.signal.aborted) continue;
         const clientEvent = clientOutputGuard.handle(event);
         if (clientEvent?.type === 'result' && clientEvent.is_error !== true) {
           terminalSuccessEvent = clientEvent;
@@ -1636,12 +1643,6 @@ export class AiController {
             emittedTerminalError = true;
             terminalErrorEvent = clientEvent;
           }
-        }
-        if (event.type === 'result' && event.usage !== undefined) {
-          lastUsage = event.usage;
-        }
-        if (event.type === 'result' && event.model?.trim()) {
-          actualModel = event.model.trim();
         }
         if (
           event.type === 'result' &&

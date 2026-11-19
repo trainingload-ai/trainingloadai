@@ -210,6 +210,10 @@
     "MAP_TILE_URL": {
       "type": "string"
     },
+    "PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED": {
+      "$ref": "#/$defs/booleanString",
+      "default": "false"
+    },
     "SELF_HOST_ALLOW_INSECURE_HTTP": {
       "$ref": "#/$defs/booleanString",
       "default": "false"

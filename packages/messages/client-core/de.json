@@ -471,7 +471,18 @@
       "planAlreadySavedShort": "Gespeichert",
       "waitStreamEnd": "Warten Sie, bis die Antwort abgeschlossen ist, bevor Sie speichern.",
       "creating": "Speichern…",
-      "createFailed": "Der Plan konnte nicht gespeichert werden. Überprüfen Sie den Trainingstext (DSL) und versuchen Sie es erneut.",
+      "createFailed": "Der Plan konnte nicht gespeichert werden. Der Entwurf bleibt erhalten. Bitte versuchen Sie es erneut.",
+      "saveErrors": {
+        "validation": "Der Plan hat die Prüfung nicht bestanden. Prüfen Sie die Einheiten und versuchen Sie es erneut. Der Entwurf bleibt erhalten.",
+        "network": "Es ist unklar, ob der Plan gespeichert wurde. Prüfen Sie zuerst die Planbibliothek, um Duplikate zu vermeiden.",
+        "service": "Speichern ist vorübergehend nicht möglich. Versuchen Sie es später erneut. Der Entwurf bleibt erhalten.",
+        "rateLimit": "Zu viele Speicheranfragen. Warten Sie kurz und versuchen Sie es erneut.",
+        "authentication": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an, um zu speichern.",
+        "noWorkouts": "Der Entwurf enthält keine speicherbaren Einheiten. Bitten Sie den Coach, Einheiten hinzuzufügen.",
+        "unknown": "Der Plan konnte nicht gespeichert werden. Der Entwurf bleibt erhalten. Bitte versuchen Sie es erneut.",
+        "receipt": "Der Plan wurde gespeichert, aber das Gespräch konnte nicht aktualisiert werden. Sie finden ihn in der Planbibliothek. Erneutes Speichern ist nicht nötig.",
+        "checkLibrary": "Planbibliothek öffnen"
+      },
       "createSuccess": "Plan gespeichert",
       "noWorkouts": "Dieser Entwurf enthält keine Sitzungen mit Trainingstext.",
       "weekdayShort": {

@@ -130,7 +130,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 174
+          "line": 175
         }
       ],
       "capability": "product-internal",
@@ -144,7 +144,7 @@
       "references": [
         {
           "file": "scripts/selfhost/management-core.mjs",
-          "line": 4519
+          "line": 4522
         }
       ],
       "capability": "product-internal",
@@ -158,7 +158,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 219
+          "line": 220
         }
       ],
       "capability": "product-internal",
@@ -200,7 +200,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 62
+          "line": 66
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -227,7 +227,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 56
+          "line": 60
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -1436,7 +1436,7 @@
       "references": [
         {
           "file": ".env.example",
-          "line": 68
+          "line": 72
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1626,10 +1626,6 @@
         },
         {
           "file": "compose.yml",
-          "line": 201
-        },
-        {
-          "file": "compose.yml",
           "line": 202
         },
         {
@@ -1639,6 +1635,10 @@
         {
           "file": "compose.yml",
           "line": 204
+        },
+        {
+          "file": "compose.yml",
+          "line": 205
         }
       ],
       "capability": "product-internal",
@@ -2302,7 +2302,7 @@
       "references": [
         {
           "file": "compose.yml",
-          "line": 200
+          "line": 201
         },
         {
           "file": "scripts/selfhost/verify-compose-contract.mjs",

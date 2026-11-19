@@ -125,6 +125,10 @@ You can use activities, plans, and analysis with AI disabled. When you enable an
 
 Self-hosting does not use Trainingload.ai Cloud memberships or AI credits. **AI Usage** explains how using your own provider is billed. Check actual API usage, balance, and invoices in that provider's dashboard.
 
+## Optional diagnostics for public file tools
+
+Set `PUBLIC_FAILED_UPLOAD_CAPTURE_ENABLED=true` in `.env.selfhost` to retain the original files when a public file tool encounters a server error. The setting defaults to `false`. Captures can contain GPS or other personal data. They stay in `data/operations/public-upload-failures`, are excluded from backups, and are pruned after 72 hours or sooner when the size or count limit is reached.
+
 ## Environment fallback for automated provisioning
 
 The release schema still accepts complete provider groups in `.env.selfhost` for unattended provisioning. This is a fallback, not the preferred interactive path. The Client never reveals an environment key, and the Owner must enter a fresh key when switching from environment-managed configuration to Client-managed configuration.
