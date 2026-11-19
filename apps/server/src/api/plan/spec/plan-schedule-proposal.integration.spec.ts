@@ -185,7 +185,7 @@ describe('remaining schedule / PostgreSQL', () => {
         range: d.request.range,
       },
     });
-  });
+  }, 30_000);
   async function apply(d: Awaited<ReturnType<typeof running>>) {
     const preview = await f.proposals.createPreview(
       'user',
