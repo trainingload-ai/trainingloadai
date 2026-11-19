@@ -180,6 +180,7 @@ beforeEach(() => {
   state.ready = true;
   state.unit = "metric";
   state.theme = "light";
+  state.config.maxZoom = 18;
   vi.stubGlobal(
     "ResizeObserver",
     class {
@@ -190,6 +191,27 @@ beforeEach(() => {
 });
 
 describe("activity map lifetime and route updates", () => {
+  it("fits the complete route with a closer detail zoom while respecting provider limits", () => {
+    const { rerender } = renderHook(useActivityLayerManager, {
+      initialProps: { ...options(), fitBoundsMaxZoom: 17 },
+    });
+    const map = state.maps[0];
+    expect(map.fitBounds).toHaveBeenLastCalledWith(
+      [
+        [120, 30],
+        [120.01, 30.01],
+      ],
+      expect.objectContaining({ maxZoom: 17, duration: 0 }),
+    );
+    rerender({ ...options(), interactive: true, fitBoundsMaxZoom: 17 });
+    const framingCount = map.fitBounds.mock.calls.length;
+    rerender({ ...options(), interactive: true, fitBoundsMaxZoom: 17 });
+    expect(map.fitBounds).toHaveBeenCalledTimes(framingCount);
+    state.config.maxZoom = 16;
+    rerender({ ...options(), fitBoundsMaxZoom: 17 });
+    expect(state.maps.at(-1)!.fitBounds.mock.calls.at(-1)![1].maxZoom).toBe(16);
+  });
+
   it("reuses the same basemap and camera when entering and leaving timeline repeatedly", () => {
     const { rerender, unmount } = renderHook(useActivityLayerManager, {
       initialProps: options(),

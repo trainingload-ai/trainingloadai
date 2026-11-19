@@ -74,6 +74,7 @@ const ActivityMap = React.memo(() => {
         isLoading={isLoading}
         interactive={!isMapLocked}
         fitBoundsPadding={DESKTOP_MAP_PADDING}
+        fitBoundsMaxZoom={17}
         lockedFitBoundsPadding={DESKTOP_MAP_PADDING}
         showInteractionOverlay={false}
         focusDistanceM={hoveredDistanceM}

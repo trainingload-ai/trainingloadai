@@ -27,11 +27,13 @@ vi.mock("@/components/MapBoxMap/MapBoxMap", () => ({
     className,
     interactive,
     lockedFitBoundsPadding,
+    fitBoundsMaxZoom,
     showInteractionOverlay,
   }: {
     className: string;
     interactive: boolean;
     lockedFitBoundsPadding: unknown;
+    fitBoundsMaxZoom: number;
     showInteractionOverlay: boolean;
   }) => (
     <div
@@ -39,6 +41,7 @@ vi.mock("@/components/MapBoxMap/MapBoxMap", () => ({
       data-class-name={className}
       data-interactive={String(interactive)}
       data-padding={JSON.stringify(lockedFitBoundsPadding)}
+      data-max-zoom={fitBoundsMaxZoom}
       data-show-overlay={String(showInteractionOverlay)}
     />
   ),
@@ -75,6 +78,10 @@ describe("ActivityMap", () => {
     expect(screen.getByTestId("route-map")).toHaveAttribute(
       "data-show-overlay",
       "false",
+    );
+    expect(screen.getByTestId("route-map")).toHaveAttribute(
+      "data-max-zoom",
+      "17",
     );
     expect(screen.getByTestId("route-map")).toHaveAttribute(
       "data-padding",

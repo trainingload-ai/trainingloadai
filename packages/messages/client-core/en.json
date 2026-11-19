@@ -4376,16 +4376,33 @@
       "template": {
         "title": "Official training",
         "desc": "Choose a training goal, then preview a complete structured plan",
-        "badge": "No AI chat"
+        "badge": "No AI chat",
+        "feature1": "Choose a training goal",
+        "feature2": "Preview the full cycle and sessions",
+        "action": "Explore official plans"
       },
       "ai": {
         "title": "AI Coach",
         "desc": "Open AI Coach and generate a plan through guided multi-step questions",
-        "badge": "AI Coach"
+        "badge": "AI Coach",
+        "eyebrow": "Fixed training cycle",
+        "feature1": "Uses your training history",
+        "feature2": "Drafts a complete training cycle",
+        "action": "Plan with your coach"
       },
       "manual": {
         "title": "Manual",
-        "desc": "Create your plan manually"
+        "desc": "Create your plan manually",
+        "eyebrow": "Build week by week",
+        "feature1": "Mix endurance and strength",
+        "feature2": "Choose training and rest days",
+        "action": "Build your own plan"
+      },
+      "rolling": {
+        "eyebrow": "Automatically adapts",
+        "feature1": "Monthly training direction",
+        "feature2": "Weekly sessions that adapt",
+        "action": "Set up continuous training"
       }
     },
     "buttons": {

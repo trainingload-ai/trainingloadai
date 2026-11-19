@@ -4026,16 +4026,33 @@
       "template": {
         "title": "官方訓練",
         "desc": "先選擇訓練目標，再預覽完整結構化計畫",
-        "badge": "無需 AI 對話"
+        "badge": "無需 AI 對話",
+        "feature1": "依訓練目標挑選",
+        "feature2": "預覽完整週期與課程",
+        "action": "瀏覽官方訓練"
       },
       "ai": {
         "title": "AI 教練",
         "desc": "進入 AI 教練，用多輪選項問答嚟生成訓練計劃",
-        "badge": "AI 教練"
+        "badge": "AI 教練",
+        "eyebrow": "固定週期",
+        "feature1": "結合既有訓練紀錄",
+        "feature2": "一次擬定完整週期",
+        "action": "與教練制定計畫"
       },
       "manual": {
         "title": "手動建立",
-        "desc": "透過手動配置嚟建立訓練計劃"
+        "desc": "透過手動配置嚟建立訓練計劃",
+        "eyebrow": "按週編排",
+        "feature1": "搭配耐力與肌力訓練",
+        "feature2": "自訂訓練日與休息日",
+        "action": "開始手動編排"
+      },
+      "rolling": {
+        "eyebrow": "自動滾動",
+        "feature1": "每月規劃訓練方向",
+        "feature2": "逐週產生，隨近況調整",
+        "action": "設定持續訓練計畫"
       }
     },
     "buttons": {

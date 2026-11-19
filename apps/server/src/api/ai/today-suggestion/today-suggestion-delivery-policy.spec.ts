@@ -86,6 +86,94 @@ describe('TodaySuggestionDeliveryPolicy', () => {
     process.env.SELF_HOST_AUTH_SECRET = originalSecret;
   });
 
+  it.each(['ACCESS_DENIED', 'AI_DISABLED', 'AI_NOT_CONFIGURED'] as const)(
+    'does not offer an unavailable coach continuation for %s, including cached delivery',
+    (reasonCode) => {
+      const policy = new TodaySuggestionDeliveryPolicy(createAiFallbackI18n());
+      const result = policy.build({
+        projection: projection({ featureAllowed: false }),
+        draft: draft({
+          recommendation: { kind: 'RECOVER' },
+          preferredIntent: 'ASK_COACH',
+          secondaryIntents: ['OPEN_IMPORT', 'ASK_COACH'],
+          generatedWorkout: undefined,
+        }),
+        generationToken: 'unavailable-coach',
+        state: 'AI_UNAVAILABLE',
+        reasonCode,
+        generatedAt: null,
+      });
+      expect(result.primaryIntent).toBeNull();
+      expect(result.secondaryIntents.map((intent) => intent.type)).toEqual([
+        'OPEN_IMPORT',
+      ]);
+      const legacy = {
+        ...result,
+        primaryIntent: { type: 'ASK_COACH' as const, label: 'Ask coach' },
+      };
+      expect(
+        policy.localize(legacy, { locale: 'en' }).primaryIntent,
+      ).toBeNull();
+    },
+  );
+
+  it('removes a cached coach action after access is revoked, while retaining useful navigation', () => {
+    const policy = new TodaySuggestionDeliveryPolicy(createAiFallbackI18n());
+    const result = policy.build({
+      projection: projection(),
+      draft: draft({
+        recommendation: { kind: 'RECOVER' },
+        preferredIntent: 'ASK_COACH',
+        secondaryIntents: ['OPEN_IMPORT'],
+        generatedWorkout: undefined,
+      }),
+      generationToken: 'previously-allowed-coach',
+      state: 'GENERATED',
+      reasonCode: 'GENERATED',
+      generatedAt: new Date(),
+    });
+    expect(result.primaryIntent?.type).toBe('ASK_COACH');
+    const revoked = policy.localize(
+      result,
+      projection({ featureAllowed: false }),
+    );
+    expect(revoked.primaryIntent).toBeNull();
+    expect(revoked.secondaryIntents[0]?.type).toBe('OPEN_IMPORT');
+  });
+
+  it('opens the same remaining course that grounds the recommendation', () => {
+    const result = new TodaySuggestionDeliveryPolicy(
+      createAiFallbackI18n(),
+    ).build({
+      projection: projection({
+        todayWorkouts: ['first', 'selected'].map((id) => ({
+          id,
+          planId: 'plan',
+          scheduledDate: '2026-10-28',
+          name: id,
+          sportType: 'RUN',
+          status: 'PLANNED',
+          plannedDurationSeconds: 1800,
+          linkedActivityCount: 0,
+        })),
+      }),
+      draft: draft({
+        preferredIntent: 'OPEN_TODAY_WORKOUT',
+        trainingBasis: { kind: 'SCHEDULED', workoutId: 'selected' },
+        generatedWorkout: undefined,
+      }),
+      generationToken: 'selected-course',
+      state: 'GENERATED',
+      reasonCode: 'GENERATED',
+      generatedAt: new Date(),
+    });
+    expect(result.primaryIntent).toMatchObject({
+      type: 'OPEN_TODAY_WORKOUT',
+      workoutId: 'selected',
+    });
+    expect(result).not.toHaveProperty('trainingBasis');
+  });
+
   it.each(['de', 'de-DE'])(
     'localizes delivered actions and evidence for %s',
     (locale) => {

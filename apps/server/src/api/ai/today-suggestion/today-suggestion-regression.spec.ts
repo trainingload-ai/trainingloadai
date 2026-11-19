@@ -61,6 +61,7 @@ function harness() {
     recentReviews: [],
   };
   const runtimeAi = { state: 'enabled', provider: 'test' };
+  const access = { allowed: true };
   const coverage = {
     activities: {
       latestReadyAt: '2026-11-10T10:00:00Z',
@@ -104,7 +105,7 @@ function harness() {
     { snapshot: () => ({ capabilities: { ai: runtimeAi } }) } as never,
     {
       evaluate: async () => ({
-        features: { 'ai.todaySuggestion': { allowed: true } },
+        features: { 'ai.todaySuggestion': access },
       }),
     } as never,
     engagement,
@@ -149,6 +150,7 @@ function harness() {
     independent,
     coachState,
     runtimeAi,
+    access,
     prisma,
     recentActivities,
     diagnosis,
@@ -161,6 +163,59 @@ describe('activity-first today suggestion regressions', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-11-11T10:00:00Z')),
   );
   afterEach(() => jest.useRealTimers());
+
+  it('rejects an ungrounded moved-course recommendation through projection, generation and cached delivery', async () => {
+    const { service, execution, agent } = harness();
+    execution.day.plannedWorkouts.push({
+      id: 'moved-course',
+      status: 'MOVED',
+      scheduledDate: '2026-11-11',
+      name: 'Endurance ride',
+      plannedDurationSeconds: 3900,
+      linkedActivities: [],
+    } as never);
+    execution.tomorrow.plannedWorkouts.push({
+      id: 'tomorrow-course',
+      status: 'PLANNED',
+      scheduledDate: '2026-11-12',
+      name: 'Endurance ride',
+      plannedDurationSeconds: 3900,
+      linkedActivities: [],
+    } as never);
+    const result = await service.get(args);
+    const projected = agent.run.mock.calls[0][0].projection;
+    expect(projected.lightContext.todayExecution).toMatchObject({
+      scheduledCount: 0,
+      remainingCount: 0,
+      remainingWorkoutIds: [],
+      movedWorkoutIds: ['moved-course'],
+    });
+    expect(result.delivery.reasonCode).toBe('OUTPUT_REJECTED');
+    expect(result.recommendation.kind).toBe('RECOVER');
+    expect(result.summary).not.toContain('A short easy session');
+    expect((await service.get(args)).recommendation.kind).toBe('RECOVER');
+    expect(agent.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps access-denied fallback usable and refreshes it when access returns', async () => {
+    const { service, access, coverage, recentActivities, agent } = harness();
+    access.allowed = false;
+    coverage.activities.readyCount = 0;
+    coverage.activities.latestReadyAt = null as never;
+    recentActivities.length = 0;
+    const denied = await service.get(args);
+    expect(denied.delivery.reasonCode).toBe('ACCESS_DENIED');
+    expect(denied.primaryIntent?.type).toBe('OPEN_IMPORT');
+    expect(denied.secondaryIntents).toEqual([]);
+    expect(denied.summary).not.toContain('告诉教练');
+    expect(agent.run).not.toHaveBeenCalled();
+    expect((await service.get(args)).secondaryIntents).toEqual([]);
+    access.allowed = true;
+    const restored = await service.get(args);
+    expect(restored.delivery.reasonCode).toBe('GENERATED');
+    expect(restored.suggestionId).not.toBe(denied.suggestionId);
+    expect(agent.run).toHaveBeenCalledTimes(1);
+  });
 
   it('keeps fallback grounded in the actual morning session without inventing a plan', async () => {
     const { service, execution, recentActivities, agent } = harness();

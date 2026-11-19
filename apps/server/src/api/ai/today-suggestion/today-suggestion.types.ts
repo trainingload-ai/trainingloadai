@@ -11,7 +11,7 @@ import type {
   WeatherAttribution,
 } from '@/weather/weather.types';
 
-export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v6';
+export const TODAY_SUGGESTION_POLICY_VERSION = 'today-shared-facts-v7';
 
 export type TodaySuggestionConstraintCode =
   | 'NEVER_RECORDED_ACTIVITY'
@@ -103,12 +103,48 @@ export type TodaySuggestionDraft = {
   secondaryIntents: TodaySuggestionIntentType[];
   generatedWorkout?: TodaySuggestionWorkout;
   tags: string[];
+  trainingBasis?:
+    | { kind: 'SCHEDULED'; workoutId: string }
+    | { kind: 'ADDITIONAL'; reason: string };
   coachDecisionHandling?: Array<{
     decisionId: string;
     handling: 'FOLLOW' | 'CONDITIONAL' | 'DEPART' | 'HISTORY' | 'IGNORE';
     reason: string | null;
   }>;
 };
+
+export function todaySuggestionCoachAvailable(
+  projection: Partial<
+    Pick<
+      TodaySuggestionConstraintProjection,
+      'allowAi' | 'featureAllowed' | 'aiState'
+    >
+  >,
+) {
+  return (
+    projection.allowAi !== false &&
+    projection.featureAllowed !== false &&
+    !['not_configured', 'disabled', 'misconfigured'].includes(
+      projection.aiState ?? '',
+    )
+  );
+}
+
+export function todaySuggestionScheduledWorkout(
+  projection: Pick<
+    TodaySuggestionConstraintProjection,
+    'date' | 'todayWorkouts'
+  >,
+  draft: Pick<TodaySuggestionDraft, 'trainingBasis'>,
+) {
+  const basis = draft.trainingBasis;
+  return projection.todayWorkouts.find(
+    (workout) =>
+      ['PLANNED', 'IN_PROGRESS'].includes(workout.status) &&
+      (!workout.scheduledDate || workout.scheduledDate === projection.date) &&
+      (basis?.kind !== 'SCHEDULED' || workout.id === basis.workoutId),
+  );
+}
 
 export type TodaySuggestionAgentRun = {
   draft: TodaySuggestionDraft;

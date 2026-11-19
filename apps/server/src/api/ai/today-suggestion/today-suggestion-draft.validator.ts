@@ -7,7 +7,10 @@ import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
 } from './today-suggestion.types';
-import { hasRecentTrainingActivity } from './today-suggestion.types';
+import {
+  hasRecentTrainingActivity,
+  todaySuggestionScheduledWorkout,
+} from './today-suggestion.types';
 
 const RECOMMENDATION_KINDS = new Set<TodaySuggestionRecommendationKind>([
   'TRAIN',
@@ -64,6 +67,22 @@ function stringList(value: unknown, maxItems: number, maxLength: number) {
   return result;
 }
 
+function trainingBasis(value: unknown): TodaySuggestionDraft['trainingBasis'] {
+  if (value == null) return undefined;
+  const basis = record(value);
+  if (basis?.kind === 'SCHEDULED')
+    return {
+      kind: 'SCHEDULED',
+      workoutId: requiredText(basis.workoutId, 160, 'TRAINING_BASIS_WORKOUT'),
+    };
+  if (basis?.kind === 'ADDITIONAL')
+    return {
+      kind: 'ADDITIONAL',
+      reason: requiredText(basis.reason, 240, 'TRAINING_BASIS_REASON'),
+    };
+  throw new Error('TODAY_SUGGESTION_INVALID_TRAINING_BASIS');
+}
+
 export function validateTodaySuggestionDraft(
   raw: unknown,
 ): TodaySuggestionDraft {
@@ -100,6 +119,7 @@ export function validateTodaySuggestionDraft(
   const secondaryIntents = stringList(row.secondaryIntents, 4, 48).filter(
     isTodaySuggestionIntentType,
   );
+  const basis = trainingBasis(row.trainingBasis);
   return {
     headline: requiredText(row.headline, 120, 'HEADLINE'),
     summary: requiredText(row.summary, 700, 'SUMMARY'),
@@ -127,6 +147,7 @@ export function validateTodaySuggestionDraft(
       : null,
     secondaryIntents,
     tags: stringList(row.tags, 5, 32),
+    ...(basis ? { trainingBasis: basis } : {}),
     ...(Array.isArray(row.coachDecisionHandling)
       ? {
           coachDecisionHandling: row.coachDecisionHandling.map((item) => {
@@ -156,6 +177,27 @@ export function validateTodaySuggestionDraftForProjection(
   projection: TodaySuggestionConstraintProjection,
 ): TodaySuggestionDraft {
   const draft = validateTodaySuggestionDraft(raw);
+  const scheduledWorkout = todaySuggestionScheduledWorkout(projection, draft);
+  if (draft.recommendation.kind === 'TRAIN') {
+    const basis = draft.trainingBasis;
+    const moved = projection.todayWorkouts.some(
+      (workout) => workout.status === 'MOVED',
+    );
+    if (moved && !basis)
+      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+    if (basis?.kind === 'SCHEDULED') {
+      if (!scheduledWorkout)
+        throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+    }
+    if (
+      basis?.kind === 'ADDITIONAL' &&
+      (!draft.summary.includes(basis.reason) ||
+        [draft.preferredIntent, ...draft.secondaryIntents].includes(
+          'OPEN_TODAY_WORKOUT',
+        ))
+    )
+      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+  }
   if (
     draft.recommendation.kind === 'TRAIN' &&
     (projection.constraints ?? []).includes('TODAY_WORKOUT_COMPLETED')
@@ -218,9 +260,8 @@ export function validateTodaySuggestionDraftForProjection(
     ) &&
     Number.isFinite(projection.minutesUntilDayEnd) &&
     (draft.recommendation.durationMinutes ??
-      (projection.todayWorkouts.find((workout) =>
-        ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
-      )?.plannedDurationSeconds ?? 1_800) / 60) > projection.minutesUntilDayEnd
+      (scheduledWorkout?.plannedDurationSeconds ?? 1_800) / 60) >
+      projection.minutesUntilDayEnd
   ) {
     throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_INSUFFICIENT_TIME');
   }

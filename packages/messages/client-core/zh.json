@@ -4357,16 +4357,33 @@
       "template": {
         "title": "官方训练",
         "desc": "先选择训练目标，再预览完整结构化计划",
-        "badge": "无需 AI 对话"
+        "badge": "无需 AI 对话",
+        "feature1": "按训练目标挑选",
+        "feature2": "预览完整周期与课程",
+        "action": "浏览官方训练"
       },
       "ai": {
         "title": "AI 教练",
         "desc": "告诉教练目标和时间，由 AI 起草完整训练周期。",
-        "badge": "AI 教练"
+        "badge": "AI 教练",
+        "eyebrow": "固定周期",
+        "feature1": "结合已有训练记录",
+        "feature2": "一次起草完整周期",
+        "action": "与教练制定计划"
       },
       "manual": {
         "title": "手动编排",
-        "desc": "按周安排每一节耐力或力量训练，完全由你控制。"
+        "desc": "按周安排每一节耐力或力量训练，完全由你控制。",
+        "eyebrow": "按周编排",
+        "feature1": "搭配耐力与力量训练",
+        "feature2": "自定训练日与休息日",
+        "action": "开始手动编排"
+      },
+      "rolling": {
+        "eyebrow": "自动滚动",
+        "feature1": "月度规划训练方向",
+        "feature2": "逐周生成，随近况调整",
+        "action": "设置持续计划"
       }
     },
     "buttons": {

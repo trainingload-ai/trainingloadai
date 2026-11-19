@@ -25,7 +25,10 @@ import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
 } from './today-suggestion.types';
-import { hasRecentTrainingActivity } from './today-suggestion.types';
+import {
+  hasRecentTrainingActivity,
+  todaySuggestionCoachAvailable,
+} from './today-suggestion.types';
 import type { TodayWeatherLocation } from '@/weather/weather.types';
 
 export type TodaySuggestionResponseV2 = TodaySuggestionV2 & {
@@ -858,24 +861,37 @@ export class TodaySuggestionOrchestratorService {
     const noActivity = projection.constraints.includes(
       'NEVER_RECORDED_ACTIVITY',
     );
+    const coachAvailable = todaySuggestionCoachAvailable(projection);
     return {
       headline: zh
         ? '暂无近期训练记录'
         : 'No recent training records are available',
       summary: noActivity
-        ? zh
-          ? '目前还没有可用于判断近期训练状态的活动记录。你可以先导入活动，或直接告诉教练今天的时间和身体感受。'
-          : 'There is no recorded activity to assess recent training yet. Import an activity or tell the coach about your available time and how you feel today.'
+        ? coachAvailable
+          ? zh
+            ? '目前还没有可用于判断近期训练状态的活动记录。你可以先导入活动，或直接告诉教练今天的时间和身体感受。'
+            : 'There is no recorded activity to assess recent training yet. Import an activity or tell the coach about your available time and how you feel today.'
+          : zh
+            ? '目前还没有可用于判断近期训练状态的活动记录。你可以先导入活动，在活动列表查看处理结果。'
+            : 'There is no recorded activity to assess recent training yet. Import an activity and check its processing status in your activity list.'
         : zh
           ? '近期没有新的活动记录，暂不据此推断你停止了训练。已有历史记录可以保留；如需基于最近训练生成建议，可以导入近期活动。'
           : 'No recent activities are recorded here; this does not imply you stopped training. Importing a recent activity can support advice based on your latest training.',
       recommendation: { kind: noActivity ? 'SYNC_DATA' : 'CHECK_IN' },
       confidence: 'LOW',
       evidenceCodes: projection.constraints,
-      preferredIntent: noActivity ? 'OPEN_IMPORT' : 'ASK_COACH',
+      preferredIntent: noActivity
+        ? 'OPEN_IMPORT'
+        : coachAvailable
+          ? 'ASK_COACH'
+          : null,
       secondaryIntents: projection.activePlan
-        ? ['OPEN_PLAN', 'ASK_COACH']
-        : ['ASK_COACH'],
+        ? coachAvailable
+          ? ['OPEN_PLAN', 'ASK_COACH']
+          : ['OPEN_PLAN']
+        : coachAvailable
+          ? ['ASK_COACH']
+          : [],
       tags: [zh ? '事实不足' : 'More context needed'],
     };
   }
