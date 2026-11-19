@@ -348,8 +348,10 @@ export class TodaySuggestionOrchestratorService {
             workoutRunId = generated.runId;
           } catch (error) {
             if (draft.trainingBasis?.kind === 'ADDITIONAL')
-              throw new Error(
-                'TODAY_SUGGESTION_OUTPUT_REJECTED_ADDITIONAL_WORKOUT',
+              throw Object.assign(
+                new Error(
+                  'TODAY_SUGGESTION_OUTPUT_REJECTED_ADDITIONAL_WORKOUT',
+                ),
                 { cause: error },
               );
             this.logger.warn(

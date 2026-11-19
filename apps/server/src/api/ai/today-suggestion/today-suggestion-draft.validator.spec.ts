@@ -364,6 +364,35 @@ describe('validateTodaySuggestionDraft', () => {
     ).toBe('TRAIN');
   });
 
+  it('does not exempt a future session from the time limit because another session is in progress', () => {
+    const sessions = ['IN_PROGRESS', 'PLANNED'].map((status, index) => ({
+      ...movedProjection.tomorrowWorkouts[0],
+      id: `course-${index}`,
+      scheduledDate: movedProjection.date,
+      status,
+    }));
+    expect(() =>
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'course-1' },
+        },
+        { ...movedProjection, todayWorkouts: sessions, minutesUntilDayEnd: 10 },
+      ),
+    ).toThrow('INSUFFICIENT_TIME');
+    expect(
+      validateTodaySuggestionDraftForProjection(
+        {
+          ...valid,
+          preferredIntent: 'OPEN_TODAY_WORKOUT',
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'course-0' },
+        },
+        { ...movedProjection, todayWorkouts: sessions, minutesUntilDayEnd: 10 },
+      ).recommendation.kind,
+    ).toBe('TRAIN');
+  });
+
   it('delivers recovery guidance with an optional review link in the evening', () => {
     expect(
       validateTodaySuggestionDraftForProjection(

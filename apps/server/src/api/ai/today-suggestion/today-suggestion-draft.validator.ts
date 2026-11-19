@@ -258,9 +258,7 @@ export function validateTodaySuggestionDraftForProjection(
     draft.recommendation.kind === 'TRAIN' &&
     !(
       draft.preferredIntent === 'OPEN_TODAY_WORKOUT' &&
-      projection.todayWorkouts.some(
-        (workout) => workout.status === 'IN_PROGRESS',
-      )
+      scheduledWorkout?.status === 'IN_PROGRESS'
     ) &&
     Number.isFinite(projection.minutesUntilDayEnd) &&
     (draft.recommendation.durationMinutes ??
