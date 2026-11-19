@@ -6,6 +6,8 @@ import type {
 } from "@shared/workout-structure";
 import type { WorkoutSummary } from "@shared/workout-summary";
 import type { VdotPlanDraftV1 } from "@shared/vdot-plan";
+import type { PlanGenerationCoverage } from "@/lib/rolling-plan";
+import type { RollingMonthDraft, RollingPolicySettings } from "@shared/rolling-plan";
 
 // 计划状态 定义
 // DRAFT 草稿，
@@ -253,7 +255,8 @@ export type CreatePlanDto = {
   goal?: string;
   sourceType?: PlanSourceType;
   generationMetadata?: Record<string, unknown>;
-  periodWeeks: number;
+  planningMode?: "FIXED" | "ROLLING";
+  periodWeeks: number | null;
   workouts: Array<{
     weekIndex: number;
     dayIndex: number;
@@ -307,6 +310,20 @@ export type UpdatePlanWorkoutStatusDto = {
   status: PlanWorkoutStatus;
 };
 
+export type PlanAutomationPolicy = {
+  revision: number;
+  enabled: boolean;
+  settings: RollingPolicySettings;
+};
+
+export type PlanMonthDirection = {
+  monthStart: string;
+  monthEnd: string;
+  effectiveFrom: string;
+  revision: number;
+  strategy: Omit<RollingMonthDraft, "monthStart">;
+};
+
 export type TrainingPlanSummary = {
   id: string;
   userId: string;
@@ -317,7 +334,12 @@ export type TrainingPlanSummary = {
   generationMetadata?: Record<string, unknown> | null;
   status: PlanStatus;
   capabilities?: { delete: boolean };
-  periodWeeks: number;
+  planningMode?: "FIXED" | "ROLLING";
+  periodWeeks: number | null;
+  generatedThrough?: string | null;
+  generationCoverage?: PlanGenerationCoverage;
+  automationPolicy?: PlanAutomationPolicy | null;
+  monthDirections?: PlanMonthDirection[];
   startDate: string | null;
   endDate: string | null;
   currentWeekIndex: number | null;
@@ -354,7 +376,12 @@ export type TrainingPlanDetail = {
   generationMetadata?: Record<string, unknown> | null;
   status: PlanStatus;
   capabilities?: { delete: boolean };
-  periodWeeks: number;
+  planningMode?: "FIXED" | "ROLLING";
+  periodWeeks: number | null;
+  generatedThrough?: string | null;
+  generationCoverage?: PlanGenerationCoverage;
+  automationPolicy?: PlanAutomationPolicy | null;
+  monthDirections?: PlanMonthDirection[];
   startDate: string | null;
   endDate: string | null;
   activatedAt?: string | null;
@@ -427,6 +454,35 @@ export async function createPlan(
   })) as PlanResult | undefined;
 
   return data?.plan;
+}
+
+export type PlanWindowLoadMetric = {
+  value: number | null;
+  unit: "NORMALIZED_LOAD";
+  coverage: "COMPLETE" | "PARTIAL" | "NO_DATA" | "UNKNOWN";
+  knownCount?: number;
+  totalCount?: number;
+  sources?: string[];
+  reason?: string;
+};
+
+export type PlanWindowSnapshot = {
+  load: Record<"actual" | "remainingPlanned" | "ungeneratedForecast", PlanWindowLoadMetric>;
+  schemaVersion: 2;
+  payloadVersion: "plan-window-v2";
+  sourceMode: "ROLLING";
+  snapshotOnly: true;
+  title: string;
+  goal: string | null;
+  window: { from: string; through: string };
+  generationCoverage: PlanGenerationCoverage;
+  monthDirections: unknown[];
+  workouts: unknown[];
+};
+
+export async function getPlanWindowSnapshot(planId: string, from: string, through: string) {
+  const query = new URLSearchParams({ from, through });
+  return apiFetch(`/plans/${encodeURIComponent(planId)}/window-snapshot?${query}`) as Promise<PlanWindowSnapshot | undefined>;
 }
 
 export type PlanSharePreview = {
@@ -843,4 +899,30 @@ export async function attachWorkoutToPlan(planId: string, workoutId: string) {
     },
   )) as WorkoutResult | undefined;
   return data?.workout;
+}
+
+export type PlanStartConversation = {
+  earliestStartDate: string;
+  evaluationStarted: boolean;
+  sid: string;
+  branchId: string | null;
+  entryKey: string;
+  startDate: string;
+  calendarTimeZone: string;
+  plan: TrainingPlanDetail;
+};
+
+export async function openPlanStartConversation(
+  planId: string,
+  startDate?: string,
+): Promise<PlanStartConversation> {
+  const result = (await apiFetch(
+    `/plans/${encodeURIComponent(planId)}/start-conversation`,
+    {
+      method: "POST",
+      body: JSON.stringify(startDate ? { startDate } : {}),
+    },
+  )) as PlanStartConversation | undefined;
+  if (!result) throw new Error("START_CONVERSATION_UNAVAILABLE");
+  return result;
 }

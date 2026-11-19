@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  projectPlanCalendar,
+  type ScheduleConstraints,
+} from "@shared/plan-calendar";
 import type { ParsedPlan } from "@/api/workout";
 import {
   buildCoachDraftGlobalSessionOrdinalMap,
@@ -116,17 +120,29 @@ function workoutSportLabel(workout: WorkoutRow): string {
 type Props = {
   draft: CoachPlanDraft;
   className?: string;
+  startDate?: string;
+  calendarTimeZone?: string;
+  scheduleConstraints?: ScheduleConstraints;
   /** default：固定最大高度日历区；dialog / embedded：占满父级剩余高度（embedded 用于手动创建第三步等） */
   variant?: "default" | "dialog" | "embedded";
+  windowOnly?: boolean;
+  generationWindow?: { from: string; through: string };
 };
 
 export function CoachPlanDraftCalendarPreview({
   draft,
   className,
+  startDate,
+  calendarTimeZone = "UTC",
+  scheduleConstraints,
   variant = "default",
+  windowOnly = false,
+  generationWindow,
 }: Props) {
   const t = useTranslations("AiCoachPage.planDraft");
+  const rollingT = useTranslations("RollingPlan");
   const tStrength = useTranslations("WorkoutEditor.strength.preview");
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const [picked, setPicked] = useState<{
     week: number;
     day: number;
@@ -135,11 +151,7 @@ export function CoachPlanDraftCalendarPreview({
   const [activeWeek, setActiveWeek] = useState(0);
   const [safeDescriptionHtml, setSafeDescriptionHtml] = useState("");
 
-  useEffect(() => {
-    setActiveWeek((current) =>
-      Math.min(Math.max(0, current), Math.max(0, draft.periodWeeks - 1)),
-    );
-  }, [draft.periodWeeks]);
+  useEffect(() => setPicked(null), [startDate, calendarTimeZone, draft]);
 
   useEffect(() => {
     const raw = draft.description?.trim();
@@ -162,7 +174,49 @@ export function CoachPlanDraftCalendarPreview({
     return keys.map((k) => t(`weekdayShort.${k}`));
   }, [t]);
 
-  const grid = useMemo(() => buildGrid(draft), [draft]);
+  const calendar = useMemo(
+    () =>
+      startDate
+        ? projectPlanCalendar({
+            periodWeeks: draft.periodWeeks,
+            startDate,
+            calendarTimeZone,
+            constraints: scheduleConstraints,
+            workouts: buildGrid(draft).flat(2),
+          })
+        : null,
+    [draft, startDate, calendarTimeZone, scheduleConstraints],
+  );
+  const generationThrough = generationWindow?.through;
+  const grid = useMemo(
+    () =>
+      calendar
+        ? calendar.weeks
+            .filter(
+              (week) =>
+                !generationThrough || week.startDate <= generationThrough,
+            )
+            .map((week) =>
+              week.days.map((day) => day.workouts.map((w) => w.workout)),
+            )
+        : buildGrid(draft),
+    [calendar, draft, generationThrough],
+  );
+  const displayedWeek = Math.min(activeWeek, Math.max(0, grid.length - 1));
+  const weekLabel = (week: number) =>
+    calendar?.weeks[week]?.startDate ?? t("weekLabel", { week: week + 1 });
+  const dateAt = (week: number, day: number) => {
+    const date = calendar?.weeks[week]?.days[day];
+    return date && generationWindow
+      ? {
+          ...date,
+          inPlan:
+            date.inPlan &&
+            date.date >= generationWindow.from &&
+            date.date <= generationWindow.through,
+        }
+      : date;
+  };
 
   const draftGlobalSessionOrdinal = useMemo(
     () => buildCoachDraftGlobalSessionOrdinalMap(draft),
@@ -191,10 +245,12 @@ export function CoachPlanDraftCalendarPreview({
             {draft.title}
           </div>
           <p className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-muted-foreground dark:bg-muted/55">
-            {t("summary", {
-              weeks: draft.periodWeeks,
-              sessions: draft.workouts.filter((w) => w.text?.trim()).length,
-            })}
+            {windowOnly
+              ? rollingT("coverageLabel")
+              : t("summary", {
+                  weeks: draft.periodWeeks,
+                  sessions: draft.workouts.filter((w) => w.text?.trim()).length,
+                })}
           </p>
         </div>
         <div className="mt-1.5 min-h-[2lh] text-sm leading-snug">
@@ -219,10 +275,10 @@ export function CoachPlanDraftCalendarPreview({
         <div className="shrink-0 px-2 py-2">
           <MobileHorizontalSegmentedControl
             ariaLabel={t("weekColumn")}
-            value={activeWeek}
+            value={displayedWeek}
             options={grid.map((_, week) => ({
               value: week,
-              label: t("weekLabel", { week: week + 1 }),
+              label: weekLabel(week),
             }))}
             itemClassName="w-auto min-w-[68px] px-3"
             onValueChange={setActiveWeek}
@@ -235,7 +291,8 @@ export function CoachPlanDraftCalendarPreview({
           )}
         >
           <div className="space-y-1.5">
-            {(grid[activeWeek] ?? []).map((cell, day) => {
+            {(grid[displayedWeek] ?? []).map((cell, day) => {
+              if (calendar && !dateAt(displayedWeek, day)?.inPlan) return null;
               const filled = cell.length > 0;
               return (
                 <div
@@ -243,14 +300,32 @@ export function CoachPlanDraftCalendarPreview({
                   className="rounded-md bg-background/80 px-3 py-2.5 dark:bg-background/45"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="w-12 shrink-0 text-sm font-semibold text-muted-foreground">
+                    <div
+                      className={cn(
+                        "shrink-0 text-sm font-semibold text-muted-foreground",
+                        calendar ? "w-20" : "w-12",
+                      )}
+                    >
                       {weekdayLabels[day]}
+                      {calendar ? (
+                        <time
+                          className="block text-mobile-unit font-normal tabular-nums"
+                          dateTime={dateAt(displayedWeek, day)?.date}
+                        >
+                          {dateAt(displayedWeek, day)?.date}
+                        </time>
+                      ) : null}
                     </div>
                     {filled ? (
                       <div className="min-w-0 flex-1 space-y-1">
+                        {dateAt(displayedWeek, day)?.conflicts.length ? (
+                          <p className="text-mobile-caption text-destructive">
+                            {t("scheduleConflict")}
+                          </p>
+                        ) : null}
                         {cell.map((workout, workoutIndex) => {
                           const selected =
-                            picked?.week === activeWeek &&
+                            picked?.week === displayedWeek &&
                             picked.day === day &&
                             picked.workoutIndex === workoutIndex;
                           const ordinal =
@@ -268,14 +343,15 @@ export function CoachPlanDraftCalendarPreview({
                               key={`${activeWeek}-${day}-${workout.sessionIndex ?? 1}-${workoutIndex}`}
                               type="button"
                               aria-pressed={selected}
-                              aria-label={`${workout.name?.trim() || workout.sportType?.trim() || "—"} · S${ordinal}`}
-                              onClick={() =>
+                              aria-label={`${workout.name?.trim() || workout.sportType?.trim() || "—"} · S${ordinal}${calendar ? ` · ${dateAt(displayedWeek, day)?.date}` : ""}`}
+                              onClick={(event) => {
+                                returnFocusRef.current = event.currentTarget;
                                 setPicked({
-                                  week: activeWeek,
+                                  week: displayedWeek,
                                   day,
                                   workoutIndex,
-                                })
-                              }
+                                });
+                              }}
                               className={cn(
                                 "min-h-11 w-full touch-manipulation select-none rounded-lg bg-muted/55 px-2.5 py-2 text-left outline-none ring-offset-background transition-[background-color,box-shadow,transform] duration-100 hover:bg-neutral-200/75 active:scale-[0.985] active:bg-neutral-200 focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-muted/75 dark:active:bg-muted/90",
                                 selected &&
@@ -352,7 +428,7 @@ export function CoachPlanDraftCalendarPreview({
             {grid.map((weekRow, week) => (
               <div key={week} className="grid min-w-0 grid-cols-8 gap-1">
                 <div className="min-w-0 p-1.5 text-mobile-caption pc:text-xs font-medium text-muted-foreground sm:p-2">
-                  {t("weekLabel", { week: week + 1 })}
+                  {weekLabel(week)}
                 </div>
                 {weekRow.map((cell, day) => {
                   const filled = cell.length > 0;
@@ -366,6 +442,19 @@ export function CoachPlanDraftCalendarPreview({
                           : "bg-background/35 dark:bg-background/20",
                       )}
                     >
+                      {calendar && dateAt(week, day)?.inPlan ? (
+                        <time
+                          className="mb-1 text-mobile-unit tabular-nums text-muted-foreground"
+                          dateTime={dateAt(week, day)?.date}
+                        >
+                          {dateAt(week, day)?.date}
+                        </time>
+                      ) : null}
+                      {dateAt(week, day)?.conflicts.length ? (
+                        <p className="text-mobile-caption text-destructive">
+                          {t("scheduleConflict")}
+                        </p>
+                      ) : null}
                       {filled ? (
                         <div className="flex min-h-0 flex-1 flex-col gap-1">
                           {cell.map((workout, workoutIndex) => {
@@ -389,10 +478,11 @@ export function CoachPlanDraftCalendarPreview({
                                 key={`${week}-${day}-${workout.sessionIndex ?? 1}-${workoutIndex}`}
                                 type="button"
                                 aria-pressed={selected}
-                                aria-label={`${workout.name?.trim() || workout.sportType?.trim() || "—"} · S${ordinal}`}
-                                onClick={() =>
-                                  setPicked({ week, day, workoutIndex })
-                                }
+                                aria-label={`${workout.name?.trim() || workout.sportType?.trim() || "—"} · S${ordinal}${calendar ? ` · ${dateAt(week, day)?.date}` : ""}`}
+                                onClick={(event) => {
+                                  returnFocusRef.current = event.currentTarget;
+                                  setPicked({ week, day, workoutIndex });
+                                }}
                                 className={cn(
                                   "touch-manipulation select-none rounded-md bg-neutral-200/70 px-1.5 py-1 text-left outline-none ring-offset-background transition-[background-color,box-shadow,transform] duration-100 hover:bg-neutral-300/70 active:scale-[0.985] active:bg-neutral-300 focus-visible:ring-2 focus-visible:ring-ring dark:bg-muted/50 dark:hover:bg-muted/70 dark:active:bg-muted/90",
                                   selected &&
@@ -464,7 +554,9 @@ export function CoachPlanDraftCalendarPreview({
                         </div>
                       ) : (
                         <span className="text-mobile-caption pc:text-[11px] text-muted-foreground/70">
-                          {t("rest")}
+                          {calendar && !dateAt(week, day)?.inPlan
+                            ? "—"
+                            : t("rest")}
                         </span>
                       )}
                     </div>
@@ -482,9 +574,18 @@ export function CoachPlanDraftCalendarPreview({
         onOpenChange={(open) => {
           if (!open) setPicked(null);
         }}
+        onCloseAutoFocus={(event) => {
+          if (returnFocusRef.current?.isConnected) {
+            event.preventDefault();
+            returnFocusRef.current.focus();
+          }
+        }}
         workouts={selectedWorkouts ?? []}
-        weekIndex1={picked ? picked.week + 1 : 1}
-        dayIndex1={picked ? picked.day + 1 : 1}
+        weekIndex1={selectedWorkouts?.[0]?.weekIndex ?? 1}
+        dayIndex1={selectedWorkouts?.[0]?.dayIndex ?? 1}
+        calendarDate={
+          picked ? dateAt(picked.week, picked.day)?.date : undefined
+        }
       />
     </div>
   );

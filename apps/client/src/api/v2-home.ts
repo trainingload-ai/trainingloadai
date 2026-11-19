@@ -1,3 +1,5 @@
+import { isRollingPlan, naturalWeekStart } from "@/lib/rolling-plan";
+
 import type { FitnessStatusData, PMCExtremes } from "@/api/usePMC";
 import type { UserProfile } from "@/api/settings";
 import type {
@@ -42,7 +44,12 @@ export type V2HomeActivePlan = {
   title: string;
   description: string | null;
   goal: string | null;
-  periodWeeks: number;
+  planningMode?: TrainingPlanDetail["planningMode"];
+  generationCoverage?: TrainingPlanDetail["generationCoverage"];
+  automationPolicy?: TrainingPlanDetail["automationPolicy"];
+  monthDirections?: TrainingPlanDetail["monthDirections"];
+  generatedThrough?: string | null;
+  periodWeeks: number | null;
   startDate: string | null;
   endDate: string | null;
   currentWeekIndex: number | null;
@@ -323,6 +330,11 @@ export function mapTrainingPlanToHomePlan(
     title: plan.title,
     description: plan.description ?? null,
     goal: plan.goal ?? null,
+    planningMode: plan.planningMode ?? "FIXED",
+    generationCoverage: plan.generationCoverage,
+    automationPolicy: plan.automationPolicy,
+    monthDirections: plan.monthDirections,
+    generatedThrough: plan.generatedThrough,
     periodWeeks: plan.periodWeeks,
     startDate: plan.startDate,
     endDate: plan.endDate,
@@ -332,9 +344,20 @@ export function mapTrainingPlanToHomePlan(
       .filter((workout) => workout.scheduledDate === todayKey)
       .sort((a, b) => a.sessionIndex - b.sessionIndex),
     currentWeekWorkouts: workouts
-      .filter((workout) => workout.weekIndex === currentWeek)
+      .filter((workout) =>
+        isRollingPlan(plan)
+          ? Boolean(
+              workout.scheduledDate &&
+              naturalWeekStart(workout.scheduledDate) ===
+                naturalWeekStart(todayKey),
+            )
+          : workout.weekIndex === currentWeek,
+      )
       .sort(
-        (a, b) => a.dayIndex - b.dayIndex || a.sessionIndex - b.sessionIndex,
+        (a, b) =>
+          (isRollingPlan(plan)
+            ? (a.scheduledDate ?? "").localeCompare(b.scheduledDate ?? "")
+            : a.dayIndex - b.dayIndex) || a.sessionIndex - b.sessionIndex,
       ),
   };
 }

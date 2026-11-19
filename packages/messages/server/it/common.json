@@ -328,6 +328,11 @@
     }
   },
   "notification": {
+    "rollingPlan": {
+      "titleMonthApplied": "Piano continuo: obiettivo mensile aggiornato",
+      "titleWeekApplied": "Piano continuo: allenamenti aggiornati",
+      "titleBlocked": "Il piano continuo richiede attenzione"
+    },
     "reviewDigest": {
       "titleDailyReady": "Daily review is ready",
       "titleWeeklyReady": "Weekly review is ready",

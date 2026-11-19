@@ -1,10 +1,9 @@
 import type { CoachSkillDef } from '../skill.types';
 export const fitnessAssessmentSkill: CoachSkillDef = {
   name: 'fitness-assessment',
-  description:
-    'Assess fitness from activity evidence using estimation methods, their physiological context, and deterministic calculations.',
+  description: 'Estimate a new fitness metric from bounded athlete evidence.',
   whenToUse:
-    'Estimate any discoverable user fitness metric from bounded evidence; diagnose stale values; resume a pending assessment.',
+    'New estimates, stale-value reassessment or a bound assessment reply; definitions and saved values use metric-explainer.',
   suggestedTools: [
     'fitness.methods',
     'fitness.evidence',
@@ -17,18 +16,12 @@ export const fitnessAssessmentSkill: CoachSkillDef = {
     'metric.history',
     'metric.forecast',
     'profile.current',
-    'ask_user_question',
+    'training.readiness',
     'plan.active',
-    'plan.by_id',
-    'plan.day_view',
-    'pmc.range',
-    'workout.intensity_strategy',
-    'coach_decision_draft',
-    'coach_decision_apply',
+    'ask_user_question',
   ],
   prompt: [
-    'For a personal interpretation of 最大摄氧量 / VO2max, read metric.current, bounded metric.history and any available metric.forecast. Explain current level and changes even when forecasting is unavailable. Base training advice on relevant recent activity, load, readiness and active-plan evidence. Running-derived values are estimates, not laboratory measurements; historical forecasts do not quantify training changes.',
-    'A request for VO2max in four weeks or next month is a future forecast. Call metric.forecast and explain its returned status, estimates and ranges according to intervalKind (REFERENCE has no calibrated coverage claim; CALIBRATED_80 is a validated 80% interval). Do not substitute a current fitness assessment or invent future values when the forecast is unavailable. The forecast uses historical VO2max, so it cannot quantify the effects of a proposed training change.',
+    'First decide whether the request needs a new estimate, an explanation of a saved value, or a future forecast. Use metric-explainer for definitions/current-reference questions and training-analytics for a requested historical chart.',
     'Complete the requested assessment using the selected evidence and the method catalog, including its rationale and interpretation, not just requirements. Use applicable deterministic calculators when their execution requirements are met. Other evidence-based estimates may be explained with their actual inputs, derivation and assumptions, clearly distinguished from tool results; never fabricate inputs or calculations.',
     'Treat saved metric history as settings/history, not a new assessment. Preserve the confirmed metric, sport, time scope, and user facts when resuming a task; a request to update from recent data creates a new preview rather than write permission.',
     'The catalog describes implemented methods for the requested metric, not an exhaustive account of valid estimation. CSS is swim CS. VO2_MAX is the single stored product metric, named 最大摄氧量 in Simplified Chinese and VO2max in English. Running-derived values are estimates, not laboratory measurements. Unsupported methods are software capability limits.',
@@ -36,7 +29,7 @@ export const fitnessAssessmentSkill: CoachSkillDef = {
     'A NEEDS_INPUT, WAITING_DATA, UNAVAILABLE, or FAILED tool result blocks that calculation, not every possible assessment from the evidence. Explain the concrete gap in athlete language and, when one fact is required, use ask_user_question. Do not expose activity ids, elapsed-second fields, evidence selectors, or other calculation controls to the athlete.',
     'Finish with a calculated result or explained coaching estimate, a specific blocker and next action, or one necessary question. Clearly distinguish the saved value, evidence date, new result, assessment time, and limitations.',
     "A valid displayed result may be proposed as the athlete's selected estimate/reference, including observed MaxHR. Adoption requires the dedicated fitness calculation confirmation path and does not turn an estimate into laboratory measurement.",
-    'When a method needs a future test, use the Workout operation decision guide to create a structured test workout and any related schedule changes. The completed Activity remains evidence and must pass the protocol and signal checks.',
+    'When a future test is needed and the athlete requests a test session, activate workout-management with the selected protocol, sport, dates, settled facts and target plan. The completed Activity must still pass protocol and signal checks; planning the test grants no metric adoption or tracking permission.',
     'Start follow-up tracking only after explicit consent, and never auto-apply a later result.',
   ].join('\n'),
 };

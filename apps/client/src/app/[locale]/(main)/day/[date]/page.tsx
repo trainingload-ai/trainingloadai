@@ -1,5 +1,6 @@
 "use client";
 
+import { isRollingPlan, isPlanDateNotGenerated, naturalWeekStart } from "@/lib/rolling-plan";
 import { useGuestAccessText } from "@deployment/managed-ui";
 
 import dayjs from "dayjs";
@@ -60,6 +61,8 @@ const ViewWorkoutDialog = dynamic(
 
 type TranslateFn = ReturnType<typeof useTranslations>;
 type DayPlanData = {
+  notGenerated?: boolean;
+  rolling?: boolean;
   planId: string | null;
   date: string;
   dateLabel: string;
@@ -384,6 +387,7 @@ function WorkoutTimeline({
   const publicDemo = usePublicDemo();
   const demoText = useGuestAccessText();
   const tActivities = useTranslations("activities");
+  const rollingT = useTranslations("RollingPlan");
   const tLoad = useTranslations("V2PlanDetailPage.mobile.loadChart");
   const queryClient = useQueryClient();
   const {
@@ -444,10 +448,10 @@ function WorkoutTimeline({
         {dayPlanData.workouts.length === 0 ? (
           <div className="rounded-md border border-dashed border-border/70 bg-neutral-100 px-4 py-6 dark:bg-muted/45">
             <div className="text-sm font-semibold text-foreground">
-              {t("timeline.empty.title")}
+              {dayPlanData.notGenerated ? rollingT("notGenerated") : t("timeline.empty.title")}
             </div>
             <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              {t("timeline.empty.description")}
+              {dayPlanData.notGenerated ? rollingT("description") : t("timeline.empty.description")}
             </p>
           </div>
         ) : null}
@@ -752,6 +756,7 @@ export default function V2DayPage() {
   const locale = useLocale();
   const t = useTranslations("V2DayPage");
   const tActivityTitle = useTranslations("ActivityTitle");
+  const rollingT = useTranslations("RollingPlan");
   const tCompetition = useTranslations("CompetitionEvents");
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
@@ -804,14 +809,15 @@ export default function V2DayPage() {
     if (diffDays < 0) return emptyData;
 
     const weekIndex = Math.floor(diffDays / 7) + 1;
-    if (weekIndex > activePlan.periodWeeks) return emptyData;
+    if (!isRollingPlan(activePlan) && weekIndex > (activePlan.periodWeeks ?? 1)) return emptyData;
 
     const dayIndex = (diffDays % 7) + 1;
+    const monday = naturalWeekStart(selectedDateKey);
     const weekWorkouts = activePlan.workouts.filter(
-      (item) => item.weekIndex === weekIndex,
+      (item) => isRollingPlan(activePlan) ? Boolean(item.scheduledDate && naturalWeekStart(item.scheduledDate.slice(0, 10)) === monday) : item.weekIndex === weekIndex,
     );
     const dayWorkouts = weekWorkouts
-      .filter((item) => item.dayIndex === dayIndex)
+      .filter((item) => isRollingPlan(activePlan) ? item.scheduledDate?.slice(0, 10) === selectedDateKey : item.dayIndex === dayIndex)
       .sort((a, b) => (a.sessionIndex ?? 1) - (b.sessionIndex ?? 1));
     const doneCount = dayWorkouts.filter(
       (item) => item.status === "DONE",
@@ -835,18 +841,20 @@ export default function V2DayPage() {
 
     return {
       ...emptyData,
+      notGenerated: isPlanDateNotGenerated(activePlan, selectedDateKey) && !dayWorkouts.length,
+      rolling: isRollingPlan(activePlan),
       planId: activePlan.id,
       date: selectedDateKey,
       dateLabel: t("dynamic.dateLabel", {
         month: selectedDate.month() + 1,
         day: selectedDate.date(),
       }),
-      weekday: getWeekdayShortLabel(t, dayIndex),
+      weekday: getWeekdayShortLabel(t, ((selectedDate.day() + 6) % 7) + 1),
       cycle: activePlan.title,
       description: activePlan.description?.trim() || null,
-      weekLabel: t("dynamic.weekLabel", {
+      weekLabel: isRollingPlan(activePlan) ? rollingT("currentWeek", { week: weekIndex }) : t("dynamic.weekLabel", {
         current: weekIndex,
-        total: activePlan.periodWeeks,
+        total: activePlan.periodWeeks ?? 1,
       }),
       intent: activePlan.goal?.trim() || "",
       summary: {
@@ -865,7 +873,7 @@ export default function V2DayPage() {
           : [],
       weekContext,
     };
-  }, [activePlan, selectedDateKey, startDate, t, tActivityTitle]);
+  }, [activePlan, selectedDateKey, startDate, t, tActivityTitle, rollingT]);
   const completedPercent = dayPlanData.summary.plannedLoad
     ? Math.round(
         (dayPlanData.summary.completedLoad / dayPlanData.summary.plannedLoad) *
@@ -882,17 +890,17 @@ export default function V2DayPage() {
           <CoachCard dayPlanData={dayPlanData} t={t} />
         </div>
         <div className="order-2 min-w-0 md:col-start-2 md:row-start-2 md:order-none">
-          <WeekContextCard dayPlanData={dayPlanData} t={t} />
+          {!dayPlanData.rolling ? <WeekContextCard dayPlanData={dayPlanData} t={t} /> : null}
         </div>
         <div className="order-3 md:hidden">
           <UploadWorkoutFileMobile t={t} />
         </div>
         <main className="order-4 flex min-w-0 flex-col gap-2 md:gap-3 md:col-start-1 md:row-span-3 md:row-start-1 md:order-none">
-          <DayOverview
+          {dayPlanData.notGenerated ? <p className="rounded-surface bg-muted p-4 text-sm text-muted-foreground">{rollingT("notGenerated")}</p> : <DayOverview
             dayPlanData={dayPlanData}
             completedPercent={completedPercent}
             t={t}
-          />
+          />}
           <Panel>
             <div className="flex items-center justify-between gap-3">
               <SectionTitle title={tCompetition("calendar.title")} t={t} />

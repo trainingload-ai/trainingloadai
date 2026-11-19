@@ -1,3 +1,5 @@
+import { PlanCalendarValidationService } from '../../../api/plan/application/plan-calendar-validation.service';
+import { PlanCalendarRepository } from '../../../api/plan/persistence/plan-calendar.repository';
 import { describe, expect, it, jest } from '@jest/globals';
 import { PlanExternalSyncService } from '@/api/plan/application/plan-external-sync.service';
 describe('verified workout delivery mapping', () => {
@@ -40,6 +42,7 @@ describe('verified workout delivery mapping', () => {
         links as never,
         {} as never,
         {} as never,
+        new PlanCalendarValidationService(new PlanCalendarRepository()),
       );
       const transaction = {} as never;
       await service.recordVerifiedDelivery(

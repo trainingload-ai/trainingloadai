@@ -1,3 +1,5 @@
+import { PlanCalendarValidationService } from '../application/plan-calendar-validation.service';
+import { PlanCalendarRepository } from '../persistence/plan-calendar.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
 import { WorkoutService } from '../../workout/workout.service';
@@ -84,6 +86,7 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
       new PlanActivityLinkRepository(prisma as never),
       { assertMutable: () => undefined } as never,
       { getPreferredTimezone: async () => 'UTC' } as never,
+      new PlanCalendarValidationService(new PlanCalendarRepository()),
     );
   }, 30_000);
 
@@ -129,6 +132,62 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     expect(await prisma.planWorkoutExternalMapping.findFirst()).toMatchObject({
       planWorkoutId: row.id,
       externalEventId: '100',
+    });
+  });
+
+  it('rejects an imported course on the target plan rest day and rolls back the independent course', async () => {
+    const before = await create();
+    const plan = await prisma.plan.create({
+      data: {
+        userId: 'user',
+        title: 'Rest day plan',
+        periodWeeks: 1,
+        status: 'ACTIVE',
+        startDate: new Date('2026-11-22'),
+        generationMetadata: {
+          scheduleConstraints: {
+            version: 1,
+            revision: 1,
+            calendarTimeZone: 'Asia/Shanghai',
+            fixedRestWeekdays: [3, 5],
+            unavailableDates: [],
+            availableDateOverrides: [],
+            effectiveFrom: '2026-11-22',
+            confirmation: {
+              source: 'USER',
+              reference: 'synthetic-confirmation',
+            },
+          },
+        },
+      },
+    });
+    await expect(
+      service.updateImportedWorkout({
+        userId: 'user',
+        workoutId: before.id,
+        preferredSessionIndex: 1,
+        scheduledDate: new Date('2026-11-25'),
+        targetPlanId: plan.id,
+        targetPlanStartDate: plan.startDate,
+        sportType: 'RUN',
+        text: 'Remote session',
+        status: 'PLANNED',
+        blocks: [],
+        structureKind: 'FREEFORM',
+        plannedDurationSeconds: 1800,
+        dayOffset: 3,
+        expectedUpdatedAt: before.updatedAt,
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        code: 'PLAN_SCHEDULE_INVALID',
+        issues: [{ code: 'FIXED_REST_DAY', date: '2026-11-25' }],
+      },
+    });
+    expect(await service.findLocalWorkout('user', before.id)).toMatchObject({
+      planId: null,
+      scheduledDate: new Date('2026-07-06'),
+      text: 'Run',
     });
   });
 

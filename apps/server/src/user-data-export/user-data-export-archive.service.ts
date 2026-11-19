@@ -1383,10 +1383,66 @@ export class UserDataExportArchiveService {
     catalog: CatalogEntry[],
   ) {
     const files = this.healthFiles;
-    if(job.mode==='FULL_BACKUP'){
-      const [observations,reports]=await Promise.all([files.listExportObservations(job.userId,job.dataCutoffAt),files.listExportReportedQuantities(job.userId,job.dataCutoffAt)]);
-      await this.writeJsonlDataset({root,catalog,id:'health-observations',path:'04_HEALTH/observations.jsonl',schemaId:'health-observation',description:'Complete blood-pressure measurements and source-coded breathing classifications, with original temporal scope.',primaryKey:['id'],rows:observations.map(({userId:_user,connectionId:_connection,deletedAt:_deleted,createdAt:_created,updatedAt:_updated,sourceGroupKey,externalId,...row})=>({...row,groupId:sourceGroupKey,sourceExternalId:externalId,localDate:date(row.localDate),measuredAt:iso(row.measuredAt),intervalStart:iso(row.intervalStart),intervalEnd:iso(row.intervalEnd),sourceUpdatedAt:row.sourceUpdatedAt.toISOString()}))});
-      await this.writeJsonlDataset({root,catalog,id:'health-reported-quantities',path:'04_HEALTH/reported-quantities.jsonl',schemaId:'health-reported-quantity',description:'Source-reported quantities excluded from daily totals because aggregation semantics remain unspecified.',primaryKey:['id'],rows:reports.map(row=>({id:row.id,localDate:date(row.localDate),metricType:row.metricType,value:row.value,unit:row.unit,provider:row.provider,basis:'UNSPECIFIED_REPORT',sourceName:row.sourceName,sourceNamespace:row.sourceNamespace,sourceObjectId:row.sourceObjectId,sourceExternalId:row.externalId,sourceUpdatedAt:iso(row.sourceUpdatedAt)}))});
+    if (job.mode === 'FULL_BACKUP') {
+      const [observations, reports] = await Promise.all([
+        files.listExportObservations(job.userId, job.dataCutoffAt),
+        files.listExportReportedQuantities(job.userId, job.dataCutoffAt),
+      ]);
+      await this.writeJsonlDataset({
+        root,
+        catalog,
+        id: 'health-observations',
+        path: '04_HEALTH/observations.jsonl',
+        schemaId: 'health-observation',
+        description:
+          'Complete blood-pressure measurements and source-coded breathing classifications, with original temporal scope.',
+        primaryKey: ['id'],
+        rows: observations.map(
+          ({
+            userId: _user,
+            connectionId: _connection,
+            deletedAt: _deleted,
+            createdAt: _created,
+            updatedAt: _updated,
+            sourceGroupKey,
+            externalId,
+            ...row
+          }) => ({
+            ...row,
+            groupId: sourceGroupKey,
+            sourceExternalId: externalId,
+            localDate: date(row.localDate),
+            measuredAt: iso(row.measuredAt),
+            intervalStart: iso(row.intervalStart),
+            intervalEnd: iso(row.intervalEnd),
+            sourceUpdatedAt: row.sourceUpdatedAt.toISOString(),
+          }),
+        ),
+      });
+      await this.writeJsonlDataset({
+        root,
+        catalog,
+        id: 'health-reported-quantities',
+        path: '04_HEALTH/reported-quantities.jsonl',
+        schemaId: 'health-reported-quantity',
+        description:
+          'Source-reported quantities excluded from daily totals because aggregation semantics remain unspecified.',
+        primaryKey: ['id'],
+        rows: reports.map((row) => ({
+          id: row.id,
+          localDate: date(row.localDate),
+          metricType: row.metricType,
+          value: row.value,
+          unit: row.unit,
+          provider: row.provider,
+          basis: 'UNSPECIFIED_REPORT',
+          sourceName: row.sourceName,
+          sourceNamespace: row.sourceNamespace,
+          sourceObjectId: row.sourceObjectId,
+          sourceExternalId: row.externalId,
+          sourceUpdatedAt: iso(row.sourceUpdatedAt),
+        })),
+      });
     }
 
     const [daily, sessions] = await Promise.all([
@@ -1520,6 +1576,11 @@ export class UserDataExportArchiveService {
           planSportTypes.get(plan.id)?.size === 1
             ? [...planSportTypes.get(plan.id)!][0]
             : null,
+        automationPolicies: plan.automationPolicies ?? [],
+        monthStrategies: plan.monthStrategies ?? [],
+        weekGenerations: plan.weekGenerations ?? [],
+        planningMode: plan.planningMode,
+        generatedThrough: date(plan.generatedThrough),
         periodWeeks: plan.periodWeeks,
         startDate: date(plan.startDate),
         endDate: date(plan.endDate),

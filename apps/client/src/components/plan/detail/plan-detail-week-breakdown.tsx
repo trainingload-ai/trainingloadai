@@ -3,7 +3,6 @@ import { PlanWorkoutListRow } from "@/components/plan/plan-workout-list-row";
 import { WorkoutRenderer } from "@/components/workout/WorkoutRenderer";
 import {
   formatSportTypeLabel,
-  getWeekdayCompactLabel,
   type DerivedWorkout,
   type TranslateFn,
   type WeekGroup,
@@ -13,6 +12,7 @@ import {
   SectionTitle,
 } from "@/components/plan/detail/plan-detail-panel";
 import { formatWorkoutDuration } from "@/lib/workout-display-utils";
+import { useTranslations } from "next-intl";
 
 function WeekWorkoutChartPreview({ workout }: { workout: PlanWorkout }) {
   return (
@@ -69,6 +69,7 @@ export function PlanDetailWeekBreakdown({
   t: TranslateFn;
   onOpenWorkout: (workout: DerivedWorkout) => void;
 }) {
+  const rollingT = useTranslations("RollingPlan");
   const hasWorkout = weeks.some((week) =>
     week.days.some((day) => day.workouts.length > 0),
   );
@@ -76,7 +77,8 @@ export function PlanDetailWeekBreakdown({
   return (
     <Panel className="flex min-h-0 flex-1 flex-col gap-3">
       <SectionTitle title={t("weekBreakdown.title")} />
-      {!hasWorkout ? (
+      {!hasWorkout &&
+      !weeks.some((week) => week.days.some((day) => day.notGenerated)) ? (
         <div className="rounded-md border border-dashed border-border/70 bg-neutral-100 p-4 dark:bg-muted/45">
           <div className="text-sm font-semibold">
             {t("weekBreakdown.emptyPlanTitle")}
@@ -100,6 +102,9 @@ export function PlanDetailWeekBreakdown({
                     .length,
                 0,
               );
+              const notGenerated =
+                weekWorkoutCount === 0 &&
+                week.days.every((day) => day.notGenerated);
 
               return (
                 <div
@@ -110,19 +115,27 @@ export function PlanDetailWeekBreakdown({
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <div className="text-sm font-semibold">
-                        {t("weekBreakdown.weekLabel", { week: week.weekIndex })}
+                        {week.calendarRange
+                          ? `${week.calendarRange.from} – ${week.calendarRange.through}`
+                          : t("weekBreakdown.weekLabel", {
+                              week: week.weekIndex,
+                            })}
                       </div>
                       <div className="mt-0.5 text-mobile-caption pc:text-xs text-muted-foreground">
-                        {t("weekBreakdown.completedMeta", {
-                          done: weekCompletedCount,
-                          total: weekWorkoutCount,
-                        })}
+                        {notGenerated
+                          ? rollingT("notGenerated")
+                          : t("weekBreakdown.completedMeta", {
+                              done: weekCompletedCount,
+                              total: weekWorkoutCount,
+                            })}
                       </div>
                     </div>
                     <div className="rounded-md bg-background px-2 py-0.5 text-mobile-caption pc:text-[11px] text-muted-foreground dark:bg-black/20">
-                      {t("weekBreakdown.sessionsCount", {
-                        count: weekWorkoutCount,
-                      })}
+                      {notGenerated
+                        ? "—"
+                        : t("weekBreakdown.sessionsCount", {
+                            count: weekWorkoutCount,
+                          })}
                     </div>
                   </div>
 
@@ -134,7 +147,7 @@ export function PlanDetailWeekBreakdown({
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="text-mobile-caption pc:text-xs font-medium text-foreground">
-                            {getWeekdayCompactLabel(day.dayIndex)}
+                            {day.dayLabel}
                             {day.dateLabel ? (
                               <span className="ml-1.5 text-mobile-caption pc:text-[11px] font-normal text-muted-foreground">
                                 {day.dateLabel}
@@ -142,14 +155,18 @@ export function PlanDetailWeekBreakdown({
                             ) : null}
                           </div>
                           <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
-                            {t("weekBreakdown.sessionsCount", {
-                              count: day.workouts.length,
-                            })}
+                            {day.notGenerated && !day.workouts.length
+                              ? "—"
+                              : t("weekBreakdown.sessionsCount", {
+                                  count: day.workouts.length,
+                                })}
                           </div>
                         </div>
                         {day.workouts.length === 0 ? (
                           <div className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
-                            {t("weekBreakdown.emptyDay")}
+                            {day.notGenerated
+                              ? rollingT("notGenerated")
+                              : t("weekBreakdown.emptyDay")}
                           </div>
                         ) : (
                           <div className="mt-1.5 space-y-1">

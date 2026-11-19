@@ -141,6 +141,11 @@
     "intervals_icu_athlete_identity_missing": "Intervals.icu アカウントの本人確認ができませんでした。再度認証してください。"
   },
   "notification": {
+    "rollingPlan": {
+      "titleMonthApplied": "継続プラン：月の方針を更新しました",
+      "titleWeekApplied": "継続プラン：トレーニング予定を更新しました",
+      "titleBlocked": "継続プランの確認が必要です"
+    },
     "reviewDigest": {
       "titleDailyReady": "日次レビューの準備ができました",
       "titleWeeklyReady": "週次レビューの準備ができました",

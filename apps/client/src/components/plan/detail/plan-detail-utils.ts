@@ -1,4 +1,10 @@
 import dayjs from "dayjs";
+import { addCalendarDays, calendarIsoWeekday } from "@shared/plan-calendar";
+import {
+  isRollingPlan,
+  isPlanDateNotGenerated,
+  naturalWeekStart,
+} from "@/lib/rolling-plan";
 import type { useTranslations } from "next-intl";
 import {
   isWorkoutPlannedOrInProgress,
@@ -33,11 +39,13 @@ export type PlanWorkoutDisplayKind =
 
 export type WeekGroup = {
   weekIndex: number;
+  calendarRange?: { from: string; through: string };
   days: Array<{
     dayIndex: number;
     dayLabel: string;
     dateLabel: string;
     dateKey: string | null;
+    notGenerated?: boolean;
     workouts: DerivedWorkout[];
   }>;
 };
@@ -325,6 +333,50 @@ export function buildWeekGroups(
   t: TranslateFn,
   plan: TrainingPlanDetail,
 ): WeekGroup[] {
+  if (isRollingPlan(plan)) {
+    if (!plan.startDate) return [];
+    const start = plan.startDate.slice(0, 10);
+    const firstMonday = naturalWeekStart(start);
+    const currentDate =
+      plan.currentWeekIndex && plan.currentDayIndex
+        ? addCalendarDays(
+            start,
+            (plan.currentWeekIndex - 1) * 7 + plan.currentDayIndex - 1,
+          )
+        : dayjs().format("YYYY-MM-DD");
+    const currentMonday = naturalWeekStart(currentDate);
+    const mondays = new Set([currentMonday, addCalendarDays(currentMonday, 7)]);
+    for (const interval of plan.generationCoverage?.intervals ?? [])
+      mondays.add(interval.weekStart);
+    for (const workout of plan.workouts) {
+      if (workout.scheduledDate)
+        mondays.add(naturalWeekStart(workout.scheduledDate.slice(0, 10)));
+    }
+    return [...mondays]
+      .filter((monday) => addCalendarDays(monday, 6) >= start)
+      .sort()
+      .map((monday) => ({
+        calendarRange: { from: monday, through: addCalendarDays(monday, 6) },
+        weekIndex:
+          Math.floor(dayjs(monday).diff(dayjs(firstMonday), "day") / 7) + 1,
+        days: Array.from({ length: 7 }, (_, index) => {
+          const dateKey = addCalendarDays(monday, index);
+          return {
+            dayIndex: calendarIsoWeekday(dateKey),
+            dayLabel: getWeekdayLabel(t, index + 1),
+            dateLabel: dateKey.slice(5).replace("-", "/"),
+            dateKey,
+            notGenerated:
+              dateKey < start || isPlanDateNotGenerated(plan, dateKey),
+            workouts: plan.workouts
+              .filter(
+                (workout) => workout.scheduledDate?.slice(0, 10) === dateKey,
+              )
+              .map((workout) => toDerivedWorkout(t, plan, workout)),
+          };
+        }),
+      }));
+  }
   return Array.from(
     { length: Math.max(1, plan.periodWeeks || 1) },
     (_, weekOffset) => {

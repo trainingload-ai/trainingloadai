@@ -1,4 +1,5 @@
 import dayjs = require('dayjs');
+import { isCalendarDate, scheduleRulePeriods } from '@shared/plan-calendar';
 import {
   buildAiTool,
   hasSignedInUser,
@@ -9,20 +10,28 @@ import {
   buildPlanSnapshotFromRow,
   emptyPlanSnapshotOutput,
   type PlanSnapshotToolOutput,
+  planSnapshotModelPlan,
 } from './plan-snapshot.shared';
 
 type Input = {
   planId: string;
   asOf?: string;
   includeAllWorkouts?: boolean;
+  workoutOffset?: number;
+  workoutLimit?: number;
+  calendarFrom?: string;
+  calendarTo?: string;
+  calendarOffset?: number;
+  calendarLimit?: number;
+  scheduleRuleOffset?: number;
 };
 
-export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiTool(
-  {
+export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> =
+  buildAiTool({
     name: 'plan.by_id',
     aliases: ['plan_by_id', 'get_plan_by_id', 'saved_plan'],
     description:
-      'Load a specific training plan by id for the signed-in user (any status: DRAFT, ACTIVE, PAUSED, etc.). Same snapshot shape as plan.active. Use when the user opened a plan detail or plan-followup seed provides planId — do not use plan.active for arbitrary plan ids.',
+      'Load a specific signed-in user plan. scheduleRules.effective is authoritative at asOf; latestConfirmed is a version that can be future or expired. For SCHEDULE read calendarFrom/calendarTo and every scheduleRuleInventory page; use its effective periods rather than copying expired rest rules or treating pending budgets as current.',
     cost: 'low',
     searchHint: 'plan by id draft saved plan user',
     isEnabled: async (ctx) => hasSignedInUser(ctx),
@@ -36,10 +45,45 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
           type: 'string',
           description: 'The plan id (cuid) for this user.',
         },
+        calendarFrom: {
+          type: 'string',
+          description:
+            'Read related standalone and other-plan courses from this inclusive calendar date YYYY-MM-DD; use with calendarTo for SCHEDULE coordination.',
+        },
+        calendarTo: {
+          type: 'string',
+          description: 'Inclusive calendar range end YYYY-MM-DD.',
+        },
+        calendarOffset: {
+          type: 'integer',
+          minimum: 0,
+          description:
+            'Related calendar offset; follow relatedCalendar.nextOffset until hasMore=false.',
+        },
+        calendarLimit: { type: 'integer', minimum: 1, maximum: 40 },
+        scheduleRuleOffset: {
+          type: 'integer',
+          minimum: 0,
+          description:
+            'Rule-period offset in the same calendar range; follow scheduleRuleInventory.nextOffset until hasMore=false.',
+        },
         asOf: {
           type: 'string',
           description:
             'Optional anchor date in YYYY-MM-DD. Defaults to athlete-local today.',
+        },
+        workoutOffset: {
+          type: 'integer',
+          minimum: 0,
+          description:
+            'Zero-based source inventory offset. Read successive pages when editing a long plan; do not claim unseen workouts were assessed.',
+        },
+        workoutLimit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 40,
+          description:
+            'Source inventory page size, default 40. Each source includes identity and revision.',
         },
         includeAllWorkouts: {
           type: 'boolean',
@@ -51,11 +95,16 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
     checkPermissions: async (ctx) => requireSignedInUser(ctx),
     summarizeForModel: ({ output }) => ({
       asOf: output.asOf,
-      plan: output.plan,
+      plan: planSnapshotModelPlan(output.plan),
       today: output.today,
       tomorrow: output.tomorrow,
       currentWeek: output.currentWeek,
-      allWorkouts: output.allWorkouts?.slice(0, 80),
+      allWorkouts: output.allWorkouts,
+      workoutInventory: output.workoutInventory,
+      relatedCalendar: output.relatedCalendar,
+      scheduleRulePeriods: output.scheduleRulePeriods,
+      scheduleRuleInventory: output.scheduleRuleInventory,
+      candidateCapacity: 10000,
     }),
     execute: async (ctx, input) => {
       const userId = ctx.session?.user?.id;
@@ -72,6 +121,9 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
       }
 
       const plan = await ctx.planQuery.findCoachPlanSnapshot({
+        asOf: anchor.format('YYYY-MM-DD'),
+        calendarFrom: input.calendarFrom,
+        calendarTo: input.calendarTo,
         userId: userId!,
         planId,
         includeCoachSummary: true,
@@ -81,7 +133,60 @@ export const planByIdTool: AiToolDef<Input, PlanSnapshotToolOutput> = buildAiToo
         return emptyPlanSnapshotOutput(anchor, tomorrow);
       }
 
-      return buildPlanSnapshotFromRow(plan, input, anchor, tomorrow);
+      const output = buildPlanSnapshotFromRow(plan, input, anchor, tomorrow);
+      if (output.allWorkouts) {
+        const offset = Math.max(0, Math.floor(input.workoutOffset ?? 0));
+        const limit = Math.max(
+          1,
+          Math.min(40, Math.floor(input.workoutLimit ?? 40)),
+        );
+        const total = output.allWorkouts.length;
+        output.allWorkouts = output.allWorkouts.slice(offset, offset + limit);
+        const nextOffset = offset + output.allWorkouts.length;
+        output.workoutInventory = {
+          total,
+          offset,
+          returned: output.allWorkouts.length,
+          hasMore: nextOffset < total,
+          nextOffset: nextOffset < total ? nextOffset : null,
+        };
+      }
+      if (input.calendarFrom || input.calendarTo) {
+        if (
+          !isCalendarDate(input.calendarFrom) ||
+          !isCalendarDate(input.calendarTo) ||
+          input.calendarTo! < input.calendarFrom!
+        )
+          throw new Error(
+            'A valid complete related calendar range is required',
+          );
+        output.relatedCalendar = await ctx.planQuery.findRelatedCalendarPage({
+          userId: userId!,
+          planId,
+          from: input.calendarFrom!,
+          to: input.calendarTo!,
+          offset: Math.max(0, Math.floor(input.calendarOffset ?? 0)),
+          limit: Math.max(
+            1,
+            Math.min(40, Math.floor(input.calendarLimit ?? 40)),
+          ),
+        });
+        const periods = scheduleRulePeriods(
+          plan.generationMetadata,
+          input.calendarFrom!,
+          input.calendarTo!,
+        );
+        const offset = Math.max(0, Math.floor(input.scheduleRuleOffset ?? 0));
+        output.scheduleRulePeriods = periods.slice(offset, offset + 40);
+        const nextOffset = offset + output.scheduleRulePeriods.length;
+        output.scheduleRuleInventory = {
+          total: periods.length,
+          offset,
+          returned: output.scheduleRulePeriods.length,
+          hasMore: nextOffset < periods.length,
+          nextOffset: nextOffset < periods.length ? nextOffset : null,
+        };
+      }
+      return output;
     },
-  },
-);
+  });

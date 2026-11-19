@@ -1,3 +1,13 @@
+import { RollingPlanAutomationService } from './application/rolling-plan-automation.service';
+import { RollingPlanAuthorizationService } from './application/rolling-plan-authorization.service';
+import { AiDataConsentModule } from '@/ai-data-consent/ai-data-consent.module';
+import { RollingPlanService } from './application/rolling-plan.service';
+import { PlanCalendarRepository } from './persistence/plan-calendar.repository';
+import { HealthDataModule } from '@/health-data/health-data.module';
+import { UserAnalysisConfigModule } from '@/api/user/user-analysis-config.module';
+import { PlanCalendarValidationService } from './application/plan-calendar-validation.service';
+import { PlanStartRepository } from './persistence/plan-start.repository';
+import { PlanStartService } from './application/plan-start.service';
 import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { PlanProjectionReadModule } from './application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
@@ -46,7 +56,10 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
  */
 @Module({
   imports: [
+    AiDataConsentModule,
     AthleteStateUpdatesModule,
+    HealthDataModule,
+    UserAnalysisConfigModule,
     PrismaModule,
     PlanProjectionReadModule,
     LoadReadoutModule,
@@ -66,6 +79,9 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PublicPlanShareController,
   ],
   providers: [
+    PlanCalendarRepository,
+    PlanCalendarValidationService,
+    PlanStartRepository,
     PlanActivityLinkRepository,
     CoachContextRepository,
     PlanShareRepository,
@@ -85,6 +101,10 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     CoachContextService,
     PlanExecutionContextService,
     PlanWorkoutMutabilityPolicy,
+    RollingPlanAuthorizationService,
+    PlanStartService,
+    RollingPlanService,
+    RollingPlanAutomationService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanScheduledActivationWorker,
@@ -105,6 +125,9 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     CoachContextService,
     PlanExecutionContextService,
     WorkoutPersistenceService,
+    PlanStartService,
+    RollingPlanService,
+    RollingPlanAutomationService,
     PlanProposalService,
     PlanProposalApplyService,
     PlanDeliveryReadService,

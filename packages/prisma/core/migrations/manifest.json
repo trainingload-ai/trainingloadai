@@ -180,7 +180,22 @@
       "id": "0036_health_daily_fact_revisions",
       "file": "0036_health_daily_fact_revisions/migration.sql",
       "sha256": "d94ff126be360e20e3ab7227bf7820b10854d0645fc0f9acf0c136458d39b802"
+    },
+    {
+      "id": "0037_plan_start_conversation",
+      "file": "0037_plan_start_conversation/migration.sql",
+      "sha256": "73a7b6a5a92f1d0d53e3e0e882aff58728bb64fa69c584cf1c98c17d696d09d8"
+    },
+    {
+      "id": "0038_plan_schedule",
+      "file": "0038_plan_schedule/migration.sql",
+      "sha256": "1af9d4adddb7a63b3fe0a08cacee90162625cbe15e48262bc9e8f279e0b8d6ac"
+    },
+    {
+      "id": "0039_rolling_plan",
+      "file": "0039_rolling_plan/migration.sql",
+      "sha256": "e2e2271d6566091f24b322bd2b97ff025dc22a3654785aa7d3a9640bbe0db634"
     }
   ],
-  "schemaChecksum": "46efffb30bc6137c3b53428a7253778ea46b02660d065896203fa93c0e27eec1"
+  "schemaChecksum": "bffc793808a83eeb9c0d087347f62c96aa0c23feb9145f6ed1aa4878885ea9b2"
 }

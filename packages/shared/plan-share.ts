@@ -132,6 +132,7 @@ export type PlanShareSourceWorkout = {
 };
 
 export type PlanShareSourcePlan = {
+  planningMode?: "FIXED" | "ROLLING";
   title?: string | null;
   description?: string | null;
   goal?: string | null;
@@ -576,6 +577,8 @@ export function fromPlan(
   plan: PlanShareSourcePlan,
   options?: { locale?: string; now?: Date },
 ): PlanSharePayloadV1 {
+  if (plan.planningMode === "ROLLING")
+    throw new PlanSharePayloadError("Continuous plans require a dated window snapshot; plan-share-v1 cannot represent their automatic policy or open-ended duration");
   const title = asTrimmedString(plan.title);
   if (!title) {
     throw new PlanSharePayloadError("Plan title cannot be empty");

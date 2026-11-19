@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { calendarIsoWeekday } from "@shared/plan-calendar";
 import { useTranslations } from "next-intl";
 
 import {
@@ -41,9 +42,11 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workouts: WorkoutRow[];
-  /** 与草案一致：1-based 周次、1-based 周几（1=周一 … 7=周日） */
+  /** Original 1-based plan position, independent of the calendar weekday. */
   weekIndex1: number;
   dayIndex1: number;
+  calendarDate?: string;
+  onCloseAutoFocus?: (event: Event) => void;
 };
 
 export function CoachPlanDraftWorkoutDialog({
@@ -53,7 +56,10 @@ export function CoachPlanDraftWorkoutDialog({
   workouts,
   weekIndex1,
   dayIndex1,
+  calendarDate,
+  onCloseAutoFocus,
 }: Props) {
+  const titleId = useId();
   const t = useTranslations("AiCoachPage.planDraft");
   const tWe = useTranslations("WorkoutEditor");
   const tSports = useTranslations("SportCatalog");
@@ -141,15 +147,16 @@ export function CoachPlanDraftWorkoutDialog({
     };
   }, [open, workouts]);
 
-  const weekdayKey = String(Math.min(6, Math.max(0, dayIndex1 - 1))) as
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6";
-  const weekdayShort = t(`weekdayShort.${weekdayKey}`);
+  const weekdayKey = String(
+    Math.min(
+      6,
+      Math.max(
+        0,
+        (calendarDate ? calendarIsoWeekday(calendarDate) : dayIndex1) - 1,
+      ),
+    ),
+  ) as "0" | "1" | "2" | "3" | "4" | "5" | "6";
+  const weekdayShort = `${calendarDate ? `${calendarDate} · ` : ""}${t(`weekdayShort.${weekdayKey}`)}`;
 
   const sessionMultiple = workouts.length > 1;
   const firstWorkout = workouts[0];
@@ -182,10 +189,14 @@ export function CoachPlanDraftWorkoutDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-[100vw] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none md:w-[min(92vw,900px)]">
+      <DialogContent
+        aria-labelledby={titleId}
+        onCloseAutoFocus={onCloseAutoFocus}
+        className="flex max-h-[90vh] w-[100vw] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none md:w-[min(92vw,900px)]"
+      >
         <div className="shrink-0 space-y-3 border-b border-border/60 p-3">
           <DialogHeader className="space-y-0 text-left">
-            <DialogTitle className="text-base leading-snug">
+            <DialogTitle id={titleId} className="text-base leading-snug">
               {sessionMultiple
                 ? `${tWe("title.view")} · ${tWe("title.weekLabel", { week: weekIndex1 })} · ${weekdayShort} · ${t("workoutDialogSessionCount", { count: workouts.length })}`
                 : `${tWe("title.view")} · ${tWe("title.weekLabel", { week: weekIndex1 })} · ${weekdayShort} · ${tWe("title.sessionLabel", { session: headerOrdinal })}`}
@@ -232,10 +243,7 @@ export function CoachPlanDraftWorkoutDialog({
                     workout.sessionIndex ??
                     1;
                   return (
-                    <div
-                      key={key}
-                      className="overflow-hidden bg-background"
-                    >
+                    <div key={key} className="overflow-hidden bg-background">
                       {sessionMultiple ? (
                         <div className="border-b border-border/50 px-5 pb-3 pt-4">
                           {workout.name?.trim() ? (
@@ -253,7 +261,8 @@ export function CoachPlanDraftWorkoutDialog({
                             {tWe("title.sessionLabel", {
                               session: globalOrdinal,
                             })}{" "}
-                            · {sportLabel(
+                            ·{" "}
+                            {sportLabel(
                               sport,
                               workout.structureKind,
                               workout.sportDefinitionCode,

@@ -31,6 +31,7 @@ function createService(
     users as never,
     (overrides.prescriptions ?? {}) as never,
     {} as never,
+    {} as never,
   );
   const tx = { $executeRawUnsafe: jest.fn(async () => 1) };
   return { service, planService, proposals, tx };

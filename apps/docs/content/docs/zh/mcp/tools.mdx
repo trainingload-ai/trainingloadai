@@ -26,8 +26,8 @@ description: TrainingLoad MCP 的只读工具、OAuth scopes、输入和输出�
 | `get_fitness_trends` | Read a bounded history for one athlete fitness metric and one explicit source track. Estimated values are advisory; AUTO or MANUAL values are profile records. | `profile:read` |
 | `get_training_zones` | Read the athlete current resolved heart-rate, pace, and power zones, including whether each setting is custom, derived, or unavailable. | `profile:read` |
 | `get_personal_bests` | Read processed best performances for standard or custom distance/time targets within a bounded date range. No route or raw sensor data is returned. | `activity:read` |
-| `list_training_plans` | Discover authorized training plans overlapping a bounded date range. Returns plan identity and lifecycle summary without generation metadata. | `plan:read` |
-| `get_plan_summary` | Read a user-owned plan summary with completion, planned-versus-actual load, weekly progress, and sport breakdown. The plan is never modified. | `plan:read` `activity:read` |
+| `list_training_plans` | Discover authorized training plans overlapping a bounded date range. Continuous plans have null periodWeeks and endDate. generatedThrough is the latest published date, not a plan end or a guarantee of uninterrupted coverage. | `plan:read` |
+| `get_plan_summary` | Read a user-owned plan summary with completion, planned-versus-actual load, weekly progress, and sport breakdown. Continuous-plan totals cover workoutWindow only, with null periodWeeks; they are not lifetime totals. The plan is never modified. | `plan:read` `activity:read` |
 | `list_planned_workouts` | List authorized planned workouts in a bounded date range with opaque pagination. | `plan:read` |
 | `get_planned_workout` | Read one authorized planned workout and its structured steps. This tool never changes the plan. | `plan:read` |
 | `get_plan_adherence` | Summarize status-based plan adherence for a bounded date range. DONE is complete, SKIPPED is skipped, and PLANNED or IN_PROGRESS remains pending. | `plan:read` |
@@ -2904,7 +2904,7 @@ Read processed best performances for standard or custom distance/time targets wi
 
 ## `list_training_plans`
 
-Discover authorized training plans overlapping a bounded date range. Returns plan identity and lifecycle summary without generation metadata.
+Discover authorized training plans overlapping a bounded date range. Continuous plans have null periodWeeks and endDate. generatedThrough is the latest published date, not a plan end or a guarantee of uninterrupted coverage.
 
 - **所需 scopes:** `plan:read`
 - **Annotations:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
@@ -3030,10 +3030,24 @@ Discover authorized training plans overlapping a bounded date range. Returns pla
               "SUPERSEDED"
             ]
           },
+          "planningMode": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "ROLLING"
+            ]
+          },
           "periodWeeks": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "startDate": {
             "anyOf": [
@@ -3059,6 +3073,18 @@ Discover authorized training plans overlapping a bounded date range. Returns pla
               }
             ]
           },
+          "generatedThrough": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
@@ -3071,9 +3097,11 @@ Discover authorized training plans overlapping a bounded date range. Returns pla
           "description",
           "goal",
           "status",
+          "planningMode",
           "periodWeeks",
           "startDate",
           "endDate",
+          "generatedThrough",
           "updatedAt"
         ],
         "additionalProperties": false
@@ -3099,7 +3127,7 @@ Discover authorized training plans overlapping a bounded date range. Returns pla
 
 ## `get_plan_summary`
 
-Read a user-owned plan summary with completion, planned-versus-actual load, weekly progress, and sport breakdown. The plan is never modified.
+Read a user-owned plan summary with completion, planned-versus-actual load, weekly progress, and sport breakdown. Continuous-plan totals cover workoutWindow only, with null periodWeeks; they are not lifetime totals. The plan is never modified.
 
 - **所需 scopes:** `plan:read`, `activity:read`
 - **Annotations:** `readOnlyHint=true`, `destructiveHint=false`, `idempotentHint=true`, `openWorldHint=false`
@@ -3150,6 +3178,33 @@ Read a user-owned plan summary with completion, planned-versus-actual load, week
         "CANCELLED",
         "SUPERSEDED"
       ]
+    },
+    "planningMode": {
+      "type": "string",
+      "enum": [
+        "FIXED",
+        "ROLLING"
+      ]
+    },
+    "workoutWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "through": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      },
+      "required": [
+        "from",
+        "through"
+      ],
+      "additionalProperties": false
     },
     "periodWeeks": {
       "anyOf": [

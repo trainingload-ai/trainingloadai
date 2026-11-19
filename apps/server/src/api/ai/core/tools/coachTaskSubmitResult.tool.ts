@@ -29,6 +29,7 @@ export const coachTaskSubmitResultTool: AiToolDef<Input, Output> = buildAiTool({
     'plan-cycle-review',
     'period-review',
     'plan-review-adjustment',
+    'rolling-plan',
     'workout-generator',
   ],
   isEnabled: (ctx) => Boolean(ctx.backgroundTask),

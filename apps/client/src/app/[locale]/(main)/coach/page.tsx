@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanCoverage } from "@/components/plan/rolling-plan-coverage";
 import {
   ArrowRight,
   CalendarDays,
@@ -263,9 +265,9 @@ export default function V2CoachPage() {
                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                 <div className="mt-2 text-sm font-semibold">
                   {activePlan
-                    ? t("dynamic.week", {
+                    ? isRollingPlan(activePlan) ? <RollingPlanCoverage plan={activePlan} /> : t("dynamic.week", {
                         current: currentWeekIndex,
-                        total: activePlan.periodWeeks,
+                        total: activePlan.periodWeeks ?? 1,
                       })
                     : t("currentContext.week")}
                 </div>

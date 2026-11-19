@@ -1,5 +1,8 @@
 import type { CoachUserMessageBody } from './coach-query-yield';
-import { getCoachSkillByName } from './skill.registry';
+import {
+  getCoachSkillByName,
+  getCoachCatalogSkillByName,
+} from './skill.registry';
 import type { ActiveCoachSkill } from './skill.types';
 
 export function hasCoachQuestionReplyToolResult(
@@ -36,7 +39,9 @@ export function resolveCoachActiveSkill(args: {
   restoredSkill?: string | null;
 }): ActiveCoachSkill | null {
   const prompt = String(args.prompt ?? '').trim();
-  const explicitSkill = args.intent ? getCoachSkillByName(args.intent) : null;
+  const explicitSkill = args.intent
+    ? getCoachCatalogSkillByName(args.intent)
+    : null;
   const inferredPlanBuilder = detectPlanBuilderIntentFromPrompt(prompt)
     ? getCoachSkillByName('plan-builder')
     : null;

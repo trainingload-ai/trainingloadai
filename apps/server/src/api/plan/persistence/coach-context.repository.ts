@@ -118,6 +118,43 @@ export class CoachContextRepository {
     });
   }
 
+  async supersedeStartDecisions(
+    args: { userId: string; planId: string; appliedDecisionId?: string | null },
+    tx: PlanDb,
+  ) {
+    const db = this.db(tx);
+    const pending = await db.planProposalPreview.findMany({
+      where: {
+        userId: args.userId,
+        sourcePlanId: args.planId,
+        mode: { in: ['START', 'SCHEDULE'] },
+        appliedAt: null,
+        ...(args.appliedDecisionId
+          ? {
+              OR: [
+                { decisionId: null },
+                { decisionId: { not: args.appliedDecisionId } },
+              ],
+            }
+          : {}),
+      },
+      select: { id: true, decisionId: true },
+    });
+    await db.planProposalPreview.updateMany({
+      where: { id: { in: pending.map((p) => p.id) } },
+      data: { expiresAt: new Date() },
+    });
+    await db.coachDecision.updateMany({
+      where: {
+        id: {
+          in: pending.flatMap((p) => (p.decisionId ? [p.decisionId] : [])),
+        },
+        state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
+      },
+      data: { state: 'SUPERSEDED' },
+    });
+  }
+
   upsertSummary<T extends Prisma.CoachSummaryUpsertArgs>(
     args: Prisma.SelectSubset<T, Prisma.CoachSummaryUpsertArgs>,
     tx?: PlanDb,

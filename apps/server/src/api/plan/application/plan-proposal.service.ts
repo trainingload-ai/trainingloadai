@@ -1,3 +1,8 @@
+import {
+  PlanStartService,
+  type CanonicalStartProposal,
+  type PlanStartBinding,
+} from './plan-start.service';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { UserService } from '@/api/user/user.service';
@@ -100,7 +105,8 @@ type CanonicalSupersedeProposal = {
 
 export type CanonicalPlanProposal =
   | CanonicalAdaptProposal
-  | CanonicalSupersedeProposal;
+  | CanonicalSupersedeProposal
+  | CanonicalStartProposal;
 
 function invalid(message: string): never {
   throw new BusinessException({
@@ -289,12 +295,16 @@ export class PlanProposalService {
     private readonly workout: WorkoutService,
     private readonly prescriptions: WorkoutPrescriptionService,
     private readonly loads: PlanLoadEstimatorService,
+    private readonly starts: PlanStartService,
   ) {}
 
   async createPreview(
     userId: string,
     request: PlanProposalPreviewRequest,
+    binding?: PlanStartBinding,
   ): Promise<PlanProposalPreviewResult> {
+    if (request.mode === 'START' || request.mode === 'SCHEDULE')
+      return this.starts.createPreview(userId, request, binding);
     return request.mode === 'ADAPT'
       ? this.createAdaptPreview(userId, request)
       : this.createSupersedePreview(userId, request);
@@ -304,7 +314,8 @@ export class PlanProposalService {
     userId: string;
     sourcePlanId: string;
     previewId: string;
-    mode: 'ADAPT' | 'SUPERSEDE';
+    mode: 'ADAPT' | 'SUPERSEDE' | 'START' | 'SCHEDULE';
+    binding?: PlanStartBinding;
   }) {
     const preview = await this.proposals.findUnique({
       where: { id: args.previewId },
@@ -316,6 +327,23 @@ export class PlanProposalService {
       preview.mode !== args.mode
     ) {
       invalid('Plan proposal preview is unavailable');
+    }
+    if (args.mode === 'START' || args.mode === 'SCHEDULE') {
+      const proposal = preview.proposal as unknown as CanonicalStartProposal;
+      const session = await this.starts.assertBinding(
+        args.userId,
+        args.sourcePlanId,
+        args.binding,
+        this.proposals.database(),
+        proposal.mode === 'START' ? proposal.startDate : undefined,
+        proposal.mode === 'SCHEDULE',
+      );
+      if (
+        proposal.binding?.sid !== args.binding?.sid ||
+        proposal.binding?.branchId !== args.binding?.branchId ||
+        proposal.conversationRevision !== session.planStartRevision
+      )
+        conflict('Start proposal belongs to a different conversation version');
     }
     if (preview.expiresAt.getTime() <= Date.now())
       expired('Plan proposal has expired; generate a fresh preview');

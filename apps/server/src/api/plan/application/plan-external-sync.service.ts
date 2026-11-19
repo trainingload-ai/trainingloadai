@@ -1,3 +1,11 @@
+import { PlanCalendarValidationService } from './plan-calendar-validation.service';
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
+import { UnprocessableEntityException } from '@nestjs/common';
+import {
+  assessPlanSchedule,
+  parseScheduleConstraints,
+} from '@shared/plan-calendar';
+import { parsePlanQualityContract } from '@shared/plan-quality';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   PLAN_WORKOUTS_CHANGED_EVENT,
@@ -55,6 +63,7 @@ export class PlanExternalSyncService {
     private readonly links: PlanActivityLinkRepository,
     private readonly mutability: PlanWorkoutMutabilityPolicy,
     private readonly users: UserService,
+    private readonly calendarValidation: PlanCalendarValidationService,
     @Optional()
     private readonly workoutTargetResolver?: PlanWorkoutTargetResolver,
     @Optional() private readonly events?: EventEmitter2,
@@ -173,6 +182,7 @@ export class PlanExternalSyncService {
     revision?: number;
   }): Promise<'deleted' | 'missing' | 'changed' | 'protected'> {
     return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       const current = await this.workouts.findFirst(
         { where: { id: args.workoutId, userId: args.userId } },
         tx,
@@ -397,6 +407,7 @@ export class PlanExternalSyncService {
     ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
   ) {
     return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       const sessionIndex = await this.nextIndependentSessionIndex(
         tx,
         args.userId,
@@ -424,6 +435,7 @@ export class PlanExternalSyncService {
       );
       await this.replaceWorkoutSteps(tx, created.id, args.blocks);
       await this.estimateWorkoutLoad(created.id, tx);
+      await this.calendarValidation.assertStored(args.userId, [created.id], tx);
       // Load estimation also writes the workout. Return the final transaction
       // snapshot so its own updatedAt change is not mistaken for a later edit.
       const stored = await this.workouts.findFirst(
@@ -490,6 +502,7 @@ export class PlanExternalSyncService {
     ) => Prisma.PlanWorkoutExternalMappingUncheckedCreateInput,
   ) {
     return this.runTransaction(async (tx) => {
+      await acquireHashtextAdvisoryXactLock(tx, args.userId);
       await this.workouts.lockForUpdate(args.workoutId, tx);
       const current = await this.workouts.findUnique(
         {
@@ -619,6 +632,55 @@ export class PlanExternalSyncService {
         );
       }
       await this.estimateWorkoutLoad(updated.id, tx);
+      if (args.targetPlanId) {
+        const plan = await this.plans.findUnique(
+          { where: { id: args.targetPlanId } },
+          tx,
+        );
+        const metadata = plan?.generationMetadata as Record<
+          string,
+          unknown
+        > | null;
+        try {
+          const constraints = parseScheduleConstraints(
+            metadata?.scheduleConstraints,
+          );
+          const qualityContract = parsePlanQualityContract(
+            metadata?.qualityContract,
+          );
+          if (plan?.startDate && (constraints || qualityContract)) {
+            const rows = await this.workouts.findMany(
+              { where: { planId: args.targetPlanId } },
+              tx,
+            );
+            const report = assessPlanSchedule({
+              startDate: plan.startDate.toISOString().slice(0, 10),
+              planningMode: plan.planningMode,
+              periodWeeks: plan.periodWeeks,
+              workouts: rows.map((row) => ({
+                ...row,
+                scheduledDate: row.scheduledDate?.toISOString().slice(0, 10),
+                durationSeconds: row.plannedDurationSeconds,
+              })),
+              changedWorkoutIds: [updated.id],
+              constraints,
+              qualityContract,
+              scheduleRuleMetadata: metadata,
+            });
+            if (!report.valid)
+              throw new UnprocessableEntityException({
+                code: 'PLAN_SCHEDULE_INVALID',
+                issues: report.issues,
+              });
+          }
+        } catch (error) {
+          if (error instanceof UnprocessableEntityException) throw error;
+          throw new UnprocessableEntityException(
+            'Invalid plan schedule constraints',
+          );
+        }
+      }
+      await this.calendarValidation.assertStored(args.userId, [updated.id], tx);
       const stored = await this.workouts.findFirst(
         {
           where: { id: updated.id, userId: args.userId },

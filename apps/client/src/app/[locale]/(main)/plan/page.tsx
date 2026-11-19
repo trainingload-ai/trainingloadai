@@ -1,5 +1,7 @@
 "use client";
 
+import { isRollingPlan } from "@/lib/rolling-plan";
+import { RollingPlanExecution } from "@/components/plan/rolling-plan-execution";
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import {
@@ -1322,6 +1324,8 @@ export default function V2PlanPage() {
     );
   }
 
+  if (plan && isRollingPlan(plan)) return <><MobilePlanNavigation /><RollingPlanExecution plan={plan} /></>;
+
   if (!plan) {
     return (
       <>
@@ -1399,7 +1403,7 @@ export default function V2PlanPage() {
               <span className="rounded-xs bg-white/88 px-1.5 py-0.5 dark:bg-black/28">
                 {t("header.weekStatus", {
                   current: currentWeekIndex,
-                  total: plan.periodWeeks,
+                  total: plan.periodWeeks ?? 1,
                   status: describePlanStatus(t, plan),
                 })}
               </span>
@@ -1435,7 +1439,7 @@ export default function V2PlanPage() {
                   plan.endDate
                     ? dayjs(plan.endDate).format("YYYY-MM-DD")
                     : dayjs(plan.startDate)
-                        .add(Math.max(1, plan.periodWeeks) * 7 - 1, "day")
+                        .add(Math.max(1, plan.periodWeeks ?? 1) * 7 - 1, "day")
                         .format("YYYY-MM-DD")
                 }
                 locale={locale}
@@ -1498,7 +1502,7 @@ export default function V2PlanPage() {
                     plan.endDate
                       ? dayjs(plan.endDate).format("YYYY-MM-DD")
                       : dayjs(plan.startDate)
-                          .add(Math.max(1, plan.periodWeeks) * 7 - 1, "day")
+                          .add(Math.max(1, plan.periodWeeks ?? 1) * 7 - 1, "day")
                           .format("YYYY-MM-DD")
                   }
                   locale={locale}

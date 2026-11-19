@@ -1,3 +1,7 @@
+import { ConfigurePlanAutomationDto } from '../dto/configure-plan-automation.dto';
+import { RollingPlanAutomationService } from '../application/rolling-plan-automation.service';
+import { PlanQueryService } from '../application/plan-query.service';
+import { PlanStartService } from '../application/plan-start.service';
 import {
   Body,
   Controller,
@@ -38,7 +42,31 @@ export class PlanController {
     private readonly planService: PlanService,
     private readonly planSummary: PlanSummaryService,
     private readonly planShares: PlanShareService,
+    private readonly starts: PlanStartService,
+    private readonly queries: PlanQueryService,
+    private readonly automation: RollingPlanAutomationService,
   ) {}
+
+  @Get(':planId/automation')
+  async automationStatus(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+  ) {
+    return this.automation.status(userId, planId);
+  }
+  @Put(':planId/automation')
+  async configureAutomation(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Body() input: ConfigurePlanAutomationDto,
+  ) {
+    return this.automation.configure(
+      userId,
+      planId,
+      input.enabled,
+      input.settings,
+    );
+  }
 
   @Get()
   @AllowPublicDemo(PUBLIC_DEMO_CAPABILITIES.PLANS_READ)
@@ -94,6 +122,16 @@ export class PlanController {
     @CurrentUserId() userId: string,
   ) {
     return this.planService.getPlanDetail(userId, planId);
+  }
+
+  @Get(':planId/window-snapshot')
+  async windowSnapshot(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Query('from') from: string,
+    @Query('through') through: string,
+  ) {
+    return this.queries.windowSnapshot(userId, planId, from, through);
   }
 
   @Get(':planId/summary')
@@ -157,6 +195,15 @@ export class PlanController {
     @CurrentUserId() userId: string,
   ) {
     return this.planShares.createFromPlan(userId, planId);
+  }
+
+  @Post(':planId/start-conversation')
+  async startConversation(
+    @Param('planId') planId: string,
+    @CurrentUserId() userId: string,
+    @Body() dto?: ActivatePlanDto,
+  ) {
+    return this.starts.conversation(userId, planId, dto?.startDate);
   }
 
   @Post(':planId/activate')

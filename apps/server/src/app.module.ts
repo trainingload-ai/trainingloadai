@@ -1,3 +1,4 @@
+import { RollingPlanRuntimeModule } from './rolling-plan/rolling-plan-runtime.module';
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/config';
@@ -178,6 +179,7 @@ const envFilePath = [
     CalendarModule,
     CompetitionModule,
     ReviewModule,
+    RollingPlanRuntimeModule,
     NotificationModule,
     ReviewApiModule,
     ImportingModule,

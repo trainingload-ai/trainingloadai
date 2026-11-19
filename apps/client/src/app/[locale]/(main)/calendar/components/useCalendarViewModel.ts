@@ -401,6 +401,7 @@ export function useCalendarViewModel(
     selectedIndependentWorkouts:
       independentWorkoutsByDate[selectedDateKey] || [],
     activePlanId,
+    activePlan: active?.plan ?? null,
     selectedTss,
     activitiesByDate,
     workoutsByDate: effectiveWorkoutsByDate,

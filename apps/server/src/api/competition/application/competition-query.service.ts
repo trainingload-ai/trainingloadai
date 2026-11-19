@@ -1,3 +1,4 @@
+import type { PrismaTx } from '@/prisma/prisma-db';
 import { Injectable } from '@nestjs/common';
 import { CompetitionStatus } from '@prisma/client';
 import { CompetitionRepository } from '../persistence/competition.repository';
@@ -8,6 +9,36 @@ import { CompetitionRepository } from '../persistence/competition.repository';
 @Injectable()
 export class CompetitionQueryService {
   constructor(private readonly competitions: CompetitionRepository) {}
+
+  findPlanProposalFacts(
+    userId: string,
+    since: Date,
+    until: Date,
+    tx: PrismaTx,
+  ) {
+    return this.competitions.findEvents(
+      {
+        where: { userId, startDate: { gte: since, lte: until } },
+        orderBy: { id: 'asc' },
+        select: {
+          id: true,
+          version: true,
+          startDate: true,
+          endDate: true,
+          startTimeMinute: true,
+          timezone: true,
+          status: true,
+          deletedAt: true,
+          importance: true,
+          sportType: true,
+          goalType: true,
+          targetTimeSeconds: true,
+          distanceMeters: true,
+        },
+      },
+      tx,
+    );
+  }
 
   /** Bounded, user-scoped competition projection for read-only MCP clients. */
   listForMcp(args: {

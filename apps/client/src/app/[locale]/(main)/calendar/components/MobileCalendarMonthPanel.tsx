@@ -1,4 +1,5 @@
 "use client";
+import { isPlanDateNotGenerated, type PlanPlanning } from "@/lib/rolling-plan";
 import { palette as tokenPalette, visualColors as tokenVisual } from '@trainingloadai/design-tokens/colors';
 
 
@@ -22,6 +23,7 @@ const MONTH_MARKER_COLORS = {
 } as const;
 
 export function MobileCalendarMonthPanel({
+  activePlan,
   activitiesByDate,
   competitionEventsByDate,
   currentMonth,
@@ -36,6 +38,7 @@ export function MobileCalendarMonthPanel({
   weeks,
   workoutsByDate,
 }: {
+  activePlan?: PlanPlanning | null;
   activitiesByDate: Record<string, Activity[]>;
   competitionEventsByDate: Record<string, CompetitionEvent[]>;
   currentMonth: Dayjs;
@@ -52,6 +55,7 @@ export function MobileCalendarMonthPanel({
 }) {
   const locale = useLocale();
   const t = useTranslations("MobileCalendarTimeline");
+  const rollingT = useTranslations("RollingPlan");
   const monthSwipeStartRef = React.useRef<{ x: number; y: number } | null>(
     null,
   );
@@ -143,7 +147,7 @@ export function MobileCalendarMonthPanel({
             const today = date.isSame(dayjs(), "day");
             const inMonth = date.month() === currentMonth.month();
             const inPlanRange = Boolean(
-              range &&
+              !(activePlan && isPlanDateNotGenerated(activePlan, key)) && range &&
               !date.isBefore(range.startOfWeek, "day") &&
               !date.isAfter(range.end, "day"),
             );
@@ -218,7 +222,7 @@ export function MobileCalendarMonthPanel({
               {selectedDateLine}
             </div>
             <div className="mt-0.5 text-sm font-semibold text-foreground">
-              {hasSelectedContent ? t("dayContent") : t("noSchedule")}
+              {hasSelectedContent ? t("dayContent") : activePlan && isPlanDateNotGenerated(activePlan, selectedKey) ? rollingT("notGenerated") : t("noSchedule")}
             </div>
           </div>
           {hasSelectedContent ? (
@@ -231,6 +235,7 @@ export function MobileCalendarMonthPanel({
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
           <MobileCalendarDayContent
+            notGenerated={Boolean(activePlan && isPlanDateNotGenerated(activePlan, selectedKey))}
             activities={selectedActivities}
             events={selectedEvents}
             workouts={selectedWorkouts}

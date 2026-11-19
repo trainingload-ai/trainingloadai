@@ -362,3 +362,45 @@ export function assessPlanQuality(
     issues,
   };
 }
+
+/** Validate rolling prescriptions in bounded plan-week groups; date budgets use assessPlanSchedule. */
+export function assessRollingPlanQuality(
+  workouts: PlanQualityWorkout[],
+  contract?: PlanQualityContract,
+) {
+  const groups = new Map<number, PlanQualityWorkout[]>();
+  for (const workout of workouts) {
+    const list = groups.get(workout.weekIndex) ?? [];
+    list.push({ ...workout, weekIndex: 1 });
+    groups.set(workout.weekIndex, list);
+  }
+  const reports = [...groups.values()].map((group) =>
+    assessPlanQuality(
+      1,
+      group,
+      contract
+        ? {
+            ...contract,
+            weekPhases: undefined,
+            requiredSports: undefined,
+            maxTrainingDaysPerWeek: undefined,
+            maxDailyMinutes: undefined,
+            allowedDays: undefined,
+          }
+        : undefined,
+    ),
+  );
+  const issues = reports.flatMap((r) => r.issues);
+  for (const sport of contract?.requiredSports ?? [])
+    if (!workouts.some((w) => w.sportType === sport))
+      issues.push({
+        code: "MISSING_SPORT",
+        severity: "ERROR",
+        message: `Required sport ${sport} is missing`,
+      });
+  return {
+    valid: issues.every((i) => i.severity !== "ERROR"),
+    weeks: reports.flatMap((r) => r.weeks),
+    issues,
+  };
+}
