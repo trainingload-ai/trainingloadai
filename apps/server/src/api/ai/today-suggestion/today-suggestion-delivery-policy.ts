@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { I18nService } from 'nestjs-i18n';
+import { resolveSupportedLocale } from '@/utils/locale.util';
 import { createHmac } from 'crypto';
 import type {
   TodaySuggestionEvidence,
@@ -8,6 +10,7 @@ import type {
   TodaySuggestionWorkout,
 } from '@shared/ai-today-suggestion-contract';
 import { stableJson } from '../core/ai-common.util';
+import { aiFallbackText } from '../core/ai-fallback-copy';
 import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
@@ -40,42 +43,72 @@ export function todaySuggestionProposalToken(args: {
     .digest('base64url');
 }
 
-function isChinese(locale: string) {
-  return locale.toLowerCase().startsWith('zh');
+export function todaySuggestionLabel(
+  i18n: I18nService,
+  locale: string,
+  key: string,
+) {
+  return aiFallbackText(
+    i18n,
+    resolveSupportedLocale(locale),
+    `todayDelivery.${key}`,
+  );
 }
 
-function label(locale: string, zh: string, en: string) {
-  return isChinese(locale) ? zh : en;
-}
-
-const EVIDENCE_LABELS: Record<string, [string, string]> = {
-  NEVER_RECORDED_ACTIVITY: ['尚无活动记录', 'No recorded activity yet'],
-  LAST_ACTIVITY_OVER_30_DAYS: [
-    '超过 30 天没有活动记录',
-    'No activity recorded for 30+ days',
-  ],
-  ACTIVITY_PROCESSING_PENDING: [
-    '活动仍在处理中',
-    'Activity data is still processing',
-  ],
-  TODAY_WORKOUT_COMPLETED: ['今日训练已完成', "Today's workout is complete"],
-  TODAY_WORKOUT_AVAILABLE: ['今日已有训练安排', 'A workout is scheduled today'],
-  NO_ACTIVE_PLAN: ['暂无进行中的计划', 'No active plan'],
-  WAITING_FOR_USER: ['需要补充身体状态', 'Athlete input is needed'],
-  WAITING_FOR_DATA: ['等待训练数据', 'Waiting for training data'],
-  HIGH_CONCERN: ['当前状态需要优先处理', 'Current state needs attention'],
-  RECENT_LOAD: ['近期训练负荷', 'Recent training load'],
-  RECENT_ACTIVITY: ['最近一次活动', 'Latest activity'],
-  PLAN_CONTEXT: ['当前训练计划', 'Current training plan'],
-  COMPETITION_CONTEXT: ['近期比赛安排', 'Upcoming competition'],
-  LOAD_ZERO_28D: [
-    '近 28 天计算训练负荷为 0',
-    'Calculated training load is zero over 28 days',
-  ],
-};
+const EVIDENCE_CODES = new Set([
+  'NEVER_RECORDED_ACTIVITY',
+  'LAST_ACTIVITY_OVER_30_DAYS',
+  'ACTIVITY_PROCESSING_PENDING',
+  'TODAY_WORKOUT_COMPLETED',
+  'TODAY_WORKOUT_AVAILABLE',
+  'NO_ACTIVE_PLAN',
+  'WAITING_FOR_USER',
+  'WAITING_FOR_DATA',
+  'HIGH_CONCERN',
+  'RECENT_LOAD',
+  'RECENT_ACTIVITY',
+  'PLAN_CONTEXT',
+  'COMPETITION_CONTEXT',
+  'LOAD_ZERO_28D',
+]);
 
 @Injectable()
 export class TodaySuggestionDeliveryPolicy {
+  constructor(private readonly i18n: I18nService) {}
+
+  private text(locale: string, key: string) {
+    return todaySuggestionLabel(this.i18n, locale, key);
+  }
+
+  localize(
+    result: TodaySuggestionV2,
+    projection: Pick<
+      TodaySuggestionConstraintProjection,
+      'locale' | 'matchingActivityId'
+    >,
+  ): TodaySuggestionV2 {
+    const intent = (value: TodaySuggestionIntent): TodaySuggestionIntent => ({
+      ...value,
+      label: this.text(
+        projection.locale,
+        `intents.${value.type === 'OPEN_ACTIVITY_REVIEW' && projection.matchingActivityId === value.activityId ? 'CHECK_ACTIVITY_ASSOCIATION' : value.type}`,
+      ),
+    });
+    return {
+      ...result,
+      evidence: result.evidence.map((value) =>
+        EVIDENCE_CODES.has(value.code)
+          ? {
+              ...value,
+              label: this.text(projection.locale, `evidence.${value.code}`),
+            }
+          : value,
+      ),
+      primaryIntent: result.primaryIntent ? intent(result.primaryIntent) : null,
+      secondaryIntents: result.secondaryIntents.map(intent),
+    };
+  }
+
   build(args: {
     projection: TodaySuggestionConstraintProjection;
     draft: TodaySuggestionDraft;
@@ -87,16 +120,15 @@ export class TodaySuggestionDeliveryPolicy {
     const { projection, draft } = args;
     const evidenceCodes = [
       ...draft.evidenceCodes,
-      ...projection.constraints.filter((code) => EVIDENCE_LABELS[code]),
+      ...projection.constraints.filter((code) => EVIDENCE_CODES.has(code)),
     ];
     const evidence: TodaySuggestionEvidence[] = [...new Set(evidenceCodes)]
-      .filter((code) => Boolean(EVIDENCE_LABELS[code]))
+      .filter((code) => Boolean(EVIDENCE_CODES.has(code)))
       .slice(0, 3)
       .map((code) => {
-        const pair = EVIDENCE_LABELS[code];
         return {
           code,
-          label: label(projection.locale, pair[0], pair[1]),
+          label: this.text(projection.locale, `evidence.${code}`),
           evidenceRefs: [
             `fact:${projection.factHash}`,
             ...(projection.constraints.includes(code as never)
@@ -189,25 +221,21 @@ export class TodaySuggestionDeliveryPolicy {
     if (projection.highConcern && projection.pendingInquiry) {
       return {
         type: 'OPEN_ASSESSMENT',
-        label: label(projection.locale, '补充状态', 'Update status'),
+        label: this.text(projection.locale, 'intents.OPEN_ASSESSMENT'),
         caseId: projection.pendingInquiry.caseId,
       };
     }
     if (projection.activeDecisionId && projection.highConcern) {
       return {
         type: 'OPEN_DECISION',
-        label: label(
-          projection.locale,
-          '查看教练判断',
-          'Review coach decision',
-        ),
+        label: this.text(projection.locale, 'intents.OPEN_DECISION'),
         decisionId: projection.activeDecisionId,
       };
     }
     if (projection.highConcern) {
       return {
         type: 'ASK_COACH',
-        label: label(projection.locale, '问教练', 'Ask coach'),
+        label: this.text(projection.locale, 'intents.ASK_COACH'),
         starterCode: 'today-high-concern',
       };
     }
@@ -241,11 +269,7 @@ export class TodaySuggestionDeliveryPolicy {
         return todayWorkout
           ? {
               type,
-              label: label(
-                projection.locale,
-                '打开今日训练',
-                "Open today's workout",
-              ),
+              label: this.text(projection.locale, 'intents.OPEN_TODAY_WORKOUT'),
               workoutId: todayWorkout.id,
               scheduledDate: todayWorkout.scheduledDate ?? projection.date,
               planId: todayWorkout.planId,
@@ -255,7 +279,7 @@ export class TodaySuggestionDeliveryPolicy {
         return projection.activePlan
           ? {
               type,
-              label: label(projection.locale, '查看计划', 'View plan'),
+              label: this.text(projection.locale, 'intents.OPEN_PLAN'),
               planId: projection.activePlan.id,
             }
           : null;
@@ -263,34 +287,29 @@ export class TodaySuggestionDeliveryPolicy {
         return projection.pendingInquiry
           ? {
               type,
-              label: label(projection.locale, '补充状态', 'Update status'),
+              label: this.text(projection.locale, 'intents.OPEN_ASSESSMENT'),
               caseId: projection.pendingInquiry.caseId,
             }
           : null;
       case 'OPEN_PROVIDER_SETTINGS':
         return {
           type,
-          label: label(
-            projection.locale,
-            '检查数据连接',
-            'Check data connection',
-          ),
+          label: this.text(projection.locale, 'intents.OPEN_PROVIDER_SETTINGS'),
         };
       case 'OPEN_IMPORT':
         return {
           type,
-          label: label(projection.locale, '导入活动', 'Import activity'),
+          label: this.text(projection.locale, 'intents.OPEN_IMPORT'),
         };
       case 'OPEN_ACTIVITY_REVIEW':
         return projection.matchingActivityId || projection.latestActivityId
           ? {
               type,
-              label: label(
+              label: this.text(
                 projection.locale,
-                projection.matchingActivityId ? '核对活动关联' : '查看活动复盘',
                 projection.matchingActivityId
-                  ? 'Check activity association'
-                  : 'Review activity',
+                  ? 'intents.CHECK_ACTIVITY_ASSOCIATION'
+                  : 'intents.OPEN_ACTIVITY_REVIEW',
               ),
               activityId:
                 projection.matchingActivityId ?? projection.latestActivityId,
@@ -300,29 +319,21 @@ export class TodaySuggestionDeliveryPolicy {
         return projection.activeDecisionId
           ? {
               type,
-              label: label(
-                projection.locale,
-                '查看教练判断',
-                'Review coach decision',
-              ),
+              label: this.text(projection.locale, 'intents.OPEN_DECISION'),
               decisionId: projection.activeDecisionId,
             }
           : null;
       case 'ASK_COACH':
         return {
           type,
-          label: label(projection.locale, '问教练', 'Ask coach'),
+          label: this.text(projection.locale, 'intents.ASK_COACH'),
           starterCode: 'today-suggestion',
         };
       case 'VIEW_TOMORROW':
         return projection.tomorrowWorkouts.length
           ? {
               type,
-              label: label(
-                projection.locale,
-                '查看明日安排',
-                "View tomorrow's plan",
-              ),
+              label: this.text(projection.locale, 'intents.VIEW_TOMORROW'),
               date: projection.tomorrowWorkouts[0].scheduledDate ?? '',
             }
           : null;
@@ -332,11 +343,7 @@ export class TodaySuggestionDeliveryPolicy {
         }
         return {
           type,
-          label: label(
-            projection.locale,
-            '添加为今日课次',
-            "Add as today's workout",
-          ),
+          label: this.text(projection.locale, 'intents.CREATE_TODAY_WORKOUT'),
           proposalToken: todaySuggestionProposalToken({
             generationToken,
             constraintHash: projection.constraintHash,
@@ -349,7 +356,7 @@ export class TodaySuggestionDeliveryPolicy {
         if (earliest.getTime() >= projection.validUntil.getTime()) return null;
         return {
           type,
-          label: label(projection.locale, '稍后提醒', 'Remind me later'),
+          label: this.text(projection.locale, 'intents.SCHEDULE_REMINDER'),
           earliestAt: earliest.toISOString(),
           latestAt: projection.validUntil.toISOString(),
         };

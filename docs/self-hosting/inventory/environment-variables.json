@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2182
+          "line": 2183
         }
       ]
     },
@@ -1837,7 +1837,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 20
+          "line": 23
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -1870,7 +1870,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 19
+          "line": 22
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -2701,7 +2701,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 63
+          "line": 64
         }
       ]
     },
@@ -2918,7 +2918,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 127
+          "line": 129
         }
       ]
     },
@@ -3264,7 +3264,7 @@
       "references": [
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 123
+          "line": 125
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -4485,11 +4485,11 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 25
+          "line": 26
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 116
+          "line": 118
         },
         {
           "file": "apps/server/src/bootstrap/self-host-network-security.ts",
@@ -4924,7 +4924,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 127
+          "line": 129
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -5477,7 +5477,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/today-suggestion/today-suggestion-delivery-policy.ts",
-          "line": 18
+          "line": 21
         },
         {
           "file": "apps/server/src/api/user/account-deletion-crypto.ts",
@@ -6409,7 +6409,7 @@
         },
         {
           "file": "apps/server/src/bootstrap/bootstrap-application.ts",
-          "line": 64
+          "line": 65
         },
         {
           "file": "apps/server/src/importing/fit-release-corpus.command.ts",

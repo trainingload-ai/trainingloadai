@@ -1,3 +1,4 @@
+import { createAiFallbackI18n } from '../spec/ai-fallback-i18n.test-util';
 import { uncontendedGeneration } from './testing/generation.fixture';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
 import { TodaySuggestionOrchestratorService } from './today-suggestion-orchestrator.service';
@@ -134,7 +135,7 @@ function harness() {
     projector,
     agent as never,
     {} as never,
-    new TodaySuggestionDeliveryPolicy(),
+    new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
     engagement,
     uncontendedGeneration(prisma),
   );

@@ -115,5 +115,37 @@
       "strength": "Krafttraining",
       "unknown": "Aktivität"
     }
+  },
+  "todayDelivery": {
+    "evidence": {
+      "NEVER_RECORDED_ACTIVITY": "Noch keine Aktivitäten erfasst",
+      "LAST_ACTIVITY_OVER_30_DAYS": "Seit über 30 Tagen keine Aktivität erfasst",
+      "ACTIVITY_PROCESSING_PENDING": "Aktivitätsdaten werden noch verarbeitet",
+      "TODAY_WORKOUT_COMPLETED": "Das heutige Training ist abgeschlossen",
+      "TODAY_WORKOUT_AVAILABLE": "Für heute ist ein Training geplant",
+      "NO_ACTIVE_PLAN": "Kein aktiver Trainingsplan",
+      "WAITING_FOR_USER": "Angaben zum Körpergefühl fehlen",
+      "WAITING_FOR_DATA": "Warten auf Trainingsdaten",
+      "HIGH_CONCERN": "Der aktuelle Zustand braucht Aufmerksamkeit",
+      "RECENT_LOAD": "Aktuelle Trainingsbelastung",
+      "RECENT_ACTIVITY": "Letzte Aktivität",
+      "PLAN_CONTEXT": "Aktueller Trainingsplan",
+      "COMPETITION_CONTEXT": "Bevorstehender Wettkampf",
+      "LOAD_ZERO_28D": "Berechnete Trainingsbelastung der letzten 28 Tage ist null"
+    },
+    "intents": {
+      "OPEN_TODAY_WORKOUT": "Heutiges Training öffnen",
+      "OPEN_PLAN": "Plan ansehen",
+      "OPEN_ASSESSMENT": "Status ergänzen",
+      "OPEN_PROVIDER_SETTINGS": "Datenverbindung prüfen",
+      "OPEN_IMPORT": "Aktivität importieren",
+      "OPEN_ACTIVITY_REVIEW": "Aktivität auswerten",
+      "CHECK_ACTIVITY_ASSOCIATION": "Aktivitätszuordnung prüfen",
+      "OPEN_DECISION": "Coach-Entscheidung ansehen",
+      "ASK_COACH": "Coach fragen",
+      "VIEW_TOMORROW": "Training für morgen ansehen",
+      "CREATE_TODAY_WORKOUT": "Als heutiges Training hinzufügen",
+      "SCHEDULE_REMINDER": "Später erinnern"
+    }
   }
 }

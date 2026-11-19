@@ -36,16 +36,16 @@ Provider availability and supported directions can change. Use the controls show
 
 ## Choose an import path
 
-| Source          | Best for                                                          | Connection model                                |
-| --------------- | ----------------------------------------------------------------- | ----------------------------------------------- |
-| Strava          | Ongoing activity synchronization                                  | Connected account with sync settings            |
-| Polar           | Ongoing Polar activity import                                     | OAuth connection and sync settings              |
-| COROS           | Activity and daily-data synchronization; compatible plan export   | Connected account with manual sync controls     |
-| Intervals.icu   | Activity synchronization and compatible planned-workout workflows | OAuth or API key, depending on account setup    |
-| Suunto          | Ongoing workout import and supported guide workflows              | OAuth connection with sync settings             |
-| Wahoo           | Ongoing Wahoo workout import                                      | OAuth connection with sync settings             |
-| Garmin          | New training sync or older activity history                       | OAuth connection or file import                |
-| FIT / TCX / GPX | Individual files or exports from unsupported sources              | Manual upload                                   |
+| Source          | Best for                                                          | Connection model                             |
+| --------------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| Strava          | Ongoing activity synchronization                                  | Connected account with sync settings         |
+| Polar           | Ongoing Polar activity import                                     | OAuth connection and sync settings           |
+| COROS           | Activity and daily-data synchronization; compatible plan export   | Connected account with manual sync controls  |
+| Intervals.icu   | Activity synchronization and compatible planned-workout workflows | OAuth or API key, depending on account setup |
+| Suunto          | Ongoing workout import and supported guide workflows              | OAuth connection with sync settings          |
+| Wahoo           | Ongoing Wahoo workout import                                      | OAuth connection with sync settings          |
+| Garmin          | New training sync or older activity history                       | OAuth connection or file import              |
+| FIT / TCX / GPX | Individual files or exports from unsupported sources              | Manual upload                                |
 
 ## Connect a provider
 
@@ -71,6 +71,8 @@ During a large import:
 
 ## Garmin historical import
 
+**Trainingload.ai currently cannot retrieve activities recorded before authorization through the official Garmin OAuth connection. Disconnecting and reconnecting does not backfill that history.** Import a Garmin full-export ZIP (or its temporary download link), or upload individual FIT, TCX, or GPX files for those records. This limitation does not describe the self-hosted Garmin Personal API; follow its separate guide.
+
 On the Garmin page, **OAuth** receives new activities and authorized health summaries. **File import** supplies older training records. These are separate actions; choose the one you need.
 
 ## How do planned workouts sync with Intervals.icu?
@@ -86,14 +88,14 @@ These are workouts scheduled on your calendar, not completed activity recordings
 
 This table assumes both directions are on:
 
-| What you do | What happens on the other side |
-| --- | --- |
-| Add a workout in Trainingload.ai | A corresponding new workout appears in Intervals.icu. |
-| Add a workout in Intervals.icu | A corresponding new workout appears in Trainingload.ai. |
-| Change only the Trainingload.ai date, name, or prescription | The corresponding Intervals.icu workout is updated. |
-| Change only the Intervals.icu date, name, or prescription | The corresponding Trainingload.ai workout is updated. |
-| Delete a workout in Trainingload.ai | The Intervals.icu copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
-| Delete a workout in Intervals.icu | The Trainingload.ai copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
+| What you do                                                 | What happens on the other side                                                                         |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Add a workout in Trainingload.ai                            | A corresponding new workout appears in Intervals.icu.                                                  |
+| Add a workout in Intervals.icu                              | A corresponding new workout appears in Trainingload.ai.                                                |
+| Change only the Trainingload.ai date, name, or prescription | The corresponding Intervals.icu workout is updated.                                                    |
+| Change only the Intervals.icu date, name, or prescription   | The corresponding Trainingload.ai workout is updated.                                                  |
+| Delete a workout in Trainingload.ai                         | The Intervals.icu copy is deleted if it has not changed. If it has changed, the edited copy is kept.   |
+| Delete a workout in Intervals.icu                           | The Trainingload.ai copy is deleted if it has not changed. If it has changed, the edited copy is kept. |
 
 ### Which version wins if I edit both copies?
 

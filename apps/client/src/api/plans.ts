@@ -415,8 +415,12 @@ type DeletePlanResult = {
   success: true;
 };
 
-export async function createPlan(dto: CreatePlanDto) {
+export async function createPlan(
+  dto: CreatePlanDto,
+  options?: { suppressErrorToast?: boolean },
+) {
   const data = (await apiFetch("/plans", {
+    suppressErrorToast: options?.suppressErrorToast,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dto),

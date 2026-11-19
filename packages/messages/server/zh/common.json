@@ -44,7 +44,7 @@
     "metric_required": "指标不能为空",
     "internal": "系统内部错误，请稍后重试。",
     "request_failed": "请求失败",
-    "payload_too_large": "上传的文件过大。",
+    "payload_too_large": "提交的内容超出大小限制。请减少内容或分批提交后重试。",
     "unauthorized": "请先登录后再继续",
     "forbidden": "你没有权限执行此操作",
     "not_found": "未找到请求的内容",

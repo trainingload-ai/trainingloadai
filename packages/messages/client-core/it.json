@@ -469,7 +469,18 @@
       "planAlreadySavedShort": "Salvato",
       "waitStreamEnd": "Attendi il completamento della risposta prima di salvare.",
       "creating": "Risparmio…",
-      "createFailed": "Impossibile salvare il piano. Controlla il testo dell'allenamento (DSL) e riprova.",
+      "createFailed": "Impossibile salvare il piano. La bozza è conservata; riprova.",
+      "saveErrors": {
+        "validation": "Il piano non ha superato la convalida. Controlla le sessioni e riprova; la bozza è conservata.",
+        "network": "Non è possibile confermare se il piano sia stato salvato. Controlla la raccolta dei piani prima di salvare di nuovo per evitare duplicati.",
+        "service": "Il salvataggio è temporaneamente non disponibile. Riprova più tardi; la bozza è conservata.",
+        "rateLimit": "Troppe richieste di salvataggio. Attendi un momento e riprova.",
+        "authentication": "La sessione è scaduta. Accedi di nuovo per salvare.",
+        "noWorkouts": "La bozza non contiene sessioni da salvare. Chiedi al coach di aggiungerne.",
+        "unknown": "Impossibile salvare il piano. La bozza è conservata; riprova.",
+        "receipt": "Il piano è stato salvato, ma la conversazione non è stata aggiornata. Lo trovi nella raccolta dei piani; non occorre salvarlo di nuovo.",
+        "checkLibrary": "Apri la raccolta dei piani"
+      },
       "createSuccess": "Piano salvato",
       "noWorkouts": "Questa bozza non contiene sessioni con testo di allenamento.",
       "weekdayShort": {
