@@ -14,6 +14,7 @@ import { createAiFallbackI18n } from '../../ai/spec/ai-fallback-i18n.test-util';
 import { TodaySuggestionConstraintProjector } from '../../ai/today-suggestion/today-suggestion-constraint.projector';
 import { TodaySuggestionOrchestratorService } from '../../ai/today-suggestion/today-suggestion-orchestrator.service';
 import { TodaySuggestionDeliveryPolicy } from '../../ai/today-suggestion/today-suggestion-delivery-policy';
+import { createAiFallbackI18n } from '../../ai/spec/ai-fallback-i18n.test-util';
 import { TodaySuggestionEngagementService } from '../../ai/today-suggestion/today-suggestion-engagement.service';
 import { uncontendedGeneration } from '../../ai/today-suggestion/testing/generation.fixture';
 
@@ -330,7 +331,7 @@ describe('Committed schedule advice caches / PostgreSQL', () => {
         projector,
         agent as never,
         {} as never,
-        new TodaySuggestionDeliveryPolicy(),
+        new TodaySuggestionDeliveryPolicy(createAiFallbackI18n()),
         engagement,
         uncontendedGeneration(prisma as never),
       );
