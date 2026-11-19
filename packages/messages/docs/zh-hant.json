@@ -63,7 +63,9 @@
     },
     "history": {
       "heading": "版本更新",
-      "description": "查看 macOS 個人版近期的更新。摘要保留發行原文的語言。",
+      "description": "查看 Trainingload.ai 雲端服務和 macOS 個人版的最新變更。",
+      "cloudTitle": "雲端服務",
+      "cloudEmpty": "目前沒有雲端服務的更新記錄。",
       "empty": "目前沒有公開版本。"
     },
     "macos": {

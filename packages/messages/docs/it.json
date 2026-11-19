@@ -78,7 +78,9 @@
     },
     "history": {
       "heading": "Note di rilascio",
-      "description": "Consulta gli aggiornamenti recenti dell’edizione personale per macOS. Gli estratti sono nella lingua originale.",
+      "description": "Scopri le novità del servizio cloud e dell’edizione personale per macOS.",
+      "cloudTitle": "Servizio cloud",
+      "cloudEmpty": "Non sono ancora stati pubblicati aggiornamenti del servizio cloud.",
       "empty": "Non ci sono ancora versioni pubbliche."
     },
     "macos": {

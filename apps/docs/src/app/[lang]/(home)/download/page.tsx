@@ -99,7 +99,7 @@ export default async function DownloadPage({ params }: PageProps) {
         </section>
 
         <div className="mt-6 flex flex-wrap gap-x-5 gap-y-3">
-          <Link href={withLocalePath(lang, "/releases")} className={textLink}>
+          <Link href={withLocalePath(lang, "/releases#macos")} className={textLink}>
             {t("history.heading")}
           </Link>
           {releases === null && (

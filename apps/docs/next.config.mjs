@@ -63,6 +63,7 @@ const config = {
     "/api/docs-markdown/\\[lang\\]/\\[\\[\\.\\.\\.slug\\]\\]": [
       "./content/docs/**/*",
     ],
+    "/\\[lang\\]/releases": ["./content/releases/cloud.md"],
   },
   productionBrowserSourceMaps: Boolean(sentryAuthToken),
   poweredByHeader: false,

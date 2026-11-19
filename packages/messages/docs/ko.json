@@ -77,7 +77,9 @@
     },
     "history": {
       "heading": "릴리스 노트",
-      "description": "macOS 개인용 버전의 최근 업데이트입니다. 발췌문은 원문 언어로 표시됩니다.",
+      "description": "클라우드 서비스와 macOS 개인용 에디션의 업데이트를 확인하세요.",
+      "cloudTitle": "클라우드 서비스",
+      "cloudEmpty": "아직 공개된 클라우드 업데이트가 없습니다.",
       "empty": "아직 공개 릴리스가 없습니다."
     },
     "macos": {

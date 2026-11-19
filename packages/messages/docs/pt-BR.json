@@ -78,7 +78,9 @@
     },
     "history": {
       "heading": "Notas de versão",
-      "description": "Veja as atualizações recentes da edição pessoal para macOS. Os trechos aparecem no idioma original.",
+      "description": "Veja as novidades do serviço na nuvem e da edição pessoal para macOS.",
+      "cloudTitle": "Serviço na nuvem",
+      "cloudEmpty": "Ainda não há atualizações publicadas para o serviço na nuvem.",
       "empty": "Ainda não há versões públicas."
     },
     "macos": {
