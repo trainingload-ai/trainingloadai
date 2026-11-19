@@ -10,7 +10,6 @@ import { ActivityReadService } from '../../activity/activity-read.service';
 import { UserQueryService } from '../../user/user-query.service';
 import { UserIdentityRepository } from '../../user/persistence/user-identity.repository';
 import { AiPlanExecutionAdviceService } from '../../ai/ai-plan-execution-advice.service';
-import { createAiFallbackI18n } from '../../ai/spec/ai-fallback-i18n.test-util';
 import { TodaySuggestionConstraintProjector } from '../../ai/today-suggestion/today-suggestion-constraint.projector';
 import { TodaySuggestionOrchestratorService } from '../../ai/today-suggestion/today-suggestion-orchestrator.service';
 import { TodaySuggestionDeliveryPolicy } from '../../ai/today-suggestion/today-suggestion-delivery-policy';
