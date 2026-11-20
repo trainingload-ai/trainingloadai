@@ -11,6 +11,16 @@ Write short paragraphs or flat bullet lists about user-visible changes.
 
 ### en
 
+- If a file download stalls during activity analysis, the analysis now retries automatically so other imported activities can keep processing.
+
+### zh-Hans
+
+- 活动分析遇到文件下载卡住时，现在会自动重试，其他导入活动可以继续处理。
+
+## 2026-11-20
+
+### en
+
 - Fixed an issue that could leave imported Intervals.icu activities stuck during analysis.
 - Today’s AI training suggestions now identify the workout already on your schedule or explain why an optional extra session fits today.
 - Updated the recovery charts on the web to show the latest daily readings and use consistent date ranges for trends.
