@@ -42,6 +42,10 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
 import { CoachSearchDialog } from "./coach-search-dialog";
+import {
+  setCoachSidebarGroupOpen,
+  useCollapsedCoachSidebarGroups,
+} from "./coach-sidebar-group-preferences";
 
 const MOBILE_HISTORY_PAGE_TAKE = 30;
 
@@ -66,6 +70,7 @@ export function CoachSidebarHistoryList({
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
   const queryClient = useQueryClient();
+  const collapsedGroups = useCollapsedCoachSidebarGroups();
   const [editSession, setEditSession] = useState<CoachSessionListItem | null>(
     null,
   );
@@ -115,7 +120,7 @@ export function CoachSidebarHistoryList({
   );
   const groups = [
     ...(pinned.length > 0
-      ? [{ key: "pinned", label: t("pinnedSection"), items: pinned }]
+      ? [{ key: "pinned" as const, label: t("pinnedSection"), items: pinned }]
       : []),
     ...groupCoachSessionsByRecentBuckets(recent, {
       today: t("today"),
@@ -214,7 +219,11 @@ export function CoachSidebarHistoryList({
         ) : (
           <div className="space-y-1 pb-1" data-coach-recent-history>
             {groups.map(({ key, label, items }) => (
-              <Collapsible key={key} defaultOpen>
+              <Collapsible
+                key={key}
+                open={!collapsedGroups.includes(key)}
+                onOpenChange={(open) => setCoachSidebarGroupOpen(key, open)}
+              >
                 <CollapsibleTrigger className="group flex h-7 w-full items-center gap-1.5 rounded-control px-2 text-start text-xs font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <ChevronRight className="size-3 shrink-0 group-data-[state=open]:rotate-90" aria-hidden="true" />
                   <span className="truncate">{label}</span>

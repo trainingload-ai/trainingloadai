@@ -199,6 +199,52 @@ test("sidebar chat titles reveal their overflow and expose conversation actions"
   await expect(page.getByRole("dialog").getByRole("textbox")).toHaveValue(title);
 });
 
+test("coach sidebar persists each group across reloads", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop recent sidebar");
+  const now = Date.parse(visualTime);
+  await page.clock.setFixedTime(new Date(now));
+  await openCoachFixture(page, undefined, {
+    navigate: false,
+    sessions: [
+      { id: "pinned", title: "训练重点", updatedAt: visualTime, pinnedAt: visualTime },
+      { id: "coach-stream-fixture", title: "今日对话", updatedAt: visualTime, pinnedAt: null },
+      {
+        id: "yesterday",
+        title: "昨日对话",
+        updatedAt: new Date(now - 86_400_000).toISOString(),
+        pinnedAt: null,
+      },
+      {
+        id: "past",
+        title: "过去对话",
+        updatedAt: new Date(now - 172_800_000).toISOString(),
+        pinnedAt: null,
+      },
+    ],
+  });
+  await page.goto("/zh/plan", { waitUntil: "domcontentloaded" });
+  const history = page.locator("[data-coach-recent-history]");
+  const group = (name: string) =>
+    history.getByRole("button", { name, exact: true }).filter({ hasText: name });
+
+  for (const name of ["置顶", "昨天"]) {
+    await expect(group(name)).toHaveAttribute("aria-expanded", "true");
+    await group(name).click();
+  }
+  await page.reload({ waitUntil: "domcontentloaded" });
+  for (const name of ["置顶", "昨天"]) {
+    await expect(group(name)).toHaveAttribute("aria-expanded", "false");
+  }
+  for (const name of ["今天", "过去"]) {
+    await expect(group(name)).toHaveAttribute("aria-expanded", "true");
+  }
+
+  await group("置顶").click();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(group("置顶")).toHaveAttribute("aria-expanded", "true");
+  await expect(group("昨天")).toHaveAttribute("aria-expanded", "false");
+});
+
 test("recent sidebar keeps row spacing after a conversation moves to today", async ({
   page,
 }, testInfo) => {

@@ -233,7 +233,7 @@ function DesktopSidebar() {
           </div>
           <nav
             aria-label={t("navigationLabel")}
-            className="grid shrink-0 gap-0.5 px-1.5 pb-1.5"
+            className="grid shrink-0 gap-0.5 px-1.5 pb-3"
           >
             {TRAINING_LINKS.map(({ key, href, Icon }) => (
               <SidebarLink
