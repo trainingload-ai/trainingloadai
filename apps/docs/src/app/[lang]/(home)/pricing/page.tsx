@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HOME_OPEN_GRAPH_IMAGE_PATH } from "@/lib/social-metadata";
 import { getTranslations } from "next-intl/server";
 import { optimizeSeoText } from "@/lib/seo-metadata";
 import { JsonLd } from "@/components/JsonLd";
@@ -55,13 +56,13 @@ export async function generateMetadata({
       description: seo.description,
       type: "website",
       url: `${siteUrl}${prefix}/pricing`,
-      images: [{ url: `${siteUrl}/og/home.jpg?v=20260912` }],
+      images: [{ url: `${siteUrl}${HOME_OPEN_GRAPH_IMAGE_PATH}` }],
     },
     twitter: {
       card: "summary_large_image",
       title: seo.title,
       description: seo.description,
-      images: [`${siteUrl}/og/home.jpg?v=20260912`],
+      images: [`${siteUrl}${HOME_OPEN_GRAPH_IMAGE_PATH}`],
     },
   };
 }

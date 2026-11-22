@@ -1,5 +1,6 @@
 "use client";
 
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import { ArrowUpRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -41,15 +42,17 @@ export function HomeHeroDemoPreview({
     ? lang
     : "en";
 
-  const previewImage = (mobile: boolean, dark = false) =>
-    getImageProps({
-      src: `/5k-training-plan/${mobile ? "mobile" : "web"}-home${dark ? "-dark" : ""}-v2-${previewLocale}.png`,
+  const previewImage = (mobile: boolean, dark = false) => {
+    const path = `/5k-training-plan/${mobile ? "mobile" : "web"}-home${dark ? "-dark" : ""}-v2-${previewLocale}.png`;
+    return getImageProps({
+      src: mobile ? path : productScreenshotUrl(path),
       alt: "",
       width: mobile ? 390 : 1152,
       height: mobile ? 2868 : 960,
       loading: "eager",
       fetchPriority: "high",
     }).props;
+  };
 
   useEffect(() => {
     if (loadDemo) return;

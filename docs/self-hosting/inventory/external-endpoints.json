@@ -362,7 +362,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
-          "line": 77
+          "line": 78
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
@@ -410,7 +410,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 85
+          "line": 86
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-analysis/page.tsx",
@@ -418,11 +418,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
-          "line": 86
+          "line": 87
         },
         {
           "file": "apps/docs/src/components/calculators/app-promo.tsx",
-          "line": 39
+          "line": 40
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
@@ -468,7 +468,7 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 118
+          "line": 119
         },
         {
           "file": "apps/docs/src/app/pricing.md/route.ts",
@@ -776,7 +776,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 228
+          "line": 240
         }
       ],
       "capability": "telemetry",
@@ -790,7 +790,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 250
+          "line": 262
         }
       ],
       "capability": "telemetry",
@@ -2216,11 +2216,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
-          "line": 119
+          "line": 120
         },
         {
           "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
-          "line": 216
+          "line": 217
         },
         {
           "file": "apps/docs/src/lib/seo-schema.ts",
@@ -2238,35 +2238,35 @@
       "references": [
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 132
+          "line": 133
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 142
+          "line": 143
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 152
+          "line": 153
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 162
+          "line": 163
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 171
+          "line": 172
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 180
+          "line": 181
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 189
+          "line": 190
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 198
+          "line": 199
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2637,7 +2637,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 251
+          "line": 263
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2873,7 +2873,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 217
+          "line": 229
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3092,7 +3092,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
-          "line": 32
+          "line": 33
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
@@ -3292,11 +3292,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 36
+          "line": 37
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 81
+          "line": 82
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
@@ -3360,7 +3360,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
-          "line": 29
+          "line": 30
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tss-calculator/page.tsx",
@@ -3404,7 +3404,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
-          "line": 21
+          "line": 22
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/page.tsx",
@@ -3412,7 +3412,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
-          "line": 27
+          "line": 28
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",

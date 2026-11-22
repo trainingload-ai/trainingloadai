@@ -1924,7 +1924,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 225
+          "line": 237
         }
       ]
     },
@@ -3514,7 +3514,7 @@
         },
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 21
+          "line": 22
         }
       ]
     },
@@ -3531,7 +3531,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 22
+          "line": 23
         }
       ]
     },
@@ -3741,7 +3741,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-coach/page.tsx",
-          "line": 32
+          "line": 33
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/ai-half-marathon-training-plan/page.tsx",
@@ -3941,11 +3941,11 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 36
+          "line": 37
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/pricing/page.tsx",
-          "line": 81
+          "line": 82
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/privacy/page.tsx",
@@ -4009,7 +4009,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
-          "line": 29
+          "line": 30
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/tss-calculator/page.tsx",
@@ -4053,7 +4053,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/[...slug]/page.tsx",
-          "line": 21
+          "line": 22
         },
         {
           "file": "apps/docs/src/app/[lang]/blog/page.tsx",
@@ -4061,7 +4061,7 @@
         },
         {
           "file": "apps/docs/src/app/[lang]/docs/[[...slug]]/page.tsx",
-          "line": 27
+          "line": 28
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
@@ -4154,7 +4154,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 28
+          "line": 29
         },
         {
           "file": "apps/docs/src/lib/public-demo-url.ts",
@@ -4433,7 +4433,7 @@
         },
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 40
+          "line": 41
         },
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
@@ -6085,7 +6085,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 26
+          "line": 27
         }
       ]
     },
@@ -6119,7 +6119,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 219
+          "line": 231
         }
       ]
     },
@@ -6136,7 +6136,7 @@
       "references": [
         {
           "file": "apps/docs/next.config.mjs",
-          "line": 221
+          "line": 233
         }
       ]
     },

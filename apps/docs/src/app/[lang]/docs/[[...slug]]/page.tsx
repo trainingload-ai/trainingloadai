@@ -15,6 +15,7 @@ import {
   localePrefix,
 } from "@/lib/locale-url";
 import type { Metadata } from "next";
+import { HOME_OPEN_GRAPH_IMAGE_PATH } from "@/lib/social-metadata";
 import { openGraphLocale, schemaLanguage } from "@/lib/seo-schema";
 import { SEO_INDEXED_LANGUAGES } from "@/lib/i18n";
 import { optimizeSeoText } from "@/lib/seo-metadata";
@@ -233,7 +234,7 @@ export default async function Page(props: {
           name: "Trainingload.ai",
           logo: {
             "@type": "ImageObject",
-            url: `${getSiteUrl()}/og/home.jpg?v=20260912`,
+            url: `${getSiteUrl()}${HOME_OPEN_GRAPH_IMAGE_PATH}`,
           },
         },
       },
@@ -389,7 +390,7 @@ export async function generateMetadata(props: {
       locale: openGraphLocale(lang),
       images: [
         {
-          url: `${siteUrl}/og/home.jpg?v=20260912`,
+          url: `${siteUrl}${HOME_OPEN_GRAPH_IMAGE_PATH}`,
           width: 2400,
           height: 1260,
           alt: page.data.title,
@@ -400,7 +401,7 @@ export async function generateMetadata(props: {
       card: "summary_large_image",
       title: seo.title,
       description: seo.description,
-      images: [`${siteUrl}/og/home.jpg?v=20260912`],
+      images: [`${siteUrl}${HOME_OPEN_GRAPH_IMAGE_PATH}`],
     },
   };
 }

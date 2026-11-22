@@ -1,5 +1,6 @@
 "use client";
 
+import { productScreenshotUrl } from "@/lib/product-screenshot-url.mjs";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -123,13 +124,13 @@ function previewAssets(
 
   if (surface === "analysis") {
     return {
-      web: `/5k-training-plan/web-plan${suffix}-v2-${locale}.png`,
+      web: productScreenshotUrl(`/5k-training-plan/web-plan${suffix}-v2-${locale}.png`),
       mobile: `/5k-training-plan/mobile-analysis${suffix}-v2-${locale}.png`,
     };
   }
 
   return {
-    web: `/5k-training-plan/web-${surface}${suffix}-v2-${locale}.png`,
+    web: productScreenshotUrl(`/5k-training-plan/web-${surface}${suffix}-v2-${locale}.png`),
     mobile: `/5k-training-plan/mobile-${surface}${suffix}-v2-${locale}.png`,
   };
 }
