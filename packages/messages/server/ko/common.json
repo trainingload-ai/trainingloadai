@@ -335,7 +335,8 @@
     },
     "reviewDigest": {
       "report": {
-        "overview": "활동 {sessions}회 · 훈련 {duration}",
+        "overview": "{period}에 활동 {sessions}회와 총 {duration}의 훈련이 기록되었습니다.",
+        "overviewWithoutDuration": "{period}에 활동 {sessions}회가 기록되었으며 훈련 시간 기록은 없습니다.",
         "dailyTraining": "당일 활동",
         "weeklyTraining": "종목별 주간 훈련",
         "activeDays": "훈련 일수",
@@ -360,6 +361,7 @@
         "recorded": "다음 날 기록",
         "trainingComparison": "훈련 기간 비교",
         "periodChange": "변화율",
+        "baselineChange": "개인 기준 대비",
         "runningDistance": "달리기 거리",
         "total": "합계",
         "personalBaseline": "이전 {days}일 중앙값",

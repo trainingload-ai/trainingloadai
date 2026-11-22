@@ -335,7 +335,8 @@
     },
     "reviewDigest": {
       "report": {
-        "overview": "{sessions} activities · {duration} training",
+        "overview": "For {period}, the recorded activity count was {sessions}, with {duration} of training.",
+        "overviewWithoutDuration": "For {period}, the recorded activity count was {sessions}, with no training time recorded.",
         "dailyTraining": "Daily activities",
         "weeklyTraining": "Training by sport",
         "activeDays": "Training days",
@@ -360,6 +361,7 @@
         "recorded": "Next-day record",
         "trainingComparison": "Training comparison",
         "periodChange": "Change",
+        "baselineChange": "vs. baseline",
         "runningDistance": "Running distance",
         "total": "Total",
         "personalBaseline": "Previous {days} days · median",

@@ -335,7 +335,8 @@
     },
     "reviewDigest": {
       "report": {
-        "overview": "{sessions} 次活动 · 训练 {duration}",
+        "overview": "{period}共记录 {sessions} 次活动，累计训练 {duration}。",
+        "overviewWithoutDuration": "{period}共记录 {sessions} 次活动，训练时长暂无记录。",
         "dailyTraining": "当日活动",
         "weeklyTraining": "本周运动情况",
         "activeDays": "训练天数",
@@ -360,6 +361,7 @@
         "recorded": "次日记录",
         "trainingComparison": "训练环比",
         "periodChange": "环比",
+        "baselineChange": "较个人基线",
         "runningDistance": "跑步距离",
         "total": "合计",
         "personalBaseline": "此前 {days} 天中位数",

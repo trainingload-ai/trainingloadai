@@ -335,7 +335,8 @@
     },
     "reviewDigest": {
       "report": {
-        "overview": "{sessions} attività · {duration} di allenamento",
+        "overview": "Nel periodo {period} sono state registrate {sessions} attività, per un totale di {duration} di allenamento.",
+        "overviewWithoutDuration": "Nel periodo {period} sono state registrate {sessions} attività senza indicazione della durata dell’allenamento.",
         "dailyTraining": "Attività del giorno",
         "weeklyTraining": "Allenamento per sport",
         "activeDays": "Giorni di allenamento",
@@ -360,6 +361,7 @@
         "recorded": "Dato del giorno seguente",
         "trainingComparison": "Confronto degli allenamenti",
         "periodChange": "Variazione",
+        "baselineChange": "Rispetto al riferimento",
         "runningDistance": "Distanza di corsa",
         "total": "Totale",
         "personalBaseline": "Mediana dei {days} giorni precedenti",

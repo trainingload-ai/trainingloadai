@@ -173,6 +173,7 @@ type ReviewDigestEvidence = {
 };
 
 export function buildReviewDigestUserPayload(args: ReviewDigestEvidence) {
+  const previousPeriod = args.training?.previousPeriod;
   const bySport =
     args.training?.bySport ??
     (['RUN', 'CYCLING', 'SWIM', 'UNKNOWN'] as const)
@@ -227,7 +228,13 @@ export function buildReviewDigestUserPayload(args: ReviewDigestEvidence) {
     weeklyActivity: args.training?.byWeek.length
       ? args.training.byWeek
       : undefined,
-    previousPeriod: args.training?.previousPeriod,
+    previousPeriod: previousPeriod && {
+      sessions: previousPeriod.sessions,
+      durationSec:
+        args.training?.totals.durationSamples === args.training?.totals.sessions
+          ? previousPeriod.durationSec
+          : null,
+    },
     recovery: args.recovery ?? [],
     coaching: args.coachingContext ?? null,
   };

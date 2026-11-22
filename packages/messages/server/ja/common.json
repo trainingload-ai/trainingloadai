@@ -148,7 +148,8 @@
     },
     "reviewDigest": {
       "report": {
-        "overview": "アクティビティ {sessions} 件 · トレーニング {duration}",
+        "overview": "{period}のアクティビティは {sessions} 件、トレーニング時間は合計 {duration} でした。",
+        "overviewWithoutDuration": "{period}のアクティビティは {sessions} 件で、トレーニング時間の記録はありません。",
         "dailyTraining": "当日のアクティビティ",
         "weeklyTraining": "種目別の週間トレーニング",
         "activeDays": "トレーニング日数",
@@ -173,6 +174,7 @@
         "recorded": "翌日の記録",
         "trainingComparison": "トレーニングの前期比較",
         "periodChange": "変化率",
+        "baselineChange": "基準値との比較",
         "runningDistance": "ランニング距離",
         "total": "合計",
         "personalBaseline": "過去 {days} 日の中央値",

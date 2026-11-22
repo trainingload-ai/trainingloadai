@@ -112,6 +112,11 @@ describe('review report', () => {
       from: '2026-03-08',
       through: '2026-03-08',
     });
+    expect(markdown.split('\n\n', 1)).toEqual([
+      'For Mar 8, 2026, the recorded activity count was 1, with 1 h 0 min of training.',
+    ]);
+    expect(markdown).not.toContain('Steady threshold work');
+    expect(markdown).toContain('Late intervals held pace');
     expect(markdown).toContain('## Daily activities');
     expect(markdown).toContain('Threshold \\| \\[intervals\\]');
     expect(markdown).toContain(
@@ -148,13 +153,60 @@ describe('review report', () => {
       translate,
       sportLabel: (sport) => sport,
     });
-    expect(markdown).toContain('<!-- review-comparison:training:[[1,2],[3600,3000]] -->');
+    expect(markdown).toContain(
+      `[review-comparison-training]: # '[["sessions",1,2],["duration",3600,3000]]'`,
+    );
     expect(markdown).toContain('| Sessions | 1 | 2 | -50% |');
     expect(markdown).toContain('| Duration | 1 h 0 min | 50 min | +20% |');
-    expect(markdown).toContain('| RUN | 1 | 1 h 0 min | 9.2 km | 1 | 1 h 0 min |');
+    expect(markdown).toContain(
+      '| RUN | 1 | 1 h 0 min | 9.2 km | 1 | 1 h 0 min |',
+    );
     expect(markdown).not.toContain('| Training load |');
+    expect(markdown).toContain('## Coach insights\n\nSteady threshold work');
     expect(markdown).toContain('Final intervals stayed near target pace');
     expect(markdown).not.toContain('An unreferenced activity analysis');
+  });
+
+  it('compares daily recovery with the personal baseline when coverage allows', () => {
+    const training = buildReviewReportTraining({ ...day, activities: [] });
+    const markdown = renderReviewReport({
+      type: day.type,
+      lang: 'en',
+      training,
+      activities: [],
+      references: [],
+      recovery: [
+        {
+          metric: 'SLEEP_ASLEEP_SECONDS',
+          statistic: 'observed',
+          value: 25200,
+          samples: 1,
+          days: 1,
+          baseline: { value: 28800, samples: 18, days: 28 },
+        },
+        {
+          metric: 'HRV_RMSSD_MS',
+          statistic: 'observed',
+          value: 52,
+          samples: 1,
+          days: 1,
+          baseline: null,
+        },
+      ],
+      translate,
+      sportLabel: (sport) => sport,
+    });
+    expect(markdown).toContain(
+      '| Previous 28 days · median | vs. baseline |',
+    );
+    expect(markdown).toContain(
+      `[review-comparison-recovery]: # '[["SLEEP_ASLEEP_SECONDS",25200,28800],null]'`,
+    );
+    expect(markdown).toContain(
+      '| Sleep duration | 7 h 0 min | 8 h 0 min (18/28) | -12.5% |',
+    );
+    expect(markdown).toContain('| HRV (RMSSD) | 52 ms | — | — |');
+    expect(markdown).not.toContain('[review-comparison-training]');
   });
 
   it('keeps missing durations and incomparable recovery readings out of the chart', () => {
@@ -173,17 +225,42 @@ describe('review report', () => {
       activities: [],
       references: [],
       recovery: [
-        { metric: 'SLEEP_ASLEEP_SECONDS', statistic: 'mean', value: 25200, samples: 23, days: 31, baseline: { value: 28800, samples: 28, days: 28 } },
-        { metric: 'HRV_RMSSD_MS', statistic: 'median', value: 52, samples: 5, days: 31, baseline: null },
+        {
+          metric: 'SLEEP_ASLEEP_SECONDS',
+          statistic: 'mean',
+          value: 25200,
+          samples: 23,
+          days: 31,
+          baseline: { value: 28800, samples: 28, days: 28 },
+        },
+        {
+          metric: 'HRV_RMSSD_MS',
+          statistic: 'median',
+          value: 52,
+          samples: 5,
+          days: 31,
+          baseline: null,
+        },
       ],
       translate,
       sportLabel: (sport) => sport,
     });
-    expect(markdown).toContain('<!-- review-comparison:training:[[1,0]] -->');
+    expect(markdown).toContain(
+      `[review-comparison-training]: # '[["sessions",1,0]]'`,
+    );
+    expect(markdown.split('\n\n', 1)).toEqual([
+      'For Mar 1, 2026 – Mar 31, 2026, the recorded activity count was 1, with no training time recorded.',
+    ]);
     expect(markdown).toContain('| Sessions | 1 | 0 | — |');
-    expect(markdown).toContain('<!-- review-comparison:recovery:[[25200,28800],null] -->');
-    expect(markdown).toContain('| Sleep duration · average | 7 h 0 min (23/31) | 8 h 0 min (28/28) | -12.5% |');
-    expect(markdown).toContain('| HRV (RMSSD) · median | 52 ms (5/31) | — | — |');
+    expect(markdown).toContain(
+      `[review-comparison-recovery]: # '[["SLEEP_ASLEEP_SECONDS",25200,28800],null]'`,
+    );
+    expect(markdown).toContain(
+      '| Sleep duration · average | 7 h 0 min (23/31) | 8 h 0 min (28/28) | -12.5% |',
+    );
+    expect(markdown).toContain(
+      '| HRV (RMSSD) · median | 52 ms (5/31) | — | — |',
+    );
   });
 
   it('counts distinct training dates and shows load coverage in the weekly table', () => {
@@ -207,8 +284,12 @@ describe('review report', () => {
       translate,
       sportLabel: (sport) => sport,
     });
-    expect(markdown).toContain('| Training days | Avg. session | Training load |');
-    expect(markdown).toContain('| RUN | 2 | 1 h 0 min | 18.4 km | 1 | 1 h 0 min | 42 (1/2) |');
+    expect(markdown).toContain(
+      '| Training days | Avg. session | Training load |',
+    );
+    expect(markdown).toContain(
+      '| RUN | 2 | 1 h 0 min | 18.4 km | 1 | 1 h 0 min | 42 (1/2) |',
+    );
   });
 
   it('fills the complete month with local week buckets including empty partial weeks', () => {
@@ -409,5 +490,58 @@ describe('review report', () => {
       'digest-1',
       expected,
     );
+  });
+
+  it('queries the previous calendar month at athlete-local midnight for a monthly chart', async () => {
+    const findMany = jest
+      .fn<(...args: unknown[]) => Promise<unknown[]>>()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ timerTime: null, elapsedTime: 1800 }]);
+    const updateBody = jest.fn(async () => undefined);
+    const service = new ReviewDigestService(
+      {
+        updateBodyMarkdownByKey: updateBody,
+        updateBodyMarkdownByDigestId: updateBody,
+      } as never,
+      {
+        t: (key: string, opts: { args?: Record<string, string | number> }) =>
+          translate(
+            key.replace('common.notification.reviewDigest.', ''),
+            opts.args,
+          ),
+      } as never,
+      { findMany } as never,
+      { digests: () => ({ update: jest.fn() }) } as never,
+      new ReviewModelCallGuard(),
+    );
+    jest.spyOn(service, 'writeSnapshotAndDetails').mockResolvedValue(undefined);
+
+    const markdown = await service.finalizeDigestContent({
+      ...day,
+      type: 'MONTHLY',
+      periodStart: new Date('2026-04-01T04:00:00Z'),
+      periodEnd: new Date('2026-05-01T04:00:00Z'),
+      digestId: 'digest-1',
+      userId: 'user-1',
+      lang: 'en',
+    });
+
+    expect(findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            {
+              userId: 'user-1',
+              startTime: {
+                gte: new Date('2026-03-01T05:00:00Z'),
+                lt: new Date('2026-04-01T04:00:00Z'),
+              },
+            },
+          ]),
+        }),
+      }),
+    );
+    expect(markdown).toContain('| Duration | 0 min | 30 min | -100% |');
   });
 });

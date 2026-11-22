@@ -142,19 +142,23 @@ function markdownText(value: string) {
 }
 
 type ComparisonPair = readonly [current: number, previous: number];
+type ChartPair = readonly [metric: string, ...values: ComparisonPair];
 
 function table(
   headers: string[],
   rows: string[][],
   comparison?: {
     kind: 'training' | 'recovery';
-    pairs: (ComparisonPair | null)[];
+    pairs: (ChartPair | null)[];
   },
 ) {
   const line = (cells: string[]) => `| ${cells.join(' | ')} |`;
   return [
     ...(comparison?.pairs.some(Boolean)
-      ? [`<!-- review-comparison:${comparison.kind}:${JSON.stringify(comparison.pairs)} -->`, '']
+      ? [
+          `[review-comparison-${comparison.kind}]: # '${JSON.stringify(comparison.pairs)}'`,
+          '',
+        ]
       : []),
     line(headers.map(markdownText)),
     line(headers.map((_, index) => (index === 0 ? '---' : '---:'))),
@@ -272,7 +276,11 @@ export function renderReviewReport(args: {
           duration(row.durationSec),
           distance(row.distanceM),
           number.format(row.activeDays),
-          duration(row.durationSec === null ? null : row.durationSec / row.durationSamples),
+          duration(
+            row.durationSec === null
+              ? null
+              : row.durationSec / row.durationSamples,
+          ),
           ...(showLoad
             ? [
                 row.load === null
@@ -291,18 +299,21 @@ export function renderReviewReport(args: {
       ...(showRunningDistance ? [distance(runs.distanceM)] : []),
     ]);
   }
-  const lines = [
-    ...(analysis?.headline
-      ? [`**${markdownText(analysis.headline)}**`, '']
-      : []),
-    dateRange(training.from, training.through, reportDate),
-    '',
-    t('report.overview', {
+  const totalDurationSec = training.totals.sessions
+    ? training.totals.durationSec
+    : 0;
+  const overview = t(
+    totalDurationSec === null
+      ? 'report.overviewWithoutDuration'
+      : 'report.overview',
+    {
+      period: dateRange(training.from, training.through, reportDate),
       sessions: number.format(training.totals.sessions),
-      duration: duration(
-        training.totals.sessions ? training.totals.durationSec : 0,
-      ),
-    }),
+      duration: duration(totalDurationSec),
+    },
+  );
+  const lines = [
+    overview,
     '',
     `## ${report(day ? 'dailyTraining' : month ? 'monthlyTraining' : 'weeklyTraining')}`,
     '',
@@ -339,20 +350,41 @@ export function renderReviewReport(args: {
       `## ${report('trainingComparison')}`,
       '',
       ...table(
-        [report('metric'), report('currentPeriod'), report('previousPeriod'), report('periodChange')],
         [
-          [report('sessions'), ...sessions.map((value) => number.format(value)), change(sessions)],
+          report('metric'),
+          report('currentPeriod'),
+          report('previousPeriod'),
+          report('periodChange'),
+        ],
+        [
+          [
+            report('sessions'),
+            ...sessions.map((value) => number.format(value)),
+            change(sessions),
+          ],
           ...(durations
-            ? [[report('duration'), ...durations.map(duration), change(durations)]]
+            ? [
+                [
+                  report('duration'),
+                  ...durations.map(duration),
+                  change(durations),
+                ],
+              ]
             : []),
         ],
-        { kind: 'training', pairs: durations ? [sessions, durations] : [sessions] },
+        {
+          kind: 'training',
+          pairs: [
+            ['sessions', ...sessions],
+            ...(durations ? [['duration', ...durations] as const] : []),
+          ],
+        },
       ),
     );
   }
   if (recovery.length) {
     const recoveryComparisons = recovery.map((row): ComparisonPair | null =>
-      !day && row.value !== null && row.baseline
+      (day || previousPeriod) && row.value !== null && row.baseline
         ? [row.value, row.baseline.value]
         : null,
     );
@@ -378,7 +410,9 @@ export function renderReviewReport(args: {
                 days: DAILY_RECOVERY_BASELINE_DAYS,
               })
             : report('previousPeriod'),
-          ...(showRecoveryChanges ? [report('periodChange')] : []),
+          ...(showRecoveryChanges
+            ? [report(day ? 'baselineChange' : 'periodChange')]
+            : []),
         ],
         recovery.map((row, index) => {
           const metric = report(row.metric);
@@ -393,10 +427,17 @@ export function renderReviewReport(args: {
             row.baseline
               ? `${recoveryValue(row, row.baseline.value)} (${samples(row.baseline.samples, row.baseline.days)})`
               : '—',
-            ...(showRecoveryChanges ? [change(recoveryComparisons[index])] : []),
+            ...(showRecoveryChanges
+              ? [change(recoveryComparisons[index])]
+              : []),
           ];
         }),
-        { kind: 'recovery', pairs: recoveryComparisons },
+        {
+          kind: 'recovery',
+          pairs: recoveryComparisons.map((pair, index) =>
+            pair ? [recovery[index].metric, ...pair] : null,
+          ),
+        },
       ),
       '',
       report('recoveryCoverage'),
@@ -414,16 +455,19 @@ export function renderReviewReport(args: {
       ],
       [day ? 'nextDay' : month ? 'nextMonth' : 'nextWeek', analysis.next],
     ].filter((entry): entry is [string, string] => Boolean(entry[1]));
-    if (findings.length) {
-      lines.push(
-        '',
-        `## ${report('analysis')}`,
-        '',
-        ...findings.flatMap(
-          ([key, value]) => [`### ${report(key)}`, '', markdownText(value), ''],
-        ),
-      );
-    }
+    lines.push(
+      '',
+      `## ${report('analysis')}`,
+      '',
+      ...(findings.length
+        ? findings.flatMap(([key, value]) => [
+            `### ${report(key)}`,
+            '',
+            markdownText(value),
+            '',
+          ])
+        : [markdownText(analysis.headline)]),
+    );
   }
   const references = analysis
     ? args.references.filter(({ rank }) => analysis.activityRefs.includes(rank))
