@@ -585,6 +585,53 @@ export class WorkoutService {
     return topLevel;
   }
 
+  inferIntensityIntent(
+    step: WorkoutPlanStepDraft,
+  ): NonNullable<WorkoutPlanStepDraft['intensityIntent']> {
+    const intensity = String(step.intensity ?? '').toUpperCase();
+    const family =
+      intensity === 'RECOVERY' ||
+      intensity === 'REST' ||
+      intensity === 'WARMUP' ||
+      intensity === 'COOLDOWN'
+        ? 'RECOVERY'
+        : intensity === 'ACTIVE'
+          ? 'ENDURANCE'
+          : 'OTHER';
+    return {
+      family,
+      purpose: step.name ?? step.notes ?? undefined,
+    };
+  }
+
+  assignNewPrescriptionModes(
+    steps: WorkoutPlanStepDraft[],
+  ): WorkoutPlanStepDraft[] {
+    return steps.map((step) => {
+      const children = step.children?.length
+        ? this.assignNewPrescriptionModes(step.children)
+        : step.children;
+      if (step.targetResolutionMode) return { ...step, children };
+      const hasZoneReference =
+        typeof step.targetZoneIndex === 'number' && step.targetZoneIndex > 0;
+      const hasFixedTarget =
+        step.targetType != null &&
+        step.targetType !== 'OPEN' &&
+        (step.targetValueLow != null || step.targetValueHigh != null);
+      return {
+        ...step,
+        children,
+        intensityIntent:
+          step.intensityIntent ?? this.inferIntensityIntent(step),
+        targetResolutionMode: hasZoneReference
+          ? 'DYNAMIC_ZONE'
+          : hasFixedTarget
+            ? 'FIXED_VALUE'
+            : 'EFFORT_ONLY',
+      };
+    });
+  }
+
   buildPlanBlocksFromWorkoutSteps(
     rows: WorkoutStepTreeRow[],
     sportType?: WorkoutExpressionSportType,
@@ -680,8 +727,11 @@ export class WorkoutService {
       const hasZoneReference =
         typeof row.targetZoneIndex === 'number' ||
         Boolean(row.targetZoneSource);
+      const unresolvedZone =
+        row.targetResolutionMode === 'DYNAMIC_ZONE' &&
+        hasZoneReference && row.targetUnit == null;
 
-      if (row.targetType === 'POWER' && row.targetUnit === 'PERCENT') {
+      if (row.targetType === 'POWER' && (row.targetUnit === 'PERCENT' || unresolvedZone)) {
         step.power =
           typeof row.targetValueLow === 'number'
             ? row.targetValueLow / 100
@@ -691,7 +741,7 @@ export class WorkoutService {
           value: row.targetValueLow ?? undefined,
           valueHigh: row.targetValueHigh ?? undefined,
           ...zoneMeta,
-          unit: '%',
+          unit: unresolvedZone ? undefined : '%',
         };
       } else if (row.targetType === 'POWER' && row.targetUnit === 'WATTS') {
         step.powerWatts =
@@ -714,7 +764,7 @@ export class WorkoutService {
         };
       } else if (
         row.targetType === 'HEART_RATE' &&
-        row.targetUnit === 'PERCENT'
+        (row.targetUnit === 'PERCENT' || unresolvedZone)
       ) {
         step.heartRatePercent = row.targetValueLow ?? undefined;
         step.primaryTargetMeta = {
@@ -722,7 +772,7 @@ export class WorkoutService {
           value: row.targetValueLow ?? undefined,
           valueHigh: row.targetValueHigh ?? undefined,
           ...zoneMeta,
-          unit: '%',
+          unit: unresolvedZone ? undefined : '%',
         };
       } else if (row.targetType === 'HEART_RATE' && row.targetUnit === 'BPM') {
         step.heartRateBpm =
@@ -735,7 +785,7 @@ export class WorkoutService {
           unit: 'bpm',
         };
       } else if (row.targetType === 'SPEED') {
-        if (row.targetUnit === 'SECONDS') {
+        if (row.targetUnit === 'SECONDS' || unresolvedZone) {
           step.primaryTargetMeta = {
             kind: 'SPEED',
             value: row.targetValueLow ?? undefined,

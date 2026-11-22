@@ -22,6 +22,7 @@ export function WorkoutActionConfirm({
   pending = false,
   destructive = false,
   onConfirm,
+  onCloseAutoFocus,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,6 +33,7 @@ export function WorkoutActionConfirm({
   pending?: boolean;
   destructive?: boolean;
   onConfirm: () => void | Promise<void>;
+  onCloseAutoFocus?: (event: Event) => void;
 }) {
   return (
     <AlertDialog
@@ -40,7 +42,10 @@ export function WorkoutActionConfirm({
         if (!pending) onOpenChange(nextOpen);
       }}
     >
-      <AlertDialogContent className="max-w-[18.5rem] gap-0 overflow-hidden rounded-control-lg border-border/60 bg-background/95 p-0 shadow-2xl backdrop-blur-xl pc:max-w-sm pc:gap-4 pc:rounded-overlay pc:p-6">
+      <AlertDialogContent
+        onCloseAutoFocus={onCloseAutoFocus}
+        className="max-w-[18.5rem] gap-0 overflow-hidden rounded-control-lg border-border/60 bg-background/95 p-0 shadow-2xl backdrop-blur-xl pc:max-w-sm pc:gap-4 pc:rounded-overlay pc:p-6"
+      >
         <AlertDialogHeader className="gap-1.5 px-5 pb-4 pt-5 text-center pc:px-0 pc:pb-0 pc:pt-0 pc:text-left">
           <AlertDialogTitle className="text-[17px] leading-6 pc:text-lg">
             {title}

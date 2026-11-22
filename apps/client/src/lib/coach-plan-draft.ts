@@ -97,7 +97,10 @@ export function draftToCreatePlanDto(draft: CoachPlanDraft): CreatePlanDto {
     ...(draft.description?.trim()
       ? { description: draft.description.trim() }
       : {}),
-    periodWeeks: draft.periodWeeks,
+    ...(draft.goal?.trim() ? { goal: draft.goal.trim() } : {}),
+    ...(draft.planningMode === "ROLLING"
+      ? { planningMode: "ROLLING" as const, periodWeeks: null }
+      : { periodWeeks: draft.periodWeeks }),
     workouts,
   };
 }

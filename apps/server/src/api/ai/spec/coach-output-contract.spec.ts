@@ -2,12 +2,16 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { EventEmitter } from 'node:events';
 import type { Response } from 'express';
 import { APIConnectionTimeoutError } from 'openai';
+import { ConflictException } from '@nestjs/common';
+import { COACH_QUESTION_STALE_ERROR_CODE } from '@shared/coach-turn-error';
 import { AiController } from '../ai.controller';
 import type { CoachUiStreamYield } from '../core/coach-ui-message-stream';
 import { coachQueryYieldsToUIMessageStream } from '../core/coach-ui-message-stream';
 import { CoachRunProjector } from '../core/coach-run-projector';
 import type { CoachRunHandle } from '../coach-run-store.service';
 import { purposeForActualModel } from '../ai-model-catalog';
+import { aiOperationError } from '../ai-operation.error';
+import type { PlanStartService } from '../../plan/application/plan-start.service';
 
 // Authentication is outside this output-contract test; keep the real controller
 // and stream serializers while isolating the ESM-only authentication package.
@@ -117,6 +121,7 @@ function setup(events: CoachUiStreamYield[]) {
   const runSnapshots: unknown[] = [];
   const coachRuns = {
     existingRequestBranch: jest.fn(async () => undefined),
+    recoverStaleOperation: jest.fn(async (_userId: string, _operationId: string) => false),
     assertLegacyInput: jest.fn(async () => undefined),
     begin: jest.fn(async () => ({
       handle: {
@@ -145,11 +150,16 @@ function setup(events: CoachUiStreamYield[]) {
     }),
     heartbeat: jest.fn(async () => null),
   };
+  const planStarts = {
+    calendarCoachSession: jest.fn<PlanStartService['calendarCoachSession']>(),
+  };
   Object.assign(controller, {
     prisma: {
       aiCoachSession: { findUnique: jest.fn(async () => null) },
     },
     coachRuns,
+    planStarts,
+    coachBranching: { appendBranchMessage: jest.fn(async () => undefined) },
     aiService,
     aiUsage,
     operations,
@@ -202,11 +212,177 @@ function setup(events: CoachUiStreamYield[]) {
     logger,
     response,
     coachRuns,
+    planStarts,
     runSnapshots,
   };
 }
 
 describe('durable Coach output contract', () => {
+  it('ends an obsolete answer with the stale-question code before calling the model', async () => {
+    const { run, coachRuns, aiService, aiUsage, logger } = setup([]);
+    coachRuns.begin.mockRejectedValueOnce(
+      new ConflictException({
+        code: COACH_QUESTION_STALE_ERROR_CODE,
+        message: 'Coach question is no longer pending',
+      }),
+    );
+
+    const output = await run({
+      protocolVersion: 2,
+      branchId: 'branch-1',
+      runCommand: {
+        kind: 'answer',
+        requestId: 'answer-request',
+        submissionId: 'answer-submission',
+        runId: 'run-1',
+        interactionId: 'old-question',
+      },
+    });
+
+    expect(output.filter((event) => event.type === 'result')).toEqual([
+      expect.objectContaining({
+        is_error: true,
+        error_code: COACH_QUESTION_STALE_ERROR_CODE,
+      }),
+    ]);
+    expect(coachRuns.begin).toHaveBeenCalledTimes(1);
+    expect(aiService.coachStream).not.toHaveBeenCalled();
+    expect(aiUsage.recordUsageEvent).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('records a recoverable expired calendar move without starting or charging for the model', async () => {
+    const fixture = setup([]);
+    const sid = 'calendar-move:preview-1';
+    fixture.planStarts.calendarCoachSession.mockResolvedValue({
+      sid,
+      planId: 'plan-1',
+      previewId: 'preview-1',
+      branchId: 'branch-1',
+      expired: true,
+      range: { from: '2026-11-21', to: '2026-11-29' },
+      impact: {
+        workoutId: 'workout-1',
+        from: '2026-11-21',
+        to: '2026-11-24',
+        reasons: [],
+        weeks: [],
+      },
+    });
+    await fixture.run({
+      sid,
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'expired-move' },
+    });
+    expect(fixture.runSnapshots.at(-1)).toMatchObject({
+      parts: expect.arrayContaining([
+        expect.objectContaining({
+          type: 'data-coach-turn-error',
+          data: expect.objectContaining({ code: 'calendar_move_expired' }),
+        }),
+      ]),
+    });
+    expect(fixture.aiService.coachStream).not.toHaveBeenCalled();
+    expect(fixture.operations.begin).not.toHaveBeenCalled();
+  });
+
+  it('records a calendar confirmation receipt without paid model admission', async () => {
+    const fixture = setup([
+      {
+        type: 'assistant',
+        message: {
+          content: [
+            {
+              type: 'tool_use',
+              id: 'apply-1',
+              name: 'CoachDecisionApplied',
+              input: {
+                kind: 'coach_decision_apply',
+                decisionId: 'decision-1',
+                result: 'APPLIED',
+                receipt: { readbackVerified: true },
+              },
+            },
+          ],
+        },
+      },
+      success,
+    ]);
+    const sid = 'calendar-move:preview-1';
+    const branchId = 'branch-1';
+    const calendarEdit = {
+      sid,
+      branchId,
+      planId: 'plan-1',
+      previewId: 'preview-1',
+      range: { from: '2026-11-21', to: '2026-11-29' },
+      impact: {
+        workoutId: 'workout-1',
+        from: '2026-11-21',
+        to: '2026-11-24',
+        reasons: [],
+        weeks: [],
+      },
+    };
+    fixture.planStarts.calendarCoachSession.mockResolvedValue(calendarEdit);
+    const body: Parameters<typeof fixture.run>[0] = {
+      sid,
+      branchId,
+      protocolVersion: 2,
+      runCommand: { kind: 'start', requestId: 'confirm-1' },
+      message: {
+        content: [
+          {
+            type: 'tool_result',
+            tool_use_id: 'draft-1',
+            content: {
+              kind: 'coach_decision_confirmation',
+              decisionId: 'decision-1',
+              repliesToAssistantMessageId: 'proposal-1',
+            },
+          },
+        ],
+      },
+    };
+    const events = await fixture.run(body);
+
+    expect(fixture.aiService.coachStream).toHaveBeenCalledWith(
+      expect.objectContaining({ sid, branchId, calendarEdit }),
+    );
+    expect(JSON.stringify(events)).toContain('readbackVerified');
+    const snapshot = fixture.runSnapshots.at(-1);
+    expect(snapshot).toMatchObject({
+      parts: expect.arrayContaining([
+        expect.objectContaining({
+          type: 'data-coach-run',
+          data: expect.objectContaining({ status: 'completed' }),
+        }),
+      ]),
+    });
+    expect(fixture.operations.begin).not.toHaveBeenCalled();
+    expect(fixture.operations.complete).not.toHaveBeenCalled();
+    expect(fixture.aiUsage.recordUsageEvent).not.toHaveBeenCalled();
+
+    const replay = setup([]);
+    replay.planStarts.calendarCoachSession.mockResolvedValue(calendarEdit);
+    Object.assign(replay.coachRuns, {
+      existingRequestBranch: jest.fn(async () => branchId),
+      begin: jest.fn(async () => ({
+        replay: { id: 'message-1', message: snapshot, operationId: 'operation-1' },
+      })),
+    });
+    const replayedEvents = await replay.run(body);
+    expect(replay.planStarts.calendarCoachSession).toHaveBeenCalledWith(
+      'user-1',
+      sid,
+      undefined,
+      { allowApplied: true, reportExpired: true },
+    );
+    expect(JSON.stringify(replayedEvents)).toContain('readbackVerified');
+    expect(replay.aiService.coachStream).not.toHaveBeenCalled();
+    expect(replay.operations.get).not.toHaveBeenCalled();
+  });
+
   it('keeps a disconnected empty stream interrupted without a model failure receipt', async () => {
     const fixture = setup([]);
     fixture.aiService.coachStream.mockImplementation(async () => ({
@@ -729,6 +905,45 @@ describe('AI coach client output contract through the controller', () => {
     await run();
 
     expect(aiService.coachAppendTurnFailure).not.toHaveBeenCalled();
+  });
+
+  it('retries admission after releasing the expired Coach operation from another session', async () => {
+    const { run, aiService, operations, coachRuns } = setup([
+      { type: 'stream_event', event: { type: 'text_delta', text: '训练建议' } },
+      success,
+    ]);
+    operations.begin.mockRejectedValueOnce(
+      aiOperationError('AI_OPERATION_IN_PROGRESS', { operationId: 'orphan' }),
+    );
+    coachRuns.recoverStaleOperation.mockResolvedValueOnce(true);
+
+    await run({ protocolVersion: 2, runCommand: { kind: 'start', requestId: 'request-1' } });
+
+    expect(coachRuns.recoverStaleOperation).toHaveBeenCalledWith('user-1', 'orphan');
+    expect(operations.fail).toHaveBeenCalledWith({
+      userId: 'user-1',
+      operationId: 'orphan',
+      errorCode: 'COACH_RUN_LEASE_EXPIRED',
+    });
+    expect(operations.begin).toHaveBeenCalledTimes(2);
+    expect(aiService.coachStream).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['AI_OPERATION_IN_PROGRESS', true],
+    ['AI_OPERATION_COMPLETION_PENDING', false],
+  ] as const)('preserves a live or settling operation (%s)', async (code, checkLease) => {
+    const { run, aiService, operations, coachRuns } = setup([]);
+    operations.begin.mockRejectedValueOnce(
+      aiOperationError(code, { operationId: 'active' }),
+    );
+
+    await run({ protocolVersion: 2, runCommand: { kind: 'start', requestId: 'request-1' } });
+
+    expect(coachRuns.recoverStaleOperation).toHaveBeenCalledTimes(checkLease ? 1 : 0);
+    expect(operations.fail).not.toHaveBeenCalled();
+    expect(operations.begin).toHaveBeenCalledTimes(1);
+    expect(aiService.coachStream).not.toHaveBeenCalled();
   });
 
   it('does not call the model after operation admission fails', async () => {

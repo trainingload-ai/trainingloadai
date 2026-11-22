@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { MoreHorizontal, RotateCcw, Pencil } from "lucide-react";
 import type { Activity } from "@/api/activities";
+import type { CoachActivityFocus } from "@shared/ai-coach-schema";
 import { useHeartRateZones } from "@/api/use-heart-rate";
 import { useActivityPowerZones } from "@/api/use-power";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import { formatSecondsToTime } from "@/utils/timeFormatter";
 import { getPowerZoneColorByZone } from "@/utils/util";
 import {
   coordinateAtTrackTime,
+  recordedTimelineFocus,
   sliceTrackByTime,
   timelineValueAt,
   timelineTimeAtDistance,
@@ -66,9 +68,11 @@ const timeLabel = (value: number) => formatSecondsToTime(Math.round(value));
 export default function ActivityTimeline({
   activity,
   activityId,
+  initialFocus,
 }: {
   activity: Activity;
   activityId: string;
+  initialFocus?: CoachActivityFocus;
 }) {
   const t = useTranslations("ActivityTimeline");
   const { model, loading, errors, retry, segments, formatDistance } =
@@ -109,6 +113,19 @@ export default function ActivityTimeline({
   const [keyboardInspecting, setKeyboardInspecting] = useState(false);
   const [range, setRange] = useState<TimelineRange | null>(null);
   const [zoom, setZoom] = useState<TimelineRange | null>(null);
+  const focusApplied = useRef(false);
+  const [focusUnavailable, setFocusUnavailable] = useState(false);
+  useEffect(() => {
+    if (!initialFocus || !model || loading || focusApplied.current) return;
+    focusApplied.current = true;
+    const focused = recordedTimelineFocus(initialFocus, model);
+    if (focused) {
+      setRange(focused);
+      setZoom(focused);
+    } else {
+      setFocusUnavailable(true);
+    }
+  }, [initialFocus, loading, model]);
   const [preview, setPreview] = useState<TimelineRange | null>(null);
   const plotRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -534,6 +551,11 @@ export default function ActivityTimeline({
       data-timeline-start={viewport[0]}
       data-timeline-end={viewport[1]}
     >
+      {focusUnavailable ? (
+        <p role="status" className="border-b border-border/60 px-3 py-2 text-xs text-muted-foreground">
+          {t("focusUnavailable")}
+        </p>
+      ) : null}
       {analysis.error ? (
         <div
           role="alert"

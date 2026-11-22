@@ -500,6 +500,10 @@ export class PlanWriteSupport {
           status: true,
           title: true,
           startDate: true,
+          endDate: true,
+          planningMode: true,
+          activationTimezone: true,
+          generationMetadata: true,
           supersededBy: {
             select: { status: true, startDate: true },
           },
@@ -577,7 +581,7 @@ export class PlanWriteSupport {
     };
     const include = this.buildScheduledWorkoutInclude();
 
-    const [inPlanRows, independentRows] = await Promise.all([
+    const [inPlanRows, independentRows, preferredTimezone] = await Promise.all([
       this.workouts.findMany({
         where: {
           userId,
@@ -596,6 +600,7 @@ export class PlanWriteSupport {
         include,
         orderBy: [{ scheduledDate: 'asc' }, { sessionIndex: 'asc' }],
       }),
+      this.userService.getPreferredTimezone(userId),
     ]);
 
     const visibleInPlanRows = inPlanRows.filter((row) => {
@@ -622,9 +627,14 @@ export class PlanWriteSupport {
     ]);
 
     return {
-      inPlan: resolvedInPlanRows.map((row) =>
-        this.normalizePlanWorkoutRow(row),
-      ),
+      inPlan: resolvedInPlanRows.map((row) => {
+        if (!row.plan) return this.normalizePlanWorkoutRow(row);
+        const mutability = this.resolveWorkoutMutability({ ...row, plan: row.plan }, preferredTimezone);
+        return {
+          ...this.normalizePlanWorkoutRow(row),
+          ...this.workoutCapabilityProjection(mutability),
+        };
+      }),
       independent: resolvedIndependentRows.map((row) =>
         this.normalizePlanWorkoutRow(row),
       ),
@@ -1162,10 +1172,31 @@ export class PlanWriteSupport {
 
   private async workoutMutabilityInput(
     userId: string,
-    workout: Awaited<ReturnType<PlanWriteSupport['assertWorkoutOwnership']>>,
+    workout: Parameters<PlanWriteSupport['resolveWorkoutMutability']>[0],
     tx?: PlanDb,
   ) {
-    const timezone = await this.userService.getPreferredTimezone(userId, tx);
+    return this.resolveWorkoutMutability(workout, await this.userService.getPreferredTimezone(userId, tx));
+  }
+
+  private resolveWorkoutMutability(
+    workout: {
+      status: string;
+      scheduledDate: Date | null;
+      links: unknown[];
+      plan: {
+        status: string;
+        generationMetadata?: unknown;
+        startDate?: Date | null;
+        endDate?: Date | null;
+        planningMode?: string;
+        activationTimezone?: string | null;
+        supersededBy?: { status: string; startDate: Date | null } | null;
+      };
+    },
+    preferredTimezone: string | null | undefined,
+  ) {
+    const timezone = this.parseStoredScheduleConstraints(workout.plan.generationMetadata)?.calendarTimeZone ??
+      workout.plan.activationTimezone ?? preferredTimezone;
     const athleteTodayYmd =
       activityCalendarYmdInZone(new Date(), timezone) ??
       new Date().toISOString().slice(0, 10);
@@ -1177,11 +1208,34 @@ export class PlanWriteSupport {
         : null,
       athleteTodayYmd,
       activeActivityLinkCount: workout.links.length,
+      planStartYmd: workout.plan.startDate?.toISOString().slice(0, 10),
+      planEndYmd: workout.plan.planningMode !== 'ROLLING' ? workout.plan.endDate?.toISOString().slice(0, 10) : undefined,
       pendingSupersessionYmd:
         workout.plan.supersededBy?.status === 'SCHEDULED' &&
         workout.plan.supersededBy.startDate
           ? workout.plan.supersededBy.startDate.toISOString().slice(0, 10)
           : null,
+    };
+  }
+
+  private workoutCapabilityProjection(
+    input: ReturnType<PlanWriteSupport['resolveWorkoutMutability']>,
+  ) {
+    const edit = this.workoutMutability.reason(input, 'PRESCRIPTION');
+    const remove = this.workoutMutability.reason(input, 'DELETE');
+    const postpone = this.workoutMutability.reason(input, 'SCHEDULE');
+    const skip = this.workoutMutability.reason(input, 'STATUS') ??
+      (input.activeActivityLinkCount ? 'ACTIVITY_LINKED' : null);
+    return {
+      calendarTodayYmd: input.athleteTodayYmd,
+      calendarMoveWindow: {
+        from: input.planStartYmd && input.planStartYmd > input.athleteTodayYmd ? input.planStartYmd : input.athleteTodayYmd,
+        through: input.planEndYmd,
+        before: input.pendingSupersessionYmd ?? undefined,
+      },
+      calendarMoveAllowed: !postpone && ['ACTIVE', 'PAUSED'].includes(input.planStatus),
+      capabilities: { edit: !edit, delete: !remove, postpone: !postpone, skip: !skip },
+      capabilityReasons: { edit, delete: remove, postpone, skip },
     };
   }
 
@@ -1205,7 +1259,8 @@ export class PlanWriteSupport {
         );
       }
     }
-    const timezone = await this.userService.getPreferredTimezone(userId, tx);
+    const timezone = this.parseStoredScheduleConstraints(plan.generationMetadata)?.calendarTimeZone ??
+      await this.userService.getPreferredTimezone(userId, tx);
     const athleteTodayYmd =
       activityCalendarYmdInZone(new Date(), timezone) ??
       new Date().toISOString().slice(0, 10);
@@ -1446,7 +1501,7 @@ export class PlanWriteSupport {
   ) {
     // 结构化编辑器会传 blocks；保留 text 作为 DSL 展示源，但 step 树以 blocks 为准，避免 zone provenance 丢失。
     const blocks = this.getWorkoutBlocksForPersist(text, blocksInput);
-    const stepDrafts = this.assignNewPrescriptionModes(
+    const stepDrafts = this.workoutService.assignNewPrescriptionModes(
       await this.attachZoneSnapshotsToStepDrafts(
         tx,
         workoutId,
@@ -1476,53 +1531,6 @@ export class PlanWriteSupport {
       }
     }
     return false;
-  }
-
-  private inferredIntensityIntent(
-    step: WorkoutPlanStepDraft,
-  ): NonNullable<WorkoutPlanStepDraft['intensityIntent']> {
-    const intensity = String(step.intensity ?? '').toUpperCase();
-    const family =
-      intensity === 'RECOVERY' ||
-      intensity === 'REST' ||
-      intensity === 'WARMUP' ||
-      intensity === 'COOLDOWN'
-        ? 'RECOVERY'
-        : intensity === 'ACTIVE'
-          ? 'ENDURANCE'
-          : 'OTHER';
-    return {
-      family,
-      purpose: step.name ?? step.notes ?? undefined,
-    };
-  }
-
-  private assignNewPrescriptionModes(
-    steps: WorkoutPlanStepDraft[],
-  ): WorkoutPlanStepDraft[] {
-    return steps.map((step) => {
-      const children = step.children?.length
-        ? this.assignNewPrescriptionModes(step.children)
-        : step.children;
-      if (step.targetResolutionMode) return { ...step, children };
-      const hasZoneReference =
-        typeof step.targetZoneIndex === 'number' && step.targetZoneIndex > 0;
-      const hasFixedTarget =
-        step.targetType != null &&
-        step.targetType !== 'OPEN' &&
-        (step.targetValueLow != null || step.targetValueHigh != null);
-      return {
-        ...step,
-        children,
-        intensityIntent:
-          step.intensityIntent ?? this.inferredIntensityIntent(step),
-        targetResolutionMode: hasZoneReference
-          ? 'DYNAMIC_ZONE'
-          : hasFixedTarget
-            ? 'FIXED_VALUE'
-            : 'EFFORT_ONLY',
-      };
-    });
   }
 
   private clearUnavailableZoneProjections(
@@ -1856,7 +1864,7 @@ export class PlanWriteSupport {
       targetZoneSource: 'TRAININGLOAD',
       targetZoneBasis: zoneBasis,
       intensityIntent:
-        args.step.intensityIntent ?? this.inferredIntensityIntent(args.step),
+        args.step.intensityIntent ?? this.workoutService.inferIntensityIntent(args.step),
       targetResolutionMode: identity ? 'DYNAMIC_ZONE' : 'LEGACY_SNAPSHOT',
       targetZoneSystemKey: identity?.systemKey ?? null,
       targetZoneFingerprint: identity?.fingerprint ?? null,
@@ -2330,18 +2338,10 @@ export class PlanWriteSupport {
     );
 
     const mutability = await this.workoutMutabilityInput(userId, workout, db);
-    const canEdit =
-      this.workoutMutability.reason(mutability, 'DELETE') === null;
     return {
       workout: {
         ...this.normalizePlanWorkoutRow(resolved),
-        capabilities: {
-          delete: canEdit,
-          postpone: canEdit,
-          skip:
-            this.workoutMutability.reason(mutability, 'STATUS') === null &&
-            mutability.activeActivityLinkCount === 0,
-        },
+        ...this.workoutCapabilityProjection(mutability),
       },
     };
   }
@@ -3753,6 +3753,11 @@ export class PlanWriteSupport {
         workoutId,
         tx,
       );
+      if (dto.expectedRevision != null && workout.revision !== dto.expectedRevision)
+        throw new BusinessException({
+          code: BUSINESS_ERROR_CODE.PLAN_PROPOSAL_CONFLICT,
+          message: 'Workout revision changed; refresh the calendar',
+        });
       await this.assertWorkoutMutable(userId, workout, 'PRESCRIPTION', tx);
       if (
         workout.plan.status === 'COMPLETED' ||

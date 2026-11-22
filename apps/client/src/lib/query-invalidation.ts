@@ -101,6 +101,8 @@ export async function invalidateAfterPlanMutation(
 
   const tasks: Promise<unknown>[] = [
     qc.invalidateQueries({ queryKey: ["scheduled-workouts"] }),
+    qc.invalidateQueries({ queryKey: ["coach-calendar-move"] }),
+    qc.invalidateQueries({ queryKey: ["calendar-adjustments"] }),
     qc.invalidateQueries({ queryKey: queryKeys.root.planAutomation }),
     qc.invalidateQueries({ queryKey: ["ai-plan-execution-advice"] }),
     qc.invalidateQueries({ queryKey: queryKeys.account.intervalsIcu() }),

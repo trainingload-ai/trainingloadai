@@ -1,6 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart3, HeartPulse } from "lucide-react";
+import { BarChart3, HeartPulse } from "lucide-react";
 import React, { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notFound } from "next/navigation";
@@ -8,7 +7,6 @@ import { useTranslations } from "next-intl";
 
 // Import analysis components
 import HeartRatePage from "./heartRate/heartRatePage";
-import { useRouter } from "@/i18n/routing";
 import { useGetActivity } from "@/hooks/useActivities";
 import { useActivityId } from "@/hooks/useActivityId";
 import { ActivityHeader } from "./ActivityHeader";
@@ -42,7 +40,6 @@ function DetailSectionTitle({
   );
 }
 const SwimActivityDetail = () => {
-  const router = useRouter();
   const activityId = useActivityId();
   const { data: activity, isLoading } = useGetActivity(activityId || "");
   const { charts: dataChartConfig } = useActivityDataChartConfig();
@@ -89,17 +86,6 @@ const SwimActivityDetail = () => {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 pb-6">
       <div className="rounded-md bg-neutral-100 p-3 dark:bg-muted/45">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/activities")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            {t("activityFeed")}
-          </Button>
-        </div>
         {activity && <ActivityHeader activity={activity} />}
       </div>
 

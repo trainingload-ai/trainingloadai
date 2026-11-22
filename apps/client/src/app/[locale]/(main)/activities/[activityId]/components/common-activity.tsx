@@ -1,33 +1,31 @@
 "use client";
 
-
-import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
   BarChart3,
   ChartLine,
   Footprints,
   Gauge,
   HeartPulse,
   ListOrdered,
+  MapPin,
   Trophy,
   Zap,
 } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
+import type { Activity } from "@/api/activities";
+import type { CoachActivityFocus } from "@shared/ai-coach-schema";
 
 // Import analysis components
 import Overview from "./Overview";
 import ActivityMap from "./ActivityMap";
 import HeartRatePage from "./heartRate/heartRatePage";
-import { useRouter } from "@/i18n/routing";
 import { useGetActivity } from "@/hooks/useActivities";
 import { useActivityId } from "@/hooks/useActivityId";
 import PowerZones from "./power/power";
 import PacePage from "./pace/PacePage";
-import SlopeAnalysis from "./slope/SlopeAnalysis";
 import { ActivityHeader } from "./ActivityHeader";
 import { ActivityLaps } from "./laps/ActivityLaps";
 import { ActivityConfigDialog } from "./ActivityConfigDialog";
@@ -43,6 +41,7 @@ import {
   getActivityDetailPolicy,
   isActivityDataChartAllowed,
   isActivityDetailTabVisible,
+  type ActivityDetailSection,
 } from "@/lib/activity-detail-policy";
 import { useActivityMetricAvailability } from "@/api/useActivityMetric";
 import { ActivityWeatherCard } from "./ActivityWeatherCard";
@@ -78,6 +77,7 @@ function TimelineLoading() {
 const ActivityTimeline = dynamic(() => import("./timeline/activity-timeline"), {
   loading: TimelineLoading,
 });
+const SwimOverview = dynamic(() => import("./swim/swim-overview"));
 
 const RUNNING_DYNAMICS_METRICS = [
   "cadence",
@@ -90,18 +90,30 @@ const RUNNING_DYNAMICS_METRICS = [
   "totalSteps",
 ] as const;
 
-/**
- * 活动详情页聚合概览、地图、AI 解读、圈段和各专项分析标签页。
- * @returns
- */
-const CommonActivityDetail = () => {
-  const router = useRouter();
-  const activityId = useActivityId();
-  const { data: activity, isLoading } = useGetActivity(activityId || "");
+type ActivityDetailPreview = {
+  section: ActivityDetailSection;
+  onSectionChange: (section: ActivityDetailSection) => void;
+  focus?: CoachActivityFocus;
+};
+
+export function ActivityDetailContent({
+  activity,
+  activityId,
+  navigation,
+  preview,
+}: {
+  activity: Activity | undefined;
+  activityId: string;
+  navigation?: ReactNode;
+  preview?: ActivityDetailPreview;
+}) {
+  const [pageSection, setPageSection] = useState<ActivityDetailSection>("overview");
+  const activeSection = preview?.section ?? pageSection;
   const { charts: dataChartConfig } = useActivityDataChartConfig();
 
   // 针对活动类型，获取对应的活动详情策略
   const detailPolicy = getActivityDetailPolicy(activity);
+  const isSwimming = detailPolicy.group === "SWIM";
   const candidateDataCharts = getActivityDataChartsForSport(
     activity?.sportType,
   ).filter((chart) => isActivityDataChartAllowed(activity, chart.id));
@@ -112,7 +124,7 @@ const CommonActivityDetail = () => {
     ]),
   );
   const { availableMetrics, isLoading: isChartAvailabilityLoading } =
-    useActivityMetricAvailability(activityId || "", requestedMetrics);
+    useActivityMetricAvailability(activityId, requestedMetrics);
   const availableDataCharts = candidateDataCharts.filter((chart) =>
     availableMetrics.has(chart.metric),
   );
@@ -127,7 +139,7 @@ const CommonActivityDetail = () => {
   const hasRunningDynamics = RUNNING_DYNAMICS_METRICS.some((metric) =>
     availableMetrics.has(metric),
   );
-  const visibleTabs = tabItems.filter(
+  const availableTabs = tabItems.filter(
     (item) =>
       isActivityDetailTabVisible(activity, item.value) &&
       (item.value !== "runningDynamics" ||
@@ -135,48 +147,67 @@ const CommonActivityDetail = () => {
   );
   const t = useTranslations("ActivityDetail");
   const tAi = useTranslations("AIAnalysis");
+  const tSidebar = useTranslations("sidebar");
+  const tOverview = useTranslations("Overview");
+  const canConfigureOverview = !isChartAvailabilityLoading && availableDataCharts.length > 0;
+  const visibleTabs = tabItems.filter((item) =>
+    availableTabs.includes(item) || item.value === preview?.section,
+  );
+  const sections = preview?.section === "map"
+    ? [...visibleTabs, { value: "map", icon: MapPin } as const]
+    : visibleTabs;
+  const hasSection = (section: ActivityDetailSection) => section === "map"
+    ? detailPolicy.showMap
+    : availableTabs.some((item) => item.value === section);
 
-  // 加载状态
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t("loading")}</p>
-        </div>
+  const panels: Record<ActivityDetailSection, ReactNode> = {
+    overview: (
+      <div className="space-y-4">
+        {isSwimming ? <SwimOverview /> : null}
+        <ActivityWeatherCard weather={activity?.weather} />
+        {activity ? <ActivityStrengthSection activity={activity} /> : null}
+        {canConfigureOverview ? (
+          <div className="grid w-full grid-cols-1 gap-3 pc:gap-4">
+            {visibleDataCharts.map((chart) => (
+              <ActivityDataChart key={chart.id} activityId={activityId} chartId={chart.id} />
+            ))}
+          </div>
+        ) : null}
       </div>
-    );
-  }
+    ),
+    timeline: activity ? (
+      <ActivityTimeline
+        key={`${activityId}:${JSON.stringify(preview?.focus ?? null)}`}
+        activity={activity}
+        activityId={activityId}
+        initialFocus={preview?.focus}
+      />
+    ) : null,
+    bestIntervals: <BestIntervals activityId={activityId} />,
+    lap: activity ? <ActivityLaps laps={activity.laps || []} sportType={activity.sportType} /> : null,
+    heartrate: <HeartRatePage />,
+    power: <PowerZones />,
+    pace: <PacePage />,
+    runningDynamics: <RunningDynamicsPage activityId={activityId} availableMetrics={availableMetrics} />,
+    map: <ActivityMap showEmpty />,
+  };
 
   return (
     <ActivityAnalysisLinkProvider>
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-3 pb-10">
-        <header className="flex items-center justify-between gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/activities")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            {t("activityFeed")}
-          </Button>
-        </header>
-
-        <div className="flex flex-col gap-4">
+      <div className="@container/activity-detail flex w-full min-w-0 flex-col gap-3">
+        {navigation}
+        <div className="flex min-w-0 flex-col gap-4">
           <section className="flex flex-col gap-4">
             <div className="px-1 py-1">
               {activity ? <ActivityHeader activity={activity} /> : null}
             </div>
-            <div className="overflow-hidden rounded-md">
-              <Overview />
-            </div>
+            {isSwimming ? null : <Overview />}
             {activity ? (
               <GenericActivityDataNotice activity={activity} />
             ) : null}
           </section>
 
-          <section className="relative overflow-hidden rounded-md bg-neutral-50 px-4 py-3.5 dark:bg-visual-artwork-inset-dark md:px-5">
+          {isSwimming ? null : <section className="relative overflow-clip rounded-md bg-neutral-50 px-4 py-3.5 dark:bg-visual-artwork-inset-dark @min-[42rem]/activity-detail:px-5">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_srgb,var(--visual-review-gradient-start)_20%,transparent),transparent_46%)] dark:bg-[radial-gradient(ellipse_at_top_left,color-mix(in_srgb,var(--visual-review-gradient-start-dark)_20%,transparent),transparent_46%)]" />
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-visual-review-accent/45 via-visual-review-accent/15 to-transparent" />
             <div className="pointer-events-none absolute bottom-3.5 left-0 top-3.5 w-px bg-gradient-to-b from-visual-review-accent/30 to-transparent" />
@@ -189,118 +220,69 @@ const CommonActivityDetail = () => {
               </span>
             </div>
             <div className="relative mt-2.5">
-              <AIAnalysis />
+              <AIAnalysis autoStart={!preview} />
             </div>
-          </section>
+          </section>}
         </div>
 
-        {detailPolicy.showMap ? <ActivityMap /> : null}
+        {detailPolicy.showMap && activeSection !== "map" ? <ActivityMap /> : null}
 
-        <Tabs defaultValue="overview" className="relative space-y-3">
-          <div className="overflow-x-auto border-b border-border pr-10 no-scrollbar">
-            <TabsList className="h-auto gap-6 rounded-none bg-transparent p-0">
-              {visibleTabs.map((item) => {
-                const Icon = item.icon;
-                const label =
-                  item.value === "lap" || item.value === "pace"
-                    ? t(`tabs.${item.value}`)
-                    : t(`tabs.${item.value}`);
-                return (
+        <Tabs
+          value={activeSection}
+          onValueChange={(value) => {
+            const section = sections.find((item) => item.value === value)?.value;
+            if (section) (preview?.onSectionChange ?? setPageSection)(section);
+          }}
+          activationMode={preview ? "manual" : "automatic"}
+          className="min-w-0 space-y-3"
+        >
+          <div className="flex min-w-0 items-center gap-2 border-b border-border">
+            <div className="min-w-0 flex-1 overflow-x-auto">
+              <TabsList aria-label={t("title")} className="h-auto gap-4 rounded-none bg-transparent p-0 @min-[42rem]/activity-detail:gap-6">
+                {sections.map(({ value, icon: Icon }) => (
                   <TabsTrigger
-                    key={item.value}
-                    className="relative gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-0 py-3 text-mobile-caption text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none pc:text-xs"
-                    value={item.value}
+                    key={value}
+                    className="relative shrink-0 gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-0 py-3 text-mobile-caption text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none pc:text-xs"
+                    value={value}
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    {label}
+                    <Icon aria-hidden className="size-3.5" />
+                    {value === "map" ? tSidebar("map") : t(`tabs.${value}`)}
                   </TabsTrigger>
-                );
-              })}
-            </TabsList>
-          </div>
-          {/* 总览标签页 */}
-          <TabsContent value="overview" className="space-y-3">
-            {!isChartAvailabilityLoading && availableDataCharts.length > 0 ? (
-              <div className="absolute right-0 top-1 z-10">
-                <ActivityConfigDialog
-                  defaultTab="dataCharts"
-                  tabs={["dataCharts"]}
-                />
-              </div>
-            ) : null}
-            <div className="space-y-4">
-              <ActivityWeatherCard weather={activity?.weather} />
-              {activity ? (
-                <ActivityStrengthSection activity={activity} />
-              ) : null}
-              {!isChartAvailabilityLoading && availableDataCharts.length > 0 ? (
-                <div className="grid w-full grid-cols-1 gap-3 pc:gap-4">
-                  {visibleDataCharts.map((chart) => (
-                    <ActivityDataChart
-                      key={chart.id}
-                      activityId={activityId || ""}
-                      chartId={chart.id}
-                    />
-                  ))}
-                </div>
-              ) : null}
+                ))}
+              </TabsList>
             </div>
-          </TabsContent>
-
-          <TabsContent value="timeline">
-            {activity ? (
-              <ActivityTimeline
-                key={activityId}
-                activity={activity}
-                activityId={activityId || ""}
-              />
+            {activeSection === "overview" && canConfigureOverview ? (
+              <ActivityConfigDialog defaultTab="dataCharts" tabs={["dataCharts"]} />
             ) : null}
-          </TabsContent>
-
-          <TabsContent value="bestIntervals" className="space-y-3">
-            <BestIntervals activityId={activityId || ""} />
-          </TabsContent>
-
-          <TabsContent value="lap" className="space-y-3">
-            {activity ? (
-              <ActivityLaps
-                laps={activity.laps || []}
-                sportType={activity.sportType}
-              />
-            ) : null}
-          </TabsContent>
-
-          <TabsContent value="heartrate" className="space-y-3">
-            <Suspense fallback={<div>{t("suspenseFallback")}</div>}>
-              <HeartRatePage />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="power" className="space-y-3">
-            <Suspense fallback={<div>{t("suspenseFallback")}</div>}>
-              <PowerZones />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="pace" className="space-y-3">
-            <Suspense fallback={<div>{t("suspenseFallback")}</div>}>
-              <PacePage />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="runningDynamics" className="space-y-3">
-            <Suspense fallback={<div>{t("suspenseFallback")}</div>}>
-              <RunningDynamicsPage
-                activityId={activityId || ""}
-                availableMetrics={availableMetrics}
-              />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="slope" className="space-y-3">
-            <SlopeAnalysis />
-          </TabsContent>
+          </div>
+          {sections.map(({ value }) => (
+            <TabsContent key={value} value={value} className="min-w-0 space-y-3">
+              {hasSection(value) ? (
+                <Suspense fallback={<div role="status">{t("loading")}</div>}>
+                  {panels[value]}
+                </Suspense>
+              ) : (
+                <p role="status" className="p-3 text-sm text-muted-foreground">{tOverview("noData")}</p>
+              )}
+            </TabsContent>
+          ))}
         </Tabs>
-      </main>
+      </div>
     </ActivityAnalysisLinkProvider>
   );
-};
+}
 
-export default CommonActivityDetail;
+export default function CommonActivityDetail() {
+  const activityId = useActivityId() || "";
+  const { data: activity, isLoading } = useGetActivity(activityId);
+  if (isLoading) return <TimelineLoading />;
+
+  return (
+    <main className="mx-auto w-full max-w-7xl pb-10">
+      <ActivityDetailContent
+        activity={activity}
+        activityId={activityId}
+      />
+    </main>
+  );
+}

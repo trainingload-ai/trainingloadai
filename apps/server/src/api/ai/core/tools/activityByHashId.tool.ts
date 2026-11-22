@@ -6,8 +6,9 @@ import {
   type AiToolDef,
 } from '../tool.types';
 import type { UnifiedActivityAnalysisInput } from '../../dto/ai.type';
+import { COACH_ACTIVITY_SECTIONS, readCoachActivityFocus, type CoachActivityFocus, type CoachActivitySection } from '@shared/ai-coach-schema';
 
-type Input = { hashId: string };
+type Input = { hashId: string; section?: CoachActivitySection; focus?: CoachActivityFocus };
 
 export const activityByHashIdTool: AiToolDef<
   Input,
@@ -25,16 +26,26 @@ export const activityByHashIdTool: AiToolDef<
     required: ['hashId'],
     properties: {
       hashId: { type: 'string', description: 'Activity hash id' },
+      section: {
+        type: 'string', enum: [...COACH_ACTIVITY_SECTIONS],
+        description: 'Attach a clickable detail card when opening a known activity.',
+      },
+      focus: {
+        type: 'object', additionalProperties: false,
+        description: 'An explicitly requested lap number or length from the finish. Use with timeline. Supply exactly one; the client resolves it using recorded laps or distance.',
+        properties: { lap: { type: 'integer', minimum: 1 }, lastMeters: { type: 'number', exclusiveMinimum: 0 } },
+      },
     },
   },
-  validateInput: async (ctx, input) =>
-    String(input?.hashId ?? '').trim()
-      ? { ok: true }
-      : aiToolError(
-          ctx.i18n.t('common.error.missing_activity_id') ||
-            'Missing activity id',
-          'INVALID_INPUT',
-        ),
+  validateInput: async (ctx, input) => {
+    if (!String(input?.hashId ?? '').trim()) return aiToolError(
+      ctx.i18n.t('common.error.missing_activity_id') || 'Missing activity id', 'INVALID_INPUT',
+    );
+    if (input.focus && (input.section !== 'timeline' || !readCoachActivityFocus(input.focus))) {
+      return aiToolError('Use either a lap or a positive lastMeters range with the timeline', 'INVALID_INPUT');
+    }
+    return { ok: true };
+  },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
   summarizeForModel: ({ output }) => ({
     evidenceScope: {

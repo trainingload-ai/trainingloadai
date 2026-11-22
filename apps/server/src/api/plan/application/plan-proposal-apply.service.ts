@@ -112,6 +112,18 @@ export class PlanProposalApplyService {
         data: {
           appliedAt: new Date(),
           appliedDecisionId: args.decisionId,
+          ...(proposal.mode === 'SCHEDULE' && preview.calendarAdjustmentId
+            ? {
+                calendarReceipt: {
+                  planId: args.contextPlanId,
+                  versionId: preview.id,
+                  readbackVerified: true,
+                  changedWorkoutCount: proposal.request.changes.length,
+                  addedWorkoutCount: proposal.request.additions.length,
+                  deletedWorkoutCount: proposal.request.deletions.length,
+                },
+              }
+            : {}),
           ...(receipt.createdPlanId
             ? { createdPlanId: receipt.createdPlanId }
             : {}),

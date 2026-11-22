@@ -15,7 +15,8 @@ import {
   Waves,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
@@ -191,10 +192,24 @@ function clampNumber(value: number, min: number, max: number) {
 }
 
 export default function V2PlanCreatePage() {
-  // 创建页只收集用户偏好，真正生成计划交给 AI Coach 通过 URL seed 启动。
+  return (
+    <Suspense>
+      <PlanCreateRoute />
+    </Suspense>
+  );
+}
+
+function PlanCreateRoute() {
+  const rolling = useSearchParams().get("planMode") === "rolling";
+  return <PlanCreateForm key={rolling ? "rolling" : "fixed"} rolling={rolling} />;
+}
+
+function PlanCreateForm({ rolling }: { rolling: boolean }) {
   const t = useTranslations("V2PlanCreatePage");
   const tEquipment = useTranslations("StrengthCatalog.equipment");
-  useSetPageTitle(t("header.title"));
+  const rollingT = useTranslations("RollingPlan");
+  const title = rolling ? rollingT("title") : t("header.title");
+  useSetPageTitle(title);
   const router = useRouter();
   const isMobile = useIsMobile();
   const planLibraryHref = getPlanLibraryHref(isMobile);
@@ -205,7 +220,7 @@ export default function V2PlanCreatePage() {
     [t],
   );
   const [sportTypes, setSportTypes] = useState<AiPlanSeedSport[]>(["run"]);
-  const [intent, setIntent] = useState<AiPlanSeedIntent>("racePrep");
+  const [intent, setIntent] = useState<AiPlanSeedIntent>(rolling ? "fitnessBuild" : "racePrep");
   const [raceDiscipline, setRaceDiscipline] =
     useState<AiPlanSeedRaceDiscipline>("run");
   const [raceDistance, setRaceDistance] =
@@ -276,7 +291,6 @@ export default function V2PlanCreatePage() {
     const params = new URLSearchParams({
       planIntent: intent,
       sports: sportTypes.join(","),
-      weeks: String(cycleWeeks),
       days: String(weeklyDays),
       mins: String(dailyMinutes),
       strength: strengthPreference.toLowerCase(),
@@ -284,6 +298,9 @@ export default function V2PlanCreatePage() {
       strengthMins: String(strengthMinutes),
       equipment: equipment.join(","),
     });
+
+    if (rolling) params.set("planMode", "rolling");
+    else params.set("weeks", String(cycleWeeks));
 
     if (intent === "racePrep") {
       params.set("raceD", raceDiscipline);
@@ -296,7 +313,7 @@ export default function V2PlanCreatePage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 pb-2 pc:gap-3">
       <header className="px-1 py-1">
-        <div className="mb-2">
+        <div className="mb-2 tablet:hidden">
           <Link
             href={planLibraryHref}
             className="inline-flex items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -312,10 +329,10 @@ export default function V2PlanCreatePage() {
               <span>{t("header.badge")}</span>
             </div>
             <h1 className="mt-1 truncate text-base font-semibold tracking-normal text-foreground">
-              {t("header.title")}
+              {title}
             </h1>
             <p className="mt-1 text-mobile-caption pc:text-xs text-muted-foreground">
-              {t("header.description")}
+              {rolling ? rollingT("description") : t("header.description")}
             </p>
           </div>
         </section>
@@ -333,11 +350,9 @@ export default function V2PlanCreatePage() {
                 {t("brief.intent", { value: selectedIntentTitle })}
               </div>
               <div className="rounded-md bg-neutral-100 px-3 py-2 dark:bg-muted/45">
-                {t("brief.cycle", {
-                  weeks: cycleWeeks,
-                  weeklyDays,
-                  dailyMinutes,
-                })}
+                {rolling
+                  ? rollingT("availability", { weeklyDays, dailyMinutes })
+                  : t("brief.cycle", { weeks: cycleWeeks, weeklyDays, dailyMinutes })}
               </div>
               {intent === "racePrep" ? (
                 <div className="rounded-md bg-neutral-100 px-3 py-2 dark:bg-muted/45">
@@ -364,7 +379,7 @@ export default function V2PlanCreatePage() {
               {t("brief.start")}
             </Button>
             <p className="mt-2 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
-              {t("brief.handoff")}
+              {rolling ? rollingT("creationHint") : t("brief.handoff")}
             </p>
           </Panel>
         </div>
@@ -439,21 +454,22 @@ export default function V2PlanCreatePage() {
                   <ToggleGroupItem
                     key={option.value}
                     value={option.value}
-                    className="h-auto min-h-16 justify-start whitespace-normal bg-muted/55 px-3 py-3 text-left data-[state=on]:bg-accent"
+                    className="h-auto min-h-16 items-start gap-3 whitespace-normal bg-muted/55 px-3 py-3 text-left data-[state=on]:bg-accent"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-semibold">
-                          {option.title}
-                        </div>
-                        <p className="mt-1 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
-                          {option.description}
-                        </p>
-                      </div>
-                      {selected ? (
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                      ) : null}
-                    </div>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold">
+                        {option.title}
+                      </span>
+                      <span className="mt-1 block text-mobile-caption leading-5 text-muted-foreground pc:text-xs">
+                        {option.description}
+                      </span>
+                    </span>
+                    {selected ? (
+                      <CheckCircle2
+                        aria-hidden="true"
+                        className="size-4 shrink-0 text-emerald-500"
+                      />
+                    ) : null}
                   </ToggleGroupItem>
                 );
               })}
@@ -525,9 +541,11 @@ export default function V2PlanCreatePage() {
           ) : null}
 
           <Panel className="p-3">
-            <SectionTitle title={t("cycleConstraints.title")} />
-            <FieldGroup className="grid gap-2 sm:grid-cols-3">
-              <Field className="gap-1">
+            <SectionTitle title={rolling ? rollingT("availabilityTitle") : t("cycleConstraints.title")} />
+            <FieldGroup
+              className={rolling ? "grid gap-2 sm:grid-cols-2" : "grid gap-2 sm:grid-cols-3"}
+            >
+              {!rolling ? <Field className="gap-1">
                 <FieldLabel className="text-mobile-caption text-muted-foreground pc:text-xs">
                   {t("cycleConstraints.cycleLength")}
                 </FieldLabel>
@@ -548,7 +566,7 @@ export default function V2PlanCreatePage() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-              </Field>
+              </Field> : null}
               <Field className="gap-1">
                 <FieldLabel
                   htmlFor="weekly-days"

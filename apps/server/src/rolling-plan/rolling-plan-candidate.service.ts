@@ -10,7 +10,11 @@ import {
   reviewUsageFailureReason,
 } from '@/review/review-model-call-guard';
 import { addCalendarDays, isCalendarDate } from '@shared/plan-calendar';
-import { calendarMonthEnd, isoWeekStart } from '@shared/rolling-plan';
+import {
+  calendarMonthEnd,
+  hasRollingWeekTargets,
+  isoWeekStart,
+} from '@shared/rolling-plan';
 import type { WorkoutDefinitionInput } from '@shared/workout-structure';
 import {
   WORKOUT_DSL_CONTRACT_LINES,
@@ -28,6 +32,15 @@ const range = z
   .object({ min: z.number().nonnegative(), max: z.number().nonnegative() })
   .strict()
   .refine((value) => value.max >= value.min);
+const loadRange = z
+  .object({
+    unit: z.literal('NORMALIZED_LOAD'),
+    min: z.number().nonnegative(),
+    max: z.number().nonnegative(),
+  })
+  .strict()
+  .refine((value) => value.max >= value.min)
+  .nullable();
 const monthSchema = z
   .object({
     kind: z.literal('MONTH'),
@@ -36,17 +49,20 @@ const monthSchema = z
       .object({
         monthStart: date,
         objective: text,
-        loadRange: z
-          .object({
-            unit: z.literal('NORMALIZED_LOAD'),
-            min: z.number().nonnegative(),
-            max: z.number().nonnegative(),
-          })
-          .strict()
-          .refine((value) => value.max >= value.min)
-          .nullable(),
+        loadRange,
         durationMinutesRange: range.nullable(),
-        weekFocus: z.array(z.object({ weekStart: date, focus: text }).strict()),
+        runningDistanceKmRange: range.nullable().optional(),
+        monthOverMonthReason: text.max(500).nullable().optional(),
+        weekFocus: z.array(
+          z
+            .object({
+              weekStart: date,
+              focus: text,
+              loadRange,
+              durationMinutesRange: range.nullable(),
+            })
+            .strict(),
+        ),
       })
       .strict(),
   })
@@ -174,7 +190,9 @@ export class RollingPlanCandidateService {
           instructions: [
             ...(input.kind === 'MONTH'
               ? [
-                  'Return {kind:"MONTH",strategy:{monthStart,objective,loadRange:{unit:"NORMALIZED_LOAD",min,max}|null,durationMinutesRange:{min,max}|null,weekFocus:[{weekStart,focus}]},reason}. monthStart must equal windowStart; weekStart is the ISO Monday of a week intersecting the remaining month window.',
+                  'Return {kind:"MONTH",strategy:{monthStart,objective,loadRange,durationMinutesRange,runningDistanceKmRange,monthOverMonthReason,weekFocus:[{weekStart,focus,loadRange,durationMinutesRange}]},reason}. Use {unit:"NORMALIZED_LOAD",min,max} or null for loadRange. Use {min,max} or null for durationMinutesRange and runningDistanceKmRange. monthStart must equal windowStart. Include every ISO week intersecting from/through once, with ranges only for that week’s days inside the requested month window.',
+                  'Write the objective in the athlete’s language as one short paragraph on this window’s training focus and why it fits now. Keep individual workouts in weekFocus. Give a running distance target in kilometers only when supported by training history, pace, or distance-based sessions. Use null for unsupported targets.',
+                  'If facts.previousMonthDirection exists, compare planned targets for the same activity and units using both bounds. In monthOverMonthReason, explain in one or two sentences why the goals increase, decrease, or stay at the same level, using the athlete’s recent training, recovery, or event context. If a comparable target or a reason is missing, use null rather than guessing. Never compare a partial month with a full month or substitute actual load for a planned target.',
                 ]
               : [
                   'Return {kind:"WEEK"|"ADJUST",schedule:{mode:"SCHEDULE",planId,range:{from,to},rationale,evidenceRefs:[{type,label,value?}],changes:[{sourceWorkoutId,expectedRevision,workout}],additions:[{candidateKey,workout}],deletions:[{sourceWorkoutId,expectedRevision}],preserved?:[{sourceWorkoutId,expectedRevision}],preserveUnmentioned?:boolean},reason}. kind, planId and range.from/to must exactly match the supplied task kind, planId and from/through.',
@@ -224,14 +242,7 @@ export class RollingPlanCandidateService {
     if (
       !parsed.success ||
       parsed.data.strategy.monthStart !== input.windowStart ||
-      parsed.data.strategy.weekFocus.some(
-        (week) =>
-          isoWeekStart(week.weekStart) !== week.weekStart ||
-          addCalendarDays(week.weekStart, 6) < input.from ||
-          week.weekStart > input.through,
-      ) ||
-      new Set(parsed.data.strategy.weekFocus.map((week) => week.weekStart))
-        .size !== parsed.data.strategy.weekFocus.length
+      !hasRollingWeekTargets(parsed.data.strategy, input.from, input.through)
     ) {
       throw new RollingPlanCandidateError('ROLLING_CANDIDATE_INVALID');
     }

@@ -65,11 +65,6 @@ const RESOURCE_SCOPE_RULES: ResourceScopeRule[] = [
     readScope: 'activity:read',
     writeScope: 'activity:write',
   },
-  {
-    prefix: '/calendar/subscription',
-    readScope: 'plan:read',
-    writeScope: 'plan:write',
-  },
   { prefix: '/pmc', readScope: 'training:read' },
   {
     prefix: '/charts',

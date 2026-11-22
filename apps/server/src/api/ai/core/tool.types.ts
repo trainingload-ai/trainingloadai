@@ -6,6 +6,7 @@ import type {
   FitnessTrackingReply,
 } from '@shared/fitness-assessment';
 import type { HealthDataQueryService } from '@/health-data/health-data-query.service';
+import type { powerService } from '@/power/power.service';
 import type { PrismaService } from '@/prisma/prisma.service';
 import type { UserService } from '@/api/user/user.service';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
@@ -45,7 +46,10 @@ export type JsonSchemaObject = {
 };
 
 export type AiToolContext = {
+  calendarScheduleOnly?: boolean;
+  planQuestionReview?: import('./coach-plan-question-review').PlanQuestionReview;
   healthData?: HealthDataQueryService;
+  power?: powerService;
   fitnessCalculations?: FitnessCalculationService;
   fitnessApply?: FitnessAssessmentApplyService;
   fitnessFollowup?: FitnessAssessmentFollowupService;
@@ -62,6 +66,7 @@ export type AiToolContext = {
   planSuitability?: {
     latest?: {
       assessmentId: string;
+      goalSummary?: string;
       status: 'READY' | 'NEEDS_INPUT' | 'NEEDS_ADJUSTMENT';
       constraints: {
         periodWeeks: number;
@@ -75,6 +80,7 @@ export type AiToolContext = {
   /** Parent operation attribution for nested model calls made by tools. */
   aiOperationId?: string | null;
   aiUsageKind?: AiUsageKind;
+  rollingPlanDraft?: boolean;
   currentUserPrompt?: string;
   currentUserMessageId?: string;
   /** Structured-question response state for this resumed turn. */
@@ -179,7 +185,7 @@ export type AiToolContext = {
   /**
    * 当前登录会话（用于拿 userId，以及权限控制）
    */
-  session: UserSession;
+  session: { user: Pick<UserSession['user'], 'id'> };
   /**
    * 当前对话会话 sid（教练 chat 才有；用于把写动作账本归到正确的会话下）
    */

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { TrainingVisualizationV1 } from "@shared/training-visualization";
 import zhMessages from "../../../../../../../packages/messages/client-core/zh.json";
 import { TrainingVisualizationCard } from "./training-visualization-card";
+import { CoachChartPreviewContext } from "./coach-preview-panel";
 
 vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
@@ -110,6 +111,35 @@ describe("TrainingVisualizationCard", () => {
     expect(screen.getByText("运动次数")).toBeVisible();
     expect(screen.getByText("12")).toBeVisible();
     expect(screen.getByText("486.5 min")).toBeVisible();
+  });
+
+  it("shows the measured duration and opens the selected measure from a historical card", () => {
+    const openChart = vi.fn();
+    const card: TrainingVisualizationV1 = {
+      ...fixture(), rows: [], observedAt: "2026-09-30T12:00:00Z", detail: {},
+      series: [{ key: "AVG_HEART_RATE", unit: "bpm" }, { key: "AVG_POWER", unit: "W" }],
+      summary: { AVG_HEART_RATE: 142.5, AVG_POWER: null },
+      provenance: {
+        ...fixture().provenance,
+        coverage: { AVG_HEART_RATE: 0.667, AVG_POWER: 0 },
+        coverageDetails: { AVG_HEART_RATE: { known: 40, total: 60, unit: "min" } },
+      },
+    };
+    render(
+      <NextIntlClientProvider locale="zh" messages={zhMessages} timeZone="Asia/Shanghai">
+        <CoachChartPreviewContext.Provider value={openChart}>
+          <TrainingVisualizationCard payload={card} chartRef={{ messageId: "message", deliveryId: "delivery" }} />
+        </CoachChartPreviewContext.Provider>
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText(/40\/60.*覆盖率 67%/)).toBeVisible();
+    const heartRate = screen.getByRole("button", { name: /查看图表 · 平均心率/ });
+    expect(heartRate).toHaveTextContent("142.5 bpm");
+    expect(screen.queryByRole("button", { name: /平均功率/ })).toBeNull();
+    fireEvent.click(heartRate);
+    expect(openChart).toHaveBeenCalledWith(expect.objectContaining({
+      deliveryId: "delivery", messageId: "message", measure: "AVG_HEART_RATE",
+    }), card.title);
   });
 
   it("rejects an unversioned arbitrary chart payload", () => {

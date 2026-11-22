@@ -328,7 +328,7 @@
       "references": [
         {
           "file": "apps/client/src/components/layout/MainAppShell.tsx",
-          "line": 86
+          "line": 170
         },
         {
           "file": "apps/docs/src/components/OfficialPlanTemplateDetailPage.tsx",
@@ -341,10 +341,6 @@
         {
           "file": "apps/docs/src/lib/analytics.ts",
           "line": 176
-        },
-        {
-          "file": "apps/docs/src/lib/plan-share.ts",
-          "line": 49
         }
       ],
       "capability": "product-internal",
@@ -1002,10 +998,6 @@
       "url": "http://127.0.0.1:${process.env.PORT",
       "references": [
         {
-          "file": "apps/server/src/api/calendar/calendar.service.ts",
-          "line": 27
-        },
-        {
           "file": "apps/server/src/auth.ts",
           "line": 44
         }
@@ -1542,7 +1534,7 @@
         },
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 120
+          "line": 116
         },
         {
           "file": "apps/server/src/bootstrap/cors-origin.ts",
@@ -3335,10 +3327,6 @@
           "line": 93
         },
         {
-          "file": "apps/docs/src/app/[lang]/(home)/share/plans/[publicId]/page.tsx",
-          "line": 12
-        },
-        {
           "file": "apps/docs/src/app/[lang]/(home)/swim-training-plan/page.tsx",
           "line": 14
         },
@@ -3506,11 +3494,11 @@
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/dashboard/fitness-metric/page.tsx",
-          "line": 104
+          "line": 105
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/dashboard/fitness-metric/page.tsx",
-          "line": 110
+          "line": 111
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/_components/home-demo/metric-history/demo-fixtures.ts",

@@ -195,7 +195,12 @@
       "id": "0039_rolling_plan",
       "file": "0039_rolling_plan/migration.sql",
       "sha256": "e2e2271d6566091f24b322bd2b97ff025dc22a3654785aa7d3a9640bbe0db634"
+    },
+    {
+      "id": "0040_calendar_adjustments",
+      "file": "0040_calendar_adjustments/migration.sql",
+      "sha256": "84d0de2d4a799ef879c197552fa66dac85281496c8e249da95a864247290aaae"
     }
   ],
-  "schemaChecksum": "bffc793808a83eeb9c0d087347f62c96aa0c23feb9145f6ed1aa4878885ea9b2"
+  "schemaChecksum": "917e37f5f4f39a011d99e861de458462e5ea00f23c382f1dea29afc3b2bbd221"
 }

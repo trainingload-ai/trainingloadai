@@ -15,9 +15,12 @@ import {
 } from 'ai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type { ActiveCoachSkill } from './skill.types';
-import type {
-  CoachPlanDraftData,
-  PlanWorkoutAdjustmentDraftData,
+import {
+  isCoachHealthVisualization,
+  readCoachActivityView,
+  readCoachEntityView,
+  type CoachPlanDraftData,
+  type PlanWorkoutAdjustmentDraftData,
 } from '@shared/ai-coach-schema';
 import {
   buildContextWindowSnapshot,
@@ -32,8 +35,12 @@ import {
   getCoachUpstreamProvider,
   type CoachClientOptions,
 } from './coach-upstream.adapter';
-import { resolveAthleteClock } from './athlete-relative-day';
+import {
+  resolveAthleteClock,
+  type CoachPromptClock,
+} from './athlete-relative-day';
 import { buildCoachSystemPrompt } from './coach.prompt';
+import { coachPlanCalendarBlock } from './coach-plan-calendar';
 import {
   scopeToolsByActiveSkill,
   sortToolsBySkillPreference,
@@ -97,6 +104,7 @@ const COACH_UI_CARD_TOOL_DISPLAY_NAMES: Record<string, string> = {
   'activity.day_view': 'ActivityDayView',
   'pmc.range': 'PmcRange',
   present_training_visualization: 'TrainingVisualization',
+  present_coach_health: 'CoachHealthVisualization',
   'profile.zones': 'ProfileZones',
   'profile.zone_ranges': 'ProfileZoneRanges',
   'competition.events.list': 'CompetitionEvents',
@@ -490,16 +498,46 @@ export function buildCoachUiCardToolUseBlocks(args: {
   calls: ProviderToolCall[];
   results: ProviderToolResult[];
 }): CoachAssistantContentBlock[] {
-  return args.calls.map((call, index) => {
+  return args.calls.flatMap<CoachAssistantContentBlock>((call, index) => {
     const result = args.results[index];
     const resolvedTool = resolveCanonicalTool({
       tools: args.tools,
       providerToolName: call.name,
     });
     const canonical = resolvedTool?.name ?? call.name;
+    const original: CoachAssistantContentBlock = {
+      type: 'tool_use', id: call.id, name: call.name, input: call.input,
+    };
+    if (result?.ok === true && result.output && typeof result.output === 'object') {
+      const views: CoachAssistantContentBlock[] = [];
+      if (canonical === 'plan.by_id' || canonical === 'plan.active') {
+        const { plan } = result.output as { plan?: { id?: string; title?: string } };
+        const detail = call.input.showDetail === true && readCoachEntityView({
+          kind: 'plan_detail', planId: plan?.id, title: plan?.title,
+        });
+        const calendar = call.input.showCalendar === true &&
+          coachPlanCalendarBlock(call.id, call.input, result.output);
+        if (detail) views.push({ type: 'tool_use', id: `${call.id}:detail`, name: 'CoachDetailView', input: detail });
+        if (calendar) views.push(calendar);
+      }
+      if (canonical === 'profile.current' && call.input.showOverview === true) {
+        views.push({
+          type: 'tool_use', id: `${call.id}:detail`, name: 'CoachDetailView', input: { kind: 'athlete_overview' },
+        });
+      }
+      if (canonical === 'activity.byHashId') {
+        const detail = readCoachActivityView({
+          kind: 'activity_detail', hashId: call.input.hashId, section: call.input.section,
+          focus: call.input.focus,
+        });
+        if (detail) views.push({ type: 'tool_use', id: `${call.id}:detail`, name: 'CoachDetailView', input: detail });
+      }
+      if (views.length) return [original, ...views];
+    }
     const uiName = COACH_UI_CARD_TOOL_DISPLAY_NAMES[canonical];
-    const publicOutput =
-      canonical === 'competition.events.list'
+    const publicOutput = canonical === 'present_coach_health'
+      ? (isCoachHealthVisualization(result?.output) ? result.output : null)
+      : canonical === 'competition.events.list'
         ? projectCoachCompetitionEvents(call.input, result?.output)
         : canonical === 'training.baseline'
           ? projectCoachTrainingBaseline(result?.output)
@@ -529,12 +567,7 @@ export function buildCoachUiCardToolUseBlocks(args: {
         input: result.output,
       };
     }
-    return {
-      type: 'tool_use',
-      id: call.id,
-      name: call.name,
-      input: call.input,
-    };
+    return original;
   });
 }
 
@@ -787,6 +820,7 @@ const UI_SURFACE_PAYLOAD_TOOLS = new Set([
   'present_coach_plan_draft',
   'present_plan_workout_adjustment_draft',
   'present_training_visualization',
+  'present_coach_health',
 ]);
 
 const UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS = 8_000;
@@ -825,6 +859,8 @@ function isSuccessfulUiSurfaceToolOutput(
       return obj.kind === 'plan_workout_adjustment_draft';
     case 'present_training_visualization':
       return obj.kind === 'training_visualization';
+    case 'present_coach_health':
+      return isCoachHealthVisualization(output);
     default:
       return false;
   }
@@ -1024,6 +1060,10 @@ export async function* streamCoachAnswer(args: {
   coachFacts?: Awaited<ReturnType<CoachFactContextService['build']>>;
   /** Optional server-owned task model override (for example REVIEW_AI_MODEL). */
   model?: string;
+  /** Application-owned upper bound for a single delegated task. */
+  maxSteps?: number;
+  /** A specialist can use its own instructions while sharing tools and metering. */
+  systemPrompt?: (clock: CoachPromptClock) => string;
 }): AsyncGenerator<CoachQueryYield, void, undefined> {
   const { tools: allTools, ctx } = args;
   const t0 = Date.now();
@@ -1032,10 +1072,16 @@ export async function* streamCoachAnswer(args: {
     userService: ctx.userService,
     userId: ctx.session?.user?.id,
   });
-  const serverOwnedTask = Boolean(ctx.backgroundTask || ctx.athleteState);
-  const systemPromptFor = (publicReasoningSummary: boolean) =>
+  const serverOwnedTask = Boolean(
+    ctx.backgroundTask || ctx.athleteState || ctx.calendarScheduleOnly,
+  );
+  const systemPromptFor = (
+    activeSkill: ActiveCoachSkill | null,
+    publicReasoningSummary: boolean,
+  ) =>
+    args.systemPrompt?.(clock) ??
     appendAmbientMemory(
-      buildCoachSystemPrompt(ctx.lang, args.activeSkill ?? null, clock, {
+      buildCoachSystemPrompt(ctx.lang, activeSkill, clock, {
         publicReasoningSummary,
         serverOwnedTask,
       }),
@@ -1049,9 +1095,14 @@ export async function* streamCoachAnswer(args: {
     : getModelCandidates({ thinking });
   const stepTimeoutMs = resolveStepTimeoutMs(provider, args.activeSkill?.name);
   const streamIdleTimeoutMs = resolveStreamIdleTimeoutMs(provider);
-  const maxSteps = Math.max(
+  const configuredMaxSteps = Math.max(
     1,
     Number(process.env.AI_COACH_MAX_AGENT_STEPS ?? 16),
+  );
+  const maxSteps = Math.min(
+    configuredMaxSteps,
+    args.maxSteps ?? configuredMaxSteps,
+    ctx.planQuestionReview ? 6 : configuredMaxSteps,
   );
 
   const runtimeState: CoachToolLoopRuntimeState = {
@@ -1070,7 +1121,7 @@ export async function* streamCoachAnswer(args: {
     messages: [
       {
         role: 'system',
-        content: systemPromptFor(thinking),
+        content: systemPromptFor(runtimeState.currentActiveSkill, thinking),
       },
       ...args.messages,
     ],
@@ -1165,13 +1216,16 @@ export async function* streamCoachAnswer(args: {
       const agent = new ToolLoopAgent({
         id: 'trainingload-ai-coach',
         model: createCoachLanguageModel({ thinking }, model),
-        instructions: systemPromptFor(thinking),
+        instructions: systemPromptFor(args.activeSkill ?? null, thinking),
         allowSystemInMessages: true,
         tools: allAiSdkTools,
         toolChoice: ctx.backgroundTask ? 'required' : 'auto',
         temperature: 0.35,
         stopWhen: [
           ({ steps }) => coachStepBudgetReached(steps, maxSteps),
+          ({ steps }) => Boolean(
+            ctx.planQuestionReview && !ctx.planQuestionReview.decisions && steps.length >= 2,
+          ),
           ({ steps }) =>
             steps.length > 1 && needsCoachDeliverySummary(steps.slice(0, -1)),
           stopAfterUiSurfaceTool,
@@ -1201,18 +1255,9 @@ export async function* streamCoachAnswer(args: {
             messages: [
               {
                 role: 'system',
-                content: appendAmbientMemory(
-                  buildCoachSystemPrompt(
-                    ctx.lang,
-                    runtimeState.currentActiveSkill,
-                    clock,
-                    {
-                      publicReasoningSummary: thinking,
-                      serverOwnedTask,
-                    },
-                  ),
-                  args.ambientMemory,
-                  args.coachFacts,
+                content: systemPromptFor(
+                  runtimeState.currentActiveSkill,
+                  thinking,
                 ),
               },
               ...args.messages,
@@ -1227,31 +1272,32 @@ export async function* streamCoachAnswer(args: {
             compactedMessages: 0,
           };
 
-          const systemPrompt = appendAmbientMemory(
-            buildCoachSystemPrompt(
-              ctx.lang,
-              runtimeState.currentActiveSkill,
-              clock,
-              {
-                publicReasoningSummary: thinking && !deliveryOnly,
-                serverOwnedTask,
-              },
-            ),
-            args.ambientMemory,
-            args.coachFacts,
+          const systemPrompt = systemPromptFor(
+            runtimeState.currentActiveSkill,
+            thinking && !deliveryOnly,
           );
+          const review = ctx.planQuestionReview;
+          const requireQuestionReview = review && !review.decisions && !deliveryOnly;
           return {
             system: deliveryOnly
               ? systemPrompt + COACH_DELIVERY_SUMMARY_INSTRUCTION
-              : systemPrompt,
+              : requireQuestionReview
+                ? systemPrompt + `\nBefore replying, call plan_suitability_assess and complete its questionReview. Use these exact question IDs: ${review.questions.map(({ id }) => id).join(', ')}.`
+                : systemPrompt,
             activeTools: deliveryOnly
               ? []
-              : (activeTools as Array<keyof typeof allAiSdkTools>),
-            toolChoice: ctx.backgroundTask
-              ? 'required'
-              : deliveryOnly
-                ? 'none'
-                : 'auto',
+              : requireQuestionReview
+                ? ['plan_suitability_assess']
+                : (activeTools as Array<keyof typeof allAiSdkTools>),
+            toolChoice: requireQuestionReview
+              ? thinking
+                ? 'auto'
+                : { type: 'tool', toolName: 'plan_suitability_assess' }
+              : ctx.backgroundTask
+                ? 'required'
+                : deliveryOnly
+                  ? 'none'
+                  : 'auto',
             providerOptions: buildCoachStreamProviderOptions({
               thinking,
               provider,

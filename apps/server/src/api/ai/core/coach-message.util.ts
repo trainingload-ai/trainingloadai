@@ -1,6 +1,7 @@
 import type { Response } from 'express';
 import type { I18nService } from 'nestjs-i18n';
 import { COACH_MODEL_UNAVAILABLE_ERROR_CODE } from '@shared/coach-turn-error';
+import { COACH_PLAN_CALENDAR_TOOL } from './coach-plan-calendar';
 import type {
   CoachAssistantContentBlock,
   CoachUserMessageBody,
@@ -17,10 +18,13 @@ const COACH_UI_SURFACE_TOOL_NAMES = new Set([
   'PresentCoachPlanDraft',
   'PresentPlanWorkoutAdjustmentDraft',
   'PlanDayView',
+  COACH_PLAN_CALENDAR_TOOL,
   'ActivityRecent',
   'ActivityDayView',
   'PmcRange',
   'TrainingVisualization',
+  'CoachHealthVisualization',
+  'CoachDetailView',
   'ProfileZones',
   'ProfileZoneRanges',
   'CompetitionEvents',

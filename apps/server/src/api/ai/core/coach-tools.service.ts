@@ -23,6 +23,7 @@ import utc = require('dayjs/plugin/utc');
 import timezone = require('dayjs/plugin/timezone');
 import isoWeek = require('dayjs/plugin/isoWeek');
 import { round } from 'lodash';
+import { isCalendarDate } from '@shared/plan-calendar';
 import { ActivityService } from '@/api/activity/activity.service';
 import { ActivityQueryService } from '@/api/activity/activity-query.service';
 import { ActivityReadService } from '@/api/activity/activity-read.service';
@@ -2120,18 +2121,26 @@ export class CoachToolsService {
         message: ctx.i18n.t('common.error.missing_user_id'),
       });
     }
-    const day = dayjs(input.date).startOf('day');
-    if (!day.isValid()) {
+    const dateStr = input.date;
+    if (!isCalendarDate(dateStr)) {
       throw new BusinessException({
         code: BUSINESS_ERROR_CODE.COMMON,
         message:
           ctx.i18n.t('common.error.invalid_date_range') ?? 'Invalid date',
       });
     }
-    const dateStr = day.format('YYYY-MM-DD');
+    const athleteTimezone = ctx.currentTurnCalendar?.timezone ??
+      (await ctx.userService.getPreferredTimezone(userId)) ?? 'UTC';
+    const day = dayjs.tz(dateStr, athleteTimezone);
     const from = day.toDate();
     const to = day.endOf('day').toDate();
-    const sportType = String(input?.sportType ?? '').trim() || undefined;
+    const sportType = this.normalizeSportType(input.sportType);
+    if (input.sportType && !sportType) {
+      throw new BusinessException({
+        code: BUSINESS_ERROR_CODE.COMMON,
+        message: 'Select a supported sport.',
+      });
+    }
 
     const [rows, profile] = await Promise.all([
       this.activityQuery.searchActivitiesForAi({
@@ -3323,7 +3332,7 @@ export class CoachToolsService {
    * 通用训练统计读取端口。模型只提交语义查询；聚合、单位、时区、覆盖率和
    * 完整性均由服务端确定。可视化工具也复用这里，避免模型自行拼数字。
    */
-  async trainingAggregate(ctx: AiToolContext, input: TrainingAnalysisQuery) {
+  async trainingAggregate(ctx: AiToolContext, input: TrainingAnalysisQuery, resolvedTimezone?: string) {
     const userId = ctx.session?.user?.id;
     if (!userId) {
       throw new BusinessException({
@@ -3344,7 +3353,7 @@ export class CoachToolsService {
       });
     }
 
-    const userTimezone =
+    const userTimezone = resolvedTimezone ??
       (await ctx.userService.getPreferredTimezone(userId)) ??
       ctx.currentTurnCalendar?.timezone ??
       'UTC';

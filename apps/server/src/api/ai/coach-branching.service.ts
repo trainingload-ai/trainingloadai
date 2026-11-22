@@ -749,6 +749,11 @@ export class CoachBranchingService {
         where: {
           branchId: branch.id,
           id: { not: decision.id },
+          OR: [
+            { decisionType: { not: 'PLAN_SCHEDULE' } },
+            { planProposalPreview: { is: null } },
+            { planProposalPreview: { is: { calendarAdjustmentId: null } } },
+          ],
           state: {
             in: [
               CoachDecisionState.DRAFT,
@@ -911,6 +916,10 @@ export class CoachBranchingService {
       binding?.branchId === decision.branchId
       ? decision.branchId
       : null;
+  }
+
+  listCalendarAdjustments(userId: string, planId: string) {
+    return this.planProposalPreviews.listCalendarAdjustments(userId, planId);
   }
 
   async createPlanProposalPreview(args: {
@@ -1168,17 +1177,34 @@ export class CoachBranchingService {
       args.decisionId,
     );
     const reason = toSafeString(args.reason);
+    const data = {
+      state: CoachDecisionState.REJECTED,
+      rationale:
+        reason.length > 0
+          ? [decision.rationale, `[rejected] ${reason}`]
+              .filter(Boolean)
+              .join('\n')
+          : decision.rationale,
+    };
+    if (decision.decisionType === 'PLAN_SCHEDULE') {
+      // Compete with apply on the decision state, without rewriting a committed proposal.
+      await this.prisma.coachDecision.updateMany({
+        where: {
+          id: decision.id,
+          state: { in: ['DRAFT', 'PROPOSED', 'APPROVED'] },
+        },
+        data,
+      });
+      const current = await this.prisma.coachDecision.findUniqueOrThrow({
+        where: { id: decision.id },
+      });
+      if (current.state !== CoachDecisionState.REJECTED)
+        this.fail('DECISION_STATE_CHANGED');
+      return { decision: current };
+    }
     const updated = await this.prisma.coachDecision.update({
       where: { id: decision.id },
-      data: {
-        state: CoachDecisionState.REJECTED,
-        rationale:
-          reason.length > 0
-            ? [decision.rationale, `[rejected] ${reason}`]
-                .filter(Boolean)
-                .join('\n')
-            : decision.rationale,
-      },
+      data,
     });
 
     return { decision: updated };

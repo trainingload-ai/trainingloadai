@@ -735,7 +735,7 @@ export class PlanLoadEstimatorService {
       durationSeconds?: number | null;
       plannedSessionRpe?: number | null;
     }>,
-    options?: { includeInputs?: boolean },
+    options?: { includeInputs?: boolean; tx?: PlanDb },
   ): Promise<
     Array<{
       estimatedLoad: number | null;
@@ -751,7 +751,7 @@ export class PlanLoadEstimatorService {
       sports.map(async (sport) => {
         thresholdsBySport.set(
           sport,
-          await this.loadThresholdsForUser(userId, sport),
+          await this.loadThresholdsForUser(userId, sport, options?.tx),
         );
       }),
     );

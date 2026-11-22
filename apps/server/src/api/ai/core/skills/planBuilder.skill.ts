@@ -29,6 +29,7 @@ export const planBuilderSkill: CoachSkillDef = {
     `Fit the plan to the athlete's goal, availability, capability and recovery; use the scoped payload contract for its format.`,
     `- For a saved draft's start, activate plan-start and confirm its START card for that same plan.`,
     `- Preserve fixed ISO rest weekdays, unavailable dates, timezone and confirmed exceptions in scheduleConstraints. qualityContract.allowedDays stays relative. Validate dated drafts against the actual calendar.`,
+    `- For a continuous plan brief, assess the long-term goal and any dated event on its own timeline. Use one week for the suitability blueprint and workout preview. Explain the longer-term direction without promising fixed progression. The product saves a continuous draft. Later, during START, use the selected date and confirm the monthly direction, actual first natural week, and automatic management scope.`,
     `- Preserve brief facts, all selected sports and strength preferences. Weekly days and session duration are availability budgets, not quotas.`,
     `- Identify only facts or evidence that could change the schedule. Prefer training.plan_context for personalized plans and narrower tools for unresolved details; generic templates need less evidence than race plans.`,
     `- Ask only material questions the product cannot answer, preferably in one structured round; otherwise state conservative assumptions and continue.`,

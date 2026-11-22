@@ -28,7 +28,6 @@ import {
   sampleCoachPromptExamples,
 } from "./coach-chat-view-model";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
-import { useRuntimeEnvironment } from "@/hooks/use-runtime-environment";
 
 function CoachComposerContext() {
   const context = useCoachThread(
@@ -49,7 +48,6 @@ export function CoachComposer({
   const t = useTranslations("AiCoachPage");
   const demoText = useGuestAccessText();
   const publicDemo = usePublicDemo();
-  const { isDesktopSelfHost } = useRuntimeEnvironment();
   const demoReadOnly = publicDemo.active;
   const isRunning = useCoachThread((state) => state.isRunning);
   const actions = useCoachActions();
@@ -103,6 +101,30 @@ export function CoachComposer({
     ? t("composer.deepMode")
     : t("composer.standardMode");
 
+  const composerAction = isRunning ? (
+    <Button
+      type="button"
+      size="icon-sm"
+      className="relative z-10 shrink-0 rounded-full"
+      aria-label={t("actions.stop")}
+      title={t("actions.stop")}
+      onClick={() => void actions.stop()}
+    >
+      <Square className="!size-3" fill="currentColor" aria-hidden="true" />
+    </Button>
+  ) : (
+    <Button
+      type="submit"
+      size="icon-sm"
+      className="relative z-10 shrink-0 rounded-full"
+      disabled={demoReadOnly || !draft.trim()}
+      aria-label={t("actions.send")}
+      title={t("actions.send")}
+    >
+      <ArrowUp aria-hidden="true" />
+    </Button>
+  );
+
   return (
     <div
       className={cn(
@@ -140,7 +162,7 @@ export function CoachComposer({
           }
         }}
         className={cn(
-          "rounded-overlay pc:rounded-md border-0 bg-neutral-100 shadow-none dark:bg-muted/45 focus-within:ring-1 focus-within:ring-ring/30",
+          "rounded-overlay border-0 bg-neutral-100 pc:rounded-surface shadow-none dark:bg-muted/45 focus-within:ring-1 focus-within:ring-ring/30",
           "px-3 py-2 sm:p-2",
         )}
       >
@@ -159,7 +181,7 @@ export function CoachComposer({
               }
               className="max-h-28 min-h-6 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent px-0 py-1 text-base leading-6 text-foreground shadow-none outline-none focus-visible:ring-0 placeholder:text-muted-foreground sm:min-h-[72px] sm:w-full sm:p-0 sm:text-sm"
             />
-            <div className="flex shrink-0 items-end justify-end gap-3 sm:items-center sm:border-t sm:border-border sm:pt-1 sm:justify-between">
+            <div className="flex shrink-0 items-end justify-end gap-3 sm:items-center sm:border-t sm:border-border/45 sm:pt-1 sm:justify-between">
               <div className="hidden flex-1 text-mobile-caption pc:text-xs text-muted-foreground sm:block">
                 {t("composer.hint")}
               </div>
@@ -179,58 +201,7 @@ export function CoachComposer({
                 />
                 <span className="whitespace-nowrap">{modelPurposeLabel}</span>
               </label>
-              {isRunning ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size={isDesktopSelfHost ? "icon-sm" : "composer"}
-                    className={cn(isDesktopSelfHost && "rounded-full")}
-                    aria-label={t("actions.stop")}
-                    title={t("actions.stop")}
-                    onClick={() => void actions.stop()}
-                  >
-                    <Square
-                      fill={isDesktopSelfHost ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
-                    <span
-                      className={
-                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
-                      }
-                    >
-                      {t("actions.stop")}
-                    </span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    type="submit"
-                    disabled={demoReadOnly || !draft.trim()}
-                    title={
-                      demoReadOnly
-                        ? demoText("readOnlyAction")
-                        : t("actions.send")
-                    }
-                    size={isDesktopSelfHost ? "icon-sm" : "composer"}
-                    className={cn(
-                      "relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary",
-                      isDesktopSelfHost && "rounded-full",
-                    )}
-                    aria-label={t("actions.send")}
-                  >
-                    <ArrowUp aria-hidden="true" />
-                    <span
-                      className={
-                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
-                      }
-                    >
-                      {t("actions.send")}
-                    </span>
-                  </Button>
-                </>
-              )}
+              {composerAction}
             </div>
           </div>
         ) : (
@@ -263,61 +234,7 @@ export function CoachComposer({
                   {modelPurposeLabel}
                 </span>
               </label>
-              {isRunning ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size={isDesktopSelfHost ? "icon-sm" : "composer-compact"}
-                    className={cn(
-                      "shrink-0",
-                      isDesktopSelfHost && "rounded-full",
-                    )}
-                    aria-label={t("actions.stop")}
-                    title={t("actions.stop")}
-                    onClick={() => void actions.stop()}
-                  >
-                    <Square
-                      fill={isDesktopSelfHost ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
-                    <span
-                      className={
-                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
-                      }
-                    >
-                      {t("actions.stop")}
-                    </span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    type="submit"
-                    disabled={demoReadOnly || !draft.trim()}
-                    title={
-                      demoReadOnly
-                        ? demoText("readOnlyAction")
-                        : t("actions.send")
-                    }
-                    size={isDesktopSelfHost ? "icon-sm" : "composer-compact"}
-                    className={cn(
-                      "relative z-10 min-h-8 min-w-8 shrink-0 bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-neutral-200 disabled:text-zinc-500 disabled:opacity-100 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:bg-black/20 dark:disabled:text-zinc-500 pc:min-w-0 pc:bg-primary pc:text-primary-foreground pc:hover:bg-primary/90 pc:disabled:bg-primary pc:disabled:text-primary-foreground pc:disabled:opacity-50 pc:dark:bg-primary pc:dark:text-primary-foreground pc:dark:disabled:bg-primary",
-                      isDesktopSelfHost && "rounded-full",
-                    )}
-                    aria-label={t("actions.send")}
-                  >
-                    <ArrowUp aria-hidden="true" />
-                    <span
-                      className={
-                        isDesktopSelfHost ? "sr-only" : "hidden sm:inline"
-                      }
-                    >
-                      {t("actions.send")}
-                    </span>
-                  </Button>
-                </>
-              )}
+              {composerAction}
             </div>
           </div>
         )}

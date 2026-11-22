@@ -329,6 +329,16 @@ export function toDerivedWorkout(
   };
 }
 
+export function getRollingPlanCurrentDate(plan: TrainingPlanDetail): string {
+  if (plan.startDate && plan.currentWeekIndex && plan.currentDayIndex) {
+    return addCalendarDays(
+      plan.startDate.slice(0, 10),
+      (plan.currentWeekIndex - 1) * 7 + plan.currentDayIndex - 1,
+    );
+  }
+  return dayjs().format("YYYY-MM-DD");
+}
+
 export function buildWeekGroups(
   t: TranslateFn,
   plan: TrainingPlanDetail,
@@ -337,14 +347,7 @@ export function buildWeekGroups(
     if (!plan.startDate) return [];
     const start = plan.startDate.slice(0, 10);
     const firstMonday = naturalWeekStart(start);
-    const currentDate =
-      plan.currentWeekIndex && plan.currentDayIndex
-        ? addCalendarDays(
-            start,
-            (plan.currentWeekIndex - 1) * 7 + plan.currentDayIndex - 1,
-          )
-        : dayjs().format("YYYY-MM-DD");
-    const currentMonday = naturalWeekStart(currentDate);
+    const currentMonday = naturalWeekStart(getRollingPlanCurrentDate(plan));
     const mondays = new Set([currentMonday, addCalendarDays(currentMonday, 7)]);
     for (const interval of plan.generationCoverage?.intervals ?? [])
       mondays.add(interval.weekStart);
@@ -415,6 +418,44 @@ export function buildWeekGroups(
       };
     },
   );
+}
+
+type LifecycleActionModel = {
+  action: PlanLifecycleAction;
+  tone: "primary" | "neutral" | "destructive";
+};
+
+export function getLifecycleActions(
+  status: PlanStatus,
+  capabilities?: { delete?: boolean } | null,
+): LifecycleActionModel[] {
+  if (status === "DRAFT") {
+    return [
+      { action: "activate", tone: "primary" },
+      { action: "delete", tone: "destructive" },
+    ];
+  }
+  if (status === "ACTIVE") {
+    return [
+      { action: "pause", tone: "neutral" },
+      { action: "complete", tone: "neutral" },
+      { action: "cancel", tone: "destructive" },
+    ];
+  }
+  if (status === "SCHEDULED") {
+    return [{ action: "cancel", tone: "destructive" }];
+  }
+  if (status === "PAUSED") {
+    return [
+      { action: "resume", tone: "primary" },
+      { action: "complete", tone: "neutral" },
+      { action: "cancel", tone: "destructive" },
+    ];
+  }
+  if (status === "COMPLETED" && capabilities?.delete) {
+    return [{ action: "delete", tone: "destructive" }];
+  }
+  return [];
 }
 
 export function getLifecycleDescription(t: TranslateFn, status: PlanStatus) {

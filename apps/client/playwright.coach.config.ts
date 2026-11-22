@@ -13,7 +13,7 @@ export default defineConfig({
     launchOptions: { channel: "chrome" },
   },
   webServer: {
-    command: "COACH_E2E=1 CLIENT_DEV_PORT=3012 pnpm dev",
+    command: "COACH_E2E=1 NEXT_PUBLIC_SELF_HOST_MODE=core-local pnpm exec next dev -p 3012",
     url: "http://localhost:3012/zh/login",
     reuseExistingServer: false,
     timeout: 120_000,

@@ -131,8 +131,13 @@ export const coachDecisionDraftTool: AiToolDef<Input, Output> = buildAiTool({
     return ctx.coachBranching.canUseDecisionTools({ userId, branchId });
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
-  validateInput: (_ctx, input) => {
+  validateInput: (ctx, input) => {
     const decisionType = String(input?.decisionType ?? '').trim();
+    if (ctx.calendarScheduleOnly && decisionType !== 'PLAN_SCHEDULE')
+      return aiToolError(
+        'Calendar moves require a PLAN_SCHEDULE decision',
+        'INVALID_INPUT',
+      );
     if (!SUPPORTED_DECISION_TYPES.has(decisionType)) {
       return aiToolError('Unsupported decisionType', 'INVALID_INPUT');
     }

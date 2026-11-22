@@ -271,9 +271,9 @@ export default function FitnessStateMiniCards() {
   const canAddMore = draftLayout.length < MAX_HOME_METRICS;
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3 pc:gap-1.5">
       {/* 操作头 */}
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="flex min-h-8 flex-wrap items-center justify-between gap-2 pc:min-h-7">
         <h2 className="text-sm font-semibold text-foreground">
           {tHome("title")}
         </h2>
@@ -310,7 +310,7 @@ export default function FitnessStateMiniCards() {
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="shrink-0 text-muted-foreground hover:text-foreground"
+            className="shrink-0 text-muted-foreground hover:text-foreground pc:size-7"
             aria-label={tHome("settingsAria")}
             title={
               publicDemo.active

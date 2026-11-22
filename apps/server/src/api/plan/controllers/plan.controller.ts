@@ -9,6 +9,8 @@ import {
   Get,
   Logger,
   Param,
+  ParseBoolPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -20,7 +22,6 @@ import { BusinessException } from '@/filters/business-exception/business.excepti
 import { BUSINESS_ERROR_CODE } from '@/filters/business-exception/business-exception.error.codes';
 import { PlanService } from '../plan.service';
 import { PlanSummaryService } from '../application/plan-summary.service';
-import { PlanShareService } from '../application/plan-share.service';
 import { CreatePlanDto } from '../dto/create-plan.dto';
 import { UpdatePlanDto } from '../dto/update-plan.dto';
 import { ActivatePlanDto } from '../dto/activate-plan.dto';
@@ -30,6 +31,8 @@ import { LinkPlanWorkoutActivityDto } from '../dto/link-plan-workout-activity.dt
 import { UpdatePlanWorkoutStatusDto } from '../dto/update-plan-workout-status.dto';
 import { UpdatePlanWorkoutDto } from '../dto/update-plan-workout.dto';
 import { CreateScheduledWorkoutDto } from '../dto/create-scheduled-workout.dto';
+import { PreviewCalendarMoveDto } from '../dto/preview-calendar-move.dto';
+import { ReviseCalendarAdjustmentDto, SaveCalendarAdjustmentDto, RebaseCalendarAdjustmentDto } from '../dto/apply-calendar-edits.dto';
 import { AllowPublicDemo } from '@/public-demo/allow-public-demo.decorator';
 import { PUBLIC_DEMO_CAPABILITIES } from '@shared/public-demo-policy';
 
@@ -41,11 +44,114 @@ export class PlanController {
   constructor(
     private readonly planService: PlanService,
     private readonly planSummary: PlanSummaryService,
-    private readonly planShares: PlanShareService,
     private readonly starts: PlanStartService,
     private readonly queries: PlanQueryService,
     private readonly automation: RollingPlanAutomationService,
   ) {}
+
+  @Post(':planId/workouts/:workoutId/calendar-move')
+  previewCalendarMove(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Param('workoutId') workoutId: string,
+    @Body() input: PreviewCalendarMoveDto,
+  ) {
+    return this.starts.previewCalendarMove(userId, planId, workoutId, input);
+  }
+
+  @Get(':planId/calendar-adjustments')
+  listCalendarAdjustments(@CurrentUserId() userId: string, @Param('planId') planId: string) {
+    return this.starts.listCalendarAdjustments(userId, planId);
+  }
+
+  @Get(':planId/calendar-adjustments/:id')
+  getCalendarAdjustment(
+    @CurrentUserId() userId: string, @Param('planId') planId: string,
+    @Param('id') id: string, @Query('versionId') versionId?: string,
+  ) {
+    return this.starts.getCalendarAdjustment(userId, planId, id, versionId);
+  }
+
+  @Put(':planId/calendar-adjustments/:id')
+  saveCalendarAdjustment(
+    @CurrentUserId() userId: string, @Param('planId') planId: string,
+    @Param('id') id: string, @Body() input: SaveCalendarAdjustmentDto,
+  ) {
+    return this.starts.saveCalendarAdjustment(userId, planId, id, input);
+  }
+
+  @Post(':planId/calendar-adjustments/:id/rebase')
+  rebaseCalendarAdjustment(
+    @CurrentUserId() userId: string, @Param('planId') planId: string,
+    @Param('id') id: string, @Body() input: RebaseCalendarAdjustmentDto,
+  ) {
+    return this.starts.rebaseCalendarAdjustment(userId, planId, id, input);
+  }
+
+  @Post(':planId/calendar-adjustments/:id/versions/:versionId/confirm')
+  confirmCalendarAdjustment(
+    @CurrentUserId() userId: string, @Param('planId') planId: string,
+    @Param('id') id: string, @Param('versionId') versionId: string,
+  ) {
+    return this.starts.confirmCalendarAdjustment(userId, planId, id, versionId);
+  }
+
+  @Delete(':planId/calendar-adjustments/:id/versions/:versionId')
+  discardCalendarAdjustment(
+    @CurrentUserId() userId: string, @Param('planId') planId: string,
+    @Param('id') id: string, @Param('versionId') versionId: string,
+  ) {
+    return this.starts.discardCalendarAdjustment(userId, planId, id, versionId);
+  }
+
+  @Get(':planId/calendar-moves/:previewId')
+  readCalendarMove(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Param('previewId') previewId: string,
+  ) {
+    return this.starts.readCalendarMove(userId, planId, previewId);
+  }
+
+  @Delete(':planId/calendar-moves/:previewId')
+  cancelCalendarMove(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Param('previewId') previewId: string,
+  ) {
+    return this.starts.cancelCalendarMove(userId, planId, previewId);
+  }
+
+  @Post(':planId/calendar-moves/:previewId/confirm')
+  confirmCalendarMove(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Param('previewId') previewId: string,
+    @Body('confirmationId', new ParseUUIDPipe({ version: '4', optional: true }))
+    confirmationId?: string,
+  ) {
+    return this.starts.confirmCalendarMove(userId, planId, previewId, confirmationId);
+  }
+
+  @Put(':planId/calendar-moves/:previewId')
+  reviseCalendarAdjustment(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Param('previewId') previewId: string,
+    @Body() input: ReviseCalendarAdjustmentDto,
+  ) {
+    return this.starts.reviseCalendarAdjustment(userId, planId, previewId, input);
+  }
+
+  @Post(':planId/calendar-moves/:previewId/coach')
+  openCalendarMoveCoach(
+    @CurrentUserId() userId: string,
+    @Param('planId') planId: string,
+    @Param('previewId') previewId: string,
+    @Body('background', new ParseBoolPipe({ optional: true })) background?: boolean,
+  ) {
+    return this.starts.openCalendarMoveCoach(userId, planId, previewId, background);
+  }
 
   @Get(':planId/automation')
   async automationStatus(
@@ -187,14 +293,6 @@ export class PlanController {
     @Body() dto?: UpdatePlanDto,
   ) {
     return this.planService.updatePlan(userId, planId, dto!);
-  }
-
-  @Post(':planId/shares')
-  async createPlanShare(
-    @Param('planId') planId: string,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.planShares.createFromPlan(userId, planId);
   }
 
   @Post(':planId/start-conversation')

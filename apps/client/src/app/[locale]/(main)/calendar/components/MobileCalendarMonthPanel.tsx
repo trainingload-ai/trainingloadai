@@ -10,23 +10,38 @@ import type { Activity } from "@/api/activities";
 import type { CompetitionEvent } from "@/api/competition-events";
 import type { PlanWorkout } from "@/api/plans";
 import { cn } from "@/lib/utils";
+import { getPlanWorkoutDisplayKind } from "@/components/plan/detail/plan-detail-utils";
 import {
   getPlannedWorkoutLoad,
   MobileCalendarDayLoad,
 } from "./MobileCalendarDayLoad";
 import { MobileCalendarDayContent } from "./MobileCalendarSessionCards";
+import { MobileCalendarWorkoutList } from "./MobileCalendarWorkoutList";
+import { MobileCalendarDateDropTarget, MobileCalendarDateGrid, MobileCalendarWorkoutDrag } from "./mobile-calendar-workout-drag";
+import { calendarProposalStyle } from "./calendar-proposal-appearance";
+import type { CalendarProposalMark } from "./calendar-move-model";
+import { CalendarDateContextMenu, type CalendarCreateKind } from "./calendar-context-actions";
 
 const MONTH_MARKER_COLORS = {
   activity: tokenPalette["sky-500"],
   competition: tokenPalette["blue-300"],
   workout: tokenVisual.assessment.accent,
+  missed: tokenPalette["amber-500"],
 } as const;
 
 export function MobileCalendarMonthPanel({
   activePlan,
   activitiesByDate,
+  className,
   competitionEventsByDate,
   currentMonth,
+  dayActions,
+  onMoveWorkout,
+  onRequestMoveWorkout,
+  getMoveWorkout,
+  onCreateOnDate,
+  onAdjustSchedule,
+  createWorkoutOnly,
   onNavigateMonth,
   onSelectActivity,
   onSelectCompetition,
@@ -34,14 +49,24 @@ export function MobileCalendarMonthPanel({
   onSelectWorkout,
   range,
   selectedDate,
+  showMonthHeading = true,
   tssByDate,
   weeks,
+  workoutChangeMarks,
   workoutsByDate,
 }: {
   activePlan?: PlanPlanning | null;
   activitiesByDate: Record<string, Activity[]>;
+  className?: string;
   competitionEventsByDate: Record<string, CompetitionEvent[]>;
   currentMonth: Dayjs;
+  dayActions?: React.ReactNode;
+  onMoveWorkout?: (workout: PlanWorkout, targetDate: string) => void;
+  onRequestMoveWorkout?: (workout: PlanWorkout, trigger: HTMLElement) => void;
+  getMoveWorkout?: (workout: PlanWorkout) => PlanWorkout | undefined;
+  onCreateOnDate?: (kind: CalendarCreateKind, date: Dayjs) => void;
+  onAdjustSchedule?: (date: Dayjs) => void;
+  createWorkoutOnly?: boolean;
   onNavigateMonth: (direction: 1 | -1) => void;
   onSelectActivity: (activity: Activity) => void;
   onSelectCompetition: (event: CompetitionEvent) => void;
@@ -49,13 +74,14 @@ export function MobileCalendarMonthPanel({
   onSelectWorkout: (workout: PlanWorkout, date: Dayjs) => void;
   range?: { startOfWeek: Dayjs; end: Dayjs } | null;
   selectedDate: Dayjs;
+  showMonthHeading?: boolean;
   tssByDate: Record<string, number>;
   weeks: Dayjs[][];
+  workoutChangeMarks?: ReadonlyMap<string, CalendarProposalMark>;
   workoutsByDate: Record<string, PlanWorkout[]>;
 }) {
   const locale = useLocale();
   const t = useTranslations("MobileCalendarTimeline");
-  const rollingT = useTranslations("RollingPlan");
   const monthSwipeStartRef = React.useRef<{ x: number; y: number } | null>(
     null,
   );
@@ -64,7 +90,9 @@ export function MobileCalendarMonthPanel({
   const selectedWorkouts = workoutsByDate[selectedKey] ?? [];
   const selectedEvents = competitionEventsByDate[selectedKey] ?? [];
   const selectedTss = tssByDate[selectedKey] ?? 0;
-  const selectedPlannedLoad = getPlannedWorkoutLoad(selectedWorkouts);
+  const selectedPlannedLoad = getPlannedWorkoutLoad(selectedWorkouts.filter(
+    (workout) => workoutChangeMarks?.get(workout.id)?.side !== "before",
+  ));
   const hasSelectedContent =
     selectedActivities.length > 0 ||
     selectedWorkouts.length > 0 ||
@@ -97,11 +125,16 @@ export function MobileCalendarMonthPanel({
     return Array.from({ length: 42 }, (_, index) => first.add(index, "day"));
   }, [currentMonth, weeks]);
   const weekdays = gridDays.slice(0, 7);
+  const openWorkout = (workout: PlanWorkout) => onSelectWorkout(workout, selectedDate);
 
   return (
+    <MobileCalendarWorkoutDrag onMove={onMoveWorkout}>
     <section
       aria-label={monthTitle}
-      className="flex h-full min-h-0 flex-col gap-3 bg-background px-4 pb-safe-or-3 pt-[calc(env(safe-area-inset-top,0px)+16px)]"
+      className={cn(
+        "flex h-full min-h-0 flex-col gap-3 bg-background px-4 pb-safe-or-3 pt-[calc(env(safe-area-inset-top,0px)+16px)]",
+        className,
+      )}
     >
       <div
         className="shrink-0 touch-pan-y"
@@ -122,11 +155,13 @@ export function MobileCalendarMonthPanel({
           onNavigateMonth(dy < 0 ? 1 : -1);
         }}
       >
-        <h2 className="text-[30px] font-semibold leading-tight tracking-tight text-foreground">
-          {monthTitle}
-        </h2>
+        {showMonthHeading ? (
+          <h2 className="text-[30px] font-semibold leading-tight tracking-tight text-foreground">
+            {monthTitle}
+          </h2>
+        ) : null}
 
-        <div className="mt-4 grid grid-cols-7">
+        <div className={cn("grid grid-cols-7", showMonthHeading && "mt-4")}>
           {weekdays.map((date) => (
             <div
               key={date.format("d")}
@@ -137,7 +172,7 @@ export function MobileCalendarMonthPanel({
           ))}
         </div>
 
-        <div className="relative grid grid-cols-7 border-t border-border/70 pt-2">
+        <MobileCalendarDateGrid>
           {gridDays.map((date) => {
             const key = date.format("YYYY-MM-DD");
             const activities = activitiesByDate[key] ?? [];
@@ -151,9 +186,10 @@ export function MobileCalendarMonthPanel({
               !date.isBefore(range.startOfWeek, "day") &&
               !date.isAfter(range.end, "day"),
             );
-            return (
+            const dayButton = (
               <button
                 key={key}
+                data-calendar-date={key}
                 data-tap-feedback="false"
                 type="button"
                 onClick={() => onSelectDate(date)}
@@ -168,10 +204,10 @@ export function MobileCalendarMonthPanel({
                 <span
                   className={cn(
                     "grid size-7 place-items-center rounded-full",
-                    selected && "bg-emerald-600 text-white",
+                    selected && "bg-brand text-brand-foreground",
                     today &&
                       !selected &&
-                      "border border-emerald-500 text-emerald-600",
+                      "border border-ring text-ring",
                   )}
                 >
                   {date.date()}
@@ -186,16 +222,22 @@ export function MobileCalendarMonthPanel({
                       }}
                     />
                   ) : null}
-                  {Array.from({ length: Math.min(workouts.length, 4) }).map(
-                    (_, index) => (
+                  {workouts.slice(0, 4).map((workout) => {
+                    const mark = workoutChangeMarks?.get(workout.id);
+                    return (
                       <span
-                        key={`workout-${index}`}
+                        key={workout.id}
                         data-calendar-marker="workout"
+                        data-calendar-marker-change={mark?.side}
                         className="size-1.5 rounded-full"
-                        style={{ backgroundColor: MONTH_MARKER_COLORS.workout }}
+                        style={calendarProposalStyle(mark, "marker") ?? {
+                          backgroundColor: getPlanWorkoutDisplayKind(workout) === "incomplete"
+                            ? MONTH_MARKER_COLORS.missed
+                            : MONTH_MARKER_COLORS.workout,
+                        }}
                       />
-                    ),
-                  )}
+                    );
+                  })}
                   {Array.from({ length: Math.min(activities.length, 4) }).map(
                     (_, index) => (
                       <span
@@ -211,8 +253,18 @@ export function MobileCalendarMonthPanel({
                 </span>
               </button>
             );
+            const cell = onCreateOnDate ? (
+              <CalendarDateContextMenu
+                key={key}
+                trigger={dayButton}
+                onCreate={(kind) => onCreateOnDate(kind, date)}
+                onAdjustSchedule={onAdjustSchedule ? () => onAdjustSchedule(date) : undefined}
+                workoutOnly={createWorkoutOnly}
+              />
+            ) : dayButton;
+            return onMoveWorkout ? <MobileCalendarDateDropTarget key={key} date={key}>{cell}</MobileCalendarDateDropTarget> : cell;
           })}
-        </div>
+        </MobileCalendarDateGrid>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col border-t border-border/70 pt-3">
@@ -222,7 +274,7 @@ export function MobileCalendarMonthPanel({
               {selectedDateLine}
             </div>
             <div className="mt-0.5 text-sm font-semibold text-foreground">
-              {hasSelectedContent ? t("dayContent") : activePlan && isPlanDateNotGenerated(activePlan, selectedKey) ? rollingT("notGenerated") : t("noSchedule")}
+              {hasSelectedContent ? t("dayContent") : t("noSchedule")}
             </div>
           </div>
           {hasSelectedContent ? (
@@ -231,20 +283,31 @@ export function MobileCalendarMonthPanel({
               plannedLoad={selectedPlannedLoad}
             />
           ) : null}
+          {dayActions}
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
           <MobileCalendarDayContent
-            notGenerated={Boolean(activePlan && isPlanDateNotGenerated(activePlan, selectedKey))}
             activities={selectedActivities}
             events={selectedEvents}
             workouts={selectedWorkouts}
+            workoutContent={workoutChangeMarks || onMoveWorkout ? (
+              <MobileCalendarWorkoutList
+                selectedDate={selectedKey}
+                workoutsByDate={workoutsByDate}
+                marks={workoutChangeMarks}
+                onSelect={openWorkout}
+                onRequestMove={onMoveWorkout ? onRequestMoveWorkout : undefined}
+                getMoveWorkout={getMoveWorkout}
+              />
+            ) : undefined}
             onActivityPress={onSelectActivity}
             onEventPress={onSelectCompetition}
-            onWorkoutPress={(workout) => onSelectWorkout(workout, selectedDate)}
+            onWorkoutPress={openWorkout}
           />
         </div>
       </div>
     </section>
+    </MobileCalendarWorkoutDrag>
   );
 }

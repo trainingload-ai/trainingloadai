@@ -68,6 +68,7 @@ import { trainingDataCoverageTool } from './tools/trainingDataCoverage.tool';
 import { coachTaskSubmitResultTool } from './tools/coachTaskSubmitResult.tool';
 import { trainingAggregateTool } from './tools/trainingAggregate.tool';
 import { presentTrainingVisualizationTool } from './tools/presentTrainingVisualization.tool';
+import { presentCoachHealthTool } from './tools/presentCoachHealth.tool';
 import { planProposalPreviewTool } from './tools/planProposalPreview.tool';
 import { planSuitabilityAssessTool } from './tools/planSuitabilityAssess.tool';
 import { memorySearchTool } from './tools/memorySearch.tool';
@@ -113,6 +114,7 @@ const CORE_ALWAYS_ON_TOOL_NAMES = [
 const BRANCH_ALWAYS_ON_TOOL_NAMES = [
   'coach_decision_draft',
   'coach_decision_apply',
+  'review.explain',
 ];
 
 function toolAppliesToSkill(
@@ -183,6 +185,7 @@ export const COACH_TOOL_DEFINITIONS: readonly AiToolDef[] = [
   activitySeriesTool,
   trainingAggregateTool,
   presentTrainingVisualizationTool,
+  presentCoachHealthTool,
   pmcRangeTool,
   pmcProjectionTool,
   zonesProfileTool,

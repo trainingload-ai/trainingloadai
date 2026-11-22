@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { useCoachMessage, useCoachThread } from "./coach-chat-provider";
-import { LoaderCircle } from "lucide-react";
+import { CalendarDays, LoaderCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CoachAssistantToolData } from "@/lib/ai-coach-ui-parts";
 import { CoachMarkdown } from "./coach-markdown";
@@ -15,12 +15,15 @@ import { useSmoothStreamingText } from "./use-smooth-streaming-text";
 import { shouldShowTrailingCoachWaiting } from "./coach-streaming-content";
 import { useCoachThinkingEnabled } from "./coach-thinking-context";
 import { CoachV2AssistantCards } from "./coach-assistant-cards";
+import { CoachNavigationCard } from "./cards/coach-navigation-card";
 import {
   isCoachTurnErrorEchoText,
   readCoachTurnError,
 } from "./coach-turn-error-model";
 import { CoachTurnErrorCard } from "./coach-turn-error-card";
 import { coachActivityResults } from "./coach-run-view-model";
+import { readCoachPublishedCalendar } from "./coach-calendar-artifact";
+import { CoachSchedulePreviewContext } from "./coach-preview-panel";
 
 function isOnlyStreamingPunctuation(text: string) {
   const compact = text.trim();
@@ -180,7 +183,7 @@ function CoachUserMessage() {
   return (
     <div className="group flex justify-end gap-3 [contain-intrinsic-size:auto_72px] [content-visibility:auto]">
       <div className="ml-auto max-w-[82%] space-y-2">
-        <div className="ml-auto inline-flex max-w-full flex-wrap gap-1 rounded-surface rounded-tr-xs border border-border/60 bg-neutral-100 px-3.5 py-2.5 text-[15px] font-normal leading-[23px] tracking-normal text-foreground dark:bg-muted/45">
+        <div className="ml-auto inline-flex max-w-full flex-wrap gap-1 rounded-surface rounded-tr-xs bg-neutral-100 px-3.5 py-2.5 text-[15px] font-normal leading-[23px] tracking-normal text-foreground dark:bg-muted/45">
           <UserMessageText />
         </div>
       </div>
@@ -188,11 +191,20 @@ function CoachUserMessage() {
   );
 }
 
-function CoachAssistantMessage() {
+function CoachAssistantMessage({
+  showTurnError = true,
+}: {
+  showTurnError?: boolean;
+}) {
   const hasRun = useCoachMessage((message) =>
     message.ui.parts.some((part) => part.type === "data-coach-run"),
   );
   const ordered = useOrderedAssistantContent();
+  const calendar = useCoachMessage(readCoachPublishedCalendar);
+  const openPublishedCalendar = useContext(
+    CoachSchedulePreviewContext,
+  )?.openPublishedCalendar;
+  const tWorkspace = useTranslations("AiCoachPage.workspace");
   const isThreadRunning = useCoachThread((state) => state.isRunning);
   const isLastMessage = useCoachThread(
     (state) =>
@@ -200,29 +212,29 @@ function CoachAssistantMessage() {
   );
   const isStreaming =
     ordered.status?.type === "running" || (isThreadRunning && isLastMessage);
-  const lastTextIndex = ordered.content.findLastIndex(
-    (part) => part.kind === "text",
-  );
-  const turnError = ordered.turnError;
+  const textBlocks = ordered.content.filter((part) => part.kind === "text");
+  const cardGroups = ordered.content.filter((part) => part.kind === "tools");
+  const turnError = showTurnError ? ordered.turnError : null;
   const showTrailingWaiting =
     !hasRun &&
     !turnError &&
     shouldShowTrailingCoachWaiting(ordered.content, isStreaming);
+  const showCalendar = calendar && openPublishedCalendar && !ordered.turnError;
+  const showCards = !isStreaming && (cardGroups.length > 0 || showCalendar);
+  if (!textBlocks.length && !showTrailingWaiting && !turnError && !showCards)
+    return null;
+
   return (
     <div className="group flex justify-start gap-3">
-      <div className="min-w-0 max-w-full flex-1 space-y-3 text-foreground sm:max-w-[860px]">
-        {ordered.content.map((part, index) =>
-          part.kind === "text" ? (
-            <AssistantMessageTextBlock
-              key={part.id}
-              id={part.id}
-              text={part.text}
-              isStreaming={isStreaming && index === lastTextIndex}
-            />
-          ) : (
-            <CoachV2AssistantCards key={part.id} toolsOverride={part.tools} />
-          ),
-        )}
+      <div className="min-w-0 flex-1 space-y-3 text-foreground">
+        {textBlocks.map((part, index) => (
+          <AssistantMessageTextBlock
+            key={part.id}
+            id={part.id}
+            text={part.text}
+            isStreaming={isStreaming && index === textBlocks.length - 1}
+          />
+        ))}
         {showTrailingWaiting ? <AssistantMessageWaiting /> : null}
         {turnError ? (
           // The inline card replaces the generic stream error for this turn.
@@ -231,6 +243,21 @@ function CoachAssistantMessage() {
             messageId={ordered.messageId}
             isLastMessage={isLastMessage}
           />
+        ) : null}
+        {showCards ? (
+          <div className="space-y-2">
+            {cardGroups.map((part) => (
+              <CoachV2AssistantCards key={part.id} toolsOverride={part.tools} />
+            ))}
+            {showCalendar ? (
+              <CoachNavigationCard
+                icon={CalendarDays}
+                title={tWorkspace("viewCalendar")}
+                subtitle={calendar.title}
+                onOpen={() => openPublishedCalendar(calendar.id)}
+              />
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>

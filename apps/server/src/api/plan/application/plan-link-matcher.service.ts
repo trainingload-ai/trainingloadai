@@ -60,6 +60,7 @@ const WORKOUT_INCLUDE = {
     select: { id: true, source: true, activityId: true },
   },
 } satisfies Prisma.PlanWorkoutInclude;
+const MATCH_REGISTRATION_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 type Workout = Prisma.PlanWorkoutGetPayload<{
   include: typeof WORKOUT_INCLUDE;
 }>;
@@ -457,7 +458,7 @@ export class PlanLinkMatcherService {
     }
   }
 
-  @OnEvent(PLAN_WORKOUTS_CHANGED_EVENT)
+  @OnEvent(PLAN_WORKOUTS_CHANGED_EVENT, { suppressErrors: false })
   async onWorkoutsChanged(event: PlanWorkoutsChangedEvent) {
     if (event.reason === 'automatic_matching') return;
     const [workouts, states] = await Promise.all([
@@ -506,7 +507,7 @@ export class PlanLinkMatcherService {
     for (const day of days) await this.requestDay(event.userId, day);
   }
 
-  /** Repairs missed post-commit wakeups; only feature-owned states are revisited, never a historical backfill. */
+  /** Repairs missed wakeups for tracked matches and recently available activities. */
   @Interval(60_000)
   async rescanPendingMatches() {
     if (this.sweeping) return;
@@ -537,8 +538,38 @@ export class PlanLinkMatcherService {
         take: 100,
         select: { activityId: true },
       });
-      for (const state of states)
-        await this.tryAutoLinkForActivity(state.activityId);
+      // A failed initial transaction leaves no match state. The persisted
+      // activity can still be discovered after a process restart.
+      const cutoff = new Date(Date.now() - MATCH_REGISTRATION_LOOKBACK_MS);
+      const unregistered = await this.activityRead.findMany({
+        where: {
+          state: 1,
+          mergedIntoActivityId: null,
+          startTime: { not: null },
+          workoutMatchState: null,
+          planWorkoutLinks: { none: { unlinkedAt: null } },
+          OR: [
+            { processingStatus: 'READY', processingUpdatedAt: { gte: cutoff } },
+            { status: 'FINISHED', startTime: { gte: cutoff } },
+          ],
+        },
+        orderBy: { id: 'asc' },
+        take: 25,
+        select: { id: true },
+      });
+      let deferred = 0;
+      for (const activityId of [
+        ...states.map((state) => state.activityId),
+        ...unregistered.map((activity) => activity.id),
+      ]) {
+        try {
+          await this.tryAutoLinkForActivity(activityId);
+        } catch {
+          deferred++;
+        }
+      }
+      if (deferred)
+        this.logger.warn(`Workout matching rescan deferred count=${deferred}`);
     } catch {
       this.logger.warn('Workout matching rescan deferred');
     } finally {

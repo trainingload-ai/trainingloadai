@@ -113,6 +113,7 @@ export function PlanCycleProgressChart({
   labels,
   ariaLabel,
   currentKey,
+  currentPositionLabel,
   selectedKey,
   onPointSelect,
   action,
@@ -122,6 +123,7 @@ export function PlanCycleProgressChart({
   labels: Record<Status, string>;
   ariaLabel: string;
   currentKey?: string;
+  currentPositionLabel?: string;
   selectedKey: string;
   onPointSelect: (key: string) => void;
   action?: ReactNode;
@@ -218,7 +220,7 @@ export function PlanCycleProgressChart({
                 aria-hidden="true"
                 className="size-1.5 rounded-full bg-palette-violet-600 dark:bg-palette-violet-400"
               />
-              {t("currentPosition", {
+              {currentPositionLabel ?? t("currentPosition", {
                 current: currentPoint.selectionKey,
                 total: data.length,
               })}
@@ -398,7 +400,7 @@ export function PlanCycleProgressChart({
                     aria-current={isCurrent ? "step" : undefined}
                     aria-pressed={isSelected}
                     onClick={() => onPointSelect(point.selectionKey)}
-                    className="flex min-h-10 min-w-0 flex-col items-center rounded-md pt-1 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex min-h-8 min-w-0 items-center justify-center rounded-md text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span
                       className={cn(
@@ -410,16 +412,6 @@ export function PlanCycleProgressChart({
                       )}
                     >
                       {point.label}
-                    </span>
-                    <span
-                      className={cn(
-                        "h-3 text-[10px] leading-3",
-                        isCurrent
-                          ? "text-palette-violet-600 dark:text-palette-violet-400"
-                          : "invisible",
-                      )}
-                    >
-                      {t("state.current")}
                     </span>
                   </button>
                 );

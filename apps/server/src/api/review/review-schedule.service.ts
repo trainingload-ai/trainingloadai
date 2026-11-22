@@ -3,12 +3,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { UserQueryService } from '@/api/user/user-query.service';
 import { DEFAULT_REVIEW_SEND_AT_LOCAL_TIME } from '@/review/review-schedule.constants';
 import { BodyMetricType, ReviewDigestType } from '@prisma/client';
-import dayjs = require('dayjs');
-import utc = require('dayjs/plugin/utc');
-import timezone = require('dayjs/plugin/timezone');
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import { completedReviewWindow } from '@/review/review-date-window';
 
 const TYPES = ['DAILY', 'WEEKLY', 'MONTHLY'] as const;
 export type ReviewType = (typeof TYPES)[number];
@@ -121,13 +116,11 @@ export class ReviewScheduleService {
 
   async triggerNow(userId: string, type: ReviewDigestType) {
     const tz = await this.getUserTimezone(userId);
-    const localNow = dayjs().tz(tz);
-    const periodEnd = localNow.startOf('day').utc().toDate();
-    const periodStart = localNow
-      .startOf('day')
-      .subtract(type === 'DAILY' ? 1 : type === 'WEEKLY' ? 7 : 30, 'day')
-      .utc()
-      .toDate();
+    const { periodStart, periodEnd } = completedReviewWindow(
+      type,
+      new Date(),
+      tz,
+    );
 
     const row = await this.prisma.reviewJob.upsert({
       where: {
@@ -164,7 +157,7 @@ export class ReviewScheduleService {
     });
 
     this.logger.log(
-      `[复盘][手动触发] userId=${userId} type=${type} timezone=${tz} localNow=${localNow.format()} periodStartUtc=${periodStart.toISOString()} periodEndUtc=${periodEnd.toISOString()}`,
+      `Review manually queued userId=${userId} type=${type} timezone=${tz} periodStartUtc=${periodStart.toISOString()} periodEndUtc=${periodEnd.toISOString()}`,
     );
 
     return row;

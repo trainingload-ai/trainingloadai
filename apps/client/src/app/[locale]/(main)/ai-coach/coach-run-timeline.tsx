@@ -73,9 +73,11 @@ const icons = {
 function ActivityRow({
   activity,
   result,
+  messageId,
 }: {
   activity: CoachActivity;
   result?: CoachAssistantToolData;
+  messageId: string;
 }) {
   const t = useTranslations("AiCoachPage.timeline");
   const [open, setOpen] = useState(false);
@@ -162,7 +164,11 @@ function ActivityRow({
             data-activity-result={result.toolCallId}
           >
             <CoachCardDetailsContext.Provider value={true}>
-              <CoachReadToolCard name={result.name} input={result.input} />
+              <CoachReadToolCard
+                name={result.name}
+                input={result.input}
+                chartRef={{ messageId, deliveryId: result.toolCallId }}
+              />
             </CoachCardDetailsContext.Provider>
           </CollapsibleContent>
         ) : null}
@@ -245,6 +251,7 @@ const RunTimeline = memo(function RunTimeline({
             <ActivityRow
               key={part.data.activityId}
               activity={part.data}
+              messageId={message.id}
               result={results.get(part.data.activityId)}
             />
           );
@@ -304,7 +311,7 @@ const RunTimeline = memo(function RunTimeline({
   );
   return (
     <section
-      className="min-w-0 max-w-[860px] space-y-3"
+      className="min-w-0 space-y-3"
       data-run-id={run.runId}
     >
       {group.resumed ? (
@@ -368,7 +375,9 @@ const RunTimeline = memo(function RunTimeline({
       ) : null}
       {group.messages.map((message) => (
         <CoachMessageProvider key={message.id} id={message.id}>
-          <COACH_MESSAGE_COMPONENTS.AssistantMessage />
+          <COACH_MESSAGE_COMPONENTS.AssistantMessage
+            showTurnError={latestAttempt && message.id === last.id}
+          />
         </CoachMessageProvider>
       ))}
     </section>

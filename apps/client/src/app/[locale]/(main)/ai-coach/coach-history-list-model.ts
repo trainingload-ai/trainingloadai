@@ -42,7 +42,7 @@ export function groupCoachSessionsByRecentBuckets(
     yesterday: string;
     past: string;
   },
-): CoachHistoryFlatRow[] {
+) {
   const today = dayjs().startOf("day");
   const yesterday = today.subtract(1, "day");
   const buckets: Array<{
@@ -66,21 +66,10 @@ export function groupCoachSessionsByRecentBuckets(
     }
   }
 
-  const rows: CoachHistoryFlatRow[] = [];
-  for (const bucket of buckets) {
-    if (bucket.items.length === 0) continue;
-    rows.push({
-      kind: "header",
-      key: `section-${bucket.key}`,
-      label: bucket.label,
-    });
-    bucket.items.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
-    for (const session of bucket.items) {
-      rows.push({ kind: "session", key: session.id, session });
-    }
-  }
-
-  return rows;
+  return buckets.filter((bucket) => bucket.items.length > 0).map((bucket) => ({
+    ...bucket,
+    items: bucket.items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+  }));
 }
 
 export function groupCoachSessionsByHistoryBuckets(

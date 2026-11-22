@@ -1,6 +1,5 @@
 "use client";
 
-import { isPlanDateNotGenerated } from "@/lib/rolling-plan";
 import React from "react";
 import dayjs from "dayjs";
 import { CalendarRange } from "lucide-react";
@@ -17,7 +16,10 @@ import { useMobileEdgeSwipe } from "@/components/mobile-app/hooks/use-mobile-edg
 import { usePcViewport } from "@/hooks/use-mobile";
 import { useSetPageTitle } from "@/hooks/useSetPageTitle";
 import type { MobileCalendarSheetPage } from "./components/MobileCalendarDaySheet";
+import { CalendarEditingDialogs, useCalendarEditing } from "./components/calendar-editing";
 import { useCalendarViewModel } from "./components/useCalendarViewModel";
+import { calendarScrollFetchRange } from "./components/utils";
+import { useCalendarScrollPosition } from "./components/use-calendar-scroll-position";
 
 function CalendarSurfaceFallback() {
   return (
@@ -28,17 +30,13 @@ function CalendarSurfaceFallback() {
   );
 }
 
-const CalendarHeader = dynamic(
-  () =>
-    import("./components/CalendarHeader").then((module) => module.default),
+const CalendarAdjustmentDialog = dynamic(
+  () => import("./components/calendar-adjustment-dialog").then((module) => module.CalendarAdjustmentDialog),
   { ssr: false },
 );
 
-const CalendarStage = dynamic(
-  () =>
-    import("./components/CalendarStage").then(
-      (module) => module.CalendarStage,
-    ),
+const CalendarMonthView = dynamic(
+  () => import("./components/CalendarMonthView").then((module) => module.CalendarMonthView),
   { loading: CalendarSurfaceFallback, ssr: false },
 );
 
@@ -91,7 +89,9 @@ export default function PMCPage() {
   const pcViewport = usePcViewport();
   const isPc = pcViewport === true;
   const isMobileLayout = pcViewport === false;
-  const [currentMonth, setCurrentMonth] = React.useState(dayjs());
+  const { currentMonth, setCurrentMonth, displayedMonth: scrolledMonth, scroll, resetScrollAnchor } =
+    useCalendarScrollPosition(() => dayjs());
+  const displayedMonth = isPc ? scrolledMonth : currentMonth;
   const [displayMode, setDisplayMode] = React.useState<"week" | "month">(
     "month",
   );
@@ -104,6 +104,7 @@ export default function PMCPage() {
     React.useState<CompetitionEvent | null>(null);
   const [monthOpen, setMonthOpen] = React.useState(false);
   const [daySheetOpen, setDaySheetOpen] = React.useState(false);
+  const workoutDetailsTrigger = React.useRef<HTMLElement | null>(null);
   const [mobileSheetPage, setMobileSheetPage] =
     React.useState<MobileCalendarSheetPage>({ kind: "day" });
   const [mobileAgendaWindow, setMobileAgendaWindow] = React.useState(() => {
@@ -112,9 +113,7 @@ export default function PMCPage() {
       start: today
         .subtract(MOBILE_AGENDA_EXTENSION_MONTHS, "month")
         .startOf("month"),
-      end: today
-        .add(MOBILE_AGENDA_EXTENSION_MONTHS, "month")
-        .endOf("month"),
+      end: today.add(MOBILE_AGENDA_EXTENSION_MONTHS, "month").endOf("month"),
     };
   });
   const mobileAgendaRange = React.useMemo(
@@ -124,6 +123,10 @@ export default function PMCPage() {
     }),
     [mobileAgendaWindow],
   );
+  const requestedCalendarRange = React.useMemo(() => {
+    if (!isPc) return mobileAgendaRange;
+    return calendarScrollFetchRange(currentMonth);
+  }, [currentMonth, isPc, mobileAgendaRange]);
   useSetPageTitle(t("page.title"));
 
   const {
@@ -143,7 +146,7 @@ export default function PMCPage() {
     competitionEventsByDate,
     tssByDate,
     range,
-  } = useCalendarViewModel(currentMonth, mobileAgendaRange);
+  } = useCalendarViewModel(currentMonth, requestedCalendarRange, displayedMonth);
   const mobileAgendaDays = React.useMemo(() => {
     const start = mobileAgendaWindow.start.startOf("day");
     const end = mobileAgendaWindow.end.endOf("day");
@@ -197,12 +200,25 @@ export default function PMCPage() {
     [currentMonth, setSelectedDate],
   );
 
+  const openWorkoutDetails = React.useCallback(
+    (workout: PlanWorkout | null) => {
+      if (workout) {
+        workoutDetailsTrigger.current =
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
+      }
+      setSelectedPlanWorkout(workout);
+    },
+    [],
+  );
+
   const handleSelectWorkout = React.useCallback(
     (workout: PlanWorkout, date: dayjs.Dayjs) => {
       applySelectedDate(date);
-      setSelectedPlanWorkout(workout);
+      openWorkoutDetails(workout);
     },
-    [applySelectedDate],
+    [applySelectedDate, openWorkoutDetails],
   );
 
   const openMobileSheet = React.useCallback(
@@ -228,16 +244,18 @@ export default function PMCPage() {
   );
 
   const navigateMonth = React.useCallback(
-    (direction: 1 | -1) => {
+    (direction: 1 | -1, fromMonth?: string) => {
       setNavigationDirection(direction);
-      const targetMonth = currentMonth.add(direction, "month").startOf("month");
+      resetScrollAnchor();
+      const sourceMonth = fromMonth ? dayjs(`${fromMonth}-01`) : displayedMonth;
+      const targetMonth = sourceMonth.add(direction, "month").startOf("month");
+      setCurrentMonth(targetMonth);
       const targetDate = targetMonth.date(
         Math.min(selectedDate.date(), targetMonth.daysInMonth()),
       );
-      setCurrentMonth(targetMonth);
       setSelectedDate(targetDate);
     },
-    [currentMonth, selectedDate, setSelectedDate],
+    [displayedMonth, resetScrollAnchor, selectedDate, setCurrentMonth, setSelectedDate],
   );
 
   const navigateWeek = React.useCallback(
@@ -268,10 +286,15 @@ export default function PMCPage() {
     const today = dayjs();
     setNavigationDirection(1);
     setCurrentMonth(today.startOf("month"));
+    resetScrollAnchor();
     setSelectedDate(today);
     setMonthOpen(false);
-  }, [setSelectedDate]);
+  }, [resetScrollAnchor, setCurrentMonth, setSelectedDate]);
 
+  const [adjustmentDate, setAdjustmentDate] = React.useState<string | null>(null);
+  const openAdjustment = activePlanId
+    ? (date: dayjs.Dayjs) => setAdjustmentDate(date.format("YYYY-MM-DD"))
+    : undefined;
   useMobileEdgeSwipe(() => setMonthOpen(true), !monthOpen);
   useMobileNavigation({
     leading: (
@@ -300,62 +323,68 @@ export default function PMCPage() {
 
   const monthLabel = React.useMemo(() => {
     const labelDate =
-      effectiveDisplayMode === "week" ? selectedDate : currentMonth;
+      effectiveDisplayMode === "week" ? selectedDate : displayedMonth;
     return new Intl.DateTimeFormat(locale, {
       year: "numeric",
       month: "long",
     }).format(labelDate.toDate());
-  }, [locale, currentMonth, effectiveDisplayMode, selectedDate]);
+  }, [locale, displayedMonth, effectiveDisplayMode, selectedDate]);
+
+  const editing = useCalendarEditing({ onSelectDate: applySelectedDate });
 
   return (
     <div
       data-testid="calendar-page"
       className="relative grid h-full min-h-0 min-w-0 flex-1 gap-3 overflow-hidden pc:grid-cols-[minmax(0,1.24fr)_minmax(220px,260px)] pc:gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(240px,280px)]"
     >
-      <div className="flex h-full min-h-0 min-w-0 flex-col gap-3 pc:overflow-y-auto pc:overscroll-contain pc:pr-1">
+      <div className="flex h-full min-h-0 min-w-0 flex-col gap-3 pc:overflow-hidden pc:pr-1">
         {pcViewport === undefined ? (
           <CalendarSurfaceFallback />
         ) : isPc ? (
-          <>
-            <CalendarHeader
-              monthLabel={monthLabel}
-              displayMode={effectiveDisplayMode}
-              showDisplayModeToggle={false}
-              onDisplayModeChange={(mode) => setDisplayMode(mode)}
-              onPrev={handlePrev}
-              onNext={handleNext}
-              onToday={handleToday}
-              currentMonthDate={currentMonth.toDate()}
-              onMonthChange={(date) => {
+          <CalendarMonthView
+            header={{
+              monthLabel,
+              displayMode: effectiveDisplayMode,
+              showDisplayModeToggle: false,
+              onPrev: handlePrev,
+              onNext: handleNext,
+              onToday: handleToday,
+              currentMonthDate: displayedMonth.toDate(),
+              onMonthChange: (date) => {
                 const nextMonth = dayjs(date).startOf("month");
+                resetScrollAnchor();
                 setCurrentMonth(nextMonth);
                 setSelectedDate(
-                  nextMonth.date(
-                    Math.min(selectedDate.date(), nextMonth.daysInMonth()),
-                  ),
+                  nextMonth.date(Math.min(selectedDate.date(), nextMonth.daysInMonth())),
                 );
-              }}
-            />
-            <CalendarStage
-              currentMonth={currentMonth}
-              weeks={weeks}
-              selectedWeek={selectedWeek}
-              selectedDate={selectedDate}
-              displayMode={effectiveDisplayMode}
-              navigationDirection={navigationDirection}
-              onSelectDate={applySelectedDate}
-              onSelectCompetition={setSelectedCompetitionEvent}
-              onSelectWorkout={handleSelectWorkout}
-              onPrev={handlePrev}
-              onNext={handleNext}
-              activitiesByDate={activitiesByDate}
-              workoutsByDate={workoutsByDate}
-              competitionEventsByDate={competitionEventsByDate}
-              tssByDate={tssByDate}
-              activePlan={activePlan}
-              range={range}
-            />
-          </>
+              },
+            }}
+            grid={{
+              currentMonth,
+              visibleMonth: displayedMonth,
+              weeks,
+              selectedWeek,
+              selectedDate,
+              displayMode: effectiveDisplayMode,
+              navigationDirection,
+              onSelectDate: applySelectedDate,
+              onSelectCompetition: setSelectedCompetitionEvent,
+              onSelectWorkout: handleSelectWorkout,
+              onMoveWorkout: editing.moveWorkout,
+              ...scroll,
+              onScrollMonth: navigateMonth,
+              onCreateOnDate: editing.createOnDate,
+              onAdjustSchedule: openAdjustment,
+              onRequestMove: editing.requestMove,
+              onPrev: handlePrev,
+              onNext: handleNext,
+              activitiesByDate,
+              workoutsByDate,
+              competitionEventsByDate,
+              tssByDate,
+              range,
+            }}
+          />
         ) : (
           <>
             <MobilePushSidePage
@@ -369,6 +398,10 @@ export default function PMCPage() {
                   weeks={weeks}
                   selectedDate={selectedDate}
                   onSelectDate={applySelectedDate}
+                  onCreateOnDate={editing.createOnDate}
+                  onAdjustSchedule={openAdjustment}
+                  onMoveWorkout={editing.moveWorkout}
+                  onRequestMoveWorkout={editing.requestMove}
                   onNavigateMonth={navigateMonth}
                   onSelectActivity={handleMobileActivity}
                   onSelectCompetition={(event) => {
@@ -384,7 +417,7 @@ export default function PMCPage() {
                   competitionEventsByDate={competitionEventsByDate}
                   tssByDate={tssByDate}
                   activePlan={activePlan}
-              range={range}
+                  range={range}
                 />
               ) : null}
             </MobilePushSidePage>
@@ -416,7 +449,13 @@ export default function PMCPage() {
             activePlanId={activePlanId}
             summaryScopes={summaryScopes}
             selectedPlanWorkout={selectedPlanWorkout}
-            onSelectPlanWorkout={setSelectedPlanWorkout}
+            onSelectPlanWorkout={openWorkoutDetails}
+            onCreateWorkout={() => editing.createOnDate("workout", selectedDate)}
+            onMovePlanWorkout={
+              editing.requestMove
+                ? (workout) => editing.requestMove?.(workout, workoutDetailsTrigger.current)
+                : undefined
+            }
             focusedCompetitionEvent={null}
             className="h-full"
           />
@@ -424,11 +463,11 @@ export default function PMCPage() {
       ) : null}
       {isMobileLayout && daySheetOpen ? (
         <MobileCalendarDaySheet
-          notGenerated={Boolean(activePlan && isPlanDateNotGenerated(activePlan, selectedDate.format("YYYY-MM-DD")))}
           open
           onOpenChange={setDaySheetOpen}
           page={mobileSheetPage}
           onPageChange={setMobileSheetPage}
+          onMoveWorkout={editing.requestMove}
           date={selectedDate}
           activities={selectedActivities}
           workouts={selectedPlanWorkouts}
@@ -446,6 +485,14 @@ export default function PMCPage() {
             currentCompetitionEvent.startDate ??
             selectedDate.format("YYYY-MM-DD")
           }
+        />
+      ) : null}
+      <CalendarEditingDialogs editing={editing} planId={activePlanId} />
+      {adjustmentDate && activePlanId ? (
+        <CalendarAdjustmentDialog
+          planId={activePlanId}
+          initialDate={adjustmentDate}
+          onClose={() => setAdjustmentDate(null)}
         />
       ) : null}
     </div>

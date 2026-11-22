@@ -169,6 +169,14 @@ describe("AIAnalysis feature access", () => {
     expect(screen.getByText("analyzing")).toBeInTheDocument();
   });
 
+  it("shows the empty review in a preview without starting a new stream", () => {
+    mocks.accessAllowed = true;
+    mocks.reviewQuery.data = { found: false };
+    render(<AIAnalysis autoStart={false} />);
+    expect(screen.getByText("emptyHint")).toBeInTheDocument();
+    expect(mocks.useAiAnalysisStream).toHaveBeenLastCalledWith("activity-1", true, 0, false);
+  });
+
   it("retries a terminal failure inside the card without navigating", () => {
     mocks.accessAllowed = true;
     mocks.reviewQuery.data = { found: true, status: "DEAD", markdown: "" };

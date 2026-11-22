@@ -4,7 +4,6 @@ import { AiCoachMainScrollLock } from "./main-scroll-lock";
  * AI 教练路由专用布局
  *
  * - 与 `(main)/layout.tsx` 共用顶栏与侧栏
- * - 页脚版本文案由 `MainAppFooter` 按路径隐藏
  * - 锁住外层 main 滚动，仅允许页面内部消息区滚动
  */
 export default function AiCoachLayout({

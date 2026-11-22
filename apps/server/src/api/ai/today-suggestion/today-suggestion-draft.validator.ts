@@ -292,6 +292,9 @@ export function validateTodaySuggestionDraftForProjection(
       throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION');
     }
   }
+  if (draft.recommendation.kind !== 'TRAIN' && draft.trainingBasis)
+    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+
   const factualEvidence = new Set<string>(projection.constraints ?? []);
   if (hasRecentTrainingActivity(projection))
     factualEvidence.add('RECENT_ACTIVITY');

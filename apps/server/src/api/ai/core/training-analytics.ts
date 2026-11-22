@@ -214,6 +214,8 @@ function summarizeActivities(
   );
   let totalDistanceM = 0;
   let distanceDurationSec = 0;
+  let pairedDistanceM = 0;
+  let pairedActivityCount = 0;
   let distanceActivityCount = 0;
   let durationActivityCount = 0;
   for (const row of rows) {
@@ -223,7 +225,11 @@ function summarizeActivities(
     if (distance == null || distance < 0) continue;
     totalDistanceM += distance;
     distanceActivityCount += 1;
-    if (duration > 0) distanceDurationSec += duration;
+    if (duration > 0) {
+      distanceDurationSec += duration;
+      pairedDistanceM += distance;
+      pairedActivityCount += 1;
+    }
   }
   const weighted = (
     getter: (row: TrainingAggregateActivity) => number | null,
@@ -239,7 +245,7 @@ function summarizeActivities(
     }
     return {
       value: denominator > 0 ? numerator / denominator : null,
-      coverage: totalDurationSec > 0 ? denominator / totalDurationSec : 0,
+      knownSeconds: denominator,
     };
   };
   const heartRate = weighted((row) => finite(row.avgHeartRate));
@@ -247,12 +253,22 @@ function summarizeActivities(
 
   const allValues: Partial<Record<TrainingAnalysisMeasure, number | null>> = {
     ACTIVITY_COUNT: rows.length,
-    DURATION_MIN: rounded(totalDurationSec / 60, 1),
-    DISTANCE_KM: rounded(totalDistanceM / 1_000, 2),
+    DURATION_MIN: durationActivityCount ? rounded(totalDurationSec / 60, 1) : null,
+    DISTANCE_KM: distanceActivityCount ? rounded(totalDistanceM / 1_000, 2) : null,
     AVG_SPEED_KMH:
       distanceDurationSec > 0
-        ? rounded((totalDistanceM / distanceDurationSec) * 3.6, 2)
+        ? rounded((pairedDistanceM / distanceDurationSec) * 3.6, 2)
         : null,
+    AVG_PACE_SEC_PER_KM:
+      pairedDistanceM > 0 && new Set(rows.map((row) => row.sportType)).size === 1
+        ? rounded((distanceDurationSec * 1_000) / pairedDistanceM, 1)
+        : null,
+    AVG_DURATION_MIN: durationActivityCount
+      ? rounded(totalDurationSec / durationActivityCount / 60, 1)
+      : null,
+    AVG_DISTANCE_KM: distanceActivityCount
+      ? rounded(totalDistanceM / distanceActivityCount / 1_000, 2)
+      : null,
     AVG_HEART_RATE:
       heartRate.value == null ? null : rounded(heartRate.value, 1),
     AVG_POWER: power.value == null ? null : rounded(power.value, 1),
@@ -269,31 +285,32 @@ function summarizeActivities(
     measures.map((measure) => [measure, allValues[measure]]),
   ) as Partial<Record<TrainingAnalysisMeasure, number | null>>;
   const coverage: Partial<Record<TrainingAnalysisMeasure, number>> = {};
+  const coverageDetails: NonNullable<TrainingDatasetV1['coverageDetails']> = {};
+  const byActivity = (known: number) => ({ known, total: rows.length, unit: 'count' as const });
+  const byDuration = (seconds: number) => ({
+    known: rounded(seconds / 60, 1), total: rounded(totalDurationSec / 60, 1), unit: 'min' as const,
+  });
+  const allCoverageDetails: NonNullable<TrainingDatasetV1['coverageDetails']> = {
+    AVG_HEART_RATE: byDuration(heartRate.knownSeconds),
+    AVG_POWER: byDuration(power.knownSeconds),
+    AVG_SPEED_KMH: byActivity(pairedActivityCount),
+    AVG_PACE_SEC_PER_KM: byActivity(pairedActivityCount),
+    DISTANCE_KM: byActivity(distanceActivityCount),
+    AVG_DISTANCE_KM: byActivity(distanceActivityCount),
+    DURATION_MIN: byActivity(durationActivityCount),
+    AVG_DURATION_MIN: byActivity(durationActivityCount),
+  };
   for (const measure of measures) {
-    coverage[measure] = rounded(
-      measure === 'AVG_HEART_RATE'
-        ? heartRate.coverage
-        : measure === 'AVG_POWER'
-          ? power.coverage
-          : measure === 'AVG_SPEED_KMH'
-            ? totalDurationSec > 0
-              ? distanceDurationSec / totalDurationSec
-              : 0
-            : measure === 'DISTANCE_KM'
-              ? rows.length > 0
-                ? distanceActivityCount / rows.length
-                : 0
-              : measure === 'DURATION_MIN'
-                ? rows.length > 0
-                  ? durationActivityCount / rows.length
-                  : 0
-                : measure === 'ACTIVITY_COUNT'
-                  ? 1
-                  : 0,
-      3,
-    );
+    const detail = allCoverageDetails[measure];
+    if (detail) coverageDetails[measure] = detail;
+    if (measure === 'AVG_HEART_RATE' || measure === 'AVG_POWER') {
+      const knownSeconds = measure === 'AVG_HEART_RATE' ? heartRate.knownSeconds : power.knownSeconds;
+      coverage[measure] = totalDurationSec > 0 ? rounded(knownSeconds / totalDurationSec, 3) : 0;
+    } else {
+      coverage[measure] = detail?.total ? rounded(detail.known / detail.total, 3) : Number(measure === 'ACTIVITY_COUNT');
+    }
   }
-  return { values, coverage };
+  return { values, coverage, coverageDetails };
 }
 
 export function buildActivityTrainingDataset(args: {
@@ -349,6 +366,8 @@ export function buildActivityTrainingDataset(args: {
   const fingerprint = stableFingerprint({
     query: args.query,
     rows,
+    summary: aggregate.values,
+    coverageDetails: aggregate.coverageDetails,
     truncated: args.truncated,
   });
   return {
@@ -362,6 +381,7 @@ export function buildActivityTrainingDataset(args: {
       matchedActivityCount: args.activities.length,
     },
     coverage: aggregate.coverage,
+    coverageDetails: aggregate.coverageDetails,
     complete: !args.truncated,
     truncated: args.truncated,
     fingerprint,
@@ -376,26 +396,26 @@ type PmcAccumulator = {
   rows: PMCData[];
 };
 
-function pmcValue(row: PMCData, measure: TrainingAnalysisMeasure): number {
+function pmcValue(row: PMCData, measure: TrainingAnalysisMeasure): number | null {
   switch (measure) {
     case 'DAILY_LOAD':
-      return row.dailyValue ?? 0;
+      return row.dailyValue ?? null;
     case 'ATL':
-      return row.ATL ?? 0;
+      return row.ATL ?? null;
     case 'CTL':
-      return row.CTL ?? 0;
+      return row.CTL ?? null;
     case 'TSB':
-      return row.TSB ?? 0;
+      return row.TSB ?? null;
     case 'RUNNING_LOAD':
-      return row.runningValue ?? 0;
+      return row.runningValue ?? null;
     case 'CYCLING_LOAD':
-      return row.cyclingValue ?? 0;
+      return row.cyclingValue ?? null;
     case 'SWIMMING_LOAD':
-      return row.swimmingValue ?? 0;
+      return row.swimmingValue ?? null;
     case 'OTHER_LOAD':
-      return row.otherValue ?? 0;
+      return row.otherValue ?? null;
     default:
-      return 0;
+      return null;
   }
 }
 
@@ -403,15 +423,12 @@ function summarizePmcBucket(
   rows: PMCData[],
   measures: TrainingAnalysisMeasure[],
 ) {
-  const latest = rows.at(-1);
   return Object.fromEntries(
     measures.map((measure) => {
-      const value =
-        measure === 'ATL' || measure === 'CTL' || measure === 'TSB'
-          ? latest
-            ? pmcValue(latest, measure)
-            : null
-          : rows.reduce((sum, row) => sum + pmcValue(row, measure), 0);
+      const values = rows.map((row) => pmcValue(row, measure)).filter((value) => value !== null);
+      const value = measure === 'ATL' || measure === 'CTL' || measure === 'TSB'
+        ? values.at(-1) ?? null
+        : values.length ? values.reduce((sum, item) => sum + item, 0) : null;
       return [measure, value == null ? null : rounded(value, 1)];
     }),
   ) as Partial<Record<TrainingAnalysisMeasure, number | null>>;
@@ -441,7 +458,7 @@ export function buildPmcTrainingDataset(args: {
           measure === 'DAILY_LOAD' || measure === sourceMeasure
             ? rounded(
                 args.records.reduce(
-                  (sum, record) => sum + pmcValue(record, sourceMeasure),
+                  (sum, record) => sum + (pmcValue(record, sourceMeasure) ?? 0),
                   0,
                 ),
                 1,
@@ -463,6 +480,12 @@ export function buildPmcTrainingDataset(args: {
       existing.rows.push(record);
       buckets.set(bucket.key, existing);
     }
+    if (args.query.groupBy === 'DAY' && args.records.length > 0) {
+      for (let cursor = dayjs.utc(args.query.from); cursor.format('YYYY-MM-DD') <= args.query.to; cursor = cursor.add(1, 'day')) {
+        const bucket = bucketForDate(cursor.toDate(), 'DAY', 'UTC');
+        if (!buckets.has(bucket.key)) buckets.set(bucket.key, { ...bucket, rows: [] });
+      }
+    }
     rows = [...buckets.values()]
       .sort((a, b) => a.key.localeCompare(b.key))
       .map((bucket) => ({
@@ -482,7 +505,11 @@ export function buildPmcTrainingDataset(args: {
     timezone: args.timezone,
     rows,
     summary,
-    coverage: Object.fromEntries(args.query.measures.map((item) => [item, 1])),
+    coverage: Object.fromEntries(args.query.measures.map((item) => [
+      item,
+      args.records.filter((record) => pmcValue(record, item) !== null).length /
+        (dayjs.utc(args.query.to).diff(dayjs.utc(args.query.from), 'day') + 1),
+    ])),
     complete: true,
     truncated: false,
     fingerprint,
@@ -603,6 +630,7 @@ export function buildTrainingVisualization(args: {
       complete: args.dataset.complete,
       truncated: args.dataset.truncated,
       coverage: args.dataset.coverage,
+      coverageDetails: args.dataset.coverageDetails,
       fingerprint: args.dataset.fingerprint,
     },
   };

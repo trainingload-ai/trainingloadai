@@ -61,7 +61,7 @@ function toPreviewText(markdown: string) {
     .trim();
 }
 
-const AIAnalysis = () => {
+const AIAnalysis = ({ autoStart = true }: { autoStart?: boolean }) => {
   const t = useTranslations("AIAnalysis");
   const queryClient = useQueryClient();
   const activityId = useActivityId();
@@ -116,6 +116,7 @@ const AIAnalysis = () => {
     review?.found === true && ["DEAD", "SKIPPED"].includes(review.status ?? "");
   useEffect(() => {
     if (
+      autoStart &&
       streamEligible &&
       !hasStoredMarkdown &&
       !workerPending &&
@@ -128,6 +129,7 @@ const AIAnalysis = () => {
       );
     }
   }, [
+    autoStart,
     streamEligible,
     hasStoredMarkdown,
     workerPending,
@@ -251,7 +253,7 @@ const AIAnalysis = () => {
               onClick={handleCardClick}
               onMouseEnter={preloadActivityCoachConversation}
               onFocus={preloadActivityCoachConversation}
-              className="group flex min-h-[96px] w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex min-h-12 w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[42rem]/activity-detail:min-h-[96px]"
             >
               <div className="relative max-h-[72px] min-h-0 flex-1 overflow-hidden">
                 <div className="prose prose-sm max-w-none text-foreground dark:prose-invert prose-p:my-1.5 prose-p:leading-6 prose-headings:my-1.5 prose-headings:text-sm prose-headings:font-semibold prose-ul:my-1.5 prose-li:my-0.5 prose-strong:text-foreground dark:prose-strong:text-foreground">
@@ -265,6 +267,10 @@ const AIAnalysis = () => {
                 <span>{t("expand")} ›</span>
               </div>
             </button>
+          ) : !autoStart && !loadingCombined ? (
+            <p className="text-mobile-caption text-muted-foreground pc:text-xs">
+              {t("emptyHint")}
+            </p>
           ) : (
             analyzingPulse
           )}

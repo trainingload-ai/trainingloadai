@@ -1,3 +1,4 @@
+import { reviewRemainingQuestions } from '../coach-plan-question-review';
 import { aiToolError, buildAiTool, type AiToolDef } from '../tool.types';
 import {
   ASK_USER_QUESTION_TYPE,
@@ -31,11 +32,22 @@ export const askUserQuestionTool: AiToolDef<Input, Output> = buildAiTool({
     if (!parsed.ok) {
       return aiToolError(parsed.error, 'INVALID_INPUT');
     }
+    if (
+      ctx.planQuestionReview &&
+      !reviewRemainingQuestions(ctx.planQuestionReview, parsed.data.questions)
+    ) {
+      return aiToolError(
+        'Complete the prior-question assessment first. Include a revised question with the same ID for each REPLACE decision, and omit ANSWERED or IRRELEVANT IDs.',
+        'PLAN_QUESTION_REVIEW_REQUIRED',
+      );
+    }
     return { ok: true };
   },
   execute: async (ctx, input) => ({
     kind: ASK_USER_QUESTION_TYPE,
-    questions: input.questions,
+    questions: ctx.planQuestionReview
+      ? reviewRemainingQuestions(ctx.planQuestionReview, input.questions)!
+      : input.questions,
     metadata: {
       // Action bindings are issued by their own tools, never supplied by the model.
       ...(input.metadata?.source ? { source: input.metadata.source } : {}),

@@ -205,12 +205,12 @@ describe('NotificationDomainService', () => {
       }),
     );
     expect(prisma.notification.count).toHaveBeenLastCalledWith({
-      where: {
+      where: expect.objectContaining({
         userId: 'user-1',
         readAt: null,
         visibleAt: { lte: expect.any(Date) },
         cancelledAt: null,
-      },
+      }),
     });
   });
 

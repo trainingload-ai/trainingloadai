@@ -1,4 +1,5 @@
 import { AiService } from '../ai.service';
+import { TrainingCoachAgent } from '../agents/training-coach-agent.service';
 import { AiUsageKind } from '@prisma/client';
 
 function installBackgroundPersistence(service: AiService) {
@@ -67,7 +68,7 @@ describe('AiService background coach tasks', () => {
       loadCoachContextFromDb: { value: history },
     });
     await expect(
-      service.coachStream({
+      service['runCoachTurn']({
         session: { user: { id: 'athlete' } } as never,
         sid: 'state-session',
         prompt: 'Refresh state.',
@@ -101,7 +102,7 @@ describe('AiService background coach tasks', () => {
         };
       })(),
     );
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
     const result = await service.runBackgroundCoachTask({
       userId: 'user-1',
       lang: 'en',
@@ -177,7 +178,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const run = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -265,7 +266,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     await expect(
       service.runBackgroundCoachTask({
@@ -315,7 +316,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const run = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -388,7 +389,7 @@ describe('AiService background coach tasks', () => {
     };
     Object.defineProperty(service, 'coachRuns', { value: coachRuns });
     Object.defineProperty(service, 'operations', { value: operations });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const replayed = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -440,7 +441,7 @@ describe('AiService background coach tasks', () => {
     };
     Object.defineProperty(service, 'coachRuns', { value: coachRuns });
     Object.defineProperty(service, 'operations', { value: operations });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     await expect(
       service.runBackgroundCoachTask({
@@ -496,7 +497,7 @@ describe('AiService background coach tasks', () => {
     };
     Object.defineProperty(service, 'coachRuns', { value: coachRuns });
     Object.defineProperty(service, 'operations', { value: operations });
-    Object.defineProperty(service, 'coachStream', { value: jest.fn() });
+    Object.defineProperty(service, 'runCoachTurn', { value: jest.fn() });
 
     const replayed = await service.runBackgroundCoachTask({
       userId: 'user-1',
@@ -547,7 +548,7 @@ describe('AiService background coach tasks', () => {
         };
       })();
     });
-    Object.defineProperty(service, 'coachStream', { value: coachStream });
+    Object.defineProperty(service, 'runCoachTurn', { value: coachStream });
 
     const result = await service.runAnonymousCoachTask({
       lang: 'zh',
@@ -827,7 +828,7 @@ describe('AiService background coach tasks', () => {
         value: runBackgroundCoachTask,
       });
 
-      const result = await service.generatePlanReviewJudgment({
+      const result = await new TrainingCoachAgent(service).generatePlanReviewJudgment({
         userId: 'user-1',
         lang: 'zh',
         scale,

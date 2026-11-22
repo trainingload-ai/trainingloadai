@@ -74,6 +74,7 @@ export const COACH_TOOL_LABELS = {
   present_coach_plan_draft: "planDraft",
   present_plan_workout_adjustment_draft: "workoutAdjustment",
   present_training_visualization: "visualization",
+  present_coach_health: "visualization",
   "skill.activate": "skillActivate",
   "fitness.methods": "fitnessMethods",
   "fitness.evidence": "fitnessEvidence",

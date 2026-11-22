@@ -36,6 +36,9 @@ export const TRAINING_ACTIVITY_MEASURES = [
   "DURATION_MIN",
   "DISTANCE_KM",
   "AVG_SPEED_KMH",
+  "AVG_PACE_SEC_PER_KM",
+  "AVG_DURATION_MIN",
+  "AVG_DISTANCE_KM",
   "AVG_HEART_RATE",
   "AVG_POWER",
 ] as const;
@@ -102,6 +105,8 @@ export type TrainingDatasetRow = {
   values: Partial<Record<TrainingAnalysisMeasure, number | null>>;
 };
 
+type TrainingCoverageDetail = { known: number; total: number; unit: "count" | "min" };
+
 export type TrainingDatasetV1 = {
   kind: "training_dataset";
   schemaVersion: 1;
@@ -112,6 +117,7 @@ export type TrainingDatasetV1 = {
     matchedActivityCount?: number;
   };
   coverage: Partial<Record<TrainingAnalysisMeasure, number>>;
+  coverageDetails?: Partial<Record<TrainingAnalysisMeasure, TrainingCoverageDetail>>;
   complete: boolean;
   truncated: boolean;
   fingerprint: string;
@@ -144,6 +150,10 @@ export type TrainingVisualizationV1 = {
   intent: TrainingVisualizationIntent;
   view: TrainingVisualizationView;
   requestedView?: TrainingVisualizationView;
+  detail?: { limit?: number };
+  observedAt?: string;
+  observationDate?: string;
+  metricSources?: TrainingMetricSource[];
   viewAdjustmentReason?: "NO_DATA" | "SINGLE_POINT" | "INCOMPATIBLE_VIEW";
   x: {
     key: "label";
@@ -164,6 +174,7 @@ export type TrainingVisualizationV1 = {
     complete: boolean;
     truncated: boolean;
     coverage: TrainingDatasetV1["coverage"];
+    coverageDetails?: TrainingDatasetV1["coverageDetails"];
     fingerprint: string;
   };
 };
@@ -176,6 +187,9 @@ const MEASURE_UNITS: Record<
   DURATION_MIN: "min",
   DISTANCE_KM: "km",
   AVG_SPEED_KMH: "km/h",
+  AVG_PACE_SEC_PER_KM: "s/km",
+  AVG_DURATION_MIN: "min",
+  AVG_DISTANCE_KM: "km",
   AVG_HEART_RATE: "bpm",
   AVG_POWER: "W",
   DAILY_LOAD: "load",
@@ -219,6 +233,8 @@ export function isTrainingVisualizationV1(
     typeof value.title === "string" &&
     TRAINING_VISUALIZATION_INTENTS.includes(value.intent) &&
     TRAINING_VISUALIZATION_VIEWS.includes(value.view) &&
+    (value.metricSources === undefined || Array.isArray(value.metricSources) &&
+      value.metricSources.every((source) => TRAINING_METRIC_SOURCES.includes(source))) &&
     !!value.x &&
     (value.x.type === "TIME" || value.x.type === "CATEGORY") &&
     Array.isArray(value.series) &&

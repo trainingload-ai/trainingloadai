@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import type { PlanQuestionReview, PlanQuestionReviewDecision } from '../coach-plan-question-review';
 import {
   aiToolError,
   buildAiTool,
@@ -13,6 +14,7 @@ type Sport = 'RUN' | 'CYCLING' | 'SWIM' | 'STRENGTH';
 type Input = {
   status: Status;
   goalSummary: string;
+  questionReview?: PlanQuestionReviewDecision[];
   constraints: {
     intent:
       | 'HEALTH_FAT_LOSS'
@@ -396,7 +398,36 @@ export const planSuitabilityAssessTool: AiToolDef<Input, Output> = buildAiTool({
   },
   isEnabled: async (ctx) => hasSignedInUser(ctx),
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
-  validateInput: async (_ctx, input) => {
+  validateInput: async (ctx, input) => {
+    if (ctx.planQuestionReview) {
+      const decisions = input.questionReview ?? [];
+      const original = ctx.planQuestionReview.questions;
+      if (
+        decisions.length !== original.length ||
+        original.some((question) => !decisions.some((item) => item.id === question.id)) ||
+        decisions.some((item) => !item.reason.trim())
+      ) {
+        return aiToolError(
+          `Provide one questionReview entry with an outcome and reason for each exact ID: ${original.map(({id}) => id).join(', ')}.`,
+          'PLAN_QUESTION_REVIEW_REQUIRED',
+        );
+      }
+      if (
+        input.status !== 'NEEDS_INPUT' &&
+        decisions.some((item) => item.outcome === 'KEEP' || item.outcome === 'REPLACE')
+      ) {
+        return aiToolError(
+          'Return NEEDS_INPUT while a retained or replaced question still needs an answer.',
+          'PLAN_QUESTION_REVIEW_REQUIRED',
+        );
+      }
+    }
+    if (ctx.rollingPlanDraft && input.constraints.periodWeeks !== 1) {
+      return aiToolError(
+        'For a continuous plan, assess the full goal but use periodWeeks=1 for the starter-week blueprint. The continuous plan has no fixed duration.',
+        'PLAN_SUITABILITY_CONSTRAINT_CONFLICT',
+      );
+    }
     const requiredSports = unique(input.constraints.requiredSports);
     if (requiredSports.length !== input.constraints.requiredSports.length) {
       return aiToolError(
@@ -436,9 +467,11 @@ export const planSuitabilityAssessTool: AiToolDef<Input, Output> = buildAiTool({
   summarizeForModel: ({ output }) => output,
   execute: async (ctx, input) => {
     const assessmentId = randomUUID();
+    if (ctx.planQuestionReview) ctx.planQuestionReview.decisions = input.questionReview;
     if (ctx.planSuitability) {
       ctx.planSuitability.latest = {
         assessmentId,
+        goalSummary: input.goalSummary,
         status: input.status,
         constraints: {
           periodWeeks: input.constraints.periodWeeks,
@@ -456,3 +489,35 @@ export const planSuitabilityAssessTool: AiToolDef<Input, Output> = buildAiTool({
     };
   },
 });
+
+/** Advertise the review as a required input only for the refresh attempt. */
+export function planSuitabilityQuestionReviewTool(review: PlanQuestionReview): AiToolDef {
+  const tool = planSuitabilityAssessTool;
+  const ids = review.questions.map((question) => question.id);
+  return {
+    ...tool,
+    description: `Recheck the previous questions and assess plan suitability. Required questionReview IDs: ${ids.join(', ')}. Include one entry per ID.`,
+    parameters: {
+      ...tool.parameters,
+      required: [...(tool.parameters.required ?? []), 'questionReview'],
+      properties: {
+        ...tool.parameters.properties,
+        questionReview: {
+          type: 'array',
+          minItems: ids.length,
+          maxItems: ids.length,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['id', 'outcome', 'reason'],
+            properties: {
+              id: { type: 'string', enum: ids },
+              outcome: { type: 'string', enum: ['KEEP', 'ANSWERED', 'IRRELEVANT', 'REPLACE'] },
+              reason: { type: 'string', minLength: 1 },
+            },
+          },
+        },
+      },
+    },
+  } as AiToolDef;
+}

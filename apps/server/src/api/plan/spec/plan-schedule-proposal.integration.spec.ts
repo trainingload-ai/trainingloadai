@@ -1,11 +1,22 @@
 import { fork, type ChildProcess } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CalendarAdjustmentSyncWorker } from '../application/calendar-adjustment-sync.worker';
+import { PLAN_WORKOUTS_CHANGED_EVENT } from '../events/plan.events';
 import { planStartFixture } from './plan-start.fixture';
 import { addCalendarDays } from '@shared/plan-calendar';
 import type { PlanQualityContract } from '@shared/plan-quality';
 import { planByIdTool } from '../../ai/core/tools/planById.tool';
 import { planActiveTool } from '../../ai/core/tools/planActive.tool';
+import { AiService } from '../../ai/ai.service';
+import { CoachBranchingService } from '../../ai/coach-branching.service';
+import { CoachRunStore } from '../../ai/coach-run-store.service';
+import type {
+  CoachQueryYield,
+  CoachUserMessageBody,
+} from '../../ai/core/coach-query-yield';
 
 describe('remaining schedule / PostgreSQL', () => {
   let database: ChildProcess;
@@ -59,6 +70,7 @@ describe('remaining schedule / PostgreSQL', () => {
       startDate?: string;
       durationMinutes?: number;
       periodWeeks?: number;
+      openSession?: (planId: string) => Promise<{ id: string }>;
     } = {},
   ) {
     const created = await f.service.createPlan('user', {
@@ -107,11 +119,17 @@ describe('remaining schedule / PostgreSQL', () => {
       data: { contextId: context.id },
     });
     const branch = await prisma.coachBranch.create({
-      data: { threadId: thread.id, contextId: context.id, baseEventSeq: 0 },
+      data: {
+        threadId: thread.id,
+        contextId: context.id,
+        baseEventSeq: context.headEventSeq,
+      },
     });
-    const session = await prisma.aiCoachSession.create({
-      data: { userId: 'user', id: 'ordinary-chat' },
-    });
+    const session = options.openSession
+      ? await options.openSession(planId)
+      : await prisma.aiCoachSession.create({
+          data: { userId: 'user', id: 'ordinary-chat' },
+        });
     const user = await prisma.aiCoachMessage.create({
       data: {
         userId: 'user',
@@ -170,6 +188,234 @@ describe('remaining schedule / PostgreSQL', () => {
       } as any,
     };
   }
+  it('commits manual moves, additions and deletions atomically and replays the receipt', async () => {
+    const { planId } = await running(4);
+    const read = () => prisma.planWorkout.findMany({
+      where: { planId }, orderBy: [{ dayOffset: 'asc' }, { sessionIndex: 'asc' }],
+    });
+    const [first, second, third, fourth] = await read();
+    const targetDate = fourth.scheduledDate!.toISOString().slice(0, 10);
+    const input = {
+      versionId: randomUUID(),
+      edits: [
+        { kind: 'UPDATE' as const, workoutId: first.id, expectedRevision: first.revision, targetDate },
+        { kind: 'UPDATE' as const, workoutId: second.id, expectedRevision: second.revision, targetDate },
+        { kind: 'DELETE' as const, workoutId: third.id, expectedRevision: third.revision },
+        {
+          kind: 'ADD' as const, candidateKey: randomUUID(), targetDate,
+          workout: {
+            name: 'Recovery run', sportType: 'RUN' as const,
+            definition: { kind: 'FREEFORM' as const, version: 1 as const, source: 'TEXT' as const, text: 'Easy 20m' },
+          },
+        },
+      ],
+    };
+    const stale = {
+      ...input,
+      edits: [...input.edits.slice(0, 2), { ...input.edits[2], expectedRevision: third.revision + 1 }],
+    };
+    await expect(f.starts.saveCalendarAdjustment('user', planId, input.versionId, stale)).rejects.toThrow();
+    expect(await read()).toEqual([first, second, third, fourth]);
+    const saved = await f.starts.saveCalendarAdjustment('user', planId, input.versionId, input);
+    expect(await read()).toEqual([first, second, third, fourth]);
+    const receipt = await f.starts.confirmCalendarAdjustment('user', planId, saved.id, saved.versionId);
+    expect(receipt).toMatchObject({ versionId: input.versionId, readbackVerified: true,
+      changedWorkoutCount: 2, addedWorkoutCount: 1, deletedWorkoutCount: 1 });
+    const committed = await read();
+    expect(committed.map(({ id }) => id)).toEqual([fourth.id, first.id, second.id, expect.any(String)]);
+    expect(committed.every(({ scheduledDate }) => scheduledDate?.toISOString().startsWith(targetDate))).toBe(true);
+    expect(committed.at(-1)?.name).toBe('Recovery run');
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, saved.id, saved.versionId)).resolves.toEqual(receipt);
+    expect(await read()).toEqual(committed);
+  });
+
+  it('versions a cross-month drag once and keeps an independent adjustment in another week', async () => {
+    const { planId } = await running(4, { periodWeeks: 5, startDate: '2099-11-22' });
+    const [first, second] = await prisma.planWorkout.findMany({ where: { planId }, orderBy: { dayOffset: 'asc' } });
+    const id = randomUUID();
+    const firstVersion = await f.starts.saveCalendarAdjustment('user', planId, id, {
+      versionId: id,
+      edits: [{ kind: 'UPDATE', workoutId: first.id, expectedRevision: first.revision, targetDate: '2099-11-28' }],
+    });
+    const latest = await f.starts.saveCalendarAdjustment('user', planId, id, {
+      baseVersionId: firstVersion.versionId, versionId: randomUUID(),
+      edits: [{ kind: 'UPDATE', workoutId: first.id, expectedRevision: first.revision, targetDate: '2099-12-03' }],
+    });
+    expect(latest.presentation.rows.filter((row) => row.changeKind === 'CHANGED')).toEqual([
+      expect.objectContaining({ workoutId: first.id, beforeScheduledDate: '2099-11-22', scheduledDate: '2099-12-03' }),
+    ]);
+    expect(await f.starts.getCalendarAdjustment('user', planId, id, firstVersion.versionId))
+      .toMatchObject({ state: 'SUPERSEDED', currentVersionId: latest.versionId });
+    expect(await prisma.planWorkout.findUnique({ where: { id: first.id } })).toEqual(first);
+    await expect(f.starts.getCalendarAdjustment('other', planId, id)).rejects.toThrow();
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, firstVersion.versionId)).rejects.toThrow();
+
+    const independentId = randomUUID();
+    const unrelated = await f.starts.saveCalendarAdjustment('user', planId, independentId, {
+      versionId: independentId,
+      edits: [{ kind: 'ADD', candidateKey: randomUUID(), targetDate: '2099-12-16', workout: {
+        sportType: 'RUN', name: 'Run',
+        definition: { kind: 'FREEFORM', version: 1, source: 'TEXT', text: 'Easy 20m' },
+      } }],
+    });
+    expect((await f.starts.listCalendarAdjustments('user', planId)).map((item) => item.id)).toEqual(expect.arrayContaining([id, independentId]));
+    const receipt = await f.starts.confirmCalendarAdjustment('user', planId, id, latest.versionId);
+    expect(receipt).toMatchObject({ readbackVerified: true, changedWorkoutCount: 1 });
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, latest.versionId)).resolves.toEqual(receipt);
+    expect(await prisma.planWorkout.findUnique({ where: { id: second.id } })).toEqual(second);
+    expect(await f.starts.getCalendarAdjustment('user', planId, independentId)).toMatchObject({ state: 'READY' });
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, independentId, unrelated.versionId))
+      .resolves.toMatchObject({ addedWorkoutCount: 1 });
+  });
+
+  it('confirms a saved adjustment when only the floating-point load representation changed', async () => {
+    const { planId } = await running(1, { periodWeeks: 2 });
+    const workout = await prisma.planWorkout.findFirstOrThrow({ where: { planId } });
+    await prisma.planWorkout.update({ where: { id: workout.id }, data: { estimatedLoad: 125.4 } });
+    const id = randomUUID();
+    const saved = await f.starts.saveCalendarAdjustment('user', planId, id, {
+      versionId: id,
+      edits: [{ kind: 'UPDATE', workoutId: workout.id, expectedRevision: workout.revision, targetDate: '2099-11-24' }],
+    });
+    const weeks = saved.presentation.calendarAdjustmentWeeks!;
+    expect(weeks[0].before.estimatedLoad).toBe(125.4);
+    const { proposal } = await prisma.planProposalPreview.findUniqueOrThrow({ where: { id } });
+    const setStoredLoad = (estimatedLoad: number) => prisma.planProposalPreview.update({
+      where: { id },
+      data: { proposal: JSON.parse(JSON.stringify({
+        ...(proposal as object),
+        presentation: {
+          ...saved.presentation,
+          calendarAdjustmentWeeks: [{ ...weeks[0], before: { ...weeks[0].before, estimatedLoad } }, ...weeks.slice(1)],
+        },
+      })) },
+    });
+
+    await setStoredLoad(125.5);
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, saved.versionId)).rejects.toThrow();
+    await setStoredLoad(125.39999999999);
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, saved.versionId))
+      .resolves.toMatchObject({ changedWorkoutCount: 1, readbackVerified: true });
+  });
+
+  it('confirms calendar edits to an endurance workout with separately authored steps', async () => {
+    const { planId } = await running(1, { periodWeeks: 2 });
+    const workout = await prisma.planWorkout.findFirstOrThrow({ where: { planId } });
+    const id = randomUUID();
+    const saved = await f.starts.saveCalendarAdjustment('user', planId, id, {
+      versionId: id,
+      edits: [{
+        kind: 'UPDATE', workoutId: workout.id, expectedRevision: workout.revision, targetDate: '2099-11-24',
+        workout: {
+          name: 'Endurance run', sportType: 'RUN',
+          definition: {
+            kind: 'ENDURANCE', version: 1, source: 'TEXT',
+            text: 'warmup 5m\nwork 40m hr z2\ncooldown 5m',
+          },
+        },
+      }],
+    });
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, saved.versionId))
+      .resolves.toMatchObject({ changedWorkoutCount: 1, readbackVerified: true });
+    const actual = await prisma.planWorkout.findUniqueOrThrow({ where: { id: workout.id } });
+    expect(actual).toMatchObject({ name: 'Endurance run', plannedDurationSeconds: 3000 });
+    const { plan } = await f.service.getPlanDetail('user', planId);
+    expect(plan!.workouts![0].structure).toMatchObject({
+      kind: 'ENDURANCE',
+      blocks: [{ steps: [expect.anything(), { primaryTargetMeta: { kind: 'HEART_RATE_ZONE', zoneIndex: 2 } }, expect.anything()] }],
+    });
+  });
+
+  it('invalidates completed workouts and only rebases operations selected from the same adjustment', async () => {
+    const { planId } = await running(4, { periodWeeks: 2 });
+    const [first, second] = await prisma.planWorkout.findMany({ where: { planId }, orderBy: { dayOffset: 'asc' } });
+    const id = randomUUID();
+    const version = await f.starts.saveCalendarAdjustment('user', planId, id, {
+      versionId: id,
+      edits: [
+        { kind: 'UPDATE', workoutId: first.id, expectedRevision: first.revision, targetDate: '2099-11-27' },
+        { kind: 'DELETE', workoutId: second.id, expectedRevision: second.revision },
+      ],
+    });
+    await prisma.planWorkout.update({ where: { id: first.id }, data: { status: 'DONE' } });
+    const invalidated = await f.starts.getCalendarAdjustment('user', planId, id);
+    expect(invalidated).toMatchObject({ state: 'INVALIDATED', conflicts: [{ key: first.id, reason: 'WORKOUT_STATUS' }] });
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, version.versionId)).rejects.toThrow();
+    expect(await prisma.planWorkout.findUnique({ where: { id: second.id } })).toEqual(second);
+    const rebased = await f.starts.rebaseCalendarAdjustment('user', planId, id, {
+      versionId: randomUUID(), baseVersionId: version.versionId, operationKeys: [second.id],
+    });
+    expect(rebased).toMatchObject({ state: 'READY', operationKeys: [second.id] });
+    const discarded = await f.starts.discardCalendarAdjustment('user', planId, id, rebased.versionId);
+    expect(discarded.state).toBe('DISCARDED');
+    await expect(f.starts.confirmCalendarAdjustment('user', planId, id, rebased.versionId)).rejects.toThrow();
+    expect(await prisma.planWorkout.findUnique({ where: { id: second.id } })).toEqual(second);
+  });
+
+  it('retries delivery of a committed version without writing the schedule again', async () => {
+    const { planId } = await running(3);
+    const [first] = await prisma.planWorkout.findMany({ where: { planId }, orderBy: { dayOffset: 'asc' } });
+    const id = randomUUID();
+    const saved = await f.starts.saveCalendarAdjustment('user', planId, id, {
+      versionId: id,
+      edits: [{ kind: 'UPDATE', workoutId: first.id, expectedRevision: first.revision, targetDate: '2099-11-26' }],
+    });
+    await f.starts.confirmCalendarAdjustment('user', planId, id, saved.versionId);
+    const bus = new EventEmitter2();
+    const worker = new CalendarAdjustmentSyncWorker(prisma as never, bus);
+    const delivery: string[] = [];
+    bus.on(PLAN_WORKOUTS_CHANGED_EVENT, (event) => {
+      delivery.push(event.calendarAdjustmentVersionId);
+      if (delivery.length === 1) throw new Error('Temporary sync target failure');
+    });
+    const record = () => prisma.planProposalPreview.findUniqueOrThrow({ where: { id: saved.versionId } });
+    await worker.drain();
+    expect((await record()).calendarSyncSentAt).toBeNull();
+    await worker.drain();
+    expect((await record()).calendarSyncSentAt).toBeInstanceOf(Date);
+    await worker.drain();
+    expect(delivery).toEqual([saved.versionId, saved.versionId]);
+    expect((await prisma.planWorkout.findUniqueOrThrow({ where: { id: first.id } })).revision).toBe(first.revision + 1);
+  });
+
+  it('adds an agent proposal to the same adjustment from a new conversation and rejects a late claim', async () => {
+    const d = await running(3, { periodWeeks: 3 });
+    const [first, second] = await prisma.planWorkout.findMany({ where: { planId: d.planId }, orderBy: { dayOffset: 'asc' } });
+    const id = randomUUID();
+    const base = await f.starts.saveCalendarAdjustment('user', d.planId, id, {
+      versionId: id,
+      edits: [{ kind: 'UPDATE', workoutId: first.id, expectedRevision: first.revision, targetDate: '2099-11-28' }],
+    });
+    const branch = await prisma.coachBranch.findUniqueOrThrow({ where: { id: d.binding.branchId } });
+    const amended = { ...d.request,
+      calendarAdjustment: { id, baseVersionId: base.versionId },
+      changes: [{
+        sourceWorkoutId: second.id, expectedRevision: second.revision,
+        workout: { weekIndex: 2, dayIndex: 3, sessionIndex: 1, sportType: 'RUN',
+          definition: { kind: 'FREEFORM', version: 1, source: 'TEXT', text: 'Run 30m' } },
+      }],
+    };
+    const proposed = await f.proposals.createPreview('user', amended, d.binding);
+    const late = await f.proposals.createPreview('user', amended, d.binding);
+    const claim = (previewId: string) => prisma.$transaction(async (tx) => {
+      const decision = await tx.coachDecision.create({ data: {
+        branchId: branch.id, contextId: branch.contextId, decisionType: 'PLAN_SCHEDULE',
+        state: 'PROPOSED', payload: { planId: d.planId, previewId },
+      } });
+      await f.proposals.claimDecision({
+        previewId, decisionId: decision.id, userId: 'user', sourcePlanId: d.planId, tx,
+      });
+    });
+    await claim(proposed.previewId);
+    await expect(claim(late.previewId)).rejects.toThrow(/version changed/);
+    const head = await f.starts.getCalendarAdjustment('user', d.planId, id);
+    expect(head).toMatchObject({ versionId: proposed.previewId, operationKeys: [first.id, second.id] });
+    expect(await f.starts.getCalendarAdjustment('user', d.planId, id, base.versionId))
+      .toMatchObject({ state: 'SUPERSEDED', currentVersionId: proposed.previewId });
+    await expect(f.starts.confirmCalendarAdjustment('user', d.planId, id, head.versionId))
+      .resolves.toMatchObject({ changedWorkoutCount: 2 });
+  });
+
   it('covers all 210 courses from an ordinary chat without truncation or requiring a start session', async () => {
     const d = await running(210);
     const result = await f.proposals.createPreview(
@@ -186,6 +432,427 @@ describe('remaining schedule / PostgreSQL', () => {
       },
     });
   });
+  it('previews a calendar move across two weeks and applies it once after confirmation', async () => {
+    const d = await running(1, {
+      startDate: '2099-11-16',
+      durationMinutes: 30,
+      periodWeeks: 3,
+    });
+    const before = (await f.service.getPlanDetail('user', d.planId)).plan!;
+    const workout = before.workouts![0];
+    const preview = await f.starts.previewCalendarMove(
+      'user',
+      d.planId,
+      workout.id,
+      {
+        targetDate: '2099-11-24',
+        expectedRevision: workout.revision,
+      },
+    );
+    expect(preview.impact).toMatchObject({
+      from: '2099-11-16',
+      to: '2099-11-24',
+      weeks: [
+        {
+          weekStart: '2099-11-16',
+          before: { sessions: 1 },
+          after: { sessions: 0 },
+        },
+        {
+          weekStart: '2099-11-23',
+          before: { sessions: 0 },
+          after: { sessions: 1 },
+        },
+      ],
+    });
+    expect(preview.presentation.rows).toContainEqual(
+      expect.objectContaining({
+        workoutId: workout.id,
+        beforeScheduledDate: '2099-11-16',
+        scheduledDate: '2099-11-24',
+      }),
+    );
+    expect(
+      (await f.service.getPlanDetail('user', d.planId)).plan!.workouts![0],
+    ).toMatchObject({ scheduledDate: '2099-11-16' });
+    const receipt = await f.starts.confirmCalendarMove(
+      'user',
+      d.planId,
+      preview.previewId,
+    );
+    expect(receipt).toMatchObject({
+      readbackVerified: true,
+      identityMap: [
+        {
+          workoutId: workout.id,
+          scheduledDate: '2099-11-24',
+          revision: workout.revision + 1,
+        },
+      ],
+    });
+    expect(
+      await f.starts.confirmCalendarMove('user', d.planId, preview.previewId),
+    ).toEqual(receipt);
+  });
+  it('confirms a date-only move in a rolling plan with adjacent structured workouts', async () => {
+    const startDate = addCalendarDays(new Date().toISOString().slice(0, 10), -1);
+    const offsets = [0, 2, 4, 6, 8, 11, 13, 16];
+    const draft = await f.service.createPlan('user', {
+      title: 'Continuous running',
+      goal: 'Build endurance',
+      planningMode: 'ROLLING',
+      periodWeeks: null,
+      workouts: offsets.map((offset) => ({
+        weekIndex: Math.floor(offset / 7) + 1,
+        dayIndex: (offset % 7) + 1,
+        sportType: 'RUN',
+        definition: {
+          kind: 'ENDURANCE',
+          version: 1,
+          source: 'TEXT',
+          text: 'warmup 5m\nwork 40m\ncooldown 5m',
+        },
+      })),
+    });
+    const planId = draft.plan!.id;
+    await prisma.plan.update({
+      where: { id: planId },
+      data: { status: 'ACTIVE', startDate: new Date(startDate), activationTimezone: 'UTC' },
+    });
+    const scheduled = await prisma.planWorkout.findMany({
+      where: { planId },
+      orderBy: { dayOffset: 'asc' },
+    });
+    for (const item of scheduled) {
+      await prisma.planWorkout.update({
+        where: { id: item.id },
+        data: { scheduledDate: new Date(addCalendarDays(startDate, item.dayOffset)) },
+      });
+    }
+    const workout = scheduled[1];
+    const targetDate = addCalendarDays(startDate, 7);
+    const preview = await f.starts.previewCalendarMove('user', planId, workout.id, {
+      targetDate,
+      expectedRevision: workout.revision,
+    });
+    await expect(f.starts.confirmCalendarMove('user', planId, preview.previewId)).resolves.toMatchObject({
+      readbackVerified: true,
+      identityMap: [{ workoutId: workout.id, scheduledDate: targetDate, revision: workout.revision + 1 }],
+    });
+  });
+
+  it('rejects an unowned, cancelled or stale calendar move without changing the workout', async () => {
+    const d = await running(1, { startDate: '2099-11-16', periodWeeks: 3 });
+    const workout = (await f.service.getPlanDetail('user', d.planId)).plan!
+      .workouts![0];
+    const moves = await Promise.all(
+      ['2099-11-24', '2099-11-25', '2099-11-26'].map((targetDate) =>
+        f.starts.previewCalendarMove('user', d.planId, workout.id, {
+          targetDate,
+          expectedRevision: workout.revision,
+        }),
+      ),
+    );
+    await expect(
+      f.starts.confirmCalendarMove('other', d.planId, moves[0].previewId),
+    ).rejects.toThrow();
+    await expect(
+      f.starts.cancelCalendarMove('user', d.planId, moves[0].previewId),
+    ).resolves.toMatchObject({ state: 'CANCELLED' });
+    await expect(
+      f.starts.confirmCalendarMove('user', d.planId, moves[0].previewId),
+    ).rejects.toThrow();
+    await f.starts.confirmCalendarMove('user', d.planId, moves[1].previewId);
+    await expect(
+      f.starts.confirmCalendarMove('user', d.planId, moves[2].previewId),
+    ).rejects.toThrow();
+    const after = (await f.service.getPlanDetail('user', d.planId)).plan!;
+    expect(after.workouts![0]).toMatchObject({
+      id: workout.id,
+      scheduledDate: '2099-11-25',
+    });
+  });
+
+  it('only resumes the same coaching session for an authorized, open calendar move', async () => {
+    const d = await running(1, { startDate: '2099-11-16', periodWeeks: 3 });
+    const workout = (await f.service.getPlanDetail('user', d.planId)).plan!
+      .workouts![0];
+    const move = await f.starts.previewCalendarMove(
+      'user',
+      d.planId,
+      workout.id,
+      {
+        targetDate: '2099-11-17',
+        expectedRevision: workout.revision,
+      },
+    );
+    expect(move.impact.reasons).toEqual([]);
+    await expect(
+      f.starts.openCalendarMoveCoach('user', d.planId, move.previewId),
+    ).rejects.toThrow();
+    let authorized = true;
+    Object.defineProperty(f.starts, 'automationAccess', {
+      value: {
+        assertAllowed: async () => {
+          if (!authorized) throw new Error('Plan advice required');
+        },
+      },
+      configurable: true,
+    });
+    try {
+      const session = await f.starts.openCalendarMoveCoach(
+        'user',
+        d.planId,
+        move.previewId,
+        true,
+      );
+      const sessionRow = () => prisma.aiCoachSession.findUniqueOrThrow({
+        where: { userId_id: { userId: 'user', id: session.sid } },
+      });
+      expect((await sessionRow()).type).toBe('BACKGROUND');
+      await expect(
+        f.starts.openCalendarMoveCoach('user', d.planId, move.previewId),
+      ).resolves.toEqual(session);
+      expect((await sessionRow()).type).toBe('CHAT');
+      await expect(
+        f.starts.calendarCoachSession('other', session.sid),
+      ).rejects.toThrow();
+      authorized = false;
+      await expect(
+        f.starts.calendarCoachSession('user', session.sid),
+      ).rejects.toThrow('Plan advice required');
+      authorized = true;
+      await f.starts.cancelCalendarMove('user', d.planId, move.previewId);
+      await expect(
+        f.starts.calendarCoachSession('user', session.sid),
+      ).rejects.toThrow();
+    } finally {
+      Object.defineProperty(f.starts, 'automationAccess', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
+  it('rechecks an expired move against the current workout in its original coaching session', async () => {
+    const d = await running(1, { startDate: '2099-11-16', periodWeeks: 3 });
+    const workout = (await f.service.getPlanDetail('user', d.planId)).plan!
+      .workouts![0];
+    const move = await f.starts.previewCalendarMove('user', d.planId, workout.id, {
+      targetDate: '2099-11-24',
+      expectedRevision: workout.revision,
+    });
+    Object.defineProperty(f.starts, 'automationAccess', {
+      value: { assertAllowed: async () => undefined },
+      configurable: true,
+    });
+    const session = await f.starts.openCalendarMoveCoach('user', d.planId, move.previewId);
+    await prisma.planProposalPreview.update({
+      where: { id: move.previewId },
+      data: { expiresAt: new Date(0) },
+    });
+    await prisma.planWorkout.update({
+      where: { id: workout.id },
+      data: { name: 'Latest workout', revision: { increment: 1 } },
+    });
+    await expect(f.starts.calendarCoachSession('user', session.sid)).rejects.toThrow();
+    await expect(f.starts.refreshCalendarMoveCoach('other', session.sid)).rejects.toThrow('not found');
+
+    await expect(f.starts.refreshCalendarMoveCoach('user', session.sid)).resolves.toMatchObject({
+      status: 'refreshed',
+      preview: {
+        previewId: move.previewId,
+        state: 'PENDING',
+        requiresCoachConfirmation: true,
+        confirmationId: expect.any(String),
+        impact: { from: move.impact.from, to: move.impact.to },
+        presentation: { rows: expect.arrayContaining([expect.objectContaining({ name: 'Latest workout' })]) },
+      },
+    });
+    await expect(f.starts.calendarCoachSession('user', session.sid)).resolves.toMatchObject({ sid: session.sid });
+    await expect(f.starts.confirmCalendarMove('user', d.planId, move.previewId)).rejects.toThrow();
+    expect((await f.service.getPlanDetail('user', d.planId)).plan?.workouts?.[0]?.scheduledDate).toBe(move.impact.from);
+
+    await prisma.planWorkout.update({ where: { id: workout.id }, data: { status: 'DONE' } });
+    await expect(f.starts.refreshCalendarMoveCoach('user', session.sid)).resolves.toEqual({ status: 'scheduleChanged' });
+    await f.starts.cancelCalendarMove('user', d.planId, move.previewId);
+    await expect(f.starts.refreshCalendarMoveCoach('user', session.sid)).resolves.toEqual({ status: 'discarded' });
+  });
+
+  it.each(['confirm', 'complete'] as const)('rebuilds an entire calendar adjustment and handles %s across conversations', async (action) => {
+    Object.defineProperty(f.starts, 'automationAccess', {
+      value: { assertAllowed: async () => undefined },
+      configurable: true,
+    });
+    const d = await running(4, {
+      startDate: '2099-11-16',
+      periodWeeks: 3,
+      openSession: async (planId) => {
+        const [workout] = (await f.service.getPlanDetail('user', planId)).plan!.workouts!;
+        const move = await f.starts.previewCalendarMove('user', planId, workout.id, {
+          targetDate: '2099-11-24',
+          expectedRevision: workout.revision,
+        });
+        const session = await f.starts.openCalendarMoveCoach('user', planId, move.previewId);
+        return { id: session.sid };
+      },
+    });
+    const { sid, branchId } = d.binding;
+    const session = await f.starts.calendarCoachSession('user', sid);
+    const before = (await f.service.getPlanDetail('user', d.planId)).plan!.workouts!;
+    const [, companion, removed, independent] = before;
+    d.request.changes = [{
+      sourceWorkoutId: companion.id,
+      expectedRevision: companion.revision,
+      workout: {
+        weekIndex: 2,
+        dayIndex: 4,
+        sessionIndex: 1,
+        sportType: 'RUN',
+        name: 'Companion adjustment',
+        definition: { kind: 'FREEFORM', version: 1, source: 'STRUCTURE', structure: companion.structure },
+      },
+    }];
+    d.request.deletions = [{ sourceWorkoutId: removed.id, expectedRevision: removed.revision }];
+    d.request.additions = [{
+      candidateKey: 'new-recovery-run',
+      workout: {
+        ...d.request.changes[0].workout,
+        dayIndex: 5,
+        name: 'New recovery run',
+      },
+    }];
+    const draft = await f.starts.createPreview('user', d.request, d.binding);
+    const branch = await prisma.coachBranch.findUniqueOrThrow({ where: { id: branchId } });
+    const decision = await prisma.coachDecision.create({
+      data: {
+        branchId,
+        contextId: branch.contextId,
+        decisionType: 'PLAN_SCHEDULE',
+        state: 'PROPOSED',
+        payload: draft.decisionPayload,
+      },
+    });
+    await prisma.planProposalPreview.update({ where: { id: draft.previewId }, data: { decisionId: decision.id } });
+    await prisma.planProposalPreview.update({ where: { id: session.previewId }, data: { expiresAt: new Date(0) } });
+
+    const restored = await f.starts.refreshCalendarMoveCoach('user', sid);
+    expect(restored).toMatchObject({
+      status: 'refreshed',
+      preview: {
+        state: 'PENDING',
+        presentation: { rows: expect.arrayContaining([
+          expect.objectContaining({ workoutId: before[0].id, scheduledDate: '2099-11-24' }),
+          expect.objectContaining({ workoutId: companion.id, scheduledDate: '2099-11-26', name: 'Companion adjustment' }),
+          expect.objectContaining({ workoutId: removed.id, changeKind: 'DELETED' }),
+          expect.objectContaining({ name: 'New recovery run', scheduledDate: '2099-11-27', changeKind: 'ADDED' }),
+        ]) },
+      },
+    });
+    if (restored.status !== 'refreshed') throw new Error('Expected a refreshed preview');
+    expect((await prisma.coachDecision.findUniqueOrThrow({ where: { id: decision.id } })).state).toBe('SUPERSEDED');
+    const firstVersion = restored.preview.confirmationId!;
+    const otherMove = await f.starts.previewCalendarMove('user', d.planId, independent.id, {
+      targetDate: '2099-11-29',
+      expectedRevision: independent.revision,
+    });
+    const otherSession = await f.starts.openCalendarMoveCoach('user', d.planId, otherMove.previewId);
+    expect(otherSession.sid).not.toBe(sid);
+    await expect(f.starts.readCoachCalendarMove('user', sid)).resolves.toMatchObject({
+      state: 'PENDING', confirmationId: firstVersion,
+    });
+
+    if (action === 'complete') {
+      await prisma.planWorkout.update({
+        where: { id: companion.id },
+        data: { status: 'DONE', completedAt: new Date() },
+      });
+      await expect(f.starts.readCoachCalendarMove('user', sid)).resolves.toMatchObject({ state: 'INVALIDATED' });
+      await expect(f.starts.confirmCalendarMove('user', d.planId, session.previewId, firstVersion)).rejects.toThrow();
+      await expect(f.starts.refreshCalendarMoveCoach('user', sid)).resolves.toEqual({ status: 'scheduleChanged' });
+      await expect(f.starts.readCoachCalendarMove('user', otherSession.sid)).resolves.toMatchObject({ state: 'PENDING' });
+      const unchanged = (await f.service.getPlanDetail('user', d.planId)).plan!.workouts!;
+      expect(unchanged.map((workout) => workout.scheduledDate)).toEqual(before.map((workout) => workout.scheduledDate));
+      return;
+    }
+    const current = await f.starts.refreshCalendarMoveCoach('user', sid, firstVersion);
+    if (current.status !== 'refreshed') throw new Error('Expected a new preview version');
+    const currentVersion = current.preview.confirmationId!;
+    expect(currentVersion).not.toBe(firstVersion);
+    await expect(f.starts.confirmCalendarMove('user', d.planId, session.previewId, firstVersion)).rejects.toThrow();
+    await expect(f.starts.confirmCalendarMove('other', d.planId, session.previewId, currentVersion)).rejects.toThrow('not found');
+    expect((await f.service.getPlanDetail('user', d.planId)).plan!.workouts!.map((workout) => workout.scheduledDate)).toEqual(before.map((workout) => workout.scheduledDate));
+
+    const receipt = await f.starts.confirmCalendarMove('user', d.planId, session.previewId, currentVersion);
+    expect(receipt).toMatchObject({
+      readbackVerified: true,
+      deletedWorkoutIds: [removed.id],
+      identityMap: expect.arrayContaining([
+        expect.objectContaining({ workoutId: before[0].id, scheduledDate: '2099-11-24' }),
+        expect.objectContaining({ workoutId: companion.id, scheduledDate: '2099-11-26' }),
+        expect.objectContaining({ scheduledDate: '2099-11-27' }),
+      ]),
+    });
+    expect(receipt.identityMap).toHaveLength(3);
+    await expect(f.starts.confirmCalendarMove('user', d.planId, session.previewId, currentVersion)).resolves.toEqual(receipt);
+    await expect(f.starts.readCoachCalendarMove('user', sid)).resolves.toMatchObject({ state: 'APPLIED', receipt });
+    const after = (await f.service.getPlanDetail('user', d.planId)).plan!.workouts!;
+    expect(after.map((workout) => workout.scheduledDate)).toEqual([independent.scheduledDate, '2099-11-24', '2099-11-26', '2099-11-27']);
+    expect(after.find((workout) => workout.id === companion.id)?.name).toBe('Companion adjustment');
+  });
+
+  it('revises a recovered calendar with mixed edits before committing the current version', async () => {
+    const { planId } = await running(4, { startDate: '2099-11-16', periodWeeks: 4 });
+    const read = async () => (await f.service.getPlanDetail('user', planId)).plan!.workouts!;
+    const before = await read();
+    const [anchor, companion, removed, unchanged] = before;
+    const preview = await f.starts.previewCalendarMove('user', planId, anchor.id, {
+      targetDate: '2099-11-24', expectedRevision: anchor.revision,
+    });
+    const sid = `calendar-move:${preview.previewId}`;
+    await prisma.aiCoachSession.create({ data: { userId: 'user', id: sid } });
+    const restored = await f.starts.refreshCalendarMoveCoach('user', sid);
+    if (restored.status !== 'refreshed') throw new Error('Expected a refreshed preview');
+    const confirmationId = restored.preview.confirmationId!;
+    const candidateKey = randomUUID();
+    const workout = {
+      name: 'Revised recovery', sportType: 'RUN',
+      definition: { kind: 'FREEFORM', version: 1, source: 'TEXT', text: 'Easy 20m' },
+    } as const;
+    const changes = {
+      confirmationId,
+      edits: [
+        { kind: 'UPDATE' as const, workoutId: anchor.id, expectedRevision: anchor.revision, targetDate: '2099-12-01' },
+        { kind: 'UPDATE' as const, workoutId: companion.id, expectedRevision: companion.revision, targetDate: '2099-12-01', workout },
+        { kind: 'DELETE' as const, workoutId: removed.id, expectedRevision: removed.revision },
+        { kind: 'ADD' as const, candidateKey, targetDate: '2099-12-02', workout },
+      ],
+    };
+    const revision = await f.starts.reviseCalendarAdjustment('user', planId, preview.previewId, changes);
+    expect(revision.confirmationId).not.toBe(confirmationId);
+    expect(revision.presentation.rows).toEqual(expect.arrayContaining([
+      expect.objectContaining({ workoutId: anchor.id, beforeScheduledDate: '2099-11-16', scheduledDate: '2099-12-01' }),
+      expect.objectContaining({ workoutId: companion.id, name: workout.name, scheduledDate: '2099-12-01' }),
+      expect.objectContaining({ workoutId: removed.id, changeKind: 'DELETED' }),
+      expect.objectContaining({ candidateKey, changeKind: 'ADDED', scheduledDate: '2099-12-02' }),
+    ]));
+    await expect(f.starts.reviseCalendarAdjustment('user', planId, preview.previewId, changes)).rejects.toThrow();
+    await expect(f.starts.confirmCalendarMove('user', planId, preview.previewId, confirmationId)).rejects.toThrow();
+    expect(await read()).toEqual(before);
+    const next = await f.starts.reviseCalendarAdjustment('user', planId, preview.previewId, {
+      confirmationId: revision.confirmationId!,
+      edits: [{ kind: 'UPDATE', workoutId: `candidate:${candidateKey}`, expectedRevision: 0, targetDate: '2099-12-03' }],
+    });
+    await expect(f.starts.readCoachCalendarMove('user', sid)).resolves.toMatchObject({ confirmationId: next.confirmationId });
+    const receipt = await f.starts.confirmCalendarMove('user', planId, preview.previewId, next.confirmationId);
+    expect(receipt.identityMap.map((row) => row.scheduledDate).sort()).toEqual(['2099-12-01', '2099-12-01', '2099-12-03']);
+    expect(receipt.deletedWorkoutIds).toEqual([removed.id]);
+    expect((await read()).find((item) => item.id === unchanged.id)?.revision).toBe(unchanged.revision);
+    await expect(f.starts.reviseCalendarAdjustment('user', planId, preview.previewId, {
+      ...changes, confirmationId: next.confirmationId!,
+    })).rejects.toThrow();
+  });
+
   async function apply(d: Awaited<ReturnType<typeof running>>) {
     const preview = await f.proposals.createPreview(
       'user',
@@ -226,6 +893,253 @@ describe('remaining schedule / PostgreSQL', () => {
       { isolationLevel: 'Serializable', timeout: 60000 },
     );
   }
+  it('commits a calendar coach batch and closes the original move with a verified receipt', async () => {
+    Object.defineProperty(f.starts, 'automationAccess', {
+      value: { assertAllowed: async () => undefined },
+      configurable: true,
+    });
+    try {
+      const d = await running(2, {
+        startDate: '2099-11-16',
+        periodWeeks: 3,
+        openSession: async (planId) => {
+          const [workout] = (await f.service.getPlanDetail('user', planId))
+            .plan!.workouts!;
+          const preview = await f.starts.previewCalendarMove(
+            'user',
+            planId,
+            workout.id,
+            { targetDate: '2099-11-24', expectedRevision: workout.revision },
+          );
+          const session = await f.starts.openCalendarMoveCoach(
+            'user',
+            planId,
+            preview.previewId,
+          );
+          return { id: session.sid };
+        },
+      });
+      const session = await f.starts.calendarCoachSession(
+        'user',
+        d.binding.sid,
+      );
+      d.request.range = { from: '2099-11-01', to: '2099-12-31' };
+      const before = (await f.service.getPlanDetail('user', d.planId)).plan!
+        .workouts!;
+      const moveOnly = await f.proposals.createPreview('user', d.request, d.binding);
+      expect(moveOnly.presentation.calendarMoveOnly).toBe(true);
+      // The model only needs to propose the related edit.
+      d.request.changes = before.slice(1).map((row) => ({
+        sourceWorkoutId: row.id,
+        expectedRevision: row.revision,
+        workout: {
+          weekIndex: 2,
+          dayIndex: 4,
+          sessionIndex: 1,
+          sportType: 'RUN',
+          definition: {
+            kind: 'FREEFORM',
+            version: 1,
+            source: 'STRUCTURE',
+            structure: {
+              kind: 'FREEFORM',
+              version: 1,
+              text: row.text,
+              durationSeconds: 1800,
+            },
+          },
+        },
+      }));
+      const branches = new CoachBranchingService(
+        prisma as never,
+        f.service,
+        f.context,
+        f.query,
+        f.apply,
+        f.proposals,
+      );
+      const relatedEdit = d.request.changes[0];
+      await expect(
+        f.proposals.createPreview(
+          'user',
+          {
+            ...d.request,
+            changes: [{
+              ...relatedEdit,
+              workout: { ...relatedEdit.workout, weekIndex: 3, dayIndex: 5 },
+            }],
+          },
+          d.binding,
+        ),
+      ).rejects.toThrow('Candidate target is outside the mutable schedule range');
+      const preview = await f.proposals.createPreview(
+        'user',
+        d.request,
+        d.binding,
+      );
+      expect(preview.presentation.calendarMoveOnly).toBeUndefined();
+      const { decision } = await branches.squashBranch({
+        userId: 'user',
+        branchId: d.binding.branchId,
+        decisionType: 'PLAN_SCHEDULE',
+        payload: preview.decisionPayload,
+        rationale: 'Keep the recovery interval after moving the run.',
+        binding: d.binding,
+        options: [{ optionKey: 'apply', title: 'Apply', isSelected: true }],
+      });
+      const card = await prisma.aiCoachMessage.update({
+        where: {
+          userId_sessionId_sequence: {
+            userId: 'user',
+            sessionId: session.sid,
+            sequence: 2,
+          },
+        },
+        data: {
+          createdAt: new Date(Date.now() - 60_000),
+          message: {
+            content: [
+              {
+                type: 'tool_use',
+                name: 'CoachDecisionDraft',
+                input: {
+                  decisionId: decision.id,
+                  branchId: d.binding.branchId,
+                  payload: preview.decisionPayload,
+                },
+              },
+            ],
+          },
+        },
+      });
+      const ai = Object.assign(Object.create(AiService.prototype) as AiService, {
+        coachBranching: branches,
+        aiDataConsent: { assertGranted: async () => undefined },
+      });
+      const message = {
+        content: [
+          { type: 'text', text: 'Confirm' },
+          {
+            type: 'tool_result',
+            tool_use_id: 'draft',
+            content: {
+              kind: 'coach_decision_confirmation',
+              decisionId: decision.id,
+              repliesToAssistantMessageId: card.id,
+            },
+          },
+        ],
+      } satisfies CoachUserMessageBody;
+      const confirm = async (branchId = d.binding.branchId) => {
+        const events: CoachQueryYield[] = [];
+        const stream = await ai.coachStream({
+          session: { user: { id: 'user' } },
+          sid: session.sid,
+          branchId,
+          calendarEdit: session,
+          lang: 'en',
+          prompt: 'Confirm',
+          message,
+          signal: new AbortController().signal,
+        });
+        for await (const event of stream) events.push(event);
+        return events;
+      };
+      await expect(confirm('wrong-branch')).rejects.toThrow(
+        'CALENDAR_CONFIRMATION_MISMATCH',
+      );
+      await expect(confirm()).rejects.toThrow('START_CONFIRMATION_REQUIRED');
+      expect(
+        await prisma.planWorkout.findUnique({ where: { id: before[0].id } }),
+      ).toMatchObject({
+        scheduledDate: new Date('2099-11-16T00:00:00.000Z'),
+      });
+      await prisma.aiCoachSession.update({
+        where: { userId_id: { userId: 'user', id: session.sid } },
+        data: { nextSequence: 3 },
+      });
+      const runs = new CoachRunStore(
+        prisma as never,
+        undefined,
+        undefined,
+        undefined,
+        f.starts,
+      );
+      const confirmationTurn = {
+        userId: 'user',
+        sid: session.sid,
+        branchId: d.binding.branchId,
+        lang: 'en',
+        prompt: 'Confirm',
+        message,
+        operationId: 'confirm-adjustment',
+        command: { kind: 'start' as const, requestId: 'confirm-adjustment' },
+      };
+      const begun = await runs.begin(confirmationTurn);
+      if (!begun.handle) throw new Error('Expected a new confirmation run');
+      const events = await confirm();
+      expect(events[0]).toMatchObject({
+        type: 'assistant',
+        message: {
+          content: [
+            {
+              name: 'CoachDecisionApplied',
+              input: {
+                result: 'APPLIED',
+                receipt: { readbackVerified: true, changedWorkoutCount: 2 },
+              },
+            },
+          ],
+        },
+      });
+      const replay = await confirm();
+      expect(replay[0]).toMatchObject({
+        type: 'assistant',
+        message: { content: [{ input: { result: 'APPLIED' } }] },
+      });
+      expect(
+        await prisma.coachCommit.count({ where: { decisionId: decision.id } }),
+      ).toBe(1);
+      for (const event of events) begun.handle.projector.consume(event);
+      begun.handle.projector.finish('completed');
+      await runs.checkpoint(begun.handle, 'completed');
+      await expect(runs.begin(confirmationTurn)).resolves.toMatchObject({
+        replay: { id: begun.handle.projector.message.id },
+      });
+      const after = (await f.service.getPlanDetail('user', d.planId)).plan!
+        .workouts!;
+      expect(
+        after.map((workout) => [workout.id, workout.scheduledDate]),
+      ).toEqual([
+        [before[0].id, '2099-11-24'],
+        [before[1].id, '2099-11-26'],
+      ]);
+      await expect(
+        f.starts.readCalendarMove('user', d.planId, session.previewId),
+      ).resolves.toMatchObject({
+        state: 'APPLIED',
+        receipt: {
+          readbackVerified: true,
+          identityMap: [
+            { workoutId: before[0].id, scheduledDate: '2099-11-24' },
+          ],
+        },
+      });
+      await expect(
+        f.starts.calendarCoachSession('user', session.sid),
+      ).rejects.toThrow();
+      await expect(
+        f.starts.calendarCoachSession('user', session.sid, undefined, {
+          allowApplied: true,
+        }),
+      ).resolves.toMatchObject({ sid: session.sid });
+    } finally {
+      Object.defineProperty(f.starts, 'automationAccess', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
   it('swaps remaining positions and reads back original identities and RPE without restarting the plan', async () => {
     const d = await running();
     const before = (await f.service.getPlanDetail('user', d.planId)).plan!;

@@ -49,6 +49,25 @@ describe('planSuitabilityAssessTool', () => {
     ).toContain('Exclude the actual goal event');
   });
 
+  it('uses one week as the continuous preview horizon', async () => {
+    const context = { ...ctx(), rollingPlanDraft: true };
+    const input = {
+      status: 'NEEDS_INPUT' as const,
+      goalSummary: 'Build endurance over time',
+      constraints: { ...constraints, requiredSports: ['RUN' as const] },
+      evidence,
+      missingFacts: [{ key: 'availability', reason: 'Confirm fixed rest days' }],
+    };
+    expect(await planSuitabilityAssessTool.validateInput!(context, input)).toMatchObject({
+      ok: false,
+      code: 'PLAN_SUITABILITY_CONSTRAINT_CONFLICT',
+    });
+    expect(await planSuitabilityAssessTool.validateInput!(context, {
+      ...input,
+      constraints: { ...input.constraints, periodWeeks: 1 },
+    })).toEqual({ ok: true });
+  });
+
   it('rejects READY when the blueprint exceeds the agreed session limit', async () => {
     const result = await planSuitabilityAssessTool.validateInput!(ctx(), {
       status: 'READY',

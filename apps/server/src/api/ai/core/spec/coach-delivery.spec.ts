@@ -11,9 +11,44 @@ import {
   buildCoachUiCardToolUseBlocks,
   stopAfterUiSurfaceTool,
 } from '../tool-loop-agent.runtime';
+import { planByIdTool } from '../tools/planById.tool';
 
 describe('evidence projection and final delivery', () => {
   const range = { startDate: '2026-10-01', endDate: '2026-12-31' };
+  it('projects a calendar only when a successful plan read requests one', () => {
+    const input = { planId: 'plan', calendarFrom: '2026-11-16', showCalendar: true };
+    const call = { id: 'plan-read', name: 'plan_by_id', input };
+    const output = {
+      asOf: '2026-11-21',
+      plan: { id: 'plan', title: 'Base phase', generationMetadata: { private: true } },
+      allWorkouts: [{ notes: 'Private data' }],
+    };
+    const project = (useCalendar: boolean, planFound: boolean) =>
+      buildCoachUiCardToolUseBlocks({
+        tools: [planByIdTool],
+        calls: [{ ...call, input: { ...input, showCalendar: useCalendar } }],
+        results: [{ ...call, ok: true, output: planFound ? output : { ...output, plan: null } }],
+      });
+    expect(project(true, true)).toEqual([
+      { type: 'tool_use', ...call },
+      {
+        type: 'tool_use',
+        id: 'plan-read:calendar',
+        name: 'PlanCalendarView',
+        input: { planId: 'plan', title: 'Base phase', initialDate: '2026-11-16' },
+      },
+    ]);
+    expect(project(false, true)).toHaveLength(1);
+    expect(project(true, false)).toHaveLength(1);
+    expect(buildCoachUiCardToolUseBlocks({
+      tools: [planByIdTool], calls: [{ ...call, input: { ...input, showDetail: true } }],
+      results: [{ ...call, ok: true, output }],
+    })).toMatchObject([
+      { id: call.id },
+      { name: 'CoachDetailView', input: { kind: 'plan_detail', planId: 'plan', title: 'Base phase' } },
+      { name: 'PlanCalendarView' },
+    ]);
+  });
   it('distinguishes an empty query from missing or failed output', () => {
     expect(projectCoachCompetitionEvents(range, { events: [] })).toEqual({
       kind: 'competition_events',

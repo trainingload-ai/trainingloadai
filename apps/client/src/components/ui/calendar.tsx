@@ -15,6 +15,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useMobileViewport } from "@/hooks/use-mobile";
 
 function Calendar({
   className,
@@ -215,6 +216,20 @@ function CalendarDayButton({
         className,
       )}
       {...buttonProps}
+    />
+  );
+}
+
+export function ResponsiveDatePickerCalendar({
+  className,
+  ...props
+}: React.ComponentProps<typeof Calendar>) {
+  const isMobile = useMobileViewport();
+  return (
+    <Calendar
+      {...props}
+      className={cn("w-full min-w-0", className)}
+      numberOfMonths={isMobile === false ? 2 : 1}
     />
   );
 }

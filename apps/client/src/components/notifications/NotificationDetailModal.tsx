@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/responsive-modal";
 import { Button } from "@/components/ui/button";
 import type { NotificationItem } from "@/api/notifications";
-import { MarkdownProse } from "@/components/MarkdownProse";
+import {
+  isReviewReport,
+  NotificationMarkdown,
+} from "@/components/notifications/NotificationMarkdown";
 import {
   isThirdPartyExportFailureNotification,
   resolveNotificationDisplay,
@@ -107,6 +110,7 @@ export function NotificationDetailModal(props: {
   const tone = toneStyles[resolved?.tone ?? "neutral"];
   const Icon = tone.Icon;
   const fitnessTarget = fitnessNotificationTarget(item);
+  const isReview = isReviewReport(item);
   const reviewSid =
     item?.kind === "REVIEW_DIGEST" && item.digestId
       ? `review-digest-${item.digestId}`
@@ -126,10 +130,18 @@ export function NotificationDetailModal(props: {
 
   return (
     <ResponsiveModal open={props.open} onOpenChange={props.onOpenChange}>
-      <ResponsiveModalContent className="flex min-h-0 max-h-[min(85dvh,720px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-md">
+      <ResponsiveModalContent
+        className={cn(
+          "flex min-h-0 max-h-[min(85dvh,720px)] flex-col gap-0 overflow-hidden p-0",
+          isReview ? "pc:w-[calc(100%-2rem)] pc:max-w-4xl pc:p-0" : "sm:max-w-md",
+        )}
+      >
         {item && resolved ? (
           <>
-            <header className="shrink-0 border-b border-border/60 px-4 pb-3.5 pt-4 pr-12">
+            <header className={cn(
+              "shrink-0 border-b border-border/60 px-4 pb-3.5 pt-4 pr-12",
+              isReview && "pc:pl-8 pc:pt-6",
+            )}>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-mobile-caption pc:text-[11px] leading-4 text-muted-foreground">
                 <span
                   className={cn(
@@ -180,16 +192,22 @@ export function NotificationDetailModal(props: {
               ) : null}
             </header>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+            <div className={cn(
+              "min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3",
+              isReview && "pc:px-8 pc:py-5",
+            )}>
               {body ? (
-                <MarkdownProse markdown={body} />
+                <NotificationMarkdown item={item} markdown={body} />
               ) : (
                 <p className="text-sm text-muted-foreground">{props.noBody}</p>
               )}
             </div>
 
             {reviewSid ? (
-              <footer className="shrink-0 border-t border-border/60 px-4 py-3">
+              <footer className={cn(
+                "shrink-0 border-t border-border/60 px-4 py-3",
+                isReview && "pc:px-8",
+              )}>
                 <Button
                   type="button"
                   size="sm"

@@ -5403,12 +5403,21 @@ model PlanProposalPreview {
   expiresAt DateTime  @map("expires_at")
   appliedAt DateTime? @map("applied_at")
 
+  calendarAdjustmentId String?   @map("calendar_adjustment_id")
+  calendarVersion      Int?      @map("calendar_version")
+  discardedAt          DateTime? @map("discarded_at")
+  calendarReceipt      Json?     @map("calendar_receipt")
+  calendarSyncClaimedAt DateTime? @map("calendar_sync_claimed_at")
+  calendarSyncSentAt    DateTime? @map("calendar_sync_sent_at")
+
   decisionId        String?        @unique @map("decision_id")
   decision          CoachDecision? @relation("PlanProposalDecision", fields: [decisionId], references: [id], onDelete: SetNull)
   appliedDecisionId String?        @unique @map("applied_decision_id")
   createdPlanId     String?        @unique @map("created_plan_id")
   createdPlan       Plan?          @relation("PlanProposalCreatedPlan", fields: [createdPlanId], references: [id], onDelete: SetNull)
 
+  @@unique([calendarAdjustmentId, calendarVersion], map: "plan_calendar_adjustment_version_key")
+  @@index([userId, sourcePlanId, calendarAdjustmentId, calendarVersion], map: "plan_calendar_adjustment_owner_idx")
   @@index([userId, expiresAt])
   @@index([sourcePlanId, expiresAt])
   @@index([expiresAt, appliedAt])

@@ -30,7 +30,7 @@ describe('workout detail permissions use the write policy', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-10-09'));
     expect(
       (await setup().getWorkoutDetail('owner', 'p', 'w')).workout.capabilities,
-    ).toEqual({ delete: true, postpone: true, skip: true });
+    ).toEqual({ edit: true, delete: true, postpone: true, skip: true });
   });
   it.each([
     { status: 'DONE' },
@@ -52,13 +52,13 @@ describe('workout detail permissions use the write policy', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-10-09'));
     const caps = (await setup(overrides).getWorkoutDetail('owner', 'p', 'w'))
       .workout.capabilities;
-    expect(caps).toEqual({ delete: false, postpone: false, skip: false });
+    expect(caps).toEqual({ edit: false, delete: false, postpone: false, skip: false });
   });
   it('keeps historical deletion blocked but permits recording a missed session as skipped', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-10-13'));
     expect(
       (await setup().getWorkoutDetail('owner', 'p', 'w')).workout.capabilities,
-    ).toEqual({ delete: false, postpone: false, skip: true });
+    ).toEqual({ edit: false, delete: false, postpone: false, skip: true });
   });
   it('never returns permissions for another user', async () => {
     await expect(

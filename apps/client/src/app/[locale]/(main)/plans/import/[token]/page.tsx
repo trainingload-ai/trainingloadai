@@ -114,13 +114,13 @@ export default function VdotPlanImportPage() {
     <main className="mx-auto max-w-6xl p-4 pb-24 pt-8 sm:p-6 sm:pt-10">
       <Link
         href="/plans"
-        className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground tablet:hidden"
       >
         <ArrowLeft className="h-4 w-4" />
         {copy.back}
       </Link>
 
-      <div className="mt-7 max-w-3xl">
+      <div className="mt-7 max-w-3xl tablet:mt-0">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
           {copy.eyebrow}
         </p>

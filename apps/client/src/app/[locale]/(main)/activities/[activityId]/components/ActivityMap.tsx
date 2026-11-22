@@ -22,8 +22,10 @@ const DESKTOP_MAP_PADDING = {
   right: 64,
 } as const;
 
-const ActivityMap = React.memo(() => {
+const ActivityMap = React.memo(({ showEmpty = false }: { showEmpty?: boolean }) => {
   const t = useTranslations("ActivityMap");
+  const tDetail = useTranslations("ActivityDetail");
+  const tOverview = useTranslations("Overview");
   const [isMapLocked, setIsMapLocked] = useState(true); // 默认锁定
 
   // 优化地图锁定切换函数
@@ -64,7 +66,14 @@ const ActivityMap = React.memo(() => {
     return [selectedInterval.startDistanceM, selectedInterval.endDistanceM];
   }, [selectedInterval]);
 
-  if (!activityLayer?.maps?.length) return null;
+  if (!activityLayer?.maps?.length) {
+    if (!showEmpty) return null;
+    return (
+      <p role="status" className="p-3 text-sm text-muted-foreground">
+        {isLoading ? tDetail("loading") : tOverview("noData")}
+      </p>
+    );
+  }
 
   return (
     <section className="relative overflow-hidden rounded-md bg-zinc-900 ring-1 ring-border/60">

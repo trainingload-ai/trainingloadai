@@ -28,6 +28,7 @@ import {
 } from "@/components/plan/detail/plan-detail-utils";
 import { PlanWorkoutListRow } from "@/components/plan/plan-workout-list-row";
 import { formatWorkoutDuration } from "@/lib/workout-display-utils";
+import { cn } from "@/lib/utils";
 
 export type MobileWorkoutSegment = {
   duration: number;
@@ -205,9 +206,11 @@ function buildFallbackWorkoutSegments(text: string | null | undefined) {
 export const WorkoutMiniChart = memo(function WorkoutMiniChart({
   fallbackText,
   workout,
+  className,
 }: {
   fallbackText?: string | null;
   workout: WorkoutMiniChartWorkout | null;
+  className?: string;
 }) {
   const segments = useMemo(() => {
     if (workout?.structure.kind === "FREEFORM") return [];
@@ -226,7 +229,10 @@ export const WorkoutMiniChart = memo(function WorkoutMiniChart({
   return (
     <div
       data-testid="workout-mini-chart"
-      className="relative min-h-12 w-24 self-stretch shrink-0 overflow-hidden rounded-control bg-background/70 dark:bg-black/20"
+      className={cn(
+        "relative min-h-12 w-24 self-stretch shrink-0 overflow-hidden rounded-control bg-background/70 dark:bg-black/20",
+        className,
+      )}
     >
       {["25%", "50%", "75%"].map((top) => (
         <span
@@ -310,22 +316,28 @@ function formatPlannedDistance(workout: PlanWorkout) {
 }
 
 export function MobilePlanWorkoutRow({
+  className,
   emptyDetail,
   emptyTitle,
+  headerClassName,
   onClick,
   plan,
   showChart = true,
   showDateBlock = true,
   showMetrics = true,
+  statusLabelOverride,
   workout,
 }: {
+  className?: string;
   emptyDetail: string;
   emptyTitle: string;
+  headerClassName?: string;
   onClick?: (workout: PlanWorkout) => void;
   plan?: TrainingPlanDetail;
   showChart?: boolean;
   showDateBlock?: boolean;
   showMetrics?: boolean;
+  statusLabelOverride?: string;
   workout: PlanWorkout | null;
 }) {
   const t = useTranslations("V2PlanDetailPage");
@@ -390,11 +402,16 @@ export function MobilePlanWorkoutRow({
 
   return (
     <PlanWorkoutListRow
+      className={className}
+      ariaLabel={
+        statusLabelOverride ? `${title} · ${statusLabelOverride}` : undefined
+      }
       dateLabel={showDateBlock ? (date?.format("DD") ?? "--") : undefined}
       dayLabel={showDateBlock ? dateLabel : undefined}
       displayKind={displayKind}
+      headerClassName={headerClassName}
       onOpen={workout && onClick ? () => onClick(workout) : undefined}
-      statusLabel={statusLabel}
+      statusLabel={statusLabelOverride ?? statusLabel}
       subtitle={detail}
       title={title}
       meta={

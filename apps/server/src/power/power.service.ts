@@ -282,16 +282,11 @@ export class powerService {
     }
 
     const map = new Map(peaks.map((p) => [p.scaleValue, round(p.value, 0)]));
-    const getVal = (sec: number) => map.get(sec) ?? 0;
-
-    // Build result points
     const points: DurationCurvePoint[] = [];
-
-    // Add actual points (only those with values > 0)
     const durations = [1, 5, 10, 20, 30, 60, 180, 300, 1200, 3600, 7200, 10800];
     durations.forEach((d) => {
-      const val = getVal(d);
-      if (val > 0) {
+      const val = map.get(d);
+      if (val !== undefined) {
         points.push({ duration: d, power: val });
       }
     });

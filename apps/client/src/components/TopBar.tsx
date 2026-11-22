@@ -36,6 +36,7 @@ import {
   DeploymentUnauthenticatedAccountAction,
   ManagedAccountMenuItem,
   DeploymentAccountBadge,
+  DeploymentAccountUsage,
 } from "@deployment/managed-ui";
 import { localeNativeLabel, routing } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing";
@@ -48,8 +49,9 @@ import {
 import { useSelfHostSessionPolicy } from "@/api/self-host-bootstrap";
 
 type TopBarProps = {
-  placement?: "header" | "sidebar" | "rail";
+  placement?: "header" | "sidebar" | "rail" | "workspace";
   collapsed?: boolean;
+  settingsControl?: React.ReactNode;
   unauthenticatedHref?: string;
   reloadOnLocaleChange?: boolean;
 };
@@ -57,6 +59,7 @@ type TopBarProps = {
 function TopBarComponent({
   placement = "header",
   collapsed = false,
+  settingsControl,
   unauthenticatedHref,
   reloadOnLocaleChange = false,
 }: TopBarProps) {
@@ -83,6 +86,7 @@ function TopBarComponent({
   const { canSignOut } = useSelfHostSessionPolicy();
   const showSessionPending = !hydrated || isPending;
   const isSidebar = placement !== "header";
+  const inWorkspace = placement === "workspace";
   const isAuthRoute = [
     "/setup",
     "/login",
@@ -218,14 +222,35 @@ function TopBarComponent({
     </DropdownMenuContent>
   );
 
+  const preferences = (
+    <>
+      <ChangeThemeButton
+        inCollapsedSidebar={inWorkspace && collapsed}
+        labels={{
+          trigger: tSettings("theme"),
+          light: tSettings("light"),
+          dark: tSettings("dark"),
+          system: tSettings("system"),
+        }}
+      />
+      <LocaleSwitcher
+        ariaLabel={tSettings("language")}
+        inCollapsedSidebar={inWorkspace && collapsed}
+        reloadOnLocaleChange={reloadOnLocaleChange}
+      />
+    </>
+  );
+  const notifications = !showSessionPending && session && !signingOut ? (
+    <NotificationDrawer placement={placement === "rail" ? "rail" : "header"} />
+  ) : null;
+
   if (isSidebar) {
     return (
       <div
         className={cn(
           "shrink-0",
-          placement === "rail"
-            ? "px-1 py-2"
-            : "border-b border-sidebar-border px-3 py-2",
+          placement === "rail" && "px-1 py-2",
+          placement === "sidebar" && "border-b border-sidebar-border px-3 py-2",
         )}
       >
         <div
@@ -250,10 +275,12 @@ function TopBarComponent({
                 className={cn(
                   "min-w-0 flex-1 justify-start gap-2 px-1",
                   collapsed && "size-9 flex-none justify-center px-0",
+                  inWorkspace && "h-8 text-[13px]",
+                  inWorkspace && collapsed && "w-8",
                   placement === "rail" && "desktop-rail-control",
                 )}
               >
-                <Avatar className="size-7">
+                <Avatar className={inWorkspace ? "size-5" : "size-7"}>
                   <AvatarImage
                     src={session.user.image ?? undefined}
                     alt={session.user.name}
@@ -265,23 +292,37 @@ function TopBarComponent({
                   </AvatarFallback>
                 </Avatar>
                 {!collapsed ? (
-                  <>
+                  <span className="flex min-w-0 flex-1 items-center gap-2 transition-opacity duration-150 group-data-[sidebar-collapsed=true]/workspace:opacity-0 motion-reduce:transition-none">
                     <span className="min-w-0 flex-1 truncate text-left">
                       {session.user.name}
                     </span>
                     <ChevronsUpDown aria-hidden="true" />
-                  </>
+                  </span>
                 ) : null}
               </DropdownMenuTrigger>
               {renderAccountMenuContent()}
             </DropdownMenu>
           ) : null}
-          {!showSessionPending && session && !signingOut ? (
-            <NotificationDrawer
-              placement={placement === "rail" ? "rail" : "header"}
-            />
-          ) : null}
+          {inWorkspace ? (
+            !showSessionPending && session && !collapsed ? (
+              <span className="shrink-0 transition-opacity duration-150 group-data-[sidebar-collapsed=true]/workspace:opacity-0 motion-reduce:transition-none">
+                <DeploymentAccountBadge />
+              </span>
+            ) : null
+          ) : notifications}
         </div>
+        {inWorkspace ? (
+          <div className={cn(
+            "mt-0.5 flex items-center gap-0.5 border-t border-sidebar-border/70 pt-0.5 [&_button]:size-8",
+            collapsed && "flex-col",
+          )}>
+            {settingsControl}
+            {!showSessionPending && session && !signingOut && !publicDemo.active ? (
+              <DeploymentAccountUsage />
+            ) : null}
+            {preferences}
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -333,25 +374,9 @@ function TopBarComponent({
           </div>
           <div className="flex items-center space-x-2">
             <div className="hidden items-center gap-1 pc:flex">
-              <ChangeThemeButton
-                labels={{
-                  trigger: tSettings("theme"),
-                  light: tSettings("light"),
-                  dark: tSettings("dark"),
-                  system: tSettings("system"),
-                }}
-              />
-              <LocaleSwitcher
-                ariaLabel={tSettings("language")}
-                reloadOnLocaleChange={reloadOnLocaleChange}
-              />
+              {preferences}
             </div>
-            {/* Notifications（桌面端 Sheet） */}
-            {!showSessionPending && session && !signingOut ? (
-              <div className="block">
-                <NotificationDrawer />
-              </div>
-            ) : null}
+            {notifications}
             {showSessionPending ? (
               <Skeleton className="w-20 h-4 mr-2" />
             ) : session ? (

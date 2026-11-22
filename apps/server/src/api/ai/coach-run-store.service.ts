@@ -37,6 +37,9 @@ import {
 } from './core/coach-history-messages';
 import type { CoachUserMessageBody } from './core/coach-query-yield';
 import { CoachRunProjector } from './core/coach-run-projector';
+import { COACH_QUESTION_STALE_ERROR_CODE } from '@shared/coach-turn-error';
+import { isPlanClarification } from './core/coach-plan-question-review';
+import type { CoachUiChunk } from './core/coach-ui-message-stream';
 import { stableJson } from './core/ai-common.util';
 import { CoachMemoryExtractionEnqueuer } from './memory/coach-memory-extraction-enqueuer.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -51,7 +54,14 @@ const json = (value: unknown): Prisma.InputJsonValue =>
 const hash = (value: unknown) =>
   createHash('sha256').update(stableJson(value)).digest('hex');
 const LEASE_MS = 60_000;
-export class CoachRunCancelledError extends Error {}
+export class CoachRunCancelledError extends Error {
+  constructor(
+    reason: 'facts_changed' | 'user_cancelled',
+    readonly terminalChunks?: CoachUiChunk[],
+  ) {
+    super(reason);
+  }
+}
 
 export type CoachRunHandle = {
   projector: CoachRunProjector;
@@ -387,9 +397,10 @@ export class CoachRunStore {
               !isCoachInteraction(run.pendingInteraction) ||
               run.pendingInteraction.interactionId !== command.interactionId
             )
-              throw new ConflictException(
-                'Coach question is no longer pending',
-              );
+              throw new ConflictException({
+                code: COACH_QUESTION_STALE_ERROR_CODE,
+                message: 'Coach question is no longer pending',
+              });
             const pending = run.pendingInteraction;
             const source = await tx.aiCoachMessage.findUnique({
               where: { id: pending.questionMessageId },
@@ -564,7 +575,7 @@ export class CoachRunStore {
             sessionId: sid,
             sourceMessageId: inputMessageId,
             content: args.prompt,
-            hasStructuredUserInput: args.message.content.length > 0,
+            message: args.message,
           });
         }
         const projector = new CoachRunProjector({
@@ -960,18 +971,24 @@ export class CoachRunStore {
     runResult?: { resultType: string; resultRef: unknown },
   ) {
     const p = handle.projector;
+    const planClarification =
+      terminal === 'awaiting_input' && p.planClarification && !p.mutationStarted;
+    let staleQuestionChunks: CoachUiChunk[] | undefined;
     if (terminal === 'awaiting_input' && this.factScopes) {
-      await this.reconcileFactGuidance(
-        handle.userId,
-        await this.factScopes.current(handle.userId),
-        p.run.runId,
-      );
-      const current = await this.prisma.coachRun.findFirst({
-        where: { id: p.run.runId, userId: handle.userId },
-        select: { status: true },
-      });
-      if (current?.status === 'cancelled')
-        throw new CoachRunCancelledError('facts_changed');
+      try {
+        await this.reconcileFactGuidance(
+          handle.userId,
+          await this.factScopes.current(handle.userId),
+          { runId: p.run.runId, planClarification },
+        );
+      } catch (error) {
+        if (!(error instanceof CoachRunCancelledError) || error.message !== 'facts_changed')
+          throw error;
+        terminal = 'cancelled';
+        legacyMessage = undefined;
+        runResult = undefined;
+        staleQuestionChunks = p.finish('cancelled');
+      }
     }
     const envelope = p.envelope(legacyMessage);
     await this.prisma.$transaction(async (tx) => {
@@ -1024,7 +1041,10 @@ export class CoachRunStore {
               terminal === 'awaiting_input' ? null : new Date(p.run.endedAt),
             pendingInteraction:
               terminal === 'awaiting_input' && p.pendingInteraction
-                ? json(p.pendingInteraction)
+                ? json({
+                    ...p.pendingInteraction,
+                    ...(planClarification ? { planClarification: true } : {}),
+                  })
                 : Prisma.DbNull,
             ...(runResult
               ? {
@@ -1043,6 +1063,8 @@ export class CoachRunStore {
       this.logger.log(
         `run_terminal run=${p.run.runId} attempt=${p.run.attemptId} status=${terminal} executionMs=${p.run.executionMs} retryBlocked=${p.run.retryBlocked}`,
       );
+    if (staleQuestionChunks)
+      throw new CoachRunCancelledError('facts_changed', staleQuestionChunks);
   }
 
   async contextTimezone(userId: string, runId: string) {
@@ -1116,7 +1138,7 @@ export class CoachRunStore {
   async reconcileFactGuidance(
     userId: string,
     topics: CoachFactScope[],
-    finishingRunId?: string,
+    finishing?: { runId: string; planClarification: boolean },
   ) {
     const current = new Map(
       topics.map((topic) => [topic.topic, topic.revision]),
@@ -1135,8 +1157,8 @@ export class CoachRunStore {
           {
             OR: [
               { status: 'awaiting_input' },
-              ...(finishingRunId
-                ? [{ id: finishingRunId, status: 'running' }]
+              ...(finishing
+                ? [{ id: finishing.runId, status: 'running' }]
                 : []),
             ],
           },
@@ -1159,8 +1181,9 @@ export class CoachRunStore {
         }
       }
     }
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       let cancelled = 0;
+      let finishingRunStale = false;
       for (const run of runs) {
         const scope =
           run.factScope &&
@@ -1185,6 +1208,62 @@ export class CoachRunStore {
           expected.get(scope.topic) === scope.revision
         )
           continue;
+        const finishingHere = run.id === finishing?.runId && run.status === 'running';
+        const pending = isCoachInteraction(run.pendingInteraction)
+          ? run.pendingInteraction
+          : null;
+        const hasCurrentCoachFacts =
+          scope.topic?.startsWith('coach-context:') &&
+          [...expected].some(
+            ([topic, revision]) =>
+              topic.startsWith('coach-context:') &&
+              revision !== 'disabled' &&
+              revision !== 'unverified',
+          );
+        // Clarifications submit user input, and the next turn reads current facts.
+        // The streaming planner reviews provisional questions before they are shown.
+        if (
+          hasCurrentCoachFacts &&
+          !run.branchId &&
+          run.taskKind === 'CONVERSATION' &&
+          run.triggerType !== 'FACT_GUIDANCE'
+        ) {
+          if (finishingHere && finishing?.planClarification) continue;
+          if (pending) {
+            if ('planClarification' in pending && pending.planClarification === true)
+              continue;
+            // Older question receipts do not have the server-owned marker.
+            const source = await tx.coachRunAttempt.findUnique({
+              where: { messageId: pending.questionMessageId },
+              select: {
+                mutationStarted: true,
+                unresolvedTools: true,
+                message: { select: { message: true } },
+              },
+            });
+            const legacy = getStoredCoachLegacyMessage(source?.message.message) as {
+              content?: Array<{ type: string; id?: string; name?: string; input?: unknown }>;
+            } | null;
+            const question = legacy?.content?.find((block) =>
+              block.type === 'tool_use' &&
+              block.name === 'AskUserQuestion' &&
+              block.id === pending.questionToolCallId,
+            );
+            if (
+              source &&
+              !source.mutationStarted &&
+              Array.isArray(source.unresolvedTools) &&
+              source.unresolvedTools.length === 0 &&
+              isPlanClarification(question?.input)
+            )
+              continue;
+          }
+        }
+        if (finishingHere) {
+          // The producer must finalize the attempt and run together.
+          finishingRunStale = true;
+          continue;
+        }
         const changed = await tx.coachRun.updateMany({
           where: {
             id: run.id,
@@ -1202,14 +1281,6 @@ export class CoachRunStore {
         });
         if (!changed.count) continue;
         cancelled++;
-        if (run.activeAttemptId)
-          await tx.coachRunAttempt.updateMany({
-            where: { id: run.activeAttemptId, userId, status: 'running' },
-            data: { cancelRequestedAt: new Date() },
-          });
-        const pending = isCoachInteraction(run.pendingInteraction)
-          ? run.pendingInteraction
-          : null;
         if (!pending) continue;
         const row = await tx.aiCoachMessage.findFirst({
           where: {
@@ -1252,8 +1323,11 @@ export class CoachRunStore {
           data: { message: json({ ...envelope, parts }) },
         });
       }
-      return cancelled;
+      return { cancelled, finishingRunStale };
     });
+    if (result.finishingRunStale)
+      throw new CoachRunCancelledError('facts_changed');
+    return result.cancelled;
   }
 
   async cancel(userId: string, runId: string, attemptId: string) {
@@ -1348,15 +1422,38 @@ export class CoachRunStore {
     return null;
   }
 
-  /** Called on history reads. Lease expiry is recovery, never permission to replay a write. */
-  async recoverStale(userId: string, sid: string) {
+  recoverStale(userId: string, sid: string) {
+    return this.recoverStaleAttempts(userId, { run: { sessionId: sid } });
+  }
+
+  async recoverStaleOperation(userId: string, operationId: string) {
+    await this.recoverStaleAttempts(userId, { operationId });
+    // A history read may already have interrupted the attempt. Only lease
+    // recovery leaves an interrupted attempt without a completion reason.
+    const attempt = await this.prisma.coachRunAttempt.findFirst({
+      where: {
+        userId,
+        operationId,
+        status: 'interrupted',
+        completionReason: null,
+      },
+      select: { id: true },
+    });
+    return Boolean(attempt);
+  }
+
+  /** Lease expiry is recovery, never permission to replay a write. */
+  private async recoverStaleAttempts(
+    userId: string,
+    target: Pick<Prisma.CoachRunAttemptWhereInput, 'operationId' | 'run'>,
+  ) {
     const cutoff = new Date(Date.now() - LEASE_MS);
     const stale = await this.prisma.coachRunAttempt.findMany({
       where: {
         userId,
         status: 'running',
         heartbeatAt: { lt: cutoff },
-        run: { sessionId: sid },
+        ...target,
       },
       include: { message: true, run: true },
     });

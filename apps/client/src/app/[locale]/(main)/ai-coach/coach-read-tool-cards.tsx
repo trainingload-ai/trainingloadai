@@ -12,15 +12,17 @@ import {
   BarChart3,
   Bike,
   CalendarDays,
+  ClipboardList,
   Footprints,
   Gauge,
   HeartPulse,
+  LayoutDashboard,
   Waves,
   Zap,
   Dumbbell,
   StretchHorizontal,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import type { SportType } from "@/api/activities";
 import { ActivitySummaryCard } from "@/components/activities/activity-summary-card";
@@ -47,6 +49,10 @@ import {
 import type { TrainingVisualizationV1 } from "@shared/training-visualization";
 import { resolveCoachActivityLoad } from "./coach-activity-load";
 import { parseCoachCompetitionEvents } from "@shared/coach-competition-events";
+import { isCoachActivitySection, readCoachActivityView, readCoachEntityView, type CoachActivitySection } from "@shared/ai-coach-schema";
+import { CoachActivityPreviewContext } from "./coach-preview-panel";
+import { CoachHealthCard } from "./coach-health-card";
+import { CoachNavigationCard } from "./cards/coach-navigation-card";
 
 function asRecord(v: unknown): Record<string, unknown> | null {
   if (!v || typeof v !== "object" || Array.isArray(v)) return null;
@@ -150,10 +156,12 @@ export function CoachReadToolCard({
   input,
   onAction,
   disabled,
+  chartRef,
 }: {
   name: string;
   input: unknown;
   disabled?: boolean;
+  chartRef?: { messageId: string; deliveryId: string };
   onAction?: (text: string, content: unknown) => void | Promise<void>;
 }) {
   const expectedKind: Record<string, string> = {
@@ -162,6 +170,7 @@ export function CoachReadToolCard({
     ActivityDayView: "activity_day_view",
     PmcRange: "pmc_range",
     TrainingVisualization: "training_visualization",
+    CoachHealthVisualization: "coach_health_visualization",
     ProfileZones: "profile_zones",
     ProfileZoneRanges: "profile_zone_ranges",
     CompetitionEvents: "competition_events",
@@ -196,7 +205,11 @@ export function CoachReadToolCard({
     case "PmcRange":
       return <PmcRangeCard payload={input} />;
     case "TrainingVisualization":
-      return <TrainingVisualizationCard payload={input} />;
+      return <TrainingVisualizationCard payload={input} chartRef={chartRef} />;
+    case "CoachHealthVisualization":
+      return <CoachHealthCard payload={input} chartRef={chartRef} />;
+    case "CoachDetailView":
+      return <CoachDetailLink payload={input} />;
     case "ProfileZones":
       return <ProfileZonesCard payload={input} />;
     case "ProfileZoneRanges":
@@ -206,6 +219,22 @@ export function CoachReadToolCard({
     default:
       return null;
   }
+}
+
+function CoachDetailLink({ payload }: { payload: unknown }) {
+  const t = useTranslations();
+  const open = useContext(CoachActivityPreviewContext);
+  const view = readCoachActivityView(payload) ?? readCoachEntityView(payload);
+  if (!view) return <CoachInvalidStructuredCard />;
+  const title = view.kind === "plan_detail" ? view.title
+    : view.kind === "activity_detail" ? t("ActivityDetail.title")
+      : t("sidebar.dashboard");
+  const href = view.kind === "plan_detail" ? `/plans/${view.planId}`
+    : view.kind === "activity_detail" ? `/activities/${view.hashId}` : "/dashboard";
+  const icon = view.kind === "plan_detail" ? ClipboardList
+    : view.kind === "activity_detail" ? Activity : LayoutDashboard;
+  const destination = open ? { onOpen: () => open(view, title) } : { href };
+  return <CoachNavigationCard icon={icon} title={title} {...destination} />;
 }
 
 function CompetitionEventsCard({ payload }: { payload: unknown }) {
@@ -486,6 +515,7 @@ function ActivityRecentCard({ payload }: { payload: unknown }) {
 }
 
 function ActivityDayViewCard({ payload }: { payload: unknown }) {
+  const requestedSection = asRecord(payload)?.section;
   const t = useTranslations("AiCoachPage.readCards.activityDay");
   const tc = useTranslations("AiCoachPage.readCards");
   const o = asRecord(payload);
@@ -504,7 +534,7 @@ function ActivityDayViewCard({ payload }: { payload: unknown }) {
       dense
       appearance="strip"
       collapsible
-      defaultCollapsed
+      defaultCollapsed={requestedSection == null && items.length > 1}
       toggleAriaLabel={tc("toggleDetails")}
     >
       {items.length === 0 ? (
@@ -512,14 +542,20 @@ function ActivityDayViewCard({ payload }: { payload: unknown }) {
           {t("empty")}
         </p>
       ) : (
-        <ActivitySummaryList items={items} />
+        <ActivitySummaryList
+          items={items}
+          section={isCoachActivitySection(requestedSection) ? requestedSection : undefined}
+        />
       )}
     </CoachCard>
   );
 }
 
-function ActivitySummaryList({ items }: { items: unknown[] }) {
+function ActivitySummaryList({
+  items, section = "overview",
+}: { items: unknown[]; section?: CoachActivitySection }) {
   const router = useRouter();
+  const openPreview = useContext(CoachActivityPreviewContext);
   const tActivityCommon = useTranslations("V2ActivitiesPage.common");
   const tActivityTitle = useTranslations("ActivityTitle");
   const { timeFormat } = useStore();
@@ -531,6 +567,7 @@ function ActivitySummaryList({ items }: { items: unknown[] }) {
         if (!item) return null;
         const sportType = String(item.sportType ?? "RUN");
         const hashId = String(item.hashId ?? "");
+        const activityView = readCoachActivityView({ kind: "activity_detail", hashId, section });
         const load = resolveCoachActivityLoad(item);
         const title = getLocalizedActivityTitle(
           { title: String(item.title ?? ""), sportType },
@@ -557,9 +594,10 @@ function ActivitySummaryList({ items }: { items: unknown[] }) {
                 ? item.mapThumbnailUrl
                 : null
             }
-            onOpen={
-              hashId ? () => router.push(`/activities/${hashId}`) : undefined
-            }
+            onOpen={activityView ? () => {
+              if (openPreview) openPreview(activityView, title);
+              else router.push(`/activities/${activityView.hashId}`);
+            } : undefined}
             footer={
               hasFooter ? (
                 <div className="flex flex-wrap gap-2 text-mobile-caption pc:text-xs text-muted-foreground">

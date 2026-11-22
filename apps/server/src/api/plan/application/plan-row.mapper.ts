@@ -33,6 +33,7 @@ export type PlanWorkoutRowLike = {
   dayOffset?: number | null;
   sessionIndex?: number | null;
   scheduledDate?: Date | string | null;
+  revision?: number;
   sportType: string;
   sportDefinitionCode?: string | null;
   name?: string | null;
@@ -232,6 +233,7 @@ export function normalizePlanWorkoutRow(
     dayOffset: row.dayOffset,
     sessionIndex: row.sessionIndex ?? 1,
     scheduledDate: normalizePlanDate(row.scheduledDate),
+    revision: row.revision,
     sportType: row.sportType,
     sportDefinitionCode:
       row.sportDefinitionCode ??

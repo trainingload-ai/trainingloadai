@@ -8,6 +8,7 @@ import { UserAnalysisConfigModule } from '@/api/user/user-analysis-config.module
 import { PlanCalendarValidationService } from './application/plan-calendar-validation.service';
 import { PlanStartRepository } from './persistence/plan-start.repository';
 import { PlanStartService } from './application/plan-start.service';
+import { CalendarAdjustmentSyncWorker } from './application/calendar-adjustment-sync.worker';
 import { AthleteStateUpdatesModule } from '@/athlete-state/updates/athlete-state-updates.module';
 import { PlanProjectionReadModule } from './application/plan-projection-read.module';
 import { Module } from '@nestjs/common';
@@ -28,7 +29,6 @@ import { PlanImportDraftService } from './plan-import-draft.service';
 import { PlanImportDraftController } from './plan-import-draft.controller';
 import { PublicPlanImportDraftController } from './public-plan-import-draft.controller';
 import { PlanShareService } from './plan-share.service';
-import { PlanShareAuthController } from './plan-share-auth.controller';
 import { PublicPlanShareController } from './public-plan-share.controller';
 import { PMCModule } from '@/training-load/pmc.module';
 import { PlanActivityLinkRepository } from './persistence/plan-activity-link.repository';
@@ -75,7 +75,6 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PlanController,
     PlanImportDraftController,
     PublicPlanImportDraftController,
-    PlanShareAuthController,
     PublicPlanShareController,
   ],
   providers: [
@@ -103,6 +102,7 @@ import { PlanDeliveryReadService } from './application/plan-delivery-read.servic
     PlanWorkoutMutabilityPolicy,
     RollingPlanAuthorizationService,
     PlanStartService,
+    CalendarAdjustmentSyncWorker,
     RollingPlanService,
     RollingPlanAutomationService,
     PlanProposalService,

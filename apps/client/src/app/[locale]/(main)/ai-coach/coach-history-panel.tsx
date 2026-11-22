@@ -2,7 +2,7 @@
 
 import { useGuestAccessText } from "@deployment/managed-ui";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -11,12 +11,12 @@ import {
 } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
-  ChevronDown,
+  ChevronRight,
+  ListFilter,
+  Search,
   History,
   LoaderCircle,
-  Pin,
   Plus,
-  Sparkles,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -39,29 +39,28 @@ import {
   groupCoachSessionsByHistoryBuckets,
   groupCoachSessionsByRecentBuckets,
 } from "./coach-history-list-model";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { usePublicDemo } from "@/public-demo/public-demo-provider";
+import { CoachSearchDialog } from "./coach-search-dialog";
 
 const MOBILE_HISTORY_PAGE_TAKE = 30;
 
-function HistoryListBody({
+export function CoachSidebarHistoryList({
   activeSid,
+  heading,
   onSelectSession,
   onSessionDeleted,
   onViewAll,
-  onOpenReview,
   onNewChat,
-  className,
 }: {
   activeSid: string;
+  heading: ReactNode;
   onSelectSession: (sid: string) => void;
-  onSessionDeleted?: (sid: string) => void;
-  /** 在主聊天页展开全量历史，不跳转路由 */
-  onViewAll?: () => void;
-  onOpenReview?: () => void;
-  onNewChat?: () => void;
-  className?: string;
+  onSessionDeleted: (sid: string) => void;
+  onViewAll: () => void;
+  onNewChat: () => void;
 }) {
+  const sidebarT = useTranslations("sidebar");
   const t = useTranslations("AiCoachPage.history");
   const tCoach = useTranslations("AiCoachPage");
   const demoText = useGuestAccessText();
@@ -93,32 +92,37 @@ function HistoryListBody({
     sidebarQuery.data?.items ?? [],
   );
 
-  const pinnedSessions = useMemo(
-    () =>
-      sessions
-        .filter((s) => Boolean(s.pinnedAt))
-        .sort(
-          (a, b) =>
-            new Date(b.pinnedAt!).getTime() - new Date(a.pinnedAt!).getTime(),
-        ),
-    [sessions],
-  );
+  const [focused, setFocused] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const historyViewport = useRef<HTMLDivElement>(null);
+  const historyEnd = useRef<HTMLDivElement>(null);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
 
-  const historyRows = useMemo(
-    () =>
-      groupCoachSessionsByRecentBuckets(
-        sessions.filter((s) => !s.pinnedAt),
-        {
-          today: t("today"),
-          yesterday: t("yesterday"),
-          past: t("past"),
-        },
-      ),
-    [sessions, t],
-  );
+  useEffect(() => {
+    const viewport = historyViewport.current;
+    const end = historyEnd.current;
+    if (!viewport || !end || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setHasMoreBelow(!entry.isIntersecting);
+    }, { root: viewport, rootMargin: "0px 0px 1px", threshold: 1 });
+    observer.observe(end);
+    return () => observer.disconnect();
+  }, []);
 
-  // 置顶分组默认收起；普通历史始终展示，避免侧栏内部再出现一层“历史对话”折叠。
-  const [pinnedOpen, setPinnedOpen] = useState(false);
+  const pinned = sessions.filter((session) => session.pinnedAt);
+  const recent = sessions.filter(
+    (session) => !session.pinnedAt && (!focused || session.id === activeSid),
+  );
+  const groups = [
+    ...(pinned.length > 0
+      ? [{ key: "pinned", label: t("pinnedSection"), items: pinned }]
+      : []),
+    ...groupCoachSessionsByRecentBuckets(recent, {
+      today: t("today"),
+      yesterday: t("yesterday"),
+      past: t("past"),
+    }),
+  ];
 
   const patchMutation = useMutation({
     mutationFn: (vars: {
@@ -154,171 +158,107 @@ function HistoryListBody({
   });
 
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
-      {onOpenReview ? (
-        <div className="shrink-0 px-3 pb-1 pt-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="menu"
-            className="w-full justify-start gap-2 font-medium text-neutral-700 shadow-none transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-            onClick={onOpenReview}
-          >
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
-            <span>{t("openAiReview")}</span>
-          </Button>
-        </div>
-      ) : null}
-      {onNewChat ? (
-        <div className={cn("shrink-0 px-3 pb-1", !onOpenReview && "pt-2")}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="menu"
-            className="w-full justify-start gap-2 font-medium text-neutral-700 shadow-none transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-            onClick={onNewChat}
-            disabled={publicDemo.active}
-            title={publicDemo.active ? demoText("aiReadOnly") : undefined}
-            aria-label={tCoach("actions.newChat")}
-          >
-            <Plus className="h-4 w-4 text-muted-foreground" />
-            <span>{tCoach("actions.newChat")}</span>
-          </Button>
-        </div>
-      ) : null}
-      <div className="min-h-0 flex-1 overflow-auto overscroll-y-contain">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex shrink-0 items-center gap-0.5 px-1.5">
+        <div className="min-w-0 flex-1">{heading}</div>
+        <Button type="button" size="icon-compact" variant="ghost"
+          className={cn("size-7 text-muted-foreground", focused && "bg-accent text-foreground")}
+          aria-label={sidebarT("focusChats")} title={sidebarT("focusChats")}
+          aria-pressed={focused} onClick={() => setFocused(!focused)}>
+          <ListFilter aria-hidden="true" />
+        </Button>
+        <CoachSearchDialog
+          open={searchOpen}
+          onOpenChange={setSearchOpen}
+          sessions={sessions}
+          onSelectSession={onSelectSession}
+          onNewChat={publicDemo.active ? undefined : onNewChat}
+          trigger={(
+            <Button type="button" size="icon-compact" variant="ghost"
+              className="size-7 text-muted-foreground" aria-label={sidebarT("searchChats")}
+              title={sidebarT("searchChats")}>
+              <Search aria-hidden="true" />
+            </Button>
+          )}
+        />
+      </div>
+      <div className="shrink-0 px-1.5 pb-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 w-full justify-start gap-2 px-2 text-[13px] hover:bg-background/70"
+          onClick={onNewChat}
+          disabled={publicDemo.active}
+          title={publicDemo.active ? demoText("aiReadOnly") : undefined}
+        >
+          <Plus aria-hidden="true" />
+          {tCoach("actions.newChat")}
+        </Button>
+      </div>
+      <div
+        ref={historyViewport}
+        className={cn(
+          "min-h-0 flex-1 overflow-auto overscroll-y-contain scroll-pb-3.5 px-1.5",
+          hasMoreBelow && "[mask-image:linear-gradient(to_bottom,black_calc(100%_-_14px),hsl(var(--black)/0.35))]",
+        )}
+      >
         {sidebarQuery.isPending ? (
-          <div className="flex justify-center py-10 text-muted-foreground">
-            <LoaderCircle className="h-5 w-5 animate-spin" />
+          <div className="flex justify-center py-4 text-muted-foreground">
+            <LoaderCircle className="size-4 animate-spin" role="status" aria-label={sidebarT("loadingChats")} />
           </div>
-        ) : sessions.length === 0 ? (
-          <p className="mx-3 rounded-surface border border-dashed border-border/70 bg-muted/25 px-3 py-6 text-center text-sm text-muted-foreground">
-            {t("empty")}
+        ) : groups.length === 0 ? (
+          <p className="px-2 py-2 text-xs text-muted-foreground">
+            {focused ? sidebarT("focusChatsEmpty") : t("empty")}
           </p>
         ) : (
-          <div className="pb-3">
-            {/* Pinned 分组：默认收起 */}
-            {pinnedSessions.length > 0 ? (
-              <div className="px-3 pb-1 pt-1">
-                <Collapsible open={pinnedOpen} onOpenChange={setPinnedOpen}>
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex min-h-10 w-full items-center justify-between rounded-surface px-3 py-2 text-left",
-                      "text-mobile-caption pc:text-xs font-medium text-muted-foreground",
-                      "transition-colors hover:bg-neutral-100 hover:text-foreground dark:hover:bg-neutral-800",
-                    )}
-                    onClick={(e) => {
-                      // 只切换展开状态，不触发任何“选中会话/关闭面板”等上层点击逻辑
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setPinnedOpen((v) => !v);
-                    }}
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <Pin className="h-3.5 w-3.5" />
-                      {t("pinnedSection")}
-                    </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-3.5 w-3.5 transition-transform",
-                        pinnedOpen ? "rotate-180" : "rotate-0",
-                      )}
-                    />
-                  </button>
-                  <CollapsibleContent>
-                    <div className="mt-1 space-y-0.5">
-                      {pinnedSessions.map((s) => {
-                        const lineText = getCoachHistoryLineText(
-                          s,
-                          t("untitled"),
-                        );
-                        return (
-                          <div key={s.id} className="py-0.5">
-                            <CoachHistorySessionRow
-                              activeSid={activeSid}
-                              lineText={lineText}
-                              menuLabel={t("menuMore")}
-                              onDelete={() => setDeleteTarget(s)}
-                              onEdit={() => setEditSession(s)}
-                              onPinToggle={() => {
-                                patchMutation.mutate({
-                                  sid: s.id,
-                                  body: { pinned: !s.pinnedAt },
-                                });
-                              }}
-                              onSelect={() => onSelectSession(s.id)}
-                              readOnly={publicDemo.active}
-                              session={s}
-                              t={t}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            ) : null}
-
-            {/* At most 20 recent sessions: normal flow keeps row spacing stable
-                when new messages move sessions between date groups. */}
-            <div className="w-full" data-coach-recent-history>
-              {historyRows.map((row) => {
-                if (row.kind === "header") {
-                  return (
-                    <div key={row.key} className="w-full px-6 pb-1 pt-3">
-                      <div className="text-mobile-caption pc:text-[11px] font-medium text-muted-foreground">
-                        {row.label}
-                      </div>
-                    </div>
-                  );
-                }
-                const s = row.session;
-                const lineText = getCoachHistoryLineText(s, t("untitled"));
-
-                return (
-                  <div key={row.key} className="w-full px-3 py-0.5">
+          <div className="space-y-1 pb-1" data-coach-recent-history>
+            {groups.map(({ key, label, items }) => (
+              <Collapsible key={key} defaultOpen>
+                <CollapsibleTrigger className="group flex h-7 w-full items-center gap-1.5 rounded-control px-2 text-start text-xs font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <ChevronRight className="size-3 shrink-0 group-data-[state=open]:rotate-90" aria-hidden="true" />
+                  <span className="truncate">{label}</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-0.5">
+                  {items.map((session) => (
                     <CoachHistorySessionRow
+                      key={session.id}
                       activeSid={activeSid}
-                      lineText={lineText}
+                      lineText={getCoachHistoryLineText(session, t("untitled"))}
                       menuLabel={t("menuMore")}
-                      onDelete={() => setDeleteTarget(s)}
-                      onEdit={() => setEditSession(s)}
-                      onPinToggle={() => {
-                        patchMutation.mutate({
-                          sid: s.id,
-                          body: { pinned: !s.pinnedAt },
-                        });
-                      }}
-                      onSelect={() => onSelectSession(s.id)}
+                      onDelete={() => setDeleteTarget(session)}
+                      onEdit={() => setEditSession(session)}
+                      onPinToggle={() => patchMutation.mutate({
+                        sid: session.id,
+                        body: { pinned: !session.pinnedAt },
+                      })}
+                      onSelect={() => onSelectSession(session.id)}
                       readOnly={publicDemo.active}
-                      session={s}
+                      session={session}
                       t={t}
                     />
-                  </div>
-                );
-              })}
-            </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
           </div>
         )}
+        <div ref={historyEnd} className="h-px" aria-hidden="true" />
       </div>
-
-      {sessions.length > 0 && onViewAll ? (
-        <div className="shrink-0 px-3 pb-2 pt-1">
+      {sessions.length > 0 ? (
+        <div className="shrink-0 px-1.5 py-0.5">
           <Button
             type="button"
             variant="ghost"
-            size="menu"
-            className="w-full justify-start gap-2 text-mobile-caption text-neutral-500 shadow-none transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 pc:text-xs"
+            size="sm"
+            className="h-7 w-full justify-start gap-2 px-2 text-xs text-muted-foreground hover:bg-background/70"
             onClick={onViewAll}
           >
-            <History className="h-4 w-4" />
+            <History aria-hidden="true" />
             {t("viewAll")}
           </Button>
         </div>
       ) : null}
-
       <CoachHistoryDialogs
         deletePending={deleteMutation.isPending}
         deleteTarget={deleteTarget}
@@ -346,30 +286,6 @@ function HistoryListBody({
         t={t}
       />
     </div>
-  );
-}
-
-export function CoachSidebarHistoryList({
-  activeSid,
-  onSelectSession,
-  onSessionDeleted,
-  onViewAll,
-  onNewChat,
-}: {
-  activeSid: string;
-  onSelectSession: (sid: string) => void;
-  onSessionDeleted?: (sid: string) => void;
-  onViewAll?: () => void;
-  onNewChat?: () => void;
-}) {
-  return (
-    <HistoryListBody
-      activeSid={activeSid}
-      onNewChat={onNewChat}
-      onSelectSession={onSelectSession}
-      onSessionDeleted={onSessionDeleted}
-      onViewAll={onViewAll}
-    />
   );
 }
 

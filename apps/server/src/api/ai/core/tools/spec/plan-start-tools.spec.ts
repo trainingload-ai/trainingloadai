@@ -68,6 +68,59 @@ describe('saved draft start tools', () => {
       }),
     ).toEqual({ ok: true });
   });
+  it('requires a load and duration target for every remaining ISO week of a rolling start', async () => {
+    const ctx = {
+      sid: 's',
+      branchId: 'b',
+      currentUserMessageId: 'input',
+      coachBranching: {},
+    };
+    const rollingStart = {
+      ...request,
+      rolling: {
+        policy: {
+          goal: 'Build endurance',
+          sportTypes: ['RUN'],
+          autoPlanMonths: true,
+          autoGenerateWeeks: true,
+          autoAdjustFuture: true,
+        },
+        monthStrategies: [
+          {
+            monthStart: '2026-11-01',
+            objective: 'Build endurance',
+            loadRange: null,
+            durationMinutesRange: { min: 30, max: 90 },
+            weekFocus: ['2026-11-16', '2026-11-23', '2026-11-30'].map(
+              (weekStart) => ({
+                weekStart,
+                focus: 'Easy training',
+                loadRange: null,
+                durationMinutesRange: { min: 10, max: 30 },
+              }),
+            ),
+          },
+        ],
+      },
+    };
+    expect(
+      toolSchemaValidator(planProposalPreviewTool.parameters!)(rollingStart)
+        .success,
+    ).toBe(true);
+    expect(
+      await planProposalPreviewTool.validateInput!(
+        ctx as never,
+        rollingStart as never,
+      ),
+    ).toEqual({ ok: true });
+    rollingStart.rolling.monthStrategies[0].weekFocus.pop();
+    expect(
+      await planProposalPreviewTool.validateInput!(
+        ctx as never,
+        rollingStart as never,
+      ),
+    ).toMatchObject({ ok: false, code: 'ROLLING_WEEK_TARGETS_REQUIRED' });
+  });
   it('pages all source identities and revisions with honest coverage for a long plan', async () => {
     const workouts = Array.from({ length: 95 }, (_, i) => ({
       id: `w${i + 1}`,

@@ -28,7 +28,7 @@ export function AccountAiSettingsPage() {
     <MainScrollPageShell maxWidthClass="max-w-3xl">
       <AccountPageTitle title={title} />
       <header className="mb-4 flex items-start gap-2">
-        <Button asChild variant="ghost" size="icon-sm">
+        <Button asChild variant="ghost" size="icon-sm" className="tablet:hidden">
           <Link href="/account" aria-label={title}>
             <ArrowLeft aria-hidden="true" />
           </Link>

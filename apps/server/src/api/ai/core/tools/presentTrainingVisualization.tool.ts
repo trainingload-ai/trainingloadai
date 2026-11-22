@@ -16,6 +16,7 @@ import {
   type TrainingVisualizationView,
 } from '@shared/training-visualization';
 import {
+  aiToolError,
   buildAiTool,
   hasSignedInUser,
   requireSignedInUser,
@@ -33,6 +34,8 @@ type Input = (TrainingAnalysisQuery | ExplorationQuery) & {
   preferredView?: TrainingVisualizationView;
   title?: string;
   subtitle?: string;
+  presentation?: 'SUMMARY' | 'CHART';
+  currentVo2Max?: boolean;
 };
 
 export const presentTrainingVisualizationTool: AiToolDef<
@@ -54,6 +57,15 @@ export const presentTrainingVisualizationTool: AiToolDef<
     allOf: trainingQueryConstraints,
     properties: {
       ...trainingAnalysisQueryProperties,
+      presentation: {
+        type: 'string',
+        enum: ['SUMMARY', 'CHART'],
+        description: 'SUMMARY for compact aggregate values with a chart link. CHART when the athlete asks for a visualization.',
+      },
+      currentVo2Max: {
+        type: 'boolean',
+        description: 'Only for a current VO2 max lookup. Uses the effective record and opens a chart for its source.',
+      },
       intent: {
         type: 'string',
         enum: TRAINING_VISUALIZATION_INTENTS,
@@ -79,7 +91,14 @@ export const presentTrainingVisualizationTool: AiToolDef<
     },
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
-  validateInput: (_ctx, input) => validateTrainingQuery(input),
+  validateInput: (_ctx, input) => {
+    if (input.currentVo2Max && (input.source !== 'METRICS' ||
+      input.presentation !== 'SUMMARY' || !Array.isArray(input.measures) || input.measures.length !== 1 ||
+      input.measures[0] !== 'VO2_MAX' || input.metricSource != null)) {
+      return aiToolError('Current VO2 max requires a VO2_MAX-only METRICS summary', 'INVALID_INPUT');
+    }
+    return validateTrainingQuery(input);
+  },
   summarizeForModel: ({ output }) =>
     output.schemaVersion === 2
       ? summarizeExploration(output)
@@ -93,7 +112,38 @@ export const presentTrainingVisualizationTool: AiToolDef<
           rows: output.rows.slice(0, 24),
         },
   execute: async (ctx, input) => {
-    if (isExplorationQuery(input)) return queryTrainingExploration(ctx, input);
+    if (isExplorationQuery(input)) {
+      const chart = await queryTrainingExploration(ctx, input);
+      if (input.presentation !== 'SUMMARY' ||
+          !['ZONE_DISTRIBUTION', 'POWER_DURATION'].includes(input.source)) return chart;
+      const highlights = chart.panels.flatMap((panel) =>
+        panel.series.flatMap((series) => {
+          const points = series.points.filter((point) => point.y !== null);
+          const selected = input.source === 'POWER_DURATION'
+            ? points.filter((point) => point.x === 300 || point.x === 1200)
+            : points.reduce<typeof points>((top, candidate) =>
+              !top.length || candidate.y! > top[0].y! ? [candidate] : top, []);
+          return selected.map((point) => ({
+            label: [panel.label, series.label, input.source === 'POWER_DURATION'
+              ? `${point.x / 60} min` : panel.x.categories?.[point.x]]
+              .filter(Boolean).join(' · '),
+            value: point.y!,
+            unit: panel.y.unit,
+          }));
+        }),
+      ).slice(0, 8);
+      return {
+        ...chart,
+        panels: [],
+        detail: chart.notes.includes('NO_DATA') ? undefined : true,
+        highlights,
+        observedAt: (ctx.currentTurnStartedAt ?? new Date()).toISOString(),
+      };
+    }
+    const current = input.currentVo2Max
+      ? (await ctx.coachTools.metricCurrent(ctx, { metrics: ['vo2Max'] })).items
+        .find((metric) => metric && 'effectiveCurrent' in metric)
+      : undefined;
     const query: TrainingAnalysisQuery = {
       source: input.source,
       from: input.from,
@@ -101,7 +151,8 @@ export const presentTrainingVisualizationTool: AiToolDef<
       groupBy: input.groupBy,
       measures: input.measures,
       sportTypes: input.sportTypes,
-      metricSource: input.metricSource,
+      metricSource: current && 'effectiveSource' in current
+        ? current.effectiveSource ?? 'ESTIMATED' : input.metricSource,
       limit: input.limit,
     };
     const dataset = await ctx.coachTools.trainingAggregate(ctx, query);
@@ -114,12 +165,31 @@ export const presentTrainingVisualizationTool: AiToolDef<
     const subtitle = String(input.subtitle ?? '')
       .trim()
       .slice(0, 120);
-    return buildTrainingVisualization({
+    const visualization = buildTrainingVisualization({
       dataset,
       intent: input.intent,
       preferredView: input.preferredView,
       title: title || (isChinese ? '训练分析' : 'Training analysis'),
       subtitle: subtitle || undefined,
     });
+    const effective = current && 'effectiveCurrent' in current ? current : null;
+    const observationDate = effective?.effectiveRecordedAt ?? (
+      input.currentVo2Max ? dataset.rows.filter((row) => row.values.VO2_MAX != null).at(-1)?.end : undefined
+    );
+    return input.presentation === 'SUMMARY' ? {
+      ...visualization,
+      summary: effective ? {
+        ...visualization.summary,
+        VO2_MAX: effective.effectiveCurrent ?? visualization.summary.VO2_MAX,
+      } : visualization.summary,
+      view: 'METRIC_STRIP',
+      rows: [],
+      detail: (dataset.query.source === 'METRICS' && dataset.query.measures.length === 1 &&
+        dataset.query.measures[0] === 'VO2_MAX') || dataset.rows.length && dataset.query.measures.some(
+        (measure) => dataset.summary[measure] != null,
+      ) ? { limit: dataset.query.limit } : undefined,
+      observedAt: (ctx.currentTurnStartedAt ?? new Date()).toISOString(),
+      observationDate: observationDate ?? undefined,
+    } : visualization;
   },
 });

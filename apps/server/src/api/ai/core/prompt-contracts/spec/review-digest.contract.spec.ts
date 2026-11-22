@@ -121,19 +121,17 @@ describe('review-digest prompt contract', () => {
     expect(prompt).toContain('Never expose or narrate internal mechanics');
     expect(prompt).toContain('separate Coach Runtime job');
     expect(prompt).toContain('do not identify internal ids');
-    expect(prompt).toContain('Write natural Markdown in locale: en');
-    expect(prompt).toContain('Execution of the reviewed day');
-    expect(prompt).toContain(
-      "Never call the reviewed activity 'today's workout'",
-    );
+    expect(prompt).toContain('Write in locale: en');
+    expect(prompt).toContain('most useful execution detail');
+    expect(prompt).toContain('Never call a past activity today’s workout');
     expect(prompt).toContain('half-open');
     expect(prompt).toContain('window.timezone');
     expect(prompt).toContain('window.athleteToday');
     expect(prompt).toContain('1-based human-facing indices');
     expect(prompt).toContain(
-      'When `coaching` is null, do not answer plan execution',
+      'When `coaching` is null, write an activity-based review',
     );
-    expect(prompt).toContain('350–600 Chinese characters');
+    expect(prompt).toContain('recorded values and their sample counts');
   });
 
   it('includes the optional coaching context in compact JSON', () => {
@@ -165,13 +163,13 @@ describe('review-digest prompt contract', () => {
       lang: 'zh',
     });
 
-    expect(daily).toContain('Connection to the next training day');
-    expect(weekly).toContain('Key sessions and deviations');
-    expect(weekly).toContain('600–1,000 Chinese characters');
-    expect(monthly).toContain('Consistency and key training patterns');
-    expect(monthly).toContain('Do not invent a named training phase');
-    expect(monthly).toContain('not proof of physiological adaptation');
-    expect(monthly).toContain('900–1,500 Chinese characters');
+    expect(daily).toContain('next training day');
+    expect(weekly).toContain('sequence, distribution, or plan execution');
+    expect(monthly).toContain('Compare at least two comparable weeks');
+    expect(monthly).toContain('Do not invent plan phases');
+    expect(monthly).toContain(
+      'physiological adaptation without comparable performance evidence',
+    );
     expect(new Set([daily, weekly, monthly]).size).toBe(3);
   });
 
@@ -183,6 +181,8 @@ describe('review-digest prompt contract', () => {
     });
     expect(prompt).toContain('server-owned background task');
     expect(prompt).toContain('coach_task_submit_result');
-    expect(prompt).toContain('{"markdown":"the complete review"}');
+    expect(prompt).toContain(
+      'headline (required), highlight, watch, recovery, next, and activityRefs',
+    );
   });
 });

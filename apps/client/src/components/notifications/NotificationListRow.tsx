@@ -79,7 +79,7 @@ export function NotificationUnreadDot({ show }: { show: boolean }) {
   if (!show) return null;
   return (
     <span
-      className="pointer-events-none absolute -left-0.5 -top-0.5 z-[1] h-2.5 w-2.5 rounded-full bg-brand ring-2 ring-background"
+      className="pointer-events-none absolute -end-0.5 -top-0.5 size-2 rounded-full bg-brand ring-1 ring-background"
       aria-hidden
     />
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components, type Options } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 
@@ -10,14 +10,29 @@ const proseBase =
 type MarkdownProseProps = {
   markdown: string;
   className?: string;
+  components?: Components;
+  remarkPlugins?: Options["remarkPlugins"];
+  urlTransform?: Options["urlTransform"];
 };
 
 /** 统一 typography（@tailwindcss/typography）样式，避免业务里拼一串 prose-* */
-export function MarkdownProse({ markdown, className }: MarkdownProseProps) {
+export function MarkdownProse({
+  markdown,
+  className,
+  components,
+  remarkPlugins,
+  urlTransform,
+}: MarkdownProseProps) {
   if (!markdown.trim()) return null;
   return (
     <div className={cn(proseBase, className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, ...(remarkPlugins ?? [])]}
+        components={components}
+        urlTransform={urlTransform}
+      >
+        {markdown}
+      </ReactMarkdown>
     </div>
   );
 }

@@ -29,7 +29,7 @@ describe('Agent task architecture boundary', () => {
 
   it('keeps plan review composition on a persistent background Agent task', () => {
     const body = methodBody(
-      aiService,
+      source('../agents/training-coach-agent.service.ts'),
       'async generatePlanReviewAdjustment(',
       '\n  }\n}',
     );

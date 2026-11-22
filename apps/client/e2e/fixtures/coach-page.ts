@@ -20,6 +20,9 @@ export async function openCoachFixture(
     sessions?: Array<Record<string, unknown>>;
     thinkingEnabled?: boolean;
     membershipPlan?: "FREE" | "PLUS" | "PRO";
+    membershipPeriodEnd?: string;
+    subscriptionUsedCredits?: number;
+    useGrantedCredits?: boolean;
     userName?: string;
     userEmail?: string;
     navigate?: boolean;
@@ -35,20 +38,23 @@ export async function openCoachFixture(
   const createdAt = "2026-09-26T00:00:00.000Z";
   const membershipPlan = options.membershipPlan ?? "PLUS";
   const membershipActive = membershipPlan !== "FREE";
+  const usedCredits = options.subscriptionUsedCredits ?? 0;
+  const subscriptionQuota = options.useGrantedCredits ? 0 : 10000;
   const credits = {
-    balanceCredits: 10000,
+    balanceCredits: 10000 - usedCredits,
     debtCredits: 0,
+    activeGrants: { grantedCredits: 10000, usedCredits },
     activeAction: null,
     membership: {
       active: membershipActive,
       plan: membershipPlan,
       provider: null,
-      periodEnd: null,
+      periodEnd: options.membershipPeriodEnd ?? null,
     },
     subscription: {
-      grantedCredits: 10000,
-      usedCredits: 0,
-      availableCredits: 10000,
+      grantedCredits: subscriptionQuota,
+      usedCredits: options.useGrantedCredits ? 0 : usedCredits,
+      availableCredits: options.useGrantedCredits ? 0 : subscriptionQuota - usedCredits,
       expiresAt: null,
     },
     topUp: { availableCredits: 0, lockedCredits: 0, expiresAt: null },
@@ -124,6 +130,15 @@ export async function openCoachFixture(
     const path = url.pathname.replace(/^\/api\/proxy/, "");
     const json = (body: unknown) => route.fulfill({ json: body });
     if (path === "/api/runtime/capabilities") return json(runtimeCapabilities);
+    if (path === "/api/access/features") return json({
+      schemaVersion: 1,
+      features: {
+        "ai.activityReview": {
+          allowed: membershipActive,
+          reason: membershipActive ? "GRANTED" : "PLAN_REQUIRED",
+        },
+      },
+    });
     if (path === "/api/self-host/session/policy")
       return json({
         data: {
@@ -233,20 +248,16 @@ export async function openCoachFixture(
         ],
       });
     }
-    if (path === "/ai/coach/sessions")
-      return json({
-        data: {
-          items: options.sessions ?? [
-            {
-              id: sid,
-              title: "流式渲染回归",
-              updatedAt: createdAt,
-              pinnedAt: null,
-            },
-          ],
-          nextOffset: null,
-        },
-      });
+    if (path === "/ai/coach/sessions") {
+      const sessions = options.sessions ?? [
+        { id: sid, title: "流式渲染回归", updatedAt: createdAt, pinnedAt: null },
+      ];
+      const query = url.searchParams.get("q")?.toLowerCase();
+      const items = query
+        ? sessions.filter((session) => String(session.title ?? "").toLowerCase().includes(query))
+        : sessions;
+      return json({ data: { items, nextOffset: null } });
+    }
     if (path === "/users/is-new-user") return json({ data: false });
     if (path === "/ai/credits/summary") return json({ data: credits });
     if (path === "/notifications")

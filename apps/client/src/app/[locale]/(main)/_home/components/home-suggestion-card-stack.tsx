@@ -462,7 +462,7 @@ export function HomeSuggestionCardStack({
     : "/ai-coach";
 
   return (
-    <div ref={region} className="min-w-0 space-y-3">
+    <div ref={region} className="flex h-full min-w-0 flex-col gap-3 pc:gap-1.5">
       <div className="flex min-h-8 min-w-0 items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2 text-mobile-caption text-muted-foreground pc:text-xs">
           <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -487,26 +487,26 @@ export function HomeSuggestionCardStack({
           <HomeAccessExtension />
         </div>
       </div>
-      <div className="flex min-w-0 flex-wrap items-stretch gap-2">
+      <div className="flex min-w-0 flex-1 flex-wrap items-stretch gap-2">
         {suggestionPreviewLeading}
-        <div className="min-w-0 grow basis-64">
-          <div
-            className="min-w-0 rounded-xl bg-neutral-100 p-4 dark:bg-surface-strong pc:rounded-md"
+        <div className="flex min-w-0 grow basis-64">
+          <article
+            className="relative isolate flex min-w-0 flex-1 flex-col rounded-xl bg-neutral-100 p-4 transition-colors hover:bg-neutral-200 dark:bg-surface-strong dark:hover:bg-muted pc:rounded-surface pc:py-3 pc:pb-2"
             data-testid="today-advice"
           >
             <h2 className="text-sm font-semibold leading-5">
               {details?.headline || suggestion.title}
             </h2>
-            <p className="mt-2 whitespace-pre-wrap break-words text-pretty text-sm leading-6 text-muted-foreground">
+            <p className="mt-2 line-clamp-3 whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground">
               {details?.summary || suggestion.summary}
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 pc:pt-2">
               {quickIntent ? (
                 <Button
                   type="button"
                   size="xs"
                   variant="ghost"
-                  className="h-auto min-h-8 max-w-full whitespace-normal break-words text-left"
+                  className="relative z-10 h-auto min-h-8 max-w-full whitespace-normal break-words text-left disabled:pointer-events-auto"
                   disabled={busy || publicDemo.active}
                   onClick={() => void handleIntent(quickIntent)}
                 >
@@ -517,14 +517,15 @@ export function HomeSuggestionCardStack({
                 type="button"
                 size="xs"
                 variant="ghost"
-                className="h-auto min-h-8 max-w-full whitespace-normal break-words text-left"
+                className="h-auto min-h-8 max-w-full scale-none! whitespace-normal break-words text-left after:absolute after:inset-0"
+                aria-haspopup="dialog"
                 data-front="true"
                 onClick={openSuggestionDetails}
               >
                 {t("todaySuggestionActions.viewSuggestion")}
               </Button>
             </div>
-          </div>
+          </article>
         </div>
       </div>
       <ResponsiveModal

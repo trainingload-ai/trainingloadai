@@ -1,3 +1,4 @@
+import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock';
 import {
   PlanStartService,
   type CanonicalStartProposal,
@@ -27,6 +28,7 @@ import type {
   PlanProposalEvidenceRef,
   PlanProposalPresentation,
   PlanProposalPreviewRequest,
+  PlanSchedulePreviewRequest,
   PlanProposalPreviewResult,
   PlanReplacementDraft,
   PlanSupersessionPreviewRequest,
@@ -310,6 +312,10 @@ export class PlanProposalService {
       : this.createSupersedePreview(userId, request);
   }
 
+  listCalendarAdjustments(userId: string, planId: string) {
+    return this.starts.listCalendarAdjustments(userId, planId);
+  }
+
   async resolveDecisionPayload(args: {
     userId: string;
     sourcePlanId: string;
@@ -349,9 +355,13 @@ export class PlanProposalService {
       expired('Plan proposal has expired; generate a fresh preview');
     if (preview.decisionId || preview.appliedAt)
       conflict('Plan proposal preview is already linked or applied');
+    const amendment = args.mode === 'SCHEDULE'
+      ? ((preview.proposal as unknown as CanonicalStartProposal).request as PlanSchedulePreviewRequest).calendarAdjustment
+      : undefined;
     return {
       planId: args.sourcePlanId,
       previewId: preview.id,
+      ...(amendment ? { calendarAdjustmentId: amendment.id } : {}),
       presentation: preview.presentation as unknown as PlanProposalPresentation,
     };
   }
@@ -363,6 +373,7 @@ export class PlanProposalService {
     sourcePlanId: string;
     tx: PlanDb;
   }) {
+    await acquireHashtextAdvisoryXactLock(args.tx, args.userId);
     const claimed = await this.proposals.updateMany(
       {
         where: {
@@ -391,6 +402,7 @@ export class PlanProposalService {
       }
       conflict('Plan proposal preview is unavailable or already linked');
     }
+    await this.starts.registerCoachCalendarAdjustment(args.previewId, args.decisionId, args.tx);
   }
 
   private async loadSourcePlan(userId: string, planId: string) {

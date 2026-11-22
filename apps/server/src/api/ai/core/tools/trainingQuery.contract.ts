@@ -37,6 +37,9 @@ export const trainingQueryConstraints: Record<string, unknown>[] = [
     measures: measures(TRAINING_ACTIVITY_MEASURES),
     metricSource: false,
   }),
+  when('POWER_DURATION', [], {
+    measures: false, limit: false,
+  }),
   when('PMC', dated, {
     measures: measures(TRAINING_PMC_MEASURES),
     groupBy: groups(['DAY', 'WEEK', 'MONTH', 'SPORT']),

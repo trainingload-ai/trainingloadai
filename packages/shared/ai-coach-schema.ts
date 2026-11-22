@@ -1,4 +1,5 @@
 import {
+  isCalendarDate,
   parseScheduleConstraints,
   scheduleConstraintsSchema,
   type ScheduleConstraints,
@@ -13,6 +14,13 @@ import {
   planQualityContractSchema,
   type PlanQualityContract,
 } from "./plan-quality";
+import {
+  HEALTH_HRV_TYPES,
+  type HealthBaseline,
+  type HealthHrvType,
+  type HealthOverviewCard,
+  type HealthSleepValueKind,
+} from "./health-overview";
 
 export type JsonSchemaObject = {
   type: "object";
@@ -23,6 +31,147 @@ export type JsonSchemaObject = {
 
 export const ASK_USER_QUESTION_TYPE = "ask_user_question" as const;
 export const COACH_PLAN_DRAFT_TYPE = "coach_plan_draft" as const;
+
+export const COACH_ACTIVITY_SECTIONS = ["overview", "map", "heartrate", "pace", "power", "timeline"] as const;
+export type CoachActivitySection = (typeof COACH_ACTIVITY_SECTIONS)[number];
+
+export function isCoachActivitySection(value: unknown): value is CoachActivitySection {
+  return COACH_ACTIVITY_SECTIONS.some((section) => section === value);
+}
+
+export type CoachActivityView = {
+  kind: "activity_detail";
+  hashId: string;
+  section: CoachActivitySection;
+  focus?: CoachActivityFocus;
+};
+
+export type CoachActivityFocus = { lap: number } | { lastMeters: number };
+
+export function readCoachActivityFocus(value: unknown): CoachActivityFocus | undefined {
+  if (!value || typeof value !== "object") return;
+  const { lap, lastMeters } = value as Record<string, unknown>;
+  if (typeof lap === "number" && Number.isSafeInteger(lap) && lap > 0 && lastMeters === undefined) return { lap };
+  if (typeof lastMeters === "number" && Number.isFinite(lastMeters) && lastMeters > 0 && lap === undefined) return { lastMeters };
+}
+
+export function readCoachActivityView(value: unknown): CoachActivityView | null {
+  if (!value || typeof value !== "object") return null;
+  const { kind, hashId, section, focus } = value as Record<string, unknown>;
+  const range = readCoachActivityFocus(focus);
+  return kind === "activity_detail" &&
+    typeof hashId === "string" && /^[a-zA-Z0-9_-]{1,128}$/.test(hashId) &&
+    isCoachActivitySection(section)
+    ? { kind, hashId, section, ...(range ? { focus: range } : {}) }
+    : null;
+}
+
+export type CoachEntityView =
+  | { kind: "plan_detail"; planId: string; title: string }
+  | { kind: "athlete_overview" };
+
+export function readCoachEntityView(value: unknown): CoachEntityView | null {
+  if (!value || typeof value !== "object") return null;
+  const { kind, planId, title } = value as Record<string, unknown>;
+  if (kind === "athlete_overview") return { kind };
+  return kind === "plan_detail" && typeof planId === "string" &&
+    /^[a-zA-Z0-9_-]{1,128}$/.test(planId) && typeof title === "string" && title.trim()
+    ? { kind, planId, title }
+    : null;
+}
+
+export const COACH_HEALTH_METRICS = ["hrv", "sleep", "restingHeartRate", "sleepHeartRate"] as const;
+export type CoachHealthMetric = (typeof COACH_HEALTH_METRICS)[number];
+export const COACH_HEALTH_MODES = ["LATEST", "AVERAGE", "TREND", "BASELINE"] as const;
+
+export type CoachHealthScope = {
+  metric: CoachHealthMetric;
+  from: string;
+  to: string;
+  mode: (typeof COACH_HEALTH_MODES)[number];
+  provider?: string | null;
+  hrvType?: HealthHrvType;
+  sleepValueKind?: HealthSleepValueKind;
+  compareFrom?: string;
+  compareTo?: string;
+};
+
+export type CoachHealthVisualization = {
+  kind: "coach_health_visualization";
+  schemaVersion: 1;
+  scope: CoachHealthScope;
+  observedAt: string;
+  fingerprint: string;
+  value: number | null;
+  date: string | null;
+  knownDays: number;
+  recent?: { date: string; value: number; scope: CoachHealthScope };
+  baseline?: HealthBaseline | null;
+  hrvSources?: Array<{ id: string; provider: string | null; hrvType: HealthHrvType }>;
+  chart?: HealthOverviewCard;
+  comparison?: {
+    value: number | null;
+    knownDays: number;
+    points?: HealthOverviewCard["points"];
+  };
+};
+
+function isCoachHealthScope(scope: CoachHealthScope | undefined): boolean {
+  return !!scope && COACH_HEALTH_METRICS.includes(scope.metric) &&
+    COACH_HEALTH_MODES.includes(scope.mode) &&
+    isCalendarDate(scope.from) && isCalendarDate(scope.to) && scope.from <= scope.to &&
+    (scope.provider == null || typeof scope.provider === "string") &&
+    (scope.hrvType === undefined || HEALTH_HRV_TYPES.includes(scope.hrvType)) &&
+    (scope.sleepValueKind === undefined || ["timeAsleep", "timeInBed"].includes(scope.sleepValueKind)) &&
+    (scope.compareFrom === undefined && scope.compareTo === undefined ||
+      isCalendarDate(scope.compareFrom) && isCalendarDate(scope.compareTo) && scope.compareFrom <= scope.compareTo);
+}
+
+const isHealthPointList = (points: HealthOverviewCard["points"]) =>
+  Array.isArray(points) && points.every((point) => point && isCalendarDate(point.date) &&
+    (point.value === undefined || Number.isFinite(point.value)));
+
+export function isCoachHealthVisualization(value: unknown): value is CoachHealthVisualization {
+  if (!value || typeof value !== "object") return false;
+  const data = value as CoachHealthVisualization;
+  return data.kind === "coach_health_visualization" && data.schemaVersion === 1 &&
+    typeof data.fingerprint === "string" && typeof data.observedAt === "string" &&
+    isCoachHealthScope(data.scope) &&
+    (data.date === null || isCalendarDate(data.date)) &&
+    (data.value === null || Number.isFinite(data.value)) &&
+    Number.isInteger(data.knownDays) && data.knownDays >= 0 &&
+    (data.recent === undefined || !!data.recent && isCalendarDate(data.recent.date) &&
+      Number.isFinite(data.recent.value) && isCoachHealthScope(data.recent.scope) &&
+      data.recent.scope.from === data.recent.date && data.recent.scope.to === data.recent.date) &&
+    (data.chart === undefined || !!data.chart && ["sleep", "line", "range", "bar"].includes(data.chart.chartKind) &&
+      isCalendarDate(data.chart.latestDate) && Number.isFinite(data.chart.latestValue) &&
+      typeof data.chart.latestUnit === "string" && isHealthPointList(data.chart.points)) &&
+    (data.hrvSources === undefined || Array.isArray(data.hrvSources) && data.hrvSources.every((source) =>
+      source && typeof source.id === "string" && (source.provider === null || typeof source.provider === "string") &&
+      HEALTH_HRV_TYPES.includes(source.hrvType))) &&
+    (data.comparison === undefined || !!data.comparison &&
+      (data.comparison.value === null || Number.isFinite(data.comparison.value)) &&
+      Number.isInteger(data.comparison.knownDays) && data.comparison.knownDays >= 0 &&
+      (data.comparison.points === undefined || isHealthPointList(data.comparison.points)));
+}
+
+export type CoachPlanCalendar = {
+  planId: string;
+  title: string;
+  initialDate: string;
+};
+
+export function readCoachPlanCalendar(value: unknown): CoachPlanCalendar | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const { planId, title, initialDate } = value as Record<string, unknown>;
+  if (
+    typeof planId !== "string" || !planId.trim() ||
+    typeof title !== "string" || !title.trim() ||
+    !isCalendarDate(initialDate)
+  ) return null;
+  return { planId, title, initialDate };
+}
+
 export const PLAN_WORKOUT_ADJUSTMENT_DRAFT_TYPE =
   "plan_workout_adjustment_draft" as const;
 export const COACH_QUESTION_REPLY_KIND = "coach_question_reply" as const;
@@ -83,6 +232,8 @@ export type CoachPlanDraftData = {
   title: string;
   description?: string;
   periodWeeks: number;
+  planningMode?: "ROLLING";
+  goal?: string;
   workouts: CoachPlanDraftWorkout[];
 };
 
@@ -453,6 +604,9 @@ export function parseCoachPlanDraftData(
     min: 1,
   });
   if (!periodWeeks.ok) return err(periodWeeks.error);
+  const rolling = obj.planningMode === "ROLLING";
+  if (rolling && periodWeeks.data !== 1) return err("Continuous draft must preview one week");
+  const goal = readOptionalTrimmedString(obj.goal);
 
   const workoutsRaw = obj.workouts;
   if (!Array.isArray(workoutsRaw)) return err("workouts must be an array");
@@ -558,6 +712,8 @@ export function parseCoachPlanDraftData(
       ? { description: readOptionalTrimmedString(obj.description) }
       : {}),
     periodWeeks: periodWeeks.data,
+    ...(rolling ? { planningMode: "ROLLING" as const } : {}),
+    ...(goal ? { goal } : {}),
     workouts,
   });
 }

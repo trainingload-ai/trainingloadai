@@ -219,6 +219,38 @@ describe('activity-first today suggestion regressions', () => {
     expect(agent.run).toHaveBeenCalledTimes(1);
   });
 
+  it('falls back and reuses the safe result when recovery carries an additional-training basis', async () => {
+    const { service, agent, workoutGenerator, prisma } = harness();
+    agent.run.mockImplementationOnce(async ({ projection }) => ({
+      draft: validateTodaySuggestionDraftForProjection(
+        {
+          headline: 'Recover today',
+          summary: 'Keep the rest of today light.',
+          recommendation: { kind: 'RECOVER' },
+          preferredIntent: 'ASK_COACH',
+          secondaryIntents: [],
+          trainingBasis: { kind: 'ADDITIONAL', reason: 'An easy ride fits.' },
+        },
+        projection,
+      ),
+      runId: 'inconsistent-run',
+      provider: 'test',
+      model: 'test',
+    }));
+
+    const first = await service.get(args);
+    const second = await service.get(args);
+    expect(first.delivery).toMatchObject({
+      state: 'FACT_FALLBACK',
+      reasonCode: 'OUTPUT_REJECTED',
+    });
+    expect(second.suggestionId).toBe(first.suggestionId);
+    expect(second.delivery.cached).toBe(true);
+    expect(agent.run).toHaveBeenCalledTimes(1);
+    expect(workoutGenerator.generate).not.toHaveBeenCalled();
+    expect(prisma.aiTodaySuggestion.upsert).toHaveBeenCalledTimes(1);
+  });
+
   it('falls back as a whole when an additional-training preview cannot be generated', async () => {
     const { service, agent, workoutGenerator } = harness();
     const reason =

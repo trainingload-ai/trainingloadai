@@ -1,4 +1,4 @@
-import { apiFetch, ApiFetchError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import type {
   WorkoutDefinitionInput,
   WorkoutStructure,
@@ -7,7 +7,19 @@ import type {
 import type { WorkoutSummary } from "@shared/workout-summary";
 import type { VdotPlanDraftV1 } from "@shared/vdot-plan";
 import type { PlanGenerationCoverage } from "@/lib/rolling-plan";
-import type { RollingMonthDraft, RollingPolicySettings } from "@shared/rolling-plan";
+import type {
+  RollingMonthDraft,
+  RollingPolicySettings,
+} from "@shared/rolling-plan";
+import type {
+  PlanCalendarCoachSession,
+  PlanCalendarMoveInput,
+  PlanCalendarMovePreview,
+  PlanCalendarMoveReceipt,
+  CalendarAdjustment,
+  CalendarAdjustmentReceipt,
+  PlanCalendarEdit,
+} from "@shared/plan-proposal";
 
 // 计划状态 定义
 // DRAFT 草稿，
@@ -211,6 +223,7 @@ export type PlanWorkoutLink = {
 };
 
 export type PlanWorkout = {
+  revision?: number;
   id: string;
   planId: string | null;
   dayOffset: number;
@@ -244,7 +257,11 @@ export type PlanWorkout = {
   /** 期望负荷估算输入快照（含阈值快照与逐步贡献） */
   estimatedLoadInputs?: PlanWorkoutEstimatedLoadInputs | null;
   /** Server-derived permissions; write endpoints recheck them at execution. */
-  capabilities?: { delete: boolean; postpone: boolean; skip: boolean };
+  calendarTodayYmd?: string;
+  calendarMoveAllowed?: boolean;
+  calendarMoveWindow?: { from: string; through?: string; before?: string };
+  capabilities?: { edit?: boolean; delete: boolean; postpone: boolean; skip: boolean };
+  capabilityReasons?: Record<"edit" | "delete" | "postpone" | "skip", string | null>;
   /** 期望负荷快照计算时刻 */
   estimatedLoadComputedAt?: string | null;
 };
@@ -293,6 +310,7 @@ export type UpdatePlanDto = {
 };
 
 export type UpdatePlanWorkoutDto = {
+  expectedRevision?: number;
   weekIndex: number;
   dayIndex: number;
   sessionIndex?: number;
@@ -456,157 +474,6 @@ export async function createPlan(
   return data?.plan;
 }
 
-export type PlanWindowLoadMetric = {
-  value: number | null;
-  unit: "NORMALIZED_LOAD";
-  coverage: "COMPLETE" | "PARTIAL" | "NO_DATA" | "UNKNOWN";
-  knownCount?: number;
-  totalCount?: number;
-  sources?: string[];
-  reason?: string;
-};
-
-export type PlanWindowSnapshot = {
-  load: Record<"actual" | "remainingPlanned" | "ungeneratedForecast", PlanWindowLoadMetric>;
-  schemaVersion: 2;
-  payloadVersion: "plan-window-v2";
-  sourceMode: "ROLLING";
-  snapshotOnly: true;
-  title: string;
-  goal: string | null;
-  window: { from: string; through: string };
-  generationCoverage: PlanGenerationCoverage;
-  monthDirections: unknown[];
-  workouts: unknown[];
-};
-
-export async function getPlanWindowSnapshot(planId: string, from: string, through: string) {
-  const query = new URLSearchParams({ from, through });
-  return apiFetch(`/plans/${encodeURIComponent(planId)}/window-snapshot?${query}`) as Promise<PlanWindowSnapshot | undefined>;
-}
-
-export type PlanSharePreview = {
-  publicId: string;
-  lineagePublicId: string;
-  slug?: string;
-  origin: "USER_SHARE" | "OFFICIAL";
-  visibility: "UNLISTED" | "CATALOG";
-  version: number;
-  title: string;
-  description: string | null;
-  goal: string | null;
-  periodWeeks: number;
-  locale: string;
-  sportTypes: string[];
-  workoutCount: number;
-  trainingDaysPerWeek: number;
-  loadPersonalized?: boolean;
-  workouts: Array<{
-    weekIndex: number;
-    dayIndex: number;
-    sessionIndex: number;
-    sportType: string;
-    name: string | null;
-    notes: string | null;
-    structureKind: WorkoutStructureKind;
-    structure?: WorkoutStructure;
-    durationSeconds?: number | null;
-    previewLoad?: number | null;
-    estimatedLoad?: number | null;
-    estimatedLoadSource?: string | null;
-  }>;
-  headVersion?: number | null;
-  parentLineagePublicId?: string | null;
-};
-
-export type PlanShareResult = {
-  reused: boolean;
-  share: {
-    publicId: string;
-    version: number;
-    status: string;
-    payloadHash: string;
-    title: string;
-  };
-  lineage: {
-    publicId: string;
-    origin: string;
-    visibility: string;
-    status: string;
-    parentLineageId: string | null;
-  };
-};
-
-export async function createPlanShare(planId: string) {
-  return (await apiFetch(`/plans/${planId}/shares`, {
-    method: "POST",
-  })) as PlanShareResult | undefined;
-}
-
-export async function getPublicPlanSharePreview(publicId: string) {
-  return (await apiFetch(
-    `/public/plan-shares/${encodeURIComponent(publicId)}`,
-    { method: "GET", suppressErrorToast: true },
-  )) as PlanSharePreview | undefined;
-}
-
-export async function getPublicPlanShareLineagePreview(
-  publicId: string,
-  version?: number,
-) {
-  const query =
-    typeof version === "number"
-      ? `?version=${encodeURIComponent(version)}`
-      : "";
-  return (await apiFetch(
-    `/public/plan-share-lineages/${encodeURIComponent(publicId)}${query}`,
-    { method: "GET", suppressErrorToast: true },
-  )) as PlanSharePreview | undefined;
-}
-
-export async function getPlanSharePublicPreview(publicId: string) {
-  try {
-    return await getPublicPlanShareLineagePreview(publicId);
-  } catch (error) {
-    if (error instanceof ApiFetchError && error.status === 404) {
-      return getPublicPlanSharePreview(publicId);
-    }
-    throw error;
-  }
-}
-
-export async function getViewerPlanSharePreview(publicId: string) {
-  return (await apiFetch(
-    `/plan-shares/${encodeURIComponent(publicId)}/preview`,
-    { method: "GET", suppressErrorToast: true },
-  )) as PlanSharePreview | undefined;
-}
-
-export async function importPlanShare(publicId: string, share = false) {
-  const data = (await apiFetch(
-    `/plan-shares/${encodeURIComponent(publicId)}/import`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ share }),
-    },
-  )) as { plan: TrainingPlanDetail; share: PlanShareResult | null } | undefined;
-  return data;
-}
-
-export async function revokePlanShare(publicId: string) {
-  return apiFetch(`/plan-shares/${encodeURIComponent(publicId)}/revoke`, {
-    method: "POST",
-  });
-}
-
-export async function revokePlanShareLineage(publicId: string) {
-  return apiFetch(
-    `/plan-share-lineages/${encodeURIComponent(publicId)}/revoke`,
-    { method: "POST" },
-  );
-}
-
 export async function getVdotPlanImportPreview(token: string) {
   return (await apiFetch(
     `/plan-import-drafts/${encodeURIComponent(token)}/preview`,
@@ -674,9 +541,14 @@ export async function getActivePlan(): Promise<ActivePlanResponse> {
   };
 }
 
-export async function getPlanWorkoutDetail(planId: string, workoutId: string) {
+export async function getPlanWorkoutDetail(
+  planId: string,
+  workoutId: string,
+  options?: { suppressErrorToast?: boolean },
+) {
   const data = (await apiFetch(`/plans/${planId}/workouts/${workoutId}`, {
     method: "GET",
+    ...options,
   })) as WorkoutResult | undefined;
   return data?.workout;
 }
@@ -842,19 +714,132 @@ export type ScheduledWorkoutsResponse = {
   independent: PlanWorkout[];
 };
 
+export function previewCalendarMove(
+  planId: string,
+  workoutId: string,
+  input: PlanCalendarMoveInput,
+) {
+  return apiFetch<PlanCalendarMovePreview>(
+    `/plans/${encodeURIComponent(planId)}/workouts/${encodeURIComponent(workoutId)}/calendar-move`,
+    { method: "POST", body: JSON.stringify(input), suppressErrorToast: true },
+  );
+}
+
+function calendarMovePath(planId: string, previewId: string) {
+  return `/plans/${encodeURIComponent(planId)}/calendar-moves/${encodeURIComponent(previewId)}`;
+}
+
+export function getCalendarMove(planId: string, previewId: string) {
+  return apiFetch<PlanCalendarMovePreview>(
+    calendarMovePath(planId, previewId),
+    { suppressErrorToast: true },
+  );
+}
+
+export function reviseCalendarAdjustment(planId: string, previewId: string, input: import("@shared/plan-proposal").ReviseCalendarAdjustmentInput) {
+  return apiFetch<PlanCalendarMovePreview>(calendarMovePath(planId, previewId), {
+    method: "PUT",
+    body: JSON.stringify(input),
+    suppressErrorToast: true,
+  });
+}
+
+export function confirmCalendarMove(planId: string, previewId: string, confirmationId?: string) {
+  return apiFetch<PlanCalendarMoveReceipt>(
+    `${calendarMovePath(planId, previewId)}/confirm`,
+    {
+      method: "POST",
+      ...(confirmationId ? { body: JSON.stringify({ confirmationId }) } : {}),
+      suppressErrorToast: true,
+    },
+  );
+}
+
+export function cancelCalendarMove(planId: string, previewId: string) {
+  return apiFetch<PlanCalendarMovePreview>(
+    calendarMovePath(planId, previewId),
+    { method: "DELETE", suppressErrorToast: true },
+  );
+}
+
+export function openCalendarMoveCoach(planId: string, previewId: string, background = false) {
+  return apiFetch<PlanCalendarCoachSession>(
+    `${calendarMovePath(planId, previewId)}/coach`,
+    { method: "POST", body: JSON.stringify({ background }), suppressErrorToast: true },
+  );
+}
+
 export async function getScheduledWorkouts(
   start: string,
   end: string,
+  options?: { suppressErrorToast?: boolean },
 ): Promise<ScheduledWorkoutsResponse> {
   const params = new URLSearchParams({ start, end });
   const data = (await apiFetch(
     `/plans/scheduled-workouts?${params.toString()}`,
-    { method: "GET" },
+    { method: "GET", ...options },
   )) as ScheduledWorkoutsResponse | undefined;
   return {
     inPlan: data?.inPlan ?? [],
     independent: data?.independent ?? [],
   };
+}
+
+const calendarAdjustmentsPath = (planId: string) =>
+  `/plans/${encodeURIComponent(planId)}/calendar-adjustments`;
+
+const calendarAdjustmentPath = (planId: string, id: string) =>
+  `${calendarAdjustmentsPath(planId)}/${encodeURIComponent(id)}`;
+
+export async function listCalendarAdjustments(planId: string) {
+  const data = await apiFetch<CalendarAdjustment[]>(calendarAdjustmentsPath(planId), {
+    method: "GET", suppressErrorToast: true,
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getCalendarAdjustment(planId: string, id: string, versionId?: string) {
+  const query = versionId ? `?versionId=${encodeURIComponent(versionId)}` : "";
+  const result = await apiFetch<CalendarAdjustment>(calendarAdjustmentPath(planId, id) + query, {
+    method: "GET",
+    suppressErrorToast: true,
+  });
+  if (result?.id !== id || result.planId !== planId || (versionId && result.versionId !== versionId) ||
+    !Array.isArray(result.conflicts) || !Array.isArray(result.operationKeys) ||
+    !Array.isArray(result.presentation?.rows)) {
+    throw new Error("Calendar adjustment response is unavailable");
+  }
+  return result;
+}
+
+export function saveCalendarAdjustment(
+  planId: string, id: string, input: { versionId: string; baseVersionId?: string; edits: PlanCalendarEdit[] },
+) {
+  return apiFetch<CalendarAdjustment>(calendarAdjustmentPath(planId, id), {
+    method: "PUT", body: JSON.stringify(input), suppressErrorToast: true,
+  });
+}
+
+export function rebaseCalendarAdjustment(
+  planId: string, id: string, input: { versionId: string; baseVersionId: string; operationKeys?: string[] },
+) {
+  return apiFetch<CalendarAdjustment>(calendarAdjustmentPath(planId, id) + "/rebase", {
+    method: "POST", body: JSON.stringify(input), suppressErrorToast: true,
+  });
+}
+
+export function confirmCalendarAdjustment(planId: string, id: string, versionId: string) {
+  return apiFetch<CalendarAdjustmentReceipt>(
+    calendarAdjustmentPath(planId, id) + `/versions/${encodeURIComponent(versionId)}/confirm`,
+    { method: "POST", suppressErrorToast: true },
+  );
+}
+
+export function discardCalendarAdjustment(planId: string, id: string, versionId: string) {
+  return apiFetch<CalendarAdjustment>(
+    calendarAdjustmentPath(planId, id) + `/versions/${encodeURIComponent(versionId)}`,
+    { method: "DELETE", suppressErrorToast: true },
+  );
 }
 
 export async function createIndependentWorkout(dto: CreateScheduledWorkoutDto) {

@@ -31,6 +31,7 @@ export const coachTaskSubmitResultTool: AiToolDef<Input, Output> = buildAiTool({
     'plan-review-adjustment',
     'rolling-plan',
     'workout-generator',
+    'metric-explainer',
   ],
   isEnabled: (ctx) => Boolean(ctx.backgroundTask),
   isReadOnly: true,

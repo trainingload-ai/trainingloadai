@@ -12,13 +12,12 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
 import MonthYearPicker from "./MonthYearPicker";
 import { useTranslations } from "next-intl";
-import { CalendarPlanActions } from "./CalendarPlanActions";
 
 interface CalendarHeaderProps {
   monthLabel: string;
   displayMode: "week" | "month";
   showDisplayModeToggle?: boolean;
-  onDisplayModeChange: (mode: "week" | "month") => void;
+  onDisplayModeChange?: (mode: "week" | "month") => void;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -96,8 +95,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           </div>
         </div>
 
-        <div className="hidden min-w-0 items-center justify-between gap-2 md:flex md:shrink-0 md:justify-end">
-          {showDisplayModeToggle ? (
+        {showDisplayModeToggle && onDisplayModeChange ? (
+          <div className="hidden shrink-0 md:flex">
             <div className="inline-flex rounded-md bg-neutral-100 dark:bg-muted/45 p-1">
               {(["week", "month"] as const).map((mode) => (
                 <button
@@ -115,10 +114,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 </button>
               ))}
             </div>
-          ) : null}
-
-          <CalendarPlanActions />
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -48,5 +48,6 @@ export class PlanWorkoutsChangedEvent {
     public readonly reason: string,
     public readonly workoutIds: string[] = [],
     public readonly planId: string | null = null,
+    public readonly calendarAdjustmentVersionId?: string,
   ) {}
 }

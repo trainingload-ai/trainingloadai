@@ -31,7 +31,7 @@ export function PlanDetailNotFoundState({
 }) {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 pb-3">
-      <div>
+      <div className="tablet:hidden">
         <Link
           href={backHref}
           className="inline-flex items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"

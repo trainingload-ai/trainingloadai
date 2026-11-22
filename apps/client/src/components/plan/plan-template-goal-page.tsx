@@ -34,7 +34,7 @@ export function PlanTemplateGoalPage({ goal }: { goal: RunPlanTemplateGoal }) {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 pb-12">
       <div>
-        <Button asChild variant="ghost" size="sm" className="-ml-3">
+        <Button asChild variant="ghost" size="sm" className="-ml-3 tablet:hidden">
           <Link href="/plans/templates">
             <ArrowLeft className="mr-2 size-4" />
             {locale.startsWith("zh")
@@ -42,7 +42,7 @@ export function PlanTemplateGoalPage({ goal }: { goal: RunPlanTemplateGoal }) {
               : "Back to official training"}
           </Link>
         </Button>
-        <div className="mt-5 max-w-3xl">
+        <div className="mt-5 max-w-3xl tablet:mt-0">
           <p className="text-sm font-semibold text-emerald-600">
             {t("officialTraining")} · {displayGoal}
           </p>

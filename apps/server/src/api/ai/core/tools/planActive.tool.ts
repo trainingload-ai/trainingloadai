@@ -15,6 +15,8 @@ import {
 type Input = {
   asOf?: string;
   includeAllWorkouts?: boolean;
+  showCalendar?: boolean;
+  showDetail?: boolean;
 };
 
 export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> =
@@ -41,6 +43,11 @@ export const planActiveTool: AiToolDef<Input, PlanSnapshotToolOutput> =
           description:
             'Include every workout in the active plan. Use for full plan/cycle review only.',
         },
+        showCalendar: {
+          type: 'boolean',
+          description: 'Attach a clickable calendar when the athlete asks to see the active plan schedule.',
+        },
+        showDetail: { type: 'boolean', description: 'Show a clickable detail card for the active plan.' },
       },
     },
     checkPermissions: async (ctx) => requireSignedInUser(ctx),

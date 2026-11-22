@@ -2,7 +2,7 @@ import { acquireHashtextAdvisoryXactLock } from '@/prisma/hashtext-advisory-lock
 import { ActivityReadService } from '@/api/activity/activity-read.service';
 import { activityCalendarYmdInZone } from '../plan-link-calendar.util';
 import { addCalendarDays, isCalendarDate } from '@shared/plan-calendar';
-import { generationCoverage } from '@shared/rolling-plan';
+import { generationCoverage, isoWeekStarts } from '@shared/rolling-plan';
 import {
   Injectable,
   Optional,
@@ -48,6 +48,7 @@ export class PlanQueryService {
     planId: string,
     from: string,
     through: string,
+    options?: { includeWeeklyReview: boolean },
   ) {
     if (
       !isCalendarDate(from) ||
@@ -119,12 +120,12 @@ export class PlanQueryService {
           select: { id: true, startTime: true, timezone: true },
         })
       : [];
-    const activities = observed.filter((a) => {
+    const activities = observed.flatMap((a) => {
       const day = activityCalendarYmdInZone(
         a.startTime,
         plan.activationTimezone ?? a.timezone ?? 'UTC',
       );
-      return day && day >= from && day <= through;
+      return day && day >= from && day <= through ? [{ id: a.id, day }] : [];
     });
     const actuals = activities.length
       ? await this.loadReadout.batchGetActualLoad([
@@ -156,24 +157,28 @@ export class PlanQueryService {
         sources: [...new Set(known.map((r) => r.source).filter(Boolean))],
       };
     };
-    const load = {
-      actual: aggregate(
-        activities.map((a) => ({
+    const actualLoad = (rows: typeof activities) =>
+      aggregate(
+        rows.map((a) => ({
           value: actuals.get(a.id)?.actualLoad ?? null,
           source: actuals.get(a.id)?.actualLoadSource ?? null,
         })),
-      ),
-      remainingPlanned: aggregate(
-        workouts
-          .filter(
-            (w) =>
-              ['PLANNED', 'IN_PROGRESS'].includes(w.status) &&
-              !w.links.some((l) => actualIds.has(l.activityId)),
-          )
-          .map((w) => ({
-            value: w.estimatedLoad,
-            source: w.estimatedLoadSource,
-          })),
+      );
+    const estimatedLoad = (rows: typeof workouts) =>
+      aggregate(
+        rows.map((w) => ({
+          value: w.estimatedLoad,
+          source: w.estimatedLoadSource,
+        })),
+      );
+    const load = {
+      actual: actualLoad(activities),
+      remainingPlanned: estimatedLoad(
+        workouts.filter(
+          (w) =>
+            ['PLANNED', 'IN_PROGRESS'].includes(w.status) &&
+            !w.links.some((l) => actualIds.has(l.activityId)),
+        ),
       ),
       ungeneratedForecast: {
         value: null,
@@ -183,8 +188,34 @@ export class PlanQueryService {
           'Month directions are forecasts, not completed or generated workout load',
       },
     };
+    const weeklyReview = options?.includeWeeklyReview
+      ? isoWeekStarts(from, through).map((weekStart) => {
+          const weekEnd = addCalendarDays(weekStart, 6);
+          const observedFrom = weekStart < from ? from : weekStart;
+          const observedThrough = weekEnd > through ? through : weekEnd;
+          const inWeek = (day: string) =>
+            day >= observedFrom && day <= observedThrough;
+          const scheduled = workouts.filter(
+            (w) =>
+              w.scheduledDate &&
+              w.status !== 'MOVED' &&
+              inWeek(ymd(w.scheduledDate)),
+          );
+          return {
+            weekStart,
+            from: observedFrom,
+            through: observedThrough,
+            scheduled: scheduled.length,
+            completed: scheduled.filter((w) => w.status === 'DONE').length,
+            skipped: scheduled.filter((w) => w.status === 'SKIPPED').length,
+            actualLoad: actualLoad(activities.filter((a) => inWeek(a.day))),
+            scheduledLoad: estimatedLoad(scheduled),
+          };
+        })
+      : undefined;
     return {
       load,
+      ...(weeklyReview ? { weeklyReview } : {}),
       schemaVersion: 2,
       payloadVersion: 'plan-window-v2',
       sourceMode: 'ROLLING',

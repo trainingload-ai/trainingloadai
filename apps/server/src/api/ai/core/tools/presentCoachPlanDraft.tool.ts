@@ -298,6 +298,15 @@ export const presentCoachPlanDraftTool: AiToolDef<Input, Output> = buildAiTool({
   isConcurrencySafe: false,
   parameters: compactCoachPlanDraftToolParametersSchema,
   validateInput: async (ctx, input) => {
+    if (ctx.planQuestionReview && (
+      !ctx.planQuestionReview.decisions ||
+      ctx.planQuestionReview.decisions.some((item) => item.outcome === 'KEEP' || item.outcome === 'REPLACE')
+    )) {
+      return aiToolError(
+        'Finish reviewing the prior questions and resolve any remaining user input before drafting.',
+        'PLAN_QUESTION_REVIEW_REQUIRED',
+      );
+    }
     const suitability = ctx.planSuitability?.latest;
     if (ctx.activeSkillName === 'plan-builder' && !suitability) {
       return aiToolError(
@@ -317,6 +326,12 @@ export const presentCoachPlanDraftTool: AiToolDef<Input, Output> = buildAiTool({
     const parsed = expandCoachPlanDraftInput(input);
     if (parsed.ok === false) {
       return aiToolError(parsed.error, 'INVALID_INPUT');
+    }
+    if (ctx.rollingPlanDraft && parsed.data.periodWeeks !== 1) {
+      return aiToolError(
+        'A continuous draft previews one starter week. Set periodWeeks to 1 and keep all workouts in week 1.',
+        'PLAN_SUITABILITY_CONSTRAINT_CHANGED',
+      );
     }
     if (ctx.activeSkillName === 'plan-builder' && suitability) {
       const qualityContract = parsed.data.qualityContract;
@@ -702,6 +717,9 @@ export const presentCoachPlanDraftTool: AiToolDef<Input, Output> = buildAiTool({
         .filter(Boolean)
         .join('\n\n'),
       periodWeeks: expanded.data.periodWeeks,
+      ...(ctx.rollingPlanDraft
+        ? { planningMode: 'ROLLING' as const, goal: ctx.planSuitability?.latest?.goalSummary }
+        : {}),
       ...(expanded.data.qualityContract
         ? { qualityContract: expanded.data.qualityContract }
         : {}),

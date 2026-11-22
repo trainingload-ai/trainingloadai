@@ -129,7 +129,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2241
+          "line": 1894
         }
       ]
     },
@@ -289,7 +289,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 85
+          "line": 86
         }
       ]
     },
@@ -783,7 +783,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 2234
+          "line": 2365
         }
       ]
     },
@@ -800,7 +800,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 458
+          "line": 432
         }
       ]
     },
@@ -905,7 +905,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 612
+          "line": 595
         }
       ]
     },
@@ -939,7 +939,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1166
+          "line": 1169
         }
       ]
     },
@@ -998,7 +998,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 753
+          "line": 786
         }
       ]
     },
@@ -1040,7 +1040,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 1054
+          "line": 1100
         }
       ]
     },
@@ -1057,7 +1057,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 957
+          "line": 960
         }
       ]
     },
@@ -1074,11 +1074,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1050
+          "line": 1105
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2993
+          "line": 2760
         }
       ]
     },
@@ -1095,27 +1095,27 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1052
+          "line": 1107
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2673
+          "line": 2346
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2734
+          "line": 2407
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2821
+          "line": 2494
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2873
+          "line": 2636
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 2977
+          "line": 2744
         }
       ]
     },
@@ -1153,7 +1153,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 285
+          "line": 295
         }
       ]
     },
@@ -1170,7 +1170,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 284
+          "line": 294
         }
       ]
     },
@@ -1208,7 +1208,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/coach-branching.service.ts",
-          "line": 1925
+          "line": 1951
         }
       ]
     },
@@ -1225,11 +1225,11 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 535
+          "line": 509
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 956
+          "line": 959
         }
       ]
     },
@@ -1267,7 +1267,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 315
+          "line": 323
         }
       ]
     },
@@ -1284,7 +1284,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 341
+          "line": 349
         }
       ]
     },
@@ -1301,7 +1301,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 1088
+          "line": 1143
         }
       ]
     },
@@ -1394,7 +1394,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 150
+          "line": 160
         }
       ]
     },
@@ -1588,7 +1588,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 294
+          "line": 304
         }
       ]
     },
@@ -1605,7 +1605,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.controller.ts",
-          "line": 293
+          "line": 303
         }
       ]
     },
@@ -1639,7 +1639,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 173
+          "line": 177
         },
         {
           "file": "apps/server/src/config/config.ts",
@@ -1714,7 +1714,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 328
+          "line": 336
         }
       ]
     },
@@ -1731,7 +1731,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 353
+          "line": 361
         }
       ]
     },
@@ -1912,23 +1912,6 @@
       ]
     },
     {
-      "name": "CALENDAR_FEED_PUBLIC_URL",
-      "capability": "core-runtime",
-      "mode": "core-or-feature",
-      "sensitive": false,
-      "documented": false,
-      "exampleDefault": null,
-      "owners": [
-        "apps"
-      ],
-      "references": [
-        {
-          "file": "apps/server/src/api/calendar/calendar.service.ts",
-          "line": 24
-        }
-      ]
-    },
-    {
       "name": "CI",
       "capability": "core-runtime",
       "mode": "core-or-feature",
@@ -1958,7 +1941,7 @@
       "references": [
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 60
+          "line": 56
         },
         {
           "file": "apps/client/src/lib/server-api-base-url.ts",
@@ -2162,7 +2145,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 479
+          "line": 453
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2196,7 +2179,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 484
+          "line": 458
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -2542,7 +2525,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 321
+          "line": 329
         }
       ]
     },
@@ -2559,7 +2542,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 346
+          "line": 354
         }
       ]
     },
@@ -2618,7 +2601,7 @@
         },
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 87
+          "line": 86
         },
         {
           "file": "apps/server/src/bootstrap/deployment-edition.ts",
@@ -2838,7 +2821,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 1317
+          "line": 1320
         },
         {
           "file": "apps/server/src/api/ai/core/tools/fitnessAssessment.tools.ts",
@@ -3362,6 +3345,23 @@
       ]
     },
     {
+      "name": "MARKETING_CAPTURE",
+      "capability": "core-runtime",
+      "mode": "core-or-feature",
+      "sensitive": false,
+      "documented": false,
+      "exampleDefault": null,
+      "owners": [
+        "apps"
+      ],
+      "references": [
+        {
+          "file": "apps/client/next.config.ts",
+          "line": 20
+        }
+      ]
+    },
+    {
       "name": "MCP_AUDIT_SECRET",
       "capability": "agent",
       "mode": "core-or-feature",
@@ -3565,15 +3565,11 @@
       "references": [
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 62
+          "line": 58
         },
         {
           "file": "apps/docs/src/lib/docs-server-api-base-url.ts",
           "line": 29
-        },
-        {
-          "file": "apps/server/src/api/calendar/calendar.service.ts",
-          "line": 24
         },
         {
           "file": "apps/server/src/api/intervals-icu/intervals-icu.service.ts",
@@ -3614,7 +3610,7 @@
       "references": [
         {
           "file": "apps/client/src/components/layout/MainAppShell.tsx",
-          "line": 86
+          "line": 170
         },
         {
           "file": "apps/client/src/lib/tiptap-utils.ts",
@@ -3627,10 +3623,6 @@
         {
           "file": "apps/docs/src/components/TenKBridgePage.tsx",
           "line": 74
-        },
-        {
-          "file": "apps/docs/src/lib/plan-share.ts",
-          "line": 49
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -3721,11 +3713,11 @@
       "references": [
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 111
+          "line": 107
         },
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 120
+          "line": 116
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/10k-training-plan/page.tsx",
@@ -3982,10 +3974,6 @@
         {
           "file": "apps/docs/src/app/[lang]/(home)/running-pace-calculator/page.tsx",
           "line": 93
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/(home)/share/plans/[publicId]/page.tsx",
-          "line": 12
         },
         {
           "file": "apps/docs/src/app/[lang]/(home)/swim-training-plan/page.tsx",
@@ -4293,7 +4281,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 20
+          "line": 21
         },
         {
           "file": "apps/client/src/api/runtime-capabilities.ts",
@@ -4302,10 +4290,6 @@
         {
           "file": "apps/client/src/api/self-host-bootstrap.ts",
           "line": 104
-        },
-        {
-          "file": "apps/client/src/app/[locale]/(main)/calendar/components/CalendarPlanActions.tsx",
-          "line": 54
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/usage/page.tsx",
@@ -4337,7 +4321,7 @@
         },
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 61
+          "line": 57
         },
         {
           "file": "apps/client/src/middleware.ts",
@@ -4425,11 +4409,11 @@
         },
         {
           "file": "apps/client/next.config.ts",
-          "line": 120
+          "line": 122
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/ActivitiesPageClient.tsx",
-          "line": 136
+          "line": 133
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/dev-activity-feed-fixture.ts",
@@ -4437,7 +4421,7 @@
         },
         {
           "file": "apps/client/src/app/[locale]/(main)/ai-coach/training-visualization-card.tsx",
-          "line": 147
+          "line": 163
         },
         {
           "file": "apps/client/src/app/[locale]/layout.tsx",
@@ -4445,7 +4429,7 @@
         },
         {
           "file": "apps/client/src/lib/config.ts",
-          "line": 63
+          "line": 59
         },
         {
           "file": "apps/docs/next.config.mjs",
@@ -4594,7 +4578,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 479
+          "line": 453
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -4865,7 +4849,7 @@
         },
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 333
+          "line": 341
         }
       ]
     },
@@ -4882,7 +4866,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/tool-loop-agent.runtime.ts",
-          "line": 359
+          "line": 367
         }
       ]
     },
@@ -4921,10 +4905,6 @@
         {
           "file": "apps/client/src/app/[locale]/(main)/activities/activities-data.ts",
           "line": 66
-        },
-        {
-          "file": "apps/server/src/api/calendar/calendar.service.ts",
-          "line": 27
         },
         {
           "file": "apps/server/src/auth.ts",
@@ -5196,7 +5176,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-digest.service.ts",
-          "line": 625
+          "line": 514
         }
       ]
     },
@@ -5213,7 +5193,7 @@
       "references": [
         {
           "file": "apps/server/src/review/review-digest.service.ts",
-          "line": 630
+          "line": 519
         }
       ]
     },
@@ -5315,7 +5295,7 @@
       "references": [
         {
           "file": "apps/server/src/api/review/review-schedule.service.ts",
-          "line": 40
+          "line": 35
         }
       ]
     },
@@ -5789,7 +5769,7 @@
         },
         {
           "file": "apps/server/src/api/ai/ai.service.ts",
-          "line": 470
+          "line": 444
         },
         {
           "file": "apps/server/src/api/ai/core/coach-upstream.adapter.ts",
@@ -6173,15 +6153,15 @@
       "references": [
         {
           "file": "apps/server/src/app.module.ts",
-          "line": 83
+          "line": 82
+        },
+        {
+          "file": "apps/server/src/app.module.ts",
+          "line": 92
         },
         {
           "file": "apps/server/src/app.module.ts",
           "line": 93
-        },
-        {
-          "file": "apps/server/src/app.module.ts",
-          "line": 94
         }
       ]
     },
@@ -6396,7 +6376,7 @@
       "references": [
         {
           "file": "apps/client/next.config.ts",
-          "line": 21
+          "line": 22
         }
       ]
     },
@@ -6438,7 +6418,7 @@
       "references": [
         {
           "file": "apps/server/src/api/ai/core/coach-tools.service.ts",
-          "line": 1055
+          "line": 1056
         }
       ]
     },

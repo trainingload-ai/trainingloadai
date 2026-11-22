@@ -4,6 +4,7 @@ import {
   buildHistoryMessages,
   buildStoredCoachUiMessageEnvelope,
   getStoredCoachLegacyMessage,
+  isRollingPlanBrief,
   sanitizeStoredCoachMessageForClient,
 } from '../coach-history-messages';
 import type {
@@ -12,6 +13,45 @@ import type {
 } from '../coach-query-yield';
 
 describe('coach history UIMessage-first persistence', () => {
+  it('restores a calendar from the successful plan range read in an earlier reply', () => {
+    const text = { type: 'text', text: 'Here is the plan for these weeks.' };
+    const run = { type: 'data-coach-run', data: { status: 'completed' } };
+    const stored = {
+      kind: 'ui_message',
+      version: 2,
+      role: 'assistant',
+      parts: [run, text],
+      providerHistory: [
+        { message: { content: [{
+          type: 'tool_use',
+          id: 'read',
+          name: 'plan_by_id',
+          input: { planId: 'owned', includeAllWorkouts: true, calendarFrom: '2026-11-16', calendarTo: '2026-12-06' },
+        }] } },
+        { message: { content: [{
+          type: 'tool_result',
+          tool_use_id: 'read',
+          content: JSON.stringify({ asOf: '2026-11-21', plan: { id: 'owned', title: 'Base phase' } }),
+        }] } },
+      ],
+    };
+    const calendar = {
+      type: 'data-coach-tool',
+      id: 'read:calendar',
+      data: {
+        toolCallId: 'read:calendar',
+        name: 'PlanCalendarView',
+        input: { planId: 'owned', title: 'Base phase', initialDate: '2026-11-16' },
+      },
+    };
+    expect(sanitizeStoredCoachMessageForClient(stored)).toEqual({
+      kind: 'ui_message', version: 2, role: 'assistant', parts: [run, text, calendar],
+    });
+    expect(sanitizeStoredCoachMessageForClient({ ...stored, parts: [run, calendar, text] }))
+      .toMatchObject({ parts: [run, calendar, text] });
+    expect(sanitizeStoredCoachMessageForClient({ ...stored, providerHistory: stored.providerHistory.slice(0, 1) }))
+      .toMatchObject({ parts: [run, text] });
+  });
   it('stores UIMessage parts while preserving legacy message for model replay', () => {
     const legacy: CoachAssistantMessageBody = {
       reasoning_content: 'checked plan constraints',
@@ -758,4 +798,26 @@ describe('coach history UIMessage-first persistence', () => {
     });
     expect(messages[2]).toEqual({ role: 'user', content: '下一步' });
   });
+});
+
+it('recovers continuous creation after a follow-up and ends it on saving', () => {
+  const seed: CoachUserMessageBody = {
+    content: [{
+      type: 'tool_result',
+      tool_use_id: 'client:ai_plan_seed',
+      content: { kind: 'ai_plan_seed', payload: { planningMode: 'ROLLING', cycleWeeks: null } },
+    }],
+  };
+  const history = [{
+    role: AiCoachMessageRole.USER,
+    content: 'Continuous training plan',
+    message: buildStoredCoachUiMessageEnvelope({ role: 'user', content: 'Continuous training plan', message: seed }),
+  }];
+  expect(isRollingPlanBrief(seed, [])).toBe(true);
+  expect(isRollingPlanBrief({ content: [{ type: 'text', text: 'Start easy' }] }, history)).toBe(true);
+  expect(isRollingPlanBrief({ content: [{
+    type: 'tool_result',
+    tool_use_id: 'draft-card',
+    content: { kind: 'coach_plan_draft_saved', planId: 'plan-1' },
+  }] }, history)).toBe(false);
 });

@@ -286,6 +286,52 @@ describe('Planned workout synchronization / PostgreSQL invariants', () => {
     return f;
   }
 
+  it('recovers a recently ready activity after the initial registration retries are exhausted', async () => {
+    const f = await independentScenario();
+    await prisma.activity.update({
+      where: { id: f.activity.id },
+      data: { processingUpdatedAt: new Date() },
+    });
+    const conflict = Object.assign(new Error('serialization conflict'), {
+      code: 'P2034',
+    });
+    const transaction = jest.spyOn(prisma, '$transaction');
+    const matching = matcher();
+    try {
+      transaction
+        .mockRejectedValueOnce(conflict)
+        .mockRejectedValueOnce(conflict)
+        .mockRejectedValueOnce(conflict);
+      await expect(matching.tryAutoLinkForActivity(f.activity.id)).rejects.toBe(
+        conflict,
+      );
+    } finally {
+      transaction.mockRestore();
+    }
+    expect(
+      await prisma.planActivityMatchState.findUnique({
+        where: { activityId: f.activity.id },
+      }),
+    ).toBeNull();
+
+    await matching.rescanPendingMatches();
+    await matching.rescanPendingMatches();
+
+    const links = await prisma.planWorkoutActivityLink.findMany({
+      where: { activityId: f.activity.id, unlinkedAt: null },
+    });
+    expect(links).toHaveLength(1);
+    expect(links[0]).toMatchObject({
+      source: 'AUTO_MATCH',
+      planWorkoutId: f.independent.id,
+    });
+    expect(
+      await prisma.planWorkout.findUniqueOrThrow({
+        where: { id: f.independent.id },
+      }),
+    ).toMatchObject({ status: 'DONE' });
+  });
+
   it('automatically completes an independent ordinary course without a training plan', async () => {
     const f = await independentScenario();
     await matcher().tryAutoLinkForActivity(f.activity.id);

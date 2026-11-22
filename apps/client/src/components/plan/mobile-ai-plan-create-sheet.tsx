@@ -171,16 +171,19 @@ export function MobileAiPlanCreateSheet({
   onOpenChange,
   onBackToMode,
   onGenerate,
+  rolling = false,
 }: {
   open: boolean;
+  rolling?: boolean;
   onOpenChange: (open: boolean) => void;
   onBackToMode: () => void;
   onGenerate: (params: URLSearchParams) => void;
 }) {
   const t = useTranslations("V2PlanCreatePage");
+  const rollingT = useTranslations("RollingPlan");
   const [page, setPage] = useState<SheetPage>("form");
   const [sportTypes, setSportTypes] = useState<AiPlanSeedSport[]>(["run"]);
-  const [intent, setIntent] = useState<AiPlanSeedIntent>("racePrep");
+  const [intent, setIntent] = useState<AiPlanSeedIntent>(rolling ? "fitnessBuild" : "racePrep");
   const [raceDiscipline, setRaceDiscipline] =
     useState<AiPlanSeedRaceDiscipline>("run");
   const [raceDistance, setRaceDistance] =
@@ -283,7 +286,6 @@ export function MobileAiPlanCreateSheet({
     const params = new URLSearchParams({
       planIntent: intent,
       sports: sportTypes.join(","),
-      weeks: String(cycleWeeks),
       days: String(weeklyDays),
       mins: String(dailyMinutes),
       strength: sportTypes.includes("strength") ? "include" : "auto",
@@ -291,6 +293,8 @@ export function MobileAiPlanCreateSheet({
       strengthMins: "40",
       equipment: "bodyweight,dumbbell",
     });
+    if (rolling) params.set("planMode", "rolling");
+    else params.set("weeks", String(cycleWeeks));
     if (intent === "racePrep") {
       params.set("raceD", raceDiscipline);
       params.set("raceDist", raceDistance);
@@ -313,7 +317,7 @@ export function MobileAiPlanCreateSheet({
         ? t("raceInfo.discipline")
         : page === "distance"
           ? t("raceInfo.distance")
-          : t("header.title");
+          : rolling ? rollingT("title") : t("header.title");
 
   return (
     <Drawer
@@ -452,10 +456,10 @@ export function MobileAiPlanCreateSheet({
 
               <section>
                 <h2 className="mb-2 px-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground">
-                  {t("cycleConstraints.title")}
+                  {rolling ? rollingT("availabilityTitle") : t("cycleConstraints.title")}
                 </h2>
                 <div className="space-y-2">
-                  <StepperRow
+                  {!rolling ? <StepperRow
                     label={t("cycleConstraints.cycleLength")}
                     value={cycleWeeks}
                     unit={t("cycleConstraints.weekOption", {
@@ -465,7 +469,7 @@ export function MobileAiPlanCreateSheet({
                     max={24}
                     step={1}
                     onChange={setCycleWeeks}
-                  />
+                  /> : null}
                   <StepperRow
                     label={t("cycleConstraints.daysPerWeek")}
                     value={weeklyDays}
@@ -488,7 +492,7 @@ export function MobileAiPlanCreateSheet({
               </section>
 
               <p className="px-1 text-mobile-caption pc:text-xs leading-5 text-muted-foreground">
-                {t("brief.handoff")}
+                {rolling ? rollingT("creationHint") : t("brief.handoff")}
               </p>
             </div>
           )}

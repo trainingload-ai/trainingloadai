@@ -33,7 +33,27 @@ const month = {
     objective: 'Build consistency without catch-up training.',
     loadRange: null,
     durationMinutesRange: { min: 60, max: 120 },
-    weekFocus: [{ weekStart: '2026-11-16', focus: 'Easy training' }],
+    runningDistanceKmRange: { min: 10, max: 18 },
+    weekFocus: [
+      {
+        weekStart: '2026-11-16',
+        focus: 'Easy training',
+        loadRange: null,
+        durationMinutesRange: { min: 20, max: 40 },
+      },
+      {
+        weekStart: '2026-11-23',
+        focus: 'Progress if recovered',
+        loadRange: null,
+        durationMinutesRange: { min: 30, max: 60 },
+      },
+      {
+        weekStart: '2026-11-30',
+        focus: 'Ease into the next month',
+        loadRange: null,
+        durationMinutesRange: { min: 10, max: 20 },
+      },
+    ],
   },
 };
 const weekInput: RollingPlanCandidateInput = {
@@ -118,7 +138,7 @@ function runtime(result: unknown, usageReported = true) {
   });
   Object.defineProperties(ai, {
     getCoachModel: { value: () => 'provider-test' },
-    coachStream: { value: stream },
+    runCoachTurn: { value: stream },
     coachRuns: {
       value: {
         beginBackground: jest.fn(async () => ({

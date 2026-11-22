@@ -123,6 +123,7 @@ type Props = {
   startDate?: string;
   calendarTimeZone?: string;
   scheduleConstraints?: ScheduleConstraints;
+  responsiveToContainer?: boolean;
   /** default：固定最大高度日历区；dialog / embedded：占满父级剩余高度（embedded 用于手动创建第三步等） */
   variant?: "default" | "dialog" | "embedded";
   windowOnly?: boolean;
@@ -135,6 +136,7 @@ export function CoachPlanDraftCalendarPreview({
   startDate,
   calendarTimeZone = "UTC",
   scheduleConstraints,
+  responsiveToContainer = false,
   variant = "default",
   windowOnly = false,
   generationWindow,
@@ -235,6 +237,7 @@ export function CoachPlanDraftCalendarPreview({
     <div
       className={cn(
         "overflow-hidden rounded-xl bg-neutral-100 shadow-none dark:bg-muted/45",
+        responsiveToContainer && "@container",
         fillHeight && "flex min-h-0 flex-1 flex-col",
         className,
       )}
@@ -247,7 +250,7 @@ export function CoachPlanDraftCalendarPreview({
           <p className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-200/80 px-2 py-0.5 text-mobile-caption pc:text-[11px] font-medium text-muted-foreground dark:bg-muted/55">
             {windowOnly
               ? rollingT("coverageLabel")
-              : t("summary", {
+              : draft.planningMode === "ROLLING" ? rollingT("firstWeekPreview") : t("summary", {
                   weeks: draft.periodWeeks,
                   sessions: draft.workouts.filter((w) => w.text?.trim()).length,
                 })}
@@ -268,7 +271,8 @@ export function CoachPlanDraftCalendarPreview({
       <div
         data-testid="coach-plan-draft-mobile-calendar"
         className={cn(
-          "min-h-0 overscroll-contain pc:hidden",
+          "min-h-0 overscroll-contain",
+          responsiveToContainer ? "@min-[35rem]:hidden" : "pc:hidden",
           fillHeight && "flex flex-1 flex-col",
         )}
       >
@@ -402,7 +406,8 @@ export function CoachPlanDraftCalendarPreview({
       </div>
       <div
         className={cn(
-          "hidden overflow-auto pc:block",
+          "hidden overflow-auto",
+          responsiveToContainer ? "@min-[35rem]:block" : "pc:block",
           fillHeight ? "min-h-0 flex-1" : "max-h-[min(64vh,560px)]",
         )}
       >

@@ -8,6 +8,8 @@ import { CoachRunProjector, coachSnapshotChunks } from '../coach-run-projector';
 import { readUIMessageStream } from 'ai';
 import type { CoachUiChunk, CoachUiMessage } from '../coach-ui-message-stream';
 import { askUserQuestionTool } from '../tools/askUserQuestion.tool';
+import { planSuitabilityQuestionReviewTool } from '../tools/planSuitabilityAssess.tool';
+import { getCoachSkillByName } from '../skill.registry';
 import { presentTrainingVisualizationTool } from '../tools/presentTrainingVisualization.tool';
 import { sanitizeStoredCoachMessageForClient } from '../coach-history-messages';
 
@@ -515,5 +517,57 @@ describe('real AI SDK delivery loop', () => {
       ),
     ).toBe(false);
     expect(events.at(-1)).toMatchObject({ type: 'result', is_error: false });
+  });
+});
+
+it('forces the per-question tool schema and stops after two malformed reviews', async () => {
+  const context = ctx();
+  const review = {
+    questions: [{
+      id: 'recent-baseline',
+      header: 'Training',
+      question: 'How much do you run?',
+      options: [
+        { value: 'a', label: 'A', description: 'Less' },
+        { value: 'b', label: 'B', description: 'More' },
+      ],
+    }],
+  };
+  context.planQuestionReview = review;
+  model = new MockLanguageModelV3({
+    doStream: async () => ({
+      stream: convertArrayToReadableStream<StreamChunk>([
+        { type: 'stream-start', warnings: [] },
+        {
+          type: 'tool-call',
+          toolCallId: 'missing-required-review',
+          toolName: 'plan_suitability_assess',
+          input: '{}',
+        },
+        {
+          type: 'finish',
+          finishReason: { unified: 'tool-calls', raw: 'tool_calls' },
+          usage,
+        },
+      ]),
+    }),
+  });
+  for await (const _event of streamCoachAnswer({
+    tools: [planSuitabilityQuestionReviewTool(review)],
+    messages: [{ role: 'user', content: 'Help me make a training plan.' }],
+    activeSkill: getCoachSkillByName('plan-builder'),
+    ctx: context,
+  })) {
+    /* Drain both attempts. */
+  }
+  expect(model.doStreamCalls).toHaveLength(2);
+  expect(model.doStreamCalls[0]).toMatchObject({
+    toolChoice: { type: 'tool', toolName: 'plan_suitability_assess' },
+    tools: [expect.objectContaining({
+      name: 'plan_suitability_assess',
+      inputSchema: expect.objectContaining({
+        required: expect.arrayContaining(['questionReview']),
+      }),
+    })],
   });
 });

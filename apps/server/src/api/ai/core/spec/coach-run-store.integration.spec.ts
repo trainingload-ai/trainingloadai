@@ -16,6 +16,7 @@ import {
   CoachRunCancelledError,
   type CoachRunHandle,
 } from '../../coach-run-store.service';
+import { CoachMemoryExtractionEnqueuer } from '../../memory/coach-memory-extraction-enqueuer.service';
 import { AthleteStateInquiryService } from '../../athlete-state/athlete-state-inquiry.service';
 import { createAiSdkCoachTools } from '../ai-sdk-tool-adapter';
 import type { AiToolContext } from '../tool.types';
@@ -120,6 +121,124 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     );
     expect(await prisma.aiCoachMessage.count()).toBe(0);
     expect(await prisma.aiCoachMemoryExtractionJob.count()).toBe(0);
+  });
+
+  it.each(['ROLLING', 'FIXED'])(
+    'keeps a %s creation brief answerable when memory extraction runs during the turn',
+    async (planningMode) => {
+      const memory = new CoachMemoryExtractionEnqueuer(
+        { isEnabled: async () => true } as never,
+        { isGranted: async () => true } as never,
+      );
+      const scope = { topic: 'coach-context:2026-11-20', revision: 'initial' };
+      const scopedStore = new CoachRunStore(prisma as PrismaService, memory, undefined, {
+        current: async () => [{
+          ...scope,
+          revision: (await prisma.aiCoachMemoryExtractionJob.count())
+            ? 'brief-promoted-to-memory'
+            : scope.revision,
+        }],
+      });
+      const args = startArgs();
+      const { handle } = await scopedStore.begin({
+        ...args,
+        message: {
+          content: [
+            ...args.message.content,
+            {
+              type: 'tool_result',
+              tool_use_id: 'client:ai_plan_seed',
+              content: { kind: 'ai_plan_seed', payload: { planningMode } },
+            },
+          ],
+        },
+      });
+      await scopedStore.bindFactScope(args.userId, handle!.projector.run.runId, scope);
+      handle!.projector.consume({
+        type: 'assistant',
+        message: { content: [{
+          type: 'tool_use',
+          id: 'question-call',
+          name: 'AskUserQuestion',
+          input: question,
+        }] },
+      });
+      handle!.projector.finish('awaiting_input');
+      await scopedStore.checkpoint(handle!, 'awaiting_input');
+
+      expect(await prisma.aiCoachMemoryExtractionJob.count()).toBe(0);
+      expect(await prisma.coachRun.findUniqueOrThrow({
+        where: { id: handle!.projector.run.runId },
+      })).toMatchObject({
+        status: 'awaiting_input',
+        pendingInteraction: expect.objectContaining({ status: 'pending' }),
+      });
+      expect((await scopedStore.begin(answerArgs(handle!))).handle).toBeDefined();
+    },
+  );
+
+  it.each(['keep', 'withdraw consent'])(
+    'reconciles a published plan clarification on current facts: %s',
+    async (outcome) => {
+      const topic = 'coach-context:2026-11-20';
+      let revision = 'first';
+      const scopedStore = new CoachRunStore(
+        prisma as PrismaService,
+        undefined,
+        undefined,
+        { current: async () => [{ topic, revision }] },
+      );
+      const args = startArgs();
+      const { handle } = await scopedStore.begin(args);
+      const runId = handle!.projector.run.runId;
+      await scopedStore.bindFactScope(args.userId, runId, { topic, revision });
+      handle!.projector.consume({
+        type: 'assistant',
+        message: {
+          content: [{
+            type: 'tool_use',
+            id: 'question-call',
+            name: 'AskUserQuestion',
+            input: { ...question, metadata: { skill: 'plan-builder' } },
+          }],
+        },
+      });
+      revision = 'background-memory-changed';
+      handle!.projector.finish('awaiting_input');
+      await scopedStore.checkpoint(handle!, 'awaiting_input');
+
+      revision = outcome === 'keep' ? 'new-workout' : 'disabled';
+      await scopedStore.reconcileCurrentFacts(args.userId);
+      const run = await prisma.coachRun.findUniqueOrThrow({ where: { id: runId } });
+      if (outcome === 'keep') {
+        expect(run.status).toBe('awaiting_input');
+        expect((await scopedStore.begin(answerArgs(handle!))).handle).toBeDefined();
+      } else {
+        expect(run.status).toBe('cancelled');
+        expect(run.pendingInteraction).toBeNull();
+      }
+    },
+  );
+
+  it('atomically finalizes the run and attempt when bound question facts change', async () => {
+    const topic = 'coach-context:2026-11-20';
+    const scopedStore = new CoachRunStore(prisma as PrismaService, undefined, undefined, {
+      current: async () => [{ topic, revision: 'new' }],
+    });
+    const args = startArgs();
+    const { handle } = await scopedStore.begin(args);
+    const { runId, attemptId } = handle!.projector.run;
+    await scopedStore.bindFactScope(args.userId, runId, { topic, revision: 'old' });
+
+    handle!.projector.finish('awaiting_input');
+    await expect(scopedStore.checkpoint(handle!, 'awaiting_input')).rejects.toThrow('facts_changed');
+
+    expect(await prisma.coachRun.findUniqueOrThrow({ where: { id: runId } })).toMatchObject({
+      status: 'cancelled', activeAttemptId: null, pendingInteraction: null,
+    });
+    expect(await prisma.coachRunAttempt.findUniqueOrThrow({ where: { id: attemptId } })).toMatchObject({
+      status: 'cancelled', cancelRequestedAt: null,
+    });
   });
 
   it('reuses one state session and resumes its owned pending question through the normal Coach runtime', async () => {
@@ -566,7 +685,10 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
         ...args,
         command: { ...args.command, interactionId: 'obsolete' },
       }),
-    ).rejects.toThrow('pending');
+    ).rejects.toMatchObject({
+      status: 409,
+      response: { code: 'question_stale' },
+    });
     await store.begin(args);
     await expect(
       store.begin({ ...args, message: { content: [] } }),
@@ -700,6 +822,37 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     expect(
       await prisma.coachRun.findUnique({ where: { id: runId } }),
     ).toMatchObject({ status: 'cancelled', activeAttemptId: null });
+  });
+
+  it('recovers only the expired attempt attached to the blocking operation', async () => {
+    const expired = startArgs();
+    const { handle } = await store.begin(expired);
+    const unrelated = startArgs();
+    const { handle: otherHandle } = await store.begin({
+      ...unrelated,
+      sid: 'other-session',
+    });
+    await expect(store.recoverStaleOperation('athlete', expired.operationId))
+      .resolves.toBe(false);
+
+    await prisma.coachRunAttempt.updateMany({
+      where: { id: { in: [handle.projector.run.attemptId, otherHandle.projector.run.attemptId] } },
+      data: { heartbeatAt: new Date(Date.now() - 120_000) },
+    });
+    await expect(store.recoverStaleOperation('intruder', expired.operationId))
+      .resolves.toBe(false);
+    await expect(store.recoverStaleOperation('athlete', expired.operationId))
+      .resolves.toBe(true);
+    // The accounting operation can still need release after a history read
+    // (or another request) has already recovered the attempt.
+    await expect(store.recoverStaleOperation('athlete', expired.operationId))
+      .resolves.toBe(true);
+    expect(await prisma.coachRun.findUnique({
+      where: { id: handle.projector.run.runId },
+    })).toMatchObject({ status: 'interrupted', activeAttemptId: null });
+    expect(await prisma.coachRun.findUnique({
+      where: { id: otherHandle.projector.run.runId },
+    })).toMatchObject({ status: 'running' });
   });
 
   it('reconciles a late write without reviving or making it blindly retryable', async () => {

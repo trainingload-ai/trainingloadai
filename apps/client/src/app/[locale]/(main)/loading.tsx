@@ -1,13 +1,14 @@
-import { LoadingSpinner } from "@/components/icons/spinner";
+import { useTranslations } from "next-intl";
+import { MainPageSkeleton } from "@/components/layout/MainPageSkeleton";
 
 export default function MainRouteLoading() {
+  const t = useTranslations("SharedUI");
   return (
-    <div
-      className="flex h-full min-h-0 w-full flex-1 items-center justify-center"
-      role="status"
-      aria-live="polite"
-    >
-      <LoadingSpinner className="h-6 w-6" />
+    <div role="status">
+      <span className="sr-only">{t("loadingEllipsis")}</span>
+      <div aria-hidden="true">
+        <MainPageSkeleton />
+      </div>
     </div>
   );
 }

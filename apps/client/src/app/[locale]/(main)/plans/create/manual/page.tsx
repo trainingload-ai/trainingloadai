@@ -359,12 +359,12 @@ export default function ManualPlanCreatePage() {
       <header className="hidden shrink-0 px-1 pc:block">
         <Link
           href="/plans"
-          className="inline-flex items-center gap-1 text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1 tablet:hidden text-mobile-caption pc:text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {tNav("header.backToPlans")}
         </Link>
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex items-center gap-2 tablet:mt-0">
           {[1, 2, 3].map((n) => (
             <div
               key={n}

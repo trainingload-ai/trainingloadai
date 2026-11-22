@@ -225,7 +225,7 @@ export function CoachReviewSessionsListPage() {
           type="button"
           variant="ghost"
           size="icon"
-          className="shrink-0"
+          className="shrink-0 tablet:hidden"
           asChild
         >
           <Link href="/ai-coach" aria-label={t("listBack")}>

@@ -1,6 +1,7 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
+import { ArrowUpRight, CalendarDays } from "lucide-react";
 import {
   coachPlanSaveErrorKind,
   type CoachPlanSaveErrorKind,
@@ -47,6 +48,7 @@ import {
 import { MutationAppliedCard } from "./cards/MutationAppliedCard";
 import { COACH_READ_TOOL_CARD_NAMES } from "./coach-conversation-items";
 import { CoachPlanDraftCalendarPreview } from "./coach-plan-draft-calendar-preview";
+import { CoachPlanDraftPreviewContext } from "./coach-preview-panel";
 import { CoachQuestionCard } from "./coach-question-card";
 import {
   CoachQuestionSurface,
@@ -134,6 +136,8 @@ function CoachV2AssistantCardsInner({
   const locale = useLocale();
   const twa = useTranslations("AiCoachPage.workoutAdjustment");
   const td = useTranslations("AiCoachPage.decision");
+  const tPreview = useTranslations("AiCoachPage.workspace");
+  const openDraftPreview = useContext(CoachPlanDraftPreviewContext);
 
   const assistantMessageId = message?.id ?? "";
 
@@ -318,7 +322,11 @@ function CoachV2AssistantCardsInner({
             return;
           }
           toast.success(tpd("createSuccess"));
-          router.push(getPlanLibraryHref(isMobile));
+          router.push(
+            draft.planningMode === "ROLLING"
+              ? `/plans/${result.id}`
+              : getPlanLibraryHref(isMobile),
+          );
         },
         onError: (err) => {
           setPlanSaveError(coachPlanSaveErrorKind(err));
@@ -415,6 +423,7 @@ function CoachV2AssistantCardsInner({
               )}
               name={tool.name}
               input={tool.input}
+              chartRef={{ messageId: assistantMessageId, deliveryId: tool.toolCallId }}
               disabled={isRunning}
               onAction={(text, content) =>
                 appendCoachToolResult(thread, text, {
@@ -450,15 +459,35 @@ function CoachV2AssistantCardsInner({
       {planDraft ? (
         <Plan open>
           <PlanContent className="p-0">
-            <CoachPlanDraftCalendarPreview
-              draft={planDraft}
-              startDate={planDraft.qualityContract?.startDate}
-              calendarTimeZone={
-                planDraft.scheduleConstraints?.calendarTimeZone ?? "UTC"
-              }
-              scheduleConstraints={planDraft.scheduleConstraints}
-              className="rounded-none bg-transparent dark:bg-transparent"
-            />
+            {openDraftPreview && planDraftTool ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() =>
+                  openDraftPreview(
+                    `${assistantMessageId}:tool:${planDraftTool.toolCallId}`,
+                  )
+                }
+              >
+                <CalendarDays aria-hidden />
+                <span className="min-w-0 truncate">{planDraft.title}</span>
+                <span className="ms-auto shrink-0">
+                  {tPreview("openCalendar")}
+                </span>
+                <ArrowUpRight aria-hidden />
+              </Button>
+            ) : (
+              <CoachPlanDraftCalendarPreview
+                draft={planDraft}
+                startDate={planDraft.qualityContract?.startDate}
+                calendarTimeZone={
+                  planDraft.scheduleConstraints?.calendarTimeZone ?? "UTC"
+                }
+                scheduleConstraints={planDraft.scheduleConstraints}
+                className="rounded-none bg-transparent dark:bg-transparent"
+              />
+            )}
           </PlanContent>
           <PlanFooter className="flex-col items-stretch gap-2 sm:items-end">
             {planSaveError ? (

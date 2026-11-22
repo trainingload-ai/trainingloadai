@@ -10,6 +10,104 @@ import type { WorkoutIntensityIntent } from "./endurance-workout-ir";
 import type { PlanQualityContract } from "./plan-quality";
 
 export type PlanProposalMode = "ADAPT" | "SUPERSEDE" | "START" | "SCHEDULE";
+export type PlanCalendarMoveInput = {
+  targetDate: string;
+  expectedRevision: number;
+};
+
+export type PlanCalendarEditWorkout = {
+  sportType: string;
+  sportDefinitionCode?: string | null;
+  name?: string | null;
+  notes?: string | null;
+  definition: WorkoutDefinitionInput;
+};
+
+export type PlanCalendarEdit =
+  | { kind: "ADD"; candidateKey: string; targetDate: string; workout: PlanCalendarEditWorkout }
+  | { kind: "UPDATE"; workoutId: string; expectedRevision: number; targetDate: string; workout?: PlanCalendarEditWorkout }
+  | { kind: "DELETE"; workoutId: string; expectedRevision: number };
+
+export type PlanCalendarEditsInput = {
+  batchId: string;
+  edits: PlanCalendarEdit[];
+};
+
+export type ReviseCalendarAdjustmentInput = Pick<PlanCalendarEditsInput, "edits"> & {
+  confirmationId: string;
+};
+
+export type CalendarMoveWeekTotals = {
+  sessions: number;
+  trainingDays: number;
+  durationMinutes: number | null;
+  estimatedLoad: number | null;
+};
+
+export type CalendarAdjustmentWeek = {
+  weekStart: string;
+  before: CalendarMoveWeekTotals;
+  after: CalendarMoveWeekTotals;
+};
+
+export type PlanCalendarMoveImpact = {
+  workoutId: string;
+  from: string;
+  to: string;
+  reasons: Array<
+    | "WEEKLY_DISTRIBUTION_CHANGED"
+    | "ADJACENT_TRAINING_CHANGED"
+    | "CALENDAR_CONFLICT"
+  >;
+  weeks: CalendarAdjustmentWeek[];
+};
+
+export type PlanCalendarMoveReceipt = {
+  previewId: string;
+  planId: string;
+  readbackVerified: true;
+  deletedWorkoutIds?: string[];
+  identityMap: Array<{
+    workoutId: string;
+    scheduledDate: string;
+    revision: number;
+  }>;
+};
+
+export const PlanCalendarMoveState = {
+  Pending: "PENDING",
+  Applied: "APPLIED",
+  Cancelled: "CANCELLED",
+  Expired: "EXPIRED",
+  Invalidated: "INVALIDATED",
+} as const;
+export type PlanCalendarMoveState =
+  (typeof PlanCalendarMoveState)[keyof typeof PlanCalendarMoveState];
+
+export type PlanCalendarMovePreview = {
+  previewId: string;
+  planId?: string;
+  expiresAt: string;
+  state: PlanCalendarMoveState;
+  requiresCoachConfirmation?: true;
+  confirmationId?: string;
+  impact: PlanCalendarMoveImpact;
+  presentation: PlanProposalPresentation;
+  receipt: PlanCalendarMoveReceipt | null;
+};
+export type PlanCalendarMoveRefreshResult =
+  | { status: "refreshed"; preview: PlanCalendarMovePreview }
+  | { status: "alreadyApplied" | "discarded" | "datesPassed" | "scheduleChanged" };
+
+export type PlanCalendarCoachSession = {
+  sid: string;
+  planId: string;
+  previewId: string;
+  impact: PlanCalendarMoveImpact;
+  range: { from: string; to: string };
+  branchId?: string;
+  expired?: true;
+};
 export type PlanAdaptationScope = "WORKOUT" | "PLAN_REMAINING";
 export type PlanAssessmentDisposition = "APPLY" | "PRESERVE";
 export type PlanTargetDimension = "PACE" | "HEART_RATE" | "POWER";
@@ -114,6 +212,7 @@ export type PlanSchedulePreviewRequest = Omit<
 > & {
   mode: "SCHEDULE";
   range: { from: string; to: string };
+  calendarAdjustment?: { id: string; baseVersionId: string };
 };
 
 export type PlanProposalPreviewRequest =
@@ -123,9 +222,13 @@ export type PlanProposalPreviewRequest =
   | PlanSchedulePreviewRequest;
 
 export type PlanProposalPresentationRow = {
+  candidateKey?: string;
+  beforeName?: string;
+  beforeScheduledDate?: string;
   protectedReason?: string;
   changeKind?: "CHANGED" | "ADDED" | "DELETED" | "PRESERVED";
   workoutId?: string;
+  sourceRevision?: number;
   name: string;
   scheduledDate?: string | null;
   sportType: string;
@@ -145,6 +248,9 @@ export type RelatedCalendarConflict = {
 };
 
 export type PlanProposalPresentation = {
+  calendarMoveImpact?: PlanCalendarMoveImpact;
+  calendarMoveOnly?: true;
+  calendarAdjustmentWeeks?: CalendarAdjustmentWeek[];
   calendarDraftStartDate?: string;
   rolling?: RollingStartSettings & {
     generatedFrom: string;
@@ -161,7 +267,9 @@ export type PlanProposalPresentation = {
   startDate?: string;
   calendarTimeZone?: string;
   scheduleConstraints?: ScheduleConstraints;
-  calendarDraft?: CoachPlanDraftData;
+  calendarDraft?: Omit<CoachPlanDraftData, "workouts"> & {
+    workouts: Array<CoachPlanDraftData["workouts"][number] & { sourceWorkoutId?: string; candidateKey?: string }>;
+  };
   facts: PlanProposalEvidenceRef[];
   counts: {
     total: number;
@@ -191,7 +299,45 @@ export type PlanProposalPreviewResult = {
   decisionPayload: {
     planId: string;
     previewId: string;
+    calendarAdjustmentId?: string;
     presentation: PlanProposalPresentation;
   };
   presentation: PlanProposalPresentation;
+};
+
+export const CalendarAdjustmentState = {
+  Ready: "READY",
+  Stale: "STALE",
+  Expired: "EXPIRED",
+  Invalidated: "INVALIDATED",
+  Superseded: "SUPERSEDED",
+  Discarded: "DISCARDED",
+  Applied: "APPLIED",
+} as const;
+
+export type CalendarAdjustmentState =
+  (typeof CalendarAdjustmentState)[keyof typeof CalendarAdjustmentState];
+
+export type CalendarAdjustmentReceipt = {
+  planId: string;
+  versionId: string;
+  readbackVerified: true;
+  changedWorkoutCount: number;
+  addedWorkoutCount: number;
+  deletedWorkoutCount: number;
+};
+
+export type CalendarAdjustment = {
+  id: string;
+  planId: string;
+  versionId: string;
+  currentVersionId: string;
+  decisionId?: string | null;
+  isVersioned: boolean;
+  state: CalendarAdjustmentState;
+  expiresAt: string;
+  presentation: PlanProposalPresentation;
+  conflicts: Array<{ key: string; reason: string }>;
+  operationKeys: string[];
+  receipt: CalendarAdjustmentReceipt | null;
 };

@@ -7,6 +7,9 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { CronJob } from 'cron';
+import { addCalendarDays } from '@shared/plan-calendar';
+import { findComparablePreviousMonth, isoWeekStart } from '@shared/rolling-plan';
+import { activityCalendarYmdInZone } from '@/api/plan/plan-link-calendar.util';
 import { PlanStartService } from '@/api/plan/application/plan-start.service';
 import { PlanQueryService } from '@/api/plan/application/plan-query.service';
 import { RollingPlanAutomationService } from '@/api/plan/application/rolling-plan-automation.service';
@@ -116,18 +119,57 @@ export class RollingPlanRuntimeService
           } | null;
           let candidate = persisted?.candidate;
           if (!candidate) {
-            if (
-              !(input.facts as { loadObservation?: unknown }).loadObservation
-            ) {
-              const loadObservation = await this.queries.windowSnapshot(
-                input.userId,
-                input.planId,
-                input.from,
-                input.through,
+            const facts = input.facts as {
+              plan: { activationTimezone?: string | null };
+              loadObservation?: unknown;
+              recentWeeks?: unknown;
+            };
+            if (!facts.loadObservation || !facts.recentWeeks) {
+              const today =
+                activityCalendarYmdInZone(
+                  now,
+                  facts.plan.activationTimezone ?? 'UTC',
+                ) ?? now.toISOString().slice(0, 10);
+              const beforeWindow = addCalendarDays(input.from, -1);
+              const historyThrough =
+                today < beforeWindow ? today : beforeWindow;
+              const historyFrom = addCalendarDays(
+                isoWeekStart(historyThrough),
+                -21,
               );
+              const [loadObservation, history] = await Promise.all([
+                facts.loadObservation ??
+                  this.queries.windowSnapshot(
+                    input.userId,
+                    input.planId,
+                    input.from,
+                    input.through,
+                  ),
+                this.queries.windowSnapshot(
+                  input.userId,
+                  input.planId,
+                  historyFrom,
+                  historyThrough,
+                  {
+                    includeWeeklyReview: true,
+                  },
+                ),
+              ]);
+              const previousMonthDirection =
+                input.kind === 'MONTH'
+                  ? findComparablePreviousMonth(
+                      { monthStart: input.windowStart, effectiveFrom: input.from },
+                      history.monthDirections,
+                    )
+                  : undefined;
               input = {
                 ...input,
-                facts: { ...(input.facts as object), loadObservation },
+                facts: {
+                  ...facts,
+                  loadObservation,
+                  recentWeeks: history.weeklyReview,
+                  ...(previousMonthDirection ? { previousMonthDirection } : {}),
+                },
               };
               await this.queue.freezeModelInput(job.id, token, input);
             }
@@ -178,31 +220,26 @@ export class RollingPlanRuntimeService
           if (changed) await this.deliverCommittedResults();
           await this.queue.discover(now);
         } catch (error) {
-          await this.queue.fail(
+          const state = await this.queue.fail(
             job,
             error,
             error instanceof ReviewModelDeferredError
               ? error.resumeAt
               : undefined,
           );
-          if (
-            job.attempts >= 5 ||
-            (error as { code?: string })?.code ===
-              'ROLLING_CANDIDATE_NEEDS_INPUT'
-          ) {
+          if (state === 'BLOCKED') {
             try {
               const prepared = await this.queue.statusForNotification(job.id);
               await this.notifications.ensureNotification({
                 userId: prepared.userId,
                 kind: 'REVIEW_DIGEST',
-                dedupeKey: `rolling:${job.planId}:${job.windowStart.toISOString().slice(0, 10)}:blocked`,
+                dedupeKey: `rolling:${job.planId}:${job.windowStart.toISOString().slice(0, 10)}:needs-input`,
                 title: String(
                   this.i18n?.t('common.notification.rollingPlan.titleBlocked', {
                     lang: prepared.lang,
                   }) ?? 'Continuous training needs attention',
                 ),
-                bodyMarkdown:
-                  (error as { reason?: string })?.reason ?? String(error),
+                bodyMarkdown: (error as { reason?: string })?.reason,
                 data: { planId: job.planId, jobId: job.id, state: 'BLOCKED' },
               });
             } catch (notificationError) {

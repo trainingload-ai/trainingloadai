@@ -122,6 +122,7 @@ type WorkoutEditorSheetProps = {
   canDelete?: boolean;
   onDelete?: () => Promise<void>;
   headerExtra?: React.ReactNode;
+  footerActions?: React.ReactNode;
   showNameField?: boolean;
 };
 
@@ -158,10 +159,12 @@ export function WorkoutEditorSheet({
   canDelete = false,
   onDelete,
   headerExtra,
+  footerActions,
   showNameField = false,
 }: WorkoutEditorSheetProps) {
   const t = useTranslations("WorkoutEditor");
   const tSports = useTranslations("SportCatalog");
+  const titleId = React.useId();
   const [raw, setRaw] = useState("");
   const [notes, setNotes] = useState("");
   const [name, setName] = useState("");
@@ -539,6 +542,8 @@ export function WorkoutEditorSheet({
       shouldScaleBackground={false}
     >
       <AdaptiveDialogContent
+        desktopProps={{ "aria-labelledby": titleId }}
+        mobileProps={{ "aria-labelledby": titleId }}
         className="flex flex-col gap-0 overflow-hidden p-0"
         mobileClassName={cn(
           "h-[96dvh] max-h-[96dvh] rounded-t-overlay border-0",
@@ -594,7 +599,7 @@ export function WorkoutEditorSheet({
           )}
         >
           <AdaptiveDialogHeader className="space-y-0 text-left">
-            <AdaptiveDialogTitle className="text-base leading-snug">
+            <AdaptiveDialogTitle id={titleId} className="text-base leading-snug">
               {title}
             </AdaptiveDialogTitle>
           </AdaptiveDialogHeader>
@@ -1013,13 +1018,19 @@ export function WorkoutEditorSheet({
           </div>
         ) : null}
 
-        <AdaptiveDialogFooter className="shrink-0 gap-2 border-t border-border/60 bg-background px-4 py-3 pc:px-4 pc:py-2.5">
+        <AdaptiveDialogFooter className={cn(
+          "shrink-0 gap-2 border-t border-border/60 bg-background px-4 py-3 pc:px-4 pc:py-2.5",
+          readOnly && footerActions && "flex-row flex-wrap items-center justify-between sm:justify-between",
+        )}>
+          {readOnly ? footerActions : null}
           <Button
             size={readOnly ? "touch-sm" : "sm"}
             variant="outline"
             onClick={() => onOpenChange(false)}
             className={
-              readOnly ? "w-full pc:w-auto" : DESKTOP_FOOTER_BUTTON_LAYOUT_CLASS
+              readOnly
+                ? footerActions ? "ml-auto w-auto" : "w-full pc:w-auto"
+                : DESKTOP_FOOTER_BUTTON_LAYOUT_CLASS
             }
           >
             {t("buttons.close")}

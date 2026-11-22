@@ -4,6 +4,7 @@ import { localizedCoachTurnError } from "./coach-turn-errors";
 
 const labels = {
   modelUnavailable: "model unavailable",
+  questionStale: "question expired",
   aborted: "request interrupted",
   business: "business request failed",
   internal: "internal failure",
@@ -16,6 +17,7 @@ const labels = {
 describe("localizedCoachTurnError", () => {
   it.each([
     ["model_unavailable", "model unavailable"],
+    ["question_stale", "question expired"],
     ["aborted", "request interrupted"],
     ["internal", "internal failure"],
     ["upstream_failed", "upstream failure"],

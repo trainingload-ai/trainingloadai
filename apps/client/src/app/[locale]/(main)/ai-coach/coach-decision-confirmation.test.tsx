@@ -9,14 +9,48 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, expect, it, vi } from "vitest";
+import { CalendarAdjustmentState } from "@shared/plan-proposal";
 import messages from "../../../../../../../packages/messages/client-core/zh.json";
 import {
   CoachDecisionDraftCard,
   type CoachDecisionDraftToolResult,
 } from "./cards/CoachDecisionCard";
+import { CoachScheduleAdjustmentCard } from "./cards/CoachScheduleAdjustmentCard";
 import { rejectCoachDecision } from "@/api/ai-coach";
 
 vi.mock("@/api/ai-coach", () => ({ rejectCoachDecision: vi.fn() }));
+
+it("collapses past schedule cards by default and expands each one independently", () => {
+  render(
+    <NextIntlClientProvider locale="zh" messages={messages}>
+      <CoachScheduleAdjustmentCard
+        state={CalendarAdjustmentState.Stale}
+        planTitle="本周长跑"
+        footer={<button type="button">加载最新课表</button>}
+      >
+        <p>原定周末</p>
+      </CoachScheduleAdjustmentCard>
+      <CoachScheduleAdjustmentCard
+        state={CalendarAdjustmentState.Applied}
+        planTitle="下周长跑"
+      >
+        <p>已移到周日</p>
+      </CoachScheduleAdjustmentCard>
+    </NextIntlClientProvider>,
+  );
+  const stale = screen.getByRole("button", { name: /课表已变化.*本周长跑/ });
+  const applied = screen.getByRole("button", { name: /已生效.*下周长跑/ });
+  expect(stale).toHaveAttribute("aria-expanded", "false");
+  expect(applied).toHaveAttribute("aria-expanded", "false");
+  expect(within(applied).getByText("已生效")).toHaveClass("text-success");
+  expect(screen.queryByRole("button", { name: "加载最新课表" })).toBeNull();
+  fireEvent.click(stale);
+  expect(screen.getByRole("button", { name: "加载最新课表" })).toBeVisible();
+  fireEvent.click(applied);
+  expect(screen.getByText("已移到周日")).toBeVisible();
+  expect(stale).toHaveAttribute("aria-expanded", "true");
+});
+
 const proposal: CoachDecisionDraftToolResult = {
   kind: "coach_decision_draft",
   decisionId: "decision",

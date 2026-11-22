@@ -2,13 +2,408 @@ import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { TrainingVisualizationV1 } from "../../../packages/shared/training-visualization";
+import type { TrainingVisualizationV2 } from "../../../packages/shared/training-exploration";
 import { openCoachFixture } from "./fixtures/coach-page";
 import {
   activity,
   runRow,
+  text,
+  tool,
+  userRow,
   visualStates,
   visualTime,
 } from "./fixtures/coach-visual-states";
+
+test("puts sleep and matching navigation cards below the completed answer", async ({ page }) => {
+  const firstParagraph = "下面是昨晚的睡眠记录。";
+  const finalParagraph = "也可以打开活动、计划和概览。";
+  const activityCard = tool("CoachDetailView", {
+    kind: "activity_detail", hashId: "sleep-related-run", section: "overview",
+  }, "activity-detail");
+  const otherCards = [
+    tool("CoachHealthVisualization", {
+      kind: "coach_health_visualization", schemaVersion: 1,
+      scope: { metric: "sleep", mode: "LATEST", from: "2026-11-22", to: "2026-11-22" },
+      observedAt: visualTime, fingerprint: "sleep-fixture",
+      date: "2026-11-22", value: 24_720, knownDays: 1,
+    }, "sleep"),
+    tool("CoachDetailView", {
+      kind: "plan_detail", planId: "coach-test-plan", title: "基础训练计划",
+    }, "plan"),
+    tool("CoachDetailView", { kind: "athlete_overview" }, "overview"),
+    tool("PlanCalendarView", {
+      planId: "coach-test-plan", title: "基础训练计划", initialDate: "2026-11-22",
+    }, "calendar"),
+  ];
+  const history = [
+    userRow("先看一下训练情况。"),
+    {
+      id: "previous-answer", role: "assistant",
+      content: "这是已经保存的历史回复。", createdAt: visualTime,
+    },
+  ];
+  await openCoachFixture(page, history);
+  await page.getByRole("textbox").fill("看看昨晚睡眠和训练详情。");
+  await page.getByRole("button", { name: "发送", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.coachStreamFixture.requests)).toBe(1);
+  await page.evaluate(
+    ({ activityCard, firstParagraph, otherCards }) => {
+      window.coachStreamFixture.send([
+        { type: "start", messageId: "answer-cards-live" },
+        { type: "start-step" },
+        activityCard,
+        { type: "text-start", id: "coach-text-1" },
+        { type: "text-delta", id: "coach-text-1", delta: firstParagraph },
+        { type: "text-end", id: "coach-text-1" },
+        ...otherCards,
+      ]);
+    },
+    { activityCard, firstParagraph, otherCards },
+  );
+  const log = page.getByRole("log");
+  const activityButton = log.getByRole("button", { name: "活动详情", exact: true });
+  const sleep = log.getByText("412 min", { exact: true });
+  await expect(log.getByText(firstParagraph, { exact: true })).toBeVisible();
+  await expect(activityButton).toHaveCount(0);
+  await expect(sleep).toHaveCount(0);
+  history.push(runRow({
+    id: "answer-cards", title: "睡眠和训练详情", category: "数据结果",
+    parts: [activityCard, text(firstParagraph), ...otherCards, text(finalParagraph)],
+  }));
+  await page.evaluate((delta) => {
+    window.coachStreamFixture.send([
+      { type: "text-start", id: "coach-text-2" },
+      { type: "text-delta", id: "coach-text-2", delta },
+    ]);
+    window.coachStreamFixture.finish("coach-text-2");
+  }, finalParagraph);
+
+  const verifyCards = async () => {
+    const links = [
+      activityButton,
+      log.getByRole("button", { name: "基础训练计划", exact: true }),
+      log.getByRole("button", { name: "概览", exact: true }),
+      log.getByRole("button", { name: /查看日历.*基础训练计划/ }),
+    ];
+    const answer = log.getByText(finalParagraph, { exact: true });
+    await expect(answer).toBeVisible();
+    const paragraph = await answer.elementHandle();
+    for (const card of [sleep, ...links]) {
+      await expect(card).toBeVisible();
+      expect(await card.evaluate((node, before) =>
+        Boolean(before.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING),
+      paragraph)).toBe(true);
+    }
+    const sizes = await Promise.all(links.map((link) => link.evaluate((node) => {
+      const { width, height } = node.getBoundingClientRect();
+      return { width, height };
+    })));
+    expect(new Set(sizes.map((size) => JSON.stringify(size))).size).toBe(1);
+    await paragraph.dispose();
+  };
+  await verifyCards();
+  await page.reload();
+  await verifyCards();
+});
+
+test("loads health chart details on demand and preserves sources and gaps", async ({ page }) => {
+  const scope = {
+    metric: "hrv", from: "2026-11-19", to: "2026-11-22",
+    mode: "TREND", hrvType: "HRV_SDNN_MS", provider: "APPLE_HEALTH",
+  };
+  const summary = {
+    kind: "coach_health_visualization", schemaVersion: 1, scope,
+    observedAt: visualTime, fingerprint: "sdnn-fixture", date: "2026-11-21",
+    value: 37, knownDays: 2,
+  };
+  const rows = [runRow({
+    id: "health", title: "健康指标", category: "数据结果",
+    parts: [
+      tool("CoachHealthVisualization", summary, "health-trend"),
+      tool("CoachHealthVisualization", {
+        ...summary, scope: { ...scope, from: "2026-11-22", mode: "LATEST" },
+        value: null, date: null, knownDays: 0,
+      }, "health-empty"),
+    ],
+  })];
+  await openCoachFixture(page, rows, { navigate: false });
+  const garmin = { id: JSON.stringify(["GARMIN", "HRV_RMSSD_MS"]), provider: "GARMIN", hrvType: "HRV_RMSSD_MS" };
+  const apple = { id: JSON.stringify(["APPLE_HEALTH", "HRV_SDNN_MS"]), provider: "APPLE_HEALTH", hrvType: "HRV_SDNN_MS" };
+  let reads = 0;
+  await page.route(/\/messages\/gallery-message\/charts\/health-trend(?:\?|$)/, (route) => {
+    reads++;
+    const switched = new URL(route.request().url()).searchParams.get("hrvSource") === garmin.id;
+    return route.fulfill({ json: { data: {
+      ...summary,
+      hrvSources: [apple, garmin],
+      ...(switched ? {
+        value: 52, knownDays: 1, date: "2026-11-19",
+        scope: { ...scope, provider: garmin.provider, hrvType: garmin.hrvType },
+      } : {}),
+      chart: {
+        key: "hrv", chartKind: "line", latestDate: switched ? "2026-11-19" : "2026-11-21",
+        latestValue: switched ? 52 : 39, latestUnit: "ms",
+        provider: switched ? garmin.provider : apple.provider, hrvType: switched ? garmin.hrvType : apple.hrvType,
+        points: switched ? [{ date: "2026-11-19", value: 52 }] : [
+          { date: "2026-11-19" }, { date: "2026-11-20", value: 35 },
+          { date: "2026-11-21", value: 39 }, { date: "2026-11-22" },
+        ],
+      },
+    } } });
+  });
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  await expect(page.getByText("2/4 天有记录")).toBeVisible();
+  await expect(page.getByText("没有符合范围的可用数据。")).toBeVisible();
+  expect(reads).toBe(0);
+  await page.getByRole("button", { name: "查看图表", exact: true }).click();
+  await page.getByText("查看数据", { exact: true }).click();
+  await expect(page.getByText("2026-11-19", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "2026-11-20", exact: true })).toBeVisible();
+  expect(reads).toBeGreaterThan(0);
+  const panel = page.getByRole("tabpanel", { name: "HRV" });
+  const source = panel.getByRole("combobox", { name: "HRV 来源" });
+  await source.selectOption(garmin.id);
+  await expect(panel.getByText("52 ms", { exact: true }).first()).toBeVisible();
+  await expect(panel.getByText("2026-11-19 – 2026-11-22 · RMSSD · Garmin", { exact: true })).toBeVisible();
+  await source.selectOption(apple.id);
+  await expect(panel.getByText("2/4 天有记录")).toBeVisible();
+  await expect(page.getByText("2/4 天有记录")).toHaveCount(2);
+});
+
+test("opens an activity in the conversation sidebar after history reload", async ({ page }, testInfo) => {
+  const row = runRow(visualStates.find((state) => state.id === "activity-day")!);
+  const message = row.message as { parts: Array<{ data?: { input?: { items?: Array<{ hashId: string }> } } }> };
+  const id = message.parts.find((part) => part.data?.input?.items)?.data?.input?.items?.[0]?.hashId;
+  expect(id).toBeTruthy();
+  await openCoachFixture(page, [row], { navigate: false });
+  await page.route(`**/activities/${id}`, (route) => route.request().isNavigationRequest()
+    ? route.fallback()
+    : route.fulfill({ json: { data: {
+      hashId: id, title: "测试跑步详情", sportType: "RUN",
+      distance: 5000, elapsedTime: 1800, averageSpeed: 2.78, avgHeartRate: 130,
+      sessionRpe: 3, processingStatus: "READY",
+      startTime: "2026-10-09T08:00:00.000Z",
+    } } }));
+  await page.route(`**/activities/${id}/ai-review?*`, (route) => route.fulfill({ json: { data: {
+    found: true, status: "SUCCEEDED", markdown: "保持轻松配速，逐步恢复训练节奏。",
+  } } }));
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  const open = page.getByRole("button", { name: /清晨轻松跑/ }).first();
+  const metrics = page.getByTestId("activity-summary-metric");
+  let desktopMetrics: string[] | undefined;
+  for (const afterReload of [false, true]) {
+    if (afterReload) await page.reload();
+    await open.click();
+    await expect(page.getByRole("link", { name: "查看完整活动" })).toBeVisible();
+    const title = page.getByRole("heading", { name: "测试跑步详情", exact: true });
+    await expect(title).toBeVisible();
+    const review = page.getByText("保持轻松配速，逐步恢复训练节奏。", { exact: true });
+    await expect(review).toBeVisible();
+    await expect(page.getByRole("tab", { name: "总览", selected: true })).toBeVisible();
+    await expect(metrics).toHaveCount(6);
+    const pace = metrics.filter({ hasText: "平均配速" }).getByText("6:00", { exact: true });
+    await expect(pace).toBeVisible();
+    expect(await pace.evaluate((value) => value.scrollWidth - value.clientWidth)).toBeLessThanOrEqual(1);
+    if (!afterReload) {
+      const metricRows = () => metrics.evaluateAll((cells) =>
+        new Set(cells.map((cell) => cell.getBoundingClientRect().top)).size,
+      );
+      const divider = page.getByRole("separator", { name: "调整对话和预览宽度" });
+      if (await divider.isVisible()) {
+        await expect.poll(metricRows).toBe(1);
+        desktopMetrics = await metrics.allTextContents();
+        await page.screenshot({ path: testInfo.outputPath("activity-sidebar-wide.png") });
+        const bounds = (await divider.boundingBox())!;
+        const x = bounds.x + bounds.width / 2;
+        const y = bounds.y + bounds.height / 2;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.mouse.move(x + 220, y, { steps: 10 });
+        await expect.poll(metricRows).toBe(2);
+        await page.mouse.move(x + 500, y, { steps: 10 });
+        await page.mouse.up();
+        await expect.poll(metricRows).toBe(3);
+        await expect(review).toBeVisible();
+        await page.screenshot({ path: testInfo.outputPath("activity-sidebar-narrow.png") });
+      } else if ((page.viewportSize()?.width ?? 0) < 448) {
+        await expect.poll(metricRows).toBe(3);
+        await page.screenshot({ path: testInfo.outputPath("activity-sidebar-phone.png") });
+      }
+    }
+    expect(new URL(page.url()).pathname).toBe("/zh/ai-coach");
+    await page.getByRole("button", { name: /关闭.*预览/ }).click();
+    await expect(open).toBeFocused();
+  }
+  if (desktopMetrics) {
+    await page.goto(`/zh/activities/${id}`);
+    await expect(page.getByRole("heading", { name: "测试跑步详情", exact: true })).toBeVisible();
+    await expect(metrics).toHaveText(desktopMetrics);
+    await expect(page.getByText("保持轻松配速，逐步恢复训练节奏。", { exact: true })).toBeVisible();
+  }
+});
+
+test("opens plan details and athlete overview in the same sidebar", async ({ page }) => {
+  const rows = [runRow({
+    id: "detail-views", title: "训练详情", category: "数据结果",
+    parts: [
+      tool("CoachDetailView", { kind: "plan_detail", planId: "coach-test-plan", title: "基础训练计划" }, "plan-detail"),
+      tool("CoachDetailView", { kind: "athlete_overview" }, "overview"),
+    ],
+  })];
+  await openCoachFixture(page, rows, { navigate: false });
+  await page.route("**/plans/coach-test-plan", (route) => route.fulfill({ json: { data: { plan: {
+    id: "coach-test-plan", title: "基础训练计划", status: "ACTIVE", mode: "FIXED",
+    startDate: "2026-11-16", endDate: "2026-12-13", durationWeeks: 4, currentWeekIndex: 0,
+    goal: "建立有氧基础", workouts: [],
+  } } } }));
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  await page.getByRole("button", { name: "基础训练计划", exact: true }).click();
+  const plan = page.getByRole("tabpanel", { name: "基础训练计划" });
+  await expect(plan.getByText("建立有氧基础")).toBeVisible();
+  await expect(plan.getByRole("button", { name: "暂停", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /关闭.*预览/ }).click();
+  await page.getByRole("button", { name: "概览", exact: true }).click();
+  await expect(page.getByRole("tabpanel", { name: "概览" }).getByText("近30天", { exact: true })).toBeVisible();
+  const tabs = page.getByRole("tablist", { name: "课表预览" });
+  const overview = tabs.getByRole("tab", { name: "概览", exact: true });
+  await page.getByRole("button", { name: "关闭 基础训练计划", exact: true }).click();
+  await expect(tabs.getByRole("tab", { name: "基础训练计划" })).toHaveCount(0);
+  await expect(overview).toHaveAttribute("aria-selected", "true");
+  await expect(overview).toBeFocused();
+  expect(new URL(page.url()).pathname).toBe("/zh/ai-coach");
+});
+
+test("drills into training statistics, PMC gaps and a measured power curve", async ({ page }) => {
+  const from = "2026-11-20";
+  const to = "2026-11-22";
+  const stats: TrainingVisualizationV1 = {
+    kind: "training_visualization", schemaVersion: 1, title: "跑步训练统计",
+    intent: "LOOKUP", view: "METRIC_STRIP", x: { key: "label", type: "TIME" },
+    detail: {}, observedAt: visualTime, rows: [],
+    summary: { AVG_HEART_RATE: 142.5, ACTIVITY_COUNT: 3 },
+    series: [{ key: "AVG_HEART_RATE", unit: "bpm" }, { key: "ACTIVITY_COUNT", unit: "count" }],
+    provenance: {
+      source: "ACTIVITIES", from, to, groupBy: "DAY", timezone: "Asia/Shanghai",
+      sportTypes: ["RUN"], fingerprint: "stats", complete: true, truncated: false,
+      coverage: { AVG_HEART_RATE: 0.667 }, coverageDetails: { AVG_HEART_RATE: { known: 40, total: 60, unit: "min" } },
+    },
+  };
+  const pmc: TrainingVisualizationV1 = {
+    ...stats, title: "负荷状态趋势", intent: "TREND", view: "LINE", detail: undefined,
+    series: [{ key: "TSB", unit: "load" }], summary: { TSB: -8 },
+    rows: [0, null, -8].map((TSB, index) => ({
+      key: `2026-11-2${index}`, label: `2026-11-2${index}`, values: { TSB },
+    })),
+    provenance: { ...stats.provenance, source: "PMC", sportTypes: [], fingerprint: "pmc", coverage: { TSB: 0.667 } },
+  };
+  const power: TrainingVisualizationV2 = {
+    kind: "training_visualization", schemaVersion: 2, title: "骑行功率持续曲线",
+    highlights: [{ label: "5 min", value: 220, unit: "W" }], detail: true, panels: [], notes: [],
+    provenance: {
+      query: { source: "POWER_DURATION", from, to, sportTypes: ["CYCLING"] }, timezone: "Asia/Shanghai",
+      fingerprint: "power", complete: true, truncated: false, matchedCount: 1, missingCount: 1,
+    },
+  };
+  await openCoachFixture(page, [runRow({ id: "stats-and-power", title: "训练数据", category: "数据结果", parts: [
+    tool("TrainingVisualization", stats, "training-stats"),
+    tool("TrainingVisualization", pmc, "pmc-trend"),
+    tool("TrainingVisualization", power, "power-duration"),
+  ] })], { navigate: false });
+  await page.route(/\/charts\/training-stats(?:\?|$)/, (route) => {
+    const group = new URL(route.request().url()).searchParams.has("byActivity");
+    return route.fulfill({ json: { data: {
+      ...stats, detail: undefined, view: "TABLE",
+      provenance: { ...stats.provenance, groupBy: group ? "ACTIVITY" : "DAY" },
+      rows: [{ key: "a", label: group ? "清晨耐力跑" : from, start: from, values: { AVG_HEART_RATE: 142.5, ACTIVITY_COUNT: 1 } }],
+    } } });
+  });
+  await page.route("**/charts/power-duration", (route) => route.fulfill({ json: { data: {
+    ...power, highlights: undefined, detail: undefined,
+    panels: [{
+      id: "cycling", view: "LINE", x: { kind: "ELAPSED_TIME", unit: "s" },
+      y: { kind: "NUMBER", unit: "W", measure: "POWER" },
+      series: [{ id: "cycling", points: [
+        { x: 300, y: 220, label: "山路骑行", activityHashId: "power-origin" },
+        { x: 1200, y: null },
+      ] }],
+    }],
+  } } }));
+  await page.route("**/activities/power-origin", (route) => route.fulfill({ json: { data: {
+    hashId: "power-origin", title: "山路骑行", sportType: "CYCLING", avgPower: 220,
+    distance: 25000, elapsedTime: 4000, processingStatus: "READY", startTime: "2026-11-21T08:00:00.000Z",
+  } } }));
+  await page.goto("/zh/ai-coach?sid=coach-stream-fixture");
+  await expect(page.getByText(/40\/60.*覆盖率 67%/)).toBeVisible();
+  await page.getByText("查看数据", { exact: true }).click();
+  const pmcRows = page.getByRole("table").first().getByRole("row");
+  await expect(pmcRows.nth(1)).toContainText("0");
+  await expect(pmcRows.nth(2)).toContainText("—");
+  await expect(pmcRows.nth(3)).toContainText("-8");
+  await page.getByRole("button", { name: "查看图表 · 平均心率" }).click();
+  const statsPanel = page.getByRole("tabpanel", { name: "跑步训练统计" });
+  await statsPanel.getByRole("button", { name: "按活动查看" }).click();
+  await expect(statsPanel.getByText("清晨耐力跑")).toBeVisible();
+  await expect(statsPanel.getByText("142.5 bpm")).toBeVisible();
+  await page.getByRole("button", { name: /关闭.*预览/ }).click();
+  await page.getByRole("button", { name: "查看图表", exact: true }).click();
+  const powerPanel = page.getByRole("tabpanel", { name: "骑行功率持续曲线" });
+  await powerPanel.getByText("查看数据", { exact: true }).click();
+  await expect(powerPanel.getByRole("row", { name: /5:00 220/ }).getByRole("cell", { name: "220", exact: true })).toBeVisible();
+  await expect(powerPanel.getByRole("row", { name: /20:00 —/ }).getByRole("cell").nth(2)).toHaveText("—");
+  await powerPanel.getByRole("button", { name: "山路骑行", exact: true }).click();
+  const activityPanel = page.getByRole("tabpanel", { name: "山路骑行" });
+  await expect(activityPanel.getByRole("tab", { name: "功率", selected: true })).toBeVisible();
+});
+
+test("refreshes the conversation after an obsolete answer and removes the old question", async ({
+  page,
+}) => {
+  const pending = visualStates.find((state) => state.id === "question-pending")!;
+  const rows = [runRow(pending)];
+  const historyReads = await openCoachFixture(page, rows, { empty: true });
+  const question = page.locator(
+    "[data-coach-question-dock] [data-coach-question]",
+  );
+  await expect(question).toBeVisible();
+  const firstRead = historyReads();
+  await question.getByText("备战半程马拉松", { exact: true }).click();
+  await question.getByRole("button", { name: "下一步", exact: true }).click();
+  await question.getByText("3 次", { exact: true }).click();
+  await question.getByRole("button", { name: "提交", exact: true }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.coachStreamFixture.requests))
+    .toBe(1);
+
+  rows.splice(
+    0,
+    1,
+    runRow({ ...pending, status: "cancelled", parts: [] }),
+    {
+      id: "current",
+      role: "assistant",
+      content: "训练安排已更新。",
+      createdAt: visualTime,
+    },
+  );
+  await page.evaluate(() => {
+    window.coachStreamFixture.send([
+      { type: "start", messageId: "stale-answer-result" },
+      { type: "start-step" },
+      {
+        type: "data-coach-turn-error",
+        id: "coach-turn-error",
+        data: { code: "question_stale" },
+      },
+      { type: "error", errorText: "请求与当前状态冲突" },
+    ]);
+    window.coachStreamFixture.finish(null);
+  });
+
+  await expect(page.getByText("训练安排已更新。", { exact: true })).toBeVisible();
+  await expect(question).toHaveCount(0);
+  await expect(page.getByText(/这个问题已过期/)).toBeVisible();
+  expect(historyReads()).toBe(firstRead + 1);
+});
 
 for (const outcome of ["completed", "failed"] as const) {
   test(`internal repair stays private until final ${outcome} and survives history restore`, async ({

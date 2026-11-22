@@ -12,13 +12,23 @@ export type RollingPolicySettings = {
   autoGenerateWeeks: true;
   autoAdjustFuture: true;
 };
+type RollingTargetRange = { min: number; max: number };
+type RollingLoadRange = RollingTargetRange & { unit: "NORMALIZED_LOAD" };
 export type RollingMonthDraft = {
   monthStart: string;
   objective: string;
   /** Null means unknown, never zero load. All values use the existing normalized load scale. */
-  loadRange: { unit: "NORMALIZED_LOAD"; min: number; max: number } | null;
-  durationMinutesRange: { min: number; max: number } | null;
-  weekFocus: Array<{ weekStart: string; focus: string }>;
+  loadRange: RollingLoadRange | null;
+  durationMinutesRange: RollingTargetRange | null;
+  runningDistanceKmRange?: RollingTargetRange | null;
+  monthOverMonthReason?: string | null;
+  weekFocus: Array<{
+    weekStart: string;
+    focus: string;
+    // Older strategies contain only a focus. Each new target covers the month's portion of the week.
+    loadRange?: RollingLoadRange | null;
+    durationMinutesRange?: RollingTargetRange | null;
+  }>;
 };
 export type RollingStartSettings = {
   policy: RollingPolicySettings;
@@ -37,12 +47,69 @@ export type GenerationCoverage = {
 };
 export const isoWeekStart = (date: string) =>
   addCalendarDays(date, 1 - calendarIsoWeekday(date));
+export function isoWeekStarts(from: string, through: string) {
+  const starts: string[] = [];
+  for (
+    let start = isoWeekStart(from);
+    start <= through;
+    start = addCalendarDays(start, 7)
+  )
+    starts.push(start);
+  return starts;
+}
 export const calendarMonthEnd = (date: string) => {
   const next = new Date(`${date.slice(0, 7)}-01T00:00:00Z`);
   next.setUTCMonth(next.getUTCMonth() + 1);
   next.setUTCDate(0);
   return next.toISOString().slice(0, 10);
 };
+
+type MonthWindow = { monthStart: string; effectiveFrom: string };
+
+export function findComparablePreviousMonth<T extends MonthWindow>(
+  current: MonthWindow,
+  history: readonly T[],
+): T | undefined {
+  if (current.effectiveFrom !== current.monthStart) return undefined;
+  const previousStart = `${addCalendarDays(current.monthStart, -1).slice(0, 7)}-01`;
+  return history.find(
+    (month) => month.monthStart === previousStart && month.effectiveFrom === previousStart,
+  );
+}
+
+export function hasRollingWeekTargets(
+  strategy: Pick<RollingMonthDraft, "weekFocus">,
+  from: string,
+  through: string,
+) {
+  const starts = isoWeekStarts(from, through);
+  const targets = new Map(
+    strategy.weekFocus.map((week) => [week.weekStart, week]),
+  );
+  return (
+    strategy.weekFocus.length === starts.length &&
+    starts.every((start) => {
+      const target = targets.get(start);
+      return (
+        target?.loadRange !== undefined &&
+        target.durationMinutesRange !== undefined
+      );
+    })
+  );
+}
+
+function validTargetRange(range: RollingTargetRange | null) {
+  return (
+    range === null ||
+    Boolean(
+      range &&
+      Number.isFinite(range.min) &&
+      Number.isFinite(range.max) &&
+      range.min >= 0 &&
+      range.max >= range.min,
+    )
+  );
+}
 export function generationCoverage(
   from: string | null,
   through: string | null,
@@ -120,27 +187,32 @@ export function parseRollingStartSettings(
       !Array.isArray(strategy.weekFocus)
     )
       fail();
-    for (const range of [strategy.loadRange, strategy.durationMinutesRange])
-      if (
-        range !== null &&
-        (!range ||
-          !Number.isFinite(range.min) ||
-          !Number.isFinite(range.max) ||
-          range.min < 0 ||
-          range.max < range.min)
-      )
-        fail();
-    if (strategy.loadRange && strategy.loadRange.unit !== "NORMALIZED_LOAD")
+    if (
+      !validTargetRange(strategy.loadRange) ||
+      !validTargetRange(strategy.durationMinutesRange) ||
+      (strategy.runningDistanceKmRange !== undefined &&
+        !validTargetRange(strategy.runningDistanceKmRange)) ||
+      (strategy.monthOverMonthReason != null &&
+        (typeof strategy.monthOverMonthReason !== "string" ||
+          !strategy.monthOverMonthReason.trim() ||
+          strategy.monthOverMonthReason.length > 500)) ||
+      (strategy.loadRange && strategy.loadRange.unit !== "NORMALIZED_LOAD")
+    )
       fail();
     if (
       strategy.weekFocus.some(
         (w) =>
+          !w ||
           !isCalendarDate(w.weekStart) ||
           isoWeekStart(w.weekStart) !== w.weekStart ||
           typeof w.focus !== "string" ||
           !w.focus.trim() ||
           addCalendarDays(w.weekStart, 6) < strategy.monthStart ||
-          w.weekStart > calendarMonthEnd(strategy.monthStart),
+          w.weekStart > calendarMonthEnd(strategy.monthStart) ||
+          (w.loadRange !== undefined && !validTargetRange(w.loadRange)) ||
+          (w.loadRange && w.loadRange.unit !== "NORMALIZED_LOAD") ||
+          (w.durationMinutesRange !== undefined &&
+            !validTargetRange(w.durationMinutesRange)),
       )
     )
       fail();

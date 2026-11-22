@@ -2,6 +2,12 @@ import type {
   PlanProposalPreviewRequest,
   PlanProposalPreviewResult,
 } from '@shared/plan-proposal';
+import { isCalendarDate } from '@shared/plan-calendar';
+import {
+  calendarMonthEnd,
+  hasRollingWeekTargets,
+  parseRollingStartSettings,
+} from '@shared/rolling-plan';
 import {
   aiToolError,
   buildAiTool,
@@ -9,6 +15,39 @@ import {
   requireSignedInUser,
   type AiToolDef,
 } from '../tool.types';
+
+const targetRangeProperties = {
+  min: { type: 'number', minimum: 0 },
+  max: { type: 'number', minimum: 0 },
+};
+const nullableTargetRange = {
+  anyOf: [
+    { type: 'null' },
+    {
+      type: 'object',
+      properties: targetRangeProperties,
+      required: ['min', 'max'],
+      additionalProperties: false,
+    },
+  ],
+};
+const rollingRanges = {
+  loadRange: {
+    anyOf: [
+      { type: 'null' },
+      {
+        type: 'object',
+        properties: {
+          unit: { type: 'string', const: 'NORMALIZED_LOAD' },
+          ...targetRangeProperties,
+        },
+        required: ['unit', 'min', 'max'],
+        additionalProperties: false,
+      },
+    ],
+  },
+  durationMinutesRange: nullableTargetRange,
+};
 
 export const planProposalPreviewTool: AiToolDef<
   PlanProposalPreviewRequest,
@@ -44,6 +83,16 @@ export const planProposalPreviewTool: AiToolDef<
       planId: {
         type: 'string',
         description: 'Source plan id for ADAPT, START or SCHEDULE.',
+      },
+      calendarAdjustment: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['id', 'baseVersionId'],
+        properties: {
+          id: { type: 'string' },
+          baseVersionId: { type: 'string' },
+        },
+        description: 'SCHEDULE only. Use when the athlete asks to revise a specific saved adjustment. Read pendingCalendarAdjustments first, use the exact current version, and include only the requested delta.',
       },
       range: {
         type: 'object',
@@ -170,35 +219,8 @@ export const planProposalPreviewTool: AiToolDef<
               properties: {
                 monthStart: { type: 'string' },
                 objective: { type: 'string' },
-                loadRange: {
-                  anyOf: [
-                    { type: 'null' },
-                    {
-                      type: 'object',
-                      properties: {
-                        unit: { type: 'string', const: 'NORMALIZED_LOAD' },
-                        min: { type: 'number', minimum: 0 },
-                        max: { type: 'number', minimum: 0 },
-                      },
-                      required: ['unit', 'min', 'max'],
-                      additionalProperties: false,
-                    },
-                  ],
-                },
-                durationMinutesRange: {
-                  anyOf: [
-                    { type: 'null' },
-                    {
-                      type: 'object',
-                      properties: {
-                        min: { type: 'number', minimum: 0 },
-                        max: { type: 'number', minimum: 0 },
-                      },
-                      required: ['min', 'max'],
-                      additionalProperties: false,
-                    },
-                  ],
-                },
+                ...rollingRanges,
+                runningDistanceKmRange: nullableTargetRange,
                 weekFocus: {
                   type: 'array',
                   items: {
@@ -206,8 +228,14 @@ export const planProposalPreviewTool: AiToolDef<
                     properties: {
                       weekStart: { type: 'string' },
                       focus: { type: 'string' },
+                      ...rollingRanges,
                     },
-                    required: ['weekStart', 'focus'],
+                    required: [
+                      'weekStart',
+                      'focus',
+                      'loadRange',
+                      'durationMinutesRange',
+                    ],
                     additionalProperties: false,
                   },
                 },
@@ -399,6 +427,11 @@ export const planProposalPreviewTool: AiToolDef<
   },
   checkPermissions: async (ctx) => requireSignedInUser(ctx),
   validateInput: (ctx, input) => {
+    if (ctx.calendarScheduleOnly && input?.mode !== 'SCHEDULE')
+      return aiToolError(
+        'Calendar moves require a SCHEDULE proposal',
+        'INVALID_INPUT',
+      );
     if (!ctx.coachBranching) {
       return aiToolError('Plan proposal previews are unavailable', 'FORBIDDEN');
     }
@@ -447,7 +480,8 @@ export const planProposalPreviewTool: AiToolDef<
         !input.planId ||
         (input.mode === 'START'
           ? !/^\d{4}-\d{2}-\d{2}$/.test(input.startDate)
-          : !input.range?.from || !input.range?.to) ||
+          : !ctx.calendarScheduleOnly &&
+            (!input.range?.from || !input.range?.to)) ||
         !input.rationale?.trim() ||
         !Array.isArray(input.evidenceRefs) ||
         input.evidenceRefs.length === 0)
@@ -478,9 +512,46 @@ export const planProposalPreviewTool: AiToolDef<
           'INVALID_INPUT',
         );
     }
+    if (
+      input.mode === 'START' &&
+      input.rolling &&
+      isCalendarDate(input.startDate)
+    ) {
+      try {
+        const settings = parseRollingStartSettings(
+          input.rolling,
+          input.startDate,
+        );
+        for (const strategy of settings.monthStrategies) {
+          const from =
+            input.startDate > strategy.monthStart
+              ? input.startDate
+              : strategy.monthStart;
+          if (
+            !hasRollingWeekTargets(
+              strategy,
+              from,
+              calendarMonthEnd(strategy.monthStart),
+            )
+          ) {
+            return aiToolError(
+              'Each remaining ISO week in every included month needs a focus and explicit load and duration ranges. Use null for unknown ranges.',
+              'ROLLING_WEEK_TARGETS_REQUIRED',
+            );
+          }
+        }
+      } catch (error) {
+        return aiToolError(
+          error instanceof Error
+            ? error.message
+            : 'Invalid rolling start settings',
+          'INVALID_INPUT',
+        );
+      }
+    }
     return { ok: true };
   },
-  summarizeForModel: ({ output }) => ({
+  summarizeForModel: ({ ctx, output }) => ({
     kind: output.kind,
     previewId: output.previewId,
     mode: output.mode,
@@ -488,7 +559,11 @@ export const planProposalPreviewTool: AiToolDef<
     decisionType: output.decisionType,
     decisionPayload:
       output.mode === 'START' || output.mode === 'SCHEDULE'
-        ? { planId: output.decisionPayload.planId, previewId: output.previewId }
+        ? {
+            planId: output.decisionPayload.planId,
+            previewId: output.previewId,
+            calendarAdjustmentId: output.decisionPayload.calendarAdjustmentId,
+          }
         : output.decisionPayload,
     ...(output.mode === 'START' || output.mode === 'SCHEDULE'
       ? {
@@ -510,6 +585,21 @@ export const planProposalPreviewTool: AiToolDef<
           relatedCalendarConflicts:
             output.presentation.relatedCalendarConflicts,
           warnings: output.presentation.warnings,
+          ...(ctx.calendarScheduleOnly
+            ? {
+                changedRows: output.presentation.rows
+                  .filter((row) => row.changeKind && row.changeKind !== 'PRESERVED')
+                  .slice(0, 12)
+                  .map((row) => ({
+                    changeKind: row.changeKind,
+                    name: row.name,
+                    from: row.beforeScheduledDate,
+                    to: row.scheduledDate,
+                    before: row.before,
+                    after: row.after,
+                  })),
+              }
+            : {}),
         }
       : {}),
   }),

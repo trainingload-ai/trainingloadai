@@ -102,8 +102,6 @@ export const queryKeys = {
   },
 
   plans: {
-    windowSnapshot: (planId: string, from: string, through: string) =>
-      ["plan-detail", planId, "window-snapshot", from, through] as const,
     automation: (planId?: string) => ["plan-automation", planId] as const,
     list: () => ["plans-list"] as const,
     /** plan-workout-activity-link-control 等使用的历史 key */

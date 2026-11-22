@@ -28,7 +28,11 @@ export type CoachMessageView = {
   ui: CoachUiMessage;
   status: { type: "running" | "complete" };
 };
-type Snapshot = { messages: readonly CoachMessageView[]; isRunning: boolean };
+type Snapshot = {
+  messages: readonly CoachMessageView[];
+  isRunning: boolean;
+  status: UseChatHelpers<CoachUiMessage>["status"];
+};
 type Store = {
   snapshot: Snapshot;
   listeners: Set<() => void>;
@@ -81,6 +85,7 @@ export function CoachChatProvider({
   const snapshot = useMemo<Snapshot>(
     () => ({
       isRunning,
+      status: chat.status,
       messages: chat.messages.map((message, index) =>
         messageView(
           message,
@@ -90,7 +95,7 @@ export function CoachChatProvider({
         ),
       ),
     }),
-    [chat.messages, isRunning],
+    [chat.messages, chat.status, isRunning],
   );
   const [store] = useState(() => {
     const value: Store = {

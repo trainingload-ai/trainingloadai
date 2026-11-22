@@ -344,7 +344,7 @@ export function ActivitiesSearchPageClient() {
       <header className="hidden items-center justify-between gap-3 pc:flex">
         <Link
           href="/activities"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground tablet:hidden"
         >
           <ArrowLeft className="h-4 w-4" />
           {t("back")}

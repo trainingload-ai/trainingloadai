@@ -6,11 +6,9 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { formatValue, getUnit } from "@/hooks/useFormatterBySettings";
 import { useStore } from "@/lib/store";
-import type { Activity, SportType } from "@/api/activities";
+import type { Activity } from "@/api/activities";
 import type { PlanWorkout } from "@/api/plans";
-import type { ParsedPlan } from "@/api/workout";
 import { MobilePlanWorkoutRow } from "@/components/plan/mobile-plan-workout-row";
-import { ViewWorkoutDialog } from "@/components/plan/view-workout-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -18,7 +16,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { attachWorkoutToPlan } from "@/api/plans";
-import { CalendarCreateWorkoutSheet } from "./calendar-create-workout-sheet";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { queryKeys } from "@/lib/query-keys";
@@ -39,6 +36,7 @@ import {
 } from "@/components/competition/competition-event-dialog";
 import { getLocalizedActivityTitle } from "@/lib/activity-title";
 import { activitySupportsDistance } from "@/lib/activity-presentation";
+import { CalendarWorkoutDialog } from "./calendar-workout-dialog";
 
 type WeekStats = {
   count: number;
@@ -56,20 +54,6 @@ type SummaryScope = {
   comparisonStats: WeekStats;
 };
 
-function parsePlanBlocks(planWorkout?: PlanWorkout) {
-  const blocks = planWorkout?.blocks;
-  if (!blocks) return null;
-  try {
-    if (typeof blocks === "string") {
-      const parsed = JSON.parse(blocks);
-      return Array.isArray(parsed) ? (parsed as ParsedPlan) : null;
-    }
-    return Array.isArray(blocks) ? (blocks as ParsedPlan) : null;
-  } catch {
-    return null;
-  }
-}
-
 export function CalendarDaySheet({
   selectedDate,
   tss,
@@ -80,6 +64,8 @@ export function CalendarDaySheet({
   activePlanId,
   selectedPlanWorkout = null,
   onSelectPlanWorkout,
+  onMovePlanWorkout,
+  onCreateWorkout,
   focusedCompetitionEvent = null,
   onFocusCompetitionEvent,
   summaryScopes,
@@ -94,6 +80,8 @@ export function CalendarDaySheet({
   activePlanId?: string | null;
   selectedPlanWorkout?: PlanWorkout | null;
   onSelectPlanWorkout?: (workout: PlanWorkout | null) => void;
+  onMovePlanWorkout?: (workout: PlanWorkout) => void;
+  onCreateWorkout: () => void;
   focusedCompetitionEvent?: CompetitionEvent | null;
   onFocusCompetitionEvent?: (event: CompetitionEvent | null) => void;
   summaryScopes: {
@@ -117,7 +105,6 @@ export function CalendarDaySheet({
   const [summaryScopeKey, setSummaryScopeKey] = React.useState<
     "plan" | "month"
   >(summaryScopes.defaultKey);
-  const [createOpen, setCreateOpen] = React.useState(false);
   const [competitionDialogOpen, setCompetitionDialogOpen] =
     React.useState(false);
   const [competitionDialogInitialMode, setCompetitionDialogInitialMode] =
@@ -287,7 +274,9 @@ export function CalendarDaySheet({
                   {selectedDate.format("MM/DD")}
                 </div>
                 <div className="truncate text-sm text-muted-foreground">
-                  {selectedDate.format("dddd")}
+                  {new Intl.DateTimeFormat(locale, { weekday: "long" }).format(
+                    selectedDate.toDate(),
+                  )}
                 </div>
               </div>
             </div>
@@ -369,7 +358,7 @@ export function CalendarDaySheet({
                     size="icon-sm"
                     variant="ghost"
                     aria-label={t("createWorkoutButton")}
-                    onClick={() => setCreateOpen(true)}
+                    onClick={onCreateWorkout}
                   >
                     <Plus aria-hidden="true" />
                   </Button>
@@ -596,19 +585,12 @@ export function CalendarDaySheet({
 
       {selectedPlanWorkout ? (
         <>
-          <ViewWorkoutDialog
-            open={Boolean(selectedPlanWorkout)}
+          <CalendarWorkoutDialog
+            workout={selectedPlanWorkout}
             onOpenChange={(open) => {
               if (!open) setSelectedPlanWorkout(null);
             }}
-            planId={selectedPlanWorkout.planId ?? undefined}
-            workoutId={selectedPlanWorkout.id}
-            weekIndex={Math.max(0, (selectedPlanWorkout.weekIndex ?? 1) - 1)}
-            dayIndex={Math.max(0, (selectedPlanWorkout.dayIndex ?? 1) - 1)}
-            notes={selectedPlanWorkout.notes}
-            text={selectedPlanWorkout.text}
-            sportType={selectedPlanWorkout.sportType as SportType}
-            plan={parsePlanBlocks(selectedPlanWorkout)}
+            onMoveWorkout={onMovePlanWorkout}
           />
           {selectedPlanWorkout.planId == null && activePlanId ? (
             <div className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2">
@@ -624,13 +606,6 @@ export function CalendarDaySheet({
         </>
       ) : null}
 
-      <CalendarCreateWorkoutSheet
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        scheduledDate={selectedDate.format("YYYY-MM-DD")}
-        activePlanId={activePlanId}
-        defaultScope={activePlanId ? "inPlan" : "independent"}
-      />
       <CompetitionEventDialog
         open={competitionDialogOpen}
         onOpenChange={setCompetitionDialogOpen}

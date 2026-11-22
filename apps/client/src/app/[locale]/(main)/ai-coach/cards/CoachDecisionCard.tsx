@@ -31,10 +31,15 @@ import {
   isCalendarDate,
   parseScheduleConstraints,
 } from "@shared/plan-calendar";
-import type { PlanProposalPresentation } from "@shared/plan-proposal";
+import { CalendarAdjustmentState, type PlanProposalPresentation } from "@shared/plan-proposal";
 import { parsePlanQualityContract } from "@shared/plan-quality";
 import { safeParseCoachPlanDraftData } from "@shared/ai-coach-schema";
 import { CoachPlanDraftCalendarPreview } from "../coach-plan-draft-calendar-preview";
+import { CoachSchedulePreviewContext } from "../coach-preview-panel";
+import { CalendarAdjustmentControls } from "../../calendar/components/calendar-adjustment-controls";
+import { useCalendarAdjustment } from "../../calendar/components/use-calendar-adjustments";
+import { CoachScheduleComparison } from "./coach-schedule-comparison";
+import { CoachScheduleAdjustmentCard } from "./CoachScheduleAdjustmentCard";
 import { getRestoredStartDecisionApply } from "../coach-plan-decision-state";
 import { rejectCoachDecision } from "@/api/ai-coach";
 import { parseRollingStartSettings } from "@shared/rolling-plan";
@@ -231,6 +236,10 @@ function getPlanProposalPresentation(
       return [
         {
           name,
+          workoutId: asText(row.workoutId) || undefined,
+          beforeScheduledDate: isCalendarDate(row.beforeScheduledDate)
+            ? row.beforeScheduledDate
+            : undefined,
           ...(["CHANGED", "ADDED", "DELETED", "PRESERVED"].includes(
             asText(row.changeKind),
           )
@@ -600,16 +609,30 @@ export function CoachDecisionDraftCard({
   onConfirm?: (decisionId: string) => void;
 }) {
   const t = useTranslations("AiCoachPage.decision");
+  const schedulePreview = React.useContext(CoachSchedulePreviewContext);
   const [showAllProposalRows, setShowAllProposalRows] = React.useState(false);
   const [isCancelling, setIsCancelling] = React.useState(false);
   const [isCancelled, setIsCancelled] = React.useState(false);
   const [cancelFailed, setCancelFailed] = React.useState(false);
   const applied = Boolean(isApplied || result.state === "APPLIED");
+  const moveCopy = useTranslations("CalendarMove");
+  const schedulePlanId = result.decisionType === "PLAN_SCHEDULE" ? asText(result.payload?.planId) : "";
+  const adjustmentId = asText(result.payload?.calendarAdjustmentId) || result.decisionId;
+  const latestVersion = useCalendarAdjustment(schedulePlanId, schedulePlanId && schedulePreview ? adjustmentId : undefined).data;
+  const historical = Boolean(latestVersion?.decisionId && latestVersion.decisionId !== result.decisionId);
+  const historicalVersionId = historical ? asText(result.payload?.previewId) : undefined;
+  const historicalVersion = useCalendarAdjustment(schedulePlanId,
+    historicalVersionId ? adjustmentId : undefined, historicalVersionId).data;
+  const version = historical ? historicalVersion : latestVersion;
   const restoredApply = !isApplied
     ? getRestoredStartDecisionApply(result)
     : null;
   const superseded = !applied && result.state === "SUPERSEDED";
-  const rejected = !applied && (isCancelled || result.state === "REJECTED");
+  const rejected =
+    !applied &&
+    (isCancelled ||
+      result.state === "REJECTED" ||
+      schedulePreview?.cancelledDecisionId === result.decisionId);
   const approved = !rejected && (applied || result.state === "APPROVED");
   const isHighRisk = result.riskTier === "HIGH";
   const proposal = getPlanProposalPresentation(result);
@@ -624,6 +647,74 @@ export function CoachDecisionDraftCard({
       ? proposal.rows
       : proposal.rows.slice(0, 10)
     : [];
+  if (historical) {
+    const proposalVersion = historicalVersion?.presentation ?? proposal;
+    if (proposalVersion) return (
+      <CoachScheduleAdjustmentCard
+        state={CalendarAdjustmentState.Superseded}
+        statusLabel={t("supersededTitle")}
+        planTitle={proposalVersion.title}
+        dense={dense}
+        footer={<Button size="sm" variant="ghost" onClick={() => schedulePreview?.open(result.decisionId)}>
+          {moveCopy("viewLatestAdjustment")}
+        </Button>}
+      >
+        <CoachScheduleComparison proposal={proposalVersion} />
+      </CoachScheduleAdjustmentCard>
+    );
+  }
+  if (version && (version.isVersioned || ["STALE", "EXPIRED", "INVALIDATED"].includes(version.state))) {
+    return (
+      <CoachScheduleAdjustmentCard
+        state={version.state}
+        planTitle={version.presentation.title}
+        dense={dense}
+        footer={<CalendarAdjustmentControls adjustment={version}
+          disabled={confirmDisabled || schedulePreview?.isEditingAdjustment?.(version.id)} />}
+      >
+        <CoachScheduleComparison proposal={version.presentation}
+          onOpenPreview={schedulePreview ? () => schedulePreview.open(result.decisionId) : undefined} />
+      </CoachScheduleAdjustmentCard>
+    );
+  }
+  const scheduleComparison =
+    proposal?.mode === "SCHEDULE" && schedulePreview ? (
+      <CoachScheduleComparison
+        proposal={proposal}
+        initialMove={schedulePreview.initialMove}
+        onOpenPreview={
+          applied ||
+          rejected ||
+          superseded ||
+          !proposal.rows.some(
+            (row) => row.changeKind && row.changeKind !== "PRESERVED",
+          )
+            ? undefined
+            : () => schedulePreview.open(result.decisionId)
+        }
+      />
+    ) : null;
+  if (scheduleComparison && proposal && schedulePreview?.confirmInPreview) {
+    const state = applied
+      ? CalendarAdjustmentState.Applied
+      : rejected
+        ? CalendarAdjustmentState.Discarded
+        : superseded
+          ? CalendarAdjustmentState.Superseded
+          : CalendarAdjustmentState.Ready;
+    return (
+      <CoachScheduleAdjustmentCard
+        state={state}
+        planTitle={proposal.title}
+        dense={dense}
+      >
+        {proposal.summary ? (
+          <p className="text-xs text-muted-foreground">{proposal.summary}</p>
+        ) : null}
+        {scheduleComparison}
+      </CoachScheduleAdjustmentCard>
+    );
+  }
   const draftCard = (
     <CoachCard
       tone={workoutDrafts.length ? "neutral" : isHighRisk ? "warning" : "info"}
@@ -722,7 +813,7 @@ export function CoachDecisionDraftCard({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  disabled={confirmDisabled || isCancelling}
+                  disabled={confirmDisabled || isCancelling || schedulePreview?.isEditingAdjustment?.(result.decisionId)}
                   onClick={() => {
                     setIsCancelling(true);
                     setCancelFailed(false);
@@ -741,7 +832,7 @@ export function CoachDecisionDraftCard({
               <ConfirmationAction
                 type="button"
                 size="sm"
-                disabled={confirmDisabled || isCancelling}
+                disabled={confirmDisabled || isCancelling || schedulePreview?.isEditingAdjustment?.(result.decisionId)}
                 onClick={() => onConfirm?.(result.decisionId)}
               >
                 {proposal?.mode === "SCHEDULE"
@@ -760,205 +851,210 @@ export function CoachDecisionDraftCard({
       }
     >
       <div className="space-y-2.5">
-        {proposal ? (
-          <>
-            {proposal.rolling ? (
-              <RollingStartSummary
-                rolling={proposal.rolling}
-                pending={!applied}
-              />
-            ) : null}
-            {(proposal.mode === "START" || proposal.mode === "SCHEDULE") &&
-            proposal.calendarDraft &&
-            proposal.startDate &&
-            proposal.calendarTimeZone ? (
-              <CoachPlanDraftCalendarPreview
-                windowOnly={Boolean(proposal.rolling)}
-                generationWindow={
-                  proposal.rolling
-                    ? {
-                        from: proposal.rolling.generatedFrom,
-                        through: proposal.rolling.generatedThrough,
-                      }
-                    : undefined
-                }
-                draft={proposal.calendarDraft}
-                startDate={
-                  proposal.calendarDraftStartDate ?? proposal.startDate
-                }
-                calendarTimeZone={proposal.calendarTimeZone}
-                scheduleConstraints={proposal.scheduleConstraints}
-              />
-            ) : null}
-            <CoachScheduleRules proposal={proposal} />
-            {proposal.relatedCalendarConflicts?.length ? (
-              <div className="flex min-w-0 flex-col gap-2 rounded-md bg-muted px-3 py-3">
-                <CoachCard.SectionTitle>
-                  {t("relatedCalendarConflicts")}
-                </CoachCard.SectionTitle>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {t("relatedCalendarUnmanaged")}
-                </p>
-                <ul className="flex min-w-0 list-disc flex-col gap-1 pl-4 text-xs leading-5">
-                  {proposal.relatedCalendarConflicts.map((conflict, index) => (
-                    <li
-                      key={`${conflict.workoutId}:${conflict.code}:${index}`}
-                      className="min-w-0 break-words"
-                    >
-                      <time dateTime={conflict.date}>{conflict.date}</time>
-                      {" · "}
-                      <span>{conflict.name || t("workoutName")}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(proposal.mode === "START" || proposal.mode === "SCHEDULE"
-                ? ([
-                    "total",
-                    "changed",
-                    "added",
-                    "deleted",
-                    "preserved",
-                    "protected",
-                  ] as const)
-                : (["total", "changed", "preserved", "skipped"] as const)
-              ).map((key) => (
-                <div
-                  key={key}
-                  className="rounded-md bg-background/80 px-3 py-2 dark:bg-background/45"
-                >
-                  <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
-                    {t(key)}
-                  </div>
-                  <div className="mt-0.5 text-sm font-semibold text-foreground">
-                    {proposal.counts[key]}
-                  </div>
+        {scheduleComparison ??
+          (proposal ? (
+            <>
+              {proposal.rolling ? (
+                <RollingStartSummary
+                  rolling={proposal.rolling}
+                  pending={!applied}
+                />
+              ) : null}
+              {(proposal.mode === "START" || proposal.mode === "SCHEDULE") &&
+              proposal.calendarDraft &&
+              proposal.startDate &&
+              proposal.calendarTimeZone ? (
+                <CoachPlanDraftCalendarPreview
+                  windowOnly={Boolean(proposal.rolling)}
+                  generationWindow={
+                    proposal.rolling
+                      ? {
+                          from: proposal.rolling.generatedFrom,
+                          through: proposal.rolling.generatedThrough,
+                        }
+                      : undefined
+                  }
+                  draft={proposal.calendarDraft}
+                  startDate={
+                    proposal.calendarDraftStartDate ?? proposal.startDate
+                  }
+                  calendarTimeZone={proposal.calendarTimeZone}
+                  scheduleConstraints={proposal.scheduleConstraints}
+                />
+              ) : null}
+              <CoachScheduleRules proposal={proposal} />
+              {proposal.relatedCalendarConflicts?.length ? (
+                <div className="flex min-w-0 flex-col gap-2 rounded-md bg-muted px-3 py-3">
+                  <CoachCard.SectionTitle>
+                    {t("relatedCalendarConflicts")}
+                  </CoachCard.SectionTitle>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    {t("relatedCalendarUnmanaged")}
+                  </p>
+                  <ul className="flex min-w-0 list-disc flex-col gap-1 pl-4 text-xs leading-5">
+                    {proposal.relatedCalendarConflicts.map(
+                      (conflict, index) => (
+                        <li
+                          key={`${conflict.workoutId}:${conflict.code}:${index}`}
+                          className="min-w-0 break-words"
+                        >
+                          <time dateTime={conflict.date}>{conflict.date}</time>
+                          {" · "}
+                          <span>{conflict.name || t("workoutName")}</span>
+                        </li>
+                      ),
+                    )}
+                  </ul>
                 </div>
-              ))}
-            </div>
-            {proposal.facts.length ? (
-              <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-                <CoachCard.SectionTitle>{t("evidence")}</CoachCard.SectionTitle>
-                {proposal.facts.map((fact, index) => (
-                  <CoachCard.MetaRow
-                    key={`${fact.type}:${fact.label}:${index}`}
-                    label={fact.label}
+              ) : null}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {(proposal.mode === "START" || proposal.mode === "SCHEDULE"
+                  ? ([
+                      "total",
+                      "changed",
+                      "added",
+                      "deleted",
+                      "preserved",
+                      "protected",
+                    ] as const)
+                  : (["total", "changed", "preserved", "skipped"] as const)
+                ).map((key) => (
+                  <div
+                    key={key}
+                    className="rounded-md bg-background/80 px-3 py-2 dark:bg-background/45"
                   >
-                    {fact.value == null ? "—" : String(fact.value)}
-                  </CoachCard.MetaRow>
+                    <div className="text-mobile-caption pc:text-[11px] text-muted-foreground">
+                      {t(key)}
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold text-foreground">
+                      {proposal.counts[key]}
+                    </div>
+                  </div>
                 ))}
               </div>
-            ) : null}
-            <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-              {proposal.estimatedLoadDelta != null ? (
-                <CoachCard.MetaRow label={t("loadDelta")}>
-                  {proposal.estimatedLoadDelta > 0 ? "+" : ""}
-                  {proposal.estimatedLoadDelta}
-                </CoachCard.MetaRow>
+              {proposal.facts.length ? (
+                <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
+                  <CoachCard.SectionTitle>
+                    {t("evidence")}
+                  </CoachCard.SectionTitle>
+                  {proposal.facts.map((fact, index) => (
+                    <CoachCard.MetaRow
+                      key={`${fact.type}:${fact.label}:${index}`}
+                      label={fact.label}
+                    >
+                      {fact.value == null ? "—" : String(fact.value)}
+                    </CoachCard.MetaRow>
+                  ))}
+                </div>
               ) : null}
-              <CoachCard.MetaRow label={t("syncImpact")}>
-                {proposal.mode === "START" || proposal.mode === "SCHEDULE"
-                  ? t(
-                      proposal.mode === "SCHEDULE"
-                        ? "scheduleSyncImpact"
-                        : "startSyncImpact",
-                    )
-                  : proposal.syncImpact || "—"}
-              </CoachCard.MetaRow>
-              {proposal.effectiveFrom ? (
-                <CoachCard.MetaRow label={t("startDate")}>
-                  {proposal.effectiveFrom}
+              <div className="space-y-1.5 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
+                {proposal.estimatedLoadDelta != null ? (
+                  <CoachCard.MetaRow label={t("loadDelta")}>
+                    {proposal.estimatedLoadDelta > 0 ? "+" : ""}
+                    {proposal.estimatedLoadDelta}
+                  </CoachCard.MetaRow>
+                ) : null}
+                <CoachCard.MetaRow label={t("syncImpact")}>
+                  {proposal.mode === "START" || proposal.mode === "SCHEDULE"
+                    ? t(
+                        proposal.mode === "SCHEDULE"
+                          ? "scheduleSyncImpact"
+                          : "startSyncImpact",
+                      )
+                    : proposal.syncImpact || "—"}
                 </CoachCard.MetaRow>
-              ) : null}
-            </div>
-            <div className="space-y-3 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
-              <CoachCard.SectionTitle>
-                {t("changePreview")}
-              </CoachCard.SectionTitle>
-              {proposalRows.map((row, index) => (
+                {proposal.effectiveFrom ? (
+                  <CoachCard.MetaRow label={t("startDate")}>
+                    {proposal.effectiveFrom}
+                  </CoachCard.MetaRow>
+                ) : null}
+              </div>
+              <div className="space-y-3 rounded-md bg-background/80 px-3 py-3 dark:bg-background/45">
+                <CoachCard.SectionTitle>
+                  {t("changePreview")}
+                </CoachCard.SectionTitle>
+                {proposalRows.map((row, index) => (
+                  <div
+                    key={`${row.name}:${row.scheduledDate}:${index}`}
+                    className="pt-1 first:pt-0"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 text-xs font-medium text-foreground">
+                        {row.name}
+                        {row.protectedReason ? (
+                          <span className="ml-2 text-muted-foreground">
+                            {t(
+                              (
+                                {
+                                  OUTSIDE_RANGE: "protectedOutsideRange",
+                                  PLAN_STATUS: "protectedPlanStatus",
+                                  WORKOUT_STATUS: "protectedWorkoutStatus",
+                                  ACTIVITY_LINKED: "protectedActivityLinked",
+                                  HISTORY: "protectedHistory",
+                                  PENDING_SUPERSESSION: "protectedSuccessor",
+                                } as Record<string, string>
+                              )[row.protectedReason] ?? "protected",
+                            )}
+                          </span>
+                        ) : null}
+                        {row.changeKind ? (
+                          <span className="ml-2 text-muted-foreground">
+                            {t(
+                              (
+                                {
+                                  CHANGED: "changed",
+                                  ADDED: "added",
+                                  DELETED: "deleted",
+                                  PRESERVED: "preserved",
+                                } as const
+                              )[row.changeKind],
+                            )}
+                          </span>
+                        ) : null}
+                      </div>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {[row.scheduledDate, row.sportType]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    </div>
+                    <div className="mt-1 whitespace-pre-line text-xs leading-5 text-muted-foreground">
+                      {row.before} → {row.after}
+                    </div>
+                    {row.rationale ? (
+                      <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
+                        {row.rationale}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+                {proposal.rows.length > 10 ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-1.5"
+                    onClick={() => setShowAllProposalRows((value) => !value)}
+                  >
+                    {showAllProposalRows ? (
+                      <ChevronUp className="mr-1 h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronDown className="mr-1 h-3.5 w-3.5" />
+                    )}
+                    {showAllProposalRows ? t("showLess") : t("showAll")}
+                  </Button>
+                ) : null}
+              </div>
+              {proposal.warnings.map((warning) => (
                 <div
-                  key={`${row.name}:${row.scheduledDate}:${index}`}
-                  className="pt-1 first:pt-0"
+                  key={warning}
+                  className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 text-xs font-medium text-foreground">
-                      {row.name}
-                      {row.protectedReason ? (
-                        <span className="ml-2 text-muted-foreground">
-                          {t(
-                            (
-                              {
-                                OUTSIDE_RANGE: "protectedOutsideRange",
-                                PLAN_STATUS: "protectedPlanStatus",
-                                WORKOUT_STATUS: "protectedWorkoutStatus",
-                                ACTIVITY_LINKED: "protectedActivityLinked",
-                                HISTORY: "protectedHistory",
-                                PENDING_SUPERSESSION: "protectedSuccessor",
-                              } as Record<string, string>
-                            )[row.protectedReason] ?? "protected",
-                          )}
-                        </span>
-                      ) : null}
-                      {row.changeKind ? (
-                        <span className="ml-2 text-muted-foreground">
-                          {t(
-                            (
-                              {
-                                CHANGED: "changed",
-                                ADDED: "added",
-                                DELETED: "deleted",
-                                PRESERVED: "preserved",
-                              } as const
-                            )[row.changeKind],
-                          )}
-                        </span>
-                      ) : null}
-                    </div>
-                    <span className="shrink-0 text-[11px] text-muted-foreground">
-                      {[row.scheduledDate, row.sportType]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                  </div>
-                  <div className="mt-1 whitespace-pre-line text-xs leading-5 text-muted-foreground">
-                    {row.before} → {row.after}
-                  </div>
-                  {row.rationale ? (
-                    <div className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                      {row.rationale}
-                    </div>
-                  ) : null}
+                  {warning}
                 </div>
               ))}
-              {proposal.rows.length > 10 ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 px-1.5"
-                  onClick={() => setShowAllProposalRows((value) => !value)}
-                >
-                  {showAllProposalRows ? (
-                    <ChevronUp className="mr-1 h-3.5 w-3.5" />
-                  ) : (
-                    <ChevronDown className="mr-1 h-3.5 w-3.5" />
-                  )}
-                  {showAllProposalRows ? t("showLess") : t("showAll")}
-                </Button>
-              ) : null}
-            </div>
-            {proposal.warnings.map((warning) => (
-              <div
-                key={warning}
-                className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-200"
-              >
-                {warning}
-              </div>
-            ))}
-          </>
-        ) : null}
+            </>
+          ) : null)}
         {workoutDrafts.map((draft, index) => (
           <WorkoutDraftPreview
             key={`${asText(draft.name)}:${asNumber(draft.weekIndex)}:${asNumber(draft.dayIndex)}:${index}`}

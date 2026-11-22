@@ -129,6 +129,7 @@ export class CoachContextRepository {
         sourcePlanId: args.planId,
         mode: { in: ['START', 'SCHEDULE'] },
         appliedAt: null,
+        calendarAdjustmentId: null,
         ...(args.appliedDecisionId
           ? {
               OR: [

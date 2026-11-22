@@ -54,7 +54,7 @@ export function useAccessNavigationGuard() {
   );
   const [pricingOpen, setPricingOpen] = React.useState(false);
   return React.useMemo(
-    () => ({ guardNavigation, pricingOpen, setPricingOpen }),
+    () => ({ canAccess: true, guardNavigation, pricingOpen, setPricingOpen }),
     [guardNavigation, pricingOpen],
   );
 }
@@ -85,10 +85,12 @@ export function DeploymentUsagePage() {
 
 export function useManagedAiAccessRecovery(
   _reason: AiOperationErrorReason | null,
+  _options?: { retry?: () => void; retryDisabled?: boolean },
 ) {
   return React.useMemo(
     () => ({
       recoveryAction: undefined,
+      message: undefined,
       overlay: null,
     }),
     [],
@@ -174,6 +176,10 @@ export function DeploymentSocialAuth(_props: {
 export function recordDeploymentAuthMethodCompletion(_method?: string) {}
 
 export function DeploymentAccountBadge(_props: { compact?: boolean }) {
+  return null;
+}
+
+export function DeploymentAccountUsage() {
   return null;
 }
 
