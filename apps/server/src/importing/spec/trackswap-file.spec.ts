@@ -1,10 +1,13 @@
 import { describe, expect, it } from '@jest/globals';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { trackFileRecords } from '../track-file-conversion';
+import { mapTrackFileRequestError } from '../track-file-request-error';
 import {
   assertFITActivityRecordParity,
   decodeTrackFile,
+  encodeTrackCourse,
   inspectTrackFile,
   transcodeTrackFile,
 } from '../trackswap-file';
@@ -20,7 +23,9 @@ const gpx = Buffer.from(
   ].join(''),
 );
 
-// Small synthetic activity files encoded with Garmin's official SDK. No user data.
+// Small synthetic FIT files encoded with Garmin's official SDK. No user data.
+// The course has a valid 12-byte header so the test detects a raw file copy.
+// Two local record definitions contain the same fields in different orders.
 const fitFixture = (kind: string) =>
   readFileSync(join(__dirname, 'fixtures', `conversion-${kind}.fit`));
 
@@ -54,7 +59,86 @@ const metricTcx = (gps: boolean) =>
       '</Track></Lap></Activity></Activities></TrainingCenterDatabase>',
   );
 
+const serverDirectory = join(__dirname, '../../..');
+
+function readFitCourse(content: Buffer) {
+  const json = execFileSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `import { readFileSync } from 'node:fs';
+       import { Decoder, Profile, Stream } from '@garmin/fitsdk';
+       const decoder = new Decoder(Stream.fromBuffer(readFileSync(0)));
+       const integrity = decoder.checkIntegrity();
+       const navigationOrder = [];
+       const { messages, errors } = decoder.read({
+         mesgListener: (id) => {
+           if (id === Profile.MesgNum.RECORD) navigationOrder.push('record');
+           if (id === Profile.MesgNum.COURSE_POINT) navigationOrder.push('cue');
+         },
+       });
+       console.log(JSON.stringify({
+         integrity, errors: errors.length, type: messages.fileIdMesgs[0].type,
+         records: messages.recordMesgs, cues: messages.coursePointMesgs ?? [],
+         courses: messages.courseMesgs, laps: messages.lapMesgs, events: messages.eventMesgs,
+         navigationOrder,
+       }));`,
+    ],
+    { input: content, encoding: 'utf8', cwd: serverDirectory },
+  );
+  return JSON.parse(json) as {
+    integrity: boolean;
+    errors: number;
+    type: string;
+    navigationOrder: string[];
+    cues: Array<{ name: string; type: string; messageIndex: number }>;
+    courses?: Array<{ name: string; sport: string }>;
+    laps?: Array<{ totalDistance: number }>;
+    events?: Array<{ event: string; eventType: string }>;
+    records: Array<{
+      timestamp: string;
+      positionLat: number;
+      positionLong: number;
+      distance?: number;
+      speed?: number;
+    }>;
+  };
+}
+
 describe('TrackSwap server file boundary', () => {
+  it('re-encodes an existing FIT Course without changing route records or cues', async () => {
+    const input = fitFixture('course-with-cues');
+    const source = readFitCourse(input);
+    expect(source).toMatchObject({
+      integrity: true,
+      errors: 0,
+      type: 'course',
+      navigationOrder: ['record', 'record', 'cue', 'record', 'cue', 'record'],
+      courses: [{ name: 'Synthetic switchbacks', sport: 'cycling' }],
+      laps: [{ totalDistance: 38.75 }],
+      events: [
+        { event: 'timer', eventType: 'start' },
+        { event: 'timer', eventType: 'stopAll' },
+      ],
+      cues: [
+        { messageIndex: 0, type: 'left', name: 'Left turn' },
+        { messageIndex: 1, type: 'food', name: 'Aid station' },
+      ],
+    });
+    expect(source.records).toHaveLength(4);
+    const reencoded = await encodeTrackCourse(input);
+    expect(reencoded).not.toEqual(input);
+    expect(readFitCourse(reencoded)).toEqual(source);
+  });
+
+  it('rejects a FIT Course with a damaged file checksum', async () => {
+    const input = fitFixture('course-with-cues');
+    input[input.length - 1] ^= 1;
+    await expect(encodeTrackCourse(input)).rejects.toMatchObject({
+      code: 'DECODE_FAILED',
+    });
+  });
   it('rejects a FIT document when canonicalization drops decoded records', () => {
     expect(() =>
       assertFITActivityRecordParity({
@@ -232,6 +316,148 @@ describe('TrackSwap server file boundary', () => {
         recordCount: 1,
         coordinateCount: 1,
       },
+    });
+  });
+
+  it.each([
+    '1980-01-01T00:00:00.000Z',
+    '1998-07-03T21:24:15.999Z',
+    '2126-02-06T06:28:15.000Z',
+  ])(
+    'rejects an activity timestamp outside the FIT range as file input: %s',
+    async (timestamp) => {
+      const input = Buffer.from(
+        gpx.toString().replace('2026-07-20T00:00:00.000Z', timestamp),
+      );
+      const error = await transcodeTrackFile(input, 'fit').catch(
+        (reason: unknown) => reason,
+      );
+      const mapped = mapTrackFileRequestError(error, { targetFormat: 'fit' });
+      expect(mapped?.getStatus()).toBe(400);
+      expect(mapped?.getResponse()).toMatchObject({
+        code: 'TRACK_FILE_FIT_TIMESTAMPS_OUT_OF_RANGE',
+        data: { origin: 'UPLOADED_FILE' },
+      });
+    },
+  );
+
+  it('rejects an out-of-range lap timestamp even when the activity points are valid', async () => {
+    const input = Buffer.from(
+      metricTcx(true)
+        .toString()
+        .replace(
+          `<Lap StartTime="${sampleTimes[0]}">`,
+          '<Lap StartTime="1989-01-01T00:00:00.000Z">',
+        ),
+    );
+    await expect(transcodeTrackFile(input, 'fit')).rejects.toMatchObject({
+      code: 'FIT_TIMESTAMPS_OUT_OF_RANGE',
+    });
+  });
+
+  it.each([false, true])(
+    'encodes every route point with incomplete source times (mixed: %s)',
+    async (mixed) => {
+      const input = Buffer.from(
+        '<gpx version="1.1" creator="server-test"><rte>' +
+          '<rtept lat="31.2" lon="121.4" />' +
+          '<rtept lat="31.201" lon="121.4">' +
+          (mixed ? '<time>2026-01-01T00:00:00Z</time>' : '') +
+          '</rtept><rtept lat="31.202" lon="121.4" />' +
+          '</rte></gpx>',
+      );
+      const decoded = readFitCourse(await encodeTrackCourse(input));
+      expect(decoded).toMatchObject({
+        integrity: true,
+        errors: 0,
+        type: 'course',
+      });
+      expect(decoded.records).toHaveLength(3);
+      const firstTimestamp = Date.parse(decoded.records[0].timestamp);
+      decoded.records.forEach((record, index) => {
+        expect(record.positionLat * (180 / 2 ** 31)).toBeCloseTo(
+          31.2 + index * 0.001,
+          6,
+        );
+        expect(record.positionLong * (180 / 2 ** 31)).toBeCloseTo(121.4, 6);
+        expect(Date.parse(record.timestamp) - firstTimestamp).toBe(
+          index * 1000,
+        );
+        expect(record.speed).toBeUndefined();
+      });
+      expect(decoded.records[0].distance).toBe(0);
+      expect(decoded.records[1].distance).toBeGreaterThan(100);
+      expect(decoded.records[2].distance).toBeGreaterThan(
+        decoded.records[1].distance!,
+      );
+    },
+  );
+
+  it.each([2026, 1980])(
+    'preserves the intervals of a complete FIT Course timeline from %s',
+    async (year) => {
+      const input = Buffer.from(
+        multiPointGpx.toString().replaceAll('2026-', `${year}-`),
+      );
+      const decoded = readFitCourse(await encodeTrackCourse(input));
+      const start = Date.parse(decoded.records[0].timestamp);
+      expect(
+        decoded.records.map(({ timestamp }) => Date.parse(timestamp) - start),
+      ).toEqual([0, 10_000, 20_000]);
+      if (year === 2026) {
+        expect(decoded.records.map(({ timestamp }) => timestamp)).toEqual(
+          sampleTimes,
+        );
+      }
+      expect(decoded.records[0].distance).toBe(0);
+      expect(decoded.records[2].distance).toBeGreaterThan(
+        decoded.records[1].distance!,
+      );
+    },
+  );
+
+  it('encodes course points at the antimeridian without inventing distance between duplicates', async () => {
+    const input = Buffer.from(
+      '<gpx version="1.1" creator="server-test"><rte>' +
+        '<rtept lat="40" lon="179.99999995" />'.repeat(2) +
+        '</rte></gpx>',
+    );
+    const decoded = readFitCourse(await encodeTrackCourse(input));
+    expect(decoded.records).toHaveLength(2);
+    for (const record of decoded.records) {
+      expect(Math.abs(record.positionLong * (180 / 2 ** 31))).toBeCloseTo(
+        180,
+        6,
+      );
+      expect(record.distance).toBe(0);
+    }
+  });
+
+  it('rejects a route whose cumulative distance would wrap in FIT', async () => {
+    const input = Buffer.from(
+      '<gpx version="1.1" creator="server-test"><rte>' +
+        '<rtept lat="0" lon="0" /><rtept lat="0" lon="-180" />'.repeat(2) +
+        '</rte></gpx>',
+    );
+    const error = await encodeTrackCourse(input).catch(
+      (reason: unknown) => reason,
+    );
+    const mapped = mapTrackFileRequestError(error, { targetFormat: 'fit' });
+    expect(mapped?.getStatus()).toBe(400);
+    expect(mapped?.getResponse()).toMatchObject({
+      code: 'TRACK_FILE_COURSE_DISTANCE_OUT_OF_RANGE',
+    });
+  });
+
+  it('reports a missing course geometry as file input', async () => {
+    const error = await encodeTrackCourse(fitFixture('indoor')).catch(
+      (reason: unknown) => reason,
+    );
+    const mapped = mapTrackFileRequestError(error, { targetFormat: 'fit' });
+    expect(mapped?.getStatus()).toBe(400);
+    expect(mapped?.getResponse()).toMatchObject({
+      code: 'TRACK_FILE_COURSE_COORDINATES_REQUIRED',
+      data: { origin: 'UPLOADED_FILE' },
     });
   });
 

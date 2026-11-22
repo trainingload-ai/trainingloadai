@@ -5,12 +5,29 @@ import type {
   TrackFileMetric,
 } from '@shared/track-file-contract';
 
+const FIT_EPOCH_MS = Date.UTC(1989, 11, 31);
+const FIT_ABSOLUTE_TIMESTAMP_MIN_MS = FIT_EPOCH_MS + 0x10000000 * 1000;
+const FIT_INVALID_TIMESTAMP_MS = FIT_EPOCH_MS + 0xffffffff * 1000;
+
+function isFitTimestampInRange(
+  timestamp: Date | undefined,
+  sourceFormat?: TrackFileFormat,
+): boolean {
+  if (!timestamp) return false;
+  const millis = new Date(timestamp).getTime();
+  // A decoded FIT file may already use relative timestamps.
+  const minimum =
+    sourceFormat === 'fit' ? FIT_EPOCH_MS : FIT_ABSOLUTE_TIMESTAMP_MIN_MS;
+  return millis >= minimum && millis < FIT_INVALID_TIMESTAMP_MS;
+}
+
 export class TrackFileConversionError extends Error {
   constructor(
     readonly code:
       | 'GPX_COORDINATES_REQUIRED'
       | 'RECORDS_REQUIRED'
       | 'TIMESTAMPS_REQUIRED'
+      | 'FIT_TIMESTAMPS_OUT_OF_RANGE'
       | 'OUTPUT_INVALID',
     readonly reason: string,
   ) {
@@ -47,6 +64,7 @@ export function hasTrackCoordinates(record: ActivityRecordType): boolean {
 export function assertTrackFileConvertible(
   file: FileType,
   target: TrackFileFormat,
+  sourceFormat?: TrackFileFormat,
 ): void {
   const records = trackFileRecords(file);
   if (records.length === 0) {
@@ -73,6 +91,27 @@ export function assertTrackFileConvertible(
       'TIMESTAMPS_REQUIRED',
       'Target format requires timestamps for every point',
     );
+  }
+  if (target === 'fit') {
+    const activities = file.activities ?? [];
+    const laps = activities.length
+      ? activities.flatMap((activity) => activity.laps ?? [])
+      : (file.routes ?? []);
+    if (
+      records.some(
+        ({ timestamp }) => !isFitTimestampInRange(timestamp, sourceFormat),
+      ) ||
+      [...activities, ...laps].some(({ startTime, timestamp }) =>
+        [startTime, timestamp].some(
+          (time) => time != null && !isFitTimestampInRange(time, sourceFormat),
+        ),
+      )
+    ) {
+      throw new TrackFileConversionError(
+        'FIT_TIMESTAMPS_OUT_OF_RANGE',
+        'FIT cannot represent one or more activity timestamps',
+      );
+    }
   }
 }
 
