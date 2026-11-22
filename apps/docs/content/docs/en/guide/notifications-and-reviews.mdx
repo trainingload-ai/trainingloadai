@@ -18,7 +18,7 @@ Use notifications to check import results and completed reviews. With review aut
 
 ## Notification types
 
-Notifications can include general system messages and training-review digests. Import dialogs may also tell you that a notification will arrive when a background batch completes, so you do not need to keep the dialog open.
+Notifications can include general system messages, updates to continuous training plans, and completed training reviews. Import dialogs may also tell you that a notification will arrive when a background batch completes, so you do not need to keep the dialog open.
 
 From Notifications you can:
 
@@ -27,6 +27,16 @@ From Notifications you can:
 - Mark all notifications as read.
 
 Marking a notification read does not delete the underlying activity, plan, or coach session.
+
+## Read a training review
+
+Daily reviews list the previous day's activities, weekly reviews summarize the last completed week by sport, and monthly reviews group the last completed calendar month by week. When available, coach insights highlight what went well, what to watch, and one focus for the next period. Select a referenced activity to check the original record.
+
+Weekly reviews also show training days, average session duration, and training load when available. Multiple sessions on the same day count as one training day.
+
+Sleep duration, HRV, and resting heart rate appear when records are available. Daily reviews use the following day's recovery records and your recent baseline when it can be calculated. Weekly and monthly reviews show how many days were recorded and compare with the previous period when the readings are comparable.
+
+On web, paired bars compare the two periods. The tables retain the values and show percentage change for session count, duration, and comparable recovery metrics when the previous value is above zero.
 
 ## Configure review automation
 
@@ -62,7 +72,7 @@ Before relying on automation:
 
 ## Manually trigger a review
 
-Where the product exposes manual review controls, you can request daily, weekly, or monthly review work without changing the automation schedule. Review jobs run asynchronously; wait for completion rather than submitting repeated triggers.
+Where the product exposes manual review controls, you can request a review for the last completed day, week, or month without changing the automation schedule. Review jobs run in the background. Wait for completion before submitting another request.
 
 ## Verify success
 

@@ -49,6 +49,15 @@ or proportions, invalid pairings, and isolated web crops fail the check.
 `pending` is for unpublished capture work;
 it must not be used as a published substitute for an image.
 
+Generate the Web home, plan, coach, and calendar guide PNGs with the existing
+capture fixture. Review the captures and convert them to WebP before registering
+them in the manifest.
+
+```sh
+DOCS_CAPTURE_DIRECTORY="$(mktemp -d)" pnpm --dir apps/client exec playwright test \
+  --config=playwright.marketing-5k.config.ts --grep 'documentation screenshots'
+```
+
 The entire screenshot group is one keyboard-accessible Demo link. Do not add an
 image lightbox, Preview overlay, nested link, or “View original image” action.
 Center the description, operation paths, and Demo hint below the image. Keep

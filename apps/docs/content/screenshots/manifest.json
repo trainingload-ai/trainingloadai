@@ -13,17 +13,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/",
-      "state": "Web home with synthetic current plan, advice, scheduled workout, weekly load and current status; full application viewport including navigation",
+      "state": "Home with the workspace sidebar, today’s workout and synthetic current training state",
       "asset": "docs/daily/en/getting-started-home.webp",
       "localizedAssets": {
         "en": "docs/daily/en/getting-started-home.webp",
         "zh": "docs/daily/zh/getting-started-home.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/getting-started-home-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/getting-started-home-dark.webp",
@@ -107,17 +107,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/",
-      "state": "Home workspace showing plan, recent activity, and training state",
+      "state": "Home with the workspace sidebar, today’s workout and synthetic current training state",
       "asset": "docs/daily/en/getting-started-home.webp",
       "localizedAssets": {
         "en": "docs/daily/en/getting-started-home.webp",
         "zh": "docs/daily/zh/getting-started-home.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/getting-started-home-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/getting-started-home-dark.webp",
@@ -245,8 +245,8 @@
       ],
       "companionId": "mobile-permission-sources",
       "navigation": {
-        "en": "Top-right avatar → Third Party Connections",
-        "zh": "右上角头像 → 第三方连接"
+        "en": "Sidebar account menu → Account → Third Party Connections",
+        "zh": "侧栏底部账号菜单 → 账户 → 第三方连接"
       }
     },
     {
@@ -255,17 +255,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/activities/17921623926005309429",
-      "state": "First device lap selected (0:00–7:23), range statistics and route highlight; empty Elevation chart removed via UI",
+      "state": "First device lap from 0:00 to 8:00 selected, with range statistics and route highlight",
       "asset": "docs/activities/en/activity-timeline-selection.webp",
       "localizedAssets": {
         "en": "docs/activities/en/activity-timeline-selection.webp",
         "zh": "docs/activities/zh/activity-timeline-selection.webp"
       },
       "viewport": "1280x1200",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 1200",
-      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/activities/en/activity-timeline-selection-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/activities/en/activity-timeline-selection-dark.webp",
@@ -282,17 +282,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/activities/17921623926005309429",
-      "state": "Timeline in full-activity range, first laps visible with horizontal scrolling; empty Elevation chart removed via UI",
+      "state": "Full synthetic interval run timeline with device laps and recorded sensor series",
       "asset": "docs/activities/en/activity-timeline-full.webp",
       "localizedAssets": {
         "en": "docs/activities/en/activity-timeline-full.webp",
         "zh": "docs/activities/zh/activity-timeline-full.webp"
       },
       "viewport": "1280x1200",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 1200",
-      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/activities/en/activity-timeline-full-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/activities/en/activity-timeline-full-dark.webp",
@@ -309,17 +309,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/plans/create/manual",
-      "state": "Manual workout dialog with sport selector, structured builder, notes, and preview",
+      "state": "Workout editor opened from a day in the manual plan schedule",
       "asset": "docs/captures/en/manual-workout-editor.webp",
       "localizedAssets": {
         "en": "docs/captures/en/manual-workout-editor.webp",
         "zh": "docs/captures/zh/manual-workout-editor.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/manual-workout-editor-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/manual-workout-editor-dark.webp",
@@ -336,17 +336,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/activities/17921623926005309429",
-      "state": "Overview with summary, route and analysis tabs",
+      "state": "Synthetic interval run showing activity summary, planned workout link, route, and analysis tabs",
       "asset": "docs/activities/en/activity-detail-review.webp",
       "localizedAssets": {
         "en": "docs/activities/en/activity-detail-review.webp",
         "zh": "docs/activities/zh/activity-detail-review.webp"
       },
       "viewport": "1280x1200",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 1200",
-      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/activities/en/activity-detail-review-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/activities/en/activity-detail-review-dark.webp",
@@ -392,17 +392,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/",
-      "state": "Same synthetic Web home as the first-use guide; native mobile controls are described separately",
+      "state": "Home with the workspace sidebar, today’s workout and synthetic current training state",
       "asset": "docs/daily/en/getting-started-home.webp",
       "localizedAssets": {
         "en": "docs/daily/en/getting-started-home.webp",
         "zh": "docs/daily/zh/getting-started-home.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/getting-started-home-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/getting-started-home-dark.webp",
@@ -420,17 +420,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/calendar",
-      "state": "Synthetic calendar on 2026-10-30 with one planned workout and one recorded activity; Training tab selected",
+      "state": "Monthly calendar with booked workouts, recorded activity and the Training tab for the selected date",
       "asset": "docs/daily/en/calendar-plan-actual.webp",
       "localizedAssets": {
         "en": "docs/daily/en/calendar-plan-actual.webp",
         "zh": "docs/daily/zh/calendar-plan-actual.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/calendar-plan-actual-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/calendar-plan-actual-dark.webp",
@@ -503,17 +503,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/ai-coach",
-      "state": "Activity or plan review conversation showing evidence, recommendation, and a confirmation card",
+      "state": "Coach conversation reviewing a synthetic training week, with the workspace sidebar",
       "asset": "docs/captures/en/ai-coach-contextual-review.webp",
       "localizedAssets": {
         "en": "docs/captures/en/ai-coach-contextual-review.webp",
         "zh": "docs/captures/zh/ai-coach-contextual-review.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/ai-coach-contextual-review-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/ai-coach-contextual-review-dark.webp",
@@ -558,17 +558,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/plan",
-      "state": "Active plan detail showing status, week structure, and expected-versus-actual load",
+      "state": "Current training cycle, planned and recorded load, and today’s workout",
       "asset": "docs/captures/en/plan-active-summary.webp",
       "localizedAssets": {
         "en": "docs/captures/en/plan-active-summary.webp",
         "zh": "docs/captures/zh/plan-active-summary.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/plan-active-summary-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/plan-active-summary-dark.webp",
@@ -586,17 +586,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/plans/create",
-      "state": "Full AI plan-creation page with sport, goal, training schedule, and strength preferences",
+      "state": "AI plan creation form with sport, training intent, and a plan brief",
       "asset": "docs/captures/en/plan-create-paths.webp",
       "localizedAssets": {
         "en": "docs/captures/en/plan-create-paths.webp",
         "zh": "docs/captures/zh/plan-create-paths.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/plan-create-paths-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/plan-create-paths-dark.webp",
@@ -613,17 +613,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/plan",
-      "state": "Current plan showing today's workout, status controls, one linked completed activity, and expected-versus-actual load",
+      "state": "Current training cycle, complete workout list and today’s workout",
       "asset": "docs/captures/en/plan-active-summary.webp",
       "localizedAssets": {
         "en": "docs/captures/en/plan-active-summary.webp",
         "zh": "docs/captures/zh/plan-active-summary.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/plan-active-summary-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/plan-active-summary-dark.webp",
@@ -669,17 +669,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/pmc",
-      "state": "Synthetic running fixture with recorded history, current cards and plan/habit-based forecast; Form selected",
+      "state": "Recorded running load and plan- and habit-based forecast with Form selected",
       "asset": "docs/analysis/en/pmc-forecast-overview.webp",
       "localizedAssets": {
         "en": "docs/analysis/en/pmc-forecast-overview.webp",
         "zh": "docs/analysis/zh/pmc-forecast-overview.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/analysis/en/pmc-forecast-overview-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/analysis/en/pmc-forecast-overview-dark.webp",
@@ -696,17 +696,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/pmc",
-      "state": "Same synthetic running fixture; Fitness selected and keyboard inspection seven days ahead with load basis in tooltip",
+      "state": "Fitness selected with a future date and projected load displayed in the chart tooltip",
       "asset": "docs/analysis/en/pmc-forecast-date.webp",
       "localizedAssets": {
         "en": "docs/analysis/en/pmc-forecast-date.webp",
         "zh": "docs/analysis/zh/pmc-forecast-date.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "apps/client/e2e/fixtures/pmc-projection.ts (ready, RUN, AUTO; 2026-11-11)",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/analysis/en/pmc-forecast-date-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/analysis/en/pmc-forecast-date-dark.webp",
@@ -723,17 +723,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/pmc",
-      "state": "Public Demo as captured; recorded history remains visible and next-day tooltip verified No forecast available",
+      "state": "Recorded load with a future date that has no available forecast",
       "asset": "docs/analysis/en/pmc-forecast-unavailable.webp",
       "localizedAssets": {
         "en": "docs/analysis/en/pmc-forecast-unavailable.webp",
         "zh": "docs/analysis/zh/pmc-forecast-unavailable.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/analysis/en/pmc-forecast-unavailable-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/analysis/en/pmc-forecast-unavailable-dark.webp",
@@ -804,17 +804,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/ai-coach",
-      "state": "Plan-aware AI Coach conversation with evidence, one conservative workout adjustment, and an unconfirmed action card",
+      "state": "Coach conversation with a schedule adjustment open in the workout calendar",
       "asset": "docs/captures/en/ai-adjustment-confirmation.webp",
       "localizedAssets": {
         "en": "docs/captures/en/ai-adjustment-confirmation.webp",
         "zh": "docs/captures/zh/ai-adjustment-confirmation.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/ai-adjustment-confirmation-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/ai-adjustment-confirmation-dark.webp",
@@ -887,17 +887,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/analysis",
-      "state": "Synthetic athlete signed in; Analysis hub shows training and performance groups, searchable available tools, and the Progression card marked Coming soon",
+      "state": "Training Tools with training and performance groups, search, and the Progression card marked Soon",
       "asset": "docs/captures/en/analysis-hub-tools.webp",
       "localizedAssets": {
         "en": "docs/captures/en/analysis-hub-tools.webp",
         "zh": "docs/captures/zh/analysis-hub-tools.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "dataSource": "Public Trainingload.ai Demo, synthetic athlete; complete application viewport",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/analysis-hub-tools-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/analysis-hub-tools-dark.webp",
@@ -1312,17 +1312,17 @@
       "platform": "web",
       "status": "ready",
       "route": "/calendar",
-      "state": "Same synthetic date and records, with Activities tab selected",
+      "state": "The same calendar date with the Activities tab selected",
       "asset": "docs/daily/en/calendar-activity-details.webp",
       "localizedAssets": {
         "en": "docs/daily/en/calendar-activity-details.webp",
         "zh": "docs/daily/zh/calendar-activity-details.webp"
       },
       "viewport": "1280x960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
       "aspectRatio": "1280 / 960",
-      "dataSource": "apps/client/e2e/marketing-5k-preview.spec.ts and today-suggestion-lifecycle.spec.ts; synthetic 2026-10-30 scenario with complete workout structures",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/calendar-activity-details-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/calendar-activity-details-dark.webp",
@@ -1335,22 +1335,76 @@
       "companionId": "calendar-overview-mobile"
     },
     {
+      "id": "calendar-adjustment-draft",
+      "article": "guide/calendar",
+      "platform": "web",
+      "status": "ready",
+      "route": "/calendar",
+      "asset": "docs/daily/en/calendar-adjustment-draft.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/calendar-adjustment-draft.webp",
+        "zh": "docs/daily/zh/calendar-adjustment-draft.webp"
+      },
+      "darkAsset": "docs/daily/en/calendar-adjustment-draft-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/calendar-adjustment-draft-dark.webp",
+        "zh": "docs/daily/zh/calendar-adjustment-draft-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "state": "Calendar adjustment editor with the original and proposed dates marked before review",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data"
+    },
+    {
+      "id": "calendar-adjustment-entry",
+      "article": "guide/calendar",
+      "platform": "web",
+      "status": "ready",
+      "route": "/calendar",
+      "asset": "docs/daily/en/calendar-adjustment-entry.webp",
+      "localizedAssets": {
+        "en": "docs/daily/en/calendar-adjustment-entry.webp",
+        "zh": "docs/daily/zh/calendar-adjustment-entry.webp"
+      },
+      "darkAsset": "docs/daily/en/calendar-adjustment-entry-dark.webp",
+      "localizedDarkAssets": {
+        "en": "docs/daily/en/calendar-adjustment-entry-dark.webp",
+        "zh": "docs/daily/zh/calendar-adjustment-entry-dark.webp"
+      },
+      "capturedThemes": [
+        "light",
+        "dark"
+      ],
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "state": "Calendar date context menu with Adjust schedule visible",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data"
+    },
+    {
       "id": "activity-import-entry",
       "article": "guide/connect-data",
       "platform": "web",
       "status": "ready",
       "route": "/activities",
-      "state": "Full Activities workspace with file-upload dialog open, before selecting files or submitting an upload",
+      "state": "Activities page with the activity file upload dialog open",
       "asset": "docs/daily/en/activity-import-entry.webp",
       "localizedAssets": {
         "en": "docs/daily/en/activity-import-entry.webp",
         "zh": "docs/daily/zh/activity-import-entry.webp"
       },
-      "viewport": "1280x900",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
-      "aspectRatio": "1280 / 900",
-      "dataSource": "apps/client/e2e/fixtures/coach-page.ts; actual file upload dialog",
+      "viewport": "1280x960",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/activity-import-entry-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/activity-import-entry-dark.webp",
@@ -1394,18 +1448,18 @@
       "article": "guide/upload-activity-files",
       "platform": "web",
       "route": "/activities",
-      "state": "Full Activities page before opening the upload dialog, including app navigation and the file-upload action",
+      "state": "Activities page with the file upload action visible",
       "status": "ready",
       "asset": "docs/daily/en/activity-upload-location.webp",
       "localizedAssets": {
         "en": "docs/daily/en/activity-upload-location.webp",
         "zh": "docs/daily/zh/activity-upload-location.webp"
       },
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
-      "viewport": "1280x900",
-      "aspectRatio": "1280 / 900",
-      "dataSource": "Real web application with synthetic Playwright responses from the client E2E fixtures; complete application viewport",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
+      "viewport": "1280x960",
+      "aspectRatio": "1280 / 960",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/daily/en/activity-upload-location-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/daily/en/activity-upload-location-dark.webp",
@@ -1422,7 +1476,7 @@
       "platform": "web",
       "status": "ready",
       "route": "/plans/create/manual",
-      "state": "Full manual-plan schedule before opening the workout editor; day-level Add Session actions and navigation visible",
+      "state": "Manual plan schedule grid with the add-session action on each day",
       "asset": "docs/captures/en/manual-plan-location.webp",
       "localizedAssets": {
         "en": "docs/captures/en/manual-plan-location.webp",
@@ -1430,9 +1484,9 @@
       },
       "viewport": "1280x960",
       "aspectRatio": "1280 / 960",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
-      "dataSource": "Real web manual-plan builder with synthetic E2E data; full application viewport",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.27",
+      "dataSource": "Current Public Client rendered with synthetic Playwright training data",
       "darkAsset": "docs/captures/en/manual-plan-location-dark.webp",
       "localizedDarkAssets": {
         "en": "docs/captures/en/manual-plan-location-dark.webp",
@@ -1609,7 +1663,7 @@
       "platform": "mobile",
       "status": "ready",
       "route": "/calendar",
-      "state": "Calendar with synthetic planned and recorded training",
+      "state": "Native calendar agenda with a planned synthetic run on the selected date",
       "asset": "docs/mobile/en/calendar-overview-mobile.webp",
       "localizedAssets": {
         "en": "docs/mobile/en/calendar-overview-mobile.webp",
@@ -1617,8 +1671,8 @@
       },
       "viewport": "1206x2622",
       "aspectRatio": "1206 / 2622",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.13",
       "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
       "darkAsset": "docs/mobile/en/calendar-overview-mobile-dark.webp",
       "localizedDarkAssets": {
@@ -1640,7 +1694,7 @@
       "platform": "mobile",
       "status": "ready",
       "route": "/ai-coach",
-      "state": "Coach conversation reviewing planned training",
+      "state": "Native coach conversation with a synthetic load chart and planned tempo workout",
       "asset": "docs/mobile/en/coach-review-mobile.webp",
       "localizedAssets": {
         "en": "docs/mobile/en/coach-review-mobile.webp",
@@ -1648,8 +1702,8 @@
       },
       "viewport": "1206x2622",
       "aspectRatio": "1206 / 2622",
-      "capturedAt": "2026-11-13",
-      "sourceVersion": "1.1.22",
+      "capturedAt": "2026-11-22",
+      "sourceVersion": "1.1.13",
       "dataSource": "Real native mobile components running isolated synthetic App Store demo transport",
       "darkAsset": "docs/mobile/en/coach-review-mobile-dark.webp",
       "localizedDarkAssets": {
