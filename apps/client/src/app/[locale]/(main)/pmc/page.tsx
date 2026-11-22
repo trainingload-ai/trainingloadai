@@ -82,7 +82,10 @@ export default function PMCPage() {
         <h1 className="hidden text-lg font-semibold md:block">{t("title")}</h1>
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Select value={scope} onValueChange={setScope}>
-            <SelectTrigger className="w-32" aria-label={t("scopeLabel")}>
+            <SelectTrigger
+              className="w-32 border-transparent bg-muted hover:bg-muted/75"
+              aria-label={t("scopeLabel")}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -72,8 +72,8 @@ export default function PMCProjectionChart({
       load: [
         metric.x,
         stress.actual,
-        stress.future.map((v, i) =>
-          points[i]?.date === result.today ? null : v,
+        stress.future.map((value, index) =>
+          value === 0 || points[index]?.date === result.today ? null : value,
         ),
       ] as uPlot.AlignedData,
     };
@@ -85,6 +85,7 @@ export default function PMCProjectionChart({
       const tonal = (alpha: number) =>
         `color-mix(in srgb, ${fg} ${alpha * 100}%, transparent)`;
       const metricColor = color(PMC_METRIC_TOKENS[focus]);
+      const loadColor = color("--load");
       const todayX = Date.parse(`${result.today}T00:00:00Z`) / 1000;
       const x = data.main[0];
       const line = (
@@ -154,7 +155,7 @@ export default function PMCProjectionChart({
           },
           {
             stroke: fg,
-            grid: { show: panel === "main", stroke: tonal(0.15), width: 1 },
+            grid: { show: panel === "main", stroke: tonal(0.12), width: 1 },
             ticks: { show: false },
             font: "11px sans-serif",
             size: 42,
@@ -175,15 +176,15 @@ export default function PMCProjectionChart({
                 {
                   label: t("actual"),
                   stroke: "transparent",
-                  fill: tonal(0.27),
-                  paths: uPlot.paths.bars!({ size: [0.65, 10] }),
+                  fill: loadColor,
+                  paths: uPlot.paths.bars!({ size: [0.7, 12] }),
                   points: { show: false },
                 },
                 {
                   label: t("projected"),
-                  stroke: tonal(0.35),
-                  fill: tonal(0.06),
-                  paths: uPlot.paths.bars!({ size: [0.65, 10] }),
+                  stroke: loadColor,
+                  fill: `color-mix(in srgb, ${loadColor} 12%, transparent)`,
+                  paths: uPlot.paths.bars!({ size: [0.7, 12] }),
                   points: { show: false },
                 },
               ],
@@ -200,7 +201,15 @@ export default function PMCProjectionChart({
             (u) => {
               const { ctx, bbox } = u;
               const xpos = u.valToPos(todayX, "x", true);
+              const ratio = window.devicePixelRatio || 1;
               ctx.save();
+              ctx.fillStyle = tonal(0.04);
+              ctx.fillRect(
+                xpos,
+                bbox.top,
+                bbox.left + bbox.width - xpos,
+                bbox.height,
+              );
               if (panel === "main" && focus === "tsb") {
                 const min = u.scales.y.min ?? 0,
                   max = u.scales.y.max ?? 1;
@@ -210,10 +219,11 @@ export default function PMCProjectionChart({
                   if (low >= high) continue;
                   const top = u.valToPos(high, "y", true),
                     bottom = u.valToPos(low, "y", true);
-                  ctx.globalAlpha = 0.065;
-                  ctx.fillStyle = color(zone.token);
-                  ctx.fillRect(bbox.left, top, bbox.width, bottom - top);
-                  const ratio = window.devicePixelRatio || 1;
+                  if (zone.label !== "neutral") {
+                    ctx.globalAlpha = 0.07;
+                    ctx.fillStyle = color(zone.token);
+                    ctx.fillRect(bbox.left, top, bbox.width, bottom - top);
+                  }
                   if (bottom - top >= 18 * ratio) {
                     ctx.globalAlpha = 1;
                     ctx.font = `${11 * ratio}px sans-serif`;
@@ -228,14 +238,6 @@ export default function PMCProjectionChart({
                   }
                 }
               }
-              ctx.globalAlpha = 1;
-              ctx.fillStyle = tonal(0.025);
-              ctx.fillRect(
-                xpos,
-                bbox.top,
-                bbox.left + bbox.width - xpos,
-                bbox.height,
-              );
               ctx.restore();
             },
           ],
@@ -332,12 +334,17 @@ export default function PMCProjectionChart({
                   setSelectedMetric(value);
               }}
               size="sm"
-              variant="outline"
+              spacing={0.5}
+              className="bg-muted p-0.5"
               aria-label={t("metricSwitch")}
               data-testid="pmc-metric-switch"
             >
               {(["tsb", "ctl", "atl"] as const).map((metric) => (
-                <ToggleGroupItem key={metric} value={metric}>
+                <ToggleGroupItem
+                  key={metric}
+                  value={metric}
+                  className="h-7 cursor-pointer rounded-compact text-xs text-muted-foreground transition-[background-color,color,box-shadow] hover:text-foreground data-[state=on]:bg-card data-[state=on]:shadow-sm"
+                >
                   {t(`metricNames.${metric}`)}
                 </ToggleGroupItem>
               ))}
@@ -367,7 +374,7 @@ export default function PMCProjectionChart({
         </span>
       </div>
       <div
-        className="relative overflow-hidden rounded-surface bg-neutral-50/80 dark:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative overflow-hidden rounded-surface bg-neutral-100 pb-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-muted/45"
         tabIndex={0}
         role="group"
         aria-label={`${t("chartTitle")}. ${t("keyboardHint")}${focus === "tsb" ? `. ${PMC_TSB_ZONES.map((zone) => zoneText(zone.label)).join("; ")}` : ""}`}
@@ -463,9 +470,22 @@ export default function PMCProjectionChart({
         </div>
         {showLoad ? (
           <>
-            <p className="px-4 pt-2 text-xs text-muted-foreground">
-              {t("load")}
-            </p>
+            <div className="mx-4 mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border/70 pt-2 text-xs">
+              <p className="font-medium">{t("load")}</p>
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 rounded-xs bg-load" aria-hidden />
+                  {t("actual")}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="size-2 rounded-xs border border-load bg-load/12"
+                    aria-hidden
+                  />
+                  {t("projected")}
+                </span>
+              </div>
+            </div>
             <div
               ref={load.ref}
               className="h-[105px] w-full min-w-0 md:h-[110px]"
