@@ -68,6 +68,44 @@ const workouts = Array.from({ length: 18 }, (_, index) => {
   };
 });
 
+test("active plan menu offers completion without deletion", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, "Desktop plan menu");
+  await page.clock.setFixedTime(new Date("2026-10-09T03:00:00Z"));
+  await openCoachFixture(page, undefined, { navigate: false });
+  await page.route("**/api/proxy/competition-impact/current*", (route) =>
+    route.fulfill({
+      json: { data: { result: { eventAssessments: [], combinedImpact: { conflicts: [] } } } },
+    }),
+  );
+  await page.route("**/api/proxy/plans/active", (route) =>
+    route.fulfill({
+      json: {
+        data: {
+          plan: {
+            id: planId,
+            title: "当前训练计划",
+            status: "ACTIVE",
+            periodWeeks: 6,
+            startDate: "2026-10-05",
+            endDate: "2026-11-15",
+            currentWeekIndex: 1,
+            currentDayIndex: 5,
+            capabilities: { delete: false },
+            workouts,
+          },
+        },
+      },
+    }),
+  );
+  await page.goto("/zh/plan", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "管理计划" }).click();
+  await expect(page.getByRole("menuitem", { name: "删除计划" })).toHaveCount(0);
+  await page.getByRole("menuitem", { name: "完成计划" }).click();
+  const dialog = page.getByRole("alertdialog", { name: "完成计划" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "取消" }).click();
+});
+
 async function openPlan(page: Page, status = "ACTIVE") {
   await page.clock.setFixedTime(new Date("2026-10-09T03:00:00Z"));
   await openCoachFixture(page);

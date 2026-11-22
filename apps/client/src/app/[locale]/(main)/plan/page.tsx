@@ -16,7 +16,6 @@ import {
   Sparkles,
   StopCircle,
   Target,
-  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -27,7 +26,7 @@ import { invalidateActivePlanAndPlanDetails } from "@/lib/query-invalidation";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
 import { useActivePlan } from "@/api/usePlans";
-import { useDeletePlan, useCompletePlan } from "@/api/usePlanMutations";
+import { useCompletePlan } from "@/api/usePlanMutations";
 import {
   isWorkoutPlannedOrInProgress,
   type PlanWorkout,
@@ -141,7 +140,6 @@ function getWeekdayLabelFromDate(t: TranslateFn, date: dayjs.Dayjs) {
   return t(`weekday.${keys[date.day()]}`);
 }
 
-type ManageAction = "complete" | "delete" | null;
 type PostponeAction =
   | { type: "today" }
   | { type: "single"; workout: DerivedWorkout }
@@ -1069,11 +1067,10 @@ export default function V2PlanPage() {
   const tWorkoutDialog = useTranslations("ViewWorkoutDialog.mobile");
   const locale = useLocale();
   useSetPageTitle(t("header.title"));
-  const [manageAction, setManageAction] = useState<ManageAction>(null);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const { active, isLoading } = useActivePlan(true);
   const { mutateAsync: completeAsync, isPending: completing } =
     useCompletePlan();
-  const { mutateAsync: deleteAsync, isPending: deleting } = useDeletePlan();
   const queryClient = useQueryClient();
   const {
     pendingWorkoutId: postponingWorkoutId,
@@ -1290,31 +1287,6 @@ export default function V2PlanPage() {
     setSelectedWeek(currentWeekIndex);
   }, [currentWeekIndex]);
 
-  const actionCopy =
-    manageAction === "complete"
-      ? {
-          title: t("manage.complete.title"),
-          description: t("manage.complete.description"),
-          confirm: t("manage.complete.confirm"),
-          pending: completing,
-          onConfirm: async () => {
-            if (!plan) return;
-            await completeAsync({ planId: plan.id });
-          },
-        }
-      : manageAction === "delete"
-        ? {
-            title: t("manage.delete.title"),
-            description: t("manage.delete.description"),
-            confirm: t("manage.delete.confirm"),
-            pending: deleting,
-            onConfirm: async () => {
-              if (!plan) return;
-              await deleteAsync({ planId: plan.id });
-            },
-          }
-        : null;
-
   if (isLoading) {
     return (
       <>
@@ -1379,18 +1351,10 @@ export default function V2PlanPage() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onSelect={() => setManageAction("complete")}
+                      onSelect={() => setCompleteDialogOpen(true)}
                     >
                       <StopCircle className="h-4 w-4" />
                       {t("manage.complete.menu")}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onSelect={() => setManageAction("delete")}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      {t("manage.delete.menu")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -1557,30 +1521,28 @@ export default function V2PlanPage() {
         </div>
 
         <AlertDialog
-          open={Boolean(manageAction)}
-          onOpenChange={(open) => {
-            if (!open) setManageAction(null);
-          }}
+          open={completeDialogOpen}
+          onOpenChange={setCompleteDialogOpen}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{actionCopy?.title}</AlertDialogTitle>
+              <AlertDialogTitle>{t("manage.complete.title")}</AlertDialogTitle>
               <AlertDialogDescription>
-                {actionCopy?.description}
+                {t("manage.complete.description")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={actionCopy?.pending}>
+              <AlertDialogCancel disabled={completing}>
                 {t("manage.cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
-                disabled={actionCopy?.pending}
+                disabled={completing}
                 onClick={async () => {
-                  await actionCopy?.onConfirm();
-                  setManageAction(null);
+                  await completeAsync({ planId: plan.id });
+                  setCompleteDialogOpen(false);
                 }}
               >
-                {actionCopy?.confirm ?? t("manage.confirm")}
+                {t("manage.complete.confirm")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

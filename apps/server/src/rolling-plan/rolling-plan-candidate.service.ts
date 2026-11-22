@@ -161,8 +161,9 @@ export class RollingPlanCandidateService {
           lang: input.lang,
           taskType: `ROLLING_PLAN_${input.kind}`,
           activeSkillName: 'rolling-plan',
-          funding: 'USER',
-          dedupeKey: `rolling-plan:${input.jobId}:${input.inputRevision}`,
+          funding: 'PLATFORM',
+          // Retries must not reuse a run created with the previous billing policy.
+          dedupeKey: `rolling-plan:platform:${input.jobId}:${input.inputRevision}`,
           triggerType: 'ROLLING_PLAN_JOB',
           triggerRef: input.jobId,
           allowedToolNames: ROLLING_PLAN_READ_TOOLS,
