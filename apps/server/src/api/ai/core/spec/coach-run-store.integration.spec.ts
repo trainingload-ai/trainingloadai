@@ -237,7 +237,7 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
       status: 'cancelled', activeAttemptId: null, pendingInteraction: null,
     });
     expect(await prisma.coachRunAttempt.findUniqueOrThrow({ where: { id: attemptId } })).toMatchObject({
-      status: 'cancelled', cancelRequestedAt: null,
+      status: 'cancelled', cancelRequestedAt: null, endedAt: expect.any(Date),
     });
   });
 
@@ -419,8 +419,7 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
       await prisma.coachRunAttempt.count({ where: { runId: run.id } }),
     ).toBe(1);
   });
-  async function ask() {
-    const { handle } = await store.begin(startArgs());
+  function presentQuestion(handle: CoachRunHandle) {
     handle.projector.consume({
       type: 'assistant',
       message: {
@@ -434,6 +433,11 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
         ],
       },
     });
+  }
+
+  async function ask() {
+    const { handle } = await store.begin(startArgs());
+    presentQuestion(handle);
     handle.projector.finish('awaiting_input');
     await store.checkpoint(handle, 'awaiting_input');
     return handle;
@@ -822,6 +826,74 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     expect(
       await prisma.coachRun.findUnique({ where: { id: runId } }),
     ).toMatchObject({ status: 'cancelled', activeAttemptId: null });
+  });
+
+  it('rejects stale actions after a question is cancelled and finalizes the new text turn', async () => {
+    const { handle: old } = await store.begin(startArgs());
+    presentQuestion(old);
+    const lateAnswer = answerArgs(old);
+    const { runId, attemptId } = old.projector.run;
+    await store.cancel('athlete', runId, attemptId);
+    old.projector.finish('cancelled');
+    await store.checkpoint(old, 'cancelled');
+
+    for (const retry of [startArgs(), startArgs()]) {
+      await expect(
+        store.begin({
+          ...retry,
+          command: { ...retry.command, kind: 'retry', runId, attemptId },
+        }),
+      ).rejects.toThrow('Coach attempt cannot be safely retried');
+    }
+    await expect(store.begin(lateAnswer)).rejects.toMatchObject({
+      status: 409,
+      response: { code: 'question_stale' },
+    });
+    expect(await prisma.coachRunAttempt.count()).toBe(1);
+
+    const prompt = 'Yes, please.';
+    const { handle: next } = await store.begin({
+      ...startArgs(),
+      prompt,
+      message: { content: [{ type: 'text', text: prompt }] },
+    });
+    const nextRun = next.projector.run;
+    expect(nextRun.runId).not.toBe(runId);
+    expect(next.sessionId).toBe(old.sessionId);
+    presentQuestion(next);
+    await store.checkpoint(next);
+    await store.cancel('athlete', nextRun.runId, nextRun.attemptId);
+    next.projector.finish('awaiting_input');
+    await expect(store.checkpoint(next, 'awaiting_input')).rejects.toThrow(
+      'user_cancelled',
+    );
+    next.projector.finish('cancelled');
+    await store.checkpoint(next, 'cancelled');
+
+    expect(
+      await prisma.coachRun.findUniqueOrThrow({
+        where: { id: nextRun.runId },
+        include: { attempts: true },
+      }),
+    ).toMatchObject({
+      status: 'cancelled',
+      activeAttemptId: null,
+      pendingInteraction: null,
+      attempts: [
+        {
+          id: nextRun.attemptId,
+          status: 'cancelled',
+          endedAt: expect.any(Date),
+          mutationStarted: false,
+        },
+      ],
+    });
+    const inputs = await prisma.aiCoachMessage.findMany({
+      where: { userId: old.userId, sessionId: old.sessionId, role: 'USER' },
+      orderBy: { sequence: 'asc' },
+      select: { content: true },
+    });
+    expect(inputs).toEqual([{ content: '训练建议' }, { content: prompt }]);
   });
 
   it('recovers only the expired attempt attached to the blocking operation', async () => {

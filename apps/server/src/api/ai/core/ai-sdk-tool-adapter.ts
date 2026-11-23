@@ -67,13 +67,24 @@ function asRecord(value: unknown): Record<string, unknown> {
   return {};
 }
 
+export function previewToolInputForLog(
+  providerToolName: string,
+  input: Record<string, unknown>,
+  maxChars: number,
+): string {
+  return providerToolName === 'ask_user_question'
+    ? '[omitted]'
+    : safeJsonPreview(input, maxChars);
+}
+
 function logUiSurfaceValidationFailure(args: {
   providerToolName: string;
   validation: { message: string; code?: string };
   input: Record<string, unknown>;
 }) {
   const { providerToolName, validation, input } = args;
-  const argsPreview = safeJsonPreview(
+  const argsPreview = previewToolInputForLog(
+    providerToolName,
     input,
     UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS,
   );
@@ -81,7 +92,7 @@ function logUiSurfaceValidationFailure(args: {
     ? input.questions.length
     : undefined;
   logger.warn(
-    `[AI][教练][工具] 参数不合法 name=${providerToolName} ${validation.message} code=${validation.code ?? 'none'} keys=${Object.keys(input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${argsPreview}`,
+    `[AI][coach][tool] Invalid input name=${providerToolName} ${validation.message} code=${validation.code ?? 'none'} keys=${Object.keys(input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${argsPreview}`,
   );
 }
 
@@ -157,7 +168,7 @@ async function executeCoachTool(args: {
 
   if (shouldLogToolDebug()) {
     logger.warn(
-      `[AI][教练][tool-debug] start name=${providerToolName} keys=${Object.keys(input).join(',') || '(empty)'} argsPreview=${safeJsonPreview(input, 1600)}`,
+      `[AI][coach][tool-debug] start name=${providerToolName} keys=${Object.keys(input).join(',') || '(empty)'} argsPreview=${previewToolInputForLog(providerToolName, input, 1600)}`,
     );
   }
 
@@ -190,7 +201,7 @@ async function executeCoachTool(args: {
   if (validation.ok === false) {
     if (shouldLogToolDebug()) {
       logger.warn(
-        `[AI][教练][tool-debug] validate_failed name=${providerToolName} code=${validation.code ?? 'none'} message=${validation.message} argsPreview=${safeJsonPreview(input, 1600)}`,
+        `[AI][coach][tool-debug] validate_failed name=${providerToolName} code=${validation.code ?? 'none'} message=${validation.message} argsPreview=${previewToolInputForLog(providerToolName, input, 1600)}`,
       );
     }
     if (

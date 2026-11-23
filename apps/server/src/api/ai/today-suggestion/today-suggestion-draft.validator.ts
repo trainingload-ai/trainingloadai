@@ -4,6 +4,7 @@ import {
   type TodaySuggestionRecommendationKind,
 } from '@shared/ai-today-suggestion-contract';
 import { CoachTaskResultValidationError } from '../core/coach-task-result-error';
+import { groundTodaySuggestionNumbers } from './today-suggestion-number-grounding';
 import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
@@ -203,6 +204,7 @@ export function validateTodaySuggestionDraftForProjection(
   projection: TodaySuggestionConstraintProjection,
 ): TodaySuggestionDraft {
   const draft = validateTodaySuggestionDraft(raw);
+  groundTodaySuggestionNumbers(draft, projection);
   const scheduledWorkout = todaySuggestionScheduledWorkout(projection, draft);
   if (draft.recommendation.kind === 'TRAIN') {
     const basis = draft.trainingBasis;

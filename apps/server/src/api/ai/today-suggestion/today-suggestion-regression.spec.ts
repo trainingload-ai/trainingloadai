@@ -876,3 +876,183 @@ describe('activity-first today suggestion regressions', () => {
     expect(agent.run).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('Report case 08: tomorrow workout duration and weekly load claims', () => {
+  const request = { userId: 'test-athlete', locale: 'en', allowAi: true };
+  const planName = 'Synthetic endurance ride';
+
+  beforeEach(() =>
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-15T23:00:00Z')),
+  );
+  afterEach(() => jest.useRealTimers());
+
+  async function deliver(
+    minutes: number,
+    change: number,
+    {
+      locale = 'en',
+      comparable = true,
+      direction = 'higher',
+      period = 'the same days last week',
+      detail = '',
+      summary = '',
+    } = {},
+  ) {
+    const { service, execution, agent } = harness();
+    execution.anchor.anchorDate = '2026-11-15';
+    execution.tomorrow.plannedWorkouts.push({
+      id: 'tomorrow-workout',
+      status: 'PLANNED',
+      scheduledDate: '2026-11-16',
+      name: planName,
+      plannedDurationSeconds: 3_960,
+      linkedActivities: [],
+    } as never);
+    Object.assign(execution.recentLoad, {
+      currentWeekLoad: 330,
+      previousWeekLoad: 300,
+      ...(comparable ? { weekToDateLoadChangePercent: 10 } : {}),
+      dailyLoadLast7d: [50, 50, 30, 60, 40, 50, 50],
+    });
+
+    const suggestionAgent = new TodaySuggestionAgentService({
+      runBackgroundCoachTask: async (task) => ({
+        result: task.validateResult({
+          headline: 'Recover today',
+          summary:
+            summary ||
+            (locale === 'de'
+              ? `Nutze den Abend zur Erholung. Deine Wochenlast liegt um ${String(change).replace('.', ',')} % höher als an den gleichen Tagen der letzten Woche.`
+              : `Use today for recovery. This week's recorded load is ${change}% ${direction} than on ${period}.`),
+          recommendation: {
+            kind: 'RECOVER',
+            details: [
+              detail ||
+                (locale === 'de'
+                  ? `Morgen: ${planName}, ${minutes} min mit 3 × 12 min.`
+                  : `Tomorrow: ${planName}, ${minutes} minutes.`),
+            ],
+          },
+          confidence: 'MEDIUM',
+          evidenceCodes: ['RECENT_ACTIVITY'],
+          preferredIntent: 'VIEW_TOMORROW',
+          secondaryIntents: [],
+        }),
+        runId: 'synthetic-run',
+        provider: 'test',
+        model: 'test-model',
+      }),
+    } as never);
+    agent.run.mockImplementationOnce((input) => suggestionAgent.run(input));
+
+    const delivered = await service.get({ ...request, locale });
+    const projection = agent.run.mock.calls[0][0].projection;
+    expect(projection.lightContext).toMatchObject({
+      tomorrowWorkouts: [{ name: planName, plannedDurationSeconds: 3_960 }],
+      load: { currentWeekLoad: 330, previousWeekLoad: 300 },
+    });
+    return delivered;
+  }
+
+  it('delivers the recovery suggestion when the claims match the projection', async () => {
+    const delivered = await deliver(66, 10);
+    expect(delivered.delivery.state).toBe('GENERATED');
+    expect(delivered.summary).toContain('10% higher');
+    expect(delivered.primaryIntent).toMatchObject({
+      type: 'VIEW_TOMORROW',
+      date: '2026-11-16',
+    });
+    expect(delivered.recommendation.details).toContain(
+      `Tomorrow: ${planName}, 66 minutes.`,
+    );
+  });
+
+  it('omits or corrects a tomorrow workout duration that disagrees with the projection', async () => {
+    const delivered = await deliver(71, 10);
+    expect(delivered.recommendation.kind).toBe('RECOVER');
+    expect(delivered.primaryIntent?.type).toBe('VIEW_TOMORROW');
+    const narrative = [
+      delivered.summary,
+      ...(delivered.recommendation.details ?? []),
+    ].join(' ');
+    expect(narrative).not.toMatch(/\b71\s*[-–]?\s*(?:minutes?|min|m)\b/i);
+  });
+
+  it('omits or corrects a weekly load comparison that disagrees with the projection', async () => {
+    const delivered = await deliver(66, 24);
+    expect(delivered.recommendation.kind).toBe('RECOVER');
+    expect(delivered.primaryIntent?.type).toBe('VIEW_TOMORROW');
+    const narrative = [
+      delivered.summary,
+      ...(delivered.recommendation.details ?? []),
+    ].join(' ');
+    expect(narrative).not.toMatch(/\b24(?:\s*%|\s+percent\b)/i);
+  });
+  it('preserves the German recovery advice, interval details and matching plan duration', async () => {
+    const delivered = await deliver(66, 10, { locale: 'de' });
+    expect(delivered.summary).toContain('10 % höher');
+    expect(delivered.recommendation.details).toContain(
+      `Morgen: ${planName}, 66 min mit 3 × 12 min.`,
+    );
+  });
+
+  it('drops unsupported German claims while preserving the action', async () => {
+    const delivered = await deliver(71, 24.5, { locale: 'de' });
+    expect(delivered.summary).toBe('Nutze den Abend zur Erholung.');
+    expect(delivered.recommendation.details ?? []).toHaveLength(0);
+    expect(delivered.primaryIntent?.type).toBe('VIEW_TOMORROW');
+  });
+
+  it.each([{ comparable: false }, { direction: 'lower' }])(
+    'omits a weekly load percentage with unsupported basis %j',
+    async (options) => {
+      const delivered = await deliver(66, 10, options);
+      expect(delivered.summary).toBe('Use today for recovery.');
+      expect(delivered.primaryIntent?.type).toBe('VIEW_TOMORROW');
+    },
+  );
+  it.each([
+    'Tomorrow’s 71-minute ride.',
+    'Tomorrow: a 1:11 endurance ride.',
+    '明天骑行71分钟即可。',
+  ])('drops a mismatched tomorrow total written as %s', async (detail) => {
+    const delivered = await deliver(66, 10, { detail });
+    expect(delivered.recommendation.details ?? []).toHaveLength(0);
+  });
+
+  it.each([
+    'Tomorrow: Synthetic endurance ride, 66 minutes including 10 min of warm-up.',
+    'Recover for 20 minutes today before tomorrow’s ride.',
+    'Tomorrow: Synthetic endurance ride, 1 h 6 min.',
+    'Tomorrow: Synthetic endurance ride, 400 m of drills, 66 minutes.',
+  ])(
+    'keeps a supported duration or unrelated quantity in %s',
+    async (detail) => {
+      const delivered = await deliver(66, 10, { detail });
+      expect(delivered.recommendation.details).toEqual([detail]);
+    },
+  );
+
+  it.each([
+    'Training load is 25% higher this week than the same days last week.',
+    'Die Belastung dieser Woche liegt um 24 % höher als im gleichen Zeitraum der letzten Woche.',
+    '本週負荷比上週同期高24%。',
+  ])(
+    'drops a mismatched weekly comparison written as %s',
+    async (comparison) => {
+      const delivered = await deliver(66, 10, {
+        summary: `Use today for recovery. ${comparison}`,
+      });
+      expect(delivered.summary).toBe('Use today for recovery.');
+      expect(delivered.primaryIntent?.type).toBe('VIEW_TOMORROW');
+    },
+  );
+  it('keeps an actionable summary when its numeric rationale is unsupported', async () => {
+    const delivered = await deliver(66, 10, {
+      summary:
+        "Use today for recovery because this week's recorded load is 25% higher than on the same days last week.",
+    });
+    expect(delivered.summary).toBe('Use today for recovery.');
+    expect(delivered.primaryIntent?.type).toBe('VIEW_TOMORROW');
+  });
+});

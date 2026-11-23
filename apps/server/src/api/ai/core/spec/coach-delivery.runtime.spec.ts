@@ -7,6 +7,7 @@ import type { CoachQueryYield } from '../coach-query-yield';
 import { CoachRunProjector, coachSnapshotChunks } from '../coach-run-projector';
 import { readUIMessageStream } from 'ai';
 import type { CoachUiChunk, CoachUiMessage } from '../coach-ui-message-stream';
+import { buildHistoryMessages } from '../coach-history-messages';
 import { askUserQuestionTool } from '../tools/askUserQuestion.tool';
 import { planSuitabilityQuestionReviewTool } from '../tools/planSuitabilityAssess.tool';
 import { getCoachSkillByName } from '../skill.registry';
@@ -570,4 +571,181 @@ it('forces the per-question tool schema and stops after two malformed reviews', 
       }),
     })],
   });
+});
+
+describe('Report case 07: clarify a workout without replaying inaccurate zone advice', () => {
+  const wrongLabel = 'Pakai 80/20: Z2 = 154–171';
+  const workoutOnly = {
+    value: 'workout',
+    label: 'Apply my preferred cap to this workout',
+    description: 'Use the preference for the current workout',
+  };
+  const keepSettings = {
+    value: 'keep',
+    label: 'Keep the usual workout guidance',
+    description: 'Keep the established guidance for this workout',
+  };
+  const wrongZone = {
+    value: 'external-zone',
+    label: wrongLabel,
+    description: 'Use 81–90% of the synthetic maximum heart rate of 190',
+  };
+  const question = (
+    options: (typeof workoutOnly)[],
+    prompt = 'Should the preferred 145 bpm cap apply to this workout?',
+  ) => ({
+    questions: [
+      {
+        id: 'scope',
+        header: 'Workout scope',
+        question: prompt,
+        options,
+      },
+    ],
+  });
+
+  function projector(id: string) {
+    return new CoachRunProjector({
+      run: {
+        runId: `${id}-run`,
+        attemptId: `${id}-attempt`,
+        messageId: `${id}-message`,
+        revision: 0,
+        status: 'running',
+        startedAt: new Date().toISOString(),
+        executionMs: 0,
+        previousExecutionMs: 0,
+      },
+    });
+  }
+
+  function continuedHistory(status: 'cancelled' | 'interrupted' = 'cancelled') {
+    const prior = projector('retired');
+    prior.consume({
+      type: 'assistant',
+      message: {
+        content: [
+          {
+            type: 'tool_use',
+            id: 'previous-question',
+            name: 'AskUserQuestion',
+            input: question([workoutOnly, wrongZone]),
+          },
+        ],
+      },
+    });
+    prior.finish(status);
+    return buildHistoryMessages({
+      provider: 'openrouter',
+      thinking: false,
+      currentUserMessage: { content: [{ type: 'text', text: 'Yes, please.' }] },
+      rows: [{ role: 'ASSISTANT', ...prior.envelope() }],
+    });
+  }
+
+  it.each(['cancelled', 'interrupted'] as const)(
+    'does not inject %s card options into the follow-up model context',
+    (status) => {
+      const history = continuedHistory(status);
+      expect(history.at(-1)).toMatchObject({
+        role: 'user',
+        content: 'Yes, please.',
+      });
+      expect(JSON.stringify(history)).not.toContain(wrongLabel);
+    },
+  );
+
+  async function visibleQuestions(...attempts: ReturnType<typeof question>[]) {
+    let step = 0;
+    model = new MockLanguageModelV3({
+      doStream: async () => {
+        const input = attempts[step++];
+        return {
+          stream: convertArrayToReadableStream<StreamChunk>([
+            { type: 'stream-start', warnings: [] },
+            {
+              type: 'tool-call',
+              toolCallId: `follow-up-question-${step}`,
+              toolName: 'ask_user_question',
+              input: JSON.stringify(input),
+            },
+            {
+              type: 'finish',
+              finishReason: { unified: 'tool-calls', raw: 'tool_calls' },
+              usage,
+            },
+          ]),
+        };
+      },
+    });
+    const turn = projector('follow-up');
+    for await (const event of streamCoachAnswer({
+      ctx: { ...ctx(), lang: 'en' },
+      tools: [askUserQuestionTool],
+      messages: continuedHistory(),
+      maxSteps: attempts.length,
+    })) {
+      turn.consume(event);
+    }
+    expect(model.doStreamCalls).toHaveLength(attempts.length);
+    return JSON.stringify(
+      turn.message.parts.filter(
+        (part) =>
+          part.type === 'data-coach-tool' &&
+          part.data.name === 'AskUserQuestion',
+      ),
+    );
+  }
+
+  it('still delivers a valid clarification about the workout scope', async () => {
+    const visible = await visibleQuestions(
+      question([workoutOnly, keepSettings]),
+    );
+    expect(visible).toContain(workoutOnly.label);
+    expect(visible).toContain(keepSettings.label);
+  });
+
+  it('keeps an explicit power option usable', async () => {
+    const power = {
+      ...keepSettings,
+      label: '80/20 Zone 2: 125–155 W',
+    };
+    const visible = await visibleQuestions(question([workoutOnly, power]));
+    expect(visible).toContain(power.label);
+  });
+
+  it('accepts a user-specified cap in a workout-only option mentioning 80/20', async () => {
+    const cap = {
+      ...workoutOnly,
+      label: '80/20: keep my 145 bpm cap for this workout',
+    };
+    const visible = await visibleQuestions(question([cap, keepSettings]));
+    expect(visible).toContain(cap.label);
+  });
+
+  it.each([
+    { prompt: undefined, option: wrongZone },
+    {
+      prompt: 'Use the 80/20 Running heart rate zone for this workout?',
+      option: {
+        ...wrongZone,
+        label: 'Use 154–171 bpm for this workout',
+        description: 'Use that range for the planned run',
+      },
+    },
+  ])(
+    'retries without displaying an unverified running zone ($option.label)',
+    async ({ prompt, option }) => {
+      const visible = await visibleQuestions(
+        question([workoutOnly, option], prompt),
+        question([workoutOnly, keepSettings]),
+      );
+      expect(JSON.stringify(model.doStreamCalls[1].prompt)).toContain(
+        'UNVERIFIED_HEART_RATE_ZONE',
+      );
+      expect(visible).not.toContain(option.label);
+      expect(visible).toContain(workoutOnly.label);
+      expect(visible).toContain(keepSettings.label);
+    },
+  );
 });

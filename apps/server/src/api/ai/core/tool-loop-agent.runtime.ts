@@ -54,6 +54,7 @@ import {
 } from './tool.types';
 import {
   createAiSdkCoachTools,
+  previewToolInputForLog,
   stringifyAiSdkToolResultForModel,
 } from './ai-sdk-tool-adapter';
 import {
@@ -914,8 +915,13 @@ export function detectUiSurfacePayloadError(args: {
   const questionCount = Array.isArray(args.input.questions)
     ? args.input.questions.length
     : undefined;
+  const argsPreview = previewToolInputForLog(
+    args.result.name,
+    args.input,
+    UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS,
+  );
   logger.warn(
-    `[AI][教练][ui_surface][validate_failed] tool=${args.result.name} attempt=${args.attempt}/${maxAttempts} allow_retry=${args.attempt < maxAttempts ? 'yes' : 'no'} stage=${stage ?? 'none'} code=${code ?? 'none'} error=${error ?? 'unknown'} keys=${Object.keys(args.input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${safeJsonPreview(args.input, UI_SURFACE_VALIDATION_LOG_PREVIEW_CHARS)}`,
+    `[AI][coach][ui_surface][validate_failed] tool=${args.result.name} attempt=${args.attempt}/${maxAttempts} allow_retry=${args.attempt < maxAttempts ? 'yes' : 'no'} stage=${stage ?? 'none'} code=${code ?? 'none'} error=${error ?? 'unknown'} keys=${Object.keys(args.input).join(',') || '(empty)'}${questionCount !== undefined ? ` questionCount=${questionCount}` : ''} argsPreview=${argsPreview}`,
   );
 
   if (
