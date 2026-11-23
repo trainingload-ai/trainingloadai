@@ -6,7 +6,7 @@ import {
 } from "@shared/public-demo-policy";
 
 const page = readFileSync(
-  new URL("../app/[lang]/page.tsx", import.meta.url),
+  new URL("../app/[lang]/(home)/page.tsx", import.meta.url),
   "utf8",
 );
 const preview = readFileSync(

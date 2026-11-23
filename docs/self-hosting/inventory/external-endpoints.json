@@ -401,6 +401,10 @@
           "line": 272
         },
         {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 165
+        },
+        {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
           "line": 181
         },
@@ -419,10 +423,6 @@
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
           "line": 86
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/page.tsx",
-          "line": 167
         },
         {
           "file": "apps/docs/src/components/calculators/app-promo.tsx",
@@ -1034,8 +1034,8 @@
       "url": "https://fazier.com",
       "references": [
         {
-          "file": "apps/docs/src/components/Footer.tsx",
-          "line": 182
+          "file": "apps/docs/src/components/FazierBadge.tsx",
+          "line": 17
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1048,8 +1048,8 @@
       "url": "https://fazier.com/api/v1/public/badges/launch_badges.svg?badge_type=launched&theme=neutral",
       "references": [
         {
-          "file": "apps/docs/src/components/Footer.tsx",
-          "line": 188
+          "file": "apps/docs/src/components/FazierBadge.tsx",
+          "line": 23
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -1228,8 +1228,8 @@
           "line": 18
         },
         {
-          "file": "apps/docs/src/app/[lang]/page.tsx",
-          "line": 249
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 247
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
@@ -2377,7 +2377,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 172
+          "line": 167
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2391,7 +2391,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 164
+          "line": 159
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2405,7 +2405,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 158
+          "line": 153
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3295,6 +3295,14 @@
           "line": 14
         },
         {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 112
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 161
+        },
+        {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
           "line": 127
         },
@@ -3449,14 +3457,6 @@
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
           "line": 44
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/page.tsx",
-          "line": 114
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/page.tsx",
-          "line": 163
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",

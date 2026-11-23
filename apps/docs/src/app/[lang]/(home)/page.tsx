@@ -26,26 +26,24 @@ import {
 } from "@/lib/seo-schema";
 import { PricingPreviewSection } from "@/components/PricingPreviewSection";
 import { TrackedLink } from "@/components/TrackedLink";
-import { DocsMarketingShell } from "@/components/layout/DocsMarketingShell";
-import { isSelfHostedDocs } from "@/lib/telemetry-config.mjs";
 import {
   HomeHeroWorksWith,
   HomePlatformShowcase,
-} from "./(home)/_components/HomeIntegrationLogos";
+} from "./_components/HomeIntegrationLogos";
 import {
   HomeProductShowcase,
   type HomeProductShowcaseModule,
-} from "./(home)/_components/HomeProductShowcase";
+} from "./_components/HomeProductShowcase";
 import {
   HomeHeroDemoPreview,
   type HomeHeroDemoCopy,
-} from "./(home)/_components/HomeHeroDemoPreview";
-import { HomeMcpShowcase } from "./(home)/_components/HomeMcpShowcase";
+} from "./_components/HomeHeroDemoPreview";
+import { HomeMcpShowcase } from "./_components/HomeMcpShowcase";
 import {
   HOME_RUNNING_PLAN_ROUTES,
   HomeTrainingPlanSpotlight,
   type HomeTrainingPlanSpotlightCopy,
-} from "./(home)/_components/HomeTrainingPlanSpotlight";
+} from "./_components/HomeTrainingPlanSpotlight";
 import {
   HOME_OPEN_GRAPH_IMAGE_PATH,
   homeOpenGraphImage,
@@ -57,7 +55,7 @@ import { publicDemoDestination } from "@/lib/public-demo-url";
 import {
   HomeOpenSourceSection,
   type HomeOpenSourceCopy,
-} from "./(home)/_components/HomeOpenSourceSection";
+} from "./_components/HomeOpenSourceSection";
 
 type HomeFaq = {
   q: string;
@@ -306,7 +304,7 @@ export default async function HomePage({
     }),
   ]);
 
-  const content = (
+  return (
     <div className="overflow-x-hidden bg-background text-foreground">
       <JsonLd id="home-structured-data" data={structuredData} />
       <section className="relative overflow-hidden bg-card px-4 pb-12 pt-10 text-foreground md:px-6 md:pb-16 md:pt-14">
@@ -481,11 +479,5 @@ export default async function HomePage({
         </div>
       </section>
     </div>
-  );
-
-  return (
-    <DocsMarketingShell lang={lang} showFazierBadge={!isSelfHostedDocs()}>
-      {content}
-    </DocsMarketingShell>
   );
 }

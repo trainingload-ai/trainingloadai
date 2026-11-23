@@ -3916,6 +3916,14 @@
           "line": 14
         },
         {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 112
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
+          "line": 161
+        },
+        {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
           "line": 127
         },
@@ -4070,14 +4078,6 @@
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
           "line": 44
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/page.tsx",
-          "line": 114
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/page.tsx",
-          "line": 163
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",

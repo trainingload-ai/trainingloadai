@@ -82,22 +82,12 @@ describe("compact footer navigation", () => {
         ).toBe(true);
       }
       expect(links).toContain(IOS_APP_STORE_URL);
-      expect(links).not.toContain("https://fazier.com");
       expect(links).toContain("mailto:support@trainingload.ai");
       expect(html).not.toContain("/improve");
       expect(html).not.toContain("/target");
       expect(html).not.toContain("/intermediate");
     },
   );
-
-  it("renders the Fazier badge below Startup Fame when enabled", async () => {
-    const html = renderToStaticMarkup(
-      await Footer({ lang: "en", showFazierBadge: true }),
-    );
-    expect(html).toMatch(
-      /href="https:\/\/startupfa\.me\/[^"]*"[^>]*>.*?<\/a><a href="https:\/\/fazier\.com"[^>]*>.*?alt="Launched on Fazier"/,
-    );
-  });
 
   it("uses matching navigation keys in every locale", () => {
     const messages = locales.map((lang) =>

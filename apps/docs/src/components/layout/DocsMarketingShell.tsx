@@ -7,11 +7,9 @@ import { newUserGiftValues } from "@/lib/offer-content";
 export async function DocsMarketingShell({
   lang,
   children,
-  showFazierBadge,
 }: {
   lang: string;
   children: ReactNode;
-  showFazierBadge?: boolean;
 }) {
   const newUserGift = newUserGiftValues(process.env);
 
@@ -25,7 +23,7 @@ export async function DocsMarketingShell({
         <CustomHeader newUserGift={newUserGift} />
       </Suspense>
       <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
-      <Footer lang={lang} showFazierBadge={showFazierBadge} />
+      <Footer lang={lang} />
     </>
   );
 }
