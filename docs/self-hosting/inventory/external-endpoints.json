@@ -401,10 +401,6 @@
           "line": 272
         },
         {
-          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 165
-        },
-        {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
           "line": 181
         },
@@ -423,6 +419,10 @@
         {
           "file": "apps/docs/src/app/[lang]/(home)/training-load/page.tsx",
           "line": 86
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/page.tsx",
+          "line": 167
         },
         {
           "file": "apps/docs/src/components/calculators/app-promo.tsx",
@@ -1030,6 +1030,34 @@
       ]
     },
     {
+      "host": "fazier.com",
+      "url": "https://fazier.com",
+      "references": [
+        {
+          "file": "apps/docs/src/components/Footer.tsx",
+          "line": 182
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
+      "host": "fazier.com",
+      "url": "https://fazier.com/api/v1/public/badges/launch_badges.svg?badge_type=launched&theme=neutral",
+      "references": [
+        {
+          "file": "apps/docs/src/components/Footer.tsx",
+          "line": 188
+        }
+      ],
+      "capability": "web-asset-or-tooling",
+      "owners": [
+        "apps"
+      ]
+    },
+    {
       "host": "fellrnr.com",
       "url": "https://fellrnr.com/wiki/TRIMP#TRIMPexp_Exponential_Heart_Rate_Scaling",
       "references": [
@@ -1200,8 +1228,8 @@
           "line": 18
         },
         {
-          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 247
+          "file": "apps/docs/src/app/[lang]/page.tsx",
+          "line": 249
         },
         {
           "file": "apps/docs/src/components/CustomHeader.tsx",
@@ -2349,7 +2377,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 166
+          "line": 172
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2363,7 +2391,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 158
+          "line": 164
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -2377,7 +2405,7 @@
       "references": [
         {
           "file": "apps/docs/src/components/Footer.tsx",
-          "line": 152
+          "line": 158
         }
       ],
       "capability": "web-asset-or-tooling",
@@ -3267,14 +3295,6 @@
           "line": 14
         },
         {
-          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 112
-        },
-        {
-          "file": "apps/docs/src/app/[lang]/(home)/page.tsx",
-          "line": 161
-        },
-        {
           "file": "apps/docs/src/app/[lang]/(home)/plan/page.tsx",
           "line": 127
         },
@@ -3429,6 +3449,14 @@
         {
           "file": "apps/docs/src/app/[lang]/layout.tsx",
           "line": 44
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/page.tsx",
+          "line": 114
+        },
+        {
+          "file": "apps/docs/src/app/[lang]/page.tsx",
+          "line": 163
         },
         {
           "file": "apps/docs/src/app/api/docs-markdown/[lang]/[[...slug]]/route.ts",

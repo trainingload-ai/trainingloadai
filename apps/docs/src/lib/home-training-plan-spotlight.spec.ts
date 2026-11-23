@@ -120,7 +120,7 @@ describe("homepage training plan spotlight", () => {
 
   it("adds the spotlight, hero entry, and ItemList data to the homepage", () => {
     const page = readFileSync(
-      new URL("../app/[lang]/(home)/page.tsx", import.meta.url),
+      new URL("../app/[lang]/page.tsx", import.meta.url),
       "utf8",
     );
 
@@ -206,7 +206,7 @@ describe("homepage product positioning", () => {
   it("keeps the free-plan promise static and the homepage capability story focused", () => {
     const home = messages("en").home;
     const page = readFileSync(
-      new URL("../app/[lang]/(home)/page.tsx", import.meta.url),
+      new URL("../app/[lang]/page.tsx", import.meta.url),
       "utf8",
     );
     const showcase = readFileSync(

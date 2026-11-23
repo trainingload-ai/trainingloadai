@@ -51,7 +51,13 @@ function FooterLinkGroup({
   );
 }
 
-export async function Footer({ lang }: { lang: string }) {
+export async function Footer({
+  lang,
+  showFazierBadge = false,
+}: {
+  lang: string;
+  showFazierBadge?: boolean;
+}) {
   const t = await getTranslations({ locale: lang, namespace: "footer" });
   const year = new Date().getFullYear();
   const localizedLink = (href: string, title: string): FooterLink => ({
@@ -171,6 +177,24 @@ export async function Footer({ lang }: { lang: string }) {
               className="hidden h-auto max-w-full dark:block"
             />
           </a>
+          {showFazierBadge && (
+            <a
+              href="https://fazier.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex max-w-full rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring dark:bg-foreground dark:px-1.5 dark:py-1"
+            >
+              <Image
+                src="https://fazier.com/api/v1/public/badges/launch_badges.svg?badge_type=launched&theme=neutral"
+                alt="Launched on Fazier"
+                width={103}
+                height={44}
+                unoptimized
+                referrerPolicy="no-referrer"
+                className="h-10 w-auto max-w-full"
+              />
+            </a>
+          )}
           <p className="mt-6 text-xs leading-5 text-muted-foreground">
             {t("copyright", { year })}
           </p>
