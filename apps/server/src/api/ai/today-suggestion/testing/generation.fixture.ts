@@ -3,6 +3,7 @@ export function uncontendedGeneration(prisma: {
   $transaction: (work: (tx: any) => Promise<any>) => Promise<any>;
 }) {
   return {
+    contextToken: async () => 'test-context-token',
     claim: async (scope: any) => ({
       kind: 'ACQUIRED',
       lease: { ...scope, token: 'lease', fence: 1 },

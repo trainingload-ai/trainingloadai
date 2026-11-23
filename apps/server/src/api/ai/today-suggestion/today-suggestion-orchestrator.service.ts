@@ -46,6 +46,12 @@ export type TodaySuggestionResponseV2 = TodaySuggestionV2 & {
   };
 };
 
+type TodaySuggestionAttempt = { runId: string; attemptId?: string };
+type TodaySuggestionDeliveryTrace = {
+  date?: string;
+  attempts: TodaySuggestionAttempt[];
+};
+
 function jsonValue(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 }
@@ -156,7 +162,23 @@ export class TodaySuggestionOrchestratorService {
     allowWithoutConsent?: boolean;
     signal?: AbortSignal;
   }) {
-    return this.serialized(args.userId, () => this.generate(args));
+    return this.serialized(args.userId, async () => {
+      const trace: TodaySuggestionDeliveryTrace = { attempts: [] };
+      const result = await this.generate(args, trace);
+      if (trace.date) {
+        const { state, reasonCode } = result.delivery;
+        const attempts: TodaySuggestionAttempt[] =
+          trace.attempts.length > 0 ? trace.attempts : [{ runId: 'none' }];
+        for (const [index, { runId, attemptId }] of attempts.entries()) {
+          const event =
+            index === attempts.length - 1 ? 'outcome' : 'superseded outcome';
+          this.logger.log(
+            `[AI][today-suggestion-v2] ${event} userId=${args.userId} date=${trace.date} state=${state} reason=${reasonCode} runId=${runId} attemptId=${attemptId ?? 'none'}`,
+          );
+        }
+      }
+      return result;
+    });
   }
 
   private async generate(
@@ -169,6 +191,7 @@ export class TodaySuggestionOrchestratorService {
       allowWithoutConsent?: boolean;
       signal?: AbortSignal;
     },
+    trace: TodaySuggestionDeliveryTrace,
     revisionRetry = 0,
     lease?: TodayGenerationLease,
     waitAttempt = 0,
@@ -210,6 +233,7 @@ export class TodaySuggestionOrchestratorService {
         (cachedResult.recommendation.durationMinutes ?? 0) <=
           (projection.minutesUntilDayEnd ?? 1_440))
     ) {
+      if (trace.attempts.length > 0) trace.date = projection.date;
       if (keyContextTimezone(cached.keyContext) !== projection.timezone) {
         await this.prisma.aiTodaySuggestion.update({
           where: { id: cached.id },
@@ -260,7 +284,13 @@ export class TodaySuggestionOrchestratorService {
           await new Promise((resolve) =>
             setTimeout(resolve, [150, 350, 750][waitAttempt]),
           );
-          return this.generate(args, revisionRetry, undefined, waitAttempt + 1);
+          return this.generate(
+            args,
+            trace,
+            revisionRetry,
+            undefined,
+            waitAttempt + 1,
+          );
         }
         return this.currentFallback(
           projection,
@@ -273,11 +303,13 @@ export class TodaySuggestionOrchestratorService {
         );
       }
       try {
-        return await this.generate(args, revisionRetry, claim.lease);
+        return await this.generate(args, trace, revisionRetry, claim.lease);
       } catch (error) {
         if (!(error instanceof TodayGenerationLeaseLost)) throw error;
+        const latest = await this.projector.project(args);
+        if (trace.attempts.length > 0) trace.date = latest.date;
         return this.currentFallback(
-          await this.projector.project(args),
+          latest,
           'GENERATION_IN_PROGRESS',
           new Date(Date.now() + 15_000),
         );
@@ -286,6 +318,7 @@ export class TodaySuggestionOrchestratorService {
       }
     }
     await this.generations.bind(lease, scope);
+    trace.date = projection.date;
 
     // Viewing a card is optional and must never alter the training prescription.
     let draft: TodaySuggestionDraft;
@@ -294,6 +327,7 @@ export class TodaySuggestionOrchestratorService {
     let provider: string | null = null;
     let model: string | null = null;
     let runId: string | null = null;
+    let attempt: TodaySuggestionAttempt | undefined;
     let workoutRunId: string | null = null;
     let generatedAt: Date | null = null;
 
@@ -326,7 +360,15 @@ export class TodaySuggestionOrchestratorService {
           projection,
           signal: controller.signal,
           allowWithoutConsent: args.allowWithoutConsent,
+          onRunStarted: (id, attemptId) => {
+            attempt = { runId: id, attemptId };
+            trace.attempts.push(attempt);
+          },
         });
+        if (!attempt) {
+          attempt = { runId: run.runId };
+          trace.attempts.push(attempt);
+        }
         draft = run.draft;
         lease.failure = undefined;
         if (draft.preferredIntent === 'CREATE_TODAY_WORKOUT') {
@@ -399,8 +441,14 @@ export class TodaySuggestionOrchestratorService {
       latest.constraintHash !== projection.constraintHash ||
       !cachedWeatherMatches(keyContext(projection), latest)
     ) {
-      if (revisionRetry < 1 && !lease.failure)
-        return this.generate(args, revisionRetry + 1, lease);
+      if (revisionRetry < 1 && !lease.failure) {
+        if (attempt) {
+          this.logger.log(
+            `[AI][today-suggestion-v2] attempt superseded reason=FACTS_CHANGED runId=${attempt.runId} attemptId=${attempt.attemptId ?? 'none'}`,
+          );
+        }
+        return this.generate(args, trace, revisionRetry + 1, lease);
+      }
       projection = latest;
       draft = this.factFallback(latest);
       state = 'FACT_FALLBACK';
@@ -527,9 +575,7 @@ export class TodaySuggestionOrchestratorService {
       continuityHash: projection.continuityHash,
       suggestionDate: projection.date,
     });
-    this.logger.log(
-      `[AI][today-suggestion-v2] outcome userId=${args.userId} date=${projection.date} state=${state} reason=${reasonCode} runId=${runId ?? 'none'}`,
-    );
+    trace.date = projection.date;
     return this.present(
       persisted.generationToken === generationToken
         ? persistedResult

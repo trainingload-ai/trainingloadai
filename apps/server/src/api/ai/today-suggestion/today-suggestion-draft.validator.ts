@@ -3,6 +3,7 @@ import {
   type TodaySuggestionIntensity,
   type TodaySuggestionRecommendationKind,
 } from '@shared/ai-today-suggestion-contract';
+import { CoachTaskResultValidationError } from '../core/coach-task-result-error';
 import type {
   TodaySuggestionConstraintProjection,
   TodaySuggestionDraft,
@@ -27,6 +28,31 @@ const INTENSITIES = new Set<TodaySuggestionIntensity>([
   'MODERATE',
   'HARD',
 ]);
+
+const TRAINING_BASIS_CORRECTIONS = {
+  TRAINING_BASIS_REQUIRED:
+    'Provide trainingBasis for the scheduled workout or optional additional training, or reassess whether TRAIN is supported.',
+  TRAINING_BASIS_WORKOUT_UNAVAILABLE:
+    'Select a PLANNED or IN_PROGRESS workout for the projected date, or revise the recommendation using the current schedule.',
+  TRAINING_BASIS_REASON_NOT_IN_SUMMARY:
+    'Include the reason for optional additional training in summary and use the same wording in trainingBasis.reason.',
+  TRAINING_BASIS_CREATE_WORKOUT_REQUIRED:
+    'Use CREATE_TODAY_WORKOUT as preferredIntent for ADDITIONAL training.',
+  TRAINING_BASIS_OPEN_WORKOUT_CONFLICT:
+    'Remove OPEN_TODAY_WORKOUT from secondaryIntents for ADDITIONAL training.',
+  TRAINING_BASIS_UNEXPECTED:
+    'Omit trainingBasis when recommendation.kind is not TRAIN.',
+} as const;
+
+function rejectTrainingBasis(
+  code: keyof typeof TRAINING_BASIS_CORRECTIONS,
+): never {
+  throw new CoachTaskResultValidationError(
+    'TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS',
+    code,
+    TRAINING_BASIS_CORRECTIONS[code],
+  );
+}
 
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -186,21 +212,23 @@ export function validateTodaySuggestionDraftForProjection(
     const remaining = projection.todayWorkouts.filter((workout) =>
       ['PLANNED', 'IN_PROGRESS'].includes(workout.status),
     );
-    if ((moved || remaining.length > 1) && !basis)
-      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
-    if (basis?.kind === 'SCHEDULED') {
-      if (!scheduledWorkout)
-        throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+    if ((moved || remaining.length > 1) && !basis) {
+      rejectTrainingBasis('TRAINING_BASIS_REQUIRED');
     }
-    if (
-      basis?.kind === 'ADDITIONAL' &&
-      (!draft.summary.includes(basis.reason) ||
-        draft.preferredIntent !== 'CREATE_TODAY_WORKOUT' ||
-        [draft.preferredIntent, ...draft.secondaryIntents].includes(
-          'OPEN_TODAY_WORKOUT',
-        ))
-    )
-      throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+    if (basis?.kind === 'SCHEDULED' && !scheduledWorkout) {
+      rejectTrainingBasis('TRAINING_BASIS_WORKOUT_UNAVAILABLE');
+    }
+    if (basis?.kind === 'ADDITIONAL') {
+      if (!draft.summary.includes(basis.reason)) {
+        rejectTrainingBasis('TRAINING_BASIS_REASON_NOT_IN_SUMMARY');
+      }
+      if (draft.preferredIntent !== 'CREATE_TODAY_WORKOUT') {
+        rejectTrainingBasis('TRAINING_BASIS_CREATE_WORKOUT_REQUIRED');
+      }
+      if (draft.secondaryIntents.includes('OPEN_TODAY_WORKOUT')) {
+        rejectTrainingBasis('TRAINING_BASIS_OPEN_WORKOUT_CONFLICT');
+      }
+    }
   }
   if (
     draft.recommendation.kind === 'TRAIN' &&
@@ -292,8 +320,9 @@ export function validateTodaySuggestionDraftForProjection(
       throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_COACH_DECISION');
     }
   }
-  if (draft.recommendation.kind !== 'TRAIN' && draft.trainingBasis)
-    throw new Error('TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS');
+  if (draft.recommendation.kind !== 'TRAIN' && draft.trainingBasis) {
+    rejectTrainingBasis('TRAINING_BASIS_UNEXPECTED');
+  }
 
   const factualEvidence = new Set<string>(projection.constraints ?? []);
   if (hasRecentTrainingActivity(projection))

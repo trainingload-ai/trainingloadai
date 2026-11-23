@@ -28,6 +28,7 @@ export class TodaySuggestionAgentService {
     projection: TodaySuggestionConstraintProjection;
     signal?: AbortSignal;
     allowWithoutConsent?: boolean;
+    onRunStarted?: (runId: string, attemptId: string) => void;
   }): Promise<TodaySuggestionAgentRun> {
     const { projection } = args;
     const result = await this.ai.runBackgroundCoachTask({
@@ -43,6 +44,7 @@ export class TodaySuggestionAgentService {
       requiredToolNames: projection.requiredToolNames,
       signal: args.signal,
       allowWithoutConsent: args.allowWithoutConsent,
+      onRunStarted: args.onRunStarted,
       instructions: [
         'Produce a structured today-suggestion draft. This is one branch of the normal Coach Agent loop.',
         'Decide what is useful for the rest of today from actual activities, remaining workouts and recent training load. Complete this judgment yourself and explain its basis directly; do not turn completion checks or reviews into tasks for the athlete.',

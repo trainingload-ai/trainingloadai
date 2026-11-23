@@ -1,11 +1,29 @@
+import { Logger } from '@nestjs/common';
+import { convertArrayToReadableStream, MockLanguageModelV3 } from 'ai/test';
+import { executeBackgroundCoachTask } from '../core/coach-task-runtime';
+import type { CoachTurnInput } from '../core/coach-turn-input';
+import { streamCoachAnswer } from '../core/tool-loop-agent.runtime';
+import { coachTaskSubmitResultTool } from '../core/tools/coachTaskSubmitResult.tool';
 import { createAiFallbackI18n } from '../spec/ai-fallback-i18n.test-util';
 import { uncontendedGeneration } from './testing/generation.fixture';
+import { TodaySuggestionAgentService } from './today-suggestion-agent.service';
 import { TodaySuggestionConstraintProjector } from './today-suggestion-constraint.projector';
 import { TodaySuggestionOrchestratorService } from './today-suggestion-orchestrator.service';
 import { TodaySuggestionDeliveryPolicy } from './today-suggestion-delivery-policy';
 import { TodaySuggestionEngagementService } from './today-suggestion-engagement.service';
+import { TodayGenerationLeaseLost } from './today-suggestion-generation.service';
 import { validateTodaySuggestionDraftForProjection } from './today-suggestion-draft.validator';
 import type { TodaySuggestionDraft } from './today-suggestion.types';
+
+let coachModel: MockLanguageModelV3;
+jest.mock('../core/coach-upstream.adapter', () => ({
+  ...jest.requireActual<typeof import('../core/coach-upstream.adapter')>(
+    '../core/coach-upstream.adapter',
+  ),
+  createCoachLanguageModel: () => coachModel,
+  getCoachUpstreamProvider: () => 'openrouter',
+  getCoachBaseUrlForLog: () => 'test',
+}));
 
 function harness() {
   let row: any = null;
@@ -197,6 +215,232 @@ describe('activity-first today suggestion regressions', () => {
     expect(result.summary).not.toContain('A short easy session');
     expect((await service.get(args)).recommendation.kind).toBe('RECOVER');
     expect(agent.run).toHaveBeenCalledTimes(1);
+  });
+
+  describe('training basis rejection in a background run', () => {
+    const draft = {
+      headline: 'A short easy workout',
+      summary: 'Optional extra training fits the current load and schedule.',
+      recommendation: { kind: 'TRAIN', intensity: 'EASY' },
+      preferredIntent: null,
+      secondaryIntents: [],
+    };
+    const rejectedDrafts = [
+      {
+        code: 'TRAINING_BASIS_REQUIRED',
+        correction: 'Provide trainingBasis',
+        input: draft,
+      },
+      {
+        code: 'TRAINING_BASIS_WORKOUT_UNAVAILABLE',
+        correction: 'Select a PLANNED or IN_PROGRESS workout',
+        input: {
+          ...draft,
+          trainingBasis: { kind: 'SCHEDULED', workoutId: 'invalid-workout' },
+        },
+      },
+      {
+        code: 'TRAINING_BASIS_OPEN_WORKOUT_CONFLICT',
+        correction: 'Remove OPEN_TODAY_WORKOUT',
+        input: {
+          ...draft,
+          trainingBasis: { kind: 'ADDITIONAL', reason: draft.summary },
+          preferredIntent: 'CREATE_TODAY_WORKOUT',
+          secondaryIntents: ['OPEN_TODAY_WORKOUT'],
+        },
+      },
+    ];
+
+    afterEach(() => jest.restoreAllMocks());
+
+    const scenarios = rejectedDrafts.flatMap((scenario) => [
+      { ...scenario, repaired: true },
+      { ...scenario, repaired: false },
+    ]);
+    it.each(scenarios)(
+      'surfaces $code and correlates the outcome (repaired=$repaired)',
+      async ({ code, correction, input, repaired }) => {
+        const log = jest
+          .spyOn(Logger.prototype, 'log')
+          .mockImplementation(() => undefined);
+        const warn = jest
+          .spyOn(Logger.prototype, 'warn')
+          .mockImplementation(() => undefined);
+        const { service, execution, agent, workoutGenerator, prisma } =
+          harness();
+        execution.day.plannedWorkouts.push({
+          id: 'moved-course',
+          status: 'MOVED',
+          scheduledDate: '2026-11-11',
+          linkedActivities: [],
+        } as never);
+        const runId = repaired ? 'repaired-run' : 'rejected-run';
+        const run = { runId, attemptId: 'attempt', messageId: 'message' };
+        const projector = {
+          run,
+          consume: jest.fn(() => []),
+          finish: jest.fn(),
+        };
+        const handle = {
+          projector,
+          sessionId: 'background:today',
+          operationId: 'operation',
+        };
+        const runs = {
+          beginBackground: jest.fn(async () => ({ handle })),
+          checkpoint: jest.fn(
+            async (_handle: unknown, _state?: string) => undefined,
+          ),
+        };
+        const submit = jest.fn(coachTaskSubmitResultTool.execute);
+        const usage = {
+          inputTokens: { total: 10, noCache: 10, cacheRead: 0, cacheWrite: 0 },
+          outputTokens: { total: 10, text: 10, reasoning: 0 },
+        };
+        const corrected = {
+          ...draft,
+          headline: 'Recover today',
+          summary: 'Use today for recovery.',
+          recommendation: { kind: 'RECOVER' },
+        };
+        let modelStep = 0;
+        const model = new MockLanguageModelV3({
+          doStream: async () => {
+            const step = modelStep++;
+            return {
+              stream: convertArrayToReadableStream([
+                { type: 'stream-start', warnings: [] },
+                {
+                  type: 'tool-call' as const,
+                  toolCallId: `submit-${step}`,
+                  toolName: 'coach_task_submit_result',
+                  input: JSON.stringify({
+                    result: step === 0 ? input : corrected,
+                  }),
+                },
+                {
+                  type: 'finish' as const,
+                  finishReason: {
+                    unified: 'tool-calls' as const,
+                    raw: 'tool_calls',
+                  },
+                  usage,
+                },
+              ]),
+            };
+          },
+        });
+        coachModel = model;
+        const background = {
+          runs,
+          logger: new Logger('Case06'),
+          usage: { recordUsageEvent: jest.fn() },
+          runTurn: async ({
+            backgroundTask,
+            lang,
+            prompt,
+            session,
+            signal,
+            onActivity,
+          }: CoachTurnInput) => {
+            for (const toolName of backgroundTask!.requiredToolNames ?? []) {
+              backgroundTask!.completedToolNames!.add(toolName);
+            }
+            return streamCoachAnswer({
+              tools: [{ ...coachTaskSubmitResultTool, execute: submit }],
+              ctx: {
+                backgroundTask,
+                signal,
+                onActivity,
+                session,
+                lang,
+                userService: { getPreferredTimezone: async () => 'UTC' },
+              } as never,
+              messages: [{ role: 'user', content: prompt }],
+              model: 'test-model',
+              maxSteps: repaired ? 3 : 1,
+            });
+          },
+        };
+        const todayAgent = new TodaySuggestionAgentService({
+          runBackgroundCoachTask: (
+            params: Parameters<typeof executeBackgroundCoachTask>[1],
+          ) =>
+            executeBackgroundCoachTask(
+              background as unknown as Parameters<
+                typeof executeBackgroundCoachTask
+              >[0],
+              { ...params, model: 'test-model' },
+            ),
+        } as never);
+        agent.run.mockImplementation(
+          (params) => todayAgent.run(params) as never,
+        );
+
+        const result = await service.get(args);
+        expect(model.doStreamCalls).toHaveLength(repaired ? 2 : 1);
+        expect(submit).toHaveBeenCalledTimes(repaired ? 2 : 1);
+        await expect(submit.mock.results[0].value).resolves.toEqual({
+          code,
+          error: expect.stringContaining(correction),
+          stage: 'execute',
+        });
+        if (repaired) {
+          expect(JSON.stringify(model.doStreamCalls[1].prompt)).toContain(
+            correction,
+          );
+          await expect(submit.mock.results[1].value).resolves.toEqual({
+            kind: 'coach_task_result_accepted',
+            taskType: 'TODAY_SUGGESTION',
+          });
+        }
+        const delivery = repaired
+          ? { state: 'GENERATED', reasonCode: 'GENERATED' }
+          : { state: 'FACT_FALLBACK', reasonCode: 'OUTPUT_REJECTED' };
+        expect(result.delivery).toMatchObject(delivery);
+        expect(result.recommendation.kind).toBe('RECOVER');
+        expect(workoutGenerator.generate).not.toHaveBeenCalled();
+        expect(projector.consume).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'activity',
+            activity: expect.objectContaining({
+              status: 'failed',
+              failure: { code, stage: 'execute' },
+            }),
+          }),
+        );
+        expect(runs.checkpoint.mock.lastCall?.[1]).toBe(
+          repaired ? 'completed' : 'failed',
+        );
+        expect(prisma.aiTodaySuggestion.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            create: expect.objectContaining({ runId: repaired ? runId : null }),
+          }),
+        );
+        const rejectionLog = warn.mock.calls
+          .map(([message]) => String(message))
+          .find((message) => message.includes(`runId=${runId}`));
+        expect(rejectionLog).toContain(
+          'TODAY_SUGGESTION_OUTPUT_REJECTED_TRAINING_BASIS',
+        );
+        expect(rejectionLog).toContain(`attemptId=attempt`);
+        expect(rejectionLog).toContain(`reasonCode=${code}`);
+        expect(rejectionLog).not.toContain(input.summary);
+        const acceptedLog = expect.stringContaining(
+          `corrected result accepted task=TODAY_SUGGESTION runId=${runId} attemptId=attempt`,
+        );
+        if (repaired) {
+          expect(log).toHaveBeenCalledWith(acceptedLog);
+        } else {
+          expect(log).not.toHaveBeenCalledWith(acceptedLog);
+        }
+        expect(log).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `state=${delivery.state} reason=${delivery.reasonCode} runId=${runId} attemptId=attempt`,
+          ),
+        );
+      },
+    );
   });
 
   it('keeps access-denied fallback usable and refreshes it when access returns', async () => {
@@ -504,9 +748,25 @@ describe('activity-first today suggestion regressions', () => {
     const normalRun = agent.run.getMockImplementation()!;
     agent.run.mockImplementationOnce(async (input) => {
       coverage.activities.readyCount += 1;
-      return normalRun(input);
+      input.onRunStarted('outdated-run', 'first-attempt');
+      return { ...(await normalRun(input)), runId: 'outdated-run' };
     });
-    await service.get(args);
+    const log = jest.spyOn(Logger.prototype, 'log');
+    try {
+      await service.get(args);
+      expect(log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'attempt superseded reason=FACTS_CHANGED runId=outdated-run attemptId=first-attempt',
+        ),
+      );
+      expect(log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'state=GENERATED reason=GENERATED runId=outdated-run attemptId=first-attempt',
+        ),
+      );
+    } finally {
+      log.mockRestore();
+    }
     expect(agent.run).toHaveBeenCalledTimes(2);
     expect(prisma.aiTodaySuggestion.upsert).toHaveBeenCalledTimes(1);
     expect(
@@ -557,14 +817,53 @@ describe('activity-first today suggestion regressions', () => {
     };
     prisma.aiTodaySuggestion.findUnique
       .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(winner);
-    agent.run.mockRejectedValueOnce(
-      new Error('upstream temporarily unavailable'),
-    );
-    const result = await service.get(args);
-    expect(result.summary).toBe('Use the already completed judgment.');
-    expect(result.delivery.state).toBe('CACHED');
-    expect(prisma.aiTodaySuggestion.upsert).not.toHaveBeenCalled();
+    agent.run.mockImplementationOnce(async ({ onRunStarted }) => {
+      onRunStarted('rejected-run', 'first-attempt');
+      throw new Error('BACKGROUND_COACH_TASK_RESULT_MISSING');
+    });
+    const log = jest
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    try {
+      const result = await service.get(args);
+      expect(agent.run).toHaveBeenCalledTimes(1);
+      expect(result.summary).toBe('Use the already completed judgment.');
+      expect(result.delivery.state).toBe('CACHED');
+      expect(prisma.aiTodaySuggestion.upsert).not.toHaveBeenCalled();
+      expect(log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'state=CACHED reason=CACHE_HIT runId=rejected-run attemptId=first-attempt',
+        ),
+      );
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it('correlates the in-progress fallback when the publishing lease is lost', async () => {
+    const { service, agent, prisma } = harness();
+    agent.run.mockImplementationOnce(async ({ onRunStarted }) => {
+      onRunStarted('rejected-run', 'first-attempt');
+      throw new Error('BACKGROUND_COACH_TASK_RESULT_MISSING');
+    });
+    prisma.$transaction.mockRejectedValueOnce(new TodayGenerationLeaseLost());
+    const log = jest.spyOn(Logger.prototype, 'log');
+    try {
+      const result = await service.get(args);
+      expect(result.delivery).toMatchObject({
+        state: 'FACT_FALLBACK',
+        reasonCode: 'GENERATION_IN_PROGRESS',
+      });
+      expect(log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'state=FACT_FALLBACK reason=GENERATION_IN_PROGRESS runId=rejected-run attemptId=first-attempt',
+        ),
+      );
+    } finally {
+      log.mockRestore();
+    }
   });
 
   it('invalidates advice when new ready training records arrive', async () => {

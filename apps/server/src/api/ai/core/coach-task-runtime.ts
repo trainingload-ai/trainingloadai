@@ -11,6 +11,7 @@ import {
 } from '../coach-run-store.service';
 import { sha256Hex, stableJson } from './ai-common.util';
 import type { CoachQueryYield } from './coach-query-yield';
+import { CoachTaskResultValidationError } from './coach-task-result-error';
 import type { CoachTurnInput } from './coach-turn-input';
 import { getCoachSkillByName } from './skill.registry';
 
@@ -88,6 +89,7 @@ export async function executeBackgroundCoachTask<T>(
     activeSkillName: string;
     instructions: string;
     validateResult: (result: unknown) => T;
+    onRunStarted?: (runId: string, attemptId: string) => void;
     /** Stable logical identity. When omitted, the complete task input is hashed. */
     dedupeKey?: string;
     triggerType?: string;
@@ -269,6 +271,7 @@ export async function executeBackgroundCoachTask<T>(
   }
 
   let submitted: T | undefined;
+  let resultRejected = false;
   const usageEvents: unknown[] = [];
   let provider: string | null = null;
   let actualModel = model;
@@ -303,6 +306,7 @@ export async function executeBackgroundCoachTask<T>(
   }, 15_000);
 
   try {
+    params.onRunStarted?.(runId, attemptId);
     const completedToolNames = new Set<string>();
     const stream = await runtime.runTurn({
       session: { user: { id: params.userId } },
@@ -323,7 +327,23 @@ export async function executeBackgroundCoachTask<T>(
         requiredToolNames,
         completedToolNames,
         submitResult: (raw) => {
-          submitted = params.validateResult(raw);
+          try {
+            submitted = params.validateResult(raw);
+          } catch (error) {
+            if (error instanceof CoachTaskResultValidationError) {
+              resultRejected = true;
+              runtime.logger.warn(
+                `[AI][background] result rejected task=${params.taskType} runId=${runId} attemptId=${attemptId} category=${error.category} reasonCode=${error.code}`,
+              );
+            }
+            throw error;
+          }
+          if (resultRejected) {
+            runtime.logger.log(
+              `[AI][background] corrected result accepted task=${params.taskType} runId=${runId} attemptId=${attemptId}`,
+            );
+            resultRejected = false;
+          }
         },
       },
       allowWithoutConsent: params.allowWithoutConsent,

@@ -1,13 +1,13 @@
+import { CoachTaskResultValidationError } from '../coach-task-result-error';
 import { buildAiTool, type AiToolDef } from '../tool.types';
 
 type Input = {
   result: Record<string, unknown>;
 };
 
-type Output = {
-  kind: 'coach_task_result_accepted';
-  taskType: string;
-};
+type Output =
+  | { kind: 'coach_task_result_accepted'; taskType: string }
+  | { code: string; error: string; stage: 'execute' };
 
 /**
  * Server-owned background tasks use this as their only terminal result channel.
@@ -16,7 +16,7 @@ type Output = {
 export const coachTaskSubmitResultTool: AiToolDef<Input, Output> = buildAiTool({
   name: 'coach_task_submit_result',
   description:
-    'Submit the final structured result for the current server-owned coach task. Call this exactly once after gathering enough evidence. Do not return the result as ordinary chat text.',
+    'Submit the final structured result once after gathering enough evidence. If the tool returns a correction, address it before resubmitting. Stop after one accepted result. Do not return the result as ordinary chat text.',
   kind: 'read',
   cost: 'low',
   searchHint: 'background coach task final structured result submit',
@@ -77,7 +77,12 @@ export const coachTaskSubmitResultTool: AiToolDef<Input, Output> = buildAiTool({
   },
   execute: async (ctx, input) => {
     const task = ctx.backgroundTask!;
-    await task.submitResult(input.result);
+    try {
+      await task.submitResult(input.result);
+    } catch (error) {
+      if (!(error instanceof CoachTaskResultValidationError)) throw error;
+      return { code: error.code, error: error.correction, stage: 'execute' };
+    }
     return {
       kind: 'coach_task_result_accepted',
       taskType: task.taskType,
