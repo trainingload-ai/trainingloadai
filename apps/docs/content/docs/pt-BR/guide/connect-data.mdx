@@ -1,80 +1,119 @@
 ---
-title: Connect Data
-description: Connect training data to Trainingload.ai so completed workouts can feed activity analysis, training load, plans, calendar views, and AI Coach reviews.
-keywords:
-  [
-    "connect training data",
-    "Strava sync",
-    "activity import",
-    "Trainingload.ai data",
-  ]
+title: Conectar dados de treino
+description: Escolha uma origem, importe um treino conhecido, acompanhe o processamento, verifique duplicatas e cobertura de sensores e confirme que o registro está pronto para análise.
+seoTitle: "Conecte e verifique dados de treino | Trainingload.ai"
+seoDescription: "Escolha sincronização de plataforma, arquivo de atividade ou gravação no celular. Acompanhe o resultado da importação, verifique origem, duplicatas e sensores."
+keywords: ["conectar dados de treino", "importação de atividades", "envio de FIT", "sincronização de treinos", "guia Trainingload.ai"]
 ---
 
-# Connect Data
+# Conectar dados de treino
 
-Trainingload.ai needs completed workouts before it can analyze execution, load, and readiness. You can bring data in through platform sync or by uploading files.
+Importe um treino concluído para o Trainingload.ai e verifique sua data, origem e detalhes. Escolha uma conexão de plataforma, envio de arquivo ou gravação pelo celular conforme o local onde o registro original está salvo.
 
-## What happens after data arrives
+[Navegue pelas atividades na Demo](https://demo.trainingload.ai/en/activities). Enviar arquivos ou autorizar uma plataforma exige a sua própria conta. A captura de tela de envio usa uma conta de exemplo no aplicativo real.
 
-Imported workouts go through a processing pipeline:
+## 1. Escolha uma origem
 
-1. **Receive** the source activity or file.
-2. **Normalize** the data into a common activity format.
-3. **Check duplicates** so repeated uploads do not create confusing history.
-4. **Materialize** the activity in your account.
-5. **Build analysis data** for charts, maps, and metrics.
-6. **Compute training metrics** such as load, pace, power, heart rate, and PMC signals.
+| Via | Quando usar | O que verificar depois |
+| --- | --- | --- |
+| Conexão de plataforma compatível | Uma plataforma de origem armazena as atividades que você quer importar ou sincronizar | Direção oferecida, intervalo de datas, resultado do processo e a atividade importada. |
+| Arquivo original FIT, TCX ou GPX | Um treino específico, um arquivo histórico ou uma origem sem conexão disponível | Inspeção por arquivo e resultado do lote de importação. |
+| Gravação no celular | Você grava um treino com o aplicativo Trainingload.ai | Sincronização da gravação finalizada e a atividade resultante. |
 
-You may see an activity before every chart is ready. If analysis is still running, wait for the status to finish and refresh the page.
+Para capacidades e autorização de plataformas, consulte [Integrações de apps de treino](/pt-BR/docs/guide/integrations) e [Conectar Strava, Garmin, COROS](/pt-BR/docs/guide/connect-third-party-platforms). Use as operações efetivamente oferecidas na sua implantação e conta. Uma importação pontual de histórico e a sincronização contínua são recursos distintos.
 
-## Platform sync
+## 2. Defina uma rota principal para um treino conhecido
 
-If you connect a supported third-party provider, new activities can be brought into Trainingload.ai without manual file upload.
+Identifique a data, o esporte e a duração aproximada de um treino de origem. Se a mesma sessão passa de um dispositivo para vários serviços, escolha qual rota deve fornecê-la antes de iniciar uma importação em massa.
 
-Use platform sync when:
+Mantenha a gravação original disponível. Um arquivo convertido ou apenas com resumo pode conter campos diferentes do arquivo FIT original. A importação de atividades exige uma gravação de atividade; uma exportação somente de saúde diária é outro tipo de dado.
 
-- You record workouts on another service.
-- You want recent activities to appear automatically.
-- You want AI Coach and plans to use the latest completed training.
+## 3. Importe pela rota escolhida
 
-If a synced activity looks incomplete, check the original source first. Missing heart rate, power, GPS, or elevation data usually comes from the source file or device permissions.
+### Envio de arquivos
 
-## File upload
+1. Abra **Atividades** e selecione a opção de envio.
+2. Escolha o arquivo original e aguarde a inspeção de formato.
+3. Confira o formato detectado e qualquer erro de validação. A extensão sozinha não garante o formato real do arquivo.
+4. Prossiga com o envio e analise qualquer aviso de duplicata.
+5. Acompanhe os resultados por arquivo na janela de progresso do lote. Reabra o lote recente se tiver fechado a janela.
 
-Use file upload when:
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Escolha o arquivo original da atividade"
+  description="Conta web sintética. A janela de envio aceita arquivos de atividade e oferece uma ação separada de confirmação. Selecionar um arquivo e concluir a importação são etapas distintas."
+  imageAlt="Janela de envio de atividades com área de seleção de arquivos e ação de envio"
+  route="Atividades → Enviar"
+  demoLabel="Ver atividades existentes na Demo"
+/>
 
-- You have a GPX / TCX / FIT file.
-- You want to import historical workouts.
-- You recorded a workout outside the connected platform.
-- You need to retry or test a specific activity.
+Consulte [Enviar arquivos de atividade](/pt-BR/docs/guide/upload-activity-files) para o fluxo completo de inspeção, duplicatas e estados do lote.
 
-See [Upload Activity Files](/docs/guide/upload-activity-files) for the step-by-step flow.
+### Sincronização de plataforma
 
-## Data quality checklist
+Abra as configurações de conexão da plataforma, leia a direção de dados oferecida, conclua a autorização e execute a importação inicial ou sincronização quando disponível. Aguarde o resultado dessa tarefa e depois localize o treino conhecido em Atividades.
 
-For the best analysis, make sure your files contain:
+Requisitos de sincronização e janelas de histórico variam por plataforma. Uma conta marcada como conectada não garante que o treino antigo esperado já tenha chegado. Insira credenciais somente no fluxo oficial de conexão da plataforma.
 
-- Accurate start time and time zone when available.
-- Distance and duration.
-- GPS track for outdoor routes.
-- Heart rate if you want HR zones, TRIMP, EF, or decoupling.
-- Power if you want FTP/CP/NP/VI and power-based TSS.
-- Elevation if you want GAP, NGP, route analysis, or climb context.
+### Gravação no celular
 
-## How connected data is used
+Encerre e salve a gravação e deixe o aplicativo sincronizá-la. Verifique o estado de recuperação ou envio pendente antes de iniciar outra gravação do mesmo treino. Siga [Gravação no celular](/pt-BR/docs/guide/mobile-recording).
 
-Once processed, workouts can appear in:
+## 4. Diferencie progresso da importação e análise da atividade
 
-- **Activities**: feed, search, detail pages, charts, and map.
-- **Dashboard**: summary cards and trend views.
-- **PMC**: CTL, ATL, TSB, and related load metrics.
-- **Plans**: actual workouts can link back to planned sessions.
-- **AI Coach**: reviews can reference real completed training.
+| O que aparece | O que verificar |
+| --- | --- |
+| Item de importação na fila ou em processamento | Aguarde o resultado final no lote de importação. |
+| Concluído ou link da atividade | Abra a atividade e confira o próprio estado de análise. |
+| Ignorado como duplicata | Confirme qual atividade existente correspondeu. |
+| Falha parcial | Identifique qual arquivo ou análise falhou e use os resultados disponíveis. |
+| Falhou | Leia o erro do item antes de tentar novamente com o arquivo original ou a operação da plataforma. |
 
-For day-to-day activity management, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+Uma atividade pode aparecer antes de todos os gráficos ou métricas derivadas terminarem. Ausência de dados de sensor, falha em uma solicitação de processamento e arquivo de origem incompatível exigem respostas diferentes.
 
-## Connect Suunto
+## 5. Verifique a atividade registrada
 
-Open **Account → Third Party Connections → Suunto**, then select **Connect with OAuth**. After you approve workout access on Suunto, Trainingload.ai queues an initial import of recent workouts. New workouts are imported through Suunto notifications with scheduled reconciliation as a fallback.
+Confira origem, esporte, data local, duração e distância. Depois, inspecione apenas as medições que a gravação realmente contém.
 
-You can return to the Suunto settings dialog to run a manual sync, disable automatic synchronization, reconnect an expired authorization, or disconnect the account. Disconnecting stops future imports but does not delete activities that were already imported.
+| Evidência de origem | O que ela sustenta |
+| --- | --- |
+| Amostras de GPS | Trajeto gravado e contexto baseado em localização. |
+| Amostras de frequência cardíaca | Gráficos de frequência cardíaca e análises derivadas compatíveis. |
+| Amostras de potência | Gráficos de potência e análises baseadas em limiar. Potência estimada é sinalizada separadamente. |
+| Séries temporais válidas | Gráficos detalhados, inspeção de linha do tempo e estatísticas por trecho quando suportadas. |
+
+Uma conexão de origem não consegue fornecer medições que nunca foram gravadas ou compartilhadas. Se um campo esperado estiver faltando, compare a plataforma de origem e o arquivo original antes de repetir a importação.
+
+## 6. Conecte a atividade ao uso diário
+
+Abra [Detalhes da atividade](/pt-BR/docs/guide/activity-detail) para revisá-la. Use o calendário para confirmar a data local e vinculá-la ao treino planejado correspondente. Depois, inspecione o [PMC](/pt-BR/docs/guide/pmc-forecast) considerando o esporte relevante e o histórico disponível.
+
+Sincronizar atividades por si só não significa que sono, HRV ou todas as medições diárias de saúde foram importadas. Verifique cada categoria de dados separadamente.
+
+## Confira o resultado
+
+O treino conhecido deve aparecer uma única vez pela rota pretendida, com resultado claro de importação e análise, origem e data corretas e cobertura de sensores que você consegue explicar. Se pertencer a uma sessão planejada, confirme o vínculo depois de validar a identificação.
+
+## Perguntas frequentes
+
+### Uma plataforma está conectada, mas a atividade não aparece
+
+Verifique a janela compatível, a conta de origem, o resultado da operação e os filtros da lista de atividades. Execute a sincronização manual disponível uma vez e aguarde o término da tarefa antes de iniciar outra importação.
+
+### O mesmo treino aparece duas vezes
+
+Compare origem, horário de início, duração e cobertura da gravação. Investigue encaminhamentos duplicados antes de excluir um registro, especialmente se uma das cópias estiver vinculada a um plano.
+
+### O gráfico está vazio após a importação
+
+Verifique o processamento da atividade e se a origem contém amostras válidas. Valores de resumo por si sós não alimentam todos os gráficos. Use a ação de tentar novamente exibida apenas em caso de falha real de solicitação.
+
+### Desconectar remove meu histórico importado?
+
+Desconectar uma plataforma e excluir atividades são operações separadas. Leia o efeito descrito na janela de conexão antes de confirmar e depois verifique as atividades existentes separadamente.
+
+## Continue
+
+- [Enviar arquivos de atividade](/pt-BR/docs/guide/upload-activity-files)
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Calendário](/pt-BR/docs/guide/calendar)

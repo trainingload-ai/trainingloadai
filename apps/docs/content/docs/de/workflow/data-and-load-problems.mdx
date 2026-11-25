@@ -1,0 +1,35 @@
+---
+title: Probleme mit Aktivitäts-, Belastungs- und Erholungsdaten beheben
+description: Gehe vom sichtbaren Symptom zu fehlenden Eingangsdaten oder zum Verarbeitungsstatus, bevor du Schwellenwerte, Belastungsquellen oder Trainingsentscheidungen änderst.
+seoTitle: "Aktivität oder Trainingsbelastung fehlt? Fehlerbehebung"
+seoDescription: Finde die Ursache für fehlende Aktivitäten, Trainingsbelastung, Erholungsdaten und Verarbeitungsfehler anhand von Quelldaten und Importstatus.
+keywords: ["fehlende Aktivitätsdaten", "Trainingsbelastung fehlt", "Synchronisierung Fehlerbehebung", "Erholungsdaten"]
+---
+
+# Probleme mit Aktivitäts-, Belastungs- und Erholungsdaten beheben
+
+## Beim Symptom ansetzen
+
+| Symptom | Zuerst prüfen | Passende Folgeanleitung |
+| --- | --- | --- |
+| Aktivität fehlt | Plattformverbindung, Importzeitraum und Dateistatus | [Daten verbinden](/de/docs/guide/connect-data) |
+| Aktivität ist doppelt vorhanden | Mehrere Importwege und Quell-IDs | [Integrationen](/de/docs/guide/integrations) |
+| Aktivität vorhanden, aber ohne Belastung | Verarbeitungsstatus, Dauer, Herzfrequenz, Leistung, Pace und Profil-Schwellenwerte | [Aktivitätsdetails](/de/docs/guide/activity-detail) |
+| Diagramme oder Runden fehlen | Ob die Quelldatei Messpunkte und Runden enthalten hat | [Aktivitätsdateien hochladen](/de/docs/guide/upload-activity-files) |
+| Schlaf, HRV oder Ruhepuls bleiben leer | Gesundheitsberechtigung, Anbieterabdeckung, Datum und Zeitzone | [Konto, Berechtigungen und Nutzung](/de/docs/guide/account-permissions-and-usage) |
+| PMC wirkt unerwartet hoch oder niedrig | Duplikate, fehlende Tage, gewählte Sportart, Belastungsquelle und Schwellenwertänderungen | [Trainingsanalyse-Workflow](/de/docs/guide/training-analysis-workflow) |
+
+## Systematisch eingrenzen
+
+1. Erwartete Datenquelle und Zeitraum bestätigen.
+2. Prüfen, ob die Quelle den benötigten Sensordatenstrom überhaupt geliefert hat.
+3. Import- und Verarbeitungsstatus kontrollieren.
+4. Profil-Schwellenwerte und Priorität der Belastungsquellen prüfen.
+5. Eine betroffene Aktivität mit einer nachweislich korrekten Aktivität vergleichen.
+6. Erst danach Einstellungen ändern oder den Support kontaktieren.
+
+## Hilfreiche Angaben für den Support sammeln
+
+Gib Datum der Aktivität, Sportart, Quelle, sichtbaren Status, erwartetes vs. tatsächliches Ergebnis und die Reproduzierbarkeit an. Entferne vorab E-Mail-Adressen, OAuth-Tokens, API-Schlüssel, genaue Wohnorte und private Anbieterkennungen.
+
+Ändere Schwellenwerte niemals nur deshalb, um einen bestimmten Belastungswert zu erzwingen. Eine Konfigurationsänderung beeinflusst spätere Auswertungen und kann berechnete Verlaufsdaten verändern.

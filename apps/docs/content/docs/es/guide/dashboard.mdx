@@ -1,77 +1,126 @@
 ---
-title: Dashboard
-description: Use the Trainingload.ai dashboard to review training trends, filter by time and sport, customize cards, and connect summary signals with deeper metric pages.
-keywords: ["Trainingload.ai dashboard", "training dashboard", "fitness status", "training load dashboard"]
+title: Panel de control
+description: Usa el panel de control de Trainingload.ai para revisar tendencias de entrenamiento, filtrar por fecha y deporte, personalizar tarjetas y conectar las señales de resumen con páginas de métricas detalladas.
+keywords:
+  [
+    "panel de control de Trainingload.ai",
+    "panel de entrenamiento",
+    "estado de fitness",
+    "panel de carga de entrenamiento",
+  ]
 ---
 
-# Dashboard
+# Panel de control
 
-The dashboard is the fastest way to understand your recent training pattern. It combines summary cards, fitness status, and configurable overview metrics.
+El panel de control es la forma más rápida de entender tu patrón reciente de entrenamiento. Combina tarjetas de resumen, estado de fitness y métricas generales configurables.
 
-Use it when you want to answer:
+Úsalo cuando quieras responder:
 
-- How much have I trained recently?
-- Is my load rising, stable, or falling?
-- Which sport is driving the trend?
-- Do I need to look deeper at activities, PMC, power, pace, or heart rate?
+- ¿Cuánto he entrenado últimamente?
+- ¿Mi carga de entrenamiento está subiendo, estable o bajando?
+- ¿Qué deporte está impulsando la tendencia?
+- ¿Necesito profundizar en actividades, PMC, potencia, ritmo o frecuencia cardíaca?
 
-## Filters
+## Antes de empezar
 
-The dashboard supports global filters:
+- Importa suficientes actividades recientes para que el rango de fechas elegido tenga sentido.
+- Configura tus umbrales y la prioridad de fuentes de carga antes de comparar métricas basadas en intensidad.
+- Analiza un deporte cada vez cuando carrera, ciclismo y natación dependan de umbrales distintos.
 
-- **Time range**: switch between recent periods.
-- **Sport type**: focus on running, cycling, swimming, or all activity.
+## Flujo de revisión de tendencias
 
-When you change filters, the cards and charts update to match the selected context.
+1. Selecciona el rango de fechas y el deporte adecuados.
+2. Interpreta el estado de fitness como una tendencia, no como un diagnóstico ni un veredicto de preparación.
+3. Identifica la tarjeta o gráfica que cambió.
+4. Abre las actividades que explican ese cambio.
+5. Continúa hacia la página correspondiente de PMC, potencia, ritmo o frecuencia cardíaca antes de modificar el plan.
 
-## Fitness status
+<DocsScreenshot
+  id="dashboard-trend-review"
+  title="Revisión de tendencias en el panel de control"
+  description="Confirma los filtros de fecha y deporte antes de comparar el estado de fitness y las tarjetas generales con las actividades que las respaldan."
+  route="Inicio → Panel de control"
+/>
 
-Fitness status cards summarize the current training picture. They are meant for scanning, not final decisions.
+## Filtros
 
-Common signals include:
+El panel de control admite filtros globales:
 
-- Long-term load and fitness trend.
-- Recent fatigue.
-- Readiness/form context.
-- Training consistency.
+- **Rango de tiempo**: alterna entre periodos recientes.
+- **Tipo de deporte**: céntrate en carrera, ciclismo, natación o todas las actividades.
 
-For the underlying model, read:
+Cuando cambias los filtros, las tarjetas y gráficas se actualizan al contexto seleccionado.
 
-- [Chronic Training Load](/docs/metrics/pmc/chronic-training-load)
-- [Acute Training Load](/docs/metrics/pmc/acute-training-load)
-- [Training Stress Balance](/docs/metrics/pmc/training-stress-balance)
+## Estado de fitness
 
-## Overview cards
+Las tarjetas de estado de fitness resumen tu situación actual de entrenamiento. Están pensadas para una lectura rápida, no para decisiones definitivas.
 
-Overview cards summarize activity volume and performance-related metrics. Depending on your data, they can include distance, duration, elevation, heart rate, power, cadence, and other training fields.
+Entre las señales habituales se incluyen:
 
-Use overview cards to spot changes, then open the relevant page for detail:
+- Carga a largo plazo y tendencia de fitness.
+- Fatiga reciente.
+- Contexto de forma y frescura.
+- Constancia del entrenamiento.
 
-- **Activities** for the workouts behind the numbers.
-- **PMC** for load trend.
-- **Power** for FTP, CP, NP, VI, and power curve context.
-- **Pace** for running pace, GAP, NGP, and best-distance views.
-- **Heart Rate** for HR response, zones, EF, and decoupling.
+Para conocer el modelo subyacente, lee:
 
-## Edit layout
+- [Carga de entrenamiento crónica (CTL)](/es/docs/metrics/pmc/chronic-training-load)
+- [Carga de entrenamiento aguda (ATL)](/es/docs/metrics/pmc/acute-training-load)
+- [Balance de estrés de entrenamiento (TSB)](/es/docs/metrics/pmc/training-stress-balance)
 
-On desktop, the dashboard supports editing the layout of key sections. Use this when you want the dashboard to match your training focus.
+## Tarjetas de resumen
 
-Examples:
+Las tarjetas de resumen sintetizan el volumen de actividad y métricas ligadas al rendimiento. Según tus datos, pueden incluir distancia, duración, desnivel, frecuencia cardíaca, potencia, cadencia y otros campos de entrenamiento.
 
-- Put load and consistency first during base training.
-- Put power or pace metrics first during a race-specific block.
-- Keep recovery and fatigue visible when returning from a high-load week.
+Usa las tarjetas de resumen para detectar cambios y luego abre la página correspondiente para entrar en detalle:
 
-After editing, save the layout so the dashboard opens in the same structure next time.
+- **Actividades** para las sesiones que originan los números.
+- **PMC** para la tendencia de carga.
+- **Potencia** para FTP, CP, NP, VI y curva de potencia.
+- **Ritmo** para ritmo de carrera, GAP, NGP y mejores distancias.
+- **Frecuencia cardíaca** para respuesta cardíaca, zonas, EF y desacoplamiento.
 
-## How to interpret dashboard changes
+## Editar el diseño
 
-Do not overreact to one card changing for one day. A better workflow:
+En escritorio, el panel de control permite editar la distribución de las secciones principales. Úsalo para adaptar el panel a tu foco de entrenamiento actual.
 
-1. Check whether the time range and sport filter are correct.
-2. Open recent activities behind the change.
-3. Compare load with subjective fatigue.
-4. Use AI Coach if you want a plan-aware interpretation.
+Ejemplos:
 
-The dashboard is your starting point. The decision should still consider the plan, recent workouts, and how you feel.
+- Pon carga y constancia arriba durante un bloque de base.
+- Prioriza potencia o ritmo durante un bloque específico de competición.
+- Mantén visibles recuperación y fatiga al salir de una semana de carga alta.
+
+Tras editar, guarda el diseño para que el panel se abra con la misma estructura la próxima vez.
+
+## Cómo interpretar cambios en el panel
+
+No sobrerreacciones porque una tarjeta cambie en un solo día. Un flujo mejor es:
+
+1. Comprobar si el rango de fechas y el filtro de deporte son correctos.
+2. Abrir las actividades recientes detrás del cambio.
+3. Comparar la carga con la fatiga subjetiva.
+4. Usar el Entrenador con IA si quieres una interpretación integrada con tu plan.
+
+El panel de control es tu punto de partida. La decisión final siempre debe tener en cuenta el plan, las sesiones recientes y cómo te sientes.
+
+## Verifica el resultado
+
+- Los filtros activos coinciden con la pregunta que querías responder.
+- Las actividades y totales visibles cubren el mismo rango de fechas y deporte.
+- Toda tendencia puede rastrearse hasta actividades completadas concretas.
+- Las métricas dependientes de umbrales usan los valores vigentes del perfil.
+- Un diseño guardado en escritorio se mantiene al volver a abrir el panel.
+
+## Solución de problemas
+
+- **Las tarjetas aparecen vacías:** amplía el rango de fechas, quita el filtro de deporte y confirma que las actividades estén en estado Lista.
+- **Un total difiere de la lista de actividades:** compara zona horaria, rango de fechas, filtro de deporte y estado de procesamiento.
+- **La carga o el estado cambiaron de forma inesperada:** revisa el historial de umbrales y la prioridad de fuentes de carga antes de asumir que cambió el entrenamiento.
+- **El diseño no se guardó:** guarda la edición y confirma que has iniciado sesión en tu cuenta antes de recargar.
+- **Una tarjeta muestra un valor extremo:** abre la actividad subyacente y comprueba la calidad de los sensores antes de actuar sobre un dato atípico.
+
+## Próximos pasos
+
+- [Flujo de análisis de entrenamiento](/es/docs/guide/training-analysis-workflow)
+- [Detalle de actividad](/es/docs/guide/activity-detail)
+- [Carga de entrenamiento](/es/docs/metrics/training-load)

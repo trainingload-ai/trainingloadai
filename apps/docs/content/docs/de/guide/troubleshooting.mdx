@@ -1,0 +1,95 @@
+---
+title: Fehlerbehebung
+description: Behebe häufige Probleme in Trainingload.ai rund um Anmeldung, Synchronisierung, Aktivitätsverarbeitung, Trainingspläne, mobile Aufzeichnung, KI-Coach und fehlende Kennzahlen.
+keywords:
+  [
+    "Trainingload.ai Fehlerbehebung",
+    "Aktivitätssynchronisierung fehlgeschlagen",
+    "Trainingsplan Fehler",
+  ]
+---
+
+# Fehlerbehebung
+
+Beginne immer beim konkret beobachtbaren Symptom. Trenne Anbieter nicht vorschnell, lösche keine Aktivitäten und lege keine Pläne neu an, bevor klar ist, an welcher Stelle der Ablauf fehlgeschlagen ist.
+
+## Anmelde- oder Autorisierungsschleifen
+
+1. Prüfe, ob Browser oder mobile App den Dienst erreichen können.
+2. Schließe den OAuth-Ablauf in derselben Browser-Sitzung ab, in der du ihn gestartet hast.
+3. Vergewissere dich, dass das Konto über eine aktive Anmeldemethode verfügt, bevor du eine andere trennst.
+4. Lade die Anmeldeseite neu und versuche es genau einmal erneut.
+
+Wenn die Autorisierung beim Anbieter erfolgreich war, Trainingload.ai aber weiterhin „Getrennt“ anzeigt, öffne den Anbieterdialog erneut und prüfe, ob ein Callback- oder Berechtigungsfehler angezeigt wird.
+
+## Eine synchronisierte Aktivität fehlt
+
+1. Prüfe, ob die Einheit beim Quellanbieter tatsächlich existiert.
+2. Kontrolliere den Verbindungsstatus des Anbieters.
+3. Starte – sofern verfügbar – einmalig eine manuelle Synchronisierung oder einen Abgleich.
+4. Warte, bis der laufende Import-Batch abgeschlossen ist.
+5. Suche unter **Aktivitäten** gezielt nach Datum und Sportart.
+
+Trennen und wiederholtes Neuverbinden solltest du vermeiden – es erzeugt oft parallele Importläufe, ohne ein Berechtigungsproblem bei der Quelle zu lösen.
+
+## Die Aktivität ist sichtbar, aber die Analyse ist unvollständig
+
+Eine Aktivität kann bereits angezeigt werden, bevor jedes abgeleitete Diagramm fertig berechnet ist. Lade die Seite neu, sobald die Verarbeitung abgeschlossen ist. Fehlt nur eine einzelne Kennzahlengruppe, prüfe die Quelldatenreihen:
+
+- Herzfrequenzanalyse benötigt Herzfrequenz-Messwerte.
+- Leistungsanalyse benötigt Leistungswerte sowie einen passenden Sportart- und Profilkontext.
+- Routen- und Höhenansichten benötigen GPS- und Höhendaten.
+- Pace- und Distanzanalyse benötigen nutzbare Distanz- und Zeitdaten.
+
+## Eine Kennzahl wirkt falsch
+
+Prüfe der Reihe nach:
+
+1. Sportart und genauere Sportartdefinition.
+2. Einheiten und Zeitzone.
+3. Schwellenwert und dessen Gültigkeitsdatum.
+4. Zonenmodell und benutzerdefinierte Zonengrenzen.
+5. Gewählte Priorität der Belastungsquellen.
+6. Rohe Aktivitätsdatenreihen.
+
+Das Ändern eines Schwellenwerts beeinflusst die Einordnung nachfolgender Berechnungen. Halte fest, warum ein Wert geändert wurde, statt ihn so lange anzupassen, bis eine einzelne Einheit gut aussieht.
+
+## Eine Einheit lässt sich nicht speichern
+
+Prüfe bei Ausdauereinheiten, ob jeder strukturierte Abschnitt eine gültige Dauer oder Distanz und ein unterstütztes Ziel hat. Prüfe bei Krafteinheiten, dass:
+
+- Mindestens eine Übung vorhanden ist.
+- Jede Übung einen Namen hat.
+- Jede Übung mindestens eine Satzgruppe enthält.
+- Jede Übung mindestens einen Arbeitssatz umfasst.
+
+Der Editor zeigt eine lokalisierte Validierungsmeldung an und hält den ungültigen Entwurf zur Korrektur geöffnet.
+
+## Der Plan wurde anderswo geändert
+
+Meldet die App einen Versions- oder Statuskonflikt, hat eine andere Anfrage den Plan verändert, nachdem deine Ansicht geladen wurde. Lade den Plan neu, prüfe den aktuellsten Stand und wende deine Änderung erneut an. Wiederhole eine veraltete löschende oder überschreibende Aktion niemals blind.
+
+## Mobile Aufzeichnung wurde nicht fertig synchronisiert
+
+Lass die App installiert und lösche den lokalen Speicher nicht, solange eine Wiederherstellung möglich ist. Öffne den Aufzeichnungsbildschirm erneut, lass die App die Sitzung wiederherstellen und verbinde dich wieder mit dem Netzwerk. Siehe [Mobile Aufzeichnung](/de/docs/guide/mobile-recording).
+
+## Der KI-Coach kann eine Anfrage nicht abschließen
+
+- Kürze sehr umfangreiche Anfragen oder teile sie in Einzelschritte auf.
+- Prüfe, ob Plan oder Aktivität noch existieren und zugänglich sind.
+- Kontrolliere deine Nutzungslimits.
+- Schlägt die Validierung einer strukturierten Aktion fehl, beschreibe die gewünschte Änderung in klaren Worten und versuche es erneut.
+- Übernimm niemals eine Anpassung, die du nicht in der Vorher-Nachher-Vorschau prüfen kannst.
+
+## Nützliche Hinweise für den Support sammeln
+
+Wenn du ein Problem meldest, gib möglichst an:
+
+- Ungefähre Uhrzeit und Zeitzone.
+- Web oder mobil, Betriebssystem sowie App- oder Browserversion.
+- Die betroffene Seite oder den Workflow – niemals Zugangsdaten.
+- Aktivitäts-Hash-ID, Plan-ID oder Anbietername, sofern unbedenklich.
+- Den exakten lokalisierten Fehlertext.
+- Einen Screenshot mit ausgeblendeten persönlichen Daten.
+
+Sende niemals Passwörter, OAuth-Token, API-Schlüssel oder genaue Wohnort-Koordinaten mit.

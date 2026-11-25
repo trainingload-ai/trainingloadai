@@ -1,0 +1,13 @@
+{
+  "title": "클라이언트 가이드",
+  "pages": [
+    "index",
+    "chatgpt",
+    "codex",
+    "claude-code",
+    "claude-desktop",
+    "cursor",
+    "vscode",
+    "opencode"
+  ]
+}

@@ -1,44 +1,81 @@
 ---
-title: Training Load
-description: Understand training load, TSS, IF, and TRIMP, and how load trends support fatigue management and adaptive endurance training plans.
-keywords: ["Training Load", "training load management", "TSS", "IF", "TRIMP", "training stress", "adaptive training plan"]
+title: "Qu’est-ce que la charge d’entraînement ? TSS, TRIMP et IF expliqués"
+description: "La charge d’entraînement quantifie la dose d’une séance ou d’une semaine à l’aide du TSS, du TRIMP et de l’Intensity Factor. Découvrez comment comparer vos séances et piloter votre plan d’entraînement."
+keywords:
+  [
+    "qu'est-ce que la charge d'entraînement",
+    "charge d'entraînement expliquée",
+    "TSS vs TRIMP",
+    "métriques charge d'entraînement",
+    "comment mesurer la charge d'entraînement",
+  ]
 ---
 
-# Training Load
+# Qu’est-ce que la charge d’entraînement ? TSS, TRIMP et IF expliqués
 
-**Training load** is a way to quantify how much stress a workout, week, or training block places on the body. It gives endurance athletes a shared language for comparing sessions, managing fatigue, and deciding whether an adaptive training plan should build, hold, recover, or adjust.
+La **charge d’entraînement** représente la dose d’effort modélisée sur une séance, une semaine ou un bloc d’entraînement. Cette page présente la famille de métriques dédiées — TSS, TRIMP et Intensity Factor (IF) — afin que vous puissiez comparer une longue sortie facile avec une courte séance d’intervalles, puis décider si votre plan d’entraînement doit construire, stabiliser, récupérer ou s’ajuster. Les décisions produit détaillées se trouvent sur [la gestion de la charge d’entraînement](/fr/training-load) ; les pages ci-dessous regroupent les définitions.
 
-Without a load metric, it is hard to compare “a 2-hour easy ride/run” with “a 30-minute interval session”. It is also harder to see whether recent load has risen faster than recovery can absorb.
+Sans métrique de charge, il est difficile de comparer « une sortie facile de 2 heures à vélo ou à pied » avec « une séance d’intervalles de 30 minutes ». Il est aussi plus délicat de voir si la charge récente a augmenté plus vite que votre capacité de récupération.
 
-## Key Metrics
+## Métriques clés
 
 <Cards>
-  <Card title="TSS (Training Stress Score)" href="/docs/metrics/training-load/training-stress-score" />
-  <Card title="IF (Intensity Factor)" href="/docs/metrics/training-load/intensity-factor" />
-  <Card title="TRIMP (Training Impulse)" href="/docs/metrics/training-load/training-impulse" />
+  <Card
+    title="TSS (Training Stress Score)"
+    href="/fr/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF (Intensity Factor)"
+    href="/fr/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP (Training Impulse)"
+    href="/fr/docs/metrics/training-load/training-impulse"
+  />
 </Cards>
 
-## Why Quantify Training Load?
+## Pourquoi quantifier la charge d’entraînement ?
 
-1.  **Objective comparison**: evaluate different durations and session types with a single yardstick.
-2.  **Progress tracking**: ensure weekly load increases gradually and avoid injury risk from sudden spikes.
-3.  **Recovery management**: higher load requires more recovery; quantification helps you plan training and rest more rationally.
+1. **Comparaison objective** : évaluer des durées et des types de séances différents sur une même échelle.
+2. **Suivi des tendances** : repérer les évolutions progressives ou brutales de la charge hebdomadaire modélisée.
+3. **Contexte de récupération** : associer l’historique de charge à la qualité des séances et aux sensations de l’athlète pour planifier l’effort et le repos.
 
-## How Training Load Supports Adaptive Planning
+## Comment la charge d’entraînement soutient la planification adaptative
 
-Training load is not the plan itself. It is the evidence layer behind better plan decisions:
+La charge d’entraînement ne remplace pas le plan d’entraînement : elle constitue la couche de preuve qui éclaire de meilleures décisions :
 
--   **After completed workouts**: actual load can be compared with planned load instead of relying only on completion status.
--   **During review**: CTL, ATL, and TSB help separate long-term fitness trends from short-term fatigue.
--   **Before adjustment**: missed workouts, unusually high fatigue, or a fast load ramp can justify changing the next few sessions.
+- **Après les séances réalisées** : la charge réelle est comparée à la charge prévue au lieu de se limiter à un simple statut « fait / non fait ».
+- **Pendant l’analyse** : CTL (forme), ATL (fatigue) et TSB (fraîcheur) comparent des tendances de charge lentes et rapides ; ils ne mesurent pas directement la condition physique, la fatigue biologique ou la disponibilité.
+- **Avant un ajustement** : des séances manquées, une fatigue inhabituelle ou une montée en charge trop rapide peuvent justifier d’adapter les séances suivantes.
 
-Trainingload.ai uses this pattern throughout the product loop: plan → completed workouts → load trend → AI coach review → confirmed adjustment.
+Trainingload.ai applique cette boucle dans tout le produit : plan d’entraînement → séances réalisées → tendance de charge → revue du Coach IA → ajustement confirmé.
 
-## Related Concepts
+## FAQ
 
--   [Training Stress Score (TSS)](/docs/metrics/training-load/training-stress-score): single-session training stress.
--   [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor): workout intensity relative to threshold.
--   [Training Impulse (TRIMP)](/docs/metrics/training-load/training-impulse): heart-rate-based internal load.
--   [Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load): longer-term load trend.
--   [Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load): recent fatigue trend.
--   [Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance): freshness derived from CTL and ATL.
+### Qu’est-ce que la charge d’entraînement ?
+
+La charge d’entraînement est une dose d’entraînement modélisée. Des scores de séance comme le TSS ou le TRIMP estiment une activité isolée ; la CTL et l’ATL synthétisent ces scores dans le temps pour comparer des semaines entre elles, au-delà du simple fait d’avoir terminé la séance.
+
+### TSS vs TRIMP : lequel mesure la charge d’entraînement ?
+
+Le TSS est le score de charge externe privilégié lorsque la puissance ou une allure fiable est disponible. Le TRIMP mesure la charge interne à partir de la fréquence cardiaque et de la durée. Trainingload.ai peut utiliser l’un ou l’autre selon la discipline et votre ordre de priorité des sources de charge.
+
+### Comment mesurer la charge d’entraînement en course à pied et en cyclisme ?
+
+En cyclisme, on utilise habituellement le TSS de puissance calculé à partir de la NP, de l’IF et de la FTP. En course à pied, on utilise souvent le rTSS basé sur la NGP et l’allure au seuil, ou le TRIMP lorsque seule la fréquence cardiaque est fiable. Comparez d’abord les scores au sein d’une même discipline avant de les comparer entre sports.
+
+### Par où continuer après cette page ?
+
+Ouvrez les pages de définition du [TSS](/fr/docs/metrics/training-load/training-stress-score), du [TRIMP](/fr/docs/metrics/training-load/training-impulse) et de l’[Intensity Factor](/fr/docs/metrics/training-load/intensity-factor). Ensuite, [pilotez votre charge d’entraînement avec CTL, ATL et TSB dans votre plan](/fr/training-load).
+
+## Concepts associés
+
+- [Training Stress Score (TSS)](/fr/docs/metrics/training-load/training-stress-score) : stress d’entraînement d’une séance.
+- [Intensity Factor (IF)](/fr/docs/metrics/training-load/intensity-factor) : intensité d’une séance par rapport au seuil.
+- [Training Impulse (TRIMP)](/fr/docs/metrics/training-load/training-impulse) : charge interne basée sur la fréquence cardiaque.
+- [Calculer le TSS à partir de la durée, de la NP et de la FTP](/fr/tss-calculator)
+- [Projeter CTL, ATL et TSB à partir du TSS quotidien](/fr/training-load-calculator)
+- [Chronic Training Load (CTL)](/fr/docs/metrics/pmc/chronic-training-load) : tendance de charge longue (forme).
+- [Acute Training Load (ATL)](/fr/docs/metrics/pmc/acute-training-load) : tendance de charge récente (fatigue).
+- [Training Stress Balance (TSB)](/fr/docs/metrics/pmc/training-stress-balance) : CTL actuelle moins ATL actuelle (fraîcheur).
+- [Utiliser la revue du Coach IA pour ajuster la charge d’entraînement en toute sécurité](/fr/ai-training-plan)

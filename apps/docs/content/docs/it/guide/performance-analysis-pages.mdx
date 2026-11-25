@@ -1,0 +1,134 @@
+---
+title: Pagine di analisi delle prestazioni
+description: Scegli la pagina di analisi giusta in Trainingload.ai, mantieni coerenti i filtri di sport e periodo e riconduci gli andamenti di potenza, passo, frequenza cardiaca e carico alle attività reali.
+keywords:
+  [
+    "analisi prestazioni allenamento",
+    "curva di potenza",
+    "curva di passo",
+    "zone frequenza cardiaca",
+    "analisi Trainingload.ai",
+  ]
+---
+
+# Pagine di analisi delle prestazioni
+
+Apri **Analisi** per scegliere Potenza, Frequenza cardiaca, Passo, PMC o un'altra vista su prestazioni e carico di allenamento. Usa le domande qui sotto per individuare subito la pagina giusta.
+
+## Prima di iniziare
+
+- Attendi che le attività pertinenti raggiungano lo stato Ready.
+- Controlla le soglie del profilo e le zone specifiche per sport prima di interpretare le distribuzioni in zona.
+- Scegli un solo sport e una sola finestra decisionale.
+- Verifica che le attività contengano il sensore richiesto dalla pagina: potenza, frequenza cardiaca oppure distanza e tempo affidabili.
+- Mantieni lo stesso sistema di unità e lo stesso fuso orario quando confronti valori tra pagine diverse.
+
+## 1. Scegli una pagina da Analisi
+
+Apri **Analisi** e cerca o seleziona uno strumento:
+
+| Domanda                                                           | Pagina               | Cosa mostra                                                                |
+| ----------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------------- |
+| Quanto e quanto spesso mi sono allenato?                          | Statistiche attività | Heatmap annuale e andamento di distanza, durata, FC, conteggio o calorie   |
+| Come è cambiato il carico di allenamento recente?                 | PMC                  | Contesto del carico con CTL, ATL e TSB                                     |
+| Quali sono i miei migliori sforzi sostenuti?                      | Migliori distanze    | Classifica delle prestazioni per distanza fissa o tempo fisso              |
+| Come è cambiata la mia capacità di potenza?                       | Potenza              | Curva, potenza massima, distribuzione in zone e profilo potenza            |
+| Come è cambiato il passo in uno sport specifico?                  | Passo                | Curva di passo e distribuzione nelle zone di passo                         |
+| Quali sforzi cardiaci e tempi in zona emergono dai dati?          | Frequenza cardiaca   | Curva di frequenza cardiaca e distribuzione in zone                        |
+
+**Progressione** è contrassegnata come **In arrivo (Coming soon)**. Non considerarla un report disponibile né aspettare questa vista per rispondere a una domanda già coperta dalle pagine attive.
+
+<DocsScreenshot
+  id="analysis-hub-tools"
+  title="Elenco degli strumenti di analisi"
+  description="Scegli un report dai gruppi allenamento e prestazioni; la scheda Progressione resta chiaramente contrassegnata come In arrivo."
+  route="Analisi"
+/>
+
+## 2. Imposta i filtri prima di leggere il grafico
+
+Su Potenza, Passo e Frequenza cardiaca imposta prima lo sport e l'intervallo di date, poi mantienili invariati mentre passi da una scheda all'altra.
+
+- Usa un singolo intervallo per rispondere a una domanda sullo stato attuale.
+- Aggiungi più intervalli solo quando la pagina lo consente e il confronto ha uno scopo chiaro.
+- Passo richiede uno sport specifico e non offre una vista per tutti gli sport insieme.
+- Potenza e Frequenza cardiaca possono includere tutti gli sport, ma un risultato multisport è spesso più difficile da interpretare.
+- Un grafico vuoto indica spesso l'assenza di dati sensore qualificanti nell'intervallo scelto.
+
+Annota sport, durata dello sforzo e intervalli di date quando confronti i risultati. Per esempio, confronta la potenza sui 5 minuti nel ciclismo degli ultimi 90 giorni con i 90 giorni precedenti anziché fermarti a un singolo picco massimo.
+
+## 3. Usare le schede di Potenza
+
+La pagina Potenza comprende quattro viste:
+
+- **Curva**: tabella e grafico della migliore potenza sostenuta sulle diverse durate; può confrontare più intervalli temporali.
+- **Massima**: storico della potenza massima per il contesto selezionato.
+- **Zone**: distribuzione del lavoro nelle zone di potenza configurate; può confrontare più intervalli.
+- **Profilo**: contesto del profilo potenza per lo sport e l'intervallo scelti.
+
+Usa Curva per la capacità specifica per durata, Zone per capire come hai distribuito il lavoro e Profilo per il quadro d'insieme. Rispondono a domande diverse e non vanno ridotte a un unico giudizio sulla «fitness».
+
+<DocsScreenshot
+  id="power-analysis-tabs"
+  title="Analisi potenza con filtri coerenti"
+  description="Mantieni fisso lo sport mentre ti sposti tra Curva, Massima, Zone e Profilo; usa più intervalli solo dove la pagina supporta il confronto."
+  route="Analisi → Potenza"
+/>
+
+## 4. Usare Passo e Frequenza cardiaca
+
+La pagina Passo contiene:
+
+- **Curva**: tabella e grafico del passo sulle diverse distanze.
+- **Zone**: distribuzione del tempo o del lavoro nelle zone di passo configurate.
+
+Seleziona corsa, ciclismo o nuoto in base al filtro offerto. Il passo del nuoto usa la propria base di distanza dedicata, mentre corsa e ciclismo hanno il proprio contesto di visualizzazione: evita di confrontare numeri grezzi di passo tra sport diversi.
+
+La pagina Frequenza cardiaca contiene:
+
+- **Curva**: tabella e grafico dei valori sostenuti di frequenza cardiaca.
+- **Zone**: distribuzione nelle zone di frequenza cardiaca configurate.
+
+La frequenza cardiaca è un segnale di risposta fisiologica: interpretala sempre insieme a durata, passo o potenza, condizioni ambientali, fatica e qualità del sensore, invece di considerare automaticamente migliore un valore più alto.
+
+## 5. Aggiungere il contesto del carico con il PMC
+
+Apri **PMC / Gestione fitness** quando la domanda riguarda la pressione di allenamento accumulata. Scegli lo sport, leggi insieme le schede correnti di CTL, ATL e TSB, poi passa il grafico tra Forma, Fitness e Fatica. Il pannello del carico giornaliero e il tooltip sulla data aiutano a spiegare il punto selezionato.
+
+La pagina distingue lo storico registrato dalle stime future disponibili. Leggi sempre la base di carico di una data futura prima di interpretarla: una previsione mancante non significa carico pari a zero. Segui [Leggere storico e previsioni PMC](/it/docs/guide/pmc-forecast) per il flusso completo, i requisiti dati e le schede storiche della dashboard.
+
+Per lo storico di risposta prestazionale e la proiezione separata a quattro settimane usa [Capire il VO2max effettivo](/it/docs/guide/effective-vo2max-for-endurance). Prosegui con il [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow) per collegare le evidenze alla revisione del piano.
+
+## 6. Ricondurre un risultato alle prove originali
+
+Quando un punto della curva, una distribuzione in zone o una variazione del carico conta davvero:
+
+1. Annota sport, intervallo di date, scheda, durata e valore.
+2. Apri l'attività pertinente o usa la ricerca attività per trovare le sessioni che hanno generato il dato.
+3. Controlla stato di elaborazione, sensori, soglie ed eventuali picchi o cali anomali.
+4. Separa il risultato osservato dalla tua interpretazione.
+5. Prendi la decisione più contenuta che sia sostenuta dai dati.
+
+## Verifica dell'analisi
+
+- La pagina scelta corrisponde alla domanda posta.
+- Sport, intervallo temporale, unità e impostazioni delle zone sono chiari.
+- Il risultato poggia su attività qualificanti in stato Ready.
+- Eventuali lacune di sensori o valori anomali sono stati rilevati anziché ignorati nella media.
+- Ogni decisione di allenamento è riconducibile alle attività sottostanti e al contesto del piano.
+
+## Risoluzione dei problemi
+
+- **La ricerca in Analisi non restituisce risultati:** cancella il testo cercato; la ricerca abbina titolo e descrizione localizzati.
+- **Una scheda non si apre:** verifica se è contrassegnata come In arrivo (Coming soon).
+- **Una curva o un grafico zone è vuoto:** amplia l'intervallo di date, seleziona lo sport corretto e controlla che le attività qualificanti contengano il flusso del sensore richiesto.
+- **I valori sono cambiati dopo la modifica delle soglie:** distribuzioni in zone e metriche derivate possono aggiornarsi; annota le nuove impostazioni prima di confrontare lo storico.
+- **Potenza, passo e frequenza cardiaca raccontano cose diverse:** misurano input e risposte differenti. Ricontrolla domanda, sessioni di origine e condizioni invece di scegliere il grafico più rassicurante.
+- **I risultati di tutti gli sport sembrano incoerenti:** passa a un singolo sport e ripeti il confronto.
+
+## Prossimi passi
+
+- [Storico attività e migliori sforzi](/it/docs/guide/activity-history-insights)
+- [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow)
+- [Profilo, soglie e zone](/it/docs/guide/profile-thresholds-zones)
+- [Dettaglio attività](/it/docs/guide/activity-detail)

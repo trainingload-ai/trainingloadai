@@ -1,0 +1,148 @@
+---
+title: MCP 資源與提示詞
+description: TrainingLoad MCP 原生參考資源與可重複使用的訓練分析提示詞。
+---
+
+# MCP 資源與提示詞
+
+本頁面由伺服器 MCP 內容目錄自動產生。請勿直接編輯；更新時請執行 `pnpm --dir apps/server mcp:reference`。
+
+資源可為用戶端提供穩定的指標說明、安全指引與已授權能力目錄，無須額外讀取運動員資料。提示詞則會產生結構化的提問範本；實際資料仍須透過符合 OAuth 權限範圍的工具讀取。
+
+## 資源
+
+| URI | 名稱 | 用途 |
+| --- | --- | --- |
+| `trainingload://guide/training-metrics` | TrainingLoad 指標解讀指南 | 說明訓練負荷、ATL、CTL、TSB、準備度區間、資料覆蓋率與缺失資料的定義與解讀邊界。 |
+| `trainingload://guide/privacy-and-safety` | TrainingLoad 隱私與安全指南 | 說明唯讀邊界、非信任文字處理方式、健康資料限制及排除回傳的資料類別。 |
+| `trainingload://catalog/capabilities` | 已授權 TrainingLoad 能力目錄 | 列出目前已授權的唯讀工具名稱、說明與對應的 OAuth 權限範圍。 |
+
+## 提示詞
+
+## `weekly-training-review`
+
+建立一份基於證據的回顧，涵蓋近期訓練負荷、訓練一致性、已完成活動與即將到來的課表。
+
+<details>
+<summary>參數 JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": "7",
+      "type": "string",
+      "enum": [
+        "7",
+        "14",
+        "28"
+      ]
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `compare-training-blocks`
+
+運用訓練負荷、運動項目組成、活動總計與訓練一致性，比較兩個指定範圍的訓練週期。
+
+<details>
+<summary>參數 JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "periodAFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodATo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBTo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "periodAFrom",
+    "periodATo",
+    "periodBFrom",
+    "periodBTo"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `race-preparation-check`
+
+在不做出醫療宣稱的前提下，檢視賽事資訊、訓練計畫執行度、近期負荷與即將到來的課表。
+
+<details>
+<summary>參數 JSON Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "horizonDays": {
+      "default": "28",
+      "type": "string",
+      "enum": [
+        "14",
+        "28",
+        "56"
+      ]
+    }
+  },
+  "required": [
+    "horizonDays"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>

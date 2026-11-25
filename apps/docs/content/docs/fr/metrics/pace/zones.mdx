@@ -1,68 +1,90 @@
 ---
-title: Pace Zones
-description: Running pace zones based on Functional Threshold Pace (FTPa), used to plan and review easy, tempo, threshold, VO2max, and anaerobic running intensity.
-keywords: ["Pace Zones", "FTPa", "Threshold Pace", "Running Zones", "running pace zones", "VDOT calculator"]
+title: Zones d’allure
+description: Zones d’allure de course à pied basées sur l’allure au seuil fonctionnel (FTPa), utilisées pour planifier et analyser les intensités faciles, tempo, seuil, VO2max et anaérobie.
+keywords: ["Zones d'allure", "FTPa", "Allure au seuil", "Zones course à pied", "zones d'allure course", "calculateur VDOT"]
 ---
 
-# Pace Zones
+# Zones d’allure
 
-**Pace zones** are a direct way to plan and review running intensity. Compared with heart rate, pace responds immediately to speed changes, but it still needs context: terrain, wind, surface, heat, fatigue, and elevation can all change how hard a pace feels.
+Les **zones d’allure** constituent un moyen direct de planifier et d’analyser votre intensité en course à pied. Contrairement à la fréquence cardiaque, l’allure réagit instantanément aux changements de vitesse, mais elle doit toujours être remise en contexte : le relief, le vent, la surface, la chaleur, la fatigue et l’altitude influencent tous la difficulté ressentie pour une même allure.
 
-Trainingload.ai uses a classic zone model based on **Functional Threshold Pace (FTPa / Threshold Pace)** (similar in spirit to common definitions from Joe Friel or Jack Daniels).
+Trainingload.ai utilise un modèle classique basé sur l’**allure au seuil fonctionnel (FTPa / Threshold Pace)**, proche dans l’esprit des références de Joe Friel ou Jack Daniels.
 
-## Key concept: FTPa
+## Concept clé : la FTPa
 
-All pace zones anchor to your **FTPa (Functional Threshold Pace)**: an estimate of the fastest pace you can sustain for roughly an all-out 1-hour effort.
--   For elite runners, this is often around half-marathon to 15K race pace.
--   For recreational runners, it’s often slightly slower than 10K pace, or close to 10K pace.
+Toutes les zones d’allure s’ancrent sur votre **FTPa (Functional Threshold Pace)** : une estimation de la vitesse maximale que vous pourriez tenir environ 1 heure à fond.
+- Chez les coureurs élite, elle se situe souvent autour de l’allure semi-marathon à 15 km.
+- Chez les coureurs amateurs, elle se situe généralement autour de l’allure 10 km ou légèrement plus lentement.
 
-## Zone definitions
+## Comment Trainingload.ai calcule l’allure au seuil (TP)
 
-The table below shows the Trainingload.ai standard pace zones, their FTPa percentages, and training intent.
+Lorsque la mise à jour automatique est activée, Trainingload.ai recherche la meilleure performance valide sur **5 km** au cours des **180 derniers jours** :
 
-| Zone | Name | Intensity | % FTPa | Typical feel (RPE) | Training goal |
+1. Lire la meilleure vitesse moyenne sur 5 km dans les records de distance.
+2. La convertir en secondes par kilomètre.
+3. Ajouter **20 secondes par kilomètre** pour estimer l’allure au seuil (TP).
+4. Enregistrer à la fois la vitesse au seuil (m/s) et l’allure au seuil (s/km).
+
+Par exemple, un meilleur 5 km récent en `4:20/km` donne une TP automatique de `4:40/km`. Sans record valide sur 5 km, la plateforme n’invente pas de TP. Vous pouvez également saisir votre TP manuellement dans votre profil de course à pied ; la valeur active (manuelle ou automatique) dépend de votre paramètre de mise à jour automatique.
+
+## Comment la TP modifie vos zones d’allure
+
+L’état actuel (Current Status) affiche la TP active ainsi que chaque plage d’allure absolue calculée. Lorsque la TP change, les zones qui en dépendent sont recalculées :
+
+- Le **modèle Friel** utilise directement la vitesse au seuil comme repère.
+- Lorsqu’une TP est disponible, le **modèle Daniels** utilise `vVO2max speed ≈ TP speed ÷ 0.90`, puis applique les pourcentages de vitesse Easy, Marathon, Threshold, Interval et Repetition.
+- Si le modèle Daniels ne dispose pas encore de TP, il se rabat sur la vVO2max déduite de la VO2 Max actuelle.
+- Les zones personnalisées enregistrées sont résolues selon leur repère configuré : TP, VO2 Max, CS ou allure absolue.
+
+Quand votre TP s’accélère (moins de secondes par kilomètre), toutes les bornes d’allure qui dépendent de la TP deviennent plus rapides ; une TP plus lente les décale en sens inverse. Cela ne modifie pas la vitesse brute de vos activités passées, mais actualise vos futures cibles de plan d’entraînement et l’interprétation des zones au regard de votre profil actuel.
+
+## Définition des zones
+
+Le tableau ci-dessous présente les zones d’allure standard de Trainingload.ai, leurs pourcentages de FTPa et leur intention d’entraînement.
+
+| Zone | Nom | Intensité | % FTPa | Sensation typique (RPE) | Objectif d’entraînement |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Z1** | **Recovery** | Very easy | > 129% | < 2 | Promote circulation, speed recovery, build volume. |
-| **Z2** | **Aerobic** | Easy | 114% - 129% | 2 - 3 | Build aerobic base, improve fat oxidation, increase mitochondrial and capillary density. |
-| **Z3** | **Tempo** | Moderate / comfortably hard | 106% - 113% | 3 - 4 | Raise aerobic durability, practice race-like steady pacing (HM / marathon). |
-| **Z4** | **Threshold** | Hard | 100% - 105% | 5 - 7 | Improve lactate clearance and raise FTPa; learn to work near the threshold boundary. |
-| **Z5a** | **VO2max** | Very hard | 90% - 99% | 8 - 9 | Improve VO2 max; typically done as 3–5 minute intervals. |
-| **Z5b** | **Anaerobic** | All-out | < 90% | 10 | Improve anaerobic capacity, sprint speed, and neuromuscular recruitment. |
+| **Z1** | **Récupération** | Très facile | > 129 % | < 2 | Favoriser la circulation, accélérer la récupération, accumuler du volume doux. |
+| **Z2** | **Aérobie** | Facile | 114 % - 129 % | 2 - 3 | Construire la base aérobie, améliorer l’oxydation des lipides, densifier mitochondries et capillaires. |
+| **Z3** | **Tempo** | Modérée / soutenue mais contrôlée | 106 % - 113 % | 3 - 4 | Développer l’endurance aérobie, travailler une allure régulière de course (semi / marathon). |
+| **Z4** | **Seuil** | Difficile | 100 % - 105 % | 5 - 7 | Améliorer la clairance du lactate et élever la FTPa ; apprendre à travailler près du seuil. |
+| **Z5a** | **VO2max** | Très difficile | 90 % - 99 % | 8 - 9 | Développer la VO2 max ; typiquement travaillée sous forme d’intervalles de 3 à 5 minutes. |
+| **Z5b** | **Anaérobie** | Maximale | < 90 % | 10 | Améliorer la capacité anaérobie, la vitesse de pointe et le recrutement neuromusculaire. |
 
-> **Note**: pace percentages are **time-based** (min/km). A larger number means a **slower** pace.
-> *Example: if FTPa is 5:00 (300 s), the Z2 upper bound 129% is 300 × 1.29 = 387 s (6:27/km).*
+> **Remarque** : les pourcentages d’allure sont **basés sur le temps** (min/km). Un pourcentage plus élevé correspond donc à une allure **plus lente**.
+> *Exemple : si votre FTPa vaut 5:00/km (300 s), la borne haute de Z2 à 129 % vaut 300 × 1,29 = 387 s (6:27/km).*
 
-## Typical applications
+## Applications typiques
 
-### 1. Base phase
-Focus on mostly easy running. **Z1/Z2** is commonly used to build aerobic volume while keeping fatigue manageable.
+### 1. Phase de base (foncier)
+Misez sur une majorité de course facile. Les zones **Z1/Z2** permettent de bâtir du volume aérobie tout en gardant la fatigue sous contrôle.
 
-### 2. Build / race-specific phase
-Add zones based on your target event:
--   **Marathon**: lots of **Z3 tempo**.
--   **5K/10K**: emphasize **Z4 threshold** and **Z5a VO2 max intervals**.
+### 2. Phase de construction / spécifique course
+Ajustez l’accent selon votre objectif :
+- **Marathon** : place importante au **Z3 tempo**.
+- **5 km / 10 km** : accent sur le **Z4 seuil** et les **intervalles Z5a VO2 max**.
 
-### 3. Recovery
-Use **Z1** for recovery days after hard sessions. If the run drifts into Z2 or Z3, it may no longer serve the recovery purpose and can add fatigue without much targeted benefit.
+### 3. Récupération
+Utilisez la **Z1** lors des journées de récupération après de grosses séances. Si la sortie dérive en Z2 ou Z3, elle ne remplit plus vraiment son rôle de récupération et ajoute de la fatigue sans bénéfice ciblé.
 
-## How Trainingload.ai uses pace zones
+## Comment Trainingload.ai utilise les zones d’allure
 
--   **Plan vs. actual**: pace zones show whether a run matched the intended intensity.
--   **Use with heart rate**: pace is **external load**, heart rate is **internal load**.
-    -   On flat terrain in good conditions, prioritize **pace**.
-    -   In heat/humidity, headwinds, or fatigue, prioritize **heart rate** and adjust pace down to maintain similar physiological intensity.
--   **Use grade-adjusted metrics when needed**: on hilly routes, Grade Adjusted Pace and Normalized Graded Pace can make zone analysis more realistic.
--   **Re-test periodically**: FTPa changes with training. Re-test every 4–6 weeks, or after a meaningful fitness change, to keep zones calibrated.
+- **Prévu vs réalisé** : les zones d’allure montrent si une séance a respecté l’intensité visée.
+- **À croiser avec la fréquence cardiaque** : l’allure mesure la **charge externe**, la fréquence cardiaque mesure la **charge interne**.
+  - Sur terrain plat dans de bonnes conditions, privilégiez l’**allure**.
+  - Par forte chaleur/humidité, vent de face ou fatigue, privilégiez la **fréquence cardiaque** et ralentissez l’allure pour conserver un effort physiologique équivalent.
+- **Métriques ajustées à la pente si nécessaire** : sur parcours vallonné, l’allure ajustée à la pente (GAP) et la NGP rendent l’analyse par zones beaucoup plus réaliste.
+- **Réévaluation régulière** : la FTPa évolue avec l’entraînement. Réévaluez-la toutes les 4 à 6 semaines, ou après un changement net de forme, afin de garder des zones bien calibrées.
 
-## Related tools and docs
+## Outils et documentation associés
 
-- [Calculate VDOT to set training load pace targets](/vdot-calculator)
-- [Estimate lactate threshold for training load pace zones](/lactate-threshold-calculator)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace)
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+- [Calculer votre VDOT pour définir vos allures d’entraînement](/fr/vdot-calculator)
+- [Estimer votre seuil lactique pour calibrer vos zones d’allure](/fr/lactate-threshold-calculator)
+- [Zones de fréquence cardiaque](/fr/docs/metrics/heart-rate/zones)
+- [Allure ajustée à la pente (GAP)](/fr/docs/metrics/pace/grade-adjusted-pace)
+- [Allure normalisée ajustée à la pente (NGP)](/fr/docs/metrics/pace/normalized-graded-pace)
 
-## References
+## Références
 
--   [Joe Friel: Setting Zones for Running](https://joefrieltraining.com/setting-zones-for-running/)
--   [TrainingPeaks: Pace Zones](https://help.trainingpeaks.com/hc/en-us/articles/204071854-Pace-Zones)
+- [Joe Friel: Setting Zones for Running](https://joefrieltraining.com/setting-zones-for-running/)
+- [TrainingPeaks: Pace Zones](https://help.trainingpeaks.com/hc/en-us/articles/204071854-Pace-Zones)

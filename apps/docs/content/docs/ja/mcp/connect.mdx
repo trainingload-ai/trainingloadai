@@ -1,0 +1,50 @@
+---
+title: AIクライアントを接続する
+description: ChatGPT、Codex、Claude Code、Claude Desktop、Cursor、VS Code、opencode向けの接続ガイドを選べます。
+---
+
+# AIクライアントを接続する
+
+どのクライアントでも、同じリモートの Streamable HTTP エンドポイントを使用します。
+
+```text
+https://api.trainingload.ai/mcp
+```
+
+TrainingLoad は OAuth 2.1 ディスカバリー、PKCE S256、リフレッシュトークンローテーション、リソースに紐付いたアクセストークンを採用しています。APIキーやアクセストークンを設定ファイルに記述しないでください。
+
+## クライアントを選ぶ
+
+| クライアント | 最短の接続手順 | 詳細ガイド |
+| --- | --- | --- |
+| ChatGPT | Plugins から custom MCP server を追加 | [ChatGPT](/ja/docs/mcp/clients/chatgpt) |
+| Codex | `codex mcp add trainingload --url https://api.trainingload.ai/mcp` | [Codex](/ja/docs/mcp/clients/codex) |
+| Claude Code | `claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp` | [Claude Code](/ja/docs/mcp/clients/claude-code) |
+| Claude Desktop | Customize → Connectors → Add custom connector | [Claude Desktop](/ja/docs/mcp/clients/claude-desktop) |
+| Cursor | `~/.cursor/mcp.json` にリモートサーバーを追加 | [Cursor](/ja/docs/mcp/clients/cursor) |
+| VS Code | MCP: Add Server → HTTP | [VS Code](/ja/docs/mcp/clients/vscode) |
+| opencode | `opencode.json` に `remote` エントリを追加 | [opencode](/ja/docs/mcp/clients/opencode) |
+
+## デフォルトの権限
+
+初回認可では、次のスコープセットが推奨されます。
+
+```text
+openid profile email offline_access profile:read activity:read training:read plan:read competition:read
+```
+
+`health:read` は意図的に除外されています。縮小版の日次ヘルスサマリーをクライアントに読み取らせたい場合のみ追加してください。
+
+## すべてのクライアント共通の動作確認手順
+
+1. カタログに 24個のツール、3個のリソース、3個のプロンプトが表示されることを確認します。`health:read` が未認可でも、ヘルス関連ツールは段階的同意（インクリメンタル同意）の入口として一覧に表示されたままになる場合があります。
+2. 「TrainingLoadを使って現在のトレーニング状態を要約し、使用した日付とタイムゾーンを明記して」と質問します。
+3. クライアントが `get_training_snapshot` を呼び出し、トークンの貼り付けを求めないことを確認します。
+4. 回答で欠損値と 0 が区別され、TrainingLoad のツール呼び出しが表示されることを確認します。
+5. 期間比較の質問を送り、クライアントが `compare_training_periods` を呼び出せることを確認します。
+
+## アクセスを取り消す・再接続する
+
+TrainingLoad のアカウント認可ページを開くと、各クライアントのスコープや最近のアクセス履歴を確認し、権限を取り消すことができます。取り消し後もクライアント側に古い状態が残る場合は、クライアント側で該当 MCP サーバーの OAuth セッションを切断またはクリアしてから再接続してください。
+
+接続や認可に失敗する場合は、[トラブルシューティング](/ja/docs/mcp/troubleshooting)を参照してください。

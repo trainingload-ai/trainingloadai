@@ -1,0 +1,72 @@
+---
+title: MCP-Anwendungsfälle
+description: Prompts zum Kopieren, der erwartete Tool-Ablauf und die Belege, die eine gute Antwort enthalten sollte.
+---
+
+# MCP-Anwendungsfälle
+
+Füge einen beliebigen Prompt unten in einen mit TrainingLoad verbundenen KI-Client ein. Der Client muss nicht jedes aufgeführte Tool verwenden – er sollte die kleinste Kombination wählen, die deine Frage zuverlässig beantwortet.
+
+## Aktueller Zustand und gefühlte Ermüdung
+
+> Nutze TrainingLoad, um meinen Trainingszustand zum heutigen Stand zusammenzufassen. Vergleiche die letzten 7 Tage mit den 7 Tagen davor, beziehe meine Form und meine nächsten drei geplanten Einheiten mit ein und trenne Fakten klar von Interpretationen.
+
+Erwarteter Ablauf: `get_training_snapshot` → `get_training_readiness` → bei Bedarf `list_planned_workouts`.
+
+Die Antwort sollte `asOf`, Zeitzone, Belastungsdifferenz, die Verfügbarkeit von ATL/CTL/TSB sowie den Hinweis enthalten, dass die Bereitschaftsausgabe ein beobachtbares Belastungssignal ist – keine medizinische Bewertung und keine Freigabe im Sinne von „sicher zu trainieren“.
+
+## Zwei Trainingsblöcke vergleichen
+
+> Vergleiche den Zeitraum 1.–28. September 2026 mit dem 1.–28. Oktober 2026. Schlüssle die Trainingsbelastung nach Laufen, Radfahren und Schwimmen auf und nenne nur Veränderungen, die durch die Daten belegt sind.
+
+Erwarteter Ablauf: `compare_training_periods` + `get_training_breakdown`.
+
+Für eine wiederholbare Variante wähle den nativen Prompt `compare-training-blocks`. Ergänze `get_activity_statistics`, wenn sich Einheitenanzahl, Dauer oder Distanz unabhängig von der Trainingsbelastung verändert haben, und `get_training_consistency`, wenn Trainingshäufigkeit, Serien oder Schwankungen relevant sind.
+
+## Eine absolvierte Aktivität analysieren
+
+> Zeige die Zeit-in-Zonen-Verteilung sowie die Runden- oder Split-Zusammenfassung für diese Aktivität. Hebe ungleichmäßiges Pacing ausschließlich anhand gespeicherter aggregierter Felder hervor; fordere weder den Roh-Track noch Sensordatenströme an.
+
+Erwarteter Ablauf: `get_activity` → `get_activity_zones` + `get_activity_splits`.
+
+## Fitnesstrends und persönliche Bestleistungen
+
+> Zeige meinen geschätzten Lauf-VO2_MAX-Trend in diesem Jahr, meine aktuellen Trainingszonen sowie meine besten 5-km- und 10-km-Leistungen. Stelle Schätzwerte nicht als Labormessung dar.
+
+Erwarteter Ablauf: `get_fitness_trends` + `get_training_zones` + `get_personal_bests`.
+
+## Umsetzung des Trainingsplans
+
+> Fasse die Umsetzung meines Trainingsplans in den letzten 8 Wochen zusammen: absolvierte, übersprungene und noch ausstehende Einheiten. Liste anschließend die Einheiten der nächsten Woche auf und erkläre den Nenner der Erfüllungsquote.
+
+Erwarteter Ablauf: `get_plan_adherence` + `list_planned_workouts`.
+
+`get_plan_adherence` wertet den Status der Einheiten aus, anstatt zu raten, ob eine Aktivität zu einem Trainingsplan passt. Nur `DONE` zählt als absolviert; künftige `PLANNED`-Einheiten bleiben im Nenner des gewählten Zeitraums.
+
+Für einen vollständigen Trainingsplan nutze zuerst `list_training_plans`, um dessen opake ID zu ermitteln, und danach `get_plan_summary` für Erfüllung, tatsächliche vs. geschätzte Trainingsbelastung, Wochenfortschritt und Sportartenmix.
+
+## Wettkampfvorbereitung
+
+> Finde meinen nächsten Wettkampf und prüfe den zugehörigen Trainingsplan, aktuelle Belastungs- und Formsignale sowie anstehende Einheiten. Benenne fehlende Belege und mache aus Bereitschaftswerten keine medizinische Bewertung oder Startfreigabe.
+
+Erwarteter Ablauf: `list_competitions` → `get_competition` → `list_training_plans` / `get_plan_summary` → `get_training_readiness` → `list_planned_workouts`.
+
+Clients mit Unterstützung für MCP-Prompts können direkt `race-preparation-check` auswählen, statt die gesamte Anfrage zu kopieren.
+
+## Synchronisierungsprobleme prüfen
+
+> Prüfe meine Strava-Verbindung. Sag mir, ob Import und Export absolvierter Aktivitäten verfügbar und automatisch aktiv sind und ob bei der letzten Synchronisierung ein Fehler aufgetreten ist. Gib keine Konto-IDs oder rohe Fehlertexte aus.
+
+Erwarteter Ablauf: `get_integration_status`.
+
+## Gesundheitskontext (separate Freigabe)
+
+> Nachdem ich den Gesundheitszugriff freigegeben habe, fasse die verfügbaren Wellness-Veränderungen der letzten 14 Tage zusammen. Markiere fehlende Werte und stelle keine Diagnosen.
+
+Erwarteter Ablauf: `get_health_summary`. Wenn `health:read` noch nicht erteilt wurde, sollte der Client eine inkrementelle Freigabe anzeigen, statt nach einem Token zu fragen.
+
+## Jede Antwort leichter überprüfbar machen
+
+Hänge diesen Zusatz an einen beliebigen Prompt an:
+
+> Liste die tatsächlich aufgerufenen TrainingLoad-Tools, den jeweiligen Datumsbereich und die zurückgegebenen Felder auf, auf denen deine Schlussfolgerung beruht. Ergänze keine fehlenden Werte.

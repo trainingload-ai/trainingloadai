@@ -1,0 +1,148 @@
+---
+title: MCP-Ressourcen und Prompts
+description: Native Referenzressourcen von TrainingLoad MCP und wiederverwendbare Prompts für die Trainingsanalyse.
+---
+
+# MCP-Ressourcen und Prompts
+
+Diese Seite wird aus dem MCP-Inhaltskatalog des Servers erzeugt. Bearbeite sie nicht direkt; führe `pnpm --dir apps/server mcp:reference` aus.
+
+Ressourcen liefern Clients stabile Leitlinien zu Kennzahlen, Sicherheit und dem autorisierten Fähigkeitskatalog, ohne zusätzliche Athletendaten zu lesen. Prompts erzeugen strukturierte Fragevorlagen; die eigentlichen Daten stammen weiterhin aus OAuth-gesicherten Tools.
+
+## Ressourcen
+
+| URI | Name | Zweck |
+| --- | --- | --- |
+| `trainingload://guide/training-metrics` | Leitfaden zur Interpretation von TrainingLoad-Kennzahlen | Definitionen und Interpretationsgrenzen für Trainingsbelastung, ATL, CTL, TSB, Bereitschaftsbereiche, Datenabdeckung und fehlende Daten. |
+| `trainingload://guide/privacy-and-safety` | Leitfaden zu Datenschutz und Sicherheit bei TrainingLoad | Schreibgeschützte Grenzen, Umgang mit nicht vertrauenswürdigem Text, Grenzen bei Gesundheitsdaten und ausgeschlossene Datenklassen. |
+| `trainingload://catalog/capabilities` | Autorisierter TrainingLoad-Fähigkeitskatalog | Die aktuell autorisierten schreibgeschützten Tool-Namen, Beschreibungen und OAuth-Scopes. |
+
+## Prompts
+
+## `weekly-training-review`
+
+Erstellt einen datengestützten Rückblick auf aktuelle Trainingsbelastung, Konstanz, Aktivitäten und anstehende Einheiten.
+
+<details>
+<summary>Argument-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "days": {
+      "default": "7",
+      "type": "string",
+      "enum": [
+        "7",
+        "14",
+        "28"
+      ]
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `compare-training-blocks`
+
+Vergleicht zwei abgegrenzte Zeiträume anhand von Trainingsbelastung, Sportartenmix, Aktivitätssummen und Konstanz.
+
+<details>
+<summary>Argument-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "periodAFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodATo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBFrom": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "periodBTo": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "sportType": {
+      "type": "string",
+      "enum": [
+        "RUN",
+        "CYCLING",
+        "SWIM"
+      ]
+    }
+  },
+  "required": [
+    "periodAFrom",
+    "periodATo",
+    "periodBFrom",
+    "periodBTo"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>
+
+## `race-preparation-check`
+
+Prüft einen Wettkampf, die Umsetzung des Trainingsplans, die aktuelle Trainingsbelastung und anstehende Einheiten, ohne medizinische Aussagen zu treffen.
+
+<details>
+<summary>Argument-JSON-Schema</summary>
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "horizonDays": {
+      "default": "28",
+      "type": "string",
+      "enum": [
+        "14",
+        "28",
+        "56"
+      ]
+    }
+  },
+  "required": [
+    "horizonDays"
+  ],
+  "additionalProperties": false
+}
+```
+
+</details>

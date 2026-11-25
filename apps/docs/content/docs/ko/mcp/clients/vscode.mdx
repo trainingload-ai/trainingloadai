@@ -1,0 +1,32 @@
+---
+title: VS Code 연결
+description: "MCP: Add Server 명령 또는 이식 가능한 .mcp.json 파일로 TrainingLoad를 연결합니다."
+---
+
+# VS Code 연결
+
+가장 간단한 방법은 명령 팔레트(Command Palette)에서 **MCP: Add Server**를 실행하는 것입니다.
+
+1. **HTTP**를 선택합니다.
+2. `https://api.trainingload.ai/mcp`를 입력합니다.
+3. 서버 ID로 `trainingload`를 입력합니다.
+4. 사용자 설정 또는 워크스페이스 설정 중 하나를 선택합니다.
+
+또는 워크스페이스 루트에 이식 가능한 `.mcp.json` 파일을 만들 수 있습니다.
+
+```json
+{
+  "mcpServers": {
+    "trainingload": {
+      "type": "http",
+      "url": "https://api.trainingload.ai/mcp"
+    }
+  }
+}
+```
+
+Agent 모드로 Chat을 열고 도구 선택기에서 TrainingLoad를 활성화한 뒤 브라우저 OAuth를 완료합니다. 다음 질문으로 동작을 확인하세요: “최근 8주간 훈련 플랜 이행률을 요약하고 다음 주 워크아웃을 나열해 주세요.”
+
+오류가 발생하면 **MCP: List Servers**를 실행해 로그를 확인하거나 서버를 재시작하거나 신뢰 설정을 초기화하세요. 공유 `.mcp.json` 파일에는 절대 자격 증명을 저장하지 마세요.
+
+[공식 VS Code MCP 가이드](https://code.visualstudio.com/docs/agent-customization/mcp-servers)

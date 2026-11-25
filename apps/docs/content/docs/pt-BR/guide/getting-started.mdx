@@ -1,93 +1,102 @@
 ---
-title: Getting Started
-description: "Learn the core Trainingload.ai workflow: set up your profile, bring in training data, review load, manage plans, and ask the AI coach for context-aware guidance."
-keywords: ["Trainingload.ai guide", "getting started", "training load app", "AI coach", "training plan"]
+title: Importe sua primeira atividade
+description: Conecte uma plataforma de treino ou envie um arquivo de treino e abra a atividade importada para explorar sua análise.
+seoTitle: "Início rápido: importe sua primeira atividade | Trainingload.ai"
+seoDescription: "Conecte uma plataforma de treino ou envie arquivos FIT, TCX ou GPX para importar sua primeira atividade e explorar gráficos e carga de treino."
+keywords: ["início rápido Trainingload.ai", "importar primeira atividade", "importar treinos", "enviar arquivo FIT"]
 ---
 
-# Getting Started
+# Importe sua primeira atividade [#get-started-with-your-first-activity]
 
-Trainingload.ai is built around a simple loop:
+Importe uma gravação do seu relógio, ciclocomputador ou plataforma de treino para ver os detalhes da atividade, gráficos e carga de treino no Trainingload.ai. Este guia mostra a sincronização de plataformas e o envio de arquivos no aplicativo web.
 
-1. Set up your athlete profile and thresholds.
-2. Import or sync completed workouts.
-3. Review training load, intensity, and recovery signals.
-4. Create or activate a training plan.
-5. Use AI Coach to review execution and adjust the plan when needed.
+## Antes de começar
 
-The product is most useful when plans and real workouts stay connected. A workout file on its own tells you what happened; a plan-linked workout tells you whether the training matched the intent.
+[Abra o Trainingload.ai](https://app.trainingload.ai/en) e faça login na sua conta. Se você usa hospedagem própria, abra sua instância. Para conhecer a interface primeiro, [navegue pela Demo](https://demo.trainingload.ai/en).
 
-## 1. Set up your account
+## 1. Escolha como importar [#2-choose-one-route-for-the-first-activity]
 
-After signing in, open **Settings** or **Me** and check:
+| Método de sincronização | Guia |
+| --- | --- |
+| Sincronizar de uma plataforma de treino de terceiros (Strava, Garmin, Intervals.icu) | [Conectar a plataforma](#connect-a-training-platform) |
+| Sincronizar a partir de arquivos de atividade (FIT, TCX, GPX) | [Enviar o arquivo](#upload-a-workout-file) |
+| Sincronizar pelo celular | [Ler o guia de sincronização no celular](/pt-BR/docs/guide/account-permissions-and-usage#2-review-mobile-permissions-and-data-sources) |
 
-- Time zone, because calendar days and reminders depend on it.
-- Unit preference, so distance, pace, power, and elevation display correctly.
-- Language and theme preferences.
-- Athlete profile values such as body weight and sport preferences.
+Para hospedagem própria, consulte [Configuração](/pt-BR/docs/self-host/configuration) para ver as conexões compatíveis. Você também pode usar as etapas de envio de arquivos abaixo.
 
-## 2. Add thresholds and zones
+## 2. Importe sua gravação [#3-import-and-wait-for-processing]
 
-Trainingload.ai uses threshold settings to calculate intensity and load. Add the values you know first; you can refine them later.
+### Opção 1: Conecte uma plataforma de treino [#connect-a-training-platform]
 
-- Cycling: FTP, CP, and power zones.
-- Running: threshold pace, heart-rate zones, and pace zones.
-- Heart rate: max HR, resting HR, or LTHR when available.
+1. Abra o menu da conta na parte inferior da barra lateral, selecione **Conta** e role até **Conexões de terceiros**.
+2. Escolha a plataforma onde estão suas gravações e siga a caixa de diálogo para conectá-la.
+3. Use a opção de importação inicial ou sincronização manual, se necessário.
+4. Abra **Atividades** na barra lateral para encontrar as gravações sincronizadas.
 
-For the full setup flow, see [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones).
+Cada plataforma oferece um intervalo de histórico diferente. Veja [Conectar Strava, Garmin e outras plataformas](/pt-BR/docs/guide/connect-third-party-platforms) para as etapas de conexão e importação de histórico.
 
-If you are unsure, start with the calculators and update the values after a recent test or race:
+<DocsScreenshot
+  id="integrations-connections"
+  title="Escolha uma plataforma de treino"
+  description="Em Conta, role até Conexões de terceiros e selecione a plataforma onde estão suas gravações."
+  route="Menu da conta na barra lateral → Conta → Conexões de terceiros"
+  demoLabel="Ver plataformas na Demo"
+/>
 
-- [Estimate FTP training load from an activity file](/ftp-calculator)
-- [Fit Critical Power for training load planning](/critical-power-calculator)
-- [Calculate heart-rate training load zones](/heart-rate-zones-calculator)
-- [Calculate VDOT to calibrate running training load](/vdot-calculator)
+### Opção 2: Envie um arquivo de treino [#upload-a-workout-file]
 
-## 3. Bring in completed workouts
+Exporte um arquivo FIT, TCX ou GPX do seu relógio, ciclocomputador ou plataforma de treino e depois:
 
-You can import activity files or connect a supported platform. Trainingload.ai analyzes the activity, computes metrics, and makes the workout available in the activity feed, dashboard, calendar, and AI Coach context.
+1. Clique em **Atividades** na barra lateral esquerda para abrir a página de Atividades.
+2. No cartão **Enviar arquivos de atividade** à direita, clique em **Escolher arquivos de atividade**.
 
-Supported file-based workflow:
+<DocsScreenshot
+  id="activity-upload-location"
+  title="Encontre o botão de envio em Atividades"
+  description="Clique em Atividades na barra lateral esquerda e depois em Escolher arquivos de atividade no cartão à direita."
+  route="Barra lateral esquerda: Atividades → Cartão à direita: Escolher arquivos de atividade"
+  demoLabel="Ver atividades na Demo"
+/>
 
-- Upload GPX / TCX / FIT files.
-- Review duplicate warnings when they appear.
-- Wait for the import batch to finish processing.
-- Open the activity detail page once analysis is ready.
+3. Arraste os arquivos que deseja importar para a janela ou clique na área de seleção para escolhê-los.
+4. Clique em **Enviar** no canto inferior direito da janela.
 
-## 4. Review your training load
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Selecione os arquivos e envie"
+  description="Arraste os arquivos para a janela ou clique para selecioná-los e depois clique em Enviar no canto inferior direito."
+  route="Janela de envio: Escolher arquivos → Enviar"
+  demoLabel="Ver atividades na Demo"
+/>
 
-Use the dashboard and PMC pages to understand the training trend:
+A janela de progresso da importação abre logo após o envio. Quando a importação terminar, volte para **Atividades** para ver suas gravações. Se aparecer um aviso de duplicata, mantenha a gravação existente em vez de importar o mesmo treino duas vezes. Veja [Enviar arquivos de atividade](/pt-BR/docs/guide/upload-activity-files) para mais ajuda.
 
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
-- [CTL](/docs/metrics/pmc/chronic-training-load) for longer-term load.
-- [ATL](/docs/metrics/pmc/acute-training-load) for recent fatigue.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for freshness/form context.
+## 3. Abra sua atividade importada [#4-verify-the-first-recorded-result]
 
-Treat these as evidence, not verdicts. The best decisions usually combine load, workout quality, sleep, soreness, and the goal of the current training block.
+Encontre o treino pela data em **Atividades** e abra os detalhes. Você verá duração, distância, carga de treino e os gráficos e mapa suportados pela gravação. Consulte [Detalhes da atividade](/pt-BR/docs/guide/activity-detail) para um tour pela página.
 
-## 5. Create a plan
+Uma atividade recém-importada ainda pode estar em processamento. Aguarde a conclusão da análise antes de avaliar os resultados completos. Gráficos de frequência cardíaca, potência e trajeto exigem os dados gravados correspondentes; uma gravação sem GPS não exibirá rota.
 
-Open **Plans** to create a plan manually or with AI. A useful plan should include:
+## Perguntas frequentes
 
-- Goal and date range.
-- Sport type.
-- Weekly structure.
-- Individual workouts with clear intent.
-- Expected load when enough target information is available.
+### Conectei uma plataforma, mas não vejo minhas atividades
 
-Once a plan is active, the **Plan** page becomes your daily training workspace.
+Verifique se a plataforma está conectada e confira os filtros de data em Atividades. Treinos antigos podem exigir uma importação de histórico separada. Siga as opções da plataforma ou exporte um arquivo de treino e envie para o Trainingload.ai.
 
-## 6. Use AI Coach
+### Minha atividade não tem frequência cardíaca ou trajeto
 
-AI Coach can discuss your training with context from workouts, plans, and load trends. Good questions include:
+Aguarde o término do processamento. Se o arquivo original não contiver dados de frequência cardíaca, potência ou GPS, os gráficos correspondentes não aparecerão. Se a plataforma de origem exibe essas medições, tente exportar o arquivo original da atividade e enviá-lo novamente.
 
-- “How did this week compare with my plan?”
-- “Should I adjust tomorrow’s workout?”
-- “Why did my long run feel harder than expected?”
-- “Which session should I prioritize if I only have four days this week?”
+### A atividade aparece na data errada
 
-AI suggestions that change a plan should be reviewed before applying. Trainingload.ai is designed to keep the final decision visible to you.
+Verifique o fuso horário da sua conta e o horário de início da gravação. Consulte [Perfil, limiares e zonas](/pt-BR/docs/guide/profile-thresholds-zones) para configurar fuso horário e unidades.
 
-## Continue with product workflows
+### Por que não consigo enviar arquivos na Demo?
 
-- [Manage training load with CTL, ATL, and TSB in your plan](/training-load)
-- [Use AI coach review to adjust training load safely](/ai-training-plan)
+A Demo serve apenas para explorar dados de exemplo. Para importar suas próprias gravações, [abra o aplicativo principal](https://app.trainingload.ai/en) e faça login na sua conta.
+
+## Próximos passos [#5-choose-the-next-task]
+
+- [Explorar a evolução da carga de treino](/pt-BR/docs/guide/pmc-forecast)
+- [Criar um plano de treino](/pt-BR/docs/guide/create-training-plan)
+- [Perguntar ao Treinador de IA sobre este treino](/pt-BR/docs/guide/ai-coach)

@@ -1,68 +1,94 @@
 ---
-title: Upload Activity Files
-description: Upload GPX, TCX, or FIT activity files to Trainingload.ai and understand duplicate checks, import batches, processing status, and post-import analysis.
-keywords: ["upload FIT file", "upload GPX", "upload TCX", "activity file import", "Trainingload.ai upload"]
+title: Importer des fichiers d’activité
+description: Téléversez des fichiers FIT, TCX ou GPX depuis la page Web Activités, suivez la progression de l’importation, retrouvez vos enregistrements et résolvez les doublons ou échecs.
+keywords:
+  [
+    "téléverser fichier FIT",
+    "importer GPX",
+    "importer TCX",
+    "importation fichier d’activité",
+    "téléversement Trainingload.ai",
+  ]
 ---
 
-# Upload Activity Files
+# Importer des fichiers d’activité
 
-Use file upload when you have activity files from a watch, bike computer, training platform, or exported archive.
+Téléversez un enregistrement exporté depuis votre montre, compteur vélo ou plateforme d’entraînement pour afficher ses détails, graphiques et sa charge d’entraînement dans Trainingload.ai. Ces étapes s’appliquent à l’application Web.
 
-Trainingload.ai supports the file-based workflow used by the activity import screen. After upload, files are processed as an import batch so you can see progress and failures clearly.
+## Préparer vos fichiers [#before-uploading]
 
-## Before uploading
+Utilisez des fichiers de séance FIT, TCX ou GPX. Vous pouvez téléverser jusqu’à 100 fichiers à la fois. Les fichiers originaux exportés depuis votre appareil ou plateforme offrent les meilleures chances de conserver la fréquence cardiaque, la puissance et le tracé.
 
-Check that the file is one of the supported activity formats:
+## Téléverser depuis Activités
 
-- GPX
-- TCX
-- FIT
+1. Cliquez sur **Activités** dans la barre latérale gauche pour ouvrir la page Activités.
+2. Dans la carte **Importer des fichiers d’activité** tout à droite, cliquez sur **Choisir des fichiers d’activité**.
 
-For better analysis, prefer original files from the device or platform. Screenshots, CSV exports without time series, and manually edited files may not include enough data for charts or load metrics.
+<DocsScreenshot
+  id="activity-upload-location"
+  title="Trouver l’action de téléversement dans Activités"
+  description="Cliquez sur Activités dans la barre latérale gauche, puis sur Choisir des fichiers d’activité dans la carte tout à droite."
+  imageAlt="Page Activités complète avec la navigation de l’application et le bouton Choisir des fichiers d’activité"
+  route="Barre latérale gauche : Activités → Carte de droite : Choisir des fichiers d’activité"
+/>
 
-## Upload from Activities
+3. Glissez les fichiers à importer dans la fenêtre, ou cliquez sur la zone de sélection pour les choisir.
+4. Cliquez sur **Téléverser** dans le coin inférieur droit de la fenêtre.
 
-1. Open **Activities**.
-2. Choose the upload action.
-3. Select one or more files.
-4. Confirm the upload.
-5. Keep the import progress dialog open or return later from the recent import batch button.
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Sélectionner des fichiers et téléverser"
+  description="Glissez vos fichiers dans la fenêtre ou cliquez pour les sélectionner, puis cliquez sur Téléverser en bas à droite."
+  imageAlt="Fenêtre de téléversement d’activité avec sélection de fichiers et bouton de téléversement distinct"
+  route="Fenêtre de téléversement : Choisir des fichiers → Téléverser"
+  demoLabel="Parcourir les activités existantes dans la Démo"
+/>
 
-If Trainingload.ai detects possible duplicates, review the duplicate warning before continuing. You can cancel, keep the existing activity, or force a new import when you intentionally want a separate copy.
+La fenêtre de progression de l’importation s’ouvre après le téléversement et affiche le résultat pour chaque fichier.
 
-## Import statuses
+## Suivre la progression de l’importation [#import-statuses]
 
-During import, each item may move through states such as:
+Vous pouvez continuer à naviguer pendant l’importation des fichiers. Si vous fermez la fenêtre, cliquez sur **Progression de l’importation** sur la page Activités pour la rouvrir.
 
-- **Queued**: waiting to be processed.
-- **Normalizing**: converting the source file into the internal activity format.
-- **Materializing**: creating or updating the activity record.
-- **Parquet building**: preparing time-series data for charts and analysis.
-- **Done**: import completed.
-- **Skipped**: not imported, usually because it matched an existing activity.
-- **Failed**: the file could not be processed.
+| Statut affiché | Que faire |
+| --- | --- |
+| En file d’attente, Normalisation, Matérialisation, Construction de l’analyse | Vos fichiers sont encore en cours de traitement. Attendez la fin de l’importation. |
+| Terminé | Revenez dans Activités pour retrouver l’enregistrement. |
+| Ignoré | Un enregistrement correspondant existe généralement déjà. Recherchez-le dans Activités. |
+| Échec, Arrêté | Lisez le message affiché à côté du fichier et suivez les étapes de dépannage ci-dessous. |
 
-The batch can finish as completed, partially failed, failed, or cancelled.
+## Retrouver vos activités importées [#after-upload]
 
-## After upload
+Une fois l’importation terminée, cliquez sur **Activités** dans la barre latérale gauche. Retrouvez votre enregistrement par sa date de séance et cliquez dessus pour consulter la durée, la distance, les graphiques et la charge d’entraînement.
 
-Once processing is complete:
+Consultez [Fil d’activités et recherche](/fr/docs/guide/activity-feed-search) et [Détail de l’activité](/fr/docs/guide/activity-detail) pour un tour complet de ces pages.
 
-- Open the new activity from the import dialog or activity feed.
-- Check whether key metrics are present.
-- Confirm sport type if it was inferred incorrectly.
-- Link the activity to a planned workout if it belongs to a training plan.
-- Ask AI Coach to review the session if you want context.
+## Dépannage
 
-For ongoing review and filtering, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+### Le bouton Téléverser est désactivé
 
-## Troubleshooting
+Commencez par choisir vos fichiers. S’ils sont encore en cours de vérification, patientez quelques instants. Si un fichier affiche une erreur, suivez le message indiqué ou retirez ce fichier avant de réessayer.
 
-If a file fails:
+### Un avertissement de doublon s’affiche
 
-- Export the original activity again from the source platform.
-- Avoid editing the file manually before upload.
-- Check whether the file contains time-series data.
-- Try importing one file at a time to isolate the failing file.
+Si la séance figure déjà dans Activités, vous pouvez conserver l’enregistrement existant ou annuler le téléversement. Ne forcez une nouvelle importation que si vous souhaitez conserver une copie distincte.
 
-If analysis looks incomplete, the file may lack heart rate, power, GPS, elevation, or pace data. Trainingload.ai can still show the activity, but some metrics may be unavailable or estimated.
+### Un fichier ne parvient pas à être téléversé ou importé
+
+Lisez le message affiché à côté du fichier. Essayez d’exporter à nouveau le fichier FIT, TCX ou GPX d’origine depuis votre appareil ou plateforme, puis téléversez-le individuellement. Renommer l’extension d’un fichier ne le convertit pas.
+
+Les captures d’écran, les tableaux CSV ordinaires et les fichiers FIT ne contenant que des données de santé quotidienne ne peuvent pas être utilisés ici pour importer une séance.
+
+### Mon enregistrement n’a ni fréquence cardiaque, ni puissance, ni tracé
+
+Attendez d’abord la fin du traitement de l’activité. Les graphiques nécessitent les données correspondantes dans l’enregistrement d’origine. Une séance en intérieur sans GPS, par exemple, n’affichera pas d’itinéraire. Vérifiez la plateforme source et essayez d’exporter à nouveau le fichier d’origine.
+
+## Besoin d’un autre format de fichier ? [#convert-between-formats]
+
+Le téléversement prend en charge FIT, TCX et GPX : une conversion est donc rarement nécessaire. Si vous avez également besoin du fichier pour une autre plateforme, utilisez le [convertisseur FIT, GPX et TCX](/fr/converter).
+
+## Étapes suivantes
+
+- [Fil d’activités et recherche](/fr/docs/guide/activity-feed-search)
+- [Détail de l’activité](/fr/docs/guide/activity-detail)
+- [Dépannage](/fr/docs/guide/troubleshooting)

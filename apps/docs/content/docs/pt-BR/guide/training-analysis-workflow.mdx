@@ -1,58 +1,118 @@
 ---
-title: Training Analysis Workflow
-description: A practical workflow for turning training analysis into daily decisions using plan vs actual, training load, and AI review.
-keywords: ["training analysis app", "endurance training analysis", "plan vs actual", "training load workflow"]
+title: Fluxo de análise de treino
+description: Transforme execução do plano, evidências de atividades concluídas, carga de treino, tendências de resposta e revisão por IA em uma decisão conservadora de treino.
+keywords:
+  [
+    "app de análise de treino",
+    "análise de treino de resistência",
+    "planejado vs realizado",
+    "fluxo de carga de treino",
+  ]
 ---
 
-# Training Analysis Workflow
+# Fluxo de análise de treino
 
-Training analysis is useful only when it changes a decision.
-Use this workflow to avoid collecting metrics without acting on them.
+A análise de treino só é útil quando melhora uma decisão real. Este fluxo evita que um painel cheio de métricas vire apenas uma coleção de números soltos.
 
-## Step 1: Compare plan vs actual
+## Antes de começar
 
-Before reading any score, answer:
+- Escolha uma única decisão e janela de tempo — por exemplo, manter ou ajustar o treino-chave de amanhã.
+- Aguarde as atividades relevantes atingirem o status Pronto.
+- Confirme limiares, fuso horário, filtro de esporte e prioridade de fonte de carga.
+- Vincule atividades concluídas aos treinos planejados quando o plano fizer parte da pergunta.
+- Registre contexto subjetivo, como RPE da sessão ou estado atual, quando disponível.
 
-- What was planned?
-- What was completed?
-- Which key sessions drifted?
+## 1. Defina a pergunta
 
-If you skip this step, load metrics lose context.
+Comece por uma decisão, não por uma métrica:
 
-## Step 2: Read load and response together
+- O próximo treino-chave deve permanecer como planejado?
+- Esta semana entregou o estresse de treino pretendido?
+- Um problema recorrente de execução está vindo da agenda, da carga ou do desenho dos treinos?
 
-Use these signals as a set:
+Defina o esporte e o intervalo de datas relevantes. Não misture uma decisão de execução de sete dias com um gráfico de todo o histórico.
 
-- [CTL](/docs/metrics/pmc/chronic-training-load): long-term load trend.
-- [ATL](/docs/metrics/pmc/acute-training-load): recent stress.
-- [TSB](/docs/metrics/pmc/training-stress-balance): freshness context.
-- effective VO2max trend: whether stress is translating into performance.
+## 2. Compare planejado e realizado
 
-Load tells you pressure. Response tells you adaptation.
+Antes de ler qualquer pontuação, responda:
 
-## Step 3: Draft one conservative change
+- O que estava planejado?
+- O que foi concluído, pulado, movido ou ficou sem vínculo?
+- Quais sessões-chave diferiram em duração, intensidade, estrutura ou carga?
+- A diferença foi intencional?
 
-Avoid changing everything at once.
-Choose one primary adjustment:
+Sem essa etapa, as métricas de carga perdem o propósito dentro do treinamento.
 
-- Reduce intensity but keep frequency.
-- Keep intensity but trim duration.
-- Move one key session by 24-48 hours.
+## 3. Valide as evidências
 
-Then observe the next key session before adjusting again.
+Abra as atividades por trás dos totais e verifique:
 
-## Step 4: Confirm and log rationale
+- Status de processamento e provedor de origem.
+- Disponibilidade de sensores e erros óbvios nos dados.
+- Contexto de limiares e zonas.
+- Qual fonte gerou a carga da atividade.
+- Terreno, clima, equipamento ou outro fator de execução que altera a interpretação.
 
-Record what changed and why:
+Assumir explicitamente um sinal ausente é melhor do que preencher a lacuna com um palpite que parece preciso.
 
-- Trigger (e.g. ATL rising too fast).
-- Decision (e.g. threshold -> easy aerobic).
-- Expected outcome (e.g. protect quality in next long run).
+## 4. Leia carga e resposta em conjunto
 
-This makes future reviews faster and more reliable.
+Use os sinais do PMC como um conjunto:
 
-## Recommended navigation
+- [CTL](/pt-BR/docs/metrics/pmc/chronic-training-load) descreve a tendência de carga mais longa.
+- [ATL](/pt-BR/docs/metrics/pmc/acute-training-load) descreve a pressão de treino recente.
+- [TSB](/pt-BR/docs/metrics/pmc/training-stress-balance) mostra a diferença entre a carga modelada longa e a recente.
 
-- [Manage training load in your plan](/training-load)
-- [Use AI review for adjustment drafts](/ai-training-plan)
-- [Analyze pacing and execution details](/docs/guide/activity-detail)
+Depois compare esses valores com a qualidade da execução, a fadiga subjetiva e uma tendência de resposta relevante. Carga descreve pressão aplicada; ela não comprova adaptação sozinha.
+
+<DocsScreenshot
+  id="training-analysis-decision"
+  title="Carga de treino no contexto da decisão"
+  description="Use um único intervalo de tempo para conectar CTL, ATL e TSB às atividades e ao período do plano ativo que geraram a tendência."
+  route="Análise → PMC"
+/>
+
+## 5. Elabore uma mudança conservadora
+
+Altere primeiro uma única variável principal:
+
+- Mantenha a frequência e reduza a intensidade de uma sessão.
+- Preserve o objetivo do treino e reduza a duração.
+- Mova uma sessão-chave em 24–48 horas.
+- Mantenha o plano inalterado e aguarde o resultado da próxima sessão-chave.
+
+Deixe explícito o que não deve mudar para que o ajuste não reescreva silenciosamente o bloco inteiro.
+
+## 6. Confirme e registre a justificativa
+
+Antes de aplicar uma mudança no plano, anote:
+
+- **Gatilho:** o padrão de execução ou carga que motivou a revisão.
+- **Decisão:** exatamente qual treino e qual campo serão alterados.
+- **Intenção protegida:** o que o plano ainda precisa cumprir.
+- **Resultado esperado:** o que deve melhorar ou estabilizar.
+- **Ponto de revisão:** a próxima atividade ou data que vai testar a decisão.
+
+Quando o Treinador de IA preparar o ajuste, inspecione o treino proposto e confirme somente depois de validar esses cinco pontos.
+
+## Confirme a decisão
+
+- Toda conclusão pode ser rastreada até um plano, atividade, configuração ou tendência visível no Trainingload.ai.
+- Dados observados ficam separados de interpretação e incerteza.
+- Apenas o treino futuro pretendido é alterado.
+- O histórico de sessões concluídas e puladas permanece intacto.
+- Existe um ponto de revisão específico definido.
+
+## Solução de problemas
+
+- **As métricas discordam:** compare período, esporte, limiares e fontes de carga antes de escolher um sinal como o “correto”.
+- **O gráfico mudou após editar configurações:** identifique qual limiar ou prioridade de fonte mudou e reinterprete o histórico de forma consistente.
+- **Não é possível comparar planejado e realizado:** vincule a atividade correta e confirme se o treino planejado tem estrutura suficiente para calcular a carga esperada.
+- **A IA sugere uma reescrita grande demais:** peça uma mudança conservadora com restrições protegidas e exija confirmação.
+- **Não há evidências suficientes:** mantenha o plano inalterado ou faça o ajuste reversível mais seguro e colete a próxima sessão relevante.
+
+## Próximos passos
+
+- [Gerencie um plano ativo](/pt-BR/docs/guide/manage-active-plan)
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Treinador de IA](/pt-BR/docs/guide/ai-coach)

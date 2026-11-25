@@ -1,0 +1,185 @@
+---
+title: "Trainings-App-Integrationen: Strava, Garmin, COROS & mehr"
+description: "Vergleiche die Integrationen von Trainingload.ai für Strava, Garmin, COROS, Polar, Suunto, Wahoo und Intervals.icu und wähle den passenden Importweg."
+keywords:
+  [
+    "Trainings-App Integrationen",
+    "Strava Integration",
+    "Garmin Integration",
+    "COROS Synchronisierung",
+    "Intervals.icu Integration",
+  ]
+---
+
+# Trainings-App-Integrationen: Strava, Garmin, COROS & mehr
+
+Entscheide, woher du deine Trainingsdaten importierst und ob du eine laufende Synchronisierung oder einen einmaligen Verlaufsimport brauchst. Diese Seite beschreibt die Cloud-Verbindungen; die schrittweise Einrichtung findest du unter [Drittanbieter-Plattformen verbinden](/de/docs/guide/connect-third-party-platforms).
+
+Für Self-Hosting nutze die separaten Anleitungen zu [Intervals.icu-Einstellungen](/de/docs/self-host/configuration#connect-intervalsicu) und [Garmin Personal API](/de/docs/self-host/garmin-personal-api) oder lade Aktivitätsdateien direkt hoch.
+
+Verfügbarkeit und unterstützte Richtungen können sich je nach Anbieter ändern. Maßgeblich sind immer die Optionen im jeweiligen Verbindungsdialog.
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="Drittanbieter-Verbindungen"
+  description="Jede Anbieterkarte zeigt den aktuellen Verbindungsstatus und die für das Konto unterstützten Aktionen."
+  route="Seitenleiste Kontomenü → Konto → Drittanbieter-Verbindungen"
+/>
+
+## Vor dem Verbinden
+
+- Melde dich beim Anbieterkonto an, dem die gewünschten Trainingsdaten gehören.
+- Lege fest, welche Plattform für jede Aktivität die primäre Quelle sein soll. Vermeide es, dieselbe Einheit über zwei verbundene Dienste gleichzeitig weiterzuleiten.
+- Prüfe, ob du eine dauerhafte Verbindung, einen einmaligen Verlaufsimport oder einen Datei-Upload benötigst.
+- Halte Zugangsdaten und API-Schlüssel bereit, gib sie aber ausschließlich im offiziellen Verbindungsdialog ein.
+- Merke dir die aktuell neueste Aktivität in Trainingload.ai, damit du den ersten erfolgreichen Import sofort erkennst.
+
+## Importweg wählen
+
+| Quelle | Am besten geeignet für | Verbindungsmodell |
+| --- | --- | --- |
+| Strava | Laufende Synchronisierung von Aktivitäten | Verbundenes Konto mit Synchronisierungseinstellungen |
+| Polar | Laufender Import von Polar-Aktivitäten | OAuth-Verbindung und Synchronisierungseinstellungen |
+| COROS | Synchronisierung von Aktivitäten und Tagesdaten; kompatibler Planexport | Verbundenes Konto mit manuellen Synchronisierungsaktionen |
+| Intervals.icu | Synchronisierung von Aktivitäten und kompatible Workflows für geplante Einheiten | OAuth oder API-Schlüssel, je nach Kontoeinrichtung |
+| Suunto | Laufender Einheiten-Import und unterstützte Guide-Workflows | OAuth-Verbindung mit Synchronisierungseinstellungen |
+| Wahoo | Laufender Import von Wahoo-Einheiten | OAuth-Verbindung mit Synchronisierungseinstellungen |
+| Garmin | Synchronisierung neuer Einheiten oder Import älterer Aktivitätshistorie | OAuth-Verbindung oder Datei-Import |
+| FIT / TCX / GPX | Einzeldateien oder Exporte aus nicht direkt unterstützten Quellen | Manueller Upload |
+
+## Anbieter verbinden
+
+1. Wähle die Karte des gewünschten Anbieters.
+2. Lies die angeforderten Datenrichtungen und Einstellungen sorgfältig durch.
+3. Autorisiere über OAuth oder gib den erforderlichen API-Schlüssel ein.
+4. Speichere deine Synchronisierungseinstellungen.
+5. Starte den Erstimport, sofern der Dialog ihn anbietet.
+6. Öffne **Aktivitäten** und prüfe die zuletzt importierte Einheit.
+
+Füge niemals einen Anbieter-API-Schlüssel in den KI-Coach, in Plannotizen oder in Support-Screenshots ein. Nutze dafür ausschließlich den Verbindungsdialog. Gespeicherte Schlüssel werden im Client nicht erneut im Klartext angezeigt.
+
+## Erstimport versus automatische Synchronisierung
+
+Ein Erstimport übernimmt ein freigegebenes aktuelles Zeitfenster oder startet einen historischen Import-Job. Die automatische Synchronisierung verarbeitet künftige Ereignisse des Anbieters. Einige Anbieter bieten zusätzlich einen manuellen Abgleich für verpasste Benachrichtigungen.
+
+Bei einem größeren Import:
+
+- Lass den laufenden Batch fertig werden, bevor du ihn erneut startest.
+- Rechne damit, dass Aktivitäten nach und nach erscheinen, während die Einträge verarbeitet werden.
+- Prüfe Hinweise zur Duplikaterkennung, statt die Verbindung wiederholt neu einzurichten.
+- Kontrolliere die Quelldaten, wenn ein Sensorstream fehlt.
+
+## Garmin-Verlaufsimport
+
+**Über die offizielle Garmin-OAuth-Verbindung kann Trainingload.ai derzeit keine Aktivitäten abrufen, die vor der Autorisierung aufgezeichnet wurden. Trennen und erneutes Verbinden lädt diese Historie nicht nach.** Importiere für ältere Daten eine vollständige Garmin-Export-ZIP-Datei (oder deren temporären Download-Link) oder lade einzelne FIT-, TCX- bzw. GPX-Dateien hoch. Diese Einschränkung betrifft nicht die selbst gehostete Garmin Personal API; folge dafür der separaten Anleitung.
+
+Auf der Garmin-Seite empfängt **OAuth** neue Aktivitäten und freigegebene Gesundheitszusammenfassungen. Der **Datei-Import** liefert ältere Trainingsaufzeichnungen. Beides sind getrennte Aktionen – wähle die passende für deinen Bedarf.
+
+## Wie synchronisieren sich geplante Einheiten mit Intervals.icu?
+
+Hier geht es um im Kalender terminierte Einheiten, nicht um absolvierte Aktivitätsaufzeichnungen. In den Verbindungseinstellungen von Intervals.icu kannst du **Geplante Einheiten importieren** und **Geplante Einheiten exportieren** unabhängig voneinander aktivieren.
+
+- **Geplante Einheiten importieren** übernimmt neue, geänderte und gelöschte Einheiten aus Intervals.icu in Trainingload.ai.
+- **Geplante Einheiten exportieren** überträgt neue, geänderte und gelöschte Einheiten aus Trainingload.ai nach Intervals.icu.
+
+**Sind beide Richtungen aktiv, werden auch Löschungen synchronisiert.** Wurde das Gegenstück seit der letzten Synchronisierung nicht verändert, löscht das Entfernen auf einer Seite auch die Kopie auf der anderen Seite.
+
+### Was passiert beim Hinzufügen, Bearbeiten oder Löschen einer Einheit?
+
+Diese Tabelle gilt, wenn beide Richtungen aktiviert sind:
+
+| Deine Aktion | Was auf der anderen Seite passiert |
+| --- | --- |
+| Einheit in Trainingload.ai hinzufügen | Eine passende neue Einheit erscheint in Intervals.icu. |
+| Einheit in Intervals.icu hinzufügen | Eine passende neue Einheit erscheint in Trainingload.ai. |
+| Nur Datum, Name oder Vorgabe in Trainingload.ai ändern | Die zugehörige Einheit in Intervals.icu wird aktualisiert. |
+| Nur Datum, Name oder Vorgabe in Intervals.icu ändern | Die zugehörige Einheit in Trainingload.ai wird aktualisiert. |
+| Einheit in Trainingload.ai löschen | Die Kopie in Intervals.icu wird gelöscht, sofern sie unverändert ist. Wurde sie bearbeitet, bleibt die bearbeitete Kopie erhalten. |
+| Einheit in Intervals.icu löschen | Die Kopie in Trainingload.ai wird gelöscht, sofern sie unverändert ist. Wurde sie bearbeitet, bleibt die bearbeitete Kopie erhalten. |
+
+### Welche Version gewinnt, wenn ich beide Kopien bearbeite?
+
+Das hängt davon ab, welche Richtung gerade synchronisiert wird:
+
+- Beim Import aus Intervals.icu gilt die Version aus Intervals.icu.
+- Beim Export nach Intervals.icu gilt die Version aus Trainingload.ai.
+
+Die tägliche automatische Synchronisierung importiert zuerst und exportiert danach. Wurden beim Start dieses Laufs bereits beide Kopien bearbeitet, hat die Version aus Intervals.icu Vorrang.
+
+Um ungewolltes Überschreiben zu vermeiden, schließe Änderungen auf einer Seite ab, warte die Synchronisierung ab und bearbeite erst danach auf der anderen Seite weiter.
+
+### Warum existiert eine Kopie noch, nachdem ich die andere gelöscht habe?
+
+Die verbliebene Kopie wurde nach der letzten Synchronisierung bearbeitet. Diese Änderungen bleiben geschützt, beide Einheiten aktualisieren sich danach nicht mehr gegenseitig, und die Synchronisierung legt die gelöschte Einheit nicht sofort wieder an.
+
+Beispiel: Du löschst den Sonntagslauf in Intervals.icu, nachdem du die Kopie in Trainingload.ai auf Samstag verschoben hast. Trainingload.ai behält den Samstagslauf; die gelöschte Einheit in Intervals.icu taucht dadurch nicht wieder auf.
+
+Kann das System nicht sicher feststellen, ob die andere Kopie verändert wurde, behält es sie vorsichtshalber, statt sie zu löschen. Abgeschlossene oder übersprungene Einheiten sowie Einheiten mit verknüpfter Aktivität bewahren ebenfalls die notwendige Historie.
+
+### Was passiert, wenn ich eine Einheit lösche und eine neue mit demselben Namen anlege?
+
+Die neu erstellte Einheit gilt als eigenständige Einheit und wird separat synchronisiert. Selbst identische Namen, Daten und Vorgaben verknüpfen sie nicht wieder mit einer gelöschten Einheit. Wiederholte Benachrichtigungen zur selben Einheit erzeugen keine zusätzlichen Duplikate.
+
+### Warum wurde die andere Seite noch nicht aktualisiert?
+
+Beide Seiten aktualisieren sich nicht immer sofort zeitgleich. Das System empfängt Benachrichtigungen des Anbieters und prüft kommende Einheiten regelmäßig. Der tägliche automatische Abgleich deckt in deiner Zeitzone den Zeitraum von gestern bis zu den nächsten sieben Tagen ab.
+
+Eine Einheit außerhalb dieses Zeitfensters zu verschieben bedeutet nicht automatisch, dass sie gelöscht wurde – ihr neuer Termin wird separat geprüft. Auch eine vorübergehend nicht erreichbare Verbindung führt nicht dazu, dass die andere Kopie gelöscht wird.
+
+## Verbindung trennen
+
+Das Trennen einer Verbindung beendet künftige Synchronisierungen und entfernt die gespeicherten Zugangsdaten. Bereits importierte Aktivitäten werden dabei normalerweise nicht gelöscht. Lösche eine Aktivität nur separat und erst nachdem du sicher bist, dass sie nicht deine einzige Kopie ist.
+
+## Verbindung überprüfen
+
+- Die Anbieterkarte zeigt – sofern zutreffend – den Status „Verbunden“.
+- Eine manuelle Synchronisierung meldet „Abgeschlossen“ oder „In Warteschlange“ statt eines Autorisierungsfehlers.
+- Importierte Aktivitäten zeigen die erwartete Quelle.
+- Beim erneuten Öffnen des Dialogs sind die gespeicherten Synchronisierungseinstellungen weiterhin sichtbar.
+
+## Fehlerbehebung
+
+### Nach der Autorisierung bleibt die Karte getrennt
+
+Prüfe, ob du alle angeforderten Berechtigungen bestätigt hast und der Browser zum selben Trainingload.ai-Konto zurückgekehrt ist. Starte den Vorgang neu über die Anbieterkarte, statt eine alte Autorisierungs-URL wiederzuverwenden. Bei einer API-Schlüssel-Verbindung ersetze einen abgelaufenen oder widerrufenen Schlüssel direkt im Dialog.
+
+### Die Verbindung steht, aber es erscheint keine Aktivität
+
+Prüfe den unterstützten Zeitraum und die unterstützten Aktivitätstypen des Anbieters. Starte die verfügbare manuelle oder erstmalige Synchronisierung einmalig und lass den Import-Job durchlaufen. Liegt die Aufzeichnung außerhalb des unterstützten Fensters, exportiere sie als FIT-, TCX- oder GPX-Datei und lade sie hoch.
+
+### Dieselbe Einheit erscheint mehrfach
+
+Prüfe die angezeigte Quelle bei jeder Aktivität. Behalte einen primären Weg – zum Beispiel direkten COROS-Import oder Weiterleitung über Strava – und deaktiviere den doppelten Pfad, bevor du weitere Historie importierst. Prüfe den Duplikat-Hinweis, bevor du eine Kopie löschst.
+
+### Herzfrequenz, Leistung, GPS oder Krafttrainingsdaten fehlen
+
+Öffne die Einheit zuerst auf der Quellplattform. Trainingload.ai kann keinen Datenstream importieren, den der Anbieter nicht bereitstellt. Sind die Daten dort vorhanden, warte das Ende der Verarbeitung ab und starte anschließend – falls verfügbar – den manuellen Abgleich des Anbieters.
+
+### Eine hier beschriebene Option fehlt
+
+Maßgeblich ist immer der Verbindungsdialog für dein aktuelles Konto, den Anbieter und die Plattform. Einzelne Optionen hängen von Anbieterfreigaben, Tarifstufe oder Rollout-Status ab.
+
+## Häufige Fragen
+
+### Welche Trainings-App-Integrationen unterstützt Trainingload.ai?
+
+Strava, Polar, COROS, Intervals.icu, Suunto und Wahoo lassen sich dauerhaft verbinden. Garmin bietet eine OAuth-Verbindung für neue Daten sowie Datei-Import für ältere Historie. FIT, TCX und GPX decken Einzeldateien oder nicht direkt unterstützte Uhren ab.
+
+### Strava-Integration oder Garmin-Import?
+
+Nutze Garmin OAuth für neue Garmin-Einheiten und den Verlaufsimport für ältere Aufzeichnungen. Landen dieselben Einheiten auch auf Strava, wähle einen primären Importweg, um Duplikate zu vermeiden.
+
+### Kann ich zwei Integrationen für dieselbe Uhr aktivieren?
+
+Technisch ja, aber du solltest dieselbe Aufzeichnung nicht doppelt importieren. Wähle einen Hauptweg – zum Beispiel COROS direkt statt COROS plus Strava-Weiterleitung –, bevor du einen größeren Rückimport startest.
+
+### Wo richte ich die Verbindung ein?
+
+Im Web öffnest du unten in der Seitenleiste das Kontomenü, wählst **Konto** und scrollst zu **Drittanbieter-Verbindungen**. In der mobilen App öffnest du **Ich → Menü → Datenautorisierung**. Folge anschließend [Strava, Garmin und COROS verbinden](/de/docs/guide/connect-third-party-platforms) für die anbieterspezifischen Schritte.
+
+## Nächste Schritte
+
+- Folge [Strava, Garmin und COROS verbinden](/de/docs/guide/connect-third-party-platforms) für Autorisierung, Erstimport und Fehlerbehebung.
+- Lies [Trainingsdaten verbinden](/de/docs/guide/connect-data), um Import, Verarbeitung, Duplikate und Quellzuordnung zu verstehen.
+- [Alle GPX-, FIT- und TCX-Konverter entdecken](/de/converter), falls du vor dem Upload eine portierbare Datei brauchst.
+- [Trainingsbelastung mit CTL, ATL und TSB im Plan steuern](/de/training-load), sobald deine importierte Historie vorliegt.

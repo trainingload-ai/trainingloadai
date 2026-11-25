@@ -1,0 +1,158 @@
+---
+title: 셀프 호스팅 빠른 시작
+description: 서명된 Trainingload.ai 릴리스를 검증하고 로컬 인스턴스를 설치한 뒤 Owner 계정을 생성하고 첫 검증된 백업을 만드는 방법을 안내합니다.
+seoTitle: "서명된 릴리스로 Trainingload.ai 셀프 호스팅 설치하기"
+seoDescription: "Linux, macOS, Windows용 공식 Trainingload.ai 셀프 호스팅 빠른 시작 가이드입니다. 릴리스 검증, 안전한 설치, Owner 계정 생성, 첫 백업까지 안내합니다."
+keywords:
+  [
+    "Trainingload.ai 설치",
+    "셀프 호스팅 빠른 시작",
+    "서명된 릴리스 번들",
+    "Docker Compose 셀프 호스팅",
+  ]
+---
+
+# 셀프 호스팅 빠른 시작
+
+## 목표 결과
+
+실행 중인 로컬 Trainingload.ai 인스턴스 1개, 생성된 Owner 계정 1개, 정상 통과한 헬스 체크, 그리고 검증을 마친 첫 번째 백업을 확보합니다.
+
+## 시작하기 전에
+
+지원되는 호스트 환경 중 하나를 준비하세요.
+
+- `amd64` 또는 `arm64` 아키텍처의 Ubuntu 24.04
+- Docker Desktop이 설치된 Apple Silicon macOS
+- WSL2 및 Linux 컨테이너 기반 Docker Desktop이 설치된 `amd64` Windows 11
+
+호스트에는 다음 구성 요소도 필요합니다.
+
+- Node.js 22 이상
+- Docker Engine 및 Docker Compose v2
+- `verify-blob --bundle`을 지원하는 Cosign
+- Core Local 기준 최소 2 CPU, 2 GiB 메모리, 5 GiB 여유 디스크 공간
+
+공식 [GitHub Releases](https://github.com/trainingload-ai/trainingloadai/releases) 페이지에서 정확한 버전의 릴리스 아카이브, 체크섬 파일, 체크섬 서명 번들을 모두 다운로드합니다. 소스 코드 체크아웃이나 버전이 지정되지 않은 아카이브를 운영 릴리스로 사용하지 마세요.
+
+기본 데이터 디렉터리는 압축을 푼 릴리스 폴더 내부의 `./data`입니다. 전용 디스크나 다른 경로를 사용해야 한다면 설치 스크립트를 실행하기 전에 [로컬 데이터 경로 선택하기](/ko/docs/self-host/configuration#choose-the-local-data-path)를 먼저 읽어 보세요.
+
+## Linux, macOS 또는 WSL2에서 설치하기
+
+### 1. 다운로드한 아카이브 검증하기
+
+다운로드한 3개의 파일이 있는 디렉터리에서 다음 명령을 실행합니다.
+
+```bash
+version='<exact-version>'
+archive="trainingload-selfhost-$version.tar.gz"
+identity="https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$version"
+
+cosign verify-blob \
+  --bundle "$archive.sha256.bundle.json" \
+  --certificate-identity "$identity" \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$archive.sha256"
+```
+
+이어서 호스트 환경에 맞는 명령으로 아카이브 체크섬을 검증합니다.
+
+```bash
+# Linux or WSL2
+sha256sum -c "$archive.sha256"
+
+# macOS
+shasum -a 256 -c "$archive.sha256"
+```
+
+서명 검증과 체크섬 검증이 모두 성공한 경우에만 다음 단계로 진행하세요.
+
+### 2. 압축 해제 및 설치 계획 점검하기
+
+```bash
+tar -xzf "$archive"
+cd "trainingload-selfhost-$version"
+./install.sh --dry-run --json
+```
+
+드라이 런(`--dry-run`)은 내부 번들 서명, 호스트 사전 요구 사항, 정확한 릴리스 버전, 설정, 데이터 경로, 수명 주기 계획을 검증합니다. JSON 결과에 `"ok": true`가 반환된 경우에만 계속 진행합니다.
+
+### 3. 인스턴스 설치하기
+
+```bash
+./install.sh --json
+```
+
+설치 프로그램은 보호된 로컬 시크릿을 생성하고, 지정된 데이터 디렉터리를 준비하며, 다이제스트가 고정된(digest-pinned) 컨테이너 이미지를 시작하고, 데이터베이스 마이그레이션을 실행한 뒤 필수 서비스가 준비될 때까지 대기합니다.
+
+## Windows 11에서 설치하기
+
+다운로드한 파일이 있는 디렉터리에서 PowerShell을 열고 다음 명령을 실행합니다.
+
+```powershell
+$Version = '<exact-version>'
+$Archive = "trainingload-selfhost-$Version.tar.gz"
+$Identity = "https://github.com/trainingload-ai/trainingloadai/.github/workflows/selfhost-images.yml@refs/tags/v$Version"
+
+cosign verify-blob `
+  --bundle "$Archive.sha256.bundle.json" `
+  --certificate-identity $Identity `
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
+  "$Archive.sha256"
+
+$Expected = ((Get-Content "$Archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$Actual = (Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($Actual -ne $Expected) { throw 'Release archive checksum mismatch' }
+
+tar.exe -xzf $Archive
+Set-Location "trainingload-selfhost-$Version"
+.\install.ps1 --dry-run --json
+.\install.ps1 --json
+```
+
+PowerShell에서도 드라이 런 결과에 `"ok": true`가 포함된 경우에만 설치를 진행합니다.
+
+## 로컬 계정 생성하기
+
+기본 설치는 `127.0.0.1`에서만 수신 대기합니다. 서비스가 준비되면 같은 컴퓨터에서 `http://localhost:43210`을 여세요. 첫 실행 페이지에서는 사용자 이름만 입력하면 되며 이메일 주소나 비밀번호는 필요하지 않습니다. 제출하면 단일 Owner 계정이 생성되고 로컬 세션이 열리며 곧바로 온보딩 단계로 이어집니다. 나중에 해당 세션이 만료되더라도 앱을 다시 열면 동일한 Owner 세션이 자동으로 복원됩니다.
+
+비밀번호 없는 접근(Passwordless access)은 사이트 오리진, Client 바인드 주소, 신뢰할 수 있는 클라이언트 주소가 모두 루프백(loopback)이고 동일 오리진 브라우저에서 요청이 들어온 경우에만 활성화됩니다. 데이터베이스에 빈 비밀번호가 저장되지는 않습니다.
+
+다른 컴퓨터에서 접속하려면 인스턴스를 루프백에 바인드된 상태로 유지하고 SSH 포트 포워딩으로 `localhost:43210`에 연결하세요. 공개 셀프 호스팅 애플리케이션은 사용자 이름 설정과 로컬 세션 복원만 제공하며, 클라우드의 이메일·비밀번호·회원가입·OAuth 페이지는 제공하지 않습니다. 비밀번호 없는 인스턴스를 인터넷에 직접 공개하지 마세요.
+
+## 설치 후 구성
+
+기본 사이트는 `http://localhost:43210`에서 열립니다. PostgreSQL 데이터, 업로드 파일, 캐시, 백업, 작업 기록은 모두 지정된 데이터 루트 아래에 저장됩니다. 외부에 노출되는 서비스는 Client뿐이며 문서는 별도로 배포됩니다. 초기 사용에는 AI 키나 훈련 플랫폼 키가 필요하지 않습니다. 단일 Owner는 나중에 BYOK AI, Intervals.icu 개인 API 키, Garmin Personal API를 설정할 수 있습니다.
+
+## 검증하기
+
+읽기 전용 점검 명령을 실행한 뒤 첫 번째 검증된 백업을 생성합니다.
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host backup --output first-verified-backup --dry-run --json
+./self-host backup --output first-verified-backup --json
+```
+
+다음 조건을 모두 만족하면 설치 준비가 완료된 것입니다.
+
+- `status`와 `doctor`가 모두 `"ok": true`를 반환합니다.
+- 설정된 사이트 주소로 인스턴스에 접속할 수 있습니다.
+- 백업에 성공 상태의 `backup-result.json`이 포함되고 검증 단계를 통과합니다.
+
+검증된 백업은 별도의 장애 도메인에 있는 암호화된 저장소로 옮겨 보관하세요. 같은 디스크에만 남겨 둔 백업은 충분한 복구 대책이 아닙니다.
+
+## 문제 해결
+
+- **설치 프로그램이 호스트를 거부함:** 플랫폼 검사를 우회하지 말고 지원되는 호스트 조합 중 하나를 사용하세요.
+- **서명 또는 체크섬 검증 실패:** 즉시 중단하고 동일한 정확한 버전의 모든 릴리스 파일을 다시 다운로드하세요.
+- **Docker를 사용할 수 없음:** Docker가 Compose v2 및 Linux 컨테이너 백엔드와 함께 실행 중인지 확인하세요.
+- **포트가 이미 사용 중임:** 인스턴스를 시작하기 전에 사용 가능한 다른 지원 바인드 주소와 포트를 설정하세요.
+- **준비 상태(Readiness) 확인 실패:** `./self-host doctor --json`을 실행해 진단하세요. 공식 수명 주기 명령 대신 수동으로 `docker compose` 명령을 실행하지 마세요.
+
+안정적인 오류 코드와 안전한 복구 절차는 [셀프 호스팅 문제 해결](/ko/docs/self-host/troubleshooting)을 참고하세요.
+
+## 다음 단계
+
+[인스턴스 설정](/ko/docs/self-host/configuration)으로 이동해 네트워크 노출 범위를 확인하고 필요 시 BYOK AI 공급자를 활성화하세요. 중요한 데이터를 가져오기 전에 [인스턴스 운영 관리](/ko/docs/self-host/operations)도 함께 검토하는 것을 권장합니다.

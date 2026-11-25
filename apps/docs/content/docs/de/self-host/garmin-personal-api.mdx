@@ -1,0 +1,62 @@
+---
+title: Garmin Personal API
+description: Verbinde deinen eigenen Garmin-Schlüssel mit einer selbst gehosteten Instanz, importiere Aktivitäten und lies Schlaf- und Erholungsdaten aus.
+seoTitle: "Garmin Personal API: Aktivitäten & Erholung im Self-Hosting"
+seoDescription: "Verbinde Garmin im Self-Hosting per Personal-API-Key, importiere Aktivitäten, lies Erholungsdaten und prüfe Regionen sowie Nur-Lese-Grenzen."
+keywords: ["Garmin Personal API", "Garmin Self-Hosting", "Garmin persönlicher Schlüssel", "Garmin Aktivitäten importieren"]
+---
+
+# Garmin Personal API
+
+In einer selbst gehosteten Instanz kannst du deinen eigenen Garmin Personal API-Schlüssel verwenden, um absolvierte Aktivitäten sowie verfügbare Daten zu Schlaf, HRV, Ruhepuls und weitere Messwerte aus deinem Gerät und Konto zu importieren.
+
+Diese Seite gilt ausschließlich für Self-Hosting. Für die Cloud-Autorisierung und den Verlaufsimport lies die [Anleitung zu Drittanbieter-Verbindungen](/de/docs/guide/connect-third-party-platforms#connect-garmin-for-new-data).
+
+## Eigenes Konto verbinden
+
+1. Erstelle einen Schlüssel in den [Personal-API-Key-Einstellungen von Garmin Connect](https://connect.garmin.com/app/settings/personalApiToken). Verwende für ein China-Konto die entsprechende Garmin-Connect-Region.
+2. Öffne in Trainingload.ai **Konto → Drittanbieter-Verbindungen → Garmin → Verbindungseinstellungen**.
+3. Wähle die Konto-Region und bestätige deine Zeitzone, z. B. `Europe/Berlin` oder `Asia/Shanghai`.
+4. Aktiviere nach Bedarf Aktivitätsimport, Schlaf- und Erholungsdaten sowie geplante Synchronisierung. Füge den Schlüssel ein und verbinde.
+5. Wähle **Jetzt synchronisieren**. Bleiben die Datumsfelder leer, werden standardmäßig die letzten 30 Tage abgerufen; du kannst auch einen historischen Zeitraum wählen.
+
+Du musst weder dein Garmin-Passwort noch Browser-Cookies angeben. Der Schlüssel wird in deiner eigenen Instanz verschlüsselt gespeichert. Gib ihn niemals in Chats, Issues oder Logs weiter. Bewahre ihn nach der Erstellung sicher auf und ersetze ihn, falls er widerrufen wird oder abläuft; beachte dabei die von Garmin angezeigten Ablaufoptionen.
+
+## Was du nach der Synchronisierung prüfen solltest
+
+| Daten | Zu prüfendes Ergebnis |
+| --- | --- |
+| Absolvierte Aktivitäten | Ein entsprechender Eintrag erscheint unter Aktivitäten; öffne ihn, um Quelle, Zeitpunkt und verfügbare Diagramme zu prüfen |
+| Schlaf, HRV, Ruhepuls, Schritte | Der jeweilige Tag zeigt die von Garmin gelieferten Werte; fehlende Werte werden nicht mit null aufgefüllt |
+| Gewicht, Stress, Sauerstoffsättigung, Body Battery | Die Garmin-Bedeutung bleibt erhalten; diese Werte ersetzen weder ATL noch CTL oder TSB |
+| Zusätzliche Metriken | Werden nach Datum unter **Erweiterte Daten und Vorgänge** ausgelesen, ohne lokale Sporteinstellungen automatisch zu ändern |
+| Ernährungs- und Zyklusdaten | Von der geplanten Synchronisierung ausgenommen; zusätzliche Abrufe erfordern eine separate Bestätigung |
+
+Die Verfügbarkeit hängt von Geräteaufzeichnungen, Region und Garmin-Berechtigungen ab. Nicht jedes Konto enthält jeden Eintrag dieser Tabelle. Prüfe nach dem Verbinden das Synchronisierungsergebnis. Nicht erkannte Daten erzeugen eine Fehlermeldung; ein leeres Ergebnis bedeutet nicht null.
+
+Diese Verbindung liest ausschließlich persönliche Daten. Sie erstellt keine künftigen Einheiten und sendet keine Trainingspläne an Garmin.
+
+## Verlauf und Fortschritt
+
+- Wähle den gewünschten Zeitraum; Datumsbereiche richten sich nach deiner Konto-Zeitzone.
+- **In Warteschlange** bedeutet, dass die Anfrage gespeichert wurde. Eine Aktivität gilt erst dann als **Importiert**, wenn Download und Import abgeschlossen sind.
+- Ein Neuladen der Seite bricht keine laufende Aufgabe ab. Warte bei einem großen Import ab, statt die Anfrage mehrfach erneut abzusenden.
+- Eine Verlaufsanfrage kann bis zu zehn Jahre umfassen. Die Dauer hängt von der Anzahl der Aktivitäten und den Limits von Garmin ab.
+- Eine erneute Synchronisierung prüft und aktualisiert bestehende Garmin-Einträge, statt jedes Mal Duplikate anzulegen.
+- Lies bei einzelnen Fehlern die angezeigte Meldung. Andere erfolgreich abgerufene Einträge können dennoch fertig importiert werden.
+
+Aktiviere in den Verbindungseinstellungen die gewünschten Optionen für die geplante Synchronisierung. Die Anzahl gefundener Datensätze entspricht nicht automatisch der Anzahl erfolgreich importierter Einträge.
+
+## Abgelaufene Schlüssel, Trennen und Backups
+
+Nutze **Schlüssel ersetzen oder neu autorisieren**, wenn ein Schlüssel abläuft oder widerrufen wurde. Prüfe Region und Konto, bevor du den neuen Schlüssel eingibst.
+
+Das Trennen der Verbindung stoppt künftige Synchronisierungen, löscht aber keine bereits gespeicherten Offline-Backups. Folge der [Anleitung zu Backups und Wiederherstellung](/de/docs/self-host/operations), um die ursprünglichen Instanz-Schlüssel sicher zusammen mit deinem Datenbank-Backup aufzubewahren. Wiederhergestellte Verbindungen benötigen diese Schlüssel.
+
+Diese Verbindung ist ausschließlich für deine eigenen Garmin-Daten gedacht. Sammle keine Schlüssel anderer Personen, um über eine persönliche Instanz einen Mehrbenutzerdienst anzubieten. Weitere Informationen findest du in der [offiziellen Einführung zur Garmin Personal API](https://developer.garmin.com/gc-developer-program/personal/personal-api/).
+
+## Nächste Schritte
+
+- [Aktivitätsdetails](/de/docs/guide/activity-detail): eine synchronisierte Einheit im Detail prüfen.
+- [Daten verbinden](/de/docs/guide/connect-data): eine Hauptquelle festlegen und Duplikate vermeiden.
+- [Self-Hosting Fehlerbehebung](/de/docs/self-host/troubleshooting): Verbindungs- oder Synchronisierungsfehler untersuchen.

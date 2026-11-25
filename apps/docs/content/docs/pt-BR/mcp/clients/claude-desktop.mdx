@@ -1,0 +1,16 @@
+---
+title: Conectar o Claude Desktop
+description: Conecte o TrainingLoad MCP pelos Connectors do Claude Desktop.
+---
+
+# Conectar o Claude Desktop
+
+1. Abra **Customize → Connectors**, selecione **Add** e depois **Add custom connector**. Workspaces Team e Enterprise podem exigir que um proprietário adicione o conector primeiro nas configurações de conectores da organização.
+2. Informe `TrainingLoad` e `https://api.trainingload.ai/mcp`.
+3. Selecione **Connect** e conclua o OAuth do TrainingLoad no seu navegador.
+4. Inicie uma nova conversa e habilite o TrainingLoad em **Search and tools**.
+5. Pergunte: “Liste os treinos planejados da próxima semana e adicione contexto com base no meu estado atual de treino.”
+
+Se o conector já existir mas novas ferramentas estiverem faltando, desconecte e reconecte para atualizar o catálogo. Não use uma configuração local via stdio; o TrainingLoad é um serviço HTTP remoto.
+
+[Guia oficial de conectores personalizados do Claude](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)

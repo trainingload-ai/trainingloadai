@@ -1,0 +1,146 @@
+---
+title: Leggere storico e previsioni PMC
+description: Usa la pagina gestione fitness di Trainingload.ai per confrontare CTL, ATL e TSB, esaminare una data, distinguere carico registrato e previsioni e chiedere al Coach AI con il contesto selezionato.
+seoTitle: "Guida allo storico e alle previsioni PMC | Trainingload.ai"
+seoDescription: "Segui il flusso PMC per scegliere uno sport, analizzare CTL, ATL e TSB, verificare carico giornaliero e basi di previsione e capire quando una previsione manca."
+keywords: ["previsione PMC", "CTL ATL TSB", "fitness fatica forma", "previsione carico di allenamento", "guida Trainingload.ai"]
+---
+
+# Leggere storico e previsioni PMC
+
+Il PMC riunisce in un unico posto il carico di allenamento registrato e una proiezione condizionata. Usalo per capire come è cambiata la pressione di allenamento e cosa comporterebbero gli input futuri disponibili. Una previsione è una stima basata su quei dati: non conferma che un allenamento sia già avvenuto né garantisce che una scelta di allenamento sia adeguata.
+
+[Apri la gestione fitness nella Demo](https://demo.trainingload.ai/en/pmc). La Demo pubblica è in sola lettura. Dopo l'apertura seleziona lo sport che vuoi esaminare. Gli screenshot con le curve previsionali usano dati di esempio renderizzati dall'app; i valori e la disponibilità delle previsioni nella Demo dipendono dai suoi record attuali.
+
+## Prima di iniziare
+
+- Importa le attività completate e attendi che termini l'elaborazione del carico di allenamento.
+- Verifica classificazione dello sport, soglie, priorità delle fonti di carico e fuso orario dell'account.
+- Per le previsioni basate sul piano servono allenamenti programmati con carico previsto utilizzabile: una bozza o un allenamento non programmato non genera automaticamente un carico giornaliero futuro.
+- Tieni sempre separati allenamenti registrati, allenamenti pianificati e abitudini stimate quando interpreti il grafico.
+
+## 1. Apri la gestione fitness e scegli uno sport
+
+Apri **PMC / Gestione fitness** dagli strumenti di analisi. In alto a destra usa **Sport** per scegliere Tutti gli sport, Corsa, Ciclismo o Nuoto: le tre schede dei valori attuali e il grafico usano quell'ambito.
+
+Parti da un solo sport quando esamini un blocco specifico di allenamento. Ricontrolla sempre l'ambito quando passi tra dashboard, PMC e relative attività.
+
+La pagina PMC principale mostra di norma 60 giorni di storico e una proiezione che si estende per 28 giorni nel futuro, presentando una metrica selezionata alla volta con il carico giornaliero sotto.
+
+<DocsScreenshot
+  id="pmc-forecast-overview"
+  title="Individua valori attuali, metrica selezionata e carico giornaliero"
+  description="Esempio sintetico di corsa. CTL, ATL e TSB attuali si trovano sopra il grafico. Valori registrati a linea continua e valori previsti a linea tratteggiata condividono le stesse date, con il carico giornaliero sotto."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Esempio PMC di corsa con tre schede dei valori attuali, TSB registrato e previsto e carico giornaliero"
+  route="Analisi → PMC → Corsa"
+/>
+
+## 2. Leggi i valori attuali prima della proiezione
+
+Leggi sempre insieme le tre schede:
+
+| Valore | Cosa descrive | Cosa non dimostra |
+| --- | --- | --- |
+| Fitness / CTL | Carico di allenamento accumulato nel lungo periodo | Un miglioramento misurato della prestazione. |
+| Fatica / ATL | Il segnale più reattivo del carico recente | Una diagnosi di quanto ti senti stanco. |
+| Forma / TSB | Il rapporto tra carico di lungo periodo e carico recente | Una prontezza garantita per un allenamento o una gara. |
+
+Le schede descrivono lo stato attuale registrato. Spostare il cursore su una data futura non le sostituisce con valori previsti. Per approfondire il calcolo consulta [CTL](/it/docs/metrics/pmc/chronic-training-load), [ATL](/it/docs/metrics/pmc/acute-training-load) e [TSB](/it/docs/metrics/pmc/training-stress-balance).
+
+## 3. Cambia metrica ed esamina una singola data
+
+1. Seleziona **Forma**, **Fitness** o **Fatica** sopra il grafico.
+2. Muovi il puntatore sulla data che vuoi esaminare. Il tooltip mostra data, stato registrato o previsto, CTL, ATL, TSB e carico giornaliero.
+3. Per una data futura leggi sia il valore sia la base di calcolo mostrata.
+4. Confronta la metrica con il pannello del carico nella stessa data: la variazione della curva e il carico di un singolo giorno sono grandezze distinte.
+
+Il grafico è navigabile anche da tastiera: porta il focus sul grafico e usa le frecce sinistra e destra per scorrere giorno per giorno; **Esc** chiude il tooltip. Su touchscreen tocca una data nel grafico per ispezionarla.
+
+<DocsScreenshot
+  id="pmc-forecast-date"
+  title="Controlla una data futura e la sua base di carico"
+  description="Esempio sintetico di corsa. La data futura selezionata è etichettata come Prevista e indica la base del carico giornaliero. Le schede in alto continuano a mostrare lo stato attuale registrato."
+  imageSrc="/docs/analysis/en/pmc-forecast-date.webp"
+  imageAlt="Grafico PMC Fitness con tooltip di una data futura che mostra CTL, ATL, TSB previsti, carico e relativa base"
+  route="PMC → Fitness → Ispeziona una data"
+/>
+
+## 4. Distingui lo storico registrato da una previsione condizionata
+
+Usa la legenda e il confine **Oggi** per orientarti. I valori registrati usano una linea continua; le stime future disponibili usano una linea tratteggiata. Il pannello del carico giornaliero usa barre piene per il carico registrato e uno stile più leggero per il carico futuro.
+
+La previsione standard dà priorità agli allenamenti programmati utilizzabili. Dove non esistono input programmati applicabili, può usare un andamento recente di allenamento sufficientemente aggiornato e valido. Controlla il tooltip per capire quale base vale per ogni data.
+
+| Base mostrata | Come interpretarla |
+| --- | --- |
+| Allenamento programmato | Il carico futuro deriva dagli allenamenti pianificati applicabili. |
+| Abitudini recenti di allenamento | La previsione usa una stima del ritmo recente; non crea un nuovo allenamento nel calendario. |
+| Pausa allenamento | Lo scenario visualizzato ipotizza nessun allenamento aggiuntivo in quei giorni. |
+| Nessuna previsione | I dati disponibili non consentono di stimare un valore per quella data. |
+
+Aprire il grafico non programma allenamenti e non salva modifiche al piano. Un giorno senza sessioni pianificate non è automaticamente un giorno di riposo confermato, e un carico mancante non va mai letto come carico pari a zero.
+
+Se la previsione diventa non disponibile a metà della proiezione, i giorni successivi possono restare vuoti perché dipendono dai dati precedenti mancanti. Importare nuove attività o modificare il programma può aggiornare la proiezione.
+
+## 5. Capire un'area futura vuota
+
+I valori storici restano utili anche quando non è disponibile alcuna curva futura. Le cause più frequenti sono uno storico breve o non aggiornato, carico registrato mancante oppure allenamenti programmati privi di carico previsto utilizzabile.
+
+<DocsScreenshot
+  id="pmc-forecast-unavailable"
+  title="Lo storico registrato resta visibile anche senza previsione"
+  description="La Demo pubblica al momento dell'acquisizione: lo storico registrato è visibile mentre la fascia futura non dispone di una curva utilizzabile. Un'area previsionale vuota non indica zero allenamento."
+  imageSrc="/docs/analysis/en/pmc-forecast-unavailable.webp"
+  imageAlt="PMC della Demo pubblica con storico registrato e fascia futura vuota dopo Oggi"
+  route="Demo → PMC"
+/>
+
+Verifica data e ambito, poi controlla le attività recenti e il programma pertinente. Se un tooltip indica **Nessuna previsione disponibile**, mantieni esplicita quell'incertezza. Se la pagina avvisa **Aggiornamento non riuscito; mostrato il risultato precedente**, il grafico visibile è l'ultimo dato salvato e non un aggiornamento recente. In caso di errore al caricamento iniziale usa **Riprova**.
+
+## 6. Chiedi al Coach con questo contesto
+
+Seleziona **Chiedi al Coach** in cima alla pagina. La domanda precompilata porta nel Coach AI lo sport selezionato e il contesto della proiezione. Controlla sempre la domanda prima di inviarla: aprire il link non applica alcuna modifica all'allenamento.
+
+Aggiungi il dubbio concreto che stai valutando, come un aumento del carico recente o la collocazione di una sessione chiave. Verifica le attività e le ipotesi future usate nella risposta e segui il normale flusso di conferma per ogni proposta di modifica a piani o allenamenti.
+
+Per un'analisi orientata alla maratona prosegui con [Usare il PMC per gli adattamenti maratona](/it/docs/guide/pmc-marathon-adjustment).
+
+## Usare la dashboard per una finestra più ravvicinata
+
+Le schede Fitness, Fatica e Forma nella dashboard aprono una vista dedicata alla singola metrica con schede storiche da **7**, **14**, **30** e **60** giorni. La finestra futura visibile segue la scheda selezionata fino a un massimo di 30 giorni, a differenza della proiezione più ampia della pagina PMC principale.
+
+Scegli sempre la finestra temporale prima di interpretare il grafico e tieni distinto il valore attuale dalla data futura selezionata.
+
+## Verifica il risultato
+
+Dovresti poter indicare chiaramente sport, data, metrica, stato registrato o previsto e base di carico del punto esaminato. Una spiegazione solida collega la curva ad attività reali o a sessioni pianificate ed evidenzia dove mancano dati.
+
+## Domande frequenti
+
+### Perché le schede in alto non cambiano quando ispeziono il futuro?
+
+Mostrano i valori attuali registrati. Usa il tooltip per leggere i valori della data futura selezionata.
+
+### Perché la previsione è cambiata dopo aver completato un allenamento?
+
+Il carico reale e il collegamento al piano aggiornano gli input del modello. Assicurati che l'attività sia stata elaborata e collegata all'allenamento previsto prima di confrontare i risultati.
+
+### Perché una scheda della dashboard mostra una finestra diversa?
+
+La scheda storica della dashboard controlla anche una finestra previsionale più breve, mentre la pagina PMC principale usa il proprio intervallo più ampio. Confronta sempre lo stesso sport e la stessa data, non la posizione visiva del punto sullo schermo.
+
+### Posso scegliere diversi scenari di previsione dal grafico?
+
+La pagina principale offre la selezione di sport e metrica e seleziona automaticamente gli input applicabili di piano e abitudini. Alcuni link condivisi o provenienti dal Coach possono aprire uno scenario diverso: controlla sempre la base visualizzata per la data invece di presumere le stesse ipotesi.
+
+### Le fasce colorate del TSB dimostrano che sono pronto?
+
+Sono fasce di riferimento per leggere il contesto del carico: non tengono conto di tutti i fattori che determinano la tua reale condizione fisica o prestazione.
+
+## Continua
+
+- [Dettaglio attività](/it/docs/guide/activity-detail)
+- [Revisione settimanale dell'allenamento](/it/docs/workflow/weekly-review)
+- [Capire il VO2max effettivo nell'allenamento endurance](/it/docs/guide/effective-vo2max-for-endurance)
+- [Coach AI](/it/docs/guide/ai-coach)

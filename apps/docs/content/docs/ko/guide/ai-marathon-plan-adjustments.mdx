@@ -1,48 +1,123 @@
 ---
-title: AI Marathon Plan Adjustments
-description: A conservative method for using AI-generated marathon workout adjustments with explicit confirmation.
-keywords: ["AI marathon training plan", "marathon workout adjustments", "adaptive marathon plan", "AI coach"]
+title: AI 마라톤 훈련 플랜 조정
+description: 명시적 확인 절차를 거쳐 AI가 제안하는 마라톤 워크아웃 조정을 보수적이고 안전하게 활용하는 방법입니다.
+keywords:
+  [
+    "AI 마라톤 훈련 플랜",
+    "마라톤 워크아웃 조정",
+    "적응형 마라톤 플랜",
+    "AI 코치",
+  ]
 ---
 
-# AI Marathon Plan Adjustments
+# AI 마라톤 훈련 플랜 조정
 
-AI adjustments are strongest when they are conservative, explicit, and reviewable.
+AI 코치는 훈련 플랜, 활동 기록, 훈련 부하 맥락을 연결해 조정 초안을 작성할 수 있습니다. 다만 마라톤 훈련 블록을 사용자 모르게 임의로 다시 써서는 안 됩니다. 확정하기 전에 직접 검토할 수 있도록 명시적이고 보수적인 제안 하나를 받아 보는 방식으로 활용하세요.
 
-## Trigger checklist
+## 시작하기 전에
 
-Use AI adjustment drafts when one or more are true:
+- 현재 진행 중인 올바른 플랜을 열고 날짜, 목표, 현재 주차를 확인합니다.
+- 최근 활동의 분석 처리가 완료될 때까지 기다린 뒤 예정된 워크아웃에 연결합니다.
+- 관련 기간의 PMC 흐름을 살펴보고, 필요하면 유효 VO2max / VDOT 추세도 함께 확인합니다.
+- 실제 제약 조건을 정리합니다. 훈련 가능한 요일, 통증이나 컨디션 이상 여부, 출장·여행 일정, 장비, 그리고 이번 주에 가장 지켜야 할 핵심 세션이 무엇인지 명시합니다.
+- 결정할 질문 하나를 정합니다. 예를 들어 내일 마라톤 페이스 워크아웃을 유지할지 옮길지, 향후 7일 일정을 단순화할지, 또는 놓친 장거리 러닝에 어떻게 대응할지 중 하나를 선택합니다.
+- AI 코치에게 의학적 훈련 허가나 부상 진단을 요청하지 마세요.
 
-- Key sessions are repeatedly missed.
-- ATL is climbing faster than expected.
-- TSB remains strongly negative near quality days.
-- effective VO2max trend stalls across 10-14 days.
+## 1. 플랜 맥락에서 대화 시작하기
 
-## Adjustment order
+진행 중인 플랜 페이지에서 AI 코치를 열거나, 새 대화에서 정확한 플랜 이름과 대상 주차를 명시합니다. 플랜 화면에서 바로 진입하면 엉뚱한 일정을 논의할 위험이 줄어듭니다.
 
-Use this sequence:
+질문(프롬프트)은 다음 네 가지 요소로 구성하세요.
 
-1. Keep training frequency stable.
-2. Modify one major variable first (volume or intensity).
-3. Protect long run and marathon-pace quality.
-4. Re-evaluate after next key workout.
+1. **결정 사항:** 지금 답을 얻어야 할 단일 질문
+2. **근거:** 완료했거나 건너뛴 세션, PMC 패턴, 반응 추세, 주관적 상태
+3. **제약 조건:** 절대 바뀌어서는 안 되는 날짜와 워크아웃
+4. **출력 형식:** 보수적인 초안 하나와 다음 점검 시점
 
-## Confirmation standard
+예시:
 
-Before applying AI changes, confirm:
+> 진행 중인 마라톤 플랜의 7주차를 리뷰해 주세요. 화요일 역치 세션이 계획보다 힘들었고 주말 이후 ATL이 상승했지만, 토요일 장거리 러닝은 반드시 유지해야 합니다. 향후 7일 일정에서 변경안은 최대 한 가지만 초안으로 제안해 주세요. 주간 훈련 빈도는 유지하면서 근거, 정확한 워크아웃 변경 내용, 다음 리뷰 시점을 설명해 주세요. 아직 적용하지는 마세요.
 
-- Why the change was proposed.
-- What exactly changes in the session.
-- Which risk is reduced.
-- What metric will validate the change.
+## 2. 사용된 근거 점검하기
 
-## Common safe edits
+변경 내용을 논의하기 전에 AI 코치의 답변이 다음 항목을 정확히 참조하고 있는지 확인합니다.
 
-- Replace one threshold run with easy aerobic.
-- Shorten one quality session but keep structure.
-- Shift a key workout by 24-48 hours.
+- 올바른 플랜, 주차, 종목
+- 올바른 완료 또는 미완료 워크아웃
+- 적절한 날짜 범위의 CTL, ATL, TSB
+- 실제 예정된 다음 핵심 세션
+- 사용자가 입력한 제약 조건
 
-## Related pages
+하나라도 대상이 틀렸다면 즉시 중단하고 다시 명시하세요. 잘못된 기록을 바탕으로 그럴듯하게 만들어진 추천은 확정하지 마세요.
 
-- [AI marathon training plan](/marathon-training-plan)
-- [AI coach usage guide](/docs/guide/ai-coach)
-- [PMC-based marathon adjustment](/docs/guide/pmc-marathon-adjustment)
+## 3. 가장 작은 변경부터 요청하기
+
+조정은 아래 순서대로 보수적으로 접근하는 것이 좋습니다.
+
+1. 근거가 충분하지 않으면 플랜을 그대로 유지합니다.
+2. 워크아웃의 목적은 유지한 채 날짜만 이동합니다.
+3. 구조는 유지하면서 워크아웃 하나의 길이만 줄입니다.
+4. 필수가 아닌 고강도(퀄리티) 세션 하나를 쉬운 유산소 러닝이나 휴식으로 대체합니다.
+5. 위와 같은 작은 조치로 문제가 해결되지 않을 때만 주간 전체 훈련량이나 강도를 조정합니다.
+
+훈련 빈도, 훈련량, 강도, 핵심 세션 배치를 한꺼번에 모두 바꾸는 것은 피하세요. 변수가 동시에 바뀌면 결과를 해석하거나 되돌리기가 매우 어려워집니다.
+
+<DocsScreenshot
+  id="ai-adjustment-confirmation"
+  title="AI 워크아웃 조정안 검토하기"
+  description="제안에는 판단 근거가 명시되고, 미래 워크아웃 하나의 정확한 변경 내용과 제약 조건 유지 여부가 표시되며, 사용자가 검토하기 전까지는 확정되지 않습니다."
+  route="Coach → View workout calendar"
+/>
+
+## 4. 확정 전 제안 내용 검토하기
+
+코치 대화창에서 **View workout calendar(워크아웃 캘린더 보기)**를 선택하고, 미리보기에서 기존 세션과 제안된 세션을 비교합니다.
+
+| 점검 항목 | 확인할 질문 |
+| --- | --- |
+| 대상 | 의도한 미래 워크아웃과 날짜가 맞나요? |
+| 범위 | 주요 변수 하나만 변경되고 있나요? |
+| 목적 | 변경 후에도 해당 마라톤 훈련 블록의 원래 목적에 부합하나요? |
+| 제약 조건 | 유지하기로 한 장거리 러닝, 대회, 휴식일, 훈련 가능 일정이 그대로인가요? |
+| 근거 | 설명이 관측된 데이터와 해석을 명확히 구분하고 있나요? |
+| 리뷰 시점 | 다음 점검 기준점이 분명하게 제시되어 있나요? |
+
+완료된 과거 기록, 다른 플랜, 서로 무관한 여러 워크아웃, 또는 보호해야 할 제약 조건을 건드리는 초안이라면 거절하거나 수정을 요청하세요.
+
+## 5. 확정 후 플랜 다시 확인하기
+
+일정을 검토한 뒤 **Confirm plan changes(플랜 변경 확정)**를 선택합니다. 이어서 다음 항목을 확인하세요.
+
+1. 진행 중인 플랜 또는 훈련 캘린더를 다시 엽니다.
+2. 대상 워크아웃의 날짜, 종목, 시간, 구조가 의도대로 반영되었는지 확인합니다.
+3. 주변의 다른 워크아웃이 예상치 않게 바뀌지 않았는지 확인합니다.
+4. 가능하다면 플랜 메모나 리뷰 맥락에 조정 이유를 기록해 둡니다.
+5. 다음 비교 가능한 핵심 워크아웃 이후를 점검 시점으로 잡아 둡니다.
+
+실행 취소(Undo)가 제공되고 적용 결과가 잘못되었다면 즉시 실행 취소하세요. 그렇지 않다면 최신 플랜 버전을 확인한 뒤 영향을 받은 미래 워크아웃만 직접 수정합니다.
+
+## 조정 결과 검증하기
+
+- AI 코치가 올바른 플랜, 주차, 활동, 날짜 범위를 사용했습니다.
+- 확정 전에 제안의 변경 전후 효과를 정확히 확인했습니다.
+- 의도한 미래 워크아웃 하나만 변경되었습니다.
+- 완료, 건너뜀, 연결된 과거 기록은 그대로 보존되었습니다.
+- 보호하기로 한 제약 조건과 마라톤 훈련 블록의 목적이 유지되었습니다.
+- 진행 중인 플랜과 훈련 캘린더에 동일한 수정 워크아웃이 표시됩니다.
+- 구체적인 다음 리뷰 시점이 기록되었습니다.
+
+## 문제 해결
+
+- **답변이 너무 일반적입니다:** 플랜 페이지에서 대화를 시작하고, 정확한 주차와 워크아웃 이름, 관련 근거와 제약 조건을 함께 적어 주세요.
+- **엉뚱한 활동이나 플랜을 참조합니다:** 절대 확정하지 마세요. 올바른 기록 화면을 열거나 플랜 맥락에서 새 대화를 시작합니다.
+- **제안이 너무 많은 일정을 바꿉니다:** 변경 1건, 주요 변수 1개, 보호할 제약 조건, 최대 7일 범위로 제한해 다시 요청하세요.
+- **버전 충돌로 작업이 실패합니다:** 진행 중인 플랜을 새로고침해 최신 버전을 비교한 뒤, 가장 작은 변경안을 다시 요청하거나 적용합니다.
+- **적용된 워크아웃이 예상과 다릅니다:** Undo가 보이면 즉시 실행 취소하고, 불가능하다면 플랜을 확인한 뒤 해당 미래 워크아웃만 수동으로 바로잡습니다.
+- **근거 활동이 아직 처리 중이거나 누락되었습니다:** 플랜은 변경하지 말고 데이터 처리나 활동 연결을 마친 뒤 맥락이 완전히 갖춰졌을 때 다시 시도합니다.
+- **통증, 질병 또는 이상 증상이 질문의 원인입니다:** 자격을 갖춘 의료진이나 전문 코치의 조언을 받으세요. AI 코치는 의학적 진단이나 훈련 허가를 내릴 수 없습니다.
+
+## 다음 단계
+
+- [AI 코치](/ko/docs/guide/ai-coach)에서 전체 대화 흐름과 실행 취소(Undo) 모델을 확인하세요.
+- [PMC로 마라톤 훈련 조정하기](/ko/docs/guide/pmc-marathon-adjustment)에서 훈련 압력 해석 방법을 살펴보세요.
+- [진행 중인 플랜 관리](/ko/docs/guide/manage-active-plan)에서 변경된 일정의 실행과 점검을 이어가세요.

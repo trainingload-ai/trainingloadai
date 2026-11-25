@@ -1,0 +1,139 @@
+---
+title: Allenamenti di forza
+description: Crea allenamenti di forza strutturati con esercizi, serie di riscaldamento e allenanti, ripetizioni o tempo, carico, sforzo e recupero su Trainingload.ai.
+keywords: ["builder allenamento di forza", "piano allenamento forza"]
+---
+
+# Allenamenti di forza
+
+Gli allenamenti di forza richiedono esercizi, serie, ripetizioni, carico, sforzo e recupero anziché fasi di endurance basate su tempo e distanza. Trainingload.ai offre un editor dedicato per la forza e permette di affiancare la prescrizione pianificata all'attività di forza completata.
+
+## Prima di iniziare
+
+- Apri una bozza di piano o un allenamento futuro modificabile. Non riscrivere un'attività completata come nuova prescrizione.
+- Scegli **Allenamento di forza** come sport per aprire l'editor dedicato.
+- Decidi se usare la modalità **Manuale** o **Regole**: entrambe producono la stessa struttura di allenamento.
+- Prepara nomi degli esercizi, attrezzatura, carichi o valori 1RM affidabili e l'RPE/RIR desiderato. Scegli **Carico libero** quando un carico numerico non è noto.
+
+## Struttura in sintesi
+
+<Mermaid
+  chart={`flowchart TD
+  Session[Sessione di forza] --> Exercise[Esercizio]
+  Exercise --> Warmup[Gruppo serie di riscaldamento]
+  Exercise --> Work[Gruppo serie allenanti]
+  Work --> Prescription[Ripetizioni o tempo]
+  Work --> Load[Libero, peso, percentuale 1RM o corpo libero]
+  Work --> Effort[RPE o RIR]
+  Work --> Rest[Durata recupero]`}
+/>
+
+## 1. Scegli Allenamento di forza
+
+Apri l'editor manuale degli allenamenti e seleziona **Allenamento di forza**. L'editor passa dalle fasi di endurance al builder per la forza.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Apri l'editor dal programma del piano"
+  description="Nel Manual Plan Builder prosegui fino alla selezione delle date, poi seleziona + Sessione nel giorno desiderato."
+  route="Piani → Manual Plan Builder → Selezione date → + Sessione"
+/>
+
+<DocsScreenshot
+  id="strength-workout-builder"
+  title="Builder per allenamenti di forza"
+  description="Un esercizio completo include un nome e almeno un gruppo di serie allenanti; le serie di riscaldamento sono facoltative."
+  route="Piani → Allenamento manuale → Allenamento di forza"
+/>
+
+## 2. Imposta le indicazioni di sessione
+
+Aggiungi durata pianificata e RPE di sessione solo quando sono utili per il piano. L'RPE di sessione descrive la difficoltà complessiva prevista, non il target di sforzo di ogni singola serie.
+
+## 3. Aggiungi un esercizio
+
+Ogni esercizio deve avere un nome non vuoto. Usa nomi coerenti e riconoscibili così da poter confrontare piano e sessione completata in seguito. L'attrezzatura è facoltativa e dovrebbe indicare ciò che serve, non duplicare il nome dell'esercizio.
+
+Esempi:
+
+- Back Squat — Bilanciere
+- Stacco rumeno — Bilanciere
+- Trazioni alla sbarra — Corpo libero
+- Split Squat — Manubri
+
+## 4. Aggiungi i gruppi di serie
+
+Un gruppo di serie descrive serie ripetute con la stessa prescrizione.
+
+- **Riscaldamento** — serie preparatorie, facoltative.
+- **Lavoro** — le serie che definiscono la prescrizione principale, obbligatorie per ogni esercizio.
+
+Scegli ripetizioni per il lavoro a ripetizioni oppure tempo per una serie isometrica o a tempo. In un intervallo di ripetizioni, il minimo non deve superare il massimo.
+
+## 5. Scegli il carico
+
+- **Carico libero** — nessun carico numerico prescritto. Usalo quando attrezzatura o forza attuale non sono note.
+- **Peso fisso** — un peso numerico con un'unità supportata.
+- **Percentuale di 1RM** — adatta solo quando il relativo 1RM è noto e aggiornato.
+- **Corpo libero** — il peso corporeo dell'atleta.
+- **Corpo libero con variazione** — peso corporeo più o meno un carico esterno dove supportato.
+
+I piani di forza generati dall'AI non devono inventare chilogrammi, libbre o percentuali di 1RM quando non esiste uno storico supportato dai dati o un 1RM noto. Carico libero abbinato a un'indicazione RPE/RIR è l'impostazione più sicura.
+
+## 6. Aggiungi sforzo e recupero
+
+Usa RPE per descrivere lo sforzo percepito oppure RIR per le ripetizioni rimaste in riserva. Mantieni coerenza interna: evita di prescrivere un carico molto impegnativo insieme a un obiettivo di sforzo facilissimo, a meno che il contrasto non sia intenzionale.
+
+Il recupero è salvato per gruppo di serie. Imposta un tempo adeguato alla qualità richiesta invece di forzare lo stesso recupero per tutti gli esercizi.
+
+## 7. Scrivi lo stesso allenamento con lo Strength DSL
+
+In modalità **Regole**, una sessione di forza può essere scritta così:
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+
+exercise "Pull Up" equipment bodyweight {
+  work 3x8 bodyweight rir 2 rest 90s
+}
+```
+
+Segui il [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl) per la grammatica completa, i nomi localizzati degli esercizi, le forme di carico, il flusso di validazione e la correzione degli errori. Lo Strength DSL è una prescrizione statica: non esegue `if/else`, progressioni settimanali, script di scarico, blocchi annidati o codice arbitrario.
+
+## Verifica l'allenamento
+
+Prima di salvare, controlla che:
+
+- Esista almeno un esercizio.
+- Ogni esercizio abbia un nome.
+- Ogni esercizio abbia almeno un gruppo di serie.
+- Ogni esercizio includa almeno un gruppo di serie allenanti.
+- Serie, ripetizioni, secondi, sforzo e carico rientrino negli intervalli supportati.
+- L'anteprima rispecchi la sessione prevista.
+
+Dopo il salvataggio, riapri l'allenamento e conferma che la stessa struttura compaia nel builder visuale o nello Strength DSL normalizzato. Il riepilogo di anteprima deve contare il numero previsto di esercizi e serie allenanti.
+
+## Risoluzione dei problemi
+
+- **«Inserisci un nome per ogni esercizio»:** aggiungi un nome non vuoto tra virgolette nel DSL o compila il campo Esercizio nel builder visuale.
+- **«Ogni esercizio richiede almeno un gruppo di serie»:** aggiungi un gruppo di riscaldamento o di lavoro prima di chiudere l'esercizio.
+- **«Ogni esercizio richiede almeno una serie allenante»:** un esercizio con solo riscaldamento non è valido; aggiungi almeno una riga `work`.
+- **Un intervallo di ripetizioni non supera la validazione:** scrivi prima il valore inferiore, ad esempio `3x8-12`.
+- **Carico o sforzo non superano la validazione:** usa una forma di carico supportata e scegli RPE oppure RIR, non entrambi.
+- **La parentesi graffa di chiusura viene rifiutata:** chiudi ogni esercizio una sola volta e non annidare blocchi esercizio.
+- **Passare da forza a endurance svuota l'editor:** le strutture sono intenzionalmente diverse. Salva o copia il testo desiderato prima di cambiare sport.
+
+## Sessioni di forza completate
+
+Le attività di forza possono registrare esercizi, completamento delle serie e completamento della sessione. Dopo l'allenamento, apri il dettaglio dell'attività di forza e verifica nomi degli esercizi, serie completate, carico, ripetizioni/tempo e contesto generale prima di usarla per la revisione.
+
+## Prossimi passi
+
+- Segui il [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl) per una guida completa alla modalità testuale.
+- Aggiungi l'allenamento a un piano e prosegui con [Gestire lo stato del piano](/it/docs/planning/plan-lifecycle) o [Gestire un piano attivo](/it/docs/guide/manage-active-plan).

@@ -1,0 +1,138 @@
+---
+title: Analiza una sesión con la Línea temporal
+description: Usa la línea temporal de actividades de escritorio en Trainingload.ai para inspeccionar gráficas sincronizadas, seleccionar segmentos, comparar estadísticas de rango y localizar el esfuerzo en la ruta.
+seoTitle: "Línea temporal y análisis de segmentos | Trainingload.ai"
+seoDescription: "Sigue el flujo de la línea temporal para carrera y ciclismo: selecciona esfuerzos, analiza estadísticas y ruta, configura gráficas y guarda segmentos."
+keywords: ["línea temporal de actividad", "análisis de segmentos de sesión", "análisis de series de carrera", "gráficas de ciclismo", "línea temporal de Trainingload.ai"]
+---
+
+# Analiza una sesión con la Línea temporal
+
+La Línea temporal alinea las series grabadas de una actividad sobre un mismo eje horizontal. Úsala para inspeccionar un instante concreto o comparar el ritmo, la potencia, la frecuencia cardíaca, la cadencia y la ruta de un esfuerzo seleccionado. Las estadísticas de rango y la lectura puntual responden preguntas diferentes.
+
+Esta guía cubre la **web de escritorio** para carrera y ciclismo. Las gráficas disponibles dependen de los datos grabados en la actividad. Para el flujo general de revisión, empieza por [Detalle de actividad](/es/docs/guide/activity-detail).
+
+## Abre el ejemplo
+
+[Abre la actividad de demostración de 10 km](https://demo.trainingload.ai/en/activities/17921623926005309429) y selecciona **Línea temporal** debajo de la ruta. La actividad se abre primero en Resumen. La demo es de solo lectura, por lo que la edición de segmentos guardados está desactivada.
+
+En tus propias actividades, espera a que termine el procesamiento y confirma que incluyen muestras grabadas. Las actividades con solo resumen no disponen de línea temporal sincronizada. Las sesiones en interior pueden mostrar gráficas válidas aunque no tengan GPS. Comprueba el deporte, los umbrales y las unidades antes de interpretar los datos.
+
+## 1. Lee la actividad completa
+
+Después de seleccionar **Línea temporal**, localiza los encabezados de segmentos en la parte superior, los controles de métricas y estadísticas de rango a la izquierda, y las gráficas alineadas a la derecha. El eje horizontal comienza en modo tiempo. La ruta permanece sobre las pestañas cuando la actividad tiene datos de ubicación.
+
+Las actividades largas superan el ancho visible de la gráfica. Desplázate horizontalmente para ver los tramos posteriores. Las estadísticas de rango siguen describiendo toda la actividad hasta que seleccionas un rango.
+
+Al principio, **Media**, **Mín.** y **Máx.** en el lado izquierdo describen la actividad completa. Una métrica sin muestras válidas puede no aparecer, y los huecos en una serie se muestran como cortes en su gráfica.
+
+<DocsScreenshot
+  id="activity-timeline-full"
+  title="Empieza por la actividad completa y las gráficas alineadas"
+  description="La columna izquierda resume el rango actual. Cada gráfica comparte la misma posición horizontal para poder comparar el esfuerzo en ritmo, frecuencia cardíaca y cadencia."
+  imageAlt="Línea temporal completa de la carrera con gráficas alineadas y estadísticas del rango completo"
+  route="Detalle de actividad → Línea temporal"
+  demoLabel="Abrir este ejemplo de línea temporal"
+/>
+
+## 2. Inspecciona un instante
+
+Mueve el cursor sobre una gráfica. Lee el valor flotante dentro de cada gráfica en la misma posición horizontal. Si hay datos GPS, el mapa muestra la posición correspondiente.
+
+Haz clic para mantener seleccionada una posición. Al sacar el cursor de las gráficas se ocultan las lecturas temporales al pasar el ratón. Las estadísticas de rango de la izquierda siguen vinculadas a toda la actividad o al rango seleccionado.
+
+Puedes enfocar el control de posicionamiento de la línea temporal y usar las flechas izquierda y derecha para recorrer las muestras, o **Inicio** y **Fin** para saltar a sus extremos. Las lecturas por teclado se ocultan cuando el control pierde el foco.
+
+| Pregunta | Dónde mirar |
+| --- | --- |
+| ¿Qué se grabó en este instante? | La lectura puntual dentro de cada gráfica. |
+| ¿Cuál fue el valor típico en este esfuerzo? | La media en las estadísticas de rango de la izquierda. |
+| ¿Cuáles fueron los extremos válidos grabados? | El mínimo y el máximo de ese mismo rango. |
+
+## 3. Selecciona un esfuerzo y compáralo
+
+Puedes seleccionar una vuelta grabada o trazar tu propio rango.
+
+1. Selecciona un encabezado de segmento para resaltarlo y actualizar sus estadísticas. Vuelve a seleccionarlo para quitar la selección.
+2. Para analizar otro rango, arrastra horizontalmente sobre una gráfica y suelta. El rango compartido de las gráficas hace zoom sobre tu selección.
+3. Compara la media, el mínimo y el máximo del rango seleccionado con el esfuerzo visible. Mueve el cursor para revisar muestras individuales dentro de él.
+4. Revisa el tramo resaltado en la ruta cuando haya datos de ubicación. Usa el mapa de alrededor para entender dónde tuvo lugar ese esfuerzo.
+
+<DocsScreenshot
+  id="activity-timeline-selection"
+  title="Compara un esfuerzo seleccionado con su ruta"
+  description="Al seleccionar un segmento se actualizan las estadísticas de rango y se resaltan tanto el intervalo en las gráficas como el tramo de ruta. Las lecturas del cursor siguen separadas del resumen de rango."
+  imageAlt="Segmento de carrera seleccionado con estadísticas de rango actualizadas y tramo de ruta resaltado"
+  route="Detalle de actividad → Línea temporal → Seleccionar un segmento"
+  demoLabel="Inspeccionar la misma actividad en la Demo"
+/>
+
+En un esfuerzo largo y constante, comprueba si el ritmo o la potencia se mantienen estables mientras cambia la frecuencia cardíaca. En series repetidas, compara los intervalos de trabajo y las recuperaciones con el objetivo de la sesión. Explica el patrón teniendo en cuenta la duración, el terreno, las paradas y los datos de sensores disponibles.
+
+## 4. Vuelve a la actividad completa o cambia el eje
+
+Abre **Opciones de línea temporal** junto a **Segmentos** y elige **Mostrar actividad completa** para limpiar el rango y restaurar la vista completa. Hacer doble clic en una gráfica o pulsar **Escape** dentro de la línea temporal también restablece la selección y el zoom.
+
+En el mismo menú, cambia **Eje horizontal** entre **Tiempo** y **Distancia**. El modo Distancia requiere un registro válido de distancia acumulada. El esfuerzo seleccionado mantiene sus límites temporales originales al cambiar de eje.
+
+## 5. Configura las gráficas
+
+Selecciona el nombre de una métrica, como **Ritmo** o **Frecuencia cardíaca**, para abrir sus ajustes. Puedes elegir la métrica disponible, el color de la línea, la altura de la gráfica y el suavizado. Usa **Subir**, **Bajar** o **Quitar gráfica** para ordenar las filas visibles.
+
+Usa **Añadir gráfica** en la parte inferior para incorporar otra serie disponible. Puedes añadir la misma métrica más de una vez, por ejemplo para comparar la señal sin procesar y la suavizada. **Ampliar** abre una vista más grande de una gráfica individual.
+
+El suavizado modifica la curva dibujada. Las lecturas puntuales y las estadísticas de rango conservan su significado basado en los datos grabados. La disposición de las gráficas se guarda en las preferencias de ese navegador y no modifica la actividad original.
+
+## 6. Edita segmentos de análisis en tu cuenta
+
+Usa **Editar segmentos** cuando quieras rangos de análisis distintos a las vueltas del dispositivo. Requiere iniciar sesión en una cuenta con permiso para editar la actividad.
+
+1. Abre **Editar segmentos** y revisa el nombre, inicio y fin de cada segmento.
+2. Renombra un segmento o cambia sus límites. El editor también ofrece **Añadir segmento en un hueco**, **Dividir por la mitad**, **Combinar con el siguiente** y **Eliminar** cuando corresponda.
+3. Mantén los límites dentro de la actividad, con cada inicio anterior a su fin y sin segmentos solapados.
+4. Selecciona **Guardar segmentos** y revisa las estadísticas actualizadas. **Cancelar** cierra el borrador sin guardar.
+
+Los segmentos de análisis guardados dejan intactos el archivo original, las vueltas del dispositivo y la carga de entrenamiento global de la actividad. Los límites modificados utilizan las series grabadas para recalcular las estadísticas de ese rango. **Restaurar vueltas del dispositivo** devuelve las definiciones del editor a los rangos originales de vueltas, que luego puedes guardar.
+
+Si otra ventana ha modificado las definiciones, cierra y vuelve a abrir el editor para cargar la última versión antes de editar de nuevo. Si falla el guardado, el borrador permanece disponible para reintentarlo. La demo pública desactiva este flujo de edición.
+
+## Comprueba el resultado
+
+Después de seleccionar un esfuerzo, confirma que sus límites, estadísticas de rango y tramo de ruta se refieren a la misma parte de la actividad. Restaura la vista completa y verifica que las estadísticas vuelven a corresponder a toda la actividad. Si guardaste segmentos de análisis en tu cuenta, vuelve a abrir la actividad y comprueba que tus definiciones siguen ahí.
+
+## Preguntas frecuentes
+
+### ¿Por qué no cambian los números de la izquierda al mover el cursor?
+
+Porque resumen la actividad completa o el rango seleccionado. Consulta las lecturas flotantes de cada gráfica para ver el punto exacto bajo el cursor.
+
+### ¿Por qué aparecen huecos o guiones?
+
+Una serie ausente, un corte en el muestreo o un valor no válido pueden dejar un hueco o un guion. Una velocidad, cadencia o potencia grabada de cero puede ser válida. Una muestra en parada no tiene ritmo utilizable, y las muestras ausentes de frecuencia cardíaca no se sustituyen por cero.
+
+### ¿Por qué cambia una vuelta después de editar sus límites?
+
+Una vuelta del dispositivo sin modificar puede usar su resumen importado. Un segmento de análisis modificado o personalizado se recalcula a partir de las muestras válidas grabadas en ese rango. La cobertura disponible y los límites elegidos influyen en el resultado.
+
+### ¿Por qué un valor de potencia aparece etiquetado como Estimada?
+
+Esa serie usa potencia estimada. Ten en cuenta su origen al compararla con una grabación de potenciómetro o al interpretar la intensidad.
+
+### ¿Por qué la ruta no resalta el rango seleccionado?
+
+La actividad puede no tener GPS válido en esos momentos, o el mapa puede no estar disponible. Continúa con las gráficas grabadas y revisa el estado del mapa por separado.
+
+### ¿Por qué no veo la Línea temporal en mi teléfono?
+
+Este flujo está disponible en la web de escritorio. Usa el detalle de actividad y las gráficas de datos en el móvil para las vistas compatibles con esa app y deporte, o abre la actividad en escritorio.
+
+### ¿Qué pasa si una gráfica no carga?
+
+Usa su acción de reintento cuando aparezca. Las demás gráficas cargadas pueden seguir siendo utilizables. Si falla una actualización, la página puede conservar el resultado anterior e indicar ese estado. Comprueba por separado si faltan datos o si falló la solicitud.
+
+## Continúa
+
+- [Detalle de actividad](/es/docs/guide/activity-detail)
+- [Desacoplamiento aeróbico](/es/docs/metrics/heart-rate/aerobic-decoupling)
+- [Perfil, umbrales y zonas](/es/docs/guide/profile-thresholds-zones)
+- [Revisión semanal de entrenamiento](/es/docs/workflow/weekly-review)

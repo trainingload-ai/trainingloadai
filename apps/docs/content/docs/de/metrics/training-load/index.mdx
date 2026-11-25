@@ -1,44 +1,81 @@
 ---
-title: Training Load
-description: Understand training load, TSS, IF, and TRIMP, and how load trends support fatigue management and adaptive endurance training plans.
-keywords: ["Training Load", "training load management", "TSS", "IF", "TRIMP", "training stress", "adaptive training plan"]
+title: "Was ist Trainingsbelastung? TSS, TRIMP und IF einfach erklärt"
+description: "Trainingsbelastung quantifiziert die Dosis einzelner Einheiten und Wochen mit TSS, TRIMP und Intensity Factor. Erfahre, wie du Einheiten vergleichst und deinen Trainingsplan auswertest."
+keywords:
+  [
+    "was ist Trainingsbelastung",
+    "Trainingsbelastung erklärt",
+    "TSS vs TRIMP",
+    "Trainingsbelastung Metriken",
+    "Trainingsbelastung messen",
+  ]
 ---
 
-# Training Load
+# Was ist Trainingsbelastung? TSS, TRIMP und IF einfach erklärt
 
-**Training load** is a way to quantify how much stress a workout, week, or training block places on the body. It gives endurance athletes a shared language for comparing sessions, managing fatigue, and deciding whether an adaptive training plan should build, hold, recover, or adjust.
+**Trainingsbelastung** ist eine modellierte Trainingsdosis für eine einzelne Einheit, eine Woche oder einen Trainingsblock. Diese Übersichtsseite erklärt die zugehörige Metrikfamilie – TSS, TRIMP und Intensity Factor –, damit du eine lange lockere Einheit mit einem kurzen Intervalltag vergleichen und entscheiden kannst, ob dein Trainingsplan aufbauen, halten, erholen oder anpassen sollte. Produktbezogene Steuerungsentscheidungen findest du unter [Trainingsbelastung steuern](/de/training-load); die folgenden Seiten enthalten die genauen Definitionen.
 
-Without a load metric, it is hard to compare “a 2-hour easy ride/run” with “a 30-minute interval session”. It is also harder to see whether recent load has risen faster than recovery can absorb.
+Ohne eine Belastungsmetrik lassen sich „2 Stunden lockeres Radfahren oder Laufen“ und „30 Minuten hartes Intervalltraining“ kaum objektiv vergleichen. Ebenso schwer ist erkennbar, ob die jüngste Belastung schneller gestiegen ist, als dein Körper sie regenerieren kann.
 
-## Key Metrics
+## Zentrale Metriken
 
 <Cards>
-  <Card title="TSS (Training Stress Score)" href="/docs/metrics/training-load/training-stress-score" />
-  <Card title="IF (Intensity Factor)" href="/docs/metrics/training-load/intensity-factor" />
-  <Card title="TRIMP (Training Impulse)" href="/docs/metrics/training-load/training-impulse" />
+  <Card
+    title="TSS (Training Stress Score)"
+    href="/de/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF (Intensity Factor)"
+    href="/de/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP (Training Impulse)"
+    href="/de/docs/metrics/training-load/training-impulse"
+  />
 </Cards>
 
-## Why Quantify Training Load?
+## Warum Trainingsbelastung quantifizieren?
 
-1.  **Objective comparison**: evaluate different durations and session types with a single yardstick.
-2.  **Progress tracking**: ensure weekly load increases gradually and avoid injury risk from sudden spikes.
-3.  **Recovery management**: higher load requires more recovery; quantification helps you plan training and rest more rationally.
+1.  **Objektiver Vergleich**: Bewerte unterschiedliche Dauern und Einheitentypen mit einem gemeinsamen Maßstab.
+2.  **Trendverfolgung**: Erkenne schrittweise oder sprunghafte Veränderungen deiner modellierten Wochenbelastung.
+3.  **Erholungskontext**: Verbinde deine Belastungshistorie mit Einheitenqualität und deinem subjektiven Körpergefühl, um Training und Regeneration sinnvoll zu planen.
 
-## How Training Load Supports Adaptive Planning
+## Wie Trainingsbelastung adaptive Planung unterstützt
 
-Training load is not the plan itself. It is the evidence layer behind better plan decisions:
+Trainingsbelastung ist nicht selbst der Trainingsplan – sie ist die Datengrundlage für bessere Planentscheidungen:
 
--   **After completed workouts**: actual load can be compared with planned load instead of relying only on completion status.
--   **During review**: CTL, ATL, and TSB help separate long-term fitness trends from short-term fatigue.
--   **Before adjustment**: missed workouts, unusually high fatigue, or a fast load ramp can justify changing the next few sessions.
+- **Nach absolvierten Einheiten**: Die tatsächliche Belastung lässt sich mit der geplanten Belastung vergleichen, statt nur „erledigt / nicht erledigt“ abzuhaken.
+- **In der Auswertung**: CTL, ATL und TSB vergleichen langsamere und schnellere modellierte Belastungstrends; sie messen Fitness, Ermüdung oder Wettkampfbereitschaft nicht direkt.
+- **Vor einer Anpassung**: Ausgelassene Einheiten, ungewöhnlich starke Ermüdung oder ein steiler Belastungsanstieg können Anlass geben, die nächsten Einheiten gezielt umzustellen.
 
-Trainingload.ai uses this pattern throughout the product loop: plan → completed workouts → load trend → AI coach review → confirmed adjustment.
+Trainingload.ai folgt genau diesem Kreislauf im gesamten Produkt: Trainingsplan → absolvierte Einheiten → Belastungstrend → Analyse durch den KI-Coach → bestätigte Anpassung.
 
-## Related Concepts
+## FAQ
 
--   [Training Stress Score (TSS)](/docs/metrics/training-load/training-stress-score): single-session training stress.
--   [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor): workout intensity relative to threshold.
--   [Training Impulse (TRIMP)](/docs/metrics/training-load/training-impulse): heart-rate-based internal load.
--   [Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load): longer-term load trend.
--   [Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load): recent fatigue trend.
--   [Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance): freshness derived from CTL and ATL.
+### Was ist Trainingsbelastung?
+
+Trainingsbelastung ist eine modellierte Trainingsdosis. Einheitenwerte wie TSS oder TRIMP schätzen eine einzelne Aktivität; CTL und ATL fassen diese Werte über die Zeit zusammen, sodass du ganze Wochen vergleichen kannst statt nur „Habe ich die Einheit absolviert?“.
+
+### TSS vs. TRIMP: Was misst die Trainingsbelastung?
+
+TSS ist der übliche Wert für die externe Belastung, wenn Leistungsdaten oder eine verlässliche Pace vorliegen. TRIMP misst die interne Belastung aus Herzfrequenz und Dauer. Trainingload.ai kann je nach Sportart und deiner Priorität der Belastungsquellen beides verwenden.
+
+### Wie messe ich die Trainingsbelastung beim Laufen und Radfahren?
+
+Beim Radfahren wird meist Power-TSS aus NP, IF und FTP genutzt. Beim Laufen kommen häufig rTSS aus NGP und Schwellenpace oder TRIMP zum Einsatz, wenn nur die Herzfrequenz verlässlich ist. Vergleiche Werte zuerst innerhalb derselben Sportart, bevor du sie sportartübergreifend einordnest.
+
+### Wie geht es nach dieser Übersicht weiter?
+
+Öffne die Detailseiten zu [TSS](/de/docs/metrics/training-load/training-stress-score), [TRIMP](/de/docs/metrics/training-load/training-impulse) und [Intensity Factor](/de/docs/metrics/training-load/intensity-factor). Danach kannst du deine [Trainingsbelastung mit CTL, ATL und TSB in deinem Trainingsplan steuern](/de/training-load).
+
+## Verwandte Konzepte
+
+- [Training Stress Score (TSS)](/de/docs/metrics/training-load/training-stress-score): Trainingsstress einer einzelnen Einheit.
+- [Intensity Factor (IF)](/de/docs/metrics/training-load/intensity-factor): Intensität einer Einheit relativ zur Schwelle.
+- [Training Impulse (TRIMP)](/de/docs/metrics/training-load/training-impulse): herzfrequenzbasierte interne Belastung.
+- [TSS aus Dauer, NP und FTP berechnen](/de/tss-calculator)
+- [CTL, ATL und TSB aus täglichem TSS vorausberechnen](/de/training-load-calculator)
+- [Chronic Training Load (CTL)](/de/docs/metrics/pmc/chronic-training-load): längerfristiger Belastungstrend (Fitness).
+- [Acute Training Load (ATL)](/de/docs/metrics/pmc/acute-training-load): kurzfristiger Belastungstrend (Ermüdung).
+- [Training Stress Balance (TSB)](/de/docs/metrics/pmc/training-stress-balance): aktuelle CTL minus aktuelle ATL (Form).
+- [Mit dem KI-Coach die Trainingsbelastung sicher anpassen](/de/ai-training-plan)

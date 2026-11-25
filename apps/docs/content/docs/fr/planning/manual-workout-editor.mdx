@@ -1,0 +1,145 @@
+---
+title: "Guide de l’éditeur manuel de séances : modifier vos séances dans Trainingload"
+description: "Documentation produit pour modifier des séances planifiées dans Trainingload. Apprenez à éditer manuellement des séances d’endurance et de renforcement dans l’éditeur intégré."
+keywords:
+  [
+    "éditeur manuel de séances",
+    "comment modifier des séances",
+    "éditer séance structurée",
+    "guide éditeur séances Trainingload",
+    "éditeur de séance intégré",
+  ]
+---
+
+# Comment modifier manuellement des séances dans Trainingload
+
+Cette page constitue le **guide produit de l’éditeur manuel de séances intégré à Trainingload.ai**. Elle explique comment modifier une séance planifiée une fois un plan ouvert : choisir le sport, ajouter des étapes d’endurance ou des séries de renforcement, prévisualiser la séance et enregistrer un brouillon valide.
+
+Il ne s’agit pas d’un **éditeur** ou **créateur de séances** autonome. Si vous cherchez un outil web gratuit pour préparer vos étapes puis copier le DSL de séance, utilisez l’[Éditeur et créateur de séances](/fr/workout-editor). Revenez ici dès que vous avez besoin de l’enregistrement dans l’application, du constructeur de renforcement et du placement sur un jour précis du plan.
+
+## Avant de commencer
+
+- Ouvrez un plan manuel ou une séance modifiable d’un plan.
+- Vérifiez les seuils de l’athlète utilisés par toute cible en zone ou en pourcentage.
+- Déterminez si la séance relève de l’endurance ou du renforcement musculaire.
+- Si vous souhaitez simplement préparer un brouillon public d’abord, [créez la séance dans l’éditeur de séances](/fr/workout-editor), puis collez-la ou reconstruisez-la ici.
+
+## 1. Choisir le sport
+
+L’éditeur manuel propose volontairement une liste ciblée dédiée à la planification :
+
+- Course à pied : Course à pied, Trail, Tapis de course.
+- Cyclisme : Cyclisme, VTT, Cyclisme en intérieur.
+- Natation : Natation en piscine, Natation en eau libre.
+- Autre : Renforcement musculaire.
+
+Le sport sélectionné modifie les unités de cible disponibles et peut changer le type de structure de la séance. Basculer entre endurance et renforcement réinitialise toute structure incompatible du brouillon : choisissez donc toujours le sport avant de saisir les étapes détaillées.
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="Ouvrir l’éditeur depuis le calendrier du plan"
+  description="Dans le créateur de plan manuel, passez à la sélection des dates, puis cliquez sur + Séance le jour souhaité."
+  route="Plans → Créateur de plan manuel → Sélection des dates → + Séance"
+/>
+
+<DocsScreenshot
+  id="manual-workout-editor"
+  title="Éditeur manuel de séances"
+  description="Choisissez le sport, construisez le travail structuré, ajoutez des notes d’entraînement et vérifiez l’aperçu avant d’enregistrer."
+  route="Plans → Plan manuel → Ajouter une séance"
+/>
+
+## 2. Ajouter un nom et des notes
+
+Utilisez le nom pour identifier brièvement la séance, par exemple « Intervalles aérobies » ou « Renforcement bas du corps ». Réservez les notes aux indications humaines qui ne doivent pas devenir une structure automatisée :
+
+- Repères techniques.
+- Rappels d’équipement.
+- Conseils de ravitaillement.
+- Remarques sur le parcours ou le terrain.
+- Conditions d’arrêt ou d’allègement de la séance.
+
+Ne saisissez pas de texte libre dans un champ DSL. Les étapes de la séance vont en mode Manuel ou Règles ; le contexte de coaching va dans les notes.
+
+## 3. Construire une séance d’endurance
+
+En mode Manuel, ajoutez une étape ou un bloc de répétition. Pour chaque étape :
+
+1. Choisissez le type d’étape : échauffement, travail, récupération, etc.
+2. Définissez la durée ou la distance.
+3. Ajoutez une cible uniquement si vous disposez d’une valeur de référence fiable.
+4. Pour du fractionné, utilisez un bloc de répétition plutôt que de dupliquer plusieurs fois les mêmes étapes de travail et de récupération.
+5. Vérifiez le graphique au fil des modifications.
+
+Une structure d’endurance valide doit contenir au moins une étape significative. Pour une cible sous forme de plage, la borne inférieure doit être inférieure ou égale à la borne supérieure.
+
+## 4. Construire une séance de renforcement musculaire
+
+Sélectionnez **Renforcement musculaire** pour ouvrir l’éditeur dédié. Ajoutez vos exercices et vos séries de travail comme indiqué dans [Séances de renforcement musculaire](/fr/docs/planning/strength-workouts). Pour une saisie textuelle, suivez le [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl).
+
+## 5. Utiliser le mode Règles lorsque cela s’y prête
+
+Le mode Règles accepte le DSL de séance pris en charge. Il est idéal pour une rédaction compacte et réutilisable, mais ce n’est pas un champ de notes libres.
+
+Avant d’enregistrer en mode Règles :
+
+- Gardez une instruction par expression DSL prise en charge.
+- Placez les explications en langage naturel dans les notes.
+- Validez la syntaxe et inspectez la structure rendue.
+- Consultez le [DSL de séance d’endurance](/fr/docs/planning/workout-dsl) ou le [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl) pour la syntaxe correspondante.
+- Vous pouvez d’abord [préparer le même DSL dans l’éditeur public de séances](/fr/workout-editor), puis le coller ici.
+
+## 6. Enregistrer
+
+Sélectionnez **Enregistrer le brouillon**. Trainingload.ai valide la séance avant de l’ajouter au brouillon du plan.
+
+## Vérifier la séance enregistrée
+
+Assurez-vous que :
+
+- L’intitulé du sport est correct.
+- L’aperçu correspond bien à l’enchaînement travail/récupération ou aux séries de renforcement souhaités.
+- Les notes restent séparées de la structure.
+- La séance apparaît bien sur la bonne semaine, le bon jour et dans le bon ordre.
+- La charge attendue n’est affichée que lorsque suffisamment d’informations sont disponibles.
+
+## Dépannage
+
+- **La liste des sports ne contient pas un sport attendu :** vérifiez que vous êtes bien dans l’éditeur manuel de plan. Sa liste de création est volontairement limitée aux neuf sports documentés ci-dessus ; les écrans de classification d’activité disposent d’un catalogue plus large.
+- **Changer de sport efface le brouillon :** les structures d’endurance et de renforcement sont incompatibles. Choisissez le sport en premier et copiez vos notes ou règles réutilisables avant de changer.
+- **L’aperçu d’endurance est vide :** ajoutez au moins une étape significative et vérifiez la validité de sa durée/distance et de ses cibles.
+- **Une plage cible est refusée :** indiquez la valeur minimale avant la valeur maximale et vérifiez l’unité associée au sport choisi.
+- **« Saisissez un nom pour chaque exercice » :** renseignez le nom de chaque exercice de renforcement ; le texte d’exemple (placeholder) n’est pas enregistré.
+- **Un exercice de renforcement ne s’enregistre pas :** ajoutez au moins un groupe de séries et au moins une série de travail à chaque exercice.
+- **Une erreur du mode Règles reste en anglais :** ne copiez pas le message serveur brut dans les notes. Notez l’alerte affichée, le sport sélectionné et la ligne DSL en erreur pour le support.
+- **La séance apparaît le mauvais jour :** vérifiez la date de début du plan, le décalage semaine/jour, l’ordre des séances et le fuseau horaire du compte.
+
+## Questions fréquentes
+
+### Qu’est-ce que l’éditeur manuel de séances ?
+
+C’est l’écran intégré à Trainingload permettant de modifier une séance planifiée. Vous choisissez un sport, ajoutez des étapes d’endurance ou des exercices de renforcement, joignez des notes, vérifiez l’aperçu et enregistrez la séance sur une semaine et un jour donnés. L’[éditeur et créateur de séances](/fr/workout-editor) public est un outil distinct dédié à l’ébauche rapide.
+
+### Comment modifier manuellement une séance dans Trainingload ?
+
+Ouvrez une séance modifiable du plan, sélectionnez d’abord le sport, puis ajoutez des étapes ou un bloc de répétition. Définissez la durée ou la distance, n’ajoutez une cible que si le seuil est fiable, et utilisez un bloc de répétition pour le fractionné plutôt que de recopier plusieurs fois la même paire.
+
+### L’éditeur intégré permet-il de créer des séances de renforcement ?
+
+Oui. Choisissez **Renforcement musculaire** pour ouvrir le constructeur dédié. Ajoutez des exercices nommés et au moins une série de travail par exercice. Pour la saisie texte, utilisez le [DSL de séance de renforcement](/fr/docs/planning/strength-workout-dsl).
+
+### Mode Manuel ou mode Règles ?
+
+Utilisez le mode Manuel lorsque vous préférez composer vos étapes en cliquant. Utilisez le mode Règles si vous recherchez un DSL compact et réutilisable. Ne mettez jamais de texte de coaching dans un champ DSL : il appartient aux notes. Consultez le [DSL de séance d’endurance](/fr/docs/planning/workout-dsl).
+
+### Pourquoi le changement de sport a-t-il réinitialisé mon brouillon ?
+
+Les structures d’endurance et de renforcement sont incompatibles. Choisissez toujours le sport avant de saisir les étapes détaillées et copiez toute note ou règle à conserver avant de basculer.
+
+## Étapes suivantes
+
+- [Préparez une séance structurée dans l’éditeur de séances](/fr/workout-editor) si vous préférez commencer dans l’outil public.
+- Poursuivez avec [Gérer l’état d’un plan](/fr/docs/planning/plan-lifecycle), puis activez le plan une fois l’ensemble du programme prêt.
+- Utilisez le [DSL de séance d’endurance](/fr/docs/planning/workout-dsl) pour la rédaction en mode Règles.
+- Consultez [Séances de renforcement musculaire](/fr/docs/planning/strength-workouts) pour l’éditeur visuel.
+- [Utilisez l’analyse du Coach IA pour ajuster votre charge d’entraînement en toute sécurité](/fr/ai-training-plan) une fois la séance réalisée.

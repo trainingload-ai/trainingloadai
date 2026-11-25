@@ -1,130 +1,142 @@
 ---
-title: Calendar
-description: Use the Trainingload.ai calendar to review planned workouts, completed activities, daily load, weekly summaries, and plan progress in one date-based view.
-keywords: ["training calendar", "workout calendar", "planned workouts", "completed activities", "Trainingload.ai calendar"]
+title: Geplantes und absolviertes Training im Kalender vergleichen
+description: Wähle einen Tag aus, prüfe geplante Einheiten und absolvierte Aktivitäten, verknüpfe die richtige Aufzeichnung und kontrolliere Zeitraum und Umfang der Belastungszusammenfassungen.
+seoTitle: "Trainingskalender: Plan und Ist vergleichen | Trainingload.ai"
+seoDescription: "Nutze den Trainingskalender, um geplante und absolvierte Einheiten zu finden, Tagesdetails zu öffnen, Aktivitäten zu verknüpfen sowie Datum, Status und Belastung zu prüfen."
+keywords: ["Trainingskalender", "Plan-Ist-Vergleich", "Aktivität verknüpfen", "täglicher Trainingsrückblick", "Trainingload.ai Anleitung"]
 ---
 
-# Calendar
+# Geplantes und absolviertes Training im Kalender vergleichen
 
-The calendar brings planned workouts and completed activities into one date-based view. It is useful when you want to see how the training plan and real training line up across days and weeks.
+Der Trainingskalender bringt geplante Einheiten und aufgezeichnetes Training auf eine gemeinsame Datumsachse. Eine geplante Einheit und eine Aktivität am selben Tag sind zunächst getrennte Einträge. Über ihre Details und Verknüpfung legst du eindeutig fest, ob die Aufzeichnung dieser geplanten Einheit entspricht.
 
-Use it to answer:
+[Kalender in der Demo öffnen](https://demo.trainingload.ai/en/calendar). Die Screenshots zeigen Beispiel-Pläne und -Aktivitäten in der echten Web-App. Du kannst in der Demo durch die Tage navigieren; zum Speichern von Verknüpfungen oder Zeitplanänderungen benötigst du ein eigenes Konto.
 
-- What is scheduled today?
-- What did I actually complete?
-- How much load landed on this day or week?
-- Did missed or moved workouts change the rhythm of the plan?
-- Which day should I open for more detail?
+## Bevor du beginnst
 
-## Month and week views
+Prüfe deine Konto-Zeitzone und die Startzeit der Aktivität. Kontrolliere bei geplantem Training Startdatum und Zeitplan deines aktiven Plans. Lass importierte Aktivitäten fertig verarbeiten, bevor du fehlende Belastungswerte oder Analysen bewertest.
 
-The calendar shows a month view on larger screens. On mobile, it can use a week-focused view so each day remains readable.
+Öffne im Web und in Trainingload.ai Personal für macOS **Kalender** über die Seitenleiste. Auf schmalen Web-Bildschirmen öffnest du die Monatsauswahl über die Kalender-Schaltfläche. In der mobilen App wählst du den Tab **Kalender**.
 
-Use navigation controls to:
+## 1. Den richtigen Tag finden und auswählen
 
-- Move to the previous or next month.
-- Move to the previous or next week on mobile week view.
-- Jump back to today.
-- Pick another month.
+Auf einem breiten Bildschirm scrollst du durch den Kalender oder nutzt Monatsauswahl und Pfeile. Klicke auf ein Datum, um das Tagespanel anzuzeigen, oder springe über **Heute** zum aktuellen Tag zurück.
 
-The selected date controls the detail panel on the side or bottom of the screen.
+Das ausgewählte Datum bestimmt den Inhalt des Tagespanels. Ein Tag kann geplante Planeinheiten, eigenständige Einheiten, aufgezeichnete Aktivitäten oder eine Kombination daraus enthalten. Achte auf die Beschriftungen, bevor du einen Eintrag öffnest.
 
-## What each day can show
+<DocsScreenshot
+  id="calendar-plan-actual"
+  title="Geplante Einheiten und tatsächliche Aktivität am selben Datum sehen"
+  description="Synthetisches Web-Beispiel. Der Kalender zeigt geplante Einheiten neben absolvierten Aktivitäten und der Tagesbelastung, während die Tagesansicht alle Details getrennt aufführt."
+  imageAlt="Kalenderbeispiel mit geplanten Einheiten, einer absolvierten Aktivität und dem Trainingskontext des gewählten Tages"
+  route="Kalender → Tag auswählen"
+  demoLabel="Demo-Kalender öffnen"
+/>
 
-A calendar day can include:
+## 2. Das Tagespanel richtig lesen
 
-- Planned workouts from the active plan.
-- Completed activities.
-- Daily load.
-- Visual indicators for plan range.
-- Sport-specific styling for workouts or activities.
+Nutze **Training**, um die geplante Einheit zu prüfen, und **Aktivitäten**, um die Aufzeichnung anzusehen. Kontrolliere ausgewähltes Datum, angezeigte Belastung und die Anzahl der Einträge. Wähle **Tag ansehen**, wenn du die vollständige Tagesansicht brauchst.
 
-Calendar markers are meant for scanning. Open the day panel or activity detail page when you need exact metrics.
+| Eintrag | Vor dem Vergleichen prüfen |
+| --- | --- |
+| Geplante Einheit | Trainingsziel, geplantes Datum, Sportart, Struktur, Notizen und Ausführungsstatus. |
+| Absolvierte Aktivität | Startzeit, Quelle, Sportart, aufgezeichnete Dauer/Distanz, Verarbeitungsstatus und Sensorabdeckung. |
+| Verknüpfung | Ob tatsächlich die richtige Aktivität mit der passenden Einheit verknüpft ist. |
 
-## Selected day panel
+Ein Abschluss-Label allein identifiziert noch keine Aufzeichnung. Öffne die [Aktivitätsdetails](/de/docs/guide/activity-detail), um die tatsächliche Belastung auszuwerten.
 
-The selected day panel shows the details for one date.
+<DocsScreenshot
+  id="calendar-activity-details"
+  title="Zur Aufzeichnung des gewählten Tages wechseln"
+  description="Dasselbe synthetische Kalenderdatum mit ausgewähltem Tab Aktivitäten. Öffne die Aufzeichnung, um tatsächliche Dauer, Distanz und Analyse vor dem Verknüpfen zu prüfen."
+  imageAlt="Ausgewählter Kalendertag mit dem Tab Aktivitäten und der zugehörigen Aufzeichnung"
+  route="Kalender → Ausgewählter Tag → Aktivitäten"
+  demoLabel="Demo-Kalender öffnen"
+/>
 
-It can include:
+## 3. Die richtige Aktivität mit einer Einheit verknüpfen
 
-- Selected date.
-- Daily load.
-- Activity count.
-- Planned workout count.
-- Planned workout cards or charts.
-- Completed activity list.
-- Link to the full day page.
+Öffne in deinem Konto die Details der geplanten Einheit und wähle **Aktivität verknüpfen**.
 
-Open a planned workout to inspect the workout description and chart. Open a completed activity to review its activity detail page.
+1. Prüfe, ob die Einheit ein geplantes Datum und die passende Sportart hat.
+2. Kontrolliere zuerst die Startzeit der Aufzeichnung in den Aktivitätsdetails. Vergleiche dann in der angebotenen Tagesliste Titel und Dauer, um die richtige Aufzeichnung zu erkennen.
+3. Wähle die passende Aufzeichnung aus und warte auf die Bestätigung.
+4. Gehört sie bereits zu einer anderen geplanten Einheit, lies die Abfrage **Verknüpfung ersetzen?** sorgfältig, bevor du bestätigst.
+5. Öffne Einheit und Aktivität erneut, um die Verknüpfung zu kontrollieren.
 
-## Training and activity tabs
+Erscheint kein passender Eintrag, prüfe Synchronisierung, lokales Datum der Aktivität, Zeitplan der Einheit und Sportart. Kläre diese Abweichungen, statt eine unpassende Aktivität auszuwählen.
 
-The day panel separates planned training and completed activities.
+Um eine falsche Zuordnung zu korrigieren, nutze **Verknüpfung entfernen** bei der bestehenden Zuordnung oder wähle die richtige Aktivität aus. Das Entfernen einer Verknüpfung und das Löschen einer Aktivität sind völlig unterschiedliche Aktionen. In der Demo sind diese Schreibaktionen deaktiviert.
 
-Use **Training** to review:
+## 4. Geplante und absolvierte Arbeit vergleichen
 
-- Planned workouts.
-- Workout structure.
-- Sport type.
-- Session details.
+Vergleiche zuerst Ziel und Struktur, danach aufgezeichnete Dauer, Distanz, Intensität und verfügbare Trainingsbelastung. Halte fest, warum eine Einheit gekürzt, ersetzt oder übersprungen wurde. Zusätzliche Aktivitäten sind ebenfalls echtes Training, auch wenn sie ursprünglich nicht im Plan standen.
 
-Use **Activity** to review:
+Eine fehlende erwartete oder tatsächliche Belastung ist ein Datenzustand, den du prüfen solltest – setze sie nicht vorschnell mit null gleich, sondern prüfe Schwellenwerte, Sportart und Verarbeitung. Nutze [Aktiven Plan verwalten](/de/docs/guide/manage-active-plan) für Abschließen, Überspringen, Verschieben und weitere Ausführungsaktionen des jeweiligen Einheitenstatus.
 
-- Completed workouts for the selected day.
-- Distance and duration.
-- Sport type.
-- Links to activity details.
+## 5. Den Umfang der Zusammenfassungen prüfen
 
-This separation helps avoid confusing "what was planned" with "what happened."
+Der Kalender kann **Plan**- und **Monats**-Zusammenfassungen anzeigen. Achte auf den aktiven Bezugsrahmen und die angezeigten Datumsgrenzen, bevor du Anzahl, Distanz, Dauer oder Trainingsbelastung vergleichst.
 
-## Summary scope
+Der Planfortschritt bezieht sich auf den aktiven Zyklus. Eine Monatsübersicht gilt für den sichtbaren Kalendermonat. Da sich die Vergleichszeiträume unterscheiden, lies immer den angezeigten Kontext, statt anzunehmen, dass jede Zusammenfassung denselben Zeitraum abdeckt.
 
-The calendar can summarize training by plan progress or by calendar month.
+Für den größeren Rückblick nutze den [Wochenrückblick](/de/docs/workflow/weekly-review) und für angesammelte Belastung samt bedingter Prognose das [PMC](/de/docs/guide/pmc-forecast).
 
-When an active plan exists, the plan scope helps you review the current plan period. Without an active plan, the month scope still gives a useful overview.
+## Ergebnis überprüfen
 
-Summary metrics can include:
+Ausgewählter Tag, Tagespanel und geöffnete Einträge sollten beim Datum übereinstimmen. Geplante Einheit und Aktivität sollten sauber verknüpft sein, und jeder Belastungsvergleich sollte seinen Zeitraum sowie eventuell fehlende Daten klar berücksichtigen.
 
-- Activity count.
-- Training load.
-- Distance.
-- Duration.
-- Comparison with the previous period.
+## Kommende Einheiten anpassen [#adjust-upcoming-workouts]
 
-Use these summaries to spot patterns, not to judge one day in isolation.
+1. Bei aktivem Plan klicke im Web oder in Personal mit der rechten Maustaste auf ein Datum und wähle **Zeitplan anpassen**.
+2. Ziehe eine kommende Einheit auf ein anderes Datum oder klicke sie rechts an und wähle **Einheit verschieben**, um ein Datum auszuwählen. Über **Einheit bearbeiten** im Einheitenmenü änderst du die Vorgaben. Über das Datumsmenü fügst du eine Einheit hinzu, über das Einheitenmenü entfernst du eine. Der Editor fasst all diese Änderungen in einem gemeinsamen Entwurf zusammen.
+3. Prüfe die gepaarten Farben sowie die Kennzeichnungen **Vorher** und **Nachher**. Wähle **Änderungen prüfen** und dann **Planänderungen bestätigen**, um das Paket anzuwenden. Wenn du später weitermachen möchtest, schließe den Editor, wähle **Entwurf speichern** und öffne die ausstehende Anpassung später erneut über **Zeitplan anpassen**.
+4. Öffne den Kalender erneut und prüfe die neuen Termine und Inhalte. Hat sich der Zeitplan vor der Bestätigung geändert, nutze **Aktuellsten Zeitplan laden** und prüfe die verbleibenden zulässigen Änderungen.
 
-## Calendar vs current plan
+<DocsScreenshot
+  id="calendar-adjustment-entry"
+  title="Zeitplan-Editor direkt an einem Datum öffnen"
+  description="Klicke im Monatskalender mit der rechten Maustaste auf das Datum und wähle Zeitplan anpassen."
+  route="Kalender → Rechtsklick auf ein Datum → Zeitplan anpassen"
+/>
 
-Use the calendar when you want date context across multiple days.
+<DocsScreenshot
+  id="calendar-adjustment-draft"
+  title="Ursprüngliches und neues Trainingsdatum vergleichen"
+  description="Gepaarte Farben sowie Vorher- und Nachher-Markierungen zeigen eine Einheit, die vom 30. auf den 31. Oktober verschoben wurde. Prüfe den Entwurf vor dem Übernehmen."
+  route="Zeitplan anpassen → Einheit verschieben → Änderungen prüfen"
+/>
 
-Use the current plan page when you want to execute or adjust the plan:
+Auf einem schmalen Bildschirm nutzt du das Menü der Einheit oder den Ziehpunkt, um sie im Monatsraster zu verschieben. Vergangene, abgeschlossene oder bereits verknüpfte Einheiten können gegen Verschieben geschützt sein.
 
-- Mark workouts done or skipped.
-- Move unfinished workouts.
-- Compare expected and actual load in the plan workflow.
-- Ask AI Coach for plan follow-up.
+Um im Hauptkalender nur eine einzelne Einheit zu verschieben, ziehe sie auf das neue Datum oder wähle **Einheit verschieben** im Menü. Prüfe das Datum in der Vorschau und klicke auf **Anpassung bestätigen**.
 
-The calendar is for orientation; the current plan page is for execution.
+Bietet das Coach-Gespräch **Trainingskalender ansehen** an, öffne die Vorschau direkt dort. Unterstützte Änderungen kannst du im selben Gespräch prüfen oder bearbeiten und den gespeicherten Entwurf vor der Bestätigung verifizieren.
 
-## When the calendar looks wrong
+## Häufige Fragen
 
-If a workout or activity appears on an unexpected day:
+### Warum erscheint die Aktivität an einem anderen Datum?
 
-- Check your profile time zone.
-- Check the activity start time and activity time zone.
-- Confirm the plan start date.
-- Confirm the activity has finished processing.
-- Check whether search or calendar data needs refreshing.
+Vergleiche Startzeit und Zeitzone der Aktivität mit der Anzeige-Zeitzone deines Kontos sowie Startdatum und Termin im Plan. Kläre das Datum, bevor du eine Einheit verschiebst.
 
-If planned workouts are missing:
+### Warum fehlt die geplante Einheit?
 
-- Confirm a plan is active.
-- Check whether the selected date is inside the active plan range.
-- Open the plan detail page to confirm the workout schedule.
+Prüfe deinen aktiven Plan, seinen Zeitraum sowie Termin und Status der einzelnen Einheit. Eine verschobene oder übersprungene Einheit steht eventuell nicht mehr am ursprünglich erwarteten Tag.
 
-Related pages:
+### Warum stehen zwei Einträge für eine einzige Trainingseinheit?
 
-- [Manage an Active Plan](/docs/guide/manage-active-plan)
-- [Activity Detail](/docs/guide/activity-detail)
-- [Activities Feed and Search](/docs/guide/activity-feed-search)
-- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+Geplante Einheit und absolvierte Aktivität sind getrennte Datensätze. Prüfe ihre Verknüpfung. Existieren darüber hinaus zwei echte Aktivitäten, kläre zuerst Mehrfach-Weiterleitungen und doppelte Importe, bevor du etwas löschst.
+
+### Warum kann ich die Aktivität in der Demo nicht verknüpfen?
+
+Die Demo erlaubt das Durchsehen der Beispiele. Verknüpfungen und Zeitplanänderungen erfordern die entsprechenden Schreibrechte in deinem eigenen Konto.
+
+### Was tun, wenn eine Änderung abgelehnt wird?
+
+Lies die Fehlermeldung und lade den neuesten Plan- oder Aktivitätsstatus neu, bevor du es erneut versuchst. Prüfe anschließend, ob sich die gewünschte Verknüpfung oder der Zeitplan tatsächlich aktualisiert hat.
+
+## Weiterlesen
+
+- [Heute und aktueller Zustand](/de/docs/guide/today-and-current-state)
+- [Aktiven Plan verwalten](/de/docs/guide/manage-active-plan)
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)

@@ -1,0 +1,68 @@
+---
+title: Autohospedado vs. Cloud
+description: Compara la puesta en marcha, el almacenamiento de datos, la importación de actividades, los costes de IA y el mantenimiento para elegir la opción adecuada para ti.
+seoTitle: "Trainingload.ai autohospedado vs. Cloud: ¿Cuál te conviene?"
+seoDescription: "Compara Trainingload.ai Cloud y el autohospedaje según instalación, ubicación de datos, archivos locales, IA BYOK, integraciones, copias de seguridad, actualizaciones y soporte."
+keywords:
+  [
+    "autohospedado vs cloud",
+    "despliegue de Trainingload.ai",
+    "datos de entrenamiento locales",
+    "IA BYOK",
+  ]
+---
+
+# Autohospedado vs. Cloud
+
+Elige Cloud para empezar a usar Trainingload.ai de inmediato. Elige autohospedaje si quieres guardar tus datos de entrenamiento en tu propio ordenador o servidor y estás dispuesto a instalar y mantener la aplicación.
+
+## Comparativa rápida
+
+| Qué te importa | Cloud | Autohospedado |
+| --- | --- | --- |
+| Puesta en marcha | Abre la app y crea una cuenta | Descarga un paquete de versión y sigue la guía de instalación en tu propio equipo |
+| Dónde viven tus datos | En el servicio Cloud de Trainingload.ai | En tu equipo, incluidas actividades, planes y archivos subidos |
+| Importación de entrenamientos | Conecta una plataforma compatible o sube archivos de actividad | Sube archivos de actividad o conecta Intervals.icu y Garmin Personal API con tus propias claves |
+| Uso del Entrenador con IA | Usa el cupo de IA incluido en tu plan de cuenta | Desactivado por defecto; configura tu propio servicio de IA y paga a ese proveedor |
+| Cuentas | Usa tu cuenta Cloud | Una sola persona por instancia autohospedada |
+| Copias de seguridad y recuperación | Trainingload.ai mantiene el servicio Cloud | Tú guardas las copias de seguridad y las restauras cuando hace falta |
+| Actualizaciones de software | Trainingload.ai actualiza el servicio | Sigues la guía de actualización para instalar una nueva versión |
+
+## ¿Cuál encaja mejor contigo?
+
+**Elige Cloud** si prefieres dedicar tu tiempo a entrenar y revisar sesiones, sin instalar software, aplicar actualizaciones ni gestionar copias de seguridad por tu cuenta.
+
+**Elige autohospedaje** si quieres almacenar tus propios datos de entrenamiento, puedes mantener un equipo que ejecute la aplicación y te encargarás de mantenerla actualizada y respaldada. El autohospedaje es para uso personal; una instancia no admite varios usuarios.
+
+## Comprueba cómo importarás tus entrenamientos
+
+El autohospedaje admite actualmente:
+
+- subida de archivos de actividad **FIT, GPX y TCX**;
+- conexión con **Intervals.icu** mediante una clave API personal;
+- conexión con **Garmin Personal API** mediante una clave API personal.
+
+Si dependes de una plataforma de entrenamiento concreta, revisa primero [Conectar datos](/es/docs/guide/connect-data) y la [configuración de conexiones en autohospedaje](/es/docs/self-host/configuration#connect-intervalsicu). Cloud y autohospedaje ofrecen métodos de conexión distintos. Si otra plataforma permite exportar un archivo de actividad compatible, puedes subir ese archivo directamente.
+
+**Trainingload.ai no ofrece actualmente una app para Apple Watch.**
+
+## Cómo funciona la IA y cuánto cuesta
+
+La IA está desactivada por defecto. Puedes usar todas las funciones sin IA sin configurarla. Para usar el Entrenador con IA, elige un proveedor en ajustes e introduce tu propia clave API; consulta [Configurar la IA en el cliente](/es/docs/self-host/configuration#configure-ai-in-the-client).
+
+El autohospedaje no utiliza suscripciones ni créditos de IA de Trainingload.ai Cloud. Tu proveedor de IA elegido te cobra por su uso de API.
+
+Cuando utilizas un servicio de IA externo, la información de entrenamiento necesaria para esa petición se envía a dicho proveedor. Instalar la aplicación en local no hace que un servicio de IA externo se ejecute en local. La sincronización con una plataforma de entrenamiento también requiere conexión a internet.
+
+## Qué tendrás que mantener
+
+- Conservar suficiente espacio libre en el equipo y ejecutar la aplicación cuando la necesites.
+- Hacer copias de seguridad antes de actualizar y guardar una copia fuera del equipo donde corre la aplicación.
+- Comprobar que tus copias de seguridad se pueden restaurar para tener un respaldo usable si falla el equipo.
+- Seguir la [guía de gestión y actualización](/es/docs/self-host/operations) para actualizar la aplicación.
+
+## Próximo paso
+
+Para Cloud, [abre la app](https://app.trainingload.ai/en) y sigue [Primeros pasos](/es/docs/guide/getting-started) para importar tu primera actividad.
+
+Para autohospedaje, empieza por la [guía de instalación](/es/docs/self-host/installation). Los pasos de instalación, copia de seguridad y actualización se detallan en sus guías respectivas.

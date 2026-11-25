@@ -1,44 +1,123 @@
 ---
-title: Effective VO2max for Endurance Decisions
-description: How to interpret effective VO2max trends with training load and plan execution context.
-keywords: ["effective VO2max", "training analysis", "endurance decisions", "training load response"]
+title: Effektive VO2max im Ausdauertraining verstehen
+description: Öffne die VO2Max-Detailansicht, prüfe Aktivitätsschätzungen und Verlauf, unterscheide den aktuellen Wert von der Vier-Wochen-Prognose und ordne die angezeigte Unsicherheit richtig ein.
+seoTitle: "VO2Max-Verlauf und Prognose verstehen | Trainingload.ai"
+seoDescription: "Erfahre, wie du VO2Max-Verlaufstabs, Aktivitätsschätzungen, die Vier-Wochen-Prognose samt Referenzbereich nutzt – auch bei fehlenden oder veralteten Daten."
+keywords: ["effektive VO2max", "VO2max Prognose", "VO2max Verlauf", "Laufleistung Trend", "Trainingload.ai Anleitung"]
 ---
 
-# Effective VO2max for Endurance Decisions
+# Effektive VO2max im Ausdauertraining verstehen
 
-effective VO2max is most useful as a trend signal.
-Use it to validate whether current training stress is producing useful adaptation.
+Trainingload.ai nutzt verfügbare Aktivitätsdaten, um eine effektive VO2max / VDOT zu schätzen. Die Detailansicht hilft dir, den zeitlichen Verlauf und – bei ausreichend vergleichbarer Laufhistorie – einen bedingten Ausblick zu prüfen. Dabei handelt es sich um Modellschätzungen, nicht um Labormessungen oder garantierte Zukunftsergebnisse.
 
-## What it does well
+[Dashboard in der Demo öffnen](https://demo.trainingload.ai/en/dashboard) und anschließend die Karte **VO2Max** auswählen. Ob eine Prognose verfügbar ist, hängt von den aktuellen Einträgen der Demo ab. Der Screenshot unten zeigt Beispieldaten, die direkt von der App gerendert wurden.
 
-- Flags medium-term changes in performance response.
-- Helps detect stagnation earlier than race-day feedback.
-- Improves context for load adjustments.
+## Bevor du beginnst
 
-## What it cannot do alone
+- Importiere aktuelle Laufaktivitäten und warte, bis die Verarbeitung abgeschlossen ist.
+- Prüfe maximale Herzfrequenz, gewählte Schätzquelle und eventuelle Korrekturfaktoren in deinem Profil.
+- Vergleiche Aktivitäten mit verlässlichen Eingabedaten und ähnlicher Zielsetzung. Halte Wechsel bei Sensoren, Gelände oder Schätzeinstellungen fest.
+- Trenne in deiner Auswertung sauber zwischen einzelnen Aktivitätsschätzungen, dem aktuellen Wert und der Prognose.
 
-- It cannot explain execution quality by itself.
-- It cannot replace pacing, power, and heart-rate analysis.
-- It should not be treated as a single-score verdict.
+Die Prognose basiert auf geeigneten Laufbeobachtungen. Ein Wechsel des Sportartfilters im Dashboard erzeugt keine Rad- oder Schwimmprognose.
 
-## How to use it with load metrics
+## 1. VO2Max-Detailansicht öffnen
 
-Pair effective VO2max with:
+Suche im Dashboard die Karte **VO2Max** und öffne sie. Die Detailansicht zeigt den aktuellen Wert, einen eventuell verfügbaren Vier-Wochen-Ausblick, das Diagramm, Verlaufs-Tabs, Erläuterungen sowie **Coach fragen**.
 
-- [ATL](/docs/metrics/pmc/acute-training-load) for recent stress.
-- [TSB](/docs/metrics/pmc/training-stress-balance) for freshness.
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score) for session load.
+Der aktuelle Wert kann auch dann sichtbar sein, wenn keine Prognose verfügbar ist. Prüfe die Statusmeldung zur Verfügbarkeit und achte darauf, ob das Diagramm tatsächlich zukünftige Schätzwerte enthält.
 
-If effective VO2max stalls while ATL stays high, reduce intensity before increasing volume.
+## 2. Verlaufszeitraum wählen
 
-## Suggested review cadence
+Wähle über die Tabs **7**, **14**, **30** oder **60** Tage den aufgezeichneten Zeitraum, den du untersuchen möchtest. Beginne mit einem Fenster, das mehrere vergleichbare Aktivitäten umfasst.
 
-- Daily: scan for abrupt drift and obvious recovery issues.
-- Weekly: compare trend direction with plan completion.
-- Block-end: confirm whether adaptation matched objective.
+Ist eine Prognose verfügbar, zeigt das Diagramm zusätzlich ein zum Tab passendes Zukunftszeitfenster – begrenzt auf maximal 30 Tage. Der 7-Tage-Tab zeigt also einen kürzeren Zukunftsabschnitt als der 30-Tage-Tab. Der Wert **In vier Wochen** in der Zusammenfassung bezieht sich dennoch immer auf den Endpunkt nach vier Wochen.
 
-## Where to apply this in Trainingload.ai
+<DocsScreenshot
+  id="effective-vo2max-trend"
+  title="Aktuellen Wert, Verlauf und Zukunftsschätzungen getrennt lesen"
+  description="Synthetisches Laufbeispiel. Die Detailansicht zeigt den aktuellen Wert, eine Vier-Wochen-Schätzung samt Referenzbereich sowie darunter ein 60-Tage-Verlaufsfenster und die verfügbare Prognosekurve."
+  imageSrc="/docs/analysis/en/effective-vo2max-trend.webp"
+  imageAlt="Beispiel der VO2Max-Detailansicht mit aktuellem Wert, Vier-Wochen-Schätzung, Referenzbereich, historischen Aktivitätspunkten und Prognosekurve"
+  route="Dashboard → VO2Max → 60 Tage"
+/>
 
-- [Training load page](/training-load)
-- [AI coach review page](/ai-training-plan)
-- [Training analysis landing](/training-analysis)
+## 3. Erkennen, welchen Wert du gerade liest
+
+| Anzeige | Was sie darstellt |
+| --- | --- |
+| Aktuelle VO2Max | Der aktuelle vom Produkt angezeigte Wert. |
+| Historische Werte und Aktivitätspunkte | Die verfügbaren Schätzungen oder Einträge für Daten im gewählten Verlaufszeitraum. |
+| Aktuell geschätztes Niveau | Das vom Modell geschätzte Niveau am historischen Stichtag, sofern das Diagramm diesen Wert anbietet. |
+| In vier Wochen | Der Endpunkt der verfügbaren Vier-Wochen-Prognose. |
+| Referenzbereich oder 80%-Prognoseintervall | Die mit der Prognose verbundene Spanne – jeweils so beschriftet, wie es dem eingesetzten Modell entspricht. |
+
+Der aktuelle Produktwert und das modellgeschätzte Niveau können voneinander abweichen. Lies Beschriftung und Datum genau, bevor du sie vergleichst. Ein zukünftiger Punkt stellt keine absolvierte Trainingseinheit dar.
+
+Fahre über einen historischen oder zukünftigen Punkt, um die verfügbaren Messwerte im Diagramm einzusehen. Bei einem auffälligen historischen Punkt suche über das Datum die ursprüngliche Aktivität unter **Aktivitäten** und prüfe Aufzeichnung und Schätzquelle, bevor du auf eine echte Fitnessveränderung schließt.
+
+## 4. Prognose und Spanne richtig lesen
+
+Ist der Ausblick verfügbar, zeigt die Zusammenfassung **In vier Wochen**, die Richtung im Vergleich zum aktuellen Wert, die zugehörige Spanne und den Stichtag der Historie. Lies diese Angaben immer gemeinsam.
+
+Ein **Referenzbereich** ist kein kalibriertes 80%-Prognoseintervall. Wenn die Seite ausdrücklich ein **80%-Prognoseintervall** ausweist, behalte diese Bezeichnung bei. Keine der beiden Angaben garantiert, dass dein tatsächlicher zukünftiger Wert innerhalb dieses Bandes liegt.
+
+Die Prognose folgt historischen Beobachtungen und den Annahmen des Modells. Sie ist unabhängig vom zeitplanbasierten Belastungsausblick des PMC. Das bloße Hinzufügen einer zukünftigen Trainingseinheit beweist allein noch nicht, dass sich die VO2Max um den angezeigten Betrag verbessert.
+
+Nutze die Schätzung als Kontext für deinen Rückblick und vergleiche sie mit der tatsächlichen Einheitenumsetzung und der Trainingsbelastung. Für den Belastungs-Workflow siehe [PMC-Verlauf und Prognosen](/de/docs/guide/pmc-forecast).
+
+## 5. Mit einer nicht verfügbaren Prognose umgehen
+
+Lies zuerst den angezeigten Hinweis, bevor du Einstellungen änderst.
+
+| Meldung | Nächster Schritt |
+| --- | --- |
+| Mehr Laufhistorie erforderlich | Sammle weiter geeignete, verarbeitete Laufaufzeichnungen. Ein aktueller Einzelwert allein liefert noch keine ausreichende Prognosegrundlage. |
+| Neue Laufaufzeichnungen erforderlich | Prüfe, ob die letzten geeigneten Beobachtungen veraltet sind, und importiere aktuelle Aktivitäten. |
+| Die Berechnungsmethode hat sich geändert | Prüfe Quell- und Korrektureinstellungen. Eventuell sind neue vergleichbare Beobachtungen nötig. |
+| Prognose nicht verfügbar | Nutze weiter den vorhandenen Verlauf und prüfe den Anfrage- oder Datenstatus. |
+
+Ein leeres Verlaufsdiagramm kann auch einfach bedeuten, dass das gewählte 7-Tage-Fenster keine Beobachtungen enthält. Probiere ein längeres Zeitfenster, bevor du davon ausgehst, dass alle Daten fehlen. Fehlende Schätzungen sind keine Nullwerte.
+
+Ändere maximale Herzfrequenz oder Korrekturfaktoren niemals nur, um eine gefälligere Prognose zu erhalten. Jede Einstellungsänderung kann die Vergleichbarkeit ebenso verändern wie die angezeigten Werte.
+
+## 6. Den Coach zur Datengrundlage fragen
+
+Klicke in der Detailansicht auf **Coach fragen**. Die vorbereitete Frage bezieht sich auf das aktuelle Niveau, historische Veränderungen und einen eventuell verfügbaren Vier-Wochen-Ausblick. Prüfe sie und sende sie ab, wenn sie zu deiner Fragestellung passt.
+
+Ergänze die konkreten Daten und Aktivitäten, die du erklärt haben möchtest. Bitte den Coach, aufgezeichnete Daten klar von Schätzungen zu trennen und fehlenden Kontext zu benennen. Das Öffnen dieses Links sendet weder automatisch eine Frage noch ändert es deinen Plan.
+
+Prüfe vor der Bestätigung einer vorgeschlagenen Änderung immer Aktivitätsdaten, Plankontext und den regulären [Bestätigungsablauf im KI-Coach](/de/docs/guide/ai-coach).
+
+## Ergebnis überprüfen
+
+Notiere Verlaufsfenster, Eingabequelle, relevante Daten, aktuellen Wert, Prognoseverfügbarkeit und die Bezeichnung der Spanne. Du solltest klar erklären können, welche Beobachtungen einen Trend stützen und welcher Teil eine Prognose bleibt.
+
+## Häufige Fragen
+
+### Warum bleibt die Vier-Wochen-Zusammenfassung gleich, wenn ich 7 Tage wähle?
+
+Der Tab ändert lediglich das sichtbare Diagrammfenster. Die Zusammenfassung beschreibt weiterhin den Vier-Wochen-Endpunkt, während das Diagramm einen kürzeren Teil des verfügbaren Ausblicks anzeigt.
+
+### Warum gibt es einen aktuellen Wert, aber keine Prognose?
+
+Aktuelle Anzeige und Prognose stellen unterschiedliche Anforderungen an die Datengrundlage. Eine Prognose kann fehlen, weil zu wenige, veraltete, nicht vergleichbare oder für das Modell nicht nutzbare Laufbeobachtungen vorliegen.
+
+### Warum weicht eine einzelne Aktivität vom Trend ab?
+
+Eine einzelne Aktivitätsschätzung und das modellierte aktuelle Niveau fassen unterschiedliche Daten zusammen. Prüfe Quelle, Sensorqualität, Gelände und Trainingsziel dieser Aktivität. Vergleiche mehrere geeignete Einträge, statt einen Einzelpunkt als Ergebnis eines ganzen Trainingsblocks zu werten.
+
+### Verändert eine geplante Einheit diese Prognose?
+
+Das PMC schätzt zukünftige Belastung aus anwendbaren geplanten Einheiten und Gewohnheiten. Der VO2Max-Ausblick beruht hingegen auf seinem historischen Beobachtungsmodell. Behandle beide Prognosen nicht als dieselbe Berechnung.
+
+### Warum weicht der Wert von meiner Uhr oder einem Labortest ab?
+
+Unterschiedliche Verfahren nutzen verschiedene Methoden, Eingaben und Messzeitpunkte. Bleibe beim Vergleichen jeweils innerhalb derselben Messreihe. Mehr zu Mess- und Schätzkonzepten findest du unter [VO2 Max](/de/docs/metrics/maximal-oxygen-uptake).
+
+## Weiterlesen
+
+- [PMC-Verlauf und Prognosen](/de/docs/guide/pmc-forecast)
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)
+- [Profil, Schwellenwerte und Zonen](/de/docs/guide/profile-thresholds-zones)
+- [Wöchentlicher Trainingsrückblick](/de/docs/workflow/weekly-review)

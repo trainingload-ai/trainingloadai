@@ -1,0 +1,146 @@
+---
+title: Lire l’historique et les prévisions PMC
+description: Utilisez la page de gestion de la forme de Trainingload.ai pour comparer CTL, ATL et TSB, inspecter une date, distinguer la charge enregistrée des prévisions et interroger le Coach IA avec le contexte sélectionné.
+seoTitle: "Guide d’historique et prévisions PMC | Trainingload.ai"
+seoDescription: "Suivez le flux PMC pour choisir un sport, examiner CTL, ATL et TSB, vérifier la charge quotidienne et les hypothèses de prévision."
+keywords: ["prévision PMC", "CTL ATL TSB", "forme fatigue fraîcheur", "prévision charge d’entraînement", "guide Trainingload.ai"]
+---
+
+# Lire l’historique et les prévisions PMC
+
+Le PMC rassemble au même endroit la charge d’entraînement enregistrée et une projection conditionnelle. Utilisez-le pour examiner comment la pression d’entraînement a évolué et ce qu’impliqueraient les entrées futures disponibles. Une prévision reste une estimation fondée sur ces entrées : elle ne confirme ni qu’une séance a eu lieu, ni qu’une décision d’entraînement donnée est adaptée.
+
+[Ouvrir la gestion de la forme dans la Démo](https://demo.trainingload.ai/en/pmc). La Démo publique est en lecture seule. Sélectionnez le sport à inspecter une fois la page ouverte. Les captures d’écran comportant des courbes de prévision illustrent des données d’exemple rendues par l’application. Les valeurs et la disponibilité des prévisions dans la Démo dépendent de ses enregistrements actuels.
+
+## Avant de commencer
+
+- Importez vos activités terminées et attendez que leur charge d’entraînement ait fini d’être calculée.
+- Vérifiez la classification du sport, les seuils, les réglages de source de charge et le fuseau horaire du compte.
+- Pour les prévisions basées sur un plan, utilisez des séances programmées disposant d’une charge prévue exploitable. Un brouillon ou une séance non programmée ne fournit pas automatiquement de charge quotidienne future.
+- Gardez bien distincts l’entraînement enregistré, l’entraînement planifié et les habitudes estimées lorsque vous expliquez le graphique.
+
+## 1. Ouvrir la gestion de la forme et choisir un sport
+
+Ouvrez **PMC / Gestion de la forme** depuis les outils d’analyse. En haut à droite, utilisez **Sport** pour sélectionner Tous les sports, Course à pied, Cyclisme ou Natation. Les trois cartes de valeurs actuelles et le graphique adoptent ce périmètre.
+
+Commencez par un seul sport lorsque vous analysez un bloc d’entraînement précis. Vérifiez de nouveau le périmètre en passant du tableau de bord au PMC et aux activités liées.
+
+La page principale du PMC affiche habituellement 60 jours d’historique et une projection s’étendant sur 28 jours dans le futur. Elle présente un indicateur sélectionné à la fois, accompagné de la charge quotidienne en dessous.
+
+<DocsScreenshot
+  id="pmc-forecast-overview"
+  title="Repérer les valeurs actuelles, l’indicateur sélectionné et la charge quotidienne"
+  description="Exemple synthétique en course à pied. Les valeurs actuelles CTL, ATL et TSB figurent au-dessus du graphique. Les valeurs enregistrées en trait plein et les prévisions en pointillés partagent les mêmes dates, avec la charge quotidienne en dessous."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Exemple PMC course à pied avec trois cartes de valeurs actuelles, TSB enregistré et projeté, et charge d’entraînement quotidienne"
+  route="Analyse → PMC → Course à pied"
+/>
+
+## 2. Lire les valeurs actuelles avant la projection
+
+Lisez les trois cartes ensemble.
+
+| Valeur | Ce qu’elle décrit | Ce qu’elle ne démontre pas |
+| --- | --- | --- |
+| Forme / CTL | La charge d’entraînement accumulée à plus long terme | Une amélioration mesurée de la performance. |
+| Fatigue / ATL | Le signal plus réactif de la charge récente | Un diagnostic de votre niveau de fatigue ressentie. |
+| Fraîcheur / TSB | L’écart entre la charge à long terme et la charge récente | Une garantie d’être prêt pour une séance ou une course. |
+
+Ces cartes décrivent l’état actuel enregistré. Survoler une date future ne les remplace pas par des valeurs projetées. Pour comprendre leur calcul, consultez [CTL](/fr/docs/metrics/pmc/chronic-training-load), [ATL](/fr/docs/metrics/pmc/acute-training-load) et [TSB](/fr/docs/metrics/pmc/training-stress-balance).
+
+## 3. Changer d’indicateur et inspecter une date
+
+1. Choisissez **Fraîcheur**, **Forme** ou **Fatigue** au-dessus du graphique.
+2. Déplacez le pointeur sur la date à inspecter. L’infobulle indique la date, le statut enregistré ou projeté, CTL, ATL, TSB et la charge quotidienne.
+3. Pour une date future, lisez la base de calcul affichée en plus du chiffre.
+4. Comparez l’indicateur avec le panneau de charge à cette même date : le mouvement d’une courbe et la charge d’une journée sont deux grandeurs différentes.
+
+Le graphique est également accessible au clavier. Placez le focus sur le graphique et utilisez les flèches gauche et droite pour naviguer de date en date ; la touche **Échap** masque l’infobulle. Sur écran tactile, touchez une date sur le graphique pour l’inspecter.
+
+<DocsScreenshot
+  id="pmc-forecast-date"
+  title="Vérifier une date future et sa base de charge"
+  description="Exemple synthétique en course à pied. La date future sélectionnée porte la mention Projeté et précise la base de sa charge quotidienne. Les cartes du haut continuent d’afficher l’état actuel enregistré."
+  imageSrc="/docs/analysis/en/pmc-forecast-date.webp"
+  imageAlt="Graphique PMC Forme avec infobulle sur une date future affichant CTL, ATL, TSB projetés, la charge et sa base"
+  route="PMC → Forme → Inspecter une date"
+/>
+
+## 4. Distinguer l’historique enregistré d’une prévision conditionnelle
+
+Repérez-vous grâce à la légende et au repère **Aujourd’hui**. Les valeurs enregistrées apparaissent en trait plein, tandis que les estimations futures disponibles s’affichent en pointillés. Le panneau de charge quotidienne utilise des barres pleines pour la charge enregistrée et un rendu plus léger pour la charge future.
+
+La prévision normale privilégie l’entraînement planifié exploitable. Lorsqu’aucune séance programmée applicable n’existe, elle peut s’appuyer sur un schéma d’entraînement récent suffisamment représentatif. Vérifiez l’infobulle pour savoir quelle base s’applique à une date donnée.
+
+| Base affichée | Comment l’interpréter |
+| --- | --- |
+| Entraînement programmé | La charge future provient des séances planifiées applicables. |
+| Habitudes d’entraînement récentes | La prévision utilise une estimation de votre rythme récent. Il ne s’agit pas d’une nouvelle séance ajoutée à votre calendrier. |
+| Pause d’entraînement | Le scénario affiché suppose l’absence d’entraînement supplémentaire sur ces jours. |
+| Aucune prévision | Les données disponibles ne permettent pas d’estimer de valeur pour cette date. |
+
+Ouvrir le graphique ne programme aucune séance et n’enregistre aucun changement dans le plan. Un jour sans séance planifiée n’est pas automatiquement un jour de repos confirmé, et une charge manquante ne doit pas être lue comme une charge nulle.
+
+Si une prévision devient indisponible en cours de projection, les dates suivantes peuvent rester vides puisqu’elles dépendent de l’entrée manquante qui les précède. Importer de nouvelles activités ou modifier le calendrier peut actualiser la projection.
+
+## 5. Comprendre une zone future vide
+
+Les valeurs historiques restent pleinement exploitables même lorsqu’aucune courbe future n’est disponible. Les causes fréquentes incluent un historique d’entraînement trop court ou trop ancien, des charges enregistrées manquantes, ou des séances programmées sans charge prévue exploitable.
+
+<DocsScreenshot
+  id="pmc-forecast-unavailable"
+  title="L’historique enregistré reste visible sans prévision"
+  description="La Démo publique au moment de la capture. Son historique enregistré est visible, tandis que la zone future ne dispose pas de courbe exploitable. Une zone de prévision vide ne prédit pas un entraînement nul."
+  imageSrc="/docs/analysis/en/pmc-forecast-unavailable.webp"
+  imageAlt="PMC de la Démo publique affichant l’historique enregistré et une zone future vide après Aujourd’hui"
+  route="Démo → PMC"
+/>
+
+Vérifiez la date et le périmètre, puis contrôlez vos activités récentes et le programme concerné. Si une infobulle indique **Aucune prévision disponible**, conservez cette incertitude dans votre analyse. Si la page affiche **Échec de la mise à jour ; affichage du résultat précédent**, le graphique visible correspond au dernier résultat connu et non à un rafraîchissement réussi. En cas d’échec de chargement initial, un bouton **Réessayer** est proposé.
+
+## 6. Interroger le Coach IA avec ce contexte
+
+Cliquez sur **Demander au Coach** en haut de la page. La question préremplie transmet au Coach IA le sport sélectionné et le contexte de la projection. Relisez-la avant de l’envoyer : ouvrir ce lien n’applique aucun changement à votre entraînement.
+
+Précisez le problème concret que vous examinez, par exemple une évolution de la charge récente ou le positionnement d’une séance planifiée. Vérifiez les activités et hypothèses futures retenues dans la réponse, puis suivez le flux habituel de confirmation pour toute modification proposée au plan ou aux séances.
+
+Pour une revue spécifique au marathon, poursuivez avec [Utiliser le PMC pour les ajustements marathon](/fr/docs/guide/pmc-marathon-adjustment).
+
+## Utiliser le tableau de bord pour une fenêtre plus courte
+
+Les cartes Forme, Fatigue et Fraîcheur du tableau de bord ouvrent une vue dédiée à un seul indicateur, avec des onglets d’historique de **7**, **14**, **30** et **60** jours. La fenêtre future visible suit l’onglet sélectionné, dans la limite de 30 jours, ce qui diffère de la plage plus large de la page PMC principale.
+
+Choisissez votre fenêtre avant d’interpréter le graphique et conservez la distinction entre la valeur actuelle et la date future sélectionnée.
+
+## Vérifier le résultat
+
+Vous devez pouvoir nommer le sport, la date, l’indicateur, le statut (enregistré ou projeté) et la base de charge du point examiné. Une explication rigoureuse relie la courbe aux activités réelles ou aux séances programmées, tout en mentionnant les données manquantes.
+
+## Questions fréquentes
+
+### Pourquoi les cartes ne changent-elles pas lorsque j’inspecte le futur ?
+
+Elles représentent les valeurs actuelles enregistrées. Fiez-vous à l’infobulle pour consulter les valeurs de la date future sélectionnée.
+
+### Pourquoi la prévision a-t-elle changé après une séance terminée ?
+
+La charge réelle et l’association au plan actualisent les données d’entrée. Assurez-vous que l’activité est bien traitée et associée à la séance prévue avant de comparer les résultats.
+
+### Pourquoi une carte du tableau de bord affiche-t-elle une autre fenêtre graphique ?
+
+Son onglet d’historique pilote également une fenêtre future plus courte, tandis que la page PMC principale possède sa propre plage élargie. Comparez toujours à sport et date identiques plutôt qu’à la position visuelle d’un point à l’écran.
+
+### Puis-je choisir des scénarios de prévision depuis le graphique ?
+
+La page principale propose la sélection du sport et de l’indicateur, et retient automatiquement les entrées de plan et d’habitudes applicables. Certains liens partagés ou issus du coach peuvent embarquer un scénario différent : lisez toujours la base affichée sur la date plutôt que de supposer des hypothèses identiques partout.
+
+### Les bandes colorées du TSB prouvent-elles que je suis prêt ?
+
+Ce sont des repères visuels permettant de situer le contexte de charge. Elles n’intègrent pas l’ensemble des facteurs qui influencent votre condition réelle ou votre performance.
+
+## Continuer
+
+- [Détail de l’activité](/fr/docs/guide/activity-detail)
+- [Bilan d’entraînement hebdomadaire](/fr/docs/workflow/weekly-review)
+- [Comprendre la VO2max effective en endurance](/fr/docs/guide/effective-vo2max-for-endurance)
+- [Coach IA](/fr/docs/guide/ai-coach)

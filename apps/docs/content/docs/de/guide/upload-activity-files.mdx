@@ -1,68 +1,94 @@
 ---
-title: Upload Activity Files
-description: Upload GPX, TCX, or FIT activity files to Trainingload.ai and understand duplicate checks, import batches, processing status, and post-import analysis.
-keywords: ["upload FIT file", "upload GPX", "upload TCX", "activity file import", "Trainingload.ai upload"]
+title: Aktivitätsdateien hochladen
+description: Lade FIT-, TCX- oder GPX-Dateien über die Web-Seite Aktivitäten hoch, verfolge den Importfortschritt, finde deine Aufzeichnungen und löse Duplikate oder Upload-Fehler.
+keywords:
+  [
+    "FIT-Datei hochladen",
+    "GPX hochladen",
+    "TCX hochladen",
+    "Aktivitätsdateien importieren",
+    "Trainingload.ai Upload",
+  ]
 ---
 
-# Upload Activity Files
+# Aktivitätsdateien hochladen
 
-Use file upload when you have activity files from a watch, bike computer, training platform, or exported archive.
+Lade eine von deiner Uhr, deinem Radcomputer oder einer Trainingsplattform exportierte Aufzeichnung hoch, um Details, Diagramme und Trainingsbelastung in Trainingload.ai zu sehen. Diese Schritte gelten für die Web-App.
 
-Trainingload.ai supports the file-based workflow used by the activity import screen. After upload, files are processed as an import batch so you can see progress and failures clearly.
+## Dateien vorbereiten [#before-uploading]
 
-## Before uploading
+Verwende FIT-, TCX- oder GPX-Trainingsdateien. Du kannst bis zu 100 Dateien gleichzeitig hochladen. Originaldateien direkt von deinem Gerät oder deiner Plattform bieten die beste Chance, dass Herzfrequenz-, Leistungs- und Routendaten vollständig erhalten bleiben.
 
-Check that the file is one of the supported activity formats:
+## Über Aktivitäten hochladen
 
-- GPX
-- TCX
-- FIT
+1. Klicke in der linken Seitenleiste auf **Aktivitäten**, um die Aktivitäten-Seite zu öffnen.
+2. Klicke in der Karte **Aktivitätsdateien hochladen** ganz rechts auf **Aktivitätsdateien auswählen**.
 
-For better analysis, prefer original files from the device or platform. Screenshots, CSV exports without time series, and manually edited files may not include enough data for charts or load metrics.
+<DocsScreenshot
+  id="activity-upload-location"
+  title="Upload-Aktion unter Aktivitäten finden"
+  description="Klicke in der linken Seitenleiste auf Aktivitäten und dann in der rechten Karte auf Aktivitätsdateien auswählen."
+  imageAlt="Vollständige Aktivitäten-Seite mit App-Navigation und der Schaltfläche Aktivitätsdateien auswählen"
+  route="Linke Seitenleiste: Aktivitäten → Rechte Karte: Aktivitätsdateien auswählen"
+/>
 
-## Upload from Activities
+3. Ziehe die gewünschten Dateien in den Dialog oder klicke in den Auswahlbereich, um sie auszuwählen.
+4. Klicke unten rechts im Dialog auf **Hochladen**.
 
-1. Open **Activities**.
-2. Choose the upload action.
-3. Select one or more files.
-4. Confirm the upload.
-5. Keep the import progress dialog open or return later from the recent import batch button.
+<DocsScreenshot
+  id="activity-import-entry"
+  title="Dateien auswählen und hochladen"
+  description="Ziehe Dateien in den Dialog oder klicke zur Auswahl und bestätige unten rechts mit Hochladen."
+  imageAlt="Upload-Dialog für Aktivitäten mit Dateiauswahl und separater Hochladen-Schaltfläche"
+  route="Upload-Dialog: Dateien auswählen → Hochladen"
+  demoLabel="Bestehende Demo-Aktivitäten ansehen"
+/>
 
-If Trainingload.ai detects possible duplicates, review the duplicate warning before continuing. You can cancel, keep the existing activity, or force a new import when you intentionally want a separate copy.
+Nach dem Upload öffnet sich der Fortschrittsdialog und zeigt das Ergebnis für jede einzelne Datei.
 
-## Import statuses
+## Importfortschritt verfolgen [#import-statuses]
 
-During import, each item may move through states such as:
+Du kannst während des Imports normal weiter navigieren. Wenn du den Dialog schließt, klicke auf der Aktivitäten-Seite auf **Importfortschritt**, um ihn erneut zu öffnen.
 
-- **Queued**: waiting to be processed.
-- **Normalizing**: converting the source file into the internal activity format.
-- **Materializing**: creating or updating the activity record.
-- **Parquet building**: preparing time-series data for charts and analysis.
-- **Done**: import completed.
-- **Skipped**: not imported, usually because it matched an existing activity.
-- **Failed**: the file could not be processed.
+| Angezeigter Status | Was du tun solltest |
+| --- | --- |
+| In Warteschlange, Normalisieren, Materialisieren, Analyse wird erstellt | Deine Dateien werden noch verarbeitet. Warte, bis der Import abgeschlossen ist. |
+| Fertig | Kehre zu Aktivitäten zurück, um die Aufzeichnung zu öffnen. |
+| Übersprungen | Eine passende Aufzeichnung existiert meist bereits. Suche sie unter Aktivitäten. |
+| Fehlgeschlagen, Abgebrochen | Lies die Meldung neben der Datei und prüfe die Schritte zur Fehlerbehebung unten. |
 
-The batch can finish as completed, partially failed, failed, or cancelled.
+## Importierte Aktivitäten finden [#after-upload]
 
-## After upload
+Sobald der Import abgeschlossen ist, klicke in der linken Seitenleiste auf **Aktivitäten**. Suche deine Aufzeichnung anhand des Trainingsdatums und öffne sie, um Dauer, Distanz, Diagramme und Trainingsbelastung anzusehen.
 
-Once processing is complete:
+Eine Übersicht über beide Ansichten bieten [Aktivitäten-Feed und Suche](/de/docs/guide/activity-feed-search) sowie [Aktivitätsdetails](/de/docs/guide/activity-detail).
 
-- Open the new activity from the import dialog or activity feed.
-- Check whether key metrics are present.
-- Confirm sport type if it was inferred incorrectly.
-- Link the activity to a planned workout if it belongs to a training plan.
-- Ask AI Coach to review the session if you want context.
+## Fehlerbehebung
 
-For ongoing review and filtering, see [Activities Feed and Search](/docs/guide/activity-feed-search).
+### Die Schaltfläche „Hochladen“ ist deaktiviert
 
-## Troubleshooting
+Wähle zuerst deine Dateien aus. Werden sie noch geprüft, warte einen Moment. Zeigt eine Datei einen Fehler an, folge dem Hinweis oder entferne diese Datei, bevor du es erneut versuchst.
 
-If a file fails:
+### Ich sehe eine Duplikat-Warnung
 
-- Export the original activity again from the source platform.
-- Avoid editing the file manually before upload.
-- Check whether the file contains time-series data.
-- Try importing one file at a time to isolate the failing file.
+Ist die Einheit bereits unter Aktivitäten vorhanden, kannst du die bestehende Aufzeichnung behalten oder den Upload abbrechen. Erzwinge nur dann einen neuen Import, wenn du bewusst eine separate Kopie behalten möchtest.
 
-If analysis looks incomplete, the file may lack heart rate, power, GPS, elevation, or pace data. Trainingload.ai can still show the activity, but some metrics may be unavailable or estimated.
+### Eine Datei lässt sich nicht hochladen oder importieren
+
+Lies die Meldung neben der Datei. Exportiere die originale FIT-, TCX- oder GPX-Datei noch einmal von deinem Gerät oder deiner Plattform und lade sie einzeln hoch. Das bloße Umbenennen einer Dateiendung konvertiert die Datei nicht.
+
+Screenshots, gewöhnliche CSV-Tabellen und FIT-Dateien mit reinen Ganztags-Gesundheitsdaten lassen sich hier nicht als Trainingsaufzeichnung importieren.
+
+### Meine Aufzeichnung hat keine Herzfrequenz, Leistung oder Route
+
+Warte zuerst das Ende der Aktivitätsverarbeitung ab. Diagramme setzen voraus, dass die entsprechenden Messdaten in der Originaldatei enthalten sind. Eine Indoor-Einheit ohne GPS zeigt beispielsweise keine Route. Prüfe die Quellplattform und exportiere bei Bedarf erneut die originale Trainingsdatei.
+
+## Ein anderes Dateiformat benötigt? [#convert-between-formats]
+
+Der Upload unterstützt FIT, TCX und GPX, sodass eine Konvertierung normalerweise nicht nötig ist. Wenn du die Datei zusätzlich für eine andere Plattform brauchst, nutze den [FIT-, GPX- und TCX-Konverter](/de/converter).
+
+## Nächste Schritte
+
+- [Aktivitäten-Feed und Suche](/de/docs/guide/activity-feed-search)
+- [Aktivitätsdetails](/de/docs/guide/activity-detail)
+- [Fehlerbehebung](/de/docs/guide/troubleshooting)

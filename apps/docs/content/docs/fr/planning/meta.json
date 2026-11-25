@@ -1,4 +1,11 @@
 {
-  "title": "Planning",
-  "pages": ["workout-dsl"]
+  "title": "Plans et séances",
+  "pages": [
+    "index",
+    "plan-lifecycle",
+    "manual-workout-editor",
+    "strength-workouts",
+    "strength-workout-dsl",
+    "workout-dsl"
+  ]
 }

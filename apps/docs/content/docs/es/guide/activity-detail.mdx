@@ -1,99 +1,124 @@
 ---
-title: Activity Detail
-description: Understand an activity detail page in Trainingload.ai, including processing status, summary metrics, charts, route data, load, pace, power, and heart-rate analysis.
-keywords: ["activity detail", "workout analysis", "training activity charts", "Trainingload.ai activity"]
+title: Detalle de actividad
+description: Revisa una sesión completada en Trainingload.ai con su resumen, línea temporal, vueltas, mejores esfuerzos, frecuencia cardíaca, potencia, ruta, carga de entrenamiento y contexto del plan.
+seoTitle: "Guía de análisis de actividades | Trainingload.ai"
+seoDescription: "Aprende a revisar una sesión, elegir la pestaña de análisis adecuada, comprobar sensores y carga, compararla con tu plan y preguntar al Entrenador con IA."
+keywords: ["análisis de actividades", "revisión de sesiones", "detalle de actividad", "línea temporal de entrenamiento", "guía de Trainingload.ai"]
 ---
 
-# Activity Detail
+# Detalle de actividad
 
-The activity detail page explains one completed workout. It is where you move from “I uploaded a file” to “I understand what this session did.”
+Usa el detalle de actividad para entender a fondo una sesión completada. Reúne la actividad grabada, la ruta, las gráficas, las métricas específicas de cada deporte y la revisión del entrenador disponible. Empieza por el origen y el resumen, analiza un esfuerzo concreto y contrasta la evidencia con el objetivo de la sesión.
 
-Open it from:
+[Abre la demo de la carrera de 10 km](https://demo.trainingload.ai/en/activities/17921623926005309429). Abre una actividad real en una cuenta de demostración de solo lectura donde puedes explorar sus pestañas y gráficas. Para guardar cambios necesitas tu propia cuenta.
 
-- The activity feed.
-- Activity search.
-- Map.
-- Calendar or day view.
-- A linked workout inside a training plan.
+## Antes de empezar
 
-## Processing status
+- Importa o graba una actividad y espera a que finalice su procesamiento.
+- Confirma el deporte y la fecha de la actividad. Revisa tu sistema de unidades y los umbrales relevantes en tu perfil.
+- Usa una actividad que contenga los datos que quieres analizar. El análisis de frecuencia cardíaca requiere muestras de pulso, el de potencia necesita datos de potencia y la ruta requiere GPS.
+- Para comparar lo planificado con lo completado, identifica la sesión prevista en el plan y su vínculo con la actividad.
 
-An activity may not be fully analyzed immediately after import. Processing can include file normalization, duplicate handling, time-series preparation, and metric computation.
+Una actividad que solo tenga valores de resumen también puede revisarse, pero mostrará menos gráficas. Las pestañas disponibles dependen del deporte y de los datos grabados.
 
-Common states:
+## 1. Abre la actividad y comprueba su origen
 
-- **Analyzing**: charts and derived metrics may still be incomplete.
-- **Ready**: the activity is available for normal review.
-- **Partial failed**: the activity exists, but some analysis may be missing.
-- **Failed**: the file could not be processed.
+Abre **Actividades**, selecciona una sesión y verifica su título, deporte, hora de inicio, origen, distancia y duración. También puedes abrir una actividad desde la búsqueda, el mapa, el calendario o la sesión vinculada de tu plan.
 
-If the activity is not ready yet, wait for processing to complete before judging missing charts or metrics.
+Si el procesamiento sigue en curso, espera antes de valorar por qué faltan gráficas. Una actividad puede aparecer antes de que todos los análisis estén listos.
 
-## Summary metrics
+| Estado de procesamiento | Qué hacer |
+| --- | --- |
+| Analizando | Espera a que termine el procesamiento de la actividad y luego actualiza. |
+| Lista | Continúa revisando los datos disponibles. |
+| Fallo parcial | Comprueba qué análisis falta y utiliza las partes completadas. |
+| Fallida | Revisa el archivo y la información del error antes de reintentar o volver a importar. |
 
-The top-level summary usually includes core workout fields such as:
+<DocsScreenshot
+  id="activity-detail-review"
+  title="Encuentra las pestañas de análisis bajo el resumen y el mapa"
+  description="Revisa primero el origen y el resumen. Las pestañas situadas bajo la ruta dan acceso a Resumen, Vueltas, Frecuencia cardíaca, Potencia, Ritmo, Mejores esfuerzos y Línea temporal cuando están disponibles."
+  imageAlt="Resumen y ruta de la carrera de demostración con las pestañas de análisis debajo"
+  route="Actividades → Detalle de actividad"
+  demoLabel="Abrir esta actividad en la Demo"
+/>
 
-- Sport type.
-- Start time and time zone.
-- Distance and duration.
-- Moving time and elapsed time.
-- Elevation gain.
-- Average and max heart rate.
-- Average and max power.
-- Pace or speed.
+## 2. Elige la vista adecuada para tu pregunta
 
-The exact fields depend on the sport and the data available in the file.
+En la web de escritorio, las pestañas de análisis aparecen debajo de la ruta. Empieza en **Resumen** y después abre la pestaña que responda a tu pregunta. En el móvil, utiliza las vistas de detalle y gráficas disponibles para ese deporte. La **Línea temporal** sincronizada que describimos más abajo es un flujo de trabajo de la web de escritorio.
 
-## Charts and time series
+| Vista | Úsala para investigar | Datos o alcance |
+| --- | --- | --- |
+| Resumen | Resumen de la sesión, gráficas disponibles, clima y contexto propio del deporte | Los campos dependen de la actividad. |
+| Línea temporal | Un instante concreto o un segmento seleccionado a través de gráficas sincronizadas y la ruta | Carrera o ciclismo con series temporales utilizables en web de escritorio. |
+| Vueltas | Comparar las vueltas grabadas y sus métricas de resumen | Disponible cuando la actividad incluye vueltas y el deporte admite esta vista. |
+| Mejores esfuerzos | Encontrar esfuerzos sostenidos por distancia o duración y revisar sus estadísticas | La disponibilidad depende del deporte y de las series grabadas. |
+| Frecuencia cardíaca | Respuesta cardiovascular, zonas y métricas derivadas compatibles | Requiere datos de frecuencia cardíaca para el análisis correspondiente. |
+| Potencia | Producción de potencia, zonas y métricas relacionadas con la eficiencia | Requiere datos de potencia. La potencia estimada aparece etiquetada. |
+| Ritmo | Estrategia de ritmo y análisis asociado al ritmo | Se muestra en actividades de carrera compatibles. |
+| Dinámica de carrera | Mediciones técnicas grabadas durante la carrera | Carrera con las series de sensores correspondientes. |
 
-Activity charts help explain how the workout unfolded over time. Depending on the data, you may see:
+La natación y otros deportes tienen sus propias vistas de detalle. Que falte una pestaña suele deberse al deporte o a datos ausentes, no a un error de procesamiento.
 
-- Pace or speed.
-- Heart rate.
-- Power.
-- Cadence.
-- Elevation.
-- Grade or slope.
+## 3. Analiza un esfuerzo en contexto
 
-Use charts to find pacing drift, surges, climbs, stops, or unusual sensor behavior.
+Para investigar una subida, un cambio de ritmo o una serie, abre **Línea temporal**. Sitúate en un punto para comparar las lecturas o selecciona un rango para ver su media, mínimo y máximo junto con el tramo correspondiente de la ruta.
 
-## Load and intensity
+Sigue [Analiza una sesión con la Línea temporal](/es/docs/guide/activity-timeline) para conocer el flujo completo de selección, configuración de gráficas y edición de segmentos de análisis.
 
-Trainingload.ai can compute session load from different data sources:
+Usa **Vueltas** para comparar las vueltas registradas por tu dispositivo. Usa **Mejores esfuerzos** cuando quieras ver tus esfuerzos sostenidos más fuertes. En Mejores esfuerzos, alterna entre distancia y tiempo cuando esté disponible. **Editar columnas** controla qué estadísticas disponibles se muestran y en qué orden. Al seleccionar la primera columna o un valor de un esfuerzo, se localiza su tramo en la ruta si hay datos de ubicación.
 
-- Power-based TSS when power and threshold are reliable.
-- Pace-based rTSS for running when pace, terrain, and threshold pace are available.
-- Heart-rate-based TRIMP / hrTSS when heart rate is the best available signal.
-- Fallback estimates when limited data is available.
+## 4. Interpreta la intensidad y la carga de entrenamiento
 
-For the concepts behind this, read [Training Load](/docs/metrics/training-load).
+Revisa los análisis disponibles de ritmo, frecuencia cardíaca y potencia teniendo en cuenta el deporte y tus umbrales. La fuente de la carga importa al comparar sesiones.
 
-## Route and terrain context
+- La carga basada en potencia utiliza la potencia y el umbral aplicable.
+- La carga basada en ritmo de carrera depende del ritmo disponible, el terreno y el contexto de umbrales.
+- La carga basada en frecuencia cardíaca utiliza el registro de pulso disponible y los ajustes del perfil.
+- Pueden aplicarse otros métodos de carga cuando esas señales no están disponibles.
 
-If the activity has GPS and elevation data, terrain can change how you interpret pace and effort.
+Lee [Carga de entrenamiento](/es/docs/metrics/training-load) para ver los conceptos compatibles. Revisa [Perfil, umbrales y zonas](/es/docs/guide/profile-thresholds-zones) si las zonas o la intensidad no parecen coherentes.
 
-- Uphill pace may look slow while effort is high.
-- Downhill pace may look fast while mechanical stress is high.
-- GAP and NGP help compare hilly running with flatter efforts.
+En el análisis de frecuencia cardíaca compatible, el desacoplamiento aeróbico compara la relación entre rendimiento externo y pulso a lo largo de la actividad. Consulta [Desacoplamiento aeróbico](/es/docs/metrics/heart-rate/aerobic-decoupling) para verificar sus condiciones antes de interpretar Pw:Hr o Pa:Hr. Una sesión variable o con paradas necesita un contexto distinto al de un esfuerzo constante.
 
-See [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace) and [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace).
+## 5. Añade contexto de ruta y de plan
 
-## Plan linkage
+Usa la ruta para relacionar los cambios de esfuerzo con el terreno. Las cuestas, las paradas y las condiciones ambientales pueden explicar variaciones en el ritmo o la frecuencia cardíaca. Si no hay GPS, apóyate en el resto de la evidencia grabada.
 
-If the activity belongs to a plan workout, link it to the planned session. This unlocks plan execution review:
+Si la sesión corresponde a un entrenamiento planificado, comprueba el vínculo en el calendario o en el plan. Verifica que sea la sesión prevista antes de comparar contenido planificado, cumplimiento y carga. Corrige cualquier vínculo erróneo antes de pedir una revisión del plan. Sigue [Gestiona un plan activo](/es/docs/guide/manage-active-plan) para el flujo de vinculación.
 
-- Planned vs completed session.
-- Expected load vs actual load.
-- Completion status.
-- AI Coach follow-up with plan context.
+## 6. Lee la revisión del entrenador o haz una pregunta concreta
 
-If the wrong activity is linked, unlink it and choose the correct workout manually.
+La sección **Revisión del entrenador** muestra el estado disponible de la revisión con IA. Si la página te pide revisar el uso compartido de datos, completa esa elección antes de usar la IA con tus propios datos. El procesamiento o una solicitud de revisión también pueden seguir pendientes. Usa la acción de reintento visible si falla una solicitud.
 
-## Ask AI Coach
+Al continuar con el Entrenador con IA, incluye la actividad y una pregunta específica. Algunos buenos puntos de partida son comprobar si la sesión encajó con la intensidad prevista, qué cambió al final del entrenamiento o cómo encaja la actividad en tu carga reciente. Verifica siempre la actividad, el rango de fechas y la evidencia usada en la respuesta antes de aplicar cualquier cambio propuesto en el plan.
 
-Use AI Coach when you want interpretation rather than raw numbers. Helpful prompts:
+Consulta [Entrenador con IA](/es/docs/guide/ai-coach) para ver el flujo de revisión y confirmación.
 
-- “Did this session match the planned intensity?”
-- “Why did my heart rate drift late in the run?”
-- “Was this too hard for an easy day?”
-- “What should I change before the next workout?”
+## Verifica tu revisión
+
+Deberías poder identificar la actividad y su fuente de datos, explicar el esfuerzo que inspeccionaste e indicar qué señales grabadas respaldan tu conclusión. En entrenamientos planificados, comprueba la sesión vinculada. Anota cualquier dato de sensor ausente o interpretación incierta antes de tomar la siguiente decisión de entrenamiento.
+
+## Preguntas frecuentes
+
+### ¿Por qué faltan algunas gráficas o pestañas?
+
+Comprueba el estado de procesamiento, el deporte y la cobertura de sensores. Los archivos con solo resumen no ofrecen el mismo análisis que los archivos con muestras grabadas. Además, la web de escritorio y la app móvil nativa muestran flujos de detalle diferentes.
+
+### ¿Por qué un valor difiere entre vistas?
+
+Revisa las unidades, el rango seleccionado y el cálculo que se está mostrando. Las estadísticas de rango de la Línea temporal describen toda la actividad o el tramo seleccionado, mientras que la lectura del cursor corresponde a una sola muestra. Los resúmenes de vueltas del dispositivo y los segmentos de análisis recalculados también pueden usar entradas diferentes.
+
+### ¿Por qué falta la ruta?
+
+Puede que el archivo no tenga GPS, que el ajuste de privacidad haya eliminado los datos de ubicación o que haya fallado la carga del mapa. Revisa las gráficas disponibles y el estado de error del mapa por separado.
+
+### ¿Puedo editar la actividad de la Demo?
+
+La Demo pública te permite explorar el ejemplo. Para editar actividades, guardar segmentos de análisis y modificar planes necesitas iniciar sesión en tu propia cuenta.
+
+## Continúa
+
+- [Analiza una sesión con la Línea temporal](/es/docs/guide/activity-timeline)
+- [Páginas de análisis de rendimiento](/es/docs/guide/performance-analysis-pages)
+- [Revisión semanal de entrenamiento](/es/docs/workflow/weekly-review)

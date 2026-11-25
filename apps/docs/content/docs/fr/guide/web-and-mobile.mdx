@@ -1,0 +1,120 @@
+---
+title: Web et mobile
+description: Comprenez comment l’application Web et l’application mobile Trainingload.ai partagent vos données, et choisissez la meilleure interface pour planifier, enregistrer, analyser et exécuter au quotidien.
+keywords:
+  ["Trainingload.ai mobile", "application web Trainingload.ai", "synchronisation web et mobile"]
+---
+
+# Web et mobile
+
+L’application Web Cloud et l’application iPhone utilisent le même compte. Après enregistrement et synchronisation, retrouvez vos plans, activités, valeurs de profil, conversations avec le Coach IA et notifications sur un autre appareil.
+
+Cette page concerne la version Cloud. Pour l’auto-hébergement, suivez le [guide d’installation](/fr/docs/self-host/installation) afin d’accéder à l’application depuis un navigateur. La prise en charge d’une application Apple Watch n’est pas disponible pour le moment.
+
+## Avant de changer d’appareil
+
+- Connectez-vous au même compte Trainingload.ai sur les deux appareils.
+- Vérifiez le fuseau horaire et les unités dans votre profil : les dates du calendrier et les valeurs affichées en dépendent.
+- Enregistrez la modification en cours avant d’ouvrir le même plan ou champ de profil ailleurs.
+- Conservez une connexion réseau pour les plans, le Coach IA, les importations et l’analyse traitée.
+
+## Utiliser le Web pour
+
+- Construire ou passer en revue un plan sur plusieurs semaines.
+- Modifier des séances structurées d’endurance ou de musculation.
+- Comparer des graphiques détaillés, cartes, courbes de puissance, d’allure, de fréquence cardiaque ou tendances PMC.
+- Gérer les connexions aux plateformes tierces et les importations d’historique.
+- Parcourir un grand fil d’activités ou rechercher d’anciens entraînements.
+
+## Utiliser le mobile pour
+
+- Consulter Aujourd’hui, Calendrier, Coach, Plan ou Moi tout au long de votre journée d’entraînement.
+- Enregistrer une séance en extérieur depuis votre téléphone.
+- Consulter une séance terminée juste après l’avoir sauvegardée.
+- Associer une activité terminée à une séance planifiée.
+- Mettre à jour votre état actuel, consulter les notifications ou suivre l’exécution du plan loin de votre ordinateur.
+
+<DocsScreenshot
+  id="web-mobile-navigation"
+  title="Navigation mobile"
+  description="Aujourd’hui, Calendrier, Coach, Plan et Moi regroupent le flux quotidien de votre compte sur mobile."
+  route="Onglets principaux"
+  platform="mobile"
+/>
+
+## Ce qui se synchronise
+
+| Données | Web | Mobile | Remarques |
+| --- | --- | --- | --- |
+| Profil, unités, fuseau horaire | Lecture et édition | Lecture et édition | Les dates du calendrier dépendent du fuseau horaire. |
+| Activités et analyse | Détail complet | Vues quotidiennes et détaillées | Le traitement peut se terminer après l’apparition initiale de l’activité. |
+| Plans et séances | Création et édition complètes | Consultation, création, exécution et association | Les éditions complexes restent généralement plus confortables sur le Web. |
+| Coach IA | Sessions et actions | Sessions et actions | Les modifications appliquées mettent à jour le même plan. |
+| Notifications et bilans | Disponibles | Disponibles | L’automatisation des bilans suit les préférences du compte. |
+| Connexions aux plateformes | Gestion complète | Flux de connexion et d’autorisation sélectionnés | La disponibilité dépend de la plateforme et de l’appareil. |
+
+## Règles d’actualisation et de conflit
+
+Si vous modifiez le même plan ou champ de profil sur deux appareils, le dernier enregistrement réussi fait foi. Avant d’effectuer une seconde modification :
+
+1. Revenez à la liste ou à l’écran de détail.
+2. Tirez vers le bas pour actualiser sur mobile ou rechargez la page sur le Web.
+3. Vérifiez que la dernière valeur est bien affichée.
+4. Appliquez la modification suivante.
+
+Les mises à jour de plan peuvent rejeter une édition obsolète lorsqu’une autre requête a modifié le même enregistrement. Actualisez le plan puis réappliquez la modification voulue au lieu de soumettre à nouveau la version périmée.
+
+## Poursuivre votre travail sur un autre appareil
+
+1. Terminez et enregistrez l’action en cours sur le premier appareil.
+2. Ouvrez l’écran de liste ou de détail correspondant sur le second appareil.
+3. Tirez pour actualiser sur mobile ou rechargez sur le Web.
+4. Vérifiez l’horodatage de l’activité, la version du plan ou la valeur de profil que vous venez de modifier.
+5. Ne poursuivez l’édition qu’une fois la valeur serveur à jour visible.
+
+## Fonctionnement hors ligne
+
+L’enregistrement mobile est conçu pour préserver l’enregistrement local pendant la séance et récupérer les sessions interrompues lorsque c’est possible. Les écrans dépendants du serveur nécessitent toujours un accès réseau pour charger les plans actuels, les réponses IA et l’analyse traitée.
+
+Après reconnexion :
+
+- Laissez le téléversement de l’enregistrement ou de l’importation se terminer.
+- Évitez de lancer un second téléversement en doublon pour la même séance.
+- Vérifiez que l’activité n’apparaît qu’une seule fois dans Activités.
+- Ouvrez l’activité et patientez si l’analyse est encore en cours de traitement.
+
+## Vérifier la synchronisation
+
+- Les deux interfaces affichent les mêmes unités et le même fuseau horaire.
+- Une activité terminée apparaît une seule fois avec la même heure de début et la même source.
+- Le plan actif et la prochaine séance affichent le même statut et la dernière modification.
+- Une action du Coach IA appliquée sur une interface se reflète dans le plan sous-jacent sur l’autre.
+- Les notifications et bilans terminés ne repassent pas en non lus après actualisation.
+
+## Dépannage
+
+### Un appareil affiche des données plus anciennes
+
+Revenez à la liste ou à l’écran de détail et actualisez. Vérifiez l’accès réseau et assurez-vous que les deux appareils utilisent le même compte. Ne modifiez pas la copie périmée tant que la dernière valeur serveur n’est pas affichée.
+
+### Une modification de plan signale un conflit de version
+
+Une autre requête a déjà modifié le plan entre-temps. Rechargez le plan, comparez la séance actuelle avec la modification souhaitée, puis réappliquez votre changement sur la nouvelle version.
+
+### Un enregistrement mobile n’apparaît pas sur le Web
+
+Gardez l’application mobile accessible jusqu’à la fin du téléversement, puis actualisez Activités sur le Web. Si l’activité est visible mais que les graphiques sont incomplets, le traitement est encore en cours : ne téléversez pas une deuxième copie.
+
+### Les réglages de plateformes diffèrent entre les interfaces
+
+Utilisez **Compte → Connexions tierces** sur le Web pour disposer de la gestion complète. Le mobile peut n’exposer que certains flux d’autorisation ou de permissions.
+
+### Les dates du calendrier diffèrent
+
+Comparez le fuseau horaire du compte sur les deux appareils ainsi que l’heure de début enregistrée de l’activité. Corrigez le réglage du profil avant de déplacer ou de recréer une séance.
+
+## Étapes suivantes
+
+- Enregistrer avec votre téléphone grâce à [Enregistrement mobile](/fr/docs/guide/mobile-recording).
+- Créer et suivre des plans avec [Plans mobiles et musculation](/fr/docs/guide/mobile-plans-and-strength).
+- Suivre la configuration complète du compte dans [Importer votre première activité](/fr/docs/guide/getting-started).

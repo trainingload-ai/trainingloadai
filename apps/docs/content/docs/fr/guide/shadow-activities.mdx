@@ -1,0 +1,56 @@
+---
+title: "Activités fantômes : pourquoi seul un résumé est-il disponible ?"
+description: Comprenez le fonctionnement des activités fantômes issues d’Intervals.icu et de Strava, et sachez quand connecter une source, relancer la synchronisation ou téléverser le fichier d’origine.
+keywords:
+  [
+    "activités fantômes",
+    "flux manquants Strava",
+    "importation d’activité Intervals.icu",
+    "relancer synchronisation activité",
+  ]
+---
+
+# Activités fantômes : pourquoi seul un résumé est-il disponible ?
+
+**Une activité fantôme est une activité que nous avons détectée, mais dont les enregistrements complets ne sont pas encore disponibles.** Trainingload.ai conserve son titre et son heure de début afin que vous sachiez qu’elle n’a pas été oubliée, ainsi que la prochaine action possible.
+
+Une activité fantôme n’est pas une activité complètement importée : nous n’inventons ni graphiques ni charge d’entraînement à partir d’un simple résumé. Une importation réussie remplace l’activité fantôme par l’activité complète. Un enregistrement complet déjà présent n’est jamais effacé parce qu’une synchronisation ultérieure ne parvient pas à récupérer de données.
+
+Il existe actuellement deux situations principales.
+
+## Cas 1 : Intervals.icu dispose d’informations sur l’activité mais ne peut pas fournir le fichier d’origine
+
+Intervals.icu peut afficher le résumé d’une activité reçue de Strava, tout en restreignant explicitement l’accès au fichier d’activité d’origine via son API. Voir l’activité dans Intervals.icu ne signifie donc pas que Trainingload.ai peut récupérer les enregistrements complets par cette API.
+
+Trainingload.ai interroge alors directement Strava. Suivez l’invitation de la carte pour connecter Strava, renouveler l’autorisation ou activer l’importation d’activités, puis attendez la fin de la synchronisation.
+
+Si Strava ne peut pas non plus fournir les données requises, l’activité fantôme reste affichée. Relancer la synchronisation d’Intervals.icu de façon répétée ne permet pas de contourner cette restriction sur le fichier d’origine.
+
+## Cas 2 : Strava dispose des détails de l’activité mais ne peut pas fournir les flux
+
+Le nom de l’activité, la distance totale et la durée sont distincts des échantillons GPS, de fréquence cardiaque, de puissance ou de distance enregistrés à chaque instant. **Disposer des détails de l’activité ne garantit pas que des flux exploitables pour l’importation soient disponibles.**
+
+- **Les échantillons n’ont jamais existé :** par exemple une activité saisie manuellement dans Strava avec distance et durée mais sans enregistrement d’appareil. Elle possède bien une page de détail, mais aucune nouvelle tentative ne peut générer les échantillons manquants.
+- **Les enregistrements sont temporairement indisponibles :** la plateforme source est peut-être encore en train de traiter le fichier, ou le point d’accès aux données détaillées est momentanément indisponible. Une réponse « introuvable » isolée ne prouve ni une suppression ni une absence définitive des flux.
+
+Trainingload.ai réessaie un nombre limité de fois en cas d’échec de disponibilité incertain. Si les enregistrements demeurent indisponibles, il conserve l’activité fantôme et propose un bouton de nouvelle tentative. L’absence seule de fréquence cardiaque, de puissance ou de GPS ne crée pas nécessairement d’activité fantôme : une activité contenant une série temporelle exploitable peut tout de même être importée tout en comportant moins d’analyses.
+
+## Que faire ?
+
+| Ce que vous savez | Action recommandée |
+| --- | --- |
+| La carte demande de connecter, renouveler l’autorisation ou activer l’importation | Terminez la configuration indiquée, puis attendez la synchronisation ou réessayez. |
+| L’activité vient d’être téléversée ou est encore en traitement | Attendez la fin du traitement, puis réessayez une fois. |
+| Un incident temporaire du fournisseur est résolu | Réessayez une fois pour redemander les enregistrements complets. |
+| L’activité a été saisie manuellement et n’a jamais eu d’échantillons | Répéter les tentatives ne changera rien. Recherchez plutôt un fichier issu d’un appareil. |
+| Plusieurs tentatives laissent toujours une activité fantôme | Vérifiez si la plateforme d’origine permet d’exporter un fichier d’activité ; contactez le support si nécessaire. |
+
+Relancer une tentative demande de nouveau les données, sans garantir que la plateforme source puisse désormais les fournir. Vous n’avez pas besoin de supprimer au préalable l’activité fantôme ni une activité complète existante. Déconnecter et reconnecter à répétition ne générera pas les échantillons manquants.
+
+## Je dispose du fichier d’origine
+
+Si votre appareil ou la plateforme ayant enregistré la séance en premier permet d’exporter un fichier FIT, TCX ou GPX contenant les enregistrements d’activité, utilisez [Importer des fichiers d’activité](/fr/docs/guide/upload-activity-files). Vérifiez les avertissements de doublon et comparez la date ainsi que le contenu si une activité complète existe déjà.
+
+## Obtenir de l’aide
+
+Indiquez la date de l’activité, la plateforme source, le message affiché et précisez si la plateforme d’origine permet d’exporter un fichier. N’envoyez jamais de jetons d’accès ni de mots de passe. Consultez [Dépannage](/fr/docs/guide/troubleshooting) pour d’autres pistes.

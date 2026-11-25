@@ -1,0 +1,95 @@
+---
+title: Dépannage
+description: Diagnostiquez les problèmes courants dans Trainingload.ai liés à la connexion, à la synchronisation, au traitement des activités, aux plans, à l’enregistrement mobile, au Coach IA et aux métriques manquantes.
+keywords:
+  [
+    "dépannage Trainingload.ai",
+    "échec synchronisation activité",
+    "erreur plan d’entraînement",
+  ]
+---
+
+# Dépannage
+
+Partez toujours du symptôme observable. Évitez de reconnecter des plateformes, de supprimer des activités ou de recréer un plan avant d’identifier quelle étape a échoué.
+
+## Boucles de connexion ou d’autorisation
+
+1. Vérifiez que le navigateur ou l’application mobile parvient bien à joindre le service.
+2. Terminez le flux OAuth dans la même session de navigateur que celle qui l’a lancé.
+3. Vérifiez que le compte dispose encore d’une méthode de connexion active avant d’en déconnecter une autre.
+4. Réessayez une fois après avoir actualisé la page de connexion.
+
+Si l’autorisation chez un fournisseur réussit mais que Trainingload.ai affiche toujours un état déconnecté, rouvrez la boîte de dialogue du fournisseur et recherchez une erreur de rappel (callback) ou d’autorisation.
+
+## Une activité synchronisée est absente
+
+1. Confirmez que la séance existe bien sur la plateforme source.
+2. Vérifiez l’état de connexion de la plateforme.
+3. Lancez une seule synchronisation manuelle ou action de réconciliation si elle est disponible.
+4. Attendez la fin du lot d’importation.
+5. Recherchez dans Activités par date et par sport.
+
+Ne déconnectez et ne reconnectez pas à répétition : cela peut créer des tâches d’importation concurrentes sans résoudre un problème d’autorisation à la source.
+
+## L’activité apparaît mais son analyse est incomplète
+
+Une activité peut s’afficher avant que tous ses graphiques dérivés ne soient prêts. Actualisez la page une fois le traitement terminé. Si une seule famille de métriques manque, vérifiez les flux d’origine :
+
+- L’analyse de fréquence cardiaque requiert des échantillons de fréquence cardiaque.
+- L’analyse de puissance requiert des échantillons de puissance ainsi qu’un contexte de sport et de profil adapté.
+- Les vues de tracé et de dénivelé nécessitent des données GPS / d’altitude.
+- L’analyse d’allure et de distance nécessite des données exploitables de distance et de temps.
+
+## Une métrique semble erronée
+
+Vérifiez, dans l’ordre :
+
+1. Le type de sport et la définition du sport.
+2. Les unités et le fuseau horaire.
+3. La valeur du seuil et sa date d’effet.
+4. Le modèle de zones et les bornes personnalisées.
+5. La priorité sélectionnée des sources de charge.
+6. Les flux bruts de l’activité.
+
+Modifier un seuil peut influencer l’interprétation des calculs ultérieurs. Notez la raison du changement plutôt que d’ajuster la valeur jusqu’à rendre une seule séance conforme à vos attentes.
+
+## Impossible d’enregistrer une séance
+
+Pour les séances d’endurance, vérifiez que chaque étape structurée comporte une durée ou une distance valide ainsi qu’une cible prise en charge. Pour les séances de musculation, vérifiez que :
+
+- Au moins un exercice est présent.
+- Chaque exercice possède un nom.
+- Chaque exercice comporte au moins un groupe de séries.
+- Chaque exercice inclut au moins une série de travail.
+
+L’éditeur affiche un message de validation localisé et garde le brouillon invalide ouvert pour correction.
+
+## Le plan a été modifié ailleurs
+
+Si l’application signale un conflit de version ou d’état, une autre requête a modifié le plan depuis le chargement de votre écran. Actualisez le plan, vérifiez son état le plus récent, puis appliquez de nouveau la modification. Ne relancez jamais aveuglément une action destructive obsolète.
+
+## L’enregistrement mobile n’a pas terminé sa synchronisation
+
+Gardez l’application installée et évitez d’effacer le stockage local tant que la récupération reste possible. Rouvrez l’écran d’enregistrement, laissez l’application restaurer la session et reconnectez-vous au réseau. Consultez [Enregistrement mobile](/fr/docs/guide/mobile-recording).
+
+## Le Coach IA ne parvient pas à traiter une demande
+
+- Raccourcissez les demandes très volumineuses ou découpez-les en plusieurs étapes.
+- Vérifiez que le plan ou l’activité existe toujours et reste accessible.
+- Contrôlez vos limites d’utilisation.
+- Si une action structurée échoue à la validation, décrivez la modification souhaitée en langage simple puis réessayez.
+- N’appliquez jamais un ajustement que vous ne pouvez pas vérifier dans l’aperçu avant/après.
+
+## Rassembler des éléments utiles
+
+Lorsque vous signalez un problème, indiquez :
+
+- L’heure approximative et votre fuseau horaire.
+- Web ou mobile, système d’exploitation et version de l’application ou du navigateur.
+- La page ou le flux concerné, sans identifiants.
+- L’identifiant de hachage de l’activité, l’identifiant du plan ou le nom du fournisseur lorsque cela ne présente aucun risque.
+- Le texte exact du message d’erreur localisé.
+- Une capture d’écran en masquant les données personnelles.
+
+N’incluez jamais de mots de passe, de jetons OAuth, de clés API ni vos coordonnées précises de domicile.

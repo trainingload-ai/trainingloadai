@@ -1,0 +1,70 @@
+---
+title: Trainingspläne und Einheiten
+description: Erfahre, wie Trainingload.ai Trainingspläne, geplante Einheiten, Ausdauer- und Kraftstrukturen, erwartete Belastung und verknüpfte Aktivitäten abbildet.
+keywords:
+  ["Trainingload.ai Trainingspläne", "strukturierte Einheiten", "Trainingsplan Lebenszyklus"]
+---
+
+# Trainingspläne und Einheiten
+
+Trainingload.ai behandelt deinen Trainingsplan als aktiven Arbeitsbereich und nicht als statisches PDF. Ein Plan enthält datierte oder relativ angeordnete Einheiten; jede Einheit kann eine maschinenlesbare Struktur, eigene Notizen, eine erwartete Trainingsbelastung, einen Ausführungsstatus und Verknüpfungen zu absolvierten Aktivitäten tragen.
+
+## Das Planungsmodell
+
+<Mermaid
+  chart={`flowchart TD
+  Goal[Ziel und Rahmenbedingungen] --> Plan[Trainingsplan]
+  Plan --> Workout[Geplante Einheit]
+  Workout --> Structure[Ausdauer- oder Kraftstruktur]
+  Structure --> Expected[Erwartete Belastung]
+  Workout --> Activity[Verknüpfte Aktivität]
+  Activity --> Actual[Tatsächliche Belastung und Ausführung]
+  Expected --> Review[Planauswertung]
+  Actual --> Review
+  Review --> Adjustment[Bestätigte Anpassung]
+  Adjustment --> Plan`}
+/>
+
+## Planstatus
+
+- **Entwurf** — bearbeitbarer Plan im Aufbau. Ideal zum Prüfen vor dem Start.
+- **Aktiv** — aktueller Plan mit Startdatum und täglichem Trainingskontext.
+- **Pausiert** — vorübergehend angehalten, während Plan und Verlauf erhalten bleiben.
+- **Abgeschlossen** — planmäßig beendeter Trainingsblock.
+- **Abgebrochen** — vorzeitig beendeter Plan, der nicht als abgeschlossen gelten soll.
+
+Lies [Planstatus verwalten](/de/docs/planning/plan-lifecycle), bevor du den Status eines Plans änderst, der bereits verknüpfte Aktivitäten enthält.
+
+## Strukturtypen für Einheiten
+
+### Ausdauer
+
+Ausdauereinheiten bestehen aus Aufwärmen, Belastungs-, Erholungs-, Wiederholungs- und weiteren Schritten mit Zeit- oder Distanzvorgaben sowie optionalen Zielen wie Zonen, Pace, Geschwindigkeit, Leistung, Tritt- bzw. Schrittfrequenz oder Herzfrequenz.
+
+Nutze die [Anleitung zum manuellen Einheiten-Editor](/de/docs/planning/manual-workout-editor) für die visuelle Bearbeitung in der App, den [Workout Editor & Builder](/de/workout-editor) für einen öffentlichen Entwurf im Browser oder die [Ausdauer-Workout-DSL](/de/docs/planning/workout-dsl) für kompakte Textregeln.
+
+### Kraft
+
+Krafteinheiten bestehen aus Übungen und Satzgruppen. Die Vorgabe erfolgt nach Wiederholungen oder Zeit – je nach Bedarf mit offener Last, festem Gewicht, Prozent des 1RM, Körpergewicht, Belastungsempfinden und Satzpause.
+
+Nutze [Krafteinheiten](/de/docs/planning/strength-workouts) für den visuellen Workflow oder die [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl) für den textbasierten Regelmodus.
+
+## Erwartete vs. tatsächliche Belastung
+
+Die erwartete Belastung wird nur berechnet, wenn Einheitenstruktur, Schwellenwerte und Zielvorgaben genügend verlässliche Informationen liefern. Die tatsächliche Belastung stammt aus der absolvierten Aktivität und der konfigurierten Priorität der Belastungsquellen.
+
+Die beiden Werte beantworten unterschiedliche Fragen:
+
+- Erwartet: „Welchen Trainingsreiz sollte diese Einheit gemäß Plan setzen?“
+- Tatsächlich: „Welche Belastung hat die absolvierte Einheit wirklich erzeugt?“
+
+Erzwinge niemals einen Wert für die erwartete Belastung durch erfundene Schwellenwerte oder Zielangaben. Ein klares „Unbekannt“ ist immer besser als vorgetäuschte Genauigkeit.
+
+## Empfohlene Reihenfolge
+
+1. [Trainingsplan erstellen](/de/docs/guide/create-training-plan)
+2. [Anleitung zum manuellen Einheiten-Editor](/de/docs/planning/manual-workout-editor)
+3. [Kraft-Workout-DSL](/de/docs/planning/strength-workout-dsl), wenn du Krafteinheiten planst
+4. [Planstatus verwalten](/de/docs/planning/plan-lifecycle)
+5. [Aktiven Trainingsplan verwalten](/de/docs/guide/manage-active-plan)
+6. [KI-Coach](/de/docs/guide/ai-coach)

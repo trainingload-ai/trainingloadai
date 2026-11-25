@@ -1,0 +1,283 @@
+---
+title: 筋力ワークアウト DSL
+description: Rules モードで種目・セットグループ・負荷・RPE または RIR・レスト時間を含む完全な Trainingload.ai 筋力ワークアウトを記述・検証する方法を解説します。
+keywords:
+  [
+    "Trainingload.ai 筋力 DSL",
+    "筋力ワークアウト Rules",
+    "エクササイズ セット構文",
+  ]
+---
+
+# 筋力ワークアウト DSL
+
+Strength DSL は、筋力ワークアウトビルダーをテキストで表現した形式です。コーチから共有されたセッションを貼り付けたいとき、複数のセットグループを素早く編集したいとき、Trainingload.ai に保存される正確な構造を確認したいときに役立ちます。1つの静的なセッションを記述し、各種目に1つ以上のウォームアップまたはワークのセットグループを持たせます。
+
+## 始める前に
+
+- 編集可能なワークアウトを開き、種目に **Strength Training** を選びます。
+- **Rules** タブを選択します（**Manual** タブでは同じワークアウト構造をビジュアル編集できます）。
+- どの負荷値が確定しているかを確認します。重量や割合を推測で入力せず、未定の場合は `open` を使ってください。
+- コーチング上の説明はワークアウトのメモ欄に書きます。DSL に記述するのは処方だけで、自由記述の文章は入れません。
+
+## 最小の有効なワークアウトから始める
+
+以下を **Rules** 欄に貼り付けます。
+
+```text
+exercise "Goblet Squat" equipment dumbbell {
+  work 3x8 open rir 3 rest 90s
+}
+```
+
+続いて **Validate Input** を選択します。この記述の意味は次のとおりです。
+
+- 「Goblet Squat」という名前の種目が1つ
+- 使用器具はダンベル（`dumbbell`）
+- 8回×3セットのワークセット
+- 固定重量の指定なし（`open`）
+- 余力回数（RIR）は3回
+- 各セット間のレストは90秒
+
+有効なワークアウトには少なくとも1つの種目が必要です。また、すべての種目に空でない引用符付きの種目名と、少なくとも1行の `work` が必要です。
+
+<DocsScreenshot
+  id="manual-plan-location"
+  title="プランスケジュールからエディタを開く"
+  description="手動プランビルダーで日程選択へ進み、対象日の「+ セッション」を選択します。"
+  route="プラン → 手動プランビルダー → 日程選択 → + セッション"
+/>
+
+<DocsScreenshot
+  id="strength-dsl-rules-input"
+  title="Rules モードの Strength DSL"
+  description="検証済みの2種目セッションと、筋力プレビューに表示された保存予定の構造。"
+  route="プラン → 手動ワークアウト → Strength Training → Rules"
+/>
+
+## ドキュメント全体の構造を理解する
+
+完全なセッションは3つの階層で構成されます。
+
+```text
+duration 50m
+session rpe 6
+
+exercise "Back Squat" equipment barbell {
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 80kg rpe 7 rest 3m
+}
+```
+
+1. `duration` と `session rpe` はセッション全体の設定です。どちらも任意で、最大1回ずつ記述できます。
+2. `exercise "…" {` で種目ブロックを開始し、`}` で閉じます。
+3. その中に `warmup` 行と `work` 行でセットグループを記述します。
+
+空行は使用できます。コメントや通常の文章は文法に含まれません。
+
+## セッション全体の設定を追加する
+
+最初の種目より前に次の行を記述します。
+
+```text
+duration 50m
+session rpe 6
+```
+
+`duration` には `45s`、`50m`、`1.5h` のように秒・分・時間を指定できます。これは1セットではなくワークアウト全体の予定時間です。
+
+`session rpe` には 1〜10 の数値を指定します。ワークアウト全体の想定きつさを表し、各セットグループ行の努力度目標である `rpe` とは別物です。
+
+## 種目を追加する
+
+基本形は次のとおりです。
+
+```text
+exercise "Romanian Deadlift" {
+  work 3x8 open rir 2 rest 2m
+}
+```
+
+種目名は二重引用符で囲む必要があり、空にはできません。日本語などアスリートの言語をそのまま使えます。名前に二重引用符を含める場合は `\"`、バックスラッシュそのものは `\\` でエスケープします。
+
+器具（`equipment`）の指定は任意です。
+
+```text
+exercise "Romanian Deadlift" equipment barbell {
+```
+
+器具コードには英大文字・小文字、数字、ハイフン、アンダースコアを使用でき、保存時に小文字へ正規化されます。`barbell`、`dumbbell`、`bodyweight`、`cable`、`machine` のような安定したコードを使うのがおすすめです。
+
+## セットグループを記述する
+
+読みやすく正規化された DSL にするため、次の語順で記述します。
+
+```text
+work PRESCRIPTION LOAD EFFORT rest DURATION
+```
+
+必須なのは `warmup` または `work` と処方（PRESCRIPTION）だけです。負荷を省略した場合はオープン負荷になりますが、意図を明確にするため `open` を明記するのがおすすめです。努力度とレストは任意です。
+
+| 要素 | 指定できる形式 | 例 |
+| --- | --- | --- |
+| セット種別 | `warmup` または `work` | `work` |
+| 処方 | 固定回数・範囲・AMRAP・時間 | `3x5`、`3x8-12`、`1x5+`、`3x45s` |
+| 負荷 | オープン・重量・1RM 比率・自重 | `open`、`weight 80kg`、`weight 75%1rm`、`bodyweight` |
+| 努力度 | RPE または RIR | `rpe 7`、`rir 2` |
+| レスト | `rest` に続く時間 | `rest 90s`、`rest 3m` |
+
+1つの種目に複数のセットグループを記述できます。
+
+```text
+exercise "Back Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+```
+
+ウォームアップグループは任意ですが、ワークグループは1つ以上必須です。`warmup` 行のみの種目は検証エラーになります。
+
+## 回数または時間の処方を選ぶ
+
+| 目的 | 構文 | 意味 |
+| --- | --- | --- |
+| 固定回数 | `3x5` | 5回 × 3セット |
+| 回数レンジ | `3x8-12` | 8〜12回 × 3セット |
+| AMRAP | `1x5+` | 基準5回の AMRAP フラグ付き1セット |
+| 時間制セット（秒） | `3x45s` | 45秒 × 3セット |
+| 時間制セット（分） | `2x1.5m` | 90秒 × 2セット |
+
+セット数と回数はいずれも正の数である必要があります。範囲指定では小さい値を先に書いてください。
+
+## 負荷（Load）を選ぶ
+
+### オープン負荷
+
+```text
+work 3x10 open rir 3 rest 90s
+```
+
+当日の感覚で重量を選ぶ場合や、信頼できる負荷履歴がない場合は `open` を使用します。
+
+### 固定重量
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x5 weight 175lb rpe 7 rest 3m
+```
+
+数値と `kg` または `lb` の間にスペースを入れずに記述します。
+
+### 1RM 比率
+
+```text
+work 4x4 weight 80%1rm rest 3m
+```
+
+対象種目の現在有効な 1RM が把握できている場合にのみ使用してください。指定できる範囲は 0 より大きく 100 以下です。
+
+### 自重と自重オフセット
+
+```text
+work 3x8 bodyweight rir 2 rest 90s
+work 3x6 bodyweight +10kg rpe 8 rest 2m
+work 3x8 bodyweight -20kg rir 2 rest 2m
+```
+
+`+10kg` は加重、`-20kg` はチューブやマシンなどによる補助（実効負荷の軽減）を表します。
+
+## RPE または RIR を選ぶ
+
+1つのセットグループ行で使える努力度モデルはどちらか1つだけです。
+
+```text
+work 3x5 weight 80kg rpe 7 rest 3m
+work 3x8 open rir 2 rest 2m
+```
+
+- `rpe` は 1〜10 を受け付けます。
+- `rir` は 0〜10 を受け付けます。
+- 同じ行に両方を書かないでください。
+
+RPE と RIR は目安（キュー）であり、自動重量計算ではありません。`rpe 7` と書いても Trainingload.ai が重量を推測・自動調整することはありません。
+
+## 多言語の種目名を使った完全なセッション例
+
+種目名はユーザー入力データなので、英語である必要はありません（例：`"バーベルスクワット"`）。一方、DSL のキーワード自体は文法の一部であるため英語のまま記述します。
+
+```text
+duration 45m
+session rpe 6
+
+exercise "Barbell Squat" equipment barbell {
+  warmup 1x8 weight 20kg rest 60s
+  warmup 1x5 weight 40kg rest 90s
+  work 3x5 weight 60kg rpe 7 rest 3m
+}
+
+exercise "Push-up" equipment bodyweight {
+  work 3x8-12 bodyweight rir 2 rest 90s
+}
+
+exercise "Plank" equipment bodyweight {
+  work 3x45s bodyweight rest 60s
+}
+```
+
+この例では、加重レップ種目、自重の回数レンジ種目、自重の時間制ホールド種目の3種目が定義されます。
+
+## 検証・比較・保存の手順
+
+1. **Validate Input** を選択します。
+2. 他の行を触る前に、最初に報告された行のエラーを確認して修正します。
+3. 筋力プレビューに表示された種目数とワークセット数が意図どおりか確認します。
+4. パース後の各項目を視覚的に確認したい場合は **Manual** タブへ切り替えます。
+5. **Rules** タブへ戻り、正規化後の DSL の意味が変わっていないことを確認します。
+6. **Save Draft** を選択し、ワークアウトを開き直して再度確認します。
+
+正規化によってキーワード・器具コード・単位が小文字に統一されたり、明示的な `open` が補われたりすることがありますが、ワークアウトの意味自体は変わりません。種目、セット数、処方、負荷、努力度、レストが変わっている場合は誤りがあるため修正してください。
+
+## DSL がサポートしない機能
+
+Strength DSL は静的なセッション処方です。以下は記述しないでください。
+
+- `if/else` などの実行ロジック
+- 週次の漸進ルールやディロードルール
+- 入れ子になった `exercise` ブロック
+- カンマ区切りの属性
+- 実行可能なプログレッションスクリプト
+- メモやコーチングの文章
+
+人向けの指示はワークアウトのメモ欄に書いてください。外部システムの実行スクリプトは、無理に別の処方へ書き換えるのではなく元のシステム側で管理してください。
+
+## ワークアウトの確認項目
+
+- 種目が持久系ではなく **Strength Training** になっている。
+- すべての種目に引用符付きの空でない名前がある。
+- すべての種目に少なくとも1つの `work` グループがある。
+- 回数レンジが小さい値から大きい値の順に並んでいる。
+- 各セットグループの負荷と努力度モデルがそれぞれ1つ以内に収まっている。
+- プレビューに意図した種目とワークセットが表示されている。
+- 保存後に開き直しても同じ意味が保持されている。
+
+## トラブルシューティング
+
+| エラーまたは症状 | 対処法 |
+| --- | --- |
+| Exercise name cannot be empty | `exercise "Back Squat" {` のように二重引用符の中に空でない種目名を入れます。 |
+| Strength workout requires at least one exercise | 有効な `exercise` ブロックを1つ以上追加します。 |
+| Exercise requires at least one work set | `work` 行を追加します。ウォームアップのみの種目は無効です。 |
+| Invalid set prescription | `3x5`、`3x8-12`、`1x5+`、または `3x45s` のような時間形式を使用します。 |
+| Maximum reps must be greater than or equal to minimum reps | `3x12-8` を `3x8-12` のように昇順へ直します。 |
+| Use either RPE or RIR, not both | セットグループ行から RPE または RIR の片方を削除します。 |
+| Invalid weight | `weight 80kg`、`weight 175lb`、`weight 80%1rm` のように数値と単位の間にスペースを入れずに記述します。 |
+| Unsupported set attribute | セット行から文章、カンマ、未対応キーワード、動的ロジックを取り除きます。 |
+| Exercise is missing a closing brace | 該当種目の最後のセットグループの後に `}` を1つ追加します。 |
+| 種目を切り替えるとエディタが空になる・置き換わる | 持久系と筋力で構造が異なるため、切り替える前に DSL をコピーまたは保存してください。 |
+
+## 次のステップ
+
+- ビジュアルビルダーとプログラム設計の判断については[筋力ワークアウト](/ja/docs/planning/strength-workouts)を参照してください。
+- Rules モードと Manual モードの違いは[手動ワークアウトエディタガイド](/ja/docs/planning/manual-workout-editor)で確認してください。
+- 作成したワークアウトをプランへ組み込むには[トレーニングプランを作成する](/ja/docs/guide/create-training-plan)へ進みます。

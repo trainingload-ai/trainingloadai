@@ -1,134 +1,170 @@
 ---
-title: Activities Feed and Search
-description: Use the Trainingload.ai activity feed and search page to review imported workouts, filter activities, open details, export files, delete mistakes, and link activities to training-plan workouts.
-keywords: ["activity feed", "activity search", "workout management", "training activity list", "Trainingload.ai activities"]
+title: Feed e busca de atividades
+description: Use o feed e a busca de atividades do Trainingload.ai para revisar treinos importados, filtrar atividades, abrir detalhes, exportar arquivos, excluir erros e vincular atividades a treinos do plano.
+keywords:
+  [
+    "feed de atividades",
+    "busca de atividades",
+    "gerenciamento de treinos",
+    "lista de atividades de treino",
+    "atividades Trainingload.ai",
+  ]
 ---
 
-# Activities Feed and Search
+# Feed e busca de atividades
 
-The activity feed is the main list of completed workouts in Trainingload.ai. It brings together synced activities, uploaded files, manual imports, map previews, load values, and plan links.
+O feed de atividades é a lista principal de treinos concluídos no Trainingload.ai. Ele reúne atividades sincronizadas, arquivos enviados, importações manuais, miniaturas de mapa, valores de carga e vínculos com o plano.
 
-Use it when you want to answer:
+Use essa tela quando quiser responder:
 
-- What did I train recently?
-- Did a new import arrive?
-- Which workouts still need review?
-- Is this activity linked to the right plan workout?
-- Where is the activity detail page for deeper analysis?
+- O que eu treinei recentemente?
+- Uma nova importação já chegou?
+- Quais treinos ainda precisam de revisão?
+- Esta atividade está vinculada ao treino certo do plano?
+- Onde abro a página de detalhes da atividade para uma análise mais profunda?
 
-## Activity feed
+## Antes de começar
 
-Open **Activities** to see recent workouts. Each activity card can show:
+- Conecte um provedor ou [envie um arquivo de atividade](/pt-BR/docs/guide/upload-activity-files).
+- Saiba a data aproximada, o esporte e a origem ao procurar uma importação específica.
+- Se pretende vincular uma atividade, confirme que o plano desejado está ativo e cobre a data da atividade.
 
-- Activity title.
-- Sport type.
-- Start time.
-- Distance and duration.
-- Training load when available.
-- Source provider, such as Garmin, Strava, or manual upload.
-- Activity status.
-- Map thumbnail when route data is available.
-- Plan workout link when the activity falls inside an active plan window.
+## Fluxo de revisão
 
-The feed loads more items as you scroll. On mobile, pull down at the top of the list to refresh.
+1. Abra **Atividades** e atualize o feed.
+2. Confira os cartões mais recentes e o estado de processamento.
+3. Refine a lista por período, esporte ou outro filtro visível.
+4. Abra os detalhes da atividade antes de julgar métricas ou carga ausentes.
+5. Vincule a atividade a um treino planejado apenas após confirmar data, esporte e objetivo da sessão.
 
-## Activity status
+<DocsScreenshot
+  id="activities-feed-review"
+  title="Revisão do feed de atividades"
+  description="Use contexto de status, origem, esporte, carga e vínculo com o plano para localizar o treino que precisa de atenção."
+  route="Atividades"
+/>
 
-Activity cards can show statuses such as:
+## Feed de atividades
 
-- **Synced**: imported or synced into Trainingload.ai.
-- **Pending review**: available but not yet reviewed.
-- **Reviewed**: already reviewed or processed through the review flow.
-- **Unknown**: status was not available.
+Abra **Atividades** para ver os treinos recentes. Cada cartão de atividade pode exibir:
 
-Status labels help you triage the list, but they do not replace the activity detail page. Open the activity when charts, metrics, or processing results matter.
+- Título da atividade.
+- Tipo de esporte.
+- Horário de início.
+- Distância e duração.
+- Carga de treino quando disponível.
+- Provedor de origem, como Garmin, Strava ou envio manual.
+- Status da atividade.
+- Miniatura do mapa quando há dados de trajeto.
+- Vínculo com treino do plano quando a atividade cai dentro da janela de um plano ativo.
 
-## Search and filters
+O feed carrega mais itens conforme você rola a página. No celular, puxe o topo da lista para baixo para atualizar.
 
-Use activity search when the feed is too broad.
+## Status da atividade
 
-Quick filters include:
+Os cartões podem exibir status como:
 
-- Recent 7 days.
-- Recent 30 days.
-- Run.
-- Cycling.
-- Swim.
+- **Sincronizada**: importada ou sincronizada no Trainingload.ai.
+- **Pendente de revisão**: disponível, mas ainda não revisada.
+- **Revisada**: já revisada ou processada no fluxo de revisão.
+- **Desconhecido**: status indisponível.
 
-Search also supports query parameters for fields such as sport type, provider, date range, duration, distance, ordering, and time zone. The visible UI may expose only the common filters, while saved links can preserve more specific query combinations.
+Os rótulos de status ajudam na triagem da lista, mas não substituem a página de detalhes da atividade. Abra a atividade sempre que gráficos, métricas ou resultados de processamento forem importantes.
 
-## Open an activity
+## Busca e filtros
 
-Open an activity when you need more than the summary card.
+Use a busca de atividades quando o feed estiver amplo demais.
 
-The detail page is where you review:
+Os filtros rápidos incluem:
 
-- Full summary metrics.
-- Charts and time series.
-- Route and terrain context.
-- Load and intensity.
-- Heart rate, power, pace, and elevation signals.
-- AI Coach prompts for that workout.
+- Últimos 7 dias.
+- Últimos 30 dias.
+- Corrida.
+- Ciclismo.
+- Natação.
 
-See [Activity Detail](/docs/guide/activity-detail).
+Use os filtros exibidos na página de busca para refinar a lista. Se uma atividade não aparecer, limpe os filtros, amplie o intervalo de datas e verifique o esporte e a origem.
 
-## Link activities to plan workouts
+## Abra uma atividade
 
-When there is an active plan and the activity date falls inside the plan range, the activity card can show a plan-link control.
+Abra uma atividade quando precisar de mais informações do que o cartão de resumo oferece.
 
-Use it to connect the completed workout to the intended plan session.
+A página de detalhes é onde você analisa:
 
-This matters because Trainingload.ai can then compare:
+- Métricas completas de resumo.
+- Gráficos e séries temporais.
+- Contexto de trajeto e terreno.
+- Carga e intensidade.
+- Sinais de frequência cardíaca, potência, ritmo e elevação.
+- Sugestões de perguntas ao Treinador de IA para aquele treino.
 
-- Planned workout vs completed activity.
-- Expected load vs actual load.
-- Completion status.
-- Plan compliance.
-- AI Coach plan follow-up.
+Veja [Detalhes da atividade](/pt-BR/docs/guide/activity-detail).
 
-If the wrong workout is linked, unlink it and choose the correct one manually.
+## Vincule atividades a treinos do plano
 
-## Export or delete an activity
+Quando existe um plano ativo e a data da atividade cai no período do plano, o cartão pode mostrar um controle de vínculo com o plano.
 
-The activity card menu can include:
+Use esse controle para conectar o treino concluído à sessão planejada correspondente.
 
-- **View**: open the activity detail page.
-- **Export**: download the activity as GPX, FIT, or TCX when export is supported.
-- **Delete**: remove the activity after confirmation.
+Isso importa porque o Trainingload.ai passa a comparar:
 
-Use delete carefully. If an activity is linked to a plan workout, removing it can change plan execution summaries and load comparisons.
+- Treino planejado vs. atividade concluída.
+- Carga esperada vs. carga real.
+- Status de conclusão.
+- Aderência ao plano.
+- Acompanhamento do plano pelo Treinador de IA.
 
-## Map entry
+Se o treino errado estiver vinculado, desvincule-o e selecione o correto manualmente.
 
-The activities page can show a map entry that opens the map view. Use the map when route context matters:
+## Exporte ou exclua uma atividade
 
-- Comparing routes.
-- Reviewing where workouts happened.
-- Finding GPS-based activities visually.
-- Checking whether a route looks incomplete or unusual.
+O menu do cartão de atividade pode incluir:
 
-The map is useful for location context, while the activity detail page remains the better place for metrics.
+- **Visualizar**: abre a página de detalhes da atividade.
+- **Exportar**: baixa a atividade em GPX, FIT ou TCX quando a exportação é compatível.
+- **Excluir**: remove a atividade após confirmação.
 
-## Troubleshooting
+Use a exclusão com cuidado. Se uma atividade estiver vinculada a um treino do plano, removê-la pode alterar os resumos de execução e as comparações de carga do plano.
 
-If an activity is missing:
+## Acesso ao mapa
 
-- Check whether the import batch has finished.
-- Refresh the feed.
-- Search with a wider date range.
-- Confirm the source provider actually has the workout.
-- Check whether the activity was deleted or filtered out.
+A página de atividades pode exibir um atalho para abrir a visualização de mapa. Use o mapa quando o contexto do percurso importar:
 
-If load or charts are missing:
+- Comparar trajetos.
+- Rever onde os treinos aconteceram.
+- Encontrar visualmente atividades com GPS.
+- Verificar se um trajeto parece incompleto ou incomum.
 
-- Open the activity detail page and check processing status.
-- Confirm the source file includes the needed sensor data.
-- Check profile thresholds and zones.
-- Wait for analysis to finish if the activity was just uploaded.
+O mapa é útil para o contexto de localização, enquanto a página de detalhes continua sendo o melhor lugar para métricas.
 
-Related pages:
+## Solução de problemas
 
-- [Upload Activity Files](/docs/guide/upload-activity-files)
-- [Connect Data](/docs/guide/connect-data)
-- [Activity Detail](/docs/guide/activity-detail)
-- [Manage an Active Plan](/docs/guide/manage-active-plan)
+Se uma atividade estiver faltando:
+
+- Verifique se o lote de importação foi concluído.
+- Atualize o feed.
+- Busque com um intervalo de datas maior.
+- Confirme se o provedor de origem realmente possui o treino.
+- Verifique se a atividade foi excluída ou ocultada por algum filtro.
+
+Se carga ou gráficos estiverem ausentes:
+
+- Abra a página de detalhes da atividade e verifique o estado de processamento.
+- Confirme se o arquivo de origem contém os dados de sensores necessários.
+- Verifique limiares e zonas no perfil.
+- Aguarde a análise terminar caso a atividade tenha acabado de ser enviada.
+
+## Confirme o resultado
+
+- A atividade esperada aparece uma única vez, com horário de início, esporte e origem corretos.
+- Abrir o cartão leva aos detalhes esperados da atividade.
+- Uma atividade vinculada aponta para o treino planejado correto, e não apenas para uma data próxima.
+- Limpar os filtros não faz a atividade sumir inesperadamente.
+- Exportação ou exclusão ocorre apenas na atividade confirmada.
+
+## Próximos passos
+
+- [Enviar arquivos de atividade](/pt-BR/docs/guide/upload-activity-files)
+- [Conectar dados](/pt-BR/docs/guide/connect-data)
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Gerencie um plano ativo](/pt-BR/docs/guide/manage-active-plan)

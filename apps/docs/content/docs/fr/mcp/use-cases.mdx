@@ -1,0 +1,72 @@
+---
+title: Cas d’usage MCP
+description: Prompts prêts à copier, enchaînement d’outils attendu et éléments de preuve qu’une bonne réponse doit contenir.
+---
+
+# Cas d’usage MCP
+
+Collez n’importe lequel des prompts ci-dessous dans un client IA connecté à TrainingLoad. Le client n’a pas besoin d’appeler tous les outils listés ; il doit choisir la plus petite combinaison permettant de répondre précisément à la question.
+
+## État actuel et fatigue ressentie
+
+> Utilise TrainingLoad pour résumer mon état d’entraînement à la date d’aujourd’hui. Compare les 7 derniers jours aux 7 précédents, inclus ma forme (TSB) et mes trois prochaines séances planifiées, et distingue clairement les faits des déductions.
+
+Parcours attendu : `get_training_snapshot` → `get_training_readiness` → `list_planned_workouts` si nécessaire.
+
+La réponse doit préciser `asOf`, le fuseau horaire, l’écart de charge d’entraînement, la disponibilité des valeurs ATL/CTL/TSB, et rappeler que l’indicateur de disponibilité (readiness) reste un signal observationnel de charge — jamais un avis médical ni un feu vert pour s’entraîner.
+
+## Comparer deux blocs d’entraînement
+
+> Compare la période du 1er au 28 septembre 2026 avec celle du 1er au 28 octobre 2026. Détaille la charge d’entraînement entre course à pied, cyclisme et natation, et ne cite que les évolutions réellement étayées par les données.
+
+Parcours attendu : `compare_training_periods` + `get_training_breakdown`.
+
+Pour une version reproductible, sélectionnez le prompt natif `compare-training-blocks`. Ajoutez `get_activity_statistics` lorsque le nombre de séances, la durée ou la distance a évolué indépendamment de la charge, et `get_training_consistency` lorsque la fréquence, les séries de jours actifs ou la variabilité comptent.
+
+## Examiner une activité réalisée
+
+> Affiche la répartition du temps par zone et le résumé des tours ou intermédiaires pour cette activité. Repère les irrégularités d’allure en utilisant uniquement les champs agrégés enregistrés, sans demander la trace brute ni le flux des capteurs.
+
+Parcours attendu : `get_activity` → `get_activity_zones` + `get_activity_splits`.
+
+## Tendances de forme physique et records personnels
+
+> Affiche l’évolution estimée de ma VO2_MAX en course à pied cette année, mes zones d’entraînement actuelles et mes meilleures performances sur 5 km et 10 km. Ne présente pas une estimation comme une mesure de laboratoire.
+
+Parcours attendu : `get_fitness_trends` + `get_training_zones` + `get_personal_bests`.
+
+## Suivi du plan d’entraînement
+
+> Résume la réalisation de mon plan d’entraînement sur les 8 dernières semaines : séances effectuées, sautées et encore en attente. Liste ensuite les séances de la semaine prochaine et explique le dénominateur utilisé pour le taux de réalisation.
+
+Parcours attendu : `get_plan_adherence` + `list_planned_workouts`.
+
+`get_plan_adherence` s’appuie sur le statut des séances plutôt que de deviner si une activité correspond à un plan. Seul le statut `DONE` compte comme réalisé ; les séances futures au statut `PLANNED` restent incluses dans le dénominateur de la période sélectionnée.
+
+Pour un plan complet, utilisez `list_training_plans` afin de récupérer son identifiant opaque, puis `get_plan_summary` pour obtenir le taux de réalisation, la charge réelle par rapport à la charge estimée, la progression hebdomadaire et la répartition par sport.
+
+## Préparation de course
+
+> Trouve ma prochaine compétition et passe en revue le plan d’entraînement associé, les signaux récents de charge et de forme ainsi que les séances à venir. Signale les données manquantes et ne transforme pas l’indicateur de disponibilité en décision médicale ni en feu vert pour prendre le départ.
+
+Parcours attendu : `list_competitions` → `get_competition` → `list_training_plans` / `get_plan_summary` → `get_training_readiness` → `list_planned_workouts`.
+
+Les clients qui prennent en charge les prompts MCP peuvent sélectionner directement `race-preparation-check` au lieu de recopier toute la demande.
+
+## Diagnostic de synchronisation
+
+> Vérifie ma connexion Strava. Indique-moi si l’import et l’export des activités réalisées sont disponibles et automatiques, et si la dernière synchronisation présente une erreur. N’affiche ni identifiants de compte ni messages d’erreur bruts.
+
+Parcours attendu : `get_integration_status`.
+
+## Contexte de santé (consentement séparé)
+
+> Une fois que j’aurai autorisé l’accès santé, résume les évolutions de bien-être disponibles sur les 14 derniers jours. Signale les valeurs manquantes et ne pose aucun diagnostic.
+
+Parcours attendu : `get_health_summary`. Si la portée (scope) `health:read` n’a pas encore été accordée, le client doit déclencher le consentement incrémental au lieu de demander un jeton d’accès.
+
+## Rendre chaque réponse plus facile à vérifier
+
+Ajoutez cette consigne à la fin d’un prompt :
+
+> Liste les outils TrainingLoad que tu as réellement appelés, chaque plage de dates utilisée et les champs retournés qui appuient ta conclusion. Ne complète jamais les valeurs manquantes.

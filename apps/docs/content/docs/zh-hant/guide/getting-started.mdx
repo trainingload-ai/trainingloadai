@@ -1,0 +1,102 @@
+---
+title: 匯入您的第一筆活動
+description: 連接第三方訓練平台或上傳活動檔案，接著開啟匯入完成的活動紀錄探索完整分析。
+seoTitle: "快速入門：匯入您的第一筆訓練活動 | Trainingload.ai"
+seoDescription: "連接第三方訓練平台或上傳 FIT、TCX、GPX 檔案，快速匯入您的第一筆訓練活動，並立即檢視詳情、圖表與訓練負荷。"
+keywords: ["Trainingload.ai 快速入門", "首次匯入活動", "匯入訓練紀錄", "FIT 檔案上傳"]
+---
+
+# 匯入您的第一筆活動 [#get-started-with-your-first-activity]
+
+從運動手錶、車錶或第三方訓練平台匯入一筆紀錄，立即在 Trainingload.ai 中檢視活動詳情、感測圖表與訓練負荷。本指南示範網頁版中的平台同步與手動上傳檔案流程。
+
+## 開始之前
+
+[開啟 Trainingload.ai](https://app.trainingload.ai/en) 並登入您的個人帳號。若採用自架版（Self-host），請改開您自己的實例網址。想先體驗介面操作，也可直接[瀏覽線上示範](https://demo.trainingload.ai/en)。
+
+## 1. 選擇匯入方式 [#2-choose-one-route-for-the-first-activity]
+
+| 同步方式 | 對應指南 |
+| --- | --- |
+| 從第三方訓練平台同步（Strava、Garmin、Intervals.icu） | [連接第三方平台](#connect-a-training-platform) |
+| 從活動檔案同步（FIT、TCX、GPX） | [上傳活動檔案](#upload-a-workout-file) |
+| 從手機端同步 | [閱讀手機同步指南](/zh-hant/docs/guide/account-permissions-and-usage#2-review-mobile-permissions-and-data-sources) |
+
+自架版使用者請參閱[自架設定說明](/zh-hant/docs/self-host/configuration)了解支援的連線項目，或直接使用下方的活動檔案上傳步驟。
+
+## 2. 匯入您的訓練紀錄 [#3-import-and-wait-for-processing]
+
+### 方式一：連接第三方訓練平台 [#connect-a-training-platform]
+
+1. 點開側邊欄底部的帳號選單，進入**帳號（Account）**，接著捲動至**第三方平台連線（Third Party Connections）**。
+2. 選擇存放您訓練紀錄的平台，依視窗指示完成連線。
+3. 視需求勾選初始匯入或執行手動同步。
+4. 在側邊欄開啟**活動（Activities）**即可檢視同步完成的紀錄。
+
+各平台支援的歷史回溯區間各不相同，詳細連線與歷史資料匯入步驟請參閱[連接 Strava、Garmin 與其他平台](/zh-hant/docs/guide/connect-third-party-platforms)。
+
+<DocsScreenshot
+  id="integrations-connections"
+  title="選擇訓練平台"
+  description="在「帳號」頁面中捲動至「第三方平台連線」，選擇存放您訓練紀錄的平台。"
+  route="側邊欄帳號選單 → 帳號 → 第三方平台連線"
+  demoLabel="在示範環境中瀏覽支援平台"
+/>
+
+### 方式二：上傳活動檔案 [#upload-a-workout-file]
+
+從您的運動手錶、車錶或訓練平台匯出 FIT、TCX 或 GPX 檔案，然後依序操作：
+
+1. 點擊左側欄的**活動（Activities）**開啟活動頁面。
+2. 在最右側的**上傳活動檔案（Upload activity files）**卡片中，點擊**選擇活動檔案（Choose activity files）**。
+
+<DocsScreenshot
+  id="activity-upload-location"
+  title="在「活動」頁面找到上傳按鈕"
+  description="點擊左側欄的「活動」，再於最右側卡片中點擊「選擇活動檔案」。"
+  route="左側欄：活動 → 右側卡片：選擇活動檔案"
+  demoLabel="在示範環境中瀏覽活動"
+/>
+
+3. 將欲匯入的檔案拖曳至視窗中，或點擊檔案選取區域挑選檔案。
+4. 點擊視窗右下角的**上傳（Upload）**。
+
+<DocsScreenshot
+  id="activity-import-entry"
+  title="選取檔案並上傳"
+  description="將檔案拖曳進視窗或點擊選取，接著點擊右下角的「上傳」。"
+  route="上傳視窗：選擇檔案 → 上傳"
+  demoLabel="在示範環境中瀏覽活動"
+/>
+
+上傳後畫面會自動開啟匯入進度視窗。待匯入完成後返回**活動（Activities）**，即可看到您的訓練紀錄。若出現重複紀錄警告，可直接保留既有紀錄，避免同一堂課匯入兩次。更多協助請參閱[上傳活動檔案](/zh-hant/docs/guide/upload-activity-files)。
+
+## 3. 開啟剛匯入的活動 [#4-verify-the-first-recorded-result]
+
+在**活動（Activities）**中依日期找到這筆訓練並點開詳情。您可以檢視持續時間、距離、訓練負荷，以及該筆紀錄所支援的各項圖表與路線軌跡。完整介面導覽請見[活動詳情](/zh-hant/docs/guide/activity-detail)。
+
+剛匯入的新活動可能仍在處理中，請等待分析完成後再檢視全部結果。心率、功率與路線圖表都需要原始檔案具備對應採樣資料；不含 GPS 的紀錄不會顯示路線圖。
+
+## 常見問題
+
+### 已經連接平台了，但看不到我的活動
+
+確認平台卡片處於已連線狀態，並檢查「活動」頁面的日期篩選條件。過往歷史紀錄可能需要另外執行歷史匯入；請依該平台提供的選項操作，或改從原平台匯出活動檔案後手動上傳至 Trainingload.ai。
+
+### 我的活動沒有心率或路線圖
+
+請先等待系統處理完成。如果原始檔案本身沒有記錄心率、功率或 GPS 資料，對應圖表便不會顯示。若原始平台看得到這些數值，建議從原平台匯出原始活動檔案後重新上傳一次。
+
+### 活動出現在錯誤的日期
+
+請核對您的帳號時區與活動紀錄的開始時間。時區與單位調整方式請參閱[個人檔案、閾值與訓練區間](/zh-hant/docs/guide/profile-thresholds-zones)。
+
+### 為什麼無法在示範環境中上傳檔案？
+
+示範環境僅供瀏覽範例資料。若要匯入您自己的訓練紀錄，請[開啟主應用程式](https://app.trainingload.ai/en)並登入個人帳號。
+
+## 下一步 [#5-choose-the-next-task]
+
+- [探索訓練負荷的長期變化](/zh-hant/docs/guide/pmc-forecast)
+- [建立訓練計畫](/zh-hant/docs/guide/create-training-plan)
+- [請智能教練分析這堂訓練](/zh-hant/docs/guide/ai-coach)

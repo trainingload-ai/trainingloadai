@@ -1,0 +1,68 @@
+---
+title: Solução de problemas da auto-hospedagem
+description: Diagnostique falhas de instalação, prontidão, armazenamento, IA, restauração e atualização sem contornar os controles de ciclo de vida nem de segurança de dados.
+---
+
+# Solução de problemas da auto-hospedagem
+
+Comece pelas checagens oficiais somente leitura. Preserve o primeiro código de erro estável; ele é mais útil do que modificar repetidamente o host até o sintoma desaparecer.
+
+## Primeira resposta
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+Se o Docker estiver indisponível, o `doctor` ainda reporta as verificações que consegue concluir. Se uma restauração ou atualização falhar, preserve o relatório e o marcador de operação incompleta. Não remova o marcador para forçar uma inicialização normal.
+
+## Problemas comuns
+
+| Sintoma | O que verificar | Próxima ação segura |
+| --- | --- | --- |
+| O instalador rejeita o lançamento | Checksum externo, identidade Cosign, versão exata e integridade dos arquivos baixados | Baixe novamente todos os artefatos da mesma versão oficial |
+| O site não abre | `status`, logs do Client, endereço de bind, conflito de porta e origem HTTPS | Corrija a configuração declarada e execute `start --dry-run` antes de `start` |
+| Banco de dados indisponível | Estado do serviço de banco, disco, permissões e resultado das migrações no `doctor` | Restaure capacidade ou permissões do host; não exponha nem edite o PostgreSQL diretamente |
+| Falha no upload | Espaço livre na raiz de dados, capacidade de inodes, propriedade (ownership) e pasta de uploads | Expanda o volume de dados dedicado e execute `doctor` novamente |
+| Configurações de IA ocultas | Modo de implantação, prontidão da instância e identidade do Owner autenticado | Entre como o Owner; outros usuários não podem ler nem alterar configurações de provedor |
+| Falha na requisição de IA | Status do provedor, URL base exata, IDs dos modelos, permissão da chave e DNS/TLS de saída | Corrija a configuração gerenciada pelo Owner ou desative a IA enquanto o provedor estiver fora do ar |
+| IA falha após restauração | Se o destino usa um segredo de autenticação de instância diferente | Informe uma nova chave de provedor; não tente extrair a chave antiga em texto puro |
+| Restauração bloqueada | Versão de destino, estado da autoridade de destino, manifesto do backup, checksum e relatório | Use um destino limpo da mesma versão exata e preserve o destino com falha para diagnóstico |
+| Atualização bloqueada | Versões de origem suportadas, inventário de migrações, backup, disco e declaração de rollback | Siga o relatório de atualização; não altere tags de imagem nem registros de migração manualmente |
+
+## Coletar diagnósticos
+
+Quando o `doctor` não for suficiente:
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+Os diagnósticos aplicam ocultação automática de dados sensíveis, mas isso não autoriza publicar o artefato. Abra-o localmente e verifique nomes de host, dados de usuário, detalhes de atividades e logs de negócio antes de enviá-lo por um canal privado aprovado pelos mantenedores.
+
+Nunca compartilhe:
+
+- `.env.selfhost`;
+- senhas do Owner ou o token de bootstrap;
+- chaves de API de provedores, cookies ou chaves privadas;
+- dump de banco de dados ou arquivos de atividade enviados;
+- um pacote de diagnósticos que não foi revisado.
+
+## Ações a evitar
+
+- Não use `docker compose down -v`.
+- Não apague dados do PostgreSQL, arquivos enviados, o marcador da raiz de dados, bloqueios de operação ou marcadores de ciclo de vida incompleto.
+- Não edite `_prisma_migrations`, manifestos de lançamento, checksums ou relatórios de atualização.
+- Não use `--skip-verify` nem tags mutáveis de imagem.
+- Não tente repetir comandos que alteram estado em paralelo.
+
+Essas ações podem transformar uma falha diagnosticável em perda de dados irrecuperável ou ambígua.
+
+## Escalar com evidências úteis
+
+Compartilhe apenas a versão exata do lançamento, sistema operacional e arquitetura do host, o `error.code` estável, o comando que falhou e o SHA-256 de um artefato de diagnóstico revisado localmente. Mantenha o artefato completo privado, salvo se um mantenedor fornecer um canal de envio aprovado.
+
+## Próximo passo
+
+Volte para [Gerenciando sua instância](/pt-BR/docs/self-host/operations) depois de resolver a condição bloqueante. Se a recuperação exigir substituir os dados, restaure um backup verificado em um destino limpo em vez de sobrescrever a instância com falha.

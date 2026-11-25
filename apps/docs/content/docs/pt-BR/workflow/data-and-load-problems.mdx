@@ -1,0 +1,35 @@
+---
+title: Diagnosticar Problemas em Dados de Atividade, Carga e Recuperação
+description: Parta do sintoma visível até o dado ausente ou o estado de processamento antes de alterar limiares, fontes de carga ou decisões de treino.
+seoTitle: "Atividade ou Carga de Treino Ausente? Guia de Diagnóstico"
+seoDescription: Diagnostique atividades ausentes, carga de treino, métricas de recuperação e erros de processamento rastreando cada sintoma até a origem e o status dos dados.
+keywords: ["dados de atividade ausentes", "carga de treino ausente", "solução de problemas sincronização", "dados de recuperação"]
+---
+
+# Diagnosticar Problemas em Dados de Atividade, Carga e Recuperação
+
+## Comece pelo sintoma
+
+| Sintoma | O que verificar primeiro | Próximo guia indicado |
+| --- | --- | --- |
+| Atividade ausente | Conexão com o provedor, período de importação e status do arquivo | [Conectar dados](/pt-BR/docs/guide/connect-data) |
+| Atividade duplicada | Múltiplos caminhos de importação e identificadores de origem | [Integrações](/pt-BR/docs/guide/integrations) |
+| Atividade existe, mas sem carga | Status de processamento, duração, frequência cardíaca, potência, ritmo e limiares do perfil | [Detalhes da atividade](/pt-BR/docs/guide/activity-detail) |
+| Gráficos ou voltas falham | Se o arquivo de origem forneceu registros e voltas | [Enviar arquivos de atividade](/pt-BR/docs/guide/upload-activity-files) |
+| Sono, VFC (HRV) ou FC de repouso vazios | Permissões de saúde, cobertura do provedor, data e fuso horário | [Conta, permissões e uso](/pt-BR/docs/guide/account-permissions-and-usage) |
+| PMC parece baixo ou alto demais | Duplicidades, dias ausentes, modalidade selecionada, fonte de carga e alterações de limiares | [Fluxo de análise de treino](/pt-BR/docs/guide/training-analysis-workflow) |
+
+## Diagnostique em ordem
+
+1. Confirme a fonte esperada e o período.
+2. Confirme se a fonte forneceu o fluxo de sensores necessário.
+3. Verifique o status de importação e processamento.
+4. Confira os limiares do perfil e a prioridade da fonte de carga.
+5. Compare uma atividade afetada com uma atividade sabidamente correta.
+6. Só então altere configurações ou entre em contato com o suporte.
+
+## Reúna evidências seguras para o suporte
+
+Inclua a data da atividade, modalidade, fonte, status visível, resultado esperado versus obtido e se o problema é reproduzível. Remova endereços de e-mail, tokens OAuth, chaves de API, localização residencial precisa e identificadores privados do provedor.
+
+Não edite limiares apenas para forçar um valor de carga preferido. Alterações de configuração afetam interpretações futuras e podem modificar o histórico derivado.

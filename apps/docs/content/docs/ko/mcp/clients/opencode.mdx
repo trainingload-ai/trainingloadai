@@ -1,0 +1,34 @@
+---
+title: opencode 연결
+description: opencode 설정 파일과 OAuth 명령을 통해 TrainingLoad MCP를 연결합니다.
+---
+
+# opencode 연결
+
+`opencode.json`에 원격 서버를 추가합니다.
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "trainingload": {
+      "type": "remote",
+      "url": "https://api.trainingload.ai/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+이어서 다음 명령을 실행하세요.
+
+```bash
+opencode mcp auth trainingload
+opencode mcp list
+```
+
+OAuth 인증이 끝나면 다음과 같이 질문하세요: “내 서드파티 훈련 플랫폼 연동을 확인하고 현재 사용 가능한 동기화 방향을 설명해 주세요.” 이 요청은 `get_integration_status`를 호출해야 합니다.
+
+인증 화면이 자동으로 열리지 않으면 `opencode mcp auth trainingload`를 다시 실행하세요. 설정 파일에 토큰을 입력하지 마세요.
+
+[공식 opencode MCP 가이드](https://opencode.ai/docs/mcp-servers/)

@@ -1,0 +1,96 @@
+---
+title: Gerenciar uma instância auto-hospedada
+description: Use o ponto de entrada oficial de gerenciamento para verificações de integridade, logs, backup, restauração, atualização, rollback e desligamento.
+---
+
+# Gerenciar uma instância auto-hospedada
+
+Opere a instância usando `./self-host <command> --json` no Linux, macOS e WSL2, ou `.\self-host.ps1 <command> --json` no Windows PowerShell. O ponto de entrada de gerenciamento preserva as regras de validação, bloqueio, auditoria e segurança de dados do pacote de lançamento.
+
+## Antes de começar
+
+- Mantenha privados o diretório instalado do lançamento e o arquivo `.env.selfhost`.
+- Em automações, avalie os campos JSON `ok`, `exitCode`, `error.code` e `details`, e não mensagens legíveis por humanos.
+- Execute o mesmo comando com `--dry-run` antes de toda operação que altera estado.
+- Nunca use `docker compose down -v`, nunca apague marcadores de ciclo de vida nem faça downgrade manual do banco de dados.
+
+## Verificar status, integridade e logs
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` retorna um resumo limitado do estado em execução. `doctor` verifica configuração confiável, recursos do host, caminhos de dados, estado do banco de dados, prontidão e provedores ativos. Os logs passam por ocultação automática de segredos e têm tamanho limitado, mas ainda podem conter dados de negócio; revise-os antes de compartilhar.
+
+## Iniciar e parar
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+Parar a instância preserva contêineres, configuração e dados persistentes. Para remover recursos de execução mantendo os dados, use o fluxo documentado de `uninstall`; não remova volumes manualmente.
+
+## Criar um backup verificado
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+O backup contém um dump lógico do PostgreSQL e os arquivos enviados oficiais. Ele exclui caches, diagnósticos, tokens de bootstrap, estado privado de TLS, dados locais de elevação e valores de segredos. Guarde o pacote concluído em armazenamento criptografado fora do host e teste-o periodicamente em um destino limpo e isolado.
+
+## Restaurar com segurança
+
+Restaure apenas em um destino recém-inicializado, da mesma versão exata, cujo banco de dados oficial e diretório de arquivos enviados estejam vazios:
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+Não sobrescreva a instância atual. Uma restauração com falha deixa um marcador de bloqueio e um relatório para evitar que um destino incompleto seja iniciado como se estivesse íntegro.
+
+## Atualizar
+
+Uma atualização exige o diretório completo e assinado do lançamento de destino. Mantenha a instância atual, o pacote de destino e um backup verificado fora do host. Execute os dry runs de compatibilidade dos controladores atual e de destino antes da atualização controlada pelo destino:
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+Migrações de banco de dados avançam apenas em uma direção (forward-only). O rollback da aplicação só está disponível quando o relatório de atualização o declara explicitamente e as imagens antigas permanecem verificáveis; ele nunca faz downgrade do banco de dados.
+
+## Rotina sugerida
+
+- Diariamente: verifique `status` e o espaço em disco.
+- Semanalmente: execute `doctor` e crie um backup verificado fora do host.
+- Antes de cada atualização: leia as notas do lançamento de destino, verifique o pacote, teste o backup e revise a declaração de rollback.
+- Periodicamente: restaure um backup em um destino isolado e verifique Owner, atividades e arquivos enviados.
+
+## Verificar
+
+- Toda operação que altera estado foi precedida pelo mesmo comando e parâmetros com `--dry-run`.
+- `doctor` retorna `"ok": true` após iniciar, restaurar ou atualizar.
+- Existe pelo menos um backup recente e verificado fora do host da instância.
+- Um teste de restauração confirmou que o backup é utilizável, e não apenas presente.
+
+## Solução de problemas
+
+Se uma operação falhar, preserve o código de erro estável e execute `doctor`. Gere diagnósticos apenas quando necessário, inspecione-os localmente e nunca publique `.env.selfhost`, dump de banco de dados, arquivos enviados, senhas, tokens ou chaves de provedores. Não tente repetir uma alteração em paralelo enquanto outra operação mantiver o bloqueio da instância.
+
+## Próximo passo
+
+Mantenha [Solução de problemas](/pt-BR/docs/self-host/troubleshooting) junto ao seu guia operacional. Revise [Configuração](/pt-BR/docs/self-host/configuration) antes de alterar rede ou provedores.

@@ -1,0 +1,86 @@
+---
+title: Grabación móvil
+description: Prepara los permisos, graba una sesión de forma segura, recupera grabaciones interrumpidas y verifica que la actividad móvil se haya sincronizado con Trainingload.ai.
+keywords:
+  ["grabación móvil de sesiones", "grabación en Trainingload.ai", "app de entrenamiento GPS"]
+---
+
+# Grabación móvil
+
+Este tutorial termina con una sesión grabada en el móvil que aparece en tu historial de actividades de Trainingload.ai.
+
+## Antes de empezar
+
+- Inicia sesión en la app móvil con la misma cuenta que usas en la web.
+- Activa el permiso de ubicación para grabar rutas GPS en exteriores.
+- Permite la ubicación en segundo plano cuando tu sistema operativo lo ofrezca y vayas a bloquear la pantalla durante el entrenamiento.
+- Desactiva restricciones agresivas de batería para Trainingload.ai si tu teléfono pausa aplicaciones en segundo plano.
+- Asegúrate de tener suficiente batería y almacenamiento para la duración prevista.
+
+## 1. Comprueba los permisos
+
+Abre **Yo → Menú → Autorización de datos** y revisa los permisos de ubicación o datos de salud antes de entrenar. El permiso de una plataforma externa y el permiso GPS del teléfono son independientes: conectar una plataforma no concede al teléfono permiso para registrar ubicación.
+
+## 2. Abre la grabadora
+
+En **Hoy**, abre la sesión programada, revisa su deporte y estructura y selecciona **Iniciar sesión de hoy**. También puedes abrir la sesión desde tu plan activo. Verifica el permiso de ubicación antes de una salida en exterior.
+
+<DocsScreenshot
+  id="mobile-recording-ready"
+  title="Inicia la grabación desde la sesión de hoy"
+  description="Revisa la estructura del entrenamiento de hoy y pulsa Iniciar sesión de hoy en la parte inferior de la hoja."
+  route="Hoy → Sesión programada → Iniciar sesión de hoy"
+  platform="mobile"
+/>
+
+## 3. Inicia y supervisa la sesión
+
+1. Pulsa **Iniciar sesión de hoy** una sola vez, sigue las indicaciones de preparación y espera la cuenta atrás.
+2. Comprueba que el tiempo transcurrido avanza.
+3. En sesiones al aire libre, verifica que la distancia o los datos de ruta empiezan a actualizarse.
+4. Bloquea la pantalla solo cuando la sesión esté claramente en marcha.
+
+Si la app vuelve a primer plano tras haber sido suspendida, espera a que restaure la sesión activa. No inicies una segunda grabación mientras la recuperación esté en curso.
+
+## 4. Finaliza y guarda
+
+Al terminar la sesión:
+
+1. Detén la grabación.
+2. Revisa la duración, la distancia y el deporte.
+3. Guarda la sesión.
+4. Mantén la aplicación con conexión hasta que termine la subida o la transferencia de importación.
+
+La app móvil conserva los datos de grabación en local durante la sesión y cuenta con un flujo de recuperación para grabaciones interrumpidas. Que el guardado local termine bien no significa que todas las gráficas del servidor estén listas al instante; el análisis continúa tras la subida.
+
+## Verifica el resultado
+
+Abre **Yo → Actividades** o el día correspondiente del calendario. Confirma:
+
+- Que existe una sola actividad para esa sesión.
+- Que la hora de inicio, el deporte, la duración y la distancia son coherentes.
+- Que aparece el mapa en una sesión con GPS.
+- Que las gráficas derivadas de sensores solo aparecen cuando la grabación incluyó esos datos.
+- Que la actividad puede vincularse a la sesión planificada correspondiente.
+
+## Solución de problemas
+
+### El tiempo avanza pero la distancia sigue en cero
+
+Comprueba el permiso de ubicación, la señal GPS y si el deporte elegido espera distancia en exteriores. Muévete a una zona despejada y espera a tener señal lista.
+
+### La grabación se detiene al bloquear la pantalla
+
+Activa la ubicación en segundo plano y retira la optimización de batería para la app. Los ajustes del sistema operativo pueden prevalecer sobre el estado de permisos dentro de la aplicación.
+
+### La actividad aparece dos veces
+
+No vuelvas a subir manualmente el archivo grabado en local mientras la sincronización siga pendiente. Compara hora de inicio y duración, y borra únicamente el duplicado confirmado.
+
+### La actividad existe pero faltan gráficas
+
+Espera a que termine el análisis y actualiza. La ausencia de frecuencia cardíaca, potencia o cadencia también puede deberse a que la grabación no incluyó esas series.
+
+## Próximo paso
+
+Abre [Detalle de actividad](/es/docs/guide/activity-detail) y vincula el resultado mediante [Gestionar un plan activo](/es/docs/guide/manage-active-plan) si se trataba de una sesión planificada.

@@ -1,0 +1,70 @@
+---
+title: Piani e allenamenti
+description: Scopri come Trainingload.ai gestisce piani di allenamento, sessioni programmate, struttura di endurance e forza, carico previsto e collegamento alle attività completate.
+keywords:
+  ["piani Trainingload.ai", "allenamenti strutturati", "ciclo di vita piano di allenamento"]
+---
+
+# Piani e allenamenti
+
+Trainingload.ai gestisce il piano di allenamento come uno spazio di lavoro attivo, non come un PDF statico. Un piano contiene allenamenti con date fisse o relative; ogni sessione può includere una struttura leggibile dal sistema, note testuali, carico previsto, stato di esecuzione e collegamenti alle attività completate.
+
+## Il modello di pianificazione
+
+<Mermaid
+  chart={`flowchart TD
+  Goal[Obiettivo e vincoli] --> Plan[Piano di allenamento]
+  Plan --> Workout[Allenamento programmato]
+  Workout --> Structure[Struttura endurance o forza]
+  Structure --> Expected[Carico previsto]
+  Workout --> Activity[Collegamento attività completata]
+  Activity --> Actual[Carico effettivo ed esecuzione]
+  Expected --> Review[Revisione del piano]
+  Actual --> Review
+  Review --> Adjustment[Aggiustamento confermato]
+  Adjustment --> Plan`}
+/>
+
+## Stati del piano
+
+- **Bozza** — piano modificabile in costruzione. Usalo per la revisione prima di avviare l'esecuzione.
+- **Attivo** — piano corrente con una data di inizio e il contesto di esecuzione quotidiana.
+- **In pausa** — sospeso temporaneamente preservando il piano e il suo storico.
+- **Completato** — piano terminato in modo intenzionale.
+- **Annullato** — piano interrotto prima del completamento previsto.
+
+Leggi [Gestire lo stato del piano](/it/docs/planning/plan-lifecycle) prima di modificare lo stato di un piano che contiene già attività completate collegate.
+
+## Tipi di struttura dell'allenamento
+
+### Endurance
+
+Gli allenamenti di endurance comprendono riscaldamento, lavoro, recupero, ripetizioni e altre fasi con prescrizioni basate su tempo o distanza e obiettivi facoltativi come zone, passo, velocità, potenza, cadenza o frequenza cardiaca.
+
+Usa la [guida all'editor manuale degli allenamenti](/it/docs/planning/manual-workout-editor) per la modifica visuale nell'app, l'[Editor e builder di allenamenti](/it/workout-editor) per preparare una bozza pubblica oppure il [DSL per allenamenti di endurance](/it/docs/planning/workout-dsl) per scrivere regole compatte in formato testo.
+
+### Forza
+
+Gli allenamenti di forza contengono esercizi e gruppi di serie. Il lavoro può essere prescritto per ripetizioni o per tempo, con carico libero, peso fisso, percentuale di 1RM, corpo libero, sforzo e recupero dove supportati.
+
+Usa [Allenamenti di forza](/it/docs/planning/strength-workouts) per il flusso visuale oppure [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl) per la modalità Regole passo dopo passo.
+
+## Carico previsto vs carico effettivo
+
+Il carico previsto viene calcolato solo quando la struttura dell'allenamento, le soglie e le informazioni sugli obiettivi forniscono un segnale sufficiente. Il carico effettivo deriva invece dall'attività completata e dalla priorità configurata per la sorgente del carico.
+
+I due valori rispondono a domande diverse:
+
+- Previsto: «Quale stress intendeva generare questo piano?»
+- Effettivo: «Quale stress ha prodotto la sessione completata?»
+
+Non forzare un valore di carico previsto inventando una soglia o un obiettivo. Un dato esplicitamente non disponibile è più sicuro di una falsa precisione.
+
+## Ordine di lettura consigliato
+
+1. [Creare un piano di allenamento](/it/docs/guide/create-training-plan)
+2. [Guida all'editor manuale degli allenamenti](/it/docs/planning/manual-workout-editor)
+3. [DSL per allenamenti di forza](/it/docs/planning/strength-workout-dsl), quando programmi sessioni di forza
+4. [Gestire lo stato del piano](/it/docs/planning/plan-lifecycle)
+5. [Gestire un piano attivo](/it/docs/guide/manage-active-plan)
+6. [Coach AI](/it/docs/guide/ai-coach)

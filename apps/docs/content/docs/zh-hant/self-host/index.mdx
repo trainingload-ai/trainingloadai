@@ -1,0 +1,86 @@
+---
+title: 自行託管
+description: 在自己的電腦或伺服器上使用 Trainingload.ai，保存個人訓練資料、匯入活動，並可選擇性設定智能教練。
+seoTitle: "Trainingload.ai 自行託管：本機安裝與日常維運指南"
+seoDescription: 安裝經簽章驗證的 Trainingload.ai 自行託管版本，將上傳檔案保存在自有儲存空間、設定 BYOK AI 服務，並安全執行備份與升級。
+keywords:
+  [
+    "Trainingload.ai 自行託管",
+    "自行託管訓練應用程式",
+    "本機訓練資料",
+    "Docker Compose 部署",
+  ]
+---
+
+# 自行託管
+
+透過自行託管，你可以在自己的電腦或伺服器上使用 Trainingload.ai。你的活動紀錄、訓練計畫與上傳檔案皆保存在自有裝置上，並透過瀏覽器檢視與管理訓練。
+
+每個自行託管實例僅供單人使用，由你自行負責維護裝置、更新軟體與管理備份。如果你希望開啟應用程式就能直接開始使用，請先閱讀[自行託管與雲端版比較](/zh-hant/docs/self-host/self-host-vs-cloud)。
+
+## 支援功能
+
+- 匯入活動紀錄，並檢視活動詳情、時間軸與訓練負荷。
+- 在行事曆中安排訓練課表，並比較計畫與實際完成的訓練。
+- 上傳 FIT、GPX 或 TCX 檔案，或使用個人金鑰連接 Intervals.icu 與 Garmin Personal API。
+- 設定自己的 AI 服務以啟用智能教練，或將 AI 功能保持關閉。
+
+## 選擇起點
+
+<Cards>
+  <Card
+    title="自行託管與雲端版比較"
+    href="/zh-hant/docs/self-host/self-host-vs-cloud"
+    description="比較安裝設定、資料存放、活動匯入方式與 AI 費用。"
+  />
+  <Card
+    title="快速入門"
+    href="/zh-hant/docs/self-host/installation"
+    description="下載發行套件、安裝應用程式、建立本機帳號，並儲存第一份備份。"
+  />
+  <Card
+    title="設定實例"
+    href="/zh-hant/docs/self-host/configuration"
+    description="選擇本機資料路徑，並設定 OpenAI、DeepSeek 或其他相容的 AI 服務商。"
+  />
+  <Card
+    title="管理你的實例"
+    href="/zh-hant/docs/self-host/operations"
+    description="檢查健康狀態、檢視日誌，並安全執行備份、還原、升級與停止實例。"
+  />
+  <Card
+    title="疑難排解"
+    href="/zh-hant/docs/self-host/troubleshooting"
+    description="排解常見的啟動、連線與同步問題。"
+  />
+</Cards>
+
+## 連接 Garmin
+
+如果你持有 Garmin Personal API 金鑰，可以連接 Garmin 以匯入已完成活動並讀取可用的恢復資料。以下指南說明連接步驟與支援的資料項目。
+
+<Cards>
+  <Card
+    title="Garmin Personal API"
+    href="/zh-hant/docs/self-host/garmin-personal-api"
+    description="連接你的 Garmin Personal API 金鑰、同步活動，並讀取可用的恢復資料。"
+  />
+</Cards>
+
+## 安裝前的準備工作
+
+- 一台符合[安裝需求](/zh-hant/docs/self-host/installation)且已安裝 Docker Compose 的裝置。
+- 足以容納訓練資料與上傳檔案的磁碟空間。
+- 獨立於主機之外的備份存放位置，以便在裝置故障時進行還原。
+
+請使用官方提供、具明確版本號且經簽章的發行套件，並在安裝前依照指南完成驗證。你不需要自行編譯原始碼或組裝容器。Docker Compose 為目前支援的安裝方式。
+
+## 資料流向說明
+
+活動紀錄、訓練計畫與上傳檔案皆儲存在你的裝置上。連接第三方運動平台時，系統會依照你選擇的同步選項傳送或接收資料；使用外部 AI 服務時，僅會將該次請求所需的訓練資訊傳送給所選的服務商。
+
+AI 功能預設為關閉。若要啟用，請依照[設定指南](/zh-hant/docs/self-host/configuration)填入你自己的服務商 API 金鑰，API 使用費將由該服務商計費。
+
+## 下一步
+
+準備好安裝了嗎？請依照[安裝指南](/zh-hant/docs/self-host/installation)開始操作。如果仍在評估要採用哪種版本，請先閱讀[自行託管與雲端版比較](/zh-hant/docs/self-host/self-host-vs-cloud)。

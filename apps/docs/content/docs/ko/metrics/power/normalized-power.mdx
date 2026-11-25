@@ -1,71 +1,71 @@
 ---
-title: Normalized Power (NP)
-description: Normalized Power estimates the steady-power equivalent of a variable ride, helping calculate TSS, IF, and pacing variability.
-keywords: ["Normalized Power", "NP", "normalized power cycling", "TSS", "IF", "Training Stress Score", "Variability Index", "VI"]
+title: 정규화 파워 (NP)
+description: 정규화 파워(Normalized Power)는 변동이 큰 라이딩을 동일한 생리학적 비용의 일정 파워로 환산하여 TSS, IF, 페이싱 변동성 계산에 활용하는 지표입니다.
+keywords: ["정규화 파워", "Normalized Power", "NP", "사이클링 정규화 파워", "TSS", "IF", "훈련 스트레스 점수", "변동성 지수", "VI"]
 ---
 
-# Normalized Power (NP)
+# 정규화 파워 (NP)
 
-Normalized Power (NP) converts a variable power profile into a single equivalent steady intensity. Intuitively, it tries to answer:
+**정규화 파워(Normalized Power, NP)**는 변동이 심한 파워 출력을 하나의 등가 일정 강도로 환산한 지표입니다. 직관적으로는 다음 질문에 답하려는 개념입니다.
 
-- If I rode at a constant power with the same physiological cost, what constant power would that be?
+- 이번 라이딩과 똑같은 생리학적 부담을 일정한 파워로 탔다면 몇 와트였을까?
 
-Compared to average power, NP is more sensitive to high-intensity surges, making it useful for estimating training load (e.g., power-based TSS).
+단순 평균 파워와 달리 NP는 고강도 급가속(surge) 구간에 더 민감하게 반응하므로, 파워 기반 TSS 같은 훈련 부하 추정에 매우 유용합니다.
 
-## Why NP exists
+## NP가 필요한 이유
 
-Physiology shows that intensity and physiological cost (glycogen use, lactate accumulation, hormonal stress) are not linear; the cost rises disproportionately at higher intensities.
+운동 생리학에 따르면 운동 강도와 생리학적 비용(글리코겐 소모, 젖산 축적, 호르몬 스트레스)은 선형 관계가 아니며, 고강도로 갈수록 부담이 기하급수적으로 커집니다.
 
-### Linear vs. exponential
-- **Linear view (average power)**: riding 1 hour at 200 W has the same average as “30 min at 100 W + 30 min at 300 W” (both average to 200 W).
-- **Physiological view (NP)**: 300 W causes much more stress than 100 W “gives back”. The latter often feels closer to a steady ~260–270 W effort.
+### 선형 vs. 지수
+- **선형 관점 (평균 파워)**: 200 W로 1시간 일정하게 타는 것과 “100 W로 30분 + 300 W로 30분” 타는 것은 평균 파워가 똑같이 200 W입니다.
+- **생리학적 관점 (NP)**: 300 W 구간이 만드는 부담은 100 W 구간에서 회복되는 양보다 훨씬 큽니다. 후자의 실제 체감과 대사 비용은 약 260–270 W로 일정하게 탄 것에 더 가깝습니다.
 
-NP amplifies high-power segments via a **fourth-power weighting**, which is intended to better approximate metabolic cost than a simple average.
+NP는 **4제곱 가중치(fourth-power weighting)**로 고출력 구간을 강조함으로써 단순 평균보다 실제 대사 비용에 더 가깝게 근사합니다.
 
-## How Trainingload.ai computes NP
+## Trainingload.ai의 NP 계산 방식
 
-Trainingload.ai follows the common NP definition: compute a 30-second rolling average, raise to the 4th power, average, then take the 4th root.
+Trainingload.ai는 표준 NP 정의를 따릅니다. 30초 이동 평균을 구한 뒤 4제곱하여 평균을 내고, 마지막에 4제곱근을 취합니다.
 
 ```text
 P_smooth(t) = (1/30) * sum_{i=0..29} P(t-i)
 NP = 4th_root( (1/N) * sum_{j=1..N} (P_smooth(j))^4 )
 ```
 
-Where:
-- $P(t)$ is instantaneous power at time $t$
-- $P_{smooth}(t)$ is the 30-second rolling average at time $t$
-- $N$ is the number of samples
+각 기호의 의미는 다음과 같습니다.
+- $P(t)$: 시점 $t$에서의 순간 파워
+- $P_{smooth}(t)$: 시점 $t$에서의 30초 이동 평균 파워
+- $N$: 전체 샘플 수
 
-## Typical Use Cases
+## 주요 활용 사례
 
-### 1. Race analysis
-- **Criterium**: frequent accelerations often make NP much higher than average power. NP better reflects how hard the race was.
-- **Time trial / triathlon**: NP should be close to average power due to steadier pacing. If NP is much higher, pacing was likely too variable.
+### 1. 레이스 분석
+- **크리테리움(Criterium)**: 코너 탈출마다 반복되는 급가속 때문에 NP가 평균 파워보다 훨씬 높게 나타납니다. 이때 NP가 레이스의 실제 난이도를 훨씬 정확히 반영합니다.
+- **타임트라이얼(TT) / 트라이애슬론**: 일정한 페이싱이 핵심이므로 NP가 평균 파워에 가까워야 합니다. NP가 평균 파워보다 크게 높다면 페이싱 변동이 과도했다는 신호입니다.
 
-### 2. Training load (TSS)
-NP is a key input to [TSS (Training Stress Score)](/docs/metrics/training-load/training-stress-score).
+### 2. 훈련 부하 (TSS)
+NP는 [TSS(훈련 스트레스 점수)](/ko/docs/metrics/training-load/training-stress-score) 계산의 핵심 입력값입니다.
 
 ```text
 IF = NP / FTP
 TSS ∝ Duration_sec * NP * IF
 ```
 
-Using NP helps TSS capture the load of variable workouts (intervals) more realistically than average power alone.
+NP를 사용하면 인터벌처럼 강도 변동이 큰 워크아웃의 훈련 부하를 단순 평균 파워보다 훨씬 현실적으로 반영할 수 있습니다.
 
-> **Trainingload.ai advice**:
+> **Trainingload.ai 권장 사항**:
 >
-> 1. **Less meaningful for short durations**: below ~20 minutes, NP can be noisy because physiology may not reach a steady state. For sprint sessions, use max power, average power, and interval-level metrics instead.
-> 2. **Don’t “game” NP**: on recovery rides, don’t add sprints just to inflate NP. The goal is low intensity; NP should match the purpose of the session.
-> 3. **Check VI**: view it alongside [VI (Variability Index)](./variability-index): `VI = NP / Avg Power`. Higher VI means a more variable effort.
+> 1. **짧은 시간에서는 의미가 줄어듦**: 약 20분 미만의 짧은 활동에서는 신체가 정상 상태에 도달하지 않아 NP 노이즈가 커질 수 있습니다. 스프린트 세션은 최대 파워, 평균 파워, 인터벌 구간 지표로 평가하세요.
+> 2. **NP를 인위적으로 부풀리지 마세요**: 회복 라이딩에서 NP를 높이려고 중간에 스프린트를 섞지 마세요. NP는 세션의 목적에 부합해야 합니다.
+> 3. **VI와 함께 확인하세요**: [VI(변동성 지수)](./variability-index) = `NP / Avg Power`와 나란히 보세요. VI가 높을수록 출력 변동이 큰 라이딩이었다는 뜻입니다.
 
-## Limitations
+## 한계점
 
-- Depends on reliable power data: dropouts and device errors affect results.
-- Sensitive to windowing and sampling: different sampling rates/interpolation can slightly change NP.
-- Captures “cost intensity”, not fatigue directly: NP doesn’t directly equal recovery needs or muscle damage.
+- 신뢰할 수 있는 파워 데이터에 의존합니다. 신호 끊김(dropout)이나 기기 오류가 결과에 영향을 미칩니다.
+- 이동 창과 샘플링 방식에 민감합니다. 샘플링 주기나 보간 방식에 따라 NP가 소폭 달라질 수 있습니다.
+- “비용 강도”를 반영할 뿐 실제 피로를 직접 측정하지는 않습니다. NP 자체가 곧바로 회복 필요량이나 근육 손상 정도를 뜻하지는 않습니다.
 
-## Related docs
+## 관련 문서
 
-- [Variability Index](/docs/metrics/power/variability-index)
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
-- [Intensity Factor](/docs/metrics/training-load/intensity-factor)
+- [변동성 지수 (VI)](/ko/docs/metrics/power/variability-index)
+- [훈련 스트레스 점수 (TSS)](/ko/docs/metrics/training-load/training-stress-score)
+- [강도 계수 (IF)](/ko/docs/metrics/training-load/intensity-factor)

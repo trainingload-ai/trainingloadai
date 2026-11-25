@@ -1,83 +1,83 @@
 ---
-title: Aerobic Decoupling
-description: Aerobic decoupling compares output-to-heart-rate efficiency between the first and second half of a steady endurance session.
-keywords: ["Aerobic Decoupling", "Cardiac Drift", "Pw:Hr", "Pa:Hr", "EF", "Efficiency Factor", "Aerobic Endurance", "heart rate drift"]
+title: Disaccoppiamento aerobico
+description: "Il disaccoppiamento aerobico confronta l'efficienza tra lavoro esterno e frequenza cardiaca nella prima e nella seconda metà di una sessione di endurance a ritmo costante."
+keywords: ["Disaccoppiamento aerobico", "Deriva cardiaca", "Pw:Hr", "Pa:Hr", "EF", "Efficiency Factor", "Resistenza aerobica", "deriva della frequenza cardiaca"]
 ---
 
-# Aerobic Decoupling
+# Disaccoppiamento aerobico
 
-**Aerobic Decoupling** (also called **cardiac decoupling / cardiac drift**) measures whether the relationship between your heart rate and your power or pace changes during a steady effort.
+Il **disaccoppiamento aerobico** (noto anche come **disaccoppiamento cardiaco** o **deriva cardiaca**) misura se il rapporto tra la tua frequenza cardiaca e la tua potenza o il tuo passo cambia durante uno sforzo a intensità costante.
 
-## Core Concept: Coupling vs. Decoupling
+## Concetto chiave: accoppiamento vs. disaccoppiamento
 
-During a well-controlled steady endurance effort, your **input** (heart rate) and **output** (power or pace) should stay reasonably coupled. If the same output requires a higher heart rate later in the session, or the same heart rate produces less output, efficiency is drifting.
+Durante una sessione di endurance ben controllata a sforzo costante, l'**input** interno (la frequenza cardiaca) e l'**output** esterno (potenza o passo) dovrebbero restare ragionevolmente accoppiati. Se nella seconda parte dell'allenamento lo stesso output richiede una frequenza cardiaca più alta, oppure la stessa frequenza cardiaca produce meno output, la tua efficienza sta calando.
 
-During a long steady effort, we call it **Decoupling** if either of these happens:
-1.  **Heart rate drift**: power stays similar but heart rate gradually rises.
-2.  **Power/pace fade**: heart rate stays similar but power/pace gradually drops.
+Durante uno sforzo lungo e costante si parla di **disaccoppiamento** quando si verifica una di queste due situazioni:
+1.  **Deriva della frequenza cardiaca**: la potenza o il passo restano simili, ma la frequenza cardiaca sale progressivamente.
+2.  **Calo di potenza o passo**: la frequenza cardiaca resta simile, ma la potenza o il passo calano progressivamente.
 
-This can reflect fatigue, heat stress, dehydration, fueling issues, pacing that was too aggressive for the day, or data-quality problems.
+Questo fenomeno può riflettere fatica, stress da calore, disidratazione, errori di integrazione energetica, un passo iniziale troppo aggressivo per la giornata o problemi di qualità dei dati.
 
-Common interpretation:
+Interpretazione comune:
 
-- **Positive value**: aerobic efficiency decreases over time (often due to fatigue, heat/dehydration, poor fueling, or going too hard)
-- **Typical range**: often **0% - 10%** (implementations, environment, and data quality vary by platform)
-- **Best use case**: long, **steady** efforts (endurance / steady-state segments). Very short or highly variable efforts are less meaningful.
+- **Valore positivo**: l'efficienza aerobica diminuisce nel tempo (spesso a causa di fatica, caldo/disidratazione, alimentazione insufficiente o partenza troppo forte).
+- **Intervallo tipico**: spesso **0% - 10%** (implementazione, condizioni ambientali e qualità del segnale variano da piattaforma a piattaforma).
+- **Caso d'uso migliore**: sforzi lunghi e **costanti** (segmenti di endurance / stato stazionario). Sessioni molto brevi o fortemente variabili sono molto meno significative.
 
-## Calculation Formula
+## Formula di calcolo
 
-The logic involves taking a steady-state workout (excluding warm-up) and splitting it **in half**:
+La logica consiste nel prendere un allenamento a sforzo costante (escluso il riscaldamento) e dividerlo **a metà**:
 
-1.  Calculate the Efficiency Factor ($EF_1$) for the **first half**.
-2.  Calculate the Efficiency Factor ($EF_2$) for the **second half**.
+1.  Calcola l'Efficiency Factor ($EF_1$) della **prima metà**.
+2.  Calcola l'Efficiency Factor ($EF_2$) della **seconda metà**.
 
-Here, **EF / AE (Aerobic Efficiency)** is essentially “output / heart rate”:
+Qui **EF / AE (Aerobic Efficiency)** rappresenta essenzialmente il rapporto «output / frequenza cardiaca»:
 
-- **Pw:Hr**: using power as output, $EF = \frac{Power}{HR}$
-- **Pa:Hr**: using speed as output, $EF = \frac{Speed}{HR}$
+- **Pw:Hr**: usando la potenza come output, $EF = \frac{Power}{HR}$
+- **Pa:Hr**: usando la velocità come output, $EF = \frac{Speed}{HR}$
 
 $$
 Pw:Hr[\%] / Pa:Hr[\%] = \frac{AE_1 - AE_2}{AE_1} \times 100\%
 $$
 
-Usually expressed as the percentage change of **Pw:Hr** or **Pa:Hr**.
+Di solito si esprime come variazione percentuale di **Pw:Hr** o **Pa:Hr**.
 
-## Common Reference: The 5% Rule
+## Riferimento comune: la regola del 5%
 
-According to **Joe Friel**, **5%** is often used as a practical reference point:
+Secondo **Joe Friel**, il **5%** viene spesso utilizzato come riferimento pratico:
 
-| Decoupling | Level | Meaning & Suggestion |
+| Disaccoppiamento | Livello | Significato e suggerimento |
 | :--- | :--- | :--- |
-| **< 5%** | **Stable** | Efficiency stayed fairly stable for this duration and intensity. This is a positive sign for aerobic durability. |
-| **5% - 10%** | **Moderate drift** | Fatigue, heat, fueling, terrain, or pacing may be affecting the second half. Compare with similar sessions before changing the plan. |
-| **> 10%** | **High drift** | The session may have been too long, too hard, too hot, or poorly fueled for the current state. Treat it as a signal to review context. |
+| **< 5%** | **Stabile** | L'efficienza è rimasta piuttosto stabile per questa durata e intensità. È un segnale positivo per la tua durabilità aerobica. |
+| **5% - 10%** | **Deriva moderata** | Fatica, caldo, alimentazione, terreno o gestione del passo possono aver inciso sulla seconda metà. Confronta la sessione con allenamenti simili prima di modificare il piano di allenamento. |
+| **> 10%** | **Deriva elevata** | La sessione potrebbe essere stata troppo lunga, troppo intensa, troppo calda o poco supportata sul piano nutrizionale per il tuo stato attuale. Consideralo un segnale per verificare il contesto. |
 
-## Practical Guide: How to Test?
+## Guida pratica: come effettuare il test?
 
-Don’t rely on random workouts. Use a structured **Aerobic Threshold Test**:
+Non affidarti ad allenamenti casuali. Esegui un **test di soglia aerobica** strutturato:
 
-1.  **Intensity**: strictly stay in **Zone 2** (aerobic endurance).
-    -   Power/pace: 65–75% FTP / FTPa.
-    -   Heart rate: below AeT (Aerobic Threshold), often LTHR minus 20–30 bpm.
-2.  **Duration**:
-    -   Olympic / Half marathon target: 1–1.5 hours.
-    -   Ironman / Ultramarathon target: 2–4 hours.
-3.  **Environment**: flat terrain or trainer; stay hydrated (avoid pseudo-decoupling caused by dehydration).
+1.  **Intensità**: resta rigorosamente in **Zona 2** (resistenza aerobica).
+    -   Potenza/passo: 65–75% FTP / FTPa.
+    -   Frequenza cardiaca: sotto la soglia aerobica (AeT), spesso pari a LTHR meno 20–30 bpm.
+2.  **Durata**:
+    -   Obiettivo olimpico / mezza maratona: 1–1,5 ore.
+    -   Obiettivo Ironman / ultramaratona: 2–4 ore.
+3.  **Ambiente**: percorso pianeggiante o rulli; mantieni una buona idratazione (per evitare un falso disaccoppiamento causato dalla disidratazione).
 
-## How Trainingload.ai uses aerobic decoupling
+## Come Trainingload.ai utilizza il disaccoppiamento aerobico
 
--   **Long-session quality check**: after steady long runs or rides, decoupling helps show whether aerobic efficiency held up.
--   **Context-aware review**: Trainingload.ai reads high decoupling alongside heat, elevation, pace/power variability, fueling, and recent load before treating it as a warning.
--   **Base training feedback**: repeated low decoupling in similar sessions can support the case that aerobic durability is improving.
--   **Not for every workout**: intervals, races with surges, hilly routes, and very short sessions can produce noisy decoupling values.
+-   **Controllo qualità delle sessioni lunghe**: dopo un lungo di corsa o un'uscita costante in bici, il disaccoppiamento aiuta a capire se la tua efficienza aerobica ha retto fino in fondo.
+-   **Valutazione contestuale**: Trainingload.ai legge un disaccoppiamento elevato insieme a caldo, dislivello, variabilità di passo/potenza, integrazione e carico recente prima di considerarlo un campanello d'allarme.
+-   **Feedback sul periodo di base**: valori di disaccoppiamento ripetutamente bassi in sessioni simili confermano che la tua durabilità aerobica sta migliorando.
+-   **Non adatto a ogni allenamento**: ripetute, gare con cambi di ritmo, percorsi collinari e uscite molto brevi producono valori di disaccoppiamento rumorosi.
 
-## Related docs
+## Documentazione correlata
 
-- [Efficiency Factor (EF)](/docs/metrics/heart-rate/efficiency-factor)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Pace Zones](/docs/metrics/pace/zones)
+- [Efficiency Factor (EF)](/it/docs/metrics/heart-rate/efficiency-factor)
+- [Zone di frequenza cardiaca](/it/docs/metrics/heart-rate/zones)
+- [Zone di passo](/it/docs/metrics/pace/zones)
 
-## References
+## Riferimenti
 
 -   [Joe Friel: Are You Fit? All About Aerobic Endurance and Decoupling](https://www.trainingpeaks.com/blog/aerobic-endurance-and-decoupling/)
 -   [Joe Friel: Efficiency Factor and Decoupling](https://www.trainingpeaks.com/blog/efficiency-factor-and-decoupling/)

@@ -1,0 +1,16 @@
+---
+title: Claude Desktop 연결
+description: Claude Desktop의 Connectors에서 TrainingLoad MCP를 연결합니다.
+---
+
+# Claude Desktop 연결
+
+1. **Customize → Connectors**를 열고 **Add**를 누른 뒤 **Add custom connector**를 선택합니다. Team 및 Enterprise 워크스페이스에서는 소유자가 조직 커넥터 설정에 먼저 추가해야 할 수 있습니다.
+2. 이름에 `TrainingLoad`, URL에 `https://api.trainingload.ai/mcp`를 입력합니다.
+3. **Connect**를 선택하고 브라우저에서 TrainingLoad OAuth를 완료합니다.
+4. 새 대화를 시작한 뒤 Search and tools에서 TrainingLoad를 활성화합니다.
+5. 다음과 같이 질문하세요: “다음 주 예정된 워크아웃 목록을 보여 주고 현재 내 훈련 상태 맥락을 함께 설명해 주세요.”
+
+커넥터는 존재하지만 새 도구가 보이지 않는다면 연결을 해제했다가 다시 연결해 카탈로그를 새로고침하세요. 로컬 stdio 설정은 사용하지 마세요. TrainingLoad는 원격 HTTP 서비스입니다.
+
+[공식 Claude 커스텀 커넥터 가이드](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)

@@ -1,14 +1,14 @@
 ---
 title: Form (TSB)
-description: So berechnet Trainingload.ai die Form (TSB) aus Fitness und Ermüdung desselben Tages, ohne den Wert mit Wettkampfbereitschaft gleichzusetzen.
-keywords: ["Form", "Training Stress Balance", "TSB", "TSB Formel", "Belastungsbalance"]
+description: Erfahre, wie Trainingload.ai Form (TSB) aus Fitness und Ermüdung desselben Tages berechnet und wie du die Belastungsbalance nutzt, ohne sie mit Wettkampfbereitschaft zu verwechseln.
+keywords: ["Form", "Training Stress Balance", "TSB", "TSB Formel", "Belastungsbalance", "TSB lesen"]
 ---
 
-# Was bedeutet Form (TSB)?
+# Was ist Form (TSB)?
 
-**Form (TSB)** beziehungsweise Training Stress Balance ist die Differenz aus Fitness (CTL) und Ermüdung (ATL). Sie zeigt, wie die schnell reagierende kurzfristige Belastung zur langsameren langfristigen Belastung steht.
+**Form (TSB)** – kurz für Training Stress Balance – ist die Differenz zwischen Fitness (CTL) und Ermüdung (ATL). Sie zeigt, wo deine schnell reagierende kurzfristige Belastung im Vergleich zum langsameren langfristigen Belastungsmodell steht.
 
-TSB ist ein abgeleiteter Modellwert und misst Bereitschaft, Erholung, Gesundheit oder Leistung nicht direkt.
+„Form“ ist dabei eine leicht verständliche Bezeichnung für die Oberfläche. TSB wird aus zwei modellierten Belastungskurven abgeleitet und ist keine direkte Messung von Bereitschaft, Erholung, Gesundheit oder Leistungsfähigkeit.
 
 <div className="my-6 max-w-sm w-full mx-auto">
   <TsbStatPreviewCard
@@ -17,34 +17,61 @@ TSB ist ein abgeleiteter Modellwert und misst Bereitschaft, Erholung, Gesundheit
     valuePopoverTitle="TSB-Wert"
     valuePopoverBody="Trainingload.ai zieht die Ermüdung (ATL) desselben Tages von der Fitness (CTL) desselben Tages ab."
     rangePopoverTitle="TSB-Kontext"
-    rangePopoverBody="Vorzeichen und Höhe beschreiben die Beziehung zweier Belastungsmodelle, keine allgemeingültigen Bereitschaftszonen."
+    rangePopoverBody="Positive und negative Werte beschreiben das Verhältnis zwischen kurz- und langfristiger modellierter Belastung; es sind keine allgemeingültigen Bereitschaftszonen."
     helpTitle="Belastungsbalance"
-    details="Vergleiche beide Kurven und prüfe anschließend Aktivitäten, Leistung und subjektives Befinden."
+    details="Nutze TSB, um beide Belastungskurven zu vergleichen, und prüfe anschließend Aktivitäten, Leistung und dein subjektives Befinden."
   />
 </div>
 
+_Die Beispielwerte dienen nur der Vorschau der Oberfläche._
+
+## Woher der Wert stammt
+
+TSB hat keine eigene Aktivitätseingabe. Trainingload.ai berechnet zuerst die tagesaktuelle CTL mit einer 42-Tage-Zeitkonstante und die tagesaktuelle ATL mit einer 7-Tage-Zeitkonstante aus derselben Reihe täglicher Belastungen. Jede Aktivitäts-, Schwellenwert- oder Quellenänderung, die eine der beiden Kurven bewegt, verändert daher auch den TSB.
+
+TSB nutzt dieselbe modellierte Belastungsskala wie CTL und ATL. Es handelt sich weder um einen Prozentsatz noch um eine physiologische Einheit.
+
 ## Formel
+
+Trainingload.ai folgt der Tageswert-Konvention von Intervals.icu:
 
 ```text
 TSB_today = CTL_today − ATL_today
 ```
 
-Bei CTL 50 und ATL 65 beträgt TSB `−15`. Trainingload.ai folgt damit der Tageswert-Konvention von Intervals.icu. TrainingPeaks beschreibt die heutige Form dagegen öffentlich als gestrige Fitness minus gestrige Ermüdung. Plattformwerte sind deshalb nur bei gleicher Datumskonvention, Zeitkonstante und Belastungsquelle vergleichbar.
+Liegt deine heutige CTL zum Beispiel bei 50 und deine ATL bei 65, beträgt dein TSB `50 − 65 = −15`.
 
-## Interpretation und Grenzen
+Nicht alle Plattformen nutzen dieselbe Datumskonvention. Intervals.icu zieht die heutige ATL von der heutigen CTL ab, während TrainingPeaks die heutige Form öffentlich als gestrige Fitness minus gestrige Ermüdung beschreibt. Prüfe vor einem Plattformvergleich immer Datumskonvention, Zeitkonstanten und Belastungsquelle.
 
-- **Negativ:** ATL liegt über CTL; die jüngste modellierte Belastung ist höher als das langfristige Niveau.
-- **Nahe null:** Beide Kurven liegen nah beieinander; das beweist kein physiologisches Gleichgewicht.
-- **Positiv:** ATL liegt unter CTL.
+## Form richtig lesen
 
-Im Belastungsaufbau fällt TSB häufig, in Ruhe- und Taperphasen steigt der Wert meist. Das Vorzeichen schreibt nicht vor, wie sich die Person fühlen muss. Universelle „Peak-“ oder „Risikozonen“ sollten nicht als Sicherheitsgrenzen verwendet werden.
+- **Negativer TSB:** ATL liegt über CTL; die kurzfristige modellierte Belastung ist höher als das langsamere Langzeitniveau.
+- **TSB nahe null:** Beide Belastungskurven liegen eng beieinander; das beweist kein physiologisches Gleichgewicht.
+- **Positiver TSB:** ATL liegt unter CTL; die kurzfristige modellierte Belastung ist niedriger als das langsamere Langzeitniveau.
 
-TSB ist am aussagekräftigsten zusammen mit [Fitness (CTL)](/de/docs/metrics/pmc/chronic-training-load), [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load), den zugrunde liegenden Aktivitäten, Leistungstrends und subjektivem Befinden.
+Steigt die Belastung, klettert ATL meist schneller als CTL und der TSB sinkt. In Ruhephasen oder beim Tapering fällt ATL schneller ab und der TSB steigt. Das Vorzeichen beschreibt ein reines Belastungsverhältnis – nicht, wie du dich fühlen musst.
+
+## Nutzen und Grenzen
+
+TSB hilft dir zu prüfen, ob ein Aufbau-, Erholungs- oder Taperblock das Verhältnis zwischen kurz- und langfristiger Belastung wie geplant verschoben hat. Am aussagekräftigsten ist er im Vergleich mit deinen eigenen ähnlichen Trainingsphasen aus der Vergangenheit.
+
+TSB allein kann weder Wettkampfbereitschaft belegen, einen negativen Wert als gefährlich oder einen positiven Wert als optimal einstufen, Ruhetage verordnen noch Schmerzen oder Krankheiten erklären.
+
+Jage keinen universellen „Peak-“, „Optimal-“ oder „Hochrisiko“-Bereichen hinterher. Solche Grenzen hängen von Belastungsmethode, Sportart, Trainingshistorie, individueller Reaktion und Datenqualität ab. Betrachte [Fitness (CTL)](/de/docs/metrics/pmc/chronic-training-load), [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load), die zugrunde liegenden Aktivitäten, Leistungstrends und dein subjektives Befinden immer gemeinsam.
 
 ## Quellen
 
-- [Intervals.icu: Tageswert-Konvention für Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
-- [RUNALYZE: Training Stress Balance](https://runalyze.com/glossary/tsb)
+- [Intervals.icu: Entwicklererklärung zur Tageswert-Konvention für Form](https://forum.intervals.icu/t/done-horisontal-line-in-trainingload/292/9)
+- [RUNALYZE-Glossar: Training Stress Balance (TSB)](https://runalyze.com/glossary/tsb)
 - [TrainingPeaks: Performance Management Chart](https://www.trainingpeaks.com/learn/articles/what-is-the-performance-management-chart/)
 - [GoldenCheetah-Quellcode: PMCData.cpp](https://github.com/GoldenCheetah/GoldenCheetah/blob/master/src/Metrics/PMCData.cpp)
-- [Calvert et al. (1976)](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Calvert et al. (1976): A Systems Model of the Effects of Training on Physical Performance](https://doi.org/10.1109/TSMC.1976.5409179)
+- [Clarke und Skiba (2013): Mathematical modeling of athletic training and performance](https://doi.org/10.1152/advan.00078.2011)
+
+## Verwandte Seiten
+
+- [Fitness (CTL)](/de/docs/metrics/pmc/chronic-training-load)
+- [Ermüdung (ATL)](/de/docs/metrics/pmc/acute-training-load)
+- [CTL, ATL und TSB aus täglichem TSS vorausberechnen](/de/training-load-calculator)
+- [PMC für Marathon-Anpassungen nutzen](/de/docs/guide/pmc-marathon-adjustment)
+- [Workflow zur Trainingsanalyse](/de/docs/guide/training-analysis-workflow)

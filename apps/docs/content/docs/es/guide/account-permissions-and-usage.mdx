@@ -1,0 +1,209 @@
+---
+title: Cuenta, permisos, exportaciones y uso de IA
+description: Verifica la seguridad de tu cuenta, gestiona permisos y conexiones, exporta tus datos, revisa tu suscripción y consumo de IA, y elimina una cuenta de forma segura.
+keywords:
+  [
+    "cuenta de Trainingload.ai",
+    "permisos móviles",
+    "uso de IA",
+    "cambiar contraseña",
+    "actualizaciones automáticas de umbrales",
+    "exportar datos de Trainingload",
+    "eliminar cuenta de Trainingload",
+  ]
+---
+
+# Cuenta, permisos, exportaciones y uso de IA
+
+Los ajustes de la cuenta controlan tu identidad y el acceso; los permisos determinan qué datos del dispositivo y de plataformas externas pueden entrar en Trainingload.ai; y el uso explica tu suscripción y consumo de IA. Revísalos juntos al configurar un dispositivo nuevo o al investigar por qué falta una función.
+
+Esta página cubre las cuentas en la nube (Cloud). El despliegue en servidor propio utiliza una cuenta personal local; consulta [Configuración de servidor propio](/es/docs/self-host/configuration) para ver sus ajustes.
+
+## Antes de empezar
+
+- Inicia sesión en la misma cuenta de Trainingload.ai en la web y en el móvil.
+- Mantén acceso al correo electrónico de tu cuenta para recibir códigos de verificación.
+- En el móvil, comprueba si el sistema operativo ya denegó el acceso a Salud o Ubicación.
+- Decide qué umbrales pueden actualizarse automáticamente antes de activar cualquier interruptor.
+- No compartas códigos de verificación, contraseñas, credenciales de conexión ni capturas de pantalla con identificadores privados de tu cuenta.
+
+## 1. Verifica tu identidad y el estado de la contraseña
+
+En la web, abre **Cuenta**. En el móvil, abre **Yo → Menú → Cuenta**.
+
+Podrás revisar:
+
+- Nombre visible.
+- Correo electrónico de la cuenta y estado de verificación.
+- Si tienes una contraseña configurada.
+
+El campo del correo actual es de solo lectura. Si la cuenta aún no está verificada, solicita un código de verificación de seis dígitos e introdúcelo antes de que caduque. En la web, un código enviado es válido durante cinco minutos y no puede reenviarse mientras la cuenta atrás esté activa.
+
+Usa **Establecer contraseña** si la cuenta aún no tiene contraseña, o **Cambiar contraseña** si ya existe una. Una cuenta creada con OAuth puede indicar que todavía no tiene contraseña; utiliza la acción de contraseña que aparezca en pantalla en lugar de pensar que la cuenta tiene un fallo.
+
+### Recupera el acceso y completa el inicio de sesión
+
+Desde la página de inicio de sesión, usa **¿Olvidaste tu contraseña?** para solicitar un correo de restablecimiento. Abre solo el enlace más reciente, comprueba que te devuelve a la pantalla de restablecimiento de Trainingload.ai y establece allí tu nueva contraseña. Un token caducado, mal formado o ya usado debe sustituirse solicitando un nuevo correo.
+
+El inicio de sesión con OAuth puede pasar por una pantalla de finalización o de error antes de volver a la aplicación. Si la pantalla de finalización no redirige, vuelve a Iniciar sesión e inténtalo una vez más; si aparece una página de error, anota el mensaje visible sin compartir tokens ni la URL completa de retorno.
+
+Cuando otra aplicación solicita acceso a Trainingload.ai, la pantalla de consentimiento OAuth muestra la aplicación solicitante, la cuenta con sesión iniciada, los permisos (scopes) solicitados y la dirección de retorno. Aprueba la solicitud solo si los cuatro datos coinciden con lo que esperas. Denegar el consentimiento devuelve el control sin conceder el acceso solicitado.
+
+<DocsScreenshot
+  id="account-security-status"
+  title="Identidad y estado de seguridad de la cuenta"
+  description="Confirma el correo electrónico, la insignia de verificación y el estado de la contraseña antes de cambiar conexiones o ajustes de suscripción."
+  route="Cuenta → Identidad y seguridad"
+/>
+
+## 2. Revisa los permisos móviles y las fuentes de datos [#2-review-mobile-permissions-and-data-sources]
+
+Abre **Yo → Menú → Autorización de datos** o la página móvil de **Permisos**. Las fuentes se dividen en fuentes locales del dispositivo y servicios de terceros.
+
+Las fuentes locales incluyen:
+
+- **Salud**: autoriza la lectura de datos de salud y sesiones compatibles, comprueba si el permiso es completo o parcial, solicita una sincronización histórica, gestiona dispositivos conectados o abre los ajustes de Salud del sistema.
+- **Ubicación**: permite grabar rutas o abre los ajustes del sistema si el permiso se denegó anteriormente.
+
+Las fuentes de terceros pueden incluir Strava, Polar, COROS, Suunto, Wahoo e Intervals.icu. Cada fila muestra su estado actual. Abre una fuente para conectarla, revisar sus ajustes específicos o ir a la página de conexiones.
+
+<DocsScreenshot
+  id="mobile-permission-sources"
+  title="Permisos móviles y fuentes de conexión"
+  description="Los permisos del dispositivo y las conexiones con plataformas se gestionan por separado. Este ejemplo muestra Ubicación y plataformas de entrenamiento; abre una fuente para ver sus acciones disponibles."
+  route="Yo → Menú → Autorización de datos"
+  platform="mobile"
+/>
+
+El permiso del dispositivo y la conexión con el servidor son estados independientes. Salud puede estar autorizado en el sistema operativo mientras la conexión del dispositivo en Trainingload.ai todavía necesita reconectarse. Vuelve a abrir el detalle de la fuente al regresar de los ajustes del sistema para que la aplicación actualice ambos estados.
+
+## 3. Controla las actualizaciones automáticas de métricas
+
+Abre **Cuenta → Actualización automática** en la web o en el móvil. Cada interruptor autoriza actualizaciones para una métrica:
+
+| Grupo               | Métricas          |
+| ------------------- | ----------------- |
+| Potencia            | FTP, CP, W′, Pmax |
+| Ritmo               | TP, CS            |
+| Frecuencia cardíaca | LTHR, FC máx.     |
+
+Activa solo las métricas que quieras que Trainingload.ai actualice a partir de evidencia válida. Activar un interruptor no garantiza que haya un valor nuevo de inmediato; el sistema sigue necesitando suficientes datos de actividades compatibles.
+
+Las actualizaciones automáticas pueden cambiar los umbrales usados en zonas, gráficas, sesiones estructuradas e interpretación de la carga de entrenamiento. Después de una actualización, revisa el historial de la métrica y una actividad reciente antes de comparar periodos antiguos y nuevos.
+
+## 4. Revisa tu suscripción y el consumo de IA
+
+La tarjeta de suscripción en Cuenta muestra:
+
+- Plan actual y estado activo.
+- Periodo de suscripción o fecha de vencimiento.
+- Origen de facturación.
+- Si hay una cancelación programada al final del periodo.
+
+Solo una suscripción activa procedente de un origen de facturación compatible muestra la acción de gestión dentro de la aplicación. Otros orígenes de acceso pueden mostrar el estado de suscripción sin los mismos controles de gestión.
+
+Abre **Uso** desde la tarjeta de suscripción o el área de cuenta en el móvil. La página muestra:
+
+- Plan actual.
+- Créditos disponibles, incluido un saldo negativo si la última operación completada superó el saldo anterior.
+- Créditos mensuales de suscripción usados, restantes y fecha de caducidad.
+- Saldo de paquetes de créditos disponibles o bloqueados por suscripción y su caducidad más próxima.
+- Saldo pendiente, tendencias de consumo, número de operaciones y entradas individuales del registro.
+
+Elige entre 1 día, 7 días, 30 días, mes actual o mes anterior. Las entradas del registro identifican operaciones en modo Estándar (1×), Profundo (3×), modo mixto, asignaciones de suscripción, paquetes de créditos, regalos, reembolsos y compensaciones de saldo pendiente. Un crédito equivale a 1.000 tokens equivalentes tras aplicar los multiplicadores de entrada en caché, entrada sin caché, salida, modo y multiplicador global; no equivale a un número fijo de mensajes.
+
+<DocsScreenshot
+  id="ai-usage-ledger"
+  title="Resumen y registro de uso de IA"
+  description="Compara el plan, las asignaciones restantes, el consumo del periodo, las tendencias del rango seleccionado y el registro detallado de movimientos."
+  route="Cuenta → Uso"
+/>
+
+## 5. Configura las preferencias de la aplicación
+
+Abre **Ajustes** en la web para elegir:
+
+- tema claro, oscuro o del sistema;
+- unidades métricas o imperiales;
+- comportamiento del eje X en las gráficas;
+- formato horario de 12 o 24 horas;
+- idioma preferido de la interfaz.
+
+Estos controles mantienen un valor temporal hasta que pulsas **Guardar**. Cambiar el idioma también redirige la ruta actual al idioma seleccionado y guarda la preferencia para visitas posteriores. Las unidades y el formato de hora afectan a la presentación; no reescriben el registro original de la actividad.
+
+## 6. Exporta los datos de tu cuenta
+
+En la web, abre **Cuenta → Exportación de datos**. Elige el tipo de exportación adecuado para tu objetivo:
+
+- **Análisis con IA** genera un paquete compacto orientado al análisis y no incluye los archivos originales subidos.
+- **Copia de seguridad completa** genera un archivo más amplio y puede incluir los archivos originales si conservas la ubicación exacta.
+
+Elige cómo tratar las ubicaciones de las rutas antes de solicitar la exportación:
+
+- ocultar ubicaciones visitadas con frecuencia;
+- eliminar datos GPS;
+- conservar ubicaciones exactas.
+
+Incluir los archivos originales obliga a conservar ubicaciones exactas, ya que esos archivos pueden contener sus propios datos de localización. Trata una exportación con ubicaciones exactas como información sensible y no la subas a un servicio de IA ni la compartas con terceros si no sabes exactamente qué contiene el archivo.
+
+La creación de la exportación es asíncrona. Mantén la página abierta o vuelve más tarde, actualiza el trabajo más reciente y descarga el archivo solo cuando su estado sea **Lista**. La página muestra el tamaño del archivo y su fecha de caducidad. Los trabajos listos, fallidos o caducados se pueden eliminar de la lista.
+
+## 7. Elimina una cuenta de forma segura
+
+La eliminación de la cuenta es permanente y asíncrona. Antes de iniciarla en el móvil:
+
+1. Exporta todo lo que necesites conservar.
+2. Revisa la suscripción y el proveedor de facturación mostrados.
+3. Cancela la renovación si el proceso lo requiere.
+4. Lee y marca todas las confirmaciones finales.
+5. Envía la solicitud de eliminación y espera a que aparezca la pantalla de aceptación antes de salir del flujo.
+
+La solicitud cierra tu sesión y revoca el acceso activo mientras la eliminación continúa en segundo plano. Por lo general se completa en 24 horas y puede tardar hasta 7 días. La pantalla de aceptación vuelve a Iniciar sesión; eso no significa que la cuenta anterior pueda restaurarse.
+
+La gestión de la suscripción depende del origen de facturación activo. Es posible que debas cancelar una renovación facturada por web antes de continuar con la eliminación. La renovación mediante Apple se gestiona a través de Apple y puede seguir activa tras eliminar la cuenta de Trainingload.ai si no la cancelas por separado. Eliminar la cuenta no garantiza por sí mismo un reembolso, ni contratar una suscripción posterior recupera los datos eliminados.
+
+## 8. Verifica los ajustes entre dispositivos
+
+Después de cambiar ajustes de cuenta, conexiones, permisos o actualización automática:
+
+1. Guarda o completa la acción en el dispositivo actual.
+2. Vuelve a la lista de fuentes y confirma el estado mostrado.
+3. Actualiza el otro dispositivo.
+4. Confirma que ambos muestran el mismo correo electrónico y los ajustes sincronizados con el servidor.
+5. En el caso de permisos locales, comprueba el estado en el sistema operativo del dispositivo donde los concediste; los permisos locales no se transfieren a otro teléfono.
+
+## Verifica la configuración
+
+- Las sesiones web y móvil muestran el mismo correo electrónico de cuenta.
+- El estado de verificación del correo y de la contraseña coincide con el método de inicio de sesión previsto.
+- Salud y Ubicación muestran el estado esperado en el dispositivo.
+- Las plataformas de terceros muestran el estado de conexión con el servidor esperado.
+- Solo están activados los interruptores de actualización automática de métricas que deseas.
+- El estado de la suscripción y el registro de Uso coinciden con las asignaciones o acciones de IA recientes.
+- Una exportación solicitada pasa a estado Lista, se descarga correctamente antes de caducar y refleja la opción de privacidad de ubicación elegida.
+- Los ajustes de tema, unidades, gráficas, formato horario e idioma se mantienen al volver a abrir Ajustes.
+
+## Solución de problemas
+
+- **El código de verificación no funciona:** introduce los seis dígitos, confirma el correo electrónico, comprueba si caducó y solicita un código nuevo solo cuando el botón de reenvío vuelva a estar disponible.
+- **No puedo editar el correo electrónico:** el cambio de correo no está disponible en la interfaz actual de Cuenta; el campo es de solo lectura de forma intencionada.
+- **Salud está autorizado pero no conectado:** vuelve a abrir Salud, revisa el estado de conexión entre app, servidor y dispositivo, y usa la opción de reconectar si aparece.
+- **Ubicación sigue denegada:** abre los ajustes de la aplicación en el sistema operativo; un permiso denegado previamente puede no volver a mostrar el aviso del sistema.
+- **Una plataforma aparece desconectada tras OAuth:** actualiza el estado de la fuente, comprueba que usas la misma cuenta de Trainingload.ai y revisa los ajustes específicos de la plataforma.
+- **Una métrica automática no cambió:** comprueba que el interruptor esté activado y que las actividades recientes válidas incluyan datos compatibles suficientes.
+- **Uso aparece vacío:** selecciona un rango de fechas más amplio y comprueba que la cuenta tenga asignaciones o consumos de IA.
+- **No puedo gestionar la suscripción en la app:** la gestión solo se muestra para orígenes de suscripción activos compatibles; verifica el origen de facturación indicado.
+- **No se puede iniciar una exportación:** espera a que termine el trabajo de exportación en curso, actualiza la página e inténtalo de nuevo.
+- **Una exportación ha caducado:** elimina el trabajo caducado y solicita un archivo nuevo con las opciones de privacidad necesarias.
+- **La eliminación de la cuenta está bloqueada por una suscripción:** sigue el paso de renovación del proveedor indicado en el flujo de eliminación y actualiza su estado. En facturación con Apple, cancela la renovación por separado desde Apple.
+- **Se rechazó un enlace de restablecimiento:** solicita un correo nuevo y abre su enlace más reciente; no reutilices un token ya consumido o caducado.
+- **El consentimiento OAuth parece extraño:** deniega la solicitud y comprueba la aplicación solicitante, los permisos, la cuenta y el destino de retorno antes de volver a intentarlo.
+- **Una preferencia parece no haberse guardado:** pulsa Guardar y vuelve a abrir Ajustes; las preferencias visuales locales y el idioma almacenado en el servidor pueden refrescarse en momentos distintos.
+
+## Próximos pasos
+
+- [Conectar datos](/es/docs/guide/connect-data)
+- [Integraciones](/es/docs/guide/integrations)
+- [Perfil, umbrales y zonas](/es/docs/guide/profile-thresholds-zones)
+- [Grabación móvil](/es/docs/guide/mobile-recording)
+- [Notificaciones y revisiones automáticas](/es/docs/guide/notifications-and-reviews)

@@ -1,0 +1,18 @@
+---
+title: 連線 ChatGPT
+description: 在 ChatGPT 中將 TrainingLoad 新增為自訂 MCP 伺服器並完成 OAuth 授權。
+---
+
+# 連線 ChatGPT
+
+1. 在 ChatGPT 中開啟 **Plugins**，點選加號按鈕，再選擇 **Add custom MCP server**。若您的工作區需要啟用開發者模式（developer mode），請先依管理員政策開啟。
+2. 名稱填入 `TrainingLoad`，伺服器 URL 填入 `https://api.trainingload.ai/mcp`。
+3. 掃描工具後選擇 **Connect**，ChatGPT 會在瀏覽器中開啟 TrainingLoad OAuth 授權頁面。
+4. 確認用戶端名稱與唯讀權限範圍後核准授權。
+5. 開啟新對話並啟用 TrainingLoad，接著提問：「摘要我目前的訓練狀態，並列出所使用的工具與日期範圍。」
+
+首次呼叫應為 `get_training_snapshot`。之後若要讀取健康資料，可於對話中請求 `get_health_summary` 以觸發獨立的 `health:read` 授權同意。
+
+若工具清單未更新，請在對話中移除並重新啟用 TrainingLoad。若 OAuth 授權失敗，請從 TrainingLoad 帳號中撤銷舊連線後再重新連線。
+
+[ChatGPT 官方 MCP 指南](https://developers.openai.com/plugins/build/app-quickstart)

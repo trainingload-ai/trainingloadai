@@ -1,0 +1,21 @@
+---
+title: Claude Code verbinden
+description: Verbinde TrainingLoad über die Remote-HTTP-MCP-Unterstützung von Claude Code.
+---
+
+# Claude Code verbinden
+
+Füge den Server für deinen aktuellen Benutzer projektübergreifend hinzu:
+
+```bash
+claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp
+claude mcp list
+```
+
+Lasse `--scope user` weg, wenn die Verbindung nur im aktuellen Projekt gelten soll. Führe in Claude Code `/mcp` aus, wähle TrainingLoad und schließe die OAuth-Autorisierung im Browser ab.
+
+Überprüfe die Verbindung mit: „Vergleiche meine zwei letzten 28-Tage-Trainingsblöcke und kennzeichne, welche Schlussfolgerungen Interpretation sind.“ Dabei sollte `compare_training_periods` genutzt werden, und Detail-Tools nur bei Bedarf folgen.
+
+Bleibt die Verbindung getrennt, prüfe die URL mit `claude mcp list` und starte OAuth anschließend erneut über `/mcp`.
+
+[Offizielle Claude-Code-MCP-Anleitung](https://docs.anthropic.com/en/docs/claude-code/mcp)

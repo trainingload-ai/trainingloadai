@@ -1,0 +1,56 @@
+---
+title: "Schattenaktivitäten: Warum ist nur eine Zusammenfassung verfügbar?"
+description: Verstehe Schattenaktivitäten von Intervals.icu und Strava und entscheide, wann du eine Quelle verbinden, die Synchronisierung wiederholen oder die Originaldatei hochladen solltest.
+keywords:
+  [
+    "Schattenaktivitäten",
+    "Strava fehlende Datenreihen",
+    "Intervals.icu Aktivitätsimport",
+    "Aktivitätssynchronisierung wiederholen",
+  ]
+---
+
+# Schattenaktivitäten: Warum ist nur eine Zusammenfassung verfügbar?
+
+**Eine Schattenaktivität ist eine erkannte Aktivität, für die die vollständigen Messdaten noch nicht verfügbar sind.** Trainingload.ai speichert Titel und Startzeit, damit du siehst, dass die Einheit nicht übersehen wurde – zusammen mit der nächsten verfügbaren Aktion.
+
+Eine Schattenaktivität ist keine vollständig importierte Aktivität. Wir erfinden weder Diagramme noch Trainingsbelastung aus einer bloßen Zusammenfassung. Sobald ein Import erfolgreich ist, ersetzt die vollständige Aktivität den Schatteneintrag. Eine bereits vorhandene vollständige Aufzeichnung wird nicht gelöscht, nur weil eine spätere Synchronisierung keine Daten abrufen kann.
+
+Derzeit gibt es vor allem zwei Situationen.
+
+## Fall 1: Intervals.icu hat Aktivitätsinfos, darf aber die Originaldatei nicht liefern
+
+Intervals.icu kann eine Zusammenfassung einer über Strava empfangenen Aktivität anzeigen, während die API die Originaldatei ausdrücklich sperrt. Dass die Aktivität dort sichtbar ist, bedeutet daher nicht, dass Trainingload.ai über diese API die vollständigen Messdaten abrufen kann.
+
+Trainingload.ai versucht es daraufhin direkt über Strava. Folge dem Hinweis auf der Karte, um Strava zu verbinden, die Autorisierung zu erneuern oder den Aktivitätsimport zu aktivieren, und warte, bis die Synchronisierung abgeschlossen ist.
+
+Kann auch Strava die benötigten Daten nicht liefern, bleibt die Schattenaktivität bestehen. Wiederholtes Synchronisieren mit Intervals.icu umgeht die Beschränkung für die Originaldatei nicht.
+
+## Fall 2: Strava hat Aktivitätsdetails, kann aber keine Datenreihen liefern
+
+Aktivitätsname, Gesamtdistanz und Dauer sind getrennt von zeitpunktbezogenen Messwerten wie GPS, Herzfrequenz, Leistung oder Distanzverlauf. **Dass Aktivitätsdetails existieren, garantiert nicht, dass importierbare Datenreihen (Streams) verfügbar sind.**
+
+- **Es gab nie Messdaten:** Zum Beispiel eine manuell in Strava eingetragene Aktivität mit Distanz und Dauer, aber ohne Geräteaufzeichnung. Sie besitzt zwar eine Detailseite, wiederholte Versuche können die fehlenden Messdaten jedoch nicht erzeugen.
+- **Die Messdaten sind vorübergehend nicht verfügbar:** Der Anbieter verarbeitet die Datei eventuell noch, oder der Endpunkt für Detaildaten ist kurzzeitig nicht erreichbar. Eine einzelne „Nicht gefunden“-Antwort beweist weder eine Löschung noch ein dauerhaftes Fehlen der Datenreihen.
+
+Trainingload.ai wiederholt unsichere Verfügbarkeitsfehler begrenzt oft automatisch. Bleiben die Daten nicht abrufbar, wird die Schattenaktivität beibehalten und ein erneuter Versuch angeboten. Fehlende Herzfrequenz-, Leistungs- oder GPS-Daten allein erzeugen nicht zwangsläufig eine Schattenaktivität: Eine Aktivität mit nutzbarer Zeitreihe lässt sich dennoch importieren, auch wenn einzelne Analysen fehlen.
+
+## Was sollte ich tun?
+
+| Was du weißt | Empfohlene Aktion |
+| --- | --- |
+| Die Karte bittet darum, zu verbinden, die Autorisierung zu erneuern oder den Import zu aktivieren | Schließe den angegebenen Schritt ab und warte auf die Synchronisierung oder versuche es erneut. |
+| Die Aktivität wurde gerade hochgeladen oder wird noch verarbeitet | Warte das Ende der Verarbeitung ab und starte dann genau einen neuen Versuch. |
+| Ein vorübergehendes Problem beim Anbieter wurde behoben | Versuche es einmal erneut, um die vollständigen Daten anzufordern. |
+| Die Aktivität wurde manuell eingetragen und hatte nie Messwerte | Wiederholte Versuche helfen nicht. Suche nach einer Originalaufzeichnung vom Gerät. |
+| Auch nach mehreren Versuchen bleibt eine Schattenaktivität zurück | Prüfe, ob die ursprüngliche Plattform eine Aktivitätsdatei exportieren kann; kontaktiere bei Bedarf den Support. |
+
+Ein erneuter Versuch fragt die Daten lediglich neu an – er garantiert nicht, dass der Anbieter sie nun liefern kann. Du musst weder die Schattenaktivität noch eine bestehende vollständige Aktivität vorher löschen. Auch wiederholtes Trennen und Neuverbinden erzeugt keine fehlenden Messdaten.
+
+## Ich habe die Originaldatei
+
+Wenn dein Gerät oder die Plattform, auf der die Einheit ursprünglich aufgezeichnet wurde, eine FIT-, TCX- oder GPX-Datei mit Messdaten exportieren kann, nutze [Aktivitätsdateien hochladen](/de/docs/guide/upload-activity-files). Achte auf Duplikatwarnungen und vergleiche Datum sowie Inhalt, falls bereits eine vollständige Aktivität vorhanden ist.
+
+## Hilfe erhalten
+
+Gib Aktivitätsdatum, Quellanbieter, die angezeigte Meldung und die Information an, ob die ursprüngliche Plattform eine Datei exportieren kann. Sende niemals Zugriffstoken oder Passwörter mit. Weitere Schritte findest du in der [Fehlerbehebung](/de/docs/guide/troubleshooting).

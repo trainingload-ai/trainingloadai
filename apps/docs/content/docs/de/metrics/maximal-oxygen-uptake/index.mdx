@@ -1,19 +1,19 @@
 ---
-title: "VO2 Max (Maximal Oxygen Uptake)"
-description: "VO2 Max is one of the key metrics for aerobic capacity and cardiorespiratory fitness. This guide explains what it means, common estimation methods (watch/platform/VDOT/power), typical error sources, and how to use VO2 Max for trends and training intensity."
+title: "VO₂max (Maximale Sauerstoffaufnahme)"
+description: "Die VO₂max ist eine zentrale Kennzahl für deine aerobe Kapazität und kardiorespiratorische Fitness. Dieser Leitfaden erklärt Bedeutung, gängige Schätzmethoden (Uhr, Plattform, VDOT, Leistung), typische Fehlerquellen und den Einsatz für Trends und Trainingsintensität."
 keywords:
-  - "VO2 Max"
-  - "VO2 max calculator"
-  - "estimate VO2 max"
-  - "estimate VO2 max calculator"
-  - "what is VO2 max"
-  - "VO2 max for runners"
-  - "VO2 max for cyclists"
+  - "VO2max"
+  - "VO2max Rechner"
+  - "VO2max schätzen"
+  - "VO2max berechnen"
+  - "was ist VO2max"
+  - "VO2max Laufen"
+  - "VO2max Radfahren"
   - "VDOT"
   - "vVO2max"
-  - "estimated VO2 max"
-  - "watch VO2 max"
-  - "cycling VO2 max from power"
+  - "geschätzte VO2max"
+  - "Sportuhr VO2max"
+  - "VO2max aus Leistung Radfahren"
 ---
 
 import {
@@ -23,37 +23,37 @@ import {
 } from "@/lib/vo2-methods-compare-classes";
 import { DocsToolCtaCard } from "@/components/DocsToolCtaCard";
 
-# VO2 Max (Maximal Oxygen Uptake)
+# VO₂max (Maximale Sauerstoffaufnahme)
 
-> Note on terminology: this doc uses **VO2 Max** (instead of VO2 max / eVO2 Max / estimated VO2 Max) as a single umbrella term for readability and search intent. When precision matters, we’ll explicitly say **lab-measured VO2 Max** vs **estimated VO2 Max**.
+> Hinweis zur Schreibweise: Dieser Leitfaden verwendet **VO₂max** (statt VO2 max / eVO₂max / geschätzter VO2 Max) als einheitlichen Oberbegriff für bessere Lesbarkeit. Wo Genauigkeit entscheidend ist, unterscheiden wir klar zwischen **im Labor gemessener VO₂max** und **geschätzter VO₂max**.
 
-**VO2 Max** is the maximum rate your body can **take in, transport, and use oxygen** during intense exercise. It’s usually expressed as `ml · kg⁻¹ · min⁻¹`.
+Die **VO₂max** beschreibt die maximale Menge Sauerstoff, die dein Körper bei intensiver Belastung **aufnehmen, transportieren und verwerten** kann. Sie wird üblicherweise in `ml · kg⁻¹ · min⁻¹` angegeben.
 
-It matters because in endurance sports it acts like an **aerobic ceiling**: the higher the ceiling, the more room you have to sustain higher intensities. But performance is not determined by VO2 Max alone—**threshold ability, efficiency/economy, durability, fueling, terrain, and pacing** can be equally (or more) decisive.
+Im Ausdauersport wirkt sie wie eine **aerobe Obergrenze**: Je höher diese Obergrenze liegt, desto mehr Spielraum hast du für höhere Dauerintensitäten. Über deine Wettkampfleistung entscheidet die VO₂max aber nie allein – **Schwellenfähigkeit, Lauf- bzw. Bewegungsökonomie, Ermüdungsresistenz, Verpflegung, Streckenprofil und Pacing** können genauso (oder noch) ausschlaggebender sein.
 
-## What kind of “VO2 Max” are you seeing?
+## Welche Art von „VO₂max“ siehst du überhaupt?
 
-- **Lab-measured VO2 Max (gas analysis)**: tested on a treadmill or cycling ergometer with a metabolic cart. This is the closest to a direct physiological VO2 Max measurement.
-- **Estimated VO2 Max (watch/platform)**: a model output inferred from your **pace/speed, heart rate, and context** (and often smoothed across recent sessions).
+- **Im Labor gemessene VO₂max (Spiroergometrie)**: gemessen auf dem Laufband oder Fahrradergometer per Atemgasanalyse. Das kommt einer direkten physiologischen VO₂max-Messung am nächsten.
+- **Geschätzte VO₂max (Sportuhr/Plattform)**: ein Modellwert, der aus **Pace/Geschwindigkeit, Herzfrequenz und Kontext** abgeleitet (und oft über mehrere Einheiten geglättet) wird.
 
-In day-to-day training, your watch/platform value can drift due to **sensor noise, heat, altitude, wind, hills, fatigue, poor sleep, and fueling**. Treat it primarily as a **trend metric**, not a medical-grade measurement.
+Im Trainingsalltag kann der Wert deiner Uhr oder Plattform durch **Sensorrauschen, Hitze, Höhe, Wind, Steigungen, Ermüdung, schlechten Schlaf und Verpflegung** schwanken. Betrachte ihn vor allem als **Trendmetrik** und nicht als medizinischen Messwert.
 
-## Why VO2 Max is useful
+## Warum die VO₂max nützlich ist
 
-Think of VO2 Max as the “ceiling,” but your results often depend on **how high you can sustainably operate below that ceiling**.
+Stell dir die VO₂max als dein „Dach“ vor – deine Ergebnisse hängen aber oft davon ab, **wie nah unter diesem Dach du dauerhaft leisten kannst**.
 
-- **VO2 Max helps**: explain aerobic fitness trends, set training intensities (especially VO2 intervals), and contextualize performance changes.
-- **VO2 Max doesn’t replace**: threshold markers, economy, durability, or sport-specific strength. Two athletes with the same lab VO2 Max can race very differently.
+- **Wobei die VO₂max hilft**: aerobe Fitnesstrends einordnen, Trainingsintensitäten festlegen (insbesondere VO₂max-Intervalle) und Leistungsänderungen in Kontext setzen.
+- **Was die VO₂max nicht ersetzt**: Schwellenwerte, Ökonomie, Ermüdungsresistenz oder sportartspezifische Kraft. Zwei Athletinnen oder Athleten mit derselben Labor-VO₂max können im Wettkampf völlig unterschiedlich abschneiden.
 
-## How to estimate VO2 Max
+## So wird die VO₂max geschätzt
 
-Trainingload.ai may use different data sources and models depending on the sport and the quality of your inputs. The core idea is converting **performance capability** (how fast you can run / how much power you can hold) into `ml · kg⁻¹ · min⁻¹`.
+Trainingload.ai nutzt je nach Sportart und Qualität deiner Eingangsdaten unterschiedliche Datenquellen und Modelle. Die Grundidee besteht darin, deine **Leistungsfähigkeit** (wie schnell du laufen oder wie viel Watt du halten kannst) in `ml · kg⁻¹ · min⁻¹` umzurechnen.
 
-### Running: heart rate → speed model
+### Laufen: Herzfrequenz → Geschwindigkeitsmodell
 
-For running, an estimate can be framed as: **heart-rate intensity → equivalent vVO2max → oxygen cost model**.
+Beim Laufen lässt sich die Schätzung so beschreiben: **Herzfrequenz-Intensität → äquivalente vVO₂max → Sauerstoffkosten-Modell**.
 
-Here’s the core formula (where `v` is `m/min`, and `r = HR / HRmax`; see [Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm) for a practical implementation reference):
+Hier ist die Kernformel (mit `v` in `m/min` und `r = HR / HRmax`; eine praxisnahe Referenz findest du unter [Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm)):
 
 $$
 X = v / exp((r - 1.00466) / 0.68725)
@@ -63,149 +63,217 @@ $$
 VO2max = -4.6 + 0.182258 * X + 0.000104 * X^2
 $$
 
-### Cycling: power → weight model
+### Datenquellen und Priorität der Lauf-VO₂max in Trainingload.ai
 
-With reliable cycling power + body weight, a VO2 Max estimate can be derived from FRIEND-style cycle ergometry relationships (see [Kokkinos P, et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29692203/)). Internally we may estimate maximal aerobic power using `MAP = MMP(5min) * 0.92`, then combine it as:
+Für jeden gültigen Lauf speichert Trainingload.ai möglichst drei Schätzwerte auf Aktivitätsebene, statt sie sofort zusammenzuführen:
+
+- **Herzfrequenz (HEARTRATE)**: berechnet aus durchschnittlicher Pace, durchschnittlicher Herzfrequenz und maximaler Herzfrequenz anhand des oben genannten HF–Pace-Modells.
+- **Korrigiert (FACTOR)**: `Herzfrequenz-Schätzung × persönlicher Korrekturfaktor`. Wenn du den Faktor änderst, wendet die Anzeige den aktuellen Faktor auf die HF-Schätzung an – historische Läufe bleiben also nicht an einen veralteten Faktor gebunden.
+- **Wettkampfergebnis (STANDARD / Race VDOT)**: nutzt das beste gültige Leistungsfenster zwischen 4 Minuten und 4 Stunden; gibt es kein geeignetes Fenster, wird auf effektive Distanz und verstrichene Zeit zurückgegriffen.
+
+Die rohe Herzfrequenz-Schätzung ist ein diagnostischer Zwischenwert und kein endgültiger VO₂max-Wert. Produktfunktionen wenden immer zuerst den aktuellen Korrekturfaktor an. Die wählbare Prioritätsreihenfolge für den effektiven Wert lautet:
+
+> **Korrigiert → Wettkampfergebnis**
+
+Eine nachgelagerte Quelle wird nur genutzt, wenn die vorherige nicht verfügbar ist. In deinem Laufprofil kannst du „Korrigiert“ oder „Wettkampfergebnis“ als bevorzugte Quelle wählen; die andere Schätzung dient dann als Fallback. Wählst du zum Beispiel „Wettkampfergebnis“, ergibt sich die Reihenfolge Wettkampfergebnis → Korrigiert. Ältere Einstellungen auf „Herzfrequenz“ werden wie „Korrigiert“ behandelt.
+
+Für die Lauf-VO₂max im aktuellen Status wertet Trainingload.ai zunächst jeden Lauf der letzten 180 Tage nach dieser Regel aus und wendet dann eine exponentielle Zeitglättung an (Abklingzeit 40 Tage, sodass ältere Aktivitäten weniger Gewicht haben). Ein einzelner Ausreißer beeinflusst den Wert dadurch deutlich weniger als bei einer ungeglätteten Anzeige des letzten Laufs.
+
+#### So stellst du den Korrekturfaktor ein
+
+Der Standardwert für den Korrekturfaktor ist `1.00`. Liegt die HF-Schätzung bei `50` und der Faktor bei `0.94`, ergibt sich ein korrigierter Wert von `47`. Nutze den Faktor, um eine stabile persönliche Abweichung auszugleichen – idealerweise durch den Vergleich verlässlicher Herzfrequenzdaten mit einer nahezu maximalen Wettkampf- oder Testleistung. Jage damit keine einmaligen Schwankungen durch Hitze, Ermüdung oder Brustgurt-Drift.
+
+### Radfahren: Leistung → Gewichtsmodell
+
+Liegen verlässliche Leistungsdaten und das Körpergewicht vor, lässt sich eine VO₂max-Schätzung über ergometriebasierte Zusammenhänge nach FRIEND ableiten (siehe [Kokkinos P, et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29692203/)). Intern schätzen wir die maximale aerobe Leistung über `MAP = MMP(5min) * 0.92` und berechnen daraus:
 
 $$
 VO2max = 1.74 * ((0.92 * MMP_5 * 6.12) / Weight_kg) + 3.5
 $$
 
-## Different VO2 Max methods (quick comparison)
+## Verschiedene VO₂max-Methoden im Kurzvergleich
 
-Below is a practical comparison across **accuracy, cost, repeatability, and use-cases**. For training decisions, the most useful method is usually the one you can **repeat consistently**.
+Die folgende Übersicht vergleicht die Methoden nach **Genauigkeit, Aufwand, Wiederholbarkeit und Anwendungsfall**. Für Trainingsentscheidungen ist meist die Methode am wertvollsten, die du **konsistent wiederholen** kannst.
 
 <div className={VO2_METHODS_COMPARE_SHELL}>
-<table>
-  <colgroup>
-    <col style={{ width: "18%" }} />
-    <col style={{ width: "18%" }} />
-    <col style={{ width: "18%" }} />
-    <col style={{ width: "26%" }} />
-    <col style={{ width: "20%" }} />
-  </colgroup>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>What you need</th>
-      <th>Pros</th>
-      <th>Cons / error sources</th>
-      <th>Best for</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr className="vo2-mt-row-a">
-      <td><strong>Lab gas analysis (treadmill/erg)</strong></td>
-      <td>Lab equipment + staff</td>
-      <td><strong className={VO2_MT_STRONG_EM}>Closest to direct VO2 Max measurement</strong>; can also identify thresholds</td>
-      <td>Expensive; protocol differences; hard to repeat often</td>
-      <td>One-time benchmark; research; detailed assessment</td>
-    </tr>
-    <tr className="vo2-mt-row-b">
-      <td><strong>Race/time-trial → VDOT / performance VO2</strong></td>
-      <td>A near-all-out result (3K/5K/10K/half)</td>
-      <td><strong className={VO2_MT_STRONG_BL}>Repeatable and low-cost</strong>; tightly linked to performance</td>
-      <td>Weather/route/pacing strategy matter; different distances produce different values (normal)</td>
-      <td>Track progress; set paces; predict races</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>Running HR–pace model (training estimate)</strong></td>
-      <td>Good HR data (strap preferred) + stable conditions</td>
-      <td>No need to test all-out frequently; closer to daily training</td>
-      <td>Wrong HRmax, drift, hills/heat, fatigue distort HR–speed relationship</td>
-      <td>Trend tracking; “same HR faster / same pace easier”</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>Cycling power–weight estimate (FTP/MAP)</strong></td>
-      <td>Power meter + body weight</td>
-      <td>Strongly linked to cycling performance; high-quality training data</td>
-      <td>Calibration/data quality matter; weight fluctuations change relative value</td>
-      <td>Monitor aerobic changes; guide intensity</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>HR ratio method (HRmax/HRrest)</strong></td>
-      <td>HRmax + resting HR (multi-day average)</td>
-      <td>Low equipment barrier; rough starting point</td>
-      <td>High variability; sensitive to stress/sleep/training status; larger error</td>
-      <td>Only for a coarse reference</td>
-    </tr>
-    <tr className="vo2-mt-row-n">
-      <td><strong>Watch/platform VO2 Max</strong></td>
-      <td>Wearable device (black-box model)</td>
-      <td>Convenient; continuous tracking</td>
-      <td>Brand-to-brand values aren’t comparable; environment and workout type can skew</td>
-      <td>Same-device trend; cross-check with other methods</td>
-    </tr>
-  </tbody>
-</table>
+  <table>
+    <colgroup>
+      <col style={{ width: "18%" }} />
+      <col style={{ width: "18%" }} />
+      <col style={{ width: "18%" }} />
+      <col style={{ width: "26%" }} />
+      <col style={{ width: "20%" }} />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Methode</th>
+        <th>Was du brauchst</th>
+        <th>Vorteile</th>
+        <th>Nachteile / Fehlerquellen</th>
+        <th>Am besten für</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="vo2-mt-row-a">
+        <td>
+          <strong>Spiroergometrie im Labor (Laufband/Ergometer)</strong>
+        </td>
+        <td>Laborgeräte + Fachpersonal</td>
+        <td>
+          <strong className={VO2_MT_STRONG_EM}>
+            Kommt einer direkten VO₂max-Messung am nächsten
+          </strong>
+          ; bestimmt oft auch Schwellen
+        </td>
+        <td>Teuer; unterschiedliche Testprotokolle; selten wiederholbar</td>
+        <td>Einmalige Standortbestimmung; Forschung; tiefgehende Diagnostik</td>
+      </tr>
+      <tr className="vo2-mt-row-b">
+        <td>
+          <strong>Wettkampf/Zeitfahren → VDOT / Leistungs-VO₂</strong>
+        </td>
+        <td>Ein nahezu maximal gelaufenes Ergebnis (3/5/10 km/HM)</td>
+        <td>
+          <strong className={VO2_MT_STRONG_BL}>Wiederholbar und günstig</strong>;
+          eng an die reale Leistung gekoppelt
+        </td>
+        <td>
+          Wetter, Strecke und Pacing beeinflussen das Ergebnis; unterschiedliche
+          Distanzen liefern leicht abweichende Werte (normal)
+        </td>
+        <td>Fortschritt messen; Paces festlegen; Wettkampfzeiten prognostizieren</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>Lauf-HF–Pace-Modell (Trainingsschätzung)</strong>
+        </td>
+        <td>Gute HF-Daten (am besten Brustgurt) + stabile Bedingungen</td>
+        <td>Keine ständigen Maximaltests nötig; nah am Trainingsalltag</td>
+        <td>
+          Falsche HRmax, Drift, Hügel/Hitze und Ermüdung verzerren das
+          HF–Geschwindigkeits-Verhältnis
+        </td>
+        <td>Trendbeobachtung: „gleiche HF schneller / gleiche Pace leichter“</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>Rad-Leistungs–Gewichts-Schätzung (FTP/MAP)</strong>
+        </td>
+        <td>Powermeter + Körpergewicht</td>
+        <td>
+          Eng an die Radleistung gekoppelt; hochwertige Trainingsdaten
+        </td>
+        <td>
+          Kalibrierung und Datenqualität entscheidend; Gewichtsschwankungen
+          verändern den relativen Wert
+        </td>
+        <td>Aerobe Entwicklung verfolgen; Intensität steuern</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>HF-Verhältnis-Methode (HRmax/HRrest)</strong>
+        </td>
+        <td>HRmax + Ruheherzfrequenz (Mehrtagesdurchschnitt)</td>
+        <td>Kaum Ausrüstung nötig; grober Einstiegswert</td>
+        <td>
+          Hohe Streuung; anfällig für Stress, Schlaf und Trainingszustand;
+          größerer Fehlerbereich
+        </td>
+        <td>Nur als sehr grobe Orientierung</td>
+      </tr>
+      <tr className="vo2-mt-row-n">
+        <td>
+          <strong>Sportuhr-/Plattform-VO₂max</strong>
+        </td>
+        <td>Wearable (Black-Box-Modell)</td>
+        <td>Bequem; laufende Erfassung</td>
+        <td>
+          Werte sind zwischen Marken nicht vergleichbar; Umweltbedingungen und
+          Einheitentyp können verzerren
+        </td>
+        <td>Trend innerhalb desselben Geräts; Abgleich mit anderen Methoden</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
-Practical shortcut: for training (paces/zones/progress), prefer **repeatable race-based estimates (VDOT)** or **fixed-condition training estimates (HR–pace / power)**. For a direct physiological measurement, use a lab test.
+Praxis-Abkürzung: Für das tägliche Training (Paces, Zonen, Fortschritt) sind **wiederholbare wettkampfbasierte Schätzungen (VDOT)** oder **Trainingsschätzungen unter stabilen Bedingungen (HF–Pace / Leistung)** meist am hilfreichsten. Für eine direkte physiologische Messung brauchst du einen Labortest.
 
-## Lab VO2 Max vs estimated VO2 Max
+## Labor-VO₂max vs. geschätzte VO₂max
 
-Even with the same lab VO2 Max, two athletes can race very differently because performance also depends on **economy/efficiency**, technique, muscular endurance, durability, fueling, and pacing.
+Selbst bei identischer Labor-VO₂max können zwei Athletinnen oder Athleten im Wettkampf ganz unterschiedlich abschneiden, weil Leistung zusätzlich von **Ökonomie/Effizienz**, Technik, lokaler Muskelausdauer, Ermüdungsresistenz, Verpflegung und Pacing abhängt.
 
-That’s why in running you’ll often see “performance VO2” concepts (VDOT / equivalent VO2): it’s not trying to replicate lab physiology; it’s optimizing for training utility by mapping “**how fast you can run**” into a VO2-like scale to:
+Deshalb begegnen dir im Laufsport oft Konzepte wie „Leistungs-VO₂“ (VDOT / äquivalente VO₂): Sie wollen keine Labormessung kopieren, sondern sind auf den Trainingsnutzen optimiert, indem sie **deine tatsächliche Laufgeschwindigkeit** auf eine VO₂-ähnliche Skala abbilden, um:
 
-- **Predict race performance** across distances
-- **Set training paces** (Easy, Marathon, Threshold, Interval often described as % of vVO2max)
+- **Wettkampfleistungen** über verschiedene Distanzen abzuschätzen
+- **Trainingspaces festzulegen** (Easy, Marathon, Threshold, Interval – häufig ausgedrückt als % der vVO₂max)
 
-## How to interpret and use VO2 Max in training
+## So interpretierst und nutzt du die VO₂max im Training
 
-- **Focus on trend, not daily noise**: weekly/monthly views are more reliable.
-- **Validate the inputs**: wrong HRmax, HR strap drift, pauses, strong heat/wind, and heavy fatigue can break HR–pace relationships.
-- **Read it alongside load and recovery**: VO2 Max is a background marker—pair it with **[Fatigue | Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load)**, **[Fitness | Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load)**, and **[Form | Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance)**.
-- **Use it to guide training, not chase a number**: rising estimated VO2 Max often reflects “faster at the same HR” or “same pace feels easier.”
+- **Auf den Trend achten, nicht auf Tagesrauschen**: Wochen- und Monatsverläufe sind wesentlich belastbarer.
+- **Eingangsdaten prüfen**: Eine falsche HRmax, Brustgurt-Drift, Pausen, starke Hitze/Wind oder hohe Ermüdung stören das HF–Pace-Verhältnis.
+- **Immer zusammen mit Belastung und Kontext lesen**: Die VO₂max ist eine Hintergrundmetrik – kombiniere sie mit [ATL](/de/docs/metrics/pmc/acute-training-load), [CTL](/de/docs/metrics/pmc/chronic-training-load), [TSB](/de/docs/metrics/pmc/training-stress-balance), Einheitenqualität, subjektiver Ermüdung, Schlaf und Schmerzsignalen.
+- **Training steuern statt einer Zahl hinterherzulaufen**: Eine steigende geschätzte VO₂max spiegelt meist wider, dass du „bei gleicher HF schneller“ oder „bei gleicher Pace entspannter“ unterwegs bist.
 
-## For runners: what does VO2 Max mean in practice?
+## Für Läuferinnen und Läufer: Was bedeutet die VO₂max in der Praxis?
 
-VO2 Max intervals are often used to improve high-aerobic output and can also contribute to economy/technique. Its “importance weight” varies by event: shorter races depend more on VO2-intensity ability, while in marathon training VO2 work isn’t the main course—but periodic blocks can help maintain speed and running mechanics.
+VO₂max-Intervalle werden häufig eingesetzt, um die obere aerobe Leistungsfähigkeit zu steigern – und können nebenbei auch Laufökonomie und Technik verbessern. Ihr Gewicht hängt stark von der Zielstrecke ab: Kürzere Wettkämpfe profitieren stärker von der VO₂max-Intensität; im Marathontraining steht VO₂-Arbeit nicht im Zentrum, doch gezielte Blöcke helfen, Grundschnelligkeit und Laufmechanik wachzuhalten.
 
-## Common mistakes
+## Häufige Fehler
 
-- **Treating an estimate like a medical report**: platform VO2 Max is a model output—use it as a trend.
-- **Ignoring threshold and durability**: many athletes plateau due to threshold, durability, fueling, or strategy rather than VO2 Max.
+- **Eine Schätzung wie einen Laborbefund behandeln**: Die Plattform-VO₂max ist ein Modellwert – nutze sie als Trend.
+- **Schwelle und Ermüdungsresistenz ignorieren**: Viele stagnieren eher wegen Schwellenleistung, Ermüdungsresistenz, Verpflegung oder Rennstrategie als wegen ihrer VO₂max.
 
-## VO2 Max levels
+## VO₂max-Einstufungen
 
-To make VO2 Max easier to read, we map it into 5 levels and color-code them. Two approaches are supported:
+Damit sich die VO₂max leichter einordnen lässt, teilen wir sie in 5 farblich gekennzeichnete Stufen ein. Dabei werden zwei Verfahren unterstützt:
 
-- **Without age/sex**: a general threshold set.
-- **With age/sex**: thresholds by sex and age group.
+- **Ohne Alter/Geschlecht**: ein allgemeines Schwellenwert-Set.
+- **Mit Alter/Geschlecht**: abgestufte Werte nach Geschlecht und Altersgruppe.
 
-See **[VO2 Max levels](/docs/metrics/maximal-oxygen-uptake/levels)**.
+Siehe **[VO₂max-Einstufungen](/de/docs/metrics/maximal-oxygen-uptake/levels)**.
 
-## FAQ (VO2 Max)
+## FAQ (VO₂max)
 
-### What is a good VO2 Max?
-It depends on age and sex, and the most useful baseline is your **own trend** over time. If you want a categorical view, use our **[VO2 Max levels](/docs/metrics/maximal-oxygen-uptake/levels)**.
+### Was ist eine gute VO₂max?
 
-### Why did my watch VO2 Max drop suddenly?
-Common reasons include heat, hills/wind, fatigue, wrong HRmax, poor HR signal, or unusual pacing. Look at weekly averages and cross-check with perceived effort and training load.
+Das hängt von Alter und Geschlecht ab – die wichtigste Referenz bleibt jedoch dein **eigener Verlauf** über die Zeit. Für eine kategorisierte Einordnung findest du alle Tabellen unter **[VO₂max-Einstufungen](/de/docs/metrics/maximal-oxygen-uptake/levels)**.
 
-### Can VO2 Max predict race time?
-Not by itself. Race performance also depends on threshold ability, economy, durability, and pacing/fueling. VO2 Max is a useful “ceiling,” not the whole story.
+### Warum ist die VO₂max meiner Uhr plötzlich gefallen?
 
-### How can I improve VO2 Max?
-Most athletes benefit from consistent aerobic volume, plus periodic blocks of VO2-intensity intervals (with adequate recovery). Improvements are easiest to see when your inputs are stable and you track trends.
+Häufige Gründe sind Hitze, Hügel oder Wind, Ermüdung, eine falsch eingestellte HRmax, ein schlechtes Herzfrequenzsignal oder ungewohntes Pacing. Schau auf den Wochentrend und gleiche ihn mit deinem Belastungsempfinden und der Trainingsbelastung ab.
 
-## References
+### Kann die VO₂max meine Wettkampfzeit vorhersagen?
+
+Nicht allein. Deine Wettkampfzeit hängt ebenso von Schwellenfähigkeit, Ökonomie, Ermüdungsresistenz, Pacing und Verpflegung ab. Die VO₂max zeigt vor allem dein aerobes „Dach“, nicht das ganze Bild.
+
+### Wie kann ich meine VO₂max verbessern?
+
+Die meisten profitieren von beständigem aerobem Grundlagenvolumen kombiniert mit periodischen Blöcken aus VO₂max-Intervallen (inklusive ausreichender Erholung). Fortschritte erkennst du am zuverlässigsten, wenn deine Messbedingungen stabil sind und du Trends verfolgst.
+
+## Quellen
 
 - [RunnersConnect: VO2 Max for Runners](https://runnersconnect.net/vo2-max-for-runners/)
 - [Simpson Associates: Running Math](http://www.simpsonassociatesinc.com/runningmath2.htm)
 - [Kokkinos P, et al. FRIEND cycle ergometry VO2max equation (2018)](https://pubmed.ncbi.nlm.nih.gov/29692203/)
 
 <DocsToolCtaCard
-  title="Go to the tool: estimate VO2 Max and see your VO2 Max level"
+  title="Zum Rechner: VO₂max schätzen und deine Einstufung sehen"
   description={
     <>
-      If you haven’t estimated your VO2 Max yet, start with the tool page. The
-      results will also show your <b>VO2 Max level</b> and a short explanation,
-      so you can interpret your number as a practical range (Fair / Good / Very
-      Good / Excellent).
+      Wenn du deine VO₂max noch nicht geschätzt hast, starte direkt mit dem
+      Rechner. Das Ergebnis zeigt dir außerdem deine{" "}
+      <b>VO₂max-Einstufung</b> samt kurzer Einordnung, damit du deinen Wert als
+      praxisnahe Stufe (Ausreichend / Gut / Sehr gut / Hervorragend) verstehen
+      kannst.
     </>
   }
-  primary={{ href: "/vo2-max-calculator", label: "Open the VO2 Max Calculator →" }}
-  secondary={{ href: "/docs/metrics/maximal-oxygen-uptake", label: "Read the VO2 Max guide first" }}
+  primary={{
+    href: "/de/vo2-max-calculator",
+    label: "VO₂max-Rechner öffnen →",
+  }}
+  secondary={{
+    href: "/de/docs/metrics/maximal-oxygen-uptake",
+    label: "Zuerst den VO₂max-Leitfaden lesen",
+  }}
 />

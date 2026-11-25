@@ -1,0 +1,68 @@
+---
+title: Auto-hébergé vs Cloud
+description: Comparez la mise en place, le stockage des données, l’importation d’activités, les coûts d’IA et la maintenance pour choisir la version adaptée à vos besoins.
+seoTitle: "Trainingload.ai auto-hébergé ou Cloud : quelle option choisir ?"
+seoDescription: "Comparez Trainingload.ai Cloud et l’auto-hébergement : installation, stockage local des données, IA BYOK, intégrations, sauvegardes et mises à jour."
+keywords:
+  [
+    "auto-hébergé vs cloud",
+    "déploiement Trainingload.ai",
+    "données d’entraînement locales",
+    "IA BYOK",
+  ]
+---
+
+# Auto-hébergé vs Cloud
+
+Choisissez le Cloud pour commencer à utiliser Trainingload.ai immédiatement. Choisissez l’auto-hébergement si vous souhaitez garder vos données d’entraînement sur votre propre ordinateur ou serveur et que vous êtes prêt à installer et maintenir l’application.
+
+## Comparaison rapide
+
+| Critère | Cloud | Auto-hébergé |
+| --- | --- | --- |
+| Démarrage | Ouvrez l’application et créez un compte | Téléchargez un paquet de version et suivez le guide d’installation sur votre propre machine |
+| Emplacement des données | Service Cloud Trainingload.ai | Votre appareil, y compris les activités, les plans et les fichiers téléversés |
+| Importation des séances | Connectez une plateforme prise en charge ou téléversez des fichiers d’activité | Téléversez des fichiers d’activité, ou connectez Intervals.icu et Garmin Personal API avec vos propres clés |
+| Utilisation du Coach IA | Utilisez le quota IA inclus dans votre forfait | Désactivé par défaut ; configurez votre propre service d’IA et réglez directement ce fournisseur |
+| Comptes | Utilisez votre compte Cloud | Une seule personne par instance auto-hébergée |
+| Sauvegardes et restauration | Trainingload.ai gère la continuité du service Cloud | Vous réalisez vos sauvegardes et les restaurez en cas de besoin |
+| Mises à jour logicielles | Trainingload.ai met le service à jour | Vous suivez le guide de mise à niveau pour installer chaque nouvelle version |
+
+## Quelle option vous convient ?
+
+**Choisissez le Cloud** si vous voulez consacrer votre temps à vous entraîner et analyser vos séances, sans installer de logiciel, effectuer de mises à jour ni gérer de sauvegardes.
+
+**Choisissez l’auto-hébergement** si vous souhaitez héberger vous-même vos données d’entraînement, que vous pouvez maintenir une machine dédiée et assurer les mises à jour et sauvegardes. L’auto-hébergement est conçu pour un usage personnel : une même instance ne peut pas héberger plusieurs utilisateurs.
+
+## Vérifiez comment vous importerez vos entraînements
+
+L’auto-hébergement prend actuellement en charge :
+
+- le téléversement de fichiers d’activité **FIT, GPX et TCX** ;
+- la connexion à **Intervals.icu** avec une clé API personnelle ;
+- la connexion à **Garmin Personal API** avec une clé API personnelle.
+
+Si vous dépendez d’une plateforme d’entraînement spécifique, consultez d’abord [Connecter des données](/fr/docs/guide/connect-data) et les [paramètres de connexion en auto-hébergement](/fr/docs/self-host/configuration#connect-intervalsicu). Le Cloud et l’auto-hébergement proposent des méthodes de connexion différentes. Si une autre plateforme permet d’exporter un fichier d’activité dans un format pris en charge, vous pouvez téléverser ce fichier.
+
+**Trainingload.ai ne propose pas actuellement d’application Apple Watch.**
+
+## Fonctionnement et coût de l’IA
+
+L’IA est désactivée par défaut. Vous pouvez utiliser toutes les fonctionnalités hors IA sans la configurer. Pour activer le Coach IA, choisissez un fournisseur dans les paramètres et saisissez votre propre clé API ; consultez [Configurer l’IA](/fr/docs/self-host/configuration#configure-ai-in-the-client).
+
+L’auto-hébergement n’utilise ni les abonnements Cloud Trainingload.ai ni les crédits IA. Le fournisseur d’IA que vous choisissez vous facture directement votre consommation API.
+
+Lorsque vous utilisez un service d’IA externe, les informations d’entraînement nécessaires à la requête lui sont envoyées. Installer l’application en local ne fait pas tourner un service d’IA externe sur votre machine. La synchronisation avec une plateforme d’entraînement nécessite également une connexion Internet.
+
+## Ce que vous devrez entretenir
+
+- Garder suffisamment d’espace libre sur l’appareil et lancer l’application lorsque vous en avez besoin.
+- Réaliser une sauvegarde avant toute mise à jour et en conserver une copie en dehors de la machine qui héberge l’application.
+- Vérifier que vos sauvegardes sont restaurables afin de disposer d’une copie exploitable en cas de panne matérielle.
+- Suivre le [guide de gestion et de mise à niveau](/fr/docs/self-host/operations) pour mettre l’application à jour.
+
+## Étape suivante
+
+Pour le Cloud, [ouvrez l’application](https://app.trainingload.ai/en) et suivez [Bien démarrer](/fr/docs/guide/getting-started) pour importer votre première activité.
+
+Pour l’auto-hébergement, commencez par le [guide d’installation](/fr/docs/self-host/installation). Les procédures d’installation, de sauvegarde et de mise à niveau disposent chacune de leur propre guide.

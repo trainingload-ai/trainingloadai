@@ -1,0 +1,68 @@
+---
+title: Dépannage de l’auto-hébergement
+description: Diagnostiquez les erreurs d’installation, de disponibilité, de stockage, d’IA, de restauration et de mise à niveau sans contourner les garde-fous de cycle de vie ni de sécurité des données.
+---
+
+# Dépannage de l’auto-hébergement
+
+Commencez par les vérifications officielles en lecture seule. Conservez le premier code d’erreur stable : il est bien plus utile que de multiplier les modifications sur l’hôte jusqu’à masquer le symptôme.
+
+## Premiers réflexes
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+Si Docker est indisponible, `doctor` remonte malgré tout les contrôles qu’il peut exécuter. Si une restauration ou une mise à niveau a échoué, conservez son rapport et son marqueur d’état incomplet. Ne supprimez jamais ce marqueur pour forcer un démarrage normal.
+
+## Problèmes fréquents
+
+| Symptôme | À vérifier | Action sûre à suivre |
+| --- | --- | --- |
+| L’installateur refuse la version | Somme de contrôle externe, identité Cosign, version exacte et complétude des fichiers téléchargés | Retéléchargez tous les artefacts depuis la même version officielle |
+| Le site ne s’ouvre pas | `status`, journaux du Client, adresse d’écoute, conflit de port et origine HTTPS | Corrigez le paramètre déclaré, puis lancez `start --dry-run` avant `start` |
+| La base de données est indisponible | État du service PostgreSQL, disque, permissions et résultat de migration dans `doctor` | Rétablissez la capacité ou les permissions de l’hôte ; n’exposez ni ne modifiez PostgreSQL directement |
+| Le téléversement échoue | Espace libre sur la racine de données, capacité d’inodes, propriétaire et dossier d’envois | Agrandissez le volume de données dédié puis relancez `doctor` |
+| Les paramètres IA sont masqués | Mode de déploiement, disponibilité de l’instance, identité de l’Owner connecté | Connectez-vous avec le compte Owner ; aucun autre utilisateur ne peut lire ou modifier ces réglages |
+| Une requête IA échoue | État du fournisseur, URL de base exacte, identifiants de modèles, accès de la clé et DNS/TLS sortant | Corrigez la configuration gérée par l’Owner ou désactivez l’IA tant que le fournisseur est indisponible |
+| L’IA échoue après restauration | Vérifier si la cible utilise un secret d’authentification différent | Saisissez une nouvelle clé fournisseur ; n’essayez pas d’extraire l’ancienne clé en clair |
+| La restauration est bloquée | Version cible, état d’autorité cible, manifeste de sauvegarde, somme de contrôle et rapport | Utilisez une cible vierge de version exacte et conservez la cible en échec pour le diagnostic |
+| La mise à niveau est bloquée | Versions sources prises en charge, inventaire des migrations, sauvegarde, disque et déclaration de retour arrière | Suivez le rapport de mise à niveau ; ne modifiez manuellement ni les tags d’images ni l’historique des migrations |
+
+## Collecter des diagnostics
+
+Lorsque `doctor` ne suffit pas :
+
+```bash
+./self-host diagnostics --output support-<yyyy-mm-dd> --tail 500 --service server --service client --json
+```
+
+Les diagnostics appliquent un masquage automatique, mais celui-ci ne vaut pas autorisation de publier l’artefact. Ouvrez-le localement et vérifiez la présence éventuelle de noms d’hôte, de données utilisateur, de détails d’activités ou de journaux métier avant de le transmettre via un canal privé validé par les mainteneurs.
+
+Ne partagez jamais :
+
+- `.env.selfhost` ;
+- les mots de passe Owner ou le jeton d’amorçage ;
+- les clés API fournisseur, cookies ou clés privées ;
+- un export de base de données ou des fichiers d’activité téléversés ;
+- un paquet de diagnostics non relu.
+
+## Actions à éviter
+
+- N’utilisez pas `docker compose down -v`.
+- Ne supprimez pas les données PostgreSQL, les fichiers téléversés, le marqueur de racine de données, les verrous d’opération ni les marqueurs de cycle de vie incomplet.
+- Ne modifiez pas `_prisma_migrations`, les manifestes de version, les sommes de contrôle ni les rapports de mise à niveau.
+- N’utilisez pas `--skip-verify` ni des tags d’images mutables.
+- Ne relancez pas des commandes modifiant l’état en parallèle.
+
+Ces actions peuvent transformer une panne diagnosticable en perte de données irréversible ou ambiguë.
+
+## Escalader avec des éléments utiles
+
+Ne partagez que la version exacte, le système d’exploitation et l’architecture de l’hôte, le code `error.code` stable, la commande ayant échoué et le SHA-256 d’un artefact de diagnostics relu localement. Conservez l’artefact complet en privé sauf si un mainteneur fournit un canal de transfert approuvé.
+
+## Étape suivante
+
+Revenez à [Gérer votre instance](/fr/docs/self-host/operations) une fois la situation bloquante résolue. Si la reprise nécessite de remplacer les données, restaurez une sauvegarde vérifiée dans une cible vierge plutôt que d’écraser l’instance défaillante.

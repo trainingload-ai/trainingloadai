@@ -1,0 +1,209 @@
+---
+title: Konto, Berechtigungen, Exporte und KI-Nutzung
+description: Prüfe Kontosicherheit, verwalte Berechtigungen und Verbindungen, exportiere Kontodaten, behalte Mitgliedschaft und KI-Nutzung im Blick und lösche ein Konto sicher.
+keywords:
+  [
+    "Trainingload.ai Konto",
+    "mobile Berechtigungen",
+    "KI-Nutzung",
+    "Passwort ändern",
+    "automatische Schwellenwert-Updates",
+    "Trainingload Daten exportieren",
+    "Trainingload Konto löschen",
+  ]
+---
+
+# Konto, Berechtigungen, Exporte und KI-Nutzung
+
+Kontoeinstellungen steuern Identität und Zugriff; Berechtigungen bestimmen, welche Geräte- und Anbieterdaten in Trainingload.ai einfließen dürfen; die Nutzungsansicht erklärt Mitgliedschaft und KI-Verbrauch. Prüfe diese drei Bereiche gemeinsam, wenn du ein neues Gerät einrichtest oder nach einer fehlenden Funktion suchst.
+
+Diese Seite gilt für Cloud-Konten. Self-Hosting nutzt ein lokales persönliches Konto; dessen Einstellungen findest du unter [Self-Host-Konfiguration](/de/docs/self-host/configuration).
+
+## Bevor du beginnst
+
+- Melde dich im Web und mobil mit demselben Trainingload.ai-Konto an.
+- Halte Zugriff auf deine Konto-E-Mail für Bestätigungscodes bereit.
+- Prüfe auf dem Smartphone, ob das Betriebssystem den Zugriff auf Health oder Standort bereits abgelehnt hat.
+- Entscheide vor dem Aktivieren eines Schalters, welche Schwellenwerte sich automatisch aktualisieren dürfen.
+- Teile niemals Bestätigungscodes, Passwörter, Verbindungsdaten oder Screenshots mit privaten Kontokennungen.
+
+## 1. Identität und Passwortstatus prüfen
+
+Öffne im Web **Konto**. In der mobilen App öffnest du **Ich → Menü → Konto**.
+
+Dort siehst du:
+
+- Anzeigename,
+- Konto-E-Mail und Verifizierungsstatus,
+- ob ein Passwort festgelegt ist.
+
+Das Feld mit der aktuellen E-Mail-Adresse ist schreibgeschützt. Ist dein Konto noch nicht verifiziert, fordere einen sechsstelligen Bestätigungscode an und gib ihn vor Ablauf ein. Im Web bleibt ein gesendeter Code fünf Minuten gültig und lässt sich während des laufenden Countdowns nicht erneut anfordern.
+
+Nutze **Passwort festlegen**, wenn das Konto noch kein Passwort hat, oder **Passwort ändern**, wenn bereits eines besteht. Auch bei einem OAuth-Konto kann stehen, dass kein Passwort gesetzt ist – verwende die angezeigte Passwort-Aktion, statt von einem Kontofehler auszugehen.
+
+### Zugriff wiederherstellen und Anmeldung abschließen
+
+Nutze auf der Anmeldeseite **Passwort vergessen**, um eine Zurücksetzen-E-Mail anzufordern. Öffne ausschließlich den neuesten Link, vergewissere dich, dass er zur Zurücksetzen-Seite von Trainingload.ai führt, und lege dort ein neues Passwort fest. Ein abgelaufener, fehlerhafter oder bereits genutzter Token muss durch eine neue Anfrage ersetzt werden.
+
+Bei der OAuth-Anmeldung kann kurz eine Abschluss- oder Fehlerseite erscheinen, bevor die Rückkehr in die App erfolgt. Leitet die Abschlussseite nicht weiter, kehre zum Login zurück und versuche es einmal erneut; erscheint eine Fehlerseite, notiere den sichtbaren Fehlertext ohne Tokens oder die vollständige Callback-URL weiterzugeben.
+
+Wenn eine andere Anwendung Zugriff auf Trainingload.ai anfordert, zeigt die OAuth-Zustimmungsseite die anfragende App, das angemeldete Konto, die angeforderten Berechtigungen (Scopes) und die Rücksprungadresse an. Stimme nur zu, wenn alle vier Angaben deinen Erwartungen entsprechen. Bei Ablehnung wird kein Zugriff erteilt.
+
+<DocsScreenshot
+  id="account-security-status"
+  title="Kontoidentität und Sicherheitsstatus"
+  description="Prüfe Konto-E-Mail, Verifizierungsstatus und Passwortstatus, bevor du Verbindungen oder Mitgliedschaftseinstellungen änderst."
+  route="Konto → Identität und Sicherheit"
+/>
+
+## 2. Mobile Berechtigungen und Datenquellen prüfen [#2-review-mobile-permissions-and-data-sources]
+
+Öffne **Ich → Menü → Datenautorisierung** oder die mobile Seite **Berechtigungen**. Die Quellen sind in lokale Gerätequellen und Drittanbieterdienste unterteilt.
+
+Lokale Quellen umfassen:
+
+- **Health**: Unterstützte Gesundheits- und Trainingsdaten zum Lesen freigeben, vollständigen oder teilweisen Status prüfen, historischen Abgleich anfordern, verbundene Geräte verwalten oder die System-Health-Einstellungen öffnen.
+- **Standort**: Routenaufzeichnung erlauben oder nach einer früheren Ablehnung die Systemeinstellungen öffnen.
+
+Drittanbieterquellen können Strava, Polar, COROS, Suunto, Wahoo und Intervals.icu umfassen. Jede Zeile zeigt ihren aktuellen Status. Öffne eine Quelle, um sie zu verbinden, anbieterspezifische Einstellungen zu prüfen oder zur Verbindungsseite zu wechseln.
+
+<DocsScreenshot
+  id="mobile-permission-sources"
+  title="Mobile Berechtigungen und Verbindungsquellen"
+  description="Geräteberechtigungen und Anbieterverbindungen werden getrennt verwaltet. Dieses Beispiel zeigt Standort und Trainingsanbieter; öffne eine Quelle für ihre verfügbaren Aktionen."
+  route="Ich → Menü → Datenautorisierung"
+  platform="mobile"
+/>
+
+Geräteberechtigung und Serververbindung sind getrennte Zustände. Health kann im Betriebssystem freigegeben sein, während die Geräteverbindung in Trainingload.ai noch neu verbunden werden muss. Öffne die Quellendetails nach der Rückkehr aus den Systemeinstellungen erneut, damit die App beide Zustände aktualisieren kann.
+
+## 3. Automatische Kennzahlen-Updates steuern
+
+Öffne im Web oder mobil **Konto → Automatisch aktualisieren**. Jeder Schalter erlaubt automatische Updates für genau eine Kennzahl:
+
+| Gruppe | Kennzahlen |
+| --- | --- |
+| Leistung | FTP, CP, W′, Pmax |
+| Pace | TP, CS |
+| Herzfrequenz | LTHR, Max-HF |
+
+Aktiviere nur die Kennzahlen, die Trainingload.ai auf Basis geeigneter Nachweise selbst aktualisieren darf. Ein aktiver Schalter garantiert noch keinen sofortigen neuen Wert – das System benötigt weiterhin genügend passende Aktivitätsdaten.
+
+Automatische Updates können Schwellenwerte verändern, auf denen Zonen, Diagramme, strukturierte Einheiten und die Belastungsinterpretation beruhen. Prüfe nach einem Update den Kennzahlenverlauf und eine aktuelle Aktivität, bevor du alte und neue Zeiträume direkt miteinander vergleichst.
+
+## 4. Mitgliedschaft und KI-Nutzung prüfen
+
+Die Mitgliedschaftskarte unter Konto zeigt:
+
+- aktueller Tarif und Aktivstatus,
+- Abrechnungszeitraum bzw. Ablaufdatum,
+- Abrechnungsquelle,
+- ob eine Kündigung zum Ende des Zeitraums vorgemerkt ist.
+
+Nur ein aktives Abonnement aus der unterstützten Abo-Abrechnungsquelle bietet die direkte Abo-Verwaltung in der App. Andere Zugangsarten zeigen den Mitgliedschaftsstatus eventuell ohne dieselben Verwaltungsaktionen.
+
+Öffne **Nutzung** über die Mitgliedschaftskarte oder den mobilen Kontobereich. Die Seite zeigt:
+
+- aktuellen Tarif,
+- verfügbare KI-Credits – einschließlich eines negativen Saldos, wenn die letzte abgeschlossene Aktion das vorherige Guthaben überschritten hat,
+- verbrauchte, verbleibende und ablaufende monatliche Abo-Credits,
+- verfügbares oder an die Mitgliedschaft gebundenes Credit-Paket-Guthaben samt nächstem Ablaufdatum,
+- offenen Fehlbetrag, Verbrauchstrends, Anzahl der Aktionen und einzelne Buchungseinträge.
+
+Wähle 1 Tag, 7 Tage, 30 Tage, laufenden Monat oder letzten Monat. Im Buchungsprotokoll erkennst du Standard- (1×), Deep- (3×) und Mischmodus-Aktionen sowie Abo-Gutschriften, Credit-Pakete, Geschenke, Erstattungen und Ausgleichsbuchungen. Ein Credit entspricht 1.000 äquivalenten Tokens nach Anwendung von gecachtem Input, ungecachtem Input, Output, Modus- und globalen Multiplikatoren – er entspricht keiner festen Anzahl an Nachrichten.
+
+<DocsScreenshot
+  id="ai-usage-ledger"
+  title="KI-Nutzungsübersicht und Buchungsprotokoll"
+  description="Vergleiche Tarif, verbleibende Kontingente, Periodenverbrauch, Trends im gewählten Zeitraum und das vollständige Buchungsprotokoll."
+  route="Konto → Nutzung"
+/>
+
+## 5. App-Einstellungen festlegen
+
+Öffne im Web **Einstellungen**, um Folgendes festzulegen:
+
+- helles, dunkles oder System-Design,
+- metrische oder imperiale Einheiten,
+- Verhalten der Diagramm-X-Achse,
+- 12-Stunden- oder 24-Stunden-Zeitformat,
+- bevorzugte Sprache der Oberfläche.
+
+Diese Optionen gelten zunächst nur vorläufig, bis du auf **Speichern** klickst. Eine Sprachänderung wechselt auch die aktuelle Route auf die gewählte Sprache und speichert die Einstellung für spätere Besuche. Einheiten und Zeitformat ändern nur die Darstellung; sie überschreiben keine gespeicherten Aktivitätsdaten.
+
+## 6. Kontodaten exportieren
+
+Öffne im Web **Konto → Datenexport**. Wähle den Export, der zu deinem Ziel passt:
+
+- **KI-Analyse** erstellt ein kompaktes, analyseorientiertes Paket ohne die ursprünglich hochgeladenen Originaldateien.
+- **Vollständiges Backup** erstellt ein umfassenderes Archiv und kann Originaldateien enthalten, sofern exakte Standortdaten beibehalten werden.
+
+Lege vor dem Anfordern fest, wie Routenstandorte behandelt werden sollen:
+
+- häufig besuchte Orte unkenntlich machen,
+- GPS-Daten entfernen,
+- exakte Standorte beibehalten.
+
+Das Einschließen von Originaldateien erzwingt die Beibehaltung exakter Standorte, da diese Dateien eigene Standortdaten enthalten können. Behandle einen Export mit exakten Standorten als sensibel und lade ihn weder bei einem KI-Dienst hoch noch teile ihn mit Dritten, solange du nicht genau weißt, was das Archiv enthält.
+
+Die Exporterstellung läuft asynchron. Lass die Seite offen oder kehre später zurück, aktualisiere den letzten Job und lade das Archiv erst herunter, wenn der Status **Bereit** lautet. Die Seite zeigt Archivgröße und Ablaufzeit an. Einen fertigen, fehlgeschlagenen oder abgelaufenen Export-Job kannst du aus der Liste entfernen.
+
+## 7. Konto sicher löschen
+
+Die Kontolöschung ist dauerhaft und läuft asynchron. Bevor du sie auf dem Smartphone startest:
+
+1. Exportiere alle Daten, die du behalten möchtest.
+2. Prüfe die angezeigte Mitgliedschaft und den Abrechnungsanbieter.
+3. Kündige die Verlängerung, sofern der Ablauf dies verlangt.
+4. Lies und bestätige jede abschließende Zustimmung.
+5. Sende den Löschantrag ab und warte auf die Bestätigungsseite, bevor du den Ablauf verlässt.
+
+Der Antrag meldet dein Konto ab und beendet den aktiven Zugriff, während die Löschung im Hintergrund weiterläuft. Der Abschluss wird in der Regel innerhalb von 24 Stunden erwartet und kann bis zu 7 Tage dauern. Die Bestätigungsseite führt zurück zum Login; das alte Konto lässt sich danach nicht wiederherstellen.
+
+Der Umgang mit Abonnements hängt von der aktiven Abrechnungsquelle ab. Über das Web abgerechnete Verlängerungen müssen eventuell vor der Löschung gekündigt werden. Über Apple laufende Verlängerungen werden direkt über Apple verwaltet und können weiterlaufen, wenn du sie nach dem Löschen des Trainingload.ai-Kontos nicht separat bei Apple kündigst. Eine Kontolöschung beinhaltet keinen automatischen Anspruch auf Rückerstattung, und ein späterer erneuter Abo-Abschluss stellt gelöschte Daten nicht wieder her.
+
+## 8. Geräteübergreifende Einstellungen überprüfen
+
+Nach Änderungen an Konto, Verbindungen, Berechtigungen oder automatischen Updates:
+
+1. Speichere oder schließe die Aktion auf dem aktuellen Gerät ab.
+2. Kehre zur Quellenliste zurück und prüfe den angezeigten Status.
+3. Aktualisiere das andere Gerät.
+4. Prüfe, ob dieselbe Konto-E-Mail und die jeweilige serverseitige Einstellung angezeigt werden.
+5. Prüfe lokale Berechtigungen direkt im Betriebssystem des Geräts, auf dem sie erteilt wurden – lokale Berechtigungen werden nicht auf andere Smartphones übertragen.
+
+## Einrichtung überprüfen
+
+- Web- und mobile Sitzung zeigen dieselbe Konto-E-Mail.
+- E-Mail-Verifizierung und Passwortstatus passen zur gewünschten Anmeldemethode.
+- Health und Standort zeigen den erwarteten Gerätestatus.
+- Drittanbieter zeigen den erwarteten Verbindungsstatus auf dem Server.
+- Es sind nur die gewünschten Schalter für automatische Kennzahlen-Updates aktiv.
+- Mitgliedschaftsstatus und Nutzungsprotokoll passen zu jüngsten Gutschriften oder KI-Aktionen.
+- Ein angeforderter Export erreicht den Status Bereit, lässt sich vor Ablauf herunterladen und berücksichtigt die gewählte Standort-Datenschutzoption.
+- Design-, Einheiten-, Diagramm-, Zeitformat- und Spracheinstellungen bleiben nach erneutem Öffnen von Einstellungen erhalten.
+
+## Fehlerbehebung
+
+- **Der Bestätigungscode funktioniert nicht:** Gib alle sechs Ziffern ein, prüfe die E-Mail-Adresse und die Gültigkeit und fordere erst dann einen neuen Code an, wenn die Schaltfläche zum erneuten Senden aktiv ist.
+- **Die E-Mail-Adresse lässt sich nicht bearbeiten:** Eine E-Mail-Änderung ist in der aktuellen Konto-Oberfläche nicht vorgesehen; das Feld ist bewusst schreibgeschützt.
+- **Health ist autorisiert, aber nicht verbunden:** Öffne Health erneut, prüfe den App-/Server-/Geräte-Verbindungsstatus und nutze bei Bedarf die Option zum erneuten Verbinden.
+- **Standort bleibt abgelehnt:** Öffne die App-Einstellungen des Betriebssystems; eine einmal abgelehnte Berechtigung zeigt eventuell keinen neuen Systemdialog mehr an.
+- **Ein Anbieter erscheint nach OAuth als getrennt:** Aktualisiere den Quellenstatus, prüfe, ob dasselbe Trainingload.ai-Konto angemeldet ist, und kontrolliere die anbieterspezifischen Einstellungen.
+- **Eine automatische Kennzahl hat sich nicht geändert:** Prüfe, ob der Schalter aktiviert ist und ob aktuelle geeignete Aktivitäten genügend unterstützte Daten liefern.
+- **Die Nutzungsansicht wirkt leer:** Wähle einen größeren Zeitraum und prüfe, ob das Konto überhaupt KI-Gutschriften oder Verbrauchsereignisse hat.
+- **Die Mitgliedschaft lässt sich in der App nicht verwalten:** Die Verwaltung erscheint nur bei unterstützten aktiven Abo-Quellen; prüfe die angezeigte Abrechnungsquelle.
+- **Ein Export startet nicht:** Warte, bis der laufende Export-Job abgeschlossen ist, lade die Seite neu und versuche es erneut.
+- **Ein Export ist abgelaufen:** Entferne den abgelaufenen Job und fordere ein neues Archiv mit den gewünschten Datenschutzoptionen an.
+- **Die Kontolöschung wird durch ein Abonnement blockiert:** Folge dem im Löschdialog angezeigten Schritt für deinen Abrechnungsanbieter und aktualisiere anschließend den Status. Bei Apple-Abrechnung kündige die Verlängerung separat über Apple.
+- **Ein Zurücksetzen-Link wird abgelehnt:** Fordere eine neue E-Mail an und nutze den neuesten Link; verwende keinen bereits genutzten oder abgelaufenen Token.
+- **Die OAuth-Zustimmungsseite wirkt ungewohnt:** Lehne die Anfrage ab und prüfe anfragende App, Scopes, Konto und Rücksprungziel, bevor du es erneut versuchst.
+- **Eine Einstellung wirkt unverändert:** Klicke auf Speichern und öffne Einstellungen erneut; lokale Anzeigeoptionen und serverseitige Spracheinstellungen können sich zeitversetzt aktualisieren.
+
+## Nächste Schritte
+
+- [Trainingsdaten verbinden](/de/docs/guide/connect-data)
+- [Integrationen](/de/docs/guide/integrations)
+- [Profil, Schwellenwerte und Zonen](/de/docs/guide/profile-thresholds-zones)
+- [Mobile Aufzeichnung](/de/docs/guide/mobile-recording)
+- [Benachrichtigungen und automatische Auswertungen](/de/docs/guide/notifications-and-reviews)

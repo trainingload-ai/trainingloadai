@@ -1,0 +1,43 @@
+---
+title: MCP-Fehlerbehebung
+description: Diagnose von Problemen bei Server-Erkennung, OAuth, Berechtigungsumfängen (Scopes), Tools, Timeouts und veralteten Client-Zuständen in TrainingLoad MCP.
+---
+
+# MCP-Fehlerbehebung
+
+## Der Client findet den Server nicht
+
+Prüfe, ob die URL exakt `https://api.trainingload.ai/mcp` lautet – einschließlich `/mcp`. Der Client muss Remote Streamable HTTP unterstützen. Firmennetzwerke müssen HTTPS sowohl zu `api.trainingload.ai` als auch zu den TrainingLoad-Autorisierungsseiten zulassen.
+
+## OAuth öffnet sich nicht oder kehrt mit einem Fehler zum Client zurück
+
+- Starte den Vorgang direkt über die Verbindungsaktion des Clients, statt eine alte Autorisierungs-URL erneut zu öffnen.
+- Stelle sicher, dass der Client OAuth-Discovery und PKCE S256 unterstützt.
+- Prüfe, ob der Callback an dieselbe Client-Instanz zurückkehrt, die die Autorisierung gestartet hat.
+- Falls die Autorisierungsprüfung vorübergehend nicht erreichbar ist, warte das `Retry-After`-Intervall ab, bevor du es erneut versuchst.
+
+## Ein Tool fehlt
+
+Der Server filtert `tools/list` nach Kontoberechtigung und Rollout-Flags. `get_health_summary` bleibt sichtbar, bevor `health:read` erteilt wurde, damit ein Aufruf die inkrementelle Autorisierung auslösen kann. Fehlt ein anderes Tool, prüfe Kontoberechtigung und Rollout-Status und verbinde dich danach neu – füge niemals manuell ein Bearer-Token hinzu.
+
+## `INSUFFICIENT_SCOPE`
+
+Nutze die Aktion zum Neuverbinden oder Autorisieren im Client und bestätige den angeforderten Berechtigungsumfang (Scope). Ignoriert der Client die MCP-Aufforderung `mcp/www_authenticate`, entferne die Verbindung und füge sie erneut hinzu, damit der vollständige gewünschte schreibgeschützte Scope-Satz angefordert wird.
+
+## Leere Ergebnisse
+
+Ein leeres Ergebnis bedeutet, dass im angegebenen Datumsbereich keine passenden gespeicherten Daten vorliegen. Es bedeutet nicht „Trainingsbelastung gleich Null“, „kein Training“ oder „gesund/normal“. Prüfe die vom Tool zurückgegebene Zeitzone und den abgefragten Zeitraum und erweitere den Bereich bei Bedarf innerhalb der dokumentierten Grenzen.
+
+## `CAPABILITY_TIMEOUT`, Abbruch oder Rate-Limit
+
+- `CAPABILITY_TIMEOUT`: Grenze den Datumsbereich ein oder reduziere `limit` und versuche es einmal erneut.
+- `CAPABILITY_CANCELLED`: Der Client hat die Anfrage abgebrochen oder die Verbindung getrennt; starte eine neue Anfrage.
+- Rate-Limit: Warte das zurückgegebene Wiederholungsintervall ab. Sende keine schnellen Wiederholungen in einer Schleife.
+
+## Der Client zeigt weiterhin alte Tools an
+
+Aktualisiere oder leere den MCP-Tool-Cache des jeweiligen Clients. In ChatGPT kann eine veröffentlichte Workspace-App einen eingefrorenen Tool-Stand behalten, bis ein Administrator ihn aktualisiert. Führe in VS Code **MCP: Reset Cached Tools** aus. Falls nötig, entferne den Server und verbinde ihn neu.
+
+## Daten wirken unsicher oder gehören zu einem anderen Konto
+
+Beende die Nutzung der Verbindung und widerrufe sie sofort in TrainingLoad. Notiere den Client-Namen, den ungefähren Zeitpunkt und die Request-ID und kontaktiere den Support. Gib weder das Zugriffstoken noch die vollständige Nutzlast weiter.

@@ -1,0 +1,35 @@
+---
+title: Diagnosticare problemi con attività, carico e dati di recupero
+description: Parti dal sintomo visibile per risalire al dato mancante o allo stato di elaborazione prima di modificare soglie, sorgenti del carico o decisioni di allenamento.
+seoTitle: "Attività o carico di allenamento mancanti? Guida alla diagnosi"
+seoDescription: "Diagnostica attività mancanti, carico di allenamento assente, dati di recupero ed errori di elaborazione risalendo dal sintomo alla sorgente dati."
+keywords: ["dati attività mancanti", "carico di allenamento mancante", "problemi sincronizzazione attività", "dati di recupero"]
+---
+
+# Diagnosticare problemi con attività, carico e dati di recupero
+
+## Parti dal sintomo
+
+| Sintomo | Cosa controllare per prima cosa | Guida successiva probabile |
+| --- | --- | --- |
+| L'attività manca | Connessione al provider, intervallo di importazione e stato del file | [Collegare i dati](/it/docs/guide/connect-data) |
+| L'attività è duplicata | Più percorsi di importazione e identificativi della sorgente | [Integrazioni](/it/docs/guide/integrations) |
+| L'attività esiste ma non ha carico | Stato di elaborazione, durata, frequenza cardiaca, potenza, passo e soglie del profilo | [Dettaglio attività](/it/docs/guide/activity-detail) |
+| Grafici o giri non si caricano | Se il file sorgente contiene campioni e giri | [Caricare file attività](/it/docs/guide/upload-activity-files) |
+| Sonno, HRV o frequenza cardiaca a riposo sono vuoti | Permessi salute, copertura del provider, data e fuso orario | [Account, permessi e utilizzo](/it/docs/guide/account-permissions-and-usage) |
+| La PMC sembra insolitamente bassa o alta | Duplicati, giorni mancanti, sport selezionato, sorgente del carico e cambi di soglia | [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow) |
+
+## Diagnostica in ordine
+
+1. Conferma la sorgente prevista e l'intervallo temporale.
+2. Verifica se la sorgente ha fornito il flusso sensori richiesto.
+3. Controlla lo stato di importazione ed elaborazione.
+4. Verifica le soglie del profilo e la priorità della sorgente del carico.
+5. Confronta un'attività interessata dal problema con un'attività sicuramente corretta.
+6. Solo dopo modifica la configurazione o contatta il supporto.
+
+## Raccogli evidenze sicure per il supporto
+
+Includi data dell'attività, sport, sorgente, stato visibile, risultato atteso rispetto a quello effettivo e se il problema è riproducibile. Rimuovi indirizzi email, token OAuth, chiavi API, posizioni precise di casa e identificativi privati dei provider.
+
+Non modificare le soglie solo per ottenere un valore di carico che preferisci. Un cambio di configurazione influisce sulle interpretazioni successive e può alterare lo storico derivato.

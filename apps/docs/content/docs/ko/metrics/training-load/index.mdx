@@ -1,44 +1,81 @@
 ---
-title: Training Load
-description: Understand training load, TSS, IF, and TRIMP, and how load trends support fatigue management and adaptive endurance training plans.
-keywords: ["Training Load", "training load management", "TSS", "IF", "TRIMP", "training stress", "adaptive training plan"]
+title: "훈련 부하란 무엇인가요? TSS, TRIMP, IF 핵심 정리"
+description: "훈련 부하는 TSS, TRIMP, 강도 계수(IF)를 통해 단일 세션과 주간 훈련량을 정량화합니다. 각 지표로 훈련을 비교하고 플랜을 점검하는 방법을 알아보세요."
+keywords:
+  [
+    "훈련 부하란",
+    "훈련 부하 설명",
+    "TSS vs TRIMP",
+    "훈련 부하 지표",
+    "훈련 부하 측정 방법",
+  ]
 ---
 
-# Training Load
+# 훈련 부하란 무엇인가요? TSS, TRIMP, IF 핵심 정리
 
-**Training load** is a way to quantify how much stress a workout, week, or training block places on the body. It gives endurance athletes a shared language for comparing sessions, managing fatigue, and deciding whether an adaptive training plan should build, hold, recover, or adjust.
+**훈련 부하(Training load)**는 단일 훈련, 한 주, 또는 훈련 블록이 신체에 주는 자극의 양을 모델로 정량화한 값입니다. 이 허브 문서에서는 TSS, TRIMP, 강도 계수(IF) 지표군을 설명합니다. 이를 이해하면 장시간 저강도 훈련과 짧은 고강도 인터벌을 한 기준으로 비교하고, 훈련 플랜을 증량·유지·회복·조정 중 어느 방향으로 가져갈지 판단할 수 있습니다. 제품 내 실제 관리 워크플로는 [훈련 부하 관리](/ko/training-load)에서 다루며, 아래 하위 문서들은 각 지표의 정의를 상세히 설명합니다.
 
-Without a load metric, it is hard to compare “a 2-hour easy ride/run” with “a 30-minute interval session”. It is also harder to see whether recent load has risen faster than recovery can absorb.
+훈련 부하 지표가 없으면 “2시간 이지 라이딩/러닝”과 “30분 고강도 인터벌”을 객관적으로 비교하기 어렵습니다. 또한 최근 부하가 신체의 회복 속도를 앞질러 너무 빠르게 올라가고 있는지도 파악하기 어렵습니다.
 
-## Key Metrics
+## 핵심 지표
 
 <Cards>
-  <Card title="TSS (Training Stress Score)" href="/docs/metrics/training-load/training-stress-score" />
-  <Card title="IF (Intensity Factor)" href="/docs/metrics/training-load/intensity-factor" />
-  <Card title="TRIMP (Training Impulse)" href="/docs/metrics/training-load/training-impulse" />
+  <Card
+    title="TSS (훈련 스트레스 점수)"
+    href="/ko/docs/metrics/training-load/training-stress-score"
+  />
+  <Card
+    title="IF (강도 계수)"
+    href="/ko/docs/metrics/training-load/intensity-factor"
+  />
+  <Card
+    title="TRIMP (훈련 임펄스)"
+    href="/ko/docs/metrics/training-load/training-impulse"
+  />
 </Cards>
 
-## Why Quantify Training Load?
+## 훈련 부하를 정량화하는 이유
 
-1.  **Objective comparison**: evaluate different durations and session types with a single yardstick.
-2.  **Progress tracking**: ensure weekly load increases gradually and avoid injury risk from sudden spikes.
-3.  **Recovery management**: higher load requires more recovery; quantification helps you plan training and rest more rationally.
+1. **객관적 비교**: 운동 시간과 유형이 다른 세션들을 하나의 일관된 척도로 평가할 수 있습니다.
+2. **추세 추적**: 주간 모델링 부하가 완만하게 증가하는지, 급격히 치솟았는지 한눈에 파악할 수 있습니다.
+3. **회복 맥락 확보**: 부하 이력을 세션 수행 품질 및 선수 피드백과 결합해 훈련과 휴식을 계획할 수 있습니다.
 
-## How Training Load Supports Adaptive Planning
+## 적응형 훈련 플랜에서 훈련 부하의 역할
 
-Training load is not the plan itself. It is the evidence layer behind better plan decisions:
+훈련 부하 자체가 훈련 플랜은 아닙니다. 더 나은 플랜 의사결정을 뒷받침하는 근거 계층입니다.
 
--   **After completed workouts**: actual load can be compared with planned load instead of relying only on completion status.
--   **During review**: CTL, ATL, and TSB help separate long-term fitness trends from short-term fatigue.
--   **Before adjustment**: missed workouts, unusually high fatigue, or a fast load ramp can justify changing the next few sessions.
+- **훈련 완료 후**: 단순 완료 여부만 보지 않고 계획된 부하와 실제 수행 부하를 비교합니다.
+- **리뷰 단계**: CTL, ATL, TSB는 완만한 장기 부하 추세와 빠른 최근 부하 추세를 비교해 주지만, 체력·피로·경기 준비도를 직접 측정하지는 않습니다.
+- **조정 전 판단**: 빠진 훈련, 평소보다 높은 피로도, 가파른 부하 상승은 앞으로 며칠간의 훈련을 조정할 합리적 근거가 됩니다.
 
-Trainingload.ai uses this pattern throughout the product loop: plan → completed workouts → load trend → AI coach review → confirmed adjustment.
+Trainingload.ai는 `훈련 플랜 → 완료된 훈련 → 부하 추세 → AI 코치 리뷰 → 사용자 확인 후 조정`의 제품 순환 구조 전반에 이 패턴을 적용합니다.
 
-## Related Concepts
+## 자주 묻는 질문
 
--   [Training Stress Score (TSS)](/docs/metrics/training-load/training-stress-score): single-session training stress.
--   [Intensity Factor (IF)](/docs/metrics/training-load/intensity-factor): workout intensity relative to threshold.
--   [Training Impulse (TRIMP)](/docs/metrics/training-load/training-impulse): heart-rate-based internal load.
--   [Chronic Training Load (CTL)](/docs/metrics/pmc/chronic-training-load): longer-term load trend.
--   [Acute Training Load (ATL)](/docs/metrics/pmc/acute-training-load): recent fatigue trend.
--   [Training Stress Balance (TSB)](/docs/metrics/pmc/training-stress-balance): freshness derived from CTL and ATL.
+### 훈련 부하란 무엇인가요?
+
+훈련 부하는 모델링된 훈련 자극의 크기입니다. TSS나 TRIMP 같은 세션 점수가 단일 훈련을 추정하고, CTL과 ATL이 이를 시간에 따라 요약해 주므로 단순히 “운동을 했는가”를 넘어 주간 단위로 부하를 비교할 수 있습니다.
+
+### TSS vs TRIMP: 어떤 지표로 훈련 부하를 측정하나요?
+
+파워나 신뢰할 수 있는 페이스가 있을 때는 주로 외부 부하 지표인 TSS를 사용합니다. TRIMP는 심박수와 운동 시간으로 계산하는 내부 부하 지표입니다. Trainingload.ai는 종목과 설정된 부하 소스 우선순위에 따라 두 지표를 모두 활용할 수 있습니다.
+
+### 러닝과 사이클링의 훈련 부하는 어떻게 측정하나요?
+
+사이클링은 보통 NP, IF, FTP를 이용한 파워 TSS를 사용합니다. 러닝은 NGP와 역치 페이스를 이용한 rTSS를 쓰거나, 심박수만 신뢰할 수 있을 때 TRIMP를 사용합니다. 서로 다른 종목 간 점수를 비교하기 전에 먼저 같은 종목 내에서 일관되게 비교하세요.
+
+### 이 허브 다음에는 무엇을 보면 좋나요?
+
+[TSS](/ko/docs/metrics/training-load/training-stress-score), [TRIMP](/ko/docs/metrics/training-load/training-impulse), [강도 계수(IF)](/ko/docs/metrics/training-load/intensity-factor) 정의 문서를 차례로 확인해 보세요. 그다음 [훈련 플랜에서 CTL, ATL, TSB로 훈련 부하 관리하기](/ko/training-load)로 넘어가실 수 있습니다.
+
+## 관련 개념
+
+- [훈련 스트레스 점수 (TSS)](/ko/docs/metrics/training-load/training-stress-score): 단일 세션의 훈련 스트레스
+- [강도 계수 (IF)](/ko/docs/metrics/training-load/intensity-factor): 역치 대비 훈련 강도
+- [훈련 임펄스 (TRIMP)](/ko/docs/metrics/training-load/training-impulse): 심박수 기반 내부 훈련 부하
+- [시간, NP, FTP로 TSS 계산하기](/ko/tss-calculator)
+- [일일 TSS로 CTL, ATL, TSB 시뮬레이션하기](/ko/training-load-calculator)
+- [만성 훈련 부하 (CTL)](/ko/docs/metrics/pmc/chronic-training-load): 장기 훈련 부하 추세
+- [급성 훈련 부하 (ATL)](/ko/docs/metrics/pmc/acute-training-load): 빠른 최근 훈련 부하 추세
+- [훈련 스트레스 균형 (TSB)](/ko/docs/metrics/pmc/training-stress-balance): 현재 CTL에서 현재 ATL을 뺀 값
+- [AI 코치 리뷰로 안전하게 훈련 부하 조정하기](/ko/ai-training-plan)

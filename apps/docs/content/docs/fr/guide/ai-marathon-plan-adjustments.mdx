@@ -1,48 +1,123 @@
 ---
-title: AI Marathon Plan Adjustments
-description: A conservative method for using AI-generated marathon workout adjustments with explicit confirmation.
-keywords: ["AI marathon training plan", "marathon workout adjustments", "adaptive marathon plan", "AI coach"]
+title: Ajustements de plan marathon avec le Coach IA
+description: Une méthode prudente pour exploiter les ajustements de séances marathon générés par le Coach IA avec confirmation explicite.
+keywords:
+  [
+    "plan d’entraînement marathon IA",
+    "ajustements de séances marathon",
+    "plan marathon adaptatif",
+    "Coach IA",
+  ]
 ---
 
-# AI Marathon Plan Adjustments
+# Ajustements de plan marathon avec le Coach IA
 
-AI adjustments are strongest when they are conservative, explicit, and reviewable.
+Le Coach IA peut relier le contexte du plan, des activités et de la charge d’entraînement, puis rédiger une proposition d’ajustement. Il ne doit pas réécrire silencieusement un bloc marathon. Utilisez-le pour produire une proposition explicite et prudente que vous examinez avant confirmation.
 
-## Trigger checklist
+## Avant de commencer
 
-Use AI adjustment drafts when one or more are true:
+- Ouvrez le bon plan actif et vérifiez ses dates, son objectif et la semaine en cours.
+- Laissez les activités récentes terminer leur traitement et associez-les aux séances planifiées.
+- Consultez la fenêtre PMC pertinente et, si utile, la tendance de VO2max effective / VDOT.
+- Ajoutez vos contraintes réelles : jours disponibles, douleurs ou maladie, déplacements, matériel et séance clé prioritaire.
+- Choisissez une seule décision. Exemples : conserver ou déplacer la séance à allure marathon de demain, alléger les sept prochains jours, ou réagir à une sortie longue manquée.
+- Ne demandez au Coach IA ni avis médical ni diagnostic de blessure.
 
-- Key sessions are repeatedly missed.
-- ATL is climbing faster than expected.
-- TSB remains strongly negative near quality days.
-- effective VO2max trend stalls across 10-14 days.
+## 1. Partir du contexte du plan
 
-## Adjustment order
+Ouvrez le Coach IA depuis le plan actif ou indiquez précisément le plan et la semaine ciblée dans une nouvelle conversation. Entrer depuis le plan limite le risque d’analyser le mauvais calendrier.
 
-Use this sequence:
+Structurez votre demande en quatre parties :
 
-1. Keep training frequency stable.
-2. Modify one major variable first (volume or intensity).
-3. Protect long run and marathon-pace quality.
-4. Re-evaluate after next key workout.
+1. **Décision :** la question unique à trancher.
+2. **Éléments factuels :** séances réalisées et manquées, dynamique PMC, tendance de réponse et ressenti subjectif.
+3. **Contraintes :** dates et séances qui ne doivent pas bouger.
+4. **Livrable attendu :** un seul brouillon prudent accompagné d’un point de contrôle.
 
-## Confirmation standard
+Exemple :
 
-Before applying AI changes, confirm:
+> Analyse la semaine 7 de mon plan marathon actif. La séance au seuil de mardi a été plus dure que prévu, l’ATL a grimpé après le week-end, et la sortie longue de samedi doit rester en place. Propose au maximum un changement pour les sept prochains jours. Préserve la fréquence hebdomadaire et explique les éléments retenus, la modification exacte de séance et le prochain point de contrôle. Ne l’applique pas encore.
 
-- Why the change was proposed.
-- What exactly changes in the session.
-- Which risk is reduced.
-- What metric will validate the change.
+## 2. Vérifier les éléments utilisés
 
-## Common safe edits
+Avant de discuter d’un changement, vérifiez que la réponse mentionne bien :
 
-- Replace one threshold run with easy aerobic.
-- Shorten one quality session but keep structure.
-- Shift a key workout by 24-48 hours.
+- Le bon plan, la bonne semaine et le bon sport.
+- Les bonnes séances réalisées ou manquées.
+- Une plage de dates pertinente pour CTL, ATL et TSB.
+- La véritable prochaine séance clé.
+- Les contraintes que vous avez indiquées.
 
-## Related pages
+Si l’une de ces cibles est erronée, arrêtez-vous et reformulez-la. Ne confirmez jamais une recommandation séduisante mais bâtie sur le mauvais enregistrement.
 
-- [AI marathon training plan](/marathon-training-plan)
-- [AI coach usage guide](/docs/guide/ai-coach)
-- [PMC-based marathon adjustment](/docs/guide/pmc-marathon-adjustment)
+## 3. Demander le plus petit changement possible
+
+Suivez cet ordre d’ajustement :
+
+1. Conserver le plan inchangé lorsque les éléments sont insuffisants.
+2. Déplacer une séance sans modifier son objectif.
+3. Raccourcir une séance tout en préservant sa structure.
+4. Remplacer une séance qualitative non essentielle par de l’endurance facile ou du repos.
+5. Modifier le volume ou l’intensité hebdomadaire plus largement uniquement lorsque les options plus légères ne règlent pas le problème.
+
+Évitez de modifier simultanément la fréquence, le volume, l’intensité et le placement des séances clés : il deviendrait difficile d’en attribuer l’effet ou de revenir en arrière.
+
+<DocsScreenshot
+  id="ai-adjustment-confirmation"
+  title="Examiner un ajustement de séance proposé par l’IA"
+  description="La proposition doit identifier ses éléments justificatifs, montrer un seul changement précis sur une séance future, préserver vos contraintes et rester non confirmée tant que vous ne l’avez pas relue."
+  route="Coach → Afficher le calendrier des séances"
+/>
+
+## 4. Relire la proposition avant confirmation
+
+Sélectionnez **Afficher le calendrier des séances** dans la conversation avec le coach. Comparez les séances d’origine et les séances proposées dans l’aperçu.
+
+| Contrôle | Question |
+| --- | --- |
+| Cible | S’agit-il bien de la séance future et de la date visées ? |
+| Périmètre | Une seule variable principale change-t-elle ? |
+| Objectif | La séance sert-elle toujours l’objectif prévu du bloc marathon ? |
+| Contraintes | La sortie longue protégée, la course, le jour de repos et les disponibilités restent-ils intacts ? |
+| Justification | L’explication distingue-t-elle les données observées de l’interprétation ? |
+| Suivi | Le prochain point de contrôle est-il explicite ? |
+
+Refusez ou demandez une révision du brouillon s’il modifie l’historique réalisé, le mauvais plan, plusieurs séances sans lien ou une contrainte protégée.
+
+## 5. Confirmer, puis contrôler le plan
+
+Sélectionnez **Confirmer les modifications du plan** après relecture du calendrier. Ensuite :
+
+1. Rouvrez le plan actif ou le calendrier.
+2. Vérifiez la date, le sport, la durée et la structure de la séance ciblée.
+3. Confirmez que les séances voisines n’ont pas changé de manière inattendue.
+4. Consignez la justification dans le plan ou dans le contexte de bilan lorsque c’est possible.
+5. Fixez un point de contrôle après la prochaine séance clé comparable.
+
+Si Annuler est proposé et que le résultat appliqué ne convient pas, utilisez-le rapidement. Sinon, modifiez directement la séance future concernée après avoir vérifié la dernière version du plan.
+
+## Vérifier l’ajustement
+
+- Le Coach IA s’est appuyé sur le bon plan, la bonne semaine, les bonnes activités et la bonne plage de dates.
+- La proposition affichait l’effet exact avant/après avant confirmation.
+- Seule la séance future visée a été modifiée.
+- L’historique des séances terminées, ignorées ou associées est resté intact.
+- Les contraintes protégées et l’objectif du bloc marathon ont été préservés.
+- Le plan actif et le calendrier affichent la même séance mise à jour.
+- Un prochain point de contrôle précis est défini.
+
+## Dépannage
+
+- **La réponse est générique :** partez de la page du plan, nommez précisément la semaine et la séance, et indiquez les données pertinentes ainsi que vos contraintes.
+- **La mauvaise activité ou le mauvais plan est cité :** ne confirmez pas. Ouvrez le bon enregistrement ou démarrez une nouvelle conversation dans le contexte du plan.
+- **La proposition réécrit trop d’éléments :** demandez un seul changement, une seule variable principale, le respect des contraintes protégées et une portée maximale de sept jours.
+- **L’action échoue à cause d’un conflit de version :** rechargez le plan actif, comparez la dernière version et demandez ou appliquez de nouveau le changement minimal.
+- **La séance appliquée est inattendue :** utilisez Annuler immédiatement si disponible ; sinon, inspectez le plan et corrigez manuellement uniquement la séance future.
+- **Les données sont encore en traitement ou incomplètes :** laissez le plan inchangé, terminez le traitement ou l’association des données, puis revenez une fois le contexte complet.
+- **Des douleurs, une maladie ou des symptômes inhabituels motivent la question :** adressez-vous à un professionnel de santé ou un entraîneur qualifié ; le Coach IA ne peut ni poser un diagnostic ni autoriser la reprise.
+
+## Étapes suivantes
+
+- Découvrir l’ensemble du fonctionnement d’interaction et d’annulation du [Coach IA](/fr/docs/guide/ai-coach).
+- Évaluer la pression de charge avec le [PMC pour les ajustements marathon](/fr/docs/guide/pmc-marathon-adjustment).
+- Poursuivre l’exécution et la vérification dans [Gérer un plan actif](/fr/docs/guide/manage-active-plan).

@@ -1,58 +1,118 @@
 ---
-title: Training Analysis Workflow
-description: A practical workflow for turning training analysis into daily decisions using plan vs actual, training load, and AI review.
-keywords: ["training analysis app", "endurance training analysis", "plan vs actual", "training load workflow"]
+title: 훈련 분석 워크플로
+description: 플랜 실행 기록, 완료된 활동 근거, 훈련 부하, 반응 추세, AI 리뷰를 종합해 보수적이고 실용적인 하나의 훈련 의사결정으로 연결합니다.
+keywords:
+  [
+    "훈련 분석 앱",
+    "지구력 훈련 분석",
+    "계획 대 실제 비교",
+    "훈련 부하 워크플로",
+  ]
 ---
 
-# Training Analysis Workflow
+# 훈련 분석 워크플로
 
-Training analysis is useful only when it changes a decision.
-Use this workflow to avoid collecting metrics without acting on them.
+훈련 분석은 실제 의사결정을 더 나아지게 만들 때 비로소 가치가 있습니다. 이 워크플로는 지표가 가득한 대시보드가 서로 관련 없는 점수 모음으로 그치지 않고 하나의 명확한 행동으로 이어지도록 돕습니다.
 
-## Step 1: Compare plan vs actual
+## 시작하기 전에
 
-Before reading any score, answer:
+- "내일 핵심 워크아웃을 그대로 진행할까?"처럼 하나의 의사결정과 기간을 정합니다.
+- 관련 활동이 모두 준비 완료(Ready) 상태에 도달할 때까지 기다립니다.
+- 역치, 시간대, 종목 필터, 부하 소스 우선순위를 확인합니다.
+- 플랜과 관련된 질문이라면 완료된 활동을 예정된 워크아웃에 연결해 둡니다.
+- 가능하면 세션 RPE나 현재 상태 같은 주관적 컨디션 맥락을 기록해 둡니다.
 
-- What was planned?
-- What was completed?
-- Which key sessions drifted?
+## 1. 지표가 아니라 질문부터 정의하기
 
-If you skip this step, load metrics lose context.
+숫자부터 보기 전에 내려야 할 결정을 먼저 명확히 하세요.
 
-## Step 2: Read load and response together
+- 다음 핵심 워크아웃을 계획대로 유지해야 하는가?
+- 이번 주 훈련이 의도한 훈련 자극을 전달했는가?
+- 반복되는 수행 부진의 원인이 일정, 누적 부하, 워크아웃 설계 중 어디에 있는가?
 
-Use these signals as a set:
+질문에 맞는 종목과 기간을 설정합니다. 최근 7일 실행 여부를 판단하는 질문에 전체 기간 차트를 섞어 보지 마세요.
 
-- [CTL](/docs/metrics/pmc/chronic-training-load): long-term load trend.
-- [ATL](/docs/metrics/pmc/acute-training-load): recent stress.
-- [TSB](/docs/metrics/pmc/training-stress-balance): freshness context.
-- effective VO2max trend: whether stress is translating into performance.
+## 2. 계획과 실제 수행 비교하기
 
-Load tells you pressure. Response tells you adaptation.
+어떤 점수를 읽기 전에 먼저 아래 질문에 답해 보세요.
 
-## Step 3: Draft one conservative change
+- 무엇이 계획되어 있었는가?
+- 어떤 워크아웃이 완료, 건너뜀, 이동 또는 미연결 상태로 남았는가?
+- 어떤 핵심 세션이 시간, 강도, 구성 또는 부하 면에서 계획과 달랐는가?
+- 그 차이는 의도된 조정이었는가?
 
-Avoid changing everything at once.
-Choose one primary adjustment:
+이 단계를 건너뛰면 훈련 부하 지표는 훈련 맥락과 목적을 잃게 됩니다.
 
-- Reduce intensity but keep frequency.
-- Keep intensity but trim duration.
-- Move one key session by 24-48 hours.
+## 3. 근거 데이터 검증하기
 
-Then observe the next key session before adjusting again.
+합계 수치 뒤에 있는 개별 활동을 직접 열어 확인합니다.
 
-## Step 4: Confirm and log rationale
+- 처리 상태와 원본 플랫폼
+- 센서 데이터 포함 여부와 명백한 오류 유무
+- 역치 및 존 설정 맥락
+- 활동 부하가 어떤 소스(파워, 심박수, 페이스, RPE)에서 계산되었는지
+- 해석을 바꿀 수 있는 지형, 날씨, 장비 등 수행 환경
 
-Record what changed and why:
+누락된 신호를 그럴듯한 추측으로 채우기보다 "이 신호는 비어 있다"고 명시하는 편이 훨씬 정확합니다.
 
-- Trigger (e.g. ATL rising too fast).
-- Decision (e.g. threshold -> easy aerobic).
-- Expected outcome (e.g. protect quality in next long run).
+## 4. 훈련 부하와 신체 반응을 함께 읽기
 
-This makes future reviews faster and more reliable.
+PMC 지표는 반드시 한 세트로 함께 읽어야 합니다.
 
-## Recommended navigation
+- [CTL](/ko/docs/metrics/pmc/chronic-training-load): 장기 훈련 부하(체력) 추세
+- [ATL](/ko/docs/metrics/pmc/acute-training-load): 최근 단기 훈련 압력(피로)
+- [TSB](/ko/docs/metrics/pmc/training-stress-balance): 장기 부하와 최근 부하의 차이(컨디션)
 
-- [Manage training load in your plan](/training-load)
-- [Use AI review for adjustment drafts](/ai-training-plan)
-- [Analyze pacing and execution details](/docs/guide/activity-detail)
+그런 다음 이를 수행 품질, 주관적 피로감, 관련 반응 추세와 비교합니다. 훈련 부하는 가해진 압력의 크기를 나타낼 뿐, 그 자체로 신체 적응(기량 향상)을 증명하지는 않습니다.
+
+<DocsScreenshot
+  id="training-analysis-decision"
+  title="의사결정 맥락 속의 훈련 부하"
+  description="하나의 기간 범위 안에서 CTL, ATL, TSB를 해당 추세를 만든 실제 활동 및 진행 중인 플랜 기간과 연결해 봅니다."
+  route="Analysis → PMC"
+/>
+
+## 5. 보수적인 단일 변경안 작성하기
+
+먼저 핵심 변수 하나만 조정해 보세요.
+
+- 훈련 빈도는 유지하고 한 세션의 강도만 낮추기
+- 워크아웃 목적은 유지하고 운동 시간만 줄이기
+- 핵심 세션 하나만 24~48시간 미루기
+- 플랜은 그대로 두고 다음 핵심 세션의 결과를 지켜보기
+
+조정 과정에서 전체 훈련 블록이 의도치 않게 뒤바뀌지 않도록 '그대로 유지할 항목'도 함께 명시하세요.
+
+## 6. 근거를 기록하고 변경 확정하기
+
+플랜 변경을 적용하기 전에 다음 다섯 가지를 정리합니다.
+
+- **계기(Trigger)**: 리뷰를 촉발한 플랜/실행 또는 부하 패턴
+- **결정(Decision)**: 변경할 정확한 워크아웃과 수정 항목
+- **유지할 의도(Protected intent)**: 플랜이 계속 달성해야 할 본래 목적
+- **기대 결과(Expected result)**: 개선되거나 안정되기를 기대하는 변화
+- **재검토 시점(Review point)**: 이 결정을 검증할 다음 활동 또는 날짜
+
+AI 코치가 조정안을 준비한 경우에도 이 다섯 가지가 명확해진 뒤에 제안된 워크아웃을 확인하고 확정하세요.
+
+## 결정 검증 체크리스트
+
+- 모든 결론이 Trainingload.ai에서 확인 가능한 플랜, 활동, 설정 또는 추세로 추적됩니다.
+- 관측된 데이터와 해석·불확실성이 분리되어 있습니다.
+- 의도한 미래 워크아웃만 변경됩니다.
+- 이미 완료되거나 건너뛴 과거 기록은 그대로 보존됩니다.
+- 구체적인 다음 재검토 시점이 정해져 있습니다.
+
+## 문제 해결
+
+- **지표들이 서로 다른 방향을 가리킴:** 어느 한 신호를 "정답"으로 고르기 전에 날짜 범위, 종목, 역치, 부하 소스를 비교하세요.
+- **설정 변경 후 차트가 달라짐:** 변경된 역치나 부하 소스 우선순위를 확인하고 과거 이력도 같은 기준으로 재해석합니다.
+- **계획과 실제를 비교할 수 없음:** 올바른 활동을 연결하고 예정 워크아웃에 예상 부하를 계산할 충분한 구조가 있는지 확인합니다.
+- **AI가 대규모 전면 수정을 제안함:** 유지해야 할 제약을 명시해 보수적인 단일 변경안을 요청하고 반드시 확정 절차를 거치세요.
+- **근거가 충분하지 않음:** 플랜을 유지하거나 가장 안전하게 되돌릴 수 있는 작은 조정만 적용한 뒤 다음 관련 세션 데이터를 수집합니다.
+
+## 다음 단계
+
+- [진행 중인 플랜 관리](/ko/docs/guide/manage-active-plan)
+- [활동 상세 분석](/ko/docs/guide/activity-detail)
+- [AI 코치](/ko/docs/guide/ai-coach)

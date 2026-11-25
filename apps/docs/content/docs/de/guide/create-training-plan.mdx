@@ -1,110 +1,166 @@
 ---
-title: Create a Training Plan
-description: Create a manual or AI-assisted training plan in Trainingload.ai, review the draft, and activate it when the schedule is ready.
-keywords: ["create training plan", "AI training plan", "manual training plan", "Trainingload.ai plan"]
+title: Trainingsplan erstellen
+description: Erstelle einen Trainingsplan in Trainingload.ai aus einer offiziellen Vorlage, mit dem KI-Coach oder manuell, prüfe den Entwurf und aktiviere ihn, sobald alles passt.
+keywords:
+  [
+    "Trainingsplan erstellen",
+    "KI-Trainingsplan",
+    "manueller Trainingsplan",
+    "Trainingload.ai Plan",
+  ]
 ---
 
-# Create a Training Plan
+# Trainingsplan erstellen
 
-Trainingload.ai supports two plan creation paths:
+Trainingload.ai unterstützt vier Wege zur Planerstellung:
 
-- **Manual plan**: you build the plan week by week.
-- **AI-assisted plan**: you provide a brief, then AI Coach drafts a plan for review.
+- **Laufender Trainingsplan**: Lege eine langfristige Ausrichtung fest und erstelle den kommenden Zeitplan schrittweise in Etappen.
+- **Offizielle Vorlage**: Prüfe einen redaktionell geprüften Plan in der Vorschau, passe ihn an deinen Kalender an und erstelle einen Entwurf ohne KI-Credits zu verbrauchen.
+- **Manueller Plan**: Du baust den Trainingsplan Woche für Woche selbst auf.
+- **KI-gestützter Plan**: Du gibst ein Briefing vor, und der KI-Coach entwirft einen Plan zur Prüfung.
 
-Both paths produce the same core object: a structured training plan with weeks, days, workouts, sport types, planned workout text, and optional notes.
+Jeder Weg speichert zunächst einen Planentwurf. Prüfe Wochenstruktur, Sportarten, Inhalte der Einheiten und Notizen, bevor du ihn aktivierst.
 
-## Before you create a plan
+## Bevor du einen Plan erstellst
 
-Check these items first:
+Kontrolliere zuerst diese Punkte:
 
-- Your profile and thresholds are up to date.
-- Your recent activities have finished processing.
-- Your training goal is specific enough to guide scheduling.
-- Your available training days and session duration are realistic.
+- Profil und Schwellenwerte sind aktuell.
+- Deine letzten Aktivitäten sind vollständig verarbeitet.
+- Dein Trainingsziel ist konkret genug, um die Struktur zu steuern.
+- Deine verfügbaren Trainingstage und die Zeit pro Einheit sind realistisch.
 
-Thresholds and recent activity history help Trainingload.ai estimate plan load and give AI Coach better context. If those inputs are missing, the plan can still be created, but load estimates and recommendations may be less precise.
+Schwellenwerte und aktuelle Aktivitätshistorie helfen Trainingload.ai dabei, die erwartete Planbelastung zu schätzen und dem KI-Coach besseren Kontext zu geben. Fehlen diese Angaben, lässt sich trotzdem ein Plan erstellen – Belastungsschätzungen und Empfehlungen fallen dann jedoch ungenauer aus.
 
-## Manual plan
+## Erstellungsweg wählen
 
-Use the manual flow when you already know the structure you want.
+1. Öffne **Pläne** und wähle die Aktion zum Erstellen.
+2. Wähle **Offizielle Vorlagen**, wenn ein geprüfter Plan bereits zu deinem Ziel und aktuellen Leistungsstand passt.
+3. Wähle **Manuell**, wenn dein Zeitplan bereits feststeht.
+4. Wähle **KI-gestützt**, wenn Ziel und Rahmenbedingungen klar sind, die Wochenstruktur aber noch entworfen werden soll.
+5. Wähle einen **laufenden Plan**, wenn du in aufeinanderfolgenden Blöcken trainieren möchtest.
+6. Prüfe den Entwurf gründlich, bevor du den [Plan startest](/de/docs/planning/plan-lifecycle#activate).
 
-The manual flow usually has three steps:
+<DocsScreenshot
+  id="plan-create-paths"
+  title="Trainingsziel für den KI-Coach beschreiben"
+  description="Das KI-Planformular erfasst Sportart, Ziel, Zyklus und Krafttrainings-Präferenzen, bevor der Coach einen Entwurf generiert."
+  route="Plan → Erstellen → KI"
+/>
 
-- Enter the plan name, duration, and description.
-- Add workouts to the weekly calendar.
-- Review the plan preview and save it.
+## Laufender Trainingsplan
 
-Each workout can include:
+Wähle einen laufenden Plan, wenn du auf ein langfristiges Ziel hinarbeitest und die kommenden Trainingsabschnitte schrittweise generieren möchtest. Prüfe jeweils das aktuelle Trainingsfenster, bevor du das nächste öffnest.
 
-- Sport type.
-- Week, day, and session order.
-- Workout text.
-- Workout name.
-- Notes.
+## Offizielle Vorlagen
 
-Manual plans are useful when a coach has already written the training, or when you are copying a plan from another source and want Trainingload.ai to track execution.
+Nutze eine offizielle Vorlage, wenn Einstiegsvoraussetzungen und wöchentliche Häufigkeit bereits zu deinem gewünschten Ziel passen. Die Laufbibliothek umfasst drei 5-km-Pläne sowie Finish-, Improve- und Target-Pläne für [10 km](/de/10k-training-plan), [Halbmarathon](/de/half-marathon-training-plan) und [Marathon](/de/marathon-training-plan) – insgesamt 12 geprüfte Vorlagen.
 
-## AI-assisted plan
+Die vollständige Vorschau der Vorlage ist kostenlos. Wähle ein Startdatum und deine Trainingstage, bevor du einen Entwurf erstellst; zum Anlegen des Entwurfs ist PLUS oder PRO erforderlich. Weder Vorschau noch Erstellung rufen ein KI-Modell auf oder verbrauchen KI-Credits.
 
-Use the AI flow when you want Trainingload.ai to help draft the structure.
+So funktionieren offizielle Vorlagen:
 
-The plan brief can include:
+1. Offizielle Vorlagen werden vor der Veröffentlichung sorgfältig ausgearbeitet und geprüft. Du siehst dir eine bestehende Vorlage in der Vorschau an, statt die KI einen neuen Plan generieren zu lassen.
+2. Die Vorschau verteilt die Einheiten auf dein Startdatum und deine Trainingstage und nutzt jüngste Läufe, gespeicherte Fitnesswerte sowie optional ein Wettkampfergebnis, um – soweit möglich – Pace-Ziele festzulegen. Finish- und Improve-Pläne greifen auf RPE und den Sprechtest zurück, wenn keine belastbaren Pace-Daten vorliegen. Target-Pläne erfordern zusätzlich einen gespeicherten Zielwettkampf sowie einen belastbaren Nachweis deiner aktuellen Leistungsfähigkeit.
+3. Nach dem Erstellen kann der KI-Coach geplantes und absolviertes Training vergleichen, Belastung und Erholung erklären und überprüfbare Anpassungen vorschlagen. Prüfe solche Vorschläge immer, bevor du sie auf deinen Plan anwendest.
 
-- Main sport or sports.
-- Training intent, such as race preparation, fitness build, skill focus, return to training, or health and fat loss.
-- Plan duration.
-- Weekly training days.
-- Typical daily training time.
-- Race discipline and distance when relevant.
+## Manueller Plan
 
-After you submit the brief, AI Coach receives the plan request and can generate a draft. Review the draft before saving it as a plan.
+Nutze den manuellen Ablauf, wenn du die gewünschte Struktur bereits kennst.
 
-## Review the draft
+In der Regel umfasst er drei Schritte:
 
-Before saving or activating a plan, check:
+- Planname, Dauer und Beschreibung eintragen.
+- Einheiten in den Wochenkalender einfügen.
+- Planvorschau prüfen und speichern.
 
-- Does the weekly rhythm match your real schedule?
-- Are hard days separated well enough from other hard days?
-- Are easy or recovery days actually easy?
-- Does the plan start from your current fitness rather than your target fitness?
-- Are sport types and workout descriptions correct?
-- Is the total volume plausible for the next few weeks?
+Jede Einheit kann enthalten:
 
-If something is off, edit the plan before you activate it.
+- Sportart.
+- Woche, Tag und Reihenfolge der Einheit.
+- Trainingstext.
+- Name der Einheit.
+- Notizen.
 
-## Save vs activate
+Manuelle Pläne eignen sich besonders, wenn ein Trainer den Plan bereits geschrieben hat oder du einen Plan aus einer anderen Quelle überträgst und die Umsetzung in Trainingload.ai verfolgen möchtest.
 
-A saved plan may still be a draft. A draft is useful for review, editing, or comparison.
+## KI-gestützter Plan
 
-Activate the plan when you are ready to execute it. Activation gives the plan a start date and lets Trainingload.ai treat its workouts as the current schedule.
+Nutze den KI-Ablauf, wenn Trainingload.ai dir beim Entwerfen der Struktur helfen soll.
 
-After activation, the plan can be connected to:
+Das Planbriefing kann umfassen:
 
-- Calendar and current plan views.
-- Completed activities.
-- Expected vs actual load.
-- AI Coach follow-up.
+- Hauptsportart oder Sportarten.
+- Trainingsziel wie Wettkampfvorbereitung, Fitnessaufbau, Technikfokus, Wiedereinstieg oder Gesundheit und Fettabbau.
+- Plandauer.
+- Wöchentliche Trainingstage.
+- Typische tägliche Trainingszeit.
+- Wettkampfdisziplin und -distanz, sofern relevant.
 
-## Expected load
+Nach dem Absenden erhält der KI-Coach die Plananfrage und erstellt einen Entwurf. Prüfe diesen Entwurf genau, bevor du ihn als Plan speicherst.
 
-Trainingload.ai can estimate the expected load of planned workouts when the workout structure and your thresholds provide enough signal.
+## Entwurf überprüfen
 
-In general:
+Prüfe vor dem Speichern oder Aktivieren eines Plans:
 
-- Draft plans may not have final expected-load snapshots.
-- Active or paused plans can use expected load during execution review.
-- Expected load is an estimate, not a promise of how the workout will feel.
+- Passt der Wochenrhythmus zu deinem realen Alltag?
+- Liegen intensive Tage weit genug auseinander?
+- Sind lockere Tage und Erholungstage wirklich locker?
+- Startet der Plan bei deiner aktuellen Fitness statt bei deiner angestrebten Ziel-Fitness?
+- Stimmen Sportarten und Einheitenbeschreibungen?
+- Ist der Gesamtumfang für die nächsten Wochen realistisch?
 
-Read [Training Load](/docs/metrics/training-load) for the metric background.
+Wenn etwas nicht passt, bearbeite den Plan vor der Aktivierung.
 
-## After creating the plan
+## Speichern vs. Aktivieren
 
-Open the plan detail page and confirm:
+Ein gespeicherter Plan kann zunächst ein Entwurf bleiben. Ein Entwurf eignet sich gut zum Prüfen, Bearbeiten oder Vergleichen.
 
-- Plan status.
-- Start date.
-- Week-by-week structure.
-- Workout count.
-- Completion and load summary.
+Aktiviere den Plan, sobald du bereit bist, ihn umzusetzen. Durch die Aktivierung erhält der Plan ein Startdatum und Trainingload.ai behandelt seine Einheiten als deinen aktuellen Trainingskalender.
 
-Then use [Manage an Active Plan](/docs/guide/manage-active-plan) to execute the plan day by day.
+Nach der Aktivierung ist der Plan verbunden mit:
+
+- Kalender- und Planansichten.
+- Absolvierten Aktivitäten.
+- Erwarteter vs. tatsächlicher Trainingsbelastung.
+- Begleitung durch den KI-Coach.
+
+## Erwartete Belastung
+
+Trainingload.ai kann die erwartete Trainingsbelastung geplanter Einheiten schätzen, wenn Einheitenstruktur und deine Schwellenwerte genügend Datengrundlage bieten.
+
+Grundsätzlich gilt:
+
+- Entwürfe enthalten unter Umständen noch keine endgültigen Snapshots der erwarteten Belastung.
+- Aktive oder pausierte Pläne können die erwartete Belastung bei der Auswertung der Umsetzung nutzen.
+- Die erwartete Belastung ist eine Schätzung – kein Versprechen, wie sich die Einheit tatsächlich anfühlen wird.
+
+Die Grundlagen der Kennzahl findest du unter [Trainingsbelastung](/de/docs/metrics/training-load).
+
+## Plan überprüfen
+
+Öffne die Plandetailseite und kontrolliere:
+
+- Planstatus.
+- Startdatum.
+- Woche-für-Woche-Struktur.
+- Anzahl der Einheiten.
+- Abschluss- und Belastungszusammenfassung.
+
+Danach hilft dir [Aktiven Plan verwalten](/de/docs/guide/manage-active-plan) bei der täglichen Umsetzung.
+
+## Fehlerbehebung
+
+- **Die erwartete Belastung fehlt:** Prüfe, ob die Einheit eine unterstützte Struktur besitzt und im Profil der nötige Schwellenwert hinterlegt ist; erfinde keinen Wert, nur um eine Schätzung zu erzwingen.
+- **Eine Einheit liegt am falschen Tag:** Prüfe Woche, Tag, Reihenfolge, Plandauer und das Startdatum bei der Aktivierung.
+- **Der KI-Entwurf ist zu allgemein:** Gib aktuelle Ausgangsbasis, Verfügbarkeit, Ausrüstung, Wettkampfdaten und Einschränkungen an und fordere einen überarbeiteten Entwurf an, statt ihn unverändert zu speichern.
+- **Eine Improve-Vorschau zeigt kein Pace-Ziel:** Speichere ein belastbares aktuelles Wettkampfergebnis oder eine unterstützte Laufleistungs-Kennzahl. Ohne geeigneten Anker verwendet die Vorlage bewusst RPE und den Sprechtest, statt Pace-Werte zu erfinden.
+- **Eine Target-Vorschau lässt sich nicht erstellen:** Stelle sicher, dass ein passender Laufwettkampf mit Zielzeit gespeichert ist, der Wettkampftag zu den ausgewählten Trainingstagen gehört, der gesamte Planzeitraum vor den Wettkampf passt und deine aktuelle Leistungsfähigkeit das Ziel stützt.
+- **Der Plan lässt sich nicht speichern:** Behebe die erste Validierungsmeldung – zum Beispiel leere Einheiten, ungültige Strukturen oder eine Einheit außerhalb des Planzeitraums.
+- **Die Aktivierung ordnet unerwartete Daten zu:** Brich die Bestätigung ab, korrigiere Startdatum oder Zeitzone und prüfe die Zuordnung erneut.
+
+## Nächste Schritte
+
+- [Anleitung für den manuellen Einheiten-Editor](/de/docs/planning/manual-workout-editor)
+- [Planstatus verwalten](/de/docs/planning/plan-lifecycle)
+- [Aktiven Plan verwalten](/de/docs/guide/manage-active-plan)

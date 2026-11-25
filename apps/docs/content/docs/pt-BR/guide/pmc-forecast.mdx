@@ -1,0 +1,146 @@
+---
+title: Leia o histórico e as previsões do PMC
+description: Use a página de gestão de condicionamento do Trainingload.ai para comparar CTL, ATL e TSB, inspecionar uma data, diferenciar carga gravada de previsões e perguntar ao Treinador de IA com o contexto selecionado.
+seoTitle: "Guia de Histórico e Previsões do PMC | Trainingload.ai"
+seoDescription: "Siga o fluxo do PMC para escolher um esporte, inspecionar CTL, ATL e TSB, checar carga diária e premissas da previsão e entender dados ausentes."
+keywords: ["previsão PMC", "CTL ATL TSB", "condicionamento fadiga forma", "previsão de carga de treino", "guia Trainingload.ai"]
+---
+
+# Leia o histórico e as previsões do PMC
+
+O PMC reúne carga de treino gravada e projeção condicional no mesmo lugar. Use-o para entender como a pressão de treino mudou e o que os dados futuros disponíveis indicam. Uma previsão é uma estimativa baseada nessas entradas — ela não confirma que um treino aconteceu nem garante que uma decisão específica seja a mais adequada.
+
+[Abra a gestão de condicionamento na Demo](https://demo.trainingload.ai/en/pmc). A Demo pública é somente leitura. Selecione o esporte que deseja examinar depois de abrir. As capturas de tela com curvas de previsão usam dados de exemplo renderizados pelo app. Os valores da Demo e a disponibilidade de previsão dependem dos registros atuais dela.
+
+## Antes de começar
+
+- Importe atividades concluídas e aguarde o processamento da carga de treino terminar.
+- Verifique classificação de esporte, limiares, prioridade de fonte de carga e fuso horário da conta.
+- Para previsões baseadas em plano, use treinos agendados com carga esperada utilizável. Um rascunho ou treino não agendado não gera carga futura diária automaticamente.
+- Mantenha separados treino gravado, treino planejado e hábitos estimados ao explicar o gráfico.
+
+## 1. Abra a gestão de condicionamento e escolha um esporte
+
+Abra **PMC / Gestão de condicionamento** nas ferramentas de análise. No canto superior direito, use **Esporte** para escolher Todos os esportes, Corrida, Ciclismo ou Natação. Os três cartões de valores atuais e o gráfico seguem esse escopo.
+
+Comece por um único esporte ao investigar um bloco específico de treino. Confira o escopo novamente ao alternar entre painel, PMC e atividades relacionadas.
+
+A página principal do PMC normalmente exibe 60 dias de histórico e uma projeção que se estende por 28 dias à frente. Ela mostra uma métrica selecionada por vez, com a carga diária abaixo.
+
+<DocsScreenshot
+  id="pmc-forecast-overview"
+  title="Encontre os valores atuais, a métrica selecionada e a carga diária"
+  description="Exemplo sintético de corrida. CTL, ATL e TSB atuais ficam acima do gráfico. Valores gravados em linha contínua e previsões em linha tracejada compartilham as mesmas datas, com a carga diária abaixo."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Exemplo de PMC de corrida com três cartões de valores atuais, TSB gravado e projetado e carga diária de treino"
+  route="Análise → PMC → Corrida"
+/>
+
+## 2. Leia os valores atuais antes da projeção
+
+Use os três cartões em conjunto.
+
+| Valor | O que descreve | O que não estabelece |
+| --- | --- | --- |
+| Condicionamento / CTL | Carga de treino acumulada no longo prazo | Uma melhora medida de desempenho. |
+| Fadiga / ATL | O sinal mais sensível à carga recente | Um diagnóstico de quão cansado você se sente. |
+| Forma / TSB | A relação entre carga de longo prazo e carga recente | Prontidão garantida para um treino ou prova. |
+
+Os cartões descrevem o estado atual gravado. Passar o cursor sobre uma data futura não substitui esses cartões pelos valores projetados. Para entender o cálculo, leia [CTL](/pt-BR/docs/metrics/pmc/chronic-training-load), [ATL](/pt-BR/docs/metrics/pmc/acute-training-load) e [TSB](/pt-BR/docs/metrics/pmc/training-stress-balance).
+
+## 3. Alterne métricas e inspecione uma data
+
+1. Escolha **Forma**, **Condicionamento** ou **Fadiga** acima do gráfico.
+2. Mova o ponteiro sobre a data que deseja examinar. A dica exibe a data, o status gravado ou projetado, CTL, ATL, TSB e carga diária.
+3. Para uma data futura, leia tanto a base exibida quanto o número.
+4. Compare a métrica com o painel de carga na mesma data. O movimento da linha e a carga diária são grandezas diferentes.
+
+O gráfico também é acessível por teclado. Foque o gráfico e use as setas esquerda e direita para avançar ou recuar dia a dia. **Escape** oculta a dica. Em telas sensíveis ao toque, toque em uma data no gráfico para inspecioná-la.
+
+<DocsScreenshot
+  id="pmc-forecast-date"
+  title="Confira uma data futura e sua base de carga"
+  description="Exemplo sintético de corrida. A data futura selecionada aparece como Projetada e mostra a base de carga diária. Os cartões superiores continuam exibindo o estado atual gravado."
+  imageSrc="/docs/analysis/en/pmc-forecast-date.webp"
+  imageAlt="Gráfico de Condicionamento do PMC com dica de data futura mostrando CTL, ATL, TSB projetados, carga e base"
+  route="PMC → Condicionamento → Inspecionar uma data"
+/>
+
+## 4. Separe histórico gravado de previsão condicional
+
+Use a legenda e a linha **Hoje** para se orientar. Valores gravados aparecem em linha contínua. Estimativas futuras disponíveis usam linha tracejada. O painel de carga diária usa barras preenchidas para carga gravada e um estilo mais leve para carga futura.
+
+A previsão normal prioriza treinos agendados utilizáveis. Quando não há entrada agendada aplicável, ela pode usar um padrão de treino recente e suficiente. Consulte a dica da data para ver qual base se aplica a cada dia.
+
+| Base exibida | Como interpretar |
+| --- | --- |
+| Treino agendado | A carga futura vem dos treinos agendados aplicáveis. |
+| Hábitos recentes de treino | A previsão usa uma estimativa do padrão recente de treinos. Não é um treino novo adicionado ao calendário. |
+| Pausa nos treinos | O cenário exibido assume ausência de carga adicional naqueles dias. |
+| Sem previsão | Os dados disponíveis não sustentam um valor para aquela data. |
+
+Abrir o gráfico não agenda treinos nem salva mudanças no plano. Um dia sem treino agendado não é automaticamente um dia confirmado de descanso. Carga ausente não deve ser lida como carga zero.
+
+Se a previsão ficar indisponível no meio da projeção, valores posteriores podem permanecer em branco porque dependem da entrada anterior ausente. Importar novas atividades ou alterar o cronograma pode modificar a projeção.
+
+## 5. Entenda uma área futura em branco
+
+Os valores históricos continuam úteis mesmo sem curva futura disponível. Causas comuns incluem histórico curto ou desatualizado, ausência de carga gravada ou treinos agendados sem carga esperada utilizável.
+
+<DocsScreenshot
+  id="pmc-forecast-unavailable"
+  title="O histórico gravado continua visível mesmo sem previsão"
+  description="A Demo pública no momento da captura. O histórico gravado aparece, enquanto a área futura não tem curva utilizável. Uma área de previsão vazia não prevê treino zero."
+  imageSrc="/docs/analysis/en/pmc-forecast-unavailable.webp"
+  imageAlt="PMC da Demo pública mostrando histórico gravado e área futura em branco após Hoje"
+  route="Demo → PMC"
+/>
+
+Confira data e escopo e depois verifique atividades recentes e o cronograma relevante. Se a dica exibir **Sem previsão disponível**, mantenha essa incerteza registrada. Se a página avisar **Falha ao atualizar; exibindo resultado anterior**, o gráfico visível corresponde ao último resultado carregado, e não a uma atualização concluída. Uma falha na requisição inicial oferece **Tentar novamente**.
+
+## 6. Pergunte ao Treinador com esse contexto
+
+Selecione **Perguntar ao Treinador** no topo da página. O atalho leva o esporte selecionado e o contexto da projeção para o Treinador de IA. Revise a pergunta preparada antes de enviar. Abrir o link não aplica nenhuma mudança nos treinos por conta própria.
+
+Inclua a dúvida real que você está investigando, como uma mudança na carga recente ou o momento de uma sessão planejada. Confira as atividades e premissas futuras usadas na resposta. Siga o fluxo normal de confirmação para qualquer edição proposta no plano ou nos treinos.
+
+Para uma revisão voltada à maratona, continue em [PMC para ajustes na maratona](/pt-BR/docs/guide/pmc-marathon-adjustment).
+
+## Use o painel para uma janela mais curta
+
+Os cartões Condicionamento, Fadiga e Forma do painel abrem visualizações individuais de cada métrica. Essas telas oferecem abas de histórico de **7**, **14**, **30** e **60** dias. A janela futura visível acompanha a aba selecionada, até o limite de 30 dias — diferente do horizonte mais amplo da página principal do PMC.
+
+Escolha uma janela de tempo antes de interpretar o gráfico e mantenha clara a diferença entre o valor atual e a data futura selecionada.
+
+## Confira o resultado
+
+Você deve conseguir informar esporte, data, métrica, status gravado ou projetado e base de carga do ponto examinado. Uma boa explicação conecta a curva a atividades reais ou entradas agendadas e indica onde faltam evidências.
+
+## Perguntas frequentes
+
+### Por que os cartões não mudam quando inspeciono o futuro?
+
+Eles mostram os valores atuais gravados. Use a dica do gráfico para ver os números da data futura selecionada.
+
+### Por que a previsão mudou depois que concluí um treino?
+
+A carga real e o vínculo com o plano podem atualizar as entradas. Confirme se a atividade terminou de processar e está vinculada ao treino planejado antes de comparar resultados.
+
+### Por que um cartão do painel mostra uma janela de gráfico diferente?
+
+A aba de histórico dele também controla uma janela futura visível mais curta. A página principal do PMC usa uma janela própria mais ampla. Compare sempre o mesmo esporte e a mesma data, não a posição visual do ponto na tela.
+
+### Posso escolher cenários de previsão direto no gráfico?
+
+A página principal oferece seleção de esporte e métrica. O acesso comum seleciona automaticamente as entradas aplicáveis do plano e dos hábitos. Alguns links compartilhados ou do treinador podem carregar cenários diferentes. Leia a base exibida na data em vez de presumir que toda visão usa as mesmas premissas.
+
+### As faixas coloridas de TSB provam que estou pronto?
+
+São faixas de referência para leitura do contexto de carga. Elas não incorporam todos os fatores que afetam sua condição real ou desempenho.
+
+## Continue
+
+- [Detalhes da atividade](/pt-BR/docs/guide/activity-detail)
+- [Revisão semanal de treino](/pt-BR/docs/workflow/weekly-review)
+- [Entenda o VO2max efetivo em esportes de resistência](/pt-BR/docs/guide/effective-vo2max-for-endurance)
+- [Treinador de IA](/pt-BR/docs/guide/ai-coach)

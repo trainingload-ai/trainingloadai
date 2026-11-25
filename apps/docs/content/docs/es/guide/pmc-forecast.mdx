@@ -1,0 +1,146 @@
+---
+title: Interpreta el historial y las proyecciones de PMC
+description: Usa la página de gestión del fitness de Trainingload.ai para comparar CTL, ATL y TSB, inspeccionar una fecha, distinguir carga grabada de proyecciones y consultar al Entrenador con IA con ese contexto.
+seoTitle: "Guía de historial y proyecciones PMC | Trainingload.ai"
+seoDescription: "Sigue el flujo de PMC para elegir deporte, revisar CTL, ATL y TSB, consultar la carga diaria y los supuestos de proyección, y entender proyecciones vacías."
+keywords: ["proyección PMC", "CTL ATL TSB", "fitness fatiga forma", "proyección de carga de entrenamiento", "guía de Trainingload.ai"]
+---
+
+# Interpreta el historial y las proyecciones de PMC
+
+El PMC reúne en un solo lugar tu carga de entrenamiento grabada y una proyección condicional. Úsalo para investigar cómo ha cambiado tu presión de entrenamiento y qué implicarían las entradas futuras disponibles. Una proyección es una estimación basada en esas entradas; no confirma que una sesión haya ocurrido ni que una decisión concreta de entrenamiento sea la adecuada.
+
+[Abre Gestión del fitness en la Demo](https://demo.trainingload.ai/en/pmc). La Demo pública es de solo lectura. Elige el deporte que deseas inspeccionar después de abrirla. Las capturas con curvas de proyección utilizan datos de ejemplo renderizados por la aplicación. Los valores y la disponibilidad de proyección en la Demo dependen de sus registros actuales.
+
+## Antes de empezar
+
+- Importa tus actividades completadas y espera a que termine el cálculo de su carga de entrenamiento.
+- Comprueba la clasificación del deporte, los umbrales, la prioridad de fuentes de carga y la zona horaria de tu cuenta.
+- Para proyecciones basadas en plan, utiliza sesiones programadas con una carga estimada válida. Un borrador o una sesión sin fecha no aporta automáticamente carga futura diaria.
+- Mantén diferenciados el entrenamiento grabado, el planificado y los hábitos estimados al explicar la gráfica.
+
+## 1. Abre Gestión del fitness y elige un deporte
+
+Abre **PMC / Gestión del fitness** desde las herramientas de análisis. En la esquina superior derecha, usa **Deporte** para elegir Todos los deportes, Carrera, Ciclismo o Natación. Las tres tarjetas de valores actuales y la gráfica aplican ese alcance.
+
+Empieza con un solo deporte cuando investigues un bloque específico. Vuelve a revisar el alcance al cambiar entre el panel de control, el PMC y las actividades relacionadas.
+
+La página principal de PMC suele mostrar 60 días de historial y una proyección que abarca 28 días hacia adelante. Muestra una métrica seleccionada cada vez, con la carga diaria debajo.
+
+<DocsScreenshot
+  id="pmc-forecast-overview"
+  title="Encuentra los valores actuales, la métrica seleccionada y la carga diaria"
+  description="Ejemplo sintético de carrera. Los valores actuales de CTL, ATL y TSB se sitúan sobre la gráfica. Los valores grabados en línea continua y los proyectados en línea discontinua comparten fechas, con la carga diaria debajo."
+  imageSrc="/docs/analysis/en/pmc-forecast-overview.webp"
+  imageAlt="Ejemplo de PMC de carrera con tres tarjetas de valores actuales, TSB grabado y proyectado, y carga diaria de entrenamiento"
+  route="Análisis → PMC → Carrera"
+/>
+
+## 2. Lee los valores actuales antes de la proyección
+
+Interpreta las tres tarjetas en conjunto.
+
+| Valor | Qué describe | Qué no demuestra |
+| --- | --- | --- |
+| Fitness / CTL | Carga de entrenamiento acumulada a más largo plazo | Una mejora medida del rendimiento. |
+| Fatiga / ATL | Señal de carga reciente con respuesta más rápida | Un diagnóstico de cuán cansado te sientes. |
+| Forma / TSB | Relación entre la carga a largo plazo y la carga reciente | Disponibilidad garantizada para una sesión o carrera. |
+
+Las tarjetas reflejan el estado actual grabado. Situar el cursor sobre una fecha futura no las sustituye por valores proyectados. Para conocer su cálculo, consulta [CTL](/es/docs/metrics/pmc/chronic-training-load), [ATL](/es/docs/metrics/pmc/acute-training-load) y [TSB](/es/docs/metrics/pmc/training-stress-balance).
+
+## 3. Cambia de métrica e inspecciona una fecha
+
+1. Elige **Forma**, **Fitness** o **Fatiga** sobre la gráfica.
+2. Mueve el cursor sobre la fecha que deseas revisar. El cuadro emergente muestra la fecha, el estado grabado o proyectado, CTL, ATL, TSB y la carga diaria.
+3. En una fecha futura, lee también la base de cálculo mostrada además del número.
+4. Compara la métrica con el panel de carga en esa misma fecha. El movimiento de la curva y la carga diaria son magnitudes distintas.
+
+La gráfica también es accesible mediante teclado. Enfoca la gráfica y usa las flechas izquierda y derecha para desplazarte día a día. **Escape** oculta el cuadro emergente. En pantallas táctiles, toca una fecha en la gráfica para inspeccionarla.
+
+<DocsScreenshot
+  id="pmc-forecast-date"
+  title="Revisa una fecha futura y su base de carga"
+  description="Ejemplo sintético de carrera. La fecha futura seleccionada aparece etiquetada como Proyectada e incluye su base de carga diaria. Las tarjetas superiores siguen mostrando el estado actual grabado."
+  imageSrc="/docs/analysis/en/pmc-forecast-date.webp"
+  imageAlt="Gráfica de Fitness del PMC con un cuadro emergente de fecha futura mostrando CTL, ATL, TSB proyectados, carga y su base"
+  route="PMC → Fitness → Inspeccionar una fecha"
+/>
+
+## 4. Distingue el historial grabado de una proyección condicional
+
+Oriéntate con la leyenda y la marca de **Hoy**. Los valores grabados usan una línea continua. Las estimaciones futuras disponibles usan una línea discontinua. El panel de carga diaria emplea barras sólidas para la carga grabada y un trazo más suave para la carga futura.
+
+La proyección normal prioriza el entrenamiento programado válido. Cuando no hay ninguna entrada programada aplicable, puede usar un patrón reciente de entrenamiento suficiente y utilizable. Revisa el cuadro emergente para saber qué base se aplica en cada fecha.
+
+| Base mostrada | Cómo interpretarla |
+| --- | --- |
+| Entrenamiento programado | La carga futura procede de las sesiones programadas aplicables. |
+| Hábitos recientes de entrenamiento | La proyección usa una estimación de tu patrón reciente. No crea ninguna sesión nueva en tu calendario. |
+| Pausar entrenamiento | El escenario mostrado asume que no habrá entrenamiento adicional esos días. |
+| Sin proyección | Las entradas disponibles no permiten calcular un valor para esa fecha. |
+
+Abrir la gráfica no programa entrenamientos ni guarda cambios en el plan. Un día sin sesión planificada no equivale automáticamente a un día de descanso confirmado. La carga ausente no debe leerse como carga cero.
+
+Si la proyección deja de estar disponible a mitad del horizonte, los valores posteriores pueden quedar en blanco porque dependen de la entrada faltante anterior. Importar nuevas actividades o modificar el calendario puede cambiar la proyección.
+
+## 5. Entiende una región futura en blanco
+
+Los valores históricos siguen siendo útiles aunque no exista curva futura. Las causas habituales incluyen un historial corto o desactualizado, carga grabada faltante o sesiones planificadas sin carga estimada utilizable.
+
+<DocsScreenshot
+  id="pmc-forecast-unavailable"
+  title="El historial grabado puede seguir visible sin proyección"
+  description="La Demo pública en el momento de la captura. Su historial grabado es visible mientras la región futura no tiene curva utilizable. Una región de proyección vacía no predice entrenamiento cero."
+  imageSrc="/docs/analysis/en/pmc-forecast-unavailable.webp"
+  imageAlt="PMC de la Demo pública mostrando historial grabado y una región futura en blanco después de Hoy"
+  route="Demo → PMC"
+/>
+
+Revisa la fecha y el alcance, y verifica después las actividades recientes y el calendario correspondiente. Si el cuadro emergente indica **Sin proyección disponible**, conserva esa incertidumbre. Si la página avisa **Error al actualizar; mostrando el resultado anterior**, la gráfica visible es el resultado previo y no una actualización satisfactoria. Si falla la carga inicial, aparece **Reintentar**.
+
+## 6. Pregunta al Entrenador con este contexto
+
+Pulsa **Preguntar al Entrenador** en la parte superior de la página. La pregunta vinculada lleva el deporte seleccionado y el contexto de la proyección al Entrenador con IA. Revisa la pregunta preparada antes de enviarla. Abrir ese enlace no aplica ningún cambio de entrenamiento por sí solo.
+
+Incluye la cuestión real que estás analizando, como un cambio en la carga reciente o la fecha de una sesión planificada. Verifica las actividades y supuestos futuros que use la respuesta. Sigue el flujo habitual de confirmación antes de aplicar cualquier edición propuesta al plan o a una sesión.
+
+Para una revisión específica de maratón, continúa con [Usar PMC para ajustes de maratón](/es/docs/guide/pmc-marathon-adjustment).
+
+## Usa el panel de control para una ventana más cercana
+
+Las tarjetas de Fitness, Fatiga y Forma del panel de control abren una vista individual por métrica. Estas vistas ofrecen pestañas históricas de **7**, **14**, **30** y **60** días. La ventana futura visible sigue a la pestaña seleccionada, hasta un máximo de 30 días. Esto difiere del horizonte más amplio de la página principal de PMC.
+
+Elige primero una ventana temporal antes de interpretar la gráfica y mantén diferenciados el valor actual y la fecha futura seleccionada.
+
+## Comprueba el resultado
+
+Deberías poder indicar el deporte, la fecha, la métrica, el estado grabado o proyectado y la base de carga del punto que revisaste. Una buena explicación conecta la curva con actividades reales o entradas programadas y señala dónde faltan datos.
+
+## Preguntas frecuentes
+
+### ¿Por qué las tarjetas no cambian cuando inspecciono el futuro?
+
+Porque muestran valores actuales grabados. Consulta el cuadro emergente para ver los datos de la fecha futura seleccionada.
+
+### ¿Por qué cambió la proyección después de completar una sesión?
+
+La carga real y el vínculo con el plan pueden actualizar las entradas. Confirma que la actividad se ha procesado y vinculado a la sesión prevista antes de comparar resultados.
+
+### ¿Por qué una tarjeta del panel de control muestra una ventana gráfica distinta?
+
+Su pestaña histórica también controla una ventana futura visible más corta. La página principal de PMC tiene su propio rango más amplio. Compara siempre el mismo deporte y la misma fecha en lugar de la posición visual del punto en pantalla.
+
+### ¿Puedo elegir escenarios de proyección desde la gráfica?
+
+La página principal ofrece selección de deporte y métrica. En una visita normal selecciona automáticamente las entradas aplicables del plan y de tus hábitos. Algunos enlaces compartidos o del entrenador pueden llevar un escenario diferente. Lee siempre la base mostrada en cada fecha en lugar de asumir los mismos supuestos en todas las vistas.
+
+### ¿Las bandas de color de TSB demuestran que estoy listo?
+
+Son bandas de referencia para leer el contexto de carga. No incorporan todos los factores que afectan a tu estado real o a tu rendimiento.
+
+## Continúa
+
+- [Detalle de actividad](/es/docs/guide/activity-detail)
+- [Revisión semanal de entrenamiento](/es/docs/workflow/weekly-review)
+- [Comprende el VO2max efectivo en deportes de resistencia](/es/docs/guide/effective-vo2max-for-endurance)
+- [Entrenador con IA](/es/docs/guide/ai-coach)

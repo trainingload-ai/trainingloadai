@@ -1,113 +1,165 @@
 ---
-title: Manage an Active Plan
-description: Execute an active training plan in Trainingload.ai, update workout status, link activities, compare expected and actual load, and ask AI Coach for follow-up.
-keywords: ["active training plan", "plan execution", "workout status", "training plan compliance"]
+title: 진행 중인 플랜 관리
+description: Trainingload.ai에서 진행 중인 훈련 플랜을 실행하고 워크아웃 상태를 업데이트하며 활동을 연결하고 예상·실제 부하를 비교해 AI 코치와 후속 조정을 진행합니다.
+keywords:
+  [
+    "진행 중인 훈련 플랜",
+    "플랜 실행",
+    "워크아웃 상태",
+    "훈련 플랜 이행률",
+  ]
 ---
 
-# Manage an Active Plan
+# 진행 중인 플랜 관리
 
-An active plan is the plan Trainingload.ai treats as your current schedule. It connects planned workouts, completed activities, training load, and AI Coach follow-up.
+진행 중인 플랜(Active plan)은 활성화하여 현재 따르고 있는 훈련 일정입니다. 여기에서 예정된 워크아웃을 확인하고, 완료된 활동을 연결하며, 훈련 부하를 비교하고 AI 코치와 대화를 이어갈 수 있습니다.
 
-Open it from the main **Plan** area, or open a specific plan from the plan list.
+메인 **Plan(플랜)** 메뉴에서 바로 열거나 플랜 목록에서 특정 플랜을 선택해 열 수 있습니다.
 
-## Plan status
+## 시작하기 전에
 
-Plans can have these statuses:
+- 의도한 플랜을 올바른 시작일로 활성화합니다.
+- 프로필의 시간대와 현재 역치를 확인합니다.
+- 완료된 활동을 연결하기 전에 분석 처리가 완료될 때까지 기다립니다.
+- 처음 작성한 초안이 여전히 현실과 맞다고 가정하지 말고 이번 주 일정을 먼저 점검합니다.
 
-- **Draft**: saved, but not started.
-- **Active**: currently being executed.
-- **Paused**: temporarily stopped, but still available for schedule changes.
-- **Completed**: finished.
-- **Cancelled**: ended before completion.
+## 일일 실행 워크플로
 
-Only one plan is usually treated as the current active schedule. Draft and completed plans remain useful for review, but they are not the current execution surface.
+1. 현재 플랜을 열어 오늘 예정된 워크아웃을 찾습니다.
+2. 훈련 전에 워크아웃 구성과 메모를 확인합니다.
+3. 훈련을 마친 뒤 완료된 활동을 열어 정확한 기록인지 확인합니다.
+4. 해당 활동을 예정된 워크아웃에 연결하고 워크아웃 상태를 사실대로 업데이트합니다.
+5. 맥락 속에서 예상 부하와 실제 부하를 비교한 뒤 앞으로의 워크아웃 조정이 필요한지 판단합니다.
 
-## Workout status
+<DocsScreenshot
+  id="active-plan-execution"
+  title="진행 중인 플랜 실행"
+  description="남은 일정을 변경하기 전에 워크아웃 상태, 연결된 활동, 예상 대 실제 부하를 함께 확인합니다."
+  route="Plans → Current plan"
+/>
 
-Each planned workout has its own status:
+## 플랜 상태
 
-- **Planned**: scheduled but not started.
-- **In progress**: currently being worked through or partially handled.
-- **Done**: completed.
-- **Skipped**: intentionally missed.
-- **Moved**: rescheduled.
+훈련 플랜은 다음 다섯 가지 상태를 가질 수 있습니다.
 
-Use status changes to keep the plan honest. A skipped workout is different from a completed workout with low load, and both should be visible.
+- **Draft(초안)**: 저장되었으나 아직 시작되지 않음
+- **Active(진행 중)**: 현재 실행 중인 플랜
+- **Paused(일시 중지)**: 잠시 멈춰 있지만 일정 변경은 가능
+- **Completed(완료됨)**: 기간이 종료된 플랜
+- **Cancelled(취소됨)**: 완료 전에 종료된 플랜
 
-## Link completed activities
+보통 한 번에 하나의 플랜만 현재 진행 일정으로 취급됩니다. 초안과 완료된 플랜은 리뷰용으로 유용하지만 현재 실행 화면은 아닙니다.
 
-Link real activities to planned workouts when they belong together.
+## 워크아웃 상태
 
-Activity links make these comparisons possible:
+각 예정 워크아웃은 개별 상태를 가집니다.
 
-- Planned session vs completed session.
-- Expected load vs actual load.
-- Session completion rate.
-- Load compliance.
-- AI Coach plan follow-up.
+- **Planned(예정됨)**: 일정에 등록되었으나 아직 시작하지 않음
+- **In progress(진행 중)**: 현재 수행 중이거나 일부만 처리됨
+- **Done(완료)**: 수행을 마침
+- **Skipped(건너뜀)**: 의도적으로 수행하지 않음
+- **Moved(이동됨)**: 다른 날짜로 일정 변경됨
 
-Trainingload.ai may suggest or create links automatically in some cases, but you can also link or unlink manually when the wrong activity is connected.
+플랜 기록의 정확성을 유지하려면 상태를 솔직하게 반영하세요. 건너뛴 워크아웃과 낮은 부하로 완료한 워크아웃은 전혀 다른 의미이며, 둘 다 기록에 정확히 남아야 합니다.
 
-## Expected vs actual load
+## 완료된 활동 연결하기
 
-The plan view can compare:
+실제 완료한 활동이 특정 예정 워크아웃을 수행한 결과라면 서로 연결해 주세요.
 
-- **Expected load**: the planned workload estimate for the workout.
-- **Actual load**: the load from the completed primary activity.
+활동을 연결하면 다음 비교가 가능해집니다.
 
-This comparison is most useful when the expected and actual load are based on compatible signals. For example, power-based planned load and power-based activity load are easier to compare than mixed-source estimates.
+- 예정된 세션 vs 완료된 세션
+- 예상 부하 vs 실제 부하
+- 세션 완료율
+- 부하 이행률
+- AI 코치의 플랜 후속 분석
 
-Use the comparison as a planning signal, not a scorecard. One workout can be intentionally lighter or harder than planned; the pattern across days and weeks matters more.
+경우에 따라 Trainingload.ai가 자동으로 연결을 제안하거나 생성할 수 있지만, 잘못된 활동이 연결되었을 때는 언제든 수동으로 해제하고 다시 연결할 수 있습니다.
 
-## Current plan view
+## 예상 부하 vs 실제 부하
 
-The current plan view is designed for daily execution. Use it to:
+플랜 화면에서는 두 가지 부하를 나란히 비교할 수 있습니다.
 
-- See today's scheduled workouts.
-- Review the current week.
-- Open workout details.
-- Link completed activities.
-- Mark a workout done or skipped.
-- Move workouts when the schedule changes.
-- Compare weekly planned and completed load.
+- **예상 부하(Expected load)**: 예정된 워크아웃의 계획 훈련량 추정치
+- **실제 부하(Actual load)**: 완료된 주 활동에서 계산된 훈련 부하
 
-Use [Calendar](/docs/guide/calendar) when you want the same plan and activity data in a broader date-based view.
+이 비교는 두 부하가 호환되는 신호를 기반으로 할 때 가장 정확합니다. 예를 들어 파워 기반 예상 부하와 파워 기반 실제 부하의 비교가 서로 다른 소스를 섞어 비교하는 것보다 훨씬 명확합니다.
 
-When the plan is active or paused, schedule changes can be applied to unfinished workouts. Completed or skipped workouts should generally stay as historical records.
+이 수치는 채점표가 아니라 계획 조정 신호로 활용하세요. 하루 훈련이 의도적으로 더 가볍거나 무거울 수 있으며, 중요한 것은 며칠과 몇 주에 걸친 패턴입니다.
 
-## Plan detail view
+## 현재 플랜 뷰(Current plan)
 
-The plan detail page is better for reviewing the whole cycle. Use it to:
+현재 플랜 뷰는 매일의 실행을 위해 설계되었습니다. 여기에서 다음 작업을 할 수 있습니다.
 
-- Check plan metadata and status.
-- Activate a draft.
-- Review week-by-week structure.
-- Inspect workout charts or descriptions.
-- See execution summaries.
-- Ask AI Coach to review remaining work.
+- 오늘 예정된 워크아웃 확인
+- 이번 주 일정 리뷰
+- 워크아웃 상세 열기
+- 완료된 활동 연결
+- 워크아웃 완료 또는 건너뛰기 표시
+- 일정 변경 시 워크아웃 이동
+- 주간 예정 부하와 완료 부하 비교
 
-From a plan detail page, the AI Coach follow-up includes plan context and the number of unfinished workouts.
+같은 플랜과 활동 데이터를 더 넓은 달력 형태로 보려면 [훈련 캘린더](/ko/docs/guide/calendar)를 이용하세요.
 
-## When to adjust the plan
+플랜이 진행 중이거나 일시 중지 상태일 때는 아직 끝나지 않은 워크아웃의 일정을 변경할 수 있습니다. 이미 완료되었거나 건너뛴 워크아웃은 일반적으로 과거 기록으로 보존해야 합니다.
 
-Adjust the plan when the schedule and reality have clearly diverged.
+다가오는 여러 워크아웃을 한꺼번에 조정하려면 **Calendar(캘린더)**를 열고 날짜를 우클릭해 **Adjust schedule(일정 조정)**을 선택하세요. 하나의 초안에서 변경 사항을 검토한 뒤 확정할 수 있습니다. 자세한 절차는 [예정된 워크아웃 일정 조정하기](/ko/docs/guide/calendar#adjust-upcoming-workouts)를 참고하세요.
 
-Common reasons:
+## 플랜 상세 뷰(Plan detail)
 
-- Missed workouts are accumulating.
-- Actual load is repeatedly higher than planned.
-- Fatigue is rising faster than fitness.
-- A race, travel day, or recovery need changes the next week.
-- A key workout was completed, but the response was very different from expected.
+플랜 상세 페이지는 전체 주기를 조망하기에 적합합니다. 다음 작업을 수행할 수 있습니다.
 
-Avoid changing the plan after every small fluctuation. The goal is to keep the plan aligned with reality without losing the training intent.
+- 플랜 메타데이터 및 상태 확인
+- 초안 플랜 활성화
+- 주차별 전체 구성 리뷰
+- 워크아웃 차트 및 설명 확인
+- 실행 요약 확인
+- 남은 일정에 대해 AI 코치 리뷰 요청
 
-## Ask AI Coach
+플랜 상세 페이지에서 AI 코치를 열면 플랜 맥락과 남은 미완료 워크아웃 수가 자동으로 전달됩니다.
 
-Helpful prompts:
+## 플랜을 조정해야 할 때
 
-- "Review my current plan progress and load."
-- "Which unfinished workouts matter most this week?"
-- "Should I move tomorrow's workout after today's hard session?"
-- "My actual load is above plan for two weeks. What should change?"
-- "Help me adjust the next seven days without losing the main goal."
+일정과 실제 현실이 뚜렷하게 어긋나기 시작했을 때 플랜을 조정합니다.
+
+대표적인 신호:
+
+- 놓친 워크아웃이 계속 누적될 때
+- 실제 부하가 반복적으로 계획보다 높을 때
+- 피로가 체력보다 빠르게 치솟을 때
+- 대회, 출장/여행 또는 추가 회복 필요로 다음 주 일정이 바뀔 때
+- 핵심 워크아웃을 완료했으나 신체 반응이 예상과 크게 달랐을 때
+
+작은 변동마다 플랜을 매번 뜯어고치지 마세요. 핵심 훈련 의도를 잃지 않으면서 플랜을 현실에 맞춰 유지하는 것이 목표입니다.
+
+## AI 코치에게 물어보기
+
+유용한 질문 예시:
+
+- "현재 플랜 진행 상황과 훈련 부하를 리뷰해 줘."
+- "이번 주 남은 미완료 워크아웃 중 가장 중요한 세션은 뭐야?"
+- "오늘 훈련이 예상보다 힘들었는데 내일 워크아웃을 옮기는 게 좋을까?"
+- "2주 연속 실제 부하가 계획보다 높은데 어떤 부분을 조정하면 좋을까?"
+- "핵심 목표를 해치지 않으면서 앞으로 7일 일정을 조정해 줘."
+
+## 현재 상태 검증
+
+- 플랜 시작일이 각 워크아웃을 의도한 캘린더 날짜에 정확히 배치합니다.
+- 오늘의 워크아웃에 정확한 상태와 메모가 표시됩니다.
+- 연결된 활동이 해당 워크아웃을 실제로 수행한 세션입니다.
+- 예상 부하와 실제 부하가 각자의 소스와 의미를 유지합니다.
+- 미완료 워크아웃을 이동해도 완료·건너뜀 과거 기록은 변경되지 않습니다.
+
+## 문제 해결
+
+- **현재 플랜이 보이지 않음:** 의도한 플랜이 초안·일시 중지·완료·취소 상태가 아니라 진행 중(Active) 상태인지 확인하세요.
+- **활동이 연결되지 않음:** 날짜 범위, 종목 호환성, 활동 처리 상태, 다른 워크아웃에 이미 연결되어 있는지 확인하세요.
+- **잘못된 활동이 자동 연결됨:** 연결을 해제하고 시작 시각과 종목을 확인한 뒤 올바른 활동을 수동으로 선택합니다.
+- **플랜 편집 시 충돌 발생:** 다른 기기나 AI 작업이 플랜 버전을 먼저 바꾼 상태입니다. 새로고침해 최신 플랜을 확인한 뒤 다시 시도하세요.
+- **실제 부하가 표시되지 않음:** 계획된 예상치를 수정하지 말고 완료된 활동 자체와 부하 소스 설정을 점검하세요.
+
+## 다음 단계
+
+- [훈련 캘린더](/ko/docs/guide/calendar)
+- [활동 상세 분석](/ko/docs/guide/activity-detail)
+- [AI 코치](/ko/docs/guide/ai-coach)

@@ -1,0 +1,50 @@
+---
+title: AI 클라이언트 연결
+description: ChatGPT, Codex, Claude Code, Claude Desktop, Cursor, VS Code, opencode용 연결 가이드를 선택하세요.
+---
+
+# AI 클라이언트 연결
+
+모든 클라이언트는 동일한 원격 Streamable HTTP 엔드포인트를 사용합니다.
+
+```text
+https://api.trainingload.ai/mcp
+```
+
+TrainingLoad는 OAuth 2.1 디스커버리, PKCE S256, 리프레시 토큰 순환(rotation), 리소스 바운드 액세스 토큰을 사용합니다. 설정 파일에 API 키나 액세스 토큰을 절대 직접 입력하지 마세요.
+
+## 클라이언트 선택
+
+| 클라이언트 | 가장 빠른 연결 경로 | 전체 가이드 |
+| --- | --- | --- |
+| ChatGPT | Plugins에서 커스텀 MCP 서버 추가 | [ChatGPT](/ko/docs/mcp/clients/chatgpt) |
+| Codex | `codex mcp add trainingload --url https://api.trainingload.ai/mcp` | [Codex](/ko/docs/mcp/clients/codex) |
+| Claude Code | `claude mcp add --transport http --scope user trainingload https://api.trainingload.ai/mcp` | [Claude Code](/ko/docs/mcp/clients/claude-code) |
+| Claude Desktop | Customize → Connectors → Add custom connector | [Claude Desktop](/ko/docs/mcp/clients/claude-desktop) |
+| Cursor | `~/.cursor/mcp.json`에 원격 서버 추가 | [Cursor](/ko/docs/mcp/clients/cursor) |
+| VS Code | MCP: Add Server → HTTP | [VS Code](/ko/docs/mcp/clients/vscode) |
+| opencode | `opencode.json`에 `remote` 항목 추가 | [opencode](/ko/docs/mcp/clients/opencode) |
+
+## 기본 권한
+
+권장 초기 승인 권한 범위(스코프):
+
+```text
+openid profile email offline_access profile:read activity:read training:read plan:read competition:read
+```
+
+`health:read`는 의도적으로 제외되어 있습니다. 클라이언트가 축소된 일별 건강 요약을 읽도록 허용하고 싶을 때만 추가하세요.
+
+## 모든 클라이언트 공통 검증 절차
+
+1. 카탈로그에 24개 도구, 3개 리소스, 3개 프롬프트가 표시되어야 합니다. `health:read`가 없더라도 건강 도구는 점진적 동의(incremental consent) 진입점으로 계속 표시될 수 있습니다.
+2. 다음과 같이 질문하세요: “TrainingLoad를 사용해 현재 내 훈련 상태를 요약하고, 사용된 날짜와 시간대를 명시해 주세요.”
+3. 클라이언트가 `get_training_snapshot`을 호출해야 하며, 토큰 붙여넣기를 요구해서는 안 됩니다.
+4. 응답은 누락된 값과 0을 구분해 설명하고, TrainingLoad 도구 호출 내역을 표시해야 합니다.
+5. 기간 비교 질문을 추가로 입력해 클라이언트가 `compare_training_periods`를 호출할 수 있는지 확인하세요.
+
+## 권한 해제 또는 재연결
+
+TrainingLoad 계정 권한 관리 페이지에서 권한 범위(스코프)와 최근 사용 내역을 확인하거나 클라이언트 권한을 철회할 수 있습니다. 철회 후에도 클라이언트에 이전 상태가 남아 있다면 클라이언트에서 해당 MCP 서버의 OAuth 세션을 연결 해제하거나 초기화한 뒤 다시 연결하세요.
+
+연결 또는 인증에 실패하면 [문제 해결](/ko/docs/mcp/troubleshooting)을 참고하세요.

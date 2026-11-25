@@ -1,130 +1,142 @@
 ---
-title: Calendar
-description: Use the Trainingload.ai calendar to review planned workouts, completed activities, daily load, weekly summaries, and plan progress in one date-based view.
-keywords: ["training calendar", "workout calendar", "planned workouts", "completed activities", "Trainingload.ai calendar"]
+title: Compara entrenamiento planificado y grabado en el Calendario
+description: Elige un día, revisa sus sesiones planificadas y actividades completadas, vincula la grabación correcta y verifica la fecha y el alcance de los resúmenes de carga.
+seoTitle: "Calendario de entrenamiento y plan frente a real | Trainingload.ai"
+seoDescription: "Usa el calendario para ver entrenamientos planificados y completados, abrir el detalle diario, vincular actividades a sesiones y verificar fechas y carga."
+keywords: ["calendario de entrenamiento", "plan frente a real", "vincular actividad a sesión", "revisión diaria de entrenamiento", "guía de Trainingload.ai"]
 ---
 
-# Calendar
+# Compara entrenamiento planificado y grabado en el Calendario
 
-The calendar brings planned workouts and completed activities into one date-based view. It is useful when you want to see how the training plan and real training line up across days and weeks.
+El Calendario reúne tus entrenamientos futuros y tus registros completados en un mismo contexto de fechas. Una sesión planificada y una actividad en la misma fecha son registros independientes. Usa su detalle y su vínculo para confirmar si la grabación corresponde a esa sesión planificada.
 
-Use it to answer:
+[Abre el Calendario en la Demo](https://demo.trainingload.ai/en/calendar). Las capturas utilizan un plan y actividades de ejemplo en la aplicación web real. Navega a una fecha relevante en la Demo; guardar vínculos o cambios de calendario requiere tu propia cuenta.
 
-- What is scheduled today?
-- What did I actually complete?
-- How much load landed on this day or week?
-- Did missed or moved workouts change the rhythm of the plan?
-- Which day should I open for more detail?
+## Antes de empezar
 
-## Month and week views
+Comprueba la zona horaria de tu cuenta y la hora de inicio de la actividad. Para el entrenamiento planificado, verifica la fecha de inicio del plan activo y el calendario de sesiones. Deja que las actividades importadas terminen de procesarse antes de valorar si falta carga o análisis.
 
-The calendar shows a month view on larger screens. On mobile, it can use a week-focused view so each day remains readable.
+En la web y en Trainingload.ai Personal para macOS, abre **Calendario** desde la barra lateral. En una pantalla web estrecha, usa el botón de calendario para abrir el selector de mes. En la app móvil, abre la pestaña **Calendario**.
 
-Use navigation controls to:
+## 1. Busca y selecciona el día
 
-- Move to the previous or next month.
-- Move to the previous or next week on mobile week view.
-- Jump back to today.
-- Pick another month.
+En pantalla ancha, desplázate por el calendario o usa el selector de mes y las flechas. Selecciona una fecha para abrir su panel diario, o pulsa **Hoy** para volver a la fecha actual.
 
-The selected date controls the detail panel on the side or bottom of the screen.
+La fecha seleccionada determina el contenido del panel diario. Un día puede contener sesiones de un plan, entrenamientos programados independientes, actividades grabadas o una combinación de ellos. Revisa las etiquetas de cada elemento antes de abrirlo.
 
-## What each day can show
+<DocsScreenshot
+  id="calendar-plan-actual"
+  title="Localiza sesiones planificadas y actividades reales en la misma fecha"
+  description="Ejemplo sintético en web. El Calendario muestra las sesiones planificadas junto con la actividad grabada y la carga diaria, mientras que la vista del día seleccionado ofrece sus detalles por separado."
+  imageAlt="Ejemplo de calendario que muestra sesiones planificadas, una actividad grabada y el contexto de entrenamiento de la fecha seleccionada"
+  route="Calendario → Selecciona un día"
+  demoLabel="Abrir el calendario en la Demo"
+/>
 
-A calendar day can include:
+## 2. Lee el panel del día
 
-- Planned workouts from the active plan.
-- Completed activities.
-- Daily load.
-- Visual indicators for plan range.
-- Sport-specific styling for workouts or activities.
+Usa **Entrenamiento** para inspeccionar la sesión programada y **Actividades** para revisar la grabación. Comprueba la fecha seleccionada, la carga mostrada y el número de elementos. Elige **Ver día** cuando necesites la vista completa del día.
 
-Calendar markers are meant for scanning. Open the day panel or activity detail page when you need exact metrics.
+| Registro | Qué comprobar antes de comparar |
+| --- | --- |
+| Sesión planificada | Propósito, fecha programada, deporte, estructura, notas y estado de ejecución. |
+| Actividad completada | Hora de inicio, origen, deporte, duración/distancia grabadas, estado de procesamiento y cobertura de sensores. |
+| Vínculo | Si la actividad correcta está realmente vinculada a la sesión prevista. |
 
-## Selected day panel
+Una etiqueta de completado por sí sola no identifica la grabación. Abre [Detalle de actividad](/es/docs/guide/activity-detail) para analizar el esfuerzo real.
 
-The selected day panel shows the details for one date.
+<DocsScreenshot
+  id="calendar-activity-details"
+  title="Cambia a la grabación del día seleccionado"
+  description="La misma fecha sintética del calendario con la pestaña Actividades seleccionada. Abre la actividad grabada para comprobar su duración, distancia y análisis reales antes de vincularla."
+  imageAlt="Día del calendario seleccionado con la pestaña Actividades mostrando su sesión grabada"
+  route="Calendario → Día seleccionado → Actividades"
+  demoLabel="Abrir el calendario en la Demo"
+/>
 
-It can include:
+## 3. Vincula la actividad correcta a una sesión
 
-- Selected date.
-- Daily load.
-- Activity count.
-- Planned workout count.
-- Planned workout cards or charts.
-- Completed activity list.
-- Link to the full day page.
+En tu cuenta, abre el detalle de la sesión programada y su opción **Vincular actividad**.
 
-Open a planned workout to inspect the workout description and chart. Open a completed activity to review its activity detail page.
+1. Confirma que la sesión tiene fecha programada y el deporte correcto.
+2. Comprueba primero la hora de inicio de la grabación en el detalle de actividad. En la lista ofrecida para ese día, compara el título y la duración para identificarla.
+3. Selecciona la grabación correspondiente y espera la confirmación.
+4. Si ya pertenece a otra sesión planificada, lee el aviso **¿Reemplazar vínculo?** antes de sustituirlo.
+5. Vuelve a abrir la sesión y la actividad para verificar el vínculo.
 
-## Training and activity tabs
+Si no aparece ninguna candidata, revisa la sincronización, la fecha local de la actividad, la programación de la sesión y el deporte. Resuelve esas diferencias antes de seleccionar una actividad que no corresponde.
 
-The day panel separates planned training and completed activities.
+Para corregir un vínculo erróneo, usa **Quitar vínculo** en el enlace existente o elige la actividad correcta. Quitar un vínculo y eliminar una actividad tienen efectos distintos. La Demo desactiva estas acciones de escritura.
 
-Use **Training** to review:
+## 4. Compara lo previsto y lo grabado
 
-- Planned workouts.
-- Workout structure.
-- Sport type.
-- Session details.
+Compara primero el propósito y la estructura, y después la duración, distancia, intensidad y carga disponible. Anota por qué una sesión se acortó, se sustituyó o se omitió. Una actividad adicional puede ser entrenamiento real aunque no formara parte del plan original.
 
-Use **Activity** to review:
+Que falte una carga estimada o real es una condición de datos que conviene investigar. Comprueba umbrales, deporte y procesamiento antes de tratarla como cero. Sigue [Gestionar un plan activo](/es/docs/guide/manage-active-plan) para marcar como completada, omitir, posponer u otras acciones disponibles según el estado actual de la sesión.
 
-- Completed workouts for the selected day.
-- Distance and duration.
-- Sport type.
-- Links to activity details.
+## 5. Comprueba el alcance del resumen
 
-This separation helps avoid confusing "what was planned" with "what happened."
+El Calendario puede ofrecer resúmenes de **Plan** y de **Mes**. Lee el alcance activo y los límites de fechas mostrados antes de comparar recuentos, distancia, duración o carga.
 
-## Summary scope
+El progreso del plan usa el ciclo activo. La vista general del mes usa el mes visible en el calendario. Sus ventanas de comparación son distintas, así que fíjate en el contexto mostrado en lugar de asumir que todos los resúmenes cubren el mismo periodo.
 
-The calendar can summarize training by plan progress or by calendar month.
+Usa [Revisión semanal](/es/docs/workflow/weekly-review) para una visión más amplia y [PMC](/es/docs/guide/pmc-forecast) cuando la pregunta trate sobre carga acumulada y proyección condicional.
 
-When an active plan exists, the plan scope helps you review the current plan period. Without an active plan, the month scope still gives a useful overview.
+## Comprueba el resultado
 
-Summary metrics can include:
+El día seleccionado, el panel diario y los registros abiertos deben coincidir en la fecha. La sesión planificada y la actividad deben tener el vínculo correcto, y cualquier comparación de carga debe indicar su alcance y los datos faltantes.
 
-- Activity count.
-- Training load.
-- Distance.
-- Duration.
-- Comparison with the previous period.
+## Ajusta sesiones próximas [#adjust-upcoming-workouts]
 
-Use these summaries to spot patterns, not to judge one day in isolation.
+1. Con un plan activo, haz clic derecho en una fecha en la web o en Personal y elige **Ajustar calendario**.
+2. Arrastra una sesión próxima a otra fecha, o haz clic derecho sobre ella y selecciona **Mover sesión** para elegir fecha. Usa **Editar sesión** en el menú de la sesión para modificar su prescripción. Usa el menú de la fecha para añadir una sesión, o el menú de la sesión para eliminar una. El editor agrupa estos cambios en un solo borrador.
+3. Revisa los colores emparejados y las etiquetas **Antes** y **Después**. Selecciona **Revisar cambios** y luego **Confirmar cambios del plan** para aplicar el lote. Para terminar más tarde, cierra el editor, elige **Guardar borrador** y reabre el ajuste pendiente desde **Ajustar calendario**.
+4. Vuelve a abrir el calendario y verifica las nuevas fechas y el contenido de las sesiones. Si el calendario cambia antes de confirmar, usa **Cargar último calendario** y revisa las ediciones pendientes válidas.
 
-## Calendar vs current plan
+<DocsScreenshot
+  id="calendar-adjustment-entry"
+  title="Abre el editor de calendario desde una fecha"
+  description="Haz clic derecho en la fecha del calendario mensual y elige Ajustar calendario."
+  route="Calendario → Clic derecho en una fecha → Ajustar calendario"
+/>
 
-Use the calendar when you want date context across multiple days.
+<DocsScreenshot
+  id="calendar-adjustment-draft"
+  title="Compara las fechas de entrenamiento originales y nuevas"
+  description="Los colores emparejados y las etiquetas Antes y Después muestran una sesión movida del 30 al 31 de octubre. Revisa el borrador antes de aplicarlo."
+  route="Ajustar calendario → Mover sesión → Revisar cambios"
+/>
 
-Use the current plan page when you want to execute or adjust the plan:
+En pantallas estrechas, usa el menú de la sesión o su tirador de arrastre para moverla por la cuadrícula mensual. Una sesión pasada, completada o vinculada puede estar protegida frente a reprogramaciones.
 
-- Mark workouts done or skipped.
-- Move unfinished workouts.
-- Compare expected and actual load in the plan workflow.
-- Ask AI Coach for plan follow-up.
+Para mover una sola sesión desde el calendario principal, arrástrala a la nueva fecha o selecciona **Mover sesión** en su menú. Comprueba la fecha en la vista previa y elige **Confirmar ajuste**.
 
-The calendar is for orientation; the current plan page is for execution.
+Cuando la conversación con el entrenador ofrezca **Ver calendario de entrenamiento**, abre la vista previa desde allí. Podrás revisar o editar los cambios compatibles en la misma conversación y comprobar el borrador guardado antes de confirmar.
 
-## When the calendar looks wrong
+## Preguntas frecuentes
 
-If a workout or activity appears on an unexpected day:
+### ¿Por qué aparece la actividad en una fecha distinta?
 
-- Check your profile time zone.
-- Check the activity start time and activity time zone.
-- Confirm the plan start date.
-- Confirm the activity has finished processing.
-- Check whether search or calendar data needs refreshing.
+Compara la hora de inicio y la zona horaria de la actividad con la zona horaria de visualización de tu cuenta, y luego revisa la fecha de inicio del plan y la fecha programada. Confirma la fecha antes de mover una sesión.
 
-If planned workouts are missing:
+### ¿Por qué falta una sesión del plan?
 
-- Confirm a plan is active.
-- Check whether the selected date is inside the active plan range.
-- Open the plan detail page to confirm the workout schedule.
+Comprueba el plan activo, su rango de fechas y la programación y estado de la sesión individual. Una sesión movida u omitida puede no aparecer donde esperabas.
 
-Related pages:
+### ¿Por qué aparecen dos registros para un mismo entrenamiento?
 
-- [Manage an Active Plan](/docs/guide/manage-active-plan)
-- [Activity Detail](/docs/guide/activity-detail)
-- [Activities Feed and Search](/docs/guide/activity-feed-search)
-- [Profile, Thresholds, and Zones](/docs/guide/profile-thresholds-zones)
+La sesión planificada y la actividad real son registros separados. Confirma su vínculo. Si también existen dos actividades reales, investiga el reenvío entre plataformas y la importación duplicada antes de eliminar nada.
+
+### ¿Por qué no puedo vincular la actividad en la Demo?
+
+La Demo permite inspeccionar los ejemplos. Los cambios de vínculos y de calendario requieren los permisos de tu propia cuenta.
+
+### ¿Qué pasa si se rechaza un cambio?
+
+Lee el mensaje de error y actualiza el último estado del plan o de la actividad antes de reintentarlo. Verifica que el vínculo o el calendario hayan cambiado como esperabas.
+
+## Continúa
+
+- [Hoy y estado actual](/es/docs/guide/today-and-current-state)
+- [Gestionar un plan activo](/es/docs/guide/manage-active-plan)
+- [Detalle de actividad](/es/docs/guide/activity-detail)

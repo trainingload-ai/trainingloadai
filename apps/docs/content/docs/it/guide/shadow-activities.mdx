@@ -1,0 +1,56 @@
+---
+title: "Attività ombra: perché è disponibile solo un riepilogo?"
+description: Scopri cosa sono le attività ombra di Intervals.icu e Strava e decidi quando collegare una fonte, riprovare la sincronizzazione o caricare un file originale.
+keywords:
+  [
+    "attività ombra",
+    "flussi mancanti Strava",
+    "importazione attività Intervals.icu",
+    "riprovare sincronizzazione attività",
+  ]
+---
+
+# Attività ombra: perché è disponibile solo un riepilogo?
+
+**Un'attività ombra è un'attività che il sistema ha individuato ma di cui non sono ancora disponibili i record completi.** Trainingload.ai conserva titolo e orario di inizio così sai che non è andata persa, insieme alla prossima azione disponibile.
+
+Un'attività ombra non è un'attività importata completamente: non inventiamo grafici né carico di allenamento a partire dal solo riepilogo. Un'importazione riuscita sostituisce l'attività ombra con l'attività completa. Una registrazione completa già esistente non viene cancellata se una sincronizzazione successiva non riesce a recuperare dati.
+
+Al momento esistono due scenari principali.
+
+## Caso 1: Intervals.icu ha le informazioni dell'attività ma non può fornire il file originale
+
+Intervals.icu può mostrare il riepilogo di un'attività ricevuta da Strava, mentre la sua API limita esplicitamente l'accesso al file originale dell'attività. Vedere l'attività lì non significa che Trainingload.ai possa scaricarne i record completi attraverso quella API.
+
+Trainingload.ai prova quindi direttamente con Strava. Segui l'indicazione sulla scheda per collegare Strava, rinnovare l'autorizzazione o abilitare l'importazione delle attività, poi attendi la conclusione della sincronizzazione.
+
+Se neanche Strava riesce a fornire i dati richiesti, l'attività ombra rimane. Sincronizzare ripetutamente Intervals.icu non può aggirare la restrizione sul file originale.
+
+## Caso 2: Strava ha i dettagli dell'attività ma non può fornire i flussi (streams)
+
+Nome dell'attività, distanza totale e durata sono dati separati dai campioni puntuali di GPS, frequenza cardiaca, potenza o distanza. **Avere i dettagli riepilogativi di un'attività non garantisce che siano disponibili flussi adatti all'importazione.**
+
+- **I campioni non sono mai esistiti:** ad esempio un'attività inserita manualmente in Strava con distanza e durata ma senza registrazione da dispositivo. Ha una pagina di dettaglio, ma nuovi tentativi non possono creare campioni inesistenti.
+- **I record sono temporaneamente non disponibili:** il provider potrebbe essere ancora in elaborazione oppure l'endpoint dei dati dettagliati potrebbe essere momentaneamente irraggiungibile. Una singola risposta «non trovato» non dimostra che i flussi siano stati eliminati o manchino definitivamente.
+
+Trainingload.ai riprova un numero limitato di volte in caso di errori temporanei di disponibilità. Se i record restano irraggiungibili, mantiene l'attività ombra e offre un comando per riprovare. La semplice assenza di frequenza cardiaca, potenza o GPS non crea necessariamente un'attività ombra: una sessione con serie temporali utilizzabili viene comunque importata, anche se priva di alcune analisi.
+
+## Cosa devo fare?
+
+| Situazione                                                                    | Azione consigliata                                                                           |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| La scheda chiede di collegare, rinnovare l'autorizzazione o abilitare import  | Completa la configurazione indicata, poi attendi la sincronizzazione o riprova.              |
+| L'attività è stata appena caricata o è ancora in elaborazione                 | Attendi il termine dell'elaborazione, poi riprova una volta.                                 |
+| Un problema temporaneo del provider è stato risolto                           | Riprova una volta per richiedere di nuovo i record completi.                                 |
+| L'attività è stata inserita manualmente e non ha mai avuto campioni           | Riprovare ripetutamente non serve: cerca la registrazione originale del dispositivo.         |
+| Dopo più tentativi resta ancora un'attività ombra                             | Verifica se la piattaforma originale consente l'esportazione di un file; se serve, scrivi al supporto. |
+
+Riprovare richiede nuovamente i dati, ma non garantisce che il provider sia ora in grado di fornirli. Non serve eliminare prima l'attività ombra o un'attività completa già esistente. Scollegare e ricollegare ripetutamente non genera campioni mancanti.
+
+## Ho il file originale
+
+Se il tuo dispositivo o la piattaforma che ha registrato originariamente l'allenamento può esportare un file FIT, TCX o GPX contenente i record dell'attività, usa [Caricare file di attività](/it/docs/guide/upload-activity-files). Controlla eventuali avvisi di duplicato e confronta data e contenuti se esiste già un'attività completa.
+
+## Richiedere supporto
+
+Indica data dell'attività, provider di origine, messaggio visualizzato e se la piattaforma originale permette di esportare un file. Non inviare mai token di accesso o password. Consulta [Risoluzione dei problemi](/it/docs/guide/troubleshooting) per altri passaggi.

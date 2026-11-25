@@ -1,0 +1,95 @@
+---
+title: Risoluzione dei problemi
+description: Diagnostica i problemi più comuni di Trainingload.ai su accesso, sincronizzazione, elaborazione delle attività, piani, registrazione mobile, Coach AI e metriche mancanti.
+keywords:
+  [
+    "risoluzione problemi Trainingload.ai",
+    "sincronizzazione attività fallita",
+    "errore piano di allenamento",
+  ]
+---
+
+# Risoluzione dei problemi
+
+Parti sempre dal sintomo osservabile. Evita di ricollegare provider, eliminare attività o ricreare piani prima di capire quale fase si è interrotta.
+
+## Accesso o cicli di autorizzazione
+
+1. Verifica che il browser o l'app mobile riesca a raggiungere il servizio.
+2. Completa il flusso OAuth nella stessa sessione del browser che lo ha avviato.
+3. Controlla che l'account disponga di un altro metodo di accesso attivo prima di scollegarne uno.
+4. Riprova una volta dopo aver aggiornato la pagina di accesso.
+
+Se l'autorizzazione di un provider riesce ma Trainingload.ai lo mostra ancora scollegato, riapri la finestra del provider e controlla eventuali errori di callback o di permessi.
+
+## Manca un'attività sincronizzata
+
+1. Verifica che l'allenamento esista sul provider di origine.
+2. Controlla lo stato di connessione del provider.
+3. Esegui una volta la sincronizzazione manuale o l'azione di riconciliazione se disponibile.
+4. Attendi il completamento del batch di importazione.
+5. Cerca in Attività per data e sport.
+
+Non scollegare e ricollegare ripetutamente: può creare importazioni sovrapposte senza risolvere un problema di permessi alla fonte.
+
+## L'attività è visibile ma l'analisi è incompleta
+
+Un'attività può comparire prima che tutti i grafici derivati siano pronti. Aggiorna al termine dell'elaborazione. Se manca solo una famiglia di metriche, controlla i flussi di origine:
+
+- L'analisi della frequenza cardiaca richiede campioni cardio.
+- L'analisi di potenza richiede campioni di potenza e un contesto sport/profilo adeguato.
+- Le viste percorso e altimetria richiedono dati GPS/dislivello.
+- L'analisi di passo e distanza richiede dati affidabili di distanza e tempo.
+
+## Una metrica sembra sbagliata
+
+Controlla, in quest'ordine:
+
+1. Tipo di sport e definizione dello sport.
+2. Unità di misura e fuso orario.
+3. Valore di soglia e data di decorrenza.
+4. Modello di zone e limiti personalizzati.
+5. Priorità selezionata delle fonti di carico.
+6. Flussi grezzi dell'attività.
+
+Modificare una soglia può incidere sull'interpretazione dei calcoli successivi. Annota il motivo della variazione anziché ritoccarla finché un singolo allenamento appare ideale.
+
+## Impossibile salvare un allenamento
+
+Per gli allenamenti di endurance verifica che ogni blocco strutturato abbia una durata o distanza valida e un obiettivo supportato. Per gli allenamenti di forza verifica che:
+
+- Esista almeno un esercizio.
+- Ogni esercizio abbia un nome.
+- Ogni esercizio abbia almeno un gruppo di serie.
+- Ogni esercizio includa almeno una serie allenante.
+
+L'editor mostra un messaggio di validazione localizzato e mantiene aperta la bozza non valida per la correzione.
+
+## Il piano è stato modificato altrove
+
+Se l'app segnala un conflitto di versione o di stato, un'altra richiesta ha modificato il piano dopo il caricamento della schermata. Aggiorna il piano, verifica lo stato più recente e riapplica la modifica. Non riprovare alla cieca un'azione distruttiva basata su una versione vecchia.
+
+## La registrazione mobile non ha terminato la sincronizzazione
+
+Mantieni installata l'app ed evita di cancellare l'archiviazione locale finché il recupero è possibile. Riapri la schermata di registrazione, lascia che l'app ripristini la sessione e riconnettiti alla rete. Consulta [Registrazione mobile](/it/docs/guide/mobile-recording).
+
+## Il Coach AI non riesce a completare una richiesta
+
+- Accorcia richieste molto lunghe o dividile in passaggi.
+- Controlla che piano o attività esistano ancora e siano accessibili.
+- Verifica i limiti di utilizzo.
+- Se un'azione strutturata non supera la validazione, descrivi in linguaggio semplice la modifica desiderata e riprova.
+- Non applicare mai un adattamento che non riesci a verificare nell'anteprima prima/dopo.
+
+## Raccogliere informazioni utili
+
+Quando segnali un problema includi:
+
+- Orario approssimativo e fuso orario.
+- Web o mobile, sistema operativo e versione di app/browser.
+- La pagina o il flusso interessato (mai le credenziali).
+- ID hash dell'attività, ID del piano o nome del provider quando sicuro.
+- Il testo esatto del messaggio di errore localizzato.
+- Uno screenshot con i dati personali oscurati.
+
+Non includere mai password, token OAuth, chiavi API o coordinate precise di casa.

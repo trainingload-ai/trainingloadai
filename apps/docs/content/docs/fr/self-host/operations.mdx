@@ -1,0 +1,96 @@
+---
+title: Gérer une instance auto-hébergée
+description: Utilisez le point d’entrée de gestion officiel pour les contrôles de santé, journaux, sauvegardes, restaurations, mises à niveau, retours arrière et arrêts.
+---
+
+# Gérer une instance auto-hébergée
+
+Administrez votre instance via `./self-host <command> --json` sous Linux, macOS et WSL2, ou `.\self-host.ps1 <command> --json` sous Windows PowerShell. Ce point d’entrée de gestion applique les règles de validation, de verrouillage, d’audit et de protection des données de la version.
+
+## Avant de commencer
+
+- Gardez privés le répertoire de la version installée ainsi que son fichier `.env.selfhost`.
+- En automatisation, fiez-vous aux champs JSON `ok`, `exitCode`, `error.code` et `details`, et non aux messages lisibles par l’humain.
+- Exécutez toujours la même commande avec `--dry-run` avant toute opération modifiant l’état.
+- N’utilisez jamais `docker compose down -v`, ne supprimez jamais les marqueurs de cycle de vie et ne rétrogradez jamais manuellement la base de données.
+
+## Vérifier l’état, la santé et les journaux
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` fournit un instantané borné de l’exécution. `doctor` contrôle la configuration fiable, les ressources de l’hôte, les chemins de données, l’état de la base de données, la disponibilité des services et les fournisseurs activés. Les journaux sont expurgés et bornés, mais peuvent encore contenir des données métier ; relisez-les avant tout partage.
+
+## Démarrer et arrêter
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+L’arrêt conserve les conteneurs, la configuration et les données persistantes. Pour supprimer les ressources d’exécution tout en gardant vos données, utilisez le flux documenté `uninstall` ; ne supprimez jamais les volumes manuellement.
+
+## Créer une sauvegarde vérifiée
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+Une sauvegarde contient un export logique PostgreSQL ainsi que les fichiers téléversés faisant autorité. Elle exclut les caches, diagnostics, jetons d’amorçage, états TLS privés, données locales d’élévation et valeurs de secrets. Conservez le paquet obtenu dans un stockage chiffré hors de l’hôte et testez-le régulièrement sur une cible propre et isolée.
+
+## Restaurer en toute sécurité
+
+Restaurez uniquement dans une cible nouvellement initialisée, de même version exacte, dont la base de données et les fichiers téléversés faisant autorité sont vides :
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+N’écrasez jamais l’instance en cours. Un échec de restauration laisse un marqueur bloquant et un rapport afin qu’une cible incomplète ne puisse pas être démarrée comme si elle était saine.
+
+## Mettre à niveau
+
+Une mise à niveau nécessite le répertoire complet et signé de la version cible. Conservez l’instance actuelle, le paquet cible et une sauvegarde vérifiée hors hôte. Exécutez les simulations (`dry-run`) de compatibilité du contrôleur actuel puis du contrôleur cible avant de lancer la mise à niveau pilotée par la version cible :
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+Les migrations de base de données sont strictement ascendantes. Un retour arrière applicatif n’est possible que si le rapport de mise à niveau le déclare explicitement et que les anciennes images restent vérifiables ; il ne rétrograde jamais la base de données.
+
+## Routine recommandée
+
+- Chaque jour : vérifiez `status` et l’espace disque disponible.
+- Chaque semaine : lancez `doctor` et créez une sauvegarde vérifiée hors hôte.
+- Avant chaque mise à niveau : lisez les notes de version cible, vérifiez le paquet cible, testez la sauvegarde et examinez la déclaration de retour arrière.
+- Périodiquement : restaurez une sauvegarde dans une cible isolée et vérifiez le compte Owner, les activités et les fichiers téléversés.
+
+## Vérifier
+
+- Chaque modification d’état a été précédée de la même commande et des mêmes paramètres avec `--dry-run`.
+- `doctor` renvoie `"ok": true` après un démarrage, une restauration ou une mise à niveau.
+- Au moins une sauvegarde vérifiée récente existe en dehors de l’hôte de l’instance.
+- Un exercice de restauration a confirmé que la sauvegarde est bien exploitable, et pas seulement présente.
+
+## Dépannage
+
+Si une opération échoue, conservez son code d’erreur stable et lancez `doctor`. Ne générez un paquet de diagnostics que si nécessaire, examinez-le localement et ne publiez jamais le fichier `.env.selfhost` brut, un export de base de données, des fichiers téléversés, des mots de passe, des jetons ou des clés fournisseur. Ne relancez pas une opération modificatrice en parallèle tant qu’une autre détient le verrou d’instance.
+
+## Étape suivante
+
+Gardez la page [Dépannage](/fr/docs/self-host/troubleshooting) à portée de main dans votre documentation d’exploitation. Relisez la [Configuration](/fr/docs/self-host/configuration) avant de modifier le réseau ou les fournisseurs.

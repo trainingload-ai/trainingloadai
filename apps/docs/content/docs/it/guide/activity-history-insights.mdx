@@ -1,0 +1,130 @@
+---
+title: Storico attività e migliori sforzi
+description: Analizza il volume annuale delle attività, classifica i migliori sforzi per distanza o durata, esplora i percorsi GPS e riconduci ogni risultato alla sua attività di origine.
+keywords:
+  [
+    "storico attività",
+    "migliori distanze",
+    "heatmap allenamento",
+    "mappa allenamenti",
+    "migliori sforzi personali",
+  ]
+---
+
+# Storico attività e migliori sforzi
+
+Usa gli strumenti storici per passare da «cosa è successo?» alla specifica attività sorgente. Statistiche attività riassume il volume, Migliori distanze classifica gli sforzi sostenuti e Mappa aggiunge il contesto del percorso.
+
+Queste pagine descrivono i dati registrati: non certificano un risultato ufficiale di gara, non prevedono un tempo finale e non spiegano da sole perché la prestazione è cambiata senza un'analisi ulteriore.
+
+## Prima di iniziare
+
+- Attendi che le attività importate raggiungano lo stato Ready.
+- Verifica classificazione dello sport, fuso orario e sistema di unità.
+- Correggi duplicati ed errori evidenti dei sensori prima di confrontare totali o record.
+- Seleziona un intervallo di date coerente con la tua domanda.
+- Ricorda che Mappa richiede coordinate GPS valide; le attività indoor o senza GPS compaiono comunque nelle altre viste.
+
+## 1. Analizza il volume annuale delle attività
+
+Apri **Analisi → Statistiche attività**. La pagina utilizza il filtro sport attivo in Attività, quindi imposta quel filtro prima di interpretare il report.
+
+Scegli un anno dalla barra laterale. Gli anni disponibili risalgono fino all'attività più vecchia dello sport selezionato. La heatmap copre la finestra di 365 giorni disponibile per l'anno scelto e conta i giorni di attività.
+
+Sotto la heatmap seleziona una metrica:
+
+- Distanza.
+- Durata.
+- Frequenza cardiaca.
+- Numero di attività.
+- Calorie.
+
+Aggrega poi il grafico a linee per giorno, settimana o mese. Usa i dati giornalieri per esaminare un periodo breve, quelli settimanali per valutare la costanza e quelli mensili per confrontare il volume su larga scala. La frequenza cardiaca viene mediata tra i valori disponibili; le metriche additive come distanza e durata vengono sommate.
+
+<DocsScreenshot
+  id="activity-stats-year"
+  title="Storico annuale delle attività"
+  description="Seleziona sport e anno, poi confronta la heatmap delle attività con una metrica aggregata per giorno, settimana o mese."
+  route="Analisi → Statistiche attività"
+/>
+
+## 2. Trova i migliori sforzi
+
+Apri **Analisi → Migliori distanze** e segui questo ordine:
+
+1. Seleziona **Corsa**, **Ciclismo** o **Nuoto**.
+2. Scegli **Per distanza** o **Per tempo**.
+3. Imposta l'intervallo di date.
+4. Seleziona una distanza o una durata target.
+5. Esamina i record in classifica: la pagina richiede fino a dieci risultati per target.
+6. Apri l'attività di origine dalla riga del record.
+
+**Per distanza** risponde a «Qual è stato il mio tempo più veloce su questa distanza?». **Per tempo** risponde a «Quanta distanza ho coperto in questa durata?». Il passo visualizzato aiuta a confrontare sforzi dentro lo stesso sport e contesto.
+
+<DocsScreenshot
+  id="best-distance-records"
+  title="Classifica dei migliori sforzi"
+  description="Seleziona sport, modalità per distanza o per tempo, intervallo di date e target prima di aprire l'attività dietro a un risultato."
+  route="Analisi → Migliori distanze"
+/>
+
+Non chiamare ogni riga un record personale assoluto. Un risultato è il miglior segmento qualificante trovato nei dati e nell'intervallo selezionati: può provenire da un allenamento, dipendere dalla qualità del GPS e cambiare dopo una rielaborazione o una correzione dell'attività.
+
+## 3. Esplora lo storico dei percorsi su Mappa
+
+Apri **Mappa**, poi imposta i filtri di periodo e sport. La pagina disegna i percorsi delle attività corrispondenti che contengono dati GPS utilizzabili.
+
+Usa Mappa per:
+
+- Trovare attività in base alla località o alla forma del percorso.
+- Confrontare dove si sono svolte sessioni ripetute.
+- Individuare subito una traccia incompleta o anomala prima di aprire l'attività.
+- Creare un poster condivisibile basato sul percorso di un'attività selezionata.
+
+Seleziona un percorso per aprire il poster dell'attività. Dal poster puoi proseguire verso il dettaglio attività completo quando contano metriche, stato di elaborazione o dati dei sensori.
+
+<DocsScreenshot
+  id="activity-history-map"
+  title="Percorsi delle attività filtrati"
+  description="Usa i filtri di tempo e sport per restringere i percorsi GPS, poi seleziona una traccia per esaminare poster e dettaglio sorgente."
+  route="Mappa"
+/>
+
+La Mappa contiene dati di posizione sensibili. Controlla sempre poster e percorso prima di condividere ed evita di esporre casa, luogo di lavoro o altri punti di partenza privati.
+
+## 4. Indaga su un risultato sorprendente
+
+Se un totale annuale, un miglior sforzo o un percorso sembrano errati:
+
+1. Apri l'attività di origine.
+2. Verifica orario di inizio, sport, provider, stato di elaborazione e sistema di unità.
+3. Ispeziona GPS, distanza, durata, pause e flussi dei sensori pertinenti.
+4. Controlla eventuali duplicati o errori di classificazione dello sport.
+5. Correggi l'attività sorgente o le impostazioni, poi aggiorna la pagina di riepilogo.
+
+Considera sempre l'attività di origine come la prova principale: una pagina riepilogativa può mettere in luce un'anomalia, ma raramente può spiegarla o risolverla da sola.
+
+## Verifica il risultato
+
+- Statistiche attività utilizza sport, anno, metrica e aggregazione corretti.
+- Ogni riga di Migliori distanze apre l'attività sorgente attesa e coincide con la data.
+- Il percorso selezionato su Mappa appartiene all'attività prevista.
+- Le attività senza GPS non vengono scambiate per importazioni mancate solo perché non compaiono su Mappa.
+- Ogni poster condiviso è stato controllato per non esporre posizioni private.
+
+## Risoluzione dei problemi
+
+- **In Statistiche attività compare lo sport sbagliato:** torna in Attività, cambia il filtro sport, poi riapri o aggiorna Statistiche attività.
+- **È disponibile solo l'anno corrente:** lo sport selezionato non ha attività qualificanti precedenti, oppure la ricerca dell'attività più vecchia non si è ancora conclusa.
+- **Heatmap e grafico a linee sembrano diversi:** la heatmap conta i giorni di attività; il grafico a linee usa la metrica e l'aggregazione selezionate.
+- **Manca un miglior sforzo:** amplia l'intervallo di date, controlla sport e target e verifica che l'attività contenga dati validi di distanza e tempo.
+- **Un record sembra impossibile:** controlla picchi GPS, pause, distanza, durata e attività duplicate prima di considerarlo valido.
+- **Un'attività non compare su Mappa:** può trovarsi fuori dai filtri attivi oppure essere priva di traccia GPS valida.
+- **Selezionare un percorso apre un poster che sembra errato:** verifica la data dell'attività e apri il dettaglio completo prima di condividere.
+
+## Prossimi passi
+
+- [Feed e ricerca attività](/it/docs/guide/activity-feed-search)
+- [Dettaglio attività](/it/docs/guide/activity-detail)
+- [Pagine di analisi delle prestazioni](/it/docs/guide/performance-analysis-pages)
+- [Flusso di analisi dell'allenamento](/it/docs/guide/training-analysis-workflow)

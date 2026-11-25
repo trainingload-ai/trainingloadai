@@ -1,0 +1,96 @@
+---
+title: 管理自行託管實例
+description: 透過受支援的管理入口執行健康檢查、檢視日誌、備份、還原、升級、回復與停止實例。
+---
+
+# 管理自行託管實例
+
+請在 Linux、macOS 與 WSL2 上透過 `./self-host <command> --json`，或在 Windows PowerShell 中透過 `.\self-host.ps1 <command> --json` 來操作實例。此管理入口會完整保留發行版本的驗證、鎖定、稽核與資料安全規則。
+
+## 開始之前
+
+- 妥善保密已安裝的發行目錄及其 `.env.selfhost`。
+- 撰寫自動化流程時，請依據 JSON 中的 `ok`、`exitCode`、`error.code` 與 `details` 判斷結果，而非依賴人類可讀的文字訊息。
+- 執行任何會改變狀態的操作前，務必先以相同命令加上 `--dry-run` 預演。
+- 切勿使用 `docker compose down -v`、刪除生命週期標記，或手動降級資料庫。
+
+## 檢查狀態、健康度與日誌
+
+```bash
+./self-host status --json
+./self-host doctor --json
+./self-host logs --tail 200 --service server --service client --json
+```
+
+`status` 會回傳有限範圍的執行狀態快照；`doctor` 會檢查受信任設定、主機資源、資料路徑、資料庫狀態、就緒狀態與已啟用的服務商。日誌雖經過遮蔽與筆數限制，但仍可能包含業務資料，分享前請務必先自行檢查。
+
+## 啟動與停止
+
+```bash
+./self-host start --dry-run --json
+./self-host start --json
+
+./self-host stop --dry-run --json
+./self-host stop --json
+```
+
+停止實例會保留容器、設定與持久資料。若要在保留資料的同時移除執行資源，請使用文件記載的 `uninstall` 流程，切勿手動刪除資料卷。
+
+## 建立已驗證備份
+
+```bash
+./self-host backup --output weekly-<yyyy-mm-dd> --dry-run --json
+./self-host backup --output weekly-<yyyy-mm-dd> --json
+```
+
+備份包含 PostgreSQL 邏輯傾印與權威上傳檔案，排除快取、診斷檔案、引導權杖（bootstrap tokens）、TLS 私密狀態、本機高程資料與機密數值。請將完成的備份套件保存於主機之外的加密儲存空間，並定期在乾淨隔離的目標環境測試還原。
+
+## 安全還原
+
+僅可還原至全新初始化、精確版本相符，且權威資料庫與上傳目錄皆為空的目標環境：
+
+```bash
+./self-host restore /secure/path/to/backup --dry-run --json
+./self-host restore /secure/path/to/backup --json
+./self-host doctor --json
+```
+
+切勿覆寫運作中的現有實例。若還原失敗，系統會留下阻擋標記與報告，以防不完整的目標環境被當作正常實例啟動。
+
+## 升級
+
+升級需要完整的已簽章目標發行目錄。請同時保留現有實例、目標發行套件與一份經驗證的異地備份。執行實際的目標控制升級前，請先分別執行現有與目標控制器的相容性預演：
+
+```bash
+instance='/absolute/path/to/current-instance'
+target='/absolute/path/to/trainingload-selfhost-<target-version>'
+
+"$instance/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --dry-run --json
+"$target/self-host" upgrade "$target" --directory "$instance" --json
+"$target/self-host" doctor --directory "$instance" --json
+```
+
+資料庫遷移為單向遞進（forward-only）。只有在升級報告明確宣告支援且舊版映像檔仍可驗證時，才可執行應用程式回復；回復絕不會降級資料庫。
+
+## 建議日常維護節奏
+
+- 每日：檢查 `status` 與磁碟可用容量。
+- 每週：執行 `doctor` 並建立一份經驗證的異地備份。
+- 每次升級前：閱讀目標版本發行說明、驗證目標套件、測試備份，並檢視回復宣告。
+- 定期：將備份還原至隔離目標環境，驗證擁有者帳號、活動紀錄與上傳檔案。
+
+## 驗證操作
+
+- 每項狀態變更操作前，都先以相同命令與參數執行過 `--dry-run`。
+- 啟動、還原或升級後，`doctor` 回傳 `"ok": true`。
+- 實例主機之外至少存有一份最新的已驗證備份。
+- 已實際執行過還原演練，確認備份可用而不只是存在檔案。
+
+## 疑難排解
+
+若操作失敗，請保留穩定的錯誤代碼並執行 `doctor`。僅在必要時才產生診斷套件，先在本機檢視內容，絕不公開原始 `.env.selfhost`、資料庫傾印、上傳檔案、密碼、權杖或服務商金鑰。當另一項操作正持有實例鎖定時，切勿並行重試狀態變更命令。
+
+## 下一步
+
+請將[疑難排解](/zh-hant/docs/self-host/troubleshooting)納入你的維運手冊。變更網路或服務商設定前，請先回顧[設定實例](/zh-hant/docs/self-host/configuration)。

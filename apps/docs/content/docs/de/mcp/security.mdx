@@ -1,0 +1,40 @@
+---
+title: MCP-Sicherheit und Datenschutz
+description: OAuth, Datensparsamkeit, Mandantentrennung, Bereinigung, Limits, Protokollierung und Grenzen für Gesundheitsdaten bei TrainingLoad MCP.
+---
+
+# MCP-Sicherheit und Datenschutz
+
+Wenn du TrainingLoad MCP verbindest, kann der von dir autorisierte KI-Client Trainingszusammenfassungen lesen und Fragen beantworten. MCP ist schreibgeschützt: Aktivitäten, Trainingspläne, Wettkämpfe, Profilwerte oder Kontoeinstellungen lassen sich darüber nicht ändern.
+
+## Du bestimmst die Berechtigungen
+
+Während des Verbindens öffnet der Client die TrainingLoad-Autorisierungsseite. Prüfe den Client-Namen und den angeforderten Berechtigungsumfang (Scope), bevor du zustimmst. Du musst dem Client weder dein TrainingLoad-Passwort noch einen API-Schlüssel mitteilen.
+
+Bei jeder Anfrage wird die aktuelle Kontoautorisierung erneut geprüft. Ein Client kann nur Daten lesen, die du freigegeben hast. Fehlende Berechtigungen, abgelaufener Zugriff oder eine vorübergehende Störung führen zu einer entsprechenden Fehlermeldung.
+
+Gesundheitsdaten erfordern den separaten Berechtigungsumfang (Scope) `health:read`, der standardmäßig nicht enthalten ist. Du kannst den Zugriff eines Clients jederzeit in deinem Konto widerrufen.
+
+## Was der Client lesen darf
+
+Die Tools liefern Zusammenfassungen, die für Trainingsfragen erforderlich sind – etwa Aktivitätsdauer, Trainingsbelastung, Planerfüllung und Kennzahlentrends. Abfragen zu Aktivitäten und Trainingsplänen sind strikt auf Datensätze deines autorisierten Kontos beschränkt.
+
+MCP gibt keine E-Mail-Adressen, internen Benutzer-IDs, genauen GPS-Tracks, rohen Sensordatenströme, Zugangsdaten von Drittanbietern oder vollständigen FIT-Dateien zurück. Listen und Datumsbereiche sind begrenzt, sodass ein Client für längere Trainingshistorien gegebenenfalls mehrere Anfragen stellen muss.
+
+## Aktivitätsnotizen sind Daten, keine Anweisungen
+
+Aktivitätsnamen, Beschreibungen, Einheitsnamen und Wettkampfnotizen werden ausschließlich als Trainingsdaten behandelt. Der Dienst bereinigt unsicheren Text und weist Clients an, eingebettete Befehle oder Links in solchen Notizen nicht auszuführen.
+
+## Umgang mit Gesundheitsdaten
+
+Das Gesundheits-Tool stellt eine reduzierte tägliche Wellness-Zusammenfassung zur Unterstützung der Trainingsanalyse bereit. Es ersetzt weder eine medizinische Diagnose noch die Einschätzung durch qualifiziertes Fachpersonal.
+
+## Anfragelimits und Diagnoseprotokolle
+
+Der Dienst kann Anfragen begrenzen, wenn sie zu häufig erfolgen oder zu viele Daten auf einmal anfordern. Der Client sollte den Fehlerhinweisen folgen, den Datumsbereich eingrenzen oder vor einem erneuten Versuch warten.
+
+Zur Fehlerbehebung speichert der Dienst Diagnoseinformationen wie Tool-Name, Ergebnisstatus, Fehlercode, Dauer und Request-ID. Benutzer- und Client-Kennungen werden pseudonymisiert. Diese Protokolle enthalten weder Zugriffstoken noch vollständige Anfrage- oder Antwortinhalte.
+
+## Bei Verdacht auf unerwünschten Zugriff
+
+Widerrufe den Zugriff des Clients sofort in deinem TrainingLoad-Konto und melde den Vorfall anschließend über den Support-Kanal der Website. Nenne dabei den ungefähren Zeitpunkt, den Client-Namen und – sofern angezeigt – die Request-ID. Sende niemals Zugriffstoken oder vollständige Gesundheitsdaten mit.

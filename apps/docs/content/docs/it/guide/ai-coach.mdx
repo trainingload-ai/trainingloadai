@@ -1,127 +1,172 @@
 ---
-title: AI Coach
-description: Use AI Coach in Trainingload.ai to review activities, follow up on training plans, generate plan drafts, and turn workout data into practical training decisions.
-keywords: ["AI coach", "AI workout review", "AI training plan", "Trainingload.ai coach"]
+title: Coach AI
+description: Usa il Coach AI di Trainingload.ai per analizzare le attività, monitorare i piani di allenamento, generare bozze di piano e trasformare i dati degli allenamenti in scelte concrete.
+keywords:
+  ["Coach AI", "revisione allenamento AI", "piano di allenamento AI", "coach Trainingload.ai"]
 ---
 
-# AI Coach
+# Coach AI
 
-AI Coach is the conversational layer of Trainingload.ai. It helps interpret your training data, review plan execution, and draft next steps when the numbers alone are not enough.
+Chiedi al Coach AI di spiegare un'attività, valutare l'andamento di un piano o capire se conviene adattare il prossimo allenamento. Il Coach AI risponde utilizzando i dati di allenamento disponibili: controlla sempre i record su cui si basa e le modifiche proposte prima di applicare un suggerimento.
 
-Use it for:
+Usalo per:
 
-- Activity interpretation.
-- Daily, weekly, or monthly training review.
-- Plan follow-up.
-- AI-assisted plan creation.
-- Workout adjustment ideas.
-- Questions about load, recovery, pace, heart rate, and power.
+- Interpretare una singola attività.
+- Revisioni giornaliere, settimanali o mensili dell'allenamento.
+- Follow-up sul piano di allenamento.
+- Creazione assistita da AI di un piano.
+- Idee per adattare gli allenamenti.
+- Domande su carico di allenamento, recupero, passo, frequenza cardiaca e potenza.
 
-## Start a conversation
+## Prima di iniziare
 
-Open **AI Coach** from the main navigation, mobile coach button, an activity detail page, a plan page, or a review notification.
+- Lascia che le attività pertinenti completino l'elaborazione.
+- Mantieni aggiornati soglie del profilo, zone e informazioni sullo stato attuale.
+- Collega le attività completate agli allenamenti pianificati se vuoi consigli sull'esecuzione del piano.
+- Definisci una domanda o decisione concreta; evita richieste generiche su tutto.
 
-You can start a new chat or continue an existing session. Existing sessions keep the previous messages and context for that conversation.
+## Avviare una conversazione
 
-## What context AI Coach can use
+Scegli **Coach** nella barra laterale sul web o in Personal. Puoi aprire il Coach anche dall'app mobile, da una pagina di dettaglio attività, da una pagina piano o da una notifica di revisione.
 
-Depending on the entry point and available data, AI Coach may use:
+Avvia una nuova chat oppure seleziona una conversazione esistente nella barra laterale per conservarne messaggi e contesto.
 
-- Recent activities.
-- Activity detail and time-series analysis.
-- Current training plan.
-- Plan workouts and completion status.
-- Linked activities.
-- Training load metrics.
-- Profile, thresholds, and zones.
-- Daily, weekly, or monthly review summaries.
+Nella pagina **Coach** sul web puoi consultare piano attivo, allenamento di oggi, avanzamento settimanale, attività recenti e conversazioni. Seleziona l'elemento pertinente per avviare una conversazione dedicata. Nello storico trovi anche le revisioni giornaliere, settimanali e mensili: apri sempre i record citati prima di applicare una raccomandazione.
 
-AI Coach works best when your data is current. If activities are still processing, or thresholds are missing, its suggestions may be more general.
+<DocsScreenshot
+  id="ai-coach-contextual-review"
+  title="Revisione contestuale con il Coach AI"
+  description="L'esempio mostra una revisione dell'allenamento nella conversazione, con le chat salvate nella barra laterale."
+  route="Coach AI"
+/>
 
-## Activity review
+## Quale contesto può usare il Coach AI
 
-For a single activity, ask questions such as:
+In base al punto di accesso e ai dati disponibili, il Coach AI può utilizzare:
 
-- "Did this workout match the planned target?"
-- "Was the late heart-rate drift a problem?"
-- "How should I interpret this climb-heavy ride?"
-- "What should I watch before the next hard session?"
+- Attività recenti.
+- Dettaglio attività e analisi delle serie temporali.
+- Piano di allenamento corrente.
+- Allenamenti del piano e relativo stato di completamento.
+- Attività collegate.
+- Metriche di carico di allenamento.
+- Profilo, soglie e zone.
+- Riepiloghi di revisione giornalieri, settimanali o mensili.
 
-Good activity review combines the raw metrics with the purpose of the workout.
+Il Coach AI lavora al meglio quando i dati sono aggiornati. Se ci sono attività ancora in elaborazione o mancano le soglie, i suggerimenti potrebbero essere più generici.
 
-## Plan follow-up
+## Revisione di un'attività
 
-From a plan detail page, use AI Coach to review plan progress with plan context.
+Per una singola attività prova domande come:
 
-Useful questions:
+- "Questo allenamento ha rispettato l'obiettivo pianificato?"
+- "La deriva cardiaca nel finale è un segnale da tenere d'occhio?"
+- "Come dovrei interpretare questa uscita con molto dislivello?"
+- "A cosa devo prestare attenzione prima della prossima sessione impegnativa?"
 
-- "How is this plan going so far?"
-- "Which missed workouts matter most?"
-- "Should I move the next workout?"
-- "Is my actual load too far above the expected load?"
-- "How should the next week change after today's session?"
+Una buona revisione unisce i numeri grezzi allo scopo della sessione.
 
-When AI Coach suggests schedule changes, review them before treating them as final.
+## Follow-up sul piano
 
-## AI plan drafts
+Dalla pagina di dettaglio del piano usa il Coach AI per analizzare i progressi con il contesto completo del piano.
 
-When creating an AI-assisted plan, the plan brief is passed into AI Coach. AI Coach can ask follow-up questions when important information is missing, then present a plan draft.
+Domande utili:
 
-Review the draft carefully:
+- "Come sta andando questo piano finora?"
+- "Quali allenamenti saltati contano di più?"
+- "Mi conviene spostare il prossimo allenamento?"
+- "Il mio carico effettivo è troppo superiore al carico previsto?"
+- "Come dovrebbe cambiare la prossima settimana dopo la sessione di oggi?"
 
-- Weekly structure.
-- Hard/easy rhythm.
-- Workout descriptions.
-- Sport types.
-- Recovery placement.
-- Total workload.
+Quando il Coach AI propone una modifica al programma, seleziona **Visualizza calendario allenamenti** per confrontare sessioni originali e proposte dentro la stessa conversazione. Controlla date e contenuti prima di scegliere **Conferma modifiche al piano**. Consulta [Calendario](/it/docs/guide/calendar#adjust-upcoming-workouts) per modificare il programma.
 
-Saving the draft creates a plan; it does not remove your responsibility to check whether the schedule fits your real life.
+## Bozze di piano AI
 
-## Questions and confirmations
+Quando crei un piano assistito da AI, il brief viene passato al Coach AI. Se mancano informazioni importanti, il Coach AI può fare domande di chiarimento prima di presentare una bozza di piano.
 
-AI Coach may ask you to choose between options when a missing detail would materially change the recommendation.
+Esamina con attenzione la bozza:
 
-Examples:
+- Struttura settimanale.
+- Alternanza tra giorni impegnativi e giorni facili.
+- Descrizioni degli allenamenti.
+- Tipi di sport.
+- Collocazione del recupero.
+- Carico complessivo.
 
-- Preferred long-workout day.
-- Race date or target distance.
-- Current injury concern.
-- Whether to prioritize recovery or maintain volume.
+Salvare la bozza crea un piano, ma resta tua responsabilità verificare che il programma si adatti alla tua vita quotidiana.
 
-Answering these questions keeps the recommendation grounded in your constraints.
+## Domande e conferme
 
-## Changes and undo
+Il Coach AI può chiederti di scegliere tra alcune opzioni quando un dettaglio mancante cambierebbe in modo sostanziale la raccomandazione.
 
-Some AI Coach actions can apply changes to your training data, such as a workout adjustment. Higher-risk changes are presented for confirmation before they are applied.
+Esempi:
 
-When an applied action supports undo, use the undo button promptly. Undo availability may be time-limited.
+- Giorno preferito per il lungo.
+- Data di gara o distanza obiettivo.
+- Eventuale fastidio o infortunio in corso.
+- Se dare priorità al recupero o mantenere il volume.
 
-## Session history
+Rispondere a queste domande mantiene il consiglio ancorato ai tuoi vincoli reali.
 
-Use history to:
+## Modifiche e annullamento
 
-- Continue a previous chat.
-- Reopen review sessions.
-- Rename or pin useful sessions.
-- Delete sessions you no longer need.
+Alcune azioni del Coach AI possono applicare modifiche ai tuoi dati di allenamento, come l'adattamento di una sessione. Le modifiche più rilevanti vengono sottoposte a conferma prima di essere eseguite.
 
-If you edit an earlier user message, later context may be replaced so the conversation stays consistent with the edited request.
+Quando un'azione applicata supporta l'annullamento (Undo), usa subito il pulsante Annulla se serve: la disponibilità dell'annullamento può avere un limite di tempo.
 
-## Better prompts
+## Cronologia delle sessioni
 
-Be specific about the decision you need to make.
+Usa la cronologia per:
 
-Helpful:
+- Riprendere una chat precedente.
+- Riaprire sessioni di revisione.
+- Rinominare o fissare in alto le conversazioni utili.
+- Eliminare le sessioni che non ti servono più.
 
-- "I have a long run tomorrow, but today's workout was harder than planned. Should I adjust?"
-- "Compare this week's actual load with the plan and suggest one conservative change."
-- "I missed two easy sessions. Should I make them up or move on?"
+Quando apri la vista di tutte le sessioni da una notifica di revisione, verifica il filtro giorno, settimana o mese selezionato prima di scegliere una conversazione.
 
-Less helpful:
+Se modifichi un tuo messaggio precedente, il contesto successivo può essere sostituito così che la conversazione rimanga coerente con la richiesta aggiornata.
 
-- "What do you think?"
-- "Analyze everything."
-- "Make me faster."
+## Scrivere richieste più efficaci
 
-AI Coach is most useful when the question is tied to a real training decision.
+Sii specifico sulla decisione che devi prendere.
+
+Richieste utili:
+
+- "Domani ho un lungo, ma l'allenamento di oggi è stato più duro del previsto. Conviene adattarlo?"
+- "Confronta il carico effettivo di questa settimana con il piano e proponi una sola modifica prudente."
+- "Ho saltato due sessioni leggere. Devo recuperarle o proseguire normalmente?"
+
+Richieste meno utili:
+
+- "Cosa ne pensi?"
+- "Analizza tutto."
+- "Fammi andare più veloce."
+
+Il Coach AI rende al meglio quando la domanda è legata a una scelta concreta di allenamento.
+
+## Riconoscere una risposta affidabile
+
+Una risposta utile dovrebbe:
+
+- Citare l'attività, il piano, l'intervallo di date o il contesto metrico corretti.
+- Separare i dati osservati dall'interpretazione e dalle incertezze.
+- Spiegare perché la raccomandazione deriva dai dati disponibili.
+- Preferire un'unica azione successiva prudente anziché riscrivere tutto senza motivo.
+- Chiedere conferma prima di una modifica sostanziale ai dati o al programma.
+
+Se la risposta sembra usare un contesto sbagliato, non confermare l'azione: indica nuovamente l'attività o il piano di riferimento e chiedi prima al Coach di verificarli.
+
+## Risoluzione dei problemi
+
+- **La risposta è troppo generica:** attendi il completamento dell'elaborazione, aggiorna le soglie mancanti e fai la domanda dalla pagina dell'attività o del piano pertinente.
+- **Si parla del piano o dell'attività sbagliati:** parti dalla pagina di dettaglio corretta oppure indica esattamente titolo e data.
+- **Un'azione supportata da strumenti fallisce:** aggiorna la pagina di origine, controlla che il record esista ancora e riprova l'azione minima.
+- **Una bozza di piano sembra irrealistica:** specifica disponibilità settimanale, attrezzatura, baseline recente, dati delle gare e vincoli di dolore o infortunio senza chiedere diagnosi mediche al Coach.
+- **Una modifica è stata applicata per errore:** usa subito Annulla se disponibile; altrimenti apri e modifica direttamente il piano o l'allenamento interessato.
+
+## Prossimi passi
+
+- [Notifiche e automazione delle revisioni](/it/docs/guide/notifications-and-reviews)
+- [Gestire un piano attivo](/it/docs/guide/manage-active-plan)
+- [Creare un piano di allenamento](/it/docs/guide/create-training-plan)

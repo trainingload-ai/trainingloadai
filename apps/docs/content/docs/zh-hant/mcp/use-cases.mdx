@@ -1,0 +1,72 @@
+---
+title: MCP 使用情境
+description: 可直接複製使用的提示詞、預期的工具呼叫路徑，以及優質回答應包含的證據。
+---
+
+# MCP 使用情境
+
+將下方任一提示詞貼到已連線至 TrainingLoad 的 AI 用戶端即可開始使用。用戶端不一定會呼叫列出的全部工具，而是應選用足以回答問題的最小工具組合。
+
+## 當前訓練狀態與主觀疲勞
+
+> 使用 TrainingLoad 摘要我截至今天的訓練狀態。比較最近 7 天與前 7 天，納入狀態值（Form）與接下來三堂計畫課表，並清楚區分事實與推論。
+
+預期呼叫路徑：`get_training_snapshot` → `get_training_readiness` → 必要時呼叫 `list_planned_workouts`。
+
+優質回答應明確標示 `asOf` 基準日期、時區、負荷差值、ATL/CTL/TSB 是否有值，並說明準備度輸出屬於觀察性負荷訊號，而非醫療診斷或「是否適合訓練」的判定。
+
+## 比較兩個訓練週期
+
+> 比較 2026 年 9 月 1 日至 28 日與 2026 年 10 月 1 日至 28 日的訓練表現。依跑步、騎車與游泳拆解訓練負荷，且僅指出有資料支撐的變化。
+
+預期呼叫路徑：`compare_training_periods` + `get_training_breakdown`。
+
+若想以標準化方式重複執行，可直接選用原生的 `compare-training-blocks` 提示詞。當訓練次數、時長或距離的變化與負荷不同步時，可補充呼叫 `get_activity_statistics`；若需檢視頻率、連續訓練天數或負荷波動度，則可加上 `get_training_consistency`。
+
+## 檢視單筆已完成活動
+
+> 顯示這筆活動的區間停留時間分布與單圈／分段摘要。僅依據已儲存的彙總欄位指出配速不均之處，不要請求原始軌跡或感測器串流。
+
+預期呼叫路徑：`get_activity` → `get_activity_zones` + `get_activity_splits`。
+
+## 體能趨勢與個人最佳成績
+
+> 顯示我今年的跑步 VO2_MAX 推估趨勢、目前的訓練區間，以及 5 公里與 10 公里最佳成績。不要將推估值描述為實驗室實測數值。
+
+預期呼叫路徑：`get_fitness_trends` + `get_training_zones` + `get_personal_bests`。
+
+## 訓練計畫執行度
+
+> 摘要過去 8 週的訓練計畫執行情形：已完成、已跳過與仍待執行的課表數。接著列出下週的課表，並說明完成率的分母計算方式。
+
+預期呼叫路徑：`get_plan_adherence` + `list_planned_workouts`。
+
+`get_plan_adherence` 依據課表狀態進行統計，而非猜測某筆活動是否對應計畫。僅有 `DONE` 會計為已完成；所選範圍內未來的 `PLANNED` 課表仍會計入分母。
+
+若要檢視單一完整訓練計畫，請先用 `list_training_plans` 取得其不透明 ID，再呼叫 `get_plan_summary` 讀取完成度、實際與預估負荷比較、每週進度與運動項目組成。
+
+## 賽前準備檢視
+
+> 找出我下一場賽事，並檢視相關訓練計畫、近期負荷與狀態訊號，以及即將到來的課表。請指出缺失的證據，且不要將準備度轉化為醫療建議或「能否參賽」的決策。
+
+預期呼叫路徑：`list_competitions` → `get_competition` → `list_training_plans` / `get_plan_summary` → `get_training_readiness` → `list_planned_workouts`。
+
+支援 MCP 提示詞的用戶端可直接選用 `race-preparation-check`，不需手動複製整段提問。
+
+## 同步疑難排解
+
+> 檢查我的 Strava 連線狀態。告訴我已完成活動的匯入與匯出是否可用且為自動同步，以及最近一次同步是否有錯誤。不要揭露帳號 ID 或原始錯誤文字。
+
+預期呼叫路徑：`get_integration_status`。
+
+## 健康背景資料（須另行授權）
+
+> 在我授權健康資料存取後，摘要最近 14 天內可用的身心狀態變化。請標示缺失數值，且不要進行醫療診斷。
+
+預期呼叫路徑：`get_health_summary`。若尚未授予 `health:read`，用戶端應啟動增量授權同意流程，而非要求貼上權杖。
+
+## 讓每個回答都更容易查證
+
+可在任何提示詞結尾加上這段話：
+
+> 請列出您實際呼叫的 TrainingLoad 工具、每個工具查詢的日期範圍，以及支撐結論的回傳欄位。切勿自行補齊缺失數值。

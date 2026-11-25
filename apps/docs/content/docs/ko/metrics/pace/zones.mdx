@@ -1,68 +1,90 @@
 ---
-title: Pace Zones
-description: Running pace zones based on Functional Threshold Pace (FTPa), used to plan and review easy, tempo, threshold, VO2max, and anaerobic running intensity.
-keywords: ["Pace Zones", "FTPa", "Threshold Pace", "Running Zones", "running pace zones", "VDOT calculator"]
+title: 페이스 존 (Pace Zones)
+description: 기능적 역치 페이스(FTPa)를 기반으로 이지, 템포, 역치, VO2max, 무산소 러닝 강도를 계획하고 리뷰하는 러닝 페이스 존 가이드입니다.
+keywords: ["페이스 존", "Pace Zones", "FTPa", "역치 페이스", "러닝 존", "러닝 페이스 존", "VDOT 계산기"]
 ---
 
-# Pace Zones
+# 페이스 존 (Pace Zones)
 
-**Pace zones** are a direct way to plan and review running intensity. Compared with heart rate, pace responds immediately to speed changes, but it still needs context: terrain, wind, surface, heat, fatigue, and elevation can all change how hard a pace feels.
+**페이스 존(Pace Zones)**은 러닝 강도를 계획하고 리뷰하는 가장 직관적인 방법입니다. 심박수와 달리 페이스는 속도 변화에 즉각 반응하지만, 지형·바람·노면·더위·피로·고도에 따라 같은 페이스의 체감 강도가 크게 달라지므로 맥락과 함께 해석해야 합니다.
 
-Trainingload.ai uses a classic zone model based on **Functional Threshold Pace (FTPa / Threshold Pace)** (similar in spirit to common definitions from Joe Friel or Jack Daniels).
+Trainingload.ai는 **기능적 역치 페이스(FTPa / Threshold Pace)**를 기준으로 한 클래식 존 모델을 사용합니다(조 프리엘이나 잭 대니얼스의 표준 정의와 같은 맥락입니다).
 
-## Key concept: FTPa
+## 핵심 개념: FTPa
 
-All pace zones anchor to your **FTPa (Functional Threshold Pace)**: an estimate of the fastest pace you can sustain for roughly an all-out 1-hour effort.
--   For elite runners, this is often around half-marathon to 15K race pace.
--   For recreational runners, it’s often slightly slower than 10K pace, or close to 10K pace.
+모든 페이스 존은 **FTPa(Functional Threshold Pace, 기능적 역치 페이스)**에 고정됩니다. 이는 약 1시간 동안 전력으로 지속할 수 있는 가장 빠른 페이스의 추정치입니다.
+- 엘리트 러너의 경우 대개 하프 마라톤~15K 레이스 페이스 부근입니다.
+- 일반 동호인 러너의 경우 보통 10K 페이스와 비슷하거나 약간 느린 수준입니다.
 
-## Zone definitions
+## Trainingload.ai의 역치 페이스(TP) 계산 방식
 
-The table below shows the Trainingload.ai standard pace zones, their FTPa percentages, and training intent.
+자동 업데이트가 활성화되어 있으면 Trainingload.ai는 최근 **180일** 이내의 가장 우수한 유효 **5 km** 러닝 기록을 찾습니다.
 
-| Zone | Name | Intensity | % FTPa | Typical feel (RPE) | Training goal |
+1. 거리별 최고 기록(distance peak records)에서 최고 5 km 평균 속도를 읽습니다.
+2. 이를 킬로미터당 초(s/km) 단위로 변환합니다.
+3. 여기에 **킬로미터당 20초**를 더해 TP를 추정합니다.
+4. 역치 속도(m/s)와 역치 페이스(s/km)를 모두 저장합니다.
+
+예를 들어 최근 최고 5 km 페이스가 `4:20/km`라면 자동 TP는 `4:40/km`으로 산출됩니다. 유효한 5 km 최고 기록이 없으면 플랫폼이 임의로 TP를 만들어 내지 않습니다. 러닝 프로필에서 TP를 수동 입력할 수도 있으며, 수동값과 자동값 중 어느 쪽이 적용되는지는 자동 업데이트 설정에 따라 결정됩니다.
+
+## TP 변화가 페이스 존에 미치는 영향
+
+현재 상태(Current Status)에는 활성 TP와 계산된 모든 절대 페이스 구간이 표시됩니다. TP가 변경되면 TP에 의존하는 존들이 자동으로 다시 계산됩니다.
+
+- **Friel 모델**은 역치 속도를 직접 기준점으로 사용합니다.
+- TP가 있을 때 **Daniels 모델**은 `vVO2max 속도 ≈ TP 속도 ÷ 0.90`을 계산한 뒤 Easy, Marathon, Threshold, Interval, Repetition 속도 비율을 적용합니다.
+- Daniels 모델에서 아직 TP가 없으면 현재 VO2 Max에서 도출한 vVO2max를 대체 기준으로 사용합니다.
+- 저장된 사용자 정의 존은 설정된 기준 지표(TP, VO2 Max, CS 또는 절대 페이스)에 따라 계산됩니다.
+
+TP가 빨라지면(킬로미터당 초가 줄어들면) TP 연동 절대 존 경계도 모두 빨라지며, TP가 느려지면 반대로 이동합니다. 이 변경은 과거 활동의 원시 속도를 수정하지 않으며, 향후 훈련 플랜 목표와 현재 프로필 기준의 존 해석에만 반영됩니다.
+
+## 존 정의
+
+아래 표는 Trainingload.ai의 표준 페이스 존, FTPa 대비 백분율, 그리고 각 존의 훈련 의도를 정리한 것입니다.
+
+| 존 | 명칭 | 강도 | % FTPa | 대표 체감 (RPE) | 훈련 목표 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Z1** | **Recovery** | Very easy | > 129% | < 2 | Promote circulation, speed recovery, build volume. |
-| **Z2** | **Aerobic** | Easy | 114% - 129% | 2 - 3 | Build aerobic base, improve fat oxidation, increase mitochondrial and capillary density. |
-| **Z3** | **Tempo** | Moderate / comfortably hard | 106% - 113% | 3 - 4 | Raise aerobic durability, practice race-like steady pacing (HM / marathon). |
-| **Z4** | **Threshold** | Hard | 100% - 105% | 5 - 7 | Improve lactate clearance and raise FTPa; learn to work near the threshold boundary. |
-| **Z5a** | **VO2max** | Very hard | 90% - 99% | 8 - 9 | Improve VO2 max; typically done as 3–5 minute intervals. |
-| **Z5b** | **Anaerobic** | All-out | < 90% | 10 | Improve anaerobic capacity, sprint speed, and neuromuscular recruitment. |
+| **Z1** | **회복 (Recovery)** | 매우 쉬움 | > 129% | < 2 | 혈액순환 촉진, 회복 가속, 훈련량 확보 |
+| **Z2** | **유산소 (Aerobic)** | 쉬움 | 114% - 129% | 2 - 3 | 유산소 기반 구축, 지방 산화 향상, 미토콘드리아 및 모세혈관 밀도 증가 |
+| **Z3** | **템포 (Tempo)** | 보통 / 기분 좋게 힘듦 | 106% - 113% | 3 - 4 | 유산소 내구성 강화, 하프·풀 마라톤 실전형 지속 페이싱 연습 |
+| **Z4** | **역치 (Threshold)** | 강함 | 100% - 105% | 5 - 7 | 젖산 제거 능력 개선 및 FTPa 향상, 역치 경계에서의 주행 감각 습득 |
+| **Z5a** | **VO2max** | 매우 강함 | 90% - 99% | 8 - 9 | VO2 max 향상, 주로 3–5분 인터벌 형태로 수행 |
+| **Z5b** | **무산소 (Anaerobic)** | 전력 | < 90% | 10 | 무산소 능력, 스프린트 스피드, 신경근 동원 능력 향상 |
 
-> **Note**: pace percentages are **time-based** (min/km). A larger number means a **slower** pace.
-> *Example: if FTPa is 5:00 (300 s), the Z2 upper bound 129% is 300 × 1.29 = 387 s (6:27/km).*
+> **참고**: 페이스 백분율은 **시간 기준**(분/km)입니다. 숫자가 클수록 **느린** 페이스를 의미합니다.
+> *예시: FTPa가 5:00(300초)일 때 Z2 상한 129%는 300 × 1.29 = 387초(6:27/km)입니다.*
 
-## Typical applications
+## 주요 활용 사례
 
-### 1. Base phase
-Focus on mostly easy running. **Z1/Z2** is commonly used to build aerobic volume while keeping fatigue manageable.
+### 1. 기반 훈련기 (Base phase)
+대부분 이지 러닝에 집중합니다. 피로를 관리 가능한 수준으로 유지하면서 유산소 볼륨을 쌓기 위해 **Z1/Z2**를 중심으로 구성합니다.
 
-### 2. Build / race-specific phase
-Add zones based on your target event:
--   **Marathon**: lots of **Z3 tempo**.
--   **5K/10K**: emphasize **Z4 threshold** and **Z5a VO2 max intervals**.
+### 2. 빌드 / 레이스 특화기 (Build / race-specific phase)
+목표 종목에 맞춰 상위 존을 추가합니다.
+- **마라톤**: **Z3 템포** 비중을 높게 가져갑니다.
+- **5K/10K**: **Z4 역치**와 **Z5a VO2 max 인터벌**에 중점을 둡니다.
 
-### 3. Recovery
-Use **Z1** for recovery days after hard sessions. If the run drifts into Z2 or Z3, it may no longer serve the recovery purpose and can add fatigue without much targeted benefit.
+### 3. 회복 (Recovery)
+고강도 훈련 다음 날 회복 러닝에는 **Z1**을 사용합니다. 회복 런이 Z2나 Z3로 빨라지면 회복 목적을 잃고 뚜렷한 훈련 효과 없이 피로만 쌓일 수 있습니다.
 
-## How Trainingload.ai uses pace zones
+## Trainingload.ai의 페이스 존 활용 방식
 
--   **Plan vs. actual**: pace zones show whether a run matched the intended intensity.
--   **Use with heart rate**: pace is **external load**, heart rate is **internal load**.
-    -   On flat terrain in good conditions, prioritize **pace**.
-    -   In heat/humidity, headwinds, or fatigue, prioritize **heart rate** and adjust pace down to maintain similar physiological intensity.
--   **Use grade-adjusted metrics when needed**: on hilly routes, Grade Adjusted Pace and Normalized Graded Pace can make zone analysis more realistic.
--   **Re-test periodically**: FTPa changes with training. Re-test every 4–6 weeks, or after a meaningful fitness change, to keep zones calibrated.
+- **계획 vs 실제 비교**: 러닝이 의도한 강도로 수행되었는지 페이스 존으로 점검합니다.
+- **심박수와 함께 활용**: 페이스는 **외부 부하**, 심박수는 **내부 부하**입니다.
+  - 날씨가 좋고 평탄한 코스에서는 **페이스**를 우선 기준으로 삼으세요.
+  - 고온다습, 강한 맞바람, 피로 누적 상황에서는 **심박수**를 우선 기준으로 삼고 페이스를 낮춰 동일한 생리적 강도를 유지하세요.
+- **필요 시 경사도 보정 지표 병행**: 언덕이 많은 코스에서는 경사도 보정 페이스(GAP)와 정규화 경사도 페이스(NGP)를 함께 보면 존 분석이 훨씬 현실적입니다.
+- **주기적 재측정**: 훈련이 쌓이면 FTPa도 변합니다. 4–6주마다, 또는 체력에 뚜렷한 변화가 있을 때 재측정하여 존을 최신 상태로 유지하세요.
 
-## Related tools and docs
+## 관련 도구 및 문서
 
-- [Calculate VDOT to set training load pace targets](/vdot-calculator)
-- [Estimate lactate threshold for training load pace zones](/lactate-threshold-calculator)
-- [Heart Rate Zones](/docs/metrics/heart-rate/zones)
-- [Grade Adjusted Pace](/docs/metrics/pace/grade-adjusted-pace)
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
+- [VDOT을 계산해 훈련 부하 페이스 목표 설정하기](/ko/vdot-calculator)
+- [젖산 역치를 추정해 페이스 존 설정하기](/ko/lactate-threshold-calculator)
+- [심박수 존](/ko/docs/metrics/heart-rate/zones)
+- [경사도 보정 페이스 (GAP)](/ko/docs/metrics/pace/grade-adjusted-pace)
+- [정규화 경사도 페이스 (NGP)](/ko/docs/metrics/pace/normalized-graded-pace)
 
-## References
+## 참고 자료
 
--   [Joe Friel: Setting Zones for Running](https://joefrieltraining.com/setting-zones-for-running/)
--   [TrainingPeaks: Pace Zones](https://help.trainingpeaks.com/hc/en-us/articles/204071854-Pace-Zones)
+- [Joe Friel: Setting Zones for Running](https://joefrieltraining.com/setting-zones-for-running/)
+- [TrainingPeaks: Pace Zones](https://help.trainingpeaks.com/hc/en-us/articles/204071854-Pace-Zones)

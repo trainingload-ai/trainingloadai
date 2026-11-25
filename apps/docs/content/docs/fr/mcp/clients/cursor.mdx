@@ -1,0 +1,24 @@
+---
+title: Connecter Cursor
+description: Configurez le serveur MCP distant TrainingLoad dans le fichier mcp.json de Cursor.
+---
+
+# Connecter Cursor
+
+Ajoutez ce bloc dans `~/.cursor/mcp.json` sous macOS/Linux, en conservant vos serveurs existants :
+
+```json
+{
+  "mcpServers": {
+    "trainingload": {
+      "url": "https://api.trainingload.ai/mcp"
+    }
+  }
+}
+```
+
+Redémarrez Cursor ou actualisez les serveurs depuis les paramètres MCP, puis finalisez le flux OAuth TrainingLoad lorsque vous y êtes invité. Une fois les outils activés, demandez : « Affiche l’évolution de ma forme en course à pied cette année, mes zones d’entraînement actuelles et mon record personnel sur 5 km. »
+
+Si la connexion échoue, vérifiez la syntaxe JSON et l’URL, puis réauthentifiez-vous depuis les paramètres MCP de Cursor. Ne codez jamais de jeton d’accès en dur dans `headers`.
+
+[Guide MCP officiel Cursor](https://docs.cursor.com/context/model-context-protocol)

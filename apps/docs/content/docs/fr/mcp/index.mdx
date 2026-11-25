@@ -1,0 +1,52 @@
+---
+title: TrainingLoad MCP
+description: Connectez votre compte TrainingLoad en toute sécurité à ChatGPT, Codex, Claude, Cursor, VS Code et opencode.
+---
+
+# TrainingLoad MCP
+
+Connectez vos données d’entraînement à ChatGPT, Codex, Claude ou à tout autre client IA compatible grâce à TrainingLoad MCP. Posez des questions sur votre charge d’entraînement récente, le suivi de votre plan d’entraînement, vos tendances de performance ou un problème de synchronisation, sans avoir à copier vos activités une par une. MCP lit vos données en lecture seule et ne modifie jamais votre calendrier d’entraînement.
+
+**URL du serveur :** `https://api.trainingload.ai/mcp`
+
+Aucune clé API n’est nécessaire. Le client IA ouvre la page OAuth de TrainingLoad, où vous vérifiez le nom du client et les portées (scopes) demandées. Vous pouvez révoquer cet accès à tout moment depuis votre compte.
+
+## Données d’entraînement accessibles en lecture
+
+| Question | Capacités principales |
+| --- | --- |
+| Quel est mon état d’entraînement actuel ? | Synthèse d’entraînement, indicateurs de disponibilité (readiness), séries de charge d’entraînement |
+| Qu’est-ce qui a changé entre deux blocs d’entraînement ? | Comparaison de périodes, répartition par sport, statistiques d’activités et régularité |
+| Ma forme en course à pied, cyclisme ou natation évolue-t-elle ? | Tendances de forme physique, zones d’entraînement, records personnels |
+| Est-ce que je suis fidèlement mon plan d’entraînement ? | Découverte et synthèse de plan, séances planifiées, détail des séances, suivi d’adhésion par statut |
+| Quelles séances ai-je réalisées ? | Liste des activités, détail anonymisé, temps passé dans les zones et résumés des tours/intermédiaires |
+| Quelles compétitions approchent ? | Liste des compétitions et détail d’un événement rattaché à votre compte |
+| Pourquoi une plateforme tierce ne se synchronise-t-elle pas ? | État de connexion et de synchronisation |
+| Mon contexte de bien-être a-t-il évolué ? | Synthèse quotidienne de santé autorisée séparément |
+
+Consultez la [Référence des outils](/fr/docs/mcp/tools) pour découvrir chaque champ et chaque portée (scope). Les clients peuvent également découvrir trois [ressources et prompts](/fr/docs/mcp/resources-and-prompts) intégrés dédiés à l’interprétation des métriques, aux limites de sécurité et aux analyses reproductibles.
+
+## Exemples de questions à essayer
+
+- « Compare mon volume et ma charge d’entraînement de cette semaine avec la semaine dernière. Quelles activités expliquent les principaux écarts ? »
+- « Quelle part de mon plan d’entraînement de cette semaine ai-je réalisée, et quelles séances n’ont encore aucune activité associée ? »
+- « Comment mes métriques récentes de course à pied ont-elles évolué ? Quelles dates manquent de données comparables ? »
+
+Lorsque vous lisez une réponse, vérifiez la plage de dates retenue, les activités citées et les données manquantes. Les tendances éclairent une discussion d’entraînement, mais ne constituent pas une conclusion médicale.
+
+## Limites à connaître avant de vous connecter
+
+- **En lecture seule :** les clients ne peuvent modifier ni vos activités, ni vos plans d’entraînement, ni vos compétitions, ni votre profil, ni vos connexions, ni votre compte.
+- **Uniquement vos données :** un client ne peut interroger que les enregistrements appartenant au compte que vous avez autorisé.
+- **Synthèses d’entraînement :** les outils ne fournissent ni trace GPS précise, ni flux bruts de capteurs, ni identifiants de fournisseurs tiers, ni fichiers FIT complets.
+- **Autorisation santé séparée :** la portée (scope) `health:read` n’est pas incluse par défaut.
+- **Accès révocable :** retirez l’autorisation d’un client depuis votre compte dès que vous ne l’utilisez plus.
+
+## Pour commencer
+
+- [Comprendre le déroulement d’une requête](/fr/docs/mcp/how-it-works)
+- [Copier des prompts prêts à l’emploi](/fr/docs/mcp/use-cases)
+- [Choisir un client IA et le connecter](/fr/docs/mcp/connect)
+- [Parcourir tous les outils](/fr/docs/mcp/tools)
+- [Découvrir les ressources et prompts](/fr/docs/mcp/resources-and-prompts)
+- [Consulter les règles de sécurité et de confidentialité](/fr/docs/mcp/security)

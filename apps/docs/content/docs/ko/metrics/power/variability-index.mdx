@@ -1,65 +1,65 @@
 ---
-title: Variability Index (VI)
-description: Variability Index compares Normalized Power with average power to show how steady or surgy a ride or power-based run was.
-keywords: ["Variability Index", "VI", "variability index cycling", "Normalized Power", "NP", "Pacing", "Efficiency"]
+title: 변동성 지수 (VI)
+description: 변동성 지수(Variability Index)는 정규화 파워와 평균 파워를 비교하여 라이딩이나 파워 기반 러닝이 얼마나 일정했는지, 혹은 가감속이 잦았는지 보여 줍니다.
+keywords: ["변동성 지수", "Variability Index", "VI", "사이클링 변동성 지수", "정규화 파워", "NP", "페이싱", "효율성"]
 ---
 
-# Variability Index (VI)
+# 변동성 지수 (VI)
 
-**Variability Index (VI)** describes how steady your power output was in a ride (and often in runs with power, too). In plain terms, it tells you whether the effort was steady or repeatedly surgy.
+**변동성 지수(Variability Index, VI)**는 라이딩(및 파워 데이터를 사용하는 러닝)에서 파워 출력이 얼마나 일정했는지를 나타내는 지표입니다. 쉽게 말해 주행이 꾸준했는지, 아니면 급가속이 반복되었는지를 알려 줍니다.
 
-## Formula
+## 공식
 
-VI is the ratio of [Normalized Power (NP)](/docs/metrics/power/normalized-power) to Average Power:
+VI는 [정규화 파워(NP)](/ko/docs/metrics/power/normalized-power)를 평균 파워(Average Power)로 나눈 비율입니다.
 
 ```text
 VI = NP / AvgPower
 ```
 
--   **NP** reflects physiological cost (including the cost of variability).
--   **Average power** reflects mechanical work output.
+- **NP**는 변동 비용까지 포함한 생리학적 부담을 반영합니다.
+- **평균 파워**는 순수 기계적 작업 출력을 반영합니다.
 
-## Why VI matters
+## VI가 중요한 이유
 
-Although VI was originally designed for cycling power analysis, it is also useful for running power (Stryd, Garmin, COROS, etc.) and has become a cross-sport metric.
+VI는 원래 사이클링 파워 분석을 위해 만들어졌지만, 러닝 파워미터(Stryd, Garmin, COROS 등)의 보급과 함께 러닝에서도 유용한 종목 횡단 지표로 자리 잡았습니다.
 
-### 1. Pacing efficiency
-- **Cycling**: for triathlon and time trial pacing, VI reflects how well you hold a steady output. Closer to 1.0 usually means less wasted effort on surges.
-- **Running**: for marathon pacing, VI reflects how economically you distribute effort across terrain and conditions. Running typically has lower VI than cycling (no coasting). High VI often means pushing too hard on climbs or pacing inconsistently.
+### 1. 페이싱 효율성
+- **사이클링**: 트라이애슬론이나 타임트라이얼(TT) 페이싱에서 VI는 일정한 출력을 얼마나 잘 유지했는지 보여 줍니다. 1.0에 가까울수록 불필요한 급가속으로 에너지를 낭비하지 않았다는 뜻입니다.
+- **러닝**: 마라톤 페이싱에서 지형과 환경에 맞춰 에너지를 얼마나 경제적으로 배분했는지 보여 줍니다. 러닝은 페달을 멈추고 굴러가는 구간(coasting)이 없으므로 보통 사이클링보다 VI가 낮습니다. 러닝에서 VI가 높다면 오르막에서 무리했거나 페이싱이 불규칙했을 가능성이 큽니다.
 
-### 2. Race demands
-- **Road cycling**: criteriums often have very high VI (> 1.2) due to repeated switching between 0 W (coasting) and high sprint power out of corners.
-- **Trail running**: VI is often higher than road running due to terrain variability; that can be a natural feature, not necessarily a pacing mistake.
+### 2. 레이스 특성 파악
+- **로드 사이클링**: 크리테리움은 코너 진입 시 0 W(코스팅)와 탈출 시 고출력 스프린트를 반복하므로 VI가 매우 높게(> 1.2) 나옵니다.
+- **트레일 러닝**: 지형 기복이 커서 로드 러닝보다 VI가 높게 나오며, 이는 페이싱 실수가 아니라 코스의 자연스러운 특성일 수 있습니다.
 
-## Typical reference values
+## 일반적인 참고 범위
 
-Because movement patterns differ, **running VI is usually much lower than cycling VI**.
+움직임의 구조가 다르므로 **러닝 VI는 보통 사이클링 VI보다 훨씬 낮습니다**.
 
-### Cycling (rough reference)
+### 사이클링 (개략적 기준)
 
-| VI Range | Ride Type | Description |
+| VI 범위 | 라이딩 유형 | 설명 |
 | :--- | :--- | :--- |
-| **1.00 - 1.05** | Triathlon / TT | Very steady. Common target range for long-course pacing. |
-| **1.05 - 1.10** | Climbing / steady training | Steady. Many Zone 2 rides fall here. |
-| **1.10 - 1.20** | Rolling / group ride | Moderately variable due to terrain and drafting dynamics. |
-| **> 1.20** | Criterium / MTB | Highly variable with lots of coasting and anaerobic surges. |
+| **1.00 - 1.05** | 트라이애슬론 / TT | 매우 일정함. 장거리 지속 페이싱의 대표적인 목표 범위입니다. |
+| **1.05 - 1.10** | 업힐 / 지속 훈련 | 비교적 일정함. 많은 존 2 라이딩이 이 범위에 속합니다. |
+| **1.10 - 1.20** | 구릉지 / 그룹 라이딩 | 지형 변화와 드래프팅 영향으로 중간 수준의 변동이 나타납니다. |
+| **> 1.20** | 크리테리움 / MTB | 코스팅과 무산소 급가속이 잦아 변동성이 매우 큽니다. |
 
-### Running (rough reference)
+### 러닝 (개략적 기준)
 
-| VI Range | Run Type | Description |
+| VI 범위 | 러닝 유형 | 설명 |
 | :--- | :--- | :--- |
-| **1.00 - 1.02** | Track / flat marathon | Very steady. Typical for well-paced marathons. |
-| **1.02 - 1.05** | Rolling road / city run | Normal variability from stops, bridges, and small hills. |
-| **1.05 - 1.15** | Trail / fartlek | High variability with climbs, technical descents, or intervals. |
+| **1.00 - 1.02** | 트랙 / 평지 마라톤 | 매우 일정함. 페이싱이 잘 된 평지 마라톤의 전형적인 범위입니다. |
+| **1.02 - 1.05** | 구릉 로드 / 도심 러닝 | 신호 대기, 교량, 작은 언덕 등으로 인한 정상적인 변동 범위입니다. |
+| **1.05 - 1.15** | 트레일 / 파틀렉 | 오르막, 기술적 내리막, 인터벌이 포함된 고변동 주행입니다. |
 
-## How Trainingload.ai uses VI
+## Trainingload.ai의 VI 활용 방식
 
-- **Running / marathon**: on flat marathons, a low VI usually reflects steadier pacing. On hilly routes, use power or effort instead of forcing flat-pace targets.
-- **Triathlon / time trial**: lower VI often means fewer costly surges, but terrain and wind still matter.
-- **Road / MTB**: high VI can be a feature of the discipline. Trainingload.ai reads it as race-demand context, not automatically as a pacing mistake.
-- **Session review**: VI is interpreted alongside NP, average power, IF, terrain, and the workout goal.
+- **러닝 / 마라톤**: 평지 마라톤에서는 낮은 VI가 안정적인 페이싱을 의미하는 경우가 많습니다. 언덕이 많은 코스에서는 평지 페이스를 억지로 맞추기보다 파워나 체감 노력 기준으로 조절하세요.
+- **트라이애슬론 / 타임트라이얼**: 낮은 VI는 소모적인 급가속이 적었음을 뜻하지만, 지형과 바람 조건도 함께 고려해야 합니다.
+- **로드 / MTB**: 높은 VI는 종목 고유의 특성일 수 있습니다. Trainingload.ai는 이를 자동으로 페이싱 실수로 단정하지 않고 레이스 요구 맥락으로 해석합니다.
+- **세션 리뷰**: NP, 평균 파워, IF, 지형, 훈련 목표와 함께 종합적으로 해석합니다.
 
-## Related
+## 관련 문서
 
-- [Normalized Power (NP)](./normalized-power)
-- [Average power vs. NP](./normalized-power#linear-vs-exponential)
+- [정규화 파워 (NP)](./normalized-power)
+- [평균 파워 vs. NP](./normalized-power#선형-vs-지수)

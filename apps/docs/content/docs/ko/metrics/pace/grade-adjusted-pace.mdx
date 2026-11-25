@@ -1,79 +1,79 @@
 ---
-title: Grade Adjusted Pace (GAP)
-description: Converts uphill and downhill running pace into an estimated flat-equivalent pace for comparing effort across rolling terrain.
-keywords: ["GAP", "Grade Adjusted Pace", "grade adjusted pace calculator", "Pace", "Running", "Elevation", "hill running pace"]
+title: 경사도 보정 페이스 (GAP)
+description: 오르막과 내리막 러닝 페이스를 평지 기준 등가 페이스로 환산하여 기복이 있는 지형에서도 운동 강도를 비교할 수 있게 해 주는 지표입니다.
+keywords: ["GAP", "경사도 보정 페이스", "Grade Adjusted Pace", "경사도 페이스 계산기", "페이스", "러닝", "고도", "언덕 러닝 페이스"]
 ---
 
-# Grade Adjusted Pace (GAP)
+# 경사도 보정 페이스 (GAP)
 
-**Grade Adjusted Pace (GAP)** converts your actual pace on **uphill** or **downhill** terrain into an estimated flat-equivalent pace with similar energy cost, using a biomechanical/energetic model.
+**경사도 보정 페이스(Grade Adjusted Pace, GAP)**는 생체역학·에너지 대사 모델을 바탕으로 **오르막**이나 **내리막**에서 달린 실제 페이스를 비슷한 에너지 소비를 내는 평지 등가 페이스로 환산한 지표입니다.
 
-It tries to answer the runner’s core question: “If I weren’t climbing this hill, what pace would I be running on flat ground at the same effort?”
+러너가 가장 자주 묻는 질문, 즉 “이 언덕을 오르지 않고 같은 힘으로 평지를 달렸다면 페이스가 어느 정도였을까?”에 답하기 위한 지표입니다.
 
-## Core idea
+## 핵심 개념
 
-On rolling terrain, **actual pace** can be misleading:
--   **Uphill**: you do extra work against gravity; pace slows but physiological cost is high.
--   **Downhill**: gravity assists; pace speeds up but energy cost does not necessarily drop linearly (braking forces matter).
+오르막과 내리막이 섞인 코스에서는 **실제 페이스**만으로 강도를 판단하기 어렵습니다.
+- **오르막**: 중력을 거슬러 추가 일을 해야 하므로 페이스는 느려지지만 생리학적 부담은 매우 큽니다.
+- **내리막**: 중력의 도움을 받아 페이스는 빨라지지만, 제동력(braking force) 때문에 에너지 소비가 직선적으로 줄어들지는 않습니다.
 
-GAP reduces part of the terrain effect and provides a standardized pace so you can compare similar efforts across routes.
+GAP은 지형으로 인한 왜곡을 일정 부분 제거하여, 서로 다른 코스에서도 유사한 운동 강도를 공정하게 비교할 수 있는 표준화된 페이스를 제공합니다.
 
-## How it’s computed
+## 계산 원리
 
-Trainingload.ai computes GAP using an energy cost model based on **Minetti (2002)**, which quantifies **energy cost (EC)** across grades.
+Trainingload.ai는 경사도별 **에너지 소비(Energy Cost, EC)**를 정량화한 **Minetti (2002)** 에너지 비용 모델을 기반으로 GAP을 계산합니다.
 
-### Energy cost equation
+### 에너지 비용 방정식
 
 $$
 C_r = 155.4 \times i^5 - 30.4 \times i^4 - 43.3 \times i^3 + 46.3 \times i^2 + 19.5 \times i + 3.6
 $$
 
-Where:
--   $C_r$: energy cost (J/kg/m)
--   $i$: grade (e.g., 5% grade is 0.05)
+각 변수의 의미는 다음과 같습니다.
+- $C_r$: 에너지 비용 (J/kg/m)
+- $i$: 경사도 (예: 5% 오르막은 0.05)
 
-### GAP equation
+### GAP 계산식
 
 ```text
 GAP = Pace_actual / (C_r / C_flat)
 ```
 
--   At 0% grade, $C_{flat} \approx 3.6$.
--   Uphill: $C_r > 3.6$, so GAP is faster than actual pace (a smaller time value).
--   Gentle downhill: $C_r < 3.6$, so GAP is slower than actual pace.
--   **Note**: on very steep downhills (often below -20%), heavy **eccentric braking** can increase energy cost again, making GAP “faster” again.
+- 경사도 0% 평지에서는 $C_{flat} \approx 3.6$입니다.
+- 오르막에서는 $C_r > 3.6$이므로 GAP이 실제 페이스보다 빠릅니다(시간 수치가 더 작음).
+- 완만한 내리막에서는 $C_r < 3.6$이므로 GAP이 실제 페이스보다 느립니다.
+- **참고**: 매우 가파른 내리막(보통 -20% 이하)에서는 강한 **신장성 제동(eccentric braking)** 때문에 에너지 소비가 다시 증가하며, 이에 따라 GAP도 다시 “빨라질” 수 있습니다.
 
-## Typical applications
+## 주요 활용 사례
 
-### 1. Trail and mountain running
-On steep terrain, actual pace can be hard to interpret.
--   **Example**: you climb a 15% grade and your pace drops to 12:00/km.
--   **GAP**: shows 5:00/km.
--   **Interpretation**: the metabolic intensity may be much higher than the raw pace suggests.
+### 1. 트레일 및 산악 러닝
+가파른 지형에서는 실제 페이스만으로 훈련 강도를 해석하기 어렵습니다.
+- **예시**: 15% 경사도를 오르면서 실제 페이스가 12:00/km까지 떨어졌습니다.
+- **GAP**: 5:00/km로 표시됩니다.
+- **해석**: 겉으로 보이는 페이스보다 실제 대사 강도가 훨씬 높았음을 파악할 수 있습니다.
 
-### 2. Basis for rTSS
-Trainingload.ai uses **NGP (Normalized Graded Pace)** to compute running load (rTSS), and GAP is the foundation of NGP.
+### 2. rTSS 계산의 토대
+Trainingload.ai는 러닝 훈련 부하(rTSS)를 계산할 때 **NGP(정규화 경사도 페이스)**를 사용하며, GAP은 바로 NGP의 기반이 됩니다.
 ```text
 Pace_actual  --(grade adjustment)-->  GAP  --(weighted smoothing)-->  NGP
 ```
 
-### 3. Race pacing strategy
-By analyzing course GPX data with GAP, you can plan what actual pace to run on different segments to keep effort more consistent.
+### 3. 레이스 페이싱 전략
+코스의 GPX 데이터를 GAP과 함께 분석하면, 구간별로 실제 페이스를 어느 정도로 조절해야 전체 노력도를 일정하게 유지할 수 있는지 미리 계획할 수 있습니다.
 
-## How Trainingload.ai uses GAP
+## Trainingload.ai의 GAP 활용 방식
 
--   **Terrain context**: GAP helps explain why a slow uphill split may still be a high-intensity effort.
--   **Foundation for NGP**: Trainingload.ai uses GAP as the first step before computing NGP and rTSS.
--   **Do not chase it blindly**: GAP is a metabolic equivalence. It does not fully reflect musculoskeletal stress. Long, hard downhills may look manageable in GAP but still create high quad and knee load.
--   **Prefer trends over instant values**: GPS-grade estimates are noisy and delayed, which can make real-time GAP jumpy. Prefer lap averages or post-activity analysis.
+- **지형 맥락 파악**: 느려 보이는 오르막 스플릿이 실제로는 고강도 노력이었음을 설명해 줍니다.
+- **NGP의 기반**: Trainingload.ai는 NGP와 rTSS를 계산하기 전 첫 단계로 GAP을 산출합니다.
+- **맹목적으로 쫓지 마세요**: GAP은 대사적 등가치일 뿐 근골격계 스트레스를 온전히 반영하지는 못합니다. 길고 강한 내리막은 GAP상 무난해 보여도 대퇴사두근과 무릎에는 큰 충격을 줄 수 있습니다.
+- **순간값보다 추세 우선**: GPS 기반 경사도 추정은 노이즈와 지연이 있어 실시간 GAP이 들쭉날쭉할 수 있습니다. 랩 평균이나 활동 완료 후 분석에 활용하는 것이 더 정확합니다.
 
-## Related docs
+## 관련 문서
 
-- [Normalized Graded Pace](/docs/metrics/pace/normalized-graded-pace)
-- [Pace Zones](/docs/metrics/pace/zones)
-- [Training Stress Score](/docs/metrics/training-load/training-stress-score)
+- [정규화 경사도 페이스 (NGP)](/ko/docs/metrics/pace/normalized-graded-pace)
+- [페이스 존](/ko/docs/metrics/pace/zones)
+- [훈련 스트레스 점수 (TSS)](/ko/docs/metrics/training-load/training-stress-score)
 
-## References
+## 참고 자료
 
--   Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *Journal of Applied Physiology*.
--   Strava: [Grade Adjusted Pace (GAP)](https://support.strava.com/hc/en-us/articles/216917067-Grade-Adjusted-Pace-GAP)
+- Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *Journal of Applied Physiology*.
+- Strava: [Grade Adjusted Pace (GAP)](https://support.strava.com/hc/en-us/articles/216917067-Grade-Adjusted-Pace-GAP)
