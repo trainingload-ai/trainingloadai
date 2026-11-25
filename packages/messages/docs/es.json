@@ -95,7 +95,7 @@
   },
   "nav": {
     "blog": "Blog",
-    "aiPlans": "AI Coach",
+    "aiPlans": "Entrenador con IA",
     "features": "Funciones",
     "trainingLoad": "Carga de entrenamiento",
     "tools": "Herramientas",
@@ -103,7 +103,7 @@
     "pricing": "Precios",
     "docsWorkflow": "Flujo de entrenamiento",
     "metrics": "Métricas",
-    "docs": "Documentacion"
+    "docs": "Documentación"
   },
   "languageSuggestion": {
     "label": "Sugerencia de idioma",
@@ -205,7 +205,7 @@
       "rpeScale": "Escala de esfuerzo RPE",
       "appComparisons": "Comparativas de apps"
     },
-    "aiPlans": "AI Coach",
+    "aiPlans": "Entrenador con IA",
     "blog": "Blog",
     "documentation": "Documentación",
     "alternatives": "Training load app alternatives",
@@ -218,15 +218,15 @@
     "pricing": "Precios",
     "github": "GitHub",
     "company": "Empresa",
-    "privacyPolicy": "Politica de privacidad",
-    "termsAndConditions": "Terminos y condiciones",
+    "privacyPolicy": "Política de privacidad",
+    "termsAndConditions": "Términos y condiciones",
     "copyright": "© {year} Trainingload.ai. Todos los derechos reservados.",
     "toolLinks": {
       "estimateCp": "Calculadora de FTP",
       "lactateThresholdCalculator": "Calculadora de umbral de lactato",
-      "criticalPowerCalculator": "Calculadora de potencia critica",
-      "maxHeartRateCalculator": "Calculadora de frecuencia cardiaca maxima",
-      "heartRateZonesCalculator": "Calculadora de zonas de frecuencia cardiaca",
+      "criticalPowerCalculator": "Calculadora de potencia crítica",
+      "maxHeartRateCalculator": "Calculadora de frecuencia cardíaca máxima",
+      "heartRateZonesCalculator": "Calculadora de zonas de frecuencia cardíaca",
       "vo2MaxCalculator": "Calculadora de VO₂max",
       "vdotCalculator": "Calculadora VDOT",
       "runningPaceCalculator": "Calculadora de ritmo",
@@ -3317,6 +3317,18 @@
           "description": "El código abierto y la documentación completa reducen el bloqueo y permiten que la comunidad revise, mejore y contribuya."
         }
       ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "Tus datos de entrenamiento no tienen por qué quedarse solo en Trainingload.ai.",
+      "description": "Conéctate una vez para consultar tus planes, actividades, carga y carreras de Trainingload.ai desde ChatGPT, Codex, Claude, Cursor o VS Code. La IA solo puede leer los datos sin modificarlos, y cada consulta y respuesta permanece visible.",
+      "primary": "Explorar MCP",
+      "secondary": "Guía de conexión",
+      "points": [
+        "24 herramientas de solo lectura",
+        "Llamadas de herramientas visibles",
+        "Acceso revocable"
+      ]
     }
   },
   "vo2MaxCalculator": {
@@ -5247,19 +5259,19 @@
       "items": [
         {
           "name": "Paquete inicial",
-          "credits": "5,000 créditos",
+          "credits": "5.000 créditos",
           "price": "$6.99",
           "note": "Para uso extra ocasional"
         },
         {
           "name": "Paquete avanzado",
-          "credits": "15,000 créditos",
+          "credits": "15.000 créditos",
           "price": "$17.99",
           "note": "Para uso extra habitual"
         },
         {
           "name": "Paquete profesional",
-          "credits": "40,000 créditos",
+          "credits": "40.000 créditos",
           "price": "$39.99",
           "note": "Para uso extra intensivo"
         }

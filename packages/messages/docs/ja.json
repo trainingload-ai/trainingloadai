@@ -67,7 +67,7 @@
       "empty": "公開リリースはまだありません。"
     },
     "macos": {
-      "title": "macOS 個人版",
+      "title": "macOS Personal",
       "requirements": "Appleシリコン搭載の Mac（arm64）が必要です。",
       "download": "macOS 用 DMG をダウンロード",
       "downloadLatest": "最新版をダウンロード",
@@ -80,7 +80,7 @@
   },
   "nav": {
     "blog": "ブログ",
-    "aiPlans": "AI コーチ",
+    "aiPlans": "AIコーチ",
     "features": "機能",
     "trainingLoad": "トレーニング負荷",
     "tools": "ツール",
@@ -191,7 +191,7 @@
       "appComparisons": "アプリ比較"
     },
     "copyright": "© {year} Trainingload.ai. 無断転載を禁じます。",
-    "aiPlans": "AI コーチ",
+    "aiPlans": "AIコーチ",
     "blog": "ブログ",
     "documentation": "ドキュメント",
     "alternatives": "トレーニング負荷アプリの代替",
@@ -4401,7 +4401,7 @@
         },
         {
           "q": "回復判断にはどう役立ちますか？",
-          "a": "フィットネス、疲労、フォーム、最近の負荷をまとめて見せることで、順調に積み上がっているのか、軽すぎるのか、強すぎるのかを判断しやすくします。"
+          "a": "体力、疲労、コンディション、最近の負荷をまとめて見せることで、順調に積み上がっているのか、軽すぎるのか、強すぎるのかを判断しやすくします。"
         },
         {
           "q": "ランニングレースの準備に使えますか？",
@@ -4502,7 +4502,7 @@
       "eyebrow": "無料プラン · トレーニング負荷 · AIコーチ",
       "subtitleBefore": "Trainingload.ai は",
       "subtitleHighlight": "オープンソースのトレーニングコア",
-      "subtitleAfter": "を基盤に、ランニングとサイクリングのプラン、実績、負荷、回復をひとつにまとめます。計画との差を確認して根拠に基づいて調整でき、メンバーは AI コーチから個別の提案も受け取れます。",
+      "subtitleAfter": "を基盤に、ランニングとサイクリングのプラン、実績、負荷、回復をひとつにまとめます。計画との差を確認して根拠に基づいて調整でき、メンバーはAIコーチから個別の提案も受け取れます。",
       "watermark": "KEEP MOVING",
       "prefix": "トレーニング計画と負荷：",
       "planCta": "無料プランを見る",
@@ -4777,7 +4777,7 @@
       "repositoryLabel": "公開リポジトリ",
       "licenseLabel": "AGPL-3.0-only",
       "sourceCta": "GitHub でソースを見る",
-      "docsCta": "セルフホスト資料を読む",
+      "docsCta": "セルフホストドキュメントを読む",
       "items": [
         {
           "title": "提案が変わった理由がわかる",
@@ -4789,8 +4789,20 @@
         },
         {
           "title": "ひとつのサービスに縛られない",
-          "description": "公開コードと完全なセルフホスト資料により、長く使い続けられ、コミュニティも確認・改善・貢献できます。"
+          "description": "公開コードと完全なセルフホストドキュメントにより、長く使い続けられ、コミュニティも確認・改善・貢献できます。"
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "トレーニングデータを、Trainingload.ai の中だけに閉じ込めません。",
+      "description": "一度連携すれば、ChatGPT、Codex、Claude、Cursor、VS Code から Trainingload.ai のプラン、アクティビティ、負荷、レース情報を照会できます。AI は読み取り専用で変更はできず、すべてのツール呼び出しと結果を確認できます。",
+      "primary": "MCP を見る",
+      "secondary": "接続ガイド",
+      "points": [
+        "24個の読み取り専用ツール",
+        "ツール呼び出しを可視化",
+        "権限はいつでも解除可能"
       ]
     }
   },

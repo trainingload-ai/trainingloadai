@@ -82,7 +82,7 @@ const HOME_PREVIEW_COPY: Record<PreviewLocale, PreviewCopy> = {
   },
   "zh-hant": {
     webAlt: "Trainingload.ai Web 首頁展示今日建議、目前計畫與訓練狀態",
-    mobileAlt: "Trainingload.ai iOS 今日頁展示智慧建議、當天訓練與本週負荷",
+    mobileAlt: "Trainingload.ai iOS 今日頁展示今日建議、當天訓練與本週負荷",
   },
   ja: {
     webAlt:
@@ -199,6 +199,13 @@ function ProductScreens({
   const appPath = APP_PATH_BY_SURFACE[surface];
   const destination = publicDemoDestination(lang, appPath);
 
+  const altSeparator =
+    locale === "zh" || locale === "zh-hant"
+      ? "；"
+      : locale === "ja"
+        ? " / "
+        : "; ";
+
   return (
     <figure
       className={[
@@ -207,7 +214,7 @@ function ProductScreens({
           ? "max-w-[1080px] pb-[7%] pr-[7.5%]"
           : "max-w-[860px] pb-[7%] pr-[7%]",
       ].join(" ")}
-      aria-label={`${copy.webAlt}；${copy.mobileAlt}`}
+      aria-label={`${copy.webAlt}${altSeparator}${copy.mobileAlt}`}
     >
       <ProductBrowserWindow
         address={destination.address}

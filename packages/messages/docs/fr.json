@@ -95,9 +95,9 @@
   },
   "nav": {
     "blog": "Blog",
-    "aiPlans": "AI Coach",
-    "features": "Fonctionnalites",
-    "trainingLoad": "Charge d'entrainement",
+    "aiPlans": "Coach IA",
+    "features": "Fonctionnalités",
+    "trainingLoad": "Charge d'entraînement",
     "tools": "Outils",
     "freeAiReview": "Bilan IA gratuit",
     "pricing": "Tarifs",
@@ -205,22 +205,22 @@
       "rpeScale": "Échelle d’effort RPE",
       "appComparisons": "Comparatifs d’apps"
     },
-    "aiPlans": "AI Coach",
+    "aiPlans": "Coach IA",
     "blog": "Blog",
     "documentation": "Documentation",
     "alternatives": "Training load app alternatives",
     "support": "Assistance",
     "contact": "Contact",
     "resources": "Ressources",
-    "features": "Fonctionnalites",
-    "trainingLoad": "Charge d'entrainement",
+    "features": "Fonctionnalités",
+    "trainingLoad": "Charge d'entraînement",
     "tools": "Outils",
     "pricing": "Tarifs",
     "github": "GitHub",
     "company": "Entreprise",
-    "privacyPolicy": "Politique de confidentialite",
-    "termsAndConditions": "Conditions generales",
-    "copyright": "© {year} Trainingload.ai. Tous droits reserves.",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsAndConditions": "Conditions générales",
+    "copyright": "© {year} Trainingload.ai. Tous droits réservés.",
     "toolLinks": {
       "estimateCp": "Calculateur FTP",
       "lactateThresholdCalculator": "Calculateur de seuil lactique",
@@ -3272,7 +3272,7 @@
           "points": [
             "Séances planifiées",
             "Activités réalisées",
-            "Déplacer ou manquer"
+            "Déplacer ou passer"
           ]
         },
         {
@@ -3302,7 +3302,7 @@
       "repositoryLabel": "Dépôt public",
       "licenseLabel": "AGPL-3.0-only",
       "sourceCta": "Voir le code sur GitHub",
-      "docsCta": "Lire la documentation",
+      "docsCta": "Lire le guide d’auto-hébergement",
       "items": [
         {
           "title": "Comprendre pourquoi une recommandation change",
@@ -3316,6 +3316,18 @@
           "title": "Rester libre de changer",
           "description": "Le code ouvert et la documentation complète limitent la dépendance et permettent à la communauté d’examiner, d’améliorer et de contribuer."
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "Vos données d’entraînement n’ont pas à rester enfermées dans Trainingload.ai.",
+      "description": "Connectez votre compte une fois pour interroger vos plans, activités, charge et courses Trainingload.ai depuis ChatGPT, Codex, Claude, Cursor ou VS Code. L’IA peut lire vos données sans les modifier, et chaque appel comme chaque réponse reste visible.",
+      "primary": "Découvrir MCP",
+      "secondary": "Guide de connexion",
+      "points": [
+        "24 outils en lecture seule",
+        "Appels d’outils visibles",
+        "Accès révocable"
       ]
     }
   },
@@ -5249,19 +5261,19 @@
       "items": [
         {
           "name": "Pack découverte",
-          "credits": "5,000 crédits",
+          "credits": "5 000 crédits",
           "price": "$6.99",
           "note": "Pour un besoin occasionnel"
         },
         {
           "name": "Pack avancé",
-          "credits": "15,000 crédits",
+          "credits": "15 000 crédits",
           "price": "$17.99",
           "note": "Pour un besoin régulier"
         },
         {
           "name": "Pack professionnel",
-          "credits": "40,000 crédits",
+          "credits": "40 000 crédits",
           "price": "$39.99",
           "note": "Pour un usage intensif"
         }

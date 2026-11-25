@@ -4825,6 +4825,18 @@
           "description": "Open source and complete self-hosting documentation reduce lock-in and let the community inspect, improve, and contribute."
         }
       ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "Your training data does not have to stay inside Trainingload.ai.",
+      "description": "Connect once to query your Trainingload.ai plans, activities, load, and race information from ChatGPT, Codex, Claude, Cursor, or VS Code. AI can read this data but cannot change it, and every query and response stays visible.",
+      "primary": "Explore MCP",
+      "secondary": "Connection guide",
+      "points": [
+        "24 read-only tools",
+        "Visible tool calls",
+        "Revocable access"
+      ]
     }
   },
   "vo2MaxCalculator": {
@@ -6774,7 +6786,7 @@
         "priceYearlyStrike": "$118.80",
         "yearlyCompare": "Billed once yearly; credits are still added monthly. Unused monthly credits do not roll over.",
         "items": [
-          "Everything in Free",
+          "Everything in PLUS",
           "{credits} subscription credits added each month",
           "Standard (1×) and Deep (3×) modes are both available",
           "More included credits for frequent AI Coach use"

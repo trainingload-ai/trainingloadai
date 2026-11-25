@@ -56,8 +56,8 @@
     "release": {
       "ariaLabel": "新用户专属权益",
       "eyebrow": "新用户礼遇",
-      "message": "完成账号设置，领取 {days} 天 PLUS 会员和 {credits} AI 积分。",
-      "mobileMessage": "完成设置，领取 {days} 天 PLUS + {credits} AI 积分。",
+      "message": "完成账户设置，领取 {days} 天 PLUS 会员和 {credits} 积分。",
+      "mobileMessage": "完成设置，领取 {days} 天 PLUS + {credits} 积分。",
       "cta": "免费开始"
     }
   },
@@ -89,7 +89,7 @@
     "trainingLoad": "训练负荷",
     "aiPlans": "智能教练",
     "tools": "工具",
-    "freeAiReview": "免费智能教练复盘",
+    "freeAiReview": "免费训练复盘",
     "pricing": "定价",
     "docsWorkflow": "训练流程",
     "metrics": "指标",
@@ -4511,13 +4511,13 @@
     },
     "planSpotlight": {
       "eyebrow": "Trainingload.ai 官方免费跑步计划",
-      "title": "从适合你的跑步计划开始，完整课表免费查看。",
+      "title": "从适合你的跑步计划开始，完整课表免费查看",
       "subtitle": "按当前基础和目标选择计划。无需注册即可查看 Trainingload.ai 官方发布的 12 套跑步训练计划，包括每周安排和每次训练。创建账户后，即可将计划加入日历并按需调整。",
       "browseAll": "查看全部 12 套免费计划",
       "planCta": "查看完整课表",
       "freeLabel": "免费",
       "freeTitle": "完整计划，无需注册即可查看",
-      "freeText": "从每周安排到每次训练都公开可读。创建账户后，即可将计划加入日历并按需调整。",
+      "freeText": "从每周安排到每次训练都完整公开，无需登录即可查看。创建账户后，即可将计划加入日历并按需调整。",
       "aiLabel": "会员",
       "aiTitle": "训练被打乱时，再让智能教练帮你调整",
       "aiText": "智能教练会结合当前计划、实际完成、训练负荷等信息生成调整建议；只有你确认后，调整才会应用到计划。",
@@ -4628,7 +4628,7 @@
       ]
     },
     "docsCtaLabel": "查看文档",
-    "bottomTrialNote": "无需购买，新用户完成账号设置后即可自动领取 {days} 天 PLUS 会员。",
+    "bottomTrialNote": "无需购买，新用户完成账户设置后即可自动领取 {days} 天 PLUS 会员。",
     "expandDemoLabel": "放大演示",
     "featureMatrix": {
       "eyebrow": "训练负荷分析",
@@ -4719,32 +4719,32 @@
     },
     "pageModules": {
       "eyebrow": "完整训练闭环",
-      "title": "计划、执行、理解、调整，都在同一套训练上下文里。",
+      "title": "计划、执行、理解、调整，都在同一套训练上下文里",
       "subtitle": "在计划页安排训练周期，在日历里对照计划与实际，在分析中看懂负荷和恢复，需要改变下一步时再使用智能教练。",
       "modules": [
         {
           "name": "智能教练",
-          "title": "需要调整时，再问智能教练。",
+          "title": "需要调整时，再问智能教练",
           "description": "根据计划、实际训练和训练负荷，查看有依据的调整建议。",
           "points": ["当前计划", "实际完成", "调整建议"],
           "cta": "了解智能教练"
         },
         {
           "name": "训练日历",
-          "title": "对照计划与实际完成。",
+          "title": "对照计划与实际完成",
           "description": "把计划训练与已完成活动放在同一条时间线，改期、跳过和补训都更清楚。",
           "points": ["计划训练", "已完成活动", "移动或跳过"]
         },
         {
           "name": "训练计划",
-          "title": "看清整个训练周期。",
+          "title": "看清整个训练周期",
           "description": "当前阶段、每周目标和后续课程一直可见，知道今天练什么，也知道为什么这样练。",
           "points": ["当前阶段", "每周目标", "后续课程"],
           "cta": "查看训练计划"
         },
         {
           "name": "训练分析",
-          "title": "判断负荷与恢复状态。",
+          "title": "判断负荷与恢复状态",
           "description": "用体能、疲劳、状态和趋势图表，判断训练是否按预期推进。",
           "points": ["体能与疲劳", "本周负荷", "长期趋势"],
           "cta": "了解训练负荷"
@@ -4753,7 +4753,7 @@
     },
     "openSource": {
       "eyebrow": "开源 · 可自托管",
-      "title": "你的训练，始终由你掌控。",
+      "title": "你的训练，始终由你掌控",
       "body": "Trainingload.ai 把训练计划、实际训练、训练负荷与恢复状态放进一个开源系统。你可以直接使用官方云服务，也可以自行部署；训练逻辑公开透明，数据和使用方式由你掌控。",
       "repositoryLabel": "公开仓库",
       "licenseLabel": "AGPL-3.0-only",
@@ -4772,6 +4772,18 @@
           "title": "不被单一平台锁定",
           "description": "开放源码与完整自托管文档让你可以长期使用，也让社区能够审查、改进和贡献。"
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "训练数据，不必只留在 Trainingload.ai 里",
+      "description": "连接一次后，就能在 ChatGPT、Codex、Claude、Cursor 或 VS Code 中查询 Trainingload.ai 里的计划、活动、负荷和比赛信息。AI 只能读取，不能替你修改；每次查了什么、返回了什么都清楚可见。",
+      "primary": "了解 MCP",
+      "secondary": "查看连接指南",
+      "points": [
+        "24 个只读工具",
+        "工具调用全程可见",
+        "授权随时可撤销"
       ]
     }
   },
@@ -6617,7 +6629,7 @@
     "plans": {
       "free": {
         "name": "免费版",
-        "desc": "适合先体验训练记录、基础分析，并完成账号设置领取新用户 PLUS 赠送权益的用户。",
+        "desc": "适合先体验训练记录、基础分析，并完成账户设置领取新用户 PLUS 赠送权益的用户。",
         "price": "免费",
         "items": [
           "活动上传与基础训练分析",

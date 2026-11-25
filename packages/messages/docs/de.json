@@ -64,8 +64,8 @@
     "release": {
       "ariaLabel": "Vorteil für neue Nutzer",
       "eyebrow": "Neue Nutzer",
-      "message": "Kontoeinrichtung abschließen und {days} Tage PLUS sowie {credits} AI-Credits erhalten.",
-      "mobileMessage": "{days} Tage PLUS + {credits} AI-Credits sichern.",
+      "message": "Kontoeinrichtung abschließen und {days} Tage PLUS sowie {credits} KI-Credits erhalten.",
+      "mobileMessage": "{days} Tage PLUS + {credits} KI-Credits sichern.",
       "cta": "Kostenlos starten"
     }
   },
@@ -81,7 +81,7 @@
       "empty": "Es gibt noch keine öffentlichen Versionen."
     },
     "macos": {
-      "title": "macOS-App",
+      "title": "macOS Personal",
       "requirements": "Erfordert einen Mac mit Apple Silicon (arm64).",
       "download": "DMG für macOS herunterladen",
       "downloadLatest": "Neueste Version herunterladen",
@@ -96,7 +96,7 @@
     "blog": "Blog",
     "tools": "Werkzeuge",
     "freeAiReview": "Kostenlose KI-Analyse",
-    "aiPlans": "AI Coach",
+    "aiPlans": "KI-Coach",
     "features": "Funktionen",
     "trainingLoad": "Trainingsbelastung",
     "pricing": "Preise",
@@ -204,7 +204,7 @@
       "rpeScale": "RPE-Belastungsskala",
       "appComparisons": "App-Vergleiche"
     },
-    "aiPlans": "AI Coach",
+    "aiPlans": "KI-Coach",
     "blog": "Blog",
     "documentation": "Dokumentation",
     "alternatives": "Training load app alternatives",
@@ -217,7 +217,7 @@
     "pricing": "Preise",
     "github": "GitHub",
     "company": "Unternehmen",
-    "privacyPolicy": "Datenschutzerklaerung",
+    "privacyPolicy": "Datenschutzerklärung",
     "termsAndConditions": "Nutzungsbedingungen",
     "copyright": "© {year} Trainingload.ai. Alle Rechte vorbehalten.",
     "toolLinks": {
@@ -3287,7 +3287,7 @@
       ]
     },
     "openSource": {
-      "eyebrow": "Open Source · Self-hosted",
+      "eyebrow": "Open Source · Selbst hostbar",
       "title": "Dein Training bleibt in deiner Hand.",
       "body": "Trainingload.ai vereint Plan, absolvierte Einheiten, Belastung und Erholung in einem offenen System. Nutze den offiziellen Cloud-Dienst oder betreibe es selbst; die Trainingslogik bleibt transparent, und du behältst die Kontrolle über deine Daten und die Nutzung des Produkts.",
       "repositoryLabel": "Öffentliches Repository",
@@ -3307,6 +3307,18 @@
           "title": "Bleibe unabhängig",
           "description": "Offener Code und vollständige Self-host-Dokumentation reduzieren Abhängigkeiten und ermöglichen Prüfung, Verbesserung und Beiträge aus der Community."
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "Deine Trainingsdaten müssen nicht in Trainingload.ai bleiben.",
+      "description": "Verbinde dich einmal und frage deine Pläne, Aktivitäten, Belastung und Wettkämpfe aus Trainingload.ai direkt in ChatGPT, Codex, Claude, Cursor oder VS Code ab. Die KI kann nur lesen, nichts ändern, und jeder Aufruf samt Antwort bleibt sichtbar.",
+      "primary": "MCP entdecken",
+      "secondary": "Verbindungsanleitung",
+      "points": [
+        "24 schreibgeschützte Tools",
+        "Sichtbare Tool-Aufrufe",
+        "Jederzeit widerrufbar"
       ]
     }
   },
@@ -5070,7 +5082,7 @@
         "priceYearlyStrike": "$118.80",
         "yearlyCompare": "Jährlich einmal bezahlt; Credits werden weiterhin monatlich ausgegeben. Ungenutzte Monats-Credits werden nicht übertragen.",
         "items": [
-          "Alle Funktionen des kostenlosen Tarifs",
+          "Alles aus PLUS",
           "{credits} Abo-Credits pro Monat",
           "Standardmodus (1×) und Tiefenmodus (3×) sind in beiden Tarifen verfügbar",
           "Mehr enthaltene Credits für häufigere KI-Coach-Nutzung"
@@ -5240,19 +5252,19 @@
       "items": [
         {
           "name": "Starter-Paket",
-          "credits": "5,000 Credits",
+          "credits": "5.000 Credits",
           "price": "$6.99",
           "note": "Für gelegentlichen Mehrbedarf"
         },
         {
-          "name": "Plus-Paket",
-          "credits": "15,000 Credits",
+          "name": "Erweitert-Paket",
+          "credits": "15.000 Credits",
           "price": "$17.99",
           "note": "Für regelmäßigen Mehrbedarf"
         },
         {
           "name": "Profi-Paket",
-          "credits": "40,000 Credits",
+          "credits": "40.000 Credits",
           "price": "$39.99",
           "note": "Für intensiven Mehrbedarf"
         }

@@ -95,11 +95,11 @@
   },
   "nav": {
     "blog": "Blog",
-    "aiPlans": "AI Coach",
-    "features": "Funzionalita",
+    "aiPlans": "Coach AI",
+    "features": "Funzionalità",
     "trainingLoad": "Carico di allenamento",
     "tools": "Strumenti",
-    "freeAiReview": "Analisi IA gratuita",
+    "freeAiReview": "Analisi AI gratuita",
     "pricing": "Prezzi",
     "docsWorkflow": "Flusso di allenamento",
     "metrics": "Metriche",
@@ -205,14 +205,14 @@
       "rpeScale": "Scala dello sforzo RPE",
       "appComparisons": "Confronti tra app"
     },
-    "aiPlans": "AI Coach",
+    "aiPlans": "Coach AI",
     "blog": "Blog",
     "documentation": "Documentazione",
     "alternatives": "Training load app alternatives",
     "support": "Supporto",
     "contact": "Contatti",
     "resources": "Risorse",
-    "features": "Funzionalita",
+    "features": "Funzionalità",
     "trainingLoad": "Carico di allenamento",
     "tools": "Strumenti",
     "pricing": "Prezzi",
@@ -2886,7 +2886,7 @@
         },
         {
           "q": "Come aiutano carico e recupero ad adattare il piano?",
-          "a": "Trainingload.ai combina volume recente, forma, fatica e segnali di recupero disponibili per indicare se conviene progredire, mantenere il carico o dare priorità al recupero."
+          "a": "Trainingload.ai combina volume recente, fitness, fatica, forma e segnali di recupero disponibili per indicare se conviene progredire, mantenere il carico o dare priorità al recupero."
         },
         {
           "q": "Il coach AI modifica automaticamente il piano?",
@@ -3287,7 +3287,7 @@
           "title": "Valuta carico e recupero",
           "description": "Usa fitness, fatica, forma e tendenze per capire se l’allenamento procede come previsto.",
           "points": [
-            "Forma e fatica",
+            "Fitness e fatica",
             "Carico settimanale",
             "Tendenze nel tempo"
           ],
@@ -3296,7 +3296,7 @@
       ]
     },
     "openSource": {
-      "eyebrow": "Open source · Self-hosted",
+      "eyebrow": "Open source · Self-hostable",
       "title": "Il tuo allenamento resta nelle tue mani.",
       "body": "Trainingload.ai riunisce piano, allenamenti svolti, carico e recupero in un sistema open source. Usa il servizio cloud ufficiale o installalo in autonomia; la logica di allenamento resta trasparente e mantieni il controllo dei tuoi dati e del modo in cui usi il prodotto.",
       "repositoryLabel": "Repository pubblico",
@@ -3316,6 +3316,18 @@
           "title": "Non restare legato a una sola piattaforma",
           "description": "Codice aperto e documentazione completa riducono il lock-in e permettono alla community di verificare, migliorare e contribuire."
         }
+      ]
+    },
+    "mcpShowcase": {
+      "eyebrow": "TrainingLoad MCP",
+      "title": "I tuoi dati di allenamento non devono restare solo dentro Trainingload.ai.",
+      "description": "Collegati una sola volta per consultare piani, attività, carico e gare di Trainingload.ai da ChatGPT, Codex, Claude, Cursor o VS Code. L’AI può leggere i dati ma non modificarli, e ogni chiamata e risposta resta visibile.",
+      "primary": "Scopri MCP",
+      "secondary": "Guida alla connessione",
+      "points": [
+        "24 strumenti in sola lettura",
+        "Chiamate agli strumenti visibili",
+        "Accesso revocabile"
       ]
     }
   },
@@ -5246,19 +5258,19 @@
       "items": [
         {
           "name": "Pacchetto iniziale",
-          "credits": "5,000 crediti",
+          "credits": "5.000 crediti",
           "price": "$6.99",
           "note": "Per uso extra occasionale"
         },
         {
           "name": "Pacchetto avanzato",
-          "credits": "15,000 crediti",
+          "credits": "15.000 crediti",
           "price": "$17.99",
           "note": "Per uso extra regolare"
         },
         {
           "name": "Pacchetto professionale",
-          "credits": "40,000 crediti",
+          "credits": "40.000 crediti",
           "price": "$39.99",
           "note": "Per uso extra intensivo"
         }
