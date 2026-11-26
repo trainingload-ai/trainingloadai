@@ -100,11 +100,17 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     );
     const tool = createAiSdkCoachTools({ tools: [presentCoachPlanDraftTool], ctx: {
       session: { user: { id: 'athlete' } }, signal: new AbortController().signal,
-      workoutDefinitions, planLoadEstimator,
+      workoutDefinitions, planLoadEstimator, activeSkillName: 'plan-builder',
+      planSuitability: { latest: {
+        status: 'READY', skillName: 'plan-builder', assessmentId: 'audit-assessment',
+        constraints: { periodWeeks: 3, maxDailyMinutes: 90, maxTrainingDaysPerWeek: 3, requiredSports: ['RUN'], strengthPreference: 'EXCLUDE' },
+      } },
       onPlanValidationRejected: (event) => store.recordPlanValidationRejection(handle, event),
     } as AiToolContext }).present_coach_plan_draft;
     const candidate = {
-      title: 'Test plan', periodWeeks: 3, qualityContract: { weekPhases: ['BUILD', 'RECOVERY', 'BUILD'] },
+      title: 'Test plan', periodWeeks: 3, qualityContract: {
+        weekPhases: ['BUILD', 'RECOVERY', 'BUILD'], maxDailyMinutes: 90, maxTrainingDaysPerWeek: 3, requiredSports: ['RUN'],
+      },
       workouts: [
         { weekIndex: 1, dayIndex: 1, sportType: 'RUN', text: 'work 60m', notes: 'Run easily.', plannedSessionRpe: 4 },
         { weekIndex: 2, dayIndex: 1, sportType: 'RUN', text: 'work 40m', notes: 'Run a hard effort.', plannedSessionRpe: 7 },
@@ -113,24 +119,27 @@ describe('Coach run transactions / PostgreSQL constraints', () => {
     };
     for (const toolCallId of ['first-rejection', 'second-rejection']) {
       const response = await tool.execute!(candidate, { toolCallId, messages: [] });
-      expect(response).toMatchObject({ code: 'PLAN_QUALITY_INVALID', feedback: [{
-        target: { scope: 'WEEK', weekIndex: 2 },
-        weeks: [
-          { weekIndex: 1, phase: 'BUILD', totalEstimatedLoad: 40 },
-          { weekIndex: 2, phase: 'RECOVERY', totalEstimatedLoad: 46.7 },
-          { weekIndex: 3, phase: 'BUILD', totalEstimatedLoad: 50 },
-        ],
-      }] });
+      expect(response).toMatchObject({
+        code: 'PLAN_QUALITY_INVALID',
+        error: expect.stringMatching(/W2.*RECOVERY_NOT_REDUCED/),
+      });
       expect(response).not.toHaveProperty('diagnostics');
     }
     const rows = await prisma.coachPlanValidationRejection.findMany({
       where: { attemptId: handle.projector.run.attemptId }, orderBy: { toolCallId: 'asc' },
     });
     expect(rows.map(({ toolCallId }) => toolCallId)).toEqual(['first-rejection', 'second-rejection']);
-    expect(rows[0].payload).toMatchObject({ candidate, diagnostics: {
+    expect(rows[0].payload).toMatchObject({ candidate, feedback: [expect.objectContaining({
+      target: { scope: 'WEEK', weekIndex: 2 },
+      weeks: [
+        expect.objectContaining({ weekIndex: 1, phase: 'BUILD', totalEstimatedLoad: 40 }),
+        expect.objectContaining({ weekIndex: 2, phase: 'RECOVERY', totalEstimatedLoad: 46.7 }),
+        expect.objectContaining({ weekIndex: 3, phase: 'BUILD', totalEstimatedLoad: 50 }),
+      ],
+    })], diagnostics: {
       valid: false,
       workoutLoadEstimates: expect.arrayContaining([
-        { weekIndex: 2, dayIndex: 1, sessionIndex: 1, estimatedLoad: 46.7, source: 'SESSION_RPE' },
+        expect.objectContaining({ weekIndex: 2, dayIndex: 1, sessionIndex: 1, estimatedLoad: 46.7, source: 'SESSION_RPE' }),
       ]),
     } });
     await prisma.aiCoachSession.deleteMany();

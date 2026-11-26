@@ -215,7 +215,12 @@
       "id": "0043_coach_plan_validation_rejections",
       "file": "0043_coach_plan_validation_rejections/migration.sql",
       "sha256": "952a36f64899aec56839e235f4912b17ec3aa7aeb0214df21e99eb77574bfb21"
+    },
+    {
+      "id": "0044_import_item_utc_availability",
+      "file": "0044_import_item_utc_availability/migration.sql",
+      "sha256": "59f7dad8a05c7c41790a3d7f81fff4e27db27ab1146b1abd52bbc1c07a6ad980"
     }
   ],
-  "schemaChecksum": "8e779a9c2f293ccc8448f1baa45685cc7b7f0bb92cc227f02333549dae2bb767"
+  "schemaChecksum": "7b196e317d3b63144be80625ed880a8fddfa256ac4b418a45d06b0edb26bf769"
 }

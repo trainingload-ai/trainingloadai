@@ -2651,7 +2651,7 @@ model ImportItemJob {
   lastErrorCode    String? @map("last_error_code")
   lastError        String? @map("last_error") @db.Text
 
-  availableAt    DateTime  @default(now()) @map("available_at")
+  availableAt    DateTime  @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @map("available_at")
   attempts       Int       @default(0) @map("attempts")
   startedAt      DateTime? @map("started_at")
   completedAt    DateTime? @map("completed_at")
